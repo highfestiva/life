@@ -55,24 +55,14 @@ void Cutie::DrainHealth(float pDrain)
 		mWheelExpelTickCount = 20 + (int)(30/lSpeed);
 	}
 	GetPhysics()->ClearEngines();
-	TBC::ChunkyClass* lClass = (TBC::ChunkyClass*)GetClass();
+	/*TBC::ChunkyClass* lClass = (TBC::ChunkyClass*)GetClass();
 	size_t lTagCount = lClass->GetTagCount();
 	for (size_t x = 0; x < lTagCount;)
 	{
-		/*const str& lTagName = lClass->GetTag(x).mTagName;
-		if (lTagName == _T("engine_sound") ||
-			lTagName == _T("brake_light") ||
-			lTagName == _T("exhaust"))*/
-		{
-			lClass->RemoveTag(x);
-			--lTagCount;
-		}
-		/*else
-		{
-			++x;
-		}*/
+		lClass->RemoveTag(x);
+		--lTagCount;
 	}
-	DeleteEngineSounds();
+	DeleteEngineSounds();*/
 }
 
 float Cutie::GetHealth() const

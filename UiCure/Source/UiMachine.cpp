@@ -143,6 +143,10 @@ void Machine::OnTick()
 			else
 			{
 				const int lEngineIndex = lTag.mEngineIndexList[0];
+				if (lEngineIndex >= mPhysics->GetEngineCount())
+				{
+					continue;
+				}
 				TBC::PhysicsEngine* lEngine = lPhysics->GetEngine(lEngineIndex);
 				lJointValue = lEngine->GetLerpThrottle(0.1f, 0.1f);
 			}
@@ -179,7 +183,12 @@ void Machine::OnTick()
 				assert(false);
 				continue;
 			}
-			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
+			const int lEngineIndex = lTag.mEngineIndexList[0];
+			if (lEngineIndex >= mPhysics->GetEngineCount())
+			{
+				continue;
+			}
+			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
 			for (size_t y = 0; y < lTag.mMeshIndexList.size(); ++y)
 			{
 				TBC::GeometryBase* lMesh = GetMesh(lTag.mMeshIndexList[y]);
@@ -249,7 +258,12 @@ void Machine::OnTick()
 			float lLowVolume = lTag.mFloatValueList[FV_VOLUME_LOW];
 			for (size_t y = 0; y < lTag.mEngineIndexList.size(); ++y)
 			{
-				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[y]);
+				const int lEngineIndex = lTag.mEngineIndexList[y];
+				if (lEngineIndex >= mPhysics->GetEngineCount())
+				{
+					continue;
+				}
+				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
 				float lEngineIntensity = Math::Clamp(lEngine->GetIntensity(), 0.0f, 1.0f);
 				if (lTag.mFloatValueList[FV_THROTTLE_FACTOR] > 0)
 				{
@@ -316,7 +330,12 @@ void Machine::OnTick()
 				assert(false);
 				continue;
 			}
-			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
+			const int lEngineIndex = lTag.mEngineIndexList[0];
+			if (lEngineIndex >= mPhysics->GetEngineCount())
+			{
+				continue;
+			}
+			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
 			const float lDensity = lTag.mFloatValueList[FV_DENSITY];
 			mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity() * lDensity) * lFrameTime * 25;
 			if (mExhaustTimeout > 0)

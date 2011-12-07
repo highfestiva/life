@@ -1,3 +1,7 @@
+Skipped
+-------
+-Tutorial for controls as well.
+
 Done
 ----
 Level: remove hole (behind goal) that Cutie can fall into.
@@ -25,6 +29,11 @@ Path finding for Cutie AI.
 AI for Cutie.
 Smooth Cutie's roof and windows (and thus normals).
 Cutify Cutie.
+Tutorial.
+Game over view.
+When restarted (a couple of times?), Cutie's engine sound dissappear. Fix!
+Autostart next/same level.
+Score counting.
 
 Computer demo
 -------------
@@ -32,22 +41,17 @@ Record voice for tutorial.
 Playback voice for tutorial.
 Single player difficulty levels.
 Polish on level_2 roads (in texture).
-Tutorial.
-Game over view.
-When restarted (a couple of times?), Cutie's engine sound dissappear. Fix!
 Show keyboard controls when starting.
 Delete all resources when switching level (and make sure!).
 Turn the table when completing a level.
-Autostart next/same level.
-Score counting.
 Optimize.
 Memory leak check.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
 
 iOS and computer full version
 -----------------------------
-Tutorial for controls as well.
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
 Extra vehicles: cute monster truck.
 2 extra levels: castle and machine.
+iPad adjustments.

@@ -311,10 +311,10 @@ bool Game::Shoot()
 
 float Game::GetMuzzleVelocity() const
 {
-	float lMuzzleVelocity = 50.0;
+	float lMuzzleVelocity = 60.0;
 	if (mLauncher && mLauncher->IsLoaded() && mVehicle && mVehicle->IsLoaded())
 	{
-		lMuzzleVelocity = ::pow(mLauncher->GetPosition().GetDistance(mVehicle->GetPosition()), 0.5f) * 3.5f;
+		lMuzzleVelocity = ::pow(mLauncher->GetPosition().GetDistance(mVehicle->GetPosition()), 0.5f) * 3.6f;
 	}
 	return lMuzzleVelocity;
 }
