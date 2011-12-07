@@ -16,6 +16,7 @@
 #endif // iOS
 //#define LEPRA_IOS_LOOKANDFEEL
 #define FPS		20
+#define	SCALE_FACTOR	3	// Hard-coded for Kill Cutie. If ever re-using for other game, drop this.
 
 
 
@@ -105,7 +106,9 @@ public:
 	TransformationF GetCutieStart() const;
 	virtual bool Tick();
 
+	str GetVehicle() const;
 	void SetVehicle(const str& pVehicle);
+	void Game::ResetLauncher();
 	UiCure::CppContextObject* GetP1() const;
 	UiCure::CppContextObject* GetP2() const;
 	Level* GetLevel() const;
@@ -125,11 +128,14 @@ public:
 		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
 	void OnCapture();	// CTF
 	int GetWinnerIndex() const;	// -1, 0, or 1.
+	void ResetWinnerIndex();
 	void SetComputerIndex(int pIndex);	// -1, 0, or 1.
 	int GetComputerIndex() const;	// -1, 0, or 1.
 	void NextComputerIndex();
-	void SetComputerDifficulty(float pDifficulty);	// -1,[0,1], -1=inactive.
-	int GetScoreBalance();	// 0 = score is 2 love, -1 = P1 leads with 1 point, +2 P2 leads with 2 points...
+	float GetComputerDifficulty() const;	// -1,[0,1], -1=inactive.
+	void SetComputerDifficulty(float pDifficulty);
+	int GetScoreBalance() const;	// 0 = score is 2 love, -1 = P1 leads with 1 point, +2 P2 leads with 2 points...
+	void SetScoreBalance(int pBalance);
 
 	bool Render();
 	bool Paint();
@@ -188,6 +194,7 @@ private:
 	int mComputerIndex;
 	float mComputerDifficulty;
 	int mScoreBalance;
+	bool mAllowWin;
 };
 
 

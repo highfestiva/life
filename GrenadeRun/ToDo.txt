@@ -34,6 +34,7 @@ Single player difficulty levels.
 Polish on level_2 roads (in texture).
 Tutorial.
 Game over view.
+When restarted (a couple of times?), Cutie's engine sound dissappear. Fix!
 Show keyboard controls when starting.
 Delete all resources when switching level (and make sure!).
 Turn the table when completing a level.

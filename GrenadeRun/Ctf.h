@@ -26,6 +26,7 @@ public:
 
 	Vector3DF GetPosition() const;
 	float GetCaptureLevel() const;
+	void StartSlideDown();
 
 private:
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
@@ -36,10 +37,12 @@ private:
 	Vector3DF mFlagOffset;
 	Vector3DF mFlagTop;
 	Vector3DF mCatchingFlagVelocity;
+	Vector3DF mStartFlagVelocity;
 	bool mLastFrameTriggered;
 	bool mIsTriggerTimerStarted;
 	HiResTimer mTriggerTimer;
 	TBC::GeometryReference* mFlagMesh;
+	bool mSlideDown;
 
 	LOG_CLASS_DECLARE();
 };

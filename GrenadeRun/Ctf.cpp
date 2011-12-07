@@ -22,7 +22,8 @@ Ctf::Ctf(Cure::ContextManager* pManager):
 	mTrigger(0),
 	mLastFrameTriggered(false),
 	mIsTriggerTimerStarted(false),
-	mFlagMesh(0)
+	mFlagMesh(0),
+	mSlideDown(false)
 {
 	pManager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
@@ -45,6 +46,11 @@ float Ctf::GetCaptureLevel() const
 	return 1 - (mFlagTop - mFlagMesh->GetOffsetTransformation().GetPosition()).GetLength() / mFlagOffset.GetLength();
 }
 
+void Ctf::StartSlideDown()
+{
+	mSlideDown = true;
+	mCatchingFlagVelocity = mStartFlagVelocity;
+}
 
 
 void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
@@ -59,6 +65,7 @@ void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 		mFlagOffset.y		= lTag->mFloatValueList[1];
 		mFlagOffset.z		= lTag->mFloatValueList[2];
 		mCatchingFlagVelocity	= -mFlagOffset / lTag->mFloatValueList[3];
+		mStartFlagVelocity	= mCatchingFlagVelocity;
 	}
 }
 
@@ -87,7 +94,7 @@ void Ctf::OnTick()
 	}
 
 	// Move flag up or down...
-	if (mIsTriggerTimerStarted)
+	if (mIsTriggerTimerStarted && !mSlideDown)
 	{
 		// Move up or stop if reached top.
 		mFlagMesh->AddOffset(mCatchingFlagVelocity / 20);
@@ -97,14 +104,18 @@ void Ctf::OnTick()
 			((Game*)GetManager()->GetGameManager())->OnCapture();
 		}
 	}
-	/*else
+	else
 	{
 		// Move down if not at bottom.
-		if ((mFlagOffset - (mFlagMesh->GetOffsetTransformation().GetPosition() - mFlagTop)).Dot(mFlagOffset) > 0)
+		if (mSlideDown && (mFlagOffset - (mFlagMesh->GetOffsetTransformation().GetPosition() - mFlagTop)).Dot(mFlagOffset) > 0)
 		{
-			mFlagMesh->AddOffset(mCatchingFlagVelocity / -60);
+			mFlagMesh->AddOffset(mCatchingFlagVelocity / -20);
 		}
-	}*/
+		else
+		{
+			mSlideDown = false;
+		}
+	}
 
 	mLastFrameTriggered = false;
 	mTriggerTimer.UpdateTimer();

@@ -30,6 +30,8 @@ public:
 	void GetAngles(const Vector3DF& pTargetPosition, const Vector3DF& pTargetVelocity,
 		float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const;
 
+	void CreateEngines();
+
 private:
 	void GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
 		float pPitch, float& pGuidePitch, float& pGuideYaw, float &pTime) const;

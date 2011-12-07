@@ -10,6 +10,7 @@
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/LogListener.h"
+#include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../TBC/Include/PhysicsEngine.h"
@@ -86,7 +87,7 @@ private:
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	void Layout();
 	void MainMenu();
-	void SuperReset();
+	void SuperReset(bool pGameOver);
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -519,6 +520,11 @@ bool App::Poll()
 	}
 	mResourceManager->ForceFreeCache();
 	mIsLoaded = true;
+	if (lOk)
+	{
+		const bool lShowPause = !mIsPaused && (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE);
+		mPauseButton->SetVisible(lShowPause);
+	}
 	if (lOk && mDoLayout)
 	{
 		Layout();
@@ -594,9 +600,14 @@ bool App::Poll()
 		}
 	}
 
-	if (mGameOverTimer.IsStarted() && mGameOverTimer.QueryTimeDiff() > 10.0)
+	if (mGameOverTimer.IsStarted())
 	{
-		SuperReset();
+		if (mGameOverTimer.QueryTimeDiff() > 20.0 ||
+			(mGame->GetComputerIndex() == 1 && mGame->GetCutie()->GetHealth() <= 0 && mGameOverTimer.QueryTimeDiff() > 5.0) ||
+			(mGame->GetComputerIndex() == 0 && mGameOverTimer.QueryTimeDiff() > 10.0))
+		{
+			SuperReset(true);
+		}
 	}
 
 	return lOk;
@@ -653,35 +664,49 @@ void App::DrawHud()
 #endif // iOS / computer
 		UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
+		const bool lGameOver = (mGame->GetScoreBalance() == -SCORE_POINTS/2 || mGame->GetScoreBalance() == +SCORE_POINTS/2);
+		const str lWon = lGameOver? _T("You rule!") : _T("Won heart");
+		const str lLost = lGameOver? _T("Defeat!") : _T("Lost heart");
+		const float lBackgroundSize = 110;
 		if (mGame->GetComputerIndex() < 0)
 		{
 			str lText1;
 			str lText2;
+			Color lColor1;
+			Color lColor2;
 			if (lWinner == 0)
 			{
-				lText1 = _T("WON!");
-				lText2 = _T("LOST!");
+				lText1 = lWon;
+				lText2 = lLost;
+				lColor1 = LIGHT_GREEN;
+				lColor2 = LIGHT_RED;
 			}
 			else if (lWinner == 1)
 			{
-				lText1 = _T("LOST!");
-				lText2 = _T("WON!");
+				lText1 = lLost;
+				lText2 = lWon;
+				lColor1 = LIGHT_RED;
+				lColor2 = LIGHT_GREEN;
 			}
 			const int x1 = (int)(w*1/4);
 			const int x2 = (int)(w*3/4);
 			const int y  = (int)(h/2);
-			DrawRoundedPolygon((float)x1, (float)y, 45, PIF/4, 4, BGCOLOR_DIALOG);
-			DrawRoundedPolygon((float)x2, (float)y, 45, PIF/4, 4, BGCOLOR_DIALOG);
-			mUiManager->GetPainter()->SetColor(GREEN, 0);
-			PrintText(lText1,  +lAngle, x1, y);
-			mUiManager->GetPainter()->SetColor(RED, 0);
+			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
+			DrawRoundedPolygon((float)x1, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
+			DrawRoundedPolygon((float)x2, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
+			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
+			mUiManager->GetPainter()->SetColor(lColor1, 0);
+			PrintText(lText1, +lAngle, x1, y);
+			mUiManager->GetPainter()->SetColor(lColor2, 0);
 			PrintText(lText2, -lAngle, x2, y);
 		}
 		else
 		{
 			const int x = (int)(w/2);
 			const int y  = (int)(h/2);
-			DrawRoundedPolygon((float)x, (float)y, 45, PIF/4, 4, BGCOLOR_DIALOG);
+			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
+			DrawRoundedPolygon((float)x, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
+			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 #ifdef LEPRA_IOS_LOOKANDFEEL
 				const float a = (mGame->GetComputerIndex() == 0)? -lAngle : 0;
 #else // Computer L&F
@@ -689,13 +714,13 @@ void App::DrawHud()
 #endif // iOS / Computer L&F
 			if (lWinner != mGame->GetComputerIndex())
 			{
-				mUiManager->GetPainter()->SetColor(GREEN, 0);
-				PrintText(_T("WON!"), a, x, y);
+				mUiManager->GetPainter()->SetColor(LIGHT_GREEN, 0);
+				PrintText(lWon, a, x, y);
 			}
 			else
 			{
-				mUiManager->GetPainter()->SetColor(RED, 0);
-				PrintText(_T("LOST!"), a, x, y);
+				mUiManager->GetPainter()->SetColor(LIGHT_RED, 0);
+				PrintText(lLost, a, x, y);
 			}
 		}
 		mUiManager->GetFontManager()->SetActiveFont(lFontId);
@@ -1327,19 +1352,15 @@ void App::Resume()
 
 bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 {
-	if (!mGame)
+	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
 	{
 		return false;
 	}
 	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
-	if (!lAvatar1 || !lAvatar1->IsLoaded())
+	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 ||!lAvatar2->IsLoaded())
 	{
 		return false;
-	}
-	if (!lAvatar2 ||!lAvatar2->IsLoaded())
-	{
-		lAvatar2 = lAvatar1;
 	}
 	if ((pKeyCode == UIKEY(E) || pKeyCode == UIKEY(F)) && pFactor > 0)
 	{
@@ -1456,6 +1477,10 @@ void App::OnMouseInput(UiLepra::InputElement* pElement)
 
 int App::PollTap(FingerMovement& pMovement)
 {
+	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
+	{
+		return 0;
+	}
 	(void)pMovement;
 	int lTag = 0;
 #ifdef LEPRA_IOS_LOOKANDFEEL
@@ -1551,23 +1576,52 @@ int App::PollTap(FingerMovement& pMovement)
 
 void App::MainMenu()
 {
+	// TRICKY: leave these here, since this call comes from >1 place.
+	mGame->ResetWinnerIndex();
 	mGame->SetFlybyMode(Game::FLYBY_SYSTEM_PAUSE);
+	mGame->SetScoreBalance(0);
+	// TRICKY-END!
+
 	mPauseButton->SetVisible(false);
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTN("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTN("btn_2p.png", "Two players"));
 }
 
-void App::SuperReset()
+void App::SuperReset(bool pGameOver)
 {
-	const str lLevel = mGame->GetLevelName();
-	delete mGame;
+	mGameOverTimer.Stop();
+
+	if (pGameOver)
+	{
+		// Total game over (someone won the match)?
+		const int lScoreBalance = mGame->GetScoreBalance();
+		if (lScoreBalance == -SCORE_POINTS/2 || lScoreBalance == +SCORE_POINTS/2)
+		{
+			MainMenu();
+			return;
+		}
+		mGame->SetScoreBalance(-lScoreBalance);
+
+		// Nope, simply reload the interior.
+		const int lComputerIndex = mGame->GetComputerIndex();
+		switch (lComputerIndex)
+		{
+			case 0:		mGame->SetComputerIndex(1);	break;
+			case 1:		mGame->SetComputerIndex(0);	break;
+		}
+	}
+	else
+	{
+		// Restart level.
+		mGame->SetScoreBalance(0);
+	}
+	mGame->ResetWinnerIndex();
+	mGame->SetVehicle(mGame->GetVehicle());
+	mGame->ResetLauncher();
+	mResourceManager->Tick();
 	mResourceManager->ForceFreeCache();
-	mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-	mGame->SetComputerIndex(0);
-	mGame->SetLevelName(lLevel);
-	mGame->Cure::GameTicker::GetTimeManager()->Tick();
-	mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
+
 	mIsLoaded = false;
 	mDoLayout = true;
 }
@@ -1604,7 +1658,8 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	if (pButton->GetTag() == 1)
 	{
 		// 1P
-		mGame->SetComputerIndex(1);
+		const int lComputerIndex = (Random::Uniform() > 0.5)? 1 : 0;
+		mGame->SetComputerIndex(lComputerIndex);
 	}
 	else
 	{
@@ -1613,9 +1668,10 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnLevelAction);
 	d->QueryLabel(_T("Select level"), mBigFontId);
-	d->AddButton(1, ICONBTN("btn_lvl2.png", "Pendulum"));
-	d->AddButton(2, ICONBTN("btn_lvl3.png", "Elevate"));
-	d->AddButton(3, ICONBTN("btn_lvl4.png", "RoboCastle"));
+	d->AddButton(1, ICONBTN("btn_lvl2.png", "Tutorial"));
+	d->AddButton(2, ICONBTN("btn_lvl2.png", "Pendulum"));
+	d->AddButton(3, ICONBTN("btn_lvl3.png", "Elevate"));
+	d->AddButton(4, ICONBTN("btn_lvl4.png", "RoboCastle"));
 }
 
 void App::OnLevelAction(UiTbc::Button* pButton)
@@ -1624,12 +1680,22 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	switch (pButton->GetTag())
 	{
 		case 1:	lLevel = _T("level_2");	break;
-		case 2:	lLevel = _T("level_3");	break;
-		case 3:	lLevel = _T("level_4");	break;
+		case 2:	lLevel = _T("level_2");	break;
+		case 3:	lLevel = _T("level_3");	break;
+		case 4:	lLevel = _T("level_4");	break;
 	}
 	if (mGame->GetLevelName() != lLevel)
 	{
 		mGame->SetLevelName(lLevel);
+	}
+	if (pButton->GetTag() == 1)
+	{
+		// Tutorial.
+		mGame->SetFlybyMode(Game::FLYBY_INTRODUCTION);
+		mGame->ResetWinnerIndex();
+		mGame->SetVehicle(mGame->GetVehicle());
+		mGame->ResetLauncher();
+		return;
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnVehicleAction);
 	d->QueryLabel(_T("Select vehicle"), mBigFontId);
@@ -1649,15 +1715,15 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 		case 3:	lVehicle = _T("speedie");	break;
 		case 4:	lVehicle = _T("sleepie");	break;
 	}
+	mGame->ResetWinnerIndex();
 	mGame->SetVehicle(lVehicle);
+	mGame->ResetLauncher();
 	mGame->SetFlybyMode(Game::FLYBY_INACTIVE);
-	mPauseButton->SetVisible(true);
 }
 
 void App::OnPauseClick(UiTbc::Button*)
 {
 	mIsPaused = true;
-	mPauseButton->SetVisible(false);
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, _T("Resume"));
 	d->AddButton(2, _T("Restart"));
@@ -1667,10 +1733,9 @@ void App::OnPauseClick(UiTbc::Button*)
 void App::OnPauseAction(UiTbc::Button* pButton)
 {
 	mIsPaused = false;
-	mPauseButton->SetVisible(true);
 	if (pButton->GetTag() == 2)
 	{
-		SuperReset();
+		SuperReset(false);
 	}
 	else if (pButton->GetTag() == 3)
 	{

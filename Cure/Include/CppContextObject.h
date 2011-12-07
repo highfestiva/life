@@ -34,6 +34,7 @@ public:
 	virtual void SetTagIndex(int pIndex);
 
 protected:
+	void SetForceLoadUnique(bool pLoadUnique);
 	virtual void StartLoading();
 	void StartLoadingPhysics(const str& pPhysicsName);
 	virtual bool TryComplete();
@@ -59,6 +60,7 @@ private:
 	UserPhysicsResource* mPhysicsResource;
 	ActiveTriggerGroupMap mActiveTriggerGroupMap;
 	bool mAllowNetworkLogic;
+	bool mForceLoadUnique;
 
 	LOG_CLASS_DECLARE();
 };

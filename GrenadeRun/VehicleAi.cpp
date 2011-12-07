@@ -18,7 +18,6 @@
 
 
 
-#define	SCALE_FACTOR			3	// Hard-coded for Kill Cutie. If ever re-using for other game, drop this.
 #define	NORMAL_AIM_AHEAD		10.0f	// How far ahead to try and intersect the path.
 #define GOAL_DISTANCE			4.5f	// When to slow down before stopping at goal.
 #define OFF_COURSE_DISTANCE		4.5f	// When to start heading back.
@@ -60,7 +59,8 @@ void VehicleAi::Init()
 void VehicleAi::OnTick()
 {
 	if (!mGame->GetCutie() || !mGame->GetCutie()->IsLoaded() ||
-		!mGame->GetLevel() || !mGame->GetLevel()->IsLoaded())
+		!mGame->GetLevel() || !mGame->GetLevel()->IsLoaded() ||
+		mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
 	{
 		return;
 	}

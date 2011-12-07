@@ -40,7 +40,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
 	mLevel(0),
-	mFlybyMode(FLYBY_INTRODUCTION),
+	mFlybyMode(FLYBY_INACTIVE),
 	mFlyByTime(0),
 	mVehicle(0),
 	mVehicleCamPos(0, 0, 200),
@@ -56,7 +56,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLauncherAi(0),
 	mComputerIndex(-1),
 	mComputerDifficulty(0.5f),
-	mScoreBalance(0)
+	mScoreBalance(0),
+	mAllowWin(false)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -94,7 +95,11 @@ const str& Game::GetLevelName() const
 bool Game::SetLevelName(const str& pLevel)
 {
 	mLevelName = pLevel;
-	return Initialize();
+	if (!mVehicle)
+	{
+		return RestartLevel();
+	}
+	return 	InitializeTerrain();
 }
 
 bool Game::RestartLevel()
@@ -111,11 +116,16 @@ TransformationF Game::GetCutieStart() const
 
 bool Game::Tick()
 {
+	if (!mLevel || !mLevel->IsLoaded())
+	{
+		return true;
+	}
+
 	GameTicker::GetTimeManager()->Tick();
 
 	Vector3DF lPosition;
 	Vector3DF lVelocity;
-	if (mVehicle)
+	if (mVehicle && mVehicle->IsLoaded())
 	{
 		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, -2);
 		if (lPosition.z < -100)
@@ -137,7 +147,7 @@ bool Game::Tick()
 
 		mVehicle->QueryFlip();
 	}
-	else
+	else if (mLauncher && mLauncher->IsLoaded())
 	{
 		lPosition = mLauncher->GetPosition();
 	}
@@ -176,9 +186,19 @@ bool Game::Tick()
 
 
 
+str Game::GetVehicle() const
+{
+	if (mVehicle)
+	{
+		return mVehicle->GetClassId();
+	}
+	return str();
+}
+
 void Game::SetVehicle(const str& pVehicle)
 {
-	if (mVehicle && mVehicle->GetClassId() == pVehicle)
+	mAllowWin = true;
+	if (mVehicle && mVehicle->IsLoaded() && mVehicle->GetPosition().GetDistance(GetCutieStart().GetPosition()) < 3.0f*SCALE_FACTOR)
 	{
 		return;
 	}
@@ -191,6 +211,18 @@ void Game::SetVehicle(const str& pVehicle)
 		mVehicle->SetInitialTransform(GetCutieStart());
 		mVehicle->StartLoading();
 	}
+}
+
+void Game::ResetLauncher()
+{
+	mAllowWin = true;
+	delete mLauncher;
+	mLauncher = new Launcher(this);
+	AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	mLauncher->DisableRootShadow();
+	mLauncher->StartLoading();
+	mLauncherYaw = 0;
+	mLauncherPitch = -PIF/4;
 }
 
 UiCure::CppContextObject* Game::GetP1() const
@@ -407,7 +439,10 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				mVehicle->DrainHealth(d * 0.7f);
 				if (mVehicle->GetHealth() <= 0)
 				{
-					mWinnerIndex = (mWinnerIndex != 0)? 1 : mWinnerIndex;
+					if (mAllowWin)
+					{
+						mWinnerIndex = (mWinnerIndex != 0)? 1 : mWinnerIndex;
+					}
 				}
 			}
 		}
@@ -416,7 +451,10 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 
 void Game::OnCapture()
 {
-	mWinnerIndex = (mWinnerIndex != 1)? 0 : mWinnerIndex;
+	if (mAllowWin)
+	{
+		mWinnerIndex = (mWinnerIndex != 1)? 0 : mWinnerIndex;
+	}
 }
 
 int Game::GetWinnerIndex() const
@@ -424,10 +462,39 @@ int Game::GetWinnerIndex() const
 	return mWinnerIndex;
 }
 
+void Game::ResetWinnerIndex()
+{
+	mAllowWin = false;
+	if (mCtf)
+	{
+		mCtf->StartSlideDown();
+	}
+	mWinnerIndex = -1;
+	mPreviousFrameWinnerIndex = -1;
+}
+
 void Game::SetComputerIndex(int pIndex)
 {
 	assert(pIndex >= -1 && pIndex <= 1);
 	mComputerIndex = pIndex;
+	if (mComputerIndex == 0)
+	{
+		delete mVehicleAi;
+		mVehicleAi = new VehicleAi(this);
+		AddContextObject(mVehicleAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mVehicleAi->Init();
+		delete mLauncherAi;
+		mLauncherAi = 0;
+	}
+	else if (mComputerIndex == 1)
+	{
+		delete mLauncherAi;
+		mLauncherAi = new LauncherAi(this);
+		AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mLauncherAi->Init();
+		delete mVehicleAi;
+		mVehicleAi = 0;
+	}
 }
 
 int Game::GetComputerIndex() const
@@ -443,15 +510,25 @@ void Game::NextComputerIndex()
 	}
 }
 
+float Game::GetComputerDifficulty() const
+{
+	return mComputerDifficulty;
+}
+
 void Game::SetComputerDifficulty(float pDifficulty)
 {
 	assert(pDifficulty >= -1 && pDifficulty <= 1);
 	mComputerDifficulty = pDifficulty;
 }
 
-int Game::GetScoreBalance()
+int Game::GetScoreBalance() const
 {
 	return mScoreBalance;
+}
+
+void Game::SetScoreBalance(int pBalance)
+{
+	mScoreBalance = pBalance;
 }
 
 bool Game::Render()
@@ -730,16 +807,14 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (pOk && pObject == mVehicle)
 	{
+		assert(pObject->GetPhysics()->GetEngineCount() == 3);
 		const str lName = _T("float_is_child");
 		new Cure::FloatAttribute(mVehicle, lName, 1);
 	}
 	if (pOk && pObject == mLauncher)
 	{
 		// Create a mock engine on the launcher that we use to navigate.
-		TBC::PhysicsEngine* lPitchEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_TILTER, 1, 1, 1, 1, 0);
-		pObject->GetPhysics()->AddEngine(lPitchEngine);
-		TBC::PhysicsEngine* lYawEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 1, 1, 1, 1, 1);
-		pObject->GetPhysics()->AddEngine(lYawEngine);
+		mLauncher->CreateEngines();
 	}
 }
 
@@ -831,37 +906,11 @@ bool Game::Initialize()
 	if (lOk)
 	{
 		SetVehicle(_T("cutie"));
+		ResetLauncher();
 	}
 	if (lOk)
 	{
-		mLauncher = new Launcher(this);
-		AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lOk = (mLauncher != 0);
-		assert(lOk);
-		if (lOk)
-		{
-			mLauncher->DisableRootShadow();
-			mLauncher->StartLoading();
-		}
-	}
-	if (lOk && mComputerDifficulty > 0)
-	{
-		if (mComputerIndex == 0)
-		{
-			mVehicleAi = new VehicleAi(this);
-			AddContextObject(mVehicleAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			mVehicleAi->Init();
-		}
-		else if (mComputerIndex == 1)
-		{
-			mLauncherAi = new LauncherAi(this);
-			AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			mLauncherAi->Init();
-		}
-	}
-	if (lOk)
-	{
-		SetFlybyMode(FLYBY_INTRODUCTION);
+		SetFlybyMode(FLYBY_INACTIVE);
 	}
 	return lOk;
 }
@@ -871,6 +920,7 @@ bool Game::InitializeTerrain()
 	bool lOk = true;
 	if (lOk)
 	{
+		delete mLevel;
 		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);

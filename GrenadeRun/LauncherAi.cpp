@@ -38,7 +38,9 @@ void LauncherAi::Init()
 
 void LauncherAi::OnTick()
 {
-	if (mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
+	if (mGame->GetFlybyMode() != Game::FLYBY_INACTIVE ||
+		!mGame->GetLauncher() || !mGame->GetLauncher()->IsLoaded() ||
+		!mGame->GetCutie() || !mGame->GetCutie()->IsLoaded())
 	{
 		return;
 	}

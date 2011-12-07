@@ -5,6 +5,7 @@
 
 
 #include "Launcher.h"
+#include "../TBC/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 
 
@@ -18,6 +19,7 @@ Launcher::Launcher(Game* pGame):
 	Parent(pGame->GetResourceManager(), _T("Launcher"), pGame->GetUiManager()),
 	mGame(pGame)
 {
+	SetForceLoadUnique(true);
 }
 
 Launcher::~Launcher()
@@ -73,6 +75,15 @@ void Launcher::GetAngles(const Vector3DF& pTargetPosition, const Vector3DF& pTar
 	GetBallisticData(lPosition1, lPosition2, lBetterPitch, pGuidePitch, pGuideYaw, lTime);
 	pGuidePitch = Math::Clamp(pGuidePitch, -PIF/2, 0.0f);
 	pGuideYaw = Math::Clamp(pGuideYaw, -PIF/2, PIF/2);
+}
+
+void Launcher::CreateEngines()
+{
+	assert(GetPhysics()->GetEngineCount() == 0);
+	TBC::PhysicsEngine* lPitchEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_TILTER, 1, 1, 1, 1, 0);
+	GetPhysics()->AddEngine(lPitchEngine);
+	TBC::PhysicsEngine* lYawEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 1, 1, 1, 1, 1);
+	GetPhysics()->AddEngine(lYawEngine);
 }
 
 void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,

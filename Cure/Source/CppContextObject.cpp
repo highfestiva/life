@@ -25,7 +25,8 @@ CppContextObject::CppContextObject(ResourceManager* pResourceManager, const str&
 	ContextObject(pResourceManager, pClassId),
 	mClassResource(0),
 	mPhysicsResource(0),
-	mAllowNetworkLogic(true)
+	mAllowNetworkLogic(true),
+	mForceLoadUnique(false)
 {
 }
 
@@ -154,6 +155,11 @@ void CppContextObject::SetTagIndex(int pIndex)
 
 
 
+void CppContextObject::SetForceLoadUnique(bool pLoadUnique)
+{
+	mForceLoadUnique = pLoadUnique;
+}
+
 void CppContextObject::StartLoading()
 {
 	assert(mClassResource == 0);
@@ -168,7 +174,7 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 	assert(mPhysicsResource == 0);
 	mPhysicsResource = new UserPhysicsResource();
 	const str lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
-	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
+	if (!mForceLoadUnique && mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
 		// If we're only in it for the bones, we can manage without a unique physics object.
 		mPhysicsResource->Load(GetResourceManager(), lAssetName,
