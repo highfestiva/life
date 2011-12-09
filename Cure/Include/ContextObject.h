@@ -105,6 +105,7 @@ public:
 	Vector3DF GetVelocity() const;
 	Vector3DF GetAngularVelocity() const;
 	Vector3DF GetAcceleration() const;
+	Vector3DF GetForwardDirection() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
 	ObjectPositionalData* GetNetworkOutputGhost();

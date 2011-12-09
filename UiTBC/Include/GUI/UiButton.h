@@ -49,6 +49,7 @@ template <class _TButton> class ButtonType
 public:
 	typedef fastdelegate::FastDelegate1<_TButton*, void> Delegate;
 	typedef fastdelegate::FastDelegate3<_TButton*, int, int, bool> DelegateXY;
+	typedef fastdelegate::FastDelegate5<_TButton*, int, int, int, int, bool> DelegateXYXY;
 };
 
 #define SetOnPress(_class, _func) \
@@ -61,7 +62,7 @@ public:
 	SetOnClickDelegate(UiTbc::ButtonType<UiTbc::Button>::Delegate(this, &_class::_func))
 
 #define SetOnDrag(_class, _func) \
-	SetOnDragDelegate(UiTbc::ButtonType<UiTbc::Button>::DelegateXY(this, &_class::_func))
+	SetOnDragDelegate(UiTbc::ButtonType<UiTbc::Button>::DelegateXYXY(this, &_class::_func))
 
 
 class Button: public Window, public TextComponent
@@ -70,6 +71,7 @@ class Button: public Window, public TextComponent
 public:
 	typedef ButtonType<Button>::Delegate Delegate;
 	typedef ButtonType<Button>::DelegateXY DelegateXY;
+	typedef ButtonType<Button>::DelegateXYXY DelegateXYXY;
 
 	enum IconAlignment
 	{
@@ -115,7 +117,7 @@ public:
 	void SetOnReleaseDelegate(const Delegate& pOnRelease);
 	// Actual click.
 	void SetOnClickDelegate(const Delegate& pOnClick);
-	void SetOnDragDelegate(const DelegateXY& pOnDrag);
+	void SetOnDragDelegate(const DelegateXYXY& pOnDrag);
 
 	void SetIcon(Painter::ImageID pIconID, IconAlignment pAlignment);
 	Painter::ImageID GetIconCanvas() const;
@@ -152,7 +154,7 @@ protected:
 	Delegate* mOnPress;
 	Delegate* mOnRelease;
 	Delegate* mOnClick;
-	DelegateXY* mOnDrag;
+	DelegateXYXY* mOnDrag;
 
 private:
 	Painter::ImageID mReleasedImageID;

@@ -477,23 +477,21 @@ void Game::SetComputerIndex(int pIndex)
 {
 	assert(pIndex >= -1 && pIndex <= 1);
 	mComputerIndex = pIndex;
+	delete mVehicleAi;
+	mVehicleAi = 0;
+	delete mLauncherAi;
+	mLauncherAi = 0;
 	if (mComputerIndex == 0)
 	{
-		delete mVehicleAi;
 		mVehicleAi = new VehicleAi(this);
 		AddContextObject(mVehicleAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		mVehicleAi->Init();
-		delete mLauncherAi;
-		mLauncherAi = 0;
 	}
 	else if (mComputerIndex == 1)
 	{
-		delete mLauncherAi;
 		mLauncherAi = new LauncherAi(this);
 		AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		mLauncherAi->Init();
-		delete mVehicleAi;
-		mVehicleAi = 0;
 	}
 }
 

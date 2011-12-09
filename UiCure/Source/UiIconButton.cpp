@@ -23,6 +23,7 @@ IconButton::IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResour
 	SetText(pText);
 	mIconResource->Load(pResourceManager, pIconImageName,
 		UserPainterKeepImageResource::TypeLoadCallback(this, &IconButton::PainterImageLoadCallback));
+	GetClientRectComponent()->SetIsHollow(true);
 }
 
 IconButton::~IconButton()

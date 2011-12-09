@@ -105,6 +105,7 @@ ScrollBar::ScrollBar(Style pStyle, int pSize,  int pButtonSize, const Color& pBo
 
 	LoadIcons();
 	LoadButtons();
+	SetupScrollButton();
 	CheckAndSetSize();
 	InitPreferredSize();
 
@@ -138,14 +139,9 @@ ScrollBar::ScrollBar(Style pStyle, Painter::ImageID pBackgImageID, Button* pTopL
 	mBorderWidth(3),
 	mOwner(0)
 {
+	SetupScrollButton();
 	CheckAndSetSize();
 	InitPreferredSize();
-
-	LoadIcons();
-	LoadButtons();
-	CheckAndSetSize();
-	InitPreferredSize();
-
 	DoLayout();
 	UpdateLayout();
 }
@@ -267,6 +263,25 @@ void ScrollBar::AddImage(Painter::ImageID& pImageID, uint8 pImage[], int pDim)
 	}
 }
 
+void ScrollBar::SetupScrollButton()
+{
+	if (mScrollerButton == 0)
+	{
+		if (mStyle == HORIZONTAL)
+			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("HScroller"));
+		else
+			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("VScroller"));
+	}
+
+	if (mStyle == HORIZONTAL)
+		AddChild(mScrollerButton, 0, 2);
+	else
+		AddChild(mScrollerButton, 2, 0);
+
+	mScrollerButton->SetOnPress(ScrollBar, OnScrollerDown);
+	mScrollerButton->SetOnDrag(ScrollBar, OnScrollerDragged);
+}
+
 void ScrollBar::LoadButtons()
 {
 	if (mTLButton == 0)
@@ -307,19 +322,6 @@ void ScrollBar::LoadButtons()
 	else
 		AddChild(mBRButton, 4, 0);
 
-	if (mScrollerButton == 0)
-	{
-		if (mStyle == HORIZONTAL)
-			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("HScroller"));
-		else
-			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("VScroller"));
-	}
-
-	if (mStyle == HORIZONTAL)
-		AddChild(mScrollerButton, 0, 2);
-	else
-		AddChild(mScrollerButton, 2, 0);
-
 	// Finally add the two dummy rects.
 	mTLRect = new RectComponent(_T("TLDummyRect"));
 	mBRRect = new RectComponent(_T("BRDummyRect"));
@@ -343,9 +345,6 @@ void ScrollBar::LoadButtons()
 	mBRButton->SetOnPress(ScrollBar, OnScrollBR);
 	mTLButton->SetOnRelease(ScrollBar, OnStopScroll);
 	mBRButton->SetOnRelease(ScrollBar, OnStopScroll);
-
-	mScrollerButton->SetOnPress(ScrollBar, OnScrollerDown);
-	mScrollerButton->SetOnDrag(ScrollBar, OnScrollerDragged);
 }
 
 void ScrollBar::CheckButtonSize(Button* pButton)
@@ -381,6 +380,7 @@ void ScrollBar::CheckButtonSize(Button* pButton)
 
 void ScrollBar::CheckAndSetSize()
 {
+	SetBehaveSolid(true);
 	CheckButtonSize(mTLButton);
 	CheckButtonSize(mBRButton);
 
@@ -428,7 +428,7 @@ void ScrollBar::InitPreferredSize()
 
 		if (mScrollerButton != 0)
 		{
-			mTLButton->SetPreferredSize(GetSize().x - 2 * mButtonSize, mSize);
+			mScrollerButton->SetPreferredSize(GetSize().x - 2 * mButtonSize, mSize);
 		}
 	}
 	else
@@ -445,7 +445,7 @@ void ScrollBar::InitPreferredSize()
 
 		if (mScrollerButton != 0)
 		{
-			mTLButton->SetPreferredSize(mSize, GetSize().y - 2 * mButtonSize);
+			mScrollerButton->SetPreferredSize(mSize, GetSize().y - 2 * mButtonSize);
 		}
 	}
 
@@ -475,7 +475,11 @@ void ScrollBar::DoLayout()
 			int stophere = 0;
 		}*/
 
-		int lWidth = lRect.GetWidth() - mButtonSize * 2;
+		int lWidth = lRect.GetWidth();
+		if (mTLRect)
+		{
+			lWidth -= mButtonSize * 2;
+		}
 		int lScrollerWidth = (int)floor(((float64)lWidth * lRatio));
 
 		if (mScrollerSize != 0)
@@ -490,24 +494,33 @@ void ScrollBar::DoLayout()
 		int lRest = lWidth - lScrollerWidth;
 		int lScrollPos = (int)floor((float64)lRest * mPos);
 
+		mScrollerButton->SetPos(lScrollPos, 0);
 		mScrollerButton->SetPreferredSize(lScrollerWidth, mSize);
+		mScrollerButton->SetSize(lScrollerWidth, mSize);
 
-		mTLRect->SetPreferredSize(lScrollPos, mSize);
-		if (lScrollPos == 0)
+		if (mTLRect)
 		{
-			mBRRect->SetPreferredSize(lRest - lScrollPos, mSize);
-		}
-		else
-		{
-			mBRRect->SetPreferredSize(0, mSize);
-		}
+			mTLRect->SetPreferredSize(lScrollPos, mSize);
+			if (lScrollPos == 0)
+			{
+				mBRRect->SetPreferredSize(lRest - lScrollPos, mSize);
+			}
+			else
+			{
+				mBRRect->SetPreferredSize(0, mSize);
+			}
 
-		mTLButton->SetPreferredSize(mButtonSize, mSize);
-		mBRButton->SetPreferredSize(mButtonSize, mSize);
+			mTLButton->SetPreferredSize(mButtonSize, mSize);
+			mBRButton->SetPreferredSize(mButtonSize, mSize);
+		}
 	}
 	else
 	{
-		int lHeight = lRect.GetHeight() - mButtonSize * 2;
+		int lHeight = lRect.GetHeight();
+		if (mTLRect)
+		{
+			lHeight -= mButtonSize * 2;
+		}
 		int lScrollerHeight = (int)floor(((float64)lHeight * lRatio));
 
 		if (mScrollerSize != 0)
@@ -522,12 +535,18 @@ void ScrollBar::DoLayout()
 		int lRest = lHeight - lScrollerHeight;
 		int lScrollPos = (int)floor((float64)lRest * mPos);
 
+		mScrollerButton->SetPos(0, lScrollPos);
 		mScrollerButton->SetPreferredSize(mSize, lScrollerHeight);
-		mTLRect->SetPreferredSize(mSize, lScrollPos);
-		mBRRect->SetPreferredSize(mSize, lRest - lScrollPos);
+		mScrollerButton->SetSize(mSize, lScrollerHeight);
 
-		mTLButton->SetPreferredSize(mSize, mButtonSize);
-		mBRButton->SetPreferredSize(mSize, mButtonSize);
+		if (mTLRect)
+		{
+			mTLRect->SetPreferredSize(mSize, lScrollPos);
+			mBRRect->SetPreferredSize(mSize, lRest - lScrollPos);
+
+			mTLButton->SetPreferredSize(mSize, mButtonSize);
+			mBRButton->SetPreferredSize(mSize, mButtonSize);
+		}
 	}
 }
 
@@ -572,22 +591,38 @@ void ScrollBar::OnScrollerDown(Button* pButton)
 	}
 }
 
-bool ScrollBar::OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY)
+bool ScrollBar::OnScrollerDragged(Button* pButton, int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 {
-	float64 lDeltaPos = 0;
 
 	PixelRect lRect(GetScreenRect());
 	PixelCoord lScrollerSize(mScrollerButton->GetSize());
 
-	if (mStyle == HORIZONTAL)
+	if (mTLRect)
 	{
-		lDeltaPos = (float64)pDeltaX / (float64)(lRect.GetWidth() - (lScrollerSize.x + 2 * mButtonSize));
+		float64 lDeltaPos;
+		if (mStyle == HORIZONTAL)
+		{
+			lDeltaPos = (float64)pDeltaX / (float64)(lRect.GetWidth() - (lScrollerSize.x + 2 * mButtonSize));
+		}
+		else
+		{
+			lDeltaPos = (float64)pDeltaY / (float64)(lRect.GetHeight() - (lScrollerSize.y + 2 * mButtonSize));
+		}
+		SetScrollPos(GetScrollPos() + lDeltaPos);
 	}
 	else
 	{
-		lDeltaPos = (float64)pDeltaY / (float64)(lRect.GetHeight() - (lScrollerSize.y + 2 * mButtonSize));
+		float64 lPos;
+		if (mStyle == HORIZONTAL)
+		{
+			lPos = (pMouseX - lRect.mLeft - mSize/2.0f) / (lRect.GetWidth() - mSize - 2.0f);
+		}
+		else
+		{
+			lPos = (pMouseY - lRect.mTop - mSize/2.0f) / (lRect.GetHeight() - mSize - 2.0f);
+		}
+		SetScrollPos(lPos);
 	}
-	SetScrollPos(GetScrollPos() + lDeltaPos);
 
 	if (mUserDefinedGfx == false)
 	{

@@ -103,7 +103,10 @@ void RectComponent::Repaint(Painter* pPainter)
 				}
 				else
 				{
-					pPainter->FillRect(lRect);
+					if (mColor[0].mAlpha != 0)
+					{
+						pPainter->FillRect(lRect);
+					}
 				}
 			}
 			else

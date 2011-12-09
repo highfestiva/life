@@ -69,6 +69,7 @@ void VehicleAi::OnTick()
 	const int lModeRunDeltaFrameCount = lTime->GetCurrentPhysicsFrameDelta(mModeStartFrame);
 	const float lModeRunTime = lTime->ConvertPhysicsFramesToSeconds(lModeRunDeltaFrameCount);
 
+	const float lStrength = Math::Lerp(0.6f, 1.0f, mGame->GetComputerDifficulty());
 	const Vector3DF lPosition = mGame->GetCutie()->GetPosition();
 	const Vector3DF lVelocity = mGame->GetCutie()->GetVelocity();
 	switch (mMode)
@@ -207,7 +208,7 @@ void VehicleAi::OnTick()
 			}
 
 			// Move forward.
-			mGame->GetCutie()->SetEnginePower(0, +1.0f, 0);
+			mGame->GetCutie()->SetEnginePower(0, +lStrength, 0);
 			mGame->GetCutie()->SetEnginePower(2, 0, 0);
 
 			// Steer.
@@ -221,8 +222,8 @@ void VehicleAi::OnTick()
 		{
 			// Brake or move backward.
 			const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
-			mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -1.0f, 0);
-			mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? 1.0f :  0.0f, 0);
+			mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength, 0);
+			mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f, 0);
 
 			if (!lIsMovingForward && lModeRunTime > 1.7f)
 			{
@@ -249,7 +250,7 @@ void VehicleAi::OnTick()
 			}
 			// Brake!
 			mGame->GetCutie()->SetEnginePower(0, 0, 0);
-			mGame->GetCutie()->SetEnginePower(2, +1.0f, 0);
+			mGame->GetCutie()->SetEnginePower(2, +lStrength, 0);
 		}
 		break;
 	}
@@ -257,6 +258,11 @@ void VehicleAi::OnTick()
 
 bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pCaution)
 {
+	if (mGame->GetComputerDifficulty() < 0.6f)
+	{
+		return false;
+	}
+
 	// Walk all objects, pick out grenades.
 	const Cure::ContextManager::ContextObjectTable& lObjectTable = GetManager()->GetObjectTable();
 	Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();

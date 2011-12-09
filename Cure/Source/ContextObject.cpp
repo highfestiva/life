@@ -710,9 +710,8 @@ Vector3DF ContextObject::GetAcceleration() const
 	return lAcceleration;
 }
 
-float ContextObject::GetForwardSpeed() const
+Vector3DF ContextObject::GetForwardDirection() const
 {
-	float lSpeed = 0;
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
@@ -721,11 +720,20 @@ float ContextObject::GetForwardSpeed() const
 		const Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetInverse() * Vector3DF(0, 1, 0);
 		TransformationF lTransform;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
+		return (lTransform.GetOrientation() * lForwardAxis).GetNormalized();
+	}
+	return Vector3DF(0, 1, 0);
+}
+
+float ContextObject::GetForwardSpeed() const
+{
+	float lSpeed = 0;
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
 		Vector3DF lVelocity;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-		Vector3DF lAxis = lTransform.GetOrientation() * lForwardAxis;
-		lAxis.Normalize();
-		lSpeed = lVelocity*lAxis;
+		lSpeed = lVelocity * GetForwardDirection();
 	}
 	/*else
 	{

@@ -29,6 +29,7 @@
 #include "../UiTBC/Include/GUI/UiButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiDialog.h"
+#include "../UiTBC/Include/GUI/UiScrollBar.h"
 #include "../UiTBC/Include/UiFontManager.h"
 #include "Cutie.h"
 #include "Game.h"
@@ -181,6 +182,8 @@ private:
 	UiTbc::Dialog<App>* mDialog;
 	mutable StopWatch mStartTimer;
 	mutable StopWatch mGameOverTimer;
+	UiCure::PainterImageResource* mScrollBarImage;
+	UiTbc::ScrollBar* mDifficultySlider;
 
 	LOG_CLASS_DECLARE();
 };
@@ -223,7 +226,9 @@ App::App(const strutil::strvec& pArgumentList):
 	mAngleTime(0),
 	mBigFontId(UiTbc::FontManager::INVALID_FONTID),
 	mReverseAndBrake(0),
-	mDialog(0)
+	mDialog(0),
+	mScrollBarImage(0),
+	mDifficultySlider(0)
 {
 	mApp = this;
 }
@@ -386,6 +391,9 @@ bool App::Open()
 
 void App::Close()
 {
+	delete mScrollBarImage;
+	mScrollBarImage = 0;
+
 	mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
 	mUiManager->GetDisplayManager()->RemoveResizeObserver(this);
 
@@ -528,6 +536,13 @@ bool App::Poll()
 	if (lOk && mDoLayout)
 	{
 		Layout();
+	}
+	if (lOk)
+	{
+		if (mDifficultySlider)
+		{
+			mGame->SetComputerDifficulty((float)mDifficultySlider->GetScrollPos());
+		}
 	}
 	if (lOk)
 	{
@@ -1703,6 +1718,39 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	d->AddButton(2, _T("Hardie"));
 	d->AddButton(3, _T("Speedie"));
 	d->AddButton(4, _T("Sleepie"));
+	if (mGame->GetComputerIndex() != -1)
+	{
+		d->SetOffset(PixelCoord(0, -40));
+
+		if (!mScrollBarImage)
+		{
+			mScrollBarImage = new UiCure::PainterImageResource(mUiManager, mResourceManager,
+				_T("scrollbar.png"), UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+			mScrollBarImage->Load();
+			mScrollBarImage->PostProcess();
+			mUiManager->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*mScrollBarImage->GetRamData(),
+				mScrollBarImage->GetUserData(0), UiTbc::GUIImageManager::CENTERED,
+				UiTbc::GUIImageManager::ALPHABLEND, 255);
+		}
+		UiTbc::Button* lScrollButton = ICONBTN("btn_scroll.png", "");
+		lScrollButton->SetPreferredSize(PixelCoord(44, 44), false);
+		mDifficultySlider = new UiTbc::ScrollBar(UiTbc::ScrollBar::HORIZONTAL,
+			mScrollBarImage->GetUserData(0), 0, 0, lScrollButton);
+		mDifficultySlider->SetScrollRatio(44, mScrollBarImage->GetRamData()->GetWidth());
+		mDifficultySlider->SetScrollPos(0.5);
+		mDifficultySlider->SetPreferredSize(mScrollBarImage->GetRamData()->GetWidth()+15*2, 44);
+		d->AddChild(mDifficultySlider);
+		const int x = d->GetPreferredWidth()/2 - mDifficultySlider->GetPreferredWidth()/2;
+		const int y = d->GetPreferredHeight() - 60;
+		mDifficultySlider->SetPos(x, y);
+
+		UiTbc::Label* lLabel = new UiTbc::Label();
+		lLabel->SetText(_T("Opponent difficulty"), FGCOLOR_DIALOG, CLEAR_COLOR);
+		d->AddChild(lLabel);
+		lLabel->SetPos(x+15, y-3);
+
+		d->UpdateLayout();
+	}
 }
 
 void App::OnVehicleAction(UiTbc::Button* pButton)
@@ -1715,6 +1763,7 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 		case 3:	lVehicle = _T("speedie");	break;
 		case 4:	lVehicle = _T("sleepie");	break;
 	}
+	mDifficultySlider = 0;
 	mGame->ResetWinnerIndex();
 	mGame->SetVehicle(lVehicle);
 	mGame->ResetLauncher();

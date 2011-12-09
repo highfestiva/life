@@ -79,7 +79,7 @@ Label* Dialog<_Target>::QueryLabel(const str& pText, UiTbc::FontManager::FontId 
 	const PixelCoord lSize = GetSize();
 	lCoord.x = lSize.x/2 - w/2;
 	lCoord.y = lSize.y/3 - h;
-	mLabel->SetPos(lCoord);
+	mLabel->SetPos(lCoord+mOffset);
 	mLabel->DeactivateFont(lPainter);
 	return mLabel;
 }
@@ -98,7 +98,6 @@ void Dialog<_Target>::AddButton(int pTag, Button* pButton)
 {
 	//pButton->SetBaseColor(Color(0, 0, 0, 0));
 	pButton->SetText(pButton->GetText(), mColor[1]);
-	pButton->GetClientRectComponent()->SetIsHollow(true);
 	pButton->SetTag(pTag);
 	AddChild(pButton);
 	mButtonList.push_back(pButton);
@@ -107,13 +106,11 @@ void Dialog<_Target>::AddButton(int pTag, Button* pButton)
 	UpdateLayout();
 }
 
-
-
 template<class _Target>
-void Dialog<_Target>::Repaint(Painter* pPainter)
+void Dialog<_Target>::SetOffset(PixelCoord pOffset)
 {
-	Animate();	// Slides dialog in on create and out on destroy.
-	Parent::Repaint(pPainter);
+	mOffset = pOffset;
+	UpdateLayout();
 }
 
 template<class _Target>
@@ -121,6 +118,13 @@ void Dialog<_Target>::UpdateLayout()
 {
 	const int lCount = (int)mButtonList.size();
 	const PixelCoord& lSize = GetSize();
+
+	if (mLabel)
+	{
+		PixelCoord lLabelSize = mLabel->GetPreferredSize(false);
+		PixelCoord lCoord(lSize.x/2 - lLabelSize.x/2, lSize.y/3 - lLabelSize.y);
+		mLabel->SetPos(lCoord + mOffset);
+	}
 
 	Button* lButton = mButtonList[0];
 	PixelCoord lButtonSize = lButton->GetPreferredSize();
@@ -131,11 +135,20 @@ void Dialog<_Target>::UpdateLayout()
 	for (int i = 0; i < lCount; ++i)
 	{
 		Button* lButton = mButtonList[i];
-		lButton->SetPos(x, y);
+		lButton->SetPos(PixelCoord(x, y) + mOffset);
 		x +=  lSpacePerEach;
 	}
 
 	Parent::UpdateLayout();
+}
+
+
+
+template<class _Target>
+void Dialog<_Target>::Repaint(Painter* pPainter)
+{
+	Animate();	// Slides dialog in on create and out on destroy.
+	Parent::Repaint(pPainter);
 }
 
 template<class _Target>

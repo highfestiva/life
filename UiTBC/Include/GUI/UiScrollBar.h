@@ -73,6 +73,7 @@ protected:
 
 	GridLayout* CreateLayout(Style pStyle);
 	void LoadIcons();
+	void SetupScrollButton();
 	void LoadButtons();
 	void CheckAndSetSize();
 	void CheckButtonSize(Button* pButton);
@@ -83,7 +84,7 @@ protected:
 	void OnScrollBR(Button* pButton);
 	void OnStopScroll(Button* pButton);
 	void OnScrollerDown(Button* pButton);
-	bool OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY);
+	bool OnScrollerDragged(Button* pButton, int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
 private:
 

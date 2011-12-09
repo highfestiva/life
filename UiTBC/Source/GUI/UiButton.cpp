@@ -243,8 +243,16 @@ void Button::Repaint(Painter* pPainter)
 			break;
 			case ICON_CENTER:
 				x = lRect.mLeft + (lRect.GetWidth()  - lImageSize.x) / 2 + lOffset;
-				y = lRect.mTop;
-				lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
+				if (!mText.empty())
+				{
+					y = lRect.mTop;
+					lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
+				}
+				else
+				{
+					y = lRect.GetCenterY() - lImageSize.y/2;
+					lTextX = 0;
+				}
 			break;
 			case ICON_RIGHT:
 				x = lRect.mRight - lImageSize.x + lOffset;
@@ -384,7 +392,7 @@ bool Button::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 
 		if (mOnDrag != 0)
 		{
-			(*mOnDrag)(this, pDeltaX, pDeltaY);
+			(*mOnDrag)(this, pMouseX, pMouseX, pDeltaX, pDeltaY);
 		}
 	}
 	else
@@ -440,7 +448,8 @@ void Button::SetIcon(Painter::ImageID pIconID,
 	mIconAlignment = pAlignment;
 
 	PixelCoord lSize = GetImageManager()->GetImageSize(mIconID);
-	SetPreferredSize(lSize.x, lSize.y + ((DesktopWindow*)GetTopParent())->GetPainter()->GetFontHeight()*3/2);
+	const int dh = GetText().empty()? 0 : ((DesktopWindow*)GetTopParent())->GetPainter()->GetFontHeight()*3/2;
+	SetPreferredSize(lSize.x, lSize.y + dh);
 
 	SetNeedsRepaint(true);
 }
@@ -505,10 +514,10 @@ void Button::SetOnClickDelegate(const Delegate& pOnClick)
 	mOnClick = new Delegate(pOnClick);
 }
 
-void Button::SetOnDragDelegate(const DelegateXY& pOnDrag)
+void Button::SetOnDragDelegate(const DelegateXYXY& pOnDrag)
 {
 	delete mOnDrag;
-	mOnDrag = new DelegateXY(pOnDrag);
+	mOnDrag = new DelegateXYXY(pOnDrag);
 }
 
 
