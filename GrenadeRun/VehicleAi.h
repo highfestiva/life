@@ -41,7 +41,7 @@ private:
 	virtual void OnTick();
 	bool AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pCaution);
 	void SetMode(Mode pMode);
-	bool IsCloseToTarget(const Vector3DF& pPosition) const;
+	bool IsCloseToTarget(const Vector3DF& pPosition, float pDistance) const;
 	float GetClosestPathDistance(const Vector3DF& pPosition, int pPath = -1) const;
 
 	Game* mGame;

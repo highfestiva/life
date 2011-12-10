@@ -60,6 +60,8 @@ public:
 	int GetBorderWidth();
 	int GetTotalBorderWidth();
 
+	void SetRoundedStyle(int pRadius);
+
 	virtual bool IsOver(int pScreenX, int pScreenY);
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
@@ -96,6 +98,7 @@ protected:
 
 private:
 	void Init();
+	void InitBorder();
 	bool Check(unsigned pFlags, unsigned pFlag);
 
 	BorderComponent* mTLBorder;

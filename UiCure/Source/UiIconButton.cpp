@@ -75,8 +75,13 @@ void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResourc
 		}
 		mHighlightedIconId = GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
 		//lCanvas.SetBuffer(0);	// Free buffer.
+		PixelCoord lPreferredSize = GetPreferredSize();
 		SetIcon(pResource->GetData(), ICON_CENTER);
 		SetHighlightedIcon(mHighlightedIconId);
+		if (lPreferredSize.x != 0 || lPreferredSize.y != 0)
+		{
+			SetPreferredSize(lPreferredSize, false);
+		}
 	}
 }
 

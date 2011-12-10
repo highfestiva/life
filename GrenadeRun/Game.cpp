@@ -130,22 +130,16 @@ bool Game::Tick()
 		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, -2);
 		if (lPosition.z < -100)
 		{
-			const Cure::ObjectPositionalData* lPosition = 0;
-			mVehicle->UpdateFullPosition(lPosition);
-			if (lPosition)
-			{
-				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
-				lNewPlacement->mPosition.mTransformation = GetCutieStart();
-				lNewPlacement->mPosition.mVelocity.Set(0, 0, 0);
-				lNewPlacement->mPosition.mAcceleration.Set(0, 0, 0);
-				lNewPlacement->mPosition.mAngularVelocity.Set(0, 0, 0);
-				lNewPlacement->mPosition.mAngularAcceleration.Set(0, 0, 0);
-				mVehicle->SetFullPosition(*lNewPlacement);
-			}
+			const float lHealth = mVehicle->GetHealth();
+			const str lVehicleType = mVehicle->GetClassId();	// TRICKY: don't fetch reference!!!
+			SetVehicle(lVehicleType);
+			mVehicle->DrainHealth(mVehicle->GetHealth() - lHealth);
 		}
-		lVelocity = mVehicle->GetVelocity();
-
-		mVehicle->QueryFlip();
+		else
+		{
+			lVelocity = mVehicle->GetVelocity();
+			mVehicle->QueryFlip();
+		}
 	}
 	else if (mLauncher && mLauncher->IsLoaded())
 	{
@@ -198,7 +192,9 @@ str Game::GetVehicle() const
 void Game::SetVehicle(const str& pVehicle)
 {
 	mAllowWin = true;
-	if (mVehicle && mVehicle->IsLoaded() && mVehicle->GetPosition().GetDistance(GetCutieStart().GetPosition()) < 3.0f*SCALE_FACTOR)
+	if (mVehicle && mVehicle->IsLoaded() &&
+		mVehicle->GetPosition().GetDistance(GetCutieStart().GetPosition()) < 3.0f*SCALE_FACTOR &&
+		mVehicle->GetClassId() == pVehicle)
 	{
 		return;
 	}
@@ -865,7 +861,10 @@ Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 	{
 		return new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
 	}
-	else if (strutil::StartsWith(pClassId, _T("cutie")))
+	else if (strutil::StartsWith(pClassId, _T("cutie")) ||
+		strutil::StartsWith(pClassId, _T("monster")) ||
+		strutil::StartsWith(pClassId, _T("corvette")) ||
+		strutil::StartsWith(pClassId, _T("road_roller")))
 	{
 		return new Cutie(GetResourceManager(), pClassId, mUiManager);
 	}

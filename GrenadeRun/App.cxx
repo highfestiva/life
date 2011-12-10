@@ -340,12 +340,18 @@ bool App::Open()
 		mPlayerSplitter = new UiTbc::RectComponent(BLACK, _T("Splitter"));
 		lDesktopWindow->AddChild(mPlayerSplitter);
 
-		mPauseButton = CreateButton(_T("Pause"), Color(95, 95, 95), lDesktopWindow);
+		mPauseButton = ICONBTN("btn_pause.png", "");
+		mPauseButton->SetBaseColor(BGCOLOR_DIALOG);
+		mPauseButton->SetRoundedStyle(10);
+		lDesktopWindow->AddChild(mPauseButton);
+		mPauseButton->SetPreferredSize(PixelCoord(44, 44), false);
+		mPauseButton->SetSize(mPauseButton->GetPreferredSize());
 		mPauseButton->SetVisible(true);
 		mPauseButton->SetOnClick(App, OnPauseClick);
 
 #ifndef LEPRA_IOS_LOOKANDFEEL
-		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), lDesktopWindow);
+		mGetiPhoneButton = ICONBTN("btn_iphone.png", "");
+		lDesktopWindow->AddChild(mGetiPhoneButton);
 		mGetiPhoneButton->SetVisible(true);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
 #endif // iOS L&F
@@ -1077,6 +1083,7 @@ void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int 
 	}
 	lCoords.push_back(lCoords[1]);
 	mUiManager->GetPainter()->SetColor(pColor, 0);
+	mUiManager->GetPainter()->SetAlphaValue(pColor.mAlpha);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
 	/*const Vector2DF lCenter(x, y);
 	for (size_t i = 0; i < lCoords.size()-1; ++i)
@@ -1163,12 +1170,13 @@ void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth
 	Color lStartColor = RED;
 	Color lEndColor = GREEN;
 	const int lBarCount = 19;
-	const int lBarHeight = (int)(pSize/lBarCount*0.5f);
+	const int lBarSpace = 3;
+	const int lBarHeight = (int)(pSize/lBarCount) - lBarSpace;
 	const int lBarWidth = BUTTON_WIDTH;
 	const float lHealthStep = 1.0f/lBarCount - 0.0001f*lBarCount;
 	float lCurrentHealth = 0;
-	const int lXStep = -(int)(::sin(pAngle)*lBarHeight*2);
-	const int lYStep = -(int)(::cos(pAngle)*lBarHeight*2);
+	const int lXStep = -(int)(::sin(pAngle)*(lBarHeight+lBarSpace));
+	const int lYStep = -(int)(::cos(pAngle)*(lBarHeight+lBarSpace));
 	const bool lXIsMain = ::abs(lXStep) >= ::abs(lYStep);
 	x -= (int)(lXStep * lBarCount*0.5f);
 	y -= (int)(lYStep * lBarCount*0.5f);
@@ -1592,6 +1600,7 @@ int App::PollTap(FingerMovement& pMovement)
 void App::MainMenu()
 {
 	// TRICKY: leave these here, since this call comes from >1 place.
+	mGameOverTimer.Stop();
 	mGame->ResetWinnerIndex();
 	mGame->SetFlybyMode(Game::FLYBY_SYSTEM_PAUSE);
 	mGame->SetScoreBalance(0);
@@ -1706,6 +1715,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	if (pButton->GetTag() == 1)
 	{
 		// Tutorial.
+		mGameOverTimer.Stop();
 		mGame->SetFlybyMode(Game::FLYBY_INTRODUCTION);
 		mGame->ResetWinnerIndex();
 		mGame->SetVehicle(mGame->GetVehicle());
@@ -1759,11 +1769,12 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 	switch (pButton->GetTag())
 	{
 		case 1:	lVehicle = _T("cutie");		break;
-		case 2:	lVehicle = _T("hardie");	break;
-		case 3:	lVehicle = _T("speedie");	break;
-		case 4:	lVehicle = _T("sleepie");	break;
+		case 2:	lVehicle = _T("monster");	break;
+		case 3:	lVehicle = _T("corvette");	break;
+		case 4:	lVehicle = _T("road_roller");	break;
 	}
 	mDifficultySlider = 0;
+	mGameOverTimer.Stop();
 	mGame->ResetWinnerIndex();
 	mGame->SetVehicle(lVehicle);
 	mGame->ResetLauncher();

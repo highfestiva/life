@@ -19,7 +19,7 @@
 
 
 #define	NORMAL_AIM_AHEAD		10.0f	// How far ahead to try and intersect the path.
-#define GOAL_DISTANCE			4.5f	// When to slow down before stopping at goal.
+#define GOAL_DISTANCE			4.2f	// When to slow down before stopping at goal.
 #define OFF_COURSE_DISTANCE		4.5f	// When to start heading back.
 #define END_PATH_TIME			0.9999f	// Time is considered at end of path.
 #define	OFF_END_PATH_TIME		0.9995f	// Close to end, but not quite.
@@ -109,22 +109,34 @@ void VehicleAi::OnTick()
 				return;
 			}
 			mActivePath = lRelevantPaths[Random::GetRandomNumber() % lRelevantPaths.size()];
+			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
+			const float lWantedDistance = SCALE_FACTOR * NORMAL_AIM_AHEAD;
+			float lStep = lWantedDistance * lPath->GetDistanceNormal();
+			if (lStep + lPath->GetCurrentInterpolationTime() > 1)
+			{
+				lStep = 1 - lPath->GetCurrentInterpolationTime();
+			}
+			lPath->StepInterpolation(lStep);
 			SetMode(MODE_HEADING_BACK_ON_TRACK);
 			mLog.Headlinef(_T("Picked path %i (%i pickable)."), mActivePath, lRelevantPaths.size());
 		}
 		break;
 		case MODE_HEADING_BACK_ON_TRACK:
 		{
-			if (GetClosestPathDistance(lPosition) <= SCALE_FACTOR*OFF_COURSE_DISTANCE)
+			if (lModeRunDeltaFrameCount%5 == 2)
 			{
-				// We were able to return to normal, keep on running.
-				SetMode(MODE_NORMAL);
-				return;
-			}
-			else if (lModeRunTime > 7.0f)
-			{
-				SetMode(MODE_FIND_BEST_PATH);
-				return;
+				const float lVelocityScaleFactor = std::min(1.0f, lVelocity.GetLength() / 5);
+				if (GetClosestPathDistance(lPosition) < SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
+				{
+					// We were able to return to normal, keep on running.
+					SetMode(MODE_NORMAL);
+					return;
+				}
+				else if (lModeRunTime > 7.0f)
+				{
+					SetMode(MODE_FIND_BEST_PATH);
+					return;
+				}
 			}
 		}
 		// TRICKY: fall through.
@@ -132,7 +144,8 @@ void VehicleAi::OnTick()
 		{
 			if (mMode == MODE_NORMAL && lModeRunDeltaFrameCount%20 == 19)
 			{
-				if (GetClosestPathDistance(lPosition) > SCALE_FACTOR*OFF_COURSE_DISTANCE)
+				const float lVelocityScaleFactor = std::min(1.0f, lVelocity.GetLength() / 5);
+				if (GetClosestPathDistance(lPosition) > SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
 				{
 					SetMode(MODE_HEADING_BACK_ON_TRACK);
 					return;
@@ -185,7 +198,7 @@ void VehicleAi::OnTick()
 			// Step target (aim) ahead.
 			{
 				const float lActualDistance2 = lTarget.GetDistanceSquared(lPosition);
-				const float lWantedDistance = SCALE_FACTOR * NORMAL_AIM_AHEAD;
+				const float lWantedDistance = SCALE_FACTOR * NORMAL_AIM_AHEAD * std::min(1.0f, lVelocity.GetLength() / 10);
 				if (lActualDistance2 < lWantedDistance*lWantedDistance)
 				{
 					const float lMoveAhead = lWantedDistance*1.1f - ::sqrt(lActualDistance2);
@@ -197,7 +210,7 @@ void VehicleAi::OnTick()
 					{
 						lPath->GotoAbsoluteTime(END_PATH_TIME);
 						if (mGame->GetCutie()->GetForwardSpeed() > 2.0f*SCALE_FACTOR ||
-							IsCloseToTarget(lPosition))
+							IsCloseToTarget(lPosition, GOAL_DISTANCE))
 						{
 							SetMode(MODE_AT_GOAL);
 							return;
@@ -216,6 +229,22 @@ void VehicleAi::OnTick()
 			const Vector3DF lWantedDirection = lTarget-lPosition;
 			const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
 			mGame->GetCutie()->SetEnginePower(1, +lAngle, 0);
+
+			// Check if we need to slow down.
+			const float lHighSpeed = SCALE_FACTOR * 2.5f;
+			const float lAbsAngle = ::fabs(lAngle);
+			if (lVelocity.GetLengthSquared() > lHighSpeed*lHighSpeed)
+			{
+				if (lAbsAngle > 0.5f)
+				{
+					mGame->GetCutie()->SetEnginePower(2, lAbsAngle*0.001f + lVelocity.GetLength()*0.0001f, 0);
+				}
+				else if (lPath->GetCurrentInterpolationTime() >= DOUBLE_OFF_END_PATH_TIME &&
+					IsCloseToTarget(lPosition, 3.5f*GOAL_DISTANCE))
+				{
+					mGame->GetCutie()->SetEnginePower(2, 0.3f, 0);
+				}
+			}
 		}
 		break;
 		case MODE_BACKING_UP:
@@ -242,7 +271,7 @@ void VehicleAi::OnTick()
 				}
 			}
 			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-			if (!IsCloseToTarget(lPosition))
+			if (!IsCloseToTarget(lPosition, GOAL_DISTANCE))
 			{
 				lPath->GotoAbsoluteTime(DOUBLE_OFF_END_PATH_TIME);	// Close to end, but not at end.
 				SetMode(MODE_HEADING_BACK_ON_TRACK);
@@ -250,7 +279,7 @@ void VehicleAi::OnTick()
 			}
 			// Brake!
 			mGame->GetCutie()->SetEnginePower(0, 0, 0);
-			mGame->GetCutie()->SetEnginePower(2, +lStrength, 0);
+			mGame->GetCutie()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
 		}
 		break;
 	}
@@ -355,12 +384,12 @@ void VehicleAi::SetMode(Mode pMode)
 	mLog.Headlinef(_T("Switching mode to %s."), lModeName);
 }
 
-bool VehicleAi::IsCloseToTarget(const Vector3DF& pPosition) const
+bool VehicleAi::IsCloseToTarget(const Vector3DF& pPosition, float pDistance) const
 {
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
 	const Vector3DF lTarget = lPath->GetValue();
 	const float lTargetDistance2 = lTarget.GetDistanceSquared(pPosition);
-	const float lGoalDistance = GOAL_DISTANCE*SCALE_FACTOR;
+	const float lGoalDistance = pDistance*SCALE_FACTOR;
 	return (lTargetDistance2 <= lGoalDistance*lGoalDistance);
 }
 
