@@ -7,7 +7,7 @@
 #include "../Include/UiSoundManagerOpenAL.h"
 #include <assert.h>
 #include "../../ThirdParty/freealut-1.1.0/include/AL/alut.h"
-//#include "../../Lepra/Include/DiskFile.h"
+#include "../Include/UiChibiXmAlStream.h"
 #include "../Include/UiOggAlStream.h"
 
 
@@ -164,7 +164,15 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 
 SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int)
 {
-	SoundStream* lSoundStream = new OggAlStream(this, pFileName, pLoopMode == LOOP_FORWARD);
+	SoundStream* lSoundStream;
+	if (strutil::EndsWith(pFileName, _T(".xm")))
+	{
+		lSoundStream = new ChibiXmAlStream(this, pFileName, pLoopMode == LOOP_FORWARD);
+	}
+	else
+	{
+		lSoundStream = new OggAlStream(this, pFileName, pLoopMode == LOOP_FORWARD);
+	}
 	if (!lSoundStream->IsOpen())
 	{
 		delete lSoundStream;

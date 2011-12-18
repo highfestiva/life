@@ -1992,6 +1992,18 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="ChibiXM"
+			>
+			<File
+				RelativePath=".\ChibiXM\xmplay.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChibiXM\xmplay.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\Readme.txt"
 			>

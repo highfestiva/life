@@ -24,7 +24,7 @@ OggAlStream::OggAlStream(SoundManager* pSoundManager, const str& pFilename, bool
 	Parent(pSoundManager)
 {
 	mIsLooping = pLoop;
-	mIsOpen = Open(pFilename);
+	Open(pFilename);
 }
 
 OggAlStream::~OggAlStream()
@@ -101,16 +101,19 @@ bool OggAlStream::Update()
 
 bool OggAlStream::Open(const str& pFilename)
 {
+	Release();
+
 	if((mOggFile = fopen(astrutil::Encode(pFilename).c_str(), "rb")) == 0)
 	{
-		return false;
+		return mIsOpen;
 	}
 
 	int lResult;
 	if((lResult = ov_open(mOggFile, &mOggStream, NULL, 0)) < 0)	// Ogg/Vorbis takes ownership of file.
 	{
 		fclose(mOggFile);
-		return false;
+		mOggFile = 0;
+		return mIsOpen;
 	}
 
 	mVorbisInfo = ov_info(&mOggStream, -1);
@@ -127,11 +130,17 @@ bool OggAlStream::Open(const str& pFilename)
 	alSource3f(mAlSource, AL_DIRECTION,		0.0, 0.0, 0.0);
 	alSourcef (mAlSource, AL_ROLLOFF_FACTOR,	0.0);
 	alSourcei (mAlSource, AL_SOURCE_RELATIVE,	AL_TRUE);
-	return true;
+	mIsOpen = true;
+	return mIsOpen;
 }
 
 bool OggAlStream::Release()
 {
+	if (!mIsOpen)
+	{
+		return false;
+	}
+
 	alSourceStop(mAlSource);
 	if (!Clear())
 	{
@@ -144,6 +153,7 @@ bool OggAlStream::Release()
 	AL_CHECK();
 
 	ov_clear(&mOggStream);
+	mIsOpen = false;
 	return true;
 }
 
@@ -181,7 +191,7 @@ bool OggAlStream::Stream(ALuint buffer)
 
 bool OggAlStream::Clear()
 {
-	int lQueuedBufferCount;
+	int lQueuedBufferCount = 0;
 	alGetSourcei(mAlSource, AL_BUFFERS_QUEUED, &lQueuedBufferCount);
 	while (lQueuedBufferCount--)
 	{

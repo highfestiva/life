@@ -34,12 +34,13 @@ Game over view.
 When restarted (a couple of times?), Cutie's engine sound dissappear. Fix!
 Autostart next/same level.
 Score counting.
+Single player difficulty levels.
+Extra vehicles: cute monster truck, speed car, slowmobile.
 
 Computer demo
 -------------
 Record voice for tutorial.
 Playback voice for tutorial.
-Single player difficulty levels.
 Polish on level_2 roads (in texture).
 Show keyboard controls when starting.
 Delete all resources when switching level (and make sure!).
@@ -52,6 +53,5 @@ iOS and computer full version
 -----------------------------
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
-Extra vehicles: cute monster truck.
 2 extra levels: castle and machine.
 iPad adjustments.

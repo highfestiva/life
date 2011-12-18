@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;;../ThirdParty/ChibiXM"
 				PreprocessorDefinitions="WIN32;_DEBUG;LEPRA_WITHOUT_FMOD"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -115,7 +115,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;;../ThirdParty/ChibiXM"
 				PreprocessorDefinitions="WIN32;NDEBUG;LEPRA_WITHOUT_FMOD"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -181,7 +181,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;;../ThirdParty/ChibiXM"
 				PreprocessorDefinitions="WIN32;_DEBUG;LEPRA_WITHOUT_FMOD"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -253,7 +253,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;;../ThirdParty/ChibiXM"
 				PreprocessorDefinitions="WIN32;NDEBUG;LEPRA_WITHOUT_FMOD"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -323,7 +323,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;;../ThirdParty/ChibiXM"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO;LEPRA_WITHOUT_FMOD"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -393,7 +393,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;;../ThirdParty/ChibiXM"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO;LEPRA_WITHOUT_FMOD"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -443,6 +443,10 @@
 			>
 			<File
 				RelativePath=".\Include\GLEXT.H"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiChibiXmAlStream.h"
 				>
 			</File>
 			<File
@@ -559,6 +563,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\Source\UiChibiXmAlStream.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\Source\UiDisplayManager.cpp"
 				>

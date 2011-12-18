@@ -381,6 +381,11 @@ bool App::Open()
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mMusicStreamer = 0;
 		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("ButterflyRide.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
+		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("BehindTheFace.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
+		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("BrittiskBensin.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
+		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("DontYouWantMe'97.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
+		mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("CloseEncounters.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));

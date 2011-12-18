@@ -164,7 +164,7 @@ def _incremental_copy_data(sourcedir, targetdir, buildtype):
 	datadir = os.path.join(sourcedir, "Data")
 	fl = glob.glob(datadir+"/*.class") + glob.glob(datadir+"/*.mesh") + glob.glob(datadir+"/*.phys") + \
 		 glob.glob(datadir+"/*.jpg") + glob.glob(datadir+"/*.png") + glob.glob(datadir+"/*.tga") + glob.glob(datadir+"/*.bmp") + \
-		 glob.glob(datadir+"/*.wav") + glob.glob(datadir+"/*.ogg") + glob.glob(datadir+"/*.mp3")
+		 glob.glob(datadir+"/*.wav") + glob.glob(datadir+"/*.ogg") + glob.glob(datadir+"/*.mp3") + glob.glob(datadir+"/*.xm")
 	targetdata = os.path.join(targetdir, "Data")
 	_incremental_copy(fl, targetdata, buildtype)
 
