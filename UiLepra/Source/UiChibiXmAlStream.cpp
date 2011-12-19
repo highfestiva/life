@@ -36,7 +36,7 @@ static void free_mem(void *p_mem, XM_MemoryAllocType) {
 ///////////////////////////////////////////////////////////////////////////////
 // File System Interface
 ///////////////////////////////////////////////////////////////////////////////
-FILE*   m_fp;
+FILE* m_fp;
 xm_bool f_be;
 
 static xm_bool fileio_in_use() {
@@ -156,7 +156,7 @@ static xm_bool fileio_eof_reached()
 
 static void fileio_close() 
 {
-	if(m_fp) {
+	if (m_fp) {
 		fclose(m_fp);
 	}
 	m_fp=NULL;
@@ -217,7 +217,7 @@ bool ChibiXmAlStream::Playback()
 
 	xm_player_play();
 
-	if(!Stream(mAlBuffers[0]) || !Stream(mAlBuffers[1]))
+	if (!Stream(mAlBuffers[0]) || !Stream(mAlBuffers[1]))
 	{
 		return false;
 	}
@@ -229,8 +229,9 @@ bool ChibiXmAlStream::Playback()
 
 bool ChibiXmAlStream::Rewind()
 {
+	const bool lIsPlaying = IsPlaying();
 	xm_player_stop();
-	if (IsPlaying())
+	if (lIsPlaying)
 	{
 		xm_player_play();
 	}
@@ -241,7 +242,7 @@ bool ChibiXmAlStream::IsPlaying() const
 {
 	ALenum state = !AL_PLAYING;
 	alGetSourcei(mAlSource, AL_SOURCE_STATE, &state);
-	return (state == AL_PLAYING);
+	return (state == AL_PLAYING && xm_player_is_playing());
 }
 
 bool ChibiXmAlStream::Stop()
@@ -279,6 +280,7 @@ bool ChibiXmAlStream::Update()
 		Clear();
 		lIsActive = Rewind();
 	}
+	TimeoutAutoResume();
 	return lIsActive;
 }
 
@@ -375,6 +377,16 @@ bool ChibiXmAlStream::Clear()
 		AL_CHECK();
 	}
 	return true;
+}
+
+void ChibiXmAlStream::TimeoutAutoResume()
+{
+	ALenum state;
+	alGetSourcei(mAlSource, AL_SOURCE_STATE, &state);
+	if (state == AL_STOPPED)
+	{
+		alSourcePlay(mAlSource);
+	}
 }
 
 int ChibiXmAlStream::XmRead(char* pBuffer, int pBufferByteCount)

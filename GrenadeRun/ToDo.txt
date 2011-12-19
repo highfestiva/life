@@ -39,6 +39,8 @@ Extra vehicles: cute monster truck, speed car, slowmobile.
 
 Computer demo
 -------------
+Load buttons before dialog is displayed.
+Load music files from .pk3 archive instead of directly from raw file.
 Record voice for tutorial.
 Playback voice for tutorial.
 Polish on level_2 roads (in texture).

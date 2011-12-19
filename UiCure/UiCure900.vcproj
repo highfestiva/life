@@ -487,6 +487,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiMusicPlayer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiProps.cpp"
 				>
 			</File>
@@ -530,6 +534,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiMachine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiMusicPlayer.h"
 				>
 			</File>
 			<File

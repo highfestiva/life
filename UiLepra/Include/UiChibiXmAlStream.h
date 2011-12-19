@@ -42,6 +42,7 @@ protected:
 	bool Release();				// release the file handle
 	bool Stream(ALuint buffer);		// reloads a buffer
 	bool Clear();				// empties the queue
+	void TimeoutAutoResume();		// If too high latencies between updates, OpenAL stops playing. This resumes.
 	int XmRead(char* pBuffer, int pBufferByteCount);
 
 private:

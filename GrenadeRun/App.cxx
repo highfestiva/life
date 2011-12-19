@@ -18,6 +18,7 @@
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiIconButton.h"
+#include "../UiCure/Include/UiMusicPlayer.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiLepra/Include/Mac/UiIosInput.h"
 #include "../UiLepra/Include/UiCore.h"
@@ -144,7 +145,7 @@ private:
 	Cure::ResourceManager* mResourceManager;
 	Cure::RuntimeVariableScope* mVariableScope;
 	UiCure::GameUiManager* mUiManager;
-	UiLepra::SoundStream* mMusicStreamer;
+	UiCure::MusicPlayer* mMusicPlayer;
 	int mLayoutFrameCounter;
 	UiTbc::Button* mLazyButton;
 	UiTbc::Button* mHardButton;
@@ -379,21 +380,16 @@ bool App::Open()
 	if (lOk)
 	{
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
-		mMusicStreamer = 0;
-		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
-		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("ButterflyRide.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
-		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("BehindTheFace.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
-		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("BrittiskBensin.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
-		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("DontYouWantMe'97.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
-		mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("CloseEncounters.xm"), UiLepra::SoundManager::LOOP_NONE, 0);
-		if (!mMusicStreamer || !mMusicStreamer->Playback())
-		{
-			mLog.Errorf(_T("Unable to play beautiful muzak!"));
-		}
-		else
-		{
-			mMusicStreamer->SetVolume(0.5f);
-		}
+		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
+		mMusicPlayer->SetVolume(0.5f);
+		mMusicPlayer->SetSongPauseTime(4, 20);
+		//mMusicPlayer->AddSong(lPathPrefix+_T("ButterflyRide.xm"));
+		mMusicPlayer->AddSong(lPathPrefix+_T("BehindTheFace.xm"));
+		mMusicPlayer->AddSong(lPathPrefix+_T("BrittiskBensin.xm"));
+		//mMusicPlayer->AddSong(lPathPrefix+_T("DontYouWantMe'97.xm"));
+		//mMusicPlayer->AddSong(lPathPrefix+_T("CloseEncounters.xm"));
+		//mMusicPlayer->Shuffle();
+		mMusicPlayer->Playback();
 	}
 
 	UiLepra::Core::ProcessMessages();
@@ -413,8 +409,8 @@ void App::Close()
 	Thread::Sleep(0.05);
 	UiLepra::Core::ProcessMessages();
 
-	delete mMusicStreamer;
-	mMusicStreamer = 0;
+	delete mMusicPlayer;
+	mMusicPlayer = 0;
 
 	delete mGame;
 	mGame = 0;
@@ -617,13 +613,9 @@ bool App::Poll()
 	mResourceManager->Tick();
 	mUiManager->EndRender();
 
-	if (mMusicStreamer && mMusicStreamer->Update())
+	if (mMusicPlayer)
 	{
-		if(!mMusicStreamer->IsPlaying())
-		{
-			mMusicStreamer->Pause();
-			mMusicStreamer->Playback();
-		}
+		mMusicPlayer->Update();
 	}
 
 	if (mGameOverTimer.IsStarted())
@@ -1356,9 +1348,9 @@ void App::Layout()
 
 void App::Suspend()
 {
-	if (mMusicStreamer)
+	if (mMusicPlayer)
 	{
-		mMusicStreamer->Pause();
+		mMusicPlayer->Pause();
 	}
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
@@ -1370,10 +1362,10 @@ void App::Resume()
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
-	if (mMusicStreamer)
+	if (mMusicPlayer)
 	{
-		mMusicStreamer->Stop();
-		mMusicStreamer->Playback();
+		mMusicPlayer->Stop();
+		mMusicPlayer->Playback();
 	}
 }
 
@@ -1752,7 +1744,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		mDifficultySlider = new UiTbc::ScrollBar(UiTbc::ScrollBar::HORIZONTAL,
 			mScrollBarImage->GetUserData(0), 0, 0, lScrollButton);
 		mDifficultySlider->SetScrollRatio(44, mScrollBarImage->GetRamData()->GetWidth());
-		mDifficultySlider->SetScrollPos(0.5);
+		mDifficultySlider->SetScrollPos((mGame->GetComputerDifficulty() < 0)? 0.5 : mGame->GetComputerDifficulty());
 		mDifficultySlider->SetPreferredSize(mScrollBarImage->GetRamData()->GetWidth()+15*2, 44);
 		d->AddChild(mDifficultySlider);
 		const int x = d->GetPreferredWidth()/2 - mDifficultySlider->GetPreferredWidth()/2;

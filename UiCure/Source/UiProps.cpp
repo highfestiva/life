@@ -117,7 +117,10 @@ void Props::OnTick()
 					UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
 					if (!mIsFadingOut && mOpacity >= 1)
 					{
-						mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED);
+						if (mUiManager->CanRender())
+						{
+							mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED);
+						}
 					}
 					lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha = lFadeOutOpacity;
 				}

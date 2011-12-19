@@ -1039,6 +1039,7 @@ typedef struct {
 	xm_u8 forced_next_order; /* order change */
 	xm_u16 forced_next_order_row; /* order change */
 	xm_bool active;
+	xm_bool no_restart;	// high_festiva was here! Disallow song restart (by stopping player).
 
 	_XM_PatternDecompressor decompressor;
 
@@ -2621,7 +2622,16 @@ static void _xm_player_process_tick() {
 			p->current_row=0;
 			p->current_order++;
 			if (p->current_order>=p->song->order_count)
+			{
 				p->current_order=p->song->restart_pos;
+
+				// high_festiva was here!
+				if (p->no_restart)
+				{
+					xm_player_stop();
+					return;
+				}
+			}
 
 
 			p->current_pattern=p->song->order_list[p->current_order];
@@ -2696,6 +2706,16 @@ void xm_player_stop() {
 	if (_xm_mixer)
 		_xm_mixer->reset_voices();
 
+}
+
+// high_festiva was here!
+xm_bool xm_player_is_playing()
+{
+	if (!_xm_player)
+	{
+		return xm_false;
+	}
+	return _xm_player->active;
 }
 
 /*******************************

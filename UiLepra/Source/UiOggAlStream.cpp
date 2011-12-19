@@ -34,12 +34,12 @@ OggAlStream::~OggAlStream()
 
 bool OggAlStream::Playback()
 {
-	if(IsPlaying())
+	if (IsPlaying())
 	{
 		return true;
 	}
 
-	if(!Stream(mAlBuffers[0]) || !Stream(mAlBuffers[1]))
+	if (!Stream(mAlBuffers[0]) || !Stream(mAlBuffers[1]))
 	{
 		return false;
 	}
@@ -91,10 +91,22 @@ bool OggAlStream::Update()
 		alSourceQueueBuffers(mAlSource, 1, &buffer);
 		AL_CHECK();
 	}
-	if (!lIsActive && mIsLooping)
+	if (!lIsActive)
 	{
-		Clear();
-		lIsActive = Rewind();
+		if (mIsLooping)
+		{
+			Clear();
+			lIsActive = Rewind();
+			TimeoutAutoResume();
+		}
+		else
+		{
+			Stop();
+		}
+	}
+	else
+	{
+		TimeoutAutoResume();
 	}
 	return lIsActive;
 }
@@ -103,13 +115,13 @@ bool OggAlStream::Open(const str& pFilename)
 {
 	Release();
 
-	if((mOggFile = fopen(astrutil::Encode(pFilename).c_str(), "rb")) == 0)
+	if ((mOggFile = fopen(astrutil::Encode(pFilename).c_str(), "rb")) == 0)
 	{
 		return mIsOpen;
 	}
 
 	int lResult;
-	if((lResult = ov_open(mOggFile, &mOggStream, NULL, 0)) < 0)	// Ogg/Vorbis takes ownership of file.
+	if ((lResult = ov_open(mOggFile, &mOggStream, NULL, 0)) < 0)	// Ogg/Vorbis takes ownership of file.
 	{
 		fclose(mOggFile);
 		mOggFile = 0;
@@ -171,7 +183,7 @@ bool OggAlStream::Stream(ALuint buffer)
 		}
 		else if (lResult < 0)
 		{
-				return false;
+			return false;
 		}
 		else
 		{
@@ -179,7 +191,7 @@ bool OggAlStream::Stream(ALuint buffer)
 		}
 	}
 
-	if(lSize == 0)
+	if (lSize == 0)
 	{
 		return false;
 	}
@@ -200,6 +212,16 @@ bool OggAlStream::Clear()
 		AL_CHECK();
 	}
 	return true;
+}
+
+void OggAlStream::TimeoutAutoResume()
+{
+	ALenum state;
+	alGetSourcei(mAlSource, AL_SOURCE_STATE, &state);
+	if (state == AL_STOPPED)
+	{
+		alSourcePlay(mAlSource);
+	}
 }
 
 

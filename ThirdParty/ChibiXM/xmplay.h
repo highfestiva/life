@@ -284,6 +284,7 @@ void xm_player_set_song(XM_Song *p_song);
 
 void xm_player_play();
 void xm_player_stop();
+xm_bool xm_player_is_playing();	// high_festiva was here!
 
 
 /** FILEIO **/
