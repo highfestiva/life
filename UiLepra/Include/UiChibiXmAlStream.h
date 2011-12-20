@@ -13,8 +13,14 @@
 #else // !Mac
 #include <AL/al.h>
 #endif // Mac/!Mac
-#include "UiLepra.h"
 #include "UiSoundStream.h"
+
+
+
+namespace Lepra
+{
+class FileOpener;
+}
 
 
 
@@ -27,6 +33,8 @@ class ChibiXmAlStream: public SoundStream
 {
 public:
 	typedef SoundStream Parent;
+
+	static void SetFileOpener(FileOpener* pOpener);
 
 	ChibiXmAlStream(SoundManager* pSoundManager, const str& pFilename, bool pLoop);
 	virtual ~ChibiXmAlStream();

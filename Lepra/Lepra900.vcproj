@@ -565,6 +565,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\FileOpener.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\GammaLookup.h"
 				>
 			</File>

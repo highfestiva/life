@@ -4,6 +4,9 @@
 
 
 #include "../Include/UiChibiXmAlStream.h"
+#include <assert.h>
+#include "../../Lepra/Include/File.h"
+#include "../../Lepra/Include/FileOpener.h"
 #include "../Include/UiSoundManager.h"
 
 #ifdef LEPRA_MSVC
@@ -12,6 +15,11 @@
 #define AL_CHECK()	if (alGetError() != AL_NO_ERROR) return false;
 #define SAMPLE_RATE	22050
 #define BUFFER_SIZE	(4096 * 8)
+
+
+
+namespace UiLepra
+{
 
 
 
@@ -36,142 +44,126 @@ static void free_mem(void *p_mem, XM_MemoryAllocType) {
 ///////////////////////////////////////////////////////////////////////////////
 // File System Interface
 ///////////////////////////////////////////////////////////////////////////////
-FILE* m_fp;
-xm_bool f_be;
+static FileOpener* gFileOpener = 0;
+static File* gFile = 0;
 
-static xm_bool fileio_in_use() {
-	return m_fp ? xm_true : xm_false;		
+static xm_bool fileio_in_use()
+{
+	return gFile? xm_true : xm_false;		
 }
 
 static XM_FileIOError fileio_open(const char *p_file, xm_bool p_big_endian_mode) 
 {
-	if(m_fp) {
+	if (gFile)
+	{
 		return XM_FILE_ERROR_IN_USE;
 	}
-	
-	m_fp=fopen(p_file,"rb");
-	if (!m_fp) {
+
+	gFile = gFileOpener->Open(strutil::Encode(p_file));
+	if (!gFile)
+	{
 		return XM_FILE_ERROR_CANT_OPEN;
 	}
-	
-	f_be = p_big_endian_mode;
-	
+
+	gFile->SetReaderEndian(p_big_endian_mode? Endian::TYPE_BIG_ENDIAN : Endian::TYPE_LITTLE_ENDIAN);
+
 	return XM_FILE_OK;
 }
 
 static xm_u8 fileio_get_u8() 
 {
-	xm_u8 b;
-	
-	if (!m_fp) {
-		return 0;	
+	if (!gFile)
+	{
+		return 0;
 	}
-	
-	fread(&b,1,1,m_fp);
-	
+	xm_u8 b;
+	gFile->Read(b);
 	return b;
 }
 
 static xm_u16 fileio_get_u16() 
 {
-	xm_u8 a,b;
-	xm_u16 c;
-	
-	if (!m_fp) {
-		return 0;	
+	if (!gFile)
+	{
+		return 0;
 	}
-	
-	if (!f_be) {
-		a=fileio_get_u8();
-		b=fileio_get_u8();
-	} else {
-		
-		b=fileio_get_u8();
-		a=fileio_get_u8();		
-	}
-	
-	c=((xm_u16)b << 8 ) | a;
-	
-	return c;
+	xm_u16 w;
+	gFile->Read(w);
+	return w;
 }
 
 static xm_u32 fileio_get_u32() 
 {
-	xm_u16 a,b;
-	xm_u32 c;
-	
-	if (!m_fp) {
-		return 0;	
+	if (!gFile)
+	{
+		return 0;
 	}
-	
-	if (!f_be) {
-		a=fileio_get_u16();
-		b=fileio_get_u16();
-	} else {
-		
-		b=fileio_get_u16();
-		a=fileio_get_u16();		
-	}
-	
-	c=((xm_u32)b << 16 ) | a;	
-	
-	return c;
+	xm_u32 dw;
+	gFile->Read(dw);
+	return dw;
 }
 
-static void fileio_get_byte_array(xm_u8 *p_dst,xm_u32 p_count) 
+static void fileio_get_byte_array(xm_u8 *p_dst, xm_u32 p_count)
 {
-	if (!m_fp) {
-		return;	
+	if (!gFile)
+	{
+		return;
 	}
-	
-	fread(p_dst,p_count,1,m_fp);
+	gFile->ReadData(p_dst, p_count);
 }
 
 static void fileio_seek_pos(xm_u32 p_offset) 
 {
-	if (!m_fp) {
-		return;	
+	if (!gFile)
+	{
+		return;
 	}
-	
-	fseek(m_fp,p_offset,SEEK_SET);
+	gFile->SeekSet(p_offset);
 }
 
 static xm_u32 fileio_get_pos() 
 {
-	if (!m_fp) {
-		return 0;	
+	if (!gFile)
+	{
+		return 0;
 	}
-	
-	return ftell(m_fp);
+	return (xm_u32)gFile->Tell();
 }
 
 static xm_bool fileio_eof_reached() 
 {
-	if (!m_fp) {
-		return xm_true;	
+	if (!gFile)
+	{
+		return xm_true;
 	}
-	
-	return feof(m_fp)?xm_true:xm_false;
+	return (gFile->Tell() == gFile->GetSize())? xm_true : xm_false;
 }
 
 static void fileio_close() 
 {
-	if (m_fp) {
-		fclose(m_fp);
+	if (gFile)
+	{
+		gFile->Close();
+		delete gFile;
+		gFile = 0;
 	}
-	m_fp=NULL;
 }
 
 
 
-namespace UiLepra
+void ChibiXmAlStream::SetFileOpener(FileOpener* pOpener)
 {
+	delete gFileOpener;
+	gFileOpener = pOpener;
+}
 
 
 
 ChibiXmAlStream::ChibiXmAlStream(SoundManager* pSoundManager, const str& pFilename, bool pLoop):
 	Parent(pSoundManager)
 {
+	assert(gFileOpener);
+
 	mIsLooping = pLoop;
 
 	// Setup ChibiXM memory & file IO.

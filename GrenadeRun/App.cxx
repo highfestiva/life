@@ -9,6 +9,7 @@
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/CyclicArray.h"
+#include "../Lepra/Include/FileOpener.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/Path.h"
@@ -379,17 +380,34 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
 		mMusicPlayer->SetVolume(0.5f);
 		mMusicPlayer->SetSongPauseTime(4, 20);
-		//mMusicPlayer->AddSong(lPathPrefix+_T("ButterflyRide.xm"));
-		mMusicPlayer->AddSong(lPathPrefix+_T("BehindTheFace.xm"));
-		mMusicPlayer->AddSong(lPathPrefix+_T("BrittiskBensin.xm"));
-		//mMusicPlayer->AddSong(lPathPrefix+_T("DontYouWantMe'97.xm"));
-		//mMusicPlayer->AddSong(lPathPrefix+_T("CloseEncounters.xm"));
-		//mMusicPlayer->Shuffle();
-		mMusicPlayer->Playback();
+		mMusicPlayer->AddSong(_T("ButterflyRide.xm"));
+		mMusicPlayer->AddSong(_T("BehindTheFace.xm"));
+		mMusicPlayer->AddSong(_T("BrittiskBensin.xm"));
+		mMusicPlayer->AddSong(_T("DontYouWantMe'97.xm"));
+		mMusicPlayer->AddSong(_T("CloseEncounters.xm"));
+		mMusicPlayer->Shuffle();
+		lOk = mMusicPlayer->Playback();
+	}
+	if (lOk)
+	{
+		struct ResourceOpener: public FileOpener
+		{
+			Cure::ResourceManager* mResourceManager;
+
+			ResourceOpener(Cure::ResourceManager* pResourceManager):
+				mResourceManager(pResourceManager)
+			{
+			}
+
+			virtual File* Open(const str& pFilename)
+			{
+				return mResourceManager->QueryFile(pFilename);
+			}
+		};
+		mUiManager->GetSoundManager()->SetFileOpener(new ResourceOpener(mResourceManager));
 	}
 
 	UiLepra::Core::ProcessMessages();

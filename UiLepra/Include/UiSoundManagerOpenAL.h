@@ -108,6 +108,8 @@ public:
 					float pBandwidth,
 					float pGain);
 
+	virtual void SetFileOpener(FileOpener* pOpener);
+
 protected:
 	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
 

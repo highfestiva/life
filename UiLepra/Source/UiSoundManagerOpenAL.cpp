@@ -63,6 +63,8 @@ SoundManagerOpenAL::SoundManagerOpenAL(int pMixRate):
 
 SoundManagerOpenAL::~SoundManagerOpenAL()
 {
+	SetFileOpener(0);
+
 	StopAll();
 	SourceSet::iterator x = mSourceSet.begin();
 	for (; x != mSourceSet.end(); ++x)
@@ -399,6 +401,13 @@ void SoundManagerOpenAL::SetEcho(SoundInstanceID, int, float, float, float)
 
 void SoundManagerOpenAL::SetParamEQ(SoundInstanceID, int, float, float, float)
 {
+}
+
+
+
+void SoundManagerOpenAL::SetFileOpener(FileOpener* pOpener)
+{
+	ChibiXmAlStream::SetFileOpener(pOpener);
 }
 
 

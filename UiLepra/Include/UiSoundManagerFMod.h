@@ -100,6 +100,8 @@ public:
 					float pBandwidth,
 					float pGain);
 
+	virtual void SetFileOpener(FileOpener* pOpener);
+
 protected:
 	SoundID LoadSound(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority, int pExtraFlags);
 	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);

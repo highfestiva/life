@@ -366,7 +366,8 @@ def _include_data_files(fn):
 		fn.endswith(".tga") or \
 		fn.endswith(".tif") or \
 		fn.endswith(".tiff") or \
-		fn.endswith(".bmp")
+		fn.endswith(".bmp") or \
+		fn.endswith(".xm")
 
 
 #-------------------- High-level build stuff below. --------------------
@@ -425,6 +426,16 @@ def build_life():
 
 def rebuild_life():
 	_rebuild("Life", bindir, default_build_mode)
+
+
+def zipdata_dirty():
+	os.chdir(bindir+'/Data')
+	zipdir('', _include_data_files, "Data.pk3")
+	files = os.listdir('.')
+	for f in files:
+		if _include_data_files(f):
+			os.remove(f)
+	os.chdir('../../')
 
 
 def clean():

@@ -373,6 +373,12 @@ void SoundManagerFMod::SetParamEQ(SoundInstanceID pSoundIID, int pFXIndex, float
 
 
 
+void SoundManagerFMod::SetFileOpener(FileOpener*)
+{
+}
+
+
+
 SoundManager::SoundID SoundManagerFMod::LoadSound(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority, int pExtraFlags)
 {
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);

@@ -14,6 +14,13 @@
 
 
 
+namespace Lepra
+{
+class FileOpener;
+}
+
+
+
 namespace UiLepra
 {
 
@@ -152,6 +159,8 @@ public:
 					float pCenter,
 					float pBandwidth,
 					float pGain) = 0;
+
+	virtual void SetFileOpener(FileOpener* pOpener) = 0;	// Takes over ownership of opener.
 
 protected:
 	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel) = 0;
