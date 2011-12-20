@@ -1079,6 +1079,25 @@ void Component::RequestRepaint()
 	}
 }
 
+bool Component::IsComplete() const
+{
+	for (int i = 0; i < mLayerCount; i++)
+	{
+		if (mLayout[i] != 0)
+		{
+			Component* c = mLayout[i]->GetFirst();
+			for (; c; c = mLayout[i]->GetNext())
+			{
+				if (!c->IsComplete())
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
 bool Component::NeedsRepaint()
 {
 	return mNeedsRepaint;

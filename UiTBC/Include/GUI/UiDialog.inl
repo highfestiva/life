@@ -54,6 +54,10 @@ Dialog<_Target>::~Dialog()
 template<class _Target>
 void Dialog<_Target>::Center()
 {
+	if (mAnimationStep)
+	{
+		return;
+	}
 	const PixelCoord& lParentSize = GetParent()->GetSize();
 	const PixelCoord& lSize = GetSize();
 	SetPos(lParentSize.x/2 - lSize.x/2, lParentSize.y/2 - lSize.y/2);
@@ -154,6 +158,10 @@ void Dialog<_Target>::Repaint(Painter* pPainter)
 template<class _Target>
 void Dialog<_Target>::Animate()
 {
+	if (!IsComplete())
+	{
+		return;
+	}
 	if (mAnimationStep)
 	{
 		const PixelCoord& lParentSize = GetParent()->GetSize();

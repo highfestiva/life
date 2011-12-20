@@ -37,6 +37,7 @@ public:
 	virtual ~IconButton();
 
 private:
+	virtual bool IsComplete() const;
 	void PainterImageLoadCallback(UserPainterKeepImageResource* pResource);
 
 	UserPainterKeepImageResource* mIconResource;

@@ -42,6 +42,11 @@ IconButton::~IconButton()
 
 
 
+bool IconButton::IsComplete() const
+{
+	return (mIconResource->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS);
+}
+
 void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResource)
 {
 	assert(pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);

@@ -212,6 +212,8 @@ public:
 
 	void RequestRepaint();
 
+	virtual bool IsComplete() const;
+
 protected:
 	virtual void DoSetPos(int x, int y);
 	virtual void DoSetSize(int pWidth, int pHeight);
