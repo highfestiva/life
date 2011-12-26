@@ -34,7 +34,6 @@ public:
 						  const Vector3D<_TVarType>& pPosition);
 	Transformation(const _TVarType pData[7]);
 	Transformation(const Transformation& pTransformation);
-	virtual ~Transformation();
 
 	void SetIdentity();
 

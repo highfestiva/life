@@ -186,6 +186,7 @@ private:
 	mutable StopWatch mGameOverTimer;
 	UiCure::PainterImageResource* mScrollBarImage;
 	UiTbc::ScrollBar* mDifficultySlider;
+	int mSlowShadowCount;
 
 	LOG_CLASS_DECLARE();
 };
@@ -230,7 +231,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mReverseAndBrake(0),
 	mDialog(0),
 	mScrollBarImage(0),
-	mDifficultySlider(0)
+	mDifficultySlider(0),
+	mSlowShadowCount(0)
 {
 	mApp = this;
 }
@@ -281,6 +283,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
@@ -296,6 +299,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
 
 #ifndef LEPRA_IOS_LOOKANDFEEL
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
@@ -521,11 +525,21 @@ bool App::Poll()
 	bool lOk = true;
 	if (lOk)
 	{
-		// Adjust frame rate, or it will be hopelessly high...
+		// Adjust frame rate, or it will be hopelessly high... on most reasonable platforms.
 		mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
 		const double lDelayTime = 1.0/FPS - mAverageLoopTime;
 		Thread::Sleep(lDelayTime);
 		mLoopTimer.PopTimeDiff();
+#ifndef LEPRA_IOS_LOOKANDFEEL
+		if (mAverageLoopTime > 1.0/(FPS-2))
+		{
+			if (++mSlowShadowCount > 20)
+			{
+				// Shadows is not such a good idea on this computer.
+				CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
+			}
+		}
+#endif // !iOS
 	}
 	if (lOk)
 	{
@@ -612,6 +626,11 @@ bool App::Poll()
 		mTouchShootColor = Color(170, 38, 45)*(1.1f+::sin(mAngleTime*37)*0.2f);
 		mInfoTextColor = Color(127, 127, 127)*(1+::sin(mAngleTime*27)*0.9f);
 		DrawHud();
+
+#ifdef LEPRA_DEBUG
+		mUiManager->GetPainter()->SetColor(WHITE);
+		mUiManager->GetPainter()->PrintText(strutil::Format(_T("%.1f"), 1.0/mAverageLoopTime), 10, 10);
+#endif // Debug
 
 		mGame->Paint();
 

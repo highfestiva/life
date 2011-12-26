@@ -67,7 +67,6 @@ public:
 	inline Quaternion(const Quaternion& pQuaternion);
 	inline Quaternion(const RotationMatrix<_TVarType>& pRotMtx);
 	inline Quaternion(_TVarType pAngle, const Vector3D<_TVarType>& pVector);
-	inline virtual ~Quaternion();
 
 	inline void Set(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
 	inline void Set(const Quaternion& pQuaternion);

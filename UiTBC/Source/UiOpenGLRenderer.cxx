@@ -1098,8 +1098,8 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		/*TransformationF t = GetCameraTransformation();
 		t.GetOrientation().Div(t.GetOrientation().GetMagnitude());
 		SetCameraTransformation(t);*/
-		//mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
-		mCamSpaceTransformation = mCameraTransformation.InverseTransform(pGeometry->GetTransformation());
+		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
+		//mCamSpaceTransformation = mCameraTransformation.InverseTransform(pGeometry->GetTransformation());
 		/*TransformationF lCamSpaceTransformation = GetCameraTransformation().InverseTransform(pGeometry->GetTransformation());
 		assert(mCamSpaceTransformation.GetPosition().GetDistanceSquared(lCamSpaceTransformation.GetPosition()) < 1e-8);
 		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);*/

@@ -34,10 +34,6 @@ TEMPLATE QUAL::Transformation(const Transformation& pTransformation) :
 {
 }
 
-TEMPLATE QUAL::~Transformation()
-{
-}
-
 TEMPLATE void QUAL::SetIdentity()
 {
 	mOrientation.SetIdentity();

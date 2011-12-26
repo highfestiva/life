@@ -42,10 +42,6 @@ TEMPLATE QUAL::Quaternion(_TVarType pAngle, const Vector3D<_TVarType>& pVector)
 	Set(pAngle, pVector);
 }
 
-TEMPLATE QUAL::~Quaternion()
-{
-}
-
 TEMPLATE void QUAL::Set(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
 	mA = pA;
