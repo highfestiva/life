@@ -16,6 +16,13 @@
 		B106D4C11467342800E009B8 /* Cutie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106D4C01467342800E009B8 /* Cutie.cpp */; };
 		B106E0AE146734DD00E009B8 /* Ctf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106E0AD146734DD00E009B8 /* Ctf.cpp */; };
 		B106E0B2146734F300E009B8 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106E0B1146734F300E009B8 /* Spawner.cpp */; };
+		B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04914AB36A7007A84E4 /* ContextPath.cpp */; };
+		B110A04D14AB36CC007A84E4 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04B14AB36CC007A84E4 /* Level.cpp */; };
+		B110A04E14AB36CC007A84E4 /* VehicleAi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04C14AB36CC007A84E4 /* VehicleAi.cpp */; };
+		B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05114AB3720007A84E4 /* xmplay.cpp */; };
+		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
+		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
+		B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -468,7 +475,6 @@
 		B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1B4898F13F9BD6C0047C78A /* GrenadeRun-Info.plist */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
-		B1FB29231450C8CC00F1C762 /* Oiit.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29211450C8CC00F1C762 /* Oiit.ogg */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
 /* End PBXBuildFile section */
 
@@ -483,6 +489,13 @@
 		B106D4C01467342800E009B8 /* Cutie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cutie.cpp; sourceTree = "<group>"; };
 		B106E0AD146734DD00E009B8 /* Ctf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ctf.cpp; sourceTree = "<group>"; };
 		B106E0B1146734F300E009B8 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Spawner.cpp; sourceTree = "<group>"; };
+		B110A04914AB36A7007A84E4 /* ContextPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextPath.cpp; path = ../../Cure/Source/ContextPath.cpp; sourceTree = SOURCE_ROOT; };
+		B110A04B14AB36CC007A84E4 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Level.cpp; sourceTree = "<group>"; };
+		B110A04C14AB36CC007A84E4 /* VehicleAi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VehicleAi.cpp; sourceTree = "<group>"; };
+		B110A05114AB3720007A84E4 /* xmplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmplay.cpp; path = ChibiXM/xmplay.cpp; sourceTree = "<group>"; };
+		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
+		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
+		B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1125,7 +1138,6 @@
 		B1B489A313F9BE4A0047C78A /* GrenadeRun_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GrenadeRun_Prefix.pch; path = GrenadeRunXcode/GrenadeRun_Prefix.pch; sourceTree = "<group>"; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
-		B1FB29211450C8CC00F1C762 /* Oiit.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Oiit.ogg; path = ../Data/Oiit.ogg; sourceTree = SOURCE_ROOT; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1202,9 +1214,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		B110A04F14AB370D007A84E4 /* ChibiXM */ = {
+			isa = PBXGroup;
+			children = (
+				B110A05114AB3720007A84E4 /* xmplay.cpp */,
+			);
+			name = ChibiXM;
+			sourceTree = "<group>";
+		};
 		B15F791D13FC597B00E01A90 /* Cure */ = {
 			isa = PBXGroup;
 			children = (
+				B110A04914AB36A7007A84E4 /* ContextPath.cpp */,
 				B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */,
 				B15F791F13FC59DE00E01A90 /* ContextManager.cpp */,
 				B15F792013FC59DE00E01A90 /* ContextObject.cpp */,
@@ -1236,6 +1257,8 @@
 		B15F795413FC59E300E01A90 /* UiCure */ = {
 			isa = PBXGroup;
 			children = (
+				B110A05314AB374E007A84E4 /* UiIconButton.cpp */,
+				B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */,
 				35128A4C147262150006467C /* UiSound.cpp */,
 				B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */,
 				B15F795513FC5A0500E01A90 /* UiCollisionSoundManager.cpp */,
@@ -1367,6 +1390,8 @@
 		B19A146913A122DE0051A61C /* GrenadeRun */ = {
 			isa = PBXGroup;
 			children = (
+				B110A04B14AB36CC007A84E4 /* Level.cpp */,
+				B110A04C14AB36CC007A84E4 /* VehicleAi.cpp */,
 				35128A4F147262300006467C /* Launcher.cpp */,
 				35128A50147262300006467C /* LauncherAi.cpp */,
 				B106E0B1146734F300E009B8 /* Spawner.cpp */,
@@ -1482,6 +1507,7 @@
 		B19A154913A124AB0051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */,
 				B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */,
 				B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */,
 				B19A154A13A124AB0051A61C /* Mac */,
@@ -1512,6 +1538,7 @@
 		B19A15AA13A127E40051A61C /* ThirdParty */ = {
 			isa = PBXGroup;
 			children = (
+				B110A04F14AB370D007A84E4 /* ChibiXM */,
 				B1A1DC5613AA6CC30097B8D0 /* libvorbis-1.3.2 */,
 				B1A1DB2213AA6AE00097B8D0 /* libogg-1.2.2 */,
 				B19A296A13A1391E0051A61C /* STLport src */,
@@ -2217,7 +2244,6 @@
 			isa = PBXGroup;
 			children = (
 				B1FB29391450CAD600F1C762 /* Data.pk3 */,
-				B1FB29211450C8CC00F1C762 /* Oiit.ogg */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -2276,7 +2302,6 @@
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */,
-				B1FB29231450C8CC00F1C762 /* Oiit.ogg in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2738,6 +2763,13 @@
 				35128A4D147262150006467C /* UiSound.cpp in Sources */,
 				35128A51147262300006467C /* Launcher.cpp in Sources */,
 				35128A52147262300006467C /* LauncherAi.cpp in Sources */,
+				B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */,
+				B110A04D14AB36CC007A84E4 /* Level.cpp in Sources */,
+				B110A04E14AB36CC007A84E4 /* VehicleAi.cpp in Sources */,
+				B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */,
+				B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */,
+				B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */,
+				B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2770,6 +2802,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/lib\"",
+					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "GrenadeRun-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
@@ -2806,6 +2839,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/lib\"",
+					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "GrenadeRun-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
@@ -2858,6 +2892,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/lib\"",
+					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "GrenadeRun-Info.plist";
 				LIBRARY_SEARCH_PATHS = (

@@ -51,7 +51,7 @@ void IosInputElement::SetValue(int pValue)
 
 	if (GetType() == DIGITAL)
 	{
-		Parent::SetValue(pValue);
+		Parent::SetValue((float)pValue);
 	}
 	else if (mMin < mMax)
 	{

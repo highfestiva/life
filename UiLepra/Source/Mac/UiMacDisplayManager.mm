@@ -104,7 +104,7 @@ MacDisplayManager::MacDisplayManager():
 {
 #ifdef LEPRA_IOS
 	mScreenMode = FULLSCREEN;
-	mEnumeratedDisplayModeCount = 1;
+	mEnumeratedDisplayModeCount = 6;
 	mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
 	DisplayMode lDisplayMode;
 	lDisplayMode.mWidth = 320;
@@ -112,6 +112,18 @@ MacDisplayManager::MacDisplayManager():
 	lDisplayMode.mRefreshRate = 0;
 	lDisplayMode.mBitDepth = 0;
 	mEnumeratedDisplayMode[0] = lDisplayMode;
+	std::swap(lDisplayMode.mWidth, lDisplayMode.mHeight);
+	mEnumeratedDisplayMode[1] = lDisplayMode;
+	lDisplayMode.mWidth = 640;
+	lDisplayMode.mHeight = 960;
+	mEnumeratedDisplayMode[2] = lDisplayMode;
+	std::swap(lDisplayMode.mWidth, lDisplayMode.mHeight);
+	mEnumeratedDisplayMode[3] = lDisplayMode;
+	lDisplayMode.mWidth = 1024;
+	lDisplayMode.mHeight = 768;
+	mEnumeratedDisplayMode[4] = lDisplayMode;
+	std::swap(lDisplayMode.mWidth, lDisplayMode.mHeight);
+	mEnumeratedDisplayMode[5] = lDisplayMode;
 #else // !iOS
 	// Obtain number of available displays.
 	CGDisplayCount lDisplayCount = 0;

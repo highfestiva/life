@@ -108,7 +108,7 @@ public:
 
 	str GetVehicle() const;
 	void SetVehicle(const str& pVehicle);
-	void Game::ResetLauncher();
+	void ResetLauncher();
 	UiCure::CppContextObject* GetP1() const;
 	UiCure::CppContextObject* GetP2() const;
 	Level* GetLevel() const;
