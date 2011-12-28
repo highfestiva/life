@@ -13,8 +13,7 @@ namespace UiTbc
 
 
 
-const char* OpenGLMatTextureDiffuseBumpMapPXS::smVP =
-{
+const astr OpenGLMatTextureDiffuseBumpMapPXS::smVP =
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
 	 \n\
@@ -110,8 +109,7 @@ const char* OpenGLMatTextureDiffuseBumpMapPXS::smVP =
 	 DP3 oFragPos.z, V, N;\n\
 	 \n\
 	 MOV oPriCol, iPriCol;\n\
-	 END",
-};
+	 END";
 
 // Same header for all shaders.
 #define FP_HEADER "\
@@ -203,7 +201,7 @@ MUL outCol.rgb, DiffuseCol, primCol;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
-const char* OpenGLMatTextureDiffuseBumpMapPXS::smFP[NUM_FP] =
+const astr OpenGLMatTextureDiffuseBumpMapPXS::smFP[NUM_FP] =
 {
 	// Ambient light only.
 	"!!ARBfp1.0\n\

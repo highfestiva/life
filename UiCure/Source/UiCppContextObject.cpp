@@ -205,7 +205,7 @@ void CppContextObject::UiMove()
 	}
 	mMeshOffset = Math::Lerp(mMeshOffset, lOrigo, lLerpFactor);
 	//mMeshAngularOffset.Normalize();
-	//mMeshAngularOffset.Slerp(mMeshAngularOffset, QuaternionF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
+	//mMeshAngularOffset.Slerp(mMeshAngularOffset, gIdentityQuaternionF, Math::GetIterateLerpTime(0.12f, lFrameTime));
 }
 
 void CppContextObject::ActivateLerp()
@@ -217,13 +217,19 @@ void CppContextObject::ActivateLerp()
 
 TBC::GeometryBase* CppContextObject::GetMesh(int pIndex) const
 {
+	const UserGeometryReferenceResource* lResource = GetMeshResource(pIndex);
+	if (lResource && lResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		return (lResource->GetRamData());
+	}
+	return (0);
+}
+
+UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) const
+{
 	if (pIndex < (int)mMeshResourceArray.size())
 	{
-		UserGeometryReferenceResource* lResource = mMeshResourceArray[pIndex];
-		if (lResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-		{
-			return (lResource->GetRamData());
-		}
+		return mMeshResourceArray[pIndex];
 	}
 	else
 	{
@@ -549,10 +555,15 @@ void CppContextObject::TryAddTexture()
 				{
 					lTexture = mTextureResourceArray[0];
 				}
-				const bool lIsBlended = (lTransparent ||
-					((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(x).mShaderName == _T("blend"));
+				const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(x).mShaderName;
+				const bool lIsBlended = (lTransparent || lShader == _T("blend"));
+				const bool lIsHighlight = (lShader == _T("highlight"));
 				UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
-				if (lIsBlended)
+				if (lIsHighlight)
+				{
+					lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_HIGHLIGHT;
+				}
+				else if (lIsBlended)
 				{
 					lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED;
 				}

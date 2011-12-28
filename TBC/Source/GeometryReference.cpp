@@ -62,7 +62,9 @@ const TransformationF& GeometryReference::GetTransformation()
 	}
 
 	mReturnTransformation = GetBaseTransformation();
-	mReturnTransformation.GetPosition() += mReturnTransformation.GetOrientation() * mOffset.GetPosition();
+	Vector3DF lDelta;
+	mReturnTransformation.GetOrientation().FastRotatedVector(mReturnTransformation.GetOrientation().GetConjugate(), lDelta, mOffset.GetPosition());
+	mReturnTransformation.GetPosition() += lDelta;
 	mReturnTransformation.GetOrientation() *= mOffset.GetOrientation();
 	ClearFlag(REF_TRANSFORMATION_CHANGED);
 	return (mReturnTransformation);

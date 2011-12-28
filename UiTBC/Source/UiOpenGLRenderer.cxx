@@ -42,6 +42,8 @@ Material* OpenGLRenderer::CreateMaterial(MaterialType pMaterialType)
 		return new OpenGLMatVertexColorSolid(this, GetMaterial(MAT_SINGLE_COLOR_SOLID));
 	case MAT_SINGLE_TEXTURE_SOLID:
 		return new OpenGLMatSingleTextureSolid(this, GetMaterial(MAT_SINGLE_COLOR_SOLID));
+	case MAT_SINGLE_TEXTURE_HIGHLIGHT:
+		return new OpenGLMatSingleTextureHighlight(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID));
 	case MAT_SINGLE_TEXTURE_SOLID_PXS:
 		return new OpenGLMatSingleTextureSolidPXS(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID));
 	case MAT_SINGLE_COLOR_ENVMAP_SOLID:
@@ -341,12 +343,12 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
 		glLightfv(lLight, GL_QUADRATIC_ATTENUATION, &lQuad);
 	}
 
-	float lAmbient[] = {0, 0, 0, 1.0f};
+	float lBlack[] = {0, 0, 0, 1.0f};
 
 	glLightfv(lLight, GL_POSITION, lPos);
-	glLightfv(lLight, GL_AMBIENT, lAmbient);
+	glLightfv(lLight, GL_AMBIENT, lBlack);
 	glLightfv(lLight, GL_DIFFUSE, pLight.mColor);
-	glLightfv(lLight, GL_SPECULAR, pLight.mColor);
+	glLightfv(lLight, GL_SPECULAR, lBlack);
 	OGL_ASSERT();
 }
 
@@ -1140,7 +1142,7 @@ void OpenGLRenderer::PostRender(TBC::GeometryBase* pGeometry)
 void OpenGLRenderer::DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor)
 {
 	glEnable(GL_DEPTH_TEST);
-	TransformationF lCamTransform = GetCameraTransformation().InverseTransform(TransformationF());
+	TransformationF lCamTransform = GetCameraTransformation().InverseTransform(gIdentityTransformationF);
 	float lModelViewMatrix[16];
 	lCamTransform.GetAs4x4TransposeMatrix(lModelViewMatrix);
 	glMatrixMode(GL_MODELVIEW);
@@ -1575,8 +1577,9 @@ void OpenGLRenderer::RenderShadowVolumes()
 			if (lShadowVolume->GetParentGeometry()->GetAlwaysVisible() == true ||
 			   lShadowVolume->GetParentGeometry()->GetLastFrameVisible() == GetCurrentFrame())
 			{
+				mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, lShadowVolume->GetTransformation());
 				float lModelViewMatrix[16];
-				(GetCameraTransformation().InverseTransform(lShadowVolume->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
+				mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
 				const float lScale = lShadowVolume->GetScale();
 				if (lScale != 1)
 				{

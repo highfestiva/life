@@ -119,6 +119,7 @@ public:
 	inline void Div(const Quaternion& pQuaternion);
 
 	inline Vector3D<_TVarType> GetRotatedVector(const Vector3D<_TVarType>& pVector) const;
+	inline void FastRotatedVector(const Quaternion& pInverse, Vector3D<_TVarType>& pTarget, const Vector3D<_TVarType>& pSource) const;
 	inline Vector3D<_TVarType> GetInverseRotatedVector(const Vector3D<_TVarType>& pVector) const;
 	inline void FastInverseRotatedVector(const Quaternion& pInverse, Vector3D<_TVarType>& pTarget, const Vector3D<_TVarType>& pSource) const;
 
@@ -217,5 +218,10 @@ public:
 
 typedef Quaternion<float32> QuaternionF;
 typedef Quaternion<float64> QuaternionD;
+
+extern const QuaternionF gIdentityQuaternionF;
+extern const QuaternionD gIdentityQuaternionD;
+
+
 
 }

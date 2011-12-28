@@ -10,8 +10,7 @@
 namespace UiTbc
 {
 
-const char* OpenGLMatSingleTextureSolidPXS::smVP =
-{
+const astr OpenGLMatSingleTextureSolidPXS::smVP =
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
 	 # Diffuse vp.\n\
@@ -57,8 +56,7 @@ const char* OpenGLMatSingleTextureSolidPXS::smVP =
 	 DP3 oNormal.z, iNormal, mvIT[2];\n\
 	 \n\
 	 MOV oPriCol, iPriCol;\n\
-	 END",
-};
+	 END";
 
 // Same header for all shaders.
 #define FP_HEADER "\
@@ -183,7 +181,7 @@ MAD outCol.rgb, Temp, primCol, N;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
-const char* OpenGLMatSingleTextureSolidPXS::smFP[NUM_FP] =
+const astr OpenGLMatSingleTextureSolidPXS::smFP[NUM_FP] =
 {
 	// Ambient light only.
 	"!!ARBfp1.0\n\

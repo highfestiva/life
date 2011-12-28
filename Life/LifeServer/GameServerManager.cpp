@@ -336,7 +336,7 @@ void GameServerManager::Build(const str& pWhat)
 			Vector3DF lPosition = lObject->GetPosition() + Vector3DF(10, 0, 0);
 			mLog.Info(_T("Building object '")+pWhat+_T("' near user ")+strutil::Encode(lClient->GetUserConnection()->GetLoginName())+_T("."));
 			Cure::ContextObject* lObject = Parent::CreateContextObject(pWhat, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-			lObject->SetInitialTransform(TransformationF(QuaternionF(), lPosition));
+			lObject->SetInitialTransform(TransformationF(gIdentityQuaternionF, lPosition));
 			lObject->StartLoading();
 		}
 	}

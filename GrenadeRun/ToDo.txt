@@ -31,29 +31,44 @@ Smooth Cutie's roof and windows (and thus normals).
 Cutify Cutie.
 Tutorial.
 Game over view.
-When restarted (a couple of times?), Cutie's engine sound dissappear. Fix!
+When restarted (a couple of times?), Cutie's engine sound disappear. Fix!
 Autostart next/same level.
 Score counting.
 Single player difficulty levels.
 Extra vehicles: cute monster truck, speed car, slowmobile.
+Load buttons before dialog is displayed.
+Load music files from .pk3 archive instead of directly from raw file.
 
 Computer demo
 -------------
-Load buttons before dialog is displayed.
-Load music files from .pk3 archive instead of directly from raw file.
+Steering wheel GUI.
+Steering wheel controls.
+Throttle GUI.
+Canon fire GUI.
+Canon aim GUI.
+Add slow-mo when detonated close by Cutie.
 Record voice for tutorial.
 Playback voice for tutorial.
 Polish on level_2 roads (in texture).
 Show keyboard controls when starting.
 Delete all resources when switching level (and make sure!).
 Turn the table when completing a level.
+Local highscore.
 Optimize.
 Memory leak check.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
+Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
+In-app purchase.
+Activation of features depending on purchases.
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
 2 extra levels: castle and machine.
 iPad adjustments.
+Global high score list.
+Optimize.
+Memory leaks, zombies.
+iOS 5.
+HD version only should have support for 2 players.

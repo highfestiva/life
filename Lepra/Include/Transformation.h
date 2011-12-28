@@ -137,8 +137,8 @@ TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVe
 typedef Transformation<float> TransformationF;
 typedef Transformation<double> TransformationD;
 
-const Transformation<float> gIdentityTransformationF;
-const Transformation<double> gIdentityTransformationD;
+extern const TransformationF gIdentityTransformationF;
+extern const TransformationD gIdentityTransformationD;
 
 #undef TEMPLATE
 #undef QUAL

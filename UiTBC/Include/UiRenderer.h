@@ -67,6 +67,7 @@ public:
 		MAT_SINGLE_COLOR_SOLID_PXS,		// Single color using pixel shaders.
 		MAT_VERTEX_COLOR_SOLID,
 		MAT_SINGLE_TEXTURE_SOLID,
+		MAT_SINGLE_TEXTURE_HIGHLIGHT,		// Single texture without lighting/specular.
 		MAT_SINGLE_TEXTURE_SOLID_PXS,		// Single texture using pixel shaders.
 		MAT_SINGLE_COLOR_ENVMAP_SOLID,
 		MAT_SINGLE_TEXTURE_ENVMAP_SOLID,	// Environtment map + single texture.

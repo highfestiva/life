@@ -419,7 +419,7 @@ QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 	if (lObject->mWorldID != mWorldID)
 	{
 		mLog.Errorf(_T("GetBodyOrientation() - Body %i is not part of this world!"), pBodyId);
-		return (QuaternionF());
+		return gIdentityQuaternionF;
 	}
 
 	dQuaternion q;

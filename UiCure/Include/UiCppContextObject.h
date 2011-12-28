@@ -50,6 +50,7 @@ public:
 	void ActivateLerp();
 
 	TBC::GeometryBase* GetMesh(int pIndex) const;
+	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 

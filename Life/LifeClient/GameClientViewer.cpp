@@ -91,7 +91,7 @@ bool GameClientViewer::InitializeTerrain()
 
 	Cure::ContextObject* lVehicle = new UiCure::Machine(GetResourceManager(), _T("monster_02"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
-	lVehicle->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(-23, -80, 53)));
+	lVehicle->SetInitialTransform(TransformationF(gIdentityQuaternionF, Vector3DF(-23, -80, 53)));
 	lVehicle->StartLoading();
 	mAvatarId = lVehicle->GetInstanceId();
 	GetConsoleManager()->ExecuteCommand(_T("fork execute-file Data/Steering.rec"));

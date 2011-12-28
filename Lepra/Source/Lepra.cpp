@@ -9,13 +9,22 @@
 #include "../Include/GammaLookup.h"
 #include "../Include/HiResTimer.h"
 #include "../Include/MetaFile.h"
+#include "../Include/Quaternion.h"
 #include "../Include/Random.h"
 #include "../Include/SystemManager.h"
+#include "../Include/Transformation.h"
 
 
 
 namespace Lepra
 {
+
+
+
+const QuaternionF gIdentityQuaternionF;
+const QuaternionD gIdentityQuaternionD;
+const TransformationF gIdentityTransformationF;
+const TransformationD gIdentityTransformationD;
 
 
 

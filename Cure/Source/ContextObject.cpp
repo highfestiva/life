@@ -717,10 +717,10 @@ Vector3DF ContextObject::GetForwardDirection() const
 	{
 		const TransformationF& lOriginalTransform =
 			mPhysics->GetOriginalBoneTransformation(0);
-		const Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetInverse() * Vector3DF(0, 1, 0);
+		const Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetConjugate() * Vector3DF(0, 1, 0);	// Assumes original quaternion normalized.
 		TransformationF lTransform;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
-		return (lTransform.GetOrientation() * lForwardAxis).GetNormalized();
+		return (lTransform.GetOrientation() * lForwardAxis);
 	}
 	return Vector3DF(0, 1, 0);
 }

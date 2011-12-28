@@ -184,6 +184,24 @@ private:
 
 
 
+class OpenGLMatSingleTextureHighlight: public OpenGLMatSingleTextureSolid
+{
+	typedef OpenGLMatSingleTextureSolid Parent;
+public:
+	inline OpenGLMatSingleTextureHighlight(OpenGLRenderer* pRenderer,
+					   Material* pFallBackMaterial) :
+		Parent(pRenderer, Material::DEPTHSORT_F2B, pFallBackMaterial)
+	{
+	}
+	virtual void PreRender();
+	virtual void PostRender();
+
+private:
+	bool mIsLighted;
+};
+
+
+
 class OpenGLMatSingleTextureBlended: public OpenGLMatSingleTextureSolid
 {
 	typedef OpenGLMatSingleTextureSolid Parent;
@@ -415,7 +433,7 @@ protected:
 		MAX_SHADER_LIGHTS = 3
 	};
 
-	OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]);
+	OpenGLMatPXS(const astr& pVP, const astr pFP[NUM_FP]);
 
 	void PrepareShaderPrograms(OpenGLRenderer* pRenderer);
 	void CleanupShaderPrograms();
@@ -471,8 +489,8 @@ protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
-	static const char* smVP;
-	static const char* smFP[NUM_FP];
+	static const astr smVP;
+	static const astr smFP[NUM_FP];
 
 private:
 	LOG_CLASS_DECLARE();
@@ -493,8 +511,8 @@ protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
-	static const char* smVP;
-	static const char* smFP[NUM_FP];
+	static const astr smVP;
+	static const astr smFP[NUM_FP];
 
 private:
 	LOG_CLASS_DECLARE();
@@ -515,8 +533,8 @@ protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
-	static const char* smVP;
-	static const char* smFP[NUM_FP];
+	static const astr smVP;
+	static const astr smFP[NUM_FP];
 
 private:
 	LOG_CLASS_DECLARE();
@@ -532,8 +550,8 @@ public:
 				 Material* pFallBackMaterial);
 	OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 				 Material* pFallBackMaterial,
-				 const char* pVP,
-				 const char** pFP);
+				 const astr pVP,
+				 const astr* pFP);
 
 	virtual ~OpenGLMatTextureSBMapPXS();
 
@@ -541,8 +559,8 @@ protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
-	static const char* smVP;
-	static const char* smFP[NUM_FP];
+	static const astr smVP;
+	static const astr smFP[NUM_FP];
 
 private:
 	LOG_CLASS_DECLARE();
@@ -561,8 +579,8 @@ public:
 
 protected:
 
-	static const char* smVP;
-	static const char* smFP[NUM_FP];
+	static const astr smVP;
+	static const astr smFP[NUM_FP];
 };
 
 

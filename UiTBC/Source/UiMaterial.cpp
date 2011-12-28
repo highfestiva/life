@@ -365,6 +365,7 @@ void Material::RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGr
 	DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 
 	SetBasicMaterial(lPreviousMaterial);
+	GetRenderer()->ResetAmbientLight(true);
 	mEnableDrawMaterial = lOldEnableDrawMaterial;
 	mEnableDepthSort = false;
 }

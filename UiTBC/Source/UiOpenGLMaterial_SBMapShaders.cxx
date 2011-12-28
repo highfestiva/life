@@ -10,8 +10,7 @@
 namespace UiTbc
 {
 
-const char* OpenGLMatTextureSBMapPXS::smVP =
-{
+const astr OpenGLMatTextureSBMapPXS::smVP =
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
 	 \n\
@@ -108,8 +107,7 @@ const char* OpenGLMatTextureSBMapPXS::smVP =
 	 DP3 oFragPos.z, V, N;\n\
 	 \n\
 	 MOV oPriCol, iPriCol;\n\
-	 END",
-};
+	 END";
 
 // Same header for all shaders.
 #define FP_HEADER "\
@@ -229,7 +227,7 @@ MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
 
-const char* OpenGLMatTextureSBMapPXS::smFP[NUM_FP] =
+const astr OpenGLMatTextureSBMapPXS::smFP[NUM_FP] =
 {
 	// Ambient light only.
 	"!!ARBfp1.0\n\

@@ -33,10 +33,6 @@ namespace GrenadeRun
 
 
 
-const QuaternionF gIdentityQuaternion;
-
-
-
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
 	Cure::GameTicker(),
 	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager, 400, 4, 3),
@@ -113,7 +109,7 @@ bool Game::RestartLevel()
 
 TransformationF Game::GetCutieStart() const
 {
-	TransformationF t(gIdentityQuaternion, Vector3DF(-173, -85, 7));
+	TransformationF t(gIdentityQuaternionF, Vector3DF(-173, -85, 7));
 	t.GetOrientation().RotateAroundOwnZ(-PIF*0.6f);
 	return t;
 }
@@ -150,7 +146,7 @@ bool Game::Tick()
 		lPosition = mLauncher->GetPosition();
 	}
 	mCollisionSoundManager->Tick(lPosition);
-	mUiManager->SetMicrophonePosition(TransformationF(gIdentityQuaternion, lPosition), lVelocity);
+	mUiManager->SetMicrophonePosition(TransformationF(gIdentityQuaternionF, lPosition), lVelocity);
 
 	if (mLauncher && mLauncher->IsLoaded())
 	{
@@ -360,7 +356,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			float x = (float)Random::Uniform(-1, 1);
 			float y = (float)Random::Uniform(-1, 1);
 			float z = 0;
-			TransformationF lTransform(gIdentityQuaternion, pPosition + Vector3DF(x, y, z));
+			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
 			const float lAngle = (float)Random::Uniform(0, 2*PIF);
 			x = (20.0f * i/lParticleCount - 10) * cos(lAngle);
@@ -382,7 +378,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			float x = (float)Random::Uniform(-1, 1);
 			float y = (float)Random::Uniform(-1, 1);
 			float z = (float)Random::Uniform(-1, 1);
-			TransformationF lTransform(gIdentityQuaternion, pPosition + Vector3DF(x, y, z));
+			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
 			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
 			lPuff->SetOpacity(lOpacity);
@@ -574,7 +570,7 @@ bool Game::Render()
 
 	if (GetComputerIndex() != 0)
 	{
-		TransformationF t(gIdentityQuaternion, Vector3DF(-100, -140, -10));
+		TransformationF t(gIdentityQuaternionF, Vector3DF(-100, -140, -10));
 		const Vector3DF lVehiclePos = mVehicle->GetPosition();
 		Vector3DF lOffset = mVehicleCamPos - lVehiclePos;
 		lOffset.z = 0;
@@ -620,6 +616,7 @@ bool Game::Render()
 		mUiManager->SetCameraPosition(mLeftCamera);
 		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
 		mUiManager->Render(mLeftRect);
+		mUiManager->GetRenderer()->ResetAmbientLight(true);
 	}
 
 	if (GetComputerIndex() != 1)
@@ -641,7 +638,7 @@ bool Game::Render()
 		lStraightVector.x = lCamDistance*sin(mLauncherYaw);
 		lStraightVector.y = -lCamDistance*cos(mLauncherYaw);
 		lStraightVector.z = -lStraightVector.z + lLauncherHeight*0.7f;
-		TransformationF t(gIdentityQuaternion, lLauncherPosition+lStraightVector);
+		TransformationF t(gIdentityQuaternionF, lLauncherPosition+lStraightVector);
 		t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.9f);
 		t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
 #ifdef LEPRA_IOS_LOOKANDFEEL
@@ -899,9 +896,10 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
+		const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
-			Color::Color(255, 255, 255), 1.0f, 300);
+			Color::Color(255, 255, 255), lPixelShadersEnabled? 1.0f : 1.5f, 300);
 		mUiManager->GetRenderer()->EnableAllLights(true);
 	}
 	if (lOk)

@@ -530,13 +530,13 @@ void GameUiManager::UpdateSettings()
 	CURE_RTVAR_TRYGET(lAmbientRed, *=, mVariableScope, RTVAR_UI_3D_AMBIENTREDFACTOR, 1.0);
 	CURE_RTVAR_TRYGET(lAmbientGreen, *=, mVariableScope, RTVAR_UI_3D_AMBIENTGREENFACTOR, 1.0);
 	CURE_RTVAR_TRYGET(lAmbientBlue, *=, mVariableScope, RTVAR_UI_3D_AMBIENTBLUEFACTOR, 1.0);
-	if (!mRenderer->IsPixelShadersEnabled())
+	/*if (!mRenderer->IsPixelShadersEnabled())
 	{
-		// Without pixel shaders the scene becomes darker for some reason. At least on my computer...
-		lAmbientRed *= 1.5;
-		lAmbientGreen *= 1.5;
-		lAmbientBlue *= 1.5;
-	}
+		// Without pixel shader highlights the scene becomes darker. At least on my computer...
+		lAmbientRed *= 1.2;
+		lAmbientGreen *= 1.2;
+		lAmbientBlue *= 1.2;
+	}*/
 
 	CURE_RTVAR_GET(lEnableTrilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
 	CURE_RTVAR_GET(lEnableBilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);

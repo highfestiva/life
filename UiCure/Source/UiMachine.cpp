@@ -453,7 +453,7 @@ void Machine::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 	{
 		Props* lPuff = new Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
 		GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lPuff->SetInitialTransform(TransformationF(QuaternionF(), lPosition));
+		lPuff->SetInitialTransform(TransformationF(gIdentityQuaternionF, lPosition));
 		lPuff->StartParticle(Props::PARTICLE_SOLID, lRelativeVelocity, 1, 2, 2);
 		lPuff->StartLoading();
 		mCreatedParticles = true;

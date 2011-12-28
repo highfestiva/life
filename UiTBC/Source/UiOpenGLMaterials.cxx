@@ -84,7 +84,7 @@ void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSett
 	::glShadeModel(pMaterial.mSmooth ? GL_SMOOTH : GL_FLAT);
 	OGL_ASSERT();
 
-	pRenderer->SetGlobalMaterialReflectance(pMaterial.mDiffuse.x, pMaterial.mDiffuse.y, pMaterial.mDiffuse.z, pMaterial.mShininess);
+	//pRenderer->SetGlobalMaterialReflectance(pMaterial.mDiffuse.x, pMaterial.mDiffuse.y, pMaterial.mDiffuse.z, pMaterial.mShininess);
 
 	pRenderer->AddAmbience(pMaterial.mAmbient.x, pMaterial.mAmbient.y, pMaterial.mAmbient.z);
 }
@@ -435,6 +435,26 @@ void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mTextureParamMag);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+
+
+void OpenGLMatSingleTextureHighlight::PreRender()
+{
+	Parent::PreRender();
+	if (GetRenderer()->GetLightsEnabled())
+	{
+		::glDisable(GL_LIGHTING);
+	}
+}
+
+void OpenGLMatSingleTextureHighlight::PostRender()
+{
+	if (GetRenderer()->GetLightsEnabled())
+	{
+		::glEnable(GL_LIGHTING);
+	}
+	Parent::PostRender();
 }
 
 
@@ -1087,7 +1107,7 @@ int OpenGLMatPXS::smNumSptLights = 0;
 int OpenGLMatPXS::smLightCount = 0;
 
 
-OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
+OpenGLMatPXS::OpenGLMatPXS(const astr& pVP, const astr pFP[NUM_FP]):
 	mVPID(0)
 {
 #ifndef LEPRA_GL_ES
@@ -1174,8 +1194,8 @@ OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 		GLint lErrorPos;
 		UiLepra::OpenGLExtensions::glProgramStringARB(GL_VERTEX_PROGRAM_ARB, 
 							    GL_PROGRAM_FORMAT_ASCII_ARB,
-							    (GLsizei)::strlen(pVP),
-							    pVP);
+							    (GLsizei)pVP.length(),
+							    pVP.c_str());
 		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &lErrorPos);
 		if (lErrorPos != -1)
 		{
@@ -1199,8 +1219,8 @@ OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 			GLint lErrorPos;
 			UiLepra::OpenGLExtensions::glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, 
 								    GL_PROGRAM_FORMAT_ASCII_ARB,
-								    (GLsizei)::strlen(pFP[i]),
-								    pFP[i]);
+								    (GLsizei)pFP[i].length(),
+								    pFP[i].c_str());
 			glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &lErrorPos);
 			if (lErrorPos != -1)
 			{
@@ -1835,8 +1855,8 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 
 OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 						   Material* pFallBackMaterial,
-						   const char* pVP,
-						   const char** pFP) :
+						   const astr pVP,
+						   const astr* pFP) :
 	OpenGLMatSingleTextureSolid(pRenderer, pFallBackMaterial),
 	OpenGLMatPXS(pVP, pFP)
 {
