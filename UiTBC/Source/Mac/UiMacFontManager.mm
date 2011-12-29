@@ -16,6 +16,10 @@
 
 
 
+#define FONT_SIZE_FACTOR 0.8f
+
+
+
 namespace UiTbc
 {
 
@@ -80,6 +84,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	pImage.CreateBuffer();
 	::memset(pImage.GetBuffer(), 0, pImage.GetWidth()*pImage.GetPixelByteSize()*pImage.GetHeight());
 
+	const float lCorrectedFontSize = mCurrentFont->mSize * FONT_SIZE_FACTOR;	// Similar to other platforms...
 	CGContextRef textcontext; // this is our rendering context
 	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB(); // we need some colorspace
 	// we create a bitmap context
@@ -92,12 +97,12 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, transparent)); 
 	CGContextFillRect(textcontext, *(CGRect*)rect);
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, text_color));
-	CGContextSelectFont(textcontext, mCurrentFont->mName.c_str(), mCurrentFont->mSize, kCGEncodingMacRoman);
+	CGContextSelectFont(textcontext, mCurrentFont->mName.c_str(), lCorrectedFontSize, kCGEncodingMacRoman);
 	CGContextSetLineWidth(textcontext, 0.3);
 	//CGContextSetCharacterSpacing(textcontext, 1);
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
 	CGContextSetRGBStrokeColor(textcontext, 1,1,1,0.5);
-	int y = pRect.GetHeight()-mCurrentFont->mSize;
+	int y = pRect.GetHeight() - lCorrectedFontSize;
 	if (y < pRect.GetHeight()/4)
 	{
 		y = pRect.GetHeight()/4;
@@ -151,7 +156,8 @@ int MacFontManager::GetCharWidth(const tchar pChar) const
 	tchar lTempString[2] = {0, 0};
 	lTempString[0] = pChar;
 	NSString* lFontName = [NSString stringWithUTF8String:mCurrentFont->mName.c_str()];
-	TBC_APPLE_FONT* lFont = [TBC_APPLE_FONT fontWithName:lFontName size:mCurrentFont->mSize];
+	const float lCorrectedFontSize = mCurrentFont->mSize * FONT_SIZE_FACTOR;	// Similar to other platforms...
+	TBC_APPLE_FONT* lFont = [TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize];
 #ifdef LEPRA_IOS
 	CGSize lSize = [[NSString stringWithUTF8String:lTempString] sizeWithFont:lFont];
 #else // !iOS

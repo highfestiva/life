@@ -777,16 +777,18 @@ Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAl
 			mTextureTable.Insert(lID, lTexture);
 
 			glBindTexture (GL_TEXTURE_2D, lID);
+			OGL_ASSERT();
 
-			glTexImage2D (GL_TEXTURE_2D, 
-						  0, 
-						  4, 
-						  lImage.GetWidth(), 
-						  lImage.GetHeight(), 
-						  0, 
+			glTexImage2D (GL_TEXTURE_2D,
+						  0,
+						  GL_RGBA,
+						  lImage.GetWidth(),
+						  lImage.GetHeight(),
+						  0,
 						  GL_RGBA,
 						  GL_UNSIGNED_BYTE,
 						  lImage.GetBuffer());
+			OGL_ASSERT();
 		}
 		else if(lColor == true)
 		{
@@ -809,16 +811,18 @@ Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAl
 			mTextureTable.Insert(lID, lTexture);
 
 			glBindTexture (GL_TEXTURE_2D, lID);
+			OGL_ASSERT();
 
-			glTexImage2D (GL_TEXTURE_2D, 
-						  0, 
-						  3, 
-						  lImage.GetWidth(), 
-						  lImage.GetHeight(), 
-						  0, 
+			glTexImage2D (GL_TEXTURE_2D,
+						  0,
 						  GL_RGB,
-						  GL_UNSIGNED_BYTE, 
+						  lImage.GetWidth(),
+						  lImage.GetHeight(),
+						  0,
+						  GL_RGB,
+						  GL_UNSIGNED_BYTE,
 						  lImage.GetBuffer());
+			OGL_ASSERT();
 		}
 		else if(pAlphaBuffer != 0)
 		{
@@ -843,20 +847,20 @@ Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAl
 			mTextureTable.Insert(lID, lTexture);
 
 			glBindTexture (GL_TEXTURE_2D, lID);
+			OGL_ASSERT();
 
-			glTexImage2D (GL_TEXTURE_2D, 
-						  0, 
-						  4, 
-						  lImage.GetWidth(), 
-						  lImage.GetHeight(), 
-						  0, 
+			glTexImage2D (GL_TEXTURE_2D,
+						  0,
+						  GL_RGBA,
+						  lImage.GetWidth(),
+						  lImage.GetHeight(),
+						  0,
 						  GL_RGBA,
 						  GL_UNSIGNED_BYTE, 
 						  lImage.GetBuffer());
+			OGL_ASSERT();
 		}
 	}
-
-	OGL_ASSERT();
 
 	return (ImageID)lID;
 }
@@ -887,27 +891,27 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 			if (pImage->GetBitDepth() == Canvas::BITDEPTH_24_BIT)
 			{
 				glBindTexture (GL_TEXTURE_2D, pImageID);
-				glTexImage2D (GL_TEXTURE_2D, 
-							  0, 
-							  3, 
+				glTexImage2D (GL_TEXTURE_2D,
+							  0,
+							  GL_RGB,
 							  pImage->GetWidth(),
 							  pImage->GetHeight(),
-							  0, 
+							  0,
 							  GL_RGB,
-							  GL_UNSIGNED_BYTE, 
+							  GL_UNSIGNED_BYTE,
 							  pImage->GetBuffer());
 			}
 			else if(pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 			{
 				glBindTexture (GL_TEXTURE_2D, pImageID);
-				glTexImage2D (GL_TEXTURE_2D, 
-							  0, 
-							  4, 
+				glTexImage2D (GL_TEXTURE_2D,
+							  0,
+							  GL_RGBA,
 							  pImage->GetWidth(),
 							  pImage->GetHeight(),
-							  0, 
-							  GL_RGBA, 
-							  GL_UNSIGNED_BYTE, 
+							  0,
+							  GL_RGBA,
+							  GL_UNSIGNED_BYTE,
 							  pImage->GetBuffer());
 			}
 		}
@@ -964,14 +968,14 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 
 		glBindTexture (GL_TEXTURE_2D, pImageID);
 
-		glTexImage2D (GL_TEXTURE_2D, 
-					  0, 
-					  4, 
-					  lImage.GetWidth(), 
-					  lImage.GetHeight(), 
-					  0, 
-					  GL_RGBA, 
-					  GL_UNSIGNED_BYTE, 
+		glTexImage2D (GL_TEXTURE_2D,
+					  0,
+					  GL_RGBA,
+					  lImage.GetWidth(),
+					  lImage.GetHeight(),
+					  0,
+					  GL_RGBA,
+					  GL_UNSIGNED_BYTE,
 					  lImage.GetBuffer());
 	}
 	else if(lColor == true)
@@ -992,14 +996,14 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 
 		glBindTexture (GL_TEXTURE_2D, pImageID);
 
-		glTexImage2D (GL_TEXTURE_2D, 
-					  0, 
-					  3, 
-					  lImage.GetWidth(), 
-					  lImage.GetHeight(), 
-					  0, 
+		glTexImage2D (GL_TEXTURE_2D,
+					  0,
+					  GL_RGB, 
+					  lImage.GetWidth(),
+					  lImage.GetHeight(),
+					  0,
 					  GL_RGB,
-					  GL_UNSIGNED_BYTE, 
+					  GL_UNSIGNED_BYTE,
 					  lImage.GetBuffer());
 	}
 	else if(pAlphaBuffer != 0)
@@ -1024,7 +1028,7 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 
 		glTexImage2D (GL_TEXTURE_2D, 
 					  0, 
-					  4, 
+					  GL_RGBA, 
 					  lImage.GetWidth(), 
 					  lImage.GetHeight(), 
 					  0, 
@@ -1177,11 +1181,11 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 		glColor4ub(255, 255, 255, GetAlphaValue());
 	}
 
-	GLint u[] = {0, 0, 1, 0, 1, 1, 0, 1};
-	GLint v[] = {pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mTop, pRect.mRight, pRect.mBottom, pRect.mLeft, pRect.mBottom};
+	GLfloat u[] = {0, 0, 1, 0, 1, 1, 0, 1};
+	GLfloat v[] = {pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mTop, pRect.mRight, pRect.mBottom, pRect.mLeft, pRect.mBottom};
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	::glTexCoordPointer(2, GL_INT, 0, u);
-	::glVertexPointer(2, GL_INT, 0, v);
+	::glTexCoordPointer(2, GL_FLOAT, 0, u);
+	::glVertexPointer(2, GL_FLOAT, 0, v);
 	::glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glDisable(GL_TEXTURE_2D);

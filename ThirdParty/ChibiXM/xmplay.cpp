@@ -728,7 +728,7 @@ void _xm_sw_software_mix_voice_to_buffer( xm_u8 p_voice, xm_s32 *p_buffer, xm_u3
 
 					xm_s32 integer = (v->offset>>_XM_SW_FRAC_SIZE);
 					while(integer>v->ima_adpcm.last_nibble) {			
-						xm_s16 nibble,signed_nibble,diff,step;
+						xm_s16 nibble,diff,step;
 						
 						v->ima_adpcm.last_nibble++;
 						
@@ -3121,7 +3121,7 @@ static void _xm_loader_recompress_sample(XM_SampleData *p_sample_data) {
 	
 	
 	for (i=0;i<len;i++) {
-		int step,diff,vpdiff,signed_nibble,p,mask;
+		int step,diff,vpdiff,mask;
 		xm_u8 nibble;
 		xm_s16 xm_sample = ((i==p_sample_data->length)?0:(_XM_GET_SAMPLE16));
 		xm_sample=xm_sample+xm_prev;

@@ -1568,19 +1568,21 @@ void App::OnMouseInput(UiLepra::InputElement* pElement)
 
 int App::PollTap(FingerMovement& pMovement)
 {
-	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
-	{
-		return 0;
-	}
 	(void)pMovement;
 	int lTag = 0;
+
 #ifdef LEPRA_IOS_LOOKANDFEEL
 #ifdef LEPRA_IOS
-	mUiManager->GetInputManager()->SetMousePosition(pMovement.mLastX, pMovement.mLastY);
+	mUiManager->GetInputManager()->SetMousePosition(pMovement.mLastY, pMovement.mLastX);
 	mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(pMovement.mIsPress? 1 : 0);
 	mUiManager->GetInputManager()->GetMouse()->GetAxis(0)->SetValue(pMovement.mLastX);
 	mUiManager->GetInputManager()->GetMouse()->GetAxis(1)->SetValue(pMovement.mLastY);
 #endif // iOS
+
+	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
+	{
+		return lTag;
+	}
 
 	float x = (float)pMovement.mLastX;
 	float y = (float)pMovement.mLastY;
