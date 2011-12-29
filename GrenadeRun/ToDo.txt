@@ -38,6 +38,7 @@ Single player difficulty levels.
 Extra vehicles: cute monster truck, speed car, slowmobile.
 Load buttons before dialog is displayed.
 Load music files from .pk3 archive instead of directly from raw file.
+Optimize.
 
 Computer demo
 -------------
@@ -54,7 +55,6 @@ Show keyboard controls when starting.
 Delete all resources when switching level (and make sure!).
 Turn the table when completing a level.
 Local highscore.
-Optimize.
 Memory leak check.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
 Add link to iOS versions.

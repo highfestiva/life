@@ -163,6 +163,7 @@ private:
 #ifndef LEPRA_IOS_LOOKANDFEEL
 	UiCure::UserPainterKeepImageResource* mKeyboardButton;
 #endif // Computer
+	UiCure::UserPainterKeepImageResource* mSteeringWheel;
 	mutable Vector3DF mScoreHeartPos[SCORE_POINTS];
 	UiTbc::RectComponent* mPlayerSplitter;
 	float mAngleTime;
@@ -187,6 +188,9 @@ private:
 	UiCure::PainterImageResource* mScrollBarImage;
 	UiTbc::ScrollBar* mDifficultySlider;
 	int mSlowShadowCount;
+	float mThrottle;
+	float mPreviousSteering;
+	float mCurrentSteering;
 
 	LOG_CLASS_DECLARE();
 };
@@ -232,7 +236,10 @@ App::App(const strutil::strvec& pArgumentList):
 	mDialog(0),
 	mScrollBarImage(0),
 	mDifficultySlider(0),
-	mSlowShadowCount(0)
+	mSlowShadowCount(0),
+	mThrottle(0),
+	mPreviousSteering(0),
+	mCurrentSteering(0)
 {
 	mApp = this;
 }
@@ -375,6 +382,9 @@ bool App::Open()
 		mKeyboardButton->Load(mResourceManager, _T("btn_key.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 #endif // Computer
+		mSteeringWheel = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mSteeringWheel->Load(mResourceManager, _T("steering_wheel.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 	}
 	if (lOk)
 	{
@@ -677,8 +687,12 @@ void App::PollTaps()
 	{
 		return;
 	}
-	mGame->SetThrottle(lAvatar1, 0);
-	lAvatar1->SetEnginePower(1, 0, 0);
+	if (lAvatar1->GetPhysics()->GetEngineCount() >= 3)
+	{
+		mGame->SetThrottle(lAvatar1, mThrottle);
+		mPreviousSteering = Math::Clamp(mPreviousSteering, -1.0f, 1.0f);
+		lAvatar1->SetEnginePower(1, mPreviousSteering+mCurrentSteering, 0);
+	}
 	mGame->SetThrottle(lAvatar2, 0);
 	lAvatar2->SetEnginePower(1, 0, 0);
 	FingerMoveList::iterator x = gFingerMoveList.begin();
@@ -693,12 +707,26 @@ void App::PollTaps()
 			gFingerMoveList.erase(x++);
 		}
 	}
+#ifndef LEPRA_IOS
+	// Test code.
+	if (!gFingerMoveList.empty() && !gFingerMoveList.back().mIsPress)
+	{
+		gFingerMoveList.clear();
+	}
+#endif // Computer
 #endif // iOS L&F
 }
 
 void App::DrawHud()
 {
 	if (mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
+	{
+		return;
+	}
+
+	Cure::ContextObject* lAvatar1 = mGame->GetP1();
+	Cure::ContextObject* lAvatar2 = mGame->GetP2();
+	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 || !lAvatar2->IsLoaded())
 	{
 		return;
 	}
@@ -712,6 +740,8 @@ void App::DrawHud()
 	const int lWinner = mGame->GetWinnerIndex();
 	if (lWinner >= 0)
 	{
+		mPlayer1LastTouch.PopTimeDiff();
+		mPlayer2LastTouch.PopTimeDiff();
 #ifdef LEPRA_IOS_LOOKANDFEEL
 		const float lAngle = (mGame->GetComputerIndex() != 1)? PIF/2 : 0;
 #else // Computer.
@@ -749,7 +779,7 @@ void App::DrawHud()
 			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 			DrawRoundedPolygon((float)x1, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
 			DrawRoundedPolygon((float)x2, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
-			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
+			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 			mUiManager->GetPainter()->SetColor(lColor1, 0);
 			PrintText(lText1, +lAngle, x1, y);
 			mUiManager->GetPainter()->SetColor(lColor2, 0);
@@ -761,7 +791,7 @@ void App::DrawHud()
 			const int y  = (int)(h/2);
 			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 			DrawRoundedPolygon((float)x, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
-			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
+			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 #ifdef LEPRA_IOS_LOOKANDFEEL
 				const float a = (mGame->GetComputerIndex() == 0)? -lAngle : 0;
 #else // Computer L&F
@@ -784,7 +814,9 @@ void App::DrawHud()
 	}
 
 #ifdef LEPRA_IOS_LOOKANDFEEL
-	if (mGame->GetComputerIndex() != 0)
+	if (mGame->GetComputerIndex() != 0 &&
+		mSteeringWheel->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+		lAvatar1->GetPhysics()->GetEngineCount() >= 3)
 	{
 		// Left player.
 		if (mGame->GetComputerIndex() < 0)	// 2P?
@@ -793,10 +825,12 @@ void App::DrawHud()
 			InfoText(1, _T("Throttle/brake"), 0, 14, 0);
 			DrawRoundedPolygon(m*2+lButtonWidth*1.6f,	m+lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
 			DrawRoundedPolygon(lButtonWidth*0.4f,		m+lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
-			DrawCircle(m+lButtonRadius,			h-m-lButtonWidth,	lButtonRadius-2);	// Left/right.
-			InfoText(1, _T("Left/right"), -PIF/2);
-			DrawRoundedPolygon(m+lButtonRadius,		h-m*2-lButtonWidth*1.6f,lButtonRadius*0.5f,	0,	3);
-			DrawRoundedPolygon(m+lButtonRadius,		h-lButtonWidth*0.4f,	lButtonRadius*0.5f,	PIF,	3);
+
+			const float s = h * 0.25f;
+			const TBC::PhysicsEngine* lGas = lAvatar1->GetPhysics()->GetEngine(1);
+			const float a = lGas->GetLerpThrottle(0.2f, 0.2f) * -1.5f - PIF/2;
+			DrawImage(mSteeringWheel->GetData(), s*0.15f, h-s*0.3f, s, s, a);
+			InfoText(1, _T("Left/right"), -PIF/2, 0, -10);
 		}
 		else
 		{
@@ -804,10 +838,12 @@ void App::DrawHud()
 			InfoText(1, _T("Throttle/brake"), PIF/2, 0, -14);
 			DrawRoundedPolygon(m+lButtonRadius,		h-m*2-lButtonWidth*1.6f,	lButtonRadius*0.5f,	0,	3);
 			DrawRoundedPolygon(m+lButtonRadius,		h-lButtonWidth*0.4f,		lButtonRadius*0.5f,	+PIF,	3);
-			DrawCircle(w-m-lButtonWidth,			h-m-lButtonRadius,		lButtonRadius-2);	// Left/right.
-			InfoText(1, _T("Left/right"), 0);
-			DrawRoundedPolygon(w-m*2-lButtonWidth*1.6f,	h-m-lButtonRadius,		lButtonRadius*0.5f,	-PIF/2,	3);
-			DrawRoundedPolygon(w-lButtonWidth*0.4f,		h-m-lButtonRadius,		lButtonRadius*0.5f,	+PIF/2,	3);
+
+			const float s = w * 0.25f;
+			const TBC::PhysicsEngine* lGas = lAvatar1->GetPhysics()->GetEngine(1);
+			const float a = lGas->GetLerpThrottle(0.2f, 0.2f) * -1.5f;
+			DrawImage(mSteeringWheel->GetData(), w-s*0.3f, h-s*0.15f, s, s, a);
+			InfoText(1, _T("Left/right"), 0, -10, 0);
 		}
 	}
 	if (mGame->GetComputerIndex() != 1)
@@ -830,12 +866,6 @@ void App::DrawHud()
 #endif // iOS
 
 	// Draw touch force meters, to give a visual indication of steering.
-	Cure::ContextObject* lAvatar1 = mGame->GetP1();
-	Cure::ContextObject* lAvatar2 = mGame->GetP2();
-	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 || !lAvatar2->IsLoaded())
-	{
-		return;
-	}
 
 	Cutie* lCutie = (Cutie*)lAvatar1;
 	if (mGame->GetComputerIndex() < 0)	// Two players.
@@ -856,7 +886,7 @@ void App::DrawHud()
 	const TBC::PhysicsEngine* lGas;
 	const TBC::PhysicsEngine* lBrakes;
 	const TBC::PhysicsEngine* lTurn;
-	if ( lAvatar1->GetPhysics()->GetEngineCount() >= 3)
+	if (lAvatar1->GetPhysics()->GetEngineCount() >= 3)
 	{
 		if (mGame->GetComputerIndex() != 0)
 		{
@@ -876,7 +906,7 @@ void App::DrawHud()
 					InfoText(1, _T("Acceleration"), +PIF/2);
 				}
 			}
-			lTurn = lAvatar1->GetPhysics()->GetEngine(1);
+			/*lTurn = lAvatar1->GetPhysics()->GetEngine(1);
 			lForce = lTurn->GetValue();
 			if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(2)) != gFingerMoveList.end())
 			{
@@ -890,7 +920,7 @@ void App::DrawHud()
 					DrawForceMeter((int)(w-m-lButtonWidth), (int)(h-m*2-lButtonWidth*4), -PIF/2, lForce, true);
 					InfoText(1, _T("Steering wheel"), 0, -20, 0);
 				}
-			}
+			}*/
 		}
 	}
 	if (mGame->GetComputerIndex() != 1 && lAvatar2->GetPhysics()->GetEngineCount() >= 2)
@@ -1082,6 +1112,8 @@ void App::DrawHud()
 
 void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
 {
+	mPenX = cx;
+	mPenY = cy;
 	const float ca = ::cos(pAngle);
 	const float sa = ::sin(pAngle);
 	const float w2 = w*0.5f;
@@ -1119,6 +1151,7 @@ void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int 
 	mUiManager->GetPainter()->SetColor(pColor, 0);
 	mUiManager->GetPainter()->SetAlphaValue(pColor.mAlpha);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
+	mUiManager->GetPainter()->SetAlphaValue(255);
 	/*const Vector2DF lCenter(x, y);
 	for (size_t i = 0; i < lCoords.size()-1; ++i)
 	{
@@ -1527,7 +1560,8 @@ void App::OnMouseInput(UiLepra::InputElement* pElement)
 	}
 	else
 	{
-		gFingerMoveList.clear();
+		FingerMovement& lMovement = gFingerMoveList.back();
+		lMovement.mIsPress = false;
 	}
 }
 #endif // Computer emulating iOS
@@ -1553,15 +1587,15 @@ int App::PollTap(FingerMovement& pMovement)
 	float lStartX = (float)pMovement.mStartX;
 	float lStartY = (float)pMovement.mStartY;
 
-	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
+	//UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 	std::swap(x, y);
 	std::swap(lStartX, lStartY);
-	const float lTapMargin = 28.0f;
+	/*const float lTapMargin = 28.0f;
 	lStartX = Math::Clamp(lStartX, lTapMargin, w-lTapMargin);
-	lStartY = Math::Clamp(lStartY, lTapMargin, h-lTapMargin);
+	lStartY = Math::Clamp(lStartY, lTapMargin, h-lTapMargin);*/
 	y = h-y;
 	lStartY = h-lStartY;
 	const float m = BUTTON_MARGIN;
@@ -1575,13 +1609,22 @@ int App::PollTap(FingerMovement& pMovement)
 		{
 			if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
 			{
-				mGame->SetThrottle(lAvatar1, CLAMPUP((x-lStartX)/s));
+				mThrottle = CLAMPUP((x-lStartX)/s);
 				mPlayer1LastTouch.ClearTimeDiff();
 				lTag = 1;
 			}
-			else if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
+			else if (lStartX <= lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
 			{
-				lAvatar1->SetEnginePower(1, CLAMPUP((y-lStartY)/s), 0);
+				mCurrentSteering = CLAMPUP((y-lStartY)/s);
+				if (!pMovement.mIsPress)
+				{
+					mPreviousSteering += mCurrentSteering;
+					if (!mCurrentSteering)	// Go to neutral if just tap/release.
+					{
+						mPreviousSteering = 0;
+					}
+					mCurrentSteering = 0;
+				}
 				mPlayer1LastTouch.ClearTimeDiff();
 				lTag = 2;
 			}
@@ -1590,13 +1633,22 @@ int App::PollTap(FingerMovement& pMovement)
 		{
 			if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 up/down?
 			{
-				mGame->SetThrottle(lAvatar1, CLAMPUP((lStartY-y)/s));
+				mThrottle = CLAMPUP((lStartY-y)/s);
 				mPlayer1LastTouch.ClearTimeDiff();
 				lTag = 1;
 			}
-			else if (lStartX >= h-lDoubleWidth && lStartY >= h-lSingleWidth)	// P1 left/right?
+			else if (lStartX >= h-lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
 			{
-				lAvatar1->SetEnginePower(1, CLAMPUP((x-lStartX)/s), 0);
+				mCurrentSteering = CLAMPUP((x-lStartX)/s);
+				if (!pMovement.mIsPress)
+				{
+					mPreviousSteering += mCurrentSteering;
+					if (!mCurrentSteering)	// Go to neutral if just tap/release.
+					{
+						mPreviousSteering = 0;
+					}
+					mCurrentSteering = 0;
+				}
 				mPlayer1LastTouch.ClearTimeDiff();
 				lTag = 2;
 			}
