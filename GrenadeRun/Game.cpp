@@ -110,7 +110,7 @@ bool Game::RestartLevel()
 TransformationF Game::GetCutieStart() const
 {
 	TransformationF t(gIdentityQuaternionF, Vector3DF(-173, -85, 7));
-	t.GetOrientation().RotateAroundOwnZ(-PIF*0.6f);
+	t.GetOrientation().RotateAroundOwnZ(-PIF*0.45f);
 	return t;
 }
 
@@ -217,7 +217,7 @@ void Game::ResetLauncher()
 	AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	mLauncher->DisableRootShadow();
 	mLauncher->StartLoading();
-	mLauncherYaw = 0;
+	mLauncherYaw = PIF*0.27f;
 	mLauncherPitch = -PIF/4;
 }
 

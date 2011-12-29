@@ -61,6 +61,7 @@ Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
+Rotate (90 deg) and move the pause button when running single player grenade laucher (portrait). Adjust the hearts accordingly.
 In-app purchase.
 Activation of features depending on purchases.
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
