@@ -1182,7 +1182,7 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 	}
 
 	GLfloat u[] = {0, 0, 1, 0, 1, 1, 0, 1};
-	GLfloat v[] = {pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mTop, pRect.mRight, pRect.mBottom, pRect.mLeft, pRect.mBottom};
+	GLfloat v[] = {(float)pRect.mLeft, (float)pRect.mTop, (float)pRect.mRight, (float)pRect.mTop, (float)pRect.mRight, (float)pRect.mBottom, (float)pRect.mLeft, (float)pRect.mBottom};
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glTexCoordPointer(2, GL_FLOAT, 0, u);
 	::glVertexPointer(2, GL_FLOAT, 0, v);
