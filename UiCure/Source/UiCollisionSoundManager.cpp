@@ -52,24 +52,23 @@ void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
 	while (x != mSoundMap.end())
 	{
 		SoundInfo* lSoundInfo = x->second;
-		bool lOneIsPlaying = false;
-		//for (unsigned y = 0; !lOneIsPlaying && y < 2; ++y)
+		bool lIsPlaying = false;
+		bool lOneIsPlayingOrLoading = false;
+		if (lSoundInfo->mSound)
 		{
-			if (lSoundInfo->mSound)
+			if (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 			{
-				if (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-				{
-					lOneIsPlaying |= mUiManager->GetSoundManager()->IsPlaying(lSoundInfo->mSound->GetData());
-				}
-				else if (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_IN_PROGRESS)
-				{
-					lOneIsPlaying = true;
-				}
+				lIsPlaying = mUiManager->GetSoundManager()->IsPlaying(lSoundInfo->mSound->GetData());
+				lOneIsPlayingOrLoading |= lIsPlaying;
+			}
+			else if (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_IN_PROGRESS)
+			{
+				lOneIsPlayingOrLoading = true;
 			}
 		}
-		if (lOneIsPlaying)
+		if (lOneIsPlayingOrLoading)
 		{
-			if (lRealTimeRatio != 1)
+			if (lIsPlaying && lRealTimeRatio != 1)
 			{
 				mUiManager->GetSoundManager()->SetPitch(lSoundInfo->mSound->GetData(), lSoundInfo->mPitch*lRealTimeRatio);
 			}

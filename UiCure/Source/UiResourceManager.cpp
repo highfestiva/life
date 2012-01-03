@@ -575,6 +575,7 @@ bool SoundResource::Load()
 			lSoundId = GetUiManager()->GetSoundManager()->LoadSound3D(GetName(), lData, lDataSize, mLoopMode, 0);
 		}
 		lOk = (lSoundId != UiLepra::INVALID_SOUNDID);
+		assert(lOk);
 		if (lOk)
 		{
 			SetRamDataType(lSoundId);

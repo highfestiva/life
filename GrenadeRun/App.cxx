@@ -1137,12 +1137,43 @@ void App::DrawHud()
 	{
 		mStartTimer.Start();
 	}
-	if (mStartTimer.IsStarted() && mStartTimer.QueryTimeDiff() < 5.0)
+	if (mStartTimer.IsStarted() && mStartTimer.QueryTimeDiff() < 7.0 &&
+		mKeyboardButton->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		if (mKeyboardButton->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		mUiManager->GetPainter()->SetColor(GRAY);
+		const int sw = (int)w;
+		const int sh = (int)h;
+		const int m = BUTTON_MARGIN;
+		const int iw = mKeyboardButton->GetRamData()->GetWidth();
+		const int ih = mKeyboardButton->GetRamData()->GetHeight();
+		int bx = sw/2;
+		const int by = sh/2 - ih/3;
+		if (mGame->GetComputerIndex() == -1)
 		{
-			mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), 100, 100);
+			bx = sw/4;
+			mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*3/2-m, by-ih-m);	// w
+			mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw/2-m*0, by-ih-m);	// e
+			mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*2-m*2, by);	// a
+			mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*1-m*1, by);	// s
+			mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*0-m*0, by);	// d
+			PrintText(_T("W"), 0, bx-iw-m*3, by-ih/2-m*2);
+			PrintText(_T("E"), 0, bx-m*2, by-ih/2-m*2);
+			PrintText(_T("A"), 0, bx-iw*3/2-m*4, by+ih/2-m*2);
+			PrintText(_T("S"), 0, bx-iw/2-m*3, by+ih/2-m*2);
+			PrintText(_T("D"), 0, bx+iw/2-m*2, by+ih/2-m*2);
+			bx = sw*3/4;
 		}
+		bx += iw*3/2;
+		mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*1-m*1, by-ih-m);
+		mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*4+m*0, by);
+		mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*2-m*2, by);
+		mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*1-m*1, by);
+		mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), bx-iw*0-m*0, by);
+		PrintText(_T("Up"),	0, bx-iw/2-m*3, by-ih/2-m*2);
+		PrintText(_T("Ctrl"),	0, bx-iw*7/2-m*2, by+ih/2-m*2);
+		PrintText(_T("L"),	0, bx-iw*3/2-m*4, by+ih/2-m*2);
+		PrintText(_T("Dn"),	0, bx-iw/2-m*3, by+ih/2-m*2);
+		PrintText(_T("R"),	0, bx+iw/2-m*2, by+ih/2-m*2);
 	}
 #endif // Computer
 
@@ -1382,16 +1413,22 @@ void App::DrawInfoTexts() const
 
 void App::PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const
 {
-	::glMatrixMode(GL_PROJECTION);
-	::glPushMatrix();
-	::glRotatef(pAngle*180/PIF, 0, 0, 1);
+	if (pAngle)
+	{
+		::glMatrixMode(GL_PROJECTION);
+		::glPushMatrix();
+		::glRotatef(pAngle*180/PIF, 0, 0, 1);
+	}
 	const int cx = (int)(pCenterX*cos(pAngle) + pCenterY*sin(pAngle));
 	const int cy = (int)(pCenterY*cos(pAngle) - pCenterX*sin(pAngle));
 	const int w = mUiManager->GetPainter()->GetStringWidth(pText);
 	const int h = mUiManager->GetPainter()->GetFontHeight();
 	mUiManager->GetPainter()->PrintText(pText, cx-w/2, cy-h/2);
-	::glPopMatrix();
-	::glMatrixMode(GL_MODELVIEW);
+	if (pAngle)
+	{
+		::glPopMatrix();
+		::glMatrixMode(GL_MODELVIEW);
+	}
 }
 
 
@@ -1506,26 +1543,28 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		DIRECTIVE_FUNCTION,
 	};
 	Directive lDirective = DIRECTIVE_NONE;
-	UiCure::CppContextObject* lAvatar = lAvatar1;
+	UiCure::CppContextObject* lAvatar = lAvatar2;
 	switch (pKeyCode)
 	{
 		case UIKEY(UP):
 		case UIKEY(NUMPAD_8):	lDirective = DIRECTIVE_UP;					break;
-		case UIKEY(W):		lDirective = DIRECTIVE_UP;		lAvatar = lAvatar2;	break;
+		case UIKEY(W):		lDirective = DIRECTIVE_UP;		lAvatar = lAvatar1;	break;
 		case UIKEY(DOWN):
 		case UIKEY(NUMPAD_2):
 		case UIKEY(NUMPAD_5):	lDirective = DIRECTIVE_DOWN;					break;
-		case UIKEY(S):		lDirective = DIRECTIVE_DOWN;		lAvatar = lAvatar2;	break;
+		case UIKEY(S):		lDirective = DIRECTIVE_DOWN;		lAvatar = lAvatar1;	break;
 		case UIKEY(LEFT):
 		case UIKEY(NUMPAD_4):	lDirective = DIRECTIVE_LEFT;					break;
-		case UIKEY(A):		lDirective = DIRECTIVE_LEFT;		lAvatar = lAvatar2;	break;
+		case UIKEY(A):		lDirective = DIRECTIVE_LEFT;		lAvatar = lAvatar1;	break;
 		case UIKEY(RIGHT):
 		case UIKEY(NUMPAD_6):	lDirective = DIRECTIVE_RIGHT;					break;
-		case UIKEY(D):		lDirective = DIRECTIVE_RIGHT;		lAvatar = lAvatar2;	break;
+		case UIKEY(D):		lDirective = DIRECTIVE_RIGHT;		lAvatar = lAvatar1;	break;
+		case UIKEY(LCTRL):
+		case UIKEY(RCTRL):
 		case UIKEY(INSERT):
 		case UIKEY(NUMPAD_0):	lDirective = DIRECTIVE_FUNCTION;				break;
 		case UIKEY(E):
-		case UIKEY(F):		lDirective = DIRECTIVE_FUNCTION;	lAvatar = lAvatar2;	break;
+		case UIKEY(F):		lDirective = DIRECTIVE_FUNCTION;	lAvatar = lAvatar1;	break;
 
 #ifdef LEPRA_DEBUG
 		case UIKEY(0):
@@ -1887,16 +1926,22 @@ void App::OnAction(UiTbc::Button* pButton)
 
 void App::OnMainMenuAction(UiTbc::Button* pButton)
 {
+	const int lPreviousComputerIndex = mGame->GetComputerIndex();
 	if (pButton->GetTag() == 1)
 	{
 		// 1P
-		const int lComputerIndex = (Random::Uniform() > 0.5)? 1 : 0;
+		const int lComputerIndex = Random::GetRandomNumber()&1;
 		mGame->SetComputerIndex(lComputerIndex);
 	}
 	else
 	{
 		// 2P
 		mGame->SetComputerIndex(-1);
+	}
+	// Switched from single play to dual play or vice versa?
+	if ((lPreviousComputerIndex == -1) != (mGame->GetComputerIndex() == -1))
+	{
+		mStartTimer.Stop();	// Show keys again in.
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnLevelAction);
 	d->QueryLabel(_T("Select level"), mBigFontId);

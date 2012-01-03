@@ -48,12 +48,12 @@ Rotate (90 deg) and move the pause button when running single player grenade lau
 Scale everything down by x2.
 Make wrecking ball a lot heavier.
 Add slow-mo when detonated close by Cutie.
+Fix "reset". I.e. reset health, reload vehicle if dead near starting point...
+Show keyboard controls when starting.
 
 Computer demo
 -------------
 Turn the table when completing a level.
-Fix "reset". I.e. reset health, reload vehicle if dead near starting point...
-Show keyboard controls when starting.
 Fix "holes" in backside of corvette's wheels.
 Put eyes on Sleepie.
 Make Sleepie wider.
