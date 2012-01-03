@@ -46,6 +46,8 @@ public:
 	virtual ~GameUiManager();
 
 	bool Open();
+	bool OpenDraw();	// Only opens the renderer+painter.
+	bool OpenRest();	// Opens rest; fonts, GUI, input, sound, etc.
 	void Close();
 	void DeleteDesktopWindow();
 

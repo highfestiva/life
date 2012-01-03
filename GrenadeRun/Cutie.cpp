@@ -8,6 +8,7 @@
 #include "../Lepra/Include/Math.h"
 #include "../TBC/Include/ChunkyBoneGeometry.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/RuntimeVariable.h"
 #include "Game.h"
 
 
@@ -48,12 +49,15 @@ void Cutie::DrainHealth(float pDrain)
 	const float lSpeed = GetVelocity().GetLength();
 	if (lSpeed < 1)
 	{
-		mWheelExpelTickCount = 50;
+		mWheelExpelTickCount = 25;
 	}
 	else
 	{
-		mWheelExpelTickCount = 20 + (int)(30/lSpeed);
+		mWheelExpelTickCount = 12 + (int)(15/lSpeed);
 	}
+	float lRealTimeRatio;
+	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	mWheelExpelTickCount = (int)(mWheelExpelTickCount/lRealTimeRatio);
 	GetPhysics()->ClearEngines();
 	/*TBC::ChunkyClass* lClass = (TBC::ChunkyClass*)GetClass();
 	size_t lTagCount = lClass->GetTagCount();
@@ -85,7 +89,7 @@ bool Cutie::QueryFlip()
 		lPositionData.CopyData(lOriginalPositionData);
 		lPositionData.Stop();
 		TransformationF& lTransform = lPositionData.mPosition.mTransformation;
-		lTransform.SetPosition(GetPosition() + Vector3DF(0, 0, 3));
+		lTransform.SetPosition(GetPosition() + Vector3DF(0, 0, 1.5f));
 		Vector3DF lEulerAngles;
 		GetOrientation().GetEulerAngles(lEulerAngles);
 		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);

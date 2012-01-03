@@ -34,6 +34,8 @@ private:
 	Game* mGame;
 	HiResTimer mLastShot;
 	Vector3DF mTargetOffset;
+	bool mDidShoot;
+	int mShotCount;
 
 	LOG_CLASS_DECLARE();
 };

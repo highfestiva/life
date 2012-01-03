@@ -46,6 +46,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mVehicleCamPos(0, 0, 200),
 	mVehicleCamHeight(15),
 	mIsLaunching(false),
+	mIsLauncherBarrelFree(true),
 	mLauncherYaw(0),
 	mLauncherPitch(-PIF/4),
 	mWinnerIndex(-1),
@@ -109,7 +110,7 @@ bool Game::RestartLevel()
 
 TransformationF Game::GetCutieStart() const
 {
-	TransformationF t(gIdentityQuaternionF, Vector3DF(-173, -85, 7));
+	TransformationF t(gIdentityQuaternionF, Vector3DF(-86.5f, -42.5f, 3.5f));
 	t.GetOrientation().RotateAroundOwnZ(-PIF*0.45f);
 	return t;
 }
@@ -121,14 +122,19 @@ bool Game::Tick()
 		return true;
 	}
 
+	if (mSlowmoTimer.IsStarted() && mSlowmoTimer.QueryTimeDiff() > 4.0f)
+	{
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
+	}
+
 	GameTicker::GetTimeManager()->Tick();
 
 	Vector3DF lPosition;
 	Vector3DF lVelocity;
 	if (mVehicle && mVehicle->IsLoaded())
 	{
-		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, -2);
-		if (lPosition.z < -100)
+		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, -1);
+		if (lPosition.z < -50)
 		{
 			const float lHealth = mVehicle->GetHealth();
 			const str lVehicleType = mVehicle->GetClassId();	// TRICKY: don't fetch reference!!!
@@ -150,8 +156,10 @@ bool Game::Tick()
 
 	if (mLauncher && mLauncher->IsLoaded())
 	{
-		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
-		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * 0.01f * lRealTimeRatio;
+		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * 0.01f * lRealTimeRatio;
 		mLauncherYaw = Math::Clamp(mLauncherYaw, -PIF/2, PIF/2);
 		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF/2*0.6f, -PIF/90);
 		mLauncher->SetBarrelAngle(mLauncherYaw, mLauncherPitch);
@@ -194,8 +202,10 @@ void Game::SetVehicle(const str& pVehicle)
 	mAllowWin = true;
 	if (mVehicle && mVehicle->IsLoaded() &&
 		mVehicle->GetPosition().GetDistance(GetCutieStart().GetPosition()) < 3.0f*SCALE_FACTOR &&
-		mVehicle->GetClassId() == pVehicle)
+		mVehicle->GetClassId() == pVehicle &&
+		mVehicle->GetHealth() > 0)
 	{
+		mVehicle->DrainHealth(-1);
 		return;
 	}
 	delete mVehicle;
@@ -217,7 +227,7 @@ void Game::ResetLauncher()
 	AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	mLauncher->DisableRootShadow();
 	mLauncher->StartLoading();
-	mLauncherYaw = PIF*0.27f;
+	mLauncherYaw = PIF*0.24f;
 	mLauncherPitch = -PIF/4;
 }
 
@@ -297,10 +307,11 @@ bool Game::Shoot()
 	assert(lOk);
 	if (lOk)
 	{
-		TransformationF t(mLauncher->GetOrientation(), mLauncher->GetPosition()+Vector3DF(0, 0, +5.0f));
+		TransformationF t(mLauncher->GetOrientation(), mLauncher->GetPosition()+Vector3DF(0, 0, +2.5f));
 		lGrenade->SetInitialTransform(t);
 		lGrenade->StartLoading();
 		mIsLaunching = true;
+		mIsLauncherBarrelFree = false;
 	}
 	return lOk;
 }
@@ -323,6 +334,17 @@ bool Game::IsLauncherLocked() const
 void Game::UnlockLauncher()
 {
 	mIsLaunching = false;
+	FreeLauncherBarrel();
+}
+
+bool Game::IsLauncherBarrelFree() const
+{
+	return mIsLauncherBarrelFree;
+}
+
+void Game::FreeLauncherBarrel()
+{
+	mIsLauncherBarrelFree = true;
 }
 
 Game::FlybyMode Game::GetFlybyMode() const
@@ -359,10 +381,10 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
 			const float lAngle = (float)Random::Uniform(0, 2*PIF);
-			x = (20.0f * i/lParticleCount - 10) * cos(lAngle);
-			y = (8 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
-			z = (30 + 12 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(6, 12), 0.5f, (float)Random::Uniform(3, 7));
+			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
+			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
+			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(5, 10), 0.5f, (float)Random::Uniform(3, 7));
 			lPuff->StartLoading();
 		}
 	}
@@ -382,9 +404,9 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			lPuff->SetInitialTransform(lTransform);
 			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
 			lPuff->SetOpacity(lOpacity);
-			x = x*17;
-			y = y*17;
-			z = (float)Random::Uniform(0, 10);
+			x = x*12;
+			y = y*12;
+			z = (float)Random::Uniform(0, 7);
 			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
 			lPuff->StartLoading();
 		}
@@ -401,7 +423,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			continue;
 		}
 		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
-		const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -1.5f);
+		const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -0.75f);
 		const int lBoneCount = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
@@ -413,16 +435,16 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
 			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
-			if (d > 50*3)
+			if (d > 50*SCALE_FACTOR)
 			{
 				continue;
 			}
 			d = 1/d;
 			f *= d;
-			d *= 12;
+			d *= 4.5;
 			d = d*d*d;
 			d = std::min(1.0f, d);
-			const float lMaxForceFactor = 600.0f;
+			const float lMaxForceFactor = 800.0f;
 			const float ff = lMaxForceFactor * lObject->GetMass() * d;
 			if (f.z <= 0.1f)
 			{
@@ -432,7 +454,12 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
 			if (lObject == mVehicle)
 			{
-				mVehicle->DrainHealth(d * 0.7f);
+				if (d > 0.5f)
+				{
+					CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.2);
+					mSlowmoTimer.Start();
+				}
+				mVehicle->DrainHealth(d);
 				if (mVehicle->GetHealth() <= 0)
 				{
 					if (mAllowWin)
@@ -525,6 +552,16 @@ void Game::SetScoreBalance(int pBalance)
 	mScoreBalance = pBalance;
 }
 
+void Game::SyncCameraPositions()
+{
+	switch (GetComputerIndex())
+	{
+		case -1:	std::swap(mLeftCamera, mRightCamera);	break;
+		case 0:		mLeftCamera = mRightCamera;		break;	// Computer is "left", copy player.
+		case 1:		mRightCamera = mLeftCamera;		break;	// Computer is "right", copy player.
+	}
+}
+
 bool Game::Render()
 {
 	if (!mVehicle || !mVehicle->IsLoaded() ||
@@ -560,8 +597,17 @@ bool Game::Render()
 		case 1:	mLeftRect = lFullRect;	break;	// Single player, to left.
 	}
 
-	const Vector3DF lLauncherPosition(0, -215, 29);
+	const Vector3DF lLauncherPosition(0, -107.5f, 14.5f);
 	mLauncher->SetRootPosition(lLauncherPosition);
+
+	if (GetComputerIndex() == 0)
+	{
+		mLeftCamera = mRightCamera;	// For smooth transitions.
+	}
+	else if (GetComputerIndex() == 1)
+	{
+		mRightCamera = mLeftCamera;	// For smooth transitions.
+	}
 
 	if (mFlybyMode != FLYBY_INACTIVE)
 	{
@@ -570,12 +616,12 @@ bool Game::Render()
 
 	if (GetComputerIndex() != 0)
 	{
-		TransformationF t(gIdentityQuaternionF, Vector3DF(-100, -140, -10));
+		TransformationF t(gIdentityQuaternionF, Vector3DF(-50, -70, -5));
 		const Vector3DF lVehiclePos = mVehicle->GetPosition();
 		Vector3DF lOffset = mVehicleCamPos - lVehiclePos;
 		lOffset.z = 0;
-		const float lCamXYDistance = 40;
-		float lCamHeight = 15;
+		const float lCamXYDistance = 20;
+		float lCamHeight = 7.5f;
 		lOffset.Normalize(lCamXYDistance);
 		float lAngle = (-lOffset).GetAngle(Vector3DF(0, lCamXYDistance, 0));
 		if (lOffset.x < 0)
@@ -614,14 +660,14 @@ bool Game::Render()
 #endif // iOS
 		mLeftCamera.Interpolate(mLeftCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mLeftCamera);
-		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+		mUiManager->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
 		mUiManager->Render(mLeftRect);
 		mUiManager->GetRenderer()->ResetAmbientLight(true);
 	}
 
 	if (GetComputerIndex() != 1)
 	{
-		const float lLauncherHeight = 6;
+		const float lLauncherHeight = 3;
 		const Vector3DF lMuzzlePosition(lLauncherPosition + mLauncher->GetOrientation()*Vector3DF(0, 0, lLauncherHeight));
 
 		float lRange = 150.0f;
@@ -647,7 +693,8 @@ bool Game::Render()
 #endif // iOS
 		mRightCamera.Interpolate(mRightCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mRightCamera);
-		mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, 9000/lRange), 3, 1000);
+		const float lDistanceFoV = 22000 / ::pow(lRange, 1.2f);
+		mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, lDistanceFoV), 1.5f, 500);
 		mUiManager->Render(mRightRect);
 	}
 	return true;
@@ -684,7 +731,7 @@ bool Game::FlybyRender()
 		const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
 		t.GetOrientation().RotateAroundOwnZ(a + PIF/2);
 		t.GetOrientation().RotateAroundOwnX(-PIF/8);
-		t.SetPosition(Vector3DF(::cos(a)*240, ::sin(a)*240, ::sin(a+PIF/8)*50 + 80));
+		t.SetPosition(Vector3DF(::cos(a)*120, ::sin(a)*120, ::sin(a+PIF/8)*25 + 40));
 	}
 	else
 	{
@@ -731,19 +778,19 @@ bool Game::FlybyRender()
 		// Position.
 		if (mFlyByTime-lSweepTime < lDetailTime * 1/3)
 		{
-			t.SetPosition(lCutie + Vector3DF(+4, +20, +10));
+			t.SetPosition(lCutie + Vector3DF(+2, +10, +5));
 		}
 		else if (mFlyByTime-lSweepTime < lDetailTime * 2/3)
 		{
-			t.SetPosition(lGoal + Vector3DF(-40, -30, +30));
+			t.SetPosition(lGoal + Vector3DF(-20, -15, +15));
 		}
 		else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
 		{
-			t.SetPosition(mLauncherPosition + Vector3DF(+5, +15, +10));	// In front of launcher.
+			t.SetPosition(mLauncherPosition + Vector3DF(+2.5, +7.5, +5));	// In front of launcher.
 		}
 		else
 		{
-			t.SetPosition(mLauncherPosition + Vector3DF(+14, 0, +14));	// Beside launcher.
+			t.SetPosition(mLauncherPosition + Vector3DF(+7, 0, +7));	// Beside launcher.
 		}
 	}
 #ifdef LEPRA_IOS_LOOKANDFEEL
@@ -757,18 +804,26 @@ bool Game::FlybyRender()
 	{
 		mLeftCamera.Interpolate(mLeftCamera, t, 0.05f);
 		mUiManager->SetCameraPosition(mLeftCamera);
-		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+		mUiManager->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
 		mUiManager->Render(mLeftRect);
 	}
 	if (GetComputerIndex() != 1)
 	{
 #ifdef LEPRA_IOS_LOOKANDFEEL
-		// The launcher is always displayed in portrait, both for single and dual play.
-		t.GetOrientation().RotateAroundOwnY(PIF);
+		if (GetComputerIndex() == 0)
+		{
+			// Fly-by always in landscape when single playing.
+			t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
+		}
+		else
+		{
+			// The launcher in portrait for dual play.
+			t.GetOrientation().RotateAroundOwnY(PIF);
+		}
 #endif // iOS
 		mRightCamera.Interpolate(mRightCamera, t, 0.05f);
 		mUiManager->SetCameraPosition(mRightCamera);
-		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+		mUiManager->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
 		mUiManager->Render(mRightRect);
 	}
 	return true;
@@ -883,14 +938,14 @@ bool Game::Initialize()
 		QuaternionF lRotation;
 		lRotation.RotateAroundOwnX(-PIF/4);
 		lRotation.RotateAroundOwnZ(-PIF/8);
-		mLeftCamera = TransformationF(lRotation, Vector3DF(-50, -100, 70));
+		mLeftCamera = TransformationF(lRotation, Vector3DF(-25, -50, 35));
 		mRightCamera = mLeftCamera;
 #ifdef LEPRA_IOS_LOOKANDFEEL
 		mLeftCamera.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 		mRightCamera.GetOrientation().RotateAroundOwnY(+PIF*0.5f);
 #endif // iOS
 
-		mLauncherPosition = Vector3DF(0, -215, 27);
+		mLauncherPosition = Vector3DF(0, -107.5f, 13.5f);
 
 		lOk = InitializeTerrain();
 	}

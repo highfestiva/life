@@ -67,6 +67,7 @@ void TimeManager::Tick()
 
 	if (lIsFixedFps)
 	{
+		mPhysicsFrameTime = mRealTimeRatio/mTargetFrameRate;
 		mPhysicsFrameCounter = GetCurrentPhysicsFrameAddFrames(1);
 		return;
 	}

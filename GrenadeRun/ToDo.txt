@@ -39,21 +39,35 @@ Extra vehicles: cute monster truck, speed car, slowmobile.
 Load buttons before dialog is displayed.
 Load music files from .pk3 archive instead of directly from raw file.
 Optimize.
+Steering wheel GUI.
+Steering wheel controls.
+Cutie engines and steering not reset when changing sides.
+Launcher FoV too high.
+Hardie and Speedie causes crash (assertion fails).
+Rotate (90 deg) and move the pause button when running single player grenade laucher or dual play (portrait). Adjust the hearts accordingly.
+Scale everything down by x2.
+Make wrecking ball a lot heavier.
+Add slow-mo when detonated close by Cutie.
 
 Computer demo
 -------------
-Steering wheel GUI.
-Steering wheel controls.
+Turn the table when completing a level.
+Fix "reset". I.e. reset health, reload vehicle if dead near starting point...
+Show keyboard controls when starting.
+Fix "holes" in backside of corvette's wheels.
+Put eyes on Sleepie.
+Make Sleepie wider.
+Push Sleepies wheels away harder when dead to avoid "post-mortem jitters".
+Tweak other levels.
+Launcher indicators suck, replace with Sabbe's idea.
+Adaptive launcher indicators must go - do it right right away.
 Throttle GUI.
 Canon fire GUI.
 Canon aim GUI.
-Add slow-mo when detonated close by Cutie.
 Record voice for tutorial.
 Playback voice for tutorial.
 Polish on level_2 roads (in texture).
-Show keyboard controls when starting.
 Delete all resources when switching level (and make sure!).
-Turn the table when completing a level.
 Local highscore.
 Memory leak check.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
@@ -61,15 +75,17 @@ Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
-Rotate (90 deg) and move the pause button when running single player grenade laucher (portrait). Adjust the hearts accordingly.
+Steering wheel tap-to-reset doesn't work.
 In-app purchase.
 Activation of features depending on purchases.
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
 2 extra levels: castle and machine.
 iPad adjustments.
+Test on iPad.
 Global high score list.
 Optimize.
 Memory leaks, zombies.
 iOS 5.
 HD version only should have support for 2 players.
+Publish on App Store x2.

@@ -52,6 +52,16 @@ GameUiManager::~GameUiManager()
 
 bool GameUiManager::Open()
 {
+	bool lOk = OpenDraw();
+	if (lOk)
+	{
+		lOk = OpenRest();
+	}
+	return lOk;
+}
+
+bool GameUiManager::OpenDraw()
+{
 	str lRenderTypeString;
 	int lDisplayWidth;
 	int lDisplayHeight;
@@ -73,18 +83,6 @@ bool GameUiManager::Open()
 	else if (lRenderTypeString == _T("DirectX"))
 	{
 		lRenderingContext = UiLepra::DisplayManager::DIRECTX_CONTEXT;
-	}
-
-	str lSoundTypeString;
-	CURE_RTVAR_GET(lSoundTypeString, =, mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
-	UiLepra::SoundManager::ContextType lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
-	if (lSoundTypeString == _T("OpenAL"))
-	{
-		lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
-	}
-	else if (lSoundTypeString == _T("FMOD"))
-	{
-		lSoundContext = UiLepra::SoundManager::CONTEXT_FMOD;
 	}
 
 	// Initialize UI based on settings parameters.
@@ -165,7 +163,29 @@ bool GameUiManager::Open()
 			mPainter = new TBC::DirectXPainter;
 		}*/
 	}
+	if (lOk)
+	{
+		mPainter->SetDestCanvas(mCanvas);
+	}
+	UiLepra::Core::ProcessMessages();
+	return lOk;
+}
 
+bool GameUiManager::OpenRest()
+{
+	str lSoundTypeString;
+	CURE_RTVAR_GET(lSoundTypeString, =, mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	UiLepra::SoundManager::ContextType lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
+	if (lSoundTypeString == _T("OpenAL"))
+	{
+		lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
+	}
+	else if (lSoundTypeString == _T("FMOD"))
+	{
+		lSoundContext = UiLepra::SoundManager::CONTEXT_FMOD;
+	}
+
+	bool lOk = true;
 	if (lOk)
 	{
 		mFontManager = UiTbc::FontManager::Create(mDisplay);
@@ -191,11 +211,6 @@ bool GameUiManager::Open()
 		{
 			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight);
 		}
-	}
-	if (lOk)
-	{
-		mCanvas->SetBuffer(0);
-		mPainter->SetDestCanvas(mCanvas);
 	}
 	if (lOk)
 	{

@@ -8,6 +8,7 @@
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../Include/UiGameUiManager.h"
 
 
@@ -44,6 +45,9 @@ void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
 {
 	mCameraPosition = pCameraPosition;
 
+	float lRealTimeRatio;
+	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+
 	SoundMap::iterator x = mSoundMap.begin();
 	while (x != mSoundMap.end())
 	{
@@ -65,6 +69,10 @@ void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
 		}
 		if (lOneIsPlaying)
 		{
+			if (lRealTimeRatio != 1)
+			{
+				mUiManager->GetSoundManager()->SetPitch(lSoundInfo->mSound->GetData(), lSoundInfo->mPitch*lRealTimeRatio);
+			}
 			++x;
 		}
 		else
@@ -167,10 +175,12 @@ void CollisionSoundManager::OnSoundLoaded(UiCure::UserSound3dResource* pSoundRes
 	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(),
 			lSoundInfo->mPosition, Vector3DF());
 		lSoundInfo->UpdateImpact();
-		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), lSoundInfo->mVolume, lSoundInfo->mPitch);
+		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), lSoundInfo->mVolume, lSoundInfo->mPitch * lRealTimeRatio);
 	}
 }
 
@@ -182,9 +192,11 @@ void CollisionSoundManager::UpdateSound(SoundInfo* pSoundInfo)
 		{
 			return;
 		}
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		pSoundInfo->UpdateImpact();
 		mUiManager->GetSoundManager()->SetVolume(pSoundInfo->mSound->GetData(), pSoundInfo->mVolume);
-		mUiManager->GetSoundManager()->SetPitch(pSoundInfo->mSound->GetData(), pSoundInfo->mPitch);
+		mUiManager->GetSoundManager()->SetPitch(pSoundInfo->mSound->GetData(), pSoundInfo->mPitch * lRealTimeRatio);
 	}
 }
 

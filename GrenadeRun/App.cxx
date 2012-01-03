@@ -73,6 +73,7 @@ private:
 	void Close();
 	virtual void Init();
 	virtual int Run();
+	void DisplayLogo();
 	bool Poll();
 	void PollTaps();
 	void DrawHud();
@@ -314,7 +315,15 @@ bool App::Open()
 #endif // !iOS
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
-	bool lOk = mUiManager->Open();
+	bool lOk = mUiManager->OpenDraw();
+	if (lOk)
+	{
+		DisplayLogo();
+	}
+	if (lOk)
+	{
+		lOk = mUiManager->OpenRest();
+	}
 	if (lOk)
 	{
 #ifdef LEPRA_IOS
@@ -396,7 +405,7 @@ bool App::Open()
 	{
 		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
 		mMusicPlayer->SetVolume(0.5f);
-		mMusicPlayer->SetSongPauseTime(4, 20);
+		mMusicPlayer->SetSongPauseTime(6, 18);
 		mMusicPlayer->AddSong(_T("ButterflyRide.xm"));
 		mMusicPlayer->AddSong(_T("BehindTheFace.xm"));
 		mMusicPlayer->AddSong(_T("BrittiskBensin.xm"));
@@ -498,6 +507,9 @@ int App::Run()
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
 	}
+#ifndef LEPRA_IOS
+	HiResTimer lStartupTimer;
+#endif // Computer
 	if (lOk)
 	{
 		lOk = Open();
@@ -516,8 +528,18 @@ int App::Run()
 		MainMenu();
 		lOk = mResourceManager->InitDefault();
 	}
+	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
-	bool lQuit = false;
+	while (2.0 - lStartupTimer.QueryTimeDiff() > 0)
+	{
+		if (SystemManager::GetQuitRequest())
+		{
+			break;
+		}
+		Thread::Sleep(0.1);
+		UiLepra::Core::ProcessMessages();
+	}
+	bool lQuit = (SystemManager::GetQuitRequest() != 0);
 	while (!lQuit)
 	{
 		lQuit = !Poll();
@@ -528,6 +550,24 @@ int App::Run()
 	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
 	return 0;
 #endif // !iOS/iOS
+}
+
+void App::DisplayLogo()
+{
+	UiCure::PainterImageResource* lLogo = new UiCure::PainterImageResource(mUiManager, mResourceManager, _T("logo.png"), UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+	if (lLogo->Load())
+	{
+		if (lLogo->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			//mUiManager->BeginRender(Vector3DF(0, 1, 0));
+			mUiManager->PreparePaint(true);
+			const Canvas* lCanvas = mUiManager->GetCanvas();
+			const Canvas* lImage = lLogo->GetRamData();
+			mUiManager->GetPainter()->DrawImage(lLogo->GetUserData(0), lCanvas->GetWidth()/2 - lImage->GetWidth()/2, lCanvas->GetHeight()/2 - lImage->GetHeight()/2);
+			mUiManager->GetDisplayManager()->UpdateScreen();
+		}
+	}
+	delete lLogo;
 }
 
 bool App::Poll()
@@ -740,8 +780,6 @@ void App::DrawHud()
 	const int lWinner = mGame->GetWinnerIndex();
 	if (lWinner >= 0)
 	{
-		mPlayer1LastTouch.PopTimeDiff();
-		mPlayer2LastTouch.PopTimeDiff();
 #ifdef LEPRA_IOS_LOOKANDFEEL
 		const float lAngle = (mGame->GetComputerIndex() != 1)? PIF/2 : 0;
 #else // Computer.
@@ -1059,12 +1097,13 @@ void App::DrawHud()
 		if (mGame->GetComputerIndex() == -1)
 		{
 			x = w/2 + BUTTON_WIDTH/2 + lMargin;
+			y = lMargin;
 		}
 		else
 		{
-			x = BUTTON_WIDTH + lMargin*2;
+			x = lMargin;
+			y = BUTTON_WIDTH + lMargin*2;
 		}
-		y = lMargin;
 		lAngle = PIF/2;
 #endif	// iOS L&F
 		if (mGame->GetComputerIndex() == -1)
@@ -1452,36 +1491,41 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 	{
 		return false;
 	}
-	if ((pKeyCode == UIKEY(E) || pKeyCode == UIKEY(F)) && pFactor > 0)
+	switch (mGame->GetComputerIndex())
 	{
-		mGame->Shoot();
+		case 0:	lAvatar1 = lAvatar2;	break;
+		case 1:	lAvatar2 = lAvatar1;	break;
 	}
+	enum Directive
+	{
+		DIRECTIVE_NONE,
+		DIRECTIVE_UP,
+		DIRECTIVE_DOWN,
+		DIRECTIVE_LEFT,
+		DIRECTIVE_RIGHT,
+		DIRECTIVE_FUNCTION,
+	};
+	Directive lDirective = DIRECTIVE_NONE;
+	UiCure::CppContextObject* lAvatar = lAvatar1;
 	switch (pKeyCode)
 	{
-		case UIKEY(W):		lAvatar2->SetEnginePower(0, -1*pFactor, 0);	break;
-		case UIKEY(S):		lAvatar2->SetEnginePower(0, +1*pFactor, 0);	break;
-		case UIKEY(A):		lAvatar2->SetEnginePower(1, -1*pFactor, 0);	break;
-		case UIKEY(D):		lAvatar2->SetEnginePower(1, +1*pFactor, 0);	break;
 		case UIKEY(UP):
-		case UIKEY(NUMPAD_8):	lAvatar1->SetEnginePower(0, +1*pFactor, 0);	break;
+		case UIKEY(NUMPAD_8):	lDirective = DIRECTIVE_UP;					break;
+		case UIKEY(W):		lDirective = DIRECTIVE_UP;		lAvatar = lAvatar2;	break;
 		case UIKEY(DOWN):
 		case UIKEY(NUMPAD_2):
-		case UIKEY(NUMPAD_5):
-		{
-			mReverseAndBrake = pFactor;
-			if (!mReverseAndBrake)
-			{
-				lAvatar1->SetEnginePower(0, 0, 0);
-				lAvatar1->SetEnginePower(2, 0, 0);
-			}
-		}
-		break;
+		case UIKEY(NUMPAD_5):	lDirective = DIRECTIVE_DOWN;					break;
+		case UIKEY(S):		lDirective = DIRECTIVE_DOWN;		lAvatar = lAvatar2;	break;
 		case UIKEY(LEFT):
-		case UIKEY(NUMPAD_4):	lAvatar1->SetEnginePower(1, -1*pFactor, 0);	break;
+		case UIKEY(NUMPAD_4):	lDirective = DIRECTIVE_LEFT;					break;
+		case UIKEY(A):		lDirective = DIRECTIVE_LEFT;		lAvatar = lAvatar2;	break;
 		case UIKEY(RIGHT):
-		case UIKEY(NUMPAD_6):	lAvatar1->SetEnginePower(1, +1*pFactor, 0);	break;
+		case UIKEY(NUMPAD_6):	lDirective = DIRECTIVE_RIGHT;					break;
+		case UIKEY(D):		lDirective = DIRECTIVE_RIGHT;		lAvatar = lAvatar2;	break;
 		case UIKEY(INSERT):
-		case UIKEY(NUMPAD_0):	lAvatar1->SetEnginePower(2, +1*pFactor, 0);	break;
+		case UIKEY(NUMPAD_0):	lDirective = DIRECTIVE_FUNCTION;				break;
+		case UIKEY(E):
+		case UIKEY(F):		lDirective = DIRECTIVE_FUNCTION;	lAvatar = lAvatar2;	break;
 
 #ifdef LEPRA_DEBUG
 		case UIKEY(0):
@@ -1524,6 +1568,75 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		}
 		break;
 #endif // Debug
+	}
+
+	switch (lDirective)
+	{
+		case DIRECTIVE_NONE:
+		{
+		}
+		break;
+		case DIRECTIVE_UP:
+		{
+			lAvatar->SetEnginePower(0, +1*pFactor, 0);
+		}
+		break;
+		case DIRECTIVE_DOWN:
+		{
+			if (mGame->GetComputerIndex() != 0 && lAvatar == lAvatar1)
+			{
+				mReverseAndBrake = pFactor;
+				if (!mReverseAndBrake)
+				{
+					lAvatar->SetEnginePower(0, 0, 0);
+					lAvatar->SetEnginePower(2, 0, 0);
+				}
+			}
+			if (mGame->GetComputerIndex() != 1 && lAvatar == lAvatar2)
+			{
+				lAvatar->SetEnginePower(0, -1*pFactor, 0);
+			}
+		}
+		break;
+		case DIRECTIVE_LEFT:
+		{
+			lAvatar->SetEnginePower(1, -1*pFactor, 0);
+		}
+		break;
+		case DIRECTIVE_RIGHT:
+		{
+			lAvatar->SetEnginePower(1, +1*pFactor, 0);
+		}
+		break;
+		case DIRECTIVE_FUNCTION:
+		{
+			switch (mGame->GetComputerIndex())
+			{
+				case -1:
+				{
+					if (lAvatar == lAvatar1)
+					{
+						lAvatar1->SetEnginePower(2, +1*pFactor, 0);	// Break.
+					}
+					else
+					{
+						mGame->Shoot();
+					}
+				}
+				break;
+				case 0:
+				{
+					mGame->Shoot();
+				}
+				break;
+				case 1:
+				{
+					lAvatar1->SetEnginePower(2, +1*pFactor, 0);	// Break.
+				}
+				break;
+			}
+		}
+		break;
 	}
 	return false;
 }
@@ -1621,7 +1734,7 @@ int App::PollTap(FingerMovement& pMovement)
 				if (!pMovement.mIsPress)
 				{
 					mPreviousSteering += mCurrentSteering;
-					if (!mCurrentSteering)	// Go to neutral if just tap/release.
+					if (::fabs(mCurrentSteering) < 0.03f)	// Go to neutral if just tap/release.
 					{
 						mPreviousSteering = 0;
 					}
@@ -1645,7 +1758,7 @@ int App::PollTap(FingerMovement& pMovement)
 				if (!pMovement.mIsPress)
 				{
 					mPreviousSteering += mCurrentSteering;
-					if (!mCurrentSteering)	// Go to neutral if just tap/release.
+					if (::fabs(mCurrentSteering) < 0.03f)	// Go to neutral if just tap/release.
 					{
 						mPreviousSteering = 0;
 					}
@@ -1704,6 +1817,13 @@ void App::SuperReset(bool pGameOver)
 {
 	mGameOverTimer.Stop();
 
+	mPlayer1LastTouch.PopTimeDiff();
+	mPlayer2LastTouch.PopTimeDiff();
+
+	mThrottle = 0;
+	mPreviousSteering = 0;
+	mCurrentSteering = 0;
+	mGame->SyncCameraPositions();
 	if (pGameOver)
 	{
 		// Total game over (someone won the match)?
@@ -1862,7 +1982,7 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 		case 4:	lVehicle = _T("road_roller");	break;
 	}
 	mDifficultySlider = 0;
-	mGameOverTimer.Stop();
+	SuperReset(false);
 	mGame->ResetWinnerIndex();
 	mGame->SetVehicle(lVehicle);
 	mGame->ResetLauncher();

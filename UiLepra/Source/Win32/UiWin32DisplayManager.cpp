@@ -109,7 +109,7 @@ bool Win32DisplayManager::Register()
 		msWindowClass.hInstance		= (HINSTANCE)mshThisInstance;
 		msWindowClass.hIcon		= ::LoadIcon((HINSTANCE)mshThisInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
 		msWindowClass.hIconSm		= ::LoadIcon((HINSTANCE)mshThisInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
-		msWindowClass.hCursor		= ::LoadCursor((HINSTANCE)mshThisInstance, IDC_ARROW);
+		msWindowClass.hCursor		= ::LoadCursor(0, IDC_ARROW);
 		msWindowClass.lpszMenuName	= NULL;
 		msWindowClass.lpszClassName	= _T("LepraWin32Class");
 

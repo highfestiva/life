@@ -16,7 +16,7 @@
 #endif // iOS
 //#define LEPRA_IOS_LOOKANDFEEL
 #define FPS		20
-#define	SCALE_FACTOR	3	// Hard-coded for Kill Cutie. If ever re-using for other game, drop this.
+#define	SCALE_FACTOR	1.5f	// Hard-coded for Kill Cutie. If ever re-using for other game, drop this.
 
 
 
@@ -122,6 +122,8 @@ public:
 	float GetMuzzleVelocity() const;
 	bool IsLauncherLocked() const;
 	void UnlockLauncher();
+	bool IsLauncherBarrelFree() const;
+	void FreeLauncherBarrel();
 	FlybyMode GetFlybyMode() const;
 	void SetFlybyMode(FlybyMode pFlybyMode);
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -137,6 +139,7 @@ public:
 	int GetScoreBalance() const;	// 0 = score is 2 love, -1 = P1 leads with 1 point, +2 P2 leads with 2 points...
 	void SetScoreBalance(int pBalance);
 
+	void SyncCameraPositions();
 	bool Render();
 	bool Paint();
 
@@ -179,6 +182,7 @@ private:
 	PixelRect mRightRect;
 	float mVehicleCamHeight;
 	bool mIsLaunching;
+	bool mIsLauncherBarrelFree;
 	float mLauncherYaw;
 	float mLauncherPitch;
 	int mWinnerIndex;
@@ -195,6 +199,8 @@ private:
 	float mComputerDifficulty;
 	int mScoreBalance;
 	bool mAllowWin;
+
+	StopWatch mSlowmoTimer;
 };
 
 

@@ -6,6 +6,7 @@
 
 #include "Grenade.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../TBC/Include/ChunkyBoneGeometry.h"
 #include "../UiCure/Include/UiGameUiManager.h"
@@ -72,6 +73,8 @@ void Grenade::Launch()
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 
 	GetManager()->AddAlarmCallback(this, 3, RELAUNCH_DELAY, 0);
+
+	((Game*)GetManager()->GetGameManager())->FreeLauncherBarrel();
 }
 
 void Grenade::OnTick()
@@ -116,8 +119,10 @@ void Grenade::OnTick()
 		((Game*)GetManager()->GetGameManager())->GetLauncherTransform(lTransform);
 		const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 		const float lTime = lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mTimeFrameCreated));
-		const float lLauncherLength = 3.0f;
-		float h = lLauncherLength/2+6 - lTime*lTime*8.0f;
+		const float lLauncherLength = 1.5f;
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		float h = lLauncherLength/2+3 - lTime*lTime*4.0f*lRealTimeRatio;
 		h = std::max(-lLauncherLength/2, h);
 		const Vector3DF lFalling = lTransform.GetOrientation() * Vector3DF(0, 0, h);
 		lTransform.GetPosition() += lFalling;

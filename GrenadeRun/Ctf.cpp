@@ -94,14 +94,24 @@ void Ctf::OnTick()
 	}
 
 	// Move flag up or down...
+	Game* lGame = (Game*)GetManager()->GetGameManager();
+	float lFactor = 1.0f / FPS;
 	if (mIsTriggerTimerStarted && !mSlideDown)
 	{
 		// Move up or stop if reached top.
-		mFlagMesh->AddOffset(mCatchingFlagVelocity / 20);
+		if (lGame->GetComputerIndex() == 0)
+		{
+			const float t = lGame->GetComputerDifficulty();
+			if (t >= 0 && t < 0.5f)
+			{
+				lFactor *= Math::Lerp(0.4f, 1.0f, t*2);
+			}
+		}
+		mFlagMesh->AddOffset(mCatchingFlagVelocity * lFactor);
 		if ((mFlagTop - mFlagMesh->GetOffsetTransformation().GetPosition()).Dot(mCatchingFlagVelocity) <= 0)
 		{
 			mCatchingFlagVelocity.Set(0, 0, 0);
-			((Game*)GetManager()->GetGameManager())->OnCapture();
+			lGame->OnCapture();
 		}
 	}
 	else
@@ -109,7 +119,7 @@ void Ctf::OnTick()
 		// Move down if not at bottom.
 		if (mSlideDown && (mFlagOffset - (mFlagMesh->GetOffsetTransformation().GetPosition() - mFlagTop)).Dot(mFlagOffset) > 0)
 		{
-			mFlagMesh->AddOffset(mCatchingFlagVelocity / -20);
+			mFlagMesh->AddOffset(mCatchingFlagVelocity * -lFactor);
 		}
 		else
 		{

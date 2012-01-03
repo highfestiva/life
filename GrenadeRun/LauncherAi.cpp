@@ -22,7 +22,9 @@ namespace GrenadeRun
 
 LauncherAi::LauncherAi(Game* pGame):
 	Parent(pGame->GetResourceManager(), _T("LauncherAi")),
-	mGame(pGame)
+	mGame(pGame),
+	mDidShoot(false),
+	mShotCount(0)
 {
 }
 
@@ -51,18 +53,65 @@ void LauncherAi::OnTick()
 		mGame->GetCutie()->GetAcceleration() * 7) * 1.1f;
 	const float lTargetSpeed = lTargetVelocity.GetLength();
 	const Vector3DF lCtfPosition = mGame->GetCtf()->GetPosition();
-	const Vector3DF lDelta = lCtfPosition-lTargetPosition;
-	const float lCtfDistance = lDelta.GetLength();
-	const bool lHeadingTowardsCtf = ((lDelta/lCtfDistance).Dot(lTargetVelocity/lTargetSpeed) > 0.8f);
+	Vector3DF lDirection = lCtfPosition-lTargetPosition;
+	const float lCtfDistance = lDirection.GetLength();
+	lDirection /= lCtfDistance;
+	const bool lHeadingTowardsCtf = (lDirection.Dot(lTargetVelocity/lTargetSpeed) > 0.8f);
 	bool lAdjustedForSlowingDown = false;
-	if (lCtfDistance < 20*SCALE_FACTOR)
+	const float lDifficulty = mGame->GetComputerDifficulty();
+	bool lHandled = false;
+	if (mDidShoot && mGame->IsLauncherBarrelFree())
 	{
-		// She's close, assume she's going to be close and brake hard soon.
-		//lTargetPosition = (lTargetPosition+lCtfPosition) * 0.5f;
-		lTargetVelocity *= 0.3f;
-		lAdjustedForSlowingDown = true;
+		++mShotCount;
+		mDidShoot = false;
 	}
-	else if (lHeadingTowardsCtf)
+	if (lDifficulty > 0.9f)
+	{
+		if (lCtfDistance < 25*SCALE_FACTOR)
+		{
+			lHandled = true;
+			if (mShotCount > 2)
+			{
+				mShotCount = 0;
+			}
+			// Alternate between firing twice at CTF platform and once at vehicle.
+			if (mShotCount <= 1)
+			{
+				lTargetPosition = lCtfPosition;
+				lTargetVelocity.Set(0, 0, 0);
+				mTargetOffset = -lDirection * (3 * SCALE_FACTOR);
+				mTargetOffset.x += (float)Random::Uniform(-0.5f*SCALE_FACTOR, 0.5f*SCALE_FACTOR);
+				mTargetOffset.y += (float)Random::Uniform(-0.5f*SCALE_FACTOR, 0.5f*SCALE_FACTOR);
+				mTargetOffset.z = 0;
+				lAdjustedForSlowingDown = true;
+				mLog.AHeadline("Shooting at CTF platform!");
+			}
+			else if (lHeadingTowardsCtf)	// Only asume slowdown if going towards our goal.
+			{
+				lTargetVelocity *= 0.3f;
+				mTargetOffset.Set(0, 0, 0);
+				lAdjustedForSlowingDown = true;
+				mLog.AHeadline("Shooting at slowing vehicle!");
+			}
+			else
+			{
+				mTargetOffset.Set(0, 0, 0);
+				mLog.AHeadline("Shooting at vehicle plain and simple!");
+			}
+		}
+	}
+	else
+	{
+		if (lCtfDistance < 20*SCALE_FACTOR)
+		{
+			lHandled = true;
+			// She's close, assume she's going to be close and brake hard soon.
+			//lTargetPosition = (lTargetPosition+lCtfPosition) * 0.5f;
+			lTargetVelocity *= 0.3f;
+			lAdjustedForSlowingDown = true;
+		}
+	}
+	if (!lHandled && lHeadingTowardsCtf)
 	{
 		if (lCtfDistance < 170*SCALE_FACTOR)
 		{
@@ -110,14 +159,16 @@ void LauncherAi::OnTick()
 	{
 		mGame->GetLauncher()->SetEnginePower(1, +1*lYawFactor, 0);
 	}
-	const float lDifficulty = mGame->GetComputerDifficulty();
-	const float lLongestTimeBase = 4.0f * (1-lDifficulty);
+	const float lLongestTimeBase = 8.0f * (1-lDifficulty);
 	const double lLastShotDiff = mLastShot.QueryTimeDiff();
 	if (lLastShotDiff > lLongestTimeBase &&	// Wait at least this long.
 		((lYawFactor < 0.1f && lPitchFactor < 0.1f) ||	// In range.
 		lLastShotDiff > lLongestTimeBase*2))
 	{
-		mGame->Shoot();
+		if (mGame->Shoot())
+		{
+			mDidShoot = true;
+		}
 		mLastShot.ClearTimeDiff();
 		if (lDifficulty >= 0.7f)
 		{

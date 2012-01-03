@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: level_2.ma
-//Last modified: Wed, Dec 28, 2011 01:04:20 AM
+//Last modified: Sun, Jan 01, 2012 11:11:01 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -12,8 +12,8 @@ fileInfo "cutIdentifier" "200904080023-749524";
 fileInfo "osv" "Microsoft Windows XP Service Pack 3 (Build 2600)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" -33.103192809219692 72.730827402700541 223.5362592193417 ;
-	setAttr ".r" -type "double3" -21.938352705707697 339.39999999992824 0 ;
+	setAttr ".t" -type "double3" -48.819427485852593 120.50082153867686 135.73918919342813 ;
+	setAttr ".r" -type "double3" -33.938352705707821 348.9999999999269 0 ;
 	setAttr ".rp" -type "double3" 0 0 2.8421709430404007e-014 ;
 	setAttr ".rpt" -type "double3" 3.2706875017071578e-013 -1.3570671321711116e-014 
 		5.7590455282700066e-014 ;
@@ -21,7 +21,7 @@ createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
 	setAttr ".fcp" 2000;
-	setAttr ".coi" 331.41516749162935;
+	setAttr ".coi" 277.37609918659325;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -72,6 +72,7 @@ createNode camera -s -n "sideShape" -p "side";
 	setAttr ".hc" -type "string" "viewSet -s %camera";
 	setAttr ".o" yes;
 createNode transform -n "m_ground";
+	setAttr ".s" -type "double3" 0.5 0.5 0.5 ;
 createNode mesh -n "m_phys_groundShape" -p "m_ground";
 	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
@@ -5916,7 +5917,7 @@ createNode blinn -n "mat_flag";
 	setAttr ".sro" 0;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2011-12-28T01:04:19.953000";
+	setAttr ".time" -type "string" "2012-01-01T23:11:01.001000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;
