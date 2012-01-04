@@ -62,7 +62,7 @@ class GroupReader(DefaultMAReader):
 				     "deleteUVSet", "polyAutoProj", "plusMinusAverage", \
 				     "transformGeometry", "cameraView", "directionalLight", \
 				     "brush"]
-		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp"]
+		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
 				     "file"]
 		self.basename = basename
@@ -272,6 +272,8 @@ class GroupReader(DefaultMAReader):
 					mat_islands.append(island)
 				if n.nodetype in self.silent_types:
 					island.remove(n)
+			if not island:
+				islands.remove(island)
 		return islands, mat_islands
 
 
