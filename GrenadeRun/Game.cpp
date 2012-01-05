@@ -58,7 +58,9 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mComputerIndex(-1),
 	mComputerDifficulty(0.5f),
 	mScoreBalance(0),
-	mAllowWin(false)
+	mAllowWin(false),
+	mFlipRenderSide(0),
+	mFlipRenderSideFactor(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -129,6 +131,12 @@ bool Game::Tick()
 
 	GameTicker::GetTimeManager()->Tick();
 
+	mFlipRenderSideFactor = Math::Lerp(mFlipRenderSideFactor, (float)mFlipRenderSide, 0.15f);
+	if (::fabs(mFlipRenderSideFactor-(float)mFlipRenderSide) < 0.001f)
+	{
+		mFlipRenderSideFactor = (float)mFlipRenderSide;
+	}
+
 	Vector3DF lPosition;
 	Vector3DF lVelocity;
 	if (mVehicle && mVehicle->IsLoaded())
@@ -179,7 +187,7 @@ bool Game::Tick()
 		{
 			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("kia.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		}
-		mScoreBalance += (mWinnerIndex == 0)? -1 : +1;
+		mScoreBalance += (!!mWinnerIndex == mFlipRenderSide)? -1 : +1;
 	}
 	mPreviousFrameWinnerIndex = mWinnerIndex;
 
@@ -499,6 +507,8 @@ void Game::ResetWinnerIndex()
 void Game::SetComputerIndex(int pIndex)
 {
 	assert(pIndex >= -1 && pIndex <= 1);
+	mFlipRenderSide = 0;
+	mFlipRenderSideFactor = 0;
 	mComputerIndex = pIndex;
 	delete mVehicleAi;
 	mVehicleAi = 0;
@@ -552,11 +562,21 @@ void Game::SetScoreBalance(int pBalance)
 	mScoreBalance = pBalance;
 }
 
+void Game::FlipRenderSides()
+{
+	mFlipRenderSide = !mFlipRenderSide;
+}
+
+bool Game::IsFlipRenderSide() const
+{
+	return !!mFlipRenderSide;
+}
+
 void Game::SyncCameraPositions()
 {
 	switch (GetComputerIndex())
 	{
-		case -1:	std::swap(mLeftCamera, mRightCamera);	break;
+		//case -1:	std::swap(mLeftCamera, mRightCamera);	break;
 		case 0:		mLeftCamera = mRightCamera;		break;	// Computer is "left", copy player.
 		case 1:		mRightCamera = mLeftCamera;		break;	// Computer is "right", copy player.
 	}
@@ -589,6 +609,25 @@ bool Game::Render()
 	else
 	{
 		mRightRect.mLeft = mLeftRect.mRight + 10;
+	}
+	if (mFlipRenderSideFactor)
+	{
+		if (mFlipRenderSideFactor == 1)
+		{
+			std::swap(mLeftRect, mRightRect);
+		}
+		else
+		{
+			const PixelRect r = mRightRect;
+			mRightRect.mLeft = Math::Lerp(mRightRect.mLeft, mLeftRect.mLeft, mFlipRenderSideFactor);
+			mRightRect.mRight = Math::Lerp(mRightRect.mRight, mLeftRect.mRight, mFlipRenderSideFactor);
+			mRightRect.mTop = Math::Lerp(mRightRect.mTop, mLeftRect.mTop, mFlipRenderSideFactor);
+			mRightRect.mBottom = Math::Lerp(mRightRect.mBottom, mLeftRect.mBottom, mFlipRenderSideFactor);
+			mLeftRect.mLeft = Math::Lerp(mLeftRect.mLeft, r.mLeft, mFlipRenderSideFactor);
+			mLeftRect.mRight = Math::Lerp(mLeftRect.mRight, r.mRight, mFlipRenderSideFactor);
+			mLeftRect.mTop = Math::Lerp(mLeftRect.mTop, r.mTop, mFlipRenderSideFactor);
+			mLeftRect.mBottom = Math::Lerp(mLeftRect.mBottom, r.mBottom, mFlipRenderSideFactor);
+		}
 	}
 	switch (GetComputerIndex())
 	{
@@ -657,6 +696,10 @@ bool Game::Render()
 		{
 			t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 		}
+		if (mFlipRenderSideFactor)
+		{
+			t.GetOrientation().RotateAroundOwnY(PIF*mFlipRenderSideFactor);
+		}
 #endif // iOS
 		mLeftCamera.Interpolate(mLeftCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mLeftCamera);
@@ -690,6 +733,10 @@ bool Game::Render()
 #ifdef LEPRA_IOS_LOOKANDFEEL
 		// The launcher is always displayed in portrait, both for single and dual play.
 		t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
+		if (mFlipRenderSideFactor)
+		{
+			t.GetOrientation().RotateAroundOwnY(PIF*mFlipRenderSideFactor);
+		}
 #endif // iOS
 		mRightCamera.Interpolate(mRightCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mRightCamera);

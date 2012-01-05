@@ -121,6 +121,8 @@ private:
 	typedef void (App::*ButtonAction)(UiTbc::Button*);
 	UiTbc::Dialog<App>* CreateTbcDialog(ButtonAction pAction);
 	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent);
+	void Transpose(int& x, int& y, float& pAngle) const;
+	void Transpose(float& x, float& y, float& pAngle) const;
 
 	StdioConsoleLogListener mConsoleLogger;
 	DebuggerLogListener mDebugLogger;
@@ -192,6 +194,7 @@ private:
 	float mThrottle;
 	float mPreviousSteering;
 	float mCurrentSteering;
+	bool mFlipDraw;
 
 	LOG_CLASS_DECLARE();
 };
@@ -240,7 +243,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mSlowShadowCount(0),
 	mThrottle(0),
 	mPreviousSteering(0),
-	mCurrentSteering(0)
+	mCurrentSteering(0),
+	mFlipDraw(false)
 {
 	mApp = this;
 }
@@ -797,14 +801,14 @@ void App::DrawHud()
 			str lText2;
 			Color lColor1;
 			Color lColor2;
-			if (lWinner == 0)
+			if (!!lWinner == mGame->IsFlipRenderSide())
 			{
 				lText1 = lWon;
 				lText2 = lLost;
 				lColor1 = LIGHT_GREEN;
 				lColor2 = LIGHT_RED;
 			}
-			else if (lWinner == 1)
+			else
 			{
 				lText1 = lLost;
 				lText2 = lWon;
@@ -850,6 +854,8 @@ void App::DrawHud()
 
 		mGameOverTimer.TryStart();
 	}
+
+	mFlipDraw = mGame->IsFlipRenderSide();
 
 #ifdef LEPRA_IOS_LOOKANDFEEL
 	if (mGame->GetComputerIndex() != 0 &&
@@ -1040,6 +1046,8 @@ void App::DrawHud()
 		InfoText(2, _T("Left/right compass"), PIF/2, -lButtonRadius, 30);
 	}
 
+	mFlipDraw = false;
+
 	if (mScoreHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 		mScoreGreyHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -1182,6 +1190,8 @@ void App::DrawHud()
 
 void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
 {
+	Transpose (cx, cy, pAngle);
+
 	mPenX = cx;
 	mPenY = cy;
 	const float ca = ::cos(pAngle);
@@ -1203,6 +1213,8 @@ void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int 
 
 void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const
 {
+	Transpose(x, y, pAngle);
+
 	mPenX = x;
 	mPenY = y;
 	//pRadius -= 2;
@@ -1241,6 +1253,9 @@ void App::DrawCircle(float x, float y, float pRadius) const
 
 void App::DrawCircle(float x, float y, float pRadius, const Color& pColor) const
 {
+	float f = 0;
+	Transpose(x, y, f);
+
 	mPenX = x;
 	mPenY = y;
 	std::vector<Vector2DF> lCoords;
@@ -1256,6 +1271,8 @@ void App::DrawCircle(float x, float y, float pRadius, const Color& pColor) const
 
 void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAreEqual) const
 {
+	Transpose(x, y, pAngle);
+
 	mPenX = (float)x;
 	mPenY = (float)y;
 
@@ -1304,6 +1321,8 @@ void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAr
 
 void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth) const
 {
+	Transpose(x, y, pAngle);
+
 	Color lStartColor = RED;
 	Color lEndColor = GREEN;
 	const int lBarCount = 19;
@@ -1337,6 +1356,8 @@ void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth
 
 void App::DrawBarrelIndicatorGround(float x, float y, float pAngle, float pBaseLength, float pBaseWidth) const
 {
+	Transpose(x, y, pAngle);
+
 	const float sa = ::sin(pAngle);
 	const float ca = ::cos(pAngle);
 	x += 3*ca - 3*sa;
@@ -1352,6 +1373,8 @@ void App::DrawBarrelIndicatorGround(float x, float y, float pAngle, float pBaseL
 
 void App::DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const
 {
+	Transpose(x, y, pAngle);
+
 	mPenX = x;
 	mPenY = y;
 
@@ -1371,8 +1394,17 @@ void App::DrawBarrelIndicator(float x, float y, float pAngle, float pLength, flo
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
 }
 
-void App::InfoText(int pPlayer, const str& pInfo, const float pAngle, float dx, float dy) const
+void App::InfoText(int pPlayer, const str& pInfo, float pAngle, float dx, float dy) const
 {
+#ifdef LEPRA_IOS_LOOKANDFEEL
+	if (mFlipDraw)
+	{
+		dx = -dx;
+		dy = -dy;
+		pAngle += PIF;
+	}
+#endif // iOS
+
 	const double lLastTime = (pPlayer == 1)? mPlayer1LastTouch.QueryTimeDiff() : mPlayer2LastTouch.QueryTimeDiff();
 	const double lShowDelayTime = (pPlayer == 1)? mPlayer1TouchDelay.QueryTimeDiff() : mPlayer2TouchDelay.QueryTimeDiff();
 	if (lLastTime < 20)	// Delay until shown.
@@ -1606,9 +1638,44 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			}
 		}
 		break;
+		case UIKEY(8):
+		{
+			if (!pFactor)
+			{
+				mGame->FlipRenderSides();
+			}
+		}
+		break;
+		case UIKEY(7):
+		{
+			mGame->GetCutie()->DrainHealth(1);
+		}
+		break;
+		case UIKEY(6):
+		{
+			if (!pFactor)
+			{
+				const Cure::ObjectPositionalData* lPosition = 0;
+				lAvatar1->UpdateFullPosition(lPosition);
+				if (lPosition)
+				{
+					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
+					lNewPlacement->mPosition.mTransformation.GetPosition().x += 30;
+					lNewPlacement->mPosition.mTransformation.GetPosition().y += 20;
+					lNewPlacement->mPosition.mTransformation.GetPosition().z += 15;
+					lAvatar1->SetFullPosition(*lNewPlacement);
+				}
+			}
+		}
+		break;
 #endif // Debug
 	}
 
+	if (mGame->IsFlipRenderSide())
+	{
+		//std::swap(lAvatar1, lAvatar2);
+		lAvatar = (lAvatar == lAvatar1)? lAvatar2 : lAvatar1;
+	}
 	switch (lDirective)
 	{
 		case DIRECTIVE_NONE:
@@ -1741,8 +1808,6 @@ int App::PollTap(FingerMovement& pMovement)
 	float lStartX = (float)pMovement.mStartX;
 	float lStartY = (float)pMovement.mStartY;
 
-	//UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
-	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 	std::swap(x, y);
@@ -1756,31 +1821,34 @@ int App::PollTap(FingerMovement& pMovement)
 	const float lSingleWidth = (m*2 + BUTTON_WIDTH) * 1.5f;
 	const float lDoubleWidth = (m*3 + BUTTON_WIDTH*2) * 1.5f;
 	const float s = lDoubleWidth / 2;
+	enum Directive
+	{
+		DIRECTIVE_NONE,
+		DIRECTIVE_UP_DOWN,
+		DIRECTIVE_LEFT_RIGHT,
+		DIRECTIVE_FUNCTION,
+	};
+	Directive directive = DIRECTIVE_NONE;
+	bool lIsRightControls = false;
+	float lValue = 0;
 #define CLAMPUP(v)	Math::Clamp((v)*2, -1.0f, 1.0f)
 	if (mGame->GetComputerIndex() != 0)
 	{
-		if (mGame->GetComputerIndex() != 1)	// Dual play = portrait layout.
+		if (mGame->GetComputerIndex() == -1)	// Dual play = portrait layout.
 		{
 			if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
 			{
-				mThrottle = CLAMPUP((x-lStartX)/s);
-				mPlayer1LastTouch.ClearTimeDiff();
-				lTag = 1;
+				directive = DIRECTIVE_UP_DOWN;
+				lValue = CLAMPUP((x-lStartX)/s);
 			}
 			else if (lStartX <= lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
 			{
-				mCurrentSteering = CLAMPUP((y-lStartY)/s);
-				if (!pMovement.mIsPress)
-				{
-					mPreviousSteering += mCurrentSteering;
-					if (::fabs(mCurrentSteering) < 0.03f)	// Go to neutral if just tap/release.
-					{
-						mPreviousSteering = 0;
-					}
-					mCurrentSteering = 0;
-				}
-				mPlayer1LastTouch.ClearTimeDiff();
-				lTag = 2;
+				directive = DIRECTIVE_LEFT_RIGHT;
+				lValue = CLAMPUP((y-lStartY)/s);
+			}
+			else if (x <= lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
+			{
+				directive = DIRECTIVE_FUNCTION;
 			}
 		}
 		else	// Cutie vs. computer = landscape layout.
@@ -1813,21 +1881,90 @@ int App::PollTap(FingerMovement& pMovement)
 		// Launcher always in portrait mode.
 		if (lStartX >= w-lDoubleWidth && lStartY >= h-lSingleWidth)	// P2 up/down?
 		{
-			mGame->SetThrottle(lAvatar2, CLAMPUP((x-lStartX)/s));
-			mPlayer2LastTouch.ClearTimeDiff();
-			lTag = 3;
+			lIsRightControls = true;
+			directive = DIRECTIVE_UP_DOWN;
+			lValue = CLAMPUP((x-lStartX)/s);
 		}
-		else if (lStartX >= w-lSingleWidth && lStartY <= lDoubleWidth)	// P1 left/right?
+		else if (lStartX >= w-lDoubleWidth && lStartY <= lDoubleWidth)	// P1 left/right?
 		{
-			lAvatar2->SetEnginePower(1, CLAMPUP((lStartY-y)/s), 0);
-			mPlayer2LastTouch.ClearTimeDiff();
-			lTag = 4;
+			lIsRightControls = true;
+			directive = DIRECTIVE_LEFT_RIGHT;
+			lValue = CLAMPUP((lStartY-y)/s);
 		}
 		else if (x >= w-lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
 		{
-			mGame->Shoot();
-			mPlayer2LastTouch.ClearTimeDiff();
-			lTag = 5;
+			lIsRightControls = true;
+			directive = DIRECTIVE_FUNCTION;
+		}
+	}
+
+	{
+		UiCure::CppContextObject* lAvatar = mGame->GetP2();
+		/*if (mGame->IsFlipRenderSide())
+		{
+			lAvatar = mGame->GetP1();
+		}*/
+		switch (directive)
+		{
+			case DIRECTIVE_NONE:
+			{
+			}
+			break;
+			case DIRECTIVE_UP_DOWN:
+			{
+				if (mGame->IsFlipRenderSide())
+				{
+					lValue = -lValue;
+				}
+				if (mGame->IsFlipRenderSide() == lIsRightControls)
+				{
+					mThrottle = lValue;
+					mPlayer1LastTouch.ClearTimeDiff();
+					lTag = 1;
+				}
+				else
+				{
+					mGame->SetThrottle(lAvatar, lValue);
+					mPlayer2LastTouch.ClearTimeDiff();
+					lTag = 3;
+				}
+			}
+			break;
+			case DIRECTIVE_LEFT_RIGHT:
+			{
+				if (mGame->IsFlipRenderSide() == lIsRightControls)
+				{
+					mCurrentSteering = lValue;
+					if (!pMovement.mIsPress)
+					{
+						mPreviousSteering += mCurrentSteering;
+						if (::fabs(mCurrentSteering) < 0.03f)	// Go to neutral if just tap/release.
+						{
+							mPreviousSteering = 0;
+						}
+						mCurrentSteering = 0;
+					}
+					mPlayer1LastTouch.ClearTimeDiff();
+					lTag = 2;
+				}
+				else
+				{
+					lAvatar->SetEnginePower(1, lValue, 0);
+					mPlayer2LastTouch.ClearTimeDiff();
+					lTag = 4;
+				}
+			}
+			break;
+			case DIRECTIVE_FUNCTION:
+			{
+				if (mGame->IsFlipRenderSide() != lIsRightControls)
+				{
+					mGame->Shoot();
+					mPlayer2LastTouch.ClearTimeDiff();
+					lTag = 5;
+				}
+			}
+			break;
 		}
 	}
 	pMovement.mTag = lTag;
@@ -1869,23 +2006,29 @@ void App::SuperReset(bool pGameOver)
 		const int lScoreBalance = mGame->GetScoreBalance();
 		if (lScoreBalance == -SCORE_POINTS/2 || lScoreBalance == +SCORE_POINTS/2)
 		{
+			mGame->SetComputerIndex(mGame->GetComputerIndex());	// Force flip side reset.
 			MainMenu();
 			return;
 		}
-		mGame->SetScoreBalance(-lScoreBalance);
+		//mGame->SetScoreBalance(-lScoreBalance);
 
 		// Nope, simply reload the interior.
 		const int lComputerIndex = mGame->GetComputerIndex();
 		switch (lComputerIndex)
 		{
-			case 0:		mGame->SetComputerIndex(1);	break;
-			case 1:		mGame->SetComputerIndex(0);	break;
+			case -1:	mGame->FlipRenderSides();								break;
+			case 0:		mGame->SetComputerIndex(1);	mGame->SetScoreBalance(-mGame->GetScoreBalance());	break;
+			case 1:		mGame->SetComputerIndex(0);	mGame->SetScoreBalance(-mGame->GetScoreBalance());	break;
 		}
 	}
 	else
 	{
 		// Restart level.
 		mGame->SetScoreBalance(0);
+		if (mGame->IsFlipRenderSide())
+		{
+			mGame->FlipRenderSides();
+		}
 	}
 	mGame->ResetWinnerIndex();
 	mGame->SetVehicle(mGame->GetVehicle());
@@ -2088,6 +2231,40 @@ UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::C
 	lButton->SetVisible(false);
 	lButton->UpdateLayout();
 	return lButton;
+}
+
+void App::Transpose(int& x, int& y, float& pAngle) const
+{
+	float fx = (float)x;
+	float fy = (float)y;
+	Transpose(fx, fy, pAngle);
+	x = (int)fx;
+	y = (int)fy;
+}
+
+void App::Transpose(float& x, float& y, float& pAngle) const
+{
+	if (mFlipDraw)
+	{
+		const int w = mUiManager->GetCanvas()->GetWidth();
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		x = w - x;
+		y = mUiManager->GetCanvas()->GetHeight() - y;
+		pAngle += PIF;
+#else // Computer
+		(void)y;
+		(void)pAngle;
+		const int w2 = w/2;
+		if (x < w2)
+		{
+			x += w2;
+		}
+		else
+		{
+			x -= w2;
+		}
+#endif // iOS / Computer
+	}
 }
 
 

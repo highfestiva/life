@@ -138,6 +138,8 @@ public:
 	void SetComputerDifficulty(float pDifficulty);
 	int GetScoreBalance() const;	// 0 = score is 2 love, -1 = P1 leads with 1 point, +2 P2 leads with 2 points...
 	void SetScoreBalance(int pBalance);
+	void FlipRenderSides();
+	bool IsFlipRenderSide() const;
 
 	void SyncCameraPositions();
 	bool Render();
@@ -199,6 +201,8 @@ private:
 	float mComputerDifficulty;
 	int mScoreBalance;
 	bool mAllowWin;
+	int mFlipRenderSide;
+	float mFlipRenderSideFactor;
 
 	StopWatch mSlowmoTimer;
 };
