@@ -79,11 +79,11 @@ private:
 	void DrawHud();
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float x, float y, float w, float h, float pAngle) const;
 	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const;
-	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
+	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor, float pScaleX, float pScaleY) const;
 	void DrawCircle(float x, float y, float pRadius) const;
 	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAreEqual) const;
-	void DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth) const;
+	void DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, float pMaxValue) const;
 	void DrawBarrelIndicatorGround(float x, float y, float pAAngle, float pBaseLength, float pBaseWidth) const;
 	void DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const;
 	void InfoText(int pPlayer, const str& pInfo, float pAngle, float dx = 0, float dy = 0) const;
@@ -166,7 +166,10 @@ private:
 #ifndef LEPRA_IOS_LOOKANDFEEL
 	UiCure::UserPainterKeepImageResource* mKeyboardButton;
 #endif // Computer
+	UiCure::UserPainterKeepImageResource* mArrow;
 	UiCure::UserPainterKeepImageResource* mSteeringWheel;
+	UiCure::UserPainterKeepImageResource* mGrenade;
+	float mGrenadeSizeFactor;
 	mutable Vector3DF mScoreHeartPos[SCORE_POINTS];
 	UiTbc::RectComponent* mPlayerSplitter;
 	float mAngleTime;
@@ -192,6 +195,8 @@ private:
 	UiTbc::ScrollBar* mDifficultySlider;
 	int mSlowShadowCount;
 	float mThrottle;
+	bool mIsThrottling;
+	int mThrottleMeterOffset;
 	float mPreviousSteering;
 	float mCurrentSteering;
 	bool mFlipDraw;
@@ -242,6 +247,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mDifficultySlider(0),
 	mSlowShadowCount(0),
 	mThrottle(0),
+	mIsThrottling(false),
+	mThrottleMeterOffset(0),
 	mPreviousSteering(0),
 	mCurrentSteering(0),
 	mFlipDraw(false)
@@ -395,9 +402,16 @@ bool App::Open()
 		mKeyboardButton->Load(mResourceManager, _T("btn_key.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 #endif // Computer
+		mArrow = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mArrow->Load(mResourceManager, _T("arrow.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 		mSteeringWheel = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mSteeringWheel->Load(mResourceManager, _T("steering_wheel.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
+		mGrenade = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mGrenade->Load(mResourceManager, _T("grenade.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
+		mGrenadeSizeFactor = 1.0f;
 	}
 	if (lOk)
 	{
@@ -740,6 +754,7 @@ void App::PollTaps()
 	mGame->SetThrottle(lAvatar2, 0);
 	lAvatar2->SetEnginePower(1, 0, 0);
 	FingerMoveList::iterator x = gFingerMoveList.begin();
+	mIsThrottling = false;
 	for (; x != gFingerMoveList.end();)
 	{
 		if (PollTap(*x) > 0)
@@ -819,8 +834,8 @@ void App::DrawHud()
 			const int x2 = (int)(w*3/4);
 			const int y  = (int)(h/2);
 			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-			DrawRoundedPolygon((float)x1, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
-			DrawRoundedPolygon((float)x2, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
+			DrawRoundedPolygon((float)x1, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG, 1.0f, 1.0f);
+			DrawRoundedPolygon((float)x2, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG, 1.0f, 1.0f);
 			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 			mUiManager->GetPainter()->SetColor(lColor1, 0);
 			PrintText(lText1, +lAngle, x1, y);
@@ -832,7 +847,7 @@ void App::DrawHud()
 			const int x = (int)(w/2);
 			const int y  = (int)(h/2);
 			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-			DrawRoundedPolygon((float)x, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG);
+			DrawRoundedPolygon((float)x, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG, 1.0f, 1.0f);
 			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 #ifdef LEPRA_IOS_LOOKANDFEEL
 				const float a = (mGame->GetComputerIndex() == 0)? -lAngle : 0;
@@ -859,38 +874,76 @@ void App::DrawHud()
 
 #ifdef LEPRA_IOS_LOOKANDFEEL
 	if (mGame->GetComputerIndex() != 0 &&
+		mArrow->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 		mSteeringWheel->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 		lAvatar1->GetPhysics()->GetEngineCount() >= 3)
 	{
+		float v0 = 0.5f;
+		float v1 = mThrottle*0.5f+0.5f;
+		if (mThrottle < 0)
+		{
+			std::swap(v0, v1);
+		}
+		const float mw = lButtonWidth*0.65f;
+		const float aw = (float)mArrow->GetRamData()->GetWidth();
+		const float ah = (float)mArrow->GetRamData()->GetHeight();
+		int o = (int)(m+lButtonWidth);
+		if (mIsThrottling)
+		{
+			o += 104;
+		}
+		mThrottleMeterOffset = o = Math::Lerp(mThrottleMeterOffset, o, 0.7f);
+
 		// Left player.
 		if (mGame->GetComputerIndex() < 0)	// 2P?
 		{
-			DrawCircle(m+lButtonWidth,			m+lButtonRadius,	lButtonRadius-2);	// Up/down.
+			const int x = o;
+			if (mThrottle == 0 && !mIsThrottling)
+			{
+				DrawMeter(x, (int)(m+lButtonRadius), -PIF/2, lButtonWidth, 0, 1);
+			}
+			else
+			{
+				DrawMeter(x, (int)(m+lButtonRadius), -PIF/2, lButtonWidth, v0, v1);
+			}
 			InfoText(1, _T("Throttle/brake"), 0, 14, 0);
-			DrawRoundedPolygon(m*2+lButtonWidth*1.6f,	m+lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
-			DrawRoundedPolygon(lButtonWidth*0.4f,		m+lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
+			DrawImage(mArrow->GetData(), x+m+mw-2,		m+lButtonRadius, aw, ah, -PIF/2);
+			DrawImage(mArrow->GetData(), x-m-mw+1.5f,	m+lButtonRadius, aw, ah, +PIF/2);
+			//DrawRoundedPolygon(m*2+lButtonWidth+mw,	m+lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
+			//DrawRoundedPolygon(lButtonWidth-mw,	m+lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
 
 			const float s = h * 0.25f;
-			const TBC::PhysicsEngine* lGas = lAvatar1->GetPhysics()->GetEngine(1);
-			const float a = lGas->GetLerpThrottle(0.2f, 0.2f) * -1.5f - PIF/2;
+			const TBC::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
+			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f) * -1.5f - PIF/2;
 			DrawImage(mSteeringWheel->GetData(), s*0.15f, h-s*0.3f, s, s, a);
 			InfoText(1, _T("Left/right"), -PIF/2, 0, -10);
 		}
 		else
 		{
-			DrawCircle(m+lButtonRadius,			h-m-lButtonWidth,		lButtonRadius-2);	// Up/down.
+			const int y = (int)h-o;
+			if (mThrottle == 0 && !mIsThrottling)
+			{
+				DrawMeter((int)(m+lButtonRadius), y, 0, lButtonWidth, 0, 1);
+			}
+			else
+			{
+				DrawMeter((int)(m+lButtonRadius), y, 0, lButtonWidth, v0, v1);
+			}
 			InfoText(1, _T("Throttle/brake"), PIF/2, 0, -14);
-			DrawRoundedPolygon(m+lButtonRadius,		h-m*2-lButtonWidth*1.6f,	lButtonRadius*0.5f,	0,	3);
-			DrawRoundedPolygon(m+lButtonRadius,		h-lButtonWidth*0.4f,		lButtonRadius*0.5f,	+PIF,	3);
+			DrawImage(mArrow->GetData(), m+lButtonRadius+1,	y-m-mw+1,	aw, ah, 0);
+			DrawImage(mArrow->GetData(), m+lButtonRadius,	y+m+mw-2,	aw, ah, PIF);
+			//DrawRoundedPolygon(m+lButtonRadius,	h-m*2-lButtonWidth-mw,	lButtonRadius*0.5f,	0,	3);
+			//DrawRoundedPolygon(m+lButtonRadius,	h-lButtonWidth+mw,	lButtonRadius*0.5f,	+PIF,	3);
 
 			const float s = w * 0.25f;
-			const TBC::PhysicsEngine* lGas = lAvatar1->GetPhysics()->GetEngine(1);
-			const float a = lGas->GetLerpThrottle(0.2f, 0.2f) * -1.5f;
+			const TBC::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
+			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f) * -1.5f;
 			DrawImage(mSteeringWheel->GetData(), w-s*0.3f, h-s*0.15f, s, s, a);
 			InfoText(1, _T("Left/right"), 0, -10, 0);
 		}
 	}
-	if (mGame->GetComputerIndex() != 1)
+	if (mGame->GetComputerIndex() != 1 &&
+		mGrenade->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		// Right player.
 		DrawCircle(w-m-lButtonWidth,			h-m-lButtonRadius,	lButtonRadius-2);	// Up/down.
@@ -902,10 +955,22 @@ void App::DrawHud()
 		DrawRoundedPolygon(w-m-lButtonRadius,		m*2+lButtonWidth*1.6f,	lButtonRadius*0.5f,	PIF,	3);
 		DrawRoundedPolygon(w-m-lButtonRadius,		lButtonWidth*0.4f,	lButtonRadius*0.5f,	0,	3);
 		// Bomb button.
-		bool lIsLocked = mGame->IsLauncherLocked();
+		const float s = std::min((float)mUiManager->GetCanvas()->GetHeight() * 0.11f, 64.0f);
+		float t = std::min(1.0f, mGame->GetLauncherLockPercent());
+		const float r = (s+4) * 1.414f;
+		Color c = GREEN;
+		if (t < 1.0f)
+		{
+			const float lMinimumWidth = 0.5f;
+			t = Math::Lerp(lMinimumWidth, 1.0f, t);
+			c = RED;
+		}
+		DrawRoundedPolygon(w-r*0.5f*t-m, h*0.5f, r*0.5f, PIF/4, 4, c, t, 1.0f);
+		DrawImage(mGrenade->GetData(), w-r*0.5f-m, h*0.5f, s, s, PIF/2);
+		/*bool lIsLocked = mGame->IsLauncherLocked();
 		Color c = lIsLocked? Color(10, 10, 10) : mTouchShootColor;
 		DrawRoundedPolygon(w-m-lButtonRadius,		h/2,			lButtonRadius,	-PIF/2,	6, c);
-		InfoText(2, _T("BOOOM!"), PIF/2);
+		InfoText(2, _T("BOOOM!"), PIF/2);*/
 	}
 #endif // iOS
 
@@ -915,21 +980,22 @@ void App::DrawHud()
 	if (mGame->GetComputerIndex() < 0)	// Two players.
 	{
 #ifdef LEPRA_IOS_LOOKANDFEEL
-		DrawHealthMeter((int)w/2, (int)h/2, PIF, h/2, lCutie->GetHealth());
+		DrawMeter((int)w/2, (int)h/2, PIF, h/2, 0, lCutie->GetHealth()+0.0002f);
 #else // !iOS
-		DrawHealthMeter((int)w/4, (int)(lButtonWidth*0.7f), -PIF/2, w/3, lCutie->GetHealth());
+		DrawMeter((int)w/4, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()+0.0002f);
 #endif // iOS/!iOS
 	}
 	else if (mGame->GetComputerIndex() != 0)	// Single player Cutie.
 	{
-		DrawHealthMeter((int)w/2, (int)(lButtonWidth*0.7f), -PIF/2, w/3, lCutie->GetHealth());
+		DrawMeter((int)w/2, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()+0.0002f);
 	}
 
 #ifdef LEPRA_IOS_LOOKANDFEEL
 	float lForce;
 	const TBC::PhysicsEngine* lGas;
-	const TBC::PhysicsEngine* lBrakes;
+	//const TBC::PhysicsEngine* lBrakes;
 	const TBC::PhysicsEngine* lTurn;
+#if 0
 	if (lAvatar1->GetPhysics()->GetEngineCount() >= 3)
 	{
 		if (mGame->GetComputerIndex() != 0)
@@ -967,6 +1033,7 @@ void App::DrawHud()
 			}*/
 		}
 	}
+#endif // 0
 	if (mGame->GetComputerIndex() != 1 && lAvatar2->GetPhysics()->GetEngineCount() >= 2)
 	{
 		lGas = lAvatar2->GetPhysics()->GetEngine(0);
@@ -1076,9 +1143,14 @@ void App::DrawHud()
 			lAngle = -PIF/2;
 		}
 #endif	// iOS L&F
+		if (mGame->GetComputerIndex() == 1 && !mGetiPhoneButton)
+		{
+			x = lMargin+2;
+			y = lMargin+2;
+		}
 		if (mGame->GetComputerIndex() == -1)
 		{
-			y = lMargin;
+			y = lMargin+2;
 		}
 		int lHeartIndex = 0;
 		for (int i = -SCORE_POINTS/2; i < +SCORE_POINTS/2; ++i)
@@ -1117,6 +1189,14 @@ void App::DrawHud()
 		if (mGame->GetComputerIndex() == -1)
 		{
 			y = lMargin;
+		}
+		else if (mGame->GetComputerIndex() == 0 && !mGetiPhoneButton)
+		{
+#ifdef LEPRA_IOS_LOOKANDFEEL
+			x += BUTTON_WIDTH/2 - iw/2 + 2;
+#else // Computer
+			y = lMargin;
+#endif // iOS / Computer
 		}
 		y += (iw+8) * (SCORE_POINTS - 1);
 		for (int i = -SCORE_POINTS/2; i < +SCORE_POINTS/2; ++i)
@@ -1191,6 +1271,7 @@ void App::DrawHud()
 void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
 {
 	Transpose (cx, cy, pAngle);
+	cx -= 0.5f;
 
 	mPenX = cx;
 	mPenY = cy;
@@ -1208,10 +1289,10 @@ void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float 
 
 void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const
 {
-	DrawRoundedPolygon(x, y, pRadius, pAngle, pCorners, mTouchSteerColor);
+	DrawRoundedPolygon(x, y, pRadius, pAngle, pCorners, mTouchSteerColor, 1.0f, 1.0f);
 }
 
-void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const
+void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor, float pScaleX, float pScaleY) const
 {
 	Transpose(x, y, pAngle);
 
@@ -1224,9 +1305,17 @@ void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int 
 	lCoords.push_back(Vector2DF(x, y));
 	for (int i = 0; i < pCorners; ++i)
 	{
+		const float lReduceX = pRadius * (1.0f - pScaleX);
+		const float lReduceY = pRadius * (1.0f - pScaleY);
 		lCoords.push_back(Vector2DF(x+lRoundRadius*::sin(pAngle-lRoundAngle), y-lRoundRadius*::cos(pAngle-lRoundAngle)));
+		lCoords.back().x += (lCoords.back().x < x)? lReduceX : -lReduceX;
+		lCoords.back().y += (lCoords.back().y < y)? lReduceY : -lReduceY;
 		lCoords.push_back(Vector2DF(x+pRadius*::sin(pAngle), y-pRadius*::cos(pAngle)));
+		lCoords.back().x += (lCoords.back().x < x)? lReduceX : -lReduceX;
+		lCoords.back().y += (lCoords.back().y < y)? lReduceY : -lReduceY;
 		lCoords.push_back(Vector2DF(x+lRoundRadius*::sin(pAngle+lRoundAngle), y-lRoundRadius*::cos(pAngle+lRoundAngle)));
+		lCoords.back().x += (lCoords.back().x < x)? lReduceX : -lReduceX;
+		lCoords.back().y += (lCoords.back().y < y)? lReduceY : -lReduceY;
 		pAngle += 2*PIF/pCorners;
 	}
 	lCoords.push_back(lCoords[1]);
@@ -1319,26 +1408,30 @@ void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAr
 	}
 }
 
-void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth) const
+void App::DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, float pMaxValue) const
 {
 	Transpose(x, y, pAngle);
+
+	mPenX = (float)x;
+	mPenY = (float)y;
 
 	Color lStartColor = RED;
 	Color lEndColor = GREEN;
 	const int lBarCount = 19;
 	const int lBarSpace = 3;
 	const int lBarHeight = (int)(pSize/lBarCount) - lBarSpace;
-	const int lBarWidth = BUTTON_WIDTH;
-	const float lHealthStep = 1.0f/lBarCount - 0.0001f*lBarCount;
-	float lCurrentHealth = 0;
+	const int lBarWidth = 30;
+	int lMaxValue = (int)(pMaxValue * lBarCount);
+	int lMinValue = (int)(pMinValue * lBarCount);
 	const int lXStep = -(int)(::sin(pAngle)*(lBarHeight+lBarSpace));
 	const int lYStep = -(int)(::cos(pAngle)*(lBarHeight+lBarSpace));
 	const bool lXIsMain = ::abs(lXStep) >= ::abs(lYStep);
-	x -= (int)(lXStep * lBarCount*0.5f);
-	y -= (int)(lYStep * lBarCount*0.5f);
+	x -= (int)(lXStep * (lBarCount-1) * 0.5f);
+	y -= (int)(lYStep * (lBarCount-1) * 0.5f);
 	for (int i = 0; i < lBarCount; ++i)
 	{
-		const Color c = (lCurrentHealth < pHealth)? Color(lStartColor, lEndColor, lCurrentHealth) : DARK_GRAY;
+		const Color c = (i >= lMinValue && i <= lMaxValue)?
+			Color(lStartColor, lEndColor, i/(float)lBarCount) : DARK_GRAY;
 		mUiManager->GetPainter()->SetColor(c);
 		if (lXIsMain)
 		{
@@ -1350,7 +1443,6 @@ void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth
 		}
 		x += lXStep;
 		y += lYStep;
-		lCurrentHealth += lHealthStep;
 	}
 }
 
@@ -1501,6 +1593,11 @@ void App::Layout()
 		ty = s;
 		tx2 = s;
 		ty2 = ty;
+		if (mGame->GetComputerIndex() == 1 && !mGetiPhoneButton)
+		{
+			tx2 = tx;
+			ty2 = ty;
+		}
 	}
 	/*mLazyButton->SetPos(x, sy);
 	mHardButton->SetPos(x, sy+dy);
@@ -1855,6 +1952,7 @@ int App::PollTap(FingerMovement& pMovement)
 		{
 			if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 up/down?
 			{
+				mIsThrottling = true;
 				mThrottle = CLAMPUP((lStartY-y)/s);
 				mPlayer1LastTouch.ClearTimeDiff();
 				lTag = 1;
@@ -1918,6 +2016,7 @@ int App::PollTap(FingerMovement& pMovement)
 				}
 				if (mGame->IsFlipRenderSide() == lIsRightControls)
 				{
+					mIsThrottling = true;
 					mThrottle = lValue;
 					mPlayer1LastTouch.ClearTimeDiff();
 					lTag = 1;
@@ -1996,6 +2095,7 @@ void App::SuperReset(bool pGameOver)
 	mPlayer1LastTouch.PopTimeDiff();
 	mPlayer2LastTouch.PopTimeDiff();
 
+	mIsThrottling = false;
 	mThrottle = 0;
 	mPreviousSteering = 0;
 	mCurrentSteering = 0;
@@ -2204,6 +2304,7 @@ void App::OnGetiPhoneClick(UiTbc::Button*)
 	SystemManager::WebBrowseTo(_T("http://itunes.apple.com/us/app/slimeball/id447966821?mt=8&ls=1"));
 	delete mGetiPhoneButton;
 	mGetiPhoneButton = 0;
+	mDoLayout = true;
 }
 
 void App::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)

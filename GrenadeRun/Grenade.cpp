@@ -15,10 +15,6 @@
 
 
 
-#define RELAUNCH_DELAY	1.6f
-
-
-
 namespace GrenadeRun
 {
 
@@ -31,7 +27,6 @@ Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, U
 	mTimeFrameCreated(-1),
 	mMuzzleVelocity(pMuzzleVelocity),
 	mIsLaunched(false),
-	mUnlockedLauncher(false),
 	mExploded(false)
 {
 }
@@ -45,15 +40,6 @@ Grenade::~Grenade()
 }
 
 
-
-void Grenade::UnlockLauncher()
-{
-	if (!mUnlockedLauncher)
-	{
-		mUnlockedLauncher = true;
-		((Game*)GetManager()->GetGameManager())->UnlockLauncher();
-	}
-}
 
 void Grenade::Launch()
 {
@@ -71,8 +57,6 @@ void Grenade::Launch()
 	GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
 	Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-
-	GetManager()->AddAlarmCallback(this, 3, RELAUNCH_DELAY, 0);
 
 	((Game*)GetManager()->GetGameManager())->FreeLauncherBarrel();
 }
@@ -140,11 +124,6 @@ void Grenade::OnTick()
 	Parent::OnTick();
 }
 
-void Grenade::OnAlarm(int, void*)
-{
-	UnlockLauncher();
-}
-
 bool Grenade::TryComplete()
 {
 	bool lOk = Parent::TryComplete();
@@ -170,8 +149,6 @@ void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 		return;
 	}
 	mExploded = true;
-
-	UnlockLauncher();
 
 	GetManager()->PostKillObject(GetInstanceId());
 	((Game*)GetManager()->GetGameManager())->Detonate(pForce, pTorque, pPosition,

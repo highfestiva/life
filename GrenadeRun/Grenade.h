@@ -28,10 +28,8 @@ public:
 	virtual ~Grenade();
 
 private:
-	void UnlockLauncher();
 	void Launch();
 	void OnTick();
-	void OnAlarm(int, void*);
 	virtual bool TryComplete();
 	virtual void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
@@ -44,7 +42,6 @@ private:
 	int mTimeFrameCreated;
 	float mMuzzleVelocity;
 	bool mIsLaunched;
-	bool mUnlockedLauncher;
 	bool mExploded;
 
 	LOG_CLASS_DECLARE();

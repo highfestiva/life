@@ -52,18 +52,18 @@ Fix "reset". I.e. reset health, reload vehicle if dead near starting point...
 Show keyboard controls when starting.
 Fix "holes" in backside of corvette's wheels.
 Turn the table when completing a level.
+Push Sleepies wheels away harder when dead to avoid "post-mortem jitters".
+Throttle GUI.
+Canon fire GUI.
 
 Computer demo
 -------------
+Launcher indicators suck, replace with Sabbe's idea. Canon aim GUI.
 Put eyes on Sleepie.
 Make Sleepie wider.
-Push Sleepies wheels away harder when dead to avoid "post-mortem jitters".
+2 extra levels: castle and machine.
 Tweak other levels.
-Launcher indicators suck, replace with Sabbe's idea.
 Adaptive launcher indicators must go - do it right right away.
-Throttle GUI.
-Canon fire GUI.
-Canon aim GUI.
 Record voice for tutorial.
 Playback voice for tutorial.
 Polish on level_2 roads (in texture).
@@ -80,7 +80,6 @@ In-app purchase.
 Activation of features depending on purchases.
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
-2 extra levels: castle and machine.
 iPad adjustments.
 Test on iPad.
 Global high score list.

@@ -146,9 +146,10 @@ void Cutie::OnTick()
 				GetManager()->GetGameManager()->GetPhysicsManager()->DeleteJoint(lWheel->GetJointId());
 				lWheel->ResetJointId();
 				// Push the wheel away somewhat, not too much.
-				const int lPushFactor = 40;
+				const int lPushFactor = 200;
 				const Vector3DF lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
-				GetManager()->GetGameManager()->GetPhysicsManager()->AddForce(lWheel->GetBodyId(), (lWheelPosition-lPosition)*lPushFactor*lWheel->GetMass());
+				const Vector3DF lForce = (lWheelPosition-lPosition).GetNormalized()*lPushFactor*lWheel->GetMass();
+				GetManager()->GetGameManager()->GetPhysicsManager()->AddForce(lWheel->GetBodyId(), lForce);
 			}
 		}
 	}

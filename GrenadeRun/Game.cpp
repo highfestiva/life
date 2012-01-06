@@ -26,6 +26,8 @@
 #include "Spawner.h"
 #include "VehicleAi.h"
 
+#define GRENADE_RELAUNCH_DELAY	1.6f
+
 
 
 namespace GrenadeRun
@@ -45,7 +47,6 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mVehicle(0),
 	mVehicleCamPos(0, 0, 200),
 	mVehicleCamHeight(15),
-	mIsLaunching(false),
 	mIsLauncherBarrelFree(true),
 	mLauncherYaw(0),
 	mLauncherPitch(-PIF/4),
@@ -124,6 +125,10 @@ bool Game::Tick()
 		return true;
 	}
 
+	if (mLaucherLockWatch.IsStarted())
+	{
+		mLaucherLockWatch.UpdateTimer();
+	}
 	if (mSlowmoTimer.IsStarted() && mSlowmoTimer.QueryTimeDiff() > 4.0f)
 	{
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
@@ -305,7 +310,7 @@ void Game::SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle)
 
 bool Game::Shoot()
 {
-	if (mIsLaunching)
+	if (GetLauncherLockPercent() < 1.0f)
 	{
 		return false;
 	}
@@ -318,7 +323,7 @@ bool Game::Shoot()
 		TransformationF t(mLauncher->GetOrientation(), mLauncher->GetPosition()+Vector3DF(0, 0, +2.5f));
 		lGrenade->SetInitialTransform(t);
 		lGrenade->StartLoading();
-		mIsLaunching = true;
+		mLaucherLockWatch.Start();
 		mIsLauncherBarrelFree = false;
 	}
 	return lOk;
@@ -334,15 +339,13 @@ float Game::GetMuzzleVelocity() const
 	return lMuzzleVelocity;
 }
 
-bool Game::IsLauncherLocked() const
+float Game::GetLauncherLockPercent() const
 {
-	return mIsLaunching;
-}
-
-void Game::UnlockLauncher()
-{
-	mIsLaunching = false;
-	FreeLauncherBarrel();
+	if (mLaucherLockWatch.IsStarted())
+	{
+		return (float)mLaucherLockWatch.GetTimeDiff() / GRENADE_RELAUNCH_DELAY;
+	}
+	return 1.0f;
 }
 
 bool Game::IsLauncherBarrelFree() const
