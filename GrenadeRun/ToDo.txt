@@ -55,16 +55,16 @@ Turn the table when completing a level.
 Push Sleepies wheels away harder when dead to avoid "post-mortem jitters".
 Throttle GUI.
 Canon fire GUI.
+Launcher indicators suck, replace with Sabbe's idea. Canon aim GUI.
 
 Computer demo
 -------------
-Launcher indicators suck, replace with Sabbe's idea. Canon aim GUI.
 Put eyes on Sleepie.
 Make Sleepie wider.
 2 extra levels: castle and machine.
 Tweak other levels.
 Adaptive launcher indicators must go - do it right right away.
-Record voice for tutorial.
+Record voice for tutorial. Compress HARD!
 Playback voice for tutorial.
 Polish on level_2 roads (in texture).
 Delete all resources when switching level (and make sure!).

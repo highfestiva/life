@@ -46,6 +46,9 @@
 #define FGCOLOR_DIALOG	Color(170, 170, 170, 255)
 #define ICONBTN(i,n)	new UiCure::IconButton(mUiManager, mResourceManager, _T(i), _T(n))
 #define SCORE_POINTS	4
+#define BARREL_COMPASS_LINE_COUNT	13
+#define BARREL_COMPASS_LINE_SPACING	3
+#define BARREL_COMPASS_WIDTH		(BARREL_COMPASS_LINE_COUNT-1)*BARREL_COMPASS_LINE_SPACING + 1
 
 
 
@@ -84,8 +87,9 @@ private:
 	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAreEqual) const;
 	void DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, float pMaxValue) const;
-	void DrawBarrelIndicatorGround(float x, float y, float pAAngle, float pBaseLength, float pBaseWidth) const;
-	void DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const;
+	/*void DrawBarrelIndicatorGround(float x, float y, float pAAngle, float pBaseLength, float pBaseWidth) const;
+	void DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const;*/
+	void DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue1, float pValue2) const;
 	void InfoText(int pPlayer, const str& pInfo, float pAngle, float dx = 0, float dy = 0) const;
 	void DrawInfoTexts() const;
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
@@ -197,6 +201,8 @@ private:
 	float mThrottle;
 	bool mIsThrottling;
 	int mThrottleMeterOffset;
+	float mLiftMeterOffset;
+	float mYawMeterOffset;
 	float mPreviousSteering;
 	float mCurrentSteering;
 	bool mFlipDraw;
@@ -249,6 +255,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mThrottle(0),
 	mIsThrottling(false),
 	mThrottleMeterOffset(0),
+	mLiftMeterOffset(0),
+	mYawMeterOffset(0),
 	mPreviousSteering(0),
 	mCurrentSteering(0),
 	mFlipDraw(false)
@@ -791,7 +799,6 @@ void App::DrawHud()
 	}
 
 	const float lButtonWidth = BUTTON_WIDTH;	// TODO: fix for Retina.
-	const float lButtonRadius = lButtonWidth/2;
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 	const float m = BUTTON_MARGIN;
@@ -884,6 +891,7 @@ void App::DrawHud()
 		{
 			std::swap(v0, v1);
 		}
+		const float lButtonRadius = lButtonWidth/2;
 		const float mw = lButtonWidth*0.65f;
 		const float aw = (float)mArrow->GetRamData()->GetWidth();
 		const float ah = (float)mArrow->GetRamData()->GetHeight();
@@ -892,7 +900,7 @@ void App::DrawHud()
 		{
 			o += 104;
 		}
-		mThrottleMeterOffset = o = Math::Lerp(mThrottleMeterOffset, o, 0.7f);
+		mThrottleMeterOffset = o = Math::Lerp(mThrottleMeterOffset, o, 0.8f);
 
 		// Left player.
 		if (mGame->GetComputerIndex() < 0)	// 2P?
@@ -945,6 +953,7 @@ void App::DrawHud()
 	if (mGame->GetComputerIndex() != 1 &&
 		mGrenade->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
+		/*
 		// Right player.
 		DrawCircle(w-m-lButtonWidth,			h-m-lButtonRadius,	lButtonRadius-2);	// Up/down.
 		InfoText(2, _T("Up/down"), PIF);
@@ -954,6 +963,7 @@ void App::DrawHud()
 		InfoText(2, _T("Left/right"), PIF/2);
 		DrawRoundedPolygon(w-m-lButtonRadius,		m*2+lButtonWidth*1.6f,	lButtonRadius*0.5f,	PIF,	3);
 		DrawRoundedPolygon(w-m-lButtonRadius,		lButtonWidth*0.4f,	lButtonRadius*0.5f,	0,	3);
+		*/
 		// Bomb button.
 		const float s = std::min((float)mUiManager->GetCanvas()->GetHeight() * 0.11f, 64.0f);
 		float t = std::min(1.0f, mGame->GetLauncherLockPercent());
@@ -980,21 +990,21 @@ void App::DrawHud()
 	if (mGame->GetComputerIndex() < 0)	// Two players.
 	{
 #ifdef LEPRA_IOS_LOOKANDFEEL
-		DrawMeter((int)w/2, (int)h/2, PIF, h/2, 0, lCutie->GetHealth()+0.0002f);
+		DrawMeter((int)w/2, (int)h/2, PIF, h/2, 0, lCutie->GetHealth()*1.0002f);
 #else // !iOS
-		DrawMeter((int)w/4, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()+0.0002f);
+		DrawMeter((int)w/4, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()*1.0002f);
 #endif // iOS/!iOS
 	}
 	else if (mGame->GetComputerIndex() != 0)	// Single player Cutie.
 	{
-		DrawMeter((int)w/2, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()+0.0002f);
+		DrawMeter((int)w/2, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()*1.0002f);
 	}
 
 #ifdef LEPRA_IOS_LOOKANDFEEL
-	float lForce;
+	/*float lForce;
 	const TBC::PhysicsEngine* lGas;
 	//const TBC::PhysicsEngine* lBrakes;
-	const TBC::PhysicsEngine* lTurn;
+	const TBC::PhysicsEngine* lTurn;*/
 #if 0
 	if (lAvatar1->GetPhysics()->GetEngineCount() >= 3)
 	{
@@ -1034,7 +1044,7 @@ void App::DrawHud()
 		}
 	}
 #endif // 0
-	if (mGame->GetComputerIndex() != 1 && lAvatar2->GetPhysics()->GetEngineCount() >= 2)
+	/*if (mGame->GetComputerIndex() != 1 && lAvatar2->GetPhysics()->GetEngineCount() >= 2)
 	{
 		lGas = lAvatar2->GetPhysics()->GetEngine(0);
 		lForce = lGas->GetValue();
@@ -1050,67 +1060,81 @@ void App::DrawHud()
 			DrawForceMeter((int)(w-m*2-lButtonWidth*4), (int)(m*1.5f+lButtonWidth), 0, lForce, true);
 			InfoText(2, _T("Turn power"), PIF/2);
 		}
-	}
+	}*/
 #endif // iOS
 
-	// Draw launcher guides
-	float lDrawAngle = 0;
-	float lPitch;
-	float lGuidePitch;
-	float lYaw;
-	float lGuideYaw;
-	mGame->GetLauncher()->GetAngles(mGame->GetCutie(), lPitch, lGuidePitch, lYaw, lGuideYaw);
-	if (mGame->GetComputerIndex() != 1)	// Computer not running launcher.
+	if (mGame->GetComputerIndex() != 1 &&	// Computer not running launcher.
+		mArrow->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
+		// Draw launcher guides, used for steering in iOS.
+		float lPitch;
+		float lGuidePitch;
+		float lYaw;
+		float lGuideYaw;
+		mGame->GetLauncher()->GetAngles(mGame->GetCutie(), lPitch, lGuidePitch, lYaw, lGuideYaw);
+
 		float x;
 		float y;
+		float dx = 0;
+		float dy = 0;
+		float lValue1 = lPitch/-1;
+		float lValue2 = lGuidePitch/-1;
+		float lDrawAngle = 0;
+		const float aw = (float)mArrow->GetRamData()->GetWidth();
+		const float ah = (float)mArrow->GetRamData()->GetHeight();
 #ifdef LEPRA_IOS_LOOKANDFEEL
-		x = w-m*1.5f-lButtonWidth/2;
-		y = h-m*2-lButtonWidth-8;
+		x = w-m-2-BARREL_COMPASS_WIDTH/2;
+		y = h-m-aw/2;
+		dx = BARREL_COMPASS_WIDTH/2-ah/2-2;
+		lValue1 = 1 - lValue1;
+		lValue2 = 1 - lValue2;
+
+		if (std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(3)) != gFingerMoveList.end())
+		{
+			x -= 104;
+		}
+		mLiftMeterOffset = x = Math::Lerp(mLiftMeterOffset, x, 0.8f);
 #else // !iOS
+		x = m+aw/2 + 30;
+		y = h-m-2-BARREL_COMPASS_WIDTH/2;
+		lDrawAngle = -PIF/2;
 		if (mGame->GetComputerIndex() < 0)	// Two players.
 		{
-			lDrawAngle = -PIF/2;
-			x = w/2+m+lButtonWidth;
-			y = h-m*2;
+			x += w/2;
 		}
-		else	// Single player launcher.
-		{
-			lDrawAngle = -PIF/2;
-			x = +m+lButtonWidth;
-			y = h-m*2;
-		}
+		dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
 #endif // iOS/!iOS
-		mUiManager->GetPainter()->SetColor(Color(60, 40, 20), 0);
-		DrawBarrelIndicatorGround(x, y, lDrawAngle, lButtonWidth*0.4f, 8);
-		mUiManager->GetPainter()->SetColor(Color(150, 20, 20), 0);
-		DrawBarrelIndicator(x, y, lGuidePitch+lDrawAngle, 1.1f, 3.0f, true);
-		mUiManager->GetPainter()->SetColor(Color(220, 210, 200), 0);
-		DrawBarrelIndicator(x, y, lGuidePitch+lDrawAngle, 0.9f, 1.4f, true);
-		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
-		DrawBarrelIndicator(x, y, lPitch+lDrawAngle, 1, 1, false);
-		InfoText(2, _T("Up/down compass"), PIF, -20-lButtonRadius, -lButtonRadius/2);
-	}
+		DrawBarrelCompass((int)x, (int)y, lDrawAngle, (int)aw-8, lValue1, lValue2);
+		InfoText(2, _T("Up/down compass"), PIF, -20, 0);
+		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle+PIF/2);
+		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF/2);
 
-	if (mGame->GetComputerIndex() != 1)	// Computer not running launcher.
-	{
-		float x;
-		float y;
+		dx = 0;
+		dy = 0;
+		lValue1 = lYaw/(PIF+0.1f)+0.5f;
+		lValue2 = (lGuideYaw)/(PIF+0.1f)+0.5f;
 #ifdef LEPRA_IOS_LOOKANDFEEL
-		x = w-m*2-lButtonWidth-8;
-		y = m*1.5f+lButtonWidth;
+		x = w-m-aw/2;
+		y = m+2+BARREL_COMPASS_WIDTH/2;
+		dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
+		lValue1 = 1 - lValue1;
+		lValue2 = 1 - lValue2;
+
+		if (std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(4)) != gFingerMoveList.end())
+		{
+			x -= 104;
+		}
+		mYawMeterOffset = x = Math::Lerp(mYawMeterOffset, x, 0.8f);
 #else // !iOS
-		lDrawAngle = -PIF/2;
-		x = w-m-lButtonWidth;
-		y = h-m*2;
+		//lDrawAngle = -PIF/2;
+		x = w-m-2-BARREL_COMPASS_WIDTH/2 - 30;
+		y = h-m-aw/2;
+		dx = -(BARREL_COMPASS_WIDTH/2-ah/2-2);
 #endif // iOS/!iOS
-		mUiManager->GetPainter()->SetColor(Color(150, 20, 20), 0);
-		DrawBarrelIndicator(x, y, lGuideYaw+lDrawAngle, 1.1f, 3.0f, true);
-		mUiManager->GetPainter()->SetColor(Color(220, 210, 200), 0);
-		DrawBarrelIndicator(x, y, lGuideYaw+lDrawAngle, 0.9f, 1.4f, true);
-		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
-		DrawBarrelIndicator(x, y, lYaw+lDrawAngle, 1, 1, false);
-		InfoText(2, _T("Left/right compass"), PIF/2, -lButtonRadius, 30);
+		DrawBarrelCompass((int)x, (int)y, +PIF/2+lDrawAngle, (int)aw-8, lValue1, lValue2);
+		InfoText(2, _T("Left/right compass"), PIF/2, 0, 30);
+		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle);
+		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF);
 	}
 
 	mFlipDraw = false;
@@ -1420,9 +1444,13 @@ void App::DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, fl
 	const int lBarCount = 19;
 	const int lBarSpace = 3;
 	const int lBarHeight = (int)(pSize/lBarCount) - lBarSpace;
-	const int lBarWidth = 30;
+	const int lBarWidth = 24;
 	int lMaxValue = (int)(pMaxValue * lBarCount);
 	int lMinValue = (int)(pMinValue * lBarCount);
+	if (pMaxValue <= 0)
+	{
+		lMaxValue = -1;
+	}
 	const int lXStep = -(int)(::sin(pAngle)*(lBarHeight+lBarSpace));
 	const int lYStep = -(int)(::cos(pAngle)*(lBarHeight+lBarSpace));
 	const bool lXIsMain = ::abs(lXStep) >= ::abs(lYStep);
@@ -1446,7 +1474,7 @@ void App::DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, fl
 	}
 }
 
-void App::DrawBarrelIndicatorGround(float x, float y, float pAngle, float pBaseLength, float pBaseWidth) const
+/*void App::DrawBarrelIndicatorGround(float x, float y, float pAngle, float pBaseLength, float pBaseWidth) const
 {
 	Transpose(x, y, pAngle);
 
@@ -1484,6 +1512,42 @@ void App::DrawBarrelIndicator(float x, float y, float pAngle, float pLength, flo
 	}
 	lCoords.push_back(Vector2DF(x-sa*lWidth-lIndicatorLength*ca, y-ca*lWidth+lIndicatorLength*sa));
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
+}*/
+
+void App::DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue1, float pValue2) const
+{
+	Transpose(x, y, pAngle);
+
+	mPenX = (float)x;
+	mPenY = (float)y;
+
+	float ca = ::cos(pAngle);
+	ca = (::fabs(ca) < 1e-5)? 0 : ca;
+	float sa = ::sin(pAngle);
+	sa = (::fabs(sa) < 1e-5)? 0 : sa;
+	const int lLineCount = BARREL_COMPASS_LINE_COUNT;
+	const int lLineSpacing = BARREL_COMPASS_LINE_SPACING;
+	const int lWidth = BARREL_COMPASS_WIDTH;
+	const int w2 = lWidth/2;
+	const int s2 = pSize/2;
+	const int s3 = pSize*2/3;
+	mUiManager->GetPainter()->SetColor(DARK_GRAY);
+	for (int i = 0; i < lLineCount; ++i)
+	{
+		const int lHeight = (i%3 == 0)? pSize : s3;
+		const int x2 = -w2 + i*lLineSpacing;
+		const int y2 = s2-lHeight;
+		mUiManager->GetPainter()->DrawLine((int)(x-x2*ca+s2*sa), (int)(y+y2*ca+x2*sa), (int)(x-x2*ca+y2*sa), (int)(y+s2*ca+x2*sa));
+	}
+	const int lValue1 = (int)((pValue1-0.5f)*-lWidth);
+	int lValue2 = (int)((pValue2-0.5f)*-lWidth);
+	mUiManager->GetPainter()->SetColor(RED);
+	--lValue2;
+	mUiManager->GetPainter()->DrawLine((int)(x+lValue2*ca), (int)(y-s2*ca+lValue2*sa), (int)(x+lValue2*ca-s2*sa), (int)(y+lValue2*sa));
+	lValue2 += 2;
+	mUiManager->GetPainter()->DrawLine((int)(x+lValue2*ca), (int)(y-s2*ca+lValue2*sa), (int)(x+lValue2*ca-s2*sa), (int)(y+lValue2*sa));
+	mUiManager->GetPainter()->SetColor(WHITE);
+	mUiManager->GetPainter()->DrawLine((int)(x+lValue1*ca+s2*sa), (int)(y-s2*ca+lValue1*sa), (int)(x+lValue1*ca-s2*sa), (int)(y+s2*ca+lValue1*sa));
 }
 
 void App::InfoText(int pPlayer, const str& pInfo, float pAngle, float dx, float dy) const
