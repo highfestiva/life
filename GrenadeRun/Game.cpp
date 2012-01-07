@@ -743,7 +743,7 @@ bool Game::Render()
 #endif // iOS
 		mRightCamera.Interpolate(mRightCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mRightCamera);
-		const float lDistanceFoV = 22000 / ::pow(lRange, 1.2f);
+		const float lDistanceFoV = 8500 / ::pow(lRange, 1.2f);
 		mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, lDistanceFoV), 1.5f, 500);
 		mUiManager->Render(mRightRect);
 	}

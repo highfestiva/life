@@ -2024,15 +2024,6 @@ int App::PollTap(FingerMovement& pMovement)
 			else if (lStartX >= h-lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
 			{
 				mCurrentSteering = CLAMPUP((x-lStartX)/s);
-				if (!pMovement.mIsPress)
-				{
-					mPreviousSteering += mCurrentSteering;
-					if (::fabs(mCurrentSteering) < 0.03f)	// Go to neutral if just tap/release.
-					{
-						mPreviousSteering = 0;
-					}
-					mCurrentSteering = 0;
-				}
 				mPlayer1LastTouch.ClearTimeDiff();
 				lTag = 2;
 			}
@@ -2082,6 +2073,14 @@ int App::PollTap(FingerMovement& pMovement)
 				{
 					mIsThrottling = true;
 					mThrottle = lValue;
+					if (!pMovement.mIsPress)
+					{
+						if (mThrottle < 0.16f)	// Go to neutral if just tap/release.
+						{
+							mIsThrottling = false;
+							mThrottle = 0.0f;
+						}
+					}
 					mPlayer1LastTouch.ClearTimeDiff();
 					lTag = 1;
 				}
@@ -2101,7 +2100,7 @@ int App::PollTap(FingerMovement& pMovement)
 					if (!pMovement.mIsPress)
 					{
 						mPreviousSteering += mCurrentSteering;
-						if (::fabs(mCurrentSteering) < 0.03f)	// Go to neutral if just tap/release.
+						if (::fabs(mCurrentSteering) < 0.16f)	// Go to neutral if just tap/release.
 						{
 							mPreviousSteering = 0;
 						}
