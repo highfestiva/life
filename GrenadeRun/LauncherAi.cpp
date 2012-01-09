@@ -62,12 +62,13 @@ void LauncherAi::OnTick()
 	bool lHandled = false;
 	if (mDidShoot && mGame->IsLauncherBarrelFree())
 	{
+		mLog.AHeadline("Fire in the hole!");
 		++mShotCount;
 		mDidShoot = false;
 	}
 	if (lDifficulty > 0.9f)
 	{
-		if (lCtfDistance < 25*SCALE_FACTOR)
+		if (lCtfDistance < 45*SCALE_FACTOR)
 		{
 			lHandled = true;
 			if (mShotCount > 2)
@@ -78,15 +79,14 @@ void LauncherAi::OnTick()
 			if (mShotCount <= 1)
 			{
 				lTargetPosition = lCtfPosition;
+				lTargetPosition.x += -lDirection.x * (2 * SCALE_FACTOR) + (float)Random::Uniform(-0.3f*SCALE_FACTOR, 0.3f*SCALE_FACTOR);
+				lTargetPosition.y += -lDirection.y * (2 * SCALE_FACTOR) + (float)Random::Uniform(-0.3f*SCALE_FACTOR, 0.3f*SCALE_FACTOR);
 				lTargetVelocity.Set(0, 0, 0);
-				mTargetOffset = -lDirection * (3 * SCALE_FACTOR);
-				mTargetOffset.x += (float)Random::Uniform(-0.5f*SCALE_FACTOR, 0.5f*SCALE_FACTOR);
-				mTargetOffset.y += (float)Random::Uniform(-0.5f*SCALE_FACTOR, 0.5f*SCALE_FACTOR);
-				mTargetOffset.z = 0;
+				mTargetOffset.Set(0, 0, 0);
 				lAdjustedForSlowingDown = true;
 				mLog.AHeadline("Shooting at CTF platform!");
 			}
-			else if (lHeadingTowardsCtf)	// Only asume slowdown if going towards our goal.
+			else if (lHeadingTowardsCtf)	// Only assume slowdown if going towards our goal.
 			{
 				lTargetVelocity *= 0.3f;
 				mTargetOffset.Set(0, 0, 0);
@@ -159,7 +159,7 @@ void LauncherAi::OnTick()
 	{
 		mGame->GetLauncher()->SetEnginePower(1, +1*lYawFactor, 0);
 	}
-	const float lLongestTimeBase = 8.0f * (1-lDifficulty);
+	const float lLongestTimeBase = 8.0f * (1-lDifficulty*0.8f);
 	const double lLastShotDiff = mLastShot.QueryTimeDiff();
 	if (lLastShotDiff > lLongestTimeBase &&	// Wait at least this long.
 		((lYawFactor < 0.1f && lPitchFactor < 0.1f) ||	// In range.
@@ -168,43 +168,43 @@ void LauncherAi::OnTick()
 		if (mGame->Shoot())
 		{
 			mDidShoot = true;
-		}
-		mLastShot.ClearTimeDiff();
-		if (lDifficulty >= 0.7f)
-		{
-			// Good player has some tactics.
-			if (lTargetSpeed > 2*SCALE_FACTOR && !lAdjustedForSlowingDown &&
-				mGame->GetCutie()->GetPhysics()->GetEngineCount() >= 2)
+			mLastShot.ClearTimeDiff();
+			if (lDifficulty >= 0.7f)
 			{
-				// Guess direction depending on steering.
-				const float lAngle = mGame->GetCutie()->GetPhysics()->GetEngine(1)->GetValue();
-				Vector3DF lDirection = mGame->GetCutie()->GetForwardDirection();
-				QuaternionF lRotation(lAngle*-0.5f, Vector3DF(0, 0, 1));
-				lDirection = lRotation * lDirection;
-				lDirection.z = 0;
-				const float lAdjustedTargetSpeed = (lTargetSpeed > 10)? 10 : lTargetSpeed;
-				mTargetOffset = lDirection * lAdjustedTargetSpeed * 1.0f;
-				if (lTargetSpeed < 30)
+				// Good player has some tactics.
+				if (lTargetSpeed > 2*SCALE_FACTOR && !lAdjustedForSlowingDown &&
+					mGame->GetCutie()->GetPhysics()->GetEngineCount() >= 2)
 				{
-					mTargetOffset += lTargetVelocity * 2.0f;
+					// Guess direction depending on steering.
+					const float lAngle = mGame->GetCutie()->GetPhysics()->GetEngine(1)->GetValue();
+					Vector3DF lDirection = mGame->GetCutie()->GetForwardDirection();
+					QuaternionF lRotation(lAngle*-0.5f, Vector3DF(0, 0, 1));
+					lDirection = lRotation * lDirection;
+					lDirection.z = 0;
+					const float lAdjustedTargetSpeed = (lTargetSpeed > 10)? 10 : lTargetSpeed;
+					mTargetOffset = lDirection * lAdjustedTargetSpeed * 1.0f;
+					if (lTargetSpeed < 30)
+					{
+						mTargetOffset += lTargetVelocity * 2.0f;
+					}
 				}
+				else
+				{
+					mTargetOffset.Set(0, 0, 0);
+				}
+			}
+			else if (lDifficulty <= 0.3f)
+			{
+				// Poor player spreads 'em a lot.
+				const float o = 7*SCALE_FACTOR / (0.8f+lDifficulty*8);
+				mTargetOffset.Set((float)Random::Uniform(-o, o), (float)Random::Uniform(-o, o), 0);
 			}
 			else
 			{
-				mTargetOffset.Set(0, 0, 0);
+				// Average computer player always spreads 'em a little.
+				const float o = 2*SCALE_FACTOR;
+				mTargetOffset.Set((float)Random::Uniform(-o, o), (float)Random::Uniform(-o, o), 0);
 			}
-		}
-		else if (lDifficulty <= 0.3f)
-		{
-			// Poor player spreads 'em a lot.
-			const float o = 7*SCALE_FACTOR / (0.8f+lDifficulty*8);
-			mTargetOffset.Set((float)Random::Uniform(-o, o), (float)Random::Uniform(-o, o), 0);
-		}
-		else
-		{
-			// Average computer player always spreads 'em a little.
-			const float o = 2*SCALE_FACTOR;
-			mTargetOffset.Set((float)Random::Uniform(-o, o), (float)Random::Uniform(-o, o), 0);
 		}
 	}
 }

@@ -948,7 +948,7 @@ void GameClientSlaveManager::TickUiInput()
 		{
 			mAvatarMightSelectTime.UpdateTimer();
 
-			QuerySetIsChild(lObject);
+			QuerySetChildishness(lObject);
 
 			const Options::Steering& s = mOptions.GetSteeringControl();
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
@@ -1858,18 +1858,18 @@ void GameClientSlaveManager::DropAvatar()
 	mHadAvatar = false;
 }
 
-bool GameClientSlaveManager::QuerySetIsChild(Cure::ContextObject* pAvatar) const
+float GameClientSlaveManager::QuerySetChildishness(Cure::ContextObject* pAvatar) const
 {
-	const str lName = _T("float_is_child");
+	const str lName = _T("float_childishness");
 	Cure::FloatAttribute* lAttribute = (Cure::FloatAttribute*)pAvatar->GetAttribute(lName);
 	if (!lAttribute)
 	{
 		lAttribute = new Cure::FloatAttribute(pAvatar, lName, 0);
 	}
-	bool lIsChild;
-	CURE_RTVAR_GET(lIsChild, =, GetVariableScope(), RTVAR_GAME_ISCHILD, false);
-	lAttribute->SetValue(lIsChild? 1.0f : 0.0f);
-	return lIsChild;
+	float lChildishness;
+	CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, false);
+	lAttribute->SetValue(lChildishness);
+	return lChildishness;
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const

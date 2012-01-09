@@ -26,7 +26,9 @@
 #include "Spawner.h"
 #include "VehicleAi.h"
 
-#define GRENADE_RELAUNCH_DELAY	1.6f
+
+
+#define GRENADE_RELAUNCH_DELAY	2.4f
 
 
 
@@ -908,8 +910,8 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	if (pOk && pObject == mVehicle)
 	{
 		assert(pObject->GetPhysics()->GetEngineCount() == 3);
-		const str lName = _T("float_is_child");
-		new Cure::FloatAttribute(mVehicle, lName, 1);
+		const str lName = _T("float_childishness");
+		new Cure::FloatAttribute(mVehicle, lName, 0.67f);
 	}
 	if (pOk && pObject == mLauncher)
 	{

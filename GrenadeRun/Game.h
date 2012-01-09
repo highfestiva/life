@@ -14,7 +14,7 @@
 #ifdef LEPRA_IOS
 #define LEPRA_IOS_LOOKANDFEEL
 #endif // iOS
-#define LEPRA_IOS_LOOKANDFEEL
+//#define LEPRA_IOS_LOOKANDFEEL
 #define FPS		20
 #define	SCALE_FACTOR	1.5f	// Hard-coded for Kill Cutie. If ever re-using for other game, drop this.
 

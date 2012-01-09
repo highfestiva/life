@@ -67,7 +67,7 @@ void Machine::OnTick()
 	}
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
-	const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
+	const bool lIsChild = IsAttributeTrue(_T("float_childishness"));
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();

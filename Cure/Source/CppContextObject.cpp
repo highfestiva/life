@@ -244,13 +244,13 @@ void CppContextObject::OnMicroTick(float pFrameTime)
 {
 	if (mPhysics && GetManager())
 	{
-		const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
+		const bool lNeedsSteeringHelp = (GetAttributeFloatValue(_T("float_is_child")) > 0.75f);
 		int lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(GetPhysics()->GetEngineCount()-1, -1, 0);
 		const int lTurnIndex = GetPhysics()->GetEngineIndexFromControllerIndex(0, 1, 1);
-		if (lIsChild && lAccIndex >= 0 && lTurnIndex >= 0)
+		if (lNeedsSteeringHelp && lAccIndex >= 0 && lTurnIndex >= 0)
 		{
-			// Children have the possibility of just pressing left/right which will cause a forward
-			// motion in the currently used vehicle.
+			// Young children have the possibility of just pressing left/right which will cause
+			// a forward motion in the currently used vehicle.
 			TBC::PhysicsEngine* lAcc = GetPhysics()->GetEngine(lAccIndex);
 			const TBC::PhysicsEngine* lTurn = GetPhysics()->GetEngine(lTurnIndex);
 			const float lPowerFwdRev = lAcc->GetValue();
