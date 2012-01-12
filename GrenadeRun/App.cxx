@@ -1829,6 +1829,14 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			}
 		}
 		break;
+		case UIKEY(5):
+		{
+			if (!pFactor)
+			{
+				mGame->SetComputerIndex((mGame->GetComputerIndex() == 0)? 1 : 0);
+			}
+		}
+		break;
 #endif // Debug
 	}
 
@@ -2193,6 +2201,7 @@ void App::SuperReset(bool pGameOver)
 		{
 			mGame->FlipRenderSides();
 		}
+		mGame->SetComputerIndex(mGame->GetComputerIndex());
 	}
 	mGame->ResetWinnerIndex();
 	mGame->SetVehicle(mGame->GetVehicle());

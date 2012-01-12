@@ -467,7 +467,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
 			if (lObject == mVehicle)
 			{
-				if (d > 0.5f)
+				if (d > 0.6f)
 				{
 					CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.2);
 					mSlowmoTimer.Start();

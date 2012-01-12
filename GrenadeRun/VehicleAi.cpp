@@ -87,21 +87,33 @@ void VehicleAi::OnTick()
 				mActivePath = -1;
 			}
 			int lBestPathDistance = 1000000;
-			std::vector<int> lRelevantPaths;
+			struct PathIndexLikeliness
+			{
+				int mPathIndex;
+				float mLikeliness;
+			};
+			std::vector<PathIndexLikeliness> lRelevantPaths;
+			float lTotalLikeliness = 0;
 			const int lPathCount = mGame->GetLevel()->QueryPath()->GetPathCount();
 			for (int x = 0; x < lPathCount; ++x)
 			{
 				mGame->GetLevel()->QueryPath()->GetPath(x)->GotoAbsoluteTime(lStartTime);
-				const int lRoundedNearestDistance = (int)(GetClosestPathDistance(lPosition, x)/SCALE_FACTOR/2);
+				float lLikeliness = 1;
+				const int lRoundedNearestDistance = (int)(GetClosestPathDistance(lPosition, x, &lLikeliness)/SCALE_FACTOR/2);
+				PathIndexLikeliness pl;
+				pl.mPathIndex = x;
+				pl.mLikeliness = lLikeliness;
 				if (lRoundedNearestDistance < lBestPathDistance)
 				{
 					lRelevantPaths.clear();
-					lRelevantPaths.push_back(x);
+					lRelevantPaths.push_back(pl);
 					lBestPathDistance = lRoundedNearestDistance;
+					lTotalLikeliness += lLikeliness;
 				}
 				else if (lRoundedNearestDistance == lBestPathDistance)
 				{
-					lRelevantPaths.push_back(x);
+					lRelevantPaths.push_back(pl);
+					lTotalLikeliness += lLikeliness;
 				}
 			}
 			assert(!lRelevantPaths.empty());
@@ -109,7 +121,23 @@ void VehicleAi::OnTick()
 			{
 				return;
 			}
-			mActivePath = lRelevantPaths[Random::GetRandomNumber() % lRelevantPaths.size()];
+			const float lPickedLikeliness = (float)Random::Uniform(0, lTotalLikeliness);
+			lTotalLikeliness = 0;
+			std::vector<PathIndexLikeliness>::iterator x;
+			for (x = lRelevantPaths.begin(); x != lRelevantPaths.end(); ++x)
+			{
+				const float lNextLikeliness = lTotalLikeliness + x->mLikeliness;
+				if (lPickedLikeliness >= lTotalLikeliness && lPickedLikeliness <= lNextLikeliness)
+				{
+					mActivePath = x->mPathIndex;
+					break;
+				}
+				lTotalLikeliness = lNextLikeliness;
+			}
+			if (mActivePath < 0)
+			{
+				mActivePath = lRelevantPaths[Random::GetRandomNumber() % lRelevantPaths.size()].mPathIndex;
+			}
 			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
 			const float lWantedDistance = SCALE_FACTOR * NORMAL_AIM_AHEAD;
 			float lStep = lWantedDistance * lPath->GetDistanceNormal();
@@ -405,9 +433,13 @@ bool VehicleAi::IsCloseToTarget(const Vector3DF& pPosition, float pDistance) con
 	return (lTargetDistance2 <= lGoalDistance*lGoalDistance);
 }
 
-float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, int pPath) const
+float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, int pPath, float* pLikeliness) const
 {
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath((pPath >= 0)? pPath : mActivePath);
+	if (pLikeliness)
+	{
+		*pLikeliness = lPath->GetLikeliness();
+	}
 	const float lCurrentTime = lPath->GetCurrentInterpolationTime();
 
 	// We can assume the path "current" pointer is a bit ahead, so step back some to get a closer
@@ -425,6 +457,11 @@ float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, int pPath) c
 	const float lSearchStepLength = (pPath >= 0)? -0.1f : 0.0125f;
 	const int lSearchSteps = (pPath >= 0)? 10 : 3;
 	lPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, lClosestPoint, lSearchSteps);
+	// Steep check.
+	if (lNearestDistance < ::fabs(pPosition.z - lClosestPoint.z)*3)
+	{
+		lNearestDistance *= 5;
+	}
 
 	if (pPath < 0)
 	{

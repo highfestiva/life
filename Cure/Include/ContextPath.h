@@ -25,10 +25,13 @@ public:
 		SplinePath(Vector3DF* pKeyFrames,	// pCount + 1 elements.
 			float* pTimeTags,		// pCount + 1 elements.
 			int pCount,
-			float pDistanceNormal);
+			float pDistanceNormal,
+			float pLikeliness);
 		float GetDistanceNormal() const;
+		float GetLikeliness() const;
 	private:
 		float mDistanceNormal;
+		float mLikeliness;
 	};
 
 	ContextPath(ResourceManager* pResourceManager, const str& pClassId);
