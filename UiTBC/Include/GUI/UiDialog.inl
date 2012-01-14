@@ -70,7 +70,7 @@ Label* Dialog<_Target>::QueryLabel(const str& pText, UiTbc::FontManager::FontId 
 	{
 		mLabel = new UiTbc::Label;
 	}
-	UiTbc::Painter* lPainter = ((DesktopWindow*)GetTopParent())->GetPainter();
+	UiTbc::Painter* lPainter = ((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->GetPainter();
 	mLabel->SetFontId(pFontId);
 	mLabel->ActivateFont(lPainter);
 	mLabel->SetText(pText, mColor[1], Lepra::Color(0,0,0,0), lPainter);
@@ -188,7 +188,7 @@ void Dialog<_Target>::Animate()
 			if (lPos.x+GetSize().x < -MARGIN || mAnimationStep >= 0)
 			{
 				mTarget(mClickedButton);
-				((DesktopWindow*)GetTopParent())->PostDeleteComponent(this, 0);
+				((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->PostDeleteComponent(this, 0);
 			}
 		}
 	}

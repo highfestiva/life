@@ -173,6 +173,7 @@ private:
 	UiCure::UserPainterKeepImageResource* mArrow;
 	UiCure::UserPainterKeepImageResource* mSteeringWheel;
 	UiCure::UserPainterKeepImageResource* mGrenade;
+	UiCure::UserPainterKeepImageResource* mRotate;
 	float mGrenadeSizeFactor;
 	mutable Vector3DF mScoreHeartPos[SCORE_POINTS];
 	UiTbc::RectComponent* mPlayerSplitter;
@@ -209,6 +210,7 @@ private:
 #ifndef LEPRA_IOS
 	HiResTimer mStartupTimer;
 #endif // Computer
+	StopWatch mRotateTimer;
 
 	LOG_CLASS_DECLARE();
 };
@@ -421,6 +423,9 @@ bool App::Open()
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 		mGrenade = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mGrenade->Load(mResourceManager, _T("grenade.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
+		mRotate = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mRotate->Load(mResourceManager, _T("rotate.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 		mGrenadeSizeFactor = 1.0f;
 	}
@@ -708,6 +713,18 @@ bool App::Poll()
 		mUiManager->GetPainter()->SetColor(WHITE);
 		mUiManager->GetPainter()->PrintText(strutil::Format(_T("%.1f"), 1.0/mAverageLoopTime), 10, 10);
 #endif // Debug
+
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		if (mRotateTimer.IsStarted() && mRotateTimer.QueryTimeDiff() < 2.0 &&
+			mRotate->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
+			mUiManager->GetPainter()->DrawImage(mRotate->GetData(),
+				mUiManager->GetCanvas()->GetWidth()/2 - mRotate->GetRamData()->GetWidth()/2,
+				mUiManager->GetCanvas()->GetHeight()/2 - mRotate->GetRamData()->GetHeight()/2);
+			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
+		}
+#endif // iOS L&F
 
 		mGame->Paint();
 
@@ -2189,9 +2206,9 @@ void App::SuperReset(bool pGameOver)
 		const int lComputerIndex = mGame->GetComputerIndex();
 		switch (lComputerIndex)
 		{
-			case -1:	mGame->FlipRenderSides();								break;
-			case 0:		mGame->SetComputerIndex(1);	mGame->SetScoreBalance(-mGame->GetScoreBalance());	break;
-			case 1:		mGame->SetComputerIndex(0);	mGame->SetScoreBalance(-mGame->GetScoreBalance());	break;
+			case -1:	mGame->FlipRenderSides();											break;
+			case 0:		mGame->SetComputerIndex(1);	mGame->SetScoreBalance(-mGame->GetScoreBalance());	mRotateTimer.Start();	break;
+			case 1:		mGame->SetComputerIndex(0);	mGame->SetScoreBalance(-mGame->GetScoreBalance());	mRotateTimer.Start();	break;
 		}
 	}
 	else
@@ -2208,7 +2225,14 @@ void App::SuperReset(bool pGameOver)
 	mGame->SetVehicle(mGame->GetVehicle());
 	mGame->ResetLauncher();
 	mResourceManager->Tick();
-	//mResourceManager->ForceFreeCache();
+	strutil::strvec lResourceTypes;
+	lResourceTypes.push_back(_T("RenderImg"));
+	lResourceTypes.push_back(_T("Geometry"));
+	lResourceTypes.push_back(_T("GeometryRef"));
+	lResourceTypes.push_back(_T("Physics"));
+	lResourceTypes.push_back(_T("RamImg"));
+	mResourceManager->ForceFreeCache(lResourceTypes);
+	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
 
 	mIsLoaded = false;
 	mDoLayout = true;
@@ -2352,6 +2376,12 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 	mGame->SetVehicle(lVehicle);
 	mGame->ResetLauncher();
 	mGame->SetFlybyMode(Game::FLYBY_INACTIVE);
+#ifdef LEPRA_IOS_LOOKANDFEEL
+	if (mGame->GetComputerIndex() == 0)
+	{
+		mRotateTimer.Start();
+	}
+#endif // iOS L&F
 }
 
 void App::OnPauseClick(UiTbc::Button*)

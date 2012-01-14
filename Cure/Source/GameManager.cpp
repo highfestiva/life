@@ -280,7 +280,6 @@ ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObje
 
 void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
-	pObject->SetManager(GetContext());
 	pObject->SetNetworkObjectType(pNetworkType);
 	if (pInstanceId)
 	{
@@ -290,6 +289,7 @@ void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNe
 	{
 		pObject->SetInstanceId(GetContext()->AllocateGameObjectId(pNetworkType));
 	}
+	pObject->SetManager(GetContext());
 	GetContext()->AddObject(pObject);
 }
 

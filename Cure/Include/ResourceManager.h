@@ -428,7 +428,8 @@ public:
 	bool WaitLoading();
 
 	void Tick();	// Call often, preferably every frame.
-	unsigned ForceFreeCache();	// Called to force immediate freeing of all resources.
+	unsigned ForceFreeCache();	// Called to force immediate freeing of all cached resources.
+	unsigned ForceFreeCache(const strutil::strvec& pResourceTypeList);	// Empty type list = all.
 
 	size_t QueryResourceCount() const;
 	size_t QueryCachedResourceCount() const;

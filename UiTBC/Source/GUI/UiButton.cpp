@@ -448,7 +448,9 @@ void Button::SetIcon(Painter::ImageID pIconID,
 	mIconAlignment = pAlignment;
 
 	PixelCoord lSize = GetImageManager()->GetImageSize(mIconID);
-	const int dh = GetText().empty()? 0 : ((DesktopWindow*)GetTopParent())->GetPainter()->GetFontHeight()*3/2;
+	DesktopWindow* lTopmost = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
+	const int lFontHeight = lTopmost? lTopmost->GetPainter()->GetFontHeight()*3/2 : 12;	// Just try anything if not into system yet.
+	const int dh = GetText().empty()? 0 : lFontHeight;
 	SetPreferredSize(lSize.x, lSize.y + dh);
 
 	SetNeedsRepaint(true);

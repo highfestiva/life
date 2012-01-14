@@ -24,6 +24,8 @@ public:
 	virtual ~Sound();
 
 private:
+	virtual void SetManager(Cure::ContextManager* pManager);
+
 	void LoadPlaySound2d(UserSound2dResource* pSoundResource);
 	void OnTick();
 

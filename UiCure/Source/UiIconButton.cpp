@@ -52,7 +52,7 @@ void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResourc
 	assert(pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		Canvas& lCanvas = *pResource->GetRamData();
+		Canvas lCanvas(*pResource->GetRamData(), true);
 		bool lHasTransparent = false;
 		const unsigned w = lCanvas.GetWidth();
 		const unsigned h = lCanvas.GetHeight();
@@ -76,7 +76,7 @@ void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResourc
 		const UiTbc::GUIImageManager::BlendFunc lBlendFunc = lHasTransparent? UiTbc::GUIImageManager::ALPHABLEND : UiTbc::GUIImageManager::NO_BLEND;
 		if (!GetImageManager()->HasImage(pResource->GetData()))
 		{
-			GetImageManager()->AddLoadedImage(lCanvas, pResource->GetData(), UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
+			GetImageManager()->AddLoadedImage(*pResource->GetRamData(), pResource->GetData(), UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
 		}
 		mHighlightedIconId = GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
 		//lCanvas.SetBuffer(0);	// Free buffer.

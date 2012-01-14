@@ -2,6 +2,7 @@ Skipped
 -------
 -Tutorial for controls as well.
 -Make Sleepie wider.
+-Adaptive launcher indicators must go - do it right right away.
 
 Done
 ----
@@ -63,16 +64,20 @@ Put eyes on Sleepie.
 Add more paths in first level.
 Add Kill Cutie logo to Pixel Doctrine logo.
 Make text sharp in Pixel Doctrine logo.
+Delete all resources when switching level (and make sure!).
+Make sure orientation change landscape->portrait and vice versa is automatically understood.
 
 Computer demo
 -------------
+Menu: credits.
+Menu: high score.
 2 extra levels: castle and machine.
 Tweak other levels.
-Adaptive launcher indicators must go - do it right right away.
 Record voice for tutorial. Compress HARD!
+Record voice for instructions: SHOOT! DRIVE!
 Playback voice for tutorial.
 Polish on level_2 roads (in texture).
-Delete all resources when switching level (and make sure!).
+Score counting.
 Local highscore.
 Memory leak check.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
@@ -81,13 +86,14 @@ Add link to iOS versions.
 iOS and computer full version
 -----------------------------
 Tweak steering.
-Make sure orientation change landscape->portrait and vice versa is automatically understood.
+Add visual feedback on launcher motor strengths.
 In-app purchase.
 Activation of features depending on purchases.
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.
+Server-side high score REST interface. Secure.
 Global high score list.
 Optimize.
 Memory leaks, zombies.
