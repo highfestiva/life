@@ -206,6 +206,9 @@ private:
 	float mPreviousSteering;
 	float mCurrentSteering;
 	bool mFlipDraw;
+#ifndef LEPRA_IOS
+	HiResTimer mStartupTimer;
+#endif // Computer
 
 	LOG_CLASS_DECLARE();
 };
@@ -533,9 +536,6 @@ int App::Run()
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
 	}
-#ifndef LEPRA_IOS
-	HiResTimer lStartupTimer;
-#endif // Computer
 	if (lOk)
 	{
 		lOk = Open();
@@ -556,7 +556,7 @@ int App::Run()
 	}
 	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
-	while (2.0 - lStartupTimer.QueryTimeDiff() > 0)
+	while (2.0 - mStartupTimer.QueryTimeDiff() > 0)
 	{
 		if (SystemManager::GetQuitRequest())
 		{
@@ -564,6 +564,7 @@ int App::Run()
 		}
 		Thread::Sleep(0.1);
 		UiLepra::Core::ProcessMessages();
+		mResourceManager->Tick();
 	}
 	bool lQuit = (SystemManager::GetQuitRequest() != 0);
 	while (!lQuit)
@@ -641,7 +642,7 @@ bool App::Poll()
 		mResourceManager->Tick();
 		return lOk;
 	}
-	mResourceManager->ForceFreeCache();
+	//mResourceManager->ForceFreeCache();
 	mIsLoaded = true;
 	if (lOk)
 	{
@@ -2207,7 +2208,7 @@ void App::SuperReset(bool pGameOver)
 	mGame->SetVehicle(mGame->GetVehicle());
 	mGame->ResetLauncher();
 	mResourceManager->Tick();
-	mResourceManager->ForceFreeCache();
+	//mResourceManager->ForceFreeCache();
 
 	mIsLoaded = false;
 	mDoLayout = true;
@@ -2217,6 +2218,9 @@ void App::SuperReset(bool pGameOver)
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
 	mDoLayout = true;
+#ifndef LEPRA_IOS
+	mStartupTimer.ReduceTimeDiff(-10);
+#endif // Computer
 }
 
 void App::OnMinimize()
