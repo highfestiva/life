@@ -24,10 +24,12 @@ public:
 
 	Dialog(Component* pParent, Action pTarget);
 	virtual ~Dialog();
+	void SetDirection(int pDirection, bool pSetPos);
+	void SetPreClickTarget(Action pPreClickTarget);
 	virtual void Center();
-	Label* QueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId);
-	void AddButton(int pTag, const str& pText);
-	void AddButton(int pTag, Button* pButton);
+	Label* SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId);
+	void AddButton(int pTag, const str& pText);	// Tag < 0 to layout yourself.
+	void AddButton(int pTag, Button* pButton);	// Tag < 0 to layout yourself.
 	void SetOffset(PixelCoord pOffset);
 	virtual void UpdateLayout();
 
@@ -41,10 +43,12 @@ private:
 	PixelCoord mOffset;
 	Label* mLabel;
 	Action mTarget;
+	Action mPreClickTarget;
 	ButtonList mButtonList;
 	Button* mClickedButton;
 	bool mIsClosing;
 	int mAnimationStep;
+	int mDirection;
 };
 
 

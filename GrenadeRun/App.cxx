@@ -28,7 +28,7 @@
 #include "../UiLepra/Include/UiOpenGLExtensions.h"	// Included to get the gl-headers.
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiSoundStream.h"
-#include "../UiTBC/Include/GUI/UiButton.h"
+#include "../UiTBC/Include/GUI/UiCustomButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiDialog.h"
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
@@ -95,6 +95,7 @@ private:
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	void Layout();
 	void MainMenu();
+	void HiscoreMenu(int pIndex, int pDirection);
 	void SuperReset(bool pGameOver);
 
 	virtual void Suspend();
@@ -117,6 +118,9 @@ private:
 	void OnMainMenuAction(UiTbc::Button* pButton);
 	void OnLevelAction(UiTbc::Button* pButton);
 	void OnVehicleAction(UiTbc::Button* pButton);
+	void OnHiscoreAction(UiTbc::Button* pButton);
+	void OnPreHiscoreAction(UiTbc::Button* pButton);
+	void OnCreditsAction(UiTbc::Button* pButton);
 	void OnPauseClick(UiTbc::Button*);
 	void OnPauseAction(UiTbc::Button* pButton);
 	void OnGetiPhoneClick(UiTbc::Button*);
@@ -191,6 +195,7 @@ private:
 	mutable HiResTimer mPlayer1TouchDelay;
 	mutable HiResTimer mPlayer2TouchDelay;
 	UiTbc::FontManager::FontId mBigFontId;
+	UiTbc::FontManager::FontId mMonospacedFontId;
 	float mReverseAndBrake;
 	UiTbc::Dialog<App>::Action mButtonDelegate;
 	UiTbc::Dialog<App>* mDialog;
@@ -211,6 +216,7 @@ private:
 	HiResTimer mStartupTimer;
 #endif // Computer
 	StopWatch mRotateTimer;
+	int mHiscoreViewIndex;
 
 	LOG_CLASS_DECLARE();
 };
@@ -252,6 +258,7 @@ App::App(const strutil::strvec& pArgumentList):
 	mGetiPhoneButton(0),
 	mAngleTime(0),
 	mBigFontId(UiTbc::FontManager::INVALID_FONTID),
+	mMonospacedFontId(UiTbc::FontManager::INVALID_FONTID),
 	mReverseAndBrake(0),
 	mDialog(0),
 	mScrollBarImage(0),
@@ -264,7 +271,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mYawMeterOffset(0),
 	mPreviousSteering(0),
 	mCurrentSteering(0),
-	mFlipDraw(false)
+	mFlipDraw(false),
+	mHiscoreViewIndex(0)
 {
 	mApp = this;
 }
@@ -433,6 +441,7 @@ bool App::Open()
 	{
 		UiTbc::FontManager::FontId lDefaultFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mBigFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Helvetica"), 24);
+		mMonospacedFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Courier New"), 14);
 		mUiManager->GetFontManager()->SetActiveFont(lDefaultFontId);
 	}
 	if (lOk)
@@ -2176,6 +2185,84 @@ void App::MainMenu()
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTN("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTN("btn_2p.png", "Two players"));
+	d->AddButton(3, _T("Hiscore"));
+	d->AddButton(4, _T("Credits"));
+}
+
+void App::HiscoreMenu(int pIndex, int pDirection)
+{
+	mHiscoreViewIndex = pIndex;
+	const int lIndexCount = 12;
+	if (mHiscoreViewIndex < 0)
+	{
+		mHiscoreViewIndex = lIndexCount + mHiscoreViewIndex;
+	}
+	mHiscoreViewIndex %= lIndexCount;
+
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnHiscoreAction);
+	d->SetPreClickTarget(UiTbc::Dialog<App>::Action(this, &App::OnPreHiscoreAction));
+	d->SetDirection(pDirection, true);
+	d->SetOffset(PixelCoord(0, -30));
+	const str lLevels[] = { _T("Pendulum"), _T("Elevate"), _T("RoboCastle") };
+	const str lVehicles[] = { _T("Cutie"), _T("Hardie"), _T("Speedie"), _T("Sleepie") };
+	const str lLevelName = lLevels[mHiscoreViewIndex / LEPRA_ARRAY_COUNT(lVehicles)];
+	const str lVehicleName = lVehicles[mHiscoreViewIndex % LEPRA_ARRAY_COUNT(lVehicles)];
+	d->SetQueryLabel(_T("Hiscore ") + lLevelName + _T("/") + lVehicleName, mBigFontId);
+	struct HiscoreEntry
+	{
+		str mName;
+		int mScore;
+		inline HiscoreEntry(str pName, int pScore):
+			mName(pName),
+			mScore(pScore)
+		{
+		}
+	};
+	HiscoreEntry lEntries[10] =
+	{
+		HiscoreEntry(_T("Jonte"),         21043904),
+		HiscoreEntry(_T("Sviodolf"),       2994502),
+		HiscoreEntry(_T("Gunnar"),          978131),
+		HiscoreEntry(_T("Olle"),             85523),
+		HiscoreEntry(_T("Dasen"),            83134),
+		HiscoreEntry(_T("Svein"),             5521),
+		HiscoreEntry(_T("Egon Egonsson"),     4126),
+		HiscoreEntry(_T("RoundRobin"),         184),
+		HiscoreEntry(_T("Bertram"),             72),
+		HiscoreEntry(_T("Solvej"),               1),
+	};
+	str lHiscore;
+	for (int x = 0; x < mHiscoreViewIndex && x < 10; ++x)
+	{
+		const HiscoreEntry& lEntry = lEntries[x];
+		str lScore = strutil::IntToString(lEntry.mScore, 10);
+		for (size_t y = 3; y < lScore.length(); y += 4)
+		{
+			lScore.insert(lScore.length()-y, 1, ',');
+		}
+		lHiscore += strutil::Format(_T("%2i %-13s %10s\n"), x+1, lEntry.mName.c_str(), lScore.c_str());
+	}
+	if (lHiscore.empty())
+	{
+		lHiscore = _T("No score entered. Yet.");
+	}
+	UiTbc::Label* lText = new UiTbc::Label;
+	lText->SetFontId(mMonospacedFontId);
+	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
+	lText->SetText(lHiscore, LIGHT_GRAY, CLEAR_COLOR);
+	d->AddChild(lText, 120, 75);
+	UiTbc::Button* lMainMenuButton = new UiTbc::CustomButton(_T("main_menu"));
+	UiTbc::Button* lPrevButton = ICONBTN("btn_prev.png", "");
+	UiTbc::Button* lNextButton = ICONBTN("btn_next.png", "");
+	lMainMenuButton->SetPreferredSize(d->GetPreferredWidth() / 2, d->GetPreferredHeight());
+	lPrevButton->SetPreferredSize(57, 57);
+	lNextButton->SetPreferredSize(57, 57);
+	d->AddButton(-1, lMainMenuButton);
+	d->AddButton(-2, lPrevButton);
+	d->AddButton(-3, lNextButton);
+	lMainMenuButton->SetPos(d->GetPreferredWidth()/4, 0);
+	lPrevButton->SetPos(20, d->GetPreferredHeight()/2 - 57/2);
+	lNextButton->SetPos(d->GetPreferredWidth()-20-57, d->GetPreferredHeight()/2 - 57/2);
 }
 
 void App::SuperReset(bool pGameOver)
@@ -2271,24 +2358,54 @@ void App::OnAction(UiTbc::Button* pButton)
 void App::OnMainMenuAction(UiTbc::Button* pButton)
 {
 	const int lPreviousComputerIndex = mGame->GetComputerIndex();
-	if (pButton->GetTag() == 1)
+	switch (pButton->GetTag())
 	{
-		// 1P
-		const int lComputerIndex = Random::GetRandomNumber()&1;
-		mGame->SetComputerIndex(lComputerIndex);
-	}
-	else
-	{
-		// 2P
-		mGame->SetComputerIndex(-1);
+		case 1:
+		{
+			// 1P
+			const int lComputerIndex = Random::GetRandomNumber()&1;
+			mGame->SetComputerIndex(lComputerIndex);
+		}
+		break;
+		case 2:
+		{
+			// 2P
+			mGame->SetComputerIndex(-1);
+		}
+		break;
+		case 3:
+		{
+			HiscoreMenu(0, +1);
+		}
+		return;
+		case 4:
+		{
+			UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnCreditsAction);
+			d->SetQueryLabel(_T("Credits"), mBigFontId);
+			UiTbc::Label* lText = new UiTbc::Label;
+			lText->SetFontId(mMonospacedFontId);
+			lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
+			lText->SetText(	_T("Music:  Jonas Kapla\n")
+					_T("\n")
+					_T("Thanks: ODE, STLport, ChibiXM, Ogg/Vorbis,\n")
+					_T("        OpenAL, ALUT, libpng, Minizip,\n")
+					_T("        zlib, FastDelegate, UTF-8 CPP,\n")
+					_T("        DMI and ljudman/freesound"), LIGHT_GRAY, CLEAR_COLOR);
+			d->AddChild(lText, 70, 110);
+			UiTbc::Button* lButton = new UiTbc::CustomButton(_T("back"));
+			lButton->SetPreferredSize(d->GetPreferredSize());
+			d->AddButton(-1, lButton);
+			lButton->SetPos(0, 0);
+		}
+		return;
 	}
 	// Switched from single play to dual play or vice versa?
 	if ((lPreviousComputerIndex == -1) != (mGame->GetComputerIndex() == -1))
 	{
-		mStartTimer.Stop();	// Show keys again in.
+		mStartTimer.Stop();	// Show keys again on the computer screen.
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnLevelAction);
-	d->QueryLabel(_T("Select level"), mBigFontId);
+	d->SetQueryLabel(_T("Select level"), mBigFontId);
 	d->AddButton(1, ICONBTN("btn_lvl2.png", "Tutorial"));
 	d->AddButton(2, ICONBTN("btn_lvl2.png", "Pendulum"));
 	d->AddButton(3, ICONBTN("btn_lvl3.png", "Elevate"));
@@ -2320,7 +2437,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		return;
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnVehicleAction);
-	d->QueryLabel(_T("Select vehicle"), mBigFontId);
+	d->SetQueryLabel(_T("Select vehicle"), mBigFontId);
 	d->AddButton(1, _T("Cutie"));
 	d->AddButton(2, _T("Hardie"));
 	d->AddButton(3, _T("Speedie"));
@@ -2382,6 +2499,55 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 		mRotateTimer.Start();
 	}
 #endif // iOS L&F
+}
+
+void App::OnHiscoreAction(UiTbc::Button* pButton)
+{
+	switch (pButton->GetTag())
+	{
+		case -1:
+		{
+			MainMenu();
+		}
+		break;
+		case -2:
+		{
+			HiscoreMenu(mHiscoreViewIndex - 1, -1);
+		}
+		break;
+		case -3:
+		{
+			HiscoreMenu(mHiscoreViewIndex + 1, +1);
+		}
+		break;
+	}
+}
+
+void App::OnPreHiscoreAction(UiTbc::Button* pButton)
+{
+	switch (pButton->GetTag())
+	{
+		case -1:
+		{
+			mDialog->SetDirection(+1, false);
+		}
+		break;
+		case -2:
+		{
+			mDialog->SetDirection(-1, false);
+		}
+		break;
+		case -3:
+		{
+			mDialog->SetDirection(+1, false);
+		}
+		break;
+	}
+}
+
+void App::OnCreditsAction(UiTbc::Button* /*pButton*/)
+{
+	MainMenu();
 }
 
 void App::OnPauseClick(UiTbc::Button*)

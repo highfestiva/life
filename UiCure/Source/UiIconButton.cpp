@@ -30,7 +30,8 @@ IconButton::~IconButton()
 {
 	if (mIconResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		if (GetImageManager()->HasImage(mIconResource->GetData()))
+		if (mIconResource->GetConstResource()->GetReferenceCount() == 0 &&
+			GetImageManager()->HasImage(mIconResource->GetData()))
 		{
 			GetImageManager()->DropImage(mIconResource->GetData());
 		}

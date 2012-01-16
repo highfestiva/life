@@ -181,7 +181,13 @@ void Label::Repaint(Painter* pPainter)
 	pPainter->ReduceClippingRect(lRect);
 
 	int lTextX = lRect.mLeft;
-	int lTextY = lRect.mTop + (lRect.GetHeight() - mTextHeight) / 2;
+	int lTextY = 0;
+	switch (GetVAlign())
+	{
+		case VALIGN_TOP:	lTextY = lRect.mTop;						break;
+		case VALIGN_CENTER:	lTextY = lRect.mTop + (lRect.GetHeight() - mTextHeight) / 2;	break;
+		case VALIGN_BOTTOM:	lTextY = lRect.mBottom - mTextHeight;				break;
+	}
 
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{

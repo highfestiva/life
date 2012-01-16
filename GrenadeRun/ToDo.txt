@@ -71,20 +71,22 @@ Computer demo
 -------------
 Menu: credits.
 Menu: high score.
+Score counting.
+Local highscore?
 2 extra levels: castle and machine.
 Tweak other levels.
 Record voice for tutorial. Compress HARD!
 Record voice for instructions: SHOOT! DRIVE!
 Playback voice for tutorial.
 Polish on level_2 roads (in texture).
-Score counting.
-Local highscore.
 Memory leak check.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
 Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
+Server-side high score REST interface. Secure.
+Global high score list.
 Tweak steering.
 Add visual feedback on launcher motor strengths.
 In-app purchase.
@@ -93,8 +95,6 @@ Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.
-Server-side high score REST interface. Secure.
-Global high score list.
 Optimize.
 Memory leaks, zombies.
 iOS 5.

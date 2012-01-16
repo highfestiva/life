@@ -17,7 +17,8 @@ namespace UiTbc
 TextComponent::TextComponent():
 	mTextColor(OFF_BLACK),
 	mFontId(FontManager::INVALID_FONTID),
-	mIsFontActive(false)
+	mIsFontActive(false),
+	mVAlignment(VALIGN_CENTER)
 {
 }
 
@@ -67,6 +68,11 @@ void TextComponent::DeactivateFont(Painter* pPainter)
 	}
 }
 
+void TextComponent::SetVericalAlignment(VAlign pAlignment)
+{
+	mVAlignment = pAlignment;
+}
+
 void TextComponent::DoPrintText(Painter* pPainter, const str& pText, int x, int y)
 {
 	pPainter->SetColor(mTextColor, 0);
@@ -84,6 +90,11 @@ void TextComponent::PrintTextDeactivate(Painter* pPainter, const str& pText, int
 Color TextComponent::GetTextColor() const
 {
 	return (mTextColor);
+}
+
+TextComponent::VAlign TextComponent::GetVAlign() const
+{
+	return mVAlignment;
 }
 
 

@@ -127,6 +127,7 @@ void GUIImageManager::DrawImage(Painter::ImageID pImageID, int x, int y)
 	if (pImageID != Painter::INVALID_IMAGEID)
 	{
 		ImageTable::Iterator lIter = mImageTable.Find(pImageID);
+		assert(lIter != mImageTable.End());
 		if (lIter != mImageTable.End())
 		{
 			Image* lImage = *lIter;
