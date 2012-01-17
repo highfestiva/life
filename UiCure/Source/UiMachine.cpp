@@ -252,8 +252,8 @@ void Machine::OnTick()
 				FV_INTENSITY_EXPONENT,
 				FV_ENGINE_FACTOR_BASE,
 			};
-			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.2f, lFrameTime);
-			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.1f, lFrameTime);
+			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.05f, lFrameTime);
+			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.02f, lFrameTime);
 			float lIntensity = 0;
 			float lLowVolume = lTag.mFloatValueList[FV_VOLUME_LOW];
 			for (size_t y = 0; y < lTag.mEngineIndexList.size(); ++y)

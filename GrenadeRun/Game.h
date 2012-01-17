@@ -125,6 +125,9 @@ public:
 	void FreeLauncherBarrel();
 	FlybyMode GetFlybyMode() const;
 	void SetFlybyMode(FlybyMode pFlybyMode);
+	void ResetScore();
+	void AddScore(double pCutieScore, double pLauncherScore);
+	double GetScore() const;
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
 	void OnCapture();	// CTF
@@ -135,8 +138,8 @@ public:
 	void NextComputerIndex();
 	float GetComputerDifficulty() const;	// -1,[0,1], -1=inactive.
 	void SetComputerDifficulty(float pDifficulty);
-	int GetScoreBalance() const;	// 0 = score is 2 love, -1 = P1 leads with 1 point, +2 P2 leads with 2 points...
-	void SetScoreBalance(int pBalance);
+	int GetHeartBalance() const;	// 0 = Heart is 2 love, -1 = P1 leads with 1 point, +2 P2 leads with 2 points...
+	void SetHeartBalance(int pBalance);
 	void FlipRenderSides();
 	bool IsFlipRenderSide() const;
 
@@ -198,10 +201,11 @@ private:
 	LauncherAi* mLauncherAi;
 	int mComputerIndex;
 	float mComputerDifficulty;
-	int mScoreBalance;
+	int mHeartBalance;
 	bool mAllowWin;
 	int mFlipRenderSide;
 	float mFlipRenderSideFactor;
+	double mScore;
 
 	StopWatch mSlowmoTimer;
 };

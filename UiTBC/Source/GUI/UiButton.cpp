@@ -120,7 +120,21 @@ void Button::SetBaseColor(const Color& pColor)
 void Button::SetPressed(bool pPressed)
 {
 	mPressed = pPressed;
-	SetState(mPressed? PRESSED : HasMouseFocus()? RELEASED_HOOVER : RELEASED);
+	if (mPressed)
+	{
+		SetState(PRESSED);
+	}
+	else
+	{
+		if (HasMouseFocus())
+		{
+			SetState(RELEASED_HOOVER);
+		}
+		else
+		{
+			SetState(RELEASED);
+		}
+	}
 }
 
 void Button::SetState(State pState)
@@ -348,13 +362,16 @@ bool Button::OnLButtonUp(int pMouseX, int pMouseY)
 {
 	bool lCallFunctor = HasMouseFocus();
 
-	SetPressed(false);
-	ReleaseMouseFocus();
-
 	if (IsOver(pMouseX, pMouseY) == true &&
 		lCallFunctor == true && mOnClick != 0)
 	{
+		SetPressed(false);
 		(*mOnClick)(this);
+	}
+	else
+	{
+		ReleaseMouseFocus();
+		SetPressed(false);
 	}
 
 	return true;
@@ -449,7 +466,7 @@ void Button::SetIcon(Painter::ImageID pIconID,
 
 	PixelCoord lSize = GetImageManager()->GetImageSize(mIconID);
 	DesktopWindow* lTopmost = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-	const int lFontHeight = lTopmost? lTopmost->GetPainter()->GetFontHeight()*3/2 : 12;	// Just try anything if not into system yet.
+	const int lFontHeight = lTopmost? lTopmost->GetPainter()->GetFontHeight()*3/2 : 21;	// Just try anything if not into system yet.
 	const int dh = GetText().empty()? 0 : lFontHeight;
 	SetPreferredSize(lSize.x, lSize.y + dh);
 

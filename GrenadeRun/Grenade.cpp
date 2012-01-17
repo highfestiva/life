@@ -27,7 +27,8 @@ Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, U
 	mTimeFrameCreated(-1),
 	mMuzzleVelocity(pMuzzleVelocity),
 	mIsLaunched(false),
-	mExploded(false)
+	mExploded(false),
+	mIsUserFired(false)
 {
 }
 
@@ -37,6 +38,13 @@ Grenade::~Grenade()
 	mLaunchSound = 0;
 	delete mShreekSound;
 	mShreekSound = 0;
+}
+
+
+
+bool Grenade::IsUserFired() const
+{
+	return mIsUserFired;
 }
 
 
@@ -59,6 +67,7 @@ void Grenade::Launch()
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 
 	((Game*)GetManager()->GetGameManager())->FreeLauncherBarrel();
+	mIsUserFired = (((Game*)GetManager()->GetGameManager())->GetComputerIndex() != 1);
 }
 
 void Grenade::OnTick()
