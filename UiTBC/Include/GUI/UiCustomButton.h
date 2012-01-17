@@ -38,7 +38,7 @@ public:
 	void SetOnRenderDelegate(const Delegate& pOnRenderer);
 	void SetIsOverDelegate(const DelegateXY& pIsOver);
 
-	virtual void Repaint(Painter* pPainter);
+	virtual void Repaint(Painter*);
 	virtual bool IsOver(int pScreenX, int pScreenY);
 
 private:

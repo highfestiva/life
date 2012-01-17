@@ -49,7 +49,7 @@
 #define RTVAR_DEBUG_PERFORMANCE_NAMES	"Debug.Performance.Names"
 #define RTVAR_DEBUG_PERFORMANCE_COUNT	"Debug.Performance.Count"
 
-#define RTVAR_GAME_ISCHILD		"Game.IsChild"
+#define RTVAR_GAME_CHILDISHNESS		"Game.Childishness"
 #define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
 #define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
 

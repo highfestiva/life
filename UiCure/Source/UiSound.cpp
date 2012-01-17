@@ -31,6 +31,12 @@ Sound::~Sound()
 
 
 
+void Sound::SetManager(Cure::ContextManager* pManager)
+{
+	Parent::SetManager(pManager);
+	GetManager()->EnableTickCallback(this);
+}
+
 void Sound::LoadPlaySound2d(UserSound2dResource* pSoundResource)
 {
 	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
@@ -39,12 +45,17 @@ void Sound::LoadPlaySound2d(UserSound2dResource* pSoundResource)
 		return;
 	}
 	mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.7f, 1.0);
-	GetManager()->EnableTickCallback(this);
 }
 
 void Sound::OnTick()
 {
-	if (!mUiManager->GetSoundManager()->IsPlaying(mSoundResource->GetData()))
+	if (mSoundResource->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS &&
+		mSoundResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		GetManager()->PostKillObject(GetInstanceId());
+	}
+	else if (mSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+		!mUiManager->GetSoundManager()->IsPlaying(mSoundResource->GetData()))
 	{
 		GetManager()->PostKillObject(GetInstanceId());
 	}

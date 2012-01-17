@@ -67,7 +67,7 @@ void Machine::OnTick()
 	}
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
-	const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
+	const bool lIsChild = IsAttributeTrue(_T("float_childishness"));
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
@@ -252,8 +252,8 @@ void Machine::OnTick()
 				FV_INTENSITY_EXPONENT,
 				FV_ENGINE_FACTOR_BASE,
 			};
-			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.2f, lFrameTime);
-			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.1f, lFrameTime);
+			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.05f, lFrameTime);
+			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.02f, lFrameTime);
 			float lIntensity = 0;
 			float lLowVolume = lTag.mFloatValueList[FV_VOLUME_LOW];
 			for (size_t y = 0; y < lTag.mEngineIndexList.size(); ++y)

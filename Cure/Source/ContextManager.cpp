@@ -221,6 +221,7 @@ bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
 
 void ContextManager::EnableTickCallback(ContextObject* pObject)
 {
+	assert(pObject->GetInstanceId());
 	mTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
 }
 

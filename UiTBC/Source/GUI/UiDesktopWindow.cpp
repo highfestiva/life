@@ -378,6 +378,7 @@ void DesktopWindow::PostDeleteComponent(Component* pComponent, int /*pLayer*/)
 
 Painter* DesktopWindow::GetPainter()
 {
+	assert(this);
 	return (mPainter);
 }
 

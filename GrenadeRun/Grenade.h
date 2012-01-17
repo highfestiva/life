@@ -27,6 +27,8 @@ public:
 	Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, float pMuzzleVelocity);
 	virtual ~Grenade();
 
+	bool IsUserFired() const;
+
 private:
 	void Launch();
 	void OnTick();
@@ -43,6 +45,7 @@ private:
 	float mMuzzleVelocity;
 	bool mIsLaunched;
 	bool mExploded;
+	bool mIsUserFired;
 
 	LOG_CLASS_DECLARE();
 };

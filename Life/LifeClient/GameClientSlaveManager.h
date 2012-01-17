@@ -148,7 +148,7 @@ protected:
 	void CancelLogin();
 	void OnAvatarSelect(UiTbc::Button* pButton);
 	void DropAvatar();
-	bool QuerySetIsChild(Cure::ContextObject* pAvatar) const;
+	float QuerySetChildishness(Cure::ContextObject* pAvatar) const;
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;

@@ -17,9 +17,11 @@ namespace Cure
 ContextPath::SplinePath::SplinePath(Vector3DF* pKeyFrames,
 	float* pTimeTags,
 	int pCount,
-	float pDistanceNormal):
+	float pDistanceNormal,
+	float pLikeliness):
 	Parent(pKeyFrames, pTimeTags, pCount, SplineShape::TYPE_CATMULLROM, TAKE_OWNERSHIP),
-	mDistanceNormal(pDistanceNormal)
+	mDistanceNormal(pDistanceNormal),
+	mLikeliness(pLikeliness)
 {
 }
 
@@ -28,6 +30,10 @@ float ContextPath::SplinePath::GetDistanceNormal() const
 	return mDistanceNormal;
 }
 
+float ContextPath::SplinePath::GetLikeliness() const
+{
+	return mLikeliness;
+}
 
 
 ContextPath::ContextPath(ResourceManager* pResourceManager, const str& pClassId):
@@ -50,9 +56,10 @@ ContextPath::~ContextPath()
 void ContextPath::SetTagIndex(int pIndex)
 {
 	const TBC::ChunkyClass::Tag& lTag = ((CppContextObject*)mParent)->GetClass()->GetTag(pIndex);
+	assert(lTag.mFloatValueList.size() == 1);
 	const size_t lBodyCount = lTag.mBodyIndexList.size();
 	assert(lBodyCount >= 2);
-	if (lBodyCount < 2)
+	if (lTag.mFloatValueList.size() != 1 || lBodyCount < 2)
 	{
 		return;
 	}
@@ -93,7 +100,8 @@ void ContextPath::SetTagIndex(int pIndex)
 	}
 	lPathPositions[1+lBodyCount] = lPathPositions[1+lBodyCount-1];
 	lPathPositions[1+lBodyCount+1] = lPathPositions[1+lBodyCount-1];
-	SplinePath* lSplinePath = new SplinePath(lPathPositions, lTimes, lBodyCount+2, lScale);
+	const float lLikeliness = lTag.mFloatValueList[0];
+	SplinePath* lSplinePath = new SplinePath(lPathPositions, lTimes, lBodyCount+2, lScale, lLikeliness);
 	lSplinePath->StartInterpolation(0);
 	mPathArray.push_back(lSplinePath);
 }

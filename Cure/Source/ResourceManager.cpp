@@ -917,6 +917,11 @@ void ResourceManager::Tick()
 
 unsigned ResourceManager::ForceFreeCache()
 {
+	return ForceFreeCache(strutil::strvec());
+}
+
+unsigned ResourceManager::ForceFreeCache(const strutil::strvec& pResourceTypeList)
+{
 	ScopeLock lLock(&mThreadLock);
 	// TODO: optimize by keeping objects in cache for a while!
 
@@ -927,18 +932,31 @@ unsigned ResourceManager::ForceFreeCache()
 		mLog.Headlinef(_T("  - %s @ %p."), (*x)->GetName().c_str(), *x);
 	}
 	mLog.AHeadline("---------------");*/
-	const unsigned lDroppedResourceCount = mCachedResourceTable.GetCount();
-	while (!mCachedResourceTable.IsEmpty())
+	unsigned lDroppedResourceCount = 0;
+	ResourceTable::Iterator x = mCachedResourceTable.First();
+	while (x != mCachedResourceTable.End())
 	{
-		ResourceTable::Iterator x = mCachedResourceTable.First();
-		/*mLog.Headlinef(_T("  %p:"), *x);
-		mLog.Headlinef(_T("  - %s."), (*x)->GetName().c_str());*/
 		Resource* lResource = *x;
 		assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
-		mCachedResourceTable.Remove(x);
-		DeleteResource(lResource);
+		bool lDrop = pResourceTypeList.empty();
+		const str& lType = lResource->GetType();
+		strutil::strvec::const_iterator y = pResourceTypeList.begin();
+		for (; !lDrop && y != pResourceTypeList.end(); ++y)
+		{
+			lDrop = (lType == *y);
+		}
+		if (lDrop)
+		{
+			mCachedResourceTable.Remove(x++);
+			DeleteResource(lResource);
+			++lDroppedResourceCount;
+		}
+		else
+		{
+			++x;
+		}
 	}
-	return (lDroppedResourceCount);
+	return lDroppedResourceCount;
 }
 
 

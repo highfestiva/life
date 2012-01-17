@@ -36,15 +36,11 @@ void CustomButton::SetIsOverDelegate(const DelegateXY& pIsOver)
 	mIsOver = new DelegateXY(pIsOver);
 }
 
-void CustomButton::Repaint(Painter* pPainter)
+void CustomButton::Repaint(Painter*)
 {
 	if (mOnRender)
 	{
 		(*mOnRender)(this);
-	}
-	else
-	{
-		Parent::Repaint(pPainter);
 	}
 }
 

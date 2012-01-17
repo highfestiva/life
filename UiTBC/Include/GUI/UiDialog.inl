@@ -17,38 +17,60 @@ Dialog<_Target>::Dialog(Component* pParent, Action pTarget):
 	mTarget(pTarget),
 	mClickedButton(0),
 	mIsClosing(false),
-	mAnimationStep(-SPEED)
+	mAnimationStep(0),
+	mDirection(0)
 {
 	SetCornerRadius(20);
 	mColor[1] = DARK_GRAY;
 	pParent->AddChild(this);
 
-	const PixelCoord& lParentSize = pParent->GetSize();
-	PixelCoord lSize = lParentSize / 2;
-	SetPos(lParentSize.x+MARGIN, lParentSize.y/2 - lSize.y/2);
+	const PixelCoord& lParentSize = GetParent()->GetSize();
+	PixelCoord lSize = lParentSize - PixelCoord(100, 100);
 	SetSize(lSize);
 	SetPreferredSize(lSize);
 
-	// Calculate what animation speed is required to get right end speed using the acceleration.
-	const int lTargetX = lParentSize.x/2 - lSize.x/2;
-	const int lStartX = GetPos().x;
-	int x = lTargetX;
-	for (int i = 0; i < 1000; ++i)
-	{
-		x -= mAnimationStep;
-		if (x >= lStartX)
-		{
-			break;
-		}
-		mAnimationStep -= ACCELERATION;
-	}
-	SetPos(x, GetPos().y);
+	SetDirection(+1, true);
 }
 
 template<class _Target>
 Dialog<_Target>::~Dialog()
 {
 	mTarget.clear();
+	mPreClickTarget.clear();
+}
+
+template<class _Target>
+void Dialog<_Target>::SetDirection(int pDirection, bool pSetPos)
+{
+	mDirection = pDirection;
+
+	const PixelCoord& lParentSize = GetParent()->GetSize();
+	const PixelCoord& lSize = GetSize();
+	const int lStartX = (mDirection > 0)? lParentSize.x+MARGIN : -lSize.x-MARGIN;
+
+	// Calculate what animation speed is required to get right end speed using the acceleration.
+	const int lTargetX = lParentSize.x/2 - lSize.x/2;
+	int x = lTargetX;
+	mAnimationStep = -SPEED * mDirection;
+	for (int i = 0; i < 1000; ++i)
+	{
+		x -= mAnimationStep;
+		if ((mDirection > 0)? (x >= lStartX) : (x <= lStartX))
+		{
+			break;
+		}
+		mAnimationStep -= ACCELERATION * mDirection;
+	}
+	if (pSetPos)
+	{
+		SetPos(x, lParentSize.y/2 - lSize.y/2);
+	}
+}
+
+template<class _Target>
+void Dialog<_Target>::SetPreClickTarget(Action pPreClickTarget)
+{
+	mPreClickTarget = pPreClickTarget;
 }
 
 template<class _Target>
@@ -64,15 +86,15 @@ void Dialog<_Target>::Center()
 }
 
 template<class _Target>
-Label* Dialog<_Target>::QueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId)
+Label* Dialog<_Target>::SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId)
 {
 	if (!mLabel)
 	{
 		mLabel = new UiTbc::Label;
 	}
-	UiTbc::Painter* lPainter = ((DesktopWindow*)GetTopParent())->GetPainter();
+	UiTbc::Painter* lPainter = ((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->GetPainter();
 	mLabel->SetFontId(pFontId);
-	mLabel->ActivateFont(lPainter);
+	//mLabel->ActivateFont(lPainter);
 	mLabel->SetText(pText, mColor[1], Lepra::Color(0,0,0,0), lPainter);
 	const int w = lPainter->GetStringWidth(pText);
 	const int h = lPainter->GetFontHeight();
@@ -84,7 +106,7 @@ Label* Dialog<_Target>::QueryLabel(const str& pText, UiTbc::FontManager::FontId 
 	lCoord.x = lSize.x/2 - w/2;
 	lCoord.y = lSize.y/3 - h;
 	mLabel->SetPos(lCoord+mOffset);
-	mLabel->DeactivateFont(lPainter);
+	//mLabel->DeactivateFont(lPainter);
 	return mLabel;
 }
 
@@ -120,7 +142,6 @@ void Dialog<_Target>::SetOffset(PixelCoord pOffset)
 template<class _Target>
 void Dialog<_Target>::UpdateLayout()
 {
-	const int lCount = (int)mButtonList.size();
 	const PixelCoord& lSize = GetSize();
 
 	if (mLabel)
@@ -130,17 +151,24 @@ void Dialog<_Target>::UpdateLayout()
 		mLabel->SetPos(lCoord + mOffset);
 	}
 
-	Button* lButton = mButtonList[0];
-	PixelCoord lButtonSize = lButton->GetPreferredSize();
-	const int lSpacePerEach = lButtonSize.x*3/2;
-	const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
-	int x = lSize.x/2 + lHalfGap - lSpacePerEach*lCount/2;
-	const int y = mLabel? lSize.y/2 : lSize.y/2-lButtonSize.y/2;
-	for (int i = 0; i < lCount; ++i)
+	const int lButtonCount = (int)mButtonList.size();
+	if (lButtonCount)
 	{
-		Button* lButton = mButtonList[i];
-		lButton->SetPos(PixelCoord(x, y) + mOffset);
-		x +=  lSpacePerEach;
+		Button* lButton = mButtonList[0];
+		PixelCoord lButtonSize = lButton->GetPreferredSize();
+		const int lSpacePerEach = lButtonSize.x*3/2;
+		const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
+		int x = lSize.x/2 + lHalfGap - lSpacePerEach*lButtonCount/2;
+		const int y = mLabel? lSize.y/2 : lSize.y/2-lButtonSize.y/2;
+		for (int i = 0; i < lButtonCount; ++i)
+		{
+			Button* lButton = mButtonList[i];
+			if (lButton->GetTag() >= 0)
+			{
+				lButton->SetPos(PixelCoord(x, y) + mOffset);
+				x += lSpacePerEach;
+			}
+		}
 	}
 
 	Parent::UpdateLayout();
@@ -173,9 +201,10 @@ void Dialog<_Target>::Animate()
 		if (!mIsClosing)
 		{
 			// Move in from right.
-			mAnimationStep += ACCELERATION;
+			mAnimationStep += ACCELERATION * mDirection;
 			const int x = lParentSize.x/2-lSize.x/2;
-			if (lPos.x <= x || mAnimationStep >= 0)
+			if ((mDirection > 0 && (lPos.x <= x || mAnimationStep >= 0)) ||
+				(mDirection < 0 && (lPos.x >= x || mAnimationStep <= 0)))
 			{
 				mAnimationStep = 0;
 				Center();
@@ -184,11 +213,12 @@ void Dialog<_Target>::Animate()
 		else
 		{
 			// Move out to left.
-			mAnimationStep -= ACCELERATION;
-			if (lPos.x+GetSize().x < -MARGIN || mAnimationStep >= 0)
+			mAnimationStep -= ACCELERATION * mDirection;
+			if ((mDirection > 0 && (lPos.x+GetSize().x < -MARGIN || mAnimationStep >= 0)) ||
+				(mDirection < 0 && (lPos.x > lParentSize.x+MARGIN || mAnimationStep <= 0)))
 			{
 				mTarget(mClickedButton);
-				((DesktopWindow*)GetTopParent())->PostDeleteComponent(this, 0);
+				((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->PostDeleteComponent(this, 0);
 			}
 		}
 	}
@@ -199,8 +229,12 @@ void Dialog<_Target>::OnClick(Button* pButton)
 {
 	if (!mClickedButton)
 	{
+		if (mPreClickTarget)
+		{
+			mPreClickTarget(pButton);
+		}
 		mClickedButton = pButton;
-		mAnimationStep = -SPEED;
+		mAnimationStep = -SPEED * mDirection;
 		mIsClosing = true;
 	}
 }

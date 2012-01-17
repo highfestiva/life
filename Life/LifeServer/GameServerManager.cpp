@@ -103,7 +103,7 @@ bool GameServerManager::BeginTick()
 		{
 			continue;
 		}
-		if (lObject->IsAttributeTrue(_T("float_is_child")) ||
+		if (lObject->IsAttributeTrue(_T("float_childishness")) ||
 			lObject->GetGuideMode() == TBC::ChunkyPhysics::GUIDE_ALWAYS)
 		{
 			lObject->StabilizeTick();
@@ -965,7 +965,7 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 		return;
 	}
 	// A grown-up still activating an engine = leave 'em be.
-	if (!pObject->IsAttributeTrue(_T("float_is_child")))
+	if (!pObject->IsAttributeTrue(_T("float_childishness")))
 	{
 		const int lEngineCount = pObject->GetPhysics()->GetEngineCount();
 		for (int x = 0; x < lEngineCount; ++x)

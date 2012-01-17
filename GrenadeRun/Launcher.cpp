@@ -70,8 +70,13 @@ void Launcher::GetAngles(const Vector3DF& pTargetPosition, const Vector3DF& pTar
 	this->GetOrientation().GetEulerAngles(pYaw, pPitch, lRoll);
 	float lTime = 10.0f;
 	GetBallisticData(lPosition1, lPosition2, pPitch, pGuidePitch, pGuideYaw, lTime);
-	lPosition1 += pTargetVelocity * lTime;
-	const float lBetterPitch = pGuidePitch;
+	float lBetterPitch = pGuidePitch;
+	{
+		Vector3DF p = lPosition1 + pTargetVelocity * lTime;
+		GetBallisticData(p, lPosition2, lBetterPitch, pGuidePitch, pGuideYaw, lTime);
+	}
+	lBetterPitch = pGuidePitch;
+	lPosition1 = lPosition1 + pTargetVelocity * lTime;
 	GetBallisticData(lPosition1, lPosition2, lBetterPitch, pGuidePitch, pGuideYaw, lTime);
 	pGuidePitch = Math::Clamp(pGuidePitch, -PIF/2, 0.0f);
 	pGuideYaw = Math::Clamp(pGuideYaw, -PIF/2, PIF/2);

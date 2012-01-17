@@ -28,7 +28,7 @@
 #include "../UiLepra/Include/UiOpenGLExtensions.h"	// Included to get the gl-headers.
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiSoundStream.h"
-#include "../UiTBC/Include/GUI/UiButton.h"
+#include "../UiTBC/Include/GUI/UiCustomButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiDialog.h"
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
@@ -45,7 +45,7 @@
 #define BGCOLOR_DIALOG	Color(5, 20, 30, 192)
 #define FGCOLOR_DIALOG	Color(170, 170, 170, 255)
 #define ICONBTN(i,n)	new UiCure::IconButton(mUiManager, mResourceManager, _T(i), _T(n))
-#define SCORE_POINTS	4
+#define HEART_POINTS	4
 #define BARREL_COMPASS_LINE_COUNT	13
 #define BARREL_COMPASS_LINE_SPACING	3
 #define BARREL_COMPASS_WIDTH		(BARREL_COMPASS_LINE_COUNT-1)*BARREL_COMPASS_LINE_SPACING + 1
@@ -95,6 +95,7 @@ private:
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	void Layout();
 	void MainMenu();
+	void HiscoreMenu(int pIndex, int pDirection);
 	void SuperReset(bool pGameOver);
 
 	virtual void Suspend();
@@ -117,6 +118,9 @@ private:
 	void OnMainMenuAction(UiTbc::Button* pButton);
 	void OnLevelAction(UiTbc::Button* pButton);
 	void OnVehicleAction(UiTbc::Button* pButton);
+	void OnHiscoreAction(UiTbc::Button* pButton);
+	void OnPreHiscoreAction(UiTbc::Button* pButton);
+	void OnCreditsAction(UiTbc::Button* pButton);
 	void OnPauseClick(UiTbc::Button*);
 	void OnPauseAction(UiTbc::Button* pButton);
 	void OnGetiPhoneClick(UiTbc::Button*);
@@ -127,6 +131,7 @@ private:
 	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent);
 	void Transpose(int& x, int& y, float& pAngle) const;
 	void Transpose(float& x, float& y, float& pAngle) const;
+	static str Int2Str(int pNumber);
 
 	StdioConsoleLogListener mConsoleLogger;
 	DebuggerLogListener mDebugLogger;
@@ -165,16 +170,17 @@ private:
 	UiTbc::Button* mRetryButton;
 	UiTbc::Button* mPauseButton;
 	UiTbc::Button* mGetiPhoneButton;
-	UiCure::UserPainterKeepImageResource* mScoreHeart;
-	UiCure::UserPainterKeepImageResource* mScoreGreyHeart;
+	UiCure::UserPainterKeepImageResource* mHeart;
+	UiCure::UserPainterKeepImageResource* mGreyHeart;
 #ifndef LEPRA_IOS_LOOKANDFEEL
 	UiCure::UserPainterKeepImageResource* mKeyboardButton;
 #endif // Computer
 	UiCure::UserPainterKeepImageResource* mArrow;
 	UiCure::UserPainterKeepImageResource* mSteeringWheel;
 	UiCure::UserPainterKeepImageResource* mGrenade;
+	UiCure::UserPainterKeepImageResource* mRotate;
 	float mGrenadeSizeFactor;
-	mutable Vector3DF mScoreHeartPos[SCORE_POINTS];
+	mutable Vector3DF mHeartPos[HEART_POINTS];
 	UiTbc::RectComponent* mPlayerSplitter;
 	float mAngleTime;
 	Color mTouchCenterColor;
@@ -190,6 +196,7 @@ private:
 	mutable HiResTimer mPlayer1TouchDelay;
 	mutable HiResTimer mPlayer2TouchDelay;
 	UiTbc::FontManager::FontId mBigFontId;
+	UiTbc::FontManager::FontId mMonospacedFontId;
 	float mReverseAndBrake;
 	UiTbc::Dialog<App>::Action mButtonDelegate;
 	UiTbc::Dialog<App>* mDialog;
@@ -206,6 +213,11 @@ private:
 	float mPreviousSteering;
 	float mCurrentSteering;
 	bool mFlipDraw;
+#ifndef LEPRA_IOS
+	HiResTimer mStartupTimer;
+#endif // Computer
+	StopWatch mRotateTimer;
+	int mHiscoreViewIndex;
 
 	LOG_CLASS_DECLARE();
 };
@@ -247,6 +259,7 @@ App::App(const strutil::strvec& pArgumentList):
 	mGetiPhoneButton(0),
 	mAngleTime(0),
 	mBigFontId(UiTbc::FontManager::INVALID_FONTID),
+	mMonospacedFontId(UiTbc::FontManager::INVALID_FONTID),
 	mReverseAndBrake(0),
 	mDialog(0),
 	mScrollBarImage(0),
@@ -259,7 +272,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mYawMeterOffset(0),
 	mPreviousSteering(0),
 	mCurrentSteering(0),
-	mFlipDraw(false)
+	mFlipDraw(false),
+	mHiscoreViewIndex(0)
 {
 	mApp = this;
 }
@@ -399,11 +413,11 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mScoreHeart = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mScoreHeart->Load(mResourceManager, _T("heart.png"),
+		mHeart = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mHeart->Load(mResourceManager, _T("heart.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
-		mScoreGreyHeart = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mScoreGreyHeart->Load(mResourceManager, _T("grey_heart.png"),
+		mGreyHeart = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mGreyHeart->Load(mResourceManager, _T("grey_heart.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 #ifndef LEPRA_IOS_LOOKANDFEEL
 		mKeyboardButton = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
@@ -419,12 +433,16 @@ bool App::Open()
 		mGrenade = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mGrenade->Load(mResourceManager, _T("grenade.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
+		mRotate = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mRotate->Load(mResourceManager, _T("rotate.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 		mGrenadeSizeFactor = 1.0f;
 	}
 	if (lOk)
 	{
 		UiTbc::FontManager::FontId lDefaultFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mBigFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Helvetica"), 24);
+		mMonospacedFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Courier New"), 14);
 		mUiManager->GetFontManager()->SetActiveFont(lDefaultFontId);
 	}
 	if (lOk)
@@ -533,9 +551,6 @@ int App::Run()
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
 	}
-#ifndef LEPRA_IOS
-	HiResTimer lStartupTimer;
-#endif // Computer
 	if (lOk)
 	{
 		lOk = Open();
@@ -556,7 +571,7 @@ int App::Run()
 	}
 	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
-	while (2.0 - lStartupTimer.QueryTimeDiff() > 0)
+	while (2.0 - mStartupTimer.QueryTimeDiff() > 0)
 	{
 		if (SystemManager::GetQuitRequest())
 		{
@@ -564,6 +579,7 @@ int App::Run()
 		}
 		Thread::Sleep(0.1);
 		UiLepra::Core::ProcessMessages();
+		mResourceManager->Tick();
 	}
 	bool lQuit = (SystemManager::GetQuitRequest() != 0);
 	while (!lQuit)
@@ -641,7 +657,7 @@ bool App::Poll()
 		mResourceManager->Tick();
 		return lOk;
 	}
-	mResourceManager->ForceFreeCache();
+	//mResourceManager->ForceFreeCache();
 	mIsLoaded = true;
 	if (lOk)
 	{
@@ -676,6 +692,10 @@ bool App::Poll()
 	const bool lTRICKY_IsLoopPaused = mIsPaused;
 	if (lOk && !lTRICKY_IsLoopPaused)
 	{
+		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE)
+		{
+			mGame->AddScore(+3, 0);
+		}
 		mGame->BeginTick();
 	}
 	bool lRender = false;
@@ -703,10 +723,24 @@ bool App::Poll()
 		mInfoTextColor = Color(127, 127, 127)*(1+::sin(mAngleTime*27)*0.9f);
 		DrawHud();
 
-#ifdef LEPRA_DEBUG
-		mUiManager->GetPainter()->SetColor(WHITE);
-		mUiManager->GetPainter()->PrintText(strutil::Format(_T("%.1f"), 1.0/mAverageLoopTime), 10, 10);
-#endif // Debug
+		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE)
+		{
+			mUiManager->GetPainter()->SetColor(WHITE);
+			const str lScore = Int2Str((int)mGame->GetScore());
+			mUiManager->GetPainter()->PrintText(lScore, 10, 10);
+		}
+
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		if (mRotateTimer.IsStarted() && mRotateTimer.QueryTimeDiff() < 2.0 &&
+			mRotate->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
+			mUiManager->GetPainter()->DrawImage(mRotate->GetData(),
+				mUiManager->GetCanvas()->GetWidth()/2 - mRotate->GetRamData()->GetWidth()/2,
+				mUiManager->GetCanvas()->GetHeight()/2 - mRotate->GetRamData()->GetHeight()/2);
+			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
+		}
+#endif // iOS L&F
 
 		mGame->Paint();
 
@@ -813,7 +847,7 @@ void App::DrawHud()
 #endif // iOS / computer
 		UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
-		const bool lGameOver = (mGame->GetScoreBalance() == -SCORE_POINTS/2 || mGame->GetScoreBalance() == +SCORE_POINTS/2);
+		const bool lGameOver = (mGame->GetHeartBalance() == -HEART_POINTS/2 || mGame->GetHeartBalance() == +HEART_POINTS/2);
 		const str lWon = lGameOver? _T("You rule!") : _T("Won heart");
 		const str lLost = lGameOver? _T("Defeat!") : _T("Lost heart");
 		const float lBackgroundSize = 110;
@@ -1139,8 +1173,8 @@ void App::DrawHud()
 
 	mFlipDraw = false;
 
-	if (mScoreHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
-		mScoreGreyHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	if (mHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+		mGreyHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 		mUiManager->GetPainter()->SetAlphaValue(255);
@@ -1148,7 +1182,7 @@ void App::DrawHud()
 		float x = lMargin;
 		float y = BUTTON_WIDTH + 8*2 + 3;
 		float lAngle = 0;
-		const int lBalance = -mGame->GetScoreBalance();
+		const int lBalance = -mGame->GetHeartBalance();
 		static float lHeartBeatTime = 0;
 		lHeartBeatTime += 0.5f;
 		if (lHeartBeatTime > 4*PIF)
@@ -1156,8 +1190,8 @@ void App::DrawHud()
 			lHeartBeatTime -= 4*PIF;
 		}
 		const float lHeartBeatFactor = (lHeartBeatTime < 2*PIF) ? 1 : 1+0.15f*sin(lHeartBeatTime);
-		const float iw = (float)mScoreHeart->GetRamData()->GetWidth();
-		const float ih = (float)mScoreHeart->GetRamData()->GetHeight();
+		const float iw = (float)mHeart->GetRamData()->GetWidth();
+		const float ih = (float)mHeart->GetRamData()->GetHeight();
 		const float hw = iw * lHeartBeatFactor;
 		const float hh = ih * lHeartBeatFactor;
 #ifdef LEPRA_IOS_LOOKANDFEEL
@@ -1177,20 +1211,20 @@ void App::DrawHud()
 			y = lMargin+2;
 		}
 		int lHeartIndex = 0;
-		for (int i = -SCORE_POINTS/2; i < +SCORE_POINTS/2; ++i)
+		for (int i = -HEART_POINTS/2; i < +HEART_POINTS/2; ++i)
 		{
 			if (mGame->GetComputerIndex() != 0)
 			{
 				Vector3DF v(x+iw/2, y+iw/2, lAngle);
 				if (i < lBalance)
 				{
-					v = mScoreHeartPos[lHeartIndex] = Math::Lerp(mScoreHeartPos[lHeartIndex], v, 0.07f);
+					v = mHeartPos[lHeartIndex] = Math::Lerp(mHeartPos[lHeartIndex], v, 0.07f);
 					++lHeartIndex;
-					DrawImage(mScoreHeart->GetData(), v.x, v.y, hw, hh, v.z);
+					DrawImage(mHeart->GetData(), v.x, v.y, hw, hh, v.z);
 				}
 				else
 				{
-					DrawImage(mScoreGreyHeart->GetData(), v.x, v.y, iw, ih, v.z);
+					DrawImage(mGreyHeart->GetData(), v.x, v.y, iw, ih, v.z);
 				}
 				y += iw+8;
 			}
@@ -1222,21 +1256,21 @@ void App::DrawHud()
 			y = lMargin;
 #endif // iOS / Computer
 		}
-		y += (iw+8) * (SCORE_POINTS - 1);
-		for (int i = -SCORE_POINTS/2; i < +SCORE_POINTS/2; ++i)
+		y += (iw+8) * (HEART_POINTS - 1);
+		for (int i = -HEART_POINTS/2; i < +HEART_POINTS/2; ++i)
 		{
 			if (mGame->GetComputerIndex() != 1)
 			{
 				Vector3DF v(x+iw/2, y+iw/2, lAngle);
 				if (i >= lBalance)
 				{
-					v = mScoreHeartPos[lHeartIndex] = Math::Lerp(mScoreHeartPos[lHeartIndex], v, 0.07f);
+					v = mHeartPos[lHeartIndex] = Math::Lerp(mHeartPos[lHeartIndex], v, 0.07f);
 					++lHeartIndex;
-					DrawImage(mScoreHeart->GetData(), v.x, v.y, hw, hh, v.z);
+					DrawImage(mHeart->GetData(), v.x, v.y, hw, hh, v.z);
 				}
 				else
 				{
-					DrawImage(mScoreGreyHeart->GetData(), v.x, v.y, iw, ih, v.z);
+					DrawImage(mGreyHeart->GetData(), v.x, v.y, iw, ih, v.z);
 				}
 				y -= iw+8;
 			}
@@ -1829,6 +1863,14 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			}
 		}
 		break;
+		case UIKEY(5):
+		{
+			if (!pFactor)
+			{
+				mGame->SetComputerIndex((mGame->GetComputerIndex() == 0)? 1 : 0);
+			}
+		}
+		break;
 #endif // Debug
 	}
 
@@ -2142,13 +2184,87 @@ void App::MainMenu()
 	mGameOverTimer.Stop();
 	mGame->ResetWinnerIndex();
 	mGame->SetFlybyMode(Game::FLYBY_SYSTEM_PAUSE);
-	mGame->SetScoreBalance(0);
+	mGame->SetHeartBalance(0);
 	// TRICKY-END!
 
 	mPauseButton->SetVisible(false);
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTN("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTN("btn_2p.png", "Two players"));
+	d->AddButton(3, _T("Hiscore"));
+	d->AddButton(4, _T("Credits"));
+}
+
+void App::HiscoreMenu(int pIndex, int pDirection)
+{
+	mHiscoreViewIndex = pIndex;
+	const int lIndexCount = 12;
+	if (mHiscoreViewIndex < 0)
+	{
+		mHiscoreViewIndex = lIndexCount + mHiscoreViewIndex;
+	}
+	mHiscoreViewIndex %= lIndexCount;
+
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnHiscoreAction);
+	d->SetPreClickTarget(UiTbc::Dialog<App>::Action(this, &App::OnPreHiscoreAction));
+	d->SetDirection(pDirection, true);
+	d->SetOffset(PixelCoord(0, -30));
+	const str lLevels[] = { _T("Pendulum"), _T("Elevate"), _T("RoboCastle") };
+	const str lVehicles[] = { _T("Cutie"), _T("Hardie"), _T("Speedie"), _T("Sleepie") };
+	const str lLevelName = lLevels[mHiscoreViewIndex / LEPRA_ARRAY_COUNT(lVehicles)];
+	const str lVehicleName = lVehicles[mHiscoreViewIndex % LEPRA_ARRAY_COUNT(lVehicles)];
+	d->SetQueryLabel(_T("Hiscore ") + lLevelName + _T("/") + lVehicleName, mBigFontId);
+	struct HiscoreEntry
+	{
+		str mName;
+		int mScore;
+		inline HiscoreEntry(str pName, int pScore):
+			mName(pName),
+			mScore(pScore)
+		{
+		}
+	};
+	HiscoreEntry lEntries[10] =
+	{
+		HiscoreEntry(_T("Jonte"),         21043904),
+		HiscoreEntry(_T("Sviodolf"),       2994502),
+		HiscoreEntry(_T("Gunnar"),          978131),
+		HiscoreEntry(_T("Olle"),             85523),
+		HiscoreEntry(_T("Dasen"),            83134),
+		HiscoreEntry(_T("Svein"),             5521),
+		HiscoreEntry(_T("Egon Egonsson"),     4126),
+		HiscoreEntry(_T("RoundRobin"),         184),
+		HiscoreEntry(_T("Bertram"),             72),
+		HiscoreEntry(_T("Solvej"),               1),
+	};
+	str lHiscore;
+	for (int x = 0; x < mHiscoreViewIndex && x < 10; ++x)
+	{
+		const HiscoreEntry& lEntry = lEntries[x];
+		const str lScore = Int2Str(lEntry.mScore);
+		lHiscore += strutil::Format(_T("%2i %-13s %10s\n"), x+1, lEntry.mName.c_str(), lScore.c_str());
+	}
+	if (lHiscore.empty())
+	{
+		lHiscore = _T("No score entered. Yet.");
+	}
+	UiTbc::Label* lText = new UiTbc::Label;
+	lText->SetFontId(mMonospacedFontId);
+	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
+	lText->SetText(lHiscore, LIGHT_GRAY, CLEAR_COLOR);
+	d->AddChild(lText, 120, 75);
+	UiTbc::Button* lMainMenuButton = new UiTbc::CustomButton(_T("main_menu"));
+	UiTbc::Button* lPrevButton = ICONBTN("btn_prev.png", "");
+	UiTbc::Button* lNextButton = ICONBTN("btn_next.png", "");
+	lMainMenuButton->SetPreferredSize(d->GetPreferredWidth() / 2, d->GetPreferredHeight());
+	lPrevButton->SetPreferredSize(57, 57);
+	lNextButton->SetPreferredSize(57, 57);
+	d->AddButton(-1, lMainMenuButton);
+	d->AddButton(-2, lPrevButton);
+	d->AddButton(-3, lNextButton);
+	lMainMenuButton->SetPos(d->GetPreferredWidth()/4, 0);
+	lPrevButton->SetPos(20, d->GetPreferredHeight()/2 - 57/2);
+	lNextButton->SetPos(d->GetPreferredWidth()-20-57, d->GetPreferredHeight()/2 - 57/2);
 }
 
 void App::SuperReset(bool pGameOver)
@@ -2166,38 +2282,47 @@ void App::SuperReset(bool pGameOver)
 	if (pGameOver)
 	{
 		// Total game over (someone won the match)?
-		const int lScoreBalance = mGame->GetScoreBalance();
-		if (lScoreBalance == -SCORE_POINTS/2 || lScoreBalance == +SCORE_POINTS/2)
+		const int lHeartBalance = mGame->GetHeartBalance();
+		if (lHeartBalance == -HEART_POINTS/2 || lHeartBalance == +HEART_POINTS/2)
 		{
 			mGame->SetComputerIndex(mGame->GetComputerIndex());	// Force flip side reset.
+			mGame->ResetScore();
 			MainMenu();
 			return;
 		}
-		//mGame->SetScoreBalance(-lScoreBalance);
 
-		// Nope, simply reload the interior.
+		// Nope, simply reload the interior. Go another round.
 		const int lComputerIndex = mGame->GetComputerIndex();
 		switch (lComputerIndex)
 		{
-			case -1:	mGame->FlipRenderSides();								break;
-			case 0:		mGame->SetComputerIndex(1);	mGame->SetScoreBalance(-mGame->GetScoreBalance());	break;
-			case 1:		mGame->SetComputerIndex(0);	mGame->SetScoreBalance(-mGame->GetScoreBalance());	break;
+			case -1:	mGame->FlipRenderSides();											break;
+			case 0:		mGame->SetComputerIndex(1);	mGame->SetHeartBalance(-mGame->GetHeartBalance());	mRotateTimer.Start();	break;
+			case 1:		mGame->SetComputerIndex(0);	mGame->SetHeartBalance(-mGame->GetHeartBalance());	mRotateTimer.Start();	break;
 		}
 	}
 	else
 	{
 		// Restart level.
-		mGame->SetScoreBalance(0);
+		mGame->SetHeartBalance(0);
 		if (mGame->IsFlipRenderSide())
 		{
 			mGame->FlipRenderSides();
 		}
+		mGame->SetComputerIndex(mGame->GetComputerIndex());
+		mGame->ResetScore();
 	}
 	mGame->ResetWinnerIndex();
 	mGame->SetVehicle(mGame->GetVehicle());
 	mGame->ResetLauncher();
 	mResourceManager->Tick();
-	mResourceManager->ForceFreeCache();
+	strutil::strvec lResourceTypes;
+	lResourceTypes.push_back(_T("RenderImg"));
+	lResourceTypes.push_back(_T("Geometry"));
+	lResourceTypes.push_back(_T("GeometryRef"));
+	lResourceTypes.push_back(_T("Physics"));
+	lResourceTypes.push_back(_T("RamImg"));
+	mResourceManager->ForceFreeCache(lResourceTypes);
+	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
 
 	mIsLoaded = false;
 	mDoLayout = true;
@@ -2207,6 +2332,9 @@ void App::SuperReset(bool pGameOver)
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
 	mDoLayout = true;
+#ifndef LEPRA_IOS
+	mStartupTimer.ReduceTimeDiff(-10);
+#endif // Computer
 }
 
 void App::OnMinimize()
@@ -2233,24 +2361,54 @@ void App::OnAction(UiTbc::Button* pButton)
 void App::OnMainMenuAction(UiTbc::Button* pButton)
 {
 	const int lPreviousComputerIndex = mGame->GetComputerIndex();
-	if (pButton->GetTag() == 1)
+	switch (pButton->GetTag())
 	{
-		// 1P
-		const int lComputerIndex = Random::GetRandomNumber()&1;
-		mGame->SetComputerIndex(lComputerIndex);
-	}
-	else
-	{
-		// 2P
-		mGame->SetComputerIndex(-1);
+		case 1:
+		{
+			// 1P
+			const int lComputerIndex = Random::GetRandomNumber()&1;
+			mGame->SetComputerIndex(lComputerIndex);
+		}
+		break;
+		case 2:
+		{
+			// 2P
+			mGame->SetComputerIndex(-1);
+		}
+		break;
+		case 3:
+		{
+			HiscoreMenu(0, +1);
+		}
+		return;
+		case 4:
+		{
+			UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnCreditsAction);
+			d->SetQueryLabel(_T("Credits"), mBigFontId);
+			UiTbc::Label* lText = new UiTbc::Label;
+			lText->SetFontId(mMonospacedFontId);
+			lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
+			lText->SetText(	_T("Music:  Jonas Kapla\n")
+					_T("\n")
+					_T("Thanks: ODE, STLport, ChibiXM, Ogg/Vorbis,\n")
+					_T("        OpenAL, ALUT, libpng, Minizip,\n")
+					_T("        zlib, FastDelegate, UTF-8 CPP,\n")
+					_T("        DMI and ljudman/freesound"), LIGHT_GRAY, CLEAR_COLOR);
+			d->AddChild(lText, 70, 110);
+			UiTbc::Button* lButton = new UiTbc::CustomButton(_T("back"));
+			lButton->SetPreferredSize(d->GetPreferredSize());
+			d->AddButton(-1, lButton);
+			lButton->SetPos(0, 0);
+		}
+		return;
 	}
 	// Switched from single play to dual play or vice versa?
 	if ((lPreviousComputerIndex == -1) != (mGame->GetComputerIndex() == -1))
 	{
-		mStartTimer.Stop();	// Show keys again in.
+		mStartTimer.Stop();	// Show keys again on the computer screen.
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnLevelAction);
-	d->QueryLabel(_T("Select level"), mBigFontId);
+	d->SetQueryLabel(_T("Select level"), mBigFontId);
 	d->AddButton(1, ICONBTN("btn_lvl2.png", "Tutorial"));
 	d->AddButton(2, ICONBTN("btn_lvl2.png", "Pendulum"));
 	d->AddButton(3, ICONBTN("btn_lvl3.png", "Elevate"));
@@ -2282,7 +2440,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		return;
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnVehicleAction);
-	d->QueryLabel(_T("Select vehicle"), mBigFontId);
+	d->SetQueryLabel(_T("Select vehicle"), mBigFontId);
 	d->AddButton(1, _T("Cutie"));
 	d->AddButton(2, _T("Hardie"));
 	d->AddButton(3, _T("Speedie"));
@@ -2338,10 +2496,70 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 	mGame->SetVehicle(lVehicle);
 	mGame->ResetLauncher();
 	mGame->SetFlybyMode(Game::FLYBY_INACTIVE);
+#ifdef LEPRA_IOS_LOOKANDFEEL
+	if (mGame->GetComputerIndex() == 0)
+	{
+		mRotateTimer.Start();
+	}
+#endif // iOS L&F
+}
+
+void App::OnHiscoreAction(UiTbc::Button* pButton)
+{
+	switch (pButton->GetTag())
+	{
+		case -1:
+		{
+			MainMenu();
+		}
+		break;
+		case -2:
+		{
+			HiscoreMenu(mHiscoreViewIndex - 1, -1);
+		}
+		break;
+		case -3:
+		{
+			HiscoreMenu(mHiscoreViewIndex + 1, +1);
+		}
+		break;
+	}
+}
+
+void App::OnPreHiscoreAction(UiTbc::Button* pButton)
+{
+	switch (pButton->GetTag())
+	{
+		case -1:
+		{
+			mDialog->SetDirection(+1, false);
+		}
+		break;
+		case -2:
+		{
+			mDialog->SetDirection(-1, false);
+		}
+		break;
+		case -3:
+		{
+			mDialog->SetDirection(+1, false);
+		}
+		break;
+	}
+}
+
+void App::OnCreditsAction(UiTbc::Button* /*pButton*/)
+{
+	MainMenu();
 }
 
 void App::OnPauseClick(UiTbc::Button*)
 {
+	if (mIsPaused)
+	{
+		return;
+	}
+
 	mIsPaused = true;
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, _T("Resume"));
@@ -2429,6 +2647,16 @@ void App::Transpose(float& x, float& y, float& pAngle) const
 		}
 #endif // iOS / Computer
 	}
+}
+
+str App::Int2Str(int pNumber)
+{
+	str s = strutil::IntToString(pNumber, 10);
+	for (size_t y = 3; y < s.length(); y += 4)
+	{
+		s.insert(s.length()-y, 1, ',');
+	}
+	return s;
 }
 
 

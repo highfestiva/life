@@ -26,7 +26,9 @@
 #include "Spawner.h"
 #include "VehicleAi.h"
 
-#define GRENADE_RELAUNCH_DELAY	1.6f
+
+
+#define GRENADE_RELAUNCH_DELAY	2.4f
 
 
 
@@ -58,10 +60,11 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLauncherAi(0),
 	mComputerIndex(-1),
 	mComputerDifficulty(0.5f),
-	mScoreBalance(0),
+	mHeartBalance(0),
 	mAllowWin(false),
 	mFlipRenderSide(0),
-	mFlipRenderSideFactor(0)
+	mFlipRenderSideFactor(0),
+	mScore(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -192,7 +195,7 @@ bool Game::Tick()
 		{
 			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("kia.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		}
-		mScoreBalance += (!!mWinnerIndex == mFlipRenderSide)? -1 : +1;
+		mHeartBalance += (!!mWinnerIndex == mFlipRenderSide)? -1 : +1;
 	}
 	mPreviousFrameWinnerIndex = mWinnerIndex;
 
@@ -372,6 +375,35 @@ void Game::SetFlybyMode(FlybyMode pFlybyMode)
 	}
 }
 
+void Game::ResetScore()
+{
+	mScore = 0;
+}
+
+void Game::AddScore(double pCutieScore, double pLauncherScore)
+{
+	if (mComputerIndex == -1 || mWinnerIndex != -1)
+	{
+		return;
+	}
+	// Difficulty: multiply by lerp(1, 3) ^ 2, with some factor...
+	double lDifficultyFactor = (mComputerDifficulty * 2.0 + 1.0);
+	lDifficultyFactor *= lDifficultyFactor;
+	if (mComputerIndex == 1)
+	{
+		mScore += pCutieScore * lDifficultyFactor;
+	}
+	else
+	{
+		mScore += pLauncherScore * lDifficultyFactor;
+	}
+}
+
+double Game::GetScore() const
+{
+	return mScore;
+}
+
 void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 	Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId)
 {
@@ -423,6 +455,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 		}
 	}
 
+	bool lDidHitVehicle = false;
 	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
 	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
 	for (; x != lObjectTable.end(); ++x)
@@ -453,6 +486,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			d = 1/d;
 			f *= d;
 			d *= 4.5;
+			double lScore = d;
 			d = d*d*d;
 			d = std::min(1.0f, d);
 			const float lMaxForceFactor = 800.0f;
@@ -463,23 +497,36 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			}
 			f *= ff;
 			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
-			if (lObject == mVehicle)
+			if (lObject == mVehicle && x == 0)
 			{
-				if (d > 0.5f)
+				if (d > 0.6f)
 				{
 					CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.2);
 					mSlowmoTimer.Start();
 				}
 				mVehicle->DrainHealth(d);
+				lDidHitVehicle = true;
+				lScore *= 141.421356;
+				lScore = std::min(20000.0, lScore*lScore);
 				if (mVehicle->GetHealth() <= 0)
 				{
+					AddScore(-30000, lScore);
 					if (mAllowWin)
 					{
 						mWinnerIndex = (mWinnerIndex != 0)? 1 : mWinnerIndex;
 					}
 				}
+				else
+				{
+					AddScore(-lScore, lScore);
+				}
 			}
 		}
+	}
+	if (!lDidHitVehicle)
+	{
+		const Grenade* lGrenade = (Grenade*)pExplosive;
+		AddScore(+1000, lGrenade->IsUserFired()? -1000 : 0);
 	}
 }
 
@@ -487,6 +534,7 @@ void Game::OnCapture()
 {
 	if (mAllowWin)
 	{
+		AddScore(+10000, -10000);
 		mWinnerIndex = (mWinnerIndex != 1)? 0 : mWinnerIndex;
 	}
 }
@@ -555,14 +603,14 @@ void Game::SetComputerDifficulty(float pDifficulty)
 	mComputerDifficulty = pDifficulty;
 }
 
-int Game::GetScoreBalance() const
+int Game::GetHeartBalance() const
 {
-	return mScoreBalance;
+	return mHeartBalance;
 }
 
-void Game::SetScoreBalance(int pBalance)
+void Game::SetHeartBalance(int pBalance)
 {
-	mScoreBalance = pBalance;
+	mHeartBalance = pBalance;
 }
 
 void Game::FlipRenderSides()
@@ -908,8 +956,8 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	if (pOk && pObject == mVehicle)
 	{
 		assert(pObject->GetPhysics()->GetEngineCount() == 3);
-		const str lName = _T("float_is_child");
-		new Cure::FloatAttribute(mVehicle, lName, 1);
+		const str lName = _T("float_childishness");
+		new Cure::FloatAttribute(mVehicle, lName, 0.67f);
 	}
 	if (pOk && pObject == mLauncher)
 	{

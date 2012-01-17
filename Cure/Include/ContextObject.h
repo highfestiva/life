@@ -54,7 +54,7 @@ public:
 	virtual ~ContextObject();
 
 	ContextManager* GetManager() const;
-	void SetManager(ContextManager* pManager);
+	virtual void SetManager(ContextManager* pManager);
 
 	GameObjectId GetInstanceId() const;
 	void SetInstanceId(GameObjectId pInstanceId);
