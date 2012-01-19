@@ -346,6 +346,8 @@ bool MacDisplayManager::InitWindow()
 	mWnd = lWnd;
 	lWnd->mDisplayManager = this;
 #ifdef LEPRA_IOS
+	// TODO: move to somewhere that can update depending on canvas rotation.
+	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
 	[mWnd initWithFrame:[UIScreen mainScreen].bounds];
 #else // !iOS
 	[mWnd	initWithContentRect:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)

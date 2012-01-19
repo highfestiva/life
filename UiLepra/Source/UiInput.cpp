@@ -673,6 +673,14 @@ void InputManager::ReleaseAll()
 	}
 }
 
+void InputManager::ActivateKeyboard()
+{
+}
+
+void InputManager::ReleaseKeyboard()
+{
+}
+
 InputDevice* InputManager::FindDevice(const str& pDeviceIdentifier, int pN)
 {
 	int lN = 0;

@@ -9,6 +9,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import "../../Include/Mac/EAGLView.h"
+#import "../../../Lepra/Include/StringUtility.h"
 
 static EAGLView* gSharedView;
 
@@ -23,6 +24,7 @@ static EAGLView* gSharedView;
 @synthesize isOpen;
 @synthesize responder;
 @synthesize orientationStrictness;
+@synthesize inputManager;
 
 // You must implement this method
 + (Class)layerClass
@@ -221,6 +223,32 @@ static EAGLView* gSharedView;
 	{
 		[responder touchesCancelled:touches withEvent:event];
 	}
+}
+
+- (void)insertText:(NSString*)text
+{
+	const char* cString = [text UTF8String];
+	Lepra::astr utf8String(cString);
+	Lepra::str s = Lepra::strutil::Encode(utf8String);
+	for (size_t x = 0; x < s.length(); ++x)
+	{
+		inputManager->NotifyOnChar(s[x]);
+	}
+}
+
+- (void)deleteBackward
+{
+		inputManager->NotifyOnChar('\b');
+}
+
+- (BOOL)hasText
+{
+    return YES;
+}
+
+- (BOOL)canBecomeFirstResponder
+{
+    return YES;
 }
 
 @end

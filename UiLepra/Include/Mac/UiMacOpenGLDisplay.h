@@ -33,6 +33,7 @@ public:
 	bool SetVSyncEnabled(bool pEnabled);
 
 	ContextType GetContextType();
+	LEPRA_APPLE_GL_VIEW* GetGlView() const;
 
 protected:
 	void OnResize(int pWidth, int pHeight);

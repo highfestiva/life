@@ -8,7 +8,7 @@
 
 #include "../UiLepra.h"
 #ifdef LEPRA_IOS
-#include "UiMacDisplayManager.h"
+#include "UiMacOpenGLDisplay.h"
 #include "../UiInput.h"
 
 
@@ -86,13 +86,16 @@ public:
 	// Declared as friend in order to get access to screen width and height.
 	friend class IosInputElement;
 
-	IosInputManager(MacDisplayManager* pDisplayManager);
+	IosInputManager(MacOpenGLDisplay* pDisplayManager);
 	virtual ~IosInputManager();
 
 	bool IsInitialized();
 	virtual void Refresh();
 
 	MacDisplayManager* GetDisplayManager() const;
+
+	virtual void ActivateKeyboard();
+	virtual void ReleaseKeyboard();
 
 	virtual const InputDevice* GetKeyboard() const;
 	virtual InputDevice* GetKeyboard();
@@ -114,7 +117,7 @@ private:
 	void AddObserver();
 	void RemoveObserver();
 
-	MacDisplayManager* mDisplayManager;
+	MacOpenGLDisplay* mDisplayManager;
 
 	bool mInitialized;
 

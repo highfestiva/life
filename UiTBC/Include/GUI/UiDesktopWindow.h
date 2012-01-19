@@ -69,6 +69,9 @@ public:
 	void AddIdleSubscriber(Component* pComponent);
 	void RemoveIdleSubscriber(Component* pComponent);
 
+	void ActivateKeyboard();
+	void DeactivateKeyboard();
+
 	// Wait for destruction of the DesktopWindow, in which case all cleaners will 
 	// be deleted. This is a special solution to cope with the problem of cleaning up
 	// among static variables stored in various GUI component classes.

@@ -479,6 +479,9 @@ public:
 	void ActivateAll();
 	void ReleaseAll();
 
+	virtual void ActivateKeyboard();
+	virtual void ReleaseKeyboard();
+
 	/*
 		Default mouse management.
 	*/

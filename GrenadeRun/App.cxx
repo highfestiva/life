@@ -32,6 +32,7 @@
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiDialog.h"
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
+#include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiFontManager.h"
 #include "Cutie.h"
 #include "Game.h"
@@ -96,6 +97,7 @@ private:
 	void Layout();
 	void MainMenu();
 	void HiscoreMenu(int pIndex, int pDirection);
+	void EnterHiscore();
 	void SuperReset(bool pGameOver);
 
 	virtual void Suspend();
@@ -351,6 +353,10 @@ bool App::Open()
 	bool lOk = mUiManager->OpenDraw();
 	if (lOk)
 	{
+#ifdef LEPRA_IOS
+		mUiManager->GetCanvas()->SetOutputRotation(90);
+#endif // iOS
+		mUiManager->GetPainter()->ResetClippingRect();
 		DisplayLogo();
 	}
 	if (lOk)
@@ -359,9 +365,6 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-#ifdef LEPRA_IOS
-		mUiManager->GetCanvas()->SetOutputRotation(90);
-#endif // iOS
 		mUiManager->GetDisplayManager()->SetCaption(_T("Kill Cutie"));
 		mUiManager->GetDisplayManager()->AddResizeObserver(this);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
@@ -567,6 +570,7 @@ int App::Run()
 		mGame->Cure::GameTicker::GetTimeManager()->Tick();
 		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
 		MainMenu();
+		//EnterHiscore();
 		lOk = mResourceManager->InitDefault();
 	}
 	mLoopTimer.PopTimeDiff();
@@ -771,7 +775,14 @@ bool App::Poll()
 			(mGame->GetComputerIndex() == 1 && mGame->GetCutie()->GetHealth() <= 0 && mGameOverTimer.QueryTimeDiff() > 5.0) ||
 			(mGame->GetComputerIndex() == 0 && mGameOverTimer.QueryTimeDiff() > 10.0))
 		{
-			SuperReset(true);
+			if (mGame->GetComputerIndex() != mGame->GetWinnerIndex())
+			{
+				EnterHiscore();
+			}
+			else
+			{
+				SuperReset(true);
+			}
 		}
 	}
 
@@ -2265,6 +2276,22 @@ void App::HiscoreMenu(int pIndex, int pDirection)
 	lMainMenuButton->SetPos(d->GetPreferredWidth()/4, 0);
 	lPrevButton->SetPos(20, d->GetPreferredHeight()/2 - 57/2);
 	lNextButton->SetPos(d->GetPreferredWidth()-20-57, d->GetPreferredHeight()/2 - 57/2);
+}
+
+void App::EnterHiscore()
+{
+	mGameOverTimer.Stop();
+	mGame->ResetWinnerIndex();
+	mPauseButton->SetVisible(false);
+
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
+	d->SetOffset(PixelCoord(0, -30));
+	d->SetQueryLabel(_T("Enter hiscore name"), mBigFontId);
+	UiTbc::TextField* lText = new UiTbc::TextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
+	lText->SetText(_T("Your name"));
+	lText->SetPreferredSize(300, 25, false);
+	d->AddChild(lText, 70, 80);
+	lText->SetKeyboardFocus();
 }
 
 void App::SuperReset(bool pGameOver)

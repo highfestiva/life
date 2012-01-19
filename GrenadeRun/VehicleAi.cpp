@@ -35,6 +35,12 @@ namespace GrenadeRun
 
 typedef Cure::ContextPath::SplinePath Spline;
 
+struct PathIndexLikeliness
+{
+	int mPathIndex;
+	float mLikeliness;
+};
+
 
 
 VehicleAi::VehicleAi(Game* pGame):
@@ -87,11 +93,6 @@ void VehicleAi::OnTick()
 				mActivePath = -1;
 			}
 			int lBestPathDistance = 1000000;
-			struct PathIndexLikeliness
-			{
-				int mPathIndex;
-				float mLikeliness;
-			};
 			std::vector<PathIndexLikeliness> lRelevantPaths;
 			float lTotalLikeliness = 0;
 			const int lPathCount = mGame->GetLevel()->QueryPath()->GetPathCount();

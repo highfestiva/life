@@ -288,8 +288,8 @@ void OpenGLPainter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
 	//glLineWidth(1);
-	GLshort v[] = {(GLshort)pX1, (GLshort)pY1, (GLshort)pX2, (GLshort)pY2};
-	::glVertexPointer(2, GL_SHORT, 0, v);
+	GLfloat v[] = {(GLfloat)pX1, (GLfloat)pY1, (GLfloat)pX2, (GLfloat)pY2};
+	::glVertexPointer(2, GL_FLOAT, 0, v);
 	::glDrawArrays(GL_LINES, 0, 2);
 
 	OGL_ASSERT();

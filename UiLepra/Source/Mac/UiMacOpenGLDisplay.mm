@@ -7,8 +7,8 @@
 #include "../../Include/Mac/UiMacOpenGLDisplay.h"
 #include <stdio.h>
 #include "../../../Lepra/Include/String.h"
-#include "../../Include/Mac/UiMacInput.h"
-#include "../../Include/UiLepra.h"
+//#include "../../Include/Mac/UiMacInput.h"
+//#include "../../Include/UiLepra.h"
 #include "../../Include/UiOpenGLExtensions.h"
 
 
@@ -99,6 +99,11 @@ bool MacOpenGLDisplay::SetVSyncEnabled(bool pEnabled)
 DisplayManager::ContextType MacOpenGLDisplay::GetContextType()
 {
 	return DisplayManager::OPENGL_CONTEXT;
+}
+
+LEPRA_APPLE_GL_VIEW* MacOpenGLDisplay::GetGlView() const
+{
+	return mGlView;
 }
 
 void MacOpenGLDisplay::SetFocus(bool pFocus)

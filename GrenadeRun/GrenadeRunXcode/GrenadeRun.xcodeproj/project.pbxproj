@@ -193,7 +193,7 @@
 		B19A154213A124940051A61C /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A150413A124940051A61C /* Time.cpp */; };
 		B19A154713A124940051A61C /* Writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A150A13A124940051A61C /* Writer.cpp */; };
 		B19A154813A124940051A61C /* ZipArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A150B13A124940051A61C /* ZipArchive.cpp */; };
-		B19A156413A124AB0051A61C /* EAGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = B19A154B13A124AB0051A61C /* EAGLView.m */; };
+		B19A156413A124AB0051A61C /* EAGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154B13A124AB0051A61C /* EAGLView.mm */; };
 		B19A156513A124AB0051A61C /* UiMacCore.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154C13A124AB0051A61C /* UiMacCore.mm */; };
 		B19A156613A124AB0051A61C /* UiMacDisplayManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */; };
 		B19A156713A124AB0051A61C /* UiMacInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154E13A124AB0051A61C /* UiMacInput.mm */; };
@@ -472,7 +472,6 @@
 		B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B1A1DD9813AA6CC60097B8D0 /* window.c */; };
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
-		B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1B4898F13F9BD6C0047C78A /* GrenadeRun-Info.plist */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
@@ -666,7 +665,7 @@
 		B19A150413A124940051A61C /* Time.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Time.cpp; sourceTree = "<group>"; };
 		B19A150A13A124940051A61C /* Writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Writer.cpp; sourceTree = "<group>"; };
 		B19A150B13A124940051A61C /* ZipArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipArchive.cpp; sourceTree = "<group>"; };
-		B19A154B13A124AB0051A61C /* EAGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EAGLView.m; sourceTree = "<group>"; };
+		B19A154B13A124AB0051A61C /* EAGLView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = EAGLView.mm; sourceTree = "<group>"; };
 		B19A154C13A124AB0051A61C /* UiMacCore.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacCore.mm; sourceTree = "<group>"; };
 		B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacDisplayManager.mm; sourceTree = "<group>"; };
 		B19A154E13A124AB0051A61C /* UiMacInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacInput.mm; sourceTree = "<group>"; };
@@ -1526,7 +1525,7 @@
 			isa = PBXGroup;
 			children = (
 				B1CC28E313BA906B009BD34A /* UiIosInput.mm */,
-				B19A154B13A124AB0051A61C /* EAGLView.m */,
+				B19A154B13A124AB0051A61C /* EAGLView.mm */,
 				B19A154C13A124AB0051A61C /* UiMacCore.mm */,
 				B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */,
 				B19A154E13A124AB0051A61C /* UiMacInput.mm */,
@@ -2301,7 +2300,6 @@
 				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
-				B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2443,7 +2441,7 @@
 				B19A154213A124940051A61C /* Time.cpp in Sources */,
 				B19A154713A124940051A61C /* Writer.cpp in Sources */,
 				B19A154813A124940051A61C /* ZipArchive.cpp in Sources */,
-				B19A156413A124AB0051A61C /* EAGLView.m in Sources */,
+				B19A156413A124AB0051A61C /* EAGLView.mm in Sources */,
 				B19A156513A124AB0051A61C /* UiMacCore.mm in Sources */,
 				B19A156613A124AB0051A61C /* UiMacDisplayManager.mm in Sources */,
 				B19A156713A124AB0051A61C /* UiMacInput.mm in Sources */,

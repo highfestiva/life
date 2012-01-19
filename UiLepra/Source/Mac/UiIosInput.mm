@@ -9,7 +9,7 @@
 //#include "../../../Lepra/Include/CyclicArray.h"
 //#include "../../../Lepra/Include/Log.h"
 //#include "../../Include/Mac/UiMacCore.h"
-#include "../../Include/Mac/UiMacDisplayManager.h"
+//#include "../../Include/Mac/UiMacOpenGLDisplayManager.h"
 
 
 
@@ -20,7 +20,7 @@ namespace UiLepra
 
 InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 {
-	return (new IosInputManager((MacDisplayManager*)pDisplayManager));
+	return (new IosInputManager((MacOpenGLDisplay*)pDisplayManager));
 }
 
 
@@ -162,7 +162,7 @@ LOG_CLASS_DEFINE(UI_INPUT, IosInputDevice);
 
 
 
-IosInputManager::IosInputManager(MacDisplayManager* pDisplayManager):
+IosInputManager::IosInputManager(MacOpenGLDisplay* pDisplayManager):
 	mDisplayManager(pDisplayManager),
 	mScreenWidth(0),
 	mScreenHeight(0),
@@ -249,6 +249,18 @@ MacDisplayManager* IosInputManager::GetDisplayManager() const
 	return (mDisplayManager);
 }
 
+void IosInputManager::ActivateKeyboard()
+{
+	EAGLView* lView = mDisplayManager->GetGlView();
+	[lView becomeFirstResponder];
+}
+
+void IosInputManager::ReleaseKeyboard()
+{
+	EAGLView* lView = mDisplayManager->GetGlView();
+	[lView resignFirstResponder];
+}
+
 void IosInputManager::ShowCursor()
 {
 }
@@ -301,8 +313,8 @@ void IosInputManager::AddObserver()
 {
 	if (mDisplayManager)
 	{
-		// Listen to text input and standard mouse events.
-		//mDisplayManager->AddObserver(NSKeyDown, this);
+		EAGLView* lView = mDisplayManager->GetGlView();
+		lView.inputManager = this;
 	}
 }
 

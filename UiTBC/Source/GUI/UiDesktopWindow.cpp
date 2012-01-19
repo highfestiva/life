@@ -403,6 +403,16 @@ void DesktopWindow::RemoveIdleSubscriber(Component* pComponent)
 	mIdleSubscribers.remove(pComponent);
 }
 
+void DesktopWindow::ActivateKeyboard()
+{
+	mInputManager->ActivateKeyboard();
+}
+
+void DesktopWindow::DeactivateKeyboard()
+{
+	mInputManager->ReleaseKeyboard();
+}
+
 void DesktopWindow::AddCleaner(Cleaner* pCleaner)
 {
 	mCleanerList.push_back(pCleaner);

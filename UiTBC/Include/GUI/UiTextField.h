@@ -126,6 +126,7 @@ private:
 	bool mIsReadOnly;
 	tchar mPasswordCharacter;
 	int mTextX;
+	int mTextPadX;
 
 	Painter::ImageID mMarkerID;
 	size_t mMarkerPos;

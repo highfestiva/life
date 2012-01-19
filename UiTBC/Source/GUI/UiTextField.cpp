@@ -22,6 +22,7 @@ TextField::TextField(Component* pTopParent, const str& pName) :
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
+	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -44,6 +45,7 @@ TextField::TextField(Component* pTopParent,
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
+	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -66,6 +68,7 @@ TextField::TextField(Component* pTopParent,
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
+	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -87,6 +90,7 @@ TextField::TextField(Component* pTopParent,
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
+	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -108,6 +112,7 @@ TextField::TextField(Component* pTopParent,
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
+	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -501,6 +506,7 @@ void TextField::SetupMarkerBlink()
 	if (lDesktopWin != 0)
 	{
 		lDesktopWin->AddIdleSubscriber(this);
+		lDesktopWin->ActivateKeyboard();
 		mMarkerTimer.UpdateTimer();
 		mMarkerTimer.ClearTimeDiff();
 		mMarkerVisible = true;
@@ -521,6 +527,7 @@ void TextField::ReleaseKeyboardFocus(RecurseDir pDir, Component* pFocusedCompone
 	if (lDesktopWin != 0)
 	{
 		lDesktopWin->RemoveIdleSubscriber(this);
+		lDesktopWin->DeactivateKeyboard();
 		if (mMarkerVisible == true)
 		{
 			SetNeedsRepaint(true);
@@ -577,7 +584,7 @@ void TextField::Repaint(Painter* pPainter)
 	const PixelRect lRect(GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
-	int lMarkerX  = mTextX + pPainter->GetStringWidth(GetVisibleText().substr(0, mMarkerPos));
+	int lMarkerX  = mTextX + mTextPadX + pPainter->GetStringWidth(GetVisibleText().substr(0, mMarkerPos));
 	int lMarkerWidth = 1;
 
 	if (mMarkerID != Painter::INVALID_IMAGEID)
@@ -597,15 +604,15 @@ void TextField::Repaint(Painter* pPainter)
 		lMarkerX = 0;
 	}
 
-	int lTextX = lRect.mLeft + mTextX;
+	int lTextX = lRect.mLeft + mTextX + mTextPadX;
 	int lTextY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
 
 	PrintTextDeactivate(pPainter, GetVisibleText(), lTextX, lTextY);
 
 	if (mMarkerVisible == true)
 	{
-		pPainter->PushAttrib(Painter::ATTR_RENDERMODE);
-		pPainter->SetRenderMode(Painter::RM_XOR);
+		//pPainter->PushAttrib(Painter::ATTR_RENDERMODE);
+		//pPainter->SetRenderMode(Painter::RM_XOR);
 		if (mMarkerID != Painter::INVALID_IMAGEID)
 		{
 			GetImageManager()->DrawImage(mMarkerID, lRect.mLeft + lMarkerX, lRect.mTop);
@@ -615,7 +622,7 @@ void TextField::Repaint(Painter* pPainter)
 			const int lMarkerY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
 			pPainter->DrawLine(lRect.mLeft + lMarkerX, lMarkerY, lRect.mLeft + lMarkerX, lMarkerY + lTextHeight);
 		}
-		pPainter->PopAttrib();
+		//pPainter->PopAttrib();
 	}
 
 	pPainter->PopAttrib();
@@ -643,7 +650,7 @@ Component::StateComponentList TextField::GetStateList(ComponentState pState)
 void TextField::UpdateMarkerPos(Painter* pPainter)
 {
 	PixelRect lRect(GetClientRect());
-	int lTextX = (mClickX - lRect.mLeft) - mTextX;
+	int lTextX = (mClickX - lRect.mLeft) - mTextX - mTextPadX;
 
 	// Search for the correct marker position using binary search.
 	size_t lMin = 0;
