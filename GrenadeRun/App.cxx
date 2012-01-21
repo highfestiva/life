@@ -62,6 +62,8 @@ FingerMoveList gFingerMoveList;
 
 
 
+class HiscoreTextField;
+
 class App: public Application, public UiLepra::DisplayResizeObserver, public UiLepra::KeyCodeInputObserver
 {
 public:
@@ -72,7 +74,6 @@ public:
 
 	static bool PollApp();
 
-private:
 	bool Open();
 	void Close();
 	virtual void Init();
@@ -118,6 +119,7 @@ private:
 
 	void OnAction(UiTbc::Button* pButton);
 	void OnMainMenuAction(UiTbc::Button* pButton);
+	void OnEnterHiscoreAction(UiTbc::Button* pButton);
 	void OnLevelAction(UiTbc::Button* pButton);
 	void OnVehicleAction(UiTbc::Button* pButton);
 	void OnHiscoreAction(UiTbc::Button* pButton);
@@ -215,13 +217,38 @@ private:
 	float mPreviousSteering;
 	float mCurrentSteering;
 	bool mFlipDraw;
-#ifndef LEPRA_IOS
 	HiResTimer mStartupTimer;
-#endif // Computer
 	StopWatch mRotateTimer;
 	int mHiscoreViewIndex;
+	HiscoreTextField* mHiscoreTextField;
+	str mLastHiscoreName;
 
 	LOG_CLASS_DECLARE();
+};
+
+class HiscoreTextField: public UiTbc::TextField
+{
+public:
+	typedef UiTbc::TextField Parent;
+	App* mApp;
+	HiscoreTextField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth,
+		const Color& pColor, const str& pName):
+		Parent(pTopParent, pBorderStyle, pBorderWidth, pColor, pName)
+	{
+	}
+	virtual bool OnChar(tchar pChar)
+	{
+		bool b = Parent::OnChar(pChar);
+		if (GetText().length() > 13)
+		{
+			SetText(GetText().substr(0, 13));
+		}
+		if (pChar == '\r' || pChar == '\n')
+		{
+			mApp->mDialog->Dismiss();
+		}
+		return b;
+	}
 };
 
 
@@ -275,7 +302,9 @@ App::App(const strutil::strvec& pArgumentList):
 	mPreviousSteering(0),
 	mCurrentSteering(0),
 	mFlipDraw(false),
-	mHiscoreViewIndex(0)
+	mHiscoreViewIndex(0),
+	mHiscoreTextField(0),
+	mLastHiscoreName(_T(""))
 {
 	mApp = this;
 }
@@ -358,6 +387,7 @@ bool App::Open()
 #endif // iOS
 		mUiManager->GetPainter()->ResetClippingRect();
 		DisplayLogo();
+		mStartupTimer.PopTimeDiff();
 	}
 	if (lOk)
 	{
@@ -575,16 +605,6 @@ int App::Run()
 	}
 	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
-	while (2.0 - mStartupTimer.QueryTimeDiff() > 0)
-	{
-		if (SystemManager::GetQuitRequest())
-		{
-			break;
-		}
-		Thread::Sleep(0.1);
-		UiLepra::Core::ProcessMessages();
-		mResourceManager->Tick();
-	}
 	bool lQuit = (SystemManager::GetQuitRequest() != 0);
 	while (!lQuit)
 	{
@@ -619,6 +639,16 @@ void App::DisplayLogo()
 bool App::Poll()
 {
 	bool lOk = true;
+	if (lOk)
+	{
+		if (2.0 - mStartupTimer.QueryTimeDiff() > 0)
+		{
+			Thread::Sleep(0.1);
+			UiLepra::Core::ProcessMessages();
+			mResourceManager->Tick();
+			return true;
+		}
+	}
 	if (lOk)
 	{
 		// Adjust frame rate, or it will be hopelessly high... on most reasonable platforms.
@@ -775,7 +805,11 @@ bool App::Poll()
 			(mGame->GetComputerIndex() == 1 && mGame->GetCutie()->GetHealth() <= 0 && mGameOverTimer.QueryTimeDiff() > 5.0) ||
 			(mGame->GetComputerIndex() == 0 && mGameOverTimer.QueryTimeDiff() > 10.0))
 		{
-			if (mGame->GetComputerIndex() != mGame->GetWinnerIndex())
+			const int lHeartBalance = mGame->GetHeartBalance();
+			if ((lHeartBalance == -HEART_POINTS/2 || lHeartBalance == +HEART_POINTS/2) &&	// Somebody won.
+				mGame->GetComputerIndex() != -1 &&	// Computer in the game.
+				mGame->GetComputerIndex() != mGame->GetWinnerIndex() &&	// Computer didn't win = user won over computer.
+				mGame->GetScore() > 10.0)		// Negative score isn't any good - at least be positive.
 			{
 				EnterHiscore();
 			}
@@ -2284,14 +2318,19 @@ void App::EnterHiscore()
 	mGame->ResetWinnerIndex();
 	mPauseButton->SetVisible(false);
 
-	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("Enter hiscore name"), mBigFontId);
-	UiTbc::TextField* lText = new UiTbc::TextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
-	lText->SetText(_T("Your name"));
-	lText->SetPreferredSize(300, 25, false);
-	d->AddChild(lText, 70, 80);
-	lText->SetKeyboardFocus();
+	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str(mGame->GetScore())+_T(")"), mBigFontId);
+	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
+	mHiscoreTextField->mApp = this;
+	mHiscoreTextField->SetText(mLastHiscoreName);
+	mHiscoreTextField->SetPreferredSize(210, 25, false);
+	d->AddChild(mHiscoreTextField, 70, 80);
+	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
+	UiTbc::Button* lCancelButton = new UiTbc::CustomButton(_T("Cancel"));
+	lCancelButton->SetPreferredSize(300-mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight());
+	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
+	d->AddButton(-1, lCancelButton);
 }
 
 void App::SuperReset(bool pGameOver)
@@ -2359,9 +2398,7 @@ void App::SuperReset(bool pGameOver)
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
 	mDoLayout = true;
-#ifndef LEPRA_IOS
 	mStartupTimer.ReduceTimeDiff(-10);
-#endif // Computer
 }
 
 void App::OnMinimize()
@@ -2405,7 +2442,8 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		break;
 		case 3:
 		{
-			HiscoreMenu(0, +1);
+			//HiscoreMenu(0, +1);
+			EnterHiscore();
 		}
 		return;
 		case 4:
@@ -2442,6 +2480,20 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	d->AddButton(4, ICONBTN("btn_lvl4.png", "RoboCastle"));
 }
 
+void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
+{
+	if (!pButton)
+	{
+		mLastHiscoreName = mHiscoreTextField->GetText();	// TODO: something.
+		mHiscoreTextField = 0;
+		MainMenu();
+	}
+	else if (pButton->GetTag() == -1)
+	{
+		MainMenu();
+	}
+}
+	
 void App::OnLevelAction(UiTbc::Button* pButton)
 {
 	str lLevel = _T("level_2");
@@ -2679,7 +2731,12 @@ void App::Transpose(float& x, float& y, float& pAngle) const
 str App::Int2Str(int pNumber)
 {
 	str s = strutil::IntToString(pNumber, 10);
-	for (size_t y = 3; y < s.length(); y += 4)
+	size_t l = s.length();
+	if (pNumber < 0)
+	{
+		--l;
+	}
+	for (size_t y = 3; y < l; y += 4)
 	{
 		s.insert(s.length()-y, 1, ',');
 	}

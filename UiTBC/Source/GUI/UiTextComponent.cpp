@@ -76,7 +76,7 @@ void TextComponent::SetVericalAlignment(VAlign pAlignment)
 void TextComponent::DoPrintText(Painter* pPainter, const str& pText, int x, int y)
 {
 	pPainter->SetColor(mTextColor, 0);
-	pPainter->PrintText(pText.c_str(), x, y);
+	pPainter->PrintText(pText, x, y);
 }
 
 void TextComponent::PrintTextDeactivate(Painter* pPainter, const str& pText, int x, int y)

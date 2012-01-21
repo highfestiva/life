@@ -2791,6 +2791,7 @@
 					"HAVE_USLEEP=1",
 					LEPRA_WITHOUT_FMOD,
 					LEPRA_IPHONE_SIMULATOR,
+					LEPRA_UNICODE,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
@@ -2822,6 +2823,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = GrenadeRun_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					LEPRA_UNICODE,
 					"HAVE_STDINT_H=1",
 					"HAVE_STAT=1",
 					"HAVE_UNISTD_H=1",
@@ -2881,6 +2883,7 @@
 					"HAVE_USLEEP=1",
 					LEPRA_WITHOUT_FMOD,
 					LEPRA_IPHONE_SIMULATOR,
+					LEPRA_UNICODE,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",

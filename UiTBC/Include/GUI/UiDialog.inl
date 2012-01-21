@@ -40,6 +40,12 @@ Dialog<_Target>::~Dialog()
 }
 
 template<class _Target>
+void Dialog<_Target>::Dismiss()
+{
+	OnClick(0);
+}
+
+template<class _Target>
 void Dialog<_Target>::SetDirection(int pDirection, bool pSetPos)
 {
 	mDirection = pDirection;

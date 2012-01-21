@@ -37,6 +37,36 @@ template<> astr astrutil::VFormat(const char* pFormat, va_list& pArguments)
 template<> wstr wstrutil::VFormat(const wchar_t* pFormat, va_list& pArguments)
 {
 	wchar_t lBuffer[1024];
+#ifndef LEPRA_WINDOWS
+	wchar_t lFormat[1024];
+	int x = 0;
+	bool lIsPercent = false;
+	do
+	{
+		wchar_t ch = pFormat[x];
+		if (lIsPercent)
+		{
+			if (ch == '%' || ch == 'd' || ch == 'i' || ch == 'f' || ch == 'F' ||
+				ch == 'x' || ch == 'X' || ch == 'c' || ch == 'C' || ch == 'p' ||
+				ch == 'g' || ch == 'G' || ch == 'e' || ch == 'E')
+			{
+				lIsPercent = false;
+			}
+			else if (ch == 's')
+			{
+				ch = 'S';
+				lIsPercent = false;
+			}
+		}
+		else if (!lIsPercent && ch == '%')
+		{
+			lIsPercent = true;
+		}
+		lFormat[x] = ch;
+	}
+	while (pFormat[x++]);
+	pFormat = lFormat;
+#endif // !Windows
 	WIDE_SPRINTF(lBuffer, sizeof(lBuffer)/sizeof(wchar_t), pFormat, pArguments);
 	return (wstr(lBuffer));
 }

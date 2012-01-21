@@ -125,7 +125,8 @@ void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 #ifdef LEPRA_IOS
-	::glScissor(GetCanvas()->GetHeight() - pBottom, pLeft, pBottom - pTop, pRight - pLeft);
+	::glScissor(GetCanvas()->GetHeight() - pBottom, GetCanvas()->GetWidth() - pRight,
+		pBottom - pTop, pRight - pLeft);
 #else // !iOS
 	::glScissor(pLeft, GetCanvas()->GetHeight() - pBottom, pRight - pLeft, pBottom - pTop);
 #endif // iOS/!iOS

@@ -21,7 +21,7 @@ void MacLog::Write(const str& pText)
 NSString* MacLog::Encode(const str& pText)
 {
 #if defined(LEPRA_UNICODE)
-	NSString* lText = [NSString stringWithCString:pText.c_str() encoding:NSUTF32StringEncoding];
+	NSString* lText = [[[NSString alloc] initWithBytes:(const char*)pText.c_str() length:pText.length()*sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding] autorelease];
 #else
 	NSString* lText = [NSString stringWithCString:pText.c_str() encoding:NSUTF8StringEncoding];
 #endif

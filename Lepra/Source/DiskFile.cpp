@@ -613,7 +613,7 @@ bool DiskFile::FindNext(FindData& pFindData)
 			if (x <= lGlobList.gl_pathc)
 			{
 				lOk = true;
-				pFindData.mName = astrutil::Encode(lGlobList.gl_pathv[x]);
+				pFindData.mName = strutil::Encode(lGlobList.gl_pathv[x]);
 				struct stat lFileInfo;
 				::stat(lGlobList.gl_pathv[x], &lFileInfo);	// TODO: error check.
 				pFindData.mSize = lFileInfo.st_size;

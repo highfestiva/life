@@ -133,7 +133,7 @@ TextField::~TextField()
 	if (mDesktopWindow != 0)
 	{
 		// We are still registered as a subscriber...
-		mDesktopWindow->RemoveIdleSubscriber(this);
+		ReleaseKeyboardFocus();
 	}
 
 	// The list control is deleted when the top parent is deleted.
@@ -522,12 +522,10 @@ void TextField::ReleaseKeyboardFocus(RecurseDir pDir, Component* pFocusedCompone
 {
 	Parent::ReleaseKeyboardFocus(pDir, pFocusedComponent);
 
-	DesktopWindow* lDesktopWin = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-
-	if (lDesktopWin != 0)
+	if (mDesktopWindow != 0)
 	{
-		lDesktopWin->RemoveIdleSubscriber(this);
-		lDesktopWin->DeactivateKeyboard();
+		mDesktopWindow->RemoveIdleSubscriber(this);
+		mDesktopWindow->DeactivateKeyboard();
 		if (mMarkerVisible == true)
 		{
 			SetNeedsRepaint(true);
