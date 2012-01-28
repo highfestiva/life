@@ -54,6 +54,12 @@ def verify_base_dir():
 		sys.exit(1)
 
 
+def sorted_natural(l):
+	import re
+	convert = lambda text: int(text) if text.isdigit() else text
+	alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
+	return sorted(l, key=alphanum_key)
+
 def getmake(builder):
 	global vcver
 
@@ -64,15 +70,16 @@ def getmake(builder):
 		dirname = os.getenv("VCINSTALLDIR")
 		if not dirname:
 			import glob
-			names = sorted(glob.glob(os.path.join(winprogs, "Microsoft Visual*")))
+			names = sorted_natural(glob.glob(os.path.join(winprogs, "Microsoft Visual*")))
 			if len(names) == 0:
+				print("Visual Studio not installed?")
 				return None	# No Visual Studio installed.
 			dirname = os.path.join(names[-1], "VC")
 			if not os.path.exists(dirname):
 				print("GOT HERE!", dirname)
 				return None	# Visual Studio might be installed, but not VC++.
 		make_exe = os.path.join(dirname, builder)
-		if dirname.find("Studio 10") > 0:	vcver = 10
+		if dirname.find("Studio 10.0") > 0:	vcver = 10
 		elif dirname.find("Studio 9") > 0:	vcver = 9
 		elif dirname.find("Studio 8") > 0:	vcver = 8
 		else:
