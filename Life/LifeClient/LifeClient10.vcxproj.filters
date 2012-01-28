@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{b4389831-75c2-488b-b12e-2762cb928eae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{93d663ed-eac7-494e-886a-cef16d1c07b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Master">
+      <UniqueIdentifier>{b2e347a4-45db-4181-a561-3b3ee8efa6a4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ClientApplication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientConsoleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientLoginView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientOptionsManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameClientDemo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameClientMasterTicker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameClientSlaveManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameClientViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerListView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sunlight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UiConsole.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="View.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="MassObject.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadSignButton.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="StopWatch.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="UiRaceScore.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeServer\BulletTime.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeServer\Client.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeServer\Elevator.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeServer\GameServerManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeServer\RaceTimer.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeServer\ServerConsoleManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeServer\Spawner.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="UiGameServerManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="UiServerConsoleManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeServer\MasterServerConnection.cpp">
+      <Filter>Master</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LifeMaster\MasterServerNetworkParser.cpp">
+      <Filter>Master</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ClientConsoleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientLoginView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientOptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientOptionsManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameClientDemo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameClientMasterTicker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameClientSlaveManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameClientViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputObserver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionsManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RtVar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerListView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sunlight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UiConsole.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="View.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="MassObject.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadSignButton.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="StopWatch.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="UiRaceScore.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeServer\BulletTime.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeServer\Client.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeServer\Elevator.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeServer\GameServerManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeServer\RaceTimer.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeServer\ServerConsoleManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeServer\Spawner.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="UiGameServerManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="UiServerConsoleManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeMaster\MasterServer.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeServer\MasterServerConnection.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LifeMaster\MasterServerNetworkParser.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

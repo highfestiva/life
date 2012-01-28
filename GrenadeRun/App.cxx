@@ -2320,7 +2320,7 @@ void App::EnterHiscore()
 
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str(mGame->GetScore())+_T(")"), mBigFontId);
+	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
 	mHiscoreTextField->SetText(mLastHiscoreName);

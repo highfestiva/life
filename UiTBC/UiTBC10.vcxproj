@@ -1,0 +1,402 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Final|Win32">
+      <Configuration>Final</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Candidate|Win32">
+      <Configuration>Release Candidate</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Unicode Debug|Win32">
+      <Configuration>Unicode Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Unicode Final|Win32">
+      <Configuration>Unicode Final</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Unicode Release Candidate|Win32">
+      <Configuration>Unicode Release Candidate</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>UiTbc</ProjectName>
+    <ProjectGuid>{BDBF3606-E371-454B-B162-27FD92B67D51}</ProjectGuid>
+    <RootNamespace>Migel</RootNamespace>
+    <Keyword>ManagedCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(ProjectDir)/Lib/UiTbcD.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(ProjectDir)/Lib/UiTbc.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(ProjectDir)/Lib/UiTbcRC.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(ProjectDir)/Lib/UiTbcUD.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(ProjectDir)/Lib/UiTbcU.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(ProjectDir)/Lib/UiTbcURC.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Data">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\UiAnimatedGeometry.cpp" />
+    <ClCompile Include="Source\UiBasicMeshCreator.cpp" />
+    <ClCompile Include="Source\UiChunkyClass.cpp" />
+    <ClCompile Include="Source\UiChunkyLoader.cpp" />
+    <ClCompile Include="Source\UiFontManager.cpp" />
+    <ClCompile Include="Source\UiFontTexture.cpp" />
+    <ClCompile Include="Source\UiGeometry2D.cpp" />
+    <ClCompile Include="Source\UiGeometryBatch.cpp" />
+    <ClCompile Include="Source\UiGraphicalModel.cpp" />
+    <ClCompile Include="Source\UiMaterial.cpp" />
+    <ClCompile Include="Source\UiOpenGLMaterial_DiffuseBumpMapShaders.cxx" />
+    <ClCompile Include="Source\UiOpenGLMaterial_SBMapShaders.cxx" />
+    <ClCompile Include="Source\UiOpenGLMaterial_SingleColorShaders.cxx" />
+    <ClCompile Include="Source\UiOpenGLMaterial_SingleTextureShaders.cxx" />
+    <ClCompile Include="Source\UiOpenGLMaterial_TextureAndLightmapShaders.cxx" />
+    <ClCompile Include="Source\UiOpenGLMaterials.cxx" />
+    <ClCompile Include="Source\UiOpenGLPainter.cxx" />
+    <ClCompile Include="Source\UiOpenGLRenderer.cxx" />
+    <ClCompile Include="Source\UiPainter.cpp" />
+    <ClCompile Include="Source\UiPortalManager.cpp" />
+    <ClCompile Include="Source\UiProgressiveTriangleGeometry.cpp" />
+    <ClCompile Include="Source\UiRenderer.cpp" />
+    <ClCompile Include="Source\UiRendererFactory.cxx" />
+    <ClCompile Include="Source\UiShadowVolume.cpp" />
+    <ClCompile Include="Source\UiTBC.cpp" />
+    <ClCompile Include="Source\UiTerrainTextureGenerator.cpp" />
+    <ClCompile Include="Source\UiTEXLoader.cpp" />
+    <ClCompile Include="Source\UiTexture.cpp" />
+    <ClCompile Include="Source\UiTriangleBasedGeometry.cpp" />
+    <ClCompile Include="Source\UiUVMapper.cpp" />
+    <ClCompile Include="Source\GUI\UiBorderComponent.cpp" />
+    <ClCompile Include="Source\GUI\UiButton.cpp" />
+    <ClCompile Include="Source\GUI\UiCaption.cpp" />
+    <ClCompile Include="Source\GUI\UiCenterLayout.cpp" />
+    <ClCompile Include="Source\GUI\UiCheckButton.cpp" />
+    <ClCompile Include="Source\GUI\UiComponent.cpp" />
+    <ClCompile Include="Source\GUI\UiConsoleLogListener.cpp" />
+    <ClCompile Include="Source\GUI\UiConsolePrompt.cpp" />
+    <ClCompile Include="Source\GUI\UiCustomButton.cpp" />
+    <ClCompile Include="Source\GUI\UiDesktopWindow.cpp" />
+    <ClCompile Include="Source\GUI\UiFileNameField.cpp" />
+    <ClCompile Include="Source\GUI\UiFloatingLayout.cpp" />
+    <ClCompile Include="Source\GUI\UiGridLayout.cpp" />
+    <ClCompile Include="Source\GUI\UiGUIImageManager.cpp" />
+    <ClCompile Include="Source\GUI\UiLabel.cpp" />
+    <ClCompile Include="Source\GUI\UiListControl.cpp" />
+    <ClCompile Include="Source\GUI\UiListLayout.cpp" />
+    <ClCompile Include="Source\GUI\UiPopupList.cpp" />
+    <ClCompile Include="Source\GUI\UiProgressBar.cpp" />
+    <ClCompile Include="Source\GUI\UiRadioButton.cpp" />
+    <ClCompile Include="Source\GUI\UiRectComponent.cpp" />
+    <ClCompile Include="Source\GUI\UiScrollBar.cpp" />
+    <ClCompile Include="Source\GUI\UiStackLayout.cpp" />
+    <ClCompile Include="Source\GUI\UiTextArea.cpp" />
+    <ClCompile Include="Source\GUI\UiTextComponent.cpp" />
+    <ClCompile Include="Source\GUI\UiTextField.cpp" />
+    <ClCompile Include="Source\GUI\UiTreeNode.cpp" />
+    <ClCompile Include="Source\GUI\UiWindow.cpp" />
+    <ClCompile Include="Source\Win32\UiWin32DirectX9Painter.cpp" />
+    <ClCompile Include="Source\Win32\UiWin32FontManager.cpp" />
+    <ClCompile Include="Source\X11\UiX11FontManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\UiOpenGLMaterials.mm" />
+    <None Include="Source\UiOpenGLPainter.mm" />
+    <None Include="Source\UiOpenGLRenderer.mm" />
+    <None Include="Source\UiRendererFactory.mm" />
+    <ClCompile Include="Source\Mac\UiMacFontManager.mm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <None Include="Include\GUI\UiDialog.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\UiAnimatedGeometry.h" />
+    <ClInclude Include="Include\UiBasicMeshCreator.h" />
+    <ClInclude Include="Include\UiChunkyClass.h" />
+    <ClInclude Include="Include\UiChunkyLoader.h" />
+    <ClInclude Include="Include\UiFontManager.h" />
+    <ClInclude Include="Include\UiFontTexture.h" />
+    <ClInclude Include="Include\UiGeometry2D.h" />
+    <ClInclude Include="Include\UiGeometryBatch.h" />
+    <ClInclude Include="Include\UiGraphicalModel.h" />
+    <ClInclude Include="Include\UiMaterial.h" />
+    <ClInclude Include="Include\UiOpenGLMaterials.h" />
+    <ClInclude Include="Include\UiOpenGLPainter.h" />
+    <ClInclude Include="Include\UiOpenGLRenderer.h" />
+    <ClInclude Include="Include\UiPainter.h" />
+    <ClInclude Include="Include\UiPortalManager.h" />
+    <ClInclude Include="Include\UiProgressiveTriangleGeometry.h" />
+    <ClInclude Include="Include\UiRenderer.h" />
+    <ClInclude Include="Include\UiRendererFactory.h" />
+    <ClInclude Include="Include\UiShadowVolume.h" />
+    <ClInclude Include="Include\UiTBC.h" />
+    <ClInclude Include="Include\UiTerrainTextureGenerator.h" />
+    <ClInclude Include="Include\UiTEXLoader.h" />
+    <ClInclude Include="Include\UiTexture.h" />
+    <ClInclude Include="Include\UiTriangleBasedGeometry.h" />
+    <ClInclude Include="Include\UiUVMapper.h" />
+    <ClInclude Include="Include\GUI\UiBorderComponent.h" />
+    <ClInclude Include="Include\GUI\UiButton.h" />
+    <ClInclude Include="Include\GUI\UiCaption.h" />
+    <ClInclude Include="Include\GUI\UiCenterLayout.h" />
+    <ClInclude Include="Include\GUI\UiCheckButton.h" />
+    <ClInclude Include="Include\GUI\UiCleaner.h" />
+    <ClInclude Include="Include\GUI\UiComponent.h" />
+    <ClInclude Include="Include\GUI\UiConsoleLogListener.h" />
+    <ClInclude Include="Include\GUI\UiConsolePrompt.h" />
+    <ClInclude Include="Include\GUI\UiCustomButton.h" />
+    <ClInclude Include="Include\GUI\UiDesktopWindow.h" />
+    <ClInclude Include="Include\GUI\UiDialog.h" />
+    <ClInclude Include="Include\GUI\UiFileNameField.h" />
+    <ClInclude Include="Include\GUI\UiFloatingLayout.h" />
+    <ClInclude Include="Include\GUI\UiGridLayout.h" />
+    <ClInclude Include="Include\GUI\UiGUIImageManager.h" />
+    <ClInclude Include="Include\GUI\UiLabel.h" />
+    <ClInclude Include="Include\GUI\UiLayout.h" />
+    <ClInclude Include="Include\GUI\UiListControl.h" />
+    <ClInclude Include="Include\GUI\UiListLayout.h" />
+    <ClInclude Include="Include\GUI\UiPopupList.h" />
+    <ClInclude Include="Include\GUI\UiProgressBar.h" />
+    <ClInclude Include="Include\GUI\UiRadioButton.h" />
+    <ClInclude Include="Include\GUI\UiRectComponent.h" />
+    <ClInclude Include="Include\GUI\UiScrollBar.h" />
+    <ClInclude Include="Include\GUI\UiStackLayout.h" />
+    <ClInclude Include="Include\GUI\UiTextArea.h" />
+    <ClInclude Include="Include\GUI\UiTextComponent.h" />
+    <ClInclude Include="Include\GUI\UiTextField.h" />
+    <ClInclude Include="Include\GUI\UiTreeNode.h" />
+    <ClInclude Include="Include\GUI\UiWindow.h" />
+    <ClInclude Include="Include\Win32\UiWin32DirectX9Painter.h" />
+    <ClInclude Include="Include\Win32\UiWin32FontManager.h" />
+    <ClInclude Include="Include\X11\UiX11FontManager.h" />
+    <ClInclude Include="Include\Mac\UiMacFontManager.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

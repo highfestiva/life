@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>OpenAL</ProjectName>
+    <ProjectGuid>{00E79E9D-7870-4921-9022-9AD4951BC225}</ProjectGuid>
+    <RootNamespace>OpenAL_800</RootNamespace>
+    <Keyword>ManagedCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>../ThirdParty/stlport/stlport;include;include/AL;OpenAL32/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName)D.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>../ThirdParty/stlport/stlport;include;include/AL;OpenAL32/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Data">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Xml">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="OpenAL32\alAuxEffectSlot.c" />
+    <ClCompile Include="OpenAL32\alBuffer.c" />
+    <ClCompile Include="Alc\ALc.c" />
+    <ClCompile Include="Alc\alcConfig.c" />
+    <ClCompile Include="Alc\alcEcho.c" />
+    <ClCompile Include="Alc\alcReverb.c" />
+    <ClCompile Include="Alc\alcRing.c" />
+    <ClCompile Include="Alc\alcThread.c" />
+    <ClCompile Include="OpenAL32\alDatabuffer.c" />
+    <ClCompile Include="OpenAL32\alEffect.c" />
+    <ClCompile Include="OpenAL32\alError.c" />
+    <ClCompile Include="OpenAL32\alExtension.c" />
+    <ClCompile Include="OpenAL32\alFilter.c" />
+    <ClCompile Include="OpenAL32\alListener.c" />
+    <ClCompile Include="Alc\alsa.c" />
+    <ClCompile Include="OpenAL32\alSource.c" />
+    <ClCompile Include="OpenAL32\alState.c" />
+    <ClCompile Include="OpenAL32\alThunk.c" />
+    <ClCompile Include="Alc\ALu.c" />
+    <ClCompile Include="Alc\bs2b.c" />
+    <ClCompile Include="Alc\dsound.c" />
+    <ClCompile Include="Alc\oss.c" />
+    <ClCompile Include="Alc\portaudio.c" />
+    <ClCompile Include="Alc\pulseaudio.c" />
+    <ClCompile Include="Alc\solaris.c" />
+    <ClCompile Include="Alc\wave.c" />
+    <ClCompile Include="Alc\winmm.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\AL\al.h" />
+    <ClInclude Include="OpenAL32\Include\alAuxEffectSlot.h" />
+    <ClInclude Include="OpenAL32\Include\alBuffer.h" />
+    <ClInclude Include="include\AL\alc.h" />
+    <ClInclude Include="OpenAL32\Include\alDatabuffer.h" />
+    <ClInclude Include="OpenAL32\Include\alEffect.h" />
+    <ClInclude Include="OpenAL32\Include\alError.h" />
+    <ClInclude Include="include\AL\alext.h" />
+    <ClInclude Include="OpenAL32\Include\alExtension.h" />
+    <ClInclude Include="OpenAL32\Include\alFilter.h" />
+    <ClInclude Include="OpenAL32\Include\alListener.h" />
+    <ClInclude Include="OpenAL32\Include\alMain.h" />
+    <ClInclude Include="OpenAL32\Include\alSource.h" />
+    <ClInclude Include="OpenAL32\Include\alState.h" />
+    <ClInclude Include="OpenAL32\Include\alThunk.h" />
+    <ClInclude Include="OpenAL32\Include\alu.h" />
+    <ClInclude Include="OpenAL32\Include\bs2b.h" />
+    <ClInclude Include="OpenAL32\Include\config.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
