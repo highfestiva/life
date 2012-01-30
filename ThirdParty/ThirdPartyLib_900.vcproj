@@ -2004,6 +2004,18 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="HappyHTTP"
+			>
+			<File
+				RelativePath=".\happyhttp-0.1\happyhttp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\happyhttp-0.1\happyhttp.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\Readme.txt"
 			>
