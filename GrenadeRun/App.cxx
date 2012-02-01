@@ -366,7 +366,7 @@ void App::Test2()
 	conn.setcallbacks( &App::OnBegin, &App::OnData, &App::OnComplete, 0 );
 
 	const char** headers = (const char**)0;
-	conn.request( "GET", "/", headers, 0, 0 );
+	conn.request( "GET", "/?game=Kill+Cutie&platform=iOS&level=Pendulum&avatar=Cutie", headers, 0, 0 );
 
 	while( conn.outstanding() )
 		conn.pump();
@@ -381,12 +381,12 @@ void App::Test3()
 
 	const char* headers[] = 
 	{
-		"CLIENT", "1045612016413849187",
+		"CLIENT", "549616483132882",
 		"Accept", "text/plain",
 		0
 	};
 
-	const char* body = "platform=iOS&vehicle=Cutie&level=Pendulum&name=Assar&score=100000";
+	const char* body = "game=Kill+Cutie&platform=iOS&level=Pendulum&avatar=Cutie&name=Assar&score=100000";
 
 	happyhttp::Connection conn( "localhost", 8080 );
 	conn.setcallbacks( &App::OnBegin, &App::OnData, &App::OnComplete, 0 );

@@ -2439,6 +2439,10 @@ bool TestPerformance(const LogDecorator& pAccount)
 				}
 				{
 					LEPRA_MEASURE_SCOPE(Close);
+					for (int x = 0; lAcceptor.IsRunning() && x < 10; ++x)
+					{
+						Thread::Sleep(0.06);
+					}
 					lMuxSocket1.CloseSocket(lSocket);
 				}
 			}
