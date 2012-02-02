@@ -590,6 +590,14 @@ public:
 
 bool HiscoreTest::Test()
 {
+	const std::vector<Log*> lLogArray = LogType::GetLogs();
+	std::vector<Log*>::const_iterator x = lLogArray.begin();
+	Log::LogLevel lNewLogLevel = Log::LEVEL_LOWEST_TYPE;
+	for (; x != lLogArray.end(); ++x)
+	{
+		(*x)->SetLevelThreashold(lNewLogLevel);
+	}
+
 	str lContext;
 	bool lTestOk = true;
 
@@ -600,7 +608,7 @@ bool HiscoreTest::Test()
 		assert(lTestOk);
 	}
 
-	Cure::HiscoreAgent lHiscore(_T("localhost"), 8080, _T("UnitTest"));
+	Cure::HiscoreAgent lHiscore(_T("gamehiscore.pixeldoctrine.com"), 80, _T("UnitTest"));
 
 	if (lTestOk)
 	{
@@ -618,6 +626,32 @@ bool HiscoreTest::Test()
 		if (lTestOk)
 		{
 			a = "{ \"offset\" : 13 , \"total_count\" : 5 , \"list\" : [ { \"name\" : \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" , \"score\" : 42 } , { \"name\" : \"A\" , \"score\" : 4321 } ] }";
+			lTestOk = lHiscore.ParseList(a);
+			assert(lHiscore.GetDownloadedList().mOffset == 13);
+			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\\\"\\\\@#%&"));
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
+			lHiscore.Close();
+		}
+		if (lTestOk)
+		{
+			a = "{ \"total_count\": 5 , \"list\": [ { \"name\": \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" , \"score\" :42 } , { \"name\" : \"A\" , \"score\":4321 } ], \"offset\" :13}";
+			lTestOk = lHiscore.ParseList(a);
+			assert(lHiscore.GetDownloadedList().mOffset == 13);
+			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\\\"\\\\@#%&"));
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
+			lHiscore.Close();
+		}
+		if (lTestOk)
+		{
+			a = "{\"list\":[ { \"score\" :42,\"name\": \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" } , { \"score\":4321,\"name\" : \"A\"}],\"total_count\" :5,\"offset\" :13 }";
 			lTestOk = lHiscore.ParseList(a);
 			assert(lHiscore.GetDownloadedList().mOffset == 13);
 			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
@@ -648,6 +682,23 @@ bool HiscoreTest::Test()
 		assert(lTestOk);
 	}
 
+	/*// Upload some scores.
+	for (int y = 0; y < 7; ++y)
+	{
+		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), _T("high_festiva!"), Lepra::Random::GetRandomNumber()%1000);
+		for (int x = 0; x < 50; ++x)
+		{
+			Thread::Sleep(0.1f);
+			Cure::ResourceLoadState lLoadState = lHiscore.Poll();
+			lTestOk = (lLoadState == Cure::RESOURCE_LOAD_COMPLETE);
+			if (lLoadState != Cure::RESOURCE_LOAD_IN_PROGRESS)
+			{
+				assert(lTestOk);
+				break;
+			}
+		}
+	}*/
+
 	if (lTestOk)
 	{
 		lContext = _T("init score download");
@@ -670,23 +721,6 @@ bool HiscoreTest::Test()
 		}
 		assert(lTestOk);
 	}
-
-	/*
-	// Upload some scores.
-	for (int y = 0; y < 5; ++y)
-	{
-		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), _T("high_festiva!"), Lepra::Random::GetRandomNumber()%1000);
-		for (int x = 0; x < 50; ++x)
-		{
-			Thread::Sleep(0.1f);
-			Cure::ResourceLoadState lLoadState = lHiscore.Poll();
-			lTestOk = (lLoadState == Cure::RESOURCE_LOAD_COMPLETE);
-			if (lLoadState != Cure::RESOURCE_LOAD_IN_PROGRESS)
-			{
-				break;
-			}
-		}
-	}*/
 
 	if (lTestOk)
 	{

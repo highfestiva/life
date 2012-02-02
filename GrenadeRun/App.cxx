@@ -41,10 +41,6 @@
 
 
 
-#include <happyhttp.h>
-
-
-
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
 #define BUTTON_WIDTH	40
 #define BUTTON_MARGIN	2
@@ -228,13 +224,6 @@ public:
 	HiscoreTextField* mHiscoreTextField;
 	str mLastHiscoreName;
 
-	void Test1();
-	void Test2();
-	void Test3();
-	static void OnBegin( const happyhttp::Response* r, void* /*userdata*/ );
-	static void OnData( const happyhttp::Response* /*r*/, void* /*userdata*/, const unsigned char* data, int n );
-	static void OnComplete( const happyhttp::Response* /*r*/, void* /*userdata*/ );
-
 	LOG_CLASS_DECLARE();
 };
 
@@ -287,118 +276,6 @@ LEPRA_RUN_APPLICATION(GrenadeRun::App, UiLepra::UiMain);
 
 namespace GrenadeRun
 {
-
-
-
-astr gCookie;
-astr gLocation;
-
-int count=0;
-void App::OnBegin( const happyhttp::Response* r, void* /*userdata*/ )
-{
-	mLog.Infof(_T("BEGIN (%d %s)\n"), r->getstatus(), strutil::Encode(r->getreason()).c_str());
-	const char* lCookie = r->getheader("set-cookie");
-	if (lCookie)
-	{
-		gCookie = lCookie;
-	}
-	const char* lLocation = r->getheader("location");
-	if (lLocation)
-	{
-		gLocation = lLocation;
-	}
-	typedef happyhttp::Response::HeaderMap HttpHeader;
-	const HttpHeader& lHeader = r->getheaders();
-	for (HttpHeader::const_iterator x = lHeader.begin(); x != lHeader.end(); ++x)
-	{
-		mLog.Infof(_T("HEADER: %-20s %s"), strutil::Encode(x->first+':').c_str(),
-			strutil::Encode(x->second).c_str());
-	}
-	count = 0;
-}
-
-void App::OnData( const happyhttp::Response* /*r*/, void* /*userdata*/, const unsigned char* data, int n )
-{
-	((char*)data)[n] = 0;
-	str s = strutil::Encode((const char*)data);
-	mLog.Info(strutil::Encode(s.c_str()));
-	count += n;
-}
-
-void App::OnComplete( const happyhttp::Response* /*r*/, void* /*userdata*/ )
-{
-	mLog.Infof(_T("COMPLETE (%d bytes)\n"), count);
-}
-
-
-
-void App::Test1()
-{
-	mLog.AInfo("-----------------Test1------------------------\n" );
-	// simple simple GET
-	astr host = "www.google.com";
-	if (!gLocation.empty())
-	{
-		host = gLocation.substr(7, gLocation.size()-1-7);
-	}
-	happyhttp::Connection conn( host.c_str(), 80 );
-	conn.setcallbacks( &App::OnBegin, &App::OnData, &App::OnComplete, 0 );
-
-	const char** headers = (const char**)0;
-	const char* maybeheaders[] = { "Cookie", gCookie.c_str(), 0, 0 };
-	if (!gCookie.empty())
-	{
-		headers = maybeheaders;
-	};
-	conn.request( "GET", "/", headers, 0, 0 );
-
-	while( conn.outstanding() )
-		conn.pump();
-}
-
-
-
-void App::Test2()
-{
-	mLog.AInfo("-----------------Test1------------------------\n" );
-	// simple simple GET
-	happyhttp::Connection conn( "localhost", 8080 );
-	conn.setcallbacks( &App::OnBegin, &App::OnData, &App::OnComplete, 0 );
-
-	const char** headers = (const char**)0;
-	conn.request( "GET", "/?game=Kill+Cutie&platform=iOS&level=Pendulum&avatar=Cutie", headers, 0, 0 );
-
-	while( conn.outstanding() )
-		conn.pump();
-}
-
-
-
-void App::Test3()
-{
-	mLog.AInfo("-----------------Test2------------------------\n" );
-	// POST using high-level request interface
-
-	const char* headers[] = 
-	{
-		"CLIENT", "549616483132882",
-		"Accept", "text/plain",
-		0
-	};
-
-	const char* body = "game=Kill+Cutie&platform=iOS&level=Pendulum&avatar=Cutie&name=Assar&score=100000";
-
-	happyhttp::Connection conn( "localhost", 8080 );
-	conn.setcallbacks( &App::OnBegin, &App::OnData, &App::OnComplete, 0 );
-	conn.request( "POST",
-			"/add_entry",
-			headers,
-			(const unsigned char*)body,
-			strlen(body) );
-
-	while( conn.outstanding() )
-		conn.pump();
-}
 
 
 
@@ -696,22 +573,6 @@ int App::Run()
 		{
 			(*x)->SetLevelThreashold(Log::LEVEL_INFO);
 		}
-	}
-
-	try
-	{
-		//Test1();
-		//Test1();
-		Test2();
-		Test3();
-	}
-	catch (happyhttp::Wobbly& e)
-	{
-		mLog.Errorf(_T("Exception:\n%s\n"), strutil::Encode(e.what()).c_str() );
-	}
-	if (gCookie.size() != 0xFFFF)
-	{
-		exit(0);
 	}
 
 	bool lOk = true;

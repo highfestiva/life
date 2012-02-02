@@ -73,6 +73,8 @@ private:
 	astr mResponseData;
 
 	void operator=(const HiscoreAgent&);
+
+	LOG_CLASS_DECLARE();
 };
 
 
