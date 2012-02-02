@@ -52,7 +52,7 @@ def _buildstl():
 def _buildcode(command, buildtype):
 	make = getmake(VCBUILD)
 	ver = getvcver()
-	projext = "900" if ver == 9 else "";
+	projext = "900" if ver == 9 else "10";
 	if command == "build":
 		_buildstl()
 		if osname == "Windows":	args = [make, "/useenv", "/M2", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
@@ -152,10 +152,6 @@ def _incremental_copy_code(targetdir, buildtype):
 					fl += glob.glob(os.path.join(obj, lgpl_tt[buildtype], "*.dll"))
 				elif list(filter(lambda x: x, [obj.startswith(an) for an in appnames])) or obj.startswith(testappname):
 					fl += glob.glob(os.path.join(obj, own_tt[buildtype], "*.exe"))
-		#if hwname.find("64") >= 0:
-		#	fl += ["ThirdParty/fmod/api/fmod64.dll"]
-		#else:
-		#	fl += ["ThirdParty/fmod/api/fmod.dll"]
 	_incremental_copy(fl, targetdir, buildtype)
 
 
@@ -416,6 +412,13 @@ def buildcode():
 		_createmakes()
 		_buildcode("build", buildtype)
 		_incremental_copy_code(targetdir, buildtype)
+
+
+def copycode():
+	targetdir=bindir
+	buildtype=default_build_mode
+	_createmakes()
+	_incremental_copy_code(targetdir, buildtype)
 
 
 def build_life():

@@ -1,0 +1,1389 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="JPeg">
+      <UniqueIdentifier>{31f5c8df-aea2-4e1c-aaf8-393674373154}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JPeg\Header Files">
+      <UniqueIdentifier>{37905cd9-d0c9-41d8-b193-ba5e7e5916f3}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="JPeg\Source Files">
+      <UniqueIdentifier>{ce3c9187-9981-42a1-b22e-2fb16cc45db5}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="PNG">
+      <UniqueIdentifier>{7df49916-e41e-41aa-83c5-dd5b051fc815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PNG\Header Files">
+      <UniqueIdentifier>{ca3881e1-403f-41e1-ba1b-2db70e967a8c}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="PNG\Source Files">
+      <UniqueIdentifier>{32d33e11-1268-45a4-943e-7ebad558b173}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ZLib">
+      <UniqueIdentifier>{2272674d-06cc-433d-836f-acd2dd6e2479}</UniqueIdentifier>
+      <Extensions>*</Extensions>
+    </Filter>
+    <Filter Include="ZLib\Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="ZLib\Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Minizip">
+      <UniqueIdentifier>{1482dc36-32b7-4530-baa4-10100023cd60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Minizip\Header Files">
+      <UniqueIdentifier>{264b9291-c865-4e25-b9fa-730459967fcf}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Minizip\Source Files">
+      <UniqueIdentifier>{e18cfe16-51db-4581-a1df-655ddfece8fa}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ODE">
+      <UniqueIdentifier>{d5cbbe6e-9706-4381-8568-6def21948c40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ODE\Source Files">
+      <UniqueIdentifier>{48223242-4b3e-4dae-8bc0-8fa4eb4cb995}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ODE\Source Files\Joints">
+      <UniqueIdentifier>{55bc4768-256b-470b-be94-198ceb12792e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ODE\HeaderFiles">
+      <UniqueIdentifier>{15d13279-53ee-42a1-813e-5719768fc4a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ODE\OPCODE">
+      <UniqueIdentifier>{cebbf67b-f9c0-4165-b74a-f111aaf8da41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ODE\OPCODE\Ice">
+      <UniqueIdentifier>{b72e4b1f-9a40-4d7b-9b4f-8b0ca04f41aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ODE\OU">
+      <UniqueIdentifier>{f39c7dd7-999f-4e1e-98f2-3c9cab03e2c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FastDelegate">
+      <UniqueIdentifier>{eb30956b-6873-4dc0-9382-714632cf97bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utf8cpp">
+      <UniqueIdentifier>{7aa2d51f-5f60-406a-a405-9557a9b22988}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utf8cpp\utf8">
+      <UniqueIdentifier>{f4a1d84c-b38f-4a08-bd8b-250a182b5ead}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ogg">
+      <UniqueIdentifier>{f4d4c455-efdd-4392-919c-9a7d4e2056ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ogg\Header Files">
+      <UniqueIdentifier>{1a36e2c7-9e9a-4f2f-977b-33a80e28464d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ogg\Source Files">
+      <UniqueIdentifier>{9c01e6b2-e303-458e-b553-adda3e8c471c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vorbis">
+      <UniqueIdentifier>{08777589-6996-4cfb-8fd6-51e5f5b27904}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vorbis\Header Files">
+      <UniqueIdentifier>{183a2145-1f39-4fb3-b7d1-fa7d85d5b1ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vorbis\Source Files">
+      <UniqueIdentifier>{fb801305-dd9f-46a2-91ee-66e6b3e2d9cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ChibiXM">
+      <UniqueIdentifier>{e7cd0018-658b-4915-bf40-c7f9dc4056bc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="jpeg-6b\jchuff.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jconfig.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jdct.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jdhuff.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jerror.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jinclude.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jmemsys.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jmorecfg.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jpegint.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jpeglib.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpeg-6b\jversion.h">
+      <Filter>JPeg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lpng1212\png.h">
+      <Filter>PNG\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lpng1212\pngconf.h">
+      <Filter>PNG\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\crc32.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\deflate.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\inffast.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\inffixed.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\inflate.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\inftrees.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\trees.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zconf.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zconf.in.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zlib.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zutil.h">
+      <Filter>ZLib\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="minizip\crypt.h">
+      <Filter>Minizip\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="minizip\ioapi.h">
+      <Filter>Minizip\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="minizip\iowin32.h">
+      <Filter>Minizip\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="minizip\mztools.h">
+      <Filter>Minizip\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="minizip\unzip.h">
+      <Filter>Minizip\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="minizip\zip.h">
+      <Filter>Minizip\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\array.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\collision_kernel.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\collision_space_internal.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\collision_std.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\collision_transform.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\collision_trimesh_colliders.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\collision_trimesh_internal.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\collision_util.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\config.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\heightfield.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\lcp.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\mat.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\objects.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\obstack.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\odeou.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\odetls.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\quickstep.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\step.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\testing.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\util.h">
+      <Filter>ODE\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\amotor.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\ball.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\contact.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\fixed.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\hinge.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\hinge2.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\joint.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\joint_internal.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\joints.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\lmotor.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\null.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\piston.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\plane2d.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\pr.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\pu.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\slider.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ode\src\joints\universal.h">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\collision.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\collision_space.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\collision_trimesh.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\common.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\compatibility.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\contact.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\error.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\export-dif.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\mass.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\matrix.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\memory.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\misc.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\objects.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\ode.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\odeconfig.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\odecpp.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\odecpp_collision.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\odeinit.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\odemath.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\rotation.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\include\ode\timer.h">
+      <Filter>ODE\HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_AABBCollider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_AABBTree.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_BaseModel.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_BoxBoxOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Collider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Common.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_HybridModel.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_IceHook.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_LSSAABBOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_LSSCollider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_LSSTriOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_MeshInterface.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Model.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_OBBCollider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_OptimizedTree.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Picking.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_PlanesAABBOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_PlanesCollider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_PlanesTriOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_RayAABBOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_RayCollider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_RayTriOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Settings.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_SphereAABBOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_SphereCollider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_SphereTriOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_TreeBuilders.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_TreeCollider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_TriBoxOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_TriTriOverlap.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_VolumeCollider.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Opcode.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Stdafx.h">
+      <Filter>ODE\OPCODE</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceAABB.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceAxes.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceBoundingSphere.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceContainer.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceFPU.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceHPoint.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceIndexedTriangle.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceLSS.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceMatrix3x3.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceMatrix4x4.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceMemoryMacros.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceOBB.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IcePairs.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IcePlane.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IcePoint.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IcePreprocessor.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceRandom.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceRay.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceRevisitedRadix.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceSegment.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceTriangle.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceTriList.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceTypes.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceUtils.h">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\assert.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\atomic.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\atomicflags.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\customization.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\enumarrays.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\flags.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\flagsdefines.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\inttypes.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\macros.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\malloc.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\namespace.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\platform.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\simpleflags.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\templates.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\threadlocalstorage.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="ode-0.11.1\ou\include\ou\typewrapper.h">
+      <Filter>ODE\OU</Filter>
+    </ClInclude>
+    <ClInclude Include="FastDelegate\FastDelegate.h">
+      <Filter>FastDelegate</Filter>
+    </ClInclude>
+    <ClInclude Include="FastDelegate\FastDelegateBind.h">
+      <Filter>FastDelegate</Filter>
+    </ClInclude>
+    <ClInclude Include="utf8cpp\utf8.h">
+      <Filter>utf8cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="utf8cpp\utf8\checked.h">
+      <Filter>utf8cpp\utf8</Filter>
+    </ClInclude>
+    <ClInclude Include="utf8cpp\utf8\core.h">
+      <Filter>utf8cpp\utf8</Filter>
+    </ClInclude>
+    <ClInclude Include="utf8cpp\utf8\unchecked.h">
+      <Filter>utf8cpp\utf8</Filter>
+    </ClInclude>
+    <ClInclude Include="libogg-1.2.2\include\ogg\ogg.h">
+      <Filter>Ogg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libogg-1.2.2\include\ogg\os_types.h">
+      <Filter>Ogg\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\backends.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\bitrate.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\codebook.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\include\vorbis\codec.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\codec_internal.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\envelope.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\floor_all.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\books\floor\floor_books.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\highlevel.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\lookup.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\lookup_data.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\lpc.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\lsp.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\masking.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\mdct.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\misc.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\os.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\psy.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\psych_11.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\psych_16.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\psych_44.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\psych_8.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\registry.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\books\coupled\res_books_stereo.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\books\uncoupled\res_books_uncoupled.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\residue_16.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\residue_44.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\residue_44u.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\residue_8.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\scales.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_11.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_16.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_22.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_32.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_44.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_44u.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_8.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_X.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\smallft.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\include\vorbis\vorbisenc.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\include\vorbis\vorbisfile.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libvorbis-1.3.2\lib\window.h">
+      <Filter>Vorbis\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChibiXM\xmplay.h">
+      <Filter>ChibiXM</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="jpeg-6b\jcapimin.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcapistd.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jccoefct.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jccolor.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcdctmgr.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jchuff.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcinit.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcmainct.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcmarker.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcmaster.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcomapi.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcparam.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcphuff.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcprepct.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jcsample.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jctrans.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdapimin.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdapistd.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdatadst.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdatasrc.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdcoefct.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdcolor.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jddctmgr.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdhuff.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdinput.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdmainct.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdmarker.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdmaster.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdmerge.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdphuff.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdpostct.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdsample.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jdtrans.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jerror.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jfdctflt.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jfdctfst.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jfdctint.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jidctflt.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jidctfst.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jidctint.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jidctred.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jmemansi.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jmemmgr.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jquant1.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jquant2.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg-6b\jutils.cpp">
+      <Filter>JPeg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\png.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngerror.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pnggccrd.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngget.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngmem.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngpread.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngread.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngrio.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngrtran.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngrutil.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngset.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngtrans.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngvcrd.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngwio.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngwrite.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngwtran.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lpng1212\pngwutil.c">
+      <Filter>PNG\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\adler32.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\compress.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\crc32.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\deflate.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzio.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\infback.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inffast.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inflate.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inftrees.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\trees.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\uncompr.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\zutil.c">
+      <Filter>ZLib\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="minizip\ioapi.c">
+      <Filter>Minizip\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="minizip\iowin32.c">
+      <Filter>Minizip\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="minizip\mztools.c">
+      <Filter>Minizip\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="minizip\unzip.c">
+      <Filter>Minizip\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="minizip\zip.c">
+      <Filter>Minizip\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\array.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\box.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\capsule.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_cylinder_box.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_cylinder_plane.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_cylinder_sphere.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_cylinder_trimesh.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_kernel.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_quadtreespace.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_sapspace.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_space.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_transform.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_box.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_ccylinder.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_disabled.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_distance.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_gimpact.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_opcode.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_plane.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_ray.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_sphere.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_trimesh.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_trimesh_new.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\collision_util.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\convex.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\cylinder.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\error.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\export-dif.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\fastdot.c">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\fastldlt.c">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\fastlsolve.c">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\fastltsolve.c">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\heightfield.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\lcp.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\mass.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\mat.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\matrix.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\memory.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\misc.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\obstack.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\ode.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\odeinit.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\odemath.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\odeou.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\odetls.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\plane.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\quickstep.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\ray.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\rotation.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\sphere.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\step.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\stepfast.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\testing.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\timer.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\util.cpp">
+      <Filter>ODE\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\amotor.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\ball.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\contact.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\fixed.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\hinge.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\hinge2.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\joint.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\lmotor.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\null.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\piston.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\plane2d.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\pr.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\pu.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\slider.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ode\src\joints\universal.cpp">
+      <Filter>ODE\Source Files\Joints</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_AABBCollider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_AABBTree.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_BaseModel.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_Collider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_Common.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_HybridModel.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_LSSCollider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_MeshInterface.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_Model.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_OBBCollider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_OptimizedTree.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_Picking.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_PlanesCollider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_RayCollider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_SphereCollider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_TreeBuilders.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_TreeCollider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_VolumeCollider.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Opcode.cpp">
+      <Filter>ODE\OPCODE</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceAABB.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceContainer.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceHPoint.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceIndexedTriangle.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceMatrix3x3.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceMatrix4x4.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceOBB.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IcePlane.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IcePoint.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceRandom.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceRay.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceRevisitedRadix.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceSegment.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceTriangle.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceUtils.cpp">
+      <Filter>ODE\OPCODE\Ice</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ou\src\ou\atomic.cpp">
+      <Filter>ODE\OU</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ou\src\ou\customization.cpp">
+      <Filter>ODE\OU</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ou\src\ou\malloc.cpp">
+      <Filter>ODE\OU</Filter>
+    </ClCompile>
+    <ClCompile Include="ode-0.11.1\ou\src\ou\threadlocalstorage.cpp">
+      <Filter>ODE\OU</Filter>
+    </ClCompile>
+    <ClCompile Include="libogg-1.2.2\src\bitwise.c">
+      <Filter>Ogg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libogg-1.2.2\src\framing.c">
+      <Filter>Ogg\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\analysis.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\bitrate.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\block.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\codebook.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\envelope.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\floor0.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\floor1.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\info.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\lookup.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\lpc.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\lsp.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\mapping0.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\mdct.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\psy.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\registry.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\res0.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\sharedbook.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\smallft.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\synthesis.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\vorbisenc.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\vorbisfile.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libvorbis-1.3.2\lib\window.c">
+      <Filter>Vorbis\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChibiXM\xmplay.cpp">
+      <Filter>ChibiXM</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libogg-1.2.2\win32\ogg.def">
+      <Filter>Ogg\Source Files</Filter>
+    </None>
+    <None Include="libvorbis-1.3.2\win32\vorbis.def">
+      <Filter>Vorbis\Source Files</Filter>
+    </None>
+    <None Include="Readme.txt" />
+  </ItemGroup>
+</Project>

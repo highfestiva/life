@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Win32">
+      <UniqueIdentifier>{38ad0768-e740-406b-91b9-f5bf05326270}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\X11">
+      <UniqueIdentifier>{413e3a0f-d58a-4565-8947-f134c86796d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Mac">
+      <UniqueIdentifier>{8fbed4a5-158c-4803-be79-16b9b0e969fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Win32">
+      <UniqueIdentifier>{fa7e5f9c-68a3-449e-9072-eebafa501f6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\X11">
+      <UniqueIdentifier>{485074d3-9c91-4ead-bbc8-9718429f8771}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Mac">
+      <UniqueIdentifier>{e066df9f-eb00-4277-b0a5-b7d772e914b9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\GLEXT.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiChibiXmAlStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiDisplayManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiLepra.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiOggAlStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiOpenGLExtensions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiSoundManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiSoundManagerFMod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiSoundManagerOpenAL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Win32\UiWin32Core.h">
+      <Filter>Header Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Win32\UiWin32DirectXDisplay.h">
+      <Filter>Header Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Win32\UiWin32DisplayManager.h">
+      <Filter>Header Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Win32\UiWin32Input.h">
+      <Filter>Header Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Win32\UiWin32OpenGLDisplay.h">
+      <Filter>Header Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Win32\WGLEXT.H">
+      <Filter>Header Files\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\X11\UiX11Core.h">
+      <Filter>Header Files\X11</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\X11\UiX11DisplayManager.h">
+      <Filter>Header Files\X11</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\X11\UiX11Input.h">
+      <Filter>Header Files\X11</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\X11\UiX11OpenGLDisplay.h">
+      <Filter>Header Files\X11</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mac\EAGLView.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mac\UiMacCore.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mac\UiMacDisplayManager.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mac\UiMacInput.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mac\UiMacOpenGLDisplay.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\UiChibiXmAlStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiDisplayManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiLepra.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiOggAlStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiOpenGLExtensions.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiSoundManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiSoundManagerFMod.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiSoundManagerOpenAL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiSoundStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Win32\UiWin32Core.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Win32\UiWin32DirectXDisplay.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Win32\UiWin32DisplayManager.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Win32\UiWin32Input.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Win32\UiWin32OpenGLDisplay.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\X11\UiX11Core.cpp">
+      <Filter>Source Files\X11</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\X11\UiX11DisplayManager.cpp">
+      <Filter>Source Files\X11</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\X11\UiX11Input.cpp">
+      <Filter>Source Files\X11</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\X11\UiX11OpenGLDisplay.cpp">
+      <Filter>Source Files\X11</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mac\EAGLView.m">
+      <Filter>Source Files\Mac</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mac\UiMacCore.mm">
+      <Filter>Source Files\Mac</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mac\UiMacDisplayManager.mm">
+      <Filter>Source Files\Mac</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mac\UiMacInput.mm">
+      <Filter>Source Files\Mac</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mac\UiMacOpenGLDisplay.mm">
+      <Filter>Source Files\Mac</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\UiOpenGLExtensions.mm">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
