@@ -102,6 +102,7 @@ public:
 	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAreEqual) const;
 	void DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, float pMaxValue) const;
+	void DrawTapIndicator(int pTag, int x, int y, float pAngle) const;
 	/*void DrawBarrelIndicatorGround(float x, float y, float pAAngle, float pBaseLength, float pBaseWidth) const;
 	void DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const;*/
 	void DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue1, float pValue2) const;
@@ -910,7 +911,8 @@ void App::PollTaps()
 	mIsThrottling = false;
 	for (; x != gFingerMoveList.end();)
 	{
-		if (PollTap(*x) > 0)
+		x->mTag = PollTap(*x);
+		if (x->mTag > 0)
 		{
 			++x;
 		}
@@ -1083,6 +1085,7 @@ void App::DrawHud()
 				DrawMeter((int)(m+lButtonRadius), y, 0, lButtonWidth, v0, v1);
 			}
 			InfoText(1, _T("Throttle/brake"), PIF/2, 0, -14);
+			DrawTapIndicator(1, (int)(m+lButtonRadius)+15, y - (int)(mThrottle*18.7f)-1, 0);
 			DrawImage(mArrow->GetData(), m+lButtonRadius+1,	y-m-mw+1,	aw, ah, 0);
 			DrawImage(mArrow->GetData(), m+lButtonRadius,	y+m+mw-2,	aw, ah, PIF);
 			//DrawRoundedPolygon(m+lButtonRadius,	h-m*2-lButtonWidth-mw,	lButtonRadius*0.5f,	0,	3);
@@ -1616,6 +1619,29 @@ void App::DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, fl
 		}
 		x += lXStep;
 		y += lYStep;
+	}
+}
+
+void App::DrawTapIndicator(int pTag, int x, int y, float pAngle) const
+{
+	int x2 = x + 20;
+	int y2 = y;
+	float lAngle = pAngle;
+	Transpose(x2, y2, lAngle);
+	Transpose(x, y, pAngle);
+	mUiManager->GetPainter()->SetColor(WHITE);
+	FingerMoveList::iterator i = gFingerMoveList.begin();
+	for (; i != gFingerMoveList.end(); ++i)
+	{
+		if (i->mTag != pTag)
+		{
+			continue;
+		}
+		int x3 = i->mLastY;
+		int y3 = mUiManager->GetCanvas()->GetHeight() - i->mLastX;
+		Transpose(x3, y3, lAngle);
+		mUiManager->GetPainter()->DrawLine(x3, y3, x2, y2);
+		mUiManager->GetPainter()->DrawLine(x2, y2, x, y);
 	}
 }
 
