@@ -22,7 +22,8 @@ HiscoreAgent::HiscoreAgent(const str& pHost, const int pPort, const str& pGameNa
 	mServerHost(pHost),
 	mServerPort(pPort),
 	mConnection(0),
-	mGameName(pGameName)
+	mGameName(pGameName),
+	mAction(ACTION_NONE)
 {
 	Close();
 }
@@ -77,6 +78,11 @@ ResourceLoadState HiscoreAgent::GetLoadState() const
 	return mLoadState;
 }
 
+HiscoreAgent::Action HiscoreAgent::GetAction() const
+{
+	return mAction;
+}
+
 void HiscoreAgent::SetLoadState(ResourceLoadState pLoadState)
 {
 	mLoadState = pLoadState;
@@ -94,6 +100,7 @@ bool HiscoreAgent::StartDownloadingList(const str& pPlatform, const str& pLevel,
 		astr lMethod = _OA("WzYJ", "GET");
 		astr lAPath = astrutil::Encode(lPath);
 		mConnection->request(lMethod.c_str(), lAPath.c_str());
+		mAction = ACTION_DOWNLOAD_LIST;
 		log_volatile(mLog.AInfo("Downloading highscore list."));
 		return true;
 	}
@@ -132,6 +139,7 @@ bool HiscoreAgent::StartUploadingScore(const str& pPlatform, const str& pLevel, 
 		const astr lPath = _OA("oe=::?`90*,%o", "/add_entry/") + astrutil::Encode(mGameName);
 		const astr lUtf8Body = astrutil::Encode(lBody);
 		mConnection->request(lMethod.c_str(), lPath.c_str(), lHeaders, (const unsigned char*)lUtf8Body.c_str(), lUtf8Body.length());
+		mAction = ACTION_UPLOAD_SCORE;
 		log_volatile(mLog.AInfo("Uploading score."));
 		return true;
 	}

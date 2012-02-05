@@ -14,7 +14,7 @@ namespace UiLepra
 bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
 {
 	astr lExtension(pExtension);
-	astrutil::StripWhiteSpaces(lExtension);
+	astrutil::StripAllWhiteSpaces(lExtension);
 
 	if (lExtension.length() == 0)
 		return false;

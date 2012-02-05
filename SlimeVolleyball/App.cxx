@@ -226,7 +226,7 @@ bool App::Open()
 		mDisplay->AddResizeObserver(this);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
-#ifdef LEPRA_IOS
+#ifdef LEPRA_TOUCH
 		mCanvas->SetOutputRotation(90);
 #endif // iOS
 	}
@@ -294,7 +294,7 @@ bool App::Open()
 		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), mDesktopWindow);
 		mRetryButton->SetOnClick(App, OnFinishedClick);
 
-#ifdef LEPRA_IOS
+#ifdef LEPRA_TOUCH
 		mGetiPhoneButton = 0;
 #else // !iOS
 		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), mDesktopWindow);

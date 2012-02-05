@@ -132,6 +132,8 @@ public:
 	// The base 2 logarithm of x, rounded down to nearest lower integer.
 	static int Log2(int x);
 
+	template<class _T> static _T Round(_T pValue);
+
 	template<class _T> static _T Acos(_T pAngle);
 
 	template<class _T, class _Vector> static _T CalculateMedian(const _Vector& pArray);
@@ -155,6 +157,11 @@ template<class _Type> void Math::RangeAngles(_Type& pAngle1, _Type& pAngle2)
 	{
 		pAngle1 += (_Type)(PI*2);
 	}
+}
+
+template<class _T> _T Math::Round(_T pValue)
+{
+	return (pValue > (_T)0)? ::floor(pValue + (_T)0.5) : ::ceil(pValue - (_T)0.5);
 }
 
 template<class _T> _T Math::Acos(_T pAngle)

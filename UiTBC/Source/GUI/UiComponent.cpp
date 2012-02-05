@@ -142,12 +142,10 @@ void Component::DeleteChildrenInLayer(int pLayer)
 {
 	if (pLayer >= 0 && pLayer < mLayerCount)
 	{
-		Component* lChild = mLayout[pLayer]->GetFirst();
-		while (lChild != 0)
+		Component* lChild;
+		while ((lChild = mLayout[pLayer]->GetFirst()) != 0)
 		{
-			lChild->SetParent(0);
 			delete lChild;
-			lChild = mLayout[pLayer]->GetNext();
 		}
 	}
 }
@@ -209,6 +207,7 @@ void Component::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer
 {
 	if (pLayer >= 0 && pLayer < mLayerCount && mLayout[pLayer] != 0)
 	{
+		assert(pChild->GetParentLayout() == 0);
 		pChild->SetParent(this);
 		mLayout[pLayer]->Add(pChild, pParam1, pParam2);
 		pChild->SetParentLayout(mLayout[pLayer]);

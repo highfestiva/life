@@ -24,6 +24,13 @@ namespace Cure
 class HiscoreAgent
 {
 public:
+	enum Action
+	{
+		ACTION_NONE = 1,
+		ACTION_DOWNLOAD_LIST,
+		ACTION_UPLOAD_SCORE,
+	};
+
 	struct Entry
 	{
 		str mName;
@@ -44,6 +51,7 @@ public:
 	ResourceLoadState Poll();
 
 	ResourceLoadState GetLoadState() const;
+	Action GetAction() const;
 	void SetLoadState(ResourceLoadState pLoadState);
 	bool StartDownloadingList(const str& pPlatform, const str& pLevel, const str& pAvatar, int pOffset, int pLimit);
 	const List& GetDownloadedList() const;
@@ -71,6 +79,7 @@ private:
 	List mDownloadedList;
 	int mUploadedPlace;
 	astr mResponseData;
+	Action mAction;
 
 	void operator=(const HiscoreAgent&);
 

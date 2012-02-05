@@ -1034,7 +1034,7 @@ class SlimeVolleyball
 
 	private: void drawTapIndicators()
 	{
-#ifdef LEPRA_IOS
+#ifdef LEPRA_TOUCH
 		const int dy = screen.height*2/10;
 		const int y = screen.height - std::min(std::max(dy, 120), 60); 
 		const int h = screen.height/3;

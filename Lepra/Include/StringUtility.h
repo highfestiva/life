@@ -36,6 +36,8 @@ public:
 	static bool CStringToString(const _String& pCString, _String& _pString);
 
 	static _String StripLeft(const _String& pString, const _String& pCharDelimitors);
+	static _String StripRight(const _String& pString, const _String& pCharDelimitors);
+	static _String Strip(const _String& pString, const _String& pCharDelimitors);
 
 	static _String ReplaceAll(const _String& pString, typename _String::value_type pFromChar, typename _String::value_type pToChar);
 	static _String ReplaceAll(const _String& pString, const _String& pFrom, const _String& pTo);
@@ -60,7 +62,7 @@ public:
 	static size_t FindPreviousWord(const _String& pLine, const _String& pDelimitors, size_t pStartIndex);
 	static size_t FindNextWord(const _String& pLine, const _String& pDelimitors, size_t pStartIndex);
 	static int FindFirstWhiteSpace(const _String& pString, size_t pOffset, int pSearchDirection);
-	static void StripWhiteSpaces(_String& pString);
+	static void StripAllWhiteSpaces(_String& pString);
 	static bool IsWhiteSpace(typename _String::value_type pChar);
 	static _String ReplaceCtrlChars(const _String& pString, typename _String::value_type pReplacement);
 	static _String DumpData(const uint8* pData, size_t pLength);

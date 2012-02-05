@@ -39,7 +39,6 @@ Window::Window(const str& pName,
 	mClientRect = new RectComponent(_T("ClientRect"), pLayout);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	Parent::AddChild(mCenterComponent);
 	Init();
 }
 
@@ -125,7 +124,6 @@ Window::Window(const Color& pColor,
 	//mClientRect->SetPreferredSize(0, 0, true);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	Parent::AddChild(mCenterComponent);
 	InitBorder();
 }
 

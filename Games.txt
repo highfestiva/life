@@ -6,7 +6,11 @@ Bombulum - use the pendulum to push bombs off their respective "poles" befor the
 
 Car Jumpin'
 
+Construction vehicle game - fork lift, front loader, excavator... Build, move and demolish!
+
 Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
+
+Physical programming game - give instructions such as "push left 10" and "pop". Try to hit something? Use car, hovercraft, spaceship...
 
 Robo Arm - optimize a movement scheme to make the robot pick something up and move it to a designated area. Definition of done = object colliding with trigger and object velocity <= threshold.
 
