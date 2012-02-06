@@ -2529,7 +2529,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		case 1:
 		{
 			// 1P
-			const int lComputerIndex = Random::GetRandomNumber()&1;
+			const int lComputerIndex = ((Random::GetRandomNumber() % 256) >= 128);
 			mGame->SetComputerIndex(lComputerIndex);
 		}
 		break;
@@ -2767,6 +2767,8 @@ void App::OnPauseClick(UiTbc::Button*)
 	}
 
 	mIsPaused = true;
+	mPauseButton->ReleaseKeyboardFocus();
+	mPauseButton->ReleaseMouseFocus();
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, _T("Resume"));
 	d->AddButton(2, _T("Restart"));

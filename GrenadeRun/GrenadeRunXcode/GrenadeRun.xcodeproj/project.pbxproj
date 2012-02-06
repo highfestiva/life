@@ -474,6 +474,9 @@
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
+		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
+		B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */; };
+		B1D88DC814DEA9190000CD85 /* happyhttp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DC714DEA9190000CD85 /* happyhttp.cpp */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
 /* End PBXBuildFile section */
 
@@ -1137,6 +1140,9 @@
 		B1B489A313F9BE4A0047C78A /* GrenadeRun_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GrenadeRun_Prefix.pch; path = GrenadeRunXcode/GrenadeRun_Prefix.pch; sourceTree = "<group>"; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
+		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
+		B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HiscoreAgent.cpp; path = ../../Cure/Source/HiscoreAgent.cpp; sourceTree = SOURCE_ROOT; };
+		B1D88DC714DEA9190000CD85 /* happyhttp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = happyhttp.cpp; path = "happyhttp-0.1/happyhttp.cpp"; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1224,6 +1230,7 @@
 		B15F791D13FC597B00E01A90 /* Cure */ = {
 			isa = PBXGroup;
 			children = (
+				B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */,
 				B110A04914AB36A7007A84E4 /* ContextPath.cpp */,
 				B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */,
 				B15F791F13FC59DE00E01A90 /* ContextManager.cpp */,
@@ -1433,6 +1440,7 @@
 		B19A14CC13A124940051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */,
 				B19A14CD13A124940051A61C /* Alarm.cpp */,
 				B19A14CE13A124940051A61C /* Application.cpp */,
 				B19A14CF13A124940051A61C /* ArchiveFile.cpp */,
@@ -1537,6 +1545,7 @@
 		B19A15AA13A127E40051A61C /* ThirdParty */ = {
 			isa = PBXGroup;
 			children = (
+				B1D88DC614DEA9070000CD85 /* HappyHTTP */,
 				B110A04F14AB370D007A84E4 /* ChibiXM */,
 				B1A1DC5613AA6CC30097B8D0 /* libvorbis-1.3.2 */,
 				B1A1DB2213AA6AE00097B8D0 /* libogg-1.2.2 */,
@@ -2239,6 +2248,14 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
+		B1D88DC614DEA9070000CD85 /* HappyHTTP */ = {
+			isa = PBXGroup;
+			children = (
+				B1D88DC714DEA9190000CD85 /* happyhttp.cpp */,
+			);
+			name = HappyHTTP;
+			sourceTree = "<group>";
+		};
 		B1FB291E1450C8A600F1C762 /* Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -2768,6 +2785,9 @@
 				B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */,
 				B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */,
 				B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */,
+				B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */,
+				B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */,
+				B1D88DC814DEA9190000CD85 /* happyhttp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2801,6 +2821,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/lib\"",
+					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "GrenadeRun-Info.plist";
@@ -2839,6 +2860,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/lib\"",
+					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "GrenadeRun-Info.plist";
@@ -2893,6 +2915,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/lib\"",
+					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "GrenadeRun-Info.plist";

@@ -490,7 +490,8 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
 			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
-			if (d > 50*SCALE_FACTOR)
+			if (d > 80*SCALE_FACTOR ||
+				(d > 50*SCALE_FACTOR && lObject != mVehicle))
 			{
 				continue;
 			}
@@ -515,15 +516,23 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 					CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.2);
 					mSlowmoTimer.Start();
 				}
+				d = std::max(0.005f, d);
 				mVehicle->DrainHealth(d);
 				lDidHitVehicle = true;
+				if (mComputerIndex != -1)
+				{
+					// Weigh up minimum score for computer, if very bad.
+					// Otherwise the car can go round, round and only
+					// gain more points for every lap.
+					lScore = std::max(0.18-mComputerDifficulty, lScore);
+				}
 				lScore *= 141.421356;
 				lScore = std::min(20000.0, lScore*lScore);
 				if (mVehicle->GetHealth() <= 0)
 				{
-					AddScore(-30000, lScore);
 					if (mAllowWin)
 					{
+						AddScore(-30000, lScore);
 						mWinnerIndex = (mWinnerIndex != 0)? 1 : mWinnerIndex;
 					}
 				}
