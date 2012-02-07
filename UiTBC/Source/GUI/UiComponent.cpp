@@ -981,6 +981,11 @@ void Component::SetVisible(bool pVisible)
 	{
 		SetNeedsRepaint(true);
 	}
+	else if (mVisible == true && pVisible == false)
+	{
+		ReleaseKeyboardFocus();
+		ReleaseMouseFocus();
+	}
 
 	mVisible = pVisible;
 }

@@ -107,9 +107,11 @@ private:
 	void OnButton1(UiLepra::InputElement* pElement);
 	void OnButton2(UiLepra::InputElement* pElement);
 	void OnButton3(UiLepra::InputElement* pElement);
+	void GetCursorPosition(int& pMouseX, int& pMouseY) const;
+	void DispatchMouseMove(int pMouseX, int pMouseY);
 
 	void Init(const tchar* pImageDefinitionFile, const tchar* pArchive);
-	void ClampMouse(int& x, int& y);
+	void ClampMouse(int& x, int& y) const;
 
 	void PurgeDeleted();
 
