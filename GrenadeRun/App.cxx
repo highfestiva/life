@@ -40,6 +40,9 @@
 #include "Cutie.h"
 #include "Game.h"
 #include "Launcher.h"
+#ifdef LEPRA_MAC
+#include "../Lepra/Include/Posix/MacLog.h"
+#endif // iOS
 
 
 
@@ -85,7 +88,7 @@ public:
 	App(const strutil::strvec& pArgumentList);
 	virtual ~App();
 
-	static bool PollApp();
+	static App* GetApp();
 
 	bool Open();
 	void Close();
@@ -113,9 +116,11 @@ public:
 	void MainMenu();
 	void UpdateHiscore(bool pError);
 	void HiscoreMenu(int pDirection);
-	void EnterHiscore();
+	void EnterHiscore(const str& pMessage);
 	void SuperReset(bool pGameOver);
 	void CreateHiscoreAgent();
+	void Purchase(const str& pProductName);
+	void SetIsPurchasing(bool pIsPurchasing);
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -240,6 +245,7 @@ public:
 	HiscoreTextField* mHiscoreTextField;
 	str mLastHiscoreName;
 	Cure::HiscoreAgent* mHiscoreAgent;
+	bool mIsPurchasing;
 
 	LOG_CLASS_DECLARE();
 };
@@ -333,7 +339,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mHiscoreVehicleIndex(0),
 	mHiscoreTextField(0),
 	mLastHiscoreName(),
-	mHiscoreAgent(0)
+	mHiscoreAgent(0),
+	mIsPurchasing(false)
 {
 	mApp = this;
 }
@@ -348,13 +355,9 @@ App::~App()
 	UiLepra::Shutdown();
 }
 
-bool App::PollApp()
+App* App::GetApp()
 {
-	if (!mApp->Poll())
-	{
-		return false;
-	}
-	return (SystemManager::GetQuitRequest() == 0);
+	return mApp;
 }
 
 bool App::Open()
@@ -849,6 +852,14 @@ bool App::Poll()
 		{
 			mUiManager->Paint(false);
 		}
+
+		if (mIsPurchasing)
+		{
+			mUiManager->GetPainter()->SetColor(WHITE, 0);
+			PrintText(_T("Communicating with App Store..."), 0, 
+				mUiManager->GetCanvas()->GetWidth()/2,
+				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight() - 8);
+		}
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
 	{
@@ -878,7 +889,7 @@ bool App::Poll()
 				mGame->GetComputerIndex() != mGame->GetWinnerIndex() &&	// Computer didn't win = user won over computer.
 				mGame->GetScore() > 500.0)		// Negative score isn't any good - at least be positive.
 			{
-				EnterHiscore();
+				EnterHiscore(str());
 			}
 			else
 			{
@@ -892,6 +903,12 @@ bool App::Poll()
 
 void App::PollTaps()
 {
+	if (mIsPurchasing)
+	{
+		gFingerMoveList.clear();
+		return;
+	}
+
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
@@ -2324,7 +2341,7 @@ void App::MainMenu()
 	mGame->SetHeartBalance(0);
 	// TRICKY-END!
 
-	mPauseButton->SetVisible(false);
+	mIsPaused = true;
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"));
@@ -2374,7 +2391,11 @@ void App::HiscoreMenu(int pDirection)
 	CreateHiscoreAgent();
 	const str lLevelName = gLevels[mHiscoreLevelIndex];
 	const str lVehicleName = gVehicles[mHiscoreVehicleIndex];
-	mHiscoreAgent->StartDownloadingList(gPlatform, lLevelName, lVehicleName, 0, 10);
+	if (!mHiscoreAgent->StartDownloadingList(gPlatform, lLevelName, lVehicleName, 0, 10))
+	{
+		delete mHiscoreAgent;
+		mHiscoreAgent = 0;
+	}
 
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnHiscoreAction);
 	d->SetPreClickTarget(UiTbc::Dialog<App>::Action(this, &App::OnPreHiscoreAction));
@@ -2401,18 +2422,29 @@ void App::HiscoreMenu(int pDirection)
 	lNextLevelButton->SetPos(d->GetPreferredWidth()-20-57, d->GetPreferredHeight()/2 - 57-15);
 	lPrevAvatarButton->SetPos(20, d->GetPreferredHeight()/2 +15);
 	lNextAvatarButton->SetPos(d->GetPreferredWidth()-20-57, d->GetPreferredHeight()/2 +15);
+	if (!mHiscoreAgent)
+	{
+		UpdateHiscore(true);
+	}
 }
 
-void App::EnterHiscore()
+void App::EnterHiscore(const str& pMessage)
 {
 	mGameOverTimer.Stop();
 	mGame->ResetWinnerIndex();
 	mGame->EnableScoreCounting(false);
-	mPauseButton->SetVisible(false);
+	mIsPaused = true;
 
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
+	if (pMessage.empty())
+	{
+		d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
+	}
+	else
+	{
+		d->SetQueryLabel(pMessage, mBigFontId);
+	}
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
 	mHiscoreTextField->SetText(mLastHiscoreName);
@@ -2493,6 +2525,21 @@ void App::CreateHiscoreAgent()
 	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("kill_cutie"));
 }
 
+void App::Purchase(const str& pProductName)
+{
+#ifdef LEPRA_IOS
+	[mAnimatedApp startPurchase:MacLog::Encode(pProductName)];
+#endif // iOS
+}
+
+void App::SetIsPurchasing(bool pIsPurchasing)
+{
+	mIsPurchasing = pIsPurchasing;
+	if (!mIsPurchasing)
+	{
+		MainMenu();
+	}
+}
 
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
@@ -2541,7 +2588,8 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		break;
 		case 3:
 		{
-			HiscoreMenu(+1);
+			//HiscoreMenu(+1);
+			EnterHiscore(str());
 		}
 		return;
 		case 4:
@@ -2589,7 +2637,12 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 			const str lLevelName = gLevels[mHiscoreLevelIndex];
 			const str lVehicleName = gVehicles[mHiscoreVehicleIndex];
 			CreateHiscoreAgent();
-			mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, lVehicleName, mLastHiscoreName, (int)Math::Round(mGame->GetScore()));
+			if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, lVehicleName, mLastHiscoreName, (int)Math::Round(mGame->GetScore())))
+			{
+				delete mHiscoreAgent;
+				mHiscoreAgent = 0;
+				EnterHiscore(_T("Please retry (hiscore server obstipation)"));
+			}
 		}
 		else
 		{
@@ -2604,6 +2657,11 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 	
 void App::OnLevelAction(UiTbc::Button* pButton)
 {
+	if (pButton->GetTag() >= 3)	// && not bought!)
+	{
+		Purchase(_T("levels"));
+		return;
+	}
 	str lLevel = _T("level_2");
 	switch (pButton->GetTag())
 	{
@@ -2690,6 +2748,7 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 		mRotateTimer.Start();
 	}
 #endif // Touch L&F
+	mIsPaused = false;
 }
 
 void App::OnHiscoreAction(UiTbc::Button* pButton)

@@ -436,7 +436,11 @@ void Connection::pump()
 	if( m_Outstanding.empty() )
 		return;		// no requests outstanding
 
-	assert( m_Sock >0 );	// outstanding requests but no connection!
+	if (m_Sock < 0)
+	{
+		throw Wobbly("Pumping unconnected socket.");
+	}
+	//assert( m_Sock >0 );	// outstanding requests but no connection!
 
 	if( !datawaiting( m_Sock ) )
 		return;				// recv will block

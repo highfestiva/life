@@ -59,6 +59,7 @@
 		B15F798113FC5E1500E01A90 /* UiGameUiManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */; };
 		B15F798913FC5E6000E01A90 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F798713FC5E6000E01A90 /* Game.cpp */; };
 		B15F798A13FC5E6000E01A90 /* Grenade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F798813FC5E6000E01A90 /* Grenade.cpp */; };
+		B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1942D2114E08E86002F37E1 /* StoreKit.framework */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
 		B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560E13BE6C3B006A1422 /* Icon-72.png */; };
@@ -534,6 +535,7 @@
 		B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = UiGameUiManager.mm; path = ../../UiCure/Source/UiGameUiManager.mm; sourceTree = SOURCE_ROOT; };
 		B15F798713FC5E6000E01A90 /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
 		B15F798813FC5E6000E01A90 /* Grenade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Grenade.cpp; sourceTree = "<group>"; };
+		B1942D2114E08E86002F37E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
 		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
 		B196560E13BE6C3B006A1422 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../Icons/Icon-72.png"; sourceTree = SOURCE_ROOT; };
@@ -1157,6 +1159,7 @@
 				B19A295813A137400051A61C /* OpenAL.framework in Frameworks */,
 				B19A295A13A137400051A61C /* OpenGLES.framework in Frameworks */,
 				B19A29E213A13B9B0051A61C /* QuartzCore.framework in Frameworks */,
+				B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1187,6 +1190,7 @@
 				29B97315FDCFA39411CA2CEA /* Sources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				B1942D2114E08E86002F37E1 /* StoreKit.framework */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
