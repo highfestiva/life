@@ -59,7 +59,10 @@
 #define BARREL_COMPASS_WIDTH		(BARREL_COMPASS_LINE_COUNT-1)*BARREL_COMPASS_LINE_SPACING + 1
 #define GET_NAME_INDEX(idx, a)		((idx) < 0)? LEPRA_ARRAY_COUNT(a)-1 : (idx)%LEPRA_ARRAY_COUNT(a)
 #define GET_NAME(idx, a)		a[GET_NAME_INDEX(idx, a)]
-
+#define CONTENT_LEVELS			"levels"
+#define CONTENT_VEHICLES		"vehicles"
+#define RTVAR_CONTENT_LEVELS		"Content.Levels"
+#define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
 
 
 namespace GrenadeRun
@@ -414,6 +417,9 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
 #endif // !Touch
+
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, false);
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
 	bool lOk = mUiManager->OpenDraw();
@@ -2674,9 +2680,9 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 	
 void App::OnLevelAction(UiTbc::Button* pButton)
 {
-	if (pButton->GetTag() >= 3)	// && not bought!)
+	if (pButton->GetTag() >= 3 && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false))
 	{
-		Purchase(_T("levels"));
+		Purchase(_T(CONTENT_LEVELS));
 		return;
 	}
 	str lLevel = _T("level_2");
