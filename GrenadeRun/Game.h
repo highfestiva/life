@@ -57,6 +57,7 @@ struct FingerMovement
 	int mStartY;
 	int mLastX;
 	int mLastY;
+	float mHighestDistance;
 	bool mIsPress;
 	int mTag;
 
@@ -65,6 +66,7 @@ struct FingerMovement
 		mStartY(y),
 		mLastX(x),
 		mLastY(y),
+		mHighestDistance(0),
 		mIsPress(true),
 		mTag(0)
 	{
@@ -79,6 +81,14 @@ struct FingerMovement
 			return true;
 		}
 		return false;
+	}
+
+	inline void UpdateDistance(float pDistance)
+	{
+		if (std::abs(pDistance) > mHighestDistance)
+		{
+			mHighestDistance = std::abs(pDistance);
+		}
 	}
 };
 typedef std::list<FingerMovement> FingerMoveList;

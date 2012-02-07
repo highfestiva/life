@@ -209,19 +209,20 @@ public:
 	UiCure::PainterImageResource* mScrollBarImage;
 	UiTbc::ScrollBar* mDifficultySlider;
 	int mSlowShadowCount;
-	float mThrottle;
+	float mBaseThrottle;
 	bool mIsThrottling;
 	int mThrottleMeterOffset;
 	float mLiftMeterOffset;
 	float mYawMeterOffset;
-	float mPreviousSteering;
-	float mCurrentSteering;
+	float mSteering;
+	float mBaseSteering;
 	bool mFlipDraw;
 	HiResTimer mStartupTimer;
 	StopWatch mRotateTimer;
 	int mHiscoreViewIndex;
 	HiscoreTextField* mHiscoreTextField;
 	str mLastHiscoreName;
+	float mThrottle;
 
 	LOG_CLASS_DECLARE();
 };
@@ -294,17 +295,18 @@ App::App(const strutil::strvec& pArgumentList):
 	mScrollBarImage(0),
 	mDifficultySlider(0),
 	mSlowShadowCount(0),
-	mThrottle(0),
+	mBaseThrottle(0),
 	mIsThrottling(false),
 	mThrottleMeterOffset(0),
 	mLiftMeterOffset(0),
 	mYawMeterOffset(0),
-	mPreviousSteering(0),
-	mCurrentSteering(0),
+	mSteering(0),
+	mBaseSteering(0),
 	mFlipDraw(false),
 	mHiscoreViewIndex(0),
 	mHiscoreTextField(0),
-	mLastHiscoreName(_T(""))
+	mLastHiscoreName(_T("")),
+	mThrottle(0)
 {
 	mApp = this;
 }
@@ -835,8 +837,8 @@ void App::PollTaps()
 	if (lAvatar1->GetPhysics()->GetEngineCount() >= 3)
 	{
 		mGame->SetThrottle(lAvatar1, mThrottle);
-		mPreviousSteering = Math::Clamp(mPreviousSteering, -1.0f, 1.0f);
-		lAvatar1->SetEnginePower(1, mPreviousSteering+mCurrentSteering, 0);
+		mSteering = Math::Clamp(mSteering, -1.0f, 1.0f);
+		lAvatar1->SetEnginePower(1, mSteering, 0);
 	}
 	mGame->SetThrottle(lAvatar2, 0);
 	lAvatar2->SetEnginePower(1, 0, 0);
@@ -2079,6 +2081,7 @@ int App::PollTap(FingerMovement& pMovement)
 	Directive directive = DIRECTIVE_NONE;
 	bool lIsRightControls = false;
 	float lValue = 0;
+#define SCALEUP(v)	(v)*2
 #define CLAMPUP(v)	Math::Clamp((v)*2, -1.0f, 1.0f)
 	if (mGame->GetComputerIndex() != 0)
 	{
@@ -2087,12 +2090,12 @@ int App::PollTap(FingerMovement& pMovement)
 			if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
 			{
 				directive = DIRECTIVE_UP_DOWN;
-				lValue = CLAMPUP((x-lStartX)/s);
+				lValue = SCALEUP((x-lStartX)/s);
 			}
 			else if (lStartX <= lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
 			{
 				directive = DIRECTIVE_LEFT_RIGHT;
-				lValue = CLAMPUP((y-lStartY)/s);
+				lValue = SCALEUP((y-lStartY)/s);
 			}
 			else if (x <= lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
 			{
@@ -2103,16 +2106,13 @@ int App::PollTap(FingerMovement& pMovement)
 		{
 			if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 up/down?
 			{
-				mIsThrottling = true;
-				mThrottle = CLAMPUP((lStartY-y)/s);
-				mPlayer1LastTouch.ClearTimeDiff();
-				lTag = 1;
+				directive = DIRECTIVE_UP_DOWN;
+				lValue = SCALEUP((lStartY-y)/s);
 			}
 			else if (lStartX >= h-lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
 			{
-				mCurrentSteering = CLAMPUP((x-lStartX)/s);
-				mPlayer1LastTouch.ClearTimeDiff();
-				lTag = 2;
+				directive = DIRECTIVE_LEFT_RIGHT;
+				lValue = SCALEUP((x-lStartX)/s);
 			}
 		}
 	}
@@ -2138,6 +2138,8 @@ int App::PollTap(FingerMovement& pMovement)
 		}
 	}
 
+	pMovement.UpdateDistance(lValue);
+
 	{
 		UiCure::CppContextObject* lAvatar = mGame->GetP2();
 		/*if (mGame->IsFlipRenderSide())
@@ -2159,12 +2161,14 @@ int App::PollTap(FingerMovement& pMovement)
 				if (mGame->IsFlipRenderSide() == lIsRightControls)
 				{
 					mIsThrottling = true;
-					mThrottle = lValue;
+					mThrottle = Math::Clamp(mBaseThrottle+lValue, -1.0f, +1.0f);
 					if (!pMovement.mIsPress)
 					{
-						if (mThrottle < 0.16f)	// Go to neutral if just tap/release.
+						mBaseThrottle = mThrottle;
+						if (::fabs(pMovement.mHighestDistance) < 0.16f)	// Go to neutral if just tap/release.
 						{
 							mIsThrottling = false;
+							mBaseThrottle = 0.0f;
 							mThrottle = 0.0f;
 						}
 					}
@@ -2183,15 +2187,15 @@ int App::PollTap(FingerMovement& pMovement)
 			{
 				if (mGame->IsFlipRenderSide() == lIsRightControls)
 				{
-					mCurrentSteering = lValue;
+					mSteering = Math::Clamp(mBaseSteering+lValue, -1.0f, 1.0f);
 					if (!pMovement.mIsPress)
 					{
-						mPreviousSteering += mCurrentSteering;
-						if (::fabs(mCurrentSteering) < 0.16f)	// Go to neutral if just tap/release.
+						mBaseSteering = mSteering;
+						if (::fabs(pMovement.mHighestDistance) < 0.16f)	// Go to neutral if just tap/release.
 						{
-							mPreviousSteering = 0;
+							mBaseSteering = 0.0f;
+							mSteering = 0;
 						}
-						mCurrentSteering = 0;
 					}
 					mPlayer1LastTouch.ClearTimeDiff();
 					lTag = 2;
@@ -2342,8 +2346,9 @@ void App::SuperReset(bool pGameOver)
 
 	mIsThrottling = false;
 	mThrottle = 0;
-	mPreviousSteering = 0;
-	mCurrentSteering = 0;
+	mBaseThrottle = 0;
+	mSteering = 0;
+	mBaseSteering = 0;
 	mGame->SyncCameraPositions();
 	if (pGameOver)
 	{
