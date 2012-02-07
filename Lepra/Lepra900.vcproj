@@ -717,6 +717,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\Obfuxator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\OBR.h"
 				>
 			</File>
@@ -1145,6 +1149,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\Number.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Obfuxator.cpp"
 				>
 			</File>
 			<File

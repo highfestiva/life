@@ -1867,7 +1867,7 @@ float GameClientSlaveManager::QuerySetChildishness(Cure::ContextObject* pAvatar)
 		lAttribute = new Cure::FloatAttribute(pAvatar, lName, 0);
 	}
 	float lChildishness;
-	CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, false);
+	CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	lAttribute->SetValue(lChildishness);
 	return lChildishness;
 }

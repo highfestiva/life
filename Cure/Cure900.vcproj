@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -114,7 +114,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -184,7 +184,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -250,7 +250,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -321,7 +321,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -391,7 +391,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -488,6 +488,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\GameManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\HiscoreAgent.cpp"
 				>
 			</File>
 			<File
@@ -602,6 +606,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\GameManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\HiscoreAgent.h"
 				>
 			</File>
 			<File

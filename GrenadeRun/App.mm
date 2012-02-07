@@ -5,6 +5,7 @@
 
 
 #include "../Lepra/Include/LepraTarget.h"
+#import <StoreKit/StoreKit.h>
 
 
 
@@ -17,7 +18,7 @@ using namespace Lepra;
 
 
 #ifdef LEPRA_IOS
-@interface AnimatedApp: UIResponder
+@interface AnimatedApp: UIResponder <SKProductsRequestDelegate, UIAlertViewDelegate>
 {
 @private
 	Canvas* canvas;
@@ -29,6 +30,7 @@ using namespace Lepra;
 -(void) stopTick;
 -(void) tick;
 -(void) dropFingerMovements;
+-(void) startPurchase:(NSString*)productName;
 @end
 #endif // iOS
 
@@ -46,6 +48,7 @@ using namespace Lepra;
 -(id) init:(Canvas*)pCanvas
 {
 	canvas = pCanvas;
+	animationTimer = nil;
 	return self;
 }
 
@@ -70,7 +73,7 @@ using namespace Lepra;
 	}
 	else
 	{
-		GrenadeRun::App::PollApp();
+		GrenadeRun::App::GetApp()->Poll();
 		[self dropFingerMovements];
 	}
 }
@@ -122,7 +125,7 @@ using namespace Lepra;
 	return lLocation;
 }
 
-- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
+-(void) touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	NSEnumerator* e = [touches objectEnumerator];
 	UITouch* lTouch;
@@ -143,14 +146,73 @@ using namespace Lepra;
 	}
 }
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+-(void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	[self touchesMoved:touches withEvent:event];
 }
 
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+-(void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	[self touchesMoved:touches withEvent:event];
+}
+
+-(void) startPurchase:(NSString*)productName
+{
+	if ([SKPaymentQueue canMakePayments])
+	{
+		GrenadeRun::App::GetApp()->SetIsPurchasing(true);
+		SKProductsRequest* request = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithObject:productName]];
+		request.delegate = self;
+		[request start];
+	}
+	else
+	{
+		UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Disabled"
+			message:@"You have disabled purchases in settings." delegate:self
+			cancelButtonTitle:@"OK" otherButtonTitles:nil];
+		[alertView show];
+		[alertView release];
+	}
+}
+
+-(void) productsRequest:(SKProductsRequest*)request didReceiveResponse:(SKProductsResponse*)response
+{
+	NSArray* products = response.products;
+	SKProduct* product = [products objectAtIndex:0];
+
+	NSNumberFormatter* priceFormatter = [[NSNumberFormatter alloc] init];
+	[priceFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
+	[priceFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+	[priceFormatter setLocale:product.priceLocale];
+	NSString* price = [priceFormatter stringFromNumber:product.price];
+	NSString* message = [product.localizedDescription stringByAppendingFormat:@"\n\nPrice: %@\n\nInterested?", price];
+
+	UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:product.localizedTitle
+		message:message delegate:self
+		cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
+	[alertView show];
+	[alertView release];
+
+	[request autorelease];
+}
+
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error
+{
+	UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Error"
+		message:@"Unable to contact App Store." delegate:self
+		cancelButtonTitle:@"OK" otherButtonTitles:nil];
+	[alertView show];
+	[alertView release];
+}
+
+-(void) alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+	GrenadeRun::App::GetApp()->SetIsPurchasing(false);
+}
+
+-(void) alertViewCancel:(UIAlertView*)alertView
+{
+	GrenadeRun::App::GetApp()->SetIsPurchasing(false);
 }
 
 @end

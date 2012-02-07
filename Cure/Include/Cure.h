@@ -45,6 +45,16 @@ enum NetworkObjectType
 
 
 
+enum ResourceLoadState
+{
+	RESOURCE_UNLOADED		= 1,
+	RESOURCE_LOAD_IN_PROGRESS	= 2,
+	RESOURCE_LOAD_COMPLETE		= 3,
+	RESOURCE_LOAD_ERROR		= 4,
+};
+
+
+
 #define CURE_STANDARD_FRAME_RATE	30
 
 

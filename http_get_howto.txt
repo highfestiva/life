@@ -1,0 +1,11 @@
+python
+import socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(('www.google.se', 80))
+s.send('''GET /index.html HTTP/1.1
+Host: www.google.se
+Cookie: PREF=ID=c44048e372ffb967:FF=0:TM=1327266313:LM=1327266313:S=Z9It_7IejBazKUfM;
+
+'''.encode())
+data = s.recv(16000)
+print(data.decode())

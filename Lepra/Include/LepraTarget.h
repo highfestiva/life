@@ -124,6 +124,10 @@
 #define LEPRA_STRING_TYPE_TEXT	"Ansi"
 #endif
 
+#if defined(LEPRA_IOS)
+#define LEPRA_TOUCH
+#endif // Touch device
+
 
 #endif // !LEPRATARGET_H
 

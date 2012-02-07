@@ -248,6 +248,22 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StripLeft(const _String& pString, const
 	return (_String());
 }
 
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StripRight(const _String& pString, const _String& pCharDelimitors)
+{
+	// Skip delimitor characters at end, find end of last token.
+	size_t lTokenEndPosition = pString.find_last_not_of(pCharDelimitors, pString.size()-1);
+	if (lTokenEndPosition != _String::npos)
+	{
+		return (pString.substr(0, lTokenEndPosition+1));
+	}
+	return (_String());
+}
+
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Strip(const _String& pString, const _String& pCharDelimitors)
+{
+	return StripRight(StripLeft(pString, pCharDelimitors), pCharDelimitors);
+}
+
 
 
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, typename _String::value_type pFromChar, typename _String::value_type pToChar)
@@ -339,7 +355,7 @@ STR_UTIL_TEMPLATE int STR_UTIL_QUAL::FindFirstWhiteSpace(const _String& pString,
 	return (x);
 }
 
-STR_UTIL_TEMPLATE void STR_UTIL_QUAL::StripWhiteSpaces(_String& pString)
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::StripAllWhiteSpaces(_String& pString)
 {
 	int lDestIndex = 0;
 	for (size_t i = 0; i < pString.length(); i++)

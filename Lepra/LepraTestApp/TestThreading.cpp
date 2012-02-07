@@ -354,8 +354,12 @@ bool TestThreading(const LogDecorator& pAccount)
 	{
 		lContext = _T("STL lock release");
 		gStlLock._M_release_lock();
-		Thread::Sleep(0.01);
-		lTestOk = (gThreadTestCounter == 3 && !lStlLockerThread.IsRunning());
+		lTestOk = false;
+		for (int x = 0; !lTestOk && x < 10; ++x)
+		{
+			lTestOk = (gThreadTestCounter == 3 && !lStlLockerThread.IsRunning());
+			Thread::Sleep(0.06);
+		}
 		assert(lTestOk);
 	}
 

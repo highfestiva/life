@@ -89,7 +89,7 @@ bool TestString(const LogDecorator& pAccount)
 		strutil::ToLower(lTmp2);
 		lString.insert(10, lTmp1+lTmp2);
 		lTmp1 = _T("*!\" #\t%&/\r()=\n\v");
-		strutil::StripWhiteSpaces(lTmp1);
+		strutil::StripAllWhiteSpaces(lTmp1);
 		lString.insert(30, lTmp1);
 		lString.insert(0, strutil::Right(_T("Johannes"), 6) + str(_T("Sune")).substr(0, 1));
 		lTestOk = (lString == _T("hannesSABCdefghijOAoaklmnopqrstUvw yz*!\"#%&/()=97531efghijklmnopqrstUvw yz02468") &&
@@ -224,6 +224,14 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("string stripping");
 		lTestWords[1] = strutil::StripLeft(lTestWords[1], _T("\""));
 		lTestOk = (lTestWords[1] == _T("kyliga"));
+		if (lTestOk)
+		{
+			lTestOk = (strutil::StripRight(_T("aabbcc"), _T("c")) == _T("aabb"));
+		}
+		if (lTestOk)
+		{
+			lTestOk = (strutil::Strip(_T("  Jonte  "), _T(" ")) == _T("Jonte"));
+		}
 		assert(lTestOk);
 	}
 
@@ -2439,6 +2447,10 @@ bool TestPerformance(const LogDecorator& pAccount)
 				}
 				{
 					LEPRA_MEASURE_SCOPE(Close);
+					for (int x = 0; lAcceptor.IsRunning() && x < 10; ++x)
+					{
+						Thread::Sleep(0.06);
+					}
 					lMuxSocket1.CloseSocket(lSocket);
 				}
 			}

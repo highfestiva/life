@@ -17,7 +17,7 @@
 		<string>Icon-72.png</string>
 	</array>
 	<key>CFBundleIdentifier</key>
-	<string>com.pixeldoctrine.GrenadeRun</string>
+	<string>com.pixeldoctrine.killcutie</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -34,9 +34,7 @@
 	<array>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
+	<key>UIPrerenderedIcon</key>
+	<integer>1</integer>
 </dict>
 </plist>

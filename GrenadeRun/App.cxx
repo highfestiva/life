@@ -5,12 +5,15 @@
 
 
 #include <list>
+#include "../Cure/Include/HiscoreAgent.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/FileOpener.h"
 #include "../Lepra/Include/LogListener.h"
+#include "../Lepra/Include/Network.h"
+#include "../Lepra/Include/Obfuxator.h"
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
@@ -37,19 +40,25 @@
 #include "Cutie.h"
 #include "Game.h"
 #include "Launcher.h"
+#ifdef LEPRA_MAC
+#include "../Lepra/Include/Posix/MacLog.h"
+#endif // iOS
 
 
 
-#define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
-#define BUTTON_WIDTH	40
-#define BUTTON_MARGIN	2
-#define BGCOLOR_DIALOG	Color(5, 20, 30, 192)
-#define FGCOLOR_DIALOG	Color(170, 170, 170, 255)
-#define ICONBTN(i,n)	new UiCure::IconButton(mUiManager, mResourceManager, _T(i), _T(n))
-#define HEART_POINTS	4
+#define UIKEY(name)			UiLepra::InputManager::IN_KBD_##name
+#define BUTTON_WIDTH			40
+#define BUTTON_MARGIN			2
+#define BGCOLOR_DIALOG			Color(5, 20, 30, 192)
+#define FGCOLOR_DIALOG			Color(170, 170, 170, 255)
+#define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, mResourceManager, i, n)
+#define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
+#define HEART_POINTS			4
 #define BARREL_COMPASS_LINE_COUNT	13
 #define BARREL_COMPASS_LINE_SPACING	3
 #define BARREL_COMPASS_WIDTH		(BARREL_COMPASS_LINE_COUNT-1)*BARREL_COMPASS_LINE_SPACING + 1
+#define GET_NAME_INDEX(idx, a)		((idx) < 0)? LEPRA_ARRAY_COUNT(a)-1 : (idx)%LEPRA_ARRAY_COUNT(a)
+#define GET_NAME(idx, a)		a[GET_NAME_INDEX(idx, a)]
 
 
 
@@ -59,6 +68,13 @@ namespace GrenadeRun
 
 
 FingerMoveList gFingerMoveList;
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
+const str gPlatform = _T("touch");
+#else // Computer.
+const str gPlatform = _T("computer");
+#endif // Touch / computer.
+const str gLevels[] = { _T("Pendulum"), _T("Elevate"), _T("RoboCastle") };
+const str gVehicles[] = { _T("Cutie"), _T("Hardie"), _T("Speedie"), _T("Sleepie") };
 
 
 
@@ -72,7 +88,7 @@ public:
 	App(const strutil::strvec& pArgumentList);
 	virtual ~App();
 
-	static bool PollApp();
+	static App* GetApp();
 
 	bool Open();
 	void Close();
@@ -89,6 +105,7 @@ public:
 	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAreEqual) const;
 	void DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, float pMaxValue) const;
+	void DrawTapIndicator(int pTag, int x, int y, float pAngle) const;
 	/*void DrawBarrelIndicatorGround(float x, float y, float pAAngle, float pBaseLength, float pBaseWidth) const;
 	void DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const;*/
 	void DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue1, float pValue2) const;
@@ -97,9 +114,13 @@ public:
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	void Layout();
 	void MainMenu();
-	void HiscoreMenu(int pIndex, int pDirection);
-	void EnterHiscore();
+	void UpdateHiscore(bool pError);
+	void HiscoreMenu(int pDirection);
+	void EnterHiscore(const str& pMessage);
 	void SuperReset(bool pGameOver);
+	void CreateHiscoreAgent();
+	void Purchase(const str& pProductName);
+	void SetIsPurchasing(bool pIsPurchasing);
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -107,10 +128,10 @@ public:
 	bool Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
-#if !defined(LEPRA_IOS) && defined(LEPRA_IOS_LOOKANDFEEL)
+#if !defined(LEPRA_TOUCH) && defined(LEPRA_TOUCH_LOOKANDFEEL)
 	void OnMouseInput(UiLepra::InputElement* pElement);
 	bool mIsMouseDown;
-#endif // Computer emulating iOS
+#endif // Computer emulating touch device
 	virtual int PollTap(FingerMovement& pMovement);
 
 	void OnResize(int pWidth, int pHeight);
@@ -141,9 +162,9 @@ public:
 	DebuggerLogListener mDebugLogger;
 
 	static App* mApp;
-#ifdef LEPRA_IOS
+#ifdef LEPRA_TOUCH
 	AnimatedApp* mAnimatedApp;
-#endif // iOS
+#endif // Touch
 	Game* mGame;
 
 	double mAverageLoopTime;
@@ -176,7 +197,7 @@ public:
 	UiTbc::Button* mGetiPhoneButton;
 	UiCure::UserPainterKeepImageResource* mHeart;
 	UiCure::UserPainterKeepImageResource* mGreyHeart;
-#ifndef LEPRA_IOS_LOOKANDFEEL
+#ifndef LEPRA_TOUCH_LOOKANDFEEL
 	UiCure::UserPainterKeepImageResource* mKeyboardButton;
 #endif // Computer
 	UiCure::UserPainterKeepImageResource* mArrow;
@@ -219,10 +240,13 @@ public:
 	bool mFlipDraw;
 	HiResTimer mStartupTimer;
 	StopWatch mRotateTimer;
-	int mHiscoreViewIndex;
+	int mHiscoreLevelIndex;
+	int mHiscoreVehicleIndex;
 	HiscoreTextField* mHiscoreTextField;
 	str mLastHiscoreName;
 	float mThrottle;
+	Cure::HiscoreAgent* mHiscoreAgent;
+	bool mIsPurchasing;
 
 	LOG_CLASS_DECLARE();
 };
@@ -239,14 +263,23 @@ public:
 	}
 	virtual bool OnChar(tchar pChar)
 	{
-		bool b = Parent::OnChar(pChar);
-		if (GetText().length() > 13)
+		bool b = false;
+		if (GetText().length() < 13 || pChar < ' ')	// Limit character length.
 		{
-			SetText(GetText().substr(0, 13));
+			b = Parent::OnChar(pChar);
+			if (GetText().length() > 13)	// Shouln't happen...
+			{
+				SetText(GetText().substr(0, 13));
+			}
 		}
 		if (pChar == '\r' || pChar == '\n')
 		{
-			mApp->mDialog->Dismiss();
+			const str lText = strutil::Strip(GetText(), _T(" \t\v\r\n"));
+			if (!lText.empty())
+			{
+				mApp->mDialog->Dismiss();
+				b = true;
+			}
 		}
 		return b;
 	}
@@ -303,46 +336,47 @@ App::App(const strutil::strvec& pArgumentList):
 	mSteering(0),
 	mBaseSteering(0),
 	mFlipDraw(false),
-	mHiscoreViewIndex(0),
+	mHiscoreLevelIndex(0),
+	mHiscoreVehicleIndex(0),
 	mHiscoreTextField(0),
-	mLastHiscoreName(_T("")),
-	mThrottle(0)
+	mThrottle(0),
+	mLastHiscoreName(),
+	mHiscoreAgent(0),
+	mIsPurchasing(false)
 {
 	mApp = this;
 }
 
 App::~App()
 {
+	delete mHiscoreAgent;
+	mHiscoreAgent = 0;
 	mVariableScope = 0;
 	UiCure::Shutdown();
 	UiTbc::Shutdown();
 	UiLepra::Shutdown();
 }
 
-bool App::PollApp()
+App* App::GetApp()
 {
-	if (!mApp->Poll())
-	{
-		return false;
-	}
-	return (SystemManager::GetQuitRequest() == 0);
+	return mApp;
 }
 
 bool App::Open()
 {
-#ifdef LEPRA_IOS
+#ifdef LEPRA_TOUCH
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	const int lDisplayWidth = lSize.height;
 	const int lDisplayHeight = lSize.width;
-#else // !iOS
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#else // !Touch
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	const int lDisplayWidth = 480;
 	const int lDisplayHeight = 320;
-#else // !iOS L&F
+#else // !Touch L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
-#endif // iOS / Computer L&F
-#endif // iOS/!iOS
+#endif // Touch / Computer L&F
+#endif // Touch/!Touch
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
@@ -372,21 +406,21 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.7);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
 
-#ifndef LEPRA_IOS_LOOKANDFEEL
+#ifndef LEPRA_TOUCH_LOOKANDFEEL
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
-#endif // !iOS
+#endif // !Touch
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
 	bool lOk = mUiManager->OpenDraw();
 	if (lOk)
 	{
-#ifdef LEPRA_IOS
+#ifdef LEPRA_TOUCH
 		mUiManager->GetCanvas()->SetOutputRotation(90);
-#endif // iOS
+#endif // Touch
 		mUiManager->GetPainter()->ResetClippingRect();
 		DisplayLogo();
 		mStartupTimer.PopTimeDiff();
@@ -400,10 +434,10 @@ bool App::Open()
 		mUiManager->GetDisplayManager()->SetCaption(_T("Kill Cutie"));
 		mUiManager->GetDisplayManager()->AddResizeObserver(this);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
-#if !defined(LEPRA_IOS) && defined(LEPRA_IOS_LOOKANDFEEL)
+#if !defined(LEPRA_TOUCH) && defined(LEPRA_TOUCH_LOOKANDFEEL)
 		mIsMouseDown = false;
 		mUiManager->GetInputManager()->GetMouse()->AddFunctor(new UiLepra::TInputFunctor<App>(this, &App::OnMouseInput));
-#endif // Computer emulating iOS
+#endif // Computer emulating touch
 	}
 	if (lOk)
 	{
@@ -430,7 +464,7 @@ bool App::Open()
 		mPlayerSplitter = new UiTbc::RectComponent(BLACK, _T("Splitter"));
 		lDesktopWindow->AddChild(mPlayerSplitter);
 
-		mPauseButton = ICONBTN("btn_pause.png", "");
+		mPauseButton = ICONBTNA("btn_pause.png", "");
 		mPauseButton->SetBaseColor(BGCOLOR_DIALOG);
 		mPauseButton->SetRoundedStyle(10);
 		lDesktopWindow->AddChild(mPauseButton);
@@ -439,12 +473,12 @@ bool App::Open()
 		mPauseButton->SetVisible(true);
 		mPauseButton->SetOnClick(App, OnPauseClick);
 
-#ifndef LEPRA_IOS_LOOKANDFEEL
-		mGetiPhoneButton = ICONBTN("btn_iphone.png", "");
+#ifndef LEPRA_TOUCH_LOOKANDFEEL
+		mGetiPhoneButton = ICONBTNA("btn_iphone.png", "");
 		lDesktopWindow->AddChild(mGetiPhoneButton);
 		mGetiPhoneButton->SetVisible(true);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
-#endif // iOS L&F
+#endif // Touch L&F
 	}
 	if (lOk)
 	{
@@ -454,7 +488,7 @@ bool App::Open()
 		mGreyHeart = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mGreyHeart->Load(mResourceManager, _T("grey_heart.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
-#ifndef LEPRA_IOS_LOOKANDFEEL
+#ifndef LEPRA_TOUCH_LOOKANDFEEL
 		mKeyboardButton = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mKeyboardButton->Load(mResourceManager, _T("btn_key.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
@@ -559,6 +593,7 @@ int App::Run()
 	UiLepra::Init();
 	UiTbc::Init();
 	UiCure::Init();
+	Network::Start();
 
 	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("KillCutie")), _T("log"), _T("txt"));
 	FileLogListener lFileLogger(lLogName);
@@ -571,6 +606,7 @@ int App::Run()
 			(*x)->SetLevelThreashold(Log::LEVEL_INFO);
 		}
 	}
+
 	bool lOk = true;
 	if (lOk)
 	{
@@ -602,7 +638,6 @@ int App::Run()
 		mGame->Cure::GameTicker::GetTimeManager()->Tick();
 		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
 		MainMenu();
-		//EnterHiscore();
 		lOk = mResourceManager->InitDefault();
 	}
 	mLoopTimer.PopTimeDiff();
@@ -658,7 +693,7 @@ bool App::Poll()
 		const double lDelayTime = 1.0/FPS - mAverageLoopTime;
 		Thread::Sleep(lDelayTime);
 		mLoopTimer.PopTimeDiff();
-#ifndef LEPRA_IOS_LOOKANDFEEL
+#ifndef LEPRA_TOUCH_LOOKANDFEEL
 		if (mAverageLoopTime > 1.0/(FPS-2))
 		{
 			if (++mSlowShadowCount > 20)
@@ -667,7 +702,42 @@ bool App::Poll()
 				CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
 			}
 		}
-#endif // !iOS
+#endif // !Touch
+	}
+	if (lOk)
+	{
+		// Download any pending hiscore request.
+		if (mHiscoreAgent)
+		{
+			Cure::ResourceLoadState lLoadState = mHiscoreAgent->Poll();
+			if (lLoadState != Cure::RESOURCE_LOAD_IN_PROGRESS)
+			{
+				switch (mHiscoreAgent->GetAction())
+				{
+					case Cure::HiscoreAgent::ACTION_DOWNLOAD_LIST:
+					{
+						UpdateHiscore(lLoadState != Cure::RESOURCE_LOAD_COMPLETE);
+						delete mHiscoreAgent;
+						mHiscoreAgent = 0;
+					}
+					break;
+					case Cure::HiscoreAgent::ACTION_UPLOAD_SCORE:
+					{
+						HiscoreMenu(+1);
+					}
+					break;
+					default:
+					{
+						delete mHiscoreAgent;
+						mHiscoreAgent = 0;
+						mLog.AError("Oops! Completed hiscore communication, but something went wrong.");
+						assert(false);
+						MainMenu();	// Well... assume some super-shitty state...
+					}
+					break;
+				}
+			}
+		}
 	}
 	if (lOk)
 	{
@@ -759,14 +829,14 @@ bool App::Poll()
 		mInfoTextColor = Color(127, 127, 127)*(1+::sin(mAngleTime*27)*0.9f);
 		DrawHud();
 
-		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE)
+		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE && mGame->IsScoreCountingEnabled())
 		{
 			mUiManager->GetPainter()->SetColor(WHITE);
 			const str lScore = Int2Str((int)mGame->GetScore());
 			mUiManager->GetPainter()->PrintText(lScore, 10, 10);
 		}
 
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		if (mRotateTimer.IsStarted() && mRotateTimer.QueryTimeDiff() < 2.0 &&
 			mRotate->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 		{
@@ -776,13 +846,21 @@ bool App::Poll()
 				mUiManager->GetCanvas()->GetHeight()/2 - mRotate->GetRamData()->GetHeight()/2);
 			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 		}
-#endif // iOS L&F
+#endif // Touch L&F
 
 		mGame->Paint();
 
 		if (mDialog)
 		{
 			mUiManager->Paint(false);
+		}
+
+		if (mIsPurchasing)
+		{
+			mUiManager->GetPainter()->SetColor(WHITE, 0);
+			PrintText(_T("Communicating with App Store..."), 0, 
+				mUiManager->GetCanvas()->GetWidth()/2,
+				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight() - 8);
 		}
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
@@ -811,9 +889,9 @@ bool App::Poll()
 			if ((lHeartBalance == -HEART_POINTS/2 || lHeartBalance == +HEART_POINTS/2) &&	// Somebody won.
 				mGame->GetComputerIndex() != -1 &&	// Computer in the game.
 				mGame->GetComputerIndex() != mGame->GetWinnerIndex() &&	// Computer didn't win = user won over computer.
-				mGame->GetScore() > 10.0)		// Negative score isn't any good - at least be positive.
+				mGame->GetScore() > 500.0)		// Negative score isn't any good - at least be positive.
 			{
-				EnterHiscore();
+				EnterHiscore(str());
 			}
 			else
 			{
@@ -827,7 +905,13 @@ bool App::Poll()
 
 void App::PollTaps()
 {
-#ifdef LEPRA_IOS_LOOKANDFEEL
+	if (mIsPurchasing)
+	{
+		gFingerMoveList.clear();
+		return;
+	}
+
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
 	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 ||!lAvatar2->IsLoaded())
@@ -846,7 +930,8 @@ void App::PollTaps()
 	mIsThrottling = false;
 	for (; x != gFingerMoveList.end();)
 	{
-		if (PollTap(*x) > 0)
+		x->mTag = PollTap(*x);
+		if (x->mTag > 0)
 		{
 			++x;
 		}
@@ -855,14 +940,14 @@ void App::PollTaps()
 			gFingerMoveList.erase(x++);
 		}
 	}
-#ifndef LEPRA_IOS
+#ifndef LEPRA_TOUCH
 	// Test code.
 	if (!gFingerMoveList.empty() && !gFingerMoveList.back().mIsPress)
 	{
 		gFingerMoveList.clear();
 	}
 #endif // Computer
-#endif // iOS L&F
+#endif // Touch L&F
 }
 
 void App::DrawHud()
@@ -887,11 +972,11 @@ void App::DrawHud()
 	const int lWinner = mGame->GetWinnerIndex();
 	if (lWinner >= 0)
 	{
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		const float lAngle = (mGame->GetComputerIndex() != 1)? PIF/2 : 0;
 #else // Computer.
 		const float lAngle = 0;
-#endif // iOS / computer
+#endif // Touch / computer.
 		UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
 		const bool lGameOver = (mGame->GetHeartBalance() == -HEART_POINTS/2 || mGame->GetHeartBalance() == +HEART_POINTS/2);
@@ -937,11 +1022,11 @@ void App::DrawHud()
 			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 			DrawRoundedPolygon((float)x, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG, 1.0f, 1.0f);
 			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 				const float a = (mGame->GetComputerIndex() == 0)? -lAngle : 0;
 #else // Computer L&F
 				const float a = 0;
-#endif // iOS / Computer L&F
+#endif // Touch / Computer L&F
 			if (lWinner != mGame->GetComputerIndex())
 			{
 				mUiManager->GetPainter()->SetColor(LIGHT_GREEN, 0);
@@ -960,7 +1045,7 @@ void App::DrawHud()
 
 	mFlipDraw = mGame->IsFlipRenderSide();
 
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	if (mGame->GetComputerIndex() != 0 &&
 		mArrow->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 		mSteeringWheel->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
@@ -1019,6 +1104,7 @@ void App::DrawHud()
 				DrawMeter((int)(m+lButtonRadius), y, 0, lButtonWidth, v0, v1);
 			}
 			InfoText(1, _T("Throttle/brake"), PIF/2, 0, -14);
+			DrawTapIndicator(1, (int)(m+lButtonRadius)+15, y - (int)(mThrottle*18.7f)-1, 0);
 			DrawImage(mArrow->GetData(), m+lButtonRadius+1,	y-m-mw+1,	aw, ah, 0);
 			DrawImage(mArrow->GetData(), m+lButtonRadius,	y+m+mw-2,	aw, ah, PIF);
 			//DrawRoundedPolygon(m+lButtonRadius,	h-m*2-lButtonWidth-mw,	lButtonRadius*0.5f,	0,	3);
@@ -1063,25 +1149,25 @@ void App::DrawHud()
 		DrawRoundedPolygon(w-m-lButtonRadius,		h/2,			lButtonRadius,	-PIF/2,	6, c);
 		InfoText(2, _T("BOOOM!"), PIF/2);*/
 	}
-#endif // iOS
+#endif // Touch
 
 	// Draw touch force meters, to give a visual indication of steering.
 
 	Cutie* lCutie = (Cutie*)lAvatar1;
 	if (mGame->GetComputerIndex() < 0)	// Two players.
 	{
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		DrawMeter((int)w/2, (int)h/2, PIF, h/2, 0, lCutie->GetHealth()*1.0002f);
-#else // !iOS
+#else // !Touch
 		DrawMeter((int)w/4, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()*1.0002f);
-#endif // iOS/!iOS
+#endif // Touch/!Touch
 	}
 	else if (mGame->GetComputerIndex() != 0)	// Single player Cutie.
 	{
 		DrawMeter((int)w/2, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()*1.0002f);
 	}
 
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	/*float lForce;
 	const TBC::PhysicsEngine* lGas;
 	//const TBC::PhysicsEngine* lBrakes;
@@ -1142,12 +1228,12 @@ void App::DrawHud()
 			InfoText(2, _T("Turn power"), PIF/2);
 		}
 	}*/
-#endif // iOS
+#endif // Touch
 
 	if (mGame->GetComputerIndex() != 1 &&	// Computer not running launcher.
 		mArrow->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		// Draw launcher guides, used for steering in iOS.
+		// Draw launcher guides, used for steering in touch device.
 		float lPitch;
 		float lGuidePitch;
 		float lYaw;
@@ -1163,7 +1249,7 @@ void App::DrawHud()
 		float lDrawAngle = 0;
 		const float aw = (float)mArrow->GetRamData()->GetWidth();
 		const float ah = (float)mArrow->GetRamData()->GetHeight();
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		x = w-m-2-BARREL_COMPASS_WIDTH/2;
 		y = h-m-aw/2;
 		dx = BARREL_COMPASS_WIDTH/2-ah/2-2;
@@ -1175,7 +1261,7 @@ void App::DrawHud()
 			x -= 104;
 		}
 		mLiftMeterOffset = x = Math::Lerp(mLiftMeterOffset, x, 0.8f);
-#else // !iOS
+#else // !Touch
 		x = m+aw/2 + 30;
 		y = h-m-2-BARREL_COMPASS_WIDTH/2;
 		lDrawAngle = -PIF/2;
@@ -1184,7 +1270,7 @@ void App::DrawHud()
 			x += w/2;
 		}
 		dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
-#endif // iOS/!iOS
+#endif // Touch/!touch
 		DrawBarrelCompass((int)x, (int)y, lDrawAngle, (int)aw-8, lValue1, lValue2);
 		InfoText(2, _T("Up/down compass"), PIF, -20, 0);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle+PIF/2);
@@ -1194,7 +1280,7 @@ void App::DrawHud()
 		dy = 0;
 		lValue1 = lYaw/(PIF+0.1f)+0.5f;
 		lValue2 = (lGuideYaw)/(PIF+0.1f)+0.5f;
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		x = w-m-aw/2;
 		y = m+2+BARREL_COMPASS_WIDTH/2;
 		dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
@@ -1206,12 +1292,12 @@ void App::DrawHud()
 			x -= 104;
 		}
 		mYawMeterOffset = x = Math::Lerp(mYawMeterOffset, x, 0.8f);
-#else // !iOS
+#else // !Touch
 		//lDrawAngle = -PIF/2;
 		x = w-m-2-BARREL_COMPASS_WIDTH/2 - 30;
 		y = h-m-aw/2;
 		dx = -(BARREL_COMPASS_WIDTH/2-ah/2-2);
-#endif // iOS/!iOS
+#endif // Touch/!Touch
 		DrawBarrelCompass((int)x, (int)y, +PIF/2+lDrawAngle, (int)aw-8, lValue1, lValue2);
 		InfoText(2, _T("Left/right compass"), PIF/2, 0, 30);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle);
@@ -1241,13 +1327,13 @@ void App::DrawHud()
 		const float ih = (float)mHeart->GetRamData()->GetHeight();
 		const float hw = iw * lHeartBeatFactor;
 		const float hh = ih * lHeartBeatFactor;
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		if (mGame->GetComputerIndex() == -1)
 		{
 			x = w/2 - BUTTON_WIDTH/2 - 8 - 3 - ih;
 			lAngle = -PIF/2;
 		}
-#endif	// iOS L&F
+#endif	// Touch L&F
 		if (mGame->GetComputerIndex() == 1 && !mGetiPhoneButton)
 		{
 			x = lMargin+2;
@@ -1278,7 +1364,7 @@ void App::DrawHud()
 		}
 		x = w - lMargin - iw;
 		y = BUTTON_WIDTH + 8*2 + 3;
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		if (mGame->GetComputerIndex() == -1)
 		{
 			x = w/2 + BUTTON_WIDTH/2 + lMargin;
@@ -1290,18 +1376,18 @@ void App::DrawHud()
 			y = BUTTON_WIDTH + lMargin*2;
 		}
 		lAngle = PIF/2;
-#endif	// iOS L&F
+#endif	// Touch L&F
 		if (mGame->GetComputerIndex() == -1)
 		{
 			y = lMargin;
 		}
 		else if (mGame->GetComputerIndex() == 0 && !mGetiPhoneButton)
 		{
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 			x += BUTTON_WIDTH/2 - iw/2 + 2;
 #else // Computer
 			y = lMargin;
-#endif // iOS / Computer
+#endif // Touch / Computer
 		}
 		y += (iw+8) * (HEART_POINTS - 1);
 		for (int i = -HEART_POINTS/2; i < +HEART_POINTS/2; ++i)
@@ -1325,7 +1411,7 @@ void App::DrawHud()
 		//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 	}
 
-#ifndef LEPRA_IOS_LOOKANDFEEL
+#ifndef LEPRA_TOUCH_LOOKANDFEEL
 	if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE && !mStartTimer.IsStarted())
 	{
 		mStartTimer.Start();
@@ -1555,6 +1641,29 @@ void App::DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, fl
 	}
 }
 
+void App::DrawTapIndicator(int pTag, int x, int y, float pAngle) const
+{
+	int x2 = x + 20;
+	int y2 = y;
+	float lAngle = pAngle;
+	Transpose(x2, y2, lAngle);
+	Transpose(x, y, pAngle);
+	mUiManager->GetPainter()->SetColor(WHITE);
+	FingerMoveList::iterator i = gFingerMoveList.begin();
+	for (; i != gFingerMoveList.end(); ++i)
+	{
+		if (i->mTag != pTag)
+		{
+			continue;
+		}
+		int x3 = i->mLastY;
+		int y3 = mUiManager->GetCanvas()->GetHeight() - i->mLastX;
+		Transpose(x3, y3, lAngle);
+		mUiManager->GetPainter()->DrawLine(x3, y3, x2, y2);
+		mUiManager->GetPainter()->DrawLine(x2, y2, x, y);
+	}
+}
+
 /*void App::DrawBarrelIndicatorGround(float x, float y, float pAngle, float pBaseLength, float pBaseWidth) const
 {
 	Transpose(x, y, pAngle);
@@ -1633,14 +1742,14 @@ void App::DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue
 
 void App::InfoText(int pPlayer, const str& pInfo, float pAngle, float dx, float dy) const
 {
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	if (mFlipDraw)
 	{
 		dx = -dx;
 		dy = -dy;
 		pAngle += PIF;
 	}
-#endif // iOS
+#endif // Touch
 
 	const double lLastTime = (pPlayer == 1)? mPlayer1LastTouch.QueryTimeDiff() : mPlayer2LastTouch.QueryTimeDiff();
 	const double lShowDelayTime = (pPlayer == 1)? mPlayer1TouchDelay.QueryTimeDiff() : mPlayer2TouchDelay.QueryTimeDiff();
@@ -1664,7 +1773,7 @@ void App::InfoText(int pPlayer, const str& pInfo, float pAngle, float dx, float 
 
 void App::DrawInfoTexts() const
 {
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	const Color c = mUiManager->GetPainter()->GetColor(0);
 	mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
 
@@ -1675,7 +1784,7 @@ void App::DrawInfoTexts() const
 	}
 
 	mUiManager->GetPainter()->SetColor(c, 0);
-#endif // iOS
+#endif // Touch
 
 	mInfoTextArray.clear();
 }
@@ -2007,7 +2116,7 @@ bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 	return Steer(pKeyCode, 0);
 }
 
-#if !defined(LEPRA_IOS) && defined(LEPRA_IOS_LOOKANDFEEL)
+#if !defined(LEPRA_TOUCH) && defined(LEPRA_TOUCH_LOOKANDFEEL)
 void App::OnMouseInput(UiLepra::InputElement* pElement)
 {
 	if (pElement->GetType() == UiLepra::InputElement::DIGITAL)
@@ -2033,20 +2142,20 @@ void App::OnMouseInput(UiLepra::InputElement* pElement)
 		lMovement.mIsPress = false;
 	}
 }
-#endif // Computer emulating iOS
+#endif // Computer emulating touch device.
 
 int App::PollTap(FingerMovement& pMovement)
 {
 	(void)pMovement;
 	int lTag = 0;
 
-#ifdef LEPRA_IOS_LOOKANDFEEL
-#ifdef LEPRA_IOS
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
+#ifdef LEPRA_TOUCH
 	mUiManager->GetInputManager()->SetMousePosition(pMovement.mLastY, pMovement.mLastX);
 	mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(pMovement.mIsPress? 1 : 0);
 	mUiManager->GetInputManager()->GetMouse()->GetAxis(0)->SetValue(pMovement.mLastX);
 	mUiManager->GetInputManager()->GetMouse()->GetAxis(1)->SetValue(pMovement.mLastY);
-#endif // iOS
+#endif // Touch
 
 	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
 	{
@@ -2221,7 +2330,7 @@ int App::PollTap(FingerMovement& pMovement)
 		}
 	}
 	pMovement.mTag = lTag;
-#endif // iOS L&F
+#endif // Touch L&F
 	return lTag;
 }
 
@@ -2236,62 +2345,38 @@ void App::MainMenu()
 	mGame->SetHeartBalance(0);
 	// TRICKY-END!
 
-	mPauseButton->SetVisible(false);
+	mIsPaused = true;
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
-	d->AddButton(1, ICONBTN("btn_1p.png", "Single player"));
-	d->AddButton(2, ICONBTN("btn_2p.png", "Two players"));
+	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"));
+	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"));
 	d->AddButton(3, _T("Hiscore"));
 	d->AddButton(4, _T("Credits"));
 }
 
-void App::HiscoreMenu(int pIndex, int pDirection)
+void App::UpdateHiscore(bool pError)
 {
-	mHiscoreViewIndex = pIndex;
-	const int lIndexCount = 12;
-	if (mHiscoreViewIndex < 0)
+	if (!mDialog)
 	{
-		mHiscoreViewIndex = lIndexCount + mHiscoreViewIndex;
+		return;
 	}
-	mHiscoreViewIndex %= lIndexCount;
-
-	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnHiscoreAction);
-	d->SetPreClickTarget(UiTbc::Dialog<App>::Action(this, &App::OnPreHiscoreAction));
-	d->SetDirection(pDirection, true);
-	d->SetOffset(PixelCoord(0, -30));
-	const str lLevels[] = { _T("Pendulum"), _T("Elevate"), _T("RoboCastle") };
-	const str lVehicles[] = { _T("Cutie"), _T("Hardie"), _T("Speedie"), _T("Sleepie") };
-	const str lLevelName = lLevels[mHiscoreViewIndex / LEPRA_ARRAY_COUNT(lVehicles)];
-	const str lVehicleName = lVehicles[mHiscoreViewIndex % LEPRA_ARRAY_COUNT(lVehicles)];
-	d->SetQueryLabel(_T("Hiscore ") + lLevelName + _T("/") + lVehicleName, mBigFontId);
-	struct HiscoreEntry
+	if (pError)
 	{
-		str mName;
-		int mScore;
-		inline HiscoreEntry(str pName, int pScore):
-			mName(pName),
-			mScore(pScore)
-		{
-		}
-	};
-	HiscoreEntry lEntries[10] =
-	{
-		HiscoreEntry(_T("Jonte"),         21043904),
-		HiscoreEntry(_T("Sviodolf"),       2994502),
-		HiscoreEntry(_T("Gunnar"),          978131),
-		HiscoreEntry(_T("Olle"),             85523),
-		HiscoreEntry(_T("Dasen"),            83134),
-		HiscoreEntry(_T("Svein"),             5521),
-		HiscoreEntry(_T("Egon Egonsson"),     4126),
-		HiscoreEntry(_T("RoundRobin"),         184),
-		HiscoreEntry(_T("Bertram"),             72),
-		HiscoreEntry(_T("Solvej"),               1),
-	};
+		UiTbc::Label* lText = new UiTbc::Label;
+		lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
+		lText->SetText(_T("Network problem, try again l8r."), LIGHT_RED, CLEAR_COLOR);
+		mDialog->AddChild(lText, 120, 75);
+		return;
+	}
+	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
+	typedef Cure::HiscoreAgent::List HiscoreList;
+	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
 	str lHiscore;
-	for (int x = 0; x < mHiscoreViewIndex && x < 10; ++x)
+	for (int x = 0; x < (int)lHiscoreList.mEntryList.size() && x < 10; ++x)
 	{
-		const HiscoreEntry& lEntry = lEntries[x];
+		const int lPlace = x + 1 + lHiscoreList.mOffset;
+		const HiscoreEntry& lEntry = lHiscoreList.mEntryList[x];
 		const str lScore = Int2Str(lEntry.mScore);
-		lHiscore += strutil::Format(_T("%2i %-13s %10s\n"), x+1, lEntry.mName.c_str(), lScore.c_str());
+		lHiscore += strutil::Format(_T("%4i %-13s %10s\n"), lPlace, lEntry.mName.c_str(), lScore.c_str());
 	}
 	if (lHiscore.empty())
 	{
@@ -2301,30 +2386,69 @@ void App::HiscoreMenu(int pIndex, int pDirection)
 	lText->SetFontId(mMonospacedFontId);
 	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
 	lText->SetText(lHiscore, LIGHT_GRAY, CLEAR_COLOR);
-	d->AddChild(lText, 120, 75);
-	UiTbc::Button* lMainMenuButton = new UiTbc::CustomButton(_T("main_menu"));
-	UiTbc::Button* lPrevButton = ICONBTN("btn_prev.png", "");
-	UiTbc::Button* lNextButton = ICONBTN("btn_next.png", "");
-	lMainMenuButton->SetPreferredSize(d->GetPreferredWidth() / 2, d->GetPreferredHeight());
-	lPrevButton->SetPreferredSize(57, 57);
-	lNextButton->SetPreferredSize(57, 57);
-	d->AddButton(-1, lMainMenuButton);
-	d->AddButton(-2, lPrevButton);
-	d->AddButton(-3, lNextButton);
-	lMainMenuButton->SetPos(d->GetPreferredWidth()/4, 0);
-	lPrevButton->SetPos(20, d->GetPreferredHeight()/2 - 57/2);
-	lNextButton->SetPos(d->GetPreferredWidth()-20-57, d->GetPreferredHeight()/2 - 57/2);
+	mDialog->AddChild(lText, 120, 75);
 }
 
-void App::EnterHiscore()
+void App::HiscoreMenu(int pDirection)
+{
+	// Start downloading the highscore.
+	CreateHiscoreAgent();
+	const str lLevelName = gLevels[mHiscoreLevelIndex];
+	const str lVehicleName = gVehicles[mHiscoreVehicleIndex];
+	if (!mHiscoreAgent->StartDownloadingList(gPlatform, lLevelName, lVehicleName, 0, 10))
+	{
+		delete mHiscoreAgent;
+		mHiscoreAgent = 0;
+	}
+
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnHiscoreAction);
+	d->SetPreClickTarget(UiTbc::Dialog<App>::Action(this, &App::OnPreHiscoreAction));
+	d->SetDirection(pDirection, true);
+	d->SetOffset(PixelCoord(0, -30));
+	d->SetQueryLabel(_T("Hiscore ") + lLevelName + _T("/") + lVehicleName, mBigFontId);
+	UiTbc::Button* lMainMenuButton = new UiTbc::CustomButton(_T("main_menu"));
+	UiTbc::Button* lPrevLevelButton = ICONBTN(_T("btn_prev.png"), GET_NAME(mHiscoreLevelIndex-1, gLevels));
+	UiTbc::Button* lNextLevelButton = ICONBTN(_T("btn_next.png"), GET_NAME(mHiscoreLevelIndex+1, gLevels));
+	UiTbc::Button* lPrevAvatarButton = ICONBTN(_T("btn_prev.png"), GET_NAME(mHiscoreVehicleIndex-1, gVehicles));
+	UiTbc::Button* lNextAvatarButton = ICONBTN(_T("btn_next.png"), GET_NAME(mHiscoreVehicleIndex+1, gVehicles));
+	lMainMenuButton->SetPreferredSize(d->GetPreferredWidth() / 2, d->GetPreferredHeight());
+	lPrevLevelButton->SetPreferredSize(57, 57);
+	lNextLevelButton->SetPreferredSize(lPrevLevelButton->GetPreferredSize());
+	lPrevAvatarButton->SetPreferredSize(lPrevLevelButton->GetPreferredSize());
+	lNextAvatarButton->SetPreferredSize(lPrevLevelButton->GetPreferredSize());
+	d->AddButton(-1, lMainMenuButton);
+	d->AddButton(-2, lPrevLevelButton);
+	d->AddButton(-3, lNextLevelButton);
+	d->AddButton(-4, lPrevAvatarButton);
+	d->AddButton(-5, lNextAvatarButton);
+	lMainMenuButton->SetPos(d->GetPreferredWidth()/4, 0);
+	lPrevLevelButton->SetPos(20, d->GetPreferredHeight()/2 - 57-15);
+	lNextLevelButton->SetPos(d->GetPreferredWidth()-20-57, d->GetPreferredHeight()/2 - 57-15);
+	lPrevAvatarButton->SetPos(20, d->GetPreferredHeight()/2 +15);
+	lNextAvatarButton->SetPos(d->GetPreferredWidth()-20-57, d->GetPreferredHeight()/2 +15);
+	if (!mHiscoreAgent)
+	{
+		UpdateHiscore(true);
+	}
+}
+
+void App::EnterHiscore(const str& pMessage)
 {
 	mGameOverTimer.Stop();
 	mGame->ResetWinnerIndex();
-	mPauseButton->SetVisible(false);
+	mGame->EnableScoreCounting(false);
+	mIsPaused = true;
 
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
+	if (pMessage.empty())
+	{
+		d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
+	}
+	else
+	{
+		d->SetQueryLabel(pMessage, mBigFontId);
+	}
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
 	mHiscoreTextField->SetText(mLastHiscoreName);
@@ -2399,6 +2523,28 @@ void App::SuperReset(bool pGameOver)
 	mDoLayout = true;
 }
 
+void App::CreateHiscoreAgent()
+{
+	delete mHiscoreAgent;
+	const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
+	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("kill_cutie"));
+}
+
+void App::Purchase(const str& pProductName)
+{
+#ifdef LEPRA_IOS
+	[mAnimatedApp startPurchase:MacLog::Encode(pProductName)];
+#endif // iOS
+}
+
+void App::SetIsPurchasing(bool pIsPurchasing)
+{
+	mIsPurchasing = pIsPurchasing;
+	if (!mIsPurchasing)
+	{
+		MainMenu();
+	}
+}
 
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
@@ -2435,7 +2581,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		case 1:
 		{
 			// 1P
-			const int lComputerIndex = Random::GetRandomNumber()&1;
+			const int lComputerIndex = ((Random::GetRandomNumber() % 256) >= 128);
 			mGame->SetComputerIndex(lComputerIndex);
 		}
 		break;
@@ -2447,8 +2593,8 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		break;
 		case 3:
 		{
-			//HiscoreMenu(0, +1);
-			EnterHiscore();
+			//HiscoreMenu(+1);
+			EnterHiscore(str());
 		}
 		return;
 		case 4:
@@ -2479,19 +2625,34 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnLevelAction);
 	d->SetQueryLabel(_T("Select level"), mBigFontId);
-	d->AddButton(1, ICONBTN("btn_lvl2.png", "Tutorial"));
-	d->AddButton(2, ICONBTN("btn_lvl2.png", "Pendulum"));
-	d->AddButton(3, ICONBTN("btn_lvl3.png", "Elevate"));
-	d->AddButton(4, ICONBTN("btn_lvl4.png", "RoboCastle"));
+	d->AddButton(1, ICONBTNA("btn_lvl2.png", "Tutorial"));
+	d->AddButton(2, ICONBTNA("btn_lvl2.png", "Pendulum"));
+	d->AddButton(3, ICONBTNA("btn_lvl3.png", "Elevate"));
+	d->AddButton(4, ICONBTNA("btn_lvl4.png", "RoboCastle"));
 }
 
 void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 {
 	if (!pButton)
 	{
-		mLastHiscoreName = mHiscoreTextField->GetText();	// TODO: something.
+		mLastHiscoreName = strutil::Strip(mHiscoreTextField->GetText(), _T(" \t\v\r\n"));
 		mHiscoreTextField = 0;
-		MainMenu();
+		if (!mLastHiscoreName.empty())
+		{
+			const str lLevelName = gLevels[mHiscoreLevelIndex];
+			const str lVehicleName = gVehicles[mHiscoreVehicleIndex];
+			CreateHiscoreAgent();
+			if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, lVehicleName, mLastHiscoreName, (int)Math::Round(mGame->GetScore())))
+			{
+				delete mHiscoreAgent;
+				mHiscoreAgent = 0;
+				EnterHiscore(_T("Please retry (hiscore server obstipation)"));
+			}
+		}
+		else
+		{
+			MainMenu();
+		}
 	}
 	else if (pButton->GetTag() == -1)
 	{
@@ -2501,13 +2662,18 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 	
 void App::OnLevelAction(UiTbc::Button* pButton)
 {
+	if (pButton->GetTag() >= 3)	// && not bought!)
+	{
+		Purchase(_T("levels"));
+		return;
+	}
 	str lLevel = _T("level_2");
 	switch (pButton->GetTag())
 	{
-		case 1:	lLevel = _T("level_2");	break;
-		case 2:	lLevel = _T("level_2");	break;
-		case 3:	lLevel = _T("level_3");	break;
-		case 4:	lLevel = _T("level_4");	break;
+		case 1:	lLevel = _T("level_2");	mHiscoreLevelIndex = 0;	break;
+		case 2:	lLevel = _T("level_2");	mHiscoreLevelIndex = 0;	break;
+		case 3:	lLevel = _T("level_3");	mHiscoreLevelIndex = 1;	break;
+		case 4:	lLevel = _T("level_4");	mHiscoreLevelIndex = 2;	break;
 	}
 	if (mGame->GetLevelName() != lLevel)
 	{
@@ -2543,7 +2709,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 				mScrollBarImage->GetUserData(0), UiTbc::GUIImageManager::CENTERED,
 				UiTbc::GUIImageManager::ALPHABLEND, 255);
 		}
-		UiTbc::Button* lScrollButton = ICONBTN("btn_scroll.png", "");
+		UiTbc::Button* lScrollButton = ICONBTNA("btn_scroll.png", "");
 		lScrollButton->SetPreferredSize(PixelCoord(44, 44), false);
 		mDifficultySlider = new UiTbc::ScrollBar(UiTbc::ScrollBar::HORIZONTAL,
 			mScrollBarImage->GetUserData(0), 0, 0, lScrollButton);
@@ -2566,13 +2732,14 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 
 void App::OnVehicleAction(UiTbc::Button* pButton)
 {
+	mGame->EnableScoreCounting(true);
 	str lVehicle = _T("cutie");
 	switch (pButton->GetTag())
 	{
-		case 1:	lVehicle = _T("cutie");		break;
-		case 2:	lVehicle = _T("monster");	break;
-		case 3:	lVehicle = _T("corvette");	break;
-		case 4:	lVehicle = _T("road_roller");	break;
+		case 1:	lVehicle = _T("cutie");		mHiscoreVehicleIndex= 0;	break;
+		case 2:	lVehicle = _T("monster");	mHiscoreVehicleIndex= 1;	break;
+		case 3:	lVehicle = _T("corvette");	mHiscoreVehicleIndex= 2;	break;
+		case 4:	lVehicle = _T("road_roller");	mHiscoreVehicleIndex= 3;	break;
 	}
 	mDifficultySlider = 0;
 	SuperReset(false);
@@ -2580,16 +2747,19 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 	mGame->SetVehicle(lVehicle);
 	mGame->ResetLauncher();
 	mGame->SetFlybyMode(Game::FLYBY_INACTIVE);
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	if (mGame->GetComputerIndex() == 0)
 	{
 		mRotateTimer.Start();
 	}
-#endif // iOS L&F
+#endif // Touch L&F
+	mIsPaused = false;
 }
 
 void App::OnHiscoreAction(UiTbc::Button* pButton)
 {
+	delete mHiscoreAgent;
+	mHiscoreAgent = 0;
 	switch (pButton->GetTag())
 	{
 		case -1:
@@ -2599,12 +2769,26 @@ void App::OnHiscoreAction(UiTbc::Button* pButton)
 		break;
 		case -2:
 		{
-			HiscoreMenu(mHiscoreViewIndex - 1, -1);
+			mHiscoreLevelIndex = GET_NAME_INDEX(mHiscoreLevelIndex-1, gLevels);
+			HiscoreMenu(-1);
 		}
 		break;
 		case -3:
 		{
-			HiscoreMenu(mHiscoreViewIndex + 1, +1);
+			mHiscoreLevelIndex = GET_NAME_INDEX(mHiscoreLevelIndex+1, gLevels);
+			HiscoreMenu(+1);
+		}
+		break;
+		case -4:
+		{
+			mHiscoreVehicleIndex = GET_NAME_INDEX(mHiscoreVehicleIndex-1, gVehicles);
+			HiscoreMenu(-1);
+		}
+		break;
+		case -5:
+		{
+			mHiscoreVehicleIndex = GET_NAME_INDEX(mHiscoreVehicleIndex+1, gVehicles);
+			HiscoreMenu(+1);
 		}
 		break;
 	}
@@ -2620,11 +2804,13 @@ void App::OnPreHiscoreAction(UiTbc::Button* pButton)
 		}
 		break;
 		case -2:
+		case -4:
 		{
 			mDialog->SetDirection(-1, false);
 		}
 		break;
 		case -3:
+		case -5:
 		{
 			mDialog->SetDirection(+1, false);
 		}
@@ -2645,6 +2831,8 @@ void App::OnPauseClick(UiTbc::Button*)
 	}
 
 	mIsPaused = true;
+	mPauseButton->ReleaseKeyboardFocus();
+	mPauseButton->ReleaseMouseFocus();
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, _T("Resume"));
 	d->AddButton(2, _T("Restart"));
@@ -2713,7 +2901,7 @@ void App::Transpose(float& x, float& y, float& pAngle) const
 	if (mFlipDraw)
 	{
 		const int w = mUiManager->GetCanvas()->GetWidth();
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		x = w - x;
 		y = mUiManager->GetCanvas()->GetHeight() - y;
 		pAngle += PIF;
@@ -2729,7 +2917,7 @@ void App::Transpose(float& x, float& y, float& pAngle) const
 		{
 			x -= w2;
 		}
-#endif // iOS / Computer
+#endif // Touch / Computer
 	}
 }
 

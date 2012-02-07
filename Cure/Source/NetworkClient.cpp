@@ -26,6 +26,7 @@ NetworkClient::NetworkClient(RuntimeVariableScope* pVariableScope):
 	mLoginAccountId(0),
 	mIsConnecting(false),
 	mIsLoggingIn(false),
+	mIsSocketConnecting(false),
 	mServerHost(),
 	mConnectTimeout(0),
 	mLoginToken(),
@@ -47,7 +48,12 @@ bool NetworkClient::Open(const str& pLocalAddress)
 	SendDisconnect();
 	Stop();
 
-	bool lOk = true;
+	bool lOk = !mIsSocketConnecting;
+	if (!lOk)
+	{
+		mLog.AWarning("Already connecting (from some other thread?)...");
+		assert(false);
+	}
 	SocketAddress lLocalAddress;
 	uint16 lEndPort = 0;
 	if (lOk)
@@ -76,6 +82,7 @@ bool NetworkClient::Open(const str& pLocalAddress)
 void NetworkClient::Stop()
 {
 	ScopeLock lLock(&mLock);
+	assert(!mIsSocketConnecting);
 	if (mSocket)
 	{
 		mMuxSocket->CloseSocket(mSocket);
@@ -95,7 +102,12 @@ bool NetworkClient::Connect(const str& pServerAddress, double pTimeout)
 {
 	ScopeLock lLock(&mLock);
 
-	bool lOk = true;
+	bool lOk = !mIsSocketConnecting;
+	if (!lOk)
+	{
+		mLog.AWarning("Already connecting (from some other thread?)...");
+		assert(false);
+	}
 
 	SocketAddress lTargetAddress;
 	if (lOk)
@@ -109,9 +121,11 @@ bool NetworkClient::Connect(const str& pServerAddress, double pTimeout)
 	if (lOk)
 	{
 		const std::string lConnectionId = SystemManager::GetRandomId();
+		mIsSocketConnecting = true;
 		lLock.Release();
 		mSocket = mMuxSocket->Connect(lTargetAddress, lConnectionId, pTimeout);
 		lLock.Acquire();
+		mIsSocketConnecting = false;
 		lOk = (mSocket != 0);
 	}
 	return (lOk);
@@ -140,6 +154,7 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 
 void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTimeout, const Cure::LoginId& pLoginToken)
 {
+	assert(mMuxSocket);
 	assert(!mIsConnecting);
 	assert(!mIsLoggingIn);
 	mLoginAccountId = 0;
@@ -384,6 +399,8 @@ void NetworkClient::SendDisconnect()
 
 void NetworkClient::LoginEntry()
 {
+	assert(mMuxSocket);
+
 	bool lOk = true;
 	if (lOk && mConnectTimeout > 0)
 	{

@@ -71,6 +71,7 @@ private:
 	uint32 mLoginAccountId;
 	bool mIsConnecting;
 	bool mIsLoggingIn;
+	bool mIsSocketConnecting;
 	str mServerHost;
 	double mConnectTimeout;
 	Cure::LoginId mLoginToken;

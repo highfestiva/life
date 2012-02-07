@@ -64,7 +64,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mAllowWin(false),
 	mFlipRenderSide(0),
 	mFlipRenderSideFactor(0),
-	mScore(0)
+	mScore(0),
+	mScoreCountingEnabled(false)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -404,6 +405,16 @@ double Game::GetScore() const
 	return mScore;
 }
 
+void Game::EnableScoreCounting(bool pEnable)
+{
+	mScoreCountingEnabled = pEnable;
+}
+
+bool Game::IsScoreCountingEnabled() const
+{
+	return mScoreCountingEnabled;
+}
+
 void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 	Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId)
 {
@@ -479,7 +490,8 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
 			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
-			if (d > 50*SCALE_FACTOR)
+			if (d > 80*SCALE_FACTOR ||
+				(d > 50*SCALE_FACTOR && lObject != mVehicle))
 			{
 				continue;
 			}
@@ -504,15 +516,23 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 					CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.2);
 					mSlowmoTimer.Start();
 				}
+				d = std::max(0.005f, d);
 				mVehicle->DrainHealth(d);
 				lDidHitVehicle = true;
+				if (mComputerIndex != -1)
+				{
+					// Weigh up minimum score for computer, if very bad.
+					// Otherwise the car can go round, round and only
+					// gain more points for every lap.
+					lScore = std::max(0.18-mComputerDifficulty, lScore);
+				}
 				lScore *= 141.421356;
 				lScore = std::min(20000.0, lScore*lScore);
 				if (mVehicle->GetHealth() <= 0)
 				{
-					AddScore(-30000, lScore);
 					if (mAllowWin)
 					{
+						AddScore(-30000, lScore);
 						mWinnerIndex = (mWinnerIndex != 0)? 1 : mWinnerIndex;
 					}
 				}
@@ -741,7 +761,7 @@ bool Game::Render()
 		t.GetOrientation().RotateAroundOwnX(-::atan(mVehicleCamHeight/lCamXYDistance) + PIF/18);
 		mVehicleCamPos = lVehiclePos + lOffset;
 		t.GetPosition() = mVehicleCamPos;
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		// If computer runs the launcher, the vehicle should be displayed in landscape mode.
 		if (GetComputerIndex() != 1)
 		{
@@ -751,7 +771,7 @@ bool Game::Render()
 		{
 			t.GetOrientation().RotateAroundOwnY(PIF*mFlipRenderSideFactor);
 		}
-#endif // iOS
+#endif // Touch
 		mLeftCamera.Interpolate(mLeftCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mLeftCamera);
 		mUiManager->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
@@ -781,14 +801,14 @@ bool Game::Render()
 		TransformationF t(gIdentityQuaternionF, lLauncherPosition+lStraightVector);
 		t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.9f);
 		t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		// The launcher is always displayed in portrait, both for single and dual play.
 		t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
 		if (mFlipRenderSideFactor)
 		{
 			t.GetOrientation().RotateAroundOwnY(PIF*mFlipRenderSideFactor);
 		}
-#endif // iOS
+#endif // Touch
 		mRightCamera.Interpolate(mRightCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mRightCamera);
 		const float lDistanceFoV = 8500 / ::pow(lRange, 1.2f);
@@ -891,13 +911,13 @@ bool Game::FlybyRender()
 			t.SetPosition(mLauncherPosition + Vector3DF(+7, 0, +7));	// Beside launcher.
 		}
 	}
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	// If computer runs the launcher, the vehicle should be displayed in landscape mode.
 	if (GetComputerIndex() != 1)
 	{
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 	}
-#endif // iOS
+#endif // Touch
 	if (GetComputerIndex() != 0)
 	{
 		mLeftCamera.Interpolate(mLeftCamera, t, 0.05f);
@@ -907,7 +927,7 @@ bool Game::FlybyRender()
 	}
 	if (GetComputerIndex() != 1)
 	{
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		if (GetComputerIndex() == 0)
 		{
 			// Fly-by always in landscape when single playing.
@@ -918,7 +938,7 @@ bool Game::FlybyRender()
 			// The launcher in portrait for dual play.
 			t.GetOrientation().RotateAroundOwnY(PIF);
 		}
-#endif // iOS
+#endif // Touch
 		mRightCamera.Interpolate(mRightCamera, t, 0.05f);
 		mUiManager->SetCameraPosition(mRightCamera);
 		mUiManager->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
@@ -1038,10 +1058,10 @@ bool Game::Initialize()
 		lRotation.RotateAroundOwnZ(-PIF/8);
 		mLeftCamera = TransformationF(lRotation, Vector3DF(-25, -50, 35));
 		mRightCamera = mLeftCamera;
-#ifdef LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
 		mLeftCamera.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 		mRightCamera.GetOrientation().RotateAroundOwnY(+PIF*0.5f);
-#endif // iOS
+#endif // Touch
 
 		mLauncherPosition = Vector3DF(0, -107.5f, 13.5f);
 

@@ -5,6 +5,7 @@
 
 
 #include <assert.h>
+#include "../../Cure/Include/HiscoreAgent.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/NetworkServer.h"
 #include "../../Cure/Include/Packet.h"
@@ -13,6 +14,7 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Packer.h"
+#include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/SystemManager.h"
 
 
@@ -294,6 +296,8 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
+		lTestOk = lClient->Open(_T(":11332"));
+		assert(lTestOk);
 		lClient->StartConnectLogin(_T(":25344"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_OK);
@@ -306,7 +310,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" connect client2");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = lClient->Open(_T(":11333"));
+		lTestOk = lClient2->Open(_T(":11333"));
 		assert(lTestOk);
 		lTestOk = lClient2->Connect(_T(":25344"), 0.5);
 		assert(lTestOk);
@@ -343,6 +347,8 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client2"), lPassword);
+		lTestOk = lClient2->Open(_T(":11333"));
+		assert(lTestOk);
 		lClient2->StartConnectLogin(_T(":25344"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient2->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_OK);
@@ -575,6 +581,212 @@ LOG_CLASS_DEFINE(TEST, NetworkClientServerTest);
 
 
 
+class HiscoreTest
+{
+public:
+	bool Test();
+	LOG_CLASS_DECLARE();
+};
+
+bool HiscoreTest::Test()
+{
+	const std::vector<Log*> lLogArray = LogType::GetLogs();
+	std::vector<Log*>::const_iterator x = lLogArray.begin();
+	Log::LogLevel lNewLogLevel = Log::LEVEL_LOWEST_TYPE;
+	for (; x != lLogArray.end(); ++x)
+	{
+		(*x)->SetLevelThreashold(lNewLogLevel);
+	}
+
+	str lContext;
+	bool lTestOk = true;
+
+	if (lTestOk)
+	{
+		lContext = _T("network startup error");
+		lTestOk = Network::Start();
+		assert(lTestOk);
+	}
+
+	Cure::HiscoreAgent lHiscore(_T("gamehiscore.pixeldoctrine.com"), 80, _T("UnitTest"));
+
+	if (lTestOk)
+	{
+		lContext = _T("list parse");
+		astr a = "{\"offset\":2,\"total_count\":5,\"list\":[{\"name\":\"Jonte\",\"score\":4},{\"name\":\"Bea Sune\",\"score\":34567}]}";
+		lTestOk = lHiscore.ParseList(a);
+		assert(lHiscore.GetDownloadedList().mOffset == 2);
+		assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+		assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+		assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Jonte"));
+		assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 4);
+		assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("Bea Sune"));
+		assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 34567);
+		lHiscore.Close();
+		if (lTestOk)
+		{
+			a = "{ \"offset\" : 13 , \"total_count\" : 5 , \"list\" : [ { \"name\" : \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" , \"score\" : 42 } , { \"name\" : \"A\" , \"score\" : 4321 } ] }";
+			lTestOk = lHiscore.ParseList(a);
+			assert(lHiscore.GetDownloadedList().mOffset == 13);
+			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\\\"\\\\@#%&"));
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
+			lHiscore.Close();
+		}
+		if (lTestOk)
+		{
+			a = "{ \"total_count\": 5 , \"list\": [ { \"name\": \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" , \"score\" :42 } , { \"name\" : \"A\" , \"score\":4321 } ], \"offset\" :13}";
+			lTestOk = lHiscore.ParseList(a);
+			assert(lHiscore.GetDownloadedList().mOffset == 13);
+			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\\\"\\\\@#%&"));
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
+			lHiscore.Close();
+		}
+		if (lTestOk)
+		{
+			a = "{\"list\":[ { \"score\" :42,\"name\": \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" } , { \"score\":4321,\"name\" : \"A\"}],\"total_count\" :5,\"offset\" :13 }";
+			lTestOk = lHiscore.ParseList(a);
+			assert(lHiscore.GetDownloadedList().mOffset == 13);
+			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\\\"\\\\@#%&"));
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
+			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
+			lHiscore.Close();
+		}
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("score parse");
+		astr a = "{ \"offset\" : 15 }";
+		lTestOk = lHiscore.ParseScore(a);
+		assert(lHiscore.GetUploadedPlace() == 15);
+		lHiscore.Close();
+		if (lTestOk)
+		{
+			a = "{\"offset\":3429}";
+			lTestOk = lHiscore.ParseScore(a);
+			assert(lHiscore.GetUploadedPlace() == 3429);
+			lHiscore.Close();
+		}
+		assert(lTestOk);
+	}
+
+	/*// Upload some scores.
+	for (int y = 0; y < 7; ++y)
+	{
+		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), _T("high_festiva!"), Lepra::Random::GetRandomNumber()%1000);
+		for (int x = 0; x < 50; ++x)
+		{
+			Thread::Sleep(0.1f);
+			Cure::ResourceLoadState lLoadState = lHiscore.Poll();
+			lTestOk = (lLoadState == Cure::RESOURCE_LOAD_COMPLETE);
+			if (lLoadState != Cure::RESOURCE_LOAD_IN_PROGRESS)
+			{
+				assert(lTestOk);
+				break;
+			}
+		}
+	}*/
+
+	if (lTestOk)
+	{
+		lContext = _T("init score download");
+		lTestOk = lHiscore.StartDownloadingList(_T("Computer"), _T("Level"), _T("Avatar"), 0, 10);
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("downloading score");
+		for (int x = 0; x < 50; ++x)
+		{
+			Thread::Sleep(0.1f);
+			Cure::ResourceLoadState lLoadState = lHiscore.Poll();
+			lTestOk = (lLoadState == Cure::RESOURCE_LOAD_COMPLETE);
+			if (lLoadState != Cure::RESOURCE_LOAD_IN_PROGRESS)
+			{
+				break;
+			}
+		}
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("checking score");
+		Cure::HiscoreAgent::List lHiscoreList = lHiscore.GetDownloadedList();
+		lTestOk = (lHiscoreList.mOffset == 0);
+		if (lTestOk)
+		{
+			lTestOk = (lHiscoreList.mEntryList.size() > 5);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (lHiscoreList.mEntryList[0].mName.size() >= 1 && lHiscoreList.mEntryList[0].mName.size() <= 13);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (lHiscoreList.mEntryList[0].mScore >= 10 && lHiscoreList.mEntryList[0].mScore < 1000);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (lHiscoreList.mEntryList[0].mScore >= lHiscoreList.mEntryList[1].mScore &&
+				lHiscoreList.mEntryList[1].mScore >= lHiscoreList.mEntryList[2].mScore &&
+				lHiscoreList.mEntryList[2].mScore >= lHiscoreList.mEntryList[3].mScore &&
+				lHiscoreList.mEntryList[3].mScore >= lHiscoreList.mEntryList[4].mScore);
+		}
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("init score upload");
+		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), _T("high_festiva!"), Lepra::Random::GetRandomNumber()%1000);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("uploading score");
+		for (int x = 0; x < 50; ++x)
+		{
+			Thread::Sleep(0.1f);
+			Cure::ResourceLoadState lLoadState = lHiscore.Poll();
+			lTestOk = (lLoadState == Cure::RESOURCE_LOAD_COMPLETE);
+			if (lLoadState != Cure::RESOURCE_LOAD_IN_PROGRESS)
+			{
+				break;
+			}
+		}
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("score place");
+		int lPosition = lHiscore.GetUploadedPlace();
+		lTestOk = (lPosition >= 0 && lPosition <= 2000);
+		assert(lTestOk);
+	}
+
+	ReportTestResult(mLog, _T("Hiscore"), lContext, lTestOk);
+	return (lTestOk);
+}
+
+LOG_CLASS_DEFINE(TEST, HiscoreTest);
+
+
+
 bool TestCure()
 {
 	bool lTestOk = true;
@@ -595,6 +807,11 @@ bool TestCure()
 	{
 		NetworkClientServerTest lClientServerTest;
 		lTestOk = lClientServerTest.Test();
+	}
+	if (lTestOk)
+	{
+		HiscoreTest lHiscoreTest;
+		lTestOk = lHiscoreTest.Test();
 	}
 	return (lTestOk);
 }

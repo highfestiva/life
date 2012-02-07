@@ -11,10 +11,10 @@
 
 
 
-#ifdef LEPRA_IOS
-#define LEPRA_IOS_LOOKANDFEEL
+#ifdef LEPRA_TOUCH
+#define LEPRA_TOUCH_LOOKANDFEEL
 #endif // iOS
-#define LEPRA_IOS_LOOKANDFEEL
+#define LEPRA_TOUCH_LOOKANDFEEL
 #define FPS		20
 #define	SCALE_FACTOR	1.5f	// Hard-coded for Kill Cutie. If ever re-using for other game, drop this.
 
@@ -138,6 +138,8 @@ public:
 	void ResetScore();
 	void AddScore(double pCutieScore, double pLauncherScore);
 	double GetScore() const;
+	void EnableScoreCounting(bool pEnable);
+	bool IsScoreCountingEnabled() const;
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
 	void OnCapture();	// CTF
@@ -216,6 +218,7 @@ private:
 	int mFlipRenderSide;
 	float mFlipRenderSideFactor;
 	double mScore;
+	bool mScoreCountingEnabled;
 
 	StopWatch mSlowmoTimer;
 };

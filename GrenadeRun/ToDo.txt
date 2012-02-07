@@ -4,6 +4,7 @@ Skipped
 -Make Sleepie wider.
 -Adaptive launcher indicators must go - do it right right away.
 -Local highscore?
+-Store temporary highest local highscore.
 
 Done
 ----
@@ -70,10 +71,12 @@ Make sure orientation change landscape->portrait and vice versa is automatically
 Menu: credits.
 Menu: high score.
 Score counting.
+Server-side high score REST interface. Secure.
+Global high score list.
+Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 
 Computer demo
 -------------
-Store temporary highest local highscore.
 2 extra levels: castle and machine.
 Tweak other levels.
 Record voice for tutorial. Compress HARD!
@@ -86,13 +89,10 @@ Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
-Server-side high score REST interface. Secure.
-Global high score list.
 Tweak steering.
-Add visual feedback on launcher motor strengths.
+Add visual feedback on launcher motor strengths. Use "from touch digit to indicator lines".
 In-app purchase.
 Activation of features depending on purchases.
-Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.
