@@ -2549,7 +2549,6 @@ void App::CreateHiscoreAgent()
 
 void App::Purchase(const str& pProductName)
 {
-	(void)pProductName;
 #ifdef LEPRA_IOS
 	[mAnimatedApp startPurchase:MacLog::Encode(pProductName)];
 #else // !iOS
