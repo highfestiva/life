@@ -18,7 +18,7 @@ using namespace Lepra;
 
 
 #ifdef LEPRA_IOS
-@interface AnimatedApp: UIResponder <SKProductsRequestDelegate, UIAlertViewDelegate>
+@interface AnimatedApp: UIResponder <SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
 {
 @private
 	Canvas* canvas;
@@ -30,7 +30,13 @@ using namespace Lepra;
 -(void) stopTick;
 -(void) tick;
 -(void) dropFingerMovements;
+
 -(void) startPurchase:(NSString*)productName;
+-(void) completeTransaction:(SKPaymentTransaction*)transaction;
+-(void) restoreTransaction:(SKPaymentTransaction*)transaction;
+-(void) failedTransaction: (SKPaymentTransaction*)transaction;
+-(void) provideContent:(NSString*)productIdentifier;
+-(void) updateContent;
 @end
 #endif // iOS
 
@@ -49,6 +55,8 @@ using namespace Lepra;
 {
 	canvas = pCanvas;
 	animationTimer = nil;
+	[self updateContent];
+	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 	return self;
 }
 
@@ -205,9 +213,70 @@ using namespace Lepra;
 	[alertView release];
 }
 
+-(void) paymentQueue:(SKPaymentQueue*)queue updatedTransactions:(NSArray*)transactions
+{
+	for (SKPaymentTransaction *transaction in transactions)
+	{
+		switch (transaction.transactionState)
+		{
+			case SKPaymentTransactionStatePurchased:	[self completeTransaction:transaction];	break;
+			case SKPaymentTransactionStateFailed:		[self failedTransaction:transaction];	break;
+			case SKPaymentTransactionStateRestored:		[self restoreTransaction:transaction];	break;
+		}
+	}
+}
+
+-(void) completeTransaction:(SKPaymentTransaction*)transaction
+{
+	[self provideContent:transaction.payment.productIdentifier];
+	[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+}
+
+-(void) restoreTransaction:(SKPaymentTransaction*)transaction
+{
+	[self provideContent:transaction.originalTransaction.payment.productIdentifier];
+	[[SKPaymentQueue defaultQueue] finishTransaction: transaction];
+}
+
+-(void) failedTransaction:(SKPaymentTransaction *)transaction
+{
+	if (transaction.error.code != SKErrorPaymentCancelled)
+	{
+		UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Warning"
+			message:@"Purchase failed. No money deducted, no content unlocked." delegate:self
+			cancelButtonTitle:@"OK" otherButtonTitles:nil];
+		[alertView show];
+		[alertView release];
+	}
+	[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+}
+
+-(void) provideContent:(NSString*)productIdentifier
+{
+	NSUserDefaults* lDefaults = [NSUserDefaults standardUserDefaults];
+	[lDefaults setInteger:1 forKey:productIdentifier];
+	[self updateContent];
+
+	UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Thanks!"
+		message:@"Content purchased and unlocked. (The author may well invest in a chewing-gum.)"
+		delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+	[alertView show];
+	[alertView release];
+}
+
+-(void) updateContent
+{
+	NSUserDefaults* lDefaults = [NSUserDefaults standardUserDefaults];
+
+	NSInteger hasLevels = [lDefaults integerForKey:@ CONTENT_LEVELS];
+	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasLevels != 0));
+
+	NSInteger hasVehicles = [lDefaults integerForKey:@ CONTENT_VEHICLES];
+	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasVehicles != 0));
+}
+
 -(void) alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	GrenadeRun::App::GetApp()->SetIsPurchasing(false);
 }
 
 -(void) alertViewCancel:(UIAlertView*)alertView

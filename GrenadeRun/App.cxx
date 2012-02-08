@@ -59,7 +59,10 @@
 #define BARREL_COMPASS_WIDTH		(BARREL_COMPASS_LINE_COUNT-1)*BARREL_COMPASS_LINE_SPACING + 1
 #define GET_NAME_INDEX(idx, a)		((idx) < 0)? LEPRA_ARRAY_COUNT(a)-1 : (idx)%LEPRA_ARRAY_COUNT(a)
 #define GET_NAME(idx, a)		a[GET_NAME_INDEX(idx, a)]
-
+#define CONTENT_LEVELS			"levels"
+#define CONTENT_VEHICLES		"vehicles"
+#define RTVAR_CONTENT_LEVELS		"Content.Levels"
+#define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
 
 
 namespace GrenadeRun
@@ -277,6 +280,7 @@ public:
 			const str lText = strutil::Strip(GetText(), _T(" \t\v\r\n"));
 			if (!lText.empty())
 			{
+				ReleaseKeyboardFocus();
 				mApp->mDialog->Dismiss();
 				b = true;
 			}
@@ -413,6 +417,9 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
 #endif // !Touch
+
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, false);
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
 	bool lOk = mUiManager->OpenDraw();
@@ -855,10 +862,11 @@ bool App::Poll()
 			mUiManager->Paint(false);
 		}
 
-		if (mIsPurchasing)
+		if (mIsPurchasing || mHiscoreAgent)
 		{
 			mUiManager->GetPainter()->SetColor(WHITE, 0);
-			PrintText(_T("Communicating with App Store..."), 0, 
+			const str lInfo = mIsPurchasing? _T("Communicating with App Store...") : _T("Speaking to score server");
+			PrintText(lInfo, 0, 
 				mUiManager->GetCanvas()->GetWidth()/2,
 				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight() - 8);
 		}
@@ -2152,7 +2160,16 @@ int App::PollTap(FingerMovement& pMovement)
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 #ifdef LEPRA_TOUCH
 	mUiManager->GetInputManager()->SetMousePosition(pMovement.mLastY, pMovement.mLastX);
-	mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(pMovement.mIsPress? 1 : 0);
+	if (pMovement.mIsPress)
+	{
+		mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(1);
+	}
+	else
+	{
+		// If releasing, we click-release to make sure we don't miss anything.
+		mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(1);
+		mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(0);
+	}
 	mUiManager->GetInputManager()->GetMouse()->GetAxis(0)->SetValue(pMovement.mLastX);
 	mUiManager->GetInputManager()->GetMouse()->GetAxis(1)->SetValue(pMovement.mLastY);
 #endif // Touch
@@ -2532,6 +2549,7 @@ void App::CreateHiscoreAgent()
 
 void App::Purchase(const str& pProductName)
 {
+	(void)pProductName;
 #ifdef LEPRA_IOS
 	[mAnimatedApp startPurchase:MacLog::Encode(pProductName)];
 #else // !iOS
@@ -2650,7 +2668,7 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 			{
 				delete mHiscoreAgent;
 				mHiscoreAgent = 0;
-				EnterHiscore(_T("Please retry (hiscore server obstipation)"));
+				EnterHiscore(_T("Please retry; score server obstipated"));
 			}
 		}
 		else
@@ -2666,9 +2684,9 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 	
 void App::OnLevelAction(UiTbc::Button* pButton)
 {
-	if (pButton->GetTag() >= 3)	// && not bought!)
+	if (pButton->GetTag() >= 3 && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false))
 	{
-		Purchase(_T("levels"));
+		Purchase(_T(CONTENT_LEVELS));
 		return;
 	}
 	str lLevel = _T("level_2");
@@ -2835,8 +2853,6 @@ void App::OnPauseClick(UiTbc::Button*)
 	}
 
 	mIsPaused = true;
-	mPauseButton->ReleaseKeyboardFocus();
-	mPauseButton->ReleaseMouseFocus();
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, _T("Resume"));
 	d->AddButton(2, _T("Restart"));

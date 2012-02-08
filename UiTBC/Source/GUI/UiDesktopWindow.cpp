@@ -186,7 +186,7 @@ void DesktopWindow::SetMouseEnabled(bool pEnabled)
 	mMouseEnabled = pEnabled;
 }
 
-void DesktopWindow::ClampMouse(int& x, int& y)
+void DesktopWindow::ClampMouse(int& x, int& y) const
 {
 	bool lUpdateMouse = false;
 
@@ -234,26 +234,8 @@ void DesktopWindow::Repaint(Painter* /*pPainter*/)
 	}
 
 	// Handle mouse...
-	float64 lWidth  = (float64)mMouseArea.GetWidth();
-	float64 lHeight = (float64)mMouseArea.GetHeight();
-
-	if (mInputManager)
-	{
-		mMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
-		mMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
-
-		ClampMouse(mMouseX, mMouseY);
-
-		if (mMouseEnabled == true)
-		{
-			if (mMousePrevX != mMouseX || mMousePrevY != mMouseY)
-			{
-				OnMouseMove(mMouseX, mMouseY, mMouseX - mMousePrevX, mMouseY - mMousePrevY);
-			}
-			mMousePrevX = mMouseX;
-			mMousePrevY = mMouseY;
-		}
-	}
+	GetCursorPosition(mMouseX, mMouseY);
+	DispatchMouseMove(mMouseX, mMouseY);
 
 	if (NeedsRepaint() == true || mUpdateLayout)
 	{
@@ -272,20 +254,16 @@ void DesktopWindow::OnButton1(UiLepra::InputElement* pElement)
 {
 	if (mMouseEnabled == true)
 	{
-		float64 lWidth  = (float64)mMouseArea.GetWidth();
-		float64 lHeight = (float64)mMouseArea.GetHeight();
-
-		int lMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
-		int lMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
-
-		ClampMouse(lMouseX, lMouseY);
-		
+		int lMouseX;
+		int lMouseY;
+		GetCursorPosition(lMouseX, lMouseY);
 		if (pElement->GetBooleanValue() == true)
 		{
 			OnLButtonDown(lMouseX, lMouseY);
 		}
 		else
 		{
+			DispatchMouseMove(lMouseX, lMouseY);
 			OnLButtonUp(lMouseX, lMouseY);
 		}
 	}
@@ -295,20 +273,16 @@ void DesktopWindow::OnButton2(UiLepra::InputElement* pElement)
 {
 	if (mMouseEnabled == true)
 	{
-		float64 lWidth  = (float64)mMouseArea.GetWidth();
-		float64 lHeight = (float64)mMouseArea.GetHeight();
-
-		int lMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
-		int lMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
-
-		ClampMouse(lMouseX, lMouseY);
-		
+		int lMouseX;
+		int lMouseY;
+		GetCursorPosition(lMouseX, lMouseY);
 		if (pElement->GetBooleanValue() == true)
 		{
 			OnRButtonDown(lMouseX, lMouseY);
 		}
 		else
 		{
+			DispatchMouseMove(lMouseX, lMouseY);
 			OnRButtonUp(lMouseX, lMouseY);
 		}
 	}
@@ -318,22 +292,49 @@ void DesktopWindow::OnButton3(UiLepra::InputElement* pElement)
 {
 	if (mMouseEnabled == true)
 	{
-		float64 lWidth  = (float64)mMouseArea.GetWidth();
-		float64 lHeight = (float64)mMouseArea.GetHeight();
-
-		int lMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
-		int lMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
-
-		ClampMouse(lMouseX, lMouseY);
-		
+		int lMouseX;
+		int lMouseY;
+		GetCursorPosition(lMouseX, lMouseY);
 		if (pElement->GetBooleanValue() == true)
 		{
 			OnMButtonDown(lMouseX, lMouseY);
 		}
 		else
 		{
+			DispatchMouseMove(lMouseX, lMouseY);
 			OnMButtonUp(lMouseX, lMouseY);
 		}
+	}
+}
+
+void DesktopWindow::GetCursorPosition(int& pMouseX, int& pMouseY) const
+{
+	if (!mInputManager)
+	{
+		return;
+	}
+
+	float64 lWidth  = (float64)mMouseArea.GetWidth();
+	float64 lHeight = (float64)mMouseArea.GetHeight();
+
+	pMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
+	pMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
+
+	ClampMouse(pMouseX, pMouseY);
+}
+
+void DesktopWindow::DispatchMouseMove(int pMouseX, int pMouseY)
+{
+	if (!mMouseEnabled)
+	{
+		return;
+	}
+
+	if (mMousePrevX != pMouseX || mMousePrevY != pMouseY)
+	{
+		OnMouseMove(pMouseX, pMouseY, pMouseX - mMousePrevX, pMouseY - mMousePrevY);
+		mMousePrevX = pMouseX;
+		mMousePrevY = pMouseY;
 	}
 }
 
@@ -358,14 +359,9 @@ bool DesktopWindow::OnDoubleClick()
 
 	if (mMouseEnabled == true)
 	{
-		float64 lWidth  = (float64)mMouseArea.GetWidth();
-		float64 lHeight = (float64)mMouseArea.GetHeight();
-
-		int lMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
-		int lMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
-
-		ClampMouse(lMouseX, lMouseY);
-		
+		int lMouseX;
+		int lMouseY;
+		GetCursorPosition(lMouseX, lMouseY);
 		Parent::OnDoubleClick(lMouseX, lMouseY);
 	}
 	return (false);

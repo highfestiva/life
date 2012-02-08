@@ -86,42 +86,23 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	::memset(pImage.GetBuffer(), 0, pImage.GetWidth()*pImage.GetPixelByteSize()*pImage.GetHeight());
 
 	const float lCorrectedFontSize = mCurrentFont->mSize * FONT_SIZE_FACTOR;	// Similar to other platforms...
-	CGContextRef textcontext; // this is our rendering context
-	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB(); // we need some colorspace
-	// we create a bitmap context
+	CGContextRef textcontext; // This is our rendering context.
+	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB(); // We need some colorspace.
+	// Create a bitmap context.
 	textcontext = CGBitmapContextCreate(pImage.GetBuffer(), pImage.GetWidth(), pImage.GetHeight(), 8,
 		pImage.GetWidth()*pImage.GetPixelByteSize(), colorspace, kCGImageAlphaPremultipliedLast);
 	CGFloat rect[4] = { pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom };
 	CGFloat transparent[4] = { 1, 1, 1, 0 };
 	CGFloat text_color[4] = { 1, 1, 1, 1 };
-	// if you do this a lot store the color somewhere and release it when you are done with it
+	// if you do this a lot store the color somewhere and release it when you are done with it.
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, transparent)); 
 	CGContextFillRect(textcontext, *(CGRect*)rect);
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, text_color));
 	CGContextSelectFont(textcontext, astrutil::Encode(mCurrentFont->mName).c_str(), lCorrectedFontSize, kCGEncodingMacRoman);
-	//CFStringRef lFontName = CFStringCreateWithCString(NULL, astrutil::Encode(mCurrentFont->mName).c_str(), kCFStringEncodingUTF8);
-	//CGFontRef lFont = CGFontCreateWithFontName(lFontName);
-	//CGContextSetFont(textcontext, lFont);
 	CGContextSetLineWidth(textcontext, 0.3);
-	//CGContextSetCharacterSpacing(textcontext, 1);
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
 	CGContextSetRGBStrokeColor(textcontext, 1,1,1,0.5);
-	int y = pRect.GetHeight() - mCurrentFont->mSize;
-	/*if (y < pRect.GetHeight()/4)
-	{
-		y = pRect.GetHeight()/4;
-	}*/
-
-	// Do actual drawing.
-	//CGContextShowTextAtPoint(textcontext, 0, y, (char*)&pChar, 1);
-	//CGContextFlush(textcontext);
-	/*wchar_t lTmpString[2] = {pChar, 0};
-	CGGlyph lGlyph;
-	CGFontGetGlyphBBoxes(<#CGFontRef font#>, <#const CGGlyph [] glyphs#>, <#size_t count#>, <#CGRect [] bboxes#>) GlyphsForCharacters(lFont, lTmpString, &lGlyph, 1);
-	CGContextShowGlyphsAtPoint(textcontext, 0, y, &pChar, 1);
-	CGContextFlush(textcontext);
-	CFRelease(lFont);
-	CFRelease(lFontName);*/
+	int y = (pRect.GetHeight() - mCurrentFont->mSize) / 2;
 	UIGraphicsPushContext(textcontext);
 	tchar lTmpString[2] = {pChar, 0};
 	NSString* lChar = MacLog::Encode(lTmpString);
@@ -131,8 +112,6 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	UIGraphicsPopContext();
 	CFRelease(colorspace);
 	CFRelease(textcontext);
-
-	//pImage.FlipVertical();	// Upside down.
 
 	// Strengthen the colors!
 	for (int y = 0; y < (int)pImage.GetHeight(); ++y)

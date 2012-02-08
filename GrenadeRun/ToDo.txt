@@ -77,6 +77,8 @@ Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 
 Computer demo
 -------------
+Add $ icon to non-purchased items.
+Cascade using timestamp in hiscore entry message to permutate, and store current time in DB. Only allow one entry per minute.
 2 extra levels: castle and machine.
 Tweak other levels.
 Record voice for tutorial. Compress HARD!
