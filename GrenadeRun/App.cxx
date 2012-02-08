@@ -2532,9 +2532,12 @@ void App::CreateHiscoreAgent()
 
 void App::Purchase(const str& pProductName)
 {
-	(void)pProductName;
 #ifdef LEPRA_IOS
 	[mAnimatedApp startPurchase:MacLog::Encode(pProductName)];
+#else // !iOS
+	(void)pProductName;
+	mUiManager->GetDisplayManager()->ShowMessageBox(_T("Content purchase not yet implemented on this platform."), _T("Purchase not available"));
+	MainMenu();
 #endif // iOS
 }
 

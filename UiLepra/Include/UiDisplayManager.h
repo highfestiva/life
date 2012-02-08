@@ -184,6 +184,8 @@ public:
 	// Functions implemented for conveniency.
 	static Lepra::uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette);
 
+	virtual void ShowMessageBox(const str& pMsg, const str& pCaption) = 0;
+
 protected:
 	typedef std::hash_set<DisplayResizeObserver*, LEPRA_VOIDP_HASHER> ResizeObserverSet;
 	ResizeObserverSet mResizeObserverSet;

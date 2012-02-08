@@ -598,6 +598,7 @@ void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 	    cancelButtonTitle:@"OK"
 	    otherButtonTitles:nil];
 	[message show];
+	[message release];
 #endif // !iOS / iOS
 }
 
