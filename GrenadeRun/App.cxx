@@ -774,7 +774,7 @@ bool App::Poll()
 	mIsLoaded = true;
 	if (lOk)
 	{
-		const bool lShowPause = !mIsPaused && (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE);
+		const bool lShowPause = !mIsPaused && !mDialog && (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE);
 		mPauseButton->SetVisible(lShowPause);
 	}
 	if (lOk && mDoLayout)
@@ -2362,7 +2362,6 @@ void App::MainMenu()
 	mGame->SetHeartBalance(0);
 	// TRICKY-END!
 
-	mIsPaused = true;
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"));
@@ -2454,7 +2453,6 @@ void App::EnterHiscore(const str& pMessage)
 	mGameOverTimer.Stop();
 	mGame->ResetWinnerIndex();
 	mGame->EnableScoreCounting(false);
-	mIsPaused = true;
 
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));

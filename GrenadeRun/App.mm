@@ -21,11 +21,15 @@ using namespace Lepra;
 @interface AnimatedApp: UIResponder <SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
 {
 @private
-	Canvas* canvas;
-	NSTimer* animationTimer;
+	Canvas* _canvas;
+	NSTimer* _animationTimer;
+	SKProduct* _requestedProduct;
 }
 
+@property(nonatomic, retain) SKProduct* requestedProduct;
+
 -(id) init:(Canvas*)pCanvas;
+-(void) dealloc;
 -(void) startTick;
 -(void) stopTick;
 -(void) tick;
@@ -35,7 +39,7 @@ using namespace Lepra;
 -(void) completeTransaction:(SKPaymentTransaction*)transaction;
 -(void) restoreTransaction:(SKPaymentTransaction*)transaction;
 -(void) failedTransaction: (SKPaymentTransaction*)transaction;
--(void) provideContent:(NSString*)productIdentifier;
+-(void) provideContent:(NSString*)productIdentifier confirm:(BOOL)confirm;
 -(void) updateContent;
 @end
 #endif // iOS
@@ -51,25 +55,34 @@ using namespace Lepra;
 #import "../UiLepra/Include/Mac/EAGLView.h"
 
 @implementation AnimatedApp
+
+@synthesize requestedProduct = _requestedProduct;
+
 -(id) init:(Canvas*)pCanvas
 {
-	canvas = pCanvas;
-	animationTimer = nil;
+	_canvas = pCanvas;
+	_animationTimer = nil;
 	[self updateContent];
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 	return self;
 }
 
+-(void) dealloc
+{
+	self.requestedProduct = nil;
+        [super dealloc];
+}
+
 -(void) startTick
 {
-	animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0225 target:self selector:@selector(tick) userInfo:nil repeats:YES];
+	_animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0225 target:self selector:@selector(tick) userInfo:nil repeats:YES];
 	[EAGLView sharedView].responder = self;
 }
 
 -(void) stopTick
 {
-	[animationTimer invalidate];
-	animationTimer = nil;
+	[_animationTimer invalidate];
+	_animationTimer = nil;
 }
 
 -(void) tick
@@ -122,7 +135,7 @@ using namespace Lepra;
 
 -(CGPoint) xform:(const CGPoint&)pLocation
 {
-	if (canvas->GetOutputRotation() == 90)
+	if (_canvas->GetOutputRotation() == 90)
 	{
 		return pLocation;
 	}
@@ -186,16 +199,16 @@ using namespace Lepra;
 -(void) productsRequest:(SKProductsRequest*)request didReceiveResponse:(SKProductsResponse*)response
 {
 	NSArray* products = response.products;
-	SKProduct* product = [products objectAtIndex:0];
+	self.requestedProduct = [products objectAtIndex:0];
 
 	NSNumberFormatter* priceFormatter = [[NSNumberFormatter alloc] init];
 	[priceFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
 	[priceFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-	[priceFormatter setLocale:product.priceLocale];
-	NSString* price = [priceFormatter stringFromNumber:product.price];
-	NSString* message = [product.localizedDescription stringByAppendingFormat:@"\n\nPrice: %@\n\nInterested?", price];
+	[priceFormatter setLocale:self.requestedProduct.priceLocale];
+	NSString* price = [priceFormatter stringFromNumber:self.requestedProduct.price];
+	NSString* message = [self.requestedProduct.localizedDescription stringByAppendingFormat:@"\n\n%@\n\nInterested?", price];
 
-	UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:product.localizedTitle
+	UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:self.requestedProduct.localizedTitle
 		message:message delegate:self
 		cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
 	[alertView show];
@@ -228,13 +241,13 @@ using namespace Lepra;
 
 -(void) completeTransaction:(SKPaymentTransaction*)transaction
 {
-	[self provideContent:transaction.payment.productIdentifier];
+	[self provideContent:transaction.payment.productIdentifier confirm:YES];
 	[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 }
 
 -(void) restoreTransaction:(SKPaymentTransaction*)transaction
 {
-	[self provideContent:transaction.originalTransaction.payment.productIdentifier];
+	[self provideContent:transaction.originalTransaction.payment.productIdentifier confirm:NO];
 	[[SKPaymentQueue defaultQueue] finishTransaction: transaction];
 }
 
@@ -251,17 +264,25 @@ using namespace Lepra;
 	[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 }
 
--(void) provideContent:(NSString*)productIdentifier
+-(void) provideContent:(NSString*)productIdentifier confirm:(BOOL)confirm
 {
 	NSUserDefaults* lDefaults = [NSUserDefaults standardUserDefaults];
 	[lDefaults setInteger:1 forKey:productIdentifier];
 	[self updateContent];
 
-	UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Thanks!"
-		message:@"Content purchased and unlocked. (The author may well invest in a chewing-gum.)"
-		delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-	[alertView show];
-	[alertView release];
+	if (confirm)
+	{
+		UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Thanks!"
+			message:@"Content purchased and unlocked. (The author may well invest in a chewing-gum.)"
+			delegate:self cancelButtonTitle:@"Chew away!" otherButtonTitles:nil];
+		[alertView show];
+		[alertView release];
+	}
+	else
+	{
+		[self alertViewCancel:nil];
+	}
+
 }
 
 -(void) updateContent
@@ -269,18 +290,26 @@ using namespace Lepra;
 	NSUserDefaults* lDefaults = [NSUserDefaults standardUserDefaults];
 
 	NSInteger hasLevels = [lDefaults integerForKey:@ CONTENT_LEVELS];
-	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasLevels != 0));
+	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasLevels == 1));
 
 	NSInteger hasVehicles = [lDefaults integerForKey:@ CONTENT_VEHICLES];
-	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasVehicles != 0));
+	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_VEHICLES, (hasVehicles == 1));
 }
 
 -(void) alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
+	if (buttonIndex < 1 || self.requestedProduct == nil)
+	{
+		[self alertViewCancel:alertView];
+		return;
+	}
+	SKPayment *payment = [SKPayment paymentWithProduct:self.requestedProduct];
+	[[SKPaymentQueue defaultQueue] addPayment:payment];
 }
 
 -(void) alertViewCancel:(UIAlertView*)alertView
 {
+	self.requestedProduct = nil;
 	GrenadeRun::App::GetApp()->SetIsPurchasing(false);
 }
 
