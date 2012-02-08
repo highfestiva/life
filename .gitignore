@@ -26,6 +26,7 @@
 *.mode1v3
 *.pbxuser
 *.bak
+*.opensdf
 mt.dep
 stlport.res
 makefile

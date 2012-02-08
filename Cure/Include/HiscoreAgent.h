@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Cure.h"
+#include "../../Lepra/Include/MemberThread.h"
 
 
 
@@ -70,6 +71,8 @@ private:
 	static void OnListComplete(const happyhttp::Response* pResponse, void* pUserData);
 	static void OnScoreComplete(const happyhttp::Response* pResponse, void* pUserData);
 	str Hypnotize(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore);	// A sorta shuffle
+	void DownloadThreadEntry();
+	void UploadThreadEntry();
 
 	const str mServerHost;
 	const int mServerPort;
@@ -80,6 +83,10 @@ private:
 	int mUploadedPlace;
 	astr mResponseData;
 	Action mAction;
+	MemberThread<HiscoreAgent> mConnectorThread;
+	str mConnectorPath;
+	str mConnectorBody;
+	str mConnectorHash;
 
 	void operator=(const HiscoreAgent&);
 

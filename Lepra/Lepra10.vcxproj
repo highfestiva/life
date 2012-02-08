@@ -297,6 +297,7 @@
     <ClInclude Include="Include\Network.h" />
     <ClInclude Include="Include\Number.h" />
     <ClInclude Include="Include\OBB.h" />
+    <ClInclude Include="Include\Obfuxator.h" />
     <ClInclude Include="Include\OBR.h" />
     <ClInclude Include="Include\OrderedMap.h" />
     <ClInclude Include="Include\OutputStream.h" />
@@ -367,6 +368,7 @@
     <None Include="Include\Transformation.inl" />
     <None Include="Include\Vector2D.inl" />
     <None Include="Include\Vector3D.inl" />
+    <ClCompile Include="Source\Obfuxator.cpp" />
     <ClCompile Include="Source\Posix\MacLog.mm">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

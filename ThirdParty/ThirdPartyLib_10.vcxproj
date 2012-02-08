@@ -97,6 +97,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="happyhttp-0.1\happyhttp.h" />
     <ClInclude Include="jpeg-6b\jchuff.h" />
     <ClInclude Include="jpeg-6b\jconfig.h" />
     <ClInclude Include="jpeg-6b\jdct.h" />
@@ -311,6 +312,7 @@
     <ClInclude Include="ChibiXM\xmplay.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="happyhttp-0.1\happyhttp.cpp" />
     <ClCompile Include="jpeg-6b\jcapimin.cpp" />
     <ClCompile Include="jpeg-6b\jcapistd.cpp" />
     <ClCompile Include="jpeg-6b\jccoefct.cpp" />

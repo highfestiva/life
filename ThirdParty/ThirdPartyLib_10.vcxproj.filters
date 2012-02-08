@@ -97,6 +97,9 @@
     <Filter Include="ChibiXM">
       <UniqueIdentifier>{e7cd0018-658b-4915-bf40-c7f9dc4056bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HappyHTTP">
+      <UniqueIdentifier>{157781ad-ef4b-473e-a55b-aded1e9fee9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jpeg-6b\jchuff.h">
@@ -734,6 +737,9 @@
     </ClInclude>
     <ClInclude Include="ChibiXM\xmplay.h">
       <Filter>ChibiXM</Filter>
+    </ClInclude>
+    <ClInclude Include="happyhttp-0.1\happyhttp.h">
+      <Filter>HappyHTTP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1375,6 +1381,9 @@
     </ClCompile>
     <ClCompile Include="ChibiXM\xmplay.cpp">
       <Filter>ChibiXM</Filter>
+    </ClCompile>
+    <ClCompile Include="happyhttp-0.1\happyhttp.cpp">
+      <Filter>HappyHTTP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

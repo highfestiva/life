@@ -23,7 +23,8 @@ HiscoreAgent::HiscoreAgent(const str& pHost, const int pPort, const str& pGameNa
 	mServerPort(pPort),
 	mConnection(0),
 	mGameName(pGameName),
-	mAction(ACTION_NONE)
+	mAction(ACTION_NONE),
+	mConnectorThread("sxnt")
 {
 	Close();
 }
@@ -49,6 +50,17 @@ void HiscoreAgent::Close()
 
 ResourceLoadState HiscoreAgent::Poll()
 {
+	if (mConnectorThread.IsRunning())
+	{
+		// Still connecting.
+		return RESOURCE_LOAD_IN_PROGRESS;
+	}
+	if (!mConnection)
+	{
+		// Connector thread had some problem.
+		return RESOURCE_LOAD_ERROR;
+	}
+
 	log_adebug("Polling connection.");
 	if (GetLoadState() == RESOURCE_LOAD_IN_PROGRESS && mConnection->outstanding())
 	{
@@ -90,25 +102,15 @@ void HiscoreAgent::SetLoadState(ResourceLoadState pLoadState)
 
 bool HiscoreAgent::StartDownloadingList(const str& pPlatform, const str& pLevel, const str& pAvatar, int pOffset, int pLimit)
 {
-	try
+	if (!mConnectorThread.Join(0.1))
 	{
-		Reopen();
-		mConnection->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnListComplete, this);
-		const str lFormat = _O("o@y+_.R2=*8/,1ay+x2&9(92Qay+x=(=*=,ayL+x/8e8+9*ay5x2515&*ay5g", "/%s?platform=%s&level=%s&avatar=%s&offset=%i&limit=%i");
-		str lPath = strutil::Format(lFormat.c_str(),
-			mGameName.c_str(), pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pOffset, pLimit);
-		astr lMethod = _OA("WzYJ", "GET");
-		astr lAPath = astrutil::Encode(lPath);
-		mConnection->request(lMethod.c_str(), lAPath.c_str());
-		mAction = ACTION_DOWNLOAD_LIST;
-		log_volatile(mLog.AInfo("Downloading highscore list."));
-		return true;
-	}
-	catch (happyhttp::Wobbly& e)
-	{
-		log_volatile(mLog.Warning(_T("Problem retrieving list: ") + strutil::Encode(e.what())));
+		assert(false);
 		return false;
 	}
+	const str lFormat = _O("o@y+_.R2=*8/,1ay+x2&9(92Qay+x=(=*=,ayL+x/8e8+9*ay5x2515&*ay5g", "/%s?platform=%s&level=%s&avatar=%s&offset=%i&limit=%i");
+	mConnectorPath = strutil::Format(lFormat.c_str(),
+		mGameName.c_str(), pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pOffset, pLimit);
+	return mConnectorThread.Start(this, &HiscoreAgent::DownloadThreadEntry);
 }
 
 const HiscoreAgent::List& HiscoreAgent::GetDownloadedList() const
@@ -118,36 +120,17 @@ const HiscoreAgent::List& HiscoreAgent::GetDownloadedList() const
 
 bool HiscoreAgent::StartUploadingScore(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore)
 {
-	try
+	if (!mConnectorThread.Join(0.1))
 	{
-		Reopen();
-		const str lFormat = _O(".l2=*8-/,1ay+x29(92+ay+x[=(=*=,ay+x0=519ay?+x+;/,9ay5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i");
-		str lBody = strutil::Format(lFormat.c_str(),
-			pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore);
-		mConnection->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnScoreComplete, this);
-		const astr lClient = _OA("[\"RUYP_J", "CLIENT");
-		const astr lHash = astrutil::Encode(Hypnotize(pPlatform, pLevel, pAvatar, pName, pScore));
-		const astr lAccept = _OA("]x;;9.$*", "Accept");
-		const astr lPlain = _OA("*{9&*o&.2=50", "text/plain");
-		const char* lHeaders[] = 
-		{
-			lClient.c_str(), lHash.c_str(),
-			lAccept.c_str(), lPlain.c_str(),
-			0
-		};
-		const astr lMethod = _OA("NaOKJ", "POST");
-		const astr lPath = _OA("oe=::?`90*,%o", "/add_entry/") + astrutil::Encode(mGameName);
-		const astr lUtf8Body = astrutil::Encode(lBody);
-		mConnection->request(lMethod.c_str(), lPath.c_str(), lHeaders, (const unsigned char*)lUtf8Body.c_str(), lUtf8Body.length());
-		mAction = ACTION_UPLOAD_SCORE;
-		log_volatile(mLog.AInfo("Uploading score."));
-		return true;
-	}
-	catch (happyhttp::Wobbly& e)
-	{
-		log_volatile(mLog.Warning(_T("Problem uploading score: ") + strutil::Encode(e.what())));
+		assert(false);
 		return false;
 	}
+	const str lFormat = _O(".l2=*8-/,1ay+x29(92+ay+x[=(=*=,ay+x0=519ay?+x+;/,9ay5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i");
+	mConnectorBody = strutil::Format(lFormat.c_str(),
+		pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore);
+	mConnectorHash = Hypnotize(pPlatform, pLevel, pAvatar, pName, pScore);
+	mConnectorPath = _O("oe=::?`90*,%o", "/add_entry/") + mGameName;
+	return mConnectorThread.Start(this, &HiscoreAgent::UploadThreadEntry);
 }
 
 int HiscoreAgent::GetUploadedPlace() const
@@ -410,6 +393,55 @@ str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& 
 		lShuffledHash += strutil::IntToString(::abs(ints[y]), (y&1)? 9 : 10);
 	}
 	return lShuffledHash;
+}
+
+void HiscoreAgent::DownloadThreadEntry()
+{
+	try
+	{
+		mAction = ACTION_DOWNLOAD_LIST;
+		Reopen();
+		mConnection->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnListComplete, this);
+		astr lMethod = _OA("WzYJ", "GET");
+		astr lAPath = astrutil::Encode(mConnectorPath);
+		mConnection->request(lMethod.c_str(), lAPath.c_str());
+		log_volatile(mLog.AInfo("Downloading highscore list."));
+	}
+	catch (happyhttp::Wobbly& e)
+	{
+		log_volatile(mLog.Warning(_T("Problem retrieving list: ") + strutil::Encode(e.what())));
+		delete mConnection;
+		mConnection = 0;
+	}
+}
+
+void HiscoreAgent::UploadThreadEntry()
+{
+	try
+	{
+		mAction = ACTION_UPLOAD_SCORE;
+		Reopen();
+		mConnection->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnScoreComplete, this);
+		const astr lClient = _OA("[\"RUYP_J", "CLIENT");
+		const astr lAccept = _OA("]x;;9.$*", "Accept");
+		const astr lPlain = _OA("*{9&*o&.2=50", "text/plain");
+		const char* lHeaders[] = 
+		{
+			lClient.c_str(), astrutil::Encode(mConnectorHash).c_str(),
+			lAccept.c_str(), lPlain.c_str(),
+			0
+		};
+		const astr lMethod = _OA("NaOKJ", "POST");
+		const astr lUtf8Body = astrutil::Encode(mConnectorBody);
+		mConnection->request(lMethod.c_str(), astrutil::Encode(mConnectorPath).c_str(), lHeaders, (const unsigned char*)lUtf8Body.c_str(), lUtf8Body.length());
+		log_volatile(mLog.AInfo("Uploading score."));
+	}
+	catch (happyhttp::Wobbly& e)
+	{
+		log_volatile(mLog.Warning(_T("Problem uploading score: ") + strutil::Encode(e.what())));
+		delete mConnection;
+		mConnection = 0;
+	}
 }
 
 

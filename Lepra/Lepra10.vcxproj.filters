@@ -317,6 +317,9 @@
     <ClInclude Include="Include\Win32\Win32Thread.h">
       <Filter>Header Files\Win32</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Obfuxator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\CollisionDetector2D.inl">
@@ -551,6 +554,9 @@
     </ClCompile>
     <ClCompile Include="Source\Posix\MacLog.mm">
       <Filter>Source Files\Posix</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Obfuxator.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
