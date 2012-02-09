@@ -57,7 +57,9 @@ struct FingerMovement
 	int mStartY;
 	int mLastX;
 	int mLastY;
-	float mHighestDistance;
+	int mDeltaX;
+	int mDeltaY;
+	int mMovedDistance;
 	bool mIsPress;
 	int mTag;
 
@@ -66,7 +68,9 @@ struct FingerMovement
 		mStartY(y),
 		mLastX(x),
 		mLastY(y),
-		mHighestDistance(0),
+		mDeltaX(0),
+		mDeltaY(0),
+		mMovedDistance(0),
 		mIsPress(true),
 		mTag(0)
 	{
@@ -76,6 +80,8 @@ struct FingerMovement
 	{
 		if (std::abs(mLastX-pLastX) < 22 && std::abs(mLastY-pLastY) < 22)
 		{
+			mDeltaX += std::abs(mLastX-pNewX);
+			mDeltaY += std::abs(mLastY-pNewY);
 			mLastX = pNewX;
 			mLastY = pNewY;
 			return true;
@@ -83,12 +89,9 @@ struct FingerMovement
 		return false;
 	}
 
-	inline void UpdateDistance(float pDistance)
+	inline void UpdateDistance()
 	{
-		if (std::abs(pDistance) > mHighestDistance)
-		{
-			mHighestDistance = std::abs(pDistance);
-		}
+		mMovedDistance = mDeltaX + mDeltaY;
 	}
 };
 typedef std::list<FingerMovement> FingerMoveList;

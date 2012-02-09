@@ -1077,7 +1077,7 @@ void App::DrawHud()
 		mThrottleMeterOffset = o = Math::Lerp(mThrottleMeterOffset, o, 0.8f);
 
 		// Left player.
-		if (mGame->GetComputerIndex() < 0)	// 2P?
+		if (mGame->GetComputerIndex() == -1)	// 2P?
 		{
 			const int x = o;
 			if (mThrottle == 0 && !mIsThrottling)
@@ -1150,8 +1150,18 @@ void App::DrawHud()
 			t = Math::Lerp(lMinimumWidth, 1.0f, t);
 			c = RED;
 		}
-		DrawRoundedPolygon(w-r*0.5f*t-m, h*0.5f, r*0.5f, PIF/4, 4, c, t, 1.0f);
-		DrawImage(mGrenade->GetData(), w-r*0.5f-m, h*0.5f, s, s, PIF/2);
+		if (mGame->GetComputerIndex() == -1)
+		{
+			// Dual play = portrait layout.
+			DrawRoundedPolygon(w-r*0.5f*t-m, h*0.5f, r*0.5f, PIF/4, 4, c, t, 1.0f);
+			DrawImage(mGrenade->GetData(), w-r*0.5f-m, h*0.5f, s, s, PIF/2);
+		}
+		else
+		{
+			// Single play = landscape layout.
+			DrawRoundedPolygon(w*0.5f, h-r*0.5f*t-m, r*0.5f, PIF/4, 4, c, 1.0f, t);
+			DrawImage(mGrenade->GetData(), w*0.5f, h-r*0.5f-m, s, s, 0);
+		}
 		/*bool lIsLocked = mGame->IsLauncherLocked();
 		Color c = lIsLocked? Color(10, 10, 10) : mTouchShootColor;
 		DrawRoundedPolygon(w-m-lButtonRadius,		h/2,			lButtonRadius,	-PIF/2,	6, c);
@@ -1162,7 +1172,7 @@ void App::DrawHud()
 	// Draw touch force meters, to give a visual indication of steering.
 
 	Cutie* lCutie = (Cutie*)lAvatar1;
-	if (mGame->GetComputerIndex() < 0)	// Two players.
+	if (mGame->GetComputerIndex() == -1)	// Two players.
 	{
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 		DrawMeter((int)w/2, (int)h/2, PIF, h/2, 0, lCutie->GetHealth()*1.0002f);
@@ -1258,22 +1268,45 @@ void App::DrawHud()
 		const float aw = (float)mArrow->GetRamData()->GetWidth();
 		const float ah = (float)mArrow->GetRamData()->GetHeight();
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-		x = w-m-2-BARREL_COMPASS_WIDTH/2;
-		y = h-m-aw/2;
-		dx = BARREL_COMPASS_WIDTH/2-ah/2-2;
-		lValue1 = 1 - lValue1;
-		lValue2 = 1 - lValue2;
-
+		if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+		{
+			x = m+aw/2;
+			y = h-m-2-BARREL_COMPASS_WIDTH/2;
+			lDrawAngle = -PIF/2;
+			dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
+		}
+		else	// Dual play = portrait.
+		{
+			x = w-m-2-BARREL_COMPASS_WIDTH/2;
+			y = h-m-aw/2;
+			dx = BARREL_COMPASS_WIDTH/2-ah/2-2;
+			lValue1 = 1 - lValue1;
+			lValue2 = 1 - lValue2;
+		}
 		if (std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(3)) != gFingerMoveList.end())
 		{
-			x -= 104;
+			if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+			{
+				y -= 104;
+			}
+			else	// Dual play = portrait.
+			{
+				x -= 104;
+			}
 		}
-		mLiftMeterOffset = x = Math::Lerp(mLiftMeterOffset, x, 0.8f);
+		if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+		{
+			mLiftMeterOffset = y = Math::Lerp(mLiftMeterOffset, y, 0.8f);
+		}
+		else	// Dual play = portrait.
+		{
+			mLiftMeterOffset = x = Math::Lerp(mLiftMeterOffset, x, 0.8f);
+		}
 #else // !Touch
 		x = m+aw/2 + 30;
 		y = h-m-2-BARREL_COMPASS_WIDTH/2;
 		lDrawAngle = -PIF/2;
-		if (mGame->GetComputerIndex() < 0)	// Two players.
+		if (mGame->GetComputerIndex() != -1)	// Two players.
 		{
 			x += w/2;
 		}
@@ -1289,19 +1322,41 @@ void App::DrawHud()
 		lValue1 = lYaw/(PIF+0.1f)+0.5f;
 		lValue2 = (lGuideYaw)/(PIF+0.1f)+0.5f;
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-		x = w-m-aw/2;
-		y = m+2+BARREL_COMPASS_WIDTH/2;
-		dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
-		lValue1 = 1 - lValue1;
-		lValue2 = 1 - lValue2;
+		if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+		{
+			x = w-m-2-BARREL_COMPASS_WIDTH/2;
+			y = h-m-aw/2;
+			dx = -(BARREL_COMPASS_WIDTH/2-ah/2-2);
+		}
+		else	// Dual play = portrait.
+		{
+			x = w-m-aw/2;
+			y = m+2+BARREL_COMPASS_WIDTH/2;
+			dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
+			lValue1 = 1 - lValue1;
+			lValue2 = 1 - lValue2;
+		}
 
 		if (std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(4)) != gFingerMoveList.end())
 		{
-			x -= 104;
+			if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+			{
+				y -= 104;
+			}
+			else
+			{
+				x -= 104;
+			}
 		}
-		mYawMeterOffset = x = Math::Lerp(mYawMeterOffset, x, 0.8f);
+		if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+		{
+			mYawMeterOffset = y = Math::Lerp(mYawMeterOffset, y, 0.8f);
+		}
+		else
+		{
+			mYawMeterOffset = x = Math::Lerp(mYawMeterOffset, x, 0.8f);
+		}
 #else // !Touch
-		//lDrawAngle = -PIF/2;
 		x = w-m-2-BARREL_COMPASS_WIDTH/2 - 30;
 		y = h-m-aw/2;
 		dx = -(BARREL_COMPASS_WIDTH/2-ah/2-2);
@@ -2141,8 +2196,7 @@ void App::OnMouseInput(UiLepra::InputElement* pElement)
 			gFingerMoveList.push_back(FingerMovement(x, y));
 		}
 		FingerMovement& lMovement = gFingerMoveList.back();
-		lMovement.mLastX = x;
-		lMovement.mLastY = y;
+		lMovement.Update(lMovement.mLastX, lMovement.mLastY, x, y);
 	}
 	else
 	{
@@ -2209,42 +2263,51 @@ int App::PollTap(FingerMovement& pMovement)
 	float lValue = 0;
 #define SCALEUP(v)	(v)*2
 #define CLAMPUP(v)	Math::Clamp((v)*2, -1.0f, 1.0f)
-	if (mGame->GetComputerIndex() != 0)
+	if (mGame->GetComputerIndex() != -1)
 	{
-		if (mGame->GetComputerIndex() == -1)	// Dual play = portrait layout.
+		// Single play, both Cutie and Launcher.
+		if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// Up/down?
 		{
-			if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
-			{
-				directive = DIRECTIVE_UP_DOWN;
-				lValue = SCALEUP((x-lStartX)/s);
-			}
-			else if (lStartX <= lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
-			{
-				directive = DIRECTIVE_LEFT_RIGHT;
-				lValue = SCALEUP((y-lStartY)/s);
-			}
-			else if (x <= lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
-			{
-				directive = DIRECTIVE_FUNCTION;
-			}
+			directive = DIRECTIVE_UP_DOWN;
+			lValue = SCALEUP((lStartY-y)/s);
 		}
-		else	// Cutie vs. computer = landscape layout.
+		else if (lStartX >= w-lDoubleWidth && lStartY >= h-lDoubleWidth)	// Left/right?
 		{
-			if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 up/down?
+			directive = DIRECTIVE_LEFT_RIGHT;
+			lValue = SCALEUP((x-lStartX)/s);
+		}
+		else if (x >= w/2-s && x <= w/2+s && y >= h-lDoubleWidth)	// Bomb?
+		{
+			directive = DIRECTIVE_FUNCTION;
+		}
+		if (mGame->GetComputerIndex() != 1)
+		{
+			if (directive == DIRECTIVE_UP_DOWN)
 			{
-				directive = DIRECTIVE_UP_DOWN;
-				lValue = SCALEUP((lStartY-y)/s);
+				lValue = -lValue;
 			}
-			else if (lStartX >= h-lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
-			{
-				directive = DIRECTIVE_LEFT_RIGHT;
-				lValue = SCALEUP((x-lStartX)/s);
-			}
+			lIsRightControls = true;
 		}
 	}
-	if (mGame->GetComputerIndex() != 1)
+	else
 	{
-		// Launcher always in portrait mode.
+		// Cutie dual play = portrait layout.
+		if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
+		{
+			directive = DIRECTIVE_UP_DOWN;
+			lValue = SCALEUP((x-lStartX)/s);
+		}
+		else if (lStartX <= lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
+		{
+			directive = DIRECTIVE_LEFT_RIGHT;
+			lValue = SCALEUP((y-lStartY)/s);
+		}
+		else if (x <= lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
+		{
+			directive = DIRECTIVE_FUNCTION;
+		}
+
+		// Launcher in portrait mode.
 		if (lStartX >= w-lDoubleWidth && lStartY >= h-lSingleWidth)	// P2 up/down?
 		{
 			lIsRightControls = true;
@@ -2264,7 +2327,7 @@ int App::PollTap(FingerMovement& pMovement)
 		}
 	}
 
-	pMovement.UpdateDistance(lValue);
+	pMovement.UpdateDistance();
 
 	{
 		UiCure::CppContextObject* lAvatar = mGame->GetP2();
@@ -2291,7 +2354,7 @@ int App::PollTap(FingerMovement& pMovement)
 					if (!pMovement.mIsPress)
 					{
 						mBaseThrottle = mThrottle;
-						if (::fabs(pMovement.mHighestDistance) < 0.16f)	// Go to neutral if just tap/release.
+						if (pMovement.mMovedDistance < 8)	// Go to neutral if just tap/release.
 						{
 							mIsThrottling = false;
 							mBaseThrottle = 0.0f;
@@ -2317,7 +2380,7 @@ int App::PollTap(FingerMovement& pMovement)
 					if (!pMovement.mIsPress)
 					{
 						mBaseSteering = mSteering;
-						if (::fabs(pMovement.mHighestDistance) < 0.16f)	// Go to neutral if just tap/release.
+						if (pMovement.mMovedDistance < 8)	// Go to neutral if just tap/release.
 						{
 							mBaseSteering = 0.0f;
 							mSteering = 0;

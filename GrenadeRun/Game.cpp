@@ -793,7 +793,7 @@ bool Game::Render()
 		}
 
 		Vector3DF lStraightVector(mVehicle->GetPosition() - lMuzzlePosition);
-		const float lCamDistance = 10;
+		const float lCamDistance = 15;
 		lStraightVector.Normalize(lCamDistance);
 		lStraightVector.x = lCamDistance*sin(mLauncherYaw);
 		lStraightVector.y = -lCamDistance*cos(mLauncherYaw);
@@ -802,11 +802,18 @@ bool Game::Render()
 		t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.9f);
 		t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-		// The launcher is always displayed in portrait, both for single and dual play.
-		t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
-		if (mFlipRenderSideFactor)
+		if (GetComputerIndex() == -1)
 		{
-			t.GetOrientation().RotateAroundOwnY(PIF*mFlipRenderSideFactor);
+			// Launcher always displayed in portrait in dual play.
+			t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
+		}
+		else
+		{
+			// Single play in landscape mode.
+			if (mFlipRenderSideFactor)
+			{
+				t.GetOrientation().RotateAroundOwnY(PIF*mFlipRenderSideFactor);
+			}
 		}
 #endif // Touch
 		mRightCamera.Interpolate(mRightCamera, t, 0.1f);

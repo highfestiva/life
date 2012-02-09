@@ -58,7 +58,10 @@ void Cutie::DrainHealth(float pDrain)
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	mWheelExpelTickCount = (int)(mWheelExpelTickCount/lRealTimeRatio);
-	GetPhysics()->ClearEngines();
+	if (GetPhysics())
+	{
+		GetPhysics()->ClearEngines();
+	}
 	/*TBC::ChunkyClass* lClass = (TBC::ChunkyClass*)GetClass();
 	size_t lTagCount = lClass->GetTagCount();
 	for (size_t x = 0; x < lTagCount;)
