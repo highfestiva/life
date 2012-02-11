@@ -230,8 +230,6 @@ Button::StateComponentList Button::GetStateList(ComponentState pState)
 
 void Button::Repaint(Painter* pPainter)
 {
-	Parent::Repaint(pPainter);
-
 	ActivateFont(pPainter);
 	GUIImageManager* lIMan = GetImageManager();
 
@@ -283,6 +281,8 @@ void Button::Repaint(Painter* pPainter)
 			lIMan->DrawImage(mIconID, x, y);
 		}
 	}
+
+	Parent::Repaint(pPainter);
 
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{

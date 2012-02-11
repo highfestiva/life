@@ -601,6 +601,8 @@ void ResourceManager::StopClear()
 
 	ScopeLock lLock(&mThreadLock);	// Just here for mutex lock verification.
 
+	mRequestLoadList.RemoveAll();	// We claim nothin's cookin'.
+
 	// Iteratively free memory. First free all resources that ARE of reference type,
 	// then all cure resources. Inside that top-level order, we first kill resources,
 	// without any references, then those with only 1 ref, etc. This should yield
@@ -1001,6 +1003,7 @@ Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* 
 			// Resource found on the way out, move it back into the system.
 			mCachedResourceTable.Remove(lResource->GetName());
 			assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
+			assert(lResource->GetLoadState() == RESOURCE_LOAD_COMPLETE);
 			mActiveResourceTable.Insert(lResource->GetName(), lResource);
 			lResource->Resume();
 		}
@@ -1010,6 +1013,7 @@ Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* 
 		//assert(mRequestLoadList.Find(pName) == mRequestLoadList.End());
 		lResource = CreateResource(pUserResource, pName);
 		assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
+		assert(lResource->GetLoadState() == RESOURCE_LOAD_ERROR);
 		mActiveResourceTable.Insert(lResource->GetName(), lResource);
 		assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		pMustLoad = true;

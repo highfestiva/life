@@ -119,7 +119,7 @@ Label* Dialog<_Target>::SetQueryLabel(const str& pText, UiTbc::FontManager::Font
 template<class _Target>
 void Dialog<_Target>::AddButton(int pTag, const str& pText)
 {
-	Button* lButton = new Button(BorderComponent::ZIGZAG, 1, Color(mColor[0], mColor[1], 0.3f), _T("DialogButton"));
+	Button* lButton = new Button(BorderComponent::ZIGZAG, 1, Color(mColor[0], mColor[1], 0.3f), pText);
 	lButton->SetText(pText, mColor[1]);
 	lButton->SetPreferredSize(57, 57);
 	AddButton(pTag, lButton);

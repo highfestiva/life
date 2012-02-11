@@ -23,6 +23,7 @@
 #include "Launcher.h"
 #include "LauncherAi.h"
 #include "Level.h"
+#include "SeeThrough.h"
 #include "Spawner.h"
 #include "VehicleAi.h"
 
@@ -805,7 +806,14 @@ bool Game::Render()
 		if (GetComputerIndex() == -1)
 		{
 			// Launcher always displayed in portrait in dual play.
-			t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
+			if (mFlipRenderSideFactor)
+			{
+				t.GetOrientation().RotateAroundOwnY(PIF*-0.5f);
+			}
+			else
+			{
+				t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
+			}
 		}
 		else
 		{
@@ -1129,6 +1137,10 @@ Cure::ContextObject* Game::CreateLogicHandler(const str& pType) const
 	else if (pType == _T("context_path"))
 	{
 		return mLevel->QueryPath();
+	}
+	else if (pType == _T("see_through"))
+	{
+		return new SeeThrough(GetContext(), this);
 	}
 	return (0);
 }

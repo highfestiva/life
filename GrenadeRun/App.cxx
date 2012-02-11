@@ -157,6 +157,7 @@ public:
 	typedef void (App::*ButtonAction)(UiTbc::Button*);
 	UiTbc::Dialog<App>* CreateTbcDialog(ButtonAction pAction);
 	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent);
+	void AddCostIcon(const str& pName);
 	void Transpose(int& x, int& y, float& pAngle) const;
 	void Transpose(float& x, float& y, float& pAngle) const;
 	static str Int2Str(int pNumber);
@@ -206,7 +207,7 @@ public:
 	UiCure::UserPainterKeepImageResource* mArrow;
 	UiCure::UserPainterKeepImageResource* mSteeringWheel;
 	UiCure::UserPainterKeepImageResource* mGrenade;
-	UiCure::UserPainterKeepImageResource* mRotate;
+	UiCure::UserPainterKeepImageResource* mMoney;
 	float mGrenadeSizeFactor;
 	mutable Vector3DF mHeartPos[HEART_POINTS];
 	UiTbc::RectComponent* mPlayerSplitter;
@@ -250,6 +251,7 @@ public:
 	float mThrottle;
 	Cure::HiscoreAgent* mHiscoreAgent;
 	bool mIsPurchasing;
+	bool mIsMoneyIconAdded;
 
 	LOG_CLASS_DECLARE();
 };
@@ -346,7 +348,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mThrottle(0),
 	mLastHiscoreName(),
 	mHiscoreAgent(0),
-	mIsPurchasing(false)
+	mIsPurchasing(false),
+	mIsMoneyIconAdded(false)
 {
 	mApp = this;
 }
@@ -509,8 +512,8 @@ bool App::Open()
 		mGrenade = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mGrenade->Load(mResourceManager, _T("grenade.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
-		mRotate = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mRotate->Load(mResourceManager, _T("rotate.png"),
+		mMoney = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mMoney->Load(mResourceManager, _T("money.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 		mGrenadeSizeFactor = 1.0f;
 	}
@@ -730,7 +733,16 @@ bool App::Poll()
 					break;
 					case Cure::HiscoreAgent::ACTION_UPLOAD_SCORE:
 					{
-						HiscoreMenu(+1);
+						delete mHiscoreAgent;
+						mHiscoreAgent = 0;
+						if (lLoadState == Cure::RESOURCE_LOAD_COMPLETE)
+						{
+							HiscoreMenu(+1);
+						}
+						else
+						{
+							EnterHiscore(_T("Please retry; score server obstipated"));
+						}
 					}
 					break;
 					default:
@@ -843,18 +855,6 @@ bool App::Poll()
 			mUiManager->GetPainter()->PrintText(lScore, 10, 10);
 		}
 
-#ifdef LEPRA_TOUCH_LOOKANDFEEL
-		if (mRotateTimer.IsStarted() && mRotateTimer.QueryTimeDiff() < 2.0 &&
-			mRotate->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-		{
-			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-			mUiManager->GetPainter()->DrawImage(mRotate->GetData(),
-				mUiManager->GetCanvas()->GetWidth()/2 - mRotate->GetRamData()->GetWidth()/2,
-				mUiManager->GetCanvas()->GetHeight()/2 - mRotate->GetRamData()->GetHeight()/2);
-			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
-		}
-#endif // Touch L&F
-
 		mGame->Paint();
 
 		if (mDialog)
@@ -885,6 +885,13 @@ bool App::Poll()
 	if (mMusicPlayer)
 	{
 		mMusicPlayer->Update();
+	}
+
+	if (mMoney->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE && !mIsMoneyIconAdded)
+	{
+		mIsMoneyIconAdded = true;
+		mUiManager->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*mMoney->GetRamData(), mMoney->GetData(),
+			UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
 	}
 
 	if (mGameOverTimer.IsStarted())
@@ -2519,24 +2526,25 @@ void App::EnterHiscore(const str& pMessage)
 
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));
-	if (pMessage.empty())
+	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
+	if (!pMessage.empty())
 	{
-		d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
-	}
-	else
-	{
-		d->SetQueryLabel(pMessage, mBigFontId);
+		UiTbc::Label* lMessage = new UiTbc::Label;
+		lMessage->SetText(pMessage, LIGHT_RED, CLEAR_COLOR);
+		const int lStringWidth = mUiManager->GetPainter()->GetStringWidth(pMessage);
+		d->AddChild(lMessage, d->GetSize().x/2 - lStringWidth/2, 80);
 	}
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
 	mHiscoreTextField->SetText(mLastHiscoreName);
 	mHiscoreTextField->SetPreferredSize(210, 25, false);
-	d->AddChild(mHiscoreTextField, 70, 80);
+	d->AddChild(mHiscoreTextField, 70, 130);
 	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
-	UiTbc::Button* lCancelButton = new UiTbc::CustomButton(_T("Cancel"));
+	UiTbc::Button* lCancelButton = new UiTbc::Button(_T("cancel"));
+	lCancelButton->SetText(_T("Cancel"), LIGHT_GRAY, CLEAR_COLOR);
 	lCancelButton->SetPreferredSize(300-mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight());
-	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
 	d->AddButton(-1, lCancelButton);
+	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
 }
 
 void App::SuperReset(bool pGameOver)
@@ -2686,12 +2694,14 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 			UiTbc::Label* lText = new UiTbc::Label;
 			lText->SetFontId(mMonospacedFontId);
 			lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-			lText->SetText(	_T("Music:  Jonas Kapla\n")
+			lText->SetText(
+					_T("Game by: Pixel Doctrine\n")
+					_T("Music:   Jonas Kapla\n")
 					_T("\n")
-					_T("Thanks: ODE, STLport, ChibiXM, Ogg/Vorbis,\n")
-					_T("        OpenAL, ALUT, libpng, Minizip,\n")
-					_T("        zlib, FastDelegate, UTF-8 CPP,\n")
-					_T("        DMI and ljudman/freesound"), LIGHT_GRAY, CLEAR_COLOR);
+					_T("Thanks:  ODE, STLport, ChibiXM, Ogg/Vorbis,\n")
+					_T("         OpenAL, ALUT, libpng, Minizip,\n")
+					_T("         zlib, FastDelegate, UTF-8 CPP,\n")
+					_T("         DMI, freesound, HappyHTTP, GAE"), LIGHT_GRAY, CLEAR_COLOR);
 			d->AddChild(lText, 70, 110);
 			UiTbc::Button* lButton = new UiTbc::CustomButton(_T("back"));
 			lButton->SetPreferredSize(d->GetPreferredSize());
@@ -2710,7 +2720,15 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	d->AddButton(1, ICONBTNA("btn_lvl2.png", "Tutorial"));
 	d->AddButton(2, ICONBTNA("btn_lvl2.png", "Pendulum"));
 	d->AddButton(3, ICONBTNA("btn_lvl3.png", "Elevate"));
+	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false) && mIsMoneyIconAdded)
+	{
+		AddCostIcon(_T("Elevate"));
+	}
 	d->AddButton(4, ICONBTNA("btn_lvl4.png", "RoboCastle"));
+	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false) && mIsMoneyIconAdded)
+	{
+		AddCostIcon(_T("RoboCastle"));
+	}
 }
 
 void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
@@ -2728,7 +2746,6 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 			{
 				delete mHiscoreAgent;
 				mHiscoreAgent = 0;
-				EnterHiscore(_T("Please retry; score server obstipated"));
 			}
 		}
 		else
@@ -2749,6 +2766,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		Purchase(_T(CONTENT_LEVELS));
 		return;
 	}
+
 	str lLevel = _T("level_2");
 	switch (pButton->GetTag())
 	{
@@ -2775,8 +2793,20 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	d->SetQueryLabel(_T("Select vehicle"), mBigFontId);
 	d->AddButton(1, _T("Cutie"));
 	d->AddButton(2, _T("Hardie"));
+	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false) && mIsMoneyIconAdded)
+	{
+		AddCostIcon(_T("Hardie"));
+	}
 	d->AddButton(3, _T("Speedie"));
+	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false) && mIsMoneyIconAdded)
+	{
+		AddCostIcon(_T("Speedie"));
+	}
 	d->AddButton(4, _T("Sleepie"));
+	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false) && mIsMoneyIconAdded)
+	{
+		AddCostIcon(_T("Sleepie"));
+	}
 	if (mGame->GetComputerIndex() != -1)
 	{
 		d->SetOffset(PixelCoord(0, -40));
@@ -2814,16 +2844,23 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 
 void App::OnVehicleAction(UiTbc::Button* pButton)
 {
+	mDifficultySlider = 0;
+
+	if (pButton->GetTag() >= 2 && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
+	{
+		Purchase(_T(CONTENT_VEHICLES));
+		return;
+	}
+
 	mGame->EnableScoreCounting(true);
 	str lVehicle = _T("cutie");
 	switch (pButton->GetTag())
 	{
-		case 1:	lVehicle = _T("cutie");		mHiscoreVehicleIndex= 0;	break;
-		case 2:	lVehicle = _T("monster");	mHiscoreVehicleIndex= 1;	break;
-		case 3:	lVehicle = _T("corvette");	mHiscoreVehicleIndex= 2;	break;
-		case 4:	lVehicle = _T("road_roller");	mHiscoreVehicleIndex= 3;	break;
+		case 1:	lVehicle = _T("cutie");		mHiscoreVehicleIndex = 0;	break;
+		case 2:	lVehicle = _T("monster");	mHiscoreVehicleIndex = 1;	break;
+		case 3:	lVehicle = _T("corvette");	mHiscoreVehicleIndex = 2;	break;
+		case 4:	lVehicle = _T("road_roller");	mHiscoreVehicleIndex = 3;	break;
 	}
-	mDifficultySlider = 0;
 	SuperReset(false);
 	mGame->ResetWinnerIndex();
 	mGame->SetVehicle(lVehicle);
@@ -2965,6 +3002,15 @@ UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::C
 	lButton->SetVisible(false);
 	lButton->UpdateLayout();
 	return lButton;
+}
+
+void App::AddCostIcon(const str& pName)
+{
+	UiTbc::Label* lLabel = new UiTbc::Label;
+	lLabel->SetIcon(mMoney->GetData());
+	UiTbc::Button* lButton = (UiTbc::Button*)mDialog->GetChild(pName, 0);
+	lButton->GetClientRectComponent()->ReplaceLayer(0, new UiTbc::FloatingLayout);
+	lButton->AddChild(lLabel, 57-15, 57);
 }
 
 void App::Transpose(int& x, int& y, float& pAngle) const

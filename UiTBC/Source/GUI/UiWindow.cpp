@@ -169,7 +169,7 @@ Window::~Window()
 
 void Window::Init()
 {
-	Parent::AddChild(mCenterComponent, 1, 1);
+	Parent::AddChild(mCenterComponent, 0, 0);
 
 	SetColor(mBodyColor);
 	SetNeedsRepaint(true);

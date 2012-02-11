@@ -16,7 +16,7 @@ namespace UiCure
 
 IconButton::IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager,
 		const str& pIconImageName, const str& pText):
-	Parent(_T("IconButton")),
+	Parent(pText),
 	mIconResource(new UserPainterKeepImageResource(pUiManager, PainterImageResource::RELEASE_NONE)),
 	mHighlightedIconId(UiTbc::Painter::INVALID_IMAGEID)
 {
