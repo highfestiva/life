@@ -127,6 +127,8 @@ public:
 	const str& GetText();
 
 	virtual void Repaint(Painter* pPainter);
+	virtual void RepaintBackground(Painter* pPainter);
+	virtual void RepaintComponents(Painter* pPainter);
 
 	virtual Type GetType() const;
 

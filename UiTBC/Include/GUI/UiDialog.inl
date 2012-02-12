@@ -133,7 +133,6 @@ void Dialog<_Target>::AddButton(int pTag, Button* pButton)
 	pButton->SetTag(pTag);
 	AddChild(pButton);
 	mButtonList.push_back(pButton);
-	pButton->UpdateLayout();
 	pButton->SetOnClick(Dialog, OnClick);
 	UpdateLayout();
 }

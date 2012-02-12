@@ -41,7 +41,7 @@ public:
 
 	virtual ~RectComponent();
 
-	virtual void Repaint(Painter* pPainter);
+	virtual void RepaintBackground(Painter* pPainter);
 	virtual bool IsOver(int pScreenX, int pScreenY);
 
 	void SetImage(Painter::ImageID pImageID);

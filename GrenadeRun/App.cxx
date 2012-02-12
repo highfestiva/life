@@ -2717,18 +2717,17 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnLevelAction);
 	d->SetQueryLabel(_T("Select level"), mBigFontId);
-	d->AddButton(1, ICONBTNA("btn_lvl2.png", "Tutorial"));
-	d->AddButton(2, ICONBTNA("btn_lvl2.png", "Pendulum"));
-	d->AddButton(3, ICONBTNA("btn_lvl3.png", "Elevate"));
-	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false) && mIsMoneyIconAdded)
+	d->AddButton(1, ICONBTN(_T("btn_lvl2.png"), _T("Tutorial")));
+	d->AddButton(2, ICONBTN(_T("btn_lvl2.png"), gLevels[0]));
+	d->AddButton(3, ICONBTN(_T("btn_lvl3.png"), gLevels[1]));
+	d->AddButton(4, ICONBTN(_T("btn_lvl4.png"), gLevels[2]));
+#ifndef LEPRA_TOUCH
+	if (mIsMoneyIconAdded && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false))
 	{
-		AddCostIcon(_T("Elevate"));
+		AddCostIcon(gLevels[1]);
+		AddCostIcon(gLevels[2]);
 	}
-	d->AddButton(4, ICONBTNA("btn_lvl4.png", "RoboCastle"));
-	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false) && mIsMoneyIconAdded)
-	{
-		AddCostIcon(_T("RoboCastle"));
-	}
+#endif // !Touch
 }
 
 void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
@@ -2791,22 +2790,18 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	}
 	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnVehicleAction);
 	d->SetQueryLabel(_T("Select vehicle"), mBigFontId);
-	d->AddButton(1, _T("Cutie"));
-	d->AddButton(2, _T("Hardie"));
-	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false) && mIsMoneyIconAdded)
+	d->AddButton(1, gVehicles[0]);
+	d->AddButton(2, gVehicles[1]);
+	d->AddButton(3, gVehicles[2]);
+	d->AddButton(4, gVehicles[3]);
+#ifndef LEPRA_TOUCH
+	if (mIsMoneyIconAdded && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
 	{
-		AddCostIcon(_T("Hardie"));
+		AddCostIcon(gVehicles[1]);
+		AddCostIcon(gVehicles[2]);
+		AddCostIcon(gVehicles[3]);
 	}
-	d->AddButton(3, _T("Speedie"));
-	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false) && mIsMoneyIconAdded)
-	{
-		AddCostIcon(_T("Speedie"));
-	}
-	d->AddButton(4, _T("Sleepie"));
-	if (!CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false) && mIsMoneyIconAdded)
-	{
-		AddCostIcon(_T("Sleepie"));
-	}
+#endif // !Touch
 	if (mGame->GetComputerIndex() != -1)
 	{
 		d->SetOffset(PixelCoord(0, -40));
@@ -3008,9 +3003,11 @@ void App::AddCostIcon(const str& pName)
 {
 	UiTbc::Label* lLabel = new UiTbc::Label;
 	lLabel->SetIcon(mMoney->GetData());
+	//lLabel->SetAdaptive(true);
 	UiTbc::Button* lButton = (UiTbc::Button*)mDialog->GetChild(pName, 0);
 	lButton->GetClientRectComponent()->ReplaceLayer(0, new UiTbc::FloatingLayout);
-	lButton->AddChild(lLabel, 57-15, 57);
+	lButton->AddChild(lLabel, 57-12, 57);
+	mDialog->UpdateLayout();
 }
 
 void App::Transpose(int& x, int& y, float& pAngle) const

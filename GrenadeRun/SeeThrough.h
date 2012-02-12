@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
 #include "../Lepra/Include/HiResTimer.h"
+#include "../UiCure/Include/UiCppContextObject.h"
 #include "Game.h"
 
 
@@ -17,9 +17,9 @@ namespace GrenadeRun
 
 
 
-class SeeThrough: public Cure::CppContextObject
+class SeeThrough: public UiCure::CppContextObject
 {
-	typedef Cure::CppContextObject Parent;
+	typedef UiCure::CppContextObject Parent;
 public:
 	SeeThrough(Cure::ContextManager* pManager, const Game* pGame);
 	virtual ~SeeThrough();
@@ -31,6 +31,7 @@ private:
 	typedef TBC::ChunkyClass::Tag Tag;
 	const Game* mGame;
 	const Tag* mTag;
+	float mOpacity;
 
 	LOG_CLASS_DECLARE();
 };

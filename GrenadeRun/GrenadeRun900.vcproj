@@ -565,6 +565,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SeeThrough.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Spawner.cpp"
 				>
 			</File>
@@ -604,6 +608,10 @@
 			</File>
 			<File
 				RelativePath=".\Level.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SeeThrough.h"
 				>
 			</File>
 			<File

@@ -74,10 +74,14 @@ Score counting.
 Server-side high score REST interface. Secure.
 Global high score list.
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
+Add $ icon to non-purchased items.
+Fix "see through" on bridge (on Pendulum level).
+In-app purchase.
+Activation of features depending on purchases.
 
 Computer demo
 -------------
-Add $ icon to non-purchased items.
+Remove scale factor 1.5 entirely! This will yield faster pace and more fun.
 Cascade using timestamp in hiscore entry message to permutate, and store current time in DB. Only allow one entry per minute.
 2 extra levels: castle and machine.
 Tweak other levels.
@@ -93,8 +97,6 @@ iOS and computer full version
 -----------------------------
 Tweak steering.
 Add visual feedback on launcher motor strengths. Use "from touch digit to indicator lines".
-In-app purchase.
-Activation of features depending on purchases.
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.

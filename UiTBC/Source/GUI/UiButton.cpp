@@ -230,6 +230,8 @@ Button::StateComponentList Button::GetStateList(ComponentState pState)
 
 void Button::Repaint(Painter* pPainter)
 {
+	RepaintBackground(pPainter);
+
 	ActivateFont(pPainter);
 	GUIImageManager* lIMan = GetImageManager();
 
@@ -282,7 +284,7 @@ void Button::Repaint(Painter* pPainter)
 		}
 	}
 
-	Parent::Repaint(pPainter);
+	RepaintComponents(pPainter);
 
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{
@@ -305,6 +307,23 @@ void Button::Repaint(Painter* pPainter)
 	}
 
 	pPainter->PopAttrib();
+}
+
+void Button::RepaintBackground(Painter* pPainter)
+{
+	GetClientRectComponent()->RepaintBackground(pPainter);
+}
+
+void Button::RepaintComponents(Painter* pPainter)
+{
+	if (NeedsRepaint() || GetBorderWidth() > 0)
+	{
+		Parent::RepaintComponents(pPainter);
+	}
+	else
+	{
+		GetClientRectComponent()->RepaintComponents(pPainter);
+	}
 }
 
 void Button::PrintText(Painter* pPainter, int x, int y)

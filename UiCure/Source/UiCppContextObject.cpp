@@ -238,6 +238,61 @@ UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) con
 	return (0);
 }
 
+void CppContextObject::UpdateMaterial(int pMeshIndex)
+{
+	if (!mUiClassResource || !mUiManager->CanRender())
+	{
+		return;
+	}
+	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
+	UserGeometryReferenceResource* lMesh = mMeshResourceArray[pMeshIndex];
+	const bool lTransparent = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1);
+	if (lMesh->GetRamData()->GetUVData(0) && mTextureResourceArray.size() > 0)
+	{
+		UserRendererImageResource* lTexture = 0;
+		TextureArray::iterator tx = mTextureResourceArray.begin();
+		for (; !lTexture && tx != mTextureResourceArray.end(); ++tx)
+		{
+			const std::vector<str>& lTextureList = lClass->GetMaterial(pMeshIndex).mTextureList;
+			std::vector<str>::const_iterator y = lTextureList.begin();
+			for (; !lTexture && y != lTextureList.end(); ++y)
+			{
+				if ((*tx)->GetName() == *y)
+				{
+					lTexture = *tx;
+				}
+			}
+		}
+		if (!lTexture)
+		{
+			lTexture = mTextureResourceArray[0];
+		}
+		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
+		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
+		const bool lIsHighlight = (lShader == _T("highlight"));
+		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
+		if (lIsHighlight)
+		{
+			lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_HIGHLIGHT;
+		}
+		else if (lIsBlended)
+		{
+			lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED;
+		}
+		mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
+		mUiManager->GetRenderer()->TryAddGeometryTexture(lMesh->GetData(), lTexture->GetData());
+	}
+	else
+	{
+		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
+		if (lTransparent)
+		{
+			lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED;
+		}
+		mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
+	}
+}
+
 
 
 void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
@@ -528,57 +583,12 @@ void CppContextObject::TryAddTexture()
 			return;
 		}
 	}
-	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
 		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
 		if (mUiManager->GetRenderer()->GetMaterialType(lMesh->GetData()) == UiTbc::Renderer::MAT_NULL)
 		{
-			const bool lTransparent = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1);
-			if (lMesh->GetRamData()->GetUVData(0) && mTextureResourceArray.size() > 0)
-			{
-				UserRendererImageResource* lTexture = 0;
-				TextureArray::iterator tx = mTextureResourceArray.begin();
-				for (; !lTexture && tx != mTextureResourceArray.end(); ++tx)
-				{
-					const std::vector<str>& lTextureList = lClass->GetMaterial(x).mTextureList;
-					std::vector<str>::const_iterator y = lTextureList.begin();
-					for (; !lTexture && y != lTextureList.end(); ++y)
-					{
-						if ((*tx)->GetName() == *y)
-						{
-							lTexture = *tx;
-						}
-					}
-				}
-				if (!lTexture)
-				{
-					lTexture = mTextureResourceArray[0];
-				}
-				const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(x).mShaderName;
-				const bool lIsBlended = (lTransparent || lShader == _T("blend"));
-				const bool lIsHighlight = (lShader == _T("highlight"));
-				UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
-				if (lIsHighlight)
-				{
-					lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_HIGHLIGHT;
-				}
-				else if (lIsBlended)
-				{
-					lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED;
-				}
-				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
-				mUiManager->GetRenderer()->TryAddGeometryTexture(lMesh->GetData(), lTexture->GetData());
-			}
-			else
-			{
-				UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS;
-				if (lTransparent)
-				{
-					lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED;
-				}
-				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
-			}
+			UpdateMaterial(x);
 		}
 	}
 	TryComplete();

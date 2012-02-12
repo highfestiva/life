@@ -71,7 +71,7 @@ RectComponent::~RectComponent()
 {
 }
 
-void RectComponent::Repaint(Painter* pPainter)
+void RectComponent::RepaintBackground(Painter* pPainter)
 {
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 
@@ -134,8 +134,6 @@ void RectComponent::Repaint(Painter* pPainter)
 			pPainter->DrawFan(lCoords, true);
 		}
 	}
-
-	Component::Repaint(pPainter);
 
 	pPainter->PopAttrib();
 }

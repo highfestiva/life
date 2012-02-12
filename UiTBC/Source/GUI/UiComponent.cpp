@@ -211,6 +211,8 @@ void Component::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer
 		pChild->SetParent(this);
 		mLayout[pLayer]->Add(pChild, pParam1, pParam2);
 		pChild->SetParentLayout(mLayout[pLayer]);
+		UpdateLayout();
+		SetNeedsRepaint(true);
 	}
 	else
 	{
@@ -320,9 +322,7 @@ void Component::UpdateLayout()
 	{
 		if (mLayout[i] != 0)
 		{
-			mLayout[i]->UpdateLayout();
 			Component* lChild = mLayout[i]->GetFirst();
-
 			while (lChild != 0)
 			{
 				if (lChild->IsLocalVisible() &&
@@ -330,17 +330,26 @@ void Component::UpdateLayout()
 				{
 					lChild->UpdateLayout();
 				}
-
 				lChild = mLayout[i]->GetNext();
 			}
+			mLayout[i]->UpdateLayout();
 		}
 	}
 }
 
 void Component::Repaint(Painter* pPainter)
 {
-	mNeedsRepaint = false;
+	RepaintBackground(pPainter);
+	RepaintComponents(pPainter);
+}
 
+void Component::RepaintBackground(Painter* pPainter)
+{
+	(void)pPainter;
+}
+
+void Component::RepaintComponents(Painter* pPainter)
+{
 	for (int i = 0; i < mLayerCount; i++)
 	{
 		if (mLayout[i] != 0)
@@ -358,6 +367,7 @@ void Component::Repaint(Painter* pPainter)
 			}
 		}
 	}
+	mNeedsRepaint = false;
 }
 
 bool Component::OnDoubleClick(int pMouseX, int pMouseY)

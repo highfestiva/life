@@ -51,6 +51,7 @@ public:
 
 	TBC::GeometryBase* GetMesh(int pIndex) const;
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
+	virtual void UpdateMaterial(int pMeshIndex);
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 

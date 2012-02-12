@@ -140,6 +140,8 @@ public:
 	*/
 
 	virtual void Repaint(Painter* pPainter);
+	virtual void RepaintBackground(Painter* pPainter);
+	virtual void RepaintComponents(Painter* pPainter);
 	virtual void RepaintChild(Component* pChild, Painter* pPainter);
 	virtual bool IsOver(int pScreenX, int pScreenY);
 

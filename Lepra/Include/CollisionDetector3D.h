@@ -66,12 +66,9 @@ public:
 	// Point tests.
 	//
 
-	bool IsSphereEnclosingPoint(const Sphere<_TVarType>& pSphere, 
-	                            const Vector3D<_TVarType>& pPoint);
-	bool IsAABBEnclosingPoint(const AABB<_TVarType>& pAABB,
-	                          const Vector3D<_TVarType>& pPoint);
-	bool IsOBBEnclosingPoint(const OBB<_TVarType>& pOBB,
-	                         const Vector3D<_TVarType>& pPoint);
+	static bool IsSphereEnclosingPoint(const Sphere<_TVarType>& pSphere, const Vector3D<_TVarType>& pPoint);
+	static bool IsAABBEnclosingPoint(const AABB<_TVarType>& pAABB, const Vector3D<_TVarType>& pPoint);
+	static bool IsOBBEnclosingPoint(const OBB<_TVarType>& pOBB, const Vector3D<_TVarType>& pPoint);
 
 	// Cylinders aligned along the X, Y and Z-axis. Ignores the orientation
 	// of the cylinder. AA = Axis Aligned.
