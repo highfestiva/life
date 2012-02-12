@@ -611,6 +611,7 @@ void Game::NextComputerIndex()
 	{
 		mComputerIndex = -1;
 	}
+	EnableScoreCounting(false);
 }
 
 float Game::GetComputerDifficulty() const

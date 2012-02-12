@@ -81,6 +81,7 @@ Activation of features depending on purchases.
 
 Computer demo
 -------------
+Add eye lashes on Cutie!
 Remove scale factor 1.5 entirely! This will yield faster pace and more fun.
 Cascade using timestamp in hiscore entry message to permutate, and store current time in DB. Only allow one entry per minute.
 2 extra levels: castle and machine.

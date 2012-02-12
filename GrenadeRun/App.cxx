@@ -1392,11 +1392,8 @@ void App::DrawHud()
 		{
 			lHeartBeatTime -= 4*PIF;
 		}
-		const float lHeartBeatFactor = (lHeartBeatTime < 2*PIF) ? 1 : 1+0.15f*sin(lHeartBeatTime);
 		const float iw = (float)mHeart->GetRamData()->GetWidth();
 		const float ih = (float)mHeart->GetRamData()->GetHeight();
-		const float hw = iw * lHeartBeatFactor;
-		const float hh = ih * lHeartBeatFactor;
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 		if (mGame->GetComputerIndex() == -1)
 		{
@@ -1413,14 +1410,18 @@ void App::DrawHud()
 		{
 			y = lMargin+2;
 		}
+		float lHeartBeatLoopTime = lHeartBeatTime;
 		int lHeartIndex = 0;
-		for (int i = -HEART_POINTS/2; i < +HEART_POINTS/2; ++i)
+		for (int i = -HEART_POINTS/2; i < +HEART_POINTS/2; ++i, lHeartBeatLoopTime += 0.6f)
 		{
 			if (mGame->GetComputerIndex() != 0)
 			{
 				Vector3DF v(x+iw/2, y+iw/2, lAngle);
 				if (i < lBalance)
 				{
+					const float lHeartBeatFactor = (lHeartBeatLoopTime < 2*PIF) ? 1 : 1+0.15f*sin(lHeartBeatLoopTime);
+					const float hw = iw * lHeartBeatFactor;
+					const float hh = ih * lHeartBeatFactor;
 					v = mHeartPos[lHeartIndex] = Math::Lerp(mHeartPos[lHeartIndex], v, 0.07f);
 					++lHeartIndex;
 					DrawImage(mHeart->GetData(), v.x, v.y, hw, hh, v.z);
@@ -1439,13 +1440,14 @@ void App::DrawHud()
 		{
 			x = w/2 + BUTTON_WIDTH/2 + lMargin;
 			y = lMargin;
+			lAngle = PIF/2;
 		}
 		else
 		{
 			x = lMargin;
 			y = BUTTON_WIDTH + lMargin*2;
+			lAngle = 0;
 		}
-		lAngle = PIF/2;
 #endif	// Touch L&F
 		if (mGame->GetComputerIndex() == -1)
 		{
@@ -1455,18 +1457,21 @@ void App::DrawHud()
 		{
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 			x += BUTTON_WIDTH/2 - iw/2 + 2;
-#else // Computer
+#endif // Touch
 			y = lMargin;
-#endif // Touch / Computer
 		}
 		y += (iw+8) * (HEART_POINTS - 1);
-		for (int i = -HEART_POINTS/2; i < +HEART_POINTS/2; ++i)
+		lHeartBeatLoopTime = lHeartBeatTime;
+		for (int i = -HEART_POINTS/2; i < +HEART_POINTS/2; ++i, lHeartBeatLoopTime += 0.6f)
 		{
 			if (mGame->GetComputerIndex() != 1)
 			{
 				Vector3DF v(x+iw/2, y+iw/2, lAngle);
 				if (i >= lBalance)
 				{
+					const float lHeartBeatFactor = (lHeartBeatLoopTime < 2*PIF) ? 1 : 1+0.15f*sin(lHeartBeatLoopTime);
+					const float hw = iw * lHeartBeatFactor;
+					const float hh = ih * lHeartBeatFactor;
 					v = mHeartPos[lHeartIndex] = Math::Lerp(mHeartPos[lHeartIndex], v, 0.07f);
 					++lHeartIndex;
 					DrawImage(mHeart->GetData(), v.x, v.y, hw, hh, v.z);
@@ -1904,7 +1909,7 @@ void App::Layout()
 	int ty;
 	int tx2;
 	int ty2;
-	if (mGame->GetComputerIndex() < 0)
+	if (mGame->GetComputerIndex() == -1)
 	{
 		tx = mUiManager->GetCanvas()->GetWidth()/2 - px/2;
 		ty = mUiManager->GetCanvas()->GetHeight() - s - py;
@@ -1915,6 +1920,10 @@ void App::Layout()
 	{
 		tx = mUiManager->GetCanvas()->GetWidth() - s - px;
 		ty = s;
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
+		tx2 = tx;
+		ty2 = ty;
+#else // Computer L&F
 		tx2 = s;
 		ty2 = ty;
 		if (mGame->GetComputerIndex() == 1 && !mGetiPhoneButton)
@@ -1922,6 +1931,7 @@ void App::Layout()
 			tx2 = tx;
 			ty2 = ty;
 		}
+#endif // Touch L&F / Computer L&F
 	}
 	/*mLazyButton->SetPos(x, sy);
 	mHardButton->SetPos(x, sy+dy);
