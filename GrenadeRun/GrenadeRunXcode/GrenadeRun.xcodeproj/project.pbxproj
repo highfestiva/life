@@ -475,6 +475,7 @@
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
+		B1CFD06F14E8610900550345 /* SeeThrough.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1CFD06E14E8610900550345 /* SeeThrough.cpp */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
 		B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */; };
 		B1D88DC814DEA9190000CD85 /* happyhttp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DC714DEA9190000CD85 /* happyhttp.cpp */; };
@@ -1142,6 +1143,7 @@
 		B1B489A313F9BE4A0047C78A /* GrenadeRun_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GrenadeRun_Prefix.pch; path = GrenadeRunXcode/GrenadeRun_Prefix.pch; sourceTree = "<group>"; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
+		B1CFD06E14E8610900550345 /* SeeThrough.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SeeThrough.cpp; sourceTree = "<group>"; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
 		B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HiscoreAgent.cpp; path = ../../Cure/Source/HiscoreAgent.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DC714DEA9190000CD85 /* happyhttp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = happyhttp.cpp; path = "happyhttp-0.1/happyhttp.cpp"; sourceTree = "<group>"; };
@@ -1400,6 +1402,7 @@
 		B19A146913A122DE0051A61C /* GrenadeRun */ = {
 			isa = PBXGroup;
 			children = (
+				B1CFD06E14E8610900550345 /* SeeThrough.cpp */,
 				B110A04B14AB36CC007A84E4 /* Level.cpp */,
 				B110A04C14AB36CC007A84E4 /* VehicleAi.cpp */,
 				35128A4F147262300006467C /* Launcher.cpp */,
@@ -2792,6 +2795,7 @@
 				B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */,
 				B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */,
 				B1D88DC814DEA9190000CD85 /* happyhttp.cpp in Sources */,
+				B1CFD06F14E8610900550345 /* SeeThrough.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
