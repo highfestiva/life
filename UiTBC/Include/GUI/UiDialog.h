@@ -5,8 +5,9 @@
 
 
 #pragma once
-#include "UiLabel.h"
+#include "UiButton.h"
 #include "UiFloatingLayout.h"
+#include "UiLabel.h"
 
 
 
@@ -15,7 +16,6 @@ namespace UiTbc
 
 
 
-template<class _Target>
 class Dialog: public RectComponent
 {
 	typedef RectComponent Parent;
@@ -34,7 +34,7 @@ public:
 	void SetOffset(PixelCoord pOffset);
 	virtual void UpdateLayout();
 
-private:
+protected:
 	virtual void Repaint(Painter* pPainter);
 	void Animate();
 	void OnClick(Button* pButton);
@@ -51,10 +51,6 @@ private:
 	int mAnimationStep;
 	int mDirection;
 };
-
-
-
-#include "UiDialog.inl"
 
 
 

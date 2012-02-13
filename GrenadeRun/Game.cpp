@@ -66,7 +66,9 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mFlipRenderSide(0),
 	mFlipRenderSideFactor(0),
 	mScore(0),
-	mScoreCountingEnabled(false)
+	mScoreCountingEnabled(false),
+	mRoundIndex(0),
+	mVehicleHealth(1)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -224,6 +226,7 @@ void Game::SetVehicle(const str& pVehicle)
 		mVehicle->GetHealth() > 0)
 	{
 		mVehicle->DrainHealth(-1);
+		mVehicle->DrainHealth(1-mVehicleHealth);
 		return;
 	}
 	delete mVehicle;
@@ -233,6 +236,7 @@ void Game::SetVehicle(const str& pVehicle)
 	if (lOk)
 	{
 		mVehicle->SetInitialTransform(GetCutieStart());
+		mVehicle->DrainHealth(1-mVehicleHealth);
 		mVehicle->StartLoading();
 	}
 }
@@ -380,11 +384,13 @@ void Game::SetFlybyMode(FlybyMode pFlybyMode)
 void Game::ResetScore()
 {
 	mScore = 0;
+	mRoundIndex = 0;
+	mVehicleHealth = 1;
 }
 
 void Game::AddScore(double pCutieScore, double pLauncherScore)
 {
-	if (mComputerIndex == -1 || mWinnerIndex != -1)
+	if (mComputerIndex == -1 || mWinnerIndex != -1 || !IsScoreCountingEnabled())
 	{
 		return;
 	}
@@ -413,7 +419,7 @@ void Game::EnableScoreCounting(bool pEnable)
 
 bool Game::IsScoreCountingEnabled() const
 {
-	return mScoreCountingEnabled;
+	return (mScoreCountingEnabled && mComputerIndex != -1);
 }
 
 void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -611,7 +617,6 @@ void Game::NextComputerIndex()
 	{
 		mComputerIndex = -1;
 	}
-	EnableScoreCounting(false);
 }
 
 float Game::GetComputerDifficulty() const
@@ -644,6 +649,17 @@ bool Game::IsFlipRenderSide() const
 {
 	return !!mFlipRenderSide;
 }
+
+void Game::NextRound()
+{
+	++mRoundIndex;
+	if (GetComputerIndex() != -1 && mRoundIndex % 2 == 0)
+	{
+		mVehicleHealth *= 0.8f;
+	}
+}
+
+
 
 void Game::SyncCameraPositions()
 {

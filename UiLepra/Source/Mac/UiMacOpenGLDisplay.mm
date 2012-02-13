@@ -85,6 +85,21 @@ bool MacOpenGLDisplay::UpdateScreen()
 	return (true);
 }
 
+void MacOpenGLDisplay::SetOrientation(Orientation pOrientation)
+{
+	Parent::SetOrientation(pOrientation);
+#ifdef LEPRA_IOS
+	switch (mOrientation)
+	{
+		case ORIENTATION_ALLOW_ANY:		mGlView.orientationStrictness = 0;	break;
+		case ORIENTATION_ALLOW_UPSIDE_DOWN:	mGlView.orientationStrictness = 1;	break;
+		case ORIENTATION_FIXED:			mGlView.orientationStrictness = 2;	break;
+	}
+#endif // iOS
+}
+
+
+
 bool MacOpenGLDisplay::IsVSyncEnabled() const
 {
 	return true; //OpenGLExtensions::IsVSyncEnabled();

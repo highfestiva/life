@@ -166,9 +166,6 @@
     <ClCompile Include="Source\X11\UiX11OpenGLDisplay.cpp">
       <Filter>Source Files\X11</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mac\EAGLView.m">
-      <Filter>Source Files\Mac</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Mac\UiMacCore.mm">
       <Filter>Source Files\Mac</Filter>
     </ClCompile>
@@ -185,6 +182,12 @@
   <ItemGroup>
     <None Include="Source\UiOpenGLExtensions.mm">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="Source\Mac\EAGLView.mm">
+      <Filter>Source Files\Mac</Filter>
+    </None>
+    <None Include="Source\Mac\UiIosInput.mm">
+      <Filter>Source Files\Mac</Filter>
     </None>
   </ItemGroup>
 </Project>

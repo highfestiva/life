@@ -129,6 +129,7 @@ public:
 	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode, Orientation pOrientation) = 0;
 	virtual void CloseScreen() = 0;
 
+	virtual void SetOrientation(Orientation pOrientation);
 	void AddResizeObserver(DisplayResizeObserver* pResizeObserver);
 	void RemoveResizeObserver(DisplayResizeObserver* pResizeObserver);
 	void DispatchResize(int pWidth, int pHeight);

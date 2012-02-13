@@ -21,6 +21,7 @@ namespace UiLepra
 
 class MacOpenGLDisplay: public MacDisplayManager
 {
+	typedef MacDisplayManager Parent;
 public:	
 	MacOpenGLDisplay();
 	virtual ~MacOpenGLDisplay();
@@ -28,6 +29,7 @@ public:
 	void CloseScreen();
 	bool Activate();
 	bool UpdateScreen();
+	virtual void SetOrientation(Orientation pOrientation);
 
 	bool IsVSyncEnabled() const;
 	bool SetVSyncEnabled(bool pEnabled);

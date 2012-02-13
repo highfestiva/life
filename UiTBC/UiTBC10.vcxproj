@@ -257,6 +257,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\GUI\UiDialog.cpp" />
+    <ClCompile Include="Source\GUI\UiMessageDialog.cpp" />
     <ClCompile Include="Source\UiAnimatedGeometry.cpp" />
     <ClCompile Include="Source\UiBasicMeshCreator.cpp" />
     <ClCompile Include="Source\UiChunkyClass.cpp" />
@@ -340,9 +342,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <None Include="Include\GUI\UiDialog.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\GUI\UiMessageDialog.h" />
     <ClInclude Include="Include\UiAnimatedGeometry.h" />
     <ClInclude Include="Include\UiBasicMeshCreator.h" />
     <ClInclude Include="Include\UiChunkyClass.h" />

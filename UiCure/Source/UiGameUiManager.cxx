@@ -120,28 +120,13 @@ bool GameUiManager::OpenDraw()
 	}
 	if (lOk)
 	{
-		str lDisplayOrientation;
-		CURE_RTVAR_GET(lDisplayOrientation, =, mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
-		UiLepra::DisplayManager::Orientation lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
-		if (lDisplayOrientation == _T("AllowAny"))
-		{
-			lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY;
-		}
-		else if (lDisplayOrientation == _T("AllowUpsideDown"))
-		{
-			lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
-		}
-		else if (lDisplayOrientation == _T("Fixed"))
-		{
-			lOrientation = UiLepra::DisplayManager::ORIENTATION_FIXED;
-		}
 		if (lDisplayFullScreen)
 		{
-			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN, lOrientation);
+			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN, UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN);
 		}
 		else
 		{
-			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, lOrientation);
+			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN);
 		}
 	}
 	if (lOk)
@@ -522,6 +507,23 @@ void GameUiManager::UpdateSettings()
 	bool lEnableVSync;
 	CURE_RTVAR_GET(lEnableVSync, =, mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, true);
 	mDisplay->SetVSyncEnabled(lEnableVSync);
+
+	str lDisplayOrientation;
+	CURE_RTVAR_GET(lDisplayOrientation, =, mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	UiLepra::DisplayManager::Orientation lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
+	if (lDisplayOrientation == _T("AllowAny"))
+	{
+		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY;
+	}
+	else if (lDisplayOrientation == _T("AllowUpsideDown"))
+	{
+		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
+	}
+	else if (lDisplayOrientation == _T("Fixed"))
+	{
+		lOrientation = UiLepra::DisplayManager::ORIENTATION_FIXED;
+	}
+	mDisplay->SetOrientation(lOrientation);
 
 	// ----------------------------------------
 

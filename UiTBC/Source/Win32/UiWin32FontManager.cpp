@@ -229,14 +229,14 @@ int Win32FontManager::GetCharWidth(const tchar pChar) const
 	int lCharWidth = 0;
 	if (::GetCharABCWidths(mDC, (utchar)pChar, (utchar)pChar, &lABC) != FALSE)
 	{
-		lCharWidth = (int)lABC.abcA + (int)lABC.abcB + (int)lABC.abcC;
+		lCharWidth = (int)(lABC.abcA + lABC.abcB + lABC.abcC);
 	}
 	else if (::GetCharWidth32(mDC, (utchar)pChar, (utchar)pChar, &lWidth) != FALSE)
 	{
 		lCharWidth = (int)lWidth;
 	}
 	::SelectObject(mDC, lDefaultObject);
-	return (lCharWidth);
+	return lCharWidth;
 }
 
 

@@ -4,14 +4,21 @@
 
 
 
+#include "../../Include/GUI/UiDesktopWindow.h"
+#include "../../Include/GUI/UiDialog.h"
+
 #define SPEED		30
 #define ACCELERATION	20
 #define MARGIN		0
 
 
 
-template<class _Target>
-Dialog<_Target>::Dialog(Component* pParent, Action pTarget):
+namespace UiTbc
+{
+
+
+
+Dialog::Dialog(Component* pParent, Action pTarget):
 	Parent(WHITE, _T("Dialog"), new FloatingLayout),
 	mLabel(0),
 	mTarget(pTarget),
@@ -32,21 +39,18 @@ Dialog<_Target>::Dialog(Component* pParent, Action pTarget):
 	SetDirection(+1, true);
 }
 
-template<class _Target>
-Dialog<_Target>::~Dialog()
+Dialog::~Dialog()
 {
 	mTarget.clear();
 	mPreClickTarget.clear();
 }
 
-template<class _Target>
-void Dialog<_Target>::Dismiss()
+void Dialog::Dismiss()
 {
 	OnClick(0);
 }
 
-template<class _Target>
-void Dialog<_Target>::SetDirection(int pDirection, bool pSetPos)
+void Dialog::SetDirection(int pDirection, bool pSetPos)
 {
 	mDirection = pDirection;
 
@@ -73,14 +77,12 @@ void Dialog<_Target>::SetDirection(int pDirection, bool pSetPos)
 	}
 }
 
-template<class _Target>
-void Dialog<_Target>::SetPreClickTarget(Action pPreClickTarget)
+void Dialog::SetPreClickTarget(Action pPreClickTarget)
 {
 	mPreClickTarget = pPreClickTarget;
 }
 
-template<class _Target>
-void Dialog<_Target>::Center()
+void Dialog::Center()
 {
 	if (mAnimationStep)
 	{
@@ -91,8 +93,7 @@ void Dialog<_Target>::Center()
 	SetPos(lParentSize.x/2 - lSize.x/2, lParentSize.y/2 - lSize.y/2);
 }
 
-template<class _Target>
-Label* Dialog<_Target>::SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId)
+Label* Dialog::SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId)
 {
 	if (!mLabel)
 	{
@@ -116,17 +117,15 @@ Label* Dialog<_Target>::SetQueryLabel(const str& pText, UiTbc::FontManager::Font
 	return mLabel;
 }
 
-template<class _Target>
-void Dialog<_Target>::AddButton(int pTag, const str& pText)
+void Dialog::AddButton(int pTag, const str& pText)
 {
-	Button* lButton = new Button(BorderComponent::ZIGZAG, 1, Color(mColor[0], mColor[1], 0.3f), pText);
+	Button* lButton = new Button(BorderComponent::ZIGZAG, 3, Color(mColor[0], mColor[1], 0.2f), pText);
 	lButton->SetText(pText, mColor[1]);
 	lButton->SetPreferredSize(57, 57);
 	AddButton(pTag, lButton);
 }
 
-template<class _Target>
-void Dialog<_Target>::AddButton(int pTag, Button* pButton)
+void Dialog::AddButton(int pTag, Button* pButton)
 {
 	//pButton->SetBaseColor(Color(0, 0, 0, 0));
 	pButton->SetText(pButton->GetText(), mColor[1]);
@@ -137,21 +136,19 @@ void Dialog<_Target>::AddButton(int pTag, Button* pButton)
 	UpdateLayout();
 }
 
-template<class _Target>
-void Dialog<_Target>::SetOffset(PixelCoord pOffset)
+void Dialog::SetOffset(PixelCoord pOffset)
 {
 	mOffset = pOffset;
 	UpdateLayout();
 }
 
-template<class _Target>
-void Dialog<_Target>::UpdateLayout()
+void Dialog::UpdateLayout()
 {
 	const PixelCoord& lSize = GetSize();
 
 	if (mLabel)
 	{
-		PixelCoord lLabelSize = mLabel->GetPreferredSize(false);
+		PixelCoord lLabelSize = mLabel->GetPreferredSize(true);
 		PixelCoord lCoord(lSize.x/2 - lLabelSize.x/2, lSize.y/3 - lLabelSize.y);
 		mLabel->SetPos(lCoord + mOffset);
 	}
@@ -181,15 +178,13 @@ void Dialog<_Target>::UpdateLayout()
 
 
 
-template<class _Target>
-void Dialog<_Target>::Repaint(Painter* pPainter)
+void Dialog::Repaint(Painter* pPainter)
 {
 	Animate();	// Slides dialog in on create and out on destroy.
 	Parent::Repaint(pPainter);
 }
 
-template<class _Target>
-void Dialog<_Target>::Animate()
+void Dialog::Animate()
 {
 	if (!IsComplete())
 	{
@@ -229,8 +224,7 @@ void Dialog<_Target>::Animate()
 	}
 }
 
-template<class _Target>
-void Dialog<_Target>::OnClick(Button* pButton)
+void Dialog::OnClick(Button* pButton)
 {
 	if (!mClickedButton)
 	{
@@ -242,4 +236,9 @@ void Dialog<_Target>::OnClick(Button* pButton)
 		mAnimationStep = -SPEED * mDirection;
 		mIsClosing = true;
 	}
+}
+
+
+
+
 }

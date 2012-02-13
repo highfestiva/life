@@ -33,7 +33,7 @@
 #include "../UiLepra/Include/UiSoundStream.h"
 #include "../UiTBC/Include/GUI/UiCustomButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiDialog.h"
+#include "../UiTBC/Include/GUI/UiMessageDialog.h"
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
 #include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiFontManager.h"
@@ -142,6 +142,7 @@ public:
 	void OnMaximize(int pWidth, int pHeight);
 
 	void OnAction(UiTbc::Button* pButton);
+	void OnOk(UiTbc::Button* pButton);
 	void OnMainMenuAction(UiTbc::Button* pButton);
 	void OnEnterHiscoreAction(UiTbc::Button* pButton);
 	void OnLevelAction(UiTbc::Button* pButton);
@@ -153,9 +154,10 @@ public:
 	void OnPauseAction(UiTbc::Button* pButton);
 	void OnGetiPhoneClick(UiTbc::Button*);
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
+	void SoundLoadCallback(UiCure::UserSound2dResource* pResource);
 
 	typedef void (App::*ButtonAction)(UiTbc::Button*);
-	UiTbc::Dialog<App>* CreateTbcDialog(ButtonAction pAction);
+	UiTbc::Dialog* CreateTbcDialog(ButtonAction pAction);
 	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent);
 	void AddCostIcon(const str& pName);
 	void Transpose(int& x, int& y, float& pAngle) const;
@@ -227,8 +229,8 @@ public:
 	UiTbc::FontManager::FontId mBigFontId;
 	UiTbc::FontManager::FontId mMonospacedFontId;
 	float mReverseAndBrake;
-	UiTbc::Dialog<App>::Action mButtonDelegate;
-	UiTbc::Dialog<App>* mDialog;
+	UiTbc::Dialog::Action mButtonDelegate;
+	UiTbc::Dialog* mDialog;
 	mutable StopWatch mStartTimer;
 	mutable StopWatch mGameOverTimer;
 	UiCure::PainterImageResource* mScrollBarImage;
@@ -252,6 +254,7 @@ public:
 	Cure::HiscoreAgent* mHiscoreAgent;
 	bool mIsPurchasing;
 	bool mIsMoneyIconAdded;
+	UiCure::UserSound2dResource* mTapClick;
 
 	LOG_CLASS_DECLARE();
 };
@@ -393,7 +396,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
 
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 
@@ -432,6 +435,7 @@ bool App::Open()
 		mUiManager->GetCanvas()->SetOutputRotation(90);
 #endif // Touch
 		mUiManager->GetPainter()->ResetClippingRect();
+		mUiManager->GetPainter()->Clear(BLACK);
 		DisplayLogo();
 		mStartupTimer.PopTimeDiff();
 	}
@@ -528,7 +532,7 @@ bool App::Open()
 	{
 		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
 		mMusicPlayer->SetVolume(0.5f);
-		mMusicPlayer->SetSongPauseTime(6, 18);
+		mMusicPlayer->SetSongPauseTime(9, 15);
 		mMusicPlayer->AddSong(_T("ButterflyRide.xm"));
 		mMusicPlayer->AddSong(_T("BehindTheFace.xm"));
 		mMusicPlayer->AddSong(_T("BrittiskBensin.xm"));
@@ -554,6 +558,12 @@ bool App::Open()
 			}
 		};
 		mUiManager->GetSoundManager()->SetFileOpener(new ResourceOpener(mResourceManager));
+	}
+	if (lOk)
+	{
+		mTapClick = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+		mTapClick->Load(mResourceManager, _T("tap.wav"),
+			UiCure::UserSound2dResource::TypeLoadCallback(this, &App::SoundLoadCallback));
 	}
 
 	UiLepra::Core::ProcessMessages();
@@ -802,6 +812,18 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
+		// Set orientation restriction.
+		if (mGame->GetComputerIndex() == -1)
+		{
+			CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
+		}
+		else
+		{
+			CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+		}
+	}
+	if (lOk)
+	{
 		float r, g, b;
 		CURE_RTVAR_GET(r, =(float), mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
 		CURE_RTVAR_GET(g, =(float), mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
@@ -851,8 +873,14 @@ bool App::Poll()
 		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE && mGame->IsScoreCountingEnabled())
 		{
 			mUiManager->GetPainter()->SetColor(WHITE);
-			const str lScore = Int2Str((int)mGame->GetScore());
-			mUiManager->GetPainter()->PrintText(lScore, 10, 10);
+			const str lScore = _T("Score: ") + Int2Str((int)mGame->GetScore());
+			int y = 8;
+			if (mGame->GetComputerIndex() == 1)
+			{
+				y = mUiManager->GetCanvas()->GetHeight() - y - mUiManager->GetPainter()->GetFontHeight();
+			}
+			const int x = (mUiManager->GetCanvas()->GetWidth() - mUiManager->GetPainter()->GetStringWidth(lScore)) / 2;
+			mUiManager->GetPainter()->PrintText(lScore, x, y);
 		}
 
 		mGame->Paint();
@@ -987,6 +1015,8 @@ void App::DrawHud()
 	const int lWinner = mGame->GetWinnerIndex();
 	if (lWinner >= 0)
 	{
+		mGame->EnableScoreCounting(false);
+
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 		const float lAngle = (mGame->GetComputerIndex() != 1)? PIF/2 : 0;
 #else // Computer.
@@ -998,7 +1028,7 @@ void App::DrawHud()
 		const str lWon = lGameOver? _T("You rule!") : _T("Won heart");
 		const str lLost = lGameOver? _T("Defeat!") : _T("Lost heart");
 		const float lBackgroundSize = 110;
-		if (mGame->GetComputerIndex() < 0)
+		if (mGame->GetComputerIndex() == -1)
 		{
 			str lText1;
 			str lText2;
@@ -1037,11 +1067,7 @@ void App::DrawHud()
 			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 			DrawRoundedPolygon((float)x, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG, 1.0f, 1.0f);
 			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
-#ifdef LEPRA_TOUCH_LOOKANDFEEL
-				const float a = (mGame->GetComputerIndex() == 0)? -lAngle : 0;
-#else // Computer L&F
-				const float a = 0;
-#endif // Touch / Computer L&F
+			const float a = 0;
 			if (lWinner != mGame->GetComputerIndex())
 			{
 				mUiManager->GetPainter()->SetColor(LIGHT_GREEN, 0);
@@ -2371,7 +2397,8 @@ int App::PollTap(FingerMovement& pMovement)
 					if (!pMovement.mIsPress)
 					{
 						mBaseThrottle = mThrottle;
-						if (pMovement.mMovedDistance < 8)	// Go to neutral if just tap/release.
+						if (pMovement.mMovedDistance < 20 &&
+							pMovement.mTimer.QueryTimeDiff() < 0.5f)	// Go to neutral if just tap/release.
 						{
 							mIsThrottling = false;
 							mBaseThrottle = 0.0f;
@@ -2397,7 +2424,8 @@ int App::PollTap(FingerMovement& pMovement)
 					if (!pMovement.mIsPress)
 					{
 						mBaseSteering = mSteering;
-						if (pMovement.mMovedDistance < 8)	// Go to neutral if just tap/release.
+						if (pMovement.mMovedDistance < 20 &&
+							pMovement.mTimer.QueryTimeDiff() < 0.5f)	// Go to neutral if just tap/release.
 						{
 							mBaseSteering = 0.0f;
 							mSteering = 0;
@@ -2442,7 +2470,7 @@ void App::MainMenu()
 	mGame->SetHeartBalance(0);
 	// TRICKY-END!
 
-	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
+	UiTbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"));
 	d->AddButton(3, _T("Hiscore"));
@@ -2497,8 +2525,8 @@ void App::HiscoreMenu(int pDirection)
 		mHiscoreAgent = 0;
 	}
 
-	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnHiscoreAction);
-	d->SetPreClickTarget(UiTbc::Dialog<App>::Action(this, &App::OnPreHiscoreAction));
+	UiTbc::Dialog* d = CreateTbcDialog(&App::OnHiscoreAction);
+	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &App::OnPreHiscoreAction));
 	d->SetDirection(pDirection, true);
 	d->SetOffset(PixelCoord(0, -30));
 	d->SetQueryLabel(_T("Hiscore ") + lLevelName + _T("/") + lVehicleName, mBigFontId);
@@ -2532,9 +2560,8 @@ void App::EnterHiscore(const str& pMessage)
 {
 	mGameOverTimer.Stop();
 	mGame->ResetWinnerIndex();
-	mGame->EnableScoreCounting(false);
 
-	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
+	UiTbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));
 	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
 	if (!pMessage.empty())
@@ -2548,7 +2575,11 @@ void App::EnterHiscore(const str& pMessage)
 	mHiscoreTextField->mApp = this;
 	mHiscoreTextField->SetText(mLastHiscoreName);
 	mHiscoreTextField->SetPreferredSize(210, 25, false);
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
+	d->AddChild(mHiscoreTextField, 70, 97);
+#else // Computer
 	d->AddChild(mHiscoreTextField, 70, 130);
+#endif // Touch / computer
 	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
 	UiTbc::Button* lCancelButton = new UiTbc::Button(_T("cancel"));
 	lCancelButton->SetText(_T("Cancel"), LIGHT_GRAY, CLEAR_COLOR);
@@ -2590,6 +2621,7 @@ void App::SuperReset(bool pGameOver)
 			case 0:		mGame->SetComputerIndex(1);	mGame->SetHeartBalance(-mGame->GetHeartBalance());	mRotateTimer.Start();	break;
 			case 1:		mGame->SetComputerIndex(0);	mGame->SetHeartBalance(-mGame->GetHeartBalance());	mRotateTimer.Start();	break;
 		}
+		mGame->NextRound();
 	}
 	else
 	{
@@ -2632,8 +2664,11 @@ void App::Purchase(const str& pProductName)
 	[mAnimatedApp startPurchase:MacLog::Encode(pProductName)];
 #else // !iOS
 	(void)pProductName;
-	mUiManager->GetDisplayManager()->ShowMessageBox(_T("Content purchase not yet implemented on this platform."), _T("Purchase not available"));
-	MainMenu();
+	mButtonDelegate = UiTbc::Dialog::Action(this, &App::OnOk);
+	UiTbc::MessageDialog* lMessage = new UiTbc::MessageDialog(mUiManager->GetDesktopWindow(), mButtonDelegate,
+		_T("Content purchase not yet implemented on this platform."));
+	lMessage->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
+	mDialog = lMessage;
 #endif // iOS
 }
 
@@ -2663,14 +2698,23 @@ void App::OnMaximize(int pWidth, int pHeight)
 
 void App::OnAction(UiTbc::Button* pButton)
 {
+	if (mTapClick->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), 1, 1);
+	}
 	mDoLayout = true;
-	UiTbc::Dialog<App>* d = mDialog;
+	UiTbc::Dialog* d = mDialog;
 	mButtonDelegate(pButton);
 	if (mDialog == d)	// No news? Just drop it.
 	{
 		mButtonDelegate.clear();
 		mDialog = 0;
 	}
+}
+
+void App::OnOk(UiTbc::Button*)
+{
+	MainMenu();
 }
 
 void App::OnMainMenuAction(UiTbc::Button* pButton)
@@ -2699,19 +2743,18 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		return;
 		case 4:
 		{
-			UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnCreditsAction);
+			UiTbc::Dialog* d = CreateTbcDialog(&App::OnCreditsAction);
 			d->SetQueryLabel(_T("Credits"), mBigFontId);
 			UiTbc::Label* lText = new UiTbc::Label;
 			lText->SetFontId(mMonospacedFontId);
 			lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
 			lText->SetText(
-					_T("Game by: Pixel Doctrine\n")
-					_T("Music:   Jonas Kapla\n")
-					_T("\n")
-					_T("Thanks:  ODE, STLport, ChibiXM, Ogg/Vorbis,\n")
-					_T("         OpenAL, ALUT, libpng, Minizip,\n")
-					_T("         zlib, FastDelegate, UTF-8 CPP,\n")
-					_T("         DMI, freesound, HappyHTTP, GAE"), LIGHT_GRAY, CLEAR_COLOR);
+					_T("Game    Pixel Doctrine\n")
+					_T("Music   Jonas Kapla\n")
+					_T("Thanks  ODE, STLport, ChibiXM, Ogg/Vorbis,\n")
+					_T("        OpenAL, ALUT, libpng, Minizip,\n")
+					_T("        zlib, FastDelegate, UTF-8 CPP,\n")
+					_T("        DMI, freesound, HappyHTTP, GAE"), LIGHT_GRAY, CLEAR_COLOR);
 			d->AddChild(lText, 70, 110);
 			UiTbc::Button* lButton = new UiTbc::CustomButton(_T("back"));
 			lButton->SetPreferredSize(d->GetPreferredSize());
@@ -2725,7 +2768,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	{
 		mStartTimer.Stop();	// Show keys again on the computer screen.
 	}
-	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnLevelAction);
+	UiTbc::Dialog* d = CreateTbcDialog(&App::OnLevelAction);
 	d->SetQueryLabel(_T("Select level"), mBigFontId);
 	d->AddButton(1, ICONBTN(_T("btn_lvl2.png"), _T("Tutorial")));
 	d->AddButton(2, ICONBTN(_T("btn_lvl2.png"), gLevels[0]));
@@ -2798,7 +2841,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		mGame->ResetLauncher();
 		return;
 	}
-	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnVehicleAction);
+	UiTbc::Dialog* d = CreateTbcDialog(&App::OnVehicleAction);
 	d->SetQueryLabel(_T("Select vehicle"), mBigFontId);
 	d->AddButton(1, gVehicles[0]);
 	d->AddButton(2, gVehicles[1]);
@@ -2954,8 +2997,13 @@ void App::OnPauseClick(UiTbc::Button*)
 		return;
 	}
 
+	if (mTapClick->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), 1, 1);
+	}
+
 	mIsPaused = true;
-	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnPauseAction);
+	UiTbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, _T("Resume"));
 	d->AddButton(2, _T("Restart"));
 	d->AddButton(3, _T("Main menu"));
@@ -2987,10 +3035,15 @@ void App::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResour
 	(void)pResource;
 }
 
-UiTbc::Dialog<App>* App::CreateTbcDialog(ButtonAction pAction)
+void App::SoundLoadCallback(UiCure::UserSound2dResource* pResource)
 {
-	mButtonDelegate = UiTbc::Dialog<App>::Action(this, pAction);
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnAction));
+	(void)pResource;
+}
+
+UiTbc::Dialog* App::CreateTbcDialog(ButtonAction pAction)
+{
+	mButtonDelegate = UiTbc::Dialog::Action(this, pAction);
+	UiTbc::Dialog* d = new UiTbc::Dialog(mUiManager->GetDesktopWindow(), UiTbc::Dialog::Action(this, &App::OnAction));
 	d->SetSize(440, 280);
 	d->SetPreferredSize(440, 280);
 	d->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);

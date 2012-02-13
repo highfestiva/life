@@ -62,6 +62,7 @@ struct FingerMovement
 	int mMovedDistance;
 	bool mIsPress;
 	int mTag;
+	HiResTimer mTimer;
 
 	inline FingerMovement(int x, int y):
 		mStartX(x),
@@ -157,6 +158,7 @@ public:
 	void SetHeartBalance(int pBalance);
 	void FlipRenderSides();
 	bool IsFlipRenderSide() const;
+	void NextRound();
 
 	void SyncCameraPositions();
 	bool Render();
@@ -222,8 +224,9 @@ private:
 	float mFlipRenderSideFactor;
 	double mScore;
 	bool mScoreCountingEnabled;
-
 	StopWatch mSlowmoTimer;
+	int mRoundIndex;
+	float mVehicleHealth;
 };
 
 

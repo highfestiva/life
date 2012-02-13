@@ -35,6 +35,11 @@ DisplayManager::~DisplayManager()
 
 
 
+void DisplayManager::SetOrientation(Orientation pOrientation)
+{
+	mOrientation = pOrientation;
+}
+
 void DisplayManager::AddResizeObserver(DisplayResizeObserver* pResizeObserver)
 {
 	mResizeObserverSet.insert(pResizeObserver);

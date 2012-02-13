@@ -221,6 +221,12 @@
     <ClCompile Include="Source\Mac\UiMacFontManager.mm">
       <Filter>Source Files\Mac</Filter>
     </ClCompile>
+    <ClCompile Include="Source\GUI\UiMessageDialog.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GUI\UiDialog.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\UiOpenGLMaterials.mm">
@@ -234,9 +240,6 @@
     </None>
     <None Include="Source\UiRendererFactory.mm">
       <Filter>Source Files</Filter>
-    </None>
-    <None Include="Include\GUI\UiDialog.inl">
-      <Filter>Header Files\GUI</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -419,6 +422,9 @@
     </ClInclude>
     <ClInclude Include="Include\Mac\UiMacFontManager.h">
       <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\GUI\UiMessageDialog.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
