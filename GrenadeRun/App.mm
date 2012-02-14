@@ -64,6 +64,13 @@ using namespace Lepra;
 	_animationTimer = nil;
 	[self updateContent];
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+
+	UIDevice* lDevice = [UIDevice currentDevice];
+	[lDevice beginGeneratingDeviceOrientationNotifications];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+						 selector:@selector(orientationDidChange:)
+						     name:UIDeviceOrientationDidChangeNotification
+						   object:nil];
 	return self;
 }
 
@@ -71,6 +78,18 @@ using namespace Lepra;
 {
 	self.requestedProduct = nil;
         [super dealloc];
+}
+
+-(void) orientationDidChange:(NSNotification*)notification
+{
+	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+	if (orientation == UIDeviceOrientationLandscapeLeft ||
+		orientation == UIDeviceOrientationLandscapeRight)
+	{
+		const bool left = (orientation == UIDeviceOrientationLandscapeLeft);
+		_canvas->SetOutputRotation(left? 90 : -90);
+		[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
+	}
 }
 
 -(void) startTick

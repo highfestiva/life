@@ -580,7 +580,9 @@ void TextField::Repaint(Painter* pPainter)
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 
 	const PixelRect lRect(GetClientRect());
+#ifndef LEPRA_TOUCH
 	pPainter->ReduceClippingRect(lRect);
+#endif // !Touch
 
 	int lMarkerX  = mTextX + mTextPadX + pPainter->GetStringWidth(GetVisibleText().substr(0, mMarkerPos));
 	int lMarkerWidth = 1;

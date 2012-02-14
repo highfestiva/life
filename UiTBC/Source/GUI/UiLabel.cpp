@@ -178,7 +178,9 @@ void Label::Repaint(Painter* pPainter)
 
 	PixelCoord lPos(GetScreenPos());
 	PixelRect lRect(lPos, lPos + GetSize());
+#ifndef LEPRA_TOUCH
 	pPainter->ReduceClippingRect(lRect);
+#endif // !Touch
 
 	int lTextX = lRect.mLeft;
 	int lTextY = 0;
