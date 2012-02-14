@@ -96,6 +96,7 @@ Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
+Widen the throttle and launcher compass indicators from 32 to 64 pixels.
 Tweak steering.
 Add visual feedback on launcher motor strengths. Use "from touch digit to indicator lines".
 Screen shots + marketing texts.

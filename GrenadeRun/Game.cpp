@@ -226,7 +226,11 @@ void Game::SetVehicle(const str& pVehicle)
 		mVehicle->GetHealth() > 0)
 	{
 		mVehicle->DrainHealth(-1);
-		mVehicle->DrainHealth(1-mVehicleHealth);
+		// Degrade health every other round, so it becomes increasingly difficult to extend the game.
+		if (GetComputerIndex() == 1)
+		{
+			mVehicle->DrainHealth(1-mVehicleHealth);
+		}
 		return;
 	}
 	delete mVehicle;
@@ -251,6 +255,18 @@ void Game::ResetLauncher()
 	mLauncher->StartLoading();
 	mLauncherYaw = PIF*0.24f;
 	mLauncherPitch = -PIF/4;
+
+	// Drop all grenades.
+	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
+	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
+	for (; x != lObjectTable.end(); ++x)
+	{
+		Cure::ContextObject* lObject = x->second;
+		if (lObject->GetClassId().find(_T("grenade")) != str::npos)
+		{
+			GetContext()->PostKillObject(lObject->GetInstanceId());
+		}
+	}
 }
 
 UiCure::CppContextObject* Game::GetP1() const
@@ -394,8 +410,8 @@ void Game::AddScore(double pCutieScore, double pLauncherScore)
 	{
 		return;
 	}
-	// Difficulty: multiply by lerp(1, 3) ^ 2, with some factor...
-	double lDifficultyFactor = (mComputerDifficulty * 2.0 + 1.0);
+	// Difficulty: multiply by lerp(1, 3.5) ^ 2, with some factor...
+	double lDifficultyFactor = (mComputerDifficulty * 2.5 + 1.0);
 	lDifficultyFactor *= lDifficultyFactor;
 	if (mComputerIndex == 1)
 	{
@@ -502,6 +518,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			{
 				continue;
 			}
+			float lDistance = d;
 			d = 1/d;
 			f *= d;
 			d *= 4.5;
@@ -525,7 +542,6 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				}
 				d = std::max(0.005f, d);
 				mVehicle->DrainHealth(d);
-				lDidHitVehicle = true;
 				if (mComputerIndex != -1)
 				{
 					// Weigh up minimum score for computer, if very bad.
@@ -535,6 +551,14 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				}
 				lScore *= 141.421356;
 				lScore = std::min(20000.0, lScore*lScore);
+				if (lDistance < 25*SCALE_FACTOR)
+				{
+					lDidHitVehicle = true;
+				}
+				else
+				{
+					lScore = 0;
+				}
 				if (mVehicle->GetHealth() <= 0)
 				{
 					if (mAllowWin)

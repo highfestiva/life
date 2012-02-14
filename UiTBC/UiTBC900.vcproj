@@ -634,6 +634,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Source\GUI\UiDialog.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\GUI\UiFileNameField.cpp"
 					>
 				</File>
@@ -659,6 +663,10 @@
 				</File>
 				<File
 					RelativePath=".\Source\GUI\UiListLayout.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\GUI\UiMessageDialog.cpp"
 					>
 				</File>
 				<File
@@ -988,10 +996,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Include\GUI\UiDialog.inl"
-					>
-				</File>
-				<File
 					RelativePath=".\Include\GUI\UiFileNameField.h"
 					>
 				</File>
@@ -1021,6 +1025,10 @@
 				</File>
 				<File
 					RelativePath=".\Include\GUI\UiListLayout.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\GUI\UiMessageDialog.h"
 					>
 				</File>
 				<File

@@ -1094,7 +1094,7 @@ bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
+		mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1139,7 +1139,7 @@ bool PhysicsManagerODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Di
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
+		//mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1171,7 +1171,7 @@ bool PhysicsManagerODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Jo
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
+		mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1203,7 +1203,7 @@ bool PhysicsManagerODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Di
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
+		//mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1230,7 +1230,7 @@ bool PhysicsManagerODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Jo
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
+		mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1257,7 +1257,7 @@ bool PhysicsManagerODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
+		//mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1289,7 +1289,7 @@ bool PhysicsManagerODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Jo
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
+		mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -2724,7 +2724,7 @@ bool PhysicsManagerODE::GetJointParams(JointID pJointId, float32& pLowStop, floa
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
+		//mLog.Warningf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
@@ -2771,7 +2771,7 @@ bool PhysicsManagerODE::SetSuspension(JointID pJointId, float32 pFrameTime, floa
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf(_T("SetSyspension() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
@@ -2793,7 +2793,7 @@ bool PhysicsManagerODE::GetSuspension(JointID pJointId, float32& pErp, float32& 
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf(_T("GetSuspension() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
@@ -2804,7 +2804,7 @@ bool PhysicsManagerODE::GetSuspension(JointID pJointId, float32& pErp, float32& 
 		pCfm = ::dJointGetHinge2Param(lJoint->mJointID, dParamSuspensionCFM);
 		return (true);
 	}
-	mLog.AError("SetSuspension() - Joint is not a hinge-2!");
+	mLog.AError("GetSuspension() - Joint is not a hinge-2!");
 	return (false);
 }
 

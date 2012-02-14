@@ -22,7 +22,7 @@ SeeThrough::SeeThrough(Cure::ContextManager* pManager, const Game* pGame):
 	Parent(pManager->GetGameManager()->GetResourceManager(), _T("SeeThrough"), pGame->GetUiManager()),
 	mGame(pGame),
 	mTag(0),
-	mOpacity(0)
+	mOpacity(1)
 {
 	pManager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
