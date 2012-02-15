@@ -102,8 +102,8 @@ public:
 	void PollTaps();
 	void DrawHud();
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float x, float y, float w, float h, float pAngle) const;
-	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const;
-	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor, float pScaleX, float pScaleY) const;
+	void DrawRoundedPolygon(int x, int y, int pRadius, const Color& pColor, float pScaleX, float pScaleY) const;
+	void DrawRoundedPolygon(float x, float y, float pRadius, const Color& pColor, float pScaleX, float pScaleY, int pCornerRadius) const;
 	void DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, float pMaxValue) const;
 	void DrawTapIndicator(int pTag, int x, int y, float pAngle) const;
 	void DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue1, float pValue2) const;
@@ -602,6 +602,16 @@ void App::Close()
 
 void App::Init()
 {
+	assert(Int2Str(-123) == _T("-123"));
+	assert(Int2Str(-1234) == _T("-1,234"));
+	assert(Int2Str(-12345) == _T("-12,345"));
+	assert(Int2Str(-123456) == _T("-123,456"));
+	assert(Int2Str(-1234567) == _T("-1,234,567"));
+	assert(Int2Str(+123) == _T("123"));
+	assert(Int2Str(+1234) == _T("1,234"));
+	assert(Int2Str(+12345) == _T("12,345"));
+	assert(Int2Str(+123456) == _T("123,456"));
+	assert(Int2Str(+1234567) == _T("1,234,567"));
 }
 
 
@@ -1027,6 +1037,7 @@ void App::DrawHud()
 #else // Computer.
 		const float lAngle = 0;
 #endif // Touch / computer.
+		const int lSmallFontHeight = mUiManager->GetFontManager()->GetFontHeight();
 		UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
 		const bool lGameOver = (mGame->GetHeartBalance() == -HEART_POINTS/2 || mGame->GetHeartBalance() == +HEART_POINTS/2);
@@ -1036,7 +1047,7 @@ void App::DrawHud()
 		}
 		const str lWon = lGameOver? _T("You rule!") : _T("Won heart");
 		const str lLost = lGameOver? _T("Defeat!") : _T("Lost heart");
-		const float lBackgroundSize = 110;
+		const int lBackgroundSize = 110;
 		if (mGame->GetComputerIndex() == -1)
 		{
 			str lText1;
@@ -1061,8 +1072,8 @@ void App::DrawHud()
 			const int x2 = (int)(w*3/4);
 			const int y  = (int)(h/2);
 			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-			DrawRoundedPolygon((float)x1, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG, 1.0f, 1.0f);
-			DrawRoundedPolygon((float)x2, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG, 1.0f, 1.0f);
+			DrawRoundedPolygon(x1, y, lBackgroundSize, BGCOLOR_DIALOG, 1.0f, 1.0f);
+			DrawRoundedPolygon(x2, y, lBackgroundSize, BGCOLOR_DIALOG, 1.0f, 1.0f);
 			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 			mUiManager->GetPainter()->SetColor(lColor1, 0);
 			PrintText(lText1, +lAngle, x1, y);
@@ -1072,10 +1083,16 @@ void App::DrawHud()
 		else
 		{
 			const int x = (int)(w/2);
-			const int y  = (int)(h/2);
+			int y  = (int)(h/2);
 			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-			DrawRoundedPolygon((float)x, (float)y, lBackgroundSize, PIF/4, 4, BGCOLOR_DIALOG, 1.0f, 1.0f);
+			DrawRoundedPolygon(x, y, lBackgroundSize, BGCOLOR_DIALOG, 1.0f, 1.0f);
 			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
+			const int lBigFontHeight = mUiManager->GetFontManager()->GetFontHeight();
+			const bool lShowHealth = (mGame->GetComputerIndex() == 0 && mGame->GetRoundIndex()+1 >= 2 && !lGameOver);
+			if (lShowHealth)
+			{
+				y -= lSmallFontHeight + 8;
+			}
 			const float a = 0;
 			if (lWinner != mGame->GetComputerIndex())
 			{
@@ -1086,6 +1103,17 @@ void App::DrawHud()
 			{
 				mUiManager->GetPainter()->SetColor(LIGHT_RED, 0);
 				PrintText(lLost, a, x, y);
+			}
+			if (lShowHealth)
+			{
+				mUiManager->GetFontManager()->SetActiveFont(lFontId);
+				y += lBigFontHeight+8;
+				mUiManager->GetPainter()->SetColor(LIGHT_GRAY, 0);
+				const str lRound = strutil::Format(_T("Upcoming round %i"), (mGame->GetRoundIndex()+1)/2+1);
+				PrintText(lRound, a, x, y);
+				const str lHealth = strutil::Format(_T("You start with %i%% health"), (int)Math::Round(100*mGame->GetVehicleStartHealth()*HEALTH_ROUND_FACTOR));
+				y += lSmallFontHeight+2;
+				PrintText(lHealth, a, x, y);
 			}
 		}
 		mUiManager->GetFontManager()->SetActiveFont(lFontId);
@@ -1167,9 +1195,9 @@ void App::DrawHud()
 		mGrenade->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		// Bomb button.
-		const float s = std::min((float)mUiManager->GetCanvas()->GetHeight() * 0.11f, 64.0f);
+		const int s = std::min((int)(mUiManager->GetCanvas()->GetHeight() * 0.096f), 56);
 		float t = std::min(1.0f, mGame->GetLauncherLockPercent());
-		const float r = (s+4) * 1.414f;
+		const float r = (s+1) * 1.414f;
 		Color c = GREEN;
 		if (t < 1.0f)
 		{
@@ -1177,17 +1205,18 @@ void App::DrawHud()
 			t = Math::Lerp(lMinimumWidth, 1.0f, t);
 			c = RED;
 		}
+		const float r2 = r*0.5f;
 		if (mGame->GetComputerIndex() == -1)
 		{
 			// Dual play = portrait layout.
-			DrawRoundedPolygon(w-r*0.5f*t-m, h*0.5f, r*0.5f, PIF/4, 4, c, t, 1.0f);
-			DrawImage(mGrenade->GetData(), w-r*0.5f-m, h*0.5f, s, s, PIF/2);
+			DrawRoundedPolygon(w-r2*t-m*2, h/2, r2, c, t, 1.0f, 10);
+			DrawImage(mGrenade->GetData(), w-r/2-m*2, h/2, (float)s, (float)s, PIF/2);
 		}
 		else
 		{
 			// Single play = landscape layout.
-			DrawRoundedPolygon(w*0.5f, h-r*0.5f*t-m, r*0.5f, PIF/4, 4, c, 1.0f, t);
-			DrawImage(mGrenade->GetData(), w*0.5f, h-r*0.5f-m, s, s, 0);
+			DrawRoundedPolygon(w/2, h-r2*t-m*2, r2, c, 1.0f, t, 10);
+			DrawImage(mGrenade->GetData(), w/2, h-r/2-m*2, (float)s, (float)s, 0);
 		}
 	}
 #endif // Touch
@@ -1506,47 +1535,33 @@ void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float 
 	mUiManager->GetPainter()->DrawImageFan(pImageId, V(c), V(t));
 }
 
-void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor, float pScaleX, float pScaleY) const
+void App::DrawRoundedPolygon(int x, int y, int pRadius, const Color& pColor, float pScaleX, float pScaleY) const
 {
-	Transpose(x, y, pAngle);
+	DrawRoundedPolygon((float)x, (float)y, (float)pRadius, pColor, pScaleX, pScaleY, 20);
+}
 
-	mPenX = x;
-	mPenY = y;
-	//pRadius -= 2;
-	const float lRoundRadius = pRadius * 0.96f;
-	const float lRoundAngle = PIF/16;
+void App::DrawRoundedPolygon(float x, float y, float pRadius, const Color& pColor, float pScaleX, float pScaleY, int pCornerRadius) const
+{
+	float lAngle = 0;
+	Transpose(x, y, lAngle);
+
+	mPenX = (float)x;
+	mPenY = (float)y;
+	const float dx = pRadius * pScaleX;
+	const float dy = pRadius * pScaleY;
 	std::vector<Vector2DF> lCoords;
+	// Start in center.
 	lCoords.push_back(Vector2DF(x, y));
-	for (int i = 0; i < pCorners; ++i)
-	{
-		const float lReduceX = pRadius * (1.0f - pScaleX);
-		const float lReduceY = pRadius * (1.0f - pScaleY);
-		lCoords.push_back(Vector2DF(x+lRoundRadius*::sin(pAngle-lRoundAngle), y-lRoundRadius*::cos(pAngle-lRoundAngle)));
-		lCoords.back().x += (lCoords.back().x < x)? lReduceX : -lReduceX;
-		lCoords.back().y += (lCoords.back().y < y)? lReduceY : -lReduceY;
-		lCoords.push_back(Vector2DF(x+pRadius*::sin(pAngle), y-pRadius*::cos(pAngle)));
-		lCoords.back().x += (lCoords.back().x < x)? lReduceX : -lReduceX;
-		lCoords.back().y += (lCoords.back().y < y)? lReduceY : -lReduceY;
-		lCoords.push_back(Vector2DF(x+lRoundRadius*::sin(pAngle+lRoundAngle), y-lRoundRadius*::cos(pAngle+lRoundAngle)));
-		lCoords.back().x += (lCoords.back().x < x)? lReduceX : -lReduceX;
-		lCoords.back().y += (lCoords.back().y < y)? lReduceY : -lReduceY;
-		pAngle += 2*PIF/pCorners;
-	}
+	UiTbc::RectComponent::AddRadius(lCoords, (int)Math::Round(x-dx)+pCornerRadius, (int)Math::Round(y-dy)+pCornerRadius, pCornerRadius, +PIF/2, 0);
+	UiTbc::RectComponent::AddRadius(lCoords, (int)Math::Round(x+dx)-pCornerRadius, (int)Math::Round(y-dy)+pCornerRadius, pCornerRadius, 0,      -PIF/2);
+	UiTbc::RectComponent::AddRadius(lCoords, (int)Math::Round(x+dx)-pCornerRadius, (int)Math::Round(y+dy)-pCornerRadius, pCornerRadius, -PIF/2, -PIF);
+	UiTbc::RectComponent::AddRadius(lCoords, (int)Math::Round(x-dx)+pCornerRadius, (int)Math::Round(y+dy)-pCornerRadius, pCornerRadius, +PIF,   +PIF/2);
+	// Back to start.
 	lCoords.push_back(lCoords[1]);
 	mUiManager->GetPainter()->SetColor(pColor, 0);
 	mUiManager->GetPainter()->SetAlphaValue(pColor.mAlpha);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
 	mUiManager->GetPainter()->SetAlphaValue(255);
-	/*const Vector2DF lCenter(x, y);
-	for (size_t i = 0; i < lCoords.size()-1; ++i)
-	{
-		const Vector2DF c = lCoords[i+1]-lCenter;
-		lCoords[i] = c*44.0f/40 + lCenter;
-	}
-	lCoords.pop_back();
-	::glLineWidth(2);
-	mUiManager->GetPainter()->SetColor(Color(170, 180, 190), 0);
-	mUiManager->GetPainter()->DrawFan(lCoords, false);*/
 }
 
 void App::DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, float pMaxValue) const
@@ -2928,6 +2943,7 @@ str App::Int2Str(int pNumber)
 	for (size_t y = 3; y < l; y += 4)
 	{
 		s.insert(s.length()-y, 1, ',');
+		++l;
 	}
 	return s;
 }

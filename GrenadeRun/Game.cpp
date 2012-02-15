@@ -679,8 +679,18 @@ void Game::NextRound()
 	++mRoundIndex;
 	if (GetComputerIndex() != -1 && mRoundIndex % 2 == 0)
 	{
-		mVehicleHealth *= 0.8f;
+		mVehicleHealth *= HEALTH_ROUND_FACTOR;
 	}
+}
+
+int Game::GetRoundIndex() const
+{
+	return mRoundIndex;
+}
+
+float Game::GetVehicleStartHealth() const
+{
+	return mVehicleHealth;
 }
 
 

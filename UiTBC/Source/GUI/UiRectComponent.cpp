@@ -278,7 +278,7 @@ void RectComponent::SetCornerRadius(int pRadius)
 void RectComponent::AddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle)
 {
 	const float lAngleDiff = pEndAngle-pStartAngle;
-	const int lCount = (int)(r * ::fabs(lAngleDiff) * 0.32f) + 3;
+	const int lCount = (int)(r * ::fabs(lAngleDiff) * 0.256f) + 3;
 	const float lAngleStep = lAngleDiff/(lCount-1);
 	float a = pStartAngle;
 	for (int i = 0; i < lCount; ++i, a+=lAngleStep)

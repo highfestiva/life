@@ -15,8 +15,9 @@
 #define LEPRA_TOUCH_LOOKANDFEEL
 #endif // iOS
 #define LEPRA_TOUCH_LOOKANDFEEL
-#define FPS		20
-#define	SCALE_FACTOR	1.5f	// Hard-coded for Kill Cutie. If ever re-using for other game, drop this.
+#define FPS			20
+#define SCALE_FACTOR		1.5f	// Hard-coded for Kill Cutie. If ever re-using for other game, drop this shit.
+#define HEALTH_ROUND_FACTOR	0.8f
 
 
 
@@ -79,7 +80,7 @@ struct FingerMovement
 
 	inline bool Update(int pLastX, int pLastY, int pNewX, int pNewY)
 	{
-		if (std::abs(mLastX-pLastX) < 22 && std::abs(mLastY-pLastY) < 22)
+		if (std::abs(mLastX-pLastX) < 44 && std::abs(mLastY-pLastY) < 44)
 		{
 			mDeltaX += std::abs(mLastX-pNewX);
 			mDeltaY += std::abs(mLastY-pNewY);
@@ -159,6 +160,8 @@ public:
 	void FlipRenderSides();
 	bool IsFlipRenderSide() const;
 	void NextRound();
+	int GetRoundIndex() const;
+	float GetVehicleStartHealth() const;
 
 	void SyncCameraPositions();
 	bool Render();
