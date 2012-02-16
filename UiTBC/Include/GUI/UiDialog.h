@@ -25,6 +25,8 @@ public:
 	Dialog(Component* pParent, Action pTarget);
 	virtual ~Dialog();
 	void Dismiss();
+
+	virtual void SetColor(const Color& pTopLeftColor, const Color& pTopRightColor, const Color& pBottomRightColor, const Color& pBottomLeftColor);
 	void SetDirection(int pDirection, bool pSetPos);
 	void SetPreClickTarget(Action pPreClickTarget);
 	virtual void Center();

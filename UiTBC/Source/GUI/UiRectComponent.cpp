@@ -204,10 +204,7 @@ void RectComponent::SetColor(const Color& pColor)
 	}
 }
 
-void RectComponent::SetColor(const Color& pTopLeftColor,
-			     const Color& pTopRightColor,
-			     const Color& pBottomRightColor,
-			     const Color& pBottomLeftColor)
+void RectComponent::SetColor(const Color& pTopLeftColor, const Color& pTopRightColor, const Color& pBottomRightColor, const Color& pBottomLeftColor)
 {
 	mShaded = true;
 	SetNeedsRepaint(mColor[0] != pTopLeftColor || mColor[1] != pTopRightColor || 

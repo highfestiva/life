@@ -45,11 +45,8 @@ public:
 	virtual bool IsOver(int pScreenX, int pScreenY);
 
 	void SetImage(Painter::ImageID pImageID);
-	void SetColor(const Color& pColor);
-	void SetColor(const Color& pTopLeftColor,
-			     const Color& pTopRightColor,
-			     const Color& pBottomRightColor,
-			     const Color& pBottomLeftColor);
+	virtual void SetColor(const Color& pColor);
+	virtual void SetColor(const Color& pTopLeftColor, const Color& pTopRightColor, const Color& pBottomRightColor, const Color& pBottomLeftColor);
 
 	Painter::ImageID GetImage();
 	Color GetColor();

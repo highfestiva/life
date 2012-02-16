@@ -145,6 +145,7 @@ public:
 	void OnVehicleAction(UiTbc::Button* pButton);
 	void OnHiscoreAction(UiTbc::Button* pButton);
 	void OnPreHiscoreAction(UiTbc::Button* pButton);
+	void OnPreEnterAction(UiTbc::Button* pButton);
 	void OnCreditsAction(UiTbc::Button* pButton);
 	void OnPauseClick(UiTbc::Button*);
 	void OnPauseAction(UiTbc::Button* pButton);
@@ -1811,6 +1812,7 @@ void App::Suspend()
 	{
 		mMusicPlayer->Pause();
 	}
+	OnPauseClick(0);
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
 #endif // iOS
@@ -2387,6 +2389,7 @@ void App::EnterHiscore(const str& pMessage)
 	mGame->ResetWinnerIndex();
 
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
+	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &App::OnPreEnterAction));
 	d->SetOffset(PixelCoord(0, -30));
 	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
 	if (!pMessage.empty())
@@ -2603,13 +2606,11 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	d->AddButton(2, ICONBTN(_T("btn_lvl2.png"), gLevels[0]));
 	d->AddButton(3, ICONBTN(_T("btn_lvl3.png"), gLevels[1]));
 	d->AddButton(4, ICONBTN(_T("btn_lvl4.png"), gLevels[2]));
-#ifndef LEPRA_TOUCH
 	if (mIsMoneyIconAdded && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false))
 	{
 		AddCostIcon(gLevels[1]);
 		AddCostIcon(gLevels[2]);
 	}
-#endif // !Touch
 }
 
 void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
@@ -2676,14 +2677,12 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	d->AddButton(2, gVehicles[1]);
 	d->AddButton(3, gVehicles[2]);
 	d->AddButton(4, gVehicles[3]);
-#ifndef LEPRA_TOUCH
 	if (mIsMoneyIconAdded && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
 	{
 		AddCostIcon(gVehicles[1]);
 		AddCostIcon(gVehicles[2]);
 		AddCostIcon(gVehicles[3]);
 	}
-#endif // !Touch
 	if (mGame->GetComputerIndex() != -1)
 	{
 		d->SetOffset(PixelCoord(0, -40));
@@ -2809,22 +2808,24 @@ void App::OnPreHiscoreAction(UiTbc::Button* pButton)
 	}
 }
 
+void App::OnPreEnterAction(UiTbc::Button* pButton)
+{
+	OnTapSound(pButton);
+	mDialog->ReleaseKeyboardFocus();
+}
+
 void App::OnCreditsAction(UiTbc::Button* /*pButton*/)
 {
 	MainMenu();
 }
 
-void App::OnPauseClick(UiTbc::Button*)
+void App::OnPauseClick(UiTbc::Button* pButton)
 {
-	if (mIsPaused)
+	if (mIsPaused || mDialog)
 	{
 		return;
 	}
-
-	if (mTapClick->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), 1, (float)Random::Uniform(0.7, 1.4));
-	}
+	OnTapSound(pButton);
 
 	mIsPaused = true;
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
@@ -2894,7 +2895,7 @@ void App::AddCostIcon(const str& pName)
 	//lLabel->SetAdaptive(true);
 	UiTbc::Button* lButton = (UiTbc::Button*)mDialog->GetChild(pName, 0);
 	lButton->GetClientRectComponent()->ReplaceLayer(0, new UiTbc::FloatingLayout);
-	lButton->AddChild(lLabel, 57-12, 57);
+	lButton->AddChild(lLabel, 57-14, 57-9);
 	mDialog->UpdateLayout();
 }
 

@@ -50,6 +50,18 @@ void Dialog::Dismiss()
 	OnClick(0);
 }
 
+
+
+void Dialog::SetColor(const Color& pTopLeftColor, const Color& pTopRightColor, const Color& pBottomRightColor, const Color& pBottomLeftColor)
+{
+	Parent::SetColor(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor);
+	UiTbc::Painter* lPainter = ((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->GetPainter();
+	if (mLabel)
+	{
+		mLabel->SetText(mLabel->GetText(), mColor[1], CLEAR_COLOR, lPainter);
+	}
+}
+
 void Dialog::SetDirection(int pDirection, bool pSetPos)
 {
 	mDirection = pDirection;
@@ -102,10 +114,10 @@ Label* Dialog::SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontI
 	UiTbc::Painter* lPainter = ((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->GetPainter();
 	mLabel->SetFontId(pFontId);
 	//mLabel->ActivateFont(lPainter);
-	mLabel->SetText(pText, mColor[1], Lepra::Color(0,0,0,0), lPainter);
+	mLabel->SetText(pText, mColor[1], CLEAR_COLOR, lPainter);
 	const int w = lPainter->GetStringWidth(pText);
 	const int h = lPainter->GetFontHeight();
-	mLabel->SetPreferredSize(w+20, h);
+	mLabel->SetPreferredSize(w+2, h);
 	AddChild(mLabel);
 	// Set position.
 	PixelCoord lCoord;
