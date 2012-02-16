@@ -1252,6 +1252,8 @@ void App::DrawHud()
 		float y;
 		float dx = 0;
 		float dy = 0;
+		float ox = 0;
+		float oy = -20;
 		float lValue1 = lPitch/-1;
 		float lValue2 = lGuidePitch/-1;
 		float lDrawAngle = 0;
@@ -1270,6 +1272,7 @@ void App::DrawHud()
 			x = w-m-2-BARREL_COMPASS_WIDTH/2;
 			y = h-m-aw/2;
 			dx = BARREL_COMPASS_WIDTH/2-ah/2-2;
+			std::swap(ox, oy);
 			lValue1 = 1 - lValue1;
 			lValue2 = 1 - lValue2;
 		}
@@ -1303,12 +1306,14 @@ void App::DrawHud()
 		dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
 #endif // Touch/!touch
 		DrawBarrelCompass((int)x, (int)y, lDrawAngle, (int)aw-8, lValue1, lValue2);
-		InfoText(2, _T("Up/down compass"), PIF/2, 0, -20);
+		InfoText(2, _T("Up/down compass"), lDrawAngle+PIF, ox, oy);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle+PIF/2);
 		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF/2);
 
 		dx = 0;
 		dy = 0;
+		ox = -30;
+		oy = 0;
 		lValue1 = lYaw/(PIF+0.1f)+0.5f;
 		lValue2 = (lGuideYaw)/(PIF+0.1f)+0.5f;
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
@@ -1323,6 +1328,8 @@ void App::DrawHud()
 			x = w-m-aw/2;
 			y = m+2+BARREL_COMPASS_WIDTH/2;
 			dy = BARREL_COMPASS_WIDTH/2-ah/2-2;
+			ox = 0;
+			oy = +30;
 			lValue1 = 1 - lValue1;
 			lValue2 = 1 - lValue2;
 		}
@@ -1352,7 +1359,7 @@ void App::DrawHud()
 		dx = -(BARREL_COMPASS_WIDTH/2-ah/2-2);
 #endif // Touch/!Touch
 		DrawBarrelCompass((int)x, (int)y, +PIF/2+lDrawAngle, (int)aw-8, lValue1, lValue2);
-		InfoText(2, _T("Left/right compass"), 0, -30, 0);
+		InfoText(2, _T("Left/right compass"), lDrawAngle+PIF/2, ox, oy);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle);
 		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF);
 	}
@@ -1700,16 +1707,19 @@ void App::InfoText(int pPlayer, const str& pInfo, float pAngle, float dx, float 
 void App::DrawInfoTexts() const
 {
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-	const Color c = mUiManager->GetPainter()->GetColor(0);
-	mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
-
-	for (size_t x = 0; x < mInfoTextArray.size(); ++x)
+	if (!mIsPaused)
 	{
-		const InfoTextData& lData = mInfoTextArray[x];
-		PrintText(lData.mText, -lData.mAngle, (int)lData.mCoord.x, (int)lData.mCoord.y);
-	}
+		const Color c = mUiManager->GetPainter()->GetColor(0);
+		mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
 
-	mUiManager->GetPainter()->SetColor(c, 0);
+		for (size_t x = 0; x < mInfoTextArray.size(); ++x)
+		{
+			const InfoTextData& lData = mInfoTextArray[x];
+			PrintText(lData.mText, -lData.mAngle, (int)lData.mCoord.x, (int)lData.mCoord.y);
+		}
+
+		mUiManager->GetPainter()->SetColor(c, 0);
+	}
 #endif // Touch
 
 	mInfoTextArray.clear();
@@ -2836,6 +2846,9 @@ void App::OnPauseClick(UiTbc::Button* pButton)
 
 void App::OnPauseAction(UiTbc::Button* pButton)
 {
+	mPlayer1LastTouch.PopTimeDiff();
+	mPlayer2LastTouch.PopTimeDiff();
+
 	mIsPaused = false;
 	if (pButton->GetTag() == 2)
 	{

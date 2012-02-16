@@ -857,14 +857,8 @@ bool Game::Render()
 		if (GetComputerIndex() == -1)
 		{
 			// Launcher always displayed in portrait in dual play.
-			if (mFlipRenderSideFactor)
-			{
-				t.GetOrientation().RotateAroundOwnY(PIF*-0.5f);
-			}
-			else
-			{
-				t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
-			}
+			const float lOrientationFactor = mFlipRenderSideFactor + 0.5f;
+			t.GetOrientation().RotateAroundOwnY(PIF*lOrientationFactor);
 		}
 		else
 		{

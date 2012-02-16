@@ -25,6 +25,15 @@ static EAGLView* gSharedView;
 @synthesize responder;
 @synthesize orientationStrictness;
 @synthesize inputManager;
+// UITextInputTraits protocol:
+@synthesize autocapitalizationType;
+@synthesize autocorrectionType;
+@synthesize enablesReturnKeyAutomatically;
+@synthesize keyboardAppearance;
+@synthesize keyboardType;
+@synthesize returnKeyType;
+@synthesize secureTextEntry;
+@synthesize spellCheckingType;
 
 // You must implement this method
 + (Class)layerClass
@@ -48,6 +57,15 @@ static EAGLView* gSharedView;
 	isOpen = false;
 	responder = nil;
 	orientationStrictness = 1;
+
+	autocapitalizationType = UITextAutocapitalizationTypeWords;
+	autocorrectionType = UITextAutocorrectionTypeNo;
+	enablesReturnKeyAutomatically = YES;
+	keyboardAppearance = UIKeyboardAppearanceDefault;
+	keyboardType = UIKeyboardTypeDefault;
+	returnKeyType = UIReturnKeySend;
+	secureTextEntry = NO;
+	spellCheckingType = UITextSpellCheckingTypeNo;
 
 	return self;
 }
@@ -172,6 +190,51 @@ static EAGLView* gSharedView;
 	return success;
 }
 
+- (void)powerUpAcc
+{
+	UIDevice* lDevice = [UIDevice currentDevice];
+	[lDevice beginGeneratingDeviceOrientationNotifications];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+						 selector:@selector(orientationDidChange:)
+						     name:UIDeviceOrientationDidChangeNotification
+						   object:nil];
+}
+
+- (void)powerDownAcc
+{
+	UIDevice* lDevice = [UIDevice currentDevice];
+	[lDevice endGeneratingDeviceOrientationNotifications];
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) orientationDidChange:(NSNotification*)notification
+{
+	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+	if ([self shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation])
+	{
+		switch (orientation)
+		{
+			case UIDeviceOrientationLandscapeLeft:		_canvas->SetOutputRotation(90);		break;
+			case UIDeviceOrientationLandscapeRight:		_canvas->SetOutputRotation(-90);	break;
+			case UIDeviceOrientationPortrait:		_canvas->SetOutputRotation(0);		break;
+			case UIDeviceOrientationPortraitUpsideDown:	_canvas->SetOutputRotation(180);	break;
+		}
+		[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
+	}
+}
+
+-(BOOL) becomeFirstResponder
+{
+	[self powerDownAcc];
+	return [super becomeFirstResponder];
+}
+
+-(BOOL) resignFirstResponder
+{
+	[self powerUpAcc];
+	return [super resignFirstResponder];
+}
+
 - (void)layoutSubviews
 {
 	// The framebuffer will be re-created at the beginning of the next setFramebuffer method call.
@@ -238,7 +301,7 @@ static EAGLView* gSharedView;
 
 - (void)deleteBackward
 {
-		inputManager->NotifyOnChar('\b');
+	inputManager->NotifyOnChar('\b');
 }
 
 - (BOOL)hasText

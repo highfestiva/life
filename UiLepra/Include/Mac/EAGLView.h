@@ -12,7 +12,7 @@
 // This class wraps the CAEAGLLayer from CoreAnimation into a convenient UIView subclass.
 // The view content is basically an EAGL surface you render your OpenGL scene into.
 // Note that setting the view non-opaque will only work if the EAGL surface has an alpha channel.
-@interface EAGLView : UIView <UIKeyInput>
+@interface EAGLView : UIView <UIKeyInput, UITextInputTraits>
 {
 @private
 	EAGLContext *context;
@@ -29,14 +29,25 @@
 	int orientationStrictness;
 }
 
-@property (nonatomic, retain) EAGLContext *context;
-@property (nonatomic, readonly) bool isOpen;
-@property (nonatomic, assign) UIResponder* responder;
-@property (nonatomic, assign) int orientationStrictness;
-@property (nonatomic, assign) UiLepra::InputManager* inputManager;
+@property(nonatomic, retain) EAGLContext *context;
+@property(nonatomic, readonly) bool isOpen;
+@property(nonatomic, assign) UIResponder* responder;
+@property(nonatomic, assign) int orientationStrictness;
+@property(nonatomic, assign) UiLepra::InputManager* inputManager;
+// Mandatory under the UITextInputTraits protocol.
+@property(nonatomic) UITextAutocapitalizationType autocapitalizationType;
+@property(nonatomic) UITextAutocorrectionType autocorrectionType;
+@property(nonatomic) BOOL enablesReturnKeyAutomatically;
+@property(nonatomic) UIKeyboardAppearance keyboardAppearance;
+@property(nonatomic) UIKeyboardType keyboardType;
+@property(nonatomic) UIReturnKeyType returnKeyType;
+@property(nonatomic) BOOL secureTextEntry;
+@property(nonatomic) UITextSpellCheckingType spellCheckingType;
 
 + (EAGLView*)sharedView;
 - (void)setFramebuffer;
 - (BOOL)presentFramebuffer;
+- (void)powerUpAcc;
+- (void)powerDownAcc;
 
 @end
