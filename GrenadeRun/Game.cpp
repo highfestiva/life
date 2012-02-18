@@ -67,9 +67,10 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mFlipRenderSideFactor(0),
 	mScore(0),
 	mScoreCountingEnabled(false),
-	mRoundIndex(0),
-	mVehicleHealth(1)
+	mRoundIndex(0)
 {
+	mPreviousCanvasAngle = mUiManager->GetCanvas()->GetOutputRotation();
+
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
 	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f));
@@ -229,7 +230,7 @@ void Game::SetVehicle(const str& pVehicle)
 		// Degrade health every other round, so it becomes increasingly difficult to extend the game.
 		if (GetComputerIndex() == 1)
 		{
-			mVehicle->DrainHealth(1-mVehicleHealth);
+			mVehicle->DrainHealth(1 - GetVehicleStartHealth(GetRoundIndex()));
 		}
 		return;
 	}
@@ -240,7 +241,7 @@ void Game::SetVehicle(const str& pVehicle)
 	if (lOk)
 	{
 		mVehicle->SetInitialTransform(GetCutieStart());
-		mVehicle->DrainHealth(1-mVehicleHealth);
+		mVehicle->DrainHealth(1 - GetVehicleStartHealth(GetRoundIndex()));
 		mVehicle->StartLoading();
 	}
 }
@@ -401,7 +402,6 @@ void Game::ResetScore()
 {
 	mScore = 0;
 	mRoundIndex = 0;
-	mVehicleHealth = 1;
 }
 
 void Game::AddScore(double pCutieScore, double pLauncherScore)
@@ -677,10 +677,6 @@ bool Game::IsFlipRenderSide() const
 void Game::NextRound()
 {
 	++mRoundIndex;
-	if (GetComputerIndex() != -1 && mRoundIndex % 2 == 0)
-	{
-		mVehicleHealth *= HEALTH_ROUND_FACTOR;
-	}
 }
 
 int Game::GetRoundIndex() const
@@ -688,9 +684,13 @@ int Game::GetRoundIndex() const
 	return mRoundIndex;
 }
 
-float Game::GetVehicleStartHealth() const
+float Game::GetVehicleStartHealth(int pRoundIndex) const
 {
-	return mVehicleHealth;
+	if (GetComputerIndex() == -1 || pRoundIndex < 2)
+	{
+		return 1;
+	}
+	return ::pow(HEALTH_ROUND_FACTOR, pRoundIndex/2);
 }
 
 
@@ -761,6 +761,14 @@ bool Game::Render()
 
 	const Vector3DF lLauncherPosition(0, -107.5f, 14.5f);
 	mLauncher->SetRootPosition(lLauncherPosition);
+
+	// Yield smooth rotation when canvas orientation changed.
+	if (mPreviousCanvasAngle != mUiManager->GetCanvas()->GetOutputRotation())
+	{
+		mPreviousCanvasAngle = mUiManager->GetCanvas()->GetOutputRotation();
+		mLeftCamera.GetOrientation().RotateAroundOwnY(PIF);
+		mRightCamera.GetOrientation().RotateAroundOwnY(PIF);
+	}
 
 	if (GetComputerIndex() == 0)
 	{

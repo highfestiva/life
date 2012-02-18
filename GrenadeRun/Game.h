@@ -161,7 +161,7 @@ public:
 	bool IsFlipRenderSide() const;
 	void NextRound();
 	int GetRoundIndex() const;
-	float GetVehicleStartHealth() const;
+	float GetVehicleStartHealth(int pRoundIndex) const;
 
 	void SyncCameraPositions();
 	bool Render();
@@ -229,7 +229,7 @@ private:
 	bool mScoreCountingEnabled;
 	StopWatch mSlowmoTimer;
 	int mRoundIndex;
-	float mVehicleHealth;
+	int mPreviousCanvasAngle;
 };
 
 

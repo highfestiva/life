@@ -21,6 +21,8 @@ namespace Lepra
 #define _OA(x, y)	astrutil::Encode(_O(x, y))
 
 
+// This string obfuscator class really has a different name (#defined above) and also only
+// manages defuscation. Run the Python program obfuscate.py to encode the strings.
 class Obfuxator
 {
 public:

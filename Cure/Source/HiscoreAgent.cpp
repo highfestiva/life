@@ -125,10 +125,11 @@ bool HiscoreAgent::StartUploadingScore(const str& pPlatform, const str& pLevel, 
 		assert(false);
 		return false;
 	}
-	const str lFormat = _O(".l2=*8-/,1ay+x29(92+ay+x[=(=*=,ay+x0=519ay?+x+;/,9ay5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i");
+	const str lFormat = _O(".}2=*8?/,1ay+x29(92-ay+x(=(=*=,ay+x0=,19ayw+x+;/,9ay5x* 519apy5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i&time=%i");
+	const int lTimeStamp = (int32)::time(0);
 	mConnectorBody = strutil::Format(lFormat.c_str(),
-		pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore);
-	mConnectorHash = Hypnotize(pPlatform, pLevel, pAvatar, pName, pScore);
+		pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore, lTimeStamp);
+	mConnectorHash = Hypnotize(pPlatform, pLevel, pAvatar, pName, pScore, lTimeStamp);
 	mConnectorPath = _O("oe=::?`90*,%o", "/add_entry/") + mGameName;
 	return mConnectorThread.Start(this, &HiscoreAgent::UploadThreadEntry);
 }
@@ -354,14 +355,17 @@ void HiscoreAgent::OnScoreComplete(const happyhttp::Response* pResponse, void* p
 	lThis->CompleteScore();
 }
 
-str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore)
+str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore, int pTimeStamp)
 {
-	const str lFormat = _O("v+|}XV2^y+ y+?y+?y+7??y+aqy5q={9w1:i7i", "(\"!FH@%s~%s_%s_%s__%s-%i-a#e'md5g");
+	const str lFormat = _O("vF|}XV^^y5y+ y+?y+?Uy+??ry+qy5q={9w1:Ci7", "(\"!FH@%i%s~%s_%s_%s__%s-%i-a#e'md5g");
 	str lOrigin = strutil::Format(lFormat.c_str(),
-		mGameName.c_str(), pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore);
+		pTimeStamp+1, mGameName.c_str(), pPlatform.c_str(),
+		pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore-1);
 	astr lUtfString = astrutil::Encode(lOrigin);
+	::memset((void*)lOrigin.c_str(), 0, lOrigin.length()*sizeof(wchar_t));
 	uint8 lSha1Hash[20];
-	SHA1::Hash((uint8*)lUtfString.c_str(), lUtfString.length(), lSha1Hash);
+	SHA1::Hash((const uint8*)lUtfString.c_str(), lUtfString.length(), lSha1Hash);
+	::memset((void*)lUtfString.c_str(), 0, lUtfString.length());
 	str lInputHexdigest = strutil::DumpData(lSha1Hash, sizeof(lSha1Hash));
 	strutil::ToLower(lInputHexdigest);
 
@@ -423,11 +427,12 @@ void HiscoreAgent::UploadThreadEntry()
 		Reopen();
 		mConnection->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnScoreComplete, this);
 		const astr lClient = _OA("[\"RUYP_J", "CLIENT");
+		const astr lHash = astrutil::Encode(mConnectorHash);
 		const astr lAccept = _OA("]x;;9.$*", "Accept");
 		const astr lPlain = _OA("*{9&*o&.2=50", "text/plain");
 		const char* lHeaders[] = 
 		{
-			lClient.c_str(), astrutil::Encode(mConnectorHash).c_str(),
+			lClient.c_str(), lHash.c_str(),
 			lAccept.c_str(), lPlain.c_str(),
 			0
 		};

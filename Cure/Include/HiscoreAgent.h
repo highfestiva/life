@@ -22,6 +22,9 @@ namespace Cure
 
 
 
+// Interface towards my GAE (Google App Engine) Python 2.5 app called gamehiscore (which can be found at
+// ssh://rg@pixeldoctrine.dyndns.org:2202/~/hiscore.git). The app automagically redirects from
+// gamehiscore.pixeldoctrine.com to some other free hosting site in the cloud.
 class HiscoreAgent
 {
 public:
@@ -70,7 +73,7 @@ private:
 	static void OnData(const happyhttp::Response* pResponse, void* pUserData, const unsigned char* pData, int pByteCount);
 	static void OnListComplete(const happyhttp::Response* pResponse, void* pUserData);
 	static void OnScoreComplete(const happyhttp::Response* pResponse, void* pUserData);
-	str Hypnotize(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore);	// A sorta shuffle
+	str Hypnotize(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore, int pTimeStamp);	// A sorta shuffle
 	void DownloadThreadEntry();
 	void UploadThreadEntry();
 

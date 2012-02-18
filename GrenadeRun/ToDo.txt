@@ -5,6 +5,9 @@ Skipped
 -Adaptive launcher indicators must go - do it right right away.
 -Local highscore?
 -Store temporary highest local highscore.
+-iOS 5.
+-HD version only should have support for 2 players.
+-Publish on App Store x2.
 
 Done
 ----
@@ -95,16 +98,20 @@ Reset text info timeouts when resuming.
 Reset steering (App.cxx) when flipping sides in dual play.
 Make steering wheel smaller or touch area bigger in iPad verison.
 When dual play-flipping sides and reversing back again to normal (mod 2 round), the launcher does not rotate immediately. Perhaps tilt a little to side before starting?
+Show scores longer, until a dialog is displayed.
+Roll 3D camera view smoothly when changing orientation.
+Refactor upside down layout and observer pattern.
+Widen the throttle and launcher compass indicators from 32 to 48 pixels.
+Add "back up" icon in hiscore and credits menu.
+Cascade using timestamp in hiscore entry message to permutate, and store both timestamp and local time in DB. (Only allow one entry per minute - impossible since same name ambiously used by many.)
 
 Computer demo
 -------------
-Add easter egg when entering the right hiscore name + send.
-Show scores longer, until a dialog is displayed.
-Add "back up" icon in hiscore and credits menu.
+Remove scale factor 1.5 entirely! This will yield faster pace and more fun.
 Improve aiming indicators.
 Add eye lashes on Cutie!
-Remove scale factor 1.5 entirely! This will yield faster pace and more fun.
-Cascade using timestamp in hiscore entry message to permutate, and store current time in DB. Only allow one entry per minute.
+Inform on what position one arrived when entering hiscore.
+Add "scroll down" in hiscore list.
 2 extra levels: castle and machine.
 Tweak other levels.
 Record voice for tutorial. Compress HARD!
@@ -117,16 +124,10 @@ Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
-Roll 3D camera view smoothly when changing orientation.
-Refactor upside down layout and observer pattern.
-Widen the throttle and launcher compass indicators from 32 to 64 pixels.
-Tweak steering.
 Add visual feedback on launcher motor strengths. Use "from touch digit to indicator lines".
+Tweak steering.
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.
 Optimize.
 Memory leaks, zombies.
-iOS 5.
-HD version only should have support for 2 players.
-Publish on App Store x2.
