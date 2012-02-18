@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: cloud_01.ma
-//Last modified: Sun, Jan 01, 2012 11:12:54 PM
+//Last modified: Sat, Feb 18, 2012 02:18:14 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -111,7 +111,6 @@ createNode mesh -n "i_pSphereShape4" -p "transform1";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
 createNode transform -n "m_cloud";
-	setAttr ".s" -type "double3" 1.5 1.5 1.5 ;
 createNode mesh -n "m_cloudShape" -p "m_cloud";
 	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
@@ -705,7 +704,7 @@ createNode script -n "sceneConfigurationScriptNode";
 	setAttr ".st" 6;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2012-01-01T23:12:53.798000";
+	setAttr ".time" -type "string" "2012-02-18T14:18:13.843000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;

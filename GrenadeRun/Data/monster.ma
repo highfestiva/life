@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: monster.ma
-//Last modified: Sun, Jan 01, 2012 11:12:19 PM
+//Last modified: Sat, Feb 18, 2012 02:19:46 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -2143,7 +2143,7 @@ createNode mesh -n "i_m_rubber_detailsShape" -p "transform18";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
 createNode transform -n "m_body";
-	setAttr ".s" -type "double3" 0.75 0.75 0.75 ;
+	setAttr ".s" -type "double3" 0.5 0.5 0.5 ;
 createNode mesh -n "m_bodyShape" -p "m_body";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
@@ -7160,7 +7160,7 @@ createNode polySoftEdge -n "polySoftEdge24";
 	setAttr ".a" 180;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2012-01-01T23:12:19.267000";
+	setAttr ".time" -type "string" "2012-02-18T14:19:46.921000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;

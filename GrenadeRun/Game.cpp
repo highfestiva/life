@@ -121,7 +121,7 @@ bool Game::RestartLevel()
 
 TransformationF Game::GetCutieStart() const
 {
-	TransformationF t(gIdentityQuaternionF, Vector3DF(-86.5f, -42.5f, 3.5f));
+	TransformationF t(gIdentityQuaternionF, Vector3DF(-57.67f, -28.33f, 2.33f));
 	t.GetOrientation().RotateAroundOwnZ(-PIF*0.45f);
 	return t;
 }
@@ -461,7 +461,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
 			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
 			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(5, 10), 0.5f, (float)Random::Uniform(3, 7));
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * SCALE_FACTOR, 0.5f, (float)Random::Uniform(3, 7));
 			lPuff->StartLoading();
 		}
 	}
@@ -759,7 +759,7 @@ bool Game::Render()
 		case 1:	mLeftRect = lFullRect;	break;	// Single player, to left.
 	}
 
-	const Vector3DF lLauncherPosition(0, -107.5f, 14.5f);
+	const Vector3DF lLauncherPosition(0, -75.2f, 9.9f);
 	mLauncher->SetRootPosition(lLauncherPosition);
 
 	// Yield smooth rotation when canvas orientation changed.
@@ -790,8 +790,8 @@ bool Game::Render()
 		const Vector3DF lVehiclePos = mVehicle->GetPosition();
 		Vector3DF lOffset = mVehicleCamPos - lVehiclePos;
 		lOffset.z = 0;
-		const float lCamXYDistance = 20;
-		float lCamHeight = 7.5f;
+		const float lCamXYDistance = 13 * SCALE_FACTOR;
+		float lCamHeight = 5 * SCALE_FACTOR;
 		lOffset.Normalize(lCamXYDistance);
 		float lAngle = (-lOffset).GetAngle(Vector3DF(0, lCamXYDistance, 0));
 		if (lOffset.x < 0)
@@ -812,7 +812,7 @@ bool Game::Render()
 			{
 				break;
 			}
-			lCamHeight += 15;
+			lCamHeight += 10*SCALE_FACTOR;
 			lOffset.z = lCamHeight;
 		}
 		mVehicleCamHeight = Math::Lerp(mVehicleCamHeight, lCamHeight, 0.2f);
@@ -844,7 +844,7 @@ bool Game::Render()
 		const float lLauncherHeight = 3;
 		const Vector3DF lMuzzlePosition(lLauncherPosition + mLauncher->GetOrientation()*Vector3DF(0, 0, lLauncherHeight));
 
-		float lRange = 150.0f;
+		float lRange = 100 * SCALE_FACTOR;
 		float lLookDownAngle = -PIF/2;
 		if (mVehicle && mVehicle->IsLoaded())
 		{
@@ -853,7 +853,7 @@ bool Game::Render()
 		}
 
 		Vector3DF lStraightVector(mVehicle->GetPosition() - lMuzzlePosition);
-		const float lCamDistance = 15;
+		const float lCamDistance = 10 * SCALE_FACTOR;
 		lStraightVector.Normalize(lCamDistance);
 		lStraightVector.x = lCamDistance*sin(mLauncherYaw);
 		lStraightVector.y = -lCamDistance*cos(mLauncherYaw);
@@ -879,7 +879,7 @@ bool Game::Render()
 #endif // Touch
 		mRightCamera.Interpolate(mRightCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mRightCamera);
-		const float lDistanceFoV = 8500 / ::pow(lRange, 1.2f);
+		const float lDistanceFoV = 5667 / ::pow(lRange, 1.2f);
 		mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, lDistanceFoV), 1.5f, 500);
 		mUiManager->Render(mRightRect);
 	}
@@ -911,13 +911,14 @@ bool Game::FlybyRender()
 
 	TransformationF t;
 	const double lSweepTime = lTotalTime * 0.25;
+	const float lDistance = 100 * SCALE_FACTOR;
 	if (mFlyByTime < lSweepTime || mFlybyMode == FLYBY_USER_PAUSE || mFlybyMode == FLYBY_SYSTEM_PAUSE)
 	{
 		// Sweep around the area in a circle.
 		const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
 		t.GetOrientation().RotateAroundOwnZ(a + PIF/2);
 		t.GetOrientation().RotateAroundOwnX(-PIF/8);
-		t.SetPosition(Vector3DF(::cos(a)*120, ::sin(a)*120, ::sin(a+PIF/8)*25 + 40));
+		t.SetPosition(Vector3DF(::cos(a)*lDistance, ::sin(a)*lDistance, ::sin(a+PIF/8)*lDistance*0.1f + lDistance/3.5f));
 	}
 	else
 	{
@@ -964,19 +965,19 @@ bool Game::FlybyRender()
 		// Position.
 		if (mFlyByTime-lSweepTime < lDetailTime * 1/3)
 		{
-			t.SetPosition(lCutie + Vector3DF(+2, +10, +5));
+			t.SetPosition(lCutie + Vector3DF(+1.33f, +6.67f, +3.33f));
 		}
 		else if (mFlyByTime-lSweepTime < lDetailTime * 2/3)
 		{
-			t.SetPosition(lGoal + Vector3DF(-20, -15, +15));
+			t.SetPosition(lGoal + Vector3DF(-13.33f, -10, +10));
 		}
 		else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
 		{
-			t.SetPosition(mLauncherPosition + Vector3DF(+2.5, +7.5, +5));	// In front of launcher.
+			t.SetPosition(mLauncherPosition + Vector3DF(+1.67f, +5, +3.33f));	// In front of launcher.
 		}
 		else
 		{
-			t.SetPosition(mLauncherPosition + Vector3DF(+7, 0, +7));	// Beside launcher.
+			t.SetPosition(mLauncherPosition + Vector3DF(+4.67f, 0, +4.67f));	// Beside launcher.
 		}
 	}
 #ifdef LEPRA_TOUCH_LOOKANDFEEL

@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: grenade.ma
-//Last modified: Sun, Jan 01, 2012 11:13:57 PM
+//Last modified: Sat, Feb 18, 2012 02:19:18 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -163,7 +163,7 @@ createNode transform -n "i_pCube5";
 createNode transform -n "transform1" -p "i_pCube5";
 	setAttr ".v" no;
 createNode transform -n "m_grenade";
-	setAttr ".s" -type "double3" 3 3 3 ;
+	setAttr ".s" -type "double3" 2 2 2 ;
 createNode mesh -n "m_grenadeShape" -p "m_grenade";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
@@ -873,7 +873,7 @@ createNode shadingEngine -n "blinn2SG";
 createNode materialInfo -n "materialInfo2";
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2012-01-01T23:13:57.298000";
+	setAttr ".time" -type "string" "2012-02-18T14:19:17.375000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;

@@ -425,6 +425,10 @@ bool App::Open()
 
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, false);
+#ifdef LEPRA_DEBUG
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
+#endif // Debug
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
 	bool lOk = mUiManager->OpenDraw();
@@ -1060,7 +1064,7 @@ void App::DrawHud()
 		}
 		const str lWon = lGameOver? _T("You rule!") : _T("Won heart");
 		const str lLost = lGameOver? _T("Defeat!") : _T("Lost heart");
-		const int lBackgroundSize = 110;
+		const int lBackgroundSize = 100;
 		if (mGame->GetComputerIndex() == -1)
 		{
 			str lText1;
@@ -1173,6 +1177,7 @@ void App::DrawHud()
 				DrawMeter(x, (int)(m+lMeterHalfWidth), -PIF/2, METER_HEIGHT, v0, v1);
 			}
 			InfoText(1, _T("Throttle/brake"), 0, 14, 0);
+			DrawTapIndicator(1, 22, -(int)(mThrottle*(METER_HEIGHT/2-1.3f))-1, -PIF/2);
 			DrawImage(mArrow->GetData(), x+m+mw-2,		m+lMeterHalfWidth, aw, ah, -PIF/2);
 			DrawImage(mArrow->GetData(), x-m-mw+1.5f,	m+lMeterHalfWidth, aw, ah, +PIF/2);
 
@@ -1194,7 +1199,7 @@ void App::DrawHud()
 				DrawMeter((int)(m+lMeterHalfWidth), y, 0, METER_HEIGHT, v0, v1);
 			}
 			InfoText(1, _T("Throttle/brake"), PIF/2, 0, -14);
-			DrawTapIndicator(1, (int)(m+lMeterHalfWidth)+22, y - (int)(mThrottle*(METER_HEIGHT/2-1.3f))-1, 0);
+			DrawTapIndicator(1, 22, -(int)(mThrottle*(METER_HEIGHT/2-1.3f))-1, 0);
 			DrawImage(mArrow->GetData(), m+lMeterHalfWidth+1,	y-m-mw+1,	aw, ah, 0);
 			DrawImage(mArrow->GetData(), m+lMeterHalfWidth,	y+m+mw-2,	aw, ah, PIF);
 
@@ -1322,6 +1327,10 @@ void App::DrawHud()
 #endif // Touch/!touch
 		DrawBarrelCompass((int)x, (int)y, lDrawAngle, (int)aw-8, lValue1, lValue2);
 		InfoText(2, _T("Up/down compass"), lDrawAngle+PIF, ox, oy);
+		const float lLiftThrottle = mGame->GetLauncher()->GetPhysics()->GetEngine(0)->GetValue();
+		const float lCenteredValue = (mGame->GetComputerIndex() == 0)? lValue1*2-1 : -(lValue1*2-1);
+		const int lLiftOffset = (int)((BARREL_COMPASS_HEIGHT-4)*lCenteredValue/2 + 9*lLiftThrottle);
+		DrawTapIndicator(3, 22, lLiftOffset, lDrawAngle+PIF/2);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle+PIF/2);
 		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF/2);
 
@@ -1375,6 +1384,10 @@ void App::DrawHud()
 #endif // Touch/!Touch
 		DrawBarrelCompass((int)x, (int)y, +PIF/2+lDrawAngle, (int)aw-8, lValue1, lValue2);
 		InfoText(2, _T("Left/right compass"), lDrawAngle+PIF/2, ox, oy);
+		const float lRotateThrottle = mGame->GetLauncher()->GetPhysics()->GetEngine(1)->GetValue();
+		const float lCenteredRotation = (mGame->GetComputerIndex() == 0)? lValue1*2-1 : -(lValue1*2-1);
+		const int lRotateOffset = (int)((BARREL_COMPASS_HEIGHT-4)*lCenteredRotation/2 - 9*lRotateThrottle);
+		DrawTapIndicator(4, +22, lRotateOffset, lDrawAngle);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle);
 		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF);
 	}
@@ -1632,10 +1645,15 @@ void App::DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, fl
 	}
 }
 
-void App::DrawTapIndicator(int pTag, int x, int y, float pAngle) const
+void App::DrawTapIndicator(int pTag, int dx, int dy, float pAngle) const
 {
-	int x2 = x + 20;
-	int y2 = y;
+	pAngle = -pAngle;
+	Vector2DF lPoint((float)dx, (float)dy);
+	lPoint.RotateAround(Vector2DF(), pAngle);
+	int x = (int)(mPenX + lPoint.x);
+	int y = (int)(mPenY + lPoint.y);
+	int x2 = x + (int)(20*::cos(pAngle));
+	int y2 = y + (int)(20*::sin(pAngle));
 	float lAngle = pAngle;
 	Transpose(x2, y2, lAngle);
 	Transpose(x, y, pAngle);

@@ -109,11 +109,12 @@ Cascade using timestamp in hiscore entry message to permutate, and store both ti
 Tweak steering.
 Improve aiming indicators.
 Inform on what position one arrived when entering hiscore.
+Make it so that the add hiscore server only adds score if it's higher with the same name (update), or if name not present.
+Remove scale factor 1.5 entirely! This will yield faster pace and more fun.
+Add visual feedback on launcher motor strengths. Use "from touch digit to indicator lines".
 
 Computer demo
 -------------
-Make it so that the add hiscore server only adds score if it's higher with the same name (update), or if name not present.
-Remove scale factor 1.5 entirely! This will yield faster pace and more fun.
 Add eye lashes on Cutie!
 2 extra levels: castle and machine.
 Icons for tutorial, levels, back, one/two players, hiscore, credits...
@@ -127,7 +128,6 @@ Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
-Add visual feedback on launcher motor strengths. Use "from touch digit to indicator lines".
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.
