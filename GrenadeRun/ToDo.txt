@@ -8,6 +8,8 @@ Skipped
 -iOS 5.
 -HD version only should have support for 2 players.
 -Publish on App Store x2.
+-Add "scroll down" in hiscore list.
+-Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
 
 Done
 ----
@@ -104,28 +106,28 @@ Refactor upside down layout and observer pattern.
 Widen the throttle and launcher compass indicators from 32 to 48 pixels.
 Add "back up" icon in hiscore and credits menu.
 Cascade using timestamp in hiscore entry message to permutate, and store both timestamp and local time in DB. (Only allow one entry per minute - impossible since same name ambiously used by many.)
+Tweak steering.
+Improve aiming indicators.
+Inform on what position one arrived when entering hiscore.
 
 Computer demo
 -------------
+Make it so that the add hiscore server only adds score if it's higher with the same name (update), or if name not present.
 Remove scale factor 1.5 entirely! This will yield faster pace and more fun.
-Improve aiming indicators.
 Add eye lashes on Cutie!
-Inform on what position one arrived when entering hiscore.
-Add "scroll down" in hiscore list.
 2 extra levels: castle and machine.
+Icons for tutorial, levels, back, one/two players, hiscore, credits...
 Tweak other levels.
 Record voice for tutorial. Compress HARD!
 Record voice for instructions: SHOOT! DRIVE!
 Playback voice for tutorial.
 Polish on level_2 roads (in texture).
 Memory leak check.
-Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
 Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
 Add visual feedback on launcher motor strengths. Use "from touch digit to indicator lines".
-Tweak steering.
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.

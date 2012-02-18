@@ -252,6 +252,7 @@ public:
 	bool mIsPurchasing;
 	bool mIsMoneyIconAdded;
 	UiCure::UserSound2dResource* mTapClick;
+	int mMyHiscoreIndex;
 
 	LOG_CLASS_DECLARE();
 };
@@ -349,7 +350,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mLastHiscoreName(),
 	mHiscoreAgent(0),
 	mIsPurchasing(false),
-	mIsMoneyIconAdded(false)
+	mIsMoneyIconAdded(false),
+	mMyHiscoreIndex(0)
 {
 	mApp = this;
 }
@@ -754,6 +756,7 @@ bool App::Poll()
 					break;
 					case Cure::HiscoreAgent::ACTION_UPLOAD_SCORE:
 					{
+						mMyHiscoreIndex = mHiscoreAgent->GetUploadedPlace();
 						delete mHiscoreAgent;
 						mHiscoreAgent = 0;
 						if (lLoadState == Cure::RESOURCE_LOAD_COMPLETE)
@@ -955,7 +958,7 @@ bool App::Poll()
 			if ((lHeartBalance == -HEART_POINTS/2 || lHeartBalance == +HEART_POINTS/2) &&	// Somebody won.
 				mGame->GetComputerIndex() != -1 &&	// Computer in the game.
 				mGame->GetComputerIndex() != mGame->GetWinnerIndex() &&	// Computer didn't win = user won over computer.
-				mGame->GetScore() >= 10000.0)		// Negative score isn't any good - at least be positive.
+				mGame->GetScore() >= 1000.0)		// Negative score isn't any good - at least be positive.
 			{
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 				EnterHiscore(str(), FGCOLOR_DIALOG);
@@ -2367,7 +2370,16 @@ void App::UpdateHiscore(bool pError)
 		const int lPlace = x + 1 + lHiscoreList.mOffset;
 		const HiscoreEntry& lEntry = lHiscoreList.mEntryList[x];
 		const str lScore = Int2Str(lEntry.mScore);
-		lHiscore += strutil::Format(_T("%4i %-13s %10s\n"), lPlace, lEntry.mName.c_str(), lScore.c_str());
+		tchar lPointer = ' ';
+		tchar lPointer2 = ' ';
+		if (mLastHiscoreName == lEntry.mName)
+		{
+			lPointer  = '>';
+			lPointer2 = '<';
+		}
+		int lPositionDigits = (int)::ceil(::log(lPlace+6.6f));
+		const str lFormatPlace = strutil::Format(_T("%i"), lPositionDigits);
+		lHiscore += strutil::Format((_T("%c%")+lFormatPlace+_T("i %-13s %10s%c\n")).c_str(), lPointer, lPlace, lEntry.mName.c_str(), lScore.c_str(), lPointer2);
 	}
 	if (lHiscore.empty())
 	{
@@ -2377,7 +2389,7 @@ void App::UpdateHiscore(bool pError)
 	lText->SetFontId(mMonospacedFontId);
 	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
 	lText->SetText(lHiscore, FGCOLOR_DIALOG, CLEAR_COLOR);
-	mDialog->AddChild(lText, 120, 75);
+	mDialog->AddChild(lText, 100, 75);
 }
 
 void App::HiscoreMenu(int pDirection)
@@ -2386,11 +2398,13 @@ void App::HiscoreMenu(int pDirection)
 	CreateHiscoreAgent();
 	const str lLevelName = gLevels[mHiscoreLevelIndex];
 	const str lVehicleName = gVehicles[mHiscoreVehicleIndex];
-	if (!mHiscoreAgent->StartDownloadingList(gPlatform, lLevelName, lVehicleName, 0, 10))
+	const int lOffset = std::max(0, mMyHiscoreIndex-5);
+	if (!mHiscoreAgent->StartDownloadingList(gPlatform, lLevelName, lVehicleName, lOffset, 10))
 	{
 		delete mHiscoreAgent;
 		mHiscoreAgent = 0;
 	}
+	mMyHiscoreIndex = 0;
 
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnHiscoreAction);
 	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &App::OnPreHiscoreAction));
@@ -2614,8 +2628,8 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		break;
 		case 3:
 		{
-			//HiscoreMenu(+1);
-			EnterHiscore(_T("Press enter when you're done"), FGCOLOR_DIALOG);
+			HiscoreMenu(+1);
+			//EnterHiscore(_T("Press enter when you're done"), FGCOLOR_DIALOG);
 		}
 		return;
 		case 4:
