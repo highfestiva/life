@@ -96,6 +96,7 @@ using namespace Lepra;
 	}
 	else
 	{
+		lGlView.canvas = _canvas;
 		GrenadeRun::App::GetApp()->Poll();
 		[self dropFingerMovements];
 	}

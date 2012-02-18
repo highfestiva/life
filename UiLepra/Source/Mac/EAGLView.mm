@@ -21,6 +21,7 @@ static EAGLView* gSharedView;
 @implementation EAGLView
 
 @dynamic context;
+@synthesize canvas = _canvas;
 @synthesize isOpen;
 @synthesize responder;
 @synthesize orientationStrictness;
@@ -33,7 +34,7 @@ static EAGLView* gSharedView;
 @synthesize keyboardType;
 @synthesize returnKeyType;
 @synthesize secureTextEntry;
-@synthesize spellCheckingType;
+//@synthesize spellCheckingType;
 
 // You must implement this method
 + (Class)layerClass
@@ -43,14 +44,16 @@ static EAGLView* gSharedView;
 
 - (id)initWithFrame:(CGRect)frame
 {
-	if ((self = [super initWithFrame:frame]))
+	if (!(self = [super initWithFrame:frame]))
 	{
-		CAEAGLLayer*eaglLayer = (CAEAGLLayer*)self.layer;
-		eaglLayer.opaque = TRUE;
-		eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+		return nil;
+	}
+
+	CAEAGLLayer* eaglLayer = (CAEAGLLayer*)self.layer;
+	eaglLayer.opaque = TRUE;
+	eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
 		kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
-	}
 
 	self.multipleTouchEnabled = YES;
 	gSharedView = self;
@@ -65,14 +68,15 @@ static EAGLView* gSharedView;
 	keyboardType = UIKeyboardTypeDefault;
 	returnKeyType = UIReturnKeySend;
 	secureTextEntry = NO;
-	spellCheckingType = UITextSpellCheckingTypeNo;
+	//spellCheckingType = UITextSpellCheckingTypeNo;
 
 	return self;
 }
 
 - (void)dealloc
 {
-	[self deleteFramebuffer];	
+	[self deleteFramebuffer];
+	_canvas = 0;
 	[context release];
 
 	[super dealloc];
@@ -207,17 +211,34 @@ static EAGLView* gSharedView;
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+	if (orientationStrictness >= 2)
+	{
+		return NO;
+	}
+	else if (orientationStrictness == 1)
+	{
+		return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft ||
+			interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+	}
+	return YES;
+}
+
 -(void) orientationDidChange:(NSNotification*)notification
 {
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
 	if ([self shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation])
 	{
-		switch (orientation)
+		if (_canvas)
 		{
-			case UIDeviceOrientationLandscapeLeft:		_canvas->SetOutputRotation(90);		break;
-			case UIDeviceOrientationLandscapeRight:		_canvas->SetOutputRotation(-90);	break;
-			case UIDeviceOrientationPortrait:		_canvas->SetOutputRotation(0);		break;
-			case UIDeviceOrientationPortraitUpsideDown:	_canvas->SetOutputRotation(180);	break;
+			switch (orientation)
+			{
+				case UIDeviceOrientationLandscapeLeft:		_canvas->SetOutputRotation(90);		break;
+				case UIDeviceOrientationLandscapeRight:		_canvas->SetOutputRotation(-90);	break;
+				case UIDeviceOrientationPortrait:		_canvas->SetOutputRotation(0);		break;
+				case UIDeviceOrientationPortraitUpsideDown:	_canvas->SetOutputRotation(180);	break;
+			}
 		}
 		[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
 	}
@@ -239,20 +260,6 @@ static EAGLView* gSharedView;
 {
 	// The framebuffer will be re-created at the beginning of the next setFramebuffer method call.
 	[self deleteFramebuffer];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-	if (orientationStrictness >= 2)
-	{
-		return NO;
-	}
-	else if (orientationStrictness == 1)
-	{
-		return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft ||
-			interfaceOrientation == UIInterfaceOrientationLandscapeRight);
-	}
-	return YES;
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event

@@ -1,12 +1,14 @@
 // Xcode-generated on 2011-06-05.
 
 #import <UIKit/UIKit.h>
+#import <UIKit/UITextInputTraits.h>
 
 #import <OpenGLES/ES1/gl.h>
 #import <OpenGLES/ES1/glext.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import <OpenGLES/EAGL.h>
+#import "../../Lepra/Include/Canvas.h"
 #import "../UiInput.h"
 
 // This class wraps the CAEAGLLayer from CoreAnimation into a convenient UIView subclass.
@@ -16,6 +18,7 @@
 {
 @private
 	EAGLContext *context;
+	Lepra::Canvas* canvas;
 
 	// The pixel dimensions of the CAEAGLLayer.
 	GLint framebufferWidth;
@@ -30,6 +33,7 @@
 }
 
 @property(nonatomic, retain) EAGLContext *context;
+@property(nonatomic, assign) Lepra::Canvas* canvas;
 @property(nonatomic, readonly) bool isOpen;
 @property(nonatomic, assign) UIResponder* responder;
 @property(nonatomic, assign) int orientationStrictness;
@@ -42,7 +46,7 @@
 @property(nonatomic) UIKeyboardType keyboardType;
 @property(nonatomic) UIReturnKeyType returnKeyType;
 @property(nonatomic) BOOL secureTextEntry;
-@property(nonatomic) UITextSpellCheckingType spellCheckingType;
+//@property(nonatomic) UITextSpellCheckingType spellCheckingType;
 
 + (EAGLView*)sharedView;
 - (void)setFramebuffer;

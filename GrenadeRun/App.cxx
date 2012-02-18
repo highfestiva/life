@@ -2580,7 +2580,7 @@ void App::Purchase(const str& pProductName)
 void App::SetIsPurchasing(bool pIsPurchasing)
 {
 	mIsPurchasing = pIsPurchasing;
-	if (!mIsPurchasing)
+	if (!mIsPurchasing && !mDialog)
 	{
 		MainMenu();
 	}
