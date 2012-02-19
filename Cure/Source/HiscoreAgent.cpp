@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <happyhttp.h>
 #include "../../Lepra/Include/Obfuxator.h"
+#include "../../Lepra/Include/JsonString.h"
 #include "../../Lepra/Include/SHA1.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 
@@ -125,11 +126,18 @@ bool HiscoreAgent::StartUploadingScore(const str& pPlatform, const str& pLevel, 
 		assert(false);
 		return false;
 	}
+	str lJsonName = JsonString::toJson(pName);
+	if (lJsonName.empty())
+	{
+		assert(false);
+		return false;
+	}
+	lJsonName = lJsonName.substr(1, lJsonName.length()-2);
 	const str lFormat = _O(".}2=*8?/,1ay+x29(92-ay+x(=(=*=,ay+x0=,19ayw+x+;/,9ay5x* 519apy5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i&time=%i");
 	const int lTimeStamp = (int32)::time(0);
 	mConnectorBody = strutil::Format(lFormat.c_str(),
-		pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore, lTimeStamp);
-	mConnectorHash = Hypnotize(pPlatform, pLevel, pAvatar, pName, pScore, lTimeStamp);
+		pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), lJsonName.c_str(), pScore, lTimeStamp);
+	mConnectorHash = Hypnotize(pPlatform, pLevel, pAvatar, lJsonName, pScore, lTimeStamp);
 	mConnectorPath = _O("oe=::?`90*,%o", "/add_entry/") + mGameName;
 	return mConnectorThread.Start(this, &HiscoreAgent::UploadThreadEntry);
 }
@@ -222,7 +230,7 @@ bool HiscoreAgent::ParseList(astr& pData)
 				log_volatile(mLog.Warning(_T("Problem parsing download list name (empty).")));
 				return false;
 			}
-			lEntry.mName = lTagValue[lBase+1].substr(1, lTagValue[lBase+1].length()-2);
+			lEntry.mName = JsonString::fromJson(lTagValue[lBase+1]);
 			lFlags |= 1;
 		}
 		else if (lTagValue[lBase+0] == _T("\"score\""))
@@ -437,7 +445,7 @@ void HiscoreAgent::UploadThreadEntry()
 			0
 		};
 		const astr lMethod = _OA("NaOKJ", "POST");
-		const astr lUtf8Body = astrutil::Encode(mConnectorBody);
+		const astr lUtf8Body = astrutil::ReplaceAll(astrutil::Encode(mConnectorBody), "\\", "%5C");
 		mConnection->request(lMethod.c_str(), astrutil::Encode(mConnectorPath).c_str(), lHeaders, (const unsigned char*)lUtf8Body.c_str(), lUtf8Body.length());
 		log_volatile(mLog.AInfo("Uploading score."));
 	}

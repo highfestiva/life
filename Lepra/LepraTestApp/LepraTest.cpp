@@ -24,6 +24,7 @@
 #include "../Include/DiskFile.h"
 #include "../Include/IdManager.h"
 #include "../Include/IOBuffer.h"
+#include "../Include/JsonString.h"
 #include "../Include/Lepra.h"
 #include "../Include/Log.h"
 #include "../Include/LogListener.h"
@@ -273,6 +274,22 @@ bool TestString(const LogDecorator& pAccount)
 		strutil::strvec lWords = strutil::BlockSplit(_T("\"a\\\"b\""), _T(" \t\v\r\n\""), false, true, 4);
 		lTestOk = (lWords.size() == 1 && lWords[0] == _T("a\\\"b"));
 		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("JSON coder");
+		const str lC = _T("åäöabcÅÄÖACQñï");
+		const str lJson = _T("\"\\u00E5\\u00E4\\u00F6abc\\u00C5\\u00C4\\u00D6ACQ\\u00F1\\u00EF\"");
+		const str lJsonString = JsonString::toJson(lC);
+		lTestOk = (lJsonString == lJson);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			const str lString = JsonString::fromJson(lJson);
+			lTestOk = (lString == lC);
+			assert(lTestOk);
+		}
 	}
 
 	ReportTestResult(pAccount, _T("String"), lContext, lTestOk);

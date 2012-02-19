@@ -629,6 +629,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\JsonString.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\Lepra.h"
 				>
 			</File>
@@ -1110,6 +1114,10 @@
 						ShowIncludes="false"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Source\JsonString.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\Source\Lepra.cpp"

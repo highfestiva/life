@@ -2020,6 +2020,17 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			}
 		}
 		break;
+		case UIKEY(3):
+		{
+			if (!pFactor)
+			{
+				delete mDialog;
+				mDialog = 0;
+				mGame->AddScore(Random::Uniform(500, 5000), Random::Uniform(500, 5000));
+				EnterHiscore(str(), WHITE);
+			}
+		}
+		break;
 #endif // Debug
 	}
 
