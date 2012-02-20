@@ -134,6 +134,7 @@ Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
+Make hash verifiable, even on waco hiscore names. Colon (:) seems to be an offending char?
 Remove store fetching, simply do direct purchase using the hard-coded IDs.
 Word Caps on hiscore isn't working.
 Place cubes beside each other.

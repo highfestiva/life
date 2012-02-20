@@ -283,10 +283,11 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, type
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, const _String& pFrom, const _String& pTo)
 {
 	_String lString = pString;
-	typename _String::size_type lPosition;
-	while ((lPosition = lString.find(pFrom)) != str::npos)
+	typename _String::size_type lPosition = 0;
+	while ((lPosition = lString.find(pFrom, lPosition)) != str::npos)
 	{
 		lString.replace(lPosition, pFrom.length(), pTo);
+		lPosition += pTo.length();
 	}
 	return (lString);
 }

@@ -2400,8 +2400,8 @@ void App::UpdateHiscore(bool pError)
 		const int lPlace = x + 1 + lHiscoreList.mOffset;
 		const HiscoreEntry& lEntry = lHiscoreList.mEntryList[x];
 		const str lScore = Int2Str(lEntry.mScore);
-		tchar lPointer = ' ';
-		tchar lPointer2 = ' ';
+		char lPointer = ' ';
+		char lPointer2 = ' ';
 		if (mLastHiscoreName == lEntry.mName)
 		{
 			lPointer  = '>';
@@ -2409,7 +2409,17 @@ void App::UpdateHiscore(bool pError)
 		}
 		lPositionDigits = (int)::ceil(::log(lPlace+6.6f));
 		const str lFormatPlace = strutil::Format(_T("%i"), lPositionDigits);
-		lHiscore += strutil::Format((_T("%c%")+lFormatPlace+_T("i %-13s %10s%c\n")).c_str(), lPointer, lPlace, lEntry.mName.c_str(), lScore.c_str(), lPointer2);
+		// TRICKY: ugly circumvention for string that won't vswprintf()!
+		str lName = lEntry.mName;
+		if (lName.size() < 13)
+		{
+			lName.append(13-lName.size(), ' ');
+		}
+		const str lFormat1 = _T("%c%") + lFormatPlace + _T("i ");
+		const str lFormat2 = _T(" %10s%c\n");
+		lHiscore += strutil::Format(lFormat1.c_str(), lPointer, lPlace) +
+			lName +
+			strutil::Format(lFormat2.c_str(), lScore.c_str(), lPointer2);
 	}
 	if (lHiscore.empty())
 	{

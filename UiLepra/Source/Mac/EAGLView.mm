@@ -60,7 +60,7 @@ static EAGLView* gSharedView;
 	isOpen = false;
 	responder = nil;
 	_orientationStrictness = 1;
-	_preResponderStrictness = _orientationStrictness;
+	_preResponderStrictness = -1;
 
 	autocapitalizationType = UITextAutocapitalizationTypeWords;
 	autocorrectionType = UITextAutocorrectionTypeNo;
@@ -83,9 +83,12 @@ static EAGLView* gSharedView;
 	[super dealloc];
 }
 
-- (EAGLContext *)context
+- (int)setOrientationStrictness:(int)strictness
 {
-	return context;
+	if (_preResponderStrictness >= 0)
+	{
+		_orientationStrictness = strictness;
+	}
 }
 
 - (void)setContext:(EAGLContext *)newContext

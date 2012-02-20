@@ -30,7 +30,7 @@
 	bool isOpen;
 	UIResponder* responder;
 	int _orientationStrictness;
-	int _preResponerStrictness;
+	int _preResponderStrictness;
 }
 
 @property(nonatomic, retain) EAGLContext *context;

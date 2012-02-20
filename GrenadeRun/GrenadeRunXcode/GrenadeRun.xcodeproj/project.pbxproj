@@ -479,6 +479,7 @@
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
 		B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */; };
 		B1D88DC814DEA9190000CD85 /* happyhttp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DC714DEA9190000CD85 /* happyhttp.cpp */; };
+		B1DAC7E414F1D97700B285C5 /* JsonString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1DAC7E314F1D97700B285C5 /* JsonString.cpp */; };
 		B1E4528A14E9FA13001C2BE2 /* UiDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E4528814E9FA13001C2BE2 /* UiDialog.cpp */; };
 		B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E4528914E9FA13001C2BE2 /* UiMessageDialog.cpp */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
@@ -1149,6 +1150,7 @@
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
 		B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HiscoreAgent.cpp; path = ../../Cure/Source/HiscoreAgent.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DC714DEA9190000CD85 /* happyhttp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = happyhttp.cpp; path = "happyhttp-0.1/happyhttp.cpp"; sourceTree = "<group>"; };
+		B1DAC7E314F1D97700B285C5 /* JsonString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JsonString.cpp; sourceTree = "<group>"; };
 		B1E4528814E9FA13001C2BE2 /* UiDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiDialog.cpp; sourceTree = "<group>"; };
 		B1E4528914E9FA13001C2BE2 /* UiMessageDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiMessageDialog.cpp; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
@@ -1453,6 +1455,7 @@
 		B19A14CC13A124940051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B1DAC7E314F1D97700B285C5 /* JsonString.cpp */,
 				B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */,
 				B19A14CD13A124940051A61C /* Alarm.cpp */,
 				B19A14CE13A124940051A61C /* Application.cpp */,
@@ -2804,6 +2807,7 @@
 				B1CFD06F14E8610900550345 /* SeeThrough.cpp in Sources */,
 				B1E4528A14E9FA13001C2BE2 /* UiDialog.cpp in Sources */,
 				B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */,
+				B1DAC7E414F1D97700B285C5 /* JsonString.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
