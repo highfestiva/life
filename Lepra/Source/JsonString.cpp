@@ -18,7 +18,7 @@ namespace Lepra
 
 
 
-str JsonString::toJson(const str& pString)
+str JsonString::ToJson(const str& pString)
 {
 	const astr lUtf8String = astrutil::Encode(pString);
 	str lJsonString = _T("\"");
@@ -68,19 +68,8 @@ str JsonString::toJson(const str& pString)
 	return lJsonString;
 }
 
-str JsonString::fromJson(const str& pJsonString)
+str JsonString::FromJson(const str& pJsonString)
 {
-	/*const astr lUtf8JsonString = astrutil::Encode(pJsonString);
-	Json::Reader lParser;
-	Json::Value lRoot;
-	if (!lParser.parse(lUtf8JsonString, lRoot))
-	{
-		assert(false);
-		return str();
-	}
-	const astr lUtf8String = lRoot.asString();
-	str lString = strutil::Encode(lUtf8String);
-	return lString;*/
 	if (pJsonString.size() < 2 || pJsonString[0] != '"' || pJsonString[pJsonString.size()-1] != '"')
 	{
 		assert(false);
@@ -151,6 +140,30 @@ str JsonString::fromJson(const str& pJsonString)
 		}
 	}
 	return lString;
+}
+
+
+
+str JsonString::UrlEncode(const str& pUrl)
+{
+	str lEscaped;
+	const size_t l = pUrl.size();
+	for (size_t x = 0; x < l; ++x)
+	{
+		const tchar c = pUrl[x];
+		if ((c >= '0' && c <= '9') ||
+			(c >= 'A' && c <= 'Z') ||
+			(c >= 'a' && c <= 'z') ||
+			c == '~' || c == '!' || c == '*' || c == '(' || c == ')' || c == '\'')
+		{
+			lEscaped += c;
+		}
+		else
+		{
+			lEscaped += strutil::Format(_T("%%%.2X"), (unsigned)c);
+		}
+	}
+	return lEscaped;
 }
 
 

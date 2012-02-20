@@ -281,12 +281,12 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("JSON coder");
 		const str lC = _T("åäöabcÅÄÖACQñï");
 		const str lJson = _T("\"\\u00E5\\u00E4\\u00F6abc\\u00C5\\u00C4\\u00D6ACQ\\u00F1\\u00EF\"");
-		const str lJsonString = JsonString::toJson(lC);
+		const str lJsonString = JsonString::ToJson(lC);
 		lTestOk = (lJsonString == lJson);
 		assert(lTestOk);
 		if (lTestOk)
 		{
-			const str lString = JsonString::fromJson(lJson);
+			const str lString = JsonString::FromJson(lJson);
 			lTestOk = (lString == lC);
 			assert(lTestOk);
 		}

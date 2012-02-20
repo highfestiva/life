@@ -126,18 +126,19 @@ bool HiscoreAgent::StartUploadingScore(const str& pPlatform, const str& pLevel, 
 		assert(false);
 		return false;
 	}
-	str lJsonName = JsonString::toJson(pName);
+	str lJsonName = JsonString::ToJson(pName);
 	if (lJsonName.empty())
 	{
 		assert(false);
 		return false;
 	}
 	lJsonName = lJsonName.substr(1, lJsonName.length()-2);
-	const str lFormat = _O(".}2=*8?/,1ay+x29(92-ay+x(=(=*=,ay+x0=,19ayw+x+;/,9ay5x* 519apy5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i&time=%i");
 	const int lTimeStamp = (int32)::time(0);
+	mConnectorHash = Hypnotize(pPlatform, pLevel, pAvatar, lJsonName, pScore, lTimeStamp);
+	const str lFormat = _O(".}2=*8?/,1ay+x29(92-ay+x(=(=*=,ay+x0=,19ayw+x+;/,9ay5x* 519apy5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i&time=%i");
+	lJsonName = JsonString::UrlEncode(lJsonName);
 	mConnectorBody = strutil::Format(lFormat.c_str(),
 		pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), lJsonName.c_str(), pScore, lTimeStamp);
-	mConnectorHash = Hypnotize(pPlatform, pLevel, pAvatar, lJsonName, pScore, lTimeStamp);
 	mConnectorPath = _O("oe=::?`90*,%o", "/add_entry/") + mGameName;
 	return mConnectorThread.Start(this, &HiscoreAgent::UploadThreadEntry);
 }
@@ -230,7 +231,7 @@ bool HiscoreAgent::ParseList(astr& pData)
 				log_volatile(mLog.Warning(_T("Problem parsing download list name (empty).")));
 				return false;
 			}
-			lEntry.mName = JsonString::fromJson(lTagValue[lBase+1]);
+			lEntry.mName = JsonString::FromJson(lTagValue[lBase+1]);
 			lFlags |= 1;
 		}
 		else if (lTagValue[lBase+0] == _T("\"score\""))
@@ -369,13 +370,15 @@ str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& 
 	str lOrigin = strutil::Format(lFormat.c_str(),
 		pTimeStamp+1, mGameName.c_str(), pPlatform.c_str(),
 		pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore-1);
+	mLog.Infof(_T("data = %s"), lOrigin.c_str());
 	astr lUtfString = astrutil::Encode(lOrigin);
 	::memset((void*)lOrigin.c_str(), 0, lOrigin.length()*sizeof(wchar_t));
 	uint8 lSha1Hash[20];
 	SHA1::Hash((const uint8*)lUtfString.c_str(), lUtfString.length(), lSha1Hash);
 	::memset((void*)lUtfString.c_str(), 0, lUtfString.length());
-	str lInputHexdigest = strutil::DumpData(lSha1Hash, sizeof(lSha1Hash));
-	strutil::ToLower(lInputHexdigest);
+	astr lInputHexdigest = astrutil::DumpData(lSha1Hash, sizeof(lSha1Hash));
+	astrutil::ToLower(lInputHexdigest);
+	mLog.Infof(_T("sha1 = %s"), strutil::Encode(lInputHexdigest).c_str());
 
 	// Shuffle:
 	//input_hexdigest = list(input_hexdigest)
@@ -390,7 +393,7 @@ str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& 
 		j -= 5;
 	}
 	chk = (chk % 25) + (int)'a';
-	lInputHexdigest = lInputHexdigest.substr(0, 15) + (tchar)chk + lInputHexdigest.substr(15) + (tchar)(chk+1);
+	lInputHexdigest = lInputHexdigest.substr(0, 15) + (char)chk + lInputHexdigest.substr(15) + (char)(chk+1);
 	int ints[] = { 0, 0, 0, 0, 0, 0, 0 };
 	for (int x = 0; x < 6; ++x)
 	{
@@ -404,6 +407,7 @@ str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& 
 	{
 		lShuffledHash += strutil::IntToString(::abs(ints[y]), (y&1)? 9 : 10);
 	}
+	mLog.Infof(_T("output hash = %s"), lShuffledHash.c_str());
 	return lShuffledHash;
 }
 

@@ -18,8 +18,10 @@ namespace Lepra
 class JsonString
 {
 public:
-	static str toJson(const str& pString);
-	static str fromJson(const str& pJsonString);
+	static str ToJson(const str& pString);
+	static str FromJson(const str& pJsonString);
+
+	static str UrlEncode(const str& pUrl);
 };
 
 

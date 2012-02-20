@@ -887,7 +887,8 @@ bool App::Poll()
 		DrawHud();
 
 		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE &&
-			(mGame->IsScoreCountingEnabled() || mGame->GetWinnerIndex() >= 0))
+			(mGame->IsScoreCountingEnabled() || mGame->GetWinnerIndex() >= 0) &&
+			mGame->GetComputerIndex() != -1)
 		{
 			if (mScoreHud->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 			{
@@ -1319,7 +1320,7 @@ void App::DrawHud()
 		x = m+aw/2 + 30;
 		y = h-lBarrelCenterOffset;
 		lDrawAngle = -PIF/2;
-		if (mGame->GetComputerIndex() != -1)	// Two players.
+		if (mGame->GetComputerIndex() == -1)	// Two players.
 		{
 			x += w/2;
 		}
@@ -2585,9 +2586,9 @@ void App::SuperReset(bool pGameOver)
 void App::CreateHiscoreAgent()
 {
 	delete mHiscoreAgent;
-	const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
-	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("kill_cutie"));
-	//mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("kill_cutie"));
+	//const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
+	//mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("kill_cutie"));
+	mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("kill_cutie"));
 }
 
 void App::Purchase(const str& pProductName)
