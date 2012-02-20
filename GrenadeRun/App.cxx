@@ -2586,9 +2586,9 @@ void App::SuperReset(bool pGameOver)
 void App::CreateHiscoreAgent()
 {
 	delete mHiscoreAgent;
-	//const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
-	//mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("kill_cutie"));
-	mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("kill_cutie"));
+	const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
+	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("kill_cutie"));
+	//mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("kill_cutie"));
 }
 
 void App::Purchase(const str& pProductName)

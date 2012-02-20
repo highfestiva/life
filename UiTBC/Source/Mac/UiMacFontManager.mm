@@ -95,9 +95,11 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	CGFloat transparent[4] = { 1, 1, 1, 0 };
 	CGFloat text_color[4] = { 1, 1, 1, 1 };
 	// if you do this a lot store the color somewhere and release it when you are done with it.
-	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, transparent)); 
+	CGColorRef backgroundColor = CGColorCreate(colorspace, transparent);
+	CGContextSetFillColorWithColor(textcontext, backgroundColor); 
 	CGContextFillRect(textcontext, *(CGRect*)rect);
-	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, text_color));
+	CGColorRef foregroundColor = CGColorCreate(colorspace, text_color);
+	CGContextSetFillColorWithColor(textcontext, foregroundColor);
 	CGContextSelectFont(textcontext, astrutil::Encode(mCurrentFont->mName).c_str(), lCorrectedFontSize, kCGEncodingMacRoman);
 	CGContextSetLineWidth(textcontext, 0.3);
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
@@ -110,6 +112,8 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	[lChar drawAtPoint:CGPointMake(0, y) withFont:[TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize]];
 	CGContextFlush(textcontext);
 	UIGraphicsPopContext();
+	CFRelease(backgroundColor);
+	CFRelease(foregroundColor);
 	CFRelease(colorspace);
 	CFRelease(textcontext);
 

@@ -830,6 +830,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 					TransformationF(lTransformation.GetOrientation() * lPhysOrientation,
 						lTransformation.GetPosition());
 				ForceSetFullPosition(*lNewPlacement, mPhysics->GetBoneGeometry(mPhysics->GetRootBone()));
+				delete lNewPlacement;
 			}
 		}
 	}

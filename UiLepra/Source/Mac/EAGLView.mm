@@ -83,9 +83,9 @@ static EAGLView* gSharedView;
 	[super dealloc];
 }
 
-- (int)setOrientationStrictness:(int)strictness
+- (void)setOrientationStrictness:(int)strictness
 {
-	if (_preResponderStrictness >= 0)
+	if (_preResponderStrictness <= -1)
 	{
 		_orientationStrictness = strictness;
 	}
@@ -258,6 +258,8 @@ static EAGLView* gSharedView;
 -(BOOL) resignFirstResponder
 {
 	_orientationStrictness = _preResponderStrictness;
+	_preResponderStrictness = -1;
+	[self orientationDidChange:nil];
 	return [super resignFirstResponder];
 }
 
