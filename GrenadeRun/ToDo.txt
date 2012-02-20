@@ -112,6 +112,12 @@ Inform on what position one arrived when entering hiscore.
 Make it so that the add hiscore server only adds score if it's higher with the same name (update), or if name not present.
 Remove scale factor 1.5 entirely! This will yield faster pace and more fun.
 Add visual feedback on launcher motor strengths. Use "from touch digit to indicator lines".
+Reduce time between rounds?
+When returning from background to enter hiscore, orientation is allowed to change. Set strictness during entry instead of powerDownAcc.
+Remove the info texts after resume (not after two seconds)!
+Reduce cube size by 33.33%.
+Increase cube friction.
+Drop slow-mo when super-resetting.
 
 Computer demo
 -------------
@@ -128,6 +134,9 @@ Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
+Remove store fetching, simply do direct purchase using the hard-coded IDs.
+Word Caps on hiscore isn't working.
+Place cubes beside each other.
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.

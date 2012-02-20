@@ -24,7 +24,7 @@ static EAGLView* gSharedView;
 @synthesize canvas = _canvas;
 @synthesize isOpen;
 @synthesize responder;
-@synthesize orientationStrictness;
+@synthesize orientationStrictness = _orientationStrictness;
 @synthesize inputManager;
 // UITextInputTraits protocol:
 @synthesize autocapitalizationType;
@@ -59,7 +59,8 @@ static EAGLView* gSharedView;
 	gSharedView = self;
 	isOpen = false;
 	responder = nil;
-	orientationStrictness = 1;
+	_orientationStrictness = 1;
+	_preResponderStrictness = _orientationStrictness;
 
 	autocapitalizationType = UITextAutocapitalizationTypeWords;
 	autocorrectionType = UITextAutocorrectionTypeNo;
@@ -213,11 +214,11 @@ static EAGLView* gSharedView;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-	if (orientationStrictness >= 2)
+	if (_orientationStrictness >= 2)
 	{
 		return NO;
 	}
-	else if (orientationStrictness == 1)
+	else if (_orientationStrictness == 1)
 	{
 		return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft ||
 			interfaceOrientation == UIInterfaceOrientationLandscapeRight);
@@ -246,13 +247,14 @@ static EAGLView* gSharedView;
 
 -(BOOL) becomeFirstResponder
 {
-	[self powerDownAcc];
+	_preResponderStrictness = _orientationStrictness;
+	_orientationStrictness = 2;
 	return [super becomeFirstResponder];
 }
 
 -(BOOL) resignFirstResponder
 {
-	[self powerUpAcc];
+	_orientationStrictness = _preResponderStrictness;
 	return [super resignFirstResponder];
 }
 

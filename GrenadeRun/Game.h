@@ -162,6 +162,7 @@ public:
 	void NextRound();
 	int GetRoundIndex() const;
 	float GetVehicleStartHealth(int pRoundIndex) const;
+	void EndSlowmo();
 
 	void SyncCameraPositions();
 	bool Render();

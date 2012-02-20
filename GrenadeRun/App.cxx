@@ -954,9 +954,9 @@ bool App::Poll()
 
 	if (mGameOverTimer.IsStarted())
 	{
-		if (mGameOverTimer.QueryTimeDiff() > 13.0 ||
+		if (mGameOverTimer.QueryTimeDiff() > 11.0 ||
 			(mGame->GetComputerIndex() == 1 && mGame->GetCutie()->GetHealth() <= 0 && mGameOverTimer.QueryTimeDiff() > 7.0) ||
-			(mGame->GetComputerIndex() == 0 && mGameOverTimer.QueryTimeDiff() > 10.0))
+			(mGame->GetComputerIndex() == 0 && mGameOverTimer.QueryTimeDiff() > 9.0))
 		{
 			const int lHeartBalance = mGame->GetHeartBalance();
 			if ((lHeartBalance == -HEART_POINTS/2 || lHeartBalance == +HEART_POINTS/2) &&	// Somebody won.
@@ -2394,6 +2394,7 @@ void App::UpdateHiscore(bool pError)
 	typedef Cure::HiscoreAgent::List HiscoreList;
 	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
 	str lHiscore;
+	int lPositionDigits = 1;
 	for (int x = 0; x < (int)lHiscoreList.mEntryList.size() && x < 10; ++x)
 	{
 		const int lPlace = x + 1 + lHiscoreList.mOffset;
@@ -2406,7 +2407,7 @@ void App::UpdateHiscore(bool pError)
 			lPointer  = '>';
 			lPointer2 = '<';
 		}
-		int lPositionDigits = (int)::ceil(::log(lPlace+6.6f));
+		lPositionDigits = (int)::ceil(::log(lPlace+6.6f));
 		const str lFormatPlace = strutil::Format(_T("%i"), lPositionDigits);
 		lHiscore += strutil::Format((_T("%c%")+lFormatPlace+_T("i %-13s %10s%c\n")).c_str(), lPointer, lPlace, lEntry.mName.c_str(), lScore.c_str(), lPointer2);
 	}
@@ -2418,7 +2419,11 @@ void App::UpdateHiscore(bool pError)
 	lText->SetFontId(mMonospacedFontId);
 	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
 	lText->SetText(lHiscore, FGCOLOR_DIALOG, CLEAR_COLOR);
-	mDialog->AddChild(lText, 100, 75);
+	const UiTbc::FontManager::FontId lPreviousFontId = mUiManager->GetFontManager()->GetActiveFontId();
+	mUiManager->GetFontManager()->SetActiveFont(mMonospacedFontId);
+	const int lCharWidth = mUiManager->GetFontManager()->GetStringWidth(_T(" "));
+	mUiManager->GetFontManager()->SetActiveFont(lPreviousFontId);
+	mDialog->AddChild(lText, 110 - lPositionDigits/2 * lCharWidth, 75);
 }
 
 void App::HiscoreMenu(int pDirection)
@@ -2516,6 +2521,7 @@ void App::SuperReset(bool pGameOver)
 	mSteering = 0;
 	mBaseSteering = 0;
 	mGame->SyncCameraPositions();
+	mGame->EndSlowmo();
 	if (pGameOver)
 	{
 		// Total game over (someone won the match)?
@@ -2929,6 +2935,10 @@ void App::OnPauseAction(UiTbc::Button* pButton)
 {
 	mPlayer1LastTouch.PopTimeDiff();
 	mPlayer2LastTouch.PopTimeDiff();
+	mPlayer1TouchDelay.PopTimeDiff();
+	mPlayer1TouchDelay.ReduceTimeDiff(-10);
+	mPlayer2TouchDelay.PopTimeDiff();
+	mPlayer2TouchDelay.ReduceTimeDiff(-10);
 
 	mIsPaused = false;
 	if (pButton->GetTag() == 2)

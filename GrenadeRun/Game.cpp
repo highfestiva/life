@@ -139,6 +139,7 @@ bool Game::Tick()
 	}
 	if (mSlowmoTimer.IsStarted() && mSlowmoTimer.QueryTimeDiff() > 4.0f)
 	{
+		mSlowmoTimer.Stop();
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
 	}
 
@@ -691,6 +692,11 @@ float Game::GetVehicleStartHealth(int pRoundIndex) const
 		return 1;
 	}
 	return ::pow(HEALTH_ROUND_FACTOR, pRoundIndex/2);
+}
+
+void Game::EndSlowmo()
+{
+	mSlowmoTimer.ReduceTimeDiff(-20);
 }
 
 
