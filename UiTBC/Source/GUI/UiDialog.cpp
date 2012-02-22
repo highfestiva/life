@@ -244,6 +244,7 @@ void Dialog::OnClick(Button* pButton)
 		{
 			mPreClickTarget(pButton);
 		}
+		GetTopParent()->ReleaseKeyboardFocus(RECURSE_DOWN);
 		mClickedButton = pButton;
 		mAnimationStep = -SPEED * mDirection;
 		mIsClosing = true;

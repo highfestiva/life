@@ -368,11 +368,14 @@ float Game::GetMuzzleVelocity() const
 
 float Game::GetLauncherLockPercent() const
 {
+	float lValue = 1;
 	if (mLaucherLockWatch.IsStarted())
 	{
-		return (float)mLaucherLockWatch.GetTimeDiff() / GRENADE_RELAUNCH_DELAY;
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		lValue = std::min(1.0f, (float)mLaucherLockWatch.GetTimeDiff() * lRealTimeRatio / GRENADE_RELAUNCH_DELAY);
 	}
-	return 1.0f;
+	return lValue;
 }
 
 bool Game::IsLauncherBarrelFree() const

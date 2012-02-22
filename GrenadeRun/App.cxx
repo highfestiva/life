@@ -149,7 +149,8 @@ public:
 	void OnPreHiscoreAction(UiTbc::Button* pButton);
 	void OnPreEnterAction(UiTbc::Button* pButton);
 	void OnCreditsAction(UiTbc::Button* pButton);
-	void OnPauseClick(UiTbc::Button*);
+	void DoPause();
+	void OnPauseClickWithSound(UiTbc::Button* pButton);
 	void OnPauseAction(UiTbc::Button* pButton);
 	void OnGetiPhoneClick(UiTbc::Button*);
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
@@ -283,7 +284,6 @@ public:
 			const str lText = strutil::Strip(GetText(), _T(" \t\v\r\n"));
 			if (!lText.empty())
 			{
-				ReleaseKeyboardFocus();
 				mApp->mDialog->Dismiss();
 				b = true;
 			}
@@ -489,7 +489,7 @@ bool App::Open()
 		mPauseButton->SetPreferredSize(PixelCoord(44, 44), false);
 		mPauseButton->SetSize(mPauseButton->GetPreferredSize());
 		mPauseButton->SetVisible(true);
-		mPauseButton->SetOnClick(App, OnPauseClick);
+		mPauseButton->SetOnClick(App, OnPauseClickWithSound);
 
 #ifndef LEPRA_TOUCH_LOOKANDFEEL
 		mGetiPhoneButton = ICONBTNA("btn_iphone.png", "");
@@ -1178,7 +1178,7 @@ void App::DrawHud()
 				DrawMeter(x, (int)(m+lMeterHalfWidth), -PIF/2, METER_HEIGHT, v0, v1);
 			}
 			InfoText(1, _T("Throttle/brake"), 0, 14, 0);
-			DrawTapIndicator(1, 22, -(int)(mThrottle*(METER_HEIGHT/2-1.3f))-1, -PIF/2);
+			DrawTapIndicator(1, 24, -(int)(mThrottle*(METER_HEIGHT/2-1.3f))-1, -PIF/2);
 			DrawImage(mArrow->GetData(), x+m+mw-2,		m+lMeterHalfWidth, aw, ah, -PIF/2);
 			DrawImage(mArrow->GetData(), x-m-mw+1.5f,	m+lMeterHalfWidth, aw, ah, +PIF/2);
 
@@ -1200,7 +1200,7 @@ void App::DrawHud()
 				DrawMeter((int)(m+lMeterHalfWidth), y, 0, METER_HEIGHT, v0, v1);
 			}
 			InfoText(1, _T("Throttle/brake"), PIF/2, 0, -14);
-			DrawTapIndicator(1, 22, -(int)(mThrottle*(METER_HEIGHT/2-1.3f))-1, 0);
+			DrawTapIndicator(1, 24, -(int)(mThrottle*(METER_HEIGHT/2-1.3f))-1, 0);
 			DrawImage(mArrow->GetData(), m+lMeterHalfWidth+1,	y-m-mw+1,	aw, ah, 0);
 			DrawImage(mArrow->GetData(), m+lMeterHalfWidth,	y+m+mw-2,	aw, ah, PIF);
 
@@ -1331,7 +1331,7 @@ void App::DrawHud()
 		const float lLiftThrottle = mGame->GetLauncher()->GetPhysics()->GetEngine(0)->GetValue();
 		const float lCenteredValue = (mGame->GetComputerIndex() == 0)? lValue1*2-1 : -(lValue1*2-1);
 		const int lLiftOffset = (int)((BARREL_COMPASS_HEIGHT-4)*lCenteredValue/2 + 9*lLiftThrottle);
-		DrawTapIndicator(3, 22, lLiftOffset, lDrawAngle+PIF/2);
+		DrawTapIndicator(3, 24, lLiftOffset, lDrawAngle+PIF/2);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle+PIF/2);
 		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF/2);
 
@@ -1388,7 +1388,7 @@ void App::DrawHud()
 		const float lRotateThrottle = mGame->GetLauncher()->GetPhysics()->GetEngine(1)->GetValue();
 		const float lCenteredRotation = (mGame->GetComputerIndex() == 0)? lValue1*2-1 : -(lValue1*2-1);
 		const int lRotateOffset = (int)((BARREL_COMPASS_HEIGHT-4)*lCenteredRotation/2 - 9*lRotateThrottle);
-		DrawTapIndicator(4, +22, lRotateOffset, lDrawAngle);
+		DrawTapIndicator(4, +24, lRotateOffset, lDrawAngle);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle);
 		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF);
 	}
@@ -1649,15 +1649,18 @@ void App::DrawMeter(int x, int y, float pAngle, float pSize, float pMinValue, fl
 void App::DrawTapIndicator(int pTag, int dx, int dy, float pAngle) const
 {
 	pAngle = -pAngle;
+	if (mFlipDraw)
+	{
+		//dx = -dx;
+		//dy = -dy;
+		pAngle += PIF;
+	}
 	Vector2DF lPoint((float)dx, (float)dy);
 	lPoint.RotateAround(Vector2DF(), pAngle);
 	int x = (int)(mPenX + lPoint.x);
 	int y = (int)(mPenY + lPoint.y);
 	int x2 = x + (int)(20*::cos(pAngle));
 	int y2 = y + (int)(20*::sin(pAngle));
-	float lAngle = pAngle;
-	Transpose(x2, y2, lAngle);
-	Transpose(x, y, pAngle);
 	mUiManager->GetPainter()->SetColor(WHITE);
 	FingerMoveList::iterator i = gFingerMoveList.begin();
 	for (; i != gFingerMoveList.end(); ++i)
@@ -1668,7 +1671,7 @@ void App::DrawTapIndicator(int pTag, int dx, int dy, float pAngle) const
 		}
 		int x3 = i->mLastY;
 		int y3 = mUiManager->GetCanvas()->GetHeight() - i->mLastX;
-		Transpose(x3, y3, lAngle);
+		//Transpose(x3, y3, lAngle);
 		mUiManager->GetPainter()->DrawLine(x3, y3, x2, y2);
 		mUiManager->GetPainter()->DrawLine(x2, y2, x, y);
 	}
@@ -1859,7 +1862,7 @@ void App::Suspend()
 	{
 		mMusicPlayer->Pause();
 	}
-	OnPauseClick(0);
+	DoPause();
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
 #endif // iOS
@@ -2190,8 +2193,8 @@ int App::PollTap(FingerMovement& pMovement)
 	y = h-y;
 	lStartY = h-lStartY;
 	const float m = BUTTON_MARGIN;
-	const float lSingleWidth = (m*2 + BUTTON_WIDTH) * 1.5f;
-	const float lDoubleWidth = (m*3 + BUTTON_WIDTH*2) * 1.5f;
+	const float lSingleWidth = 130;
+	const float lDoubleWidth = 190;
 	const float s = lDoubleWidth / 2;
 	enum Directive
 	{
@@ -2208,7 +2211,7 @@ int App::PollTap(FingerMovement& pMovement)
 	if (mGame->GetComputerIndex() != -1)
 	{
 		// Single play, both Cutie and Launcher.
-		if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// Up/down?
+		if (lStartX <= lDoubleWidth && lStartY >= h-lDoubleWidth)	// Up/down?
 		{
 			directive = DIRECTIVE_UP_DOWN;
 			lValue = SCALEUP((lStartY-y)/s);
@@ -2256,7 +2259,7 @@ int App::PollTap(FingerMovement& pMovement)
 			directive = DIRECTIVE_UP_DOWN;
 			lValue = CLAMPUP((x-lStartX)/s);
 		}
-		else if (lStartX >= w-lDoubleWidth && lStartY <= lDoubleWidth)	// P1 left/right?
+		else if (lStartX >= w-lDoubleWidth && lStartY <= lSingleWidth)	// P1 left/right?
 		{
 			lIsRightControls = true;
 			directive = DIRECTIVE_LEFT_RIGHT;
@@ -2395,10 +2398,13 @@ void App::UpdateHiscore(bool pError)
 	typedef Cure::HiscoreAgent::List HiscoreList;
 	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
 	str lHiscore;
-	int lPositionDigits = 1;
-	for (int x = 0; x < (int)lHiscoreList.mEntryList.size() && x < 10; ++x)
+	const int lBasePlace = lHiscoreList.mOffset;
+	const int lEntryCount = 10;
+	const double lLogExponent = ::log10((double)(lBasePlace+lEntryCount)) + 1e-12;
+	const int lPositionDigits = (int)::floor(lLogExponent) + 1;
+	for (int x = 0; x < (int)lHiscoreList.mEntryList.size() && x < lEntryCount; ++x)
 	{
-		const int lPlace = x + 1 + lHiscoreList.mOffset;
+		const int lPlace = x + 1 + lBasePlace;
 		const HiscoreEntry& lEntry = lHiscoreList.mEntryList[x];
 		const str lScore = Int2Str(lEntry.mScore);
 		char lPointer = ' ';
@@ -2408,7 +2414,6 @@ void App::UpdateHiscore(bool pError)
 			lPointer  = '>';
 			lPointer2 = '<';
 		}
-		lPositionDigits = (int)::ceil(::log(lPlace+6.6f));
 		const str lFormatPlace = strutil::Format(_T("%i"), lPositionDigits);
 		// TRICKY: ugly circumvention for string that won't vswprintf()!
 		str lName = lEntry.mName;
@@ -2681,6 +2686,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		case 4:
 		{
 			UiTbc::Dialog* d = CreateTbcDialog(&App::OnCreditsAction);
+			d->SetOffset(PixelCoord(0, -30));
 			d->SetQueryLabel(_T("Credits"), mBigFontId);
 			UiTbc::Label* lText = new UiTbc::Label;
 			lText->SetFontId(mMonospacedFontId);
@@ -2688,11 +2694,14 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 			lText->SetText(
 					_T("Game    Pixel Doctrine\n")
 					_T("Music   Jonas Kapla\n")
-					_T("Thanks  ODE, STLport, ChibiXM, Ogg/Vorbis,\n")
-					_T("        OpenAL, ALUT, libpng, Minizip,\n")
-					_T("        zlib, FastDelegate, UTF-8 CPP,\n")
-					_T("        DMI, freesound, HappyHTTP, GAE"), FGCOLOR_DIALOG, CLEAR_COLOR);
-			d->AddChild(lText, 70, 110);
+					_T("Thanks  ODE, STLport, ChibiXM, Ogg/Vorbis, OpenAL, ALUT\n")
+					_T("        libpng, Minizip, zlib, FastDelegate, UTF-8 CPP,\n")
+					_T("        DMI, freesound, HappyHTTP, GAE, Python, py-cgkit\n")
+					_T("\n")
+					_T("Idiots kill civilians for real. Visit Avaaz.org if you\n")
+					_T("too belive media attention eventually can crush tyrans."),
+					FGCOLOR_DIALOG, CLEAR_COLOR);
+			d->AddChild(lText, 25, 85);
 			UiTbc::Button* lBackButton = new UiTbc::CustomButton(_T("back"));
 			lBackButton->SetPreferredSize(d->GetPreferredSize());
 			d->AddButton(-1, lBackButton);
@@ -2916,7 +2925,6 @@ void App::OnPreHiscoreAction(UiTbc::Button* pButton)
 void App::OnPreEnterAction(UiTbc::Button* pButton)
 {
 	OnTapSound(pButton);
-	mDialog->ReleaseKeyboardFocus();
 }
 
 void App::OnCreditsAction(UiTbc::Button* /*pButton*/)
@@ -2924,14 +2932,12 @@ void App::OnCreditsAction(UiTbc::Button* /*pButton*/)
 	MainMenu();
 }
 
-void App::OnPauseClick(UiTbc::Button* pButton)
+void App::DoPause()
 {
 	if (mIsPaused || mDialog)
 	{
 		return;
 	}
-	OnTapSound(pButton);
-
 	mIsPaused = true;
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, _T("Resume"));
@@ -2940,6 +2946,16 @@ void App::OnPauseClick(UiTbc::Button* pButton)
 		d->AddButton(2, _T("Restart"));
 	}
 	d->AddButton(3, _T("Main menu"));
+}
+
+void App::OnPauseClickWithSound(UiTbc::Button* pButton)
+{
+	if (mIsPaused || mDialog)
+	{
+		return;
+	}
+	OnTapSound(pButton);
+	DoPause();
 }
 
 void App::OnPauseAction(UiTbc::Button* pButton)
