@@ -2391,7 +2391,7 @@ void App::UpdateHiscore(bool pError)
 		UiTbc::Label* lText = new UiTbc::Label;
 		lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
 		lText->SetText(_T("Network problem, try again l8r."), LIGHT_RED, CLEAR_COLOR);
-		mDialog->AddChild(lText, 120, 75);
+		mDialog->AddChild(lText, 135, 75);
 		return;
 	}
 	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
@@ -2675,6 +2675,10 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		{
 			// 2P
 			mGame->SetComputerIndex(-1);
+#ifdef LEPRA_TOUCH
+			// Dual play requires original canvas orientation.
+			mUiManager->GetCanvas()->SetOutputRotation(90);
+#endif // Touch
 		}
 		break;
 		case 3:

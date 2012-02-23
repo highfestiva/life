@@ -196,13 +196,13 @@ void LauncherAi::OnTick()
 			else if (lDifficulty <= 0.3f)
 			{
 				// Poor player spreads 'em a lot.
-				const float o = 7*SCALE_FACTOR / (0.8f+lDifficulty*8);
+				const float o = 12*SCALE_FACTOR / (0.8f+lDifficulty*8);
 				mTargetOffset.Set((float)Random::Uniform(-o, o), (float)Random::Uniform(-o, o), 0);
 			}
 			else
 			{
 				// Average computer player always spreads 'em a little.
-				const float o = 2*SCALE_FACTOR;
+				const float o = 4*SCALE_FACTOR;
 				mTargetOffset.Set((float)Random::Uniform(-o, o), (float)Random::Uniform(-o, o), 0);
 			}
 		}

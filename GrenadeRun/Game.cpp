@@ -414,8 +414,8 @@ void Game::AddScore(double pCutieScore, double pLauncherScore)
 	{
 		return;
 	}
-	// Difficulty: multiply by lerp(1, 3.5) ^ 2, with some factor...
-	double lDifficultyFactor = (mComputerDifficulty * 2.5 + 1.0);
+	// Difficulty: multiply by lerp(1, 4) ^ 2, with some factor...
+	double lDifficultyFactor = (mComputerDifficulty * 3.0 + 1.0);
 	lDifficultyFactor *= lDifficultyFactor;
 	if (mComputerIndex == 1)
 	{
