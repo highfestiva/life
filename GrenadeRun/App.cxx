@@ -425,6 +425,9 @@ bool App::Open()
 
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, false);
+#ifdef LEPRA_IOS
+	[AnimatedApp updateContent];
+#endif // iOS
 #ifdef LEPRA_DEBUG
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
@@ -1706,9 +1709,12 @@ void App::DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue
 	int lValue2 = (int)((pValue2-0.5f)*-lWidth);
 	mUiManager->GetPainter()->SetColor(RED);
 	--lValue2;
-	mUiManager->GetPainter()->DrawLine((int)(x+lValue2*ca), (int)(y-s2*ca+lValue2*sa), (int)(x+lValue2*ca-s2*sa), (int)(y+lValue2*sa));
-	lValue2 += 2;
-	mUiManager->GetPainter()->DrawLine((int)(x+lValue2*ca), (int)(y-s2*ca+lValue2*sa), (int)(x+lValue2*ca-s2*sa), (int)(y+lValue2*sa));
+	int xca = (int)(lValue2*ca);
+	int ysa = (int)(lValue2*sa);
+	mUiManager->GetPainter()->DrawLine(x+xca, y+ysa-(int)(s2*ca), x+xca-(int)(s2*sa), y+ysa);
+	xca += Math::Round(2*ca);
+	ysa += Math::Round(2*sa);
+	mUiManager->GetPainter()->DrawLine(x+xca, y+ysa-(int)(s2*ca), x+xca-(int)(s2*sa), y+ysa);
 	mUiManager->GetPainter()->SetColor(WHITE);
 	mUiManager->GetPainter()->DrawLine((int)(x+lValue1*ca+s2*sa), (int)(y-s2*ca+lValue1*sa), (int)(x+lValue1*ca-s2*sa), (int)(y+s2*ca+lValue1*sa));
 }
@@ -2192,7 +2198,6 @@ int App::PollTap(FingerMovement& pMovement)
 	lStartY = Math::Clamp(lStartY, lTapMargin, h-lTapMargin);*/
 	y = h-y;
 	lStartY = h-lStartY;
-	const float m = BUTTON_MARGIN;
 	const float lSingleWidth = 130;
 	const float lDoubleWidth = 190;
 	const float s = lDoubleWidth / 2;
@@ -2242,7 +2247,7 @@ int App::PollTap(FingerMovement& pMovement)
 			directive = DIRECTIVE_UP_DOWN;
 			lValue = SCALEUP((x-lStartX)/s);
 		}
-		else if (lStartX <= lDoubleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
+		else if (lStartX <= lDoubleWidth && lStartY >= h-lSingleWidth)	// P1 left/right?
 		{
 			directive = DIRECTIVE_LEFT_RIGHT;
 			lValue = SCALEUP((y-lStartY)/s);
@@ -2703,7 +2708,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 					_T("        DMI, freesound, HappyHTTP, GAE, Python, py-cgkit\n")
 					_T("\n")
 					_T("Idiots kill civilians for real. Visit Avaaz.org if you\n")
-					_T("too belive media attention eventually can crush tyrans."),
+					_T("too belive media attention eventually can crush tyrants."),
 					FGCOLOR_DIALOG, CLEAR_COLOR);
 			d->AddChild(lText, 25, 85);
 			UiTbc::Button* lBackButton = new UiTbc::CustomButton(_T("back"));

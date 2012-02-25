@@ -5,6 +5,7 @@
 
 
 #include "Game.h"
+//#include <math.h>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
 #include "../Cure/Include/FloatAttribute.h"
@@ -29,7 +30,7 @@
 
 
 
-#define GRENADE_RELAUNCH_DELAY	2.4f
+#define GRENADE_RELAUNCH_DELAY	2.7f
 
 
 
@@ -156,7 +157,7 @@ bool Game::Tick()
 	if (mVehicle && mVehicle->IsLoaded())
 	{
 		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, -1);
-		if (lPosition.z < -50)
+		if (lPosition.z < -50 || lPosition.z > 100 /*|| isnan(lPosition.z) || isinf(lPosition.z)*/)
 		{
 			const float lHealth = mVehicle->GetHealth();
 			const str lVehicleType = mVehicle->GetClassId();	// TRICKY: don't fetch reference!!!
@@ -223,7 +224,7 @@ void Game::SetVehicle(const str& pVehicle)
 {
 	mAllowWin = true;
 	if (mVehicle && mVehicle->IsLoaded() &&
-		mVehicle->GetPosition().GetDistance(GetCutieStart().GetPosition()) < 3.0f*SCALE_FACTOR &&
+		mVehicle->GetPosition().GetDistance(GetCutieStart().GetPosition()) < 2.0f*SCALE_FACTOR &&
 		mVehicle->GetClassId() == pVehicle &&
 		mVehicle->GetHealth() > 0)
 	{

@@ -161,14 +161,25 @@ void Cutie::OnTick()
 		return;
 	}
 	// Allow collisions with body.
+	const Vector3DF lPosition = GetPosition();
 	const int lBoneCount = GetPhysics()->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
 		TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
 		if (lWheel->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
 		{
-			GetManager()->RemovePhysicsBody(lWheel->GetBodyId());
-			GetManager()->GetGameManager()->GetPhysicsManager()->SetForceFeedbackListener(lWheel->GetBodyId(), 0);
+			const Vector3DF lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
+			if (GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(lWheel->GetBodyId()) &&
+				lPosition.GetDistanceSquared(lWheelPosition) >= 5*5)
+			{
+				GetManager()->RemovePhysicsBody(lWheel->GetBodyId());
+				GetManager()->GetGameManager()->GetPhysicsManager()->SetForceFeedbackListener(lWheel->GetBodyId(), 0);
+			}
+			else
+			{
+				// Come back later for this one.
+				mWheelExpelTickCount = 1;
+			}
 		}
 	}
 }

@@ -28,6 +28,7 @@ using namespace Lepra;
 
 @property(nonatomic, retain) SKProduct* requestedProduct;
 
+-(void) updateContent;
 -(id) init:(Canvas*)pCanvas;
 -(void) dealloc;
 -(void) startTick;
@@ -40,7 +41,6 @@ using namespace Lepra;
 -(void) restoreTransaction:(SKPaymentTransaction*)transaction;
 -(void) failedTransaction: (SKPaymentTransaction*)transaction;
 -(void) provideContent:(NSString*)productIdentifier confirm:(BOOL)confirm;
--(void) updateContent;
 @end
 #endif // iOS
 
@@ -58,11 +58,21 @@ using namespace Lepra;
 
 @synthesize requestedProduct = _requestedProduct;
 
++(void) updateContent
+{
+	NSUserDefaults* lDefaults = [NSUserDefaults standardUserDefaults];
+
+	NSInteger hasLevels = [lDefaults integerForKey:@ CONTENT_LEVELS];
+	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasLevels == 1));
+
+	NSInteger hasVehicles = [lDefaults integerForKey:@ CONTENT_VEHICLES];
+	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_VEHICLES, (hasVehicles == 1));
+}
+
 -(id) init:(Canvas*)pCanvas
 {
 	_canvas = pCanvas;
 	_animationTimer = nil;
-	[self updateContent];
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 	return self;
 }
@@ -286,17 +296,6 @@ using namespace Lepra;
 		[self alertViewCancel:nil];
 	}
 
-}
-
--(void) updateContent
-{
-	NSUserDefaults* lDefaults = [NSUserDefaults standardUserDefaults];
-
-	NSInteger hasLevels = [lDefaults integerForKey:@ CONTENT_LEVELS];
-	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasLevels == 1));
-
-	NSInteger hasVehicles = [lDefaults integerForKey:@ CONTENT_VEHICLES];
-	CURE_RTVAR_SET(GrenadeRun::App::GetApp()->mVariableScope, RTVAR_CONTENT_VEHICLES, (hasVehicles == 1));
 }
 
 -(void) alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
