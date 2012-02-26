@@ -1711,8 +1711,8 @@ void App::DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue
 	int xca = (int)(lValue2*ca);
 	int ysa = (int)(lValue2*sa);
 	mUiManager->GetPainter()->DrawLine(x+xca, y+ysa-(int)(s2*ca), x+xca-(int)(s2*sa), y+ysa);
-	xca += Math::Round(2*ca);
-	ysa += Math::Round(2*sa);
+	xca += (int)Math::Round(2*ca);
+	ysa += (int)Math::Round(2*sa);
 	mUiManager->GetPainter()->DrawLine(x+xca, y+ysa-(int)(s2*ca), x+xca-(int)(s2*sa), y+ysa);
 	mUiManager->GetPainter()->SetColor(WHITE);
 	mUiManager->GetPainter()->DrawLine((int)(x+lValue1*ca+s2*sa), (int)(y-s2*ca+lValue1*sa), (int)(x+lValue1*ca-s2*sa), (int)(y+s2*ca+lValue1*sa));
@@ -1888,7 +1888,7 @@ void App::Resume()
 
 bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 {
-	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
+	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE || mDialog || mIsPaused)
 	{
 		return false;
 	}

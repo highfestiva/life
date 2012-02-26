@@ -451,7 +451,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 	if (pTarget == mLevel)
 	{
 		// Stones and mud. More if hit ground, less otherwise.
-		const int lParticleCount = (mLevel->GetStructureGeometry((unsigned)0)->GetBodyId() == pTargetBodyId)? 100 : 10;
+		const int lParticleCount = (mLevel->GetStructureGeometry((unsigned)0)->GetBodyId() == pTargetBodyId)? Random::GetRandomNumber()%50+50 : 10;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
@@ -467,6 +467,9 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
 			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
 			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * SCALE_FACTOR, 0.5f, (float)Random::Uniform(3, 7));
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
+			lPuff->SetFadeOutTime(0.3f);
+#endif // Touch L&F
 			lPuff->StartLoading();
 		}
 	}
