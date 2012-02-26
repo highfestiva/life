@@ -433,6 +433,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
 #endif // Debug
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
 	bool lOk = mUiManager->OpenDraw();

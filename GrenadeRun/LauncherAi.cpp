@@ -68,7 +68,7 @@ void LauncherAi::OnTick()
 	}
 	if (lDifficulty > 0.9f)
 	{
-		if (lCtfDistance < 45*SCALE_FACTOR)
+		if (lCtfDistance < 57*SCALE_FACTOR)
 		{
 			lHandled = true;
 			if (mShotCount > 2)
@@ -113,7 +113,7 @@ void LauncherAi::OnTick()
 	}
 	if (!lHandled && lHeadingTowardsCtf)
 	{
-		if (lCtfDistance < 140*SCALE_FACTOR)
+		if (lCtfDistance < 170*SCALE_FACTOR)
 		{
 			if (lTargetSpeed * 10 > lCtfDistance * 1.2f)
 			{

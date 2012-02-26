@@ -6,6 +6,8 @@ Bombulum - use the pendulum to push bombs off their respective "poles" befor the
 
 Car Jumpin'
 
+Sliding game. Hovercraft? Bob sleigh? Something of the kind...
+
 Construction vehicle game - fork lift, front loader, excavator... Build, move and demolish!
 
 Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
