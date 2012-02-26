@@ -9,6 +9,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import "../../Include/Mac/EAGLView.h"
+#import "../../../Lepra/Include/Posix/MacLog.h"
 #import "../../../Lepra/Include/StringUtility.h"
 
 static EAGLView* gSharedView;
@@ -304,9 +305,7 @@ static EAGLView* gSharedView;
 
 - (void)insertText:(NSString*)text
 {
-	const char* cString = [text UTF8String];
-	Lepra::astr utf8String(cString);
-	Lepra::str s = Lepra::strutil::Encode(utf8String);
+	Lepra::str s = Lepra::MacLog::Decode(text);
 	for (size_t x = 0; x < s.length(); ++x)
 	{
 		inputManager->NotifyOnChar(s[x]);

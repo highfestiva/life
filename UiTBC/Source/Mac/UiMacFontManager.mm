@@ -162,8 +162,8 @@ int MacFontManager::GetCharWidth(const tchar pChar) const
 	const float lCorrectedFontSize = mCurrentFont->mSize * FONT_SIZE_FACTOR;	// Similar to other platforms...
 	TBC_APPLE_FONT* lFont = [TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize];
 #ifdef LEPRA_IOS
-	astr lTempString = astrutil::Encode(lTempBigString);
-	CGSize lSize = [[NSString stringWithUTF8String:lTempString.c_str()] sizeWithFont:lFont];
+	NSString* tmpString = MacLog::Encode(wstr(lTempBigString));
+	CGSize lSize = [tmpString sizeWithFont:lFont];
 	--lSize.width;
 #else // !iOS
 	CGGlyph lGlyph;

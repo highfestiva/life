@@ -25,6 +25,7 @@ public:
 
 #ifdef __OBJC__
 	static NSString* Encode(const str& pText);
+	static str Decode(NSString* pText);
 #endif // Objective-C
 };
 

@@ -473,7 +473,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 
 	{
 		// Release gas puffs.
-		const int lParticleCount = 5;
+		const int lParticleCount = (Random::GetRandomNumber() % 4) + 2;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
@@ -538,7 +538,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			}
 			f *= ff;
 			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
-			if (lObject == mVehicle && x == 0)
+			if (lObject == mVehicle)
 			{
 				if (d > 0.6f)
 				{
@@ -554,7 +554,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 					// gain more points for every lap.
 					lScore = std::max(0.18-mComputerDifficulty, lScore);
 				}
-				lScore *= 141.421356;
+				lScore *= 70;
 				lScore = std::min(20000.0, lScore*lScore);
 				if (lDistance < 25*SCALE_FACTOR)
 				{

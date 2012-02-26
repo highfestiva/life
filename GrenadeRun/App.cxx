@@ -65,6 +65,7 @@
 #define CONTENT_VEHICLES		"vehicles"
 #define RTVAR_CONTENT_LEVELS		"Content.Levels"
 #define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
+#define RTVAR_HISCORE_NAME		"Hiscore.Name"	// Last entered name.
 
 
 namespace GrenadeRun
@@ -247,7 +248,6 @@ public:
 	int mHiscoreLevelIndex;
 	int mHiscoreVehicleIndex;
 	HiscoreTextField* mHiscoreTextField;
-	str mLastHiscoreName;
 	float mThrottle;
 	Cure::HiscoreAgent* mHiscoreAgent;
 	bool mIsPurchasing;
@@ -347,7 +347,6 @@ App::App(const strutil::strvec& pArgumentList):
 	mHiscoreVehicleIndex(0),
 	mHiscoreTextField(0),
 	mThrottle(0),
-	mLastHiscoreName(),
 	mHiscoreAgent(0),
 	mIsPurchasing(false),
 	mIsMoneyIconAdded(false),
@@ -2399,6 +2398,8 @@ void App::UpdateHiscore(bool pError)
 		mDialog->AddChild(lText, 135, 75);
 		return;
 	}
+	str lLastHiscoreName;
+	CURE_RTVAR_GET(lLastHiscoreName, =, mVariableScope, RTVAR_HISCORE_NAME, _T(""));
 	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
 	typedef Cure::HiscoreAgent::List HiscoreList;
 	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
@@ -2414,7 +2415,7 @@ void App::UpdateHiscore(bool pError)
 		const str lScore = Int2Str(lEntry.mScore);
 		char lPointer = ' ';
 		char lPointer2 = ' ';
-		if (mLastHiscoreName == lEntry.mName)
+		if (lLastHiscoreName == lEntry.mName)
 		{
 			lPointer  = '>';
 			lPointer2 = '<';
@@ -2510,7 +2511,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	}
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
-	mHiscoreTextField->SetText(mLastHiscoreName);
+	mHiscoreTextField->SetText(CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_HISCORE_NAME, _T("")));
 	mHiscoreTextField->SetPreferredSize(235, 25, false);
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 	d->AddChild(mHiscoreTextField, 90, 97);
@@ -2740,14 +2741,18 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 {
 	if (!pButton)
 	{
-		mLastHiscoreName = strutil::Strip(mHiscoreTextField->GetText(), _T(" \t\v\r\n"));
+		str lLastHiscoreName = strutil::Strip(mHiscoreTextField->GetText(), _T(" \t\v\r\n"));
 		mHiscoreTextField = 0;
-		if (!mLastHiscoreName.empty())
+		if (!lLastHiscoreName.empty())
 		{
+			CURE_RTVAR_SET(mVariableScope, RTVAR_HISCORE_NAME, lLastHiscoreName);
+#ifdef LEPRA_IOS
+			[AnimatedApp storeHiscoreName];
+#endif // iOS
 			const str lLevelName = gLevels[mHiscoreLevelIndex];
 			const str lVehicleName = gVehicles[mHiscoreVehicleIndex];
 			CreateHiscoreAgent();
-			if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, lVehicleName, mLastHiscoreName, (int)Math::Round(mGame->GetScore())))
+			if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, lVehicleName, lLastHiscoreName, (int)Math::Round(mGame->GetScore())))
 			{
 				delete mHiscoreAgent;
 				mHiscoreAgent = 0;
@@ -2792,6 +2797,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		mGame->ResetWinnerIndex();
 		mGame->SetVehicle(mGame->GetVehicle());
 		mGame->ResetLauncher();
+		mGame->SetComputerDifficulty(0);
 		return;
 	}
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnVehicleAction);
@@ -2821,7 +2827,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 				UiTbc::GUIImageManager::ALPHABLEND, 255);
 		}
 		UiTbc::Button* lScrollButton = ICONBTNA("btn_scroll.png", "");
-		lScrollButton->SetPreferredSize(PixelCoord(44, 44), false);
+		lScrollButton->SetPreferredSize(PixelCoord(57, 57), false);
 		mDifficultySlider = new UiTbc::ScrollBar(UiTbc::ScrollBar::HORIZONTAL,
 			mScrollBarImage->GetUserData(0), 0, 0, lScrollButton);
 		mDifficultySlider->SetScrollRatio(44, mScrollBarImage->GetRamData()->GetWidth());

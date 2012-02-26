@@ -28,6 +28,17 @@ NSString* MacLog::Encode(const str& pText)
 	return lText;
 }
 
+str MacLog::Decode(NSString* pText)
+{
+	if (pText == nil)
+	{
+		return str();
+	}
+	const char* cString = [pText UTF8String];
+	Lepra::astr lUtf8String(cString);
+	return Lepra::strutil::Encode(lUtf8String);
+}
+
 
 
 }

@@ -7,6 +7,7 @@
 #include "Ctf.h"
 #include "../Cure/Include/CppContextObject.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/RuntimeVariable.h"
 #include "../TBC/Include/PhysicsTrigger.h"
 #include "../UiCure/Include/UiCppContextObject.h"
 
@@ -107,6 +108,9 @@ void Ctf::OnTick()
 				lFactor *= Math::Lerp(0.4f, 1.0f, t*2);
 			}
 		}
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		lFactor *= lRealTimeRatio;
 		mFlagMesh->AddOffset(mCatchingFlagVelocity * lFactor);
 		if ((mFlagTop - mFlagMesh->GetOffsetTransformation().GetPosition()).Dot(mCatchingFlagVelocity) <= 0)
 		{
