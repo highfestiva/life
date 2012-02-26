@@ -772,7 +772,7 @@ bool Game::Render()
 		case 1:	mLeftRect = lFullRect;	break;	// Single player, to left.
 	}
 
-	const Vector3DF lLauncherPosition(0, -75.2f, 9.9f);
+	const Vector3DF lLauncherPosition(0, -75.2f, 10.5f);
 	mLauncher->SetRootPosition(lLauncherPosition);
 
 	// Yield smooth rotation when canvas orientation changed.

@@ -113,7 +113,7 @@ void LauncherAi::OnTick()
 	}
 	if (!lHandled && lHeadingTowardsCtf)
 	{
-		if (lCtfDistance < 130*SCALE_FACTOR)
+		if (lCtfDistance < 140*SCALE_FACTOR)
 		{
 			if (lTargetSpeed * 10 > lCtfDistance * 1.2f)
 			{

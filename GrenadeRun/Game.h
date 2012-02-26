@@ -75,7 +75,8 @@ struct FingerMovement
 		mDeltaY(0),
 		mMovedDistance(0),
 		mIsPress(true),
-		mTag(0)
+		mTag(0),
+		mTimer(false)
 	{
 	}
 

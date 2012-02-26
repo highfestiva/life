@@ -112,7 +112,7 @@ void Grenade::OnTick()
 		((Game*)GetManager()->GetGameManager())->GetLauncherTransform(lTransform);
 		const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 		const float lTime = lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mTimeFrameCreated));
-		const float lLauncherLength = 1.5f;
+		const float lLauncherLength = 1.1f;
 		float lRealTimeRatio;
 		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		float h = lLauncherLength/2+3 - lTime*lTime*4.0f*lRealTimeRatio;

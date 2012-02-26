@@ -21,10 +21,13 @@ namespace Lepra
 class HiResTimer
 {
 public:
-	inline HiResTimer();
+	inline HiResTimer(bool pIsManualUpdate = false);
 	inline HiResTimer(uint64 pCount);
 	inline HiResTimer(const HiResTimer& pTimer);
 	inline ~HiResTimer();
+
+	inline void EnableShadowCounter(bool pEnable);
+	inline void StepCounterShadow();
 
 	// Updates time, returns current time diff and resets time diff.
 	inline double PopTimeDiff();
@@ -65,6 +68,8 @@ public:
 	inline HiResTimer& operator += (const HiResTimer& pTimer);
 	inline HiResTimer& operator -= (const HiResTimer& pTimer);
 
+	inline uint64 GetSystemCounterShadow();
+
 	static inline void InitFrequency();
 	static inline int64 GetFrequency();
 	static inline double GetPeriod();
@@ -73,14 +78,17 @@ public:
 private:
 	uint64 mPrevCounter;
 	uint64 mCounter;
+	bool mIsManualUpdateEnabled;
 
 	static uint64 mFrequency;
 	static double mPeriod;
+	static uint64 mLastSystemCounter;
 };
 
-HiResTimer::HiResTimer() :
+HiResTimer::HiResTimer(bool pIsManualUpdate) :
 	mPrevCounter(0),
-	mCounter(0)
+	mCounter(0),
+	mIsManualUpdateEnabled(pIsManualUpdate)
 {
 	UpdateTimer();
 	mPrevCounter = mCounter;
@@ -88,18 +96,33 @@ HiResTimer::HiResTimer() :
 
 HiResTimer::HiResTimer(uint64 pCount) :
 	mPrevCounter(pCount),
-	mCounter(pCount)
+	mCounter(pCount),
+	mIsManualUpdateEnabled(false)
 {
 }
 
 HiResTimer::HiResTimer(const HiResTimer& pTimer) :
 	mPrevCounter(pTimer.mPrevCounter),
-	mCounter(pTimer.mCounter)
+	mCounter(pTimer.mCounter),
+	mIsManualUpdateEnabled(false)
 {
 }
 
 HiResTimer::~HiResTimer()
 {
+}
+
+void HiResTimer::EnableShadowCounter(bool pEnable)
+{
+	mIsManualUpdateEnabled = pEnable;
+}
+
+void HiResTimer::StepCounterShadow()
+{
+	const bool lEnabled = mIsManualUpdateEnabled;
+	mIsManualUpdateEnabled = false;
+	GetSystemCounterShadow();
+	mIsManualUpdateEnabled = lEnabled;
 }
 
 double HiResTimer::PopTimeDiff()
@@ -127,7 +150,7 @@ int64 HiResTimer::GetCounter() const
 
 void HiResTimer::UpdateTimer()
 {
-	mCounter = GetSystemCounter();
+	mCounter = GetSystemCounterShadow();
 }
 
 void HiResTimer::ClearTimeDiff()
@@ -203,6 +226,18 @@ HiResTimer& HiResTimer::operator -= (const HiResTimer& pTimer)
 
 
 
+uint64 HiResTimer::GetSystemCounterShadow()
+{
+	if (!mIsManualUpdateEnabled)
+	{
+		return GetSystemCounter();
+	}
+	mLastSystemCounter = GetSystemCounter();
+	return mLastSystemCounter;
+}
+
+
+
 void HiResTimer::InitFrequency()
 {
 #if defined(LEPRA_WINDOWS)
@@ -269,7 +304,7 @@ private:
 
 
 StopWatch::StopWatch():
-	Parent(0),
+	Parent((uint64)0),
 	mIsStarted(false),
 	mStartCount(0)
 {

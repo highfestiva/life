@@ -254,6 +254,7 @@ public:
 	bool mIsMoneyIconAdded;
 	UiCure::UserSound2dResource* mTapClick;
 	int mMyHiscoreIndex;
+	unsigned mFrameCounter;
 
 	LOG_CLASS_DECLARE();
 };
@@ -321,7 +322,7 @@ App::App(const strutil::strvec& pArgumentList):
 	mGame(0),
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
-	mAverageLoopTime(1.0/FPS),
+	mAverageLoopTime(1.0/(FPS+1)),
 	mIsLoaded(false),
 	mDoLayout(true),
 	mIsPaused(false),
@@ -350,7 +351,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mHiscoreAgent(0),
 	mIsPurchasing(false),
 	mIsMoneyIconAdded(false),
-	mMyHiscoreIndex(0)
+	mMyHiscoreIndex(0),
+	mFrameCounter(0)
 {
 	mApp = this;
 }
@@ -679,6 +681,17 @@ int App::Run()
 		MainMenu();
 		lOk = mResourceManager->InitDefault();
 	}
+	if (lOk)
+	{
+		mBootLogoTimer.EnableShadowCounter(true);
+		mLoopTimer.EnableShadowCounter(true);
+		mPlayer1LastTouch.EnableShadowCounter(true);
+		mPlayer2LastTouch.EnableShadowCounter(true);
+		mPlayer1TouchDelay.EnableShadowCounter(true);
+		mPlayer2TouchDelay.EnableShadowCounter(true);
+		mGameOverTimer.EnableShadowCounter(true);
+		mStartTimer.EnableShadowCounter(true);
+	}
 	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
 	bool lQuit = (SystemManager::GetQuitRequest() != 0);
@@ -717,6 +730,10 @@ bool App::Poll()
 	bool lOk = true;
 	if (lOk)
 	{
+		mLoopTimer.StepCounterShadow();
+	}
+	if (lOk)
+	{
 		if (2.0 - mBootLogoTimer.QueryTimeDiff() > 0)
 		{
 			Thread::Sleep(0.1);
@@ -727,13 +744,20 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
-		// Adjust frame rate, or it will be hopelessly high... on most reasonable platforms.
-		mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
+		if (++mFrameCounter > 2)
+		{
+			// Adjust frame rate, or it will be hopelessly high... on most reasonable platforms.
+			mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
+		}
 		const double lDelayTime = 1.0/FPS - mAverageLoopTime;
-		Thread::Sleep(lDelayTime);
+		if (lDelayTime > 0)
+		{
+			Thread::Sleep(lDelayTime);
+			mLoopTimer.StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
+		}
 		mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_TOUCH_LOOKANDFEEL
-		if (mAverageLoopTime > 1.0/(FPS-2))
+		if (mAverageLoopTime > 1.0/FPS)
 		{
 			if (++mSlowShadowCount > 20)
 			{
