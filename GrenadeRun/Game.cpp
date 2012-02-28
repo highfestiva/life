@@ -181,8 +181,8 @@ bool Game::Tick()
 	{
 		float lRealTimeRatio;
 		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * 0.01f * lRealTimeRatio;
-		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * 0.01f * lRealTimeRatio;
+		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f, false) * 0.01f * lRealTimeRatio;
+		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f, false) * 0.01f * lRealTimeRatio;
 		mLauncherYaw = Math::Clamp(mLauncherYaw, -PIF/2, PIF/2);
 		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF/2*0.6f, -PIF/90);
 		mLauncher->SetBarrelAngle(mLauncherYaw, mLauncherPitch);
@@ -557,7 +557,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 					// gain more points for every lap.
 					lScore = std::max(0.18-mComputerDifficulty, lScore);
 				}
-				lScore *= 70;
+				lScore *= 63;
 				lScore = std::min(20000.0, lScore*lScore);
 				if (lDistance < 25*SCALE_FACTOR)
 				{
@@ -571,7 +571,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				{
 					if (mAllowWin)
 					{
-						AddScore(-30000, lScore);
+						AddScore(-19000, lScore+4000);
 						mWinnerIndex = (mWinnerIndex != 0)? 1 : mWinnerIndex;
 					}
 				}
@@ -584,8 +584,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 	}
 	if (!lDidHitVehicle)
 	{
-		const Grenade* lGrenade = (Grenade*)pExplosive;
-		AddScore(+1000, lGrenade->IsUserFired()? -1000 : 0);
+		AddScore(+2000, -2000);
 	}
 }
 

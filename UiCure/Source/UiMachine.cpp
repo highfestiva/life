@@ -148,7 +148,7 @@ void Machine::OnTick()
 					continue;
 				}
 				TBC::PhysicsEngine* lEngine = lPhysics->GetEngine(lEngineIndex);
-				lJointValue = lEngine->GetLerpThrottle(0.1f, 0.1f);
+				lJointValue = lEngine->GetLerpThrottle(0.1f, 0.1f, false);
 			}
 			const float lScale = lTag.mFloatValueList[0];
 			const float lJointRightValue = lJointValue * lScale;
@@ -268,7 +268,7 @@ void Machine::OnTick()
 				if (lTag.mFloatValueList[FV_THROTTLE_FACTOR] > 0)
 				{
 					const float lThrottle =
-						::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed)) *
+						lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true) *
 						lTag.mFloatValueList[FV_THROTTLE_FACTOR];
 					lEngineIntensity *= lThrottle;
 					const float lCarburetorSound = ::fabs(lEngine->GetValue()) * 0.7f;

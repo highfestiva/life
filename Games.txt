@@ -2,11 +2,13 @@
 
 Kill Cutie
 
-Bombulum - use the pendulum to push bombs off their respective "poles" befor they blow up. Gravity is from the center in all directions. "Poles" are elevators that rise "up" towards the center.
+Bombulum - use the pendulum to push bombs off their respective "poles" befor they blow up. Gravity is from the center in all directions. "Poles" are elevators that rise "up" towards the center. "Gravity" is directly affected by the accelerometer.
 
 Car Jumpin'
 
 Sliding game. Hovercraft? Bob sleigh? Something of the kind...
+
+Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
 
 Construction vehicle game - fork lift, front loader, excavator... Build, move and demolish!
 
@@ -15,8 +17,6 @@ Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" butto
 Physical programming game - give instructions such as "push left 10" and "pop". Try to hit something? Use car, hovercraft, spaceship...
 
 Robo Arm - optimize a movement scheme to make the robot pick something up and move it to a designated area. Definition of done = object colliding with trigger and object velocity <= threshold.
-
-Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
 
 Space ship flight. Fly though predefined map, steer using swipe left/right/up/down? Or accelerometer? Fly close to ground, to give impression of moving VERY fast.
 

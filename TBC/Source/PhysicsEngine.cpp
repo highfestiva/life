@@ -560,10 +560,11 @@ float PhysicsEngine::GetMaxSpeed() const
 	return (mMaxSpeed);
 }
 
-float PhysicsEngine::GetLerpThrottle(float pUp, float pDown) const
+float PhysicsEngine::GetLerpThrottle(float pUp, float pDown, bool pAbs) const
 {
-	float& lLerpShadow = mSmoothValue[ASPECT_LOCAL_SHADOW];
-	const float lValue = GetPrimaryValue();
+	float& lLerpShadow = pAbs? mSmoothValue[ASPECT_LOCAL_SHADOW] : mSmoothValue[ASPECT_LOCAL_SHADOW_ABS];
+	float lValue = GetPrimaryValue();
+	lValue = pAbs? ::fabs(lValue) : lValue;
 	lLerpShadow = Math::Lerp(lLerpShadow, lValue, (lValue > lLerpShadow)? pUp : pDown);
 	return lLerpShadow;
 }

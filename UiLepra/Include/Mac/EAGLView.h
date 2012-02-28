@@ -46,7 +46,7 @@
 @property(nonatomic) UIKeyboardAppearance keyboardAppearance;
 @property(nonatomic) UIKeyboardType keyboardType;
 @property(nonatomic) UIReturnKeyType returnKeyType;
-@property(nonatomic) BOOL secureTextEntry;
+@property(nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry;
 //@property(nonatomic) UITextSpellCheckingType spellCheckingType;
 
 + (EAGLView*)sharedView;

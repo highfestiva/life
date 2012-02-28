@@ -175,6 +175,7 @@ public:
 	Game* mGame;
 
 	double mAverageLoopTime;
+	double mAverageFastLoopTime;
 	HiResTimer mLoopTimer;
 
 	struct InfoTextData
@@ -323,6 +324,7 @@ App::App(const strutil::strvec& pArgumentList):
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
 	mAverageLoopTime(1.0/(FPS+1)),
+	mAverageFastLoopTime(1.0/(FPS+1)),
 	mIsLoaded(false),
 	mDoLayout(true),
 	mIsPaused(false),
@@ -745,15 +747,18 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
+		const double lInstantLoopTime = mLoopTimer.QueryTimeDiff();
 		if (++mFrameCounter > 2)
 		{
 			// Adjust frame rate, or it will be hopelessly high... on most reasonable platforms.
-			mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
+			mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, lInstantLoopTime, 0.05);
+			mAverageFastLoopTime = Lepra::Math::Lerp(mAverageFastLoopTime, lInstantLoopTime, 0.7);
 		}
 		const double lDelayTime = 1.0/FPS - mAverageLoopTime;
 		if (lDelayTime > 0)
 		{
-			Thread::Sleep(lDelayTime);
+			Thread::Sleep(lDelayTime-0.001);
+			UiLepra::Core::ProcessMessages();
 			mLoopTimer.StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
 		}
 		mLoopTimer.PopTimeDiff();
@@ -762,11 +767,24 @@ bool App::Poll()
 		{
 			if (++mSlowShadowCount > 20)
 			{
-				// Shadows is not such a good idea on this computer.
+				// Shadows is not such a good idea on this system.
 				CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
+				mSlowShadowCount = 0;
 			}
 		}
-#endif // !Touch
+#endif // !Touch L&F
+		if (lInstantLoopTime >= 1.0/FPS && mAverageFastLoopTime > 1.0/FPS)
+		{
+			// This should be a temporary slow-down, due to something like rendering of
+			// lots of transparent OpenGL triangles.
+			CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, 1.0/mAverageFastLoopTime);
+		}
+		else
+		{
+			CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
+			mAverageFastLoopTime = lInstantLoopTime;	// Immediately drop back sliding average to current value when FPS is normal again.
+		}
+
 	}
 	if (lOk)
 	{
@@ -1211,7 +1229,7 @@ void App::DrawHud()
 
 			const float s = std::max(128.0f, h * 0.25f);
 			const TBC::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
-			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f) * -1.5f - PIF/2;
+			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f, false) * -1.5f - PIF/2;
 			DrawImage(mSteeringWheel->GetData(), s*0.15f, h-s*0.3f, s, s, a);
 			InfoText(1, _T("Left/right"), -PIF/2, 0, -10);
 		}
@@ -1229,11 +1247,11 @@ void App::DrawHud()
 			InfoText(1, _T("Throttle/brake"), PIF/2, 0, -14);
 			DrawTapIndicator(1, 24, -(int)(mThrottle*(METER_HEIGHT/2-1.3f))-1, 0);
 			DrawImage(mArrow->GetData(), m+lMeterHalfWidth+1,	y-m-mw+1,	aw, ah, 0);
-			DrawImage(mArrow->GetData(), m+lMeterHalfWidth,	y+m+mw-2,	aw, ah, PIF);
+			DrawImage(mArrow->GetData(), m+lMeterHalfWidth,		y+m+mw-2,	aw, ah, PIF);
 
 			const float s = w * 0.25f;
 			const TBC::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
-			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f) * -1.5f;
+			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f, false) * -1.5f;
 			DrawImage(mSteeringWheel->GetData(), w-s*0.3f, h-s*0.15f, s, s, a);
 			InfoText(1, _T("Left/right"), 0, -10, 0);
 		}

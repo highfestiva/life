@@ -56,7 +56,8 @@ public:
 		ASPECT_MAX_REMOTE_COUNT	= 4,
 
 		ASPECT_LOCAL_SHADOW	= 4,
-		ASPECT_LOCAL_PRIMARY	= 5,
+		ASPECT_LOCAL_SHADOW_ABS	= 5,
+		ASPECT_LOCAL_PRIMARY	= 6,
 		ASPECT_COUNT		= 8
 	};
 
@@ -85,7 +86,7 @@ public:
 	const float* GetValues() const;
 	float GetIntensity() const;
 	float GetMaxSpeed() const;
-	float GetLerpThrottle(float pUp, float pDown) const;
+	float GetLerpThrottle(float pUp, float pDown, bool pAbs) const;
 	bool HasEngineMode(EngineMode pMode) const;
 
 	unsigned GetChunkySize() const;

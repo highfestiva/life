@@ -102,7 +102,7 @@ using namespace Lepra;
 
 -(void) startTick
 {
-	_animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0225 target:self selector:@selector(tick) userInfo:nil repeats:YES];
+	_animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.005 target:self selector:@selector(tick) userInfo:nil repeats:YES];
 	[EAGLView sharedView].responder = self;
 	[[EAGLView sharedView] powerUpAcc];
 }
