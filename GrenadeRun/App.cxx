@@ -2423,7 +2423,7 @@ void App::MainMenu()
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"));
-	d->AddButton(3, _T("Hiscore"));
+	d->AddButton(2, ICONBTNA("btn_hiscore.png", "Hiscore"));
 	d->AddButton(4, _T("Credits"));
 }
 
@@ -2845,7 +2845,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	}
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnVehicleAction);
 	d->SetQueryLabel(_T("Select vehicle"), mBigFontId);
-	d->AddButton(1, gVehicles[0]);
+	d->AddButton(1, ICONBTN(_T("btn_cutie.png"), gVehicles[0]));
 	d->AddButton(2, gVehicles[1]);
 	d->AddButton(3, gVehicles[2]);
 	d->AddButton(4, gVehicles[3]);
