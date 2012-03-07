@@ -459,7 +459,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			lPuff->DisableRootShadow();
 			float x = (float)Random::Uniform(-1, 1);
 			float y = (float)Random::Uniform(-1, 1);
-			float z = 0;
+			float z = -1;
 			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
 			const float lAngle = (float)Random::Uniform(0, 2*PIF);

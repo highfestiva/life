@@ -235,6 +235,7 @@ public:
 	mutable StopWatch mStartTimer;
 	mutable StopWatch mGameOverTimer;
 	UiCure::PainterImageResource* mScrollBarImage;
+	UiTbc::Label* mDifficultyLabel;
 	UiTbc::ScrollBar* mDifficultySlider;
 	int mSlowShadowCount;
 	float mBaseThrottle;
@@ -336,6 +337,7 @@ App::App(const strutil::strvec& pArgumentList):
 	mReverseAndBrake(0),
 	mDialog(0),
 	mScrollBarImage(0),
+	mDifficultyLabel(0),
 	mDifficultySlider(0),
 	mSlowShadowCount(0),
 	mBaseThrottle(0),
@@ -673,7 +675,7 @@ int App::Run()
 	if (lOk)
 	{
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-		mGame->SetComputerDifficulty(0.5f);
+		mGame->SetComputerDifficulty(0.0f);
 		mGame->SetComputerIndex(1);
 		lOk = mGame->SetLevelName(_T("level_2"));
 	}
@@ -869,9 +871,32 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
-		if (mDifficultySlider)
+		if (mDifficultyLabel && mDifficultySlider)
 		{
-			mGame->SetComputerDifficulty((float)mDifficultySlider->GetScrollPos());
+			str s = _T("Opponent difficulty (");
+			const float lDifficulty = (float)mDifficultySlider->GetScrollPos();
+			if (lDifficulty < 0.1f)
+			{
+				s += _T("wanker)");
+			}
+			else if (lDifficulty < 0.3f)
+			{
+				s += _T("silly)");
+			}
+			else if (lDifficulty < 0.7f)
+			{
+				s += _T("alright)");
+			}
+			else if (lDifficulty < 0.9f)
+			{
+				s += _T("tough)");
+			}
+			else
+			{
+				s += _T("bigot)");
+			}
+			mDifficultyLabel->SetText(s, FGCOLOR_DIALOG, CLEAR_COLOR);
+			mGame->SetComputerDifficulty(lDifficulty);
 		}
 	}
 	if (lOk)
@@ -972,7 +997,7 @@ bool App::Poll()
 			const str lInfo = mIsPurchasing? _T("Communicating with App Store...") : _T("Speaking to score server");
 			PrintText(lInfo, 0, 
 				mUiManager->GetCanvas()->GetWidth()/2,
-				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight() - 8);
+				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight() - 3);
 		}
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
@@ -1075,7 +1100,7 @@ void App::PollTaps()
 
 void App::DrawHud()
 {
-	if (mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
+	if (mGame->GetFlybyMode() != Game::FLYBY_INACTIVE || mDialog)
 	{
 		return;
 	}
@@ -1103,13 +1128,13 @@ void App::DrawHud()
 		const int lSmallFontHeight = mUiManager->GetFontManager()->GetFontHeight();
 		UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
-		const bool lGameOver = (mGame->GetHeartBalance() == -HEART_POINTS/2 || mGame->GetHeartBalance() == +HEART_POINTS/2);
-		if (lGameOver)
+		const bool lIsGameOver = (mGame->GetHeartBalance() == -HEART_POINTS/2 || mGame->GetHeartBalance() == +HEART_POINTS/2);
+		if (lIsGameOver)
 		{
 			mGame->EnableScoreCounting(false);
 		}
-		const str lWon = lGameOver? _T("You rule!") : _T("Won heart");
-		const str lLost = lGameOver? _T("Defeat!") : _T("Lost heart");
+		const str lWon = lIsGameOver? _T("You rule!") : _T("Won heart");
+		const str lLost = lIsGameOver? _T("Defeat!") : _T("Lost heart");
 		const int lBackgroundSize = 100;
 		if (mGame->GetComputerIndex() == -1)
 		{
@@ -1151,7 +1176,7 @@ void App::DrawHud()
 			DrawRoundedPolygon(x, y, lBackgroundSize, BGCOLOR_DIALOG, 1.0f, 1.0f);
 			//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 			const int lBigFontHeight = mUiManager->GetFontManager()->GetFontHeight();
-			const bool lShowHealth = (mGame->GetComputerIndex() == 0 && mGame->GetRoundIndex()+1 >= 2 && !lGameOver);
+			const bool lShowHealth = (mGame->GetComputerIndex() == 0 && mGame->GetRoundIndex()+1 >= 2 && !lIsGameOver);
 			if (lShowHealth)
 			{
 				y -= lSmallFontHeight + 8;
@@ -1921,6 +1946,8 @@ void App::Resume()
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
+	mLoopTimer.StepCounterShadow();
+	mLoopTimer.PopTimeDiff();
 	if (mMusicPlayer)
 	{
 		mMusicPlayer->Stop();
@@ -2423,8 +2450,8 @@ void App::MainMenu()
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"));
-	d->AddButton(2, ICONBTNA("btn_hiscore.png", "Hiscore"));
-	d->AddButton(4, _T("Credits"));
+	d->AddButton(3, ICONBTNA("btn_hiscore.png", "Hiscore"));
+	d->AddButton(4, ICONBTNA("btn_credits.png", "Credits"));
 }
 
 void App::UpdateHiscore(bool pError)
@@ -2544,7 +2571,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &App::OnPreEnterAction));
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(")"), mBigFontId);
+	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(" points)"), mBigFontId);
 	if (!pMessage.empty())
 	{
 		UiTbc::Label* lMessage = new UiTbc::Label;
@@ -2555,11 +2582,11 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
 	mHiscoreTextField->SetText(CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_HISCORE_NAME, _T("")));
-	mHiscoreTextField->SetPreferredSize(235, 25, false);
+	mHiscoreTextField->SetPreferredSize(205, 25, false);
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-	d->AddChild(mHiscoreTextField, 90, 97);
+	d->AddChild(mHiscoreTextField, 70, 97);
 #else // Computer
-	d->AddChild(mHiscoreTextField, 90, 130);
+	d->AddChild(mHiscoreTextField, 70, 130);
 #endif // Touch / computer
 	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
 	UiTbc::Button* lCancelButton = new UiTbc::Button(_T("cancel"));
@@ -2769,7 +2796,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	}
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnLevelAction);
 	d->SetQueryLabel(_T("Select level"), mBigFontId);
-	d->AddButton(1, ICONBTN(_T("btn_lvl2.png"), _T("Tutorial")));
+	d->AddButton(1, ICONBTN(_T("btn_tutorial.png"), _T("Tutorial")));
 	d->AddButton(2, ICONBTN(_T("btn_lvl2.png"), gLevels[0]));
 	d->AddButton(3, ICONBTN(_T("btn_lvl3.png"), gLevels[1]));
 	d->AddButton(4, ICONBTN(_T("btn_lvl4.png"), gLevels[2]));
@@ -2846,9 +2873,9 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnVehicleAction);
 	d->SetQueryLabel(_T("Select vehicle"), mBigFontId);
 	d->AddButton(1, ICONBTN(_T("btn_cutie.png"), gVehicles[0]));
-	d->AddButton(2, gVehicles[1]);
-	d->AddButton(3, gVehicles[2]);
-	d->AddButton(4, gVehicles[3]);
+	d->AddButton(2, ICONBTN(_T("btn_hardie.png"), gVehicles[1]));
+	d->AddButton(3, ICONBTN(_T("btn_speedie.png"), gVehicles[2]));
+	d->AddButton(4, ICONBTN(_T("btn_sleepie.png"), gVehicles[3]));
 	if (mIsMoneyIconAdded && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
 	{
 		AddCostIcon(gVehicles[1]);
@@ -2874,17 +2901,16 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		mDifficultySlider = new UiTbc::ScrollBar(UiTbc::ScrollBar::HORIZONTAL,
 			mScrollBarImage->GetUserData(0), 0, 0, lScrollButton);
 		mDifficultySlider->SetScrollRatio(44, mScrollBarImage->GetRamData()->GetWidth());
-		mDifficultySlider->SetScrollPos((mGame->GetComputerDifficulty() < 0)? 0.5 : mGame->GetComputerDifficulty());
+		mDifficultySlider->SetScrollPos((mGame->GetComputerDifficulty() < 0)? 0.0 : mGame->GetComputerDifficulty());
 		mDifficultySlider->SetPreferredSize(mScrollBarImage->GetRamData()->GetWidth()+15*2, 44);
 		d->AddChild(mDifficultySlider);
 		const int x = d->GetPreferredWidth()/2 - mDifficultySlider->GetPreferredWidth()/2;
 		const int y = d->GetPreferredHeight() - 60;
 		mDifficultySlider->SetPos(x, y);
 
-		UiTbc::Label* lLabel = new UiTbc::Label();
-		lLabel->SetText(_T("Opponent difficulty"), FGCOLOR_DIALOG, CLEAR_COLOR);
-		d->AddChild(lLabel);
-		lLabel->SetPos(x+15, y-3);
+		mDifficultyLabel = new UiTbc::Label();
+		d->AddChild(mDifficultyLabel);
+		mDifficultyLabel->SetPos(x+15, y-3);
 
 		d->UpdateLayout();
 	}
@@ -2892,6 +2918,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 
 void App::OnVehicleAction(UiTbc::Button* pButton)
 {
+	mDifficultyLabel = 0;
 	mDifficultySlider = 0;
 
 	if (pButton->GetTag() >= 2 && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
@@ -2992,18 +3019,19 @@ void App::OnCreditsAction(UiTbc::Button* /*pButton*/)
 
 void App::DoPause()
 {
-	if (mIsPaused || mDialog)
+	const bool lIsGameOver = (mGame->GetHeartBalance() == -HEART_POINTS/2 || mGame->GetHeartBalance() == +HEART_POINTS/2);
+	if (mIsPaused || mDialog || (mGame->GetWinnerIndex() >= 0 && lIsGameOver))
 	{
 		return;
 	}
 	mIsPaused = true;
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
-	d->AddButton(1, _T("Resume"));
+	d->AddButton(1, ICONBTNA("btn_resume.png", "Resume"));
 	if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE)	// Restart not available in tutorial mode.
 	{
-		d->AddButton(2, _T("Restart"));
+		d->AddButton(2, ICONBTNA("btn_restart.png", "Restart"));
 	}
-	d->AddButton(3, _T("Main menu"));
+	d->AddButton(3, ICONBTNA("btn_main_menu.png", "Main menu"));
 }
 
 void App::OnPauseClickWithSound(UiTbc::Button* pButton)

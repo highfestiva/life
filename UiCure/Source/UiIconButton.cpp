@@ -28,13 +28,14 @@ IconButton::IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResour
 
 IconButton::~IconButton()
 {
-	if (mIconResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	if (mIconResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+		mIconResource->GetConstResource()->GetReferenceCount() == 1 &&
+		GetImageManager()->HasImage(mIconResource->GetData()))
 	{
-		if (mIconResource->GetConstResource()->GetReferenceCount() == 0 &&
-			GetImageManager()->HasImage(mIconResource->GetData()))
-		{
-			GetImageManager()->DropImage(mIconResource->GetData());
-		}
+		GetImageManager()->DropImage(mIconResource->GetData());
+	}
+	if (mHighlightedIconId != UiTbc::Painter::INVALID_IMAGEID)
+	{
 		GetImageManager()->RemoveImage(mHighlightedIconId);
 	}
 	delete mIconResource;
