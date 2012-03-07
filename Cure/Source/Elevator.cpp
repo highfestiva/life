@@ -4,23 +4,23 @@
 
 
 
-#include "Elevator.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/TimeManager.h"
+#include "../Include/Elevator.h"
+#include "../Include/ContextManager.h"
+#include "../Include/GameManager.h"
+#include "../Include/TimeManager.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
 
 
 
-namespace Life
+namespace Cure
 {
 
 
 
-Elevator::Elevator(Cure::ContextManager* pManager):
-	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Elevator")),
+Elevator::Elevator(ContextManager* pManager):
+	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Elevator")),
 	mActiveTrigger(0),
 	mStoppedTime(0),
 	mExitDelay(2.0),

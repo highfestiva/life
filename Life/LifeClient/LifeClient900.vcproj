@@ -703,14 +703,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\LifeServer\Elevator.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeServer\Elevator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\LifeServer\GameServerManager.cpp"
 				>
 			</File>

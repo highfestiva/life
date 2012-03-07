@@ -550,6 +550,10 @@
 				Name="Server"
 				>
 				<File
+					RelativePath=".\Source\Elevator.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\NetworkServer.cpp"
 					>
 				</File>
@@ -679,6 +683,10 @@
 			<Filter
 				Name="Server"
 				>
+				<File
+					RelativePath=".\Include\Elevator.h"
+					>
+				</File>
 				<File
 					RelativePath=".\Include\NetworkServer.h"
 					>

@@ -8,6 +8,7 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/CppContextObject.h"
 #include "../../Cure/Include/ContextObjectAttribute.h"
+#include "../../Cure/Include/Elevator.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Network.h"
@@ -19,7 +20,6 @@
 #include "../LifeApplication.h"
 #include "../LifeString.h"
 #include "BulletTime.h"
-#include "Elevator.h"
 #include "MasterServerConnection.h"
 #include "RaceTimer.h"
 #include "RtVar.h"
@@ -1151,7 +1151,7 @@ Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType) con
 {
 	if (pType == _T("trig_elevator"))
 	{
-		return new Elevator(GetContext());
+		return new Cure::Elevator(GetContext());
 	}
 	else if (pType == _T("spawner"))
 	{

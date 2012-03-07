@@ -779,7 +779,12 @@ bool App::Poll()
 		{
 			// This should be a temporary slow-down, due to something like rendering of
 			// lots of transparent OpenGL triangles.
-			CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, 1.0/mAverageFastLoopTime);
+			int lFrameRate = (int)(1.0/mAverageFastLoopTime);
+			if (lFrameRate < 10)
+			{
+				lFrameRate = 10;
+			}
+			CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, lFrameRate);
 		}
 		else
 		{
@@ -2850,10 +2855,10 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	str lLevel = _T("level_2");
 	switch (pButton->GetTag())
 	{
-		case 1:	lLevel = _T("level_2");	mHiscoreLevelIndex = 0;	break;
-		case 2:	lLevel = _T("level_2");	mHiscoreLevelIndex = 0;	break;
-		case 3:	lLevel = _T("level_3");	mHiscoreLevelIndex = 1;	break;
-		case 4:	lLevel = _T("level_4");	mHiscoreLevelIndex = 2;	break;
+		case 1:	lLevel = _T("level_2");			mHiscoreLevelIndex = 0;	break;
+		case 2:	lLevel = _T("level_2");			mHiscoreLevelIndex = 0;	break;
+		case 3:	lLevel = _T("level_elevate");		mHiscoreLevelIndex = 1;	break;
+		case 4:	lLevel = _T("level_robocastle");	mHiscoreLevelIndex = 2;	break;
 	}
 	if (mGame->GetLevelName() != lLevel)
 	{

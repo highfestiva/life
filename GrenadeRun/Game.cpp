@@ -5,9 +5,9 @@
 
 
 #include "Game.h"
-//#include <math.h>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
+#include "../Cure/Include/Elevator.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
@@ -112,7 +112,8 @@ bool Game::SetLevelName(const str& pLevel)
 	{
 		return RestartLevel();
 	}
-	return 	InitializeTerrain();
+	mCtf = 0;
+	return InitializeTerrain();
 }
 
 bool Game::RestartLevel()
@@ -1199,6 +1200,10 @@ Cure::ContextObject* Game::CreateLogicHandler(const str& pType) const
 	{
 		mCtf = new Ctf(GetContext());
 		return mCtf;
+	}
+	else if (pType == _T("trig_elevator"))
+	{
+		return new Cure::Elevator(GetContext());
 	}
 	else if (pType == _T("context_path"))
 	{

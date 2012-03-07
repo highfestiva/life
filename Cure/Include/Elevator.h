@@ -6,22 +6,22 @@
 
 #pragma once
 
-#include "../../Cure/Include/CppContextObject.h"
 #include "../../Lepra/Include/HiResTimer.h"
-#include "../Life.h"
+#include "CppContextObject.h"
+#include "Cure.h"
 
 
 
-namespace Life
+namespace Cure
 {
 
 
 
-class Elevator: public Cure::CppContextObject
+class Elevator: public CppContextObject
 {
-	typedef Cure::CppContextObject Parent;
+	typedef CppContextObject Parent;
 public:
-	Elevator(Cure::ContextManager* pManager);
+	Elevator(ContextManager* pManager);
 	virtual ~Elevator();
 
 protected:
