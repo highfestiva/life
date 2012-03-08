@@ -10,6 +10,13 @@ Skipped
 -Publish on App Store x2.
 -Add "scroll down" in hiscore list.
 -Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
+-Add eye lashes on Cutie!
+-Icons for tutorial, levels, back, one/two players, hiscore, credits...
+-Polish on level_2 roads (in texture).
+-Make hash verifiable, even on waco hiscore names. Colon (:) seems to be an offending char?
+-Remove store fetching, simply do direct purchase using the hard-coded IDs.
+-Word Caps on hiscore isn't working.
+-Place cubes beside each other.
 
 Done
 ----
@@ -121,23 +128,17 @@ Drop slow-mo when super-resetting.
 
 Computer demo
 -------------
-Add eye lashes on Cutie!
+Pendulum level: make bridge and trees brown instead of orange!
 2 extra levels: castle and machine.
-Icons for tutorial, levels, back, one/two players, hiscore, credits...
 Tweak other levels.
 Record voice for tutorial. Compress HARD!
 Record voice for instructions: SHOOT! DRIVE!
 Playback voice for tutorial.
-Polish on level_2 roads (in texture).
 Memory leak check.
 Add link to iOS versions.
 
 iOS and computer full version
 -----------------------------
-Make hash verifiable, even on waco hiscore names. Colon (:) seems to be an offending char?
-Remove store fetching, simply do direct purchase using the hard-coded IDs.
-Word Caps on hiscore isn't working.
-Place cubes beside each other.
 Screen shots + marketing texts.
 iPad adjustments.
 Test on iPad.
