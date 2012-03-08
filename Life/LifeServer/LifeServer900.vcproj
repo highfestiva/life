@@ -529,10 +529,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Elevator.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GameServerManager.cpp"
 				>
 			</File>
