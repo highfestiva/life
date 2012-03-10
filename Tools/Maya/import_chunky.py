@@ -107,8 +107,9 @@ class GroupReader(DefaultMAReader):
 			ininame = self.basename+".ini"
 			f = codecs.open(ininame, "r", encoding="latin-1")
 			config.readfp(f, ininame)
-		except:
+		except Exception as e:
 			print("Error: could not open tweak file '%s'!" % ininame)
+			print(e)
 			sys.exit(3)
 		self.fixparams(group)
 		self.extract_base_config(config)

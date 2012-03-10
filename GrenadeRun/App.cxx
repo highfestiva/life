@@ -1768,11 +1768,12 @@ void App::DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue
 	const int lWidth = BARREL_COMPASS_HEIGHT;
 	const int w2 = lWidth/2;
 	const int s2 = pSize/2;
-	const int s3 = pSize*2/3;
+	const int s3 = pSize/3;
+	const int s23 = pSize*2/3;
 	mUiManager->GetPainter()->SetColor(DARK_GRAY);
 	for (int i = 0; i < lLineCount; ++i)
 	{
-		const int lHeight = (i%3 == 0)? pSize : s3;
+		const int lHeight = (i%3 == 0)? s23 : s3;
 		const int x2 = -w2 + i*lLineSpacing;
 		const int y2 = s2-lHeight;
 		mUiManager->GetPainter()->DrawLine((int)(x-x2*ca+s2*sa), (int)(y+y2*ca+x2*sa), (int)(x-x2*ca+y2*sa), (int)(y+s2*ca+x2*sa));
