@@ -98,7 +98,7 @@ void SeeThrough::OnTick()
 	}
 
 	UiCure::UserGeometryReferenceResource* lMesh = lParent->GetMeshResource(mTag->mMeshIndexList[0]);
-	if (lMesh)
+	if (lMesh && lMesh->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		const float lAlpha = lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha;
 		lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity;

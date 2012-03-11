@@ -12,7 +12,7 @@ NMAKE = "bin/nmake.exe"
 VCBUILD = "vcpackages/vcbuild.exe"
 
 
-def getosname():
+def _getosname():
 	if sys.platform == "win32":		return "Windows"
 	if sys.platform == "cygwin":		return "Cygwin"
 	if sys.platform.startswith("linux"):	return "Linux"
@@ -23,7 +23,7 @@ def getosname():
 	return sys.platform
 
 
-def gethwname():
+def _gethwname():
 	if os.name == "nt":
 		ccver = sys.version.split("[")[1][:-1]
 		if ccver.find("32 bit") >= 0:
@@ -38,29 +38,29 @@ def gethwname():
 	return machine
 
 
-def getdatename():
+def _getdatename():
 	import datetime
 	now = datetime.datetime.isoformat(datetime.datetime.now())
 	return now.split("T")[0].replace("-", "")
 
 
-def filetime(filename):
+def _filetime(filename):
 	return os.stat(filename).st_mtime
 
 
-def verify_base_dir():
+def _verify_base_dir():
 	if not os.path.exists(".git") or not os.path.exists("Data"):
 		print("Must be in base dir to build!")
 		sys.exit(1)
 
 
-def sorted_natural(l):
+def _sorted_natural(l):
 	import re
 	convert = lambda text: int(text) if text.isdigit() else text
 	alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
 	return sorted(l, key=alphanum_key)
 
-def getmake(builder):
+def _getmake(builder):
 	global vcver
 
 	winprogs = os.getenv("PROGRAMFILES")
@@ -70,7 +70,7 @@ def getmake(builder):
 		dirname = os.getenv("VCINSTALLDIR")
 		if not dirname:
 			import glob
-			names = sorted_natural(glob.glob(os.path.join(winprogs, "Microsoft Visual*")))
+			names = _sorted_natural(glob.glob(os.path.join(winprogs, "Microsoft Visual*")))
 			if len(names) == 0:
 				print("Visual Studio not installed?")
 				return None	# No Visual Studio installed.
@@ -96,18 +96,18 @@ def getmake(builder):
 	return make_exe
 
 
-def getvcver():
+def _getvcver():
 	return vcver
 
 
-def hasdevenv(verbose=False):
-	hasit = getmake(NMAKE) and getmake(VCBUILD)
+def _hasdevenv(verbose=False):
+	hasit = _getmake(NMAKE) and _getmake(VCBUILD)
 	if verbose and not hasit:
 		print("Warning: no C++ development environment detected.")
 	return hasit
 
 
-def run(cmdlist, when):
+def _run(cmdlist, when):
 	path = None
 	if os.name == "nt":
 		path = os.getenv("PATH")
@@ -136,7 +136,7 @@ def _zipfiles(zf, include, filenames):
 			zf.write(filename)
 
 
-def zipdir(dirname, include, arcname):
+def _zipdir(dirname, include, arcname):
 	import glob
 	import zipfile
 	zf = zipfile.ZipFile(arcname, "w", zipfile.ZIP_DEFLATED)
@@ -145,5 +145,5 @@ def zipdir(dirname, include, arcname):
 	zf.close()
 
 
-def targzdir(dirname, arcname):
+def _targzdir(dirname, arcname):
 	run(["tar","-czf",arcname,dirname], "taring archive")

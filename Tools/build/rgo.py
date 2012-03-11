@@ -6,14 +6,14 @@ from __future__ import with_statement
 import optparse
 import os
 import sys
-from rgohelp import *
+import rgohelp
 
 
 appnames = ["Life", "SlimeVolleyball", "GrenadeRun"]
 testappname = "UiCure/CureTestApp"
-osname = getosname()
-hwname = gethwname()
-datename = getdatename()
+osname = rgohelp._getosname()
+hwname = rgohelp._gethwname()
+datename = rgohelp._getdatename()
 
 bindir = "bin"
 buildtypes = ["debug", "rc", "final"]
@@ -34,24 +34,24 @@ def _buildstl():
 		return
 	print("Building STLport...")
 	os.chdir("ThirdParty/stlport/")
-	if getvcver():
-		run(["configure.bat", "msvc"+str(getvcver())], "configuring STLport for MSVC")
+	if _getvcver():
+		rgohelp._run(["configure.bat", "msvc"+str(_getvcver())], "configuring STLport for MSVC")
 	else:
-		run(["./configure"], "configuring STLport")
+		rgohelp._run(["./configure"], "configuring STLport")
 	os.chdir("build/lib")
 	"cd build/lib"
-	make = getmake(NMAKE)
-	if getvcver():
-		run([make, "/fmsvc.mak", "install"], "building STLport for MSVC")
+	make = rgohelp._getmake(NMAKE)
+	if _getvcver():
+		rgohelp._run([make, "/fmsvc.mak", "install"], "building STLport for MSVC")
 	else:
-		run([make, "-f", "gcc.mak", "depend"], "building STLport dependancies")
-		run([make, "-f", "gcc.mak", "install"], "building STLport installation")
+		rgohelp._run([make, "-f", "gcc.mak", "depend"], "building STLport dependancies")
+		rgohelp._run([make, "-f", "gcc.mak", "install"], "building STLport installation")
 	os.chdir("../../../..")
 
 
 def _buildcode(command, buildtype):
-	make = getmake(VCBUILD)
-	ver = getvcver()
+	make = rgohelp._getmake(VCBUILD)
+	ver = _getvcver()
 	projext = "900" if ver == 9 else "10";
 	if command == "build":
 		_buildstl()
@@ -69,26 +69,26 @@ def _buildcode(command, buildtype):
 		what = "cleaning code"
 	if osname == "Windows":
 		os.chdir("Life")
-	run(args, what)
+	rgohelp._run(args, what)
 	if osname == "Windows":
 		os.chdir("..")
 
 
 def _convertdata(filename):
-	run([sys.executable, '-OO', importscript, filename], "importing "+filename)
+	rgohelp._run([sys.executable, '-OO', importscript, filename], "importing "+filename)
 
 
 def _incremental_build_data(sourcedir):
 	import glob
 	mas = glob.glob(os.path.join(sourcedir, "Data/*.ma"))
 	for ma in mas:
-		ft = filetime(ma)
+		ft = rgohelp._filetime(ma)
 		basename = os.path.splitext(ma)[0]
 		ini = basename+".ini"
 		if not os.path.exists(ini):
 			print("Warning: file %s missing..." % ini)
 			continue
-		ftini = filetime(ini)
+		ftini = rgohelp._filetime(ini)
 		if ftini > ft:
 			ft = ftini
 		fs = glob.glob(basename+"*")
@@ -102,7 +102,7 @@ def _incremental_build_data(sourcedir):
 			#print("Converting %s as no converted files exist!" % (basename,))
 			_convertdata(ma)
 		for f in fs:
-			if filetime(f) < ft:
+			if rgohelp._filetime(f) < ft:
 				#print("Converting %s since %s has an older timestamp!" % (basename, f))
 				for f in fs:
 					os.remove(f)
@@ -123,12 +123,12 @@ def _incremental_copy(filelist, targetdir, buildtype):
 		if not os.path.exists(targetdir):
 			os.makedirs(targetdir)
 		targetfile = os.path.join(targetdir, os.path.split(filename)[1])
-		if not os.path.exists(targetfile) or filetime(filename) > filetime(targetfile):
+		if not os.path.exists(targetfile) or rgohelp._filetime(filename) > rgohelp._filetime(targetfile):
 			if os.name == "nt":
 				#print("Copying %s." % filename)
 				shutil.copyfile(filename, targetfile)
 			else:
-				run(["cp", filename, targetfile], "copying of file")
+				rgohelp._run(["cp", filename, targetfile], "copying of file")
 			updates += 1
 
 
@@ -224,7 +224,7 @@ def _createmakes(force=False):
 	r = [sys.executable, makefilescript]
 	if default_build_mode != 'debug':
 		r += ['--release']
-	run(r, "generating makefiles")
+	rgohelp._run(r, "generating makefiles")
 	cnt = len(makefilescriptdir.split("/"))
 	os.chdir("/".join([".."]*cnt))
 
@@ -236,7 +236,7 @@ def _posix_no_lib_exes(targetdir):
 	import glob
 	libs = glob.glob(os.path.join(targetdir, "lib*.so*"))
 	for lib in libs:
-		run(["chmod", "-x", lib], "changing .so +x status to -x")
+		rgohelp._run(["chmod", "-x", lib], "changing .so +x status to -x")
 
 
 def _create_zip(targetdir, buildtype):
@@ -246,17 +246,17 @@ def _create_zip(targetdir, buildtype):
 		targetfile = targetdir+".zip"
 		if buildtype != "final":
 			targetfile = targetdir+".iszip"
-		zipdir(targetdir, lambda x: True, targetfile)
+		rgohelp._zipdir(targetdir, lambda x: True, targetfile)
 	else:
 		targetfile = targetdir+".tar.gz"
 		if buildtype != "final":
 			targetfile = targetdir+".tar.isgz"
-		targzdir(targetdir, targetfile)
+		rgohelp._targzdir(targetdir, targetfile)
 	return targetfile
 
 
 def _buildzip(builder, buildtype=ziptype):
-	verify_base_dir()
+	rgohelp._verify_base_dir()
 	#print(appname, osname, hwname, buildtype, datename)
 	#print(type(appname), type(osname), type(hwname), type(buildtype), type(datename))
 	targetdir=appnames[0]+"."+osname+"."+hwname+"."+buildtype+"."+datename
@@ -286,8 +286,8 @@ def _builddata(sourcedir, targetdir, buildtype):
 
 
 def _rebuild(sourcedir, targetdir, buildtype):
-	verify_base_dir()
-	if hasdevenv(verbose=True):
+	rgohelp._verify_base_dir()
+	if _hasdevenv(verbose=True):
 		_createmakes(force=True)
 		_cleandir(targetdir)
 		_buildcode("rebuild", buildtype)
@@ -369,7 +369,7 @@ def _include_data_files(fn):
 #-------------------- High-level build stuff below. --------------------
 
 
-def macappify_client():
+def macappify_life_client():
 	_macappify("LifeClient", "Da Client")
 
 def macappify_slime():
@@ -401,14 +401,14 @@ def builddata_gr():
 
 def zipdata_gr():
 	os.chdir('GrenadeRun/Data')
-	zipdir('', _include_data_files, "Data.pk3")
+	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
 
 
 def buildcode():
 	targetdir=bindir
 	buildtype=default_build_mode
-	if hasdevenv(verbose=True):
+	if _hasdevenv(verbose=True):
 		_createmakes()
 		_buildcode("build", buildtype)
 		_incremental_copy_code(targetdir, buildtype)
@@ -422,7 +422,7 @@ def copycode():
 
 
 def build_life():
-	verify_base_dir()
+	rgohelp._verify_base_dir()
 	buildcode()
 	builddata_life()
 
@@ -433,7 +433,7 @@ def rebuild_life():
 
 def zipdata_dirty():
 	os.chdir(bindir+'/Data')
-	zipdir('', _include_data_files, "Data.pk3")
+	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	files = os.listdir('.')
 	for f in files:
 		if _include_data_files(f):
@@ -444,9 +444,9 @@ def zipdata_dirty():
 def clean():
 	targetdir=bindir
 	buildtype=default_build_mode
-	verify_base_dir()
+	rgohelp._verify_base_dir()
 	global removes
-	if hasdevenv(verbose=True):
+	if _hasdevenv(verbose=True):
 		removes += _cleandir(targetdir)
 		_buildcode("clean", buildtype)
 	else:
@@ -473,7 +473,7 @@ def _prepare_run():
 		pre = ""
 		post = ".exe"
 	if not os.path.exists("LifeClient"+post) or not os.path.exists("LifeServer"+post):
-		reason = "binaries not compiled" if hasdevenv() else "missing C++ build environment"
+		reason = "binaries not compiled" if _hasdevenv() else "missing C++ build environment"
 		print("Could not run %s due to %s." % (appnames[0], reason))
 		sys.exit(2)
 	return pre, post
@@ -490,34 +490,39 @@ def _fgrun(name, app=""):
 	pre, post = _prepare_run()
 	os.system(app+pre+name+post)
 	os.chdir("..")
-def startclient():
-	_fgrun("LifeClient")
-def bgclient():
-	_bgrun("LifeClient")
-def startserver():
-	_fgrun("LifeServer")
-def bgserver():
-	_bgrun("LifeServer")
+#def startclient():
+#	_fgrun("LifeClient")
+#def bgclient():
+#	_bgrun("LifeClient")
+#def startserver():
+#	_fgrun("LifeServer")
+#def bgserver():
+#	_bgrun("LifeServer")
+#def start():
+#	bgclient()
+#	startserver()
 def start():
-	bgclient()
-	startserver()
-def gdbtest():
-	_fgrun("CureTestApp", "gdb ")
-def gdbclient():
-	_fgrun("LifeClient", "gdb ")
+	_fgrun("GrenadeRun")
+#def gdbtest():
+#	_fgrun("CureTestApp", "gdb ")
+#def gdbclient():
+#	_fgrun("LifeClient", "gdb ")
 
 
-def main():
+def _main():
 	usage = "usage: %prog [options] <filespec>\n" + \
 		"Runs some type of build command. Try build, rebuild, clean, builddata, or something like that."
 	parser = optparse.OptionParser(usage=usage, version="%prog 0.2")
 	parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: %s. Default is debug." % ", ".join(buildtypes))
-	ismac = (getosname() == "Mac")
+	ismac = (rgohelp._getosname() == "Mac")
 	parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
 	options, args = parser.parse_args()
 
 	if len(args) < 1:
-		print("Need arg!")
+		methods = [(m, callable(eval(m))) for m in dir(sys.modules["__main__"])]
+		methods,_ = zip(*filter(lambda x: x[1], methods))
+		methods = list(filter(lambda n: not (n.startswith('_') or n.startswith('get')), methods))
+		print("Need arg! Pick one of:\n  %s\n" % "\n  ".join(methods))
 		sys.exit(1)
 	if not options.buildmode in buildtypes:
 		print("Unknown build mode!")
@@ -544,4 +549,4 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	_main()
