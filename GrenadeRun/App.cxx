@@ -433,10 +433,8 @@ bool App::Open()
 #ifdef LEPRA_IOS
 	[AnimatedApp updateContent];
 #endif // iOS
-#ifdef LEPRA_DEBUG
-	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
-#endif // Debug
+
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);	// TODO!!!!!!!!!!!!!!!!!!!!!
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
