@@ -1063,7 +1063,7 @@ void ResourceManager::InjectResourceLoop()
 	ResourceMapList lInjectList;
 	{
 		ScopeLock lLock(&mThreadLock);
-		if (mLoadedList.GetCount() > 20)
+		if (mLoadedList.GetCount() > 10)
 		{
 			lInjectList = mLoadedList;
 			mLoadedList.RemoveAll();
