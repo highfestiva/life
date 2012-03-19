@@ -110,8 +110,7 @@ public:
 	{
 		FLYBY_INACTIVE = 1,
 		FLYBY_INTRODUCTION,
-		FLYBY_USER_PAUSE,
-		FLYBY_SYSTEM_PAUSE,
+		FLYBY_PAUSE,
 	};
 
 	Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);

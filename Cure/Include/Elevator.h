@@ -24,6 +24,8 @@ public:
 	Elevator(ContextManager* pManager);
 	virtual ~Elevator();
 
+	Vector3DF GetPosition() const;
+
 protected:
 	virtual void OnTick();
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);

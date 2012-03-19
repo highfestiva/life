@@ -17,12 +17,19 @@ namespace Cure
 ContextPath::SplinePath::SplinePath(Vector3DF* pKeyFrames,
 	float* pTimeTags,
 	int pCount,
+	str pType,
 	float pDistanceNormal,
 	float pLikeliness):
 	Parent(pKeyFrames, pTimeTags, pCount, SplineShape::TYPE_CATMULLROM, TAKE_OWNERSHIP),
+	mType(pType),
 	mDistanceNormal(pDistanceNormal),
 	mLikeliness(pLikeliness)
 {
+}
+
+const str& ContextPath::SplinePath::GetType() const
+{
+	return mType;
 }
 
 float ContextPath::SplinePath::GetDistanceNormal() const
@@ -57,12 +64,20 @@ void ContextPath::SetTagIndex(int pIndex)
 {
 	const TBC::ChunkyClass::Tag& lTag = ((CppContextObject*)mParent)->GetClass()->GetTag(pIndex);
 	assert(lTag.mFloatValueList.size() == 1);
+	assert(lTag.mStringValueList.size() <= 1);
 	const size_t lBodyCount = lTag.mBodyIndexList.size();
 	assert(lBodyCount >= 2);
 	if (lTag.mFloatValueList.size() != 1 || lBodyCount < 2)
 	{
 		return;
 	}
+
+	str lType;
+	if (lTag.mStringValueList.size() == 1)
+	{
+		lType = lTag.mStringValueList[0];
+	}
+
 	// 1. Store positions.
 	// 2. Calculate total distance (shortest distance through all vertices).
 	// 3. Scale time on each key so 1.0 corresponds total length.
@@ -101,7 +116,7 @@ void ContextPath::SetTagIndex(int pIndex)
 	lPathPositions[1+lBodyCount] = lPathPositions[1+lBodyCount-1];
 	lPathPositions[1+lBodyCount+1] = lPathPositions[1+lBodyCount-1];
 	const float lLikeliness = lTag.mFloatValueList[0];
-	SplinePath* lSplinePath = new SplinePath(lPathPositions, lTimes, lBodyCount+2, lScale, lLikeliness);
+	SplinePath* lSplinePath = new SplinePath(lPathPositions, lTimes, lBodyCount+2, lType, lScale, lLikeliness);
 	lSplinePath->StartInterpolation(0);
 	mPathArray.push_back(lSplinePath);
 }

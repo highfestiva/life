@@ -61,6 +61,8 @@ public:
 		ASPECT_COUNT		= 8
 	};
 
+	typedef std::vector<ChunkyBoneGeometry*> GeometryList;
+
 	PhysicsEngine(EngineType pEngineType, float pStrength,
 		float pMaxSpeed, float pMaxSpeed2, float pFriction, unsigned pControllerIndex);
 	virtual ~PhysicsEngine();
@@ -70,6 +72,7 @@ public:
 	EngineType GetEngineType() const;
 
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
+	GeometryList GetControlledGeometryList() const;
 	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
 	void ForceSetValue(unsigned pAspect, float pValue);
 

@@ -11,6 +11,13 @@
 
 
 
+namespace Cure
+{
+class Elevator;
+}
+
+
+
 namespace GrenadeRun
 {
 
@@ -37,6 +44,9 @@ private:
 		MODE_BACKING_UP,
 		MODE_STOPPING_AT_GOAL,
 		MODE_AT_GOAL,
+		MODE_WAITING_FOR_ELEVATOR,
+		MODE_GET_ON_ELEVATOR,
+		MODE_ON_ELEVATOR,
 	};
 
 	virtual void OnTick();
@@ -44,6 +54,7 @@ private:
 	void SetMode(Mode pMode);
 	bool IsCloseToTarget(const Vector3DF& pPosition, float pDistance) const;
 	float GetClosestPathDistance(const Vector3DF& pPosition, int pPath = -1, float* pLikeliness = 0) const;
+	const Cure::Elevator* GetClosestElevator(const Vector3DF& pPosition) const;
 
 	Game* mGame;
 	Mode mMode;

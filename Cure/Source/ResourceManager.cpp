@@ -1063,16 +1063,10 @@ void ResourceManager::InjectResourceLoop()
 	ResourceMapList lInjectList;
 	{
 		ScopeLock lLock(&mThreadLock);
-		if (mLoadedList.GetCount() > 10)
+		if (mLoadedList.GetCount() > 0)
 		{
 			lInjectList = mLoadedList;
 			mLoadedList.RemoveAll();
-		}
-		else if (mLoadedList.GetCount() > 0)
-		{
-			Resource* lResource;
-			mLoadedList.PopFront(lResource, lResource);
-			lInjectList.PushBack(lResource, lResource);
 		}
 	}
 	for (ResourceMapList::Iterator x = lInjectList.First(); x != lInjectList.End();)

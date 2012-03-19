@@ -25,11 +25,14 @@ public:
 		SplinePath(Vector3DF* pKeyFrames,	// pCount + 1 elements.
 			float* pTimeTags,		// pCount + 1 elements.
 			int pCount,
+			str pType,
 			float pDistanceNormal,
 			float pLikeliness);
+		const str& GetType() const;
 		float GetDistanceNormal() const;
 		float GetLikeliness() const;
 	private:
+		str mType;	// Stuff indicating stuff like "is final path", "towards some type of goal", etc.
 		float mDistanceNormal;
 		float mLikeliness;
 	};

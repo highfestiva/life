@@ -860,7 +860,6 @@ bool App::Poll()
 		mResourceManager->Tick();
 		return lOk;
 	}
-	//mResourceManager->ForceFreeCache();
 	mIsLoaded = true;
 	if (lOk)
 	{
@@ -2447,7 +2446,7 @@ void App::MainMenu()
 	mGameOverTimer.Stop();
 	mGame->EnableScoreCounting(false);
 	mGame->ResetWinnerIndex();
-	mGame->SetFlybyMode(Game::FLYBY_SYSTEM_PAUSE);
+	mGame->SetFlybyMode(Game::FLYBY_PAUSE);
 	mGame->SetHeartBalance(0);
 	// TRICKY-END!
 
@@ -2664,7 +2663,7 @@ void App::SuperReset(bool pGameOver)
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
 
-	mIsLoaded = false;
+	//mIsLoaded = false;
 	mDoLayout = true;
 }
 

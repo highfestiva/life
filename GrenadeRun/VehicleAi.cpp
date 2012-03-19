@@ -7,6 +7,7 @@
 #include "VehicleAi.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
+#include "../Cure/Include/Elevator.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Random.h"
 #include "Ctf.h"
@@ -20,6 +21,7 @@
 
 #define	NORMAL_AIM_AHEAD		10.0f	// How far ahead to try and intersect the path.
 #define GOAL_DISTANCE			4.2f	// When at goal.
+#define ELEVATOR_DISTANCE		8.4f	// When close to elevator.
 #define SLOW_DOWN_DISTANCE		15.0f	// When to slow down before stopping at goal.
 #define OFF_COURSE_DISTANCE		4.5f	// When to start heading back.
 #define END_PATH_TIME			0.9999f	// Time is considered at end of path.
@@ -171,6 +173,7 @@ void VehicleAi::OnTick()
 		}
 		// TRICKY: fall through.
 		case MODE_NORMAL:
+		case MODE_GET_ON_ELEVATOR:
 		{
 			if (mMode == MODE_NORMAL && lModeRunDeltaFrameCount%20 == 19)
 			{
@@ -236,14 +239,33 @@ void VehicleAi::OnTick()
 					lPath->StepInterpolation(lMoveAhead * lPath->GetDistanceNormal());
 					// Did wrap around? That means target is close to the end of our path, so we
 					// should try to stop.
-					if (lPreStepTime > 0.9f && lPath->GetCurrentInterpolationTime() < 0.1f)
+					if (lPreStepTime > 0.6f && lPath->GetCurrentInterpolationTime() < 0.1f)
 					{
 						lPath->GotoAbsoluteTime(END_PATH_TIME);
-						if (mGame->GetCutie()->GetForwardSpeed() > 4.0f*SCALE_FACTOR ||
-							IsCloseToTarget(lPosition, GOAL_DISTANCE))
+						if (lPath->GetType() == _T("to_elevator") &&
+							mMode != MODE_GET_ON_ELEVATOR)
 						{
-							SetMode(MODE_STOPPING_AT_GOAL);
-							return;
+							//if (IsCloseToTarget(lPosition, ELEVATOR_DISTANCE))
+							{
+								SetMode(MODE_WAITING_FOR_ELEVATOR);
+								return;
+							}
+						}
+						else	// This path heads towards goal = CTF platform.
+						{
+							if (mGame->GetCutie()->GetForwardSpeed() > 4.0f*SCALE_FACTOR ||
+								IsCloseToTarget(lPosition, GOAL_DISTANCE))
+							{
+								if (mMode != MODE_GET_ON_ELEVATOR)
+								{
+									SetMode(MODE_STOPPING_AT_GOAL);
+								}
+								else
+								{
+									SetMode(MODE_ON_ELEVATOR);
+								}
+								return;
+							}
 						}
 					}
 					lTarget = lPath->GetValue();
@@ -319,6 +341,26 @@ void VehicleAi::OnTick()
 			// Brake!
 			mGame->GetCutie()->SetEnginePower(0, 0, 0);
 			mGame->GetCutie()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
+		}
+		break;
+		case MODE_WAITING_FOR_ELEVATOR:
+		{
+			const Cure::Elevator* lMyLift = GetClosestElevator(lPosition);
+			if (lMyLift->GetPosition().z < lPosition.z)
+			{
+				mLog.Infof(_T("Elevator Z=%f, my Z=%f. Getting on!"), lMyLift->GetPosition().z, lPosition.z);
+				SetMode(MODE_GET_ON_ELEVATOR);
+			}
+			// Brake!
+			mGame->GetCutie()->SetEnginePower(0, 0, 0);
+			mGame->GetCutie()->SetEnginePower(2, -1, 0);	// Negative = use full brakes, not only hand brake.
+		}
+		break;
+		case MODE_ON_ELEVATOR:
+		{
+			// Brake!
+			mGame->GetCutie()->SetEnginePower(0, 0, 0);
+			mGame->GetCutie()->SetEnginePower(2, -1, 0);	// Negative = use full brakes, not only hand brake.
 		}
 		break;
 	}
@@ -420,6 +462,9 @@ void VehicleAi::SetMode(Mode pMode)
 		case MODE_BACKING_UP:			lModeName = _T("BACKING UP");			break;
 		case MODE_STOPPING_AT_GOAL:		lModeName = _T("STOPPING AT GOAL");		break;
 		case MODE_AT_GOAL:			lModeName = _T("AT GOAL");			break;
+		case MODE_WAITING_FOR_ELEVATOR:		lModeName = _T("WAITING FOR ELEVATOR");		break;
+		case MODE_GET_ON_ELEVATOR:		lModeName = _T("GET ON ELEVATOR");		break;
+		case MODE_ON_ELEVATOR:			lModeName = _T("ON_ELEVATOR");			break;
 	}
 	mLog.Headlinef(_T("Switching mode to %s."), lModeName);
 }
@@ -472,6 +517,41 @@ float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, int pPath, f
 
 	return lNearestDistance;
 }
+
+const Cure::Elevator* VehicleAi::GetClosestElevator(const Vector3DF& pPosition) const
+{
+	typedef Cure::ContextManager::ContextObjectTable ContextTable;
+	const ContextTable& lObjectTable = GetManager()->GetObjectTable();
+	ContextTable::const_iterator x = lObjectTable.begin();
+	const str lElevatorClassId = _T("Elevator");
+	const Cure::Elevator* lNearestElevator = 0;
+	float lDistance2 = 100;
+	for (; x != lObjectTable.end(); ++x)
+	{
+		const Cure::ContextObject* lObject = x->second;
+		if (lObject->GetClassId() != lElevatorClassId)
+		{
+			continue;
+		}
+		const Cure::Elevator* lElevator = (const Cure::Elevator*)lObject;
+		const float lThisDistance2 = lElevator->GetPosition().GetDistanceSquared(pPosition);
+		if (!lNearestElevator)
+		{
+			lNearestElevator = lElevator;
+			lDistance2 = lThisDistance2;
+		}
+		else
+		{
+			if (lThisDistance2 < lDistance2)
+			{
+				lDistance2 = lThisDistance2;
+				lNearestElevator = lElevator;
+			}
+		}
+	}
+	return lNearestElevator;
+}
+
 
 
 LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, VehicleAi);

@@ -79,6 +79,17 @@ void PhysicsEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float p
 	mEngineNodeArray.push_back(EngineNode(pGeometry, pScale, pMode));
 }
 
+PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const
+{
+	GeometryList lList;
+	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
+	for (; i != mEngineNodeArray.end(); ++i)
+	{
+		lList.push_back(i->mGeometry);
+	}
+	return lList;
+}
+
 bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);

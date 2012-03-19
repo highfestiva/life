@@ -119,10 +119,7 @@ void HiResTimer::EnableShadowCounter(bool pEnable)
 
 void HiResTimer::StepCounterShadow()
 {
-	const bool lEnabled = mIsManualUpdateEnabled;
-	mIsManualUpdateEnabled = false;
-	GetSystemCounterShadow();
-	mIsManualUpdateEnabled = lEnabled;
+	mLastSystemCounter = GetSystemCounter();
 }
 
 double HiResTimer::PopTimeDiff()
@@ -232,7 +229,6 @@ uint64 HiResTimer::GetSystemCounterShadow()
 	{
 		return GetSystemCounter();
 	}
-	mLastSystemCounter = GetSystemCounter();
 	return mLastSystemCounter;
 }
 

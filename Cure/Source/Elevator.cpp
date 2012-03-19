@@ -39,6 +39,21 @@ Elevator::~Elevator()
 
 
 
+Vector3DF Elevator::GetPosition() const
+{
+	const TBC::PhysicsTrigger* lTrigger = 0;
+	GetTriggerCount((const void*&)lTrigger);
+	assert(lTrigger && lTrigger->GetControlledEngineCount() > 0);
+	const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = lTrigger->GetControlledEngine(0);
+	typedef TBC::PhysicsEngine::GeometryList BodyList;
+	BodyList lBodyList = lEngineTrigger.mEngine->GetControlledGeometryList();
+	assert(!lBodyList.empty());
+	TBC::ChunkyBoneGeometry* lBody = lBodyList[0];
+	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lBody->GetBodyId());
+}
+
+
+
 void Elevator::OnTick()
 {
 	Parent::OnTick();

@@ -392,6 +392,10 @@ void Game::FreeLauncherBarrel()
 
 Game::FlybyMode Game::GetFlybyMode() const
 {
+	if (!mVehicle || !mVehicle->IsLoaded())
+	{
+		return FLYBY_PAUSE;
+	}
 	return mFlybyMode;
 }
 
@@ -925,7 +929,7 @@ bool Game::FlybyRender()
 	TransformationF t;
 	const double lSweepTime = lTotalTime * 0.25;
 	const float lDistance = 100 * SCALE_FACTOR;
-	if (mFlyByTime < lSweepTime || mFlybyMode == FLYBY_USER_PAUSE || mFlybyMode == FLYBY_SYSTEM_PAUSE)
+	if (mFlyByTime < lSweepTime || mFlybyMode == FLYBY_PAUSE)
 	{
 		// Sweep around the area in a circle.
 		const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
