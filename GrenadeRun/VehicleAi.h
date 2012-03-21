@@ -39,6 +39,7 @@ private:
 	enum Mode
 	{
 		MODE_FIND_BEST_PATH = 1,
+		MODE_FIND_PATH_OFF_ELEVATOR,
 		MODE_NORMAL,
 		MODE_HEADING_BACK_ON_TRACK,
 		MODE_BACKING_UP,
@@ -46,7 +47,10 @@ private:
 		MODE_AT_GOAL,
 		MODE_WAITING_FOR_ELEVATOR,
 		MODE_GET_ON_ELEVATOR,
+		MODE_GET_OFF_ELEVATOR,
 		MODE_ON_ELEVATOR,
+		MODE_ROTATE_ON_THE_SPOT_DURING,
+		MODE_ROTATE_ON_THE_SPOT_WAITING,
 	};
 
 	virtual void OnTick();
@@ -54,13 +58,18 @@ private:
 	void SetMode(Mode pMode);
 	bool IsCloseToTarget(const Vector3DF& pPosition, float pDistance) const;
 	float GetClosestPathDistance(const Vector3DF& pPosition, int pPath = -1, float* pLikeliness = 0) const;
-	const Cure::Elevator* GetClosestElevator(const Vector3DF& pPosition) const;
+	Vector3DF GetClosestElevatorPosition(const Vector3DF& pPosition, const Cure::Elevator*& pNearestElevator) const;
+	static bool IsVertical(const Vector3DF& pVector);
+	int GetVehicleId() const;
 
 	Game* mGame;
 	Mode mMode;
 	int mModeStartFrame;
 	int mStoppedFrame;
 	int mActivePath;
+	int mStuckCount;
+	float mLastAverageAngle;
+	Vector3DF mElevatorStopPosition;
 
 	LOG_CLASS_DECLARE();
 };

@@ -25,12 +25,14 @@ public:
 	virtual ~Elevator();
 
 	Vector3DF GetPosition() const;
+	Vector3DF GetVelocity() const;
 
 protected:
 	virtual void OnTick();
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void Trig(const TBC::PhysicsTrigger* pTrigger);
+	TBC::PhysicsManager::BodyID GetFirstBodyId() const;
 
 	float GetActiveMaxSpeedSquare() const;
 	void HaltActiveEngines(bool pStop);

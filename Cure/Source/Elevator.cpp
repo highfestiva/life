@@ -41,15 +41,14 @@ Elevator::~Elevator()
 
 Vector3DF Elevator::GetPosition() const
 {
-	const TBC::PhysicsTrigger* lTrigger = 0;
-	GetTriggerCount((const void*&)lTrigger);
-	assert(lTrigger && lTrigger->GetControlledEngineCount() > 0);
-	const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = lTrigger->GetControlledEngine(0);
-	typedef TBC::PhysicsEngine::GeometryList BodyList;
-	BodyList lBodyList = lEngineTrigger.mEngine->GetControlledGeometryList();
-	assert(!lBodyList.empty());
-	TBC::ChunkyBoneGeometry* lBody = lBodyList[0];
-	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lBody->GetBodyId());
+	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(GetFirstBodyId());
+}
+
+Vector3DF Elevator::GetVelocity() const
+{
+	Vector3DF lVelocity;
+	GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(GetFirstBodyId(), lVelocity);
+	return lVelocity;
 }
 
 
@@ -164,6 +163,19 @@ void Elevator::Trig(const TBC::PhysicsTrigger* pTrigger)
 		log_volatile(mLog.Debugf(_T("TRIGGER - trigging function %s."), lEngineTrigger.mFunction.c_str()));
 		GetManager()->AddAlarmCallback(this, 0, lEngineTrigger.mDelay, (void*)&lEngineTrigger);
 	}
+}
+
+TBC::PhysicsManager::BodyID Elevator::GetFirstBodyId() const
+{
+	const TBC::PhysicsTrigger* lTrigger = 0;
+	GetTriggerCount((const void*&)lTrigger);
+	assert(lTrigger && lTrigger->GetControlledEngineCount() > 0);
+	const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = lTrigger->GetControlledEngine(0);
+	typedef TBC::PhysicsEngine::GeometryList BodyList;
+	BodyList lBodyList = lEngineTrigger.mEngine->GetControlledGeometryList();
+	assert(!lBodyList.empty());
+	TBC::ChunkyBoneGeometry* lBody = lBodyList[0];
+	return lBody->GetBodyId();
 }
 
 

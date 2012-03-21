@@ -1236,6 +1236,7 @@ class GroupReader(DefaultMAReader):
 		for node in group:
 			if re.search("^"+regexp+"$", node.getFullName()[1:]):
 				found += [node]
+		found = sorted(found, key=lambda n: n.getFullName())
 		return found
 
 

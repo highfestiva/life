@@ -42,6 +42,18 @@ float ContextPath::SplinePath::GetLikeliness() const
 	return mLikeliness;
 }
 
+float ContextPath::SplinePath::GetTimeAsDistance(float pTime) const
+{
+	return pTime / mDistanceNormal;
+}
+
+float ContextPath::SplinePath::GetDistanceLeft() const
+{
+	const float lTime = GetCurrentInterpolationTime();
+	return GetTimeAsDistance(1-lTime);
+}
+
+
 
 ContextPath::ContextPath(ResourceManager* pResourceManager, const str& pClassId):
 	CppContextObject(pResourceManager, pClassId)

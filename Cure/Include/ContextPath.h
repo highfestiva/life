@@ -31,9 +31,11 @@ public:
 		const str& GetType() const;
 		float GetDistanceNormal() const;
 		float GetLikeliness() const;
+		float GetTimeAsDistance(float pTime) const;
+		float GetDistanceLeft() const;
 	private:
 		str mType;	// Stuff indicating stuff like "is final path", "towards some type of goal", etc.
-		float mDistanceNormal;
+		float mDistanceNormal;	// 1/length. The times span from 0 to 1, divide by DistanceNormal to get total length.
 		float mLikeliness;
 	};
 

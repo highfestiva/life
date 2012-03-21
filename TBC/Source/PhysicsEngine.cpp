@@ -249,7 +249,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				// TRICKY: fall through.
 				case ENGINE_HINGE_ROLL:
 				{
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					//assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
 						float lValue = lPrimaryForce;
@@ -293,7 +293,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				break;
 				case ENGINE_HINGE_BREAK:
 				{
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					//assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
 						// "Max speed" used as a type of "break threashold", so that a joystick or similar
@@ -671,7 +671,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 {
 	pFrameTime;
 
-	assert(pGeometry->GetJointId() != INVALID_JOINT);
+	//assert(pGeometry->GetJointId() != INVALID_JOINT);
 	if (pGeometry->GetJointId() == INVALID_JOINT)
 	{
 		mLog.AError("Missing torque joint!");
