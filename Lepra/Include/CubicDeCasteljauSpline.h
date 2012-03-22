@@ -58,6 +58,7 @@ public:
 			      DataPolicy pPolicy = FULL_COPY);
 	~CubicDeCasteljauSpline();
 
+	void EnableModulo(bool pEnable);
 	void StartInterpolation(TimeType pTime);
 	void GotoAbsoluteTime(TimeType pTime);
 	void StepInterpolation(TimeType pTimeStep);
@@ -95,6 +96,8 @@ private:
 
 	TimeType mCurrentTime;
 	int mCurrentFrame[4];
+
+	bool mEnableModulo;
 };
 
 

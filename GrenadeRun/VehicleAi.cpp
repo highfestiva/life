@@ -19,18 +19,20 @@
 
 
 
-#define	NORMAL_AIM_AHEAD		13.0f	// How far ahead to try and intersect the path.
-#define ON_GOAL_DISTANCE		4.2f	// When at goal.
-#define ELEVATOR_WAIT_DISTANCE		11.4f	// When close to elevator.
-#define ELEVATOR_TOO_CLOSE_DISTANCE	7.5f	// When too close to elevator.
-#define ON_ELEVATOR_DISTANCE		3.2f	// When on elevator.
-#define SLOW_DOWN_DISTANCE		15.0f	// When to slow down before stopping at goal.
+#define	NORMAL_AIM_AHEAD		5.0f	// How far ahead to try and intersect the path.
+#define ON_GOAL_DISTANCE		3.2f	// When at goal.
+#define ELEVATOR_WAIT_DISTANCE		6.3f	// When close to elevator.
+#define ELEVATOR_TOO_CLOSE_DISTANCE	5.7f	// When too close to elevator.
+#define ON_ELEVATOR_DISTANCE		2.9f	// When on elevator.
+#define ELEVATOR_FAR_DISTANCE		15.0f	// When far to elevator.
+#define SLOW_DOWN_DISTANCE		6.0f	// When to slow down before stopping at goal.
 #define OFF_COURSE_DISTANCE		4.5f	// When to start heading back.
 #define END_PATH_TIME			0.9999f	// Time is considered at end of path.
 #define	OFF_END_PATH_TIME		0.9995f	// Close to end, but not quite.
 #define DOUBLE_OFF_END_PATH_TIME	0.9990f	// Close to end, but not quite. Double that.
 #define REACT_TO_GRENADE_HEIGHT		50.0f	// How low a grenade needs to be for AI to take notice.
-#define SMOOTH_BRAKING_FACTOR		0.5f	// Factor to multiply with to ensure monster truck does not "rotate" too much.
+#define SMOOTH_BRAKING_FACTOR		0.7f	// Factor to multiply with to ensure monster truck does not "rotate" too much.
+#define AIM_DISTANCE()			(((GetVehicleId() == 1)? 1.2f : 1.0f) * SCALE_FACTOR * NORMAL_AIM_AHEAD)
 
 
 namespace GrenadeRun
@@ -62,6 +64,7 @@ void VehicleAi::Init()
 {
 	mStoppedFrame = -1;
 	mActivePath = -1;
+	mMode = MODE_AT_GOAL;	// Will end up in previous mode.
 	SetMode(MODE_FIND_BEST_PATH);
 	GetManager()->EnableTickCallback(this);
 }
@@ -80,6 +83,7 @@ void VehicleAi::OnTick()
 	const Cure::TimeManager* lTime = GetManager()->GetGameManager()->GetTimeManager();
 	const int lModeRunDeltaFrameCount = lTime->GetCurrentPhysicsFrameDelta(mModeStartFrame);
 	const float lModeRunTime = lTime->ConvertPhysicsFramesToSeconds(lModeRunDeltaFrameCount);
+	const float lAimDistance = AIM_DISTANCE();
 
 	float lStrength = Math::Lerp(0.6f, 1.0f, mGame->GetComputerDifficulty());
 	const Vector3DF lPosition = mGame->GetCutie()->GetPosition();
@@ -186,13 +190,20 @@ void VehicleAi::OnTick()
 				mActivePath = lRelevantPaths[Random::GetRandomNumber() % lRelevantPaths.size()].mPathIndex;
 			}
 			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-			const float lWantedDistance = SCALE_FACTOR * NORMAL_AIM_AHEAD;
+			const float lWantedDistance = lAimDistance;
 			float lStep = lWantedDistance * lPath->GetDistanceNormal();
 			if (lStep + lPath->GetCurrentInterpolationTime() > 1)
 			{
 				lStep = 1 - lPath->GetCurrentInterpolationTime();
 			}
 			lPath->StepInterpolation(lStep);
+			// Fetch ending position.
+			const float t = lPath->GetCurrentInterpolationTime();
+			lPath->GotoAbsoluteTime(END_PATH_TIME);
+			mElevatorStopPosition = lPath->GetValue();
+			lPath->GotoAbsoluteTime(t);
+
+			mLog.Headlinef(_T("Picked path %i (%i pickable)."), mActivePath, lRelevantPaths.size());
 			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 			{
 				SetMode(MODE_GET_OFF_ELEVATOR);
@@ -201,7 +212,6 @@ void VehicleAi::OnTick()
 			{
 				SetMode(MODE_HEADING_BACK_ON_TRACK);
 			}
-			mLog.Headlinef(_T("Picked path %i (%i pickable)."), mActivePath, lRelevantPaths.size());
 		}
 		break;
 		case MODE_HEADING_BACK_ON_TRACK:
@@ -235,18 +245,19 @@ void VehicleAi::OnTick()
 		case MODE_GET_ON_ELEVATOR:
 		case MODE_GET_OFF_ELEVATOR:
 		{
-			if (mMode == MODE_GET_ON_ELEVATOR && lModeRunTime > 3.5)
+			if (mMode == MODE_GET_ON_ELEVATOR && lModeRunTime > 4.5)
 			{
-				mLog.AHeadline("Something hinders me getting on the elevator, back square one.");
+				mLog.Headlinef(_T("Something presumably hinders me getting on the elevator, back square one. (mode run time=%f)"), lModeRunTime);
 				SetMode(MODE_FIND_BEST_PATH);
 				return;
 			}
 
-			if (mMode == MODE_NORMAL && lModeRunDeltaFrameCount%20 == 19)
+			if (mMode != MODE_HEADING_BACK_ON_TRACK && mMode != MODE_GET_ON_ELEVATOR && lModeRunDeltaFrameCount%20 == 19)
 			{
-				const float lVelocityScaleFactor = ((mMode == MODE_NORMAL)? 1.0f : 3.0f) * std::min(1.0f, lVelocity.GetLength() / 2.5f);
+				const float lVelocityScaleFactor = ((mMode == MODE_NORMAL)? 1.0f : 3.0f) * Math::Clamp(lVelocity.GetLength() / 2.5f, 0.3f, 1.0f);
 				if (GetClosestPathDistance(lPosition) > SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
 				{
+					mLog.AHeadline("Going about my way, but got offside somehow. Heading back.");
 					SetMode(MODE_HEADING_BACK_ON_TRACK);
 					return;
 				}
@@ -296,7 +307,7 @@ void VehicleAi::OnTick()
 			}
 
 			// Are we heading towards an elevator?
-			if (mMode == MODE_NORMAL && lPath->GetType() == _T("to_elevator"))
+			if (mMode != MODE_GET_ON_ELEVATOR && mMode != MODE_GET_OFF_ELEVATOR && lPath->GetType() == _T("to_elevator"))
 			{
 				if (lPath->GetDistanceLeft() <= ELEVATOR_WAIT_DISTANCE)
 				{
@@ -309,64 +320,51 @@ void VehicleAi::OnTick()
 			// Step target (aim) ahead.
 			{
 				const float lActualDistance2 = lTarget.GetDistanceSquared(lPosition);
-				const float lWantedDistance = SCALE_FACTOR * NORMAL_AIM_AHEAD * std::min(1.0f, lVelocity.GetLength() / 5);
+				const float lMaxAimFactor = (mMode == MODE_GET_OFF_ELEVATOR)? 1.0f : 1.5f;
+				const float lWantedDistance = lAimDistance * Math::Clamp(lVelocity.GetLength() / 2.5f, 0.5f, lMaxAimFactor);
 				if (lActualDistance2 < lWantedDistance*lWantedDistance)
 				{
 					const float lMoveAhead = lWantedDistance*1.1f - ::sqrt(lActualDistance2);
-					const float lPreStepTime = lPath->GetCurrentInterpolationTime();
 					lPath->StepInterpolation(lMoveAhead * lPath->GetDistanceNormal());
-					// Did wrap around? That means target is close to the end of our path, so we
-					// should try to stop.
-					if (lPreStepTime > 0.6f && lPath->GetCurrentInterpolationTime() < 0.2f)
+					mLog.Infof(_T("Stepping %f (=%f m) from %f."), lMoveAhead*lPath->GetDistanceNormal(), lMoveAhead, lPath->GetCurrentInterpolationTime());
+				}
+
+				// Check if we're there yet.
+				const float t = lPath->GetCurrentInterpolationTime();
+				lPath->GotoAbsoluteTime(1.0f);
+				const bool lTowardsElevator = (lPath->GetType() == _T("to_elevator"));
+				const float lTargetDistance = lTowardsElevator? ON_ELEVATOR_DISTANCE : ON_GOAL_DISTANCE + mGame->GetCutie()->GetForwardSpeed()/4;
+				if (IsCloseToTarget(lPosition, lTargetDistance))
+				{
+					if (lTowardsElevator)
 					{
-						lPath->GotoAbsoluteTime(END_PATH_TIME);
-						const bool lTowardsElevator = (lPath->GetType() == _T("to_elevator"));
-						const float lTargetDistance = lTowardsElevator? ON_ELEVATOR_DISTANCE : ON_GOAL_DISTANCE;
-						const bool lIsClose = IsCloseToTarget(lPosition, lTargetDistance);
-						if (mGame->GetCutie()->GetForwardSpeed() > 4.0f*SCALE_FACTOR || lIsClose)
+						if (mMode == MODE_GET_ON_ELEVATOR)
 						{
-							if (lTowardsElevator)
-							{
-								if (mMode == MODE_GET_ON_ELEVATOR)
-								{
-									// Need to check that we are actually on top of
-									// the elevator, otherwise we wait until next frame.
-									if (lIsClose)
-									{
-										SetMode(MODE_ON_ELEVATOR);
-										return;
-									}
-								}
-								else
-								{
-									// We got off track somewhere, try to shape up!
-									mLog.AHeadline("Normal mode target wrapped on our way to an elevator, changing mode.");
-									SetMode(MODE_WAITING_FOR_ELEVATOR);
-									return;
-								}
-							}
-							else
-							{
-								SetMode(MODE_STOPPING_AT_GOAL);
-								return;
-							}
+							SetMode(MODE_ON_ELEVATOR);
+							return;
+						}
+						else if (mMode != MODE_GET_OFF_ELEVATOR)
+						{
+							// We got off track somewhere, try to shape up!
+							mLog.AHeadline("Normal mode target wrapped on our way to an elevator, changing mode.");
+							SetMode(MODE_WAITING_FOR_ELEVATOR);
+							return;
 						}
 					}
-					lTarget = lPath->GetValue();
+					else
+					{
+						SetMode(MODE_STOPPING_AT_GOAL);
+						return;
+					}
 				}
+				lPath->GotoAbsoluteTime(t);
+
+				lTarget = lPath->GetValue();
 			}
 
-			if (mMode == MODE_GET_OFF_ELEVATOR && lModeRunTime < 0.5f && !IsVertical(lVelocity))
-			{
-				// Don't start driving yet, adjust the steering wheel before
-				// getting off a horizontal elevator.
-			}
-			else
-			{
-				// Move forward.
-				mGame->GetCutie()->SetEnginePower(0, +lStrength, 0);
-				mGame->GetCutie()->SetEnginePower(2, 0, 0);
-			}
+			// Move forward.
+			mGame->GetCutie()->SetEnginePower(0, +lStrength, 0);
+			mGame->GetCutie()->SetEnginePower(2, 0, 0);
 
 			// Steer.
 			const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
@@ -374,31 +372,33 @@ void VehicleAi::OnTick()
 			float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
 			if (mMode == MODE_GET_OFF_ELEVATOR)
 			{
-				if (lAngle < 0.1f)
+				// Aborting too early might cause us to stop, waiting for the next ride in mid-air.
+				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
+				const float t = lPath->GetCurrentInterpolationTime();
+				const float lClosestPathDistance = GetClosestPathDistance(lPosition, mActivePath);
+				const float lDistanceFromElevatorStop = lPath->GetCurrentInterpolationTime() / lPath->GetDistanceNormal();
+				lPath->GotoAbsoluteTime(t);
+				if (lDistanceFromElevatorStop > ELEVATOR_TOO_CLOSE_DISTANCE &&
+					lClosestPathDistance < 2.0f)
 				{
-					mMode = MODE_NORMAL;
-				}
-				else
-				{
-					// Extreme steering wheel motions, to get on and off the elevator smoothly. Usually sharp angles.
-					lAngle = (lAngle < 0)? -1.0f : +1.0f;
+					SetMode(MODE_NORMAL);
 				}
 			}
-			else if (mMode == MODE_GET_ON_ELEVATOR)
+			/*else if (mMode == MODE_GET_ON_ELEVATOR)
 			{
 				lAngle *= 2;	// Make steering more powerful while boarding.
-			}
+			}*/
 			mGame->GetCutie()->SetEnginePower(1, +lAngle, 0);
 			mLastAverageAngle = Math::Lerp(mLastAverageAngle, lAngle, 0.5f);
 
 			// Check if we need to slow down.
-			const float lHighSpeed = SCALE_FACTOR * 3.5f;
+			const float lHighSpeed = SCALE_FACTOR * 2.7f;
 			const float lAbsAngle = ::fabs(lAngle);
 			if (lVelocity.GetLengthSquared() > lHighSpeed*lHighSpeed)
 			{
-				if (lAbsAngle > 0.5f)
+				if (lAbsAngle > 0.1f)
 				{
-					mGame->GetCutie()->SetEnginePower(2, lAbsAngle*0.001f + lVelocity.GetLength()*0.0001f, 0);
+					mGame->GetCutie()->SetEnginePower(2, lAbsAngle*0.1f + lVelocity.GetLength()*0.01f, 0);
 				}
 				else if (lPath->GetCurrentInterpolationTime() >= DOUBLE_OFF_END_PATH_TIME &&
 					IsCloseToTarget(lPosition, SLOW_DOWN_DISTANCE))
@@ -460,17 +460,25 @@ void VehicleAi::OnTick()
 				SetMode(MODE_BACKING_UP);
 				return;
 			}*/
-			if (::fabs(mLastAverageAngle) > 0.1f)
+			if (::fabs(mLastAverageAngle) > 0.1f && GetVehicleId() == 1)
 			{
 				lStrength *= SMOOTH_BRAKING_FACTOR;	// Smooth braking when turning, we can always back up if necessary.
 			}
-			if (mElevatorStopPosition.GetDistanceSquared(lPosition) < ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
+			const float lElevatorDistance2 = mElevatorStopPosition.GetDistanceSquared(lPosition);
+			if (lElevatorDistance2 < ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
 			{
 				mLog.AHeadline("Got too close to the elevator stop position, backing up.");
 				mGame->GetCutie()->SetEnginePower(1, 0, 0);	// Back straight.
 				const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
 				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength, 0);
 				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f, 0);
+				return;
+			}
+			if (::fabs(mElevatorStopPosition.z-lPosition.z) >= 3 ||
+				lElevatorDistance2 > ELEVATOR_FAR_DISTANCE*ELEVATOR_FAR_DISTANCE)
+			{
+				mLog.AHeadline("Somehow got away from the elevator wait position, doing something else.");
+				SetMode(MODE_FIND_BEST_PATH);
 				return;
 			}
 
@@ -486,7 +494,7 @@ void VehicleAi::OnTick()
 					const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
 					if (::fabs(lAngle) > PIF/6)
 					{
-						mLastAverageAngle = -lAngle;
+						mRotateAngle = -lAngle;
 						SetMode(MODE_ROTATE_ON_THE_SPOT_WAITING);
 						return;
 					}
@@ -528,8 +536,7 @@ void VehicleAi::OnTick()
 				}
 			}
 
-			const float lAngle= mLastAverageAngle * 3;
-			mGame->GetCutie()->SetEnginePower(1, lAngle, 0);	// Set initial steering in a good direction.
+			mGame->GetCutie()->SetEnginePower(1, 0, 0);
 			// Brake!
 			mGame->GetCutie()->SetEnginePower(0, 0, 0);
 			mGame->GetCutie()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
@@ -556,8 +563,15 @@ void VehicleAi::OnTick()
 				Vector3DF lElevatorVelocity = lNearestElevator->GetVelocity();
 				if (lElevatorVelocity.GetLengthSquared() > lMinimumVelocity2)
 				{
-					if (!IsVertical(lElevatorVelocity))
+					const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+					mRotateAngle = -GetRelativeDriveOnAngle(lDirection);
+					const bool lIsHorizontal = !IsVertical(lElevatorVelocity);
+					if (::fabs(mRotateAngle) > PIF/6 || lIsHorizontal)
 					{
+						if (lIsHorizontal)
+						{
+							mRotateAngle = (mRotateAngle < 0)? -1.3f : +1.3f;
+						}
 						SetMode(MODE_ROTATE_ON_THE_SPOT_DURING);
 						return;
 					}
@@ -577,29 +591,47 @@ void VehicleAi::OnTick()
 			mGame->GetCutie()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
 		}
 		break;
+		case MODE_ROTATE_ON_THE_SPOT:
 		case MODE_ROTATE_ON_THE_SPOT_DURING:
 		case MODE_ROTATE_ON_THE_SPOT_WAITING:
 		{
-			const float lAngle = (mLastAverageAngle < 0)? -1.0f : 1.0f;
+			float lAngle = mRotateAngle;
+			const float lMinAngle = 0.3f;
+			if (::fabs(lAngle) < lMinAngle)
+			{
+				lAngle = (lAngle < 0)? -lMinAngle : +lMinAngle;
+			}
 			float lSteerEndTime = 0.4f;
 			float lForwardEndTime = lSteerEndTime + 0.9f;
 			float lOtherSteerEndTime = lForwardEndTime + lSteerEndTime;
 			float lPeriod = lOtherSteerEndTime + 0.8f;
 			if (GetVehicleId() == 1)
 			{
+				// Steering impared.
+				lAngle *= 2;
 				lSteerEndTime = 0.7f;
 				lForwardEndTime = lSteerEndTime + 0.7f;
 				lOtherSteerEndTime = lForwardEndTime + lSteerEndTime;
 				lPeriod = lOtherSteerEndTime + 1.0f;
 				lStrength *= SMOOTH_BRAKING_FACTOR;
 			}
-			const int lIterations = 2;
+			if (GetVehicleId() == 2)
+			{
+				// Turns really effectively.
+				lAngle *= 0.5f;
+			}
+			// Finish this rotation show if we're getting there.
+			const int lIterations = (mMode == MODE_ROTATE_ON_THE_SPOT_WAITING)? 1 : 2;
 			if (lModeRunTime > lIterations*lPeriod+lSteerEndTime)
 			{
 				mGame->GetCutie()->SetEnginePower(0, 0, 0);
 				mGame->GetCutie()->SetEnginePower(1, -lAngle, 0);
 				mGame->GetCutie()->SetEnginePower(2, -1, 0);
-				if (mMode == MODE_ROTATE_ON_THE_SPOT_DURING)
+				if (mMode == MODE_ROTATE_ON_THE_SPOT)
+				{
+					SetMode(MODE_HEADING_BACK_ON_TRACK);
+				}
+				else if (mMode == MODE_ROTATE_ON_THE_SPOT_DURING)
 				{
 					SetMode(MODE_FIND_PATH_OFF_ELEVATOR);
 				}
@@ -733,7 +765,7 @@ bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVeloc
 
 void VehicleAi::SetMode(Mode pMode)
 {
-	if (pMode == MODE_BACKING_UP || pMode == MODE_HEADING_BACK_ON_TRACK)
+	if (pMode == mPreviousMode && pMode != MODE_NORMAL)
 	{
 		++mStuckCount;
 	}
@@ -743,14 +775,22 @@ void VehicleAi::SetMode(Mode pMode)
 	}
 	if (mStuckCount >= 5)
 	{
-		pMode = MODE_FIND_BEST_PATH;
+		Vector3DF lVelocity = mGame->GetCutie()->GetVelocity();
+		lVelocity.z = 0;
+		if (lVelocity.GetLengthSquared() < 2*2)
+		{
+			mLog.AHeadline("Stuck in a vehicle AI loop, trying to break out!");
+			if (pMode != MODE_FIND_BEST_PATH && mMode != MODE_FIND_BEST_PATH)
+			{
+				pMode = MODE_FIND_BEST_PATH;
+			}
+			else
+			{
+				mRotateAngle = (Random::Uniform() > 0.5)? +2.0f : -2.0f;
+				pMode = MODE_ROTATE_ON_THE_SPOT;
+			}
+		}
 		mStuckCount = 0;
-	}
-	if (pMode == MODE_WAITING_FOR_ELEVATOR && mActivePath != -1)
-	{
-		Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-		lPath->GotoAbsoluteTime(END_PATH_TIME);
-		mElevatorStopPosition = lPath->GetValue();
 	}
 	else if (pMode == MODE_FIND_PATH_OFF_ELEVATOR)
 	{
@@ -760,6 +800,7 @@ void VehicleAi::SetMode(Mode pMode)
 	{
 		mLastAverageAngle = 0;
 	}
+	mPreviousMode = mMode;
 	mMode = pMode;
 	mModeStartFrame = GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
 	const tchar* lModeName = _T("???");
@@ -776,6 +817,7 @@ void VehicleAi::SetMode(Mode pMode)
 		case MODE_GET_ON_ELEVATOR:		lModeName = _T("GET ON ELEVATOR");		break;
 		case MODE_GET_OFF_ELEVATOR:		lModeName = _T("GET OFF ELEVATOR");		break;
 		case MODE_ON_ELEVATOR:			lModeName = _T("ON ELEVATOR");			break;
+		case MODE_ROTATE_ON_THE_SPOT:		lModeName = _T("ROTATE ON THE SPOT");		break;
 		case MODE_ROTATE_ON_THE_SPOT_DURING:	lModeName = _T("ROTATE ON THE SPOT DURING");	break;
 		case MODE_ROTATE_ON_THE_SPOT_WAITING:	lModeName = _T("ROTATE ON THE SPOT WAITING");	break;
 	}
@@ -803,7 +845,7 @@ float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, int pPath, f
 
 	// We can assume the path "current" pointer is a bit ahead, so step back some to get a closer
 	// approximation of where to start looking for our closest point on the spline.
-	const float lWantedDistance = SCALE_FACTOR * NORMAL_AIM_AHEAD;
+	const float lWantedDistance = AIM_DISTANCE();
 	float lDeltaTime = -lWantedDistance * lPath->GetDistanceNormal();
 	if (lCurrentTime+lDeltaTime < 0)
 	{
@@ -873,25 +915,45 @@ bool VehicleAi::IsVertical(const Vector3DF& pVector)
 
 int VehicleAi::GetVehicleId() const
 {
-	if (mGame->GetCutie()->GetClassId() == _T("cutie"))
+	const str& lClassId = mGame->GetCutie()->GetClassId();
+	if (lClassId == _T("cutie"))
 	{
 		return 0;
 	}
-	if (mGame->GetCutie()->GetClassId() == _T("monster"))
+	if (lClassId == _T("monster"))
 	{
 		return 1;
 	}
-	if (mGame->GetCutie()->GetClassId() == _T("corvette"))
+	if (lClassId == _T("corvette"))
 	{
 		return 2;
 	}
-	if (mGame->GetCutie()->GetClassId() == _T("road_roller"))
+	if (lClassId == _T("road_roller"))
 	{
 		return 3;
 	}
 	assert(false);
 	return -1;
 }
+
+float VehicleAi::GetRelativeDriveOnAngle(const Vector3DF& pDirection) const
+{
+	assert(mActivePath >= 0);
+	if (mActivePath < 0)
+	{
+		return 0;
+	}
+	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
+	lPath->GotoAbsoluteTime(0.95f);
+	const Vector3DF p1 = lPath->GetValue();
+	lPath->StepInterpolation(0.04f);
+	const Vector3DF p2 = lPath->GetValue();
+	const Vector3DF lWantedDirection = p2-p1;
+	const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(pDirection.x, pDirection.y));
+	return lAngle;
+}
+
+
 
 LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, VehicleAi);
 

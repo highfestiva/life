@@ -361,15 +361,18 @@ class ChunkyWriter:
 				noderegexp = e
 			else:
 				noderegexp, rest = e[0], e[1:]
+			subgroup = []
 			for body in group:
 				if re.search("^"+noderegexp+"$", body.getFullName()[1:]):
 					if type(e) == str:
-						expanded += [body]
+						subgroup += [body]
 					else:
-						expanded += [(body,)+rest]
+						subgroup += [(body,)+rest]
 				else:
 					#print("%s != %s..." % (noderegexp, body.getFullName()))
 					pass
+			subgroup = sorted(subgroup, key=lambda li: li.getFullName() if type(e) == str else li[0].getFullName())
+			expanded += subgroup
 		if len(expanded) < len(unexpanded):
 			print("Error: could not expand %s into more than %i nodes!" % (str(unexpanded), len(expanded)))
 			sys.exit(100)

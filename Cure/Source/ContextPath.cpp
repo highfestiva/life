@@ -25,6 +25,7 @@ ContextPath::SplinePath::SplinePath(Vector3DF* pKeyFrames,
 	mDistanceNormal(pDistanceNormal),
 	mLikeliness(pLikeliness)
 {
+	EnableModulo(false);
 }
 
 const str& ContextPath::SplinePath::GetType() const
@@ -109,9 +110,9 @@ void ContextPath::SetTagIndex(int pIndex)
 		assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
 #endif // Debug
 		lPathPositions[x+1] = lPhysics->GetBoneTransformation(lBoneIndex).GetPosition();
-		if (x > 0)
+		if (x > 0)	// We only start from the start position (not origo).
 		{
-			lTotalDistance += lPathPositions[x].GetDistance(lPathPositions[x-1]);
+			lTotalDistance += lPathPositions[x+1].GetDistance(lPathPositions[x]);
 			lTimes[x+1] = lTotalDistance;
 		}
 	}

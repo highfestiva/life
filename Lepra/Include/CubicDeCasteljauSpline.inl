@@ -13,7 +13,8 @@ CubicDeCasteljauSpline<T, TimeType, TBase>::CubicDeCasteljauSpline(T* pKeyFrames
 	mCount(pCount),
 	mSplineType(pSplineType),
 	mPolicy(pPolicy),
-	mCurrentTime(0)
+	mCurrentTime(0),
+	mEnableModulo(true)
 {
 	if (mPolicy == FULL_COPY)
 	{
@@ -52,6 +53,12 @@ CubicDeCasteljauSpline<T, TimeType, TBase>::~CubicDeCasteljauSpline()
 }
 
 template<class T, class TimeType, class TBase>
+void CubicDeCasteljauSpline<T, TimeType, TBase>::EnableModulo(bool pEnable)
+{
+	mEnableModulo = pEnable;
+}
+
+template<class T, class TimeType, class TBase>
 void CubicDeCasteljauSpline<T, TimeType, TBase>::StartInterpolation(TimeType pTime)
 {
 	pTime = Math::Mod(pTime, mTimeTags[0], mTimeTags[mCount]);
@@ -85,8 +92,22 @@ void CubicDeCasteljauSpline<T, TimeType, TBase>::StepInterpolation(TimeType pTim
 	{
 		mCurrentTime = GetMaximumTime();
 	}*/
-	const TimeType lModulo = Math::Mod(mCurrentTime, mTimeTags[0], mTimeTags[mCount]);
-	mCurrentTime = lModulo;
+	if (mEnableModulo)
+	{
+		const TimeType lModulo = Math::Mod(mCurrentTime, mTimeTags[0], mTimeTags[mCount]);
+		mCurrentTime = lModulo;
+	}
+	else
+	{
+		if (mCurrentTime < mTimeTags[0])
+		{
+			mCurrentTime = mTimeTags[0];
+		}
+		else if (mCurrentTime > mTimeTags[mCount])
+		{
+			mCurrentTime = mTimeTags[mCount];
+		}
+	}
 
 	if (mCurrentTime < lPrevTime && pTimeStep > 0)	// Note: don't change. Checks for "looped" condition (as opposed to "backed").
 	{

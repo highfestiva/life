@@ -49,6 +49,7 @@ private:
 		MODE_GET_ON_ELEVATOR,
 		MODE_GET_OFF_ELEVATOR,
 		MODE_ON_ELEVATOR,
+		MODE_ROTATE_ON_THE_SPOT,
 		MODE_ROTATE_ON_THE_SPOT_DURING,
 		MODE_ROTATE_ON_THE_SPOT_WAITING,
 	};
@@ -61,14 +62,17 @@ private:
 	Vector3DF GetClosestElevatorPosition(const Vector3DF& pPosition, const Cure::Elevator*& pNearestElevator) const;
 	static bool IsVertical(const Vector3DF& pVector);
 	int GetVehicleId() const;
+	float GetRelativeDriveOnAngle(const Vector3DF& pDirection) const;
 
 	Game* mGame;
+	Mode mPreviousMode;
 	Mode mMode;
 	int mModeStartFrame;
 	int mStoppedFrame;
 	int mActivePath;
 	int mStuckCount;
 	float mLastAverageAngle;
+	float mRotateAngle;
 	Vector3DF mElevatorStopPosition;
 
 	LOG_CLASS_DECLARE();
