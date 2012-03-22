@@ -128,6 +128,7 @@ Drop slow-mo when super-resetting.
 
 Computer demo
 -------------
+Pause 2s between each round.
 Pendulum level: make bridge and trees brown instead of orange!
 2 extra levels: castle and machine.
 Tweak other levels.

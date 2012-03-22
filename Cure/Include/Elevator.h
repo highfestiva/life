@@ -26,13 +26,14 @@ public:
 
 	Vector3DF GetPosition() const;
 	Vector3DF GetVelocity() const;
+	float GetRadius() const;
 
 protected:
 	virtual void OnTick();
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void Trig(const TBC::PhysicsTrigger* pTrigger);
-	TBC::PhysicsManager::BodyID GetFirstBodyId() const;
+	TBC::ChunkyBoneGeometry* GetFirstBody() const;
 
 	float GetActiveMaxSpeedSquare() const;
 	void HaltActiveEngines(bool pStop);

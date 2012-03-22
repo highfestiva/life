@@ -195,7 +195,7 @@ void Machine::OnTick()
 				if (lMesh)
 				{
 					Vector3DF& lAmbient = lMesh->GetBasicMaterialSettings().mAmbient;
-					if (::fabs(lEngine->GetValue()) > 0.1f)
+					if (::fabs(lEngine->GetValue()) > 0.001f)
 					{
 						lAmbient.Set(lTag.mFloatValueList[0], lTag.mFloatValueList[1], lTag.mFloatValueList[2]);
 					}

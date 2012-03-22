@@ -41,16 +41,21 @@ Elevator::~Elevator()
 
 Vector3DF Elevator::GetPosition() const
 {
-	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(GetFirstBodyId());
+	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(GetFirstBody()->GetBodyId());
 }
 
 Vector3DF Elevator::GetVelocity() const
 {
 	Vector3DF lVelocity;
-	GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(GetFirstBodyId(), lVelocity);
+	GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(GetFirstBody()->GetBodyId(), lVelocity);
 	return lVelocity;
 }
 
+float Elevator::GetRadius() const
+{
+	const Vector3DF lSize = GetFirstBody()->GetShapeSize();
+	return std::max(lSize.x, lSize.y) * 0.5f;
+}
 
 
 void Elevator::OnTick()
@@ -165,7 +170,7 @@ void Elevator::Trig(const TBC::PhysicsTrigger* pTrigger)
 	}
 }
 
-TBC::PhysicsManager::BodyID Elevator::GetFirstBodyId() const
+TBC::ChunkyBoneGeometry* Elevator::GetFirstBody() const
 {
 	const TBC::PhysicsTrigger* lTrigger = 0;
 	GetTriggerCount((const void*&)lTrigger);
@@ -174,8 +179,7 @@ TBC::PhysicsManager::BodyID Elevator::GetFirstBodyId() const
 	typedef TBC::PhysicsEngine::GeometryList BodyList;
 	BodyList lBodyList = lEngineTrigger.mEngine->GetControlledGeometryList();
 	assert(!lBodyList.empty());
-	TBC::ChunkyBoneGeometry* lBody = lBodyList[0];
-	return lBody->GetBodyId();
+	return lBodyList[0];
 }
 
 
