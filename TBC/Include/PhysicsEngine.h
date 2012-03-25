@@ -77,7 +77,7 @@ public:
 	void ForceSetValue(unsigned pAspect, float pValue);
 
 	void OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;
-	float GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsManager) const;
+	Vector3DF GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManager) const;
 
 	static void UprightStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
 		const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction);

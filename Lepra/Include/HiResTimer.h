@@ -312,8 +312,7 @@ bool StopWatch::TryStart()
 	{
 		return false;
 	}
-	PopTimeDiff();
-	mIsStarted = true;
+	Start();
 	return true;
 }
 

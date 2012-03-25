@@ -60,10 +60,12 @@ private:
 	bool IsCloseToTarget(const Vector3DF& pPosition, float pDistance) const;
 	float GetClosestPathDistance(const Vector3DF& pPosition, int pPath = -1, float* pLikeliness = 0) const;
 	Vector3DF GetClosestElevatorPosition(const Vector3DF& pPosition, const Cure::Elevator*& pNearestElevator) const;
+	bool HasElevatorArrived(const Cure::Elevator*& pNearestElevator, const float pPositionZ, Vector3DF& pNearestLiftPosition2d, float& pElevatorXyDistance2ToElevatorStop);
 	float GetClosestElevatorRadius() const;
 	static bool IsVertical(const Vector3DF& pVector);
 	int GetVehicleIndex() const;
 	float GetRelativeDriveOnAngle(const Vector3DF& pDirection) const;
+	bool QueryCutieHindered(const Cure::TimeManager* pTime, const Vector3DF& pVelocity);
 
 	Game* mGame;
 	Mode mPreviousMode;

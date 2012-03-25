@@ -458,8 +458,9 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 	mIntensity /= mEngineNodeArray.size();
 }
 
-float PhysicsEngine::GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsManager) const
+Vector3DF PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManager) const
 {
+	Vector3DF lMaxVelocity;
 	float lMaxSpeed = 0;
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
@@ -469,9 +470,13 @@ float PhysicsEngine::GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsMana
 		Vector3DF lVelocity;
 		pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 		const float lSpeed = lVelocity.GetLengthSquared();
-		lMaxSpeed = (lSpeed > lMaxSpeed)? lSpeed : lMaxSpeed;
+		if (lSpeed > lMaxSpeed)
+		{
+			lMaxSpeed = lSpeed;
+			lMaxVelocity = lVelocity;
+		}
 	}
-	return (lMaxSpeed);
+	return lMaxVelocity;
 }
 
 

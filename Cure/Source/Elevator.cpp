@@ -19,10 +19,16 @@ namespace Cure
 
 
 
+#define STARTS_MOVING_VELOCITY	0.6f
+#define STOPS_MOVING_VELOCITY	0.3f
+#define ELEVATOR_ACTIVITY_RESET	1000
+
+
+
+
 Elevator::Elevator(ContextManager* pManager):
 	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Elevator")),
 	mActiveTrigger(0),
-	mStoppedTime(0),
 	mExitDelay(2.0),
 	mStopDelay(5.0),
 	mElevatorHasBeenMoving(true),	// Set to get this party started in some cases.
@@ -62,31 +68,28 @@ void Elevator::OnTick()
 {
 	Parent::OnTick();
 
-	const float lSpeedStillSquare = 0.1f;
-	const float lMaxSpeedSquare = GetActiveMaxSpeedSquare();
-	if (lMaxSpeedSquare >= lSpeedStillSquare && mElevatorIsActive)
+	const float lSignedMaxSpeed2 = GetSignedMaxSpeedSquare();
+	if (::fabs(lSignedMaxSpeed2) >= STARTS_MOVING_VELOCITY && mElevatorIsActive)
 	{
 		mElevatorHasBeenMoving = true;
 	}
 
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
-	mEngineActivity = Math::Lerp(mEngineActivity, lMaxSpeedSquare, Math::GetIterateLerpTime(0.4f, lFrameTime));
-	if (mEngineActivity < lSpeedStillSquare)
+	mEngineActivity = Math::Lerp(mEngineActivity, lSignedMaxSpeed2, Math::GetIterateLerpTime(0.4f, lFrameTime));
+	if (::fabs(lSignedMaxSpeed2) < STARTS_MOVING_VELOCITY && ::fabs(mEngineActivity) < STOPS_MOVING_VELOCITY)
 	{
-		if (mStopTimer.IsStarted())
-		{
-			mStoppedTime += mStopTimer.PopTimeDiff();
-		}
-		else
-		{
-			mStopTimer.Start();
-		}
 		const TBC::PhysicsTrigger* lTrigger = 0;
 		const int lTriggerCount = GetTriggerCount((const void*&)lTrigger);
 		const bool lIsNonStop = (lTriggerCount == 1 && lTrigger->GetType() == TBC::PhysicsTrigger::TRIGGER_NON_STOP);
-		if (!lIsNonStop || mStoppedTime >= mStopDelay)
+		bool lHasStopped = true;
+		if (lIsNonStop)
 		{
-			mStoppedTime = 0;
+			mStopTimer.TryStart();
+			lHasStopped = (mStopTimer.QueryTimeDiff() >= mStopDelay);
+		}
+		if (lHasStopped)
+		{
+			mStopTimer.ClearTimeDiff();
 			if (mElevatorHasBeenMoving)
 			{
 				log_adebug("TRIGGER - elevator has stopped.");
@@ -99,10 +102,10 @@ void Elevator::OnTick()
 					Trig(lTrigger);
 				}
 			}
-			mEngineActivity = 100;	// Don't try again in a long time.
+			mEngineActivity = ELEVATOR_ACTIVITY_RESET;	// Don't try again in a long time.
 
 			// Low engine activity and no longer actively triggered means we lost the previous trigger.
-			if (mActiveTrigger && mActiveTrigger->GetType() > TBC::PhysicsTrigger::TRIGGER_ALWAYS &&
+			if (mActiveTrigger && mActiveTrigger->GetType() >= TBC::PhysicsTrigger::TRIGGER_MOVEMENT &&
 				mTrigTime.QueryTimeDiff() > mExitDelay)
 			{
 				log_adebug("TRIGGER - exited trigger volume.");
@@ -125,8 +128,8 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	if (lEngineTrigger)
 	{
 		SetFunctionTarget(lEngineTrigger->mFunction, lEngineTrigger->mEngine);
-		mEngineActivity = 100;
-		if (mActiveTrigger && mActiveTrigger->GetType() > TBC::PhysicsTrigger::TRIGGER_ALWAYS)
+		mEngineActivity = ELEVATOR_ACTIVITY_RESET;	// Don't try again in a long time.
+		if (mActiveTrigger && mActiveTrigger->GetType() >= TBC::PhysicsTrigger::TRIGGER_MOVEMENT)
 		{
 			// Run engine for some time before *forcing* deactivation.
 			GetManager()->AddAlarmCallback(this, pAlarmId, 60, 0);
@@ -184,9 +187,10 @@ TBC::ChunkyBoneGeometry* Elevator::GetFirstBody() const
 
 
 
-float Elevator::GetActiveMaxSpeedSquare() const
+float Elevator::GetSignedMaxSpeedSquare() const
 {
-	float lMaxSpeed = 0;
+	float lMaxSpeed2 = 0;
+	float lSignedMaxSpeed2 = 0;
 	if (mActiveTrigger)
 	{
 		const TBC::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
@@ -194,10 +198,16 @@ float Elevator::GetActiveMaxSpeedSquare() const
 		for (int y = 0; y < lEngineCount; ++y)
 		{
 			const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
-			lMaxSpeed = std::max(lMaxSpeed, lEngineTrigger.mEngine->GetCurrentMaxSpeedSquare(lPhysicsManager));
+			Vector3DF lVelocity = lEngineTrigger.mEngine->GetCurrentMaxSpeed(lPhysicsManager);
+			const float lSpeed2 = lVelocity.GetLengthSquared();
+			if (lSpeed2 > lMaxSpeed2)
+			{
+				lMaxSpeed2 = lSpeed2;
+			}
+			lSignedMaxSpeed2 = (lVelocity.z < 0.5f)? -lMaxSpeed2 : lMaxSpeed2;
 		}
 	}
-	return (lMaxSpeed);
+	return lSignedMaxSpeed2;
 }
 
 void Elevator::HaltActiveEngines(bool pStop)

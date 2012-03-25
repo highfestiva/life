@@ -35,7 +35,7 @@ protected:
 	void Trig(const TBC::PhysicsTrigger* pTrigger);
 	TBC::ChunkyBoneGeometry* GetFirstBody() const;
 
-	float GetActiveMaxSpeedSquare() const;
+	float GetSignedMaxSpeedSquare() const;
 	void HaltActiveEngines(bool pStop);
 
 	void SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine);
@@ -44,7 +44,6 @@ private:
 	const TBC::PhysicsTrigger* mActiveTrigger;
 	HiResTimer mTrigTime;
 	StopWatch mStopTimer;
-	double mStoppedTime;
 	const double mExitDelay;
 	const double mStopDelay;
 	bool mElevatorHasBeenMoving;

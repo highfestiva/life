@@ -31,9 +31,9 @@ public:
 	enum Type
 	{
 		TRIGGER_INVALID = 0,
-		TRIGGER_NON_STOP,
-		TRIGGER_ALWAYS,
-		TRIGGER_MOVEMENT,
+		TRIGGER_NON_STOP,	// Sorta like a "trampoline", which needs to push, even if at top.
+		TRIGGER_ALWAYS,		// Trigger after delay, "timer triggered".
+		TRIGGER_MOVEMENT,	// Triggered by something physical.
 	};
 
 	struct EngineTrigger
