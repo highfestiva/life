@@ -856,7 +856,7 @@ void VehicleAi::SetMode(Mode pMode)
 	{
 		mStuckCount = 0;
 	}
-	if (mStuckCount >= 5)
+	if (mStuckCount >= 2)
 	{
 		Vector3DF lVelocity = mGame->GetCutie()->GetVelocity();
 		lVelocity.z = 0;
