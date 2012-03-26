@@ -34,14 +34,14 @@ def _buildstl():
 		return
 	print("Building STLport...")
 	os.chdir("ThirdParty/stlport/")
-	if _getvcver():
-		rgohelp._run(["configure.bat", "msvc"+str(_getvcver())], "configuring STLport for MSVC")
+	if rgohelp._getvcver():
+		rgohelp._run(["configure.bat", "msvc"+str(rgohelp._getvcver())], "configuring STLport for MSVC")
 	else:
 		rgohelp._run(["./configure"], "configuring STLport")
 	os.chdir("build/lib")
 	"cd build/lib"
-	make = rgohelp._getmake(NMAKE)
-	if _getvcver():
+	make = rgohelp._getmake(rgohelp.NMAKE)
+	if rgohelp._getvcver():
 		rgohelp._run([make, "/fmsvc.mak", "install"], "building STLport for MSVC")
 	else:
 		rgohelp._run([make, "-f", "gcc.mak", "depend"], "building STLport dependancies")
@@ -50,8 +50,8 @@ def _buildstl():
 
 
 def _buildcode(command, buildtype):
-	make = rgohelp._getmake(VCBUILD)
-	ver = _getvcver()
+	make = rgohelp._getmake(rgohelp.VCBUILD)
+	ver = rgohelp._getvcver()
 	projext = "900" if ver == 9 else "10";
 	if command == "build":
 		_buildstl()
@@ -287,7 +287,7 @@ def _builddata(sourcedir, targetdir, buildtype):
 
 def _rebuild(sourcedir, targetdir, buildtype):
 	rgohelp._verify_base_dir()
-	if _hasdevenv(verbose=True):
+	if rgohelp._hasdevenv(verbose=True):
 		_createmakes(force=True)
 		_cleandir(targetdir)
 		_buildcode("rebuild", buildtype)
@@ -408,7 +408,7 @@ def zipdata_gr():
 def buildcode():
 	targetdir=bindir
 	buildtype=default_build_mode
-	if _hasdevenv(verbose=True):
+	if rgohelp._hasdevenv(verbose=True):
 		_createmakes()
 		_buildcode("build", buildtype)
 		_incremental_copy_code(targetdir, buildtype)
@@ -446,7 +446,7 @@ def clean():
 	buildtype=default_build_mode
 	rgohelp._verify_base_dir()
 	global removes
-	if _hasdevenv(verbose=True):
+	if rgohelp._hasdevenv(verbose=True):
 		removes += _cleandir(targetdir)
 		_buildcode("clean", buildtype)
 	else:
@@ -473,7 +473,7 @@ def _prepare_run():
 		pre = ""
 		post = ".exe"
 	if not os.path.exists("LifeClient"+post) or not os.path.exists("LifeServer"+post):
-		reason = "binaries not compiled" if _hasdevenv() else "missing C++ build environment"
+		reason = "binaries not compiled" if rgohelp._hasdevenv() else "missing C++ build environment"
 		print("Could not run %s due to %s." % (appnames[0], reason))
 		sys.exit(2)
 	return pre, post
