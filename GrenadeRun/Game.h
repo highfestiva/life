@@ -18,7 +18,6 @@
 #define FPS			20
 #define SCALE_FACTOR		1.0f
 #define HEALTH_ROUND_FACTOR	0.8f
-#define RTVAR_
 
 
 

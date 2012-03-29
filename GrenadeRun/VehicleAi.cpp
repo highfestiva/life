@@ -21,13 +21,14 @@
 
 #define	NORMAL_AIM_AHEAD		5.0f	// How far ahead to try and intersect the path.
 #define ON_GOAL_DISTANCE		3.2f	// When at goal.
-#define ELEVATOR_WAIT_DISTANCE		8.3f	// When close to elevator.
-#define ELEVATOR_TOO_CLOSE_DISTANCE	7.6f	// When too close to elevator.
+#define ELEVATOR_WAIT_DISTANCE		8.8f	// When close to elevator.
+#define ELEVATOR_TOO_CLOSE_DISTANCE	8.2f	// When too close to elevator.
 #define ELEVATOR_GOT_OFF_EXTRA_DISTANCE	1.7f	// Distance to get off elevator.
 #define ON_ELEVATOR_DISTANCE		2.3f	// When on elevator.
 #define ELEVATOR_FAR_DISTANCE		15.0f	// When far to elevator.
 #define SLOW_DOWN_DISTANCE		6.0f	// When to slow down before stopping at goal.
 #define OFF_COURSE_DISTANCE		4.5f	// When to start heading back.
+#define TOTALLY_OFF_COURSE_DISTANCE	16.0f	// When fallen off some cliff or similar.
 #define END_PATH_TIME			0.9999f	// Time is considered at end of path.
 #define	OFF_END_PATH_TIME		0.9995f	// Close to end, but not quite.
 #define DOUBLE_OFF_END_PATH_TIME	0.9990f	// Close to end, but not quite. Double that.
@@ -103,32 +104,73 @@ void VehicleAi::OnTick()
 				lStartTime = lPath->GetCurrentInterpolationTime();
 				mActivePath = -1;
 			}
-			int lBestPathDistance = 1000000;
+			Vector3DF lElevatorDirection;
+			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
+			{
+				mGame->GetCutie()->SetEnginePower(0, 0, 0);
+				mGame->GetCutie()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
+				const Cure::Elevator* lNearestElevator;
+				const Vector3DF lElevatorPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
+				if (lElevatorPosition.GetDistanceSquared(lPosition) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
+				{
+					mLog.AHeadline("Fell off elevator while looking for get-off route. Looking for somewhere else to go.");
+					SetMode(MODE_FIND_BEST_PATH);
+					return;
+				}
+				lElevatorDirection = lNearestElevator->GetVelocity().GetNormalized(0.5f);
+			}
+			float lBestPathDistance = 1000000;
 			std::vector<PathIndexLikeliness> lRelevantPaths;
 			float lTotalLikeliness = 0;
+			bool lLiftingTowardsGoal = false;
 			const int lPathCount = mGame->GetLevel()->QueryPath()->GetPathCount();
 			for (int x = 0; x < lPathCount; ++x)
 			{
+				bool lCurrentLiftingTowardsGoal = false;
 				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(x);
 				lPath->GotoAbsoluteTime(lStartTime);
 				float lLikeliness = 1;
-				const int lRoundedNearestDistance = (int)(GetClosestPathDistance(lPosition, x, &lLikeliness)/SCALE_FACTOR/2);
-				if (mMode == MODE_FIND_PATH_OFF_ELEVATOR && lPath->GetCurrentInterpolationTime() > 0.5f)
+				const float lRoundedNearestDistance = GetClosestPathDistance(lPosition, x, &lLikeliness)/SCALE_FACTOR/2;
+				mLog.Infof(_T(" - Path %2i is %2.2f units away."), x, lRoundedNearestDistance);
+				if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 				{
-					// This path is probably the one I used to get ON the elevator, we're not using that!
+					if (lPath->GetCurrentInterpolationTime() > 0.7f)
+					{
+						// This path is probably the one I used to get ON the elevator (or one
+						// just like it from another direction), we're not using that!
+						mLog.AInfo("   (Not relevant, too close to path end.)");
+						continue;
+					}
+					else
+					{
+						const float lTowardsDistance = GetClosestPathDistance(lPosition+lElevatorDirection, x)/SCALE_FACTOR/2;
+						if (lTowardsDistance < lRoundedNearestDistance)
+						{
+							lCurrentLiftingTowardsGoal = true;
+							if (!lLiftingTowardsGoal)
+							{
+								lLiftingTowardsGoal = true;
+								lBestPathDistance = 1000000;
+							}
+						}
+					}
+				}
+				if (!lCurrentLiftingTowardsGoal && lLiftingTowardsGoal)
+				{
+					// This elevator isn't heading in the right direction, but at least one other is.
 					continue;
 				}
 				PathIndexLikeliness pl;
 				pl.mPathIndex = x;
 				pl.mLikeliness = lLikeliness;
-				if (lRoundedNearestDistance < lBestPathDistance)
+				if (lRoundedNearestDistance < lBestPathDistance-0.5f)
 				{
 					lRelevantPaths.clear();
 					lRelevantPaths.push_back(pl);
 					lBestPathDistance = lRoundedNearestDistance;
 					lTotalLikeliness += lLikeliness;
 				}
-				else if (lRoundedNearestDistance == lBestPathDistance)
+				else if (lRoundedNearestDistance < lBestPathDistance+0.5f)
 				{
 					lRelevantPaths.push_back(pl);
 					lTotalLikeliness += lLikeliness;
@@ -147,11 +189,11 @@ void VehicleAi::OnTick()
 						const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
 						mGame->GetCutie()->SetEnginePower(1, lAngle*0.5f, 0);
 					}
-					mLog.Headlinef(_T("On elevator: too long distance to path %i, or too many paths %u."), lBestPathDistance, lRelevantPaths.size());
+					mLog.Headlinef(_T("On elevator: too long distance to path %.1f, or too many paths %u."), lBestPathDistance, lRelevantPaths.size());
 					if (lBestPathDistance > 15)
 					{
 						const Cure::Elevator* lNearestElevator;
-						const Vector3DF lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, lNearestElevator);
+						const Vector3DF lNearestLiftPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
 						if (lNearestLiftPosition.GetDistanceSquared(lPosition) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
 						{
 							// DUCK!!! We fell off!
@@ -166,7 +208,7 @@ void VehicleAi::OnTick()
 					}
 					return;
 				}
-				mLog.Headlinef(_T("Getting off elevator: distance to path %i."), lBestPathDistance);
+				mLog.Headlinef(_T("Getting off elevator: distance to path %.1f."), lBestPathDistance);
 			}
 			assert(!lRelevantPaths.empty());
 			if (lRelevantPaths.empty())
@@ -266,8 +308,15 @@ void VehicleAi::OnTick()
 
 			if (mMode != MODE_HEADING_BACK_ON_TRACK && mMode != MODE_GET_ON_ELEVATOR && lModeRunDeltaFrameCount%20 == 19)
 			{
+				const float lDistance = GetClosestPathDistance(lPosition);
+				if (lDistance > SCALE_FACTOR * TOTALLY_OFF_COURSE_DISTANCE)
+				{
+					mLog.AHeadline("Fell off something. Trying some new path.");
+					SetMode(MODE_FIND_BEST_PATH);
+					return;
+				}
 				const float lVelocityScaleFactor = ((mMode == MODE_NORMAL)? 1.0f : 3.0f) * Math::Clamp(lVelocity.GetLength() / 2.5f, 0.3f, 1.0f);
-				if (GetClosestPathDistance(lPosition) > SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
+				if (lDistance > SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
 				{
 					mLog.AHeadline("Going about my way, but got offside somehow. Heading back.");
 					SetMode(MODE_HEADING_BACK_ON_TRACK);
@@ -433,6 +482,20 @@ void VehicleAi::OnTick()
 			}
 		}
 		break;
+		case MODE_FLEE:
+		{
+			// Pedal to the metal.
+			mGame->GetCutie()->SetEnginePower(0, +lStrength, 0);
+			mGame->GetCutie()->SetEnginePower(1, 0, 0);
+			mGame->GetCutie()->SetEnginePower(2, 0, 0);
+			if (lModeRunTime > 3.0f)
+			{
+				mActivePath = -1;
+				SetMode(MODE_FIND_BEST_PATH);
+				return;
+			}
+		}
+		break;
 		case MODE_STOPPING_AT_GOAL:
 		case MODE_AT_GOAL:
 		{
@@ -465,12 +528,12 @@ void VehicleAi::OnTick()
 		break;
 		case MODE_WAITING_FOR_ELEVATOR:
 		{
-			/*if (lModeRunTime > 9.0f)
+			if (lModeRunTime > 9.0f)
 			{
-				mLog.AHeadline("Backing up, I've waited for the elevator too long.");
-				SetMode(MODE_BACKING_UP);
+				mLog.AHeadline("Movin' on, I've waited for the elevator too long.");
+				SetMode(MODE_FLEE);
 				return;
-			}*/
+			}
 			if (::fabs(mLastAverageAngle) > 0.1f && GetVehicleIndex() == 1)
 			{
 				lStrength *= SMOOTH_BRAKING_FACTOR;	// Smooth braking when turning, we can always back up if necessary.
@@ -484,7 +547,7 @@ void VehicleAi::OnTick()
 				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
 				const Vector3DF lWantedDirection = lPath->GetSlope();
 				const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
-				mGame->GetCutie()->SetEnginePower(1, -lAngle, 0);
+				mGame->GetCutie()->SetEnginePower(1, +lAngle, 0);
 				const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
 				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength, 0);
 				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f, 0);
@@ -899,6 +962,7 @@ void VehicleAi::SetMode(Mode pMode)
 		case MODE_NORMAL:			lModeName = _T("NORMAL");			break;
 		case MODE_HEADING_BACK_ON_TRACK:	lModeName = _T("HEADING BACK ON TRACK");	break;
 		case MODE_BACKING_UP:			lModeName = _T("BACKING UP");			break;
+		case MODE_FLEE:			lModeName = _T("BREAKOUT");			break;
 		case MODE_STOPPING_AT_GOAL:		lModeName = _T("STOPPING AT GOAL");		break;
 		case MODE_AT_GOAL:			lModeName = _T("AT GOAL");			break;
 		case MODE_WAITING_FOR_ELEVATOR:		lModeName = _T("WAITING FOR ELEVATOR");		break;
