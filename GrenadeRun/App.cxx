@@ -66,6 +66,7 @@
 #define RTVAR_CONTENT_LEVELS		"Content.Levels"
 #define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
 #define RTVAR_HISCORE_NAME		"Hiscore.Name"	// Last entered name.
+#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 
 namespace GrenadeRun
@@ -434,8 +435,11 @@ bool App::Open()
 	[AnimatedApp updateContent];
 #endif // iOS
 
-	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);	// TODO!!!!!!!!!!!!!!!!!!!!!
-	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);	// TODO!!!!!!!!!!!!!!!!!!!!!
+#ifdef KC_DEV_TESTING
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_VOLUME, 0.0);
+#endif // Kill Cutie development testing
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
 	bool lOk = mUiManager->OpenDraw();
@@ -673,15 +677,28 @@ int App::Run()
 	if (lOk)
 	{
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
+#ifndef KC_DEV_TESTING
 		mGame->SetComputerDifficulty(0.0f);
-		mGame->SetComputerIndex(1);
 		lOk = mGame->SetLevelName(_T("level_2"));
+#else // Dev testing
+		mGame->SetComputerDifficulty(1.0f);
+		mGame->SetComputerIndex(1);
+		lOk = mGame->SetLevelName(_T("level_elevate"));
+#endif // Dev testing / !dev testing
 	}
 	if (lOk)
 	{
 		mGame->Cure::GameTicker::GetTimeManager()->Tick();
 		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
+
+#ifndef KC_DEV_TESTING
 		MainMenu();
+#else // Dev testing
+		UiTbc::Button* lButton = new UiTbc::Button(_T("Apa"));
+		lButton->SetTag(3);
+		OnLevelAction(lButton);
+#endif // Dev testing / !dev testing
+
 		lOk = mResourceManager->InitDefault();
 	}
 	if (lOk)
@@ -1025,7 +1042,7 @@ bool App::Poll()
 			UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
 	}
 
-	if (mGameOverTimer.IsStarted())
+	if (mGameOverTimer.IsStarted() && !mIsPaused)
 	{
 		if (mGameOverTimer.QueryTimeDiff() > 11.0 ||
 			(mGame->GetComputerIndex() == 1 && mGame->GetCutie()->GetHealth() <= 0 && mGameOverTimer.QueryTimeDiff() > 7.0) ||
@@ -1114,7 +1131,7 @@ void App::DrawHud()
 		return;
 	}
 
-	const float lButtonWidth = BUTTON_WIDTH;	// TODO: fix for Retina.
+	const float lButtonWidth = BUTTON_WIDTH;
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 	const float m = BUTTON_MARGIN;

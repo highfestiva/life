@@ -68,7 +68,7 @@ void LauncherAi::OnTick()
 	}
 	if (lDifficulty > 0.9f)
 	{
-		if (lCtfDistance < 60*SCALE_FACTOR)
+		if (lCtfDistance < 60*SCALE_FACTOR && lCtfPosition.z-lTargetPosition.z < 7)
 		{
 			lHandled = true;
 			if (mShotCount > 2)
@@ -115,7 +115,11 @@ void LauncherAi::OnTick()
 	{
 		if (lCtfDistance < 170*SCALE_FACTOR)
 		{
-			if (lTargetSpeed * 10 > lCtfDistance * 1.2f)
+			if (lCtfPosition.z-lTargetPosition.z > 7)
+			{
+				// Nevermind - this gal is far below the goal. Keep aiming at her instead of camping at the goal.
+			}
+			else if (lTargetSpeed * 10 > lCtfDistance * 1.2f)
 			{
 				// She's probably going to reach the target and brake hard,
 				// so don't aim too far ahead.

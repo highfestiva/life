@@ -45,6 +45,7 @@ bool OggAlStream::Playback()
 	}
 
 	alSourceQueueBuffers(mAlSource, 2, mAlBuffers);
+	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMasterVolume());
 	alSourcePlay(mAlSource);
 	return true;
 }

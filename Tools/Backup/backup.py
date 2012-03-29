@@ -84,7 +84,7 @@ def main():
     fl = GlobDirectoryWalker(basedir, "*",
         ("fmod*.lib", "fmod*.dll", "DspFx.dll"),
         ("*.o", "*.obj", "*.pyo", "*.pyc", "*.log", ".cvsignore", "*.vcproj.*.user", "*.suo", "*.vcproj.*", "*.lib", "*.exp", "*.dll", "*.pdb", "*.ncb", "*.class", "*.mesh", "*.phys"),
-        ("*.svn", "*.git", "Unicode Release*", "Unicode Final", "Unicode Debug*", "Release Candidate", "Debug", "Release", "CVS", "lib"))
+        ("*.svn", "*.git", "Unicode Release*", "Unicode Final", "Unicode Debug*", "Release Candidate", "Debug", "Release", "CVS", "lib", "bin"))
     print("Copying...")
     targetdir = os.path.join(basedir, "../bak")
     cnt = 0

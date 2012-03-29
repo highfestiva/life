@@ -48,6 +48,7 @@ struct PathIndexLikeliness
 {
 	int mPathIndex;
 	float mLikeliness;
+	float mDistance;
 };
 
 
@@ -107,6 +108,13 @@ void VehicleAi::OnTick()
 			Vector3DF lElevatorDirection;
 			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 			{
+				if (lModeRunDeltaFrameCount%5 == 3)
+				{
+					if (AvoidGrenade(lPosition, lVelocity, 1))
+					{
+						return;
+					}
+				}
 				mGame->GetCutie()->SetEnginePower(0, 0, 0);
 				mGame->GetCutie()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
 				const Cure::Elevator* lNearestElevator;
@@ -121,7 +129,6 @@ void VehicleAi::OnTick()
 			}
 			float lBestPathDistance = 1000000;
 			std::vector<PathIndexLikeliness> lRelevantPaths;
-			float lTotalLikeliness = 0;
 			bool lLiftingTowardsGoal = false;
 			const int lPathCount = mGame->GetLevel()->QueryPath()->GetPathCount();
 			for (int x = 0; x < lPathCount; ++x)
@@ -130,8 +137,8 @@ void VehicleAi::OnTick()
 				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(x);
 				lPath->GotoAbsoluteTime(lStartTime);
 				float lLikeliness = 1;
-				const float lRoundedNearestDistance = GetClosestPathDistance(lPosition, x, &lLikeliness)/SCALE_FACTOR/2;
-				mLog.Infof(_T(" - Path %2i is %2.2f units away."), x, lRoundedNearestDistance);
+				const float lNearestDistance = GetClosestPathDistance(lPosition, x, &lLikeliness)/SCALE_FACTOR/2;
+				mLog.Infof(_T(" - Path %2i is %2.2f units away."), x, lNearestDistance);
 				if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 				{
 					if (lPath->GetCurrentInterpolationTime() > 0.7f)
@@ -144,7 +151,7 @@ void VehicleAi::OnTick()
 					else
 					{
 						const float lTowardsDistance = GetClosestPathDistance(lPosition+lElevatorDirection, x)/SCALE_FACTOR/2;
-						if (lTowardsDistance < lRoundedNearestDistance)
+						if (lTowardsDistance < lNearestDistance)
 						{
 							lCurrentLiftingTowardsGoal = true;
 							if (!lLiftingTowardsGoal)
@@ -163,17 +170,26 @@ void VehicleAi::OnTick()
 				PathIndexLikeliness pl;
 				pl.mPathIndex = x;
 				pl.mLikeliness = lLikeliness;
-				if (lRoundedNearestDistance < lBestPathDistance-0.5f)
+				pl.mDistance = lNearestDistance;
+				lRelevantPaths.push_back(pl);
+				if (lNearestDistance < lBestPathDistance)
 				{
-					lRelevantPaths.clear();
-					lRelevantPaths.push_back(pl);
-					lBestPathDistance = lRoundedNearestDistance;
-					lTotalLikeliness += lLikeliness;
+					lBestPathDistance = lNearestDistance;
 				}
-				else if (lRoundedNearestDistance < lBestPathDistance+0.5f)
+			}
+			// Sort out those that are too far away.
+			float lTotalLikeliness = 0;
+			std::vector<PathIndexLikeliness>::iterator x;
+			for (x = lRelevantPaths.begin(); x != lRelevantPaths.end();)
+			{
+				if (x->mDistance < lBestPathDistance+2.0f)
 				{
-					lRelevantPaths.push_back(pl);
-					lTotalLikeliness += lLikeliness;
+					lTotalLikeliness += x->mLikeliness;
+					++x;
+				}
+				else
+				{
+					x = lRelevantPaths.erase(x);
 				}
 			}
 			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
@@ -217,7 +233,6 @@ void VehicleAi::OnTick()
 			}
 			const float lPickedLikeliness = (float)Random::Uniform(0, lTotalLikeliness);
 			lTotalLikeliness = 0;
-			std::vector<PathIndexLikeliness>::iterator x;
 			for (x = lRelevantPaths.begin(); x != lRelevantPaths.end(); ++x)
 			{
 				const float lNextLikeliness = lTotalLikeliness + x->mLikeliness;
@@ -528,7 +543,14 @@ void VehicleAi::OnTick()
 		break;
 		case MODE_WAITING_FOR_ELEVATOR:
 		{
-			if (lModeRunTime > 9.0f)
+			if (lModeRunDeltaFrameCount%5 == 3)
+			{
+				if (AvoidGrenade(lPosition, lVelocity, 1))
+				{
+					return;
+				}
+			}
+			if (lModeRunTime > 25.0f)
 			{
 				mLog.AHeadline("Movin' on, I've waited for the elevator too long.");
 				SetMode(MODE_FLEE);

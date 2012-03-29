@@ -118,6 +118,7 @@ public:
 	PhysicsManager::TriggerID GetTriggerId() const;
 	bool IsConnectorType(ConnectorType pType) const;
 	void AddConnectorType(ConnectorType pType);
+	Vector3DF GetOriginalOffset() const;
 	float GetImpactFactor() const;
 	const str& GetMaterial() const;
 

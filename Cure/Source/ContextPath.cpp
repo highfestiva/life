@@ -141,10 +141,10 @@ int ContextPath::GetPathCount() const
 
 ContextPath::SplinePath* ContextPath::GetPath(int pIndex) const
 {
-	assert(pIndex >= 0 && pIndex < GetPathCount());
 	if (!(pIndex >= 0 && pIndex < GetPathCount()))
 	{
-		return 0;
+		// This shouldn't happen... Probably already killed.
+		return mPathArray[0];
 	}
 	return mPathArray[pIndex];
 }

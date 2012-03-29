@@ -46,15 +46,7 @@ void Cutie::DrainHealth(float pDrain)
 
 	// Was killed. Drop all wheels! :)
 	mKillJointsTickCount = 2;
-	const float lSpeed = GetVelocity().GetLength();
-	if (lSpeed < 1)
-	{
-		mWheelExpelTickCount = 25;
-	}
-	else
-	{
-		mWheelExpelTickCount = 12 + (int)(15/lSpeed);
-	}
+	mWheelExpelTickCount = 3;
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	mWheelExpelTickCount = (int)(mWheelExpelTickCount/lRealTimeRatio);
@@ -166,20 +158,32 @@ void Cutie::OnTick()
 	for (int x = 0; x < lBoneCount; ++x)
 	{
 		TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
-		if (lWheel->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+		if (lWheel->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE ||
+			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(lWheel->GetBodyId()))
 		{
-			const Vector3DF lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
-			if (GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(lWheel->GetBodyId()) &&
-				lPosition.GetDistanceSquared(lWheelPosition) >= 5*5)
+			continue;
+		}
+		Vector3DF lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
+		bool lFarAway = (lPosition.GetDistanceSquared(lWheelPosition) >= 5*5);
+		if (!lFarAway)
+		{
+			const QuaternionF lCarInverse = GetOrientation().GetInverse();
+			lWheelPosition = lCarInverse * (lWheelPosition - lPosition);
+			const float lMinDistance = lWheel->GetShapeSize().x * 0.5f;
+			if (::fabs(lWheelPosition.x) > ::fabs(GetPhysics()->GetOriginalBoneTransformation(x).GetPosition().x) + lMinDistance)
 			{
-				GetManager()->RemovePhysicsBody(lWheel->GetBodyId());
-				GetManager()->GetGameManager()->GetPhysicsManager()->SetForceFeedbackListener(lWheel->GetBodyId(), 0);
+				lFarAway = true;
 			}
-			else
-			{
-				// Come back later for this one.
-				mWheelExpelTickCount = 1;
-			}
+		}
+		if (lFarAway)
+		{
+			GetManager()->RemovePhysicsBody(lWheel->GetBodyId());
+			GetManager()->GetGameManager()->GetPhysicsManager()->SetForceFeedbackListener(lWheel->GetBodyId(), 0);
+		}
+		else
+		{
+			// Come back later for this one.
+			mWheelExpelTickCount = 1;
 		}
 	}
 }

@@ -3215,8 +3215,14 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		return;
 	}
 
-	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 	dContact lContact[8];
+	const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
+	if (lTriggerContactPointCount <= 0)
+	{
+		// In AABB range (since call came here), but no real contact.
+		return;
+	}
+
 	if (lObject1->mTriggerListener != 0)	// Only trig, no force application.
 	{
 		if (lObject1->mTriggerListener->IsSameInstance(lObject2->mForceFeedbackListener))
@@ -3238,8 +3244,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 
 	// Bounce/slide when both objects are dynamic, non-trigger objects.
 	{
-		const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
-
+		PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 		// Fetch force, will be used to scale friction (projected against surface normal).
 		Vector3DF lPosition1 = lThis->GetBodyPosition((BodyID)lObject1);
 		Vector3DF lPosition2 = lThis->GetBodyPosition((BodyID)lObject2);

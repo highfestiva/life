@@ -131,8 +131,7 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 			lHingeAxis = lHingeRotator*lHingeAxis;
 
 			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
-			const Vector3DF lAnchor = lBodyTransform.GetPosition() +
-				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
+			const Vector3DF lAnchor = lBodyTransform.GetPosition() + GetOriginalOffset();
 			mJointId = pPhysics->CreateHingeJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lHingeAxis);
 			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], mBodyData.mBounce);
@@ -293,6 +292,11 @@ void ChunkyBoneGeometry::AddConnectorType(ConnectorType pType)
 	{
 		mConnectorArray.push_back(pType);
 	}
+}
+
+Vector3DF ChunkyBoneGeometry::GetOriginalOffset() const
+{
+	return Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
 }
 
 float ChunkyBoneGeometry::GetImpactFactor() const
