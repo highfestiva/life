@@ -16,6 +16,10 @@ namespace Lepra
 
 
 
+#define LEPRA_XY_ANGLE(wanted, actual)	Vector2DF(wanted.x, wanted.y).GetAngle(Vector2DF(actual.x, actual.y))
+
+
+
 template<class _TVarType>
 class Vector3D
 {

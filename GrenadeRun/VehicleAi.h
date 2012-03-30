@@ -43,6 +43,7 @@ private:
 		MODE_NORMAL,
 		MODE_HEADING_BACK_ON_TRACK,
 		MODE_BACKING_UP,
+		MODE_BACKING_UP_TO_GOAL,
 		MODE_FLEE,
 		MODE_STOPPING_AT_GOAL,
 		MODE_AT_GOAL,
@@ -59,7 +60,7 @@ private:
 	bool AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pCaution);
 	void SetMode(Mode pMode);
 	bool IsCloseToTarget(const Vector3DF& pPosition, float pDistance) const;
-	float GetClosestPathDistance(const Vector3DF& pPosition, int pPath = -1, float* pLikeliness = 0) const;
+	float GetClosestPathDistance(const Vector3DF& pPosition, const int pPath = -1, float* pLikeliness = 0) const;
 	Vector3DF GetClosestElevatorPosition(const Vector3DF& pPosition, const Cure::Elevator*& pNearestElevator) const;
 	bool HasElevatorArrived(const Cure::Elevator*& pNearestElevator, const float pPositionZ, Vector3DF& pNearestLiftPosition2d, float& pElevatorXyDistance2ToElevatorStop);
 	float GetClosestElevatorRadius() const;

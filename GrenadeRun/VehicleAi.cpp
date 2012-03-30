@@ -96,8 +96,7 @@ void VehicleAi::OnTick()
 		case MODE_FIND_BEST_PATH:
 		case MODE_FIND_PATH_OFF_ELEVATOR:
 		{
-			mLog.AHeadline("Trying to find new path...");
-			float lStartTime = 0;
+			float lStartTime = 0.5f;
 			if (mActivePath != -1)
 			{
 				// Synchronize all paths.
@@ -105,6 +104,7 @@ void VehicleAi::OnTick()
 				lStartTime = lPath->GetCurrentInterpolationTime();
 				mActivePath = -1;
 			}
+			mLog.Headlinef(_T("Trying to find new path... starting iterating from  %.2f."), lStartTime);
 			Vector3DF lElevatorDirection;
 			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 			{
@@ -202,7 +202,7 @@ void VehicleAi::OnTick()
 						Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(lRelevantPaths[0].mPathIndex);
 						const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
 						const Vector3DF lWantedDirection = lPath->GetValue() - lPosition;
-						const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
+						const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 						mGame->GetCutie()->SetEnginePower(1, lAngle*0.5f, 0);
 					}
 					mLog.Headlinef(_T("On elevator: too long distance to path %.1f, or too many paths %u."), lBestPathDistance, lRelevantPaths.size());
@@ -349,7 +349,7 @@ void VehicleAi::OnTick()
 				{
 					const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
 					const Vector3DF lWantedDirection = lTarget-lPosition;
-					const float lForwardAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
+					const float lForwardAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 					// Amplify angle to be either full left or full right.
 					const float lAngle = (lForwardAngle < 0)? -1.0f : 1.0f;
 					mGame->GetCutie()->SetEnginePower(1, -lAngle, 0);
@@ -376,6 +376,25 @@ void VehicleAi::OnTick()
 					{
 						mLog.AHeadline("Normal mode close to end of path to elevator, changing mode.");
 						SetMode(MODE_WAITING_FOR_ELEVATOR);
+						return;
+					}
+				}
+			}
+
+			// Did we just pass (fly by?) the goal?
+			if (lModeRunDeltaFrameCount%3 == 0)
+			{
+				const Vector3DF lGoalDirection = mGame->GetCtf()->GetPosition() - lPosition;
+				if (::fabs(lGoalDirection.z) < 2 &&
+					lGoalDirection.GetLengthSquared() < ELEVATOR_FAR_DISTANCE*ELEVATOR_FAR_DISTANCE &&
+					lVelocity.GetLengthSquared() < 6*6)
+				{
+					const Vector3DF lCutieDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+					const float lDeltaAngle = ::fabs(LEPRA_XY_ANGLE(lGoalDirection, lCutieDirection));
+					if (lDeltaAngle >= PIF-PIF/4 && lDeltaAngle <= PIF+PIF/4)
+					{
+						mLog.AHeadline("Passed goal, it's right behind me!");
+						SetMode(MODE_BACKING_UP_TO_GOAL);
 						return;
 					}
 				}
@@ -437,7 +456,7 @@ void VehicleAi::OnTick()
 			// Steer.
 			const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
 			const Vector3DF lWantedDirection = lTarget-lPosition;
-			float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
+			float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 			if (mMode == MODE_GET_OFF_ELEVATOR)
 			{
 				// Aborting too early might cause us to stop, waiting for the next ride in mid-air.
@@ -497,6 +516,43 @@ void VehicleAi::OnTick()
 			}
 		}
 		break;
+		case MODE_BACKING_UP_TO_GOAL:
+		{
+			Vector3DF lWantedDirection = mGame->GetCtf()->GetPosition() - lPosition;
+			const float lDistance2 = lWantedDirection.GetLengthSquared();
+			if (lDistance2 <= ON_GOAL_DISTANCE*ON_GOAL_DISTANCE)
+			{
+				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
+				lPath->GotoAbsoluteTime(END_PATH_TIME);
+				SetMode(MODE_STOPPING_AT_GOAL);
+				return;
+			}
+			else if (lDistance2 >= TOTALLY_OFF_COURSE_DISTANCE*TOTALLY_OFF_COURSE_DISTANCE)
+			{
+				SetMode(MODE_FIND_BEST_PATH);
+				return;
+			}
+
+			// Brake or move backward.
+			const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
+			mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength, 0);
+			mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f, 0);
+
+			// Turn steering wheel.
+			const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+			float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
+			lAngle += (lAngle < 0)? +PIF : -PIF;
+			lAngle *= 3;
+			mGame->GetCutie()->SetEnginePower(1, -lAngle, 0);
+
+			if (lModeRunTime > 15)
+			{
+				mLog.AHeadline("Not getting back to goal. Fuck it.");
+				SetMode(MODE_ROTATE_ON_THE_SPOT);
+				return;
+			}
+		}
+		break;
 		case MODE_FLEE:
 		{
 			// Pedal to the metal.
@@ -505,7 +561,6 @@ void VehicleAi::OnTick()
 			mGame->GetCutie()->SetEnginePower(2, 0, 0);
 			if (lModeRunTime > 3.0f)
 			{
-				mActivePath = -1;
 				SetMode(MODE_FIND_BEST_PATH);
 				return;
 			}
@@ -568,7 +623,7 @@ void VehicleAi::OnTick()
 				const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
 				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
 				const Vector3DF lWantedDirection = lPath->GetSlope();
-				const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
+				const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 				mGame->GetCutie()->SetEnginePower(1, +lAngle, 0);
 				const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
 				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength, 0);
@@ -606,7 +661,7 @@ void VehicleAi::OnTick()
 				{
 					const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
 					const Vector3DF lWantedDirection = mElevatorGetOnPosition - lPosition;
-					const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
+					const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 					if (::fabs(lAngle) > PIF/12)
 					{
 						mRotateAngle = -lAngle;
@@ -984,7 +1039,8 @@ void VehicleAi::SetMode(Mode pMode)
 		case MODE_NORMAL:			lModeName = _T("NORMAL");			break;
 		case MODE_HEADING_BACK_ON_TRACK:	lModeName = _T("HEADING BACK ON TRACK");	break;
 		case MODE_BACKING_UP:			lModeName = _T("BACKING UP");			break;
-		case MODE_FLEE:			lModeName = _T("BREAKOUT");			break;
+		case MODE_BACKING_UP_TO_GOAL:		lModeName = _T("BACKING UP TO GOAL");		break;
+		case MODE_FLEE:				lModeName = _T("FLEE");				break;
 		case MODE_STOPPING_AT_GOAL:		lModeName = _T("STOPPING AT GOAL");		break;
 		case MODE_AT_GOAL:			lModeName = _T("AT GOAL");			break;
 		case MODE_WAITING_FOR_ELEVATOR:		lModeName = _T("WAITING FOR ELEVATOR");		break;
@@ -1008,7 +1064,7 @@ bool VehicleAi::IsCloseToTarget(const Vector3DF& pPosition, float pDistance) con
 	return (lTargetDistance2 <= lGoalDistance*lGoalDistance);
 }
 
-float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, int pPath, float* pLikeliness) const
+float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, const int pPath, float* pLikeliness) const
 {
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath((pPath >= 0)? pPath : mActivePath);
 	if (pLikeliness)
@@ -1017,15 +1073,38 @@ float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, int pPath, f
 	}
 	const float lCurrentTime = lPath->GetCurrentInterpolationTime();
 
-	// We can assume the path "current" pointer is a bit ahead, so step back some to get a closer
-	// approximation of where to start looking for our closest point on the spline.
-	const float lWantedDistance = AIM_DISTANCE();
-	float lDeltaTime = -lWantedDistance * lPath->GetDistanceNormal();
-	if (lCurrentTime+lDeltaTime < 0)
+	if (pPath < 0)
 	{
-		lDeltaTime = -lCurrentTime;
+		// We can assume the path "current" pointer is a bit ahead, so step back some to get a closer
+		// approximation of where to start looking for our closest point on the spline.
+		const float lWantedDistance = AIM_DISTANCE();
+		float lDeltaTime = -lWantedDistance * lPath->GetDistanceNormal();
+		if (lCurrentTime+lDeltaTime < 0)
+		{
+			lDeltaTime = -lCurrentTime;
+		}
+		lPath->StepInterpolation(lDeltaTime);
 	}
-	lPath->StepInterpolation(lDeltaTime);
+	else
+	{
+		// Coarse check first to find a reasonable sample in the whole path.
+		int lBestSample = -1;
+		float lBestDistance2 = 1e8f;
+		const int lSteps = 5;
+		for (int x = 0; x < 5; ++x)
+		{
+			const float lSampleTime = 1.0f/(lSteps+1) * (x+1);
+			lPath->GotoAbsoluteTime(lSampleTime);
+			const float lDistance2 = lPath->GetValue().GetDistanceSquared(pPosition);
+			if (lDistance2 < lBestDistance2)
+			{
+				lBestSample = x;
+				lBestDistance2 = lDistance2;
+			}
+		}
+		const float lBestTime = 1.0f/(lSteps+1) * (lBestSample+1);
+		lPath->GotoAbsoluteTime(lBestTime);
+	}
 
 	float lNearestDistance;
 	Vector3DF lClosestPoint;
@@ -1139,13 +1218,13 @@ float VehicleAi::GetRelativeDriveOnAngle(const Vector3DF& pDirection) const
 	lPath->StepInterpolation(0.04f);
 	const Vector3DF p2 = lPath->GetValue();
 	const Vector3DF lWantedDirection = p2-p1;
-	const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(pDirection.x, pDirection.y));
+	const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, pDirection);
 	return lAngle;
 }
 
 bool VehicleAi::QueryCutieHindered(const Cure::TimeManager* pTime, const Vector3DF& pVelocity)
 {
-	const float lSlowSpeed = 0.25f * SCALE_FACTOR;
+	const float lSlowSpeed = 0.35f * SCALE_FACTOR;
 	if (pVelocity.GetLengthSquared() < lSlowSpeed*lSlowSpeed)
 	{
 		if (mStoppedFrame == -1)

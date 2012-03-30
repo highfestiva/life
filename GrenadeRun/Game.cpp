@@ -505,7 +505,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 	float lLevelShootEasyness = 4.5f;
 	if (mLevelName == _T("level_elevate"))	// Bigger and open level = easier to hit Cutie.
 	{
-		lLevelShootEasyness = 2.83f;
+		lLevelShootEasyness = 3.2f;
 	}
 	bool lDidHitVehicle = false;
 	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
