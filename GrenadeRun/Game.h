@@ -14,7 +14,7 @@
 #ifdef LEPRA_TOUCH
 #define LEPRA_TOUCH_LOOKANDFEEL
 #endif // iOS
-//#define LEPRA_TOUCH_LOOKANDFEEL
+#define LEPRA_TOUCH_LOOKANDFEEL
 #define FPS			20
 #define SCALE_FACTOR		1.0f
 #define HEALTH_ROUND_FACTOR	0.8f
@@ -109,6 +109,7 @@ public:
 	{
 		FLYBY_INACTIVE = 1,
 		FLYBY_INTRODUCTION,
+		FLYBY_INTRODUCTION_FINISHING_UP,
 		FLYBY_PAUSE,
 	};
 
@@ -120,6 +121,7 @@ public:
 	bool RestartLevel();
 	TransformationF GetCutieStart() const;
 	virtual bool Tick();
+	void TickFlyby();
 
 	str GetVehicle() const;
 	void SetVehicle(const str& pVehicle);

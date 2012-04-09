@@ -104,7 +104,15 @@ public:
 	void DisplayLogo();
 	bool Poll();
 	void PollTaps();
-	void DrawHud();
+	void DrawMatchStatus();
+	void DrawVehicleSteering();
+	void DrawHealthBar();
+	void DrawLauncherIndicators(int pComputerIndex);
+	void DrawHearts();
+	void DrawKeys();
+	void DrawInfoTexts() const;
+	void ClearInfoTexts() const;
+	bool PreDrawHud();
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float x, float y, float w, float h, float pAngle) const;
 	void DrawRoundedPolygon(int x, int y, int pRadius, const Color& pColor, float pScaleX, float pScaleY) const;
 	void DrawRoundedPolygon(float x, float y, float pRadius, const Color& pColor, float pScaleX, float pScaleY, int pCornerRadius) const;
@@ -112,7 +120,6 @@ public:
 	void DrawTapIndicator(int pTag, int x, int y, float pAngle) const;
 	void DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue1, float pValue2) const;
 	void InfoText(int pPlayer, const str& pInfo, float pAngle, float dx = 0, float dy = 0) const;
-	void DrawInfoTexts() const;
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	void Layout();
 	void MainMenu();
@@ -881,8 +888,15 @@ bool App::Poll()
 	if (lOk)
 	{
 		const bool lShowPause = !mIsPaused && !mDialog &&
-			(mGame->GetFlybyMode() == Game::FLYBY_INACTIVE || mGame->GetFlybyMode() == Game::FLYBY_INTRODUCTION);
+			(mGame->GetFlybyMode() == Game::FLYBY_INACTIVE || mGame->GetFlybyMode() == Game::FLYBY_INTRODUCTION || mGame->GetFlybyMode() == Game::FLYBY_INTRODUCTION_FINISHING_UP);
 		mPauseButton->SetVisible(lShowPause);
+	}
+	if (lOk)
+	{
+		if (!mIsPaused && mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
+		{
+			mGame->TickFlyby();
+		}
 	}
 	if (lOk && mDoLayout)
 	{
@@ -973,7 +987,37 @@ bool App::Poll()
 			mUiManager->Paint(false);
 		}
 		mInfoTextColor = Color(255, (uint8)(127*(1+::sin(mAngleTime*27)*0.9f)), 255);
-		DrawHud();
+		if (PreDrawHud())
+		{
+			if (mGame->GetFlybyMode() == Game::FLYBY_INTRODUCTION_FINISHING_UP)
+			{
+				if (mGame->GetComputerIndex() == -1)
+				{
+					DrawLauncherIndicators(0);
+					DrawLauncherIndicators(1);
+				}
+				else
+				{
+					DrawLauncherIndicators(0);	// Computer is vehicle == we play launcher!
+				}
+				DrawHearts();
+				mPlayer1LastTouch.ClearTimeDiff();
+				mPlayer2LastTouch.ClearTimeDiff();
+				mPlayer1TouchDelay.ClearTimeDiff();
+				mPlayer2TouchDelay.ClearTimeDiff();
+			}
+			else
+			{
+				DrawMatchStatus();
+				DrawVehicleSteering();
+				DrawHealthBar();
+				DrawLauncherIndicators(mGame->GetComputerIndex());
+				DrawHearts();
+				DrawKeys();
+				DrawInfoTexts();
+			}
+		}
+		ClearInfoTexts();
 
 		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE &&
 			(mGame->IsScoreCountingEnabled() || mGame->GetWinnerIndex() >= 0) &&
@@ -1117,24 +1161,10 @@ void App::PollTaps()
 #endif // Touch L&F
 }
 
-void App::DrawHud()
+void App::DrawMatchStatus()
 {
-	if (mGame->GetFlybyMode() != Game::FLYBY_INACTIVE || mDialog)
-	{
-		return;
-	}
-
-	Cure::ContextObject* lAvatar1 = mGame->GetP1();
-	Cure::ContextObject* lAvatar2 = mGame->GetP2();
-	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 || !lAvatar2->IsLoaded())
-	{
-		return;
-	}
-
-	const float lButtonWidth = BUTTON_WIDTH;
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
-	const float m = BUTTON_MARGIN;
 
 	const int lWinner = mGame->GetWinnerIndex();
 	if (lWinner >= 0)
@@ -1228,10 +1258,17 @@ void App::DrawHud()
 
 		mGameOverTimer.TryStart();
 	}
+}
 
-	mFlipDraw = mGame->IsFlipRenderSide();
-
+void App::DrawVehicleSteering()
+{
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
+	const float w = (float)mUiManager->GetCanvas()->GetWidth();
+	const float h = (float)mUiManager->GetCanvas()->GetHeight();
+	const float m = BUTTON_MARGIN;
+	const UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
+
+	// Draw throttle and steering indicators on iOS.
 	if (mGame->GetComputerIndex() != 0 &&
 		mArrow->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 		mSteeringWheel->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
@@ -1329,13 +1366,19 @@ void App::DrawHud()
 		}
 	}
 #endif // Touch
+}
 
-	// Draw touch force meters, to give a visual indication of steering.
+void App::DrawHealthBar()
+{
+	const float w = (float)mUiManager->GetCanvas()->GetWidth();
+	const float lButtonWidth = BUTTON_WIDTH;
 
-	Cutie* lCutie = (Cutie*)lAvatar1;
+	// Draw health bar.
+	Cutie* lCutie = mGame->GetCutie();
 	if (mGame->GetComputerIndex() == -1)	// Two players.
 	{
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
+		const float h = (float)mUiManager->GetCanvas()->GetHeight();
 		DrawMeter((int)w/2, (int)h/2, PIF, h/2, 0, lCutie->GetHealth()*1.0002f, 20, 3, 20);
 #else // !Touch
 		DrawMeter((int)w/4, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()*1.0002f, 20, 3, 20);
@@ -1345,10 +1388,18 @@ void App::DrawHud()
 	{
 		DrawMeter((int)w/2, (int)(lButtonWidth*0.7f), -PIF/2, w/3, 0, lCutie->GetHealth()*1.0002f, 20, 3, 20);
 	}
+}
 
-	if (mGame->GetComputerIndex() != 1 &&	// Computer not running launcher.
+void App::DrawLauncherIndicators(int pComputerIndex)
+{
+	// Draw launcher indicators.
+	if (pComputerIndex != 1 &&	// Computer not running launcher.
 		mArrow->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
+		const float w = (float)mUiManager->GetCanvas()->GetWidth();
+		const float h = (float)mUiManager->GetCanvas()->GetHeight();
+		const float m = BUTTON_MARGIN;
+
 		// Draw launcher guides, used for steering in touch device.
 		float lPitch;
 		float lGuidePitch;
@@ -1370,7 +1421,7 @@ void App::DrawHud()
 		const float lBarrelCompassHalfHeight = BARREL_COMPASS_HEIGHT/2 + ah/2-2 + 2;
 		const float lBarrelCenterOffset = m + ah-5 + BARREL_COMPASS_HEIGHT/2 + 2;
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-		if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+		if (pComputerIndex == 0)	// Single play = landscape.
 		{
 			x = m+aw/2;
 			y = h-lBarrelCenterOffset;
@@ -1388,7 +1439,7 @@ void App::DrawHud()
 		}
 		if (std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(3)) != gFingerMoveList.end())
 		{
-			if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+			if (pComputerIndex == 0)	// Single play = landscape.
 			{
 				y -= TOUCH_OFFSET;
 			}
@@ -1397,7 +1448,7 @@ void App::DrawHud()
 				x -= TOUCH_OFFSET;
 			}
 		}
-		if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+		if (pComputerIndex == 0)	// Single play = landscape.
 		{
 			mLiftMeterOffset = y = Math::Lerp(mLiftMeterOffset, y, 0.8f);
 		}
@@ -1409,7 +1460,7 @@ void App::DrawHud()
 		x = m+aw/2 + 30;
 		y = h-lBarrelCenterOffset;
 		lDrawAngle = -PIF/2;
-		if (mGame->GetComputerIndex() == -1)	// Two players.
+		if (pComputerIndex == -1)	// Two players.
 		{
 			x += w/2;
 		}
@@ -1418,7 +1469,7 @@ void App::DrawHud()
 		DrawBarrelCompass((int)x, (int)y, lDrawAngle, (int)aw-8, lValue1, lValue2);
 		InfoText(2, _T("Up/down compass"), lDrawAngle+PIF, ox, oy);
 		const float lLiftThrottle = mGame->GetLauncher()->GetPhysics()->GetEngine(0)->GetValue();
-		const float lCenteredValue = (mGame->GetComputerIndex() == 0)? lValue1*2-1 : -(lValue1*2-1);
+		const float lCenteredValue = (pComputerIndex == 0)? lValue1*2-1 : -(lValue1*2-1);
 		const int lLiftOffset = (int)((BARREL_COMPASS_HEIGHT-4)*lCenteredValue/2 + 9*lLiftThrottle);
 		DrawTapIndicator(3, 24, lLiftOffset, lDrawAngle+PIF/2);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle+PIF/2);
@@ -1431,7 +1482,7 @@ void App::DrawHud()
 		lValue1 = lYaw/(PIF+0.1f)+0.5f;
 		lValue2 = (lGuideYaw)/(PIF+0.1f)+0.5f;
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-		if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+		if (pComputerIndex == 0)	// Single play = landscape.
 		{
 			x = w-lBarrelCenterOffset;
 			y = h-m-aw/2;
@@ -1450,7 +1501,7 @@ void App::DrawHud()
 
 		if (std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(4)) != gFingerMoveList.end())
 		{
-			if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+			if (pComputerIndex == 0)	// Single play = landscape.
 			{
 				y -= TOUCH_OFFSET;
 			}
@@ -1459,7 +1510,7 @@ void App::DrawHud()
 				x -= TOUCH_OFFSET;
 			}
 		}
-		if (mGame->GetComputerIndex() == 0)	// Single play = landscape.
+		if (pComputerIndex == 0)	// Single play = landscape.
 		{
 			mYawMeterOffset = y = Math::Lerp(mYawMeterOffset, y, 0.8f);
 		}
@@ -1475,18 +1526,24 @@ void App::DrawHud()
 		DrawBarrelCompass((int)x, (int)y, +PIF/2+lDrawAngle, (int)aw-8, lValue1, lValue2);
 		InfoText(2, _T("Left/right compass"), lDrawAngle+PIF/2, ox, oy);
 		const float lRotateThrottle = mGame->GetLauncher()->GetPhysics()->GetEngine(1)->GetValue();
-		const float lCenteredRotation = (mGame->GetComputerIndex() == 0)? lValue1*2-1 : -(lValue1*2-1);
+		const float lCenteredRotation = (pComputerIndex == 0)? lValue1*2-1 : -(lValue1*2-1);
 		const int lRotateOffset = (int)((BARREL_COMPASS_HEIGHT-4)*lCenteredRotation/2 - 9*lRotateThrottle);
 		DrawTapIndicator(4, +24, lRotateOffset, lDrawAngle);
 		DrawImage(mArrow->GetData(), x-dx, y-dy, aw, ah, lDrawAngle);
 		DrawImage(mArrow->GetData(), x+dx, y+dy, aw, ah, lDrawAngle-PIF);
 	}
+}
 
+void App::DrawHearts()
+{
 	mFlipDraw = false;
 
+	// Draw hearts.
 	if (mHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 		mGreyHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
+		const float w = (float)mUiManager->GetCanvas()->GetWidth();
+
 		mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 		mUiManager->GetPainter()->SetAlphaValue(255);
 		const float lMargin = 8;
@@ -1596,8 +1653,12 @@ void App::DrawHud()
 		}
 		//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 	}
+}
 
+void App::DrawKeys()
+{
 #ifndef LEPRA_TOUCH_LOOKANDFEEL
+	// Draw keyboard buttons.
 	if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE && !mStartTimer.IsStarted())
 	{
 		mStartTimer.Start();
@@ -1605,6 +1666,9 @@ void App::DrawHud()
 	if (mStartTimer.IsStarted() && mStartTimer.QueryTimeDiff() < 7.0 &&
 		mKeyboardButton->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
+		const float w = (float)mUiManager->GetCanvas()->GetWidth();
+		const float h = (float)mUiManager->GetCanvas()->GetHeight();
+
 		mUiManager->GetPainter()->SetColor(GRAY);
 		const int sw = (int)w;
 		const int sh = (int)h;
@@ -1641,9 +1705,55 @@ void App::DrawHud()
 		PrintText(_T("R"),	0, bx+iw/2-m*2, by+ih/2-m*2);
 	}
 #endif // Computer
-
-	DrawInfoTexts();
 }
+
+void App::DrawInfoTexts() const
+{
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
+	if (!mIsPaused)
+	{
+		const Color c = mUiManager->GetPainter()->GetColor(0);
+		mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
+
+		for (size_t x = 0; x < mInfoTextArray.size(); ++x)
+		{
+			const InfoTextData& lData = mInfoTextArray[x];
+			PrintText(lData.mText, -lData.mAngle, (int)lData.mCoord.x, (int)lData.mCoord.y);
+		}
+
+		mUiManager->GetPainter()->SetColor(c, 0);
+	}
+#endif // Touch
+
+	ClearInfoTexts();
+}
+
+void App::ClearInfoTexts() const
+{
+	mInfoTextArray.clear();
+}
+
+bool App::PreDrawHud()
+{
+	if ((mGame->GetFlybyMode() != Game::FLYBY_INACTIVE && mGame->GetFlybyMode() != Game::FLYBY_INTRODUCTION_FINISHING_UP) || mDialog)
+	{
+		return false;
+	}
+
+	Cure::ContextObject* lAvatar1 = mGame->GetP1();
+	Cure::ContextObject* lAvatar2 = mGame->GetP2();
+	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 || !lAvatar2->IsLoaded())
+	{
+		return false;
+	}
+
+
+	mFlipDraw = mGame->IsFlipRenderSide();
+
+	return true;
+}
+
+
 
 void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
 {
@@ -1835,27 +1945,6 @@ void App::InfoText(int pPlayer, const str& pInfo, float pAngle, float dx, float 
 	lData.mCoord = Vector2DF(mPenX+dx, mPenY+dy);
 	lData.mAngle = pAngle;
 	mInfoTextArray.push_back(lData);
-}
-
-void App::DrawInfoTexts() const
-{
-#ifdef LEPRA_TOUCH_LOOKANDFEEL
-	if (!mIsPaused)
-	{
-		const Color c = mUiManager->GetPainter()->GetColor(0);
-		mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
-
-		for (size_t x = 0; x < mInfoTextArray.size(); ++x)
-		{
-			const InfoTextData& lData = mInfoTextArray[x];
-			PrintText(lData.mText, -lData.mAngle, (int)lData.mCoord.x, (int)lData.mCoord.y);
-		}
-
-		mUiManager->GetPainter()->SetColor(c, 0);
-	}
-#endif // Touch
-
-	mInfoTextArray.clear();
 }
 
 void App::PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const

@@ -210,6 +210,12 @@ bool Game::Tick()
 	return true;
 }
 
+void Game::TickFlyby()
+{
+	const double lFrameTime = 1.0/FPS;
+	mFlyByTime += lFrameTime;
+}
+
 
 
 str Game::GetVehicle() const
@@ -781,8 +787,7 @@ bool Game::Render()
 		case 1:	mLeftRect = lFullRect;	break;	// Single player, to left.
 	}
 
-	const Vector3DF lLauncherPosition(0, -75.2f, 10.5f);
-	mLauncher->SetRootPosition(lLauncherPosition);
+	mLauncher->SetRootPosition(mLauncherPosition);
 
 	// Yield smooth rotation when canvas orientation changed.
 	if (mPreviousCanvasAngle != mUiManager->GetCanvas()->GetOutputRotation())
@@ -864,7 +869,7 @@ bool Game::Render()
 	if (GetComputerIndex() != 1)
 	{
 		const float lLauncherHeight = 3;
-		const Vector3DF lMuzzlePosition(lLauncherPosition + mLauncher->GetOrientation()*Vector3DF(0, 0, lLauncherHeight));
+		const Vector3DF lMuzzlePosition(mLauncherPosition + mLauncher->GetOrientation()*Vector3DF(0, 0, lLauncherHeight));
 
 		float lRange = 100 * SCALE_FACTOR;
 		float lLookDownAngle = -PIF/2;
@@ -880,7 +885,7 @@ bool Game::Render()
 		lStraightVector.x = lCamDistance*sin(mLauncherYaw);
 		lStraightVector.y = -lCamDistance*cos(mLauncherYaw);
 		lStraightVector.z = -lStraightVector.z + lLauncherHeight*0.7f;
-		TransformationF t(gIdentityQuaternionF, lLauncherPosition+lStraightVector);
+		TransformationF t(gIdentityQuaternionF, mLauncherPosition+lStraightVector);
 		t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.9f);
 		t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
@@ -919,12 +924,19 @@ bool Game::FlybyRender()
 {
 	const Vector3DF lCutie = mVehicle->GetPosition();
 	const Vector3DF lGoal = mCtf->GetPosition();
-	const double lTotalTime = 35.0;
-	const double lFrameTime = 1.0/FPS;
-	mFlyByTime += lFrameTime;
+	const double lTotalFlybyTime = 35.0;
 	if (mFlybyMode == FLYBY_INTRODUCTION)
 	{
-		if (mFlyByTime > lTotalTime)
+		if (mFlyByTime > lTotalFlybyTime)
+		{
+			mFlybyMode = FLYBY_INTRODUCTION_FINISHING_UP;
+			return true;
+		}
+	}
+	else if (mFlybyMode == FLYBY_INTRODUCTION_FINISHING_UP)
+	{
+		const double lTotalIntroductionTime = 50.0;
+		if (mFlyByTime > lTotalIntroductionTime)
 		{
 			mFlybyMode = FLYBY_INACTIVE;
 			return true;
@@ -932,7 +944,7 @@ bool Game::FlybyRender()
 	}
 
 	TransformationF t;
-	const double lSweepTime = lTotalTime * 0.25;
+	const double lSweepTime = lTotalFlybyTime * 0.25;
 	const float lDistance = 100 * SCALE_FACTOR;
 	if (mFlyByTime < lSweepTime || mFlybyMode == FLYBY_PAUSE)
 	{
@@ -945,7 +957,7 @@ bool Game::FlybyRender()
 	else
 	{
 		// Look at cutie, goal and launcher in more detail.
-		const double lDetailTime = lTotalTime - lSweepTime;
+		const double lDetailTime = lTotalFlybyTime - lSweepTime;
 		// Orientation. Treat orientation and position in different time slices, because if
 		// both happen at the same time, perception of space is without a doubt lost.
 		if (mFlyByTime-lSweepTime < lDetailTime * 1/12)
@@ -1154,7 +1166,7 @@ bool Game::Initialize()
 		mRightCamera.GetOrientation().RotateAroundOwnY(+PIF*0.5f);
 #endif // Touch
 
-		mLauncherPosition = Vector3DF(0, -107.5f, 13.5f);
+		mLauncherPosition = Vector3DF(0, -75.2f, 10.5f);
 
 		lOk = InitializeTerrain();
 	}
