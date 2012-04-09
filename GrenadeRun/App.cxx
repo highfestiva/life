@@ -80,7 +80,7 @@ const str gPlatform = _T("touch");
 #else // Computer.
 const str gPlatform = _T("computer");
 #endif // Touch / computer.
-const str gLevels[] = { _T("Pendulum"), _T("Elevate"), _T("RoboCastle") };
+const str gLevels[] = { _T("Pendulum"), _T("Elevate"), _T("Ball Castle") };
 const str gVehicles[] = { _T("Cutie"), _T("Hardie"), _T("Speedie"), _T("Sleepie") };
 
 
@@ -690,7 +690,7 @@ int App::Run()
 #else // Dev testing
 		mGame->SetComputerDifficulty(1.0f);
 		mGame->SetComputerIndex(1);
-		lOk = mGame->SetLevelName(_T("level_elevate"));
+		lOk = mGame->SetLevelName(_T("level_balls_castle"));
 #endif // Dev testing / !dev testing
 	}
 	if (lOk)
@@ -702,7 +702,7 @@ int App::Run()
 		MainMenu();
 #else // Dev testing
 		UiTbc::Button* lButton = new UiTbc::Button(_T("Apa"));
-		lButton->SetTag(3);
+		lButton->SetTag(4);
 		OnLevelAction(lButton);
 #endif // Dev testing / !dev testing
 
@@ -2699,8 +2699,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 #endif // Touch / computer
 	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
 	UiTbc::Button* lCancelButton = new UiTbc::Button(_T("cancel"));
-	Color c = Color(BGCOLOR_DIALOG, FGCOLOR_DIALOG, 0.2f);
-	c.mAlpha = 255;
+	Color c = Color(180, 50, 40);
 	lCancelButton->SetBaseColor(c);
 	lCancelButton->SetText(_T("Cancel"), FGCOLOR_DIALOG, CLEAR_COLOR);
 	lCancelButton->SetRoundedStyle(8);
@@ -2962,7 +2961,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		case 1:	lLevel = _T("level_2");			mHiscoreLevelIndex = 0;	break;
 		case 2:	lLevel = _T("level_2");			mHiscoreLevelIndex = 0;	break;
 		case 3:	lLevel = _T("level_elevate");		mHiscoreLevelIndex = 1;	break;
-		case 4:	lLevel = _T("level_robocastle");	mHiscoreLevelIndex = 2;	break;
+		case 4:	lLevel = _T("level_balls_castle");	mHiscoreLevelIndex = 2;	break;
 	}
 	if (mGame->GetLevelName() != lLevel)
 	{
