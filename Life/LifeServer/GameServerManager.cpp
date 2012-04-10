@@ -1147,7 +1147,7 @@ void GameServerManager::HandleWorldBoundaries()
 
 
 
-Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType) const
+Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType)
 {
 	if (pType == _T("trig_elevator"))
 	{

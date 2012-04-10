@@ -121,7 +121,7 @@ void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pP
 	else
 	{
 		const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
-		assert(t > 0);
+		//assert(t > 0);
 		pTime = t;
 		const float vfwd = lYawVector.GetLength() / t;
 		pGuidePitch = -::atan(vfwd/vup);

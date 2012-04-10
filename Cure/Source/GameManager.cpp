@@ -293,7 +293,7 @@ void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNe
 	GetContext()->AddObject(pObject);
 }
 
-ContextObject* GameManager::CreateLogicHandler(const str&) const
+ContextObject* GameManager::CreateLogicHandler(const str&)
 {
 	return 0;
 }

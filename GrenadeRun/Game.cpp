@@ -24,6 +24,7 @@
 #include "Launcher.h"
 #include "LauncherAi.h"
 #include "Level.h"
+#include "RoboBall.h"
 #include "SeeThrough.h"
 #include "Spawner.h"
 #include "VehicleAi.h"
@@ -364,6 +365,19 @@ bool Game::Shoot()
 	return lOk;
 }
 
+Cure::ContextObject* Game::CreateRoboBall()
+{
+	RoboBall* lRoboBall = (RoboBall*)Parent::CreateContextObject(_T("robo_ball"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	assert(lRoboBall);
+	if (lRoboBall)
+	{
+		TransformationF t(QuaternionF(), Vector3DF(0, 0, 30));
+		lRoboBall->SetInitialTransform(t);
+		lRoboBall->StartLoading();
+	}
+	return lRoboBall;
+}
+
 float Game::GetMuzzleVelocity() const
 {
 	float lMuzzleVelocity = 60.0;
@@ -462,6 +476,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 	if (pTarget == mLevel)
 	{
 		// Stones and mud. More if hit ground, less otherwise.
+		const float lScale = SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
 		const int lParticleCount = (mLevel->GetStructureGeometry((unsigned)0)->GetBodyId() == pTargetBodyId)? Random::GetRandomNumber()%50+50 : 10;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
@@ -477,7 +492,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
 			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
 			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * SCALE_FACTOR, 0.5f, (float)Random::Uniform(3, 7));
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * lScale, 0.5f, (float)Random::Uniform(3, 7));
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 			lPuff->SetFadeOutTime(0.3f);
 #endif // Touch L&F
@@ -1138,6 +1153,10 @@ Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 	{
 		return new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
 	}
+	else if (strutil::StartsWith(pClassId, _T("robo_ball")))
+	{
+		return new RoboBall(this, pClassId);
+	}
 	else if (strutil::StartsWith(pClassId, _T("cutie")) ||
 		strutil::StartsWith(pClassId, _T("monster")) ||
 		strutil::StartsWith(pClassId, _T("corvette")) ||
@@ -1211,7 +1230,7 @@ bool Game::InitializeTerrain()
 
 
 
-Cure::ContextObject* Game::CreateLogicHandler(const str& pType) const
+Cure::ContextObject* Game::CreateLogicHandler(const str& pType)
 {
 	if (pType == _T("spawner"))
 	{
@@ -1233,6 +1252,10 @@ Cure::ContextObject* Game::CreateLogicHandler(const str& pType) const
 	else if (pType == _T("see_through"))
 	{
 		return new SeeThrough(GetContext(), this);
+	}
+	else if (pType == _T("anything"))
+	{
+		return CreateRoboBall();
 	}
 	return (0);
 }

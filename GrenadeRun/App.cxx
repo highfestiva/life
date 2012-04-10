@@ -80,7 +80,7 @@ const str gPlatform = _T("touch");
 #else // Computer.
 const str gPlatform = _T("computer");
 #endif // Touch / computer.
-const str gLevels[] = { _T("Pendulum"), _T("Elevate"), _T("Ball Castle") };
+const str gLevels[] = { _T("Pendulum"), _T("Elevate"), _T("RoboCastle") };
 const str gVehicles[] = { _T("Cutie"), _T("Hardie"), _T("Speedie"), _T("Sleepie") };
 
 

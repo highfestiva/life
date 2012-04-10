@@ -565,6 +565,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RoboBall.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SeeThrough.cpp"
 				>
 			</File>
@@ -608,6 +612,10 @@
 			</File>
 			<File
 				RelativePath=".\Level.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RoboBall.h"
 				>
 			</File>
 			<File

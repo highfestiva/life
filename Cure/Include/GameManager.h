@@ -75,7 +75,7 @@ public:
 	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
 	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
-	virtual ContextObject* CreateLogicHandler(const str& pType) const;
+	virtual ContextObject* CreateLogicHandler(const str& pType);
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void GetSiblings(GameObjectId pObjectId, ContextObject::Array& pSiblingArray) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;

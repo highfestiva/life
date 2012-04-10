@@ -98,7 +98,7 @@ private:
 	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
 	virtual void HandleWorldBoundaries();
 
-	virtual Cure::ContextObject* CreateLogicHandler(const str& pType) const;
+	virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
 
 	void BroadcastCreateObject(Cure::ContextObject* pObject);
 	void BroadcastDeleteObject(Cure::GameObjectId pInstanceId);

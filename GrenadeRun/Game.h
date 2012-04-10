@@ -136,6 +136,7 @@ public:
 	void GetLauncherTransform(TransformationF& pTransform) const;
 	void SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle);
 	bool Shoot();
+	Cure::ContextObject* CreateRoboBall();
 	float GetMuzzleVelocity() const;
 	float GetLauncherLockPercent() const;
 	bool IsLauncherBarrelFree() const;
@@ -193,7 +194,7 @@ private:
 	virtual bool Initialize();
 	virtual bool InitializeTerrain();
 
-	Cure::ContextObject* CreateLogicHandler(const str& pType) const;
+	Cure::ContextObject* CreateLogicHandler(const str& pType);
 
 	UiCure::GameUiManager* mUiManager;
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
