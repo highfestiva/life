@@ -31,6 +31,7 @@ private:
 	HiResTimer mHeadAwayTimer;
 	UiCure::UserSound3dResource* mSound;
 	int mTimeFrameBlown;
+	int mBadSpeedCounter;
 
 	LOG_CLASS_DECLARE();
 };

@@ -140,15 +140,19 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 
 	Sample* lSample = new Sample(pLoopMode != LOOP_NONE, pPriority);
 	bool lOk = false;
-	if (pData)
+	for (int x = 0; !lOk && x < 3; ++x)	// TRICKY: retry to avoid anti-virus glitches (for the file version) and sound driver glitches (for the raw data version).
 	{
-		lOk = lSample->Load(pData, pDataSize);
-	}
-	else
-	{
-		for (int x = 0; !lOk && x < 3; ++x)	// TRICKY: retry to avoid anti-virus glitches.
+		if (pData)
+		{
+			lOk = lSample->Load(pData, pDataSize);
+		}
+		else
 		{
 			lOk = lSample->Load(pFileName);
+		}
+		if (!lOk)
+		{
+			Thread::Sleep(0.05f);
 		}
 	}
 	if (lOk)

@@ -39,6 +39,7 @@ void RoboBall::OnTick()
 
 	if (mGame->GetCutie() && mGame->GetCutie()->IsLoaded())
 	{
+		float lStrength = Math::Lerp(0.25f, 1.0f, mGame->GetComputerDifficulty());
 		const Vector3DF lPosition = GetPosition();
 		float lAngle;
 		if (mHeadAwayTimer.QueryTimeDiff() > 2.0)
@@ -76,19 +77,46 @@ void RoboBall::OnTick()
 				// ends up in a big crash! :)
 				lAngle = -LEPRA_XY_ANGLE(lDirection, Vector3DF(1, 0, 0));
 			}
+			if (lStrength < 0.6f && lDistance > 30.0f && lSpeed < 2)
+			{
+				++mBadSpeedCounter;
+			}
+			else
+			{
+				mBadSpeedCounter = 0;
+			}
 		}
 		else
 		{
 			const Vector3DF lDirection = Vector3DF(100, 100, 13) - lPosition;
 			lAngle = -LEPRA_XY_ANGLE(lDirection, Vector3DF(1, 0, 0));
 		}
-		const float lStrength = Math::Lerp(0.25f, 1.0f, mGame->GetComputerDifficulty());
+		if (mBadSpeedCounter > 2)
+		{
+			lStrength = 0.6f;
+		}
 		GetPhysics()->GetEngine(0)->SetValue(0, lStrength, lAngle);
 		static int c = 0;
 		if (++c > 20)
 		{
 			c = 0;
 			mLog.Headlinef(_T("RoboBall at (%.1f, %.1f, %.1f). Direction %.0f."), lPosition.x, lPosition.y, lPosition.z, lAngle/PIF*180);
+		}
+
+		static int d = 0;
+		if (++d > 20)
+		{
+			d = 0;
+			if (lPosition.z < -50 || lPosition.z > 200)
+			{
+				mLog.AHeadline("Outside of playing field, resetting position!");
+				const Cure::ObjectPositionalData* lPlacement;
+				UpdateFullPosition(lPlacement);
+				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPlacement->Clone();
+				lNewPlacement->mPosition.mTransformation.GetPosition().z = 30;
+				lNewPlacement->mPosition.mVelocity.Set(0, 0, 0);
+				SetFullPosition(*lNewPlacement);
+			}
 		}
 	}
 }

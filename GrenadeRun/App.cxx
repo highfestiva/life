@@ -1166,14 +1166,14 @@ void App::DrawMatchStatus()
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 
+#ifdef LEPRA_TOUCH_LOOKANDFEEL
+	const float lAngle = (mGame->GetComputerIndex() != 1)? PIF/2 : 0;
+#else // Computer.
+	const float lAngle = 0;
+#endif // Touch / computer.
 	const int lWinner = mGame->GetWinnerIndex();
 	if (lWinner >= 0)
 	{
-#ifdef LEPRA_TOUCH_LOOKANDFEEL
-		const float lAngle = (mGame->GetComputerIndex() != 1)? PIF/2 : 0;
-#else // Computer.
-		const float lAngle = 0;
-#endif // Touch / computer.
 		const int lSmallFontHeight = mUiManager->GetFontManager()->GetFontHeight();
 		UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
@@ -1257,6 +1257,42 @@ void App::DrawMatchStatus()
 		mUiManager->GetFontManager()->SetActiveFont(lFontId);
 
 		mGameOverTimer.TryStart();
+	}
+	else
+	{
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		if (lRealTimeRatio < 0.95f)
+		{
+			const int lFrameMod = mGame->Cure::GameTicker::GetTimeManager()->GetCurrentPhysicsFrame() % 20;
+			if (lFrameMod > 12)
+			{
+				return;
+			}
+			const float lBackgroundSize = 20;
+			const str lText = _T("S");
+			mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
+			if (mGame->GetComputerIndex() == -1)
+			{
+				const int x1 = (int)(w*1/4);
+				const int x2 = (int)(w*3/4);
+				const int y  = (int)(h/2);
+				DrawRoundedPolygon((float)x1, (float)y, lBackgroundSize, BGCOLOR_DIALOG, 1.0f, 1.0f, 10);
+				DrawRoundedPolygon((float)x2, (float)y, lBackgroundSize, BGCOLOR_DIALOG, 1.0f, 1.0f, 10);
+				mUiManager->GetPainter()->SetColor(FGCOLOR_DIALOG, 0);
+				PrintText(lText, +lAngle, x1, y);
+				mUiManager->GetPainter()->SetColor(FGCOLOR_DIALOG, 0);
+				PrintText(lText, -lAngle, x2, y);
+			}
+			else
+			{
+				const int x = (int)(w/2);
+				const int y = (int)(h*2/5);
+				DrawRoundedPolygon((float)x, (float)y, lBackgroundSize, BGCOLOR_DIALOG, 1.0f, 1.0f, 10);
+				mUiManager->GetPainter()->SetColor(FGCOLOR_DIALOG, 0);
+				PrintText(lText, 0, x, y);
+			}
+		}
 	}
 }
 
