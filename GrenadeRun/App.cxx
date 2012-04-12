@@ -24,6 +24,7 @@
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiMusicPlayer.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
+#include "../UiCure/Include/UiSound.h"
 #include "../UiLepra/Include/Mac/UiIosInput.h"
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiLepra/Include/UiDisplayManager.h"
@@ -182,6 +183,9 @@ public:
 #endif // Touch
 	Game* mGame;
 
+	str mPathPrefix;
+	UiLepra::SoundStream* mIntroStreamer;
+
 	double mAverageLoopTime;
 	double mAverageFastLoopTime;
 	HiResTimer mLoopTimer;
@@ -196,6 +200,7 @@ public:
 	bool mIsLoaded;
 	bool mDoLayout;
 	bool mIsPaused;
+	bool mPlaybackVoiceInstruction;
 	Cure::ResourceManager* mResourceManager;
 	Cure::RuntimeVariableScope* mVariableScope;
 	UiCure::GameUiManager* mUiManager;
@@ -332,11 +337,13 @@ App::App(const strutil::strvec& pArgumentList):
 	mGame(0),
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
+	mIntroStreamer(0),
 	mAverageLoopTime(1.0/(FPS+1)),
 	mAverageFastLoopTime(1.0/(FPS+1)),
 	mIsLoaded(false),
 	mDoLayout(true),
 	mIsPaused(false),
+	mPlaybackVoiceInstruction(false),
 	mPauseButton(0),
 	mGetiPhoneButton(0),
 	mAngleTime(0),
@@ -445,7 +452,7 @@ bool App::Open()
 #ifdef KC_DEV_TESTING
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_VOLUME, 0.0);
+	//CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_VOLUME, 0.0);
 #endif // Kill Cutie development testing
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
@@ -640,6 +647,7 @@ void App::Init()
 	assert(Int2Str(+12345) == _T("12,345"));
 	assert(Int2Str(+123456) == _T("123,456"));
 	assert(Int2Str(+1234567) == _T("1,234,567"));
+	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
 
@@ -1086,6 +1094,33 @@ bool App::Poll()
 			UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
 	}
 
+	if (mPlaybackVoiceInstruction)
+	{
+		mPlaybackVoiceInstruction = false;
+		str lInstructionFile;
+		if (mGame->GetComputerIndex() == 0)
+		{
+			lInstructionFile = _T("voice_shoot.wav");
+		}
+		else if (mGame->GetComputerIndex() == 1)
+		{
+			lInstructionFile = _T("voice_drive.wav");
+		}
+		if (!lInstructionFile.empty())
+		{
+			mGame->AddContextObject(new UiCure::Sound(mGame->GetResourceManager(), lInstructionFile, mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		}
+	}
+
+	if (mIntroStreamer && mIntroStreamer->Update())
+	{
+		if (!mIntroStreamer->IsPlaying())
+		{
+			delete mIntroStreamer;
+			mIntroStreamer = 0;
+		}
+	}
+
 	if (mGameOverTimer.IsStarted() && !mIsPaused)
 	{
 		if (mGameOverTimer.QueryTimeDiff() > 11.0 ||
@@ -1107,6 +1142,7 @@ bool App::Poll()
 			else
 			{
 				SuperReset(true);
+				mPlaybackVoiceInstruction = true;
 			}
 		}
 	}
@@ -2080,6 +2116,10 @@ void App::Suspend()
 	{
 		mMusicPlayer->Pause();
 	}
+	if (mIntroStreamer)
+	{
+		mIntroStreamer->Pause();
+	}
 	DoPause();
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
@@ -2097,6 +2137,10 @@ void App::Resume()
 	{
 		mMusicPlayer->Stop();
 		mMusicPlayer->Playback();
+	}
+	if (mIntroStreamer)
+	{
+		mIntroStreamer->Playback();
 	}
 }
 
@@ -3009,10 +3053,19 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		mGameOverTimer.Stop();
 		mGame->SetFlybyMode(Game::FLYBY_INTRODUCTION);
 		mGame->ResetWinnerIndex();
-		mGame->SetVehicle(mGame->GetVehicle());
+		mGame->SetVehicle(_T("cutie"));
 		mGame->ResetLauncher();
 		mGame->SetComputerDifficulty(0);
-		return;
+		mIntroStreamer = mUiManager->GetSoundManager()->CreateSoundStream(mPathPrefix+_T("voice_intro.ogg"), UiLepra::SoundManager::LOOP_NONE, 0);
+		if (mIntroStreamer && mIntroStreamer->Playback())
+		{
+			return;
+		}
+		delete mIntroStreamer;
+		mIntroStreamer = 0;
+		mLog.AError("Oops! Unable to play tutorial voice-over. Skipping tutorial.");
+		// If all else fails, fall thru add keep going. Makes more sense to the user than
+		// a tutorial without any instructions.
 	}
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnVehicleAction);
 	d->SetQueryLabel(_T("Select vehicle"), mBigFontId);
@@ -3095,6 +3148,7 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 	mGame->ResetLauncher();
 	mGame->SetFlybyMode(Game::FLYBY_INACTIVE);
 	mIsPaused = false;
+	mPlaybackVoiceInstruction = true;
 }
 
 void App::OnHiscoreAction(UiTbc::Button* pButton)
