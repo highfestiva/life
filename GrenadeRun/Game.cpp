@@ -32,6 +32,7 @@
 
 
 #define GRENADE_RELAUNCH_DELAY	2.7f
+#define CUTIE_START		Vector3DF(-57.67f, -28.33f, 2.33f)
 
 
 
@@ -124,7 +125,7 @@ bool Game::RestartLevel()
 
 TransformationF Game::GetCutieStart() const
 {
-	TransformationF t(gIdentityQuaternionF, Vector3DF(-57.67f, -28.33f, 2.33f));
+	TransformationF t(gIdentityQuaternionF, CUTIE_START);
 	t.GetOrientation().RotateAroundOwnZ(-PIF*0.45f);
 	return t;
 }

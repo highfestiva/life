@@ -1128,19 +1128,27 @@ bool App::Poll()
 			(mGame->GetComputerIndex() == 0 && mGameOverTimer.QueryTimeDiff() > 9.0))
 		{
 			const int lHeartBalance = mGame->GetHeartBalance();
-			if ((lHeartBalance == -HEART_POINTS/2 || lHeartBalance == +HEART_POINTS/2) &&	// Somebody won.
-				mGame->GetComputerIndex() != -1 &&	// Computer in the game.
-				mGame->GetComputerIndex() != mGame->GetWinnerIndex() &&	// Computer didn't win = user won over computer.
-				mGame->GetScore() >= 1000.0)		// Negative score isn't any good - at least be positive.
+			if (lHeartBalance == -HEART_POINTS/2 || lHeartBalance == +HEART_POINTS/2)	// Somebody won.
 			{
+				if (mGame->GetComputerIndex() != -1 &&	// Computer in the game.
+					mGame->GetComputerIndex() != mGame->GetWinnerIndex() &&	// Computer didn't win = user won over computer.
+					mGame->GetScore() >= 1000.0)		// Negative score isn't any good - at least be positive.
+				{
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-				EnterHiscore(str(), FGCOLOR_DIALOG);
+					EnterHiscore(str(), FGCOLOR_DIALOG);
 #else // Computer
-				EnterHiscore(_T("Press enter when you're done"), FGCOLOR_DIALOG);
+					EnterHiscore(_T("Press enter when you're done"), FGCOLOR_DIALOG);
 #endif // Touch/computer
+				}
+				else
+				{
+					// Score wasn't high enough, not allowed in on hiscore list.
+					SuperReset(true);
+				}
 			}
 			else
 			{
+				// Game's not over, next round!
 				SuperReset(true);
 				mPlaybackVoiceInstruction = true;
 			}

@@ -59,10 +59,10 @@ class GroupReader(DefaultMAReader):
 				     "deleteComponent", "softModHandle", "softMod", \
 				     "objectSet", "tweak", "imagePlane", "place2dTexture", \
 				     "polyBridgeEdge", "polySeparate", "polyChipOff", \
-				     "deleteUVSet", "polyAutoProj", "plusMinusAverage", \
-				     "transformGeometry", "cameraView", "directionalLight", \
-				     "brush", "createUVSet"]
-		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL"]
+				     "deleteUVSet", "plusMinusAverage", "transformGeometry", \
+				     "cameraView", "directionalLight", "brush", \
+				     "createUVSet"]
+		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", "polyAutoProj"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
 				     "file"]
 		self.basename = basename
