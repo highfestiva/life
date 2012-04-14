@@ -46,6 +46,7 @@ public:
 	{
 		MODE_NORMAL = 1,
 		MODE_HALF_LOCK,
+		MODE_RELEASE,
 	};
 	enum EngineAspects
 	{

@@ -537,6 +537,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CutieElevator.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Game.cpp"
 				>
 			</File>
@@ -592,6 +596,10 @@
 			</File>
 			<File
 				RelativePath=".\Cutie.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CutieElevator.h"
 				>
 			</File>
 			<File

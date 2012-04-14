@@ -90,10 +90,10 @@ void Elevator::OnTick()
 		if (lHasStopped)
 		{
 			mStopTimer.ClearTimeDiff();
+			const bool lStopEngines = !lIsNonStop;
 			if (mElevatorHasBeenMoving)
 			{
 				log_adebug("TRIGGER - elevator has stopped.");
-				bool lStopEngines = !lIsNonStop;
 				HaltActiveEngines(lStopEngines);
 
 				// Check if we need to restart "non_stop" or "always" trigger.
@@ -109,6 +109,12 @@ void Elevator::OnTick()
 				mTrigTime.QueryTimeDiff() > mExitDelay)
 			{
 				log_adebug("TRIGGER - exited trigger volume.");
+				// Stop the engines once again, to handle the following scenario:
+				// 1. Physically trigged, engine started.
+				// 2. Physical object came to end-point.
+				// 3. Elevator stopped due to (2).
+				// 4. Still physically triggered, engine re-started!
+				HaltActiveEngines(lStopEngines);
 				mActiveTrigger = 0;
 			}
 		}

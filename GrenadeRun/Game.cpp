@@ -7,7 +7,6 @@
 #include "Game.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/Elevator.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
@@ -20,6 +19,7 @@
 #include "../UiCure/Include/UiSound.h"
 #include "Ctf.h"
 #include "Cutie.h"
+#include "CutieElevator.h"
 #include "Grenade.h"
 #include "Launcher.h"
 #include "LauncherAi.h"
@@ -1244,7 +1244,7 @@ Cure::ContextObject* Game::CreateLogicHandler(const str& pType)
 	}
 	else if (pType == _T("trig_elevator"))
 	{
-		return new Cure::Elevator(GetContext());
+		return new CutieElevator(this);
 	}
 	else if (pType == _T("context_path"))
 	{

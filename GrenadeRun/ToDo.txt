@@ -125,16 +125,17 @@ Remove the info texts after resume (not after two seconds)!
 Reduce cube size by 33.33%.
 Increase cube friction.
 Drop slow-mo when super-resetting.
+2 extra levels: castle and machine.
+Record voice for instructions: SHOOT! DRIVE!
+Playback voice for tutorial.
 
 Computer demo
 -------------
+Tweak level difficulties: add stones, make the easiest paths harder, etc.
+Tweak textures for all levels.
 Pause 2s between each round.
 Pendulum level: make bridge and trees brown instead of orange!
-2 extra levels: castle and machine.
-Tweak other levels.
 Record voice for tutorial. Compress HARD!
-Record voice for instructions: SHOOT! DRIVE!
-Playback voice for tutorial.
 Memory leak check.
 Add link to iOS versions.
 

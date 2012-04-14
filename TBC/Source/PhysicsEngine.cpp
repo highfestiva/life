@@ -412,7 +412,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						if (!lPrimaryForce && lEngineNode.mMode != MODE_HALF_LOCK)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
+						if (!lPrimaryForce && lEngineNode.mMode == MODE_NORMAL)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
 						{
 							float lPosition;
 							pPhysicsManager->GetSliderPos(lGeometry->GetJointId(), lPosition);
@@ -422,6 +422,10 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 								lValue = (lValue > 0)? lValue*mMaxSpeed : lValue*mMaxSpeed2;
 								pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue);
 							}
+						}
+						else if (!lPrimaryForce && lEngineNode.mMode == MODE_RELEASE)	// Release slider behavior just lets go.
+						{
+							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), 0, 0);
 						}
 						else
 						{

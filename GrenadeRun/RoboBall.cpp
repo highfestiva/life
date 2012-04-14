@@ -59,7 +59,7 @@ void RoboBall::OnTick()
 				lDistance < 10 &&
 				lSpeedDiff2 < 1)
 			{
-				mLog.AHeadline("Too close and too slow, backing up!");
+				log_adebug("Too close and too slow, backing up!");
 				mHeadAwayTimer.PopTimeDiff();
 			}
 			const Vector3DF lFuturePosition = lPosition + lVelocity*lTimeTilImpact;
@@ -100,7 +100,7 @@ void RoboBall::OnTick()
 		if (++c > 20)
 		{
 			c = 0;
-			mLog.Headlinef(_T("RoboBall at (%.1f, %.1f, %.1f). Direction %.0f."), lPosition.x, lPosition.y, lPosition.z, lAngle/PIF*180);
+			log_volatile(mLog.Debugf(_T("RoboBall at (%.1f, %.1f, %.1f). Direction %.0f."), lPosition.x, lPosition.y, lPosition.z, lAngle/PIF*180));
 		}
 
 		static int d = 0;
@@ -109,7 +109,7 @@ void RoboBall::OnTick()
 			d = 0;
 			if (lPosition.z < -50 || lPosition.z > 200)
 			{
-				mLog.AHeadline("Outside of playing field, resetting position!");
+				mLog.AWarning("Fell off of playing field, resetting position!");
 				const Cure::ObjectPositionalData* lPlacement;
 				UpdateFullPosition(lPlacement);
 				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPlacement->Clone();

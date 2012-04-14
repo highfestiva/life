@@ -841,7 +841,7 @@ class GroupReader(DefaultMAReader):
 						ok &= (len(e) == 3)
 						ok &= (type(e[0]) == str)
 						ok &= (e[1] >= -100 and e[1] <= 100)
-						ok &= (e[2] in ["normal", "half_lock"])
+						ok &= (e[2] in ["normal", "half_lock", "release"])
 						connected_to = self._regexpnodes(e[0], group)
 						ok &= (len(connected_to) > 0)
 						for cn in connected_to:

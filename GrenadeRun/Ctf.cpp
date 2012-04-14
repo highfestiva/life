@@ -24,7 +24,8 @@ Ctf::Ctf(Cure::ContextManager* pManager):
 	mLastFrameTriggered(false),
 	mIsTriggerTimerStarted(false),
 	mFlagMesh(0),
-	mSlideDown(false)
+	mSlideDown(false),
+	mBlinkTime(0)
 {
 	pManager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
@@ -59,8 +60,8 @@ void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 	mTrigger = pTrigger;
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
 	const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0, std::vector<int>());
-	assert(lTag && lTag->mMeshIndexList.size() == 1);
-	if (lTag && lTag->mMeshIndexList.size() == 1)
+	assert(lTag && lTag->mMeshIndexList.size() == 2);
+	if (lTag && lTag->mMeshIndexList.size() == 2)
 	{
 		mFlagOffset.x		= lTag->mFloatValueList[0];
 		mFlagOffset.y		= lTag->mFloatValueList[1];
@@ -78,16 +79,18 @@ void Ctf::OnTick()
 	}
 
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
-	if (!mFlagMesh)
+	if (!mFlagMesh || !mBlinkMesh)
 	{
 		const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0, std::vector<int>());
 		mFlagMesh = (TBC::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[0]);
-		if (!mFlagMesh)
+		mBlinkMesh = (TBC::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[1]);
+		if (!mFlagMesh || !mBlinkMesh)
 		{
 			return;
 		}
 		mFlagTop = mFlagMesh->GetOffsetTransformation().GetPosition();
 		mFlagMesh->AddOffset(mFlagOffset);
+		mBlinkStartColor = mBlinkMesh->GetBasicMaterialSettings().mDiffuse;
 	}
 	else
 	{
@@ -117,9 +120,16 @@ void Ctf::OnTick()
 			mCatchingFlagVelocity.Set(0, 0, 0);
 			lGame->OnCapture();
 		}
+		mBlinkTime += lRealTimeRatio * 0.05f;
+		const float r = -::cos(mBlinkTime*3)*0.5f + 0.5f;
+		const float g = -::cos(mBlinkTime*4)*0.5f + 0.5f;
+		const float b = -::cos(mBlinkTime*5)*0.5f + 0.5f;
+		mBlinkMesh->GetBasicMaterialSettings().mDiffuse.Set(r, g, b);
 	}
 	else
 	{
+		mBlinkMesh->GetBasicMaterialSettings().mDiffuse = mBlinkStartColor;
+		mBlinkTime = 0;
 		// Move down if not at bottom.
 		if (mSlideDown && (mFlagOffset - (mFlagMesh->GetOffsetTransformation().GetPosition() - mFlagTop)).Dot(mFlagOffset) > 0)
 		{

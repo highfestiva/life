@@ -42,7 +42,10 @@ private:
 	bool mIsTriggerTimerStarted;
 	HiResTimer mTriggerTimer;
 	TBC::GeometryReference* mFlagMesh;
+	TBC::GeometryReference* mBlinkMesh;
 	bool mSlideDown;
+	Vector3DF mBlinkStartColor;
+	float mBlinkTime;
 
 	LOG_CLASS_DECLARE();
 };

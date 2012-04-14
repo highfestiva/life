@@ -576,7 +576,7 @@ class PhysWriter(ChunkyWriter):
 				print("Engine '%s' connected to body index is %i (scale %f)."% (node.getName(), idx, scale))
 			self._writeint(idx)
 			self._writefloat(float(scale))
-			connectiontypes = {"normal":1, "half_lock":2}
+			connectiontypes = {"normal":1, "half_lock":2, "release":3}
 			self._writeint(connectiontypes[connectiontype])
 		#print("Wrote engine '%s' for %i nodes." % (node.getName()[6:], len(connected_to)))
 		node.writecount += 1
