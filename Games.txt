@@ -14,6 +14,8 @@ Ping pong racket. Try to bounce the ball on the racket without dropping it on th
 
 Construction vehicle game - fork lift, front loader, excavator... Build, move and demolish!
 
+Build your own vehicle - place and rotate: body, wheels, cranes, brake lights... Specify joints, engines (engine powers?, speeds?). First object is suspended in mid-air, but attached objects become "live" immediately when dragged to the scene. Test drive when done!
+
 Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
 Physical programming game - give instructions such as "push left 10" and "pop". Try to hit something? Use car, hovercraft, spaceship...

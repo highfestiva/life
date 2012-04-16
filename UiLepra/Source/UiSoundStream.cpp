@@ -21,6 +21,10 @@ SoundStream::SoundStream(SoundManager* pSoundManager):
 {
 }
 
+SoundStream::~SoundStream()
+{
+}
+
 bool SoundStream::IsOpen() const
 {
 	return mIsOpen;

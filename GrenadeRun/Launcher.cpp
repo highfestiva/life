@@ -79,7 +79,16 @@ void Launcher::GetAngles(const Vector3DF& pTargetPosition, const Vector3DF& pTar
 	lPosition1 = lPosition1 + pTargetVelocity * lTime;
 	GetBallisticData(lPosition1, lPosition2, lBetterPitch, pGuidePitch, pGuideYaw, lTime);
 	pGuidePitch = Math::Clamp(pGuidePitch, -PIF/2, 0.0f);
-	pGuideYaw = Math::Clamp(pGuideYaw, -PIF/2, PIF/2);
+	//pGuideYaw = Math::Clamp(pGuideYaw, -PIF/2, PIF/2);
+	const float lYawDelta = pGuideYaw - pYaw;
+	if (lYawDelta > +PIF)
+	{
+		pGuideYaw -= 2*PIF;
+	}
+	else if (lYawDelta < -PIF)
+	{
+		pGuideYaw += 2*PIF;
+	}
 }
 
 void Launcher::CreateEngines()

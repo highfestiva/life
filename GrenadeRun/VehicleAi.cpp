@@ -277,14 +277,31 @@ void VehicleAi::OnTick()
 			if (lModeRunDeltaFrameCount%5 == 2)
 			{
 				const float lVelocityScaleFactor = std::min(1.0f, lVelocity.GetLength() / 2.5f);
-				const float lNearstPathDistance = GetClosestPathDistance(lPosition);
-				if (lNearstPathDistance < SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
+				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
+				const float lCurrentTime = lPath->GetCurrentInterpolationTime();
+				const float lNearestPathDistance = GetClosestPathDistance(lPosition, mActivePath, 0, 1);
+				if (lNearestPathDistance > 3.0f)
+				{
+					// First verify that we haven't ended up under path somehow. We do that by checking
+					// steepness, since pure Z-distance may be big when going over ditches.
+					const Vector3DF lPathPosition = lPath->GetValue();
+					const float lSteepness = (lPathPosition.z - lPosition.z) / lNearestPathDistance;
+					//mLog.Infof(_T("Checking steepness, nearest path distance is %.3f, steepness is %.3f."), lNearestPathDistance, lSteepness);
+					if (lSteepness > 0.6f)
+					{
+						mLog.Infof(_T("Searching for new, better path, we seem to have ended up under the path. Beneath a bridge perhaps? Nearest path is %.2f, steepness is %.2f."), lNearestPathDistance, lSteepness);
+						SetMode(MODE_FIND_BEST_PATH);
+						return;
+					}
+				}
+				lPath->GotoAbsoluteTime(lCurrentTime);
+				if (lNearestPathDistance < SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
 				{
 					// We were able to return to normal, keep on running.
 					SetMode(MODE_NORMAL);
 					return;
 				}
-				/*else if (lNearstPathDistance > SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor * 5)
+				/*else if (lNearestPathDistance > SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor * 5)
 				{
 					// We're far off, perhaps we fell down from a plateu.
 					mActivePath = -1;
@@ -409,7 +426,7 @@ void VehicleAi::OnTick()
 				{
 					const float lMoveAhead = lWantedDistance*1.1f - ::sqrt(lActualDistance2);
 					lPath->StepInterpolation(lMoveAhead * lPath->GetDistanceNormal());
-					mLog.Infof(_T("Stepping %f (=%f m) from %f."), lMoveAhead*lPath->GetDistanceNormal(), lMoveAhead, lPath->GetCurrentInterpolationTime());
+					log_volatile(mLog.Debugf(_T("Stepping %f (=%f m) from %f."), lMoveAhead*lPath->GetDistanceNormal(), lMoveAhead, lPath->GetCurrentInterpolationTime()));
 				}
 
 				// Check if we're there yet.
@@ -1064,7 +1081,7 @@ bool VehicleAi::IsCloseToTarget(const Vector3DF& pPosition, float pDistance) con
 	return (lTargetDistance2 <= lGoalDistance*lGoalDistance);
 }
 
-float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, const int pPath, float* pLikeliness) const
+float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, const int pPath, float* pLikeliness, float pSteepFactor) const
 {
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath((pPath >= 0)? pPath : mActivePath);
 	if (pLikeliness)
@@ -1114,7 +1131,7 @@ float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, const int pP
 	// Steep check.
 	if (lNearestDistance < ::fabs(pPosition.z - lClosestPoint.z)*3)
 	{
-		lNearestDistance *= 5;
+		lNearestDistance *= pSteepFactor;
 	}
 
 	if (pPath < 0)

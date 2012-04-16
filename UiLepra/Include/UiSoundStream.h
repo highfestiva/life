@@ -21,6 +21,7 @@ class SoundStream
 {
 public:
 	SoundStream(SoundManager* pSoundManager);
+	virtual ~SoundStream();
 	virtual bool Playback() = 0;
 	virtual bool IsPlaying() const = 0;
 	virtual bool Stop() = 0;

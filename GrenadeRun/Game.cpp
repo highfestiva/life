@@ -186,7 +186,14 @@ bool Game::Tick()
 		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f, false) * 0.01f * lRealTimeRatio;
 		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f, false) * 0.01f * lRealTimeRatio;
-		mLauncherYaw = Math::Clamp(mLauncherYaw, -PIF/2, PIF/2);
+		if (mLauncherYaw < -PIF)
+		{
+			mLauncherYaw += 2*PIF;
+		}
+		else if (mLauncherYaw > +PIF)
+		{
+			mLauncherYaw -= 2*PIF;
+		}
 		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF/2*0.6f, -PIF/90);
 		mLauncher->SetBarrelAngle(mLauncherYaw, mLauncherPitch);
 	}

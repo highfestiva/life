@@ -1114,7 +1114,7 @@ bool App::Poll()
 
 	if (mIntroStreamer && mIntroStreamer->Update())
 	{
-		if (!mIntroStreamer->IsPlaying())
+		if (!mIsPaused && !mIntroStreamer->IsPlaying())
 		{
 			delete mIntroStreamer;
 			mIntroStreamer = 0;
@@ -2124,10 +2124,6 @@ void App::Suspend()
 	{
 		mMusicPlayer->Pause();
 	}
-	if (mIntroStreamer)
-	{
-		mIntroStreamer->Pause();
-	}
 	DoPause();
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
@@ -2145,10 +2141,6 @@ void App::Resume()
 	{
 		mMusicPlayer->Stop();
 		mMusicPlayer->Playback();
-	}
-	if (mIntroStreamer)
-	{
-		mIntroStreamer->Playback();
 	}
 }
 
@@ -3059,11 +3051,13 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	{
 		// Tutorial.
 		mGameOverTimer.Stop();
+		mGame->EnableScoreCounting(true);
 		mGame->SetFlybyMode(Game::FLYBY_INTRODUCTION);
 		mGame->ResetWinnerIndex();
 		mGame->SetVehicle(_T("cutie"));
 		mGame->ResetLauncher();
 		mGame->SetComputerDifficulty(0);
+		delete mIntroStreamer;
 		mIntroStreamer = mUiManager->GetSoundManager()->CreateSoundStream(mPathPrefix+_T("voice_intro.ogg"), UiLepra::SoundManager::LOOP_NONE, 0);
 		if (mIntroStreamer && mIntroStreamer->Playback())
 		{
@@ -3240,6 +3234,10 @@ void App::DoPause()
 		return;
 	}
 	mIsPaused = true;
+	if (mIntroStreamer)
+	{
+		mIntroStreamer->Pause();
+	}
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, ICONBTNA("btn_resume.png", "Resume"));
 	if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE)	// Restart not available in tutorial mode.
@@ -3269,6 +3267,10 @@ void App::OnPauseAction(UiTbc::Button* pButton)
 	mPlayer2TouchDelay.ReduceTimeDiff(-10);
 
 	mIsPaused = false;
+	if (mIntroStreamer && !mIntroStreamer->IsPlaying())
+	{
+		mIntroStreamer->Playback();
+	}
 	if (pButton->GetTag() == 2)
 	{
 		SuperReset(false);
