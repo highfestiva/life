@@ -1118,6 +1118,11 @@ bool App::Poll()
 		{
 			delete mIntroStreamer;
 			mIntroStreamer = 0;
+			if (mMusicPlayer)
+			{
+				mMusicPlayer->SetVolume(0.5f);
+			}
+
 		}
 	}
 
@@ -3061,6 +3066,10 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		mIntroStreamer = mUiManager->GetSoundManager()->CreateSoundStream(mPathPrefix+_T("voice_intro.ogg"), UiLepra::SoundManager::LOOP_NONE, 0);
 		if (mIntroStreamer && mIntroStreamer->Playback())
 		{
+			if (mMusicPlayer)
+			{
+				mMusicPlayer->SetVolume(0.2f);
+			}
 			return;
 		}
 		delete mIntroStreamer;

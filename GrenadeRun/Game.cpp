@@ -947,7 +947,8 @@ bool Game::FlybyRender()
 {
 	const Vector3DF lCutie = mVehicle->GetPosition();
 	const Vector3DF lGoal = mCtf->GetPosition();
-	const double lTotalFlybyTime = 35.0;
+	const double lTotalFlybyTime = 37.0;
+	const double lTotalIntroductionTime = 75.0;
 	if (mFlybyMode == FLYBY_INTRODUCTION)
 	{
 		if (mFlyByTime > lTotalFlybyTime)
@@ -958,7 +959,6 @@ bool Game::FlybyRender()
 	}
 	else if (mFlybyMode == FLYBY_INTRODUCTION_FINISHING_UP)
 	{
-		const double lTotalIntroductionTime = 50.0;
 		if (mFlyByTime > lTotalIntroductionTime)
 		{
 			mFlybyMode = FLYBY_INACTIVE;

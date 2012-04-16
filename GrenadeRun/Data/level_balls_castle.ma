@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: level_balls_castle.ma
-//Last modified: Mon, Apr 16, 2012 04:04:20 AM
+//Last modified: Mon, Apr 16, 2012 10:11:28 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -12,19 +12,20 @@ fileInfo "cutIdentifier" "200904080023-749524";
 fileInfo "osv" "Microsoft Windows XP Service Pack 3 (Build 2600)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" -22.000303552372024 43.81218294523736 107.13651449907714 ;
-	setAttr ".r" -type "double3" -17.738352694585991 -16.599999999975207 4.1485961593337492e-016 ;
-	setAttr ".rp" -type "double3" 7.1054273576010019e-015 0 0 ;
-	setAttr ".rpt" -type "double3" 3.311351589071371e-013 -2.3010674986091735e-014 7.7037394875105157e-014 ;
+	setAttr ".t" -type "double3" -39.290995807782807 69.669618801275362 65.247624213571328 ;
+	setAttr ".r" -type "double3" -26.738352694587345 -57.799999999972094 -5.9686550598827819e-015 ;
+	setAttr ".rp" -type "double3" -7.1054273576010019e-015 0 1.7763568394002505e-015 ;
+	setAttr ".rpt" -type "double3" 3.4402189539783028e-013 -2.1351642660073559e-014 
+		6.6760849673604518e-014 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
 	setAttr ".fcp" 2000;
-	setAttr ".coi" 157.04820705408929;
+	setAttr ".coi" 131.31261403229379;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
-	setAttr ".tp" -type "double3" 57.889827365180025 5.6748721504675519 41.666820221172415 ;
+	setAttr ".tp" -type "double3" 59.943271370820597 10.58985409744963 2.7564710472174454 ;
 	setAttr ".hc" -type "string" "viewSet -p %camera";
 createNode transform -s -n "top";
 	setAttr ".v" no;
@@ -2868,7 +2869,7 @@ createNode transform -n "phys_pos_path1_3" -p "m_ground";
 	setAttr ".t" -type "double3" 106.0221399716814 19.850331346391929 105.29166749515328 ;
 	setAttr ".s" -type "double3" 2.8571428571428581 2.8571428571428581 2.8571428571428581 ;
 createNode transform -n "phys_pos_path1_4" -p "m_ground";
-	setAttr ".t" -type "double3" 137.65490854449033 22.459815150955727 31.882857962532981 ;
+	setAttr ".t" -type "double3" 129.06170744514094 22.459815150955727 31.882857962532981 ;
 	setAttr ".s" -type "double3" 2.8571428571428581 2.8571428571428581 2.8571428571428581 ;
 createNode transform -n "phys_pos_path1_5" -p "m_ground";
 	setAttr ".t" -type "double3" 92.671463554296835 29.050185077322176 -113.93823791838854 ;
@@ -5376,6 +5377,7 @@ createNode mesh -n "m_big_stoneShape" -p "m_big_stone";
 		 -0.20996585488319397 0.43407785892486572 0.8838508129119873 0.1743110716342926 0.51138496398925781
 		 0.84799420833587646 -0.13925214111804962 ;
 createNode transform -n "phys_big_stone" -p "m_big_stone";
+	setAttr ".v" no;
 	setAttr ".t" -type "double3" -0.26681506896894636 0.1829488136179549 -0.21958948459990069 ;
 	setAttr ".rp" -type "double3" -4.3800266098040517 -1.4260062747486486 -2.4128633805243433 ;
 	setAttr ".sp" -type "double3" -4.3800266098040517 -1.4260062747486486 -2.4128633805243433 ;
@@ -5436,6 +5438,183 @@ createNode transform -n "phys_pos_path5_2" -p "m_ground";
 createNode transform -n "phys_pos_path3_5" -p "m_ground";
 	setAttr ".t" -type "double3" 206.2655795203267 38.748634982111923 -40.097449380688779 ;
 	setAttr ".s" -type "double3" 2.8571428571428577 2.8571428571428577 2.8571428571428577 ;
+createNode transform -n "m_sign_pole" -p "m_ground";
+	setAttr ".t" -type "double3" -118.94852908689245 3.9748342406295207 124.26863310354565 ;
+	setAttr ".r" -type "double3" 167.63650977310624 -61.924000925975001 178.50272911107044 ;
+	setAttr ".s" -type "double3" 2.8571428571428581 2.8571428571428577 2.8571428571428585 ;
+	setAttr ".rp" -type "double3" -165.65718768751589 9.1153608453276149 -45.627309987791236 ;
+	setAttr ".rpt" -type "double3" 284.60571677440839 -13.090195085957163 -78.641323115754361 ;
+	setAttr ".sp" -type "double3" -57.980015690630552 3.1903762958646671 -15.969558495726929 ;
+	setAttr ".spt" -type "double3" -107.67717199688538 5.9249845494629545 -29.657751492064317 ;
+createNode mesh -n "m_sign_poleShape" -p "m_sign_pole";
+	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
+	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
+	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
+	setAttr -k off ".v";
+	setAttr -s 4 ".iog";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+	setAttr ".rgvtx" -type "vectorArray" 14 0.05000002309679985 -1.5 -0.086602531373500824 -0.049999985843896866
+		 -1.5 -0.086602553725242615 -0.10000000149011612 -1.5 -1.4901161193847656e-008 -0.050000011920928955
+		 -1.5 0.086602538824081421 0.049999997019767761 -1.5 0.086602546274662018 0.10000000149011612
+		 -1.5 0 0.05000002309679985 1.5 -0.086602531373500824 -0.049999985843896866 1.5 -0.086602553725242615 -0.10000000149011612
+		 1.5 -1.4901161193847656e-008 -0.050000011920928955 1.5 0.086602538824081421 0.049999997019767761
+		 1.5 0.086602546274662018 0.10000000149011612 1.5 0 0 -1.5 0 0 1.5 0 ;
+	setAttr ".rgf" -type "string" "[[0,1,7,6],[1,2,8,7],[2,3,9,8],[3,4,10,9],[4,5,11,10],[5,0,6,11],[1,0,12],[2,1,12],[3,2,12],[4,3,12],[5,4,12],[0,5,12],[6,7,13],[7,8,13],[8,9,13],[9,10,13],[10,11,13],[11,6,13]]";
+	setAttr ".rgn" -type "vectorArray" 60 1.9868214451435051e-007 0 -1 1.9868214451435051e-007
+		 0 -1 1.9868214451435051e-007 0 -1 1.9868214451435051e-007 0 -1 -0.86602526903152466
+		 0 -0.50000017881393433 -0.86602526903152466 0 -0.50000017881393433 -0.86602526903152466
+		 0 -0.50000017881393433 -0.86602526903152466 0 -0.50000017881393433 -0.86602544784545898
+		 0 0.49999991059303284 -0.86602544784545898 0 0.49999991059303284 -0.86602544784545898
+		 0 0.49999991059303284 -0.86602544784545898 0 0.49999991059303284 -9.9341072257175256e-008
+		 0 1 -9.9341072257175256e-008 0 1 -9.9341072257175256e-008 0 1 -9.9341072257175256e-008
+		 0 1 0.86602544784545898 0 0.5 0.86602544784545898 0 0.5 0.86602544784545898 0 0.5 0.86602544784545898
+		 0 0.5 0.86602544784545898 0 -0.49999988079071045 0.86602544784545898 0 -0.49999988079071045 0.86602544784545898
+		 0 -0.49999988079071045 0.86602544784545898 0 -0.49999988079071045 0 -1 -8.6031889168225462e-007 0
+		 -1 -1.7206380107381847e-006 0 -1 -2.8677303021140688e-007 0 -1 0 0 -1 -8.6031889168225462e-007 0
+		 -1 -2.8677303021140688e-007 0 -1 8.6031889168225462e-007 0 -1 0 0 -1 -2.8677303021140688e-007 0
+		 -1 8.6031889168225462e-007 0 -1 8.6031889168225462e-007 0 -1 -2.8677303021140688e-007 0
+		 -1 -8.603190622125112e-007 0 -1 8.6031889168225462e-007 0 -1 -2.8677303021140688e-007 0
+		 -1 -1.7206380107381847e-006 0 -1 -8.603190622125112e-007 0 -1 -2.8677303021140688e-007 0
+		 1 -8.6031889168225462e-007 0 1 -8.6031889168225462e-007 0 1 2.8677297336798802e-007 0
+		 1 -8.6031889168225462e-007 0 1 0 0 1 2.8677297336798802e-007 0 1 0 0 1 8.6031889168225462e-007 0
+		 1 2.8677297336798802e-007 0 1 8.6031889168225462e-007 0 1 1.7206377833645092e-006 0
+		 1 2.8677297336798802e-007 0 1 1.7206377833645092e-006 0 1 8.6031889168225462e-007 0
+		 1 2.8677297336798802e-007 0 1 8.6031889168225462e-007 0 1 -8.6031889168225462e-007 0
+		 1 2.8677297336798802e-007 ;
+createNode transform -n "m_sign" -p "m_sign_pole";
+	setAttr ".t" -type "double3" 0 1.1942200038690536 3.5527136788005009e-015 ;
+	setAttr ".r" -type "double3" 3.9756933518293969e-016 -3.1805546814635168e-015 0 ;
+	setAttr ".s" -type "double3" 1 0.99999999999999978 0.99999999999999978 ;
+	setAttr ".rp" -type "double3" -57.980015690630538 1.9961562919956126 -15.96955849572689 ;
+	setAttr ".sp" -type "double3" -57.980015690630538 1.9961562919956122 -15.969558495726893 ;
+	setAttr ".spt" -type "double3" 0 -4.4408920985006257e-016 3.5527136788005001e-015 ;
+createNode mesh -n "m_signShape" -p "m_sign";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
+	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
+	setAttr -k off ".v";
+	setAttr -s 2 ".iog";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+	setAttr -s 14 ".pt";
+	setAttr ".pt[2:3]" -type "float3" -1.4901161e-008 7.4505806e-009 2.2351742e-008  
+		3.7252903e-009 0 1.8626451e-009 ;
+	setAttr ".pt[6:7]" -type "float3" 0 -0.050815966 0  0 -0.050815966 0 ;
+	setAttr ".pt[14:23]" -type "float3" 0 0.050815966 0  0 0.050815966 0  0 
+		0.050815966 0  0 0.051609442 0  0 -0.051609442 0  0 0.050815966 0  0 0.032445867 
+		0  0 -0.032445867 0  0 -0.051609442 0  0 0.051609442 0 ;
+	setAttr ".rgvtx" -type "vectorArray" 24 -0.15000000596046448 -0.39850565791130066
+		 1.0045338869094849 0.15000000596046448 -0.39850565791130066 1.0045338869094849 -0.15000002086162567
+		 7.4505805969238281e-009 0.83208531141281128 0.15000000596046448 0 0.83208537101745605 -0.15000000596046448
+		 0.39850565791130066 1.0045338869094849 0.15000000596046448 0.39850565791130066 1.0045338869094849 -0.15000000596046448
+		 0.21021363139152527 -0.4605746865272522 0.15000000596046448 0.21021363139152527 -0.4605746865272522 -0.15000000596046448
+		 0.5 -0.31429281830787659 0.15000000596046448 0.5 -0.31429281830787659 -0.15000000596046448
+		 0 -1.3234990835189819 0.15000000596046448 0 -1.3234990835189819 -0.15000000596046448
+		 -0.5 -0.31429272890090942 0.15000000596046448 -0.5 -0.31429272890090942 -0.15000000596046448
+		 -0.21021363139152527 -0.46057453751564026 0.15000000596046448 -0.21021363139152527
+		 -0.46057453751564026 0.15000000596046448 -0.21021363139152527 -0.46057453751564026 0.15000000596046448
+		 -0.21349610388278961 0.38519459962844849 0.15000000596046448 0.21349610388278961
+		 0.38519442081451416 -0.15000000596046448 -0.21021363139152527 -0.46057453751564026 -0.15000000596046448
+		 -0.13422088325023651 0.41130346059799194 -0.15000000596046448 0.13422088325023651
+		 0.41130346059799194 -0.15000000596046448 0.21349610388278961 0.38519442081451416 -0.15000000596046448
+		 -0.21349610388278961 0.38519459962844849 ;
+	setAttr ".rgf" -type "string" "[[0,1,2],[2,1,3],[2,3,4],[4,3,5],[4,5,22],[22,5,18],[6,7,8],[8,7,9],[8,9,10],[10,9,11],[10,11,12],[12,11,13],[12,13,14],[14,13,15],[14,15,23],[23,15,17],[13,11,16],[1,17,3],[16,11,7],[17,16,18],[18,16,7],[3,17,18],[7,11,9],[3,18,5],[10,12,19],[12,14,19],[14,20,19],[14,23,20],[0,2,23],[23,2,20],[10,19,6],[19,20,6],[6,20,21],[20,2,21],[10,6,8],[6,21,22],[4,22,2],[21,2,22],[22,18,6],[6,18,7],[23,17,0],[0,17,1]]";
+	setAttr ".rgn" -type "vectorArray" 126 0 0.39714741706848145 0.91775482892990112 0
+		 0.39714741706848145 0.91775482892990112 0 0.39714741706848145 0.91775482892990112 -5.5274608712352347e-007
+		 0.39714735746383667 0.9177548885345459 -5.5274608712352347e-007 0.39714735746383667
+		 0.9177548885345459 -5.5274608712352347e-007 0.39714735746383667 0.9177548885345459 -4.5756308963973424e-007
+		 -0.39714741706848145 0.91775482892990112 -4.5756308963973424e-007 -0.39714741706848145
+		 0.91775482892990112 -4.5756308963973424e-007 -0.39714741706848145 0.91775482892990112 0
+		 -0.39714732766151428 0.9177548885345459 0 -0.39714732766151428 0.9177548885345459 0
+		 -0.39714732766151428 0.9177548885345459 0 0.95816296339035034 -0.28622311353683472 0
+		 0.95816296339035034 -0.28622311353683472 0 0.95816296339035034 -0.28622311353683472 0
+		 0.95816296339035034 -0.28622320294380188 0 0.95816296339035034 -0.28622320294380188 0
+		 0.95816296339035034 -0.28622320294380188 0 -0.45063263177871704 0.89270949363708496 0
+		 -0.45063263177871704 0.89270949363708496 0 -0.45063263177871704 0.89270949363708496 0
+		 -0.45063269138336182 0.89270949363708496 0 -0.45063269138336182 0.89270949363708496 0
+		 -0.45063269138336182 0.89270949363708496 0 0.89605611562728882 -0.44394096732139587 0
+		 0.89605611562728882 -0.44394096732139587 0 0.89605611562728882 -0.44394096732139587 0
+		 0.89605611562728882 -0.44394096732139587 0 0.89605611562728882 -0.44394096732139587 0
+		 0.89605611562728882 -0.44394096732139587 0 -0.89605611562728882 -0.44394096732139587 0
+		 -0.89605611562728882 -0.44394096732139587 0 -0.89605611562728882 -0.44394096732139587 0
+		 -0.89605611562728882 -0.44394096732139587 0 -0.89605611562728882 -0.44394096732139587 0
+		 -0.89605611562728882 -0.44394096732139587 0 0.45063257217407227 0.89270949363708496 0
+		 0.45063257217407227 0.89270949363708496 0 0.45063257217407227 0.89270949363708496 0
+		 0.4506324827671051 0.89270949363708496 0 0.4506324827671051 0.89270949363708496 0
+		 0.4506324827671051 0.89270949363708496 0 -0.99999254941940308 -0.0038810265250504017 0
+		 -0.99999254941940308 -0.0038810265250504017 0 -0.99999254941940308 -0.0038810265250504017 0
+		 -0.99999254941940308 -0.0038810265250504017 0 -0.99999254941940308 -0.0038810265250504017 0
+		 -0.99999254941940308 -0.0038810265250504017 0.99999994039535522 -1.3588922342933074e-007
+		 0 0.99999994039535522 -1.3588922342933074e-007 0 0.99999994039535522 -1.3588922342933074e-007
+		 0 1 -1.7334540913793717e-008 0 1 -1.7334540913793717e-008 0 1 -1.7334540913793717e-008
+		 0 1 4.1073008105740882e-008 0 1 4.1073008105740882e-008 0 1 4.1073008105740882e-008
+		 0 1 9.9028355293739878e-008 0 1 9.9028355293739878e-008 0 1 9.9028355293739878e-008
+		 0 0.99999994039535522 -8.3812231821411842e-008 0 0.99999994039535522 -8.3812231821411842e-008
+		 0 0.99999994039535522 -8.3812231821411842e-008 0 1 0 0 1 0 0 1 0 0 1 -6.7944640136374801e-008
+		 0 1 -6.7944640136374801e-008 0 1 -6.7944640136374801e-008 0 0.99999994039535522 1.7334535584723199e-008
+		 0 0.99999994039535522 1.7334535584723199e-008 0 0.99999994039535522 1.7334535584723199e-008
+		 0 -1 -1.3588920921847603e-007 0 -1 -1.3588920921847603e-007 0 -1 -1.3588920921847603e-007
+		 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 -6.9338192076884297e-008
+		 -1.2828229145611658e-008 -1 -6.9338192076884297e-008 -1.2828229145611658e-008 -1
+		 -6.9338192076884297e-008 -1.2828229145611658e-008 -1 9.3590173833035806e-008 -3.9570032583924331e-008 -1
+		 9.3590173833035806e-008 -3.9570032583924331e-008 -1 9.3590173833035806e-008 -3.9570032583924331e-008 -0.99999994039535522
+		 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0 0 -1 4.0651212174225293e-008
+		 0 -1 4.0651212174225293e-008 0 -1 4.0651212174225293e-008 0 -1 0 0 -1 0 0 -1 0 0 -1
+		 0 -3.5413030730069295e-008 -1 0 -3.5413030730069295e-008 -1 0 -3.5413030730069295e-008 -1
+		 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -0.99999994039535522 -3.4669071169446397e-008
+		 -1.2828217599292202e-008 -0.99999994039535522 -3.4669071169446397e-008 -1.2828217599292202e-008 -0.99999994039535522
+		 -3.4669071169446397e-008 -1.2828217599292202e-008 -1 2.1837729491380742e-007 -3.9570075216488476e-008 -1
+		 2.1837729491380742e-007 -3.9570075216488476e-008 -1 2.1837729491380742e-007 -3.9570075216488476e-008 0
+		 0.99999254941940308 -0.003881026990711689 0 0.99999254941940308 -0.003881026990711689 0
+		 0.99999254941940308 -0.003881026990711689 0 0.99999254941940308 -0.003881026990711689 0
+		 0.99999254941940308 -0.003881026990711689 0 0.99999254941940308 -0.003881026990711689 0
+		 -0.95816290378570557 -0.28622329235076904 0 -0.95816290378570557 -0.28622329235076904 0
+		 -0.95816290378570557 -0.28622329235076904 0 -0.95816290378570557 -0.28622320294380188 0
+		 -0.95816290378570557 -0.28622320294380188 0 -0.95816290378570557 -0.28622320294380188 ;
+createNode transform -n "phys_sign_pole" -p "m_sign_pole";
+	setAttr ".t" -type "double3" 7.1054273576010019e-015 -4.4408920985006262e-016 3.5527136788005009e-015 ;
+	setAttr ".r" -type "double3" 3.9756933518293969e-016 -3.1805546814635168e-015 0 ;
+	setAttr ".s" -type "double3" 1 0.99999999999999978 0.99999999999999978 ;
+	setAttr ".rp" -type "double3" -57.980015690630545 3.1903762958646658 -15.969558495726897 ;
+	setAttr ".sp" -type "double3" -57.980015690630545 3.1903762958646666 -15.969558495726901 ;
+	setAttr ".spt" -type "double3" 0 -8.8817841970012504e-016 3.5527136788005001e-015 ;
+createNode transform -n "m_sign_pole1" -p "m_ground";
+	setAttr ".t" -type "double3" 157.5890383842673 26.625466406847998 7.9729863872629547 ;
+	setAttr ".r" -type "double3" -5.0560765646580244 43.464845048446229 -24.144908487448763 ;
+	setAttr ".s" -type "double3" 2.8571428571428577 2.8571428571428572 2.8571428571428577 ;
+	setAttr ".rp" -type "double3" -90.98176274506514 -79.844028020913015 -104.6615451318586 ;
+	setAttr ".rpt" -type "double3" -66.607275639202172 53.218561614065045 96.688558744595639 ;
+	setAttr ".sp" -type "double3" -31.843616960772795 -27.945409807319557 -36.631540796150503 ;
+	setAttr ".spt" -type "double3" -59.138145784292348 -51.898618213593458 -68.030004335708099 ;
+createNode transform -n "m_sign1" -p "m_sign_pole1";
+	setAttr ".t" -type "double3" -3.5527136788005009e-015 1.1942200038690558 0 ;
+	setAttr ".r" -type "double3" -1.590277340731758e-015 0 -1.987846675914698e-015 ;
+	setAttr ".s" -type "double3" 1 1.0000000000000002 1 ;
+	setAttr ".rp" -type "double3" -31.843616960772792 -29.139629811188613 -36.631540796150503 ;
+	setAttr ".sp" -type "double3" -31.843616960772792 -29.139629811188605 -36.631540796150503 ;
+	setAttr ".spt" -type "double3" 0 -7.1054273576010034e-015 0 ;
+createNode transform -n "phys_sign_pole1" -p "m_sign_pole1";
+	setAttr ".t" -type "double3" -7.1054273576010019e-015 0 -7.1054273576010019e-015 ;
+	setAttr ".r" -type "double3" -1.590277340731758e-015 0 -1.987846675914698e-015 ;
+	setAttr ".s" -type "double3" 1 1.0000000000000002 1 ;
+	setAttr ".rp" -type "double3" -31.843616960772795 -27.945409807319567 -36.631540796150489 ;
+	setAttr ".sp" -type "double3" -31.843616960772795 -27.94540980731956 -36.631540796150489 ;
+	setAttr ".spt" -type "double3" 0 -7.1054273576010034e-015 0 ;
 createNode transform -n "i_leaves1";
 	setAttr ".t" -type "double3" 1.3054887926197094 10.006155378162163 -0.016122125493037265 ;
 	setAttr ".r" -type "double3" 90 -1.5902773407317584e-015 -20.39659650607976 ;
@@ -5648,6 +5827,10 @@ parent -s -nc -r -add "|m_ground|m_big_stone|m_big_stoneShape" "m_big_stone2";
 parent -s -nc -r -add "|m_ground|m_big_stone|phys_big_stone|phys_big_stoneShape" "phys_big_stone1";
 parent -s -nc -r -add "|m_ground|m_big_stone|phys_big_stone|phys_big_stoneShape" "phys_big_stone2";
 parent -s -nc -r -add "|m_ground|phys_pos_path5_1|phys_pos_path5_Shape1" "phys_pos_path5_2";
+parent -s -nc -r -add "|m_ground|m_sign_pole|m_sign_poleShape" "phys_sign_pole";
+parent -s -nc -r -add "|m_ground|m_sign_pole|m_sign_poleShape" "m_sign_pole1";
+parent -s -nc -r -add "|m_ground|m_sign_pole|m_sign_poleShape" "phys_sign_pole1";
+parent -s -nc -r -add "|m_ground|m_sign_pole|m_sign|m_signShape" "m_sign1";
 parent -s -nc -r -add "|i_leaves1|transform8|i_leavesShape3" "transform1";
 parent -s -nc -r -add "|i_leaves1|transform8|i_leavesShape3" "transform2";
 parent -s -nc -r -add "|i_leaves1|transform8|i_leavesShape3" "transform3";
@@ -5662,8 +5845,8 @@ parent -s -nc -r -add "|i_m_spear1|transform16|i_m_spearShape6" "transform14";
 parent -s -nc -r -add "|i_m_spear1|transform16|i_m_spearShape6" "transform15";
 parent -s -nc -r -add "|i_m_spear_holder1|transform10|i_m_spear_holder1Shape2" "transform9";
 createNode lightLinker -n "lightLinker1";
-	setAttr -s 39 ".lnk";
-	setAttr -s 39 ".slnk";
+	setAttr -s 41 ".lnk";
+	setAttr -s 43 ".slnk";
 createNode displayLayerManager -n "layerManager";
 createNode displayLayer -n "defaultLayer";
 createNode renderLayerManager -n "renderLayerManager";
@@ -5728,8 +5911,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n"
 		+ "                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"clipEditorPanel\" (localizedPanelLabel(\"Trax Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"clipEditorPanel\" -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n"
 		+ "                -snapValue \"none\" \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n"
-		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.346028\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_pos_path5_2\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_ground\" \n                -dropNode \"phys_pos_path4_3\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
-		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.346028\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_pos_path5_2\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_ground\" \n                -dropNode \"phys_pos_path4_3\" \n                -freeform 1\n                -imagePosition 0 0 \n"
+		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.322785\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_sign_pole1\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_ground\" \n                -dropNode \"m_sign_pole\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
+		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.322785\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_sign_pole1\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_ground\" \n                -dropNode \"m_sign_pole\" \n                -freeform 1\n                -imagePosition 0 0 \n"
 		+ "                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperShadePanel\" (localizedPanelLabel(\"Hypershade\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperShadePanel\" -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"visorPanel\" (localizedPanelLabel(\"Visor\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"visorPanel\" -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"polyTexturePlacementPanel\" (localizedPanelLabel(\"UV Texture Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"multiListerPanel\" (localizedPanelLabel(\"Multilister\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"multiListerPanel\" -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"renderWindowPanel\" (localizedPanelLabel(\"Render View\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"renderWindowPanel\" -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextPanel \"blendShapePanel\" (localizedPanelLabel(\"Blend Shape\")) `;\n"
@@ -5749,8 +5932,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "\t\t\t\t-defaultImage \"\"\n\t\t\t\t-image \"\"\n\t\t\t\t-sc false\n\t\t\t\t-configString \"global string $gMainPane; paneLayout -e -cn \\\"horizontal2\\\" -ps 1 100 46 -ps 2 100 54 $gMainPane;\"\n\t\t\t\t-removeAllPanels\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Persp View\")) \n\t\t\t\t\t\"modelPanel\"\n"
 		+ "\t\t\t\t\t\"$panelName = `modelPanel -unParent -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels `;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 1\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
 		+ "\t\t\t\t\t\"modelPanel -edit -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels  $panelName;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 1\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
-		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.346028\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_pos_path5_2\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_ground\\\" \\n                -dropNode \\\"phys_pos_path4_3\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
-		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.346028\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_pos_path5_2\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_ground\\\" \\n                -dropNode \\\"phys_pos_path4_3\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.322785\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_sign_pole1\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_ground\\\" \\n                -dropNode \\\"m_sign_pole\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.322785\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_sign_pole1\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_ground\\\" \\n                -dropNode \\\"m_sign_pole\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
 		+ "\t\t\t\t$configName;\n\n            setNamedPanelLayout (localizedPanelLabel(\"Current Layout\"));\n        }\n\n        panelHistory -e -clear mainPanelHistory;\n        setFocus `paneLayout -q -p1 $gMainPane`;\n        sceneUIReplacement -deleteRemaining;\n        sceneUIReplacement -clear;\n\t}\n\n\ngrid -spacing 5 -size 12 -divisions 5 -displayAxes yes -displayGridLines yes -displayDivisionLines yes -displayPerspectiveLabels no -displayOrthographicLabels no -displayAxesBold yes -perspectiveLabelPosition axis -orthographicLabelPosition edge;\nviewManip -drawCompass 0 -compassAngle 0 -frontParameters \"\" -homeParameters \"\" -selectionLockParameters \"\";\n}\n");
 	setAttr ".st" 3;
 createNode script -n "sceneConfigurationScriptNode";
@@ -7950,16 +8133,136 @@ createNode shadingEngine -n "phong26SG";
 	setAttr -s 2 ".dsm";
 	setAttr ".ro" yes;
 createNode materialInfo -n "materialInfo27";
+createNode polyCylinder -n "direction_sign_polyCylinder1";
+	setAttr ".r" 0.1;
+	setAttr ".h" 3;
+	setAttr ".sa" 6;
+	setAttr ".sc" 1;
+	setAttr ".cuv" 3;
+createNode polyCube -n "direction_sign_polyCube1";
+	setAttr ".w" 0.3;
+	setAttr ".d" 1.5;
+	setAttr ".sh" 3;
+	setAttr ".sd" 3;
+	setAttr ".cuv" 4;
+createNode phong -n "phong1";
+	setAttr ".dc" 1;
+	setAttr ".c" -type "float3" 0.36013886 0.40289786 0.42976001 ;
+	setAttr ".sc" -type "float3" 1 1 1 ;
+createNode shadingEngine -n "direction_sign_phong1SG";
+	setAttr ".ihi" 0;
+	setAttr -s 4 ".dsm";
+	setAttr ".ro" yes;
+createNode materialInfo -n "direction_sign_materialInfo1";
+createNode phong -n "phong2";
+	setAttr ".dc" 1;
+	setAttr ".c" -type "float3" 1 1 1 ;
+	setAttr ".sc" -type "float3" 0 0 0 ;
+	setAttr ".cp" 2;
+createNode shadingEngine -n "direction_sign_phong2SG";
+	setAttr ".ihi" 0;
+	setAttr -s 2 ".dsm";
+	setAttr ".ro" yes;
+createNode materialInfo -n "direction_sign_materialInfo2";
+createNode polyMergeVert -n "direction_sign_polyMergeVert1";
+	setAttr ".ics" -type "componentList" 4 "vtx[12]" "vtx[14]" "vtx[16]" "vtx[18]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyTweak -n "direction_sign_polyTweak1";
+	setAttr ".uopa" yes;
+	setAttr -s 20 ".tk";
+	setAttr ".tk[8:24]" -type "float3" 0 -0.17519356 -0.62548643  0 -0.17519356 
+		-0.62548643  0 0 -0.020543622  0 0 -0.020543622  0 -0.5 -0.24454954  0 -0.49969468 
+		-0.24454954  0 -0.16666666 -0.24454954  0 -0.16656488 -0.24454954  0 0.16666669 -0.24454954  
+		0 0.16656491 -0.24454954  0 0.5 -0.24454954  0 0.49969468 -0.24454954  0 0 -0.020543577  
+		0 0 -0.020543577  0 0.17519356 -0.62548631  0 0.17519356 -0.62548631  0 0 -0.3038705 ;
+	setAttr ".tk[26]" -type "float3" 0 0 -0.30387053 ;
+	setAttr ".tk[28]" -type "float3" 0 0 -0.3038705 ;
+	setAttr ".tk[30]" -type "float3" 0 0 -0.30387053 ;
+createNode polyMergeVert -n "direction_sign_polyMergeVert2";
+	setAttr ".ics" -type "componentList" 1 "vtx[13:16]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyTweak -n "direction_sign_polyTweak2";
+	setAttr ".uopa" yes;
+	setAttr -s 4 ".tk[13:16]" -type "float3"  0 -0.00030532479 0 0 -0.00010177493 
+		0 0 0.00010177493 0 0 0.00030532479 0;
+createNode polyCut -n "direction_sign_polyCut1";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 2 "f[3]" "f[8]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+	setAttr ".pc" -type "double3" 0.54427311345780116 2.6942200660705566 0.071506692632343646 ;
+	setAttr ".ro" -type "double3" -1.2721613833477622e-014 0 180 ;
+createNode polyTweak -n "direction_sign_polyTweak3";
+	setAttr ".uopa" yes;
+	setAttr -s 4 ".tk[2:5]" -type "float3"  0 0 -0.19813052 0 0 -0.19813052 
+		0 0 -0.19813053 0 0 -0.19813052;
+createNode polyMergeVert -n "direction_sign_polyMergeVert3";
+	setAttr ".ics" -type "componentList" 2 "vtx[3]" "vtx[5]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyTweak -n "direction_sign_polyTweak4";
+	setAttr ".uopa" yes;
+	setAttr -s 30 ".tk[0:29]" -type "float3"  0 0.10149435 0.25453392 0 
+		0.10149435 0.25453392 0 0.16668858 0.28021586 0 0.16666675 0.28021586 0 -0.16668858 
+		0.28021583 0 -0.16666675 0.28021586 0 -0.10149435 0.25453392 0 -0.10149435 0.25453392 
+		0 -0.063776858 -0.085088268 0 -0.063776858 -0.085088268 0 0 -0.043749172 0 0 -0.043749172 
+		0 0 -0.3289496 0 0 -0.3289496 0 0 -0.043749154 0 0 -0.043749154 0 0.063776858 -0.085088216 
+		0 0.063776858 -0.085088216 0 0 -0.15535732 0 0 0.16130348 0 0 -0.15535739 0 0 0.16130348 
+		0 0 -0.15535732 0 0 0.16130346 0 0 -0.15535739 0 0 0.16130348 0 -0.12927978 0.3136878 
+		0 -0.12927978 0.3136878 0 0.12927978 0.31368792 0 0.12927978 0.31368792;
+createNode polyMergeVert -n "direction_sign_polyMergeVert4";
+	setAttr ".ics" -type "componentList" 2 "vtx[2]" "vtx[4]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyTweak -n "direction_sign_polyTweak5";
+	setAttr ".uopa" yes;
+	setAttr -s 3 ".tk[2:4]" -type "float3"  0 -2.1830201e-005 -5.9604645e-008 
+		0 0 0 0 2.1830201e-005 5.9604645e-008;
+createNode polyTweak -n "direction_sign_polyTweak6";
+	setAttr ".uopa" yes;
+	setAttr -s 6 ".tk";
+	setAttr ".tk[16:20]" -type "float3" 0 -0.094362855 0.24865326  0 -0.098438799 
+		-0.026108861  0 0.094362855 0.24865323  0 0.098438799 -0.02610904  0 -0.094362855 
+		0.24865326 ;
+	setAttr ".tk[22]" -type "float3" 0 0.094362855 0.24865323 ;
+createNode deleteComponent -n "direction_sign_deleteComponent1";
+	setAttr ".dc" -type "componentList" 1 "f[9]";
+createNode polyMergeVert -n "direction_sign_polyMergeVert5";
+	setAttr ".ics" -type "componentList" 2 "vtx[7]" "vtx[18]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyMergeVert -n "direction_sign_polyMergeVert6";
+	setAttr ".ics" -type "componentList" 2 "vtx[6]" "vtx[21]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyMergeVert -n "direction_sign_polyMergeVert7";
+	setAttr ".ics" -type "componentList" 1 "vtx[22]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyMergeVert -n "direction_sign_polyMergeVert8";
+	setAttr ".ics" -type "componentList" 2 "vtx[18]" "vtx[23]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyMergeVert -n "direction_sign_polyMergeVert9";
+	setAttr ".ics" -type "componentList" 1 "vtx[23]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyMergeVert -n "direction_sign_polyMergeVert10";
+	setAttr ".ics" -type "componentList" 2 "vtx[17]" "vtx[24]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+createNode polyTriangulate -n "direction_sign_polyTriangulate1";
+	setAttr ".ics" -type "componentList" 4 "f[0:1]" "f[9]" "f[12]" "f[14]";
+createNode polyTriangulate -n "direction_sign_polyTriangulate2";
+	setAttr ".ics" -type "componentList" 4 "f[0:3]" "f[11]" "f[14]" "f[16]";
+createNode polyTriangulate -n "direction_sign_polyTriangulate3";
+	setAttr ".ics" -type "componentList" 1 "f[*]";
+createNode polySoftEdge -n "direction_sign_polySoftEdge1";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 1 "e[*]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 2.694220003869054 0 1;
+	setAttr ".a" 0;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2012-04-16T04:04:20.796000";
+	setAttr ".time" -type "string" "2012-04-16T22:11:28.281000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;
-	setAttr -s 39 ".st";
+	setAttr -s 41 ".st";
 select -ne :renderGlobalsList1;
 select -ne :defaultShaderList1;
-	setAttr -s 39 ".s";
+	setAttr -s 41 ".s";
 select -ne :postProcessList1;
 	setAttr -s 2 ".p";
 select -ne :defaultRenderUtilityList1;
@@ -8001,7 +8304,7 @@ select -ne :defaultHardwareRenderGlobals;
 	setAttr ".fn" -type "string" "im";
 	setAttr ".res" -type "string" "ntsc_4d 646 485 1.333";
 select -ne :hyperGraphLayout;
-	setAttr -s 129 ".hyp";
+	setAttr -s 135 ".hyp";
 	setAttr ".hyp[0].x" 53.134960174560547;
 	setAttr ".hyp[0].y" 52.811378479003906;
 	setAttr ".hyp[0].isf" yes;
@@ -8389,6 +8692,24 @@ select -ne :hyperGraphLayout;
 	setAttr ".hyp[413].x" 339.11004638671875;
 	setAttr ".hyp[413].y" -835.88995361328125;
 	setAttr ".hyp[413].isf" yes;
+	setAttr ".hyp[414].x" 1377.39208984375;
+	setAttr ".hyp[414].y" -32.274425506591797;
+	setAttr ".hyp[414].isf" yes;
+	setAttr ".hyp[415].x" 1370.39208984375;
+	setAttr ".hyp[415].y" 103.72557067871094;
+	setAttr ".hyp[415].isf" yes;
+	setAttr ".hyp[416].x" 1405.39208984375;
+	setAttr ".hyp[416].y" 63.725574493408203;
+	setAttr ".hyp[416].isf" yes;
+	setAttr ".hyp[417].x" 1405.39208984375;
+	setAttr ".hyp[417].y" 24.725574493408203;
+	setAttr ".hyp[417].isf" yes;
+	setAttr ".hyp[418].x" 1412.39208984375;
+	setAttr ".hyp[418].y" -71.274429321289063;
+	setAttr ".hyp[418].isf" yes;
+	setAttr ".hyp[419].x" 1412.39208984375;
+	setAttr ".hyp[419].y" -111.27442932128906;
+	setAttr ".hyp[419].isf" yes;
 connectAttr "cameraView1.msg" ":topShape.b" -na;
 connectAttr "cameraView2.msg" ":topShape.b" -na;
 connectAttr "polyTweakUV13.out" "|m_ground|m_phys_groundShape.i";
@@ -8491,6 +8812,10 @@ connectAttr "polyReduce1.out" "|m_ground|m_big_stone|m_big_stoneShape.i";
 connectAttr "polySphere8.out" "|m_ground|m_big_stone|phys_big_stone|phys_big_stoneShape.i"
 		;
 connectAttr "polySphere9.out" "|m_ground|phys_pos_path5_1|phys_pos_path5_Shape1.i"
+		;
+connectAttr "direction_sign_polyCylinder1.out" "|m_ground|m_sign_pole|m_sign_poleShape.i"
+		;
+connectAttr "direction_sign_polySoftEdge1.out" "|m_ground|m_sign_pole|m_sign|m_signShape.i"
 		;
 connectAttr "groupId3.id" "|i_leaves1|transform8|i_leavesShape3.iog.og[0].gid";
 connectAttr "tree_phong2SG1.mwc" "|i_leaves1|transform8|i_leavesShape3.iog.og[0].gco"
@@ -8662,6 +8987,10 @@ connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[37].llnk";
 connectAttr "phong25SG.msg" "lightLinker1.lnk[37].olnk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[38].llnk";
 connectAttr "phong26SG.msg" "lightLinker1.lnk[38].olnk";
+connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[39].llnk";
+connectAttr "direction_sign_phong1SG.msg" "lightLinker1.lnk[39].olnk";
+connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[40].llnk";
+connectAttr "direction_sign_phong2SG.msg" "lightLinker1.lnk[40].olnk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[0].sllk";
 connectAttr ":initialShadingGroup.msg" "lightLinker1.slnk[0].solk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[1].sllk";
@@ -8740,6 +9069,10 @@ connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[37].sllk";
 connectAttr "phong25SG.msg" "lightLinker1.slnk[37].solk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[38].sllk";
 connectAttr "phong26SG.msg" "lightLinker1.slnk[38].solk";
+connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[41].sllk";
+connectAttr "direction_sign_phong1SG.msg" "lightLinker1.slnk[41].solk";
+connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[42].sllk";
+connectAttr "direction_sign_phong2SG.msg" "lightLinker1.slnk[42].solk";
 connectAttr "layerManager.dli[0]" "defaultLayer.id";
 connectAttr "renderLayerManager.rlmi[0]" "defaultRenderLayer.rlid";
 connectAttr "polyPlane1.out" "deleteComponent1.ig";
@@ -9579,6 +9912,81 @@ connectAttr "|m_ground|phys_pos_path5_2|phys_pos_path5_Shape1.iog" "phong26SG.ds
 		 -na;
 connectAttr "phong26SG.msg" "materialInfo27.sg";
 connectAttr "phong26.msg" "materialInfo27.m";
+connectAttr "phong1.oc" "direction_sign_phong1SG.ss";
+connectAttr "|m_ground|m_sign_pole|m_sign_poleShape.iog" "direction_sign_phong1SG.dsm"
+		 -na;
+connectAttr "|m_ground|m_sign_pole|phys_sign_pole|m_sign_poleShape.iog" "direction_sign_phong1SG.dsm"
+		 -na;
+connectAttr "|m_ground|m_sign_pole1|m_sign_poleShape.iog" "direction_sign_phong1SG.dsm"
+		 -na;
+connectAttr "|m_ground|m_sign_pole1|phys_sign_pole1|m_sign_poleShape.iog" "direction_sign_phong1SG.dsm"
+		 -na;
+connectAttr "direction_sign_phong1SG.msg" "direction_sign_materialInfo1.sg";
+connectAttr "phong1.msg" "direction_sign_materialInfo1.m";
+connectAttr "phong2.oc" "direction_sign_phong2SG.ss";
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.iog" "direction_sign_phong2SG.dsm"
+		 -na;
+connectAttr "|m_ground|m_sign_pole1|m_sign1|m_signShape.iog" "direction_sign_phong2SG.dsm"
+		 -na;
+connectAttr "direction_sign_phong2SG.msg" "direction_sign_materialInfo2.sg";
+connectAttr "phong2.msg" "direction_sign_materialInfo2.m";
+connectAttr "direction_sign_polyTweak1.out" "direction_sign_polyMergeVert1.ip";
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert1.mp"
+		;
+connectAttr "direction_sign_polyCube1.out" "direction_sign_polyTweak1.ip";
+connectAttr "direction_sign_polyTweak2.out" "direction_sign_polyMergeVert2.ip";
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert2.mp"
+		;
+connectAttr "direction_sign_polyMergeVert1.out" "direction_sign_polyTweak2.ip";
+connectAttr "direction_sign_polyTweak3.out" "direction_sign_polyCut1.ip";
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyCut1.mp"
+		;
+connectAttr "direction_sign_polyMergeVert2.out" "direction_sign_polyTweak3.ip";
+connectAttr "direction_sign_polyTweak4.out" "direction_sign_polyMergeVert3.ip";
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert3.mp"
+		;
+connectAttr "direction_sign_polyCut1.out" "direction_sign_polyTweak4.ip";
+connectAttr "direction_sign_polyTweak5.out" "direction_sign_polyMergeVert4.ip";
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert4.mp"
+		;
+connectAttr "direction_sign_polyMergeVert3.out" "direction_sign_polyTweak5.ip";
+connectAttr "direction_sign_polyMergeVert4.out" "direction_sign_polyTweak6.ip";
+connectAttr "direction_sign_polyTweak6.out" "direction_sign_deleteComponent1.ig"
+		;
+connectAttr "direction_sign_deleteComponent1.og" "direction_sign_polyMergeVert5.ip"
+		;
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert5.mp"
+		;
+connectAttr "direction_sign_polyMergeVert5.out" "direction_sign_polyMergeVert6.ip"
+		;
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert6.mp"
+		;
+connectAttr "direction_sign_polyMergeVert6.out" "direction_sign_polyMergeVert7.ip"
+		;
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert7.mp"
+		;
+connectAttr "direction_sign_polyMergeVert7.out" "direction_sign_polyMergeVert8.ip"
+		;
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert8.mp"
+		;
+connectAttr "direction_sign_polyMergeVert8.out" "direction_sign_polyMergeVert9.ip"
+		;
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert9.mp"
+		;
+connectAttr "direction_sign_polyMergeVert9.out" "direction_sign_polyMergeVert10.ip"
+		;
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polyMergeVert10.mp"
+		;
+connectAttr "direction_sign_polyMergeVert10.out" "direction_sign_polyTriangulate1.ip"
+		;
+connectAttr "direction_sign_polyTriangulate1.out" "direction_sign_polyTriangulate2.ip"
+		;
+connectAttr "direction_sign_polyTriangulate2.out" "direction_sign_polyTriangulate3.ip"
+		;
+connectAttr "direction_sign_polyTriangulate3.out" "direction_sign_polySoftEdge1.ip"
+		;
+connectAttr "|m_ground|m_sign_pole|m_sign|m_signShape.wm" "direction_sign_polySoftEdge1.mp"
+		;
 connectAttr "phong1SG.pa" ":renderPartition.st" -na;
 connectAttr "phong2SG.pa" ":renderPartition.st" -na;
 connectAttr "blinn1SG.pa" ":renderPartition.st" -na;
@@ -9616,6 +10024,8 @@ connectAttr "phong23SG.pa" ":renderPartition.st" -na;
 connectAttr "phong24SG.pa" ":renderPartition.st" -na;
 connectAttr "phong25SG.pa" ":renderPartition.st" -na;
 connectAttr "phong26SG.pa" ":renderPartition.st" -na;
+connectAttr "direction_sign_phong1SG.pa" ":renderPartition.st" -na;
+connectAttr "direction_sign_phong2SG.pa" ":renderPartition.st" -na;
 connectAttr "mat_ground.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_phys.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_phong.msg" ":defaultShaderList1.s" -na;
@@ -9653,6 +10063,8 @@ connectAttr "phong23.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_spear.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_stone.msg" ":defaultShaderList1.s" -na;
 connectAttr "phong26.msg" ":defaultShaderList1.s" -na;
+connectAttr "phong1.msg" ":defaultShaderList1.s" -na;
+connectAttr "phong2.msg" ":defaultShaderList1.s" -na;
 connectAttr "place2dTexture1.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "tree_place2dTexture1.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "flagpole_place2dTexture1.msg" ":defaultRenderUtilityList1.u" -na;
@@ -9805,4 +10217,10 @@ connectAttr "phys_stone2.msg" ":hyperGraphLayout.hyp[410].dn";
 connectAttr "phys_pos_path5_2.msg" ":hyperGraphLayout.hyp[411].dn";
 connectAttr "phys_pos_path5_1.msg" ":hyperGraphLayout.hyp[412].dn";
 connectAttr "phys_pos_path3_5.msg" ":hyperGraphLayout.hyp[413].dn";
+connectAttr "m_sign_pole1.msg" ":hyperGraphLayout.hyp[414].dn";
+connectAttr "m_sign_pole.msg" ":hyperGraphLayout.hyp[415].dn";
+connectAttr "m_sign.msg" ":hyperGraphLayout.hyp[416].dn";
+connectAttr "phys_sign_pole.msg" ":hyperGraphLayout.hyp[417].dn";
+connectAttr "m_sign1.msg" ":hyperGraphLayout.hyp[418].dn";
+connectAttr "phys_sign_pole1.msg" ":hyperGraphLayout.hyp[419].dn";
 // End of level_balls_castle.ma
