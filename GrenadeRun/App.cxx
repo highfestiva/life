@@ -114,6 +114,7 @@ public:
 	void DrawInfoTexts() const;
 	void ClearInfoTexts() const;
 	bool PreDrawHud();
+	void DrawLine(float x1, float y1, float x2, float y2);
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float x, float y, float w, float h, float pAngle) const;
 	void DrawRoundedPolygon(int x, int y, int pRadius, const Color& pColor, float pScaleX, float pScaleY) const;
 	void DrawRoundedPolygon(float x, float y, float pRadius, const Color& pColor, float pScaleX, float pScaleY, int pCornerRadius) const;
@@ -122,6 +123,7 @@ public:
 	void DrawBarrelCompass(int x, int  y, float pAngle, int pSize, float pValue1, float pValue2) const;
 	void InfoText(int pPlayer, const str& pInfo, float pAngle, float dx = 0, float dy = 0) const;
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
+	float GetSteeringWheelGuiInfo(float w, float h, float& x, float& y) const;
 	void Layout();
 	void MainMenu();
 	void UpdateHiscore(bool pError);
@@ -1393,10 +1395,15 @@ void App::DrawVehicleSteering()
 			DrawImage(mArrow->GetData(), x+m+mw-2,		m+lMeterHalfWidth, aw, ah, -PIF/2);
 			DrawImage(mArrow->GetData(), x-m-mw+1.5f,	m+lMeterHalfWidth, aw, ah, +PIF/2);
 
-			const float s = std::max(128.0f, h * 0.25f);
+			float px;
+			float py;
+			const float s = GetSteeringWheelGuiInfo(w, h, px, py);
 			const TBC::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
 			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f, false) * -1.5f - PIF/2;
-			DrawImage(mSteeringWheel->GetData(), s*0.15f, h-s*0.3f, s, s, a);
+			const float ax = -::sin(a) * s * 0.45f;
+			const float ay = -::cos(a) * s * 0.45f;
+			DrawLine(px+ax, py+ay, px+ax*2.5f, py+ay*2.5f);
+			DrawImage(mSteeringWheel->GetData(), px, py, s, s, a);
 			InfoText(1, _T("Left/right"), -PIF/2, 0, -10);
 		}
 		else
@@ -1415,10 +1422,15 @@ void App::DrawVehicleSteering()
 			DrawImage(mArrow->GetData(), m+lMeterHalfWidth+1,	y-m-mw+1,	aw, ah, 0);
 			DrawImage(mArrow->GetData(), m+lMeterHalfWidth,		y+m+mw-2,	aw, ah, PIF);
 
-			const float s = w * 0.25f;
+			float px;
+			float py;
+			const float s = GetSteeringWheelGuiInfo(w, h, px, py);
 			const TBC::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
 			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f, false) * -1.5f;
-			DrawImage(mSteeringWheel->GetData(), w-s*0.3f, h-s*0.15f, s, s, a);
+			const float ax = -::sin(a) * s * 0.45f;
+			const float ay = -::cos(a) * s * 0.45f;
+			DrawLine(px+ax, py+ay, px+ax*2.5f, py+ay*2.5f);
+			DrawImage(mSteeringWheel->GetData(), px, py, s, s, a);
 			InfoText(1, _T("Left/right"), 0, -10, 0);
 		}
 	}
@@ -1840,6 +1852,14 @@ bool App::PreDrawHud()
 
 
 
+void App::DrawLine(float x1, float y1, float x2, float y2)
+{
+	float a = 0;
+	Transpose(x1, y1, a);
+	Transpose(x2, y2, a);
+	mUiManager->GetPainter()->DrawLine((int)x1, (int)y1, (int)x2, (int)y2);
+}
+
 void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
 {
 	Transpose (cx, cy, pAngle);
@@ -2052,6 +2072,26 @@ void App::PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) 
 	}
 }
 
+
+float App::GetSteeringWheelGuiInfo(float w, float h, float& x, float& y) const
+{
+	if (mGame->GetComputerIndex() == -1)
+	{
+		// 2P
+		const float s = std::max(128.0f, h * 0.25f);
+		x = s*0.15f;
+		y = h-s*0.3f;
+		return s;
+	}
+	else
+	{
+		// 1P
+		const float s = w * 0.25f;
+		x = w-s*0.3f;
+		y = h-s*0.15f;
+		return s;
+	}
+}
 
 void App::Layout()
 {
@@ -2488,6 +2528,21 @@ int App::PollTap(FingerMovement& pMovement)
 		{
 			directive = DIRECTIVE_LEFT_RIGHT;
 			lValue = SCALEUP((x-lStartX)/s);
+			if (mGame->GetComputerIndex() == 1)
+			{
+				// 1P Cutie also gets some "rotate" moves on the steering wheel.
+				float px;
+				float py;
+				GetSteeringWheelGuiInfo(w, h, px, py);
+				if (x < px)
+				{
+					lValue += SCALEUP((lStartY-y)/s);
+				}
+				else
+				{
+					lValue -= SCALEUP((lStartY-y)/s);
+				}
+			}
 		}
 		else if (x >= w/2-s && x <= w/2+s && y >= h-lDoubleWidth)	// Bomb?
 		{
@@ -2514,6 +2569,18 @@ int App::PollTap(FingerMovement& pMovement)
 		{
 			directive = DIRECTIVE_LEFT_RIGHT;
 			lValue = SCALEUP((y-lStartY)/s);
+			// 2P Cutie also gets some "rotate" moves on the steering wheel.
+			float px;
+			float py;
+			GetSteeringWheelGuiInfo(w, h, px, py);
+			if (y < py)
+			{
+				lValue += SCALEUP((x-lStartX)/s);
+			}
+			else
+			{
+				lValue -= SCALEUP((x-lStartX)/s);
+			}
 		}
 		else if (x <= lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
 		{
