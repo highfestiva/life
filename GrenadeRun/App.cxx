@@ -67,7 +67,7 @@
 #define RTVAR_CONTENT_LEVELS		"Content.Levels"
 #define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
 #define RTVAR_HISCORE_NAME		"Hiscore.Name"	// Last entered name.
-#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
+//#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 
 namespace GrenadeRun

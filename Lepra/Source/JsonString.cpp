@@ -101,7 +101,7 @@ str JsonString::FromJson(const str& pJsonString)
 					// Convert JSON's UTF-16 encoded characters to UTF-8, then to str.
 					utf8::uint16_t lUtf16String[128];
 					size_t lUtf16Index = 0;
-					while (true)
+					for (;;)
 					{
 						if (x+5 > lEnd)
 						{

@@ -257,6 +257,7 @@
     <ClCompile Include="Source\ContextPath.cpp" />
     <ClCompile Include="Source\CppContextObject.cpp" />
     <ClCompile Include="Source\Cure.cpp" />
+    <ClCompile Include="Source\Elevator.cpp" />
     <ClCompile Include="Source\FloatAttribute.cpp" />
     <ClCompile Include="Source\GameManager.cpp" />
     <ClCompile Include="Source\HiscoreAgent.cpp" />
@@ -285,6 +286,7 @@
     <ClInclude Include="Include\ContextPath.h" />
     <ClInclude Include="Include\CppContextObject.h" />
     <ClInclude Include="Include\Cure.h" />
+    <ClInclude Include="Include\Elevator.h" />
     <ClInclude Include="Include\FloatAttribute.h" />
     <ClInclude Include="Include\GameManager.h" />
     <ClInclude Include="Include\HiscoreAgent.h" />

@@ -279,6 +279,7 @@
     <ClInclude Include="Include\IOError.h" />
     <ClInclude Include="Include\IPAddress.h" />
     <ClInclude Include="Include\JpegLoader.h" />
+    <ClInclude Include="Include\JsonString.h" />
     <ClInclude Include="Include\Lepra.h" />
     <ClInclude Include="Include\LepraTarget.h" />
     <ClInclude Include="Include\LepraTypes.h" />
@@ -369,6 +370,7 @@
     <None Include="Include\Transformation.inl" />
     <None Include="Include\Vector2D.inl" />
     <None Include="Include\Vector3D.inl" />
+    <ClCompile Include="Source\JsonString.cpp" />
     <ClCompile Include="Source\Obfuxator.cpp" />
     <ClCompile Include="Source\Posix\MacLog.mm">
       <FileType>Document</FileType>

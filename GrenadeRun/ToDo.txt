@@ -128,11 +128,12 @@ Drop slow-mo when super-resetting.
 2 extra levels: castle and machine.
 Record voice for instructions: SHOOT! DRIVE!
 Playback voice for tutorial.
+Show blinking symbol while running slow-mo.
+Tweak textures for all levels.
 
 Computer demo
 -------------
 Tweak level difficulties: add stones, make the easiest paths harder, etc.
-Tweak textures for all levels.
 Pause 2s between each round.
 Pendulum level: make bridge and trees brown instead of orange!
 Record voice for tutorial. Compress HARD!
