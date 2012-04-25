@@ -64,7 +64,8 @@ MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSiz
 	{
 		MacFont* lFont = new MacFont();
 		lFont->mName = pFontName;
-		lFont->mSize = pSize;
+		lFont->mSize = pSize * FONT_SIZE_FACTOR;
+		lFont->mActualSize = pSize;
 		lFont->mFlags = pFlags;
 		if (!InternalAddFont(lFont))
 		{
@@ -85,7 +86,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	pImage.CreateBuffer();
 	::memset(pImage.GetBuffer(), 0, pImage.GetWidth()*pImage.GetPixelByteSize()*pImage.GetHeight());
 
-	const float lCorrectedFontSize = mCurrentFont->mSize * FONT_SIZE_FACTOR;	// Similar to other platforms...
+	const float lCorrectedFontSize = mCurrentFont->mSize;	// Similar to other platforms...
 	CGContextRef textcontext; // This is our rendering context.
 	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB(); // We need some colorspace.
 	// Create a bitmap context.
@@ -104,7 +105,8 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	CGContextSetLineWidth(textcontext, 0.3);
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
 	CGContextSetRGBStrokeColor(textcontext, 1,1,1,0.5);
-	int y = (pRect.GetHeight() - mCurrentFont->mSize) / 2;
+#ifdef LEPRA_IOS
+	int y = (pRect.GetHeight() - ((MacFont*)mCurrentFont)->mActualSize) / 2;
 	UIGraphicsPushContext(textcontext);
 	tchar lTmpString[2] = {pChar, 0};
 	NSString* lChar = MacLog::Encode(lTmpString);
@@ -112,6 +114,12 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	[lChar drawAtPoint:CGPointMake(0, y) withFont:[TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize]];
 	CGContextFlush(textcontext);
 	UIGraphicsPopContext();
+#else // !iOS
+	int y = pRect.GetHeight() - mCurrentFont->mSize;
+	CGContextShowTextAtPoint(textcontext, 0, y, &pChar, 1);
+	CGContextFlush(textcontext);
+	pImage.FlipVertical();
+#endif // iOS / Mac
 	CFRelease(backgroundColor);
 	CFRelease(foregroundColor);
 	CFRelease(colorspace);
@@ -157,18 +165,19 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 
 int MacFontManager::GetCharWidth(const tchar pChar) const
 {
-	wchar_t lTempBigString[2] = {pChar, 0};
 	NSString* lFontName = MacLog::Encode(mCurrentFont->mName);
-	const float lCorrectedFontSize = mCurrentFont->mSize * FONT_SIZE_FACTOR;	// Similar to other platforms...
+	const float lCorrectedFontSize = mCurrentFont->mSize;	// Similar to other platforms...
 	TBC_APPLE_FONT* lFont = [TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize];
 #ifdef LEPRA_IOS
+	wchar_t lTempBigString[2] = {pChar, 0};
 	NSString* tmpString = MacLog::Encode(wstr(lTempBigString));
 	CGSize lSize = [tmpString sizeWithFont:lFont];
 	--lSize.width;
 #else // !iOS
+	UniChar lTempBigString[2] = {pChar, 0};
 	CGGlyph lGlyph;
-	CTFontGetGlyphsForCharacters((CTFontRef)lFont, lTmpBigString, &lGlyph, 1);
-	NSSize lSize = [lFont advancementForGlyph:*lGlyph];
+	CTFontGetGlyphsForCharacters((CTFontRef)lFont, lTempBigString, &lGlyph, 1);
+	NSSize lSize = [lFont advancementForGlyph:lGlyph];
 #endif // iOS/!iOS
 	return lSize.width+1;
 }

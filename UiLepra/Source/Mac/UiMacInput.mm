@@ -62,7 +62,7 @@ void MacInputElement::SetValue(int pValue)
 
 	if (GetType() == DIGITAL)
 	{
-		Parent::SetValue(pValue);
+		Parent::SetValue((float)pValue);
 	}
 	/*else if (GetInterpretation() == RELATIVE_AXIS)
 	{

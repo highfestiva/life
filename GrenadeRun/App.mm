@@ -5,8 +5,9 @@
 
 
 #include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
-
+#endif // iOS
 
 
 namespace Lepra

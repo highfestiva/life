@@ -23,6 +23,9 @@
 		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
 		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
 		B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */; };
+		B1356CF0153CB7A000623C1F /* CutieElevator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1356CEE153CB7A000623C1F /* CutieElevator.cpp */; };
+		B1356CF1153CB7A000623C1F /* RoboBall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1356CEF153CB7A000623C1F /* RoboBall.cpp */; };
+		B1356CF6153CB82200623C1F /* voice_intro.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1356CF5153CB82200623C1F /* voice_intro.ogg */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -504,6 +507,9 @@
 		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
+		B1356CEE153CB7A000623C1F /* CutieElevator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CutieElevator.cpp; sourceTree = "<group>"; };
+		B1356CEF153CB7A000623C1F /* RoboBall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RoboBall.cpp; sourceTree = "<group>"; };
+		B1356CF5153CB82200623C1F /* voice_intro.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = voice_intro.ogg; path = ../../bin/Data/voice_intro.ogg; sourceTree = SOURCE_ROOT; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1413,6 +1419,8 @@
 		B19A146913A122DE0051A61C /* GrenadeRun */ = {
 			isa = PBXGroup;
 			children = (
+				B1356CEE153CB7A000623C1F /* CutieElevator.cpp */,
+				B1356CEF153CB7A000623C1F /* RoboBall.cpp */,
 				B1CFD06E14E8610900550345 /* SeeThrough.cpp */,
 				B110A04B14AB36CC007A84E4 /* Level.cpp */,
 				B110A04C14AB36CC007A84E4 /* VehicleAi.cpp */,
@@ -2278,6 +2286,7 @@
 		B1FB291E1450C8A600F1C762 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				B1356CF5153CB82200623C1F /* voice_intro.ogg */,
 				B1FB29391450CAD600F1C762 /* Data.pk3 */,
 			);
 			name = Data;
@@ -2337,6 +2346,7 @@
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
+				B1356CF6153CB82200623C1F /* voice_intro.ogg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2812,6 +2822,8 @@
 				B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */,
 				B1DAC7E414F1D97700B285C5 /* JsonString.cpp in Sources */,
 				B1E30E07150E90760076E336 /* Elevator.cpp in Sources */,
+				B1356CF0153CB7A000623C1F /* CutieElevator.cpp in Sources */,
+				B1356CF1153CB7A000623C1F /* RoboBall.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

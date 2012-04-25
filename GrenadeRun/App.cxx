@@ -70,6 +70,7 @@
 //#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 
+
 namespace GrenadeRun
 {
 
@@ -167,6 +168,7 @@ public:
 	void OnGetiPhoneClick(UiTbc::Button*);
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 	void SoundLoadCallback(UiCure::UserSound2dResource* pResource);
+	void KillIntroVoice();
 
 	typedef void (App::*ButtonAction)(UiTbc::Button*);
 	UiTbc::Dialog* CreateTbcDialog(ButtonAction pAction);
@@ -1070,7 +1072,7 @@ bool App::Poll()
 			const str lInfo = mIsPurchasing? _T("Communicating with App Store...") : _T("Speaking to score server");
 			PrintText(lInfo, 0, 
 				mUiManager->GetCanvas()->GetWidth()/2,
-				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight() - 3);
+				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight());
 		}
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
@@ -1118,13 +1120,7 @@ bool App::Poll()
 	{
 		if (!mIsPaused && !mIntroStreamer->IsPlaying())
 		{
-			delete mIntroStreamer;
-			mIntroStreamer = 0;
-			if (mMusicPlayer)
-			{
-				mMusicPlayer->SetVolume(0.5f);
-			}
-
+			KillIntroVoice();
 		}
 	}
 
@@ -3009,6 +3005,7 @@ void App::OnOk(UiTbc::Button* pButton)
 
 void App::OnMainMenuAction(UiTbc::Button* pButton)
 {
+	KillIntroVoice();
 	const int lPreviousComputerIndex = mGame->GetComputerIndex();
 	switch (pButton->GetTag())
 	{
@@ -3145,6 +3142,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		mIntroStreamer = mUiManager->GetSoundManager()->CreateSoundStream(mPathPrefix+_T("voice_intro.ogg"), UiLepra::SoundManager::LOOP_NONE, 0);
 		if (mIntroStreamer && mIntroStreamer->Playback())
 		{
+			SuperReset(false);
 			if (mMusicPlayer)
 			{
 				mMusicPlayer->SetVolume(0.2f);
@@ -3385,6 +3383,16 @@ void App::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResour
 void App::SoundLoadCallback(UiCure::UserSound2dResource* pResource)
 {
 	(void)pResource;
+}
+
+void App::KillIntroVoice()
+{
+	delete mIntroStreamer;
+	mIntroStreamer = 0;
+	if (mMusicPlayer)
+	{
+		mMusicPlayer->SetVolume(0.5f);
+	}
 }
 
 UiTbc::Dialog* App::CreateTbcDialog(ButtonAction pAction)

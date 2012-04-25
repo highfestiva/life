@@ -44,6 +44,7 @@ private:
 
 	struct MacFont: Font
 	{
+		double mActualSize;
 	};
 
 	UiLepra::MacDisplayManager* mDisplayManager;

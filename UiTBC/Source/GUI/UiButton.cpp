@@ -349,7 +349,7 @@ void Button::SetTag(int pTag)
 
 int Button::GetTag() const
 {
-	return (int)GetExtraData();
+  return (int)(intptr_t)GetExtraData();
 }
 
 bool Button::OnLButtonDown(int pMouseX, int pMouseY)

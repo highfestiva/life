@@ -571,10 +571,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Elevator.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GameServerManager.h"
 				>
 			</File>

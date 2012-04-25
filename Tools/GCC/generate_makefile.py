@@ -278,7 +278,9 @@ def generate_makefiles(basedir, vcfileinfolist):
         projdir = os.path.dirname(vcfile)
         includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
         os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
+        os.path.relpath(basedir+"ThirdParty/ChibiXM", projdir),
         os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
+        os.path.relpath(basedir+"ThirdParty/happyhttp-0.1/", projdir),
         os.path.relpath(basedir+"ThirdParty/libogg-1.2.2/include/", projdir),
         os.path.relpath(basedir+"ThirdParty/libvorbis-1.3.2/include/", projdir),
         os.path.relpath(basedir+"ThirdParty/libvorbis-1.3.2/lib/", projdir),
