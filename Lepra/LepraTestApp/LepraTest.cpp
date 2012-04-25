@@ -1219,6 +1219,11 @@ bool TestSystemManager(const LogDecorator& pAccount)
 		// Just make sure we don't crash. Need manual verification that it works anyhoo.
 		SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
 	}
+	if (lTestOk)
+	{
+		// Just make sure we don't crash. Need manual verification that it works anyhoo.
+		SystemManager::EmailTo(_T("info@pixeldoctrine.com"), _T("Test subject?"), _T("Hi,\n\nHow are you? Hope you're good!\n\nLater,\nJonas"));
+	}
 
 	ReportTestResult(pAccount, _T("System"), lContext, lTestOk);
 	return (lTestOk);

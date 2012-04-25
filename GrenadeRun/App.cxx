@@ -2942,6 +2942,8 @@ void App::Purchase(const str& pProductName)
 	UiTbc::MessageDialog* lMessage = new UiTbc::MessageDialog(mUiManager->GetDesktopWindow(), mButtonDelegate,
 		_T("Content purchase not yet implemented on this platform."));
 	lMessage->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
+	lMessage->AddButton(+10, _T("OK"));
+	lMessage->AddButton(+33, _T("Nooo!"));
 	mDialog = lMessage;
 #endif // iOS
 }
@@ -2990,8 +2992,18 @@ void App::OnTapSound(UiTbc::Button*)
 	}
 }
 
-void App::OnOk(UiTbc::Button*)
+void App::OnOk(UiTbc::Button* pButton)
 {
+	if (pButton->GetTag() == 33)
+	{
+		SystemManager::EmailTo(
+			_T("info@pixeldoctrine.com"),
+			_T("I want the complete game!"),
+			_T("Hiya Game Slave Bitches,\n\n")
+			_T("I enjoyed the KillCutie Demo [for PC/Mac?] and would like the complete game!\n\n")
+			_T("Get a move on,\n")
+			_T("Yours Truly"));
+	}
 	MainMenu();
 }
 
@@ -3359,7 +3371,7 @@ void App::OnPauseAction(UiTbc::Button* pButton)
 
 void App::OnGetiPhoneClick(UiTbc::Button*)
 {
-	SystemManager::WebBrowseTo(_T("http://itunes.apple.com/us/app/slimeball/id447966821?mt=8&ls=1"));
+	SystemManager::WebBrowseTo(_T("http://itunes.apple.com/us/app/kill-cutie/id500583207?ls=1&mt=8"));
 	delete mGetiPhoneButton;
 	mGetiPhoneButton = 0;
 	mDoLayout = true;

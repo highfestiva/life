@@ -71,6 +71,7 @@ ResourceLoadState HiscoreAgent::Poll()
 		}
 		catch (happyhttp::Wobbly& e)
 		{
+			(void)e;
 			log_volatile(mLog.Warning(_T("Problem polling connection: ") + strutil::Encode(e.what())));
 			SetLoadState(RESOURCE_LOAD_ERROR);
 		}
@@ -425,6 +426,7 @@ void HiscoreAgent::DownloadThreadEntry()
 	}
 	catch (happyhttp::Wobbly& e)
 	{
+		(void)e;
 		log_volatile(mLog.Warning(_T("Problem retrieving list: ") + strutil::Encode(e.what())));
 		delete mConnection;
 		mConnection = 0;
@@ -455,6 +457,7 @@ void HiscoreAgent::UploadThreadEntry()
 	}
 	catch (happyhttp::Wobbly& e)
 	{
+		(void)e;
 		log_volatile(mLog.Warning(_T("Problem uploading score: ") + strutil::Encode(e.what())));
 		delete mConnection;
 		mConnection = 0;

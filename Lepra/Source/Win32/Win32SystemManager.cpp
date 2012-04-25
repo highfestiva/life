@@ -14,6 +14,7 @@
 #include <ShellAPI.h>
 #include <ShlObj.h>
 #include "../../Include/DiskFile.h"
+#include "../../Include/JsonString.h"
 #include "../../Include/Lepra.h"
 #include "../../Include/Log.h"
 #include "../../Include/Path.h"
@@ -200,6 +201,14 @@ str SystemManager::QueryFullUserName()
 void SystemManager::WebBrowseTo(const str& pUrl)
 {
 	::ShellExecute(0, _T("open"), pUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
+}
+
+void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBody)
+{
+	const str lUrlSubject = JsonString::UrlEncode(pSubject);
+	const str lUrlBody = JsonString::UrlEncode(pBody);
+	str lUrl = _T("mailto:") + pTo + _T("?subject=") + lUrlSubject + _T("&body=") + lUrlBody;
+	::ShellExecute(0, _T("open"), lUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
 }
 
 unsigned SystemManager::GetLogicalCpuCount()

@@ -150,6 +150,26 @@ void SystemManager::WebBrowseTo(const str& pUrl)
 	}
 }
 
+void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBody)
+{
+	if (::fork() == 0)
+	{
+		const str lUrlSubject = JsonString::UrlEncode(pSubject);
+		const str lUrlBody = JsonString::UrlEncode(pBody);
+		str lWUrl = _T("mailto:") + pTo + _T("?subject=") + lUrlSubject + _T("&body=") + lUrlBody;
+		astr lUrl = astrutil::Encode(lWUrl);
+		bool lFound = false;
+#ifdef LEPRA_MAC
+		lFound = lFound || (::system(("open "+lUrl).c_str()) == 0);
+		lFound = lFound || (::system(("/Applications/Mail.app/Contents/MacOS/mail "+lUrl).c_str()) == 0);
+#else // Other Posix
+		lFound = lFound || (::system(("sensible-browser "+lUrl).c_str()) == 0);
+		lFound = lFound || (::system(("firefox "+lUrl).c_str()) == 0);
+#endif // OS X / Other Posix
+		::_exit(0);
+		::exit(0);
+	}
+}
 unsigned SystemManager::GetLogicalCpuCount()
 {
 	return (1);	// TODO: ... something...

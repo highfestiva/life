@@ -38,6 +38,7 @@ public:
 	static std::string GetSystemPseudoId();
 
 	static void WebBrowseTo(const str& pUrl);
+	static void EmailTo(const str& pTo, const str& pSubject, const str& pBody);
 
 	static str GetUniqueHardwareString(bool pRandomize);
 

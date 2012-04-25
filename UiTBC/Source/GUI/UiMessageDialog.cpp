@@ -16,7 +16,6 @@ namespace UiTbc
 MessageDialog::MessageDialog(Component* pParent, Action pOk, const str& pMessage):
 	Parent(pParent, pOk)
 {
-
 	SetPreferredSize(PixelCoord(310, 170));
 	SetSize(GetPreferredSize());
 	SetQueryLabel(pMessage, FontManager::INVALID_FONTID);
