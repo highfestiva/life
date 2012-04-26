@@ -27,9 +27,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>GrenadeRun</ProjectName>
+    <ProjectName>KillCutie</ProjectName>
     <ProjectGuid>{62C34C1E-4E3F-C492-C39D-69B8FCCDBC1C}</ProjectGuid>
-    <RootNamespace>GrenadeRun</RootNamespace>
+    <RootNamespace>KillCutie</RootNamespace>
     <Keyword>ManagedCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

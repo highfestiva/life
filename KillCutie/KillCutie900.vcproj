@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="GrenadeRun"
+	Name="KillCutie"
 	ProjectGUID="{62C34C1E-4E3F-C492-C39D-69B8FCCDBC1C}"
-	RootNamespace="GrenadeRun"
+	RootNamespace="KillCutie"
 	Keyword="ManagedCProj"
 	TargetFrameworkVersion="0"
 	>

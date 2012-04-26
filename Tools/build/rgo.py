@@ -9,7 +9,7 @@ import sys
 import rgohelp
 
 
-appnames = ["Life", "SlimeVolleyball", "GrenadeRun"]
+appnames = ["Life", "SlimeVolleyball", "KillCutie"]
 testappname = "UiCure/CureTestApp"
 osname = rgohelp._getosname()
 hwname = rgohelp._gethwname()
@@ -375,8 +375,8 @@ def macappify_life_client():
 def macappify_slime():
 	_macappify("SlimeVolleyball", "Slime Volleyball")
 
-def macappify_gr():
-	_macappify("GrenadeRun", "Grenade Run")
+def macappify_kc():
+	_macappify("KillCutie", "Kill Cutie")
 
 def demacappify():
 	_demacappify("*.app")
@@ -387,8 +387,8 @@ def cleandata_life():
 def cleandata_slime():
 	_cleandata_source("SlimeVolleyball")
 
-def cleandata_gr():
-	_cleandata_source("GrenadeRun")
+def cleandata_kc():
+	_cleandata_source("KillCutie")
 
 def builddata_life():
 	_builddata("Life", bindir, default_build_mode)
@@ -396,11 +396,11 @@ def builddata_life():
 def builddata_slime():
 	_builddata("SlimeVolleyball", bindir, default_build_mode)
 
-def builddata_gr():
-	_builddata("GrenadeRun", bindir, default_build_mode)
+def builddata_kc():
+	_builddata("KillCutie", bindir, default_build_mode)
 
 def zipdata_gr():
-	os.chdir('GrenadeRun/Data')
+	os.chdir('KillCutie/Data')
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
 
@@ -502,7 +502,7 @@ def _fgrun(name, app=""):
 #	bgclient()
 #	startserver()
 def start():
-	_fgrun("GrenadeRun")
+	_fgrun("KillCutie")
 #def gdbtest():
 #	_fgrun("CureTestApp", "gdb ")
 #def gdbclient():

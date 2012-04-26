@@ -373,10 +373,10 @@ str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& 
 		pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore-1);
 	mLog.Infof(_T("data = %s"), lOrigin.c_str());
 	astr lUtfString = astrutil::Encode(lOrigin);
-	::memset((void*)lOrigin.c_str(), 0, lOrigin.length()*sizeof(wchar_t));
+	//::memset((void*)lOrigin.c_str(), 0, lOrigin.size()*sizeof(tchar));
 	uint8 lSha1Hash[20];
 	SHA1::Hash((const uint8*)lUtfString.c_str(), lUtfString.length(), lSha1Hash);
-	::memset((void*)lUtfString.c_str(), 0, lUtfString.length());
+	//::memset((void*)lUtfString.c_str(), 0, lUtfString.length());
 	astr lInputHexdigest = astrutil::DumpData(lSha1Hash, sizeof(lSha1Hash));
 	astrutil::ToLower(lInputHexdigest);
 	mLog.Infof(_T("sha1 = %s"), strutil::Encode(lInputHexdigest).c_str());
