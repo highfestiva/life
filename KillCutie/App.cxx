@@ -67,7 +67,7 @@
 #define RTVAR_CONTENT_LEVELS		"Content.Levels"
 #define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
 #define RTVAR_HISCORE_NAME		"Hiscore.Name"	// Last entered name.
-#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
+//#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -696,27 +696,27 @@ int App::Run()
 	if (lOk)
 	{
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-#ifndef KC_DEV_TESTING
+//#ifndef KC_DEV_TESTING
 		mGame->SetComputerDifficulty(0.0f);
 		lOk = mGame->SetLevelName(_T("level_2"));
-#else // Dev testing
+/*#else // Dev testing
 		mGame->SetComputerDifficulty(1.0f);
 		mGame->SetComputerIndex(1);
 		lOk = mGame->SetLevelName(_T("level_balls_castle"));
-#endif // Dev testing / !dev testing
+#endif // Dev testing / !dev testing*/
 	}
 	if (lOk)
 	{
 		mGame->Cure::GameTicker::GetTimeManager()->Tick();
 		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
 
-#ifndef KC_DEV_TESTING
+//#ifndef KC_DEV_TESTING
 		MainMenu();
-#else // Dev testing
+/*#else // Dev testing
 		UiTbc::Button* lButton = new UiTbc::Button(_T("Apa"));
 		lButton->SetTag(4);
 		OnLevelAction(lButton);
-#endif // Dev testing / !dev testing
+#endif // Dev testing / !dev testing*/
 
 		lOk = mResourceManager->InitDefault();
 	}

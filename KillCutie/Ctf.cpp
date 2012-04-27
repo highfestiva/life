@@ -92,10 +92,10 @@ void Ctf::OnTick()
 		mFlagMesh->AddOffset(mFlagOffset);
 		mBlinkStartColor = mBlinkMesh->GetBasicMaterialSettings().mDiffuse;
 	}
-	else
-	{
-		lParent->EnableMeshSlide(false);
-	}
+	//else
+	//{
+	//	lParent->EnableMeshSlide(false);
+	//}
 
 	// Move flag up or down...
 	Game* lGame = (Game*)GetManager()->GetGameManager();

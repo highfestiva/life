@@ -399,7 +399,7 @@ def builddata_slime():
 def builddata_kc():
 	_builddata("KillCutie", bindir, default_build_mode)
 
-def zipdata_gr():
+def zipdata_kc():
 	os.chdir('KillCutie/Data')
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
