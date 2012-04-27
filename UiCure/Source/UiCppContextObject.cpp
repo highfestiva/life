@@ -142,7 +142,7 @@ void CppContextObject::UiMove()
 			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
 			if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
 			{
-				mLog.Warningf(_T("Physical body for %s not loaded!"), lResource->GetName().c_str());
+				mLog.Warningf(_T("Physical body (index %u) for %s not loaded!"), lResource->GetOffset().mGeometryIndex, lResource->GetName().c_str());
 				continue;
 			}
 			if (!mEnableMeshSlide && mPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC && mPhysics->GetBodyType(lGeometry) == TBC::PhysicsManager::STATIC)
@@ -630,6 +630,7 @@ bool CppContextObject::TryComplete()
 	}
 
 	OnLoaded();
+	ActivateLerp();
 	return (true);
 }
 

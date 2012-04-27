@@ -38,14 +38,14 @@ const TransformationF& GeometryReference::GetOffsetTransformation() const
 
 void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)
 {
-	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 	mOffset = pOffset;
+	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 
 void GeometryReference::AddOffset(const Vector3DF& pOffset)
 {
-	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 	mOffset.GetPosition() += pOffset;
+	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 
 const TransformationF& GeometryReference::GetTransformation()
@@ -58,16 +58,16 @@ const TransformationF& GeometryReference::GetTransformation()
 		lReturnTransformation.GetOrientation() *= mOffset.GetOrientation();
 		assert(lReturnTransformation == mReturnTransformation);
 #endif // Debug.*/
-		return (mReturnTransformation);
+		return mReturnTransformation;
 	}
+	ClearFlag(REF_TRANSFORMATION_CHANGED);
 
 	mReturnTransformation = GetBaseTransformation();
 	Vector3DF lDelta;
 	mReturnTransformation.GetOrientation().FastRotatedVector(mReturnTransformation.GetOrientation().GetConjugate(), lDelta, mOffset.GetPosition());
 	mReturnTransformation.GetPosition() += lDelta;
 	mReturnTransformation.GetOrientation() *= mOffset.GetOrientation();
-	ClearFlag(REF_TRANSFORMATION_CHANGED);
-	return (mReturnTransformation);
+	return mReturnTransformation;
 }
 
 GeometryBase::GeometryVolatility GeometryReference::GetGeometryVolatility() const
