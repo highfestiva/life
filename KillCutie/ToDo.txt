@@ -17,6 +17,12 @@ Skipped
 -Remove store fetching, simply do direct purchase using the hard-coded IDs.
 -Word Caps on hiscore isn't working.
 -Place cubes beside each other.
+-Tweak level difficulties: add stones, make the easiest paths harder, etc.
+-Pause 2s between each round.
+-Pendulum level: make bridge and trees brown instead of orange!
+-Memory leak check.
+-iPad adjustments.
+-Test on iPad.
 
 Done
 ----
@@ -130,20 +136,13 @@ Record voice for instructions: SHOOT! DRIVE!
 Playback voice for tutorial.
 Show blinking symbol while running slow-mo.
 Tweak textures for all levels.
-
-Computer demo
--------------
-Tweak level difficulties: add stones, make the easiest paths harder, etc.
-Pause 2s between each round.
-Pendulum level: make bridge and trees brown instead of orange!
-Record voice for tutorial. Compress HARD!
-Memory leak check.
+Record voice for tutorial. (Compress HARD!)
 Add link to iOS versions.
-
-iOS and computer full version
------------------------------
 Screen shots + marketing texts.
-iPad adjustments.
-Test on iPad.
 Optimize.
 Memory leaks, zombies.
+
+---
+
+Computer demo - *done*
+iOS - *done*
