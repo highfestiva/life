@@ -362,7 +362,10 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 		case ORIENTATION_ALLOW_UPSIDE_DOWN:	mGlView.orientationStrictness = 1;	break;
 		case ORIENTATION_FIXED:			mGlView.orientationStrictness = 2;	break;
 	}
-	[mWnd addSubview:mGlView];
+	// Add the controller, and add the subview by setting root controller.
+	UIViewController* controller = [[UIViewController alloc] init];
+	controller.view = mGlView;
+	mWnd.rootViewController = controller;
 	[mWnd makeKeyAndVisible];	// Only visible after we add the view.
 #else // !iOS
 	NSOpenGLPixelFormatAttribute lPixelFormatAttribs[32];

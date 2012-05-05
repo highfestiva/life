@@ -89,6 +89,7 @@ using namespace Lepra;
 
 -(id) init:(Canvas*)pCanvas
 {
+	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
 	_canvas = pCanvas;
 	_animationTimer = nil;
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
