@@ -28,7 +28,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>Magnetic</ProjectName>
-    <ProjectGuid>{62C34C1E-4E3F-C492-C39D-69B8FCCDBC1C}</ProjectGuid>
+    <ProjectGuid>{62C34C1E-4E3F-C492-C39D-69B8FCCDBCC1}</ProjectGuid>
     <RootNamespace>Magnetic</RootNamespace>
     <Keyword>ManagedCProj</Keyword>
   </PropertyGroup>

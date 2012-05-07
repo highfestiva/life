@@ -200,11 +200,11 @@ bool App::Open()
 {
 #ifdef LEPRA_TOUCH
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
-	const int lDisplayWidth = lSize.height;
-	const int lDisplayHeight = lSize.width;
+	const int lDisplayWidth = lSize.width;
+	const int lDisplayHeight = lSize.height;
 #else // !Touch
-	const int lDisplayWidth = 480;
-	const int lDisplayHeight = 320;
+	const int lDisplayWidth = 640;
+	const int lDisplayHeight = 960;
 #endif // Touch/!Touch
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
@@ -501,6 +501,10 @@ bool App::Poll()
 			}
 		}
 	}
+	if (lOk)
+	{
+		lOk = (SystemManager::GetQuitRequest() == 0);
+	}
 	if (!mIsLoaded && mResourceManager->IsLoading())
 	{
 		mResourceManager->Tick();
@@ -589,6 +593,11 @@ void App::PollTaps()
 	{
 		gFingerMoveList.clear();
 	}
+
+	float lAngle = -mUiManager->GetInputManager()->GetCursorX();
+	QuaternionF lRotation;
+	lRotation.RotateAroundOwnY(lAngle);
+	mGame->GetPhysicsManager()->SetGravity(lRotation * Vector3DF(0, 0, -9.82f));
 #endif // Computer
 }
 

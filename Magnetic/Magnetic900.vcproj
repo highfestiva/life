@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="Magnetic"
-	ProjectGUID="{62C34C1E-4E3F-C492-C39D-69B8FCCDBC1C}"
+	ProjectGUID="{62C34C1E-4E3F-C492-C39D-69B8FCCDBCC1}"
 	RootNamespace="Magnetic"
 	Keyword="ManagedCProj"
 	TargetFrameworkVersion="0"
@@ -529,23 +529,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Ctf.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Cutie.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CutieElevator.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Game.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Grenade.cpp"
+				RelativePath=".\Level.cpp"
 				>
 			</File>
 			<File
@@ -556,34 +544,6 @@
 				RelativePath=".\Magnetic.rc"
 				>
 			</File>
-			<File
-				RelativePath=".\Launcher.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LauncherAi.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Level.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RoboBall.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SeeThrough.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Spawner.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\VehicleAi.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -591,51 +551,11 @@
 			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
 			<File
-				RelativePath=".\Ctf.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Cutie.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CutieElevator.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Game.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Grenade.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Launcher.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LauncherAi.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Level.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RoboBall.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SeeThrough.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Spawner.h"
-				>
-			</File>
-			<File
-				RelativePath=".\VehicleAi.h"
 				>
 			</File>
 		</Filter>

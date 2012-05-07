@@ -43,6 +43,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f));
 	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f));
 	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f));
+
+	Initialize();
 }
 
 Game::~Game()
@@ -79,6 +81,9 @@ bool Game::Tick()
 
 bool Game::Render()
 {
+	mUiManager->SetCameraPosition(TransformationF(QuaternionF(), Vector3DF(0, -30, 0)));
+	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
+	mUiManager->Render(lFullRect);
 	return true;
 }
 
@@ -167,6 +172,14 @@ bool Game::Initialize()
 	{
 		lOk = InitializeTerrain();
 	}
+	if (lOk)
+	{
+		const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
+		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
+			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
+			Color::Color(255, 255, 255), lPixelShadersEnabled? 1.0f : 1.5f, 300);
+		mUiManager->GetRenderer()->EnableAllLights(true);
+	}
 	return lOk;
 }
 
@@ -193,6 +206,7 @@ bool Game::InitializeTerrain()
 
 Cure::ContextObject* Game::CreateLogicHandler(const str& pType)
 {
+	(void)pType;
 	return 0;
 }
 

@@ -462,7 +462,7 @@ class PhysWriter(ChunkyWriter):
 		node = shape.getnode()
 		totalmass = self._gettotalmass()
 		self._writefloat(float(node.get_fixed_attribute("mass")))
-		friction = node.get_fixed_attribute("friction")
+		friction = float(node.get_fixed_attribute("friction"))
 		if self.config["type"] == "dynamic":
 			friction *= totalmass / 1000.0
 		self._writefloat(friction)
