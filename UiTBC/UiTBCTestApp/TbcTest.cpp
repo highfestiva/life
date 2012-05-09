@@ -253,7 +253,7 @@ bool ExportStructure()
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbreak (rear wheels, nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BREAK, 8*lVolvoMass, lBreakInputThreashold, 0, 0.01f, 2);
+		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, 8*lVolvoMass, lBreakInputThreashold, 0, 0.01f, 2);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(4), 0);
@@ -441,7 +441,7 @@ bool ExportStructure()
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbreak (rear wheels, nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BREAK, 8*lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
+		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, 8*lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(4), 0);
@@ -675,7 +675,7 @@ bool ExportStructure()
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbreak (nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BREAK, lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
+		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), 100);

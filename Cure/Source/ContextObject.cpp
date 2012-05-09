@@ -555,7 +555,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			case TBC::PhysicsEngine::ENGINE_HOVER:
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
 			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
-			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
+			case TBC::PhysicsEngine::ENGINE_HINGE_BRAKE:
 			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
 			case TBC::PhysicsEngine::ENGINE_ROTOR:
@@ -1146,7 +1146,7 @@ void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositional
 			case TBC::PhysicsEngine::ENGINE_HOVER:
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
 			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
-			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
+			case TBC::PhysicsEngine::ENGINE_HINGE_BRAKE:
 			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
 			case TBC::PhysicsEngine::ENGINE_ROTOR:

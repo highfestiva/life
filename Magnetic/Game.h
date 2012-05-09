@@ -37,6 +37,7 @@ namespace Magnetic
 
 
 using namespace Lepra;
+class Chain;
 class Level;
 
 
@@ -100,6 +101,7 @@ public:
 	virtual bool Tick();
 
 	Level* GetLevel() const;
+	Chain* GetChain() const;
 
 	bool Render();
 	bool Paint();
@@ -129,6 +131,7 @@ private:
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	UiTbc::Renderer::LightID mLightId;
 	Level* mLevel;
+	Chain* mChain;
 };
 
 

@@ -825,7 +825,7 @@ class GroupReader(DefaultMAReader):
 			if section.startswith("engine:"):
 				enginetype = stripQuotes(config.get(section, "type"))
 				pushengines = ["cam_flat_push", "hover"]
-				jointengines = ["hinge_roll", "hinge_gyro", "hinge_break", "hinge_torque", "hinge2_turn", "rotor", "tilter", "slider_force"]
+				jointengines = ["hinge_roll", "hinge_gyro", "hinge_brake", "hinge_torque", "hinge2_turn", "rotor", "tilter", "slider_force", "glue", "ball_brake"]
 				engineOk = enginetype in pushengines+jointengines
 				allApplied &= engineOk
 				if not engineOk:
@@ -851,6 +851,8 @@ class GroupReader(DefaultMAReader):
 								if enginetype not in pushengines:
 									ok = False
 									print("Error: %s is not jointed, but has an engine connected_to it!" % cn.getFullName())
+							if options.options.verbose:
+								print("%s connected to:" % section, connected_to)
 					return ok
 				required = [("type", lambda x: type(x) == str),
 					    ("strength", lambda x: x > 0 and x < 30000),
@@ -1236,6 +1238,8 @@ class GroupReader(DefaultMAReader):
 		for node in group:
 			if re.search("^"+regexp+"$", node.getFullName()[1:]):
 				found += [node]
+		if options.options.verbose:
+			print("Identified these nodes (on regexp %s):\n" % regexp, found)
 		return found
 
 
@@ -1500,12 +1504,12 @@ class GroupReader(DefaultMAReader):
 				if basenode in node._parents:
 					if not f or f(node):
 						childlist.append(node)
-			childlist = sorted(childlist, key=lambda n: n.getFullName())
+			childlist = sorted(childlist, key=lambda n: n.getName())
 			if recursive:
 				grandchildlist = []
 				for child in childlist:
 					grandchildlist.extend(_list_filtered_child_nodes(child))
-				grandchildlist = sorted(grandchildlist, key=lambda n: n.getFullName())
+				grandchildlist = sorted(grandchildlist, key=lambda n: n.getName())
 				childlist.extend(grandchildlist)
 			return childlist
 		return _list_filtered_child_nodes(basenode)

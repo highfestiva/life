@@ -20,7 +20,7 @@ using namespace Lepra;
 
 
 #ifdef LEPRA_IOS
-@interface AnimatedApp: UIResponder <ADBannerViewDelegate>
+@interface AnimatedApp: UIResponder <ADBannerViewDelegate, UIAccelerometerDelegate>
 {
 @private
 	Canvas* _canvas;
@@ -67,6 +67,10 @@ using namespace Lepra;
 	_canvas = pCanvas;
 	_animationTimer = nil;
 	_adInitialized = false;
+
+	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:1.0/(FPS*2)];
+	[[UIAccelerometer sharedAccelerometer] setDelegate:self];
+
 	return self;
 }
 
@@ -110,6 +114,12 @@ using namespace Lepra;
 		Magnetic::App::GetApp()->Poll();
 		[self dropFingerMovements];
 	}
+}
+
+-(void) accelerometer:(UIAccelerometer*)accelerometer didAccelerate:(UIAcceleration*)acceleration
+{
+	Vector3DF lAcceleration(acceleration.x, -acceleration.z, acceleration.y);
+	Magnetic::App::GetApp()->SetGravity(lAcceleration);
 }
 
 -(Magnetic::FingerMovement&) getFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious

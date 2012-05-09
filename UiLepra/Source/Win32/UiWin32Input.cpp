@@ -401,6 +401,8 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	mMouse(0),
 	mKeyboard(0)
 {
+	Refresh();
+
 	POINT lPoint;
 	::GetCursorPos(&lPoint);
 	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);
@@ -428,8 +430,6 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 		mDisplayManager->ShowMessageBox(_T("DirectInput failed enumerating your devices!"), _T("DirectInput error!"));
 		return;
 	}
-
-	Refresh();
 
 	AddObserver();
 

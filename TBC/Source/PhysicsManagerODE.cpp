@@ -8,6 +8,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
 #include <../ode/src/collision_kernel.h>
+#include <../ode/src/joints/ball.h>
 #include <../ode/src/joints/hinge.h>
 #include <../ode/src/joints/slider.h>
 #include <../ode/src/joints/universal.h>
@@ -33,12 +34,19 @@ PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels, float pSensitiv
 	::dWorldSetERP(mWorldID, 0.9f);		// Error reduction.
 	::dWorldSetQuickStepNumIterations(mWorldID, 20);
 
-	::dWorldSetAutoDisableFlag(mWorldID, 1);
-	
-	::dWorldSetAutoDisableLinearThreshold(mWorldID, 0.02f/pSensitivity);
-	::dWorldSetAutoDisableAngularThreshold(mWorldID, 0.02f/pSensitivity);
-	::dWorldSetAutoDisableSteps(mWorldID, (int)(2*pSensitivity));
-	//::dWorldSetAutoDisableTime(mWorldID, 0);
+	if (pSensitivity)
+	{
+		::dWorldSetAutoDisableFlag(mWorldID, 1);
+		::dWorldSetAutoDisableLinearThreshold(mWorldID, 0.02f/pSensitivity);
+		::dWorldSetAutoDisableAngularThreshold(mWorldID, 0.02f/pSensitivity);
+		::dWorldSetAutoDisableSteps(mWorldID, (int)(2*pSensitivity));
+		//::dWorldSetAutoDisableTime(mWorldID, 0);
+	}
+	else
+	{
+		::dWorldSetAutoDisableFlag(mWorldID, 0);
+	}
+
 	//::dWorldSetLinearDampingThreshold(mWorldID, 100.0f);
 	//::dWorldSetLinearDamping(mWorldID, 0.9f);
 	::dWorldSetAngularDampingThreshold(mWorldID, 15.0f);
@@ -830,10 +838,18 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 	{
 		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
+		//::dBodySetLinearDampingThreshold(lObject2->mBodyID, 30.0f);
+		//::dBodySetLinearDamping(lObject2->mBodyID, 0.95f);
+		::dBodySetAngularDampingThreshold(lObject2->mBodyID, 10.0f);
+		::dBodySetAngularDamping(lObject2->mBodyID, 0.97f);
+		::dBodySetMaxAngularSpeed(lObject2->mBodyID, 20.0f);
 	}
 	else
 	{
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
+		::dBodySetAngularDampingThreshold(lObject2->mBodyID, 15.0f);
+		::dBodySetAngularDamping(lObject2->mBodyID, 0.97f);
+		::dBodySetMaxAngularSpeed(lObject2->mBodyID, 30.0f);
 	}
 
 	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
@@ -1108,11 +1124,21 @@ bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
 			dVector3 lAnchor2;
 			::dJointGetBallAnchor2(lJointInfo->mJointID, lAnchor2);
 			dxBody* lChildBody = lJointInfo->mJointID->node[1].body;
+			if (!lChildBody)
+			{
+				lChildBody = lJointInfo->mJointID->node[0].body;
+			}
 			const dReal* lPos = ::dBodyGetPosition(lChildBody);
 			lAnchor[0] = lPos[0] + lAnchor[0] - lAnchor2[0];
 			lAnchor[1] = lPos[1] + lAnchor[1] - lAnchor2[1];
 			lAnchor[2] = lPos[2] + lAnchor[2] - lAnchor2[2];
 			::dBodySetPosition(lChildBody, lAnchor[0], lAnchor[1], lAnchor[2]);
+			const dReal* lVel = ::dBodyGetLinearVel(lChildBody);
+			if (::fabs(lVel[0]) > 50 || ::fabs(lVel[1]) > 50 || ::fabs(lVel[2]) > 50)
+			{
+				::dBodySetLinearVel(lChildBody, 0, 0, 0);
+				::dBodySetAngularVel(lChildBody, 0, 0, 0);
+			}
 		}
 		break;
 		default:

@@ -371,7 +371,7 @@ class ChunkyWriter:
 				else:
 					#print("%s != %s..." % (noderegexp, body.getFullName()))
 					pass
-			subgroup = sorted(subgroup, key=lambda li: li.getFullName() if type(e) == str else li[0].getFullName())
+			subgroup = sorted(subgroup, key=lambda li: li.getFullName() if type(e) == str else li[0].getName())
 			expanded += subgroup
 		if len(expanded) < len(unexpanded):
 			print("Error: could not expand %s into more than %i nodes!" % (str(unexpanded), len(expanded)))
@@ -555,7 +555,7 @@ class PhysWriter(ChunkyWriter):
 
 	def _writeengine(self, node):
 		# Write all general parameters first.
-		types = {"walk":1, "cam_flat_push":2, "hover":3, "hinge_roll":4, "hinge_gyro":5, "hinge_break":6, "hinge_torque":7, "hinge2_turn":8, "rotor":9, "tilter":10, "slider_force":11, "glue":12}
+		types = {"walk":1, "cam_flat_push":2, "hover":3, "hinge_roll":4, "hinge_gyro":5, "hinge_brake":6, "hinge_torque":7, "hinge2_turn":8, "rotor":9, "tilter":10, "slider_force":11, "glue":12, "ball_brake":13}
 		self._writeint(types[node.get_fixed_attribute("type")])
 		totalmass = self._gettotalmass()
 		self._writefloat(node.get_fixed_attribute("strength")*totalmass)
@@ -569,11 +569,13 @@ class PhysWriter(ChunkyWriter):
 			print("Error: could not find any matching nodes to connect engine '%s' to." % node.getFullName())
 			sys.exit(19)
 		self._writeint(len(connected_to))
+		if options.options.verbose:
+			print("%s expands connected_to list as:\n" % node.getName(), connected_to)
 		for connection in connected_to:
 			body, scale, connectiontype = connection
 			idx = self.bodies.index(body)
 			if options.options.verbose:
-				print("Engine '%s' connected to body index is %i (scale %f)."% (node.getName(), idx, scale))
+				print("Engine '%s' connected to body index %i (scale %f)."% (node.getName(), idx, scale))
 			self._writeint(idx)
 			self._writefloat(float(scale))
 			connectiontypes = {"normal":1, "half_lock":2, "release":3}

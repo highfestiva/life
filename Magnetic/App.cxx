@@ -38,6 +38,7 @@
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
 #include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiFontManager.h"
+#include "Chain.h"
 #include "Game.h"
 #ifdef LEPRA_MAC
 #include "../Lepra/Include/Posix/MacLog.h"
@@ -80,6 +81,7 @@ public:
 
 	virtual void Suspend();
 	virtual void Resume();
+	void SetGravity(const Vector3DF& pGravity);
 
 #if !defined(LEPRA_TOUCH)
 	void OnMouseInput(UiLepra::InputElement* pElement);
@@ -112,6 +114,7 @@ public:
 	Cure::HiscoreAgent* mHiscoreAgent;
 	int mMyHiscoreIndex;
 	int mFrameCounter;
+	Vector3DF mGravity;
 
 	LOG_CLASS_DECLARE();
 };
@@ -203,8 +206,8 @@ bool App::Open()
 	const int lDisplayWidth = lSize.width;
 	const int lDisplayHeight = lSize.height;
 #else // !Touch
-	const int lDisplayWidth = 640;
-	const int lDisplayHeight = 960;
+	const int lDisplayWidth = 320;
+	const int lDisplayHeight = 480;
 #endif // Touch/!Touch
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
@@ -264,11 +267,11 @@ bool App::Open()
 		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
 		mMusicPlayer->SetVolume(0.5f);
 		mMusicPlayer->SetSongPauseTime(9, 15);
-		mMusicPlayer->AddSong(_T("ButterflyRide.xm"));
+		/*mMusicPlayer->AddSong(_T("ButterflyRide.xm"));
 		mMusicPlayer->AddSong(_T("BehindTheFace.xm"));
 		mMusicPlayer->AddSong(_T("BrittiskBensin.xm"));
 		mMusicPlayer->AddSong(_T("DontYouWantMe'97.xm"));
-		mMusicPlayer->AddSong(_T("CloseEncounters.xm"));
+		mMusicPlayer->AddSong(_T("CloseEncounters.xm"));*/
 		mMusicPlayer->Shuffle();
 		lOk = mMusicPlayer->Playback();
 	}
@@ -351,6 +354,7 @@ int App::Run()
 	if (lOk)
 	{
 		mVariableScope = UiCure::GetSettings();
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FASTALGO, false);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms, so we can render stuff from physics data.
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 2);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
@@ -380,6 +384,10 @@ int App::Run()
 	if (lOk)
 	{
 		mLoopTimer.EnableShadowCounter(true);
+	}
+	if (lOk)
+	{
+		SetGravity(Vector3DF(-2, 0, -9));
 	}
 	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
@@ -513,6 +521,10 @@ bool App::Poll()
 	mIsLoaded = true;
 	if (lOk)
 	{
+		mGame->GetPhysicsManager()->SetGravity(mGravity);
+	}
+	if (lOk)
+	{
 		const float r = 0.35f;
 		const float g = 0.30f;
 		const float b = 0.25f;
@@ -594,10 +606,31 @@ void App::PollTaps()
 		gFingerMoveList.clear();
 	}
 
-	float lAngle = -mUiManager->GetInputManager()->GetCursorX();
+	const float lZAngle = -mUiManager->GetInputManager()->GetCursorX();
+	const float lXAngle = -mUiManager->GetInputManager()->GetCursorY();
 	QuaternionF lRotation;
-	lRotation.RotateAroundOwnY(lAngle);
-	mGame->GetPhysicsManager()->SetGravity(lRotation * Vector3DF(0, 0, -9.82f));
+	lRotation.RotateAroundOwnZ(lZAngle*PIF);
+	lRotation.RotateAroundOwnX(lXAngle*PIF);
+	Vector3DF lGravity = lRotation * Vector3DF(0, 9.82f, 0);
+
+	/*if (!mUiManager->GetInputManager()->GetMouse()->GetButton(0)->GetBooleanValue())
+	{
+		lGravity.y = 0;
+	}*/
+	if (mUiManager->GetInputManager()->GetMouse()->GetButton(1)->GetBooleanValue())
+	{
+		TBC::ChunkyPhysics* lStructure = mGame->GetChain()->GetPhysics();
+		const int lBoneCount = lStructure->GetBoneCount();
+		for (int x = 0; x < lBoneCount; ++x)
+		{
+			TBC::PhysicsManager::BodyID lBodyId = lStructure->GetBoneGeometry(x)->GetBodyId();
+			if (lBodyId != TBC::INVALID_BODY)
+			{
+				mGame->GetPhysicsManager()->AddForce(lBodyId, Vector3DF(1, 0, 0));
+			}
+		}
+	}
+	SetGravity(lGravity);
 #endif // Computer
 }
 
@@ -626,6 +659,12 @@ void App::Resume()
 		mMusicPlayer->Stop();
 		mMusicPlayer->Playback();
 	}
+}
+
+
+void App::SetGravity(const Vector3DF& pGravity)
+{
+	mGravity = pGravity;
 }
 
 

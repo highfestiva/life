@@ -126,7 +126,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		case ENGINE_HOVER:
 		case ENGINE_HINGE_ROLL:
 		case ENGINE_HINGE_GYRO:
-		case ENGINE_HINGE_BREAK:
+		case ENGINE_HINGE_BRAKE:
 		case ENGINE_HINGE_TORQUE:
 		case ENGINE_HINGE2_TURN:
 		case ENGINE_ROTOR:
@@ -291,7 +291,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					}
 				}
 				break;
-				case ENGINE_HINGE_BREAK:
+				case ENGINE_HINGE_BRAKE:
 				{
 					//assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
@@ -443,6 +443,16 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
+						pPhysicsManager->StabilizeJoint(lGeometry->GetJointId());
+					}
+				}
+				break;
+				case ENGINE_BALL_BRAKE:
+				{
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT)
+					{
+						// TODO: implement!
 						pPhysicsManager->StabilizeJoint(lGeometry->GetJointId());
 					}
 				}

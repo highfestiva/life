@@ -15,6 +15,7 @@
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiCure/Include/UiSound.h"
+#include "Chain.h"
 #include "Level.h"
 
 
@@ -31,11 +32,12 @@ namespace Magnetic
 
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
 	Cure::GameTicker(),
-	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager, 400, 4, 3),
+	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager, 20, 3, 0),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
-	mLevel(0)
+	mLevel(0),
+	mChain(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -64,7 +66,8 @@ UiCure::GameUiManager* Game::GetUiManager() const
 
 bool Game::Tick()
 {
-	if (!mLevel || !mLevel->IsLoaded())
+	if (!mLevel || !mLevel->IsLoaded() ||
+		!mChain || !mChain->IsLoaded())
 	{
 		return true;
 	}
@@ -78,6 +81,20 @@ bool Game::Tick()
 
 	return true;
 }
+
+
+
+Level* Game::GetLevel() const
+{
+	return mLevel;
+}
+
+Chain* Game::GetChain() const
+{
+	return mChain;
+}
+
+
 
 bool Game::Render()
 {
@@ -195,8 +212,23 @@ bool Game::InitializeTerrain()
 		assert(lOk);
 		if (lOk)
 		{
+			mLevel->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, +6)));
 			mLevel->DisableRootShadow();
 			mLevel->StartLoading();
+		}
+	}
+	if (lOk)
+	{
+		delete mChain;
+		mChain = new Chain(GetResourceManager(), _T("chain"), mUiManager);
+		AddContextObject(mChain, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mChain != 0);
+		assert(lOk);
+		if (lOk)
+		{
+			mChain->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, -1.2f, +13)));
+			mChain->DisableRootShadow();
+			mChain->StartLoading();
 		}
 	}
 	return lOk;
