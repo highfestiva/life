@@ -101,7 +101,6 @@ public:
 	str mPathPrefix;
 
 	double mAverageLoopTime;
-	double mAverageFastLoopTime;
 	HiResTimer mLoopTimer;
 
 	bool mIsLoaded;
@@ -173,7 +172,6 @@ App::App(const strutil::strvec& pArgumentList):
 	mGame(0),
 	mVariableScope(0),
 	mAverageLoopTime(1.0/(FPS+1)),
-	mAverageFastLoopTime(1.0/(FPS+1)),
 	mIsLoaded(false),
 	mIsPressing(false),
 	mHiscoreTextField(0),
@@ -218,7 +216,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowAny"));
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
 
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 
@@ -252,6 +250,9 @@ bool App::Open()
 	}
 	if (lOk)
 	{
+#ifdef LEPRA_TOUCH
+		mUiManager->GetCanvas()->SetOutputRotation(0);
+#endif // Touch
 		lOk = mUiManager->OpenRest();
 	}
 	if (lOk)
@@ -356,7 +357,7 @@ int App::Run()
 		mVariableScope = UiCure::GetSettings();
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FASTALGO, false);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms, so we can render stuff from physics data.
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 2);
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 1);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_ISFIXEDFPS, true);
 		//CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
@@ -427,7 +428,7 @@ bool App::Poll()
 	bool lOk = true;
 	if (lOk)
 	{
-		mLoopTimer.StepCounterShadow();
+		HiResTimer::StepCounterShadow();
 	}
 	if (lOk)
 	{
@@ -436,32 +437,15 @@ bool App::Poll()
 		{
 			// Adjust frame rate, or it will be hopelessly high... on most reasonable platforms.
 			mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, lInstantLoopTime, 0.05);
-			mAverageFastLoopTime = Lepra::Math::Lerp(mAverageFastLoopTime, lInstantLoopTime, 0.7);
 		}
 		const double lDelayTime = 1.0/FPS - mAverageLoopTime;
 		if (lDelayTime > 0)
 		{
 			Thread::Sleep(lDelayTime-0.001);
+			HiResTimer::StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
 			UiLepra::Core::ProcessMessages();
-			mLoopTimer.StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
 		}
 		mLoopTimer.PopTimeDiff();
-		if (lInstantLoopTime >= 1.0/FPS && mAverageFastLoopTime > 1.0/FPS)
-		{
-			// This should be a temporary slow-down, due to something like rendering of
-			// lots of transparent OpenGL triangles.
-			int lFrameRate = (int)(1.0/mAverageFastLoopTime);
-			if (lFrameRate < 10)
-			{
-				lFrameRate = 10;
-			}
-			CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, lFrameRate);
-		}
-		else
-		{
-			CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
-			mAverageFastLoopTime = lInstantLoopTime;	// Immediately drop back sliding average to current value when FPS is normal again.
-		}
 
 	}
 	if (lOk)

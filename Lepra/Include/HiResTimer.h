@@ -27,7 +27,7 @@ public:
 	inline ~HiResTimer();
 
 	inline void EnableShadowCounter(bool pEnable);
-	inline void StepCounterShadow();
+	static inline void StepCounterShadow();
 
 	// Updates time, returns current time diff and resets time diff.
 	inline double PopTimeDiff();

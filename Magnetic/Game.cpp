@@ -98,8 +98,9 @@ Chain* Game::GetChain() const
 
 bool Game::Render()
 {
-	mUiManager->SetCameraPosition(TransformationF(QuaternionF(), Vector3DF(0, -30, 0)));
-	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
+	QuaternionF lOrientation;
+	mUiManager->SetCameraPosition(TransformationF(lOrientation, Vector3DF(0, -30, 0)));
+	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetWidth(), mUiManager->GetCanvas()->GetHeight());
 	mUiManager->Render(lFullRect);
 	return true;
 }

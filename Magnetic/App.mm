@@ -68,7 +68,7 @@ using namespace Lepra;
 	_animationTimer = nil;
 	_adInitialized = false;
 
-	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:1.0/(FPS*2)];
+	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:1.0/FPS/2];
 	[[UIAccelerometer sharedAccelerometer] setDelegate:self];
 
 	return self;

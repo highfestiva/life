@@ -198,7 +198,6 @@ createNode polyCube -n "polyCube1";
 	setAttr ".cuv" 4;
 createNode phong -n "mat_wall";
 	setAttr ".c" -type "float3" 0 0.6114434 0.85100001 ;
-	setAttr ".it" -type "float3" 0.66942 0.66942 0.66942 ;
 	setAttr ".sc" -type "float3" 0 0 0 ;
 	setAttr ".cp" 2;
 createNode shadingEngine -n "phong4SG";

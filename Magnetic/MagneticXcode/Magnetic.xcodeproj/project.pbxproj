@@ -467,6 +467,8 @@
 		B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B1A1DD9813AA6CC60097B8D0 /* window.c */; };
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
+		B1B644A6155AF4B700129E69 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1B644A5155AF4B700129E69 /* Data.pk3 */; };
+		B1B644AD155AF4F900129E69 /* Chain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B644AC155AF4F900129E69 /* Chain.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
@@ -1131,6 +1133,8 @@
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
 		B1B4898F13F9BD6C0047C78A /* Magnetic-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Magnetic-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* Magnetic_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Magnetic_Prefix.pch; path = MagneticXcode/Magnetic_Prefix.pch; sourceTree = "<group>"; };
+		B1B644A5155AF4B700129E69 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
+		B1B644AC155AF4F900129E69 /* Chain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Chain.cpp; sourceTree = "<group>"; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
@@ -1399,6 +1403,7 @@
 		B19A146913A122DE0051A61C /* Magnetic */ = {
 			isa = PBXGroup;
 			children = (
+				B1B644AC155AF4F900129E69 /* Chain.cpp */,
 				B110A04B14AB36CC007A84E4 /* Level.cpp */,
 				B15F798713FC5E6000E01A90 /* Game.cpp */,
 				B1B489A313F9BE4A0047C78A /* Magnetic_Prefix.pch */,
@@ -2256,6 +2261,7 @@
 		B1FB291E1450C8A600F1C762 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				B1B644A5155AF4B700129E69 /* Data.pk3 */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -2313,6 +2319,7 @@
 				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
+				B1B644A6155AF4B700129E69 /* Data.pk3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2780,6 +2787,7 @@
 				B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */,
 				B1DAC7E414F1D97700B285C5 /* JsonString.cpp in Sources */,
 				B1E30E07150E90760076E336 /* Elevator.cpp in Sources */,
+				B1B644AD155AF4F900129E69 /* Chain.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
