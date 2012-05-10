@@ -4,7 +4,7 @@
 
 
 
-#include "Chain.h"
+#include "Ball.h"
 //#include "../Cure/Include/ContextManager.h"
 //#include "../Cure/Include/ContextPath.h"
 
@@ -15,18 +15,18 @@ namespace Magnetic
 
 
 
-Chain::Chain(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
+Ball::Ball(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager)
 {
 }
 
-Chain::~Chain()
+Ball::~Ball()
 {
 }
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Chain);
+LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Ball);
 
 
 

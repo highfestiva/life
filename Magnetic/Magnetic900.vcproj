@@ -529,15 +529,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Chain.cpp"
+				RelativePath=".\Ball.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Game.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Level.cpp"
 				>
 			</File>
 			<File
@@ -548,6 +544,10 @@
 				RelativePath=".\Magnetic.rc"
 				>
 			</File>
+			<File
+				RelativePath=".\Racket.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -555,7 +555,7 @@
 			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
 			<File
-				RelativePath=".\Chain.h"
+				RelativePath=".\Ball.h"
 				>
 			</File>
 			<File
@@ -563,7 +563,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Level.h"
+				RelativePath=".\Racket.h"
 				>
 			</File>
 		</Filter>

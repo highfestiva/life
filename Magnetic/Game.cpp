@@ -15,8 +15,8 @@
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiCure/Include/UiSound.h"
-#include "Chain.h"
-#include "Level.h"
+#include "Ball.h"
+#include "Racket.h"
 
 
 
@@ -36,8 +36,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
-	mLevel(0),
-	mChain(0)
+	mRacket(0),
+	mBall(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -66,8 +66,8 @@ UiCure::GameUiManager* Game::GetUiManager() const
 
 bool Game::Tick()
 {
-	if (!mLevel || !mLevel->IsLoaded() ||
-		!mChain || !mChain->IsLoaded())
+	if (!mRacket || !mRacket->IsLoaded() ||
+		!mBall || !mBall->IsLoaded())
 	{
 		return true;
 	}
@@ -84,14 +84,14 @@ bool Game::Tick()
 
 
 
-Level* Game::GetLevel() const
+Racket* Game::GetRacket() const
 {
-	return mLevel;
+	return mRacket;
 }
 
-Chain* Game::GetChain() const
+Ball* Game::GetBall() const
 {
-	return mChain;
+	return mBall;
 }
 
 
@@ -99,7 +99,8 @@ Chain* Game::GetChain() const
 bool Game::Render()
 {
 	QuaternionF lOrientation;
-	mUiManager->SetCameraPosition(TransformationF(lOrientation, Vector3DF(0, -30, 0)));
+	lOrientation.RotateAroundOwnX(-PIF/5);
+	mUiManager->SetCameraPosition(TransformationF(lOrientation, Vector3DF(0, -0.4f, 0.4f)));
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetWidth(), mUiManager->GetCanvas()->GetHeight());
 	mUiManager->Render(lFullRect);
 	return true;
@@ -206,30 +207,30 @@ bool Game::InitializeTerrain()
 	bool lOk = true;
 	if (lOk)
 	{
-		delete mLevel;
-		mLevel = new Level(GetResourceManager(), _T("magnetic"), mUiManager);
-		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lOk = (mLevel != 0);
+		delete mRacket;
+		mRacket = new Racket(GetResourceManager(), _T("racket"), mUiManager);
+		AddContextObject(mRacket, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mRacket != 0);
 		assert(lOk);
 		if (lOk)
 		{
-			mLevel->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, +6)));
-			mLevel->DisableRootShadow();
-			mLevel->StartLoading();
+			mRacket->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0)));
+			mRacket->DisableRootShadow();
+			mRacket->StartLoading();
 		}
 	}
 	if (lOk)
 	{
-		delete mChain;
-		mChain = new Chain(GetResourceManager(), _T("chain"), mUiManager);
-		AddContextObject(mChain, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lOk = (mChain != 0);
+		delete mBall;
+		mBall = new Ball(GetResourceManager(), _T("ball"), mUiManager);
+		AddContextObject(mBall, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mBall != 0);
 		assert(lOk);
 		if (lOk)
 		{
-			mChain->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, -1.2f, +13)));
-			mChain->DisableRootShadow();
-			mChain->StartLoading();
+			mBall->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0.3f)));
+			mBall->DisableRootShadow();
+			mBall->StartLoading();
 		}
 	}
 	return lOk;

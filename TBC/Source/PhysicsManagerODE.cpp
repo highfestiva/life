@@ -3092,26 +3092,15 @@ void PhysicsManagerODE::RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 
 	}
 }
 
-void PhysicsManagerODE::ActivateGravity(BodyID pBodyId)
+void PhysicsManagerODE::EnableGravity(BodyID pBodyId, bool pEnable)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("ActivateGravity() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf(_T("EnableGravity() - Body %i is not part of this world!"), pBodyId);
 		return;
 	}
 
-	dBodySetGravityMode(((Object*)pBodyId)->mBodyID, 1);
-}
-
-void PhysicsManagerODE::DeactivateGravity(BodyID pBodyId)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf(_T("DeactivateGravity() - Body %i is not part of this world!"), pBodyId);
-		return;
-	}
-
-	dBodySetGravityMode(((Object*)pBodyId)->mBodyID, 0);
+	::dBodySetGravityMode(((Object*)pBodyId)->mBodyID, pEnable? 1 : 0);
 }
 
 void PhysicsManagerODE::SetGravity(const Vector3DF& pGravity)

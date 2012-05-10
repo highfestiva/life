@@ -4,7 +4,7 @@
 
 
 
-#include "Level.h"
+#include "Racket.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
 #include "Game.h"
@@ -16,20 +16,20 @@ namespace Magnetic
 
 
 
-Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
+Racket::Racket(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mPath(0)
 {
 }
 
-Level::~Level()
+Racket::~Racket()
 {
 	mPath = 0;
 }
 
 
 
-Cure::ContextPath* Level::QueryPath()
+Cure::ContextPath* Racket::QueryPath()
 {
 	if (!mPath)
 	{
@@ -41,7 +41,7 @@ Cure::ContextPath* Level::QueryPath()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Level);
+LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Racket);
 
 
 

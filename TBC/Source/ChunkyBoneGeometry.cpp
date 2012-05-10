@@ -250,6 +250,11 @@ ChunkyBoneGeometry::JointType ChunkyBoneGeometry::GetJointType() const
 	return (mBodyData.mJointType);
 }
 
+bool ChunkyBoneGeometry::IsAffectedByGravity() const
+{
+	return mBodyData.mIsAffectedByGravity;
+}
+
 ChunkyBoneGeometry::BoneType ChunkyBoneGeometry::GetBoneType() const
 {
 	assert(mBodyData.mBoneType >= BONE_BODY && mBodyData.mBoneType <= BONE_POSITION);

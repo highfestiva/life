@@ -192,8 +192,7 @@ public:
 
 	virtual void RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 pMaxAngularSpeed);
 
-	virtual void ActivateGravity(BodyID pBodyId);
-	virtual void DeactivateGravity(BodyID pBodyId);
+	virtual void EnableGravity(BodyID pBodyId, bool pEnable);
 	virtual void SetGravity(const Vector3D<float32>& pGravity);
 	virtual Vector3DF GetGravity() const;
 

@@ -110,6 +110,7 @@ public:
 	float GetMass() const;
 	ChunkyBoneGeometry* GetParent() const;
 	JointType GetJointType() const;
+	bool IsAffectedByGravity() const;
 	BoneType GetBoneType() const;
 	PhysicsManager::JointID GetJointId() const;
 	void ResetJointId();

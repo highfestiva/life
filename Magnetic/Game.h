@@ -11,7 +11,7 @@
 
 
 
-#define FPS			20
+#define FPS			30
 
 
 
@@ -37,8 +37,8 @@ namespace Magnetic
 
 
 using namespace Lepra;
-class Chain;
-class Level;
+class Ball;
+class Racket;
 
 
 
@@ -100,8 +100,8 @@ public:
 	UiCure::GameUiManager* GetUiManager() const;
 	virtual bool Tick();
 
-	Level* GetLevel() const;
-	Chain* GetChain() const;
+	Racket* GetRacket() const;
+	Ball* GetBall() const;
 
 	bool Render();
 	bool Paint();
@@ -130,8 +130,8 @@ private:
 	UiCure::GameUiManager* mUiManager;
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	UiTbc::Renderer::LightID mLightId;
-	Level* mLevel;
-	Chain* mChain;
+	Racket* mRacket;
+	Ball* mBall;
 };
 
 

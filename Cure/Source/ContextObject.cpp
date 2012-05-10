@@ -764,29 +764,10 @@ void ContextObject::DeleteNetworkOutputGhost()
 
 bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 {
-	TransformationF lTransformation;
-	if (pStructure->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
-	{
-		if (mPosition.mPosition.mTransformation.GetPosition().GetLengthSquared() == 0)
-		{
-			// TODO: drop hard-coding, this should come from world loader or spawn engine?
-			const float lX = (float)Random::Uniform(-63, 27);
-			const float lY = (float)Random::Uniform(-23, 67);
-			lTransformation.SetPosition(Vector3DF(lX, lY, 45.5));
-		}
-		else
-		{
-			lTransformation = mPosition.mPosition.mTransformation;
-		}
-	}
-	else
-	{
-		lTransformation = mPosition.mPosition.mTransformation;
-	}
-
+	const TransformationF& lTransformation = mPosition.mPosition.mTransformation;
 	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
-		bool lOk = pStructure->FinalizeInit(0, 0, &mPosition.mPosition.mTransformation.GetPosition(), 0, 0);
+		bool lOk = pStructure->FinalizeInit(0, 0, &lTransformation.GetPosition(), 0, 0);
 		if (lOk)
 		{
 			mPhysics = pStructure;

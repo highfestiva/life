@@ -38,7 +38,7 @@
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
 #include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiFontManager.h"
-#include "Chain.h"
+#include "Ball.h"
 #include "Game.h"
 #ifdef LEPRA_MAC
 #include "../Lepra/Include/Posix/MacLog.h"
@@ -81,7 +81,6 @@ public:
 
 	virtual void Suspend();
 	virtual void Resume();
-	void SetGravity(const Vector3DF& pGravity);
 
 #if !defined(LEPRA_TOUCH)
 	void OnMouseInput(UiLepra::InputElement* pElement);
@@ -113,7 +112,6 @@ public:
 	Cure::HiscoreAgent* mHiscoreAgent;
 	int mMyHiscoreIndex;
 	int mFrameCounter;
-	Vector3DF mGravity;
 
 	LOG_CLASS_DECLARE();
 };
@@ -227,8 +225,8 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.01);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 2.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
@@ -355,9 +353,9 @@ int App::Run()
 	if (lOk)
 	{
 		mVariableScope = UiCure::GetSettings();
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FASTALGO, false);
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FASTALGO, true);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms, so we can render stuff from physics data.
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 1);
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 3);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_ISFIXEDFPS, true);
 		//CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
@@ -388,7 +386,7 @@ int App::Run()
 	}
 	if (lOk)
 	{
-		SetGravity(Vector3DF(-2, 0, -9));
+		mGame->GetPhysicsManager()->SetGravity(Vector3DF(0, 0, -1));
 	}
 	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
@@ -442,9 +440,9 @@ bool App::Poll()
 		if (lDelayTime > 0)
 		{
 			Thread::Sleep(lDelayTime-0.001);
-			HiResTimer::StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
 			UiLepra::Core::ProcessMessages();
 		}
+		HiResTimer::StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
 		mLoopTimer.PopTimeDiff();
 
 	}
@@ -503,10 +501,6 @@ bool App::Poll()
 		return lOk;
 	}
 	mIsLoaded = true;
-	if (lOk)
-	{
-		mGame->GetPhysicsManager()->SetGravity(mGravity);
-	}
 	if (lOk)
 	{
 		const float r = 0.35f;
@@ -590,12 +584,12 @@ void App::PollTaps()
 		gFingerMoveList.clear();
 	}
 
-	const float lZAngle = -mUiManager->GetInputManager()->GetCursorX();
-	const float lXAngle = -mUiManager->GetInputManager()->GetCursorY();
-	QuaternionF lRotation;
-	lRotation.RotateAroundOwnZ(lZAngle*PIF);
-	lRotation.RotateAroundOwnX(lXAngle*PIF);
-	Vector3DF lGravity = lRotation * Vector3DF(0, 9.82f, 0);
+	//const float lZAngle = -mUiManager->GetInputManager()->GetCursorX();
+	//const float lXAngle = -mUiManager->GetInputManager()->GetCursorY();
+	//QuaternionF lRotation;
+	//lRotation.RotateAroundOwnZ(lZAngle*PIF);
+	//lRotation.RotateAroundOwnX(lXAngle*PIF);
+	//Vector3DF lGravity = lRotation * Vector3DF(0, 9.82f, 0);
 
 	/*if (!mUiManager->GetInputManager()->GetMouse()->GetButton(0)->GetBooleanValue())
 	{
@@ -603,7 +597,7 @@ void App::PollTaps()
 	}*/
 	if (mUiManager->GetInputManager()->GetMouse()->GetButton(1)->GetBooleanValue())
 	{
-		TBC::ChunkyPhysics* lStructure = mGame->GetChain()->GetPhysics();
+		TBC::ChunkyPhysics* lStructure = mGame->GetBall()->GetPhysics();
 		const int lBoneCount = lStructure->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
@@ -614,7 +608,6 @@ void App::PollTaps()
 			}
 		}
 	}
-	SetGravity(lGravity);
 #endif // Computer
 }
 
@@ -643,12 +636,6 @@ void App::Resume()
 		mMusicPlayer->Stop();
 		mMusicPlayer->Playback();
 	}
-}
-
-
-void App::SetGravity(const Vector3DF& pGravity)
-{
-	mGravity = pGravity;
 }
 
 

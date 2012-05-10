@@ -16,13 +16,13 @@ namespace Magnetic
 
 
 
-class Chain: public UiCure::Machine
+class Ball: public UiCure::Machine
 {
 public:
 	typedef UiCure::Machine Parent;
 
-	Chain(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
-	virtual ~Chain();
+	Ball(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	virtual ~Ball();
 
 private:
 	LOG_CLASS_DECLARE();

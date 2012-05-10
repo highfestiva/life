@@ -23,13 +23,13 @@ namespace Magnetic
 
 
 
-class Level: public UiCure::Machine
+class Racket: public UiCure::Machine
 {
 public:
 	typedef UiCure::Machine Parent;
 
-	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
-	virtual ~Level();
+	Racket(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	virtual ~Racket();
 
 	Cure::ContextPath* QueryPath();
 

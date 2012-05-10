@@ -174,14 +174,7 @@ void ChunkyPhysics::EnableGravity(PhysicsManager* pPhysicsManager, bool pEnable)
 			continue;
 		}
 		PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-		if (pEnable)
-		{
-			pPhysicsManager->ActivateGravity(lBodyId);
-		}
-		else
-		{
-			pPhysicsManager->DeactivateGravity(lBodyId);
-		}
+		pPhysicsManager->EnableGravity(lBodyId, pEnable);
 	}
 }
 
@@ -324,7 +317,7 @@ void ChunkyPhysics::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, Vector3DF* pPosition,
+bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const Vector3DF* pPosition,
 	PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
@@ -353,6 +346,10 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 					const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
 					const TransformationF& lBone = GetBoneTransformation(x);
 					lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListener, lBodyType, lBone);
+					if (lOk)
+					{
+						pPhysics->EnableGravity(lGeometry->GetBodyId(), lGeometry->IsAffectedByGravity());
+					}
 				}
 				break;
 				case ChunkyBoneGeometry::BONE_TRIGGER:
