@@ -386,7 +386,7 @@ int App::Run()
 	}
 	if (lOk)
 	{
-		mGame->GetPhysicsManager()->SetGravity(Vector3DF(0, 0, -1));
+		mGame->GetPhysicsManager()->SetGravity(Vector3DF(0, 0, -9.82f));
 	}
 	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
@@ -516,6 +516,10 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
+		mGame->MoveRacket();
+	}
+	if (lOk)
+	{
 		mGame->BeginTick();
 	}
 	bool lRender = false;
@@ -583,6 +587,14 @@ void App::PollTaps()
 	{
 		gFingerMoveList.clear();
 	}
+
+	static float lLastX = mUiManager->GetInputManager()->GetCursorX();
+	static float lLastY = mUiManager->GetInputManager()->GetCursorY();
+	const float dx = mUiManager->GetInputManager()->GetCursorX() - lLastX;
+	const float dy = mUiManager->GetInputManager()->GetCursorY() - lLastY;
+	lLastX += dx;
+	lLastY += dy;
+	mGame->SetRacketForce(Vector3DF(dx*700, 0, -dy*700));
 
 	//const float lZAngle = -mUiManager->GetInputManager()->GetCursorX();
 	//const float lXAngle = -mUiManager->GetInputManager()->GetCursorY();

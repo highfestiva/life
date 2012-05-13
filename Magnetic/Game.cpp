@@ -84,6 +84,117 @@ bool Game::Tick()
 
 
 
+void Game::SetRacketForce(const Vector3DF& pForce)
+{
+	mRacketForce = pForce;
+}
+
+void Game::MoveRacket()
+{
+	if (GetRacket() && GetRacket()->IsLoaded() &&
+		GetBall() && GetBall()->IsLoaded())
+	{
+		TransformationF lRacketTransform;
+		GetPhysicsManager()->GetBodyTransform(
+			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
+			lRacketTransform);
+		Vector3DF lRacketLinearVelocity;
+		GetPhysicsManager()->GetBodyVelocity(
+			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
+			lRacketLinearVelocity);
+		Vector3DF lRacketAngularVelocity;
+		GetPhysicsManager()->GetBodyAngularVelocity(
+			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
+			lRacketAngularVelocity);
+
+		// Calculate where ball will be as it passes z = racket z.
+		Vector3DF lBallPosition =
+			GetPhysicsManager()->GetBodyPosition(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		Vector3DF lBallVelocity;
+		GetPhysicsManager()->GetBodyVelocity(
+			GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
+			lBallVelocity);
+		if (lBallPosition.z < -2)
+		{
+			lBallPosition.Set(0, 0, 0.4f);
+			GetPhysicsManager()->SetBodyTransform(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), TransformationF(QuaternionF(), lBallPosition));
+			lBallVelocity.Set(0, 0, 2.0f);
+			GetPhysicsManager()->SetBodyVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lBallVelocity);
+			GetPhysicsManager()->SetBodyAngularVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), Vector3DF());
+			lRacketTransform.SetIdentity();
+			GetPhysicsManager()->SetBodyTransform(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketTransform);
+		}
+		Vector3DF lHome;
+		const float h = lBallPosition.z - lRacketTransform.GetPosition().z;
+		if (h > -0.5f)
+		{
+			lHome.Set(lBallPosition.x*0.3f, lBallPosition.y*0.3f, 0);
+		}
+		const float vup = lBallVelocity.z;
+		const float a = +9.82f / 2;
+		const float b = -vup;
+		const float c = +h;
+		const float b2 = b*b;
+		const float _4ac = 4*a*c;
+		if (b2 < _4ac || _4ac < 0)
+		{
+			// Does not compute.
+		}
+		else
+		{
+			const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
+			if (t > 0)
+			{
+				lHome.x += lBallVelocity.x * t;
+				lHome.y += lBallVelocity.y * t;
+			}
+		}
+		// Set linear force.
+		const Vector3DF lDirectionHome = lHome - lRacketTransform.GetPosition();
+		float f = lDirectionHome.GetLength();
+		f *= 50;
+		f *= f;
+		Vector3DF lForce = lDirectionHome * f;
+		lForce -= lRacketLinearVelocity * 50;
+		lForce += mRacketForce;
+		mRacketForce.Set(0, 0, 0);
+		f = lForce.GetLength();
+		if (f > 50)
+		{
+			lForce *= 50 / f;
+		}
+		//mLog.Infof(_T("force = (%f, %f, %f)"), lForce.x, lForce.y, lForce.z);
+		GetPhysicsManager()->AddForce(
+			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
+			lForce);
+
+		// Set torque. Note that racket is "flat" along the XZ-plane.
+		const float lTiltAngleFactor = 1.0f;
+		//const float dx = lDirectionHome.x * lTiltAngleFactor;
+		//const float dy = lDirectionHome.y * lTiltAngleFactor;
+		const float dx = -lRacketTransform.GetPosition().x * lTiltAngleFactor;
+		const float dy = -lRacketTransform.GetPosition().y * lTiltAngleFactor;
+		const Vector3DF lHomeTorque = Vector3DF(dy, dx, 0);
+		Vector3DF lRacketTorque = lRacketTransform.GetOrientation() * Vector3DF(0,0,1);
+		std::swap(lRacketTorque.x, lRacketTorque.y);
+		lRacketTorque.x *= 0.8f;
+		Vector3DF lAngleHome = lHomeTorque - lRacketTorque;
+		lAngleHome.x = -lAngleHome.x;
+		lAngleHome.z = 0;
+		f = Math::Clamp(-lBallVelocity.z, 0.0f, 4.0f) / 4.0f;
+		mLog.Infof(_T("ball_vel_lerp_t = %f"), f);
+		f = Math::Lerp(40.0f, 8.0f, f);
+		f = lAngleHome.GetLength() * 10;
+		f *= f;
+		Vector3DF lTorque = lAngleHome * f;
+		lTorque -= lRacketAngularVelocity * 0.2f;
+		//mLog.Infof(_T("torque = (%f, %f, %f)"), lTorque.x, lTorque.y, lTorque.z);
+		GetPhysicsManager()->AddTorque(
+			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
+			lTorque);
+	}
+}
+
 Racket* Game::GetRacket() const
 {
 	return mRacket;
@@ -100,7 +211,7 @@ bool Game::Render()
 {
 	QuaternionF lOrientation;
 	lOrientation.RotateAroundOwnX(-PIF/5);
-	mUiManager->SetCameraPosition(TransformationF(lOrientation, Vector3DF(0, -0.4f, 0.4f)));
+	mUiManager->SetCameraPosition(TransformationF(lOrientation, Vector3DF(0, -0.4f, 0.6f)));
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetWidth(), mUiManager->GetCanvas()->GetHeight());
 	mUiManager->Render(lFullRect);
 	return true;
@@ -228,7 +339,7 @@ bool Game::InitializeTerrain()
 		assert(lOk);
 		if (lOk)
 		{
-			mBall->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0.3f)));
+			mBall->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0.4f)));
 			mBall->DisableRootShadow();
 			mBall->StartLoading();
 		}
@@ -243,6 +354,10 @@ Cure::ContextObject* Game::CreateLogicHandler(const str& pType)
 	(void)pType;
 	return 0;
 }
+
+
+
+LOG_CLASS_DEFINE(GAME, Game);
 
 
 

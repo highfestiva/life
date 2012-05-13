@@ -11,7 +11,7 @@
 
 
 
-#define FPS			30
+#define FPS			45
 
 
 
@@ -100,6 +100,8 @@ public:
 	UiCure::GameUiManager* GetUiManager() const;
 	virtual bool Tick();
 
+	void SetRacketForce(const Vector3DF& pForce);
+	void MoveRacket();
 	Racket* GetRacket() const;
 	Ball* GetBall() const;
 
@@ -132,6 +134,9 @@ private:
 	UiTbc::Renderer::LightID mLightId;
 	Racket* mRacket;
 	Ball* mBall;
+	Vector3DF mRacketForce;
+
+	LOG_CLASS_DECLARE();
 };
 
 

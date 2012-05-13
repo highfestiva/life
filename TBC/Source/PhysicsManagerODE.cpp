@@ -3100,7 +3100,10 @@ void PhysicsManagerODE::EnableGravity(BodyID pBodyId, bool pEnable)
 		return;
 	}
 
-	::dBodySetGravityMode(((Object*)pBodyId)->mBodyID, pEnable? 1 : 0);
+	if (((Object*)pBodyId)->mBodyID)
+	{
+		::dBodySetGravityMode(((Object*)pBodyId)->mBodyID, pEnable? 1 : 0);
+	}
 }
 
 void PhysicsManagerODE::SetGravity(const Vector3DF& pGravity)

@@ -25,6 +25,9 @@ public:
 	virtual ~Ball();
 
 private:
+	virtual void OnMicroTick(float pFrameTime);
+	virtual void OnLoaded();
+
 	LOG_CLASS_DECLARE();
 };
 
