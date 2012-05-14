@@ -37,7 +37,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
 	mRacket(0),
-	mBall(0)
+	mBall(0),
+	mRacketLiftFactor(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -84,9 +85,10 @@ bool Game::Tick()
 
 
 
-void Game::SetRacketForce(const Vector3DF& pForce)
+void Game::SetRacketForce(float pLiftFactor, const Vector3DF& pDown)
 {
-	mRacketForce = pForce;
+	mRacketLiftFactor = pLiftFactor;
+	mRacketDownDirection = pDown;
 }
 
 void Game::MoveRacket()
@@ -123,12 +125,16 @@ void Game::MoveRacket()
 			GetPhysicsManager()->SetBodyAngularVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), Vector3DF());
 			lRacketTransform.SetIdentity();
 			GetPhysicsManager()->SetBodyTransform(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketTransform);
+			lRacketLinearVelocity.Set(0, 0, 0);
+			GetPhysicsManager()->SetBodyVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketLinearVelocity);
+			lRacketAngularVelocity.Set(0, 0, 0);
+			GetPhysicsManager()->SetBodyAngularVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketAngularVelocity);
 		}
 		Vector3DF lHome;
 		const float h = lBallPosition.z - lRacketTransform.GetPosition().z;
 		if (h > -0.5f)
 		{
-			lHome.Set(lBallPosition.x*0.3f, lBallPosition.y*0.3f, 0);
+			lHome.Set(lBallPosition.x*0.8f, lBallPosition.y*0.8f, 0);
 		}
 		const float vup = lBallVelocity.z;
 		const float a = +9.82f / 2;
@@ -155,9 +161,10 @@ void Game::MoveRacket()
 		f *= 50;
 		f *= f;
 		Vector3DF lForce = lDirectionHome * f;
-		lForce -= lRacketLinearVelocity * 50;
-		lForce += mRacketForce;
-		mRacketForce.Set(0, 0, 0);
+		lForce -= lRacketLinearVelocity * 16;
+		const float lRacketHitFactor = 100.0f;
+		lForce.z += mRacketLiftFactor * lRacketHitFactor;
+		mRacketLiftFactor = 0;
 		f = lForce.GetLength();
 		if (f > 50)
 		{
@@ -168,24 +175,24 @@ void Game::MoveRacket()
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lForce);
 
-		// Set torque. Note that racket is "flat" along the XZ-plane.
-		const float lTiltAngleFactor = 1.0f;
+		// Set torque. Note that racket is "flat" along the XY-plane.
+		//const float lTiltAngleFactor = 1.2f;
 		//const float dx = lDirectionHome.x * lTiltAngleFactor;
 		//const float dy = lDirectionHome.y * lTiltAngleFactor;
-		const float dx = -lRacketTransform.GetPosition().x * lTiltAngleFactor;
-		const float dy = -lRacketTransform.GetPosition().y * lTiltAngleFactor;
-		const Vector3DF lHomeTorque = Vector3DF(dy, dx, 0);
+		//const float dx = -lRacketTransform.GetPosition().x * lTiltAngleFactor;
+		//const float dy = -lRacketTransform.GetPosition().y * lTiltAngleFactor;
+		mRacketDownDirection.Normalize();
+		const Vector3DF lHomeTorque = Vector3DF(::acos(mRacketDownDirection.y), ::acos(mRacketDownDirection.x), 0);
 		Vector3DF lRacketTorque = lRacketTransform.GetOrientation() * Vector3DF(0,0,1);
-		std::swap(lRacketTorque.x, lRacketTorque.y);
-		lRacketTorque.x *= 0.8f;
+		lRacketTorque = Vector3DF(::acos(lRacketTorque.y), ::acos(lRacketTorque.x), 0);
 		Vector3DF lAngleHome = lHomeTorque - lRacketTorque;
-		lAngleHome.x = -lAngleHome.x;
+		lAngleHome.y = -lAngleHome.y;
 		lAngleHome.z = 0;
 		f = Math::Clamp(-lBallVelocity.z, 0.0f, 4.0f) / 4.0f;
-		mLog.Infof(_T("ball_vel_lerp_t = %f"), f);
-		f = Math::Lerp(40.0f, 8.0f, f);
-		f = lAngleHome.GetLength() * 10;
+		f = Math::Lerp(0.8f, 0.3f, f);
+		f = lAngleHome.GetLength() * f;
 		f *= f;
+		f = 1;
 		Vector3DF lTorque = lAngleHome * f;
 		lTorque -= lRacketAngularVelocity * 0.2f;
 		//mLog.Infof(_T("torque = (%f, %f, %f)"), lTorque.x, lTorque.y, lTorque.z);

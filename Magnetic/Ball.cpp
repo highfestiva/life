@@ -38,11 +38,14 @@ void Ball::OnMicroTick(float pFrameTime)
 	lPhysicsManager->GetBodyVelocity(
 		GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 		lVelocity);
-	const float lAirForce = lVelocity.GetLength();
-	const Vector3DF lResistance = lVelocity * (lAirForce * lAirForce * -0.0008f);
+	float lAirForce = lVelocity.GetLength();
+	lAirForce *= lAirForce * -0.0032f;
+	lVelocity.x *= lAirForce;
+	lVelocity.y *= lAirForce;
+	lVelocity.z *= lAirForce * 0.09f;
 	lPhysicsManager->AddForce(
 		GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
-		lResistance);
+		lVelocity);
 }
 
 void Ball::OnLoaded()

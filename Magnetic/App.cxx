@@ -79,6 +79,7 @@ public:
 	bool Poll();
 	void PollTaps();
 
+	void SetRacketForce(float pLiftFactor, const Vector3DF& pDown);
 	virtual void Suspend();
 	virtual void Resume();
 
@@ -594,7 +595,7 @@ void App::PollTaps()
 	const float dy = mUiManager->GetInputManager()->GetCursorY() - lLastY;
 	lLastX += dx;
 	lLastY += dy;
-	mGame->SetRacketForce(Vector3DF(dx*700, 0, -dy*700));
+	SetRacketForce((dy > 5)? dy : 0, Vector3DF(dx*700, 0, -dy*700));
 
 	//const float lZAngle = -mUiManager->GetInputManager()->GetCursorX();
 	//const float lXAngle = -mUiManager->GetInputManager()->GetCursorY();
@@ -624,6 +625,14 @@ void App::PollTaps()
 }
 
 
+
+void App::SetRacketForce(float pLiftFactor, const Vector3DF& pDown)
+{
+	if (mGame)
+	{
+		mGame->SetRacketForce(pLiftFactor, pDown);
+	}
+}
 
 void App::Suspend()
 {

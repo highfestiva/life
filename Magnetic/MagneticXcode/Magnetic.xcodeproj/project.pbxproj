@@ -12,7 +12,6 @@
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
 		35128A4D147262150006467C /* UiSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A4C147262150006467C /* UiSound.cpp */; };
 		B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04914AB36A7007A84E4 /* ContextPath.cpp */; };
-		B110A04D14AB36CC007A84E4 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04B14AB36CC007A84E4 /* Level.cpp */; };
 		B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05114AB3720007A84E4 /* xmplay.cpp */; };
 		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
 		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
@@ -468,7 +467,6 @@
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
 		B1B644A6155AF4B700129E69 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1B644A5155AF4B700129E69 /* Data.pk3 */; };
-		B1B644AD155AF4F900129E69 /* Chain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B644AC155AF4F900129E69 /* Chain.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
@@ -478,6 +476,8 @@
 		B1E30E07150E90760076E336 /* Elevator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E30E06150E90760076E336 /* Elevator.cpp */; };
 		B1E4528A14E9FA13001C2BE2 /* UiDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E4528814E9FA13001C2BE2 /* UiDialog.cpp */; };
 		B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E4528914E9FA13001C2BE2 /* UiMessageDialog.cpp */; };
+		B1F8AD6115618DFB009EFCF0 /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F8AD5F15618DFB009EFCF0 /* Ball.cpp */; };
+		B1F8AD6215618DFB009EFCF0 /* Racket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F8AD6015618DFB009EFCF0 /* Racket.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -487,7 +487,6 @@
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		35128A4C147262150006467C /* UiSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSound.cpp; path = ../../UiCure/Source/UiSound.cpp; sourceTree = "<group>"; };
 		B110A04914AB36A7007A84E4 /* ContextPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextPath.cpp; path = ../../Cure/Source/ContextPath.cpp; sourceTree = SOURCE_ROOT; };
-		B110A04B14AB36CC007A84E4 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Level.cpp; sourceTree = "<group>"; };
 		B110A05114AB3720007A84E4 /* xmplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmplay.cpp; path = ChibiXM/xmplay.cpp; sourceTree = "<group>"; };
 		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
@@ -1134,7 +1133,6 @@
 		B1B4898F13F9BD6C0047C78A /* Magnetic-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Magnetic-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* Magnetic_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Magnetic_Prefix.pch; path = MagneticXcode/Magnetic_Prefix.pch; sourceTree = "<group>"; };
 		B1B644A5155AF4B700129E69 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
-		B1B644AC155AF4F900129E69 /* Chain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Chain.cpp; sourceTree = "<group>"; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
@@ -1144,6 +1142,8 @@
 		B1E30E06150E90760076E336 /* Elevator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Elevator.cpp; path = ../../Cure/Source/Elevator.cpp; sourceTree = SOURCE_ROOT; };
 		B1E4528814E9FA13001C2BE2 /* UiDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiDialog.cpp; sourceTree = "<group>"; };
 		B1E4528914E9FA13001C2BE2 /* UiMessageDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiMessageDialog.cpp; sourceTree = "<group>"; };
+		B1F8AD5F15618DFB009EFCF0 /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
+		B1F8AD6015618DFB009EFCF0 /* Racket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Racket.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1403,8 +1403,8 @@
 		B19A146913A122DE0051A61C /* Magnetic */ = {
 			isa = PBXGroup;
 			children = (
-				B1B644AC155AF4F900129E69 /* Chain.cpp */,
-				B110A04B14AB36CC007A84E4 /* Level.cpp */,
+				B1F8AD5F15618DFB009EFCF0 /* Ball.cpp */,
+				B1F8AD6015618DFB009EFCF0 /* Racket.cpp */,
 				B15F798713FC5E6000E01A90 /* Game.cpp */,
 				B1B489A313F9BE4A0047C78A /* Magnetic_Prefix.pch */,
 				B19A146B13A122DE0051A61C /* App.mm */,
@@ -2775,7 +2775,6 @@
 				B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */,
 				35128A4D147262150006467C /* UiSound.cpp in Sources */,
 				B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */,
-				B110A04D14AB36CC007A84E4 /* Level.cpp in Sources */,
 				B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */,
 				B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */,
 				B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */,
@@ -2787,7 +2786,8 @@
 				B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */,
 				B1DAC7E414F1D97700B285C5 /* JsonString.cpp in Sources */,
 				B1E30E07150E90760076E336 /* Elevator.cpp in Sources */,
-				B1B644AD155AF4F900129E69 /* Chain.cpp in Sources */,
+				B1F8AD6115618DFB009EFCF0 /* Ball.cpp in Sources */,
+				B1F8AD6215618DFB009EFCF0 /* Racket.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

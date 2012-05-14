@@ -118,8 +118,9 @@ using namespace Lepra;
 
 -(void) accelerometer:(UIAccelerometer*)accelerometer didAccelerate:(UIAcceleration*)acceleration
 {
-	Vector3DF lAcceleration(acceleration.x, -acceleration.z, acceleration.y);
-	Magnetic::App::GetApp()->SetGravity(lAcceleration);
+	Vector3DF lAcceleration(acceleration.x, acceleration.y, acceleration.z);
+	float lLiftFactor = lAcceleration.GetLength() - 1;
+	Magnetic::App::GetApp()->SetRacketForce(lLiftFactor, lAcceleration);
 }
 
 -(Magnetic::FingerMovement&) getFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
