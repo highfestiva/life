@@ -41,14 +41,16 @@ public:
 	{
 		float mStrength;
 		float mMinimumClamp;
+		float mPitchFactor;
 		SoundResourceInfo();
-		SoundResourceInfo(float pStrength, float pMinimumClamp);
+		SoundResourceInfo(float pStrength, float pMinimumClamp, float pPitchFactor);
 	//private:
 		//void operator=(const SoundResourceInfo&);
 	};
 
 	CollisionSoundManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager);
 	virtual ~CollisionSoundManager();
+	void SetScale(float pSmallMass, float pLightImpact);
 
 	void AddSound(const str& pName, const SoundResourceInfo& pInfo);
 
@@ -117,6 +119,8 @@ private:
 	Cure::GameManager* mGameManager;
 	UiCure::GameUiManager* mUiManager;
 	Vector3DF mCameraPosition;
+	float mSmallMass;
+	float mLightImpact;
 	SoundMap mSoundMap;
 	SoundNameMap mSoundNameMap;
 

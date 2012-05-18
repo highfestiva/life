@@ -1,16 +1,18 @@
-(Slime Volleyball)
++Slime Volleyball
 
-Kill Cutie
++Kill Cutie
 
-Bombulum - use the pendulum to push bombs off their respective "poles" befor they blow up. Gravity is from the center in all directions. "Poles" are elevators that rise "up" towards the center. "Gravity" is directly affected by the accelerometer.
+-Bombulum - use the pendulum to push bombs off their respective "poles" befor they blow up. Gravity is from the center in all directions. "Poles" are elevators that rise "up" towards the center. "Gravity" is directly affected by the accelerometer.
+
+Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
 
 Car Jumpin'
+
+Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
 
 Crazy game using genitals as obstacles.
 
 Sliding game. Hovercraft? Bob sleigh? Something of the kind...
-
-Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
 
 Construction vehicle game - fork lift, front loader, excavator... Build, move and demolish!
 

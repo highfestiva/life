@@ -595,7 +595,8 @@ void App::PollTaps()
 	const float dy = mUiManager->GetInputManager()->GetCursorY() - lLastY;
 	lLastX += dx;
 	lLastY += dy;
-	SetRacketForce((dy > 5)? dy : 0, Vector3DF(dx*700, 0, -dy*700));
+	Vector3DF lGravity(dx*6, 0, dy*6 - 1);
+	SetRacketForce(lGravity.GetLength() - 1, lGravity);
 
 	//const float lZAngle = -mUiManager->GetInputManager()->GetCursorX();
 	//const float lXAngle = -mUiManager->GetInputManager()->GetCursorY();

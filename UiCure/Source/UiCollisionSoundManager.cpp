@@ -18,7 +18,7 @@ namespace UiCure
 
 
 
-#define MINIMUM_PLAYED_VOLUME	0.3f
+#define MINIMUM_PLAYED_VOLUME_FACTOR	0.3f
 
 
 
@@ -26,12 +26,19 @@ CollisionSoundManager::CollisionSoundManager(Cure::GameManager* pGameManager, Ui
 	mGameManager(pGameManager),
 	mUiManager(pUiManager)
 {
+	SetScale(50, 0.5f);
 }
 
 CollisionSoundManager::~CollisionSoundManager()
 {
 	mUiManager = 0;
 	mGameManager = 0;
+}
+
+void CollisionSoundManager::SetScale(float pSmallMass, float pLightImpact)
+{
+	mSmallMass = pSmallMass;
+	mLightImpact = pLightImpact;
 }
 
 void CollisionSoundManager::AddSound(const str& pName, const SoundResourceInfo& pInfo)
@@ -104,14 +111,14 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 	{
 		return;
 	}
-	float lImpact = pObject1->GetImpact(mGameManager->GetPhysicsManager()->GetGravity(), pForce, pTorque*0.01f, 50);
-	if (lImpact < 0.5f)
+	float lImpact = pObject1->GetImpact(mGameManager->GetPhysicsManager()->GetGravity(), pForce, pTorque*0.01f, mSmallMass);
+	if (lImpact < mLightImpact)
 	{
 		if (!pIsLoud)
 		{
 			return;
 		}
-		lImpact = 0.5f;
+		lImpact = mLightImpact;
 	}
 
 	const TBC::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
@@ -153,7 +160,7 @@ void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKe
 	const str& lMaterial = pGeometryKey->GetMaterial();
 	SoundResourceInfo lResource;
 	bool lGotSound = HashUtil::TryFindMapObject(mSoundNameMap, lMaterial, lResource);
-	lGotSound &= (SoundInfo::GetVolume(pImpact, lResource) >= MINIMUM_PLAYED_VOLUME);
+	lGotSound &= (SoundInfo::GetVolume(pImpact, lResource) >= mLightImpact*MINIMUM_PLAYED_VOLUME_FACTOR);
 	if (!lGotSound)
 	{
 		return;
@@ -220,9 +227,10 @@ CollisionSoundManager::SoundResourceInfo::SoundResourceInfo():
 {
 }
 
-CollisionSoundManager::SoundResourceInfo::SoundResourceInfo(float pStrength, float pMinimumClamp):
+CollisionSoundManager::SoundResourceInfo::SoundResourceInfo(float pStrength, float pMinimumClamp, float pPitchFactor):
 	mStrength(pStrength),
-	mMinimumClamp(pMinimumClamp)
+	mMinimumClamp(pMinimumClamp),
+	mPitchFactor(pPitchFactor)
 {
 }
 
@@ -249,7 +257,15 @@ CollisionSoundManager::SoundInfo::~SoundInfo()
 void CollisionSoundManager::SoundInfo::UpdateImpact()
 {
 	mVolume = GetVolume(mBaseImpact, mResourceInfo);
-	mPitch = 1;
+	if (!mResourceInfo.mPitchFactor)
+	{
+		mPitch = 1;
+	}
+	else
+	{
+		const float lTargetPitch = Math::Clamp(mBaseImpact, mResourceInfo.mMinimumClamp, 1.5f);
+		mPitch = Math::Lerp(1.0f, lTargetPitch, mResourceInfo.mPitchFactor);
+	}
 }
 
 float CollisionSoundManager::SoundInfo::GetVolume(float pBaseImpact, const SoundResourceInfo& pResourceInfo)
