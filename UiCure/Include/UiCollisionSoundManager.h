@@ -50,7 +50,7 @@ public:
 
 	CollisionSoundManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager);
 	virtual ~CollisionSoundManager();
-	void SetScale(float pSmallMass, float pLightImpact);
+	void SetScale(float pSmallMass, float pLightImpact, float pSoundCutoffDuration);
 
 	void AddSound(const str& pName, const SoundResourceInfo& pInfo);
 
@@ -121,6 +121,7 @@ private:
 	Vector3DF mCameraPosition;
 	float mSmallMass;
 	float mLightImpact;
+	float mSoundCutoffDuration;
 	SoundMap mSoundMap;
 	SoundNameMap mSoundNameMap;
 

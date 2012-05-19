@@ -373,7 +373,7 @@ bool CreateWorld(AgentData& pAgentData)
 		Lepra::Vector3DF lClientPosition(-lFloorSize/2+y*lClientSize*4, 0, lClientSize*10);
 		lClientPlacement.SetPosition(lClientPosition);
 		lPhysicsId = pAgentData.mPhysics->CreateSphere(true, lClientPlacement, lClientSize, lClientSize, TBC::PhysicsManager::DYNAMIC, 1, 1.0f);
-		pAgentData.mPhysics->ActivateGravity(lPhysicsId);
+		pAgentData.mPhysics->EnableGravity(lPhysicsId, true);
 		lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(lClientSize, lClientSize, lClientSize, 10, 10);
 		lGeometry->SetAlwaysVisible(true);
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(

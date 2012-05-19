@@ -18,7 +18,7 @@ namespace UiCure
 
 
 
-#define MINIMUM_PLAYED_VOLUME_FACTOR	0.3f
+#define MINIMUM_PLAYED_VOLUME_FACTOR	0.6f
 
 
 
@@ -26,7 +26,7 @@ CollisionSoundManager::CollisionSoundManager(Cure::GameManager* pGameManager, Ui
 	mGameManager(pGameManager),
 	mUiManager(pUiManager)
 {
-	SetScale(50, 0.5f);
+	SetScale(50, 0.5f, 0.2f);
 }
 
 CollisionSoundManager::~CollisionSoundManager()
@@ -35,10 +35,11 @@ CollisionSoundManager::~CollisionSoundManager()
 	mGameManager = 0;
 }
 
-void CollisionSoundManager::SetScale(float pSmallMass, float pLightImpact)
+void CollisionSoundManager::SetScale(float pSmallMass, float pLightImpact, float pSoundCutoffDuration)
 {
 	mSmallMass = pSmallMass;
 	mLightImpact = pLightImpact;
+	mSoundCutoffDuration = pSoundCutoffDuration;
 }
 
 void CollisionSoundManager::AddSound(const str& pName, const SoundResourceInfo& pInfo)
@@ -101,13 +102,7 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 	{
 		return;
 	}
-	//Vector3DF lVelocity1;
-	//Vector3DF lVelocity2;
-	//mGameManager->GetPhysicsManager()->GetBodyVelocity(pBody1Id, lVelocity1);
-	//mGameManager->GetPhysicsManager()->GetBodyVelocity(pBody2Id, lVelocity2);
-	//float lVelocitySquare = lVelocity1.GetDistanceSquared(lVelocity2);
-	//if (lVelocitySquare < 0.2f)
-	if (pObject1->GetVelocity().GetDistanceSquared(pObject2->GetVelocity()) < 0.2f)
+	if (pObject1->GetVelocity().GetDistanceSquared(pObject2->GetVelocity()) < mLightImpact)
 	{
 		return;
 	}
@@ -126,7 +121,7 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 	if (lSoundInfo)
 	{
 		const double lTime = (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)? mUiManager->GetSoundManager()->GetStreamTime(lSoundInfo->mSound->GetRamData()) : 0;
-		if (lTime < 0.2f)
+		if (lTime < mSoundCutoffDuration)
 		{
 			if (lImpact > lSoundInfo->mBaseImpact * 1.2f)
 			{
@@ -137,7 +132,7 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 		}
 		else
 		{
-			// Either we are much newer, or our volume is much higher. Replay!
+			// We are newer! Replay!
 			StopSound(lKey);
 			PlaySound(lKey, pPosition, lImpact);
 		}
@@ -263,7 +258,7 @@ void CollisionSoundManager::SoundInfo::UpdateImpact()
 	}
 	else
 	{
-		const float lTargetPitch = Math::Clamp(mBaseImpact, mResourceInfo.mMinimumClamp, 1.5f);
+		const float lTargetPitch = Math::Clamp(mBaseImpact, mResourceInfo.mMinimumClamp, 1.0f);
 		mPitch = Math::Lerp(1.0f, lTargetPitch, mResourceInfo.mPitchFactor);
 	}
 }

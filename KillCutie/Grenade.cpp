@@ -62,7 +62,7 @@ void Grenade::Launch()
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
 
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
+	GetManager()->GetGameManager()->GetPhysicsManager()->EnableGravity(lGeometry->GetBodyId(), true);
 	Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 
