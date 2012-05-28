@@ -85,6 +85,10 @@ bool Game::Tick()
 void Game::SetRacketForce(float pLiftFactor, const Vector3DF& pDown)
 {
 	mRacketLiftFactor = pLiftFactor;
+	if (::fabs(mRacketLiftFactor) > mRacketRecentLiftFactor)
+	{
+		mRacketRecentLiftFactor = ::fabs(mRacketLiftFactor);
+	}
 	mRacketDownDirection = pDown;
 }
 
@@ -158,14 +162,17 @@ void Game::MoveRacket()
 		f *= 50;
 		f *= f;
 		Vector3DF lForce = lDirectionHome * f;
-		lForce -= lRacketLinearVelocity * 16;
-		const float lRacketHitFactor = 100.0f;
-		lForce.z += mRacketLiftFactor * lRacketHitFactor;
-		mRacketLiftFactor = 0;
+		lForce -= 14 * lRacketLinearVelocity;
+		float lUserForceFactor = mRacketRecentLiftFactor * 4;
+		lUserForceFactor = std::min(1.0f, lUserForceFactor);
+		const float lRacketAcceleration = 300.0f * mRacketLiftFactor;
+		const float zForce = Math::Lerp(lForce.z, lRacketAcceleration, lUserForceFactor);
+		lForce.z = zForce;
+		mRacketRecentLiftFactor = Math::Lerp(mRacketRecentLiftFactor, 0.0f, 0.55f);
 		f = lForce.GetLength();
-		if (f > 50)
+		if (f > 100)
 		{
-			lForce *= 50 / f;
+			lForce *= 100 / f;
 		}
 		//mLog.Infof(_T("force = (%f, %f, %f)"), lForce.x, lForce.y, lForce.z);
 		GetPhysicsManager()->AddForce(
