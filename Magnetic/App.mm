@@ -8,6 +8,7 @@
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
 #import <iAd/ADBannerView.h>
+#include "../Lepra/Include/Vector3D.h"
 #endif // iOS
 
 
@@ -26,6 +27,7 @@ using namespace Lepra;
 	Canvas* _canvas;
 	NSTimer* _animationTimer;
 	bool _adInitialized;
+	float _identityFactor;
 }
 
 +(void) storeHiscoreName;
@@ -67,6 +69,7 @@ using namespace Lepra;
 	_canvas = pCanvas;
 	_animationTimer = nil;
 	_adInitialized = false;
+	_identityFactor = 1.0f;
 
 	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:1.0/FPS/2];
 	[[UIAccelerometer sharedAccelerometer] setDelegate:self];
@@ -119,6 +122,10 @@ using namespace Lepra;
 -(void) accelerometer:(UIAccelerometer*)accelerometer didAccelerate:(UIAcceleration*)acceleration
 {
 	Vector3DF lAcceleration(acceleration.x, acceleration.y, acceleration.z);
+	const float lLength = std::max(0.1f, lAcceleration.GetLength());
+	_identityFactor = Math::Lerp(_identityFactor, 1/lLength, 0.005f);
+	lAcceleration *= _identityFactor;
+	//NSLog(@"mom.acc: %f, sliding avg.inv.acc: %f", lLength, _identityFactor);
 	float lLiftFactor = lAcceleration.GetLength() - 1;
 	Magnetic::App::GetApp()->SetRacketForce(lLiftFactor, lAcceleration);
 }

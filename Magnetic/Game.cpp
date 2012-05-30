@@ -84,11 +84,7 @@ bool Game::Tick()
 
 void Game::SetRacketForce(float pLiftFactor, const Vector3DF& pDown)
 {
-	mRacketLiftFactor = pLiftFactor;
-	if (::fabs(mRacketLiftFactor) > mRacketRecentLiftFactor)
-	{
-		mRacketRecentLiftFactor = ::fabs(mRacketLiftFactor);
-	}
+	mRacketLiftFactor = (pDown.z > 0)? -pLiftFactor : pLiftFactor;
 	mRacketDownDirection = pDown;
 }
 
@@ -162,13 +158,12 @@ void Game::MoveRacket()
 		f *= 50;
 		f *= f;
 		Vector3DF lForce = lDirectionHome * f;
-		lForce -= 14 * lRacketLinearVelocity;
-		float lUserForceFactor = mRacketRecentLiftFactor * 4;
+		lForce -= lRacketLinearVelocity * 10;
+		float lUserForceFactor = ::fabs(mRacketLiftFactor) * 1.7f;
 		lUserForceFactor = std::min(1.0f, lUserForceFactor);
-		const float lRacketAcceleration = 300.0f * mRacketLiftFactor;
+		const float lRacketAcceleration = 250.0f * mRacketLiftFactor;
 		const float zForce = Math::Lerp(lForce.z, lRacketAcceleration, lUserForceFactor);
 		lForce.z = zForce;
-		mRacketRecentLiftFactor = Math::Lerp(mRacketRecentLiftFactor, 0.0f, 0.55f);
 		f = lForce.GetLength();
 		if (f > 100)
 		{

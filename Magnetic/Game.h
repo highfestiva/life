@@ -135,7 +135,6 @@ private:
 	Racket* mRacket;
 	Ball* mBall;
 	float mRacketLiftFactor;
-	float mRacketRecentLiftFactor;
 	Vector3DF mRacketDownDirection;
 
 	LOG_CLASS_DECLARE();
