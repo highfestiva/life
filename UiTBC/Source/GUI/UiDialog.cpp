@@ -169,18 +169,38 @@ void Dialog::UpdateLayout()
 	if (lButtonCount)
 	{
 		Button* lButton = mButtonList[0];
-		PixelCoord lButtonSize = lButton->GetPreferredSize();
-		const int lSpacePerEach = lButtonSize.x*3/2;
-		const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
-		int x = lSize.x/2 + lHalfGap - lSpacePerEach*lButtonCount/2;
-		const int y = mLabel? lSize.y/2 : lSize.y/2-lButtonSize.y/2;
-		for (int i = 0; i < lButtonCount; ++i)
+		const PixelCoord lButtonSize = lButton->GetPreferredSize();
+		if (lSize.x > lSize.y)
 		{
-			Button* lButton = mButtonList[i];
-			if (lButton->GetTag() >= 0)
+			const int lSpacePerEach = lButtonSize.x*3/2;
+			const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
+			int x = lSize.x/2 + lHalfGap - lSpacePerEach*lButtonCount/2;
+			const int y = mLabel? lSize.y/2 : lSize.y/2-lButtonSize.y/2;
+			for (int i = 0; i < lButtonCount; ++i)
 			{
-				lButton->SetPos(PixelCoord(x, y) + mOffset);
-				x += lSpacePerEach;
+				Button* lButton = mButtonList[i];
+				if (lButton->GetTag() >= 0)
+				{
+					lButton->SetPos(PixelCoord(x, y) + mOffset);
+					x += lSpacePerEach;
+				}
+			}
+		}
+		else
+		{
+			const int lSpacePerEach = lButtonSize.y*3/2;
+			const int lHalfGap = (lSpacePerEach - lButtonSize.y)/2;
+			const int x = lSize.x/2 - lButtonSize.x/2;
+			int y = lSize.y/2 + lHalfGap - lSpacePerEach*lButtonCount/2;
+			y += mLabel? lButtonSize.y/2 : 0;
+			for (int i = 0; i < lButtonCount; ++i)
+			{
+				Button* lButton = mButtonList[i];
+				if (lButton->GetTag() >= 0)
+				{
+					lButton->SetPos(PixelCoord(x, y) + mOffset);
+					y += lSpacePerEach;
+				}
 			}
 		}
 	}

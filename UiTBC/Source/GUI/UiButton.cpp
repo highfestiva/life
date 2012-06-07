@@ -316,7 +316,7 @@ void Button::RepaintBackground(Painter* pPainter)
 
 void Button::RepaintComponents(Painter* pPainter)
 {
-	if (NeedsRepaint() || GetBorderWidth() > 0)
+	if (NeedsRepaint() && GetBorderWidth() > 0)
 	{
 		Parent::RepaintComponents(pPainter);
 	}

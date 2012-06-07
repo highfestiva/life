@@ -38,7 +38,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
 	mRacket(0),
 	mBall(0),
-	mRacketLiftFactor(0)
+	mRacketLiftFactor(0),
+	mScore(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->SetScale(0.05f, 0.1f, 0.1f);
@@ -88,7 +89,7 @@ void Game::SetRacketForce(float pLiftFactor, const Vector3DF& pDown)
 	mRacketDownDirection = pDown;
 }
 
-void Game::MoveRacket()
+bool Game::MoveRacket()
 {
 	if (GetRacket() && GetRacket()->IsLoaded() &&
 		GetBall() && GetBall()->IsLoaded())
@@ -126,6 +127,7 @@ void Game::MoveRacket()
 			GetPhysicsManager()->SetBodyVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketLinearVelocity);
 			lRacketAngularVelocity.Set(0, 0, 0);
 			GetPhysicsManager()->SetBodyAngularVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketAngularVelocity);
+			return false;
 		}
 		Vector3DF lHome;
 		const float h = lBallPosition.z - lRacketTransform.GetPosition().z;
@@ -199,6 +201,7 @@ void Game::MoveRacket()
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lTorque);
 	}
+	return true;
 }
 
 Racket* Game::GetRacket() const
@@ -209,6 +212,16 @@ Racket* Game::GetRacket() const
 Ball* Game::GetBall() const
 {
 	return mBall;
+}
+
+void Game::ResetScore()
+{
+	mScore = 0;
+}
+
+double Game::GetScore() const
+{
+	return mScore;
 }
 
 

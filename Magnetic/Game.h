@@ -101,9 +101,11 @@ public:
 	virtual bool Tick();
 
 	void SetRacketForce(float pLiftFactor, const Vector3DF& pDown);
-	void MoveRacket();
+	bool MoveRacket();
 	Racket* GetRacket() const;
 	Ball* GetBall() const;
+	void ResetScore();
+	double GetScore() const;
 
 	bool Render();
 	bool Paint();
@@ -136,6 +138,7 @@ private:
 	Ball* mBall;
 	float mRacketLiftFactor;
 	Vector3DF mRacketDownDirection;
+	double mScore;
 
 	LOG_CLASS_DECLARE();
 };
