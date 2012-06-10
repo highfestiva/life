@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="Magnetic"
+	Name="Bounce"
 	ProjectGUID="{62C34C1E-4E3F-C492-C39D-69B8FCCDBCC1}"
-	RootNamespace="Magnetic"
+	RootNamespace="Bounce"
 	Keyword="ManagedCProj"
 	TargetFrameworkVersion="0"
 	>
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Netapi32.lib"
-				OutputFile="$(OutDir)\Magnetic.exe"
+				OutputFile="$(OutDir)\Bounce.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrtd.lib"
@@ -147,7 +147,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Netapi32.lib"
-				OutputFile="$(OutDir)\Magnetic.exe"
+				OutputFile="$(OutDir)\Bounce.exe"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateMapFile="true"
@@ -226,7 +226,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Netapi32.lib"
-				OutputFile="$(OutDir)\Magnetic.exe"
+				OutputFile="$(OutDir)\Bounce.exe"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
@@ -305,7 +305,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Netapi32.lib"
-				OutputFile="$(OutDir)\Magnetic.exe"
+				OutputFile="$(OutDir)\Bounce.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrtd.lib"
@@ -387,7 +387,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Netapi32.lib"
-				OutputFile="$(OutDir)\Magnetic.exe"
+				OutputFile="$(OutDir)\Bounce.exe"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -467,7 +467,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Netapi32.lib"
-				OutputFile="$(OutDir)\Magnetic.exe"
+				OutputFile="$(OutDir)\Bounce.exe"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
@@ -537,11 +537,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Icons\Magnetic.ico"
+				RelativePath=".\Icons\Bounce.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\Magnetic.rc"
+				RelativePath=".\Bounce.rc"
 				>
 			</File>
 			<File

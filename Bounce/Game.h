@@ -31,7 +31,7 @@ class GameUiManager;
 
 
 
-namespace Magnetic
+namespace Bounce
 {
 
 

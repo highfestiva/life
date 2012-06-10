@@ -47,7 +47,7 @@
 
 
 
-namespace Magnetic
+namespace Bounce
 {
 
 
@@ -200,11 +200,11 @@ public:
 
 
 
-LEPRA_RUN_APPLICATION(Magnetic::App, UiLepra::UiMain);
+LEPRA_RUN_APPLICATION(Bounce::App, UiLepra::UiMain);
 
 
 
-namespace Magnetic
+namespace Bounce
 {
 
 
@@ -306,7 +306,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mUiManager->GetDisplayManager()->SetCaption(_T("Magnetic"));
+		mUiManager->GetDisplayManager()->SetCaption(_T("Bounce"));
 #if !defined(LEPRA_TOUCH)
 		mIsMouseDown = false;
 		mUiManager->GetInputManager()->GetMouse()->AddFunctor(new UiLepra::TInputFunctor<App>(this, &App::OnMouseInput));
@@ -411,7 +411,7 @@ int App::Run()
 	UiCure::Init();
 	Network::Start();
 
-	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("Magnetic")), _T("log"), _T("txt"));
+	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("Bounce")), _T("log"), _T("txt"));
 	FileLogListener lFileLogger(lLogName);
 	{
 		LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&mConsoleLogger, &mDebugLogger, &lFileLogger, 0, 0);

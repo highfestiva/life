@@ -18,7 +18,7 @@ class ContextPath;
 
 
 
-namespace Magnetic
+namespace Bounce
 {
 
 

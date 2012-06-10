@@ -404,11 +404,11 @@ def zipdata_kc():
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
 
-def builddata_m():
-	_builddata("Magnetic", bindir, default_build_mode)
+def builddata_b():
+	_builddata("Bounce", bindir, default_build_mode)
 
-def zipdata_m():
-	os.chdir('Magnetic/Data')
+def zipdata_b():
+	os.chdir('Bounce/Data')
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
 

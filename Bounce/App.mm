@@ -57,7 +57,7 @@ using namespace Lepra;
 +(void) storeHiscoreName
 {
 	str lLastHiscoreName;
-	CURE_RTVAR_GET(lLastHiscoreName, =, Magnetic::App::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, _T(""));
+	CURE_RTVAR_GET(lLastHiscoreName, =, Bounce::App::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, _T(""));
 	NSString* name = [MacLog::Encode(lLastHiscoreName) retain];
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	[defaults setObject:name forKey:HISCORE_NAME_KEY];
@@ -122,7 +122,7 @@ using namespace Lepra;
 			[lGlView addSubview:adView];
 		}
 		lGlView.canvas = _canvas;
-		Magnetic::App::GetApp()->Poll();
+		Bounce::App::GetApp()->Poll();
 		[self dropFingerMovements];
 	}
 }
@@ -135,13 +135,13 @@ using namespace Lepra;
 	lAcceleration *= _identityFactor;
 	//NSLog(@"mom.acc: %f, sliding avg.inv.acc: %f", lLength, _identityFactor);
 	float lLiftFactor = lAcceleration.GetLength() - 1;
-	Magnetic::App::GetApp()->SetRacketForce(lLiftFactor, lAcceleration);
+	Bounce::App::GetApp()->SetRacketForce(lLiftFactor, lAcceleration);
 }
 
--(Magnetic::FingerMovement&) getFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
+-(Bounce::FingerMovement&) getFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
 {
-	Magnetic::FingerMoveList::iterator i = Magnetic::gFingerMoveList.begin();
-	for (; i != Magnetic::gFingerMoveList.end(); ++i)
+	Bounce::FingerMoveList::iterator i = Bounce::gFingerMoveList.begin();
+	for (; i != Bounce::gFingerMoveList.end(); ++i)
 	{
 		//NSLog(@"get: (%i; %i) ==? (%i; %i)", (int)i->mLastX, (int)i->mLastY, (int)pLocation.x, (int)pLocation.y);
 		if (i->Update(pPrevious.x, pPrevious.y, pLocation.x, pLocation.y))
@@ -150,18 +150,18 @@ using namespace Lepra;
 			return *i;
 		}
 	}
-	Magnetic::gFingerMoveList.push_back(Magnetic::FingerMovement(pLocation.x, pLocation.y));
-	return Magnetic::gFingerMoveList.back();
+	Bounce::gFingerMoveList.push_back(Bounce::FingerMovement(pLocation.x, pLocation.y));
+	return Bounce::gFingerMoveList.back();
 }
 
 -(void) dropFingerMovements
 {
-	Magnetic::FingerMoveList::iterator i = Magnetic::gFingerMoveList.begin();
-	for (; i != Magnetic::gFingerMoveList.end();)
+	Bounce::FingerMoveList::iterator i = Bounce::gFingerMoveList.begin();
+	for (; i != Bounce::gFingerMoveList.end();)
 	{
 		if (!i->mIsPress)
 		{
-			Magnetic::gFingerMoveList.erase(i++);
+			Bounce::gFingerMoveList.erase(i++);
 			//return;
 		}
 		else
@@ -194,15 +194,15 @@ using namespace Lepra;
 		CGPoint lTapPosition = [self xform:[lTouch locationInView:nil]];
 		CGPoint lPrevTapPosition = [self xform:[lTouch previousLocationInView:nil]];
 		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
-		Magnetic::FingerMovement& lMove = [self getFingerMovement:lTapPosition previous:lPrevTapPosition];
+		Bounce::FingerMovement& lMove = [self getFingerMovement:lTapPosition previous:lPrevTapPosition];
 		lMove.mIsPress = lIsPressed;
-		/*Magnetic::App::OnTap(lMove);
+		/*Bounce::App::OnTap(lMove);
 		if (!lIsPressed)
 		{
 			[self dropFingerMovement:lTapPosition previous:lPrevTapPosition];
 		}*/
 
-		//Magnetic::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
+		//Bounce::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
 	}
 }
 
