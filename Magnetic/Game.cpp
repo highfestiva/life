@@ -272,6 +272,12 @@ void Game::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const 
 {
 	(void)pBody2Id;
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 2000, false);
+
+	const float lForce = pForce.GetLength();
+	if (pObject1 == mBall && lForce > 1.0f)
+	{
+		mScore += ::sqrt(lForce) * 20;
+	}
 }
 
 bool Game::OnPhysicsSend(Cure::ContextObject* pObject)

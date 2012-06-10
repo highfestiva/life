@@ -71,6 +71,14 @@ using namespace Lepra;
 	_adInitialized = false;
 	_identityFactor = 1.0f;
 
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	double time = [defaults doubleForKey:@"FirstStartTime"];
+	if (!time)
+	{
+		time = HiResTimer::GetSystemCounter() * HiResTimer::GetPeriod();
+		[defaults setDouble: forKey:@"FirstStartTime"];
+	}
+
 	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:1.0/FPS/2];
 	[[UIAccelerometer sharedAccelerometer] setDelegate:self];
 

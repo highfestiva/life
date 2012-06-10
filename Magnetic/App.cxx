@@ -36,6 +36,7 @@
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiMessageDialog.h"
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
+#include "../UiTBC/Include/GUI/UiTextArea.h"
 #include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiFontManager.h"
 #include "Ball.h"
@@ -101,8 +102,10 @@ public:
 	virtual int PollTap(FingerMovement& pMovement);
 
 	typedef void (App::*ButtonAction)(UiTbc::Button*);
+	void Reset();
 	void MainMenu(bool pIsPause);
 	void HiscoreMenu();
+	void NumberDialog();
 	void EnterHiscore(const str& pMessage, const Color& pColor);
 	void CreateHiscoreAgent();
 	void UpdateHiscore(bool pError);
@@ -110,7 +113,11 @@ public:
 	void OnTapSound(UiTbc::Button* pButton);
 	void OnMainMenuAction(UiTbc::Button* pButton);
 	void OnHiscoreMenuAction(UiTbc::Button* pButton);
+	void OnWhatsThisClick(UiTbc::Button* pButton);
+	void OnGoToMainMenuDialogAction(UiTbc::Button* pButton);
 	void OnEnterHiscoreAction(UiTbc::Button* pButton);
+	int GetExecutionCount() const;
+	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	UiTbc::Button* CreateButton(const str& pText, const Color& pColor);
 	UiTbc::Dialog* CreateTbcDialog(ButtonAction pAction);
 
@@ -586,10 +593,17 @@ bool App::Poll()
 	{
 		if (!mGame->MoveRacket())
 		{
-			MainMenu(false);
+			if (mGame->GetScore() >= 1000)
+			{
+				EnterHiscore(_T("You've hit the hiscore list, enter your name"), LIGHT_GRAY);
+			}
+			else
+			{
+				MainMenu(false);
+			}
 		}
 	}
-	bool lIsPaused = (mDialog != 0);
+	bool lIsPaused = (mDialog != 0 || mHiscoreAgent != 0);
 	if (lOk && !lIsPaused)
 	{
 		mGame->BeginTick();
@@ -607,14 +621,20 @@ bool App::Poll()
 	{
 		mUiManager->Paint(false);
 		mGame->Paint();
+		mUiManager->GetPainter()->SetColor(OFF_BLACK, 0);
+
+		if (!lIsPaused)
+		{
+			const str lScore = _T("Score: ") + Int2Str((int)Math::Round(mGame->GetScore()));
+			PrintText(lScore, 0, 160, mUiManager->GetCanvas()->GetHeight() - 20);
+		}
 
 		if (mHiscoreAgent)
 		{
-			mUiManager->GetPainter()->SetColor(WHITE, 0);
 			const str lInfo = _T("Speaking to score server");
-			//PrintText(lInfo, 0,
-			//	mUiManager->GetCanvas()->GetWidth()/2,
-			//	mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight());
+			PrintText(lInfo, 0,
+				mUiManager->GetCanvas()->GetWidth()/2,
+				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight());
 		}
 	}
 	if (lOk && !lIsPaused)
@@ -763,6 +783,11 @@ int App::PollTap(FingerMovement& pMovement)
 
 
 
+void App::Reset()
+{
+	mGame->ResetScore();
+}
+
 void App::MainMenu(bool pIsPause)
 {
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
@@ -790,7 +815,7 @@ void App::HiscoreMenu()
 
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnHiscoreMenuAction);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("Hiscore ") + gLevelName + _T("/") + gAvatarName, mBigFontId);
+	d->SetQueryLabel(_T("High Score List"), mBigFontId);
 	UiTbc::Button* lMainMenuButton = ICONBTNA("btn_back.png", "");
 	lMainMenuButton->SetPreferredSize(d->GetPreferredSize());
 	d->AddButton(-1, lMainMenuButton);
@@ -801,34 +826,42 @@ void App::HiscoreMenu()
 	}
 }
 
+void App::NumberDialog()
+{
+	UiTbc::Dialog* d = CreateTbcDialog(&App::OnGoToMainMenuDialogAction);
+	d->SetOffset(PixelCoord(0, -30));
+	const str lExecutionCount = Int2Str(GetExecutionCount());
+	d->SetQueryLabel(lExecutionCount, mBigFontId);
+	UiTbc::Button* lWhatsThis = CreateButton(_T("What's this?"), Color(150, 30, 30));
+	d->AddButton(1, lWhatsThis);
+	lWhatsThis->SetOnClick(App, OnWhatsThisClick);
+	d->AddButton(2, CreateButton(_T("Main menu"), Color(30, 150, 30)));
+}
+
 void App::EnterHiscore(const str& pMessage, const Color& pColor)
 {
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(" points)"), mBigFontId);
+	d->SetQueryLabel(_T("Wow - ")+Int2Str((int)mGame->GetScore())+_T(" points"), mBigFontId);
 	if (!pMessage.empty())
 	{
 		UiTbc::Label* lMessage = new UiTbc::Label;
 		lMessage->SetText(pMessage, pColor, CLEAR_COLOR);
 		const int lStringWidth = mUiManager->GetPainter()->GetStringWidth(pMessage);
-		d->AddChild(lMessage, d->GetSize().x/2 - lStringWidth/2, 80);
+		d->AddChild(lMessage, d->GetSize().x/2 - lStringWidth/2, 90);
 	}
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
 	mHiscoreTextField->SetText(CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_HISCORE_NAME, _T("")));
-	mHiscoreTextField->SetPreferredSize(205, 25, false);
-#ifdef LEPRA_TOUCH_LOOKANDFEEL
-	d->AddChild(mHiscoreTextField, 70, 97);
-#else // Computer
-	d->AddChild(mHiscoreTextField, 70, 130);
-#endif // Touch / computer
+	mHiscoreTextField->SetPreferredSize(170, 25, false);
+	d->AddChild(mHiscoreTextField, 15, 107);
 	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
 	UiTbc::Button* lCancelButton = new UiTbc::Button(_T("cancel"));
 	Color c = Color(180, 50, 40);
 	lCancelButton->SetBaseColor(c);
 	lCancelButton->SetText(_T("Cancel"), FGCOLOR_DIALOG, CLEAR_COLOR);
 	lCancelButton->SetRoundedStyle(8);
-	lCancelButton->SetPreferredSize(300-mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
+	lCancelButton->SetPreferredSize(250-mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
 	d->AddButton(-1, lCancelButton);
 	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
 }
@@ -838,7 +871,7 @@ void App::CreateHiscoreAgent()
 	delete mHiscoreAgent;
 	const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
 	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("bounce_master"));
-	//mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("kill_cutie"));
+	//mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("bounce_master"));
 }
 
 void App::UpdateHiscore(bool pError)
@@ -902,7 +935,7 @@ void App::UpdateHiscore(bool pError)
 	mUiManager->GetFontManager()->SetActiveFont(mMonospacedFontId);
 	const int lCharWidth = mUiManager->GetFontManager()->GetStringWidth(_T(" "));
 	mUiManager->GetFontManager()->SetActiveFont(lPreviousFontId);
-	mDialog->AddChild(lText, 110 - lPositionDigits/2 * lCharWidth, 75);
+	mDialog->AddChild(lText, 50 - lPositionDigits/2 * lCharWidth, 95);
 }
 
 void App::OnAction(UiTbc::Button* pButton)
@@ -929,6 +962,11 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	mDialog = 0;
 	switch (pButton->GetTag())
 	{
+		case 1:
+		{
+			Reset();
+		}
+		break;
 		case 2:
 		{
 			HiscoreMenu();
@@ -936,12 +974,31 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		break;
 		case 3:
 		{
+			NumberDialog();
 		}
 		break;
 	}
 }
 
 void App::OnHiscoreMenuAction(UiTbc::Button* /*pButton*/)
+{
+	mDialog = 0;
+	MainMenu(false);
+}
+
+void App::OnWhatsThisClick(UiTbc::Button* pButton)
+{
+	const int y = pButton->GetPos().y - 10;
+	mDialog->RemoveChild(pButton, 0);
+	UiTbc::TextArea* lLabel = new UiTbc::TextArea(CLEAR_COLOR);
+	lLabel->SetPreferredSize(280, 60);
+	lLabel->SetFontColor(LIGHT_GRAY);
+	lLabel->AddText(_T("This is the number of people executed in\nping-pong nation China since you first\nstarted this app."));
+	mDialog->AddChild(lLabel);
+	lLabel->SetPos(20, y);
+}
+
+void App::OnGoToMainMenuDialogAction(UiTbc::Button*)
 {
 	mDialog = 0;
 	MainMenu(false);
@@ -973,7 +1030,41 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 	}
 	else if (pButton->GetTag() == -1)
 	{
+		mDialog = 0;
 		MainMenu(false);
+	}
+}
+
+int App::GetExecutionCount() const
+{
+#ifdef LEPRA_IOS
+	const double lStartTime = [defaults doubleForKey:@"FirstStartTime"];
+#else // !iOS
+	const double lStartTime = 0;
+#endif // iOS / !iOS
+	const double lCurrentTime = HiResTimer::GetSystemCounter() * HiResTimer::GetPeriod();
+	const double lDiff = lCurrentTime - lStartTime;
+	const double lExecutions = 5000 * lDiff / 365 / 24 / 60 / 60;
+	return (int)Math::Round(lExecutions);
+}
+
+void App::PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const
+{
+	if (pAngle)
+	{
+		::glMatrixMode(GL_PROJECTION);
+		::glPushMatrix();
+		::glRotatef(pAngle*180/PIF, 0, 0, 1);
+	}
+	const int cx = (int)(pCenterX*cos(pAngle) + pCenterY*sin(pAngle));
+	const int cy = (int)(pCenterY*cos(pAngle) - pCenterX*sin(pAngle));
+	const int w = mUiManager->GetPainter()->GetStringWidth(pText);
+	const int h = mUiManager->GetPainter()->GetFontHeight();
+	mUiManager->GetPainter()->PrintText(pText, cx-w/2, cy-h/2);
+	if (pAngle)
+	{
+		::glPopMatrix();
+		::glMatrixMode(GL_MODELVIEW);
 	}
 }
 
