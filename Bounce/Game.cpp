@@ -163,7 +163,7 @@ bool Game::MoveRacket()
 		lForce -= lRacketLinearVelocity * 10;
 		float lUserForceFactor = ::fabs(mRacketLiftFactor) * 1.7f;
 		lUserForceFactor = std::min(1.0f, lUserForceFactor);
-		const float lRacketAcceleration = 250.0f * mRacketLiftFactor;
+		const float lRacketAcceleration = 100.0f * mRacketLiftFactor;
 		const float zForce = Math::Lerp(lForce.z, lRacketAcceleration, lUserForceFactor);
 		lForce.z = zForce;
 		f = lForce.GetLength();
@@ -276,7 +276,7 @@ void Game::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const 
 	const float lForce = pForce.GetLength();
 	if (pObject1 == mBall && lForce > 1.0f)
 	{
-		mScore += ::sqrt(lForce) * 20;
+		mScore += ::sqrt(lForce) * 34;
 	}
 }
 

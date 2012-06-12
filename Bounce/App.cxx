@@ -60,7 +60,7 @@ const str gPlatform = _T("computer");
 const str gLevelName = _T("nothing");
 const str gAvatarName = _T("no-one");
 #define BGCOLOR_DIALOG		Color(5, 20, 30, 192)
-#define FGCOLOR_DIALOG		Color(170, 170, 170, 255)
+#define FGCOLOR_DIALOG		Color(255, 255, 255, 255)
 #define RTVAR_HISCORE_NAME	"Hiscore.Name"  // Last entered name.
 #define ICONBTN(i,n)		new UiCure::IconButton(mUiManager, mResourceManager, i, n)
 #define ICONBTNA(i,n)		ICONBTN(_T(i), _T(n))
@@ -800,8 +800,11 @@ void App::Reset()
 
 void App::MainMenu(bool pIsResume)
 {
-	mIsResume = pIsResume;
-	MainMenu();
+	if (!mDialog)
+	{
+		mIsResume = pIsResume;
+		MainMenu();
+	}
 }
 
 void App::MainMenu()
@@ -812,9 +815,9 @@ void App::MainMenu()
 		return;
 	}
 	const str lPlayText = mIsResume? _T("Resume") : _T("Play");
-	d->AddButton(1, CreateButton(lPlayText, Color(30, 150, 30)));
-	d->AddButton(2, CreateButton(_T("High score"), Color(40, 70, 135)));
-	d->AddButton(3, CreateButton(_T("A number"), Color(135, 30, 30)));
+	d->AddButton(1, CreateButton(lPlayText, Color(40, 210, 40)));
+	d->AddButton(2, CreateButton(_T("High score"), Color(50, 90, 210)));
+	d->AddButton(3, CreateButton(_T("A number"), Color(210, 50, 40)));
 }
 
 void App::HiscoreMenu()
@@ -848,10 +851,10 @@ void App::NumberDialog()
 	d->SetOffset(PixelCoord(0, -30));
 	const str lExecutionCount = Int2Str(GetExecutionCount());
 	d->SetQueryLabel(lExecutionCount, mBigFontId);
-	UiTbc::Button* lWhatsThis = CreateButton(_T("What's this?"), Color(150, 30, 30));
+	UiTbc::Button* lWhatsThis = CreateButton(_T("What's this?"), Color(210, 50, 40));
 	d->AddButton(1, lWhatsThis);
 	lWhatsThis->SetOnClick(App, OnWhatsThisClick);
-	d->AddButton(2, CreateButton(_T("Main menu"), Color(30, 150, 30)));
+	d->AddButton(2, CreateButton(_T("Main menu"), Color(40, 210, 40)));
 }
 
 void App::EnterHiscore(const str& pMessage, const Color& pColor)
@@ -869,15 +872,15 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
 	mHiscoreTextField->SetText(CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_HISCORE_NAME, _T("")));
-	mHiscoreTextField->SetPreferredSize(170, 25, false);
-	d->AddChild(mHiscoreTextField, 15, 107);
+	mHiscoreTextField->SetPreferredSize(140, 25, false);
+	d->AddChild(mHiscoreTextField, 28, 107);
 	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
 	UiTbc::Button* lCancelButton = new UiTbc::Button(_T("cancel"));
-	Color c = Color(180, 50, 40);
+	Color c = Color(210, 50, 40);
 	lCancelButton->SetBaseColor(c);
 	lCancelButton->SetText(_T("Cancel"), FGCOLOR_DIALOG, CLEAR_COLOR);
 	lCancelButton->SetRoundedStyle(8);
-	lCancelButton->SetPreferredSize(250-mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
+	lCancelButton->SetPreferredSize(d->GetSize().x - mHiscoreTextField->GetPos().x*2 - mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
 	d->AddButton(-1, lCancelButton);
 	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
 }
@@ -1004,12 +1007,12 @@ void App::OnHiscoreMenuAction(UiTbc::Button* /*pButton*/)
 
 void App::OnWhatsThisClick(UiTbc::Button* pButton)
 {
-	const int y = pButton->GetPos().y - 10;
+	const int y = pButton->GetPos().y - 5;
 	mDialog->RemoveChild(pButton, 0);
 	UiTbc::TextArea* lLabel = new UiTbc::TextArea(CLEAR_COLOR);
 	lLabel->SetPreferredSize(280, 60);
 	lLabel->SetFontColor(LIGHT_GRAY);
-	lLabel->AddText(_T("This is the number of people executed\nin ping-pong nation China since you\nfirst started this app."));
+	lLabel->AddText(_T("This is the number of people executed\nin ping-pong nation China since you\ninstalled this app."));
 	mDialog->AddChild(lLabel);
 	lLabel->SetPos(20, y);
 }
