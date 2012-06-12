@@ -103,7 +103,8 @@ public:
 
 	typedef void (App::*ButtonAction)(UiTbc::Button*);
 	void Reset();
-	void MainMenu(bool pIsPause);
+	void MainMenu(bool pIsReusume);
+	void MainMenu();
 	void HiscoreMenu();
 	void NumberDialog();
 	void EnterHiscore(const str& pMessage, const Color& pColor);
@@ -156,6 +157,7 @@ public:
 	UiTbc::FontManager::FontId mBigFontId;
 	UiTbc::FontManager::FontId mMonospacedFontId;
 	UiCure::UserPainterKeepImageResource* mBackdrop;
+	bool mIsResume;
 
 	LOG_CLASS_DECLARE();
 };
@@ -223,7 +225,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mDialog(0),
 	mBigFontId(UiTbc::FontManager::INVALID_FONTID),
 	mMonospacedFontId(UiTbc::FontManager::INVALID_FONTID),
-	mBackdrop(0)
+	mBackdrop(0),
+	mIsResume(false)
 {
 	mApp = this;
 }
@@ -589,13 +592,14 @@ bool App::Poll()
 		mUiManager->InputTick();
 		PollTaps();
 	}
-	if (lOk)
+	bool lIsPaused = (mDialog != 0 || mHiscoreAgent != 0);
+	if (lOk && !lIsPaused)
 	{
 		if (!mGame->MoveRacket())
 		{
 			if (mGame->GetScore() >= 1000)
 			{
-				EnterHiscore(_T("You've hit the hiscore list, enter your name"), LIGHT_GRAY);
+				EnterHiscore(_T("Enter your name for the hiscore list"), LIGHT_GRAY);
 			}
 			else
 			{
@@ -603,7 +607,6 @@ bool App::Poll()
 			}
 		}
 	}
-	bool lIsPaused = (mDialog != 0 || mHiscoreAgent != 0);
 	if (lOk && !lIsPaused)
 	{
 		mGame->BeginTick();
@@ -689,17 +692,6 @@ void App::PollTaps()
 	Vector3DF lGravity(dx*6, 0, dy*6 - 1);
 	SetRacketForce(lGravity.GetLength() - 1, lGravity);
 
-	//const float lZAngle = -mUiManager->GetInputManager()->GetCursorX();
-	//const float lXAngle = -mUiManager->GetInputManager()->GetCursorY();
-	//QuaternionF lRotation;
-	//lRotation.RotateAroundOwnZ(lZAngle*PIF);
-	//lRotation.RotateAroundOwnX(lXAngle*PIF);
-	//Vector3DF lGravity = lRotation * Vector3DF(0, 9.82f, 0);
-
-	/*if (!mUiManager->GetInputManager()->GetMouse()->GetButton(0)->GetBooleanValue())
-	{
-		lGravity.y = 0;
-	}*/
 	if (mUiManager->GetInputManager()->GetMouse()->GetButton(1)->GetBooleanValue())
 	{
 		TBC::ChunkyPhysics* lStructure = mGame->GetBall()->GetPhysics();
@@ -777,6 +769,23 @@ void App::OnMouseInput(UiLepra::InputElement* pElement)
 
 int App::PollTap(FingerMovement& pMovement)
 {
+#ifdef LEPRA_TOUCH
+	const int lScreenWidth = mUiManager->GetCanvas()->GetWidth();
+        mUiManager->GetInputManager()->SetMousePosition(lScreenWidth - pMovement.mLastX, pMovement.mLastY);
+        if (pMovement.mIsPress)
+        {
+                mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(1);
+        }
+        else
+	{
+                // If releasing, we click-release to make sure we don't miss anything.                            
+                mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(1);
+                mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(0);
+        }
+        mUiManager->GetInputManager()->GetMouse()->GetAxis(0)->SetValue(pMovement.mLastX);
+        mUiManager->GetInputManager()->GetMouse()->GetAxis(1)->SetValue(pMovement.mLastY);
+#endif // Touch
+
 	mIsPressing |= pMovement.mIsPress;
 	return pMovement.mIsPress? 1 : -1;
 }
@@ -786,16 +795,23 @@ int App::PollTap(FingerMovement& pMovement)
 void App::Reset()
 {
 	mGame->ResetScore();
+	mGame->SetRacketForce(0, Vector3DF(0,0,-1));
 }
 
-void App::MainMenu(bool pIsPause)
+void App::MainMenu(bool pIsResume)
+{
+	mIsResume = pIsResume;
+	MainMenu();
+}
+
+void App::MainMenu()
 {
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
 	if (!d)
 	{
 		return;
 	}
-	const str lPlayText = pIsPause? _T("Resume") : _T("Play");
+	const str lPlayText = mIsResume? _T("Resume") : _T("Play");
 	d->AddButton(1, CreateButton(lPlayText, Color(30, 150, 30)));
 	d->AddButton(2, CreateButton(_T("High score"), Color(40, 70, 135)));
 	d->AddButton(3, CreateButton(_T("A number"), Color(135, 30, 30)));
@@ -983,7 +999,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 void App::OnHiscoreMenuAction(UiTbc::Button* /*pButton*/)
 {
 	mDialog = 0;
-	MainMenu(false);
+	MainMenu();
 }
 
 void App::OnWhatsThisClick(UiTbc::Button* pButton)
@@ -993,7 +1009,7 @@ void App::OnWhatsThisClick(UiTbc::Button* pButton)
 	UiTbc::TextArea* lLabel = new UiTbc::TextArea(CLEAR_COLOR);
 	lLabel->SetPreferredSize(280, 60);
 	lLabel->SetFontColor(LIGHT_GRAY);
-	lLabel->AddText(_T("This is the number of people executed in\nping-pong nation China since you first\nstarted this app."));
+	lLabel->AddText(_T("This is the number of people executed\nin ping-pong nation China since you\nfirst started this app."));
 	mDialog->AddChild(lLabel);
 	lLabel->SetPos(20, y);
 }
@@ -1001,7 +1017,7 @@ void App::OnWhatsThisClick(UiTbc::Button* pButton)
 void App::OnGoToMainMenuDialogAction(UiTbc::Button*)
 {
 	mDialog = 0;
-	MainMenu(false);
+	MainMenu();
 }
 
 void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
@@ -1025,27 +1041,28 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 		}
 		else
 		{
-			MainMenu(false);
+			MainMenu();
 		}
 	}
-	else if (pButton->GetTag() == -1)
+	else
 	{
 		mDialog = 0;
-		MainMenu(false);
+		MainMenu();
 	}
 }
 
 int App::GetExecutionCount() const
 {
 #ifdef LEPRA_IOS
-	const double lStartTime = [defaults doubleForKey:@"FirstStartTime"];
+	NSUserDefaults* lDefaults = [NSUserDefaults standardUserDefaults];
+	const double lStartTime = [lDefaults doubleForKey:@"FirstStartTime"];
 #else // !iOS
 	const double lStartTime = 0;
 #endif // iOS / !iOS
 	const double lCurrentTime = HiResTimer::GetSystemCounter() * HiResTimer::GetPeriod();
 	const double lDiff = lCurrentTime - lStartTime;
 	const double lExecutions = 5000 * lDiff / 365 / 24 / 60 / 60;
-	return (int)Math::Round(lExecutions);
+	return (int)Math::Round(lExecutions) + 1;
 }
 
 void App::PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const

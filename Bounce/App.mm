@@ -76,7 +76,7 @@ using namespace Lepra;
 	if (!time)
 	{
 		time = HiResTimer::GetSystemCounter() * HiResTimer::GetPeriod();
-		[defaults setDouble: forKey:@"FirstStartTime"];
+		[defaults setDouble:time forKey:@"FirstStartTime"];
 	}
 
 	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:1.0/FPS/2];
