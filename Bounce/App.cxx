@@ -102,7 +102,7 @@ public:
 	virtual int PollTap(FingerMovement& pMovement);
 
 	typedef void (App::*ButtonAction)(UiTbc::Button*);
-	void Reset();
+	void Reset(bool pResetScore);
 	void MainMenu(bool pIsReusume);
 	void MainMenu();
 	void HiscoreMenu();
@@ -792,9 +792,12 @@ int App::PollTap(FingerMovement& pMovement)
 
 
 
-void App::Reset()
+void App::Reset(bool pResetScore)
 {
-	mGame->ResetScore();
+	if (pResetScore)
+	{
+		mGame->ResetScore();
+	}
 	mGame->SetRacketForce(0, Vector3DF(0,0,-1));
 }
 
@@ -983,7 +986,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	{
 		case 1:
 		{
-			Reset();
+			Reset(!mIsResume);
 		}
 		break;
 		case 2:
