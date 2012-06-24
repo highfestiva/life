@@ -60,3 +60,5 @@ ipch
 */Data/*.psd
 *~
 *.so
+Doc/Dated
+Doc/getting_real.pdf
