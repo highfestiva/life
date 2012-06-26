@@ -54,7 +54,6 @@
 		B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1942D2114E08E86002F37E1 /* StoreKit.framework */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
-		B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560E13BE6C3B006A1422 /* Icon-72.png */; };
 		B196562513BE6F94006A1422 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = B196562413BE6F94006A1422 /* Default.png */; };
 		B19A141913A122CE0051A61C /* UiBorderComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */; };
 		B19A141A13A122CE0051A61C /* UiButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C313A122CE0051A61C /* UiButton.cpp */; };
@@ -529,7 +528,6 @@
 		B1942D2114E08E86002F37E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
 		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
-		B196560E13BE6C3B006A1422 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../Icons/Icon-72.png"; sourceTree = SOURCE_ROOT; };
 		B196562413BE6F94006A1422 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Icons/Default.png; sourceTree = SOURCE_ROOT; };
 		B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBorderComponent.cpp; sourceTree = "<group>"; };
 		B19A13C313A122CE0051A61C /* UiButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiButton.cpp; sourceTree = "<group>"; };
@@ -2243,7 +2241,6 @@
 			children = (
 				B1FB291E1450C8A600F1C762 /* Data */,
 				B196562413BE6F94006A1422 /* Default.png */,
-				B196560E13BE6C3B006A1422 /* Icon-72.png */,
 				B196560713BE6AB5006A1422 /* Icon.png */,
 				B196560813BE6AB5006A1422 /* Icon@2x.png */,
 			);
@@ -2317,7 +2314,6 @@
 			files = (
 				B196560B13BE6AB5006A1422 /* Icon.png in Resources */,
 				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
-				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1B644A6155AF4B700129E69 /* Data.pk3 in Resources */,
 			);
@@ -2832,6 +2828,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/gcc/so_stlg\"",
 				);
 				PRODUCT_NAME = Bounce;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -2871,6 +2868,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/gcc/so_stlg\"",
 				);
 				PRODUCT_NAME = Bounce;
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -2926,6 +2924,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/gcc/so_stlg\"",
 				);
 				PRODUCT_NAME = Bounce;
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Distribution;
