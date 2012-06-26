@@ -764,7 +764,7 @@ void ContextObject::DeleteNetworkOutputGhost()
 
 bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 {
-	const TransformationF& lTransformation = mPosition.mPosition.mTransformation;
+	const TransformationF lTransformation = mPosition.mPosition.mTransformation;	// TRICKY: don't use reference!
 	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
 		bool lOk = pStructure->FinalizeInit(0, 0, &lTransformation.GetPosition(), 0, 0);

@@ -9,8 +9,8 @@ import sys
 import rgohelp
 
 
-appnames = ["Life", "SlimeVolleyball", "KillCutie"]
-testappname = "UiCure/CureTestApp"
+#appnames = [""UiCure/CureTestApp"", "Life", "SlimeVolleyball", "KillCutie", "TireFire"]
+appnames = ["TireFire"]
 osname = rgohelp._getosname()
 hwname = rgohelp._gethwname()
 datename = rgohelp._getdatename()
@@ -150,7 +150,7 @@ def _incremental_copy_code(targetdir, buildtype):
 					obj = obj.split()[0]
 				if obj.startswith("ThirdParty/"):
 					fl += glob.glob(os.path.join(obj, lgpl_tt[buildtype], "*.dll"))
-				elif list(filter(lambda x: x, [obj.startswith(an) for an in appnames])) or obj.startswith(testappname):
+				elif list(filter(lambda x: x, [obj.startswith(an) for an in appnames])):
 					fl += glob.glob(os.path.join(obj, own_tt[buildtype], "*.exe"))
 	_incremental_copy(fl, targetdir, buildtype)
 
@@ -378,6 +378,9 @@ def macappify_slime():
 def macappify_kc():
 	_macappify("KillCutie", "Kill Cutie")
 
+def macappify_tf():
+	_macappify("TireFire", "Tire Fire")
+
 def demacappify():
 	_demacappify("*.app")
 
@@ -390,6 +393,9 @@ def cleandata_slime():
 def cleandata_kc():
 	_cleandata_source("KillCutie")
 
+def cleandata_tf():
+	_cleandata_source("TireFire")
+
 def builddata_life():
 	_builddata("Life", bindir, default_build_mode)
 
@@ -401,6 +407,14 @@ def builddata_kc():
 
 def zipdata_kc():
 	os.chdir('KillCutie/Data')
+	rgohelp._zipdir('', _include_data_files, "Data.pk3")
+	os.chdir('../../')
+
+def builddata_tf():
+	_builddata("TireFire", bindir, default_build_mode)
+
+def zipdata_tf():
+	os.chdir('TireFire/Data')
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
 
