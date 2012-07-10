@@ -1015,7 +1015,7 @@ void App::OnWhatsThisClick(UiTbc::Button* pButton)
 	UiTbc::TextArea* lLabel = new UiTbc::TextArea(CLEAR_COLOR);
 	lLabel->SetPreferredSize(280, 60);
 	lLabel->SetFontColor(LIGHT_GRAY);
-	lLabel->AddText(_T("This is the number of people executed\nin ping-pong nation China since you\ninstalled this app."));
+	lLabel->AddText(_T("This is the number of people executed\nin a certain ping-pong nation since you\ninstalled this app."));
 	mDialog->AddChild(lLabel);
 	lLabel->SetPos(20, y);
 }
