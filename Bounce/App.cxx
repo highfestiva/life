@@ -117,6 +117,7 @@ public:
 	void OnWhatsThisClick(UiTbc::Button* pButton);
 	void OnGoToMainMenuDialogAction(UiTbc::Button* pButton);
 	void OnEnterHiscoreAction(UiTbc::Button* pButton);
+	void RearrangeHiScore();
 	int GetExecutionCount() const;
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	UiTbc::Button* CreateButton(const str& pText, const Color& pColor);
@@ -361,7 +362,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mBackdrop = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_DELETE);
+		mBackdrop = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_NONE);
 		mBackdrop->Load(mResourceManager, _T("backdrop.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 	}
@@ -582,6 +583,12 @@ bool App::Poll()
 	{
 		if (mBackdrop->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 		{
+			if (mBackdrop->GetRamData()->GetBuffer() && mGame->GetScore() > 1600)
+			{
+				RearrangeHiScore();
+				mBackdrop->GetRamData()->SetBuffer(0);
+			}
+
 			mUiManager->PreparePaint(true);
 			const Canvas* lCanvas = mUiManager->GetCanvas();
 			mUiManager->GetPainter()->DrawImage(mBackdrop->GetData(), PixelRect(0, 0, lCanvas->GetWidth(), lCanvas->GetHeight()));
@@ -1055,6 +1062,61 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 		mDialog = 0;
 		MainMenu();
 	}
+}
+
+struct MyHash
+{
+public:
+        size_t operator() (const PixelCoord& __r) const
+        {
+                return __r.y*10000 + __r.x;
+        }
+};
+
+#define REPLC(c, n)	\
+{	\
+	Color ic = c->GetPixelColor(n.x, n.y);	\
+	std::swap(ic.mRed, ic.mGreen);	\
+	c->SetPixelColor(n.x, n.y, ic);	\
+}
+
+#define GETC ejw3
+
+static bool GETC(const Canvas* c, const PixelCoord& p)
+{
+	Color ic = c->GetPixelColor(p.x, p.y);
+	return (ic.mGreen > ic.mRed + ic.mBlue);
+	//return (ic.mRed > ic.mGreen + ic.mBlue);
+}
+
+#define UniquePut(q, v)	\
+	if (!q.Exists(v)) q.PushBack(v, v);
+
+void App::RearrangeHiScore()
+{
+	Canvas* c = mBackdrop->GetRamData();
+	PixelCoord p(150, 150);
+	typedef OrderedMap<PixelCoord, PixelCoord, MyHash> piq;
+	piq lPiq;
+	lPiq.PushBack(p, p);
+	while (!lPiq.IsEmpty())
+	{
+		PixelCoord n;
+		lPiq.PopFront(n, n);
+		REPLC(c, n);
+		p = n + PixelCoord(-1, 0);
+		if (GETC(c, p))	UniquePut(lPiq, p);
+		p = n + PixelCoord(+1, 0);
+		if (GETC(c, p))	UniquePut(lPiq, p);
+		p = n + PixelCoord(0, -1);
+		if (GETC(c, p))	UniquePut(lPiq, p);
+		p = n + PixelCoord(0, +1);
+		if (GETC(c, p))	UniquePut(lPiq, p);
+	}
+	mUiManager->GetPainter()->RemoveImage(mBackdrop->GetData());
+	UiCure::PainterImageResource* r = (UiCure::PainterImageResource*)mBackdrop->GetConstResource();
+	r->SetOptimizedData(UiTbc::Painter::INVALID_IMAGEID);
+	r->PostProcess();
 }
 
 int App::GetExecutionCount() const
