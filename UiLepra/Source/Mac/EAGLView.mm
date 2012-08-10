@@ -23,6 +23,7 @@ static EAGLView* gSharedView;
 
 @dynamic context;
 @synthesize canvas = _canvas;
+@synthesize baseAngle = _baseAngle;
 @synthesize isOpen;
 @synthesize responder;
 @synthesize orientationStrictness = _orientationStrictness;
@@ -237,13 +238,17 @@ static EAGLView* gSharedView;
 	{
 		if (_canvas)
 		{
+			int angle = _baseAngle;
 			switch (orientation)
 			{
-				case UIDeviceOrientationLandscapeLeft:		_canvas->SetOutputRotation(90);		break;
-				case UIDeviceOrientationLandscapeRight:		_canvas->SetOutputRotation(-90);	break;
-				case UIDeviceOrientationPortrait:		_canvas->SetOutputRotation(0);		break;
-				case UIDeviceOrientationPortraitUpsideDown:	_canvas->SetOutputRotation(180);	break;
+				case UIDeviceOrientationLandscapeLeft:		angle = 90 + _baseAngle;	break;
+				case UIDeviceOrientationLandscapeRight:		angle = -90 + _baseAngle;	break;
+				case UIDeviceOrientationPortrait:		angle = 0 + _baseAngle;		break;
+				case UIDeviceOrientationPortraitUpsideDown:	angle = 180 + _baseAngle;	break;
 			}
+			angle += (angle < -90)? 360 : 0;
+			angle -= (angle > 180)? 360 : 0;
+			_canvas->SetOutputRotation(angle);
 		}
 		[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
 	}

@@ -29,9 +29,12 @@ class DannoAI2: public SlimeAI
 		int j = xAtY(this->p2Y + this->p2VY + 30);
 		int i;
 		if (j < 600) i = 0;
-		else if (j < 700) i = 10; else {
-			i = 20;
-		}
+		else if (j < 700) i = 10;
+		else i = 20;
+
+		if (this->ballVX < 0)
+			i += (int)(Math::random()*8);
+
 		if (j < 450)
 		{
 			if (Math::abs(this->p2X - 666) < 10) move(3);

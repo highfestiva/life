@@ -130,6 +130,11 @@ void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom
 //#else // !iOS
 //	::glScissor(pLeft, GetCanvas()->GetHeight() - pBottom, pRight - pLeft, pBottom - pTop);
 //#endif // iOS/!iOS
+	if (GetCanvas()->GetOutputRotation() == 90 || GetCanvas()->GetOutputRotation() == -90)
+	{
+		std::swap(pLeft, pTop);
+		std::swap(pRight, pBottom);
+	}
 	::glScissor(pLeft, GetCanvas()->GetActualHeight() - pBottom, pRight - pLeft, pBottom - pTop);
 
 	OGL_ASSERT();

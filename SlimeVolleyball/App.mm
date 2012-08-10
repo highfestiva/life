@@ -44,34 +44,21 @@ using namespace Lepra;
 @implementation AnimatedApp
 -(id) init:(Canvas*)pCanvas
 {
+	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
 	canvas = pCanvas;
-	UIDevice* lDevice = [UIDevice currentDevice];
-	[lDevice beginGeneratingDeviceOrientationNotifications];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-						 selector:@selector(orientationDidChange:)
-						     name:UIDeviceOrientationDidChangeNotification
-						   object:nil];
 	return self;
-}
-
--(void) orientationDidChange:(NSNotification*)notification
-{
-	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	if (orientation == UIDeviceOrientationLandscapeLeft ||
-		orientation == UIDeviceOrientationLandscapeRight)
-	{
-		canvas->SetOutputRotation((orientation == UIDeviceOrientationLandscapeLeft)? 90 : -90);
-	}
 }
 
 -(void) startTick
 {
 	animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0225 target:self selector:@selector(tick) userInfo:nil repeats:YES];
 	[EAGLView sharedView].responder = self;
+	[[EAGLView sharedView] powerUpAcc];
 }
 
 -(void) stopTick
 {
+	[[EAGLView sharedView] powerDownAcc];
 	[animationTimer invalidate];
 	animationTimer = nil;
 }
@@ -85,6 +72,7 @@ using namespace Lepra;
 	}
 	else
 	{
+		lGlView.canvas = canvas;
 		Slime::App::PollApp();
 	}
 }

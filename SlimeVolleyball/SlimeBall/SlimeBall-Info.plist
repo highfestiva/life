@@ -34,9 +34,7 @@
 	<array>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
+	<key>UIPrerenderedIcon</key>
+	<true/>
 </dict>
 </plist>

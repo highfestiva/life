@@ -19,6 +19,7 @@
 @private
 	EAGLContext *context;
 	Lepra::Canvas* canvas;
+	int baseAngle;
 
 	// The pixel dimensions of the CAEAGLLayer.
 	GLint framebufferWidth;
@@ -35,6 +36,7 @@
 
 @property(nonatomic, retain) EAGLContext *context;
 @property(nonatomic, assign) Lepra::Canvas* canvas;
+@property(nonatomic, assign) int baseAngle;
 @property(nonatomic, readonly) bool isOpen;
 @property(nonatomic, assign) UIResponder* responder;
 @property(nonatomic, assign) int orientationStrictness;

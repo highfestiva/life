@@ -4,8 +4,6 @@
 
 
 
-#pragma once
-
 #include <assert.h>
 #include <utf8.h>
 #include "../Include/JsonString.h"
@@ -36,7 +34,7 @@ str JsonString::ToJson(const str& pString)
 			case '\t':	lJsonString += _T("\\t");	break;
 			default:
 			{
-				if (ch >= 31 && ch <= 127)
+				if (ch >= 31)
 				{
 					lJsonString += (tchar)ch;
 				}

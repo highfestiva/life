@@ -223,6 +223,7 @@ bool App::Open()
 	if (lOk)
 	{
 		mDisplay->SetCaption(_T("Slime Volleyball"));
+		mDisplay->SetOrientation(UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN);
 		mDisplay->AddResizeObserver(this);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));

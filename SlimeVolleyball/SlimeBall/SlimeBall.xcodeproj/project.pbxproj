@@ -146,7 +146,6 @@
 		B19A154213A124940051A61C /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A150413A124940051A61C /* Time.cpp */; };
 		B19A154713A124940051A61C /* Writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A150A13A124940051A61C /* Writer.cpp */; };
 		B19A154813A124940051A61C /* ZipArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A150B13A124940051A61C /* ZipArchive.cpp */; };
-		B19A156413A124AB0051A61C /* EAGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = B19A154B13A124AB0051A61C /* EAGLView.m */; };
 		B19A156513A124AB0051A61C /* UiMacCore.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154C13A124AB0051A61C /* UiMacCore.mm */; };
 		B19A156613A124AB0051A61C /* UiMacDisplayManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */; };
 		B19A156713A124AB0051A61C /* UiMacInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154E13A124AB0051A61C /* UiMacInput.mm */; };
@@ -425,6 +424,11 @@
 		B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B1A1DD9813AA6CC60097B8D0 /* window.c */; };
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
+		B1B3C76715D4707800AB7A2B /* xmplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B3C76615D4707800AB7A2B /* xmplay.cpp */; };
+		B1B3C76A15D4709C00AB7A2B /* happyhttp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B3C76915D4709C00AB7A2B /* happyhttp.cpp */; };
+		B1B3C77F15D4730300AB7A2B /* EAGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1B3C77E15D4730300AB7A2B /* EAGLView.mm */; };
+		B1B3C78315D4732900AB7A2B /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B3C78215D4732900AB7A2B /* UiChibiXmAlStream.cpp */; };
+		B1B3C7A915D4787F00AB7A2B /* JsonString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B3C7A815D4787F00AB7A2B /* JsonString.cpp */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 		B1EE502813F0AE11000BB3B5 /* Tingaliin.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1EE502713F0AE11000BB3B5 /* Tingaliin.ogg */; };
 /* End PBXBuildFile section */
@@ -572,7 +576,6 @@
 		B19A150413A124940051A61C /* Time.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Time.cpp; sourceTree = "<group>"; };
 		B19A150A13A124940051A61C /* Writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Writer.cpp; sourceTree = "<group>"; };
 		B19A150B13A124940051A61C /* ZipArchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipArchive.cpp; sourceTree = "<group>"; };
-		B19A154B13A124AB0051A61C /* EAGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EAGLView.m; sourceTree = "<group>"; };
 		B19A154C13A124AB0051A61C /* UiMacCore.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacCore.mm; sourceTree = "<group>"; };
 		B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacDisplayManager.mm; sourceTree = "<group>"; };
 		B19A154E13A124AB0051A61C /* UiMacInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacInput.mm; sourceTree = "<group>"; };
@@ -1040,6 +1043,11 @@
 		B1A1DD9913AA6CC60097B8D0 /* window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
 		B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiOggAlStream.cpp; sourceTree = "<group>"; };
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
+		B1B3C76615D4707800AB7A2B /* xmplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmplay.cpp; path = ChibiXM/xmplay.cpp; sourceTree = "<group>"; };
+		B1B3C76915D4709C00AB7A2B /* happyhttp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = happyhttp.cpp; path = "happyhttp-0.1/happyhttp.cpp"; sourceTree = "<group>"; };
+		B1B3C77E15D4730300AB7A2B /* EAGLView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = EAGLView.mm; sourceTree = "<group>"; };
+		B1B3C78215D4732900AB7A2B /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
+		B1B3C7A815D4787F00AB7A2B /* JsonString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JsonString.cpp; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
 		B1EE502713F0AE11000BB3B5 /* Tingaliin.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Tingaliin.ogg; sourceTree = "<group>"; };
 		B1F35B0A13A200690064153E /* SlimeBall_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlimeBall_Prefix.pch; path = SlimeBall/SlimeBall_Prefix.pch; sourceTree = "<group>"; };
@@ -1269,6 +1277,7 @@
 		B19A14CC13A124940051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B1B3C7A815D4787F00AB7A2B /* JsonString.cpp */,
 				B19A14CD13A124940051A61C /* Alarm.cpp */,
 				B19A14CE13A124940051A61C /* Application.cpp */,
 				B19A14CF13A124940051A61C /* ArchiveFile.cpp */,
@@ -1342,6 +1351,7 @@
 		B19A154913A124AB0051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B1B3C78215D4732900AB7A2B /* UiChibiXmAlStream.cpp */,
 				B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */,
 				B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */,
 				B19A154A13A124AB0051A61C /* Mac */,
@@ -1359,8 +1369,8 @@
 		B19A154A13A124AB0051A61C /* Mac */ = {
 			isa = PBXGroup;
 			children = (
+				B1B3C77E15D4730300AB7A2B /* EAGLView.mm */,
 				B1CC28E313BA906B009BD34A /* UiIosInput.mm */,
-				B19A154B13A124AB0051A61C /* EAGLView.m */,
 				B19A154C13A124AB0051A61C /* UiMacCore.mm */,
 				B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */,
 				B19A154E13A124AB0051A61C /* UiMacInput.mm */,
@@ -1372,6 +1382,8 @@
 		B19A15AA13A127E40051A61C /* ThirdParty */ = {
 			isa = PBXGroup;
 			children = (
+				B1B3C76815D4708300AB7A2B /* HappyHTTP */,
+				B1B3C76215D4705000AB7A2B /* ChibiXM */,
 				B1A1DC5613AA6CC30097B8D0 /* libvorbis-1.3.2 */,
 				B1A1DB2213AA6AE00097B8D0 /* libogg-1.2.2 */,
 				B19A296A13A1391E0051A61C /* STLport src */,
@@ -2073,6 +2085,22 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
+		B1B3C76215D4705000AB7A2B /* ChibiXM */ = {
+			isa = PBXGroup;
+			children = (
+				B1B3C76615D4707800AB7A2B /* xmplay.cpp */,
+			);
+			name = ChibiXM;
+			sourceTree = "<group>";
+		};
+		B1B3C76815D4708300AB7A2B /* HappyHTTP */ = {
+			isa = PBXGroup;
+			children = (
+				B1B3C76915D4709C00AB7A2B /* happyhttp.cpp */,
+			);
+			name = HappyHTTP;
+			sourceTree = "<group>";
+		};
 		B1EE502613F0AE11000BB3B5 /* Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -2276,7 +2304,6 @@
 				B19A154213A124940051A61C /* Time.cpp in Sources */,
 				B19A154713A124940051A61C /* Writer.cpp in Sources */,
 				B19A154813A124940051A61C /* ZipArchive.cpp in Sources */,
-				B19A156413A124AB0051A61C /* EAGLView.m in Sources */,
 				B19A156513A124AB0051A61C /* UiMacCore.mm in Sources */,
 				B19A156613A124AB0051A61C /* UiMacDisplayManager.mm in Sources */,
 				B19A156713A124AB0051A61C /* UiMacInput.mm in Sources */,
@@ -2555,6 +2582,11 @@
 				B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */,
 				B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */,
 				35128A0514725ADE0006467C /* MacLog.mm in Sources */,
+				B1B3C76715D4707800AB7A2B /* xmplay.cpp in Sources */,
+				B1B3C76A15D4709C00AB7A2B /* happyhttp.cpp in Sources */,
+				B1B3C77F15D4730300AB7A2B /* EAGLView.mm in Sources */,
+				B1B3C78315D4732900AB7A2B /* UiChibiXmAlStream.cpp in Sources */,
+				B1B3C7A915D4787F00AB7A2B /* JsonString.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2578,10 +2610,13 @@
 					"HAVE_USLEEP=1",
 					LEPRA_WITHOUT_FMOD,
 					LEPRA_IPHONE_SIMULATOR,
+					LEPRA_UNICODE,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
 					"\"$(SRCROOT)/../../ThirdParty/ode-0.11.1/include\"",
+					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
+					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
 					"\"$(SRCROOT)/../../ThirdParty/utf8cpp\"",
 					"\"$(SRCROOT)/../../ThirdParty/freealut-1.1.0/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
@@ -2613,10 +2648,13 @@
 					"HAVE_USLEEP=1",
 					LEPRA_WITHOUT_FMOD,
 					LEPRA_IPHONE_SIMULATOR,
+					LEPRA_UNICODE,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
 					"\"$(SRCROOT)/../../ThirdParty/ode-0.11.1/include\"",
+					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
+					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
 					"\"$(SRCROOT)/../../ThirdParty/utf8cpp\"",
 					"\"$(SRCROOT)/../../ThirdParty/freealut-1.1.0/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
@@ -2659,6 +2697,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SlimeBall_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					LEPRA_UNICODE,
 					"HAVE_STDINT_H=1",
 					"HAVE_STAT=1",
 					"HAVE_UNISTD_H=1",
@@ -2669,6 +2708,8 @@
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
 					"\"$(SRCROOT)/../../ThirdParty/ode-0.11.1/include\"",
+					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
+					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
 					"\"$(SRCROOT)/../../ThirdParty/utf8cpp\"",
 					"\"$(SRCROOT)/../../ThirdParty/freealut-1.1.0/include\"",
 					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
