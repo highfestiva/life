@@ -4,15 +4,19 @@
 
 -Bombulum - use the pendulum to push bombs off their respective "poles" befor they blow up. Gravity is from the center in all directions. "Poles" are elevators that rise "up" towards the center. "Gravity" is directly affected by the accelerometer.
 
-Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
+-Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
 
-Car Jumpin'
+-Car Jumpin'
+
+Cyber Craft clone. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
 
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
 
 Crazy game using genitals as obstacles.
 
-Sliding game. Hovercraft? Bob sleigh? Something of the kind...
+Sliding racing game. Hovercraft? Bob sleigh? Something of the kind...
+
+Fork lift puzzle game - move all the boxes to the right locations.
 
 Construction vehicle game - fork lift, front loader, excavator... Build, move and demolish!
 
@@ -35,3 +39,5 @@ Single player vehicle simulation puzzle. Sorta like light-Bot, but in more dimen
 Playing a Matrix-style octopus! Flying quickly, swirling arms, landing hard, climbing and flying away again.
 
 Playing a presentation. Don't know how or why, but I'm on to something.
+
+Create an Early Warning System utilizing The Random Generator EGGS!
