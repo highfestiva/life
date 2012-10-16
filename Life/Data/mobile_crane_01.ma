@@ -1937,8 +1937,8 @@ createNode mesh -n "m_cabinShape" -p "m_cabin";
 		 0.012961107306182384 0.77265971899032593 0.63468813896179199 0.012961107306182384 0.77265971899032593
 		 0.63468813896179199 0.012961107306182384 0.77265971899032593 0.63468813896179199
 		 0.012961107306182384 ;
-createNode transform -n "m_breaklights" -p "m_body";
-createNode mesh -n "m_breaklightsShape" -p "m_breaklights";
+createNode transform -n "m_brakelights" -p "m_body";
+createNode mesh -n "m_brakelightsShape" -p "m_brakelights";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
@@ -2143,10 +2143,10 @@ createNode mesh -n "m_eyesShape" -p "m_eyes";
 		 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 0.99999994039535522 0 ;
 	setAttr ".rguv0" -type "vectorArray" 12 0 0 0 1 0 0 0 1 0 0 1 0 1 0 0 1 1 0 0
 		 0 0 1 0 0 0 1 0 0 1 0 1 0 0 1 1 0 ;
-createNode transform -n "i_m_breaklight1";
+createNode transform -n "i_m_brakelight1";
 	setAttr ".t" -type "double3" 1 0.38415647439107958 -4.0639182221528021 ;
-createNode transform -n "transform21" -p "i_m_breaklight1";
-createNode mesh -n "i_m_breaklight1Shape" -p "transform21";
+createNode transform -n "transform21" -p "i_m_brakelight1";
+createNode mesh -n "i_m_brakelight1Shape" -p "transform21";
 	setAttr -s 2 ".wm";
 	setAttr -k off ".v";
 	setAttr ".io" yes;
@@ -2161,9 +2161,9 @@ createNode mesh -n "i_m_breaklight1Shape" -p "transform21";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "i_m_breaklight2";
+createNode transform -n "i_m_brakelight2";
 	setAttr ".t" -type "double3" -1 0.38415647439107958 -4.0639182221528021 ;
-createNode transform -n "transform22" -p "i_m_breaklight2";
+createNode transform -n "transform22" -p "i_m_brakelight2";
 createNode transform -n "i_pCylinder1";
 	setAttr ".t" -type "double3" -0.97117678960990794 1.8349002618009931 1.5886643319439044 ;
 createNode transform -n "transform24" -p "i_pCylinder1";
@@ -2266,7 +2266,7 @@ parent -s -nc -r -add "|m_body|m_wheel1_1|phys_wheel1_1|phys_wheelShape" "phys_w
 parent -s -nc -r -add "|m_body|m_wheel1_1|phys_wheel1_1|phys_wheelShape" "phys_wheel2_2";
 parent -s -nc -r -add "|m_body|m_wheel1_1|phys_wheel1_1|phys_wheelShape" "phys_wheel3_2";
 parent -s -nc -r -add "|m_body|m_wheel1_1|phys_wheel1_1|phys_wheelShape" "phys_wheel4_2";
-parent -s -nc -r -add "|i_m_breaklight1|transform21|i_m_breaklight1Shape" "transform22";
+parent -s -nc -r -add "|i_m_brakelight1|transform21|i_m_brakelight1Shape" "transform22";
 parent -s -nc -r -add "|i_m_eye0|transform26|m_eyeShape0" "transform25";
 createNode lightLinker -n "lightLinker1";
 	setAttr -s 10 ".lnk";
@@ -3013,7 +3013,7 @@ createNode groupParts -n "groupParts23";
 	setAttr ".ic" -type "componentList" 1 "f[0:5]";
 createNode groupId -n "groupId54";
 	setAttr ".ihi" 0;
-createNode blinn -n "mat_breaklights";
+createNode blinn -n "mat_brakelights";
 	setAttr ".c" -type "float3" 0.41321999 0 0.0046830173 ;
 	setAttr ".it" -type "float3" 0.033059999 0.033059999 0.033059999 ;
 createNode shadingEngine -n "blinn1SG";
@@ -3539,25 +3539,25 @@ connectAttr "polySphere1.out" "|m_body|m_wheel1_1|phys_wheel1_1|phys_wheelShape.
 		;
 connectAttr "polyUnite1.out" "m_windowShape.i";
 connectAttr "polyMergeVert13.out" "m_cabinShape.i";
-connectAttr "polyUnite6.out" "m_breaklightsShape.i";
+connectAttr "polyUnite6.out" "m_brakelightsShape.i";
 connectAttr "polyMergeVert25.out" "m_exhaustShape.i";
 connectAttr "groupId65.id" "m_eyesShape.iog.og[1].gid";
 connectAttr "pasted__phong2SG.mwc" "m_eyesShape.iog.og[1].gco";
 connectAttr "polyTriangulate1.out" "m_eyesShape.i";
 connectAttr "groupId64.id" "m_eyesShape.ciog.cog[0].cgid";
-connectAttr "groupId53.id" "|i_m_breaklight1|transform21|i_m_breaklight1Shape.iog.og[0].gid"
+connectAttr "groupId53.id" "|i_m_brakelight1|transform21|i_m_brakelight1Shape.iog.og[0].gid"
 		;
-connectAttr ":initialShadingGroup.mwc" "|i_m_breaklight1|transform21|i_m_breaklight1Shape.iog.og[0].gco"
+connectAttr ":initialShadingGroup.mwc" "|i_m_brakelight1|transform21|i_m_brakelight1Shape.iog.og[0].gco"
 		;
-connectAttr "groupId51.id" "|i_m_breaklight2|transform22|i_m_breaklight1Shape.iog.og[0].gid"
+connectAttr "groupId51.id" "|i_m_brakelight2|transform22|i_m_brakelight1Shape.iog.og[0].gid"
 		;
-connectAttr ":initialShadingGroup.mwc" "|i_m_breaklight2|transform22|i_m_breaklight1Shape.iog.og[0].gco"
+connectAttr ":initialShadingGroup.mwc" "|i_m_brakelight2|transform22|i_m_brakelight1Shape.iog.og[0].gco"
 		;
-connectAttr "groupParts23.og" "|i_m_breaklight1|transform21|i_m_breaklight1Shape.i"
+connectAttr "groupParts23.og" "|i_m_brakelight1|transform21|i_m_brakelight1Shape.i"
 		;
-connectAttr "groupId54.id" "|i_m_breaklight1|transform21|i_m_breaklight1Shape.ciog.cog[0].cgid"
+connectAttr "groupId54.id" "|i_m_brakelight1|transform21|i_m_brakelight1Shape.ciog.cog[0].cgid"
 		;
-connectAttr "groupId52.id" "|i_m_breaklight2|transform22|i_m_breaklight1Shape.ciog.cog[0].cgid"
+connectAttr "groupId52.id" "|i_m_brakelight2|transform22|i_m_brakelight1Shape.ciog.cog[0].cgid"
 		;
 connectAttr "groupId55.id" "pCylinderShape1.iog.og[0].gid";
 connectAttr ":initialShadingGroup.mwc" "pCylinderShape1.iog.og[0].gco";
@@ -3884,22 +3884,22 @@ connectAttr "polyNormal4.out" "groupParts20.ig";
 connectAttr "groupId47.id" "groupParts20.gi";
 connectAttr "polyUnite5.out" "groupParts21.ig";
 connectAttr "groupId49.id" "groupParts21.gi";
-connectAttr "|i_m_breaklight1|transform21|i_m_breaklight1Shape.o" "polyUnite6.ip[0]"
+connectAttr "|i_m_brakelight1|transform21|i_m_brakelight1Shape.o" "polyUnite6.ip[0]"
 		;
-connectAttr "|i_m_breaklight1|transform21|i_m_breaklight1Shape.o" "polyUnite6.ip[1]"
+connectAttr "|i_m_brakelight1|transform21|i_m_brakelight1Shape.o" "polyUnite6.ip[1]"
 		;
-connectAttr "|i_m_breaklight2|transform22|i_m_breaklight1Shape.wm" "polyUnite6.im[0]"
+connectAttr "|i_m_brakelight2|transform22|i_m_brakelight1Shape.wm" "polyUnite6.im[0]"
 		;
-connectAttr "|i_m_breaklight1|transform21|i_m_breaklight1Shape.wm" "polyUnite6.im[1]"
+connectAttr "|i_m_brakelight1|transform21|i_m_brakelight1Shape.wm" "polyUnite6.im[1]"
 		;
 connectAttr "polyCube10.out" "groupParts22.ig";
 connectAttr "groupId51.id" "groupParts22.gi";
 connectAttr "groupParts22.og" "groupParts23.ig";
 connectAttr "groupId53.id" "groupParts23.gi";
-connectAttr "mat_breaklights.oc" "blinn1SG.ss";
-connectAttr "m_breaklightsShape.iog" "blinn1SG.dsm" -na;
+connectAttr "mat_brakelights.oc" "blinn1SG.ss";
+connectAttr "m_brakelightsShape.iog" "blinn1SG.dsm" -na;
 connectAttr "blinn1SG.msg" "materialInfo6.sg";
-connectAttr "mat_breaklights.msg" "materialInfo6.m";
+connectAttr "mat_brakelights.msg" "materialInfo6.m";
 connectAttr "pCylinderShape1.o" "polyBoolOp1.ip[0]";
 connectAttr "pCylinderShape2.o" "polyBoolOp1.ip[1]";
 connectAttr "pCylinderShape1.wm" "polyBoolOp1.im[0]";
@@ -4014,7 +4014,7 @@ connectAttr "wheel.msg" ":defaultShaderList1.s" -na;
 connectAttr "phys.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_window.msg" ":defaultShaderList1.s" -na;
 connectAttr "red.msg" ":defaultShaderList1.s" -na;
-connectAttr "mat_breaklights.msg" ":defaultShaderList1.s" -na;
+connectAttr "mat_brakelights.msg" ":defaultShaderList1.s" -na;
 connectAttr "blinn2.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_eyes.msg" ":defaultShaderList1.s" -na;
 connectAttr "pasted__place2dTexture2.msg" ":defaultRenderUtilityList1.u" -na;
@@ -4040,13 +4040,13 @@ connectAttr "polySurfaceShape9.iog.og[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "polySurfaceShape9.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "i_m_body1Shape.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "m_bodyShape.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
-connectAttr "|i_m_breaklight2|transform22|i_m_breaklight1Shape.iog.og[0]" ":initialShadingGroup.dsm"
+connectAttr "|i_m_brakelight2|transform22|i_m_brakelight1Shape.iog.og[0]" ":initialShadingGroup.dsm"
 		 -na;
-connectAttr "|i_m_breaklight2|transform22|i_m_breaklight1Shape.ciog.cog[0]" ":initialShadingGroup.dsm"
+connectAttr "|i_m_brakelight2|transform22|i_m_brakelight1Shape.ciog.cog[0]" ":initialShadingGroup.dsm"
 		 -na;
-connectAttr "|i_m_breaklight1|transform21|i_m_breaklight1Shape.iog.og[0]" ":initialShadingGroup.dsm"
+connectAttr "|i_m_brakelight1|transform21|i_m_brakelight1Shape.iog.og[0]" ":initialShadingGroup.dsm"
 		 -na;
-connectAttr "|i_m_breaklight1|transform21|i_m_breaklight1Shape.ciog.cog[0]" ":initialShadingGroup.dsm"
+connectAttr "|i_m_brakelight1|transform21|i_m_brakelight1Shape.ciog.cog[0]" ":initialShadingGroup.dsm"
 		 -na;
 connectAttr "pCylinderShape1.iog.og[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "pCylinderShape1.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
@@ -4124,15 +4124,15 @@ connectAttr "i_polySurface1.msg" ":hyperGraphLayout.hyp[243].dn";
 connectAttr "m_body.msg" ":hyperGraphLayout.hyp[244].dn";
 connectAttr "transform20.msg" ":hyperGraphLayout.hyp[245].dn";
 connectAttr "transform19.msg" ":hyperGraphLayout.hyp[246].dn";
-connectAttr "m_breaklights.msg" ":hyperGraphLayout.hyp[247].dn";
+connectAttr "m_brakelights.msg" ":hyperGraphLayout.hyp[247].dn";
 connectAttr "m_exhaust.msg" ":hyperGraphLayout.hyp[248].dn";
 connectAttr "i_m_eye0.msg" ":hyperGraphLayout.hyp[249].dn";
 connectAttr "i_m_eye1.msg" ":hyperGraphLayout.hyp[250].dn";
 connectAttr "m_eyes.msg" ":hyperGraphLayout.hyp[251].dn";
 connectAttr "transform26.msg" ":hyperGraphLayout.hyp[252].dn";
 connectAttr "transform25.msg" ":hyperGraphLayout.hyp[253].dn";
-connectAttr "i_m_breaklight1.msg" ":hyperGraphLayout.hyp[254].dn";
-connectAttr "i_m_breaklight2.msg" ":hyperGraphLayout.hyp[255].dn";
+connectAttr "i_m_brakelight1.msg" ":hyperGraphLayout.hyp[254].dn";
+connectAttr "i_m_brakelight2.msg" ":hyperGraphLayout.hyp[255].dn";
 connectAttr "i_pCylinder1.msg" ":hyperGraphLayout.hyp[256].dn";
 connectAttr "i_pCylinder2.msg" ":hyperGraphLayout.hyp[257].dn";
 // End of mobile_crane_01.ma

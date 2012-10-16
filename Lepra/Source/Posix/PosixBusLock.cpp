@@ -20,7 +20,7 @@ static pthread_mutex_t g_CASMutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 
-bool BusLock::CompareAndSwap(long* pDest, long pSrc, long pComperand)
+bool BusLock::CompareAndSwap(int32* pDest, int32 pSrc, int32 pComperand)
 {
 	bool lResult = false;
 #if 0 //def LEPRA_GCC_X86_32

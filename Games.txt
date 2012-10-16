@@ -8,7 +8,7 @@
 
 -Car Jumpin'
 
-Cyber Craft clone. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
+Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
 
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
 
@@ -29,8 +29,6 @@ Physical programming game - give instructions such as "push left 10" and "pop". 
 Robo Arm - optimize a movement scheme to make the robot pick something up and move it to a designated area. Definition of done = object colliding with trigger and object velocity <= threshold.
 
 Space ship flight. Fly though predefined map, steer using swipe left/right/up/down? Or accelerometer? Fly close to ground, to give impression of moving VERY fast.
-
-Spider Tank. Two thumbs steering.
 
 MMO space flight. Ships parks in "bee hives", LoD the whole world. Fly, shoot. Guild vs. guild.
 

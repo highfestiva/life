@@ -531,6 +531,13 @@ def start():
 #	_fgrun("LifeClient", "gdb ")
 
 
+def _getmethods():
+	methods = [(m, callable(eval(m))) for m in dir(sys.modules["__main__"])]
+	methods,_ = zip(*filter(lambda x: x[1], methods))
+	methods = list(filter(lambda n: not (n.startswith('_') or n.startswith('get')), methods))
+	return methods
+
+
 def _main():
 	usage = "usage: %prog [options] <filespec>\n" + \
 		"Runs some type of build command. Try build, rebuild, clean, builddata, or something like that."
@@ -541,10 +548,7 @@ def _main():
 	options, args = parser.parse_args()
 
 	if len(args) < 1:
-		methods = [(m, callable(eval(m))) for m in dir(sys.modules["__main__"])]
-		methods,_ = zip(*filter(lambda x: x[1], methods))
-		methods = list(filter(lambda n: not (n.startswith('_') or n.startswith('get')), methods))
-		print("Need arg! Pick one of:\n  %s\n" % "\n  ".join(methods))
+		print("Need arg! Pick one of:\n  %s\n" % "\n  ".join(_getmethods()))
 		sys.exit(1)
 	if not options.buildmode in buildtypes:
 		print("Unknown build mode!")
@@ -566,6 +570,19 @@ def _main():
 		except NameError as e:
 			print("Error: no such command %s!" % arg)
 			print(e)
+			suggestions = []
+			import difflib
+			for name in _getmethods():
+				match = difflib.SequenceMatcher(None, arg, name).ratio()
+				if match > 0.5:
+					suggestions += [(match, name)]
+			if suggestions:
+				suggestions = sorted(suggestions, reverse=True)
+				if suggestions[0][0] > 0.9:
+					print("Did you mean %s?" % suggestions[0][1])
+				else:
+					suggestions = list(map(lambda mn: mn[1], suggestions))
+					print("Perhaps: %s?" % ", ".join(suggestions))
 			sys.exit(1)
 	_printresult()
 

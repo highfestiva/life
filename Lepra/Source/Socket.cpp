@@ -520,11 +520,6 @@ bool TcpSocket::DisableNagleAlgo()
 	return (lResult == 0);
 }
 
-bool TcpSocket::IsConnected()
-{
-	return (mSocket != INVALID_SOCKET);
-}
-
 int TcpSocket::Send(const void* pData, int pSize)
 {
 	int lSentByteCount = 0;
@@ -595,6 +590,29 @@ int TcpSocket::Receive(void* pData, int pMaxSize)
 		}
 	}
 	return (lSize);
+}
+
+int TcpSocket::Receive(void* pData, int pMaxSize, double pTimeout)
+{
+	if (pTimeout < 0)
+	{
+		pTimeout = 0;
+	}
+	fd_set lAcceptSet;
+	FD_ZERO(&lAcceptSet);
+#pragma warning(push)
+#pragma warning(disable: 4127)	// MSVC warning: conditional expression is constant.
+	FD_SET(mSocket, &lAcceptSet);
+#pragma warning(pop)
+	timeval lTime;
+	lTime.tv_sec = (long)pTimeout;
+	lTime.tv_usec = (long)((pTimeout-lTime.tv_sec) * 1000000);
+	int lReadCount = ::select((int)mSocket+1, &lAcceptSet, NULL, NULL, &lTime);
+	if (lReadCount == 1)
+	{
+		return Receive(pData, pMaxSize);
+	}
+	return 0;
 }
 
 bool TcpSocket::Unreceive(void* pData, int pByteCount)

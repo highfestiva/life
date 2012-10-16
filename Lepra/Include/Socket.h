@@ -236,7 +236,6 @@ public:
 
 	bool Connect(const SocketAddress& pTargetAddress);
 	void Disconnect();
-	bool IsConnected();
 
 	// Nagle's algorithm is used in the Tcp protocol to reduce overhead when
 	// resending small amounts of data - usually single keystrokes in telnet.
@@ -246,6 +245,7 @@ public:
 
 	int Send(const void* pData, int pSize);
 	int Receive(void* pData, int pMaxSize);
+	int Receive(void* pData, int pMaxSize, double pTimeout);
 	bool Unreceive(void* pData, int pByteCount);
 
 	void SetDatagramReceiver(DatagramReceiver* pReceiver);

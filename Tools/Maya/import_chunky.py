@@ -117,6 +117,7 @@ class GroupReader(DefaultMAReader):
 		self.fixroottrans(group)
 
 		self.faces2triangles(group)
+		#self.printnodes(group)
 		if not self.validatehierarchy(group):
 			print("Invalid hierarchy! Terminating due to error.")
 			sys.exit(3)
@@ -166,16 +167,25 @@ class GroupReader(DefaultMAReader):
 		return node
 
 
-	def _recursiveremove(self, node, nodes):
+	def _recursiveremove(self, node, nodes, force=False):
+		removeOk = True
+		children = tuple(filter(lambda n: node in n.getparents(), nodes))	# Use conversion to avoid lazy evaluation, which will cause iterator to skip some = error.
+		for child in children:
+			removeOk &= self._recursiveremove(child, nodes, force)
+		if not removeOk:
+			return False
 		try:
+			if not force and node.getName().startswith("m_") or node.getName().startswith("phys_"):
+				#print("Not removing node %s." % node.getFullName())
+				return False
 			nodes.remove(node)
+			for parent in node.getparents():
+				parent._children.remove(node)
 			#print("Dropped node %s." % node.getName())
 			node.ignore = True
 		except ValueError:
 			pass
-		children = tuple(filter(lambda n: n.getParent() == node, nodes))	# Use conversion to avoid lazy evaluation, which will cause iterator to skip some = error.
-		for child in children:
-			self._recursiveremove(child, nodes)
+		return removeOk
 
 
 	def gatherIslands(self, nodes):
@@ -195,12 +205,12 @@ class GroupReader(DefaultMAReader):
 				#print(node.getFullName())
 				parentName = node.getParentName()
 				if parentName:
-					parentNode = self.findNode(parentName)
-					if not parentNode:
-						print("Error: parent %s does not exist!" % parentName)
-						return None
-					if not self._insert_in_same_island_as(islands, parentNode, node, False):
-						return None
+					try:
+						parentNode = self.findNode(parentName)
+						if not self._insert_in_same_island_as(islands, parentNode, node, False):
+							return None
+					except KeyError as e:
+						pass
 					nodes.remove(node)
 				outnodes = node.getOutNodes("out", "out")
 				if len(outnodes) == 1:
@@ -257,24 +267,32 @@ class GroupReader(DefaultMAReader):
 	def filterIslands(self, islands):
 		mat_islands = []
 		for_islands = islands[:]
-		for island in for_islands:
-			for n in island:
-				if n.nodetype in self.bad_types or n.getName().startswith("i_") or n.getName().find(":i_") >= 0:
-					#print("Removing bad %s (%s)." % (n.nodetype, n.getFullName()))
-					if list(filter(lambda n: n.getName().startswith("m_") or n.getName().startswith("phys_"), island)):
-						print("Culprit %s (type %s) kills main island?" % (n.getFullName(), n.nodetype))
-					islands.remove(island)
-					break
-				if n.nodetype == "<unknown>" and n.getParent() == None:
-					islands.remove(island)
-					break
-				if n.nodetype in self.mat_types:
-					islands.remove(island)
-					mat_islands.append(island)
-				if n.nodetype in self.silent_types:
-					island.remove(n)
+		for island in reversed(for_islands):
+			restart = True
+			while restart:
+				restart = False
+				for n in island:
+					if n.nodetype in self.bad_types or n.getName().startswith("i_") or n.getName().find(":i_") >= 0:
+						#print("Removing bad %s (%s)." % (n.nodetype, n.getFullName()))
+						if list(filter(lambda n: (n.getName().startswith("m_") or n.getName().startswith("phys_")) and n.nodetype == "transform", island)):
+							print("Warning: culprit %s (type %s) would have killed main island? (Island count=%i)" % (n.getFullName(), n.nodetype, len(islands)))
+							self._recursiveremove(n, island, True)
+							restart = True
+							break
+						islands.remove(island)
+						break
+					if n.nodetype == "<unknown>" and n.getParent() == None:
+						islands.remove(island)
+						break
+					if n.nodetype in self.mat_types:
+						islands.remove(island)
+						mat_islands.append(island)
+					if n.nodetype in self.silent_types:
+						island.remove(n)
 			if not island:
 				islands.remove(island)
+		#for i in islands:
+		#	self.printnodes(i)
 		return islands, mat_islands
 
 
@@ -1293,7 +1311,7 @@ class GroupReader(DefaultMAReader):
 		# Drop empty transforms that do nothing.
 		kills = []
 		for node in group:
-			if node.getName().startswith("transform") or node.getName().startswith("pasted__transform"):
+			if node.getName().startswith("transform") or node.getName().startswith("i_transform") or node.getName().startswith("pasted__transform"):
 				if node.nodetype == "transform":
 					if not node._setattr:
 						kills += [node]
@@ -1301,10 +1319,11 @@ class GroupReader(DefaultMAReader):
 			if node.getParent() in kills:
 				node.setParent(node.getParent().getParent())
 		for kill in kills:
-			group.remove(kill)
+			self._recursiveremove(kill, group)
 
 		# Traverse and check names recursively.
 		def _checknames(rootnode, group):
+			ok = True
 			for node in group:
 				if node.nodetype == "transform":
 					node.kill_empty = False
@@ -1319,8 +1338,8 @@ class GroupReader(DefaultMAReader):
 						ok = False
 						print("Error: node '%s' must be either prefixed 'phys_' or 'm_'" % node.getFullName());
 					if not _checknames(node, node._children):
-						return False
-			return True
+						ok = False
+			return ok
 		return _checknames(rootnode, rootnode._children)
 
 

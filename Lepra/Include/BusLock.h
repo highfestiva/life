@@ -20,7 +20,7 @@ class BusLock
 public:
 	// Set pDestination = pSource if pDestination == pComperand.
 	// Returns true if a swap was performed.
-	static bool CompareAndSwap(long* pDestination, long pSource, long pComperand);
+	static bool CompareAndSwap(int32* pDestination, int32 pSource, int32 pComperand);
 
 	static void Add(int32* pDestination, int32 pAddend);
 	static void Add(int64* pDestination, int64 pAddend);

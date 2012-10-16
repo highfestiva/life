@@ -36,7 +36,7 @@ private:
 		LOCKED,
 	};
 
-	long mLocked;
+	int32 mLocked;
 };
 
 inline SpinLock::SpinLock():

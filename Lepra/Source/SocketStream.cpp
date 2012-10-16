@@ -90,7 +90,7 @@ void SocketOutputStream::Flush()
 
 IOError SocketOutputStream::WriteRaw(void* pData, size_t pLength)
 {
-	if (mSocket->IsConnected() == true)
+	if (mSocket->IsOpen() == true)
 	{
 		mSocket->Send((uint8*)pData, (int)pLength);
 		return IO_OK;

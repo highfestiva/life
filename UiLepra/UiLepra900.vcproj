@@ -501,6 +501,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Include\Win32\UiWin32GDIDisplay.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Include\Win32\UiWin32Input.h"
 					>
 				</File>
@@ -624,6 +628,10 @@
 				</File>
 				<File
 					RelativePath=".\Source\Win32\UiWin32DisplayManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Win32\UiWin32GDIDisplay.cpp"
 					>
 				</File>
 				<File

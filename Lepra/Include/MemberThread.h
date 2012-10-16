@@ -31,7 +31,7 @@ namespace Lepra
 
 
 
-template<class _Base> class MemberThread: public Thread
+template<class _Base, class _Object = void*> class MemberThread: public Thread
 {
 public:
 	MemberThread(const astr& pThreadName);
@@ -39,30 +39,34 @@ public:
 
 	bool Start(_Base* pObject, void (_Base::*pThreadEntry)());
 
+	_Object GetObjectData();
+	void SetObjectData(_Object pData);
+
 private:
 	bool Start();	// Obfuscates Thread::Start(void).
 	void Run();
 
 	_Base* mObject;
 	void (_Base::*mThreadEntry)();
+	_Object mObjectData;
 };
 
 
 
-template<class _Base> MemberThread<_Base>::MemberThread(const astr& pThreadName):
+template<class _Base, class _Object> MemberThread<_Base, _Object>::MemberThread(const astr& pThreadName):
 	Thread(pThreadName),
 	mObject(0),
 	mThreadEntry(0)
 {
 }
 
-template<class _Base> MemberThread<_Base>::~MemberThread()
+template<class _Base, class _Object> MemberThread<_Base, _Object>::~MemberThread()
 {
 	// Parent class Join()s.
 }
 
 
-template<class _Base> bool MemberThread<_Base>::Start(_Base* pObject, void (_Base::*pThreadEntry)())
+template<class _Base, class _Object> bool MemberThread<_Base, _Object>::Start(_Base* pObject, void (_Base::*pThreadEntry)())
 {
 	Join(10.0);
 	Kill();
@@ -73,7 +77,18 @@ template<class _Base> bool MemberThread<_Base>::Start(_Base* pObject, void (_Bas
 	return (Thread::Start());	// Will call Run() when the new thread starts.
 }
 
-template<class _Base> void MemberThread<_Base>::Run()
+template<class _Base, class _Object> _Object MemberThread<_Base, _Object>::GetObjectData()
+{
+	return mObjectData;
+}
+
+template<class _Base, class _Object> void MemberThread<_Base, _Object>::SetObjectData(_Object pData)
+{
+	mObjectData = pData;
+}
+
+
+template<class _Base, class _Object> void MemberThread<_Base, _Object>::Run()
 {
 	assert(mObject);
 	assert(mThreadEntry);

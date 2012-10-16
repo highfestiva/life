@@ -14,7 +14,7 @@ namespace Lepra
 
 
 
-bool BusLock::CompareAndSwap(long* pDestination, long pSource, long pComperand)
+bool BusLock::CompareAndSwap(int32* pDestination, int32 pSource, int32 pComperand)
 {
 	bool lResult = false;
 	__asm

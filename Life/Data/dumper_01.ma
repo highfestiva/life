@@ -2979,11 +2979,11 @@ createNode transform -n "m_wheel_r6" -p "m_bar";
 createNode transform -n "phys_wheel_r6" -p "m_wheel_r6";
 	setAttr ".t" -type "double3" 8.8817841970012523e-016 0 0 ;
 	setAttr ".r" -type "double3" -7.016709298534872e-015 7.0167092985348752e-015 -89.999999999999986 ;
-createNode transform -n "m_breaklights" -p "m_bar";
+createNode transform -n "m_brakelights" -p "m_bar";
 	setAttr ".t" -type "double3" 0 0.25193622283418582 -3.1182189838100869 ;
 	setAttr ".rp" -type "double3" 0 -0.25193622283418582 6.4675158591358164 ;
 	setAttr ".sp" -type "double3" 0 -0.25193622283418582 6.4675158591358164 ;
-createNode mesh -n "m_breaklightsShape" -p "m_breaklights";
+createNode mesh -n "m_brakelightsShape" -p "m_brakelights";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
@@ -3268,11 +3268,11 @@ createNode mesh -n "polySurfaceShape9" -p "i_transform15";
 	setAttr -s 4 ".pt[0:3]" -type "float3"  4.7683716e-007 0 2.3841858e-007 
 		4.7683716e-007 0 2.3841858e-007 4.7683716e-007 0 2.3841858e-007 4.7683716e-007 0 
 		2.3841858e-007;
-createNode transform -n "i_m_breaklight1";
+createNode transform -n "i_m_brakelight1";
 	setAttr ".t" -type "double3" 0.4 -0.26197589193535165 -6.373453404255681 ;
-createNode transform -n "transform15" -p "i_m_breaklight1";
+createNode transform -n "transform15" -p "i_m_brakelight1";
 	setAttr ".v" no;
-createNode mesh -n "i_m_breaklightShape1" -p "transform15";
+createNode mesh -n "i_m_brakelightShape1" -p "transform15";
 	setAttr -s 2 ".wm";
 	setAttr -k off ".v";
 	setAttr ".io" yes;
@@ -3287,9 +3287,9 @@ createNode mesh -n "i_m_breaklightShape1" -p "transform15";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "i_m_breaklight2";
+createNode transform -n "i_m_brakelight2";
 	setAttr ".t" -type "double3" -0.4 -0.26197589193535165 -6.373453404255681 ;
-createNode transform -n "transform14" -p "i_m_breaklight2";
+createNode transform -n "transform14" -p "i_m_brakelight2";
 	setAttr ".v" no;
 parent -s -nc -r -add "|m_body|m_wheel_f1|phys_wheel_f1|phys_wheelShape" "phys_wheel_r3";
 parent -s -nc -r -add "|m_body|m_wheel_f1|phys_wheel_f1|phys_wheelShape" "phys_wheel_f2";
@@ -3304,7 +3304,7 @@ parent -s -nc -r -add "|m_body|m_wheel_f1|m_wheelShape" "m_wheel_r6";
 parent -s -nc -r -add "|m_body|m_seat2|m_seatShape2" "m_seat1";
 parent -s -nc -r -add "|m_body|m_bar|m_container|phys_container2|phys_containerShape2" "phys_container3";
 parent -s -nc -r -add "|m_body|m_eye0|m_eyeShape0" "m_eye1";
-parent -s -nc -r -add "|i_m_breaklight1|transform15|i_m_breaklightShape1" "transform14";
+parent -s -nc -r -add "|i_m_brakelight1|transform15|i_m_brakelightShape1" "transform14";
 createNode lightLinker -n "lightLinker1";
 	setAttr -s 28 ".lnk";
 	setAttr -s 28 ".slnk";
@@ -3363,8 +3363,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n"
 		+ "                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"clipEditorPanel\" (localizedPanelLabel(\"Trax Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"clipEditorPanel\" -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n"
 		+ "                -snapValue \"none\" \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n"
-		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.239709\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_breaklights\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_bar\" \n                -dropNode \"m_breaklights\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
-		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.239709\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_breaklights\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_bar\" \n                -dropNode \"m_breaklights\" \n                -freeform 1\n                -imagePosition 0 0 \n"
+		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.239709\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_brakelights\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_bar\" \n                -dropNode \"m_brakelights\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
+		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.239709\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_brakelights\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_bar\" \n                -dropNode \"m_brakelights\" \n                -freeform 1\n                -imagePosition 0 0 \n"
 		+ "                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperShadePanel\" (localizedPanelLabel(\"Hypershade\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperShadePanel\" -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"visorPanel\" (localizedPanelLabel(\"Visor\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"visorPanel\" -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"polyTexturePlacementPanel\" (localizedPanelLabel(\"UV Texture Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"multiListerPanel\" (localizedPanelLabel(\"Multilister\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"multiListerPanel\" -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"renderWindowPanel\" (localizedPanelLabel(\"Render View\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"renderWindowPanel\" -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextPanel \"blendShapePanel\" (localizedPanelLabel(\"Blend Shape\")) `;\n"
@@ -3384,8 +3384,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "\t\t\t\t-defaultImage \"\"\n\t\t\t\t-image \"\"\n\t\t\t\t-sc false\n\t\t\t\t-configString \"global string $gMainPane; paneLayout -e -cn \\\"horizontal2\\\" -ps 1 100 46 -ps 2 100 54 $gMainPane;\"\n\t\t\t\t-removeAllPanels\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Persp View\")) \n\t\t\t\t\t\"modelPanel\"\n"
 		+ "\t\t\t\t\t\"$panelName = `modelPanel -unParent -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels `;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 1\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
 		+ "\t\t\t\t\t\"modelPanel -edit -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels  $panelName;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 1\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
-		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.239709\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"m_breaklights\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_bar\\\" \\n                -dropNode \\\"m_breaklights\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
-		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.239709\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"m_breaklights\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_bar\\\" \\n                -dropNode \\\"m_breaklights\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.239709\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"m_brakelights\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_bar\\\" \\n                -dropNode \\\"m_brakelights\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.239709\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"m_brakelights\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_bar\\\" \\n                -dropNode \\\"m_brakelights\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
 		+ "\t\t\t\t$configName;\n\n            setNamedPanelLayout (localizedPanelLabel(\"Current Layout\"));\n        }\n\n        panelHistory -e -clear mainPanelHistory;\n        setFocus `paneLayout -q -p1 $gMainPane`;\n        sceneUIReplacement -deleteRemaining;\n        sceneUIReplacement -clear;\n\t}\n\n\ngrid -spacing 5 -size 12 -divisions 5 -displayAxes yes -displayGridLines yes -displayDivisionLines yes -displayPerspectiveLabels no -displayOrthographicLabels no -displayAxesBold yes -perspectiveLabelPosition axis -orthographicLabelPosition edge;\nviewManip -drawCompass 0 -compassAngle 0 -frontParameters \"\" -homeParameters \"\" -selectionLockParameters \"\";\n}\n");
 	setAttr ".st" 3;
 createNode script -n "sceneConfigurationScriptNode";
@@ -4232,7 +4232,7 @@ createNode polyCube -n "polyCube12";
 	setAttr ".h" 0.27535089050264389;
 	setAttr ".d" 0.12590379249751038;
 	setAttr ".cuv" 4;
-createNode blinn -n "mat_breaklights";
+createNode blinn -n "mat_brakelights";
 	setAttr ".c" -type "float3" 0.414 0.0019319999 0 ;
 	setAttr ".it" -type "float3" 0.033059999 0.033059999 0.033059999 ;
 createNode shadingEngine -n "blinn4SG";
@@ -4440,10 +4440,10 @@ connectAttr "polyCube11.out" "phys_containerShape5.i";
 connectAttr "polyCube9.out" "|m_body|m_bar|m_container|phys_container2|phys_containerShape2.i"
 		;
 connectAttr "polyCube10.out" "phys_containerShape4.i";
-connectAttr "groupId47.id" "m_breaklightsShape.iog.og[0].gid";
-connectAttr "blinn4SG.mwc" "m_breaklightsShape.iog.og[0].gco";
-connectAttr "groupParts19.og" "m_breaklightsShape.i";
-connectAttr "groupId48.id" "m_breaklightsShape.ciog.cog[0].cgid";
+connectAttr "groupId47.id" "m_brakelightsShape.iog.og[0].gid";
+connectAttr "blinn4SG.mwc" "m_brakelightsShape.iog.og[0].gco";
+connectAttr "groupParts19.og" "m_brakelightsShape.i";
+connectAttr "groupId48.id" "m_brakelightsShape.ciog.cog[0].cgid";
 connectAttr "polyPlane1.out" "|m_body|m_eye0|m_eyeShape0.i";
 connectAttr "pasted__deleteComponent8.og" "m_exhaustShape.i";
 connectAttr "pasted__polyCylinder3.out" "m_exhaust_coolerShape.i";
@@ -4459,19 +4459,19 @@ connectAttr "groupId37.id" "polySurfaceShape9.iog.og[0].gid";
 connectAttr "blinn1SG.mwc" "polySurfaceShape9.iog.og[0].gco";
 connectAttr "groupParts15.og" "polySurfaceShape9.i";
 connectAttr "groupId38.id" "polySurfaceShape9.ciog.cog[0].cgid";
-connectAttr "groupId43.id" "|i_m_breaklight1|transform15|i_m_breaklightShape1.iog.og[0].gid"
+connectAttr "groupId43.id" "|i_m_brakelight1|transform15|i_m_brakelightShape1.iog.og[0].gid"
 		;
-connectAttr "blinn4SG.mwc" "|i_m_breaklight1|transform15|i_m_breaklightShape1.iog.og[0].gco"
+connectAttr "blinn4SG.mwc" "|i_m_brakelight1|transform15|i_m_brakelightShape1.iog.og[0].gco"
 		;
-connectAttr "groupId45.id" "|i_m_breaklight2|transform14|i_m_breaklightShape1.iog.og[0].gid"
+connectAttr "groupId45.id" "|i_m_brakelight2|transform14|i_m_brakelightShape1.iog.og[0].gid"
 		;
-connectAttr "blinn4SG.mwc" "|i_m_breaklight2|transform14|i_m_breaklightShape1.iog.og[0].gco"
+connectAttr "blinn4SG.mwc" "|i_m_brakelight2|transform14|i_m_brakelightShape1.iog.og[0].gco"
 		;
-connectAttr "groupParts18.og" "|i_m_breaklight1|transform15|i_m_breaklightShape1.i"
+connectAttr "groupParts18.og" "|i_m_brakelight1|transform15|i_m_brakelightShape1.i"
 		;
-connectAttr "groupId44.id" "|i_m_breaklight1|transform15|i_m_breaklightShape1.ciog.cog[0].cgid"
+connectAttr "groupId44.id" "|i_m_brakelight1|transform15|i_m_brakelightShape1.ciog.cog[0].cgid"
 		;
-connectAttr "groupId46.id" "|i_m_breaklight2|transform14|i_m_breaklightShape1.ciog.cog[0].cgid"
+connectAttr "groupId46.id" "|i_m_brakelight2|transform14|i_m_brakelightShape1.ciog.cog[0].cgid"
 		;
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[0].llnk";
 connectAttr ":initialShadingGroup.msg" "lightLinker1.lnk[0].olnk";
@@ -4894,29 +4894,29 @@ connectAttr "pasted__polyExtrudeFace9.out" "pasted__polyTweak5.ip";
 connectAttr "pasted__polyTweak4.out" "pasted__polyExtrudeFace9.ip";
 connectAttr "m_exhaustShape.wm" "pasted__polyExtrudeFace9.mp";
 connectAttr "pasted__polyCylinder5.out" "pasted__polyTweak4.ip";
-connectAttr "mat_breaklights.oc" "blinn4SG.ss";
-connectAttr "|i_m_breaklight1|transform15|i_m_breaklightShape1.iog.og[0]" "blinn4SG.dsm"
+connectAttr "mat_brakelights.oc" "blinn4SG.ss";
+connectAttr "|i_m_brakelight1|transform15|i_m_brakelightShape1.iog.og[0]" "blinn4SG.dsm"
 		 -na;
-connectAttr "|i_m_breaklight1|transform15|i_m_breaklightShape1.ciog.cog[0]" "blinn4SG.dsm"
+connectAttr "|i_m_brakelight1|transform15|i_m_brakelightShape1.ciog.cog[0]" "blinn4SG.dsm"
 		 -na;
-connectAttr "|i_m_breaklight2|transform14|i_m_breaklightShape1.iog.og[0]" "blinn4SG.dsm"
+connectAttr "|i_m_brakelight2|transform14|i_m_brakelightShape1.iog.og[0]" "blinn4SG.dsm"
 		 -na;
-connectAttr "|i_m_breaklight2|transform14|i_m_breaklightShape1.ciog.cog[0]" "blinn4SG.dsm"
+connectAttr "|i_m_brakelight2|transform14|i_m_brakelightShape1.ciog.cog[0]" "blinn4SG.dsm"
 		 -na;
-connectAttr "m_breaklightsShape.iog.og[0]" "blinn4SG.dsm" -na;
+connectAttr "m_brakelightsShape.iog.og[0]" "blinn4SG.dsm" -na;
 connectAttr "groupId43.msg" "blinn4SG.gn" -na;
 connectAttr "groupId44.msg" "blinn4SG.gn" -na;
 connectAttr "groupId45.msg" "blinn4SG.gn" -na;
 connectAttr "groupId46.msg" "blinn4SG.gn" -na;
 connectAttr "blinn4SG.msg" "materialInfo8.sg";
-connectAttr "mat_breaklights.msg" "materialInfo8.m";
-connectAttr "|i_m_breaklight1|transform15|i_m_breaklightShape1.o" "polyBoolOp6.ip[0]"
+connectAttr "mat_brakelights.msg" "materialInfo8.m";
+connectAttr "|i_m_brakelight1|transform15|i_m_brakelightShape1.o" "polyBoolOp6.ip[0]"
 		;
-connectAttr "|i_m_breaklight1|transform15|i_m_breaklightShape1.o" "polyBoolOp6.ip[1]"
+connectAttr "|i_m_brakelight1|transform15|i_m_brakelightShape1.o" "polyBoolOp6.ip[1]"
 		;
-connectAttr "|i_m_breaklight1|transform15|i_m_breaklightShape1.wm" "polyBoolOp6.im[0]"
+connectAttr "|i_m_brakelight1|transform15|i_m_brakelightShape1.wm" "polyBoolOp6.im[0]"
 		;
-connectAttr "|i_m_breaklight2|transform14|i_m_breaklightShape1.wm" "polyBoolOp6.im[1]"
+connectAttr "|i_m_brakelight2|transform14|i_m_brakelightShape1.wm" "polyBoolOp6.im[1]"
 		;
 connectAttr "polyCube12.out" "groupParts17.ig";
 connectAttr "groupId43.id" "groupParts17.gi";
@@ -4961,7 +4961,7 @@ connectAttr "dark.msg" ":defaultShaderList1.s" -na;
 connectAttr "blue.msg" ":defaultShaderList1.s" -na;
 connectAttr "truck_exhaust_phys.msg" ":defaultShaderList1.s" -na;
 connectAttr "pasted__dark.msg" ":defaultShaderList1.s" -na;
-connectAttr "mat_breaklights.msg" ":defaultShaderList1.s" -na;
+connectAttr "mat_brakelights.msg" ":defaultShaderList1.s" -na;
 connectAttr "imagePlane1.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "place2dTexture1.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "monster_02:imagePlane1.msg" ":defaultRenderUtilityList1.u" -na;
@@ -4986,7 +4986,7 @@ connectAttr "polySurfaceShape7.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "polySurfaceShape8.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "polySurfaceShape9.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "polySurfaceShape10.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
-connectAttr "m_breaklightsShape.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
+connectAttr "m_brakelightsShape.ciog.cog[0]" ":initialShadingGroup.dsm" -na;
 connectAttr "groupId11.msg" ":initialShadingGroup.gn" -na;
 connectAttr "groupId12.msg" ":initialShadingGroup.gn" -na;
 connectAttr "groupId13.msg" ":initialShadingGroup.gn" -na;
@@ -5012,12 +5012,12 @@ connectAttr "groupId47.msg" ":initialShadingGroup.gn" -na;
 connectAttr "groupId48.msg" ":initialShadingGroup.gn" -na;
 connectAttr "m_exhaust_cooler.msg" ":hyperGraphLayout.hyp[24].dn";
 connectAttr "m_exhaust.msg" ":hyperGraphLayout.hyp[68].dn";
-connectAttr "m_breaklights.msg" ":hyperGraphLayout.hyp[258].dn";
+connectAttr "m_brakelights.msg" ":hyperGraphLayout.hyp[258].dn";
 connectAttr "i_polySurface6.msg" ":hyperGraphLayout.hyp[259].dn";
 connectAttr "i_polySurface3.msg" ":hyperGraphLayout.hyp[260].dn";
 connectAttr "i_polySurface4.msg" ":hyperGraphLayout.hyp[261].dn";
-connectAttr "i_m_breaklight1.msg" ":hyperGraphLayout.hyp[262].dn";
-connectAttr "i_m_breaklight2.msg" ":hyperGraphLayout.hyp[263].dn";
+connectAttr "i_m_brakelight1.msg" ":hyperGraphLayout.hyp[262].dn";
+connectAttr "i_m_brakelight2.msg" ":hyperGraphLayout.hyp[263].dn";
 connectAttr "transform15.msg" ":hyperGraphLayout.hyp[264].dn";
 connectAttr "transform14.msg" ":hyperGraphLayout.hyp[265].dn";
 connectAttr "i_polySurface2.msg" ":hyperGraphLayout.hyp[266].dn";
