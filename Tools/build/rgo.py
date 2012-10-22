@@ -10,7 +10,7 @@ import rgohelp
 
 
 #appnames = [""UiCure/CureTestApp"", "Life", "SlimeVolleyball", "KillCutie", "TireFire"]
-appnames = ["TireFire"]
+appnames = ["KillCutie"]
 osname = rgohelp._getosname()
 hwname = rgohelp._gethwname()
 datename = rgohelp._getdatename()

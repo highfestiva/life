@@ -67,6 +67,7 @@
 #define RTVAR_CONTENT_LEVELS		"Content.Levels"
 #define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
 #define RTVAR_HISCORE_NAME		"Hiscore.Name"	// Last entered name.
+//#define KC_FULL_VERSION			1
 //#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -453,11 +454,10 @@ bool App::Open()
 	[AnimatedApp updateContent];
 #endif // iOS
 
-#ifdef KC_DEV_TESTING
+#if defined(KC_FULL_VERSION) || defined(KC_DEV_TESTING)
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
-	//CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_VOLUME, 0.0);
-#endif // Kill Cutie development testing
+#endif // Kill Cutie full version compile
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
 	bool lOk = mUiManager->OpenDraw();
@@ -520,12 +520,12 @@ bool App::Open()
 		mPauseButton->SetVisible(true);
 		mPauseButton->SetOnClick(App, OnPauseClickWithSound);
 
-#ifndef LEPRA_TOUCH_LOOKANDFEEL
+#if !defined(LEPRA_TOUCH_LOOKANDFEEL) && !defined(KC_FULL_VERSION)
 		mGetiPhoneButton = ICONBTNA("btn_iphone.png", "");
 		lDesktopWindow->AddChild(mGetiPhoneButton);
 		mGetiPhoneButton->SetVisible(true);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
-#endif // Touch L&F
+#endif // Touch L&F AND not full version
 	}
 	if (lOk)
 	{

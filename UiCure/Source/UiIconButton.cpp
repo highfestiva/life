@@ -89,6 +89,10 @@ void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResourc
 		{
 			SetPreferredSize(lPreferredSize, false);
 		}
+		if (GetParent())
+		{
+			GetParent()->UpdateLayout();
+		}
 	}
 }
 
