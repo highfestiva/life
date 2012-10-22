@@ -32,8 +32,11 @@ class DannoAI2: public SlimeAI
 		else if (j < 700) i = 10;
 		else i = 20;
 
-		if (this->ballVX < 0)
-			i += (int)(Math::random()*8);
+		i += (int)(Math::random()*8);	// high_festiva was here!
+		if (Math::random() > 0.98)
+		{
+			i += (int)(Math::random()*10) + 10;
+		}
 
 		if (j < 450)
 		{

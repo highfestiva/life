@@ -104,6 +104,7 @@ private:
 	UiTbc::Button* mResetButton;
 	UiTbc::Button* mRetryButton;
 	UiTbc::Button* mGetiPhoneButton;
+	double mExtraSleep;
 
 	LOG_CLASS_DECLARE();
 };
@@ -125,7 +126,8 @@ namespace Slime
 
 App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
-	mLayoutFrameCounter(-10)
+	mLayoutFrameCounter(-10),
+	mExtraSleep(0)
 {
 	mApp = this;
 }
@@ -398,6 +400,17 @@ int App::Run()
 
 bool App::Poll()
 {
+	if (mExtraSleep > 0.001)
+	{
+		Thread::Sleep(mExtraSleep);
+		mExtraSleep *= 0.94;
+	}
+	else
+	{
+		mExtraSleep = 0;
+	}
+
+
 	UiLepra::Core::ProcessMessages();
 	if (mDisplay->IsVisible())
 	{
@@ -529,6 +542,10 @@ bool App::CanRender() const
 
 void App::Suspend()
 {
+	if (mGame->fInPlay)
+	{
+		mExtraSleep = 0.2;
+	}
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
 #endif // iOS

@@ -69,17 +69,17 @@ def main():
             if options.qouted: q = "\""
             else: q = ""
             filepath = os.path.abspath(os.path.join(projDir, relp))
-            if options.basename:
-                print(q + os.path.basename(filepath)  + q)
-            elif options.absPath:
-                print(q + filepath + q)
-            else:
-                if options.base: base = options.base
-                else: base = os.curdir
-                try:
+            try:
+                if options.basename:
+                    print(q + os.path.basename(filepath)  + q)
+                elif options.absPath:
+                    print(q + filepath + q)
+                else:
+                    if options.base: base = options.base
+                    else: base = os.curdir
                     print(q + relpath(filepath, base) + q)
-                except OSError as e:
-                    print('OSError: %s' % e.message, file=sys.stderr)
+            except OSError as e:
+                print('OSError: %s' % str(e), file=sys.stderr)
 
 if __name__ == '__main__':
     main()
