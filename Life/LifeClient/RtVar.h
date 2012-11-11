@@ -37,9 +37,6 @@
 
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
 
-#define RTVAR_DEBUG_3D_ENABLEAXES	"Debug.3D.EnableAxes"
-#define RTVAR_DEBUG_3D_ENABLEJOINTS	"Debug.3D.EnableJoints"
-#define RTVAR_DEBUG_3D_ENABLESHAPES	"Debug.3D.EnableShapes"
 #define RTVAR_DEBUG_3D_DRAWLOCALSERVER	"Debug.3D.DrawLocalServer"
 #define RTVAR_DEBUG_INPUT_PRINT		"Debug.Input.Print"
 #define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"		// Internal.

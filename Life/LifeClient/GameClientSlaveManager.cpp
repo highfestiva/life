@@ -22,6 +22,7 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiCure/Include/UiCollisionSoundManager.h"
+#include "../../UiCure/Include/UiDebugRenderer.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiMachine.h"
 #include "../../UiCure/Include/UiProps.h"
@@ -1966,62 +1967,16 @@ void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Colo
 
 void GameClientSlaveManager::DrawSyncDebugInfo()
 {
-	bool lDebugAxes;
-	bool lDebugJoints;
-	bool lDebugShapes;
-	bool lDrawLocalServer;
-	CURE_RTVAR_GET(lDebugAxes, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false);
-	CURE_RTVAR_GET(lDebugJoints, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
-	CURE_RTVAR_GET(lDebugShapes, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
-	CURE_RTVAR_GET(lDrawLocalServer, =, GetVariableScope(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
-	if (lDebugAxes || lDebugJoints || lDebugShapes)
-	{
-		ScopeLock lLock(GetTickLock());
-		const Cure::ContextManager* lServerContext = GetMaster()->IsLocalServer()? GetMaster()->GetLocalServer()->GetContext() : 0;
-		mUiManager->GetRenderer()->ResetClippingRect();
-		mUiManager->GetRenderer()->SetClippingRect(mRenderArea);
-		mUiManager->GetRenderer()->SetViewport(mRenderArea);
-		UpdateCameraPosition(false);
-		float lFov;
-		CURE_RTVAR_GET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
-		UpdateFrustum(lFov);
+	UpdateCameraPosition(false);
+	float lFov;
+	CURE_RTVAR_GET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+	UpdateFrustum(lFov);
 
-		const Cure::ContextManager* lContext = GetContext();
-		const Cure::ContextManager::ContextObjectTable& lObjectTable = lContext->GetObjectTable();
-		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
-		for (; x != lObjectTable.end(); ++x)
-		{
-			UiCure::CppContextObject* lObject;
-			if (lDrawLocalServer && lServerContext)
-			{
-				if (lContext->IsLocalGameObjectId(x->first))
-				{
-					continue;
-				}
-				lObject = dynamic_cast<UiCure::CppContextObject*>(lServerContext->GetObject(x->first));
-			}
-			else
-			{
-				lObject = dynamic_cast<UiCure::CppContextObject*>(x->second);
-			}
-			if (!lObject)
-			{
-				continue;
-			}
-			if (lDebugAxes)
-			{
-				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_AXES);
-			}
-			if (lDebugJoints)
-			{
-				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_JOINTS);
-			}
-			if (lDebugShapes)
-			{
-				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_SHAPES);
-			}
-		}
-	}
+	bool lDrawLocalServer;
+	CURE_RTVAR_GET(lDrawLocalServer, =, GetVariableScope(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
+	const Cure::ContextManager* lServerContext = (lDrawLocalServer && GetMaster()->IsLocalServer())? GetMaster()->GetLocalServer()->GetContext() : 0;
+	UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), GetContext(), lServerContext, GetTickLock());
+	lDebugRenderer.Render(mUiManager, mRenderArea);
 }
 
 

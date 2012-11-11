@@ -2992,13 +2992,14 @@ void App::OnOk(UiTbc::Button* pButton)
 {
 	if (pButton->GetTag() == 33)
 	{
-		SystemManager::EmailTo(
-			_T("info@pixeldoctrine.com"),
-			_T("I want the complete game!"),
-			_T("Hiya Game Slave Bitches,\n\n")
-			_T("I enjoyed the KillCutie Demo [for PC/Mac?] and would like the complete game!\n\n")
-			_T("Get a move on,\n")
-			_T("Yours Truly"));
+		SystemManager::WebBrowseTo(_T("http://pixeldoctrine.com/#KillCutie"));
+		//SystemManager::EmailTo(
+		//	_T("info@pixeldoctrine.com"),
+		//	_T("I want the complete game!"),
+		//	_T("Hiya Game Slave Bitches,\n\n")
+		//	_T("I enjoyed the KillCutie Demo [for PC/Mac?] and would like the complete game!\n\n")
+		//	_T("Get a move on,\n")
+		//	_T("Yours Truly"));
 	}
 	MainMenu();
 }

@@ -467,6 +467,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiDebugRenderer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiGameUiManager.cxx"
 				>
 			</File>
@@ -518,6 +522,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiCure.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiDebugRenderer.h"
 				>
 			</File>
 			<File

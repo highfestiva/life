@@ -6,6 +6,10 @@
 
 #pragma once
 
+#define RTVAR_DEBUG_3D_ENABLEAXES		"Debug.3D.EnableAxes"
+#define RTVAR_DEBUG_3D_ENABLEJOINTS		"Debug.3D.EnableJoints"
+#define RTVAR_DEBUG_3D_ENABLESHAPES		"Debug.3D.EnableShapes"
+
 #define RTVAR_UI_DISPLAY_WIDTH			"Ui.Display.Width"
 #define RTVAR_UI_DISPLAY_HEIGHT			"Ui.Display.Height"
 #define RTVAR_UI_DISPLAY_BITSPERPIXEL		"Ui.Display.BitsPerPixel"
