@@ -14,22 +14,10 @@
     <ClCompile Include="App.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ctf.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Cutie.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Grenade.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Launcher.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LauncherAi.cpp">
+    <ClCompile Include="Goal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Level.cpp">
@@ -38,16 +26,13 @@
     <ClCompile Include="Spawner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vehicle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="VehicleAi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SeeThrough.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RoboBall.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CutieElevator.cpp">
+    <ClCompile Include="VehicleElevator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -55,32 +40,20 @@
     <None Include="App.mm">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="Icons\GrenadeRun.ico">
+    <None Include="Icons\TireFire.ico">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="GrenadeRun.rc">
+    <ResourceCompile Include="TireFire.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Ctf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cutie.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grenade.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Launcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LauncherAi.h">
+    <ClInclude Include="Goal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Level.h">
@@ -89,16 +62,13 @@
     <ClInclude Include="Spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Vehicle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="VehicleAi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SeeThrough.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RoboBall.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CutieElevator.h">
+    <ClInclude Include="VehicleElevator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

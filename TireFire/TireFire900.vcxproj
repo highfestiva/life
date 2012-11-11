@@ -27,9 +27,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>CureTestApp</ProjectName>
-    <ProjectGuid>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD8C}</ProjectGuid>
-    <RootNamespace>PlagueTestApp</RootNamespace>
+    <ProjectName>TireFire</ProjectName>
+    <ProjectGuid>{8D80E3F0-BE49-11E1-94D3-0019213B7B87}</ProjectGuid>
+    <RootNamespace>TireFire</RootNamespace>
     <Keyword>ManagedCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -37,6 +37,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -113,8 +114,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\ThirdParty\ode-0.11.1\include;..\..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -126,19 +127,22 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmodvc.lib;Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)$(IntDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)TireFire.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
-      <SubSystem>Console</SubSystem>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\ThirdParty\ode-0.11.1\include;..\..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -150,18 +154,20 @@
       </DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmodvc.lib;Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)$(IntDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)TireFire.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\ThirdParty\ode-0.11.1\include;..\..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -172,19 +178,20 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmodvc.lib;Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)$(IntDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)TireFire.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\ThirdParty\ode-0.11.1\include;..\..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -196,19 +203,22 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmodvc.lib;Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)$(IntDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)TireFire.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
-      <SubSystem>Console</SubSystem>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\ThirdParty\ode-0.11.1\include;..\..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -220,18 +230,21 @@
       </DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmodvc.lib;Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)$(IntDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)TireFire.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\ThirdParty\ode-0.11.1\include;..\..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -242,12 +255,13 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmodvc.lib;Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(ProjectDir)$(IntDir)$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)TireFire.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -265,61 +279,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CureTest.cpp" />
-    <ClCompile Include="..\..\Lepra\LepraTestApp\LepraTest.cpp" />
-    <ClCompile Include="NetworkPhysicsTest.cpp" />
-    <ClCompile Include="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.cpp" />
-    <ClCompile Include="..\..\UiTBC\UiTBCTestApp\TbcTest.cpp" />
-    <ClCompile Include="..\..\Lepra\LepraTestApp\TestBinTree.cpp" />
-    <ClCompile Include="..\..\Lepra\LepraTestApp\TestLooseTree.cpp" />
-    <ClCompile Include="..\..\Lepra\LepraTestApp\TestSkipList.cpp" />
-    <ClCompile Include="..\..\Lepra\LepraTestApp\TestThreading.cpp" />
-    <ClCompile Include="..\..\Lepra\LepraTestApp\TestUDPSockets.cpp" />
-    <ClCompile Include="UiCureTest.cpp" />
-    <ClCompile Include="..\..\UiLepra\LepraTestApp\UiLepraTest.cpp" />
-    <ClCompile Include="..\..\UiTBC\UiTBCTestApp\UiTbcTest.cpp" />
-    <ClCompile Include="CureTestApp.cpp" />
+    <ClCompile Include="App.cxx" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Goal.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="Spawner.cpp" />
+    <ClCompile Include="Vehicle.cpp" />
+    <ClCompile Include="VehicleAi.cpp" />
+    <ClCompile Include="VehicleElevator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.h" />
+    <None Include="App.mm" />
+    <None Include="Icons\TireFire.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Cure\Cure10.vcxproj">
-      <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Lepra\Lepra10.vcxproj">
-      <Project>{e7dda722-45e3-45c9-b051-e99288accdd2}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\TBC\TBC10.vcxproj">
-      <Project>{bdbf3606-e371-454b-b162-27fd92b67d50}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ThirdParty\freealut-1.1.0\admin\VisualStudioDotNET\alut\alut10.vcxproj">
-      <Project>{07149bcb-be8a-4503-be18-815d64233116}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ThirdParty\openal-soft-1.10.622\OpenAL_10.vcxproj">
-      <Project>{00e79e9d-7870-4921-9022-9ad4951bc225}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ThirdParty\ThirdPartyLib_10.vcxproj">
-      <Project>{00f89e9d-7870-4921-9022-9ad4951bc224}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\UiLepra\UiLepra10.vcxproj">
-      <Project>{e7dda722-45e3-45c9-b051-e99288accdd3}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\UiTBC\UiTBC10.vcxproj">
-      <Project>{bdbf3606-e371-454b-b162-27fd92b67d51}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\UiCure10.vcxproj">
-      <Project>{6dbf3606-e311-454b-b162-27fd92b67d54}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
+    <ResourceCompile Include="TireFire.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Goal.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="Spawner.h" />
+    <ClInclude Include="Vehicle.h" />
+    <ClInclude Include="VehicleAi.h" />
+    <ClInclude Include="VehicleElevator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

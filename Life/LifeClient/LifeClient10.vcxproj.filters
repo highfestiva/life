@@ -80,9 +80,6 @@
     <ClCompile Include="..\LifeServer\Client.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="..\LifeServer\Elevator.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
     <ClCompile Include="..\LifeServer\GameServerManager.cpp">
       <Filter>Server</Filter>
     </ClCompile>
@@ -173,9 +170,6 @@
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="..\LifeServer\Client.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LifeServer\Elevator.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="..\LifeServer\GameServerManager.h">
