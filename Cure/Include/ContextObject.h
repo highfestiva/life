@@ -37,7 +37,7 @@ class ContextObjectAttribute;
 class ResourceManager;
 
 
-class ContextObject: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
+class ContextObject
 {
 public:
 	enum PhysicsOverride
@@ -129,6 +129,11 @@ public:
 	virtual void OnLoaded();
 	virtual void OnMicroTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody) = 0;
+	virtual void OnForceApplied(ContextObject* pOtherObject,
+		 TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		 const Vector3DF& pForce, const Vector3DF& pTorque,
+		 const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity) = 0;
 	virtual void OnTick();
 
 protected:
@@ -140,8 +145,6 @@ protected:
 	void RemoveChild(ContextObject* pChild);
 	void SetParent(ContextObject* pParent);
 	virtual void SetupChildHandlers();
-
-	virtual bool IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther);
 
 	ResourceManager* GetResourceManager() const;
 

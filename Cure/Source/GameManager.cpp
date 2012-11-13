@@ -70,6 +70,8 @@ GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariab
 	mPhysicsTickDoneSemaphore(0)
 {
 	mContext = new ContextManager(this);
+	mPhysics->SetTriggerListener(this);
+	mPhysics->SetForceFeedbackListener(this);
 	mPhysics->InitCurrentThread();
 }
 
@@ -617,6 +619,32 @@ void GameManager::DeletePhysicsThread()
 	}
 }
 
+void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+{
+	ContextObject* lObject1 = GetContext()->GetObject(pTriggerListenerId);
+	if (lObject1)
+	{
+		ContextObject* lObject2 = GetContext()->GetObject(pOtherBodyId);
+		if (lObject2)
+		{
+			lObject1->OnTrigger(pTrigger, lObject2);
+		}
+	}
+}
+
+void GameManager::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	ContextObject* lObject1 = GetContext()->GetObject(pObjectId);
+	if (lObject1)
+	{
+		ContextObject* lObject2 = GetContext()->GetObject(pOtherObjectId);
+		if (lObject2)
+		{
+			lObject1->OnForceApplied(lObject2, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+		}
+	}
+}
 
 
 LOG_CLASS_DEFINE(GAME, GameManager);

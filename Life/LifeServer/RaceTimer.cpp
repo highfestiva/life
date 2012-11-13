@@ -73,9 +73,9 @@ void RaceTimer::OnTick()
 	}
 }
 
-void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pListener)
+void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
-	Cure::ContextObject* lObject = (Cure::ContextObject*)pListener;
+	Cure::ContextObject* lObject = pBody;
 
 	// Check if just finished this race.
 	DoneMap::iterator i = mDoneMap.find(lObject->GetInstanceId());

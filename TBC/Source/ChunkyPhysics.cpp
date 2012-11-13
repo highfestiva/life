@@ -318,7 +318,7 @@ void ChunkyPhysics::SetBoneCount(int pBoneCount)
 }
 
 bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const Vector3DF* pPosition,
-	PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener)
+	int pTrigListenerId, int pForceListenerId)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
 	assert(lOk);
@@ -345,7 +345,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 				{
 					const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
 					const TransformationF& lBone = GetBoneTransformation(x);
-					lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListener, lBodyType, lBone);
+					lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListenerId, lBodyType, lBone);
 					if (lOk)
 					{
 						pPhysics->EnableGravity(lGeometry->GetBodyId(), lGeometry->IsAffectedByGravity());
@@ -354,7 +354,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 				break;
 				case ChunkyBoneGeometry::BONE_TRIGGER:
 				{
-					lOk = lGeometry->CreateTrigger(pPhysics, pTrigListener, GetBoneTransformation(x));
+					lOk = lGeometry->CreateTrigger(pPhysics, pTrigListenerId, GetBoneTransformation(x));
 				}
 				break;
 

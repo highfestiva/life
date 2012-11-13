@@ -781,7 +781,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 
 	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
 	const int lPhysicsFps = mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps();
-	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), this, this));
+	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), GetInstanceId(), GetInstanceId()));
 	assert(lOk);
 	if (lOk)
 	{
@@ -1284,17 +1284,6 @@ void ContextObject::SetupChildHandlers()
 		AddChild(lHandlerChild);
 		lHandlerChild->SetSpawner(lSpawner);
 	}
-}
-
-
-
-bool ContextObject::IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther)
-{
-	if (!pOther)
-	{
-		return false;
-	}
-	return (((ContextObject*)pOther)->GetInstanceId() == GetInstanceId());
 }
 
 

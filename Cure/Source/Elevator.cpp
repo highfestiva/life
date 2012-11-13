@@ -149,7 +149,7 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 }
 
-void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener*)
+void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject*)
 {
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
 	assert(lTrigger);

@@ -51,7 +51,7 @@ private:
 
 
 
-class GameManager
+class GameManager: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
 {
 public:
 	typedef SequencialPerformanceData<uint64> BandwidthData;
@@ -125,6 +125,9 @@ private:
 	void PhysicsThreadEntry();
 	void CreatePhysicsThread();
 	void DeletePhysicsThread();
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId);
+	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
 	mutable Lock mLock;
 	volatile bool mIsThreadSafe;

@@ -410,20 +410,20 @@ ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData):
 }
 
 bool ChunkyBoneCapsule::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
+	int pForceListenerId, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateCapsule(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
-		mBodyData.mFriction, mBodyData.mBounce, pForceListener);
+		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneCapsule::CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneCapsule::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateCapsuleTrigger(pTransform, mRadius, mLength, pTrigListener);
+	mTriggerId = pPhysics->CreateCapsuleTrigger(pTransform, mRadius, mLength, pTrigListenerId);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -469,20 +469,20 @@ ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData):
 }
 
 bool ChunkyBoneSphere::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
+	int pForceListenerId, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateSphere(pIsRoot, pTransform, mBodyData.mMass, mRadius, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pForceListener);
+		mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneSphere::CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneSphere::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateSphereTrigger(pTransform, mRadius, pTrigListener);
+	mTriggerId = pPhysics->CreateSphereTrigger(pTransform, mRadius, pTrigListenerId);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -525,20 +525,20 @@ ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData):
 }
 
 bool ChunkyBoneBox::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
+	int pForceListenerId, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateBox(pIsRoot, pTransform, mBodyData.mMass, mSize, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pForceListener);
+		mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneBox::CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneBox::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateBoxTrigger(pTransform, mSize, pTrigListener);
+	mTriggerId = pPhysics->CreateBoxTrigger(pTransform, mSize, pTrigListenerId);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -594,16 +594,16 @@ ChunkyBoneMesh::~ChunkyBoneMesh()
 }
 
 bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType,
+	int pForceListenerId, PhysicsManager::BodyType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
-		pTransform, mBodyData.mFriction, mBodyData.mBounce, pForceListener);
+		pTransform, mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, PhysicsManager::TriggerListener*, const TransformationF&)
+bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, int, const TransformationF&)
 {
 	assert(false);
 	return (false);

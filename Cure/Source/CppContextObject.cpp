@@ -281,7 +281,7 @@ void CppContextObject::OnAlarm(int /*pAlarmId*/, void* /*pExtraData*/)
 {
 }
 
-void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody)
+void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
 	if (!GetAllowNetworkLogic())
 	{
@@ -300,7 +300,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC:
 
 	/*
 	TODO: put this back when attaching objects to each other is working.
-	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
+	ContextObject* lObject2 = mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(pBody2);
 	if (mManager->GetGameManager()->IsServer() && lObject2)
 	{
 		AttachToObject(pBody1, lObject2, pBody2);
@@ -309,7 +309,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC:
 
 
 
-void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
+void CppContextObject::OnForceApplied(ContextObject* pOtherObject,
 	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 	const Vector3DF& pForce, const Vector3DF& pTorque,
 	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)

@@ -159,7 +159,7 @@ void Vehicle::OnTick()
 	{
 		TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
 		if (lWheel->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE ||
-			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(lWheel->GetBodyId()))
+			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(lWheel->GetBodyId()))
 		{
 			continue;
 		}

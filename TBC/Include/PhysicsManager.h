@@ -27,26 +27,25 @@ public:
 
 	typedef std::hash_set<BodyID> BodySet;
 
-	enum BodyType
+	class TriggerListener
 	{
-		STATIC = 1,	// Static world object.
-		DYNAMIC,	// Dynamic object within the world.
+	public:
+		virtual void OnTrigger(TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId) = 0;
 	};
 
 	class ForceFeedbackListener
 	{
 	public:
-		virtual void OnForceApplied(ForceFeedbackListener* pOtherObject,
-			BodyID pOwnBodyId, BodyID pOtherBodyId,
+		virtual void OnForceApplied(int pObjectId, int pOtherObjectId,
+			BodyID pBodyId, BodyID pOtherBodyId,
 			const Vector3DF& pForce, const Vector3DF& pTorque,
 			const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity) = 0;
 	};
 
-	class TriggerListener
+	enum BodyType
 	{
-	public:
-		virtual void OnTrigger(TriggerID pTrigger, ForceFeedbackListener* pBody) = 0;
-		virtual bool IsSameInstance(ForceFeedbackListener* pOther) = 0;
+		STATIC = 1,	// Static world object.
+		DYNAMIC,	// Dynamic object within the world.
 	};
 
 	struct Joint1Diff
@@ -120,6 +119,9 @@ public:
 	PhysicsManager();
 	virtual ~PhysicsManager();
 
+	void SetTriggerListener(TriggerListener* pTriggerCallback);
+	void SetForceFeedbackListener(ForceFeedbackListener* pForceFeedbackCallback);
+
 	virtual bool InitCurrentThread() = 0;
 
 	int QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
@@ -134,23 +136,23 @@ public:
 	// The cylinder and capsule are both created along the local Z-axis.
 	virtual BodyID CreateSphere(bool pIsRoot, const Transformation<float32>& pTransform,
 		float32 pMass, float32 pRadius, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pBounce = 0, int pForceListenerId = 0) = 0;
 	virtual BodyID CreateCylinder(bool pIsRoot, const Transformation<float32>& pTransform,
 		float32 pMass, float32 pRadius, float32 pLength, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
 	virtual BodyID CreateCapsule(bool pIsRoot, const Transformation<float32>& pTransform,
 		float32 pMass, float32 pRadius, float32 pLength, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
 	virtual BodyID CreateBox(bool pIsRoot, const Transformation<float32>& pTransform,
 		float32 pMass, const Vector3DF& pSize, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
 
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,
 		unsigned pTriangleCount, const Lepra::uint32* pIndices,
 		const TransformationF& pTransform, float32 pFriction = 1,
-		float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pBounce = 0, int pForceListenerId = 0) = 0;
 
 	virtual bool IsStaticBody(BodyID pBodyId) const = 0;
 
@@ -183,28 +185,28 @@ public:
 	//
 	virtual TriggerID CreateSphereTrigger(const Transformation<float32>& pTransform,
 						  float32 pRadius,
-						  TriggerListener* pListener) = 0;
+						  int pTriggerListenerId) = 0;
 	virtual TriggerID CreateCylinderTrigger(const Transformation<float32>& pTransform,
 						float32 pRadius,
 						float32 pLength,
-						TriggerListener* pListener) = 0;
+						int pTriggerListenerId) = 0;
 	virtual TriggerID CreateCapsuleTrigger(const Transformation<float32>& pTransform,
 						float32 pRadius,
 						float32 pLength,
-						TriggerListener* pListener) = 0;
+						int pTriggerListenerId) = 0;
 	virtual TriggerID CreateBoxTrigger(const Transformation<float32>& pTransform,
 						const Vector3DF& pSize,
-						TriggerListener* pListener) = 0;
+						int pTriggerListenerId) = 0;
 	virtual TriggerID CreateRayTrigger(const Transformation<float32>& pTransform,
 						const Vector3DF& pFromPos,
 						const Vector3DF& pToPos,
-						TriggerListener* pListener) = 0;
+						int pTriggerListenerId) = 0;
 
 	virtual void DeleteTrigger(TriggerID pTriggerID) = 0;
 
-	virtual TriggerListener* GetTriggerListener(TriggerID pTrigger) = 0;
-	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody) = 0;
-	virtual void SetForceFeedbackListener(BodyID pBody, ForceFeedbackListener* pListener) = 0;
+	virtual int GetTriggerListenerId(TriggerID pTrigger) = 0;
+	virtual int GetForceFeedbackListenerId(BodyID pBody) = 0;
+	virtual void SetForceFeedbackListener(BodyID pBody, int pForceFeedbackId) = 0;
 
 	virtual void GetTriggerTransform(TriggerID pTriggerID, Transformation<float32>& pTransform) = 0;
 	virtual void SetTriggerTransform(TriggerID pTriggerID, const Transformation<float32>& pTransform) = 0;
@@ -313,6 +315,8 @@ public:
 	virtual const BodySet& GetIdledBodies() const = 0;
 
 protected:
+	TriggerListener* mTriggerCallback;
+	ForceFeedbackListener* mForceFeedbackCallback;
 };
 
 
