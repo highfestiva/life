@@ -371,10 +371,14 @@ PhysicsResource::UserData PhysicsResource::GetUserData(const Cure::UserResource*
 
 bool PhysicsResource::Load()
 {
-	//assert(IsUnique());
+	return LoadName(GetName());
+}
+
+bool PhysicsResource::LoadName(const str& pName)
+{
 	assert(GetRamData() == 0);
 	SetRamData(new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
-	File* lFile = GetManager()->QueryFile(GetName());
+	File* lFile = GetManager()->QueryFile(pName);
 	bool lOk = (lFile != 0);
 	if (lOk)
 	{

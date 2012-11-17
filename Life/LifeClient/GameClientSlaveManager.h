@@ -66,6 +66,7 @@ public:
 
 	GameClientMasterTicker* GetMaster() const;
 
+	virtual bool IsPrimaryManager() const;
 	bool Render();
 	virtual bool Paint();
 	virtual bool EndTick();
@@ -83,7 +84,7 @@ public:
 	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet);
 	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
-	bool IsOwned(Cure::GameObjectId pObjectId) const;
+	virtual bool IsOwned(Cure::GameObjectId pObjectId) const;
 	Cure::GameObjectId GetAvatarInstanceId() const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);

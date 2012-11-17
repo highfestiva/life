@@ -35,7 +35,7 @@ MassObject::MassObject(Cure::ResourceManager* pResourceManager, const str& pClas
 	mFullyVisibleDistance = mSquareSideLength * (SQUARE_MID_TO_CORNER - 1.0f);
 	mVisibleDistanceFactor = (1+mVisibleAddTerm)/mSquareSideLength;
 
-	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
+	SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
 }
 
 MassObject::~MassObject()

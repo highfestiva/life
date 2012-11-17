@@ -24,6 +24,7 @@ Cutie::Cutie(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCur
 	mKillJointsTickCount(2),
 	mWheelExpelTickCount(3)
 {
+	SetForceLoadUnique(true);	// Needs to be unique as physics are modified and reloaded on every death.
 }
 
 Cutie::~Cutie()

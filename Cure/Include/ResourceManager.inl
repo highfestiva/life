@@ -165,7 +165,7 @@ void RamResource<RamData>::SetRamDataType(RamData pData)
 
 template<class RamData>
 RamResource<RamData>::RamResource(ResourceManager* pManager, const str& pName):
-	Resource(pManager, pName),
+	Parent(pManager, pName),
 	mRamData((RamData)0)
 {
 }

@@ -13,6 +13,7 @@
 #include "../../TBC/Include/PhysicsTrigger.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
+#include "../Include/TimeManager.h"
 
 
 
@@ -172,18 +173,20 @@ void CppContextObject::StartLoading()
 void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 {
 	assert(mPhysicsResource == 0);
-	mPhysicsResource = new UserPhysicsResource();
-	const str lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
-	if (!mForceLoadUnique && mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
+	const str lInstanceId = strutil::IntToString(GetInstanceId(), 10);
+	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();	// TODO: move to central source file.
+	PhysicsReferenceInitData lInitData(mPosition.mPosition.mTransformation, mPhysicsOverride, mManager->GetGameManager()->GetPhysicsManager(),
+		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
+	if (!mForceLoadUnique)
 	{
-		// If we're only in it for the bones, we can manage without a unique physics object.
 		mPhysicsResource->Load(GetResourceManager(), lAssetName,
-			UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+			UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 	}
 	else
 	{
 		mPhysicsResource->LoadUnique(GetResourceManager(), lAssetName,
-			UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+			UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 	}
 }
 
@@ -346,7 +349,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	}
 }
 
-void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
+void CppContextObject::OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResource)
 {
 	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{

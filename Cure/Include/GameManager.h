@@ -59,6 +59,7 @@ public:
 	GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameManager();
 
+	virtual bool IsPrimaryManager() const;
 	virtual bool BeginTick();
 	virtual bool EndTick();
 	virtual bool TickNetworkOutput();

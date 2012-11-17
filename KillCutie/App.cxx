@@ -67,7 +67,7 @@
 #define RTVAR_CONTENT_LEVELS		"Content.Levels"
 #define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
 #define RTVAR_HISCORE_NAME		"Hiscore.Name"	// Last entered name.
-//#define KC_FULL_VERSION			1
+#define KC_FULL_VERSION			1
 //#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -2912,6 +2912,7 @@ void App::SuperReset(bool pGameOver)
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
+	lResourceTypes.push_back(_T("PhysicsRef"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
@@ -3206,6 +3207,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
+	lResourceTypes.push_back(_T("PhysicsRef"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.

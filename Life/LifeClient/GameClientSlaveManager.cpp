@@ -231,6 +231,11 @@ GameClientMasterTicker* GameClientSlaveManager::GetMaster() const
 
 
 
+bool GameClientSlaveManager::IsPrimaryManager() const
+{
+	return mMaster->IsFirstSlave(this);
+}
+
 bool GameClientSlaveManager::Render()
 {
 	ScopeLock lLock(GetTickLock());

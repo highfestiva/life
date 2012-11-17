@@ -45,7 +45,7 @@ template<class ResourceType, class SubtypeExtraType>
 Cure::Resource* UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(
 	Cure::ResourceManager* pManager, const str& pName) const
 {
-	return (new ResourceType(GetUiManager(), pManager, pName, mExtraData));
+	return (new ResourceType(GetUiManager(), pManager, pName, GetExtraData()));
 }
 
 template<class ResourceType, class SubtypeExtraType>

@@ -13,6 +13,8 @@
 #include "../../Lepra/Include/String.h"
 #include "Cure.h"
 #include "PositionalData.h"
+#include "PositionHauler.h"
+#include "PhysicsReferenceResource.h"
 
 
 
@@ -40,13 +42,6 @@ class ResourceManager;
 class ContextObject
 {
 public:
-	enum PhysicsOverride
-	{
-		PHYSICS_OVERRIDE_NORMAL = 1,
-		PHYSICS_OVERRIDE_STATIC,
-		PHYSICS_OVERRIDE_BONES,
-	};
-
 	typedef std::vector<ContextObject*> Array;
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 
@@ -71,7 +66,7 @@ public:
 	bool IsLoaded() const;
 	void SetLoadResult(bool pOk);
 
-	void SetAllowMoveSelf(bool pAllow);
+	void SetAllowMoveRoot(bool pAllow);
 	void AttachToObject(TBC::PhysicsManager::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsManager::BodyID pBody2);
 	void AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
 	bool DetachFromObject(ContextObject* pObject);
@@ -94,8 +89,9 @@ public:
 
 	void AddChild(ContextObject* pChild);
 
-	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
-	void SetFullPosition(const ObjectPositionalData& pPositionalData);
+	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);	// Fetch full phys position (and update object graph as necessary).
+	static bool UpdateFullPosition(ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure);
+	void SetFullPosition(const ObjectPositionalData& pPositionalData);	// Sets full phys position if structure or significant difference seen.
 	void SetInitialTransform(const TransformationF& pTransformation);
 	TransformationF GetInitialTransform() const;
 	Vector3DF GetPosition() const;
@@ -111,7 +107,7 @@ public:
 	ObjectPositionalData* GetNetworkOutputGhost();
 	void DeleteNetworkOutputGhost();
 
-	bool SetPhysics(TBC::ChunkyPhysics* pStructure);
+	void SetPhysics(TBC::ChunkyPhysics* pStructure);
 	void ClearPhysics();
 	TBC::ChunkyPhysics* GetPhysics() const;
 	void SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride);
@@ -137,7 +133,7 @@ public:
 	virtual void OnTick();
 
 protected:
-	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData, const TBC::ChunkyBoneGeometry* pGeometry);
+	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData);
 	void AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
@@ -184,7 +180,7 @@ protected:
 	ObjectPositionalData mPosition;
 	ObjectPositionalData* mNetworkOutputGhost;
 	int mSendCount;
-	bool mAllowMoveSelf;	// This is set to false when attached to someone/something else.
+	bool mAllowMoveRoot;	// This is set to false when attached to someone/something else.
 	ConnectionList mConnectionList;
 
 	LOG_CLASS_DECLARE();

@@ -211,6 +211,7 @@ private:
 template<class RamData>
 class RamResource: public Resource
 {
+	typedef Resource Parent;
 public:
 	typedef RamData UserRamData;
 
@@ -281,6 +282,7 @@ public:
 	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
 	bool Load();
+	bool LoadName(const str& pName);
 
 private:
 	LOG_CLASS_DECLARE();

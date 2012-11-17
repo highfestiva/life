@@ -507,7 +507,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\PhysicsReferenceResource.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\PositionalData.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\PositionHauler.cpp"
 				>
 			</File>
 			<File
@@ -629,7 +637,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\PhysicsReferenceResource.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\PositionalData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\PositionHauler.h"
 				>
 			</File>
 			<File

@@ -102,6 +102,11 @@ GameManager::~GameManager()
 
 
 
+bool GameManager::IsPrimaryManager() const
+{
+	return true;
+}
+
 bool GameManager::BeginTick()
 {
 	LEPRA_MEASURE_SCOPE(BeginTick);

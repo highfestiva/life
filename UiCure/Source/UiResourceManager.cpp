@@ -391,7 +391,7 @@ const str GeometryReferenceResource::GetType() const
 
 bool GeometryReferenceResource::IsReferenceType() const
 {
-	return (true);
+	return true;
 }
 
 bool GeometryReferenceResource::Load()

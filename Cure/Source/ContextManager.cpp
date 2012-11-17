@@ -284,7 +284,10 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 
 void ContextManager::Tick(float pTimeDelta)
 {
-	DispatchMicroTickCallbacks(pTimeDelta);
+	if (GetGameManager()->IsPrimaryManager())
+	{
+		DispatchMicroTickCallbacks(pTimeDelta);
+	}
 	DispatchAlarmCallbacks();
 }
 

@@ -133,7 +133,7 @@ bool GameClientDemo::InitializeTerrain()
 	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), _T("saucer_01"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
 	mAvatarId = lVehicle->GetInstanceId();
-	lVehicle->SetPhysicsTypeOverride(Cure::ContextObject::PHYSICS_OVERRIDE_STATIC);
+	lVehicle->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_STATIC);
 	lVehicle->StartLoading();
 	return (true);
 }

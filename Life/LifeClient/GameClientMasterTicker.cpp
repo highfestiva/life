@@ -387,10 +387,6 @@ bool GameClientMasterTicker::WaitResetUi()
 
 bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) const
 {
-	if (mSlaveArray.empty())
-	{
-		return false;
-	}
 	SlaveArray::const_iterator x = mSlaveArray.begin();
 	for (; x != mSlaveArray.end(); ++x)
 	{
@@ -405,7 +401,7 @@ bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) 
 		}
 	}
 	assert(false);
-	return true;
+	return false;
 }
 
 bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const

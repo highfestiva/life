@@ -30,6 +30,7 @@ Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, U
 	mExploded(false),
 	mIsUserFired(false)
 {
+	SetForceLoadUnique(true);	// Needs to be unique as physics are reloaded often with shared IDs.
 }
 
 Grenade::~Grenade()

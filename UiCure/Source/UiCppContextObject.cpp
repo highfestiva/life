@@ -137,7 +137,7 @@ void CppContextObject::UiMove()
 		}
 		TBC::GeometryBase* lGfxGeometry = lResource->GetRamData();
 
-		if (mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
+		if (mPhysicsOverride != Cure::PHYSICS_OVERRIDE_BONES)
 		{
 			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
 			if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)

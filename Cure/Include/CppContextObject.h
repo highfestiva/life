@@ -49,7 +49,7 @@ protected:
 		 const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
 	void OnLoadClass(UserClassResource* pClassResource);
-	void OnLoadPhysics(UserPhysicsResource* pPhysicsResource);
+	void OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResource);
 
 	bool GetAllowNetworkLogic() const;
 
@@ -57,7 +57,7 @@ private:
 	typedef std::hash_map<int, const TBC::PhysicsTrigger*> ActiveTriggerGroupMap;
 
 	UserClassResource* mClassResource;
-	UserPhysicsResource* mPhysicsResource;
+	UserPhysicsReferenceResource* mPhysicsResource;
 	ActiveTriggerGroupMap mActiveTriggerGroupMap;
 	bool mAllowNetworkLogic;
 	bool mForceLoadUnique;
