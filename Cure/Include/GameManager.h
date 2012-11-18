@@ -38,6 +38,7 @@ public:
 
 	GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager);
 	virtual ~GameManager();
+	const GameTicker* GetTicker() const;
 	void SetTicker(const GameTicker* pTicker);
 
 	virtual bool IsPrimaryManager() const;

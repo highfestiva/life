@@ -71,7 +71,10 @@ const str& InputElement::GetIdentifier() const
 
 str InputElement::GetFullName() const
 {
-	return GetParentDevice()->GetUniqueIdentifier() + _T(".") + GetIdentifier();
+	str lId = GetIdentifier();
+	lId = strutil::ReplaceAll(lId, ' ', '_');
+	lId = strutil::ReplaceAll(lId, '-', '_');
+	return GetParentDevice()->GetUniqueIdentifier() + _T(".") + lId;
 }
 
 str InputElement::GetName() const
@@ -220,6 +223,8 @@ void InputDevice::SetIdentifier(const str& pIdentifier)
 {
 	mIdentifier = pIdentifier;
 	mUniqueIdentifier = mIdentifier + strutil::IntToString(GetManager()->QueryIdentifierCount(mIdentifier), 10);
+	mUniqueIdentifier = strutil::ReplaceAll(mUniqueIdentifier, ' ', '_');
+	mUniqueIdentifier = strutil::ReplaceAll(mUniqueIdentifier, '-', '_');
 }
 
 const str& InputDevice::GetIdentifier() const

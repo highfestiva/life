@@ -67,6 +67,11 @@ GameManager::~GameManager()
 	}
 }
 
+const GameTicker* GameManager::GetTicker() const
+{
+	return mTicker;
+}
+
 void GameManager::SetTicker(const GameTicker* pTicker)
 {
 	mTicker = pTicker;

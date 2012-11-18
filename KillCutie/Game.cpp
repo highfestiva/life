@@ -559,7 +559,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			{
 				continue;
 			}
-			const Vector3DF lBodyCenter = GameTicker::GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
+			const Vector3DF lBodyCenter = GameTicker::GetPhysicsManager(true)->GetBodyPosition(lGeometry->GetBodyId());
 			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
 			if (d > 80*SCALE_FACTOR ||
@@ -581,7 +581,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				f.z += 0.3f;
 			}
 			f *= ff;
-			GameTicker::GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
+			GameTicker::GetPhysicsManager(true)->AddForce(lGeometry->GetBodyId(), f);
 			if (lObject == mVehicle)
 			{
 				if (d > 0.6f)
@@ -858,7 +858,7 @@ bool Game::Render()
 		int x = 0;
 		for (x = 0; x < 3; ++x)
 		{
-			const bool lIsCollision = (GameTicker::GetPhysicsManager()->QueryRayCollisionAgainst(
+			const bool lIsCollision = (GameTicker::GetPhysicsManager(true)->QueryRayCollisionAgainst(
 				lVehiclePos, lOffset, lOffset.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
 			if (!lIsCollision)
 			{

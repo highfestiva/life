@@ -6,6 +6,7 @@
 
 #include "UiGameServerManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
+#include "GameClientMasterTicker.h"
 #include "UiServerConsoleManager.h"
 #include "UiConsole.h"
 
@@ -105,6 +106,17 @@ Cure::ContextObject* UiGameServerManager::CreateContextObject(const str& pClassI
 	UiCure::CppContextObject* lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
 	lObject->EnableUi(false);
 	return (lObject);
+}
+
+
+
+void UiGameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement)
+{
+	const GameClientMasterTicker* lTicker = (const GameClientMasterTicker*)GetTicker();
+	if (!lTicker->IsLocalObject(pMovement->GetObjectId()))
+	{
+		Parent::StoreMovement(pClientFrameIndex, pMovement);
+	}
 }
 
 

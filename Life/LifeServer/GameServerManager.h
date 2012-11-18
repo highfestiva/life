@@ -59,7 +59,7 @@ public:
 
 	void TickInput();
 
-private:
+protected:
 	typedef Cure::ContextManager::ContextObjectTable ContextTable;
 
 	void Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason);
@@ -78,7 +78,7 @@ private:
 	void DeleteObject(Cure::GameObjectId pInstanceId);
 
 	void AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex);
-	void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
+	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
 	void DeleteMovements(Cure::GameObjectId pInstanceId);
 	void ApplyStoredMovement();
 
@@ -114,6 +114,7 @@ private:
 	bool HandleMasterCommand(const ServerInfo& pServerInfo);
 	void MonitorRtvars();
 
+private:
 	typedef std::list<Cure::MessageObjectMovement*> MovementList;
 	typedef std::vector<MovementList> MovementArrayList;
 	typedef HashTable<Cure::UserAccount::AccountId, Client*> AccountClientTable;
