@@ -5,7 +5,7 @@
 
 
 #include "../Cure/Include/ConsoleManager.h"
-#include "../Cure/Include/GameManager.h"
+#include "../Cure/Include/GameTicker.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Lepra/Include/AntiCrack.h"
 #include "../Lepra/Include/LogListener.h"

@@ -108,7 +108,7 @@ str ClientApplication::GetVersion() const
 
 Cure::GameTicker* ClientApplication::CreateGameTicker() const
 {
-	GameClientMasterTicker* lMaster = new GameClientMasterTicker(mUiManager, mResourceManager);
+	GameClientMasterTicker* lMaster = new GameClientMasterTicker(mUiManager, mResourceManager, 2000, 7, 1);
 	return (lMaster);
 }
 

@@ -86,20 +86,6 @@ bool MasterServer::Tick()
 	return true;
 }
 
-void MasterServer::PollRoundTrip()
-{
-}
-
-float MasterServer::GetTickTimeReduction() const
-{
-	return 0;
-}
-
-float MasterServer::GetPowerSaveAmount() const
-{
-	return 0.05f;
-}
-
 
 
 void MasterServer::KillDeadServers()

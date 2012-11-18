@@ -93,7 +93,6 @@ typedef std::list<FingerMovement> FingerMoveList;
 
 class Game: public Cure::GameTicker, public Cure::GameManager
 {
-	typedef GameManager Parent;
 public:
 	Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
 	virtual ~Game();

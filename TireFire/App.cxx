@@ -1294,7 +1294,7 @@ void App::SuperReset()
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
-	lResourceTypes.push_back(_T("PhysicsRef"));
+	lResourceTypes.push_back(_T("PhysicsShared"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
@@ -1524,7 +1524,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
-	lResourceTypes.push_back(_T("PhysicsRef"));
+	lResourceTypes.push_back(_T("PhysicsShared"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.

@@ -24,8 +24,8 @@ namespace Life
 
 
 
-GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
-	InteractiveConsoleLogListener* pConsoleLogger):
+GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager, InteractiveConsoleLogListener* pConsoleLogger, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
+	Parent(pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mResourceManager(pResourceManager),
 	mGameManager(0),
 	mMasterConnection(new MasterServerConnection)
@@ -49,6 +49,7 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 
 	Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
 	mGameManager = new GameServerManager(GetTimeManager(), lVariableScope, pResourceManager);
+	mGameManager->SetTicker(this);
 	mGameManager->StartConsole(pConsoleLogger, new StdioConsolePrompt);
 }
 
@@ -86,6 +87,8 @@ bool GameServerTicker::Tick()
 	bool lOk = mGameManager->BeginTick();
 	if (lOk)
 	{
+		StartPhysicsTick();
+		WaitPhysicsTick();
 		lOk = mGameManager->EndTick();
 	}
 
@@ -121,6 +124,31 @@ float GameServerTicker::GetTickTimeReduction() const
 float GameServerTicker::GetPowerSaveAmount() const
 {
 	return (mGameManager->GetPowerSaveAmount());
+}
+
+
+
+void GameServerTicker::WillMicroTick(float pTimeDelta)
+{
+	mGameManager->MicroTick(pTimeDelta);
+}
+
+void GameServerTicker::DidPhysicsTick()
+{
+	mGameManager->PostPhysicsTick();
+}
+
+
+
+void GameServerTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+{
+	mGameManager->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+}
+
+void GameServerTicker::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	mGameManager->OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 }
 
 

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/GameTicker.h"
 #include "../../Lepra/Include/Thread.h"
 #include "../../UiCure/Include/UiLineGraph2d.h"
 #include "../../UiTBC/Include/UiRenderer.h"
@@ -44,7 +44,7 @@ class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, pub
 {
 	typedef Cure::GameTicker Parent;
 public:
-	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager);
+	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameClientMasterTicker();
 
 	bool CreateSlave();
@@ -106,11 +106,18 @@ private:
 	float GetSlavesVerticalAnimationTarget() const;
 	void Profile();
 	bool QueryQuit();
+	virtual void PhysicsTick();
+	virtual void WillMicroTick(float pTimeDelta);
+	virtual void DidPhysicsTick();
 	void DrawDebugData() const;
 	void DrawPerformanceLineGraph2d() const;
 
 	virtual float GetTickTimeReduction() const;
 	virtual float GetPowerSaveAmount() const;
+
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId);
+	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
 	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
 	void OnCommandError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult);

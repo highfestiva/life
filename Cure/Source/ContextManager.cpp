@@ -282,7 +282,7 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 
 
 
-void ContextManager::Tick(float pTimeDelta)
+void ContextManager::MicroTick(float pTimeDelta)
 {
 	if (GetGameManager()->IsPrimaryManager())
 	{
@@ -308,10 +308,10 @@ void ContextManager::HandleIdledBodies()
 		{
 			mGameManager->OnStopped(y->second, y->first);
 		}
-		else
+		/*else
 		{
 			mLog.AError("Body not present in body table!");
-		}
+		}*/
 	}
 }
 

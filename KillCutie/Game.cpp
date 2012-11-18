@@ -42,8 +42,8 @@ namespace GrenadeRun
 
 
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
-	Cure::GameTicker(),
-	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager, 400, 4, 3),
+	GameTicker(400, 4, 3),
+	GameManager(GameTicker::GetTimeManager(), pVariableScope, pResourceManager),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
@@ -72,6 +72,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mScoreCountingEnabled(false),
 	mRoundIndex(0)
 {
+	SetTicker(this);
+
 	mPreviousCanvasAngle = mUiManager->GetCanvas()->GetOutputRotation();
 
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
@@ -253,7 +255,7 @@ void Game::SetVehicle(const str& pVehicle)
 		return;
 	}
 	delete mVehicle;
-	mVehicle = (Cutie*)Parent::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	mVehicle = (Cutie*)GameManager::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (mVehicle != 0);
 	assert(lOk);
 	if (lOk)
@@ -359,7 +361,7 @@ bool Game::Shoot()
 		return false;
 	}
 
-	Grenade* lGrenade = (Grenade*)Parent::CreateContextObject(_T("grenade"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	Grenade* lGrenade = (Grenade*)GameManager::CreateContextObject(_T("grenade"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (lGrenade != 0);
 	assert(lOk);
 	if (lOk)
@@ -375,7 +377,7 @@ bool Game::Shoot()
 
 Cure::ContextObject* Game::CreateRoboBall()
 {
-	RoboBall* lRoboBall = (RoboBall*)Parent::CreateContextObject(_T("robo_ball"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	RoboBall* lRoboBall = (RoboBall*)GameManager::CreateContextObject(_T("robo_ball"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	assert(lRoboBall);
 	if (lRoboBall)
 	{
@@ -557,7 +559,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			{
 				continue;
 			}
-			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
+			const Vector3DF lBodyCenter = GameTicker::GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
 			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
 			if (d > 80*SCALE_FACTOR ||
@@ -579,7 +581,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				f.z += 0.3f;
 			}
 			f *= ff;
-			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
+			GameTicker::GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
 			if (lObject == mVehicle)
 			{
 				if (d > 0.6f)
@@ -856,7 +858,7 @@ bool Game::Render()
 		int x = 0;
 		for (x = 0; x < 3; ++x)
 		{
-			const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
+			const bool lIsCollision = (GameTicker::GetPhysicsManager()->QueryRayCollisionAgainst(
 				lVehiclePos, lOffset, lOffset.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
 			if (!lIsCollision)
 			{
@@ -1093,6 +1095,29 @@ float Game::GetPowerSaveAmount() const
 {
 	bool lIsMinimized = !mUiManager->GetDisplayManager()->IsVisible();
 	return (lIsMinimized? 1.0f : 0);
+}
+
+
+
+void Game::WillMicroTick(float pTimeDelta)
+{
+	MicroTick(pTimeDelta);
+}
+
+void Game::DidPhysicsTick()
+{
+	PostPhysicsTick();
+}
+
+void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+{
+	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+}
+
+void Game::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+	const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	GameManager::OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 }
 
 

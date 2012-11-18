@@ -27,7 +27,6 @@ public:
 private:
 	virtual str GetName() const;
 	virtual str GetVersion() const;
-	virtual Cure::GameTicker* CreateGameTicker() const;
 };
 
 

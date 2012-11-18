@@ -72,6 +72,7 @@ public:
 	virtual bool EndTick();
 	void TickNetworkInput();
 	bool TickNetworkOutput();
+	void TickNetworkOutputGhosts();
 
 	void ToggleConsole();
 
@@ -124,8 +125,6 @@ protected:
 	bool UpdateMassObjects(const Vector3DF& pPosition);
 	void SetLocalRender(bool pRender);
 	void SetMassRender(bool pRender);
-
-	void PhysicsTick();
 
 	void ProcessNetworkInputMessage(Cure::Message* pMessage);
 	void ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);

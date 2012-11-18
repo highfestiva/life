@@ -101,7 +101,6 @@ typedef std::list<FingerMovement> FingerMoveList;
 
 class Game: public Cure::GameTicker, public Cure::GameManager
 {
-	typedef GameManager Parent;
 public:
 	enum FlybyMode
 	{

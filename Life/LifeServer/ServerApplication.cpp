@@ -84,7 +84,7 @@ str ServerApplication::GetVersion() const
 
 Cure::GameTicker* ServerApplication::CreateGameTicker() const
 {
-	return (new GameServerTicker(mResourceManager, (InteractiveStdioConsoleLogListener*)mConsoleLogger));
+	return (new GameServerTicker(mResourceManager, (InteractiveStdioConsoleLogListener*)mConsoleLogger, 2000, 7, 1));
 }
 
 LogListener* ServerApplication::CreateConsoleLogListener() const

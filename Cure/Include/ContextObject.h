@@ -14,7 +14,7 @@
 #include "Cure.h"
 #include "PositionalData.h"
 #include "PositionHauler.h"
-#include "PhysicsReferenceResource.h"
+#include "PhysicsSharedResource.h"
 
 
 

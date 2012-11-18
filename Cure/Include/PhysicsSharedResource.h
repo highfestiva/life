@@ -29,7 +29,7 @@ enum PhysicsOverride
 
 
 
-struct PhysicsReferenceInitData
+struct PhysicsSharedInitData
 {
 	TransformationF mTransformation;
 	PhysicsOverride mPhysicsOverride;
@@ -37,34 +37,31 @@ struct PhysicsReferenceInitData
 	const int mPhysicsFps;
 	const GameObjectId mInstanceId;
 
-	PhysicsReferenceInitData(TransformationF pTransformation, PhysicsOverride pPhysicsOverride, TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
-	void operator=(const PhysicsReferenceInitData&);
+	PhysicsSharedInitData(TransformationF pTransformation, PhysicsOverride pPhysicsOverride, TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
+	void operator=(const PhysicsSharedInitData&);
 };
 
 
 
 // This class is used when sharing a physics manager (engine) between different contexts (such as split-screen clients).
-class PhysicsReferenceResource: public PhysicsResource
+class PhysicsSharedResource: public PhysicsResource
 {
 	typedef PhysicsResource Parent;
 public:
 	typedef UserTypeResource<PhysicsResource> ClassResource;
 
-	PhysicsReferenceResource(ResourceManager* pManager, const str& pName, const PhysicsReferenceInitData& pInitData);
-	virtual ~PhysicsReferenceResource();
+	PhysicsSharedResource(ResourceManager* pManager, const str& pName, const PhysicsSharedInitData& pInitData);
+	virtual ~PhysicsSharedResource();
 
 private:
 	void ReleasePhysics();
 	const str GetType() const;
-	bool IsReferenceType() const;
 
 	bool Load();
 	ResourceLoadState PostProcess();
 	bool FinalizeInit();
-	void OnLoadClass(ClassResource*);
 
-	PhysicsReferenceInitData mInitData;
-	ClassResource* mClassResource;
+	PhysicsSharedInitData mInitData;
 	ResourceLoadState mPhysicsLoadState;
 
 	LOG_CLASS_DECLARE();
@@ -72,7 +69,7 @@ private:
 
 
 
-typedef UserExtraTypeResource<PhysicsReferenceResource, PhysicsReferenceInitData> UserPhysicsReferenceResource;
+typedef UserExtraTypeResource<PhysicsSharedResource, PhysicsSharedInitData> UserPhysicsReferenceResource;
 
 
 

@@ -4,7 +4,7 @@
 
 
 
-#include "../Include/PhysicsReferenceResource.h"
+#include "../Include/PhysicsSharedResource.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../Include/PositionalData.h"
@@ -17,7 +17,7 @@ namespace Cure
 
 
 
-PhysicsReferenceInitData::PhysicsReferenceInitData(TransformationF pTransformation, PhysicsOverride pPhysicsOverride, TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
+PhysicsSharedInitData::PhysicsSharedInitData(TransformationF pTransformation, PhysicsOverride pPhysicsOverride, TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
 	mTransformation(pTransformation),
 	mPhysicsOverride(pPhysicsOverride),
 	mPhysicsManager(pPhysicsManager),
@@ -26,75 +26,42 @@ PhysicsReferenceInitData::PhysicsReferenceInitData(TransformationF pTransformati
 {
 }
 
-void PhysicsReferenceInitData::operator=(const PhysicsReferenceInitData&)
+void PhysicsSharedInitData::operator=(const PhysicsSharedInitData&)
 {
 	assert(false);
 }
 
 
 
-PhysicsReferenceResource::PhysicsReferenceResource(ResourceManager* pManager, const str& pName, const PhysicsReferenceInitData& pInitData):
+PhysicsSharedResource::PhysicsSharedResource(ResourceManager* pManager, const str& pName, const PhysicsSharedInitData& pInitData):
 	Parent(pManager, pName),
 	mInitData(pInitData),
-	mClassResource(0),
 	mPhysicsLoadState(RESOURCE_UNLOADED)
 {
 }
 
-PhysicsReferenceResource::~PhysicsReferenceResource()
+PhysicsSharedResource::~PhysicsSharedResource()
 {
-	ReleasePhysics();
-}
-
-void PhysicsReferenceResource::ReleasePhysics()
-{
-	if (IsUnique())
+	TBC::ChunkyPhysics* lStructure = GetRamData();
+	if (lStructure)
 	{
-		SetRamData(0);
+		lStructure->ClearAll(mInitData.mPhysicsManager);
 	}
-	else
-	{
-		SetRamDataType(0);
-	}
-	SetLoadState(RESOURCE_UNLOADED);
-	delete (mClassResource);
-	mClassResource = 0;
 }
 
-const str PhysicsReferenceResource::GetType() const
+const str PhysicsSharedResource::GetType() const
 {
-	return _T("PhysicsRef");
+	return _T("PhysicsShared");
 }
 
-bool PhysicsReferenceResource::IsReferenceType() const
+bool PhysicsSharedResource::Load()
 {
-	return true;
+	const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
+	assert(lFilename != GetName());
+	return Parent::LoadName(lFilename);
 }
 
-bool PhysicsReferenceResource::Load()
-{
-	bool lOk = (mClassResource == 0);
-	assert(lOk);
-	if (lOk)
-	{
-		const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
-		assert(lFilename != GetName());
-		if (!IsUnique())
-		{
-			mClassResource = new ClassResource;
-			mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this,
-				&PhysicsReferenceResource::OnLoadClass));
-		}
-		else
-		{
-			// Unique means loading from parent instead of class/reference.
-			lOk = Parent::LoadName(lFilename);
-		}
-	}
-	return lOk;
-}
-
-ResourceLoadState PhysicsReferenceResource::PostProcess()
+ResourceLoadState PhysicsSharedResource::PostProcess()
 {
 	if (mPhysicsLoadState != RESOURCE_UNLOADED)
 	{
@@ -102,17 +69,6 @@ ResourceLoadState PhysicsReferenceResource::PostProcess()
 		return mPhysicsLoadState;
 	}
 
-	if (!IsUnique())
-	{
-		// Non-unique (=shared) means loading from class/reference instead of parent.
-		ResourceLoadState lLoadState = mClassResource->GetLoadState();
-		if (lLoadState != RESOURCE_LOAD_COMPLETE)
-		{
-			return lLoadState;	// Probably "in progress", die another day.
-		}
-		TBC::ChunkyPhysics* lStructure = mClassResource->GetRamData();
-		SetRamData(lStructure);
-	}
 	// First initalization of shared reference or unique instance.
 	mPhysicsLoadState = RESOURCE_LOAD_ERROR;
 	if (FinalizeInit())
@@ -122,7 +78,7 @@ ResourceLoadState PhysicsReferenceResource::PostProcess()
 	return mPhysicsLoadState;
 }
 
-bool PhysicsReferenceResource::FinalizeInit()
+bool PhysicsSharedResource::FinalizeInit()
 {
 	TBC::ChunkyPhysics* lStructure = GetRamData();
 	TransformationF& lTransformation = mInitData.mTransformation;	// TRICKY: will change as we don't use reference!
@@ -161,10 +117,6 @@ bool PhysicsReferenceResource::FinalizeInit()
 		}
 	}
 	return lOk;
-}
-
-void PhysicsReferenceResource::OnLoadClass(ClassResource*)
-{
 }
 
 

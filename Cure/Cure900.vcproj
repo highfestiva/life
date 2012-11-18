@@ -491,6 +491,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\GameTicker.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\HiscoreAgent.cpp"
 				>
 			</File>
@@ -507,7 +511,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\PhysicsReferenceResource.cpp"
+				RelativePath=".\Source\PhysicsSharedResource.cpp"
 				>
 			</File>
 			<File
@@ -621,6 +625,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\GameTicker.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\HiscoreAgent.h"
 				>
 			</File>
@@ -637,7 +645,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\PhysicsReferenceResource.h"
+				RelativePath=".\Include\PhysicsSharedResource.h"
 				>
 			</File>
 			<File

@@ -978,6 +978,7 @@ bool App::Poll()
 			mGame->AddScore(+3, 0);
 		}
 		mGame->BeginTick();
+		mGame->StartPhysicsTick();
 	}
 	bool lRender = false;
 	if (lOk)
@@ -1077,6 +1078,7 @@ bool App::Poll()
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
 	{
+		mGame->WaitPhysicsTick();
 		lOk = mGame->EndTick();
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
@@ -2912,7 +2914,7 @@ void App::SuperReset(bool pGameOver)
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
-	lResourceTypes.push_back(_T("PhysicsRef"));
+	lResourceTypes.push_back(_T("PhysicsShared"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
@@ -3207,7 +3209,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
-	lResourceTypes.push_back(_T("PhysicsRef"));
+	lResourceTypes.push_back(_T("PhysicsShared"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.

@@ -50,7 +50,8 @@ namespace Life
 
 
 
-GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager):
+GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
+	Parent(pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mUiManager(pUiManager),
 	mResourceManager(pResourceManager),
 	mIsPlayerCountViewActive(false),
@@ -90,6 +91,8 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 
 	mConsole->ExecuteCommand(_T("execute-file -i Default.lsh"));
 	mConsole->ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ClientBase"), _T("lsh")));
+
+
 }
 
 GameClientMasterTicker::~GameClientMasterTicker()
@@ -223,6 +226,8 @@ bool GameClientMasterTicker::Tick()
 		}
 	}
 
+	StartPhysicsTick();
+
 	{
 		//LEPRA_MEASURE_SCOPE(RenderSlaves);
 
@@ -274,6 +279,8 @@ bool GameClientMasterTicker::Tick()
 			DrawPerformanceLineGraph2d();
 		}
 	}
+
+	WaitPhysicsTick();
 
 	if (mServer)
 	{
@@ -471,6 +478,7 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 	{
 		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(UiCure::GetSettings());
 		UiGameServerManager* lServer = new UiGameServerManager(mServerTimeManager, lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
+		lServer->SetTicker(this);
 		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
 		if (!lServer->Initialize(mMasterConnection))
 		{
@@ -1143,6 +1151,52 @@ bool GameClientMasterTicker::QueryQuit()
 	return (false);
 }
 
+void GameClientMasterTicker::PhysicsTick()
+{
+	Parent::PhysicsTick();
+
+	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->TickNetworkOutputGhosts();
+		}
+	}
+}
+
+void GameClientMasterTicker::WillMicroTick(float pTimeDelta)
+{
+	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->MicroTick(pTimeDelta);
+		}
+	}
+	if (mServer)
+	{
+		mServer->MicroTick(pTimeDelta);
+	}
+}
+
+void GameClientMasterTicker::DidPhysicsTick()
+{
+	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->PostPhysicsTick();
+		}
+	}
+	if (mServer)
+	{
+		mServer->PostPhysicsTick();
+	}
+}
+
 void GameClientMasterTicker::DrawDebugData() const
 {
 	bool lDebugging;
@@ -1252,6 +1306,41 @@ float GameClientMasterTicker::GetPowerSaveAmount() const
 {
 	bool lIsMinimized = !mUiManager->GetDisplayManager()->IsVisible();
 	return (lIsMinimized? 0.4f : 0);
+}
+
+
+
+void GameClientMasterTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+{
+	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+		}
+	}
+	if (mServer)
+	{
+		mServer->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+	}
+}
+
+void GameClientMasterTicker::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+		}
+	}
+	if (mServer)
+	{
+		mServer->OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+	}
 }
 
 

@@ -51,7 +51,7 @@ namespace Life
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
-	Cure::GameManager(pTime, pVariableScope, pResourceManager, 2000, 7, 1),
+	Cure::GameManager(pTime, pVariableScope, pResourceManager),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
@@ -83,6 +83,8 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mLoginWindow(0),
 	mEnginePlaybackTime(0)
 {
+	SetTicker(mMaster);
+
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
 	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
@@ -534,6 +536,21 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		GetNetworkClient()->Disconnect(false);
 	}
 	return (lSendOk);
+}
+
+void GameClientSlaveManager::TickNetworkOutputGhosts()
+{
+	const int lStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
+	const float lPhysicsFrameTime = GetTimeManager()->GetAffordedPhysicsStepTime();
+	ObjectIdSet::iterator x = mOwnedObjectList.begin();
+	for (; x != mOwnedObjectList.end(); ++x)
+	{
+		Cure::ContextObject* lObject = GetContext()->GetObject(*x);
+		if (lObject)
+		{
+			lObject->GetNetworkOutputGhost()->GhostStep(lStepCount, lPhysicsFrameTime);
+		}
+	}
 }
 
 
@@ -1321,23 +1338,6 @@ void GameClientSlaveManager::SetMassRender(bool pRender)
 			lObject->SetRender(pRender);
 		}
 	}
-}
-
-void GameClientSlaveManager::PhysicsTick()
-{
-	const int lStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
-	const float lPhysicsFrameTime = GetTimeManager()->GetAffordedPhysicsStepTime();
-	ObjectIdSet::iterator x = mOwnedObjectList.begin();
-	for (; x != mOwnedObjectList.end(); ++x)
-	{
-		Cure::ContextObject* lObject = GetContext()->GetObject(*x);
-		if (lObject)
-		{
-			lObject->GetNetworkOutputGhost()->GhostStep(lStepCount, lPhysicsFrameTime);
-		}
-	}
-
-	Parent::PhysicsTick();
 }
 
 

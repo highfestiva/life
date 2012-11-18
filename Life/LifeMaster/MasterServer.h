@@ -48,7 +48,7 @@ struct ServerInfo;
 
 
 
-class MasterServer: public Cure::GameTicker
+class MasterServer
 {
 public:
 	MasterServer();
@@ -56,9 +56,6 @@ public:
 
 	virtual bool Initialize();
 	virtual bool Tick();
-	virtual void PollRoundTrip();
-	virtual float GetTickTimeReduction() const;
-	virtual float GetPowerSaveAmount() const;
 
 private:
 	void KillDeadServers();

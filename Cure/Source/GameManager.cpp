@@ -4,7 +4,7 @@
 
 
 
-#include "../../Cure/Include/RuntimeVariableName.h"
+#include "../Include/GameManager.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/PhysicsManager.h"
@@ -12,9 +12,10 @@
 #include "../Include/ConsoleManager.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObject.h"
-#include "../Include/GameManager.h"
+#include "../Include/GameTicker.h"
 #include "../Include/NetworkAgent.h"
 #include "../Include/RuntimeVariable.h"
+#include "../Include/RuntimeVariableName.h"
 #include "../Include/TerrainManager.h"
 #include "../Include/TimeManager.h"
 
@@ -25,69 +26,35 @@ namespace Cure
 
 
 
-GameTicker::GameTicker():
-	mTimeManager(new TimeManager)
-{
-}
-
-GameTicker::~GameTicker()
-{
-}
-
-const TimeManager* GameTicker::GetTimeManager() const
-{
-	return mTimeManager;
-}
-
-TimeManager* GameTicker::GetTimeManager()
-{
-	return mTimeManager;
-}
-
-void GameTicker::Profile()
-{
-}
-
-bool GameTicker::QueryQuit()
-{
-	return (SystemManager::GetQuitRequest() != 0);
-}
-
-
-
-GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
+GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
 	mIsThreadSafe(true),
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
 	mNetwork(0),
+	mTicker(0),
 	mTime(pTime),
-	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, pPhysicsRadius, pPhysicsLevels,  pPhysicsSensitivity)),
 	mContext(0),
 	mTerrain(0),//new TerrainManager(pResourceManager)),
-	mConsole(0),
-	mPhysicsWorkerThread(0),
-	mPhysicsTickStartSemaphore(0),
-	mPhysicsTickDoneSemaphore(0)
+	mConsole(0)
 {
 	mContext = new ContextManager(this);
-	mPhysics->SetTriggerListener(this);
-	mPhysics->SetForceFeedbackListener(this);
-	mPhysics->InitCurrentThread();
 }
 
 GameManager::~GameManager()
 {
-	DeletePhysicsThread();
-
 	delete (mConsole);
 	mConsole = 0;
 	delete (mContext);
 	mContext = 0;
+
+	// Free after killing all game objects.
+	mResource->ForceFreeCache();
+	mResource->ForceFreeCache();
+
 	mTime = 0;	// Not owned resource.
+	mTicker = 0;	// Not owned resource.
 	delete (mTerrain);
 	mTerrain = 0;
-	delete (mPhysics);
-	mPhysics = 0;
 	delete (mNetwork);
 	mNetwork = 0;
 	mResource = 0;
@@ -98,6 +65,11 @@ GameManager::~GameManager()
 	{
 		mLock.Release();
 	}
+}
+
+void GameManager::SetTicker(const GameTicker* pTicker)
+{
+	mTicker = pTicker;
 }
 
 
@@ -117,20 +89,9 @@ bool GameManager::BeginTick()
 	CURE_RTVAR_GET(lReportInterval, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 1.0);
 	UpdateReportPerformance(lPerformanceText, lReportInterval);
 
-	bool lParallelPhysics;
-	CURE_RTVAR_GET(lParallelPhysics, =, GetVariableScope(), RTVAR_PHYSICS_PARALLEL, true);
-	if (lParallelPhysics)
-	{
-		CreatePhysicsThread();
-	}
-	else
-	{
-		DeletePhysicsThread();
-	}
-
 	{
 		//LEPRA_MEASURE_SCOPE(AcquireTickLock);
-		GetTickLock()->Acquire();
+		//GetTickLock()->Acquire();
 	}
 
 	{
@@ -148,43 +109,16 @@ bool GameManager::BeginTick()
 		ScriptPhysicsTick();
 	}
 
-	if (mTime->GetAffordedPhysicsStepCount() > 0)
-	{
-		//LEPRA_MEASURE_SCOPE(StartPhysics);
-		// Physics thread
-		// 1. does *NOT* add/delete objects,
-		// 2. processes context objects ("scripts"),
-		// 3. applies movement indata (from network, UI and script), and
-		// 4. integrates physics.
-		// Performance determines if this is done by a worker thread, or done synchronously
-		// by the current thread. (Single CPU => single thread...)
-		StartPhysicsTick();
-	}
-	else
-	{
-		log_adebug("Could not afford a physics step.");
-	}
+	mIsThreadSafe = false;
 
-	return (true);
+	return true;
 }
 
 bool GameManager::EndTick()
 {
 	//LEPRA_MEASURE_SCOPE(EndTick);
-
-	if (mTime->GetAffordedPhysicsStepCount() > 0)
-	{
-		LEPRA_MEASURE_SCOPE(WaitPhysics);
-		GetTickLock()->Release();
-		// Wait for physics thread to complete integration. If we run physics synchronously,
-		// this does nothing.
-		WaitPhysicsTick();
-	}
-	else
-	{
-		GetTickLock()->Release();
-	}
-
+	mIsThreadSafe = true;
+	//GetTickLock()->Release();
 
 	{
 		//LEPRA_MEASURE_SCOPE(NetworkSend);
@@ -195,7 +129,7 @@ bool GameManager::EndTick()
 		TickNetworkOutput();
 	}
 
-	return (true);
+	return true;
 }
 
 bool GameManager::TickNetworkOutput()
@@ -242,31 +176,26 @@ const TimeManager* GameManager::GetTimeManager() const
 
 TBC::PhysicsManager* GameManager::GetPhysicsManager() const
 {
-#ifdef LEPRA_DEBUG
-	// This is a check to see if the code that fetches the physics manager
-	// is thread-safe. We definitely don't want to impose mutex locks on
-	// the non-physics threads, since that would just wait and kill all
-	// performance on a dual or faster system.
-
-	// Check if we are
-	//   a) in thread-safe part of code (=physics thread not running), or
-	//   b) we don't have a physics thread (we run physics using the main thread).
-	if (!mIsThreadSafe && mPhysicsWorkerThread)
-	{
-		// We have a physics thread. Are we it?
-		size_t lPhysicsThreadId = mPhysicsWorkerThread->GetThreadId();
-		size_t lThisThreadId = Thread::GetCurrentThreadId();
-		// Make sure we're the physics thread, otherwise we're not allowed to
-		// read/write any physical stuff.
-		assert(lPhysicsThreadId == lThisThreadId);
-	}
-#endif // LEPRA_DEBUG
-	return (mPhysics);
+	return mTicker->GetPhysicsManager(mIsThreadSafe);
 }
 
 ConsoleManager* GameManager::GetConsoleManager() const
 {
 	return (mConsole);
+}
+
+
+
+void GameManager::MicroTick(float pTimeDelta)
+{
+	mContext->MicroTick(pTimeDelta);
+}
+
+void GameManager::PostPhysicsTick()
+{
+	mContext->HandleIdledBodies();
+	mContext->HandlePhysicsSend();
+	HandleWorldBoundaries();
 }
 
 
@@ -307,7 +236,7 @@ ContextObject* GameManager::CreateLogicHandler(const str&)
 
 bool GameManager::IsUiMoveForbidden(GameObjectId) const
 {
-	return (false);	// Non-UI implementors need not bother.
+	return false;	// Non-UI implementors need not bother.
 }
 
 void GameManager::GetSiblings(GameObjectId pInstanceId, ContextObject::Array& pSiblingArray) const
@@ -418,6 +347,35 @@ void GameManager::GetBandwidthData(BandwidthData& pSent, BandwidthData& pReceive
 
 
 
+void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+{
+	ContextObject* lObject1 = GetContext()->GetObject(pTriggerListenerId);
+	if (lObject1)
+	{
+		ContextObject* lObject2 = GetContext()->GetObject(pOtherBodyId);
+		if (lObject2)
+		{
+			lObject1->OnTrigger(pTrigger, lObject2);
+		}
+	}
+}
+
+void GameManager::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	ContextObject* lObject1 = GetContext()->GetObject(pObjectId);
+	if (lObject1)
+	{
+		ContextObject* lObject2 = GetContext()->GetObject(pOtherObjectId);
+		if (lObject2)
+		{
+			lObject1->OnForceApplied(lObject2, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+		}
+	}
+}
+
+
+
 void GameManager::SetConsoleManager(ConsoleManager* pConsole)
 {
 	mConsole = pConsole;
@@ -458,100 +416,9 @@ void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNode
 
 
 
-void GameManager::StartPhysicsTick()
-{
-	mIsThreadSafe = false;
-	if (mPhysicsTickStartSemaphore)
-	{
-		// We use a bool to check if all accesses are thread-safe.
-		mPhysicsTickStartSemaphore->Signal();
-	}
-	else
-	{
-		PhysicsTick();
-	}
-}
-
-void GameManager::WaitPhysicsTick()
-{
-	if (mPhysicsTickDoneSemaphore)
-	{
-#ifdef LEPRA_DEBUG
-		mPhysicsTickDoneSemaphore->Wait();
-#else // !Debugging
-		mPhysicsTickDoneSemaphore->Wait(3.0);
-#endif // Debugging/!debugging.
-	}
-	mIsThreadSafe = true;	// For error-checking.
-}
-
-
-
-void GameManager::PhysicsTick()
-{
-	LEPRA_MEASURE_SCOPE(Physics);
-
-	mPhysics->InitCurrentThread();
-
-	int lMicroSteps;
-	CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
-	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount();
-	const int lAffordedMicroStepCount = lAffordedStepCount * lMicroSteps;
-	const float lStepTime = mTime->GetAffordedPhysicsStepTime();
-	const float lStepIncrement = lStepTime / lMicroSteps;
-	/*if (lAffordedStepCount != 1)
-	{
-		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
-			lAffordedMicroStepCount, lStepIncrement);
-	}*/
-	{
-		LEPRA_MEASURE_SCOPE(PreSteps);
-		mPhysics->PreSteps();
-	}
-	bool lFastAlgo;
-	CURE_RTVAR_GET(lFastAlgo, =, GetVariableScope(), RTVAR_PHYSICS_FASTALGO, true);
-	try
-	{
-		for (int x = 0; x < lAffordedMicroStepCount; ++x)
-		{
-			ScriptTick(lStepIncrement);	// Ticks engines, so needs to be run every physics step.
-			if (lFastAlgo)
-			{
-				mPhysics->StepFast(lStepIncrement);
-			}
-			else
-			{
-				mPhysics->StepAccurate(lStepIncrement);
-			}
-		}
-	}
-	catch (...)
-	{
-		mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
-	}
-	{
-		//LEPRA_MEASURE_SCOPE(PostSteps);
-		mPhysics->PostSteps();
-	}
-
-	{
-		//LEPRA_MEASURE_SCOPE(Handles);
-		mContext->HandleIdledBodies();
-		mContext->HandlePhysicsSend();
-		HandleWorldBoundaries();
-	}
-}
-
-
-
 bool GameManager::IsThreadSafe() const
 {
 	return (mIsThreadSafe);
-}
-
-void GameManager::ScriptTick(float pTimeDelta)
-{
-	mContext->Tick(pTimeDelta);
 }
 
 void GameManager::ScriptPhysicsTick()
@@ -567,89 +434,6 @@ void GameManager::HandleWorldBoundaries()
 {
 }
 
-
-
-void GameManager::PhysicsThreadEntry()
-{
-	// We set affinity to the second processor. This is due to high resolution timers,
-	// which may differ between different CPU cores. Several seconds can differ between
-	// different cores. The main thread is locked to the first CPU, therefore this one
-	// goes to the last one.
-	// JB 2009-12: dropped this, probably not a good idea since we need to run multiple
-	// physics instances when running split screen.
-	//Thread::GetCurrentThread()->SetCpuAffinityMask(1<<(SystemManager::GetLogicalCpuCount()-1));
-
-	mPhysics->InitCurrentThread();
-
-	while (mPhysicsWorkerThread && !mPhysicsWorkerThread->GetStopRequest())
-	{
-		mPhysicsTickStartSemaphore->Wait();
-		if (!mPhysicsWorkerThread->GetStopRequest())
-		{
-			assert(!mIsThreadSafe);
-			PhysicsTick();
-			assert(!mIsThreadSafe);
-			mPhysicsTickDoneSemaphore->Signal();
-		}
-	}
-}
-
-void GameManager::CreatePhysicsThread()
-{
-	// If we have more than one CPU, we run a separate physics thread.
-	if (!mPhysicsWorkerThread && SystemManager::GetLogicalCpuCount() > 1)	// TODO: check performance to see if we should check for logical or physical CPUs.
-	{
-		mPhysicsTickStartSemaphore = new Semaphore();
-		mPhysicsTickDoneSemaphore = new Semaphore();
-
-		mPhysicsWorkerThread = new MemberThread<GameManager>("PhysicsThread");
-		mPhysicsWorkerThread->Start(this, &GameManager::PhysicsThreadEntry);
-	}
-}
-
-void GameManager::DeletePhysicsThread()
-{
-	if (mPhysicsWorkerThread)
-	{
-		mPhysicsWorkerThread->RequestStop();
-		mPhysicsTickStartSemaphore->Signal();
-		mPhysicsWorkerThread->Join(3.0);
-		delete (mPhysicsWorkerThread);
-		mPhysicsWorkerThread = 0;
-
-		delete (mPhysicsTickStartSemaphore);
-		mPhysicsTickStartSemaphore = 0;
-		delete (mPhysicsTickDoneSemaphore);
-		mPhysicsTickDoneSemaphore = 0;
-	}
-}
-
-void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
-{
-	ContextObject* lObject1 = GetContext()->GetObject(pTriggerListenerId);
-	if (lObject1)
-	{
-		ContextObject* lObject2 = GetContext()->GetObject(pOtherBodyId);
-		if (lObject2)
-		{
-			lObject1->OnTrigger(pTrigger, lObject2);
-		}
-	}
-}
-
-void GameManager::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
-{
-	ContextObject* lObject1 = GetContext()->GetObject(pObjectId);
-	if (lObject1)
-	{
-		ContextObject* lObject2 = GetContext()->GetObject(pOtherObjectId);
-		if (lObject2)
-		{
-			lObject1->OnForceApplied(lObject2, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
-		}
-	}
-}
 
 
 LOG_CLASS_DEFINE(GAME, GameManager);
