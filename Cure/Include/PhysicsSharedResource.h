@@ -56,11 +56,14 @@ public:
 private:
 	void ReleasePhysics();
 	const str GetType() const;
+	bool IsReferenceType() const;
 
 	bool Load();
 	ResourceLoadState PostProcess();
 	bool FinalizeInit();
+	void OnLoadClass(ClassResource*);
 
+	ClassResource* mClassResource;
 	PhysicsSharedInitData mInitData;
 	ResourceLoadState mPhysicsLoadState;
 

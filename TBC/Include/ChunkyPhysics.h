@@ -41,6 +41,7 @@ public:
 	};
 
 	ChunkyPhysics(TransformOperation pTransformOperation = TRANSFORM_NONE, PhysicsType pPhysicsType = STATIC);
+	ChunkyPhysics(const ChunkyPhysics& pOriginal);
 	virtual ~ChunkyPhysics();
 
 	void OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime);

@@ -37,6 +37,7 @@ public:
 
 	PhysicsSpawner();
 	virtual ~PhysicsSpawner();
+	void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsSpawner& pOriginal);
 
 	static PhysicsSpawner* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 

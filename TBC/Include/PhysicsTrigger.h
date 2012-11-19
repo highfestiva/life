@@ -47,6 +47,7 @@ public:
 
 	PhysicsTrigger();
 	virtual ~PhysicsTrigger();
+	void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsTrigger& pOriginal);
 
 	static PhysicsTrigger* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 

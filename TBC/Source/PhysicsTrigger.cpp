@@ -45,6 +45,25 @@ PhysicsTrigger::~PhysicsTrigger()
 {
 }
 
+void PhysicsTrigger::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsTrigger& pOriginal)
+{
+	size_t cnt = mTriggerArray.size();
+	for (size_t x = 0; x < cnt; ++x)
+	{
+		const int lBoneIndex = pSource->GetIndex(pOriginal.mTriggerArray[x]);
+		assert(lBoneIndex >= 0);
+		mTriggerArray[x] = pTarget->GetBoneGeometry(lBoneIndex);
+	}
+
+	cnt = mConnectionArray.size();
+	for (size_t x = 0; x < cnt; ++x)
+	{
+		const int lEngineIndex = pSource->GetEngineIndex(pOriginal.mConnectionArray[x].mEngine);
+		assert(lEngineIndex >= 0);
+		mConnectionArray[x].mEngine = pTarget->GetEngine(lEngineIndex);
+	}
+}
+
 
 
 PhysicsTrigger* PhysicsTrigger::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)

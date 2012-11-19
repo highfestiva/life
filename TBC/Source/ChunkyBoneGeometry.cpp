@@ -47,6 +47,30 @@ ChunkyBoneGeometry::~ChunkyBoneGeometry()
 	assert(mJointId == INVALID_JOINT && mBodyId == INVALID_BODY && mTriggerId == INVALID_TRIGGER);
 }
 
+void ChunkyBoneGeometry::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal)
+{
+	if (pOriginal.mBodyData.mParent)
+	{
+		const int lBoneIndex = pSource->GetIndex(pOriginal.mBodyData.mParent);
+		assert(lBoneIndex >= 0);
+		mBodyData.mParent = pTarget->GetBoneGeometry(lBoneIndex);
+	}
+}
+
+
+
+ChunkyBoneGeometry* ChunkyBoneGeometry::Create(const ChunkyBoneGeometry& pOriginal)
+{
+	switch (pOriginal.GetGeometryType())
+	{
+		case GEOMETRY_CAPSULE:	return new ChunkyBoneCapsule((ChunkyBoneCapsule&)pOriginal);	break;
+		case GEOMETRY_SPHERE:	return new ChunkyBoneSphere((ChunkyBoneSphere&)pOriginal);		break;
+		case GEOMETRY_BOX:	return new ChunkyBoneBox((ChunkyBoneBox&)pOriginal);		break;
+		case GEOMETRY_MESH:	return new ChunkyBoneMesh((ChunkyBoneMesh&)pOriginal);		break;
+	}
+	return 0;
+}
+
 ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
 {
 	if (pByteCount < sizeof(uint32))
@@ -691,6 +715,18 @@ void ChunkyBoneMesh::Clear()
 ChunkyBoneGeometry::GeometryType ChunkyBoneMesh::GetGeometryType() const
 {
 	return (GEOMETRY_MESH);
+}
+
+void ChunkyBoneMesh::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal)
+{
+	Parent::RelocatePointers(pTarget, pSource, pOriginal);
+
+	const float* lOriginalVertices = mVertices;
+	const uint32* lOriginalIndices = mIndices;
+	mVertices = new float[mVertexCount*3];
+	mIndices = new uint32[mTriangleCount*3];
+	::memcpy(mVertices, lOriginalVertices, mVertexCount*3*sizeof(mVertices[0]));
+	::memcpy(mIndices, lOriginalIndices, mTriangleCount*3*sizeof(mIndices[0]));
 }
 
 

@@ -65,6 +65,7 @@ public:
 	};
 
 	BoneHierarchy();
+	BoneHierarchy(const BoneHierarchy& pOriginal);
 	virtual ~BoneHierarchy();
 
 	virtual void ClearAll(PhysicsManager* pPhysics);

@@ -6,6 +6,7 @@
 
 #include "../Include/ChunkyPhysics.h"
 #include <assert.h>
+#include "../../Lepra/Include/ListUtil.h"
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/PhysicsEngine.h"
 #include "../Include/PhysicsSpawner.h"
@@ -18,6 +19,18 @@ namespace TBC
 
 
 
+#define TBC_PHYSICS_RELOCATE_POINTERS(a)					\
+{										\
+	const size_t cnt = a.size();						\
+	for (size_t x = 0; x < cnt; ++x)					\
+	{									\
+		a[x]->RelocatePointers(this, &pOriginal, *pOriginal.a[x]);	\
+	}									\
+}
+
+
+
+
 ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType pPhysicsType):
 	BoneHierarchy(),
 	mTransformOperation(pTransformOperation),
@@ -25,6 +38,25 @@ ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType
 	mGuideMode(GUIDE_EXTERNAL),
 	mUniqeGeometryIndex(0)
 {
+}
+
+ChunkyPhysics::ChunkyPhysics(const ChunkyPhysics& pOriginal):
+	Parent(pOriginal)
+{
+	mGuideMode = pOriginal.mGuideMode;
+	mUniqeGeometryIndex = pOriginal.mUniqeGeometryIndex;
+	Lepra::VectorUtil<ChunkyBoneGeometry>::CloneListFactoryMethod(mGeometryArray, pOriginal.mGeometryArray);
+	TBC_PHYSICS_RELOCATE_POINTERS(mGeometryArray);
+	Lepra::VectorUtil<PhysicsEngine>::CloneList(mEngineArray, pOriginal.mEngineArray);
+	TBC_PHYSICS_RELOCATE_POINTERS(mEngineArray);
+	Lepra::VectorUtil<PhysicsTrigger>::CloneList(mTriggerArray, pOriginal.mTriggerArray);
+	TBC_PHYSICS_RELOCATE_POINTERS(mTriggerArray);
+	Lepra::VectorUtil<PhysicsSpawner>::CloneList(mSpawnerArray, pOriginal.mSpawnerArray);
+	TBC_PHYSICS_RELOCATE_POINTERS(mSpawnerArray);
+	mTransformOperation = pOriginal.mTransformOperation;
+	mPhysicsType = pOriginal.mPhysicsType;
+	mGuideMode = pOriginal.mGuideMode;
+	mUniqeGeometryIndex = pOriginal.mUniqeGeometryIndex;
 }
 
 ChunkyPhysics::~ChunkyPhysics()

@@ -28,6 +28,13 @@ PhysicsSpawner::~PhysicsSpawner()
 {
 }
 
+void PhysicsSpawner::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsSpawner& pOriginal)
+{
+	const int lBoneIndex = pSource->GetIndex(pOriginal.mSpawnerNode);
+	assert(lBoneIndex >= 0);
+	mSpawnerNode = pTarget->GetBoneGeometry(lBoneIndex);
+}
+
 
 
 PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)

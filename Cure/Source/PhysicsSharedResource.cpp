@@ -35,6 +35,7 @@ void PhysicsSharedInitData::operator=(const PhysicsSharedInitData&)
 
 PhysicsSharedResource::PhysicsSharedResource(ResourceManager* pManager, const str& pName, const PhysicsSharedInitData& pInitData):
 	Parent(pManager, pName),
+	mClassResource(0),
 	mInitData(pInitData),
 	mPhysicsLoadState(RESOURCE_UNLOADED)
 {
@@ -42,6 +43,9 @@ PhysicsSharedResource::PhysicsSharedResource(ResourceManager* pManager, const st
 
 PhysicsSharedResource::~PhysicsSharedResource()
 {
+	delete mClassResource;
+	mClassResource = 0;
+
 	TBC::ChunkyPhysics* lStructure = GetRamData();
 	if (lStructure)
 	{
@@ -54,11 +58,25 @@ const str PhysicsSharedResource::GetType() const
 	return _T("PhysicsShared");
 }
 
+bool PhysicsSharedResource::IsReferenceType() const
+{
+	return true;
+}
+
+
+
 bool PhysicsSharedResource::Load()
 {
-	const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
-	assert(lFilename != GetName());
-	return Parent::LoadName(lFilename);
+	bool lOk = (mClassResource == 0);
+	assert(lOk);
+	if (lOk)
+	{
+		const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
+		assert(lFilename != GetName());
+		mClassResource = new ClassResource;
+		mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this, &PhysicsSharedResource::OnLoadClass));
+	}
+	return lOk;
 }
 
 ResourceLoadState PhysicsSharedResource::PostProcess()
@@ -67,6 +85,12 @@ ResourceLoadState PhysicsSharedResource::PostProcess()
 	{
 		// Already initialized for another context object.
 		return mPhysicsLoadState;
+	}
+
+	ResourceLoadState lLoadState = mClassResource->GetLoadState();
+	if (lLoadState != RESOURCE_LOAD_COMPLETE)
+	{
+		return lLoadState;      // Probably "in progress", die another day.
 	}
 
 	// First initalization of shared reference or unique instance.
@@ -117,6 +141,16 @@ bool PhysicsSharedResource::FinalizeInit()
 		}
 	}
 	return lOk;
+}
+
+void PhysicsSharedResource::OnLoadClass(ClassResource* pClassResource)
+{
+	if (pClassResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
+	{
+		return;
+	}
+	TBC::ChunkyPhysics* lCopy = new TBC::ChunkyPhysics(*pClassResource->GetData());
+	SetRamData(lCopy);
 }
 
 

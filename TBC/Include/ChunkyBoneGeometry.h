@@ -94,7 +94,9 @@ public:
 
 	ChunkyBoneGeometry(const BodyData& pBodyData);
 	virtual ~ChunkyBoneGeometry();
+	virtual void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal);
 
+	static ChunkyBoneGeometry* Create(const ChunkyBoneGeometry& pOriginal);
 	static ChunkyBoneGeometry* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
 	virtual GeometryType GetGeometryType() const = 0;
@@ -239,6 +241,7 @@ private:
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	void Clear();
 	GeometryType GetGeometryType() const;
+	virtual void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal);
 
 	uint32 mVertexCount;
 	float* mVertices;

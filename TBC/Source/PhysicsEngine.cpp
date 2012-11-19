@@ -41,6 +41,17 @@ PhysicsEngine::~PhysicsEngine()
 {
 }
 
+void PhysicsEngine::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsEngine& pOriginal)
+{
+	const size_t cnt = mEngineNodeArray.size();
+	for (size_t x = 0; x < cnt; ++x)
+	{
+		const int lBoneIndex = pSource->GetIndex(pOriginal.mEngineNodeArray[x].mGeometry);
+		assert(lBoneIndex >= 0);
+		mEngineNodeArray[x].mGeometry = pTarget->GetBoneGeometry(lBoneIndex);
+	}
+}
+
 
 
 PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)

@@ -71,6 +71,27 @@ BoneHierarchy::BoneHierarchy() :
 {
 }
 
+BoneHierarchy::BoneHierarchy(const BoneHierarchy& pOriginal):
+	mBoneCount(pOriginal.mBoneCount),
+	mRootBoneIndex(pOriginal.mRootBoneIndex),
+	mParent(0),
+	mParentBoneIndex(0)
+{
+	mBone = new Bone[mBoneCount];
+	mOriginalBoneTransformation		= new TransformationF[mBoneCount];
+	mRelativeBoneTransformation		= new TransformationF[mBoneCount];
+	mCurrentBoneTransformation		= new TransformationF[mBoneCount];
+	mCurrentBoneObjectTransformation	= new TransformationF[mBoneCount];
+	for (int x = 0; x < mBoneCount; ++x)
+	{
+		mBone[x] = pOriginal.mBone[x];
+	}
+	::memcpy(mOriginalBoneTransformation, pOriginal.mOriginalBoneTransformation, sizeof(TransformationF)*mBoneCount);
+	::memcpy(mRelativeBoneTransformation, pOriginal.mRelativeBoneTransformation, sizeof(TransformationF)*mBoneCount);
+	::memcpy(mCurrentBoneTransformation, pOriginal.mCurrentBoneTransformation, sizeof(TransformationF)*mBoneCount);
+	::memcpy(mCurrentBoneObjectTransformation, pOriginal.mCurrentBoneObjectTransformation, sizeof(TransformationF)*mBoneCount);
+}
+
 BoneHierarchy::~BoneHierarchy()
 {
 	ClearAll(0);

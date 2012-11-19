@@ -68,6 +68,7 @@ public:
 	PhysicsEngine(EngineType pEngineType, float pStrength,
 		float pMaxSpeed, float pMaxSpeed2, float pFriction, unsigned pControllerIndex);
 	virtual ~PhysicsEngine();
+	void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsEngine& pOriginal);
 
 	static PhysicsEngine* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 

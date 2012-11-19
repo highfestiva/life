@@ -61,5 +61,31 @@ public:
 };
 
 
+template<class _Type, class _ListType = std::vector<_Type*>>
+class VectorUtil
+{
+public:
+	static void CloneList(_ListType& pTarget, const _ListType& pSource)
+	{
+		const size_t cnt = pSource.size();
+		pTarget.resize(cnt);
+		for (size_t x = 0; x < cnt; ++x)
+		{
+			pTarget[x] = new _Type(*pSource[x]);
+		}
+	}
+
+	static void CloneListFactoryMethod(_ListType& pTarget, const _ListType& pSource)
+	{
+		const size_t cnt = pSource.size();
+		pTarget.resize(cnt);
+		for (size_t x = 0; x < cnt; ++x)
+		{
+			pTarget[x] = _Type::Create(*pSource[x]);
+		}
+	}
+};
+
+
 
 }
