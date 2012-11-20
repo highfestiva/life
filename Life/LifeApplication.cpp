@@ -248,9 +248,9 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 					mGameTicker->PollRoundTrip();
 					Thread::Sleep(MAXIMUM_SLEEP_TIME);
 				}
-				else if (lSleepTimeLeft <= SystemManager::GetSleepResolution())
+				else if (lSleepTimeLeft > SystemManager::GetSleepResolution())
 				{
-					Thread::Sleep(lSleepTimeLeft);
+					Thread::Sleep(lSleepTimeLeft - SystemManager::GetSleepResolution());
 				}
 				else
 				{

@@ -24,6 +24,7 @@
 #include "../../UiCure/Include/UiCollisionSoundManager.h"
 #include "../../UiCure/Include/UiDebugRenderer.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiCure/Include/UiGravelEmitter.h"
 #include "../../UiCure/Include/UiMachine.h"
 #include "../../UiCure/Include/UiProps.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
@@ -886,7 +887,8 @@ bool GameClientSlaveManager::InitializeTerrain()
 	mCloudArray.clear();
 
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	UiCure::CppContextObject* lLevel = new Level(GetResourceManager(), _T("level_01"), mUiManager);
+	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 1, 10, 2);
+	UiCure::CppContextObject* lLevel = new Level(GetResourceManager(), _T("level_01"), mUiManager, lGravelParticleEmitter);
 	AddContextObject(lLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
 	bool lOk = (lLevel != 0);
 	assert(lOk);
@@ -1487,7 +1489,11 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			}
 			else
 			{
-				SetMovement(lInstanceId, lFrameIndex, lData);
+				// Don't set movement for client-controlled objects.
+				if (!mMaster->IsLocalServer() || !mMaster->IsLocalObject(lInstanceId))
+				{
+					SetMovement(lInstanceId, lFrameIndex, lData);
+				}
 			}
 			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0, 1000000);
 		}

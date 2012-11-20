@@ -693,7 +693,7 @@ Vector3DF PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManager, Chun
 	pPhysicsManager->GetAxis1(pGeometry->GetJointId(), lAxis);
 	float lAngularRotorSpeed = 0;
 	pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lAngularRotorSpeed);
-	const float lLiftForce = lAngularRotorSpeed*mStrength*pEngineNode.mScale;
+	const float lLiftForce = lAngularRotorSpeed*lAngularRotorSpeed*mStrength*pEngineNode.mScale;
 	return (lAxis*lLiftForce);
 }
 

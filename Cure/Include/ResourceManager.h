@@ -329,25 +329,6 @@ public:
 
 
 
-/*class ContextObjectResource: public RamResource<ContextObject*>
-{
-	typedef RamResource<ContextObject*> Parent;
-public:
-	typedef ContextObject* UserData;
-
-	ContextObjectResource(ResourceManager* pManager, const str& pName);
-	virtual ~ContextObjectResource();
-	const str GetType() const;
-	UserData GetUserData(const UserResource*) const;
-	bool Load();
-	ResourceLoadState PostProcess();	// TODO: remove this method when ContextObject::LoadGroup has been implemented correctly (thread safe).
-
-private:
-	LOG_CLASS_DECLARE();
-};*/
-
-
-
 class PhysicalTerrainResource: public RamResource<TBC::TerrainPatch*>
 {
 	typedef RamResource<TBC::TerrainPatch*> Parent;
@@ -384,7 +365,6 @@ public:
 typedef UserTypeResource<PhysicsResource>		UserPhysicsResource;
 typedef UserTypeResource<ClassResource>			UserClassResource;
 //typedef UserTypeResource<TBC::...>			UserAnimationResource;
-//typedef UserTypeResource<ContextObjectResource>	UserContextObjectResource;
 typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
 typedef UserTypeResource<RamImageResource>		UserRamImageResource;
 
@@ -460,7 +440,7 @@ private:
 
 	unsigned mLoaderThreadCount;
 	const str mPathPrefix;
-	MemberThread<ResourceManager> mLoaderThread;	// TODO: increase max loader thread count (put in list).
+	MemberThread<ResourceManager> mLoaderThread;
 	Semaphore mLoadSemaphore;
 	mutable Lock mThreadLock;
 	ResourceTable mActiveResourceTable;	// In use. Holds non-unique resources.

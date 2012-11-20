@@ -89,7 +89,7 @@ void CppContextObject::StartLoading()
 {
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
-	const str lClassName = GetClassId()+_T(".class");	// TODO: move to central source file.
+	const str lClassName = GetClassId()+_T(".class");
 	mUiClassResource->Load(GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }

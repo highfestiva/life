@@ -13,7 +13,7 @@
 namespace UiTbc
 {
 
-Texture::Texture() :
+Texture::Texture():
 	mNumMipMapLevels(0),
 	mIsCubeMap(false),
 	mColorMap(0),
@@ -29,7 +29,7 @@ Texture::Texture() :
 {
 }
 
-Texture::Texture(const Canvas& pColorMap) :
+Texture::Texture(const Canvas& pColorMap):
 	mNumMipMapLevels(0),
 	mIsCubeMap(false),
 	mColorMap(0),
@@ -46,7 +46,24 @@ Texture::Texture(const Canvas& pColorMap) :
 	Set(pColorMap);
 }
 
-Texture::Texture(Texture* pTexture) :
+Texture::Texture(const Canvas& pColorMap, int pGenerateMipMapLevels):
+	mNumMipMapLevels(0),
+	mIsCubeMap(false),
+	mColorMap(0),
+	mAlphaMap(0),
+	mNormalMap(0),
+	mSpecularMap(0),
+	mCubeMapPosX(0),
+	mCubeMapNegX(0),
+	mCubeMapPosY(0),
+	mCubeMapNegY(0),
+	mCubeMapPosZ(0),
+	mCubeMapNegZ(0)
+{
+	Set(pColorMap, pGenerateMipMapLevels);
+}
+
+Texture::Texture(Texture* pTexture):
 	mNumMipMapLevels(0),
 	mIsCubeMap(false),
 	mColorMap(0),
@@ -232,14 +249,9 @@ void Texture::Copy(Texture* pTexture)
 	}
 }
 
-void Texture::Set(const Canvas& pColorMap,
-		  const Canvas* pAlphaMap,
-		  const Canvas* pNormalMap,
-		  const Canvas* pSpecularMap,
-		  bool pMergeColorWithAlpha)
+void Texture::Set(const Canvas& pColorMap, int pNumLevels, const Canvas* pAlphaMap, const Canvas* pNormalMap,
+	const Canvas* pSpecularMap, bool pMergeColorWithAlpha)
 {
-	ClearAll();
-
 	// The texture's dimensions must be a power of two.
 	// Check if they are, otherwise set them to the nearest lower
 	// power of two.
@@ -265,22 +277,26 @@ void Texture::Set(const Canvas& pColorMap,
 		lNumHeightBits++;
 	}
 
-	// First calculate how many levels there will be.
-	unsigned int lNumLevels = lNumWidthBits > lNumHeightBits ? lNumWidthBits : lNumHeightBits;
-	lNumLevels++;
+	if (pNumLevels <= 0)
+	{
+		// Calculate how many levels there will be.
+		pNumLevels = lNumWidthBits > lNumHeightBits ? lNumWidthBits : lNumHeightBits;
+		pNumLevels++;
+	}
 
-	// Now create all textures.
-	mColorMap = new Canvas[lNumLevels];
+	ClearAll();
 
+	// Create all textures.
+	mColorMap = new Canvas[pNumLevels];
 	if (pAlphaMap != 0 && pMergeColorWithAlpha == false)
-		pAlphaMap = new Canvas[lNumLevels];
+		pAlphaMap = new Canvas[pNumLevels];
 	if (pNormalMap != 0)
-		mNormalMap = new Canvas[lNumLevels];
+		mNormalMap = new Canvas[pNumLevels];
 	if (pSpecularMap != 0)
-		mSpecularMap = new Canvas[lNumLevels];
+		mSpecularMap = new Canvas[pNumLevels];
 
 	// And finally, resize them to their respective size.
-	for (unsigned int lLevel = 0; lLevel < lNumLevels; lLevel++)
+	for (int lLevel = 0; lLevel < pNumLevels; lLevel++)
 	{
 		int lWidth  = (lNearestPow2Width  >> lLevel);
 		int lHeight = (lNearestPow2Height >> lLevel);
@@ -330,7 +346,7 @@ void Texture::Set(const Canvas& pColorMap,
 		}
 	}
 
-	mNumMipMapLevels = lNumLevels;
+	mNumMipMapLevels = pNumLevels;
 	mIsCubeMap = false;
 }
 

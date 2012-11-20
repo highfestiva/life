@@ -199,7 +199,7 @@ bool RendererImageResource::Load()
 	delete lFile;
 	if (lOk)
 	{
-		SetRamData(new UiTbc::Texture(lImage));
+		SetRamData(new UiTbc::Texture(lImage, 1));
 	}
 	return (lOk);
 }

@@ -165,7 +165,7 @@ void CppContextObject::StartLoading()
 {
 	assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
-	const str lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
+	const str lAssetName = GetClassId()+_T(".class");
 	mClassResource->Load(GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
@@ -174,7 +174,7 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 {
 	assert(mPhysicsResource == 0);
 	const str lInstanceId = strutil::IntToString(GetInstanceId(), 10);
-	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();	// TODO: move to central source file.
+	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPhysicsOverride, mManager->GetGameManager()->GetPhysicsManager(),
 		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
 	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);

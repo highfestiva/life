@@ -76,6 +76,10 @@ void RaceTimer::OnTick()
 void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
 	Cure::ContextObject* lObject = pBody;
+	if (lObject->GetPhysics()->GetEngineCount() > 0)	// Only self-movable stuff can let the games begin!
+	{
+		return;
+	}
 
 	// Check if just finished this race.
 	DoneMap::iterator i = mDoneMap.find(lObject->GetInstanceId());

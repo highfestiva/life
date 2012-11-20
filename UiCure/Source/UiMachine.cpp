@@ -27,8 +27,7 @@ namespace UiCure
 
 Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
-	mExhaustTimeout(0),
-	mCreatedParticles(false)
+	mExhaustTimeout(0)
 {
 }
 
@@ -52,12 +51,6 @@ void Machine::DeleteEngineSounds()
 void Machine::OnTick()
 {
 	Parent::OnTick();
-	mParticleTimer.UpdateTimer();
-	if (mCreatedParticles)
-	{
-		mCreatedParticles = false;
-		mParticleTimer.ClearTimeDiff();
-	}
 
 	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
 	const TBC::ChunkyClass* lClass = GetClass();
@@ -378,85 +371,6 @@ void Machine::OnTick()
 	if (lIsChild || lPhysics->GetGuideMode() == TBC::ChunkyPhysics::GUIDE_ALWAYS)
 	{
 		StabilizeTick();
-	}
-}
-
-
-
-void Machine::OnForceApplied(Cure::ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
-{
-	Parent::OnForceApplied(pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
-
-	bool lParticlesEnabled;
-	CURE_RTVAR_GET(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
-	if (!lParticlesEnabled)
-	{
-		return;
-	}
-	// Particle emitter code. TODO: separate somewhat. Cleanup.
-	if (mParticleTimer.GetTimeDiff() < 0.3f)
-	{
-		return;
-	}
-	const float lRelativeSpeedLimit = 3;
-	if (pRelativeVelocity.GetLengthSquared() < lRelativeSpeedLimit*lRelativeSpeedLimit)
-	{
-		return;
-	}
-	const Cure::ContextObject* lOtherObject = (Cure::ContextObject*)pOtherObject;
-	if (!lOtherObject)
-	{
-		return;
-	}
-	if (lOtherObject->GetPhysics()->GetBoneGeometry(pOtherBodyId)->GetMaterial() != _T("grass"))
-	{
-		return;
-	}
-	const float lDistance = 100;	// Only show gravel particles inside this distance.
-	if (!GetManager()->GetGameManager()->IsObjectRelevant(pPosition, lDistance))
-	{
-		return;
-	}
-	const float lImpactFactor = GetPhysics()->GetBoneGeometry(pOwnBodyId)->GetImpactFactor();
-	const float lImpact = GetImpact(GetManager()->GetGameManager()->GetPhysicsManager()->GetGravity(),
-		pForce, pTorque, 0, 11) * lImpactFactor;
-	if (lImpact < 0.4f)
-	{
-		return;
-	}
-	Vector3DF lPosition(pPosition);
-	const float lAngle = (float)Random::Uniform(0, PI*2);
-	lPosition.x += 0.2f * cos(lAngle);
-	lPosition.y += 0.2f * sin(lAngle);
-	lPosition.z += (float)Random::Uniform(+0.1f, +0.2f);
-	Vector3DF lRelativeVelocity(pRelativeVelocity);
-	const Vector3DF lUp(0, 0, 1);
-	Vector3DF lTorque(pTorque.Cross(lUp));
-	const float lMassFactor = 1/GetMass();
-	lRelativeVelocity += lTorque * lMassFactor * 0.1f;
-	Vector3DF lRotationSpeed;
-	GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(pOwnBodyId, lRotationSpeed);
-	const Vector3DF lRadius = pPosition - GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(pOwnBodyId);
-	const Vector3DF lRollSpeed(lRotationSpeed.Cross(lRadius) * 0.2f);
-	lPosition += lRollSpeed.GetNormalized(0.3f);
-	const float lRollLength = lRollSpeed.GetLength();
-	const float lCollisionLength = lRelativeVelocity.GetLength();
-	lRelativeVelocity += lRollSpeed;
-	lRelativeVelocity.z += lCollisionLength*0.2f + lRollLength*0.3f;
-	lRelativeVelocity.x += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
-	lRelativeVelocity.y += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
-	lRelativeVelocity.z += (float)Random::Uniform(-lCollisionLength*0.02f, +lCollisionLength*0.05f);
-	if (lRelativeVelocity.GetLengthSquared() < pRelativeVelocity.GetLengthSquared()*200*200)
-	{
-		Props* lPuff = new Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
-		GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lPuff->SetInitialTransform(TransformationF(gIdentityQuaternionF, lPosition));
-		lPuff->StartParticle(Props::PARTICLE_SOLID, lRelativeVelocity, 1, 2, 2);
-		lPuff->StartLoading();
-		mCreatedParticles = true;
 	}
 }
 

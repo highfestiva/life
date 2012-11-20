@@ -406,61 +406,6 @@ ClassResource::~ClassResource()
 
 
 
-/*ContextObjectResource::ContextObjectResource(ResourceManager* pManager, const str& pName):
-	Parent(pManager, pName)
-{
-}
-
-ContextObjectResource::~ContextObjectResource()
-{
-	// TRICKY: delete of data must lie in this class, and not in parent class RamResource.
-	// This is so since types (UiLepra::SoundManager::SoundID) cannot be deleted!
-	SetRamData(0);
-
-	log_atrace("Deleting context object resource.");
-}
-
-const str ContextObjectResource::GetType() const
-{
-	return (_T("Context"));
-}
-
-ContextObjectResource::UserData ContextObjectResource::GetUserData(const UserResource*) const
-{
-	return (GetRamData());
-}
-
-bool ContextObjectResource::Load()
-{
-	log_atrace("Loading context object (self).");
-
-	assert(!IsUnique());
-	assert(GetRamData() == 0);
-	ContextObject* lObject = GetManager()->GetContextObjectFactory()->Create(GetName());
-	SetRamData(lObject);
-	return (lObject != 0);
-}
-
-ResourceLoadState ContextObjectResource::PostProcess()
-{
-	log_atrace("Loading context object (group).");
-	ResourceLoadState lLoadState = GetManager()->GetContextObjectFactory()->CreatePhysics(GetRamData()) ?
-		RESOURCE_LOAD_COMPLETE : RESOURCE_LOAD_ERROR;
-	if (lLoadState == RESOURCE_LOAD_COMPLETE)
-	{
-		Parent::PostProcess();
-	}
-	return (lLoadState);
-}
-
-LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObjectResource);*/
-
-
-
-// ----------------------------------------------------------------------------
-
-
-
 PhysicalTerrainResource::PhysicalTerrainResource(ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {

@@ -479,6 +479,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiGravelEmitter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiIconButton.cpp"
 				>
 			</File>
@@ -530,6 +534,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiGameUiManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiGravelEmitter.h"
 				>
 			</File>
 			<File
