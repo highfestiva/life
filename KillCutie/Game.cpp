@@ -13,7 +13,9 @@
 #include "../Lepra/Include/Random.h"
 #include "../TBC/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
+#include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiCure/Include/UiSound.h"
@@ -1182,22 +1184,31 @@ void Game::TickInput()
 
 Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 {
+	UiCure::Machine* lMachine = 0;
 	if (strutil::StartsWith(pClassId, _T("grenade")))
 	{
-		return new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
+		lMachine = new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
 	}
 	else if (strutil::StartsWith(pClassId, _T("robo_ball")))
 	{
-		return new RoboBall(this, pClassId);
+		lMachine = new RoboBall(this, pClassId);
 	}
 	else if (strutil::StartsWith(pClassId, _T("cutie")) ||
 		strutil::StartsWith(pClassId, _T("monster")) ||
 		strutil::StartsWith(pClassId, _T("corvette")) ||
 		strutil::StartsWith(pClassId, _T("road_roller")))
 	{
-		return new Cutie(GetResourceManager(), pClassId, mUiManager);
+		lMachine = new Cutie(GetResourceManager(), pClassId, mUiManager);
 	}
-	return new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+	else
+	{
+		lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+	}
+	if (lMachine)
+	{
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 3, 0.6f, 2.0f));
+	}
+	return lMachine;
 }
 
 bool Game::Initialize()
@@ -1248,7 +1259,8 @@ bool Game::InitializeTerrain()
 	if (lOk)
 	{
 		delete mLevel;
-		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager);
+		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 1, 10, 2);
+		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager, lGravelParticleEmitter);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);
 		assert(lOk);

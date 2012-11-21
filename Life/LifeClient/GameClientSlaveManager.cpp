@@ -23,6 +23,7 @@
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiCure/Include/UiCollisionSoundManager.h"
 #include "../../UiCure/Include/UiDebugRenderer.h"
+#include "../../UiCure/Include/UiExhaustEmitter.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiGravelEmitter.h"
 #include "../../UiCure/Include/UiMachine.h"
@@ -1624,7 +1625,9 @@ Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pCla
 	}
 	else
 	{
-		lObject = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 3, 0.6f, 2.0f));
+		lObject = lMachine;
 	}
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
 	return (lObject);
