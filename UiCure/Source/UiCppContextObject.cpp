@@ -497,7 +497,7 @@ void CppContextObject::LoadTextures()
 		const std::vector<str>& lTextureList = lClass->GetMaterial(x).mTextureList;
 		for (std::vector<str>::const_iterator y = lTextureList.begin(); y != lTextureList.end(); ++y)
 		{
-			UserRendererImageResource* lTexture = new UserRendererImageResource(mUiManager);
+			UserRendererImageResource* lTexture = new UserRendererImageResource(mUiManager, mUiManager->GetRenderer()->GetMipMappingEnabled());
 			mTextureResourceArray.push_back(lTexture);
 			lTexture->Load(GetResourceManager(), *y,
 				UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));

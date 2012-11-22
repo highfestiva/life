@@ -118,7 +118,6 @@ private:
 	typedef std::list<Cure::MessageObjectMovement*> MovementList;
 	typedef std::vector<MovementList> MovementArrayList;
 	typedef HashTable<Cure::UserAccount::AccountId, Client*> AccountClientTable;
-	typedef HashTable<Cure::UserAccount::AccountId, Client*> AvatarClientTable;
 
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;

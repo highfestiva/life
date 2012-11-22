@@ -29,7 +29,7 @@ Texture::Texture():
 {
 }
 
-Texture::Texture(const Canvas& pColorMap):
+Texture::Texture(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint, int pGenerateMipMapLevels):
 	mNumMipMapLevels(0),
 	mIsCubeMap(false),
 	mColorMap(0),
@@ -43,24 +43,7 @@ Texture::Texture(const Canvas& pColorMap):
 	mCubeMapPosZ(0),
 	mCubeMapNegZ(0)
 {
-	Set(pColorMap);
-}
-
-Texture::Texture(const Canvas& pColorMap, int pGenerateMipMapLevels):
-	mNumMipMapLevels(0),
-	mIsCubeMap(false),
-	mColorMap(0),
-	mAlphaMap(0),
-	mNormalMap(0),
-	mSpecularMap(0),
-	mCubeMapPosX(0),
-	mCubeMapNegX(0),
-	mCubeMapPosY(0),
-	mCubeMapNegY(0),
-	mCubeMapPosZ(0),
-	mCubeMapNegZ(0)
-{
-	Set(pColorMap, pGenerateMipMapLevels);
+	Set(pColorMap, pResizeHint, pGenerateMipMapLevels);
 }
 
 Texture::Texture(Texture* pTexture):
@@ -249,7 +232,7 @@ void Texture::Copy(Texture* pTexture)
 	}
 }
 
-void Texture::Set(const Canvas& pColorMap, int pNumLevels, const Canvas* pAlphaMap, const Canvas* pNormalMap,
+void Texture::Set(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint, int pNumLevels, const Canvas* pAlphaMap, const Canvas* pNormalMap,
 	const Canvas* pSpecularMap, bool pMergeColorWithAlpha)
 {
 	// The texture's dimensions must be a power of two.
@@ -316,7 +299,7 @@ void Texture::Set(const Canvas& pColorMap, int pNumLevels, const Canvas* pAlphaM
 			if (pAlphaMap != 0)
 			{
 				Canvas lAlphaMap(*pAlphaMap);
-				lAlphaMap.Resize(mColorMap[lLevel].GetWidth(), mColorMap[lLevel].GetHeight(), Canvas::RESIZE_NICEST);
+				lAlphaMap.Resize(mColorMap[lLevel].GetWidth(), mColorMap[lLevel].GetHeight(), pResizeHint);
 				mColorMap[lLevel].ConvertTo32BitWithAlpha(lAlphaMap);
 			}
 			else
@@ -327,22 +310,22 @@ void Texture::Set(const Canvas& pColorMap, int pNumLevels, const Canvas* pAlphaM
 			// Alpha map is stored separately and color map keeps its bitrate.
 			mAlphaMap[lLevel].Copy(*pAlphaMap);
 			mAlphaMap[lLevel].ConvertToGrayscale();
-			mAlphaMap[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+			mAlphaMap[lLevel].Resize(lWidth, lHeight, pResizeHint);
 		}
 
-		mColorMap[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+		mColorMap[lLevel].Resize(lWidth, lHeight, pResizeHint);
 
 		if (pNormalMap != 0)
 		{
 			mNormalMap[lLevel].Copy(*pNormalMap);
 			mNormalMap[lLevel].ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
-			mNormalMap[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+			mNormalMap[lLevel].Resize(lWidth, lHeight, pResizeHint);
 		}
 		if (pSpecularMap != 0)
 		{
 			mSpecularMap[lLevel].Copy(*pSpecularMap);
 			mSpecularMap[lLevel].ConvertToGrayscale();
-			mSpecularMap[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+			mSpecularMap[lLevel].Resize(lWidth, lHeight, pResizeHint);
 		}
 	}
 

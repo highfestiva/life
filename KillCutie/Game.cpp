@@ -1259,7 +1259,7 @@ bool Game::InitializeTerrain()
 	if (lOk)
 	{
 		delete mLevel;
-		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 1, 10, 2);
+		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 1, 1, 10, 2);
 		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager, lGravelParticleEmitter);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);

@@ -464,7 +464,7 @@ int App::Run()
 	}
 	if (lOk)
 	{
-		mGame->GetPhysicsManager()->SetGravity(Vector3DF(0, 0, -9.82f));
+		mGame->Cure::GameManager::GetPhysicsManager()->SetGravity(Vector3DF(0, 0, -9.82f));
 	}
 	mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_IOS
@@ -708,7 +708,7 @@ void App::PollTaps()
 			TBC::PhysicsManager::BodyID lBodyId = lStructure->GetBoneGeometry(x)->GetBodyId();
 			if (lBodyId != TBC::INVALID_BODY)
 			{
-				mGame->GetPhysicsManager()->AddForce(lBodyId, Vector3DF(1, 0, 0));
+				mGame->Cure::GameManager::GetPhysicsManager()->AddForce(lBodyId, Vector3DF(1, 0, 0));
 			}
 		}
 	}

@@ -46,6 +46,7 @@ class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, pub
 public:
 	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameClientMasterTicker();
+	void SetMasterServerConnection(MasterServerConnection* pConnection);
 
 	bool CreateSlave();
 
@@ -70,7 +71,6 @@ public:
 	void OnSetPlayerCount(int pPlayerCount);
 
 	void DownloadServerList();
-	const MasterServerConnection* GetMasterConnection() const;
 
 	Sunlight* GetSunlight() const;	// TODO: move this hard-coding to a context object or summat.
 

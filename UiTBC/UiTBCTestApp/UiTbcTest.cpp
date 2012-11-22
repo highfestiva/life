@@ -662,7 +662,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		lOk = lTEXLoader.Load(_T("multiMap.tex"), lMultiMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS;
 		if (!lOk)
 		{
-			lMultiMap.Set(*lTextureMap.GetColorMap(0), 0, lNormalMap.GetColorMap(0), lSpecMap.GetColorMap(0));
+			lMultiMap.Set(*lTextureMap.GetColorMap(0), Canvas::RESIZE_FAST, 0, 0, lNormalMap.GetColorMap(0), lSpecMap.GetColorMap(0));
 			UiTbc::TEXLoader lTEXLoader;
 			lTEXLoader.Save(_T("multiMap.tex"), lMultiMap, false);
 			lOk = true;

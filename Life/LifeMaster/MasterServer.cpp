@@ -9,6 +9,7 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../ServerInfo.h"
 #include "MasterServerNetworkParser.h"
+#include "MasterServerPort.h"
 
 
 
@@ -84,6 +85,29 @@ bool MasterServer::Tick()
 		}
 	}
 	return true;
+}
+
+void MasterServer::PollRoundTrip()
+{
+	Tick();
+}
+
+float MasterServer::GetTickTimeReduction() const
+{
+	return 0;
+}
+
+float MasterServer::GetPowerSaveAmount() const
+{
+	if (!mGameServerTable.empty())
+	{
+		return 0;
+	}
+	if (!mSocketTimeoutTable.empty())
+	{
+		return 0.1f;
+	}
+	return 1;
 }
 
 

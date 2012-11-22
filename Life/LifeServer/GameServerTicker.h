@@ -31,6 +31,7 @@ class GameServerTicker: public Cure::GameTicker
 public:
 	GameServerTicker(Cure::ResourceManager* pResourceManager, InteractiveConsoleLogListener* pConsoleLogger, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameServerTicker();
+	void SetMasterServerConnection(MasterServerConnection* pConnection);
 
 private:
 	virtual bool Initialize();

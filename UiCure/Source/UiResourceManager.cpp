@@ -169,8 +169,9 @@ Cure::ResourceLoadState RendererImageBaseResource::PostProcess()
 	return (lLoadState);
 }
 
-RendererImageResource::RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
-	RendererImageBaseResource(pUiManager, pManager, pName)
+RendererImageResource::RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, bool pMipMap):
+	RendererImageBaseResource(pUiManager, pManager, pName),
+	mMipMap(pMipMap)
 {
 }
 
@@ -199,7 +200,7 @@ bool RendererImageResource::Load()
 	delete lFile;
 	if (lOk)
 	{
-		SetRamData(new UiTbc::Texture(lImage, 1));
+		SetRamData(new UiTbc::Texture(lImage, Canvas::RESIZE_FAST, mMipMap? 0 : 1));
 	}
 	return (lOk);
 }

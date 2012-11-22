@@ -29,7 +29,7 @@ public:
 		FIREWALL_USE_LAN,
 	};
 
-	MasterServerConnection();
+	MasterServerConnection(const str& pMasterAddress);
 	virtual ~MasterServerConnection();
 
 	void SetSocketInfo(Cure::SocketIoHandler* pMuxSocket, double pConnectTimeout);
@@ -77,6 +77,7 @@ private:
 
 	void OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSocket);
 
+	str mMasterServerAddress;
 	State mState;
 	std::list<State> mStateList;
 	str mLocalServerInfo;

@@ -22,11 +22,12 @@ namespace UiCure
 
 
 
-GravelEmitter::GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, const str& pParticleClass, float pScale, float pAmount, float pLifeTime):
+GravelEmitter::GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, const str& pParticleClass, float pSensitivity, float pScale, float pAmount, float pLifeTime):
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
 	mParticleClass(pParticleClass),
 	mLastCollidedId(0),
+	mSensitivityFactor(1/pSensitivity),
 	mScale(pScale),
 	mDelay(1/pAmount),
 	mLifeTime(pLifeTime)
@@ -56,7 +57,7 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	{
 		return;
 	}
-	const float lRelativeSpeedLimit = 3;
+	const float lRelativeSpeedLimit = 2 * mSensitivityFactor;
 	if (pRelativeVelocity.GetLengthSquared() < lRelativeSpeedLimit*lRelativeSpeedLimit)
 	{
 		return;
@@ -77,7 +78,7 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	const float lImpactFactor = pOtherObject->GetPhysics()->GetBoneGeometry(pOtherBodyId)->GetImpactFactor();
 	const float lImpact = pOtherObject->GetImpact(pOtherObject->GetManager()->GetGameManager()->GetPhysicsManager()->GetGravity(),
 		pForce, pTorque, 0, 11) * lImpactFactor;
-	if (lImpact < 0.4f)
+	if (lImpact < 0.1f*mSensitivityFactor)
 	{
 		return;
 	}

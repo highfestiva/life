@@ -33,8 +33,7 @@ public:
 	// The constructor makes a copy of the data, and is not responsible
 	// for deleting the canvas.
 	Texture();
-	Texture(const Canvas& pColorMap); // Will generate mipmaps.
-	Texture(const Canvas& pColorMap, int pGenerateMipMapLevels);
+	Texture(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint, int pGenerateMipMapLevels);
 	Texture(Texture* pTexture);
 	virtual ~Texture();
 
@@ -44,7 +43,7 @@ public:
 
 	// Normal texture set. If both specular and normal maps are used, they will be merged
 	// such that the specular value will be stored in the alpha-channel of the normal map.
-	void Set(const Canvas& pColorMap, int pNumLevels = 0, const Canvas* pAlphaMap = 0, const Canvas* pNormalMap = 0,
+	void Set(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint = Canvas::RESIZE_FAST, int pNumLevels = 0, const Canvas* pAlphaMap = 0, const Canvas* pNormalMap = 0,
 		const Canvas* pSpecularMap = 0, bool pMergeColorWithAlpha = true);
 
 	// Set cube map.

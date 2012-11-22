@@ -10,11 +10,12 @@
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiTBC/Include/UiTBC.h"
+#include "../LifeMaster/MasterServerPort.h"
+#include "../LifeServer/MasterServerConnection.h"
 #include "../LifeApplication.h"
 #include "GameClientMasterTicker.h"
 #include "RtVar.h"
-
-#define VERSION	"0.1"
+#include "../LifeServer/Version.h"
 
 
 
@@ -35,7 +36,7 @@ public:
 private:
 	str GetName() const;
 	str GetVersion() const;
-	Cure::GameTicker* CreateGameTicker() const;
+	Cure::ApplicationTicker* CreateTicker() const;
 
 	UiCure::GameUiManager* mUiManager;
 
@@ -103,13 +104,14 @@ str ClientApplication::GetName() const
 
 str ClientApplication::GetVersion() const
 {
-	return _T(VERSION);
+	return _T(PLATFORM_VERSION);
 }
 
-Cure::GameTicker* ClientApplication::CreateGameTicker() const
+Cure::ApplicationTicker* ClientApplication::CreateTicker() const
 {
-	GameClientMasterTicker* lMaster = new GameClientMasterTicker(mUiManager, mResourceManager, 2000, 7, 1);
-	return (lMaster);
+	GameClientMasterTicker* lTicker = new GameClientMasterTicker(mUiManager, mResourceManager, 2000, 7, 1);
+	lTicker->SetMasterServerConnection(new MasterServerConnection(_T(MASTER_SERVER_ADDRESS) _T(":") _T(MASTER_SERVER_PORT)));
+	return lTicker;
 }
 
 

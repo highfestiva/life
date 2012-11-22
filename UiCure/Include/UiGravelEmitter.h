@@ -21,7 +21,7 @@ namespace UiCure
 class GravelEmitter: public Cure::ContextForceListener
 {
 public:
-	GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, const str& pParticleClass, float pScale, float pAmount, float pLifeTime);
+	GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, const str& pParticleClass, float pSensitivity, float pScale, float pAmount, float pLifeTime);
 	virtual ~GravelEmitter();
 
 	virtual void OnForceApplied(Cure::ContextObject* pObject, Cure::ContextObject* pOtherObject,
@@ -34,6 +34,7 @@ public:
 	str mParticleClass;
 	HiResTimer mParticleTimer;
 	Cure::GameObjectId mLastCollidedId;
+	float mSensitivityFactor;
 	float mScale;
 	float mDelay;
 	float mLifeTime;

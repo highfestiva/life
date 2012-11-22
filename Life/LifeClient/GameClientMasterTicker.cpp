@@ -57,7 +57,7 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mIsPlayerCountViewActive(false),
 	mServer(0),
 	mServerTimeManager(new Cure::TimeManager),
-	mMasterConnection(new MasterServerConnection),
+	mMasterConnection(0),
 	mFreeNetworkAgent(new Cure::NetworkFreeAgent),
 	mRestartUi(false),
 	mInitialized(false),
@@ -134,6 +134,11 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	mFreeNetworkAgent = 0;
 }
 
+void GameClientMasterTicker::SetMasterServerConnection(MasterServerConnection* pConnection)
+{
+	delete mMasterConnection;
+	mMasterConnection = pConnection;
+}
 
 
 bool GameClientMasterTicker::CreateSlave()
@@ -156,6 +161,7 @@ bool GameClientMasterTicker::Tick()
 
 	SlaveArray::iterator x;
 
+	if (mMasterConnection)
 	{
 		LEPRA_MEASURE_SCOPE(MasterServerConnectionTick);
 		// If we're not running server: use free network interface for obtaining server list.
@@ -530,7 +536,7 @@ void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 		CreateSlave();
 	}
 
-	if (!mServer)
+	if (!mServer && mMasterConnection)
 	{
 		// If client descided we won't run local server, then we have no need for
 		// a master connection any more. Was only used to download server list anyway.
@@ -540,12 +546,10 @@ void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 
 void GameClientMasterTicker::DownloadServerList()
 {
-	mMasterConnection->RequestServerList(_T(""));
-}
-
-const MasterServerConnection* GameClientMasterTicker::GetMasterConnection() const
-{
-	return mMasterConnection;
+	if (mMasterConnection)
+	{
+		mMasterConnection->RequestServerList(_T(""));
+	}
 }
 
 
@@ -760,18 +764,7 @@ bool GameClientMasterTicker::Initialize()
 					mUiManager->Paint(false);
 					mUiManager->GetDisplayManager()->UpdateScreen();
 
-					if (SystemManager::GetSleepResolution() <= 0.01)
-					{
-						Thread::Sleep(0.01);
-					}
-					else
-					{
-						HiResTimer lTimer;
-						while (lTimer.QueryTimeDiff() < 0.01)
-						{
-							Thread::YieldCpu();
-						}
-					}
+					Thread::Sleep(0.01);
 					mUiManager->InputTick();
 					//lOk = (SystemManager::GetQuitRequest() <= 0);
 

@@ -93,7 +93,7 @@ void Application::Init()
 	const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 	log_volatile(mLog.Debugf(_T("Using path prefix: %s"), lPathPrefix.c_str()));
 	mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
-	mGameTicker = CreateGameTicker();
+	mGameTicker = CreateTicker();
 }
 
 int Application::Run()

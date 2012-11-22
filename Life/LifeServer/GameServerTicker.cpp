@@ -28,7 +28,7 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager, Inte
 	Parent(pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mResourceManager(pResourceManager),
 	mGameManager(0),
-	mMasterConnection(new MasterServerConnection)
+	mMasterConnection(0)
 {
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_AUTOFLIPENABLED, true);
@@ -69,6 +69,12 @@ GameServerTicker::~GameServerTicker()
 	mMasterConnection->SetSocketInfo(0, -1);
 	delete mMasterConnection;
 	mMasterConnection = 0;
+}
+
+void GameServerTicker::SetMasterServerConnection(MasterServerConnection* pConnection)
+{
+	delete mMasterConnection;
+	mMasterConnection = pConnection;
 }
 
 

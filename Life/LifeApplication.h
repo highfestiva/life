@@ -16,7 +16,7 @@
 
 namespace Cure
 {
-class GameTicker;
+class ApplicationTicker;
 class ResourceManager;
 }
 
@@ -39,7 +39,7 @@ public:
 
 	virtual str GetName() const = 0;
 	virtual str GetVersion() const = 0;
-	virtual Cure::GameTicker* CreateGameTicker() const = 0;
+	virtual Cure::ApplicationTicker* CreateTicker() const = 0;
 
 	static str GetIoFile(const str& pName, const str& pExt, bool pAddQuotes = true);
 
@@ -47,7 +47,7 @@ protected:
 	virtual LogListener* CreateConsoleLogListener() const;
 
 	Cure::ResourceManager* mResourceManager;
-	Cure::GameTicker* mGameTicker;
+	Cure::ApplicationTicker* mGameTicker;
 	LogListener* mConsoleLogger;
 
 private:

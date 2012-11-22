@@ -124,12 +124,20 @@ void GameClientViewer::OnRequestJoinServer(const str& pServerAddress)
 
 bool GameClientViewer::UpdateServerList(ServerInfoList& pServerList) const
 {
-	return GetMaster()->GetMasterConnection()->UpdateServerList(pServerList);
+	if (mMasterServerConnection)
+	{
+		return mMasterServerConnection->UpdateServerList(pServerList);
+	}
+	return false;
 }
 
 bool GameClientViewer::IsMasterServerConnectError() const
 {
-	return GetMaster()->GetMasterConnection()->IsConnectError();
+	if (mMasterServerConnection)
+	{
+		return mMasterServerConnection->IsConnectError();
+	}
+	return true;
 }
 
 void GameClientViewer::CloseJoinServerView()

@@ -986,6 +986,10 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 					lGeometryData->mTA->mMaps[x].mMapID[Texture::ALPHA_MAP]    = lTexture->mTMapID[Texture::ALPHA_MAP];
 					lGeometryData->mTA->mMaps[x].mMapID[Texture::NORMAL_MAP]   = lTexture->mTMapID[Texture::NORMAL_MAP];
 					lGeometryData->mTA->mMaps[x].mMapID[Texture::SPECULAR_MAP] = lTexture->mTMapID[Texture::SPECULAR_MAP];
+					lGeometryData->mTA->mMaps[x].mMipMapLevelCount[Texture::COLOR_MAP]    = lTexture->mTMipMapLevelCount[Texture::COLOR_MAP];
+					lGeometryData->mTA->mMaps[x].mMipMapLevelCount[Texture::ALPHA_MAP]    = lTexture->mTMipMapLevelCount[Texture::ALPHA_MAP];
+					lGeometryData->mTA->mMaps[x].mMipMapLevelCount[Texture::NORMAL_MAP]   = lTexture->mTMipMapLevelCount[Texture::NORMAL_MAP];
+					lGeometryData->mTA->mMaps[x].mMipMapLevelCount[Texture::SPECULAR_MAP] = lTexture->mTMipMapLevelCount[Texture::SPECULAR_MAP];
 					lOk = true;
 				}
 			}

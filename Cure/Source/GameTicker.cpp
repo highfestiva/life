@@ -25,6 +25,25 @@ namespace Cure
 
 
 
+ApplicationTicker::ApplicationTicker()
+{
+}
+
+ApplicationTicker::~ApplicationTicker()
+{
+}
+
+void ApplicationTicker::Profile()
+{
+}
+
+bool ApplicationTicker::QueryQuit()
+{
+	return (SystemManager::GetQuitRequest() != 0);
+}
+
+
+
 GameTicker::GameTicker(float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	mTimeManager(new TimeManager),
 	mPhysicsManager(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, pPhysicsRadius, pPhysicsLevels,  pPhysicsSensitivity)),
@@ -76,15 +95,6 @@ TBC::PhysicsManager* GameTicker::GetPhysicsManager(bool pIsThreadSafe) const
 	}
 #endif // LEPRA_DEBUG
 	return mPhysicsManager;
-}
-
-void GameTicker::Profile()
-{
-}
-
-bool GameTicker::QueryQuit()
-{
-	return (SystemManager::GetQuitRequest() != 0);
 }
 
 

@@ -537,6 +537,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	if (pTextureData->mTMapID[pMapType] == mTMapIDManager.GetInvalidId())
 	{
 		pTextureData->mTMapID[pMapType] = mTMapIDManager.GetFreeId();
+		pTextureData->mTMipMapLevelCount[pMapType] = pTexture->GetNumMipMapLevels();
 	}
 
 	glBindTexture(GL_TEXTURE_2D, pTextureData->mTMapID[pMapType]);
@@ -594,6 +595,7 @@ void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 	if (pTextureData->mTMapID[Texture::CUBE_MAP] == mTMapIDManager.GetInvalidId())
 	{
 		pTextureData->mTMapID[Texture::CUBE_MAP] = mTMapIDManager.GetFreeId();
+		pTextureData->mTMipMapLevelCount[Texture::CUBE_MAP] = pTexture->GetNumMipMapLevels();
 	}
 
 	// Bind cube map.
@@ -674,6 +676,8 @@ void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
 			mTMapIDManager.RecycleId(pTextureData->mTMapID[i]);
 			GLuint lTextureName = pTextureData->mTMapID[i];
 			glDeleteTextures(1, &lTextureName);
+			pTextureData->mTMapID[i] = 0;
+			pTextureData->mTMipMapLevelCount[i] = 0;
 		}
 	}
 

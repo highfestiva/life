@@ -667,6 +667,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ScreenPart.h"
+				>
+			</File>
+			<File
 				RelativePath=".\StopWatch.cpp"
 				>
 			</File>
@@ -772,6 +776,10 @@
 			</File>
 			<File
 				RelativePath="..\LifeMaster\MasterServerNetworkParser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeMaster\MasterServerPort.h"
 				>
 			</File>
 		</Filter>

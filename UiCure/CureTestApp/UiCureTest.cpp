@@ -135,7 +135,7 @@ bool ResourceTest::TestAtom()
 	if (lTestOk)
 	{
 		lContext = _T("load 2D image");
-		UiCure::UserRendererImageResource lImage(mUiManager);
+		UiCure::UserRendererImageResource lImage(mUiManager, true);
 		lImage.Load(mResourceManager, _T("normalmap.tga"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();

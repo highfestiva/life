@@ -598,6 +598,10 @@
 				RelativePath=".\Spawner.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Version.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Master"

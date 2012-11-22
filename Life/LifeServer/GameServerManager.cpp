@@ -1308,7 +1308,7 @@ void GameServerManager::TickMasterServer()
 {
 	bool lIsOpenServer;
 	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-	if (!lIsOpenServer)
+	if (!mMasterConnection || !lIsOpenServer)
 	{
 		return;
 	}

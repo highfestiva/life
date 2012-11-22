@@ -8,6 +8,8 @@
 #include "../LifeApplication.h"
 #include "MasterServer.h"
 
+#define VERSION	"0.1"
+
 
 
 namespace Life
@@ -25,6 +27,7 @@ public:
 	virtual void Init();
 
 private:
+	virtual Cure::ApplicationTicker* CreateTicker() const;
 	virtual str GetName() const;
 	virtual str GetVersion() const;
 };
@@ -64,22 +67,22 @@ void MasterApplication::Init()
 	TBC::Init();
 	Cure::Init();
 
-	Init();
+	Parent::Init();
+}
+
+Cure::ApplicationTicker* MasterApplication::CreateTicker() const
+{
+	return new MasterServer;
 }
 
 str MasterApplication::GetName() const
 {
-	return _T(MASTER_APPLICATION_NAME);
+	return _T("Master");
 }
 
 str MasterApplication::GetVersion() const
 {
-	return _T(MASTER_SERVER_VERSION);
-}
-
-Cure::GameTicker* MasterApplication::CreateGameTicker() const
-{
-	return new MasterServer;
+	return _T(VERSION);
 }
 
 

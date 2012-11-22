@@ -17,7 +17,8 @@ namespace Life
 
 
 
-MasterServerConnection::MasterServerConnection():
+MasterServerConnection::MasterServerConnection(const str& pMasterAddress):
+	mMasterServerAddress(pMasterAddress),
 	mState(DISCONNECTED),
 	mSocketIoHandler(0),
 	mMuxSocket(0),
@@ -341,17 +342,16 @@ void MasterServerConnection::ConnectEntry()
 		return;
 	}
 
-	const str lMasterServerAddress(_T(MASTER_SERVER_NAME) _T(":") _T(MASTER_SERVER_PORT));
 	SocketAddress lTargetAddress;
-	if (!lTargetAddress.Resolve(lMasterServerAddress))
+	if (!lTargetAddress.Resolve(mMasterServerAddress))
 	{
-		mLog.Warningf(_T("Could not resolve master server address '%s'."), lMasterServerAddress.c_str());
+		mLog.Warningf(_T("Could not resolve master server address '%s'."), mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}
 	if (mConnecter->GetStopRequest() || !QueryMuxValid())
 	{
-		mLog.Warningf(_T("Connect to master server '%s' was aborted."), lMasterServerAddress.c_str());
+		mLog.Warningf(_T("Connect to master server '%s' was aborted."), mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}
@@ -361,7 +361,7 @@ void MasterServerConnection::ConnectEntry()
 	mVSocket = mMuxSocket->Connect(lTargetAddress, lConnectionId, mConnectTimeout);
 	if (!mVSocket)
 	{
-		mLog.Warningf(_T("Could not connect to master server address '%s'."), lMasterServerAddress.c_str());
+		mLog.Warningf(_T("Could not connect to master server address '%s'."), mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}

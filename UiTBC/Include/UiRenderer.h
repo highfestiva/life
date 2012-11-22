@@ -154,6 +154,7 @@ public:
 		struct Maps
 		{
 			int mMapID[Texture::NUM_MAPS];
+			int mMipMapLevelCount[Texture::NUM_MAPS];
 		};
 
 		TextureAssociation(int pNumTextures) :
@@ -170,6 +171,12 @@ public:
 				mMaps[i].mMapID[Texture::ALPHA_MAP]    = 0;
 				mMaps[i].mMapID[Texture::NORMAL_MAP]   = 0;
 				mMaps[i].mMapID[Texture::SPECULAR_MAP] = 0;
+				mMaps[i].mMapID[Texture::CUBE_MAP] = 0;
+				mMaps[i].mMipMapLevelCount[Texture::COLOR_MAP]    = 0;
+				mMaps[i].mMipMapLevelCount[Texture::ALPHA_MAP]    = 0;
+				mMaps[i].mMipMapLevelCount[Texture::NORMAL_MAP]   = 0;
+				mMaps[i].mMipMapLevelCount[Texture::SPECULAR_MAP] = 0;
+				mMaps[i].mMipMapLevelCount[Texture::CUBE_MAP] = 0;
 			}
 		}
 
@@ -248,6 +255,7 @@ public:
 			for (int i = 0; i < Texture::NUM_MAPS; i++)
 			{
 				mTMapID[i] = pInvalidID;
+				mTMipMapLevelCount[i] = 0;
 			}
 		}
 
@@ -263,6 +271,8 @@ public:
 		// simply the associated "texture names". For Direct3D this
 		// is the index into an array of texture handles.
 		int mTMapID[Texture::NUM_MAPS];
+
+		int mTMipMapLevelCount[Texture::NUM_MAPS];
 
 		TextureID mTextureID;
 	};

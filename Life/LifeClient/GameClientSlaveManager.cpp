@@ -59,7 +59,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mCollisionSoundManager(0),
 	mSlaveIndex(pSlaveIndex),
 	mRenderArea(pRenderArea),
-	mMasterServerConnection(new MasterServerConnection),
+	mMasterServerConnection(0),
 	mFirstInitialize(true),
 	mIsReset(false),
 	mIsResetComplete(false),
@@ -888,7 +888,7 @@ bool GameClientSlaveManager::InitializeTerrain()
 	mCloudArray.clear();
 
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 1, 10, 2);
+	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
 	UiCure::CppContextObject* lLevel = new Level(GetResourceManager(), _T("level_01"), mUiManager, lGravelParticleEmitter);
 	AddContextObject(lLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
 	bool lOk = (lLevel != 0);

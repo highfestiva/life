@@ -97,38 +97,38 @@ bool Game::MoveRacket()
 		GetBall() && GetBall()->IsLoaded())
 	{
 		TransformationF lRacketTransform;
-		GetPhysicsManager()->GetBodyTransform(
+		GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyTransform(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lRacketTransform);
 		Vector3DF lRacketLinearVelocity;
-		GetPhysicsManager()->GetBodyVelocity(
+		GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyVelocity(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lRacketLinearVelocity);
 		Vector3DF lRacketAngularVelocity;
-		GetPhysicsManager()->GetBodyAngularVelocity(
+		GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyAngularVelocity(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lRacketAngularVelocity);
 
 		// Calculate where ball will be as it passes z = racket z.
 		Vector3DF lBallPosition =
-			GetPhysicsManager()->GetBodyPosition(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+			GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyPosition(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 		Vector3DF lBallVelocity;
-		GetPhysicsManager()->GetBodyVelocity(
+		GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyVelocity(
 			GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lBallVelocity);
 		if (lBallPosition.z < -2)
 		{
 			lBallPosition.Set(0, 0, 0.4f);
-			GetPhysicsManager()->SetBodyTransform(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), TransformationF(QuaternionF(), lBallPosition));
+			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyTransform(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), TransformationF(QuaternionF(), lBallPosition));
 			lBallVelocity.Set(0, 0, 2.0f);
-			GetPhysicsManager()->SetBodyVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lBallVelocity);
-			GetPhysicsManager()->SetBodyAngularVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), Vector3DF());
+			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lBallVelocity);
+			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyAngularVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), Vector3DF());
 			lRacketTransform.SetIdentity();
-			GetPhysicsManager()->SetBodyTransform(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketTransform);
+			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyTransform(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketTransform);
 			lRacketLinearVelocity.Set(0, 0, 0);
-			GetPhysicsManager()->SetBodyVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketLinearVelocity);
+			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketLinearVelocity);
 			lRacketAngularVelocity.Set(0, 0, 0);
-			GetPhysicsManager()->SetBodyAngularVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketAngularVelocity);
+			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyAngularVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketAngularVelocity);
 			return false;
 		}
 		Vector3DF lHome;
@@ -174,7 +174,7 @@ bool Game::MoveRacket()
 			lForce *= 100 / f;
 		}
 		//mLog.Infof(_T("force = (%f, %f, %f)"), lForce.x, lForce.y, lForce.z);
-		GetPhysicsManager()->AddForce(
+		GameTicker::GetPhysicsManager(IsThreadSafe())->AddForce(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lForce);
 
@@ -199,7 +199,7 @@ bool Game::MoveRacket()
 		Vector3DF lTorque = lAngleHome * f;
 		lTorque -= lRacketAngularVelocity * 0.2f;
 		//mLog.Infof(_T("torque = (%f, %f, %f)"), lTorque.x, lTorque.y, lTorque.z);
-		GetPhysicsManager()->AddTorque(
+		GameTicker::GetPhysicsManager(IsThreadSafe())->AddTorque(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lTorque);
 	}
@@ -258,6 +258,29 @@ float Game::GetPowerSaveAmount() const
 {
 	bool lIsMinimized = !mUiManager->GetDisplayManager()->IsVisible();
 	return (lIsMinimized? 1.0f : 0);
+}
+
+
+
+void Game::WillMicroTick(float pTimeDelta)
+{
+	MicroTick(pTimeDelta);
+}
+
+void Game::DidPhysicsTick()
+{
+	PostPhysicsTick();
+}
+
+void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+{
+	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+}
+
+void Game::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+	const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	GameManager::OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 }
 
 

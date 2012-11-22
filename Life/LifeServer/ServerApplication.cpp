@@ -5,11 +5,12 @@
 
 
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../LifeMaster/MasterServerPort.h"
 #include "../LifeApplication.h"
 #include "GameServerTicker.h"
+#include "MasterServerConnection.h"
 #include "RtVar.h"
-
-#define VERSION	"0.1"
+#include "Version.h"
 
 
 
@@ -30,7 +31,7 @@ public:
 private:
 	str GetName() const;
 	str GetVersion() const;
-	Cure::GameTicker* CreateGameTicker() const;
+	Cure::ApplicationTicker* CreateTicker() const;
 	LogListener* CreateConsoleLogListener() const;
 };
 
@@ -79,12 +80,14 @@ str ServerApplication::GetName() const
 
 str ServerApplication::GetVersion() const
 {
-	return _T(VERSION);
+	return _T(PLATFORM_VERSION);
 }
 
-Cure::GameTicker* ServerApplication::CreateGameTicker() const
+Cure::ApplicationTicker* ServerApplication::CreateTicker() const
 {
-	return (new GameServerTicker(mResourceManager, (InteractiveStdioConsoleLogListener*)mConsoleLogger, 2000, 7, 1));
+	GameServerTicker* lTicker = new GameServerTicker(mResourceManager, (InteractiveStdioConsoleLogListener*)mConsoleLogger, 2000, 7, 1);
+	lTicker->SetMasterServerConnection(new MasterServerConnection(_T(MASTER_SERVER_ADDRESS) _T(":") _T(MASTER_SERVER_PORT)));
+	return lTicker;
 }
 
 LogListener* ServerApplication::CreateConsoleLogListener() const
