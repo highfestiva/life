@@ -46,6 +46,8 @@ class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, pub
 public:
 	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameClientMasterTicker();
+
+	MasterServerConnection* GetMasterServerConnection() const;
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 
 	bool CreateSlave();

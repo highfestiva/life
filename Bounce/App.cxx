@@ -649,6 +649,8 @@ bool App::Poll()
 	}
 	if (lOk && !lIsPaused)
 	{
+		mGame->PreEndTick();
+		mGame->WaitPhysicsTick();
 		lOk = mGame->EndTick();
 	}
 	if (lOk && !lIsPaused)

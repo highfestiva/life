@@ -94,6 +94,7 @@ bool GameServerTicker::Tick()
 	if (lOk)
 	{
 		StartPhysicsTick();
+		mGameManager->PreEndTick();
 		WaitPhysicsTick();
 		lOk = mGameManager->EndTick();
 	}

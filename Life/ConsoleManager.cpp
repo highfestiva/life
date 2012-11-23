@@ -35,6 +35,7 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 	{_T("fork"), COMMAND_FORK},
 	{_T("list-active-resources"), COMMAND_LIST_ACTIVE_RESOURCES},
 	{_T("push"), COMMAND_PUSH},
+	{_T("repeat"), COMMAND_REPEAT},
 	{_T("save-system-config-file"), COMMAND_SAVE_SYSTEM_CONFIG_FILE},
 	{_T("save-application-config-file"), COMMAND_SAVE_APPLICATION_CONFIG_FILE},
 	{_T("set-default-config"), COMMAND_SET_DEFAULT_CONFIG},
@@ -520,6 +521,37 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			{
 				mLog.Warningf(_T("usage: %s command [arg [arg ...]]"), pCommand.c_str());
 				mLog.AWarning("Pushes a command to be executed next time the shell is idle.");
+				lResult = 1;
+			}
+		}
+		break;
+		case COMMAND_REPEAT:
+		{
+			bool lUsage = false;
+			if (pParameterVector.size() >= 2)
+			{
+				int lRepeatCount = 0;
+				if (strutil::StringToInt(pParameterVector[0], lRepeatCount))
+				{
+					const str lCommand = strutil::Join(pParameterVector, _T(" "), 1);
+					for (int x = 0; x < lRepeatCount; ++x)
+					{
+						ExecuteCommand(lCommand);
+					}
+				}
+				else
+				{
+					lUsage = true;
+				}
+			}
+			else
+			{
+				lUsage = true;
+			}
+			if (lUsage)
+			{
+				mLog.Warningf(_T("usage: %s <count> command [arg [arg ...]]"), pCommand.c_str());
+				mLog.AWarning("Repeats a command <count> times.");
 				lResult = 1;
 			}
 		}

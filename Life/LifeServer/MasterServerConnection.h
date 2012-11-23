@@ -31,6 +31,7 @@ public:
 
 	MasterServerConnection(const str& pMasterAddress);
 	virtual ~MasterServerConnection();
+	const str& GetMasterAddress() const;
 
 	void SetSocketInfo(Cure::SocketIoHandler* pMuxSocket, double pConnectTimeout);
 

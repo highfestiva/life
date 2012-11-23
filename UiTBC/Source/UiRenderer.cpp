@@ -51,7 +51,7 @@ Renderer::Renderer(Canvas* pScreen) :
 	mLightsEnabled(false),
 	mShadowMode(NO_SHADOWS),
 	mShadowHint(Renderer::SH_VOLUMES_ONLY),
-	mShadowUpdateFrameDelay(0),
+	mShadowUpdateFrameDelay(100),
 	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight())
 {
 }
@@ -970,6 +970,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 			lOk = (lGeometryData->mTA->mTextureID[x] != pTexture);
 			if (!lOk)
 			{
+				assert(lOk);
 				log_atrace("Skipping add of texture to geometry a second time.");
 			}
 		}
@@ -1070,6 +1071,7 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 			LEPRA_DEBUG_CODE(assert(lReferenceCount == lGeometryData->mReferenceSet.size()+1));
 		}
 
+		lGeometryData->mGeometry->SetRendererData(0);
 		delete lGeometryData;
 	}
 }

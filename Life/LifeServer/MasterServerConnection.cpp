@@ -37,6 +37,10 @@ MasterServerConnection::~MasterServerConnection()
 	mConnecter = 0;
 }
 
+const str& MasterServerConnection::GetMasterAddress() const
+{
+	return mMasterServerAddress;
+}
 
 
 void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandler, double pConnectTimeout)

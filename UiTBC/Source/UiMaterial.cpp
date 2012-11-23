@@ -274,6 +274,7 @@ Material::RemoveStatus Material::RemoveGeometry(TBC::GeometryBase* pGeometry)
 	{
 		mGeometryGroupList.remove(lGeomData->mGeometryGroup);
 		delete lGeomData->mGeometryGroup;
+		lGeomData->mGeometryGroup = 0;
 	}
 
 	return lStatus;

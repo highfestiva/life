@@ -96,7 +96,7 @@ bool GameManager::BeginTick()
 
 	{
 		//LEPRA_MEASURE_SCOPE(AcquireTickLock);
-		//GetTickLock()->Acquire();
+		GetTickLock()->Acquire();	// Lock for physics propagation, user input, etc.
 	}
 
 	{
@@ -119,12 +119,14 @@ bool GameManager::BeginTick()
 	return true;
 }
 
+void GameManager::PreEndTick()
+{
+	mIsThreadSafe = true;
+	GetTickLock()->Release();
+}
+
 bool GameManager::EndTick()
 {
-	//LEPRA_MEASURE_SCOPE(EndTick);
-	mIsThreadSafe = true;
-	//GetTickLock()->Release();
-
 	{
 		//LEPRA_MEASURE_SCOPE(NetworkSend);
 

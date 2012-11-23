@@ -32,7 +32,6 @@ namespace TBC
 
 
 ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType pPhysicsType):
-	BoneHierarchy(),
 	mTransformOperation(pTransformOperation),
 	mPhysicsType(pPhysicsType),
 	mGuideMode(GUIDE_EXTERNAL),

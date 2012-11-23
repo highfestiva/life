@@ -128,10 +128,14 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	mResourceManager = 0;
 	mUiManager = 0;
 
-	delete mMasterConnection;
-	mMasterConnection = 0;
+	SetMasterServerConnection(0);
 	delete mFreeNetworkAgent;
 	mFreeNetworkAgent = 0;
+}
+
+MasterServerConnection* GameClientMasterTicker::GetMasterServerConnection() const
+{
+	return mMasterConnection;
 }
 
 void GameClientMasterTicker::SetMasterServerConnection(MasterServerConnection* pConnection)
@@ -286,11 +290,26 @@ bool GameClientMasterTicker::Tick()
 		}
 	}
 
+	if (mServer)
+	{
+		mServer->PreEndTick();
+	}
+
+	{
+		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
+		{
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				lSlave->PreEndTick();
+			}
+		}
+	}
+
 	WaitPhysicsTick();
 
 	if (mServer)
 	{
-		//LEPRA_MEASURE_SCOPE(ServerEndTick);
 		mServer->EndTick();
 	}
 
@@ -566,7 +585,9 @@ GameClientSlaveManager* GameClientMasterTicker::CreateSlaveManager(GameClientMas
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
 	int pSlaveIndex, const PixelRect& pRenderArea)
 {
-	return new GameClientSlaveManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	GameClientSlaveManager* lGameManager = new GameClientSlaveManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	lGameManager->SetMasterServerConnection(new MasterServerConnection(pMaster->GetMasterServerConnection()->GetMasterAddress()));
+	return lGameManager;
 }
 
 GameClientSlaveManager* GameClientMasterTicker::CreateViewer(GameClientMasterTicker* pMaster,

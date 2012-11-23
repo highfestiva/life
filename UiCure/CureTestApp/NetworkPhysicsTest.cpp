@@ -306,6 +306,8 @@ bool NetworkLoginClients()
 	for (int x = 0; lTestOk && x < CLIENT_COUNT; ++x)
 	{
 		Cure::NetworkClient* lClient = new Cure::NetworkClient(Cure::GetSettings());
+		lTestOk = lClient->Open(_T(":11233"));
+		assert(lTestOk);
 		gClient[x].mNetworkAgent = lClient;
 		lContext = _T("client connect+login");
 		wstr lBadPassword(L"feddo");

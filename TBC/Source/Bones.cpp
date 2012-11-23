@@ -72,16 +72,12 @@ BoneHierarchy::BoneHierarchy() :
 }
 
 BoneHierarchy::BoneHierarchy(const BoneHierarchy& pOriginal):
-	mBoneCount(pOriginal.mBoneCount),
+	mBoneCount(0),
 	mRootBoneIndex(pOriginal.mRootBoneIndex),
 	mParent(0),
 	mParentBoneIndex(0)
 {
-	mBone = new Bone[mBoneCount];
-	mOriginalBoneTransformation		= new TransformationF[mBoneCount];
-	mRelativeBoneTransformation		= new TransformationF[mBoneCount];
-	mCurrentBoneTransformation		= new TransformationF[mBoneCount];
-	mCurrentBoneObjectTransformation	= new TransformationF[mBoneCount];
+	SetBoneCount(pOriginal.mBoneCount);
 	for (int x = 0; x < mBoneCount; ++x)
 	{
 		mBone[x] = pOriginal.mBone[x];

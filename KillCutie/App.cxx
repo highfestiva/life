@@ -1078,6 +1078,7 @@ bool App::Poll()
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
 	{
+		mGame->PreEndTick();
 		mGame->WaitPhysicsTick();
 		lOk = mGame->EndTick();
 	}

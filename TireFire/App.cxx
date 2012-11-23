@@ -756,6 +756,8 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
+		mGame->PreEndTick();
+		mGame->WaitPhysicsTick();
 		lOk = mGame->EndTick();
 	}
 	if (lOk)

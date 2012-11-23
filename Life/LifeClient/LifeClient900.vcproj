@@ -754,6 +754,10 @@
 				RelativePath=".\UiServerConsoleManager.h"
 				>
 			</File>
+			<File
+				RelativePath="..\LifeServer\Version.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Master"

@@ -43,6 +43,7 @@ public:
 
 	virtual bool IsPrimaryManager() const;
 	virtual bool BeginTick();
+	virtual void PreEndTick();
 	virtual bool EndTick();
 	virtual bool TickNetworkOutput();
 	Lock* GetTickLock() const;

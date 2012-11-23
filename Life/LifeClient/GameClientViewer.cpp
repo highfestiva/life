@@ -124,18 +124,18 @@ void GameClientViewer::OnRequestJoinServer(const str& pServerAddress)
 
 bool GameClientViewer::UpdateServerList(ServerInfoList& pServerList) const
 {
-	if (mMasterServerConnection)
+	if (mMaster->GetMasterServerConnection())	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
 	{
-		return mMasterServerConnection->UpdateServerList(pServerList);
+		return mMaster->GetMasterServerConnection()->UpdateServerList(pServerList);
 	}
 	return false;
 }
 
 bool GameClientViewer::IsMasterServerConnectError() const
 {
-	if (mMasterServerConnection)
+	if (mMaster->GetMasterServerConnection())	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
 	{
-		return mMasterServerConnection->IsConnectError();
+		return mMaster->GetMasterServerConnection()->IsConnectError();
 	}
 	return true;
 }

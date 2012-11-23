@@ -56,6 +56,7 @@ public:
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~GameClientSlaveManager();
+	void SetMasterServerConnection(MasterServerConnection* pConnection);
 	void LoadSettings();
 	void SetRenderArea(const PixelRect& pRenderArea);
 	bool Open();

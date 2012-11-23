@@ -499,7 +499,7 @@ void GeometryBase::SetIndexDataChanged(bool pChanged)
 
 void GeometryBase::SetRendererData(void* pRendererData)
 {
-	assert(!mRendererData);
+	assert(!mRendererData || !pRendererData);
 	mRendererData = pRendererData;
 }
 

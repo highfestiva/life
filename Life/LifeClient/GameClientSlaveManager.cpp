@@ -59,7 +59,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mCollisionSoundManager(0),
 	mSlaveIndex(pSlaveIndex),
 	mRenderArea(pRenderArea),
-	mMasterServerConnection(0),
+	mMasterServerConnection(),
 	mFirstInitialize(true),
 	mIsReset(false),
 	mIsResetComplete(false),
@@ -107,11 +107,18 @@ GameClientSlaveManager::~GameClientSlaveManager()
 {
 	Close();
 
+	SetMasterServerConnection(0);
 	mMaster = 0;
 
 	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
 
 	GetConsoleManager()->Join();
+}
+
+void GameClientSlaveManager::SetMasterServerConnection(MasterServerConnection* pConnection)
+{
+	delete mMasterServerConnection;
+	mMasterServerConnection = pConnection;
 }
 
 void GameClientSlaveManager::LoadSettings()
@@ -523,6 +530,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		lSendOk = Parent::TickNetworkOutput();
 	}
 
+	if (mMasterServerConnection)
 	{
 		float lConnectTimeout;
 		CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
@@ -588,41 +596,46 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 
 	float lConnectTimeout;
 	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
-	mMasterServerConnection->SetSocketInfo(GetNetworkClient(), lConnectTimeout);
 	str lServerAddress = pServerAddress;
-	bool lIsLocalAddress = false;
+
+	// Open firewall path from server.
+	if (mMasterServerConnection)
 	{
-		SocketAddress lResolvedAddress;
-		if (lResolvedAddress.Resolve(lServerAddress))
+		mMasterServerConnection->SetSocketInfo(GetNetworkClient(), lConnectTimeout);
+		bool lIsLocalAddress = false;
 		{
-			str lIp = lResolvedAddress.GetIP().GetAsString();
-			if (lIp == _T("127.0.0.1") || lIp == _T("::1") || lIp == _T("0:0:0:0:0:0:0:1"))
+			SocketAddress lResolvedAddress;
+			if (lResolvedAddress.Resolve(lServerAddress))
 			{
-				lIsLocalAddress = true;
+				str lIp = lResolvedAddress.GetIP().GetAsString();
+				if (lIp == _T("127.0.0.1") || lIp == _T("::1") || lIp == _T("0:0:0:0:0:0:0:1"))
+				{
+					lIsLocalAddress = true;
+				}
 			}
 		}
-	}
-	if (!mMaster->IsLocalServer() && !lIsLocalAddress)
-	{
-		mMasterServerConnection->RequestOpenFirewall(pServerAddress);
-		const double lTimeout = 1.2;
-		const double lWaitTime = mMasterServerConnection->WaitUntilDone(lTimeout, true);
-		if (lWaitTime < lTimeout)
+		if (!mMaster->IsLocalServer() && !lIsLocalAddress)
 		{
-			if (mMasterServerConnection->GetFirewallOpenStatus() == MasterServerConnection::FIREWALL_OPENED)
+			mMasterServerConnection->RequestOpenFirewall(pServerAddress);
+			const double lTimeout = 1.2;
+			const double lWaitTime = mMasterServerConnection->WaitUntilDone(lTimeout, true);
+			if (lWaitTime < lTimeout)
 			{
-				mLog.AInfo("Master seems to have asked game server to open firewall OK.");
-				Thread::Sleep(lWaitTime+0.02);	// Let's pray. Since we got through in a certain time, perhaps the server will too.
+				if (mMasterServerConnection->GetFirewallOpenStatus() == MasterServerConnection::FIREWALL_OPENED)
+				{
+					mLog.AInfo("Master seems to have asked game server to open firewall OK.");
+					Thread::Sleep(lWaitTime+0.02);	// Let's pray. Since we got through in a certain time, perhaps the server will too.
+				}
+				else if (mMasterServerConnection->GetFirewallOpenStatus() == MasterServerConnection::FIREWALL_USE_LAN)
+				{
+					mLog.AInfo("Master seems to think the game server is on our LAN. Using that instead.");
+					lServerAddress = mMasterServerConnection->GetLanServerConnectAddress();
+				}
 			}
-			else if (mMasterServerConnection->GetFirewallOpenStatus() == MasterServerConnection::FIREWALL_USE_LAN)
+			else
 			{
-				mLog.AInfo("Master seems to think the game server is on our LAN. Using that instead.");
-				lServerAddress = mMasterServerConnection->GetLanServerConnectAddress();
+				mLog.AWarning("Master did not reply in time to if it asked game server to open firewall. Trying anyway.");
 			}
-		}
-		else
-		{
-			mLog.AWarning("Master did not reply in time to if it asked game server to open firewall. Trying anyway.");
 		}
 	}
 

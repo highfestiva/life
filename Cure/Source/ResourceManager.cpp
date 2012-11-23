@@ -600,6 +600,7 @@ void ResourceManager::StopClear()
 		}
 	}
 	ForceFreeCache();
+	ForceFreeCache();	// Free base resources, which may have just had their referencing resourced freed.
 
 	while (!mResourceSafeLookup.empty())
 	{
