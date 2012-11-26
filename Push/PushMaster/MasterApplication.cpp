@@ -5,23 +5,23 @@
 
 
 #include "../../TBC/Include/TBC.h"
-#include "../LifeApplication.h"
-#include "MasterServer.h"
+#include "../../Life/LifeMaster/MasterServer.h"
+#include "../../Life/LifeApplication.h"
+#include "../Push.h"
+#include "../Version.h"
+#include "MasterServerPort.h"
 
-#define VERSION	"0.1"
 
 
-
-namespace Life
+namespace Push
 {
 
 
 
-class MasterApplication: public Application
+class MasterApplication: public Life::Application
 {
+	typedef Life::Application Parent;
 public:
-	typedef Application Parent;
-
 	MasterApplication(const strutil::strvec& pArgumentList);
 	virtual ~MasterApplication();
 	virtual void Init();
@@ -38,17 +38,17 @@ private:
 
 
 
-LEPRA_RUN_APPLICATION(Life::MasterApplication, Lepra::Main);
+LEPRA_RUN_APPLICATION(Push::MasterApplication, Lepra::Main);
 
 
 
-namespace Life
+namespace Push
 {
 
 
 
 MasterApplication::MasterApplication(const strutil::strvec& pArgumentList):
-	Parent(pArgumentList)
+	Parent(_T(PUSH_APPLICATION_NAME), pArgumentList)
 {
 }
 
@@ -72,17 +72,17 @@ void MasterApplication::Init()
 
 Cure::ApplicationTicker* MasterApplication::CreateTicker() const
 {
-	return new MasterServer;
+	return new Life::MasterServer(_T(MASTER_SERVER_PORT));
 }
 
 str MasterApplication::GetName() const
 {
-	return _T("Master");
+	return _T("PushMaster");
 }
 
 str MasterApplication::GetVersion() const
 {
-	return _T(VERSION);
+	return _T(PLATFORM_VERSION);
 }
 
 

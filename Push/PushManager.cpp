@@ -1,0 +1,978 @@
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#include "PushManager.h"
+#include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/NetworkClient.h"
+#include "../Cure/Include/TimeManager.h"
+#include "../Lepra/Include/Time.h"
+#include "../Life/LifeClient/ClientOptions.h"
+#include "../Life/LifeClient/ClientOptions.h"
+#include "../Life/LifeClient/MassObject.h"
+#include "../Life/LifeClient/UiConsole.h"
+#include "../UiCure/Include/UiCollisionSoundManager.h"
+#include "../UiCure/Include/UiExhaustEmitter.h"
+#include "../UiCure/Include/UiGravelEmitter.h"
+#include "../UiCure/Include/UiProps.h"
+#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "Level.h"
+#include "PushConsoleManager.h"
+#include "PushTicker.h"
+#include "RoadSignButton.h"
+#include "RtVar.h"
+#include "Sunlight.h"
+
+
+
+namespace Push
+{
+
+
+
+PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
+	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
+	mCollisionSoundManager(0),
+	mAvatarId(0),
+	mHadAvatar(false),
+	mCamRotateExtra(0),
+	mJustLookingAtAvatars(false),
+	mAvatarInvisibleCount(0),
+	mRoadSignIndex(0),
+	mLevelId(0),
+	mSun(0),
+	mCameraPosition(0, -200, 100),
+	//mCameraFollowVelocity(0, 1, 0),
+	mCameraUp(0, 0, 1),
+	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
+	mCameraTargetXyDistance(20),
+	mCameraMaxSpeed(500),
+	mLoginWindow(0),
+	mEnginePlaybackTime(0)
+{
+	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
+	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
+	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
+	mCollisionSoundManager->AddSound(_T("plastic"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
+	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+
+	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
+
+	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance*3, 0);
+
+	SetConsoleManager(new PushConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
+}
+
+PushManager::~PushManager()
+{
+	Close();
+}
+
+void PushManager::LoadSettings()
+{
+	Parent::LoadSettings();
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+}
+
+void PushManager::SetRenderArea(const PixelRect& pRenderArea)
+{
+	Parent::SetRenderArea(pRenderArea);
+	if (mLoginWindow)
+	{
+		mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
+			mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
+	}
+
+	CURE_RTVAR_GET(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+}
+
+void PushManager::Close()
+{
+	ScopeLock lLock(GetTickLock());
+	ClearRoadSigns();
+	Parent::Close();
+	CloseLoginGui();
+}
+
+void PushManager::SetIsQuitting()
+{
+	CloseLoginGui();
+	((PushConsoleManager*)GetConsoleManager())->GetUiConsole()->SetVisible(false);
+	SetRoadSignsVisible(false);
+
+	Parent::SetIsQuitting();
+}
+
+void PushManager::SetFade(float pFadeAmount)
+{
+	mCameraMaxSpeed = 100000.0f;
+	float lBaseDistance;
+	CURE_RTVAR_GET(lBaseDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	mCameraTargetXyDistance = lBaseDistance + pFadeAmount*400.0f;
+}
+
+
+
+bool PushManager::Paint()
+{
+#ifdef LIFE_DEMO
+	const double lTime = mDemoTime.QueryTimeDiff();
+	if ((mSlaveIndex >= 2 || (mSlaveIndex == 1 && lTime > 10*60))
+		&& !IsQuitting())
+	{
+		const UiTbc::FontManager::FontId lOldFontId = SetFontHeight(36.0);
+		str lDemoText = strutil::Format(
+			_T(" This is a free demo.\n")
+			_T(" Buy the full version\n")
+			_T("to loose this annoying\n")
+			_T("  text for player %i."), mSlaveIndex+1);
+		if ((int)lTime % 3*60 >= 3*60-2)
+		{
+			lDemoText =
+				_T("     ])0n7 b3 B1FF\n")
+				_T("g!t pwn4ge & teh kekeke\n")
+				_T("     !3UYZORZ n0vv\n");
+		}
+		const int lTextWidth = mUiManager->GetFontManager()->GetStringWidth(lDemoText);
+		const int lTextHeight = mUiManager->GetFontManager()->GetLineHeight()*4;
+		const int lOffsetX = (int)(cos(lTime*4.3)*15);
+		const int lOffsetY = (int)(sin(lTime*4.1)*15);
+		mUiManager->GetPainter()->SetColor(Color(255, (uint8)(50*sin(lTime)+50), (uint8)(127*sin(lTime*0.9)+127), 200), 0);
+		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
+		mUiManager->GetPainter()->PrintText(lDemoText, mRenderArea.GetCenterX()-lTextWidth/2+lOffsetX, mRenderArea.GetCenterY()-lTextHeight/2+lOffsetY);
+		mUiManager->GetFontManager()->SetActiveFont(lOldFontId);
+	}
+#endif // Demo
+	return true;
+}
+
+
+
+void PushManager::RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken)
+{
+	ScopeLock lLock(GetTickLock());
+	CloseLoginGui();
+	Parent::RequestLogin(pServerAddress, pLoginToken);
+}
+
+void PushManager::OnLoginSuccess()
+{
+	ClearRoadSigns();
+}
+
+
+
+void PushManager::SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId)
+{
+	DropAvatar();
+
+	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), pAvatarId.c_str()));
+	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
+		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(pAvatarId), lPacket);
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+
+	SetRoadSignsVisible(false);
+	mAvatarSelectTime.ClearTimeDiff();
+}
+
+void PushManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet)
+{
+	if (mAvatarId)
+	{
+		Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+		if (mHadAvatar && !lAvatar)
+		{
+			DropAvatar();
+		}
+		else if (lAvatar)
+		{
+			mHadAvatar = true;
+		}
+	}
+
+	Parent::AddLocalObjects(pLocalObjectSet);
+}
+
+bool PushManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
+{
+	return (pPosition.GetDistanceSquared(mCameraPosition) <= pDistance*pDistance);
+}
+
+Cure::GameObjectId PushManager::GetAvatarInstanceId() const
+{
+	return mAvatarId;
+}
+
+
+
+void PushManager::OnInput(UiLepra::InputElement* pElement)
+{
+	Parent::OnInput(pElement);
+
+	if (mAvatarSelectTime.QueryTimeDiff() > 1.0)
+	{
+		if (pElement->GetParentDevice() == mUiManager->GetInputManager()->GetMouse())
+		{
+			PixelCoord lPosition = mUiManager->GetMouseDisplayPosition();
+			if (mRenderArea.IsInside(lPosition.x, lPosition.y))
+			{
+				SetRoadSignsVisible(true);
+				mJustLookingAtAvatars = true;
+				mAvatarMightSelectTime.PopTimeDiff();
+			}
+		}
+	}
+	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiff() > 2.0)
+	{
+		SetRoadSignsVisible(false);
+	}
+}
+
+
+
+bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle)
+{
+	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
+	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+	if (lObject)
+	{
+		return SetAvatarEnginePower(lObject, pAspect, pPower, pAngle);
+	}
+	return false;
+}
+
+
+
+Cure::RuntimeVariableScope* PushManager::GetVariableScope() const
+{
+	return (Parent::GetVariableScope());
+}
+
+
+
+bool PushManager::Reset()	// Run when disconnected. Removes all objects and displays login GUI.
+{
+	ScopeLock lLock(GetTickLock());
+	ClearRoadSigns();
+	bool lOk = Parent::Reset();
+	if (lOk)
+	{
+		CreateLoginView();
+	}
+	return (lOk);
+}
+
+void PushManager::CreateLoginView()
+{
+	if (!mLoginWindow && !GetNetworkClient()->IsActive())
+	{
+		// If first attempt (i.e. no connection problems) just skip interactivity.
+		if (mDisconnectReason.empty())
+		{
+			str lServerName;
+			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+			if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
+			{
+				lServerName = lServerName.substr(7);
+			}
+			const str lDefaultUserName = strutil::Format(_T("User%u"), mSlaveIndex);
+			str lUserName;
+			CURE_RTVAR_TRYGET(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
+                        wstr lReadablePassword = L"CarPassword";
+                        const Cure::MangledPassword lPassword(lReadablePassword);
+			const Cure::LoginId lLoginToken(wstrutil::Encode(lUserName), lPassword);
+			RequestLogin(lServerName, lLoginToken);
+		}
+		else
+		{
+			mLoginWindow = new LoginView(this, mDisconnectReason);
+			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
+			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow, 0, 0, 0);
+			mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
+				mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
+			mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
+		}
+	}
+}
+
+bool PushManager::InitializeTerrain()
+{
+	mSun = 0;
+	mCloudArray.clear();
+
+	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
+	UiCure::CppContextObject* lLevel = new Level(GetResourceManager(), _T("level_01"), mUiManager, lGravelParticleEmitter);
+	AddContextObject(lLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
+	bool lOk = (lLevel != 0);
+	assert(lOk);
+	if (lOk)
+	{
+		lLevel->DisableRootShadow();
+		lLevel->SetAllowNetworkLogic(false);
+		lLevel->StartLoading();
+		mSun = new UiCure::Props(GetResourceManager(), _T("sun"), mUiManager);
+		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mSun != 0);
+		assert(lOk);
+		if (lOk)
+		{
+			mSun->StartLoading();
+		}
+	}
+	const int lPrimeCloudCount = 11;	// TRICKY: must be prime or clouds start moving in sync.
+	for (int x = 0; lOk && x < lPrimeCloudCount; ++x)
+	{
+		Cure::ContextObject* lCloud = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+		AddContextObject(lCloud, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lCloud->StartLoading();
+		mCloudArray.push_back(lCloud);
+	}
+	mMassObjectArray.clear();
+	return (lOk);
+}
+
+void PushManager::CloseLoginGui()
+{
+	if (mLoginWindow)
+	{
+		ScopeLock lLock(GetTickLock());
+		mUiManager->GetDesktopWindow()->RemoveChild(mLoginWindow, 0);
+		delete (mLoginWindow);
+		mLoginWindow = 0;
+	}
+}
+
+void PushManager::ClearRoadSigns()
+{
+	ScopeLock lLock(GetTickLock());
+
+	mRoadSignIndex = 0;
+	RoadSignMap::iterator x = mRoadSignMap.begin();
+	for (; x != mRoadSignMap.end(); ++x)
+	{
+		GetContext()->DeleteObject(x->second->GetInstanceId());
+	}
+	mRoadSignMap.clear();
+}
+
+void PushManager::SetRoadSignsVisible(bool pVisible)
+{
+	RoadSignMap::iterator x = mRoadSignMap.begin();
+	for (; x != mRoadSignMap.end(); ++x)
+	{
+		x->second->SetIsMovingIn(pVisible);
+	}
+}
+
+
+
+void PushManager::TickInput()
+{
+	TickNetworkInput();
+	TickUiInput();
+}
+
+
+
+void PushManager::TickUiInput()
+{
+	SteeringPlaybackMode lPlaybackMode;
+	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
+	if (lPlaybackMode != PLAYBACK_PLAY && lPhysicsStepCount > 0 && mAllowMovementInput)
+	{
+		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+		if (lObject)
+		{
+			mAvatarMightSelectTime.UpdateTimer();
+
+			QuerySetChildishness(lObject);
+
+			const Life::Options::Steering& s = mOptions.GetSteeringControl();
+			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
+#define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
+			const float lForward = S(FORWARD);
+			const float lBack = S(BACKWARD);
+			const float lBreakAndBack = S(BREAKANDBACK);
+			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
+			SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
+			float lPowerLR = S(RIGHT)-S(LEFT);
+			SetAvatarEnginePower(lObject, 1, lPowerLR, mCameraOrientation.x);
+			float lPower = S(HANDBREAK) - std::max(S(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
+			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
+				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
+			{
+				// Someone is apparently trying to stop/break, but no engine configured for breaking.
+				// Just apply it as a reverse motion.
+				lPowerFwdRev = lForward - lBreakAndBack;
+				SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
+			}
+			lPower = S(UP)-S(DOWN);
+			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
+			lPower = S(FORWARD3D) - S(BACKWARD3D);
+			SetAvatarEnginePower(lObject, 4, lPower, mCameraOrientation.x);
+			lPower = S(LEFT3D) - S(RIGHT3D);
+			SetAvatarEnginePower(lObject, 5, lPower, mCameraOrientation.x);
+			lPower = S(UP3D) - S(DOWN3D);
+			SetAvatarEnginePower(lObject, 6, lPower, mCameraOrientation.x);
+			const float lSteeringChange = mLastSteering-s;
+			if (lSteeringChange > 0.5f)
+			{
+				mInputExpireAlarm.Set();
+			}
+			else if (!Math::IsEpsEqual(lSteeringChange, 0.0f, 0.01f))
+			{
+				mInputExpireAlarm.Push(0.1f);
+			}
+			mLastSteering = s;
+
+			const float lScale = 50.0f * GetTimeManager()->GetAffordedPhysicsTotalTime();
+			const Life::Options::CamControl& c = mOptions.GetCamControl();
+#define C(dir) c.mControl[Life::Options::CamControl::CAMDIR_##dir]
+			lPower = C(UP)-C(DOWN);
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, -5.0, 30.0);
+			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
+			lPower = C(BACKWARD)-C(FORWARD);
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 3.0, 100.0);
+
+			mAvatarInvisibleCount = 0;
+		}
+		else if (++mAvatarInvisibleCount > 10)
+		{
+			mJustLookingAtAvatars = false;
+			SetRoadSignsVisible(true);
+			mAvatarInvisibleCount = -10000;
+		}
+	}
+}
+
+bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle)
+{
+	bool lSet = pAvatar->SetEnginePower(pAspect, pPower, pAngle);
+
+	SteeringPlaybackMode lPlaybackMode;
+	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	if (lPlaybackMode == PLAYBACK_RECORD)
+	{
+		if (!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mPower, pPower)
+			//|| !Math::IsEpsEqual(mEnginePowerShadow[pAspect].mAngle, pAngle, 0.3f)
+			)
+		{
+			mEnginePowerShadow[pAspect].mPower = pPower;
+			mEnginePowerShadow[pAspect].mAngle = pAngle;
+			if (!mEnginePlaybackFile.IsOpen())
+			{
+				mEnginePlaybackFile.Open(_T("Data/Steering.rec"), DiskFile::MODE_TEXT_WRITE);
+				wstr lComment = wstrutil::Format(L"// Recording %s at %s.\n", pAvatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
+				mEnginePlaybackFile.WriteString(lComment);
+				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 2\n"));
+			}
+			const float lTime = GetTimeManager()->GetAbsoluteTime();
+			if (lTime != mEnginePlaybackTime)
+			{
+				wstr lCommand = wstrutil::Format(L"sleep %g\n", Cure::TimeManager::GetAbsoluteTimeDiff(lTime, mEnginePlaybackTime));
+				mEnginePlaybackFile.WriteString(lCommand);
+				mEnginePlaybackTime = lTime;
+			}
+			wstr lCommand = wstrutil::Format(L"set-avatar-engine-power %u %g %g\n", pAspect, pPower, pAngle);
+			mEnginePlaybackFile.WriteString(lCommand);
+		}
+	}
+	else if (lPlaybackMode == PLAYBACK_NONE)
+	{
+		if (mEnginePlaybackFile.IsOpen())
+		{
+			if (mEnginePlaybackFile.IsInMode(File::WRITE_MODE))
+			{
+				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 0\n"));
+			}
+			mEnginePlaybackFile.Close();
+		}
+		mEnginePlaybackTime = GetTimeManager()->GetAbsoluteTime();
+		mEnginePowerShadow[pAspect].mPower = 0;
+		mEnginePowerShadow[pAspect].mAngle = 0;
+	}
+
+	return lSet;
+}
+
+void PushManager::TickUiUpdate()
+{
+	((PushConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
+
+	mCollisionSoundManager->Tick(mCameraPosition);
+
+	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
+	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
+	if (lPhysicsTime < 1e-5)
+	{
+		return;
+	}
+
+	// TODO: remove camera hack (camera position should be context object controlled).
+	mCameraPreviousPosition = mCameraPosition;
+	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+	Vector3DF lAvatarPosition = mCameraPivotPosition;
+	float lCameraPivotSpeed = 0;
+	if (lObject)
+	{
+		// Target position is <cam> distance from the avatar along a straight line
+		// (in the XY plane) to where the camera currently is.
+		lAvatarPosition = lObject->GetPosition();
+		mCameraPivotPosition = lAvatarPosition;
+		Vector3DF lAvatarVelocity = lObject->GetVelocity();
+		lAvatarVelocity.z *= 0.2f;	// Don't take very much action on the up/down speed, that has it's own algo.
+		mCameraPivotVelocity = Math::Lerp(mCameraPivotVelocity, lAvatarVelocity, 0.5f*lPhysicsTime/0.1f);
+		mCameraPivotPosition += mCameraPivotVelocity * 0.6f;	// Look to where the avatar will be in a while.
+		lCameraPivotSpeed = mCameraPivotVelocity.GetLength();
+
+		UpdateMassObjects(mCameraPivotPosition);
+	}
+	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
+	Vector3DF lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
+	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetLength();
+	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + lCameraPivotSpeed*0.6f;
+	lTargetCameraPosition = lPivotXyPosition + lTargetCameraPosition*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
+	float lCamHeight;
+	CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	lTargetCameraPosition.z = mCameraPivotPosition.z + lCamHeight;
+
+	if (lObject)
+	{
+		/* Almost tried out "stay behind velocity". Was too jerky, since velocity varies too much.
+		Vector3DF lVelocity = lObject->GetVelocity();
+		mCameraFollowVelocity = lVelocity;
+		float lSpeed = lVelocity.GetLength();
+		if (lSpeed > 0.1f)
+		{
+			lVelocity.Normalize();
+			mCameraFollowVelocity = Math::Lerp(mCameraFollowVelocity, lVelocity, 0.1f).GetNormalized();
+		}
+		// Project previous "camera up" onto plane orthogonal to the velocity to get new "up".
+		Vector3DF lCameraUp = mCameraUp.ProjectOntoPlane(mCameraFollowVelocity) + Vector3DF(0, 0, 0.01f);
+		if (lCameraUp.GetLengthSquared() > 0.1f)
+		{
+			mCameraUp = lCameraUp;
+		}
+		lSpeed *= 0.05f;
+		lSpeed = (lSpeed > 0.4f)? 0.4f : lSpeed;
+		mCameraUp.Normalize();
+		lTargetCameraPosition = Math::Lerp(lTargetCameraPosition, mCameraPivotPosition - 
+			mCameraFollowVelocity * mCameraTargetXyDistance +
+			mCameraUp * mCameraTargetXyDistance * 0.3f, 0.0f);*/
+
+		/*// Temporary: changed to "cam stay behind" mode.
+		lTargetCameraPosition = lObject->GetOrientation() *
+			Vector3DF(0, -mCameraTargetXyDistance, mCameraTargetXyDistance/4) +
+			mCameraPivotPosition;*/
+	}
+
+	lTargetCameraPosition.x = Math::Clamp(lTargetCameraPosition.x, -1000.0f, 1000.0f);
+	lTargetCameraPosition.y = Math::Clamp(lTargetCameraPosition.y, -1000.0f, 1000.0f);
+	lTargetCameraPosition.z = Math::Clamp(lTargetCameraPosition.z, -20.0f, 200.0f);
+
+	// Now that we've settled where we should be, it's time to check where we actually can see our avatar.
+	// TODO: currently only checks against terrain. Add a ray to world, that we can use for this kinda thing.
+	Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
+	if (lLevel)
+	{
+		const float lCameraAboveGround = 0.3f;
+		lTargetCameraPosition.z -= lCameraAboveGround;
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		Vector3DF lCollisionPoint;
+		float lStepSize = (lTargetCameraPosition - lAvatarPosition).GetLength() * 0.5f;
+		for (int y = 0; y < 5; ++y)
+		{
+			int x;
+			for (x = 0; x < 2; ++x)
+			{
+				const Vector3DF lRay = lTargetCameraPosition - lAvatarPosition;
+				const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
+					lAvatarPosition, lRay, lRay.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
+				if (lIsCollision)
+				{
+					lTargetCameraPosition.z += lStepSize;
+				}
+				else
+				{
+					if (x != 0)
+					{
+						lTargetCameraPosition.z -= lStepSize;
+					}
+					break;
+				}
+			}
+			if (x == 0 && y == 0)
+			{
+				break;
+			}
+			lStepSize *= 1/3.0f;
+			//lTargetCameraPosition.z += lStepSize;
+		}
+		lTargetCameraPosition.z += lCameraAboveGround;
+	}
+
+	const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
+	float lMovingAveragePart = 0.5f*lPhysicsTime/lHalfDistanceTime;
+	if (lMovingAveragePart > 0.8f)
+	{
+		lMovingAveragePart = 0.8f;
+	}
+	//lMovingAveragePart = 1;
+	const Vector3DF lNewPosition = Math::Lerp<Vector3DF, float>(mCameraPosition,
+		lTargetCameraPosition, lMovingAveragePart);
+	const Vector3DF lDirection = lNewPosition-mCameraPosition;
+	const float lDistance = lDirection.GetLength();
+	if (lDistance > mCameraMaxSpeed*lPhysicsTime)
+	{
+		mCameraPosition += lDirection*(mCameraMaxSpeed*lPhysicsTime/lDistance);
+	}
+	else
+	{
+		mCameraPosition = lNewPosition;
+	}
+	if (lNewPosition.z > mCameraPosition.z)	// Dolly cam up pretty quick to avoid looking "through the ground."
+	{
+		mCameraPosition.z = Math::Lerp(mCameraPosition.z, lNewPosition.z, lHalfDistanceTime);
+	}
+
+	// "Roll" camera towards avatar.
+	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
+	const float lNewTargetCameraDistance = mCameraPosition.GetDistance(mCameraPivotPosition);
+	Vector3DF lTargetCameraOrientation;
+	lTargetCameraOrientation.Set(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2,
+		::acos((mCameraPivotPosition.z-mCameraPosition.z)/lNewTargetCameraDistance), 0);
+	if (lPivotXyPosition.y-mCameraPosition.y < 0)
+	{
+		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
+	}
+	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x)*3;
+	lYawChange = (lYawChange < -PIF*3/7)? -PIF*3/7 : lYawChange;
+	lYawChange = (lYawChange > PIF*3/7)? PIF*3/7 : lYawChange;
+	lTargetCameraOrientation.z = -lYawChange;
+	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
+	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
+	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
+
+	float lRotationFactor;
+	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	lRotationFactor += mCamRotateExtra;
+	if (lRotationFactor)
+	{
+		TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
+		lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), lRotationFactor * lPhysicsTime);
+		mCameraPosition = lTransform.GetPosition();
+		float lTheta;
+		float lPhi;
+		float lGimbal;
+		lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
+		mCameraOrientation.x = lTheta+PIF/2;
+		mCameraOrientation.y = PIF/2-lPhi;
+		mCameraOrientation.z = lGimbal;
+	}
+}
+
+bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
+{
+	bool lOk = true;
+
+	const Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
+	if (lLevel && mMassObjectArray.empty())
+	{
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		if (lOk)
+		{
+			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
+			mMassObjectArray.push_back(lMassObjectId);
+			Cure::ContextObject* lFlowers = new Life::MassObject(GetResourceManager(), _T("flower"), mUiManager, lTerrainBodyId, 600, 170);
+			AddContextObject(lFlowers, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
+			lFlowers->StartLoading();
+		}
+		if (lOk)
+		{
+			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
+			mMassObjectArray.push_back(lMassObjectId);
+			Cure::ContextObject* lBushes = new Life::MassObject(GetResourceManager(), _T("bush_01"), mUiManager, lTerrainBodyId, 150, 290);
+			AddContextObject(lBushes, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
+			lBushes->StartLoading();
+		}
+	}
+
+	ObjectArray::const_iterator x = mMassObjectArray.begin();
+	for (; x != mMassObjectArray.end(); ++x)
+	{
+		Life::MassObject* lObject = (Life::MassObject*)GetContext()->GetObject(*x, true);
+		assert(lObject);
+		lObject->SetRootPosition(pPosition);
+	}
+	return lOk;
+}
+
+void PushManager::SetLocalRender(bool pRender)
+{
+	if (pRender)
+	{
+		// Update light and sun according to this slave's camera.
+		Sunlight* lSunlight = ((PushTicker*)GetMaster())->GetSunlight();
+		const float lSunDistance = 1700;
+		mSun->SetRootPosition(mCameraPosition + lSunDistance * lSunlight->GetDirection());
+
+		const float lCloudDistance = 600;
+		size_t x = 0;
+		for (; x < mCloudArray.size(); ++x)
+		{
+			Cure::ContextObject* lCloud = mCloudArray[x];
+			float lTod = lSunlight->GetTimeOfDay();
+			lTod += x / (float)mCloudArray.size();
+			lTod *= 2 * PIF;
+			const float x = sin(lTod*2) * lCloudDistance;
+			const float y = cos(lTod) * lCloudDistance;
+			const float z = cos(lTod*3) * lCloudDistance * 0.2f + lCloudDistance * 0.4f;
+			lCloud->SetRootPosition(Vector3DF(x, y, z));
+		}
+
+		bool lMass;
+		CURE_RTVAR_GET(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+		SetMassRender(lMass);
+	}
+	else
+	{
+		SetMassRender(false);
+	}
+}
+
+void PushManager::SetMassRender(bool pRender)
+{
+	ObjectArray::const_iterator x = mMassObjectArray.begin();
+	for (; x != mMassObjectArray.end(); ++x)
+	{
+		Life::MassObject* lObject = (Life::MassObject*)GetContext()->GetObject(*x);
+		if (lObject)
+		{
+			lObject->SetRender(pRender);
+		}
+	}
+}
+
+
+
+void PushManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
+{
+	Parent::ProcessNetworkInputMessage(pMessage);
+
+	Cure::MessageType lType = pMessage->GetType();
+	switch (lType)
+	{
+		case Cure::MESSAGE_TYPE_DELETE_OBJECT:
+		{
+			Cure::MessageDeleteObject* lMessageDeleteObject = (Cure::MessageDeleteObject*)pMessage;
+			Cure::GameObjectId lId = lMessageDeleteObject->GetObjectId();
+			if (lId == mAvatarId)
+			{
+				DropAvatar();
+			}
+		}
+		break;
+	}
+}
+
+void PushManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage)
+{
+	switch (pMessage->GetInfo())
+	{
+		case Cure::MessageStatus::INFO_AVATAR:
+		{
+			wstr lAvatarName;
+			pMessage->GetMessageString(lAvatarName);
+			Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
+			log_adebug("Status: INFO_AVATAR...");
+			str lTextureId = strutil::Format(_T("road_sign_%s.png"), lAvatarId.c_str());
+			if (!GetResourceManager()->QueryFileExists(lTextureId))
+			{
+				lTextureId = _T("road_sign_car.png");
+			}
+			RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(),
+				mUiManager, lAvatarId, _T("road_sign_01"), lTextureId, RoadSignButton::SHAPE_ROUND);
+			GetContext()->AddLocalObject(lButton);
+			const int SIGN_COUNT_X = 5;
+			const int SIGN_COUNT_Y = 5;
+			const float lDeltaX = 1 / (float)SIGN_COUNT_X;
+			const float lDeltaY = 1 / (float)SIGN_COUNT_Y;
+			const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX - 0.5f + 0.5f*lDeltaX;
+			const float y = (mRoadSignIndex / SIGN_COUNT_X) * lDeltaY - 0.5f + 0.5f*lDeltaY;
+			++mRoadSignIndex;
+			lButton->SetTrajectory(Vector2DF(x, y), 8);
+			lButton->GetButton().SetOnClick(PushManager, OnAvatarSelect);
+			mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
+			lButton->StartLoading();
+			mJustLookingAtAvatars = false;
+		}
+		return;
+	}
+	Parent::ProcessNetworkStatusMessage(pMessage);
+}
+
+void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat)
+{
+	switch (pType)
+	{
+		case Cure::MessageNumber::INFO_AVATAR:
+		{
+			mAvatarId = pInteger;
+			mOwnedObjectList.insert(mAvatarId);
+			mLog.Infof(_T("Got control over avatar with ID %i."), pInteger);
+		}
+		return;
+	}
+	Parent::ProcessNumber(pType, pInteger, pFloat);
+}
+
+Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
+{
+	Cure::CppContextObject* lObject;
+	if (pClassId == _T("stone") || pClassId == _T("cube"))	// TODO: remove hard-coding?
+	{
+		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
+	}
+	else
+	{
+		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 3, 0.6f, 2.0f));
+		lObject = lMachine;
+	}
+	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
+	return (lObject);
+}
+
+void PushManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
+{
+	if (pOk)
+	{
+		if (pObject->GetInstanceId() == mAvatarId)
+		{
+			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
+		}
+		else
+		{
+			log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
+		}
+	}
+	else
+	{
+		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		GetContext()->PostKillObject(pObject->GetInstanceId());
+	}
+}
+
+void PushManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
+	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
+{
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
+
+	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	if (!lObject1Dynamic || !lObject2Dynamic)
+	{
+		return;
+	}
+
+	if (IsOwned(pObject1->GetInstanceId()))
+	{
+		if (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 2.0f)
+		{
+			pObject1->QueryResendTime(0, false);
+		}
+		mCollisionExpireAlarm.SetIfNotSet();
+	}
+	else if (pObject2->GetInstanceId() == mAvatarId &&
+		pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
+	{
+		if (!GetMaster()->IsLocalObject(pObject1->GetInstanceId()) &&
+			pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 0.5f)
+		{
+			if (pObject1->QueryResendTime(1.0, false))
+			{
+				GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
+					Cure::MessageNumber::INFO_REQUEST_LOAN, pObject1->GetInstanceId(), 0, 0);
+				log_adebug("Sending loan request to server.");
+			}
+		}
+	}
+}
+
+
+
+void PushManager::CancelLogin()
+{
+	CloseLoginGui();
+	SetIsQuitting();
+}
+
+void PushManager::OnAvatarSelect(UiTbc::Button* pButton)
+{
+	Cure::UserAccount::AvatarId lAvatarId = pButton->GetName();
+	SelectAvatar(lAvatarId);
+}
+
+void PushManager::DropAvatar()
+{
+	mOwnedObjectList.erase(mAvatarId);
+	mAvatarId = 0;
+	mHadAvatar = false;
+}
+
+
+
+void PushManager::UpdateCameraPosition(bool pUpdateMicPosition)
+{
+	TransformationF lCameraTransform(GetCameraQuaternion(), mCameraPosition);
+	mUiManager->SetCameraPosition(lCameraTransform);
+	if (pUpdateMicPosition)
+	{
+		const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
+		if (lFrameTime > 1e-4)
+		{
+			Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+			const float lMicrophoneMaxVelocity = 100.0f;
+			if (lVelocity.GetLength() > lMicrophoneMaxVelocity)
+			{
+				lVelocity.Normalize(lMicrophoneMaxVelocity);
+			}
+			const float lLerpTime = Math::GetIterateLerpTime(0.9f, lFrameTime);
+			mMicrophoneSpeed = Math::Lerp(mMicrophoneSpeed, lVelocity, lLerpTime);
+			mUiManager->SetMicrophonePosition(lCameraTransform, mMicrophoneSpeed);
+		}
+	}
+}
+
+QuaternionF PushManager::GetCameraQuaternion() const
+{
+	const float lTheta = mCameraOrientation.x;
+	const float lPhi = mCameraOrientation.y;
+	const float lGimbal = mCameraOrientation.z;
+	QuaternionF lOrientation;
+	lOrientation.SetEulerAngles(lTheta-PIF/2, PIF/2-lPhi, lGimbal);
+	return (lOrientation);
+}
+
+
+
+LOG_CLASS_DEFINE(GAME, PushManager);
+
+
+
+}

@@ -9,7 +9,6 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../ServerInfo.h"
 #include "MasterServerNetworkParser.h"
-#include "MasterServerPort.h"
 
 
 
@@ -18,8 +17,9 @@ namespace Life
 
 
 
-MasterServer::MasterServer():
-	mMuxSocket(0)
+MasterServer::MasterServer(const str& pPort):
+	mMuxSocket(0),
+	mPort(pPort)
 {
 }
 
@@ -35,11 +35,11 @@ MasterServer::~MasterServer()
 bool MasterServer::Initialize()
 {
 	SocketAddress lAddress;
-	str lAcceptAddress = _T("0.0.0.0:") _T(MASTER_SERVER_PORT);
+	str lAcceptAddress = _T("0.0.0.0:") + mPort;
 	if (!lAddress.Resolve(lAcceptAddress))
 	{
 		mLog.Warningf(_T("Could not resolve address '%s'."), lAcceptAddress.c_str());
-		lAcceptAddress = _T(":") _T(MASTER_SERVER_PORT);
+		lAcceptAddress = _T(":") + mPort;
 		if (!lAddress.Resolve(lAcceptAddress))
 		{
 			mLog.Errorf(_T("Could not resolve address '%s'!"), lAcceptAddress.c_str());

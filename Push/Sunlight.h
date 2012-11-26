@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include "../../Lepra/Include/HiResTimer.h"
-#include "../../UiTBC/Include/UiRenderer.h"
-#include "../Life.h"
+#include "../Lepra/Include/HiResTimer.h"
+#include "../UiTBC/Include/UiRenderer.h"
+#include "Push.h"
 
 
 
@@ -19,7 +19,7 @@ class GameUiManager;
 
 
 
-namespace Life
+namespace Push
 {
 
 

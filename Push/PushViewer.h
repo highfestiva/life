@@ -6,26 +6,26 @@
 
 #pragma once
 
-#include "GameClientSlaveManager.h"
+#include "PushManager.h"
 #include "RoadSignButton.h"
 #include "ServerListView.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 
 
 // This is just a simple viewer that shows a background for menus and shows off in demo mode.
-class GameClientViewer: public GameClientSlaveManager, public ServerSelectObserver
+class PushViewer: public PushManager, public ServerSelectObserver
 {
-	typedef GameClientSlaveManager Parent;
+	typedef PushManager Parent;
 public:
-	GameClientViewer(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+	PushViewer(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
-	virtual ~GameClientViewer();
+	virtual ~PushViewer();
 
 private:
 	virtual void TickUiInput();
@@ -35,7 +35,7 @@ private:
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	virtual void OnCancelJoinServer();
 	virtual void OnRequestJoinServer(const str& pServerAddress);
-	virtual bool UpdateServerList(ServerInfoList& pServerList) const;
+	virtual bool UpdateServerList(Life::ServerInfoList& pServerList) const;
 	virtual bool IsMasterServerConnectError() const;
 	void CloseJoinServerView();
 	RoadSignButton* CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape);

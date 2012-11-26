@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="LifeClient"
-	ProjectGUID="{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}"
-	RootNamespace="Life"
+	Name="Push"
+	ProjectGUID="{5EC8E38C-35C2-11E2-A98D-0019213B7B87}"
+	RootNamespace="Push"
 	Keyword="ManagedCProj"
 	TargetFrameworkVersion="0"
 	>
@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
@@ -43,8 +43,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport"
+				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
@@ -64,10 +64,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="Netapi32.lib"
+				OutputFile="$(OutDir)\Push.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames="msvcrtd.lib"
+				GenerateDebugInformation="true"
+				AssemblyDebug="1"
+				GenerateMapFile="true"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -77,6 +89,9 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -86,7 +101,7 @@
 			Name="Final|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
@@ -110,7 +125,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -130,10 +145,19 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="Netapi32.lib"
+				OutputFile="$(OutDir)\Push.exe"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames=""
+				GenerateMapFile="true"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -145,6 +169,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -152,7 +179,7 @@
 			Name="Release Candidate|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
@@ -177,8 +204,8 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport"
+				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
@@ -197,10 +224,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="Netapi32.lib"
+				OutputFile="$(OutDir)\Push.exe"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -212,6 +249,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -219,7 +259,7 @@
 			Name="Unicode Debug|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
@@ -242,8 +282,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport"
+				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
@@ -263,10 +303,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="Netapi32.lib"
+				OutputFile="$(OutDir)\Push.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames="msvcrtd.lib"
+				GenerateDebugInformation="true"
+				AssemblyDebug="1"
+				GenerateMapFile="true"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -278,6 +330,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -285,7 +340,7 @@
 			Name="Unicode Final|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
@@ -310,7 +365,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -330,10 +385,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="Netapi32.lib"
+				OutputFile="$(OutDir)\Push.exe"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -345,6 +410,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -352,7 +420,7 @@
 			Name="Unicode Release Candidate|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
@@ -377,8 +445,8 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport"
+				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
@@ -397,10 +465,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="Netapi32.lib"
+				OutputFile="$(OutDir)\Push.exe"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -410,6 +488,9 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -437,26 +518,58 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			UniqueIdentifier="{C734F7F1-C7A5-4376-A066-2A32FFD752A2}"
 			>
 			<File
-				RelativePath=".\ClientConsoleManager.cpp"
+				RelativePath=".\Level.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ClientOptionsManager.cpp"
+				RelativePath=".\LoginView.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GameClientMasterTicker.cpp"
+				RelativePath=".\Push.cxx"
 				>
 			</File>
 			<File
-				RelativePath=".\GameClientSlaveManager.cpp"
+				RelativePath=".\Icons\Push.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\OptionsManager.cpp"
+				RelativePath=".\Push.mm"
+				>
+			</File>
+			<File
+				RelativePath=".\Push.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\PushConsoleManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushDemo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushTicker.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushViewer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RoadSignButton.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerListView.cpp"
 				>
 			</File>
 			<File
@@ -464,41 +577,49 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UiConsole.cpp"
+				RelativePath=".\View.cpp"
 				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
 			<File
-				RelativePath=".\ClientConsoleManager.h"
+				RelativePath=".\Level.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ClientOptions.h"
+				RelativePath=".\LoginView.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ClientOptionsManager.h"
+				RelativePath=".\Push.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GameClientMasterTicker.h"
+				RelativePath=".\PushConsoleManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GameClientSlaveManager.h"
+				RelativePath=".\PushDemo.h"
 				>
 			</File>
 			<File
-				RelativePath=".\InputObserver.h"
+				RelativePath=".\PushManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\OptionsManager.h"
+				RelativePath=".\PushTicker.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushViewer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RoadSignButton.h"
 				>
 			</File>
 			<File
@@ -506,43 +627,115 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ServerListView.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Sunlight.h"
 				>
 			</File>
 			<File
-				RelativePath=".\UiConsole.h"
+				RelativePath=".\Version.h"
+				>
+			</File>
+			<File
+				RelativePath=".\View.h"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="Game"
+			Name="Server"
 			>
 			<File
-				RelativePath=".\MassObject.cpp"
+				RelativePath="..\Life\LifeServer\BulletTime.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\MassObject.h"
+				RelativePath="..\Life\LifeServer\BulletTime.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ScreenPart.h"
+				RelativePath="..\Life\LifeServer\Client.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\StopWatch.cpp"
+				RelativePath="..\Life\LifeServer\Client.h"
 				>
 			</File>
 			<File
-				RelativePath=".\StopWatch.h"
+				RelativePath="..\Life\LifeServer\GameServerManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\UiRaceScore.cpp"
+				RelativePath="..\Life\LifeServer\GameServerManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\UiRaceScore.h"
+				RelativePath="..\Life\LifeServer\RaceTimer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\RaceTimer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\ServerConsoleManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\Spawner.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\Spawner.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeClient\UiGameServerManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeClient\UiGameServerManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeClient\UiServerConsoleManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeClient\UiServerConsoleManager.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Master"
+			>
+			<File
+				RelativePath="..\Life\LifeMaster\MasterServer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\MasterServerConnection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\MasterServerConnection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeMaster\MasterServerNetworkParser.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeMaster\MasterServerNetworkParser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushMaster\MasterServerPort.h"
 				>
 			</File>
 		</Filter>

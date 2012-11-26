@@ -5,18 +5,18 @@
 
 
 #include "RoadSignButton.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "GameClientSlaveManager.h"
+#include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "../Cure/Include/TimeManager.h"
+#include "../TBC/Include/ChunkyPhysics.h"
+#include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "PushManager.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 
@@ -26,7 +26,7 @@ static const float MAX_TIME = 1.0f;
 
 
 
-RoadSignButton::RoadSignButton(ScreenPart* pScreenPart, Cure::ResourceManager* pResourceManager,
+RoadSignButton::RoadSignButton(Life::ScreenPart* pScreenPart, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, const str& pName, const str& pClassResourceName,
 	const str& pTextureResourceName, Shape pShape):
 	Parent(pResourceManager, pClassResourceName, pUiManager),
@@ -294,7 +294,7 @@ void RoadSignButton::OnLoadTexture(UiCure::UserRendererImageResource* pTextureRe
 
 str RoadSignButton::GetMeshInstanceId() const
 {
-	const int lSlaveIndex = GetManager()? ((GameClientSlaveManager*)GetManager()->GetGameManager())->GetSlaveIndex() : -1;
+	const int lSlaveIndex = GetManager()? ((PushManager*)GetManager()->GetGameManager())->GetSlaveIndex() : -1;
 	const int lSlaveIndexOffset = lSlaveIndex * 100000;
 	return (strutil::IntToString(GetInstanceId() + lSlaveIndexOffset, 10));
 }

@@ -35,8 +35,6 @@
 #define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBreak"
 #define RTVAR_CTRL_STEER_BRK		"Control.Steer.Break"
 
-#define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
-
 #define RTVAR_DEBUG_3D_DRAWLOCALSERVER	"Debug.3D.DrawLocalServer"
 #define RTVAR_DEBUG_INPUT_PRINT		"Debug.Input.Print"
 #define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"		// Internal.
@@ -48,11 +46,6 @@
 
 #define RTVAR_GAME_CHILDISHNESS		"Game.Childishness"
 #define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
-#define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
 
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
 #define RTVAR_LOGIN_ISSERVERSELECTED	"Login.IsServerSelected"
-
-#define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
-#define RTVAR_UI_3D_CAMHEIGHT		"Ui.3D.CamHeight"
-#define RTVAR_UI_3D_CAMROTATE		"Ui.3D.CamRotate"

@@ -4,22 +4,22 @@
 
 
 
-#include "ClientLoginView.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/UserAccount.h"
-#include "../../Lepra/Include/Network.h"
-#include "../../UiTBC/Include/GUI/UiCaption.h"
-#include "../../UiTBC/Include/GUI/UiTextField.h"
+#include "LoginView.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "../Cure/Include/UserAccount.h"
+#include "../Lepra/Include/Network.h"
+#include "../UiTBC/Include/GUI/UiCaption.h"
+#include "../UiTBC/Include/GUI/UiTextField.h"
 #include "RtVar.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 
 
-ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage):
+LoginView::LoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage):
 	View(_T("Login"), new UiTbc::GridLayout(7, 1)),
 	mLoginObserver(pLoginObserver)
 {
@@ -51,19 +51,19 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 	}
 	AddTextField(lServerName, _T("Server"));
 
-	AddButton(_T("Login"), 0)->SetOnClick(ClientLoginView, OnLogin);
+	AddButton(_T("Login"), 0)->SetOnClick(LoginView, OnLogin);
 
 	UpdateLayout();
 }
 
 
 
-void ClientLoginView::OnExit()
+void LoginView::OnExit()
 {
 	mLoginObserver->CancelLogin();
 }
 
-void ClientLoginView::OnLogin(UiTbc::Button*)
+void LoginView::OnLogin(UiTbc::Button*)
 {
 	// Save user's login info.
 	str lServer = ((UiTbc::TextField*)GetChild(_T("Server"), 0))->GetText();

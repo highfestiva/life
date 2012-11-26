@@ -5,13 +5,13 @@
 
 
 #include "Sunlight.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiCure/Include/UiRuntimeVariableName.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiRuntimeVariableName.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 

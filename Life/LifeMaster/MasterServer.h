@@ -44,7 +44,7 @@ struct ServerInfo;
 class MasterServer: public Cure::ApplicationTicker
 {
 public:
-	MasterServer();
+	MasterServer(const str& pPort);
 	virtual ~MasterServer();
 
 	virtual bool Initialize();
@@ -76,6 +76,7 @@ private:
 	typedef std::set<UdpVSocket*> SocketTable;
 
 	UdpMuxSocket* mMuxSocket;
+	str mPort;
 	SocketTable mSocketTable;
 	SocketTable mSocketTimeoutTable;
 	Lock mLock;

@@ -9,7 +9,6 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
-#include "../LifeClient/RtVar.h"
 #include "GameServerManager.h"
 
 

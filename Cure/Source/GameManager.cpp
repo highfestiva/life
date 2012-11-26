@@ -209,8 +209,8 @@ void GameManager::PostPhysicsTick()
 
 bool GameManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
 {
-	pPosition;
-	pDistance;
+	(void)pPosition;
+	(void)pDistance;
 	return true;
 }
 
@@ -244,12 +244,6 @@ ContextObject* GameManager::CreateLogicHandler(const str&)
 bool GameManager::IsUiMoveForbidden(GameObjectId) const
 {
 	return false;	// Non-UI implementors need not bother.
-}
-
-void GameManager::GetSiblings(GameObjectId pInstanceId, ContextObject::Array& pSiblingArray) const
-{
-	// Only self if no override/no more than one game manager instance.
-	pSiblingArray.push_back(GetContext()->GetObject(pInstanceId));
 }
 
 void GameManager::OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId)

@@ -5,18 +5,18 @@
 
 
 #include "ServerListView.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/UserAccount.h"
-#include "../../Lepra/Include/Network.h"
-#include "../../Lepra/Include/Number.h"
-#include "../../UiTBC/Include/GUI/UiCaption.h"
-#include "../../UiTBC/Include/GUI/UiCenterLayout.h"
-#include "../../UiTBC/Include/GUI/UiTextField.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "../Cure/Include/UserAccount.h"
+#include "../Lepra/Include/Network.h"
+#include "../Lepra/Include/Number.h"
+#include "../UiTBC/Include/GUI/UiCaption.h"
+#include "../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../UiTBC/Include/GUI/UiTextField.h"
 #include "RtVar.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 
@@ -26,7 +26,7 @@ ServerListView::ServerListView(ServerSelectObserver* pSelectObserver):
 	mSelectObserver(pSelectObserver),
 	mIsMasterConnectError(false)
 {
-	mServerList.push_back(ServerInfo());
+	mServerList.push_back(Life::ServerInfo());
 
 	SetPreferredSize(500, 350);
 
@@ -108,7 +108,7 @@ void ServerListView::Tick()
 		}
 		if (lMoreServers)
 		{
-			const ServerInfo& lServer = mServerList[x-1];
+			const Life::ServerInfo& lServer = mServerList[x-1];
 			AddLabel(lServer.mName, GRAY, 250, lRowLayer)->SetAdaptive(false);
 			AddLabel(strutil::IntToString(lServer.mPlayerCount, 10), GRAY, 0, lRowLayer);
 			const str lPing = (lServer.mPing > 0)? Number::ConvertToPostfixNumber(lServer.mPing, 0)+_T("s") : _T("");

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#define PUSH_APPLICATION_NAME	"Push"
 //#define MASTER_SERVER_ADDRESS	"pixeldoctrine.dyndns.org"
 #define MASTER_SERVER_ADDRESS	"localhost"
 #define PLATFORM_VERSION	"0.1"

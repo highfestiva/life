@@ -4,33 +4,33 @@
 
 
 
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../../UiCure/Include/UiCure.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiLepra/Include/UiCore.h"
-#include "../../UiTBC/Include/UiTBC.h"
-#include "../LifeMaster/MasterServerPort.h"
-#include "../LifeServer/MasterServerConnection.h"
-#include "../LifeApplication.h"
-#include "GameClientMasterTicker.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "../Lepra/Include/SystemManager.h"
+#include "../UiCure/Include/UiCure.h"
+#include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiLepra/Include/UiCore.h"
+#include "../UiTBC/Include/UiTBC.h"
+#include "../Life/LifeServer/MasterServerConnection.h"
+#include "../Life/LifeApplication.h"
+#include "PushMaster/MasterServerPort.h"
+#include "Push.h"
+#include "PushTicker.h"
 #include "RtVar.h"
-#include "../LifeServer/Version.h"
+#include "Version.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 
 
-class ClientApplication: public Application
+class Push: public Life::Application
 {
+	typedef Life::Application Parent;
 public:
-	typedef Application Parent;
-
-	ClientApplication(const strutil::strvec& pArgumentList);
-	virtual ~ClientApplication();
+	Push(const strutil::strvec& pArgumentList);
+	virtual ~Push();
 	virtual void Init();
 
 private:
@@ -49,22 +49,22 @@ private:
 
 
 
-LEPRA_RUN_APPLICATION(Life::ClientApplication, UiLepra::UiMain);
+LEPRA_RUN_APPLICATION(Push::Push, UiLepra::UiMain);
 
 
 
-namespace Life
+namespace Push
 {
 
 
 
-ClientApplication::ClientApplication(const strutil::strvec& pArgumentList):
-	Application(pArgumentList),
+Push::Push(const strutil::strvec& pArgumentList):
+	Parent(_T(PUSH_APPLICATION_NAME), pArgumentList),
 	mUiManager(0)
 {
 }
 
-ClientApplication::~ClientApplication()
+Push::~Push()
 {
 	Destroy();
 
@@ -76,7 +76,7 @@ ClientApplication::~ClientApplication()
 	UiLepra::Shutdown();
 }
 
-void ClientApplication::Init()
+void Push::Init()
 {
 	UiLepra::Init();
 	UiTbc::Init();
@@ -97,26 +97,26 @@ void ClientApplication::Init()
 	Parent::Init();
 }
 
-str ClientApplication::GetName() const
+str Push::GetName() const
 {
-	return _T("Client");
+	return _T("Push");
 }
 
-str ClientApplication::GetVersion() const
+str Push::GetVersion() const
 {
 	return _T(PLATFORM_VERSION);
 }
 
-Cure::ApplicationTicker* ClientApplication::CreateTicker() const
+Cure::ApplicationTicker* Push::CreateTicker() const
 {
-	GameClientMasterTicker* lTicker = new GameClientMasterTicker(mUiManager, mResourceManager, 2000, 7, 1);
-	lTicker->SetMasterServerConnection(new MasterServerConnection(_T(MASTER_SERVER_ADDRESS) _T(":") _T(MASTER_SERVER_PORT)));
+	PushTicker* lTicker = new PushTicker(mUiManager, mResourceManager, 2000, 7, 1);
+	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(_T(MASTER_SERVER_ADDRESS) _T(":") _T(MASTER_SERVER_PORT)));
 	return lTicker;
 }
 
 
 
-LOG_CLASS_DEFINE(GAME, ClientApplication);
+LOG_CLASS_DEFINE(GAME, Push);
 
 
 

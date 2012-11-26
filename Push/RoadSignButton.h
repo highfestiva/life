@@ -6,18 +6,21 @@
 
 #pragma once
 
-#include "../../UiCure/Include/UiCppContextObject.h"
-#include "../../UiTBC/Include/GUI/UiCustomButton.h"
-#include "../Life.h"
+#include "../UiCure/Include/UiCppContextObject.h"
+#include "../UiTBC/Include/GUI/UiCustomButton.h"
+#include "Push.h"
 
 
 
 namespace Life
 {
-
-
-
 class ScreenPart;
+}
+
+
+
+namespace Push
+{
 
 
 
@@ -31,7 +34,7 @@ public:
 		SHAPE_ROUND,
 	};
 
-	RoadSignButton(ScreenPart* pScreenPart, Cure::ResourceManager* pResourceManager,
+	RoadSignButton(Life::ScreenPart* pScreenPart, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, const str& pName, const str& pClassResourceName,
 		const str& pTextureResourceName, Shape pShape);
 	virtual ~RoadSignButton();
@@ -59,7 +62,7 @@ private:
 	void SetInitialPosition(TBC::GeometryBase* pGeometry) const;
 	float GetTargetAngle() const;
 
-	ScreenPart* mScreenPart;
+	Life::ScreenPart* mScreenPart;
 	UiTbc::CustomButton mButton;
 	Shape mShape;
 	bool mActive;

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../../UiTBC/Include/GUI/UiWindow.h"
-#include "../Life.h"
+#include "../UiTBC/Include/GUI/UiWindow.h"
+#include "Push.h"
 
 
 
@@ -20,7 +20,7 @@ class TextField;
 
 
 
-namespace Life
+namespace Push
 {
 
 

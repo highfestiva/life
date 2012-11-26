@@ -18,7 +18,7 @@ class RuntimeVariableScope;
 
 
 
-namespace Life
+namespace Push
 {
 
 
@@ -27,10 +27,10 @@ class ClientLoginObserver;
 
 
 
-class ClientLoginView: public View
+class LoginView: public View
 {
 public:
-	ClientLoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage);
+	LoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage);
 
 private:
 	void OnExit();

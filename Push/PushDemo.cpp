@@ -4,7 +4,7 @@
 
 
 
-#include "GameClientDemo.h"
+#include "PushDemo.h"
 #ifdef LIFE_DEMO
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../Cure/Include/ContextManager.h"
@@ -20,12 +20,12 @@
 
 
 
-namespace Life
+namespace Push
 {
 
 
 
-GameClientDemo::GameClientDemo(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+PushDemo::PushDemo(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
 	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
@@ -38,13 +38,13 @@ GameClientDemo::GameClientDemo(GameClientMasterTicker* pMaster, const Cure::Time
 	pUiManager->GetPainter()->ClearFontBuffers();
 }
 
-GameClientDemo::~GameClientDemo()
+PushDemo::~PushDemo()
 {
 }
 
 
 
-bool GameClientDemo::Paint()
+bool PushDemo::Paint()
 {
 	if (!mUiManager->GetDisplayManager()->IsVisible())
 	{
@@ -90,11 +90,11 @@ bool GameClientDemo::Paint()
 	return (true);
 }
 
-void GameClientDemo::TickUiInput()
+void PushDemo::TickUiInput()
 {
 }
 
-void GameClientDemo::TickUiUpdate()
+void PushDemo::TickUiUpdate()
 {
 	mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
@@ -111,7 +111,7 @@ void GameClientDemo::TickUiUpdate()
 	mCameraAngle += GetTimeManager()->GetNormalFrameTime();
 }
 
-void GameClientDemo::CreateLoginView()
+void PushDemo::CreateLoginView()
 {
 	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 3, GRAY, _T("FullInfo"));
 	lButton->SetText(_T("Click here for more information on the full version"), BLUE, BLUE);
@@ -122,13 +122,13 @@ void GameClientDemo::CreateLoginView()
 	lButton->SetMinSize(lButtonWidth, lButtonHeight);
 	lButton->SetSize(lButtonWidth, lButtonHeight);
 	lButton->UpdateLayout();
-	lButton->SetOnClick(GameClientDemo, BrowseFullInfo);
+	lButton->SetOnClick(PushDemo, BrowseFullInfo);
 	GetUiManager()->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
 	mUiManager->GetDesktopWindow()->AddChild(lButton, 0, 0, 0);
 	lButton->SetPos(lMargin, mUiManager->GetDisplayManager()->GetHeight()-lButtonHeight-lMargin);
 }
 
-bool GameClientDemo::InitializeTerrain()
+bool PushDemo::InitializeTerrain()
 {
 	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), _T("saucer_01"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
@@ -138,7 +138,7 @@ bool GameClientDemo::InitializeTerrain()
 	return (true);
 }
 
-void GameClientDemo::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
+void PushDemo::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (pOk)
 	{
@@ -149,7 +149,7 @@ void GameClientDemo::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void GameClientDemo::BrowseFullInfo(UiTbc::Button*)
+void PushDemo::BrowseFullInfo(UiTbc::Button*)
 {
 	SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com"));
 	SystemManager::AddQuitRequest(+1);
@@ -157,23 +157,33 @@ void GameClientDemo::BrowseFullInfo(UiTbc::Button*)
 
 
 
-bool GameClientDemo::OnKeyDown(UiLepra::InputManager::KeyCode)
+bool PushDemo::OnKeyDown(UiLepra::InputManager::KeyCode)
 {
 	return (false);
 }
 
-bool GameClientDemo::OnKeyUp(UiLepra::InputManager::KeyCode)
+bool PushDemo::OnKeyUp(UiLepra::InputManager::KeyCode)
 {
 	return (false);
 }
 
-void GameClientDemo::OnInput(UiLepra::InputElement*)
+void PushDemo::OnInput(UiLepra::InputElement*)
 {
 }
 
 
 
-const tchar* GameClientDemo::mInfoTextArray[6] =
+UiTbc::FontManager::FontId PushDemo::SetFontHeight(double pHeight)
+{
+	const UiTbc::FontManager::FontId lPreviousFontId = mUiManager->GetFontManager()->GetActiveFontId();
+	const str lFontName = mUiManager->GetFontManager()->GetActiveFontName();
+	mUiManager->GetFontManager()->QueryAddFont(lFontName, pHeight, UiTbc::FontManager::BOLD);
+	return (lPreviousFontId);
+}
+
+
+
+const tchar* PushDemo::mInfoTextArray[6] =
 {
 	_T("The vehicle on display is only playable in the full version."),
 	_T("In the full version you can play online. Playing with your kids from the other side of the planet has never been easier."),

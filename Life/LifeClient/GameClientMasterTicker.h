@@ -35,7 +35,6 @@ class ConsoleManager;
 class GameClientSlaveManager;
 class MasterServerConnection;
 class RoadSignButton;
-class Sunlight;
 class UiGameServerManager;
 
 
@@ -44,13 +43,13 @@ class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, pub
 {
 	typedef Cure::GameTicker Parent;
 public:
-	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameClientMasterTicker();
 
 	MasterServerConnection* GetMasterServerConnection() const;
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 
-	bool CreateSlave();
+	virtual bool CreateSlave() = 0;
 
 	bool Tick();
 	void PollRoundTrip();
@@ -60,7 +59,6 @@ public:
 
 	bool IsFirstSlave(const GameClientSlaveManager* pSlave) const;
 	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
-	void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 
 	virtual PixelRect GetRenderArea() const;
 	virtual float UpdateFrustum(float pFov);
@@ -74,43 +72,30 @@ public:
 
 	void DownloadServerList();
 
-	Sunlight* GetSunlight() const;	// TODO: move this hard-coding to a context object or summat.
-
-private:
+protected:
 	typedef GameClientSlaveManager* (*SlaveFactoryMethod)(GameClientMasterTicker* pMaster,
 		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
 		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
 		int pSlaveIndex, const PixelRect& pRenderArea);
-	static GameClientSlaveManager* CreateSlaveManager(GameClientMasterTicker* pMaster,
-		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		int pSlaveIndex, const PixelRect& pRenderArea);
-	static GameClientSlaveManager* CreateViewer(GameClientMasterTicker* pMaster,
-		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		int pSlaveIndex, const PixelRect& pRenderArea);
-	static GameClientSlaveManager* CreateDemo(GameClientMasterTicker* pMaster,
-		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		int pSlaveIndex, const PixelRect& pRenderArea);
-	Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
 	bool CreateSlave(SlaveFactoryMethod pCreate);
+	virtual void OnSlavesKilled() = 0;
+
+	Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
 	void AddSlave(GameClientSlaveManager* pSlave);
 	void DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu);
 	void DeleteServer();
 
-	bool Initialize();
-	void CreatePlayerCountWindow();
-	bool Reinitialize();
+	virtual bool Initialize();
+	virtual bool Reinitialize();
 	void UpdateSlaveLayout();
 	void SlideSlaveLayout();
 	int GetSlaveAnimationTarget(int pSlaveIndex) const;
 	float GetSlavesVerticalAnimationTarget() const;
 	void Profile();
-	bool QueryQuit();
 	virtual void PhysicsTick();
 	virtual void WillMicroTick(float pTimeDelta);
 	virtual void DidPhysicsTick();
+	virtual void BeginRender(Vector3DF& pColor);
 	void DrawDebugData() const;
 	void DrawPerformanceLineGraph2d() const;
 
@@ -128,7 +113,7 @@ private:
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void OnInput(UiLepra::InputElement* pElement);
 
-	void ClosePlayerCountGui();
+	virtual void CloseMainMenu() = 0;
 
 	bool ApplyCalibration();
 	void StashCalibration();
@@ -139,7 +124,6 @@ private:
 	Lock mLock;
 	UiCure::GameUiManager* mUiManager;
 	Cure::ResourceManager* mResourceManager;
-	bool mIsPlayerCountViewActive;
 
 	UiGameServerManager* mServer;
 	Cure::TimeManager* mServerTimeManager;
@@ -157,11 +141,8 @@ private:
 	float mSlaveBottomSplit;
 	float mSlaveVSplit;
 	float mSlaveFade;
-	HiResTimer* mDemoTime;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 	std::hash_set<Cure::GameObjectId> mLocalObjectSet;
-
-	Sunlight* mSunlight;	// TODO: remove hack and come up with something better?
 
 	LOG_CLASS_DECLARE();
 };

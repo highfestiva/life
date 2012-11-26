@@ -378,6 +378,9 @@ def macappify_slime():
 def macappify_kc():
 	_macappify("KillCutie", "Kill Cutie")
 
+def macappify_push():
+	_macappify("Push", "Push")
+
 def macappify_tf():
 	_macappify("TireFire", "Tire Fire")
 
@@ -393,6 +396,9 @@ def cleandata_slime():
 def cleandata_kc():
 	_cleandata_source("KillCutie")
 
+def cleandata_push():
+	_cleandata_source("Push")
+
 def cleandata_tf():
 	_cleandata_source("TireFire")
 
@@ -407,6 +413,14 @@ def builddata_kc():
 
 def zipdata_kc():
 	os.chdir('KillCutie/Data')
+	rgohelp._zipdir('', _include_data_files, "Data.pk3")
+	os.chdir('../../')
+
+def builddata_push():
+	_builddata("Push", bindir, default_build_mode)
+
+def zipdata_push():
+	os.chdir('Push/Data')
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
 

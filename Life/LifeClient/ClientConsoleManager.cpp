@@ -42,10 +42,6 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 	{_T("start-reset-ui"), COMMAND_START_RESET_UI},
 	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
 	{_T("add-player"), COMMAND_ADD_PLAYER},
-	{_T("set-avatar-engine-power"), COMMAND_SET_AVATAR_ENGINE_POWER},
-#if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
-	{_T("builddata"), COMMAND_BUILD_DATA},
-#endif // Debug & Windows
 };
 
 
@@ -55,7 +51,6 @@ ClientConsoleManager::ClientConsoleManager(Cure::ResourceManager* pResourceManag
 	ConsoleManager(pResourceManager, pGameManager, pVariableScope, new UiTbc::ConsoleLogListener,
 		new UiTbc::ConsolePrompt)
 {
-	InitCommands();
 	mUiConsole = new UiConsole(this, pUiManager, pArea);
 }
 
@@ -252,61 +247,6 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 					mLog.AError("Could not add another player!");
 					lResult = 1;
 				}
-			}
-			break;
-			case COMMAND_SET_AVATAR_ENGINE_POWER:
-			{
-				if (pParameterVector.size() == 3)
-				{
-					log_adebug("Setting avatar engine power.");
-					int lAspect = 0;
-					strutil::StringToInt(pParameterVector[0], lAspect);
-					double lPower;
-					strutil::StringToDouble(pParameterVector[1], lPower);
-					double lAngle;
-					strutil::StringToDouble(pParameterVector[2], lAngle);
-					if (!((GameClientSlaveManager*)GetGameManager())->SetAvatarEnginePower(lAspect, (float)lPower, (float)lAngle))
-					{
-						mLog.AError("Could not set avatar engine power!");
-						lResult = 1;
-					}
-				}
-				else
-				{
-					mLog.Warningf(_T("usage: %s <aspect> <power> <angle>"), pCommand.c_str());
-				}
-			}
-			break;
-#if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
-			case COMMAND_BUILD_DATA:
-			{
-				const Cure::GameObjectId lAvatarId = ((GameClientSlaveManager*)GetGameManager())->GetAvatarInstanceId();
-				if (!lAvatarId)
-				{
-					break;
-				}
-				const str lAvatarType = GetGameManager()->GetContext()->GetObject(lAvatarId)->GetClassId();
-				((GameClientSlaveManager*)GetGameManager())->Logout();
-				Thread::Sleep(0.5);
-				GetResourceManager()->ForceFreeCache();
-				const str lCurrentDir = SystemManager::GetCurrentDirectory();
-				::SetCurrentDirectoryA(astrutil::Encode(Path::GetParentDirectory(lCurrentDir)).c_str());
-				::system("c:/Program/Python31/python.exe -B Tools/build/rgo.py builddata");
-				::SetCurrentDirectoryA(astrutil::Encode(lCurrentDir).c_str());
-				const str lUserName = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_LOGIN_USERNAME, EmptyString);
-				const str lServer = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, EmptyString);
-				wstr lPw(L"CarPassword");
-				const Cure::LoginId lLoginId(wstrutil::Encode(lUserName), Cure::MangledPassword(lPw));
-				((GameClientSlaveManager*)GetGameManager())->RequestLogin(lServer, lLoginId);
-				((GameClientSlaveManager*)GetGameManager())->ToggleConsole();
-				ExecuteCommand(_T("wait-login"));
-				((GameClientSlaveManager*)GetGameManager())->SelectAvatar(lAvatarType);
-			}
-			break;
-#endif // Debug & Windows
-			default:
-			{
-				lResult = -1;
 			}
 			break;
 		}

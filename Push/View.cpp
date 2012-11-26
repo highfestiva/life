@@ -4,16 +4,15 @@
 
 
 
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Lepra/Include/Network.h"
-#include "../../UiTBC/Include/GUI/UiCaption.h"
-#include "../../UiTBC/Include/GUI/UiCenterLayout.h"
-#include "../../UiTBC/Include/GUI/UiTextField.h"
 #include "View.h"
+#include "../UiTBC/Include/GUI/UiCaption.h"
+#include "../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../UiTBC/Include/GUI/UiTextField.h"
+#include "RtVar.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 

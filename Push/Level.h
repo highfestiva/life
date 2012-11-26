@@ -6,13 +6,13 @@
 
 #pragma once
 
-#include "../../UiCure/Include/UiMachine.h"
-#include "../../Cure/Include/ContextForceListener.h"
-#include "../Life.h"
+#include "../UiCure/Include/UiMachine.h"
+#include "../Cure/Include/ContextForceListener.h"
+#include "Push.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 

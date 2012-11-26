@@ -338,6 +338,7 @@ def main():
         ["LifeClient",      "gfx_bin",    "Life/LifeClient/LifeClient900.vcproj", "Life UiCure"],
         ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball900.vcproj", "UiTBC"],
         ["KillCutie",       "gfx_bin",    "KillCutie/KillCutie900.vcproj", "UiCure"],
+        ["Push",            "gfx_bin",    "Push/Push900.vcproj", "UiCure"],
         ["TireFire",        "gfx_bin",    "TireFire/TireFire900.vcproj", "UiCure"],
         ["Bounce",          "gfx_bin",    "Bounce/Bounce900.vcproj", "UiCure"],
         ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]

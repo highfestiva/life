@@ -4,27 +4,28 @@
 
 
 
-#include "GameClientViewer.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTBC/Include/GUI/UiCenterLayout.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiCure/Include/UiMachine.h"
-#include "../LifeServer/MasterServerConnection.h"
-#include "GameClientMasterTicker.h"
+#include "PushViewer.h"
+#include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "../TBC/Include/ChunkyPhysics.h"
+#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiMachine.h"
+#include "../Life/LifeClient/ClientConsoleManager.h"
+#include "../Life/LifeClient/GameClientMasterTicker.h"
+#include "../Life/LifeClient/UiConsole.h"
+#include "../Life/LifeServer/MasterServerConnection.h"
 #include "RtVar.h"
-#include "UiConsole.h"
 
 
 
-namespace Life
+namespace Push
 {
 
 
 
-GameClientViewer::GameClientViewer(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+PushViewer::PushViewer(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
 	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
@@ -34,20 +35,20 @@ GameClientViewer::GameClientViewer(GameClientMasterTicker* pMaster, const Cure::
 	mCameraOrientation = Vector3DF(-PIF*1.1f/2, PIF*0.86f/2, 0.05f);
 }
 
-GameClientViewer::~GameClientViewer()
+PushViewer::~PushViewer()
 {
 	CloseJoinServerView();
 }
 
 
 
-void GameClientViewer::TickUiInput()
+void PushViewer::TickUiInput()
 {
 }
 
-void GameClientViewer::TickUiUpdate()
+void PushViewer::TickUiUpdate()
 {
-	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
+	((Life::ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 
 	if (mServerListView)
 	{
@@ -66,7 +67,7 @@ void GameClientViewer::TickUiUpdate()
 	mCameraOrientation = Vector3DF(0, PIF/2, 0);*/
 }
 
-void GameClientViewer::CreateLoginView()
+void PushViewer::CreateLoginView()
 {
 	QuaternionF lFlip;
 	lFlip.RotateAroundOwnZ(PIF);
@@ -82,7 +83,7 @@ void GameClientViewer::CreateLoginView()
 	CreateButton(+0.4f, +0.4f, 12.0f, _T("quit"),	_T("road_sign_01"), _T("road_sign_nostop.png"), RoadSignButton::SHAPE_ROUND);
 }
 
-bool GameClientViewer::InitializeTerrain()
+bool PushViewer::InitializeTerrain()
 {
 	if (!Parent::InitializeTerrain())
 	{
@@ -98,7 +99,7 @@ bool GameClientViewer::InitializeTerrain()
 	return (true);
 }
 
-void GameClientViewer::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
+void PushViewer::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (pOk)
 	{
@@ -109,12 +110,12 @@ void GameClientViewer::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void GameClientViewer::OnCancelJoinServer()
+void PushViewer::OnCancelJoinServer()
 {
 	CloseJoinServerView();
 }
 
-void GameClientViewer::OnRequestJoinServer(const str& pServerAddress)
+void PushViewer::OnRequestJoinServer(const str& pServerAddress)
 {
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, pServerAddress);
 	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
@@ -122,25 +123,25 @@ void GameClientViewer::OnRequestJoinServer(const str& pServerAddress)
 	CloseJoinServerView();
 }
 
-bool GameClientViewer::UpdateServerList(ServerInfoList& pServerList) const
+bool PushViewer::UpdateServerList(Life::ServerInfoList& pServerList) const
 {
-	if (mMaster->GetMasterServerConnection())	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
+	if (GetMaster()->GetMasterServerConnection())	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
 	{
-		return mMaster->GetMasterServerConnection()->UpdateServerList(pServerList);
+		return GetMaster()->GetMasterServerConnection()->UpdateServerList(pServerList);
 	}
 	return false;
 }
 
-bool GameClientViewer::IsMasterServerConnectError() const
+bool PushViewer::IsMasterServerConnectError() const
 {
-	if (mMaster->GetMasterServerConnection())	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
+	if (GetMaster()->GetMasterServerConnection())	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
 	{
-		return mMaster->GetMasterServerConnection()->IsConnectError();
+		return GetMaster()->GetMasterServerConnection()->IsConnectError();
 	}
 	return true;
 }
 
-void GameClientViewer::CloseJoinServerView()
+void PushViewer::CloseJoinServerView()
 {
 	if (mServerListView)
 	{
@@ -150,18 +151,18 @@ void GameClientViewer::CloseJoinServerView()
 	}
 }
 
-RoadSignButton* GameClientViewer::CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape)
+RoadSignButton* PushViewer::CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape)
 {
 	RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(), mUiManager, pName, pClass, pTexture, pShape);
 	GetContext()->AddLocalObject(lButton);
 	lButton->SetTrajectory(Vector2DF(x, y), z);
-	lButton->GetButton().SetOnClick(GameClientViewer, OnButtonClick);
+	lButton->GetButton().SetOnClick(PushViewer, OnButtonClick);
 	mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
 	lButton->StartLoading();
 	return (lButton);
 }
 
-void GameClientViewer::OnButtonClick(UiTbc::Button* pButton)
+void PushViewer::OnButtonClick(UiTbc::Button* pButton)
 {
 	if (pButton->GetName() == _T("server"))
 	{
@@ -192,7 +193,7 @@ void GameClientViewer::OnButtonClick(UiTbc::Button* pButton)
 
 
 
-LOG_CLASS_DEFINE(GAME, GameClientViewer);
+LOG_CLASS_DEFINE(GAME, PushViewer);
 
 
 

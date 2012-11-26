@@ -5,7 +5,6 @@
 
 
 #include "GameClientMasterTicker.h"
-#include <algorithm>
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/NetworkFreeAgent.h"
 #include "../../Cure/Include/ResourceManager.h"
@@ -14,30 +13,21 @@
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/Performance.h"
-#include "../../Lepra/Include/PngLoader.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiCure/Include/UiCppContextObject.h"
+#include "../../UiCure/Include/UiResourceManager.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
-#include "../../UiTBC/Include/GUI/UiCenterLayout.h"
-#include "../../UiTBC/Include/GUI/UiCenterLayout.h"
 #include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
 #include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeServer/MasterServerConnection.h"
+#include "../ConsoleManager.h"
 #include "../LifeApplication.h"
-#include "GameClientDemo.h"
 #include "GameClientSlaveManager.h"
-#include "GameClientViewer.h"
 #include "RtVar.h"
-#include "Sunlight.h"
 #include "UiGameServerManager.h"
 #include "UiRaceScore.h"
-
-// TODO: remove!
-#include "UiConsole.h"
-#include "UiServerConsoleManager.h"
 
 
 
@@ -54,7 +44,6 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	Parent(pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mUiManager(pUiManager),
 	mResourceManager(pResourceManager),
-	mIsPlayerCountViewActive(false),
 	mServer(0),
 	mServerTimeManager(new Cure::TimeManager),
 	mMasterConnection(0),
@@ -67,9 +56,7 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mSlaveTopSplit(1),
 	mSlaveBottomSplit(1),
 	mSlaveVSplit(1),
-	mSlaveFade(0),
-	mDemoTime(0),
-	mSunlight(0)
+	mSlaveFade(0)
 {
 	mSlaveArray.resize(4, 0);
 	mSlaveArray[0] = 0;
@@ -113,8 +100,6 @@ GameClientMasterTicker::~GameClientMasterTicker()
 		mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
 	}
 
-	ClosePlayerCountGui();
-
 	SlaveArray::iterator x;
 	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
@@ -142,12 +127,6 @@ void GameClientMasterTicker::SetMasterServerConnection(MasterServerConnection* p
 {
 	delete mMasterConnection;
 	mMasterConnection = pConnection;
-}
-
-
-bool GameClientMasterTicker::CreateSlave()
-{
-	return (CreateSlave(&GameClientMasterTicker::CreateSlaveManager));
 }
 
 
@@ -182,34 +161,13 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(BeginRenderAndInput);
 
-		float lRealTimeRatio;
-		CURE_RTVAR_GET(lRealTimeRatio, =(float), UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-		float lTimeOfDayFactor;
-		CURE_RTVAR_GET(lTimeOfDayFactor, =(float), UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
-		mSunlight->Tick(lRealTimeRatio * lTimeOfDayFactor);
-
-		mLocalObjectSet.clear();
-		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
-		{
-			GameClientSlaveManager* lSlave = *x;
-			if (lSlave)
-			{
-				lSlave->AddLocalObjects(mLocalObjectSet);
-			}
-		}
-
 		float r, g, b;
 		CURE_RTVAR_GET(r, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.75);
 		CURE_RTVAR_GET(g, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.80);
 		CURE_RTVAR_GET(b, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.85);
 		Vector3DF lColor(r, g, b);
-		mSunlight->AddSunColor(lColor, 2);
-		mUiManager->BeginRender(lColor);
-		lColor.Set(1.2f, 1.2f, 1.2f);
-		mSunlight->AddSunColor(lColor, 1);
-		Color lFillColor;
-		lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
-		mUiManager->GetRenderer()->SetOutlineFillColor(lFillColor);
+		BeginRender(lColor);
+
 		mUiManager->InputTick();
 	}
 
@@ -441,19 +399,6 @@ bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const
 	return (mLocalObjectSet.find(pInstanceId) != mLocalObjectSet.end());
 }
 
-void GameClientMasterTicker::GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const
-{
-	SlaveArray::const_iterator x;
-	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
-	{
-		GameClientSlaveManager* lSlave = *x;
-		if (lSlave)
-		{
-			lSlave->DoGetSiblings(pObjectId, pSiblingArray);
-		}
-	}
-}
-
 
 
 PixelRect GameClientMasterTicker::GetRenderArea() const
@@ -543,12 +488,12 @@ void GameClientMasterTicker::OnExit()
 {
 	mLog.Headline(_T("Number of players not picked, quitting."));
 	SystemManager::AddQuitRequest(+1);
-	ClosePlayerCountGui();
+	CloseMainMenu();
 }
 
 void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 {
-	ClosePlayerCountGui();
+	CloseMainMenu();
 
 	for (int x = 0; x < pPlayerCount; ++x)
 	{
@@ -572,66 +517,6 @@ void GameClientMasterTicker::DownloadServerList()
 }
 
 
-
-Sunlight* GameClientMasterTicker::GetSunlight() const
-{
-	return mSunlight;
-}
-
-
-
-GameClientSlaveManager* GameClientMasterTicker::CreateSlaveManager(GameClientMasterTicker* pMaster,
-	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-	int pSlaveIndex, const PixelRect& pRenderArea)
-{
-	GameClientSlaveManager* lGameManager = new GameClientSlaveManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
-	lGameManager->SetMasterServerConnection(new MasterServerConnection(pMaster->GetMasterServerConnection()->GetMasterAddress()));
-	return lGameManager;
-}
-
-GameClientSlaveManager* GameClientMasterTicker::CreateViewer(GameClientMasterTicker* pMaster,
-	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-	int pSlaveIndex, const PixelRect& pRenderArea)
-{
-	return new GameClientViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
-}
-
-GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicker* pMaster,
-	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-	int pSlaveIndex, const PixelRect& pRenderArea)
-{
-#ifdef LIFE_DEMO
-	return new GameClientDemo(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
-#else // !Demo
-	return new GameClientViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
-#endif // Demo / !Demo
-}
-
-Cure::ContextObjectAttribute* GameClientMasterTicker::CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName)
-{
-	ScreenPart* lScreenPart = this;
-	SlaveArray::iterator x;
-	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
-	{
-		GameClientSlaveManager* lSlave = *x;
-		if (lSlave)
-		{
-			if (lSlave->IsOwned(pObject->GetInstanceId()))
-			{
-				lScreenPart = lSlave;
-				break;
-			}
-		}
-	}
-	if (strutil::StartsWith(pAttributeName, _T("race_timer_")))
-	{
-		return new UiRaceScore(pObject, pAttributeName, lScreenPart, mUiManager, pAttributeName);
-	}
-	return Life::CreateObjectAttribute(pObject, pAttributeName);
-}
 
 bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 {
@@ -669,6 +554,29 @@ bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 	return (lOk);
 }
 
+Cure::ContextObjectAttribute* GameClientMasterTicker::CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName)
+{
+	ScreenPart* lScreenPart = this;
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			if (lSlave->IsOwned(pObject->GetInstanceId()))
+			{
+				lScreenPart = lSlave;
+				break;
+			}
+		}
+	}
+	if (strutil::StartsWith(pAttributeName, _T("race_timer_")))
+	{
+		return new UiRaceScore(pObject, pAttributeName, lScreenPart, mUiManager, pAttributeName);
+	}
+	return Life::CreateObjectAttribute(pObject, pAttributeName);
+}
+
 void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 {
 	{
@@ -701,7 +609,7 @@ void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pA
 		//mResourceManager->ForceFreeCache();
 		if (pAllowMainMenu)
 		{
-			CreatePlayerCountWindow();
+			OnSlavesKilled();
 		}
 	}
 }
@@ -804,18 +712,9 @@ bool GameClientMasterTicker::Initialize()
 		}
 		mResourceManager->ForceFreeCache();
 
-		CreatePlayerCountWindow();
+		OnSlavesKilled();
 	}
 	return (lOk);
-}
-
-void GameClientMasterTicker::CreatePlayerCountWindow()
-{
-	DeleteServer();
-	//assert(!mIsPlayerCountViewActive);
-	mIsPlayerCountViewActive = true;
-	mSlaveTopSplit = 1.0f;
-	CreateSlave(&GameClientMasterTicker::CreateViewer);
 }
 
 bool GameClientMasterTicker::Reinitialize()
@@ -837,8 +736,6 @@ bool GameClientMasterTicker::Reinitialize()
 		}
 	}
 	DeleteServer();
-	delete mSunlight;
-	mSunlight = 0;
 	mConsole->SetGameManager(0);
 	mResourceManager->StopClear();
 	mUiManager->Close();
@@ -854,7 +751,6 @@ bool GameClientMasterTicker::Reinitialize()
 	{
 		mUiManager->GetDesktopWindow()->CreateLayer(new UiTbc::FloatingLayout());
 
-		mSunlight = new Sunlight(mUiManager);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)
@@ -1136,35 +1032,6 @@ void GameClientMasterTicker::Profile()
 	}
 }
 
-bool GameClientMasterTicker::QueryQuit()
-{
-	if (mDemoTime)
-	{
-		// We quit if user tried quitting twice or more, or demo time is over.
-		return (SystemManager::GetQuitRequest() >= 2 || mDemoTime->QueryTimeDiff() > 30.0f);
-	}
-
-	if (Parent::QueryQuit())
-	{
-		for (int x = 0; x < 4; ++x)
-		{
-			DeleteSlave(mSlaveArray[x], false);
-		}
-		DeleteServer();
-#ifdef LIFE_DEMO
-		if (!mUiManager->CanRender())
-		{
-			return true;
-		}
-		CreateSlave(&GameClientMasterTicker::CreateDemo);
-		mDemoTime = new HiResTimer;
-#else // !Demo
-		return (true);
-#endif // Demo / !Demo
-	}
-	return (false);
-}
-
 void GameClientMasterTicker::PhysicsTick()
 {
 	Parent::PhysicsTick();
@@ -1208,6 +1075,22 @@ void GameClientMasterTicker::DidPhysicsTick()
 	if (mServer)
 	{
 		mServer->PostPhysicsTick();
+	}
+}
+
+void GameClientMasterTicker::BeginRender(Vector3DF& pColor)
+{
+	mUiManager->BeginRender(pColor);
+
+	mLocalObjectSet.clear();
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->AddLocalObjects(mLocalObjectSet);
+		}
 	}
 }
 
@@ -1450,17 +1333,6 @@ void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 		{
 			lSlave->OnInput(pElement);
 		}
-	}
-}
-
-
-
-void GameClientMasterTicker::ClosePlayerCountGui()
-{
-	if (mIsPlayerCountViewActive)
-	{
-		DeleteSlave(mSlaveArray[0], false);
-		mIsPlayerCountViewActive = false;
 	}
 }
 

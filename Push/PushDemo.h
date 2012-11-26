@@ -6,26 +6,26 @@
 
 #pragma once
 
-#include "GameClientSlaveManager.h"
+#include "PushManager.h"
 #include "RoadSignButton.h"
 
 
 
 #ifdef LIFE_DEMO
-namespace Life
+namespace Push
 {
 
 
 
 // This is just a simple viewer that shows a background for menus and shows off in demo mode.
-class GameClientDemo: public GameClientSlaveManager
+class PushDemo: public PushManager
 {
-	typedef GameClientSlaveManager Parent;
+	typedef PushManager Parent;
 public:
-	GameClientDemo(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+	PushDemo(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
-	virtual ~GameClientDemo();
+	virtual ~PushDemo();
 
 private:
 	virtual bool Paint();
@@ -39,6 +39,8 @@ private:
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual void OnInput(UiLepra::InputElement* pElement);
+
+	UiTbc::FontManager::FontId PushDemo::SetFontHeight(double pHeight);
 
 	float mCameraAngle;
 
