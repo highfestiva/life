@@ -10,7 +10,7 @@ import rgohelp
 
 
 #appnames = [""UiCure/CureTestApp"", "Life", "SlimeVolleyball", "KillCutie", "TireFire"]
-appnames = ["KillCutie"]
+appnames = ["Push", "PushServer", "PushMaster"]
 osname = rgohelp._getosname()
 hwname = rgohelp._gethwname()
 datename = rgohelp._getdatename()
@@ -508,7 +508,7 @@ def _prepare_run():
 	if os.name == "nt":
 		pre = ""
 		post = ".exe"
-	if not os.path.exists("LifeClient"+post) or not os.path.exists("LifeServer"+post):
+	if not os.path.exists(appnames[0]+post) or not os.path.exists(appnames[0]+post):
 		reason = "binaries not compiled" if rgohelp._hasdevenv() else "missing C++ build environment"
 		print("Could not run %s due to %s." % (appnames[0], reason))
 		sys.exit(2)

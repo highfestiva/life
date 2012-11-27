@@ -10,9 +10,7 @@
 
 #pragma once
 
-#include "FastAllocator.h"
-#include "Hasher.h"
-#include "LepraTypes.h"
+#include "String.h"	// Pulls in both basich hashing and narrow and wide string hashing.
 #include <hash_map>
 
 #define HASHTABLE_TEMPLATE template<class _TTableKey, class _TTableObject, class _THash, unsigned SIZE>

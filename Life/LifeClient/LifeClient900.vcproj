@@ -542,11 +542,51 @@
 			Name="Server"
 			>
 			<File
+				RelativePath="..\LifeServer\BulletTime.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\BulletTime.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\Client.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\Client.h"
+				>
+			</File>
+			<File
 				RelativePath="..\LifeServer\GameServerManager.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\LifeServer\GameServerManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\RaceTimer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\RaceTimer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\ServerConsoleManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\Spawner.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\Spawner.h"
 				>
 			</File>
 			<File
@@ -575,6 +615,14 @@
 			</File>
 			<File
 				RelativePath="..\LifeServer\MasterServerConnection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeMaster\MasterServerNetworkParser.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeMaster\MasterServerNetworkParser.h"
 				>
 			</File>
 		</Filter>

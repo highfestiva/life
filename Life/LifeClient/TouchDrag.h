@@ -6,7 +6,9 @@
 
 #pragma once
 
+#include "../../Lepra/Include/HiResTimer.h"
 #include <list>
+#include "../Life.h"
 
 
 

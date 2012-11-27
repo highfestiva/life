@@ -50,9 +50,14 @@ ipch
 /KillCutie/GrenadeRunXcode/build
 /Magnetic/MagneticXcode/build
 /Bounce/BounceXcode/build
+/Bounce/Bounce
+/Push/Push
+/Push/PushServer/PushServer
+/Push/PushMaster/PushMaster
 /SlimeVolleyball/SlimeVolleyball
 /SlimeVolleyball/SlimeBall/build
 /TireFire/Data/Maya
+/TireFire/TireFire
 /UiCure/CureTestApp/CureTestApp
 /ThirdParty/stlport/build
 /ThirdParty/Release
