@@ -538,6 +538,46 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Server"
+			>
+			<File
+				RelativePath="..\LifeServer\GameServerManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\GameServerManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UiGameServerManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UiGameServerManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UiServerConsoleManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UiServerConsoleManager.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Master"
+			>
+			<File
+				RelativePath="..\LifeServer\MasterServerConnection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\MasterServerConnection.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
