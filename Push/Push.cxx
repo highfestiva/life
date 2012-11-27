@@ -29,9 +29,15 @@ class Push: public Life::Application
 {
 	typedef Life::Application Parent;
 public:
+	static Push* GetApp();
+
 	Push(const strutil::strvec& pArgumentList);
 	virtual ~Push();
 	virtual void Init();
+	virtual bool MainLoop();
+
+	virtual void Suspend();
+	virtual void Resume();
 
 private:
 	str GetName() const;
@@ -39,6 +45,11 @@ private:
 	Cure::ApplicationTicker* CreateTicker() const;
 
 	UiCure::GameUiManager* mUiManager;
+
+	static Push* mApp;
+#ifdef LEPRA_TOUCH
+	AnimatedApp* mAnimatedApp;
+#endif // Touch
 
 	LOG_CLASS_DECLARE();
 };
@@ -58,10 +69,18 @@ namespace Push
 
 
 
+Push* Push::GetApp()
+{
+	return mApp;
+}
+
+
+
 Push::Push(const strutil::strvec& pArgumentList):
 	Parent(_T(PUSH_APPLICATION_NAME), pArgumentList),
 	mUiManager(0)
 {
+	mApp = this;
 }
 
 Push::~Push()
@@ -97,6 +116,45 @@ void Push::Init()
 	Parent::Init();
 }
 
+bool Push::MainLoop()
+{
+#ifndef LEPRA_IOS
+	return Parent::MainLoop();
+#else // iOS
+	// iOS has uses timer callbacks instead of a main loop.
+	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
+	return true;
+#endif // !iOS/iOS
+}
+
+
+
+void Push::Suspend()
+{
+	//if (mMusicPlayer)
+	//{
+	//	mMusicPlayer->Pause();
+	//}
+	//DoPause();
+#ifdef LEPRA_IOS
+	[mAnimatedApp stopTick];
+#endif // iOS
+}
+
+void Push::Resume()
+{
+#ifdef LEPRA_IOS
+	[mAnimatedApp startTick];
+#endif // iOS
+	//if (mMusicPlayer)
+	//{
+	//	mMusicPlayer->Stop();
+	//	mMusicPlayer->Playback();
+	//}
+}
+
+
+
 str Push::GetName() const
 {
 	return _T("Push");
@@ -116,6 +174,7 @@ Cure::ApplicationTicker* Push::CreateTicker() const
 
 
 
+Push* Push::mApp;
 LOG_CLASS_DEFINE(GAME, Push);
 
 

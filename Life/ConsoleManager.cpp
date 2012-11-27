@@ -405,6 +405,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		break;
 		case COMMAND_EXECUTE_FILE:
 		{
+#ifndef LEPRA_TOUCH	// Only default parameters are good enough for touch devices.
 			size_t lFilenameIndex = 0;
 			bool lIgnoreIfMissing = false;
 			if (pParameterVector[0] == _T("-i"))
@@ -455,6 +456,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				mLog.AWarning("  -i   Ignores non-existing shell file.");
 				lResult = 1;
 			}
+#endif // Not for touch devices
 		}
 		break;
 		case COMMAND_LIST_ACTIVE_RESOURCES:
@@ -564,6 +566,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		case COMMAND_SAVE_SYSTEM_CONFIG_FILE:
 		case COMMAND_SAVE_APPLICATION_CONFIG_FILE:
 		{
+#ifndef LEPRA_TOUCH	// Only default parameters are good enough for touch devices.
 			bool lUsage = false;
 			if (pParameterVector.size() >= 1 && pParameterVector.size() <= 3)
 			{
@@ -652,6 +655,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				mLog.AWarning("  -i                  Skips overwriting in case of already existing file.");
 				lResult = 1;
 			}
+#endif // Not for touch devices
 		}
 		break;
 		default:

@@ -460,10 +460,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Sunlight.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\UiConsole.cpp"
 				>
 			</File>
@@ -503,10 +499,6 @@
 			</File>
 			<File
 				RelativePath=".\RtVar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Sunlight.h"
 				>
 			</File>
 			<File

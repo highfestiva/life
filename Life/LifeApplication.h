@@ -34,6 +34,7 @@ public:
 	virtual ~Application();
 	void Init();
 	int Run();
+	virtual bool MainLoop();
 	virtual bool Tick();
 	void Destroy();
 

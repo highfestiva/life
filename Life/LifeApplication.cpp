@@ -115,6 +115,16 @@ int Application::Run()
 	{
 		lOk = mGameTicker->Initialize();
 	}
+	if (lOk)
+	{
+		lOk = MainLoop();
+	}
+	return lOk? 0 : 1;
+}
+
+bool Application::MainLoop()
+{
+	bool lOk = true;
 	bool lQuit = false;
 	mTimeInfo.Set(1.0/CURE_STANDARD_FRAME_RATE, 1.0/CURE_STANDARD_FRAME_RATE, 1.0/CURE_STANDARD_FRAME_RATE);
 	while (lOk && !lQuit)
@@ -147,8 +157,7 @@ int Application::Run()
 			mLog.RawPrint(Log::LEVEL_FATAL, _T("--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n"));
 		}
 	}
-
-	return (0);
+	return lOk;
 }
 
 bool Application::Tick()
