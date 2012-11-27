@@ -44,13 +44,13 @@ ChunkyPhysics::ChunkyPhysics(const ChunkyPhysics& pOriginal):
 {
 	mGuideMode = pOriginal.mGuideMode;
 	mUniqeGeometryIndex = pOriginal.mUniqeGeometryIndex;
-	Lepra::VectorUtil<ChunkyBoneGeometry>::CloneListFactoryMethod(mGeometryArray, pOriginal.mGeometryArray);
+	VectorUtil<ChunkyBoneGeometry>::CloneListFactoryMethod(mGeometryArray, pOriginal.mGeometryArray);
 	TBC_PHYSICS_RELOCATE_POINTERS(mGeometryArray);
-	Lepra::VectorUtil<PhysicsEngine>::CloneList(mEngineArray, pOriginal.mEngineArray);
+	VectorUtil<PhysicsEngine>::CloneList(mEngineArray, pOriginal.mEngineArray);
 	TBC_PHYSICS_RELOCATE_POINTERS(mEngineArray);
-	Lepra::VectorUtil<PhysicsTrigger>::CloneList(mTriggerArray, pOriginal.mTriggerArray);
+	VectorUtil<PhysicsTrigger>::CloneList(mTriggerArray, pOriginal.mTriggerArray);
 	TBC_PHYSICS_RELOCATE_POINTERS(mTriggerArray);
-	Lepra::VectorUtil<PhysicsSpawner>::CloneList(mSpawnerArray, pOriginal.mSpawnerArray);
+	VectorUtil<PhysicsSpawner>::CloneList(mSpawnerArray, pOriginal.mSpawnerArray);
 	TBC_PHYSICS_RELOCATE_POINTERS(mSpawnerArray);
 	mTransformOperation = pOriginal.mTransformOperation;
 	mPhysicsType = pOriginal.mPhysicsType;

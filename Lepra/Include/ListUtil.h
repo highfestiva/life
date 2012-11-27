@@ -61,7 +61,7 @@ public:
 };
 
 
-template<class _Type, class _ListType = std::vector<_Type*>>
+template<class _Type, class _ListType = std::vector<_Type*> >
 class VectorUtil
 {
 public:
