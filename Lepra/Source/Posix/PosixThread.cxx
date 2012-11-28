@@ -305,6 +305,9 @@ void Thread::InitializeThread(Thread* pThread)
 	assert(gThreadStorage.GetPointer() == pThread);
 	assert(Thread::GetCurrentThread() == pThread);
 	InitializeSignalMask();
+#ifdef LEPRA_MAC
+	[[NSAutoreleasePool alloc] init];
+#endif // !Apple
 }
 
 size_t Thread::GetCurrentThreadId()
