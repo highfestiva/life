@@ -40,12 +40,16 @@ std::string SystemManager::GetSystemPseudoId()
 	uint8 lHashData[20];
 	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(tchar), lHashData);
 	std::string lResult;
-	for (int x = 0; x < sizeof(lHashData); ++x)
+	for (unsigned x = 0; x < sizeof(lHashData); ++x)
 	{
-		if (lHashData[x] < ' ')
+		if (lHashData[x] == '\\')
 		{
-			lResult.push_back(' ');
-			lResult.push_back(' '+(lHashData[x]));
+			lResult += "__";
+		}
+		else if (lHashData[x] <= '"')
+		{
+			lResult.push_back('_');
+			lResult.push_back('#'+(lHashData[x]));
 		}
 		else if (lHashData[x] < 127)
 		{
@@ -53,8 +57,8 @@ std::string SystemManager::GetSystemPseudoId()
 		}
 		else
 		{
-			lResult.push_back('?'+(lHashData[x]>>6));
-			lResult.push_back('?'+(lHashData[x]&0x3F));
+			lResult.push_back('?'+(lHashData[x]>>5));
+			lResult.push_back('?'+(lHashData[x]&0x1F));
 		}
 	}
 	return lResult;
