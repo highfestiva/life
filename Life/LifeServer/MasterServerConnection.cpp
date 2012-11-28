@@ -373,6 +373,7 @@ void MasterServerConnection::ConnectEntry()
 	assert(mState == CONNECTING);
 	mState = CONNECTED;
 	mIdleTimer.PopTimeDiff();
+	mLog.Headlinef(_T("Connected to master server @ %s."), mMasterServerAddress.c_str());
 }
 
 bool MasterServerConnection::UploadServerInfo()
@@ -475,7 +476,7 @@ bool MasterServerConnection::Receive(str& pData)
 		mLog.Warning(_T("Trying to receive master server data even though unconnected."));
 		return false;
 	}
-	mVSocket->WaitAvailable(1.0);
+	mVSocket->WaitAvailable(4.0);
 	uint8 lRawData[1024];
 	int lRawSize = mVSocket->Receive(lRawData, sizeof(lRawData));
 	if (lRawSize <= 0)

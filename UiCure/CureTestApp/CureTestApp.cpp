@@ -142,7 +142,7 @@ int CureTestApplication::Run()
 	StdioConsoleLogListener* lConsoleLogPointer = 0;
 #ifdef LEPRA_CONSOLE
 	StdioConsoleLogListener lConsoleLogger;
-	lConsoleLogger.SetLevelThreashold((mTestBits&TRACE_BIT)? Log::LEVEL_TRACE : Log::LEVEL_HEADLINE);
+	lConsoleLogger.SetLevelThreashold((mTestBits&TRACE_BIT)? LEVEL_TRACE : LEVEL_HEADLINE);
 	lConsoleLogPointer = &lConsoleLogger;
 #endif // LEPRA_CONSOLE
 	DebuggerLogListener lDebugLogger;
@@ -151,7 +151,7 @@ int CureTestApplication::Run()
 	MemFileLogListener lMemLogger(100*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
 		&lFileLogger, &lPerformanceLogger, &lMemLogger);
-	LogType::GetLog(LogType::SUB_ROOT)->SetLevelThreashold(Log::LEVEL_TRACE);
+	LogType::GetLog(LogType::SUB_ROOT)->SetLevelThreashold(LEVEL_TRACE);
 
 	mLog.Headline(_T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"));
 
@@ -175,7 +175,7 @@ int CureTestApplication::Run()
 #ifdef LEPRA_CONSOLE
 	if (!lTestOk)
 	{
-		lMemLogger.Dump(lConsoleLogger, Log::LEVEL_ERROR);
+		lMemLogger.Dump(lConsoleLogger, LEVEL_ERROR);
 	}
 #endif // LEPRA_CONSOLE
 	ShowTestResult(mLog, lTestOk);

@@ -131,7 +131,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	str lContext;
 	bool lTestOk = true;
 
-	//Log::SetMainLevelThreashold(Log::LEVEL_ERROR);
+	//Log::SetMainLevelThreashold(LEVEL_ERROR);
 
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 2.0);
 
@@ -592,7 +592,7 @@ bool HiscoreTest::Test()
 {
 	const std::vector<Log*> lLogArray = LogType::GetLogs();
 	std::vector<Log*>::const_iterator x = lLogArray.begin();
-	Log::LogLevel lNewLogLevel = Log::LEVEL_LOWEST_TYPE;
+	LogLevel lNewLogLevel = LEVEL_LOWEST_TYPE;
 	for (; x != lLogArray.end(); ++x)
 	{
 		(*x)->SetLevelThreashold(lNewLogLevel);

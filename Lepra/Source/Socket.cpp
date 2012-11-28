@@ -538,8 +538,10 @@ int TcpSocket::Send(const void* pData, int pSize)
 			log_volatile(str lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
 			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min((int)pSize, 20)));
-			log_volatile(mLog.Tracef(_T("TCP -> %u bytes (%s -> %s): %s."), pSize,
-				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str()));
+			log_volatile(str lString = strutil::Encode(astrutil::ReplaceCtrlChars((const char*)pData, '.')));
+			log_volatile(lString.resize(15));
+			log_volatile(mLog.Tracef(_T("TCP -> %u bytes (%s -> %s): %s %s."), pSize,
+				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str(), lString.c_str()));
 
 			mSentByteCount += lSentByteCount;
 		}
@@ -583,8 +585,10 @@ int TcpSocket::Receive(void* pData, int pMaxSize)
 			log_volatile(str lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
 			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 20)));
-			log_volatile(mLog.Tracef(_T("TCP <- %u bytes (%s <- %s): %s."), lSize,
-				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str()));
+			log_volatile(str lString = strutil::Encode(astrutil::ReplaceCtrlChars((const char*)pData, '.')));
+			log_volatile(lString.resize(15));
+			log_volatile(mLog.Tracef(_T("TCP <- %u bytes (%s <- %s): %s %s."), lSize,
+				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str(), lString.c_str()));
 
 			mReceivedByteCount += lSize;
 		}
@@ -1225,10 +1229,10 @@ int UdpSocket::SendTo(const uint8* pData, unsigned pSize, const SocketAddress& p
 		}
 		else
 		{
-			/*log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)20)));
 			log_volatile(mLog.Tracef(_T("UDP -> %u bytes (%s -> %s): %s."), pSize,
 				mLocalAddress.GetAsString().c_str(), pTargetAddress.GetAsString().c_str(),
-				lData.c_str()));*/
+				lData.c_str()));
 			mSentByteCount += lSentByteCount;
 		}
 	}
@@ -1554,13 +1558,13 @@ LOG_CLASS_DEFINE(NETWORK, UdpMuxSocket);
 
 UdpVSocket::UdpVSocket()
 {
-	log_atrace("UdpVSocket()");
+	//log_atrace("UdpVSocket()");
 	ClearAll();
 }
 
 UdpVSocket::~UdpVSocket()
 {
-	log_atrace("~UdpVSocket()");
+	//log_atrace("~UdpVSocket()");
 }
 
 void UdpVSocket::ClearAll()

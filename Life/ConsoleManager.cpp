@@ -199,7 +199,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					str lMessage;
 					if (strutil::CStringToString(lCMessage, lMessage))
 					{
-						mLog.Print((Log::LogLevel)lLogLevel, lMessage+_T('\n'));
+						mLog.Print((LogLevel)lLogLevel, lMessage+_T('\n'));
 					}
 					else
 					{
@@ -258,8 +258,8 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					LogListener* lLogger = LogType::GetLog(LogType::SUB_ROOT)->GetListener(lListenerNameArray[x]);
 					if (lLogger)
 					{
-						lLogger->SetLevelThreashold((Log::LogLevel)lLogLevel);
-						Log::LogLevel lNewLogLevel = lLogger->GetLevelThreashold();
+						lLogger->SetLevelThreashold((LogLevel)lLogLevel);
+						LogLevel lNewLogLevel = lLogger->GetLevelThreashold();
 						if (lNewLogLevel != lLogLevel)
 						{
 							mLog.Infof(_T("Listener '%s' log level clamped to %i."), lListenerNameArray[x], lNewLogLevel);
@@ -270,7 +270,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			else
 			{
 				mLog.Warningf(_T("usage: %s <log level>"), pCommand.c_str());
-				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), Log::LEVEL_TYPE_COUNT-1);
+				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), LEVEL_TYPE_COUNT-1);
 				lResult = 1;
 			}
 		}
@@ -283,8 +283,8 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				Log* lLog = LogType::GetLog(pParameterVector[0]);
 				if (lLog)
 				{
-					lLog->SetLevelThreashold((Log::LogLevel)lLogLevel);
-					Log::LogLevel lNewLogLevel = lLog->GetLevelThreashold();
+					lLog->SetLevelThreashold((LogLevel)lLogLevel);
+					LogLevel lNewLogLevel = lLog->GetLevelThreashold();
 					mLog.Infof(_T("Log level for subsystem '%s' set to %i."), pParameterVector[0].c_str(), lNewLogLevel);
 				}
 				else
@@ -296,10 +296,10 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			{
 				const std::vector<Log*> lLogArray = LogType::GetLogs();
 				std::vector<Log*>::const_iterator x = lLogArray.begin();
-				Log::LogLevel lNewLogLevel = Log::LEVEL_LOWEST_TYPE;
+				LogLevel lNewLogLevel = LEVEL_LOWEST_TYPE;
 				for (; x != lLogArray.end(); ++x)
 				{
-					(*x)->SetLevelThreashold((Log::LogLevel)lLogLevel);
+					(*x)->SetLevelThreashold((LogLevel)lLogLevel);
 					lNewLogLevel = (*x)->GetLevelThreashold();
 				}
 				mLog.Infof(_T("All logs levels' set to %i."), lNewLogLevel);
@@ -308,7 +308,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			{
 				mLog.Warningf(_T("usage: %s [<subsystem>] <log level>"), pCommand.c_str());
 				mLog.Warningf(_T("where subsystem is Root, Network, Game, UI..."));
-				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), Log::LEVEL_TYPE_COUNT-1);
+				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), LEVEL_TYPE_COUNT-1);
 				lResult = 1;
 			}
 		}

@@ -20,7 +20,8 @@ using namespace Lepra;
 
 
 #ifdef LEPRA_IOS
-@interface AnimatedApp: UIResponder <SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
+//@interface AnimatedApp: UIResponder <SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
+@interface AnimatedApp: UIResponder
 {
 @private
 	Canvas* _canvas;
@@ -28,7 +29,7 @@ using namespace Lepra;
 	//SKProduct* _requestedProduct;
 }
 
-@property(nonatomic, retain) SKProduct* requestedProduct;
+//@property(nonatomic, retain) SKProduct* requestedProduct;
 
 +(void) updateContent;
 +(void) storeHiscoreName;

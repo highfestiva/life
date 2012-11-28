@@ -20,7 +20,7 @@ namespace Lepra
 LogListener::LogListener(str pName, OutputFormat pFormat):
 	mLog(0),
 	mName(pName),
-	mLevel(Log::LEVEL_LOWEST_TYPE),
+	mLevel(LEVEL_LOWEST_TYPE),
 	mFormat(pFormat),
 	mLogCount(1)
 {
@@ -58,7 +58,7 @@ void LogListener::KillSelf()
 	}
 }
 
-void LogListener::OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, Log::LogLevel pLevel)
+void LogListener::OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel)
 {
 	if (mFormat & FORMAT_CLASS)
 	{
@@ -70,7 +70,7 @@ void LogListener::OnLog(const Log* pOriginator, const str& pAccount, const str& 
 	}
 }
 
-void LogListener::OnLog(const Log* pOriginator, const str& pMessage, Log::LogLevel pLevel)
+void LogListener::OnLog(const Log* pOriginator, const str& pMessage, LogLevel pLevel)
 {
 	if (pLevel < mLevel)
 	{
@@ -89,15 +89,15 @@ void LogListener::OnLog(const Log* pOriginator, const str& pMessage, Log::LogLev
 	{
 		switch(pLevel)
 		{
-			case Log::LEVEL_TRACE:		lOutputString += _T("TRACE:       ");	break;
-			case Log::LEVEL_DEBUG:		lOutputString += _T("DEBUG:       ");	break;
-			case Log::LEVEL_PERFORMANCE:	lOutputString += _T("PERFORMANCE: ");	break;
-			case Log::LEVEL_INFO:		lOutputString += _T("INFO:        ");	break;
-			case Log::LEVEL_HEADLINE:	lOutputString += _T("HEADLINE:    ");	break;
-			case Log::LEVEL_WARNING:	lOutputString += _T("WARNING:     ");	break;
-			case Log::LEVEL_ERROR:		lOutputString += _T("ERROR:       ");	break;
+			case LEVEL_TRACE:	lOutputString += _T("TRACE:       ");	break;
+			case LEVEL_DEBUG:	lOutputString += _T("DEBUG:       ");	break;
+			case LEVEL_PERFORMANCE:	lOutputString += _T("PERFORMANCE: ");	break;
+			case LEVEL_INFO:	lOutputString += _T("INFO:        ");	break;
+			case LEVEL_HEADLINE:	lOutputString += _T("HEADLINE:    ");	break;
+			case LEVEL_WARNING:	lOutputString += _T("WARNING:     ");	break;
+			case LEVEL_ERROR:	lOutputString += _T("ERROR:       ");	break;
 			default:	// Fall through.
-			case Log::LEVEL_FATAL:		lOutputString += _T("FATAL:       ");	break;
+			case LEVEL_FATAL:		lOutputString += _T("FATAL:       ");	break;
 		}
 	}
 
@@ -127,12 +127,12 @@ void LogListener::OnLog(const Log* pOriginator, const str& pMessage, Log::LogLev
 	WriteLog(lOutputString, pLevel);
 }
 
-Log::LogLevel LogListener::GetLevelThreashold() const
+LogLevel LogListener::GetLevelThreashold() const
 {
 	return (mLevel);
 }
 
-void LogListener::SetLevelThreashold(Log::LogLevel pLevel)
+void LogListener::SetLevelThreashold(LogLevel pLevel)
 {
 	mLevel = pLevel;
 }
@@ -154,7 +154,7 @@ StdioConsoleLogListener::~StdioConsoleLogListener()
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
-void StdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
+void StdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 {
 #if defined(LEPRA_WINDOWS)
 	HANDLE lStdOut = ::GetStdHandle(STD_OUTPUT_HANDLE);
@@ -163,15 +163,15 @@ void StdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pL
 	WORD lAttributes;
 	switch(pLevel)
 	{
-		case Log::LEVEL_TRACE:	// Fall through.
-		case Log::LEVEL_DEBUG:		lAttributes = FOREGROUND_BLUE;									break;
-		case Log::LEVEL_INFO:		lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;				break;
-		case Log::LEVEL_PERFORMANCE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_GREEN;						break;
-		case Log::LEVEL_HEADLINE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;	break;
-		case Log::LEVEL_WARNING:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;				break;
-		case Log::LEVEL_ERROR:		lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED;						break;
+		case LEVEL_TRACE:	// Fall through.
+		case LEVEL_DEBUG:		lAttributes = FOREGROUND_BLUE;									break;
+		case LEVEL_INFO:		lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;				break;
+		case LEVEL_PERFORMANCE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_GREEN;						break;
+		case LEVEL_HEADLINE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;	break;
+		case LEVEL_WARNING:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;				break;
+		case LEVEL_ERROR:		lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED;						break;
 		default:	// Fall through.
-		case Log::LEVEL_FATAL:		lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED;	break;
+		case LEVEL_FATAL:		lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED;	break;
 	}
 	::SetConsoleTextAttribute(lStdOut, lAttributes);
 	DWORD lNumChars = (DWORD)pFullMessage.length();
@@ -214,7 +214,7 @@ InteractiveStdioConsoleLogListener::~InteractiveStdioConsoleLogListener()
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
-void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
+void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 {
 	ScopeLock lLock(&mLock);
 
@@ -269,7 +269,7 @@ DebuggerLogListener::~DebuggerLogListener()
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
-void DebuggerLogListener::WriteLog(const str& pFullMessage, Log::LogLevel)
+void DebuggerLogListener::WriteLog(const str& pFullMessage, LogLevel)
 {
 #if !defined(NO_LOG_DEBUG_INFO)
 #if defined(LEPRA_WINDOWS)
@@ -307,7 +307,7 @@ File& FileLogListener::GetFile()
 	return (mFile);
 }
 
-void FileLogListener::WriteLog(const str& pFullMessage, Log::LogLevel)
+void FileLogListener::WriteLog(const str& pFullMessage, LogLevel)
 {
 	mFile.WriteString(pFullMessage);
 	mFile.Flush();
@@ -346,15 +346,15 @@ bool MemFileLogListener::Dump(const str& pFilename)
 
 bool MemFileLogListener::Dump(File& pFile)
 {
-	return (Dump(&pFile, 0, Log::LEVEL_LOWEST_TYPE));
+	return (Dump(&pFile, 0, LEVEL_LOWEST_TYPE));
 }
 
-bool MemFileLogListener::Dump(LogListener& pLogListener, Log::LogLevel pLevel)
+bool MemFileLogListener::Dump(LogListener& pLogListener, LogLevel pLevel)
 {
 	return (Dump(0, &pLogListener, pLevel));
 }
 
-bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, Log::LogLevel pLevel)
+bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, LogLevel pLevel)
 {
 	IOError lStatus = IO_OK;
 	str lLine;
@@ -387,12 +387,12 @@ bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, Log::LogLe
 	return (lStatus == IO_OK || lStatus == IO_BUFFER_UNDERFLOW);
 }
 
-void MemFileLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLogLevel)
+void MemFileLogListener::WriteLog(const str& pFullMessage, LogLevel pLogLevel)
 {
 	mFile.WriteString(pFullMessage);
 
 #ifndef NO_ASSERT_ON_LOG_FLOOD
-	if (pLogLevel >= Log::LEVEL_INFO)
+	if (pLogLevel >= LEVEL_INFO)
 	{
 		static size_t lSessionLogSize = 0;
 		lSessionLogSize += pFullMessage.length();

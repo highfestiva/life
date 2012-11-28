@@ -140,7 +140,7 @@ const str& Log::GetName() const
 	return (mName);
 }
 
-Log::LogLevel Log::GetLevelThreashold()const
+LogLevel Log::GetLevelThreashold()const
 {
 	return (mLevel);
 }
@@ -253,12 +253,12 @@ LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 #endif // MSVC/!MSVC
 }
 
-void LogDecorator::Print(Log::LogLevel pLogLevel, const str& pText) const
+void LogDecorator::Print(LogLevel pLogLevel, const str& pText) const
 {
 	mLog->Print(mClassName, pText, pLogLevel);
 }
 
-void LogDecorator::RawPrint(Log::LogLevel pLogLevel, const str& pText) const
+void LogDecorator::RawPrint(LogLevel pLogLevel, const str& pText) const
 {
 	mLog->RawPrint(pText, pLogLevel);
 }
@@ -276,83 +276,83 @@ void LogDecorator::RawPrint(Log::LogLevel pLogLevel, const str& pText) const
 #ifndef NO_LOG_DEBUG_INFO
 void LogDecorator::Tracef(const tchar* pText, ...) const
 {
-	StrVLog(Log::LEVEL_TRACE);
+	StrVLog(LEVEL_TRACE);
 }
 
 void LogDecorator::Trace(const str& pText) const
 {
-	Print(Log::LEVEL_TRACE, pText);
+	Print(LEVEL_TRACE, pText);
 }
 
 void LogDecorator::Debugf(const tchar* pText, ...) const
 {
-	StrVLog(Log::LEVEL_DEBUG);
+	StrVLog(LEVEL_DEBUG);
 }
 
 void LogDecorator::Debug(const str& pText) const
 {
-	Print(Log::LEVEL_DEBUG, pText);
+	Print(LEVEL_DEBUG, pText);
 }
 #endif // !NO_LOG_DEBUG_INFO
 
 void LogDecorator::Performancef(const tchar* pText, ...) const
 {
-	StrVLog(Log::LEVEL_PERFORMANCE);
+	StrVLog(LEVEL_PERFORMANCE);
 }
 
 void LogDecorator::Performance(const str& pText) const
 {
-	Print(Log::LEVEL_PERFORMANCE, pText);
+	Print(LEVEL_PERFORMANCE, pText);
 }
 
 void LogDecorator::Infof(const tchar* pText, ...) const
 {
-	StrVLog(Log::LEVEL_INFO);
+	StrVLog(LEVEL_INFO);
 }
 
 void LogDecorator::Info(const str& pText) const
 {
-	Print(Log::LEVEL_INFO, pText);
+	Print(LEVEL_INFO, pText);
 }
 
 void LogDecorator::Headlinef(const tchar* pText, ...) const
 {
-	StrVLog(Log::LEVEL_HEADLINE);
+	StrVLog(LEVEL_HEADLINE);
 }
 
 void LogDecorator::Headline(const str& pText) const
 {
-	Print(Log::LEVEL_HEADLINE, pText);
+	Print(LEVEL_HEADLINE, pText);
 }
 
 void LogDecorator::Warningf(const tchar* pText, ...) const
 {
-	StrVLog(Log::LEVEL_WARNING);
+	StrVLog(LEVEL_WARNING);
 }
 
 void LogDecorator::Warning(const str& pText) const
 {
-	Print(Log::LEVEL_WARNING, pText);
+	Print(LEVEL_WARNING, pText);
 }
 
 void LogDecorator::Errorf(const tchar* pText, ...) const
 {
-	StrVLog(Log::LEVEL_ERROR);
+	StrVLog(LEVEL_ERROR);
 }
 
 void LogDecorator::Error(const str& pText) const
 {
-	Print(Log::LEVEL_ERROR, pText);
+	Print(LEVEL_ERROR, pText);
 }
 
 void LogDecorator::Fatalf(const tchar* pText, ...) const
 {
-	StrVLog(Log::LEVEL_FATAL);
+	StrVLog(LEVEL_FATAL);
 }
 
 void LogDecorator::Fatal(const str& pText) const
 {
-	Print(Log::LEVEL_FATAL, pText);
+	Print(LEVEL_FATAL, pText);
 }
 
 const str& LogDecorator::GetClassName() const

@@ -93,6 +93,14 @@ const std::vector<Log*> LogType::GetLogs()
 	return lLogArray;
 }
 
+void LogType::SetLogLevel(LogLevel pLevel)
+{
+	for (int x = SUB_LOWEST_TYPE; x < SUB_TYPE_COUNT; ++x)
+	{
+		mLogArray[x]->SetLevelThreashold(pLevel);
+	}
+}
+
 
 
 bool LogType::mInitialized = false;

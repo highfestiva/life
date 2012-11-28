@@ -36,22 +36,22 @@ void ConsoleLogListener::SetOutputComponent(TextArea* pOutputComponent)
 
 
 
-void ConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
+void ConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 {
 	if (mOutputComponent)
 	{
 		Color lColor;
 		switch(pLevel)
 		{
-			case Log::LEVEL_TRACE:	// Fall through.
-			case Log::LEVEL_DEBUG:		lColor.Set(0.2f, 0.2f, 0.7f, 1.0f);	break;
-			case Log::LEVEL_INFO:		lColor.Set(0.7f, 0.7f, 0.7f, 1.0f);	break;
-			case Log::LEVEL_PERFORMANCE:	lColor.Set(0.0f, 1.0f, 0.0f, 1.0f);	break;
-			case Log::LEVEL_HEADLINE:	lColor.Set(1.0f, 1.0f, 1.0f, 1.0f);	break;
-			case Log::LEVEL_WARNING:	lColor.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
-			case Log::LEVEL_ERROR:		lColor.Set(1.0f, 0.0f, 0.0f, 1.0f);	break;
+			case LEVEL_TRACE:	// Fall through.
+			case LEVEL_DEBUG:		lColor.Set(0.2f, 0.2f, 0.7f, 1.0f);	break;
+			case LEVEL_INFO:		lColor.Set(0.7f, 0.7f, 0.7f, 1.0f);	break;
+			case LEVEL_PERFORMANCE:	lColor.Set(0.0f, 1.0f, 0.0f, 1.0f);	break;
+			case LEVEL_HEADLINE:	lColor.Set(1.0f, 1.0f, 1.0f, 1.0f);	break;
+			case LEVEL_WARNING:	lColor.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
+			case LEVEL_ERROR:		lColor.Set(1.0f, 0.0f, 0.0f, 1.0f);	break;
 			default:	// Fall through.
-			case Log::LEVEL_FATAL:		lColor.Set(1.0f, 0.5f, 0.0f, 1.0f);	break;
+			case LEVEL_FATAL:		lColor.Set(1.0f, 0.5f, 0.0f, 1.0f);	break;
 		}
 		str lText(pFullMessage);
 		if (mLineFeed)
@@ -80,7 +80,7 @@ void ConsoleLogListener::StepPage(int pPageCount)
 
 void ConsoleLogListener::OnLogRawMessage(const str& pText)
 {
-	WriteLog(pText, Log::LEVEL_INFO);
+	WriteLog(pText, LEVEL_INFO);
 }
 
 

@@ -9,12 +9,14 @@
 #pragma once
 
 #include <vector>
+#include "LogLevel.h"
 #include "String.h"
 
 
 
 namespace Lepra
 {
+
 
 
 class Log;
@@ -54,6 +56,7 @@ public:
 	static Log* GetLog(Subsystem pSubsystem);
 	static Log* GetLog(const str& pName);
 	static const std::vector<Log*> GetLogs();
+	static void SetLogLevel(LogLevel pLevel);
 
 private:
 	static bool mInitialized;

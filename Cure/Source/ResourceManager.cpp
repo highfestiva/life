@@ -150,7 +150,7 @@ Resource::Resource(ResourceManager* pManager, const str& pName):
 Resource::~Resource()
 {
 	mState = RESOURCE_LOAD_ERROR;
-	log_volatile(mLog.Tracef((_T("Deleting resource ")+mName).c_str(), Log::LEVEL_TRACE));
+	log_volatile(mLog.Tracef((_T("Deleting resource ")+mName).c_str(), LEVEL_TRACE));
 	mManager = 0;
 
 	CallbackList::iterator x = mLoadCallbackList.begin();

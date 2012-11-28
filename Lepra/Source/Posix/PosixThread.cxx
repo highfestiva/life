@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <time.h>
+#include "../../Include/LepraTarget.h"
 #include "../../Include/HiResTimer.h"
 #include "../../Include/Thread.h"
 
@@ -286,7 +287,13 @@ void* ThreadEntry(void* pThread)
 	assert(gThreadStorage.GetPointer() == lThread);
 	assert(Thread::GetCurrentThread() == lThread);
 	//InitializeSignalMask();
+#ifdef LEPRA_MAC
+	NSAutoreleasePool* lPool = [[NSAutoreleasePool alloc] init];
+#endif // !Apple
 	RunThread(lThread);
+#ifdef LEPRA_MAC
+	[lPool release];
+#endif // !Apple
 	return (0);
 }
 

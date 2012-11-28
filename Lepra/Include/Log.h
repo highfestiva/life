@@ -11,6 +11,7 @@
 #include <typeinfo>
 #include <vector>
 #include "LepraTypes.h"
+#include "LogLevel.h"
 #include "LogType.h"
 #include "String.h"
 
@@ -29,20 +30,6 @@ class SpinLock;
 class Log
 {
 public:
-	enum LogLevel
-	{
-		LEVEL_LOWEST_TYPE = 0,
-		LEVEL_TRACE = LEVEL_LOWEST_TYPE,	// Use for tracing where execution goes.
-		LEVEL_DEBUG,				// Used for developer information messages. Will not be logged in the final version.
-		LEVEL_PERFORMANCE,			// Use when printing performance data.
-		LEVEL_INFO,				// Used for normal logging.
-		LEVEL_HEADLINE,				// Used for important events.
-		LEVEL_WARNING,				// Used for non critical errors.
-		LEVEL_ERROR,				// Used for critical errors.
-		LEVEL_FATAL,				// Even more critial, when it's time to panic or something... :)
-		LEVEL_TYPE_COUNT
-	};
-
 	Log(const str& pName, Log* pParent, LogLevel pLevel = LEVEL_INFO);
 	virtual ~Log();
 	void SetupBasicListeners(LogListener* pConsole = 0, LogListener* pDebug = 0,
@@ -74,8 +61,8 @@ class LogDecorator
 public:
 	LogDecorator(Log* pLog, const std::type_info& pTypeId);
 
-	void Print(Log::LogLevel pLogLevel, const str& pText) const;
-	void RawPrint(Log::LogLevel pLogLevel, const str& pText) const;
+	void Print(LogLevel pLogLevel, const str& pText) const;
+	void RawPrint(LogLevel pLogLevel, const str& pText) const;
 #ifndef NO_LOG_DEBUG_INFO
 	void Tracef(const tchar* pText, ...) const;
 	void Trace(const str& pText) const;

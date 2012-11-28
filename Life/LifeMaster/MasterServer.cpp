@@ -265,11 +265,11 @@ bool MasterServer::RegisterGameServer(const ServerInfo& pServerInfo, UdpVSocket*
 		}
 		if (lOk)
 		{
-			mLog.RawPrint(Log::LEVEL_DEBUG, _T("----------------------------------------\nServer list:\n"));
+			mLog.RawPrint(LEVEL_DEBUG, _T("----------------------------------------\nServer list:\n"));
 			GameServerTable::iterator x = mGameServerTable.begin();
 			for (; x != mGameServerTable.end(); ++x)
 			{
-				mLog.RawPrint(Log::LEVEL_DEBUG, x->second.mName + _T(" @ ") + x->first + _T("\n"));
+				mLog.RawPrint(LEVEL_DEBUG, x->second.mName + _T(" @ ") + x->first + _T("\n"));
 			}
 		}
 	}

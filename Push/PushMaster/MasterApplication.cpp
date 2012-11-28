@@ -4,9 +4,10 @@
 
 
 
-#include "../../TBC/Include/TBC.h"
+#include "../../Lepra/Include/LogLevel.h"
 #include "../../Life/LifeMaster/MasterServer.h"
 #include "../../Life/LifeApplication.h"
+#include "../../TBC/Include/TBC.h"
 #include "../Push.h"
 #include "../Version.h"
 #include "MasterServerPort.h"
@@ -68,6 +69,8 @@ void MasterApplication::Init()
 	Cure::Init();
 
 	Parent::Init();
+
+	//LogType::SetLogLevel(LEVEL_TRACE);
 }
 
 Cure::ApplicationTicker* MasterApplication::CreateTicker() const

@@ -45,8 +45,8 @@ Application::Application(const str& pName, const strutil::strvec& pArgumentList)
 
 Application::~Application()
 {
-	mLog.RawPrint(Log::LEVEL_HEADLINE, _T("The end. Baba!\n"));
-	mFileLogger->WriteLog(_T("---\n\n"), Log::LEVEL_INFO);
+	mLog.RawPrint(LEVEL_HEADLINE, _T("The end. Baba!\n"));
+	mFileLogger->WriteLog(_T("---\n\n"), LEVEL_INFO);
 
 	// Kill all loggers, hopefully we don't need to log anything else.
 	delete (mConsoleLogger);
@@ -76,19 +76,19 @@ void Application::Init()
 	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, mName);
 
 	mConsoleLogger = CreateConsoleLogListener();
-	//mConsoleLogger->SetLevelThreashold(Log::LEVEL_INFO);
+	//mConsoleLogger->SetLevelThreashold(LEVEL_INFO);
 #ifndef NO_LOG_DEBUG_INFO
 	mDebugLogger = new DebuggerLogListener();
 #endif // Showing debug information.
 	mFileLogger = new FileLogListener(GetIoFile(GetName(), _T("log"), false));
-	//mFileLogger->SetLevelThreashold(Log::LEVEL_INFO);
-	mFileLogger->WriteLog(_T("\n---\n"), Log::LEVEL_INFO);
+	//mFileLogger->SetLevelThreashold(LEVEL_INFO);
+	mFileLogger->WriteLog(_T("\n---\n"), LEVEL_INFO);
 	//mPerformanceLogger = new FileLogListener(GetIoFile(GetName()+_T("Performance"), _T("log"), false));
 	mMemLogger = new MemFileLogListener(20*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
 	str lStartMessage = _T("Starting ") + mName + _T(" ") + GetName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
-	mLog.RawPrint(Log::LEVEL_HEADLINE, lStartMessage);
+	mLog.RawPrint(LEVEL_HEADLINE, lStartMessage);
 
 	const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 	log_volatile(mLog.Debugf(_T("Using path prefix: %s"), lPathPrefix.c_str()));
@@ -152,9 +152,9 @@ bool Application::MainLoop()
 		mLog.AFatal("Terminating application due to fatal error.");
 		if (mMemLogger && mFileLogger)
 		{
-			mLog.RawPrint(Log::LEVEL_FATAL, _T("\nStart dump hires logs.\n--------------------------------------------------------------------------------\n"));
+			mLog.RawPrint(LEVEL_FATAL, _T("\nStart dump hires logs.\n--------------------------------------------------------------------------------\n"));
 			mMemLogger->Dump(mFileLogger->GetFile());
-			mLog.RawPrint(Log::LEVEL_FATAL, _T("--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n"));
+			mLog.RawPrint(LEVEL_FATAL, _T("--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n"));
 		}
 	}
 	return lOk;

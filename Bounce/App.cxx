@@ -423,7 +423,7 @@ int App::Run()
 		std::vector<Log*>::const_iterator x = lLogArray.begin();
 		for (; x != lLogArray.end(); ++x)
 		{
-			(*x)->SetLevelThreashold(Log::LEVEL_INFO);
+			(*x)->SetLevelThreashold(LEVEL_INFO);
 		}
 	}
 
