@@ -656,6 +656,17 @@ void InputManager::ClearFunctors()
 	}
 }
 
+void InputManager::AddInputDevice(InputDevice* pDevice)
+{
+	mDeviceList.push_back(pDevice);
+}
+
+void InputManager::DeleteInputDevice(InputDevice* pDevice)
+{
+	mDeviceList.remove(pDevice);
+	delete pDevice;
+}
+
 void InputManager::ActivateAll()
 {
 	DeviceList::iterator x;

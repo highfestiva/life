@@ -84,8 +84,6 @@ public:
 
 	virtual void PollEvents();
 
-	bool HaveRelativeAxes();
-
 protected:
 private:
 	static BOOL CALLBACK EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef);

@@ -182,11 +182,6 @@ void MacInputDevice::PollEvents()
 	}
 }
 
-bool MacInputDevice::HaveRelativeAxes()
-{
-	return (mRelAxisCount > mAbsAxisCount);
-}
-
 void MacInputDevice::EnumElements()
 {
 	pRecElement lCurrentElement = HIDGetFirstDeviceElement(mNativeDevice, kHIDElementTypeInput);

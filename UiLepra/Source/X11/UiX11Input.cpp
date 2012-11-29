@@ -380,11 +380,6 @@ void X11InputDevice::PollEvents()
 	}
 }
 
-bool X11InputDevice::HaveRelativeAxes()
-{
-	return (mRelAxisCount > mAbsAxisCount);
-}
-
 
 
 LOG_CLASS_DEFINE(UI_INPUT, X11InputDevice);

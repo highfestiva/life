@@ -378,11 +378,6 @@ void Win32InputDevice::PollEvents()
 	}
 }
 
-bool Win32InputDevice::HaveRelativeAxes()
-{
-	return (mRelAxisCount > mAbsAxisCount);
-}
-
 
 
 LOG_CLASS_DEFINE(UI_INPUT, Win32InputDevice);

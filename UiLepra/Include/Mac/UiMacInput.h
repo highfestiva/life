@@ -70,8 +70,6 @@ public:
 
 	virtual void PollEvents();
 
-	bool HaveRelativeAxes();
-
 protected:
 private:
 	void EnumElements();

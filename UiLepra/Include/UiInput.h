@@ -179,7 +179,7 @@ public:
 		TYPE_WHEEL,
 		TYPE_FLIGHT,
 		TYPE_OTHER,
-		TYPE_COUNT = TYPE_OTHER+1
+		TYPE_COUNT
 	};
 
 	typedef std::pair<str, str> CalibrationElement;
@@ -474,7 +474,10 @@ public:
 	// The input manager takes care of deleting the functor.
 	void AddFunctor(InputFunctor* pFunctor);
 	void ClearFunctors();
-	
+
+	void AddInputDevice(InputDevice* pDevice);
+	void DeleteInputDevice(InputDevice* pDevice);
+
 	// Activase/release all devices.
 	void ActivateAll();
 	void ReleaseAll();

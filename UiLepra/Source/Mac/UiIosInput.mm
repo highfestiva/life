@@ -146,11 +146,6 @@ void IosInputDevice::PollEvents()
 	}
 }
 
-bool IosInputDevice::HaveRelativeAxes()
-{
-	return (mRelAxisCount > mAbsAxisCount);
-}
-
 void IosInputDevice::AddElement(InputElement* pElement)
 {
 	mElementArray.push_back(pElement);

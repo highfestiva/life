@@ -485,6 +485,14 @@
 				RelativePath=".\Include\UiSoundManagerOpenAL.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Include\UiTouchDrag.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiTouchstick.h"
+				>
+			</File>
 			<Filter
 				Name="Win32"
 				>
@@ -613,6 +621,14 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiSoundStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiTouchDrag.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiTouchstick.cpp"
 				>
 			</File>
 			<Filter

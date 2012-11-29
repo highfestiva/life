@@ -35,11 +35,11 @@ public:
 	virtual ~Push();
 	virtual void Init();
 	virtual bool MainLoop();
+	virtual bool Tick();
 
 	virtual void Suspend();
 	virtual void Resume();
 
-private:
 	str GetName() const;
 	str GetVersion() const;
 	Cure::ApplicationTicker* CreateTicker() const;
@@ -125,6 +125,11 @@ bool Push::MainLoop()
 	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
 	return true;
 #endif // !iOS/iOS
+}
+
+bool Push::Tick()
+{
+	Parent::Tick();
 }
 
 

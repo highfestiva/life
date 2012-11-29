@@ -63,8 +63,6 @@ public:
 
 	virtual void PollEvents();
 
-	bool HaveRelativeAxes();
-
 	void AddElement(InputElement* pElement);
 
 protected:

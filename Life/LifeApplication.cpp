@@ -29,12 +29,12 @@ namespace Life
 
 
 
-Application::Application(const str& pName, const strutil::strvec& pArgumentList):
+Application::Application(const str& pBaseName, const strutil::strvec& pArgumentList):
 	Lepra::Application(pArgumentList),
 	mResourceManager(0),
 	mGameTicker(0),
 	mConsoleLogger(0),
-	mName(pName),
+	mBaseName(pBaseName),
 	mIsPowerSaving(false),
 	mDebugLogger(0),
 	mFileLogger(0),
@@ -73,7 +73,7 @@ void Application::Init()
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
-	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, mName);
+	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, mBaseName);
 
 	mConsoleLogger = CreateConsoleLogListener();
 	//mConsoleLogger->SetLevelThreashold(LEVEL_INFO);
@@ -87,7 +87,7 @@ void Application::Init()
 	mMemLogger = new MemFileLogListener(20*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
-	str lStartMessage = _T("Starting ") + mName + _T(" ") + GetName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
+	str lStartMessage = _T("Starting ") + mBaseName + _T(" ") + GetName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
 	mLog.RawPrint(LEVEL_HEADLINE, lStartMessage);
 
 	const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
@@ -131,11 +131,6 @@ bool Application::MainLoop()
 	{
 		LEPRA_MEASURE_SCOPE(AppTick);
 		lOk = Tick();
-		if (lOk)
-		{
-			LEPRA_MEASURE_SCOPE(AppSleep);
-			TickSleep(mTimeInfo.GetSlidingAverage());
-		}
 		lQuit = mGameTicker->QueryQuit();
 	}
 
@@ -176,6 +171,11 @@ bool Application::Tick()
 	if (lExtraSleep > 0)
 	{
 		Thread::Sleep(lExtraSleep);
+	}
+	if (lOk)
+	{
+		LEPRA_MEASURE_SCOPE(AppSleep);
+		TickSleep(mTimeInfo.GetSlidingAverage());
 	}
 	return lOk;
 }

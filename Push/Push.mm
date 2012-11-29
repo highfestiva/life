@@ -8,7 +8,7 @@
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
 #endif // iOS
-#include "../Life/LifeClient/TouchDrag.h"
+#include "../UiLepra/Include/UiTouchDrag.h"
 
 
 namespace Lepra
@@ -25,6 +25,7 @@ using namespace Lepra;
 {
 @private
 	Canvas* _canvas;
+	UiLepra::Touch::DragManager _dragManager;
 	NSTimer* _animationTimer;
 	//SKProduct* _requestedProduct;
 }
@@ -38,7 +39,6 @@ using namespace Lepra;
 -(void) startTick;
 -(void) stopTick;
 -(void) tick;
--(void) dropFingerMovements;
 
 //-(void) startPurchase:(NSString*)productName;
 //-(void) completeTransaction:(SKPaymentTransaction*)transaction;
@@ -58,11 +58,11 @@ using namespace Lepra;
 
 #import "../UiLepra/Include/Mac/EAGLView.h"
 
-#define HISCORE_NAME_KEY @"HiscoreName"
+//#define HISCORE_NAME_KEY @"HiscoreName"
 
 @implementation AnimatedApp
 
-@synthesize requestedProduct = _requestedProduct;
+//@synthesize requestedProduct = _requestedProduct;
 
 +(void) updateContent
 {
@@ -128,43 +128,9 @@ using namespace Lepra;
 	else
 	{
 		lGlView.canvas = _canvas;
-		// TODO: virtual joysticks!
-		[self dropFingerMovements];
+		_dragManager->UpdateTouchsticks(Push::Push::GetApp()->mUiManager->GetInputManager());
+		_dragManager.DropReleasedDrags();
 		Push::Push::GetApp()->Tick();
-	}
-}
-
--(Life::Touch::Drag&) getFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
-{
-	Life::Touch::DragList::iterator i = Life::Touch::gDragList.begin();
-	for (; i != Life::Touch::gDragList.end(); ++i)
-	{
-		//NSLog(@"get: (%i; %i) ==? (%i; %i)", (int)i->mLastX, (int)i->mLastY, (int)pLocation.x, (int)pLocation.y);
-		if (i->Update(pPrevious.x, pPrevious.y, pLocation.x, pLocation.y))
-		{
-			//NSLog(@"get: Match!");
-			return *i;
-		}
-	}
-	Life::Touch::gDragList.push_back(Life::Touch::Drag(pLocation.x, pLocation.y));
-	return Life::Touch::gDragList.back();
-}
-
--(void) dropFingerMovements
-{
-	Life::Touch::DragList::iterator i = Life::Touch::gDragList.begin();
-	for (; i != Life::Touch::gDragList.end();)
-	{
-		if (!i->mIsPress)
-		{
-			Life::Touch::gDragList.erase(i++);
-			//return;
-		}
-		else
-		{
-			++i;
-		}
-
 	}
 }
 
@@ -192,8 +158,7 @@ using namespace Lepra;
 		CGPoint lTapPosition = [lTouch locationInView:nil];
 		CGPoint lPrevTapPosition = [lTouch previousLocationInView:nil];
 		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
-		Life::Touch::Drag& lMove = [self getFingerMovement:lTapPosition previous:lPrevTapPosition];
-		lMove.mIsPress = lIsPressed;
+		_dragManager.UpdateDrag(PixelCoord(lPrevTapPosition.x, lPrevTapPosition.y), PixelCoord(lTapPosition.x, lTapPosition.y), lIsPressed);
 	}
 }
 

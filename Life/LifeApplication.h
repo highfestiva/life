@@ -30,7 +30,7 @@ namespace Life
 class Application: public Lepra::Application
 {
 public:
-	Application(const str& pName, const strutil::strvec& pArgumentList);
+	Application(const str& pBaseName, const strutil::strvec& pArgumentList);
 	virtual ~Application();
 	void Init();
 	int Run();
@@ -54,7 +54,7 @@ protected:
 private:
 	void TickSleep(double pMeasuredFrameTime) const;
 
-	str mName;
+	str mBaseName;
 	mutable bool mIsPowerSaving;
 
 	LogListener* mDebugLogger;
