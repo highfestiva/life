@@ -126,7 +126,6 @@ protected:
 	Cure::ResourceManager* mResourceManager;
 
 	UiGameServerManager* mServer;
-	Cure::TimeManager* mServerTimeManager;
 	MasterServerConnection* mMasterConnection;
 	Cure::NetworkFreeAgent* mFreeNetworkAgent;
 

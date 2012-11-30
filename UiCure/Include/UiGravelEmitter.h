@@ -33,7 +33,6 @@ public:
 	GameUiManager* mUiManager;
 	str mParticleClass;
 	HiResTimer mParticleTimer;
-	Cure::GameObjectId mLastCollidedId;
 	float mSensitivityFactor;
 	float mScale;
 	float mDelay;

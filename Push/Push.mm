@@ -8,7 +8,6 @@
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
 #endif // iOS
-#include "../UiLepra/Include/UiTouchDrag.h"
 
 
 namespace Lepra
@@ -25,7 +24,6 @@ using namespace Lepra;
 {
 @private
 	Canvas* _canvas;
-	UiLepra::Touch::DragManager _dragManager;
 	NSTimer* _animationTimer;
 	//SKProduct* _requestedProduct;
 }
@@ -128,8 +126,6 @@ using namespace Lepra;
 	else
 	{
 		lGlView.canvas = _canvas;
-		_dragManager->UpdateTouchsticks(Push::Push::GetApp()->mUiManager->GetInputManager());
-		_dragManager.DropReleasedDrags();
 		Push::Push::GetApp()->Tick();
 	}
 }
@@ -158,7 +154,7 @@ using namespace Lepra;
 		CGPoint lTapPosition = [lTouch locationInView:nil];
 		CGPoint lPrevTapPosition = [lTouch previousLocationInView:nil];
 		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
-		_dragManager.UpdateDrag(PixelCoord(lPrevTapPosition.x, lPrevTapPosition.y), PixelCoord(lTapPosition.x, lTapPosition.y), lIsPressed);
+		Push::Push::GetApp()->mDragManager.UpdateDrag(PixelCoord(lPrevTapPosition.x, lPrevTapPosition.y), PixelCoord(lTapPosition.x, lTapPosition.y), lIsPressed);
 	}
 }
 

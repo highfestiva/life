@@ -8,7 +8,7 @@
 #include "../Lepra/Include/SystemManager.h"
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiLepra/Include/UiTouchstick.h"
+#include "../UiLepra/Include/UiTouchDrag.h"
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiTBC/Include/UiTBC.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
@@ -51,17 +51,13 @@ public:
 	str GetVersion() const;
 	Cure::ApplicationTicker* CreateTicker() const;
 
-	UiCure::GameUiManager* mUiManager;
-
 	static Push* mApp;
 #ifdef LEPRA_TOUCH
 	AnimatedApp* mAnimatedApp;
 #endif // Touch
-#ifdef EMULATE_TOUCH
+
+	UiCure::GameUiManager* mUiManager;
 	UiLepra::Touch::DragManager mDragManager;
-	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
-	Touchstick* mStick1;
-#endif // Emulate touch
 
 	LOG_CLASS_DECLARE();
 };
@@ -93,9 +89,6 @@ Push::Push(const strutil::strvec& pArgumentList):
 	mUiManager(0)
 {
 	mApp = this;
-#ifdef EMULATE_TOUCH
-	mStick1 = 0;
-#endif // Emulate touch
 }
 
 Push::~Push()
@@ -134,13 +127,6 @@ void Push::Init()
 
 bool Push::MainLoop()
 {
-#ifdef EMULATE_TOUCH
-	if (!mStick1)
-	{
-		mStick1 = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 100, 100));
-	}
-#endif // Emulate touch
-
 #ifndef LEPRA_IOS
 	return Parent::MainLoop();
 #else // iOS
@@ -154,9 +140,10 @@ bool Push::Tick()
 {
 #ifdef EMULATE_TOUCH
 	mDragManager.UpdateDragByMouse(mUiManager->GetInputManager());
+#endif // Emulate touch
 	mDragManager.UpdateTouchsticks(mUiManager->GetInputManager());
 	mDragManager.DropReleasedDrags();
-#endif // Emulate touch
+
 	return Parent::Tick();
 }
 

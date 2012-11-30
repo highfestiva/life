@@ -26,7 +26,6 @@ GravelEmitter::GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiMana
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
 	mParticleClass(pParticleClass),
-	mLastCollidedId(0),
 	mSensitivityFactor(1/pSensitivity),
 	mScale(pScale),
 	mDelay(1/pAmount),
@@ -53,7 +52,7 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	{
 		return;
 	}
-	if (mLastCollidedId == pOtherObject->GetInstanceId() && mParticleTimer.QueryTimeDiff() < mDelay)
+	if (mParticleTimer.QueryTimeDiff() < mDelay)
 	{
 		return;
 	}
@@ -112,7 +111,6 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 		lPuff->StartParticle(Props::PARTICLE_SOLID, lRelativeVelocity, mScale, 2, mLifeTime);
 		lPuff->StartLoading();
 		mParticleTimer.ClearTimeDiff();
-		mLastCollidedId = pOtherObject->GetInstanceId();
 	}
 }
 

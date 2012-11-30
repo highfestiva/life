@@ -39,16 +39,22 @@ TouchstickInputDevice* TouchstickInputDevice::GetByCoordinate(InputManager* pMan
 
 
 
-TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea):
+TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle):
 	Parent(pManager),
 	mMode(pMode),
-	mArea(pArea)
+	mArea(pArea),
+	mAngle(pAngle)
 {
+	if (mAngle < -45)
+	{
+		mAngle += 360;
+	}
 	GetManager()->AddInputDevice(this);
 }
 
 TouchstickInputDevice::~TouchstickInputDevice()
 {
+	GetManager()->RemoveInputDevice(this);
 }
 
 
@@ -97,8 +103,28 @@ void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
 		}
 		break;
 	}
-	x = Math::Clamp(rx, -1.0f, +1.0f);
-	y = Math::Clamp(ry, -1.0f, +1.0f);
+	rx = Math::Clamp(rx, -1.0f, +1.0f);
+	ry = Math::Clamp(ry, -1.0f, +1.0f);
+	// Handle the angles.
+	if (mAngle < 45)
+	{
+	}
+	else if (mAngle < 135)
+	{
+		rx = -rx;
+		std::swap(rx, ry);
+	}
+	else if (mAngle < 225)
+	{
+		rx = -rx;
+		ry = -ry;
+	}
+	else
+	{
+		std::swap(rx, ry);
+	}
+	x = rx;
+	y = ry;
 	pIsPressing = mIsPressing;
 }
 

@@ -45,7 +45,6 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mUiManager(pUiManager),
 	mResourceManager(pResourceManager),
 	mServer(0),
-	mServerTimeManager(new Cure::TimeManager),
 	mMasterConnection(0),
 	mFreeNetworkAgent(new Cure::NetworkFreeAgent),
 	mRestartUi(false),
@@ -136,7 +135,6 @@ bool GameClientMasterTicker::Tick()
 	LEPRA_MEASURE_SCOPE(MasterTicker);
 
 	GetTimeManager()->Tick();
-	mServerTimeManager->Tick();
 
 	bool lOk = true;
 
@@ -447,7 +445,7 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 	if (lIsLocalServer && !mServer)
 	{
 		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(UiCure::GetSettings());
-		UiGameServerManager* lServer = new UiGameServerManager(mServerTimeManager, lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
+		UiGameServerManager* lServer = new UiGameServerManager(GetTimeManager(), lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
 		lServer->SetTicker(this);
 		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
 		if (!lServer->Initialize(mMasterConnection))

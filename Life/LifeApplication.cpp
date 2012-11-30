@@ -126,7 +126,6 @@ bool Application::MainLoop()
 {
 	bool lOk = true;
 	bool lQuit = false;
-	mTimeInfo.Set(1.0/CURE_STANDARD_FRAME_RATE, 1.0/CURE_STANDARD_FRAME_RATE, 1.0/CURE_STANDARD_FRAME_RATE);
 	while (lOk && !lQuit)
 	{
 		LEPRA_MEASURE_SCOPE(AppTick);
@@ -157,7 +156,6 @@ bool Application::MainLoop()
 
 bool Application::Tick()
 {
-	ScopeTimer lSleepTimer(&mTimeInfo);
 	bool lDebug;
 	CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	if (lDebug)
@@ -175,7 +173,7 @@ bool Application::Tick()
 	if (lOk)
 	{
 		LEPRA_MEASURE_SCOPE(AppSleep);
-		TickSleep(mTimeInfo.GetSlidingAverage());
+		TickSleep();
 	}
 	return lOk;
 }
@@ -218,7 +216,7 @@ LogListener* Application::CreateConsoleLogListener() const
 
 
 
-void Application::TickSleep(double pMeasuredFrameTime) const
+void Application::TickSleep() const
 {
 	float lPowerSaveFactor;
 	CURE_RTVAR_GET(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
@@ -243,16 +241,15 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		int lFps;
 		CURE_RTVAR_GET(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
-		const double lSleepTime = lWantedFrameTime - pMeasuredFrameTime - mGameTicker->GetTickTimeReduction();
-		const double MINIMUM_SLEEP_TIME = 0.001;
+		const double lSleepTime = lWantedFrameTime - mGameTicker->GetTickTimeReduction();
 		const double MAXIMUM_SLEEP_TIME = 0.01;
-		if (lSleepTime >= MINIMUM_SLEEP_TIME)
+		if (lSleepTime >= 0)
 		{
 			double lSleepTimeLeft = lSleepTime;
 			HiResTimer lSleepTimer;
-			while (lSleepTimeLeft >= MINIMUM_SLEEP_TIME)
+			while (lSleepTimeLeft >= 0)
 			{
-				if (lSleepTimeLeft > MAXIMUM_SLEEP_TIME*1.5)
+				if (lSleepTimeLeft > MAXIMUM_SLEEP_TIME*1.7)
 				{
 					mGameTicker->PollRoundTrip();
 					Thread::Sleep(MAXIMUM_SLEEP_TIME);
@@ -267,9 +264,11 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 				}
 				lSleepTimeLeft = lSleepTime - lSleepTimer.QueryTimeDiff();
 			}
+			//log_volatile(mLog.Debugf(_T("Done tick sleeping, %f s left in sleep loop (measured), %f s reduction, %f s measured."), lSleepTimeLeft, mGameTicker->GetTickTimeReduction(), lSleepTime));
 		}
 		else
 		{
+			//log_volatile(mLog.Debugf(_T("Skipping tick sleep (yield only), %f s left in sleep loop, %f s reduction."), lSleepTime, mGameTicker->GetTickTimeReduction()));
 			Thread::YieldCpu();	// Play nice even though time's up!
 		}
 	}

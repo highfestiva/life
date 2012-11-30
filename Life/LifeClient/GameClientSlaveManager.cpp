@@ -835,13 +835,19 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 		case Cure::MessageNumber::INFO_SET_TIME:
 		{
 			log_volatile(mLog.Tracef(_T("Setting physics frame to %i."), pInteger));
-			GetMaster()->GetTimeManager()->SetCurrentPhysicsFrame(pInteger);
+			if (!GetMaster()->IsLocalServer())
+			{
+				GetMaster()->GetTimeManager()->SetCurrentPhysicsFrame(pInteger);
+			}
 		}
 		break;
 		case Cure::MessageNumber::INFO_ADJUST_TIME:
 		{
 			log_atrace("Adjusting time.");
-			GetMaster()->GetTimeManager()->SetPhysicsSpeedAdjustment(pFloat, pInteger);
+			if (!GetMaster()->IsLocalServer())
+			{
+				GetMaster()->GetTimeManager()->SetPhysicsSpeedAdjustment(pFloat, pInteger);
+			}
 		}
 		break;
 		case Cure::MessageNumber::INFO_PONG:

@@ -14,6 +14,13 @@
 
 
 
+namespace UiLepra
+{
+namespace Touch
+{
+class TouchstickInputDevice;
+}
+}
 namespace UiCure
 {
 class CollisionSoundManager;
@@ -98,6 +105,7 @@ protected:
 	QuaternionF GetCameraQuaternion() const;
 
 	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
+	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 
@@ -130,6 +138,9 @@ protected:
 	float mCameraMaxSpeed;			// TODO: remove hack (should context object controlled)!
 	Vector3DF mMicrophoneSpeed;		// TODO: remove hack (should context object controlled)!
 	UiTbc::Window* mLoginWindow;
+
+	Touchstick* mStickLeft;
+	Touchstick* mStickRight;
 
 	struct EnginePower	// Used for recording vechile steering playback.
 	{

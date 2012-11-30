@@ -8,8 +8,6 @@
 
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/LogListener.h"
-#include "../Lepra/Include/Performance.h"
-#include "../Lepra/Include/String.h"
 #include "Life.h"
 
 
@@ -52,7 +50,7 @@ protected:
 	LogListener* mConsoleLogger;
 
 private:
-	void TickSleep(double pMeasuredFrameTime) const;
+	void TickSleep() const;
 
 	str mBaseName;
 	mutable bool mIsPowerSaving;
@@ -61,8 +59,6 @@ private:
 	FileLogListener* mFileLogger;
 	LogListener* mPerformanceLogger;
 	MemFileLogListener* mMemLogger;
-
-	PerformanceData mTimeInfo;
 
 	LOG_CLASS_DECLARE();
 };

@@ -675,10 +675,9 @@ void InputManager::AddInputDevice(InputDevice* pDevice)
 	mDeviceList.push_back(pDevice);
 }
 
-void InputManager::DeleteInputDevice(InputDevice* pDevice)
+void InputManager::RemoveInputDevice(InputDevice* pDevice)
 {
 	mDeviceList.remove(pDevice);
-	delete pDevice;
 }
 
 void InputManager::ActivateAll()

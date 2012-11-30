@@ -17,6 +17,7 @@
 #include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiProps.h"
+#include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "Level.h"
@@ -67,6 +68,15 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance*3, 0);
 
 	SetConsoleManager(new PushConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
+
+	PixelRect lLeftStickArea(pRenderArea);
+	PixelRect lRightStickArea(pRenderArea);
+	lLeftStickArea.mRight = pRenderArea.GetWidth() / 4;
+	lRightStickArea.mLeft = pRenderArea.GetWidth() * 3 / 4;
+	lLeftStickArea.mTop = lLeftStickArea.mBottom - (lLeftStickArea.mRight - lLeftStickArea.mLeft);
+	lRightStickArea.mTop = lLeftStickArea.mTop;
+	mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lLeftStickArea,  0);
+	mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lRightStickArea, 0);
 }
 
 PushManager::~PushManager()
@@ -101,6 +111,10 @@ void PushManager::Close()
 	ClearRoadSigns();
 	Parent::Close();
 	CloseLoginGui();
+	delete mStickLeft;
+	mStickLeft = 0;
+	delete mStickRight;
+	mStickRight = 0;
 }
 
 void PushManager::SetIsQuitting()

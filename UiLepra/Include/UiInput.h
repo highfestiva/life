@@ -476,7 +476,7 @@ public:
 	void ClearFunctors();
 
 	void AddInputDevice(InputDevice* pDevice);
-	void DeleteInputDevice(InputDevice* pDevice);
+	void RemoveInputDevice(InputDevice* pDevice);
 
 	// Activase/release all devices.
 	void ActivateAll();
