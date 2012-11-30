@@ -496,7 +496,8 @@ public:
 	// Range: [-1, 1] (Left and right, up and down)
 	virtual float GetCursorX() = 0;
 	virtual float GetCursorY() = 0;
-	virtual void SetMousePosition(int x, int y) = 0;
+	void GetMousePosition(int& x, int& y) const;
+	virtual void SetMousePosition(int x, int y);
 
 	bool NotifyOnChar(tchar pChar);
 	bool NotifyOnKeyDown(KeyCode pKeyCode);
@@ -525,6 +526,8 @@ private:
 	MouseObserverList mMouseObserverList;
 
 	bool mKeyDown[256];
+	int mMouseX;
+	int mMouseY;
 
 	LOG_CLASS_DECLARE();
 };

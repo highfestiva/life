@@ -429,6 +429,8 @@ LOG_CLASS_DEFINE(UI_INPUT, InputDevice);
 InputManager::InputManager()
 {
 	::memset(mKeyDown, 0, sizeof(mKeyDown));
+	mMouseX = 0;
+	mMouseY = 0;
 }
 
 InputManager::~InputManager()
@@ -468,6 +470,18 @@ void InputManager::AddMouseInputObserver(MouseInputObserver* pListener)
 void InputManager::RemoveMouseInputObserver(MouseInputObserver* pListener)
 {
 	mMouseObserverList.erase(pListener);
+}
+
+void InputManager::GetMousePosition(int& x, int& y) const
+{
+	x = mMouseX;
+	y = mMouseY;
+}
+
+void InputManager::SetMousePosition(int x, int y)
+{
+	mMouseX = x;
+	mMouseY = y;
 }
 
 bool InputManager::NotifyOnChar(tchar pChar)

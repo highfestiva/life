@@ -667,6 +667,7 @@ float MacInputManager::GetCursorY()
 
 void MacInputManager::SetMousePosition(int x, int y)
 {
+	Parent::SetMousePosition(x, mScreenHeight-y);
 	mCursorX = 2.0 * x / mScreenWidth  - 1.0;
 	mCursorY = 2.0 * (mScreenHeight-y) / mScreenHeight - 1.0;
 }

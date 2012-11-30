@@ -17,7 +17,6 @@ namespace UiLepra
 
 
 
-class InputDevice;
 class InputManager;
 
 
@@ -33,7 +32,7 @@ using namespace Lepra;
 
 struct Drag
 {
-	Drag(int x, int y);
+	Drag(int x, int y, bool isPress);
 	bool Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress);
 
 	PixelCoord mStart;
@@ -46,17 +45,19 @@ struct Drag
 
 class DragManager
 {
+public:
 	DragManager();
 	virtual ~DragManager();
 
 	void UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed);
-	void UpdateDragByMouse(InputDevice* pMouse) const;
+	void UpdateDragByMouse(const InputManager* pInputManager);
 	void UpdateTouchsticks(InputManager* pInputManager) const;
 	void DropReleasedDrags();
 
 private:
 	typedef std::list<Drag> DragList;
 	DragList mDragList;
+	PixelCoord mLastMouse;
 };
 
 

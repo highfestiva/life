@@ -4,8 +4,6 @@
 
 
 
-#pragma once
-
 #include "../Include/UiTouchDrag.h"
 #include "../Include/UiTouchstick.h"
 
@@ -18,10 +16,10 @@ namespace Touch
 
 
 
-Drag::Drag(int x, int y):
+Drag::Drag(int x, int y, bool pIsPress):
 	mStart(x, y),
 	mLast(x, y),
-	mIsPress(true)
+	mIsPress(pIsPress)
 {
 }
 
@@ -56,7 +54,16 @@ void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLoc
 			return;
 		}
 	}
-	mDragList.push_back(Drag(pLocation.x, pLocation.y));
+	mDragList.push_back(Drag(pLocation.x, pLocation.y, pIsPressed));
+}
+
+void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
+{
+	PixelCoord lMouse;
+	pInputManager->GetMousePosition(lMouse.x, lMouse.y);
+	bool lIsPressed = pInputManager->GetMouse()->GetButton(0)->GetBooleanValue();
+	UpdateDrag(mLastMouse, lMouse, lIsPressed);
+	mLastMouse = lMouse;
 }
 
 void DragManager::UpdateTouchsticks(InputManager* pInputManager) const

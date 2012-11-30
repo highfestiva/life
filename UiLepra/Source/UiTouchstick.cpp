@@ -44,6 +44,7 @@ TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode p
 	mMode(pMode),
 	mArea(pArea)
 {
+	GetManager()->AddInputDevice(this);
 }
 
 TouchstickInputDevice::~TouchstickInputDevice()
@@ -57,6 +58,7 @@ void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 	if (mIsPressing)
 	{
 		mLast = pCoord;
+		log_volatile(mLog.Debugf(_T("Movin': (%i; %i)"), pCoord.x, pCoord.y));
 	}
 	else
 	{
