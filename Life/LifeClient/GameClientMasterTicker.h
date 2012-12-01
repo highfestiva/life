@@ -87,6 +87,7 @@ protected:
 
 	virtual bool Initialize();
 	virtual bool Reinitialize();
+	virtual bool OpenUiManager();
 	void UpdateSlaveLayout();
 	void SlideSlaveLayout();
 	int GetSlaveAnimationTarget(int pSlaveIndex) const;

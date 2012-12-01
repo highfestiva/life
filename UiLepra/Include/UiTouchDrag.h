@@ -51,6 +51,7 @@ public:
 
 	void UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed);
 	void UpdateDragByMouse(const InputManager* pInputManager);
+	void UpdateMouseByDrag(InputManager* pInputManager);
 	void UpdateTouchsticks(InputManager* pInputManager) const;
 	void DropReleasedDrags();
 

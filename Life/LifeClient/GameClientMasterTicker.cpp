@@ -19,8 +19,6 @@
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
 #include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeServer/MasterServerConnection.h"
 #include "../ConsoleManager.h"
 #include "../LifeApplication.h"
@@ -633,83 +631,6 @@ bool GameClientMasterTicker::Initialize()
 			mLog.AError("An error ocurred when applying calibration.");
 		}
 
-		bool lShowLogo;
-		CURE_RTVAR_GET(lShowLogo, =, UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
-		if (lShowLogo)
-		{
-			Cure::UserRamImageResource* lLogo = new Cure::UserRamImageResource;
-			Cure::UserResourceOwner<Cure::UserRamImageResource> lLogoHolder(lLogo, mResourceManager, _T("megaphone.png"));
-			UiCure::UserSound2dResource* lLogoSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-			Cure::UserResourceOwner<UiCure::UserSound2dResource> lLogoSoundHolder(lLogoSound, mResourceManager, _T("logo_trumpet.wav"));
-			for (int x = 0; x < 1000; ++x)
-			{
-				mResourceManager->Tick();
-				if (lLogo->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS &&
-					lLogoSound->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS)
-				{
-					break;
-				}
-				Thread::Sleep(0.001);
-			}
-			if (lLogo->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
-				lLogoSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-			{
-				mUiManager->GetSoundManager()->Play(lLogoSound->GetData(), 1, 1);
-
-				UiLepra::Canvas& lCanvas = *lLogo->GetRamData();
-				const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
-				UiTbc::RectComponent lRect(lImageId, _T("logo"));
-				mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
-				mUiManager->GetDesktopWindow()->AddChild(&lRect, 0, 0, 0);
-				const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();
-				const unsigned lHeight = mUiManager->GetDisplayManager()->GetHeight();
-				lRect.SetPreferredSize(lCanvas.GetWidth(), lCanvas.GetHeight());
-				const unsigned lTargetX = lWidth/2 - lCanvas.GetWidth()/2;
-				const unsigned lTargetY = lHeight/2 - lCanvas.GetHeight()/2;
-				mUiManager->GetRenderer()->ResetClippingRect();
-				Color lColor;
-				mUiManager->GetRenderer()->SetClearColor(Color());
-				mUiManager->GetDisplayManager()->SetVSyncEnabled(true);
-
-				const float lMin = 0;
-				const float lMax = 26;
-				const int lStepCount = 50;
-				const float lBaseStep = (lMax-lMin)/(float)lStepCount;
-			        float lBase = -lMax;
-			        int lCount = 0;
-				const int lTotalFrameCount = 600;
-				for (lCount = 0; lCount <= lTotalFrameCount && SystemManager::GetQuitRequest() == 0; ++lCount)
-		                {
-					if (lCount < lStepCount || lCount > lTotalFrameCount-lStepCount)
-					{
-			                        lBase += lBaseStep;
-					}
-					int lMovement = (int)(::fabs(lBase)*lBase*3);
-					lRect.SetPos(lTargetX+lMovement, lTargetY);
-
-					mUiManager->GetRenderer()->Clear();
-					mUiManager->Paint(false);
-					mUiManager->GetDisplayManager()->UpdateScreen();
-
-					Thread::Sleep(0.01);
-					mUiManager->InputTick();
-					//lOk = (SystemManager::GetQuitRequest() <= 0);
-
-					if (lCount == lStepCount)
-					{
-						lBase = 0;
-					}
-					else if (lCount == lTotalFrameCount-lStepCount)
-					{
-						lBase = lMin;
-					}
-				}
-				mUiManager->GetDesktopWindow()->RemoveChild(&lRect, 0);
-				mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(lImageId);
-			}
-		}
-		mResourceManager->ForceFreeCache();
-
 		OnSlavesKilled();
 	}
 	return (lOk);
@@ -743,12 +664,10 @@ bool GameClientMasterTicker::Reinitialize()
 	bool lOk = mResourceManager->InitDefault();
 	if (lOk)
 	{
-		lOk = mUiManager->Open();
+		lOk = OpenUiManager();
 	}
 	if (lOk)
 	{
-		mUiManager->GetDesktopWindow()->CreateLayer(new UiTbc::FloatingLayout());
-
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)
@@ -802,6 +721,11 @@ bool GameClientMasterTicker::Reinitialize()
 		mLog.AError("Could not initialize game!");
 	}
 	return (lOk);
+}
+
+bool GameClientMasterTicker::OpenUiManager()
+{
+	return mUiManager->Open();
 }
 
 void GameClientMasterTicker::UpdateSlaveLayout()

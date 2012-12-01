@@ -40,16 +40,14 @@ Unicode Final
 Debug
 Release Candidate
 Final
+Release
 ipch
+*/*Xcode/build
 /Life/LifeClient/LifeClient
 /Life/LifeServer/LifeServer
 /Life/LifeMaster/LifeMaster
-/Life/XCode/build
 /KillCutie/KillCutie
 /KillCutie/Data/GrenadeRun
-/KillCutie/GrenadeRunXcode/build
-/Magnetic/MagneticXcode/build
-/Bounce/BounceXcode/build
 /Bounce/Bounce
 /Push/Push
 /Push/PushServer/PushServer
@@ -60,7 +58,6 @@ ipch
 /TireFire/TireFire
 /UiCure/CureTestApp/CureTestApp
 /ThirdParty/stlport/build
-/ThirdParty/Release
 /bin/
 */Data/Download
 */Data/*.mb

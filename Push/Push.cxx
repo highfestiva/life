@@ -109,10 +109,63 @@ void Push::Init()
 	UiTbc::Init();
 	UiCure::Init();
 
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+	const bool lStartLogo = false;
+#else // Computer
+	const bool lStartLogo = true;
+#endif // Touch / computer
+#if defined(LEPRA_IOS)
+	CGSize lSize = [UIScreen mainScreen].bounds.size;
+	const int lDisplayWidth = lSize.height;
+	const int lDisplayHeight = lSize.width;
+#elif defined(EMULATE_TOUCH)
+	const int lDisplayWidth = 480;
+	const int lDisplayHeight = 320;
+#else // Computer L&F
+	const int lDisplayWidth = 760;
+	const int lDisplayHeight = 524;
+#endif // Touch / Emulated / Computer L&F
+	int lDisplayBpp = 0;
+	int lDisplayFrequency = 0;
+	bool lDisplayFullScreen = false;
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 60.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 1.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.7);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
+
+#if !defined(LEPRA_TOUCH) && !defined(EMULATE_TOUCH)
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.5);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
+#endif // Computer
+
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_CHILDISHNESS, 1.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, lStartLogo);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
 	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
@@ -141,6 +194,9 @@ bool Push::Tick()
 #ifdef EMULATE_TOUCH
 	mDragManager.UpdateDragByMouse(mUiManager->GetInputManager());
 #endif // Emulate touch
+#ifdef LEPRA_TOUCH
+	mDragManager.UpdateMouseByDrag(mUiManager->GetInputManager());
+#endif // Touch
 	mDragManager.UpdateTouchsticks(mUiManager->GetInputManager());
 	mDragManager.DropReleasedDrags();
 

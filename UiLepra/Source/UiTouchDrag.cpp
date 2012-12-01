@@ -66,6 +66,28 @@ void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
 	mLastMouse = lMouse;
 }
 
+void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
+{
+	if (mDragList.size() != 1)
+	{
+		return;
+	}
+	const Drag& lDrag = mDragList.front();
+	pInputManager->SetMousePosition(lDrag.mLast.x, lDrag.mLast.y);
+	if (lDrag.mIsPress)
+	{
+		pInputManager->GetMouse()->GetButton(0)->SetValue(1);
+	}
+	else
+	{
+		// If releasing, we click-release to make sure we don't miss anything.
+		pInputManager->GetMouse()->GetButton(0)->SetValue(1);
+		pInputManager->GetMouse()->GetButton(0)->SetValue(0);
+	}
+	//pInputManager->GetMouse()->GetAxis(0)->SetValue(lDrag.mLast.x);
+	//pInputManager->GetMouse()->GetAxis(1)->SetValue(lDrag.mLast.y);
+}
+
 void DragManager::UpdateTouchsticks(InputManager* pInputManager) const
 {
 	DragList::const_iterator i = mDragList.begin();

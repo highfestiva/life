@@ -79,6 +79,9 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mStickLeft->SetUniqueIdentifier(strutil::Format(_T("TouchstickLeft%i"), pSlaveIndex));
 	mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lRightStickArea, 0);
 	mStickRight->SetUniqueIdentifier(strutil::Format(_T("TouchstickRight%i"), pSlaveIndex));
+
+	// TODO: fix - values hard-coded for computer in ClientOptionsManager.cpp!
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_FWD, _T("TouchstickLeft0.AxisY-"));
 }
 
 PushManager::~PushManager()

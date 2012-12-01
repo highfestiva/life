@@ -42,6 +42,9 @@ private:
 	virtual void OnSlavesKilled();
 
 	virtual bool Reinitialize();
+	virtual bool OpenUiManager();
+	void DisplaySplashLogo();
+	void DisplayCompanyLogo();
 
 	virtual void BeginRender(Vector3DF& pColor);
 

@@ -11,21 +11,12 @@
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
 		35128A4D147262150006467C /* UiSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A4C147262150006467C /* UiSound.cpp */; };
-		35128A51147262300006467C /* Launcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A4F147262300006467C /* Launcher.cpp */; };
-		35128A52147262300006467C /* LauncherAi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A50147262300006467C /* LauncherAi.cpp */; };
-		B106D4C11467342800E009B8 /* Push.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106D4C01467342800E009B8 /* Push.cpp */; };
-		B106E0AE146734DD00E009B8 /* Ctf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106E0AD146734DD00E009B8 /* Ctf.cpp */; };
-		B106E0B2146734F300E009B8 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106E0B1146734F300E009B8 /* Spawner.cpp */; };
 		B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04914AB36A7007A84E4 /* ContextPath.cpp */; };
 		B110A04D14AB36CC007A84E4 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04B14AB36CC007A84E4 /* Level.cpp */; };
-		B110A04E14AB36CC007A84E4 /* VehicleAi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04C14AB36CC007A84E4 /* VehicleAi.cpp */; };
 		B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05114AB3720007A84E4 /* xmplay.cpp */; };
 		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
 		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
 		B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */; };
-		B1356CF0153CB7A000623C1F /* PushElevator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1356CEE153CB7A000623C1F /* PushElevator.cpp */; };
-		B1356CF1153CB7A000623C1F /* RoboBall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1356CEF153CB7A000623C1F /* RoboBall.cpp */; };
-		B1356CF6153CB82200623C1F /* voice_intro.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1356CF5153CB82200623C1F /* voice_intro.ogg */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -60,8 +51,6 @@
 		B15F796713FC5A0500E01A90 /* UiResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F795D13FC5A0500E01A90 /* UiResourceManager.cpp */; };
 		B15F796813FC5A0500E01A90 /* UiTerrainManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F795E13FC5A0500E01A90 /* UiTerrainManager.cpp */; };
 		B15F798113FC5E1500E01A90 /* UiGameUiManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */; };
-		B15F798913FC5E6000E01A90 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F798713FC5E6000E01A90 /* Game.cpp */; };
-		B15F798A13FC5E6000E01A90 /* Grenade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F798813FC5E6000E01A90 /* Grenade.cpp */; };
 		B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1942D2114E08E86002F37E1 /* StoreKit.framework */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
@@ -121,7 +110,6 @@
 		B19A145813A122CE0051A61C /* UiTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140313A122CE0051A61C /* UiTexture.cpp */; };
 		B19A145913A122CE0051A61C /* UiTriangleBasedGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140413A122CE0051A61C /* UiTriangleBasedGeometry.cpp */; };
 		B19A145A13A122CE0051A61C /* UiUVMapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140513A122CE0051A61C /* UiUVMapper.cpp */; };
-		B19A148F13A122DF0051A61C /* App.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A146B13A122DE0051A61C /* App.mm */; };
 		B19A14BA13A1247C0051A61C /* Bones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14A813A1247C0051A61C /* Bones.cpp */; };
 		B19A14BB13A1247C0051A61C /* ChunkyBoneGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14A913A1247C0051A61C /* ChunkyBoneGeometry.cpp */; };
 		B19A14BC13A1247C0051A61C /* ChunkyClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14AA13A1247C0051A61C /* ChunkyClass.cpp */; };
@@ -179,7 +167,6 @@
 		B19A153013A124940051A61C /* PosixAntiCrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F213A124940051A61C /* PosixAntiCrack.cpp */; };
 		B19A153113A124940051A61C /* PosixBusLock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F313A124940051A61C /* PosixBusLock.cpp */; };
 		B19A153213A124940051A61C /* PosixSystemManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F413A124940051A61C /* PosixSystemManager.cpp */; };
-		B19A153313A124940051A61C /* PosixThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F513A124940051A61C /* PosixThread.cpp */; };
 		B19A153413A124940051A61C /* ProgressCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F613A124940051A61C /* ProgressCallback.cpp */; };
 		B19A153513A124940051A61C /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F713A124940051A61C /* Random.cpp */; };
 		B19A153613A124940051A61C /* Reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F813A124940051A61C /* Reader.cpp */; };
@@ -200,7 +187,6 @@
 		B19A156413A124AB0051A61C /* EAGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154B13A124AB0051A61C /* EAGLView.mm */; };
 		B19A156513A124AB0051A61C /* UiMacCore.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154C13A124AB0051A61C /* UiMacCore.mm */; };
 		B19A156613A124AB0051A61C /* UiMacDisplayManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */; };
-		B19A156713A124AB0051A61C /* UiMacInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154E13A124AB0051A61C /* UiMacInput.mm */; };
 		B19A156813A124AB0051A61C /* UiMacOpenGLDisplay.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A154F13A124AB0051A61C /* UiMacOpenGLDisplay.mm */; };
 		B19A156913A124AB0051A61C /* UiDisplayManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A155013A124AB0051A61C /* UiDisplayManager.cpp */; };
 		B19A156A13A124AB0051A61C /* UiInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A155113A124AB0051A61C /* UiInput.cpp */; };
@@ -478,7 +464,49 @@
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
-		B1CFD06F14E8610900550345 /* SeeThrough.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1CFD06E14E8610900550345 /* SeeThrough.cpp */; };
+		B1D37EE6166AB2FC00536CE5 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */; };
+		B1D37EE7166AB2FC00536CE5 /* Life.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE5166AB2FC00536CE5 /* Life.cpp */; };
+		B1D37EEA166AB32700536CE5 /* LifeApplication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE8166AB32700536CE5 /* LifeApplication.cpp */; };
+		B1D37EEB166AB32700536CE5 /* RaceScore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE9166AB32700536CE5 /* RaceScore.cpp */; };
+		B1D37EF8166AB37000536CE5 /* ClientConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EED166AB37000536CE5 /* ClientConsoleManager.cpp */; };
+		B1D37EF9166AB37000536CE5 /* ClientOptionsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EEE166AB37000536CE5 /* ClientOptionsManager.cpp */; };
+		B1D37EFA166AB37000536CE5 /* GameClientMasterTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EEF166AB37000536CE5 /* GameClientMasterTicker.cpp */; };
+		B1D37EFB166AB37000536CE5 /* GameClientSlaveManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF0166AB37000536CE5 /* GameClientSlaveManager.cpp */; };
+		B1D37EFC166AB37000536CE5 /* MassObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF1166AB37000536CE5 /* MassObject.cpp */; };
+		B1D37EFD166AB37000536CE5 /* OptionsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF2166AB37000536CE5 /* OptionsManager.cpp */; };
+		B1D37EFE166AB37000536CE5 /* StopWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF3166AB37000536CE5 /* StopWatch.cpp */; };
+		B1D37EFF166AB37000536CE5 /* UiConsole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF4166AB37000536CE5 /* UiConsole.cpp */; };
+		B1D37F00166AB37000536CE5 /* UiGameServerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF5166AB37000536CE5 /* UiGameServerManager.cpp */; };
+		B1D37F01166AB37000536CE5 /* UiRaceScore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF6166AB37000536CE5 /* UiRaceScore.cpp */; };
+		B1D37F02166AB37000536CE5 /* UiServerConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF7166AB37000536CE5 /* UiServerConsoleManager.cpp */; };
+		B1D37F0B166AB3B400536CE5 /* BulletTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F04166AB3B400536CE5 /* BulletTime.cpp */; };
+		B1D37F0C166AB3B400536CE5 /* Client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F05166AB3B400536CE5 /* Client.cpp */; };
+		B1D37F0D166AB3B400536CE5 /* GameServerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F06166AB3B400536CE5 /* GameServerManager.cpp */; };
+		B1D37F0E166AB3B400536CE5 /* MasterServerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F07166AB3B400536CE5 /* MasterServerConnection.cpp */; };
+		B1D37F0F166AB3B400536CE5 /* RaceTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F08166AB3B400536CE5 /* RaceTimer.cpp */; };
+		B1D37F10166AB3B400536CE5 /* ServerConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F09166AB3B400536CE5 /* ServerConsoleManager.cpp */; };
+		B1D37F11166AB3B400536CE5 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F0A166AB3B400536CE5 /* Spawner.cpp */; };
+		B1D37F1F166AB3F100536CE5 /* LoginView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F14166AB3F100536CE5 /* LoginView.cpp */; };
+		B1D37F20166AB3F100536CE5 /* Push.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F15166AB3F100536CE5 /* Push.mm */; };
+		B1D37F21166AB3F100536CE5 /* PushConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F16166AB3F100536CE5 /* PushConsoleManager.cpp */; };
+		B1D37F22166AB3F100536CE5 /* PushDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F17166AB3F100536CE5 /* PushDemo.cpp */; };
+		B1D37F23166AB3F100536CE5 /* PushManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F18166AB3F100536CE5 /* PushManager.cpp */; };
+		B1D37F24166AB3F100536CE5 /* PushTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F19166AB3F100536CE5 /* PushTicker.cpp */; };
+		B1D37F25166AB3F100536CE5 /* PushViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1A166AB3F100536CE5 /* PushViewer.cpp */; };
+		B1D37F26166AB3F100536CE5 /* RoadSignButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1B166AB3F100536CE5 /* RoadSignButton.cpp */; };
+		B1D37F27166AB3F100536CE5 /* ServerListView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1C166AB3F100536CE5 /* ServerListView.cpp */; };
+		B1D37F28166AB3F100536CE5 /* Sunlight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */; };
+		B1D37F29166AB3F100536CE5 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1E166AB3F100536CE5 /* View.cpp */; };
+		B1D37F38166AB53A00536CE5 /* MacThread.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F37166AB53A00536CE5 /* MacThread.mm */; };
+		B1D37F40166AB57A00536CE5 /* GameTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */; };
+		B1D37F41166AB57A00536CE5 /* PhysicsSharedResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */; };
+		B1D37F42166AB57A00536CE5 /* PositionHauler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F3F166AB57A00536CE5 /* PositionHauler.cpp */; };
+		B1D37F46166AB59C00536CE5 /* UiDebugRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F43166AB59C00536CE5 /* UiDebugRenderer.cpp */; };
+		B1D37F47166AB59C00536CE5 /* UiExhaustEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F44166AB59C00536CE5 /* UiExhaustEmitter.cpp */; };
+		B1D37F48166AB59C00536CE5 /* UiGravelEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */; };
+		B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */; };
+		B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */; };
+		B1D37F4F166AB5F200536CE5 /* MasterServerNetworkParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4E166AB5F200536CE5 /* MasterServerNetworkParser.cpp */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
 		B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */; };
 		B1D88DC814DEA9190000CD85 /* happyhttp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DC714DEA9190000CD85 /* happyhttp.cpp */; };
@@ -495,21 +523,12 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		35128A4C147262150006467C /* UiSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSound.cpp; path = ../../UiCure/Source/UiSound.cpp; sourceTree = "<group>"; };
-		35128A4F147262300006467C /* Launcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Launcher.cpp; sourceTree = "<group>"; };
-		35128A50147262300006467C /* LauncherAi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LauncherAi.cpp; sourceTree = "<group>"; };
-		B106D4C01467342800E009B8 /* Push.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Push.cpp; sourceTree = "<group>"; };
-		B106E0AD146734DD00E009B8 /* Ctf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ctf.cpp; sourceTree = "<group>"; };
-		B106E0B1146734F300E009B8 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Spawner.cpp; sourceTree = "<group>"; };
 		B110A04914AB36A7007A84E4 /* ContextPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextPath.cpp; path = ../../Cure/Source/ContextPath.cpp; sourceTree = SOURCE_ROOT; };
 		B110A04B14AB36CC007A84E4 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Level.cpp; sourceTree = "<group>"; };
-		B110A04C14AB36CC007A84E4 /* VehicleAi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VehicleAi.cpp; sourceTree = "<group>"; };
 		B110A05114AB3720007A84E4 /* xmplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmplay.cpp; path = ChibiXM/xmplay.cpp; sourceTree = "<group>"; };
 		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
-		B1356CEE153CB7A000623C1F /* PushElevator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PushElevator.cpp; sourceTree = "<group>"; };
-		B1356CEF153CB7A000623C1F /* RoboBall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RoboBall.cpp; sourceTree = "<group>"; };
-		B1356CF5153CB82200623C1F /* voice_intro.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = voice_intro.ogg; path = ../../bin/Data/voice_intro.ogg; sourceTree = SOURCE_ROOT; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -544,8 +563,6 @@
 		B15F795D13FC5A0500E01A90 /* UiResourceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiResourceManager.cpp; path = ../../UiCure/Source/UiResourceManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F795E13FC5A0500E01A90 /* UiTerrainManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiTerrainManager.cpp; path = ../../UiCure/Source/UiTerrainManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = UiGameUiManager.mm; path = ../../UiCure/Source/UiGameUiManager.mm; sourceTree = SOURCE_ROOT; };
-		B15F798713FC5E6000E01A90 /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
-		B15F798813FC5E6000E01A90 /* Grenade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Grenade.cpp; sourceTree = "<group>"; };
 		B1942D2114E08E86002F37E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
 		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
@@ -605,7 +622,6 @@
 		B19A140313A122CE0051A61C /* UiTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTexture.cpp; sourceTree = "<group>"; };
 		B19A140413A122CE0051A61C /* UiTriangleBasedGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTriangleBasedGeometry.cpp; sourceTree = "<group>"; };
 		B19A140513A122CE0051A61C /* UiUVMapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiUVMapper.cpp; sourceTree = "<group>"; };
-		B19A146B13A122DE0051A61C /* App.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = App.mm; sourceTree = "<group>"; };
 		B19A14A813A1247C0051A61C /* Bones.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bones.cpp; sourceTree = "<group>"; };
 		B19A14A913A1247C0051A61C /* ChunkyBoneGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChunkyBoneGeometry.cpp; sourceTree = "<group>"; };
 		B19A14AA13A1247C0051A61C /* ChunkyClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChunkyClass.cpp; sourceTree = "<group>"; };
@@ -663,7 +679,6 @@
 		B19A14F213A124940051A61C /* PosixAntiCrack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixAntiCrack.cpp; sourceTree = "<group>"; };
 		B19A14F313A124940051A61C /* PosixBusLock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixBusLock.cpp; sourceTree = "<group>"; };
 		B19A14F413A124940051A61C /* PosixSystemManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixSystemManager.cpp; sourceTree = "<group>"; };
-		B19A14F513A124940051A61C /* PosixThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixThread.cpp; sourceTree = "<group>"; };
 		B19A14F613A124940051A61C /* ProgressCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProgressCallback.cpp; sourceTree = "<group>"; };
 		B19A14F713A124940051A61C /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
 		B19A14F813A124940051A61C /* Reader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Reader.cpp; sourceTree = "<group>"; };
@@ -684,7 +699,6 @@
 		B19A154B13A124AB0051A61C /* EAGLView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = EAGLView.mm; sourceTree = "<group>"; };
 		B19A154C13A124AB0051A61C /* UiMacCore.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacCore.mm; sourceTree = "<group>"; };
 		B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacDisplayManager.mm; sourceTree = "<group>"; };
-		B19A154E13A124AB0051A61C /* UiMacInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacInput.mm; sourceTree = "<group>"; };
 		B19A154F13A124AB0051A61C /* UiMacOpenGLDisplay.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiMacOpenGLDisplay.mm; sourceTree = "<group>"; };
 		B19A155013A124AB0051A61C /* UiDisplayManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiDisplayManager.cpp; sourceTree = "<group>"; };
 		B19A155113A124AB0051A61C /* UiInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiInput.cpp; sourceTree = "<group>"; };
@@ -1153,7 +1167,49 @@
 		B1B489A313F9BE4A0047C78A /* Push_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Push_Prefix.pch; path = PushXcode/Push_Prefix.pch; sourceTree = "<group>"; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
-		B1CFD06E14E8610900550345 /* SeeThrough.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SeeThrough.cpp; sourceTree = "<group>"; };
+		B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Life/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EE5166AB2FC00536CE5 /* Life.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Life.cpp; path = ../../Life/Life.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EE8166AB32700536CE5 /* LifeApplication.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LifeApplication.cpp; path = ../../Life/LifeApplication.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EE9166AB32700536CE5 /* RaceScore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RaceScore.cpp; path = ../../Life/RaceScore.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EED166AB37000536CE5 /* ClientConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientConsoleManager.cpp; path = ../../Life/LifeClient/ClientConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EEE166AB37000536CE5 /* ClientOptionsManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientOptionsManager.cpp; path = ../../Life/LifeClient/ClientOptionsManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EEF166AB37000536CE5 /* GameClientMasterTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameClientMasterTicker.cpp; path = ../../Life/LifeClient/GameClientMasterTicker.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EF0166AB37000536CE5 /* GameClientSlaveManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameClientSlaveManager.cpp; path = ../../Life/LifeClient/GameClientSlaveManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EF1166AB37000536CE5 /* MassObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MassObject.cpp; path = ../../Life/LifeClient/MassObject.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EF2166AB37000536CE5 /* OptionsManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsManager.cpp; path = ../../Life/LifeClient/OptionsManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EF3166AB37000536CE5 /* StopWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StopWatch.cpp; path = ../../Life/LifeClient/StopWatch.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EF4166AB37000536CE5 /* UiConsole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiConsole.cpp; path = ../../Life/LifeClient/UiConsole.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EF5166AB37000536CE5 /* UiGameServerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiGameServerManager.cpp; path = ../../Life/LifeClient/UiGameServerManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EF6166AB37000536CE5 /* UiRaceScore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiRaceScore.cpp; path = ../../Life/LifeClient/UiRaceScore.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37EF7166AB37000536CE5 /* UiServerConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiServerConsoleManager.cpp; path = ../../Life/LifeClient/UiServerConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F04166AB3B400536CE5 /* BulletTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BulletTime.cpp; path = ../../Life/LifeServer/BulletTime.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F05166AB3B400536CE5 /* Client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Client.cpp; path = ../../Life/LifeServer/Client.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F06166AB3B400536CE5 /* GameServerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameServerManager.cpp; path = ../../Life/LifeServer/GameServerManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F07166AB3B400536CE5 /* MasterServerConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MasterServerConnection.cpp; path = ../../Life/LifeServer/MasterServerConnection.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F08166AB3B400536CE5 /* RaceTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RaceTimer.cpp; path = ../../Life/LifeServer/RaceTimer.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F09166AB3B400536CE5 /* ServerConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerConsoleManager.cpp; path = ../../Life/LifeServer/ServerConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F0A166AB3B400536CE5 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Life/LifeServer/Spawner.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F14166AB3F100536CE5 /* LoginView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoginView.cpp; sourceTree = "<group>"; };
+		B1D37F15166AB3F100536CE5 /* Push.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Push.mm; sourceTree = "<group>"; };
+		B1D37F16166AB3F100536CE5 /* PushConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PushConsoleManager.cpp; sourceTree = "<group>"; };
+		B1D37F17166AB3F100536CE5 /* PushDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PushDemo.cpp; sourceTree = "<group>"; };
+		B1D37F18166AB3F100536CE5 /* PushManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PushManager.cpp; sourceTree = "<group>"; };
+		B1D37F19166AB3F100536CE5 /* PushTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PushTicker.cpp; sourceTree = "<group>"; };
+		B1D37F1A166AB3F100536CE5 /* PushViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PushViewer.cpp; sourceTree = "<group>"; };
+		B1D37F1B166AB3F100536CE5 /* RoadSignButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RoadSignButton.cpp; sourceTree = "<group>"; };
+		B1D37F1C166AB3F100536CE5 /* ServerListView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ServerListView.cpp; sourceTree = "<group>"; };
+		B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sunlight.cpp; sourceTree = "<group>"; };
+		B1D37F1E166AB3F100536CE5 /* View.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = View.cpp; sourceTree = "<group>"; };
+		B1D37F37166AB53A00536CE5 /* MacThread.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacThread.mm; sourceTree = "<group>"; };
+		B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameTicker.cpp; path = ../../Cure/Source/GameTicker.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhysicsSharedResource.cpp; path = ../../Cure/Source/PhysicsSharedResource.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F3F166AB57A00536CE5 /* PositionHauler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PositionHauler.cpp; path = ../../Cure/Source/PositionHauler.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F43166AB59C00536CE5 /* UiDebugRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiDebugRenderer.cpp; path = ../../UiCure/Source/UiDebugRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F44166AB59C00536CE5 /* UiExhaustEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiExhaustEmitter.cpp; path = ../../UiCure/Source/UiExhaustEmitter.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiGravelEmitter.cpp; path = ../../UiCure/Source/UiGravelEmitter.cpp; sourceTree = SOURCE_ROOT; };
+		B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchDrag.cpp; sourceTree = "<group>"; };
+		B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchstick.cpp; sourceTree = "<group>"; };
+		B1D37F4E166AB5F200536CE5 /* MasterServerNetworkParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MasterServerNetworkParser.cpp; path = ../../Life/LifeMaster/MasterServerNetworkParser.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
 		B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HiscoreAgent.cpp; path = ../../Cure/Source/HiscoreAgent.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DC714DEA9190000CD85 /* happyhttp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = happyhttp.cpp; path = "happyhttp-0.1/happyhttp.cpp"; sourceTree = "<group>"; };
@@ -1214,6 +1270,7 @@
 		29B97315FDCFA39411CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				B1D37EE3166AB29400536CE5 /* Life */,
 				B19A146913A122DE0051A61C /* Push */,
 				B15F795413FC59E300E01A90 /* UiCure */,
 				B15F791D13FC597B00E01A90 /* Cure */,
@@ -1250,6 +1307,9 @@
 		B15F791D13FC597B00E01A90 /* Cure */ = {
 			isa = PBXGroup;
 			children = (
+				B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */,
+				B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */,
+				B1D37F3F166AB57A00536CE5 /* PositionHauler.cpp */,
 				B1E30E06150E90760076E336 /* Elevator.cpp */,
 				B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */,
 				B110A04914AB36A7007A84E4 /* ContextPath.cpp */,
@@ -1284,6 +1344,9 @@
 		B15F795413FC59E300E01A90 /* UiCure */ = {
 			isa = PBXGroup;
 			children = (
+				B1D37F43166AB59C00536CE5 /* UiDebugRenderer.cpp */,
+				B1D37F44166AB59C00536CE5 /* UiExhaustEmitter.cpp */,
+				B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */,
 				B110A05314AB374E007A84E4 /* UiIconButton.cpp */,
 				B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */,
 				35128A4C147262150006467C /* UiSound.cpp */,
@@ -1419,20 +1482,19 @@
 		B19A146913A122DE0051A61C /* Push */ = {
 			isa = PBXGroup;
 			children = (
-				B1356CEE153CB7A000623C1F /* PushElevator.cpp */,
-				B1356CEF153CB7A000623C1F /* RoboBall.cpp */,
-				B1CFD06E14E8610900550345 /* SeeThrough.cpp */,
+				B1D37F14166AB3F100536CE5 /* LoginView.cpp */,
+				B1D37F15166AB3F100536CE5 /* Push.mm */,
+				B1D37F16166AB3F100536CE5 /* PushConsoleManager.cpp */,
+				B1D37F17166AB3F100536CE5 /* PushDemo.cpp */,
+				B1D37F18166AB3F100536CE5 /* PushManager.cpp */,
+				B1D37F19166AB3F100536CE5 /* PushTicker.cpp */,
+				B1D37F1A166AB3F100536CE5 /* PushViewer.cpp */,
+				B1D37F1B166AB3F100536CE5 /* RoadSignButton.cpp */,
+				B1D37F1C166AB3F100536CE5 /* ServerListView.cpp */,
+				B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */,
+				B1D37F1E166AB3F100536CE5 /* View.cpp */,
 				B110A04B14AB36CC007A84E4 /* Level.cpp */,
-				B110A04C14AB36CC007A84E4 /* VehicleAi.cpp */,
-				35128A4F147262300006467C /* Launcher.cpp */,
-				35128A50147262300006467C /* LauncherAi.cpp */,
-				B106E0B1146734F300E009B8 /* Spawner.cpp */,
-				B106E0AD146734DD00E009B8 /* Ctf.cpp */,
-				B106D4C01467342800E009B8 /* Push.cpp */,
-				B15F798713FC5E6000E01A90 /* Game.cpp */,
-				B15F798813FC5E6000E01A90 /* Grenade.cpp */,
 				B1B489A313F9BE4A0047C78A /* Push_Prefix.pch */,
-				B19A146B13A122DE0051A61C /* App.mm */,
 			);
 			name = Push;
 			path = ..;
@@ -1529,11 +1591,11 @@
 		B19A14F113A124940051A61C /* Posix */ = {
 			isa = PBXGroup;
 			children = (
+				B1D37F37166AB53A00536CE5 /* MacThread.mm */,
 				B1BC733C140EEAEE003F70F3 /* MacLog.mm */,
 				B19A14F213A124940051A61C /* PosixAntiCrack.cpp */,
 				B19A14F313A124940051A61C /* PosixBusLock.cpp */,
 				B19A14F413A124940051A61C /* PosixSystemManager.cpp */,
-				B19A14F513A124940051A61C /* PosixThread.cpp */,
 			);
 			path = Posix;
 			sourceTree = "<group>";
@@ -1541,6 +1603,8 @@
 		B19A154913A124AB0051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */,
+				B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */,
 				B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */,
 				B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */,
 				B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */,
@@ -1563,7 +1627,6 @@
 				B19A154B13A124AB0051A61C /* EAGLView.mm */,
 				B19A154C13A124AB0051A61C /* UiMacCore.mm */,
 				B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */,
-				B19A154E13A124AB0051A61C /* UiMacInput.mm */,
 				B19A154F13A124AB0051A61C /* UiMacOpenGLDisplay.mm */,
 			);
 			path = Mac;
@@ -2275,6 +2338,60 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
+		B1D37EE3166AB29400536CE5 /* Life */ = {
+			isa = PBXGroup;
+			children = (
+				B1D37F4D166AB5D600536CE5 /* LifeMaster */,
+				B1D37F03166AB38700536CE5 /* LifeServer */,
+				B1D37EEC166AB33F00536CE5 /* LifeClient */,
+				B1D37EE8166AB32700536CE5 /* LifeApplication.cpp */,
+				B1D37EE9166AB32700536CE5 /* RaceScore.cpp */,
+				B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */,
+				B1D37EE5166AB2FC00536CE5 /* Life.cpp */,
+			);
+			name = Life;
+			sourceTree = "<group>";
+		};
+		B1D37EEC166AB33F00536CE5 /* LifeClient */ = {
+			isa = PBXGroup;
+			children = (
+				B1D37EED166AB37000536CE5 /* ClientConsoleManager.cpp */,
+				B1D37EEE166AB37000536CE5 /* ClientOptionsManager.cpp */,
+				B1D37EEF166AB37000536CE5 /* GameClientMasterTicker.cpp */,
+				B1D37EF0166AB37000536CE5 /* GameClientSlaveManager.cpp */,
+				B1D37EF1166AB37000536CE5 /* MassObject.cpp */,
+				B1D37EF2166AB37000536CE5 /* OptionsManager.cpp */,
+				B1D37EF3166AB37000536CE5 /* StopWatch.cpp */,
+				B1D37EF4166AB37000536CE5 /* UiConsole.cpp */,
+				B1D37EF5166AB37000536CE5 /* UiGameServerManager.cpp */,
+				B1D37EF6166AB37000536CE5 /* UiRaceScore.cpp */,
+				B1D37EF7166AB37000536CE5 /* UiServerConsoleManager.cpp */,
+			);
+			name = LifeClient;
+			sourceTree = "<group>";
+		};
+		B1D37F03166AB38700536CE5 /* LifeServer */ = {
+			isa = PBXGroup;
+			children = (
+				B1D37F04166AB3B400536CE5 /* BulletTime.cpp */,
+				B1D37F05166AB3B400536CE5 /* Client.cpp */,
+				B1D37F06166AB3B400536CE5 /* GameServerManager.cpp */,
+				B1D37F07166AB3B400536CE5 /* MasterServerConnection.cpp */,
+				B1D37F08166AB3B400536CE5 /* RaceTimer.cpp */,
+				B1D37F09166AB3B400536CE5 /* ServerConsoleManager.cpp */,
+				B1D37F0A166AB3B400536CE5 /* Spawner.cpp */,
+			);
+			name = LifeServer;
+			sourceTree = "<group>";
+		};
+		B1D37F4D166AB5D600536CE5 /* LifeMaster */ = {
+			isa = PBXGroup;
+			children = (
+				B1D37F4E166AB5F200536CE5 /* MasterServerNetworkParser.cpp */,
+			);
+			name = LifeMaster;
+			sourceTree = "<group>";
+		};
 		B1D88DC614DEA9070000CD85 /* HappyHTTP */ = {
 			isa = PBXGroup;
 			children = (
@@ -2286,7 +2403,6 @@
 		B1FB291E1450C8A600F1C762 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				B1356CF5153CB82200623C1F /* voice_intro.ogg */,
 				B1FB29391450CAD600F1C762 /* Data.pk3 */,
 			);
 			name = Data;
@@ -2346,7 +2462,6 @@
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
-				B1356CF6153CB82200623C1F /* voice_intro.ogg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2411,7 +2526,6 @@
 				B19A145813A122CE0051A61C /* UiTexture.cpp in Sources */,
 				B19A145913A122CE0051A61C /* UiTriangleBasedGeometry.cpp in Sources */,
 				B19A145A13A122CE0051A61C /* UiUVMapper.cpp in Sources */,
-				B19A148F13A122DF0051A61C /* App.mm in Sources */,
 				B19A14BA13A1247C0051A61C /* Bones.cpp in Sources */,
 				B19A14BB13A1247C0051A61C /* ChunkyBoneGeometry.cpp in Sources */,
 				B19A14BC13A1247C0051A61C /* ChunkyClass.cpp in Sources */,
@@ -2469,7 +2583,6 @@
 				B19A153013A124940051A61C /* PosixAntiCrack.cpp in Sources */,
 				B19A153113A124940051A61C /* PosixBusLock.cpp in Sources */,
 				B19A153213A124940051A61C /* PosixSystemManager.cpp in Sources */,
-				B19A153313A124940051A61C /* PosixThread.cpp in Sources */,
 				B19A153413A124940051A61C /* ProgressCallback.cpp in Sources */,
 				B19A153513A124940051A61C /* Random.cpp in Sources */,
 				B19A153613A124940051A61C /* Reader.cpp in Sources */,
@@ -2490,7 +2603,6 @@
 				B19A156413A124AB0051A61C /* EAGLView.mm in Sources */,
 				B19A156513A124AB0051A61C /* UiMacCore.mm in Sources */,
 				B19A156613A124AB0051A61C /* UiMacDisplayManager.mm in Sources */,
-				B19A156713A124AB0051A61C /* UiMacInput.mm in Sources */,
 				B19A156813A124AB0051A61C /* UiMacOpenGLDisplay.mm in Sources */,
 				B19A156913A124AB0051A61C /* UiDisplayManager.cpp in Sources */,
 				B19A156A13A124AB0051A61C /* UiInput.cpp in Sources */,
@@ -2798,18 +2910,10 @@
 				B15F796713FC5A0500E01A90 /* UiResourceManager.cpp in Sources */,
 				B15F796813FC5A0500E01A90 /* UiTerrainManager.cpp in Sources */,
 				B15F798113FC5E1500E01A90 /* UiGameUiManager.mm in Sources */,
-				B15F798913FC5E6000E01A90 /* Game.cpp in Sources */,
-				B15F798A13FC5E6000E01A90 /* Grenade.cpp in Sources */,
 				B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */,
-				B106D4C11467342800E009B8 /* Push.cpp in Sources */,
-				B106E0AE146734DD00E009B8 /* Ctf.cpp in Sources */,
-				B106E0B2146734F300E009B8 /* Spawner.cpp in Sources */,
 				35128A4D147262150006467C /* UiSound.cpp in Sources */,
-				35128A51147262300006467C /* Launcher.cpp in Sources */,
-				35128A52147262300006467C /* LauncherAi.cpp in Sources */,
 				B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */,
 				B110A04D14AB36CC007A84E4 /* Level.cpp in Sources */,
-				B110A04E14AB36CC007A84E4 /* VehicleAi.cpp in Sources */,
 				B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */,
 				B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */,
 				B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */,
@@ -2817,13 +2921,53 @@
 				B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */,
 				B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */,
 				B1D88DC814DEA9190000CD85 /* happyhttp.cpp in Sources */,
-				B1CFD06F14E8610900550345 /* SeeThrough.cpp in Sources */,
 				B1E4528A14E9FA13001C2BE2 /* UiDialog.cpp in Sources */,
 				B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */,
 				B1DAC7E414F1D97700B285C5 /* JsonString.cpp in Sources */,
 				B1E30E07150E90760076E336 /* Elevator.cpp in Sources */,
-				B1356CF0153CB7A000623C1F /* PushElevator.cpp in Sources */,
-				B1356CF1153CB7A000623C1F /* RoboBall.cpp in Sources */,
+				B1D37EE6166AB2FC00536CE5 /* ConsoleManager.cpp in Sources */,
+				B1D37EE7166AB2FC00536CE5 /* Life.cpp in Sources */,
+				B1D37EEA166AB32700536CE5 /* LifeApplication.cpp in Sources */,
+				B1D37EEB166AB32700536CE5 /* RaceScore.cpp in Sources */,
+				B1D37EF8166AB37000536CE5 /* ClientConsoleManager.cpp in Sources */,
+				B1D37EF9166AB37000536CE5 /* ClientOptionsManager.cpp in Sources */,
+				B1D37EFA166AB37000536CE5 /* GameClientMasterTicker.cpp in Sources */,
+				B1D37EFB166AB37000536CE5 /* GameClientSlaveManager.cpp in Sources */,
+				B1D37EFC166AB37000536CE5 /* MassObject.cpp in Sources */,
+				B1D37EFD166AB37000536CE5 /* OptionsManager.cpp in Sources */,
+				B1D37EFE166AB37000536CE5 /* StopWatch.cpp in Sources */,
+				B1D37EFF166AB37000536CE5 /* UiConsole.cpp in Sources */,
+				B1D37F00166AB37000536CE5 /* UiGameServerManager.cpp in Sources */,
+				B1D37F01166AB37000536CE5 /* UiRaceScore.cpp in Sources */,
+				B1D37F02166AB37000536CE5 /* UiServerConsoleManager.cpp in Sources */,
+				B1D37F0B166AB3B400536CE5 /* BulletTime.cpp in Sources */,
+				B1D37F0C166AB3B400536CE5 /* Client.cpp in Sources */,
+				B1D37F0D166AB3B400536CE5 /* GameServerManager.cpp in Sources */,
+				B1D37F0E166AB3B400536CE5 /* MasterServerConnection.cpp in Sources */,
+				B1D37F0F166AB3B400536CE5 /* RaceTimer.cpp in Sources */,
+				B1D37F10166AB3B400536CE5 /* ServerConsoleManager.cpp in Sources */,
+				B1D37F11166AB3B400536CE5 /* Spawner.cpp in Sources */,
+				B1D37F1F166AB3F100536CE5 /* LoginView.cpp in Sources */,
+				B1D37F20166AB3F100536CE5 /* Push.mm in Sources */,
+				B1D37F21166AB3F100536CE5 /* PushConsoleManager.cpp in Sources */,
+				B1D37F22166AB3F100536CE5 /* PushDemo.cpp in Sources */,
+				B1D37F23166AB3F100536CE5 /* PushManager.cpp in Sources */,
+				B1D37F24166AB3F100536CE5 /* PushTicker.cpp in Sources */,
+				B1D37F25166AB3F100536CE5 /* PushViewer.cpp in Sources */,
+				B1D37F26166AB3F100536CE5 /* RoadSignButton.cpp in Sources */,
+				B1D37F27166AB3F100536CE5 /* ServerListView.cpp in Sources */,
+				B1D37F28166AB3F100536CE5 /* Sunlight.cpp in Sources */,
+				B1D37F29166AB3F100536CE5 /* View.cpp in Sources */,
+				B1D37F38166AB53A00536CE5 /* MacThread.mm in Sources */,
+				B1D37F40166AB57A00536CE5 /* GameTicker.cpp in Sources */,
+				B1D37F41166AB57A00536CE5 /* PhysicsSharedResource.cpp in Sources */,
+				B1D37F42166AB57A00536CE5 /* PositionHauler.cpp in Sources */,
+				B1D37F46166AB59C00536CE5 /* UiDebugRenderer.cpp in Sources */,
+				B1D37F47166AB59C00536CE5 /* UiExhaustEmitter.cpp in Sources */,
+				B1D37F48166AB59C00536CE5 /* UiGravelEmitter.cpp in Sources */,
+				B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */,
+				B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */,
+				B1D37F4F166AB5F200536CE5 /* MasterServerNetworkParser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
