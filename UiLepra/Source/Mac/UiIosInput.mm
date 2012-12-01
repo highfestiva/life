@@ -174,6 +174,10 @@ IosInputManager::IosInputManager(MacOpenGLDisplay* pDisplayManager):
 	IosInputElement* lButton = new IosInputElement(InputElement::DIGITAL, InputElement::BUTTON1, 0, lTouch);
 	IosInputElement* x = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 0, lTouch);
 	IosInputElement* y = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 1, lTouch);
+	lTouch->SetIdentifier(_T("IosVirtualMouse"));
+	lButton->SetIdentifier(_T("Button"));
+	x->SetIdentifier(_T("RelAxisX"));
+	y->SetIdentifier(_T("RelAxisY"));
 	lTouch->AddElement(lButton);
 	lTouch->AddElement(x);
 	lTouch->AddElement(y);
@@ -183,6 +187,7 @@ IosInputManager::IosInputManager(MacOpenGLDisplay* pDisplayManager):
 	lButton->SetValue(0);
 	x->SetValue(mScreenWidth);
 	y->SetValue(mScreenHeight);
+	mDeviceList.push_back(lTouch);
 	mMouse = lTouch;
 
 	mInitialized = true;
@@ -196,13 +201,6 @@ IosInputManager::~IosInputManager()
 	}
 
 	RemoveObserver();
-
-	DeviceList::iterator lDIter;
-	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
-	{
-		InputDevice* lDevice = *lDIter;
-		delete lDevice;
-	}
 
 	mDisplayManager = 0;
 }

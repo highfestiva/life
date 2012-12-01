@@ -80,6 +80,7 @@ private:
 class InputElement
 {
 public:
+	typedef std::vector<InputFunctor*> FunctorArray;
 	
 	friend class InputDevice;
 
@@ -121,6 +122,7 @@ public:
 	// Sets the uncalibrated value of this device.
 	// (Only useful with analogue elements).
 	virtual void SetValue(int pNewValue) = 0;
+	virtual void SetValue(float pNewValue);
 
 	// Returns the difference between the current value and the previous value.
 	float GetDeltaValue() const;
@@ -134,12 +136,11 @@ public:
 	// of deleting it.
 	void AddFunctor(InputFunctor* pFunctor);
 	void ClearFunctors();
+	const FunctorArray& GetFunctorArray() const;
 
 	virtual str GetCalibration() const = 0;
 	virtual bool SetCalibration(const str& pData) = 0;
 
-protected:
-	virtual void SetValue(float pNewValue);
 private:
 
 	float mPrevValue;
@@ -152,7 +153,6 @@ private:
 
 	str mIdentifier;
 
-	typedef std::vector<InputFunctor*> FunctorArray;
 	FunctorArray mFunctorArray;
 
 	LOG_CLASS_DECLARE();
@@ -187,6 +187,7 @@ public:
 
 	InputDevice(InputManager* pManager);
 	virtual ~InputDevice();
+	virtual bool IsOwnedByManager() const;
 
 	Interpretation GetInterpretation() const;
 	int GetTypeIndex() const;
@@ -222,6 +223,7 @@ public:
 	unsigned GetNumAnalogueElements();
 
 	void SetIdentifier(const str& pIdentifier);
+	void SetUniqueIdentifier(const str& pIdentifier);
 	const str& GetIdentifier() const;
 	const str& GetUniqueIdentifier() const;
 

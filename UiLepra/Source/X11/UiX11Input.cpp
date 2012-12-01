@@ -186,13 +186,6 @@ X11InputDevice::~X11InputDevice()
 	}
 	mDIDevice->Release();
 
-	ElementArray::iterator lEIter;
-	for (lEIter = mElementArray.begin(); lEIter != mElementArray.end(); ++lEIter)
-	{
-		InputElement* lElement = *lEIter;
-		delete lElement;
-	}
-
 	delete[] mDeviceObjectData;
 	delete[] mDataFormat.rgodf;
 }
@@ -441,13 +434,6 @@ X11InputManager::~X11InputManager()
 	}
 
 	RemoveObserver();
-
-	DeviceList::iterator lDIter;
-	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
-	{
-		InputDevice* lDevice = *lDIter;
-		delete lDevice;
-	}
 
 	mDisplayManager = 0;
 }

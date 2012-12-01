@@ -69,19 +69,26 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 
 	SetConsoleManager(new PushConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
-	PixelRect lLeftStickArea(pRenderArea);
-	PixelRect lRightStickArea(pRenderArea);
-	lLeftStickArea.mRight = pRenderArea.GetWidth() / 4;
-	lRightStickArea.mLeft = pRenderArea.GetWidth() * 3 / 4;
+	PixelRect lLeftStickArea(mRenderArea);
+	PixelRect lRightStickArea(mRenderArea);
+	lLeftStickArea.mRight = mRenderArea.GetWidth() / 4;
+	lRightStickArea.mLeft = mRenderArea.GetWidth() * 3 / 4;
 	lLeftStickArea.mTop = lLeftStickArea.mBottom - (lLeftStickArea.mRight - lLeftStickArea.mLeft);
 	lRightStickArea.mTop = lLeftStickArea.mTop;
 	mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lLeftStickArea,  0);
+	mStickLeft->SetUniqueIdentifier(strutil::Format(_T("TouchstickLeft%i"), pSlaveIndex));
 	mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lRightStickArea, 0);
+	mStickRight->SetUniqueIdentifier(strutil::Format(_T("TouchstickRight%i"), pSlaveIndex));
 }
 
 PushManager::~PushManager()
 {
 	Close();
+
+	delete mStickLeft;
+	mStickLeft = 0;
+	delete mStickRight;
+	mStickRight = 0;
 }
 
 void PushManager::LoadSettings()
@@ -111,10 +118,6 @@ void PushManager::Close()
 	ClearRoadSigns();
 	Parent::Close();
 	CloseLoginGui();
-	delete mStickLeft;
-	mStickLeft = 0;
-	delete mStickRight;
-	mStickRight = 0;
 }
 
 void PushManager::SetIsQuitting()

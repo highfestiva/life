@@ -18,6 +18,30 @@ namespace Touch
 {
 
 
+class TouchstickInputDevice;
+
+
+
+class TouchstickInputElement: public InputElement
+{
+	typedef InputElement Parent;
+public:
+	TouchstickInputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex, TouchstickInputDevice* pParentDevice);
+	virtual ~TouchstickInputElement();
+
+	// Sets the uncalibrated value of this device.
+	// (Only useful with analogue elements).
+	void SetValue(int pValue);
+
+	str GetCalibration() const;
+	bool SetCalibration(const str& pData);
+
+private:
+
+	LOG_CLASS_DECLARE();
+};
+
+
 
 class TouchstickInputDevice: public InputDevice
 {
@@ -35,11 +59,14 @@ public:
 
 	TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle);
 	virtual ~TouchstickInputDevice();
+	bool IsOwnedByManager() const;
 
 	void SetTap(const PixelCoord& pCoord, bool pIsPress);
 	void GetValue(float& x, float& y, bool& pIsPressing);
 
 private:
+	void AddElement(InputElement* pElement);
+
 	bool IncludesCoord(const PixelCoord& pCoord) const;
 
 	virtual void Activate();
@@ -49,7 +76,6 @@ private:
 	InputMode mMode;
 	PixelRect mArea;
 	PixelCoord mStart;
-	PixelCoord mLast;
 	bool mIsPressing;
 	int mAngle;
 	/*int mMovedDistance;

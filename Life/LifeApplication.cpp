@@ -4,6 +4,7 @@
 
 
 
+#include "LifeApplication.h"
 #include "../Cure/Include/ConsoleManager.h"
 #include "../Cure/Include/GameTicker.h"
 #include "../Cure/Include/RuntimeVariable.h"
@@ -14,7 +15,6 @@
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "Life.h"
-#include "LifeApplication.h"
 #include "RtVar.h"
 
 

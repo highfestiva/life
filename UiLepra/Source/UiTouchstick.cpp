@@ -19,6 +19,31 @@ using namespace Lepra;
 
 
 
+TouchstickInputElement::TouchstickInputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, TouchstickInputDevice* pParentDevice):
+	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice)
+{
+}
+
+TouchstickInputElement::~TouchstickInputElement()
+{
+}
+
+void TouchstickInputElement::SetValue(int)
+{
+}
+
+str TouchstickInputElement::GetCalibration() const
+{
+	return str();
+}
+
+bool TouchstickInputElement::SetCalibration(const str&)
+{
+	return true;
+}
+
+
+
 TouchstickInputDevice* TouchstickInputDevice::GetByCoordinate(InputManager* pManager, const PixelCoord& pCoord)
 {
 	const InputManager::DeviceList& lList = pManager->GetDeviceList();
@@ -37,8 +62,6 @@ TouchstickInputDevice* TouchstickInputDevice::GetByCoordinate(InputManager* pMan
 	return 0;
 }
 
-
-
 TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle):
 	Parent(pManager),
 	mMode(pMode),
@@ -49,6 +72,18 @@ TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode p
 	{
 		mAngle += 360;
 	}
+
+	TouchstickInputElement* lButton = new TouchstickInputElement(InputElement::DIGITAL, InputElement::BUTTON1, 0, this);
+	TouchstickInputElement* x = new TouchstickInputElement(InputElement::ANALOGUE, InputElement::ABSOLUTE_AXIS, 0, this);
+	TouchstickInputElement* y = new TouchstickInputElement(InputElement::ANALOGUE, InputElement::ABSOLUTE_AXIS, 1, this);
+	SetIdentifier(_T("Touchstick"));
+	lButton->SetIdentifier(_T("Button"));
+	x->SetIdentifier(_T("AxisX"));
+	y->SetIdentifier(_T("AxisY"));
+	AddElement(lButton);
+	AddElement(x);
+	AddElement(y);
+
 	GetManager()->AddInputDevice(this);
 }
 
@@ -57,25 +92,23 @@ TouchstickInputDevice::~TouchstickInputDevice()
 	GetManager()->RemoveInputDevice(this);
 }
 
-
+bool TouchstickInputDevice::IsOwnedByManager() const
+{
+	return false;
+}
 
 void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 {
 	if (mIsPressing)
 	{
-		mLast = pCoord;
 		log_volatile(mLog.Debugf(_T("Movin': (%i; %i)"), pCoord.x, pCoord.y));
 	}
 	else
 	{
 		mStart = pCoord;
-		mLast = pCoord;
 	}
 	mIsPressing = pIsPress;
-}
 
-void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
-{
 	const float dx = mArea.GetWidth() * 0.5f;
 	const float dy = mArea.GetHeight() * 0.5f;
 	float rx;
@@ -85,24 +118,25 @@ void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
 		default:
 		case MODE_RELATIVE_CENTER:
 		{
-			rx = (mLast.x - mArea.GetCenterX()) / dx;
-			ry = (mLast.y - mArea.GetCenterY()) / dy;
+			rx = (pCoord.x - mArea.GetCenterX()) / dx;
+			ry = (pCoord.y - mArea.GetCenterY()) / dy;
 		}
 		break;
 		case MODE_RELATIVE_START:
 		{
-			rx = (mLast.x - mStart.x) / dx;
-			ry = (mLast.y - mStart.y) / dy;
+			rx = (pCoord.x - mStart.x) / dx;
+			ry = (pCoord.y - mStart.y) / dy;
 		}
 		break;
 		case MODE_RELATIVE_LAST:
 		{
-			rx = (mLast.x - mStart.x) / dx;
-			ry = (mLast.y - mStart.y) / dy;
-			mStart = mLast;
+			rx = (pCoord.x - mStart.x) / dx;
+			ry = (pCoord.y - mStart.y) / dy;
+			mStart = pCoord;
 		}
 		break;
 	}
+
 	rx = Math::Clamp(rx, -1.0f, +1.0f);
 	ry = Math::Clamp(ry, -1.0f, +1.0f);
 	// Handle the angles.
@@ -123,9 +157,17 @@ void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
 	{
 		std::swap(rx, ry);
 	}
-	x = rx;
-	y = ry;
-	pIsPressing = mIsPressing;
+
+	mElementArray[0]->SetValue(mIsPressing? 1.0f : 0.0f);
+	mElementArray[1]->SetValue(mIsPressing? rx : 0.0f);
+	mElementArray[2]->SetValue(mIsPressing? ry : 0.0f);
+}
+
+
+
+void TouchstickInputDevice::AddElement(InputElement* pElement)
+{
+	mElementArray.push_back(pElement);
 }
 
 

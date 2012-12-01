@@ -142,14 +142,6 @@ MacInputDevice::~MacInputDevice()
 		Release();
 	}
 	//mNativeDevice->Release();
-
-	ElementArray::iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-		delete lElement;
-	}
-	mElementArray.clear();
 }
 
 void MacInputDevice::Activate()
@@ -308,13 +300,6 @@ MacInputManager::~MacInputManager()
 	}
 
 	RemoveObserver();
-
-	DeviceList::iterator lDIter;
-	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
-	{
-		InputDevice* lDevice = *lDIter;
-		delete lDevice;
-	}
 
 	mDisplayManager = 0;
 }
