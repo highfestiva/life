@@ -182,6 +182,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 		switch (lEngine->GetEngineType())
 		{
 			case TBC::PhysicsEngine::ENGINE_CAMERA_FLAT_PUSH:
+			case TBC::PhysicsEngine::ENGINE_CAMERA_3D_PUSH:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 100);
 				++y;
@@ -384,6 +385,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 		switch (lEngine->GetEngineType())
 		{
 			case TBC::PhysicsEngine::ENGINE_CAMERA_FLAT_PUSH:
+			case TBC::PhysicsEngine::ENGINE_CAMERA_3D_PUSH:
 			{
 				assert(pPosition.mBodyPositionArray.size() > y);
 				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_4);

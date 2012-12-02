@@ -160,10 +160,7 @@ void OpenGLRenderer::SetViewport(const PixelRect& pViewport)
 void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 {
 	Parent::SetViewFrustum(pFOVAngle, pNear, pFar);
-	glMatrixMode(GL_PROJECTION);
 	Perspective(pFOVAngle, GetAspectRatio(), pNear, pFar);
-
-	glMatrixMode(GL_MODELVIEW);
 	OGL_ASSERT();
 }
 

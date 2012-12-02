@@ -134,6 +134,21 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 			}
 		}
 		break;
+		case ENGINE_CAMERA_3D_PUSH:
+		{
+			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+6)
+			{
+				switch (pAspect)
+				{
+					case 4:		mValue[ASPECT_PRIMARY]   = pValue;		break;
+					case 5:		mValue[ASPECT_SECONDARY] = -pValue;		break;
+					case 6:		mValue[ASPECT_TERTIARY]	 = pValue;		break;
+				}
+				mValue[ASPECT_CAM] = pZAngle;
+				return (true);
+			}
+		}
+		break;
 		case ENGINE_HOVER:
 		case ENGINE_HINGE_ROLL:
 		case ENGINE_HINGE_GYRO:
@@ -195,6 +210,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				}
 				break;
 				case ENGINE_CAMERA_FLAT_PUSH:
+				case ENGINE_CAMERA_3D_PUSH:
 				{
 					Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
 						Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
@@ -568,7 +584,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 float PhysicsEngine::GetValue() const
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
-	if (mEngineType == ENGINE_CAMERA_FLAT_PUSH)
+	if (mEngineType == ENGINE_CAMERA_FLAT_PUSH || mEngineType == ENGINE_CAMERA_FLAT_PUSH)
 	{
 		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
 		const float b = ::fabs(mValue[ASPECT_SECONDARY]);
