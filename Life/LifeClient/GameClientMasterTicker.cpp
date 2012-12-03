@@ -429,9 +429,10 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 	bool lIsLocalServer = false;
 	const str lServerUrl = strutil::Split(pServerAddress, _T(":"), 1)[0];
 	IPAddress lServerIpAddress;
-	IPAddress lExternalIpAddress;
-	if (Network::ResolveHostname(lServerUrl, lServerIpAddress) && Network::ResolveHostname(_T(""), lExternalIpAddress))
+	if (Network::ResolveHostname(lServerUrl, lServerIpAddress))
 	{
+		IPAddress lExternalIpAddress;
+		Network::ResolveHostname(_T(""), lExternalIpAddress);
 		const str lServerIp = lServerIpAddress.GetAsString();
 		if (lServerIp == _T("127.0.0.1") ||
 			lServerIp == _T("0.0.0.0") ||

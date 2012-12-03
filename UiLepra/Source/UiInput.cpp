@@ -705,8 +705,6 @@ void InputManager::ClearFunctors()
 
 void InputManager::AddInputDevice(InputDevice* pDevice)
 {
-	mDeviceList.push_back(pDevice);
-
 	// Clone the functors if any are present already.
 	DeviceList::iterator x;
 	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
@@ -724,6 +722,8 @@ void InputManager::AddInputDevice(InputDevice* pDevice)
 			break;
 		}
 	}
+
+	mDeviceList.push_back(pDevice);
 }
 
 void InputManager::RemoveInputDevice(InputDevice* pDevice)

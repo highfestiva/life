@@ -149,12 +149,12 @@ using namespace Lepra;
 	UITouch* lTouch;
 	while ((lTouch = (UITouch*)[e nextObject]))
 	{
-		//CGPoint lTapPosition = [self xform:[lTouch locationInView:nil]];
-		//CGPoint lPrevTapPosition = [self xform:[lTouch previousLocationInView:nil]];
 		CGPoint lTapPosition = [lTouch locationInView:nil];
 		CGPoint lPrevTapPosition = [lTouch previousLocationInView:nil];
 		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
-		Push::Push::GetApp()->mDragManager.UpdateDrag(PixelCoord(lPrevTapPosition.x, lPrevTapPosition.y), PixelCoord(lTapPosition.x, lTapPosition.y), lIsPressed);
+		PixelCoord lPreviousTap(lPrevTapPosition.y, _canvas->GetActualWidth() - lPrevTapPosition.x);
+		PixelCoord lThisTap(lTapPosition.y, _canvas->GetActualWidth() - lTapPosition.x);
+		Push::Push::GetApp()->mDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed);
 	}
 }
 

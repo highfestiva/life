@@ -381,9 +381,9 @@ public:
 	// within the one previously set. This means that setting the clipping rect one time 
 	// after another will reduce the size of the clipping area each time. Call 
 	// ResetClippingRect() to set the clipping rect back to cover the entire screen.
-	virtual void SetClippingRect(const PixelRect& pRect);
+	void SetClippingRect(const PixelRect& pRect);
 	void ReduceClippingRect(const PixelRect& pRect);
-	virtual void ResetClippingRect();
+	void ResetClippingRect();
 	const PixelRect& GetClippingRect() const;
 
 	virtual void SetCameraTransformation(const TransformationF& pTransformation);
@@ -556,6 +556,9 @@ protected:
 	void InitRenderer();
 	void CloseRenderer();
 
+	virtual void DoSetClippingRect(const PixelRect& pRect) = 0;
+	virtual void DoSetViewport(const PixelRect& pViewport) = 0;
+
 	// Some functions commonly used by the child classes.
 	Material* GetMaterial(MaterialType pMaterialType) const;
 	GeometryTable& GetGeometryTable();
@@ -595,7 +598,6 @@ protected:
 	virtual bool BindShadowGeometry(UiTbc::ShadowVolume* pShadowGeometry, LightHint pLightHint) = 0;
 	virtual void ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption) = 0;
 
-protected:
 	int AllocLight();
 
 	void ReleaseShadowVolumes();
