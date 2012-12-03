@@ -1603,12 +1603,12 @@
 		B19A154913A124AB0051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B19A154A13A124AB0051A61C /* Mac */,
 				B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */,
 				B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */,
 				B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */,
 				B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */,
 				B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */,
-				B19A154A13A124AB0051A61C /* Mac */,
 				B19A155013A124AB0051A61C /* UiDisplayManager.cpp */,
 				B19A155113A124AB0051A61C /* UiInput.cpp */,
 				B19A155213A124AB0051A61C /* UiLepra.cpp */,

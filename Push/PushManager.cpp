@@ -76,12 +76,25 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	lLeftStickArea.mTop = lLeftStickArea.mBottom - (lLeftStickArea.mRight - lLeftStickArea.mLeft);
 	lRightStickArea.mTop = lLeftStickArea.mTop;
 	mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lLeftStickArea,  0);
-	mStickLeft->SetUniqueIdentifier(strutil::Format(_T("TouchstickLeft%i"), pSlaveIndex));
+	const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), pSlaveIndex);
+	mStickLeft->SetUniqueIdentifier(lLeftName);
 	mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lRightStickArea, 0);
-	mStickRight->SetUniqueIdentifier(strutil::Format(_T("TouchstickRight%i"), pSlaveIndex));
+	const str lRightName = strutil::Format(_T("TouchstickRight%i"), pSlaveIndex);
+	mStickRight->SetUniqueIdentifier(lRightName);
 
 	// TODO: fix - values hard-coded for computer in ClientOptionsManager.cpp!
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_FWD, _T("TouchstickLeft0.AxisY-"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
 }
 
 PushManager::~PushManager()

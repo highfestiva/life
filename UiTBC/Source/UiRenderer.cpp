@@ -146,6 +146,18 @@ void Renderer::SetViewport(const PixelRect& pViewport)
 		pViewport.mTop <= pViewport.mBottom);
 	mViewport = pViewport;
 	RecalculateFrustumPlanes();
+
+	if (mScreen->GetOutputRotation()%180 != 0)
+	{
+		PixelRect lRect(pViewport);
+		std::swap(lRect.mLeft, lRect.mTop);
+		std::swap(lRect.mRight, lRect.mBottom);
+		DoSetViewport(lRect);
+	}
+	else
+	{
+		DoSetViewport(pViewport);
+	}
 }
 
 const PixelRect& Renderer::GetViewport() const
@@ -192,16 +204,27 @@ float Renderer::CalcFOVAngle(float pReferenceAngle, float pAspectRatio)
 void Renderer::SetClippingRect(const PixelRect& pRect)
 {
 	mClippingRect = pRect;
+	if (mScreen->GetOutputRotation()%180 != 0)
+	{
+		PixelRect lRect(pRect);
+		std::swap(lRect.mLeft, lRect.mTop);
+		std::swap(lRect.mRight, lRect.mBottom);
+		DoSetClippingRect(lRect);
+	}
+	else
+	{
+		DoSetClippingRect(pRect);
+	}
 }
 
 void Renderer::ReduceClippingRect(const PixelRect& pRect)
 {
-	Renderer::SetClippingRect(mClippingRect.GetOverlap(pRect));
+	SetClippingRect(mClippingRect.GetOverlap(pRect));
 }
 
 void Renderer::ResetClippingRect()
 {
-	SetClippingRect(PixelRect(0, 0, mScreen->GetActualWidth(), mScreen->GetActualHeight()));
+	SetClippingRect(PixelRect(0, 0, mScreen->GetWidth(), mScreen->GetHeight()));
 }
 
 const PixelRect& Renderer::GetClippingRect() const
@@ -212,7 +235,6 @@ const PixelRect& Renderer::GetClippingRect() const
 void Renderer::SetCameraTransformation(const TransformationF& pTransformation)
 {
 	mCameraTransformation = pTransformation;
-	mCameraTransformation.RotateRoll(GetScreen()->GetOutputRotation() * PIF / -180.0f);
 	mCameraOrientationInverse = mCameraTransformation.GetOrientation().GetInverse();
 }
 

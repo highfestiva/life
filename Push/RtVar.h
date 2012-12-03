@@ -8,6 +8,7 @@
 
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Life/LifeClient/RtVar.h"
+#include "../Life/LifeServer/RtVar.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 
 

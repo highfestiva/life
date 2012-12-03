@@ -4,6 +4,7 @@
 
 
 
+#include "../Lepra/Include/LepraTarget.h"
 #include "PushTicker.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
