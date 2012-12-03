@@ -68,6 +68,9 @@ public:
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle);
 
 protected:
+	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
+	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
+
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	virtual bool Reset();
@@ -101,11 +104,10 @@ protected:
 	void OnAvatarSelect(UiTbc::Button* pButton);
 	void DropAvatar();
 
+	void DrawStick(Touchstick* pStick);
+
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
 	QuaternionF GetCameraQuaternion() const;
-
-	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
-	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 

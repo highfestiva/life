@@ -152,6 +152,9 @@ void PushManager::SetFade(float pFadeAmount)
 
 bool PushManager::Paint()
 {
+	DrawStick(mStickLeft);
+	DrawStick(mStickRight);
+
 #ifdef LIFE_DEMO
 	const double lTime = mDemoTime.QueryTimeDiff();
 	if ((mSlaveIndex >= 2 || (mSlaveIndex == 1 && lTime > 10*60))
@@ -1010,6 +1013,42 @@ void PushManager::DropAvatar()
 	mOwnedObjectList.erase(mAvatarId);
 	mAvatarId = 0;
 	mHadAvatar = false;
+}
+
+
+
+void PushManager::DrawStick(Touchstick* pStick)
+{
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	if (!pStick || !lAvatar)
+	{
+		return;
+	}
+
+	PixelRect lArea = pStick->GetArea();
+	mUiManager->GetPainter()->DrawArc(lArea.mLeft, lArea.mTop, lArea.GetWidth(), lArea.GetHeight(), 0, 360, false);
+	float x;
+	float y;
+	bool lIsPressing;
+	pStick->GetValue(x, y, lIsPressing);
+	if (lIsPressing)
+	{
+		Vector2DF v(x, y);
+		const float lLength = v.GetLength();
+		if (lLength > 1)
+		{
+			v.Div(lLength);
+			x = v.x;
+			y = v.y;
+		}
+		x = 0.5f*x + 0.5f;
+		y = 0.5f*y + 0.5f;
+		const int r = 20;
+		mUiManager->GetPainter()->DrawArc(
+			lArea.mLeft + (int)((lArea.GetWidth()-r*2) *x),
+			lArea.mTop  + (int)((lArea.GetHeight()-r*2)*y),
+			r*2, r*2, 0, 360, true);
+	}
 }
 
 

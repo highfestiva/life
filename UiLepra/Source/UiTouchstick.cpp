@@ -92,6 +92,13 @@ TouchstickInputDevice::~TouchstickInputDevice()
 	GetManager()->RemoveInputDevice(this);
 }
 
+bool TouchstickInputDevice::IsOwnedByManager() const
+{
+	return false;
+}
+
+
+
 void TouchstickInputDevice::Move(const PixelRect& pArea, int pAngle)
 {
 	mArea = pArea;
@@ -102,10 +109,12 @@ void TouchstickInputDevice::Move(const PixelRect& pArea, int pAngle)
 	}
 }
 
-bool TouchstickInputDevice::IsOwnedByManager() const
+const PixelRect& TouchstickInputDevice::GetArea() const
 {
-	return false;
+	return mArea;
 }
+
+
 
 void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 {
@@ -172,6 +181,32 @@ void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 	mElementArray[0]->SetValue(mIsPressing? 1.0f : 0.0f);
 	mElementArray[1]->SetValue(mIsPressing? rx : 0.0f);
 	mElementArray[2]->SetValue(mIsPressing? ry : 0.0f);
+}
+
+void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
+{
+	x = mElementArray[1]->GetValue();
+	y = mElementArray[2]->GetValue();
+	pIsPressing = mElementArray[0]->GetBooleanValue();
+
+	if (mAngle < 45)
+	{
+	}
+	else if (mAngle < 135)
+	{
+		x = -x;
+		std::swap(x, y);
+	}
+	else if (mAngle < 225)
+	{
+		x = -x;
+		y = -y;
+	}
+	else
+	{
+		y = -y;
+		std::swap(x, y);
+	}
 }
 
 
