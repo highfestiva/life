@@ -92,6 +92,16 @@ TouchstickInputDevice::~TouchstickInputDevice()
 	GetManager()->RemoveInputDevice(this);
 }
 
+void TouchstickInputDevice::Move(const PixelRect& pArea, int pAngle)
+{
+	mArea = pArea;
+	mAngle = pAngle;
+	if (mAngle < -45)
+	{
+		mAngle += 360;
+	}
+}
+
 bool TouchstickInputDevice::IsOwnedByManager() const
 {
 	return false;
@@ -145,7 +155,7 @@ void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 	}
 	else if (mAngle < 135)
 	{
-		rx = -rx;
+		ry = -ry;
 		std::swap(rx, ry);
 	}
 	else if (mAngle < 225)
@@ -155,6 +165,7 @@ void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 	}
 	else
 	{
+		rx = -rx;
 		std::swap(rx, ry);
 	}
 

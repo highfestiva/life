@@ -59,6 +59,7 @@ public:
 
 	TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle);
 	virtual ~TouchstickInputDevice();
+	void Move(const PixelRect& pArea, int pAngle);
 	bool IsOwnedByManager() const;
 
 	void SetTap(const PixelCoord& pCoord, bool pIsPress);

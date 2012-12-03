@@ -26,6 +26,7 @@
 #include "RoadSignButton.h"
 #include "RtVar.h"
 #include "Sunlight.h"
+#include "Version.h"
 
 
 
@@ -54,6 +55,8 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCameraTargetXyDistance(20),
 	mCameraMaxSpeed(500),
 	mLoginWindow(0),
+	mStickLeft(0),
+	mStickRight(0),
 	mEnginePlaybackTime(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
@@ -68,33 +71,6 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance*3, 0);
 
 	SetConsoleManager(new PushConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
-
-	PixelRect lLeftStickArea(mRenderArea);
-	PixelRect lRightStickArea(mRenderArea);
-	lLeftStickArea.mRight = mRenderArea.GetWidth() / 4;
-	lRightStickArea.mLeft = mRenderArea.GetWidth() * 3 / 4;
-	lLeftStickArea.mTop = lLeftStickArea.mBottom - (lLeftStickArea.mRight - lLeftStickArea.mLeft);
-	lRightStickArea.mTop = lLeftStickArea.mTop;
-	mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lLeftStickArea,  0);
-	const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), pSlaveIndex);
-	mStickLeft->SetUniqueIdentifier(lLeftName);
-	mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, lRightStickArea, 0);
-	const str lRightName = strutil::Format(_T("TouchstickRight%i"), pSlaveIndex);
-	mStickRight->SetUniqueIdentifier(lRightName);
-
-	// TODO: fix - values hard-coded for computer in ClientOptionsManager.cpp!
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
 }
 
 PushManager::~PushManager()
@@ -110,10 +86,27 @@ PushManager::~PushManager()
 void PushManager::LoadSettings()
 {
 	Parent::LoadSettings();
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+	const str lLeftName  = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
+	const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
+#endif // Touch device or emulated touch device
 }
 
 void PushManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -124,6 +117,8 @@ void PushManager::SetRenderArea(const PixelRect& pRenderArea)
 		mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
 			mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
 	}
+
+	UpdateTouchstickPlacement();
 
 	CURE_RTVAR_GET(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
@@ -391,6 +386,66 @@ void PushManager::TickInput()
 }
 
 
+
+void PushManager::UpdateTouchstickPlacement()
+{
+	if (mTouchstickTimer.QueryTimeDiff() < 3.0)
+	{
+		return;
+	}
+	mTouchstickTimer.ClearTimeDiff();
+
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+	if (!mStickLeft)
+	{
+		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0);
+		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
+		mStickLeft->SetUniqueIdentifier(lLeftName);
+		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0);
+		const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
+		mStickRight->SetUniqueIdentifier(lRightName);
+	}
+	int lIndex = 0;
+	int lCount = 0;
+	GetMaster()->GetSlaveInfo(this, lIndex, lCount);
+	if (lCount == 2)
+	{
+		PixelRect lLeftStickArea(mRenderArea);
+		PixelRect lRightStickArea(mRenderArea);
+		lLeftStickArea.mBottom = mRenderArea.GetHeight() / 4;
+		lRightStickArea.mTop = mRenderArea.GetHeight() * 3 / 4;
+		lLeftStickArea.mRight = lLeftStickArea.mLeft + lLeftStickArea.GetHeight();
+		lRightStickArea.mRight = lLeftStickArea.mRight;
+
+		if (lIndex == 0)
+		{
+			mStickLeft->Move(lLeftStickArea, -90);
+			mStickRight->Move(lRightStickArea, -90);
+		}
+		else
+		{
+			lLeftStickArea.mLeft += mRenderArea.GetWidth() - lLeftStickArea.GetWidth();
+			lRightStickArea.mLeft = lLeftStickArea.mLeft;
+			lLeftStickArea.mRight = lLeftStickArea.mLeft + lLeftStickArea.GetHeight();
+			lRightStickArea.mRight = lLeftStickArea.mRight;
+			std::swap(lLeftStickArea, lRightStickArea);
+			mStickLeft->Move(lLeftStickArea, +90);
+			mStickRight->Move(lRightStickArea, +90);
+		}
+	}
+	else
+	{
+		PixelRect lLeftStickArea(mRenderArea);
+		PixelRect lRightStickArea(mRenderArea);
+		lLeftStickArea.mRight = mRenderArea.GetWidth() / 4;
+		lRightStickArea.mLeft = mRenderArea.GetWidth() * 3 / 4;
+		lLeftStickArea.mTop = lLeftStickArea.mBottom - (lLeftStickArea.mRight - lLeftStickArea.mLeft);
+		lRightStickArea.mTop = lLeftStickArea.mTop;
+		mStickLeft->Move(lLeftStickArea, 0);
+		mStickRight->Move(lRightStickArea, 0);
+	}
+#endif // Touch or emulated touch
+}
 
 void PushManager::TickUiInput()
 {
@@ -988,6 +1043,22 @@ QuaternionF PushManager::GetCameraQuaternion() const
 	const float lGimbal = mCameraOrientation.z;
 	QuaternionF lOrientation;
 	lOrientation.SetEulerAngles(lTheta-PIF/2, PIF/2-lPhi, lGimbal);
+
+	int lIndex = 0;
+	int lCount = 0;
+	GetMaster()->GetSlaveInfo(this, lIndex, lCount);
+	if (lCount == 2)
+	{
+		if (lIndex == 0)
+		{
+			lOrientation.RotateAroundOwnY(-PIF/2);
+		}
+		else
+		{
+			lOrientation.RotateAroundOwnY(+PIF/2);
+		}
+	}
+
 	return (lOrientation);
 }
 

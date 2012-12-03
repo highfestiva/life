@@ -390,6 +390,27 @@ bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) 
 	return false;
 }
 
+void GameClientMasterTicker::GetSlaveInfo(const GameClientSlaveManager* pSlave, int& pIndex, int& pCount) const
+{
+	int lIndex = 0;
+	pCount = mActiveSlaveCount;
+	SlaveArray::const_iterator x = mSlaveArray.begin();
+	for (; x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave == pSlave)
+		{
+			pIndex = lIndex;
+			return;
+		}
+		if (lSlave)
+		{
+			++lIndex;
+		}
+	}
+	pIndex = 0;
+}
+
 bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const
 {
 	return (mLocalObjectSet.find(pInstanceId) != mLocalObjectSet.end());

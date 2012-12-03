@@ -6,24 +6,18 @@
 
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Lepra/Include/SystemManager.h"
+#include "../Life/LifeServer/MasterServerConnection.h"
+#include "../Life/LifeApplication.h"
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiTBC/Include/UiTBC.h"
-#include "../Life/LifeServer/MasterServerConnection.h"
-#include "../Life/LifeApplication.h"
 #include "PushMaster/MasterServerPort.h"
 #include "Push.h"
 #include "PushTicker.h"
 #include "RtVar.h"
 #include "Version.h"
-
-
-
-#ifndef LEPRA_TOUCH
-#define EMULATE_TOUCH	1
-#endif // !iOS
 
 
 

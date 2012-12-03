@@ -79,6 +79,7 @@ protected:
 
 	virtual void TickInput();
 
+	void UpdateTouchstickPlacement();
 	virtual void TickUiInput();
 	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
 	virtual void TickUiUpdate();
@@ -136,6 +137,7 @@ protected:
 	Vector3DF mMicrophoneSpeed;		// TODO: remove hack (should context object controlled)!
 	UiTbc::Window* mLoginWindow;
 
+	HiResTimer mTouchstickTimer;
 	Touchstick* mStickLeft;
 	Touchstick* mStickRight;
 

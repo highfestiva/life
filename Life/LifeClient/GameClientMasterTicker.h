@@ -58,6 +58,7 @@ public:
 	bool WaitResetUi();
 
 	bool IsFirstSlave(const GameClientSlaveManager* pSlave) const;
+	void GetSlaveInfo(const GameClientSlaveManager* pSlave, int& pIndex, int& pCount) const;
 	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
 
 	virtual PixelRect GetRenderArea() const;
