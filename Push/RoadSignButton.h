@@ -41,6 +41,7 @@ public:
 
 	UiTbc::CustomButton& GetButton();
 	void SetTrajectory(const Vector2DF& pEndPoint, float pEndDistance);
+	void SetTrajectoryAngle(float pAngle);
 	void SetOrientation(const QuaternionF& pOrientation);
 	void SetIsMovingIn(bool pIsMovingIn);
 
@@ -74,6 +75,7 @@ private:
 	Vector3DF mCurrentOffset;
 	float mTrajectoryEndDistance;
 	Vector2DF mTrajectoryEndPoint;
+	float mTrajectoryAngle;
 	float mFov;
 	QuaternionF mOriginalOrientation;
 	QuaternionF mOrientation;

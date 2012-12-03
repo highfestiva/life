@@ -42,7 +42,7 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mAvatarId(0),
 	mHadAvatar(false),
 	mCamRotateExtra(0),
-	mJustLookingAtAvatars(false),
+	mPickVehicleButton(0),
 	mAvatarInvisibleCount(0),
 	mRoadSignIndex(0),
 	mLevelId(0),
@@ -202,7 +202,6 @@ void PushManager::SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId)
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
 	SetRoadSignsVisible(false);
-	mAvatarSelectTime.ClearTimeDiff();
 }
 
 void PushManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet)
@@ -231,31 +230,6 @@ bool PushManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) 
 Cure::GameObjectId PushManager::GetAvatarInstanceId() const
 {
 	return mAvatarId;
-}
-
-
-
-void PushManager::OnInput(UiLepra::InputElement* pElement)
-{
-	Parent::OnInput(pElement);
-
-	if (mAvatarSelectTime.QueryTimeDiff() > 1.0)
-	{
-		if (pElement->GetParentDevice() == mUiManager->GetInputManager()->GetMouse())
-		{
-			PixelCoord lPosition = mUiManager->GetMouseDisplayPosition();
-			if (mRenderArea.IsInside(lPosition.x, lPosition.y))
-			{
-				SetRoadSignsVisible(true);
-				mJustLookingAtAvatars = true;
-				mAvatarMightSelectTime.PopTimeDiff();
-			}
-		}
-	}
-	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiff() > 2.0)
-	{
-		SetRoadSignsVisible(false);
-	}
 }
 
 
@@ -415,8 +389,6 @@ void PushManager::TickUiInput()
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 		if (lObject)
 		{
-			mAvatarMightSelectTime.UpdateTimer();
-
 			QuerySetChildishness(lObject);
 
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
@@ -470,9 +442,8 @@ void PushManager::TickUiInput()
 		}
 		else if (++mAvatarInvisibleCount > 10)
 		{
-			mJustLookingAtAvatars = false;
 			SetRoadSignsVisible(true);
-			mAvatarInvisibleCount = -10000;
+			mAvatarInvisibleCount = -100000;
 		}
 	}
 }
@@ -838,7 +809,6 @@ void PushManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage)
 			lButton->GetButton().SetOnClick(PushManager, OnAvatarSelect);
 			mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
 			lButton->StartLoading();
-			mJustLookingAtAvatars = false;
 		}
 		return;
 	}
@@ -942,10 +912,29 @@ void PushManager::CancelLogin()
 	SetIsQuitting();
 }
 
+void PushManager::OnVehicleSelect(UiTbc::Button* pButton)
+{
+	(void)pButton;
+	mPickVehicleButton->SetIsMovingIn(false);
+	SetRoadSignsVisible(true);
+}
+
 void PushManager::OnAvatarSelect(UiTbc::Button* pButton)
 {
 	Cure::UserAccount::AvatarId lAvatarId = pButton->GetName();
 	SelectAvatar(lAvatarId);
+
+	if (!mPickVehicleButton)
+	{
+		mPickVehicleButton = new RoadSignButton(this, GetResourceManager(), mUiManager, _T("PickVehicle"),
+			_T("road_sign_01"), _T("road_sign_car.png"), RoadSignButton::SHAPE_ROUND);
+		GetContext()->AddLocalObject(mPickVehicleButton);
+		mPickVehicleButton->SetTrajectory(Vector2DF(0, 0.45f), 20);
+		mPickVehicleButton->SetTrajectoryAngle(-PIF/2);
+		mPickVehicleButton->GetButton().SetOnClick(PushManager, OnVehicleSelect);
+		mPickVehicleButton->StartLoading();
+	}
+	mPickVehicleButton->SetIsMovingIn(true);
 }
 
 void PushManager::DropAvatar()

@@ -65,8 +65,6 @@ public:
 	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
 	Cure::GameObjectId GetAvatarInstanceId() const;
 
-	virtual void OnInput(UiLepra::InputElement* pElement);
-
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle);
 
 protected:
@@ -98,6 +96,7 @@ protected:
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
 	void CancelLogin();
+	void OnVehicleSelect(UiTbc::Button* pButton);
 	void OnAvatarSelect(UiTbc::Button* pButton);
 	void DropAvatar();
 
@@ -115,9 +114,7 @@ protected:
 	Life::Options::Steering mLastSteering;
 	float mCamRotateExtra;
 
-	HiResTimer mAvatarSelectTime;
-	HiResTimer mAvatarMightSelectTime;
-	bool mJustLookingAtAvatars;
+	RoadSignButton* mPickVehicleButton;
 	int mAvatarInvisibleCount;
 	int mRoadSignIndex;
 	RoadSignMap mRoadSignMap;

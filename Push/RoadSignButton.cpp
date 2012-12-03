@@ -40,6 +40,7 @@ RoadSignButton::RoadSignButton(Life::ScreenPart* pScreenPart, Cure::ResourceMana
 	mAngle(0),
 	mIsMovingIn(true),
 	mTrajectoryEndDistance(0),
+	mTrajectoryAngle(-4*PIF),
 	mFov(90),
 	mIsOriginalOrientationSet(false)
 {
@@ -83,6 +84,11 @@ void RoadSignButton::SetTrajectory(const Vector2DF& pEndPoint, float pEndDistanc
 	mAnglePart = 1;
 	SetIsMovingIn(true);
 	mAngle = -PIF;
+}
+
+void RoadSignButton::SetTrajectoryAngle(float pAngle)
+{
+	mTrajectoryAngle = pAngle;
 }
 
 void RoadSignButton::SetOrientation(const QuaternionF& pOrientation)
@@ -147,9 +153,13 @@ void RoadSignButton::MoveSign(const float pFrameTime)
 	const Vector3DF& lPosition = lGfxGeometry->GetTransformation().GetPosition();
 	float lScreenRadius = 0;
 	const Vector2DF lScreenPosition = Get2dProjectionPosition(lPosition, lScreenRadius);
-	const float lTrajectoryAngle = (lScreenPosition.x <= GetUiManager()->GetDisplayManager()->GetWidth()/2)? PIF : 0;
+	float lTrajectoryAngle = mTrajectoryAngle;
+	if (lTrajectoryAngle < -2*PIF)
+	{
+		lTrajectoryAngle = (lScreenPosition.x <= GetUiManager()->GetDisplayManager()->GetWidth()/2)? PIF : 0;
+	}
 	const float lAnchorX = 0.8f*mTrajectoryEndDistance*1/lRatio.y*cos(lTrajectoryAngle);
-	const float lAnchorZ = 0.8f*mTrajectoryEndDistance*1/lRatio.x*sin(lTrajectoryAngle);
+	const float lAnchorZ = 0.8f*mTrajectoryEndDistance*1/lRatio.x*-sin(lTrajectoryAngle);
 	const Vector3DF lAnchor = Vector3DF(lAnchorX, 2*mTrajectoryEndDistance, lAnchorZ) - lEndPosition;
 	const Vector3DF lAxis(-lAnchorZ, 0, lAnchorX);
 
@@ -328,13 +338,20 @@ Vector2DF RoadSignButton::GetAspectRatio(bool pInverse) const
 void RoadSignButton::SetInitialPosition(TBC::GeometryBase* pGeometry) const
 {
 	TransformationF lTransformation;
-	if (mTrajectoryEndPoint.x > 0)
+	if (mTrajectoryAngle < -2*PIF)
 	{
-		lTransformation.SetPosition(Vector3DF(mTrajectoryEndDistance*3, 0, mTrajectoryEndDistance));
+		if (mTrajectoryEndPoint.x > 0)
+		{
+			lTransformation.SetPosition(Vector3DF(mTrajectoryEndDistance*3, 0, mTrajectoryEndDistance));
+		}
+		else
+		{
+			lTransformation.SetPosition(Vector3DF(-mTrajectoryEndDistance*3, 0, mTrajectoryEndDistance));
+		}
 	}
 	else
 	{
-		lTransformation.SetPosition(Vector3DF(-mTrajectoryEndDistance*3, 0, mTrajectoryEndDistance));
+		lTransformation.SetPosition(Vector3DF(-mTrajectoryEndDistance*3*cos(mTrajectoryAngle), -mTrajectoryEndDistance*3*sin(mTrajectoryAngle), mTrajectoryEndDistance));
 	}
 	pGeometry->SetTransformation(lTransformation);
 }
