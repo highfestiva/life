@@ -26,6 +26,7 @@ GravelEmitter::GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiMana
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
 	mParticleClass(pParticleClass),
+	mParticleTimer(false),
 	mSensitivityFactor(1/pSensitivity),
 	mScale(pScale),
 	mDelay(1/pAmount),
