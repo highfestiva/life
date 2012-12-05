@@ -1013,6 +1013,10 @@ void Painter::FillTriangle(const PixelCoord& pPoint1, float pU1, float pV1,
 
 void Painter::DrawArc(int x, int y, int rx, int ry, int a1, int a2, bool pFill)
 {
+	if (rx <= 0 || ry <= 0)
+	{
+		return;
+	}
 	const size_t lCurveCount = ((rx*2 + ry*2) / 20 + std::abs(a1-a2)/20 + 12) & (~7);
 	std::vector<Vector2DF> lCoords;
 	const float lMidX = x + rx*0.5f;

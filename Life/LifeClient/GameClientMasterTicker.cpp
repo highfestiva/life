@@ -1306,8 +1306,7 @@ bool GameClientMasterTicker::ApplyCalibration()
 			}
 			if (lVarNames[0] == _T("Calibration") && lVarNames[1] == lDeviceId)
 			{
-				str lValue = UiCure::GetSettings()->GetDefaultValue(
-					Cure::RuntimeVariableScope::READ_ONLY, lVarName, _T(""));
+				str lValue = UiCure::GetSettings()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVarName);
 				lCalibration.push_back(UiLepra::InputDevice::CalibrationElement(lVarNames[2], lValue));
 			}
 		}

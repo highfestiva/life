@@ -24,6 +24,13 @@ namespace Cure
 class RuntimeVariable
 {
 public:
+	enum DataType
+	{
+		DATATYPE_STRING,
+		DATATYPE_BOOL,
+		DATATYPE_INT,
+		DATATYPE_REAL,
+	};
 	enum Usage
 	{
 		USAGE_NORMAL	= 1,
@@ -33,37 +40,48 @@ public:
 	};
 
 	RuntimeVariable(const str& pName, const str& pValue, Usage pUsage);
+	RuntimeVariable(const str& pName, bool pValue, Usage pUsage);
+	RuntimeVariable(const str& pName, int pValue, Usage pUsage);
+	RuntimeVariable(const str& pName, double pValue, Usage pUsage);
 	~RuntimeVariable();
 	const str& GetName() const;
-	bool operator==(const str& pValue);
-	const str& GetValue() const;
+	//bool operator==(const str& pValue);
+	DataType GetType() const;
+	const str& GetStrValue() const;
 	bool GetBoolValue() const;
 	int GetIntValue() const;
 	double GetRealValue() const;
-	void SetValue(const str& pValue, Usage pUsage);
-	const str& GetDefaultValue() const;
-	void SetDefaultValue(const str& pDefaultValue);
+	bool SetStrValue(const str& pValue, Usage pUsage);
+	bool SetBoolValue(bool pValue, Usage pUsage);
+	bool SetIntValue(int pValue, Usage pUsage);
+	bool SetRealValue(double pValue, Usage pUsage);
+	const str& GetDefaultStrValue() const;
+	bool GetDefaultBoolValue() const;
+	int GetDefaultIntValue() const;
+	double GetDefaultRealValue() const;
+	void SetDefaultStrValue(const str& pDefaultValue);
+	void SetDefaultBoolValue(bool pValue);
+	void SetDefaultIntValue(int pValue);
+	void SetDefaultRealValue(double pValue);
 	Usage GetUsage() const;
+	static str GetTypeName(DataType pType);
 
 private:
-	void operator=(const RuntimeVariable&);
+	bool CheckType(DataType pType) const;
 
-	enum DataType
-	{
-		DATATYPE_STRING,
-		DATATYPE_BOOL,
-		DATATYPE_INT,
-		DATATYPE_REAL,
-	};
+	void operator=(const RuntimeVariable&);
 
 	str mName;
 	Usage mUsage;
 	DataType mDataType;
-	str mValue;
+	str mStrValue;
 	bool mBoolValue;
 	int mIntValue;
 	double mRealValue;
-	str mDefaultValue;
+	str mDefaultStrValue;
+	bool mDefaultBoolValue;
+	int mDefaultIntValue;
+	double mDefaultRealValue;
 
 	LOG_CLASS_DECLARE();
 };
@@ -75,47 +93,53 @@ class RuntimeVariableScope
 public:
 	enum GetMode
 	{
-		READ_WRITE	= 1,
+		READ_WRITE = 1,
 		READ_ONLY,
 		READ_DEFAULT,
 		READ_IGNORE,
 	};
 	enum SearchType
 	{
-		SEARCH_EXPORTABLE	= 1,
+		SEARCH_EXPORTABLE = 1,
 		SEARCH_ALL,
 	};
 	typedef RuntimeVariable::Usage SetMode;
+	typedef RuntimeVariable::DataType DataType;
 
 	RuntimeVariableScope(RuntimeVariableScope* pParentScope);
 	virtual ~RuntimeVariableScope();
 
-	static str GetType(const str& pValue);
-	static str Cast(const str& pValue);
 	bool IsDefined(const str& pName);
+	bool SetUntypedValue(SetMode pSetMode, const str& pName, const str& pValue);
 	bool SetValue(SetMode pSetMode, const str& pName, const str& pValue);
 	bool SetValue(SetMode pSetMode, const str& pName, const tchar* pValue);	// TRICKY: required for _T("") parameter to work.
-	bool SetValue(SetMode pSetMode, const str& pName, double pValue);
-	bool SetValue(SetMode pSetMode, const str& pName, int pValue);
 	bool SetValue(SetMode pSetMode, const str& pName, bool pValue);
+	bool SetValue(SetMode pSetMode, const str& pName, int pValue);
+	bool SetValue(SetMode pSetMode, const str& pName, double pValue);
 	// Returns the parameter default value if the runtime variable is not found.
+	str GetUntypedDefaultValue(GetMode pMode, const str& pName);
 	const str& GetDefaultValue(GetMode pMode, const HashedString& pName, const str& pDefaultValue = EmptyString);
 	const str GetDefaultValue(GetMode pMode, const HashedString& pName, const tchar* pDefaultValue);	// TRICKY: required for _T("") parameter to work.
-	double GetDefaultValue(GetMode pMode, const HashedString& pName, double pDefaultValue);
-	int GetDefaultValue(GetMode pMode, const HashedString& pName, int pDefaultValue);
 	bool GetDefaultValue(GetMode pMode, const HashedString& pName, bool pDefaultValue);
+	int GetDefaultValue(GetMode pMode, const HashedString& pName, int pDefaultValue);
+	double GetDefaultValue(GetMode pMode, const HashedString& pName, double pDefaultValue);
 
 	bool EraseVariable(const str& pName);
 
 	std::list<str> GetVariableNameList(SearchType pSearchType, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
 
-private:
-	const str& GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, const str& pDefaultValue);
-	double GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, double pDefaultValue);
-	int GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, int pDefaultValue);
-	bool GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, bool pDefaultValue);
+	static DataType GetUntypedType(const str& pValue);
 
-	void CreateLocalVariable(const str& pName, const str& pValue, SetMode pSetMode);
+private:
+	static DataType GetType(const str& pValue, str& pOutStr, bool& pOutBool, int& pOutInt, double& pOutDouble);
+	static DataType Cast(const str& pValue, str& pOutStr, bool& pOutBool, int& pOutInt, double& pOutDouble);
+
+	const str& GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, const str& pDefaultValue);
+	bool GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, bool pDefaultValue);
+	int GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, int pDefaultValue);
+	double GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, double pDefaultValue);
+
+	void CreateLocalVariable(const str& pName, DataType pType, const str& pStrValue, bool pBoolValue, int pIntValue, double pDoubleValue, SetMode pSetMode);
 	bool DeleteLocalVariable(const str& pName);
 
 	RuntimeVariable* GetVariable(const HashedString& pName, bool pRecursive = true) const;
