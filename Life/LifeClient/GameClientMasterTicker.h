@@ -53,6 +53,7 @@ public:
 
 	bool Tick();
 	void PollRoundTrip();
+	virtual void PreWaitPhysicsTick();
 
 	bool StartResetUi();
 	bool WaitResetUi();
@@ -93,6 +94,7 @@ protected:
 	void SlideSlaveLayout();
 	int GetSlaveAnimationTarget(int pSlaveIndex) const;
 	float GetSlavesVerticalAnimationTarget() const;
+	void MeasureLoad();
 	void Profile();
 	virtual void PhysicsTick();
 	virtual void WillMicroTick(float pTimeDelta);

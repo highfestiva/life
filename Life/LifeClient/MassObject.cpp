@@ -11,6 +11,7 @@
 #include "../../Lepra/Include/Random.h"
 #include "../../UiTBC/Include/UiGeometryBatch.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
+#include "RtVar.h"
 
 
 
@@ -197,7 +198,8 @@ bool MassObject::GetObjectPlacement(Vector3DF& pPosition) const
 
 MassObject::Square::Square(uint32 pSeed, const MeshArray& pResourceArray,
 	const std::vector<TransformationF>& pDisplacementArray, UiTbc::Renderer* pRenderer):
-	mRenderer(pRenderer)
+	mRenderer(pRenderer),
+	mDisableTransparency(false)
 {
 	if (pDisplacementArray.empty())
 	{
@@ -237,6 +239,12 @@ MassObject::Square::~Square()
 void MassObject::Square::SetRender(bool pRender, float pAlpha)
 {
 	pAlpha = Math::Clamp(pAlpha, 0.0f, 1.0f);
+	bool lMassObjectFading;
+	CURE_RTVAR_GET(lMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
+	if (!lMassObjectFading)
+	{
+		pAlpha = 1;
+	}
 	for (MassMeshArray::iterator x = mMassMeshArray.begin(); x != mMassMeshArray.end(); ++x)
 	{
 		x->first->SetAlwaysVisible(pRender);

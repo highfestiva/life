@@ -103,12 +103,18 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	lRelativeVelocity.x += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
 	lRelativeVelocity.y += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
 	lRelativeVelocity.z += (float)Random::Uniform(-lCollisionLength*0.02f, +lCollisionLength*0.05f);
+	bool lEnableGravelFading;
+	CURE_RTVAR_GET(lEnableGravelFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, false);
 	if (lRelativeVelocity.GetLengthSquared() < pRelativeVelocity.GetLengthSquared()*200*200)
 	{
 		Props* lPuff = new Props(mResourceManager, mParticleClass, mUiManager);
 		pObject->GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lPuff->SetInitialTransform(TransformationF(gIdentityQuaternionF, lPosition));
 		lPuff->StartParticle(Props::PARTICLE_SOLID, lRelativeVelocity, mScale, 2, mLifeTime);
+		if (!lEnableGravelFading)
+		{
+			lPuff->SetFadeOutTime(-10.0f);
+		}
 		lPuff->StartLoading();
 		mParticleTimer.ClearTimeDiff();
 	}

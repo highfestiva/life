@@ -211,7 +211,7 @@ void GameTicker::PhysicsTick()
 void GameTicker::CreatePhysicsThread()
 {
 	// If we have more than one CPU, we run a separate physics thread.
-	if (!mPhysicsWorkerThread && SystemManager::GetLogicalCpuCount() > 1)	// TODO: check performance to see if we should check for logical or physical CPUs.
+	if (!mPhysicsWorkerThread && SystemManager::GetCoreCount() > 1)	// TODO: check performance to see if we should check for logical or physical CPUs.
 	{
 		mPhysicsTickStartSemaphore = new Semaphore();
 		mPhysicsTickDoneSemaphore = new Semaphore();
@@ -248,7 +248,7 @@ void GameTicker::PhysicsThreadEntry()
 	// physics instances when running split screen.
 	// JB 2012-11: this may be a good idea again as the physics now is a singleton
 	// again, shared by server+split screen clients.
-	//Thread::GetCurrentThread()->SetCpuAffinityMask(1<<(SystemManager::GetLogicalCpuCount()-1));
+	//Thread::GetCurrentThread()->SetCpuAffinityMask(1<<(SystemManager::GetCoreCount()-1));
 
 	mPhysicsManager->InitCurrentThread();
 
