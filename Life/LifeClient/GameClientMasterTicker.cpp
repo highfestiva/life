@@ -75,8 +75,6 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 
 	mConsole->ExecuteCommand(_T("execute-file -i Default.lsh"));
 	mConsole->ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ClientBase"), _T("lsh")));
-
-
 }
 
 GameClientMasterTicker::~GameClientMasterTicker()
@@ -193,6 +191,10 @@ bool GameClientMasterTicker::Tick()
 	StartPhysicsTick();
 
 	{
+		MeasureLoad();
+	}
+
+	{
 		//LEPRA_MEASURE_SCOPE(RenderSlaves);
 
 		mUiManager->GetRenderer()->ClearDebugInfo();
@@ -260,6 +262,7 @@ bool GameClientMasterTicker::Tick()
 		}
 	}
 
+	PreWaitPhysicsTick();
 	WaitPhysicsTick();
 
 	if (mServer)
@@ -352,6 +355,10 @@ void GameClientMasterTicker::PollRoundTrip()
 			lSlave->TickNetworkInput();
 		}
 	}
+}
+
+void GameClientMasterTicker::PreWaitPhysicsTick()
+{
 }
 
 
@@ -910,6 +917,25 @@ float GameClientMasterTicker::GetSlavesVerticalAnimationTarget() const
 	return (lTopScale / (lTopScale+lBottomScale));
 }
 
+void GameClientMasterTicker::MeasureLoad()
+{
+	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
+	const ScopePerformanceData* lAppSleep = lMainLoop->GetChild(_T("AppSleep"));
+	if (lAppSleep)
+	{
+		int lTargetFrameRate;
+		CURE_RTVAR_GET(lTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
+		const double lCurrentPerformanceLoad = (lMainLoop->GetSlidingAverage()-lAppSleep->GetSlidingAverage()) * lTargetFrameRate;
+		double lAveragePerformanceLoad;
+		CURE_RTVAR_TRYGET(lAveragePerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
+		if (lCurrentPerformanceLoad < 20)
+		{
+			lAveragePerformanceLoad = Math::Lerp(lAveragePerformanceLoad, lCurrentPerformanceLoad, 0.05);
+		}
+		CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, lAveragePerformanceLoad);
+	}
+}
+
 void GameClientMasterTicker::Profile()
 {
 	bool lDebugGraph;
@@ -1049,9 +1075,9 @@ void GameClientMasterTicker::DrawDebugData() const
 
 	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
 	str lInfo = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
-	const ScopePerformanceData* lAppSleep = lMainLoop->GetChild(_T("AppSleep"));
-	const double lPercent = 100 * (lMainLoop->GetSlidingAverage()-lAppSleep->GetSlidingAverage()) / lMainLoop->GetSlidingAverage() + 0.5f;
-	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), lPercent);
+	double lLoad;
+	CURE_RTVAR_GET(lLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
+	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), 100 * lLoad + 0.5f);
 	int w = 80;
 	int h = 37;
 	bool lShowPerformanceCounters;
@@ -1306,8 +1332,7 @@ bool GameClientMasterTicker::ApplyCalibration()
 			}
 			if (lVarNames[0] == _T("Calibration") && lVarNames[1] == lDeviceId)
 			{
-				str lValue = UiCure::GetSettings()->GetDefaultValue(
-					Cure::RuntimeVariableScope::READ_ONLY, lVarName, _T(""));
+				str lValue = UiCure::GetSettings()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVarName);
 				lCalibration.push_back(UiLepra::InputDevice::CalibrationElement(lVarNames[2], lValue));
 			}
 		}

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../RtVar.h"
+#include "../../UiCure/Include/UiRuntimeVariableName.h"
 
 
 
@@ -39,10 +40,11 @@
 #define RTVAR_DEBUG_INPUT_PRINT		"Debug.Input.Print"
 #define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"		// Internal.
 #define RTVAR_DEBUG_NET_RECVPOSCNT	"Debug.Net.ReceivePositionCount"	// Internal.
-#define RTVAR_DEBUG_PERFORMANCE_YOFFSET	"Debug.Performance.YOffset"
-#define RTVAR_DEBUG_PERFORMANCE_GRAPH	"Debug.Performance.Graph"
-#define RTVAR_DEBUG_PERFORMANCE_NAMES	"Debug.Performance.Names"
 #define RTVAR_DEBUG_PERFORMANCE_COUNT	"Debug.Performance.Count"
+#define RTVAR_DEBUG_PERFORMANCE_GRAPH	"Debug.Performance.Graph"
+#define RTVAR_DEBUG_PERFORMANCE_LOAD	"Debug.Performance.Load"		// Internal.
+#define RTVAR_DEBUG_PERFORMANCE_NAMES	"Debug.Performance.Names"
+#define RTVAR_DEBUG_PERFORMANCE_YOFFSET	"Debug.Performance.YOffset"
 
 #define RTVAR_GAME_CHILDISHNESS		"Game.Childishness"
 #define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"

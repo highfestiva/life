@@ -672,7 +672,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				{
 					if (lScope->IsDefined(lVariable))
 					{
-						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
+						str lValue = lScope->GetUntypedDefaultValue(RtScope::READ_ONLY, lVariable);
 						lValue = strutil::StringToCString(lValue);
 						mLog.Infof(_T("%s %s"), lVariable.c_str(), lValue.c_str());
 					}
@@ -696,7 +696,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					}
 					if (lOk)
 					{
-						lOk = lScope->SetValue(lMode, lVariable, lValue);
+						lOk = lScope->SetUntypedValue(lMode, lVariable, lValue);
 					}
 					if (lManager)
 					{
@@ -704,7 +704,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					}
 					if (lOk)
 					{
-						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
+						str lValue = lScope->GetUntypedDefaultValue(RtScope::READ_ONLY, lVariable);
 						lValue = strutil::StringToCString(lValue);
 						mLog.Infof(_T("%s <- %s"), lVariable.c_str(), lValue.c_str());
 					}
@@ -791,15 +791,15 @@ bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<s
 			pFile->WriteString<wchar_t>(L"\n");
 			lLastGroup = lGroup;
 		}
-		str lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
+		str lValue = GetVariableScope()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
 		lValue = strutil::StringToCString(lValue);
-		if (GetVariableScope()->GetType(lValue) == _T("string"))
+		if (GetVariableScope()->GetUntypedType(lValue) == Cure::RuntimeVariable::DATATYPE_STRING)
 		{
 			lValue = _T('"')+lValue+_T('"');
 		}
-		str lDefaultValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, lVariable);
+		str lDefaultValue = GetVariableScope()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, lVariable);
 		lDefaultValue = strutil::StringToCString(lDefaultValue);
-		if (GetVariableScope()->GetType(lDefaultValue) == _T("string"))
+		if (GetVariableScope()->GetUntypedType(lDefaultValue) == Cure::RuntimeVariable::DATATYPE_STRING)
 		{
 			lDefaultValue = _T('"')+lDefaultValue+_T('"');
 		}

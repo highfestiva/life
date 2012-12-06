@@ -75,7 +75,9 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 	}
 	const TBC::PhysicsEngine* lEngine = pObject->GetPhysics()->GetEngine(lEngineIndex);
 	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
-	mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity() * lDensity) * pFrameTime * 25;
+	float lExhaustIntensity;
+	CURE_RTVAR_GET(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
+	mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity() * lDensity) * lExhaustIntensity * pFrameTime * 25;
 	if (mExhaustTimeout > 0)
 	{
 		return;

@@ -27,8 +27,10 @@ PushTicker::PushTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager*
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mIsPlayerCountViewActive(false),
 	mDemoTime(0),
-	mSunlight(0)
+	mSunlight(0),
+	mPerformanceAdjustmentTicks(0)
 {
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 }
 
 PushTicker::~PushTicker()
@@ -214,6 +216,70 @@ void PushTicker::BeginRender(Vector3DF& pColor)
 	lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
 	mUiManager->GetRenderer()->SetOutlineFillColor(lFillColor);
 }
+
+void PushTicker::PreWaitPhysicsTick()
+{
+	++mPerformanceAdjustmentTicks;
+	if (mPerformanceAdjustmentTicks & 0x3F)
+	{
+		return;
+	}
+	const int lAdjustmentIndex = (mPerformanceAdjustmentTicks >> 6);
+	
+	double lPerformanceLoad;
+	CURE_RTVAR_TRYGET(lPerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
+	switch (lAdjustmentIndex)
+	{
+		case 1:
+		{
+			bool lEnableMassObjectFading;
+			CURE_RTVAR_GET(lEnableMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
+			if (lPerformanceLoad > 1)
+			{
+				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
+			}
+			else if (lPerformanceLoad < 0.6)
+			{
+				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
+			}
+		}
+		break;
+		case 2:
+		{
+			double lExhaustIntensity;
+			CURE_RTVAR_GET(lExhaustIntensity, =, UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
+			if (lPerformanceLoad > 0.9)
+			{
+				lExhaustIntensity = Math::Lerp(lExhaustIntensity, 1.9-lPerformanceLoad, 0.1);
+			}
+			else if (lPerformanceLoad < 0.8)
+			{
+				lExhaustIntensity = Math::Lerp(lExhaustIntensity, 1.0, 0.3);
+			}
+			CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, lExhaustIntensity);
+		}
+		break;
+		case 3:
+		default:
+		{
+			mPerformanceAdjustmentTicks = 0;
+
+			bool lEnableGravelFading;
+			CURE_RTVAR_GET(lEnableGravelFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, true);
+			if (lPerformanceLoad > 1)
+			{
+				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, false);
+			}
+			else if (lPerformanceLoad < 0.75)
+			{
+				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, true);
+			}
+		}
+		break;
+	}
+}
+
+
 
 void PushTicker::CloseMainMenu()
 {

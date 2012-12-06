@@ -22,7 +22,7 @@ std::string SystemManager::GetRandomId()
 {
 	str s;
 	s += GetLoginName();
-	s += GetUniqueHardwareString(true);
+	s += GetUniqueHardwareString();
 	s += strutil::IntToString(Random::GetRandomNumber64(), 16);
 	s += strutil::IntToString(GetCpuTick(), 16);
 	s += strutil::IntToString(GetAvailRam(), 16);
@@ -36,7 +36,7 @@ std::string SystemManager::GetSystemPseudoId()
 {
 	str s;
 	s += GetLoginName();
-	s += GetUniqueHardwareString(false);
+	s += GetUniqueHardwareString();
 	uint8 lHashData[20];
 	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(tchar), lHashData);
 	std::string lResult;
@@ -64,13 +64,9 @@ std::string SystemManager::GetSystemPseudoId()
 	return lResult;
 }
 
-str SystemManager::GetUniqueHardwareString(bool pRandomize)
+str SystemManager::GetUniqueHardwareString()
 {
 	str s;
-	if (pRandomize)
-	{
-		s += strutil::IntToString(QueryCpuFrequency(), 16);
-	}
 	s += strutil::IntToString(GetLogicalCpuCount(), 16);
 	s += strutil::IntToString(GetPhysicalCpuCount(), 16);
 	s += strutil::IntToString(GetCoreCount(), 16);

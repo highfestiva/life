@@ -47,6 +47,7 @@ private:
 	void DisplayCompanyLogo();
 
 	virtual void BeginRender(Vector3DF& pColor);
+	void PreWaitPhysicsTick();
 
 	virtual void CloseMainMenu();
 	virtual bool QueryQuit();
@@ -71,6 +72,7 @@ private:
 	bool mIsPlayerCountViewActive;
 	HiResTimer* mDemoTime;
 	Sunlight* mSunlight;		// TODO: remove hack and come up with something better?
+	int mPerformanceAdjustmentTicks;
 
 	LOG_CLASS_DECLARE();
 };

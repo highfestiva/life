@@ -2,6 +2,8 @@
 // Author: Jonas Byström
 // Copyright (c) 2002-2009, Righteous Games
 
+// Warning: optimized code.
+
 
 
 #include <assert.h>
@@ -17,9 +19,34 @@ namespace Cure
 
 RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, Usage pUsage):
 	mName(pName),
-	mDefaultValue(pValue)
+	mDefaultStrValue(pValue)
 {
-	SetValue(pValue, pUsage);
+	mDataType = RuntimeVariable::DATATYPE_STRING;
+	SetStrValue(pValue, pUsage);
+}
+
+RuntimeVariable::RuntimeVariable(const str& pName, bool pValue, Usage pUsage):
+	mName(pName),
+	mDefaultBoolValue(pValue)
+{
+	mDataType = RuntimeVariable::DATATYPE_BOOL;
+	SetBoolValue(pValue, pUsage);
+}
+
+RuntimeVariable::RuntimeVariable(const str& pName, int pValue, Usage pUsage):
+	mName(pName),
+	mDefaultIntValue(pValue)
+{
+	mDataType = RuntimeVariable::DATATYPE_INT;
+	SetIntValue(pValue, pUsage);
+}
+
+RuntimeVariable::RuntimeVariable(const str& pName, double pValue, Usage pUsage):
+	mName(pName),
+	mDefaultRealValue(pValue)
+{
+	mDataType = RuntimeVariable::DATATYPE_REAL;
+	SetRealValue(pValue, pUsage);
 }
 
 RuntimeVariable::~RuntimeVariable()
@@ -28,87 +55,157 @@ RuntimeVariable::~RuntimeVariable()
 
 const str& RuntimeVariable::GetName() const
 {
-	return (mName);
+	return mName;
 }
 
-bool RuntimeVariable::operator==(const str& pValue)
+RuntimeVariable::DataType RuntimeVariable::GetType() const
 {
-	return (mValue == pValue);
+	return mDataType;
 }
 
-const str& RuntimeVariable::GetValue() const
+//bool RuntimeVariable::operator==(const str& pValue)
+//{
+//	return (mStrValue == pValue);
+//}
+
+const str& RuntimeVariable::GetStrValue() const
 {
-	return (mValue);
+	CheckType(DATATYPE_STRING);
+	return mStrValue;
 }
 
 bool RuntimeVariable::GetBoolValue() const
 {
-	if (mDataType == DATATYPE_BOOL)
-	{
-		return mBoolValue;
-	}
-	mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), mName.c_str(), mValue.c_str());
-	assert(false);
-	return 0;
+	CheckType(DATATYPE_BOOL);
+	return mBoolValue;
 }
 
 int RuntimeVariable::GetIntValue() const
 {
-	if (mDataType == DATATYPE_INT)
-	{
-		return mIntValue;
-	}
-	mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), mName.c_str(), mValue.c_str());
-	assert(false);
-	return 0;
+	CheckType(DATATYPE_INT);
+	return mIntValue;
 }
 
 double RuntimeVariable::GetRealValue() const
 {
-	if (mDataType == DATATYPE_REAL)
-	{
-		return mRealValue;
-	}
-	mLog.Errorf(_T("RT variable %s is not of type double (value is %s)."), mName.c_str(), mValue.c_str());
-	assert(false);
-	return 0;
+	CheckType(DATATYPE_REAL);
+	return mRealValue;
 }
 
-void RuntimeVariable::SetValue(const str& pValue, Usage pUsage)
+bool RuntimeVariable::SetStrValue(const str& pValue, Usage pUsage)
 {
-	mValue = pValue;
+	if (!CheckType(DATATYPE_STRING))
+	{
+		return false;
+	}
+	mStrValue = pValue;
 	if (pUsage >= USAGE_SYS_OVERRIDE)
 	{
-		mDefaultValue = pValue;
+		mDefaultStrValue = pValue;
 	}
 	mUsage = pUsage;
+	return true;
+}
 
-	if (strutil::StringToBool(pValue, mBoolValue))
+bool RuntimeVariable::SetBoolValue(bool pValue, Usage pUsage)
+{
+	if (!CheckType(DATATYPE_BOOL))
 	{
-		mDataType = DATATYPE_BOOL;
+		return false;
 	}
-	else if (strutil::StringToInt(pValue, mIntValue))
+	mBoolValue = pValue;
+	if (pUsage >= USAGE_SYS_OVERRIDE)
 	{
-		mDataType = DATATYPE_INT;
+		mDefaultBoolValue = pValue;
 	}
-	else if (strutil::StringToDouble(pValue, mRealValue))
+	mUsage = pUsage;
+	return true;
+}
+
+bool RuntimeVariable::SetIntValue(int pValue, Usage pUsage)
+{
+	if (!CheckType(DATATYPE_INT))
 	{
-		mDataType = DATATYPE_REAL;
+		return false;
 	}
-	else
+	mIntValue = pValue;
+	if (pUsage >= USAGE_SYS_OVERRIDE)
 	{
-		mDataType = DATATYPE_STRING;
+		mDefaultIntValue = pValue;
+	}
+	mUsage = pUsage;
+	return true;
+}
+
+bool RuntimeVariable::SetRealValue(double pValue, Usage pUsage)
+{
+	if (!CheckType(DATATYPE_REAL))
+	{
+		return false;
+	}
+	mRealValue = pValue;
+	if (pUsage >= USAGE_SYS_OVERRIDE)
+	{
+		mDefaultRealValue = pValue;
+	}
+	mUsage = pUsage;
+	return true;
+}
+
+const str& RuntimeVariable::GetDefaultStrValue() const
+{
+	CheckType(DATATYPE_STRING);
+	return mDefaultStrValue;
+}
+
+bool RuntimeVariable::GetDefaultBoolValue() const
+{
+	CheckType(DATATYPE_BOOL);
+	return mDefaultBoolValue;
+}
+
+int RuntimeVariable::GetDefaultIntValue() const
+{
+	CheckType(DATATYPE_INT);
+	return mDefaultIntValue;
+}
+
+double RuntimeVariable::GetDefaultRealValue() const
+{
+	CheckType(DATATYPE_REAL);
+	return mDefaultRealValue;
+}
+
+void RuntimeVariable::SetDefaultStrValue(const str& pDefaultValue)
+{
+	if (CheckType(DATATYPE_STRING))
+	{
+		mDefaultStrValue = pDefaultValue;
 	}
 }
 
-const str& RuntimeVariable::GetDefaultValue() const
+void RuntimeVariable::SetDefaultBoolValue(bool pDefaultValue)
 {
-	return (mDefaultValue);
+	if (CheckType(DATATYPE_BOOL))
+	{
+		mDefaultBoolValue = pDefaultValue;
+	}
 }
 
-void RuntimeVariable::SetDefaultValue(const str& pDefaultValue)
+void RuntimeVariable::SetDefaultIntValue(int pDefaultValue)
 {
-	mDefaultValue = pDefaultValue;
+	if (CheckType(DATATYPE_INT))
+	{
+		mDefaultIntValue = pDefaultValue;
+	}
+}
+
+void RuntimeVariable::SetDefaultRealValue(double pDefaultValue)
+{
+	if (CheckType(DATATYPE_REAL))
+	{
+		mDefaultRealValue = pDefaultValue;
+	}
 }
 
 RuntimeVariable::Usage RuntimeVariable::GetUsage() const
@@ -116,6 +213,30 @@ RuntimeVariable::Usage RuntimeVariable::GetUsage() const
 	return (mUsage);
 }
 
+str RuntimeVariable::GetTypeName(DataType pType)
+{
+	switch (pType)
+	{
+		case RuntimeVariable::DATATYPE_STRING:	return _T("string");
+		case RuntimeVariable::DATATYPE_BOOL:	return _T("bool");
+		case RuntimeVariable::DATATYPE_INT:	return _T("int");
+		case RuntimeVariable::DATATYPE_REAL:	return _T("real");
+	}
+	assert(false);
+	return _T("void");
+}
+
+bool RuntimeVariable::CheckType(DataType pType) const
+{
+	if (mDataType == pType)
+	{
+		return true;
+	}
+	mLog.Warningf(_T("Type error using variable %s; type should be %s, not %s!"),
+		mName.c_str(), GetTypeName(mDataType).c_str(), GetTypeName(pType).c_str());
+	assert(false);
+	return false;
+}
 
 
 RuntimeVariableScope::RuntimeVariableScope(RuntimeVariableScope* pParentScope):
@@ -135,160 +256,51 @@ RuntimeVariableScope::~RuntimeVariableScope()
 	mParentScope = 0;
 }
 
-str RuntimeVariableScope::GetType(const str& pValue)
-{
-	bool lDummyBool;
-	if (strutil::StringToBool(pValue, lDummyBool))
-	{
-		return (_T("boolean"));
-	}
-	int lDummyInt;
-	if (strutil::StringToInt(pValue, lDummyInt))
-	{
-		return (_T("int"));
-	}
-	double lDummyDouble;
-	if (strutil::StringToDouble(pValue, lDummyDouble))
-	{
-		return (_T("real"));
-	}
-	return (_T("string"));
-}
-
-str RuntimeVariableScope::Cast(const str& pValue)
-{
-	str lValue = pValue;
-	if (pValue.substr(0, 9) == _T("(boolean)"))
-	{
-		bool lBool = false;
-		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 9-1);
-		if (lConstantStart < pValue.length())
-		{
-			lValue = pValue.substr(lConstantStart);
-			int lInt;
-			double lDouble;
-			if (strutil::StringToBool(lValue, lBool))
-			{
-				// Redundant cast.
-			}
-			else if (strutil::StringToInt(lValue, lInt))
-			{
-				lBool = (lInt != 0);
-			}
-			else if (strutil::StringToDouble(lValue, lDouble))
-			{
-				lBool = (lDouble <= -0.5 || lDouble >= 0.5);
-			}
-			else
-			{
-				mLog.Warningf(_T("Uncastable bool value: %s."), lValue.c_str());
-				return (pValue);
-			}
-		}
-		if (lBool)
-		{
-			lValue = _T("true");
-		}
-		else
-		{
-			lValue = _T("false");
-		}
-	}
-	else if (pValue.substr(0, 5) == _T("(int)"))
-	{
-		int lInt = 0;
-		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 5-1);
-		if (lConstantStart < pValue.length())
-		{
-			lValue = pValue.substr(lConstantStart);
-			bool lBool;
-			double lDouble;
-			if (strutil::StringToBool(lValue, lBool))
-			{
-				lInt = (int)lBool;
-			}
-			else if (strutil::StringToInt(lValue, lInt))
-			{
-				// Redundant cast.
-			}
-			else if (strutil::StringToDouble(lValue, lDouble))
-			{
-				lInt = (int)lDouble;
-			}
-			else if (lValue.length() == 3 && lValue[0] == '\'' && lValue[2] == '\'')
-			{
-				lInt = (unsigned)lValue[1];
-			}
-			else
-			{
-				mLog.Warningf(_T("Uncastable integer value: %s."), lValue.c_str());
-				return (pValue);
-			}
-		}
-		lValue = strutil::IntToString(lInt, 10);
-	}
-	else if (pValue.substr(0, 6) == _T("(real)"))
-	{
-		double lDouble = 0;
-		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 6-1);
-		if (lConstantStart < pValue.length())
-		{
-			lValue = pValue.substr(lConstantStart);
-			bool lBool;
-			int lInt;
-			if (strutil::StringToBool(lValue, lBool))
-			{
-				lDouble = (double)lBool;
-			}
-			else if (strutil::StringToInt(lValue, lInt))
-			{
-				lDouble = lInt;
-			}
-			else if (strutil::StringToDouble(lValue, lDouble))
-			{
-				// Redundant cast.
-			}
-			else
-			{
-				mLog.Warningf(_T("Uncastable real value: %s."), lValue.c_str());
-				return (pValue);
-			}
-		}
-		lValue = strutil::DoubleToString(lDouble, 16);
-	}
-	return (lValue);
-}
-
 bool RuntimeVariableScope::IsDefined(const str& pName)
 {
 	bool lFound = (GetVariable(pName) != 0);
 	return (lFound);
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const str& pValue)
+bool RuntimeVariableScope::SetUntypedValue(SetMode pSetMode, const str& pName, const str& pValue)
 {
-	bool lTypeOk = true;
 	bool lIsRecursive = (pSetMode == RuntimeVariable::USAGE_NORMAL || pSetMode == RuntimeVariable::USAGE_INTERNAL);
 	RuntimeVariable* lVariable = GetVariable(pName, lIsRecursive);
-	str lValue = Cast(pValue);
+	str lStrValue;
+	bool lBoolValue;
+	int lIntValue;
+	double lRealValue;
+	DataType lType = Cast(pValue, lStrValue, lBoolValue, lIntValue, lRealValue);
 	if (lVariable)
 	{
-		if (GetType(lValue) == GetType(lVariable->GetValue()))
+		switch (lType)
 		{
-			lVariable->SetValue(lValue, pSetMode);
-		}
-		else
-		{
-			lTypeOk = false;
-			mLog.Warningf(_T("Could not set variable %s; type should be %s, not %s!"),
-				pName.c_str(), GetType(lVariable->GetValue()).c_str(), GetType(lValue).c_str());
+			case RuntimeVariable::DATATYPE_STRING:	return lVariable->SetStrValue(lStrValue, pSetMode);
+			case RuntimeVariable::DATATYPE_BOOL:	return lVariable->SetBoolValue(lBoolValue, pSetMode);
+			case RuntimeVariable::DATATYPE_INT:	return lVariable->SetIntValue(lIntValue, pSetMode);
+			case RuntimeVariable::DATATYPE_REAL:	return lVariable->SetRealValue(lRealValue, pSetMode);
 		}
 	}
 	else
 	{
-		CreateLocalVariable(pName, lValue, pSetMode);
+		CreateLocalVariable(pName, lType, lStrValue, lBoolValue, lIntValue, lRealValue, pSetMode);
 	}
-	return (lTypeOk);
+	return true;
+}
+
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const str& pValue)
+{
+	bool lIsRecursive = (pSetMode == RuntimeVariable::USAGE_NORMAL || pSetMode == RuntimeVariable::USAGE_INTERNAL);
+	RuntimeVariable* lVariable = GetVariable(pName, lIsRecursive);
+	if (lVariable)
+	{
+		return lVariable->SetStrValue(pValue, pSetMode);
+	}
+	else
+	{
+		CreateLocalVariable(pName, RuntimeVariable::DATATYPE_STRING, pValue, false, 0, 0, pSetMode);
+	}
+	return true;
 }
 
 bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const tchar* pValue)
@@ -296,26 +308,80 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const tc
 	return (SetValue(pSetMode, pName, str(pValue)));
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, double pValue)
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, bool pValue)
 {
-	// We want the real format to be differentiatable from the int format.
-	str lStringValue = strutil::Format(_T("%g"), pValue);
-	if (lStringValue.find(_T('.')) == str::npos &&
-		lStringValue.find(_T('e')) == str::npos)
+	bool lIsRecursive = (pSetMode == RuntimeVariable::USAGE_NORMAL || pSetMode == RuntimeVariable::USAGE_INTERNAL);
+	RuntimeVariable* lVariable = GetVariable(pName, lIsRecursive);
+	if (lVariable)
 	{
-		lStringValue = strutil::Format(_T("%.1f"), pValue);
+		return lVariable->SetBoolValue(pValue, pSetMode);
 	}
-	return (SetValue(pSetMode, pName, lStringValue));
+	else
+	{
+		CreateLocalVariable(pName, RuntimeVariable::DATATYPE_BOOL, str(), false, pValue, 0, pSetMode);
+	}
+	return true;
 }
 
 bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, int pValue)
 {
-	return (SetValue(pSetMode, pName, strutil::IntToString(pValue, 10)));
+	bool lIsRecursive = (pSetMode == RuntimeVariable::USAGE_NORMAL || pSetMode == RuntimeVariable::USAGE_INTERNAL);
+	RuntimeVariable* lVariable = GetVariable(pName, lIsRecursive);
+	if (lVariable)
+	{
+		return lVariable->SetIntValue(pValue, pSetMode);
+	}
+	else
+	{
+		CreateLocalVariable(pName, RuntimeVariable::DATATYPE_INT, str(), false, pValue, 0, pSetMode);
+	}
+	return true;
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, bool pValue)
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, double pValue)
 {
-	return (SetValue(pSetMode, pName, strutil::BoolToString(pValue)));
+	bool lIsRecursive = (pSetMode == RuntimeVariable::USAGE_NORMAL || pSetMode == RuntimeVariable::USAGE_INTERNAL);
+	RuntimeVariable* lVariable = GetVariable(pName, lIsRecursive);
+	if (lVariable)
+	{
+		return lVariable->SetRealValue(pValue, pSetMode);
+	}
+	else
+	{
+		CreateLocalVariable(pName, RuntimeVariable::DATATYPE_REAL, str(), false, 0, pValue, pSetMode);
+	}
+	return true;
+}
+
+str RuntimeVariableScope::GetUntypedDefaultValue(GetMode pMode, const str& pName)
+{
+	RuntimeVariable* lVariable = GetVariable(HashedString(pName));
+	if (!lVariable)
+	{
+		return EmptyString;
+	}
+	switch (lVariable->GetType())
+	{
+		case RuntimeVariable::DATATYPE_STRING:
+		{
+			return GetDefaultValue(pMode, pName, lVariable, EmptyString);
+		}
+		case RuntimeVariable::DATATYPE_BOOL:
+		{
+			return GetDefaultValue(pMode, pName, lVariable, false) ? _T("true") : _T("false");
+		}
+		case RuntimeVariable::DATATYPE_INT:
+		{
+			int i = GetDefaultValue(pMode, pName, lVariable, 0);
+			return strutil::IntToString(i, 10);
+		}
+		case RuntimeVariable::DATATYPE_REAL:
+		{
+			double d = GetDefaultValue(pMode, pName, lVariable, 0.0);
+			return strutil::Format(_T("%.1f"), d);
+		}
+	}
+	return EmptyString;
 }
 
 const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, const str& pDefaultValue)
@@ -328,7 +394,7 @@ const str RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedStrin
 	return GetDefaultValue(pMode, pName, GetVariable(pName), str(pDefaultValue));
 }
 
-double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, double pDefaultValue)
+bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, bool pDefaultValue)
 {
 	return GetDefaultValue(pMode, pName, GetVariable(pName), pDefaultValue);
 }
@@ -338,20 +404,23 @@ int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pNa
 	return GetDefaultValue(pMode, pName, GetVariable(pName), pDefaultValue);
 }
 
-bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, bool pDefaultValue)
+double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, double pDefaultValue)
 {
 	return GetDefaultValue(pMode, pName, GetVariable(pName), pDefaultValue);
 }
 
 bool RuntimeVariableScope::EraseVariable(const str& pName)
 {
-	ScopeLock lLock(&mLock);
-	bool lDeleted = DeleteLocalVariable(pName);
+	bool lDeleted;
+	{
+		ScopeLock lLock(&mLock);
+		lDeleted = DeleteLocalVariable(pName);
+	}
 	if (!lDeleted && mParentScope)
 	{
-		lDeleted = mParentScope->DeleteLocalVariable(pName);
+		lDeleted = mParentScope->EraseVariable(pName);
 	}
-	return (lDeleted);
+	return lDeleted;
 }
 
 
@@ -376,7 +445,136 @@ std::list<str> RuntimeVariableScope::GetVariableNameList(SearchType pSearchType,
 			}
 		}
 	}
-	return (lVariableNameList);
+	return lVariableNameList;
+}
+
+
+
+RuntimeVariableScope::DataType RuntimeVariableScope::GetUntypedType(const str& pValue)
+{
+	str s;
+	bool b;
+	int i;
+	double d;
+	return Cast(pValue, s, b, i, d);
+}
+
+RuntimeVariableScope::DataType RuntimeVariableScope::GetType(const str& pValue, str& pOutStr, bool& pOutBool, int& pOutInt, double& pOutDouble)
+{
+	if (strutil::StringToBool(pValue, pOutBool))
+	{
+		return RuntimeVariable::DATATYPE_BOOL;
+	}
+	if (strutil::StringToInt(pValue, pOutInt))
+	{
+		return RuntimeVariable::DATATYPE_INT;
+	}
+	if (strutil::StringToDouble(pValue, pOutDouble))
+	{
+		return RuntimeVariable::DATATYPE_REAL;
+	}
+	pOutStr = pValue;
+	return RuntimeVariable::DATATYPE_STRING;
+}
+
+RuntimeVariableScope::DataType RuntimeVariableScope::Cast(const str& pValue, str& pOutStr, bool& pOutBool, int& pOutInt, double& pOutDouble)
+{
+	if (pValue.substr(0, 9) == _T("(boolean)"))
+	{
+		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 9-1);
+		if (lConstantStart < pValue.length())
+		{
+			const str lValue = pValue.substr(lConstantStart);
+			bool lBool;
+			int lInt;
+			double lDouble;
+			if (strutil::StringToBool(lValue, lBool))
+			{
+				// Redundant cast.
+				pOutBool = lBool;
+				return RuntimeVariable::DATATYPE_BOOL;
+			}
+			else if (strutil::StringToInt(lValue, lInt))
+			{
+				pOutBool = (lInt != 0);
+				return RuntimeVariable::DATATYPE_BOOL;
+			}
+			else if (strutil::StringToDouble(lValue, lDouble))
+			{
+				pOutBool = (lDouble >= -0.5 && lDouble < 0.5);
+				return RuntimeVariable::DATATYPE_BOOL;
+			}
+			mLog.Warningf(_T("Uncastable bool value: %s."), lValue.c_str());
+			pOutStr = pValue;
+			return RuntimeVariable::DATATYPE_STRING;
+		}
+	}
+	else if (pValue.substr(0, 5) == _T("(int)"))
+	{
+		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 5-1);
+		if (lConstantStart < pValue.length())
+		{
+			const str lValue = pValue.substr(lConstantStart);
+			bool lBool;
+			int lInt = 0;
+			double lDouble;
+			if (strutil::StringToBool(lValue, lBool))
+			{
+				pOutInt = (int)lBool;
+				return RuntimeVariable::DATATYPE_INT;
+			}
+			else if (strutil::StringToInt(lValue, lInt))
+			{
+				// Redundant cast.
+				pOutInt = lInt;
+				return RuntimeVariable::DATATYPE_INT;
+			}
+			else if (strutil::StringToDouble(lValue, lDouble))
+			{
+				pOutInt = (int)lDouble;
+				return RuntimeVariable::DATATYPE_INT;
+			}
+			else if (lValue.length() == 3 && lValue[0] == '\'' && lValue[2] == '\'')
+			{
+				pOutInt = (unsigned)lValue[1];
+				return RuntimeVariable::DATATYPE_INT;
+			}
+			mLog.Warningf(_T("Uncastable integer value: %s."), lValue.c_str());
+			pOutStr = pValue;
+			return RuntimeVariable::DATATYPE_STRING;
+		}
+	}
+	else if (pValue.substr(0, 6) == _T("(real)"))
+	{
+		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 6-1);
+		if (lConstantStart < pValue.length())
+		{
+			const str lValue = pValue.substr(lConstantStart);
+			bool lBool;
+			int lInt;
+			double lDouble = 0;
+			if (strutil::StringToBool(lValue, lBool))
+			{
+				pOutDouble = (double)lBool;
+				return RuntimeVariable::DATATYPE_REAL;
+			}
+			else if (strutil::StringToInt(lValue, lInt))
+			{
+				pOutDouble = lInt;
+				return RuntimeVariable::DATATYPE_REAL;
+			}
+			else if (strutil::StringToDouble(lValue, lDouble))
+			{
+				// Redundant cast.
+				pOutDouble = lDouble;
+				return RuntimeVariable::DATATYPE_REAL;
+			}
+			mLog.Warningf(_T("Uncastable real value: %s."), lValue.c_str());
+			pOutStr = pValue;
+			return RuntimeVariable::DATATYPE_STRING;
+		}
+	}
+	return GetType(pValue, pOutStr, pOutBool, pOutInt, pOutDouble);
 }
 
 
@@ -387,13 +585,13 @@ const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName
 	{
 		if (pMode == READ_DEFAULT)
 		{
-			return (pVariable->GetDefaultValue());
+			return pVariable->GetDefaultStrValue();
 		}
 		else if (pMode == READ_WRITE)
 		{
-			pVariable->SetDefaultValue(pDefaultValue);
+			pVariable->SetDefaultStrValue(pDefaultValue);
 		}
-		return (pVariable->GetValue());
+		return pVariable->GetStrValue();
 	}
 	else if (pMode == READ_WRITE)
 	{
@@ -403,65 +601,96 @@ const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName
 	{
 		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
 	}
-	return (pDefaultValue);
-}
-
-double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, double pDefaultValue)
-{
-	if (pVariable && (pMode == READ_ONLY || pMode == READ_IGNORE))	// Optimization.
-	{
-		return pVariable->GetRealValue();
-	}
-	str lDefaultValue = strutil::FastDoubleToString(pDefaultValue);
-	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
-	double lValue = pDefaultValue;
-	if (!strutil::StringToDouble(lValueString, lValue))
-	{
-		mLog.Errorf(_T("RT variable %s is not of type double (value is %s)."), pName.c_str(), lValueString.c_str());
-		assert(false);
-	}
-	return (lValue);
-}
-
-int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, int pDefaultValue)
-{
-	if (pVariable && (pMode == READ_ONLY || pMode == READ_IGNORE))	// Optimization.
-	{
-		return pVariable->GetIntValue();
-	}
-	str lDefaultValue = strutil::IntToString(pDefaultValue, 10);
-	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
-	int lValue = pDefaultValue;
-	if (!strutil::StringToInt(lValueString, lValue))
-	{
-		mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), pName.c_str(), lValueString.c_str());
-		assert(false);
-	}
-	return (lValue);
+	return pDefaultValue;
 }
 
 bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, bool pDefaultValue)
 {
-	if (pVariable && (pMode == READ_ONLY || pMode == READ_IGNORE))	// Optimization.
+	if (pVariable)
 	{
+		if (pMode == READ_DEFAULT)
+		{
+			return pVariable->GetDefaultBoolValue();
+		}
+		else if (pMode == READ_WRITE)
+		{
+			pVariable->SetDefaultBoolValue(pDefaultValue);
+		}
 		return pVariable->GetBoolValue();
 	}
-	str lDefaultValue = strutil::BoolToString(pDefaultValue);
-	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
-	bool lValue = pDefaultValue;
-	if (!strutil::StringToBool(lValueString, lValue))
+	else if (pMode == READ_WRITE)
 	{
-		mLog.Errorf(_T("RT variable %s is not of type bool (value is %s)."), pName.c_str(), lValueString.c_str());
-		assert(false);
+		SetValue(RuntimeVariable::USAGE_NORMAL, pName, pDefaultValue);
 	}
-	return (lValue);
+	else if (pMode != READ_IGNORE)
+	{
+		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+	}
+	return pDefaultValue;
+}
+
+int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, int pDefaultValue)
+{
+	if (pVariable)
+	{
+		if (pMode == READ_DEFAULT)
+		{
+			return pVariable->GetDefaultIntValue();
+		}
+		else if (pMode == READ_WRITE)
+		{
+			pVariable->SetDefaultIntValue(pDefaultValue);
+		}
+		return pVariable->GetIntValue();
+	}
+	else if (pMode == READ_WRITE)
+	{
+		SetValue(RuntimeVariable::USAGE_NORMAL, pName, pDefaultValue);
+	}
+	else if (pMode != READ_IGNORE)
+	{
+		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+	}
+	return pDefaultValue;
+}
+
+double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, double pDefaultValue)
+{
+	if (pVariable)
+	{
+		if (pMode == READ_DEFAULT)
+		{
+			return pVariable->GetDefaultRealValue();
+		}
+		else if (pMode == READ_WRITE)
+		{
+			pVariable->SetDefaultRealValue(pDefaultValue);
+		}
+		return pVariable->GetRealValue();
+	}
+	else if (pMode == READ_WRITE)
+	{
+		SetValue(RuntimeVariable::USAGE_NORMAL, pName, pDefaultValue);
+	}
+	else if (pMode != READ_IGNORE)
+	{
+		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+	}
+	return pDefaultValue;
 }
 
 
 
-void RuntimeVariableScope::CreateLocalVariable(const str& pName, const str& pValue, SetMode pSetMode)
+void RuntimeVariableScope::CreateLocalVariable(const str& pName, DataType pType, const str& pStrValue, bool pBoolValue, int pIntValue, double pDoubleValue, SetMode pSetMode)
 {
-	RuntimeVariable* lVariable = new RuntimeVariable(pName, pValue, pSetMode);
+	RuntimeVariable* lVariable = 0;
+	switch (pType)
+	{
+		case RuntimeVariable::DATATYPE_STRING:	lVariable = new RuntimeVariable(pName, pStrValue, pSetMode);	break;
+		case RuntimeVariable::DATATYPE_BOOL:	lVariable = new RuntimeVariable(pName, pBoolValue, pSetMode);	break;
+		case RuntimeVariable::DATATYPE_INT:	lVariable = new RuntimeVariable(pName, pIntValue, pSetMode);	break;
+		case RuntimeVariable::DATATYPE_REAL:	lVariable = new RuntimeVariable(pName, pDoubleValue, pSetMode);	break;
+	}
 	ScopeLock lLock(&mLock);
 	mVariableTable.insert(VariablePair(pName, lVariable));
 }
