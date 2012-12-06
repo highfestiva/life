@@ -4,6 +4,7 @@
 
 
 
+#include <sys/sysctl.h>
 #include <stdlib.h>
 #include <termios.h>
 #include "../../Include/DiskFile.h"
