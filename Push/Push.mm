@@ -154,6 +154,11 @@ using namespace Lepra;
 		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
 		PixelCoord lPreviousTap(lPrevTapPosition.y, _canvas->GetActualWidth() - lPrevTapPosition.x);
 		PixelCoord lThisTap(lTapPosition.y, _canvas->GetActualWidth() - lTapPosition.x);
+		if (_canvas && _canvas->GetOutputRotation() != 90)
+		{
+			lPreviousTap = PixelCoord(_canvas->GetActualHeight() - lPrevTapPosition.y, lPrevTapPosition.x);
+			lThisTap = PixelCoord(_canvas->GetActualHeight() - lTapPosition.y, lTapPosition.x);
+		}
 		Push::Push::GetApp()->mDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed);
 	}
 }
