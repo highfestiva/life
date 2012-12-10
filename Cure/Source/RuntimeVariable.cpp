@@ -318,7 +318,7 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, bool pVa
 	}
 	else
 	{
-		CreateLocalVariable(pName, RuntimeVariable::DATATYPE_BOOL, str(), false, pValue, 0, pSetMode);
+		CreateLocalVariable(pName, RuntimeVariable::DATATYPE_BOOL, str(), pValue, 0, 0, pSetMode);
 	}
 	return true;
 }
@@ -726,6 +726,10 @@ RuntimeVariable* RuntimeVariableScope::GetVariable(const HashedString& pName, bo
 	else
 	{
 		lVariable = 0;
+	}
+	if (lVariable)
+	{
+		assert(lVariable->GetName() == pName);
 	}
 	return (lVariable);
 }

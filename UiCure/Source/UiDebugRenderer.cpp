@@ -4,7 +4,6 @@
 
 
 
-#pragma once
 #include "../Include/UiDebugRenderer.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"

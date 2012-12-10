@@ -268,8 +268,10 @@ void Application::TickSleep() const
 		}
 		else
 		{
+#ifndef LEPRA_IOS
 			//log_volatile(mLog.Debugf(_T("Skipping tick sleep (yield only), %f s left in sleep loop, %f s reduction."), lSleepTime, mGameTicker->GetTickTimeReduction()));
 			Thread::YieldCpu();	// Play nice even though time's up!
+#endif	// Not on iOS (which sleeps during timer ticks).
 		}
 	}
 }

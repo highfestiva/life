@@ -373,6 +373,11 @@ void PushManager::ClearRoadSigns()
 
 void PushManager::SetRoadSignsVisible(bool pVisible)
 {
+	if (mPickVehicleButton)
+	{
+		mPickVehicleButton->SetIsMovingIn(!pVisible);
+	}
+
 	RoadSignMap::iterator x = mRoadSignMap.begin();
 	for (; x != mRoadSignMap.end(); ++x)
 	{
@@ -511,7 +516,7 @@ void PushManager::TickUiInput()
 
 			mAvatarInvisibleCount = 0;
 		}
-		else if (++mAvatarInvisibleCount > 10)
+		else if (++mAvatarInvisibleCount > 60)
 		{
 			SetRoadSignsVisible(true);
 			mAvatarInvisibleCount = -100000;
@@ -986,7 +991,6 @@ void PushManager::CancelLogin()
 void PushManager::OnVehicleSelect(UiTbc::Button* pButton)
 {
 	(void)pButton;
-	mPickVehicleButton->SetIsMovingIn(false);
 	SetRoadSignsVisible(true);
 }
 

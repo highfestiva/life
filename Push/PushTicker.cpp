@@ -230,6 +230,11 @@ void PushTicker::PreWaitPhysicsTick()
 	CURE_RTVAR_TRYGET(lPerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
 	switch (lAdjustmentIndex)
 	{
+		default:
+		{
+			mPerformanceAdjustmentTicks = 0;
+		}
+		break;
 		case 1:
 		{
 			bool lEnableMassObjectFading;
@@ -260,10 +265,7 @@ void PushTicker::PreWaitPhysicsTick()
 		}
 		break;
 		case 3:
-		default:
 		{
-			mPerformanceAdjustmentTicks = 0;
-
 			bool lEnableGravelFading;
 			CURE_RTVAR_GET(lEnableGravelFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, true);
 			if (lPerformanceLoad > 1)
@@ -273,6 +275,20 @@ void PushTicker::PreWaitPhysicsTick()
 			else if (lPerformanceLoad < 0.75)
 			{
 				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, true);
+			}
+		}
+		break;
+		case 4:
+		{
+			bool lEnableMassObjects;
+			CURE_RTVAR_GET(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
+			if (lPerformanceLoad > 1)
+			{
+				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+			}
+			else if (lPerformanceLoad < 0.5)
+			{
+				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 			}
 		}
 		break;
