@@ -57,12 +57,13 @@ public:
 
 	static TouchstickInputDevice* GetByCoordinate(InputManager* pManager, const PixelCoord& pCoord);
 
-	TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle);
+	TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle, int pFingerRadius);
 	virtual ~TouchstickInputDevice();
 	bool IsOwnedByManager() const;
 
 	void Move(const PixelRect& pArea, int pAngle);
 	const PixelRect& GetArea() const;
+	int GetFingerRadius() const;
 
 	void SetTap(const PixelCoord& pCoord, bool pIsPress);
 	void GetValue(float& x, float& y, bool& pIsPressing);
@@ -78,9 +79,11 @@ private:
 
 	InputMode mMode;
 	PixelRect mArea;
+	PixelRect mTouchArea;
 	PixelCoord mStart;
 	bool mIsPressing;
 	int mAngle;
+	int mFingerRadius;
 	/*int mMovedDistance;
 	HiResTimer mPressedTimer;
 	HiResTimer mReleasedTimer;*/

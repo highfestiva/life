@@ -62,12 +62,15 @@ TouchstickInputDevice* TouchstickInputDevice::GetByCoordinate(InputManager* pMan
 	return 0;
 }
 
-TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle):
+TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle, int pFingerRadius):
 	Parent(pManager),
 	mMode(pMode),
 	mArea(pArea),
-	mAngle(pAngle)
+	mTouchArea(pArea),
+	mAngle(pAngle),
+	mFingerRadius(pFingerRadius)
 {
+	mTouchArea.Shrink(mFingerRadius);
 	if (mAngle < -45)
 	{
 		mAngle += 360;
@@ -102,6 +105,8 @@ bool TouchstickInputDevice::IsOwnedByManager() const
 void TouchstickInputDevice::Move(const PixelRect& pArea, int pAngle)
 {
 	mArea = pArea;
+	mTouchArea = pArea;
+	mTouchArea.Shrink(mFingerRadius);
 	mAngle = pAngle;
 	if (mAngle < -45)
 	{
@@ -114,7 +119,10 @@ const PixelRect& TouchstickInputDevice::GetArea() const
 	return mArea;
 }
 
-
+int TouchstickInputDevice::GetFingerRadius() const
+{
+	return mFingerRadius;
+}
 
 void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 {
@@ -128,8 +136,8 @@ void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 	}
 	mIsPressing = pIsPress;
 
-	const float dx = mArea.GetWidth() * 0.5f;
-	const float dy = mArea.GetHeight() * 0.5f;
+	const float dx = mTouchArea.GetWidth()*0.5f;
+	const float dy = mTouchArea.GetHeight()*0.5f;
 	float rx;
 	float ry;
 	switch (mMode)

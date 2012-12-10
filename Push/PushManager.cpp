@@ -401,10 +401,10 @@ void PushManager::UpdateTouchstickPlacement()
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	if (!mStickLeft)
 	{
-		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0);
+		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, 30);
 		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
 		mStickLeft->SetUniqueIdentifier(lLeftName);
-		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0);
+		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0, 30);
 		const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
 		mStickRight->SetUniqueIdentifier(lRightName);
 	}
@@ -1026,6 +1026,10 @@ void PushManager::DrawStick(Touchstick* pStick)
 	}
 
 	PixelRect lArea = pStick->GetArea();
+	const int ow = lArea.GetWidth();
+	const int lMargin = pStick->GetFingerRadius() / 3;
+	const int r = pStick->GetFingerRadius() - lMargin;
+	lArea.Shrink(lMargin*2);
 	mUiManager->GetPainter()->DrawArc(lArea.mLeft, lArea.mTop, lArea.GetWidth(), lArea.GetHeight(), 0, 360, false);
 	float x;
 	float y;
@@ -1034,19 +1038,21 @@ void PushManager::DrawStick(Touchstick* pStick)
 	if (lIsPressing)
 	{
 		Vector2DF v(x, y);
+		v.Mul((ow+lMargin*2) / (float)ow);
 		const float lLength = v.GetLength();
 		if (lLength > 1)
 		{
 			v.Div(lLength);
-			x = v.x;
-			y = v.y;
 		}
+		x = v.x;
+		y = v.y;
 		x = 0.5f*x + 0.5f;
 		y = 0.5f*y + 0.5f;
-		const int r = 20;
+		const int w = lArea.GetWidth()  - r*2;
+		const int h = lArea.GetHeight() - r*2;
 		mUiManager->GetPainter()->DrawArc(
-			lArea.mLeft + (int)((lArea.GetWidth()-r*2) *x),
-			lArea.mTop  + (int)((lArea.GetHeight()-r*2)*y),
+			lArea.mLeft + (int)(w*x),
+			lArea.mTop  + (int)(h*y),
 			r*2, r*2, 0, 360, true);
 	}
 }
