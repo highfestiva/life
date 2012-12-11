@@ -309,6 +309,7 @@ def _macappify(exe, name):
 			fs += [f]
 	for i in fs:
 		for o in fs:
+			#print("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
 			os.system("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
 	import shutil
 	shutil.copytree("../Tools/build/macosx", exe+".app")

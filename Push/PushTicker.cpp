@@ -237,13 +237,15 @@ void PushTicker::PreWaitPhysicsTick()
 		break;
 		case 1:
 		{
+			bool lEnableMassObjects;
+			CURE_RTVAR_GET(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 			bool lEnableMassObjectFading;
 			CURE_RTVAR_GET(lEnableMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
 			if (lPerformanceLoad > 1)
 			{
 				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 			}
-			else if (lPerformanceLoad < 0.6)
+			else if (lPerformanceLoad < 0.6 && lEnableMassObjects)
 			{
 				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
 			}
@@ -286,7 +288,7 @@ void PushTicker::PreWaitPhysicsTick()
 			{
 				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
 			}
-			else if (lPerformanceLoad < 0.5)
+			else if (lPerformanceLoad < 0.2)
 			{
 				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 			}

@@ -24,7 +24,7 @@ glframework = 'OpenGL'
 gcc = 'gcc'
 stllibext = '.so.5.2'
 if is_mac:
-    cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS'
+    cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS -DUSE_FILE32API'
     stllibext = '.5.2.dylib'
     if is_ios:
         darwin_kit = '-framework UIKit -framework Foundation -framework QuartzCore -framework CoreGraphics'
@@ -78,7 +78,7 @@ if is_mac:
     mac_hid = 'HID'
     space_mac_hid = ' '+mac_hid
     cflags_1 += ' -framework '+glframework+' -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
-    ldflags += ' '+darwin_kit+' -lobjc '
+    ldflags += ' '+darwin_kit+' -lobjc -headerpad_max_install_names '
 
 shared_if_copy_stlport_lib = """\t@if test -f """+stlport_path+"/lib"+stl_lib + stllibext + "; then cp "+stlport_path+"/lib"+stl_lib + stllibext + """ bin/; fi
 """

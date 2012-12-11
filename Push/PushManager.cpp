@@ -1031,7 +1031,7 @@ void PushManager::DrawStick(Touchstick* pStick)
 
 	PixelRect lArea = pStick->GetArea();
 	const int ow = lArea.GetWidth();
-	const int lMargin = pStick->GetFingerRadius() / 3;
+	const int lMargin = pStick->GetFingerRadius() / 8;
 	const int r = pStick->GetFingerRadius() - lMargin;
 	lArea.Shrink(lMargin*2);
 	mUiManager->GetPainter()->DrawArc(lArea.mLeft, lArea.mTop, lArea.GetWidth(), lArea.GetHeight(), 0, 360, false);

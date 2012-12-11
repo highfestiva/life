@@ -392,7 +392,6 @@
 		B19A280313A127ED0051A61C /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = B19A1FCB13A127EB0051A61C /* compress.c */; };
 		B19A286C13A127ED0051A61C /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = B19A205B13A127EC0051A61C /* crc32.c */; };
 		B19A286D13A127ED0051A61C /* deflate.c in Sources */ = {isa = PBXBuildFile; fileRef = B19A205D13A127EC0051A61C /* deflate.c */; };
-		B19A287913A127ED0051A61C /* gzio.c in Sources */ = {isa = PBXBuildFile; fileRef = B19A206C13A127EC0051A61C /* gzio.c */; };
 		B19A287B13A127ED0051A61C /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = B19A206E13A127EC0051A61C /* infback.c */; };
 		B19A287C13A127ED0051A61C /* inffast.c in Sources */ = {isa = PBXBuildFile; fileRef = B19A206F13A127EC0051A61C /* inffast.c */; };
 		B19A287D13A127ED0051A61C /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = B19A207213A127EC0051A61C /* inflate.c */; };
@@ -1027,7 +1026,6 @@
 		B19A205C13A127EC0051A61C /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
 		B19A205D13A127EC0051A61C /* deflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = deflate.c; sourceTree = "<group>"; };
 		B19A205E13A127EC0051A61C /* deflate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deflate.h; sourceTree = "<group>"; };
-		B19A206C13A127EC0051A61C /* gzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzio.c; sourceTree = "<group>"; };
 		B19A206E13A127EC0051A61C /* infback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = infback.c; sourceTree = "<group>"; };
 		B19A206F13A127EC0051A61C /* inffast.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inffast.c; sourceTree = "<group>"; };
 		B19A207013A127EC0051A61C /* inffast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inffast.h; sourceTree = "<group>"; };
@@ -1040,7 +1038,6 @@
 		B19A209913A127EC0051A61C /* trees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trees.h; sourceTree = "<group>"; };
 		B19A209A13A127EC0051A61C /* uncompr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uncompr.c; sourceTree = "<group>"; };
 		B19A20A413A127EC0051A61C /* zconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zconf.h; sourceTree = "<group>"; };
-		B19A20A513A127EC0051A61C /* zconf.in.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zconf.in.h; sourceTree = "<group>"; };
 		B19A20A713A127EC0051A61C /* zlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zlib.h; sourceTree = "<group>"; };
 		B19A20A813A127EC0051A61C /* zutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zutil.c; sourceTree = "<group>"; };
 		B19A20A913A127EC0051A61C /* zutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zutil.h; sourceTree = "<group>"; };
@@ -2082,7 +2079,6 @@
 				B19A205C13A127EC0051A61C /* crc32.h */,
 				B19A205D13A127EC0051A61C /* deflate.c */,
 				B19A205E13A127EC0051A61C /* deflate.h */,
-				B19A206C13A127EC0051A61C /* gzio.c */,
 				B19A206E13A127EC0051A61C /* infback.c */,
 				B19A206F13A127EC0051A61C /* inffast.c */,
 				B19A207013A127EC0051A61C /* inffast.h */,
@@ -2095,7 +2091,6 @@
 				B19A209913A127EC0051A61C /* trees.h */,
 				B19A209A13A127EC0051A61C /* uncompr.c */,
 				B19A20A413A127EC0051A61C /* zconf.h */,
-				B19A20A513A127EC0051A61C /* zconf.in.h */,
 				B19A20A713A127EC0051A61C /* zlib.h */,
 				B19A20A813A127EC0051A61C /* zutil.c */,
 				B19A20A913A127EC0051A61C /* zutil.h */,
@@ -2808,7 +2803,6 @@
 				B19A280313A127ED0051A61C /* compress.c in Sources */,
 				B19A286C13A127ED0051A61C /* crc32.c in Sources */,
 				B19A286D13A127ED0051A61C /* deflate.c in Sources */,
-				B19A287913A127ED0051A61C /* gzio.c in Sources */,
 				B19A287B13A127ED0051A61C /* infback.c in Sources */,
 				B19A287C13A127ED0051A61C /* inffast.c in Sources */,
 				B19A287D13A127ED0051A61C /* inflate.c in Sources */,
@@ -2992,6 +2986,7 @@
 					LEPRA_WITHOUT_FMOD,
 					LEPRA_IPHONE_SIMULATOR,
 					LEPRA_UNICODE,
+					USE_FILE32API,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
@@ -3031,6 +3026,7 @@
 					"HAVE_USLEEP=1",
 					LEPRA_WITHOUT_FMOD,
 					LEPRA_IPHONE_SIMULATOR,
+					USE_FILE32API,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
@@ -3086,6 +3082,7 @@
 					LEPRA_WITHOUT_FMOD,
 					LEPRA_IPHONE_SIMULATOR,
 					LEPRA_UNICODE,
+					USE_FILE32API,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
