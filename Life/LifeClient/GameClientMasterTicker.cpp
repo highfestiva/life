@@ -149,7 +149,12 @@ bool GameClientMasterTicker::Tick()
 			CURE_RTVAR_GET(lConnectTimeout, =(float), UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 			mMasterConnection->SetSocketInfo(mFreeNetworkAgent, lConnectTimeout);
 		}
-		mMasterConnection->Tick();
+		bool lAllowOnline;
+		CURE_RTVAR_GET(lAllowOnline, =, UiCure::GetSettings(), RTVAR_GAME_ENABLEONLINE, false);
+		if (lAllowOnline)
+		{
+			mMasterConnection->Tick();
+		}
 	}
 
 	{

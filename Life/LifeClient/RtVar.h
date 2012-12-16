@@ -47,6 +47,7 @@
 #define RTVAR_DEBUG_PERFORMANCE_YOFFSET	"Debug.Performance.YOffset"
 
 #define RTVAR_GAME_CHILDISHNESS		"Game.Childishness"
+#define RTVAR_GAME_ENABLEONLINE		"Game.EnableOnline"
 #define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
 
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"

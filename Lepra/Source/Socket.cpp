@@ -723,7 +723,7 @@ TcpVSocket* TcpMuxSocket::Connect(const SocketAddress& pTargetAddress, const std
 		{
 			if (lBuffer.mDataSize == 0)
 			{
-				mLog.AInfo("Remote end seems dead. Firewall?");
+				log_adebug("Remote end seems dead. Firewall?");
 			}
 			else if (lBuffer.mDataSize < 0)
 			{
@@ -1341,7 +1341,7 @@ UdpVSocket* UdpMuxSocket::Connect(const SocketAddress& pTargetAddress, const std
 		{
 			if (lBuffer.mDataSize == 0)
 			{
-				mLog.AInfo("Remote end seems dead. Firewall?");
+				log_adebug("Remote end seems dead. Firewall?");
 			}
 			else if (lBuffer.mDataSize < 0)
 			{

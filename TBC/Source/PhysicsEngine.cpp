@@ -235,7 +235,18 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 						}
 						lVelocityVector *= (0.1f + mFriction*0.4f) * lPushForce / mMaxSpeed;
 						lPushVector -= lVelocityVector;
-						pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPushVector*mStrength*lScale);
+						Vector3DF lOffset;
+						while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
+						{
+							ChunkyBoneGeometry* lParent = lGeometry->GetParent();
+							if (!lParent)
+							{
+								break;
+							}
+							lOffset += lGeometry->GetOriginalOffset();
+							lGeometry = lParent;
+						}
+						pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
 					}
 					mIntensity += lPushForce;
 				}

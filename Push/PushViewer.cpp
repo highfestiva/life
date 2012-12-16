@@ -173,6 +173,7 @@ void PushViewer::OnButtonClick(UiTbc::Button* pButton)
 			mUiManager->AssertDesktopLayout(new UiTbc::CenterLayout, 1);
 			mUiManager->GetDesktopWindow()->AddChild(mServerListView, 0, 0, 1);
 		}
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_ENABLEONLINE, true);
 		return;
 	}
 	if (pButton->GetName() == _T("quit"))

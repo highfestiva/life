@@ -2975,6 +2975,10 @@ void PhysicsManagerODE::AddForce(BodyID pBodyId, const Vector3DF& pForce)
 		dBodyEnable(((Object*)pBodyId)->mBodyID);
 		dBodyAddForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
 	}
+	else
+	{
+		mLog.Errorf(_T("AddForce() - Body %i is only geometry, not body!"), pBodyId);
+	}
 }
 
 void PhysicsManagerODE::AddTorque(BodyID pBodyId, const Vector3DF& pTorque)
@@ -3348,6 +3352,11 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			}
 			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
 			lC.surface.bounce_vel = (dReal)0.000001;
+			if (lC.surface.bounce < 0.1f)
+			{
+				lC.surface.mode |= dContactSoftERP;
+				lC.surface.soft_erp = Math::Lerp(0.0f, 1.0f, lC.surface.bounce * 10);
+			}
 
 			if (lObject1->mForceFeedbackId != 0 ||
 			   lObject2->mForceFeedbackId != 0)
