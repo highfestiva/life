@@ -455,6 +455,29 @@ void PushManager::UpdateTouchstickPlacement()
 #endif // Touch or emulated touch
 }
 
+#if 1
+static void JoinSteering(float& f0, float& f1)
+{
+	const float lDiff = std::abs(f0-f1);
+	if (lDiff > 0.45f)
+	{
+		return;
+	}
+	if (lDiff < 0.23f)
+	{
+		const float lMid = (f0+f1)*0.5f;
+		f0 = lMid;
+		f1 = lMid;
+		return;
+	}
+	if (std::abs(f0) > std::abs(f1))
+	{
+		f1 = f0;
+	}
+	f0 = f1;
+}
+#endif
+
 void PushManager::TickUiInput()
 {
 	SteeringPlaybackMode lPlaybackMode;
@@ -468,16 +491,39 @@ void PushManager::TickUiInput()
 			QuerySetChildishness(lObject);
 
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
-			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
-			const float lForward = S(FORWARD);
-			const float lBack = S(BACKWARD);
-			const float lBreakAndBack = S(BREAKANDBACK);
+#if 1
+			float lLeftPowerFwdRev = S(FORWARD) - S(BREAKANDBACK);
+			float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
+			JoinSteering(lLeftPowerFwdRev, lRightPowerFwdRev);
+			float lLeftPowerLR = S(RIGHT)-S(LEFT);
+			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
+			JoinSteering(lLeftPowerLR, lRightPowerLR);
+
+			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 1, lLeftPowerLR, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 4, lRightPowerFwdRev, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 5, lRightPowerLR, mCameraOrientation.x);
+			if (Math::IsEpsEqual(lLeftPowerFwdRev, lRightPowerFwdRev) &&
+				Math::IsEpsEqual(lLeftPowerLR, lRightPowerLR))
+			{
+				// Trying to move a certain direction, so stop rotation of craft.
+				if (lObject->IsLoaded())
+				{
+					TBC::PhysicsManager::BodyID lBodyId = lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+					Vector3DF lAngularVelocity;
+					GetPhysicsManager()->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
+					lAngularVelocity *= 0.9f;
+					GetPhysicsManager()->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
+				}
+			}
+#else
+			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
 			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
 			SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
 			float lPowerLR = S(RIGHT)-S(LEFT);
 			SetAvatarEnginePower(lObject, 1, lPowerLR, mCameraOrientation.x);
-			float lPower = S(HANDBREAK) - std::max(S(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
+			float lPower = S(HANDBRAKE) - std::max(S(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
 			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
 				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
 			{
@@ -490,10 +536,12 @@ void PushManager::TickUiInput()
 			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
 			lPower = S(FORWARD3D) - S(BACKWARD3D);
 			SetAvatarEnginePower(lObject, 4, lPower, mCameraOrientation.x);
-			lPower = S(LEFT3D) - S(RIGHT3D);
+			lPower = S(RIGHT3D) - S(LEFT3D);
 			SetAvatarEnginePower(lObject, 5, lPower, mCameraOrientation.x);
+			// Engine aspect 6 is not currently in use (3D handbraking). Might come in useful some day though.
 			lPower = S(UP3D) - S(DOWN3D);
-			SetAvatarEnginePower(lObject, 6, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 7, lPower, mCameraOrientation.x);
+#endif
 			const float lSteeringChange = mLastSteering-s;
 			if (lSteeringChange > 0.5f)
 			{
@@ -508,11 +556,11 @@ void PushManager::TickUiInput()
 			const float lScale = 50.0f * GetTimeManager()->GetAffordedPhysicsTotalTime();
 			const Life::Options::CamControl& c = mOptions.GetCamControl();
 #define C(dir) c.mControl[Life::Options::CamControl::CAMDIR_##dir]
-			lPower = C(UP)-C(DOWN);
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, -5.0, 30.0);
+			float lCamPower = C(UP)-C(DOWN);
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lCamPower*lScale, -5.0, 30.0);
 			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
-			lPower = C(BACKWARD)-C(FORWARD);
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 3.0, 100.0);
+			lCamPower = C(BACKWARD)-C(FORWARD);
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lCamPower*lScale, 3.0, 100.0);
 
 			mAvatarInvisibleCount = 0;
 		}
@@ -587,6 +635,58 @@ void PushManager::TickUiUpdate()
 		return;
 	}
 
+#if 1
+	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+	if (lObject)
+	{
+		mCameraPivotPosition = lObject->GetPosition();
+		UpdateMassObjects(mCameraPivotPosition);
+
+		const Vector3DF lForward3d = lObject->GetForwardDirection();
+		Vector3DF lBackward2d = -lForward3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
+		lBackward2d.Normalize(mCameraTargetXyDistance);
+		float lCamHeight;
+		CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+		lBackward2d.z = lCamHeight;
+		mCameraPreviousPosition = mCameraPosition;
+		mCameraPosition = mCameraPivotPosition + lBackward2d;
+	}
+
+	Vector3DF lPivotXyPosition = mCameraPivotPosition;
+	lPivotXyPosition.z = mCameraPosition.z;
+	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
+	Vector3DF lTargetCameraOrientation(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2, 4*PIF/7, 0);
+	if (lPivotXyPosition.y-mCameraPosition.y < 0)
+	{
+		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
+	}
+	/*Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	float lYawChange = (lTargetCameraOrientation.z-mCameraOrientation.z)*3;
+	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
+	lTargetCameraOrientation.z = -lYawChange;*/
+	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
+	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
+	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, 0.5f);
+
+	float lRotationFactor;
+	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	lRotationFactor += mCamRotateExtra;
+	if (lRotationFactor)
+	{
+		mCameraPivotVelocity.x += lRotationFactor;
+		TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
+		lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), mCameraPivotVelocity.x * lPhysicsTime);
+		mCameraPosition = lTransform.GetPosition();
+		float lTheta;
+		float lPhi;
+		float lGimbal;
+		lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
+		mCameraOrientation.x = lTheta+PIF/2;
+		mCameraOrientation.y = PIF/2-lPhi;
+		mCameraOrientation.z = lGimbal;
+	}
+#else
 	// TODO: remove camera hack (camera position should be context object controlled).
 	mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
@@ -726,8 +826,7 @@ void PushManager::TickUiUpdate()
 	}
 	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
 	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x)*3;
-	lYawChange = (lYawChange < -PIF*3/7)? -PIF*3/7 : lYawChange;
-	lYawChange = (lYawChange > PIF*3/7)? PIF*3/7 : lYawChange;
+	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
 	lTargetCameraOrientation.z = -lYawChange;
 	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
@@ -750,6 +849,7 @@ void PushManager::TickUiUpdate()
 		mCameraOrientation.y = PIF/2-lPhi;
 		mCameraOrientation.z = lGimbal;
 	}
+#endif
 }
 
 bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)

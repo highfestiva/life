@@ -251,7 +251,7 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), +1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), +1);
 		lStructure.AddEngine(lEngine);
-		// Normal breaks (all nodes, scaled >= 0) and handbreak (rear wheels, nodes with high scaling values).
+		// Normal breaks (all nodes, scaled >= 0) and handbrake (rear wheels, nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
 		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, 8*lVolvoMass, lBreakInputThreashold, 0, 0.01f, 2);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
@@ -439,7 +439,7 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), 1);
 		lStructure.AddEngine(lEngine);
-		// Normal breaks (all nodes, scaled >= 0) and handbreak (rear wheels, nodes with high scaling values).
+		// Normal breaks (all nodes, scaled >= 0) and handbrake (rear wheels, nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
 		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, 8*lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
@@ -673,7 +673,7 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(6), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(7), 1);
 		lStructure.AddEngine(lEngine);
-		// Normal breaks (all nodes, scaled >= 0) and handbreak (nodes with high scaling values).
+		// Normal breaks (all nodes, scaled >= 0) and handbrake (nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
 		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);

@@ -105,8 +105,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
 
-	pValue = (pValue > 1)? 1 : pValue;
-	pValue = (pValue < -1)? -1 : pValue;
+	pValue = Math::Clamp(pValue, -1.0f, +1.0f);
 
 	switch (mEngineType)
 	{
@@ -117,32 +116,17 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		}
 		break;
 		case ENGINE_CAMERA_FLAT_PUSH:
-		{
-			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+6)
-			{
-				switch (pAspect)
-				{
-					case 0:		mValue[ASPECT_PRIMARY]    = pValue;		break;
-					case 4:		mValue[ASPECT_PRIMARY]   += pValue;		break;
-					case 2:		mValue[ASPECT_PRIMARY]   -= ::fabs(pValue);	break;	// Breaking and handbreaking always reverse.
-					case 1:		mValue[ASPECT_SECONDARY]  = pValue;		break;
-					case 5:		mValue[ASPECT_SECONDARY] -= pValue;		break;
-					case 6:		mValue[ASPECT_TERTIARY]	  = pValue;		break;
-				}
-				mValue[ASPECT_CAM] = pZAngle;
-				return (true);
-			}
-		}
-		break;
 		case ENGINE_CAMERA_3D_PUSH:
 		{
-			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+6)
+			const unsigned lControlledAspects = (mEngineType == ENGINE_CAMERA_FLAT_PUSH)? 2 : 3;
+			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+lControlledAspects)
 			{
-				switch (pAspect)
+				switch (pAspect - mControllerIndex)
 				{
-					case 4:		mValue[ASPECT_PRIMARY]   = pValue;		break;
-					case 5:		mValue[ASPECT_SECONDARY] = -pValue;		break;
-					case 6:		mValue[ASPECT_TERTIARY]	 = pValue;		break;
+					case 0:	mValue[ASPECT_PRIMARY]    = pValue;	break;
+					case 2:	mValue[ASPECT_PRIMARY]   += pValue;	break;	// Handbrake.
+					case 1:	mValue[ASPECT_SECONDARY]  = pValue;	break;
+					case 3:	mValue[ASPECT_TERTIARY]	  = pValue;	break;
 				}
 				mValue[ASPECT_CAM] = pZAngle;
 				return (true);
@@ -218,11 +202,22 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					lRotation.RotateAroundWorldZ(mValue[ASPECT_CAM] - MathTraits<float>::Pi() / 2);
 					lAxis[0] = lRotation*lAxis[0];
 					lAxis[1] = lRotation*lAxis[1];
+					Vector3DF lOffset;
+					while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
+					{
+						ChunkyBoneGeometry* lParent = lGeometry->GetParent();
+						if (!lParent)
+						{
+							break;
+						}
+						lOffset -= lGeometry->GetOriginalOffset();
+						lGeometry = lParent;
+					}
 					Vector3DF lVelocityVector;
 					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
 					//lVelocityVector = lRotation*lVelocityVector;
 					Vector3DF lPushVector;
-					for (int i = 0; i <= ASPECT_TERTIARY; ++i)
+					for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
 					{
 						lPushVector += (1/CUBE_DIAGONAL) * mValue[i] * lAxis[i];
 					}
@@ -233,18 +228,13 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 						{
 							lVelocityVector += lVelocityVector.ProjectOntoPlane(lPushVector / lPushForce);
 						}
-						lVelocityVector *= (0.1f + mFriction*0.4f) * lPushForce / mMaxSpeed;
-						lPushVector -= lVelocityVector;
-						Vector3DF lOffset;
-						while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
+						if (lPushVector.Dot(lVelocityVector) > 0)
 						{
-							ChunkyBoneGeometry* lParent = lGeometry->GetParent();
-							if (!lParent)
-							{
-								break;
-							}
-							lOffset += lGeometry->GetOriginalOffset();
-							lGeometry = lParent;
+							//mLog.Infof(_T("Reducing push vector (%f; %f; %f) with velocity (%f; %f; %f) and friction."),
+							//	lPushVector.x, lPushVector.y, lPushVector.z,
+							//	lVelocityVector.x, lVelocityVector.y, lVelocityVector.z);
+							lVelocityVector *= (0.1f + mFriction*0.4f) * lPushForce / mMaxSpeed;
+							lPushVector -= lVelocityVector;
 						}
 						pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
 					}
@@ -595,7 +585,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 float PhysicsEngine::GetValue() const
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
-	if (mEngineType == ENGINE_CAMERA_FLAT_PUSH || mEngineType == ENGINE_CAMERA_FLAT_PUSH)
+	if (mEngineType == ENGINE_CAMERA_FLAT_PUSH || mEngineType == ENGINE_CAMERA_3D_PUSH)
 	{
 		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
 		const float b = ::fabs(mValue[ASPECT_SECONDARY]);

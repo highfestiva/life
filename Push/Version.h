@@ -15,5 +15,5 @@
 #define PLATFORM_VERSION	"0.1"
 
 #ifndef LEPRA_TOUCH
-#define EMULATE_TOUCH	1
+//#define EMULATE_TOUCH	1
 #endif // !iOS

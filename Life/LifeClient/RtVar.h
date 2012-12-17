@@ -33,7 +33,7 @@
 #define RTVAR_CTRL_STEER_DOWN		"Control.Steer.Down"
 #define RTVAR_CTRL_STEER_UP3D		"Control.Steer.Up3d"
 #define RTVAR_CTRL_STEER_DOWN3D		"Control.Steer.Down3d"
-#define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBreak"
+#define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBrake"
 #define RTVAR_CTRL_STEER_BRK		"Control.Steer.Break"
 
 #define RTVAR_DEBUG_3D_DRAWLOCALSERVER	"Debug.3D.DrawLocalServer"

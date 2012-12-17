@@ -399,7 +399,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 				}
 				pStructure->SetEnginePower(0, lData->mValue[0], lData->mValue[3]);
 				pStructure->SetEnginePower(1, lData->mValue[1], lData->mValue[3]);
-				pStructure->SetEnginePower(6, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
+				pStructure->SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HOVER:
