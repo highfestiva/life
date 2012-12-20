@@ -466,7 +466,7 @@ static void JoinSteering(float& f0, float& f1)
 	}
 	else
 	{
-		f0 = (f0 < 0) ? -1 : 1;
+		f0 = (f0 < 0) ? -1.0f : +1.0f;
 	}
 	if (std::abs(f1) < 0.4f)
 	{
@@ -474,7 +474,7 @@ static void JoinSteering(float& f0, float& f1)
 	}
 	else
 	{
-		f1 = (f1 < 0) ? -1 : 1;
+		f1 = (f1 < 0) ? -1.0f : +1.0f;
 	}
 }
 #endif
@@ -501,42 +501,69 @@ void PushManager::TickUiInput()
 			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
 			JoinSteering(lLeftPowerLR, lRightPowerLR);
 
-			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR, mCameraOrientation.x);
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR, mCameraOrientation.x);
-			SetAvatarEnginePower(lObject, 4, lRightPowerFwdRev, mCameraOrientation.x);
-			SetAvatarEnginePower(lObject, 5, lRightPowerLR, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev-lRightPowerLR, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 5, lLeftPowerLR, mCameraOrientation.x);
 			if (lObject->IsLoaded())
 			{
 				TBC::PhysicsManager::BodyID lBodyId = lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+				Vector3DF lAngularVelocity;
+				GetPhysicsManager()->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
 				if (Math::IsEpsEqual(lLeftPowerFwdRev, lRightPowerFwdRev) &&
 					Math::IsEpsEqual(lLeftPowerLR, lRightPowerLR))
 				{
 					float lYaw;
 					float lPitch;
 					float lRoll;
-					GetPhysicsManager()->GetBodyOrientation(lBodyId).GetEulerAngles(lYaw, lPitch, lRoll);
+					QuaternionF lOrientation = GetPhysicsManager()->GetBodyOrientation(lBodyId);
+					lOrientation.RotateAroundOwnX(PIF*-0.5f);	// Avoid gimbal lock.
+					lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
+					//Vector3DF lRotationVector;
+					//GetPhysicsManager()->GetBodyOrientation(lBodyId).GetRotationVector(lRotationVector);
+					//lYaw = lRotationVector.x;
+					//lPitch = lRotationVector.y;
+					//lRoll = lRotationVector.z;
+					//mLog.Infof(_T("Yaw, pitch, roll: (%f, %f, %f)."), lYaw*180/PIF, lPitch*180/PIF, lRoll*180/PIF);
+					//lYaw = lRoll;
+					if (std::abs(lAngularVelocity.z) > 0.5f)
+					{
+						mIsSameSteering = false;
+					}
 					if (mIsSameSteering)
 					{
 						// Turn towards original direction.
 						float lLockDirection = mSteeringLockDirection;
 						Math::RangeAngles(lLockDirection, lYaw);
-						const float lTorque = (lLockDirection - lYaw) * lObject->GetMass() * 100.0f;
+						//if (lLockDirection < -PIF)
+						//{
+						//	lLockDirection += 2*PIF;
+						//}
+						//else if (lLockDirection > +PIF)
+						//{
+						//	lLockDirection -= 2*PIF;
+						//}
+						static int c = 0;
+						if (++c > 30)
+						{
+							c = 0;
+							mLog.Infof(_T("Striving towards direction %.0f from angle %.0f (also %f, %f)."), lLockDirection*180/PIF, lYaw*180/PIF, lPitch, lRoll);
+						}
+						const float lTorque = (lLockDirection - lYaw) * lObject->GetMass() * 40.0f;
 						GetPhysicsManager()->SetBodyAngularAcceleration(lBodyId, Vector3DF(0, 0, lTorque));
 					}
-					else
+					else if (std::abs(lAngularVelocity.z) < 0.25f)
 					{
 						mSteeringLockDirection = lYaw;
+						mLog.Infof(_T("Setting target direction to %f."), mSteeringLockDirection);
 						mIsSameSteering = true;
 					}
-
 				}
 				else
 				{
 					mIsSameSteering = false;
 				}
 				// Reduce rotation of craft.
-				Vector3DF lAngularVelocity;
-				GetPhysicsManager()->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
 				lAngularVelocity *= 0.95f;
 				GetPhysicsManager()->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
 			}
