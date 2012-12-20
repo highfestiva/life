@@ -54,6 +54,8 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
 	mCameraTargetXyDistance(20),
 	mCameraMaxSpeed(500),
+	mIsSameSteering(false),
+	mSteeringLockDirection(0),
 	mLoginWindow(0),
 	mStickLeft(0),
 	mStickRight(0),
@@ -420,8 +422,8 @@ void PushManager::UpdateTouchstickPlacement()
 	{
 		PixelRect lLeftStickArea(mRenderArea);
 		PixelRect lRightStickArea(mRenderArea);
-		lLeftStickArea.mBottom = mRenderArea.GetHeight() / 4;
-		lRightStickArea.mTop = mRenderArea.GetHeight() * 3 / 4;
+		lLeftStickArea.mBottom = mRenderArea.GetHeight() / 3;
+		lRightStickArea.mTop = mRenderArea.GetHeight() * 2 / 3;
 		lLeftStickArea.mRight = lLeftStickArea.mLeft + lLeftStickArea.GetHeight();
 		lRightStickArea.mRight = lLeftStickArea.mRight;
 
@@ -445,8 +447,8 @@ void PushManager::UpdateTouchstickPlacement()
 	{
 		PixelRect lLeftStickArea(mRenderArea);
 		PixelRect lRightStickArea(mRenderArea);
-		lLeftStickArea.mRight = mRenderArea.GetWidth() / 4;
-		lRightStickArea.mLeft = mRenderArea.GetWidth() * 3 / 4;
+		lLeftStickArea.mRight = mRenderArea.GetWidth() / 3;
+		lRightStickArea.mLeft = mRenderArea.GetWidth() * 2 / 3;
 		lLeftStickArea.mTop = lLeftStickArea.mBottom - (lLeftStickArea.mRight - lLeftStickArea.mLeft);
 		lRightStickArea.mTop = lLeftStickArea.mTop;
 		mStickLeft->Move(lLeftStickArea, 0);
@@ -458,23 +460,22 @@ void PushManager::UpdateTouchstickPlacement()
 #if 1
 static void JoinSteering(float& f0, float& f1)
 {
-	const float lDiff = std::abs(f0-f1);
-	if (lDiff > 0.45f)
+	if (std::abs(f0) < 0.4f)
 	{
-		return;
+		f0 = 0;
 	}
-	if (lDiff < 0.23f)
+	else
 	{
-		const float lMid = (f0+f1)*0.5f;
-		f0 = lMid;
-		f1 = lMid;
-		return;
+		f0 = (f0 < 0) ? -1 : 1;
 	}
-	if (std::abs(f0) > std::abs(f1))
+	if (std::abs(f1) < 0.4f)
 	{
-		f1 = f0;
+		f1 = 0;
 	}
-	f0 = f1;
+	else
+	{
+		f1 = (f1 < 0) ? -1 : 1;
+	}
 }
 #endif
 
@@ -504,18 +505,40 @@ void PushManager::TickUiInput()
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR, mCameraOrientation.x);
 			SetAvatarEnginePower(lObject, 4, lRightPowerFwdRev, mCameraOrientation.x);
 			SetAvatarEnginePower(lObject, 5, lRightPowerLR, mCameraOrientation.x);
-			if (Math::IsEpsEqual(lLeftPowerFwdRev, lRightPowerFwdRev) &&
-				Math::IsEpsEqual(lLeftPowerLR, lRightPowerLR))
+			if (lObject->IsLoaded())
 			{
-				// Trying to move a certain direction, so stop rotation of craft.
-				if (lObject->IsLoaded())
+				TBC::PhysicsManager::BodyID lBodyId = lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+				if (Math::IsEpsEqual(lLeftPowerFwdRev, lRightPowerFwdRev) &&
+					Math::IsEpsEqual(lLeftPowerLR, lRightPowerLR))
 				{
-					TBC::PhysicsManager::BodyID lBodyId = lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-					Vector3DF lAngularVelocity;
-					GetPhysicsManager()->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
-					lAngularVelocity *= 0.9f;
-					GetPhysicsManager()->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
+					float lYaw;
+					float lPitch;
+					float lRoll;
+					GetPhysicsManager()->GetBodyOrientation(lBodyId).GetEulerAngles(lYaw, lPitch, lRoll);
+					if (mIsSameSteering)
+					{
+						// Turn towards original direction.
+						float lLockDirection = mSteeringLockDirection;
+						Math::RangeAngles(lLockDirection, lYaw);
+						const float lTorque = (lLockDirection - lYaw) * lObject->GetMass() * 100.0f;
+						GetPhysicsManager()->SetBodyAngularAcceleration(lBodyId, Vector3DF(0, 0, lTorque));
+					}
+					else
+					{
+						mSteeringLockDirection = lYaw;
+						mIsSameSteering = true;
+					}
+
 				}
+				else
+				{
+					mIsSameSteering = false;
+				}
+				// Reduce rotation of craft.
+				Vector3DF lAngularVelocity;
+				GetPhysicsManager()->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
+				lAngularVelocity *= 0.95f;
+				GetPhysicsManager()->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
 			}
 #else
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;

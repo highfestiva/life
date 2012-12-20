@@ -136,6 +136,8 @@ protected:
 	Vector3DF mCameraPivotVelocity;		// TODO: remove hack (should context object controlled)!
 	float mCameraTargetXyDistance;		// TODO: remove hack (should context object controlled)!
 	float mCameraMaxSpeed;			// TODO: remove hack (should context object controlled)!
+	bool mIsSameSteering;
+	float mSteeringLockDirection;
 	Vector3DF mMicrophoneSpeed;		// TODO: remove hack (should context object controlled)!
 	UiTbc::Window* mLoginWindow;
 
