@@ -124,6 +124,13 @@ int TouchstickInputDevice::GetFingerRadius() const
 	return mFingerRadius;
 }
 
+void TouchstickInputDevice::ResetTap()
+{
+	mElementArray[0]->SetValue(0.0f);
+	mElementArray[1]->SetValue(0.0f);
+	mElementArray[2]->SetValue(0.0f);
+}
+
 void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 {
 	if (mIsPressing)

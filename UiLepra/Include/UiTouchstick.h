@@ -65,6 +65,7 @@ public:
 	const PixelRect& GetArea() const;
 	int GetFingerRadius() const;
 
+	void ResetTap();
 	void SetTap(const PixelCoord& pCoord, bool pIsPress);
 	void GetValue(float& x, float& y, bool& pIsPressing);
 
