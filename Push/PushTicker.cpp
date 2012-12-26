@@ -7,6 +7,7 @@
 #include "../Lepra/Include/LepraTarget.h"
 #include "PushTicker.h"
 #include "../Lepra/Include/SystemManager.h"
+#include "../Life/LifeClient/UiGameServerManager.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiLepra/Include/UiCore.h"
@@ -62,6 +63,11 @@ void PushTicker::OnSlavesKilled()
 	mIsPlayerCountViewActive = true;
 	mSlaveTopSplit = 1.0f;
 	Parent::CreateSlave(&PushTicker::CreateViewer);
+}
+
+void PushTicker::OnServerCreated(Life::UiGameServerManager* pServer)
+{
+	pServer->SetLevelName(_T("level_02"));
 }
 
 

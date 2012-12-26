@@ -324,7 +324,7 @@ bool PushManager::InitializeTerrain()
 
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
-	UiCure::CppContextObject* lLevel = new Level(GetResourceManager(), _T("level_01"), mUiManager, lGravelParticleEmitter);
+	UiCure::CppContextObject* lLevel = new Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
 	AddContextObject(lLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
 	bool lOk = (lLevel != 0);
 	assert(lOk);
@@ -479,11 +479,9 @@ void PushManager::TickUiInput()
 #if 1
 			float lLeftPowerFwdRev = S(FORWARD) - S(BREAKANDBACK);
 			//float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
-			//JoinSteering(lLeftPowerFwdRev, lRightPowerFwdRev);
 			float lLeftPowerLR = S(RIGHT)-S(LEFT);
 			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
-			lRightPowerLR *= Math::Lerp(0.4f, 1.5f, std::abs(lLeftPowerFwdRev));
-			//JoinSteering(lLeftPowerLR, lRightPowerLR);
+			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, std::abs(lLeftPowerFwdRev));
 
 			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR, mCameraOrientation.x);
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR, mCameraOrientation.x);
@@ -494,6 +492,8 @@ void PushManager::TickUiInput()
 				TBC::PhysicsManager::BodyID lBodyId = lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 				Vector3DF lAngularVelocity;
 				GetPhysicsManager()->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
+				const float lHighAngularVelocity = 0.7f;
+				const float lLowAngularVelocity = 0.45f;
 				if (Math::IsEpsEqual(lRightPowerLR, 0.0f))
 				{
 					float lYaw;
@@ -502,7 +502,7 @@ void PushManager::TickUiInput()
 					QuaternionF lOrientation = GetPhysicsManager()->GetBodyOrientation(lBodyId);
 					lOrientation.RotateAroundOwnX(PIF*-0.5f);	// Avoid gimbal lock.
 					lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
-					if (std::abs(lAngularVelocity.z) > 0.7f)
+					if (std::abs(lAngularVelocity.z) > lHighAngularVelocity)
 					{
 						mIsSameSteering = false;
 					}
@@ -520,7 +520,7 @@ void PushManager::TickUiInput()
 						const float lTorque = (lLockDirection - lYaw) * lObject->GetMass() * 40.0f;
 						GetPhysicsManager()->SetBodyAngularAcceleration(lBodyId, Vector3DF(0, 0, lTorque));
 					}
-					else if (std::abs(lAngularVelocity.z) < 0.45f)
+					else if (std::abs(lAngularVelocity.z) < lLowAngularVelocity)
 					{
 						mSteeringLockDirection = lYaw;
 						mLog.Infof(_T("Setting target direction to %f."), mSteeringLockDirection);
@@ -532,7 +532,11 @@ void PushManager::TickUiInput()
 					mIsSameSteering = false;
 				}
 				// Reduce rotation of craft.
-				lAngularVelocity *= 0.8f;
+				lAngularVelocity.z *= 0.85f;
+				if (mIsSameSteering && std::abs(lAngularVelocity.z) < lLowAngularVelocity)
+				{
+					lAngularVelocity.z = 0;
+				}
 				GetPhysicsManager()->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
 			}
 #else

@@ -92,6 +92,13 @@ GameServerManager::~GameServerManager()
 
 
 
+void GameServerManager::SetLevelName(const str& pLevelName)
+{
+	mLevelName = pLevelName;
+}
+
+
+
 bool GameServerManager::BeginTick()
 {
 	AccountClientTable::Iterator x = mAccountClientTable.First();
@@ -450,7 +457,7 @@ Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAcco
 bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
-	mTerrainObject = new Cure::CppContextObject(GetResourceManager(), _T("level_01"));
+	mTerrainObject = new Cure::CppContextObject(GetResourceManager(), mLevelName);
 	AddContextObject(mTerrainObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mTerrainObject->StartLoading();
 	return (true);
@@ -675,6 +682,7 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 	ScopeLock lTickLock(GetTickLock());
 
 	TransformationF lTransform;
+	lTransform.SetPosition(Vector3DF(0, 0, 10));
 	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
 	if (lPreviousAvatarId)
 	{

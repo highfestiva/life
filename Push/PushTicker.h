@@ -40,6 +40,7 @@ public:
 private:
 	virtual bool CreateSlave();
 	virtual void OnSlavesKilled();
+	virtual void OnServerCreated(Life::UiGameServerManager* pServer);
 
 	virtual bool Reinitialize();
 	virtual bool OpenUiManager();

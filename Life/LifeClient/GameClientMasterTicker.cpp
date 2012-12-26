@@ -480,6 +480,7 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 		UiGameServerManager* lServer = new UiGameServerManager(GetTimeManager(), lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
 		lServer->SetTicker(this);
 		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
+		OnServerCreated(lServer);
 		if (!lServer->Initialize(mMasterConnection))
 		{
 			delete lServer;

@@ -69,6 +69,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mSendCount(0),
 	mAllowMoveRoot(true)
 {
+	assert(!pClassId.empty());
 }
 
 ContextObject::~ContextObject()

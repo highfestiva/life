@@ -81,6 +81,7 @@ protected:
 		int pSlaveIndex, const PixelRect& pRenderArea);
 	bool CreateSlave(SlaveFactoryMethod pCreate);
 	virtual void OnSlavesKilled() = 0;
+	virtual void OnServerCreated(Life::UiGameServerManager* pServer) = 0;
 
 	Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
 	void AddSlave(GameClientSlaveManager* pSlave);

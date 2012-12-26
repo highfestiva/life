@@ -524,6 +524,18 @@
 				RelativePath=".\PushServer.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\PushServerTicker.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			>
+			<File
+				RelativePath=".\PushServerTicker.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

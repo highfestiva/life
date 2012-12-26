@@ -42,6 +42,8 @@ public:
 		Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
 
+	void SetLevelName(const str& pLevelName);
+
 	virtual bool BeginTick();
 
 	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
@@ -121,7 +123,8 @@ private:
 
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;
-	Cure::ContextObject* mTerrainObject;	// TODO: remove when applicable.
+	str mLevelName;
+	Cure::ContextObject* mTerrainObject;
 	MovementArrayList mMovementArrayList;
 	mutable Timer mPowerSaveTimer;
 	MasterServerConnection* mMasterConnection;

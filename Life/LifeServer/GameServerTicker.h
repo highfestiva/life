@@ -33,7 +33,7 @@ public:
 	virtual ~GameServerTicker();
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 
-private:
+protected:
 	virtual bool Initialize();
 	virtual bool Tick();
 	virtual void PollRoundTrip();
