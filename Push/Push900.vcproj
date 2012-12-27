@@ -521,6 +521,10 @@
 			UniqueIdentifier="{C734F7F1-C7A5-4376-A066-2A32FFD752A2}"
 			>
 			<File
+				RelativePath=".\Grenade.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Level.cpp"
 				>
 			</File>
@@ -586,6 +590,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
+			<File
+				RelativePath=".\Grenade.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Launcher.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Level.h"
 				>

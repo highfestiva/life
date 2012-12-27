@@ -131,7 +131,7 @@ const TBC::ChunkyClass* CppContextObject::GetClass() const
 	return (0);
 }
 
-const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const
+const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray, bool pIgnoreIndexes) const
 {
 	const TBC::ChunkyClass* lClass = GetClass();
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
@@ -141,7 +141,7 @@ const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int 
 			lTag.mFloatValueList.size() == (size_t)pFloatValueCount &&
 			lTag.mStringValueList.size() == (size_t)pStringValueCount &&
 			lTag.mBodyIndexList.size() == pTriggerIndexArray.size() &&
-			std::equal(lTag.mBodyIndexList.begin(), lTag.mBodyIndexList.end(), pTriggerIndexArray.begin()))
+			(pIgnoreIndexes || std::equal(lTag.mBodyIndexList.begin(), lTag.mBodyIndexList.end(), pTriggerIndexArray.begin())))
 		{
 			return &lTag;
 		}

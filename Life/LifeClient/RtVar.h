@@ -36,6 +36,10 @@
 #define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBrake"
 #define RTVAR_CTRL_STEER_BRK		"Control.Steer.Break"
 
+#define RTVAR_CTRL_FIRE0		"Control.Fire0"
+#define RTVAR_CTRL_FIRE1		"Control.Fire1"
+#define RTVAR_CTRL_FIRE2		"Control.Fire2"
+
 #define RTVAR_DEBUG_3D_DRAWLOCALSERVER	"Debug.3D.DrawLocalServer"
 #define RTVAR_DEBUG_INPUT_PRINT		"Debug.Input.Print"
 #define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"		// Internal.

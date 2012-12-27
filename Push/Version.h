@@ -17,3 +17,5 @@
 #ifndef LEPRA_TOUCH
 //#define EMULATE_TOUCH	1
 #endif // !iOS
+
+#define VISUAL_SCALE_FACTOR	1.0f

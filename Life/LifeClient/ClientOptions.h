@@ -88,5 +88,29 @@ struct Steering
 
 
 
+struct FireControl
+{
+	enum Control
+	{
+		FIRE0 = 0,
+		FIRE1,
+		FIRE2,
+		FIRE_COUNT
+	};
+	float mControl[FIRE_COUNT];
+
+	inline FireControl()
+	{
+		::memset(mControl, 0, sizeof(mControl));
+	}
+
+	inline void operator=(const FireControl& pShooting)
+	{
+		::memcpy(mControl, pShooting.mControl, sizeof(mControl));
+	}
+};
+
+
+
 }
 }

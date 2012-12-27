@@ -9,6 +9,7 @@
 #include "../Lepra/Include/DiskFile.h"
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../TBC/Include/PhysicsEngine.h"
+#include "Launcher.h"
 #include "LoginView.h"
 #include "Push.h"
 
@@ -37,11 +38,12 @@ namespace Push
 
 
 
+class Level;
 class RoadSignButton;
 
 
 
-class PushManager: public Life::GameClientSlaveManager, private Push::ClientLoginObserver
+class PushManager: public Life::GameClientSlaveManager, private ClientLoginObserver, private Launcher
 {
 	typedef Life::GameClientSlaveManager Parent;
 public:
@@ -99,6 +101,12 @@ protected:
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
+	void Fire();
+	virtual void GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const;
+	virtual void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+		Cure::ContextObject* pExplosive, Cure::ContextObject* pHitObject,
+		TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pHitBodyId);
+
 	void CancelLogin();
 	void OnVehicleSelect(UiTbc::Button* pButton);
 	void OnAvatarSelect(UiTbc::Button* pButton);
@@ -116,6 +124,7 @@ protected:
 	bool mHadAvatar;
 	Life::Options::Steering mLastSteering;
 	float mCamRotateExtra;
+	HiResTimer mFireTimeout;
 
 	RoadSignButton* mPickVehicleButton;
 	int mAvatarInvisibleCount;
@@ -123,6 +132,7 @@ protected:
 	RoadSignMap mRoadSignMap;
 
 	Cure::GameObjectId mLevelId;
+	Level* mLevel;
 	ObjectArray mMassObjectArray;
 	Cure::ContextObject* mSun;	// TODO: remove hack (should context object controlled)!
 	std::vector<Cure::ContextObject*> mCloudArray;	// TODO: remove hack (should context object controlled)!

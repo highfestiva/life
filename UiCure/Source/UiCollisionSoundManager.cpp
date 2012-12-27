@@ -115,7 +115,11 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 		}
 		lImpact = mLightImpact;
 	}
+	OnCollision(lImpact, pPosition, pObject1, pBody1Id);
+}
 
+void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPosition, Cure::ContextObject* pObject1,  TBC::PhysicsManager::BodyID pBody1Id)
+{
 	const TBC::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
 	SoundInfo* lSoundInfo = GetPlayingSound(lKey);
 	if (lSoundInfo)
@@ -123,10 +127,10 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 		const double lTime = (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)? mUiManager->GetSoundManager()->GetStreamTime(lSoundInfo->mSound->GetRamData()) : 0;
 		if (lTime < mSoundCutoffDuration)
 		{
-			if (lImpact > lSoundInfo->mBaseImpact * 1.2f)
+			if (pImpact > lSoundInfo->mBaseImpact * 1.2f)
 			{
 				// We are louder! Use our impact instead!
-				lSoundInfo->mBaseImpact = lImpact;
+				lSoundInfo->mBaseImpact = pImpact;
 				UpdateSound(lSoundInfo);
 			}
 		}
@@ -134,12 +138,12 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 		{
 			// We are newer! Replay!
 			StopSound(lKey);
-			PlaySound(lKey, pPosition, lImpact);
+			PlaySound(lKey, pPosition, pImpact);
 		}
 	}
 	else
 	{
-		PlaySound(lKey, pPosition, lImpact);
+		PlaySound(lKey, pPosition, pImpact);
 	}
 }
 

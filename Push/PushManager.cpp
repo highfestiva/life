@@ -8,6 +8,7 @@
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/NetworkClient.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/Time.h"
 #include "../Life/LifeClient/ClientOptions.h"
 #include "../Life/LifeClient/ClientOptions.h"
@@ -20,6 +21,7 @@
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "Grenade.h"
 #include "Level.h"
 #include "PushConsoleManager.h"
 #include "PushTicker.h"
@@ -47,6 +49,7 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mAvatarInvisibleCount(0),
 	mRoadSignIndex(0),
 	mLevelId(0),
+	mLevel(0),
 	mSun(0),
 	mCameraPosition(0, -200, 100),
 	//mCameraFollowVelocity(0, 1, 0),
@@ -62,6 +65,7 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mEnginePlaybackTime(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
+	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
 	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
 	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
 	mCollisionSoundManager->AddSound(_T("plastic"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
@@ -324,15 +328,15 @@ bool PushManager::InitializeTerrain()
 
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
-	UiCure::CppContextObject* lLevel = new Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
-	AddContextObject(lLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
-	bool lOk = (lLevel != 0);
+	mLevel = new Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
+	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
+	bool lOk = (mLevel != 0);
 	assert(lOk);
 	if (lOk)
 	{
-		lLevel->DisableRootShadow();
-		lLevel->SetAllowNetworkLogic(false);
-		lLevel->StartLoading();
+		mLevel->DisableRootShadow();
+		mLevel->SetAllowNetworkLogic(false);
+		mLevel->StartLoading();
 		mSun = new UiCure::Props(GetResourceManager(), _T("sun"), mUiManager);
 		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
@@ -474,6 +478,7 @@ void PushManager::TickUiInput()
 		{
 			QuerySetChildishness(lObject);
 
+			// Control steering.
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 #if 1
@@ -575,6 +580,7 @@ void PushManager::TickUiInput()
 			}
 			mLastSteering = s;
 
+			// Control camera.
 			const float lScale = 50.0f * GetTimeManager()->GetAffordedPhysicsTotalTime();
 			const Life::Options::CamControl& c = mOptions.GetCamControl();
 #define C(dir) c.mControl[Life::Options::CamControl::CAMDIR_##dir]
@@ -583,6 +589,15 @@ void PushManager::TickUiInput()
 			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
 			lCamPower = C(BACKWARD)-C(FORWARD);
 			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lCamPower*lScale, 3.0, 100.0);
+
+			// Control fire.
+			const Life::Options::FireControl& f = mOptions.GetFireControl();
+#define F(alt) f.mControl[Life::Options::FireControl::FIRE##alt]
+			if (F(0) > 0.5f && mFireTimeout.QueryTimeDiff() >= 0.7f)
+			{
+				mFireTimeout.ClearTimeDiff();
+				Fire();
+			}
 
 			mAvatarInvisibleCount = 0;
 		}
@@ -773,12 +788,11 @@ void PushManager::TickUiUpdate()
 
 	// Now that we've settled where we should be, it's time to check where we actually can see our avatar.
 	// TODO: currently only checks against terrain. Add a ray to world, that we can use for this kinda thing.
-	Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
-	if (lLevel)
+	if (mLevel)
 	{
 		const float lCameraAboveGround = 0.3f;
 		lTargetCameraPosition.z -= lCameraAboveGround;
-		const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 		Vector3DF lCollisionPoint;
 		float lStepSize = (lTargetCameraPosition - lAvatarPosition).GetLength() * 0.5f;
 		for (int y = 0; y < 5; ++y)
@@ -878,10 +892,10 @@ bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
 {
 	bool lOk = true;
 
-	const Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
-	if (lLevel && mMassObjectArray.empty())
+	if (mLevel && mMassObjectArray.empty())
 	{
-		const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+#if 0
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 		if (lOk)
 		{
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
@@ -898,6 +912,7 @@ bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
 			AddContextObject(lBushes, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
 			lBushes->StartLoading();
 		}
+#endif 
 	}
 
 	ObjectArray::const_iterator x = mMassObjectArray.begin();
@@ -1057,6 +1072,7 @@ void PushManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
 		}
+		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);
 	}
 	else
 	{
@@ -1102,6 +1118,157 @@ void PushManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 	}
 }
 
+
+
+void PushManager::Fire()
+{
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	if (!lAvatar)
+	{
+		return;
+	}
+
+	Grenade* lGrenade = new Grenade(GetResourceManager(), mUiManager, 100, this);
+	AddContextObject(lGrenade, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	mLog.Infof(_T("Shooting grenade with ID %i!"), (int)lGrenade->GetInstanceId());
+	bool lOk = (lGrenade != 0);
+	assert(lOk);
+	if (lOk)
+	{
+		TransformationF t(lAvatar->GetOrientation(), lAvatar->GetPosition()+Vector3DF(0, 0, +5.0f));
+		lGrenade->SetInitialTransform(t);
+		lGrenade->StartLoading();
+	}
+}
+
+void PushManager::GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const
+{
+	const Cure::CppContextObject* lAvatar = (const Cure::CppContextObject*)GetContext()->GetObject(mAvatarId);
+	if (lAvatar && lAvatar->IsLoaded())
+	{
+		pTransform.SetOrientation(lAvatar->GetOrientation());
+		pTransform.SetPosition(lAvatar->GetPosition());
+		pVelocity = lAvatar->GetVelocity();
+		std::vector<int> lBodyArray;
+		lBodyArray.push_back(-1);
+		const TBC::ChunkyClass::Tag* lTag = lAvatar->FindTag(_T("context_path"), 0, 0, lBodyArray, true);
+		if (lTag)
+		{
+			const int lBoneIndex = lTag->mBodyIndexList[0];
+#ifdef LEPRA_DEBUG
+			TBC::ChunkyBoneGeometry* lBone = lAvatar->GetPhysics()->GetBoneGeometry(lBoneIndex);
+			assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
+#endif // Debug
+			Vector3DF lMuzzleOffset = lAvatar->GetPhysics()->GetOriginalBoneTransformation(lBoneIndex).GetPosition();
+			pTransform.GetPosition() += pTransform.GetOrientation() * lMuzzleOffset;
+		}
+	}
+}
+
+void PushManager::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	Cure::ContextObject* pExplosive, Cure::ContextObject* pHitObject,
+	TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pHitBodyId)
+{
+	(void)pForce;
+	(void)pTorque;
+	(void)pHitBodyId;
+	mCollisionSoundManager->OnCollision(5.0f, pPosition, pExplosive, pExplosiveBodyId);
+
+	{
+		// Stones and mud. More if hit level, less otherwise.
+		const float lScale = VISUAL_SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
+		const int lParticleCount = (pHitObject == mLevel)? 10 : 5;
+		for (int i = 0; i < lParticleCount; ++i)
+		{
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
+			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			lPuff->DisableRootShadow();
+			float x = (float)Random::Uniform(-1, 1);
+			float y = (float)Random::Uniform(-1, 1);
+			float z = -1;
+			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
+			lPuff->SetInitialTransform(lTransform);
+			const float lAngle = (float)Random::Uniform(0, 2*PIF);
+			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
+			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
+			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * lScale, 0.5f, (float)Random::Uniform(3, 7));
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+			lPuff->SetFadeOutTime(0.3f);
+#endif // Touch L&F
+			lPuff->StartLoading();
+		}
+	}
+
+	{
+		// Release gas puffs.
+		const int lParticleCount = (Random::GetRandomNumber() % 4) + 2;
+		for (int i = 0; i < lParticleCount; ++i)
+		{
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			lPuff->DisableRootShadow();
+			float x = (float)Random::Uniform(-1, 1);
+			float y = (float)Random::Uniform(-1, 1);
+			float z = (float)Random::Uniform(-1, 1);
+			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
+			lPuff->SetInitialTransform(lTransform);
+			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
+			lPuff->SetOpacity(lOpacity);
+			x = x*12;
+			y = y*12;
+			z = (float)Random::Uniform(0, 7);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
+			lPuff->StartLoading();
+		}
+	}
+
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	float lLevelShootEasyness = 4.5f;
+	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
+	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
+	for (; x != lObjectTable.end(); ++x)
+	{
+		const Cure::ContextObject* lObject = x->second;
+		TBC::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
+		if (!lObject->IsLoaded() || !lPhysics)
+		{
+			continue;
+		}
+		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
+		const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -0.75f);
+		const int lBoneCount = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
+		for (int x = 0; x < lBoneCount; ++x)
+		{
+			const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
+			if (lGeometry->GetBodyId() == TBC::INVALID_BODY)
+			{
+				continue;
+			}
+			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
+			Vector3DF f = lBodyCenter - lEpicenter;
+			float d = f.GetLength();
+			if (d > 80*VISUAL_SCALE_FACTOR ||
+				(d > 50*VISUAL_SCALE_FACTOR && lObject != lAvatar))
+			{
+				continue;
+			}
+			d = 1/d;
+			f *= d;
+			d *= lLevelShootEasyness;
+			d = d*d*d;
+			d = std::min(1.0f, d);
+			const float lMaxForceFactor = 800.0f;
+			const float ff = lMaxForceFactor * lObject->GetMass() * d;
+			if (f.z <= 0.1f)
+			{
+				f.z += 0.3f;
+			}
+			f *= ff;
+			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
+		}
+	}
+}
 
 
 void PushManager::CancelLogin()
