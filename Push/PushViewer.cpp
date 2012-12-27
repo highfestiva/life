@@ -42,6 +42,11 @@ PushViewer::~PushViewer()
 
 
 
+bool PushViewer::Open()
+{
+	return Life::GameClientSlaveManager::Open();
+}
+
 void PushViewer::TickUiInput()
 {
 }

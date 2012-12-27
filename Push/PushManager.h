@@ -12,6 +12,7 @@
 #include "Launcher.h"
 #include "LoginView.h"
 #include "Push.h"
+#include "Version.h"
 
 
 
@@ -53,6 +54,7 @@ public:
 	virtual ~PushManager();
 	virtual void LoadSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
+	virtual bool Open();
 	virtual void Close();
 	virtual void SetIsQuitting();
 	virtual void SetFade(float pFadeAmount);
@@ -101,6 +103,7 @@ protected:
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
+	void OnFireButton(UiTbc::Button*);
 	void Fire();
 	virtual void GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const;
 	virtual void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -150,6 +153,9 @@ protected:
 	float mSteeringLockDirection;
 	Vector3DF mMicrophoneSpeed;		// TODO: remove hack (should context object controlled)!
 	UiTbc::Window* mLoginWindow;
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+	UiTbc::Button* mFireButton;
+#endif // Touch or emulated touch.
 
 	HiResTimer mTouchstickTimer;
 	Touchstick* mStickLeft;

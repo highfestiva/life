@@ -17,6 +17,7 @@
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
+#include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
@@ -29,6 +30,9 @@
 #include "RtVar.h"
 #include "Sunlight.h"
 #include "Version.h"
+
+#define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
+#define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 
 
 
@@ -60,6 +64,9 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mIsSameSteering(false),
 	mSteeringLockDirection(0),
 	mLoginWindow(0),
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+	mFireButton(0),
+#endif // Touch or emulated touch.
 	mStickLeft(0),
 	mStickRight(0),
 	mEnginePlaybackTime(0)
@@ -129,10 +136,31 @@ void PushManager::SetRenderArea(const PixelRect& pRenderArea)
 	CURE_RTVAR_GET(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
 
+bool PushManager::Open()
+{
+	bool lOk = Parent::Open();
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+	if (lOk)
+	{
+		mFireButton = ICONBTNA("grenade.png", "");
+		int x = mRenderArea.GetCenterX() - 32;
+		int y = mRenderArea.mBottom - 76;
+		mUiManager->GetDesktopWindow()->AddChild(mFireButton, x, y);
+		mFireButton->SetVisible(true);
+		mFireButton->SetOnClick(PushManager, OnFireButton);
+	}
+#endif // Touch or emulated touch.
+	return lOk;
+}
+
 void PushManager::Close()
 {
 	ScopeLock lLock(GetTickLock());
 	ClearRoadSigns();
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+	delete mFireButton;
+	mFireButton = 0;
+#endif // Touch or emulated touch.
 	Parent::Close();
 	CloseLoginGui();
 }
@@ -593,9 +621,8 @@ void PushManager::TickUiInput()
 			// Control fire.
 			const Life::Options::FireControl& f = mOptions.GetFireControl();
 #define F(alt) f.mControl[Life::Options::FireControl::FIRE##alt]
-			if (F(0) > 0.5f && mFireTimeout.QueryTimeDiff() >= 0.7f)
+			if (F(0) > 0.5f)
 			{
-				mFireTimeout.ClearTimeDiff();
 				Fire();
 			}
 
@@ -1120,17 +1147,30 @@ void PushManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 
 
 
+void PushManager::OnFireButton(UiTbc::Button*)
+{
+	Fire();
+}
+
 void PushManager::Fire()
 {
+	if (mFireTimeout.QueryTimeDiff() < 0.2f)
+	{
+		return;
+	
+	}
+
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (!lAvatar)
 	{
 		return;
 	}
 
+	mFireTimeout.ClearTimeDiff();
+
 	Grenade* lGrenade = new Grenade(GetResourceManager(), mUiManager, 100, this);
 	AddContextObject(lGrenade, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	mLog.Infof(_T("Shooting grenade with ID %i!"), (int)lGrenade->GetInstanceId());
+	//mLog.Infof(_T("Shooting grenade with ID %i!"), (int)lGrenade->GetInstanceId());
 	bool lOk = (lGrenade != 0);
 	assert(lOk);
 	if (lOk)
