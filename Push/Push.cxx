@@ -147,7 +147,9 @@ void Push::Init()
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.7);
+#ifdef LEPRA_TOUCH
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.9);
+#endif // Touch device.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
 
 #if !defined(LEPRA_TOUCH) && !defined(EMULATE_TOUCH)
