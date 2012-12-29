@@ -17,6 +17,7 @@
 		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
 		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
 		B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */; };
+		B1166067168C89D8002375B6 /* Grenade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1166066168C89D8002375B6 /* Grenade.cpp */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -528,6 +529,7 @@
 		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
+		B1166066168C89D8002375B6 /* Grenade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Grenade.cpp; sourceTree = "<group>"; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1479,6 +1481,7 @@
 		B19A146913A122DE0051A61C /* Push */ = {
 			isa = PBXGroup;
 			children = (
+				B1166066168C89D8002375B6 /* Grenade.cpp */,
 				B1D37F14166AB3F100536CE5 /* LoginView.cpp */,
 				B1D37F15166AB3F100536CE5 /* Push.mm */,
 				B1D37F16166AB3F100536CE5 /* PushConsoleManager.cpp */,
@@ -2962,6 +2965,7 @@
 				B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */,
 				B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */,
 				B1D37F4F166AB5F200536CE5 /* MasterServerNetworkParser.cpp in Sources */,
+				B1166067168C89D8002375B6 /* Grenade.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
