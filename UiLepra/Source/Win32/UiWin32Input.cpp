@@ -605,14 +605,9 @@ BOOL CALLBACK Win32InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, L
 	return (DIENUM_CONTINUE);
 }
 
-void Win32InputManager::ShowCursor()
+void Win32InputManager::SetCursorVisible(bool pVisible)
 {
-	::ShowCursor(TRUE);
-}
-
-void Win32InputManager::HideCursor()
-{
-	::ShowCursor(FALSE);
+	::ShowCursor(pVisible? TRUE : FALSE);
 }
 
 float Win32InputManager::GetCursorX()

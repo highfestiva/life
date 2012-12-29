@@ -234,7 +234,7 @@ bool RuntimeVariable::CheckType(DataType pType) const
 	}
 	mLog.Warningf(_T("Type error using variable %s; type should be %s, not %s!"),
 		mName.c_str(), GetTypeName(mDataType).c_str(), GetTypeName(pType).c_str());
-	assert(false);
+	//assert(false);
 	return false;
 }
 

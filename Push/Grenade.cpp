@@ -54,7 +54,7 @@ void Grenade::Launch()
 	mLauncher->GetBarrel(lTransform, lParentVelocity);
 	Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, mMuzzleVelocity, 0);
 	lVelocity += lParentVelocity;
-	//lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 2, 2);
+	lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 3, 0);
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetBodyId(), lTransform);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);

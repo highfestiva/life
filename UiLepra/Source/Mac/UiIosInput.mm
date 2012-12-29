@@ -254,12 +254,9 @@ void IosInputManager::ReleaseKeyboard()
 	[lView resignFirstResponder];
 }
 
-void IosInputManager::ShowCursor()
+void IosInputManager::SetCursorVisible(bool pVisible)
 {
-}
-
-void IosInputManager::HideCursor()
-{
+	(void)pVisible;
 }
 
 float IosInputManager::GetCursorX()

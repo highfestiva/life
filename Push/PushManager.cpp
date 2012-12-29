@@ -422,6 +422,8 @@ void PushManager::SetRoadSignsVisible(bool pVisible)
 	{
 		x->second->SetIsMovingIn(pVisible);
 	}
+
+	mUiManager->GetInputManager()->SetCursorVisible(pVisible);
 }
 
 
@@ -513,7 +515,7 @@ void PushManager::TickUiInput()
 			float lLeftPowerFwdRev = S(FORWARD) - S(BREAKANDBACK);
 			//float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
 			float lLeftPowerLR = S(RIGHT)-S(LEFT);
-			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
+			float lRightPowerLR = (S(RIGHT3D) - S(LEFT3D)) * 0.65f;
 			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, std::abs(lLeftPowerFwdRev));
 
 			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR, mCameraOrientation.x);
@@ -707,13 +709,15 @@ void PushManager::TickUiUpdate()
 		UpdateMassObjects(mCameraPivotPosition);
 
 		const Vector3DF lForward3d = lObject->GetForwardDirection();
+		//const Vector3DF lRight3d = lForward3d.Cross(Vector3DF(0, 0, 1));
 		Vector3DF lBackward2d = -lForward3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
+		//Vector3DF lBackward2d = lRight3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
 		lBackward2d.Normalize(mCameraTargetXyDistance);
 		float lCamHeight;
 		CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 		lBackward2d.z = lCamHeight;
 		mCameraPreviousPosition = mCameraPosition;
-		mCameraPosition = mCameraPivotPosition + lBackward2d;
+		mCameraPosition = Math::Lerp(mCameraPosition, mCameraPivotPosition + lBackward2d, 0.2f);
 	}
 
 	Vector3DF lPivotXyPosition = mCameraPivotPosition;
@@ -724,14 +728,13 @@ void PushManager::TickUiUpdate()
 	{
 		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
 	}
-	/*Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
-	float lYawChange = (lTargetCameraOrientation.z-mCameraOrientation.z)*3;
-	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
-	lTargetCameraOrientation.z = -lYawChange;*/
 	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
+	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x) * 0.5f;
+	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
+	lTargetCameraOrientation.z = -lYawChange;
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
-	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, 0.5f);
+	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, 0.4f);
 
 	float lRotationFactor;
 	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
@@ -1196,11 +1199,13 @@ void PushManager::GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) c
 		{
 			const int lBoneIndex = lTag->mBodyIndexList[0];
 #ifdef LEPRA_DEBUG
-			TBC::ChunkyBoneGeometry* lBone = lAvatar->GetPhysics()->GetBoneGeometry(lBoneIndex);
+			const TBC::ChunkyBoneGeometry* lBone = lAvatar->GetPhysics()->GetBoneGeometry(lBoneIndex);
 			assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
 #endif // Debug
-			Vector3DF lMuzzleOffset = lAvatar->GetPhysics()->GetOriginalBoneTransformation(lBoneIndex).GetPosition();
-			pTransform.GetPosition() += pTransform.GetOrientation() * lMuzzleOffset;
+			const TBC::PhysicsManager::BodyID lRootBodyId = lAvatar->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+			const QuaternionF lRootOrientation = GetPhysicsManager()->GetBodyOrientation(lRootBodyId);
+			const Vector3DF lMuzzleOffset = lAvatar->GetPhysics()->GetOriginalBoneTransformation(lBoneIndex).GetPosition();
+			pTransform.GetPosition() += lRootOrientation * lMuzzleOffset;
 		}
 	}
 }
@@ -1422,6 +1427,7 @@ QuaternionF PushManager::GetCameraQuaternion() const
 	QuaternionF lOrientation;
 	lOrientation.SetEulerAngles(lTheta-PIF/2, PIF/2-lPhi, lGimbal);
 
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	int lIndex = 0;
 	int lCount = 0;
 	GetMaster()->GetSlaveInfo(this, lIndex, lCount);
@@ -1436,6 +1442,7 @@ QuaternionF PushManager::GetCameraQuaternion() const
 			lOrientation.RotateAroundOwnY(+PIF/2);
 		}
 	}
+#endif // Touch or emulated touch.
 
 	return (lOrientation);
 }

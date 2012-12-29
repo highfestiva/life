@@ -630,14 +630,16 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 	}
 }
 
-void MacInputManager::ShowCursor()
+void IosInputManager::SetCursorVisible(bool pVisible)
 {
-	CGDisplayHideCursor(kCGDirectMainDisplay);
-}
-
-void MacInputManager::HideCursor()
-{
-	CGDisplayShowCursor(kCGDirectMainDisplay);
+	if (pVisible)
+	{
+		CGDisplayShowCursor(kCGDirectMainDisplay);
+	}
+	else
+	{
+		CGDisplayHideCursor(kCGDirectMainDisplay);
+	}
 }
 
 float MacInputManager::GetCursorX()

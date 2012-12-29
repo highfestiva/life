@@ -608,14 +608,9 @@ BOOL CALLBACK X11InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPV
 	return (DIENUM_CONTINUE);
 }
 
-void X11InputManager::ShowCursor()
+void X11InputManager::SetCursorVisible(bool pVisible)
 {
-	::ShowCursor(TRUE);
-}
-
-void X11InputManager::HideCursor()
-{
-	::ShowCursor(FALSE);
+	::ShowCursor(pVisible? TRUE : FALSE);
 }
 
 float X11InputManager::GetCursorX()

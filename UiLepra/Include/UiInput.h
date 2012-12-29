@@ -492,8 +492,7 @@ public:
 	*/
 
 	// Show/hide system default cursor.
-	virtual void ShowCursor() = 0;
-	virtual void HideCursor() = 0;
+	virtual void SetCursorVisible(bool pVisible) = 0;
 
 	// Range: [-1, 1] (Left and right, up and down)
 	virtual float GetCursorX() = 0;
