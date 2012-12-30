@@ -842,7 +842,7 @@ class GroupReader(DefaultMAReader):
 		for section in config.sections():
 			if section.startswith("engine:"):
 				enginetype = stripQuotes(config.get(section, "type"))
-				pushengines = ["cam_flat_push", "cam_3d_push", "hover"]
+				pushengines = ["cam_flat_push", "cam_3d_push", "hover", "yaw_brake"]
 				jointengines = ["hinge_roll", "hinge_gyro", "hinge_brake", "hinge_torque", "hinge2_turn", "rotor", "tilter", "slider_force", "glue", "ball_brake"]
 				engineOk = enginetype in pushengines+jointengines
 				allApplied &= engineOk

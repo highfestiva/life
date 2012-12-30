@@ -108,7 +108,7 @@ bool PhysicsSharedResource::FinalizeInit()
 	TransformationF& lTransformation = mInitData.mTransformation;	// TRICKY: will change as we don't use reference!
 	if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
-		return lStructure->FinalizeInit(0, 0, &lTransformation.GetPosition(), 0, 0);
+		return lStructure->FinalizeInit(0, 0, &lTransformation, 0, 0);
 	}
 	else if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_STATIC)
 	{
@@ -116,7 +116,7 @@ bool PhysicsSharedResource::FinalizeInit()
 	}
 
 	const int lPhysicsFps = mInitData.mPhysicsFps;
-	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation.GetPosition(), mInitData.mInstanceId, mInitData.mInstanceId);
+	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation, mInitData.mInstanceId, mInitData.mInstanceId);
 	assert(lOk);
 
 	// Set orienation (as given in initial transform). The orientation in initial transform

@@ -43,6 +43,7 @@ public:
 		ENGINE_SLIDER_FORCE,
 		ENGINE_GLUE,
 		ENGINE_BALL_BRAKE,
+		ENGINE_YAW_BRAKE,
 	};
 	enum EngineMode
 	{
@@ -61,7 +62,7 @@ public:
 		ASPECT_LOCAL_SHADOW	= 4,
 		ASPECT_LOCAL_SHADOW_ABS	= 5,
 		ASPECT_LOCAL_PRIMARY	= 6,
-		ASPECT_COUNT		= 8
+		ASPECT_COUNT		= 10
 	};
 
 	typedef std::vector<ChunkyBoneGeometry*> GeometryList;

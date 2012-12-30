@@ -19,12 +19,15 @@ namespace Touch
 Drag::Drag(int x, int y, bool pIsPress):
 	mStart(x, y),
 	mLast(x, y),
-	mIsPress(pIsPress)
+	mIsPress(pIsPress),
+	mIsNew(true)
 {
 }
 
 bool Drag::Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress)
 {
+	mIsNew = false;
+
 	if (std::abs(mLast.x-pLast.x) < 44 && std::abs(mLast.y-pLast.y) < 44)
 	{
 		mLast = pNew;
@@ -49,10 +52,7 @@ void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLoc
 	DragList::iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
-		if (i->Update(pPrevious, pLocation, pIsPressed))
-		{
-			return;
-		}
+		i->Update(pPrevious, pLocation, pIsPressed);
 	}
 	mDragList.push_back(Drag(pLocation.x, pLocation.y, pIsPressed));
 }
@@ -68,24 +68,17 @@ void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
 
 void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
 {
-	if (mDragList.size() != 1)
+	DragList::iterator i = mDragList.begin();
+	for (; i != mDragList.end(); ++i)
 	{
-		return;
+		if (i->mIsNew)
+		{
+			pInputManager->SetMousePosition(i->mLast.x, i->mLast.y);
+			// We click-release to make it into an ordinary click-relese (button press).
+			pInputManager->GetMouse()->GetButton(0)->SetValue(1);
+			pInputManager->GetMouse()->GetButton(0)->SetValue(0);
+		}
 	}
-	const Drag& lDrag = mDragList.front();
-	pInputManager->SetMousePosition(lDrag.mLast.x, lDrag.mLast.y);
-	if (lDrag.mIsPress)
-	{
-		pInputManager->GetMouse()->GetButton(0)->SetValue(1);
-	}
-	else
-	{
-		// If releasing, we click-release to make sure we don't miss anything.
-		pInputManager->GetMouse()->GetButton(0)->SetValue(1);
-		pInputManager->GetMouse()->GetButton(0)->SetValue(0);
-	}
-	//pInputManager->GetMouse()->GetAxis(0)->SetValue(lDrag.mLast.x);
-	//pInputManager->GetMouse()->GetAxis(1)->SetValue(lDrag.mLast.y);
 }
 
 void DragManager::UpdateTouchsticks(InputManager* pInputManager) const

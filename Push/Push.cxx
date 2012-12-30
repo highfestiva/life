@@ -193,10 +193,9 @@ bool Push::MainLoop()
 
 bool Push::Tick()
 {
-#ifdef EMULATE_TOUCH
+#if defined(EMULATE_TOUCH)
 	mDragManager.UpdateDragByMouse(mUiManager->GetInputManager());
-#endif // Emulate touch
-#ifdef LEPRA_TOUCH
+#elif defined(LEPRA_TOUCH)
 	mDragManager.UpdateMouseByDrag(mUiManager->GetInputManager());
 #endif // Touch
 	mDragManager.UpdateTouchsticks(mUiManager->GetInputManager());

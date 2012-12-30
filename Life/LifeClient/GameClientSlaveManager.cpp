@@ -62,8 +62,6 @@ GameClientSlaveManager::~GameClientSlaveManager()
 	SetMasterServerConnection(0);
 	SetTicker(0);
 
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
-
 	GetConsoleManager()->Join();
 }
 

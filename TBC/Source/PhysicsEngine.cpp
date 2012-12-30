@@ -142,6 +142,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		case ENGINE_ROTOR:
 		case ENGINE_TILTER:
 		case ENGINE_SLIDER_FORCE:
+		case ENGINE_YAW_BRAKE:
 		{
 			if (pAspect == mControllerIndex)
 			{
@@ -151,6 +152,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		}
 		break;
 		case ENGINE_GLUE:
+		case ENGINE_BALL_BRAKE:
 		{
 			// Fixed mode "engine".
 		}
@@ -183,318 +185,323 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 		const EngineNode& lEngineNode = *i;
 		ChunkyBoneGeometry* lGeometry = lEngineNode.mGeometry;
 		const float lScale = lEngineNode.mScale;
-		if (lGeometry)
-		{
-			switch (mEngineType)
-			{
-				case ENGINE_WALK:
-				{
-					assert(false);
-					mLog.AError("Walk not implemented!");
-				}
-				break;
-				case ENGINE_CAMERA_FLAT_PUSH:
-				case ENGINE_CAMERA_3D_PUSH:
-				{
-					Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
-						Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
-					QuaternionF lRotation;
-					lRotation.RotateAroundWorldZ(mValue[ASPECT_CAM] - MathTraits<float>::Pi() / 2);
-					lAxis[0] = lRotation*lAxis[0];
-					lAxis[1] = lRotation*lAxis[1];
-					Vector3DF lOffset;
-					while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
-					{
-						ChunkyBoneGeometry* lParent = lGeometry->GetParent();
-						if (!lParent)
-						{
-							break;
-						}
-						lOffset -= lGeometry->GetOriginalOffset();
-						lGeometry = lParent;
-					}
-					Vector3DF lVelocityVector;
-					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
-					//lVelocityVector = lRotation*lVelocityVector;
-					Vector3DF lPushVector;
-					for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
-					{
-						lPushVector += (1/CUBE_DIAGONAL) * mValue[i] * lAxis[i];
-					}
-					const float lPushForce = lPushVector.GetLength();
-					if (lPushForce > 0.1f || mFriction != 0)
-					{
-						if (lPushForce > 0.1f)
-						{
-							lVelocityVector += lVelocityVector.ProjectOntoPlane(lPushVector / lPushForce);
-						}
-						if (lPushVector.Dot(lVelocityVector) > 0)
-						{
-							//mLog.Infof(_T("Reducing push vector (%f; %f; %f) with velocity (%f; %f; %f) and friction."),
-							//	lPushVector.x, lPushVector.y, lPushVector.z,
-							//	lVelocityVector.x, lVelocityVector.y, lVelocityVector.z);
-							lVelocityVector *= (0.1f + mFriction*0.4f) * lPushForce / mMaxSpeed;
-							lPushVector -= lVelocityVector;
-						}
-						pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
-					}
-					mIntensity += lPushForce;
-				}
-				break;
-				case ENGINE_HOVER:
-				{
-					if (lPrimaryForce != 0 || mValue[ASPECT_SECONDARY] != 0)
-					{
-						// Arcade stabilization for lifter (typically hovercraft, elevator or similar vehicle).
-						Vector3DF lLiftPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId()) + Vector3DF(0,0,1)*mFriction*lScale;
-
-						const Vector3DF lLiftForce = Vector3DF(0,0,1)*mStrength*lScale;
-						pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), lLiftForce, lLiftPivot);
-					}
-				}
-				break;
-				case ENGINE_HINGE_GYRO:
-				{
-					// Apply a fake gyro torque to parent in order to emulate a heavier gyro than
-					// it actually is. The gyro must be light weight, or physics simulation will be
-					// unstable when rolling bodies around any other axis than the hinge one.
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT && mFriction >= 0)
-					{
-						Vector3DF lAxis;
-						pPhysicsManager->GetAxis1(lGeometry->GetJointId(), lAxis);
-						Vector3DF lY;
-						Vector3DF lZ;
-						lAxis.GetNormalized().GetOrthogonals(lY, lZ);
-						const float lStrength = 3 * lPrimaryForce * mStrength;
-						lZ *= lStrength;
-						Vector3DF lPos;
-						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lPos);
-						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lZ, lPos+lY);
-						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), -lZ, lPos-lY);
-					}
-				}
-				// TRICKY: fall through.
-				case ENGINE_HINGE_ROLL:
-				{
-					//assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT)
-					{
-						float lValue = lPrimaryForce;
-						float lDirectionalMaxSpeed = ((lValue >= 0)? mMaxSpeed : -mMaxSpeed2) * lValue;
-						float lRotationSpeed;
-						pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lRotationSpeed);
-						const float lIntensity = lRotationSpeed / mMaxSpeed;
-						mIntensity += ::fabs(lIntensity);
-						if (mEngineType == ENGINE_HINGE_GYRO)
-						{
-							lValue = (lValue+1)*0.5f;
-							lDirectionalMaxSpeed = lValue * (mMaxSpeed - mMaxSpeed2) + mMaxSpeed2;
-						}
-						else if (mEngineType == ENGINE_HINGE_ROLL)
-						{
-							//if (lValue > 0)
-							{
-								// Torque curve approximation, (tested it out, looks ok to me):
-								//   -8*(x-0.65)^2*(x-0.02) + 1
-								//
-								// Starts at about 100 % strength at 0 RPM, local strength minimum of approximately 75 %
-								// at about 25 % RPM, maximum (in range) of 100 % strength at 65 % RPM, and drops to close
-								// to 0 % strength at 100 % RPM.
-								const float lSquare = lIntensity - 0.65f;
-								lValue *= -8 * lSquare * lSquare * (lIntensity-0.02f) + 1;
-							}
-						}
-						const float lUsedStrength = mStrength*(::fabs(lValue) + ::fabs(mFriction));
-						float lPreviousStrength = 0;
-						float lPreviousTargetSpeed = 0;
-						pPhysicsManager->GetAngularMotorRoll(lGeometry->GetJointId(), lPreviousStrength, lPreviousTargetSpeed);
-						const float lTargetSpeed = Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed*lScale, 0.5f);
-						const float lTargetStrength = Math::Lerp(lPreviousStrength, lUsedStrength, 0.5f);
-						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
-					}
-					else
-					{
-						mLog.AError("Missing roll joint!");
-					}
-				}
-				break;
-				case ENGINE_HINGE_BRAKE:
-				{
-					//assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT)
-					{
-						// "Max speed" used as a type of "break threashold", so that a joystick or similar
-						// won't start breaking on the tiniest movement. "Scaling" here determines part of
-						// functionality (such as only affecting some wheels), may be positive or negative.
-						const float lAbsValue = ::fabs(lPrimaryForce);
-						if (lAbsValue > mMaxSpeed && lPrimaryForce < lScale)
-						{
-							const float lBreakForceUsed = mStrength*lAbsValue;
-							lGeometry->SetExtraData(1);
-							pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lBreakForceUsed, 0);
-						}
-						else if (lGeometry->GetExtraData())
-						{
-							lGeometry->SetExtraData(0);
-							pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), 0, 0);
-						}
-					}
-					else
-					{
-						mLog.AError("Missing break joint!");
-					}
-				}
-				break;
-				case ENGINE_HINGE_TORQUE:
-				case ENGINE_HINGE2_TURN:
-				{
-					ApplyTorque(pPhysicsManager, lLimitedFrameTime, lGeometry, lEngineNode);
-				}
-				break;
-				case ENGINE_ROTOR:
-				{
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT)
-					{
-						const Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
-						Vector3DF lLiftForce = lRotorForce * lPrimaryForce;
-						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
-						const QuaternionF lOrientation =
-							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
-							pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse();
-
-						Vector3DF lRotorPivot;
-						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
-						const Vector3DF lOffset =
-							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
-							Vector3DF(0, 0, mMaxSpeed*lScale);
-						lRotorPivot += lOffset;
-
-						const float lAbsFriction = ::fabs(mFriction);
-						if (mFriction < 0)
-						{
-							// Arcade stabilization for VTOL rotor.
-							Vector3DF lParentAngularVelocity;
-							pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetParent()->GetBodyId(), lParentAngularVelocity);
-							lParentAngularVelocity = lOrientation.GetInverse() * lParentAngularVelocity;
-							const Vector3DF lParentAngle = lOrientation.GetInverse() * Vector3DF(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
-							const float lStabilityX = -lParentAngle.x * 0.5f + lParentAngularVelocity.y * lAbsFriction;
-							const float lStabilityY = -lParentAngle.y * 0.5f - lParentAngularVelocity.x * lAbsFriction;
-							lRotorPivot += lOrientation * Vector3DF(lStabilityX, lStabilityY, 0);
-						}
-
-						// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
-						const float lSmooth = lNormalizedFrameTime * 0.05f * lEngineNode.mScale;
-						lLiftForce.x = mSmoothValue[ASPECT_PRIMARY] = Math::Lerp(mSmoothValue[ASPECT_PRIMARY], lLiftForce.x, lSmooth);
-						lLiftForce.y = mSmoothValue[ASPECT_SECONDARY] = Math::Lerp(mSmoothValue[ASPECT_SECONDARY], lLiftForce.y, lSmooth);
-						lLiftForce.z = mSmoothValue[ASPECT_TERTIARY] = Math::Lerp(mSmoothValue[ASPECT_TERTIARY], lLiftForce.z, lSmooth);
-
-						// Counteract rotor's movement through perpendicular air.
-						Vector3DF lDragForce;
-						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
-						lDragForce = ((-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lNormalizedFrameTime) * lRotorForce;
-
-						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce + lDragForce, lRotorPivot);
-					}
-					else
-					{
-						mLog.AError("Missing rotor joint!");
-					}
-				}
-				break;
-				case ENGINE_TILTER:
-				{
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT)
-					{
-						const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * ::fabs(lPrimaryForce);
-						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
-						const float lPlacement = (lPrimaryForce >= 0)? 1.0f : -1.0f;
-						const Vector3DF lOffset =
-							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
-							pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse() *
-							Vector3DF(lPlacement*mMaxSpeed, -lPlacement*mMaxSpeed2, 0);
-						const Vector3DF lWorldPos = lOffset + pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
-						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce, lWorldPos);
-						//{
-						//	static int cnt = 0;
-						//	if ((++cnt)%300 == 0)
-						//	{
-						//		//Vector3DF r = pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()).GetInverse() * lRelPos;
-						//		//Vector3DF r = lRelPos;
-						//		Vector3DF r = lOffset;
-						//		Vector3DF w = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
-						//		mLog.Infof(_T("Got pos (%f, %f, %f) - world pos is (%f, %f, %f)."), r.x, r.y, r.z, w.x, w.y, w.z);
-						//	}
-						//}
-					}
-					else
-					{
-						mLog.AError("Missing rotor joint!");
-					}
-				}
-				break;
-				case ENGINE_SLIDER_FORCE:
-				{
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT)
-					{
-						if (!lPrimaryForce && lEngineNode.mMode == MODE_NORMAL)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
-						{
-							float lPosition;
-							pPhysicsManager->GetSliderPos(lGeometry->GetJointId(), lPosition);
-							if (!Math::IsEpsEqual(lPosition, 0.0f, 0.1f))
-							{
-								float lValue = -lPosition*::fabs(lScale);
-								lValue = (lValue > 0)? lValue*mMaxSpeed : lValue*mMaxSpeed2;
-								pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue);
-							}
-						}
-						else if (!lPrimaryForce && lEngineNode.mMode == MODE_RELEASE)	// Release slider behavior just lets go.
-						{
-							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), 0, 0);
-						}
-						else
-						{
-							const float lValue = (lPrimaryForce > 0)? lPrimaryForce*mMaxSpeed : lPrimaryForce*mMaxSpeed2;
-							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue*lScale);
-						}
-						float lSpeed = 0;
-						pPhysicsManager->GetSliderSpeed(lGeometry->GetJointId(), lSpeed);
-						mIntensity += ::fabs(lSpeed) / mMaxSpeed;
-					}
-				}
-				break;
-				case ENGINE_GLUE:
-				{
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT)
-					{
-						pPhysicsManager->StabilizeJoint(lGeometry->GetJointId());
-					}
-				}
-				break;
-				case ENGINE_BALL_BRAKE:
-				{
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT)
-					{
-						// TODO: implement!
-						pPhysicsManager->StabilizeJoint(lGeometry->GetJointId());
-					}
-				}
-				break;
-				default:
-				{
-					assert(false);
-				}
-				break;
-			}
-		}
-		else
+		if (!lGeometry)
 		{
 			mLog.AError("Missing node!");
+			continue;
+		}
+		switch (mEngineType)
+		{
+			case ENGINE_WALK:
+			{
+				assert(false);
+				mLog.AError("Walk not implemented!");
+			}
+			break;
+			case ENGINE_CAMERA_FLAT_PUSH:
+			case ENGINE_CAMERA_3D_PUSH:
+			{
+				Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
+					Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
+				QuaternionF lRotation;
+				lRotation.RotateAroundWorldZ(mValue[ASPECT_CAM] - MathTraits<float>::Pi() / 2);
+				lAxis[0] = lRotation*lAxis[0];
+				lAxis[1] = lRotation*lAxis[1];
+				Vector3DF lOffset;
+				while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
+				{
+					ChunkyBoneGeometry* lParent = lGeometry->GetParent();
+					if (!lParent)
+					{
+						break;
+					}
+					lOffset -= lGeometry->GetOriginalOffset();
+					lGeometry = lParent;
+				}
+				Vector3DF lVelocityVector;
+				pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
+				//lVelocityVector = lRotation*lVelocityVector;
+				Vector3DF lPushVector;
+				for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
+				{
+					lPushVector += (1/CUBE_DIAGONAL) * mValue[i] * lAxis[i];
+				}
+				const float lPushForce = lPushVector.GetLength();
+				if (lPushForce > 0.1f || mFriction != 0)
+				{
+					if (lPushForce > 0.1f)
+					{
+						lVelocityVector += lVelocityVector.ProjectOntoPlane(lPushVector / lPushForce);
+					}
+					if (lPushVector.Dot(lVelocityVector) > 0)
+					{
+						//mLog.Infof(_T("Reducing push vector (%f; %f; %f) with velocity (%f; %f; %f) and friction."),
+						//	lPushVector.x, lPushVector.y, lPushVector.z,
+						//	lVelocityVector.x, lVelocityVector.y, lVelocityVector.z);
+						lVelocityVector *= (0.1f + mFriction*0.4f) * lPushForce / mMaxSpeed;
+						lPushVector -= lVelocityVector;
+					}
+					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
+				}
+				mIntensity += lPushForce;
+			}
+			break;
+			case ENGINE_HOVER:
+			{
+				if (lPrimaryForce != 0 || mValue[ASPECT_SECONDARY] != 0)
+				{
+					// Arcade stabilization for lifter (typically hovercraft, elevator or similar vehicle).
+					Vector3DF lLiftPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId()) + Vector3DF(0,0,1)*mFriction*lScale;
+
+					const Vector3DF lLiftForce = Vector3DF(0,0,1)*mStrength*lScale;
+					pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), lLiftForce, lLiftPivot);
+				}
+			}
+			break;
+			case ENGINE_HINGE_GYRO:
+			{
+				// Apply a fake gyro torque to parent in order to emulate a heavier gyro than
+				// it actually is. The gyro must be light weight, or physics simulation will be
+				// unstable when rolling bodies around any other axis than the hinge one.
+				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				if (lGeometry->GetJointId() != INVALID_JOINT && mFriction >= 0)
+				{
+					Vector3DF lAxis;
+					pPhysicsManager->GetAxis1(lGeometry->GetJointId(), lAxis);
+					Vector3DF lY;
+					Vector3DF lZ;
+					lAxis.GetNormalized().GetOrthogonals(lY, lZ);
+					const float lStrength = 3 * lPrimaryForce * mStrength;
+					lZ *= lStrength;
+					Vector3DF lPos;
+					pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lPos);
+					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lZ, lPos+lY);
+					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), -lZ, lPos-lY);
+				}
+			}
+			// TRICKY: fall through.
+			case ENGINE_HINGE_ROLL:
+			{
+				//assert(lGeometry->GetJointId() != INVALID_JOINT);
+				if (lGeometry->GetJointId() != INVALID_JOINT)
+				{
+					float lValue = lPrimaryForce;
+					float lDirectionalMaxSpeed = ((lValue >= 0)? mMaxSpeed : -mMaxSpeed2) * lValue;
+					float lRotationSpeed;
+					pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lRotationSpeed);
+					const float lIntensity = lRotationSpeed / mMaxSpeed;
+					mIntensity += ::fabs(lIntensity);
+					if (mEngineType == ENGINE_HINGE_GYRO)
+					{
+						lValue = (lValue+1)*0.5f;
+						lDirectionalMaxSpeed = lValue * (mMaxSpeed - mMaxSpeed2) + mMaxSpeed2;
+					}
+					else if (mEngineType == ENGINE_HINGE_ROLL)
+					{
+						//if (lValue > 0)
+						{
+							// Torque curve approximation, (tested it out, looks ok to me):
+							//   -8*(x-0.65)^2*(x-0.02) + 1
+							//
+							// Starts at about 100 % strength at 0 RPM, local strength minimum of approximately 75 %
+							// at about 25 % RPM, maximum (in range) of 100 % strength at 65 % RPM, and drops to close
+							// to 0 % strength at 100 % RPM.
+							const float lSquare = lIntensity - 0.65f;
+							lValue *= -8 * lSquare * lSquare * (lIntensity-0.02f) + 1;
+						}
+					}
+					const float lUsedStrength = mStrength*(::fabs(lValue) + ::fabs(mFriction));
+					float lPreviousStrength = 0;
+					float lPreviousTargetSpeed = 0;
+					pPhysicsManager->GetAngularMotorRoll(lGeometry->GetJointId(), lPreviousStrength, lPreviousTargetSpeed);
+					const float lTargetSpeed = Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed*lScale, 0.5f);
+					const float lTargetStrength = Math::Lerp(lPreviousStrength, lUsedStrength, 0.5f);
+					pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
+				}
+				else
+				{
+					mLog.AError("Missing roll joint!");
+				}
+			}
+			break;
+			case ENGINE_HINGE_BRAKE:
+			{
+				//assert(lGeometry->GetJointId() != INVALID_JOINT);
+				if (lGeometry->GetJointId() != INVALID_JOINT)
+				{
+					// "Max speed" used as a type of "break threashold", so that a joystick or similar
+					// won't start breaking on the tiniest movement. "Scaling" here determines part of
+					// functionality (such as only affecting some wheels), may be positive or negative.
+					const float lAbsValue = ::fabs(lPrimaryForce);
+					if (lAbsValue > mMaxSpeed && lPrimaryForce < lScale)
+					{
+						const float lBreakForceUsed = mStrength*lAbsValue;
+						lGeometry->SetExtraData(1);
+						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lBreakForceUsed, 0);
+					}
+					else if (lGeometry->GetExtraData())
+					{
+						lGeometry->SetExtraData(0);
+						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), 0, 0);
+					}
+				}
+				else
+				{
+					mLog.AError("Missing break joint!");
+				}
+			}
+			break;
+			case ENGINE_HINGE_TORQUE:
+			case ENGINE_HINGE2_TURN:
+			{
+				ApplyTorque(pPhysicsManager, lLimitedFrameTime, lGeometry, lEngineNode);
+			}
+			break;
+			case ENGINE_ROTOR:
+			{
+				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				if (lGeometry->GetJointId() != INVALID_JOINT)
+				{
+					const Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
+					Vector3DF lLiftForce = lRotorForce * lPrimaryForce;
+					const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
+					const QuaternionF lOrientation =
+						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
+						pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse();
+
+					Vector3DF lRotorPivot;
+					pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
+					const Vector3DF lOffset =
+						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
+						Vector3DF(0, 0, mMaxSpeed*lScale);
+					lRotorPivot += lOffset;
+
+					const float lAbsFriction = ::fabs(mFriction);
+					if (mFriction < 0)
+					{
+						// Arcade stabilization for VTOL rotor.
+						Vector3DF lParentAngularVelocity;
+						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetParent()->GetBodyId(), lParentAngularVelocity);
+						lParentAngularVelocity = lOrientation.GetInverse() * lParentAngularVelocity;
+						const Vector3DF lParentAngle = lOrientation.GetInverse() * Vector3DF(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
+						const float lStabilityX = -lParentAngle.x * 0.5f + lParentAngularVelocity.y * lAbsFriction;
+						const float lStabilityY = -lParentAngle.y * 0.5f - lParentAngularVelocity.x * lAbsFriction;
+						lRotorPivot += lOrientation * Vector3DF(lStabilityX, lStabilityY, 0);
+					}
+
+					// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
+					const float lSmooth = lNormalizedFrameTime * 0.05f * lEngineNode.mScale;
+					lLiftForce.x = mSmoothValue[ASPECT_PRIMARY] = Math::Lerp(mSmoothValue[ASPECT_PRIMARY], lLiftForce.x, lSmooth);
+					lLiftForce.y = mSmoothValue[ASPECT_SECONDARY] = Math::Lerp(mSmoothValue[ASPECT_SECONDARY], lLiftForce.y, lSmooth);
+					lLiftForce.z = mSmoothValue[ASPECT_TERTIARY] = Math::Lerp(mSmoothValue[ASPECT_TERTIARY], lLiftForce.z, lSmooth);
+
+					// Counteract rotor's movement through perpendicular air.
+					Vector3DF lDragForce;
+					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
+					lDragForce = ((-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lNormalizedFrameTime) * lRotorForce;
+
+					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce + lDragForce, lRotorPivot);
+				}
+				else
+				{
+					mLog.AError("Missing rotor joint!");
+				}
+			}
+			break;
+			case ENGINE_TILTER:
+			{
+				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				if (lGeometry->GetJointId() != INVALID_JOINT)
+				{
+					const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * ::fabs(lPrimaryForce);
+					const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
+					const float lPlacement = (lPrimaryForce >= 0)? 1.0f : -1.0f;
+					const Vector3DF lOffset =
+						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
+						pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse() *
+						Vector3DF(lPlacement*mMaxSpeed, -lPlacement*mMaxSpeed2, 0);
+					const Vector3DF lWorldPos = lOffset + pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce, lWorldPos);
+					//{
+					//	static int cnt = 0;
+					//	if ((++cnt)%300 == 0)
+					//	{
+					//		//Vector3DF r = pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()).GetInverse() * lRelPos;
+					//		//Vector3DF r = lRelPos;
+					//		Vector3DF r = lOffset;
+					//		Vector3DF w = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+					//		mLog.Infof(_T("Got pos (%f, %f, %f) - world pos is (%f, %f, %f)."), r.x, r.y, r.z, w.x, w.y, w.z);
+					//	}
+					//}
+				}
+				else
+				{
+					mLog.AError("Missing rotor joint!");
+				}
+			}
+			break;
+			case ENGINE_SLIDER_FORCE:
+			{
+				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				if (lGeometry->GetJointId() != INVALID_JOINT)
+				{
+					if (!lPrimaryForce && lEngineNode.mMode == MODE_NORMAL)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
+					{
+						float lPosition;
+						pPhysicsManager->GetSliderPos(lGeometry->GetJointId(), lPosition);
+						if (!Math::IsEpsEqual(lPosition, 0.0f, 0.1f))
+						{
+							float lValue = -lPosition*::fabs(lScale);
+							lValue = (lValue > 0)? lValue*mMaxSpeed : lValue*mMaxSpeed2;
+							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue);
+						}
+					}
+					else if (!lPrimaryForce && lEngineNode.mMode == MODE_RELEASE)	// Release slider behavior just lets go.
+					{
+						pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), 0, 0);
+					}
+					else
+					{
+						const float lValue = (lPrimaryForce > 0)? lPrimaryForce*mMaxSpeed : lPrimaryForce*mMaxSpeed2;
+						pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue*lScale);
+					}
+					float lSpeed = 0;
+					pPhysicsManager->GetSliderSpeed(lGeometry->GetJointId(), lSpeed);
+					mIntensity += ::fabs(lSpeed) / mMaxSpeed;
+				}
+			}
+			break;
+			case ENGINE_GLUE:
+			case ENGINE_BALL_BRAKE:
+			{
+				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				if (lGeometry->GetJointId() != INVALID_JOINT)
+				{
+					pPhysicsManager->StabilizeJoint(lGeometry->GetJointId());
+				}
+			}
+			break;
+			case ENGINE_YAW_BRAKE:
+			{
+				const TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+				Vector3DF lAngularVelocity;
+				pPhysicsManager->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
+				// Reduce rotation of craft.
+				lAngularVelocity.z *= mFriction;
+				const float lLowAngularVelocity = mMaxSpeed;
+				if (Math::IsEpsEqual(lPrimaryForce, 0.0f) && std::abs(lAngularVelocity.z) < lLowAngularVelocity)
+				{
+					// Seriously kill speed depending on strength.
+					lAngularVelocity.z *= 1/mStrength;
+				}
+				pPhysicsManager->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
+			}
+			break;
+			default:
+			{
+				assert(false);
+			}
+			break;
 		}
 	}
 	mIntensity /= mEngineNodeArray.size();

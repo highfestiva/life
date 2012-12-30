@@ -83,7 +83,7 @@ public:
 	// Overrides.
 	void ClearAll(PhysicsManager* pPhysics);
 	void SetBoneCount(int pBoneCount);
-	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const Vector3DF* pPosition,
+	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const TransformationF* pTransform,
 		int pTrigListenerId, int pForceListenerId);
 
 	unsigned GetNextGeometryIndex();

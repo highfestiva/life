@@ -198,6 +198,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_ROTOR:
 			case TBC::PhysicsEngine::ENGINE_TILTER:
 			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
+			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 100);
 				++y;
@@ -206,6 +207,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_GLUE:
+			case TBC::PhysicsEngine::ENGINE_BALL_BRAKE:
 			{
 				// Unsynchronized "engine".
 			}
@@ -411,6 +413,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_ROTOR:
 			case TBC::PhysicsEngine::ENGINE_TILTER:
 			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
+			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
 			{
 				assert(pPosition.mBodyPositionArray.size() > y);
 				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
@@ -427,6 +430,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_GLUE:
+			case TBC::PhysicsEngine::ENGINE_BALL_BRAKE:
 			{
 				// Unsynchronized "engine".
 			}

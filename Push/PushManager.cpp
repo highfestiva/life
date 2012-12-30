@@ -94,6 +94,10 @@ PushManager::~PushManager()
 	mStickLeft = 0;
 	delete mStickRight;
 	mStickRight = 0;
+
+#ifndef EMULATE_TOUCH
+	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+#endif // Computer or touch device.
 }
 
 void PushManager::LoadSettings()
@@ -522,58 +526,7 @@ void PushManager::TickUiInput()
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR, mCameraOrientation.x);
 			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev-lRightPowerLR, mCameraOrientation.x);
 			SetAvatarEnginePower(lObject, 5, lLeftPowerLR, mCameraOrientation.x);
-			if (lObject->IsLoaded())
-			{
-				TBC::PhysicsManager::BodyID lBodyId = lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-				Vector3DF lAngularVelocity;
-				GetPhysicsManager()->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
-				const float lHighAngularVelocity = 0.7f;
-				const float lLowAngularVelocity = 0.45f;
-				if (Math::IsEpsEqual(lRightPowerLR, 0.0f))
-				{
-					float lYaw;
-					float lPitch;
-					float lRoll;
-					QuaternionF lOrientation = GetPhysicsManager()->GetBodyOrientation(lBodyId);
-					lOrientation.RotateAroundOwnX(PIF*-0.5f);	// Avoid gimbal lock.
-					lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
-					if (std::abs(lAngularVelocity.z) > lHighAngularVelocity)
-					{
-						mIsSameSteering = false;
-					}
-					if (mIsSameSteering)
-					{
-						// Turn towards original direction.
-						float lLockDirection = mSteeringLockDirection;
-						Math::RangeAngles(lLockDirection, lYaw);
-						static int c = 0;
-						if (++c > 30)
-						{
-							c = 0;
-							mLog.Infof(_T("Striving towards direction %.0f from angle %.0f (also %f, %f)."), lLockDirection*180/PIF, lYaw*180/PIF, lPitch*180/PIF, lRoll*180/PIF);
-						}
-						const float lTorque = (lLockDirection - lYaw) * lObject->GetMass() * 40.0f;
-						GetPhysicsManager()->SetBodyAngularAcceleration(lBodyId, Vector3DF(0, 0, lTorque));
-					}
-					else if (std::abs(lAngularVelocity.z) < lLowAngularVelocity)
-					{
-						mSteeringLockDirection = lYaw;
-						mLog.Infof(_T("Setting target direction to %f."), mSteeringLockDirection);
-						mIsSameSteering = true;
-					}
-				}
-				else
-				{
-					mIsSameSteering = false;
-				}
-				// Reduce rotation of craft.
-				lAngularVelocity.z *= 0.85f;
-				if (mIsSameSteering && std::abs(lAngularVelocity.z) < lLowAngularVelocity)
-				{
-					lAngularVelocity.z = 0;
-				}
-				GetPhysicsManager()->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
-			}
+			SetAvatarEnginePower(lObject, 8, lRightPowerLR, mCameraOrientation.x);
 #else
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
 			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
@@ -1171,7 +1124,7 @@ void PushManager::Fire()
 
 	mFireTimeout.ClearTimeDiff();
 
-	Grenade* lGrenade = new Grenade(GetResourceManager(), mUiManager, 100, this);
+	Grenade* lGrenade = new Grenade(GetResourceManager(), mUiManager, 200, this);
 	AddContextObject(lGrenade, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	//mLog.Infof(_T("Shooting grenade with ID %i!"), (int)lGrenade->GetInstanceId());
 	bool lOk = (lGrenade != 0);
@@ -1190,6 +1143,7 @@ void PushManager::GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) c
 	if (lAvatar && lAvatar->IsLoaded())
 	{
 		pTransform.SetOrientation(lAvatar->GetOrientation());
+		pTransform.GetOrientation().RotateAroundOwnX(-PIF/2);
 		pTransform.SetPosition(lAvatar->GetPosition());
 		pVelocity = lAvatar->GetVelocity();
 		std::vector<int> lBodyArray;

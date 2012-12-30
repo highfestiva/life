@@ -52,9 +52,9 @@ void Grenade::Launch()
 	TransformationF lTransform;
 	Vector3DF lParentVelocity;
 	mLauncher->GetBarrel(lTransform, lParentVelocity);
-	Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, mMuzzleVelocity, 0);
+	Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
 	lVelocity += lParentVelocity;
-	lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 3, 0);
+	lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 0, +3);
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetBodyId(), lTransform);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
@@ -68,9 +68,8 @@ void Grenade::OnTick()
 		const Vector3DF lPosition = GetPosition();
 		Vector3DF lVelocity = GetVelocity();
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), lPosition, lVelocity);
-		if (lVelocity.GetLengthSquared() > 1*1)
+		/*if (lVelocity.GetLengthSquared() > 1*1)
 		{
-			TBC::PhysicsManager::BodyID lBodyId = mPhysics->GetBoneGeometry(0)->GetBodyId();
 			const float l = lVelocity.GetLength();
 			const float lPitch = -lVelocity.GetAngle(Vector3DF(0,0,l));
 			Vector2DF lXY = Vector2DF(lVelocity.x, lVelocity.y);
@@ -79,16 +78,15 @@ void Grenade::OnTick()
 			{
 				const float lYaw = lXY.GetAngle(Vector2DF(0,l2));
 				QuaternionF q;
-				//q.SetEulerAngles(lYaw, lPitch, 0);
-				q.RotateAroundWorldZ(lPosition.z/100);
 				q.RotateAroundWorldX(lPitch);
 				q.RotateAroundWorldZ(-lYaw);
 				TransformationF t;
 				t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
 				t.SetPosition(lPosition);
+				const TBC::PhysicsManager::BodyID lBodyId = mPhysics->GetBoneGeometry(0)->GetBodyId();
 				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBodyId, t);
 			}
-		}
+		}*/
 	}
 	if (mLaunchSound && mLaunchSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
