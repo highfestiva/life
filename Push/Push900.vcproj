@@ -727,6 +727,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Life\LifeServer\ServerMessageProcessor.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\ServerMessageProcessor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Life\LifeServer\Spawner.cpp"
 				>
 			</File>

@@ -45,7 +45,12 @@ void Grenade::Detonate()
 		return;
 	}
 	mDetonated = true;
-	mLauncher->Detonate(this, GetPhysics()->GetBoneGeometry(0));
+
+	TBC::ChunkyPhysics* lPhysics = GetPhysics();
+	if (lPhysics)
+	{
+		mLauncher->Detonate(this, lPhysics->GetBoneGeometry(0));
+	}
 }
 
 void Grenade::OnLoaded()

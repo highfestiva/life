@@ -599,13 +599,34 @@ void ResourceManager::StopClear()
 			++lRefCountThreshold;
 		}
 	}
-	ForceFreeCache();
-	ForceFreeCache();	// Free base resources, which may have just had their referencing resourced freed.
+	for (int x = 0; x < 10; ++x)	// Also frees base resources, which may have just had their referencing resourced freed.
+	{
+		ForceFreeCache();
+	}
 
+	// First kill all reference resources.
+	bool lDeleteMoreReferences = true;
+	while (lDeleteMoreReferences)
+	{
+		lDeleteMoreReferences = false;
+		for (ResourceSet::iterator x = mResourceSafeLookup.begin(); x != mResourceSafeLookup.end(); ++x)
+		{
+			Resource* lResource = *x;
+			if (lResource->IsReferenceType())
+			{
+				mLog.Errorf(_T("Reference resource '%s' not freed! Going for the kill!"), lResource->GetName().c_str());
+				DeleteResource(lResource);
+				lDeleteMoreReferences = true;
+				break;
+			}
+		}
+	}
+
+	// Then kill the rest (non-reference resources).
 	while (!mResourceSafeLookup.empty())
 	{
 		Resource* lResource = *mResourceSafeLookup.begin();
-		mLog.Errorf(_T("Resource '%s' not freed! Going for the kill!"), lResource->GetName().c_str());
+		mLog.Errorf(_T("Base resource '%s' not freed! Going for the kill!"), lResource->GetName().c_str());
 		DeleteResource(lResource);
 	}
 
@@ -791,6 +812,7 @@ void ResourceManager::Release(Resource* pResource)
 {
 	if (pResource->Dereference() <= 0)
 	{
+		assert(pResource->GetReferenceCount() == 0);
 		ScopeLock lMutex(&mThreadLock);
 
 		if (!pResource->IsUnique())
@@ -807,14 +829,14 @@ void ResourceManager::Release(Resource* pResource)
 			{
 				if (PrepareRemoveInLoadProgress(pResource))
 				{
-					log_volatile(mLog.Debug(_T("Incomplete resource ")+pResource->GetName()+_T(" dereferenced. Not cached - deleted immediately.")));
+					log_volatile(mLog.Trace(_T("Incomplete resource ")+pResource->GetName()+_T(" dereferenced. Not cached - deleted immediately.")));
 					assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 					DeleteResource(pResource);
 				}
 				else
 				{
-					log_volatile(mLog.Debug(_T("Currently loading resource ")+pResource->GetName()+_T(" dereferenced. Not cached - will be deleted immediately after loader thread is done.")));
-					assert(mRequestLoadList.Find(pResource) == mRequestLoadList.First());
+					mLog.Info(_T("Currently loading resource ")+pResource->GetName()+_T(" dereferenced. Not cached - will be deleted immediately after loader thread is done."));
+					assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 				}
 			}
 		}
@@ -829,8 +851,8 @@ void ResourceManager::Release(Resource* pResource)
 			}
 			else
 			{
-				log_volatile(mLog.Debug(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Will be deleted immediately after loader thread is done.")));
-				assert(mRequestLoadList.Find(pResource) == mRequestLoadList.First());
+				mLog.Info(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Will be deleted immediately after loader thread is done."));
+				assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 			}
 		}
 	}
@@ -1117,8 +1139,6 @@ bool ResourceManager::PrepareRemoveInLoadProgress(Resource* pResource)
 	bool lAllowDelete = true;
 	if (pResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS)
 	{
-		assert(mRequestLoadList.GetCount() > 0 || mLoadedList.GetCount() > 0);
-
 		// Only the first object in the 'request load' list may be currently loading.
 		if (mRequestLoadList.GetCount() > 0 && pResource == mRequestLoadList.First().GetObject())
 		{
@@ -1130,11 +1150,12 @@ bool ResourceManager::PrepareRemoveInLoadProgress(Resource* pResource)
 			// and it's safe to delete.
 			assert(mRequestLoadList.Find(pResource) != mRequestLoadList.End() ||
 				mLoadedList.Find(pResource) != mLoadedList.End());
-			mRequestLoadList.Remove(pResource);
 		}
-		assert(mRequestLoadList.GetCount() < 10000);
+		mRequestLoadList.Remove(pResource);
 	}
+	assert(mRequestLoadList.GetCount() < 10000);
 	mLoadedList.Remove(pResource);
+	assert(mLoadedList.GetCount() < 1000);
 	return (lAllowDelete);
 }
 
@@ -1171,7 +1192,7 @@ void ResourceManager::LoadSingleResource()
 			if (lResource == mRequestLoadList.First().GetObject())
 			{
 				assert(mRequestLoadList.GetCount() < 10000);
-				mRequestLoadList.Remove(lResource);
+				mRequestLoadList.Remove(mRequestLoadList.First());
 				assert(mRequestLoadList.GetCount() < 10000);
 				mLoadedList.PushBack(lResource, lResource);
 			}
@@ -1182,7 +1203,8 @@ void ResourceManager::LoadSingleResource()
 				// this resource, since it needs both Suspend() and PostProcess(); in addition
 				// the last call must also come from the main thread.
 				assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
-				log_debug(_T("Deleting just loaded resource '")+lResource->GetName()+_T("' (unique)."));
+				assert(lResource->GetReferenceCount() == 0);
+				mLog.Info(_T("Deleting just loaded resource '")+lResource->GetName()+_T("'."));
 				DeleteResource(lResource);
 			}
 		}
