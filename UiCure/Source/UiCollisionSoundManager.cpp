@@ -115,13 +115,13 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 		}
 		lImpact = mLightImpact;
 	}
-	OnCollision(lImpact, pPosition, pObject1, pBody1Id);
+	const TBC::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
+	OnCollision(lImpact, pPosition, lKey);
 }
 
-void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPosition, Cure::ContextObject* pObject1,  TBC::PhysicsManager::BodyID pBody1Id)
+void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPosition, const TBC::ChunkyBoneGeometry* pKey)
 {
-	const TBC::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
-	SoundInfo* lSoundInfo = GetPlayingSound(lKey);
+	SoundInfo* lSoundInfo = GetPlayingSound(pKey);
 	if (lSoundInfo)
 	{
 		const double lTime = (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)? mUiManager->GetSoundManager()->GetStreamTime(lSoundInfo->mSound->GetRamData()) : 0;
@@ -137,13 +137,13 @@ void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPositio
 		else
 		{
 			// We are newer! Replay!
-			StopSound(lKey);
-			PlaySound(lKey, pPosition, pImpact);
+			StopSound(pKey);
+			PlaySound(pKey, pPosition, pImpact);
 		}
 	}
 	else
 	{
-		PlaySound(lKey, pPosition, pImpact);
+		PlaySound(pKey, pPosition, pImpact);
 	}
 }
 

@@ -89,7 +89,7 @@ void CppContextObject::StartLoading()
 {
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
-	const str lClassName = GetClassId()+_T(".class");
+	const str lClassName = _T("UI:")+GetClassId()+_T(".class");
 	mUiClassResource->Load(GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
@@ -638,7 +638,6 @@ bool CppContextObject::TryComplete()
 		return (false);
 	}
 
-	OnLoaded();
 	ActivateLerp();
 	return (true);
 }

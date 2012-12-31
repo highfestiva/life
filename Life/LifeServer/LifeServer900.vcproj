@@ -468,6 +468,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ServerMessageProcessor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Spawner.cpp"
 				>
 			</File>
@@ -507,6 +511,10 @@
 			</File>
 			<File
 				RelativePath=".\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerMessageProcessor.h"
 				>
 			</File>
 			<File

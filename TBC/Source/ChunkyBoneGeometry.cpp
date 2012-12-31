@@ -338,6 +338,11 @@ const str& ChunkyBoneGeometry::GetMaterial() const
 	return mMaterial;
 }
 
+void ChunkyBoneGeometry::SetMaterial(const str& pMaterial)
+{
+	mMaterial = pMaterial;
+}
+
 
 
 float ChunkyBoneGeometry::GetExtraData() const

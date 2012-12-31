@@ -61,6 +61,7 @@ public:
 
 	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
+	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
 	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	virtual ContextObject* CreateLogicHandler(const str& pType);
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;

@@ -20,9 +20,7 @@ class Launcher
 public:
 	virtual void GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const = 0;
 
-	virtual void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
-		Cure::ContextObject* pExplosive, Cure::ContextObject* pHitObject,
-		TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pHitBodyId) = 0;
+	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry) = 0;
 };
 
 

@@ -221,6 +221,11 @@ ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObje
 	return (lObject);
 }
 
+void GameManager::DeleteContextObject(Cure::GameObjectId pInstanceId)
+{
+	mContext->DeleteObject(pInstanceId);
+}
+
 void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
 	pObject->SetNetworkObjectType(pNetworkType);

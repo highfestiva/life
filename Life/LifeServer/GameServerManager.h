@@ -30,6 +30,7 @@ namespace Life
 
 class MasterServerConnection;
 struct ServerInfo;
+class ServerMessageProcessor;
 
 
 
@@ -37,6 +38,7 @@ class GameServerManager: public Cure::GameManager, public Cure::NetworkServer::L
 {
 public:
 	typedef Cure::GameManager Parent;
+	typedef Cure::ContextManager::ContextObjectTable ContextTable;
 
 	GameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
 		Cure::ResourceManager* pResourceManager);
@@ -50,7 +52,21 @@ public:
 	bool Initialize(MasterServerConnection* pMasterConnection);
 	float GetPowerSaveAmount() const;
 
+	LEPRA_DEBUG_CODE(virtual TBC::PhysicsManager* GetPhysicsManager() const);
+
+	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
+
+	void SetMessageProcessor(ServerMessageProcessor* pMessageProcessor);
+	void AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex);
+	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
+	void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
+	void LoanObject(Client* pClient, Cure::GameObjectId pInstanceId);
 	wstrutil::strvec ListUsers();
+	Cure::NetworkServer* GetNetworkServer() const;
+	void SendObjects(Client* pClient, bool pCreate, const ContextTable& pObjectTable);
+	void BroadcastCreateObject(Cure::GameObjectId pInstanceId, const TransformationF& pTransform, const str& pClassId);
+	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
+		Client* pExcludeClient, bool pSafe);
 	bool BroadcastChatMessage(const wstr& pMessage);
 	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
@@ -62,8 +78,6 @@ public:
 	void TickInput();
 
 protected:
-	typedef Cure::ContextManager::ContextObjectTable ContextTable;
-
 	void Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason);
 	void DeleteAllClients();
 
@@ -71,16 +85,10 @@ protected:
 
 	virtual bool InitializeTerrain();
 
-	void ProcessNetworkInputMessage(Client* pClient, Cure::Message* pMessage);
-
 	Cure::UserAccount::Availability QueryLogin(const Cure::LoginId& pLoginId, Cure::UserAccount::AccountId& pAccountId);
 	void OnLogin(Cure::UserConnection* pUserConnection);
 	void OnLogout(Cure::UserConnection* pUserConnection);
-	void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
-	void DeleteObject(Cure::GameObjectId pInstanceId);
 
-	void AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex);
-	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
 	void DeleteMovements(Cure::GameObjectId pInstanceId);
 	void ApplyStoredMovement();
 
@@ -104,13 +112,7 @@ protected:
 
 	void BroadcastCreateObject(Cure::ContextObject* pObject);
 	void BroadcastDeleteObject(Cure::GameObjectId pInstanceId);
-	void SendObjects(Client* pClient, bool pCreate, const ContextTable& pObjectTable);
-	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
-		Client* pExcludeClient, bool pSafe);
 	void BroadcastPacket(const Client* pExcludeClient, Cure::Packet* pPacket, bool pSafe);
-
-	LEPRA_DEBUG_CODE(virtual TBC::PhysicsManager* GetPhysicsManager() const);
-	Cure::NetworkServer* GetNetworkServer() const;
 
 	void TickMasterServer();
 	bool HandleMasterCommand(const ServerInfo& pServerInfo);
@@ -123,6 +125,7 @@ private:
 
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;
+	ServerMessageProcessor* mMessageProcessor;
 	str mLevelName;
 	Cure::ContextObject* mTerrainObject;
 	MovementArrayList mMovementArrayList;

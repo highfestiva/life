@@ -124,6 +124,7 @@ public:
 	Vector3DF GetOriginalOffset() const;
 	float GetImpactFactor() const;
 	const str& GetMaterial() const;
+	void SetMaterial(const str& pMaterial);
 
 	float GetExtraData() const;
 	void SetExtraData(float pExtraData);

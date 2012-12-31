@@ -549,6 +549,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PushBarrel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PushConsoleManager.cpp"
 				>
 			</File>
@@ -608,6 +612,10 @@
 			</File>
 			<File
 				RelativePath=".\Push.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushBarrel.h"
 				>
 			</File>
 			<File
@@ -683,6 +691,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PushServer\PushServerMessageProcessor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\PushServerMessageProcessor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Life\LifeServer\RaceTimer.cpp"
 				>
 			</File>
@@ -696,6 +712,18 @@
 			</File>
 			<File
 				RelativePath="..\Life\LifeServer\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\ServerGrenade.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\ServerGrenade.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\ServerLauncher.h"
 				>
 			</File>
 			<File

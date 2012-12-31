@@ -729,13 +729,20 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::GameObjectId lInstanceId = lMessageMovement->GetObjectId();
 			int32 lFrameIndex = lMessageMovement->GetFrameIndex();
 			Cure::ObjectPositionalData& lData = lMessageMovement->GetPositionalData();
-			if (GetContext()->GetObject(lInstanceId, true) == 0)
+			Cure::ContextObject* lObject = GetContext()->GetObject(lInstanceId, true);
+			if (!lObject)
 			{
 				GetNetworkAgent()->SendNumberMessage(true, GetNetworkClient()->GetSocket(),
 					Cure::MessageNumber::INFO_RECREATE_OBJECT, lInstanceId, 0);
 			}
 			else
 			{
+				if (!lObject->IsLoaded())
+				{
+					// Aha! Set positional information to it's there when the object gets loaded.
+					lObject->SetInitialPositionalData(lData);
+				}
+
 				// Don't set movement for client-controlled objects.
 				if (!GetMaster()->IsLocalServer() || !GetMaster()->IsLocalObject(lInstanceId))
 				{

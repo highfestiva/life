@@ -639,6 +639,11 @@ ClassResource::~ClassResource()
 {
 }
 
+bool ClassResource::Load()
+{
+	return LoadWithName(Resource::GetName().substr(3));	// TRICKY: cut out "UI:" prefix (to distinguish from those used by non-UiCure classes).
+}
+
 
 
 /*AnimationResource::AnimationResource(const str& pName):

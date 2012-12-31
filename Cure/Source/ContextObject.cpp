@@ -64,7 +64,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mPhysics(0),
 	mPhysicsOverride(PHYSICS_OVERRIDE_NORMAL),
 	mTotalMass(0),
-	mLastSendTime(0),
+	mLastSendTime(-10000.0f),
 	mNetworkOutputGhost(0),
 	mSendCount(0),
 	mAllowMoveRoot(true)
@@ -203,6 +203,10 @@ void ContextObject::SetLoadResult(bool pOk)
 {
 	assert(!mIsLoaded);
 	mIsLoaded = true;
+	if (pOk)
+	{
+		OnLoaded();
+	}
 	if (GetManager())
 	{
 		GetManager()->GetGameManager()->OnLoadCompleted(this, pOk);
@@ -450,6 +454,11 @@ void ContextObject::SetInitialTransform(const TransformationF& pTransformation)
 TransformationF ContextObject::GetInitialTransform() const
 {
 	return TransformationF(GetOrientation(), GetPosition());
+}
+
+void ContextObject::SetInitialPositionalData(const ObjectPositionalData& pPositionalData)
+{
+	mPosition.CopyData(&pPositionalData);
 }
 
 Vector3DF ContextObject::GetPosition() const
@@ -725,6 +734,8 @@ void ContextObject::OnLoaded()
 				mTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
 			}
 		}
+
+		PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mAllowMoveRoot);
 
 		GetManager()->EnableTickCallback(this);
 	}

@@ -294,6 +294,8 @@ class ClassResource: public Cure::ClassResourceBase<UiTbc::ChunkyClass, UiTbc::C
 public:
 	ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~ClassResource();
+
+	virtual bool Load();
 };
 
 

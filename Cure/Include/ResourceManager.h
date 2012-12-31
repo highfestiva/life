@@ -314,6 +314,7 @@ public:
 	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
 	bool Load();
+	bool LoadWithName(const str& pName);
 
 private:
 	LOG_CLASS_DECLARE();

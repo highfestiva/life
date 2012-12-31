@@ -8,6 +8,7 @@
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/GameManager.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "Launcher.h"
 
 
 
@@ -16,15 +17,12 @@ namespace Push
 
 
 
-Grenade::Grenade(Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, float pMuzzleVelocity, Launcher* pLauncher):
+Grenade::Grenade(Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, Launcher* pLauncher):
 	Parent(pResourceManager, _T("grenade"), pUiManager),
 	mShreekSound(0),
 	mLaunchSound(0),
-	mTimeFrameCreated(-1),
-	mMuzzleVelocity(pMuzzleVelocity),
 	mLauncher(pLauncher),
-	mIsLaunched(false),
-	mIsExploded(false)
+	mDetonated(false)
 {
 	SetForceLoadUnique(true);	// Needs to be unique as physics are reloaded often with shared IDs.
 }
@@ -35,12 +33,25 @@ Grenade::~Grenade()
 	mLaunchSound = 0;
 	delete mShreekSound;
 	mShreekSound = 0;
+	Detonate();
 }
 
 
 
-void Grenade::Launch()
+void Grenade::Detonate()
 {
+	if (mDetonated)
+	{
+		return;
+	}
+	mDetonated = true;
+	mLauncher->Detonate(this, GetPhysics()->GetBoneGeometry(0));
+}
+
+void Grenade::OnLoaded()
+{
+	Parent::OnLoaded();
+
 	mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
 	mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
@@ -48,16 +59,6 @@ void Grenade::Launch()
 	mLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
 	mLaunchSound->Load(GetResourceManager(), _T("launch.wav"),
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
-
-	TransformationF lTransform;
-	Vector3DF lParentVelocity;
-	mLauncher->GetBarrel(lTransform, lParentVelocity);
-	Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
-	lVelocity += lParentVelocity;
-	lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 0, +3);
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetBodyId(), lTransform);
-	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 }
 
 void Grenade::OnTick()
@@ -68,25 +69,6 @@ void Grenade::OnTick()
 		const Vector3DF lPosition = GetPosition();
 		Vector3DF lVelocity = GetVelocity();
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), lPosition, lVelocity);
-		/*if (lVelocity.GetLengthSquared() > 1*1)
-		{
-			const float l = lVelocity.GetLength();
-			const float lPitch = -lVelocity.GetAngle(Vector3DF(0,0,l));
-			Vector2DF lXY = Vector2DF(lVelocity.x, lVelocity.y);
-			const float l2 = lXY.GetLength();
-			if (l2)
-			{
-				const float lYaw = lXY.GetAngle(Vector2DF(0,l2));
-				QuaternionF q;
-				q.RotateAroundWorldX(lPitch);
-				q.RotateAroundWorldZ(-lYaw);
-				TransformationF t;
-				t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
-				t.SetPosition(lPosition);
-				const TBC::PhysicsManager::BodyID lBodyId = mPhysics->GetBoneGeometry(0)->GetBodyId();
-				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBodyId, t);
-			}
-		}*/
 	}
 	if (mLaunchSound && mLaunchSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -96,35 +78,23 @@ void Grenade::OnTick()
 		mLauncher->GetBarrel(lParentTransform, lParentVelocity);
 		mUiManager->GetSoundManager()->SetSoundPosition(mLaunchSound->GetData(), lParentTransform.GetPosition(), lParentVelocity);
 	}
-	if (!mIsLaunched && IsLoaded())
-	{
-		mIsLaunched = true;
-		Launch();
-	}
-	if (GetPosition().z <= -300)
-	{
-		GetManager()->PostKillObject(GetInstanceId());
-	}
 	Parent::OnTick();
 }
 
-void Grenade::OnForceApplied(Cure::ContextObject* pOtherObject,
+void Grenade::OnForceApplied(ContextObject* pOtherObject,
 	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 	const Vector3DF& pForce, const Vector3DF& pTorque,
 	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
 {
+	(void)pOtherObject;
 	(void)pOwnBodyId;
 	(void)pOtherBodyId;
+	(void)pForce;
+	(void)pTorque;
+	(void)pPosition;
 	(void)pRelativeVelocity;
-
-	if (mIsExploded)
-	{
-		return;
-	}
-	mIsExploded = true;
-
+	Detonate();
 	GetManager()->PostKillObject(GetInstanceId());
-	mLauncher->Detonate(pForce, pTorque, pPosition, this, pOtherObject, pOwnBodyId, pOtherBodyId);
 }
 
 void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)

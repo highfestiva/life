@@ -525,7 +525,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PushServerMessageProcessor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PushServerTicker.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerGrenade.cpp"
 				>
 			</File>
 		</Filter>
@@ -533,7 +541,31 @@
 			Name="Header Files"
 			>
 			<File
+				RelativePath=".\PushServerMessageProcessor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PushServerTicker.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerGrenade.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerLauncher.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Util"
+			>
+			<File
+				RelativePath="..\PushBarrel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\PushBarrel.h"
 				>
 			</File>
 		</Filter>

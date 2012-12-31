@@ -5,12 +5,12 @@
 
 
 #include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Life/LifeServer/GameServerTicker.h"
 #include "../../Life/LifeServer/MasterServerConnection.h"
 #include "../../Life/LifeApplication.h"
 #include "../PushMaster/MasterServerPort.h"
 #include "../Push.h"
 #include "../Version.h"
+#include "PushServerTicker.h"
 
 
 
@@ -84,7 +84,7 @@ str PushServer::GetVersion() const
 
 Cure::ApplicationTicker* PushServer::CreateTicker() const
 {
-	Life::GameServerTicker* lTicker = new Life::GameServerTicker(mResourceManager, (InteractiveStdioConsoleLogListener*)mConsoleLogger, 2000, 7, 1);
+	Life::GameServerTicker* lTicker = new PushServerTicker(mResourceManager, (InteractiveStdioConsoleLogListener*)mConsoleLogger, 2000, 7, 1);
 	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(_T(MASTER_SERVER_ADDRESS) _T(":") _T(MASTER_SERVER_PORT)));
 	return lTicker;
 }

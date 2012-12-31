@@ -13,6 +13,7 @@
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "PushServer/PushServerMessageProcessor.h"
 #include "RtVar.h"
 #include "PushDemo.h"
 #include "PushViewer.h"
@@ -68,6 +69,7 @@ void PushTicker::OnSlavesKilled()
 void PushTicker::OnServerCreated(Life::UiGameServerManager* pServer)
 {
 	pServer->SetLevelName(_T("level_02"));
+	pServer->SetMessageProcessor(new PushServerMessageProcessor(pServer));
 }
 
 
@@ -231,7 +233,15 @@ void PushTicker::PreWaitPhysicsTick()
 		return;
 	}
 	const int lAdjustmentIndex = (mPerformanceAdjustmentTicks >> 6);
+
+	bool lEnableAutoPerformance;
+	CURE_RTVAR_GET(lEnableAutoPerformance, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEAUTOPERFORMANCE, true);
+	if (!lEnableAutoPerformance)
+	{
+		return;
+	}
 	
+
 	double lPerformanceLoad;
 	CURE_RTVAR_TRYGET(lPerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
 	switch (lAdjustmentIndex)

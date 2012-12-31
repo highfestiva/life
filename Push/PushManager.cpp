@@ -24,6 +24,7 @@
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "Grenade.h"
 #include "Level.h"
+#include "PushBarrel.h"
 #include "PushConsoleManager.h"
 #include "PushTicker.h"
 #include "RoadSignButton.h"
@@ -299,6 +300,62 @@ bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower, float pAn
 	return false;
 }
 
+
+
+void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry)
+{
+	Vector3DF lPosition = pExplosive->GetPosition();
+	mCollisionSoundManager->OnCollision(5.0f, lPosition, pExplosiveGeometry);
+
+	{
+		// Shattered pieces, stones or mud.
+		const float lScale = VISUAL_SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
+		const int lParticleCount = 7;
+		for (int i = 0; i < lParticleCount; ++i)
+		{
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
+			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			lPuff->DisableRootShadow();
+			float x = (float)Random::Uniform(-1, 1);
+			float y = (float)Random::Uniform(-1, 1);
+			float z = -1;
+			TransformationF lTransform(gIdentityQuaternionF, lPosition + Vector3DF(x, y, z));
+			lPuff->SetInitialTransform(lTransform);
+			const float lAngle = (float)Random::Uniform(0, 2*PIF);
+			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
+			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
+			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * lScale, 0.5f, (float)Random::Uniform(3, 7));
+#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+			lPuff->SetFadeOutTime(0.3f);
+#endif // Touch L&F
+			lPuff->StartLoading();
+		}
+	}
+
+	{
+		// Release gas puffs.
+		const int lParticleCount = (Random::GetRandomNumber() % 4) + 2;
+		for (int i = 0; i < lParticleCount; ++i)
+		{
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			lPuff->DisableRootShadow();
+			float x = (float)Random::Uniform(-1, 1);
+			float y = (float)Random::Uniform(-1, 1);
+			float z = (float)Random::Uniform(-1, 1);
+			TransformationF lTransform(gIdentityQuaternionF, lPosition + Vector3DF(x, y, z));
+			lPuff->SetInitialTransform(lTransform);
+			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
+			lPuff->SetOpacity(lOpacity);
+			x = x*12;
+			y = y*12;
+			z = (float)Random::Uniform(0, 7);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
+			lPuff->StartLoading();
+		}
+	}
+}
 
 
 Cure::RuntimeVariableScope* PushManager::GetVariableScope() const
@@ -1029,9 +1086,13 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 {
 	Cure::CppContextObject* lObject;
-	if (pClassId == _T("stone") || pClassId == _T("cube"))	// TODO: remove hard-coding?
+	if (pClassId == _T("stone") || pClassId == _T("cube"))
 	{
 		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
+	}
+	else if (pClassId == _T("grenade"))
+	{
+		lObject = new Grenade(GetResourceManager(), mUiManager, (Launcher*)this);
 	}
 	else
 	{
@@ -1123,151 +1184,15 @@ void PushManager::Fire()
 	}
 
 	mFireTimeout.ClearTimeDiff();
-
-	Grenade* lGrenade = new Grenade(GetResourceManager(), mUiManager, 200, this);
-	AddContextObject(lGrenade, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	//mLog.Infof(_T("Shooting grenade with ID %i!"), (int)lGrenade->GetInstanceId());
-	bool lOk = (lGrenade != 0);
-	assert(lOk);
-	if (lOk)
-	{
-		TransformationF t(lAvatar->GetOrientation(), lAvatar->GetPosition()+Vector3DF(0, 0, +5.0f));
-		lGrenade->SetInitialTransform(t);
-		lGrenade->StartLoading();
-	}
+	GetNetworkClient()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
+						Cure::MessageNumber::INFO_APPLICATION_0, 0, 0);
 }
 
 void PushManager::GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const
 {
-	const Cure::CppContextObject* lAvatar = (const Cure::CppContextObject*)GetContext()->GetObject(mAvatarId);
-	if (lAvatar && lAvatar->IsLoaded())
-	{
-		pTransform.SetOrientation(lAvatar->GetOrientation());
-		pTransform.GetOrientation().RotateAroundOwnX(-PIF/2);
-		pTransform.SetPosition(lAvatar->GetPosition());
-		pVelocity = lAvatar->GetVelocity();
-		std::vector<int> lBodyArray;
-		lBodyArray.push_back(-1);
-		const TBC::ChunkyClass::Tag* lTag = lAvatar->FindTag(_T("context_path"), 0, 0, lBodyArray, true);
-		if (lTag)
-		{
-			const int lBoneIndex = lTag->mBodyIndexList[0];
-#ifdef LEPRA_DEBUG
-			const TBC::ChunkyBoneGeometry* lBone = lAvatar->GetPhysics()->GetBoneGeometry(lBoneIndex);
-			assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
-#endif // Debug
-			const TBC::PhysicsManager::BodyID lRootBodyId = lAvatar->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-			const QuaternionF lRootOrientation = GetPhysicsManager()->GetBodyOrientation(lRootBodyId);
-			const Vector3DF lMuzzleOffset = lAvatar->GetPhysics()->GetOriginalBoneTransformation(lBoneIndex).GetPosition();
-			pTransform.GetPosition() += lRootOrientation * lMuzzleOffset;
-		}
-	}
+	PushBarrel::GetInfo(this, mAvatarId, pTransform, pVelocity);
 }
 
-void PushManager::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
-	Cure::ContextObject* pExplosive, Cure::ContextObject* pHitObject,
-	TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pHitBodyId)
-{
-	(void)pForce;
-	(void)pTorque;
-	(void)pHitBodyId;
-	mCollisionSoundManager->OnCollision(5.0f, pPosition, pExplosive, pExplosiveBodyId);
-
-	{
-		// Stones and mud. More if hit level, less otherwise.
-		const float lScale = VISUAL_SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
-		const int lParticleCount = (pHitObject == mLevel)? 10 : 5;
-		for (int i = 0; i < lParticleCount; ++i)
-		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
-			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->DisableRootShadow();
-			float x = (float)Random::Uniform(-1, 1);
-			float y = (float)Random::Uniform(-1, 1);
-			float z = -1;
-			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
-			lPuff->SetInitialTransform(lTransform);
-			const float lAngle = (float)Random::Uniform(0, 2*PIF);
-			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
-			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
-			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * lScale, 0.5f, (float)Random::Uniform(3, 7));
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-			lPuff->SetFadeOutTime(0.3f);
-#endif // Touch L&F
-			lPuff->StartLoading();
-		}
-	}
-
-	{
-		// Release gas puffs.
-		const int lParticleCount = (Random::GetRandomNumber() % 4) + 2;
-		for (int i = 0; i < lParticleCount; ++i)
-		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
-			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->DisableRootShadow();
-			float x = (float)Random::Uniform(-1, 1);
-			float y = (float)Random::Uniform(-1, 1);
-			float z = (float)Random::Uniform(-1, 1);
-			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
-			lPuff->SetInitialTransform(lTransform);
-			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
-			lPuff->SetOpacity(lOpacity);
-			x = x*12;
-			y = y*12;
-			z = (float)Random::Uniform(0, 7);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
-			lPuff->StartLoading();
-		}
-	}
-
-	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	float lLevelShootEasyness = 4.5f;
-	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
-	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		const Cure::ContextObject* lObject = x->second;
-		TBC::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
-		if (!lObject->IsLoaded() || !lPhysics)
-		{
-			continue;
-		}
-		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
-		const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -0.75f);
-		const int lBoneCount = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
-		for (int x = 0; x < lBoneCount; ++x)
-		{
-			const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
-			if (lGeometry->GetBodyId() == TBC::INVALID_BODY)
-			{
-				continue;
-			}
-			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
-			Vector3DF f = lBodyCenter - lEpicenter;
-			float d = f.GetLength();
-			if (d > 80*VISUAL_SCALE_FACTOR ||
-				(d > 50*VISUAL_SCALE_FACTOR && lObject != lAvatar))
-			{
-				continue;
-			}
-			d = 1/d;
-			f *= d;
-			d *= lLevelShootEasyness;
-			d = d*d*d;
-			d = std::min(1.0f, d);
-			const float lMaxForceFactor = 800.0f;
-			const float ff = lMaxForceFactor * lObject->GetMass() * d;
-			if (f.z <= 0.1f)
-			{
-				f.z += 0.3f;
-			}
-			f *= ff;
-			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
-		}
-	}
-}
 
 
 void PushManager::CancelLogin()

@@ -71,6 +71,8 @@ public:
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle);
 
+	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry);
+
 protected:
 	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
 	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
@@ -106,9 +108,6 @@ protected:
 	void OnFireButton(UiTbc::Button*);
 	void Fire();
 	virtual void GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const;
-	virtual void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
-		Cure::ContextObject* pExplosive, Cure::ContextObject* pHitObject,
-		TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pHitBodyId);
 
 	void CancelLogin();
 	void OnVehicleSelect(UiTbc::Button* pButton);

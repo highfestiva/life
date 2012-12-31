@@ -26,6 +26,8 @@ public:
 	TBC::ChunkyPhysics::GuideMode GetGuideMode() const;
 	void StabilizeTick();
 
+	virtual void StartLoading();
+
 	void SetAllowNetworkLogic(bool pAllow);
 
 	TBC::ChunkyPhysics* GetPhysics() const;
@@ -35,7 +37,6 @@ public:
 
 protected:
 	void SetForceLoadUnique(bool pLoadUnique);
-	virtual void StartLoading();
 	void StartLoadingPhysics(const str& pPhysicsName);
 	virtual bool TryComplete();
 	virtual void SetupChildHandlers();

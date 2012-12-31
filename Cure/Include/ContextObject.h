@@ -94,6 +94,7 @@ public:
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);	// Sets full phys position if structure or significant difference seen.
 	void SetInitialTransform(const TransformationF& pTransformation);
 	TransformationF GetInitialTransform() const;
+	void SetInitialPositionalData(const ObjectPositionalData& pPositionalData);
 	Vector3DF GetPosition() const;
 	void SetRootPosition(const Vector3DF& pPosition);
 	void SetRootOrientation(const QuaternionF& pOrientation);

@@ -352,7 +352,7 @@ void ContextManager::HandlePostKill()
 	IdSet::iterator x = mPostKillSet.begin();
 	for (; x != mPostKillSet.end(); ++x)
 	{
-		DeleteObject(*x);
+		mGameManager->DeleteContextObject(*x);
 	}
 	mPostKillSet.clear();
 }

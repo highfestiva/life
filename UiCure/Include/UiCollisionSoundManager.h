@@ -58,8 +58,7 @@ public:
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance, bool pIsLoud);
-	void OnCollision(float pImpact, const Vector3DF& pPosition,
-		Cure::ContextObject* pObject1,  TBC::PhysicsManager::BodyID pBody1Id);
+	void OnCollision(float pImpact, const Vector3DF& pPosition, const TBC::ChunkyBoneGeometry* pKey);
 
 private:
 	/*struct GeometryCombination

@@ -106,6 +106,17 @@ void CppContextObject::StabilizeTick()
 
 
 
+void CppContextObject::StartLoading()
+{
+	assert(mClassResource == 0);
+	mClassResource = new UserClassResource();
+	const str lAssetName = GetClassId()+_T(".class");
+	mClassResource->Load(GetResourceManager(), lAssetName,
+		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
+}
+
+
+
 void CppContextObject::SetAllowNetworkLogic(bool pAllow)
 {
 	mAllowNetworkLogic = pAllow;
@@ -159,15 +170,6 @@ void CppContextObject::SetTagIndex(int pIndex)
 void CppContextObject::SetForceLoadUnique(bool pLoadUnique)
 {
 	mForceLoadUnique = pLoadUnique;
-}
-
-void CppContextObject::StartLoading()
-{
-	assert(mClassResource == 0);
-	mClassResource = new UserClassResource();
-	const str lAssetName = GetClassId()+_T(".class");
-	mClassResource->Load(GetResourceManager(), lAssetName,
-		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 
 void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)

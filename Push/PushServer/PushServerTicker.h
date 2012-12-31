@@ -24,7 +24,6 @@ class PushServerTicker: public Life::GameServerTicker
 public:
 	PushServerTicker(Cure::ResourceManager* pResourceManager, InteractiveConsoleLogListener* pConsoleLogger, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~PushServerTicker();
-
 };
 
 
