@@ -39,3 +39,5 @@ Playing a Matrix-style octopus! Flying quickly, swirling arms, landing hard, cli
 Playing a presentation. Don't know how or why, but I'm on to something.
 
 Create an Early Warning System utilizing The Random Generator EGGS!
+
+A game in which a server is also a client listening to other servers, and where the information on the game spreads throughout the nodes... Perhaps area based? Algo might also use a way to spread IRL geographical coordinates as world server coordinates.
