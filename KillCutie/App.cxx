@@ -880,8 +880,8 @@ bool App::Poll()
 			const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 3.0f*SCALE_FACTOR);
 			if (mReverseAndBrake)
 			{
-				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake, 0);	// Reverse.
-				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0, 0);	// Brake.
+				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake);	// Reverse.
+				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0);	// Brake.
 			}
 		}
 	}
@@ -1183,10 +1183,10 @@ void App::PollTaps()
 	{
 		mGame->SetThrottle(lAvatar1, mThrottle);
 		mSteering = Math::Clamp(mSteering, -1.0f, 1.0f);
-		lAvatar1->SetEnginePower(1, mSteering, 0);
+		lAvatar1->SetEnginePower(1, mSteering);
 	}
 	mGame->SetThrottle(lAvatar2, 0);
-	lAvatar2->SetEnginePower(1, 0, 0);
+	lAvatar2->SetEnginePower(1, 0);
 	FingerMoveList::iterator x = gFingerMoveList.begin();
 	mIsThrottling = false;
 	for (; x != gFingerMoveList.end();)
@@ -2359,7 +2359,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		break;
 		case DIRECTIVE_UP:
 		{
-			lAvatar->SetEnginePower(0, +1*pFactor, 0);
+			lAvatar->SetEnginePower(0, +1*pFactor);
 		}
 		break;
 		case DIRECTIVE_DOWN:
@@ -2369,24 +2369,24 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				mReverseAndBrake = pFactor;
 				if (!mReverseAndBrake)
 				{
-					lAvatar->SetEnginePower(0, 0, 0);
-					lAvatar->SetEnginePower(2, 0, 0);
+					lAvatar->SetEnginePower(0, 0);
+					lAvatar->SetEnginePower(2, 0);
 				}
 			}
 			if (mGame->GetComputerIndex() != 1 && lAvatar == lAvatar2)
 			{
-				lAvatar->SetEnginePower(0, -1*pFactor, 0);
+				lAvatar->SetEnginePower(0, -1*pFactor);
 			}
 		}
 		break;
 		case DIRECTIVE_LEFT:
 		{
-			lAvatar->SetEnginePower(1, -1*pFactor, 0);
+			lAvatar->SetEnginePower(1, -1*pFactor);
 		}
 		break;
 		case DIRECTIVE_RIGHT:
 		{
-			lAvatar->SetEnginePower(1, +1*pFactor, 0);
+			lAvatar->SetEnginePower(1, +1*pFactor);
 		}
 		break;
 		case DIRECTIVE_FUNCTION:
@@ -2397,7 +2397,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					if (lAvatar == lAvatar1)
 					{
-						lAvatar1->SetEnginePower(2, +1*pFactor, 0);	// Break.
+						lAvatar1->SetEnginePower(2, +1*pFactor);	// Break.
 					}
 					else
 					{
@@ -2412,7 +2412,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				break;
 				case 1:
 				{
-					lAvatar1->SetEnginePower(2, +1*pFactor, 0);	// Break.
+					lAvatar1->SetEnginePower(2, +1*pFactor);	// Break.
 				}
 				break;
 			}
@@ -2672,7 +2672,7 @@ int App::PollTap(FingerMovement& pMovement)
 				}
 				else
 				{
-					lAvatar->SetEnginePower(1, lValue, 0);
+					lAvatar->SetEnginePower(1, lValue);
 					mPlayer2LastTouch.ClearTimeDiff();
 					lTag = 4;
 				}

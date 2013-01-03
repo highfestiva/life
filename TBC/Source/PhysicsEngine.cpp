@@ -101,7 +101,7 @@ PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const
 	return lList;
 }
 
-bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
+bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
 
@@ -128,7 +128,6 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 					case 1:	mValue[ASPECT_SECONDARY]  = pValue;	break;
 					case 3:	mValue[ASPECT_TERTIARY]	  = pValue;	break;
 				}
-				mValue[ASPECT_CAM] = pZAngle;
 				return (true);
 			}
 		}
@@ -203,9 +202,16 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			{
 				Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
 					Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
+
+				const QuaternionF lOrientation =
+					pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()) *
+					pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+				float lYaw;
+				float lPitch;
+				float lRoll;
+				lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
 				QuaternionF lRotation;
-//TODO: use orientation of craft instead!!! Cam won't be updated at all times on server!
-				lRotation.RotateAroundWorldZ(mValue[ASPECT_CAM] - MathTraits<float>::Pi() / 2);
+				lRotation.RotateAroundWorldZ(lYaw);
 				lAxis[0] = lRotation*lAxis[0];
 				lAxis[1] = lRotation*lAxis[1];
 				Vector3DF lOffset;

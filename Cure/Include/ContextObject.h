@@ -114,7 +114,7 @@ public:
 	void SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride);
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
-	bool SetEnginePower(unsigned pAspect, float pPower, float pAngle);
+	bool SetEnginePower(unsigned pAspect, float pPower);
 	float GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass = 0, float pSidewaysFactor = 1) const;
 
 	void ForceSend();

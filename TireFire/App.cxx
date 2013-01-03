@@ -667,8 +667,8 @@ bool App::Poll()
 			const bool lIsMovingForward = (mGame->GetVehicle()->GetForwardSpeed() > 3.0f*SCALE_FACTOR);
 			if (mReverseAndBrake)
 			{
-				mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake, 0);	// Reverse.
-				mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0, 0);	// Brake.
+				mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake);	// Reverse.
+				mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0);	// Brake.
 			}
 		}
 	}
@@ -1041,7 +1041,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		break;
 		case DIRECTIVE_UP:
 		{
-			lVehicle->SetEnginePower(0, +1*pFactor, 0);
+			lVehicle->SetEnginePower(0, +1*pFactor);
 		}
 		break;
 		case DIRECTIVE_DOWN:
@@ -1049,19 +1049,19 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			mReverseAndBrake = pFactor;
 			if (!mReverseAndBrake)
 			{
-				lVehicle->SetEnginePower(0, 0, 0);
-				lVehicle->SetEnginePower(2, 0, 0);
+				lVehicle->SetEnginePower(0, 0);
+				lVehicle->SetEnginePower(2, 0);
 			}
 		}
 		break;
 		case DIRECTIVE_LEFT:
 		{
-			lVehicle->SetEnginePower(1, -1*pFactor, 0);
+			lVehicle->SetEnginePower(1, -1*pFactor);
 		}
 		break;
 		case DIRECTIVE_RIGHT:
 		{
-			lVehicle->SetEnginePower(1, +1*pFactor, 0);
+			lVehicle->SetEnginePower(1, +1*pFactor);
 		}
 		break;
 		case DIRECTIVE_FUNCTION:

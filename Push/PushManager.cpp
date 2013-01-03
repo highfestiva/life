@@ -290,13 +290,13 @@ Cure::GameObjectId PushManager::GetAvatarInstanceId() const
 
 
 
-bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle)
+bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 {
 	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
-		return SetAvatarEnginePower(lObject, pAspect, pPower, pAngle);
+		return SetAvatarEnginePower(lObject, pAspect, pPower);
 	}
 	return false;
 }
@@ -595,24 +595,18 @@ void PushManager::TickUiInput()
 			float lLeftPowerLR = S(RIGHT)-S(LEFT);
 			float lRightPowerLR = (S(RIGHT3D) - S(LEFT3D)) * 0.65f;
 			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, std::abs(lLeftPowerFwdRev));
-			static int cnt = 0;
-			if (++cnt < 30)
-			{
-				return;
-			}
-			cnt = 0;
 
-			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR, mCameraOrientation.x);
-			SetAvatarEnginePower(lObject, 1, lLeftPowerLR, mCameraOrientation.x);
-			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev-lRightPowerLR, mCameraOrientation.x);
-			SetAvatarEnginePower(lObject, 5, lLeftPowerLR, mCameraOrientation.x);
-			SetAvatarEnginePower(lObject, 8, lRightPowerLR, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR);
+			SetAvatarEnginePower(lObject, 1, lLeftPowerLR);
+			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev-lRightPowerLR);
+			SetAvatarEnginePower(lObject, 5, lLeftPowerLR);
+			SetAvatarEnginePower(lObject, 8, lRightPowerLR);
 #else
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
 			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
-			SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 0, lPowerFwdRev);
 			float lPowerLR = S(RIGHT)-S(LEFT);
-			SetAvatarEnginePower(lObject, 1, lPowerLR, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 1, lPowerLR);
 			float lPower = S(HANDBRAKE) - std::max(S(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
 			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
 				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
@@ -620,17 +614,17 @@ void PushManager::TickUiInput()
 				// Someone is apparently trying to stop/break, but no engine configured for breaking.
 				// Just apply it as a reverse motion.
 				lPowerFwdRev = lForward - lBreakAndBack;
-				SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
+				SetAvatarEnginePower(lObject, 0, lPowerFwdRev);
 			}
 			lPower = S(UP)-S(DOWN);
-			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 3, lPower);
 			lPower = S(FORWARD3D) - S(BACKWARD3D);
-			SetAvatarEnginePower(lObject, 4, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 4, lPower);
 			lPower = S(RIGHT3D) - S(LEFT3D);
-			SetAvatarEnginePower(lObject, 5, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 5, lPower);
 			// Engine aspect 6 is not currently in use (3D handbraking). Might come in useful some day though.
 			lPower = S(UP3D) - S(DOWN3D);
-			SetAvatarEnginePower(lObject, 7, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 7, lPower);
 #endif
 			const float lSteeringChange = mLastSteering-s;
 			if (lSteeringChange > 0.5f)
@@ -671,9 +665,9 @@ void PushManager::TickUiInput()
 	}
 }
 
-bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle)
+bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower)
 {
-	bool lSet = pAvatar->SetEnginePower(pAspect, pPower, pAngle);
+	bool lSet = pAvatar->SetEnginePower(pAspect, pPower);
 
 	SteeringPlaybackMode lPlaybackMode;
 	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
@@ -684,7 +678,6 @@ bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pA
 			)
 		{
 			mEnginePowerShadow[pAspect].mPower = pPower;
-			mEnginePowerShadow[pAspect].mAngle = pAngle;
 			if (!mEnginePlaybackFile.IsOpen())
 			{
 				mEnginePlaybackFile.Open(_T("Data/Steering.rec"), DiskFile::MODE_TEXT_WRITE);
@@ -699,7 +692,7 @@ bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pA
 				mEnginePlaybackFile.WriteString(lCommand);
 				mEnginePlaybackTime = lTime;
 			}
-			wstr lCommand = wstrutil::Format(L"set-avatar-engine-power %u %g %g\n", pAspect, pPower, pAngle);
+			wstr lCommand = wstrutil::Format(L"set-avatar-engine-power %u %g\n", pAspect, pPower);
 			mEnginePlaybackFile.WriteString(lCommand);
 		}
 	}
@@ -715,7 +708,6 @@ bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pA
 		}
 		mEnginePlaybackTime = GetTimeManager()->GetAbsoluteTime();
 		mEnginePowerShadow[pAspect].mPower = 0;
-		mEnginePowerShadow[pAspect].mAngle = 0;
 	}
 
 	return lSet;

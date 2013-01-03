@@ -69,16 +69,14 @@ int PushConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 		{
 			case COMMAND_SET_AVATAR_ENGINE_POWER:
 			{
-				if (pParameterVector.size() == 3)
+				if (pParameterVector.size() == 2)
 				{
 					log_adebug("Setting avatar engine power.");
 					int lAspect = 0;
 					strutil::StringToInt(pParameterVector[0], lAspect);
 					double lPower;
 					strutil::StringToDouble(pParameterVector[1], lPower);
-					double lAngle;
-					strutil::StringToDouble(pParameterVector[2], lAngle);
-					if (!((PushManager*)GetGameManager())->SetAvatarEnginePower(lAspect, (float)lPower, (float)lAngle))
+					if (!((PushManager*)GetGameManager())->SetAvatarEnginePower(lAspect, (float)lPower))
 					{
 						mLog.AError("Could not set avatar engine power!");
 						lResult = 1;
@@ -86,7 +84,7 @@ int PushConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <aspect> <power> <angle>"), pCommand.c_str());
+					mLog.Warningf(_T("usage: %s <aspect> <power>"), pCommand.c_str());
 				}
 			}
 			break;

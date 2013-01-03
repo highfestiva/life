@@ -105,8 +105,8 @@ void VehicleAi::OnTick()
 			Vector3DF lElevatorDirection;
 			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 			{
-				mGame->GetVehicle()->SetEnginePower(0, 0, 0);
-				mGame->GetVehicle()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
+				mGame->GetVehicle()->SetEnginePower(0, 0);
+				mGame->GetVehicle()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
 				const Cure::Elevator* lNearestElevator;
 				const Vector3DF lElevatorPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
 				if (lElevatorPosition.GetDistanceSquared(lPosition) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
@@ -193,7 +193,7 @@ void VehicleAi::OnTick()
 						const Vector3DF lDirection = mGame->GetVehicle()->GetOrientation() * Vector3DF(0,1,0);
 						const Vector3DF lWantedDirection = lPath->GetValue() - lPosition;
 						const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
-						mGame->GetVehicle()->SetEnginePower(1, lAngle*0.5f, 0);
+						mGame->GetVehicle()->SetEnginePower(1, lAngle*0.5f);
 					}
 					mLog.Headlinef(_T("On elevator: too long distance to path %.1f, or too many paths %u."), lBestPathDistance, lRelevantPaths.size());
 					if (lBestPathDistance > 15)
@@ -359,7 +359,7 @@ void VehicleAi::OnTick()
 					const float lForwardAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 					// Amplify angle to be either full left or full right.
 					const float lAngle = (lForwardAngle < 0)? -1.0f : 1.0f;
-					mGame->GetVehicle()->SetEnginePower(1, -lAngle, 0);
+					mGame->GetVehicle()->SetEnginePower(1, -lAngle);
 					SetMode(MODE_BACKING_UP);
 					return;
 				}
@@ -447,8 +447,8 @@ void VehicleAi::OnTick()
 			if (!(mMode == MODE_GET_OFF_ELEVATOR && lModeRunTime < lGetOffDelayTime))
 			{
 				// Move forward.
-				mGame->GetVehicle()->SetEnginePower(0, +lStrength, 0);
-				mGame->GetVehicle()->SetEnginePower(2, 0, 0);
+				mGame->GetVehicle()->SetEnginePower(0, +lStrength);
+				mGame->GetVehicle()->SetEnginePower(2, 0);
 			}
 
 			// Steer.
@@ -468,7 +468,7 @@ void VehicleAi::OnTick()
 				}
 				lAngle *= 2;	// Make steering more powerful while getting off.
 			}
-			mGame->GetVehicle()->SetEnginePower(1, +lAngle, 0);
+			mGame->GetVehicle()->SetEnginePower(1, +lAngle);
 			mLastAverageAngle = Math::Lerp(mLastAverageAngle, lAngle, 0.5f);
 
 			// Check if we need to slow down.
@@ -479,12 +479,12 @@ void VehicleAi::OnTick()
 				if (lAbsAngle > 0.2f)
 				{
 					float lFactor = 0.10f;
-					mGame->GetVehicle()->SetEnginePower(2, lAbsAngle*lFactor + lVelocity.GetLength()*lFactor*0.1f, 0);
+					mGame->GetVehicle()->SetEnginePower(2, lAbsAngle*lFactor + lVelocity.GetLength()*lFactor*0.1f);
 				}
 				else if (lPath->GetCurrentInterpolationTime() >= DOUBLE_OFF_END_PATH_TIME &&
 					IsCloseToTarget(lPosition, SLOW_DOWN_DISTANCE))
 				{
-					mGame->GetVehicle()->SetEnginePower(2, 0.2f, 0);
+					mGame->GetVehicle()->SetEnginePower(2, 0.2f);
 				}
 			}
 		}
@@ -493,8 +493,8 @@ void VehicleAi::OnTick()
 		{
 			// Brake or move backward.
 			const bool lIsMovingForward = (mGame->GetVehicle()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
-			mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength, 0);
-			mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f, 0);
+			mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength);
+			mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f);
 
 			const float lBackTime = 1.7f;
 			if (!lIsMovingForward && lModeRunTime > lBackTime)
@@ -523,15 +523,15 @@ void VehicleAi::OnTick()
 
 			// Brake or move backward.
 			const bool lIsMovingForward = (mGame->GetVehicle()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
-			mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength, 0);
-			mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f, 0);
+			mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength);
+			mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f);
 
 			// Turn steering wheel.
 			const Vector3DF lDirection = mGame->GetVehicle()->GetOrientation() * Vector3DF(0,1,0);
 			float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 			lAngle += (lAngle < 0)? +PIF : -PIF;
 			lAngle *= 3;
-			mGame->GetVehicle()->SetEnginePower(1, -lAngle, 0);
+			mGame->GetVehicle()->SetEnginePower(1, -lAngle);
 
 			if (lModeRunTime > 15)
 			{
@@ -544,9 +544,9 @@ void VehicleAi::OnTick()
 		case MODE_FLEE:
 		{
 			// Pedal to the metal.
-			mGame->GetVehicle()->SetEnginePower(0, +lStrength, 0);
-			mGame->GetVehicle()->SetEnginePower(1, 0, 0);
-			mGame->GetVehicle()->SetEnginePower(2, 0, 0);
+			mGame->GetVehicle()->SetEnginePower(0, +lStrength);
+			mGame->GetVehicle()->SetEnginePower(1, 0);
+			mGame->GetVehicle()->SetEnginePower(2, 0);
 			if (lModeRunTime > 3.0f)
 			{
 				SetMode(MODE_FIND_BEST_PATH);
@@ -573,8 +573,8 @@ void VehicleAi::OnTick()
 				SetMode(MODE_AT_GOAL);
 			}
 			// Brake!
-			mGame->GetVehicle()->SetEnginePower(0, 0, 0);
-			mGame->GetVehicle()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
+			mGame->GetVehicle()->SetEnginePower(0, 0);
+			mGame->GetVehicle()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
 		}
 		break;
 		case MODE_WAITING_FOR_ELEVATOR:
@@ -598,10 +598,10 @@ void VehicleAi::OnTick()
 				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
 				const Vector3DF lWantedDirection = lPath->GetSlope();
 				const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
-				mGame->GetVehicle()->SetEnginePower(1, +lAngle, 0);
+				mGame->GetVehicle()->SetEnginePower(1, +lAngle);
 				const bool lIsMovingForward = (mGame->GetVehicle()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
-				mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength, 0);
-				mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f, 0);
+				mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength);
+				mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f);
 
 				const Cure::Elevator* lNearestElevator;
 				Vector3DF lNearestLiftPosition2d;
@@ -679,10 +679,10 @@ void VehicleAi::OnTick()
 				}
 			}
 
-			mGame->GetVehicle()->SetEnginePower(1, 0, 0);
+			mGame->GetVehicle()->SetEnginePower(1, 0);
 			// Brake!
-			mGame->GetVehicle()->SetEnginePower(0, 0, 0);
-			mGame->GetVehicle()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
+			mGame->GetVehicle()->SetEnginePower(0, 0);
+			mGame->GetVehicle()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
 		}
 		break;
 		case MODE_ON_ELEVATOR:
@@ -690,9 +690,9 @@ void VehicleAi::OnTick()
 			lStrength *= SMOOTH_BRAKING_FACTOR;	// Smooth braking, we can always back up if necessary.
 
 			// Brake!
-			mGame->GetVehicle()->SetEnginePower(0, 0, 0);
-			mGame->GetVehicle()->SetEnginePower(1, 0, 0);
-			mGame->GetVehicle()->SetEnginePower(2, -lStrength, 0);	// Negative = use full brakes, not only hand brake.
+			mGame->GetVehicle()->SetEnginePower(0, 0);
+			mGame->GetVehicle()->SetEnginePower(1, 0);
+			mGame->GetVehicle()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
 
 			// Check if elevator departed.
 			const float lMinimumVelocity2 = 0.5f*0.5f;
@@ -742,13 +742,13 @@ void VehicleAi::OnTick()
 				const float lDist = mElevatorGetOnPosition.GetDistanceSquared(lPosition);
 				if (lDist > mElevatorGetOnPosition.GetDistanceSquared(lPosition+lForward))
 				{
-					mGame->GetVehicle()->SetEnginePower(0, +lStrength, 0);
-					mGame->GetVehicle()->SetEnginePower(2, 0, 0);
+					mGame->GetVehicle()->SetEnginePower(0, +lStrength);
+					mGame->GetVehicle()->SetEnginePower(2, 0);
 				}
 				else if (lDist > mElevatorGetOnPosition.GetDistanceSquared(lPosition-lForward))
 				{
-					mGame->GetVehicle()->SetEnginePower(0, -lStrength, 0);
-					mGame->GetVehicle()->SetEnginePower(2, 0, 0);
+					mGame->GetVehicle()->SetEnginePower(0, -lStrength);
+					mGame->GetVehicle()->SetEnginePower(2, 0);
 				}
 			}
 		}
@@ -791,9 +791,9 @@ void VehicleAi::OnTick()
 			const int lIterations = (mMode == MODE_ROTATE_ON_THE_SPOT_WAITING)? 1 : 2;
 			if (lModeRunTime > lIterations*lPeriod+lSteerEndTime)
 			{
-				mGame->GetVehicle()->SetEnginePower(0, 0, 0);
-				mGame->GetVehicle()->SetEnginePower(1, -lAngle, 0);
-				mGame->GetVehicle()->SetEnginePower(2, -1, 0);
+				mGame->GetVehicle()->SetEnginePower(0, 0);
+				mGame->GetVehicle()->SetEnginePower(1, -lAngle);
+				mGame->GetVehicle()->SetEnginePower(2, -1);
 				if (mMode == MODE_ROTATE_ON_THE_SPOT)
 				{
 					SetMode(MODE_HEADING_BACK_ON_TRACK);
@@ -814,31 +814,31 @@ void VehicleAi::OnTick()
 				if (lModeRunTime >= lBase && lModeRunTime < lBase+lSteerEndTime)
 				{
 					// Brake and turn in "forward direction".
-					mGame->GetVehicle()->SetEnginePower(0, 0, 0);
-					mGame->GetVehicle()->SetEnginePower(1, -lAngle, 0);
-					mGame->GetVehicle()->SetEnginePower(2, -lStrength, 0);
+					mGame->GetVehicle()->SetEnginePower(0, 0);
+					mGame->GetVehicle()->SetEnginePower(1, -lAngle);
+					mGame->GetVehicle()->SetEnginePower(2, -lStrength);
 					break;
 				}
 				else if (lModeRunTime >= lBase+lSteerEndTime && lModeRunTime < lBase+lForwardEndTime)
 				{
 					// Drive forward.
-					mGame->GetVehicle()->SetEnginePower(0, +lStrength, 0);
-					mGame->GetVehicle()->SetEnginePower(2, 0, 0);
+					mGame->GetVehicle()->SetEnginePower(0, +lStrength);
+					mGame->GetVehicle()->SetEnginePower(2, 0);
 					break;
 				}
 				else if (lModeRunTime >= lBase+lForwardEndTime && lModeRunTime < lBase+lOtherSteerEndTime)
 				{
 					// Brake and turn in "backward direction".
-					mGame->GetVehicle()->SetEnginePower(0, 0, 0);
-					mGame->GetVehicle()->SetEnginePower(1, +lAngle, 0);
-					mGame->GetVehicle()->SetEnginePower(2, -lStrength, 0);
+					mGame->GetVehicle()->SetEnginePower(0, 0);
+					mGame->GetVehicle()->SetEnginePower(1, +lAngle);
+					mGame->GetVehicle()->SetEnginePower(2, -lStrength);
 					break;
 				}
 				else if (lModeRunTime >= lBase+lOtherSteerEndTime && lModeRunTime < lBase+lPeriod)
 				{
 					// Drive backward.
-					mGame->GetVehicle()->SetEnginePower(0, -0.7f*lStrength, 0);
-					mGame->GetVehicle()->SetEnginePower(2, 0, 0);
+					mGame->GetVehicle()->SetEnginePower(0, -0.7f*lStrength);
+					mGame->GetVehicle()->SetEnginePower(2, 0);
 					break;
 				}
 			}

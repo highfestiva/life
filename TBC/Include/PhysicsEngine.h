@@ -56,9 +56,7 @@ public:
 		ASPECT_PRIMARY		= 0,
 		ASPECT_SECONDARY	= 1,
 		ASPECT_TERTIARY		= 2,
-		ASPECT_CAM		= 3,
-		ASPECT_MAX_REMOTE_COUNT	= 4,
-
+		ASPECT_MAX_REMOTE_COUNT	= 3,
 		ASPECT_LOCAL_SHADOW	= 4,
 		ASPECT_LOCAL_SHADOW_ABS	= 5,
 		ASPECT_LOCAL_PRIMARY	= 6,
@@ -78,7 +76,7 @@ public:
 
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
 	GeometryList GetControlledGeometryList() const;
-	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
+	bool SetValue(unsigned pAspect, float pValue);
 	void ForceSetValue(unsigned pAspect, float pValue);
 
 	void OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;

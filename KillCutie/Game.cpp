@@ -344,16 +344,16 @@ void Game::SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle)
 {
 	if (pPlayer == mLauncher)
 	{
-		mLauncher->SetEnginePower(0, pThrottle, 0);
+		mLauncher->SetEnginePower(0, pThrottle);
 		return;
 	}
 	if (pThrottle < 0 && mVehicle->GetForwardSpeed() > 0.5f)
 	{
-		mVehicle->SetEnginePower(2, -pThrottle, 0);
+		mVehicle->SetEnginePower(2, -pThrottle);
 		return;
 	}
-	mVehicle->SetEnginePower(2, 0, 0);	// Disengage brakes.
-	mVehicle->SetEnginePower(0, pThrottle, 0);
+	mVehicle->SetEnginePower(2, 0);	// Disengage brakes.
+	mVehicle->SetEnginePower(0, pThrottle);
 }
 
 bool Game::Shoot()

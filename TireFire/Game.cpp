@@ -228,12 +228,12 @@ void Game::SetThrottle(float pThrottle)
 {
 	if (pThrottle < 0 && mVehicle->GetForwardSpeed() > 0.5f)
 	{
-		mVehicle->SetEnginePower(0, 0, 0);	// Disengage throttle while braking.
-		mVehicle->SetEnginePower(2, -pThrottle, 0);
+		mVehicle->SetEnginePower(0, 0);	// Disengage throttle while braking.
+		mVehicle->SetEnginePower(2, -pThrottle);
 		return;
 	}
-	mVehicle->SetEnginePower(2, 0, 0);	// Disengage brakes.
-	mVehicle->SetEnginePower(0, pThrottle, 0);
+	mVehicle->SetEnginePower(2, 0);	// Disengage brakes.
+	mVehicle->SetEnginePower(0, pThrottle);
 }
 
 Game::FlybyMode Game::GetFlybyMode() const

@@ -266,13 +266,13 @@ void ChunkyPhysics::AddEngine(PhysicsEngine* pEngine)
 	mEngineArray.push_back(pEngine);
 }
 
-bool ChunkyPhysics::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
+bool ChunkyPhysics::SetEnginePower(unsigned pAspect, float pPower)
 {
 	bool lOk = false;
 	EngineArray::iterator x = mEngineArray.begin();
 	for (; x != mEngineArray.end(); ++x)
 	{
-		lOk |= (*x)->SetValue(pAspect, pPower, pAngle);
+		lOk |= (*x)->SetValue(pAspect, pPower);
 	}
 	return lOk;
 }

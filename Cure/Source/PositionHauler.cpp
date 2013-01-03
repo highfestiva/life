@@ -184,7 +184,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_CAMERA_FLAT_PUSH:
 			case TBC::PhysicsEngine::ENGINE_CAMERA_3D_PUSH:
 			{
-				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 100);
+				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData3, lData, PositionalData::TYPE_REAL_3, 100);
 				++y;
 				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*TBC::PhysicsEngine::ASPECT_MAX_REMOTE_COUNT);
 			}
@@ -390,8 +390,8 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_CAMERA_3D_PUSH:
 			{
 				assert(pPosition.mBodyPositionArray.size() > y);
-				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_4);
-				GET_OBJECT_POSITIONAL_AT(pPosition, y, const RealData4, lData, PositionalData::TYPE_REAL_4);
+				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_3);
+				GET_OBJECT_POSITIONAL_AT(pPosition, y, const RealData3, lData, PositionalData::TYPE_REAL_3);
 				++y;
 				assert(lData);
 				if (!lData)
@@ -399,9 +399,9 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 					mLog.AError("Could not fetch the right type of network positional!");
 					return;
 				}
-				pStructure->SetEnginePower(0, lData->mValue[0], lData->mValue[3]);
-				pStructure->SetEnginePower(1, lData->mValue[1], lData->mValue[3]);
-				pStructure->SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
+				pStructure->SetEnginePower(0, lData->mValue[0]);
+				pStructure->SetEnginePower(1, lData->mValue[1]);
+				pStructure->SetEnginePower(3, lData->mValue[2]);
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HOVER:
@@ -426,7 +426,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 					return;
 				}
 				assert(lData->mValue >= -1 && lData->mValue <= 1);
-				pStructure->SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
+				pStructure->SetEnginePower(lEngine->GetControllerIndex(), lData->mValue);
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_GLUE:

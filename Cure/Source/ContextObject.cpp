@@ -642,9 +642,9 @@ TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(TBC::PhysicsManager
 	return (mPhysics->GetBoneGeometry(pBodyId));
 }
 
-bool ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
+bool ContextObject::SetEnginePower(unsigned pAspect, float pPower)
 {
-	return mPhysics->SetEnginePower(pAspect, pPower, pAngle);
+	return mPhysics->SetEnginePower(pAspect, pPower);
 }
 
 float ContextObject::GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass, float pSidewaysFactor) const

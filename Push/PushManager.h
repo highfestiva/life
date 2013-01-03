@@ -69,7 +69,7 @@ public:
 	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
 	Cure::GameObjectId GetAvatarInstanceId() const;
 
-	bool SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle);
+	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition);
 
@@ -90,7 +90,7 @@ protected:
 
 	void UpdateTouchstickPlacement();
 	virtual void TickUiInput();
-	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
+	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower);
 	virtual void TickUiUpdate();
 	virtual bool UpdateMassObjects(const Vector3DF& pPosition);
 	virtual void SetLocalRender(bool pRender);
@@ -163,7 +163,6 @@ protected:
 	struct EnginePower	// Used for recording vechile steering playback.
 	{
 		float mPower;
-		float mAngle;
 	};
 	DiskFile mEnginePlaybackFile;	// Used for recording vechile steering playback.
 	float mEnginePlaybackTime;	// Used for recording vechile steering playback.

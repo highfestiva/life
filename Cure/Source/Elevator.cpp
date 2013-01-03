@@ -226,7 +226,7 @@ void Elevator::HaltActiveEngines(bool pStop)
 		for (int y = 0; y < lEngineCount; ++y)
 		{
 			const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
-			lEngineTrigger.mEngine->SetValue(lEngineTrigger.mEngine->GetControllerIndex(), 0, 0);
+			lEngineTrigger.mEngine->SetValue(lEngineTrigger.mEngine->GetControllerIndex(), 0);
 		}
 		mParent->ForceSend();	// Transmit our updated engine values.
 	}
@@ -264,7 +264,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
 	mElevatorIsActive = true;
 	pEngine->ForceSetValue(TBC::PhysicsEngine::ASPECT_LOCAL_SHADOW, lTargetValue);	// Store shadow.
-	pEngine->SetValue(pEngine->GetControllerIndex(), lTargetValue, 0);
+	pEngine->SetValue(pEngine->GetControllerIndex(), lTargetValue);
 	mParent->ForceSend();	// Transmit our updated engine values.
 }
 
