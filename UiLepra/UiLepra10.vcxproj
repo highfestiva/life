@@ -276,6 +276,8 @@
     <ClCompile Include="Source\UiSoundManagerFMod.cpp" />
     <ClCompile Include="Source\UiSoundManagerOpenAL.cpp" />
     <ClCompile Include="Source\UiSoundStream.cpp" />
+    <ClCompile Include="Source\UiTouchDrag.cpp" />
+    <ClCompile Include="Source\UiTouchstick.cpp" />
     <ClCompile Include="Source\Win32\UiWin32Core.cpp" />
     <ClCompile Include="Source\Win32\UiWin32DirectXDisplay.cpp" />
     <ClCompile Include="Source\Win32\UiWin32DisplayManager.cpp" />

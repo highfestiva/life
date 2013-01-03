@@ -204,7 +204,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
 					Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
 				QuaternionF lRotation;
-TODO: use orientation of craft instead!!! Cam won't be updated at all times on server!
+//TODO: use orientation of craft instead!!! Cam won't be updated at all times on server!
 				lRotation.RotateAroundWorldZ(mValue[ASPECT_CAM] - MathTraits<float>::Pi() / 2);
 				lAxis[0] = lRotation*lAxis[0];
 				lAxis[1] = lRotation*lAxis[1];

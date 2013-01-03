@@ -260,11 +260,14 @@
     <ClCompile Include="Source\Elevator.cpp" />
     <ClCompile Include="Source\FloatAttribute.cpp" />
     <ClCompile Include="Source\GameManager.cpp" />
+    <ClCompile Include="Source\GameTicker.cpp" />
     <ClCompile Include="Source\HiscoreAgent.cpp" />
     <ClCompile Include="Source\NetworkAgent.cpp" />
     <ClCompile Include="Source\NetworkFreeAgent.cpp" />
     <ClCompile Include="Source\Packet.cpp" />
+    <ClCompile Include="Source\PhysicsSharedResource.cpp" />
     <ClCompile Include="Source\PositionalData.cpp" />
+    <ClCompile Include="Source\PositionHauler.cpp" />
     <ClCompile Include="Source\ResourceManager.cpp" />
     <ClCompile Include="Source\RuntimeVariable.cpp" />
     <ClCompile Include="Source\TerrainFunctionManager.cpp" />

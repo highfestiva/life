@@ -10,7 +10,7 @@
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Master">
-      <UniqueIdentifier>{fc8253ac-22cd-46cc-8b67-0b0158f8fcb1}</UniqueIdentifier>
+      <UniqueIdentifier>{bbefe32d-1683-4f82-a016-bde1d58810f2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -32,10 +32,10 @@
     <ClCompile Include="RaceTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerApplication.cpp">
+    <ClCompile Include="ServerConsoleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerConsoleManager.cpp">
+    <ClCompile Include="ServerMessageProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Spawner.cpp">
@@ -68,6 +68,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ServerConsoleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerMessageProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Spawner.h">

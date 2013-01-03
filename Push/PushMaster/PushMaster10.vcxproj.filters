@@ -11,18 +11,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MasterServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MasterServerNetworkParser.cpp">
+    <ClCompile Include="MasterApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MasterServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MasterServerNetworkParser.h">
+    <ClInclude Include="MasterServerPort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
