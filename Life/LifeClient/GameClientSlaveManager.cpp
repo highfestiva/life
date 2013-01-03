@@ -710,6 +710,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			wstr lClassId;
 			Lepra::TransformationF lTransformation;
 			lMessageCreateObject->GetTransformation(lTransformation);
+			const float a = 1.0f/::sqrt(2.0f);
+			lTransformation.SetOrientation(QuaternionF(0, 0, -a, -a));
 			lMessageCreateObject->GetClassId(lClassId);
 			CreateObject(lMessageCreateObject->GetObjectId(),
 				strutil::Encode(lClassId),

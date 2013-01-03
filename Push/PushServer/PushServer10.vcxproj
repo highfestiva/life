@@ -294,6 +294,32 @@
     <ClInclude Include="..\Explosion.h" />
     <ClInclude Include="..\PushBarrel.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cure\Cure10.vcxproj">
+      <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Lepra\Lepra10.vcxproj">
+      <Project>{e7dda722-45e3-45c9-b051-e99288accdd2}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\TBC\TBC10.vcxproj">
+      <Project>{bdbf3606-e371-454b-b162-27fd92b67d50}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ThirdParty\ThirdPartyLib_10.vcxproj">
+      <Project>{00f89e9d-7870-4921-9022-9ad4951bc224}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Life\Life10.vcxproj">
+      <Project>{3c64c2e1-43ef-49c2-9d3c-1c698bcfdcaa}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Life\LifeServer\LifeServer10.vcxproj">
+      <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCDAA}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

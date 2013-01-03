@@ -590,11 +590,12 @@ void PushManager::TickUiInput()
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 #if 1
-			float lLeftPowerFwdRev = S(FORWARD) - S(BREAKANDBACK);
-			//float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
-			float lLeftPowerLR = S(RIGHT)-S(LEFT);
-			float lRightPowerLR = (S(RIGHT3D) - S(LEFT3D)) * 0.65f;
-			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, std::abs(lLeftPowerFwdRev));
+			const float lLeftPowerFwdRev = S(FORWARD) - S(BREAKANDBACK);
+			//const float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
+			const float lLeftPowerLR = S(RIGHT)-S(LEFT);
+			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
+			const float lSteeringPower = std::abs(lLeftPowerFwdRev);
+			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
 
 			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR);
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR);

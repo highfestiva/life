@@ -202,9 +202,9 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			{
 				Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
 					Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
-
+				ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
 				const QuaternionF lOrientation =
-					pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()) *
+					pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
 					pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
 				float lYaw;
 				float lPitch;
@@ -238,15 +238,19 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				{
 					if (lPushForce > 0.1f)
 					{
-						lVelocityVector += lVelocityVector.ProjectOntoPlane(lPushVector / lPushForce);
+						lVelocityVector = lVelocityVector.ProjectOntoPlane(lPushVector);
 					}
-					if (lPushVector.Dot(lVelocityVector) > 0)
+					if (lPushVector.Dot(lVelocityVector) >= 0)
 					{
 						//mLog.Infof(_T("Reducing push vector (%f; %f; %f) with velocity (%f; %f; %f) and friction."),
 						//	lPushVector.x, lPushVector.y, lPushVector.z,
-						//	lVelocityVector.x, lVelocityVector.y, lVelocityVector.z);
-						lVelocityVector *= (0.1f + mFriction*0.4f) * lPushForce / mMaxSpeed;
+						//	lVelocityVector.x, lVelocityVector.y, lVelocityVector.z);						lVelocityVector /= mMaxSpeed;
+						lVelocityVector *= (0.1f + mFriction*0.4f) / mMaxSpeed;
 						lPushVector -= lVelocityVector;
+					}
+					if (mValue[ASPECT_TERTIARY] == 0)
+					{
+						lPushVector.z = 0;
 					}
 					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
 				}
@@ -490,24 +494,18 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			case ENGINE_YAW_BRAKE:
 			{
-				if (Math::IsEpsEqual(lPrimaryForce, 0.0f))
+				const TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+				Vector3DF lAngularVelocity;
+				pPhysicsManager->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
+				// Reduce rotation of craft.
+				lAngularVelocity.z *= mFriction;
+				const float lLowAngularVelocity = mMaxSpeed;
+				if (Math::IsEpsEqual(lPrimaryForce, 0.0f) && std::abs(lAngularVelocity.z) < lLowAngularVelocity)
 				{
-					const TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-					Vector3DF lAngularVelocity;
-					pPhysicsManager->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
-					// Reduce rotation of craft.
-					const float lLowAngularVelocity = mMaxSpeed;
-					if (std::abs(lAngularVelocity.z) < lLowAngularVelocity)
-					{
-						// Seriously kill speed depending on strength.
-						lAngularVelocity.z *= 1/mStrength;
-					}
-					else
-					{
-						lAngularVelocity.z *= mFriction;
-					}
-					pPhysicsManager->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
+					// Seriously kill speed depending on strength.
+					lAngularVelocity.z *= 1/mStrength;
 				}
+				pPhysicsManager->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
 			}
 			break;
 			default:

@@ -296,6 +296,8 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 
 	TransformationF lTransform;
 	lTransform.SetPosition(Vector3DF(0, 0, 10));
+	const float a = 1.0f/::sqrt(2.0f);
+	lTransform.SetOrientation(QuaternionF(0, 0, -a, -a));
 	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
 	if (lPreviousAvatarId)
 	{
@@ -316,6 +318,8 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T("."));
 	Cure::ContextObject* lObject = Parent::CreateContextObject(pAvatarId,
 		Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	const QuaternionF& q = lTransform.GetOrientation();
+	mLog.Infof(_T("Setting avatar quaternion (%f;%f;%f;%f)."), q.GetA(), q.GetB(), q.GetC(), q.GetD());
 	lObject->SetInitialTransform(lTransform);
 	pClient->SetAvatarId(lObject->GetInstanceId());
 	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());

@@ -25,6 +25,9 @@ class PushBarrel
 {
 public:
 	static void GetInfo(const Cure::GameManager* pGameManager, Cure::GameObjectId pAvatarId, TransformationF& pTransform, Vector3DF& pVelocity);
+
+private:
+	LOG_CLASS_DECLARE();
 };
 
 }
