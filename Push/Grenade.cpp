@@ -33,12 +33,12 @@ Grenade::~Grenade()
 	mLaunchSound = 0;
 	delete mShreekSound;
 	mShreekSound = 0;
-	Detonate();
+	Detonate(GetPosition());
 }
 
 
 
-void Grenade::Detonate()
+void Grenade::Detonate(const Vector3DF& pPosition)
 {
 	if (mDetonated)
 	{
@@ -49,13 +49,18 @@ void Grenade::Detonate()
 	TBC::ChunkyPhysics* lPhysics = GetPhysics();
 	if (lPhysics)
 	{
-		mLauncher->Detonate(this, lPhysics->GetBoneGeometry(0));
+		mLauncher->Detonate(this, lPhysics->GetBoneGeometry(0), pPosition);
 	}
 }
 
 void Grenade::OnLoaded()
 {
 	Parent::OnLoaded();
+
+#ifdef LEPRA_DEBUG
+	Vector3DF lPos = GetPosition();
+	log_volatile(mLog.Infof(_T("Grenade loaded at pos (%f;%f;%f)."), lPos.x, lPos.y, lPos.z));
+#endif // Debug
 
 	mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
 	mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
@@ -98,7 +103,7 @@ void Grenade::OnForceApplied(ContextObject* pOtherObject,
 	(void)pTorque;
 	(void)pPosition;
 	(void)pRelativeVelocity;
-	Detonate();
+	Detonate(pPosition);
 	GetManager()->PostKillObject(GetInstanceId());
 }
 

@@ -32,24 +32,6 @@ namespace Cure
 
 
 
-#define GET_OBJECT_POSITIONAL_AT(obj, at, cls, name, type)		\
-	cls* name = (cls*)((obj).GetAt(at));				\
-	if (name && name->GetType() != type)				\
-	{								\
-		name = 0;						\
-	}
-
-#define GETSET_OBJECT_POSITIONAL_AT(obj, at, cls, name, type, scale)	\
-	GET_OBJECT_POSITIONAL_AT(obj, at, cls, name, type)		\
-	if (!name)							\
-	{								\
-		name = new cls;						\
-		(obj).SetAt(at, name);					\
-	}								\
-	name->SetScale(scale);
-
-
-
 ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str& pClassId):
 	mManager(0),
 	mResourceManager(pResourceManager),
@@ -412,7 +394,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	}
 
 	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-	bool lOk = PositionHauler::Get(mPosition, lPhysicsManager, mPhysics);
+	bool lOk = PositionHauler::Get(mPosition, lPhysicsManager, mPhysics, mTotalMass);
 	if (lOk)
 	{
 		pPositionalData = &mPosition;
@@ -420,7 +402,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	return lOk;
 }
 
-void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
+void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData, float pDeltaThreshold)
 {
 	if (!IsLoaded())
 	{
@@ -437,9 +419,15 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 
 	if (mPosition.IsSameStructure(pPositionalData))
 	{
-		if (mPosition.GetScaledDifference(&pPositionalData) == 0)
+		const bool lPositionOnly = (pDeltaThreshold != 0);	// If there is a threshold at all, it's always about positions, never about engines.
+		const float lScaledDiff = mPosition.GetBiasedTypeDifference(&pPositionalData, lPositionOnly);
+		if (lScaledDiff <= pDeltaThreshold)
 		{
 			return;
+		}
+		if (pDeltaThreshold > 0)
+		{
+			mLog.Infof(_T("Positional diff is %f."), lScaledDiff);
 		}
 	}
 
@@ -543,7 +531,7 @@ Vector3DF ContextObject::GetAcceleration() const
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyAcceleration(lGeometry->GetBodyId(), lAcceleration);
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyForce(lGeometry->GetBodyId(), lAcceleration);
 	}
 	return lAcceleration;
 }
@@ -725,17 +713,8 @@ void ContextObject::OnLoaded()
 		// Calculate total mass.
 		assert(mTotalMass == 0);
 		TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-		const int lBoneCount = mPhysics->GetBoneCount();
-		for (int x = 0; x < lBoneCount; ++x)
-		{
-			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
-			if (lGeometry->GetBodyId())
-			{
-				mTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
-			}
-		}
-
-		PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mAllowMoveRoot);
+		mTotalMass = mPhysics->QueryTotalMass(lPhysicsManager);
+		PositionHauler::Set(mPosition, lPhysicsManager, mPhysics, mTotalMass, mAllowMoveRoot);
 
 		GetManager()->EnableTickCallback(this);
 	}
@@ -750,7 +729,8 @@ void ContextObject::OnTick()
 void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositionalData)
 {
 	mPosition.CopyData(&pPositionalData);
-	PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mAllowMoveRoot);
+	assert(mTotalMass != 0);
+	PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mTotalMass, mAllowMoveRoot);
 }
 
 void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend)

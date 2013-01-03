@@ -179,6 +179,7 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPhysicsOverride, mManager->GetGameManager()->GetPhysicsManager(),
 		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+	lInitData.mTransformation.SetOrientation(QuaternionF());
 	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
 	if (!mForceLoadUnique)
 	{

@@ -7,6 +7,7 @@
 #include "PushServerMessageProcessor.h"
 #include "../../Life/LifeServer/GameServerManager.h"
 #include "../PushBarrel.h"
+#include "../Explosion.h"
 #include "../Version.h"
 #include "ServerGrenade.h"
 
@@ -70,55 +71,25 @@ void PushServerMessageProcessor::Detonate(const Vector3DF& pForce, const Vector3
 {
 	(void)pForce;
 	(void)pTorque;
-	(void)pPosition;
 	(void)pExplosive;
 	(void)pHitObject;
 	(void)pExplosiveBodyId;
 	(void)pHitBodyId;
 
-	float lLevelShootEasyness = 12.5f;
+	TBC::PhysicsManager* lPhysicsManager = mGameServerManager->GetPhysicsManager();
 	Cure::ContextManager::ContextObjectTable lObjectTable = mGameServerManager->GetContext()->GetObjectTable();
 	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
 	for (; x != lObjectTable.end(); ++x)
 	{
 		const Cure::ContextObject* lObject = x->second;
-		TBC::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
-		if (!lObject->IsLoaded() || !lPhysics)
+		if (!lObject->IsLoaded())
 		{
 			continue;
 		}
-		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
-		const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -0.75f);
-		const int lBoneStart = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 0 : 1;
-		const int lBoneCount = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
-		for (int x = lBoneStart; x < lBoneCount; ++x)
+		const float lForce = Explosion::PushObject(lPhysicsManager, lObject, pPosition, 1.0f);
+		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
-			const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
-			if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY
-				|| (x != 0 && lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE))
-			{
-				continue;
-			}
-			const Vector3DF lBodyCenter = mGameServerManager->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
-			Vector3DF f = lBodyCenter - lEpicenter;
-			float d = f.GetLength();
-			if (d > 80*VISUAL_SCALE_FACTOR)
-			{
-				continue;
-			}
-			d = 1/d;
-			f *= d;
-			d *= lLevelShootEasyness;
-			d = d*d*d;
-			d = std::min(1.0f, d);
-			const float lMaxForceFactor = 1200.0f;
-			const float ff = lMaxForceFactor * lObject->GetMass() * d;
-			if (f.z <= 0.1f)
-			{
-				f.z += 0.3f;
-			}
-			f *= ff;
-			mGameServerManager->GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
+			x->second->ForceSend();
 		}
 	}
 }

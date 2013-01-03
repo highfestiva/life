@@ -521,6 +521,10 @@
 			UniqueIdentifier="{C734F7F1-C7A5-4376-A066-2A32FFD752A2}"
 			>
 			<File
+				RelativePath=".\Explosion.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Grenade.cpp"
 				>
 			</File>
@@ -594,6 +598,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
+			<File
+				RelativePath=".\Explosion.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Grenade.h"
 				>

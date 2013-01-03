@@ -19,7 +19,7 @@ namespace Push
 void PushBarrel::GetInfo(const Cure::GameManager* pGameManager, Cure::GameObjectId pAvatarId, TransformationF& pTransform, Vector3DF& pVelocity)
 {
 	const Cure::CppContextObject* lAvatar = (const Cure::CppContextObject*)pGameManager->GetContext()->GetObject(pAvatarId);
-	if (lAvatar && lAvatar->IsLoaded())
+	if (lAvatar)
 	{
 		pTransform.SetOrientation(lAvatar->GetOrientation());
 		pTransform.GetOrientation().RotateAroundOwnX(-PIF/2);

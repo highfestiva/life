@@ -98,6 +98,22 @@ void ChunkyPhysics::SetGuideMode(GuideMode pGuideMode)
 	mGuideMode = pGuideMode;
 }
 
+float ChunkyPhysics::QueryTotalMass(PhysicsManager* pPhysicsManager) const
+{
+	float lTotalMass = 0;
+	const int lBoneCount = GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
+	{
+		const TBC::ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
+		if (lGeometry->GetBodyId())
+		{
+			lTotalMass += pPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
+		}
+	}
+	return lTotalMass;
+}
+
+
 
 ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int pBoneIndex) const
 {

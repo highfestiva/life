@@ -50,6 +50,7 @@ public:
 	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
 	GuideMode GetGuideMode() const;	// Gets help with automatic motions, such as flipping over.
 	void SetGuideMode(GuideMode pGuideMode);
+	float QueryTotalMass(PhysicsManager* pPhysicsManager) const;
 
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
 	ChunkyBoneGeometry* GetBoneGeometry(PhysicsManager::BodyID pBodyId) const;

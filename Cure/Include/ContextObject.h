@@ -91,7 +91,7 @@ public:
 
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);	// Fetch full phys position (and update object graph as necessary).
 	static bool UpdateFullPosition(ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure);
-	void SetFullPosition(const ObjectPositionalData& pPositionalData);	// Sets full phys position if structure or significant difference seen.
+	void SetFullPosition(const ObjectPositionalData& pPositionalData, float pDeltaThreshold);	// Sets full phys position if structure or significant difference seen.
 	void SetInitialTransform(const TransformationF& pTransformation);
 	TransformationF GetInitialTransform() const;
 	void SetInitialPositionalData(const ObjectPositionalData& pPositionalData);

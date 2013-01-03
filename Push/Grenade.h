@@ -29,7 +29,7 @@ public:
 	virtual ~Grenade();
 
 private:
-	void Detonate();
+	void Detonate(const Vector3DF& pPosition);
 	virtual void OnLoaded();
 	void OnTick();
 	virtual void Grenade::OnForceApplied(ContextObject* pOtherObject,

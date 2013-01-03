@@ -37,7 +37,7 @@ namespace Cure
 
 
 
-bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsManager* pPhysicsManager, const TBC::ChunkyPhysics* pStructure)
+bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsManager* pPhysicsManager, const TBC::ChunkyPhysics* pStructure, float pTotalMass)
 {
 	if (!pStructure)
 	{
@@ -48,7 +48,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 	TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
 	pPhysicsManager->GetBodyTransform(lBody, pPosition.mPosition.mTransformation);
 	pPhysicsManager->GetBodyVelocity(lBody, pPosition.mPosition.mVelocity);
-	pPhysicsManager->GetBodyAcceleration(lBody, pPosition.mPosition.mAcceleration);
+	pPhysicsManager->GetBodyAcceleration(lBody, pTotalMass, pPosition.mPosition.mAcceleration);
 	pPhysicsManager->GetBodyAngularVelocity(lBody, pPosition.mPosition.mAngularVelocity);
 	pPhysicsManager->GetBodyAngularAcceleration(lBody, pPosition.mPosition.mAngularAcceleration);
 
@@ -225,7 +225,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 	return true;
 }
 
-void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure, bool pAllowMoveRoot)
+void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure, float pTotalMass, bool pAllowMoveRoot)
 {
 	if (pAllowMoveRoot)
 	{
@@ -235,7 +235,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			TBC::PhysicsManager::BodyID lBody = lRootGeometry->GetBodyId();
 			pPhysicsManager->SetBodyTransform(lBody, pPosition.mPosition.mTransformation);
 			pPhysicsManager->SetBodyVelocity(lBody, pPosition.mPosition.mVelocity);
-			pPhysicsManager->SetBodyAcceleration(lBody, pPosition.mPosition.mAcceleration);
+			pPhysicsManager->SetBodyAcceleration(lBody, pTotalMass, pPosition.mPosition.mAcceleration);
 			pPhysicsManager->SetBodyAngularVelocity(lBody, pPosition.mPosition.mAngularVelocity);
 			pPhysicsManager->SetBodyAngularAcceleration(lBody, pPosition.mPosition.mAngularAcceleration);
 		}

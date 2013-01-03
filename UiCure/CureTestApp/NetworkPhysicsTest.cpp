@@ -610,9 +610,9 @@ void ClientSetMovement(AgentData& pClientData, int pClientIndex, int pClientFram
 		TBC::PhysicsManager::BodyID lPhysicsId = pClientData.mBodyArray[pClientIndex+1].mPhysicsId;
 		pClientData.mPhysics->SetBodyTransform(lPhysicsId, pData.mPosition.mTransformation);
 		pClientData.mPhysics->SetBodyVelocity(lPhysicsId, pData.mPosition.mVelocity);
-		pClientData.mPhysics->SetBodyAcceleration(lPhysicsId, pData.mPosition.mAcceleration);
+		pClientData.mPhysics->SetBodyForce(lPhysicsId, pData.mPosition.mAcceleration);
 		pClientData.mPhysics->SetBodyAngularVelocity(lPhysicsId, pData.mPosition.mAngularVelocity);
-		pClientData.mPhysics->SetBodyAngularAcceleration(lPhysicsId, pData.mPosition.mAngularAcceleration);
+		pClientData.mPhysics->SetBodyTorque(lPhysicsId, pData.mPosition.mAngularAcceleration);
 	}
 }
 
@@ -699,9 +699,9 @@ void ServerAdjustClientMovement(int pClientIndex, const Cure::ObjectPositionalDa
 	TBC::PhysicsManager::BodyID lPhysicsId = gServer.mBodyArray[pClientIndex+1].mPhysicsId;
 	gServer.mPhysics->SetBodyTransform(lPhysicsId, pData.mPosition.mTransformation);
 	gServer.mPhysics->SetBodyVelocity(lPhysicsId, pData.mPosition.mVelocity);
-	gServer.mPhysics->SetBodyAcceleration(lPhysicsId, pData.mPosition.mAcceleration);
+	gServer.mPhysics->SetBodyForce(lPhysicsId, pData.mPosition.mAcceleration);
 	gServer.mPhysics->SetBodyAngularVelocity(lPhysicsId, pData.mPosition.mAngularVelocity);
-	gServer.mPhysics->SetBodyAngularAcceleration(lPhysicsId, pData.mPosition.mAngularAcceleration);
+	gServer.mPhysics->SetBodyTorque(lPhysicsId, pData.mPosition.mAngularAcceleration);
 }
 
 void ServerHandleNetworkInput(int pFrameIndex)
@@ -790,9 +790,9 @@ void ClientSendSelf(int pClientIndex)
 	Cure::ObjectPositionalData lData;
 	lFrom.mPhysics->GetBodyTransform(lFrom.mBodyArray[pClientIndex+1].mPhysicsId, lData.mPosition.mTransformation);
 	lFrom.mPhysics->GetBodyVelocity(lFrom.mBodyArray[pClientIndex+1].mPhysicsId, lData.mPosition.mVelocity);
-	lFrom.mPhysics->GetBodyAcceleration(lFrom.mBodyArray[pClientIndex+1].mPhysicsId, lData.mPosition.mAcceleration);
+	lFrom.mPhysics->GetBodyForce(lFrom.mBodyArray[pClientIndex+1].mPhysicsId, lData.mPosition.mAcceleration);
 	lFrom.mPhysics->GetBodyAngularVelocity(lFrom.mBodyArray[pClientIndex+1].mPhysicsId, lData.mPosition.mAngularVelocity);
-	lFrom.mPhysics->GetBodyAngularAcceleration(lFrom.mBodyArray[pClientIndex+1].mPhysicsId, lData.mPosition.mAngularAcceleration);
+	lFrom.mPhysics->GetBodyTorque(lFrom.mBodyArray[pClientIndex+1].mPhysicsId, lData.mPosition.mAngularAcceleration);
 	if (lFrom.mNetworkForceSend || lData.GetScaledDifference(&lFrom.mClientLastSendPositionalData) > 10.0f)
 	{
 		lFrom.mNetworkForceSend = false;

@@ -22,6 +22,7 @@
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "Explosion.h"
 #include "Grenade.h"
 #include "Level.h"
 #include "PushBarrel.h"
@@ -302,10 +303,11 @@ bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower, float pAn
 
 
 
-void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry)
+void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition)
 {
-	Vector3DF lPosition = pExplosive->GetPosition();
-	mCollisionSoundManager->OnCollision(5.0f, lPosition, pExplosiveGeometry);
+	(void)pExplosive;
+
+	mCollisionSoundManager->OnCollision(5.0f, pPosition, pExplosiveGeometry);
 
 	{
 		// Shattered pieces, stones or mud.
@@ -319,7 +321,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 			float x = (float)Random::Uniform(-1, 1);
 			float y = (float)Random::Uniform(-1, 1);
 			float z = -1;
-			TransformationF lTransform(gIdentityQuaternionF, lPosition + Vector3DF(x, y, z));
+			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
 			const float lAngle = (float)Random::Uniform(0, 2*PIF);
 			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
@@ -344,7 +346,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 			float x = (float)Random::Uniform(-1, 1);
 			float y = (float)Random::Uniform(-1, 1);
 			float z = (float)Random::Uniform(-1, 1);
-			TransformationF lTransform(gIdentityQuaternionF, lPosition + Vector3DF(x, y, z));
+			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
 			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
 			lPuff->SetOpacity(lOpacity);
@@ -353,6 +355,15 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 			z = (float)Random::Uniform(0, 7);
 			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
 			lPuff->StartLoading();
+		}
+	}
+
+	if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
+	{
+		const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+		if (lObject)
+		{
+			Explosion::PushObject(GetPhysicsManager(), lObject, pPosition, 1.0f);
 		}
 	}
 }
@@ -461,6 +472,12 @@ void PushManager::CloseLoginGui()
 void PushManager::ClearRoadSigns()
 {
 	ScopeLock lLock(GetTickLock());
+
+	if (mPickVehicleButton)
+	{
+		GetContext()->DeleteObject(mPickVehicleButton->GetInstanceId());
+		mPickVehicleButton = 0;
+	}
 
 	mRoadSignIndex = 0;
 	RoadSignMap::iterator x = mRoadSignMap.begin();
@@ -578,6 +595,12 @@ void PushManager::TickUiInput()
 			float lLeftPowerLR = S(RIGHT)-S(LEFT);
 			float lRightPowerLR = (S(RIGHT3D) - S(LEFT3D)) * 0.65f;
 			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, std::abs(lLeftPowerFwdRev));
+			static int cnt = 0;
+			if (++cnt < 30)
+			{
+				return;
+			}
+			cnt = 0;
 
 			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR, mCameraOrientation.x);
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR, mCameraOrientation.x);

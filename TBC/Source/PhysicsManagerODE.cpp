@@ -508,7 +508,7 @@ void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVeloci
 	}
 }
 
-void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, Vector3DF& pAcceleration) const
+void PhysicsManagerODE::GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -524,11 +524,24 @@ void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, Vector3DF& pAccelera
 	}
 }
 
-void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, const Vector3DF& pAcceleration)
+void PhysicsManagerODE::SetBodyForce(BodyID pBodyId, const Vector3DF& pAcceleration)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
 		dBodySetForce(lObject->mBodyID, pAcceleration.x, pAcceleration.y, pAcceleration.z);
+}
+
+void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const
+{
+	assert(pTotalMass > 0);
+	GetBodyForce(pBodyId, pAcceleration);
+	pAcceleration /= pTotalMass;
+}
+
+void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration)
+{
+	assert(pTotalMass > 0);
+	SetBodyForce(pBodyId, pAcceleration / pTotalMass);
 }
 
 void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const
@@ -556,7 +569,7 @@ void PhysicsManagerODE::SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& 
 	}
 }
 
-void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
+void PhysicsManagerODE::GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -572,13 +585,25 @@ void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pA
 	}
 }
 
-void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration)
+void PhysicsManagerODE::SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
 	{
 		::dBodySetTorque(lObject->mBodyID, pAngularAcceleration.x, pAngularAcceleration.y, pAngularAcceleration.z);
 	}
+}
+
+void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
+{
+	GetBodyTorque(pBodyId, pAngularAcceleration);
+	// TODO: handle moment of inertia?
+}
+
+void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration)
+{
+	// TODO: handle moment of inertia?
+	SetBodyTorque(pBodyId, pAngularAcceleration);
 }
 
 float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
@@ -1375,7 +1400,7 @@ bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Dif
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
+		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mAcceleration = lAxis * lAcceleration;
 	}
 
@@ -1463,12 +1488,12 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 		if (pDiff.mAcceleration < PIF*1000)
 		{
 			Vector3DF lAcceleration;
-			GetBodyAngularAcceleration(pBodyId, lAcceleration);
+			GetBodyTorque(pBodyId, lAcceleration);
 			// Drop angular acceleration along axis, then add the specified amount.
 			Vector3DF lAxisAcceleration = lAxis*(lAxis*lAcceleration);
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis * pDiff.mAcceleration;
-			SetBodyAngularAcceleration(pBodyId, lAcceleration);
+			SetBodyTorque(pBodyId, lAcceleration);
 		}
 	}
 
@@ -1497,7 +1522,7 @@ bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Di
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAcceleration(pBodyId, lAcceleration);
+		GetBodyForce(pBodyId, lAcceleration);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
 		lAcceleration -= Vector3DF(lParentForce[0], lParentForce[1], lParentForce[2]);
@@ -1584,7 +1609,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 
 	{
 		lParentAcceleration -= lAxis*pDiff.mAcceleration;
-		SetBodyAcceleration(pBodyId, lParentAcceleration);
+		SetBodyForce(pBodyId, lParentAcceleration);
 	}
 
 	return (true);
@@ -1616,7 +1641,7 @@ bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
+		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = -(lAxis2 * lAcceleration);
 		pDiff.mAngleAcceleration = -(lAxis1 * lAcceleration);
 	}
@@ -1695,7 +1720,7 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 	{
 		Vector3DF lAxisAcceleration;
 		Vector3DF lOriginalAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lOriginalAcceleration);
+		GetBodyTorque(pBodyId, lOriginalAcceleration);
 		Vector3DF lAcceleration = lOriginalAcceleration;
 		// Drop angular acceleration along axis 1 & 2, then add the specified amount.
 		if (pDiff.mValueAcceleration < PIF*1000)
@@ -1710,8 +1735,8 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis2 * -pDiff.mAngleAcceleration;
 		}
-		//SetBodyAcceleration(pBodyId, Vector3DF());
-		SetBodyAngularAcceleration(pBodyId, lAcceleration);
+		//SetBodyForce(pBodyId, Vector3DF());
+		SetBodyTorque(pBodyId, lAcceleration);
 	}
 
 	return (true);
@@ -1757,9 +1782,9 @@ bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAcceleration(pBodyId, lAcceleration);
+		GetBodyForce(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = -(lAxis1 * lAcceleration);
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
+		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mAngle1Acceleration = -(lAxis2 * lAcceleration);
 		pDiff.mAngle2Acceleration = -(lAxis1 * lAcceleration);
 	}
@@ -1833,16 +1858,16 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAcceleration(pBodyId, lAcceleration);
+		GetBodyForce(pBodyId, lAcceleration);
 		// Drop suspension acceleration along axis1.
 		Vector3DF lAxisAcceleration(lAxis1*(lAxis1*lAcceleration));
 		lAcceleration -= lAxisAcceleration;
 		// Add suspension acceleration.
 		lAcceleration += lAxis1 * -pDiff.mValueAcceleration;
-		SetBodyAcceleration(pBodyId, lAcceleration);
+		SetBodyForce(pBodyId, lAcceleration);
 
 		Vector3DF lOriginalAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lOriginalAcceleration);
+		GetBodyTorque(pBodyId, lOriginalAcceleration);
 		lAcceleration = lOriginalAcceleration;
 		// Drop angular acceleration along axis 1 & 2, then add the specified amount.
 		if (pDiff.mAngle1Acceleration < PIF*1000)
@@ -1857,7 +1882,7 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis1 * -pDiff.mAngle2Acceleration;
 		}
-		SetBodyAngularAcceleration(pBodyId, lAcceleration);
+		SetBodyTorque(pBodyId, lAcceleration);
 	}
 
 	return (true);
@@ -1890,7 +1915,7 @@ bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
+		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = lAcceleration.x;
 		pDiff.mAngle1Acceleration = lAcceleration.y;
 		pDiff.mAngle2Acceleration = lAcceleration.z;
@@ -1942,10 +1967,10 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 
 	{
 		// TODO: adjust linear acceleration.
-		//SetBodyAcceleration(pBodyId, Vector3DF(0, 0, 0));
-		//SetBodyAcceleration(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
-		SetBodyAngularAcceleration(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
-		//SetBodyAngularAcceleration(pBodyId, Vector3DF(0, 0, 0));
+		//SetBodyForce(pBodyId, Vector3DF(0, 0, 0));
+		//SetBodyForce(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
+		SetBodyTorque(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
+		//SetBodyTorque(pBodyId, Vector3DF(0, 0, 0));
 	}
 
 	return (true);
@@ -3439,7 +3464,7 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 		{
 			lVelocity.Normalize(lMaxAngularVelocity);
 			SetBodyAngularVelocity(lObject, lVelocity);
-			SetBodyAngularAcceleration(lObject, Vector3DF());
+			SetBodyTorque(lObject, Vector3DF());
 		}
 	}
 }

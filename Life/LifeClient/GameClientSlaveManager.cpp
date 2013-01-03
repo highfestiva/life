@@ -732,6 +732,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::ContextObject* lObject = GetContext()->GetObject(lInstanceId, true);
 			if (!lObject)
 			{
+				log_volatile(mLog.Debugf(_T("Object %u is missing, can't set pos from network data. Asking server for re-creation."), lInstanceId));
 				GetNetworkAgent()->SendNumberMessage(true, GetNetworkClient()->GetSocket(),
 					Cure::MessageNumber::INFO_RECREATE_OBJECT, lInstanceId, 0);
 			}
@@ -739,14 +740,21 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				if (!lObject->IsLoaded())
 				{
-					// Aha! Set positional information to it's there when the object gets loaded.
+					// Aha! Set positional information so it's there when the object gets loaded.
 					lObject->SetInitialPositionalData(lData);
 				}
 
-				// Don't set movement for client-controlled objects.
-				if (!GetMaster()->IsLocalServer() || !GetMaster()->IsLocalObject(lInstanceId))
+				if (!GetMaster()->IsLocalServer())	// Server will have set the position already.
 				{
-					SetMovement(lInstanceId, lFrameIndex, lData);
+					if (GetMaster()->IsLocalObject(lInstanceId))
+					{
+						// Only set changes to locally controlled objects if the change is big.
+						SetMovement(lInstanceId, lFrameIndex, lData, 0.5f);
+					}
+					else
+					{
+						SetMovement(lInstanceId, lFrameIndex, lData, 0);
+					}
 				}
 			}
 			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0, 1000000);
@@ -914,7 +922,7 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 	return (true);
 }
 
-void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData)
+void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData, float pDeltaThreshold)
 {
 	ObjectFrameIndexMap::iterator x = mObjectFrameIndexMap.find(pInstanceId);
 	if (x == mObjectFrameIndexMap.end())
@@ -959,7 +967,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 					}
 				}
 			}*/
-			lObject->SetFullPosition(pData);
+			lObject->SetFullPosition(pData, pDeltaThreshold);
 			bool lEnableSmoothing;
 			CURE_RTVAR_GET(lEnableSmoothing, =, GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true);
 			if (lEnableSmoothing)

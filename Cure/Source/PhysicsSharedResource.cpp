@@ -126,8 +126,9 @@ bool PhysicsSharedResource::FinalizeInit()
 		if (lStructure->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
 		{
 			const QuaternionF lPhysOrientation(mInitData.mPhysicsManager->GetBodyOrientation(lStructure->GetBoneGeometry(0)->GetBodyId()));
+			const float lTotalMass = lStructure->QueryTotalMass(mInitData.mPhysicsManager);
 			ObjectPositionalData lPlacement;
-			lOk = PositionHauler::Get(lPlacement, mInitData.mPhysicsManager, lStructure);
+			lOk = PositionHauler::Get(lPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass);
 			assert(lOk);
 			if (lOk)
 			{
@@ -135,7 +136,7 @@ bool PhysicsSharedResource::FinalizeInit()
 				lNewPlacement->mPosition.mTransformation =
 					TransformationF(lTransformation.GetOrientation() * lPhysOrientation,
 						lTransformation.GetPosition());
-				PositionHauler::Set(*lNewPlacement, mInitData.mPhysicsManager, lStructure, true);
+				PositionHauler::Set(*lNewPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass, true);
 				delete lNewPlacement;
 			}
 		}

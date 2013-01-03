@@ -19,7 +19,9 @@ namespace Cure
 
 RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, Usage pUsage):
 	mName(pName),
-	mDefaultStrValue(pValue)
+	mRealValue(0),
+	mDefaultStrValue(pValue),
+	mDefaultRealValue(0)
 {
 	mDataType = RuntimeVariable::DATATYPE_STRING;
 	SetStrValue(pValue, pUsage);
@@ -27,7 +29,9 @@ RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, Usage pUsa
 
 RuntimeVariable::RuntimeVariable(const str& pName, bool pValue, Usage pUsage):
 	mName(pName),
-	mDefaultBoolValue(pValue)
+	mRealValue(0),
+	mDefaultBoolValue(pValue),
+	mDefaultRealValue(0)
 {
 	mDataType = RuntimeVariable::DATATYPE_BOOL;
 	SetBoolValue(pValue, pUsage);
@@ -35,7 +39,9 @@ RuntimeVariable::RuntimeVariable(const str& pName, bool pValue, Usage pUsage):
 
 RuntimeVariable::RuntimeVariable(const str& pName, int pValue, Usage pUsage):
 	mName(pName),
-	mDefaultIntValue(pValue)
+	mRealValue(0),
+	mDefaultIntValue(pValue),
+	mDefaultRealValue(0)
 {
 	mDataType = RuntimeVariable::DATATYPE_INT;
 	SetIntValue(pValue, pUsage);

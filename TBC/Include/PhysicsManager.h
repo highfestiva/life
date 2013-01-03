@@ -164,10 +164,14 @@ public:
 	virtual void SetBodyTransform(BodyID pBodyId, const Transformation<float32>& pTransform) = 0;
 	virtual void GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const = 0;
 	virtual void SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVelocity) = 0;
-	virtual void GetBodyAcceleration(BodyID pBodyId, Vector3DF& pAcceleration) const = 0;
-	virtual void SetBodyAcceleration(BodyID pBodyId, const Vector3DF& pAcceleration) = 0;
+	virtual void GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const = 0;
+	virtual void SetBodyForce(BodyID pBodyId, const Vector3DF& pAcceleration) = 0;
+	virtual void GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const = 0;
+	virtual void SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration) = 0;
 	virtual void GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const = 0;
 	virtual void SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity) = 0;
+	virtual void GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const = 0;
+	virtual void SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration) = 0;
 	virtual void GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const = 0;
 	virtual void SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration) = 0;
 

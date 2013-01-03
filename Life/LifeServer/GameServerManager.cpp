@@ -246,7 +246,7 @@ TBC::PhysicsManager* GameServerManager::GetPhysicsManager() const
 void GameServerManager::DeleteContextObject(Cure::GameObjectId pInstanceId)
 {
 	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId);
-	if (lObject && lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+	if (lObject && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 	{
 		BroadcastDeleteObject(pInstanceId);
 	}
@@ -805,7 +805,7 @@ void GameServerManager::ApplyStoredMovement()
 					{
 						const Cure::ObjectPositionalData& lData =
 							((Cure::MessageObjectPosition*)lMovement)->GetPositionalData();
-						lContextObject->SetFullPosition(lData);
+						lContextObject->SetFullPosition(lData, 0);
 					}
 					else
 					{
@@ -1000,7 +1000,7 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 		pObject->GetOrientation().GetEulerAngles(lEulerAngles);
 		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
 		lTransform.GetOrientation() *= pObject->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-		pObject->SetFullPosition(lPositionData);
+		pObject->SetFullPosition(lPositionData, 0);
 		GetContext()->AddPhysicsSenderObject(pObject);
 	}
 	else

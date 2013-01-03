@@ -494,6 +494,11 @@ int ObjectPositionalData::Unpack(const uint8* pData, int pSize)
 
 float ObjectPositionalData::GetBiasedDifference(const PositionalData* pReference) const
 {
+	return GetBiasedTypeDifference(pReference, false);
+}
+
+float ObjectPositionalData::GetBiasedTypeDifference(const PositionalData* pReference, bool pPositionOnly) const
+{
 	assert(GetType() == pReference->GetType());
 	const ObjectPositionalData& lReference = (const ObjectPositionalData&)*pReference;
 	assert(IsSameStructure(lReference));
@@ -501,13 +506,24 @@ float ObjectPositionalData::GetBiasedDifference(const PositionalData* pReference
 	lDiff += mPosition.GetBiasedDifference(&lReference.mPosition);
 	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
 	BodyPositionArray::const_iterator y = lReference.mBodyPositionArray.begin();
+	int lBodyCount = 1 + mBodyPositionArray.size();
 	for (; x != mBodyPositionArray.end(); ++x, ++y)
 	{
 		assert(y != lReference.mBodyPositionArray.end());
+		if (pPositionOnly)
+		{
+			const Type lType = (*x)->GetType();
+			if (lType != TYPE_POSITION_6 && lType != TYPE_POSITION_3 && lType != TYPE_POSITION_2 && lType != TYPE_POSITION_1)
+			{
+				--lBodyCount;
+				continue;
+			}
+
+		}
 		lDiff += (*x)->GetScaledDifference(*y);
 	}
-	assert((x == mBodyPositionArray.end()) == (y == lReference.mBodyPositionArray.end()));
-	return lDiff / (1 + mBodyPositionArray.size());
+	assert((x == mBodyPositionArray.end()) && (y == lReference.mBodyPositionArray.end()));
+	return lDiff / lBodyCount;
 }
 
 PositionalData* ObjectPositionalData::GetAt(size_t pIndex) const

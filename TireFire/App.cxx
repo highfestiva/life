@@ -954,7 +954,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
 					lNewPlacement->mPosition.mTransformation.GetPosition().x -= 10;
-					lVehicle->SetFullPosition(*lNewPlacement);
+					lVehicle->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}
@@ -969,7 +969,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
 					lNewPlacement->mPosition.mTransformation.GetOrientation().RotateAroundOwnY(PIF*0.4f);
-					lVehicle->SetFullPosition(*lNewPlacement);
+					lVehicle->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}
@@ -999,7 +999,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 					lNewPlacement->mPosition.mTransformation.GetPosition().x += 30;
 					lNewPlacement->mPosition.mTransformation.GetPosition().y += 20;
 					lNewPlacement->mPosition.mTransformation.GetPosition().z += 15;
-					lVehicle->SetFullPosition(*lNewPlacement);
+					lVehicle->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}

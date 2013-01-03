@@ -42,6 +42,8 @@ void ServerGrenade::SetOwnerId(Cure::GameObjectId pOwnerId)
 
 void ServerGrenade::OnLoaded()
 {
+	Parent::OnLoaded();
+
 	TransformationF lTransform;
 	Vector3DF lParentVelocity;
 	mLauncher->GetBarrel(mOwnerId, lTransform, lParentVelocity);
@@ -51,6 +53,11 @@ void ServerGrenade::OnLoaded()
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetBodyId(), lTransform);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+
+#ifdef LEPRA_DEBUG
+	Vector3DF lPos = GetPosition();
+	log_volatile(mLog.Debugf(_T("Server grenade started at pos (%f;%f;%f)."), lPos.x, lPos.y, lPos.z));
+#endif // Debug
 }
 
 void ServerGrenade::OnTick()

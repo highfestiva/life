@@ -18,7 +18,7 @@ namespace Push
 PushServerTicker::PushServerTicker(Cure::ResourceManager* pResourceManager, InteractiveConsoleLogListener* pConsoleLogger, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	Parent(pResourceManager, pConsoleLogger, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity)
 {
-	mGameManager->SetLevelName(_T("level_01"));
+	mGameManager->SetLevelName(_T("level_02"));
 	mGameManager->SetMessageProcessor(new PushServerMessageProcessor(mGameManager));
 }
 

@@ -204,6 +204,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
 					Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
 				QuaternionF lRotation;
+TODO: use orientation of craft instead!!! Cam won't be updated at all times on server!
 				lRotation.RotateAroundWorldZ(mValue[ASPECT_CAM] - MathTraits<float>::Pi() / 2);
 				lAxis[0] = lRotation*lAxis[0];
 				lAxis[1] = lRotation*lAxis[1];
@@ -483,18 +484,24 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			case ENGINE_YAW_BRAKE:
 			{
-				const TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-				Vector3DF lAngularVelocity;
-				pPhysicsManager->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
-				// Reduce rotation of craft.
-				lAngularVelocity.z *= mFriction;
-				const float lLowAngularVelocity = mMaxSpeed;
-				if (Math::IsEpsEqual(lPrimaryForce, 0.0f) && std::abs(lAngularVelocity.z) < lLowAngularVelocity)
+				if (Math::IsEpsEqual(lPrimaryForce, 0.0f))
 				{
-					// Seriously kill speed depending on strength.
-					lAngularVelocity.z *= 1/mStrength;
+					const TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+					Vector3DF lAngularVelocity;
+					pPhysicsManager->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
+					// Reduce rotation of craft.
+					const float lLowAngularVelocity = mMaxSpeed;
+					if (std::abs(lAngularVelocity.z) < lLowAngularVelocity)
+					{
+						// Seriously kill speed depending on strength.
+						lAngularVelocity.z *= 1/mStrength;
+					}
+					else
+					{
+						lAngularVelocity.z *= mFriction;
+					}
+					pPhysicsManager->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
 				}
-				pPhysicsManager->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
 			}
 			break;
 			default:
@@ -597,7 +604,7 @@ float PhysicsEngine::GetValue() const
 		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
 		const float b = ::fabs(mValue[ASPECT_SECONDARY]);
 		const float c = ::fabs(mValue[ASPECT_TERTIARY]);
-		if (a > b || a > c)
+		if (a > b && a > c)
 		{
 			return mValue[ASPECT_PRIMARY];
 		}

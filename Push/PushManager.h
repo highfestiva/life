@@ -71,7 +71,7 @@ public:
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle);
 
-	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry);
+	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition);
 
 protected:
 	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;

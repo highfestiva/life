@@ -64,10 +64,14 @@ public:
 	void SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform);
 	void GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const;
 	void SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVelocity);
-	void GetBodyAcceleration(BodyID pBodyId, Vector3DF& pAcceleration) const;
-	void SetBodyAcceleration(BodyID pBodyId, const Vector3DF& pAcceleration);
+	void GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const;
+	void SetBodyForce(BodyID pBodyId, const Vector3DF& pAcceleration);
+	void GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const;
+	void SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration);
 	void GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const;
 	void SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity);
+	void GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
+	void SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
 	void GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
 	void SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
 

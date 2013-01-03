@@ -90,7 +90,7 @@ bool Cutie::QueryFlip()
 		GetOrientation().GetEulerAngles(lEulerAngles);
 		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
 		lTransform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-		SetFullPosition(lPositionData);
+		SetFullPosition(lPositionData, 0);
 		return true;
 	}
 	return false;

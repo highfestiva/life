@@ -164,6 +164,7 @@ public:
 	int Pack(uint8* pData) const;
 	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
+	float GetBiasedTypeDifference(const PositionalData* pReference, bool pPositionOnly) const;
 
 	PositionalData* GetAt(size_t pIndex) const;
 	void SetAt(size_t pIndex, PositionalData* pData);
