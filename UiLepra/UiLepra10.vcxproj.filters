@@ -178,6 +178,12 @@
     <ClCompile Include="Source\Mac\UiMacOpenGLDisplay.mm">
       <Filter>Source Files\Mac</Filter>
     </ClCompile>
+    <ClCompile Include="Source\UiTouchDrag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UiTouchstick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\UiOpenGLExtensions.mm">

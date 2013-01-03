@@ -40,13 +40,13 @@ UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager
 	if (mManager->GetConsoleLogger())
 	{
 #ifdef NO_LOG_DEBUG_INFO
-		const Log::LogLevel lAllowedLevel = Log::LEVEL_INFO;
+		const LogLevel lAllowedLevel = LEVEL_INFO;
 #else // Allow debug logging.
-		const Log::LogLevel lAllowedLevel = Log::LEVEL_LOWEST_TYPE;
+		const LogLevel lAllowedLevel = LEVEL_LOWEST_TYPE;
 #endif // Disallow/allow debug logging.
-		for (int x = lAllowedLevel; x < Log::LEVEL_TYPE_COUNT; ++x)
+		for (int x = lAllowedLevel; x < LEVEL_TYPE_COUNT; ++x)
 		{
-			LogType::GetLog(LogType::SUB_ROOT)->AddListener(mManager->GetConsoleLogger(), (Log::LogLevel)x);
+			LogType::GetLog(LogType::SUB_ROOT)->AddListener(mManager->GetConsoleLogger(), (LogLevel)x);
 		}
 	}
 }

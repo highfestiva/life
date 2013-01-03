@@ -25,7 +25,7 @@ namespace Life
 
 using namespace Lepra;
 
-const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;
+const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;	// TODO: REMOVE ME!!!
 
 //#define LIFE_DEMO
 

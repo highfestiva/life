@@ -81,10 +81,7 @@ public:
 
 	virtual bool IsPixelShadersEnabled() const;
 
-	void SetViewport(const PixelRect& pViewport);
 	void SetViewFrustum(float pFOVAngle, float pNear, float pFar);
-	void SetClippingRect(const PixelRect& pRect);
-	void ResetClippingRect();
 
 	void SetShadowMode(Shadows pShadowMode, ShadowHint pHint);
 	void SetDepthWriteEnabled(bool pEnabled);
@@ -139,6 +136,9 @@ public:
 	virtual void DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor);
 
 protected:
+	virtual void DoSetClippingRect(const PixelRect& pRect);
+	virtual void DoSetViewport(const PixelRect& pViewport);
+
 	// Overloads from HardwareRenderer
 	int ReleaseShadowMap(int pShadowMapID);
 

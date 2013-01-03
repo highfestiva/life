@@ -51,7 +51,7 @@ Renderer::Renderer(Canvas* pScreen) :
 	mLightsEnabled(false),
 	mShadowMode(NO_SHADOWS),
 	mShadowHint(Renderer::SH_VOLUMES_ONLY),
-	mShadowUpdateFrameDelay(0),
+	mShadowUpdateFrameDelay(100),
 	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight())
 {
 }
@@ -146,6 +146,18 @@ void Renderer::SetViewport(const PixelRect& pViewport)
 		pViewport.mTop <= pViewport.mBottom);
 	mViewport = pViewport;
 	RecalculateFrustumPlanes();
+
+	if (mScreen->GetOutputRotation()%180 != 0)
+	{
+		PixelRect lRect(pViewport);
+		std::swap(lRect.mLeft, lRect.mTop);
+		std::swap(lRect.mRight, lRect.mBottom);
+		DoSetViewport(lRect);
+	}
+	else
+	{
+		DoSetViewport(pViewport);
+	}
 }
 
 const PixelRect& Renderer::GetViewport() const
@@ -192,16 +204,27 @@ float Renderer::CalcFOVAngle(float pReferenceAngle, float pAspectRatio)
 void Renderer::SetClippingRect(const PixelRect& pRect)
 {
 	mClippingRect = pRect;
+	if (mScreen->GetOutputRotation()%180 != 0)
+	{
+		PixelRect lRect(pRect);
+		std::swap(lRect.mLeft, lRect.mTop);
+		std::swap(lRect.mRight, lRect.mBottom);
+		DoSetClippingRect(lRect);
+	}
+	else
+	{
+		DoSetClippingRect(pRect);
+	}
 }
 
 void Renderer::ReduceClippingRect(const PixelRect& pRect)
 {
-	Renderer::SetClippingRect(mClippingRect.GetOverlap(pRect));
+	SetClippingRect(mClippingRect.GetOverlap(pRect));
 }
 
 void Renderer::ResetClippingRect()
 {
-	SetClippingRect(PixelRect(0, 0, mScreen->GetActualWidth(), mScreen->GetActualHeight()));
+	SetClippingRect(PixelRect(0, 0, mScreen->GetWidth(), mScreen->GetHeight()));
 }
 
 const PixelRect& Renderer::GetClippingRect() const
@@ -212,7 +235,6 @@ const PixelRect& Renderer::GetClippingRect() const
 void Renderer::SetCameraTransformation(const TransformationF& pTransformation)
 {
 	mCameraTransformation = pTransformation;
-	mCameraTransformation.RotateRoll(GetScreen()->GetOutputRotation() * PIF / -180.0f);
 	mCameraOrientationInverse = mCameraTransformation.GetOrientation().GetInverse();
 }
 
@@ -970,6 +992,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 			lOk = (lGeometryData->mTA->mTextureID[x] != pTexture);
 			if (!lOk)
 			{
+				assert(lOk);
 				log_atrace("Skipping add of texture to geometry a second time.");
 			}
 		}
@@ -986,6 +1009,10 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 					lGeometryData->mTA->mMaps[x].mMapID[Texture::ALPHA_MAP]    = lTexture->mTMapID[Texture::ALPHA_MAP];
 					lGeometryData->mTA->mMaps[x].mMapID[Texture::NORMAL_MAP]   = lTexture->mTMapID[Texture::NORMAL_MAP];
 					lGeometryData->mTA->mMaps[x].mMapID[Texture::SPECULAR_MAP] = lTexture->mTMapID[Texture::SPECULAR_MAP];
+					lGeometryData->mTA->mMaps[x].mMipMapLevelCount[Texture::COLOR_MAP]    = lTexture->mTMipMapLevelCount[Texture::COLOR_MAP];
+					lGeometryData->mTA->mMaps[x].mMipMapLevelCount[Texture::ALPHA_MAP]    = lTexture->mTMipMapLevelCount[Texture::ALPHA_MAP];
+					lGeometryData->mTA->mMaps[x].mMipMapLevelCount[Texture::NORMAL_MAP]   = lTexture->mTMipMapLevelCount[Texture::NORMAL_MAP];
+					lGeometryData->mTA->mMaps[x].mMipMapLevelCount[Texture::SPECULAR_MAP] = lTexture->mTMipMapLevelCount[Texture::SPECULAR_MAP];
 					lOk = true;
 				}
 			}
@@ -1066,6 +1093,7 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 			LEPRA_DEBUG_CODE(assert(lReferenceCount == lGeometryData->mReferenceSet.size()+1));
 		}
 
+		lGeometryData->mGeometry->SetRendererData(0);
 		delete lGeometryData;
 	}
 }

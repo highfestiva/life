@@ -24,6 +24,7 @@ Cutie::Cutie(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCur
 	mKillJointsTickCount(2),
 	mWheelExpelTickCount(3)
 {
+	SetForceLoadUnique(true);	// Needs to be unique as physics are modified and reloaded on every death.
 }
 
 Cutie::~Cutie()
@@ -89,7 +90,7 @@ bool Cutie::QueryFlip()
 		GetOrientation().GetEulerAngles(lEulerAngles);
 		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
 		lTransform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-		SetFullPosition(lPositionData);
+		SetFullPosition(lPositionData, 0);
 		return true;
 	}
 	return false;
@@ -159,7 +160,7 @@ void Cutie::OnTick()
 	{
 		TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
 		if (lWheel->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE ||
-			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(lWheel->GetBodyId()))
+			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(lWheel->GetBodyId()))
 		{
 			continue;
 		}

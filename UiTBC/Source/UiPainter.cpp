@@ -1011,6 +1011,36 @@ void Painter::FillTriangle(const PixelCoord& pPoint1, float pU1, float pV1,
 	             (float)pPoint3.x, (float)pPoint3.y, pU3, pV3, pImageID);
 }
 
+void Painter::DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill)
+{
+	if (dx <= 0 || dy <= 0)
+	{
+		return;
+	}
+	const size_t lCurveCount = ((dx*2 + dy*2) / 20 + std::abs(a1-a2)/20 + 12) & (~7);
+	std::vector<Vector2DF> lCoords;
+	const float lXRadius = dx*0.5f;
+	const float lYRadius = dy*0.5f;
+	const float lMidX = x + dx*0.5f;
+	const float lMidY = y + dy*0.5f;
+	if (pFill)
+	{
+		lCoords.push_back(Vector2DF(lMidX, lMidY));
+	}
+	const float lStartAngle = Lepra::Math::Deg2Rad((float)a1);
+	const float lEndAngle = Lepra::Math::Deg2Rad((float)a2);
+	const float lDeltaAngle = (lEndAngle-lStartAngle)/(lCurveCount-1);
+	float lAngle = lStartAngle;
+	for (size_t i = 0; i < lCurveCount; ++i)
+	{
+		lCoords.push_back(Vector2DF(
+			lMidX + cos(lAngle)*lXRadius,
+			lMidY - sin(lAngle)*lYRadius));
+		lAngle += lDeltaAngle;
+	}
+	DrawFan(lCoords, pFill);
+}
+
 void Painter::DrawImage(ImageID pImageID, int x, int y)
 {
 	if(mCurrentDisplayList == 0)

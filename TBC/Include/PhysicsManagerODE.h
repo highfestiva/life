@@ -15,7 +15,7 @@
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
 #include <ode/ode.h>
 #pragma warning(pop)
-#include <list>
+#include <vector>
 
 
 namespace TBC
@@ -36,23 +36,23 @@ public:
 
 	virtual BodyID CreateSphere(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0,
-		ForceFeedbackListener* pListener = 0);
+		int pForceListenerId = 0);
 	virtual BodyID CreateCylinder(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, ForceFeedbackListener* pListener = 0);
+		float32 pBounce = 0, int pForceListenerId = 0);
 	virtual BodyID CreateCapsule(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, ForceFeedbackListener* pListener = 0);
+		float32 pBounce = 0, int pForceListenerId = 0);
 	virtual BodyID CreateBox(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		const Vector3D<float32>& pSize, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, ForceFeedbackListener* pListener = 0);
+		float32 pBounce = 0, int pForceListenerId = 0);
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody);
 
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,
 		unsigned pTriangleCount, const Lepra::uint32* pIndices,
 		const TransformationF& pTransform, float32 pFriction = 1,
-		float32 pBounce = 0, ForceFeedbackListener* pListener = 0);
+		float32 pBounce = 0, int pForceListenerId = 0);
 
 	virtual bool IsStaticBody(BodyID pBodyId) const;
 
@@ -64,10 +64,14 @@ public:
 	void SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform);
 	void GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const;
 	void SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVelocity);
-	void GetBodyAcceleration(BodyID pBodyId, Vector3DF& pAcceleration) const;
-	void SetBodyAcceleration(BodyID pBodyId, const Vector3DF& pAcceleration);
+	void GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const;
+	void SetBodyForce(BodyID pBodyId, const Vector3DF& pAcceleration);
+	void GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const;
+	void SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration);
 	void GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const;
 	void SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity);
+	void GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
+	void SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
 	void GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
 	void SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
 
@@ -83,21 +87,21 @@ public:
 	// affect the simulation. It's only purpose is to tell the listener
 	// when an object intersects the trigger volume.
 	//
-	virtual TriggerID CreateSphereTrigger(const TransformationF& pTransform, float32 pRadius, TriggerListener* pListener);
+	virtual TriggerID CreateSphereTrigger(const TransformationF& pTransform, float32 pRadius, int pTriggerListenerId);
 	virtual TriggerID CreateCylinderTrigger(const TransformationF& pTransform, float32 pRadius,
-		float32 pLength, TriggerListener* pListener);
+		float32 pLength, int pTriggerListenerId);
 	virtual TriggerID CreateCapsuleTrigger(const TransformationF& pTransform, float32 pRadius,
-		float32 pLength, TriggerListener* pListener);
+		float32 pLength, int pTriggerListenerId);
 	virtual TriggerID CreateBoxTrigger(const TransformationF& pTransform,
-		const Vector3D<float32>& pSize, TriggerListener* pListener);
+		const Vector3D<float32>& pSize, int pTriggerListenerId);
 	virtual TriggerID CreateRayTrigger(const TransformationF& pTransform, const Vector3D<float32>& pFromPos,
-		const Vector3D<float32>& pToPos, TriggerListener* pListener);
+		const Vector3D<float32>& pToPos, int pTriggerListenerId);
 
 	virtual void DeleteTrigger(TriggerID pTriggerID);
 
-	virtual TriggerListener* GetTriggerListener(TriggerID pTrigger);
-	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody);
-	virtual void SetForceFeedbackListener(BodyID pBody, ForceFeedbackListener* pListener);
+	virtual int GetTriggerListenerId(TriggerID pTrigger);
+	virtual int GetForceFeedbackListenerId(BodyID pBody);
+	virtual void SetForceFeedbackListener(BodyID pBody, int pForceFeedbackId);
 
 	virtual void GetTriggerTransform(TriggerID pTriggerID, TransformationF& pTransform);
 	virtual void SetTriggerTransform(TriggerID pTriggerID, const TransformationF& pTransform);
@@ -234,8 +238,8 @@ private:
 			mFriction(0),
 			mBounce(0),
 			mUserData(0),
-			mTriggerListener(0),
-			mForceFeedbackListener(0),
+			mTriggerListenerId(0),
+			mForceFeedbackId(0),
 			mHasMassChildren(false)
 		{
 		}
@@ -252,26 +256,43 @@ private:
 		void* mUserData;
 
 		// The only thing that differs between standard bodies and triggers
-		// is the value of this pointer. If this is null, this is a regular
+		// is the value of this member. If this is 0, this is a regular
 		// body, a trigger otherwise.
-		TriggerListener* mTriggerListener;
+		int mTriggerListenerId;
 
-		ForceFeedbackListener* mForceFeedbackListener;
+		int mForceFeedbackId;
 
 		bool mHasMassChildren;
 	};
 
+	class TriggerInfo;
 	class JointInfo;
 	typedef std::hash_set<Object*, LEPRA_VOIDP_HASHER> ObjectTable;
 	typedef std::hash_set<JointInfo*, LEPRA_VOIDP_HASHER> JointTable;
-	typedef std::list<JointInfo*> JointList;
+	typedef std::vector<TriggerInfo> TriggerInfoList;
+	typedef std::vector<JointInfo*> JointList;
+
+	class TriggerInfo
+	{
+	public:
+		inline TriggerInfo(TriggerID pTriggerId, int pTriggerListenerId, int pBodyListenerId):
+			mTriggerId(pTriggerId),
+			mTriggerListenerId(pTriggerListenerId),
+			mBodyListenerId(pBodyListenerId)
+		{
+		}
+
+		TriggerID mTriggerId;
+		int mTriggerListenerId;
+		int mBodyListenerId;
+	};
 
 	class JointInfo
 	{
 	public:
 		inline JointInfo() :
-			mListener1(0),
-			mListener2(0),
+			mListenerId1(0),
+			mListenerId2(0),
 			mBody1Id(0),
 			mBody2Id(0)
 		{
@@ -291,8 +312,8 @@ private:
 		BodyID mBody1Id;
 		BodyID mBody2Id;
 		dJointFeedback mFeedback;
-		ForceFeedbackListener* mListener1;
-		ForceFeedbackListener* mListener2;
+		int mListenerId1;
+		int mListenerId2;
 		Vector3DF mPosition;
 		Vector3DF mRelativeVelocity;
 	};
@@ -324,6 +345,8 @@ private:
 	ObjectTable mObjectTable;
 	BodySet mAutoDisabledObjectSet;
 	JointTable mJointTable;
+
+	TriggerInfoList mTriggerInfoList;
 	JointList mFeedbackJointList;
 
 	FastAllocator<JointInfo> mJointInfoAllocator;

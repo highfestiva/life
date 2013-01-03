@@ -37,8 +37,8 @@ namespace TireFire
 
 
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
-	Cure::GameTicker(),
-	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager, 400, 4, 3),
+	Cure::GameTicker(400, 4, 3),
+	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
@@ -54,6 +54,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mScore(0),
 	mScoreCountingEnabled(false)
 {
+	SetTicker(this);
+
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
 	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0));
@@ -187,7 +189,7 @@ void Game::SetVehicleName(const str& pVehicle)
 		return;
 	}
 	delete mVehicle;
-	mVehicle = (Vehicle*)Parent::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	mVehicle = (Vehicle*)GameManager::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (mVehicle != 0);
 	assert(lOk);
 	if (lOk)
@@ -226,12 +228,12 @@ void Game::SetThrottle(float pThrottle)
 {
 	if (pThrottle < 0 && mVehicle->GetForwardSpeed() > 0.5f)
 	{
-		mVehicle->SetEnginePower(0, 0, 0);	// Disengage throttle while braking.
-		mVehicle->SetEnginePower(2, -pThrottle, 0);
+		mVehicle->SetEnginePower(0, 0);	// Disengage throttle while braking.
+		mVehicle->SetEnginePower(2, -pThrottle);
 		return;
 	}
-	mVehicle->SetEnginePower(2, 0, 0);	// Disengage brakes.
-	mVehicle->SetEnginePower(0, pThrottle, 0);
+	mVehicle->SetEnginePower(2, 0);	// Disengage brakes.
+	mVehicle->SetEnginePower(0, pThrottle);
 }
 
 Game::FlybyMode Game::GetFlybyMode() const
@@ -362,7 +364,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			{
 				continue;
 			}
-			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
+			const Vector3DF lBodyCenter = GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyPosition(lGeometry->GetBodyId());
 			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
 			if (d > 80*SCALE_FACTOR ||
@@ -384,7 +386,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				f.z += 0.3f;
 			}
 			f *= ff;
-			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
+			GameTicker::GetPhysicsManager(IsThreadSafe())->AddForce(lGeometry->GetBodyId(), f);
 			if (lObject == mVehicle)
 			{
 				if (d > 0.6f)
@@ -591,6 +593,29 @@ float Game::GetPowerSaveAmount() const
 {
 	bool lIsMinimized = !mUiManager->GetDisplayManager()->IsVisible();
 	return (lIsMinimized? 1.0f : 0);
+}
+
+
+
+void Game::WillMicroTick(float pTimeDelta)
+{
+	MicroTick(pTimeDelta);
+}
+
+void Game::DidPhysicsTick()
+{
+	PostPhysicsTick();
+}
+
+void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+{
+	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+}
+
+void Game::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+	const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	GameManager::OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 }
 
 

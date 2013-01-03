@@ -145,7 +145,7 @@ void Ctf::OnTick()
 	mTriggerTimer.UpdateTimer();
 }
 
-void Ctf::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener*)
+void Ctf::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject*)
 {
 	(void)pTriggerId;
 

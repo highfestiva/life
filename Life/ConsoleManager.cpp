@@ -35,6 +35,7 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 	{_T("fork"), COMMAND_FORK},
 	{_T("list-active-resources"), COMMAND_LIST_ACTIVE_RESOURCES},
 	{_T("push"), COMMAND_PUSH},
+	{_T("repeat"), COMMAND_REPEAT},
 	{_T("save-system-config-file"), COMMAND_SAVE_SYSTEM_CONFIG_FILE},
 	{_T("save-application-config-file"), COMMAND_SAVE_APPLICATION_CONFIG_FILE},
 	{_T("set-default-config"), COMMAND_SET_DEFAULT_CONFIG},
@@ -198,7 +199,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					str lMessage;
 					if (strutil::CStringToString(lCMessage, lMessage))
 					{
-						mLog.Print((Log::LogLevel)lLogLevel, lMessage+_T('\n'));
+						mLog.Print((LogLevel)lLogLevel, lMessage+_T('\n'));
 					}
 					else
 					{
@@ -257,8 +258,8 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					LogListener* lLogger = LogType::GetLog(LogType::SUB_ROOT)->GetListener(lListenerNameArray[x]);
 					if (lLogger)
 					{
-						lLogger->SetLevelThreashold((Log::LogLevel)lLogLevel);
-						Log::LogLevel lNewLogLevel = lLogger->GetLevelThreashold();
+						lLogger->SetLevelThreashold((LogLevel)lLogLevel);
+						LogLevel lNewLogLevel = lLogger->GetLevelThreashold();
 						if (lNewLogLevel != lLogLevel)
 						{
 							mLog.Infof(_T("Listener '%s' log level clamped to %i."), lListenerNameArray[x], lNewLogLevel);
@@ -269,7 +270,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			else
 			{
 				mLog.Warningf(_T("usage: %s <log level>"), pCommand.c_str());
-				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), Log::LEVEL_TYPE_COUNT-1);
+				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), LEVEL_TYPE_COUNT-1);
 				lResult = 1;
 			}
 		}
@@ -282,8 +283,8 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				Log* lLog = LogType::GetLog(pParameterVector[0]);
 				if (lLog)
 				{
-					lLog->SetLevelThreashold((Log::LogLevel)lLogLevel);
-					Log::LogLevel lNewLogLevel = lLog->GetLevelThreashold();
+					lLog->SetLevelThreashold((LogLevel)lLogLevel);
+					LogLevel lNewLogLevel = lLog->GetLevelThreashold();
 					mLog.Infof(_T("Log level for subsystem '%s' set to %i."), pParameterVector[0].c_str(), lNewLogLevel);
 				}
 				else
@@ -295,10 +296,10 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			{
 				const std::vector<Log*> lLogArray = LogType::GetLogs();
 				std::vector<Log*>::const_iterator x = lLogArray.begin();
-				Log::LogLevel lNewLogLevel = Log::LEVEL_LOWEST_TYPE;
+				LogLevel lNewLogLevel = LEVEL_LOWEST_TYPE;
 				for (; x != lLogArray.end(); ++x)
 				{
-					(*x)->SetLevelThreashold((Log::LogLevel)lLogLevel);
+					(*x)->SetLevelThreashold((LogLevel)lLogLevel);
 					lNewLogLevel = (*x)->GetLevelThreashold();
 				}
 				mLog.Infof(_T("All logs levels' set to %i."), lNewLogLevel);
@@ -307,7 +308,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			{
 				mLog.Warningf(_T("usage: %s [<subsystem>] <log level>"), pCommand.c_str());
 				mLog.Warningf(_T("where subsystem is Root, Network, Game, UI..."));
-				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), Log::LEVEL_TYPE_COUNT-1);
+				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), LEVEL_TYPE_COUNT-1);
 				lResult = 1;
 			}
 		}
@@ -404,6 +405,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		break;
 		case COMMAND_EXECUTE_FILE:
 		{
+#ifndef LEPRA_TOUCH	// Only default parameters are good enough for touch devices.
 			size_t lFilenameIndex = 0;
 			bool lIgnoreIfMissing = false;
 			if (pParameterVector[0] == _T("-i"))
@@ -454,6 +456,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				mLog.AWarning("  -i   Ignores non-existing shell file.");
 				lResult = 1;
 			}
+#endif // Not for touch devices
 		}
 		break;
 		case COMMAND_LIST_ACTIVE_RESOURCES:
@@ -524,6 +527,37 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			}
 		}
 		break;
+		case COMMAND_REPEAT:
+		{
+			bool lUsage = false;
+			if (pParameterVector.size() >= 2)
+			{
+				int lRepeatCount = 0;
+				if (strutil::StringToInt(pParameterVector[0], lRepeatCount))
+				{
+					const str lCommand = strutil::Join(pParameterVector, _T(" "), 1);
+					for (int x = 0; x < lRepeatCount; ++x)
+					{
+						ExecuteCommand(lCommand);
+					}
+				}
+				else
+				{
+					lUsage = true;
+				}
+			}
+			else
+			{
+				lUsage = true;
+			}
+			if (lUsage)
+			{
+				mLog.Warningf(_T("usage: %s <count> command [arg [arg ...]]"), pCommand.c_str());
+				mLog.AWarning("Repeats a command <count> times.");
+				lResult = 1;
+			}
+		}
+		break;
 		case COMMAND_SET_DEFAULT_CONFIG:
 		{
 			Cure::Init();
@@ -532,6 +566,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		case COMMAND_SAVE_SYSTEM_CONFIG_FILE:
 		case COMMAND_SAVE_APPLICATION_CONFIG_FILE:
 		{
+#ifndef LEPRA_TOUCH	// Only default parameters are good enough for touch devices.
 			bool lUsage = false;
 			if (pParameterVector.size() >= 1 && pParameterVector.size() <= 3)
 			{
@@ -620,6 +655,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				mLog.AWarning("  -i                  Skips overwriting in case of already existing file.");
 				lResult = 1;
 			}
+#endif // Not for touch devices
 		}
 		break;
 		default:
@@ -636,7 +672,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				{
 					if (lScope->IsDefined(lVariable))
 					{
-						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
+						str lValue = lScope->GetUntypedDefaultValue(RtScope::READ_ONLY, lVariable);
 						lValue = strutil::StringToCString(lValue);
 						mLog.Infof(_T("%s %s"), lVariable.c_str(), lValue.c_str());
 					}
@@ -660,7 +696,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					}
 					if (lOk)
 					{
-						lOk = lScope->SetValue(lMode, lVariable, lValue);
+						lOk = lScope->SetUntypedValue(lMode, lVariable, lValue);
 					}
 					if (lManager)
 					{
@@ -668,7 +704,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					}
 					if (lOk)
 					{
-						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
+						str lValue = lScope->GetUntypedDefaultValue(RtScope::READ_ONLY, lVariable);
 						lValue = strutil::StringToCString(lValue);
 						mLog.Infof(_T("%s <- %s"), lVariable.c_str(), lValue.c_str());
 					}
@@ -755,15 +791,15 @@ bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<s
 			pFile->WriteString<wchar_t>(L"\n");
 			lLastGroup = lGroup;
 		}
-		str lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
+		str lValue = GetVariableScope()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
 		lValue = strutil::StringToCString(lValue);
-		if (GetVariableScope()->GetType(lValue) == _T("string"))
+		if (GetVariableScope()->GetUntypedType(lValue) == Cure::RuntimeVariable::DATATYPE_STRING)
 		{
 			lValue = _T('"')+lValue+_T('"');
 		}
-		str lDefaultValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, lVariable);
+		str lDefaultValue = GetVariableScope()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, lVariable);
 		lDefaultValue = strutil::StringToCString(lDefaultValue);
-		if (GetVariableScope()->GetType(lDefaultValue) == _T("string"))
+		if (GetVariableScope()->GetUntypedType(lDefaultValue) == Cure::RuntimeVariable::DATATYPE_STRING)
 		{
 			lDefaultValue = _T('"')+lDefaultValue+_T('"');
 		}

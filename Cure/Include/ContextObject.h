@@ -13,6 +13,8 @@
 #include "../../Lepra/Include/String.h"
 #include "Cure.h"
 #include "PositionalData.h"
+#include "PositionHauler.h"
+#include "PhysicsSharedResource.h"
 
 
 
@@ -37,16 +39,9 @@ class ContextObjectAttribute;
 class ResourceManager;
 
 
-class ContextObject: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
+class ContextObject
 {
 public:
-	enum PhysicsOverride
-	{
-		PHYSICS_OVERRIDE_NORMAL = 1,
-		PHYSICS_OVERRIDE_STATIC,
-		PHYSICS_OVERRIDE_BONES,
-	};
-
 	typedef std::vector<ContextObject*> Array;
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 
@@ -71,7 +66,7 @@ public:
 	bool IsLoaded() const;
 	void SetLoadResult(bool pOk);
 
-	void SetAllowMoveSelf(bool pAllow);
+	void SetAllowMoveRoot(bool pAllow);
 	void AttachToObject(TBC::PhysicsManager::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsManager::BodyID pBody2);
 	void AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
 	bool DetachFromObject(ContextObject* pObject);
@@ -94,10 +89,12 @@ public:
 
 	void AddChild(ContextObject* pChild);
 
-	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
-	void SetFullPosition(const ObjectPositionalData& pPositionalData);
+	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);	// Fetch full phys position (and update object graph as necessary).
+	static bool UpdateFullPosition(ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure);
+	void SetFullPosition(const ObjectPositionalData& pPositionalData, float pDeltaThreshold);	// Sets full phys position if structure or significant difference seen.
 	void SetInitialTransform(const TransformationF& pTransformation);
 	TransformationF GetInitialTransform() const;
+	void SetInitialPositionalData(const ObjectPositionalData& pPositionalData);
 	Vector3DF GetPosition() const;
 	void SetRootPosition(const Vector3DF& pPosition);
 	void SetRootOrientation(const QuaternionF& pOrientation);
@@ -111,13 +108,13 @@ public:
 	ObjectPositionalData* GetNetworkOutputGhost();
 	void DeleteNetworkOutputGhost();
 
-	bool SetPhysics(TBC::ChunkyPhysics* pStructure);
+	void SetPhysics(TBC::ChunkyPhysics* pStructure);
 	void ClearPhysics();
 	TBC::ChunkyPhysics* GetPhysics() const;
 	void SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride);
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
-	bool SetEnginePower(unsigned pAspect, float pPower, float pAngle);
+	bool SetEnginePower(unsigned pAspect, float pPower);
 	float GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass = 0, float pSidewaysFactor = 1) const;
 
 	void ForceSend();
@@ -129,10 +126,15 @@ public:
 	virtual void OnLoaded();
 	virtual void OnMicroTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody) = 0;
+	virtual void OnForceApplied(ContextObject* pOtherObject,
+		 TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		 const Vector3DF& pForce, const Vector3DF& pTorque,
+		 const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity) = 0;
 	virtual void OnTick();
 
 protected:
-	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData, const TBC::ChunkyBoneGeometry* pGeometry);
+	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData);
 	void AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
@@ -140,8 +142,6 @@ protected:
 	void RemoveChild(ContextObject* pChild);
 	void SetParent(ContextObject* pParent);
 	virtual void SetupChildHandlers();
-
-	virtual bool IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther);
 
 	ResourceManager* GetResourceManager() const;
 
@@ -181,7 +181,7 @@ protected:
 	ObjectPositionalData mPosition;
 	ObjectPositionalData* mNetworkOutputGhost;
 	int mSendCount;
-	bool mAllowMoveSelf;	// This is set to false when attached to someone/something else.
+	bool mAllowMoveRoot;	// This is set to false when attached to someone/something else.
 	ConnectionList mConnectionList;
 
 	LOG_CLASS_DECLARE();

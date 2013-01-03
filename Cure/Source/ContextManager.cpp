@@ -282,9 +282,12 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 
 
 
-void ContextManager::Tick(float pTimeDelta)
+void ContextManager::MicroTick(float pTimeDelta)
 {
-	DispatchMicroTickCallbacks(pTimeDelta);
+	if (GetGameManager()->IsPrimaryManager())
+	{
+		DispatchMicroTickCallbacks(pTimeDelta);
+	}
 	DispatchAlarmCallbacks();
 }
 
@@ -305,10 +308,10 @@ void ContextManager::HandleIdledBodies()
 		{
 			mGameManager->OnStopped(y->second, y->first);
 		}
-		else
+		/*else
 		{
 			mLog.AError("Body not present in body table!");
-		}
+		}*/
 	}
 }
 
@@ -349,7 +352,7 @@ void ContextManager::HandlePostKill()
 	IdSet::iterator x = mPostKillSet.begin();
 	for (; x != mPostKillSet.end(); ++x)
 	{
-		DeleteObject(*x);
+		mGameManager->DeleteContextObject(*x);
 	}
 	mPostKillSet.clear();
 }

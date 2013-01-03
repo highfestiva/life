@@ -1323,6 +1323,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Source\Posix\MacThread.mm"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\Posix\PosixAntiCrack.cpp"
 					>
 					<FileConfiguration
@@ -1479,7 +1483,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Source\Posix\PosixThread.cpp"
+					RelativePath=".\Source\Posix\PosixThread.cxx"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"

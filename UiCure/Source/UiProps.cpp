@@ -29,7 +29,7 @@ Props::Props(Cure::ResourceManager* pResourceManager, const str& pClassId, GameU
 	mIsFadingOut(false)
 {
 	EnablePixelShader(false);
-	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
+	SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
 }
 
 Props::~Props()

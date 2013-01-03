@@ -67,7 +67,7 @@
 #define RTVAR_CONTENT_LEVELS		"Content.Levels"
 #define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
 #define RTVAR_HISCORE_NAME		"Hiscore.Name"	// Last entered name.
-//#define KC_FULL_VERSION			1
+#define KC_FULL_VERSION			1
 //#define KC_DEV_TESTING			1	// TODO!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -670,7 +670,7 @@ int App::Run()
 		std::vector<Log*>::const_iterator x = lLogArray.begin();
 		for (; x != lLogArray.end(); ++x)
 		{
-			(*x)->SetLevelThreashold(Log::LEVEL_INFO);
+			(*x)->SetLevelThreashold(LEVEL_INFO);
 		}
 	}
 
@@ -880,8 +880,8 @@ bool App::Poll()
 			const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 3.0f*SCALE_FACTOR);
 			if (mReverseAndBrake)
 			{
-				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake, 0);	// Reverse.
-				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0, 0);	// Brake.
+				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake);	// Reverse.
+				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0);	// Brake.
 			}
 		}
 	}
@@ -978,6 +978,7 @@ bool App::Poll()
 			mGame->AddScore(+3, 0);
 		}
 		mGame->BeginTick();
+		mGame->StartPhysicsTick();
 	}
 	bool lRender = false;
 	if (lOk)
@@ -1077,6 +1078,8 @@ bool App::Poll()
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
 	{
+		mGame->PreEndTick();
+		mGame->WaitPhysicsTick();
 		lOk = mGame->EndTick();
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
@@ -1180,10 +1183,10 @@ void App::PollTaps()
 	{
 		mGame->SetThrottle(lAvatar1, mThrottle);
 		mSteering = Math::Clamp(mSteering, -1.0f, 1.0f);
-		lAvatar1->SetEnginePower(1, mSteering, 0);
+		lAvatar1->SetEnginePower(1, mSteering);
 	}
 	mGame->SetThrottle(lAvatar2, 0);
-	lAvatar2->SetEnginePower(1, 0, 0);
+	lAvatar2->SetEnginePower(1, 0);
 	FingerMoveList::iterator x = gFingerMoveList.begin();
 	mIsThrottling = false;
 	for (; x != gFingerMoveList.end();)
@@ -2256,7 +2259,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
 					lNewPlacement->mPosition.mTransformation.GetPosition().x -= 10;
-					lAvatar1->SetFullPosition(*lNewPlacement);
+					lAvatar1->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}
@@ -2271,7 +2274,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
 					lNewPlacement->mPosition.mTransformation.GetOrientation().RotateAroundOwnY(PIF*0.4f);
-					lAvatar1->SetFullPosition(*lNewPlacement);
+					lAvatar1->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}
@@ -2301,7 +2304,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 					lNewPlacement->mPosition.mTransformation.GetPosition().x += 30;
 					lNewPlacement->mPosition.mTransformation.GetPosition().y += 20;
 					lNewPlacement->mPosition.mTransformation.GetPosition().z += 15;
-					lAvatar1->SetFullPosition(*lNewPlacement);
+					lAvatar1->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}
@@ -2356,7 +2359,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		break;
 		case DIRECTIVE_UP:
 		{
-			lAvatar->SetEnginePower(0, +1*pFactor, 0);
+			lAvatar->SetEnginePower(0, +1*pFactor);
 		}
 		break;
 		case DIRECTIVE_DOWN:
@@ -2366,24 +2369,24 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				mReverseAndBrake = pFactor;
 				if (!mReverseAndBrake)
 				{
-					lAvatar->SetEnginePower(0, 0, 0);
-					lAvatar->SetEnginePower(2, 0, 0);
+					lAvatar->SetEnginePower(0, 0);
+					lAvatar->SetEnginePower(2, 0);
 				}
 			}
 			if (mGame->GetComputerIndex() != 1 && lAvatar == lAvatar2)
 			{
-				lAvatar->SetEnginePower(0, -1*pFactor, 0);
+				lAvatar->SetEnginePower(0, -1*pFactor);
 			}
 		}
 		break;
 		case DIRECTIVE_LEFT:
 		{
-			lAvatar->SetEnginePower(1, -1*pFactor, 0);
+			lAvatar->SetEnginePower(1, -1*pFactor);
 		}
 		break;
 		case DIRECTIVE_RIGHT:
 		{
-			lAvatar->SetEnginePower(1, +1*pFactor, 0);
+			lAvatar->SetEnginePower(1, +1*pFactor);
 		}
 		break;
 		case DIRECTIVE_FUNCTION:
@@ -2394,7 +2397,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					if (lAvatar == lAvatar1)
 					{
-						lAvatar1->SetEnginePower(2, +1*pFactor, 0);	// Break.
+						lAvatar1->SetEnginePower(2, +1*pFactor);	// Break.
 					}
 					else
 					{
@@ -2409,7 +2412,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				break;
 				case 1:
 				{
-					lAvatar1->SetEnginePower(2, +1*pFactor, 0);	// Break.
+					lAvatar1->SetEnginePower(2, +1*pFactor);	// Break.
 				}
 				break;
 			}
@@ -2669,7 +2672,7 @@ int App::PollTap(FingerMovement& pMovement)
 				}
 				else
 				{
-					lAvatar->SetEnginePower(1, lValue, 0);
+					lAvatar->SetEnginePower(1, lValue);
 					mPlayer2LastTouch.ClearTimeDiff();
 					lTag = 4;
 				}
@@ -2912,6 +2915,7 @@ void App::SuperReset(bool pGameOver)
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
+	lResourceTypes.push_back(_T("PhysicsShared"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
@@ -2992,13 +2996,14 @@ void App::OnOk(UiTbc::Button* pButton)
 {
 	if (pButton->GetTag() == 33)
 	{
-		SystemManager::EmailTo(
-			_T("info@pixeldoctrine.com"),
-			_T("I want the complete game!"),
-			_T("Hiya Game Slave Bitches,\n\n")
-			_T("I enjoyed the KillCutie Demo [for PC/Mac?] and would like the complete game!\n\n")
-			_T("Get a move on,\n")
-			_T("Yours Truly"));
+		SystemManager::WebBrowseTo(_T("http://pixeldoctrine.com/#KillCutie"));
+		//SystemManager::EmailTo(
+		//	_T("info@pixeldoctrine.com"),
+		//	_T("I want the complete game!"),
+		//	_T("Hiya Game Slave Bitches,\n\n")
+		//	_T("I enjoyed the KillCutie Demo [for PC/Mac?] and would like the complete game!\n\n")
+		//	_T("Get a move on,\n")
+		//	_T("Yours Truly"));
 	}
 	MainMenu();
 }
@@ -3205,6 +3210,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
+	lResourceTypes.push_back(_T("PhysicsShared"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.

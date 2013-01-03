@@ -121,10 +121,13 @@ protected:
 class RendererImageResource: public RendererImageBaseResource
 {
 public:
-	RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
+	RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, bool pMipMap);
 	virtual ~RendererImageResource();
 	const str GetType() const;
 	bool Load();
+
+private:
+	bool mMipMap;
 };
 
 /*class TextureResource: public RendererImageBaseResource
@@ -291,6 +294,8 @@ class ClassResource: public Cure::ClassResourceBase<UiTbc::ChunkyClass, UiTbc::C
 public:
 	ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~ClassResource();
+
+	virtual bool Load();
 };
 
 
@@ -319,7 +324,7 @@ public:
 
 typedef UserUiTypeResource<PainterImageResource>						UserPainterImageResource;
 typedef UserUiExtraTypeResource<PainterImageResource, PainterImageResource::ImageReleaseMode>	UserPainterKeepImageResource;
-typedef UserUiTypeResource<RendererImageResource>						UserRendererImageResource;
+typedef UserUiExtraTypeResource<RendererImageResource, bool>					UserRendererImageResource;
 //typedef UserUiTypeResource<TextureResource>							UserTextureResource;
 typedef UserUiExtraTypeResource<SoundResource2d, SoundResource::LoopMode>			UserSound2dResource;
 typedef UserUiExtraTypeResource<SoundResource3d, SoundResource::LoopMode>			UserSound3dResource;

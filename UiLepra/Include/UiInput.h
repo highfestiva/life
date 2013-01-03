@@ -80,6 +80,7 @@ private:
 class InputElement
 {
 public:
+	typedef std::vector<InputFunctor*> FunctorArray;
 	
 	friend class InputDevice;
 
@@ -121,6 +122,7 @@ public:
 	// Sets the uncalibrated value of this device.
 	// (Only useful with analogue elements).
 	virtual void SetValue(int pNewValue) = 0;
+	virtual void SetValue(float pNewValue);
 
 	// Returns the difference between the current value and the previous value.
 	float GetDeltaValue() const;
@@ -134,12 +136,11 @@ public:
 	// of deleting it.
 	void AddFunctor(InputFunctor* pFunctor);
 	void ClearFunctors();
+	const FunctorArray& GetFunctorArray() const;
 
 	virtual str GetCalibration() const = 0;
 	virtual bool SetCalibration(const str& pData) = 0;
 
-protected:
-	virtual void SetValue(float pNewValue);
 private:
 
 	float mPrevValue;
@@ -152,7 +153,6 @@ private:
 
 	str mIdentifier;
 
-	typedef std::vector<InputFunctor*> FunctorArray;
 	FunctorArray mFunctorArray;
 
 	LOG_CLASS_DECLARE();
@@ -179,7 +179,7 @@ public:
 		TYPE_WHEEL,
 		TYPE_FLIGHT,
 		TYPE_OTHER,
-		TYPE_COUNT = TYPE_OTHER+1
+		TYPE_COUNT
 	};
 
 	typedef std::pair<str, str> CalibrationElement;
@@ -187,6 +187,7 @@ public:
 
 	InputDevice(InputManager* pManager);
 	virtual ~InputDevice();
+	virtual bool IsOwnedByManager() const;
 
 	Interpretation GetInterpretation() const;
 	int GetTypeIndex() const;
@@ -222,6 +223,7 @@ public:
 	unsigned GetNumAnalogueElements();
 
 	void SetIdentifier(const str& pIdentifier);
+	void SetUniqueIdentifier(const str& pIdentifier);
 	const str& GetIdentifier() const;
 	const str& GetUniqueIdentifier() const;
 
@@ -474,7 +476,10 @@ public:
 	// The input manager takes care of deleting the functor.
 	void AddFunctor(InputFunctor* pFunctor);
 	void ClearFunctors();
-	
+
+	void AddInputDevice(InputDevice* pDevice);
+	void RemoveInputDevice(InputDevice* pDevice);
+
 	// Activase/release all devices.
 	void ActivateAll();
 	void ReleaseAll();
@@ -487,13 +492,13 @@ public:
 	*/
 
 	// Show/hide system default cursor.
-	virtual void ShowCursor() = 0;
-	virtual void HideCursor() = 0;
+	virtual void SetCursorVisible(bool pVisible) = 0;
 
 	// Range: [-1, 1] (Left and right, up and down)
 	virtual float GetCursorX() = 0;
 	virtual float GetCursorY() = 0;
-	virtual void SetMousePosition(int x, int y) = 0;
+	void GetMousePosition(int& x, int& y) const;
+	virtual void SetMousePosition(int x, int y);
 
 	bool NotifyOnChar(tchar pChar);
 	bool NotifyOnKeyDown(KeyCode pKeyCode);
@@ -522,6 +527,8 @@ private:
 	MouseObserverList mMouseObserverList;
 
 	bool mKeyDown[256];
+	int mMouseX;
+	int mMouseY;
 
 	LOG_CLASS_DECLARE();
 };

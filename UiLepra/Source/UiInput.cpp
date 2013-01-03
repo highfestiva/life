@@ -59,6 +59,26 @@ float InputElement::GetValue() const
 	return mValue;
 }
 
+
+void InputElement::SetValue(float pNewValue)
+{
+	static const float lInputEpsilon = 0.02f;
+	if (mInterpretation == RELATIVE_AXIS || ::fabs(pNewValue - mValue) > lInputEpsilon)
+	{
+		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
+		//mLog.Infof(_T("%s(%i) = %f\n"), GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
+
+		mPrevValue = mValue;
+		mValue = pNewValue;
+
+		// Notify our observers.
+		for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
+		{
+			(*x)->Call(this);
+		}
+	}
+}
+
 float InputElement::GetDeltaValue() const
 {
 	return (mValue - mPrevValue);
@@ -71,7 +91,10 @@ const str& InputElement::GetIdentifier() const
 
 str InputElement::GetFullName() const
 {
-	return GetParentDevice()->GetUniqueIdentifier() + _T(".") + GetIdentifier();
+	str lId = GetIdentifier();
+	lId = strutil::ReplaceAll(lId, ' ', '_');
+	lId = strutil::ReplaceAll(lId, '-', '_');
+	return GetParentDevice()->GetUniqueIdentifier() + _T(".") + lId;
 }
 
 str InputElement::GetName() const
@@ -106,24 +129,12 @@ void InputElement::ClearFunctors()
 	mFunctorArray.clear();
 }
 
-void InputElement::SetValue(float pNewValue)
+const InputElement::FunctorArray& InputElement::GetFunctorArray() const
 {
-	static const float lInputEpsilon = 0.02f;
-	if (mInterpretation == RELATIVE_AXIS || ::fabs(pNewValue - mValue) > lInputEpsilon)
-	{
-		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
-		//mLog.Infof(_T("%s(%i) = %f\n"), GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
-
-		mPrevValue = mValue;
-		mValue = pNewValue;
-
-		// Notify our observers.
-		for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
-		{
-			(*x)->Call(this);
-		}
-	}
+	return mFunctorArray;
 }
+
+
 
 LOG_CLASS_DEFINE(UI_INPUT, InputElement);
 
@@ -145,6 +156,18 @@ InputDevice::InputDevice(InputManager* pManager):
 
 InputDevice::~InputDevice()
 {
+	ElementArray::const_iterator x;
+	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
+	{
+		InputElement* lElement = *x;
+		delete lElement;
+	}
+	mElementArray.clear();
+}
+
+bool InputDevice::IsOwnedByManager() const
+{
+	return true;
 }
 
 InputDevice::Interpretation InputDevice::GetInterpretation() const
@@ -220,6 +243,13 @@ void InputDevice::SetIdentifier(const str& pIdentifier)
 {
 	mIdentifier = pIdentifier;
 	mUniqueIdentifier = mIdentifier + strutil::IntToString(GetManager()->QueryIdentifierCount(mIdentifier), 10);
+	mUniqueIdentifier = strutil::ReplaceAll(mUniqueIdentifier, ' ', '_');
+	mUniqueIdentifier = strutil::ReplaceAll(mUniqueIdentifier, '-', '_');
+}
+
+void InputDevice::SetUniqueIdentifier(const str& pIdentifier)
+{
+	mUniqueIdentifier = pIdentifier;
 }
 
 const str& InputDevice::GetIdentifier() const
@@ -235,9 +265,7 @@ const str& InputDevice::GetUniqueIdentifier() const
 const InputElement* InputDevice::GetElement(const str& pIdentifier) const
 {
 	ElementArray::const_iterator x;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
+	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
 	{
 		InputElement* lElement = *x;
 		if (lElement->GetIdentifier() == pIdentifier)
@@ -424,10 +452,22 @@ LOG_CLASS_DEFINE(UI_INPUT, InputDevice);
 InputManager::InputManager()
 {
 	::memset(mKeyDown, 0, sizeof(mKeyDown));
+	mMouseX = 0;
+	mMouseY = 0;
 }
 
 InputManager::~InputManager()
 {
+	DeviceList::iterator x;
+	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
+	{
+		InputDevice* lDevice = *x;
+		if (lDevice->IsOwnedByManager())
+		{
+			delete lDevice;
+		}
+	}
+	mDeviceList.clear();
 }
 
 const InputManager::DeviceList& InputManager::GetDeviceList() const
@@ -463,6 +503,18 @@ void InputManager::AddMouseInputObserver(MouseInputObserver* pListener)
 void InputManager::RemoveMouseInputObserver(MouseInputObserver* pListener)
 {
 	mMouseObserverList.erase(pListener);
+}
+
+void InputManager::GetMousePosition(int& x, int& y) const
+{
+	x = mMouseX;
+	y = mMouseY;
+}
+
+void InputManager::SetMousePosition(int x, int y)
+{
+	mMouseX = x;
+	mMouseY = y;
 }
 
 bool InputManager::NotifyOnChar(tchar pChar)
@@ -649,6 +701,34 @@ void InputManager::ClearFunctors()
 		InputDevice* lDevice = *x;
 		lDevice->ClearFunctors();
 	}
+}
+
+void InputManager::AddInputDevice(InputDevice* pDevice)
+{
+	// Clone the functors if any are present already.
+	DeviceList::iterator x;
+	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
+	{
+		const InputDevice* lDevice = *x;
+		const InputElement* lElement = lDevice->GetElement(0);
+		if (lElement)
+		{
+			InputElement::FunctorArray::const_iterator z;
+			const InputElement::FunctorArray& lFunctorArray = lElement->GetFunctorArray();
+			for (z = lFunctorArray.begin(); z != lFunctorArray.end(); ++z)
+			{
+				pDevice->AddFunctor((*z)->CreateCopy());
+			}
+			break;
+		}
+	}
+
+	mDeviceList.push_back(pDevice);
+}
+
+void InputManager::RemoveInputDevice(InputDevice* pDevice)
+{
+	mDeviceList.remove(pDevice);
 }
 
 void InputManager::ActivateAll()

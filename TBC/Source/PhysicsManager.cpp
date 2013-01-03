@@ -13,12 +13,26 @@ namespace TBC
 
 
 
-PhysicsManager::PhysicsManager()
+PhysicsManager::PhysicsManager():
+	mTriggerCallback(0),
+	mForceFeedbackCallback(0)
 {
 }
 
 PhysicsManager::~PhysicsManager()
 {
+}
+
+
+
+void PhysicsManager::SetTriggerListener(TriggerListener* pTriggerCallback)
+{
+	mTriggerCallback = pTriggerCallback;
+}
+
+void PhysicsManager::SetForceFeedbackListener(ForceFeedbackListener* pForceFeedbackCallback)
+{
+	mForceFeedbackCallback = pForceFeedbackCallback;
 }
 
 

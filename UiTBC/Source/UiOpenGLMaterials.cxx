@@ -348,7 +348,7 @@ void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP]);
+	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 	
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -404,14 +404,18 @@ void OpenGLMatSingleTextureSolid::PostRender()
 	::glDisable(GL_TEXTURE_2D);
 }
 
-void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID)
+void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID, int pMipMapLevelCount)
 {
 	glBindTexture(GL_TEXTURE_2D, pTextureID);
 
 	mTextureParamMin = GL_NEAREST;
 	mTextureParamMag = GL_NEAREST;
-	
-	if (((OpenGLRenderer*)GetRenderer())->GetTrilinearFilteringEnabled() == true)
+
+	if (pMipMapLevelCount <= 1)
+	{
+		// Just use plain vanilla.
+	}
+	else if (((OpenGLRenderer*)GetRenderer())->GetTrilinearFilteringEnabled() == true)
 	{
 		// The trilinear setting overrides the other ones.
 		mTextureParamMin = GL_LINEAR_MIPMAP_LINEAR;
@@ -1021,7 +1025,7 @@ void OpenGLMatTextureAndLightmap::RenderGeometry(TBC::GeometryBase* pGeometry)
 	// Setup the color map in texture unit 0.
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP]);
+	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1044,7 +1048,7 @@ void OpenGLMatTextureAndLightmap::RenderGeometry(TBC::GeometryBase* pGeometry)
 		// Setup the light map in texture unit 1.
 		UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
 		UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
-		BindTexture(lGeometry->mTA->mMaps[1].mMapID[Texture::COLOR_MAP]);
+		BindTexture(lGeometry->mTA->mMaps[1].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[1].mMipMapLevelCount[Texture::COLOR_MAP]);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
@@ -1670,7 +1674,7 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	glDisable(GL_TEXTURE_GEN_T);
 #endif // !GLES
 
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP]);
+	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 
 	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
 	
@@ -1782,7 +1786,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP]);
+	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1800,7 +1804,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
-	BindTexture(lGeometry->mTA->mMaps[1].mMapID[Texture::COLOR_MAP]);
+	BindTexture(lGeometry->mTA->mMaps[1].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[1].mMipMapLevelCount[Texture::COLOR_MAP]);
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1937,7 +1941,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	// texture (UV) coordinates.
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP]);
+	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1957,7 +1961,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	// Texture unit 1, handles specular map and tangents.
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::SPECULAR_MAP]);
+	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::SPECULAR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::SPECULAR_MAP]);
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1975,7 +1979,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	// Texture unit 2, handles bitangents and normal map.
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE2);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE2);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::NORMAL_MAP]);
+	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::NORMAL_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::NORMAL_MAP]);
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;

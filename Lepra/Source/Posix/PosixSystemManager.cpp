@@ -4,6 +4,7 @@
 
 
 
+#include <sys/sysctl.h>
 #include <stdlib.h>
 #include <termios.h>
 #include "../../Include/DiskFile.h"
@@ -173,18 +174,27 @@ void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBod
 }
 unsigned SystemManager::GetLogicalCpuCount()
 {
-	return (1);	// TODO: ... something...
+	return GetPhysicalCpuCount();
 }
 
 unsigned SystemManager::GetPhysicalCpuCount()
 {
-	// TODO: search /proc/cpuinfo by brute force.
-	return (1);
+	return GetCoreCount();
 }
 
 unsigned SystemManager::GetCoreCount()
 {
-	return (1);	// TODO: ... something...
+	int mib[4];
+	mib[0] = CTL_HW;
+	mib[1] = HW_NCPU;
+	unsigned int ncpu = 1;
+	size_t len = sizeof(ncpu); 
+	::sysctl(mib, 2, &ncpu, &len, NULL, 0);
+	if (ncpu < 1)
+	{
+		ncpu = 1;
+	}
+	return ncpu;
 }
 
 str SystemManager::GetCpuName()

@@ -24,6 +24,7 @@ struct ClientOptionsManager: OptionsManager
 
 	const Steering& GetSteeringControl() const;
 	const CamControl& GetCamControl() const;
+	const FireControl& GetFireControl() const;
 
 	virtual void DoRefreshConfiguration();
 
@@ -32,6 +33,7 @@ private:
 
 	Steering mSteeringControl;
 	CamControl mCamControl;
+	FireControl mFireControl;
 
 	void operator=(const ClientOptionsManager&);
 

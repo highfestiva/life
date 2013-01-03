@@ -40,7 +40,7 @@ public:
 	static void WebBrowseTo(const str& pUrl);
 	static void EmailTo(const str& pTo, const str& pSubject, const str& pBody);
 
-	static str GetUniqueHardwareString(bool pRandomize);
+	static str GetUniqueHardwareString();
 
 	// The Cpu frequency may be an approximation, which means that it may vary 
 	// from call to call.

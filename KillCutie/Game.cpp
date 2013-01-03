@@ -13,7 +13,9 @@
 #include "../Lepra/Include/Random.h"
 #include "../TBC/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
+#include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiCure/Include/UiSound.h"
@@ -42,8 +44,8 @@ namespace GrenadeRun
 
 
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
-	Cure::GameTicker(),
-	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager, 400, 4, 3),
+	GameTicker(400, 4, 3),
+	GameManager(GameTicker::GetTimeManager(), pVariableScope, pResourceManager),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
@@ -72,6 +74,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mScoreCountingEnabled(false),
 	mRoundIndex(0)
 {
+	SetTicker(this);
+
 	mPreviousCanvasAngle = mUiManager->GetCanvas()->GetOutputRotation();
 
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
@@ -253,7 +257,7 @@ void Game::SetVehicle(const str& pVehicle)
 		return;
 	}
 	delete mVehicle;
-	mVehicle = (Cutie*)Parent::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	mVehicle = (Cutie*)GameManager::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (mVehicle != 0);
 	assert(lOk);
 	if (lOk)
@@ -340,16 +344,16 @@ void Game::SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle)
 {
 	if (pPlayer == mLauncher)
 	{
-		mLauncher->SetEnginePower(0, pThrottle, 0);
+		mLauncher->SetEnginePower(0, pThrottle);
 		return;
 	}
 	if (pThrottle < 0 && mVehicle->GetForwardSpeed() > 0.5f)
 	{
-		mVehicle->SetEnginePower(2, -pThrottle, 0);
+		mVehicle->SetEnginePower(2, -pThrottle);
 		return;
 	}
-	mVehicle->SetEnginePower(2, 0, 0);	// Disengage brakes.
-	mVehicle->SetEnginePower(0, pThrottle, 0);
+	mVehicle->SetEnginePower(2, 0);	// Disengage brakes.
+	mVehicle->SetEnginePower(0, pThrottle);
 }
 
 bool Game::Shoot()
@@ -359,7 +363,7 @@ bool Game::Shoot()
 		return false;
 	}
 
-	Grenade* lGrenade = (Grenade*)Parent::CreateContextObject(_T("grenade"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	Grenade* lGrenade = (Grenade*)GameManager::CreateContextObject(_T("grenade"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (lGrenade != 0);
 	assert(lOk);
 	if (lOk)
@@ -375,7 +379,7 @@ bool Game::Shoot()
 
 Cure::ContextObject* Game::CreateRoboBall()
 {
-	RoboBall* lRoboBall = (RoboBall*)Parent::CreateContextObject(_T("robo_ball"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	RoboBall* lRoboBall = (RoboBall*)GameManager::CreateContextObject(_T("robo_ball"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	assert(lRoboBall);
 	if (lRoboBall)
 	{
@@ -557,7 +561,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			{
 				continue;
 			}
-			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
+			const Vector3DF lBodyCenter = GameTicker::GetPhysicsManager(true)->GetBodyPosition(lGeometry->GetBodyId());
 			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
 			if (d > 80*SCALE_FACTOR ||
@@ -579,7 +583,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				f.z += 0.3f;
 			}
 			f *= ff;
-			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
+			GameTicker::GetPhysicsManager(true)->AddForce(lGeometry->GetBodyId(), f);
 			if (lObject == mVehicle)
 			{
 				if (d > 0.6f)
@@ -856,7 +860,7 @@ bool Game::Render()
 		int x = 0;
 		for (x = 0; x < 3; ++x)
 		{
-			const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
+			const bool lIsCollision = (GameTicker::GetPhysicsManager(true)->QueryRayCollisionAgainst(
 				lVehiclePos, lOffset, lOffset.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
 			if (!lIsCollision)
 			{
@@ -1097,6 +1101,29 @@ float Game::GetPowerSaveAmount() const
 
 
 
+void Game::WillMicroTick(float pTimeDelta)
+{
+	MicroTick(pTimeDelta);
+}
+
+void Game::DidPhysicsTick()
+{
+	PostPhysicsTick();
+}
+
+void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+{
+	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+}
+
+void Game::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+	const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	GameManager::OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+}
+
+
+
 void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (pOk && pObject == mVehicle)
@@ -1157,22 +1184,31 @@ void Game::TickInput()
 
 Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 {
+	UiCure::Machine* lMachine = 0;
 	if (strutil::StartsWith(pClassId, _T("grenade")))
 	{
-		return new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
+		lMachine = new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
 	}
 	else if (strutil::StartsWith(pClassId, _T("robo_ball")))
 	{
-		return new RoboBall(this, pClassId);
+		lMachine = new RoboBall(this, pClassId);
 	}
 	else if (strutil::StartsWith(pClassId, _T("cutie")) ||
 		strutil::StartsWith(pClassId, _T("monster")) ||
 		strutil::StartsWith(pClassId, _T("corvette")) ||
 		strutil::StartsWith(pClassId, _T("road_roller")))
 	{
-		return new Cutie(GetResourceManager(), pClassId, mUiManager);
+		lMachine = new Cutie(GetResourceManager(), pClassId, mUiManager);
 	}
-	return new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+	else
+	{
+		lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+	}
+	if (lMachine)
+	{
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 3, 0.6f, 2.0f));
+	}
+	return lMachine;
 }
 
 bool Game::Initialize()
@@ -1223,7 +1259,8 @@ bool Game::InitializeTerrain()
 	if (lOk)
 	{
 		delete mLevel;
-		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager);
+		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 1, 1, 10, 2);
+		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager, lGravelParticleEmitter);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);
 		assert(lOk);

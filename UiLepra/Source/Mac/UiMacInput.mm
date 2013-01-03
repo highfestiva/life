@@ -142,14 +142,6 @@ MacInputDevice::~MacInputDevice()
 		Release();
 	}
 	//mNativeDevice->Release();
-
-	ElementArray::iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-		delete lElement;
-	}
-	mElementArray.clear();
 }
 
 void MacInputDevice::Activate()
@@ -180,11 +172,6 @@ void MacInputDevice::PollEvents()
 			lElement->SetValue(lValue);
 		}
 	}
-}
-
-bool MacInputDevice::HaveRelativeAxes()
-{
-	return (mRelAxisCount > mAbsAxisCount);
 }
 
 void MacInputDevice::EnumElements()
@@ -313,13 +300,6 @@ MacInputManager::~MacInputManager()
 	}
 
 	RemoveObserver();
-
-	DeviceList::iterator lDIter;
-	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
-	{
-		InputDevice* lDevice = *lDIter;
-		delete lDevice;
-	}
 
 	mDisplayManager = 0;
 }
@@ -650,14 +630,16 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 	}
 }
 
-void MacInputManager::ShowCursor()
+void IosInputManager::SetCursorVisible(bool pVisible)
 {
-	CGDisplayHideCursor(kCGDirectMainDisplay);
-}
-
-void MacInputManager::HideCursor()
-{
-	CGDisplayShowCursor(kCGDirectMainDisplay);
+	if (pVisible)
+	{
+		CGDisplayShowCursor(kCGDirectMainDisplay);
+	}
+	else
+	{
+		CGDisplayHideCursor(kCGDirectMainDisplay);
+	}
 }
 
 float MacInputManager::GetCursorX()
@@ -672,6 +654,7 @@ float MacInputManager::GetCursorY()
 
 void MacInputManager::SetMousePosition(int x, int y)
 {
+	Parent::SetMousePosition(x, mScreenHeight-y);
 	mCursorX = 2.0 * x / mScreenWidth  - 1.0;
 	mCursorY = 2.0 * (mScreenHeight-y) / mScreenHeight - 1.0;
 }

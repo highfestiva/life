@@ -467,11 +467,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiDebugRenderer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiExhaustEmitter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiGameUiManager.cxx"
 				>
 			</File>
 			<File
 				RelativePath=".\Source\UiGameUiManager.mm"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiGravelEmitter.cpp"
 				>
 			</File>
 			<File
@@ -521,7 +533,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\UiDebugRenderer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiExhaustEmitter.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\UiGameUiManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiGravelEmitter.h"
 				>
 			</File>
 			<File

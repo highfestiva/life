@@ -491,6 +491,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\GameTicker.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\HiscoreAgent.cpp"
 				>
 			</File>
@@ -507,7 +511,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\PhysicsSharedResource.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\PositionalData.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\PositionHauler.cpp"
 				>
 			</File>
 			<File
@@ -581,6 +593,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\ContextForceListener.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\ContextManager.h"
 				>
 			</File>
@@ -613,6 +629,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\GameTicker.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\HiscoreAgent.h"
 				>
 			</File>
@@ -629,7 +649,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\PhysicsSharedResource.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\PositionalData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\PositionHauler.h"
 				>
 			</File>
 			<File

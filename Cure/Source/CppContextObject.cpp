@@ -13,6 +13,7 @@
 #include "../../TBC/Include/PhysicsTrigger.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
+#include "../Include/TimeManager.h"
 
 
 
@@ -105,6 +106,17 @@ void CppContextObject::StabilizeTick()
 
 
 
+void CppContextObject::StartLoading()
+{
+	assert(mClassResource == 0);
+	mClassResource = new UserClassResource();
+	const str lAssetName = GetClassId()+_T(".class");
+	mClassResource->Load(GetResourceManager(), lAssetName,
+		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
+}
+
+
+
 void CppContextObject::SetAllowNetworkLogic(bool pAllow)
 {
 	mAllowNetworkLogic = pAllow;
@@ -130,7 +142,7 @@ const TBC::ChunkyClass* CppContextObject::GetClass() const
 	return (0);
 }
 
-const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const
+const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray, bool pIgnoreIndexes) const
 {
 	const TBC::ChunkyClass* lClass = GetClass();
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
@@ -140,7 +152,7 @@ const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int 
 			lTag.mFloatValueList.size() == (size_t)pFloatValueCount &&
 			lTag.mStringValueList.size() == (size_t)pStringValueCount &&
 			lTag.mBodyIndexList.size() == pTriggerIndexArray.size() &&
-			std::equal(lTag.mBodyIndexList.begin(), lTag.mBodyIndexList.end(), pTriggerIndexArray.begin()))
+			(pIgnoreIndexes || std::equal(lTag.mBodyIndexList.begin(), lTag.mBodyIndexList.end(), pTriggerIndexArray.begin())))
 		{
 			return &lTag;
 		}
@@ -160,30 +172,24 @@ void CppContextObject::SetForceLoadUnique(bool pLoadUnique)
 	mForceLoadUnique = pLoadUnique;
 }
 
-void CppContextObject::StartLoading()
-{
-	assert(mClassResource == 0);
-	mClassResource = new UserClassResource();
-	const str lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
-	mClassResource->Load(GetResourceManager(), lAssetName,
-		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
-}
-
 void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 {
 	assert(mPhysicsResource == 0);
-	mPhysicsResource = new UserPhysicsResource();
-	const str lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
-	if (!mForceLoadUnique && mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
+	const str lInstanceId = strutil::IntToString(GetInstanceId(), 10);
+	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();
+	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPhysicsOverride, mManager->GetGameManager()->GetPhysicsManager(),
+		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+	lInitData.mTransformation.SetOrientation(QuaternionF());
+	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
+	if (!mForceLoadUnique)
 	{
-		// If we're only in it for the bones, we can manage without a unique physics object.
 		mPhysicsResource->Load(GetResourceManager(), lAssetName,
-			UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+			UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics), false);
 	}
 	else
 	{
 		mPhysicsResource->LoadUnique(GetResourceManager(), lAssetName,
-			UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+			UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 	}
 }
 
@@ -281,7 +287,7 @@ void CppContextObject::OnAlarm(int /*pAlarmId*/, void* /*pExtraData*/)
 {
 }
 
-void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody)
+void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
 	if (!GetAllowNetworkLogic())
 	{
@@ -300,7 +306,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC:
 
 	/*
 	TODO: put this back when attaching objects to each other is working.
-	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
+	ContextObject* lObject2 = mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(pBody2);
 	if (mManager->GetGameManager()->IsServer() && lObject2)
 	{
 		AttachToObject(pBody1, lObject2, pBody2);
@@ -309,7 +315,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC:
 
 
 
-void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
+void CppContextObject::OnForceApplied(ContextObject* pOtherObject,
 	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 	const Vector3DF& pForce, const Vector3DF& pTorque,
 	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
@@ -346,7 +352,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	}
 }
 
-void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
+void CppContextObject::OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResource)
 {
 	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{

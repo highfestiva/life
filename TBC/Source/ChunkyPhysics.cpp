@@ -6,6 +6,7 @@
 
 #include "../Include/ChunkyPhysics.h"
 #include <assert.h>
+#include "../../Lepra/Include/ListUtil.h"
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/PhysicsEngine.h"
 #include "../Include/PhysicsSpawner.h"
@@ -18,13 +19,43 @@ namespace TBC
 
 
 
+#define TBC_PHYSICS_RELOCATE_POINTERS(a)					\
+{										\
+	const size_t cnt = a.size();						\
+	for (size_t x = 0; x < cnt; ++x)					\
+	{									\
+		a[x]->RelocatePointers(this, &pOriginal, *pOriginal.a[x]);	\
+	}									\
+}
+
+
+
+
 ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType pPhysicsType):
-	BoneHierarchy(),
 	mTransformOperation(pTransformOperation),
 	mPhysicsType(pPhysicsType),
 	mGuideMode(GUIDE_EXTERNAL),
 	mUniqeGeometryIndex(0)
 {
+}
+
+ChunkyPhysics::ChunkyPhysics(const ChunkyPhysics& pOriginal):
+	Parent(pOriginal)
+{
+	mGuideMode = pOriginal.mGuideMode;
+	mUniqeGeometryIndex = pOriginal.mUniqeGeometryIndex;
+	VectorUtil<ChunkyBoneGeometry>::CloneListFactoryMethod(mGeometryArray, pOriginal.mGeometryArray);
+	TBC_PHYSICS_RELOCATE_POINTERS(mGeometryArray);
+	VectorUtil<PhysicsEngine>::CloneList(mEngineArray, pOriginal.mEngineArray);
+	TBC_PHYSICS_RELOCATE_POINTERS(mEngineArray);
+	VectorUtil<PhysicsTrigger>::CloneList(mTriggerArray, pOriginal.mTriggerArray);
+	TBC_PHYSICS_RELOCATE_POINTERS(mTriggerArray);
+	VectorUtil<PhysicsSpawner>::CloneList(mSpawnerArray, pOriginal.mSpawnerArray);
+	TBC_PHYSICS_RELOCATE_POINTERS(mSpawnerArray);
+	mTransformOperation = pOriginal.mTransformOperation;
+	mPhysicsType = pOriginal.mPhysicsType;
+	mGuideMode = pOriginal.mGuideMode;
+	mUniqeGeometryIndex = pOriginal.mUniqeGeometryIndex;
 }
 
 ChunkyPhysics::~ChunkyPhysics()
@@ -66,6 +97,22 @@ void ChunkyPhysics::SetGuideMode(GuideMode pGuideMode)
 {
 	mGuideMode = pGuideMode;
 }
+
+float ChunkyPhysics::QueryTotalMass(PhysicsManager* pPhysicsManager) const
+{
+	float lTotalMass = 0;
+	const int lBoneCount = GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
+	{
+		const TBC::ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
+		if (lGeometry->GetBodyId())
+		{
+			lTotalMass += pPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
+		}
+	}
+	return lTotalMass;
+}
+
 
 
 ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int pBoneIndex) const
@@ -219,13 +266,13 @@ void ChunkyPhysics::AddEngine(PhysicsEngine* pEngine)
 	mEngineArray.push_back(pEngine);
 }
 
-bool ChunkyPhysics::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
+bool ChunkyPhysics::SetEnginePower(unsigned pAspect, float pPower)
 {
 	bool lOk = false;
 	EngineArray::iterator x = mEngineArray.begin();
 	for (; x != mEngineArray.end(); ++x)
 	{
-		lOk |= (*x)->SetValue(pAspect, pPower, pAngle);
+		lOk |= (*x)->SetValue(pAspect, pPower);
 	}
 	return lOk;
 }
@@ -317,18 +364,18 @@ void ChunkyPhysics::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const Vector3DF* pPosition,
-	PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener)
+bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const TransformationF* pTransform,
+	int pTrigListenerId, int pForceListenerId)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
 	assert(lOk);
 	if (lOk)
 	{
-		if (pPosition)
+		if (pTransform)
 		{
 			const int lRoot = 0;
 			TransformationF lTransformation = GetOriginalBoneTransformation(lRoot);
-			lTransformation.GetPosition() += *pPosition;
+			lTransformation *= *pTransform;
 			SetOriginalBoneTransformation(lRoot, lTransformation);
 		}
 		lOk = Parent::FinalizeInit(mTransformOperation);
@@ -345,7 +392,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 				{
 					const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
 					const TransformationF& lBone = GetBoneTransformation(x);
-					lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListener, lBodyType, lBone);
+					lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListenerId, lBodyType, lBone);
 					if (lOk)
 					{
 						pPhysics->EnableGravity(lGeometry->GetBodyId(), lGeometry->IsAffectedByGravity());
@@ -354,7 +401,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 				break;
 				case ChunkyBoneGeometry::BONE_TRIGGER:
 				{
-					lOk = lGeometry->CreateTrigger(pPhysics, pTrigListener, GetBoneTransformation(x));
+					lOk = lGeometry->CreateTrigger(pPhysics, pTrigListenerId, GetBoneTransformation(x));
 				}
 				break;
 

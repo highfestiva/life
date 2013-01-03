@@ -154,6 +154,7 @@ public:
 		struct Maps
 		{
 			int mMapID[Texture::NUM_MAPS];
+			int mMipMapLevelCount[Texture::NUM_MAPS];
 		};
 
 		TextureAssociation(int pNumTextures) :
@@ -170,6 +171,12 @@ public:
 				mMaps[i].mMapID[Texture::ALPHA_MAP]    = 0;
 				mMaps[i].mMapID[Texture::NORMAL_MAP]   = 0;
 				mMaps[i].mMapID[Texture::SPECULAR_MAP] = 0;
+				mMaps[i].mMapID[Texture::CUBE_MAP] = 0;
+				mMaps[i].mMipMapLevelCount[Texture::COLOR_MAP]    = 0;
+				mMaps[i].mMipMapLevelCount[Texture::ALPHA_MAP]    = 0;
+				mMaps[i].mMipMapLevelCount[Texture::NORMAL_MAP]   = 0;
+				mMaps[i].mMipMapLevelCount[Texture::SPECULAR_MAP] = 0;
+				mMaps[i].mMipMapLevelCount[Texture::CUBE_MAP] = 0;
 			}
 		}
 
@@ -248,6 +255,7 @@ public:
 			for (int i = 0; i < Texture::NUM_MAPS; i++)
 			{
 				mTMapID[i] = pInvalidID;
+				mTMipMapLevelCount[i] = 0;
 			}
 		}
 
@@ -263,6 +271,8 @@ public:
 		// simply the associated "texture names". For Direct3D this
 		// is the index into an array of texture handles.
 		int mTMapID[Texture::NUM_MAPS];
+
+		int mTMipMapLevelCount[Texture::NUM_MAPS];
 
 		TextureID mTextureID;
 	};
@@ -371,9 +381,9 @@ public:
 	// within the one previously set. This means that setting the clipping rect one time 
 	// after another will reduce the size of the clipping area each time. Call 
 	// ResetClippingRect() to set the clipping rect back to cover the entire screen.
-	virtual void SetClippingRect(const PixelRect& pRect);
+	void SetClippingRect(const PixelRect& pRect);
 	void ReduceClippingRect(const PixelRect& pRect);
-	virtual void ResetClippingRect();
+	void ResetClippingRect();
 	const PixelRect& GetClippingRect() const;
 
 	virtual void SetCameraTransformation(const TransformationF& pTransformation);
@@ -546,6 +556,9 @@ protected:
 	void InitRenderer();
 	void CloseRenderer();
 
+	virtual void DoSetClippingRect(const PixelRect& pRect) = 0;
+	virtual void DoSetViewport(const PixelRect& pViewport) = 0;
+
 	// Some functions commonly used by the child classes.
 	Material* GetMaterial(MaterialType pMaterialType) const;
 	GeometryTable& GetGeometryTable();
@@ -585,7 +598,6 @@ protected:
 	virtual bool BindShadowGeometry(UiTbc::ShadowVolume* pShadowGeometry, LightHint pLightHint) = 0;
 	virtual void ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption) = 0;
 
-protected:
 	int AllocLight();
 
 	void ReleaseShadowVolumes();

@@ -4,8 +4,9 @@
 
 
 
+#include "LifeApplication.h"
 #include "../Cure/Include/ConsoleManager.h"
-#include "../Cure/Include/GameManager.h"
+#include "../Cure/Include/GameTicker.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Lepra/Include/AntiCrack.h"
 #include "../Lepra/Include/LogListener.h"
@@ -14,7 +15,6 @@
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "Life.h"
-#include "LifeApplication.h"
 #include "RtVar.h"
 
 
@@ -29,11 +29,12 @@ namespace Life
 
 
 
-Application::Application(const strutil::strvec& pArgumentList):
+Application::Application(const str& pBaseName, const strutil::strvec& pArgumentList):
 	Lepra::Application(pArgumentList),
 	mResourceManager(0),
 	mGameTicker(0),
 	mConsoleLogger(0),
+	mBaseName(pBaseName),
 	mIsPowerSaving(false),
 	mDebugLogger(0),
 	mFileLogger(0),
@@ -44,8 +45,8 @@ Application::Application(const strutil::strvec& pArgumentList):
 
 Application::~Application()
 {
-	mLog.RawPrint(Log::LEVEL_HEADLINE, _T("The end. Baba!\n"));
-	mFileLogger->WriteLog(_T("---\n\n"), Log::LEVEL_INFO);
+	mLog.RawPrint(LEVEL_HEADLINE, _T("The end. Baba!\n"));
+	mFileLogger->WriteLog(_T("---\n\n"), LEVEL_INFO);
 
 	// Kill all loggers, hopefully we don't need to log anything else.
 	delete (mConsoleLogger);
@@ -72,28 +73,27 @@ void Application::Init()
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
-	const str lApplicationName(_T("Life"));
-	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, lApplicationName);
+	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, mBaseName);
 
 	mConsoleLogger = CreateConsoleLogListener();
-	//mConsoleLogger->SetLevelThreashold(Log::LEVEL_INFO);
+	//mConsoleLogger->SetLevelThreashold(LEVEL_INFO);
 #ifndef NO_LOG_DEBUG_INFO
 	mDebugLogger = new DebuggerLogListener();
 #endif // Showing debug information.
 	mFileLogger = new FileLogListener(GetIoFile(GetName(), _T("log"), false));
-	//mFileLogger->SetLevelThreashold(Log::LEVEL_INFO);
-	mFileLogger->WriteLog(_T("\n---\n"), Log::LEVEL_INFO);
+	//mFileLogger->SetLevelThreashold(LEVEL_INFO);
+	mFileLogger->WriteLog(_T("\n---\n"), LEVEL_INFO);
 	//mPerformanceLogger = new FileLogListener(GetIoFile(GetName()+_T("Performance"), _T("log"), false));
 	mMemLogger = new MemFileLogListener(20*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
-	str lStartMessage = _T("Starting ") + lApplicationName + _T(" ") + GetName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
-	mLog.RawPrint(Log::LEVEL_HEADLINE, lStartMessage);
+	str lStartMessage = _T("Starting ") + mBaseName + _T(" ") + GetName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
+	mLog.RawPrint(LEVEL_HEADLINE, lStartMessage);
 
 	const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 	log_volatile(mLog.Debugf(_T("Using path prefix: %s"), lPathPrefix.c_str()));
 	mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
-	mGameTicker = CreateGameTicker();
+	mGameTicker = CreateTicker();
 }
 
 int Application::Run()
@@ -115,17 +115,21 @@ int Application::Run()
 	{
 		lOk = mGameTicker->Initialize();
 	}
+	if (lOk)
+	{
+		lOk = MainLoop();
+	}
+	return lOk? 0 : 1;
+}
+
+bool Application::MainLoop()
+{
+	bool lOk = true;
 	bool lQuit = false;
-	mTimeInfo.Set(1.0/CURE_STANDARD_FRAME_RATE, 1.0/CURE_STANDARD_FRAME_RATE, 1.0/CURE_STANDARD_FRAME_RATE);
 	while (lOk && !lQuit)
 	{
 		LEPRA_MEASURE_SCOPE(AppTick);
 		lOk = Tick();
-		if (lOk)
-		{
-			LEPRA_MEASURE_SCOPE(AppSleep);
-			TickSleep(mTimeInfo.GetSlidingAverage());
-		}
 		lQuit = mGameTicker->QueryQuit();
 	}
 
@@ -142,18 +146,16 @@ int Application::Run()
 		mLog.AFatal("Terminating application due to fatal error.");
 		if (mMemLogger && mFileLogger)
 		{
-			mLog.RawPrint(Log::LEVEL_FATAL, _T("\nStart dump hires logs.\n--------------------------------------------------------------------------------\n"));
+			mLog.RawPrint(LEVEL_FATAL, _T("\nStart dump hires logs.\n--------------------------------------------------------------------------------\n"));
 			mMemLogger->Dump(mFileLogger->GetFile());
-			mLog.RawPrint(Log::LEVEL_FATAL, _T("--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n"));
+			mLog.RawPrint(LEVEL_FATAL, _T("--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n"));
 		}
 	}
-
-	return (0);
+	return lOk;
 }
 
 bool Application::Tick()
 {
-	ScopeTimer lSleepTimer(&mTimeInfo);
 	bool lDebug;
 	CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	if (lDebug)
@@ -167,6 +169,11 @@ bool Application::Tick()
 	if (lExtraSleep > 0)
 	{
 		Thread::Sleep(lExtraSleep);
+	}
+	if (lOk)
+	{
+		LEPRA_MEASURE_SCOPE(AppSleep);
+		TickSleep();
 	}
 	return lOk;
 }
@@ -209,7 +216,7 @@ LogListener* Application::CreateConsoleLogListener() const
 
 
 
-void Application::TickSleep(double pMeasuredFrameTime) const
+void Application::TickSleep() const
 {
 	float lPowerSaveFactor;
 	CURE_RTVAR_GET(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
@@ -234,23 +241,22 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		int lFps;
 		CURE_RTVAR_GET(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
-		const double lSleepTime = lWantedFrameTime - pMeasuredFrameTime - mGameTicker->GetTickTimeReduction();
-		const double MINIMUM_SLEEP_TIME = 0.001;
+		const double lSleepTime = lWantedFrameTime - mGameTicker->GetTickTimeReduction();
 		const double MAXIMUM_SLEEP_TIME = 0.01;
-		if (lSleepTime >= MINIMUM_SLEEP_TIME)
+		if (lSleepTime >= 0)
 		{
 			double lSleepTimeLeft = lSleepTime;
 			HiResTimer lSleepTimer;
-			while (lSleepTimeLeft >= MINIMUM_SLEEP_TIME)
+			while (lSleepTimeLeft >= 0)
 			{
-				if (lSleepTimeLeft > MAXIMUM_SLEEP_TIME*1.5)
+				if (lSleepTimeLeft > MAXIMUM_SLEEP_TIME*1.7)
 				{
 					mGameTicker->PollRoundTrip();
 					Thread::Sleep(MAXIMUM_SLEEP_TIME);
 				}
-				else if (lSleepTimeLeft <= SystemManager::GetSleepResolution())
+				else if (lSleepTimeLeft > SystemManager::GetSleepResolution())
 				{
-					Thread::Sleep(lSleepTimeLeft);
+					Thread::Sleep(lSleepTimeLeft - SystemManager::GetSleepResolution());
 				}
 				else
 				{
@@ -258,10 +264,14 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 				}
 				lSleepTimeLeft = lSleepTime - lSleepTimer.QueryTimeDiff();
 			}
+			//log_volatile(mLog.Debugf(_T("Done tick sleeping, %f s left in sleep loop (measured), %f s reduction, %f s measured."), lSleepTimeLeft, mGameTicker->GetTickTimeReduction(), lSleepTime));
 		}
 		else
 		{
+#ifndef LEPRA_IOS
+			//log_volatile(mLog.Debugf(_T("Skipping tick sleep (yield only), %f s left in sleep loop, %f s reduction."), lSleepTime, mGameTicker->GetTickTimeReduction()));
 			Thread::YieldCpu();	// Play nice even though time's up!
+#endif	// Not on iOS (which sleeps during timer ticks).
 		}
 	}
 }

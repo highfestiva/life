@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../Cure/Include/GameManager.h"
+#include "../Cure/Include/GameTicker.h"
 #include "../UiTbc/Include/UiRenderer.h"
 
 
@@ -101,7 +102,8 @@ typedef std::list<FingerMovement> FingerMoveList;
 
 class Game: public Cure::GameTicker, public Cure::GameManager
 {
-	typedef GameManager Parent;
+	typedef Cure::GameTicker GameTicker;
+	typedef Cure::GameManager GameManager;
 public:
 	enum FlybyMode
 	{
@@ -157,6 +159,12 @@ private:
 	virtual void PollRoundTrip();	// Polls network for any incoming to yield lower latency.
 	virtual float GetTickTimeReduction() const;	// Returns how much quicker the tick loop should be; can be negative.
 	virtual float GetPowerSaveAmount() const;
+
+	virtual void WillMicroTick(float pTimeDelta);
+	virtual void DidPhysicsTick();
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId);
+	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,

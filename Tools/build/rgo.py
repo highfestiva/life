@@ -10,7 +10,7 @@ import rgohelp
 
 
 #appnames = [""UiCure/CureTestApp"", "Life", "SlimeVolleyball", "KillCutie", "TireFire"]
-appnames = ["KillCutie"]
+appnames = ["Push", "PushServer", "PushMaster"]
 osname = rgohelp._getosname()
 hwname = rgohelp._gethwname()
 datename = rgohelp._getdatename()
@@ -309,6 +309,7 @@ def _macappify(exe, name):
 			fs += [f]
 	for i in fs:
 		for o in fs:
+			#print("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
 			os.system("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
 	import shutil
 	shutil.copytree("../Tools/build/macosx", exe+".app")
@@ -378,6 +379,9 @@ def macappify_slime():
 def macappify_kc():
 	_macappify("KillCutie", "Kill Cutie")
 
+def macappify_push():
+	_macappify("Push", "Push")
+
 def macappify_tf():
 	_macappify("TireFire", "Tire Fire")
 
@@ -393,6 +397,9 @@ def cleandata_slime():
 def cleandata_kc():
 	_cleandata_source("KillCutie")
 
+def cleandata_push():
+	_cleandata_source("Push")
+
 def cleandata_tf():
 	_cleandata_source("TireFire")
 
@@ -407,6 +414,14 @@ def builddata_kc():
 
 def zipdata_kc():
 	os.chdir('KillCutie/Data')
+	rgohelp._zipdir('', _include_data_files, "Data.pk3")
+	os.chdir('../../')
+
+def builddata_push():
+	_builddata("Push", bindir, default_build_mode)
+
+def zipdata_push():
+	os.chdir('Push/Data')
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
 
@@ -494,7 +509,7 @@ def _prepare_run():
 	if os.name == "nt":
 		pre = ""
 		post = ".exe"
-	if not os.path.exists("LifeClient"+post) or not os.path.exists("LifeServer"+post):
+	if not os.path.exists(appnames[0]+post) or not os.path.exists(appnames[0]+post):
 		reason = "binaries not compiled" if rgohelp._hasdevenv() else "missing C++ build environment"
 		print("Could not run %s due to %s." % (appnames[0], reason))
 		sys.exit(2)

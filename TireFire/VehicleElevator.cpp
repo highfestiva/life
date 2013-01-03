@@ -26,7 +26,7 @@ VehicleElevator::~VehicleElevator()
 {
 }
 
-void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody)
+void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
 	assert(lTrigger);

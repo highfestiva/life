@@ -148,35 +148,11 @@ bool OpenGLRenderer::IsPixelShadersEnabled() const
 	return UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() && Parent::IsPixelShadersEnabled();
 }
 
-void OpenGLRenderer::SetViewport(const PixelRect& pViewport)
-{
-	OGL_ASSERT();
-	Parent::SetViewport(pViewport);
-	glViewport(pViewport.mLeft, GetScreen()->GetActualHeight() - pViewport.mBottom, 
-		pViewport.GetWidth(), pViewport.GetHeight());
-	OGL_ASSERT();
-}
-
 void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 {
 	Parent::SetViewFrustum(pFOVAngle, pNear, pFar);
-	glMatrixMode(GL_PROJECTION);
 	Perspective(pFOVAngle, GetAspectRatio(), pNear, pFar);
-
-	glMatrixMode(GL_MODELVIEW);
 	OGL_ASSERT();
-}
-
-void OpenGLRenderer::SetClippingRect(const PixelRect& pRect)
-{
-	Parent::SetClippingRect(pRect);
-	::glScissor(pRect.mLeft, GetScreen()->GetActualHeight() - pRect.mBottom, pRect.GetWidth(), pRect.GetHeight());
-	OGL_ASSERT();
-}
-
-void OpenGLRenderer::ResetClippingRect()
-{
-	Parent::ResetClippingRect();
 }
 
 void OpenGLRenderer::SetShadowMode(Shadows pShadowMode, ShadowHint pHint)
@@ -221,6 +197,20 @@ void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
 		lAmbientLight[3] = 1.0f;
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
 	}
+	OGL_ASSERT();
+}
+
+void OpenGLRenderer::DoSetClippingRect(const PixelRect& pRect)
+{
+	::glScissor(pRect.mLeft, GetScreen()->GetActualHeight() - pRect.mBottom, pRect.GetWidth(), pRect.GetHeight());
+	OGL_ASSERT();
+}
+
+void OpenGLRenderer::DoSetViewport(const PixelRect& pViewport)
+{
+	OGL_ASSERT();
+	::glViewport(pViewport.mLeft, GetScreen()->GetActualHeight() - pViewport.mBottom, 
+		pViewport.GetWidth(), pViewport.GetHeight());
 	OGL_ASSERT();
 }
 
@@ -537,6 +527,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	if (pTextureData->mTMapID[pMapType] == mTMapIDManager.GetInvalidId())
 	{
 		pTextureData->mTMapID[pMapType] = mTMapIDManager.GetFreeId();
+		pTextureData->mTMipMapLevelCount[pMapType] = pTexture->GetNumMipMapLevels();
 	}
 
 	glBindTexture(GL_TEXTURE_2D, pTextureData->mTMapID[pMapType]);
@@ -594,6 +585,7 @@ void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 	if (pTextureData->mTMapID[Texture::CUBE_MAP] == mTMapIDManager.GetInvalidId())
 	{
 		pTextureData->mTMapID[Texture::CUBE_MAP] = mTMapIDManager.GetFreeId();
+		pTextureData->mTMipMapLevelCount[Texture::CUBE_MAP] = pTexture->GetNumMipMapLevels();
 	}
 
 	// Bind cube map.
@@ -674,6 +666,8 @@ void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
 			mTMapIDManager.RecycleId(pTextureData->mTMapID[i]);
 			GLuint lTextureName = pTextureData->mTMapID[i];
 			glDeleteTextures(1, &lTextureName);
+			pTextureData->mTMapID[i] = 0;
+			pTextureData->mTMipMapLevelCount[i] = 0;
 		}
 	}
 
@@ -1964,8 +1958,12 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	   D * "aspect ratio".
 	*/
 
-	const float lDX = 1.0f / tan(Math::Deg2Rad(pFOVAngle) / 2.0f);
-	const float lDY = lDX * pAspectRatio;
+	float lDX = 1.0f / tan(Math::Deg2Rad(pFOVAngle) / 2.0f);
+	float lDY = lDX * pAspectRatio;
+	if (GetScreen()->GetOutputRotation()%180 != 0)
+	{
+		std::swap(lDX, lDY);
+	}
 
 	float lProjectionMatrix[16];
 
@@ -1989,10 +1987,11 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	lProjectionMatrix[14] = -(2.0f * pFar * pNear) / (pFar - pNear);
 	lProjectionMatrix[15] = 0;
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(lProjectionMatrix);
+	::glMatrixMode(GL_PROJECTION);
+	::glLoadMatrixf(lProjectionMatrix);
+	::glRotatef((float)GetScreen()->GetOutputRotation(), 0, 1, 0);
 
-	glMatrixMode(GL_MODELVIEW);
+	::glMatrixMode(GL_MODELVIEW);
 
 	OGL_ASSERT();
 }

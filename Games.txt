@@ -12,6 +12,8 @@ Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single play
 
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
 
+UFO Counter - Saucers come and land, and ET's emegerge. Take 'em out before they blow up planet Earth!
+
 Crazy game using genitals as obstacles.
 
 Sliding racing game. Hovercraft? Bob sleigh? Something of the kind...
@@ -41,3 +43,5 @@ Playing a presentation. Don't know how or why, but I'm on to something.
 Create an Early Warning System utilizing The Random Generator EGGS!
 
 A game in which a server is also a client listening to other servers, and where the information on the game spreads throughout the nodes... Perhaps area based? Algo might also use a way to spread IRL geographical coordinates as world server coordinates.
+
+Soap bubble game? Produce and catch 'em all.

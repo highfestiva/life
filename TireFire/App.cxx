@@ -488,7 +488,7 @@ int App::Run()
 		std::vector<Log*>::const_iterator x = lLogArray.begin();
 		for (; x != lLogArray.end(); ++x)
 		{
-			(*x)->SetLevelThreashold(Log::LEVEL_INFO);
+			(*x)->SetLevelThreashold(LEVEL_INFO);
 		}
 	}
 
@@ -667,8 +667,8 @@ bool App::Poll()
 			const bool lIsMovingForward = (mGame->GetVehicle()->GetForwardSpeed() > 3.0f*SCALE_FACTOR);
 			if (mReverseAndBrake)
 			{
-				mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake, 0);	// Reverse.
-				mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0, 0);	// Brake.
+				mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake);	// Reverse.
+				mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0);	// Brake.
 			}
 		}
 	}
@@ -756,6 +756,8 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
+		mGame->PreEndTick();
+		mGame->WaitPhysicsTick();
 		lOk = mGame->EndTick();
 	}
 	if (lOk)
@@ -952,7 +954,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
 					lNewPlacement->mPosition.mTransformation.GetPosition().x -= 10;
-					lVehicle->SetFullPosition(*lNewPlacement);
+					lVehicle->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}
@@ -967,7 +969,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
 					lNewPlacement->mPosition.mTransformation.GetOrientation().RotateAroundOwnY(PIF*0.4f);
-					lVehicle->SetFullPosition(*lNewPlacement);
+					lVehicle->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}
@@ -997,7 +999,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 					lNewPlacement->mPosition.mTransformation.GetPosition().x += 30;
 					lNewPlacement->mPosition.mTransformation.GetPosition().y += 20;
 					lNewPlacement->mPosition.mTransformation.GetPosition().z += 15;
-					lVehicle->SetFullPosition(*lNewPlacement);
+					lVehicle->SetFullPosition(*lNewPlacement, 0);
 				}
 			}
 		}
@@ -1039,7 +1041,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		break;
 		case DIRECTIVE_UP:
 		{
-			lVehicle->SetEnginePower(0, +1*pFactor, 0);
+			lVehicle->SetEnginePower(0, +1*pFactor);
 		}
 		break;
 		case DIRECTIVE_DOWN:
@@ -1047,19 +1049,19 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			mReverseAndBrake = pFactor;
 			if (!mReverseAndBrake)
 			{
-				lVehicle->SetEnginePower(0, 0, 0);
-				lVehicle->SetEnginePower(2, 0, 0);
+				lVehicle->SetEnginePower(0, 0);
+				lVehicle->SetEnginePower(2, 0);
 			}
 		}
 		break;
 		case DIRECTIVE_LEFT:
 		{
-			lVehicle->SetEnginePower(1, -1*pFactor, 0);
+			lVehicle->SetEnginePower(1, -1*pFactor);
 		}
 		break;
 		case DIRECTIVE_RIGHT:
 		{
-			lVehicle->SetEnginePower(1, +1*pFactor, 0);
+			lVehicle->SetEnginePower(1, +1*pFactor);
 		}
 		break;
 		case DIRECTIVE_FUNCTION:
@@ -1294,6 +1296,7 @@ void App::SuperReset()
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
+	lResourceTypes.push_back(_T("PhysicsShared"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
@@ -1523,6 +1526,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	lResourceTypes.push_back(_T("Geometry"));
 	lResourceTypes.push_back(_T("GeometryRef"));
 	lResourceTypes.push_back(_T("Physics"));
+	lResourceTypes.push_back(_T("PhysicsShared"));
 	lResourceTypes.push_back(_T("RamImg"));
 	mResourceManager->ForceFreeCache(lResourceTypes);
 	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.

@@ -200,6 +200,7 @@ public:
 		const PixelCoord& pPoint2, float pU2, float pV2,
 		const PixelCoord& pPoint3, float pU3, float pV3, ImageID pImageID);
 
+	void DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill);
 	virtual void DrawFan(const std::vector<Vector2DF> pCoords, bool pFill) = 0;
 	virtual void DrawImageFan(ImageID pImageID, const std::vector<Vector2DF> pCoords, const std::vector<Vector2DF> pTexCoords) = 0;
 

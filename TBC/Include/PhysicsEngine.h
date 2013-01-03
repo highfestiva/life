@@ -31,6 +31,7 @@ public:
 	{
 		ENGINE_WALK = 1,
 		ENGINE_CAMERA_FLAT_PUSH,
+		ENGINE_CAMERA_3D_PUSH,
 		ENGINE_HOVER,
 		ENGINE_HINGE_ROLL,
 		ENGINE_HINGE_GYRO,
@@ -42,6 +43,7 @@ public:
 		ENGINE_SLIDER_FORCE,
 		ENGINE_GLUE,
 		ENGINE_BALL_BRAKE,
+		ENGINE_YAW_BRAKE,
 	};
 	enum EngineMode
 	{
@@ -54,13 +56,11 @@ public:
 		ASPECT_PRIMARY		= 0,
 		ASPECT_SECONDARY	= 1,
 		ASPECT_TERTIARY		= 2,
-		ASPECT_CAM		= 3,
-		ASPECT_MAX_REMOTE_COUNT	= 4,
-
+		ASPECT_MAX_REMOTE_COUNT	= 3,
 		ASPECT_LOCAL_SHADOW	= 4,
 		ASPECT_LOCAL_SHADOW_ABS	= 5,
 		ASPECT_LOCAL_PRIMARY	= 6,
-		ASPECT_COUNT		= 8
+		ASPECT_COUNT		= 10
 	};
 
 	typedef std::vector<ChunkyBoneGeometry*> GeometryList;
@@ -68,6 +68,7 @@ public:
 	PhysicsEngine(EngineType pEngineType, float pStrength,
 		float pMaxSpeed, float pMaxSpeed2, float pFriction, unsigned pControllerIndex);
 	virtual ~PhysicsEngine();
+	void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsEngine& pOriginal);
 
 	static PhysicsEngine* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
@@ -75,7 +76,7 @@ public:
 
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
 	GeometryList GetControlledGeometryList() const;
-	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
+	bool SetValue(unsigned pAspect, float pValue);
 	void ForceSetValue(unsigned pAspect, float pValue);
 
 	void OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;

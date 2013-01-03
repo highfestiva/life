@@ -37,7 +37,7 @@ public:
 private:
 	virtual void TickInput();
 
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
+	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
 
 	UiCure::GameUiManager* mUiManager;
 	PixelRect mRenderArea;

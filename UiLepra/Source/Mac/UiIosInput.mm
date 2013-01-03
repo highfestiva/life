@@ -146,11 +146,6 @@ void IosInputDevice::PollEvents()
 	}
 }
 
-bool IosInputDevice::HaveRelativeAxes()
-{
-	return (mRelAxisCount > mAbsAxisCount);
-}
-
 void IosInputDevice::AddElement(InputElement* pElement)
 {
 	mElementArray.push_back(pElement);
@@ -176,18 +171,23 @@ IosInputManager::IosInputManager(MacOpenGLDisplay* pDisplayManager):
 	AddObserver();
 
 	IosInputDevice* lTouch = new IosInputDevice(this);
-	IosInputElement* lButton = new IosInputElement(InputElement::DIGITAL, InputElement::BUTTON1, 0, lTouch);
 	IosInputElement* x = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 0, lTouch);
 	IosInputElement* y = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 1, lTouch);
-	lTouch->AddElement(lButton);
+	IosInputElement* lButton = new IosInputElement(InputElement::DIGITAL, InputElement::BUTTON1, 0, lTouch);
+	lTouch->SetIdentifier(_T("IosVirtualMouse"));
+	x->SetIdentifier(_T("RelAxisX"));
+	y->SetIdentifier(_T("RelAxisY"));
+	lButton->SetIdentifier(_T("Button"));
 	lTouch->AddElement(x);
 	lTouch->AddElement(y);
-	lButton->SetValue(1);
+	lTouch->AddElement(lButton);
 	x->SetValue(0);
 	y->SetValue(0);
-	lButton->SetValue(0);
+	lButton->SetValue(1);
 	x->SetValue(mScreenWidth);
 	y->SetValue(mScreenHeight);
+	lButton->SetValue(0);
+	mDeviceList.push_back(lTouch);
 	mMouse = lTouch;
 
 	mInitialized = true;
@@ -201,13 +201,6 @@ IosInputManager::~IosInputManager()
 	}
 
 	RemoveObserver();
-
-	DeviceList::iterator lDIter;
-	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
-	{
-		InputDevice* lDevice = *lDIter;
-		delete lDevice;
-	}
 
 	mDisplayManager = 0;
 }
@@ -261,12 +254,9 @@ void IosInputManager::ReleaseKeyboard()
 	[lView resignFirstResponder];
 }
 
-void IosInputManager::ShowCursor()
+void IosInputManager::SetCursorVisible(bool pVisible)
 {
-}
-
-void IosInputManager::HideCursor()
-{
+	(void)pVisible;
 }
 
 float IosInputManager::GetCursorX()
@@ -282,7 +272,7 @@ float IosInputManager::GetCursorY()
 void IosInputManager::SetMousePosition(int x, int y)
 {
 	mCursorX = 2.0 * x / mScreenWidth  - 1.0;
-	mCursorY = 2.0 * (mScreenHeight-y) / mScreenHeight - 1.0;
+	mCursorY = 2.0 * y / mScreenHeight - 1.0;
 }
 
 const InputDevice* IosInputManager::GetKeyboard() const

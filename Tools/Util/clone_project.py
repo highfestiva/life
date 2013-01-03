@@ -49,9 +49,15 @@ def add_makefile_generator(filename, fromname, toname):
 	os.rename(outfn, filename)
 
 def add_builders(filename, fromname, toname):
-	fromsuffix = "".join(filter(str.isupper, fromname)).lower()
+	if len(fromname) <= 5:
+		fromsuffix = fromname.lower()
+	else:
+		fromsuffix = "".join(filter(str.isupper, fromname)).lower()
 	fromsuffix = '_'+fromsuffix+'():'
-	tosuffix   = "".join(filter(str.isupper, toname)).lower()
+	if len(toname) <= 5:
+		tosuffix = toname.lower()
+	else:
+		tosuffix   = "".join(filter(str.isupper, toname)).lower()
 	tosuffix   = '_'+tosuffix+'():'
 	fromspaced = "".join([x if x.islower() else ' '+x for x in fromname]).strip()
 	tospaced   = "".join([x if x.islower() else ' '+x for x in toname]).strip()

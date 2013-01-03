@@ -119,12 +119,12 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const Vector3DF& pRayPosition, c
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const TransformationF& pTransform,
 	float32 pMass, float32 pRadius, BodyType pType, float32 pFriction, float32 pBounce,
-	ForceFeedbackListener* pForceListener)
+	int pForceListenerId)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
-	lObject->mForceFeedbackListener = pForceListener;
-	//assert(pType == STATIC || lObject->mForceFeedbackListener);
+	lObject->mForceFeedbackId = pForceListenerId;
+	//assert(pType == STATIC || lObject->mForceFeedbackId);
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -154,7 +154,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Trans
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const TransformationF& pTransform,
 	float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction,
-	float32 pBounce, ForceFeedbackListener* pForceListener)
+	float32 pBounce, int pForceListenerId)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
@@ -162,8 +162,8 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Tra
 	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	mLog.AWarning("Warning! Cylinders are not accurately supported by ODE!");
 
-	lObject->mForceFeedbackListener = pForceListener;
-	//assert(pType == STATIC || lObject->mForceFeedbackListener);
+	lObject->mForceFeedbackId = pForceListenerId;
+	//assert(pType == STATIC || lObject->mForceFeedbackId);
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -192,13 +192,13 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Tra
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const TransformationF& pTransform,
 	float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction,
-	float32 pBounce, ForceFeedbackListener* pForceListener)
+	float32 pBounce, int pForceListenerId)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	lObject->mGeomID = ::dCreateCapsule(mSpaceID, (dReal)pRadius, (dReal)pLength);
-	lObject->mForceFeedbackListener = pForceListener;
-	//assert(pType == STATIC || lObject->mForceFeedbackListener);
+	lObject->mForceFeedbackId = pForceListenerId;
+	//assert(pType == STATIC || lObject->mForceFeedbackId);
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -227,13 +227,13 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Tran
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const TransformationF& pTransform,
 	float32 pMass, const Vector3DF& pSize, BodyType pType, float32 pFriction,
-	float32 pBounce, ForceFeedbackListener* pForceListener)
+	float32 pBounce, int pForceListenerId)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	lObject->mGeomID = ::dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
-	lObject->mForceFeedbackListener = pForceListener;
-	//assert(pType == STATIC || lObject->mForceFeedbackListener);
+	lObject->mForceFeedbackId = pForceListenerId;
+	//assert(pType == STATIC || lObject->mForceFeedbackId);
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -336,7 +336,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned pVertexCount,
 	const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,
 	const TransformationF& pTransform, float32 pFriction, float32 pBounce,
-	ForceFeedbackListener* pForceListener)
+	int pForceListenerId)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
@@ -352,8 +352,8 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned p
 	lObject->mGeomID = ::dCreateTriMesh(mSpaceID, lObject->mTriMeshID, 0, 0, 0);
 	//::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	::dGeomSetData(lObject->mGeomID, lObject);
-	lObject->mForceFeedbackListener = pForceListener;
-	assert(lObject->mForceFeedbackListener);
+	lObject->mForceFeedbackId = pForceListenerId;
+	assert(lObject->mForceFeedbackId);
 
 //	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
 
@@ -508,7 +508,7 @@ void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVeloci
 	}
 }
 
-void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, Vector3DF& pAcceleration) const
+void PhysicsManagerODE::GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -524,11 +524,24 @@ void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, Vector3DF& pAccelera
 	}
 }
 
-void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, const Vector3DF& pAcceleration)
+void PhysicsManagerODE::SetBodyForce(BodyID pBodyId, const Vector3DF& pAcceleration)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
 		dBodySetForce(lObject->mBodyID, pAcceleration.x, pAcceleration.y, pAcceleration.z);
+}
+
+void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const
+{
+	assert(pTotalMass > 0);
+	GetBodyForce(pBodyId, pAcceleration);
+	pAcceleration /= pTotalMass;
+}
+
+void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration)
+{
+	assert(pTotalMass > 0);
+	SetBodyForce(pBodyId, pAcceleration / pTotalMass);
 }
 
 void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const
@@ -556,7 +569,7 @@ void PhysicsManagerODE::SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& 
 	}
 }
 
-void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
+void PhysicsManagerODE::GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -572,13 +585,25 @@ void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pA
 	}
 }
 
-void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration)
+void PhysicsManagerODE::SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
 	{
 		::dBodySetTorque(lObject->mBodyID, pAngularAcceleration.x, pAngularAcceleration.y, pAngularAcceleration.z);
 	}
+}
+
+void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
+{
+	GetBodyTorque(pBodyId, pAngularAcceleration);
+	// TODO: handle moment of inertia?
+}
+
+void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration)
+{
+	// TODO: handle moment of inertia?
+	SetBodyTorque(pBodyId, pAngularAcceleration);
 }
 
 float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
@@ -651,7 +676,7 @@ void* PhysicsManagerODE::GetBodyData(BodyID pBodyId)
 }
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const TransformationF& pTransform,
-	float32 pRadius, TriggerListener* pListener)
+	float32 pRadius, int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
@@ -660,7 +685,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const Transform
 
 	lObject->mGeometryData[0] = pRadius;
 
-	lObject->mTriggerListener = pListener;
+	lObject->mTriggerListenerId = pTriggerListenerId;
 
 	mObjectTable.insert(lObject);
 
@@ -670,7 +695,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const Transform
 }
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const TransformationF& pTransform,
-	float32 pRadius, float32 pLength, TriggerListener* pListener)
+	float32 pRadius, float32 pLength, int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
 
@@ -683,7 +708,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Transfo
 	lObject->mGeometryData[0] = pRadius;
 	lObject->mGeometryData[1] = pLength;
 
-	lObject->mTriggerListener = pListener;
+	lObject->mTriggerListenerId = pTriggerListenerId;
 
 	mObjectTable.insert(lObject);
 
@@ -693,7 +718,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Transfo
 }
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const TransformationF& pTransform,
-	float32 pRadius, float32 pLength, TriggerListener* pListener)
+	float32 pRadius, float32 pLength, int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
 
@@ -704,7 +729,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const Transfor
 	lObject->mGeometryData[0] = pRadius;
 	lObject->mGeometryData[1] = pLength;
 
-	lObject->mTriggerListener = pListener;
+	lObject->mTriggerListenerId = pTriggerListenerId;
 
 	mObjectTable.insert(lObject);
 
@@ -714,7 +739,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const Transfor
 }
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const TransformationF& pTransform,
-	const Vector3DF& pSize, TriggerListener* pListener)
+	const Vector3DF& pSize, int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
 
@@ -726,7 +751,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const Transformati
 	lObject->mGeometryData[1] = pSize.y;
 	lObject->mGeometryData[2] = pSize.z;
 
-	lObject->mTriggerListener = pListener;
+	lObject->mTriggerListenerId = pTriggerListenerId;
 
 	mObjectTable.insert(lObject);
 
@@ -737,7 +762,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const Transformati
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const TransformationF& pTransform,
 	const Vector3DF& pFromPos, const Vector3DF& pToPos,
-	TriggerListener* pListener)
+	int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
 
@@ -752,7 +777,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const Transformati
 
 	dGeomRaySet(lObject->mGeomID, pFromPos.x, pFromPos.y, pFromPos.z, lDir.x, lDir.y, lDir.z);
 
-	lObject->mTriggerListener = pListener;
+	lObject->mTriggerListenerId = pTriggerListenerId;
 
 	mObjectTable.insert(lObject);
 
@@ -777,29 +802,29 @@ void PhysicsManagerODE::DeleteTrigger(TriggerID pTriggerID)
 	}
 }
 
-PhysicsManager::TriggerListener* PhysicsManagerODE::GetTriggerListener(TriggerID pTrigger)
+int PhysicsManagerODE::GetTriggerListenerId(TriggerID pTrigger)
 {
 	Object* lObject = (Object*)pTrigger;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetForceFeedbackListener() - trigger %i is not part of this world!"), pTrigger);
+		mLog.Errorf(_T("GetForceFeedbackListenerId() - trigger %i is not part of this world!"), pTrigger);
 		return (0);
 	}
-	return (lObject->mTriggerListener);
+	return (lObject->mTriggerListenerId);
 }
 
-PhysicsManager::ForceFeedbackListener* PhysicsManagerODE::GetForceFeedbackListener(BodyID pBody)
+int PhysicsManagerODE::GetForceFeedbackListenerId(BodyID pBody)
 {
 	Object* lObject = (Object*)pBody;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetForceFeedbackListener() - Body %i is not part of this world!"), pBody);
+		mLog.Errorf(_T("GetForceFeedbackListenerId() - Body %i is not part of this world!"), pBody);
 		return (0);
 	}
-	return (lObject->mForceFeedbackListener);
+	return (lObject->mForceFeedbackId);
 }
 
-void PhysicsManagerODE::SetForceFeedbackListener(BodyID pBody, ForceFeedbackListener* pListener)
+void PhysicsManagerODE::SetForceFeedbackListener(BodyID pBody, int pForceFeedbackId)
 {
 	Object* lObject = (Object*)pBody;
 	if (lObject->mWorldID != mWorldID)
@@ -807,7 +832,7 @@ void PhysicsManagerODE::SetForceFeedbackListener(BodyID pBody, ForceFeedbackList
 		mLog.Errorf(_T("SetForceFeedbackListener() - Body %i is not part of this world!"), pBody);
 		return;
 	}
-	lObject->mForceFeedbackListener = pListener;
+	lObject->mForceFeedbackId = pForceFeedbackId;
 }
 
 void PhysicsManagerODE::GetTriggerTransform(TriggerID pTriggerID, TransformationF& pTransform)
@@ -830,8 +855,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateBall(mWorldID, 0);
 	lJointInfo->mType = JOINT_BALL;
-	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
-	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
+	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
+	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
 	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
@@ -852,8 +877,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 		::dBodySetMaxAngularSpeed(lObject2->mBodyID, 30.0f);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
+	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
 	}*/
@@ -875,8 +900,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE;
-	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
-	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
+	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
+	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
 	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
@@ -900,8 +925,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, 0);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
+	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
 	}*/
@@ -925,15 +950,15 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, Body
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge2(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE2;
-	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
-	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
+	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
+	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
 	dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
 
 	lObject1->mHasMassChildren = true;
 	lObject2->mHasMassChildren = true;
-	/*if (lObject1->mForceFeedbackListener != 0 || 
-	   lObject2->mForceFeedbackListener != 0)
+	/*if (lObject1->mForceFeedbackId != 0 || 
+	   lObject2->mForceFeedbackId != 0)
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
 	}*/
@@ -958,8 +983,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = ::dJointCreateUniversal(mWorldID, 0);
 	lJointInfo->mType = JOINT_UNIVERSAL;
-	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
-	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
+	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
+	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
 	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
@@ -972,8 +997,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 		::dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
+	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
 	}*/
@@ -997,8 +1022,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, Body
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateSlider(mWorldID, 0);
 	lJointInfo->mType = JOINT_SLIDER;
-	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
-	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
+	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
+	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
 	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
@@ -1011,8 +1036,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, Body
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
+	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
 	}*/
@@ -1033,8 +1058,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyI
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateFixed(mWorldID, 0);
 	lJointInfo->mType = JOINT_FIXED;
-	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
-	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
+	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
+	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
 	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
@@ -1047,8 +1072,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyI
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
+	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
 	}*/
@@ -1068,8 +1093,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateAMotor(mWorldID, 0);
 	lJointInfo->mType = JOINT_ANGULARMOTOR;
-	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
-	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
+	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
+	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
 	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
@@ -1082,8 +1107,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
+	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
 	}*/
@@ -1344,8 +1369,8 @@ bool PhysicsManagerODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Jo
 
 void PhysicsManagerODE::RemoveJoint(JointInfo* pJointInfo)
 {
-	pJointInfo->mListener1 = 0;
-	pJointInfo->mListener2 = 0;
+	pJointInfo->mListenerId1 = 0;
+	pJointInfo->mListenerId2 = 0;
 	pJointInfo->mBody1Id = 0;
 	pJointInfo->mBody2Id = 0;
 	mJointInfoAllocator.Free(pJointInfo);
@@ -1375,7 +1400,7 @@ bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Dif
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
+		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mAcceleration = lAxis * lAcceleration;
 	}
 
@@ -1463,12 +1488,12 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 		if (pDiff.mAcceleration < PIF*1000)
 		{
 			Vector3DF lAcceleration;
-			GetBodyAngularAcceleration(pBodyId, lAcceleration);
+			GetBodyTorque(pBodyId, lAcceleration);
 			// Drop angular acceleration along axis, then add the specified amount.
 			Vector3DF lAxisAcceleration = lAxis*(lAxis*lAcceleration);
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis * pDiff.mAcceleration;
-			SetBodyAngularAcceleration(pBodyId, lAcceleration);
+			SetBodyTorque(pBodyId, lAcceleration);
 		}
 	}
 
@@ -1497,7 +1522,7 @@ bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Di
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAcceleration(pBodyId, lAcceleration);
+		GetBodyForce(pBodyId, lAcceleration);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
 		lAcceleration -= Vector3DF(lParentForce[0], lParentForce[1], lParentForce[2]);
@@ -1584,7 +1609,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 
 	{
 		lParentAcceleration -= lAxis*pDiff.mAcceleration;
-		SetBodyAcceleration(pBodyId, lParentAcceleration);
+		SetBodyForce(pBodyId, lParentAcceleration);
 	}
 
 	return (true);
@@ -1616,7 +1641,7 @@ bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
+		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = -(lAxis2 * lAcceleration);
 		pDiff.mAngleAcceleration = -(lAxis1 * lAcceleration);
 	}
@@ -1695,7 +1720,7 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 	{
 		Vector3DF lAxisAcceleration;
 		Vector3DF lOriginalAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lOriginalAcceleration);
+		GetBodyTorque(pBodyId, lOriginalAcceleration);
 		Vector3DF lAcceleration = lOriginalAcceleration;
 		// Drop angular acceleration along axis 1 & 2, then add the specified amount.
 		if (pDiff.mValueAcceleration < PIF*1000)
@@ -1710,8 +1735,8 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis2 * -pDiff.mAngleAcceleration;
 		}
-		//SetBodyAcceleration(pBodyId, Vector3DF());
-		SetBodyAngularAcceleration(pBodyId, lAcceleration);
+		//SetBodyForce(pBodyId, Vector3DF());
+		SetBodyTorque(pBodyId, lAcceleration);
 	}
 
 	return (true);
@@ -1757,9 +1782,9 @@ bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAcceleration(pBodyId, lAcceleration);
+		GetBodyForce(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = -(lAxis1 * lAcceleration);
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
+		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mAngle1Acceleration = -(lAxis2 * lAcceleration);
 		pDiff.mAngle2Acceleration = -(lAxis1 * lAcceleration);
 	}
@@ -1833,16 +1858,16 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAcceleration(pBodyId, lAcceleration);
+		GetBodyForce(pBodyId, lAcceleration);
 		// Drop suspension acceleration along axis1.
 		Vector3DF lAxisAcceleration(lAxis1*(lAxis1*lAcceleration));
 		lAcceleration -= lAxisAcceleration;
 		// Add suspension acceleration.
 		lAcceleration += lAxis1 * -pDiff.mValueAcceleration;
-		SetBodyAcceleration(pBodyId, lAcceleration);
+		SetBodyForce(pBodyId, lAcceleration);
 
 		Vector3DF lOriginalAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lOriginalAcceleration);
+		GetBodyTorque(pBodyId, lOriginalAcceleration);
 		lAcceleration = lOriginalAcceleration;
 		// Drop angular acceleration along axis 1 & 2, then add the specified amount.
 		if (pDiff.mAngle1Acceleration < PIF*1000)
@@ -1857,7 +1882,7 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis1 * -pDiff.mAngle2Acceleration;
 		}
-		SetBodyAngularAcceleration(pBodyId, lAcceleration);
+		SetBodyTorque(pBodyId, lAcceleration);
 	}
 
 	return (true);
@@ -1890,7 +1915,7 @@ bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff
 
 	{
 		Vector3DF lAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
+		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = lAcceleration.x;
 		pDiff.mAngle1Acceleration = lAcceleration.y;
 		pDiff.mAngle2Acceleration = lAcceleration.z;
@@ -1942,10 +1967,10 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 
 	{
 		// TODO: adjust linear acceleration.
-		//SetBodyAcceleration(pBodyId, Vector3DF(0, 0, 0));
-		//SetBodyAcceleration(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
-		SetBodyAngularAcceleration(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
-		//SetBodyAngularAcceleration(pBodyId, Vector3DF(0, 0, 0));
+		//SetBodyForce(pBodyId, Vector3DF(0, 0, 0));
+		//SetBodyForce(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
+		SetBodyTorque(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
+		//SetBodyTorque(pBodyId, Vector3DF(0, 0, 0));
 	}
 
 	return (true);
@@ -2975,6 +3000,10 @@ void PhysicsManagerODE::AddForce(BodyID pBodyId, const Vector3DF& pForce)
 		dBodyEnable(((Object*)pBodyId)->mBodyID);
 		dBodyAddForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
 	}
+	else
+	{
+		mLog.Errorf(_T("AddForce() - Body %i is only geometry, not body!"), pBodyId);
+	}
 }
 
 void PhysicsManagerODE::AddTorque(BodyID pBodyId, const Vector3DF& pTorque)
@@ -3154,6 +3183,14 @@ void PhysicsManagerODE::PostSteps()
 
 void PhysicsManagerODE::DoForceFeedback()
 {
+	TriggerInfoList::iterator y;
+	for (y = mTriggerInfoList.begin(); y != mTriggerInfoList.end(); ++y)
+	{
+		const TriggerInfo& lTriggerInfo = *y;
+		mTriggerCallback->OnTrigger(lTriggerInfo.mTriggerId, lTriggerInfo.mTriggerListenerId, lTriggerInfo.mBodyListenerId);
+	}
+	mTriggerInfoList.clear();
+
 	JointList::iterator x;
 	for (x = mFeedbackJointList.begin(); x != mFeedbackJointList.end(); ++x)
 	{
@@ -3162,13 +3199,14 @@ void PhysicsManagerODE::DoForceFeedback()
 		const bool lIsBody1Static = lJointInfo->IsBody1Static(this);
 		const bool lIsBody2Static = lJointInfo->IsBody2Static(this);
 		//const bool lOneIsDynamic = (!lIsBody1Static || !lIsBody2Static);
-		if (lJointInfo->mListener1 != lJointInfo->mListener2 /*&& lOneIsDynamic*/)
+		if (lJointInfo->mListenerId1 != lJointInfo->mListenerId2 /*&& lOneIsDynamic*/)
 		{
-			if (lJointInfo->mListener1 != 0)
+			if (lJointInfo->mListenerId1 != 0)
 			{
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
-				lJointInfo->mListener1->OnForceApplied(
-					lJointInfo->mListener2,
+				mForceFeedbackCallback->OnForceApplied(
+					lJointInfo->mListenerId1,
+					lJointInfo->mListenerId2,
 					lJointInfo->mBody1Id,
 					lJointInfo->mBody2Id,
 					Vector3DF(lFeedback->f1[0], lFeedback->f1[1], lFeedback->f1[2]),
@@ -3176,13 +3214,14 @@ void PhysicsManagerODE::DoForceFeedback()
 					lJointInfo->mPosition,
 					lJointInfo->mRelativeVelocity);
 			}
-			if (lJointInfo->mListener2 != 0)
+			if (lJointInfo->mListenerId2 != 0)
 			{
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 				if (lIsBody1Static || lIsBody2Static)	// Only a single force/torque pair set?
 				{
-					lJointInfo->mListener2->OnForceApplied(
-						lJointInfo->mListener1,
+					mForceFeedbackCallback->OnForceApplied(
+						lJointInfo->mListenerId2,
+						lJointInfo->mListenerId1,
 						lJointInfo->mBody2Id,
 						lJointInfo->mBody1Id,
 						Vector3DF(lFeedback->f1[0], lFeedback->f1[1], lFeedback->f1[2]),
@@ -3192,8 +3231,9 @@ void PhysicsManagerODE::DoForceFeedback()
 				}
 				else
 				{
-					lJointInfo->mListener2->OnForceApplied(
-						lJointInfo->mListener1,
+					mForceFeedbackCallback->OnForceApplied(
+						lJointInfo->mListenerId2,
+						lJointInfo->mListenerId1,
 						lJointInfo->mBody2Id,
 						lJointInfo->mBody1Id,
 						Vector3DF(lFeedback->f2[0], lFeedback->f2[1], lFeedback->f2[2]),
@@ -3213,8 +3253,8 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	Object* lObject1 = (Object*)dGeomGetData(pGeom1);
 	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
 
-	if ((lObject1->mForceFeedbackListener && lObject1->mForceFeedbackListener == lObject2->mForceFeedbackListener) ||	// Same body.
-		(lObject1->mTriggerListener && lObject2->mTriggerListener))	// Elevator platform trigger moves into down trigger.
+	if ((lObject1->mForceFeedbackId && lObject1->mForceFeedbackId == lObject2->mForceFeedbackId) ||	// Same body.
+		(lObject1->mTriggerListenerId && lObject2->mTriggerListenerId))	// Elevator platform trigger moves into down trigger.
 	{
 		return;
 	}
@@ -3241,28 +3281,28 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		return;
 	}
 
-	if (lObject1->mTriggerListener != 0)	// Only trig, no force application.
+	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
+	if (lObject1->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
-		if (lObject1->mTriggerListener->IsSameInstance(lObject2->mForceFeedbackListener))
+		if (lObject1->mTriggerListenerId == lObject2->mForceFeedbackId)
 		{
 			return;
 		}
-		lObject1->mTriggerListener->OnTrigger((TriggerID)lObject1, lObject2->mForceFeedbackListener);
+		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId));
 		return;
 	}
-	if(lObject2->mTriggerListener != 0)	// Only trig, no force application.
+	if(lObject2->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
-		if (lObject2->mTriggerListener->IsSameInstance(lObject1->mForceFeedbackListener))
+		if (lObject2->mTriggerListenerId == lObject1->mForceFeedbackId)
 		{
 			return;
 		}
-		lObject2->mTriggerListener->OnTrigger((TriggerID)lObject2, lObject1->mForceFeedbackListener);
+		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId));
 		return;
 	}
 
 	// Bounce/slide when both objects are dynamic, non-trigger objects.
 	{
-		PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 		// Fetch force, will be used to scale friction (projected against surface normal).
 		Vector3DF lPosition1 = lThis->GetBodyPosition((BodyID)lObject1);
 		Vector3DF lPosition2 = lThis->GetBodyPosition((BodyID)lObject2);
@@ -3337,17 +3377,22 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			}
 			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
 			lC.surface.bounce_vel = (dReal)0.000001;
+			if (lC.surface.bounce < 0.1f)
+			{
+				lC.surface.mode |= dContactSoftERP;
+				lC.surface.soft_erp = Math::Lerp(0.0f, 1.0f, lC.surface.bounce * 10);
+			}
 
-			if (lObject1->mForceFeedbackListener != 0 ||
-			   lObject2->mForceFeedbackListener != 0)
+			if (lObject1->mForceFeedbackId != 0 ||
+			   lObject2->mForceFeedbackId != 0)
 			{
 				// Create a joint whith feedback info.
 				JointInfo* lJointInfo = lThis->mJointInfoAllocator.Alloc();
 				lJointInfo->mJointID = dJointCreateContact(lThis->mWorldID, lThis->mContactJointGroupID, &lC);
 				lJointInfo->mType = JOINT_CONTACT;
 				lThis->mFeedbackJointList.push_back(lJointInfo);
-				lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
-				lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
+				lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
+				lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 				lJointInfo->mPosition = lPosition;
 				lJointInfo->mRelativeVelocity = lSpin;
 
@@ -3419,7 +3464,7 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 		{
 			lVelocity.Normalize(lMaxAngularVelocity);
 			SetBodyAngularVelocity(lObject, lVelocity);
-			SetBodyAngularAcceleration(lObject, Vector3DF());
+			SetBodyTorque(lObject, Vector3DF());
 		}
 	}
 }

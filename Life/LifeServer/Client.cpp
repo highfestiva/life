@@ -173,7 +173,7 @@ void Client::SendLoginCommands(Cure::Packet* pPacket)
 		L"#" _WIDE(RTVAR_PHYSICS_FPS) L" %i;\n"
 		L"#" _WIDE(RTVAR_PHYSICS_RTR) L" %f;\n"
 		L"%s",
-		lPhysicsFps, lPhysicsRtr, lServerGreeting.c_str());
+		lPhysicsFps, lPhysicsRtr, wstrutil::Encode(lServerGreeting).c_str());
 	mNetworkAgent->SendStatusMessage(mUserConnection->GetSocket(), 0, Cure::REMOTE_OK,
 		Cure::MessageStatus::INFO_COMMAND, lCmd, pPacket);
 }

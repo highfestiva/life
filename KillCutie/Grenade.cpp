@@ -30,6 +30,7 @@ Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, U
 	mExploded(false),
 	mIsUserFired(false)
 {
+	SetForceLoadUnique(true);	// Needs to be unique as physics are reloaded often with shared IDs.
 }
 
 Grenade::~Grenade()
@@ -144,7 +145,7 @@ bool Grenade::TryComplete()
 	return lOk;
 }
 
-void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
+void Grenade::OnForceApplied(Cure::ContextObject* pOtherObject,
 	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 	const Vector3DF& pForce, const Vector3DF& pTorque,
 	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)

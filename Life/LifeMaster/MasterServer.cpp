@@ -17,8 +17,9 @@ namespace Life
 
 
 
-MasterServer::MasterServer():
-	mMuxSocket(0)
+MasterServer::MasterServer(const str& pPort):
+	mMuxSocket(0),
+	mPort(pPort)
 {
 }
 
@@ -34,11 +35,11 @@ MasterServer::~MasterServer()
 bool MasterServer::Initialize()
 {
 	SocketAddress lAddress;
-	str lAcceptAddress = _T("0.0.0.0:") _T(MASTER_SERVER_PORT);
+	str lAcceptAddress = _T("0.0.0.0:") + mPort;
 	if (!lAddress.Resolve(lAcceptAddress))
 	{
 		mLog.Warningf(_T("Could not resolve address '%s'."), lAcceptAddress.c_str());
-		lAcceptAddress = _T(":") _T(MASTER_SERVER_PORT);
+		lAcceptAddress = _T(":") + mPort;
 		if (!lAddress.Resolve(lAcceptAddress))
 		{
 			mLog.Errorf(_T("Could not resolve address '%s'!"), lAcceptAddress.c_str());
@@ -88,6 +89,7 @@ bool MasterServer::Tick()
 
 void MasterServer::PollRoundTrip()
 {
+	Tick();
 }
 
 float MasterServer::GetTickTimeReduction() const
@@ -97,7 +99,15 @@ float MasterServer::GetTickTimeReduction() const
 
 float MasterServer::GetPowerSaveAmount() const
 {
-	return 0.05f;
+	if (!mGameServerTable.empty())
+	{
+		return 0;
+	}
+	if (!mSocketTimeoutTable.empty())
+	{
+		return 0.1f;
+	}
+	return 1;
 }
 
 
@@ -255,11 +265,11 @@ bool MasterServer::RegisterGameServer(const ServerInfo& pServerInfo, UdpVSocket*
 		}
 		if (lOk)
 		{
-			mLog.RawPrint(Log::LEVEL_DEBUG, _T("----------------------------------------\nServer list:\n"));
+			mLog.RawPrint(LEVEL_DEBUG, _T("----------------------------------------\nServer list:\n"));
 			GameServerTable::iterator x = mGameServerTable.begin();
 			for (; x != mGameServerTable.end(); ++x)
 			{
-				mLog.RawPrint(Log::LEVEL_DEBUG, x->second.mName + _T(" @ ") + x->first + _T("\n"));
+				mLog.RawPrint(LEVEL_DEBUG, x->second.mName + _T(" @ ") + x->first + _T("\n"));
 			}
 		}
 	}

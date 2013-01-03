@@ -45,18 +45,18 @@ public:
 	void KillSelf();
 	void AddLog(Log* pLog);
 	void RemoveLog(Log* pLog);
-	void OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, Log::LogLevel pLevel);
-	void OnLog(const Log* pOriginator, const str& pMessage, Log::LogLevel pLevel);
-	virtual void WriteLog(const str& pMessage, Log::LogLevel pLevel) = 0;
-	Log::LogLevel GetLevelThreashold() const;
-	void SetLevelThreashold(Log::LogLevel pType);
+	void OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel);
+	void OnLog(const Log* pOriginator, const str& pMessage, LogLevel pLevel);
+	virtual void WriteLog(const str& pMessage, LogLevel pLevel) = 0;
+	LogLevel GetLevelThreashold() const;
+	void SetLevelThreashold(LogLevel pType);
 
 	const str& GetName() const;
 
 protected:
 	Log* mLog;
 	str mName;
-	Log::LogLevel mLevel;
+	LogLevel mLevel;
 	OutputFormat mFormat;
 	int mLogCount;
 };
@@ -67,7 +67,7 @@ class StdioConsoleLogListener: public LogListener
 public:
 	StdioConsoleLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
 	virtual ~StdioConsoleLogListener();
-	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, LogLevel pLevel);
 };
 
 
@@ -93,7 +93,7 @@ public:
 	virtual ~InteractiveStdioConsoleLogListener();
 
 protected:
-	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, LogLevel pLevel);
 	void OnLogRawMessage(const str& pText);
 
 	StdioConsoleLogListener mStdioLogListener;
@@ -108,7 +108,7 @@ public:
 	virtual ~DebuggerLogListener();
 
 protected:
-	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, LogLevel pLevel);
 };
 
 
@@ -121,7 +121,7 @@ public:
 
 	File& GetFile();
 
-	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, LogLevel pLevel);
 
 protected:
 	DiskFile mFile;
@@ -138,12 +138,12 @@ public:
 	void Clear();
 	bool Dump(const str& pFilename);
 	bool Dump(File& pFile);
-	bool Dump(LogListener& pLogListener, Log::LogLevel pLevel);
+	bool Dump(LogListener& pLogListener, LogLevel pLevel);
 
 protected:
-	bool Dump(File* pFile, LogListener* pLogListener, Log::LogLevel pLevel);
+	bool Dump(File* pFile, LogListener* pLogListener, LogLevel pLevel);
 
-	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, LogLevel pLevel);
 
 	MemFile mFile;
 	uint64 mMaxSize;

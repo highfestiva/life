@@ -59,7 +59,7 @@ struct Steering
 		CONTROL_DOWN,
 		CONTROL_UP3D,
 		CONTROL_DOWN3D,
-		CONTROL_HANDBREAK,
+		CONTROL_HANDBRAKE,
 		CONTROL_BREAK,
 		CONTROL_COUNT
 	};
@@ -83,6 +83,30 @@ struct Steering
 			lSum += fabs(mControl[x]-pVehicle.mControl[x]);
 		}
 		return (lSum);
+	}
+};
+
+
+
+struct FireControl
+{
+	enum Control
+	{
+		FIRE0 = 0,
+		FIRE1,
+		FIRE2,
+		FIRE_COUNT
+	};
+	float mControl[FIRE_COUNT];
+
+	inline FireControl()
+	{
+		::memset(mControl, 0, sizeof(mControl));
+	}
+
+	inline void operator=(const FireControl& pShooting)
+	{
+		::memcpy(mControl, pShooting.mControl, sizeof(mControl));
 	}
 };
 

@@ -33,7 +33,7 @@ private:
 	void Launch();
 	void OnTick();
 	virtual bool TryComplete();
-	virtual void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
+	virtual void OnForceApplied(Cure::ContextObject* pOtherObject,
 		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 		const Vector3DF& pForce, const Vector3DF& pTorque,
 		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);

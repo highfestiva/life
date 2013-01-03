@@ -55,6 +55,9 @@ public:
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
+	GameUiManager* GetUiManager() const;
+	virtual const TBC::ChunkyClass* GetClass() const;
+
 protected:
 	enum MeshSlideMode
 	{
@@ -62,9 +65,6 @@ protected:
 		MESH_SLIDE_START,
 		MESH_SLIDE_RUN,
 	};
-
-	GameUiManager* GetUiManager() const;
-	virtual const TBC::ChunkyClass* GetClass() const;
 
 	void OnLoadClass(UserClassResource* pClassResource);
 	virtual void LoadTextures();

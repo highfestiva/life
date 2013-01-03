@@ -186,13 +186,6 @@ X11InputDevice::~X11InputDevice()
 	}
 	mDIDevice->Release();
 
-	ElementArray::iterator lEIter;
-	for (lEIter = mElementArray.begin(); lEIter != mElementArray.end(); ++lEIter)
-	{
-		InputElement* lElement = *lEIter;
-		delete lElement;
-	}
-
 	delete[] mDeviceObjectData;
 	delete[] mDataFormat.rgodf;
 }
@@ -380,11 +373,6 @@ void X11InputDevice::PollEvents()
 	}
 }
 
-bool X11InputDevice::HaveRelativeAxes()
-{
-	return (mRelAxisCount > mAbsAxisCount);
-}
-
 
 
 LOG_CLASS_DEFINE(UI_INPUT, X11InputDevice);
@@ -446,13 +434,6 @@ X11InputManager::~X11InputManager()
 	}
 
 	RemoveObserver();
-
-	DeviceList::iterator lDIter;
-	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
-	{
-		InputDevice* lDevice = *lDIter;
-		delete lDevice;
-	}
 
 	mDisplayManager = 0;
 }
@@ -627,14 +608,9 @@ BOOL CALLBACK X11InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPV
 	return (DIENUM_CONTINUE);
 }
 
-void X11InputManager::ShowCursor()
+void X11InputManager::SetCursorVisible(bool pVisible)
 {
-	::ShowCursor(TRUE);
-}
-
-void X11InputManager::HideCursor()
-{
-	::ShowCursor(FALSE);
+	::ShowCursor(pVisible? TRUE : FALSE);
 }
 
 float X11InputManager::GetCursorX()

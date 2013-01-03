@@ -10,13 +10,6 @@
 
 
 
-namespace Cure
-{
-class ContextObjectAttribute;
-}
-
-
-
 namespace Life
 {
 

@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
@@ -64,22 +64,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
-				IgnoreDefaultLibraryNames="msvcrtd.lib"
-				GenerateDebugInformation="true"
-				AssemblyDebug="1"
-				GenerateMapFile="true"
-				SubSystem="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -89,9 +77,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -101,7 +86,7 @@
 			Name="Final|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
@@ -145,19 +130,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
-				IgnoreDefaultLibraryNames=""
-				GenerateMapFile="true"
-				SubSystem="2"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -169,9 +145,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -179,7 +152,7 @@
 			Name="Release Candidate|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
@@ -224,20 +197,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
-				IgnoreDefaultLibraryNames="msvcrt.lib"
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				SubSystem="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -249,9 +212,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -259,7 +219,7 @@
 			Name="Unicode Debug|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
@@ -303,22 +263,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
-				IgnoreDefaultLibraryNames="msvcrtd.lib"
-				GenerateDebugInformation="true"
-				AssemblyDebug="1"
-				GenerateMapFile="true"
-				SubSystem="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -330,9 +278,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -340,7 +285,7 @@
 			Name="Unicode Final|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
@@ -385,20 +330,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
-				IgnoreDefaultLibraryNames=""
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				SubSystem="2"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -410,9 +345,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -420,7 +352,7 @@
 			Name="Unicode Release Candidate|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
@@ -465,20 +397,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
-				OutputFile="$(OutDir)\$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
-				IgnoreDefaultLibraryNames="msvcrt.lib"
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				SubSystem="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -488,9 +410,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -521,23 +440,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\ClientApplication.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ClientConsoleManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ClientLoginView.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ClientOptionsManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameClientDemo.cpp"
 				>
 			</File>
 			<File
@@ -549,27 +456,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GameClientViewer.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\OptionsManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ServerListView.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Sunlight.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\UiConsole.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\View.cpp"
 				>
 			</File>
 		</Filter>
@@ -583,10 +474,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ClientLoginView.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ClientOptions.h"
 				>
 			</File>
@@ -595,19 +482,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GameClientDemo.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GameClientMasterTicker.h"
 				>
 			</File>
 			<File
 				RelativePath=".\GameClientSlaveManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameClientViewer.h"
 				>
 			</File>
 			<File
@@ -623,33 +502,13 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ServerListView.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Sunlight.h"
-				>
-			</File>
-			<File
 				RelativePath=".\UiConsole.h"
-				>
-			</File>
-			<File
-				RelativePath=".\View.h"
 				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Game"
 			>
-			<File
-				RelativePath=".\Level.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Level.h"
-				>
-			</File>
 			<File
 				RelativePath=".\MassObject.cpp"
 				>
@@ -659,11 +518,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RoadSignButton.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RoadSignButton.h"
+				RelativePath=".\ScreenPart.h"
 				>
 			</File>
 			<File
@@ -754,10 +609,6 @@
 		<Filter
 			Name="Master"
 			>
-			<File
-				RelativePath="..\LifeMaster\MasterServer.h"
-				>
-			</File>
 			<File
 				RelativePath="..\LifeServer\MasterServerConnection.cpp"
 				>

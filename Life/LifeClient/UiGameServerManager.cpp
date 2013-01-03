@@ -6,6 +6,7 @@
 
 #include "UiGameServerManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
+#include "GameClientMasterTicker.h"
 #include "UiServerConsoleManager.h"
 #include "UiConsole.h"
 
@@ -18,7 +19,7 @@ namespace Life
 
 UiGameServerManager::UiGameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, const PixelRect& pArea):
-	GameServerManager(pTime, pVariableScope, pResourceManager),
+	Parent(pTime, pVariableScope, pResourceManager),
 	mUiManager(pUiManager),
 	mRenderArea(pArea),
 	mOptions(pVariableScope, 0),
@@ -98,13 +99,13 @@ void UiGameServerManager::TickInput()
 
 
 
-Cure::ContextObject* UiGameServerManager::CreateContextObject(const str& pClassId) const
+void UiGameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement)
 {
-	// TRICKY: must be of UI object to not clash with client slaves
-	// that are running in the same process.
-	UiCure::CppContextObject* lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
-	lObject->EnableUi(false);
-	return (lObject);
+	const GameClientMasterTicker* lTicker = (const GameClientMasterTicker*)GetTicker();
+	if (!lTicker->IsLocalObject(pMovement->GetObjectId()))
+	{
+		Parent::StoreMovement(pClientFrameIndex, pMovement);
+	}
 }
 
 

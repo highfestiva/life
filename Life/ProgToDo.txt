@@ -59,7 +59,7 @@ Game
 + Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
 + Extend auto-flip feature so that if the avatar is_child, the system will apply helper forces designed to keep it from toppling over.
 + Show logo when starting game.
-. Sync server's Game.TimeOfDay to client upon login.
+. Sync server's Game.TimeOfDay to client upon login and after that regularly.
 . Make sun disappear at night (currently stays below "floor").
 . Fix sizes+weights of vehicles so that some are not twice the size of others, when they should not be.
 . Server: make it so create (and auto-flip/teleport) move the object upward until it does not collide against anything, like 0.5 meters at a time.

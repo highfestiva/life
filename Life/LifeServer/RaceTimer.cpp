@@ -5,11 +5,12 @@
 
 
 #include "RaceTimer.h"
+#include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
 #include "../RaceScore.h"
-#include "GameServerManager.h"
 
 
 
@@ -73,9 +74,13 @@ void RaceTimer::OnTick()
 	}
 }
 
-void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pListener)
+void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
-	Cure::ContextObject* lObject = (Cure::ContextObject*)pListener;
+	Cure::ContextObject* lObject = pBody;
+	if (lObject->GetPhysics()->GetEngineCount() <= 0)	// Only self-movable stuff can let the games begin!
+	{
+		return;
+	}
 
 	// Check if just finished this race.
 	DoneMap::iterator i = mDoneMap.find(lObject->GetInstanceId());

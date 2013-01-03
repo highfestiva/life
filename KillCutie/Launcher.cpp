@@ -19,7 +19,7 @@ Launcher::Launcher(Game* pGame):
 	Parent(pGame->GetResourceManager(), _T("Launcher"), pGame->GetUiManager()),
 	mGame(pGame)
 {
-	SetForceLoadUnique(true);
+	SetForceLoadUnique(true);	// Needs to be unique as we set unique engines per view.
 }
 
 Launcher::~Launcher()

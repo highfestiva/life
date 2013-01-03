@@ -26,7 +26,7 @@ public:
 	virtual ~CutieElevator();
 
 private:
-	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
+	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
 
 	Game* mGame;
 

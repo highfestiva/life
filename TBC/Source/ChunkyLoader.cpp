@@ -811,6 +811,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	// Write physics modes and similar stuff.
 	int32 lBoneCount = pPhysics->GetBoneCount();
 	int32 lPhysicsType = pPhysics->GetPhysicsType();
+	int32 lGuideMode = pPhysics->GetGuideMode();
 	int32 lEngineCount = pPhysics->GetEngineCount();
 	int32 lTriggerCount = pPhysics->GetTriggerCount();
 	int32 lSpawnerCount = pPhysics->GetSpawnerCount();
@@ -818,6 +819,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	{
 		lOk = (lBoneCount > 0 && lBoneCount < 10000 &&
 			lPhysicsType >= ChunkyPhysics::STATIC &&
+			lGuideMode >= ChunkyPhysics::GUIDE_NEVER &&
 			lEngineCount >= 0 && lEngineCount < 1000 &&
 			lTriggerCount >= 0 && lTriggerCount < 1000);
 	}
@@ -826,6 +828,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 		FileElementList lSaveList;
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_COUNT, &lBoneCount));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_TYPE, &lPhysicsType));
+		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_GUIDE_MODE, &lGuideMode));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_COUNT, &lTriggerCount));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_SPAWNER_COUNT, &lSpawnerCount));
@@ -953,6 +956,34 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	if (lOk)
 	{
 		lOk = RewriteChunkSize(lTriggerChunkStart);
+	}
+
+	// Write spawner header.
+	if (lOk)
+	{
+		int64 lChunkEndPosition = 0;
+		lOk = SaveHead(CHUNK_PHYSICS_SPAWNER_CONTAINER, 0, lChunkEndPosition);
+	}
+	const int64 lSpawnerChunkStart = mFile->Tell();
+	// Write triggers.
+	for (int t = 0; lOk && t < lSpawnerCount; ++t)
+	{
+		const PhysicsSpawner* lSpawner = pPhysics->GetSpawner(t);
+		assert(lSpawner);
+		int64 lChunkEndPosition = 0;
+		unsigned lSize = lSpawner->GetChunkySize();
+		lOk = SaveHead(CHUNK_PHYSICS_SPAWNER, lSize, lChunkEndPosition);
+		if (lOk)
+		{
+			char* lData = new char[lSize];
+			lSpawner->SaveChunkyData(pPhysics, lData);
+			lOk = (mFile->WriteData(lData, lSize) == IO_OK);
+			delete (lData);
+		}
+	}
+	if (lOk)
+	{
+		lOk = RewriteChunkSize(lSpawnerChunkStart);
 	}
 
 	// Re-write file header size.

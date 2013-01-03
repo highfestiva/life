@@ -31,7 +31,7 @@ public:
 protected:
 	virtual void OnTick();
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
 	void Trig(const TBC::PhysicsTrigger* pTrigger);
 	TBC::ChunkyBoneGeometry* GetFirstBody() const;
 

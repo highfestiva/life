@@ -169,8 +169,9 @@ Cure::ResourceLoadState RendererImageBaseResource::PostProcess()
 	return (lLoadState);
 }
 
-RendererImageResource::RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
-	RendererImageBaseResource(pUiManager, pManager, pName)
+RendererImageResource::RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, bool pMipMap):
+	RendererImageBaseResource(pUiManager, pManager, pName),
+	mMipMap(pMipMap)
 {
 }
 
@@ -199,7 +200,7 @@ bool RendererImageResource::Load()
 	delete lFile;
 	if (lOk)
 	{
-		SetRamData(new UiTbc::Texture(lImage));
+		SetRamData(new UiTbc::Texture(lImage, Canvas::RESIZE_FAST, mMipMap? 0 : 1));
 	}
 	return (lOk);
 }
@@ -391,7 +392,7 @@ const str GeometryReferenceResource::GetType() const
 
 bool GeometryReferenceResource::IsReferenceType() const
 {
-	return (true);
+	return true;
 }
 
 bool GeometryReferenceResource::Load()
@@ -636,6 +637,11 @@ ClassResource::ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* p
 
 ClassResource::~ClassResource()
 {
+}
+
+bool ClassResource::Load()
+{
+	return LoadWithName(Resource::GetName().substr(3));	// TRICKY: cut out "UI:" prefix (to distinguish from those used by non-UiCure classes).
 }
 
 

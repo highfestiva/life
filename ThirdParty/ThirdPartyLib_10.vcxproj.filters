@@ -944,9 +944,6 @@
     <ClCompile Include="zlib\deflate.c">
       <Filter>ZLib\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="zlib\gzio.c">
-      <Filter>ZLib\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="zlib\infback.c">
       <Filter>ZLib\Source Files</Filter>
     </ClCompile>

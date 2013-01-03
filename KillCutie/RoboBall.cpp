@@ -115,7 +115,7 @@ void RoboBall::OnTick()
 				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPlacement->Clone();
 				lNewPlacement->mPosition.mTransformation.GetPosition().z = 30;
 				lNewPlacement->mPosition.mVelocity.Set(0, 0, 0);
-				SetFullPosition(*lNewPlacement);
+				SetFullPosition(*lNewPlacement, 0);
 			}
 		}
 	}

@@ -41,6 +41,7 @@ public:
 	};
 
 	ChunkyPhysics(TransformOperation pTransformOperation = TRANSFORM_NONE, PhysicsType pPhysicsType = STATIC);
+	ChunkyPhysics(const ChunkyPhysics& pOriginal);
 	virtual ~ChunkyPhysics();
 
 	void OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime);
@@ -49,6 +50,7 @@ public:
 	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
 	GuideMode GetGuideMode() const;	// Gets help with automatic motions, such as flipping over.
 	void SetGuideMode(GuideMode pGuideMode);
+	float QueryTotalMass(PhysicsManager* pPhysicsManager) const;
 
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
 	ChunkyBoneGeometry* GetBoneGeometry(PhysicsManager::BodyID pBodyId) const;
@@ -66,7 +68,7 @@ public:
 	int GetEngineIndexFromControllerIndex(int pStartEngineIndex, int pEngineStep, unsigned pControllerIndex) const;
 	int GetEngineIndex(const PhysicsEngine* pEngine) const;
 	void AddEngine(PhysicsEngine* pEngine);	// Takes ownership of the given engine.
-	bool SetEnginePower(unsigned pAspect, float pPower, float pAngle);
+	bool SetEnginePower(unsigned pAspect, float pPower);
 	void ClearEngines();
 
 	int GetTriggerCount() const;
@@ -82,8 +84,8 @@ public:
 	// Overrides.
 	void ClearAll(PhysicsManager* pPhysics);
 	void SetBoneCount(int pBoneCount);
-	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const Vector3DF* pPosition,
-		PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener);
+	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const TransformationF* pTransform,
+		int pTrigListenerId, int pForceListenerId);
 
 	unsigned GetNextGeometryIndex();
 

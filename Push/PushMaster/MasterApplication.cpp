@@ -1,0 +1,93 @@
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2010, Righteous Games
+
+
+
+#include "../../Lepra/Include/LogLevel.h"
+#include "../../Life/LifeMaster/MasterServer.h"
+#include "../../Life/LifeApplication.h"
+#include "../../TBC/Include/TBC.h"
+#include "../Push.h"
+#include "../Version.h"
+#include "MasterServerPort.h"
+
+
+
+namespace Push
+{
+
+
+
+class MasterApplication: public Life::Application
+{
+	typedef Life::Application Parent;
+public:
+	MasterApplication(const strutil::strvec& pArgumentList);
+	virtual ~MasterApplication();
+	virtual void Init();
+
+private:
+	virtual Cure::ApplicationTicker* CreateTicker() const;
+	virtual str GetName() const;
+	virtual str GetVersion() const;
+};
+
+
+
+}
+
+
+
+LEPRA_RUN_APPLICATION(Push::MasterApplication, Lepra::Main);
+
+
+
+namespace Push
+{
+
+
+
+MasterApplication::MasterApplication(const strutil::strvec& pArgumentList):
+	Parent(_T(PUSH_APPLICATION_NAME), pArgumentList)
+{
+}
+
+MasterApplication::~MasterApplication()
+{
+	Destroy();
+
+	Cure::Shutdown();
+	TBC::Shutdown();
+	Lepra::Shutdown();
+};
+
+void MasterApplication::Init()
+{
+	Lepra::Init();
+	TBC::Init();
+	Cure::Init();
+
+	Parent::Init();
+
+	//LogType::SetLogLevel(LEVEL_TRACE);
+}
+
+Cure::ApplicationTicker* MasterApplication::CreateTicker() const
+{
+	return new Life::MasterServer(_T(MASTER_SERVER_PORT));
+}
+
+str MasterApplication::GetName() const
+{
+	return _T("PushMaster");
+}
+
+str MasterApplication::GetVersion() const
+{
+	return _T(PLATFORM_VERSION);
+}
+
+
+
+}

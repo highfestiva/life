@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../ConsoleManager.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
 
 
 
@@ -35,9 +36,6 @@ public:
 	int FilterExecuteCommand(const str& pCommand);
 
 protected:
-	bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
-
-private:
 	enum CommandClient
 	{
 		COMMAND_QUIT = COMMAND_COUNT_COMMON,
@@ -48,11 +46,11 @@ private:
 		COMMAND_START_RESET_UI,
 		COMMAND_WAIT_RESET_UI,
 		COMMAND_ADD_PLAYER,
-		COMMAND_SET_AVATAR_ENGINE_POWER,
-#if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
-		COMMAND_BUILD_DATA,
-#endif // Debug & Windows
+
+		COMMAND_COUNT_LIFE_CLIENT
 	};
+
+	bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
 
 	virtual unsigned GetCommandCount() const;
 	virtual const CommandPair& GetCommand(unsigned pIndex) const;

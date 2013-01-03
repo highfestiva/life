@@ -65,6 +65,7 @@ public:
 	};
 
 	BoneHierarchy();
+	BoneHierarchy(const BoneHierarchy& pOriginal);
 	virtual ~BoneHierarchy();
 
 	virtual void ClearAll(PhysicsManager* pPhysics);
@@ -96,11 +97,12 @@ public:
 	// Same as above, but relative to the original transform.
 	const TransformationF& GetRelativeBoneTransformation(int pBoneIndex) const;
 
+	void UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation);
+
 private:
 	friend class BoneAnimator;
 
 	void Transform(int pBoneIndex, TransformOperation pTransformOperation);
-	void UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation);
 
 	int mBoneCount;
 	int mRootBoneIndex;

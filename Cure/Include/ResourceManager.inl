@@ -165,7 +165,7 @@ void RamResource<RamData>::SetRamDataType(RamData pData)
 
 template<class RamData>
 RamResource<RamData>::RamResource(ResourceManager* pManager, const str& pName):
-	Resource(pManager, pName),
+	Parent(pManager, pName),
 	mRamData((RamData)0)
 {
 }
@@ -292,9 +292,15 @@ typename ClassResourceBase<_Class, _ClassLoader>::UserData ClassResourceBase<_Cl
 template<class _Class, class _ClassLoader>
 bool ClassResourceBase<_Class, _ClassLoader>::Load()
 {
+	return LoadWithName(Resource::GetName());
+}
+
+template<class _Class, class _ClassLoader>
+bool ClassResourceBase<_Class, _ClassLoader>::LoadWithName(const str& pName)
+{
 	assert(Parent::GetRamData() == 0);
 	Parent::SetRamData(new _Class());
-	File* lFile = Resource::GetManager()->QueryFile(Resource::GetName());
+	File* lFile = Resource::GetManager()->QueryFile(pName);
 	bool lOk = (lFile != 0);
 	if (lOk)
 	{

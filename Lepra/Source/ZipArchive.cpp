@@ -39,7 +39,7 @@ IOError ZipArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
 	{
 		case READ_ONLY:
 		{
-			mUnzipFile = ::unzOpen(astrutil::Encode(pArchiveFileName).c_str());
+			mUnzipFile = ::unzOpen64(astrutil::Encode(pArchiveFileName).c_str());
 			if (mUnzipFile != 0)
 			{
 				lIOError = IO_OK;
@@ -130,8 +130,8 @@ int ZipArchive::GetFileCount()
 
 	if (mIOType == READ_ONLY && mUnzipFile != 0)
 	{
-		unz_global_info lUnzGlobalInfo;
-		::unzGetGlobalInfo(mUnzipFile, &lUnzGlobalInfo);
+		unz_global_info64 lUnzGlobalInfo;
+		::unzGetGlobalInfo64(mUnzipFile, &lUnzGlobalInfo);
 		lCount = (int)lUnzGlobalInfo.number_entry;
 	}
 
@@ -149,8 +149,9 @@ str ZipArchive::FileFindFirst()
 
 	if (mIOType == READ_ONLY && mUnzipFile != 0 && ::unzGoToFirstFile(mUnzipFile) == UNZ_OK)
 	{
+		unz_file_info64 lFileInfo;
 		char lCStrFileName[1024];
-		::unzGetCurrentFileInfo(mUnzipFile, 0, lCStrFileName, 1024, 0, 0, 0, 0);
+		::unzGetCurrentFileInfo64(mUnzipFile, &lFileInfo, lCStrFileName, 1024, 0, 0, 0, 0);
 		lFileName = strutil::Encode(astr(lCStrFileName));
 	}
 
@@ -163,8 +164,9 @@ str ZipArchive::FileFindNext()
 
 	if (mIOType == READ_ONLY && mUnzipFile != 0 && ::unzGoToNextFile(mUnzipFile) == UNZ_OK)
 	{
+		unz_file_info64 lFileInfo;
 		char lCStrFileName[1024];
-		::unzGetCurrentFileInfo(mUnzipFile, 0, lCStrFileName, 1024, 0, 0, 0, 0);
+		::unzGetCurrentFileInfo64(mUnzipFile, &lFileInfo, lCStrFileName, 1024, 0, 0, 0, 0);
 		lFileName = strutil::Encode(astr(lCStrFileName));
 	}
 
@@ -197,7 +199,7 @@ bool ZipArchive::FileOpen(const str& pFileName)
 		{
 			if (mZipFile != 0)
 			{
-				lOK = (::zipOpenNewFileInZip(mZipFile, astrutil::Encode(pFileName).c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION) == ZIP_OK);
+				lOK = (::zipOpenNewFileInZip64(mZipFile, astrutil::Encode(pFileName).c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION, 0) == ZIP_OK);
 
 				str lTempName;
 				str lDirectory;
@@ -350,10 +352,10 @@ int64 ZipArchive::FileSize()
 
 	if (mIOType == READ_ONLY && mUnzipFile != 0)
 	{
-		unz_file_info lInfo;
-		if (::unzGetCurrentFileInfo(mUnzipFile, &lInfo, 0, 0, 0, 0, 0, 0) == UNZ_OK)
+		unz_file_info64 lFileInfo;
+		if (::unzGetCurrentFileInfo64(mUnzipFile, &lFileInfo, 0, 0, 0, 0, 0, 0) == UNZ_OK)
 		{
-			lSize = (int64)lInfo.uncompressed_size;
+			lSize = (int64)lFileInfo.uncompressed_size;
 		}
 	}
 	else if(mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
@@ -375,7 +377,7 @@ void ZipArchive::FileSeek(int64 pOffset, FileOrigin pOrigin)
 			lOffset = pOffset;
 			break;
 		case FSEEK_CUR:
-			lOffset = (int64)::unztell(mUnzipFile) + pOffset;
+			lOffset = ::unztell64(mUnzipFile) + pOffset;
 			break;
 		case FSEEK_END:
 			lOffset = (uLong)(mFileSize + pOffset - 1);

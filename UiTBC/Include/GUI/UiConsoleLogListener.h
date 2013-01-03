@@ -29,7 +29,7 @@ public:
 	void SetOutputComponent(TextArea* pOutputComponent);
 
 protected:
-	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, LogLevel pLevel);
 	void StepPage(int pPageCount);
 	void OnLogRawMessage(const str& pText);
 

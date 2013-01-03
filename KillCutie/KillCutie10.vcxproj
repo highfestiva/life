@@ -115,7 +115,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;../ThirdParty/openal-soft-1.10.622/include;../ThirdParty/freealut-1.1.0/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;../ThirdParty/openalpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -142,7 +142,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;../ThirdParty/openal-soft-1.10.622/include;../ThirdParty/freealut-1.1.0/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;../ThirdParty/openalpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -167,7 +167,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;../ThirdParty/openal-soft-1.10.622/include;../ThirdParty/freealut-1.1.0/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;../ThirdParty/openalpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -191,7 +191,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -218,7 +218,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;../ThirdParty/openal-soft-1.10.622/include;../ThirdParty/freealut-1.1.0/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;../ThirdParty/openalpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -244,7 +244,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;../ThirdParty/openal-soft-1.10.622/include;../ThirdParty/freealut-1.1.0/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;../ThirdParty/openalpp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -282,11 +282,13 @@
     <ClCompile Include="App.cxx" />
     <ClCompile Include="Ctf.cpp" />
     <ClCompile Include="Cutie.cpp" />
+    <ClCompile Include="CutieElevator.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Grenade.cpp" />
     <ClCompile Include="Launcher.cpp" />
     <ClCompile Include="LauncherAi.cpp" />
     <ClCompile Include="Level.cpp" />
+    <ClCompile Include="RoboBall.cpp" />
     <ClCompile Include="SeeThrough.cpp" />
     <ClCompile Include="Spawner.cpp" />
     <ClCompile Include="VehicleAi.cpp" />
@@ -301,11 +303,13 @@
   <ItemGroup>
     <ClInclude Include="Ctf.h" />
     <ClInclude Include="Cutie.h" />
+    <ClInclude Include="CutieElevator.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Grenade.h" />
     <ClInclude Include="Launcher.h" />
     <ClInclude Include="LauncherAi.h" />
     <ClInclude Include="Level.h" />
+    <ClInclude Include="RoboBall.h" />
     <ClInclude Include="SeeThrough.h" />
     <ClInclude Include="Spawner.h" />
     <ClInclude Include="VehicleAi.h" />

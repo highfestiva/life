@@ -24,42 +24,26 @@ namespace Cure
 
 class ConsoleManager;
 class ContextManager;
+class GameTicker;
 class NetworkAgent;
 class TerrainManager;
 class TimeManager;
 
 
 
-class GameTicker
-{
-public:
-	GameTicker();
-	virtual ~GameTicker();
-	virtual bool Initialize() = 0;
-	virtual bool Tick() = 0;
-	virtual void PollRoundTrip() = 0;	// Polls network for any incoming to yield lower latency.
-	virtual float GetTickTimeReduction() const = 0;	// Returns how much quicker the tick loop should be; can be negative.
-	virtual float GetPowerSaveAmount() const = 0;
-	const TimeManager* GetTimeManager() const;
-	TimeManager* GetTimeManager();
-	virtual void Profile();	// Make sure it's quick, since it runs outside all profiling timers.
-	virtual bool QueryQuit();
-
-private:
-	TimeManager* mTimeManager;
-};
-
-
-
-class GameManager
+class GameManager: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
 {
 public:
 	typedef SequencialPerformanceData<uint64> BandwidthData;
 
-	GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager);
 	virtual ~GameManager();
+	const GameTicker* GetTicker() const;
+	void SetTicker(const GameTicker* pTicker);
 
+	virtual bool IsPrimaryManager() const;
 	virtual bool BeginTick();
+	virtual void PreEndTick();
 	virtual bool EndTick();
 	virtual bool TickNetworkOutput();
 	Lock* GetTickLock() const;
@@ -72,12 +56,15 @@ public:
 	LEPRA_DEBUG_CODE(virtual) TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
 
+	void MicroTick(float pTimeDelta);
+	void PostPhysicsTick();
+
 	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
+	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
 	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	virtual ContextObject* CreateLogicHandler(const str& pType);
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
-	virtual void GetSiblings(GameObjectId pObjectId, ContextObject::Array& pSiblingArray) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		ContextObject* pObject1, ContextObject* pObject2,
@@ -96,6 +83,10 @@ public:
 	void ClearPerformanceData();
 	void GetBandwidthData(BandwidthData& mSendBandwidth, BandwidthData& mReceiveBandwidth);
 
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId);
+	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+
 protected:
 	void SetConsoleManager(ConsoleManager* pConsole);
 
@@ -108,23 +99,13 @@ protected:
 
 	void ReportPerformance(const ScopePerformanceData::NodeArray& pNodes, int pRecursion);
 
-	void StartPhysicsTick();
-	void WaitPhysicsTick();
-
-	virtual void PhysicsTick();
-
 	bool IsThreadSafe() const;
 
 private:
-	void ScriptTick(float pTimeDelta);
 	void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
 
 	virtual bool InitializeTerrain() = 0;
-
-	void PhysicsThreadEntry();
-	void CreatePhysicsThread();
-	void DeletePhysicsThread();
 
 	mutable Lock mLock;
 	volatile bool mIsThreadSafe;
@@ -132,14 +113,11 @@ private:
 	RuntimeVariableScope* mVariableScope;
 	ResourceManager* mResource;
 	NetworkAgent* mNetwork;
+	const GameTicker* mTicker;
 	const TimeManager* mTime;
-	TBC::PhysicsManager* mPhysics;
 	ContextManager* mContext;
 	TerrainManager* mTerrain;
 	ConsoleManager* mConsole;
-	MemberThread<GameManager>* mPhysicsWorkerThread;
-	Semaphore* mPhysicsTickStartSemaphore;
-	Semaphore* mPhysicsTickDoneSemaphore;
 
 	Timer mPerformanceReportTimer;
 	BandwidthData mSendBandwidth;

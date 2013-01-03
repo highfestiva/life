@@ -44,6 +44,12 @@
     <ClCompile Include="SeeThrough.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RoboBall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CutieElevator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.mm">
@@ -87,6 +93,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SeeThrough.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RoboBall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CutieElevator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

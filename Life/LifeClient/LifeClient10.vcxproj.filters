@@ -10,29 +10,20 @@
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Game">
-      <UniqueIdentifier>{b4389831-75c2-488b-b12e-2762cb928eae}</UniqueIdentifier>
+      <UniqueIdentifier>{e852670c-8ca0-4852-aca9-a66180fe32c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server">
-      <UniqueIdentifier>{93d663ed-eac7-494e-886a-cef16d1c07b3}</UniqueIdentifier>
+      <UniqueIdentifier>{0929a5e8-63cc-485c-b362-4d7cb1e6cd5e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Master">
-      <UniqueIdentifier>{b2e347a4-45db-4181-a561-3b3ee8efa6a4}</UniqueIdentifier>
+      <UniqueIdentifier>{929f55b1-8b51-4628-b420-9fa20835e4ed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClientApplication.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ClientConsoleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClientLoginView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ClientOptionsManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameClientDemo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameClientMasterTicker.cpp">
@@ -41,31 +32,13 @@
     <ClCompile Include="GameClientSlaveManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameClientViewer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OptionsManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ServerListView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sunlight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UiConsole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="View.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="MassObject.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="RoadSignButton.cpp">
       <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="StopWatch.cpp">
@@ -78,9 +51,6 @@
       <Filter>Server</Filter>
     </ClCompile>
     <ClCompile Include="..\LifeServer\Client.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\LifeServer\Elevator.cpp">
       <Filter>Server</Filter>
     </ClCompile>
     <ClCompile Include="..\LifeServer\GameServerManager.cpp">
@@ -112,25 +82,16 @@
     <ClInclude Include="ClientConsoleManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ClientLoginView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ClientOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ClientOptionsManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameClientDemo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameClientMasterTicker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameClientSlaveManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GameClientViewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputObserver.h">
@@ -142,25 +103,13 @@
     <ClInclude Include="RtVar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerListView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sunlight.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="UiConsole.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="View.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Level.h">
-      <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="MassObject.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="RoadSignButton.h">
+    <ClInclude Include="ScreenPart.h">
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="StopWatch.h">
@@ -173,9 +122,6 @@
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="..\LifeServer\Client.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LifeServer\Elevator.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="..\LifeServer\GameServerManager.h">
@@ -195,9 +141,6 @@
     </ClInclude>
     <ClInclude Include="UiServerConsoleManager.h">
       <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LifeMaster\MasterServer.h">
-      <Filter>Master</Filter>
     </ClInclude>
     <ClInclude Include="..\LifeServer\MasterServerConnection.h">
       <Filter>Master</Filter>

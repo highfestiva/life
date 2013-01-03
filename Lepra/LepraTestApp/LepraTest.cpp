@@ -2811,7 +2811,7 @@ bool TestMemFileConcurrency(const LogDecorator& pAccount)
 				Log* lLog = LogType::GetLog(LogType::SUB_GENERAL_RESOURCES);
 				for (int x = 0; x < 1000; ++x)
 				{
-					mFile.OnLog(lLog, _T("?"), Log::LEVEL_TRACE);
+					mFile.OnLog(lLog, _T("?"), LEVEL_TRACE);
 				}
 			}
 			LogListener& mFile;

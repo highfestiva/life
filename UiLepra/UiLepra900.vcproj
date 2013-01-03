@@ -485,9 +485,21 @@
 				RelativePath=".\Include\UiSoundManagerOpenAL.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Include\UiTouchDrag.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiTouchstick.h"
+				>
+			</File>
 			<Filter
 				Name="Win32"
 				>
+				<File
+					RelativePath=".\Include\Mac\UiMacInput.h"
+					>
+				</File>
 				<File
 					RelativePath=".\Include\Win32\UiWin32Core.h"
 					>
@@ -557,10 +569,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Include\Mac\UiMacInput.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Include\Mac\UiMacOpenGLDisplay.h"
 					>
 				</File>
@@ -613,6 +621,14 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiSoundStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiTouchDrag.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiTouchstick.cpp"
 				>
 			</File>
 			<Filter

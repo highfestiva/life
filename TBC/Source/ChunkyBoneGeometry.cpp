@@ -47,6 +47,30 @@ ChunkyBoneGeometry::~ChunkyBoneGeometry()
 	assert(mJointId == INVALID_JOINT && mBodyId == INVALID_BODY && mTriggerId == INVALID_TRIGGER);
 }
 
+void ChunkyBoneGeometry::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal)
+{
+	if (pOriginal.mBodyData.mParent)
+	{
+		const int lBoneIndex = pSource->GetIndex(pOriginal.mBodyData.mParent);
+		assert(lBoneIndex >= 0);
+		mBodyData.mParent = pTarget->GetBoneGeometry(lBoneIndex);
+	}
+}
+
+
+
+ChunkyBoneGeometry* ChunkyBoneGeometry::Create(const ChunkyBoneGeometry& pOriginal)
+{
+	switch (pOriginal.GetGeometryType())
+	{
+		case GEOMETRY_CAPSULE:	return new ChunkyBoneCapsule((ChunkyBoneCapsule&)pOriginal);	break;
+		case GEOMETRY_SPHERE:	return new ChunkyBoneSphere((ChunkyBoneSphere&)pOriginal);		break;
+		case GEOMETRY_BOX:	return new ChunkyBoneBox((ChunkyBoneBox&)pOriginal);		break;
+		case GEOMETRY_MESH:	return new ChunkyBoneMesh((ChunkyBoneMesh&)pOriginal);		break;
+	}
+	return 0;
+}
+
 ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
 {
 	if (pByteCount < sizeof(uint32))
@@ -314,6 +338,11 @@ const str& ChunkyBoneGeometry::GetMaterial() const
 	return mMaterial;
 }
 
+void ChunkyBoneGeometry::SetMaterial(const str& pMaterial)
+{
+	mMaterial = pMaterial;
+}
+
 
 
 float ChunkyBoneGeometry::GetExtraData() const
@@ -410,20 +439,20 @@ ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData):
 }
 
 bool ChunkyBoneCapsule::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
+	int pForceListenerId, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateCapsule(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
-		mBodyData.mFriction, mBodyData.mBounce, pForceListener);
+		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneCapsule::CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneCapsule::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateCapsuleTrigger(pTransform, mRadius, mLength, pTrigListener);
+	mTriggerId = pPhysics->CreateCapsuleTrigger(pTransform, mRadius, mLength, pTrigListenerId);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -469,20 +498,20 @@ ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData):
 }
 
 bool ChunkyBoneSphere::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
+	int pForceListenerId, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateSphere(pIsRoot, pTransform, mBodyData.mMass, mRadius, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pForceListener);
+		mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneSphere::CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneSphere::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateSphereTrigger(pTransform, mRadius, pTrigListener);
+	mTriggerId = pPhysics->CreateSphereTrigger(pTransform, mRadius, pTrigListenerId);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -525,20 +554,20 @@ ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData):
 }
 
 bool ChunkyBoneBox::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
+	int pForceListenerId, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateBox(pIsRoot, pTransform, mBodyData.mMass, mSize, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pForceListener);
+		mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneBox::CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneBox::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateBoxTrigger(pTransform, mSize, pTrigListener);
+	mTriggerId = pPhysics->CreateBoxTrigger(pTransform, mSize, pTrigListenerId);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -594,16 +623,16 @@ ChunkyBoneMesh::~ChunkyBoneMesh()
 }
 
 bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType,
+	int pForceListenerId, PhysicsManager::BodyType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
-		pTransform, mBodyData.mFriction, mBodyData.mBounce, pForceListener);
+		pTransform, mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, PhysicsManager::TriggerListener*, const TransformationF&)
+bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, int, const TransformationF&)
 {
 	assert(false);
 	return (false);
@@ -691,6 +720,18 @@ void ChunkyBoneMesh::Clear()
 ChunkyBoneGeometry::GeometryType ChunkyBoneMesh::GetGeometryType() const
 {
 	return (GEOMETRY_MESH);
+}
+
+void ChunkyBoneMesh::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal)
+{
+	Parent::RelocatePointers(pTarget, pSource, pOriginal);
+
+	const float* lOriginalVertices = mVertices;
+	const uint32* lOriginalIndices = mIndices;
+	mVertices = new float[mVertexCount*3];
+	mIndices = new uint32[mTriangleCount*3];
+	::memcpy(mVertices, lOriginalVertices, mVertexCount*3*sizeof(mVertices[0]));
+	::memcpy(mIndices, lOriginalIndices, mTriangleCount*3*sizeof(mIndices[0]));
 }
 
 

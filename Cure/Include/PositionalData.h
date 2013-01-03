@@ -30,7 +30,7 @@ public:
 		TYPE_POSITION_3,
 		TYPE_POSITION_2,
 		TYPE_POSITION_1,
-		TYPE_REAL_4,
+		TYPE_REAL_3,
 		TYPE_REAL_1,
 		TYPE_COUNT
 	};
@@ -164,6 +164,7 @@ public:
 	int Pack(uint8* pData) const;
 	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
+	float GetBiasedTypeDifference(const PositionalData* pReference, bool pPositionOnly) const;
 
 	PositionalData* GetAt(size_t pIndex) const;
 	void SetAt(size_t pIndex, PositionalData* pData);
@@ -184,7 +185,7 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-class RealData4: public PositionalData
+class RealData3: public PositionalData
 {
 public:
 	float mValue[4];

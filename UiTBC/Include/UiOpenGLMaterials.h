@@ -173,7 +173,7 @@ public:
 protected:
 	
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	void BindTexture(int pTextureID);
+	void BindTexture(int pTextureID, int pMipMapLevelCount);
 
 	GLint mTextureParamMin;
 	GLint mTextureParamMag;

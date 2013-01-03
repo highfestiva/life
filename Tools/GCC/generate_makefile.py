@@ -24,7 +24,7 @@ glframework = 'OpenGL'
 gcc = 'gcc'
 stllibext = '.so.5.2'
 if is_mac:
-    cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS'
+    cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS -DUSE_FILE32API'
     stllibext = '.5.2.dylib'
     if is_ios:
         darwin_kit = '-framework UIKit -framework Foundation -framework QuartzCore -framework CoreGraphics'
@@ -78,7 +78,7 @@ if is_mac:
     mac_hid = 'HID'
     space_mac_hid = ' '+mac_hid
     cflags_1 += ' -framework '+glframework+' -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
-    ldflags += ' '+darwin_kit+' -lobjc '
+    ldflags += ' '+darwin_kit+' -lobjc -headerpad_max_install_names '
 
 shared_if_copy_stlport_lib = """\t@if test -f """+stlport_path+"/lib"+stl_lib + stllibext + "; then cp "+stlport_path+"/lib"+stl_lib + stllibext + """ bin/; fi
 """
@@ -277,30 +277,33 @@ def generate_makefiles(basedir, vcfileinfolist):
         vcfile = os.path.join(basedir, vcfile)
         projdir = os.path.dirname(vcfile)
         includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
-        os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
-        os.path.relpath(basedir+"ThirdParty/ChibiXM", projdir),
-        os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
-        os.path.relpath(basedir+"ThirdParty/happyhttp-0.1/", projdir),
-        os.path.relpath(basedir+"ThirdParty/libogg-1.2.2/include/", projdir),
-        os.path.relpath(basedir+"ThirdParty/libvorbis-1.3.2/include/", projdir),
-        os.path.relpath(basedir+"ThirdParty/libvorbis-1.3.2/lib/", projdir),
-        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/include", projdir),
-        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src", projdir),
-        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src/joints", projdir),
-        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
-        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
-        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
+                       os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
+                       os.path.relpath(basedir+"ThirdParty/ChibiXM", projdir),
+                       os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
+                       os.path.relpath(basedir+"ThirdParty/happyhttp-0.1/", projdir),
+                       os.path.relpath(basedir+"ThirdParty/libogg-1.2.2/include/", projdir),
+                       os.path.relpath(basedir+"ThirdParty/libvorbis-1.3.2/include/", projdir),
+                       os.path.relpath(basedir+"ThirdParty/libvorbis-1.3.2/lib/", projdir),
+                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/include", projdir),
+                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src", projdir),
+                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src/joints", projdir),
+                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
+                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
+                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
         libdirs = [os.path.relpath(basedir+stlport_path, projdir),
-        os.path.relpath(basedir+"ThirdParty", projdir),
-        os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
-        os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),
-        os.path.relpath(basedir+"Lepra", projdir),
-        os.path.relpath(basedir+"TBC", projdir),
-        os.path.relpath(basedir+"Cure", projdir),
-        os.path.relpath(basedir+"UiLepra", projdir),
-        os.path.relpath(basedir+"UiTBC", projdir),
-        os.path.relpath(basedir+"UiCure", projdir),
-        os.path.relpath(basedir+"Life", projdir)]
+                   os.path.relpath(basedir+"ThirdParty", projdir),
+                   os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
+                   os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),
+                   os.path.relpath(basedir+"Lepra", projdir),
+                   os.path.relpath(basedir+"TBC", projdir),
+                   os.path.relpath(basedir+"Cure", projdir),
+                   os.path.relpath(basedir+"UiLepra", projdir),
+                   os.path.relpath(basedir+"UiTBC", projdir),
+                   os.path.relpath(basedir+"UiCure", projdir),
+                   os.path.relpath(basedir+"Life", projdir),
+                   os.path.relpath(basedir+"Life/LifeClient", projdir),
+                   os.path.relpath(basedir+"Life/LifeServer", projdir),
+                   os.path.relpath(basedir+"Life/LifeMaster", projdir)]
 
         if not is_mac:
             includedirs = [os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
@@ -333,11 +336,14 @@ def main():
         ["UiTBC",           "gfx_lib",    "UiTBC/UiTBC900.vcproj", "UiLepra TBC"],
         ["UiCure",          "gfx_lib",    "UiCure/UiCure900.vcproj", "UiTBC Cure"],
         ["Life",            "lib",        "Life/Life900.vcproj", "Cure"],
-        ["LifeServer",      "bin",        "Life/LifeServer/LifeServer900.vcproj", "Life"],
-        ["LifeMaster",      "bin",        "Life/LifeMaster/LifeMaster900.vcproj", "Life"],
-        ["LifeClient",      "gfx_bin",    "Life/LifeClient/LifeClient900.vcproj", "Life UiCure"],
+        ["LifeServer",      "lib",        "Life/LifeServer/LifeServer900.vcproj", "Life"],
+        ["LifeMaster",      "lib",        "Life/LifeMaster/LifeMaster900.vcproj", "Life"],
+        ["LifeClient",      "gfx_lib",    "Life/LifeClient/LifeClient900.vcproj", "Life UiCure"],
         ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball900.vcproj", "UiTBC"],
         ["KillCutie",       "gfx_bin",    "KillCutie/KillCutie900.vcproj", "UiCure"],
+        ["Push",            "gfx_bin",    "Push/Push900.vcproj", "LifeClient"],
+        ["PushServer",      "bin",        "Push/PushServer/PushServer900.vcproj", "LifeServer"],
+        ["PushMaster",      "bin",        "Push/PushMaster/PushMaster900.vcproj", "LifeMaster"],
         ["TireFire",        "gfx_bin",    "TireFire/TireFire900.vcproj", "UiCure"],
         ["Bounce",          "gfx_bin",    "Bounce/Bounce900.vcproj", "UiCure"],
         ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]

@@ -1,0 +1,222 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{C734F7F1-C7A5-4376-A066-2A32FFD752A2}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93959380-89BD-4b04-88EB-625FBEBFB52E}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{8edadcec-85bc-4565-8c57-b84342043eb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Master">
+      <UniqueIdentifier>{1792974f-1bf0-4b18-955d-5d696e11d68b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Explosion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Grenade.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Push.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushBarrel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushConsoleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushDemo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushTicker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadSignButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerListView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sunlight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="View.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\BulletTime.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\Client.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\GameServerManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\PushServerMessageProcessor.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\RaceTimer.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\ServerConsoleManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\ServerGrenade.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\ServerMessageProcessor.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\Spawner.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeClient\UiGameServerManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeClient\UiServerConsoleManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp">
+      <Filter>Master</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp">
+      <Filter>Master</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Push.ico">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Push.mm">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Push.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Explosion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Grenade.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Launcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Push.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushBarrel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushConsoleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushDemo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushTicker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadSignButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RtVar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerListView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sunlight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="View.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\BulletTime.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\Client.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\GameServerManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\PushServerMessageProcessor.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\RaceTimer.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\ServerConsoleManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\ServerGrenade.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\ServerLauncher.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\ServerMessageProcessor.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\Spawner.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeClient\UiGameServerManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeClient\UiServerConsoleManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeMaster\MasterServer.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="PushMaster\MasterServerPort.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -131,7 +131,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	str lContext;
 	bool lTestOk = true;
 
-	//Log::SetMainLevelThreashold(Log::LEVEL_ERROR);
+	//Log::SetMainLevelThreashold(LEVEL_ERROR);
 
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 2.0);
 
@@ -592,7 +592,7 @@ bool HiscoreTest::Test()
 {
 	const std::vector<Log*> lLogArray = LogType::GetLogs();
 	std::vector<Log*>::const_iterator x = lLogArray.begin();
-	Log::LogLevel lNewLogLevel = Log::LEVEL_LOWEST_TYPE;
+	LogLevel lNewLogLevel = LEVEL_LOWEST_TYPE;
 	for (; x != lLogArray.end(); ++x)
 	{
 		(*x)->SetLevelThreashold(lNewLogLevel);
@@ -630,7 +630,7 @@ bool HiscoreTest::Test()
 			assert(lHiscore.GetDownloadedList().mOffset == 13);
 			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
 			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\\\"\\\\@#%&"));
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
 			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
 			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
 			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
@@ -643,7 +643,7 @@ bool HiscoreTest::Test()
 			assert(lHiscore.GetDownloadedList().mOffset == 13);
 			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
 			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\\\"\\\\@#%&"));
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
 			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
 			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
 			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
@@ -656,7 +656,7 @@ bool HiscoreTest::Test()
 			assert(lHiscore.GetDownloadedList().mOffset == 13);
 			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
 			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\\\"\\\\@#%&"));
+			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
 			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
 			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
 			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
@@ -683,9 +683,10 @@ bool HiscoreTest::Test()
 	}
 
 	/*// Upload some scores.
-	for (int y = 0; y < 7; ++y)
+	const tchar* lNames[] = { _T("high_festiva!"), _T("Rune"), _T("Ojsan Mobrink"), _T("Gregolf Gugerthsson"), _T("Sveodilf"), _T("Matorgh"), _T("Elow"), _T("Mastiffen"), };
+	for (int y = 0; y < LEPRA_ARRAY_COUNT(lNames); ++y)
 	{
-		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), _T("high_festiva!"), Lepra::Random::GetRandomNumber()%1000);
+		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), lNames[y], Lepra::Random::GetRandomNumber()%1000 + 1000);
 		for (int x = 0; x < 50; ++x)
 		{
 			Thread::Sleep(0.1f);
@@ -693,10 +694,10 @@ bool HiscoreTest::Test()
 			lTestOk = (lLoadState == Cure::RESOURCE_LOAD_COMPLETE);
 			if (lLoadState != Cure::RESOURCE_LOAD_IN_PROGRESS)
 			{
-				assert(lTestOk);
 				break;
 			}
 		}
+		assert(lTestOk);
 	}*/
 
 	if (lTestOk)
@@ -727,17 +728,21 @@ bool HiscoreTest::Test()
 		lContext = _T("checking score");
 		Cure::HiscoreAgent::List lHiscoreList = lHiscore.GetDownloadedList();
 		lTestOk = (lHiscoreList.mOffset == 0);
+		assert(lTestOk);
 		if (lTestOk)
 		{
-			lTestOk = (lHiscoreList.mEntryList.size() > 5);
+			lTestOk = (lHiscoreList.mEntryList.size() == 8);
+			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = (lHiscoreList.mEntryList[0].mName.size() >= 1 && lHiscoreList.mEntryList[0].mName.size() <= 13);
+			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
-			lTestOk = (lHiscoreList.mEntryList[0].mScore >= 10 && lHiscoreList.mEntryList[0].mScore < 1000);
+			lTestOk = (lHiscoreList.mEntryList[0].mScore >= 1000 && lHiscoreList.mEntryList[0].mScore < 2000);
+			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -745,14 +750,15 @@ bool HiscoreTest::Test()
 				lHiscoreList.mEntryList[1].mScore >= lHiscoreList.mEntryList[2].mScore &&
 				lHiscoreList.mEntryList[2].mScore >= lHiscoreList.mEntryList[3].mScore &&
 				lHiscoreList.mEntryList[3].mScore >= lHiscoreList.mEntryList[4].mScore);
+			assert(lTestOk);
 		}
-		assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
 		lContext = _T("init score upload");
-		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), _T("high_festiva!"), Lepra::Random::GetRandomNumber()%1000);
+		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), _T("high_festiva!"), Lepra::Random::GetRandomNumber()%1000 + 1000);
+		assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -775,7 +781,7 @@ bool HiscoreTest::Test()
 	{
 		lContext = _T("score place");
 		int lPosition = lHiscore.GetUploadedPlace();
-		lTestOk = (lPosition >= 0 && lPosition <= 2000);
+		lTestOk = (lPosition >= 0 && lPosition <= 7);
 		assert(lTestOk);
 	}
 

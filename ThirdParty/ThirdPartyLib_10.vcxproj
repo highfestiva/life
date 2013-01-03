@@ -53,7 +53,7 @@
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>../ThirdParty/stlport/stlport;../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -71,7 +71,7 @@
     <ClCompile>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>../ThirdParty/stlport/stlport;../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -380,7 +380,6 @@
     <ClCompile Include="zlib\compress.c" />
     <ClCompile Include="zlib\crc32.c" />
     <ClCompile Include="zlib\deflate.c" />
-    <ClCompile Include="zlib\gzio.c" />
     <ClCompile Include="zlib\infback.c" />
     <ClCompile Include="zlib\inffast.c" />
     <ClCompile Include="zlib\inflate.c" />

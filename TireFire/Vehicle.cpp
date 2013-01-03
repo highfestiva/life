@@ -89,7 +89,7 @@ bool Vehicle::QueryFlip()
 		GetOrientation().GetEulerAngles(lEulerAngles);
 		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
 		lTransform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-		SetFullPosition(lPositionData);
+		SetFullPosition(lPositionData, 0);
 		return true;
 	}
 	return false;
@@ -159,7 +159,7 @@ void Vehicle::OnTick()
 	{
 		TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
 		if (lWheel->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE ||
-			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(lWheel->GetBodyId()))
+			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(lWheel->GetBodyId()))
 		{
 			continue;
 		}

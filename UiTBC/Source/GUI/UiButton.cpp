@@ -356,17 +356,12 @@ bool Button::OnLButtonDown(int pMouseX, int pMouseY)
 {
 	if (IsOver(pMouseX, pMouseY) == true)
 	{
-		switch(mState)
+		switch (mState)
 		{
-		case RELEASED:
-		case RELEASED_HOOVER:
-			SetState(PRESSING);
-			break;
-		case PRESSED:
-		case PRESSED_HOOVER:
-			SetState(RELEASING);
-			break;
-		default: break;
+			case RELEASED:
+			case RELEASED_HOOVER:	SetState(PRESSING);	break;
+			case PRESSED:
+			case PRESSED_HOOVER:	SetState(RELEASING);	break;
 		}
 
 		SetMouseFocus();
@@ -382,10 +377,10 @@ bool Button::OnLButtonUp(int pMouseX, int pMouseY)
 	bool lCallFunctor = HasMouseFocus();
 
 	if (IsOver(pMouseX, pMouseY) == true &&
-		lCallFunctor == true && mOnClick != 0)
+		lCallFunctor == true)
 	{
 		SetPressed(false);
-		(*mOnClick)(this);
+		Click(true);
 	}
 	else
 	{

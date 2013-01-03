@@ -71,6 +71,23 @@ BoneHierarchy::BoneHierarchy() :
 {
 }
 
+BoneHierarchy::BoneHierarchy(const BoneHierarchy& pOriginal):
+	mBoneCount(0),
+	mRootBoneIndex(pOriginal.mRootBoneIndex),
+	mParent(0),
+	mParentBoneIndex(0)
+{
+	SetBoneCount(pOriginal.mBoneCount);
+	for (int x = 0; x < mBoneCount; ++x)
+	{
+		mBone[x] = pOriginal.mBone[x];
+	}
+	::memcpy(mOriginalBoneTransformation, pOriginal.mOriginalBoneTransformation, sizeof(TransformationF)*mBoneCount);
+	::memcpy(mRelativeBoneTransformation, pOriginal.mRelativeBoneTransformation, sizeof(TransformationF)*mBoneCount);
+	::memcpy(mCurrentBoneTransformation, pOriginal.mCurrentBoneTransformation, sizeof(TransformationF)*mBoneCount);
+	::memcpy(mCurrentBoneObjectTransformation, pOriginal.mCurrentBoneObjectTransformation, sizeof(TransformationF)*mBoneCount);
+}
+
 BoneHierarchy::~BoneHierarchy()
 {
 	ClearAll(0);
@@ -225,6 +242,24 @@ const TransformationF& BoneHierarchy::GetRelativeBoneTransformation(int pBoneInd
 
 
 
+void BoneHierarchy::UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation)
+{
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+
+	mCurrentBoneObjectTransformation[pBoneIndex] = pParentTransformation * mCurrentBoneTransformation[pBoneIndex];
+	TransformationF lOrgObjTransf(pParentTransformation * mOriginalBoneTransformation[pBoneIndex]);
+
+	mRelativeBoneTransformation[pBoneIndex] = pParentTransformation * (lOrgObjTransf / mCurrentBoneObjectTransformation[pBoneIndex]);
+
+	// Update children recursively.
+	for (int i = 0; i < mBone[pBoneIndex].GetChildCount(); i++)
+	{
+		UpdateBonesObjectTransformation(mBone[pBoneIndex].GetChild(i), mCurrentBoneObjectTransformation[pBoneIndex]);
+	}
+}
+
+
+
 void BoneHierarchy::Transform(int pBoneIndex, TransformOperation pTransformOperation)
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
@@ -249,22 +284,6 @@ void BoneHierarchy::Transform(int pBoneIndex, TransformOperation pTransformOpera
 			TransformationF& lChildTransform = mCurrentBoneTransformation[lChildIndex];
 			lChildTransform = lThisTransform.InverseTransform(lChildTransform);
 		}
-	}
-}
-
-void BoneHierarchy::UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation)
-{
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
-
-	mCurrentBoneObjectTransformation[pBoneIndex] = pParentTransformation * mCurrentBoneTransformation[pBoneIndex];
-	TransformationF lOrgObjTransf(pParentTransformation * mOriginalBoneTransformation[pBoneIndex]);
-
-	mRelativeBoneTransformation[pBoneIndex] = pParentTransformation * (lOrgObjTransf / mCurrentBoneObjectTransformation[pBoneIndex]);
-
-	// Update children recursively.
-	for (int i = 0; i < mBone[pBoneIndex].GetChildCount(); i++)
-	{
-		UpdateBonesObjectTransformation(mBone[pBoneIndex].GetChild(i), mCurrentBoneObjectTransformation[pBoneIndex]);
 	}
 }
 

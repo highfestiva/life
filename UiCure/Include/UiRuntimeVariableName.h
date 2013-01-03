@@ -6,6 +6,10 @@
 
 #pragma once
 
+#define RTVAR_DEBUG_3D_ENABLEAXES		"Debug.3D.EnableAxes"
+#define RTVAR_DEBUG_3D_ENABLEJOINTS		"Debug.3D.EnableJoints"
+#define RTVAR_DEBUG_3D_ENABLESHAPES		"Debug.3D.EnableShapes"
+
 #define RTVAR_UI_DISPLAY_WIDTH			"Ui.Display.Width"
 #define RTVAR_UI_DISPLAY_HEIGHT			"Ui.Display.Height"
 #define RTVAR_UI_DISPLAY_BITSPERPIXEL		"Ui.Display.BitsPerPixel"
@@ -17,8 +21,12 @@
 
 #define RTVAR_UI_3D_ENABLELIGHTS		"Ui.3D.EnableLights"
 #define RTVAR_UI_3D_ENABLECLEAR			"Ui.3D.EnableClear"
+#define RTVAR_UI_3D_ENABLEAUTOPERFORMANCE	"Ui.3D.EnableAutoPerformance"
+#define RTVAR_UI_3D_ENABLEGRAVELFADING		"Ui.3D.EnableGravelFading"
 #define RTVAR_UI_3D_ENABLEMASSOBJECTS		"Ui.3D.EnableMassObjects"
+#define RTVAR_UI_3D_ENABLEMASSOBJECTFADING	"Ui.3D.EnableMassObjectFading"
 #define RTVAR_UI_3D_ENABLEPARTICLES		"Ui.3D.EnableParticles"
+#define RTVAR_UI_3D_EXHAUSTINTENSITY		"Ui.3D.ExhaustIntensity"
 #define RTVAR_UI_3D_OUTLINEMODE			"Ui.3D.OutlineMode"
 #define RTVAR_UI_3D_WIREFRAMEMODE		"Ui.3D.WireframeMode"
 #define RTVAR_UI_3D_PIXELSHADERS		"Ui.3D.PixelShaders"

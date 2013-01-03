@@ -183,14 +183,6 @@ Win32InputDevice::~Win32InputDevice()
 	}
 	mDIDevice->Release();
 
-	ElementArray::iterator lEIter;
-	for (lEIter = mElementArray.begin(); lEIter != mElementArray.end(); ++lEIter)
-	{
-		InputElement* lElement = *lEIter;
-		delete lElement;
-	}
-	mElementArray.clear();
-
 	delete[] mDeviceObjectData;
 	delete[] mDataFormat.rgodf;
 }
@@ -378,11 +370,6 @@ void Win32InputDevice::PollEvents()
 	}
 }
 
-bool Win32InputDevice::HaveRelativeAxes()
-{
-	return (mRelAxisCount > mAbsAxisCount);
-}
-
 
 
 LOG_CLASS_DEFINE(UI_INPUT, Win32InputDevice);
@@ -444,13 +431,6 @@ Win32InputManager::~Win32InputManager()
 	}
 
 	RemoveObserver();
-
-	DeviceList::iterator lDIter;
-	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
-	{
-		InputDevice* lDevice = *lDIter;
-		delete lDevice;
-	}
 
 	mDisplayManager = 0;
 }
@@ -625,14 +605,9 @@ BOOL CALLBACK Win32InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, L
 	return (DIENUM_CONTINUE);
 }
 
-void Win32InputManager::ShowCursor()
+void Win32InputManager::SetCursorVisible(bool pVisible)
 {
-	::ShowCursor(TRUE);
-}
-
-void Win32InputManager::HideCursor()
-{
-	::ShowCursor(FALSE);
+	::ShowCursor(pVisible? TRUE : FALSE);
 }
 
 float Win32InputManager::GetCursorX()
@@ -647,6 +622,7 @@ float Win32InputManager::GetCursorY()
 
 void Win32InputManager::SetMousePosition(int x, int y)
 {
+	Parent::SetMousePosition(x, y);
 	mCursorX = 2.0f * x / mScreenWidth  - 1.0f;
 	mCursorY = 2.0f * y / mScreenHeight - 1.0f;
 }

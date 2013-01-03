@@ -17,7 +17,8 @@ namespace Life
 
 
 
-MasterServerConnection::MasterServerConnection():
+MasterServerConnection::MasterServerConnection(const str& pMasterAddress):
+	mMasterServerAddress(pMasterAddress),
 	mState(DISCONNECTED),
 	mSocketIoHandler(0),
 	mMuxSocket(0),
@@ -36,6 +37,10 @@ MasterServerConnection::~MasterServerConnection()
 	mConnecter = 0;
 }
 
+const str& MasterServerConnection::GetMasterAddress() const
+{
+	return mMasterServerAddress;
+}
 
 
 void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandler, double pConnectTimeout)
@@ -341,17 +346,16 @@ void MasterServerConnection::ConnectEntry()
 		return;
 	}
 
-	const str lMasterServerAddress(_T(MASTER_SERVER_NAME) _T(":") _T(MASTER_SERVER_PORT));
 	SocketAddress lTargetAddress;
-	if (!lTargetAddress.Resolve(lMasterServerAddress))
+	if (!lTargetAddress.Resolve(mMasterServerAddress))
 	{
-		mLog.Warningf(_T("Could not resolve master server address '%s'."), lMasterServerAddress.c_str());
+		mLog.Warningf(_T("Could not resolve master server address '%s'."), mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}
 	if (mConnecter->GetStopRequest() || !QueryMuxValid())
 	{
-		mLog.Warningf(_T("Connect to master server '%s' was aborted."), lMasterServerAddress.c_str());
+		mLog.Warningf(_T("Connect to master server '%s' was aborted."), mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}
@@ -361,7 +365,7 @@ void MasterServerConnection::ConnectEntry()
 	mVSocket = mMuxSocket->Connect(lTargetAddress, lConnectionId, mConnectTimeout);
 	if (!mVSocket)
 	{
-		mLog.Warningf(_T("Could not connect to master server address '%s'."), lMasterServerAddress.c_str());
+		mLog.Warningf(_T("Could not connect to master server address '%s'."), mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}
@@ -369,6 +373,7 @@ void MasterServerConnection::ConnectEntry()
 	assert(mState == CONNECTING);
 	mState = CONNECTED;
 	mIdleTimer.PopTimeDiff();
+	mLog.Headlinef(_T("Connected to master server @ %s."), mMasterServerAddress.c_str());
 }
 
 bool MasterServerConnection::UploadServerInfo()
@@ -471,7 +476,7 @@ bool MasterServerConnection::Receive(str& pData)
 		mLog.Warning(_T("Trying to receive master server data even though unconnected."));
 		return false;
 	}
-	mVSocket->WaitAvailable(1.0);
+	mVSocket->WaitAvailable(4.0);
 	uint8 lRawData[1024];
 	int lRawSize = mVSocket->Receive(lRawData, sizeof(lRawData));
 	if (lRawSize <= 0)

@@ -83,8 +83,6 @@ public:
 
 	virtual void PollEvents();
 
-	bool HaveRelativeAxes();
-
 protected:
 private:
 	static BOOL CALLBACK EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef);
@@ -127,8 +125,7 @@ public:
 	virtual const InputDevice* GetMouse() const;
 	virtual InputDevice* GetMouse();
 
-	virtual void ShowCursor();
-	virtual void HideCursor();
+	virtual void SetCursorVisible(bool pVisible);
 
 	virtual float GetCursorX();
 	virtual float GetCursorY();

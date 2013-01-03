@@ -148,20 +148,20 @@ void LauncherAi::OnTick()
 	const float lPitchFactor = ::fabs((lPitch - lGuidePitch) * (lVelocity+3) + 0.03f);
 	if (lPitch < lGuidePitch)
 	{
-		mGame->GetLauncher()->SetEnginePower(0, -1*lPitchFactor, 0);
+		mGame->GetLauncher()->SetEnginePower(0, -1*lPitchFactor);
 	}
 	else
 	{
-		mGame->GetLauncher()->SetEnginePower(0, +1*lPitchFactor, 0);
+		mGame->GetLauncher()->SetEnginePower(0, +1*lPitchFactor);
 	}
 	const float lYawFactor = ::fabs((lYaw - lGuideYaw) * (lVelocity+4) + 0.03f);
 	if (lYaw < lGuideYaw)
 	{
-		mGame->GetLauncher()->SetEnginePower(1, -1*lYawFactor, 0);
+		mGame->GetLauncher()->SetEnginePower(1, -1*lYawFactor);
 	}
 	else
 	{
-		mGame->GetLauncher()->SetEnginePower(1, +1*lYawFactor, 0);
+		mGame->GetLauncher()->SetEnginePower(1, +1*lYawFactor);
 	}
 	const float lLongestTimeBase = 8.0f * (1-lDifficulty*0.8f);
 	const double lLastShotDiff = mLastShot.QueryTimeDiff();

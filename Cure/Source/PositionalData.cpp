@@ -468,7 +468,7 @@ int ObjectPositionalData::Unpack(const uint8* pData, int pSize)
 			case TYPE_POSITION_3:	lPosition = new PositionalData3;	break;
 			case TYPE_POSITION_2:	lPosition = new PositionalData2;	break;
 			case TYPE_POSITION_1:	lPosition = new PositionalData1;	break;
-			case TYPE_REAL_4:	lPosition = new RealData4;		break;
+			case TYPE_REAL_3:	lPosition = new RealData3;		break;
 			case TYPE_REAL_1:	lPosition = new RealData1;		break;
 		}
 		if (!lPosition)
@@ -494,6 +494,11 @@ int ObjectPositionalData::Unpack(const uint8* pData, int pSize)
 
 float ObjectPositionalData::GetBiasedDifference(const PositionalData* pReference) const
 {
+	return GetBiasedTypeDifference(pReference, false);
+}
+
+float ObjectPositionalData::GetBiasedTypeDifference(const PositionalData* pReference, bool pPositionOnly) const
+{
 	assert(GetType() == pReference->GetType());
 	const ObjectPositionalData& lReference = (const ObjectPositionalData&)*pReference;
 	assert(IsSameStructure(lReference));
@@ -501,13 +506,24 @@ float ObjectPositionalData::GetBiasedDifference(const PositionalData* pReference
 	lDiff += mPosition.GetBiasedDifference(&lReference.mPosition);
 	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
 	BodyPositionArray::const_iterator y = lReference.mBodyPositionArray.begin();
+	int lBodyCount = 1 + mBodyPositionArray.size();
 	for (; x != mBodyPositionArray.end(); ++x, ++y)
 	{
 		assert(y != lReference.mBodyPositionArray.end());
+		if (pPositionOnly)
+		{
+			const Type lType = (*x)->GetType();
+			if (lType != TYPE_POSITION_6 && lType != TYPE_POSITION_3 && lType != TYPE_POSITION_2 && lType != TYPE_POSITION_1)
+			{
+				--lBodyCount;
+				continue;
+			}
+
+		}
 		lDiff += (*x)->GetScaledDifference(*y);
 	}
-	assert((x == mBodyPositionArray.end()) == (y == lReference.mBodyPositionArray.end()));
-	return lDiff / (1 + mBodyPositionArray.size());
+	assert((x == mBodyPositionArray.end()) && (y == lReference.mBodyPositionArray.end()));
+	return lDiff / lBodyCount;
 }
 
 PositionalData* ObjectPositionalData::GetAt(size_t pIndex) const
@@ -635,15 +651,15 @@ LOG_CLASS_DEFINE(NETWORK, ObjectPositionalData);
 
 
 
-int RealData4::GetPackSize() const
+int RealData3::GetPackSize() const
 {
 	return (1+sizeof(mValue[0])*4);
 }
 
-int RealData4::Pack(uint8* pData) const
+int RealData3::Pack(uint8* pData) const
 {
 	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_REAL_4;
+	pData[lSize++] = (uint8)TYPE_REAL_3;
 	lSize += PackerReal::Pack(&pData[lSize], mValue[0]);
 	lSize += PackerReal::Pack(&pData[lSize], mValue[1]);
 	lSize += PackerReal::Pack(&pData[lSize], mValue[2]);
@@ -651,11 +667,11 @@ int RealData4::Pack(uint8* pData) const
 	return (lSize);
 }
 
-int RealData4::Unpack(const uint8* pData, int pSize)
+int RealData3::Unpack(const uint8* pData, int pSize)
 {
 	CHECK_SIZE(1+sizeof(mValue[0])*4);
 	int lSize = 0;
-	CHECK_TYPE(TYPE_REAL_4);
+	CHECK_TYPE(TYPE_REAL_3);
 	lSize += PackerReal::Unpack(mValue[0], &pData[lSize], sizeof(float));
 	lSize += PackerReal::Unpack(mValue[1], &pData[lSize], sizeof(float));
 	lSize += PackerReal::Unpack(mValue[2], &pData[lSize], sizeof(float));
@@ -663,9 +679,9 @@ int RealData4::Unpack(const uint8* pData, int pSize)
 	return (lSize);
 }
 
-float RealData4::GetBiasedDifference(const PositionalData* pReference) const
+float RealData3::GetBiasedDifference(const PositionalData* pReference) const
 {
-	const RealData4& lReference = (const RealData4&)*pReference;
+	const RealData3& lReference = (const RealData3&)*pReference;
 	float lWeightedDifferenceSum =
 		::fabs(mValue[0]-lReference.mValue[0])*2 +
 		::fabs(mValue[1]-lReference.mValue[1])*2 +
@@ -674,21 +690,21 @@ float RealData4::GetBiasedDifference(const PositionalData* pReference) const
 	return lWeightedDifferenceSum / 4;
 }
 
-PositionalData::Type RealData4::GetType() const
+PositionalData::Type RealData3::GetType() const
 {
-	return (TYPE_REAL_4);
+	return TYPE_REAL_3;
 }
 
-void RealData4::CopyData(const PositionalData* pData)
+void RealData3::CopyData(const PositionalData* pData)
 {
 	assert(pData->GetType() == GetType());
-	const RealData4& lCopy = *(RealData4*)pData;
+	const RealData3& lCopy = *(RealData3*)pData;
 	*this = lCopy;
 }
 
-PositionalData* RealData4::Clone() const
+PositionalData* RealData3::Clone() const
 {
-	return (new RealData4(*this));
+	return (new RealData3(*this));
 }
 
 

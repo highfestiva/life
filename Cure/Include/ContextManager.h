@@ -67,7 +67,7 @@ public:
 	void CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId);
 	void CancelPendingAlarmCallbacks(ContextObject* pObject);
 
-	void Tick(float pTimeDelta);
+	void MicroTick(float pTimeDelta);
 	void TickPhysics();
 	void HandleIdledBodies();
 	void HandlePhysicsSend();

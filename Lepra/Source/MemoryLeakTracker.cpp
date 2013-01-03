@@ -6,6 +6,8 @@
 
 #include "../Include/MemoryLeakTracker.h"
 
+//#define MEMOVERWRITE_DETECT	1
+
 
 
 #if defined(_DEBUG) && defined(LEPRA_WINDOWS) && defined(MEMLEAK_DETECT)
@@ -346,24 +348,50 @@ MemoryLeakDetector gLeakDetector;
 #include <new>
 #include <exception>
 #include <cstdlib>
+#include <assert.h>
 
 void* operator new(size_t pSize)
 {
+#if !defined(MEMOVERWRITE_DETECT)	// Normal operation, no overwrite detection
 	void* lPointer = malloc(pSize);
-	if (lPointer == 0)
-		throw std::bad_alloc(); // ANSI/ISO compliant behavior
-
+	if (lPointer == 0) throw std::bad_alloc(); // ANSI/ISO compliant behavior
 	return lPointer;
+#else // Overwrite detection - YEAH!
+	char* lPointer = (char*)malloc(pSize+12);
+	if (lPointer == 0) throw std::bad_alloc(); // ANSI/ISO compliant behavior
+	*(int*)lPointer = 0x5AF00FA5;
+	*(int*)(lPointer+4) = (int)pSize;
+	*(int*)(lPointer+pSize+8) = 0x55C3F0A9;
+	return lPointer+8;
+#endif // Normal alloc / With overwrite detection.
 }
 
 void operator delete(void* pPointer)
 {
+#if !defined(MEMOVERWRITE_DETECT)	// Normal operation, no overwrite detection
 	free(pPointer);
+#else // Overwrite detection - YEAH!
+	if (!pPointer) return;
+	char* lPointer = (char*)pPointer - 8;
+	assert(*(int*)lPointer == 0x5AF00FA5);
+	int lSize = *(int*)(lPointer+4);
+	assert(*(int*)(lPointer+lSize+8) == 0x55C3F0A9);
+	free(lPointer);
+#endif // Normal alloc / With overwrite detection.
 }
 
 void operator delete[](void* pPointer)
 {
+#if !defined(MEMOVERWRITE_DETECT)	// Normal operation, no overwrite detection
 	free(pPointer);
+#else // Overwrite detection - YEAH!
+	if (!pPointer) return;
+	char* lPointer = (char*)pPointer - 8;
+	assert(*(int*)lPointer == 0x5AF00FA5);
+	int lSize = *(int*)(lPointer+4);
+	assert(*(int*)(lPointer+lSize+8) == 0x55C3F0A9);
+	free(lPointer);
+#endif // Normal alloc / With overwrite detection.
 }
 
 #endif // <Memleak detection>/!<Memleak detection>

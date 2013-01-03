@@ -9,7 +9,6 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
-#include "../LifeClient/RtVar.h"
 #include "GameServerManager.h"
 
 
@@ -92,7 +91,7 @@ void BulletTime::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 }
 
-void BulletTime::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pListener)
+void BulletTime::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
 	(void)pTriggerId;
 
@@ -103,7 +102,7 @@ void BulletTime::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::Physi
 
 	mLastFrameTriggered = true;
 
-	ContextObject* lObject = (ContextObject*)pListener;
+	ContextObject* lObject = pBody;
 	const float lSpeed = lObject->GetVelocity().GetLength();
 	if (lSpeed < mMinSpeed || lSpeed > mMaxSpeed)
 	{
