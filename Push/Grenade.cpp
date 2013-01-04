@@ -58,8 +58,8 @@ void Grenade::OnLoaded()
 	Parent::OnLoaded();
 
 #ifdef LEPRA_DEBUG
-	Vector3DF lPos = GetPosition();
-	log_volatile(mLog.Infof(_T("Grenade loaded at pos (%f;%f;%f)."), lPos.x, lPos.y, lPos.z));
+	//Vector3DF lPos = GetPosition();
+	//log_volatile(mLog.Infof(_T("Grenade loaded at pos (%f;%f;%f)."), lPos.x, lPos.y, lPos.z));
 #endif // Debug
 
 	mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);

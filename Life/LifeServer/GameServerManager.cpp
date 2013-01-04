@@ -296,9 +296,9 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 
 	TransformationF lTransform;
 	lTransform.SetPosition(Vector3DF(0, 0, 10));
+	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
 	const float a = 1.0f/::sqrt(2.0f);
 	lTransform.SetOrientation(QuaternionF(0, 0, -a, -a));
-	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
 	if (lPreviousAvatarId)
 	{
 		mLog.Info(_T("User ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
@@ -310,7 +310,9 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 			lTransform.GetPosition() += Vector3DF(0, 0, 2);
 			Vector3DF lEulerAngles;
 			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
-			lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
+			QuaternionF q;
+			q.SetEulerAngles(lEulerAngles.x, 0, 0);
+			lTransform.SetOrientation(q * lTransform.GetOrientation());
 		}
 		DeleteContextObject(lPreviousAvatarId);
 	}
@@ -318,8 +320,8 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T("."));
 	Cure::ContextObject* lObject = Parent::CreateContextObject(pAvatarId,
 		Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	const QuaternionF& q = lTransform.GetOrientation();
-	mLog.Infof(_T("Setting avatar quaternion (%f;%f;%f;%f)."), q.GetA(), q.GetB(), q.GetC(), q.GetD());
+	//const QuaternionF& q = lTransform.GetOrientation();
+	//mLog.Infof(_T("Setting avatar quaternion (%f;%f;%f;%f)."), q.GetA(), q.GetB(), q.GetC(), q.GetD());
 	lObject->SetInitialTransform(lTransform);
 	pClient->SetAvatarId(lObject->GetInstanceId());
 	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());
@@ -1186,7 +1188,11 @@ Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType)
 
 void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 {
-	BroadcastCreateObject(pObject->GetInstanceId(), pObject->GetInitialTransform(), pObject->GetClassId());
+	TransformationF lTransform;
+	TBC::ChunkyBoneGeometry* lStructureGeometry = pObject->GetPhysics()->GetBoneGeometry(pObject->GetPhysics()->GetRootBone());
+	TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
+	GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
+	BroadcastCreateObject(pObject->GetInstanceId(), lTransform, pObject->GetClassId());
 	if (pObject->GetVelocity().GetLengthSquared() > 0.1f)
 	{
 		OnPhysicsSend(pObject);

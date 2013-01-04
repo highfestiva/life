@@ -653,7 +653,7 @@ LOG_CLASS_DEFINE(NETWORK, ObjectPositionalData);
 
 int RealData3::GetPackSize() const
 {
-	return (1+sizeof(mValue[0])*4);
+	return (1+sizeof(mValue[0])*3);
 }
 
 int RealData3::Pack(uint8* pData) const
@@ -663,19 +663,17 @@ int RealData3::Pack(uint8* pData) const
 	lSize += PackerReal::Pack(&pData[lSize], mValue[0]);
 	lSize += PackerReal::Pack(&pData[lSize], mValue[1]);
 	lSize += PackerReal::Pack(&pData[lSize], mValue[2]);
-	lSize += PackerReal::Pack(&pData[lSize], mValue[3]);
 	return (lSize);
 }
 
 int RealData3::Unpack(const uint8* pData, int pSize)
 {
-	CHECK_SIZE(1+sizeof(mValue[0])*4);
+	CHECK_SIZE(1+sizeof(mValue[0])*3);
 	int lSize = 0;
 	CHECK_TYPE(TYPE_REAL_3);
 	lSize += PackerReal::Unpack(mValue[0], &pData[lSize], sizeof(float));
 	lSize += PackerReal::Unpack(mValue[1], &pData[lSize], sizeof(float));
 	lSize += PackerReal::Unpack(mValue[2], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mValue[3], &pData[lSize], sizeof(float));
 	return (lSize);
 }
 
@@ -683,11 +681,10 @@ float RealData3::GetBiasedDifference(const PositionalData* pReference) const
 {
 	const RealData3& lReference = (const RealData3&)*pReference;
 	float lWeightedDifferenceSum =
-		::fabs(mValue[0]-lReference.mValue[0])*2 +
-		::fabs(mValue[1]-lReference.mValue[1])*2 +
-		::fabs(mValue[2]-lReference.mValue[2])*2 +
-		::fabs(mValue[3]-lReference.mValue[3])*2;
-	return lWeightedDifferenceSum / 4;
+		::fabs(mValue[0]-lReference.mValue[0]) +
+		::fabs(mValue[1]-lReference.mValue[1]) +
+		::fabs(mValue[2]-lReference.mValue[2]);
+	return lWeightedDifferenceSum / 3;
 }
 
 PositionalData::Type RealData3::GetType() const

@@ -425,10 +425,10 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 		{
 			return;
 		}
-		if (pDeltaThreshold > 0)
-		{
-			mLog.Infof(_T("Positional diff is %f."), lScaledDiff);
-		}
+		//if (pDeltaThreshold > 0)
+		//{
+		//	mLog.Infof(_T("Positional diff is %f."), lScaledDiff);
+		//}
 	}
 
 	ForceSetFullPosition(pPositionalData);
@@ -436,8 +436,8 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 
 void ContextObject::SetInitialTransform(const TransformationF& pTransformation)
 {
-	const QuaternionF& q = pTransformation.GetOrientation();
-	mLog.Infof(_T("Setting initial quaternion (%f;%f;%f;%f) for class %s."), q.GetA(), q.GetB(), q.GetC(), q.GetD(), GetClassId().c_str());
+	//const QuaternionF& q = pTransformation.GetOrientation();
+	//mLog.Infof(_T("Setting initial quaternion (%f;%f;%f;%f) for class %s."), q.GetA(), q.GetB(), q.GetC(), q.GetD(), GetClassId().c_str());
 	mPosition.mPosition.mTransformation = pTransformation;
 }
 
@@ -448,8 +448,8 @@ TransformationF ContextObject::GetInitialTransform() const
 
 void ContextObject::SetInitialPositionalData(const ObjectPositionalData& pPositionalData)
 {
-	const QuaternionF& q = pPositionalData.mPosition.mTransformation.GetOrientation();
-	mLog.Infof(_T("Setting initial quaternion/pos (%f;%f;%f;%f) for class %s."), q.GetA(), q.GetB(), q.GetC(), q.GetD(), GetClassId().c_str());
+	//const QuaternionF& q = pPositionalData.mPosition.mTransformation.GetOrientation();
+	//mLog.Infof(_T("Setting initial quaternion/pos (%f;%f;%f;%f) for class %s."), q.GetA(), q.GetB(), q.GetC(), q.GetD(), GetClassId().c_str());
 	mPosition.CopyData(&pPositionalData);
 }
 

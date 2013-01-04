@@ -188,7 +188,7 @@ private:
 class RealData3: public PositionalData
 {
 public:
-	float mValue[4];
+	float mValue[3];
 
 	int GetPackSize() const;
 	int Pack(uint8* pData) const;

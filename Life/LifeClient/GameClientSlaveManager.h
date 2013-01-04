@@ -60,6 +60,7 @@ public:
 
 	bool Render();
 	virtual bool Paint();
+	virtual bool IsPrimaryManager() const;
 	virtual bool EndTick();
 	void TickNetworkInput();
 	bool TickNetworkOutput();

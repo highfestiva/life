@@ -34,12 +34,12 @@ void PushBarrel::GetInfo(const Cure::GameManager* pGameManager, Cure::GameObject
 #ifdef LEPRA_DEBUG
 			const TBC::ChunkyBoneGeometry* lBone = lAvatar->GetPhysics()->GetBoneGeometry(lBoneIndex);
 			assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
-			TBC::ChunkyBoneGeometry* lRootGeometry = lAvatar->GetPhysics()->GetBoneGeometry(0);
-			QuaternionF q = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootGeometry->GetBodyId());
-			QuaternionF p = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-			mLog.Infof(_T("Shooting with body orientation (%f;%f;%f;%f) and initial orientation (%f;%f;%f;%f)."),
-				q.GetA(), q.GetB(), q.GetC(), q.GetD(),
-				p.GetA(), p.GetB(), p.GetC(), p.GetD());
+			//TBC::ChunkyBoneGeometry* lRootGeometry = lAvatar->GetPhysics()->GetBoneGeometry(0);
+			//QuaternionF q = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootGeometry->GetBodyId());
+			//QuaternionF p = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
+			//mLog.Infof(_T("Shooting with body orientation (%f;%f;%f;%f) and initial orientation (%f;%f;%f;%f)."),
+			//	q.GetA(), q.GetB(), q.GetC(), q.GetD(),
+			//	p.GetA(), p.GetB(), p.GetC(), p.GetD());
 #endif // Debug
 			const TBC::PhysicsManager::BodyID lRootBodyId = lAvatar->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 			const QuaternionF lRootOrientation = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootBodyId);

@@ -196,6 +196,15 @@ bool GameClientSlaveManager::Paint()
 	return true;
 }
 
+bool GameClientSlaveManager::IsPrimaryManager() const
+{
+	if (GetMaster()->IsLocalServer())
+	{
+		return false;
+	}
+	return GetMaster()->IsFirstSlave(this);
+}
+
 bool GameClientSlaveManager::EndTick()
 {
 	bool lIsDebugDrawing = mUiManager->CanRender();
@@ -710,8 +719,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			wstr lClassId;
 			Lepra::TransformationF lTransformation;
 			lMessageCreateObject->GetTransformation(lTransformation);
-			const float a = 1.0f/::sqrt(2.0f);
-			lTransformation.SetOrientation(QuaternionF(0, 0, -a, -a));
+			//const float a = 1.0f/::sqrt(2.0f);
+			//lTransformation.SetOrientation(QuaternionF(0, 0, -a, -a));
 			lMessageCreateObject->GetClassId(lClassId);
 			CreateObject(lMessageCreateObject->GetObjectId(),
 				strutil::Encode(lClassId),

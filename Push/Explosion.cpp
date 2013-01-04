@@ -49,7 +49,7 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 		d = d*d*d;
 		d = std::min(1.0f, d);
 		d *= pStrength;
-		mLog.Infof(_T("Explosion for %s with strength %f at (%f;%f;%f)."), pObject->GetClassId().c_str(), d, pPosition.x, pPosition.y, pPosition.z);
+		//mLog.Infof(_T("Explosion for %s with strength %f at (%f;%f;%f)."), pObject->GetClassId().c_str(), d, pPosition.x, pPosition.y, pPosition.z);
 		lForce += d;
 		const float lForceFactor = 3000.0f;	// To be able to pass a sensible strength factor to this method.
 		const float ff = lForceFactor * pObject->GetMass() * d;
