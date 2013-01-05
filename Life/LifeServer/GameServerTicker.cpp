@@ -81,7 +81,9 @@ void GameServerTicker::SetMasterServerConnection(MasterServerConnection* pConnec
 
 bool GameServerTicker::Initialize()
 {
-	return mGameManager->Initialize(mMasterConnection);
+	str lServerAddress;
+	CURE_RTVAR_GET(lServerAddress, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	return mGameManager->Initialize(mMasterConnection, lServerAddress);
 }
 
 bool GameServerTicker::Tick()

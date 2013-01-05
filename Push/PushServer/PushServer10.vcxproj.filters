@@ -31,6 +31,9 @@
     <ClCompile Include="..\PushBarrel.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="PushServerDelegate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PushServerMessageProcessor.h">
@@ -51,5 +54,6 @@
     <ClInclude Include="..\PushBarrel.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="PushServerDelegate.h" />
   </ItemGroup>
 </Project>

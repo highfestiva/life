@@ -101,6 +101,12 @@
     <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp">
       <Filter>Master</Filter>
     </ClCompile>
+    <ClCompile Include="PushServer\PushServerDelegate.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Icons\Push.ico">
@@ -217,6 +223,12 @@
     </ClInclude>
     <ClInclude Include="PushMaster\MasterServerPort.h">
       <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\PushServerDelegate.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\ServerDelegate.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

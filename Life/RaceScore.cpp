@@ -32,6 +32,8 @@ RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int 
 	{
 		AddTriggered(mStartTrigger);
 	}
+
+	SetNetworkType(TYPE_SERVER);
 }
 
 RaceScore::~RaceScore()
@@ -119,11 +121,6 @@ int RaceScore::Unpack(const uint8* pSource, int pMaxSize)
 	mTriggerCount = pSource[6];
 	mIsUpdated = true;
 	return 1+sizeof(int32)+1+1;
-}
-
-RaceScore::NetworkType RaceScore::GetNetworkType() const
-{
-	return TYPE_SERVER;
 }
 
 

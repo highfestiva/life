@@ -126,7 +126,7 @@ void CppContextObject::SetAllowNetworkLogic(bool pAllow)
 
 TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
 {
-	if (mPhysicsResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	if (mPhysicsResource && mPhysicsResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		return (mPhysicsResource->GetData());
 	}

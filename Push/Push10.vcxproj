@@ -279,6 +279,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp" />
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="Grenade.cpp" />
     <ClCompile Include="Level.cpp" />
@@ -288,6 +289,7 @@
     <ClCompile Include="PushConsoleManager.cpp" />
     <ClCompile Include="PushDemo.cpp" />
     <ClCompile Include="PushManager.cpp" />
+    <ClCompile Include="PushServer\PushServerDelegate.cpp" />
     <ClCompile Include="PushTicker.cpp" />
     <ClCompile Include="PushViewer.cpp" />
     <ClCompile Include="RoadSignButton.cpp" />
@@ -316,6 +318,7 @@
     <ResourceCompile Include="Push.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Life\LifeServer\ServerDelegate.h" />
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="Grenade.h" />
     <ClInclude Include="Launcher.h" />
@@ -326,6 +329,7 @@
     <ClInclude Include="PushConsoleManager.h" />
     <ClInclude Include="PushDemo.h" />
     <ClInclude Include="PushManager.h" />
+    <ClInclude Include="PushServer\PushServerDelegate.h" />
     <ClInclude Include="PushTicker.h" />
     <ClInclude Include="PushViewer.h" />
     <ClInclude Include="RoadSignButton.h" />
@@ -396,7 +400,7 @@
       <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-   </ItemGroup>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

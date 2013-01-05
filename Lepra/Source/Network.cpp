@@ -83,6 +83,26 @@ bool Network::ResolveHostname(const str& pHostname, IPAddress& pIPAddress)
 	return false;
 }
 
+bool Network::IsLocalAddress(const str& pAddress)
+{
+	bool lIsLocalAddress = false;
+	const str lUrl = strutil::Split(pAddress, _T(":"), 1)[0];
+	IPAddress lIpAddress;
+	if (ResolveHostname(lUrl, lIpAddress))
+	{
+		IPAddress lExternalIpAddress;
+		ResolveHostname(_T(""), lExternalIpAddress);
+		const str lIp = lIpAddress.GetAsString();
+		if (lIp == _T("127.0.0.1") ||
+			lIp == _T("0.0.0.0") ||
+			lIpAddress == lExternalIpAddress)
+		{
+			lIsLocalAddress = true;
+		}
+	}
+	return lIsLocalAddress;
+}
+
 
 
 bool Network::mStarted = false;

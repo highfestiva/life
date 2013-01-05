@@ -6,9 +6,7 @@
 
 #include "PushServerMessageProcessor.h"
 #include "../../Life/LifeServer/GameServerManager.h"
-#include "../PushBarrel.h"
-#include "../Explosion.h"
-#include "../Version.h"
+#include "PushServerDelegate.h"
 #include "ServerGrenade.h"
 
 
@@ -40,7 +38,8 @@ void PushServerMessageProcessor::ProcessNumber(Life::Client* pClient, Cure::Mess
 			{
 				return;
 			}
-			ServerGrenade* lGrenade = new ServerGrenade(mGameServerManager->GetResourceManager(), 200, this);
+			PushServerDelegate* lDelegate = (PushServerDelegate*)mGameServerManager->GetDelegate();
+			ServerGrenade* lGrenade = new ServerGrenade(mGameServerManager->GetResourceManager(), 200, lDelegate);
 			mGameServerManager->AddContextObject(lGrenade, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 			bool lOk = (lGrenade != 0);
 			assert(lOk);
@@ -56,42 +55,6 @@ void PushServerMessageProcessor::ProcessNumber(Life::Client* pClient, Cure::Mess
 		return;
 	}
 	Parent::ProcessNumber(pClient, pType, pInteger, pFloat);
-}
-
-
-
-void PushServerMessageProcessor::GetBarrel(Cure::GameObjectId pOwnerId, TransformationF& pTransform, Vector3DF& pVelocity) const
-{
-	PushBarrel::GetInfo(mGameServerManager, pOwnerId, pTransform, pVelocity);
-}
-
-void PushServerMessageProcessor::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
-	Cure::ContextObject* pExplosive, Cure::ContextObject* pHitObject,
-	TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pHitBodyId)
-{
-	(void)pForce;
-	(void)pTorque;
-	(void)pExplosive;
-	(void)pHitObject;
-	(void)pExplosiveBodyId;
-	(void)pHitBodyId;
-
-	TBC::PhysicsManager* lPhysicsManager = mGameServerManager->GetPhysicsManager();
-	Cure::ContextManager::ContextObjectTable lObjectTable = mGameServerManager->GetContext()->GetObjectTable();
-	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		const Cure::ContextObject* lObject = x->second;
-		if (!lObject->IsLoaded())
-		{
-			continue;
-		}
-		const float lForce = Explosion::PushObject(lPhysicsManager, lObject, pPosition, 1.0f);
-		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
-		{
-			x->second->ForceSend();
-		}
-	}
 }
 
 

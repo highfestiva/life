@@ -72,11 +72,6 @@ int FloatAttribute::Unpack(const uint8* pSource, int pMaxSize)
 	return sizeof(mValue);
 }
 
-FloatAttribute::NetworkType FloatAttribute::GetNetworkType() const
-{
-	return TYPE_BOTH_BROADCAST;
-}
-
 
 
 void FloatAttribute::operator=(const FloatAttribute&)

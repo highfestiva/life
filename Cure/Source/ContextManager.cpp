@@ -173,7 +173,7 @@ void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
 
 void ContextManager::UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize)
 {
-	ContextObject* lObject = GetObject(pObjectId);
+	ContextObject* lObject = GetObject(pObjectId, true);
 	if (lObject)
 	{
 		ContextObjectAttribute::Unpack(lObject, pData, pSize);

@@ -6,6 +6,7 @@
 
 #include "PushServerTicker.h"
 #include "../../Life/LifeServer/GameServerManager.h"
+#include "PushServerDelegate.h"
 #include "PushServerMessageProcessor.h"
 
 
@@ -19,6 +20,7 @@ PushServerTicker::PushServerTicker(Cure::ResourceManager* pResourceManager, Inte
 	Parent(pResourceManager, pConsoleLogger, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity)
 {
 	mGameManager->SetLevelName(_T("level_02"));
+	mGameManager->SetDelegate(new PushServerDelegate(mGameManager));
 	mGameManager->SetMessageProcessor(new PushServerMessageProcessor(mGameManager));
 }
 

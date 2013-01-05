@@ -229,6 +229,7 @@
     <ClCompile Include="MasterServerConnection.cpp" />
     <ClCompile Include="RaceTimer.cpp" />
     <ClCompile Include="ServerConsoleManager.cpp" />
+    <ClCompile Include="ServerDelegate.cpp" />
     <ClCompile Include="ServerMessageProcessor.cpp" />
     <ClCompile Include="Spawner.cpp" />
     <ClCompile Include="..\LifeMaster\MasterServerNetworkParser.cpp" />
@@ -242,6 +243,7 @@
     <ClInclude Include="RaceTimer.h" />
     <ClInclude Include="RtVar.h" />
     <ClInclude Include="ServerConsoleManager.h" />
+    <ClInclude Include="ServerDelegate.h" />
     <ClInclude Include="ServerMessageProcessor.h" />
     <ClInclude Include="Spawner.h" />
     <ClInclude Include="..\LifeMaster\MasterServer.h" />

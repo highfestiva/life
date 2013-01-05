@@ -13,6 +13,7 @@
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "PushServer/PushServerDelegate.h"
 #include "PushServer/PushServerMessageProcessor.h"
 #include "RtVar.h"
 #include "PushDemo.h"
@@ -69,6 +70,7 @@ void PushTicker::OnSlavesKilled()
 void PushTicker::OnServerCreated(Life::UiGameServerManager* pServer)
 {
 	pServer->SetLevelName(_T("level_02"));
+	pServer->SetDelegate(new PushServerDelegate(pServer));
 	pServer->SetMessageProcessor(new PushServerMessageProcessor(pServer));
 }
 

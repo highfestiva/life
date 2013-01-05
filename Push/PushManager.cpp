@@ -6,6 +6,7 @@
 
 #include "PushManager.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/NetworkClient.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Random.h"
@@ -198,6 +199,16 @@ bool PushManager::Paint()
 		DrawStick(mStickRight);
 		mStickLeft->ResetTap();
 		mStickRight->ResetTap();
+	}
+
+	const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+	if (lObject)
+	{
+		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
+		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("?");
+		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 200), 0);
+		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
+		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 10, 10);
 	}
 
 #ifdef LIFE_DEMO

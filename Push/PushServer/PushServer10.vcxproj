@@ -280,6 +280,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PushServer.cpp" />
+    <ClCompile Include="PushServerDelegate.cpp" />
     <ClCompile Include="PushServerMessageProcessor.cpp" />
     <ClCompile Include="PushServerTicker.cpp" />
     <ClCompile Include="ServerGrenade.cpp" />
@@ -287,6 +288,7 @@
     <ClCompile Include="..\PushBarrel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="PushServerDelegate.h" />
     <ClInclude Include="PushServerMessageProcessor.h" />
     <ClInclude Include="PushServerTicker.h" />
     <ClInclude Include="ServerGrenade.h" />

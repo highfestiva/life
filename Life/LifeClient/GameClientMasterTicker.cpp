@@ -459,21 +459,7 @@ float GameClientMasterTicker::UpdateFrustum(float pFov, const PixelRect& pRender
 
 void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 {
-	bool lIsLocalServer = false;
-	const str lServerUrl = strutil::Split(pServerAddress, _T(":"), 1)[0];
-	IPAddress lServerIpAddress;
-	if (Network::ResolveHostname(lServerUrl, lServerIpAddress))
-	{
-		IPAddress lExternalIpAddress;
-		Network::ResolveHostname(_T(""), lExternalIpAddress);
-		const str lServerIp = lServerIpAddress.GetAsString();
-		if (lServerIp == _T("127.0.0.1") ||
-			lServerIp == _T("0.0.0.0") ||
-			lServerIpAddress == lExternalIpAddress)
-		{
-			lIsLocalServer = true;
-		}
-	}
+	const bool lIsLocalServer = Network::IsLocalAddress(pServerAddress);
 	if (lIsLocalServer && !mServer)
 	{
 		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(UiCure::GetSettings());
@@ -481,7 +467,7 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 		lServer->SetTicker(this);
 		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
 		OnServerCreated(lServer);
-		if (!lServer->Initialize(mMasterConnection))
+		if (!lServer->Initialize(mMasterConnection, pServerAddress))
 		{
 			delete lServer;
 			lServer = 0;

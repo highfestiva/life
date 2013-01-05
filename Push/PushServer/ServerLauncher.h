@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "../../Lepra/Include/Transformation.h"
+#include "../../TBC/Include/PhysicsManager.h"
 #include "../Push.h"
 
 

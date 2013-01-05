@@ -29,6 +29,7 @@ namespace Life
 
 
 class MasterServerConnection;
+class ServerDelegate;
 struct ServerInfo;
 class ServerMessageProcessor;
 
@@ -49,13 +50,15 @@ public:
 	virtual bool BeginTick();
 
 	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
-	bool Initialize(MasterServerConnection* pMasterConnection);
+	bool Initialize(MasterServerConnection* pMasterConnection, const str& pAddress);
 	float GetPowerSaveAmount() const;
 
 	LEPRA_DEBUG_CODE(virtual TBC::PhysicsManager* GetPhysicsManager() const);
 
 	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
 
+	ServerDelegate* GetDelegate() const;
+	void SetDelegate(ServerDelegate* pDelegate);
 	void SetMessageProcessor(ServerMessageProcessor* pMessageProcessor);
 	void AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex);
 	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
@@ -71,6 +74,7 @@ public:
 	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
 
+	bool IsAvatarObject(const Cure::ContextObject* pObject) const;
 	int GetLoggedInClientCount() const;
 
 	void Build(const str& pWhat);
@@ -82,6 +86,7 @@ protected:
 	void DeleteAllClients();
 
 	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
+	Client* GetClientByObject(Cure::ContextObject*& pObject) const;
 
 	virtual bool InitializeTerrain();
 
@@ -125,6 +130,7 @@ private:
 
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;
+	ServerDelegate* mDelegate;
 	ServerMessageProcessor* mMessageProcessor;
 	str mLevelName;
 	Cure::ContextObject* mTerrainObject;

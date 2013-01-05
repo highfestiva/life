@@ -13,6 +13,7 @@
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
+#include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/StringUtility.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
@@ -98,15 +99,20 @@ void GameClientSlaveManager::LoadSettings()
 	}
 	else
 	{
-		bool lIsOpenServer;
-		CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-		if (lIsOpenServer)
+		str lServerAddress;
+		CURE_RTVAR_GET(lServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+		if (Network::IsLocalAddress(lServerAddress))
 		{
-			CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
-		}
-		else
-		{
-			CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+			bool lIsOpenServer;
+			CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+			if (lIsOpenServer)
+			{
+				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+			}
+			else
+			{
+				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+			}
 		}
 	}
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
@@ -1012,10 +1018,10 @@ bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject* pObject)
 	{
 		Cure::ContextObjectAttribute* lAttribute = *x;
 		const int lSendSize = lAttribute->QuerySend();
-		if (lSendSize > 0)
-		{
-			assert(lAttribute->GetNetworkType() == Cure::ContextObjectAttribute::TYPE_BOTH ||
+		const bool lIsAllowedSend = (lAttribute->GetNetworkType() == Cure::ContextObjectAttribute::TYPE_BOTH ||
 				lAttribute->GetNetworkType() == Cure::ContextObjectAttribute::TYPE_BOTH_BROADCAST);
+		if (lSendSize > 0 && lIsAllowedSend)
+		{
 			Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 			Cure::MessageObjectAttribute* lAttribMessage = (Cure::MessageObjectAttribute*)GetNetworkAgent()->
 				GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE);

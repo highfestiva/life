@@ -24,6 +24,7 @@
 #include "RaceTimer.h"
 #include "RtVar.h"
 #include "ServerConsoleManager.h"
+#include "ServerDelegate.h"
 #include "ServerMessageProcessor.h"
 #include "Spawner.h"
 
@@ -43,6 +44,7 @@ GameServerManager::GameServerManager(const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
 	Parent(pTime, pVariableScope, pResourceManager),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
+	mDelegate(0),
 	mMessageProcessor(0),
 	mTerrainObject(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE),
@@ -85,6 +87,8 @@ GameServerManager::~GameServerManager()
 
 	delete mMessageProcessor;
 	mMessageProcessor = 0;
+	delete mDelegate;
+	mDelegate = 0;
 
 	delete (mUserAccountManager);
 	mUserAccountManager = 0;
@@ -137,7 +141,7 @@ void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogg
 	GetConsoleManager()->Start();
 }
 
-bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
+bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection, const str& pAddress)
 {
 	bool lOk = InitializeTerrain();
 
@@ -173,8 +177,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
 		}
 	}
 
-	str lAcceptAddress;
-	CURE_RTVAR_GET(lAcceptAddress, =, GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	str lAcceptAddress = pAddress;
 	if (lOk)
 	{
 		SocketAddress lAddress;
@@ -255,6 +258,17 @@ void GameServerManager::DeleteContextObject(Cure::GameObjectId pInstanceId)
 }
 
 
+
+ServerDelegate* GameServerManager::GetDelegate() const
+{
+	return mDelegate;
+}
+
+void GameServerManager::SetDelegate(ServerDelegate* pDelegate)
+{
+	assert(!mDelegate);
+	mDelegate = pDelegate;
+}
 
 void GameServerManager::SetMessageProcessor(ServerMessageProcessor* pMessageProcessor)
 {
@@ -521,6 +535,12 @@ bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr&
 
 
 
+bool GameServerManager::IsAvatarObject(const Cure::ContextObject* pObject) const
+{
+	Cure::ContextObject* lObject = (Cure::ContextObject*)pObject;
+	return GetClientByObject(lObject) != 0;
+}
+
 int GameServerManager::GetLoggedInClientCount() const
 {
 	assert(!GetNetworkAgent()->GetLock()->IsOwner());
@@ -664,6 +684,26 @@ Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAcco
 {
 	Client* lClient = mAccountClientTable.FindObject(pAccountId);
 	return (lClient);
+}
+
+Client* GameServerManager::GetClientByObject(Cure::ContextObject*& pObject) const
+{
+	Client* lClient = 0;
+	{
+		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
+		if (lAccountId)
+		{
+			lClient = GetClientByAccount(lAccountId);
+			if (!lClient)
+			{
+				mLog.Errorf(_T("Error: client seems to have logged off before avatar %s got loaded."),
+					pObject->GetClassId().c_str());
+				delete (pObject);
+				pObject = 0;
+			}
+		}
+	}
+	return lClient;
 }
 
 
@@ -848,20 +888,10 @@ Cure::ContextObject* GameServerManager::CreateContextObject(const str& pClassId)
 
 void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
-	Client* lClient = 0;
+	Client* lClient = GetClientByObject(pObject);
+	if (!pObject)
 	{
-		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
-		if (lAccountId)
-		{
-			lClient = GetClientByAccount(lAccountId);
-			if (!lClient)
-			{
-				mLog.Errorf(_T("Error: client seems to have logged off before avatar %s got loaded."),
-					pObject->GetClassId().c_str());
-				delete (pObject);
-				return;
-			}
-		}
+		return;
 	}
 	if (pOk)
 	{
@@ -871,11 +901,13 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			mLog.Infof(_T("Loaded avatar for %s with instance id %i."),
 				strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
 				pObject->GetInstanceId());
+			mDelegate->OnLoadAvatar(lClient, pObject);
 			BroadcastAvatar(lClient);
 		}
 		else
 		{
 			log_volatile(mLog.Debugf(_T("Loaded object %s."), pObject->GetClassId().c_str()));
+			mDelegate->OnLoadObject(pObject);
 			BroadcastCreateObject(pObject);
 		}
 	}
@@ -1193,6 +1225,7 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
 	GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
 	BroadcastCreateObject(pObject->GetInstanceId(), lTransform, pObject->GetClassId());
+	OnAttributeSend(pObject);
 	if (pObject->GetVelocity().GetLengthSquared() > 0.1f)
 	{
 		OnPhysicsSend(pObject);

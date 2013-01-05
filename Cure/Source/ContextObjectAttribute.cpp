@@ -18,7 +18,8 @@ namespace Cure
 
 ContextObjectAttribute::ContextObjectAttribute(ContextObject* pContextObject, const str& pName):
 	mContextObject(pContextObject),
-	mName(pName)
+	mName(pName),
+	mNetworkType(TYPE_SERVER_BROADCAST)
 {
 	mContextObject->AddAttribute(this);
 }
@@ -84,6 +85,18 @@ int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* p
 	}
 	lSize += lParamsSize;
 	return lSize;
+}
+
+
+
+ContextObjectAttribute::NetworkType ContextObjectAttribute::GetNetworkType() const
+{
+	return mNetworkType;
+}
+
+void ContextObjectAttribute::SetNetworkType(NetworkType pNetworkType)
+{
+	mNetworkType = pNetworkType;
 }
 
 

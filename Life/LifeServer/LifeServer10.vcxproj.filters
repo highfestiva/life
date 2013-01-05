@@ -44,6 +44,9 @@
     <ClCompile Include="..\LifeMaster\MasterServerNetworkParser.cpp">
       <Filter>Master</Filter>
     </ClCompile>
+    <ClCompile Include="ServerDelegate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BulletTime.h">
@@ -81,6 +84,9 @@
     </ClInclude>
     <ClInclude Include="..\LifeMaster\MasterServerNetworkParser.h">
       <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerDelegate.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

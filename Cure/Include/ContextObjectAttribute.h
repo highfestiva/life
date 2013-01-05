@@ -41,13 +41,15 @@ public:
 	virtual int QuerySend() const;	// Returns number of bytes it needs to send.
 	virtual int Pack(uint8* pDestination);
 	static int Unpack(ContextObject* pContextObject, const uint8* pSource, int pMaxSize);	// Retuns number of bytes consumed, or -1.
-	virtual NetworkType GetNetworkType() const = 0;
+	NetworkType GetNetworkType() const;
+	void SetNetworkType(NetworkType pNetworkType);
 
 protected:
 	virtual int Unpack(const uint8* pSource, int pMaxSize) = 0;	// Retuns number of bytes unpacked, or -1.
 
 	ContextObject* mContextObject;
 	const str mName;
+	NetworkType mNetworkType;
 	static Factory mFactory;
 
 	void operator=(const ContextObjectAttribute&);
