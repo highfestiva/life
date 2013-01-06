@@ -263,10 +263,10 @@ template<class _ReturnType, class _ArrayType, class _Vector> _ReturnType Math::C
 	_ArrayType lSum = 0;
 	for (int x = 0; x < lArraySize; ++x)
 	{
-		_ArrayType lDiff = pArray[x]-pMean;
+		const _ArrayType lDiff = pArray[x]-pMean;
 		lSum += lDiff*lDiff;
 	}
-	_ReturnType lDeviation = ::pow((_ReturnType)lSum/lArraySize, (_ReturnType)0.5);
+	_ReturnType lDeviation = ::sqrt((_ReturnType)lSum/lArraySize);
 	return (lDeviation);
 }
 

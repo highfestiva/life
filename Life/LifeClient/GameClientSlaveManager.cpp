@@ -1010,7 +1010,7 @@ bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
 
 bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject* pObject)
 {
-	mLog.AInfo("Sending attribute(s) for a context object...");
+	log_adebug("Sending attribute(s) for a context object...");
 	typedef Cure::ContextObject::AttributeArray AttributeArray;
 	const AttributeArray& lAttributes = pObject->GetAttributes();
 	AttributeArray::const_iterator x = lAttributes.begin();

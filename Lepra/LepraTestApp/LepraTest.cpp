@@ -296,6 +296,64 @@ bool TestString(const LogDecorator& pAccount)
 	return (lTestOk);
 }
 
+bool TestRandom(const LogDecorator& pAccount)
+{
+	str lContext;
+	bool lTestOk = true;
+
+	if (lTestOk)
+	{
+		lContext = _T("uniform span");
+		const double lLow = 0.5;
+		const double lHigh = 2.0;
+		double lAverage = 0;
+		const int cnt = 10000;
+		for (int x = 0; x < cnt; ++x)
+		{
+			const double lResult = Random::Uniform(lLow, lHigh);
+			lTestOk = (lResult >= lLow && lResult <= lHigh);
+			assert(lTestOk);
+			lAverage += lResult;
+		}
+		if (lTestOk)
+		{
+			lContext = _T("uniform mean");
+			lAverage /= cnt;
+			lTestOk = (lAverage >= 1.24 && lAverage <= 1.26);
+			assert(lTestOk);
+		}
+	}
+
+	if (lTestOk)
+	{
+		double lAverage = 0;
+		const double lMean = -3;
+		const double lStdDev = 2;
+		const int cnt = 10000;
+		std::vector<double> lValues;
+		for (int x = 0; x < cnt; ++x)
+		{
+			lValues.push_back(Random::Normal(lMean, lStdDev, -10, +10));
+			assert(lValues[x] >= -10 && lValues[x] <= +10);
+			lAverage += lValues[x];
+		}
+		lContext = _T("normal mean");
+		lAverage /= cnt;
+		lTestOk = (lAverage >= lMean-0.01*lStdDev && lAverage <= lMean+0.01*lStdDev);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lContext = _T("normal distribuion");
+			const double lActualStdDev = Math::CalculateDeviation<double>(lValues, lMean);
+			lTestOk = (lActualStdDev >= lStdDev-0.01 && lActualStdDev <= lStdDev+0.01);
+			assert(lTestOk);
+		}
+	}
+
+	ReportTestResult(pAccount, _T("Random"), lContext, lTestOk);
+	return (lTestOk);
+}
+
 bool TestNumber(const LogDecorator& pAccount)
 {
 	// Verify Number basics.
@@ -1140,7 +1198,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("logical CPU count");
-		lTestOk = (SystemManager::GetLogicalCpuCount() >= 1 && SystemManager::GetLogicalCpuCount() <= 8);
+		lTestOk = (SystemManager::GetLogicalCpuCount() >= 1 && SystemManager::GetLogicalCpuCount() <= 16);
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -2885,6 +2943,10 @@ bool TestLepra()
 	if (lTestOk)
 	{
 		lTestOk = TestString(gLLog);
+	}
+	if (lTestOk)
+	{
+		lTestOk = TestRandom(gLLog);
 	}
 	if (lTestOk)
 	{

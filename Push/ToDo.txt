@@ -1,0 +1,31 @@
+Game
+---------
+. Random damage.
+. NPC:s.
+. The vehicle "jumps" when receiving an old server position from an explosion.
+. Not possible to log in when someone is moving/shooting.
+. Server sometimes skips network positioning when a client just logged in.
+. Path finding.
+. AI (where is the user probably going to appear after disappearing behind a building).
+. Explode vehicle when health <= 0.
+. Goal seeking missiles
+. Creating temporary, local missiles, which are taken over by the server later on (including extrapolation).
+. Make sure shooting oneself can't happen (using extrapolation? On server or client?).
+. Ramps, bridges, elevators, doors.
+. Dynamic levels.
+. Destructable obstacles.
+. Fix cam moves behind walls (like in Kill Cutie: cam moves up).
+. UX design/menus.
+. Money in the game.
+. Take shield+health in the game.
+. Implement machine gun.
+. Team play.
+. One defence turret per team.
+. Nice looks.
+. Particles.
+
+
+Engine
+----------
+. GLES2.
+. Beautify rendering.

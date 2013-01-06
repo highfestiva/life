@@ -74,7 +74,7 @@ void PushServerDelegate::Detonate(const Vector3DF& pForce, const Vector3DF& pTor
 			{
 				Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
 				assert(lHealth);
-				const float lRemainingHealth = lHealth->GetValue() - lForce*0.4f;
+				const float lRemainingHealth = lHealth->GetValue() - lForce*Random::Uniform(0.38f, 0.5f);
 				if (lRemainingHealth >= 0.005f)
 				{
 					lHealth->SetValue(lRemainingHealth);

@@ -31,6 +31,8 @@ public:
 	static uint64 GetRandomNumber64();
 	static float64 Uniform(float64 pLower = 0.0, float64 pUpper = 1.0);
 	static float64 Uniform(uint32& pSeed, float64 pLower = 0.0, float64 pUpper = 1.0);
+	static float64 Normal(float64 pMean, float64 pStdDev);
+	static float64 Normal(float64 pMean, float64 pStdDev, float64 pLowCutoff, float64 pHighCutoff);
 
 private:
 	static uint32 mSeed;
