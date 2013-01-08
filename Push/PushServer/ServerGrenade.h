@@ -28,6 +28,7 @@ public:
 	ServerGrenade(Cure::ResourceManager* pResourceManager, float pMuzzleVelocity, ServerLauncher* pLauncher);
 	virtual ~ServerGrenade();
 
+	Cure::GameObjectId GetOwnerId() const;
 	void SetOwnerId(Cure::GameObjectId pOwnerId);
 
 private:

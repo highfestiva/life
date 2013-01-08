@@ -115,6 +115,7 @@ protected:
 	void DropAvatar();
 
 	void DrawStick(Touchstick* pStick);
+	void DrawScore();
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
 	QuaternionF GetCameraQuaternion() const;
@@ -138,6 +139,8 @@ protected:
 	ObjectArray mMassObjectArray;
 	Cure::ContextObject* mSun;	// TODO: remove hack (should context object controlled)!
 	std::vector<Cure::ContextObject*> mCloudArray;	// TODO: remove hack (should context object controlled)!
+
+	Cure::GameObjectId mScoreInfoId;
 
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!

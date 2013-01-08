@@ -48,6 +48,7 @@ public:
 	void SetLevelName(const str& pLevelName);
 
 	virtual bool BeginTick();
+	virtual void PreEndTick();
 
 	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
 	bool Initialize(MasterServerConnection* pMasterConnection, const str& pAddress);
@@ -74,8 +75,9 @@ public:
 	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
 
-	bool IsAvatarObject(const Cure::ContextObject* pObject) const;
 	int GetLoggedInClientCount() const;
+	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
+	Client* GetClientByObject(Cure::ContextObject*& pObject) const;
 
 	void Build(const str& pWhat);
 
@@ -84,9 +86,6 @@ public:
 protected:
 	void Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason);
 	void DeleteAllClients();
-
-	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
-	Client* GetClientByObject(Cure::ContextObject*& pObject) const;
 
 	virtual bool InitializeTerrain();
 

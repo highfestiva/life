@@ -15,6 +15,7 @@
 
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
 
+#define RTVAR_GAME_DRAWSCORE		"Game.DrawScore"
 #define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
 
 #define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"

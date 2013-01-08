@@ -20,8 +20,9 @@ PushServerTicker::PushServerTicker(Cure::ResourceManager* pResourceManager, Inte
 	Parent(pResourceManager, pConsoleLogger, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity)
 {
 	mGameManager->SetLevelName(_T("level_02"));
-	mGameManager->SetDelegate(new PushServerDelegate(mGameManager));
-	mGameManager->SetMessageProcessor(new PushServerMessageProcessor(mGameManager));
+	PushServerDelegate* lDelegate = new PushServerDelegate(mGameManager);
+	mGameManager->SetDelegate(lDelegate);
+	mGameManager->SetMessageProcessor(new PushServerMessageProcessor(mGameManager, lDelegate));
 }
 
 PushServerTicker::~PushServerTicker()

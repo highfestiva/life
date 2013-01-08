@@ -33,6 +33,11 @@ ServerGrenade::~ServerGrenade()
 
 
 
+Cure::GameObjectId ServerGrenade::GetOwnerId() const
+{
+	return mOwnerId;
+}
+
 void ServerGrenade::SetOwnerId(Cure::GameObjectId pOwnerId)
 {
 	mOwnerId = pOwnerId;

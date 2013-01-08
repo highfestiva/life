@@ -361,7 +361,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					const bool lIsAllwedDiffSend = mSendExpireAlarm.IsExpired(0.5);
 
 					float lResyncOnDiff;
-					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
+					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
 					if (lForceSendUnsafeClientKeepalive ||
 						lIsPositionExpired ||
 						(lIsAllwedDiffSend &&
@@ -930,7 +930,10 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 		{
 			lObject->SetInitialTransform(*pTransform);
 		}
-		lObject->StartLoading();
+		if (!lObject->IsLoaded())
+		{
+			lObject->StartLoading();
+		}
 	}
 	else
 	{
@@ -977,7 +980,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 				if (lObject->UpdateFullPosition(lCurrentPos))
 				{
 					float lResyncOnDiff;
-					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
+					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
 					if (pData.GetScaledDifference(lCurrentPos) < lResyncOnDiff)
 					{
 						lSetPosition = false;	// Not enough change to take notice. Would just yield a jerky movement, not much more.

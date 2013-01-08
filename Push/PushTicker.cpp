@@ -70,8 +70,9 @@ void PushTicker::OnSlavesKilled()
 void PushTicker::OnServerCreated(Life::UiGameServerManager* pServer)
 {
 	pServer->SetLevelName(_T("level_02"));
-	pServer->SetDelegate(new PushServerDelegate(pServer));
-	pServer->SetMessageProcessor(new PushServerMessageProcessor(pServer));
+	PushServerDelegate* lDelegate = new PushServerDelegate(pServer);
+	pServer->SetDelegate(lDelegate);
+	pServer->SetMessageProcessor(new PushServerMessageProcessor(pServer, lDelegate));
 }
 
 

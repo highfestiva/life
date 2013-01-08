@@ -468,6 +468,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ServerDelegate.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ServerMessageProcessor.cpp"
 				>
 			</File>
@@ -511,6 +515,10 @@
 			</File>
 			<File
 				RelativePath=".\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerDelegate.h"
 				>
 			</File>
 			<File

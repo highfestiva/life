@@ -521,7 +521,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\GameServerLogic.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Npc.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PushServer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServerDelegate.cpp"
 				>
 			</File>
 			<File
@@ -577,6 +589,14 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\GameServerLogic.h"
+			>
+		</File>
+		<File
+			RelativePath=".\PushServerDelegate.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

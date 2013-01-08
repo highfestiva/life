@@ -6,8 +6,8 @@
 
 #include "PushServerMessageProcessor.h"
 #include "../../Life/LifeServer/GameServerManager.h"
+#include "GameServerLogic.h"
 #include "PushServerDelegate.h"
-#include "ServerGrenade.h"
 
 
 
@@ -16,13 +16,15 @@ namespace Push
 
 
 
-PushServerMessageProcessor::PushServerMessageProcessor(Life::GameServerManager* pGameServerManager):
-	Parent(pGameServerManager)
+PushServerMessageProcessor::PushServerMessageProcessor(Life::GameServerManager* pGameServerManager, GameServerLogic* pLogic):
+	Parent(pGameServerManager),
+	mLogic(pLogic)
 {
 }
 
 PushServerMessageProcessor::~PushServerMessageProcessor()
 {
+	mLogic = 0;
 }
 
 
@@ -34,22 +36,9 @@ void PushServerMessageProcessor::ProcessNumber(Life::Client* pClient, Cure::Mess
 		case Cure::MessageNumber::INFO_APPLICATION_0:
 		{
 			Cure::ContextObject* lAvatar = mGameServerManager->GetContext()->GetObject(pClient->GetAvatarId());
-			if (!lAvatar)
+			if (lAvatar)
 			{
-				return;
-			}
-			PushServerDelegate* lDelegate = (PushServerDelegate*)mGameServerManager->GetDelegate();
-			ServerGrenade* lGrenade = new ServerGrenade(mGameServerManager->GetResourceManager(), 200, lDelegate);
-			mGameServerManager->AddContextObject(lGrenade, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-			bool lOk = (lGrenade != 0);
-			assert(lOk);
-			if (lOk)
-			{
-				log_volatile(mLog.Debugf(_T("Shooting grenade with ID %i!"), (int)lGrenade->GetInstanceId()));
-				lGrenade->SetOwnerId(lAvatar->GetInstanceId());
-				TransformationF t(lAvatar->GetOrientation(), lAvatar->GetPosition()+Vector3DF(0, 0, +5.0f));
-				lGrenade->SetInitialTransform(t);
-				lGrenade->StartLoading();
+				mLogic->Shoot(lAvatar);
 			}
 		}
 		return;

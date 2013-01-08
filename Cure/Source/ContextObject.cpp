@@ -268,6 +268,10 @@ bool ContextObject::DetachFromObject(ContextObject* /*pObject*/)
 void ContextObject::AddAttribute(ContextObjectAttribute* pAttribute)
 {
 	mAttributeArray.push_back(pAttribute);
+	if (mManager)
+	{
+		mManager->AddAttributeSenderObject(this);
+	}
 }
 
 void ContextObject::DeleteAttribute(const str& pName)

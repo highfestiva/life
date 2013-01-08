@@ -691,11 +691,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PushServer\GameServerLogic.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\GameServerLogic.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Life\LifeServer\GameServerManager.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\Life\LifeServer\GameServerManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\Npc.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\Npc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\PushServerDelegate.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\PushServerDelegate.h"
 				>
 			</File>
 			<File
@@ -720,6 +744,14 @@
 			</File>
 			<File
 				RelativePath="..\Life\LifeServer\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\ServerDelegate.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Life\LifeServer\ServerDelegate.h"
 				>
 			</File>
 			<File

@@ -62,7 +62,6 @@ private:
 	const Cure::TimeManager* mTimeManager;
 	Cure::NetworkAgent* mNetworkAgent;
 	Cure::UserConnection* mUserConnection;
-	Cure::ContextObject* mAvatar;
 	Cure::GameObjectId mAvatarId;
 	NetworkLatencyArray mNetworkFrameLatencyArray;
 	size_t mNetworkFrameLatencyArrayIndex;

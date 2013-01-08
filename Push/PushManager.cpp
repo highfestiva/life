@@ -7,6 +7,7 @@
 #include "PushManager.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/FloatAttribute.h"
+#include "../Cure/Include/IntAttribute.h"
 #include "../Cure/Include/NetworkClient.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Random.h"
@@ -58,6 +59,7 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mLevelId(0),
 	mLevel(0),
 	mSun(0),
+	mScoreInfoId(0),
 	mCameraPosition(0, -200, 100),
 	//mCameraFollowVelocity(0, 1, 0),
 	mCameraUp(0, 0, 1),
@@ -205,10 +207,17 @@ bool PushManager::Paint()
 	if (lObject)
 	{
 		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
-		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("?");
-		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 200), 0);
+		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("");
+		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 255), 0);
 		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
 		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 10, 10);
+	}
+
+	bool lDrawScore;
+	CURE_RTVAR_GET(lDrawScore, =, GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
+	if (lDrawScore)
+	{
+		DrawScore();
 	}
 
 #ifdef LIFE_DEMO
@@ -233,7 +242,7 @@ bool PushManager::Paint()
 		const int lTextHeight = mUiManager->GetFontManager()->GetLineHeight()*4;
 		const int lOffsetX = (int)(cos(lTime*4.3)*15);
 		const int lOffsetY = (int)(sin(lTime*4.1)*15);
-		mUiManager->GetPainter()->SetColor(Color(255, (uint8)(50*sin(lTime)+50), (uint8)(127*sin(lTime*0.9)+127), 200), 0);
+		mUiManager->GetPainter()->SetColor(Color(255, (uint8)(50*sin(lTime)+50), (uint8)(127*sin(lTime*0.9)+127), 255), 0);
 		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
 		mUiManager->GetPainter()->PrintText(lDemoText, mRenderArea.GetCenterX()-lTextWidth/2+lOffsetX, mRenderArea.GetCenterY()-lTextHeight/2+lOffsetY);
 		mUiManager->GetFontManager()->SetActiveFont(lOldFontId);
@@ -323,7 +332,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	{
 		// Shattered pieces, stones or mud.
 		const float lScale = VISUAL_SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
-		const int lParticleCount = 7;
+		const int lParticleCount = (Random::GetRandomNumber() % 7) + 2;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
@@ -348,7 +357,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 
 	{
 		// Release gas puffs.
-		const int lParticleCount = (Random::GetRandomNumber() % 4) + 2;
+		const int lParticleCount = (Random::GetRandomNumber() % 4);
 		for (int i = 0; i < lParticleCount; ++i)
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
@@ -390,6 +399,7 @@ Cure::RuntimeVariableScope* PushManager::GetVariableScope() const
 bool PushManager::Reset()	// Run when disconnected. Removes all objects and displays login GUI.
 {
 	ScopeLock lLock(GetTickLock());
+	mScoreInfoId = 0;
 	ClearRoadSigns();
 	bool lOk = Parent::Reset();
 	if (lOk)
@@ -1121,6 +1131,11 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	{
 		lObject = new Grenade(GetResourceManager(), mUiManager, (Launcher*)this);
 	}
+	else if (pClassId == _T("score_info"))
+	{
+		lObject = new UiCure::CppContextObject(GetResourceManager(), _T("score_info"), mUiManager);
+		lObject->SetLoadResult(true);
+	}
 	else
 	{
 		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
@@ -1198,7 +1213,7 @@ void PushManager::OnFireButton(UiTbc::Button*)
 
 void PushManager::Fire()
 {
-	if (mFireTimeout.QueryTimeDiff() < 0.2f)
+	if (mFireTimeout.QueryTimeDiff() < 0.3f)
 	{
 		return;
 	
@@ -1299,6 +1314,56 @@ void PushManager::DrawStick(Touchstick* pStick)
 			lArea.mTop  + (int)(h*y),
 			r*2, r*2, 0, 360, true);
 	}
+}
+
+void PushManager::DrawScore()
+{
+	typedef Cure::ContextObject::AttributeArray AttributeArray;
+	if (!mScoreInfoId)
+	{
+		const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();
+		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
+		for (; x != lObjectTable.end(); ++x)
+		{
+			Cure::ContextObject* lObject = x->second;
+			const AttributeArray& lAttributeArray = lObject->GetAttributes();
+			AttributeArray::const_iterator y = lAttributeArray.begin();
+			for (; y != lAttributeArray.end(); ++y)
+			{
+				Cure::ContextObjectAttribute* lAttribute = *y;
+				if (strutil::StartsWith(lAttribute->GetName(), _T("int_kills:")))
+				{
+					mScoreInfoId = lObject->GetInstanceId();
+					return;	// Better luck next time.
+				}
+			}
+		}
+	}
+
+	mUiManager->GetPainter()->SetColor(Color(255, 255, 255, 255), 0);
+	mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
+
+	Cure::ContextObject* lScoreInfo = GetContext()->GetObject(mScoreInfoId);
+	if (!lScoreInfo)
+	{
+		mScoreInfoId = 0;
+		mUiManager->GetPainter()->PrintText(_T("No score info available!"), mRenderArea.mLeft + 10, 30);
+		return;
+	}
+
+	str lScore;
+	const AttributeArray& lAttributeArray = lScoreInfo->GetAttributes();
+	AttributeArray::const_iterator y = lAttributeArray.begin();
+	for (; y != lAttributeArray.end(); ++y)
+	{
+		Cure::ContextObjectAttribute* lAttribute = *y;
+		if (strutil::StartsWith(lAttribute->GetName(), _T("int_")))
+		{
+			Cure::IntAttribute* lIntAttribute = (Cure::IntAttribute*)lAttribute;
+			lScore += strutil::Format(_T("%s: %i\n"), lAttribute->GetName().c_str(), lIntAttribute->GetValue());
+		}
+	}
+	mUiManager->GetPainter()->PrintText(lScore, mRenderArea.mLeft + 10, 30);
 }
 
 

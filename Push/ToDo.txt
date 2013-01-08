@@ -1,7 +1,8 @@
 Game
 ---------
-. Random damage.
-. NPC:s.
++ Random damage.
++ NPC:s.
++ Team play.
 . The vehicle "jumps" when receiving an old server position from an explosion.
 . Not possible to log in when someone is moving/shooting.
 . Server sometimes skips network positioning when a client just logged in.
@@ -17,12 +18,12 @@ Game
 . Fix cam moves behind walls (like in Kill Cutie: cam moves up).
 . UX design/menus.
 . Money in the game.
-. Take shield+health in the game.
+. Get weapons, shield, health and ammo in "stores" in the game. (Triggers which add up your inventory after some time or at regular intervals.)
 . Implement machine gun.
-. Team play.
 . One defence turret per team.
 . Nice looks.
 . Particles.
+. Improve sound quality (doppler on grenades especially).
 
 
 Engine

@@ -499,6 +499,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\IntAttribute.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\NetworkAgent.cpp"
 				>
 			</File>
@@ -634,6 +638,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\HiscoreAgent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\IntAttribute.h"
 				>
 			</File>
 			<File

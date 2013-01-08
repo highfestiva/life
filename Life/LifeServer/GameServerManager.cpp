@@ -129,6 +129,12 @@ bool GameServerManager::BeginTick()
 	return Parent::BeginTick();
 }
 
+void GameServerManager::PreEndTick()
+{
+	Parent::PreEndTick();
+	mDelegate->PreEndTick();
+}
+
 
 
 void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt)
@@ -204,6 +210,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection, co
 	{
 		mMasterConnection = pMasterConnection;
 		TickMasterServer();
+		mDelegate->OnOpen();
 	}
 	return (lOk);
 }
@@ -249,6 +256,7 @@ TBC::PhysicsManager* GameServerManager::GetPhysicsManager() const
 void GameServerManager::DeleteContextObject(Cure::GameObjectId pInstanceId)
 {
 	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId);
+	mDelegate->OnDeleteObject(lObject);
 	if (lObject && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 	{
 		BroadcastDeleteObject(pInstanceId);
@@ -535,18 +543,38 @@ bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr&
 
 
 
-bool GameServerManager::IsAvatarObject(const Cure::ContextObject* pObject) const
-{
-	Cure::ContextObject* lObject = (Cure::ContextObject*)pObject;
-	return GetClientByObject(lObject) != 0;
-}
-
 int GameServerManager::GetLoggedInClientCount() const
 {
-	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	assert(!GetNetworkAgent()->GetLock()->IsOwner() || GetTickLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 	return (mAccountClientTable.GetCount());
+}
+
+Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const
+{
+	Client* lClient = mAccountClientTable.FindObject(pAccountId);
+	return (lClient);
+}
+
+Client* GameServerManager::GetClientByObject(Cure::ContextObject*& pObject) const
+{
+	Client* lClient = 0;
+	{
+		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
+		if (lAccountId != 0 && lAccountId != -1)
+		{
+			lClient = GetClientByAccount(lAccountId);
+			if (!lClient)
+			{
+				mLog.Errorf(_T("Error: client seems to have logged off before avatar %s got loaded."),
+					pObject->GetClassId().c_str());
+				delete (pObject);
+				pObject = 0;
+			}
+		}
+	}
+	return lClient;
 }
 
 
@@ -680,34 +708,6 @@ void GameServerManager::DeleteAllClients()
 
 
 
-Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const
-{
-	Client* lClient = mAccountClientTable.FindObject(pAccountId);
-	return (lClient);
-}
-
-Client* GameServerManager::GetClientByObject(Cure::ContextObject*& pObject) const
-{
-	Client* lClient = 0;
-	{
-		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
-		if (lAccountId)
-		{
-			lClient = GetClientByAccount(lAccountId);
-			if (!lClient)
-			{
-				mLog.Errorf(_T("Error: client seems to have logged off before avatar %s got loaded."),
-					pObject->GetClassId().c_str());
-				delete (pObject);
-				pObject = 0;
-			}
-		}
-	}
-	return lClient;
-}
-
-
-
 bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
@@ -758,6 +758,8 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 		GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
 		SendObjects(lClient, true, GetContext()->GetObjectTable());
+
+		mDelegate->OnLogin(lClient);
 	}
 	else
 	{
@@ -780,6 +782,7 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 		lAvatarId = lClient->GetAvatarId();
 		assert(IsThreadSafe());
 		mAccountClientTable.Remove(pUserConnection->GetAccountId());
+		mDelegate->OnLogout(lClient);
 		delete (lClient);
 	}
 	DeleteContextObject(lAvatarId);
@@ -896,13 +899,20 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	if (pOk)
 	{
 		DeleteMovements(pObject->GetInstanceId());
-		if (lClient)
+		if (lClient || pObject->GetExtraData() == (void*)-1L)
 		{
-			mLog.Infof(_T("Loaded avatar for %s with instance id %i."),
-				strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
-				pObject->GetInstanceId());
 			mDelegate->OnLoadAvatar(lClient, pObject);
-			BroadcastAvatar(lClient);
+			if (lClient)
+			{
+				mLog.Infof(_T("Loaded avatar for %s with instance id %i."),
+					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
+					pObject->GetInstanceId());
+				BroadcastAvatar(lClient);
+			}
+			else
+			{
+				pObject->SetExtraData(0);
+			}
 		}
 		else
 		{
@@ -1221,9 +1231,12 @@ Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType)
 void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 {
 	TransformationF lTransform;
-	TBC::ChunkyBoneGeometry* lStructureGeometry = pObject->GetPhysics()->GetBoneGeometry(pObject->GetPhysics()->GetRootBone());
-	TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
-	GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
+	if (pObject->GetPhysics())
+	{
+		TBC::ChunkyBoneGeometry* lStructureGeometry = pObject->GetPhysics()->GetBoneGeometry(pObject->GetPhysics()->GetRootBone());
+		TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
+		GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
+	}
 	BroadcastCreateObject(pObject->GetInstanceId(), lTransform, pObject->GetClassId());
 	OnAttributeSend(pObject);
 	if (pObject->GetVelocity().GetLengthSquared() > 0.1f)
