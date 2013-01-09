@@ -26,7 +26,8 @@ Painter::Painter() :
 	mXDir(X_RIGHT),
 	mYDir(Y_DOWN),
 	mCanvas(0),
-	mAlphaValue(255)
+	mAlphaValue(255),
+	mTabSize(0)
 {
 	mDefaultDisplayList = NewDisplayList();
 }
@@ -321,6 +322,16 @@ int Painter::GetLineHeight() const
 		return (0);
 	}
 	return (mFontManager->GetLineHeight());
+}
+
+int Painter::GetTabSize() const
+{
+	return mTabSize;
+}
+
+void Painter::SetTabSize(int pSize)
+{
+	mTabSize = pSize;
 }
 
 Painter::DisplayListID Painter::NewDisplayList()

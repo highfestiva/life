@@ -239,6 +239,8 @@ public:
 	int GetStringWidth(const str& pString) const;
 	int GetFontHeight() const;
 	int GetLineHeight() const;
+	int GetTabSize() const;
+	void SetTabSize(int pSize);
 	virtual void PrintText(const str& pString, int x, int y) = 0;
 
 	Lepra::uint8 FindMatchingColor(const Color& pColor);
@@ -428,6 +430,8 @@ private:
 
 	Color mColor[4];
 	Lepra::uint8 mAlphaValue;
+
+	int mTabSize;
 };
 
 

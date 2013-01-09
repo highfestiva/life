@@ -3,6 +3,9 @@ Game
 + Random damage.
 + NPC:s.
 + Team play.
++ Tab score
+. Mouse look
+. Two computers.
 . The vehicle "jumps" when receiving an old server position from an explosion.
 . Not possible to log in when someone is moving/shooting.
 . Server sometimes skips network positioning when a client just logged in.

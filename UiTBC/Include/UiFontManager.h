@@ -64,6 +64,7 @@ public:
 
 	virtual int GetCharWidth(const tchar pChar) const = 0;
 	int GetStringWidth(const str& pString) const;
+	int GetStringHeight(const str& pString) const;
 	int GetFontHeight() const;
 	int GetLineHeight() const;	// Font height + some extra pixels as distance to next line.
 

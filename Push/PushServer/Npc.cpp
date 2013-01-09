@@ -93,7 +93,7 @@ void Npc::OnTick()
 	{
 		Vector3DF lDiff = lTarget->GetPosition() - lMyAvatar->GetPosition();
 		float lDistance = lDiff.GetLength();
-		const float lTimeUntilHit = lDistance / 200.0f;	// Ammo velocity m/s!
+		const float lTimeUntilHit = mIntelligence * lDistance / 200.0f;	// Ammo velocity m/s!
 		lDiff = (lTarget->GetPosition() + lTarget->GetVelocity()*lTimeUntilHit) - (lMyAvatar->GetPosition() + lMyAvatar->GetVelocity()*lTimeUntilHit);
 
 		float _;
@@ -120,11 +120,11 @@ void Npc::OnTick()
 		}
 		if (lDistance > 100 && std::abs(lRotation) < 0.4f)
 		{
-			lFwd = +2.0f;	// Head towards the target if too far away.
+			lFwd = +1.0f;	// Head towards the target if too far away.
 		}
 		else if (lDistance < 30 && std::abs(lRotation) < 0.4f)
 		{
-			lFwd = -2.0f;	// Move away if too close.
+			lFwd = -1.0f;	// Move away if too close.
 		}
 		if (lRotation != 0)
 		{
@@ -133,6 +133,10 @@ void Npc::OnTick()
 		}
 		const float lSteeringPower = std::abs(Math::Clamp(lFwd, -1.0f, +1.0f));
 		lPhi *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
+
+		lFwd *= mIntelligence;
+		lRight *= mIntelligence;
+		lPhi /= mIntelligence;
 	}
 	lMyAvatar->SetEnginePower(0, lFwd+lPhi);
 	lMyAvatar->SetEnginePower(1, lRight);
@@ -140,7 +144,9 @@ void Npc::OnTick()
 	lMyAvatar->SetEnginePower(5, lRight);
 	lMyAvatar->SetEnginePower(8, +lPhi);
 
-	if (lCanShoot && std::abs(lPhi) < 0.01f && mShootWait.QueryTimeDiff() > 0.5)
+	if (lCanShoot &&
+		std::abs(lPhi) < Math::Lerp(0.1f, 0.015f, mIntelligence) &&
+		mShootWait.QueryTimeDiff() > Math::Lerp(10.0, 0.3, mIntelligence))
 	{
 		mShootWait.ClearTimeDiff();
 		mLogic->Shoot(lMyAvatar);

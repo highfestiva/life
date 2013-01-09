@@ -180,7 +180,7 @@ void ContextManager::UnpackObjectAttribute(GameObjectId pObjectId, const uint8* 
 	}
 	else
 	{
-		mLog.Errorf(_T("Trying to unpack attribute for non-existent object %u."), pObjectId);
+		log_volatile(mLog.Debugf(_T("Trying to unpack attribute for non-existent object %u."), pObjectId));
 	}
 }
 

@@ -24,6 +24,7 @@ namespace Options
 ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority):
 	OptionsManager(pVariableScope, pPriority)
 {
+	mShowScore = 0;
 	::memset(&mSteeringControl, 0, sizeof(mSteeringControl));
 	::memset(&mCamControl, 0, sizeof(mCamControl));
 	::memset(&mFireControl, 0, sizeof(mFireControl));
@@ -32,6 +33,11 @@ ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariable
 }
 
 
+
+const bool ClientOptionsManager::GetShowScore() const
+{
+	return mShowScore > 0.5f;
+}
 
 const Steering& ClientOptionsManager::GetSteeringControl() const
 {
@@ -56,6 +62,7 @@ void ClientOptionsManager::DoRefreshConfiguration()
 	const KeyValue lEntries[] =
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
+		KeyValue(_T(RTVAR_CTRL_UI_SHOWSCORE), &mShowScore),
 		KeyValue(_T(RTVAR_CTRL_STEER_FWD), &mSteeringControl.mControl[Steering::CONTROL_FORWARD]),
 		KeyValue(_T(RTVAR_CTRL_STEER_BACK), &mSteeringControl.mControl[Steering::CONTROL_BACKWARD]),
 		KeyValue(_T(RTVAR_CTRL_STEER_FWD3D), &mSteeringControl.mControl[Steering::CONTROL_FORWARD3D]),
@@ -105,6 +112,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 0:
 		{
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PARAGRAPH, Key.ACUTE, Key.APOSTROPHE"));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.UP"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
@@ -129,6 +137,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 1:
 		{
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.SCROLL_LOCK"));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Device0.Button1"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T("Device0.AbsoluteAxis2-"));
@@ -153,6 +162,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 2:
 		{
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F12"));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.W"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
@@ -177,6 +187,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 3:
 		{
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PAUSE"));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.NUMPAD_8"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));

@@ -43,6 +43,8 @@ public:
 	virtual void OnLoadObject(Cure::ContextObject* pObject) = 0;
 	virtual void OnDeleteObject(Cure::ContextObject* pObject) = 0;
 
+	virtual bool IsObjectLendable(Client* pClient, Cure::ContextObject* pObject) = 0;
+
 	virtual void PreEndTick() = 0;
 
 protected:

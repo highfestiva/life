@@ -113,6 +113,14 @@ void PushServerDelegate::OnDeleteObject(Cure::ContextObject* pObject)
 
 
 
+bool PushServerDelegate::IsObjectLendable(Life::Client* pClient, Cure::ContextObject* pObject)
+{
+	(void)pClient;
+	return !strutil::StartsWith(pObject->GetClassId(), _T("hover_tank"));
+}
+
+
+
 void PushServerDelegate::PreEndTick()
 {
 	TickNpcGhosts();
@@ -361,10 +369,6 @@ void PushServerDelegate::TickNpcGhosts()
 			if (lAvatar && lAvatar->GetExtraData() == 0)	// Exists && NPC check.
 			{
 				lAvatar->GetNetworkOutputGhost()->GhostStep(lStepCount, lPhysicsFrameTime);
-				if (!lAvatar->QueryResendTime(0.2f, true))
-				{
-					continue;
-				}
 				const Cure::ObjectPositionalData* lPositionalData = 0;
 				if (!lAvatar->UpdateFullPosition(lPositionalData))
 				{
@@ -380,7 +384,7 @@ void PushServerDelegate::TickNpcGhosts()
 				if (lPositionalData->GetScaledDifference(lAvatar->GetNetworkOutputGhost()) > lResyncOnDiff)
 				{
 					lAvatar->GetNetworkOutputGhost()->CopyData(lPositionalData);
-					mGameServerManager->BroadcastObjectPosition(lAvatar->GetInstanceId(), *lPositionalData, 0, false);
+					mGameServerManager->GetContext()->AddPhysicsSenderObject(lAvatar);
 				}
 			}
 		}

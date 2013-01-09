@@ -36,6 +36,8 @@ private:
 	virtual void OnLoadObject(Cure::ContextObject* pObject);
 	virtual void OnDeleteObject(Cure::ContextObject* pObject);
 
+	virtual bool IsObjectLendable(Life::Client* pClient, Cure::ContextObject* pObject);
+
 	virtual void PreEndTick();
 
 	virtual void GetBarrel(Cure::GameObjectId pOwnerId, TransformationF& pTransform, Vector3DF& pVelocity) const;

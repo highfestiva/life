@@ -358,15 +358,18 @@ void GameServerManager::LoanObject(Client* pClient, Cure::GameObjectId pInstance
 		if (lObject->GetOwnerInstanceId() == pClient->GetAvatarId() ||	// Reloan?
 			lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
 		{
-			const float lClientOwnershipTime = 10.0f;
-			const float lServerOwnershipTime = lClientOwnershipTime * 1.3f;
-			int lEndFrame = GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(lClientOwnershipTime);
-			lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-			GetNetworkServer()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
-				Cure::MessageNumber::INFO_GRANT_LOAN, pInstanceId, (float)lEndFrame);
-			lObject->SetOwnerInstanceId(pClient->GetAvatarId());
-			GetContext()->CancelPendingAlarmCallbacksById(lObject, Cure::ContextManager::SYSTEM_ALARM_ID);
-			GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lServerOwnershipTime, 0);
+			if (mDelegate->IsObjectLendable(pClient, lObject))
+			{
+				const float lClientOwnershipTime = 10.0f;
+				const float lServerOwnershipTime = lClientOwnershipTime * 1.3f;
+				int lEndFrame = GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(lClientOwnershipTime);
+				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+				GetNetworkServer()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
+					Cure::MessageNumber::INFO_GRANT_LOAN, pInstanceId, (float)lEndFrame);
+				lObject->SetOwnerInstanceId(pClient->GetAvatarId());
+				GetContext()->CancelPendingAlarmCallbacksById(lObject, Cure::ContextManager::SYSTEM_ALARM_ID);
+				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lServerOwnershipTime, 0);
+			}
 		}
 	}
 	else
@@ -1001,12 +1004,6 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 	bool lAutoFlipEnabled;
 	CURE_RTVAR_GET(lAutoFlipEnabled, =, GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
 	if (!lAutoFlipEnabled)
-	{
-		return;
-	}
-
-	// No use in repositioning the poor sod, unless we're ready to send it.
-	if (!pObject->QueryResendTime(NETWORK_POSITIONAL_RESEND_INTERVAL, true))
 	{
 		return;
 	}

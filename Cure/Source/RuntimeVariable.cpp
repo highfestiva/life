@@ -759,7 +759,7 @@ std::list<str> RuntimeVariableCompleter::CompleteCommand(const str& pPartialComm
 	if (pPartialCommand.compare(0, mPrefix.length(), mPrefix) == 0)
 	{
 		const str lPartialVariableName = pPartialCommand.substr(mPrefix.length());
-		std::list<str> lVariableList = mVariableScope->GetVariableNameList(RuntimeVariableScope::SEARCH_EXPORTABLE);
+		std::list<str> lVariableList = mVariableScope->GetVariableNameList(RuntimeVariableScope::SEARCH_ALL);
 		std::list<str>::const_iterator x = lVariableList.begin();
 		for (; x != lVariableList.end(); ++x)
 		{

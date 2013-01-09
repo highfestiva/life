@@ -1338,7 +1338,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	const int lFontHeight = GetFontManager()->GetFontHeight();
 	const int lLineHeight = GetFontManager()->GetLineHeight();
 	const int lSpaceSize = GetFontManager()->GetCharWidth(' ');
-	const int lTabSize = lSpaceSize*4;
+	const int lTabSize = (GetTabSize() > 0)? GetTabSize() : lSpaceSize*4;
 
 	const Color lColor = GetColorInternal(0);
 	assert(lColor != BLACK);	// Does not show.

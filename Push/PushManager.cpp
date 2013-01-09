@@ -5,6 +5,7 @@
 
 
 #include "PushManager.h"
+#include <algorithm>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/IntAttribute.h"
@@ -603,6 +604,10 @@ void PushManager::TickUiInput()
 	if (lPlaybackMode != PLAYBACK_PLAY && lPhysicsStepCount > 0 && mAllowMovementInput)
 	{
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+
+		// Show billboard.
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_DRAWSCORE, !lObject || mOptions.GetShowScore());
+
 		if (lObject)
 		{
 			QuerySetChildishness(lObject);
@@ -1340,30 +1345,89 @@ void PushManager::DrawScore()
 		}
 	}
 
-	mUiManager->GetPainter()->SetColor(Color(255, 255, 255, 255), 0);
-	mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
-
 	Cure::ContextObject* lScoreInfo = GetContext()->GetObject(mScoreInfoId);
 	if (!lScoreInfo)
 	{
 		mScoreInfoId = 0;
-		mUiManager->GetPainter()->PrintText(_T("No score info available!"), mRenderArea.mLeft + 10, 30);
 		return;
 	}
 
-	str lScore;
+	struct Score
+	{
+		str mName;
+		int mKills;
+		int mDeaths;
+	};
+	typedef std::hash_map<str, Score*> ScoreMap;
+	typedef std::vector<Score> ScoreArray;
+	ScoreMap lScoreMap;
+	ScoreArray lScoreArray;
 	const AttributeArray& lAttributeArray = lScoreInfo->GetAttributes();
 	AttributeArray::const_iterator y = lAttributeArray.begin();
 	for (; y != lAttributeArray.end(); ++y)
 	{
 		Cure::ContextObjectAttribute* lAttribute = *y;
-		if (strutil::StartsWith(lAttribute->GetName(), _T("int_")))
+		str lName;
+		int lValue = 0;
+		int lMode = 0;
+		if (strutil::StartsWith(lAttribute->GetName(), _T("int_kills:")))
 		{
-			Cure::IntAttribute* lIntAttribute = (Cure::IntAttribute*)lAttribute;
-			lScore += strutil::Format(_T("%s: %i\n"), lAttribute->GetName().c_str(), lIntAttribute->GetValue());
+			lName = lAttribute->GetName().substr(10);
+			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
+			lMode = 0;
+		}
+		else if (strutil::StartsWith(lAttribute->GetName(), _T("int_deaths:")))
+		{
+			lName = lAttribute->GetName().substr(11);
+			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
+			lMode = 1;
+		}
+		if (!lName.empty())
+		{
+			ScoreMap::iterator x = lScoreMap.find(lName);
+			if (x == lScoreMap.end())
+			{
+				Score s;
+				s.mName = lName;
+				s.mKills = 0;
+				s.mDeaths = 0;
+				lScoreArray.push_back(s);
+				x = lScoreMap.insert(std::pair<str, Score*>(lName, &lScoreArray.back())).first;
+			}
+			switch (lMode)
+			{
+				case 0:	x->second->mKills  = lValue;	break;
+				case 1:	x->second->mDeaths = lValue;	break;
+			}
 		}
 	}
-	mUiManager->GetPainter()->PrintText(lScore, mRenderArea.mLeft + 10, 30);
+	struct DeathsAscendingOrder
+	{
+		bool operator() (const Score& a, const Score& b) { return a.mDeaths < b.mDeaths; }
+	}
+	lDeathsAscendingOrder;
+	struct KillsDecendingOrder
+	{
+		bool operator() (const Score& a, const Score& b) { return a.mKills > b.mKills; }
+	}
+	lKillsDecendingOrder;
+	std::sort(lScoreArray.begin(), lScoreArray.end(), lDeathsAscendingOrder);
+	std::sort(lScoreArray.begin(), lScoreArray.end(), lKillsDecendingOrder);
+	mUiManager->GetPainter()->SetTabSize(140);
+	str lScore = _T("Name\tKills\tDeaths");
+	ScoreArray::iterator x = lScoreArray.begin();
+	for (; x != lScoreArray.end(); ++x)
+	{
+		lScore += strutil::Format(_T("\n%s\t%i\t%i"), x->mName.c_str(), x->mKills, x->mDeaths);
+	}
+	mUiManager->GetPainter()->SetColor(Color(1, 1, 1, 190), 0);
+	mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
+	mUiManager->GetPainter()->SetAlphaValue(140);
+	int lHeight = mUiManager->GetFontManager()->GetStringHeight(lScore);
+	mUiManager->GetPainter()->FillRect(mRenderArea.mLeft + 10, 30, mRenderArea.mLeft + 450, 30+lHeight+20);
+	mUiManager->GetPainter()->SetColor(Color(140, 140, 140, 255), 0);
+	mUiManager->GetPainter()->SetAlphaValue(255);
+	mUiManager->GetPainter()->PrintText(lScore, mRenderArea.mLeft + 20, 40);
 }
 
 

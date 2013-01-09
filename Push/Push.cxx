@@ -163,7 +163,7 @@ void Push::Init()
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_CHILDISHNESS, 1.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_DRAWSCORE, false);
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_GAME_DRAWSCORE, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ENABLEONLINE, lOnline);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, lStartLogo);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);

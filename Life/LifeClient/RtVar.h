@@ -12,6 +12,7 @@
 
 
 #define RTVAR_CTRL_UI_CONTOGGLE		"Control.Ui.ConsoleToggle"
+#define RTVAR_CTRL_UI_SHOWSCORE		"Control.Ui.ShowScore"
 
 #define RTVAR_CTRL_UI_CAMUP		"Control.Ui.CamUp"
 #define RTVAR_CTRL_UI_CAMDOWN		"Control.Ui.CamDown"

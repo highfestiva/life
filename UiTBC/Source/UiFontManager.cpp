@@ -79,7 +79,8 @@ int FontManager::GetStringWidth(const str& pString) const
 {
 	int lMaxX = 0;
 	int lCurrentX = 0;
-	for (size_t i = 0; i < pString.length(); i++)
+	const size_t lLength = pString.length();
+	for (size_t i = 0; i < lLength; i++)
 	{
 		tchar lChar = pString[i];
 
@@ -100,6 +101,11 @@ int FontManager::GetStringWidth(const str& pString) const
 		}
 	}
 	return (lMaxX);
+}
+
+int FontManager::GetStringHeight(const str& pString) const
+{
+	return GetLineHeight() * (std::count(pString.begin(), pString.end(), _T('\n')) + 1);
 }
 
 int FontManager::GetFontHeight() const
