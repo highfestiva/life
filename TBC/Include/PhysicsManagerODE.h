@@ -72,8 +72,8 @@ public:
 	void SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity);
 	void GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
 	void SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
-	void GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
-	void SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
+	void GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAngularAcceleration) const;
+	void SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAngularAcceleration);
 
 	virtual float GetBodyMass(BodyID pBodyId);
 	virtual void MassAdjustBody(BodyID pBodyId);

@@ -24,6 +24,7 @@ Grenade::Grenade(Cure::ResourceManager* pResourceManager, UiCure::GameUiManager*
 	mLauncher(pLauncher),
 	mDetonated(false)
 {
+	EnableMeshSlide(false);
 	SetForceLoadUnique(true);	// Needs to be unique as physics are reloaded often with shared IDs.
 }
 

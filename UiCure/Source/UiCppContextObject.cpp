@@ -119,15 +119,13 @@ void CppContextObject::UiMove()
 {
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
 	const float lLerpFactor = Math::GetIterateLerpTime(0.2f, lFrameTime);
-	const Vector3DF lOrigo;
+	static const Vector3DF lOrigo;
 	TransformationF lPhysicsTransform;
-	if (mMeshSlideMode == MESH_SLIDE_START)
+	/*if (mMeshSlideMode == MESH_SLIDE_START)
 	{
-		mMeshOffset.Set(0, 0, 0);
+		mMeshOffset.SetIdentity();
 		//log_volatile(mLog.Debugf(_T("Starting slide of mesh on object %u/%s."), GetInstanceId(), GetClassId().c_str()));
-	}
-	//QuaternionF lGfxPhysMeshAngularOffset;
-	int lGfxPhysMeshOffsetCount = 0;
+	}*/
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
 		UserGeometryReferenceResource* lResource = mMeshResourceArray[x];
@@ -154,26 +152,23 @@ void CppContextObject::UiMove()
 
 			if (mMeshSlideMode == MESH_SLIDE_START)
 			{
-				// Start out by fetching offset.
-				Vector3DF lBasePositionOffset = lGfxGeometry->GetBaseTransformation().GetPosition();
-				lBasePositionOffset.Sub(lPhysicsTransform.GetPosition());
-				Math::Lerp(lBasePositionOffset, lOrigo, lLerpFactor);
-				if (lBasePositionOffset.GetLengthSquared() >= 0.5f*0.5f)	// Motion becomes jerky if we allow filtering of small movements.
+				if (x == 0)
 				{
-					mMeshOffset.Add(lBasePositionOffset);
-					/*if (x == 0)
-					{
-						lGfxPhysMeshAngularOffset = lPhysicsTransform.GetOrientation().GetInverse() * lTransform.GetOrientation();
-					}*/
-					lPhysicsTransform.GetPosition() += lBasePositionOffset;
+					// Start out by fetching offset.
+					//mMeshOffset = lGfxGeometry->GetBaseTransformation();
+					//mMeshOffset = mMeshOffset.InverseTransform(lPhysicsTransform);
+					mMeshOffset = lPhysicsTransform;
+					mMeshOffset = mMeshOffset.InverseTransform(lGfxGeometry->GetBaseTransformation());
+					mMeshOffset.Interpolate(mMeshOffset, gIdentityTransformationF, lLerpFactor);
 				}
-				++lGfxPhysMeshOffsetCount;
+				lPhysicsTransform = lGfxGeometry->GetBaseTransformation();
 			}
 			else if (mMeshSlideMode == MESH_SLIDE_RUN)
 			{
-				// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
-				lPhysicsTransform.GetPosition() += mMeshOffset;
-				//lPhysicsTransform.GetOrientation() *= mMeshAngularOffset;
+				// Phys + offset = current lerped mesh position.
+				//lPhysicsTransform = lPhysicsTransform.Transform(mMeshOffset);
+				lPhysicsTransform.GetOrientation() *= mMeshOffset.GetOrientation();
+				lPhysicsTransform.GetPosition() += lPhysicsTransform.GetOrientation().GetRotatedVector(mMeshOffset.GetPosition());
 			}
 		}
 		else
@@ -183,34 +178,34 @@ void CppContextObject::UiMove()
 
 		lGfxGeometry->SetTransformation(lPhysicsTransform);
 	}
-	if (lGfxPhysMeshOffsetCount)
+	if (mMeshSlideMode == MESH_SLIDE_START)
 	{
 		mMeshSlideMode = MESH_SLIDE_RUN;
-		//mMeshOffset = lGfxPhysMeshOffset;
-		mMeshOffset /= (float)lGfxPhysMeshOffsetCount;
-		if (mMeshOffset.GetLengthSquared() >= 20*20)
+		if (mMeshOffset.GetPosition().GetLengthSquared() >= 20*20)
 		{
-			mMeshOffset.Set(0, 0, 0);
-			//mMeshAngularOffset.SetIdentity();
+			mMeshOffset.SetIdentity();
 		}
 	}
-	else if (mMeshSlideMode == MESH_SLIDE_RUN && mMeshOffset.GetLengthSquared() < 0.1f)
+	else if (mMeshSlideMode == MESH_SLIDE_RUN)
 	{
-		/*QuaternionF lDiff;
-		lDiff.Sub(mMeshAngularOffset);
-		if (lDiff.GetNorm() < 0.01f)*/
+		/*if (mMeshOffset.GetPosition().GetLengthSquared() < 0.1f && mMeshOffset.GetOrientation().GetA() > 0.999f)
 		{
 			mMeshSlideMode = MESH_SLIDE_STOP;
+			mMeshOffset.SetIdentity();
+		}
+		else*/
+		{
+			mMeshOffset.Interpolate(mMeshOffset, gIdentityTransformationF, lLerpFactor);
 		}
 	}
-	mMeshOffset = Math::Lerp(mMeshOffset, lOrigo, lLerpFactor);
-	//mMeshAngularOffset.Normalize();
-	//mMeshAngularOffset.Slerp(mMeshAngularOffset, gIdentityQuaternionF, Math::GetIterateLerpTime(0.12f, lFrameTime));
 }
 
 void CppContextObject::ActivateLerp()
 {
-	mMeshSlideMode = MESH_SLIDE_START;
+	if (mEnableMeshSlide)
+	{
+		mMeshSlideMode = MESH_SLIDE_START;
+	}
 }
 
 

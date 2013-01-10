@@ -11,6 +11,8 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Life/LifeServer/GameServerManager.h"
+#include "../RtVar.h"
+#include "../RtVar.h"
 #include "../PushBarrel.h"
 #include "../Explosion.h"
 #include "../Version.h"
@@ -198,6 +200,13 @@ void PushServerDelegate::Detonate(const Vector3DF& pForce, const Vector3DF& pTor
 
 Cure::ContextObject* PushServerDelegate::CreateAvatarForNpc(Npc* pNpc)
 {
+	double lSpawnPart;
+	CURE_RTVAR_GET(lSpawnPart, =, Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+	if (Random::Uniform(0, 0.999) >= lSpawnPart)
+	{
+		return 0;
+	}
+
 	Cure::ContextObject* lAvatar = mGameServerManager->GameManager::CreateContextObject(_T("hover_tank_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 	TransformationF lTransform;
 	lTransform.SetPosition(Vector3DF((float)Random::Uniform(3, 100), (float)Random::Uniform(-100, +100), 10));
@@ -266,8 +275,7 @@ void PushServerDelegate::CreateNpc()
 	Npc* lNpc = new Npc(this, 0.5f);
 	mGameServerManager->GetContext()->AddLocalObject(lNpc);
 	mNpcSet.insert(lNpc->GetInstanceId());
-	Cure::ContextObject* lAvatar = CreateAvatarForNpc(lNpc);
-	mLog.Headlinef(_T("Creating NPC %u of type %s."), lNpc->GetInstanceId(), lAvatar->GetClassId().c_str());
+	lNpc->StartCreateAvatar(0.1f);
 
 	const str lPlayerName = strutil::Format(_T("NPC %u"), lNpc->GetInstanceId());
 	CreateScore(lPlayerName);
@@ -383,6 +391,7 @@ void PushServerDelegate::TickNpcGhosts()
 				CURE_RTVAR_GET(lResyncOnDiff, =(float), mGameServerManager->GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
 				if (lPositionalData->GetScaledDifference(lAvatar->GetNetworkOutputGhost()) > lResyncOnDiff)
 				{
+					log_volatile(mLog.Debugf(_T("NPC avatar %s (%u) sending pos due to deviation."), lAvatar->GetClassId().c_str(), lAvatar->GetInstanceId()));
 					lAvatar->GetNetworkOutputGhost()->CopyData(lPositionalData);
 					mGameServerManager->GetContext()->AddPhysicsSenderObject(lAvatar);
 				}

@@ -50,7 +50,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 	pPhysicsManager->GetBodyVelocity(lBody, pPosition.mPosition.mVelocity);
 	pPhysicsManager->GetBodyAcceleration(lBody, pTotalMass, pPosition.mPosition.mAcceleration);
 	pPhysicsManager->GetBodyAngularVelocity(lBody, pPosition.mPosition.mAngularVelocity);
-	pPhysicsManager->GetBodyAngularAcceleration(lBody, pPosition.mPosition.mAngularAcceleration);
+	pPhysicsManager->GetBodyAngularAcceleration(lBody, pTotalMass, pPosition.mPosition.mAngularAcceleration);
 
 	const int lGeometryCount = pStructure->GetBoneCount();
 	size_t y = 0;
@@ -237,7 +237,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			pPhysicsManager->SetBodyVelocity(lBody, pPosition.mPosition.mVelocity);
 			pPhysicsManager->SetBodyAcceleration(lBody, pTotalMass, pPosition.mPosition.mAcceleration);
 			pPhysicsManager->SetBodyAngularVelocity(lBody, pPosition.mPosition.mAngularVelocity);
-			pPhysicsManager->SetBodyAngularAcceleration(lBody, pPosition.mPosition.mAngularAcceleration);
+			pPhysicsManager->SetBodyAngularAcceleration(lBody, pTotalMass, pPosition.mPosition.mAngularAcceleration);
 		}
 	}
 	else

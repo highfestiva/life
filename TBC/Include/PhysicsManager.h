@@ -172,8 +172,8 @@ public:
 	virtual void SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity) = 0;
 	virtual void GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const = 0;
 	virtual void SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration) = 0;
-	virtual void GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const = 0;
-	virtual void SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration) = 0;
+	virtual void GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAngularAcceleration) const = 0;	// TODO: don't assume spheric shapes!
+	virtual void SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAngularAcceleration) = 0;	// TODO: don't assume spheric shapes!
 
 	virtual float GetBodyMass(BodyID pBodyId) = 0;
 	virtual void MassAdjustBody(BodyID pBodyId) = 0;

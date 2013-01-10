@@ -88,8 +88,7 @@ protected:
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;
 	size_t mTextureLoadCount;
-	Vector3DF mMeshOffset;
-	//QuaternionF mMeshAngularOffset;
+	TransformationF mMeshOffset;
 	MeshSlideMode mMeshSlideMode;
 
 	LOG_CLASS_DECLARE();

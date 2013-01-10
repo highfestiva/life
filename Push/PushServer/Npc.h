@@ -31,6 +31,7 @@ public:
 
 	Cure::GameObjectId GetAvatarId() const;
 	void SetAvatarId(Cure::GameObjectId pAvatarId);
+	void StartCreateAvatar(float pTime);
 
 private:
 	virtual void OnTick();

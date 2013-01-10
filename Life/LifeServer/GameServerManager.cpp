@@ -35,7 +35,6 @@ namespace Life
 
 
 
-const float NETWORK_POSITIONAL_RESEND_INTERVAL = 0.6f;
 const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 
@@ -989,11 +988,11 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 		}
 		if (lSendCollision)
 		{
-			// We have found a collision. Asynchronously inform all viewers, including the colliding client.
+			/*// We have found a collision. Asynchronously inform all viewers, including the colliding client.
 			if (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
 			{
 				pObject1->SetSendCount(3);
-			}
+			}*/
 			GetContext()->AddPhysicsSenderObject(pObject1);
 		}
 	}
@@ -1057,10 +1056,12 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
 	bool lLastSend = false;
-	if (pObject->QueryResendTime(NETWORK_POSITIONAL_RESEND_INTERVAL, false))
+	float lSendIntervalLimit;
+	CURE_RTVAR_GET(lSendIntervalLimit, =(float), GetVariableScope(), RTVAR_NETPHYS_POSSENDINTERVALLIMIT, 0.5);
+	if (pObject->QueryResendTime(lSendIntervalLimit, false))
 	{
 		lLastSend = true;
-		log_volatile(mLog.Debugf(_T("Sending pos for %s."), pObject->GetClassId().c_str()));
+		log_volatile(mLog.Debugf(_T("Sending pos for %s (%u)."), pObject->GetClassId().c_str(), pObject->GetInstanceId()));
 		const Cure::ObjectPositionalData* lPosition = 0;
 		if (pObject->UpdateFullPosition(lPosition))
 		{

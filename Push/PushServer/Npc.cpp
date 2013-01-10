@@ -50,9 +50,14 @@ void Npc::SetAvatarId(Cure::GameObjectId pAvatarId)
 	}
 	else
 	{
-		GetManager()->DisableTickCallback(this);
-		GetManager()->AddAlarmCallback(this, 5, 10.0f, 0);
+		StartCreateAvatar(10.0f);
 	}
+}
+
+void Npc::StartCreateAvatar(float pTime)
+{
+	GetManager()->DisableTickCallback(this);
+	GetManager()->AddAlarmCallback(this, 5, pTime, 0);
 }
 
 
@@ -159,7 +164,10 @@ void Npc::OnAlarm(int pAlarmId, void* pExtraData)
 
 	if (pAlarmId == 5)
 	{
-		mLogic->CreateAvatarForNpc(this);
+		if (!mLogic->CreateAvatarForNpc(this))
+		{
+			StartCreateAvatar(10.0f);
+		}
 	}
 }
 

@@ -541,7 +541,7 @@ void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Ve
 void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration)
 {
 	assert(pTotalMass > 0);
-	SetBodyForce(pBodyId, pAcceleration / pTotalMass);
+	SetBodyForce(pBodyId, pAcceleration * pTotalMass);
 }
 
 void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const
@@ -594,16 +594,17 @@ void PhysicsManagerODE::SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularA
 	}
 }
 
-void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
+void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAngularAcceleration) const
 {
 	GetBodyTorque(pBodyId, pAngularAcceleration);
 	// TODO: handle moment of inertia?
+	pAngularAcceleration /= pTotalMass;
 }
 
-void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration)
+void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAngularAcceleration)
 {
 	// TODO: handle moment of inertia?
-	SetBodyTorque(pBodyId, pAngularAcceleration);
+	SetBodyTorque(pBodyId, pAngularAcceleration * pTotalMass);
 }
 
 float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
