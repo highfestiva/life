@@ -61,9 +61,9 @@ public:
 protected:
 	enum MeshSlideMode
 	{
-		MESH_SLIDE_STOP,
-		MESH_SLIDE_START,
-		MESH_SLIDE_RUN,
+		LERP_STOP,
+		LERP_START,
+		LERP_RUN,
 	};
 
 	void OnLoadClass(UserClassResource* pClassResource);
@@ -88,8 +88,8 @@ protected:
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;
 	size_t mTextureLoadCount;
-	TransformationF mMeshOffset;
-	MeshSlideMode mMeshSlideMode;
+	TransformationF mLerpOffset;
+	MeshSlideMode mLerpMode;
 
 	LOG_CLASS_DECLARE();
 };

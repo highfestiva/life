@@ -34,7 +34,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mEnableMeshSlide(true),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
-	mMeshSlideMode(MESH_SLIDE_STOP)
+	mLerpMode(LERP_STOP)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }
@@ -119,11 +119,11 @@ void CppContextObject::UiMove()
 {
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
 	const float lLerpFactor = Math::GetIterateLerpTime(0.2f, lFrameTime);
-	static const Vector3DF lOrigo;
+	Vector3DF lRootPosition;
 	TransformationF lPhysicsTransform;
-	/*if (mMeshSlideMode == MESH_SLIDE_START)
+	/*if (mLerpMode == LERP_START)
 	{
-		mMeshOffset.SetIdentity();
+		mLerpOffset.SetIdentity();
 		//log_volatile(mLog.Debugf(_T("Starting slide of mesh on object %u/%s."), GetInstanceId(), GetClassId().c_str()));
 	}*/
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
@@ -150,25 +150,27 @@ void CppContextObject::UiMove()
 			}
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
 
-			if (mMeshSlideMode == MESH_SLIDE_START)
+			if (mLerpMode == LERP_START)
 			{
 				if (x == 0)
 				{
 					// Start out by fetching offset.
-					//mMeshOffset = lGfxGeometry->GetBaseTransformation();
-					//mMeshOffset = mMeshOffset.InverseTransform(lPhysicsTransform);
-					mMeshOffset = lPhysicsTransform;
-					mMeshOffset = mMeshOffset.InverseTransform(lGfxGeometry->GetBaseTransformation());
-					mMeshOffset.Interpolate(mMeshOffset, gIdentityTransformationF, lLerpFactor);
+					mLerpOffset.GetOrientation() = lGfxGeometry->GetBaseTransformation().GetOrientation() * lPhysicsTransform.GetOrientation().GetInverse();
+					mLerpOffset.GetPosition() = lGfxGeometry->GetBaseTransformation().GetPosition() - lPhysicsTransform.GetPosition();
+					mLerpOffset.Interpolate(mLerpOffset, gIdentityTransformationF, lLerpFactor);
 				}
-				lPhysicsTransform = lGfxGeometry->GetBaseTransformation();
 			}
-			else if (mMeshSlideMode == MESH_SLIDE_RUN)
+			if (mLerpMode == LERP_START || mLerpMode == LERP_RUN)
 			{
-				// Phys + offset = current lerped mesh position.
-				//lPhysicsTransform = lPhysicsTransform.Transform(mMeshOffset);
-				lPhysicsTransform.GetOrientation() *= mMeshOffset.GetOrientation();
-				lPhysicsTransform.GetPosition() += lPhysicsTransform.GetOrientation().GetRotatedVector(mMeshOffset.GetPosition());
+				// Phys + offset = current lerped mesh position. Also account for this physical offset to object root.
+				if (x == 0)
+				{
+					lRootPosition = lPhysicsTransform.GetPosition();
+				}
+				Vector3DF lMeshOffsetWithRootOrientation = lPhysicsTransform.GetPosition() - lRootPosition;
+				lMeshOffsetWithRootOrientation = mLerpOffset.GetOrientation() * (lMeshOffsetWithRootOrientation) - lMeshOffsetWithRootOrientation;
+				lPhysicsTransform.GetOrientation() = mLerpOffset.GetOrientation() * lPhysicsTransform.GetOrientation();
+				lPhysicsTransform.GetPosition() += mLerpOffset.GetPosition() + lMeshOffsetWithRootOrientation;
 			}
 		}
 		else
@@ -178,24 +180,24 @@ void CppContextObject::UiMove()
 
 		lGfxGeometry->SetTransformation(lPhysicsTransform);
 	}
-	if (mMeshSlideMode == MESH_SLIDE_START)
+	if (mLerpMode == LERP_START)
 	{
-		mMeshSlideMode = MESH_SLIDE_RUN;
-		if (mMeshOffset.GetPosition().GetLengthSquared() >= 20*20)
+		mLerpMode = LERP_RUN;
+		/*if (mLerpOffset.GetPosition().GetLengthSquared() >= 20*20)
 		{
-			mMeshOffset.SetIdentity();
-		}
+			mLerpOffset.SetIdentity();
+		}*/
 	}
-	else if (mMeshSlideMode == MESH_SLIDE_RUN)
+	else if (mLerpMode == LERP_RUN)
 	{
-		/*if (mMeshOffset.GetPosition().GetLengthSquared() < 0.1f && mMeshOffset.GetOrientation().GetA() > 0.999f)
+		/*if (mLerpOffset.GetPosition().GetLengthSquared() < 0.1f && mLerpOffset.GetOrientation().GetA() > 0.999f)
 		{
-			mMeshSlideMode = MESH_SLIDE_STOP;
-			mMeshOffset.SetIdentity();
+			mLerpMode = LERP_STOP;
+			mLerpOffset.SetIdentity();
 		}
 		else*/
 		{
-			mMeshOffset.Interpolate(mMeshOffset, gIdentityTransformationF, lLerpFactor);
+			mLerpOffset.Interpolate(mLerpOffset, gIdentityTransformationF, lLerpFactor);
 		}
 	}
 }
@@ -204,7 +206,7 @@ void CppContextObject::ActivateLerp()
 {
 	if (mEnableMeshSlide)
 	{
-		mMeshSlideMode = MESH_SLIDE_START;
+		mLerpMode = LERP_START;
 	}
 }
 
