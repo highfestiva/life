@@ -630,7 +630,7 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 	}
 }
 
-void IosInputManager::SetCursorVisible(bool pVisible)
+void MacInputManager::SetCursorVisible(bool pVisible)
 {
 	if (pVisible)
 	{

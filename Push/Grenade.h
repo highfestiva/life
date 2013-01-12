@@ -32,7 +32,7 @@ private:
 	void Detonate(const Vector3DF& pPosition);
 	virtual void OnLoaded();
 	void OnTick();
-	virtual void Grenade::OnForceApplied(ContextObject* pOtherObject,
+	virtual void OnForceApplied(ContextObject* pOtherObject,
 		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 		const Vector3DF& pForce, const Vector3DF& pTorque,
 		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);

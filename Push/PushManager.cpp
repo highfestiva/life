@@ -46,6 +46,32 @@ namespace Push
 
 
 
+namespace
+{
+
+struct Score
+{
+	str mName;
+	int mKills;
+	int mDeaths;
+};
+
+struct DeathsAscendingOrder
+{
+	bool operator() (const Score& a, const Score& b) { return a.mDeaths < b.mDeaths; }
+}
+gDeathsAscendingOrder;
+
+struct KillsDecendingOrder
+{
+	bool operator() (const Score& a, const Score& b) { return a.mKills > b.mKills; }
+}
+gKillsDecendingOrder;
+
+}
+
+
+
 PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
@@ -1352,12 +1378,6 @@ void PushManager::DrawScore()
 		return;
 	}
 
-	struct Score
-	{
-		str mName;
-		int mKills;
-		int mDeaths;
-	};
 	typedef std::hash_map<str, Score*> ScoreMap;
 	typedef std::vector<Score> ScoreArray;
 	ScoreMap lScoreMap;
@@ -1401,18 +1421,8 @@ void PushManager::DrawScore()
 			}
 		}
 	}
-	struct DeathsAscendingOrder
-	{
-		bool operator() (const Score& a, const Score& b) { return a.mDeaths < b.mDeaths; }
-	}
-	lDeathsAscendingOrder;
-	struct KillsDecendingOrder
-	{
-		bool operator() (const Score& a, const Score& b) { return a.mKills > b.mKills; }
-	}
-	lKillsDecendingOrder;
-	std::sort(lScoreArray.begin(), lScoreArray.end(), lDeathsAscendingOrder);
-	std::sort(lScoreArray.begin(), lScoreArray.end(), lKillsDecendingOrder);
+	std::sort(lScoreArray.begin(), lScoreArray.end(), gDeathsAscendingOrder);
+	std::sort(lScoreArray.begin(), lScoreArray.end(), gKillsDecendingOrder);
 	mUiManager->GetPainter()->SetTabSize(140);
 	str lScore = _T("Name\tKills\tDeaths");
 	ScoreArray::iterator x = lScoreArray.begin();

@@ -95,7 +95,8 @@ void RoboBall::OnTick()
 		{
 			lStrength = 0.6f;
 		}
-		GetPhysics()->GetEngine(0)->SetValue(0, lStrength, lAngle);
+		//GetPhysics()->GetEngine(0)->SetValue(0, lStrength, lAngle);
+		GetPhysics()->GetEngine(0)->SetValue(0, lStrength);
 		static int c = 0;
 		if (++c > 20)
 		{
