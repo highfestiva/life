@@ -332,6 +332,9 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		}
 
 		// Check if we should send updates. Send all owned objects at the same time to avoid penetration.
+		float lPosSendIntervalLimit;
+		CURE_RTVAR_GET(lPosSendIntervalLimit, =(float), GetVariableScope(), RTVAR_NETPHYS_POSSENDINTERVALLIMIT, 0.5);
+		lPosSendIntervalLimit *= 0.5f;	// Sampling theorem.
 		bool lSend = false;
 		ObjectIdSet::iterator x = mOwnedObjectList.begin();
 		for (; x != mOwnedObjectList.end(); ++x)
@@ -340,7 +343,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			if (lObject)
 			{
 				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-				if (!lObject->QueryResendTime(0.1f, true))
+				if (!lObject->QueryResendTime(lPosSendIntervalLimit, false))
 				{
 					continue;
 				}
@@ -367,6 +370,9 @@ bool GameClientSlaveManager::TickNetworkOutput()
 						(lIsAllwedDiffSend &&
 						lPositionalData->GetScaledDifference(lObject->GetNetworkOutputGhost()) > lResyncOnDiff))
 					{
+						//if (lForceSendUnsafeClientKeepalive)	mLog.AInfo("POS_SEND: Force pos send!");
+						//if (lIsPositionExpired)			mLog.AInfo("POS_SEND: Pos expired causing pos send!");
+						//if (lIsAllwedDiffSend)			mLog.AInfo("POS_SEND: Diff causing pos send!");
 						mSendExpireAlarm.Set();
 						lSend = true;
 						break;

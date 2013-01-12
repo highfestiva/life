@@ -155,8 +155,9 @@ void CppContextObject::UiMove()
 				if (x == 0)
 				{
 					// Start out by fetching offset.
-					mLerpOffset.GetOrientation() = lGfxGeometry->GetBaseTransformation().GetOrientation() * lPhysicsTransform.GetOrientation().GetInverse();
-					mLerpOffset.GetPosition() = lGfxGeometry->GetBaseTransformation().GetPosition() - lPhysicsTransform.GetPosition();
+					mLerpOffset = lGfxGeometry->GetBaseTransformation();
+					mLerpOffset.GetOrientation() *= lPhysicsTransform.GetOrientation().GetInverse();
+					mLerpOffset.GetPosition() -= lPhysicsTransform.GetPosition();
 					mLerpOffset.Interpolate(mLerpOffset, gIdentityTransformationF, lLerpFactor);
 				}
 			}
@@ -168,7 +169,7 @@ void CppContextObject::UiMove()
 					lRootPosition = lPhysicsTransform.GetPosition();
 				}
 				Vector3DF lMeshOffsetWithRootOrientation = lPhysicsTransform.GetPosition() - lRootPosition;
-				lMeshOffsetWithRootOrientation = mLerpOffset.GetOrientation() * (lMeshOffsetWithRootOrientation) - lMeshOffsetWithRootOrientation;
+				lMeshOffsetWithRootOrientation = mLerpOffset.GetOrientation() * lMeshOffsetWithRootOrientation - lMeshOffsetWithRootOrientation;
 				lPhysicsTransform.GetOrientation() = mLerpOffset.GetOrientation() * lPhysicsTransform.GetOrientation();
 				lPhysicsTransform.GetPosition() += mLerpOffset.GetPosition() + lMeshOffsetWithRootOrientation;
 			}
@@ -183,19 +184,19 @@ void CppContextObject::UiMove()
 	if (mLerpMode == LERP_START)
 	{
 		mLerpMode = LERP_RUN;
-		/*if (mLerpOffset.GetPosition().GetLengthSquared() >= 20*20)
+		if (mLerpOffset.GetPosition().GetLengthSquared() >= 20*20)
 		{
 			mLerpOffset.SetIdentity();
-		}*/
+		}
 	}
 	else if (mLerpMode == LERP_RUN)
 	{
-		/*if (mLerpOffset.GetPosition().GetLengthSquared() < 0.1f && mLerpOffset.GetOrientation().GetA() > 0.999f)
+		if (mLerpOffset.GetPosition().GetLengthSquared() < 0.1f && mLerpOffset.GetOrientation().GetA() > 0.999f)
 		{
 			mLerpMode = LERP_STOP;
 			mLerpOffset.SetIdentity();
 		}
-		else*/
+		else
 		{
 			mLerpOffset.Interpolate(mLerpOffset, gIdentityTransformationF, lLerpFactor);
 		}

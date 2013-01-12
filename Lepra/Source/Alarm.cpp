@@ -62,6 +62,11 @@ bool Alarm::PopExpired(double pWaitTime)
 	return (lIsExpired);
 }
 
+double Alarm::GetTimeDiff() const
+{
+	return mTimer.GetTimeDiff();
+}
+
 
 
 }

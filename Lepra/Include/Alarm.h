@@ -27,6 +27,7 @@ public:
 	// Alarm is expired if a) started AND b) time overdue.
 	bool IsExpired(double pWaitTime);
 	bool PopExpired(double pWaitTime);
+	double GetTimeDiff() const;
 
 private:
 	HiResTimer mTimer;
