@@ -22,7 +22,7 @@ class PushServerTicker: public Life::GameServerTicker
 {
 	typedef Life::GameServerTicker Parent;
 public:
-	PushServerTicker(Cure::ResourceManager* pResourceManager, InteractiveConsoleLogListener* pConsoleLogger, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	PushServerTicker(Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~PushServerTicker();
 };
 

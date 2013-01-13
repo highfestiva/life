@@ -36,7 +36,7 @@ public:
 	virtual bool Tick();
 	void Destroy();
 
-	virtual str GetName() const = 0;
+	virtual str GetTypeName() const = 0;
 	virtual str GetVersion() const = 0;
 	virtual Cure::ApplicationTicker* CreateTicker() const = 0;
 
@@ -52,7 +52,7 @@ protected:
 private:
 	void TickSleep() const;
 
-	str mBaseName;
+	static str mBaseName;
 	mutable bool mIsPowerSaving;
 
 	LogListener* mDebugLogger;

@@ -26,7 +26,7 @@ class Npc: public Cure::CppContextObject
 public:
 	typedef Cure::CppContextObject Parent;
 
-	Npc(GameServerLogic* pLogic, float pIntelligence);
+	Npc(GameServerLogic* pLogic);
 	virtual ~Npc();
 
 	Cure::GameObjectId GetAvatarId() const;

@@ -151,6 +151,9 @@ void GameTicker::WaitPhysicsTick()
 			mPhysicsTickDoneSemaphore->Wait(3.0);
 #endif // Debugging/!debugging.
 		}
+
+		// We gotta run this from the main thread, as we're working with the Context.
+		DidPhysicsTick();
 	}
 }
 
@@ -202,8 +205,6 @@ void GameTicker::PhysicsTick()
 		//LEPRA_MEASURE_SCOPE(PostSteps);
 		mPhysicsManager->PostSteps();
 	}
-
-	DidPhysicsTick();
 }
 
 

@@ -29,8 +29,9 @@ class GameServerTicker: public Cure::GameTicker
 {
 	typedef Cure::GameTicker Parent;
 public:
-	GameServerTicker(Cure::ResourceManager* pResourceManager, InteractiveConsoleLogListener* pConsoleLogger, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	GameServerTicker(Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameServerTicker();
+	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger);
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 
 protected:

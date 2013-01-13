@@ -66,6 +66,12 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	Cure::ContextObjectAttribute::SetCreator(Cure::ContextObjectAttribute::Factory(
 		this, &GameClientMasterTicker::CreateObjectAttribute));
 
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 10);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
+
 	mConsole = new ConsoleManager(mResourceManager, 0, UiCure::GetSettings(), 0, 0);
 	mConsole->InitCommands();
 	mConsole->GetConsoleCommandManager()->AddExecutor(
@@ -150,7 +156,7 @@ bool GameClientMasterTicker::Tick()
 			mMasterConnection->SetSocketInfo(mFreeNetworkAgent, lConnectTimeout);
 		}
 		bool lAllowOnline;
-		CURE_RTVAR_GET(lAllowOnline, =, UiCure::GetSettings(), RTVAR_GAME_ENABLEONLINE, false);
+		CURE_RTVAR_GET(lAllowOnline, =, UiCure::GetSettings(), RTVAR_NETWORK_ENABLEONLINEMASTER, false);
 		if (lAllowOnline)
 		{
 			mMasterConnection->Tick();
@@ -465,8 +471,8 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(UiCure::GetSettings());
 		UiGameServerManager* lServer = new UiGameServerManager(GetTimeManager(), lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
 		lServer->SetTicker(this);
-		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
 		OnServerCreated(lServer);
+		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
 		if (!lServer->Initialize(mMasterConnection, pServerAddress))
 		{
 			delete lServer;

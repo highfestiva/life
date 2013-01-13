@@ -6,8 +6,6 @@
 
 #pragma once
 
-#define RTVAR_APPLICATION_NAME			"Application.Name"
-
 #define RTVAR_CONSOLE_COLUMNSPACING		"Console.ColumnSpacing"
 #define RTVAR_CONSOLE_CHARACTERWIDTH		"Console.WidthInCharacters"
 #define RTVAR_CONSOLE_CHARACTERDELIMITORS	"Console.CharacterDelimitors"

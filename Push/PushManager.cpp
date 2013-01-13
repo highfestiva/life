@@ -134,7 +134,10 @@ PushManager::~PushManager()
 
 void PushManager::LoadSettings()
 {
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
+
 	Parent::LoadSettings();
+
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
@@ -632,7 +635,7 @@ void PushManager::TickUiInput()
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 
 		// Show billboard.
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_DRAWSCORE, !lObject || mOptions.GetShowScore());
+		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_GAME_DRAWSCORE, !lObject || mOptions.GetShowScore());
 
 		if (lObject)
 		{

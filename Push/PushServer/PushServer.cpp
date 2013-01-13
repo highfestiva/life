@@ -9,6 +9,7 @@
 #include "../../Life/LifeApplication.h"
 #include "../PushMaster/MasterServerPort.h"
 #include "../Push.h"
+#include "../RtVar.h"
 #include "../Version.h"
 #include "PushServerTicker.h"
 
@@ -28,7 +29,7 @@ public:
 	virtual void Init();
 
 private:
-	str GetName() const;
+	str GetTypeName() const;
 	str GetVersion() const;
 	Cure::ApplicationTicker* CreateTicker() const;
 	LogListener* CreateConsoleLogListener() const;
@@ -72,7 +73,7 @@ void PushServer::Init()
 	Parent::Init();
 }
 
-str PushServer::GetName() const
+str PushServer::GetTypeName() const
 {
 	return _T("Server");
 }
@@ -84,7 +85,8 @@ str PushServer::GetVersion() const
 
 Cure::ApplicationTicker* PushServer::CreateTicker() const
 {
-	Life::GameServerTicker* lTicker = new PushServerTicker(mResourceManager, (InteractiveStdioConsoleLogListener*)mConsoleLogger, 2000, 7, 1);
+	Life::GameServerTicker* lTicker = new PushServerTicker(mResourceManager, 2000, 7, 1);
+	lTicker->StartConsole((InteractiveStdioConsoleLogListener*)mConsoleLogger);
 	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(_T(MASTER_SERVER_ADDRESS) _T(":") _T(MASTER_SERVER_PORT)));
 	return lTicker;
 }

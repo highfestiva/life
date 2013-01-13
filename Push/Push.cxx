@@ -41,7 +41,7 @@ public:
 	virtual void Suspend();
 	virtual void Resume();
 
-	str GetName() const;
+	str GetTypeName() const;
 	str GetVersion() const;
 	Cure::ApplicationTicker* CreateTicker() const;
 
@@ -105,10 +105,10 @@ void Push::Init()
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const bool lStartLogo = false;
-	const bool lOnline = false;
+	const bool lOnlineMaster = false;
 #else // Computer
 	const bool lStartLogo = true;
-	const bool lOnline = true;
+	const bool lOnlineMaster = true;
 #endif // Touch / computer
 #if defined(LEPRA_IOS)
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
@@ -124,56 +124,49 @@ void Push::Init()
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
 
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 60.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 1.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, false);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 60.0);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 1.0);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
 #ifdef LEPRA_TOUCH
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.9);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.9);
 #endif // Touch device.
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
 
 #if !defined(LEPRA_TOUCH) && !defined(EMULATE_TOUCH)
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.5);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, true);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.5);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
 #endif // Computer
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_CHILDISHNESS, 1.0);
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_GAME_DRAWSCORE, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ENABLEONLINE, lOnline);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, lStartLogo);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_SPAWNPART, 0.05);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 4.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 4.0);
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, lStartLogo);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEONLINEMASTER, lOnlineMaster);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 4.0);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 4.0);
 
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 
@@ -233,9 +226,9 @@ void Push::Resume()
 
 
 
-str Push::GetName() const
+str Push::GetTypeName() const
 {
-	return _T("Push");
+	return _T("Client");
 }
 
 str Push::GetVersion() const

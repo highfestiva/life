@@ -51,6 +51,8 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex)
 {
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+
 	SetTicker(pMaster);
 
 	SetNetworkAgent(new Cure::NetworkClient(GetVariableScope()));
@@ -82,15 +84,7 @@ void GameClientSlaveManager::LoadSettings()
 	mOptions.DoRefreshConfiguration();
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_ENABLEAXES, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_ENABLESHAPES, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_INPUT_PRINT, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 10);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
 	bool lIsServerSelected;
 	CURE_RTVAR_TRYGET(lIsServerSelected, =, UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
 	if (lIsServerSelected)

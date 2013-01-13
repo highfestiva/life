@@ -6,7 +6,9 @@
 
 #include "Npc.h"
 #include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/IntAttribute.h"
+#include "../RtVar.h"
 #include "GameServerLogic.h"
 
 
@@ -16,10 +18,10 @@ namespace Push
 
 
 
-Npc::Npc(GameServerLogic* pLogic, float pIntelligence):
+Npc::Npc(GameServerLogic* pLogic):
 	Parent(0, _T("npc")),
 	mLogic(pLogic),
-	mIntelligence(pIntelligence),
+	mIntelligence(0.5f),
 	mAvatarId(0)
 {
 	SetLoadResult(true);
@@ -164,6 +166,7 @@ void Npc::OnAlarm(int pAlarmId, void* pExtraData)
 
 	if (pAlarmId == 5)
 	{
+		CURE_RTVAR_GET(mIntelligence, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5f);
 		if (!mLogic->CreateAvatarForNpc(this))
 		{
 			StartCreateAvatar(10.0f);

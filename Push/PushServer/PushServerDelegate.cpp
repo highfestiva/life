@@ -33,6 +33,7 @@ PushServerDelegate::PushServerDelegate(Life::GameServerManager* pGameServerManag
 	Parent(pGameServerManager),
 	mScoreInfoId(0)
 {
+	CURE_RTVAR_SET(mGameServerManager->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5);
 }
 
 PushServerDelegate::~PushServerDelegate()
@@ -201,7 +202,7 @@ void PushServerDelegate::Detonate(const Vector3DF& pForce, const Vector3DF& pTor
 Cure::ContextObject* PushServerDelegate::CreateAvatarForNpc(Npc* pNpc)
 {
 	double lSpawnPart;
-	CURE_RTVAR_GET(lSpawnPart, =, Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+	CURE_RTVAR_GET(lSpawnPart, =, mGameServerManager->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 	if (Random::Uniform(0, 0.999) >= lSpawnPart)
 	{
 		return 0;
@@ -272,7 +273,7 @@ const PushServerDelegate::AvatarIdSet& PushServerDelegate::GetAvatarsInTeam(int 
 
 void PushServerDelegate::CreateNpc()
 {
-	Npc* lNpc = new Npc(this, 0.5f);
+	Npc* lNpc = new Npc(this);
 	mGameServerManager->GetContext()->AddLocalObject(lNpc);
 	mNpcSet.insert(lNpc->GetInstanceId());
 	lNpc->StartCreateAvatar(0.1f);

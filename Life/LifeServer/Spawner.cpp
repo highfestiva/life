@@ -58,7 +58,7 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 void Spawner::OnCreate(float pCreateInterval)
 {
 	float lSpawnPart;
-	CURE_RTVAR_GET(lSpawnPart, =(float), Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+	CURE_RTVAR_GET(lSpawnPart, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 	const int lSpawnCount = (int)(GetSpawner()->GetNumber() * lSpawnPart);
 
 	if ((int)mChildList.size() < lSpawnCount)

@@ -24,33 +24,23 @@ namespace Life
 
 
 
-GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager, InteractiveConsoleLogListener* pConsoleLogger, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
+GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	Parent(pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mResourceManager(pResourceManager),
 	mGameManager(0),
 	mMasterConnection(0)
 {
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_AUTOFLIPENABLED, true);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, true);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _("0.0.0.0:16650"));
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _("My Dedicated Server"));
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my dedicated server! Enjoy the ride!\""));
 
 	Cure::ContextObjectAttribute::SetCreator(&CreateObjectAttribute);
-
-	ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
-	lConsole.InitCommands();
-	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));
-	lConsole.ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerBase"), _T("lsh")));
 
 	pResourceManager->InitDefault();
 
 	Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
 	mGameManager = new GameServerManager(GetTimeManager(), lVariableScope, pResourceManager);
 	mGameManager->SetTicker(this);
-	mGameManager->StartConsole(pConsoleLogger, new StdioConsolePrompt);
 }
 
 GameServerTicker::~GameServerTicker()
@@ -69,6 +59,16 @@ GameServerTicker::~GameServerTicker()
 	mMasterConnection->SetSocketInfo(0, -1);
 	delete mMasterConnection;
 	mMasterConnection = 0;
+}
+
+void GameServerTicker::StartConsole(InteractiveConsoleLogListener* pConsoleLogger)
+{
+	ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
+	lConsole.InitCommands();
+	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));
+	lConsole.ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerBase"), _T("lsh")));
+
+	mGameManager->StartConsole(pConsoleLogger, new StdioConsolePrompt);
 }
 
 void GameServerTicker::SetMasterServerConnection(MasterServerConnection* pConnection)

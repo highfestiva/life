@@ -34,13 +34,13 @@ Application::Application(const str& pBaseName, const strutil::strvec& pArgumentL
 	mResourceManager(0),
 	mGameTicker(0),
 	mConsoleLogger(0),
-	mBaseName(pBaseName),
 	mIsPowerSaving(false),
 	mDebugLogger(0),
 	mFileLogger(0),
 	mPerformanceLogger(0),
 	mMemLogger(0)
 {
+	mBaseName = pBaseName;
 }
 
 Application::~Application()
@@ -73,21 +73,20 @@ void Application::Init()
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
-	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, mBaseName);
 
 	mConsoleLogger = CreateConsoleLogListener();
 	//mConsoleLogger->SetLevelThreashold(LEVEL_INFO);
 #ifndef NO_LOG_DEBUG_INFO
 	mDebugLogger = new DebuggerLogListener();
 #endif // Showing debug information.
-	mFileLogger = new FileLogListener(GetIoFile(GetName(), _T("log"), false));
+	mFileLogger = new FileLogListener(GetIoFile(GetTypeName(), _T("log"), false));
 	//mFileLogger->SetLevelThreashold(LEVEL_INFO);
 	mFileLogger->WriteLog(_T("\n---\n"), LEVEL_INFO);
-	//mPerformanceLogger = new FileLogListener(GetIoFile(GetName()+_T("Performance"), _T("log"), false));
+	//mPerformanceLogger = new FileLogListener(GetIoFile(GetTypeName()+_T("Performance"), _T("log"), false));
 	mMemLogger = new MemFileLogListener(20*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
-	str lStartMessage = _T("Starting ") + mBaseName + _T(" ") + GetName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
+	str lStartMessage = _T("Starting ") + mBaseName + _T(" ") + GetTypeName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
 	mLog.RawPrint(LEVEL_HEADLINE, lStartMessage);
 
 	const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
@@ -195,8 +194,7 @@ void Application::Destroy()
 
 str Application::GetIoFile(const str& pName, const str& pExt, bool pAddQuotes)
 {
-	str lAppName;
-	CURE_RTVAR_GET(lAppName, =, Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("?"));
+	str lAppName = mBaseName;
 	str lIoName = Path::JoinPath(
 		SystemManager::GetIoDirectory(lAppName),
 		pName, pExt);
@@ -277,6 +275,8 @@ void Application::TickSleep() const
 }
 
 
+
+str Application::mBaseName;
 
 LOG_CLASS_DEFINE(GAME, Application);
 

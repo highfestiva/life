@@ -49,14 +49,13 @@ GameServerManager::GameServerManager(const Cure::TimeManager* pTime,
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE),
 	mMasterConnection(0)
 {
-	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
-	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_GAME_AUTOFLIPENABLED, true);
-	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
-	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, strutil::Format(_("%s's server"), SystemManager::GetLoginName().c_str()));
-	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my server! Enjoy the ride!\""));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my server! Enjoy the ride!\""));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERNAME, strutil::Format(_("%s's server"), SystemManager::GetLoginName().c_str()));
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_PUBLISHSERVER, false);	// Make it overridable and possible to change between dedicated/local by using Cure::GetSettings().
 
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
-
 }
 
 GameServerManager::~GameServerManager()
@@ -749,7 +748,9 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 		lClient = new Client(GetTimeManager(), GetNetworkAgent(), pUserConnection);
 		mAccountClientTable.Insert(pUserConnection->GetAccountId(), lClient);
 		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrameAddFrames(2), lPacket);	// TODO: adjust physics frame diff by ping-ponging some.
-		lClient->SendLoginCommands(lPacket);
+		str lServerGreeting;
+		CURE_RTVAR_GET(lServerGreeting, =, GetVariableScope(), RTVAR_NETWORK_LOGINGREETING, _T(""));
+		lClient->SendLoginCommands(lPacket, lServerGreeting);
 
 		for (AvatarIdSet::const_iterator x = lAvatarIdSet->begin(); x != lAvatarIdSet->end(); ++x)
 		{
@@ -1282,7 +1283,9 @@ void GameServerManager::TickMasterServer()
 {
 	bool lIsOpenServer;
 	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-	if (!mMasterConnection || !lIsOpenServer)
+	bool lPublishServer;
+	CURE_RTVAR_GET(lPublishServer, =, GetVariableScope(), RTVAR_NETWORK_PUBLISHSERVER, false);
+	if (!mMasterConnection || !lIsOpenServer || !lPublishServer)
 	{
 		return;
 	}
@@ -1302,7 +1305,7 @@ void GameServerManager::TickMasterServer()
 	}
 
 	str lServerName;
-	CURE_RTVAR_GET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("?"));
+	CURE_RTVAR_GET(lServerName, =, GetVariableScope(), RTVAR_NETWORK_SERVERNAME, _T("?"));
 	const str lPlayerCount = strutil::IntToString(GetLoggedInClientCount(), 10);
 	const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
 	const str lLocalServerInfo = _T("--name \"") + lServerName + _T("\" --player-count ") + lPlayerCount
@@ -1346,7 +1349,7 @@ void GameServerManager::MonitorRtvars()
 {
 	{
 		int lPhysicsFps;
-		CURE_RTVAR_GET(lPhysicsFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+		CURE_RTVAR_GET(lPhysicsFps, =, GetVariableScope(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 		if (lPhysicsFps != mPhysicsFpsShadow)
 		{
 			mPhysicsFpsShadow = lPhysicsFps;
@@ -1356,7 +1359,7 @@ void GameServerManager::MonitorRtvars()
 	}
 	{
 		float lPhysicsRtr;
-		CURE_RTVAR_GET(lPhysicsRtr, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		CURE_RTVAR_GET(lPhysicsRtr, =(float), GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
 		if (!Math::IsEpsEqual(mPhysicsRtrShadow, lPhysicsRtr, 0.01f))
 		{
 			mPhysicsRtrShadow = lPhysicsRtr;

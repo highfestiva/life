@@ -46,7 +46,7 @@ public:
 	void SendPhysicsFrame(int pPhysicsFrameIndex, Cure::Packet* pPacket = 0);
 	float GetPhysicsFrameAheadCount() const;
 
-	void SendLoginCommands(Cure::Packet* pPacket);
+	void SendLoginCommands(Cure::Packet* pPacket, const str& pServerGreeting);
 
 private:
 	int SendStriveTimes(int pNetworkFrameDiffCount);

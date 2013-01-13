@@ -553,6 +553,10 @@
 			Name="Header Files"
 			>
 			<File
+				RelativePath=".\Npc.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PushServerMessageProcessor.h"
 				>
 			</File>

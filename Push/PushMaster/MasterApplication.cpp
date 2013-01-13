@@ -29,7 +29,7 @@ public:
 
 private:
 	virtual Cure::ApplicationTicker* CreateTicker() const;
-	virtual str GetName() const;
+	virtual str GetTypeName() const;
 	virtual str GetVersion() const;
 };
 
@@ -78,9 +78,9 @@ Cure::ApplicationTicker* MasterApplication::CreateTicker() const
 	return new Life::MasterServer(_T(MASTER_SERVER_PORT));
 }
 
-str MasterApplication::GetName() const
+str MasterApplication::GetTypeName() const
 {
-	return _T("PushMaster");
+	return _T("Master");
 }
 
 str MasterApplication::GetVersion() const

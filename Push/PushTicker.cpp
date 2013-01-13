@@ -33,7 +33,8 @@ PushTicker::PushTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager*
 	mSunlight(0),
 	mPerformanceAdjustmentTicks(0)
 {
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 }
 
 PushTicker::~PushTicker()
