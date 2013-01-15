@@ -162,7 +162,7 @@ void PushServerDelegate::Detonate(const Vector3DF& pForce, const Vector3DF& pTor
 	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
 	for (; x != lObjectTable.end(); ++x)
 	{
-		const Cure::ContextObject* lObject = x->second;
+		Cure::ContextObject* lObject = x->second;
 		if (!lObject->IsLoaded())
 		{
 			continue;
@@ -175,12 +175,16 @@ void PushServerDelegate::Detonate(const Vector3DF& pForce, const Vector3DF& pTor
 				Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
 				assert(lHealth);
 				const float lPriorHealth = lHealth->GetValue();
-				const float lRemainingHealth = lPriorHealth - lForce*(float)Random::Normal(0.41, 0.05, 0.3, 0.5);
-				if (lPriorHealth > 0 && lRemainingHealth > 0)
+				float lRemainingHealth = lPriorHealth - lForce*(float)Random::Normal(0.41, 0.05, 0.3, 0.5);
+				if (lPriorHealth > 0)
 				{
+					if (lRemainingHealth < 0)
+					{
+						lRemainingHealth = 0;
+					}
 					lHealth->SetValue(lRemainingHealth);
 				}
-				else if (lPriorHealth > 0 && lRemainingHealth <= 0)
+				if (lPriorHealth > 0 && lRemainingHealth <= 0)
 				{
 					AddPoint(DEATHS, lObject, +1);
 					ServerGrenade* lGrenade = dynamic_cast<ServerGrenade*>(pExplosive);
@@ -189,7 +193,7 @@ void PushServerDelegate::Detonate(const Vector3DF& pForce, const Vector3DF& pTor
 						const int lPoints = (lGrenade->GetOwnerId() == lObject->GetInstanceId()) ? -1 : +1;	// Kills oneself?
 						AddPoint(KILLS, mGameServerManager->GetContext()->GetObject(lGrenade->GetOwnerId()), lPoints);
 					}
-					mGameServerManager->GetContext()->PostKillObject(lObject->GetInstanceId());
+					Die(lObject);
 				}
 			}
 			x->second->ForceSend();
@@ -356,6 +360,13 @@ void PushServerDelegate::AddPoint(const str& pPrefix, const Cure::ContextObject*
 	{
 		lAttribute->SetValue(lAttribute->GetValue() + pPoints);
 	}
+}
+
+void PushServerDelegate::Die(Cure::ContextObject* pAvatar)
+{
+	Explosion::FallApart(mGameServerManager->GetPhysicsManager(), pAvatar);
+	mGameServerManager->DeleteContextObjectDelay(pAvatar, 2);
+	mGameServerManager->BroadcastNumberMessage(true, Cure::MessageNumber::INFO_FALL_APART, pAvatar->GetInstanceId(), 0);
 }
 
 bool PushServerDelegate::IsAvatarObject(const Cure::ContextObject* pObject) const

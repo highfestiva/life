@@ -7,7 +7,10 @@
 #include <assert.h>
 #pragma warning(push)
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
+#pragma warning(disable: 4127)	// Warning: conditional expression is constant (in ODE).
+#include <ode/odemath.h>
 #include <../ode/src/collision_kernel.h>
+#include <../ode/src/collision_std.h>
 #include <../ode/src/joints/ball.h>
 #include <../ode/src/joints/hinge.h>
 #include <../ode/src/joints/slider.h>
@@ -309,8 +312,8 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 				case dTriMeshClass:	// TRICKY: fall through (act as sphere).
 				case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
 				case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
-				case dCapsuleClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
-				case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);	break;
+				case dCapsuleClass:	::dMassSetCapsuleTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
+				case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
 				default:
 				{
 					mLog.AError("Trying to attach object of unknown type!");
@@ -331,6 +334,47 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	}
 
 	return (true);
+}
+
+bool PhysicsManagerODE::DetachToDynamic(BodyID pStaticBody, float32 pMass)
+{
+	Object* lObject = (Object*)pStaticBody;
+
+	dGeomID g = lObject->mGeomID;
+	dMass lMass;
+	switch (g->type)
+	{
+		case dTriMeshClass:	// TRICKY: fall through (act as sphere).
+		case dSphereClass:	::dMassSetSphereTotal(&lMass, (dReal)pMass, ((dxSphere*)g)->radius);						break;
+		case dBoxClass:		::dMassSetBoxTotal(&lMass, (dReal)pMass, ((dxBox*)g)->side[0], ((dxBox*)g)->side[1], ((dxBox*)g)->side[2]);	break;
+		case dCapsuleClass:	::dMassSetCapsuleTotal(&lMass, (dReal)pMass, 3, ((dxCapsule*)g)->radius, ((dxCapsule*)g)->lz);			break;
+		case dCylinderClass:	::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, ((dxCylinder*)g)->radius, ((dxCylinder*)g)->lz);		break;
+		default:
+		{
+			mLog.AError("Trying to detach object of unknown type!");
+			assert(false);
+		}
+		return (false);
+	}
+
+	if (lObject->mBodyID)
+	{
+		// Already dynamic, just update mass.
+	}
+	else
+	{
+		// Create dynamic body for it.
+		lObject->mBodyID = ::dBodyCreate(mWorldID);
+		const dReal* lPos = ::dGeomGetPosition(lObject->mGeomID);
+		dQuaternion lQuat;
+		::dGeomGetQuaternion(lObject->mGeomID, lQuat);
+		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
+		::dGeomSetPosition(lObject->mGeomID, lPos[0], lPos[1], lPos[2]);
+		::dGeomSetQuaternion(lObject->mGeomID, lQuat);
+		::dBodySetAutoDisableDefaults(lObject->mBodyID);
+	}
+	::dBodySetMass(lObject->mBodyID, &lMass);
+	return true;
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned pVertexCount,

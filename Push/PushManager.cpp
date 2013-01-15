@@ -1150,6 +1150,19 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			mLog.Infof(_T("Got control over avatar with ID %i."), pInteger);
 		}
 		return;
+		case Cure::MessageNumber::INFO_FALL_APART:
+		{
+			const Cure::GameObjectId lInstanceId = pInteger;
+			UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)GetContext()->GetObject(lInstanceId);
+			if (lObject)
+			{
+				Explosion::FallApart(GetPhysicsManager(), lObject);
+				lObject->CenterMeshes();
+				mLog.Infof(_T("Object %i falling apart."), pInteger);
+			}
+		}
+		return;
+
 	}
 	Parent::ProcessNumber(pType, pInteger, pFloat);
 }

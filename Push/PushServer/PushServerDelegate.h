@@ -57,6 +57,7 @@ private:
 	void CreateScore(const str& pPlayerName);
 	void DeleteScore(const str& pPlayerName);
 	void AddPoint(const str& pPrefix, const Cure::ContextObject* pAvatar, int pPoints);
+	void Die(Cure::ContextObject* pAvatar);
 	bool IsAvatarObject(const Cure::ContextObject* pObject) const;
 	void TickNpcGhosts();
 

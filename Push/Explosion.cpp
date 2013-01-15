@@ -5,6 +5,7 @@
 
 
 #include "Explosion.h"
+#include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextObject.h"
 #include "../TBC/Include/ChunkyBoneGeometry.h"
 #include "../TBC/Include/ChunkyPhysics.h"
@@ -61,6 +62,37 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 		pPhysicsManager->AddForce(lGeometry->GetBodyId(), f);
 	}
 	return lForce;
+}
+
+void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::ContextObject* pObject)
+{
+	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
+	const int lBoneCount = lPhysics->GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
+	{
+		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
+		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY)
+		{
+			continue;
+		}
+		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+		{
+			pPhysicsManager->DetachToDynamic(lGeometry->GetBodyId(), lGeometry->GetMass());
+			if (x == 0)
+			{
+				pPhysicsManager->SetBodyVelocity(lGeometry->GetBodyId(), Vector3DF());
+			}
+		}
+		else
+		{
+			pPhysicsManager->DeleteJoint(lGeometry->GetJointId());
+			lGeometry->ResetJointId();
+		}
+		pObject->GetManager()->RemovePhysicsBody(lGeometry->GetBodyId());
+		pPhysicsManager->SetForceFeedbackListener(lGeometry->GetBodyId(), 0);
+	}
+
+	lPhysics->ClearEngines();
 }
 
 

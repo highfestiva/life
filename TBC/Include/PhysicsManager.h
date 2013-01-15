@@ -147,6 +147,7 @@ public:
 		float32 pMass, const Vector3DF& pSize, BodyType pType,
 		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
+	virtual bool DetachToDynamic(BodyID pStaticBody, float32 pMass) = 0;
 
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,

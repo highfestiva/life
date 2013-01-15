@@ -73,6 +73,7 @@ public:
 		Client* pExcludeClient, bool pSafe);
 	bool BroadcastChatMessage(const wstr& pMessage);
 	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
+	void BroadcastNumberMessage(bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
 
 	int GetLoggedInClientCount() const;

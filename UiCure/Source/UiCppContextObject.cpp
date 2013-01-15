@@ -236,6 +236,22 @@ UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) con
 	return (0);
 }
 
+void CppContextObject::CenterMeshes()
+{
+	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+	{
+		UserGeometryReferenceResource* lResource = mMeshResourceArray[x];
+		if (lResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			continue;
+		}
+		TBC::GeometryReference* lGfxGeometry = (TBC::GeometryReference*)lResource->GetRamData();
+		TransformationF lOffset = lGfxGeometry->GetOffsetTransformation();
+		lOffset.SetPosition(Vector3DF(0, 0, 0));
+		lGfxGeometry->SetOffsetTransformation(lOffset);
+	}
+}
+
 void CppContextObject::UpdateMaterial(int pMeshIndex)
 {
 	if (!mUiClassResource || !mUiManager->CanRender())

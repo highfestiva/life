@@ -904,7 +904,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 				const int lOwnershipFrames = GetTimeManager()->GetPhysicsFrameDelta((int)pFloat, GetTimeManager()->GetCurrentPhysicsFrame());
 				const float lOwnershipSeconds = GetTimeManager()->ConvertPhysicsFramesToSeconds(lOwnershipFrames-2);
 				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lOwnershipSeconds, 0);
+				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES, lOwnershipSeconds, 0);
 				log_volatile(mLog.Debugf(_T("Got control over object with ID %i for %f seconds."), pInteger, lOwnershipSeconds));
 			}
 		}
@@ -1059,7 +1059,7 @@ void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObjec
 
 void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void*)
 {
-	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID)
+	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
 	{
 		assert(IsOwned(pObject->GetInstanceId()));
 		mOwnedObjectList.erase(pObject->GetInstanceId());

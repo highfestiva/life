@@ -31,6 +31,8 @@ public:
 	enum
 	{
 		SYSTEM_ALARM_ID = 1000,
+		SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES,
+		SYSTEM_ALARM_ID_KILL,
 	};
 
 	ContextManager(GameManager* pGameManager);

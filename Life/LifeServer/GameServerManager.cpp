@@ -365,8 +365,8 @@ void GameServerManager::LoanObject(Client* pClient, Cure::GameObjectId pInstance
 				GetNetworkServer()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
 					Cure::MessageNumber::INFO_GRANT_LOAN, pInstanceId, (float)lEndFrame);
 				lObject->SetOwnerInstanceId(pClient->GetAvatarId());
-				GetContext()->CancelPendingAlarmCallbacksById(lObject, Cure::ContextManager::SYSTEM_ALARM_ID);
-				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lServerOwnershipTime, 0);
+				GetContext()->CancelPendingAlarmCallbacksById(lObject, Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES);
+				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES, lServerOwnershipTime, 0);
 			}
 		}
 	}
@@ -516,6 +516,17 @@ bool GameServerManager::BroadcastStatusMessage(Cure::MessageStatus::InfoType pTy
 	}
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 	return (lOk);
+}
+
+void GameServerManager::BroadcastNumberMessage(bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat)
+{
+	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+	Cure::MessageNumber* lNumber = (Cure::MessageNumber*)GetNetworkAgent()->
+		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_NUMBER);
+	lPacket->AddMessage(lNumber);
+	lNumber->Store(lPacket, pInfo, pInteger, pFloat);
+	BroadcastPacket(0, lPacket, pSafe);
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
 bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr& pMessage)
@@ -1162,16 +1173,16 @@ void GameServerManager::SendDetach(Cure::ContextObject* pObject1, Cure::ContextO
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-void GameServerManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void*)
+void GameServerManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData)
 {
-	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID)
+	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
 	{
 		pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		pObject->SetOwnerInstanceId(0);
 	}
 	else
 	{
-		assert(false);
+		Parent::OnAlarm(pAlarmId, pObject, pExtraData);
 	}
 }
 
