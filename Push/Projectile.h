@@ -11,25 +11,27 @@
 
 
 
+namespace Life
+{
+class Launcher;
+}
+
+
+
 namespace Push
 {
 
 
 
-class Launcher;
-
-
-
-class Grenade: public UiCure::Machine
+class Projectile: public UiCure::Machine
 {
 public:
 	typedef UiCure::Machine Parent;
 
-	Grenade(Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
-	virtual ~Grenade();
+	Projectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher);
+	virtual ~Projectile();
 
 private:
-	void Detonate(const Vector3DF& pPosition);
 	virtual void OnLoaded();
 	void OnTick();
 	virtual void OnForceApplied(ContextObject* pOtherObject,
@@ -39,9 +41,9 @@ private:
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	UiCure::UserSound3dResource* mShreekSound;
-	UiCure::UserSound3dResource* mLaunchSound;
-	Launcher* mLauncher;
-	bool mDetonated;
+	Life::Launcher* mLauncher;
+	int mTickCounter;
+	bool mIsDetonated;
 
 	LOG_CLASS_DECLARE();
 };

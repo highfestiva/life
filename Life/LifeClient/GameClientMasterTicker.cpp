@@ -607,7 +607,7 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 		pSlave->LoadSettings();
 		assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);
 		mSlaveArray[pSlave->GetSlaveIndex()] = pSlave;
-		pSlave->GetContext()->SetLocalRange(pSlave->GetSlaveIndex(), mSlaveArray.size());
+		pSlave->GetContext()->SetLocalRange(pSlave->GetSlaveIndex()+1, mSlaveArray.size()+1);	// Local server is first one, so skip that part in the rance.
 		++mActiveSlaveCount;
 	}
 }

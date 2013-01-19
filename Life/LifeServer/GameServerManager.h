@@ -40,6 +40,7 @@ class GameServerManager: public Cure::GameManager, public Cure::NetworkServer::L
 public:
 	typedef Cure::GameManager Parent;
 	typedef Cure::ContextManager::ContextObjectTable ContextTable;
+	typedef HashTable<Cure::UserAccount::AccountId, Client*> AccountClientTable;
 
 	GameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
 		Cure::ResourceManager* pResourceManager);
@@ -68,17 +69,18 @@ public:
 	wstrutil::strvec ListUsers();
 	Cure::NetworkServer* GetNetworkServer() const;
 	void SendObjects(Client* pClient, bool pCreate, const ContextTable& pObjectTable);
-	void BroadcastCreateObject(Cure::GameObjectId pInstanceId, const TransformationF& pTransform, const str& pClassId);
+	void BroadcastCreateObject(Cure::GameObjectId pInstanceId, const TransformationF& pTransform, const str& pClassId, Cure::GameObjectId pOwnerInstanceId);
 	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
 		Client* pExcludeClient, bool pSafe);
 	bool BroadcastChatMessage(const wstr& pMessage);
 	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
-	void BroadcastNumberMessage(bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
+	void BroadcastNumberMessage(Client* pExcludeClient, bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
 
 	int GetLoggedInClientCount() const;
 	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
 	Client* GetClientByObject(Cure::ContextObject*& pObject) const;
+	const AccountClientTable& GetAccountClientTable() const;	// Use with caution!
 
 	void Build(const str& pWhat);
 
@@ -126,7 +128,6 @@ protected:
 private:
 	typedef std::list<Cure::MessageObjectMovement*> MovementList;
 	typedef std::vector<MovementList> MovementArrayList;
-	typedef HashTable<Cure::UserAccount::AccountId, Client*> AccountClientTable;
 
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;

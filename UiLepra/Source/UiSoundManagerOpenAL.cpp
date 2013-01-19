@@ -524,6 +524,7 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 	::alGenSources(1, &mSid);
 	if (mSid == (ALuint)-1)
 	{
+		assert(false);
 		return false;
 	}
 

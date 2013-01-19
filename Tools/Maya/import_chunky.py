@@ -1159,36 +1159,9 @@ class GroupReader(DefaultMAReader):
 
 	def validategroup(self, group):
 		ok = True
-		for mesh in group:
-			if mesh.getName().startswith("m_"):
-				mesh.phys_ref = []
-		for phys in group:
-			if not phys.getName().startswith("phys_") or phys.nodetype != "transform":
-				continue
-			phys_name = phys.getName()[5:]
-			phys.mesh_ref = []
-			phys.loose_mesh_ref = []
-			phys_mesh_ref = phys.mesh_ref
-			if phys.phys_root and not phys.get_fixed_attribute("joint", optional=True):
-				phys_mesh_ref = phys.loose_mesh_ref
-			for mesh in group:
-				if not mesh.getName().startswith("m_"):
-					continue
-				mesh_name = mesh.getName()[2:]
-				samesamebutdifferent = False
-				if mesh_name == phys_name:
-					samesamebutdifferent = True
-				elif mesh_name.startswith(phys_name):
-					s = mesh_name[len(phys_name):]
-					if s.startswith("_"):
-						try:
-							int(s[1:])
-							samesamebutdifferent = True
-						except ValueError:
-							pass
-				if samesamebutdifferent:
-					mesh.phys_ref += [phys]
-					phys_mesh_ref += [mesh]
+		if not self.connectmeshandphys(False, group):
+			self.connectmeshandphys(True, group)
+
 		# Check for erroneous references.
 		for phys in group:
 			if not phys.getName().startswith("phys_") or phys.nodetype != "transform":
@@ -1227,6 +1200,44 @@ class GroupReader(DefaultMAReader):
 						ok = False
 						print("Error: mesh %s has invalid connections to phys nodes." % mesh.getName())
 		return ok
+
+
+	def connectmeshandphys(self, allowTriggers, group):
+		for mesh in group:
+			if mesh.getName().startswith("m_"):
+				mesh.phys_ref = []
+		didConnect = False
+		for phys in group:
+			if not phys.getName().startswith("phys_") or phys.nodetype != "transform":
+				continue
+			phys_name = phys.getName()[5:]
+			if allowTriggers and phys_name.startswith("trig_"):
+				phys_name = phys_name[5:]
+			phys.mesh_ref = []
+			phys.loose_mesh_ref = []
+			phys_mesh_ref = phys.mesh_ref
+			if phys.phys_root and not phys.get_fixed_attribute("joint", optional=True):
+				phys_mesh_ref = phys.loose_mesh_ref
+			for mesh in group:
+				if not mesh.getName().startswith("m_"):
+					continue
+				mesh_name = mesh.getName()[2:]
+				samesamebutdifferent = False
+				if mesh_name == phys_name:
+					samesamebutdifferent = True
+				elif mesh_name.startswith(phys_name):
+					s = mesh_name[len(phys_name):]
+					if s.startswith("_"):
+						try:
+							int(s[1:])
+							samesamebutdifferent = True
+						except ValueError:
+							pass
+				if samesamebutdifferent:
+					mesh.phys_ref += [phys]
+					phys_mesh_ref += [mesh]
+					didConnect = True
+		return didConnect
 
 
 	def adjustorientation(self, group):
@@ -1438,7 +1449,8 @@ class GroupReader(DefaultMAReader):
 			if child in invalid_child_list:
 				invcnt += 1
 
-		while not phys:
+		p = True
+		while not phys and p:
 			p = mesh.getParent()
 			while p:
 				if p.phys_ref:

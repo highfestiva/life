@@ -6,11 +6,19 @@
 
 #pragma once
 
-#include "Push.h"
+#include "../Lepra/Include/Transformation.h"
+#include "Life.h"
 
 
 
-namespace Push
+namespace TBC
+{
+class ChunkyBoneGeometry;
+}
+
+
+
+namespace Life
 {
 
 
@@ -18,9 +26,8 @@ namespace Push
 class Launcher
 {
 public:
-	virtual void GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const = 0;
-
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition) = 0;
+	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject) = 0;
 };
 
 

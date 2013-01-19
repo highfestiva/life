@@ -545,7 +545,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ServerGrenade.cpp"
+				RelativePath=".\ServerFastProjectile.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerProjectile.cpp"
 				>
 			</File>
 		</Filter>
@@ -553,7 +557,15 @@
 			Name="Header Files"
 			>
 			<File
+				RelativePath=".\GameServerLogic.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Npc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServerDelegate.h"
 				>
 			</File>
 			<File
@@ -565,11 +577,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ServerGrenade.h"
+				RelativePath=".\ServerFastProjectile.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ServerLauncher.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerProjectile.h"
 				>
 			</File>
 		</Filter>
@@ -593,14 +609,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\GameServerLogic.h"
-			>
-		</File>
-		<File
-			RelativePath=".\PushServerDelegate.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

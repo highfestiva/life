@@ -11,6 +11,8 @@
 #include "../RtVar.h"
 #include "GameServerLogic.h"
 
+#define AMMO_VELOCITY_M_PER_S	500.0f	// TODO: remove hard-coding!
+
 
 
 namespace Push
@@ -100,7 +102,7 @@ void Npc::OnTick()
 	{
 		Vector3DF lDiff = lTarget->GetPosition() - lMyAvatar->GetPosition();
 		float lDistance = lDiff.GetLength();
-		const float lTimeUntilHit = mIntelligence * lDistance / 200.0f;	// Ammo velocity m/s!
+		const float lTimeUntilHit = mIntelligence * lDistance / AMMO_VELOCITY_M_PER_S;
 		lDiff = (lTarget->GetPosition() + lTarget->GetVelocity()*lTimeUntilHit) - (lMyAvatar->GetPosition() + lMyAvatar->GetVelocity()*lTimeUntilHit);
 
 		float _;
@@ -121,7 +123,7 @@ void Npc::OnTick()
 		lPhi *= std::abs(lPhi);
 
 		lDistance = lDiff.GetLength();
-		if (lDistance > 15 && std::abs(lDiff.z) < 2)
+		if (lDistance > 15 && std::abs(lDiff.z) < 2)	// TODO: implement different shooting pattern for other weapons.
 		{
 			lCanShoot = true;	// Allow grenade shooting if out of range.
 		}

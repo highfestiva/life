@@ -11,39 +11,36 @@
 
 
 
+namespace Life
+{
+class Launcher;
+}
+
+
+
 namespace Push
 {
 
 
 
-class ServerLauncher;
-
-
-
-class ServerGrenade: public Cure::CppContextObject
+class ServerProjectile: public Cure::CppContextObject
 {
 public:
 	typedef Cure::CppContextObject Parent;
 
-	ServerGrenade(Cure::ResourceManager* pResourceManager, float pMuzzleVelocity, ServerLauncher* pLauncher);
-	virtual ~ServerGrenade();
-
-	Cure::GameObjectId GetOwnerId() const;
-	void SetOwnerId(Cure::GameObjectId pOwnerId);
+	ServerProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, float pMuzzleVelocity, Life::Launcher* pLauncher);
+	virtual ~ServerProjectile();
 
 private:
 	virtual void OnLoaded();
-	void OnTick();
 	virtual void OnForceApplied(Cure::ContextObject* pOtherObject,
 		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 		const Vector3DF& pForce, const Vector3DF& pTorque,
 		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
 	float mMuzzleVelocity;
-	ServerLauncher* mLauncher;
-	bool mIsLaunched;
-	bool mIsExploded;
-	Cure::GameObjectId mOwnerId;
+	Life::Launcher* mLauncher;
+	bool mIsDetonated;
 
 	LOG_CLASS_DECLARE();
 };

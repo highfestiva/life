@@ -13,14 +13,15 @@
 #include "../../Life/LifeServer/GameServerManager.h"
 #include "../RtVar.h"
 #include "../RtVar.h"
-#include "../PushBarrel.h"
 #include "../Explosion.h"
 #include "../Version.h"
 #include "Npc.h"
-#include "ServerGrenade.h"
+#include "ServerFastProjectile.h"
+#include "ServerProjectile.h"
 
 #define KILLS	_T("int_kills:")
 #define DEATHS	_T("int_deaths:")
+#define PING	_T("int_ping:")
 
 
 
@@ -61,7 +62,7 @@ void PushServerDelegate::OnLogin(Life::Client* pClient)
 
 	// Create scores.
 	const str lLoginName = strutil::Encode(pClient->GetUserConnection()->GetLoginName());
-	CreateScore(lLoginName);
+	CreateScore(lLoginName, true);
 
 	// Create another computer opponent, to balance teams.
 	CreateNpc();
@@ -127,35 +128,34 @@ bool PushServerDelegate::IsObjectLendable(Life::Client* pClient, Cure::ContextOb
 void PushServerDelegate::PreEndTick()
 {
 	TickNpcGhosts();
+
+	if (mPingUpdateTimer.QueryTimeDiff() > 5.0)
+	{
+		mPingUpdateTimer.ClearTimeDiff();
+		UpdatePing();
+	}
 }
 
 
-
-void PushServerDelegate::GetBarrel(Cure::GameObjectId pOwnerId, TransformationF& pTransform, Vector3DF& pVelocity) const
-{
-	PushBarrel::GetInfo(mGameServerManager, pOwnerId, pTransform, pVelocity);
-}
 
 void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar)
 {
-	ServerGrenade* lGrenade = new ServerGrenade(mGameServerManager->GetResourceManager(), 200, this);
-	mGameServerManager->AddContextObject(lGrenade, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	log_volatile(mLog.Debugf(_T("Shooting grenade with ID %i!"), (int)lGrenade->GetInstanceId()));
-	lGrenade->SetOwnerId(pAvatar->GetInstanceId());
+	//ServerProjectile* lProjectile = new ServerProjectile(mGameServerManager->GetResourceManager(), _T("grenade"), 100, this);
+	ServerFastProjectile* lProjectile = new ServerFastProjectile(mGameServerManager->GetResourceManager(), _T("bullet"), 500, this);
+	mGameServerManager->AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	log_volatile(mLog.Debugf(_T("Shooting projectile with ID %i!"), (int)lProjectile->GetInstanceId()));
+	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
 	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition()+Vector3DF(0, 0, +5.0f));
-	lGrenade->SetInitialTransform(t);
-	lGrenade->StartLoading();
+	lProjectile->SetInitialTransform(t);
+	lProjectile->StartLoading();
+
+	Life::Client* lClient = mGameServerManager->GetClientByObject(pAvatar);
+	mGameServerManager->BroadcastNumberMessage(lClient, false, Cure::MessageNumber::INFO_APPLICATION_0, pAvatar->GetInstanceId(), 0);
 }
 
-void PushServerDelegate::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
-	Cure::ContextObject* pExplosive, Cure::ContextObject* pHitObject,
-	TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pHitBodyId)
+void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition)
 {
-	(void)pForce;
-	(void)pTorque;
-	(void)pHitObject;
-	(void)pExplosiveBodyId;
-	(void)pHitBodyId;
+	(void)pExplosiveGeometry;
 
 	TBC::PhysicsManager* lPhysicsManager = mGameServerManager->GetPhysicsManager();
 	Cure::ContextManager::ContextObjectTable lObjectTable = mGameServerManager->GetContext()->GetObjectTable();
@@ -172,32 +172,18 @@ void PushServerDelegate::Detonate(const Vector3DF& pForce, const Vector3DF& pTor
 		{
 			if (IsAvatarObject(lObject))
 			{
-				Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
-				assert(lHealth);
-				const float lPriorHealth = lHealth->GetValue();
-				float lRemainingHealth = lPriorHealth - lForce*(float)Random::Normal(0.41, 0.05, 0.3, 0.5);
-				if (lPriorHealth > 0)
-				{
-					if (lRemainingHealth < 0)
-					{
-						lRemainingHealth = 0;
-					}
-					lHealth->SetValue(lRemainingHealth);
-				}
-				if (lPriorHealth > 0 && lRemainingHealth <= 0)
-				{
-					AddPoint(DEATHS, lObject, +1);
-					ServerGrenade* lGrenade = dynamic_cast<ServerGrenade*>(pExplosive);
-					if (lGrenade)
-					{
-						const int lPoints = (lGrenade->GetOwnerId() == lObject->GetInstanceId()) ? -1 : +1;	// Kills oneself?
-						AddPoint(KILLS, mGameServerManager->GetContext()->GetObject(lGrenade->GetOwnerId()), lPoints);
-					}
-					Die(lObject);
-				}
+				DrainHealth(pExplosive, lObject, lForce*(float)Random::Normal(0.51, 0.05, 0.3, 0.5));
 			}
 			x->second->ForceSend();
 		}
+	}
+}
+
+void PushServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
+{
+	if (IsAvatarObject(pHitObject))
+	{
+		DrainHealth(pBullet, pHitObject, (float)Random::Normal(0.17, 0.01, 0.1, 0.3));
 	}
 }
 
@@ -283,7 +269,7 @@ void PushServerDelegate::CreateNpc()
 	lNpc->StartCreateAvatar(0.1f);
 
 	const str lPlayerName = strutil::Format(_T("NPC %u"), lNpc->GetInstanceId());
-	CreateScore(lPlayerName);
+	CreateScore(lPlayerName, false);
 }
 
 void PushServerDelegate::DeleteNpc()
@@ -312,13 +298,17 @@ Npc* PushServerDelegate::GetNpcByAvatar(Cure::GameObjectId pAvatarId) const
 	return 0;
 }
 
-void PushServerDelegate::CreateScore(const str& pPlayerName)
+void PushServerDelegate::CreateScore(const str& pPlayerName, bool pCreatePing)
 {
 	assert(mScoreInfoId);
 	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
 	assert(lScoreInfo);
 	new Cure::IntAttribute(lScoreInfo, KILLS + pPlayerName, 0);
 	new Cure::IntAttribute(lScoreInfo, DEATHS + pPlayerName, 0);
+	if (pCreatePing)
+	{
+		new Cure::IntAttribute(lScoreInfo, PING + pPlayerName, 0);
+	}
 }
 
 void PushServerDelegate::DeleteScore(const str& pPlayerName)
@@ -328,6 +318,21 @@ void PushServerDelegate::DeleteScore(const str& pPlayerName)
 	assert(lScoreInfo);
 	lScoreInfo->DeleteAttribute(KILLS + pPlayerName);
 	lScoreInfo->DeleteAttribute(DEATHS + pPlayerName);
+	lScoreInfo->DeleteAttribute(PING + pPlayerName);
+}
+
+void PushServerDelegate::UpdatePing()
+{
+	const Cure::TimeManager* lTimeManager = mGameServerManager->GetTimeManager();
+	typedef Life::GameServerManager::AccountClientTable ClientTable;
+	const ClientTable& lClients = mGameServerManager->GetAccountClientTable();
+	ClientTable::ConstIterator x = lClients.First();
+	for (; x != lClients.End(); ++x)
+	{
+		int lPing = (int)(lTimeManager->ConvertPhysicsFramesToSeconds((int)x.GetObject()->GetPhysicsFrameAheadCount()) * 1000);
+		lPing = std::abs(lPing) * 2;
+		SetPoints(PING, x.GetObject(), lPing);
+	}
 }
 
 void PushServerDelegate::AddPoint(const str& pPrefix, const Cure::ContextObject* pAvatar, int pPoints)
@@ -362,11 +367,51 @@ void PushServerDelegate::AddPoint(const str& pPrefix, const Cure::ContextObject*
 	}
 }
 
+void PushServerDelegate::SetPoints(const str& pPrefix, const Life::Client* pClient, int pPoints)
+{
+	const str lPlayerName = strutil::Encode(pClient->GetUserConnection()->GetLoginName());
+	assert(mScoreInfoId);
+	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
+	assert(lScoreInfo);
+	Cure::IntAttribute* lAttribute = (Cure::IntAttribute*)lScoreInfo->GetAttribute(pPrefix+lPlayerName);
+	assert(lAttribute);
+	if (lAttribute)
+	{
+		lAttribute->SetValue(pPoints);
+	}
+}
+
+void PushServerDelegate::DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pAvatar, float pDamage)
+{
+	Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pAvatar->GetAttribute(_T("float_health"));
+	assert(lHealth);
+	const float lPriorHealth = lHealth->GetValue();
+	float lRemainingHealth = lPriorHealth - pDamage;
+	if (lPriorHealth > 0)
+	{
+		if (lRemainingHealth < 0)
+		{
+			lRemainingHealth = 0;
+		}
+		lHealth->SetValue(lRemainingHealth);
+	}
+	if (lPriorHealth > 0 && lRemainingHealth <= 0)
+	{
+		AddPoint(DEATHS, pAvatar, +1);
+		if (pExplosive->GetOwnerInstanceId())
+		{
+			const int lPoints = (pExplosive->GetOwnerInstanceId() == pAvatar->GetInstanceId()) ? -1 : +1;	// Kills oneself?
+			AddPoint(KILLS, mGameServerManager->GetContext()->GetObject(pExplosive->GetOwnerInstanceId()), lPoints);
+		}
+		Die(pAvatar);
+	}
+}
+
 void PushServerDelegate::Die(Cure::ContextObject* pAvatar)
 {
 	Explosion::FallApart(mGameServerManager->GetPhysicsManager(), pAvatar);
 	mGameServerManager->DeleteContextObjectDelay(pAvatar, 2);
-	mGameServerManager->BroadcastNumberMessage(true, Cure::MessageNumber::INFO_FALL_APART, pAvatar->GetInstanceId(), 0);
+	mGameServerManager->BroadcastNumberMessage(0, true, Cure::MessageNumber::INFO_FALL_APART, pAvatar->GetInstanceId(), 0);
 }
 
 bool PushServerDelegate::IsAvatarObject(const Cure::ContextObject* pObject) const

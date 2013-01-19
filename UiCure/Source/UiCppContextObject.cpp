@@ -31,7 +31,8 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mEnableUi(true),
 	mAllowRootShadow(true),
 	mEnablePixelShader(true),
-	mEnableMeshSlide(true),
+	mEnableMeshMove(true),
+	mEnableMeshSlide(false),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
 	mLerpMode(LERP_STOP)
@@ -78,6 +79,11 @@ void CppContextObject::EnablePixelShader(bool pEnable)
 	mEnablePixelShader = pEnable;
 }
 
+void CppContextObject::EnableMeshMove(bool pEnable)
+{
+	mEnableMeshMove = pEnable;
+}
+
 void CppContextObject::EnableMeshSlide(bool pEnable)
 {
 	mEnableMeshSlide = pEnable;
@@ -98,7 +104,7 @@ void CppContextObject::StartLoading()
 
 void CppContextObject::OnTick()
 {
-	if (!mEnableUi)
+	if (!mEnableUi || !mEnableMeshMove)
 	{
 		return;
 	}
@@ -138,17 +144,24 @@ void CppContextObject::UiMove()
 		if (mPhysicsOverride != Cure::PHYSICS_OVERRIDE_BONES)
 		{
 			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
-			if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
+			TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+			if (!lGeometry || lBodyId == TBC::INVALID_BODY)
 			{
-				mLog.Warningf(_T("Physical body (index %u) for %s not loaded!"), lResource->GetOffset().mGeometryIndex, lResource->GetName().c_str());
-				continue;
+				if (lGeometry)
+				{
+					lBodyId = lGeometry->GetTriggerId();
+				}
+				if (!lBodyId)
+				{
+					mLog.Warningf(_T("Physical body (index %u) for %s not loaded!"), lResource->GetOffset().mGeometryIndex, lResource->GetName().c_str());
+					continue;
+				}
 			}
-			if (!mEnableMeshSlide && mPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC && mPhysics->GetBodyType(lGeometry) == TBC::PhysicsManager::STATIC)
+			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBodyId, lPhysicsTransform);
+			/*if (mAutoDisableMeshMove && mPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC && mPhysics->GetBodyType(lGeometry) == TBC::PhysicsManager::STATIC)
 			{
-				// Forget it, we're not sliding static meshes.
-				continue;
-			}
-			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
+				mEnableMeshMove = false;
+			}*/
 
 			if (mLerpMode == LERP_START)
 			{

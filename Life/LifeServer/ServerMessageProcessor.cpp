@@ -77,7 +77,7 @@ void ServerMessageProcessor::ProcessNetworkInputMessage(Client* pClient, Cure::M
 			// TODO: make sure client is authorized to control object with given ID.
 			Cure::GameObjectId lInstanceId = lMovement->GetObjectId();
 			Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lInstanceId);
-			if (lObject && (pClient->GetAvatarId() == lInstanceId || pClient->GetAvatarId() == lObject->GetOwnerInstanceId()))
+			if (lObject && (pClient->GetAvatarId() == lInstanceId || pClient->GetAvatarId() == lObject->GetBorrowerInstanceId()))
 			{
 				int32 lClientFrameIndex = lMovement->GetFrameIndex();
 				mGameServerManager->AdjustClientSimulationSpeed(pClient, lClientFrameIndex);
@@ -147,7 +147,7 @@ void ServerMessageProcessor::ProcessNumber(Client* pClient, Cure::MessageNumber:
 			}
 			else
 			{
-				mLog.Warningf(_T("User %s tried to fetch unknown object with ID %i."), pClient->GetUserConnection()->GetLoginName().c_str(), lInstanceId);
+				log_volatile(mLog.Debugf(_T("User %s tried to fetch unknown object with ID %i."), pClient->GetUserConnection()->GetLoginName().c_str(), lInstanceId));
 			}
 		}
 		break;

@@ -514,6 +514,10 @@
 				RelativePath=".\Source\UiSound.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Source\UiSoundReleaser.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -582,6 +586,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiSound.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiSoundReleaser.h"
 				>
 			</File>
 			<File

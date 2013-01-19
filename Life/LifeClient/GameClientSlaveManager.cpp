@@ -720,6 +720,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		}
 		break;
 		case Cure::MESSAGE_TYPE_CREATE_OBJECT:
+		case Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT:
 		{
 			Cure::MessageCreateObject* lMessageCreateObject = (Cure::MessageCreateObject*)pMessage;
 			wstr lClassId;
@@ -728,9 +729,15 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			//const float a = 1.0f/::sqrt(2.0f);
 			//lTransformation.SetOrientation(QuaternionF(0, 0, -a, -a));
 			lMessageCreateObject->GetClassId(lClassId);
-			CreateObject(lMessageCreateObject->GetObjectId(),
-				strutil::Encode(lClassId),
-				Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
+			Cure::ContextObject* lObject = CreateObject(lMessageCreateObject->GetObjectId(),
+				strutil::Encode(lClassId), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
+			if (lType == Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT)
+			{
+				Cure::MessageCreateOwnedObject* lMessageCreateOwnedObject = (Cure::MessageCreateOwnedObject*)lMessageCreateObject;
+				lObject->SetOwnerInstanceId(lMessageCreateOwnedObject->GetOwnerInstanceId());
+				assert(GetContext()->GetObject(lObject->GetOwnerInstanceId(), true));
+			}
+
 		}
 		break;
 		case Cure::MESSAGE_TYPE_DELETE_OBJECT:
@@ -917,15 +924,14 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 	}
 }
 
-bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId,
+Cure::ContextObject* GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId,
 	Cure::NetworkObjectType pNetworkType, TransformationF* pTransform)
 {
-	Cure::ContextObject* lPreviousObject = GetContext()->GetObject(pInstanceId, true);
-	//assert(!lPreviousObject);
-	if (!lPreviousObject)
+	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId, true);
+	if (!lObject)
 	{
 		log_volatile(mLog.Debugf(_T("Slave %i creating context object %s."), mSlaveIndex, pClassId.c_str()));
-		Cure::ContextObject* lObject = Parent::CreateContextObject(pClassId, pNetworkType, pInstanceId);
+		lObject = Parent::CreateContextObject(pClassId, pNetworkType, pInstanceId);
 		if (pTransform)
 		{
 			lObject->SetInitialTransform(*pTransform);
@@ -937,9 +943,9 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 	}
 	else
 	{
-		assert(lPreviousObject->GetClassId() == pClassId);
+		assert(lObject->GetClassId() == pClassId);
 	}
-	return (true);
+	return lObject;
 }
 
 void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData, float pDeltaThreshold)

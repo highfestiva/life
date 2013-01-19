@@ -232,7 +232,10 @@ void ContextManager::DisableTickCallback(ContextObject* pObject)
 
 void ContextManager::EnableMicroTickCallback(ContextObject* pObject)
 {
-	mMicroTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+	if (pObject->GetNetworkObjectType() == NETWORK_OBJECT_LOCAL_ONLY || GetGameManager()->IsPrimaryManager())
+	{
+		mMicroTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+	}
 }
 
 void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
@@ -284,10 +287,7 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 
 void ContextManager::MicroTick(float pTimeDelta)
 {
-	if (GetGameManager()->IsPrimaryManager())
-	{
-		DispatchMicroTickCallbacks(pTimeDelta);
-	}
+	DispatchMicroTickCallbacks(pTimeDelta);
 	DispatchAlarmCallbacks();
 }
 

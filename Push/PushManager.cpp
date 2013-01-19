@@ -26,9 +26,9 @@
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "Explosion.h"
-#include "Grenade.h"
+#include "FastProjectile.h"
 #include "Level.h"
-#include "PushBarrel.h"
+#include "Projectile.h"
 #include "PushConsoleManager.h"
 #include "PushTicker.h"
 #include "RoadSignButton.h"
@@ -54,6 +54,7 @@ struct Score
 	str mName;
 	int mKills;
 	int mDeaths;
+	int mPing;
 };
 
 struct DeathsAscendingOrder
@@ -408,16 +409,21 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 		}
 	}
 
-	if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
+	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
 	{
 		const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 		if (lObject)
 		{
 			Explosion::PushObject(GetPhysicsManager(), lObject, pPosition, 1.0f);
 		}
-	}
+	}*/
 }
 
+void PushManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
+{
+	(void)pBullet;
+	(void)pHitObject;
+}
 
 Cure::RuntimeVariableScope* PushManager::GetVariableScope() const
 {
@@ -708,7 +714,7 @@ void PushManager::TickUiInput()
 #define F(alt) f.mControl[Life::Options::FireControl::FIRE##alt]
 			if (F(0) > 0.5f)
 			{
-				Fire();
+				Shoot();
 			}
 
 			mAvatarInvisibleCount = 0;
@@ -1162,7 +1168,16 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			}
 		}
 		return;
-
+		case Cure::MessageNumber::INFO_APPLICATION_0:
+		{
+			const Cure::GameObjectId lAvatarId = pInteger;
+			UiCure::CppContextObject* lAvatar = (UiCure::CppContextObject*)GetContext()->GetObject(lAvatarId);
+			if (lAvatar)
+			{
+				ShootLocal(lAvatar);
+			}
+		}
+		return;
 	}
 	Parent::ProcessNumber(pType, pInteger, pFloat);
 }
@@ -1176,7 +1191,7 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	}
 	else if (pClassId == _T("grenade"))
 	{
-		lObject = new Grenade(GetResourceManager(), mUiManager, (Launcher*)this);
+		lObject = new Projectile(GetResourceManager(), pClassId, mUiManager, (Launcher*)this);
 	}
 	else if (pClassId == _T("score_info"))
 	{
@@ -1255,12 +1270,12 @@ void PushManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 
 void PushManager::OnFireButton(UiTbc::Button*)
 {
-	Fire();
+	Shoot();
 }
 
-void PushManager::Fire()
+void PushManager::Shoot()
 {
-	if (mFireTimeout.QueryTimeDiff() < 0.3f)
+	if (mFireTimeout.QueryTimeDiff() < 0.15f)
 	{
 		return;
 	
@@ -1275,11 +1290,19 @@ void PushManager::Fire()
 	mFireTimeout.ClearTimeDiff();
 	GetNetworkClient()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
 						Cure::MessageNumber::INFO_APPLICATION_0, 0, 0);
+
+	ShootLocal(lAvatar);
 }
 
-void PushManager::GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const
+void PushManager::ShootLocal(Cure::ContextObject* pAvatar)
 {
-	PushBarrel::GetInfo(this, mAvatarId, pTransform, pVelocity);
+	// if fast projectile:
+	FastProjectile* lProjectile = new FastProjectile(GetResourceManager(), _T("bullet"), mUiManager, 500, this);
+	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
+	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition());
+	lProjectile->SetInitialTransform(t);
+	lProjectile->StartLoading();
 }
 
 
@@ -1418,6 +1441,12 @@ void PushManager::DrawScore()
 			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
 			lMode = 1;
 		}
+		else if (strutil::StartsWith(lAttribute->GetName(), _T("int_ping:")))
+		{
+			lName = lAttribute->GetName().substr(9);
+			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
+			lMode = 2;
+		}
 		if (!lName.empty())
 		{
 			ScoreMap::iterator x = lScoreMap.find(lName);
@@ -1427,24 +1456,26 @@ void PushManager::DrawScore()
 				s.mName = lName;
 				s.mKills = 0;
 				s.mDeaths = 0;
+				s.mPing = 0;
 				lScoreArray.push_back(s);
 				x = lScoreMap.insert(std::pair<str, Score*>(lName, &lScoreArray.back())).first;
 			}
 			switch (lMode)
 			{
-				case 0:	x->second->mKills  = lValue;	break;
-				case 1:	x->second->mDeaths = lValue;	break;
+				case 0:	x->second->mKills	= lValue;	break;
+				case 1:	x->second->mDeaths	= lValue;	break;
+				case 2:	x->second->mPing	= lValue;	break;
 			}
 		}
 	}
 	std::sort(lScoreArray.begin(), lScoreArray.end(), gDeathsAscendingOrder);
 	std::sort(lScoreArray.begin(), lScoreArray.end(), gKillsDecendingOrder);
 	mUiManager->GetPainter()->SetTabSize(140);
-	str lScore = _T("Name\tKills\tDeaths");
+	str lScore = _T("Name\tKills\tDeaths\tPing");
 	ScoreArray::iterator x = lScoreArray.begin();
 	for (; x != lScoreArray.end(); ++x)
 	{
-		lScore += strutil::Format(_T("\n%s\t%i\t%i"), x->mName.c_str(), x->mKills, x->mDeaths);
+		lScore += strutil::Format(_T("\n%s\t%i\t%i\t%i"), x->mName.c_str(), x->mKills, x->mDeaths, x->mPing);
 	}
 	mUiManager->GetPainter()->SetColor(Color(1, 1, 1, 190), 0);
 	mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);

@@ -41,6 +41,7 @@ public:
 	void EnableUi(bool pEnable);
 	void DisableRootShadow();
 	void EnablePixelShader(bool pEnable);
+	void EnableMeshMove(bool pEnable);
 	void EnableMeshSlide(bool pEnable);
 
 	virtual void StartLoading();
@@ -84,6 +85,7 @@ protected:
 	bool mEnableUi;
 	bool mAllowRootShadow;
 	bool mEnablePixelShader;
+	bool mEnableMeshMove;
 	bool mEnableMeshSlide;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;

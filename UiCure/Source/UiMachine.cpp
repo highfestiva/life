@@ -30,6 +30,7 @@ Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, G
 	Parent(pResourceManager, pClassId, pUiManager),
 	mExhaustEmitter(0)
 {
+	EnableMeshSlide(true);
 }
 
 Machine::~Machine()
@@ -71,7 +72,11 @@ void Machine::OnTick()
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;
-	lPhysicsManager->GetBodyVelocity(lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId(), lVelocity);
+	TBC::PhysicsManager::BodyID lBodyId = lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId();
+	if (lBodyId != TBC::INVALID_BODY)
+	{
+		lPhysicsManager->GetBodyVelocity(lBodyId, lVelocity);
+	}
 	size_t lEngineSoundIndex = 0;
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{

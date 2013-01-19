@@ -56,6 +56,8 @@ public:
 	const str& GetClassId() const;
 	GameObjectId GetOwnerInstanceId() const;
 	void SetOwnerInstanceId(GameObjectId pInstanceId);
+	GameObjectId GetBorrowerInstanceId() const;
+	void SetBorrowerInstanceId(GameObjectId pInstanceId);
 
 	NetworkObjectType GetNetworkObjectType() const;
 	void SetNetworkObjectType(NetworkObjectType pType);
@@ -98,6 +100,7 @@ public:
 	Vector3DF GetPosition() const;
 	void SetRootPosition(const Vector3DF& pPosition);
 	void SetRootOrientation(const QuaternionF& pOrientation);
+	void SetRootVelocity(const Vector3DF& pVelocity);
 	QuaternionF GetOrientation() const;
 	Vector3DF GetVelocity() const;
 	Vector3DF GetAngularVelocity() const;
@@ -165,6 +168,7 @@ protected:
 	ResourceManager* mResourceManager;
 	GameObjectId mInstanceId;
 	GameObjectId mOwnerInstanceId;
+	GameObjectId mBorrowerInstanceId;
 	str mClassId;
 	NetworkObjectType mNetworkObjectType;
 	ContextObject* mParent;

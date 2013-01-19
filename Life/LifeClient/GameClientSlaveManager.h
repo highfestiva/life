@@ -105,7 +105,7 @@ protected:
 	virtual void ProcessNetworkInputMessage(Cure::Message* pMessage);
 	virtual void ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage);
 	virtual void ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
-	bool CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType,
+	Cure::ContextObject* CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType,
 		TransformationF* pTransform = 0);
 	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData, float pDeltaThreshold);
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);

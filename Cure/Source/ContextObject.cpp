@@ -37,6 +37,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mResourceManager(pResourceManager),
 	mInstanceId(0),
 	mOwnerInstanceId(0),
+	mBorrowerInstanceId(0),
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
 	mParent(0),
@@ -144,6 +145,16 @@ GameObjectId ContextObject::GetOwnerInstanceId() const
 void ContextObject::SetOwnerInstanceId(GameObjectId pInstanceId)
 {
 	mOwnerInstanceId = pInstanceId;
+}
+
+GameObjectId ContextObject::GetBorrowerInstanceId() const
+{
+	return mBorrowerInstanceId;
+}
+
+void ContextObject::SetBorrowerInstanceId(GameObjectId pInstanceId)
+{
+	mBorrowerInstanceId = pInstanceId;
 }
 
 
@@ -462,9 +473,14 @@ Vector3DF ContextObject::GetPosition() const
 	if (mPhysics && mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		if (lGeometry)
 		{
-			return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()));
+			TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+			if (!lBodyId)
+			{
+				lBodyId = lGeometry->GetTriggerId();
+			}
+			return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lBodyId));
 		}
 		//assert(false);
 	}
@@ -493,6 +509,11 @@ void ContextObject::SetRootOrientation(const QuaternionF& pOrientation)
 	}
 }
 
+void ContextObject::SetRootVelocity(const Vector3DF& pVelocity)
+{
+	mPosition.mPosition.mVelocity = pVelocity;
+}
+
 QuaternionF ContextObject::GetOrientation() const
 {
 	if (mPhysics)
@@ -510,27 +531,35 @@ QuaternionF ContextObject::GetOrientation() const
 
 Vector3DF ContextObject::GetVelocity() const
 {
-	Vector3DF lVelocity;
 	if (mPhysics)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 		{
+			Vector3DF lVelocity;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+			return lVelocity;
 		}
 	}
-	return (lVelocity);
+	return mPosition.mPosition.mVelocity;
 }
 
 Vector3DF ContextObject::GetAngularVelocity() const
 {
-	Vector3DF lAngularVelocity;
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	if (mPhysics)
 	{
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocity);
+		Vector3DF lAngularVelocity;
+		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		{
+			mManager->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocity);
+		}
+		return lAngularVelocity;
 	}
-	return lAngularVelocity;
+	else
+	{
+		return mPosition.mPosition.mAngularVelocity;
+	}
 }
 
 Vector3DF ContextObject::GetAcceleration() const

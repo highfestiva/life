@@ -7,9 +7,9 @@
 #pragma once
 
 #include "../Lepra/Include/DiskFile.h"
-#include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../TBC/Include/PhysicsEngine.h"
-#include "Launcher.h"
+#include "../Life/LifeClient/GameClientSlaveManager.h"
+#include "../Life/Launcher.h"
 #include "LoginView.h"
 #include "Push.h"
 #include "Version.h"
@@ -44,7 +44,7 @@ class RoadSignButton;
 
 
 
-class PushManager: public Life::GameClientSlaveManager, private ClientLoginObserver, private Launcher
+class PushManager: public Life::GameClientSlaveManager, private ClientLoginObserver, private Life::Launcher
 {
 	typedef Life::GameClientSlaveManager Parent;
 public:
@@ -72,6 +72,7 @@ public:
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition);
+	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 protected:
 	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
@@ -106,8 +107,8 @@ protected:
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
 	void OnFireButton(UiTbc::Button*);
-	void Fire();
-	virtual void GetBarrel(TransformationF& pTransform, Vector3DF& pVelocity) const;
+	void Shoot();
+	void ShootLocal(Cure::ContextObject* pAvatar);
 
 	void CancelLogin();
 	void OnVehicleSelect(UiTbc::Button* pButton);

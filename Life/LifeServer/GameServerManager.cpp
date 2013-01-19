@@ -353,8 +353,9 @@ void GameServerManager::LoanObject(Client* pClient, Cure::GameObjectId pInstance
 	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId);
 	if (lObject)
 	{
-		if (lObject->GetOwnerInstanceId() == pClient->GetAvatarId() ||	// Reloan?
-			lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+		if (lObject->GetBorrowerInstanceId() == pClient->GetAvatarId() ||	// Reloan?
+			(lObject->GetBorrowerInstanceId() == 0 &&
+			lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED))
 		{
 			if (mDelegate->IsObjectLendable(pClient, lObject))
 			{
@@ -364,7 +365,7 @@ void GameServerManager::LoanObject(Client* pClient, Cure::GameObjectId pInstance
 				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 				GetNetworkServer()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
 					Cure::MessageNumber::INFO_GRANT_LOAN, pInstanceId, (float)lEndFrame);
-				lObject->SetOwnerInstanceId(pClient->GetAvatarId());
+				lObject->SetBorrowerInstanceId(pClient->GetAvatarId());
 				GetContext()->CancelPendingAlarmCallbacksById(lObject, Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES);
 				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES, lServerOwnershipTime, 0);
 			}
@@ -416,10 +417,13 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	Cure::MessageCreateObject* lCreateMessage = 0;
+	Cure::MessageCreateOwnedObject* lCreateOwnedMessage = 0;
 	if (pCreate)
 	{
 		lCreateMessage = (Cure::MessageCreateObject*)GetNetworkAgent()->
 			GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
+		lCreateOwnedMessage = (Cure::MessageCreateOwnedObject*)GetNetworkAgent()->
+			GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT);
 	}
 	Cure::MessageObjectPosition* lPositionMessage = (Cure::MessageObjectPosition*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_POSITION);
@@ -436,12 +440,21 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 
 		lPacket->Clear();
 
-		if (lCreateMessage)	// Store creation info?
+		if (pCreate)	// Store creation info?
 		{
-			lPacket->AddMessage(lCreateMessage);
 			TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
-			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-				 lTransformation, wstrutil::Encode(lObject->GetClassId()));
+			if (lObject->GetOwnerInstanceId() != 0)
+			{
+				lPacket->AddMessage(lCreateOwnedMessage);
+				lCreateOwnedMessage->Store(lPacket, lObject->GetInstanceId(), lTransformation,
+					wstrutil::Encode(lObject->GetClassId()), lObject->GetOwnerInstanceId());
+			}
+			else
+			{
+				lPacket->AddMessage(lCreateMessage);
+				lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
+					 lTransformation, wstrutil::Encode(lObject->GetClassId()));
+			}
 		}
 
 		const Cure::ObjectPositionalData* lPosition;
@@ -457,22 +470,32 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 	}
 
 	lPacket->Clear();
-	if (lCreateMessage)	// Store creation info?
+	if (pCreate)	// Sent creation info?
 	{
+		GetNetworkAgent()->GetPacketFactory()->GetMessageFactory()->Release(lCreateOwnedMessage);
 		GetNetworkAgent()->GetPacketFactory()->GetMessageFactory()->Release(lCreateMessage);
 	}
 	GetNetworkAgent()->GetPacketFactory()->GetMessageFactory()->Release(lPositionMessage);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-void GameServerManager::BroadcastCreateObject(Cure::GameObjectId pInstanceId, const TransformationF& pTransform, const str& pClassId)
+void GameServerManager::BroadcastCreateObject(Cure::GameObjectId pInstanceId, const TransformationF& pTransform, const str& pClassId, Cure::GameObjectId pOwnerInstanceId)
 {
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
-	Cure::MessageCreateObject* lCreate = (Cure::MessageCreateObject*)GetNetworkAgent()->
-		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
-	lPacket->AddMessage(lCreate);
-	lCreate->Store(lPacket, pInstanceId, pTransform,
-		wstrutil::Encode(pClassId));
+	if (pOwnerInstanceId)
+	{
+		Cure::MessageCreateOwnedObject* lCreate = (Cure::MessageCreateOwnedObject*)GetNetworkAgent()->
+			GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT);
+		lPacket->AddMessage(lCreate);
+		lCreate->Store(lPacket, pInstanceId, pTransform, wstrutil::Encode(pClassId), pOwnerInstanceId);
+	}
+	else
+	{
+		Cure::MessageCreateObject* lCreate = (Cure::MessageCreateObject*)GetNetworkAgent()->
+			GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
+		lPacket->AddMessage(lCreate);
+		lCreate->Store(lPacket, pInstanceId, pTransform, wstrutil::Encode(pClassId));
+	}
 	BroadcastPacket(0, lPacket, true);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
@@ -518,14 +541,14 @@ bool GameServerManager::BroadcastStatusMessage(Cure::MessageStatus::InfoType pTy
 	return (lOk);
 }
 
-void GameServerManager::BroadcastNumberMessage(bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat)
+void GameServerManager::BroadcastNumberMessage(Client* pExcludeClient, bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat)
 {
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	Cure::MessageNumber* lNumber = (Cure::MessageNumber*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_NUMBER);
 	lPacket->AddMessage(lNumber);
 	lNumber->Store(lPacket, pInfo, pInteger, pFloat);
-	BroadcastPacket(0, lPacket, pSafe);
+	BroadcastPacket(pExcludeClient, lPacket, pSafe);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
@@ -589,6 +612,10 @@ Client* GameServerManager::GetClientByObject(Cure::ContextObject*& pObject) cons
 	return lClient;
 }
 
+const GameServerManager::AccountClientTable& GameServerManager::GetAccountClientTable() const
+{
+	return mAccountClientTable;
+}
 
 
 void GameServerManager::Build(const str& pWhat)
@@ -973,8 +1000,8 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	if (pObject1 != pObject2 &&	// I.e. car where a wheel collides with the body.
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)	// We only handle network object collisions.
 	{
-		if (pObject1->GetOwnerInstanceId() == pObject2->GetInstanceId() ||
-			pObject2->GetOwnerInstanceId() == pObject1->GetInstanceId())
+		if (pObject1->GetBorrowerInstanceId() == pObject2->GetInstanceId() ||
+			pObject2->GetBorrowerInstanceId() == pObject1->GetInstanceId())
 		{
 			return;	// The client knows best what collisions have happened.
 		}
@@ -988,8 +1015,8 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 		}
 		else if (lAreBothControlled)
 		{
-			if (pObject1->GetOwnerInstanceId() == pObject2->GetInstanceId() ||
-				pObject2->GetOwnerInstanceId() == pObject1->GetInstanceId())
+			if (pObject1->GetBorrowerInstanceId() == pObject2->GetInstanceId() ||
+				pObject2->GetBorrowerInstanceId() == pObject1->GetInstanceId())
 			{
 				// An avatar collides against an object that she owns, let remote end handle!
 			}
@@ -1067,6 +1094,11 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
+	if (pObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCAL_ONLY)
+	{
+		return true;
+	}
+
 	bool lLastSend = false;
 	float lSendIntervalLimit;
 	CURE_RTVAR_GET(lSendIntervalLimit, =(float), GetVariableScope(), RTVAR_NETPHYS_POSSENDINTERVALLIMIT, 0.5);
@@ -1178,7 +1210,7 @@ void GameServerManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void
 	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
 	{
 		pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-		pObject->SetOwnerInstanceId(0);
+		pObject->SetBorrowerInstanceId(0);
 	}
 	else
 	{
@@ -1240,6 +1272,11 @@ Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType)
 
 void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 {
+	if (pObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCAL_ONLY)
+	{
+		return;
+	}
+
 	TransformationF lTransform;
 	if (pObject->GetPhysics())
 	{
@@ -1247,7 +1284,7 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 		TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
 		GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
 	}
-	BroadcastCreateObject(pObject->GetInstanceId(), lTransform, pObject->GetClassId());
+	BroadcastCreateObject(pObject->GetInstanceId(), lTransform, pObject->GetClassId(), pObject->GetOwnerInstanceId());
 	OnAttributeSend(pObject);
 	if (pObject->GetVelocity().GetLengthSquared() > 0.1f)
 	{

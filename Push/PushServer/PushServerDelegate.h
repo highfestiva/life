@@ -8,10 +8,11 @@
 
 
 
+#include "../../Lepra/Include/HiResTimer.h"
 #include "../../Life/LifeServer/ServerDelegate.h"
+#include "../../Life/Launcher.h"
 #include "../Push.h"
 #include "GameServerLogic.h"
-#include "ServerLauncher.h"
 
 
 
@@ -20,7 +21,7 @@ namespace Push
 
 
 
-class PushServerDelegate: public Life::ServerDelegate, public GameServerLogic, public ServerLauncher
+class PushServerDelegate: public Life::ServerDelegate, public GameServerLogic, public Life::Launcher
 {
 	typedef Life::ServerDelegate Parent;
 public:
@@ -40,11 +41,9 @@ private:
 
 	virtual void PreEndTick();
 
-	virtual void GetBarrel(Cure::GameObjectId pOwnerId, TransformationF& pTransform, Vector3DF& pVelocity) const;
 	virtual void Shoot(Cure::ContextObject* pAvatar);
-	virtual void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
-		Cure::ContextObject* pExplosive, Cure::ContextObject* pHitObject,
-		TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pHitBodyId);
+	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition);
+	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 	virtual Cure::ContextObject* CreateAvatarForNpc(Npc* pNpc);
 	virtual void AddAvatarToTeam(Cure::ContextObject* pAvatar, int pTeam);
@@ -54,9 +53,12 @@ private:
 	void CreateNpc();
 	void DeleteNpc();
 	Npc* GetNpcByAvatar(Cure::GameObjectId pAvatarId) const;
-	void CreateScore(const str& pPlayerName);
+	void CreateScore(const str& pPlayerName, bool pCreatePing);
 	void DeleteScore(const str& pPlayerName);
+	void UpdatePing();
 	void AddPoint(const str& pPrefix, const Cure::ContextObject* pAvatar, int pPoints);
+	void SetPoints(const str& pPrefix, const Life::Client* pClient, int pPoints);
+	void DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pAvatar, float pDamage);
 	void Die(Cure::ContextObject* pAvatar);
 	bool IsAvatarObject(const Cure::ContextObject* pObject) const;
 	void TickNpcGhosts();
@@ -64,6 +66,7 @@ private:
 	Cure::GameObjectId mScoreInfoId;
 	AvatarIdSet mAvatarTeamSets[2];
 	AvatarIdSet mNpcSet;
+	HiResTimer mPingUpdateTimer;
 
 	LOG_CLASS_DECLARE();
 };

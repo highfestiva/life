@@ -554,7 +554,8 @@ MessageType MessageCreateObject::GetType() const
 int MessageCreateObject::Parse(const uint8* pData, int pSize)
 {
 	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_CREATE_OBJECT)
+	if ((MessageType)pData[0] == MESSAGE_TYPE_CREATE_OBJECT ||
+		(MessageType)pData[0] == MESSAGE_TYPE_CREATE_OWNED_OBJECT)
 	{
 		lTotalSize = Parent::Parse(pData, pSize);
 		if (lTotalSize > 0)
@@ -593,6 +594,56 @@ void MessageCreateObject::GetTransformation(TransformationF& pTransformation) co
 void MessageCreateObject::GetClassId(wstr& pClassId) const
 {
 	PackerUnicodeString::Unpack(pClassId, &mData[1+sizeof(int32)+7*sizeof(float)], 1024);
+}
+
+
+
+MessageCreateOwnedObject::MessageCreateOwnedObject():
+	mOwnerOffset(0)
+{
+}
+
+MessageType MessageCreateOwnedObject::GetType() const
+{
+	return MESSAGE_TYPE_CREATE_OWNED_OBJECT;
+}
+
+int MessageCreateOwnedObject::Parse(const uint8* pData, int pSize)
+{
+	int lTotalSize = -1;
+	if ((MessageType)pData[0] == MESSAGE_TYPE_CREATE_OWNED_OBJECT)
+	{
+		lTotalSize = Parent::Parse(pData, pSize);
+		if (lTotalSize > 0)
+		{
+			if (lTotalSize < pSize-(int)sizeof(uint32))
+			{
+				mOwnerOffset = lTotalSize;
+				lTotalSize += sizeof(uint32);
+			}
+			else
+			{
+				lTotalSize = -1;
+			}
+		}
+	}
+	return lTotalSize;
+}
+
+int MessageCreateOwnedObject::Store(Packet* pPacket, GameObjectId pInstanceId, const TransformationF& pTransformation, const wstr& pClassId, GameObjectId pOwnerInstanceId)
+{
+	int32 lInstanceId = (int32)pInstanceId;
+	unsigned lSize = Parent::Store(pPacket, lInstanceId, pTransformation, pClassId);
+	lSize += PackerInt32::Pack(&mWritableData[lSize], pOwnerInstanceId);
+	pPacket->AddPacketSize(sizeof(int32));
+	return lSize;
+}
+
+uint32 MessageCreateOwnedObject::GetOwnerInstanceId() const
+{
+	int32 lInstanceId;
+	PackerInt32::Unpack(lInstanceId, &mData[mOwnerOffset], sizeof(lInstanceId));
+	return lInstanceId;
 }
 
 
@@ -922,6 +973,7 @@ Message* MessageFactory::Allocate(MessageType pType)
 		case MESSAGE_TYPE_STATUS:		lMessage = new MessageStatus();			break;
 		case MESSAGE_TYPE_NUMBER:		lMessage = new MessageNumber();			break;
 		case MESSAGE_TYPE_CREATE_OBJECT:	lMessage = new MessageCreateObject();		break;
+		case MESSAGE_TYPE_CREATE_OWNED_OBJECT:	lMessage = new MessageCreateOwnedObject();	break;
 		case MESSAGE_TYPE_DELETE_OBJECT:	lMessage = new MessageDeleteObject();		break;
 		case MESSAGE_TYPE_OBJECT_POSITION:	lMessage = new MessageObjectPosition();		break;
 		case MESSAGE_TYPE_OBJECT_ATTACH:	lMessage = new MessageObjectAttach();		break;

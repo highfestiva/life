@@ -525,7 +525,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Grenade.cpp"
+				RelativePath=".\FastProjectile.cpp"
 				>
 			</File>
 			<File
@@ -534,6 +534,10 @@
 			</File>
 			<File
 				RelativePath=".\LoginView.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Projectile.cpp"
 				>
 			</File>
 			<File
@@ -550,10 +554,6 @@
 			</File>
 			<File
 				RelativePath=".\Push.rc"
-				>
-			</File>
-			<File
-				RelativePath=".\PushBarrel.cpp"
 				>
 			</File>
 			<File
@@ -603,11 +603,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Grenade.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Launcher.h"
+				RelativePath=".\FastProjectile.h"
 				>
 			</File>
 			<File
@@ -619,11 +615,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Push.h"
+				RelativePath=".\Projectile.h"
 				>
 			</File>
 			<File
-				RelativePath=".\PushBarrel.h"
+				RelativePath=".\Push.h"
 				>
 			</File>
 			<File
@@ -755,15 +751,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PushServer\ServerGrenade.cpp"
+				RelativePath=".\PushServer\ServerFastProjectile.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PushServer\ServerGrenade.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\ServerLauncher.h"
+				RelativePath=".\PushServer\ServerFastProjectile.h"
 				>
 			</File>
 			<File
@@ -772,6 +764,14 @@
 			</File>
 			<File
 				RelativePath="..\Life\LifeServer\ServerMessageProcessor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\ServerProjectile.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\ServerProjectile.h"
 				>
 			</File>
 			<File

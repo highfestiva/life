@@ -25,6 +25,7 @@ UiGameServerManager::UiGameServerManager(const Cure::TimeManager* pTime, Cure::R
 	mOptions(pVariableScope, 0),
 	mConsoleActive(false)
 {
+	GetContext()->GetObjectTable();
 }
 
 UiGameServerManager::~UiGameServerManager()

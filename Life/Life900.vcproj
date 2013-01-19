@@ -451,6 +451,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ProjectileUtil.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RaceScore.cpp"
 				>
 			</File>
@@ -465,6 +469,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Launcher.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Life.h"
 				>
 			</File>
@@ -474,6 +482,10 @@
 			</File>
 			<File
 				RelativePath=".\LifeString.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ProjectileUtil.h"
 				>
 			</File>
 			<File

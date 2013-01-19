@@ -82,6 +82,7 @@ enum MessageType
 	MESSAGE_TYPE_STATUS,
 	MESSAGE_TYPE_NUMBER,
 	MESSAGE_TYPE_CREATE_OBJECT,
+	MESSAGE_TYPE_CREATE_OWNED_OBJECT,
 	MESSAGE_TYPE_DELETE_OBJECT,
 	MESSAGE_TYPE_OBJECT_POSITION,
 	MESSAGE_TYPE_OBJECT_ATTACH,
@@ -198,6 +199,22 @@ public:
 
 	void GetTransformation(TransformationF& pTransformation) const;
 	void GetClassId(wstr& pClassId) const;
+};
+
+class MessageCreateOwnedObject: public MessageCreateObject
+{
+public:
+	typedef MessageCreateObject Parent;
+
+	MessageCreateOwnedObject();
+	MessageType GetType() const;
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, const TransformationF& pTransformation, const wstr& pClassId, GameObjectId pOwnerInstanceId);
+
+	uint32 GetOwnerInstanceId() const;
+
+private:
+	int mOwnerOffset;
 };
 
 class MessageDeleteObject: public MessageObject
