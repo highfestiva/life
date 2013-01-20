@@ -59,7 +59,7 @@ void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 {
 	mTrigger = pTrigger;
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
-	const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0, std::vector<int>());
+	const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
 	assert(lTag && lTag->mMeshIndexList.size() == 2);
 	if (lTag && lTag->mMeshIndexList.size() == 2)
 	{
@@ -81,7 +81,7 @@ void Ctf::OnTick()
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
 	if (!mFlagMesh || !mBlinkMesh)
 	{
-		const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0, std::vector<int>());
+		const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
 		mFlagMesh = (TBC::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[0]);
 		mBlinkMesh = (TBC::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[1]);
 		if (!mFlagMesh || !mBlinkMesh)

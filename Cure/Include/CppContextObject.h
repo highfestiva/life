@@ -32,7 +32,7 @@ public:
 
 	TBC::ChunkyPhysics* GetPhysics() const;
 	virtual const TBC::ChunkyClass* GetClass() const;
-	const TBC::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray, bool pIgnoreIndexes = false) const;
+	const TBC::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>* pTriggerIndexArray = 0) const;
 	virtual void SetTagIndex(int pIndex);
 
 protected:

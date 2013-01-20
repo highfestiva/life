@@ -43,6 +43,7 @@ public:
 	void RemoveTag(size_t pTagIndex);
 	size_t GetTagCount() const;
 	const Tag& GetTag(size_t pTagIndex) const;
+	const Tag* GetTag(const str& pTagName) const;
 
 protected:
 private:

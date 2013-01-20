@@ -50,7 +50,7 @@ void BulletTime::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 		assert(lBoneIndex >= 0);
 		lTriggerIndexArray.push_back(lBoneIndex);
 	}
-	const TBC::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("stunt_trigger_data"), 5, 2, lTriggerIndexArray);
+	const TBC::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("stunt_trigger_data"), 5, 2, &lTriggerIndexArray);
 	assert(lTag);
 	if (lTag)
 	{

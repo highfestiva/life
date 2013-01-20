@@ -157,6 +157,19 @@ const ChunkyClass::Tag& ChunkyClass::GetTag(size_t pTagIndex) const
 	return (mTagArray[pTagIndex]);
 }
 
+const ChunkyClass::Tag* ChunkyClass::GetTag(const str& pTagName) const
+{
+	for (size_t x = 0, n = GetTagCount(); x < n; ++x)
+	{
+		const ChunkyClass::Tag& lTag = mTagArray[x];
+		if (lTag.mTagName == pTagName)
+		{
+			return &lTag;
+		}
+	}
+	return 0;
+}
+
 
 
 LOG_CLASS_DEFINE(GAME_CONTEXT, ChunkyClass);

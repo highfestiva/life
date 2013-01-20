@@ -19,9 +19,8 @@ namespace Push
 
 
 
-FastProjectile::FastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, float pMuzzleVelocity, Life::Launcher* pLauncher):
+FastProjectile::FastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
 	Parent(pResourceManager, pClassId, pUiManager),
-	mMuzzleVelocity(pMuzzleVelocity),
 	mShreekSound(0),
 	mLauncher(pLauncher),
 	mIsDetonated(false)
@@ -42,15 +41,28 @@ void FastProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	Life::ProjectileUtil::StartBullet(this, mMuzzleVelocity);
+	const UiTbc::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 3, 2);
+	assert(lTag);
 
-	/*mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
-	mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
-		UiCure::UserSound3dResource::TypeLoadCallback(this, &FastProjectile::LoadPlaySound3d));*/
+	const float lMuzzleVelocity = lTag->mFloatValueList[0];
+	Life::ProjectileUtil::StartBullet(this, lMuzzleVelocity);
+	//const float lMaxVelocity = lTag->mFloatValueList[1];
+	//const float lAcceleration = lTag->mFloatValueList[2];
 
-	UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
-	lLaunchSound->Load(GetResourceManager(), _T("machinegun1.wav"),
-		UiCure::UserSound3dResource::TypeLoadCallback(this, &FastProjectile::LoadPlaySound3d));
+	const str lLaunchSoundName = lTag->mStringValueList[0];
+	const str lShreekSoundName = lTag->mStringValueList[1];
+	if (!lLaunchSoundName.empty())
+	{
+		UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
+		lLaunchSound->Load(GetResourceManager(), lLaunchSoundName,
+			UiCure::UserSound3dResource::TypeLoadCallback(this, &FastProjectile::LoadPlaySound3d));
+	}
+	if (!lShreekSoundName.empty())
+	{
+		mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
+		mShreekSound->Load(GetResourceManager(), lShreekSoundName,
+			UiCure::UserSound3dResource::TypeLoadCallback(this, &FastProjectile::LoadPlaySound3d));
+	}
 }
 
 void FastProjectile::OnMicroTick(float pFrameTime)
@@ -70,10 +82,10 @@ void FastProjectile::OnTick()
 		const Vector3DF lVelocity = GetVelocity();
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), lPosition, lVelocity);
 	}
-	if (lPosition.GetLengthSquared() > 3000*3000)
+	/*if (lPosition.GetLengthSquared() > 3000*3000)
 	{
 		GetManager()->PostKillObject(GetInstanceId());
-	}
+	}*/
 }
 
 void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)

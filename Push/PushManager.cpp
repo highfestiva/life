@@ -1297,7 +1297,7 @@ void PushManager::Shoot()
 void PushManager::ShootLocal(Cure::ContextObject* pAvatar)
 {
 	// if fast projectile:
-	FastProjectile* lProjectile = new FastProjectile(GetResourceManager(), _T("bullet"), mUiManager, 500, this);
+	FastProjectile* lProjectile = new FastProjectile(GetResourceManager(), _T("bullet"), mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
 	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition());

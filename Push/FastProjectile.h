@@ -28,7 +28,7 @@ class FastProjectile: public UiCure::Machine
 public:
 	typedef UiCure::Machine Parent;
 
-	FastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, float pMuzzleVelocity, Life::Launcher* pLauncher);
+	FastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher);
 	virtual ~FastProjectile();
 
 private:
@@ -39,7 +39,6 @@ private:
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
-	float mMuzzleVelocity;
 	UiCure::UserSound3dResource* mShreekSound;
 	Life::Launcher* mLauncher;
 	bool mIsDetonated;

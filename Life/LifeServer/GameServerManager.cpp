@@ -1226,8 +1226,7 @@ void GameServerManager::HandleWorldBoundaries()
 	for (; x != lObjectTable.end(); ++x)
 	{
 		Cure::ContextObject* lObject = x->second;
-		const TBC::ChunkyPhysics* lPhysics = lObject->GetPhysics();
-		if (lObject->IsLoaded() && lPhysics && lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
+		if (lObject->IsLoaded())
 		{
 			const Vector3DF lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -2000.0f, +2000.0f) ||
