@@ -41,7 +41,7 @@ private:
 
 	virtual void PreEndTick();
 
-	virtual void Shoot(Cure::ContextObject* pAvatar);
+	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 

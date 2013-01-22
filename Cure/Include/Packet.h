@@ -163,6 +163,8 @@ public:
 		INFO_FALL_APART,
 		INFO_APPLICATION_0 = 1000,
 		INFO_APPLICATION_1,
+		INFO_TOOL_0 = 2000,
+		INFO_TOOL_1,
 	};
 
 	MessageNumber();

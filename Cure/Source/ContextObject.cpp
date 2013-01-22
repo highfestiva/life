@@ -252,8 +252,8 @@ bool ContextObject::DetachFromObject(ContextObject* /*pObject*/)
 				const int lBoneCount = mPhysics->GetBoneCount();
 				for (int x = 0; x < lBoneCount; ++x)
 				{
-					TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
-					if (lStructureGeometry->GetJointId() == lJointId)
+					TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+					if (lGeometry->GetJointId() == lJointId)
 					{
 						mPhysicsNodeArray.erase(x);
 						break;
@@ -400,8 +400,8 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	{
 		return false;
 	}
-	TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (!lStructureGeometry || lStructureGeometry->GetBodyId() == TBC::INVALID_BODY)
+	TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (!lGeometry || (lGeometry->GetBodyId() == TBC::INVALID_BODY && lGeometry->GetTriggerId() == TBC::INVALID_TRIGGER))
 	{
 		mLog.Errorf(_T("Could not get positional update (for streaming), since %i/%s not loaded yet!"),
 			GetInstanceId(), GetClassId().c_str());
@@ -427,7 +427,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 	}
 
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (!lGeometry || lGeometry->GetBodyId() == TBC::INVALID_BODY)
+	if (!lGeometry || (lGeometry->GetBodyId() == TBC::INVALID_BODY && lGeometry->GetBodyId() == TBC::INVALID_TRIGGER))
 	{
 		return;
 	}
@@ -489,7 +489,7 @@ Vector3DF ContextObject::GetPosition() const
 
 void ContextObject::SetRootPosition(const Vector3DF& pPosition)
 {
-	assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
+	//assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
 	mPosition.mPosition.mTransformation.SetPosition(pPosition);
 
 	if (mPhysics && mPhysics->GetBoneCount() > 0)
@@ -500,7 +500,7 @@ void ContextObject::SetRootPosition(const Vector3DF& pPosition)
 
 void ContextObject::SetRootOrientation(const QuaternionF& pOrientation)
 {
-	assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
+	//assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
 	mPosition.mPosition.mTransformation.SetOrientation(pOrientation);
 
 	if (mPhysics && mPhysics->GetBoneCount() > 0)
@@ -647,10 +647,10 @@ void ContextObject::ClearPhysics()
 		const int lBoneCount = mPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
-			TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
-			if (lStructureGeometry)
+			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+			if (lGeometry)
 			{
-				mManager->RemovePhysicsBody(lStructureGeometry->GetBodyId());
+				mManager->RemovePhysicsBody(lGeometry->GetBodyId());
 			}
 		}
 		// Not a good idea for a shared resource:

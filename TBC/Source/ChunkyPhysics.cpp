@@ -110,6 +110,10 @@ float ChunkyPhysics::QueryTotalMass(PhysicsManager* pPhysicsManager) const
 			lTotalMass += pPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
 		}
 	}
+	if (lTotalMass == 0)
+	{
+		lTotalMass = 0.1f;
+	}
 	return lTotalMass;
 }
 
@@ -375,7 +379,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 		{
 			const int lRoot = 0;
 			TransformationF lTransformation = GetOriginalBoneTransformation(lRoot);
-			lTransformation *= *pTransform;
+			lTransformation = *pTransform * lTransformation;
 			SetOriginalBoneTransformation(lRoot, lTransformation);
 		}
 		lOk = Parent::FinalizeInit(mTransformOperation);

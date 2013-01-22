@@ -465,6 +465,27 @@ Vector3DF PhysicsManagerODE::GetBodyPosition(BodyID pBodyId) const
 	return (Vector3DF(lPosition[0], lPosition[1], lPosition[2]));
 }
 
+void PhysicsManagerODE::SetBodyPosition(BodyID pBodyId, const Vector3DF& pPosition) const
+{
+	Object* lObject = (Object*)pBodyId;
+
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("SetBodyPosition() - Body %i is not part of this world!"), pBodyId);
+		return;
+	}
+
+	if(lObject->mBodyID)
+	{
+		::dBodySetPosition(lObject->mBodyID, pPosition.x, pPosition.y, pPosition.z);
+		::dBodyEnable(lObject->mBodyID);
+	}
+	else
+	{
+		::dGeomSetPosition(lObject->mGeomID, pPosition.x, pPosition.y, pPosition.z);
+	}
+}
+
 QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 {
 	Object* lObject = (Object*)pBodyId;

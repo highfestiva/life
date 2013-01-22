@@ -330,7 +330,7 @@ class GroupReader(DefaultMAReader):
 
 	def fixroottrans(self, group):
 		'''Do some magic with the (mesh) root transformation. When writing the physics root (for dynamic
-		   objects, not "levels") we will need the inverted initial transform, but 'til then we'll use
+		   objects, not "worlds") we will need the inverted initial transform, but 'til then we'll use
 		   our own coordinate system (more natural when playing, less so when editing).'''
 		t = group[0]
 		ro = t.get_fixed_attribute("ro", optional=True, default=0)
@@ -342,7 +342,8 @@ class GroupReader(DefaultMAReader):
 		#t.fix_attribute("r", -t.get_fixed_attribute("r"))
 		ir = t.gettransformto(None, "inverse_initial_r")       # Store transformation for writing.
 		#print("Had this inverse_initial_r:\n", ir)
-		xa, ya, za = (math.pi/2, 0, math.pi) if self.config["type"] == "dynamic" else (math.pi/2, 0, 0)
+		isFacingModeller = (self.config["type"] != "world")
+		xa, ya, za = (math.pi/2, 0, math.pi) if isFacingModeller else (math.pi/2, 0, 0)
 		t.fix_attribute("ra", vec3(xa, ya, za))
 		t.fix_attribute("r", vec3(0,0,0))
 		t.flipjoints = (self.config["type"] != "dynamic")

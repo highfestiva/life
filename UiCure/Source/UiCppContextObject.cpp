@@ -123,6 +123,12 @@ void CppContextObject::OnTick()
 
 void CppContextObject::UiMove()
 {
+	//if (strutil::StartsWith(mClassId, _T("indic")))
+	//{
+	//	int i = 7;
+	//	int j = i;
+	//	i = j;
+	//}
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
 	const float lLerpFactor = Math::GetIterateLerpTime(0.2f, lFrameTime);
 	Vector3DF lRootPosition;

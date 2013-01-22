@@ -600,14 +600,6 @@
 				RelativePath="..\Explosion.h"
 				>
 			</File>
-			<File
-				RelativePath="..\PushBarrel.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\PushBarrel.h"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

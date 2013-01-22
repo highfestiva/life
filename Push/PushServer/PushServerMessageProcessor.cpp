@@ -33,12 +33,12 @@ void PushServerMessageProcessor::ProcessNumber(Life::Client* pClient, Cure::Mess
 {
 	switch (pType)
 	{
-		case Cure::MessageNumber::INFO_APPLICATION_0:
+		case Cure::MessageNumber::INFO_TOOL_0:
 		{
 			Cure::ContextObject* lAvatar = mGameServerManager->GetContext()->GetObject(pClient->GetAvatarId());
 			if (lAvatar)
 			{
-				mLogic->Shoot(lAvatar);
+				mLogic->Shoot(lAvatar, (int)pFloat);
 			}
 		}
 		return;

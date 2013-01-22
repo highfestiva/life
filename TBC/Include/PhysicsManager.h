@@ -160,6 +160,7 @@ public:
 	virtual void DeleteBody(BodyID pBodyId) = 0;
 
 	virtual Vector3DF GetBodyPosition(BodyID pBodyId) const = 0;
+	virtual void SetBodyPosition(BodyID pBodyId, const Vector3DF& pPosition) const = 0;
 	virtual QuaternionF GetBodyOrientation(BodyID pBodyId) const = 0;
 	virtual void GetBodyTransform(BodyID pBodyId, Transformation<float32>& pTransform) const = 0;
 	virtual void SetBodyTransform(BodyID pBodyId, const Transformation<float32>& pTransform) = 0;

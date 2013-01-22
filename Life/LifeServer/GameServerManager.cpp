@@ -576,6 +576,18 @@ bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr&
 	return (lOk);
 }
 
+void GameServerManager::IndicatePosition(const Vector3DF pPosition, float pTime)
+{
+	if (pTime <= 0)
+	{
+		return;
+	}
+	Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	lObject->SetInitialTransform(TransformationF(gIdentityQuaternionF, pPosition));
+	lObject->StartLoading();
+	DeleteContextObjectDelay(lObject, pTime);
+}
+
 
 
 int GameServerManager::GetLoggedInClientCount() const
@@ -882,11 +894,11 @@ void GameServerManager::ApplyStoredMovement()
 		{
 			Cure::MessageObjectMovement* lMovement = *x;
 			Cure::GameObjectId lInstanceId = lMovement->GetObjectId();
-			if (lCurrentPhysicsFrame != lMovement->GetFrameIndex())
+			/*if (lCurrentPhysicsFrame != lMovement->GetFrameIndex())
 			{
 				mLog.AWarning("Throwing away network movement.");
 			}
-			else
+			else*/
 			{
 				Cure::ContextObject* lContextObject = GetContext()->GetObject(lInstanceId);
 				if (lContextObject)
@@ -1281,6 +1293,10 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	{
 		TBC::ChunkyBoneGeometry* lStructureGeometry = pObject->GetPhysics()->GetBoneGeometry(pObject->GetPhysics()->GetRootBone());
 		TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
+		if (!lBody)
+		{
+			lBody = lStructureGeometry->GetTriggerId();
+		}
 		GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
 	}
 	BroadcastCreateObject(pObject->GetInstanceId(), lTransform, pObject->GetClassId(), pObject->GetOwnerInstanceId());

@@ -11,6 +11,7 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Life/LifeServer/GameServerManager.h"
+#include "../../Life/ProjectileUtil.h"
 #include "../RtVar.h"
 #include "../RtVar.h"
 #include "../Explosion.h"
@@ -35,6 +36,7 @@ PushServerDelegate::PushServerDelegate(Life::GameServerManager* pGameServerManag
 	mScoreInfoId(0)
 {
 	CURE_RTVAR_SET(mGameServerManager->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5);
+	CURE_RTVAR_SET(mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
 }
 
 PushServerDelegate::~PushServerDelegate()
@@ -138,24 +140,42 @@ void PushServerDelegate::PreEndTick()
 
 
 
-void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar)
+void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 {
-	//ServerProjectile* lProjectile = new ServerProjectile(mGameServerManager->GetResourceManager(), _T("grenade"), 100, this);
-	ServerFastProjectile* lProjectile = new ServerFastProjectile(mGameServerManager->GetResourceManager(), _T("bullet"), 500, this);
-	mGameServerManager->AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	str lAmmo;
+	Cure::NetworkObjectType lNetworkType = Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED;
+	switch (pWeapon)
+	{
+		case 0:	lAmmo = _T("bullet");	lNetworkType = Cure::NETWORK_OBJECT_LOCAL_ONLY;	break;
+		case 1:	lAmmo = _T("grenade");							break;
+		case 2:	lAmmo = _T("rocket");							break;
+		default: assert(false); return;
+	}
+	Cure::ContextObject* lProjectile = new ServerFastProjectile(mGameServerManager->GetResourceManager(), lAmmo, this);
+	mGameServerManager->AddContextObject(lProjectile, lNetworkType, 0);
 	log_volatile(mLog.Debugf(_T("Shooting projectile with ID %i!"), (int)lProjectile->GetInstanceId()));
 	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
-	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition()+Vector3DF(0, 0, +5.0f));
+	TransformationF t;
+	Vector3DF v;
+	Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
 
-	Life::Client* lClient = mGameServerManager->GetClientByObject(pAvatar);
-	mGameServerManager->BroadcastNumberMessage(lClient, false, Cure::MessageNumber::INFO_APPLICATION_0, pAvatar->GetInstanceId(), 0);
+	if (lNetworkType == Cure::NETWORK_OBJECT_LOCAL_ONLY)
+	{
+		// Transmit the shoot event rather than the projectile itself.
+		Life::Client* lClient = mGameServerManager->GetClientByObject(pAvatar);
+		mGameServerManager->BroadcastNumberMessage(lClient, false, Cure::MessageNumber::INFO_TOOL_0, pAvatar->GetInstanceId(), (float)pWeapon);
+	}
 }
 
 void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition)
 {
 	(void)pExplosiveGeometry;
+
+	float lIndicateHit;
+	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
+	mGameServerManager->IndicatePosition(pPosition, lIndicateHit);
 
 	TBC::PhysicsManager* lPhysicsManager = mGameServerManager->GetPhysicsManager();
 	Cure::ContextManager::ContextObjectTable lObjectTable = mGameServerManager->GetContext()->GetObjectTable();
@@ -181,6 +201,10 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 
 void PushServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
 {
+	float lIndicateHit;
+	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
+	mGameServerManager->IndicatePosition(pBullet->GetPosition(), lIndicateHit);
+
 	if (IsAvatarObject(pHitObject))
 	{
 		DrainHealth(pBullet, pHitObject, (float)Random::Normal(0.17, 0.01, 0.1, 0.3));

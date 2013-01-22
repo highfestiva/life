@@ -76,6 +76,7 @@ public:
 	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
 	void BroadcastNumberMessage(Client* pExcludeClient, bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
+	void IndicatePosition(const Vector3DF pPosition, float pTime);
 
 	int GetLoggedInClientCount() const;
 	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;

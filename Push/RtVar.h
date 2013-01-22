@@ -15,6 +15,8 @@
 
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
 
+#define RTVAR_DEBUG_SERVERINDICATEHIT	"Debug.Server.IndicateHit"
+
 #define RTVAR_GAME_NPCSKILL		"Game.NpcSkill"
 #define RTVAR_GAME_DRAWSCORE		"Game.DrawScore"
 #define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"

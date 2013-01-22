@@ -46,6 +46,11 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 
 	TBC::ChunkyBoneGeometry* lStructureGeometry = pStructure->GetBoneGeometry(pStructure->GetRootBone());
 	TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
+	if (!lBody)
+	{
+		pPhysicsManager->GetBodyTransform(lStructureGeometry->GetTriggerId(), pPosition.mPosition.mTransformation);
+		return true;
+	}
 	pPhysicsManager->GetBodyTransform(lBody, pPosition.mPosition.mTransformation);
 	pPhysicsManager->GetBodyVelocity(lBody, pPosition.mPosition.mVelocity);
 	pPhysicsManager->GetBodyAcceleration(lBody, pTotalMass, pPosition.mPosition.mAcceleration);

@@ -59,22 +59,23 @@ public:
 
 	virtual void DeleteBody(BodyID pBodyId);
 
-	Vector3DF GetBodyPosition(BodyID pBodyId) const;
-	QuaternionF GetBodyOrientation(BodyID pBodyId) const;
-	void GetBodyTransform(BodyID pBodyId, TransformationF& pTransform) const;
-	void SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform);
-	void GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const;
-	void SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVelocity);
-	void GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const;
-	void SetBodyForce(BodyID pBodyId, const Vector3DF& pAcceleration);
-	void GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const;
-	void SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration);
-	void GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const;
-	void SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity);
-	void GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
-	void SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
-	void GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAngularAcceleration) const;
-	void SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAngularAcceleration);
+	virtual Vector3DF GetBodyPosition(BodyID pBodyId) const;
+	virtual void SetBodyPosition(BodyID pBodyId, const Vector3DF& pPosition) const;
+	virtual QuaternionF GetBodyOrientation(BodyID pBodyId) const;
+	virtual void GetBodyTransform(BodyID pBodyId, TransformationF& pTransform) const;
+	virtual void SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform);
+	virtual void GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const;
+	virtual void SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVelocity);
+	virtual void GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const;
+	virtual void SetBodyForce(BodyID pBodyId, const Vector3DF& pAcceleration);
+	virtual void GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const;
+	virtual void SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration);
+	virtual void GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const;
+	virtual void SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity);
+	virtual void GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
+	virtual void SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
+	virtual void GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAngularAcceleration) const;
+	virtual void SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAngularAcceleration);
 
 	virtual float GetBodyMass(BodyID pBodyId);
 	virtual void MassAdjustBody(BodyID pBodyId);

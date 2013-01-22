@@ -735,7 +735,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				Cure::MessageCreateOwnedObject* lMessageCreateOwnedObject = (Cure::MessageCreateOwnedObject*)lMessageCreateObject;
 				lObject->SetOwnerInstanceId(lMessageCreateOwnedObject->GetOwnerInstanceId());
-				assert(GetContext()->GetObject(lObject->GetOwnerInstanceId(), true));
+				//assert(GetContext()->GetObject(lObject->GetOwnerInstanceId(), true));	Owning object may have been destroyed.
 			}
 
 		}

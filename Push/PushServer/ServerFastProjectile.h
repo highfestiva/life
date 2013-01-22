@@ -28,17 +28,18 @@ class ServerFastProjectile: public Cure::CppContextObject
 public:
 	typedef Cure::CppContextObject Parent;
 
-	ServerFastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, float pMuzzleVelocity, Life::Launcher* pLauncher);
+	ServerFastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher);
 	virtual ~ServerFastProjectile();
 
 private:
 	virtual void OnLoaded();
 	virtual void OnMicroTick(float pFrameTime);
-	virtual void OnTick();
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
 
-	float mMuzzleVelocity;
 	Life::Launcher* mLauncher;
+	float mMaxVelocity;
+	float mAcceleration;
+	float mExplosiveEnergy;
 	bool mIsDetonated;
 
 	LOG_CLASS_DECLARE();

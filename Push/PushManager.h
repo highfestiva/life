@@ -108,7 +108,7 @@ protected:
 
 	void OnFireButton(UiTbc::Button*);
 	void Shoot();
-	void ShootLocal(Cure::ContextObject* pAvatar);
+	void ShootLocal(Cure::ContextObject* pAvatar, int pWeapon);
 
 	void CancelLogin();
 	void OnVehicleSelect(UiTbc::Button* pButton);
@@ -128,6 +128,7 @@ protected:
 	bool mHadAvatar;
 	Life::Options::Steering mLastSteering;
 	float mCamRotateExtra;
+	int mActiveWeapon;
 	HiResTimer mFireTimeout;
 
 	RoadSignButton* mPickVehicleButton;

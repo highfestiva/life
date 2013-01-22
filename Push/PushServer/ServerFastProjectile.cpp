@@ -17,10 +17,12 @@ namespace Push
 
 
 
-ServerFastProjectile::ServerFastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, float pMuzzleVelocity, Life::Launcher* pLauncher):
+ServerFastProjectile::ServerFastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher):
 	Parent(pResourceManager, pClassId),
-	mMuzzleVelocity(pMuzzleVelocity),
 	mLauncher(pLauncher),
+	mMaxVelocity(0),
+	mAcceleration(0),
+	mExplosiveEnergy(0),
 	mIsDetonated(false)
 {
 }
@@ -35,35 +37,33 @@ void ServerFastProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	Life::ProjectileUtil::StartBullet(this, mMuzzleVelocity);
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
+	assert(lTag);
+	const float lMuzzleVelocity = lTag->mFloatValueList[0];
+	Life::ProjectileUtil::StartBullet(this, lMuzzleVelocity, true);
+	mMaxVelocity = lTag->mFloatValueList[1];
+	mAcceleration = lTag->mFloatValueList[2];
+	mExplosiveEnergy = lTag->mFloatValueList[3];
 }
 
 void ServerFastProjectile::OnMicroTick(float pFrameTime)
 {
 	Parent::OnMicroTick(pFrameTime);
 
-	Life::ProjectileUtil::BulletMicroTick(this, pFrameTime);
-}
-
-void ServerFastProjectile::OnTick()
-{
-	Parent::OnTick();
-
-	if (IsLoaded())
-	{
-		const Vector3DF lPosition = GetPosition();
-		if (lPosition.GetLengthSquared() > 3000*3000)
-		{
-			GetManager()->PostKillObject(GetInstanceId());
-		}
-	}
+	Life::ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
 }
 
 void ServerFastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
 	(void)pTriggerId;
-
-	Life::ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
+	if (mExplosiveEnergy)
+	{
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition());
+	}
+	else
+	{
+		Life::ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
+	}
 }
 
 

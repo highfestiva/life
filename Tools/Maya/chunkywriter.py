@@ -18,7 +18,7 @@ import re
 import struct
 import sys
 
-physics_type = {"static":1, "dynamic":2, "collision_detect_only":3}
+physics_type = {"world":1, "static":1, "dynamic":2, "collision_detect_only":3}
 guide_mode = {"never":0, "external":1, "always":2, None:1}
 
 CHUNK_CLASS				= "CLAS"

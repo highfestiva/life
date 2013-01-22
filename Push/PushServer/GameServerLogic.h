@@ -36,7 +36,7 @@ public:
 	GameServerLogic();
 	virtual ~GameServerLogic();
 
-	virtual void Shoot(Cure::ContextObject* pAvatar) = 0;
+	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon) = 0;
 
 	virtual Cure::ContextObject* CreateAvatarForNpc(Npc* pNpc) = 0;
 	virtual void AddAvatarToTeam(Cure::ContextObject* pAvatar, int pTeam) = 0;

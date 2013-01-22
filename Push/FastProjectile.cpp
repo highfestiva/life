@@ -23,6 +23,10 @@ FastProjectile::FastProjectile(Cure::ResourceManager* pResourceManager, const st
 	Parent(pResourceManager, pClassId, pUiManager),
 	mShreekSound(0),
 	mLauncher(pLauncher),
+	mMaxVelocity(0),
+	mAcceleration(0),
+	mExplosiveEnergy(0),
+	mTickCount(0),
 	mIsDetonated(false)
 {
 	DisableRootShadow();
@@ -33,6 +37,11 @@ FastProjectile::~FastProjectile()
 {
 	delete mShreekSound;
 	mShreekSound = 0;
+
+	if (mExplosiveEnergy)
+	{
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition());
+	}
 }
 
 
@@ -41,13 +50,14 @@ void FastProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const UiTbc::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 3, 2);
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
 	assert(lTag);
 
 	const float lMuzzleVelocity = lTag->mFloatValueList[0];
-	Life::ProjectileUtil::StartBullet(this, lMuzzleVelocity);
-	//const float lMaxVelocity = lTag->mFloatValueList[1];
-	//const float lAcceleration = lTag->mFloatValueList[2];
+	StartBullet(lMuzzleVelocity);
+	mMaxVelocity = lTag->mFloatValueList[1];
+	mAcceleration = lTag->mFloatValueList[2];
+	mExplosiveEnergy = lTag->mFloatValueList[3];
 
 	const str lLaunchSoundName = lTag->mStringValueList[0];
 	const str lShreekSoundName = lTag->mStringValueList[1];
@@ -65,11 +75,51 @@ void FastProjectile::OnLoaded()
 	}
 }
 
+void FastProjectile::StartBullet(float pMuzzleVelocity)
+{
+	const bool lIsSynchronized = !GetManager()->IsLocalGameObjectId(GetInstanceId());
+	Life::ProjectileUtil::StartBullet(this, pMuzzleVelocity, !lIsSynchronized);
+
+	if (lIsSynchronized)
+	{
+		// Move mesh to muzzle and let it lerp towards object.
+		TransformationF lTransform;
+		Vector3DF lVelocity;
+		Life::ProjectileUtil::GetBarrel(this, lTransform, lVelocity);
+		for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+		{
+			UiCure::UserGeometryReferenceResource* lResource = mMeshResourceArray[x];
+			TBC::GeometryBase* lGfxGeometry = lResource->GetRamData();
+			lGfxGeometry->SetTransformation(lTransform);
+		}
+		EnableMeshSlide(true);
+		ActivateLerp();
+	}
+}
+
 void FastProjectile::OnMicroTick(float pFrameTime)
 {
 	Parent::OnMicroTick(pFrameTime);
 
-	Life::ProjectileUtil::BulletMicroTick(this, pFrameTime);
+	//const TBC::ChunkyBoneGeometry* lRootGeometry = GetPhysics()->GetBoneGeometry(0);
+	//TBC::PhysicsManager::BodyID lBody = lRootGeometry->GetTriggerId();
+	//TransformationF lTransform;
+	//GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
+	//static QuaternionF q;
+	//static int lFrame = 0;
+	//++lFrame;
+	//if ((q - lTransform.GetOrientation()).GetNorm() >= 0.01f)
+	//{
+	//	mLog.Infof(_T("Fast projectile BEFORE bullet tick (ID %u, frame %i): (%f;%f;%f;%f)."), GetInstanceId(), lFrame, lTransform.GetOrientation().GetA(), lTransform.GetOrientation().GetB(), lTransform.GetOrientation().GetC(), lTransform.GetOrientation().GetD());
+	//	q = lTransform.GetOrientation();
+	//}
+	Life::ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
+	//GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
+	//if ((q - lTransform.GetOrientation()).GetNorm() >= 0.01f)
+	//{
+	//	mLog.Infof(_T("Fast projectile AFTER bullet tick (ID %u, frame %i): (%f;%f;%f;%f)."), GetInstanceId(), lFrame, lTransform.GetOrientation().GetA(), lTransform.GetOrientation().GetB(), lTransform.GetOrientation().GetC(), lTransform.GetOrientation().GetD());
+	//	q = lTransform.GetOrientation();
+	//}
 }
 
 void FastProjectile::OnTick()
@@ -91,7 +141,20 @@ void FastProjectile::OnTick()
 void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
 {
 	(void)pTriggerId;
-	Life::ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
+
+	if (++mTickCount < 10 && pBody->GetInstanceId() == GetOwnerInstanceId())	// Disallow self-hit during the first few frames.
+	{
+		return;
+	}
+
+	if (mExplosiveEnergy)
+	{
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition());
+	}
+	else
+	{
+		Life::ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
+	}
 }
 
 void FastProjectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)

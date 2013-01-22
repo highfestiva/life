@@ -158,7 +158,7 @@ void Npc::OnTick()
 		mShootWait.QueryTimeDiff() > Math::Lerp(10.0, 0.3, mIntelligence))
 	{
 		mShootWait.ClearTimeDiff();
-		mLogic->Shoot(lMyAvatar);
+		mLogic->Shoot(lMyAvatar, 1);
 	}
 }
 

@@ -34,6 +34,7 @@ public:
 private:
 	void Detonate(const Vector3DF& pPosition);
 	virtual void OnLoaded();
+	void StartBullet(float pMuzzleVelocity);
 	virtual void OnMicroTick(float pFrameTime);
 	void OnTick();
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
@@ -41,6 +42,10 @@ private:
 
 	UiCure::UserSound3dResource* mShreekSound;
 	Life::Launcher* mLauncher;
+	float mMaxVelocity;
+	float mAcceleration;
+	float mExplosiveEnergy;
+	int mTickCount;
 	bool mIsDetonated;
 
 	LOG_CLASS_DECLARE();

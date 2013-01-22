@@ -52,29 +52,42 @@ void ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF
 	}
 }
 
-void ProjectileUtil::StartBullet(Cure::ContextObject* pBullet, float pMuzzleVelocity)
+void ProjectileUtil::StartBullet(Cure::ContextObject* pBullet, float pMuzzleVelocity, bool pUseBarrel)
 {
 	TransformationF lTransform;
-	Vector3DF lParentVelocity;
-	GetBarrel(pBullet, lTransform, lParentVelocity);
-	Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, 0, pMuzzleVelocity);
-	lVelocity += lParentVelocity;
-	pBullet->SetRootVelocity(lVelocity);
-	//lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 0, 3);
+	if (pUseBarrel)
+	{
+		Vector3DF lParentVelocity;
+		GetBarrel(pBullet, lTransform, lParentVelocity);
+		Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, 0, pMuzzleVelocity);
+		lVelocity += lParentVelocity;
+		pBullet->SetRootVelocity(lVelocity);
+		lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 0, 2);
+	}
+	else
+	{
+		lTransform = pBullet->GetInitialTransform();
+	}
 	const TBC::ChunkyBoneGeometry* lGeometry = pBullet->GetPhysics()->GetBoneGeometry(pBullet->GetPhysics()->GetRootBone());
 	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetTriggerId(), lTransform);
 
 	pBullet->GetManager()->EnableMicroTickCallback(pBullet);	// Used hires movement/collision detection.
 }
 
-void ProjectileUtil::BulletMicroTick(Cure::ContextObject* pBullet, float pFrameTime)
+void ProjectileUtil::BulletMicroTick(Cure::ContextObject* pBullet, float pFrameTime, float pMaxVelocity, float pAcceleration)
 {
 	const TBC::ChunkyBoneGeometry* lRootGeometry = pBullet->GetPhysics()->GetBoneGeometry(0);
 	TBC::PhysicsManager::BodyID lBody = lRootGeometry->GetTriggerId();
 	TransformationF lTransform;
 	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
-	lTransform.GetPosition() += pBullet->GetVelocity() * pFrameTime;
-	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBody, lTransform);
+	Vector3DF lVelocity = pBullet->GetVelocity();
+	lTransform.GetPosition() += lVelocity * pFrameTime;
+	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyPosition(lBody, lTransform.GetPosition());
+	if (pAcceleration && lVelocity.GetLengthSquared() < pMaxVelocity*pMaxVelocity)
+	{
+		lVelocity += lTransform.GetOrientation() * Vector3DF(0, 0, pAcceleration*pFrameTime);
+		pBullet->SetRootVelocity(lVelocity);
+	}
 }
 
 void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated, Launcher* pLauncher, const Vector3DF& pPosition)

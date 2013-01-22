@@ -81,6 +81,7 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mAvatarId(0),
 	mHadAvatar(false),
 	mCamRotateExtra(0),
+	mActiveWeapon(0),
 	mPickVehicleButton(0),
 	mAvatarInvisibleCount(0),
 	mRoadSignIndex(0),
@@ -421,8 +422,13 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 
 void PushManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
 {
-	(void)pBullet;
 	(void)pHitObject;
+
+	TBC::ChunkyPhysics* lPhysics = pBullet->GetPhysics();
+	if (lPhysics)
+	{
+		mCollisionSoundManager->OnCollision(5.0f, pBullet->GetPosition(), lPhysics->GetBoneGeometry(0));
+	}
 }
 
 Cure::RuntimeVariableScope* PushManager::GetVariableScope() const
@@ -1168,13 +1174,13 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			}
 		}
 		return;
-		case Cure::MessageNumber::INFO_APPLICATION_0:
+		case Cure::MessageNumber::INFO_TOOL_0:
 		{
 			const Cure::GameObjectId lAvatarId = pInteger;
 			UiCure::CppContextObject* lAvatar = (UiCure::CppContextObject*)GetContext()->GetObject(lAvatarId);
 			if (lAvatar)
 			{
-				ShootLocal(lAvatar);
+				ShootLocal(lAvatar, (int)pFloat);
 			}
 		}
 		return;
@@ -1189,9 +1195,9 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	{
 		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
 	}
-	else if (pClassId == _T("grenade"))
+	else if (pClassId == _T("grenade") || pClassId == _T("rocket"))
 	{
-		lObject = new Projectile(GetResourceManager(), pClassId, mUiManager, (Launcher*)this);
+		lObject = new FastProjectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 	}
 	else if (pClassId == _T("score_info"))
 	{
@@ -1289,15 +1295,26 @@ void PushManager::Shoot()
 
 	mFireTimeout.ClearTimeDiff();
 	GetNetworkClient()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
-						Cure::MessageNumber::INFO_APPLICATION_0, 0, 0);
+		Cure::MessageNumber::INFO_TOOL_0, 0, (float)mActiveWeapon);
 
-	ShootLocal(lAvatar);
+	if (mActiveWeapon == 0)
+	{
+		ShootLocal(lAvatar, mActiveWeapon);
+	}
+
+	++mActiveWeapon;
+	mActiveWeapon %= 3;
 }
 
-void PushManager::ShootLocal(Cure::ContextObject* pAvatar)
+void PushManager::ShootLocal(Cure::ContextObject* pAvatar, int pWeapon)
 {
-	// if fast projectile:
-	FastProjectile* lProjectile = new FastProjectile(GetResourceManager(), _T("bullet"), mUiManager, this);
+	str lAmmo;
+	switch (pWeapon)
+	{
+		case 0:	lAmmo = _T("bullet");	break;
+		default: assert(false); return;
+	}
+	FastProjectile* lProjectile = new FastProjectile(GetResourceManager(), lAmmo, mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
 	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition());
