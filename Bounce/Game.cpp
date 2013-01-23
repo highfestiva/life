@@ -350,7 +350,7 @@ bool Game::Initialize()
 	bool lOk = true;
 	if (lOk)
 	{
-		lOk = InitializeTerrain();
+		lOk = InitializeUniverse();
 	}
 	if (lOk)
 	{
@@ -363,7 +363,7 @@ bool Game::Initialize()
 	return lOk;
 }
 
-bool Game::InitializeTerrain()
+bool Game::InitializeUniverse()
 {
 	bool lOk = true;
 	if (lOk)

@@ -82,7 +82,7 @@ protected:
 
 	virtual bool Reset();
 	virtual void CreateLoginView();
-	virtual bool InitializeTerrain();
+	virtual bool InitializeUniverse();
 	void CloseLoginGui();
 	void ClearRoadSigns();
 	void SetRoadSignsVisible(bool pVisible);

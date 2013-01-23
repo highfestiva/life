@@ -106,8 +106,6 @@ private:
 	void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
 
-	virtual bool InitializeTerrain() = 0;
-
 	mutable Lock mLock;
 	volatile bool mIsThreadSafe;
 

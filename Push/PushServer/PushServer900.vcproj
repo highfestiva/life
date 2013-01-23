@@ -533,6 +533,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PushServerConsole.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PushServerDelegate.cpp"
 				>
 			</File>
@@ -601,6 +605,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\PushServerConsole.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

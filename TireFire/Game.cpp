@@ -95,7 +95,7 @@ bool Game::SetLevelName(const str& pLevel)
 		return RestartLevel();
 	}
 	mGoal = 0;
-	return InitializeTerrain();
+	return InitializeUniverse();
 }
 
 bool Game::RestartLevel()
@@ -687,7 +687,7 @@ bool Game::Initialize()
 	bool lOk = true;
 	if (lOk)
 	{
-		lOk = InitializeTerrain();
+		lOk = InitializeUniverse();
 	}
 	if (lOk)
 	{
@@ -708,7 +708,7 @@ bool Game::Initialize()
 	return lOk;
 }
 
-bool Game::InitializeTerrain()
+bool Game::InitializeUniverse()
 {
 	bool lOk = true;
 	if (lOk)

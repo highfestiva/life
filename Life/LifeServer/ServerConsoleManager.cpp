@@ -59,7 +59,8 @@ const ServerConsoleManager::CommandPair& ServerConsoleManager::GetCommand(unsign
 	{
 		return (Parent::GetCommand(pIndex));
 	}
-	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
+	const unsigned lLocalIndex = pIndex-Parent::GetCommandCount();
+	return mCommandIdList[lLocalIndex];
 }
 
 int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)

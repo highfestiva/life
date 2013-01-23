@@ -119,7 +119,7 @@ bool Game::SetLevelName(const str& pLevel)
 		return RestartLevel();
 	}
 	mCtf = 0;
-	return InitializeTerrain();
+	return InitializeUniverse();
 }
 
 bool Game::RestartLevel()
@@ -1231,7 +1231,7 @@ bool Game::Initialize()
 
 		mLauncherPosition = Vector3DF(0, -75.2f, 10.5f);
 
-		lOk = InitializeTerrain();
+		lOk = InitializeUniverse();
 	}
 	if (lOk)
 	{
@@ -1253,7 +1253,7 @@ bool Game::Initialize()
 	return lOk;
 }
 
-bool Game::InitializeTerrain()
+bool Game::InitializeUniverse()
 {
 	bool lOk = true;
 	if (lOk)

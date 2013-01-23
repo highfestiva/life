@@ -8,8 +8,8 @@
 
 
 
-#include "../../Lepra/Include/HiResTimer.h"
 #include "../../Life/LifeServer/ServerDelegate.h"
+#include "../../Lepra/Include/HiResTimer.h"
 #include "../../Life/Launcher.h"
 #include "../Push.h"
 #include "GameServerLogic.h"
@@ -27,6 +27,8 @@ class PushServerDelegate: public Life::ServerDelegate, public GameServerLogic, p
 public:
 	PushServerDelegate(Life::GameServerManager* pGameServerManager);
 	virtual ~PushServerDelegate();
+
+	virtual void SetLevel(const str& pLevelName);
 
 private:
 	virtual void OnOpen();
@@ -63,6 +65,12 @@ private:
 	bool IsAvatarObject(const Cure::ContextObject* pObject) const;
 	void TickNpcGhosts();
 
+	enum Command
+	{
+		COMMAND_SET_LEVEL,
+	};
+
+	Cure::GameObjectId mLevelId;
 	Cure::GameObjectId mScoreInfoId;
 	AvatarIdSet mAvatarTeamSets[2];
 	AvatarIdSet mNpcSet;

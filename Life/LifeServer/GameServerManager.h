@@ -46,7 +46,7 @@ public:
 		Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
 
-	void SetLevelName(const str& pLevelName);
+	void SetLevel(const str& pLevelName);
 
 	virtual bool BeginTick();
 	virtual void PreEndTick();
@@ -91,8 +91,6 @@ protected:
 	void Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason);
 	void DeleteAllClients();
 
-	virtual bool InitializeTerrain();
-
 	Cure::UserAccount::Availability QueryLogin(const Cure::LoginId& pLoginId, Cure::UserAccount::AccountId& pAccountId);
 	void OnLogin(Cure::UserConnection* pUserConnection);
 	void OnLogout(Cure::UserConnection* pUserConnection);
@@ -134,8 +132,6 @@ private:
 	AccountClientTable mAccountClientTable;
 	ServerDelegate* mDelegate;
 	ServerMessageProcessor* mMessageProcessor;
-	str mLevelName;
-	Cure::ContextObject* mTerrainObject;
 	MovementArrayList mMovementArrayList;
 	mutable Timer mPowerSaveTimer;
 	MasterServerConnection* mMasterConnection;

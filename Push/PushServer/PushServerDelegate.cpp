@@ -5,6 +5,7 @@
 
 
 #include "PushServerDelegate.h"
+#include "../../Cure/Include/ConsoleManager.h"
 #include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/IntAttribute.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -17,6 +18,7 @@
 #include "../Explosion.h"
 #include "../Version.h"
 #include "Npc.h"
+#include "PushServerConsole.h"
 #include "ServerFastProjectile.h"
 #include "ServerProjectile.h"
 
@@ -33,6 +35,7 @@ namespace Push
 
 PushServerDelegate::PushServerDelegate(Life::GameServerManager* pGameServerManager):
 	Parent(pGameServerManager),
+	mLevelId(0),
 	mScoreInfoId(0)
 {
 	CURE_RTVAR_SET(mGameServerManager->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5);
@@ -42,15 +45,35 @@ PushServerDelegate::PushServerDelegate(Life::GameServerManager* pGameServerManag
 PushServerDelegate::~PushServerDelegate()
 {
 	mScoreInfoId = 0;
+	mLevelId = 0;
+}
+
+
+
+void PushServerDelegate::SetLevel(const str& pLevelName)
+{
+	ScopeLock lLock(mGameServerManager->GetTickLock());
+	if (mLevelId)
+	{
+		mGameServerManager->DeleteContextObject(mLevelId);
+	}
+
+	Cure::ContextObject* lLevel = mGameServerManager->GameManager::CreateContextObject(pLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	mLevelId = lLevel->GetInstanceId();
+	lLevel->StartLoading();
 }
 
 
 
 void PushServerDelegate::OnOpen()
 {
+	new PushServerConsole(this, mGameServerManager->GetConsoleManager()->GetConsoleCommandManager());
+
+	SetLevel(_T("level_02"));
+
 	Cure::ContextObject* lScoreInfo = mGameServerManager->GameManager::CreateContextObject(_T("score_info"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	lScoreInfo->SetLoadResult(true);
 	mScoreInfoId = lScoreInfo->GetInstanceId();
+	lScoreInfo->SetLoadResult(true);
 }
 
 void PushServerDelegate::OnLogin(Life::Client* pClient)

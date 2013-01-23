@@ -669,7 +669,7 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected.
 	mObjectFrameIndexMap.clear();
 
 	GetContext()->ClearObjects();
-	bool lOk = InitializeTerrain();
+	bool lOk = InitializeUniverse();
 
 	mIsResetComplete = true;
 

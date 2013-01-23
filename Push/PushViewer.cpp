@@ -11,11 +11,13 @@
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiCenterLayout.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiMachine.h"
 #include "../Life/LifeClient/ClientConsoleManager.h"
 #include "../Life/LifeClient/GameClientMasterTicker.h"
 #include "../Life/LifeClient/UiConsole.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
+#include "Level.h"
 #include "RtVar.h"
 
 
@@ -88,12 +90,19 @@ void PushViewer::CreateLoginView()
 	CreateButton(+0.4f, +0.4f, 12.0f, _T("quit"),	_T("road_sign_01"), _T("road_sign_nostop.png"), RoadSignButton::SHAPE_ROUND);
 }
 
-bool PushViewer::InitializeTerrain()
+bool PushViewer::InitializeUniverse()
 {
-	if (!Parent::InitializeTerrain())
+	if (!Parent::InitializeUniverse())
 	{
 		return (false);
 	}
+
+	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
+	mLevel = new Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
+	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, 0);
+	mLevel->DisableRootShadow();
+	mLevel->SetAllowNetworkLogic(false);
+	mLevel->StartLoading();
 
 	Cure::ContextObject* lVehicle = new UiCure::Machine(GetResourceManager(), _T("monster_02"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);

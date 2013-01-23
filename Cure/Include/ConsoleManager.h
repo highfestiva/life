@@ -52,13 +52,13 @@ public:
 	RuntimeVariableScope* GetVariableScope() const;
 
 protected:
-	bool ForkExecuteCommand(const str& pCommand);
-
 	struct CommandPair
 	{
 		const tchar* mCommandName;
 		int mCommandId;
 	};
+
+	bool ForkExecuteCommand(const str& pCommand);
 
 	virtual void InitCommands();
 	std::list<str> GetCommandList() const;

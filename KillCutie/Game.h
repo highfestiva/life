@@ -200,7 +200,7 @@ private:
 	virtual void TickInput();
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual bool Initialize();
-	virtual bool InitializeTerrain();
+	virtual bool InitializeUniverse();
 
 	Cure::ContextObject* CreateLogicHandler(const str& pType);
 

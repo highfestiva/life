@@ -44,6 +44,10 @@ PushDemo::~PushDemo()
 
 
 
+Merge OnOpen stuff from PushViewer.cpp.
+
+
+
 bool PushDemo::Paint()
 {
 	if (!mUiManager->GetDisplayManager()->IsVisible())
@@ -128,8 +132,10 @@ void PushDemo::CreateLoginView()
 	lButton->SetPos(lMargin, mUiManager->GetDisplayManager()->GetHeight()-lButtonHeight-lMargin);
 }
 
-bool PushDemo::InitializeTerrain()
+bool PushDemo::InitializeUniverse()
 {
+	Merge level stuff from PushViewer.cpp.
+
 	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), _T("saucer_01"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
 	mAvatarId = lVehicle->GetInstanceId();

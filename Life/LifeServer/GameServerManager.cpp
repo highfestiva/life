@@ -45,7 +45,6 @@ GameServerManager::GameServerManager(const Cure::TimeManager* pTime,
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mDelegate(0),
 	mMessageProcessor(0),
-	mTerrainObject(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE),
 	mMasterConnection(0)
 {
@@ -99,13 +98,6 @@ GameServerManager::~GameServerManager()
 
 
 
-void GameServerManager::SetLevelName(const str& pLevelName)
-{
-	mLevelName = pLevelName;
-}
-
-
-
 bool GameServerManager::BeginTick()
 {
 	AccountClientTable::Iterator x = mAccountClientTable.First();
@@ -147,7 +139,7 @@ void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogg
 
 bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection, const str& pAddress)
 {
-	bool lOk = InitializeTerrain();
+	bool lOk = true;
 
 	if (lOk)
 	{
@@ -253,6 +245,8 @@ TBC::PhysicsManager* GameServerManager::GetPhysicsManager() const
 
 void GameServerManager::DeleteContextObject(Cure::GameObjectId pInstanceId)
 {
+	assert(GetTickLock()->IsOwner());
+
 	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId);
 	mDelegate->OnDeleteObject(lObject);
 	if (lObject && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
@@ -759,17 +753,6 @@ void GameServerManager::DeleteAllClients()
 
 
 
-bool GameServerManager::InitializeTerrain()
-{
-	assert(mTerrainObject == 0);
-	mTerrainObject = new Cure::CppContextObject(GetResourceManager(), mLevelName);
-	AddContextObject(mTerrainObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	mTerrainObject->StartLoading();
-	return (true);
-}
-
-
-
 Cure::UserAccount::Availability GameServerManager::QueryLogin(const Cure::LoginId& pLoginId, Cure::UserAccount::AccountId& pAccountId)
 {
 	ScopeLock lLock(GetNetworkAgent()->GetLock());
@@ -1249,10 +1232,14 @@ void GameServerManager::HandleWorldBoundaries()
 			}
 		}
 	}
-	std::vector<Cure::GameObjectId>::const_iterator y = lLostObjectArray.begin();
-	for (; y != lLostObjectArray.end(); ++y)
+	if (!lLostObjectArray.empty())
 	{
-		DeleteContextObject(*y);
+		ScopeLock lLock(GetTickLock());
+		std::vector<Cure::GameObjectId>::const_iterator y = lLostObjectArray.begin();
+		for (; y != lLostObjectArray.end(); ++y)
+		{
+			DeleteContextObject(*y);
+		}
 	}
 }
 

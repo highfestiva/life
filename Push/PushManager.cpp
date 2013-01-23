@@ -484,22 +484,14 @@ void PushManager::CreateLoginView()
 	}
 }
 
-bool PushManager::InitializeTerrain()
+bool PushManager::InitializeUniverse()
 {
 	mSun = 0;
 	mCloudArray.clear();
 
-	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
-	mLevel = new Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
-	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
-	bool lOk = (mLevel != 0);
-	assert(lOk);
+	bool lOk = true;
 	if (lOk)
 	{
-		mLevel->DisableRootShadow();
-		mLevel->SetAllowNetworkLogic(false);
-		mLevel->StartLoading();
 		mSun = new UiCure::Props(GetResourceManager(), _T("sun"), mUiManager);
 		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
@@ -1015,9 +1007,9 @@ bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
 {
 	bool lOk = true;
 
+#if 0
 	if (mLevel && mMassObjectArray.empty())
 	{
-#if 0
 		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 		if (lOk)
 		{
@@ -1035,8 +1027,8 @@ bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
 			AddContextObject(lBushes, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
 			lBushes->StartLoading();
 		}
-#endif 
 	}
+#endif 
 
 	ObjectArray::const_iterator x = mMassObjectArray.begin();
 	for (; x != mMassObjectArray.end(); ++x)
@@ -1191,13 +1183,20 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 {
 	Cure::CppContextObject* lObject;
-	if (pClassId == _T("stone") || pClassId == _T("cube"))
+	if (pClassId == _T("grenade") || pClassId == _T("rocket"))
+	{
+		lObject = new FastProjectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+	}
+	else if (pClassId == _T("stone") || pClassId == _T("cube"))
 	{
 		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
 	}
-	else if (pClassId == _T("grenade") || pClassId == _T("rocket"))
+	else if (strutil::StartsWith(pClassId, _T("level_")))
 	{
-		lObject = new FastProjectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
+		Level* mLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
+		mLevel->DisableRootShadow();
+		lObject = mLevel;
 	}
 	else if (pClassId == _T("score_info"))
 	{

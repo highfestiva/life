@@ -97,7 +97,7 @@ protected:
 	str GetApplicationCommandFilename() const;
 
 	virtual bool Reset();
-	virtual bool InitializeTerrain() = 0;
+	virtual bool InitializeUniverse() = 0;
 
 	virtual void TickUiUpdate() = 0;
 	virtual void SetLocalRender(bool pRender) = 0;

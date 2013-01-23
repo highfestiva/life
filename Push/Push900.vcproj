@@ -711,6 +711,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PushServer\PushServerConsole.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\PushServerConsole.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PushServer\PushServerDelegate.cpp"
 				>
 			</File>

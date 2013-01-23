@@ -32,7 +32,7 @@ private:
 	virtual void TickUiInput();
 	virtual void TickUiUpdate();
 	virtual void CreateLoginView();
-	virtual bool InitializeTerrain();
+	virtual bool InitializeUniverse();
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void BrowseFullInfo(UiTbc::Button*);
 
