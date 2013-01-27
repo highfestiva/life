@@ -20,6 +20,7 @@
 #include "Npc.h"
 #include "PushServerConsole.h"
 #include "ServerFastProjectile.h"
+#include "ServerMine.h"
 #include "ServerProjectile.h"
 
 #define KILLS	_T("int_kills:")
@@ -65,6 +66,14 @@ void PushServerDelegate::SetLevel(const str& pLevelName)
 
 
 
+Cure::ContextObject* PushServerDelegate::CreateContextObject(const str& pClassId) const
+{
+	if (strutil::StartsWith(pClassId, _T("mine_")))
+	{
+		return new ServerMine(mGameServerManager->GetResourceManager(), pClassId, (PushServerDelegate*)this);
+	}
+	return new Cure::CppContextObject(mGameServerManager->GetResourceManager(), pClassId);
+}
 void PushServerDelegate::OnOpen()
 {
 	new PushServerConsole(this, mGameServerManager->GetConsoleManager()->GetConsoleCommandManager());
@@ -213,9 +222,10 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 		const float lForce = Explosion::PushObject(lPhysicsManager, lObject, pPosition, 1.0f);
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
-			if (IsAvatarObject(lObject))
+			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
+			if (lHealth)
 			{
-				DrainHealth(pExplosive, lObject, lForce*(float)Random::Normal(0.51, 0.05, 0.3, 0.5));
+				DrainHealth(pExplosive, lObject, lHealth, lForce*(float)Random::Normal(0.51, 0.05, 0.3, 0.5));
 			}
 			x->second->ForceSend();
 		}
@@ -228,9 +238,10 @@ void PushServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::Context
 	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
 	mGameServerManager->IndicatePosition(pBullet->GetPosition(), lIndicateHit);
 
-	if (IsAvatarObject(pHitObject))
+	Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pHitObject->GetAttribute(_T("float_health"));
+	if (lHealth)
 	{
-		DrainHealth(pBullet, pHitObject, (float)Random::Normal(0.17, 0.01, 0.1, 0.3));
+		DrainHealth(pBullet, pHitObject, lHealth, (float)Random::Normal(0.17, 0.01, 0.1, 0.3));
 	}
 }
 
@@ -428,29 +439,25 @@ void PushServerDelegate::SetPoints(const str& pPrefix, const Life::Client* pClie
 	}
 }
 
-void PushServerDelegate::DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pAvatar, float pDamage)
+void PushServerDelegate::DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pObject, Cure::FloatAttribute* pHealth, float pDamage)
 {
-	Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pAvatar->GetAttribute(_T("float_health"));
-	assert(lHealth);
-	const float lPriorHealth = lHealth->GetValue();
+	assert(pHealth);
+	const float lPriorHealth = pHealth->GetValue();
 	float lRemainingHealth = lPriorHealth - pDamage;
 	if (lPriorHealth > 0)
 	{
-		if (lRemainingHealth < 0)
-		{
-			lRemainingHealth = 0;
-		}
-		lHealth->SetValue(lRemainingHealth);
+		pHealth->SetValue(lRemainingHealth);
 	}
-	if (lPriorHealth > 0 && lRemainingHealth <= 0)
+	if (lPriorHealth > 0 && lRemainingHealth <= 0 && IsAvatarObject(pObject))
 	{
-		AddPoint(DEATHS, pAvatar, +1);
+		Cure::ContextObject* lAvatar = pObject;
+		AddPoint(DEATHS, lAvatar, +1);
 		if (pExplosive->GetOwnerInstanceId())
 		{
-			const int lPoints = (pExplosive->GetOwnerInstanceId() == pAvatar->GetInstanceId()) ? -1 : +1;	// Kills oneself?
+			const int lPoints = (pExplosive->GetOwnerInstanceId() == lAvatar->GetInstanceId()) ? -1 : +1;	// Kills oneself?
 			AddPoint(KILLS, mGameServerManager->GetContext()->GetObject(pExplosive->GetOwnerInstanceId()), lPoints);
 		}
-		Die(pAvatar);
+		Die(lAvatar);
 	}
 }
 

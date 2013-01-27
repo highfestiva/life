@@ -116,16 +116,16 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 		lImpact = mLightImpact;
 	}
 	const TBC::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
-	OnCollision(lImpact, pPosition, lKey);
+	OnCollision(lImpact, pPosition, lKey, lKey->GetMaterial());
 }
 
-void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPosition, const TBC::ChunkyBoneGeometry* pKey)
+void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPosition, const TBC::ChunkyBoneGeometry* pKey, const str& pSoundName)
 {
 	SoundInfo* lSoundInfo = GetPlayingSound(pKey);
 	if (lSoundInfo)
 	{
 		const double lTime = (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)? mUiManager->GetSoundManager()->GetStreamTime(lSoundInfo->mSound->GetRamData()) : 0;
-		if (lTime < mSoundCutoffDuration)
+		if (lTime < mSoundCutoffDuration && strutil::StartsWith(lSoundInfo->mSound->GetName(), _T("collision_")+pSoundName))
 		{
 			if (pImpact > lSoundInfo->mBaseImpact * 1.2f)
 			{
@@ -136,14 +136,14 @@ void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPositio
 		}
 		else
 		{
-			// We are newer! Replay!
+			// We are newer or different! Replay!
 			StopSound(pKey);
-			PlaySound(pKey, pPosition, pImpact);
+			PlaySound(pKey, pSoundName, pPosition, pImpact);
 		}
 	}
 	else
 	{
-		PlaySound(pKey, pPosition, pImpact);
+		PlaySound(pKey, pSoundName, pPosition, pImpact);
 	}
 }
 
@@ -154,11 +154,10 @@ CollisionSoundManager::SoundInfo* CollisionSoundManager::GetPlayingSound(const T
 	return HashUtil::FindMapObject(mSoundMap, pGeometryKey);
 }
 
-void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKey, const Vector3DF& pPosition, float pImpact)
+void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKey, const str& pSoundName, const Vector3DF& pPosition, float pImpact)
 {
-	const str& lMaterial = pGeometryKey->GetMaterial();
 	SoundResourceInfo lResource;
-	bool lGotSound = HashUtil::TryFindMapObject(mSoundNameMap, lMaterial, lResource);
+	bool lGotSound = HashUtil::TryFindMapObject(mSoundNameMap, pSoundName, lResource);
 	lGotSound &= (SoundInfo::GetVolume(pImpact, lResource) >= mLightImpact*MINIMUM_PLAYED_VOLUME_FACTOR);
 	if (!lGotSound)
 	{
@@ -170,7 +169,7 @@ void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKe
 	lSoundInfo->mBaseImpact = pImpact;
 	lSoundInfo->mSound = new CollisionSoundResource(mUiManager, lSoundInfo);
 	mSoundMap.insert(SoundMap::value_type(pGeometryKey, lSoundInfo));
-	lSoundInfo->mSound->Load(mGameManager->GetResourceManager(), _T("collision_")+lMaterial+_T(".wav"),
+	lSoundInfo->mSound->Load(mGameManager->GetResourceManager(), _T("collision_")+pSoundName+_T(".wav"),
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &CollisionSoundManager::OnSoundLoaded));
 }
 

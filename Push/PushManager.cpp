@@ -28,6 +28,7 @@
 #include "Explosion.h"
 #include "FastProjectile.h"
 #include "Level.h"
+#include "Mine.h"
 #include "Projectile.h"
 #include "PushConsoleManager.h"
 #include "PushTicker.h"
@@ -359,7 +360,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 {
 	(void)pExplosive;
 
-	mCollisionSoundManager->OnCollision(5.0f, pPosition, pExplosiveGeometry);
+	mCollisionSoundManager->OnCollision(5.0f, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	{
 		// Shattered pieces, stones or mud.
@@ -427,7 +428,8 @@ void PushManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject*
 	TBC::ChunkyPhysics* lPhysics = pBullet->GetPhysics();
 	if (lPhysics)
 	{
-		mCollisionSoundManager->OnCollision(5.0f, pBullet->GetPosition(), lPhysics->GetBoneGeometry(0));
+		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
+		mCollisionSoundManager->OnCollision(5.0f, pBullet->GetPosition(), lGeometry, lGeometry->GetMaterial());
 	}
 }
 
@@ -655,6 +657,9 @@ void PushManager::TickUiInput()
 			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
 			const float lSteeringPower = std::abs(lLeftPowerFwdRev);
 			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
+			assert(lLeftPowerFwdRev >=  -3 && lLeftPowerFwdRev <=  +3);
+			assert(lLeftPowerLR     >=  -3 &&     lLeftPowerLR <=  +3);
+			assert(lRightPowerLR    >= -12 &&    lRightPowerLR <= +12);
 
 			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR);
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR);
@@ -1186,6 +1191,10 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	if (pClassId == _T("grenade") || pClassId == _T("rocket"))
 	{
 		lObject = new FastProjectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+	}
+	else if (strutil::StartsWith(pClassId, _T("mine")))
+	{
+		lObject = new Mine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 	}
 	else if (pClassId == _T("stone") || pClassId == _T("cube"))
 	{

@@ -104,6 +104,8 @@ PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const
 bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
+	assert(pValue >= -10000);
+	assert(pValue <= +10000);
 
 	pValue = Math::Clamp(pValue, -1.0f, +1.0f);
 
@@ -167,6 +169,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 
 void PhysicsEngine::ForceSetValue(unsigned pAspect, float pValue)
 {
+	assert(pValue >= -1 && pValue <= +1);
 	mValue[pAspect] = pValue;
 }
 

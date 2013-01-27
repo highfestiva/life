@@ -147,6 +147,8 @@ void Npc::OnTick()
 		lRight *= mIntelligence;
 		lPhi /= mIntelligence;
 	}
+	assert(lPhi >= -10000);
+	assert(lPhi <= +10000);
 	lMyAvatar->SetEnginePower(0, lFwd+lPhi);
 	lMyAvatar->SetEnginePower(1, lRight);
 	lMyAvatar->SetEnginePower(4, lFwd-lPhi);
@@ -169,6 +171,7 @@ void Npc::OnAlarm(int pAlarmId, void* pExtraData)
 	if (pAlarmId == 5)
 	{
 		CURE_RTVAR_GET(mIntelligence, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5f);
+		mIntelligence = Math::Clamp(mIntelligence, 0.1f, 1.0f);
 		if (!mLogic->CreateAvatarForNpc(this))
 		{
 			StartCreateAvatar(10.0f);

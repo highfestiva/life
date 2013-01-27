@@ -35,6 +35,8 @@ public:
 	ServerDelegate(GameServerManager* pGameServerManager);
 	virtual ~ServerDelegate();
 
+	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const = 0;
+
 	virtual void OnOpen() = 0;
 	virtual void OnLogin(Client* pClient) = 0;
 	virtual void OnLogout(Client* pClient) = 0;

@@ -537,6 +537,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Mine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Projectile.cpp"
 				>
 			</File>
@@ -612,6 +616,10 @@
 			</File>
 			<File
 				RelativePath=".\LoginView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Mine.h"
 				>
 			</File>
 			<File
@@ -772,6 +780,14 @@
 			</File>
 			<File
 				RelativePath="..\Life\LifeServer\ServerMessageProcessor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\ServerMine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\ServerMine.h"
 				>
 			</File>
 			<File

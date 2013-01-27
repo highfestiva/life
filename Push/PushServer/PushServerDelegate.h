@@ -16,6 +16,13 @@
 
 
 
+namespace Cure
+{
+class FloatAttribute;
+}
+
+
+
 namespace Push
 {
 
@@ -31,6 +38,8 @@ public:
 	virtual void SetLevel(const str& pLevelName);
 
 private:
+	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
+
 	virtual void OnOpen();
 	virtual void OnLogin(Life::Client* pClient);
 	virtual void OnLogout(Life::Client* pClient);
@@ -60,7 +69,7 @@ private:
 	void UpdatePing();
 	void AddPoint(const str& pPrefix, const Cure::ContextObject* pAvatar, int pPoints);
 	void SetPoints(const str& pPrefix, const Life::Client* pClient, int pPoints);
-	void DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pAvatar, float pDamage);
+	void DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pAvatar, Cure::FloatAttribute* pHealth, float pDamage);
 	void Die(Cure::ContextObject* pAvatar);
 	bool IsAvatarObject(const Cure::ContextObject* pObject) const;
 	void TickNpcGhosts();

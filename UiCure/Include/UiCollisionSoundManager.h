@@ -58,7 +58,7 @@ public:
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance, bool pIsLoud);
-	void OnCollision(float pImpact, const Vector3DF& pPosition, const TBC::ChunkyBoneGeometry* pKey);
+	void OnCollision(float pImpact, const Vector3DF& pPosition, const TBC::ChunkyBoneGeometry* pKey, const str& pSoundName);
 
 private:
 	/*struct GeometryCombination
@@ -109,7 +109,7 @@ private:
 	};
 
 	SoundInfo* GetPlayingSound(const TBC::ChunkyBoneGeometry* pGeometryKey) const;
-	void PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKey, const Vector3DF& pPosition, float pImpact);
+	void PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKey, const str& pSoundName, const Vector3DF& pPosition, float pImpact);
 	void OnSoundLoaded(UiCure::UserSound3dResource* pSoundResource);
 	void UpdateSound(SoundInfo* pSoundInfo);
 	void StopSound(const TBC::ChunkyBoneGeometry* pGeometryKey);
