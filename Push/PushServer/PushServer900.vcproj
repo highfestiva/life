@@ -553,6 +553,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ServerMine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ServerProjectile.cpp"
 				>
 			</File>
@@ -590,6 +594,10 @@
 			</File>
 			<File
 				RelativePath=".\ServerLauncher.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerMine.h"
 				>
 			</File>
 			<File
