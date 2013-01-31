@@ -679,6 +679,14 @@
 			Name="Server"
 			>
 			<File
+				RelativePath=".\PushServer\BombPlane.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PushServer\BombPlane.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Life\LifeServer\BulletTime.cpp"
 				>
 			</File>

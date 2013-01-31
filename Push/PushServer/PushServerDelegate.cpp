@@ -17,6 +17,7 @@
 #include "../RtVar.h"
 #include "../Explosion.h"
 #include "../Version.h"
+#include "BombPlane.h"
 #include "Npc.h"
 #include "PushServerConsole.h"
 #include "ServerFastProjectile.h"
@@ -172,6 +173,25 @@ void PushServerDelegate::PreEndTick()
 
 
 
+void PushServerDelegate::OrderAirStrike(const Vector3DF& pPosition)
+{
+	const float lIncomingAngle = 2*PIF * (float)Random::Uniform();
+	const float lPlaneDistance = 500;
+
+	Cure::ContextObject* lPlane = new BombPlane(mGameServerManager->GetResourceManager(), _T("deltawing"), pPosition);
+	mGameServerManager->AddContextObject(lPlane, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	TransformationF t;
+	t.GetPosition().Set(lPlaneDistance*::sin(lIncomingAngle), lPlaneDistance*::cos(lIncomingAngle), 30);
+	t.GetPosition().x += pPosition.x;
+	t.GetPosition().y += pPosition.y;
+	t.GetOrientation().RotateAroundOwnX(PIF/2);
+	t.GetOrientation().RotateAroundWorldZ(-lIncomingAngle);
+	lPlane->SetInitialTransform(t);
+	lPlane->StartLoading();
+}
+
+
+
 void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 {
 	str lAmmo;
@@ -242,6 +262,7 @@ void PushServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::Context
 	if (lHealth)
 	{
 		DrainHealth(pBullet, pHitObject, lHealth, (float)Random::Normal(0.17, 0.01, 0.1, 0.3));
+		OrderAirStrike(pHitObject->GetPosition());
 	}
 }
 

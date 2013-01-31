@@ -202,6 +202,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
 			case TBC::PhysicsEngine::ENGINE_ROTOR:
 			case TBC::PhysicsEngine::ENGINE_TILTER:
+			case TBC::PhysicsEngine::ENGINE_JET:
 			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
 			{
@@ -417,6 +418,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
 			case TBC::PhysicsEngine::ENGINE_ROTOR:
 			case TBC::PhysicsEngine::ENGINE_TILTER:
+			case TBC::PhysicsEngine::ENGINE_JET:
 			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
 			{

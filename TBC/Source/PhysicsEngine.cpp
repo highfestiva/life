@@ -142,6 +142,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 		case ENGINE_HINGE2_TURN:
 		case ENGINE_ROTOR:
 		case ENGINE_TILTER:
+		case ENGINE_JET:
 		case ENGINE_SLIDER_FORCE:
 		case ENGINE_YAW_BRAKE:
 		{
@@ -452,6 +453,22 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				{
 					mLog.AError("Missing rotor joint!");
 				}
+			}
+			break;
+			case ENGINE_JET:
+			{
+				ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
+				Vector3DF lVelocity;
+				pPhysicsManager->GetBodyVelocity(lRootGeometry->GetBodyId(), lVelocity);
+				if (lPrimaryForce != 0 && lVelocity.GetLengthSquared() < mMaxSpeed*mMaxSpeed)
+				{
+					const QuaternionF lOrientation =
+						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
+						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+					const Vector3DF lPushForce = lOrientation * Vector3DF(0, lPrimaryForce*mStrength, 0);
+					pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPushForce);
+				}
+				mIntensity += lPrimaryForce;
 			}
 			break;
 			case ENGINE_SLIDER_FORCE:
