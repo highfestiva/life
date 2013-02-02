@@ -176,7 +176,7 @@ void PushServerDelegate::PreEndTick()
 void PushServerDelegate::OrderAirStrike(const Vector3DF& pPosition)
 {
 	const float lIncomingAngle = 2*PIF * (float)Random::Uniform();
-	const float lPlaneDistance = 500;
+	const float lPlaneDistance = 1000;
 
 	Cure::ContextObject* lPlane = new BombPlane(mGameServerManager->GetResourceManager(), _T("deltawing"), this, pPosition);
 	mGameServerManager->AddContextObject(lPlane, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);

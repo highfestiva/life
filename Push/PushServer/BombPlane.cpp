@@ -12,7 +12,7 @@
 #include "../../Life/Launcher.h"
 #include "../../Life/ProjectileUtil.h"
 
-#define BOMBING_RADIUS 200.0f
+#define BOMBING_RADIUS 150.0f
 
 
 
@@ -46,7 +46,7 @@ void BombPlane::OnLoaded()
 void BombPlane::OnTick()
 {
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
-	if (lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mLastBombTick)) < 0.4f)
+	if (lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mLastBombTick)) < 0.6f)
 	{
 		return;
 	}

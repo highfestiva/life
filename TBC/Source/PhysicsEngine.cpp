@@ -145,6 +145,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 		case ENGINE_JET:
 		case ENGINE_SLIDER_FORCE:
 		case ENGINE_YAW_BRAKE:
+		case ENGINE_AIR_BRAKE:
 		{
 			if (pAspect == mControllerIndex)
 			{
@@ -526,6 +527,20 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					lAngularVelocity.z *= 1/mStrength;
 				}
 				pPhysicsManager->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
+			}
+			break;
+			case ENGINE_AIR_BRAKE:
+			{
+				//      1
+				// F =  - pv^2 C  A
+				//  D   2       d
+				const float pCdA = 0.5f * 1.225f * mFriction;	// Density of air multiplied with friction coefficient and area (the two latter combined in mFriction).
+				const TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+				Vector3DF lVelocity;
+				pPhysicsManager->GetBodyVelocity(lBodyId, lVelocity);
+				const float lSpeed = lVelocity.GetLength();
+				const Vector3DF lDrag = lVelocity * -lSpeed * pCdA;
+				pPhysicsManager->AddForce(lBodyId, lDrag);
 			}
 			break;
 			default:

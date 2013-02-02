@@ -205,6 +205,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_JET:
 			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
+			case TBC::PhysicsEngine::ENGINE_AIR_BRAKE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 100);
 				++y;
@@ -421,6 +422,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_JET:
 			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
+			case TBC::PhysicsEngine::ENGINE_AIR_BRAKE:
 			{
 				assert(pPosition.mBodyPositionArray.size() > y);
 				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);

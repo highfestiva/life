@@ -45,6 +45,7 @@ public:
 		ENGINE_GLUE,
 		ENGINE_BALL_BRAKE,
 		ENGINE_YAW_BRAKE,
+		ENGINE_AIR_BRAKE,
 	};
 	enum EngineMode
 	{
