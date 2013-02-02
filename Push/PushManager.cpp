@@ -717,7 +717,7 @@ void PushManager::TickUiInput()
 #define F(alt) f.mControl[Life::Options::FireControl::FIRE##alt]
 			if (F(0) > 0.5f)
 			{
-				Shoot();
+				AvatarShoot();
 			}
 
 			mAvatarInvisibleCount = 0;
@@ -1177,7 +1177,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			UiCure::CppContextObject* lAvatar = (UiCure::CppContextObject*)GetContext()->GetObject(lAvatarId);
 			if (lAvatar)
 			{
-				ShootLocal(lAvatar, (int)pFloat);
+				Shoot(lAvatar, (int)pFloat);
 			}
 		}
 		return;
@@ -1191,6 +1191,10 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	if (pClassId == _T("grenade") || pClassId == _T("rocket"))
 	{
 		lObject = new FastProjectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+	}
+	else if (pClassId == _T("bomb"))
+	{
+		lObject = new Projectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 	}
 	else if (strutil::StartsWith(pClassId, _T("mine")))
 	{
@@ -1284,10 +1288,10 @@ void PushManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 
 void PushManager::OnFireButton(UiTbc::Button*)
 {
-	Shoot();
+	AvatarShoot();
 }
 
-void PushManager::Shoot()
+void PushManager::AvatarShoot()
 {
 	if (mFireTimeout.QueryTimeDiff() < 0.15f)
 	{
@@ -1307,14 +1311,14 @@ void PushManager::Shoot()
 
 	if (mActiveWeapon == 0)
 	{
-		ShootLocal(lAvatar, mActiveWeapon);
+		Shoot(lAvatar, mActiveWeapon);
 	}
 
 	++mActiveWeapon;
 	mActiveWeapon %= 3;
 }
 
-void PushManager::ShootLocal(Cure::ContextObject* pAvatar, int pWeapon)
+void PushManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 {
 	str lAmmo;
 	switch (pWeapon)

@@ -178,7 +178,7 @@ void PushServerDelegate::OrderAirStrike(const Vector3DF& pPosition)
 	const float lIncomingAngle = 2*PIF * (float)Random::Uniform();
 	const float lPlaneDistance = 500;
 
-	Cure::ContextObject* lPlane = new BombPlane(mGameServerManager->GetResourceManager(), _T("deltawing"), pPosition);
+	Cure::ContextObject* lPlane = new BombPlane(mGameServerManager->GetResourceManager(), _T("deltawing"), this, pPosition);
 	mGameServerManager->AddContextObject(lPlane, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	TransformationF t;
 	t.GetPosition().Set(lPlaneDistance*::sin(lIncomingAngle), lPlaneDistance*::cos(lIncomingAngle), 30);
@@ -195,15 +195,25 @@ void PushServerDelegate::OrderAirStrike(const Vector3DF& pPosition)
 void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 {
 	str lAmmo;
+	bool isFast = true;
 	Cure::NetworkObjectType lNetworkType = Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED;
 	switch (pWeapon)
 	{
-		case 0:	lAmmo = _T("bullet");	lNetworkType = Cure::NETWORK_OBJECT_LOCAL_ONLY;	break;
-		case 1:	lAmmo = _T("grenade");							break;
-		case 2:	lAmmo = _T("rocket");							break;
+		case 0:		lAmmo = _T("bullet");	lNetworkType = Cure::NETWORK_OBJECT_LOCAL_ONLY;	break;
+		case 1:		lAmmo = _T("grenade");							break;
+		case 2:		lAmmo = _T("rocket");							break;
+		case -10:	lAmmo = _T("bomb");	isFast = false;					break;
 		default: assert(false); return;
 	}
-	Cure::ContextObject* lProjectile = new ServerFastProjectile(mGameServerManager->GetResourceManager(), lAmmo, this);
+	Cure::ContextObject* lProjectile;
+	if (isFast)
+	{
+		lProjectile = new ServerFastProjectile(mGameServerManager->GetResourceManager(), lAmmo, this);
+	}
+	else
+	{
+		lProjectile = new ServerProjectile(mGameServerManager->GetResourceManager(), lAmmo, 0, this);
+	}
 	mGameServerManager->AddContextObject(lProjectile, lNetworkType, 0);
 	log_volatile(mLog.Debugf(_T("Shooting projectile with ID %i!"), (int)lProjectile->GetInstanceId()));
 	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());

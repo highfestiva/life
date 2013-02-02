@@ -521,6 +521,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\BombPlane.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameServerLogic.cpp"
 				>
 			</File>
@@ -564,6 +568,10 @@
 		<Filter
 			Name="Header Files"
 			>
+			<File
+				RelativePath=".\BombPlane.h"
+				>
+			</File>
 			<File
 				RelativePath=".\GameServerLogic.h"
 				>

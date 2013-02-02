@@ -107,8 +107,8 @@ protected:
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
 	void OnFireButton(UiTbc::Button*);
-	void Shoot();
-	void ShootLocal(Cure::ContextObject* pAvatar, int pWeapon);
+	void AvatarShoot();
+	void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
 
 	void CancelLogin();
 	void OnVehicleSelect(UiTbc::Button* pButton);

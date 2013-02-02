@@ -42,18 +42,25 @@ void Projectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-#ifdef LEPRA_DEBUG
-	//Vector3DF lPos = GetPosition();
-	//log_volatile(mLog.Infof(_T("Projectile loaded at pos (%f;%f;%f)."), lPos.x, lPos.y, lPos.z));
-#endif // Debug
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 0, 2);
+	assert(lTag);
 
-	mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
-	mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
-		UiCure::UserSound3dResource::TypeLoadCallback(this, &Projectile::LoadPlaySound3d));
-
-	UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
-	lLaunchSound->Load(GetResourceManager(), _T("launch.wav"),
-		UiCure::UserSound3dResource::TypeLoadCallback(this, &Projectile::LoadPlaySound3d));
+	const str lLaunchSoundName = lTag->mStringValueList[0];
+	const str lShreekSoundName = lTag->mStringValueList[1];
+	if (!lLaunchSoundName.empty())
+	{
+		UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
+		TransformationF lParentTransform;
+		Vector3DF lParentVelocity;
+		Life::ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity);
+		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, 1.0f);
+	}
+	if (!lShreekSoundName.empty())
+	{
+		mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
+		mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
+			UiCure::UserSound3dResource::TypeLoadCallback(this, &Projectile::LoadPlaySound3d));
+	}
 }
 
 void Projectile::OnTick()
@@ -94,20 +101,8 @@ void Projectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		if (pSoundResource == mShreekSound)
-		{
-			mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), GetPosition(), GetVelocity());
-			mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.7f, 1.0);
-		}
-		else
-		{
-			TransformationF lParentTransform;
-			Vector3DF lParentVelocity;
-			Life::ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity);
-			mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), lParentTransform.GetPosition(), lParentVelocity);
-			mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 5.0f, 1.0);
-			new UiCure::SoundReleaser(mUiManager, GetManager(), pSoundResource);
-		}
+		mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), GetPosition(), GetVelocity());
+		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.7f, 1.0);
 	}
 }
 

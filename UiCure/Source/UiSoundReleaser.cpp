@@ -15,17 +15,20 @@ namespace UiCure
 
 
 
-SoundReleaser::SoundReleaser(GameUiManager* pUiManager, Cure::ContextManager* pManager, UiCure::UserSound3dResource* pSound):
-	Parent(0, _T("SoundReleaser"), pUiManager),
-	mSound(pSound)
+SoundReleaser::SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
+	const str& pSoundName, UiCure::UserSound3dResource* pSound, const Vector3DF& pPosition, const Vector3DF& pVelocity,
+	float pVolume, float pPitch):
+	Parent(pResourceManager, _T("SoundReleaser"), pUiManager),
+	mSound(pSound),
+	mPosition(pPosition),
+	mVelocity(pVelocity),
+	mVolume(pVolume),
+	mPitch(pPitch)
 {
-	if (!mUiManager->GetSoundManager()->IsPlaying(mSound->GetData()))
-	{
-		delete this;
-		return;
-	}
 	pManager->AddLocalObject(this);
-	pManager->EnableTickCallback(this);
+
+	mSound->Load(GetResourceManager(), pSoundName,
+		UiCure::UserSound3dResource::TypeLoadCallback(this, &SoundReleaser::LoadPlaySound3d));
 }
 
 SoundReleaser::~SoundReleaser()
@@ -37,6 +40,21 @@ SoundReleaser::~SoundReleaser()
 void SoundReleaser::OnTick()
 {
 	if (!mUiManager->GetSoundManager()->IsPlaying(mSound->GetData()))
+	{
+		GetManager()->PostKillObject(GetInstanceId());
+	}
+}
+
+void SoundReleaser::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
+{
+	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), mPosition, mVelocity);
+		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), mVolume, mPitch);
+		GetManager()->EnableTickCallback(this);
+	}
+	else
 	{
 		GetManager()->PostKillObject(GetInstanceId());
 	}

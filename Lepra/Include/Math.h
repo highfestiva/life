@@ -136,6 +136,8 @@ public:
 
 	template<class _T> static _T Acos(_T pAngle);
 
+	template<class _T> static bool CalculateRoot(const _T& a, const _T& b, const _T& c, _T& pRoot);
+
 	template<class _T, class _Vector> static _T CalculateMedian(const _Vector& pArray);
 	// Not necessarily standard deviation, if not providing arithmetic mean.
 	template<class _ReturnType, class _ArrayType, class _Vector> static _ReturnType CalculateDeviation(const _Vector& pArray, const _ArrayType& pMean);
@@ -175,6 +177,24 @@ template<class _T> _T Math::Acos(_T pAngle)
 		return MathTraits<_T>::Pi();
 	}
 	return ::acos(pAngle);
+}
+
+template<class _T> static bool Math::CalculateRoot(const _T& a, const _T& b, const _T& c, _T& pRoot)
+{
+	// Quaderatic formula:
+	// ax^2 + bx + c = 0
+	// =>
+	//     -b +- sqrt(b^2 - 4ac)
+	// x = ---------------------
+	//             2a
+	const float b2 = b*b;
+	const float _4ac = 4*a*c;
+	if (b2 < _4ac || !a)	// Does not compute.
+	{
+		return false;
+	}
+	pRoot = (-b + sqrt(b2 - _4ac)) / (2*a);
+	return true;
 }
 
 template<class _T, class _Vector> _T Math::CalculateMedian(const _Vector& pArray)

@@ -19,12 +19,20 @@ class SoundReleaser: public CppContextObject
 {
 	typedef CppContextObject Parent;
 public:
-	SoundReleaser(GameUiManager* pUiManager, Cure::ContextManager* pManager, UiCure::UserSound3dResource* pSound);
+	SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
+		const str& pSoundName, UiCure::UserSound3dResource* pSound, const Vector3DF& pPosition, const Vector3DF& pVelocity,
+		float pVolume, float pPitch);
 	virtual ~SoundReleaser();
-	void OnTick();
 
 private:
+	void OnTick();
+	void SoundReleaser::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
+
 	UiCure::UserSound3dResource* mSound;
+	Vector3DF mPosition;
+	Vector3DF mVelocity;
+	float mVolume;
+	float mPitch;
 };
 
 

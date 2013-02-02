@@ -26,6 +26,7 @@ namespace Life
 class Launcher
 {
 public:
+	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon) = 0;
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition) = 0;
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject) = 0;
 };
