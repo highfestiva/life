@@ -539,6 +539,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiOpenGLShader.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiPainter.cpp"
 				>
 			</File>
@@ -894,6 +898,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiOpenGLRenderer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiOpenGLShader.h"
 				>
 			</File>
 			<File
