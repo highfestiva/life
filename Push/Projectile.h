@@ -44,6 +44,7 @@ private:
 	Life::Launcher* mLauncher;
 	int mTickCounter;
 	bool mIsDetonated;
+	float mExplosiveEnergy;
 
 	LOG_CLASS_DECLARE();
 };

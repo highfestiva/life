@@ -356,11 +356,11 @@ bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 
 
 
-void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition)
+void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, float pStrength)
 {
 	(void)pExplosive;
 
-	mCollisionSoundManager->OnCollision(5.0f, pPosition, pExplosiveGeometry, _T("explosion"));
+	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	{
 		// Shattered pieces, stones or mud.
@@ -390,7 +390,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 
 	{
 		// Release gas puffs.
-		const int lParticleCount = (Random::GetRandomNumber() % 4);
+		const int lParticleCount = (Random::GetRandomNumber() % 4) + 1;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);

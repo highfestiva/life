@@ -421,8 +421,8 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 {
 	if (!IsLoaded())
 	{
-		// TODO: store movement until loaded. Movement of this object
-		// was received from server before we were ready.
+		// Movement of this object was received (from remote host) before we were ready.
+		mPosition.CopyData(&pPositionalData);
 		return;
 	}
 

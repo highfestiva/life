@@ -41,6 +41,7 @@ private:
 	float mMuzzleVelocity;
 	Life::Launcher* mLauncher;
 	bool mIsDetonated;
+	float mExplosiveEnergy;
 
 	LOG_CLASS_DECLARE();
 };

@@ -58,7 +58,7 @@ void ServerFastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, 
 	(void)pTriggerId;
 	if (mExplosiveEnergy)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition());
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), mExplosiveEnergy);
 	}
 	else
 	{

@@ -40,7 +40,7 @@ FastProjectile::~FastProjectile()
 
 	if (mExplosiveEnergy)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition());
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), mExplosiveEnergy);
 	}
 }
 
@@ -151,7 +151,7 @@ void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Contex
 
 	if (mExplosiveEnergy)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition());
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), mExplosiveEnergy);
 	}
 	else
 	{

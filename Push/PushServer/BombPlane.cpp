@@ -9,10 +9,11 @@
 #include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/TimeManager.h"
+#include "../../Lepra/Include/Random.h"
 #include "../../Life/Launcher.h"
 #include "../../Life/ProjectileUtil.h"
 
-#define BOMBING_RADIUS 150.0f
+#define BOMBING_RADIUS 80.0f
 
 
 
@@ -63,7 +64,7 @@ void BombPlane::OnTick()
 	{
 		Vector3DF lHorizontalProjectedTarget(mTarget.x, mTarget.y, lPosition.z);
 		const float d = lHorizontalProjectedTarget.GetDistanceSquared(lPosition + lVelocity*t);
-		if (d < BOMBING_RADIUS*BOMBING_RADIUS)
+		if (d < BOMBING_RADIUS*BOMBING_RADIUS * (float)Random::Uniform(0.8, 1.2))
 		{
 			mLastBombTick = lTimeManager->GetCurrentPhysicsFrame();
 			mLauncher->Shoot(this, -10);

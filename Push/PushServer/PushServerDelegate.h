@@ -52,10 +52,10 @@ private:
 
 	virtual void PreEndTick();
 
-	void OrderAirStrike(const Vector3DF& pPosition);
+	void OrderAirStrike(const Vector3DF& pPosition, float pFlyInAngle);
 
 	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
-	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition);
+	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 	virtual Cure::ContextObject* CreateAvatarForNpc(Npc* pNpc);

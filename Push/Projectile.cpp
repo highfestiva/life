@@ -24,7 +24,8 @@ Projectile::Projectile(Cure::ResourceManager* pResourceManager, const str& pClas
 	mShreekSound(0),
 	mLauncher(pLauncher),
 	mTickCounter(0),
-	mIsDetonated(false)
+	mIsDetonated(false),
+	mExplosiveEnergy(1)
 {
 	DisableRootShadow();
 }
@@ -33,7 +34,7 @@ Projectile::~Projectile()
 {
 	delete mShreekSound;
 	mShreekSound = 0;
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition());
+	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), mExplosiveEnergy);
 }
 
 
@@ -42,8 +43,9 @@ void Projectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 0, 2);
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 1, 2);
 	assert(lTag);
+	mExplosiveEnergy = lTag->mFloatValueList[0];
 
 	const str lLaunchSoundName = lTag->mStringValueList[0];
 	const str lShreekSoundName = lTag->mStringValueList[1];
@@ -93,7 +95,7 @@ void Projectile::OnForceApplied(ContextObject* pOtherObject,
 		return;
 	}
 
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition);
+	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, mExplosiveEnergy);
 }
 
 void Projectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)

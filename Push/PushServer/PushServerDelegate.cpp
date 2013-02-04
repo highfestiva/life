@@ -173,19 +173,18 @@ void PushServerDelegate::PreEndTick()
 
 
 
-void PushServerDelegate::OrderAirStrike(const Vector3DF& pPosition)
+void PushServerDelegate::OrderAirStrike(const Vector3DF& pPosition, float pFlyInAngle)
 {
-	const float lIncomingAngle = 2*PIF * (float)Random::Uniform();
 	const float lPlaneDistance = 1000;
 
 	Cure::ContextObject* lPlane = new BombPlane(mGameServerManager->GetResourceManager(), _T("deltawing"), this, pPosition);
 	mGameServerManager->AddContextObject(lPlane, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	TransformationF t;
-	t.GetPosition().Set(lPlaneDistance*::sin(lIncomingAngle), lPlaneDistance*::cos(lIncomingAngle), 30);
+	t.GetPosition().Set(lPlaneDistance*::sin(pFlyInAngle), lPlaneDistance*::cos(pFlyInAngle), 30);
 	t.GetPosition().x += pPosition.x;
 	t.GetPosition().y += pPosition.y;
 	t.GetOrientation().RotateAroundOwnX(PIF/2);
-	t.GetOrientation().RotateAroundWorldZ(-lIncomingAngle);
+	t.GetOrientation().RotateAroundWorldZ(-pFlyInAngle);
 	lPlane->SetInitialTransform(t);
 	lPlane->StartLoading();
 }
@@ -195,18 +194,18 @@ void PushServerDelegate::OrderAirStrike(const Vector3DF& pPosition)
 void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 {
 	str lAmmo;
-	bool isFast = true;
+	bool lIsFast = true;
 	Cure::NetworkObjectType lNetworkType = Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED;
 	switch (pWeapon)
 	{
 		case 0:		lAmmo = _T("bullet");	lNetworkType = Cure::NETWORK_OBJECT_LOCAL_ONLY;	break;
 		case 1:		lAmmo = _T("grenade");							break;
 		case 2:		lAmmo = _T("rocket");							break;
-		case -10:	lAmmo = _T("bomb");	isFast = false;					break;
+		case -10:	lAmmo = _T("bomb");	lIsFast = false;				break;
 		default: assert(false); return;
 	}
 	Cure::ContextObject* lProjectile;
-	if (isFast)
+	if (lIsFast)
 	{
 		lProjectile = new ServerFastProjectile(mGameServerManager->GetResourceManager(), lAmmo, this);
 	}
@@ -231,7 +230,7 @@ void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	}
 }
 
-void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition)
+void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, float pStrength)
 {
 	(void)pExplosiveGeometry;
 
@@ -249,7 +248,11 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 		{
 			continue;
 		}
-		const float lForce = Explosion::PushObject(lPhysicsManager, lObject, pPosition, 1.0f);
+		if (strutil::StartsWith(lObject->GetClassId(), _T("bomb")))	// Prevent bombs from pushing each other away from the target!
+		{
+			continue;
+		}
+		const float lForce = Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength);
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
@@ -272,7 +275,14 @@ void PushServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::Context
 	if (lHealth)
 	{
 		DrainHealth(pBullet, pHitObject, lHealth, (float)Random::Normal(0.17, 0.01, 0.1, 0.3));
-		OrderAirStrike(pHitObject->GetPosition());
+		const float lIncomingAngle = 2*PIF * (float)Random::Uniform();
+		OrderAirStrike(pHitObject->GetPosition(), lIncomingAngle);
+		Vector3DF v(25*::sin(lIncomingAngle), 25*::cos(lIncomingAngle), 0);
+		QuaternionF q = QuaternionF();
+		q.RotateAroundWorldZ(PIF/4);
+		OrderAirStrike(pHitObject->GetPosition() + q*v, lIncomingAngle);
+		q.RotateAroundWorldZ(-PIF/2);
+		OrderAirStrike(pHitObject->GetPosition() + q*v, lIncomingAngle);
 	}
 }
 

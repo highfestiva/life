@@ -23,7 +23,7 @@ Mine::Mine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure:
 
 Mine::~Mine()
 {
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition());
+	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), 1);
 }
 
 

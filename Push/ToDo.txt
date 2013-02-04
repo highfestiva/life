@@ -4,28 +4,31 @@ Game
 + NPC:s.
 + Team play.
 + Tab score
++ Two computers.
++ The vehicle "jumps" when receiving an old server position from an explosion.
++ Server sometimes skips network positioning when a client just logged in.
++ Explode vehicle when health <= 0.
+- Creating temporary, local missiles, which are taken over by the server later on (including extrapolation).
++ Make sure shooting oneself can't happen (using extrapolation? On server or client?).
++ Ramps, bridges, elevators, doors.
++ Destructable obstacles.
++ Implement machine gun.
 . Mouse look
-. Two computers.
-. The vehicle "jumps" when receiving an old server position from an explosion.
+. Test which of Arena or Adventure play is best. Make a real map!
+. Check multiplayer on two computers and one iPhone.
+. Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and sharpnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
 . Not possible to log in when someone is moving/shooting.
-. Server sometimes skips network positioning when a client just logged in.
-. Path finding.
+. Simple path finding.
 . AI (where is the user probably going to appear after disappearing behind a building).
-. Explode vehicle when health <= 0.
-. Goal seeking missiles
-. Creating temporary, local missiles, which are taken over by the server later on (including extrapolation).
-. Make sure shooting oneself can't happen (using extrapolation? On server or client?).
-. Ramps, bridges, elevators, doors.
+. Goal seeking missiles.
 . Dynamic levels.
-. Destructable obstacles.
+. Orient spawn engines correctly (for instance mines).
 . Fix cam moves behind walls (like in Kill Cutie: cam moves up).
 . UX design/menus.
 . Money in the game.
 . Get weapons, shield, health and ammo in "stores" in the game. (Triggers which add up your inventory after some time or at regular intervals.)
-. Implement machine gun.
 . One defence turret per team.
 . Nice looks.
-. Particles.
 . Improve sound quality (doppler on grenades especially).
 
 

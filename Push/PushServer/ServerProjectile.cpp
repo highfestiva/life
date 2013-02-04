@@ -21,7 +21,8 @@ ServerProjectile::ServerProjectile(Cure::ResourceManager* pResourceManager, cons
 	Parent(pResourceManager, pClassId),
 	mMuzzleVelocity(pMuzzleVelocity),
 	mLauncher(pLauncher),
-	mIsDetonated(false)
+	mIsDetonated(false),
+	mExplosiveEnergy(1)
 {
 }
 
@@ -34,6 +35,10 @@ ServerProjectile::~ServerProjectile()
 void ServerProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
+
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 1, 2);
+	assert(lTag);
+	mExplosiveEnergy = lTag->mFloatValueList[0];
 
 	TransformationF lTransform;
 	Vector3DF lParentVelocity;
@@ -58,7 +63,7 @@ void ServerProjectile::OnForceApplied(Cure::ContextObject* pOtherObject,
 	(void)pTorque;
 	(void)pRelativeVelocity;
 
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition);
+	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, mExplosiveEnergy);
 }
 
 
