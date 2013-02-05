@@ -561,6 +561,10 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			{
 				continue;
 			}
+			if (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC && lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+			{
+				continue;	// No use pushing around trees, etc.
+			}
 			const Vector3DF lBodyCenter = GameTicker::GetPhysicsManager(true)->GetBodyPosition(lGeometry->GetBodyId());
 			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();

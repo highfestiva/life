@@ -41,11 +41,12 @@ void RoboBall::OnTick()
 	{
 		float lStrength = Math::Lerp(0.25f, 1.0f, mGame->GetComputerDifficulty());
 		const Vector3DF lPosition = GetPosition();
-		float lAngle;
+		const Vector3DF lCutiePosition = mGame->GetCutie()->GetPosition();
+		const Vector3DF lDirection = lCutiePosition - lPosition;
+		Vector3DF lSteerDirection;
 		if (mHeadAwayTimer.QueryTimeDiff() > 2.0)
 		{
 			const Vector3DF lVelocity = GetVelocity();
-			const Vector3DF lCutiePosition = mGame->GetCutie()->GetPosition();
 			const Vector3DF lCutieVelocity = mGame->GetCutie()->GetVelocity();
 			const float lDistance = lPosition.GetDistance(lCutiePosition);
 			const float lSpeed = lVelocity.GetLength();
@@ -65,17 +66,16 @@ void RoboBall::OnTick()
 			const Vector3DF lFuturePosition = lPosition + lVelocity*lTimeTilImpact;
 			const Vector3DF lFutureCutiePosition = lCutiePosition + lCutieVelocity*lTimeTilImpact;
 			const Vector3DF lFutureDirection = lFutureCutiePosition - lFuturePosition;
-			const Vector3DF lDirection = lCutiePosition - lPosition;
 			if (lFutureDirection.Dot(lDirection) > 1)
 			{
-				lAngle = -LEPRA_XY_ANGLE(lFutureDirection, Vector3DF(1, 0, 0));
+				lSteerDirection = lFutureDirection;
 			}
 			else
 			{
 				// Just use the current position, to not get a vector of opposite direction when
 				// the future position indicates we will have passed the target. Which hopefully
 				// ends up in a big crash! :)
-				lAngle = -LEPRA_XY_ANGLE(lDirection, Vector3DF(1, 0, 0));
+				lSteerDirection = lDirection;
 			}
 			if (lStrength < 0.6f && lDistance > 30.0f && lSpeed < 2)
 			{
@@ -88,20 +88,24 @@ void RoboBall::OnTick()
 		}
 		else
 		{
-			const Vector3DF lDirection = Vector3DF(100, 100, 13) - lPosition;
-			lAngle = -LEPRA_XY_ANGLE(lDirection, Vector3DF(1, 0, 0));
+			lSteerDirection = Vector3DF(100, 100, 13) - lPosition;
 		}
 		if (mBadSpeedCounter > 2)
 		{
 			lStrength = 0.6f;
 		}
-		//GetPhysics()->GetEngine(0)->SetValue(0, lStrength, lAngle);
-		GetPhysics()->GetEngine(0)->SetValue(0, lStrength);
+		lSteerDirection.z = 0;
+		lSteerDirection.Normalize();
+		GetPhysics()->GetEngine(0)->SetValue(0, lSteerDirection.y * lStrength);
+		GetPhysics()->GetEngine(0)->SetValue(1, lSteerDirection.x * lStrength);
 		static int c = 0;
 		if (++c > 20)
 		{
 			c = 0;
-			log_volatile(mLog.Debugf(_T("RoboBall at (%.1f, %.1f, %.1f). Direction %.0f."), lPosition.x, lPosition.y, lPosition.z, lAngle/PIF*180));
+			log_volatile(mLog.Debugf(_T("RoboBall at (%.1f, %.1f, %.1f), heading towards (%.1f, %.1f), diff (%.1f, %.1f, %.1f)."),
+				lPosition.x, lPosition.y, lPosition.z,
+				lSteerDirection.x, lSteerDirection.y,
+				lDirection.x, lDirection.y, lDirection.z));
 		}
 
 		static int d = 0;
@@ -114,7 +118,7 @@ void RoboBall::OnTick()
 				const Cure::ObjectPositionalData* lPlacement;
 				UpdateFullPosition(lPlacement);
 				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPlacement->Clone();
-				lNewPlacement->mPosition.mTransformation.GetPosition().z = 30;
+				lNewPlacement->mPosition.mTransformation.GetPosition().Set(0, 0, 30);
 				lNewPlacement->mPosition.mVelocity.Set(0, 0, 0);
 				SetFullPosition(*lNewPlacement, 0);
 			}

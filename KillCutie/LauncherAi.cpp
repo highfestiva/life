@@ -145,7 +145,7 @@ void LauncherAi::OnTick()
 	float lGuideYaw;
 	mGame->GetLauncher()->GetAngles(lTargetPosition+mTargetOffset, lTargetVelocity, lPitch, lGuidePitch, lYaw, lGuideYaw);
 	const float lVelocity = lTargetVelocity.GetLength();
-	const float lPitchFactor = ::fabs((lPitch - lGuidePitch) * (lVelocity+3) + 0.03f);
+	const float lPitchFactor = Math::Clamp(::fabs((lPitch - lGuidePitch) * (lVelocity+3) + 0.03f), -2.0f, +2.0f);
 	if (lPitch < lGuidePitch)
 	{
 		mGame->GetLauncher()->SetEnginePower(0, -1*lPitchFactor);
@@ -154,7 +154,7 @@ void LauncherAi::OnTick()
 	{
 		mGame->GetLauncher()->SetEnginePower(0, +1*lPitchFactor);
 	}
-	const float lYawFactor = ::fabs((lYaw - lGuideYaw) * (lVelocity+4) + 0.03f);
+	const float lYawFactor = Math::Clamp(::fabs((lYaw - lGuideYaw) * (lVelocity+4) + 0.03f), -2.0f, +2.0f);
 	if (lYaw < lGuideYaw)
 	{
 		mGame->GetLauncher()->SetEnginePower(1, -1*lYawFactor);

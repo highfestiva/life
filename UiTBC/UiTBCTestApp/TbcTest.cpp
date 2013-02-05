@@ -126,7 +126,7 @@ bool ExportStructure()
 			TBC::ChunkyBoneGeometry::BodyData(1.0f, 0.2f, 1.0f), lRadius);
 		lStructure.AddBoneGeometry(Lepra::TransformationF(), lGeometry);
 
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_CAMERA_FLAT_PUSH,
+		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_PUSH_RELATIVE,
 			55, 50, 0, 0.01f, 0);
 		lEngine->AddControlledGeometry(lGeometry, 1);
 		lStructure.AddEngine(lEngine);

@@ -992,7 +992,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 			lOk = (lGeometryData->mTA->mTextureID[x] != pTexture);
 			if (!lOk)
 			{
-				assert(lOk);
+				//assert(lOk);
 				log_atrace("Skipping add of texture to geometry a second time.");
 			}
 		}

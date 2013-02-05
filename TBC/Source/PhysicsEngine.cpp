@@ -117,10 +117,10 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 			mLog.AError("Walk not implemented!");
 		}
 		break;
-		case ENGINE_CAMERA_FLAT_PUSH:
-		case ENGINE_CAMERA_3D_PUSH:
+		case ENGINE_PUSH_RELATIVE:
+		case ENGINE_PUSH_ABSOLUTE:
 		{
-			const unsigned lControlledAspects = (mEngineType == ENGINE_CAMERA_FLAT_PUSH)? 2 : 3;
+			const unsigned lControlledAspects = (mEngineType == ENGINE_PUSH_RELATIVE)? 2 : 3;
 			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+lControlledAspects)
 			{
 				switch (pAspect - mControllerIndex)
@@ -202,23 +202,26 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				mLog.AError("Walk not implemented!");
 			}
 			break;
-			case ENGINE_CAMERA_FLAT_PUSH:
-			case ENGINE_CAMERA_3D_PUSH:
+			case ENGINE_PUSH_RELATIVE:
+			case ENGINE_PUSH_ABSOLUTE:
 			{
 				Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
 					Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
-				ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
-				const QuaternionF lOrientation =
-					pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
-					pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
-				float lYaw;
-				float lPitch;
-				float lRoll;
-				lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
-				QuaternionF lRotation;
-				lRotation.RotateAroundWorldZ(lYaw);
-				lAxis[0] = lRotation*lAxis[0];
-				lAxis[1] = lRotation*lAxis[1];
+				if (mEngineType == ENGINE_PUSH_RELATIVE)
+				{
+					const ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
+					const QuaternionF lOrientation =
+						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
+						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+					float lYaw;
+					float lPitch;
+					float lRoll;
+					lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
+					QuaternionF lRotation;
+					lRotation.RotateAroundWorldZ(lYaw);
+					lAxis[0] = lRotation*lAxis[0];
+					lAxis[1] = lRotation*lAxis[1];
+				}
 				Vector3DF lOffset;
 				while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
 				{
@@ -638,7 +641,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 float PhysicsEngine::GetValue() const
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
-	if (mEngineType == ENGINE_CAMERA_FLAT_PUSH || mEngineType == ENGINE_CAMERA_3D_PUSH)
+	if (mEngineType == ENGINE_PUSH_RELATIVE || mEngineType == ENGINE_PUSH_ABSOLUTE)
 	{
 		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
 		const float b = ::fabs(mValue[ASPECT_SECONDARY]);
