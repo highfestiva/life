@@ -83,7 +83,7 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::ContextObj
 				pPhysicsManager->SetBodyVelocity(lGeometry->GetBodyId(), Vector3DF());
 			}
 		}
-		else
+		else if (lGeometry->GetJointId() != TBC::INVALID_JOINT)
 		{
 			pPhysicsManager->DeleteJoint(lGeometry->GetJointId());
 			lGeometry->ResetJointId();

@@ -61,6 +61,7 @@ public:
 	bool Render();
 	virtual bool Paint();
 	virtual bool IsPrimaryManager() const;
+	virtual void PreEndTick();
 	virtual bool EndTick();
 	void TickNetworkInput();
 	bool TickNetworkOutput();
@@ -79,6 +80,7 @@ public:
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual void OnInput(UiLepra::InputElement* pElement);
+	virtual void HandleUnusedRelativeAxis();
 
 	int GetSlaveIndex() const;
 
@@ -87,6 +89,7 @@ public:
 
 protected:
 	typedef std::vector<Cure::GameObjectId> ObjectArray;
+	typedef std::hash_set<UiLepra::InputElement*, LEPRA_VOIDP_HASHER> InputElementSet;
 	enum SteeringPlaybackMode
 	{
 		PLAYBACK_NONE = 0,
@@ -151,6 +154,9 @@ protected:
 	Alarm mCollisionExpireAlarm;
 	Alarm mInputExpireAlarm;
 	Alarm mSendExpireAlarm;
+
+	InputElementSet mRelativeAxis;
+	InputElementSet mUnusedRelativeAxis;
 
 	bool mAllowMovementInput;
 	Options::ClientOptionsManager mOptions;

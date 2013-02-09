@@ -63,11 +63,13 @@ void FastProjectile::OnLoaded()
 	const str lShreekSoundName = lTag->mStringValueList[1];
 	if (!lLaunchSoundName.empty())
 	{
-		UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
 		TransformationF lParentTransform;
 		Vector3DF lParentVelocity;
-		Life::ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity);
-		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, 1.0f);
+		if (Life::ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
+		{
+			UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
+			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, 1.0f);
+		}
 	}
 	if (!lShreekSoundName.empty())
 	{

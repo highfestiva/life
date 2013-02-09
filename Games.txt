@@ -6,9 +6,13 @@
 
 -Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
 
--Car Jumpin'
-
 Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
+
+Tank vs. Tank, similar to the Cyber Sled remake.
+
+Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
+
+Getaway - flee from tanks (and perhaps other military craft) which try to blow you out of orbit.
 
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
 
@@ -23,8 +27,6 @@ Fork lift puzzle game - move all the boxes to the right locations.
 Construction vehicle game - fork lift, front loader, excavator... Build, move and demolish!
 
 Build your own vehicle - place and rotate: body, wheels, cranes, brake lights... Specify joints, engines (engine powers?, speeds?). First object is suspended in mid-air, but attached objects become "live" immediately when dragged to the scene. Test drive when done!
-
-Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
 Physical programming game - give instructions such as "push left 10" and "pop". Try to hit something? Use car, hovercraft, spaceship...
 
@@ -45,3 +47,5 @@ Create an Early Warning System utilizing The Random Generator EGGS!
 A game in which a server is also a client listening to other servers, and where the information on the game spreads throughout the nodes... Perhaps area based? Algo might also use a way to spread IRL geographical coordinates as world server coordinates.
 
 Soap bubble game? Produce and catch 'em all.
+
+Car Jumpin'

@@ -17,14 +17,15 @@ namespace Life
 
 
 
-void ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF& pTransform, Vector3DF& pVelocity)
+bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF& pTransform, Vector3DF& pVelocity)
 {
 	assert(pProjectile);
-	assert(pProjectile->GetOwnerInstanceId());
+	//assert(pProjectile->GetOwnerInstanceId());
 	Cure::CppContextObject* lAvatar = (Cure::CppContextObject*)pProjectile->GetManager()->GetObject(pProjectile->GetOwnerInstanceId());
 	if (!lAvatar)
 	{
-		return;
+		pProjectile->GetManager()->PostKillObject(pProjectile->GetInstanceId());
+		return false;
 	}
 
 	pTransform.SetOrientation(lAvatar->GetOrientation());
@@ -50,6 +51,7 @@ void ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF
 		const Vector3DF lMuzzleOffset = lAvatar->GetPhysics()->GetOriginalBoneTransformation(lBoneIndex).GetPosition();
 		pTransform.GetPosition() += lRootOrientation * lMuzzleOffset;
 	}
+	return true;
 }
 
 void ProjectileUtil::StartBullet(Cure::ContextObject* pBullet, float pMuzzleVelocity, bool pUseBarrel)
@@ -58,7 +60,10 @@ void ProjectileUtil::StartBullet(Cure::ContextObject* pBullet, float pMuzzleVelo
 	if (pUseBarrel)
 	{
 		Vector3DF lParentVelocity;
-		GetBarrel(pBullet, lTransform, lParentVelocity);
+		if (!GetBarrel(pBullet, lTransform, lParentVelocity))
+		{
+			return;
+		}
 		Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, 0, pMuzzleVelocity);
 		lVelocity += lParentVelocity;
 		pBullet->SetRootVelocity(lVelocity);

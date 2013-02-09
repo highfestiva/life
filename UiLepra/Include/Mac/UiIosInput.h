@@ -30,22 +30,12 @@ public:
 		IosInputDevice* pParentDevice);
 	virtual ~IosInputElement();
 
-	// Sets the uncalibrated value of this device.
-	// (Only useful with analogue elements).
-	void SetValue(int pValue);
-
-	str GetCalibration() const;
-	bool SetCalibration(const str& pData);
-
 private:
 	enum
 	{
 		MAX_INT = 0x7FFFFFFF,
 		MIN_INT  = 0x80000000,
 	};
-
-	int32 mMin;
-	int32 mMax;
 
 	LOG_CLASS_DECLARE();
 };

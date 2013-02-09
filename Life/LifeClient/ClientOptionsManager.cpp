@@ -24,6 +24,7 @@ namespace Options
 ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority):
 	OptionsManager(pVariableScope, pPriority)
 {
+	mMouseSensitivity = 4.0f;
 	mShowScore = 0;
 	::memset(&mSteeringControl, 0, sizeof(mSteeringControl));
 	::memset(&mCamControl, 0, sizeof(mCamControl));
@@ -89,6 +90,45 @@ void ClientOptionsManager::DoRefreshConfiguration()
 		KeyValue(_T(RTVAR_CTRL_FIRE2), &mFireControl.mControl[FireControl::FIRE2]),
 	};
 	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
+
+	CURE_RTVAR_GET(mMouseSensitivity, =(float), mVariableScope, RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
+}
+
+bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
+{
+	bool lValueSet = false;
+	float lValue = pElement->GetValue();
+	const str lInputElementName = pElement->GetFullName();
+	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
+	{
+		const bool lIsRelative = (pElement->GetInterpretation() == UiLepra::InputElement::RELATIVE_AXIS);
+		// Update both sides for analogue input.
+		if (lIsRelative)
+		{
+			lValue *= mMouseSensitivity * 0.03f;	// Relative values are more sensitive.
+		}
+		else if (Math::IsEpsEqual(lValue, 0.0f, 0.1f))
+		{
+			// Clamp absolute+analogue to neutral when close enough.
+			lValueSet = SetValue(lInputElementName+_T("+"), 0, false);
+			SetValue(lInputElementName+_T("-"), 0, false);
+		}
+		if (lValue > 0)
+		{
+			lValueSet = SetValue(lInputElementName+_T("+"), lValue, lIsRelative);
+			SetValue(lInputElementName+_T("-"), 0, false);
+		}
+		else if (lValue < 0)
+		{
+			lValueSet = SetValue(lInputElementName+_T("-"), -lValue, lIsRelative);
+			SetValue(lInputElementName+_T("+"), 0, false);
+		}
+	}
+	else
+	{
+		lValueSet = SetValue(lInputElementName, lValue, false);
+	}
+	return lValueSet;
 }
 
 

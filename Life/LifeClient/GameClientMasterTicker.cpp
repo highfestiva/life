@@ -1284,15 +1284,6 @@ bool GameClientMasterTicker::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 
 void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 {
-	/*log_volatile(mLog.Tracef(_T("Got input from element '%s' / '%s' = %f.\n"),
-		pElement->GetFullName().c_str(),
-		pElement->GetIdentifier().c_str(),
-		pElement->GetValue()));
-
-	if (mServer)
-	{
-		mServer->OnInput(pElement);
-	}*/
 	SlaveArray::iterator x = mSlaveArray.begin();
 	for (; x != mSlaveArray.end(); ++x)
 	{

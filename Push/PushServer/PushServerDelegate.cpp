@@ -218,9 +218,11 @@ void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
 	TransformationF t;
 	Vector3DF v;
-	Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
-	lProjectile->SetInitialTransform(t);
-	lProjectile->StartLoading();
+	if (Life::ProjectileUtil::GetBarrel(lProjectile, t, v))
+	{
+		lProjectile->SetInitialTransform(t);
+		lProjectile->StartLoading();
+	}
 
 	if (lNetworkType == Cure::NETWORK_OBJECT_LOCAL_ONLY)
 	{
@@ -238,6 +240,7 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
 	mGameServerManager->IndicatePosition(pPosition, lIndicateHit);
 
+	ScopeLock lLock(mGameServerManager->GetTickLock());
 	TBC::PhysicsManager* lPhysicsManager = mGameServerManager->GetPhysicsManager();
 	Cure::ContextManager::ContextObjectTable lObjectTable = mGameServerManager->GetContext()->GetObjectTable();
 	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
@@ -517,6 +520,7 @@ bool PushServerDelegate::IsAvatarObject(const Cure::ContextObject* pObject) cons
 
 void PushServerDelegate::TickNpcGhosts()
 {
+	ScopeLock lLock(mGameServerManager->GetTickLock());
 	const Cure::ContextManager* lContextManager = mGameServerManager->GetContext();
 	const int lStepCount = mGameServerManager->GetTimeManager()->GetAffordedPhysicsStepCount();
 	const float lPhysicsFrameTime = mGameServerManager->GetTimeManager()->GetAffordedPhysicsStepTime();

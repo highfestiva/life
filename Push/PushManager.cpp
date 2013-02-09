@@ -1108,6 +1108,7 @@ void PushManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				DropAvatar();
 			}
+			mOwnedObjectList.erase(lId);
 		}
 		break;
 	}

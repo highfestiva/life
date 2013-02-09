@@ -28,20 +28,6 @@ TouchstickInputElement::~TouchstickInputElement()
 {
 }
 
-void TouchstickInputElement::SetValue(int)
-{
-}
-
-str TouchstickInputElement::GetCalibration() const
-{
-	return str();
-}
-
-bool TouchstickInputElement::SetCalibration(const str&)
-{
-	return true;
-}
-
 
 
 TouchstickInputDevice* TouchstickInputDevice::GetByCoordinate(InputManager* pManager, const PixelCoord& pCoord)

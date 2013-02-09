@@ -29,15 +29,7 @@ public:
 	TouchstickInputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex, TouchstickInputDevice* pParentDevice);
 	virtual ~TouchstickInputElement();
 
-	// Sets the uncalibrated value of this device.
-	// (Only useful with analogue elements).
-	void SetValue(int pValue);
-
-	str GetCalibration() const;
-	bool SetCalibration(const str& pData);
-
 private:
-
 	LOG_CLASS_DECLARE();
 };
 

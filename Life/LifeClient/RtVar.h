@@ -11,6 +11,9 @@
 
 
 
+#define RTVAR_CTRL_MOUSESENSITIVITY		"Control.MouseSensitivity"
+#define RTVAR_CTRL_MOUSEFILTER			"Control.MouseFilter"
+
 #define RTVAR_CTRL_UI_CONTOGGLE			"Control.Ui.ConsoleToggle"
 #define RTVAR_CTRL_UI_SHOWSCORE			"Control.Ui.ShowScore"
 

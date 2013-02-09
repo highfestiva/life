@@ -27,62 +27,13 @@ InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 
 IosInputElement::IosInputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
 	IosInputDevice* pParentDevice):
-	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
-	mMin(MAX_INT),
-	mMax(MIN_INT)
+	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice)
 {
 }
 
 IosInputElement::~IosInputElement()
 {
 }
-
-void IosInputElement::SetValue(int pValue)
-{
-	// Calibrate...
-	if (pValue < mMin)
-	{
-		mMin = pValue;
-	}
-	if (pValue > mMax)
-	{
-		mMax = pValue;
-	}
-
-	if (GetType() == DIGITAL)
-	{
-		Parent::SetValue((float)pValue);
-	}
-	else if (mMin < mMax)
-	{
-		// Scale to +-1.
-		Parent::SetValue((pValue*2.0f-(mMax+mMin)) / (float)(mMax-mMin));
-	}
-}
-
-str IosInputElement::GetCalibration() const
-{
-	str lData;
-	lData += strutil::IntToString(mMin, 10);
-	lData += _T(", ");
-	lData += strutil::IntToString(mMax, 10);
-	return (lData);
-}
-
-bool IosInputElement::SetCalibration(const str& pData)
-{
-	bool lOk = false;
-	strutil::strvec lData = strutil::Split(pData, _T(", "));
-	if (lData.size() >= 2)
-	{
-		lOk = true;
-		lOk &= strutil::StringToInt(lData[0], mMin, 10);
-		lOk &= strutil::StringToInt(lData[1], mMax, 10);
-	}
-	return (lOk);
-}
-
-
 
 LOG_CLASS_DEFINE(UI_INPUT, IosInputElement);
 

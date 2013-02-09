@@ -5,6 +5,7 @@
 
 
 #include "../Include/UiInput.h"
+#include "../../Lepra/Include/Math.h"
 #include <math.h>
 
 
@@ -15,12 +16,13 @@ namespace UiLepra
 
 
 InputElement::InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, InputDevice* pParentDevice):
-	mPrevValue(0),
 	mValue(0),
 	mType(pType),
 	mInterpretation(pInterpretation),
 	mTypeIndex(pTypeIndex),
-	mParentDevice(pParentDevice)
+	mParentDevice(pParentDevice),
+	mMin(+1),
+	mMax(-1)
 {
 }
 
@@ -68,20 +70,46 @@ void InputElement::SetValue(float pNewValue)
 		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
 		//mLog.Infof(_T("%s(%i) = %f\n"), GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
 
-		mPrevValue = mValue;
 		mValue = pNewValue;
 
-		// Notify our observers.
-		for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
-		{
-			(*x)->Call(this);
-		}
+		TriggerFunctors();
 	}
 }
 
-float InputElement::GetDeltaValue() const
+void InputElement::SetValue(int pValue)
 {
-	return (mValue - mPrevValue);
+	// Calibrate...
+	if (pValue < mMin)
+	{
+		mMin = pValue;
+	}
+	if (pValue > mMax)
+	{
+		mMax = pValue;
+	}
+
+	// Center relative axis.
+	if (GetInterpretation() == RELATIVE_AXIS)
+	{
+		if (mMax > -mMin)
+		{
+			mMin = -mMax;
+		}
+		if (mMax < -mMin)
+		{
+			mMax = -mMin;
+		}
+	}
+
+	if (GetType() == DIGITAL)
+	{
+		SetValue((float)pValue);
+	}
+	else if (mMin < mMax)
+	{
+		// Scale to +-1.
+		SetValue((pValue*2.0f-(mMax+mMin)) / (float)(mMax-mMin));
+	}
 }
 
 const str& InputElement::GetIdentifier() const
@@ -134,7 +162,35 @@ const InputElement::FunctorArray& InputElement::GetFunctorArray() const
 	return mFunctorArray;
 }
 
+void InputElement::TriggerFunctors()
+{
+	for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
+	{
+		(*x)->Call(this);
+	}
+}
 
+str InputElement::GetCalibration() const
+{
+	str lData;
+	lData += strutil::IntToString(mMin, 10);
+	lData += _T(", ");
+	lData += strutil::IntToString(mMax, 10);
+	return (lData);
+}
+
+bool InputElement::SetCalibration(const str& pData)
+{
+	bool lOk = false;
+	strutil::strvec lData = strutil::Split(pData, _T(", "));
+	if (lData.size() >= 2)
+	{
+		lOk = true;
+		lOk &= strutil::StringToInt(lData[0], mMin, 10);
+		lOk &= strutil::StringToInt(lData[1], mMax, 10);
+	}
+	return (lOk);
+}
 
 LOG_CLASS_DEFINE(UI_INPUT, InputElement);
 
@@ -199,11 +255,6 @@ bool InputDevice::IsActive()
 void InputDevice::SetActive(bool pActive)
 {
 	mActive = pActive;
-}
-
-void InputDevice::SetElementValue(InputElement* pElement, float pValue)
-{
-	pElement->SetValue(pValue);
 }
 
 const InputDevice::ElementArray& InputDevice::GetElements() const
@@ -332,7 +383,7 @@ InputElement* InputDevice::GetButton(unsigned pButtonIndex) const
 			{
 				return lElement;
 			}
-			lCurrentButton++;
+			++lCurrentButton;
 		}
 	}
 
@@ -355,7 +406,7 @@ InputElement* InputDevice::GetAxis(unsigned pAxisIndex) const
 			{
 				return lElement;
 			}
-			lCurrentAxis++;
+			++lCurrentAxis;
 		}
 	}
 

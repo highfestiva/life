@@ -35,13 +35,6 @@ public:
 
 	pRecElement GetNativeElement() const;
 
-	// Sets the uncalibrated value of this device.
-	// (Only useful with analogue elements).
-	virtual void SetValue(int pValue);
-
-	str GetCalibration() const;
-	bool SetCalibration(const str& pData);
-
 private:
 	enum
 	{
@@ -50,9 +43,6 @@ private:
 	};
 
 	pRecElement mElement;
-
-	int32 mMin;
-	int32 mMax;
 
 	LOG_CLASS_DECLARE();
 };

@@ -195,6 +195,7 @@ ConsoleManager* GameManager::GetConsoleManager() const
 
 void GameManager::MicroTick(float pTimeDelta)
 {
+	ScopeLock lLock(GetTickLock());
 	mContext->MicroTick(pTimeDelta);
 }
 

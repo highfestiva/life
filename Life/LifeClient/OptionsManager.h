@@ -29,14 +29,18 @@ namespace Options
 
 struct OptionsManager
 {
+	typedef std::vector<float*> ValueArray;
+
 	OptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
 
 	void RefreshConfiguration();
 	virtual void DoRefreshConfiguration();
 	bool UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive);
-	float UpdateInput(UiLepra::InputElement* pElement);
+	virtual bool UpdateInput(UiLepra::InputElement* pElement);
 	void ResetToggles();
-	float GetConsoleToggle() const;
+	bool IsToggleConsole() const;
+
+	ValueArray* GetValuePointers(const str& pKey, bool& pIsAnySteeringValue);
 
 protected:
 	typedef std::pair<const str, float*> KeyValue;
@@ -45,13 +49,12 @@ protected:
 
 	static const str ConvertToString(UiLepra::InputManager::KeyCode pKeyCode);
 	bool SetValue(const str& pKey, float pValue, bool pAdd);
-	std::vector<float*>* GetValuePointers(const str& pKey, bool& pIsAnySteeringValue);
 	void SetValuePointers(const KeyValue pEntries[], size_t pEntryCount);
 
 	struct InputEntry
 	{
 		bool mIsAnySteeringValue;
-		std::vector<float*> mValuePointerArray;
+		ValueArray mValuePointerArray;
 	};
 	typedef std::hash_map<str, InputEntry> InputMap;
 

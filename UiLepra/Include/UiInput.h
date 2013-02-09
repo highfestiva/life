@@ -114,18 +114,10 @@ public:
 	//    Returns true if the analogue value is greater than pThreshold.
 	bool GetBooleanValue(float pThreshold = 0.5) const;
 
-	// If digital:
-	//    Returns 1 if "pressed", 0 otherwise.
-	// If analogue:
-	//    Returns the analogue value normalized around -1 and 1.
 	float GetValue() const;
-	// Sets the uncalibrated value of this device.
+	void SetValue(float pNewValue);
 	// (Only useful with analogue elements).
-	virtual void SetValue(int pNewValue) = 0;
-	virtual void SetValue(float pNewValue);
-
-	// Returns the difference between the current value and the previous value.
-	float GetDeltaValue() const;
+	void SetValue(int pValue);
 
 	void SetIdentifier(const str& pIdentifier);
 	const str& GetIdentifier() const;
@@ -137,14 +129,15 @@ public:
 	void AddFunctor(InputFunctor* pFunctor);
 	void ClearFunctors();
 	const FunctorArray& GetFunctorArray() const;
+	void TriggerFunctors();
 
-	virtual str GetCalibration() const = 0;
-	virtual bool SetCalibration(const str& pData) = 0;
+	str GetCalibration() const;
+	bool SetCalibration(const str& pData);
 
 private:
-
-	float mPrevValue;
 	float mValue;
+	int mMin;
+	int mMax;
 
 	Type mType;
 	Interpretation mInterpretation;
@@ -205,7 +198,6 @@ public:
 
 	virtual void PollEvents() = 0;
 
-	// Returns the array of input elements.
 	const ElementArray& GetElements() const;
 
 	// Returns the first input element identified by pIdentifier.
@@ -238,8 +230,6 @@ public:
 protected:
 
 	void SetActive(bool pActive);
-
-	void SetElementValue(InputElement* pElement, float pValue);
 
 	ElementArray mElementArray;
 

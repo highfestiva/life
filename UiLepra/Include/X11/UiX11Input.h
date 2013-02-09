@@ -35,13 +35,6 @@ public:
 	const LPCDIDEVICEOBJECTINSTANCE GetDirectInputElement() const;
 	const LPDIOBJECTDATAFORMAT GetDataFormat() const;
 
-	// Sets the uncalibrated value of this device.
-	// (Only useful with analogue elements).
-	void SetValue(int pValue);
-
-	str GetCalibration() const;
-	bool SetCalibration(const str& pData);
-
 protected:
 private:
 
@@ -53,9 +46,6 @@ private:
 
 	LPCDIDEVICEOBJECTINSTANCE mElement;
 	DIOBJECTDATAFORMAT mDataFormat;
-
-	int32 mMin;
-	int32 mMax;
 
 	LOG_CLASS_DECLARE();
 };

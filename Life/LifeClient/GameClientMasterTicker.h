@@ -79,6 +79,7 @@ protected:
 		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
 		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
 		int pSlaveIndex, const PixelRect& pRenderArea);
+
 	bool CreateSlave(SlaveFactoryMethod pCreate);
 	virtual void OnSlavesKilled() = 0;
 	virtual void OnServerCreated(Life::UiGameServerManager* pServer) = 0;
@@ -114,9 +115,9 @@ protected:
 	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
 	void OnCommandError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult);
 
-	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
-	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
-	void OnInput(UiLepra::InputElement* pElement);
+	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual void OnInput(UiLepra::InputElement* pElement);
 
 	virtual void CloseMainMenu() = 0;
 

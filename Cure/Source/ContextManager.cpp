@@ -147,6 +147,7 @@ void ContextManager::AddPhysicsSenderObject(ContextObject* pObject)
 	assert(pObject->GetInstanceId() != 0);
 	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
 	assert(pObject->GetManager() == this);
+	assert(pObject->GetManager()->GetGameManager()->GetTickLock()->IsOwner());
 	mPhysicsSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
 }
 

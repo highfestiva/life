@@ -51,6 +51,8 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex)
 {
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, 0.5f);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 
 	SetTicker(pMaster);
@@ -203,6 +205,13 @@ bool GameClientSlaveManager::IsPrimaryManager() const
 		return false;
 	}
 	return GetMaster()->IsFirstSlave(this);
+}
+
+void GameClientSlaveManager::PreEndTick()
+{
+	Parent::PreEndTick();
+
+	HandleUnusedRelativeAxis();
 }
 
 bool GameClientSlaveManager::EndTick()
@@ -592,8 +601,8 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	mOptions.RefreshConfiguration();
 
-	mOptions.UpdateInput(pKeyCode, true);
-	if (mOptions.GetConsoleToggle() >= 0.5f)
+	mOptions.Options::OptionsManager::UpdateInput(pKeyCode, true);
+	if (mOptions.IsToggleConsole())
 	{
 		mOptions.ResetToggles();
 		ToggleConsole();
@@ -604,7 +613,7 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
-	mOptions.UpdateInput(pKeyCode, false);
+	mOptions.Options::OptionsManager::UpdateInput(pKeyCode, false);
 	return (false);
 }
 
@@ -619,12 +628,60 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 	
 	mOptions.RefreshConfiguration();
 
-	mOptions.UpdateInput(pElement);
-	if (mOptions.GetConsoleToggle() >= 0.5f)
+	if (mOptions.UpdateInput(pElement))
+	{
+		if (pElement->GetInterpretation() == UiLepra::InputElement::RELATIVE_AXIS)
+		{
+			mRelativeAxis.insert(pElement);
+			mUnusedRelativeAxis.erase(pElement);
+		}
+	}
+	if (mOptions.IsToggleConsole())
 	{
 		mOptions.ResetToggles();
 		ToggleConsole();
 	}
+}
+
+void GameClientSlaveManager::HandleUnusedRelativeAxis()
+{
+	float lMouseFilter;
+	CURE_RTVAR_GET(lMouseFilter, =(float), GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, 0.5f);
+
+	InputElementSet lUnusedSet = mUnusedRelativeAxis;
+	InputElementSet::iterator x = lUnusedSet.begin();
+	for (; x != lUnusedSet.end(); ++x)
+	{
+		UiLepra::InputElement* lAxis = (*x);
+
+		const str lSuffixes[2] = { _T("+"), _T("-") };
+		for (int y = 0; y < 2; ++y)
+		{
+			str lAxisName = lAxis->GetFullName() + lSuffixes[y];
+			bool lIsSteering = false;
+			Options::OptionsManager::ValueArray* lValuePointers = mOptions.GetValuePointers(lAxisName, lIsSteering);
+			if (!lValuePointers)
+			{
+				continue;
+			}
+			Options::OptionsManager::ValueArray::iterator x = lValuePointers->begin();
+			for (; x != lValuePointers->end(); ++x)
+			{
+				if (std::abs(**x) > 0.06f)
+				{
+					**x *= lMouseFilter;
+				}
+				else if (**x != 0)
+				{
+					**x = 0;
+					mRelativeAxis.erase(lAxis);
+				}
+			}
+		}
+	}
+
+	// Done. For next loop we assume all relative axis' haven't been triggered.
+	mUnusedRelativeAxis = mRelativeAxis;
 }
 
 

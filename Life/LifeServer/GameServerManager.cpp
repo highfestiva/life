@@ -976,6 +976,8 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
+	ScopeLock lLock(GetTickLock());
+
 	(void)pPosition;
 	(void)pBody1Id;
 	(void)pBody2Id;

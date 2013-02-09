@@ -31,9 +31,7 @@ InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 X11InputElement::X11InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
 	X11InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset):
 	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
-	mElement(pElement),
-	mMin(MAX_INT),
-	mMax(MIN_INT)
+	mElement(pElement)
 {
 	SetIdentifier(mElement->tszName);
 
@@ -46,75 +44,6 @@ X11InputElement::X11InputElement(Type pType, Interpretation pInterpretation, int
 X11InputElement::~X11InputElement()
 {
 }
-
-void X11InputElement::SetValue(int pValue)
-{
-	// Calibrate...
-	if (pValue < mMin)
-	{
-		mMin = pValue;
-	}
-	if (pValue > mMax)
-	{
-		mMax = pValue;
-	}
-
-	//Win32InputDevice* lDevice = (Win32InputDevice*)GetParentDevice();
-	//Win32InputManager* lManager = (Win32InputManager*)lDevice->GetManager();
-
-	if (GetType() == DIGITAL)
-	{
-		Parent::SetValue(pValue);
-	}
-	/*else if (GetInterpretation() == RELATIVE_AXIS)
-	{
-		// Treat this as a relative axis. Since we don't know the maximum value
-		// of this axis (can probably be infinitly large), we need to scale it down
-		// to some kind of common unit. The mouse x- and y-axes fall into this 
-		// category, and the mouse is the primary device that we should take into 
-		// consideration when finding the appropriate scale factor.
-		//
-		// To give the relative mouse coordinates the same unit as for absolute ones,
-		// we will divide the value by half the screen width and height.
-
-		if (GetTypeIndex() <= 1)	// Mouse of sorts.
-		{
-			Parent::SetValue(2.0f * (float)pValue / (float)lManager->mScreenWidth);
-		}
-		else
-		{
-			Parent::SetValue((float)pValue / 10.0f);
-		}
-	}*/
-	else if (mMin < mMax)
-	{
-		// Scale to +-1.
-		Parent::SetValue((pValue*2.0f-(mMax+mMin)) / (float)(mMax-mMin));
-	}
-}
-
-str X11InputElement::GetCalibration() const
-{
-	str lData;
-	lData += strutil::IntToString(mMin, 10);
-	lData += _T(", ");
-	lData += strutil::IntToString(mMax, 10);
-	return (lData);
-}
-
-bool X11InputElement::SetCalibration(const str& pData)
-{
-	bool lOk = false;
-	strutil::strvec lData = strutil::Split(pData, _T(", "));
-	if (lData.size() >= 2)
-	{
-		lOk = true;
-		lOk &= strutil::StringToInt(lData[0], mMin, 10);
-		lOk &= strutil::StringToInt(lData[1], mMax, 10);
-	}
-	return (lOk);
-}
-
 
 
 LOG_CLASS_DEFINE(UI_INPUT, X11InputElement);

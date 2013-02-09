@@ -54,44 +54,10 @@ bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool p
 	return (SetValue(lInputElementName, pActive? 1.0f : 0.0f, false));
 }
 
-float OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
+bool OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 {
-	bool lValueSet;
-	float lValue = pElement->GetValue();
-	const str lInputElementName = pElement->GetFullName();
-	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
-	{
-		const bool lIsRelative = (pElement->GetInterpretation() == UiLepra::InputElement::RELATIVE_AXIS);
-		// Update both sides for analogue input.
-		if (lIsRelative)
-		{
-			lValue *= 0.1f;	// Relative values are more sensitive.
-		}
-		else if (Math::IsEpsEqual(lValue, 0.0f, 0.1f))
-		{
-			lValue = 0;	// Clamp absolute+analogue to neutral when close enough.
-		}
-		if (lValue == 0)
-		{
-			lValueSet = SetValue(lInputElementName+_T("+"), 0, false);
-			SetValue(lInputElementName+_T("-"), 0, false);
-		}
-		else if (lValue >= 0)
-		{
-			lValueSet = SetValue(lInputElementName+_T("+"), lValue, lIsRelative);
-			SetValue(lInputElementName+_T("-"), 0, false);
-		}
-		else
-		{
-			lValueSet = SetValue(lInputElementName+_T("-"), -lValue, lIsRelative);
-			SetValue(lInputElementName+_T("+"), 0, false);
-		}
-	}
-	else
-	{
-		lValueSet = SetValue(lInputElementName, lValue, false);
-	}
-	return (lValueSet);
+	(void)pElement;
+	return false;
 }
 
 void OptionsManager::ResetToggles()
@@ -99,9 +65,21 @@ void OptionsManager::ResetToggles()
 	mConsoleToggle = 0;
 }
 
-float OptionsManager::GetConsoleToggle() const
+bool OptionsManager::IsToggleConsole() const
 {
-	return (mConsoleToggle);
+	return mConsoleToggle >= 0.5f;
+}
+
+OptionsManager::ValueArray* OptionsManager::GetValuePointers(const str& pKey, bool& pIsAnySteeringValue)
+{
+	InputMap::iterator x = mInputMap.find(pKey);
+	if (x == mInputMap.end())
+	{
+		return 0;
+	}
+	InputEntry& lEntry = x->second;
+	pIsAnySteeringValue = lEntry.mIsAnySteeringValue;
+	return &lEntry.mValuePointerArray;
 }
 
 
@@ -122,14 +100,14 @@ bool OptionsManager::SetValue(const str& pKey, float pValue, bool pAdd)
 	//log_volatile(mLog.Tracef(_T("Got input %s: %g"), pKey.c_str(), pValue));
 
 	bool lIsAnySteeringValue;
-	std::vector<float*>* lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
+	ValueArray* lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
 	if (!lValuePointers)
 	{
 		return false;
 	}
 
 	bool lInputChanged = false;
-	for (std::vector<float*>::const_iterator x = lValuePointers->begin(); x != lValuePointers->end(); ++x)
+	for (ValueArray::const_iterator x = lValuePointers->begin(); x != lValuePointers->end(); ++x)
 	{
 		if (pAdd)
 		{
@@ -143,18 +121,6 @@ bool OptionsManager::SetValue(const str& pKey, float pValue, bool pAdd)
 		}
 	}
 	return (lIsAnySteeringValue && lInputChanged);
-}
-
-std::vector<float*>* OptionsManager::GetValuePointers(const str& pKey, bool& pIsAnySteeringValue)
-{
-	InputMap::iterator x = mInputMap.find(pKey);
-	if (x == mInputMap.end())
-	{
-		return 0;
-	}
-	InputEntry& lEntry = x->second;
-	pIsAnySteeringValue = lEntry.mIsAnySteeringValue;
-	return &lEntry.mValuePointerArray;
 }
 
 void OptionsManager::SetValuePointers(const KeyValue pEntries[], size_t pEntryCount)

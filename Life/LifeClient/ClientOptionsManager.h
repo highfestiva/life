@@ -28,10 +28,12 @@ struct ClientOptionsManager: OptionsManager
 	const FireControl& GetFireControl() const;
 
 	virtual void DoRefreshConfiguration();
+	virtual bool UpdateInput(UiLepra::InputElement* pElement);
 
 private:
 	virtual bool SetDefault(int pPriority);
 
+	float mMouseSensitivity;
 	float mShowScore;
 	Steering mSteeringControl;
 	CamControl mCamControl;

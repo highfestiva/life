@@ -497,10 +497,6 @@
 				Name="Win32"
 				>
 				<File
-					RelativePath=".\Include\Mac\UiMacInput.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Include\Win32\UiWin32Core.h"
 					>
 				</File>
@@ -566,6 +562,10 @@
 				</File>
 				<File
 					RelativePath=".\Include\Mac\UiMacDisplayManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\Mac\UiMacInput.h"
 					>
 				</File>
 				<File
