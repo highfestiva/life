@@ -17,7 +17,6 @@
 		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
 		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
 		B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */; };
-		B1166067168C89D8002375B6 /* Grenade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1166066168C89D8002375B6 /* Grenade.cpp */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -462,6 +461,24 @@
 		B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B1A1DD9813AA6CC60097B8D0 /* window.c */; };
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
+		B1A8B18316C7E0FB00F57DC1 /* Explosion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B17F16C7E0FB00F57DC1 /* Explosion.cpp */; };
+		B1A8B18416C7E0FB00F57DC1 /* FastProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B18016C7E0FB00F57DC1 /* FastProjectile.cpp */; };
+		B1A8B18516C7E0FB00F57DC1 /* Mine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B18116C7E0FB00F57DC1 /* Mine.cpp */; };
+		B1A8B18616C7E0FB00F57DC1 /* Projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B18216C7E0FB00F57DC1 /* Projectile.cpp */; };
+		B1A8B19D16C7E87400F57DC1 /* BombPlane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19416C7E87400F57DC1 /* BombPlane.cpp */; };
+		B1A8B19E16C7E87400F57DC1 /* GameServerLogic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19516C7E87400F57DC1 /* GameServerLogic.cpp */; };
+		B1A8B19F16C7E87400F57DC1 /* Npc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19616C7E87400F57DC1 /* Npc.cpp */; };
+		B1A8B1A016C7E87400F57DC1 /* PushServerConsole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19716C7E87400F57DC1 /* PushServerConsole.cpp */; };
+		B1A8B1A116C7E87400F57DC1 /* PushServerDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19816C7E87400F57DC1 /* PushServerDelegate.cpp */; };
+		B1A8B1A216C7E87400F57DC1 /* PushServerMessageProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19916C7E87400F57DC1 /* PushServerMessageProcessor.cpp */; };
+		B1A8B1A316C7E87400F57DC1 /* ServerFastProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19A16C7E87400F57DC1 /* ServerFastProjectile.cpp */; };
+		B1A8B1A416C7E87400F57DC1 /* ServerMine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19B16C7E87400F57DC1 /* ServerMine.cpp */; };
+		B1A8B1A516C7E87400F57DC1 /* ServerProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19C16C7E87400F57DC1 /* ServerProjectile.cpp */; };
+		B1A8B1AA16C7E8BB00F57DC1 /* ServerDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1A816C7E8BB00F57DC1 /* ServerDelegate.cpp */; };
+		B1A8B1AB16C7E8BB00F57DC1 /* ServerMessageProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1A916C7E8BB00F57DC1 /* ServerMessageProcessor.cpp */; };
+		B1A8B1AD16C7E8D900F57DC1 /* IntAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */; };
+		B1A8B1B116C7EA7100F57DC1 /* ProjectileUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */; };
+		B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 		B1D37EE6166AB2FC00536CE5 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */; };
@@ -529,7 +546,6 @@
 		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
-		B1166066168C89D8002375B6 /* Grenade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Grenade.cpp; sourceTree = "<group>"; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1162,6 +1178,24 @@
 		B1A1DD9913AA6CC60097B8D0 /* window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
 		B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiOggAlStream.cpp; sourceTree = "<group>"; };
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
+		B1A8B17F16C7E0FB00F57DC1 /* Explosion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Explosion.cpp; sourceTree = "<group>"; };
+		B1A8B18016C7E0FB00F57DC1 /* FastProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FastProjectile.cpp; sourceTree = "<group>"; };
+		B1A8B18116C7E0FB00F57DC1 /* Mine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mine.cpp; sourceTree = "<group>"; };
+		B1A8B18216C7E0FB00F57DC1 /* Projectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Projectile.cpp; sourceTree = "<group>"; };
+		B1A8B19416C7E87400F57DC1 /* BombPlane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BombPlane.cpp; path = PushServer/BombPlane.cpp; sourceTree = "<group>"; };
+		B1A8B19516C7E87400F57DC1 /* GameServerLogic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameServerLogic.cpp; path = PushServer/GameServerLogic.cpp; sourceTree = "<group>"; };
+		B1A8B19616C7E87400F57DC1 /* Npc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Npc.cpp; path = PushServer/Npc.cpp; sourceTree = "<group>"; };
+		B1A8B19716C7E87400F57DC1 /* PushServerConsole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PushServerConsole.cpp; path = PushServer/PushServerConsole.cpp; sourceTree = "<group>"; };
+		B1A8B19816C7E87400F57DC1 /* PushServerDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PushServerDelegate.cpp; path = PushServer/PushServerDelegate.cpp; sourceTree = "<group>"; };
+		B1A8B19916C7E87400F57DC1 /* PushServerMessageProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PushServerMessageProcessor.cpp; path = PushServer/PushServerMessageProcessor.cpp; sourceTree = "<group>"; };
+		B1A8B19A16C7E87400F57DC1 /* ServerFastProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerFastProjectile.cpp; path = PushServer/ServerFastProjectile.cpp; sourceTree = "<group>"; };
+		B1A8B19B16C7E87400F57DC1 /* ServerMine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerMine.cpp; path = PushServer/ServerMine.cpp; sourceTree = "<group>"; };
+		B1A8B19C16C7E87400F57DC1 /* ServerProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerProjectile.cpp; path = PushServer/ServerProjectile.cpp; sourceTree = "<group>"; };
+		B1A8B1A816C7E8BB00F57DC1 /* ServerDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerDelegate.cpp; path = ../../Life/LifeServer/ServerDelegate.cpp; sourceTree = SOURCE_ROOT; };
+		B1A8B1A916C7E8BB00F57DC1 /* ServerMessageProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerMessageProcessor.cpp; path = ../../Life/LifeServer/ServerMessageProcessor.cpp; sourceTree = SOURCE_ROOT; };
+		B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IntAttribute.cpp; path = ../../Cure/Source/IntAttribute.cpp; sourceTree = SOURCE_ROOT; };
+		B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectileUtil.cpp; path = ../../Life/ProjectileUtil.cpp; sourceTree = SOURCE_ROOT; };
+		B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSoundReleaser.cpp; path = ../../UiCure/Source/UiSoundReleaser.cpp; sourceTree = SOURCE_ROOT; };
 		B1B4898F13F9BD6C0047C78A /* Push-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Push-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* Push_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Push_Prefix.pch; path = PushXcode/Push_Prefix.pch; sourceTree = "<group>"; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
@@ -1306,6 +1340,7 @@
 		B15F791D13FC597B00E01A90 /* Cure */ = {
 			isa = PBXGroup;
 			children = (
+				B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */,
 				B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */,
 				B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */,
 				B1D37F3F166AB57A00536CE5 /* PositionHauler.cpp */,
@@ -1343,6 +1378,7 @@
 		B15F795413FC59E300E01A90 /* UiCure */ = {
 			isa = PBXGroup;
 			children = (
+				B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */,
 				B1D37F43166AB59C00536CE5 /* UiDebugRenderer.cpp */,
 				B1D37F44166AB59C00536CE5 /* UiExhaustEmitter.cpp */,
 				B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */,
@@ -1481,7 +1517,11 @@
 		B19A146913A122DE0051A61C /* Push */ = {
 			isa = PBXGroup;
 			children = (
-				B1166066168C89D8002375B6 /* Grenade.cpp */,
+				B1A8B19316C7E82000F57DC1 /* PushServer */,
+				B1A8B17F16C7E0FB00F57DC1 /* Explosion.cpp */,
+				B1A8B18016C7E0FB00F57DC1 /* FastProjectile.cpp */,
+				B1A8B18116C7E0FB00F57DC1 /* Mine.cpp */,
+				B1A8B18216C7E0FB00F57DC1 /* Projectile.cpp */,
 				B1D37F14166AB3F100536CE5 /* LoginView.cpp */,
 				B1D37F15166AB3F100536CE5 /* Push.mm */,
 				B1D37F16166AB3F100536CE5 /* PushConsoleManager.cpp */,
@@ -2336,6 +2376,22 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
+		B1A8B19316C7E82000F57DC1 /* PushServer */ = {
+			isa = PBXGroup;
+			children = (
+				B1A8B19416C7E87400F57DC1 /* BombPlane.cpp */,
+				B1A8B19516C7E87400F57DC1 /* GameServerLogic.cpp */,
+				B1A8B19616C7E87400F57DC1 /* Npc.cpp */,
+				B1A8B19716C7E87400F57DC1 /* PushServerConsole.cpp */,
+				B1A8B19816C7E87400F57DC1 /* PushServerDelegate.cpp */,
+				B1A8B19916C7E87400F57DC1 /* PushServerMessageProcessor.cpp */,
+				B1A8B19A16C7E87400F57DC1 /* ServerFastProjectile.cpp */,
+				B1A8B19B16C7E87400F57DC1 /* ServerMine.cpp */,
+				B1A8B19C16C7E87400F57DC1 /* ServerProjectile.cpp */,
+			);
+			name = PushServer;
+			sourceTree = "<group>";
+		};
 		B1D37EE3166AB29400536CE5 /* Life */ = {
 			isa = PBXGroup;
 			children = (
@@ -2345,6 +2401,7 @@
 				B1D37EE8166AB32700536CE5 /* LifeApplication.cpp */,
 				B1D37EE9166AB32700536CE5 /* RaceScore.cpp */,
 				B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */,
+				B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */,
 				B1D37EE5166AB2FC00536CE5 /* Life.cpp */,
 			);
 			name = Life;
@@ -2371,6 +2428,8 @@
 		B1D37F03166AB38700536CE5 /* LifeServer */ = {
 			isa = PBXGroup;
 			children = (
+				B1A8B1A816C7E8BB00F57DC1 /* ServerDelegate.cpp */,
+				B1A8B1A916C7E8BB00F57DC1 /* ServerMessageProcessor.cpp */,
 				B1D37F04166AB3B400536CE5 /* BulletTime.cpp */,
 				B1D37F05166AB3B400536CE5 /* Client.cpp */,
 				B1D37F06166AB3B400536CE5 /* GameServerManager.cpp */,
@@ -2965,7 +3024,24 @@
 				B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */,
 				B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */,
 				B1D37F4F166AB5F200536CE5 /* MasterServerNetworkParser.cpp in Sources */,
-				B1166067168C89D8002375B6 /* Grenade.cpp in Sources */,
+				B1A8B18316C7E0FB00F57DC1 /* Explosion.cpp in Sources */,
+				B1A8B18416C7E0FB00F57DC1 /* FastProjectile.cpp in Sources */,
+				B1A8B18516C7E0FB00F57DC1 /* Mine.cpp in Sources */,
+				B1A8B18616C7E0FB00F57DC1 /* Projectile.cpp in Sources */,
+				B1A8B19D16C7E87400F57DC1 /* BombPlane.cpp in Sources */,
+				B1A8B19E16C7E87400F57DC1 /* GameServerLogic.cpp in Sources */,
+				B1A8B19F16C7E87400F57DC1 /* Npc.cpp in Sources */,
+				B1A8B1A016C7E87400F57DC1 /* PushServerConsole.cpp in Sources */,
+				B1A8B1A116C7E87400F57DC1 /* PushServerDelegate.cpp in Sources */,
+				B1A8B1A216C7E87400F57DC1 /* PushServerMessageProcessor.cpp in Sources */,
+				B1A8B1A316C7E87400F57DC1 /* ServerFastProjectile.cpp in Sources */,
+				B1A8B1A416C7E87400F57DC1 /* ServerMine.cpp in Sources */,
+				B1A8B1A516C7E87400F57DC1 /* ServerProjectile.cpp in Sources */,
+				B1A8B1AA16C7E8BB00F57DC1 /* ServerDelegate.cpp in Sources */,
+				B1A8B1AB16C7E8BB00F57DC1 /* ServerMessageProcessor.cpp in Sources */,
+				B1A8B1AD16C7E8D900F57DC1 /* IntAttribute.cpp in Sources */,
+				B1A8B1B116C7EA7100F57DC1 /* ProjectileUtil.cpp in Sources */,
+				B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

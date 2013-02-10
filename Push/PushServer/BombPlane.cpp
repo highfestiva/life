@@ -59,11 +59,12 @@ void BombPlane::OnTick()
 	const float g2 = +9.82f/2;	// Positive.
 	const float v0 = 0;//lVelocity.z;
 	const float h = mTarget.z - lPosition.z;	// Negative.
-	float t;
-	if (Math::CalculateRoot(g2, v0, h, t))
+	float t1;
+	float t2;
+	if (Math::CalculateRoot(g2, v0, h, t1, t2))
 	{
 		Vector3DF lHorizontalProjectedTarget(mTarget.x, mTarget.y, lPosition.z);
-		const float d = lHorizontalProjectedTarget.GetDistanceSquared(lPosition + lVelocity*t);
+		const float d = lHorizontalProjectedTarget.GetDistanceSquared(lPosition + lVelocity*t1);
 		if (d < BOMBING_RADIUS*BOMBING_RADIUS * (float)Random::Uniform(0.8, 1.2))
 		{
 			mLastBombTick = lTimeManager->GetCurrentPhysicsFrame();

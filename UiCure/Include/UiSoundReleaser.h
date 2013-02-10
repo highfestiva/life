@@ -26,7 +26,7 @@ public:
 
 private:
 	void OnTick();
-	void SoundReleaser::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
+	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	UiCure::UserSound3dResource* mSound;
 	Vector3DF mPosition;

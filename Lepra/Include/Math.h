@@ -136,7 +136,7 @@ public:
 
 	template<class _T> static _T Acos(_T pAngle);
 
-	template<class _T> static bool CalculateRoot(const _T& a, const _T& b, const _T& c, _T& pRoot);
+	template<class _T> static bool CalculateRoot(const _T& a, const _T& b, const _T& c, _T& pRoot1, _T& pRoot2);
 
 	template<class _T, class _Vector> static _T CalculateMedian(const _Vector& pArray);
 	// Not necessarily standard deviation, if not providing arithmetic mean.
@@ -179,7 +179,7 @@ template<class _T> _T Math::Acos(_T pAngle)
 	return ::acos(pAngle);
 }
 
-template<class _T> static bool Math::CalculateRoot(const _T& a, const _T& b, const _T& c, _T& pRoot)
+ template<class _T> bool Math::CalculateRoot(const _T& a, const _T& b, const _T& c, _T& pRoot1, _T& pRoot2)
 {
 	// Quaderatic formula:
 	// ax^2 + bx + c = 0
@@ -187,13 +187,16 @@ template<class _T> static bool Math::CalculateRoot(const _T& a, const _T& b, con
 	//     -b +- sqrt(b^2 - 4ac)
 	// x = ---------------------
 	//             2a
-	const float b2 = b*b;
-	const float _4ac = 4*a*c;
+	const _T b2 = b*b;
+	const _T _4ac = 4*a*c;
 	if (b2 < _4ac || !a)	// Does not compute.
 	{
 		return false;
 	}
-	pRoot = (-b + sqrt(b2 - _4ac)) / (2*a);
+	const _T lRoot = ::sqrt(b2 - _4ac);
+	const _T lReciprocal = 1 / (2*a);
+	pRoot1 = (-b + lRoot) * lReciprocal;
+	pRoot2 = (-b - lRoot) * lReciprocal;
 	return true;
 }
 
