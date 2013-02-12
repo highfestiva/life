@@ -14,6 +14,7 @@ Game
 + Destructable obstacles.
 + Implement machine gun.
 . Mouse look
+. Fix the bomber planes showing up after dropping payload in out of process server.
 . Test which of Arena or Adventure play is best. Make a real map!
 . Check multiplayer on two computers and one iPhone.
 . Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and sharpnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)

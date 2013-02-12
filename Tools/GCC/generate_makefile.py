@@ -97,22 +97,23 @@ head_lib = cflags_head+libs_head
 head_lib_nowarn = cflags_nowarn_head+libs_head
 head_gfx_lib = cflags_head+gfx_libs_head
 
-foot_rules = """
-.SUFFIXES: .o .mm
+extra_foot_rule_head = "\n.SUFFIXES: .o .mm" if is_mac else "\n.SUFFIXES: .o .cxx"
+extra_foot_rule_tail = """.m.o:
+\t$(C_COMPILER) $(CFLAGS) -o $@ -c $<
+.mm.o:
+\t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<""" if is_mac else ""
+foot_rules = extra_foot_rule_head + """
 depend:
 \tmakedepend -- $(CFLAGS) -- $(SRCS)
 \t#@grep -Ev "\\.o: .*([T]hirdParty|/[u]sr)/" makefile >.tmpmake
 \t#@mv .tmpmake makefile
 .c.o:
 \t$(C_COMPILER) $(CFLAGS) -o $@ -c $<
-.m.o:
-\t$(C_COMPILER) $(CFLAGS) -o $@ -c $<
 .cpp.o:
 \t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<
-.mm.o:
+.cxx.o:
 \t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<
-
-"""
+""" + extra_foot_rule_tail + "\n\n"
 
 foot_lib = """
 all:\tlib%(lib)s"""+link_output_ext+""" $(OBJS)
@@ -185,7 +186,8 @@ def printend(type):
 
 def issrc(fname):
     ext = os.path.splitext(fname)[1]
-    return (ext == ".cpp" or ext == ".c" or ext == '.m' or ext == ".mm" \
+    return (ext == ".cpp" or ext == ".c" \
+		or ((ext == '.m' or ext == ".mm") and is_mac) \
                 or (ext == '.cxx' and not is_mac))
 
 def create_makefile(makename, srcname, type):

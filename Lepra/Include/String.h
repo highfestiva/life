@@ -6,6 +6,9 @@
 
 #pragma once
 
+#if defined(__GNUG__) || defined (__GNUC__)
+#include <stdarg.h>
+#endif // g++ / gcc
 #include <stdio.h>
 #include <string>
 #include <string.h>

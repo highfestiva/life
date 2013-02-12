@@ -28,6 +28,9 @@
 #include "happyhttp.h"
 
 #ifndef WIN32
+#if !defined(__APPLE__) // highfestiva was here.
+	#include <unistd.h>
+#endif // !Apple = Linux
 //	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>

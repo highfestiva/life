@@ -111,7 +111,7 @@ str SystemManager::GetDataDirectory(const str& pArgv0)
 	lDataDir = Path::GetParentDirectory(lDataDir);
 	return Path::JoinPath(lDataDir, _T("Resources/Data/"));
 #else // Posix
-	pArgv0;
+	(void)pArgv0;
 	return _T("Data/");
 #endif // iOS/Mac/Posix
 }
@@ -184,6 +184,7 @@ unsigned SystemManager::GetPhysicalCpuCount()
 
 unsigned SystemManager::GetCoreCount()
 {
+#ifdef LEPRA_MAC
 	int mib[4];
 	mib[0] = CTL_HW;
 	mib[1] = HW_NCPU;
@@ -195,6 +196,9 @@ unsigned SystemManager::GetCoreCount()
 		ncpu = 1;
 	}
 	return ncpu;
+#else // Linux
+	return ::sysconf(_SC_NPROCESSORS_ONLN);
+#endif // Apple / Linux.
 }
 
 str SystemManager::GetCpuName()
