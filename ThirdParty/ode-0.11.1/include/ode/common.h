@@ -154,8 +154,10 @@ typedef dReal dQuaternion[4];
 #define dIsNan(x) (_isnanf(x))
 #elif defined(HAVE_ISNANF)
 #define dIsNan(x) (isnanf(x))
-#elif defined(__APPLE__) && defined(HAVE_ISNAN) /* high_festiva was here. */
+#elif defined(__APPLE__) && defined(HAVE_ISNAN)	/* high_festiva was here. */
 #define dIsNan(x) (isnan(x)) /* high_festiva was here. */
+#elif defined(__GNUG__)	|| defined (__GNUC__)	/* high_festiva was here. */
+#define dIsNan(x) (isnan(x))	/* high_festiva was here. */
 #else
   /*
      fall back to _isnan which is the VC way,

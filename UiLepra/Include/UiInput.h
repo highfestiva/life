@@ -213,6 +213,7 @@ public:
 	unsigned GetNumElements() const;
 	unsigned GetNumDigitalElements();
 	unsigned GetNumAnalogueElements();
+	void CountElements();
 
 	void SetIdentifier(const str& pIdentifier);
 	void SetUniqueIdentifier(const str& pIdentifier);
@@ -234,8 +235,6 @@ protected:
 	ElementArray mElementArray;
 
 private:
-
-	void CountElements();
 
 	InputManager* mManager;
 	Interpretation mInterpretation;

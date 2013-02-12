@@ -537,7 +537,7 @@ int TcpSocket::Send(const void* pData, int pSize)
 		{
 			log_volatile(str lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
-			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min((int)pSize, 20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min((int)pSize, 50)));
 			log_volatile(str lString = strutil::Encode(astrutil::ReplaceCtrlChars((const char*)pData, '.')));
 			log_volatile(lString.resize(15));
 			log_volatile(mLog.Tracef(_T("TCP -> %u bytes (%s -> %s): %s %s."), pSize,
@@ -584,7 +584,7 @@ int TcpSocket::Receive(void* pData, int pMaxSize)
 		{
 			log_volatile(str lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
-			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 50)));
 			log_volatile(str lString = strutil::Encode(astrutil::ReplaceCtrlChars((const char*)pData, '.')));
 			log_volatile(lString.resize(15));
 			log_volatile(mLog.Tracef(_T("TCP <- %u bytes (%s <- %s): %s %s."), lSize,
@@ -1197,6 +1197,7 @@ UdpSocket::UdpSocket(const SocketAddress& pLocalAddress, bool pIsServer):
 		{
 			mLog.Warningf(_T("Failed to bind UDP socket to %s: %i."), pLocalAddress.GetAsString().c_str(), SOCKET_LAST_ERROR());
 			Close();
+			mLocalAddress.Set(IPAddress(), 0);
 		}
 	}
 }
@@ -1229,7 +1230,7 @@ int UdpSocket::SendTo(const uint8* pData, unsigned pSize, const SocketAddress& p
 		}
 		else
 		{
-			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)50)));
 			log_volatile(mLog.Tracef(_T("UDP -> %u bytes (%s -> %s): %s."), pSize,
 				mLocalAddress.GetAsString().c_str(), pTargetAddress.GetAsString().c_str(),
 				lData.c_str()));
@@ -1254,7 +1255,7 @@ int UdpSocket::ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSour
 		}
 		else
 		{
-			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 50)));
 			log_volatile(mLog.Tracef(_T("UDP <- %u bytes (%s <- %s): %s."), lSize,
 				mLocalAddress.GetAsString().c_str(), pSourceAddress.GetAsString().c_str(),
 				lData.c_str()));
@@ -1288,12 +1289,15 @@ UdpMuxSocket::~UdpMuxSocket()
 
 	RequestStop();
 
-	sys_socket lKiller = CreateUdpSocket();
 	const SocketAddress& lAddress = GetLocalAddress();
-	const int lReleaseByteCount = 8;
-	::sendto(lKiller, "Release!", lReleaseByteCount, 0, (const sockaddr*)&lAddress.GetAddr(), sizeof(lAddress.GetAddr()));
-	//Thread::Sleep(0.01);
-	//CloseSysSocket(lKiller);
+	if (lAddress.GetPort())
+	{
+		sys_socket lKiller = CreateUdpSocket();
+		const int lReleaseByteCount = 8;
+		::sendto(lKiller, "Release!", lReleaseByteCount, 0, (const sockaddr*)&lAddress.GetAddr(), sizeof(lAddress.GetAddr()));
+		//Thread::Sleep(0.01);
+		//CloseSysSocket(lKiller);
+	}
 
 	Close();
 	ReleaseSocketThreads();
@@ -1518,7 +1522,7 @@ void UdpMuxSocket::Run()
 				else
 				{
 					mLog.AWarning("Non-connected socket sent us junk.");
-					log_volatile(const str lData = strutil::DumpData(lBuffer->mDataBuffer, std::min(lBuffer->mDataSize, 20)));
+					log_volatile(const str lData = strutil::DumpData(lBuffer->mDataBuffer, std::min(lBuffer->mDataSize, 50)));
 					log_volatile(mLog.Debugf(_T("UDP <- %i bytes (%s): %s."), lBuffer->mDataSize,
 						lSourceAddress.GetAsString().c_str(), lData.c_str()));
 				}
