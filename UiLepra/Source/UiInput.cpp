@@ -290,6 +290,27 @@ unsigned InputDevice::GetNumAnalogueElements()
 	return mNumAnalogueElements;
 }
 
+void InputDevice::CountElements()
+{
+	mNumDigitalElements  = 0;
+	mNumAnalogueElements = 0;
+
+	ElementArray::iterator x;
+	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
+	{
+		InputElement* lElement = *x;
+
+		if (lElement->GetType() == InputElement::DIGITAL)
+		{
+			mNumDigitalElements++;
+		}
+		else if(lElement->GetType() == InputElement::ANALOGUE)
+		{
+			mNumAnalogueElements++;
+		}
+	}
+}
+
 void InputDevice::SetIdentifier(const str& pIdentifier)
 {
 	mIdentifier = pIdentifier;
@@ -414,27 +435,6 @@ InputElement* InputDevice::GetAxis(unsigned pAxisIndex) const
 }
 
 
-
-void InputDevice::CountElements()
-{
-	mNumDigitalElements  = 0;
-	mNumAnalogueElements = 0;
-
-	ElementArray::iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-
-		if (lElement->GetType() == InputElement::DIGITAL)
-		{
-			mNumDigitalElements++;
-		}
-		else if(lElement->GetType() == InputElement::ANALOGUE)
-		{
-			mNumAnalogueElements++;
-		}
-	}
-}
 
 void InputDevice::AddFunctor(InputFunctor* pFunctor)
 {
