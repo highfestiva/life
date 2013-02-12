@@ -13,10 +13,11 @@ Game
 + Ramps, bridges, elevators, doors.
 + Destructable obstacles.
 + Implement machine gun.
-. Mouse look
++ Mouse look
+. Port server to Linux.
+. Check multiplayer on two computers and one iPhone.
 . Fix the bomber planes showing up after dropping payload in out of process server.
 . Test which of Arena or Adventure play is best. Make a real map!
-. Check multiplayer on two computers and one iPhone.
 . Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and sharpnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
 . Not possible to log in when someone is moving/shooting.
 . Simple path finding.
@@ -24,6 +25,7 @@ Game
 . Goal seeking missiles.
 . Dynamic levels.
 . Orient spawn engines correctly (for instance mines).
+. Spawn engines for players, not hard-coded positions.
 . Fix cam moves behind walls (like in Kill Cutie: cam moves up).
 . UX design/menus.
 . Money in the game.
