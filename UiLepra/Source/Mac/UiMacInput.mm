@@ -30,8 +30,18 @@ MacInputElement::MacInputElement(Type pType, Interpretation pInterpretation, int
 	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
 	mElement(pElement)
 {
-	SetIdentifier(strutil::Encode((const char*)mElement->name));
-	//mLog.Headlinef(_T("%s got Mac input element %s of type %i w/ index %i."), pParentDevice->GetIdentifier().c_str(), mElement->name, GetType(), pTypeIndex);
+	pParentDevice->CountElements();
+	str lName;
+	if (pType == ANALOGUE)
+	{
+		lName = _T("Axis") + strutil::IntToString(pParentDevice->GetNumAnalogueElements(), 10);
+	}
+	else
+	{
+		lName = str(_T("Button")) + strutil::IntToString(pParentDevice->GetNumDigitalElements(), 10);
+	}
+	SetIdentifier(lName);
+	//mLog.Headlinef(_T("%s got Mac input element %s of type %i w/ index %i."), pParentDevice->GetIdentifier().c_str(), lName, GetType(), pTypeIndex);
 }
 
 MacInputElement::~MacInputElement()
@@ -59,7 +69,7 @@ MacInputDevice::MacInputDevice(pRecDevice pNativeDevice, InputManager* pManager)
 	mAnalogueCount(0),
 	mButtonCount(0)
 {
-	SetIdentifier(strutil::Encode((const char*)pNativeDevice->manufacturer) + _T(":") + strutil::Encode((const char*)pNativeDevice->product));
+	SetIdentifier(strutil::Encode((const char*)pNativeDevice->product));
 	EnumElements();
 }
 
@@ -119,7 +129,11 @@ void MacInputDevice::EnumElements()
 			break;
 			case kIOHIDElementTypeInput_Axis:
 			{
-				InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;	// TODO: ...
+				InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;
+				if (lCurrentElement->relative)
+				{
+					lInterpretation = InputElement::RELATIVE_AXIS;
+				}
 				lElement = new MacInputElement(InputElement::ANALOGUE, lInterpretation, mAnalogueCount, this, lCurrentElement);
 				++mAnalogueCount;
 			}
@@ -151,7 +165,11 @@ void MacInputDevice::EnumElements()
 						case kHIDUsage_GD_Slider:
 						case kHIDUsage_GD_Wheel:
 						{
-							InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;	// TODO: ...
+							InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;
+							if (lCurrentElement->relative)
+							{
+								lInterpretation = InputElement::RELATIVE_AXIS;
+							}
 							lElement = new MacInputElement(InputElement::ANALOGUE, lInterpretation, mAnalogueCount, this, lCurrentElement);
 							++mAnalogueCount;
 						}

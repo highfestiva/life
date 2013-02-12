@@ -12,7 +12,11 @@ Tank vs. Tank, similar to the Cyber Sled remake.
 
 Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
+Helicopter flying and shooting.
+
 Getaway - flee from tanks (and perhaps other military craft) which try to blow you out of orbit.
+
+Flocking game. School of fish? Birds? Something! The prototype should be fun without trying, so everything else should be a bonus.
 
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
 
