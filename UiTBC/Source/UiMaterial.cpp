@@ -408,7 +408,6 @@ void Material::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupLi
 					{
 						RenderBaseGeometry(lGeometry);
 					}
-					mRenderer->ResetAmbientLight(true);
 				}
 				mRenderer->PostRender(lGeometry);
 			}

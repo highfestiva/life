@@ -221,10 +221,10 @@ void PushTicker::BeginRender(Vector3DF& pColor)
 	mSunlight->AddSunColor(pColor, 2);
 	Parent::BeginRender(pColor);
 
-	Vector3DF lColor(1.2f, 1.2f, 1.2f);
-	mSunlight->AddSunColor(lColor, 1);
-	Color lFillColor;
-	lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
+	//Vector3DF lColor(1.2f, 1.2f, 1.2f);
+	//mSunlight->AddSunColor(lColor, 1);
+	const Color lFillColor = OFF_BLACK;
+	//lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
 	mUiManager->GetRenderer()->SetOutlineFillColor(lFillColor);
 }
 

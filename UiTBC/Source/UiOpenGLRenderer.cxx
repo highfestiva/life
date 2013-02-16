@@ -1601,10 +1601,8 @@ void OpenGLRenderer::RenderShadowVolumes()
 					if (lShadowVolume->GetVertexDataChanged() == true)
 					{
 						// Upload new vertices.
-						UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
-															0,
-															lShadowVolume->GetVertexCount() * sizeof(float) * 3,
-															(void*)lShadowVolume->GetVertexData());
+						UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 0,
+							lShadowVolume->GetVertexCount() * sizeof(float) * 3, (void*)lShadowVolume->GetVertexData());
 						lShadowVolume->SetVertexDataChanged(false);
 					}
 
@@ -1612,24 +1610,16 @@ void OpenGLRenderer::RenderShadowVolumes()
 					
 					if (lShadowVolume->GetIndexDataChanged() == true)
 					{
-						UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
-															0,
-															lShadowVolume->GetTriangleCount() * 3 * sizeof(vtx_idx_t),
-															(void*)lShadowVolume->GetIndexData());
+						UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
+							lShadowVolume->GetTriangleCount() * 3 * sizeof(vtx_idx_t), (void*)lShadowVolume->GetIndexData());
 					}
 
-					glDrawElements(GL_TRIANGLES,
-								lShadowVolume->GetTriangleCount() * 3,
-								LEPRA_GL_INDEX_TYPE,
-								0);
+					glDrawElements(GL_TRIANGLES, lShadowVolume->GetTriangleCount() * 3, LEPRA_GL_INDEX_TYPE, 0);
 				}
 				else
 				{
 					glVertexPointer(3, GL_FLOAT, 0, lShadowVolume->GetVertexData());
-					glDrawElements(GL_TRIANGLES,
-								lShadowVolume->GetTriangleCount() * 3,
-								LEPRA_GL_INDEX_TYPE,
-								lShadowVolume->GetIndexData());
+					glDrawElements(GL_TRIANGLES, lShadowVolume->GetTriangleCount() * 3, LEPRA_GL_INDEX_TYPE, lShadowVolume->GetIndexData());
 				}
 			}
 		}
