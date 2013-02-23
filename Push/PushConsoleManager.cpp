@@ -22,6 +22,7 @@ namespace Push
 // Must lie before PushConsoleManager to compile.
 const PushConsoleManager::CommandPair PushConsoleManager::mCommandIdList[] =
 {
+	{_T("set-avatar"), COMMAND_SET_AVATAR},
 	{_T("set-avatar-engine-power"), COMMAND_SET_AVATAR_ENGINE_POWER},
 #if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
 	{_T("builddata"), COMMAND_BUILD_DATA},
@@ -67,6 +68,18 @@ int PushConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 		CommandClient lCommand = (CommandClient)TranslateCommand(pCommand);
 		switch ((int)lCommand)
 		{
+			case COMMAND_SET_AVATAR:
+			{
+				if (pParameterVector.size() == 1)
+				{
+					((PushManager*)GetGameManager())->SelectAvatar(pParameterVector[0]);
+				}
+				else
+				{
+					mLog.Warningf(_T("usage: %s <avatar>"), pCommand.c_str());
+				}
+			}
+			break;
 			case COMMAND_SET_AVATAR_ENGINE_POWER:
 			{
 				if (pParameterVector.size() == 2)

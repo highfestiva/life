@@ -339,7 +339,7 @@ Painter::DisplayListID Painter::NewDisplayList()
 	int lID = mDisplayListIDManager.GetFreeId();
 	if(lID != mDisplayListIDManager.GetInvalidId())
 	{
-		mDisplayListMap.insert(std::pair<unsigned, std::vector<DisplayEntity*>*>(lID, new std::vector<DisplayEntity*>));
+		mDisplayListMap.insert(DisplayListMap::value_type(lID, new std::vector<DisplayEntity*>));
 	}
 	return (DisplayListID)lID;
 }

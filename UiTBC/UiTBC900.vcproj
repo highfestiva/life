@@ -471,6 +471,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiDynamicRenderer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiFontManager.cpp"
 				>
 			</File>
@@ -544,6 +548,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiPainter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiParticleRenderer.cpp"
 				>
 			</File>
 			<File
@@ -865,6 +873,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\UiDynamicRenderer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\UiFontManager.h"
 				>
 			</File>
@@ -906,6 +918,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiPainter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiParticleRenderer.h"
 				>
 			</File>
 			<File

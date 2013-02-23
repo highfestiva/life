@@ -11,6 +11,7 @@
 #include "../../TBC/Include/GeometryBase.h"
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
 #include "../Include/UiOpenGLMaterials.h"
+#include "../Include/UiExplosionRenderer.h"
 #include "../Include/UiTexture.h"
 
 
@@ -540,14 +541,6 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
 		strutil::Format(_T("AddTexture() - the texture has an invalid pixel size of %i bytes!"), lSize));
 	OGL_ASSERT();
-
-	switch (lSize)
-	{
-		case 1:	lSize = GL_ALPHA;	break;
-		case 3:	lSize = GL_RGB;		break;
-		default:
-		case 4: lSize = GL_RGBA;	break;
-	}
 
 	for (int i = 0; i < pTexture->GetNumMipMapLevels(); i++)
 	{
@@ -1334,6 +1327,12 @@ unsigned OpenGLRenderer::RenderScene()
 				Material::RenderAllGeometry(GetCurrentFrame(), lMaterial);
 			}
 		}
+
+		DynamicRendererMap::iterator x = mDynamicRendererMap.begin();
+		for (; x != mDynamicRendererMap.end(); ++x)
+		{
+			x->second->Render();
+		}
 	}
 
 	{
@@ -2000,18 +1999,13 @@ void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pComp
 {
 	switch(pSize)
 	{
-	case 4:
-		pPixelFormat = GL_RGBA;
-		break;
-	case 3: 
-		pPixelFormat = GL_RGB;
-		break;
-	case 1:
-		pPixelFormat = GL_LUMINANCE;
-		break;
+	case 4:	pPixelFormat	= GL_RGBA;	break;
+	case 3:	pPixelFormat	= GL_RGB;	break;
+	case 1:	pPixelFormat	= GL_LUMINANCE;	break;
 	default:
-		pPixelFormat = GL_RGB;
+		pPixelFormat	= GL_RGB;
 		mLog.Info(pErrorMessage);
+	break;
 	}
 
 #ifndef LEPRA_GL_ES
@@ -2019,7 +2013,17 @@ void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pComp
 	{
 		pSize = (pSize == 4) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB;
 	}
+	else
 #endif // !GLES
+	{
+		switch(pSize)
+		{
+			case 4:		pSize = GL_RGBA;	break;
+			case 3:		pSize = GL_RGB;		break;
+			case 1:		pSize = GL_ALPHA;	break;
+			default:	pSize = GL_RGB;		break;
+		}
+	}
 }
 
 

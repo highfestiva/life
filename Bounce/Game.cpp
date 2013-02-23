@@ -272,9 +272,9 @@ void Game::DidPhysicsTick()
 	PostPhysicsTick();
 }
 
-void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId, const Vector3DF& pNormal)
 {
-	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId, pNormal);
 }
 
 void Game::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,

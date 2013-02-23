@@ -189,7 +189,7 @@ HASHTABLE_TEMPLATE void HASHTABLE_QUAL::RemoveAll()
 
 HASHTABLE_TEMPLATE void HASHTABLE_QUAL::Insert(const _TTableKey& pKey, const _TTableObject& pObject)
 {
-	mHashMap.insert(std::pair<_TTableKey, _TTableObject>(pKey, pObject));
+	mHashMap.insert(HashMap::value_type(pKey, pObject));
 }
 
 HASHTABLE_TEMPLATE void HASHTABLE_QUAL::Remove(const _TTableKey& pKey)

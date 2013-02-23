@@ -82,7 +82,6 @@ private:
 	void DispatchAlarmCallbacks();
 
 	typedef IdManager<GameObjectId> ObjectIdManager;
-	typedef std::pair<GameObjectId, ContextObject*> ContextObjectPair;
 	struct Alarm
 	{
 		ContextObject* mObject;

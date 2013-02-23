@@ -26,13 +26,13 @@ VehicleElevator::~VehicleElevator()
 {
 }
 
-void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
+void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
 {
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
 	assert(lTrigger);
 	if (lTrigger->GetPriority() > -100)
 	{
-		Parent::OnTrigger(pTriggerId, pBody);
+		Parent::OnTrigger(pTriggerId, pBody, pNormal);
 		return;
 	}
 	if (!pBody || !mGame->GetVehicle())
@@ -43,7 +43,7 @@ void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Conte
 	Cure::ContextObject* lObject = (Cure::ContextObject*)pBody;
 	if (lObject->GetInstanceId() == mGame->GetVehicle()->GetInstanceId())
 	{
-		Parent::OnTrigger(pTriggerId, pBody);
+		Parent::OnTrigger(pTriggerId, pBody, pNormal);
 	}
 }
 

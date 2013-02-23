@@ -55,7 +55,7 @@ private:
 	void OrderAirStrike(const Vector3DF& pPosition, float pFlyInAngle);
 
 	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
-	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, float pStrength);
+	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 	virtual Cure::ContextObject* CreateAvatarForNpc(Npc* pNpc);

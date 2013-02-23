@@ -17,7 +17,7 @@ Game
 . Port server to Linux.
 . Check multiplayer on two computers and one iPhone.
 . Test which of Arena or Adventure play is best. Make a real map!
-. Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and sharpnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
+. Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and shrapnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
 . Not possible to log in when someone is moving/shooting.
 . Simple path finding.
 . AI (where is the user probably going to appear after disappearing behind a building).

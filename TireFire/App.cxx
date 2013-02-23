@@ -765,7 +765,7 @@ bool App::Poll()
 		lOk = mGame->Tick();
 	}
 	mResourceManager->Tick();
-	mUiManager->EndRender();
+	mUiManager->EndRender(1.0f/FPS);
 
 	if (mMusicPlayer)
 	{

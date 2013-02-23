@@ -64,7 +64,8 @@ ChunkyBoneGeometry* ChunkyBoneGeometry::Create(const ChunkyBoneGeometry& pOrigin
 	switch (pOriginal.GetGeometryType())
 	{
 		case GEOMETRY_CAPSULE:	return new ChunkyBoneCapsule((ChunkyBoneCapsule&)pOriginal);	break;
-		case GEOMETRY_SPHERE:	return new ChunkyBoneSphere((ChunkyBoneSphere&)pOriginal);		break;
+		case GEOMETRY_CYLINDER:	return new ChunkyBoneCylinder((ChunkyBoneCylinder&)pOriginal);	break;
+		case GEOMETRY_SPHERE:	return new ChunkyBoneSphere((ChunkyBoneSphere&)pOriginal);	break;
 		case GEOMETRY_BOX:	return new ChunkyBoneBox((ChunkyBoneBox&)pOriginal);		break;
 		case GEOMETRY_MESH:	return new ChunkyBoneMesh((ChunkyBoneMesh&)pOriginal);		break;
 	}
@@ -86,6 +87,7 @@ ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const vo
 	switch (Endian::BigToHost(lData[0]))
 	{
 		case GEOMETRY_CAPSULE:	lGeometry = new ChunkyBoneCapsule(lBodyData);	break;
+		case GEOMETRY_CYLINDER:	lGeometry = new ChunkyBoneCylinder(lBodyData);	break;
 		case GEOMETRY_SPHERE:	lGeometry = new ChunkyBoneSphere(lBodyData);	break;
 		case GEOMETRY_BOX:	lGeometry = new ChunkyBoneBox(lBodyData);	break;
 		case GEOMETRY_MESH:	lGeometry = new ChunkyBoneMesh(lBodyData);	break;
@@ -486,7 +488,37 @@ void ChunkyBoneCapsule::LoadChunkyData(ChunkyPhysics* pStructure, const void* pD
 
 ChunkyBoneGeometry::GeometryType ChunkyBoneCapsule::GetGeometryType() const
 {
-	return (GEOMETRY_CAPSULE);
+	return GEOMETRY_CAPSULE;
+}
+
+
+
+ChunkyBoneCylinder::ChunkyBoneCylinder(const BodyData& pBodyData):
+	Parent(pBodyData)
+{
+}
+
+bool ChunkyBoneCylinder::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
+	int pForceListenerId, PhysicsManager::BodyType pType,
+	const TransformationF& pTransform)
+{
+	RemovePhysics(pPhysics);
+	mBodyId = pPhysics->CreateCylinder(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
+		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
+	return (mBodyId != INVALID_BODY);
+}
+
+bool ChunkyBoneCylinder::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
+	const TransformationF& pTransform)
+{
+	RemovePhysics(pPhysics);
+	mTriggerId = pPhysics->CreateCylinderTrigger(pTransform, mRadius, mLength, pTrigListenerId);
+	return (mTriggerId != INVALID_TRIGGER);
+}
+
+ChunkyBoneGeometry::GeometryType ChunkyBoneCylinder::GetGeometryType() const
+{
+	return GEOMETRY_CYLINDER;
 }
 
 

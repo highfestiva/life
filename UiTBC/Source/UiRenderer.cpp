@@ -5,11 +5,13 @@
 */
 
 #include "../Include/UiRenderer.h"
-#include "../Include/UiMaterial.h"
+#include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/GeometryReference.h"
+#include "../Include/UiParticleRenderer.h"
+#include "../Include/UiMaterial.h"
 
 
 
@@ -68,6 +70,8 @@ void Renderer::ClearDebugInfo()
 
 void Renderer::InitRenderer()
 {
+	AddDynamicRenderer(_T("particle"), new ParticleRenderer(this));
+
 	for (int i = 0; i < MAT_COUNT; i++)
 	{
 		mMaterial[i] = CreateMaterial((MaterialType)i);
@@ -76,6 +80,14 @@ void Renderer::InitRenderer()
 
 void Renderer::CloseRenderer()
 {
+	DynamicRendererMap::iterator x = mDynamicRendererMap.begin();
+	for (; x != mDynamicRendererMap.end(); ++x)
+	{
+		DynamicRenderer* lRenderer = x->second;
+		delete lRenderer;
+	}
+	mDynamicRendererMap.clear();
+
 	ReleaseGeometries();
 	ReleaseShadowVolumes();
 	ReleaseTextureMaps();
@@ -86,6 +98,7 @@ void Renderer::CloseRenderer()
 		if (mMaterial[i] != 0)
 		{
 			delete mMaterial[i];
+			mMaterial[i] = 0;
 		}
 	}
 }
@@ -104,6 +117,27 @@ const Canvas* Renderer::GetScreen() const
 {
 	return mScreen;
 }
+
+
+
+DynamicRenderer* Renderer::GetDynamicRenderer(str pName) const
+{
+	return HashUtil::FindMapObject(mDynamicRendererMap, pName);
+}
+
+void Renderer::AddDynamicRenderer(str pName, DynamicRenderer* pRenderer)
+{
+	if (!HashUtil::FindMapObject(mDynamicRendererMap, pName))
+	{
+		mDynamicRendererMap.insert(DynamicRendererMap::value_type(pName, pRenderer));
+	}
+	else
+	{
+		delete pRenderer;
+	}
+}
+
+
 
 void Renderer::SetOutlineFillColor(const Color& pColor)
 {
@@ -1351,6 +1385,16 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 		return pGeometry->GetTriangleCount() * lActiveLightCount;
 	}
 	return 0;
+}
+
+void Renderer::Tick(float pTime)
+{
+	DynamicRendererMap::iterator x = mDynamicRendererMap.begin();
+	for (; x != mDynamicRendererMap.end(); ++x)
+	{
+		DynamicRenderer* lRenderer = x->second;
+		lRenderer->Tick(pTime);
+	}
 }
 
 unsigned Renderer::GetCurrentFrame() const

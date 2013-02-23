@@ -28,7 +28,7 @@ private:
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
 
 	bool mAllowBulletTime;
 

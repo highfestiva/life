@@ -25,6 +25,7 @@
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "../UiTBC/Include/UiParticleRenderer.h"
 #include "Explosion.h"
 #include "FastProjectile.h"
 #include "Level.h"
@@ -356,13 +357,20 @@ bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 
 
 
-void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, float pStrength)
+void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
 	(void)pExplosive;
 
 	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
-	{
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	mLog.Infof(_T("Hit object normal is (%.1f; %.1f; %.1f)"), pNormal.x, pNormal.y, pNormal.z);
+	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal);
+	u -= pVelocity * 0.5f;	// Mirror and inverse (and half, but doesn't matter in this case as we normalize).
+	u.z += 3;
+	u.Normalize();
+	lParticleRenderer->CreateExplosion(pPosition, pStrength * 5.0f, u, Vector3DF(0,0,1), 1, 20, 20, 10, 10);
+	/*{
 		// Shattered pieces, stones or mud.
 		const float lScale = VISUAL_SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
 		const int lParticleCount = (Random::GetRandomNumber() % 7) + 2;
@@ -409,7 +417,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
 			lPuff->StartLoading();
 		}
-	}
+	}*/
 
 	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
 	{
@@ -1488,7 +1496,7 @@ void PushManager::DrawScore()
 				s.mDeaths = 0;
 				s.mPing = 0;
 				lScoreArray.push_back(s);
-				x = lScoreMap.insert(std::pair<str, Score*>(lName, &lScoreArray.back())).first;
+				x = lScoreMap.insert(ScoreMap::value_type(lName, &lScoreArray.back())).first;
 			}
 			switch (lMode)
 			{

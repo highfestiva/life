@@ -347,8 +347,10 @@ void GameUiManager::PreparePaint(bool pClearDepthBuffer)
 	mPainter->PrePaint(pClearDepthBuffer);
 }
 
-void GameUiManager::EndRender()
+void GameUiManager::EndRender(float pFrameTime)
 {
+	mRenderer->Tick(pFrameTime);
+
 	if (CanRender())
 	{
 		UpdateSettings();

@@ -32,12 +32,11 @@ public:
 	virtual ~FastProjectile();
 
 private:
-	void Detonate(const Vector3DF& pPosition);
 	virtual void OnLoaded();
 	void StartBullet(float pMuzzleVelocity);
 	virtual void OnMicroTick(float pFrameTime);
 	void OnTick();
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	UiCure::UserSound3dResource* mShreekSound;

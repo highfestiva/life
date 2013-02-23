@@ -91,9 +91,10 @@ void BulletTime::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 }
 
-void BulletTime::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
+void BulletTime::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
 {
 	(void)pTriggerId;
+	(void)pNormal;
 
 	if (!mAllowBulletTime)
 	{

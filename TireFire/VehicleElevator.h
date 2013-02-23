@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../Cure/Include/Elevator.h"
+#include "Game.h"
 
 
 
@@ -26,7 +27,7 @@ public:
 	virtual ~VehicleElevator();
 
 private:
-	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
+	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
 
 	Game* mGame;
 

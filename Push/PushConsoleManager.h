@@ -27,7 +27,8 @@ public:
 protected:
 	enum CommandClient
 	{
-		COMMAND_SET_AVATAR_ENGINE_POWER = Parent::COMMAND_COUNT_LIFE_CLIENT,
+		COMMAND_SET_AVATAR = Parent::COMMAND_COUNT_LIFE_CLIENT,
+		COMMAND_SET_AVATAR_ENGINE_POWER,
 #if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
 		COMMAND_BUILD_DATA,
 #endif // Debug & Windows

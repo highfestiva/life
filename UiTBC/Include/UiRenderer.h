@@ -48,8 +48,9 @@ namespace UiTbc
 
 
 
-class Material;
+class DynamicRenderer;
 class GeometryGroup;
+class Material;
 
 
 
@@ -91,6 +92,8 @@ public:
 
 		MAT_COUNT,
 	};
+
+	typedef std::hash_map<str, DynamicRenderer*> DynamicRendererMap;
 
 	enum LightType
 	{
@@ -345,8 +348,11 @@ public:
 
 	virtual void Clear(unsigned pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER) = 0;
 	virtual void SetClearColor(const Color& pColor) = 0;
-	virtual void SetOutlineFillColor(const Color& pColor);
 
+	DynamicRenderer* GetDynamicRenderer(str pName) const;
+	void AddDynamicRenderer(str pName, DynamicRenderer* pRenderer);
+
+	virtual void SetOutlineFillColor(const Color& pColor);
 	void EnableOutlineRendering(bool pEnable);
 	bool IsOutlineRenderingEnabled() const;
 	void EnableWireframe(bool pEnable);
@@ -509,6 +515,7 @@ public:
 	void UpdateShadowMaps();
 	unsigned UpdateShadowMaps(TBC::GeometryBase* pGeometry);	// Returns the number of triangles calculated for.
 
+	virtual void Tick(float pTime);
 	virtual unsigned RenderScene() = 0;
 
 	// Used for rendering stuff that are NOT in the world, such as
@@ -613,6 +620,7 @@ protected:
 	static float GetLightInfluence(const LightData& pLightData);
 
 	Material* mMaterial[MAT_COUNT];
+	DynamicRendererMap mDynamicRendererMap;
 	unsigned mCurrentFrame;
 
 	unsigned mVisibleTriangleCount;

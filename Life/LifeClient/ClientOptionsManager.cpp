@@ -59,7 +59,6 @@ const FireControl& ClientOptionsManager::GetFireControl() const
 
 void ClientOptionsManager::DoRefreshConfiguration()
 {
-	typedef std::pair<const str, float*> KeyValue;
 	const KeyValue lEntries[] =
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),

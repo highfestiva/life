@@ -232,9 +232,11 @@ void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	}
 }
 
-void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, float pStrength)
+void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
 	(void)pExplosiveGeometry;
+	(void)pVelocity;
+	(void)pNormal;
 
 	float lIndicateHit;
 	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);

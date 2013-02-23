@@ -58,7 +58,7 @@ public:
 	void Render(const PixelRect& pArea);
 	void Paint(bool pClearDepthBuffer);
 	void PreparePaint(bool pClearDepthBuffer);
-	void EndRender();
+	void EndRender(float pFrameTime);
 
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 	UiLepra::DisplayManager* GetDisplayManager() const;

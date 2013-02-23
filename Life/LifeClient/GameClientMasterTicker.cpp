@@ -303,7 +303,7 @@ bool GameClientMasterTicker::Tick()
 
 	{
 		LEPRA_MEASURE_SCOPE(UiEndRender);
-		mUiManager->EndRender();
+		mUiManager->EndRender(GetTimeManager()->GetNormalFrameTime());
 	}
 
 	{
@@ -1175,19 +1175,19 @@ float GameClientMasterTicker::GetPowerSaveAmount() const
 
 
 
-void GameClientMasterTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+void GameClientMasterTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId, const Vector3DF& pNormal)
 {
 	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
 		GameClientSlaveManager* lSlave = *x;
 		if (lSlave)
 		{
-			lSlave->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+			lSlave->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId, pNormal);
 		}
 	}
 	if (mServer)
 	{
-		mServer->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+		mServer->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId, pNormal);
 	}
 }
 

@@ -877,7 +877,7 @@ void TcpMuxSocket::AddConnectedSocket(TcpVSocket* pSocket)
 {
 	ScopeLock lLock(&mIoLock);
 	log_volatile(mLog.Tracef(_T("AddConnectedSocket(%i)"), pSocket->GetSysSocket()));
-	mConnectedSocketMap.insert(std::pair<sys_socket, TcpVSocket*>(pSocket->GetSysSocket(), pSocket));
+	mConnectedSocketMap.insert(SocketVMap::value_type(pSocket->GetSysSocket(), pSocket));
 	mActiveReceiverMapChanged = true;
 	mConnectedSocketSemaphore.Signal();
 }
@@ -2124,13 +2124,13 @@ void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 	{
 		assert(!HashUtil::FindMapObject(mTcpSocketMap, pTcpSocket));
 		pSocket->SetSocket(pTcpSocket);
-		mTcpSocketMap.insert(std::pair<TcpVSocket*, DualSocket*>(pTcpSocket, pSocket));
+		mTcpSocketMap.insert(TcpSocketMap::value_type(pTcpSocket, pSocket));
 	}
 	if (pUdpSocket)
 	{
 		assert(!HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
 		pSocket->SetSocket(pUdpSocket);
-		mUdpSocketMap.insert(std::pair<UdpVSocket*, DualSocket*>(pUdpSocket, pSocket));
+		mUdpSocketMap.insert(UdpSocketMap::value_type(pUdpSocket, pSocket));
 	}
 	if (!HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()))
 	{
@@ -2138,7 +2138,7 @@ void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 			strutil::Encode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.'))+
 			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+str()+
 			(pSocket->GetUdpSocket()?_T(" UDP set."):_T(" no UDP.")));
-		mIdSocketMap.insert(std::pair<std::string, DualSocket*>(pSocket->GetConnectionId(), pSocket));
+		mIdSocketMap.insert(IdSocketMap::value_type(pSocket->GetConnectionId(), pSocket));
 	}
 	else
 	{

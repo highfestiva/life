@@ -249,6 +249,11 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				}
 			}
 			break;
+			default:
+			{
+				lResult = -1;
+			}
+			break;
 		}
 	}
 	return (lResult);

@@ -145,7 +145,6 @@ private:
 	RuntimeVariable* GetVariable(const HashedString& pName, bool pRecursive = true) const;
 
 	typedef std::hash_map<HashedString, RuntimeVariable*> VariableTable;
-	typedef std::pair<HashedString, RuntimeVariable*> VariablePair;
 	RuntimeVariableScope* mParentScope;
 	mutable Lock mLock;
 	VariableTable mVariableTable;

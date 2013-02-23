@@ -454,9 +454,9 @@ void NetworkServer::Login(const wstr& pLoginName, UserAccount::AccountId pAccoun
 void NetworkServer::AddUser(UserConnection* pUser, UserAccount::AccountId& pAccountId)
 {
 	ScopeLock lLock(&mLock);
-	mLoggedInIdUserTable.insert(LoggedInIdUserPair(pAccountId, pUser));
-	mLoggedInNameUserTable.insert(LoggedInNameUserPair(pUser->GetLoginName(), pUser));
-	mSocketUserTable.insert(SocketUserPair(pUser->GetSocket(), pUser));
+	mLoggedInIdUserTable.insert(LoggedInIdUserTable::value_type(pAccountId, pUser));
+	mLoggedInNameUserTable.insert(LoggedInNameUserTable::value_type(pUser->GetLoginName(), pUser));
+	mSocketUserTable.insert(SocketUserTable::value_type(pUser->GetSocket(), pUser));
 }
 
 bool NetworkServer::RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy)

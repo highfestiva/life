@@ -1087,7 +1087,9 @@ bool App::Poll()
 		lOk = mGame->Tick();
 	}
 	mResourceManager->Tick();
-	mUiManager->EndRender();
+	float lRealTimeRatio;
+	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	mUiManager->EndRender(lRealTimeRatio/FPS);
 
 	if (mMusicPlayer)
 	{

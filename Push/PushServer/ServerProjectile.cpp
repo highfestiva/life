@@ -63,7 +63,7 @@ void ServerProjectile::OnForceApplied(Cure::ContextObject* pOtherObject,
 	(void)pTorque;
 	(void)pRelativeVelocity;
 
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, mExplosiveEnergy);
+	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, Vector3DF(), mExplosiveEnergy);
 }
 
 

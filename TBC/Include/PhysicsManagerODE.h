@@ -277,16 +277,18 @@ private:
 	class TriggerInfo
 	{
 	public:
-		inline TriggerInfo(TriggerID pTriggerId, int pTriggerListenerId, int pBodyListenerId):
+		inline TriggerInfo(TriggerID pTriggerId, int pTriggerListenerId, int pBodyListenerId, const Vector3DF& pNormal):
 			mTriggerId(pTriggerId),
 			mTriggerListenerId(pTriggerListenerId),
-			mBodyListenerId(pBodyListenerId)
+			mBodyListenerId(pBodyListenerId),
+			mNormal(pNormal)
 		{
 		}
 
 		TriggerID mTriggerId;
 		int mTriggerListenerId;
 		int mBodyListenerId;
+		Vector3DF mNormal;
 	};
 
 	class JointInfo

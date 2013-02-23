@@ -74,8 +74,10 @@ void RaceTimer::OnTick()
 	}
 }
 
-void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
+void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
 {
+	(void)pNormal;
+
 	Cure::ContextObject* lObject = pBody;
 	if (lObject->GetPhysics()->GetEngineCount() <= 0)	// Only self-movable stuff can let the games begin!
 	{

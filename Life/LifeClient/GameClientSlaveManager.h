@@ -131,7 +131,6 @@ protected:
 	void DrawSyncDebugInfo();
 
 	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
-	typedef std::pair<Cure::GameObjectId, int> ObjectFrameIndexPair;
 	typedef std::hash_set<Cure::GameObjectId> ObjectIdSet;
 
 	UiCure::GameUiManager* mUiManager;
