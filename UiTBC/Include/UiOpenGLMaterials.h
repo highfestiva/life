@@ -35,8 +35,9 @@ public:
 
 	GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
 
-	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
-	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer);
+	void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
+	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, Renderer* pRenderer);
+	void ResetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
 
 	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
@@ -71,7 +72,6 @@ public:
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry);
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 };
 
 
@@ -271,7 +271,6 @@ public:
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 
 	bool mSingleColorPass;
 	GLint mTextureParamMin;
@@ -296,9 +295,6 @@ public:
 	inline virtual ~OpenGLMatSingleColorEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-
-protected:
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 };
 
 
@@ -324,7 +320,6 @@ public:
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 
 	bool mSingleTexturePass;
 
@@ -347,9 +342,6 @@ public:
 	inline virtual ~OpenGLMatSingleTextureEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-
-protected:
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 };
 
 

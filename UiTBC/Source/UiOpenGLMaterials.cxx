@@ -65,10 +65,10 @@ GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 
 void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial)
 {
-	SetBasicMaterial(pMaterial, (OpenGLRenderer*)GetRenderer());
+	SetBasicMaterial(pMaterial, GetRenderer());
 }
 
-void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer)
+void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, Renderer* pRenderer)
 {
 	mCurrentMaterial = pMaterial;
 
@@ -86,7 +86,18 @@ void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSett
 
 	//pRenderer->SetGlobalMaterialReflectance(pMaterial.mDiffuse.x, pMaterial.mDiffuse.y, pMaterial.mDiffuse.z, pMaterial.mShininess);
 
-	pRenderer->AddAmbience(pMaterial.mAmbient.x, pMaterial.mAmbient.y, pMaterial.mAmbient.z);
+	if (pMaterial.mAmbient.x || pMaterial.mAmbient.y || pMaterial.mAmbient.z)
+	{
+		pRenderer->AddAmbience(pMaterial.mAmbient.x, pMaterial.mAmbient.y, pMaterial.mAmbient.z);
+	}
+}
+
+void OpenGLMaterial::ResetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial)
+{
+	if (pMaterial.mAmbient.x || pMaterial.mAmbient.y || pMaterial.mAmbient.z)
+	{
+		GetRenderer()->ResetAmbientLight(true);
+	}
 }
 
 
@@ -132,8 +143,9 @@ void OpenGLMaterial::UpdateTextureMatrix(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	RenderBaseGeometry(pGeometry);
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 void OpenGLMatSingleColorSolid::PreRender()
@@ -200,11 +212,6 @@ void OpenGLMatSingleColorSolid::RenderBaseGeometry(TBC::GeometryBase* pGeometry)
 	}
 }
 
-void OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
-{
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-}
-
 
 
 void OpenGLMatSingleColorBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
@@ -266,7 +273,7 @@ void OpenGLMatVertexColorSolid::DoRenderAllGeometry(unsigned pCurrentFrame, cons
 
 void OpenGLMatVertexColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 
@@ -308,6 +315,8 @@ void OpenGLMatVertexColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
+
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 
@@ -344,7 +353,7 @@ bool OpenGLMatSingleTextureSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 
@@ -376,6 +385,8 @@ void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(0));
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
 	}
+
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 void OpenGLMatSingleTextureSolid::PreRender()
@@ -648,35 +659,11 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void OpenGLMatSingleColorEnvMapSolid::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
-{
-	if (mSingleColorPass == true)
-	{
-		OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(pGeometry);
-	}
-	else
-	{
-		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	}
-}
-
 
 
 void OpenGLMatSingleColorEnvMapBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
 	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
-}
-
-void OpenGLMatSingleColorEnvMapBlended::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
-{
-	if (mSingleColorPass == true)
-	{
-		OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(pGeometry);
-	}
-	else
-	{
-		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	}
 }
 
 
@@ -849,7 +836,7 @@ void OpenGLMatSingleTextureEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeome
 		return;
 	}
 
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 
@@ -883,18 +870,8 @@ void OpenGLMatSingleTextureEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeome
 			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
-}
 
-void OpenGLMatSingleTextureEnvMapSolid::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
-{
-	if (mSingleTexturePass == true)
-	{
-		OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(pGeometry);
-	}
-	else
-	{
-		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	}
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 
@@ -904,17 +881,6 @@ void OpenGLMatSingleTextureEnvMapBlended::RenderAllGeometry(unsigned pCurrentFra
 	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
 }
 
-void OpenGLMatSingleTextureEnvMapBlended::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
-{
-	if (mSingleTexturePass == true)
-	{
-		OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(pGeometry);
-	}
-	else
-	{
-		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	}
-}
 
 
 void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
@@ -1020,7 +986,7 @@ void OpenGLMatTextureAndLightmap::RenderGeometry(TBC::GeometryBase* pGeometry)
 	}
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 
 	// Setup the color map in texture unit 0.
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
@@ -1086,6 +1052,8 @@ void OpenGLMatTextureAndLightmap::RenderGeometry(TBC::GeometryBase* pGeometry)
 			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
+
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 
@@ -1575,7 +1543,7 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	}
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
 
 #ifndef LEPRA_GL_ES
@@ -1612,6 +1580,8 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
+
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 
@@ -1662,7 +1632,7 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	}
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
 
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
@@ -1714,6 +1684,8 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
+
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 
@@ -1781,7 +1753,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	}
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
 
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
@@ -1848,6 +1820,8 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
+
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 
@@ -1934,7 +1908,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	}
 
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	PrepareBasicMaterialSettings(pGeometry);
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
 
 	// Texture unit 0, handles color map and regular 
@@ -2022,6 +1996,8 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
+
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 

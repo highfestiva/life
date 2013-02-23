@@ -659,7 +659,7 @@ void PushManager::TickUiInput()
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 #if 1
-			const float lLeftPowerFwdRev = S(FORWARD) - S(BREAKANDBACK);
+			const float lLeftPowerFwdRev = S(FORWARD) - S(BRAKEANDBACK);
 			//const float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
 			const float lLeftPowerLR = S(RIGHT)-S(LEFT);
 			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
@@ -675,18 +675,21 @@ void PushManager::TickUiInput()
 			SetAvatarEnginePower(lObject, 5, lLeftPowerLR);
 			SetAvatarEnginePower(lObject, 8, lRightPowerLR);
 #else
+			const float lForward = S(FORWARD);
+			const float lBack = S(BACKWARD);
+			const float lBrakeAndBack = S(BRAKEANDBACK);
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
-			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
+			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBrakeAndBack);
 			SetAvatarEnginePower(lObject, 0, lPowerFwdRev);
 			float lPowerLR = S(RIGHT)-S(LEFT);
 			SetAvatarEnginePower(lObject, 1, lPowerLR);
-			float lPower = S(HANDBRAKE) - std::max(S(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
-			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
-				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
+			float lPower = S(HANDBRAKE) - std::max(S(BREAK), lIsMovingForward? lBrakeAndBack : 0.0f);
+			if (!SetAvatarEnginePower(lObject, 2, lPower) &&
+				lBrakeAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
 			{
 				// Someone is apparently trying to stop/break, but no engine configured for breaking.
 				// Just apply it as a reverse motion.
-				lPowerFwdRev = lForward - lBreakAndBack;
+				lPowerFwdRev = lForward - lBrakeAndBack;
 				SetAvatarEnginePower(lObject, 0, lPowerFwdRev);
 			}
 			lPower = S(UP)-S(DOWN);
