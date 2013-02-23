@@ -10,8 +10,8 @@
 #include "../../Lepra/Include/Transformation.h"
 #include "../../TBC/Include/GeometryBase.h"
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
+#include "../Include/UiDynamicRenderer.h"
 #include "../Include/UiOpenGLMaterials.h"
-#include "../Include/UiExplosionRenderer.h"
 #include "../Include/UiTexture.h"
 
 
