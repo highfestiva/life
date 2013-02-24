@@ -38,6 +38,8 @@ private:
 	Life::Launcher* mLauncher;
 	Vector3DF mTarget;
 	int mLastBombTick;
+	float mBombingRadiusSquared;
+	float mDropInterval;
 
 	LOG_CLASS_DECLARE();
 };

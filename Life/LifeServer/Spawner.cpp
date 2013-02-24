@@ -63,12 +63,12 @@ void Spawner::OnCreate(float pCreateInterval)
 
 	if ((int)mChildList.size() < lSpawnCount)
 	{
-		const str lSpawnObject = GetSpawner()->GetSpawnObject((float)Random::Uniform(0, 1));
+		const str lSpawnObject = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
 		if (!lSpawnObject.empty())
 		{
 			ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 			AddChild(lObject);
-			const Vector3DF lScalePoint((float)Random::Uniform(0, 1), (float)Random::Uniform(0, 1), (float)Random::Uniform(0, 1));
+			const Vector3DF lScalePoint = RNDPOSVEC();
 			lObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint));
 			lObject->StartLoading();
 		}

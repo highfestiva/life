@@ -94,9 +94,9 @@ void GeometryBatch::SetInstances(const TransformationF* pDisplacement, const Vec
 		int lUVIndex = 0;
 		for (i = 0; i < (unsigned int)pNumInstances; i++)
 		{
-			float lXScale = (float)Random::Uniform(pRandomSeed, pXScaleMin, pXScaleMax);
-			float lYScale = (float)Random::Uniform(pRandomSeed, pYScaleMin, pYScaleMax);
-			float lZScale = (float)Random::Uniform(pRandomSeed, pZScaleMin, pZScaleMax);
+			float lXScale = Random::Uniform(pRandomSeed, pXScaleMin, pXScaleMax);
+			float lYScale = Random::Uniform(pRandomSeed, pYScaleMin, pYScaleMax);
+			float lZScale = Random::Uniform(pRandomSeed, pZScaleMin, pZScaleMax);
 
 			const TransformationF& lTransform = pDisplacement[i];
 			int lIndex = 0;

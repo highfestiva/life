@@ -298,16 +298,16 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
 			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 			lPuff->DisableRootShadow();
-			float x = (float)Random::Uniform(-1, 1);
-			float y = (float)Random::Uniform(-1, 1);
+			float x = Random::Uniform(-1.0f, 1.0f);
+			float y = Random::Uniform(-1.0f, 1.0f);
 			float z = -1;
 			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
-			const float lAngle = (float)Random::Uniform(0, 2*PIF);
+			const float lAngle = Random::Uniform(0.0f, 2*PIF);
 			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
-			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
-			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * lScale, 0.5f, (float)Random::Uniform(3, 7));
+			y = (6 * Random::Uniform(-1.0f, 1.0f)) * sin(lAngle);
+			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * Random::Uniform(0.0f, 1.0f)) * Random::Uniform(0.2f, 1.0f);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), Random::Uniform(3.0f, 7.0f) * lScale, 0.5f, Random::Uniform(3.0f, 7.0f));
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 			lPuff->SetFadeOutTime(0.3f);
 #endif // Touch L&F
@@ -323,17 +323,17 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
 			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 			lPuff->DisableRootShadow();
-			float x = (float)Random::Uniform(-1, 1);
-			float y = (float)Random::Uniform(-1, 1);
-			float z = (float)Random::Uniform(-1, 1);
+			float x = Random::Uniform(-1.0f, 1.0f);
+			float y = Random::Uniform(-1.0f, 1.0f);
+			float z = Random::Uniform(-1.0f, 1.0f);
 			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
-			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
+			const float lOpacity = Random::Uniform(0.025f, 0.1f);
 			lPuff->SetOpacity(lOpacity);
 			x = x*12;
 			y = y*12;
-			z = (float)Random::Uniform(0, 7);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
+			z = Random::Uniform(0.0f, 7.0f);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, Random::Uniform(1.5f, 4.0f));
 			lPuff->StartLoading();
 		}
 	}

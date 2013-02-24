@@ -984,7 +984,7 @@ void App::OnTapSound(UiTbc::Button*)
 {
 	if (mTapClick->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), 1, (float)Random::Uniform(0.7, 1.4));
+		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), 1, Random::Uniform(0.7f, 1.4f));
 	}
 }
 

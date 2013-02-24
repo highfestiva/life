@@ -163,7 +163,6 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Tra
 
 	// TODO: Create a real cylinder when ODE supports it.
 	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
-	mLog.AWarning("Warning! Cylinders are not accurately supported by ODE!");
 
 	lObject->mForceFeedbackId = pForceListenerId;
 	//assert(pType == STATIC || lObject->mForceFeedbackId);
@@ -767,7 +766,6 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Transfo
 
 	// TODO: Create a real cylinder when ODE supports it.
 	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
-	mLog.AWarning("Warning! Cylinders are not accurately supported by ODE!");
 
 	dGeomSetData(lObject->mGeomID, lObject);
 

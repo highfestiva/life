@@ -168,25 +168,6 @@ V2D_TEMPLATE _TVarType V2D_QUAL::GetDistanceSquared(const Vector2D<_TVarType>& p
 
 V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle() const
 {
-	/*if (fabs(x) <= MathTraits<_TVarType>::FullEps())
-	{
-		if (y >= 0)
-			return (_TVarType)(PI/2);
-		else
-			return (_TVarType)(-PI/2);
-	}
-
-	if (x >= 0)
-	{
-		return atan(y / x);
-	}
-	else
-	{
-		if (y >= 0)
-			return (_TVarType)((PI / 2) - atan(y / x));
-		else
-			return (_TVarType)(-(PI / 2) - atan(y / x));
-	}*/
 	return atan2(y, x);
 }
 

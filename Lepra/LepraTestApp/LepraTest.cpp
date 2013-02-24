@@ -17,6 +17,8 @@
 #pragma warning(pop)
 #endif // LEPRA_MSVC
 
+//#define TEST_WEB_AND_MAIL
+
 #include <assert.h>
 #include <math.h>
 #include "../Include/Canvas.h"
@@ -333,19 +335,19 @@ bool TestRandom(const LogDecorator& pAccount)
 		std::vector<double> lValues;
 		for (int x = 0; x < cnt; ++x)
 		{
-			lValues.push_back(Random::Normal(lMean, lStdDev, -10, +10));
+			lValues.push_back(Random::Normal(lMean, lStdDev, -10.0, +10.0));
 			assert(lValues[x] >= -10 && lValues[x] <= +10);
 			lAverage += lValues[x];
 		}
 		lContext = _T("normal mean");
 		lAverage /= cnt;
-		lTestOk = (lAverage >= lMean-0.01*lStdDev && lAverage <= lMean+0.01*lStdDev);
+		lTestOk = (lAverage >= lMean-0.03*lStdDev && lAverage <= lMean+0.03*lStdDev);
 		assert(lTestOk);
 		if (lTestOk)
 		{
 			lContext = _T("normal distribuion");
 			const double lActualStdDev = Math::CalculateDeviation<double>(lValues, lMean);
-			lTestOk = (lActualStdDev >= lStdDev-0.01 && lActualStdDev <= lStdDev+0.01);
+			lTestOk = (lActualStdDev >= lStdDev-0.03 && lActualStdDev <= lStdDev+0.03);
 			assert(lTestOk);
 		}
 	}
@@ -399,6 +401,55 @@ bool TestNumber(const LogDecorator& pAccount)
 	}
 
 	ReportTestResult(pAccount, _T("Number"), lContext, lTestOk);
+	return (lTestOk);
+}
+
+bool TestVector3D(const LogDecorator& pAccount)
+{
+	// Verify Number basics.
+	str lContext;
+	bool lTestOk = true;
+	float lResult;
+	float lDesiredResult;
+
+	if (lTestOk)
+	{
+		lDesiredResult = 0;
+		lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
+		lResult = Vector3DF(1,0,0).GetPolarCoordAngleY();
+		lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lDesiredResult = PIF/2;
+			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
+			lResult = Vector3DF(0,0,1).GetPolarCoordAngleY();
+			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
+			assert(lTestOk);
+		}
+
+		if (lTestOk)
+		{
+			lDesiredResult = -5*PIF/6;
+			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
+			//lResult = Vector3DF(-sqrtf(3),0,-1).GetPolarCoordAngleY();
+			lResult = atan2(-1, -sqrtf(3));
+			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
+			assert(lTestOk);
+		}
+
+		if (lTestOk)
+		{
+			lDesiredResult = +PIF;
+			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
+			//lResult = Vector3DF(-1,0,0).GetPolarCoordAngleY();
+			lResult = atan2(0.0f, -1.0f);
+			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
+			assert(lTestOk);
+		}
+	}
+
+	ReportTestResult(pAccount, _T("Vector3D"), lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1272,6 +1323,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 			SystemManager::GetAvailVirtualMemory() <= (uint64)19*1024*1024*1024);
 		assert(lTestOk);
 	}
+#ifdef TEST_WEB_AND_MAIL
 	if (lTestOk)
 	{
 		// Just make sure we don't crash. Need manual verification that it works anyhoo.
@@ -1282,6 +1334,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 		// Just make sure we don't crash. Need manual verification that it works anyhoo.
 		SystemManager::EmailTo(_T("info@pixeldoctrine.com"), _T("Test subject?"), _T("Hi,\n\nHow are you? Hope you're good!\n\nLater,\nJonas"));
 	}
+#endif // !TEST_WEB_AND_MAIL
 
 	ReportTestResult(pAccount, _T("System"), lContext, lTestOk);
 	return (lTestOk);
@@ -2951,6 +3004,10 @@ bool TestLepra()
 	if (lTestOk)
 	{
 		lTestOk = TestNumber(gLLog);
+	}
+	if (lTestOk)
+	{
+		lTestOk = TestVector3D(gLLog);
 	}
 	if (lTestOk)
 	{

@@ -1981,8 +1981,8 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	Lepra::TransformationF lPositions[100];
 	for (int i = 0; i < 100; i++)
 	{
-		lPositions[i].GetPosition().x = (float)Lepra::Random::Uniform(0, 50);
-		lPositions[i].GetPosition().y = (float)Lepra::Random::Uniform(0, 50);
+		lPositions[i].GetPosition().x = Lepra::Random::Uniform(0.0f, 50.0f);
+		lPositions[i].GetPosition().y = Lepra::Random::Uniform(0.0f, 50.0f);
 		lPositions[i].GetPosition().z = 0;
 	}
 

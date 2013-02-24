@@ -83,10 +83,10 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 		return;
 	}
 	Vector3DF lPosition(pPosition);
-	const float lAngle = (float)Random::Uniform(0, PI*2);
+	const float lAngle = Random::Uniform(0.0f, PIF*2);
 	lPosition.x += 0.2f * cos(lAngle);
 	lPosition.y += 0.2f * sin(lAngle);
-	lPosition.z += (float)Random::Uniform(+0.1f, +0.2f);
+	lPosition.z += Random::Uniform(+0.1f, +0.2f);
 	Vector3DF lRelativeVelocity(pRelativeVelocity);
 	const Vector3DF lUp(0, 0, 1);
 	Vector3DF lTorque(pTorque.Cross(lUp));
@@ -101,9 +101,9 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	const float lCollisionLength = lRelativeVelocity.GetLength();
 	lRelativeVelocity += lRollSpeed;
 	lRelativeVelocity.z += lCollisionLength*0.2f + lRollLength*0.3f;
-	lRelativeVelocity.x += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
-	lRelativeVelocity.y += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
-	lRelativeVelocity.z += (float)Random::Uniform(-lCollisionLength*0.02f, +lCollisionLength*0.05f);
+	lRelativeVelocity.x += Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
+	lRelativeVelocity.y += Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
+	lRelativeVelocity.z += Random::Uniform(-lCollisionLength*0.02f, +lCollisionLength*0.05f);
 	bool lEnableGravelFading;
 	CURE_RTVAR_GET(lEnableGravelFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, false);
 	if (lRelativeVelocity.GetLengthSquared() < pRelativeVelocity.GetLengthSquared()*200*200)

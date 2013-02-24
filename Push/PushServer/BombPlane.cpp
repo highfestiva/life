@@ -28,6 +28,9 @@ BombPlane::BombPlane(Cure::ResourceManager* pResourceManager, const str& pClassI
 	mTarget(pTarget),
 	mLastBombTick(0)
 {
+	// Randomize so bombers won't have perfect (robotic) synchronization.
+	mBombingRadiusSquared = BOMBING_RADIUS*BOMBING_RADIUS * Random::Uniform(0.6f, 1.7f);
+	mDropInterval = Random::Uniform(0.5f, 0.8f);
 }
 
 BombPlane::~BombPlane()
@@ -47,7 +50,7 @@ void BombPlane::OnLoaded()
 void BombPlane::OnTick()
 {
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
-	if (lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mLastBombTick)) < 0.6f)
+	if (lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mLastBombTick)) < mDropInterval)
 	{
 		return;
 	}
@@ -65,7 +68,7 @@ void BombPlane::OnTick()
 	{
 		Vector3DF lHorizontalProjectedTarget(mTarget.x, mTarget.y, lPosition.z);
 		const float d = lHorizontalProjectedTarget.GetDistanceSquared(lPosition + lVelocity*t1);
-		if (d < BOMBING_RADIUS*BOMBING_RADIUS * (float)Random::Uniform(0.8, 1.2))
+		if (d < mBombingRadiusSquared)
 		{
 			mLastBombTick = lTimeManager->GetCurrentPhysicsFrame();
 			mLauncher->Shoot(this, -10);

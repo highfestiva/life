@@ -159,13 +159,13 @@ void MassObject::CreateSquare(size_t pX, size_t pY)
 	for (size_t x = 0; x < mSquareInstanceCount; ++x)
 	{
 		QuaternionF lRotation;
-		lRotation.RotateAroundOwnY((float)Random::Uniform(lSeed, 0, PI*2));
-		lRotation.RotateAroundOwnX((float)Random::Uniform(lSeed, 0, PI/8));
-		lRotation.RotateAroundOwnZ((float)Random::Uniform(lSeed, 0, PI/8));
+		lRotation.RotateAroundOwnY(Random::Uniform(lSeed, 0.0f, PIF*2));
+		lRotation.RotateAroundOwnX(Random::Uniform(lSeed, 0.0f, PIF/8));
+		lRotation.RotateAroundOwnZ(Random::Uniform(lSeed, 0.0f, PIF/8));
 		Vector3DF lPosition;
 		GridToPosition(pX, pY, lPosition);
-		lPosition.x += (float)Random::Uniform(lSeed, mSquareSideLength);
-		lPosition.y += (float)Random::Uniform(lSeed, mSquareSideLength);
+		lPosition.x += Random::Uniform(lSeed, 0.3f, (float)mSquareSideLength);
+		lPosition.y += Random::Uniform(lSeed, 0.3f, (float)mSquareSideLength);
 		if (GetObjectPlacement(lPosition))
 		{
 			std::swap(lPosition.y, lPosition.z);	// TRICKY: transform from RG coords to Maya coords.

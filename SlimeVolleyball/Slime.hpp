@@ -169,7 +169,7 @@ namespace Math
 {
 inline double random()
 {
-	return Random::Uniform();
+	return Random::Uniform(0.0, 1.0);
 }
 template<class _T> static _T abs(_T v)
 {

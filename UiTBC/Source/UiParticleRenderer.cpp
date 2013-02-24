@@ -10,8 +10,6 @@
 #include "../../Lepra/Include/Random.h"
 #include "../Include/UiRenderer.h"
 
-#define RNDVEC(q)	Vector3DF((float)Random::Uniform(-q, +q), (float)Random::Uniform(-q, +q), (float)Random::Uniform(-q, +q))
-
 
 
 namespace UiTbc
@@ -59,22 +57,16 @@ void ParticleRenderer::Render()
 	const TransformationF& lCam = mRenderer->GetCameraTransformation();
 	const QuaternionF& lCamOrientationInverse = mRenderer->GetCameraOrientationInverse();
 
-	SetDepth(mFires, lCam, lCamOrientationInverse);
-	SetDepth(mSmokes, lCam, lCamOrientationInverse);
-	SetDepth(mSparks, lCam, lCamOrientationInverse);
-	SetDepth(mShrapnels, lCam, lCamOrientationInverse);
+	SetCamSpaceDepth(mFires, lCam, lCamOrientationInverse);
+	SetCamSpaceDepth(mSmokes, lCam, lCamOrientationInverse);
+	SetCamSpaceDepth(mSparks, lCam, lCamOrientationInverse);
+	SetCamSpaceDepth(mShrapnels, lCam, lCamOrientationInverse);
 	std::sort(mFires.begin(), mFires.end(), CompareDepths);
 	std::sort(mSmokes.begin(), mSmokes.end(), CompareDepths);
 	std::sort(mSparks.begin(), mSparks.end(), CompareDepths);
 	std::sort(mShrapnels.begin(), mShrapnels.end(), CompareDepths);
 
-	TransformationF lCamSpace;
-	lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(QuaternionF(), Vector3DF()));
-	float lModelViewMatrix[16];
-	lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(lModelViewMatrix);
-
 	glDisable(GL_COLOR_LOGIC_OP);
 	glDisable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
@@ -106,7 +98,7 @@ void ParticleRenderer::Render()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	const float q = 4;
+	const float q = 1;
 	BillboardArray::iterator x;
 
 	glEnable(GL_TEXTURE_2D);
@@ -117,20 +109,28 @@ void ParticleRenderer::Render()
 	x = mSmokes.begin();
 	for (; x != mSmokes.end(); ++x)
 	{
-		const float s = q + x->mOpacityTime;
-		Vector3DF lPos = x->mPosition;
+		TransformationF lCamSpace;
+		QuaternionF lRot;
+		lRot *= lCam.GetOrientation();
+		lRot.RotateAroundOwnY(x->mAngle);
+		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
+		float lModelViewMatrix[16];
+		lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		glLoadMatrixf(lModelViewMatrix);
+
+		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
 		const float rgb = Math::Lerp(0.4f, 0.2f, x->mOpacityTime/PIF);
 		glColor4f(rgb, rgb, rgb, x->mOpacity);
 		const float lOffsetX = x->mTextureIndex * 0.25f;
 		glBegin(GL_QUADS);
 		glTexCoord2f(lOffsetX+0, 0);
-		glVertex3f(lPos.x-s, lPos.y, lPos.z+s);
+		glVertex3f(-s, 0, +s);
 		glTexCoord2f(lOffsetX+0, 1);
-		glVertex3f(lPos.x-s, lPos.y, lPos.z-s);
+		glVertex3f(-s, 0, -s);
 		glTexCoord2f(lOffsetX+0.25f, 1);
-		glVertex3f(lPos.x+s, lPos.y, lPos.z-s);
+		glVertex3f(+s, 0, -s);
 		glTexCoord2f(lOffsetX+.25f, 0);
-		glVertex3f(lPos.x+s, lPos.y, lPos.z+s);
+		glVertex3f(+s, 0, +s);
 		glEnd();
 	}
 
@@ -139,13 +139,22 @@ void ParticleRenderer::Render()
 	x = mShrapnels.begin();
 	for (; x != mShrapnels.end(); ++x)
 	{
-		Vector3DF lPos = x->mPosition;
-		glColor4f(0, 0, 0, x->mOpacity);
+		TransformationF lCamSpace;
+		QuaternionF lRot;
+		lRot *= lCam.GetOrientation();
+		lRot.RotateAroundOwnY(x->mAngle);
+		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
+		float lModelViewMatrix[16];
+		lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		glLoadMatrixf(lModelViewMatrix);
+
+		const float s = x->mSizeFactor;
+		glColor4f(0.3f, 0.3f, 0.3f, x->mOpacity);
 		glBegin(GL_QUADS);
-		glVertex3f(lPos.x-.4f, lPos.y, lPos.z+.4f);
-		glVertex3f(lPos.x-.4f, lPos.y, lPos.z-.4f);
-		glVertex3f(lPos.x+.4f, lPos.y, lPos.z-.4f);
-		glVertex3f(lPos.x+.4f, lPos.y, lPos.z+.4f);
+		glVertex3f(-s, 0, +s*2.0f);
+		glVertex3f(-s, 0, -s*2.0f);
+		glVertex3f(+s, 0, -s*1.2f);
+		glVertex3f(+s, 0, +s*1.8f);
 		glEnd();
 	}
 
@@ -155,15 +164,29 @@ void ParticleRenderer::Render()
 	x = mSparks.begin();
 	for (; x != mSparks.end(); ++x)
 	{
-		Vector3DF lPos = x->mPosition;
+		TransformationF lCamSpace;
+		QuaternionF lRot;
+		lRot *= lCam.GetOrientation();
+		// Spark always points in same direction as its velocity. Thus we transform velocity into
+		// camera space and project onto camera's XZ plane.
+		const Vector3DF lCameraXZPlane(0,1,0);	// In cam space that is.
+		const Vector3DF lAngleVector = (lCamOrientationInverse * x->mVelocity).ProjectOntoPlane(lCameraXZPlane);
+		const float lAngle = lAngleVector.GetPolarCoordAngleY();
+		lRot.RotateAroundOwnY(PIF/2 - lAngle);
+		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
+		float lModelViewMatrix[16];
+		lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		glLoadMatrixf(lModelViewMatrix);
+
+		const float s = x->mSizeFactor;
 		const float r  = Math::Lerp(1.0f, 0.6f, x->mOpacityTime/PIF);
 		const float gb = Math::Lerp(1.0f, 0.3f, x->mOpacityTime/PIF);
 		glColor4f(r, gb, gb, x->mOpacity);
 		glBegin(GL_QUADS);
-		glVertex3f(lPos.x-.1f, lPos.y, lPos.z+.1f);
-		glVertex3f(lPos.x-.1f, lPos.y, lPos.z-.1f);
-		glVertex3f(lPos.x+.1f, lPos.y, lPos.z-.1f);
-		glVertex3f(lPos.x+.1f, lPos.y, lPos.z+.1f);
+		glVertex3f(0, 0, +s*0.3f);
+		glVertex3f(-s*0.4f, 0, 0);
+		glVertex3f(0, 0, -s*4.5f);
+		glVertex3f(+s*0.4f, 0, 0);
 		glEnd();
 	}
 
@@ -172,8 +195,16 @@ void ParticleRenderer::Render()
 	x = mFires.begin();
 	for (; x != mFires.end(); ++x)
 	{
-		const float s = (q + x->mOpacityTime) * 0.5f;
-		Vector3DF lPos = x->mPosition;
+		TransformationF lCamSpace;
+		QuaternionF lRot;
+		lRot *= lCam.GetOrientation();
+		lRot.RotateAroundOwnY(x->mAngle);
+		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
+		float lModelViewMatrix[16];
+		lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		glLoadMatrixf(lModelViewMatrix);
+
+		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
 		const float r = Math::Lerp(1.0f, 0.6f, x->mOpacityTime/PIF);
 		const float g = Math::Lerp(1.0f, 0.4f, x->mOpacityTime/PIF);
 		const float b = Math::Lerp(0.3f, 0.2f, x->mOpacityTime/PIF);
@@ -181,13 +212,13 @@ void ParticleRenderer::Render()
 		const float lOffsetX = x->mTextureIndex * 0.25f;
 		glBegin(GL_QUADS);
 		glTexCoord2f(lOffsetX+0, 0);
-		glVertex3f(lPos.x-s, lPos.y, lPos.z+s);
+		glVertex3f(-s, 0, +s);
 		glTexCoord2f(lOffsetX+0, 1);
-		glVertex3f(lPos.x-s, lPos.y, lPos.z-s);
+		glVertex3f(-s, 0, -s);
 		glTexCoord2f(lOffsetX+0.25f, 1);
-		glVertex3f(lPos.x+s, lPos.y, lPos.z-s);
+		glVertex3f(+s, 0, -s);
 		glTexCoord2f(lOffsetX+0.25f, 0);
-		glVertex3f(lPos.x+s, lPos.y, lPos.z+s);
+		glVertex3f(+s, 0, +s);
 		glEnd();
 	}
 
@@ -196,22 +227,44 @@ void ParticleRenderer::Render()
 
 void ParticleRenderer::Tick(float pTime)
 {
-	StepBillboards(mFires, pTime, 10);
+	StepBillboards(mFires, pTime, 6);
 	StepBillboards(mSmokes, pTime, 5);
-	StepBillboards(mSparks, pTime, -0.6f);
+	StepBillboards(mSparks, pTime, -0.4f);
 	StepBillboards(mShrapnels, pTime, -0.2f);
 }
 
-void ParticleRenderer::CreateExplosion(const Vector3DF& pPosition, float pVelocity, const Vector3DF& pDirection, const Vector3DF& pEllipsoidNorthPole, float pEllipsoidRatio, int pFires, int pSmokes, int pSparks, int pShrapnels)
+void ParticleRenderer::CreateExplosion(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, const Vector3DF& pEllipsoidNorthPole, float pEllipsoidRatio, int pFires, int pSmokes, int pSparks, int pShrapnels)
 {
 	(void)pEllipsoidNorthPole;
 	(void)pEllipsoidRatio;
 
 	const float lRandomXYEndSpeed = 1.0f;
-	CreateBillboards(pPosition, pVelocity*7, pDirection, Vector3DF(0, 0,  +9), lRandomXYEndSpeed, 3.5f, mFires, pFires);
-	CreateBillboards(pPosition, pVelocity*8, pDirection, Vector3DF(0, 0,  +5), lRandomXYEndSpeed, 2, mSmokes, pSmokes);
-	CreateBillboards(pPosition, pVelocity*6, pDirection, Vector3DF(0, 0,  -7), lRandomXYEndSpeed, 1, mSparks, pSparks);
-	CreateBillboards(pPosition, pVelocity*4, pDirection, Vector3DF(0, 0, -10), lRandomXYEndSpeed, 1, mShrapnels, pShrapnels);
+	CreateBillboards(pPosition, pStrength* 7, pDirection, Vector3DF(0, 0,  +9), lRandomXYEndSpeed, 3.5f, pStrength*0.4f, mFires, pFires);
+	CreateBillboards(pPosition, pStrength* 8, pDirection, Vector3DF(0, 0,  +5), lRandomXYEndSpeed,    2, pStrength*0.8f, mSmokes, pSmokes);
+	CreateBillboards(pPosition, pStrength*10, pDirection, Vector3DF(0, 0,  -8), lRandomXYEndSpeed,    3, ::sqrtf(pStrength)*0.25f, mSparks, pSparks);
+	CreateBillboards(pPosition, pStrength* 5, pDirection, Vector3DF(0, 0, -10), lRandomXYEndSpeed,    1, ::sqrtf(pStrength)*0.10f, mShrapnels, pShrapnels);
+}
+
+void ParticleRenderer::CreateBillboards(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, const Vector3DF& pTargetVelocity,
+	float pEndTurbulence, float pTimeFactor, float pSizeFactor, BillboardArray& pBillboards, int pCount)
+{
+	for (int x = 0; x < pCount; ++x)
+	{
+		pBillboards.push_back(Billboard());
+		Billboard& lBillboard = pBillboards.back();
+		lBillboard.mVelocity = RNDVEC(pStrength) + pDirection*pStrength * 1.2f;
+		const Vector3DF lThisParticlesTargetVelocity = Math::Lerp(pTargetVelocity*0.8f, pTargetVelocity, Random::Uniform(0.0f, 2.0f));
+		lBillboard.mTargetVelocity = RNDVEC(pEndTurbulence) + lThisParticlesTargetVelocity;
+		lBillboard.mPosition = pPosition + lBillboard.mVelocity * 0.05f + pDirection*0.5f;
+		lBillboard.mTextureIndex = Random::GetRandomNumber() & 3;
+		lBillboard.mDepth = 1000.0f;
+		lBillboard.mSizeFactor = Random::Uniform(pSizeFactor*0.7f, pSizeFactor*1.4f);
+		lBillboard.mAngle = Random::Uniform(0.0f, 2*PIF);
+		lBillboard.mAngularVelocity = Random::Uniform(-5.0f, +5.0f);
+		lBillboard.mOpacity = 0;
+		lBillboard.mOpacityTime = Random::Uniform(0.01f, 0.3f);
+		lBillboard.mTimeFactor = Random::Uniform(pTimeFactor*0.7f, pTimeFactor*1.3f);
+	}
 }
 
 void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, float pFriction)
@@ -222,9 +275,7 @@ void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, 
 		if (pFriction > 0)
 		{
 			x->mVelocity = Math::Lerp(x->mVelocity, x->mTargetVelocity, pFriction*pTime);
-
-			x->mAngularVelocity /= pFriction*pTime;
-			x->mAngle += x->mAngularVelocity * pTime;
+			x->mAngularVelocity = Math::Lerp(x->mAngularVelocity, x->mAngularVelocity * 0.7f, pFriction*pTime);
 		}
 		else
 		{
@@ -232,6 +283,7 @@ void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, 
 			x->mVelocity += x->mTargetVelocity * pTime;
 		}
 		x->mPosition += x->mVelocity * pTime;
+		x->mAngle += x->mAngularVelocity * pTime;
 
 		x->mOpacityTime += pTime * x->mTimeFactor;
 		x->mOpacity = ::sin(x->mOpacityTime) + 0.7f;
@@ -246,7 +298,7 @@ void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, 
 	}
 }
 
-void ParticleRenderer::SetDepth(BillboardArray& pBillboards, const TransformationF& pCam, const QuaternionF& pCamOrientationInverse)
+void ParticleRenderer::SetCamSpaceDepth(BillboardArray& pBillboards, const TransformationF& pCam, const QuaternionF& pCamOrientationInverse)
 {
 	const Vector3DF& lCamPosition = pCam.GetPosition();
 	const QuaternionF& lCamOrientation = pCam.GetOrientation();
@@ -256,27 +308,6 @@ void ParticleRenderer::SetDepth(BillboardArray& pBillboards, const Transformatio
 	{
 		lCamOrientation.FastInverseRotatedVector(pCamOrientationInverse, lDepth, x->mPosition - lCamPosition);
 		x->mDepth = lDepth.y;
-	}
-}
-
-void ParticleRenderer::CreateBillboards(const Vector3DF& pPosition, float pVelocity, const Vector3DF& pDirection, const Vector3DF& pTargetVelocity,
-	float pEndTurbulence, float pTimeFactor, BillboardArray& pBillboards, int pCount)
-{
-	for (int x = 0; x < pCount; ++x)
-	{
-		pBillboards.push_back(Billboard());
-		Billboard& lBillboard = pBillboards.back();
-		lBillboard.mVelocity = RNDVEC(pVelocity) + pDirection*pVelocity * 1.2f;
-		const Vector3DF lThisParticlesTargetVelocity = Math::Lerp(pTargetVelocity*0.8f, pTargetVelocity, (float)Random::Uniform(0, 2));
-		lBillboard.mTargetVelocity = RNDVEC(pEndTurbulence) + lThisParticlesTargetVelocity;
-		lBillboard.mPosition = pPosition + lBillboard.mVelocity * 0.05f + pDirection*0.5f;
-		lBillboard.mTextureIndex = Random::GetRandomNumber() & 3;
-		lBillboard.mDepth = 1000.0f;
-		lBillboard.mAngle = (float)Random::Uniform(0, 2*PIF);
-		lBillboard.mAngularVelocity = (float)Random::Uniform(-pVelocity, +pVelocity) * 0.1f;
-		lBillboard.mOpacity = 0;
-		lBillboard.mOpacityTime = (float)Random::Uniform(0, 0.5f);
-		lBillboard.mTimeFactor = (float)Random::Uniform(pTimeFactor*0.7f, pTimeFactor*1.3f);
 	}
 }
 

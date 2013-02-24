@@ -1,13 +1,6 @@
-/*
-	Class:  Random
-	Author: Jonas Byström
-	Copyright (c) 2002-2009, Righteous Games
 
-	NOTES:
-
-	This file contains a deterministic random number generator.
-	Future development may include fractal iteration helpers.
-*/
+// Author: Jonas Byström
+// Copyright (c) 2002-2013, Pixel Doctrine
 
 
 
@@ -22,6 +15,11 @@ namespace Lepra
 
 
 
+#define RNDVEC(q)	Vector3DF(Random::Uniform(-q, +q), Random::Uniform(-q, +q), Random::Uniform(-q, +q))
+#define RNDPOSVEC()	Vector3DF(Random::Uniform(0.0f, 1.0f), Random::Uniform(0.0f, 1.0f), Random::Uniform(0.0f, 1.0f))
+
+
+
 class Random
 {
 public:
@@ -29,14 +27,55 @@ public:
 	static uint32 GetRandomNumber();
 	static uint32 GetRandomNumber(uint32& pSeed);
 	static uint64 GetRandomNumber64();
-	static float64 Uniform(float64 pLower = 0.0, float64 pUpper = 1.0);
-	static float64 Uniform(uint32& pSeed, float64 pLower = 0.0, float64 pUpper = 1.0);
-	static float64 Normal(float64 pMean, float64 pStdDev);
-	static float64 Normal(float64 pMean, float64 pStdDev, float64 pLowCutoff, float64 pHighCutoff);
+
+	template<class _T> static inline _T Uniform(_T pLower, _T pUpper);
+	template<class _T> static inline _T Uniform(uint32& pSeed, _T pLower, _T pUpper);
+	template<class _T> static inline _T Normal(_T pMean, _T pStdDev);
+	template<class _T> static inline _T Normal(_T pMean, _T pStdDev, _T pLowCutoff, _T pHighCutoff);
 
 private:
 	static uint32 mSeed;
 };
+
+
+
+template<class _T> _T Random::Uniform(_T pLower, _T pUpper)
+{
+	return Uniform(mSeed, pLower, pUpper);
+}
+
+template<class _T> _T Random::Uniform(uint32& pSeed, _T pLower, _T pUpper)
+{
+	return GetRandomNumber(pSeed)/(_T)0xFFFFFFFF * (pUpper-pLower) + pLower;
+}
+
+template<class _T> _T Random::Normal(_T pMean, _T pStdDev)
+{
+	// Box-Muller.
+	_T v;
+	_T s;
+	do
+	{
+		v = Uniform((_T)-1, (_T)1);
+		_T u = Uniform((_T)-1, (_T)1);
+		s = v*v + u*u;
+	}
+	while (s >= 1.0);
+	const _T f = ::sqrt((_T)-2.0 * (_T)::log(s) / s);
+	v = f * v;
+	return v * pStdDev + pMean;
+}
+
+template<class _T> _T Random::Normal(_T pMean, _T pStdDev, _T pLowCutoff, _T pHighCutoff)
+{
+	_T lValue;
+	do
+	{
+		lValue = Normal(pMean, pStdDev);
+	}
+	while (lValue < pLowCutoff || lValue > pHighCutoff);
+	return lValue;
+}
 
 
 

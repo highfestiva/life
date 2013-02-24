@@ -26,6 +26,7 @@
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
+#include "ExplodingMachine.h"
 #include "Explosion.h"
 #include "FastProjectile.h"
 #include "Level.h"
@@ -364,60 +365,13 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	mLog.Infof(_T("Hit object normal is (%.1f; %.1f; %.1f)"), pNormal.x, pNormal.y, pNormal.z);
-	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal);
-	u -= pVelocity * 0.5f;	// Mirror and inverse (and half, but doesn't matter in this case as we normalize).
-	u.z += 3;
+	//mLog.Infof(_T("Hit object normal is (%.1f; %.1f; %.1f)"), pNormal.x, pNormal.y, pNormal.z);
+	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
+	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
+	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
-	lParticleRenderer->CreateExplosion(pPosition, pStrength * 5.0f, u, Vector3DF(0,0,1), 1, 20, 20, 10, 10);
-	/*{
-		// Shattered pieces, stones or mud.
-		const float lScale = VISUAL_SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
-		const int lParticleCount = (Random::GetRandomNumber() % 7) + 2;
-		for (int i = 0; i < lParticleCount; ++i)
-		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
-			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->DisableRootShadow();
-			float x = (float)Random::Uniform(-1, 1);
-			float y = (float)Random::Uniform(-1, 1);
-			float z = -1;
-			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
-			lPuff->SetInitialTransform(lTransform);
-			const float lAngle = (float)Random::Uniform(0, 2*PIF);
-			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
-			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
-			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * lScale, 0.5f, (float)Random::Uniform(3, 7));
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-			lPuff->SetFadeOutTime(0.3f);
-#endif // Touch L&F
-			lPuff->StartLoading();
-		}
-	}
-
-	{
-		// Release gas puffs.
-		const int lParticleCount = (Random::GetRandomNumber() % 4) + 1;
-		for (int i = 0; i < lParticleCount; ++i)
-		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
-			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->DisableRootShadow();
-			float x = (float)Random::Uniform(-1, 1);
-			float y = (float)Random::Uniform(-1, 1);
-			float z = (float)Random::Uniform(-1, 1);
-			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
-			lPuff->SetInitialTransform(lTransform);
-			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
-			lPuff->SetOpacity(lOpacity);
-			x = x*12;
-			y = y*12;
-			z = (float)Random::Uniform(0, 7);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
-			lPuff->StartLoading();
-		}
-	}*/
+	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
+	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, Vector3DF(0,0,1), 1, lParticles*2, lParticles*2, lParticles, lParticles/2);
 
 	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
 	{
@@ -1227,6 +1181,10 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	{
 		lObject = new UiCure::CppContextObject(GetResourceManager(), _T("score_info"), mUiManager);
 		lObject->SetLoadResult(true);
+	}
+	else if (strutil::StartsWith(pClassId, _T("hover_tank")))
+	{
+		lObject = new ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 	}
 	else
 	{

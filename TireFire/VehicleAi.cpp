@@ -221,7 +221,7 @@ void VehicleAi::OnTick()
 			{
 				return;
 			}
-			const float lPickedLikeliness = (float)Random::Uniform(0, lTotalLikeliness);
+			const float lPickedLikeliness = Random::Uniform(0.0f, lTotalLikeliness);
 			lTotalLikeliness = 0;
 			for (x = lRelevantPaths.begin(); x != lRelevantPaths.end(); ++x)
 			{
@@ -613,7 +613,7 @@ void VehicleAi::OnTick()
 				}
 				else if (QueryVehicleHindered(lTime, lVelocity))
 				{
-					mLastAverageAngle = (Random::Uniform() > 0.5)? +2.0f : -2.0f;
+					mLastAverageAngle = (Random::Uniform(0.0f, 1.0f) > 0.5f)? +2.0f : -2.0f;
 					SetMode(MODE_ROTATE_ON_THE_SPOT);
 				}
 				return;
@@ -870,7 +870,7 @@ void VehicleAi::SetMode(Mode pMode)
 			}
 			else
 			{
-				mRotateAngle = (Random::Uniform() > 0.5)? +2.0f : -2.0f;
+				mRotateAngle = (Random::Uniform(0.0f, 1.0f) > 0.5f)? +2.0f : -2.0f;
 				pMode = MODE_ROTATE_ON_THE_SPOT;
 			}
 		}

@@ -79,8 +79,8 @@ void LauncherAi::OnTick()
 			if (mShotCount <= 1)
 			{
 				lTargetPosition = lCtfPosition;
-				lTargetPosition.x += -lDirection.x * (2 * SCALE_FACTOR) + (float)Random::Uniform(-0.3f*SCALE_FACTOR, 0.3f*SCALE_FACTOR);
-				lTargetPosition.y += -lDirection.y * (2 * SCALE_FACTOR) + (float)Random::Uniform(-0.3f*SCALE_FACTOR, 0.3f*SCALE_FACTOR);
+				lTargetPosition.x += -lDirection.x * (2 * SCALE_FACTOR) + Random::Uniform(-0.3f*SCALE_FACTOR, 0.3f*SCALE_FACTOR);
+				lTargetPosition.y += -lDirection.y * (2 * SCALE_FACTOR) + Random::Uniform(-0.3f*SCALE_FACTOR, 0.3f*SCALE_FACTOR);
 				lTargetVelocity.Set(0, 0, 0);
 				mTargetOffset.Set(0, 0, 0);
 				lAdjustedForSlowingDown = true;
@@ -135,9 +135,6 @@ void LauncherAi::OnTick()
 			}
 		}
 	}
-
-	//lTargetPosition.x += (float)Random::Uniform(-2, 2);
-	//lTargetPosition.y += (float)Random::Uniform(-2, 2);
 
 	float lPitch;
 	float lGuidePitch;
@@ -201,13 +198,13 @@ void LauncherAi::OnTick()
 			{
 				// Poor player spreads 'em a lot.
 				const float o = 16*SCALE_FACTOR / (0.8f+lDifficulty*8);
-				mTargetOffset.Set((float)Random::Uniform(-o, o), (float)Random::Uniform(-o, o), 0);
+				mTargetOffset.Set(Random::Uniform(-o, o), Random::Uniform(-o, o), 0);
 			}
 			else
 			{
 				// Average computer player always spreads 'em a little.
 				const float o = 5*SCALE_FACTOR;
-				mTargetOffset.Set((float)Random::Uniform(-o, o), (float)Random::Uniform(-o, o), 0);
+				mTargetOffset.Set(Random::Uniform(-o, o), Random::Uniform(-o, o), 0);
 			}
 		}
 	}

@@ -69,11 +69,11 @@ public:
 		Lepra::Vector3DF lSize(pSize);
 		mType = BOX;
 		if(lSize.x <= 0)
-			lSize.x = (float)Lepra::Random::Uniform(0, -lSize.x);
+			lSize.x = Lepra::Random::Uniform(0.0f, -lSize.x);
 		if(lSize.y <= 0)
-			lSize.y = (float)Lepra::Random::Uniform(0, -lSize.y);
+			lSize.y = Lepra::Random::Uniform(0.0f, -lSize.y);
 		if(lSize.z <= 0)
-			lSize.z = (float)Lepra::Random::Uniform(0, -lSize.z);
+			lSize.z = Lepra::Random::Uniform(0.0f, -lSize.z);
 
 		float lVolume = lSize.x * lSize.y * lSize.z;
 		// Need to be careful about what is "width", "height" and "depth".
@@ -95,7 +95,7 @@ public:
 	{
 		mType = SPHERE;
 		if(pRadius <= 0)
-			pRadius = (float)Lepra::Random::Uniform(0, -pRadius);
+			pRadius = Lepra::Random::Uniform(0.0f, -pRadius);
 
 		float lVolume = pRadius * pRadius * pRadius * Lepra::PIF * 4.0f / 3.0f;
 		mGfxGeom = UiTbc::BasicMeshCreator::CreateEllipsoid(pRadius, pRadius, pRadius, 16, 16);
@@ -128,7 +128,7 @@ public:
 		                          (float)rnd::Uniform(-1.0f, 1.0f),
 					  (float)rnd::Uniform(-1.0f, 1.0f));
 		lRotAxis.Normalize();
-		float lAngle = (float)rnd::Uniform(0, 2.0f * Lepra::PIF);
+		float lAngle = rnd::Uniform(0.0f, 2.0f * Lepra::PIF);
 		mTransform.SetOrientation(Lepra::QuaternionF(lAngle, lRotAxis));
 		mPhysics->SetBodyTransform(mBodyID, mTransform);
 		UpdateTransformation();
