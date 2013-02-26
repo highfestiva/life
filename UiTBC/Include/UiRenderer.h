@@ -138,18 +138,12 @@ public:
 		CLEAR_ACCUMULATIONBUFFER = (1 << 3),
 	};
 
-	enum TextureID
-	{
-		INVALID_TEXTURE = 0,
-	};
-	enum GeometryID
-	{
-		INVALID_GEOMETRY = 0,
-	};
-	enum LightID
-	{
-		INVALID_LIGHT = -1,
-	};
+	typedef int TextureID;
+	typedef int GeometryID;
+	typedef int LightID;
+	static const TextureID INVALID_TEXTURE = 0;
+	static const GeometryID INVALID_GEOMETRY = 0;
+	static const LightID INVALID_LIGHT = -1;
 
 	class TextureAssociation
 	{
@@ -288,7 +282,6 @@ public:
 			mType(Renderer::LIGHT_DIRECTIONAL),
 			mEnabled(false),
 			mTransformationChanged(false),
-			mIndex(0),
 			mRadius(0.0f),
 			mShadowRange(0.0f),
 			mCutoffAngle(180.0f),
@@ -313,8 +306,6 @@ public:
 		LightHint mHint;
 		bool mEnabled;
 		bool mTransformationChanged;
-
-		int mIndex;
 
 		float mColor[4];
 		float mRadius;
@@ -435,28 +426,24 @@ public:
 	// shadows. pShadowRange tells how far to extrude the shadow volumes relative
 	// to the light source.
 	virtual LightID AddDirectionalLight(LightHint pHint, // Helps the renderer to optimize shadow rendering.
-				    float pDirX, float pDirY, float pDirZ,
-				    float pRed, float pGreen, float pBlue,
-				    float pShadowRange);
+		const Vector3DF& pDir,
+		const Vector3DF& pColor,
+		float pShadowRange);
 
 	virtual LightID AddPointLight(LightHint pHint, // Helps the renderer to optimize shadow rendering.
-			      float pPosX, float pPosY, float pPosZ,
-			      float pRed, float pGreen, float pBlue,
-			      float pLightRadius,
-			      float pShadowRange);
+		const Vector3DF& pPos,
+		const Vector3DF& pColor,
+		float pLightRadius,
+		float pShadowRange);
 
 	virtual LightID AddSpotLight(LightHint pHint, // Helps the renderer to optimize shadow rendering.
-			     float pPosX, float pPosY, float pPosZ,
-			     float pDirX, float pDirY, float pDirZ,
-			     float pRed, float pGreen, float pBlue,
-			     float pCutoffAngle,
-			     float pSpotExponent,
-			     float pLightRadius,
-			     float pShadowRange);
-
-	LightID AddDirectionalLight(LightHint pHint, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pShadowRange);
-	LightID AddPointLight(LightHint pHint, const Vector3DF& pPos, const Color& pColor, float pLightIntensity, float pLightRadius, float pShadowRange);
-	LightID AddSpotLight(LightHint pHint, const Vector3DF& pPos, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pCutoffAngle, float pSpotExponent, float pLightRadius, float pShadowRange);
+		const Vector3DF& pPos,
+		const Vector3DF& pDir,
+		const Vector3DF& pColor,
+		float pCutoffAngle,
+		float pSpotExponent,
+		float pLightRadius,
+		float pShadowRange);
 
 	virtual void RemoveLight(LightID pLightID);
 	virtual void EnableAllLights(bool pEnable) = 0;
@@ -470,12 +457,12 @@ public:
 					 float pNearPlane,
 					 float pFarPlane);
 
-	virtual void SetLightPosition(LightID pLightID, float pX, float pY, float pZ);
-	virtual void SetLightDirection(LightID pLightID, float pX, float pY, float pZ);
-	virtual void SetLightColor(LightID pLightID, float r, float g, float b);
-	void GetLightPosition(LightID pLightID, float& pX, float& pY, float& pZ);
-	void GetLightDirection(LightID pLightID, float& pX, float& pY, float& pZ);
-	void GetLightColor(LightID pLightID, float& pR, float& pG, float& pB);
+	virtual void SetLightPosition(LightID pLightID, const Vector3DF& pPos);
+	virtual void SetLightDirection(LightID pLightID, const Vector3DF& pDir);
+	virtual void SetLightColor(LightID pLightID, const Vector3DF& pColor);
+	Vector3DF GetLightPosition(LightID pLightID) const;
+	Vector3DF GetLightDirection(LightID pLightID) const;
+	Vector3DF GetLightColor(LightID pLightID) const;
 
 	LightType GetLightType(LightID pLightID);
 	float GetLightCutoffAngle(LightID pLightID);
@@ -571,15 +558,10 @@ protected:
 	GeometryTable& GetGeometryTable();
 	ShadowVolumeTable& GetShadowVolumeTable();
 	TextureData* GetEnvTexture() const;
-	LightData& GetLightData(int pLightIndex);
+	LightData* GetLightData(LightID pLightId) const;
 	int GetNumSpotLights() const;
 	void StepCurrentFrame();
 	ShadowHint GetShadowHint() const;
-
-	// 0 <= pIndex < GetLightCount().
-	// Returns the actual index of light number "pIndex".
-	int GetLightIndex(int pIndex) const;
-
 
 	virtual Material* CreateMaterial(Renderer::MaterialType pMaterialType) = 0;
 	virtual GeometryData* CreateGeometryData() = 0;
@@ -605,7 +587,7 @@ protected:
 	virtual bool BindShadowGeometry(UiTbc::ShadowVolume* pShadowGeometry, LightHint pLightHint) = 0;
 	virtual void ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption) = 0;
 
-	int AllocLight();
+	LightID AllocLight();
 
 	void ReleaseShadowVolumes();
 	void ReleaseGeometries();
@@ -659,9 +641,9 @@ protected:
 	TextureData* mEnvTexture;
 
 	// Lights.
-	LightData mLightData[MAX_LIGHTS];
-	int mLightIndex[MAX_LIGHTS];
-	int mLightCount;
+	typedef std::hash_map<LightID, LightData*> LightDataMap;
+	LightDataMap mLightDataMap;
+	LightID mSortedLights[MAX_LIGHTS];
 	int mNumSpotLights;
 
 	float mAmbientRed;

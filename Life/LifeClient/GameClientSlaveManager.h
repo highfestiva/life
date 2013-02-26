@@ -49,6 +49,7 @@ public:
 	virtual ~GameClientSlaveManager();
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 	virtual void LoadSettings();
+	virtual void SaveSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();

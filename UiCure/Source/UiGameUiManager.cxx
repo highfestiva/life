@@ -349,12 +349,12 @@ void GameUiManager::PreparePaint(bool pClearDepthBuffer)
 
 void GameUiManager::EndRender(float pFrameTime)
 {
-	mRenderer->Tick(pFrameTime);
-
 	if (CanRender())
 	{
 		UpdateSettings();
 		mDisplay->UpdateScreen();
+
+		mRenderer->Tick(pFrameTime);
 	}
 }
 

@@ -35,8 +35,8 @@ public:
 	void AddSunColor(Vector3DF& pBaseColor, float pFactor) const;
 	float GetTimeOfDay() const;	// Value from 0->1. 0 is 9 am.
 
-	void SetDirection(float x, float y, float z);
-	void SetColor(float r, float g, float b);
+	void SetDirection(const Vector3DF& pDirection);
+	void SetColor(const Vector3DF& pColor);
 
 private:
 	UiCure::GameUiManager* mUiManager;

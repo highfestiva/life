@@ -44,6 +44,14 @@ PushViewer::~PushViewer()
 
 
 
+void PushViewer::LoadSettings()
+{
+}
+
+void PushViewer::SaveSettings()
+{
+}
+
 bool PushViewer::Open()
 {
 	return Life::GameClientSlaveManager::Open();

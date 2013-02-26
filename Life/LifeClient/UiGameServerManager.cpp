@@ -53,7 +53,7 @@ void UiGameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLo
 
 void UiGameServerManager::ToggleConsole()
 {
-	mConsoleActive = ((UiServerConsoleManager*)GetConsoleManager())->GetUiConsole()->ToggleVisible();
+	mConsoleActive = ((UiServerConsoleManager*)GetConsoleManager())->ToggleVisible();
 }
 
 

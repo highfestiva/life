@@ -233,7 +233,7 @@ bool GameClientMasterTicker::Tick()
 		{
 			mUiManager->GetRenderer()->EnableAllLights(false);
 			UiTbc::Renderer::LightID lLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-				UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 1, -1), WHITE, 1.5f, 160);
+				UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 1, -1), Vector3DF(1.5f, 1.5f, 1.5f), 160);
 			mUiManager->Paint(true);
 			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
@@ -621,6 +621,7 @@ void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pA
 
 	ScopeLock lLock(&mLock);
 	assert(mSlaveArray[pSlave->GetSlaveIndex()] == pSlave);
+	pSlave->SaveSettings();
 	mSlaveArray[pSlave->GetSlaveIndex()] = 0;
 	delete (pSlave);
 	if (mConsole && mConsole->GetGameManager() == pSlave)

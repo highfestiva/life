@@ -14,10 +14,11 @@ Game
 + Destructable obstacles.
 + Implement machine gun.
 + Mouse look
-. Port server to Linux.
++ Port server to Linux.
++ Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and shrapnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
 . Check multiplayer on two computers and one iPhone.
+. Object should start spinning when hit by a grenade/in an explosion.
 . Test which of Arena or Adventure play is best. Make a real map!
-. Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and shrapnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
 . Not possible to log in when someone is moving/shooting.
 . Simple path finding.
 . AI (where is the user probably going to appear after disappearing behind a building).

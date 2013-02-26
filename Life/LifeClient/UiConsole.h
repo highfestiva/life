@@ -46,6 +46,7 @@ public:
 	bool ToggleVisible();
 	void SetVisible(bool pVisible);
 	void Tick();
+	UiCure::GameUiManager* GetUiManager() const;
 
 private:
 	void InitGraphics();

@@ -694,7 +694,7 @@ bool Game::Initialize()
 		const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
-			Color::Color(255, 255, 255), lPixelShadersEnabled? 1.0f : 1.5f, 300);
+			Vector3DF(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 300);
 		mUiManager->GetRenderer()->EnableAllLights(true);
 	}
 	if (lOk)

@@ -17,6 +17,7 @@
 #include "../Life/LifeClient/ClientOptions.h"
 #include "../Life/LifeClient/MassObject.h"
 #include "../Life/LifeClient/UiConsole.h"
+#include "../Life/ProjectileUtil.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
@@ -131,10 +132,6 @@ PushManager::~PushManager()
 	mStickLeft = 0;
 	delete mStickRight;
 	mStickRight = 0;
-
-#ifndef EMULATE_TOUCH
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
-#endif // Computer or touch device.
 }
 
 void PushManager::LoadSettings()
@@ -371,7 +368,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
 	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
-	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, Vector3DF(0,0,1), 1, lParticles*2, lParticles*2, lParticles, lParticles/2);
+	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, Vector3DF(0,0,1), 1, lParticles*2, lParticles*2, lParticles, lParticles/2);
 
 	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
 	{
@@ -1302,6 +1299,15 @@ void PushManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition());
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
+
+	if (pWeapon >= 0)
+	{
+		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+		TransformationF t;
+		Vector3DF v;
+		Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
+		lParticleRenderer->CreateFlare(0.3f, 7.5f, t.GetPosition(), v);
+	}
 }
 
 

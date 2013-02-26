@@ -31,6 +31,7 @@ public:
 	virtual bool Start();
 	virtual void Join();
 
+	bool ToggleVisible();
 	UiConsole* GetUiConsole() const;
 
 	int FilterExecuteCommand(const str& pCommand);

@@ -40,6 +40,7 @@ public:
 	virtual bool Start();
 	virtual void Join();
 
+	bool ToggleVisible();
 	UiConsole* GetUiConsole() const;
 
 private:

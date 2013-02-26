@@ -79,6 +79,13 @@ void ClientConsoleManager::Join()
 
 
 
+bool ClientConsoleManager::ToggleVisible()
+{
+	const bool lConsoleActive = mUiConsole->ToggleVisible();
+	mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(lConsoleActive);
+	return lConsoleActive;
+}
+
 UiConsole* ClientConsoleManager::GetUiConsole() const
 {
 	return (mUiConsole);

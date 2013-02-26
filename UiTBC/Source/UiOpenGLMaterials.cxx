@@ -1303,6 +1303,12 @@ void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 	float lLightCut[NUM_BUCKETS * MAX_SHADER_LIGHTS];
 	float lLightExp[NUM_BUCKETS * MAX_SHADER_LIGHTS];
 
+	::memset(lLightPos, 0, sizeof(lLightPos));
+	::memset(lLightDir, 0, sizeof(lLightDir));
+	::memset(lLightCol, 0, sizeof(lLightCol));
+	::memset(lLightCut, 0, sizeof(lLightCut));
+	::memset(lLightExp, 0, sizeof(lLightExp));
+
 	smNumDirLights = 0;
 	smNumPntLights = 0;
 	smNumSptLights = 0;
@@ -1315,7 +1321,7 @@ void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 	// Count the number of lights of each type, and get their position/direction and color.
 	for (i = 0; i < pRenderer->GetLightCount() && lTotalLightCount < MAX_SHADER_LIGHTS; ++i)
 	{
-		Renderer::LightID lLightID = pRenderer->GetClosestLight(i);
+		const Renderer::LightID lLightID = pRenderer->GetClosestLight(i);
 		GLenum lGLLight = GL_LIGHT0 + (int)lLightID;
 
 		int lLightIndex = 0;
@@ -1365,10 +1371,10 @@ void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 			}
 
 			// Get light color.
-			pRenderer->GetLightColor(lLightID, 
-						   lLightCol[lIndex + 0], 
-						   lLightCol[lIndex + 1], 
-						   lLightCol[lIndex + 2]);
+			const Vector3DF lLightColor = pRenderer->GetLightColor(lLightID);
+			lLightCol[lIndex + 0] = lLightColor.x;
+			lLightCol[lIndex + 1] = lLightColor.y;
+			lLightCol[lIndex + 2] = lLightColor.z;
 
 			float lCutoffAngle = pRenderer->GetLightCutoffAngle(lLightID);
 			lLightCut[lBucket * MAX_SHADER_LIGHTS + lLightIndex] = (float)cos(lCutoffAngle * PIF / 180.0f);

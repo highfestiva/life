@@ -20,9 +20,10 @@ Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
 	mUiManager(pUiManager),
 	mAngle(0)
 {
+	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 		UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(0, 0.5f, -1),
-		Color::Color(255, 255, 255), 1.5f, 60);
+		Vector3DF(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 60);
 }
 
 Sunlight::~Sunlight()
@@ -45,11 +46,11 @@ void Sunlight::Tick(float pFactor)
 	mCamSunDirection.x = sin(mAngle);
 	mCamSunDirection.y = cos(mAngle);
 	mCamSunDirection.z = -lLightSunHeight;
-	SetDirection(mCamSunDirection.x, mCamSunDirection.y, mCamSunDirection.z);
+	SetDirection(mCamSunDirection);
 	const float r = 1.5f;
 	const float g = r * (sin(mAngle)*0.05f + 0.95f);
 	const float b = r * (sin(mAngle)*0.1f + 0.9f);
-	mUiManager->GetRenderer()->SetLightColor(mLightId, r, g, b);
+	mUiManager->GetRenderer()->SetLightColor(mLightId, Vector3DF(r, g, b));
 	const double lAmbientFactor = sin(mAngle)*0.5+0.5;
 	CURE_RTVAR_INTERNAL(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTREDFACTOR, lAmbientFactor);
 	CURE_RTVAR_INTERNAL(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTGREENFACTOR, lAmbientFactor);
@@ -75,17 +76,17 @@ float Sunlight::GetTimeOfDay() const
 	return mAngle / PIF * 2;
 }
 
-void Sunlight::SetDirection(float x, float y, float z)
+void Sunlight::SetDirection(const Vector3DF& pDirection)
 {
 	if (mUiManager->CanRender())
 	{
-		mUiManager->GetRenderer()->SetLightDirection(mLightId, x, y, z);
+		mUiManager->GetRenderer()->SetLightDirection(mLightId, pDirection);
 	}
 }
 
-void Sunlight::SetColor(float r, float g, float b)
+void Sunlight::SetColor(const Vector3DF& pColor)
 {
-	mUiManager->GetRenderer()->SetLightColor(mLightId, r, g, b);
+	mUiManager->GetRenderer()->SetLightColor(mLightId, pColor);
 }
 
 

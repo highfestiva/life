@@ -292,7 +292,7 @@ void RunRotationalAgreementTest()
 	lRenderer.SetCameraTransformation(lCamTransform);
 
 	lRenderer.SetLightsEnabled(true);
-	lRenderer.AddDirectionalLight(UiTbc::Renderer::LIGHT_STATIC, 1.0f, 0.0f, -1.0f, 1.0f, 1.0f, 1.0f, 40.0f);
+	lRenderer.AddDirectionalLight(UiTbc::Renderer::LIGHT_STATIC, Lepra::Vector3DF(1.0f, 0.0f, -1.0f), Lepra::Vector3DF(1.0f, 1.0f, 1.0f), 40.0f);
 	lRenderer.SetAmbientLight(0.5f, 0.5f, 0.5f);
 
 	lRenderer.SetViewFrustum(90.0f, 0.1f, 1000.0f);

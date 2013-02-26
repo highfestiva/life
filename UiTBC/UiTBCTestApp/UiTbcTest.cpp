@@ -1616,14 +1616,14 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 					lContext = _T("add point light 0");
 					gRenderer->SetAmbientLight(0.1f, 0.1f, 0.1f);
 					gRenderer->SetLightsEnabled(true);
-					lLights[0] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, 30, OBJECT_DISTANCE - 60, -30, 50, 100, 50, OBJECT_DISTANCE, OBJECT_DISTANCE*10);
+					lLights[0] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, Vector3DF(30, OBJECT_DISTANCE - 60, -30), Vector3DF(50, 100, 50), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
 					lTestOk = (lLights[0] != UiTbc::Renderer::INVALID_LIGHT);
 					assert(lTestOk);
 				}
 				if (lTestOk)
 				{
 					lContext = _T("add point light 1");
-					lLights[1] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, -30, OBJECT_DISTANCE - 60, 30, 50, 50, 100, OBJECT_DISTANCE, OBJECT_DISTANCE*10);
+					lLights[1] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, Vector3DF(-30, OBJECT_DISTANCE - 60, 30), Vector3DF(50, 50, 100), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
 					lTestOk = (lLights[1] != UiTbc::Renderer::INVALID_LIGHT);
 					assert(lTestOk);
 				}
@@ -2098,7 +2098,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 
 	//mLightID = gRenderer->AddSpotLight(UiTbc::Renderer::LIGHT_MOVABLE, lLightPos, lLightDir, lLightColor, 30, 32, 100, 500);
 	//mLightID = gRenderer->AddDirectionalLight(UiTbc::Renderer::LIGHT_MOVABLE, lLightDir, lLightColor, 500);
-	mLightID = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_MOVABLE, mLightPos, Lepra::WHITE, 2.0f, 1000, 500);
+	mLightID = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_MOVABLE, mLightPos, Vector3DF(2.0f, 2.0f, 2.0f), 1000, 500);
 }
 
 BumpMapSceneTest::~BumpMapSceneTest()
