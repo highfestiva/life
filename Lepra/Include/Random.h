@@ -61,7 +61,7 @@ template<class _T> _T Random::Normal(_T pMean, _T pStdDev)
 		s = v*v + u*u;
 	}
 	while (s >= 1.0);
-	const _T f = ::sqrt((_T)-2.0 * (_T)::log(s) / s);
+	const _T f = sqrt((_T)-2.0 * (_T)log(s) / s);
 	v = f * v;
 	return v * pStdDev + pMean;
 }

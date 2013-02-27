@@ -34,6 +34,8 @@ ParticleRenderer::~ParticleRenderer()
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
 void ParticleRenderer::Render()
 {
+	glEnable(GL_TEXTURE_2D);
+
 	if (!gTextureId)
 	{
 		gTextureId = 10000;
@@ -89,9 +91,24 @@ void ParticleRenderer::Render()
 	glBindTexture(GL_TEXTURE_2D, gTextureId);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	const float q = 1;
 	BillboardArray::iterator x;
+
+	glDisable(GL_ALPHA_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+        glDisable(GL_COLOR_MATERIAL);
+#ifndef LEPRA_GL_ES
+	//glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+#endif // !GLES                                                                                                   
+	glDisableClientState(GL_NORMAL_ARRAY);
+	//glDisableClientState(GL_VERTEX_ARRAY);
 
 	glEnable(GL_TEXTURE_2D);
 	glMatrixMode(GL_TEXTURE);

@@ -2248,7 +2248,7 @@ void BumpMapSceneTest::InitTerrain()
 void BumpMapSceneTest::UpdateScene(double pTotalTime, double pDeltaTime)
 {
 	Lepra::Vector3DF lTempPos(mLightPos + Lepra::Vector3DF(10.0f * (float)sin(pTotalTime * 2.0), 0, 0));
-	gRenderer->SetLightPosition(mLightID, lTempPos.x, lTempPos.y, lTempPos.z);
+	gRenderer->SetLightPosition(mLightID, lTempPos);
 	Lepra::TransformationF lTransf;
 	lTransf.SetPosition(lTempPos);
 	mSphere->SetTransformation(lTransf);
