@@ -263,6 +263,7 @@
     <ClCompile Include="Source\UiBasicMeshCreator.cpp" />
     <ClCompile Include="Source\UiChunkyClass.cpp" />
     <ClCompile Include="Source\UiChunkyLoader.cpp" />
+    <ClCompile Include="Source\UiDynamicRenderer.cpp" />
     <ClCompile Include="Source\UiFontManager.cpp" />
     <ClCompile Include="Source\UiFontTexture.cpp" />
     <ClCompile Include="Source\UiGeometry2D.cpp" />
@@ -278,6 +279,7 @@
     <ClCompile Include="Source\UiOpenGLPainter.cxx" />
     <ClCompile Include="Source\UiOpenGLRenderer.cxx" />
     <ClCompile Include="Source\UiPainter.cpp" />
+    <ClCompile Include="Source\UiParticleRenderer.cpp" />
     <ClCompile Include="Source\UiPortalManager.cpp" />
     <ClCompile Include="Source\UiProgressiveTriangleGeometry.cpp" />
     <ClCompile Include="Source\UiRenderer.cpp" />
@@ -349,6 +351,7 @@
     <ClInclude Include="Include\UiBasicMeshCreator.h" />
     <ClInclude Include="Include\UiChunkyClass.h" />
     <ClInclude Include="Include\UiChunkyLoader.h" />
+    <ClInclude Include="Include\UiDynamicRenderer.h" />
     <ClInclude Include="Include\UiFontManager.h" />
     <ClInclude Include="Include\UiFontTexture.h" />
     <ClInclude Include="Include\UiGeometry2D.h" />
@@ -359,6 +362,7 @@
     <ClInclude Include="Include\UiOpenGLPainter.h" />
     <ClInclude Include="Include\UiOpenGLRenderer.h" />
     <ClInclude Include="Include\UiPainter.h" />
+    <ClInclude Include="Include\UiParticleRenderer.h" />
     <ClInclude Include="Include\UiPortalManager.h" />
     <ClInclude Include="Include\UiProgressiveTriangleGeometry.h" />
     <ClInclude Include="Include\UiRenderer.h" />

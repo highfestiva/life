@@ -237,6 +237,7 @@
     <ClCompile Include="ConsoleManager.cpp" />
     <ClCompile Include="Life.cpp" />
     <ClCompile Include="LifeApplication.cpp" />
+    <ClCompile Include="ProjectileUtil.cpp" />
     <ClCompile Include="RaceScore.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -244,6 +245,7 @@
     <ClInclude Include="Life.h" />
     <ClInclude Include="LifeApplication.h" />
     <ClInclude Include="LifeString.h" />
+    <ClInclude Include="ProjectileUtil.h" />
     <ClInclude Include="RaceScore.h" />
     <ClInclude Include="RtVar.h" />
     <ClInclude Include="ServerInfo.h" />

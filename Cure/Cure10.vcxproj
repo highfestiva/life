@@ -262,6 +262,7 @@
     <ClCompile Include="Source\GameManager.cpp" />
     <ClCompile Include="Source\GameTicker.cpp" />
     <ClCompile Include="Source\HiscoreAgent.cpp" />
+    <ClCompile Include="Source\IntAttribute.cpp" />
     <ClCompile Include="Source\NetworkAgent.cpp" />
     <ClCompile Include="Source\NetworkFreeAgent.cpp" />
     <ClCompile Include="Source\Packet.cpp" />
@@ -293,6 +294,7 @@
     <ClInclude Include="Include\FloatAttribute.h" />
     <ClInclude Include="Include\GameManager.h" />
     <ClInclude Include="Include\HiscoreAgent.h" />
+    <ClInclude Include="Include\IntAttribute.h" />
     <ClInclude Include="Include\NetworkAgent.h" />
     <ClInclude Include="Include\NetworkFreeAgent.h" />
     <ClInclude Include="Include\Packet.h" />

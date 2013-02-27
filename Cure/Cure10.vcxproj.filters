@@ -113,6 +113,9 @@
     <ClCompile Include="Source\PositionHauler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\IntAttribute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\ConsoleManager.h">
@@ -204,6 +207,9 @@
     </ClInclude>
     <ClInclude Include="Include\Elevator.h">
       <Filter>Header Files\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\IntAttribute.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
