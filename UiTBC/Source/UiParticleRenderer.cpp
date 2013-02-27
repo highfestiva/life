@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "../../Lepra/Include/ImageLoader.h"
 #include "../../Lepra/Include/Random.h"
+#include "../Include/UiBillboardGeometry.h"
 
 
 
@@ -16,8 +17,10 @@ namespace UiTbc
 
 
 
-Canvas gImage;
 unsigned gTextureId = 0;
+Canvas gImage;
+BillboardGeometry* gBillboardGas;
+Renderer::GeometryID gBillboardGasId = Renderer::INVALID_GEOMETRY;
 
 
 
@@ -36,15 +39,14 @@ void ParticleRenderer::Render()
 {
 	glEnable(GL_TEXTURE_2D);
 
-	if (!gTextureId)
+	if (gBillboardGasId == Renderer::INVALID_GEOMETRY)
 	{
-		gTextureId = 10000;
 		ImageLoader lLoader;
 		if (lLoader.Load(_T("Data/explosion.png"), gImage))
 		{
 			glGenTextures(1, &gTextureId);
 			glBindTexture(GL_TEXTURE_2D, gTextureId);
-			glTexImage2D(GL_TEXTURE_2D, 
+			glTexImage2D(GL_TEXTURE_2D,
 				     0,
 				     GL_RGBA,
 				     gImage.GetWidth(),
@@ -53,8 +55,14 @@ void ParticleRenderer::Render()
 				     GL_RGBA,
 				     GL_UNSIGNED_BYTE,
 				     gImage.GetBuffer());
+			gBillboardGas = new BillboardGeometry(4);
+			gBillboardGasId = mRenderer->AddGeometry(gBillboardGas, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
+			Texture* lTexture = new Texture(gImage, Canvas::RESIZE_FAST, 1);
+			Renderer::TextureID lTextureId = mRenderer->AddTexture(lTexture);
+			mRenderer->TryAddGeometryTexture(gBillboardGasId, lTextureId);
 		}
 	}
+	assert(gBillboardGas);
 
 	// Render particles.
 	const TransformationF& lCam = mRenderer->GetCameraTransformation();
@@ -115,33 +123,41 @@ void ParticleRenderer::Render()
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	BillboardRenderInfoArray lBillboards;
 	x = mSmokes.begin();
 	for (; x != mSmokes.end(); ++x)
 	{
+		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
+		const float rgb = Math::Lerp(0.4f, 0.2f, x->mOpacityTime/PIF);
+		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, Vector3DF(rgb, rgb, rgb), x->mOpacity, x->mTextureIndex));
+	}
+	mRenderer->RenderBillboards(gBillboardGas, true, false, lBillboards);
+	/*for (; x != mSmokes.end(); ++x)
+	{
+		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
+		const float rgb = Math::Lerp(0.4f, 0.2f, x->mOpacityTime/PIF);
+
 		TransformationF lCamSpace;
-		QuaternionF lRot;
-		lRot *= lCam.GetOrientation();
+		QuaternionF lRot = lCam.GetOrientation();
 		lRot.RotateAroundOwnY(x->mAngle);
 		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
 		float lModelViewMatrix[16];
-		lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		lCamSpace.GetAs4x4TransposeMatrix(s, lModelViewMatrix);
 		glLoadMatrixf(lModelViewMatrix);
 
-		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
-		const float rgb = Math::Lerp(0.4f, 0.2f, x->mOpacityTime/PIF);
 		glColor4f(rgb, rgb, rgb, x->mOpacity);
 		const float lOffsetX = x->mTextureIndex * 0.25f;
 		glBegin(GL_QUADS);
 		glTexCoord2f(lOffsetX+0, 0);
-		glVertex3f(-s, 0, +s);
+		glVertex3f(-1, 0, +1);
 		glTexCoord2f(lOffsetX+0, 1);
-		glVertex3f(-s, 0, -s);
+		glVertex3f(-1, 0, -1);
 		glTexCoord2f(lOffsetX+0.25f, 1);
-		glVertex3f(+s, 0, -s);
+		glVertex3f(+1, 0, -1);
 		glTexCoord2f(lOffsetX+.25f, 0);
-		glVertex3f(+s, 0, +s);
+		glVertex3f(+1, 0, +1);
 		glEnd();
-	}
+	}*/
 
 	glDisable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -154,16 +170,16 @@ void ParticleRenderer::Render()
 		lRot.RotateAroundOwnY(x->mAngle);
 		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
 		float lModelViewMatrix[16];
-		lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		const float s = x->mSizeFactor;
+		lCamSpace.GetAs4x4TransposeMatrix(s, lModelViewMatrix);
 		glLoadMatrixf(lModelViewMatrix);
 
-		const float s = x->mSizeFactor;
 		glColor4f(0.3f, 0.3f, 0.3f, x->mOpacity);
 		glBegin(GL_QUADS);
-		glVertex3f(-s, 0, +s*2.0f);
-		glVertex3f(-s, 0, -s*2.0f);
-		glVertex3f(+s, 0, -s*1.2f);
-		glVertex3f(+s, 0, +s*1.8f);
+		glVertex3f(-1, 0, +2.0f);
+		glVertex3f(-1, 0, -2.0f);
+		glVertex3f(+1, 0, -1.2f);
+		glVertex3f(+1, 0, +1.8f);
 		glEnd();
 	}
 
@@ -184,52 +200,56 @@ void ParticleRenderer::Render()
 		lRot.RotateAroundOwnY(PIF/2 - lAngle);
 		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
 		float lModelViewMatrix[16];
-		lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		const float s = x->mSizeFactor;
+		lCamSpace.GetAs4x4TransposeMatrix(s, lModelViewMatrix);
 		glLoadMatrixf(lModelViewMatrix);
 
-		const float s = x->mSizeFactor;
 		const float r  = Math::Lerp(1.0f, 0.6f, x->mOpacityTime/PIF);
 		const float gb = Math::Lerp(1.0f, 0.3f, x->mOpacityTime/PIF);
 		glColor4f(r, gb, gb, x->mOpacity);
 		glBegin(GL_QUADS);
-		glVertex3f(0, 0, +s*0.3f);
-		glVertex3f(-s*0.4f, 0, 0);
-		glVertex3f(0, 0, -s*4.5f);
-		glVertex3f(+s*0.4f, 0, 0);
+		glVertex3f(0, 0, +0.3f);
+		glVertex3f(-0.4f, 0, 0);
+		glVertex3f(0, 0, -4.5f);
+		glVertex3f(+0.4f, 0, 0);
 		glEnd();
 	}
 
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	lBillboards.clear();
 	x = mFires.begin();
 	for (; x != mFires.end(); ++x)
 	{
-		TransformationF lCamSpace;
+		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
+		const float r = Math::Lerp(1.0f, 0.6f, x->mOpacityTime/PIF);
+		const float g = Math::Lerp(1.0f, 0.4f, x->mOpacityTime/PIF);
+		const float b = Math::Lerp(0.3f, 0.2f, x->mOpacityTime/PIF);
+		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, Vector3DF(r, g, b), x->mOpacity, x->mTextureIndex));
+	}
+	mRenderer->RenderBillboards(gBillboardGas, true, true, lBillboards);
+	/*	TransformationF lCamSpace;
 		QuaternionF lRot;
 		lRot *= lCam.GetOrientation();
 		lRot.RotateAroundOwnY(x->mAngle);
 		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
 		float lModelViewMatrix[16];
-		lCamSpace.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		lCamSpace.GetAs4x4TransposeMatrix(s, lModelViewMatrix);
 		glLoadMatrixf(lModelViewMatrix);
 
-		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
-		const float r = Math::Lerp(1.0f, 0.6f, x->mOpacityTime/PIF);
-		const float g = Math::Lerp(1.0f, 0.4f, x->mOpacityTime/PIF);
-		const float b = Math::Lerp(0.3f, 0.2f, x->mOpacityTime/PIF);
 		glColor4f(r, g, b, x->mOpacity);
 		const float lOffsetX = x->mTextureIndex * 0.25f;
 		glBegin(GL_QUADS);
 		glTexCoord2f(lOffsetX+0, 0);
-		glVertex3f(-s, 0, +s);
+		glVertex3f(-1, 0, +1);
 		glTexCoord2f(lOffsetX+0, 1);
-		glVertex3f(-s, 0, -s);
+		glVertex3f(-1, 0, -1);
 		glTexCoord2f(lOffsetX+0.25f, 1);
-		glVertex3f(+s, 0, -s);
+		glVertex3f(+1, 0, -1);
 		glTexCoord2f(lOffsetX+0.25f, 0);
-		glVertex3f(+s, 0, +s);
+		glVertex3f(+1, 0, +1);
 		glEnd();
-	}
+	}*/
 
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_LIGHTING);

@@ -1,11 +1,8 @@
-/*
-	Class:  OpenGLRenderer
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
-#ifndef UIOPENGLRENDERER_H
-#define UIOPENGLRENDERER_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2013, Pixel Doctrine
+
+#pragma once
 
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Graphics2D.h"
@@ -20,13 +17,10 @@
 #include "UiTBC.h"
 #include <list>
 
+
+
 namespace UiTbc
 {
-
-/*
-	Some storage classes shared by OpenGLRenderer and the material classes.
-	They should all be private to everyone but the material classes.
-*/
 
 
 
@@ -122,6 +116,7 @@ public:
 	bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType);
 
 	virtual unsigned RenderScene();
+	virtual void RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards);
 	virtual void RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation);
 
 	// Only used by the OpenGL material classes.
@@ -195,6 +190,6 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-} // End namespace.
 
-#endif
+
+}

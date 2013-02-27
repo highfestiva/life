@@ -137,6 +137,7 @@ public:
 
 	static void RenderAllGeometry(unsigned pCurrentFrame, Material* pGeometryContainer, Material* pRenderer = 0);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry) = 0;
+	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex) = 0;
 	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry) = 0;
 
 	TBC::GeometryBase* GetFirstGeometry();
@@ -186,6 +187,9 @@ public:
 	}
 
 	void RenderGeometry(TBC::GeometryBase* /*pGeometry*/)
+	{
+	}
+	void RawRender(TBC::GeometryBase*, int)
 	{
 	}
 	void RenderBaseGeometry(TBC::GeometryBase* /*pGeometry*/)

@@ -352,6 +352,8 @@ unsigned int GeometryBase::GetMaxTriangleCount() const
 		case TRIANGLES:
 		case LINE_LOOP:
 			return GetMaxIndexCount() / 3;
+		case QUADS:
+			return GetMaxIndexCount() / 4;
 		case TRIANGLE_STRIP:
 			return GetMaxIndexCount() - 2;
 		case LINES:
@@ -369,6 +371,8 @@ unsigned int GeometryBase::GetTriangleCount() const
 		case TRIANGLES:
 		case LINE_LOOP:
 			return GetIndexCount() / 3;
+		case QUADS:
+			return GetIndexCount() / 4;
 		case TRIANGLE_STRIP:
 			return GetIndexCount() - 2;
 		case LINES:
@@ -391,6 +395,15 @@ void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3])
 			pIndices[0] = lIndices[lOffset + 0];
 			pIndices[1] = lIndices[lOffset + 1];
 			pIndices[2] = lIndices[lOffset + 2];
+		}
+		break;
+		case QUADS:
+		{
+			const int lOffset = pTriangle * 4;
+			pIndices[0] = lIndices[lOffset + 0];
+			pIndices[1] = lIndices[lOffset + 1];
+			pIndices[2] = lIndices[lOffset + 2];
+			pIndices[4] = lIndices[lOffset + 3];
 		}
 		break;
 		case TRIANGLE_STRIP:
@@ -1073,7 +1086,7 @@ void GeometryBase::SetTangentAndBitangentData(float* pTangentData, float* pBitan
 
 void GeometryBase::GenerateVertexNormalData()
 {
-	if (CheckFlag(VERTEX_NORMALS_VALID) == true || GetIndexData() == 0)
+	if (CheckFlag(VERTEX_NORMALS_VALID) == true || GetIndexData() == 0 || GetPrimitiveType() == QUADS)
 	{
 		return;
 	}

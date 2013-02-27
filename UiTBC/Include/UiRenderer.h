@@ -1,22 +1,12 @@
-/*
-	Class:  Renderer
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
 
-	NOTES:
+// Author: Jonas Byström
+// Copyright (c) 2002-2013, Pixel Doctrine
 
-	This class is a high level interface to the sublevel rendering API 
-	(which can be OpenGL, Direct3D or some other API). 
-	
-	Renderer implements all	common functionality to avoid code duplication.
-	This makes it a little bit harder to read and follow, but it makes
-	it so much easier to implement new APIs. 
-
-	The renderer is using a right handed coordinate system where...
-	X is right.
-	Y is forward.
-	Z is up.
-*/
+// This class is a high level interface to the sublevel rendering API (which can be OpenGL, Direct3D or some other API). 
+// The renderer uses a right handed coordinate system:
+//    X is right.
+//    Y is forward.
+//    Z is up.
 
 #pragma once
 
@@ -30,6 +20,7 @@
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "UiTBC.h"
+#include "UiBillboardRenderInfo.h"
 #include "UiTexture.h"
 #include "UiShadowVolume.h"
 #include "UiPortalManager.h"
@@ -504,6 +495,7 @@ public:
 
 	virtual void Tick(float pTime);
 	virtual unsigned RenderScene() = 0;
+	virtual void RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards) = 0;
 
 	// Used for rendering stuff that are NOT in the world, such as
 	// 3D-objects in the GUI. The position of the geometry is considered

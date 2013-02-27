@@ -103,6 +103,7 @@ public:
 		TRIANGLE_STRIP,
 		LINES,
 		LINE_LOOP,
+		QUADS,
 	};
 
 	class BasicMaterialSettings
@@ -118,8 +119,8 @@ public:
 		{
 		}
 
-		BasicMaterialSettings(Vector3DF pAmbient, Vector3DF pDiffuse,
-			Vector3DF pSpecular, float pShininess,
+		BasicMaterialSettings(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
+			const Vector3DF& pSpecular, float pShininess,
 			float pAlpha, bool pSmooth):
 			mAmbient(pAmbient),
 			mDiffuse(pDiffuse),
@@ -135,8 +136,8 @@ public:
 			mDiffuse.Set(pRed, pGreen, pBlue);
 		}
 
-		void Set(Vector3DF pAmbient, Vector3DF pDiffuse,
-			Vector3DF pSpecular, float pShininess,
+		void Set(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
+			const Vector3DF& pSpecular, float pShininess,
 			float pAlpha, bool pSmooth)
 		{
 			mAmbient	= pAmbient;

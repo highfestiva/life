@@ -233,6 +233,9 @@
     <ClCompile Include="Source\UiDynamicRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\UiBillboardGeometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\UiOpenGLMaterials.mm">
@@ -436,6 +439,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\UiDynamicRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiBillboardRenderInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiBillboardGeometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

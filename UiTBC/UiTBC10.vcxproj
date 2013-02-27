@@ -261,6 +261,7 @@
     <ClCompile Include="Source\GUI\UiMessageDialog.cpp" />
     <ClCompile Include="Source\UiAnimatedGeometry.cpp" />
     <ClCompile Include="Source\UiBasicMeshCreator.cpp" />
+    <ClCompile Include="Source\UiBillboardGeometry.cpp" />
     <ClCompile Include="Source\UiChunkyClass.cpp" />
     <ClCompile Include="Source\UiChunkyLoader.cpp" />
     <ClCompile Include="Source\UiDynamicRenderer.cpp" />
@@ -349,6 +350,8 @@
     <ClInclude Include="Include\GUI\UiMessageDialog.h" />
     <ClInclude Include="Include\UiAnimatedGeometry.h" />
     <ClInclude Include="Include\UiBasicMeshCreator.h" />
+    <ClInclude Include="Include\UiBillboardGeometry.h" />
+    <ClInclude Include="Include\UiBillboardRenderInfo.h" />
     <ClInclude Include="Include\UiChunkyClass.h" />
     <ClInclude Include="Include\UiChunkyLoader.h" />
     <ClInclude Include="Include\UiDynamicRenderer.h" />

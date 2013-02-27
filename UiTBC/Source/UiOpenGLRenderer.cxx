@@ -1093,20 +1093,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		assert(mCamSpaceTransformation.GetPosition().GetDistanceSquared(lCamSpaceTransformation.GetPosition()) < 1e-8);
 		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);*/
 		float lModelViewMatrix[16];
-		mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
-		const float lScale = pGeometry->GetScale();
-		if (lScale != 1)
-		{
-			lModelViewMatrix[0]  *= lScale;
-			lModelViewMatrix[1]  *= lScale;
-			lModelViewMatrix[2]  *= lScale;
-			lModelViewMatrix[4]  *= lScale;
-			lModelViewMatrix[5]  *= lScale;
-			lModelViewMatrix[6]  *= lScale;
-			lModelViewMatrix[8]  *= lScale;
-			lModelViewMatrix[9]  *= lScale;
-			lModelViewMatrix[10] *= lScale;
-		}
+		mCamSpaceTransformation.GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(lModelViewMatrix);
 		OGL_ASSERT();
@@ -1361,6 +1348,67 @@ unsigned OpenGLRenderer::RenderScene()
 	return (GetCurrentFrame());
 }
 
+void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards)
+{
+	Material* lMaterial;
+	if (pRenderTexture)
+	{
+		lMaterial = GetMaterial(MAT_SINGLE_TEXTURE_BLENDED);
+	}
+	else
+	{
+		lMaterial = GetMaterial(MAT_SINGLE_COLOR_BLENDED);
+	}
+	lMaterial->PreRender();
+	if (pAddativeBlending)
+	{
+		::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	}
+	else
+	{
+		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glMatrixMode(GL_TEXTURE);
+	::glLoadIdentity();
+	::glMatrixMode(GL_MODELVIEW);
+	const float lAmbient[]  = { 0.4f, 0.4f, 0.4f, 1 };
+	const float lDiffuse[]  = { 0.5f, 0.5f, 0.5f, 1 };
+	const float lSpecular[] = { 0, 0, 0, 1 };
+
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbient);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lDiffuse);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lSpecular);
+	::glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
+	::glDisable(GL_LIGHTING);
+	::glDisable(GL_COLOR_MATERIAL);
+	::glDisable(GL_NORMALIZE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	TBC::GeometryBase::BasicMaterialSettings lMaterialSettings(Vector3DF(), Vector3DF(), Vector3DF(), 0, 0, false);
+	BillboardRenderInfoArray::const_iterator x = pBillboards.begin();
+	for (; x != pBillboards.end(); ++x)
+	{
+		lMaterialSettings.mDiffuse = x->mColor;
+		lMaterialSettings.mAlpha = x->mOpacity;
+		//lMaterial->SetBasicMaterial(lMaterialSettings);
+		glColor4f(x->mColor.x, x->mColor.y, x->mColor.z, x->mOpacity);
+
+		TransformationF lCamSpace;
+		QuaternionF lRot = mCameraTransformation.GetOrientation();
+		lRot.RotateAroundOwnY(x->mAngle);
+		lCamSpace.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, TransformationF(lRot, x->mPosition));
+		float lModelViewMatrix[16];
+		lCamSpace.GetAs4x4TransposeMatrix(x->mScale, lModelViewMatrix);
+		::glLoadMatrixf(lModelViewMatrix);
+
+		lMaterial->RawRender(pGeometry, x->mUVIndex);
+	}
+	lMaterial->PostRender();
+}
+
 void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation)
 {
 	OGL_ASSERT();
@@ -1368,7 +1416,7 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 	::glMatrixMode(GL_MODELVIEW);
 	::glPushMatrix();
 	float lModelViewMatrix[16];
-	pGeometry->GetTransformation().GetAs4x4TransposeMatrix(lModelViewMatrix);
+	pGeometry->GetTransformation().GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 	::glLoadMatrixf(lModelViewMatrix);
 
 	::glEnable(GL_DEPTH_TEST);
@@ -1580,20 +1628,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 			{
 				mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, lShadowVolume->GetTransformation());
 				float lModelViewMatrix[16];
-				mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
-				const float lScale = lShadowVolume->GetScale();
-				if (lScale != 1)
-				{
-					lModelViewMatrix[0]  *= lScale;
-					lModelViewMatrix[1]  *= lScale;
-					lModelViewMatrix[2]  *= lScale;
-					lModelViewMatrix[4]  *= lScale;
-					lModelViewMatrix[5]  *= lScale;
-					lModelViewMatrix[6]  *= lScale;
-					lModelViewMatrix[8]  *= lScale;
-					lModelViewMatrix[9]  *= lScale;
-					lModelViewMatrix[10] *= lScale;
-				}
+				mCamSpaceTransformation.GetAs4x4TransposeMatrix(lShadowVolume->GetScale(), lModelViewMatrix);
 				glLoadMatrixf(lModelViewMatrix);
 
 				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
