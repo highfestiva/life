@@ -20,6 +20,8 @@ namespace UiTbc
 unsigned gTextureId = 0;
 Canvas gImage;
 BillboardGeometry* gBillboardGas;
+BillboardGeometry* gBillboardShrapnel;
+BillboardGeometry* gBillboardSpark;
 Renderer::GeometryID gBillboardGasId = Renderer::INVALID_GEOMETRY;
 
 
@@ -37,26 +39,33 @@ ParticleRenderer::~ParticleRenderer()
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
 void ParticleRenderer::Render()
 {
-	glEnable(GL_TEXTURE_2D);
-
 	if (gBillboardGasId == Renderer::INVALID_GEOMETRY)
 	{
 		ImageLoader lLoader;
 		if (lLoader.Load(_T("Data/explosion.png"), gImage))
 		{
-			glGenTextures(1, &gTextureId);
-			glBindTexture(GL_TEXTURE_2D, gTextureId);
-			glTexImage2D(GL_TEXTURE_2D,
-				     0,
-				     GL_RGBA,
-				     gImage.GetWidth(),
-				     gImage.GetHeight(),
-				     0,
-				     GL_RGBA,
-				     GL_UNSIGNED_BYTE,
-				     gImage.GetBuffer());
 			gBillboardGas = new BillboardGeometry(4);
 			gBillboardGasId = mRenderer->AddGeometry(gBillboardGas, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
+			gBillboardShrapnel = new BillboardGeometry(4);
+			const float lShrapnelVertexData[] =
+			{
+				-0.6f,0,+1.2f,
+				-0.6f,0,-1.2f,
+				+0.6f,0,-0.7f,
+				+0.6f,0,+1.0f,
+			};
+			gBillboardShrapnel->SetVertexData(lShrapnelVertexData);
+			mRenderer->AddGeometry(gBillboardShrapnel, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
+			gBillboardSpark = new BillboardGeometry(4);
+			const float lSparkVertexData[] =
+			{
+				+0.0f,0,+0.3f,
+				-0.4f,0,-0.0f,
+				+0.0f,0,-4.5f,
+				+0.4f,0,+0.0f,
+			};
+			gBillboardSpark->SetVertexData(lSparkVertexData);
+			mRenderer->AddGeometry(gBillboardSpark, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
 			Texture* lTexture = new Texture(gImage, Canvas::RESIZE_FAST, 1);
 			Renderer::TextureID lTextureId = mRenderer->AddTexture(lTexture);
 			mRenderer->TryAddGeometryTexture(gBillboardGasId, lTextureId);
@@ -65,64 +74,64 @@ void ParticleRenderer::Render()
 	assert(gBillboardGas);
 
 	// Render particles.
-	const TransformationF& lCam = mRenderer->GetCameraTransformation();
+	//const TransformationF& lCam = mRenderer->GetCameraTransformation();
 	const QuaternionF& lCamOrientationInverse = mRenderer->GetCameraOrientationInverse();
 
-	glMatrixMode(GL_MODELVIEW);
-	glDisable(GL_COLOR_LOGIC_OP);
-	glDisable(GL_ALPHA_TEST);
-	glEnable(GL_BLEND);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_FALSE);
-	glShadeModel(GL_SMOOTH);
-	glDepthFunc(GL_LESS);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+	//glMatrixMode(GL_MODELVIEW);
+	//glDisable(GL_COLOR_LOGIC_OP);
+	//glDisable(GL_ALPHA_TEST);
+	//glEnable(GL_BLEND);
+	//glDisable(GL_CULL_FACE);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthMask(GL_FALSE);
+//	glShadeModel(GL_SMOOTH);
+//	glDepthFunc(GL_LESS);
+//	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	mRenderer->ResetAmbientLight(true);
+	//mRenderer->ResetAmbientLight(true);
 
-	const float lAmbient[]  = { 0.4f, 0.4f, 0.4f, 1 };
-	const float lDiffuse[]  = { 0.5f, 0.5f, 0.5f, 1 };
-	const float lSpecular[] = { 0, 0, 0, 1 };
+	//const float lAmbient[]  = { 0.4f, 0.4f, 0.4f, 1 };
+	//const float lDiffuse[]  = { 0.5f, 0.5f, 0.5f, 1 };
+	//const float lSpecular[] = { 0, 0, 0, 1 };
 
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbient);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lDiffuse);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lSpecular);
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_COLOR_MATERIAL);
-	glDisable(GL_NORMALIZE);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glBindTexture(GL_TEXTURE_2D, gTextureId);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbient);
+	//glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lDiffuse);
+	//glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lSpecular);
+	//glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
+	//glDisable(GL_LIGHTING);
+	//glDisable(GL_COLOR_MATERIAL);
+	//glDisable(GL_NORMALIZE);
+	//glDisableClientState(GL_VERTEX_ARRAY);
+	//glDisableClientState(GL_NORMAL_ARRAY);
+	//glDisableClientState(GL_COLOR_ARRAY);
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glBindTexture(GL_TEXTURE_2D, gTextureId);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	const float q = 1;
 	BillboardArray::iterator x;
 
-	glDisable(GL_ALPHA_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDisableClientState(GL_VERTEX_ARRAY);
-        glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-        glDisable(GL_COLOR_MATERIAL);
-#ifndef LEPRA_GL_ES
-	//glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-#endif // !GLES                                                                                                   
-	glDisableClientState(GL_NORMAL_ARRAY);
-	//glDisableClientState(GL_VERTEX_ARRAY);
-
-	glEnable(GL_TEXTURE_2D);
-	glMatrixMode(GL_TEXTURE);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	glDisable(GL_ALPHA_TEST);
+//        glEnable(GL_BLEND);
+//        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//        glDisableClientState(GL_VERTEX_ARRAY);
+//        glDisableClientState(GL_NORMAL_ARRAY);
+//	glDisableClientState(GL_COLOR_ARRAY);
+//        glDisable(GL_COLOR_MATERIAL);
+//#ifndef LEPRA_GL_ES
+//	//glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+//#endif // !GLES                                                                                                   
+//	glDisableClientState(GL_NORMAL_ARRAY);
+//	//glDisableClientState(GL_VERTEX_ARRAY);
+//
+//	glEnable(GL_TEXTURE_2D);
+//	glMatrixMode(GL_TEXTURE);
+//	glLoadIdentity();
+//	glMatrixMode(GL_MODELVIEW);
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	BillboardRenderInfoArray lBillboards;
 	x = mSmokes.begin();
 	for (; x != mSmokes.end(); ++x)
@@ -159,18 +168,23 @@ void ParticleRenderer::Render()
 		glEnd();
 	}*/
 
-	glDisable(GL_TEXTURE_2D);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glDisable(GL_TEXTURE_2D);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	lBillboards.clear();
 	x = mShrapnels.begin();
 	for (; x != mShrapnels.end(); ++x)
 	{
-		TransformationF lCamSpace;
+		const float s = x->mSizeFactor;
+		const float rgb = 0.3f;
+		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, Vector3DF(rgb, rgb, rgb), x->mOpacity, x->mTextureIndex));
+	}
+	mRenderer->RenderBillboards(gBillboardShrapnel, false, false, lBillboards);
+		/*TransformationF lCamSpace;
 		QuaternionF lRot;
 		lRot *= lCam.GetOrientation();
 		lRot.RotateAroundOwnY(x->mAngle);
 		lCamSpace.FastInverseTransform(lCam, lCamOrientationInverse, TransformationF(lRot, x->mPosition));
 		float lModelViewMatrix[16];
-		const float s = x->mSizeFactor;
 		lCamSpace.GetAs4x4TransposeMatrix(s, lModelViewMatrix);
 		glLoadMatrixf(lModelViewMatrix);
 
@@ -181,15 +195,25 @@ void ParticleRenderer::Render()
 		glVertex3f(+1, 0, -1.2f);
 		glVertex3f(+1, 0, +1.8f);
 		glEnd();
-	}
+	}*/
 
-	glDisable(GL_TEXTURE_2D);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	glColor3f(0, 0, 0);
+	//glDisable(GL_TEXTURE_2D);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	//glColor3f(0, 0, 0);
+	lBillboards.clear();
+	const Vector3DF lCameraXZPlane(0,1,0);	// In cam space that is.
 	x = mSparks.begin();
 	for (; x != mSparks.end(); ++x)
 	{
-		TransformationF lCamSpace;
+		const Vector3DF lAngleVector = (lCamOrientationInverse * x->mVelocity).ProjectOntoPlane(lCameraXZPlane);
+		const float lAngle = PIF/2 - lAngleVector.GetPolarCoordAngleY();
+		const float s = x->mSizeFactor;
+		const float r  = Math::Lerp(1.0f, 0.6f, x->mOpacityTime/PIF);
+		const float gb = Math::Lerp(1.0f, 0.3f, x->mOpacityTime/PIF);
+		lBillboards.push_back(BillboardRenderInfo(lAngle, x->mPosition, s, Vector3DF(r, gb, gb), x->mOpacity, x->mTextureIndex));
+	}
+	mRenderer->RenderBillboards(gBillboardSpark, false, true, lBillboards);
+/*		TransformationF lCamSpace;
 		QuaternionF lRot;
 		lRot *= lCam.GetOrientation();
 		// Spark always points in same direction as its velocity. Thus we transform velocity into
@@ -213,10 +237,10 @@ void ParticleRenderer::Render()
 		glVertex3f(0, 0, -4.5f);
 		glVertex3f(+0.4f, 0, 0);
 		glEnd();
-	}
+	}*/
 
-	glEnable(GL_TEXTURE_2D);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	//glEnable(GL_TEXTURE_2D);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	lBillboards.clear();
 	x = mFires.begin();
 	for (; x != mFires.end(); ++x)
@@ -251,8 +275,8 @@ void ParticleRenderer::Render()
 		glEnd();
 	}*/
 
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_LIGHTING);
+	//glDisable(GL_TEXTURE_2D);
+	//glEnable(GL_LIGHTING);
 
 	// Update lights.
 	LightArray::iterator y = mLights.begin();
@@ -347,7 +371,7 @@ void ParticleRenderer::StepLights(float pTime, float pFriction)
 		x->mPosition += x->mVelocity * pTime;
 
 		x->mStrength -= pTime * x->mTimeFactor * 2 / PIF;
-		if (x->mStrength <= 0)
+		if (x->mStrength <= 0.1f)
 		{
 			if (x->mRenderLightId != UiTbc::Renderer::INVALID_LIGHT)
 			{
@@ -410,7 +434,7 @@ void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, 
 
 		x->mOpacityTime += pTime * x->mTimeFactor;
 		x->mOpacity = ::sin(x->mOpacityTime) + 0.7f;
-		if (x->mOpacity <= 0)
+		if (x->mOpacity <= 0.1f)
 		{
 			x = pBillboards.erase(x);
 		}

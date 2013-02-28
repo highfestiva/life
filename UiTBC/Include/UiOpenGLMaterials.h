@@ -171,11 +171,11 @@ public:
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
 	virtual void PreRender();
 	virtual void PostRender();
+	void BindTexture(int pTextureID, int pMipMapLevelCount);
 
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
-	void BindTexture(int pTextureID, int pMipMapLevelCount);
 
 	GLint mTextureParamMin;
 	GLint mTextureParamMag;

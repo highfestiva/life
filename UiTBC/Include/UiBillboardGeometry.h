@@ -34,6 +34,7 @@ public:
 	virtual unsigned GetUVSetCount() const;
 
 	virtual float* GetVertexData() const;
+	void SetVertexData(const float pVertexData[12]);
 	virtual float* GetUVData(unsigned pUVSet = 0) const;
 	virtual vtx_idx_t* GetIndexData() const;
 	virtual uint8* GetColorData() const;

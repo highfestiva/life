@@ -87,6 +87,11 @@ float* BillboardGeometry::GetVertexData() const
 	return (float*)&mVertexData[0];
 }
 
+void BillboardGeometry::SetVertexData(const float pVertexData[12])
+{
+	::memcpy(mVertexData, pVertexData, sizeof(mVertexData));
+}
+
 float* BillboardGeometry::GetUVData(unsigned pUVSet) const
 {
 	return &mUVData[pUVSet*2*4];

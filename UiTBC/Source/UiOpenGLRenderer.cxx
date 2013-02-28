@@ -1354,6 +1354,10 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	if (pRenderTexture)
 	{
 		lMaterial = GetMaterial(MAT_SINGLE_TEXTURE_BLENDED);
+		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
+		((OpenGLMatSingleTextureBlended*)lMaterial)->BindTexture(
+			lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP],
+			lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 	}
 	else
 	{
@@ -1368,6 +1372,8 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	{
 		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
+	::glEnable(GL_DEPTH_TEST);
+	::glDepthMask(GL_FALSE);
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glMatrixMode(GL_TEXTURE);
 	::glLoadIdentity();
