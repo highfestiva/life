@@ -43,24 +43,24 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	UiTbc::BillboardGeometry* lBillboardGas = new UiTbc::BillboardGeometry(4);
 	UiTbc::Renderer::GeometryID lBillboardGasId = pRenderer->AddGeometry(lBillboardGas, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
 	UiTbc::BillboardGeometry* lBillboardShrapnel = new UiTbc::BillboardGeometry(4);
-	const float lShrapnelVertexData[] =
+	const float lShrapnelTriStrip[] =
 	{
 		-0.6f,0,+1.2f,
+		+0.6f,0,+1.0f,
 		-0.6f,0,-1.2f,
 		+0.6f,0,-0.7f,
-		+0.6f,0,+1.0f,
 	};
-	lBillboardShrapnel->SetVertexData(lShrapnelVertexData);
+	lBillboardShrapnel->SetVertexData(lShrapnelTriStrip);
 	pRenderer->AddGeometry(lBillboardShrapnel, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
 	UiTbc::BillboardGeometry* lBillboardSpark = new UiTbc::BillboardGeometry(4);
-	const float lSparkVertexData[] =
+	const float lSparkTriStrip[] =
 	{
 		+0.0f,0,+0.3f,
 		-0.4f,0,-0.0f,
-		+0.0f,0,-4.5f,
 		+0.4f,0,+0.0f,
+		+0.0f,0,-4.5f,
 	};
-	lBillboardSpark->SetVertexData(lSparkVertexData);
+	lBillboardSpark->SetVertexData(lSparkTriStrip);
 	pRenderer->AddGeometry(lBillboardSpark, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
 	UiTbc::Texture* lTexture = new UiTbc::Texture(lImage, Canvas::RESIZE_FAST, 1);
 	UiTbc::Renderer::TextureID lTextureId = pRenderer->AddTexture(lTexture);

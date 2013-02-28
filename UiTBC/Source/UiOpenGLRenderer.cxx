@@ -1350,6 +1350,8 @@ unsigned OpenGLRenderer::RenderScene()
 
 void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards)
 {
+	OGL_ASSERT();
+
 	Material* lMaterial;
 	if (pRenderTexture)
 	{
@@ -1374,6 +1376,7 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	}
 	::glEnable(GL_DEPTH_TEST);
 	::glDepthMask(GL_FALSE);
+	::glDisable(GL_CULL_FACE);
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glMatrixMode(GL_TEXTURE);
 	::glLoadIdentity();
@@ -1413,6 +1416,8 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 		lMaterial->RawRender(pGeometry, x->mUVIndex);
 	}
 	lMaterial->PostRender();
+
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation)

@@ -17,14 +17,14 @@ namespace UiTbc
 BillboardGeometry::BillboardGeometry(unsigned pUVSetCount):
 	mUVSetCount(pUVSetCount)
 {
-	const float lVertexData[] =
+	const float lTriStrip[] =
 	{
 		-1,0,+1,
+		+1,0,+1,
 		-1,0,-1,
 		+1,0,-1,
-		+1,0,+1,
 	};
-	::memcpy(mVertexData, lVertexData, sizeof(mVertexData));
+	::memcpy(mVertexData, lTriStrip, sizeof(mVertexData));
 	mIndexData[0] = 0;
 	mIndexData[1] = 1;
 	mIndexData[2] = 2;
@@ -32,12 +32,12 @@ BillboardGeometry::BillboardGeometry(unsigned pUVSetCount):
 
 	mUVData = new float[2*4*mUVSetCount];
 	const float lWidth = 1.0f/mUVSetCount;
-	const float lUVData[] =
+	const float lUvTriStripData[] =
 	{
 		0,0,
+		1,0,
 		0,1,
 		1,1,
-		1,0,
 	};
 	for (unsigned x = 0; x < mUVSetCount; ++x)
 	{
@@ -45,8 +45,8 @@ BillboardGeometry::BillboardGeometry(unsigned pUVSetCount):
 		int lBase = x*4*2;
 		for (int y = 0; y < 4; ++y)
 		{
-			mUVData[lBase+y*2+0] = lUVData[y*2+0]*lWidth + x0;	// x
-			mUVData[lBase+y*2+1] = lUVData[y*2+1];	// y
+			mUVData[lBase+y*2+0] = lUvTriStripData[y*2+0]*lWidth + x0;	// x
+			mUVData[lBase+y*2+1] = lUvTriStripData[y*2+1];	// y
 		}
 	}
 }
@@ -109,7 +109,7 @@ uint8* BillboardGeometry::GetColorData() const
 
 TBC::GeometryBase::PrimitiveType BillboardGeometry::GetPrimitiveType() const
 {
-	return QUADS;
+	return TRIANGLE_STRIP;
 }
 
 TBC::GeometryBase::GeometryVolatility BillboardGeometry::GetGeometryVolatility() const

@@ -56,7 +56,6 @@ GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 	{
 		case TBC::GeometryBase::TRIANGLES:	return (GL_TRIANGLES);
 		case TBC::GeometryBase::TRIANGLE_STRIP:	return (GL_TRIANGLE_STRIP);
-		case TBC::GeometryBase::QUADS:		return (GL_QUADS);
 		case TBC::GeometryBase::LINES:		return (GL_LINES);
 		case TBC::GeometryBase::LINE_LOOP:	return (GL_LINE_LOOP);
 	}

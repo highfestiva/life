@@ -103,7 +103,6 @@ public:
 		TRIANGLE_STRIP,
 		LINES,
 		LINE_LOOP,
-		QUADS,
 	};
 
 	class BasicMaterialSettings
