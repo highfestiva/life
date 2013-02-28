@@ -5,8 +5,6 @@
 #pragma once
 
 #include "UiDynamicRenderer.h"
-#include <list>
-#include "../../Lepra/Include/Transformation.h"
 #include "UiRenderer.h"
 
 
@@ -16,12 +14,18 @@ namespace UiTbc
 
 
 
+class BillboardGeometry;
+
+
+
 class ParticleRenderer: public DynamicRenderer
 {
 	typedef DynamicRenderer Parent;
 public:
-	ParticleRenderer(Renderer* pRenderer);
+	ParticleRenderer(Renderer* pRenderer, int pMaxLightCount);
 	virtual ~ParticleRenderer();
+
+	void SetData(int pTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark);
 
 	virtual void Render();
 	virtual void Tick(float pTime);
@@ -38,7 +42,7 @@ protected:
 			mTargetVelocity(pTargetVelocity),
 			mStrength(pStrength),
 			mTimeFactor(pTimeFactor),
-			mRenderLightId(UiTbc::Renderer::INVALID_LIGHT)
+			mRenderLightId(Renderer::INVALID_LIGHT)
 		{
 		}
 		Vector3DF mPosition;
@@ -46,7 +50,7 @@ protected:
 		Vector3DF mTargetVelocity;
 		float mStrength;
 		float mTimeFactor;
-		UiTbc::Renderer::LightID mRenderLightId;
+		Renderer::LightID mRenderLightId;
 	};
 	typedef std::vector<Light> LightArray;
 
@@ -69,12 +73,16 @@ protected:
 	void CreateTempLight(float pStrength, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pTargetVelocity, float pTimeFactor);
 	void StepLights(float pTime, float pFriction);
 
-	static void CreateBillboards(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, const Vector3DF& pTargetVelocity,
+	void CreateBillboards(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, const Vector3DF& pTargetVelocity,
 		float pEndTurbulence, float pTimeFactor, float pSizeFactor, BillboardArray& pBillboards, int pCount);
 	static void StepBillboards(BillboardArray& pBillboards, float pTime, float pFriction);
 
 	LightArray mLights;
 	size_t mMaxLightCount;
+	size_t mTextureCount;
+	BillboardGeometry* mBillboardGas;
+	BillboardGeometry* mBillboardShrapnel;
+	BillboardGeometry* mBillboardSpark;
 
 	BillboardArray mFires;
 	BillboardArray mSmokes;

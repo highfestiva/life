@@ -10,7 +10,7 @@
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/GeometryReference.h"
-#include "../Include/UiParticleRenderer.h"
+#include "../Include/UiDynamicRenderer.h"
 #include "../Include/UiMaterial.h"
 
 
@@ -69,8 +69,6 @@ void Renderer::ClearDebugInfo()
 
 void Renderer::InitRenderer()
 {
-	AddDynamicRenderer(_T("particle"), new ParticleRenderer(this));
-
 	for (int i = 0; i < MAT_COUNT; i++)
 	{
 		mMaterial[i] = CreateMaterial((MaterialType)i);

@@ -10,9 +10,11 @@
 #include "../Life/LifeClient/UiGameServerManager.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "../UiTBC/Include/UiParticleRenderer.h"
 #include "PushServer/PushServerDelegate.h"
 #include "PushServer/PushServerMessageProcessor.h"
 #include "RtVar.h"
@@ -98,6 +100,12 @@ bool PushTicker::OpenUiManager()
 		mUiManager->GetPainter()->ResetClippingRect();
 		mUiManager->GetPainter()->Clear(BLACK);
 		DisplaySplashLogo();
+	}
+	if (lOk)
+	{
+		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4);
 	}
 	if (lOk)
 	{
