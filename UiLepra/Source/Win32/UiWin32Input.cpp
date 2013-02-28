@@ -324,6 +324,10 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	POINT lPoint;
 	::GetCursorPos(&lPoint);
 	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);
+	SetCursorVisible(false);
+#ifdef LEPRA_DEBUG
+	SetCursorVisible(true);
+#endif // Debug
 
 	::memset(&mTypeCount, 0, sizeof(mTypeCount));
 

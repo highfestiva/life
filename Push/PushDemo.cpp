@@ -61,7 +61,7 @@ bool PushDemo::Paint()
 	if (mUiManager->GetFontManager()->GetStringWidth(mInfoText)+mInfoTextX < 0)
 	{
 		mInfoTextX = mUiManager->GetDisplayManager()->GetWidth() * 1.5f;
-		mInfoTextTargetY = (float)Random::Uniform(20, mUiManager->GetDisplayManager()->GetHeight()-lFontHeight-60);
+		mInfoTextTargetY = Random::Uniform(20.0f, (float)(mUiManager->GetDisplayManager()->GetHeight()-lFontHeight-60));
 		const int lTextCount = sizeof(mInfoTextArray)/sizeof(void*);
 		if (mInfoText.empty())
 		{

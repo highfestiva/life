@@ -101,18 +101,32 @@ void GameClientSlaveManager::LoadSettings()
 		{
 			bool lIsOpenServer;
 			CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+			const bool lIsCurrentlyLocalhost = (strutil::StartsWith(lServerAddress, _T("localhost:")) || strutil::StartsWith(lServerAddress, _T("127.0.0.1:")));
 			if (lIsOpenServer)
 			{
-				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+				if (lIsCurrentlyLocalhost)
+				{
+					CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+				}
 			}
 			else
 			{
-				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+				if (!lIsCurrentlyLocalhost)
+				{
+					CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+				}
 			}
 		}
 	}
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+}
+
+void GameClientSlaveManager::SaveSettings()
+{
+#ifndef EMULATE_TOUCH
+	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+#endif // Computer or touch device.
 }
 
 void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -480,7 +494,7 @@ void GameClientSlaveManager::TickNetworkOutputGhosts()
 
 void GameClientSlaveManager::ToggleConsole()
 {
-	mAllowMovementInput = !((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->ToggleVisible();
+	mAllowMovementInput = !((ClientConsoleManager*)GetConsoleManager())->ToggleVisible();
 }
 
 
@@ -985,6 +999,14 @@ Cure::ContextObject* GameClientSlaveManager::CreateObject(Cure::GameObjectId pIn
 	Cure::NetworkObjectType pNetworkType, TransformationF* pTransform)
 {
 	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId, true);
+	if (lObject && lObject->GetClassId() != pClassId)
+	{
+		// Ouch, this object has been killed and we weren't informed.
+		mLog.Warningf(_T("Ouch, slave %i creating context object %s, but already had old instance of type %s (deleting that first)."),
+			mSlaveIndex, pClassId.c_str(), lObject->GetClassId().c_str());
+		GetContext()->DeleteObject(pInstanceId);
+		lObject = 0;
+	}
 	if (!lObject)
 	{
 		log_volatile(mLog.Debugf(_T("Slave %i creating context object %s."), mSlaveIndex, pClassId.c_str()));
@@ -998,10 +1020,6 @@ Cure::ContextObject* GameClientSlaveManager::CreateObject(Cure::GameObjectId pIn
 			lObject->StartLoading();
 		}
 	}
-	else
-	{
-		assert(lObject->GetClassId() == pClassId);
-	}
 	return lObject;
 }
 
@@ -1010,7 +1028,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 	ObjectFrameIndexMap::iterator x = mObjectFrameIndexMap.find(pInstanceId);
 	if (x == mObjectFrameIndexMap.end())
 	{
-		mObjectFrameIndexMap.insert(ObjectFrameIndexPair(pInstanceId, pFrameIndex-1));
+		mObjectFrameIndexMap.insert(ObjectFrameIndexMap::value_type(pInstanceId, pFrameIndex-1));
 		x = mObjectFrameIndexMap.find(pInstanceId);
 	}
 	const int lLastSetFrameIndex = x->second;	// Last set frame index.

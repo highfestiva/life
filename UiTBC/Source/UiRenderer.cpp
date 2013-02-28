@@ -5,11 +5,13 @@
 */
 
 #include "../Include/UiRenderer.h"
-#include "../Include/UiMaterial.h"
+#include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/GeometryReference.h"
+#include "../Include/UiDynamicRenderer.h"
+#include "../Include/UiMaterial.h"
 
 
 
@@ -36,7 +38,6 @@ Renderer::Renderer(Canvas* pScreen) :
 	mTextureIDManager(1, 1000000, INVALID_TEXTURE),
 	mLightIDManager(0, MAX_LIGHTS, INVALID_LIGHT),
 	mEnvTexture(0),
-	mLightCount(0),
 	mNumSpotLights(0),
 	mAmbientRed(0.2f),
 	mAmbientGreen(0.2f),
@@ -76,6 +77,14 @@ void Renderer::InitRenderer()
 
 void Renderer::CloseRenderer()
 {
+	DynamicRendererMap::iterator x = mDynamicRendererMap.begin();
+	for (; x != mDynamicRendererMap.end(); ++x)
+	{
+		DynamicRenderer* lRenderer = x->second;
+		delete lRenderer;
+	}
+	mDynamicRendererMap.clear();
+
 	ReleaseGeometries();
 	ReleaseShadowVolumes();
 	ReleaseTextureMaps();
@@ -86,6 +95,7 @@ void Renderer::CloseRenderer()
 		if (mMaterial[i] != 0)
 		{
 			delete mMaterial[i];
+			mMaterial[i] = 0;
 		}
 	}
 }
@@ -104,6 +114,27 @@ const Canvas* Renderer::GetScreen() const
 {
 	return mScreen;
 }
+
+
+
+DynamicRenderer* Renderer::GetDynamicRenderer(str pName) const
+{
+	return HashUtil::FindMapObject(mDynamicRendererMap, pName);
+}
+
+void Renderer::AddDynamicRenderer(str pName, DynamicRenderer* pRenderer)
+{
+	if (!HashUtil::FindMapObject(mDynamicRendererMap, pName))
+	{
+		mDynamicRendererMap.insert(DynamicRendererMap::value_type(pName, pRenderer));
+	}
+	else
+	{
+		delete pRenderer;
+	}
+}
+
+
 
 void Renderer::SetOutlineFillColor(const Color& pColor)
 {
@@ -352,92 +383,86 @@ void Renderer::ResetAmbientLight(bool pPropagate)
 	}
 }
 
-int Renderer::AllocLight()
+Renderer::LightID Renderer::AllocLight()
 {
-	int lLightIndex = mLightIDManager.GetFreeId();
-
-	if (lLightIndex != INVALID_LIGHT &&
-		mLightData[lLightIndex].mEnabled == false)
+	LightID lLightId = (LightID)mLightIDManager.GetFreeId();
+	if (lLightId != INVALID_LIGHT &&
+		!GetLightData(lLightId))
 	{
-		mLightIndex[mLightCount] = lLightIndex;
-		mLightData[lLightIndex].mIndex = mLightCount;
-		mLightCount++;
+		mSortedLights[GetLightCount()] = lLightId;	// Put new light at lowest priority.
+		mLightDataMap.insert(LightDataMap::value_type(lLightId, new LightData));
 	}
-	return lLightIndex;
+	return lLightId;
 }
 
 Renderer::LightID Renderer::AddDirectionalLight(LightHint pHint,
-						float pDirX, float pDirY, float pDirZ,
-						float pRed, float pGreen, float pBlue,
-						float pShadowRange)
+		const Vector3DF& pDir,
+		const Vector3DF& pColor,
+		float pShadowRange)
 {
-	int lLightIndex = AllocLight();
-	if (lLightIndex == INVALID_LIGHT)
+	LightID lLightId = AllocLight();
+	if (lLightId == INVALID_LIGHT)
 		return INVALID_LIGHT;
 
-	mLightData[lLightIndex].mType = LIGHT_DIRECTIONAL;
-	mLightData[lLightIndex].mHint = pHint;
-	mLightData[lLightIndex].mPosition.Set(0, 0, 0);
-	mLightData[lLightIndex].mDirection.Set(pDirX, pDirY, pDirZ);
-	mLightData[lLightIndex].mColor[0]            = pRed;
-	mLightData[lLightIndex].mColor[1]            = pGreen;
-	mLightData[lLightIndex].mColor[2]            = pBlue;
-	mLightData[lLightIndex].mRadius                = 0;
-	mLightData[lLightIndex].mShadowRange           = pShadowRange;
-	mLightData[lLightIndex].mCutoffAngle           = 89;
-	mLightData[lLightIndex].mSpotExponent          = 1;
-	mLightData[lLightIndex].mTransformationChanged = true;
-	mLightData[lLightIndex].mEnabled               = true;
+	LightData* lData = GetLightData(lLightId);
+	assert(lData);
+	lData->mType			= LIGHT_DIRECTIONAL;
+	lData->mHint			= pHint;
+	lData->mPosition		= Vector3DF();
+	lData->mDirection		= pDir.GetNormalized();
+	lData->mColor[0]		= pColor.x;
+	lData->mColor[1]		= pColor.y;
+	lData->mColor[2]		= pColor.z;
+	lData->mRadius			= 0;
+	lData->mShadowRange		= pShadowRange;
+	lData->mCutoffAngle		= 89;
+	lData->mSpotExponent		= 1;
+	lData->mTransformationChanged	= true;
+	lData->mEnabled			= true;
 
-	mLightData[lLightIndex].mDirection.Normalize();
-
-	return (LightID)lLightIndex;
+	return lLightId;
 }
 
 Renderer::LightID Renderer::AddPointLight(LightHint pHint,
-					  float pPosX, float pPosY, float pPosZ,
-					  float pRed, float pGreen, float pBlue,
-					  float pLightRadius,
-					  float pShadowRange)
+		const Vector3DF& pPos,
+		const Vector3DF& pColor,
+		float pLightRadius,
+		float pShadowRange)
 {
-	int lLightIndex = AllocLight();
-	if (lLightIndex == INVALID_LIGHT)
+	LightID lLightId = AllocLight();
+	if (lLightId == INVALID_LIGHT)
 		return INVALID_LIGHT;
 
-	// Scale the light intensity (makes this function accept lower rgb values).
-	const float lLightIntensityFactor = 100.0f;
-	pRed   *= lLightIntensityFactor;
-	pGreen *= lLightIntensityFactor;
-	pBlue  *= lLightIntensityFactor;
+	LightData* lData = GetLightData(lLightId);
+	assert(lData);
+	lData->mType			= LIGHT_POINT;
+	lData->mHint			= pHint;
+	lData->mPosition		= pPos;
+	lData->mDirection		= Vector3DF();
+	lData->mColor[0]		= pColor.x;
+	lData->mColor[1]		= pColor.y;
+	lData->mColor[2]		= pColor.z;
+	lData->mRadius			= pLightRadius;
+	lData->mShadowRange		= pShadowRange;
+	lData->mCutoffAngle		= 89;
+	lData->mSpotExponent		= 1;
+	lData->mTransformationChanged	= true;
+	lData->mEnabled			= true;
 
-	mLightData[lLightIndex].mType = LIGHT_POINT;
-	mLightData[lLightIndex].mHint = pHint;
-	mLightData[lLightIndex].mPosition.Set(pPosX, pPosY, pPosZ);
-	mLightData[lLightIndex].mDirection.Set(0, 0, 0);
-	mLightData[lLightIndex].mColor[0]            = pRed;
-	mLightData[lLightIndex].mColor[1]            = pGreen;
-	mLightData[lLightIndex].mColor[2]            = pBlue;
-	mLightData[lLightIndex].mRadius                = pLightRadius;
-	mLightData[lLightIndex].mShadowRange           = pShadowRange;
-	mLightData[lLightIndex].mCutoffAngle           = 89;
-	mLightData[lLightIndex].mSpotExponent          = 1;
-	mLightData[lLightIndex].mTransformationChanged = true;
-	mLightData[lLightIndex].mEnabled               = true;
-
-	return (LightID)lLightIndex;
+	return lLightId;
 }
 
 Renderer::LightID Renderer::AddSpotLight(LightHint pHint,
-					 float pPosX, float pPosY, float pPosZ,
-					 float pDirX, float pDirY, float pDirZ,
-					 float pRed, float pGreen, float pBlue,
-					 float pCutoffAngle,
-					 float pSpotExponent,
-					 float pLightRadius,
-					 float pShadowRange)
+		const Vector3DF& pPos,
+		const Vector3DF& pDir,
+		const Vector3DF& pColor,
+		float pCutoffAngle,
+		float pSpotExponent,
+		float pLightRadius,
+		float pShadowRange)
 {
-	int lLightIndex = AllocLight();
-	if (lLightIndex == INVALID_LIGHT)
+	LightID lLightId = AllocLight();
+	if (lLightId == INVALID_LIGHT)
 		return INVALID_LIGHT;
 
 	// Clamp cutoff angle to a value between 0 and 89 degrees.
@@ -446,27 +471,21 @@ Renderer::LightID Renderer::AddSpotLight(LightHint pHint,
 	pCutoffAngle = fabs(pCutoffAngle);
 	pCutoffAngle = pCutoffAngle > 89.0f ? 89.0f : pCutoffAngle;
 
-	// Scale the light intensity (makes this function accept lower rgb values).
-	const float lLightIntensityFactor = 100.0f;
-	pRed   *= lLightIntensityFactor;
-	pGreen *= lLightIntensityFactor;
-	pBlue  *= lLightIntensityFactor;
-
-	mLightData[lLightIndex].mType = LIGHT_SPOT;
-	mLightData[lLightIndex].mHint = pHint;
-	mLightData[lLightIndex].mPosition.Set(pPosX, pPosY, pPosZ);
-	mLightData[lLightIndex].mDirection.Set(pDirX, pDirY, pDirZ);
-	mLightData[lLightIndex].mColor[0]            = pRed;
-	mLightData[lLightIndex].mColor[1]            = pGreen;
-	mLightData[lLightIndex].mColor[2]            = pBlue;
-	mLightData[lLightIndex].mRadius                = pLightRadius;
-	mLightData[lLightIndex].mShadowRange           = pShadowRange;
-	mLightData[lLightIndex].mCutoffAngle           = pCutoffAngle;
-	mLightData[lLightIndex].mSpotExponent          = pSpotExponent;
-	mLightData[lLightIndex].mTransformationChanged = true;
-	mLightData[lLightIndex].mEnabled               = true;
-
-	mLightData[lLightIndex].mDirection.Normalize();
+	LightData* lData = GetLightData(lLightId);
+	assert(lData);
+	lData->mType			= LIGHT_SPOT;
+	lData->mHint			= pHint;
+	lData->mPosition		= pPos;
+	lData->mDirection		= pDir.GetNormalized();
+	lData->mColor[0]		= pColor.x;
+	lData->mColor[1]		= pColor.y;
+	lData->mColor[2]		= pColor.z;
+	lData->mRadius			= pLightRadius;
+	lData->mShadowRange		= pShadowRange;
+	lData->mCutoffAngle		= pCutoffAngle;
+	lData->mSpotExponent		= pSpotExponent;
+	lData->mTransformationChanged	= true;
+	lData->mEnabled		= true;
 
 	const float lEpsilon = 1e-6f;
 
@@ -476,72 +495,58 @@ Renderer::LightID Renderer::AddSpotLight(LightHint pHint,
 	Vector3DF lAxisZ;
 
 	// If light direction is pointing up.
-	if (mLightData[lLightIndex].mDirection.y >= (1.0f - lEpsilon))
+	if (lData->mDirection.y >= (1.0f - lEpsilon))
 	{
-		lAxisX = mLightData[lLightIndex].mDirection / Vector3DF(0, 0, 1);
-		lAxisY = lAxisX / mLightData[lLightIndex].mDirection;
-		lAxisZ = mLightData[lLightIndex].mDirection;
+		lAxisX = lData->mDirection / Vector3DF(0, 0, 1);
+		lAxisY = lAxisX / lData->mDirection;
+		lAxisZ = lData->mDirection;
 	}
 	else
 	{
-		lAxisX = mLightData[lLightIndex].mDirection / Vector3DF(0, 1, 0);
-		lAxisY = lAxisX / mLightData[lLightIndex].mDirection;
-		lAxisZ = mLightData[lLightIndex].mDirection;
+		lAxisX = lData->mDirection / Vector3DF(0, 1, 0);
+		lAxisY = lAxisX / lData->mDirection;
+		lAxisZ = lData->mDirection;
 	}
 
 	lAxisX.Normalize();
 	lAxisY.Normalize();
 	lAxisZ.Normalize();
 
-	mLightData[lLightIndex].mOrientation.SetAxisX(lAxisX);
-	mLightData[lLightIndex].mOrientation.SetAxisY(lAxisY);
-	mLightData[lLightIndex].mOrientation.SetAxisZ(lAxisZ);
+	lData->mOrientation.SetAxisX(lAxisX);
+	lData->mOrientation.SetAxisY(lAxisY);
+	lData->mOrientation.SetAxisZ(lAxisZ);
 
 	mNumSpotLights++;
 
-	return (LightID)lLightIndex;
+	return lLightId;
 }
 
-void Renderer::RemoveLight(LightID pLightID)
+void Renderer::RemoveLight(LightID pLightId)
 {
-	int lLightIndex = (int)pLightID;
+	LightData* lData = GetLightData(pLightId);
+	assert(lData);
 
-	if (lLightIndex == INVALID_LIGHT)
-		return;
-
-	mLightData[lLightIndex].mEnabled = false;
-
-	if (mLightData[lLightIndex].mType == Renderer::LIGHT_SPOT)
+	if (lData->mType == Renderer::LIGHT_SPOT)
 	{
-		mLightData[lLightIndex].mShadowMapGeometrySet.RemoveAll();
-
-		if (mLightData[lLightIndex].mShadowMapID != 0)
+		lData->mShadowMapGeometrySet.RemoveAll();
+		if (lData->mShadowMapID != 0)
 		{
-			mLightData[lLightIndex].mShadowMapID = ReleaseShadowMap(mLightData[lLightIndex].mShadowMapID);
+			lData->mShadowMapID = ReleaseShadowMap(lData->mShadowMapID);
 		}
-
 		mNumSpotLights--;
 	}
 
-	// The light is being removed, "defrag" the indices lookup..
-	for (int i = mLightData[lLightIndex].mIndex; i < (mLightCount - 1); i++)
-	{
-		mLightData[mLightIndex[i]].mIndex--;
-		mLightIndex[i] = mLightIndex[i + 1];
-	}
-	mLightCount--;
+	mLightDataMap.erase(pLightId);
+	delete lData;
 
-	mLightIDManager.RecycleId(lLightIndex);
+	mLightIDManager.RecycleId(pLightId);
 }
 
 void Renderer::RemoveAllLights()
 {
-	int lLightID[MAX_LIGHTS];
-	int lLightCount = mLightCount;
-	::memcpy(lLightID, mLightIndex, mLightCount * sizeof(int));
-	for (int i = 0; i < lLightCount; ++i)
+	while (!mLightDataMap.empty())
 	{
-		RemoveLight((LightID)lLightID[i]);
+		RemoveLight(mLightDataMap.begin()->first);
 	}
 }
 
@@ -552,67 +557,61 @@ int Renderer::GetMaxLights()
 
 int Renderer::GetLightCount()
 {
-	return mLightCount;
+	return mLightDataMap.size();
 }
 
-void Renderer::SetShadowMapOptions(LightID pLightID,
+void Renderer::SetShadowMapOptions(LightID pLightId,
 				   unsigned char pLog2Res,
 				   float pNearPlane,
 				   float pFarPlane)
 {
-	int lLightIndex = (int)pLightID;
-	if (lLightIndex == INVALID_LIGHT)
-		return;
+	LightData* lData = GetLightData(pLightId);
+	assert(lData);
 
 	// Can't change settings when the shadow map has been generated.
 	// TODO: Replace '0' with something else...
-	if (mLightData[lLightIndex].mShadowMapID == 0)
+	if (lData->mShadowMapID == 0)
 	{
-		mLightData[lLightIndex].mShadowMapRes = (1 << pLog2Res);
-		mLightData[lLightIndex].mShadowMapNear = pNearPlane;
-		mLightData[lLightIndex].mShadowMapFar  = pFarPlane;
+		lData->mShadowMapRes = (1 << pLog2Res);
+		lData->mShadowMapNear = pNearPlane;
+		lData->mShadowMapFar  = pFarPlane;
 	}
 }
 
-void Renderer::SetLightPosition(LightID pLightID, float pX, float pY, float pZ)
+void Renderer::SetLightPosition(LightID pLightId, const Vector3DF& pPos)
 {
-	int lLightIndex = (int)pLightID;
+	LightData* lData = GetLightData(pLightId);
+	assert(lData);
 
-	if (lLightIndex == INVALID_LIGHT)
-		return;
-
-	if (mLightData[lLightIndex].mType == Renderer::LIGHT_POINT ||
-	   mLightData[lLightIndex].mType == Renderer::LIGHT_SPOT)
+	if (lData->mType == Renderer::LIGHT_POINT ||
+	   lData->mType == Renderer::LIGHT_SPOT)
 	{
-		if (mLightData[lLightIndex].mPosition != Vector3DF(pX, pY, pZ))
+		if (lData->mPosition != pPos)
 		{
-			mLightData[lLightIndex].mTransformationChanged = true;
+			lData->mTransformationChanged = true;
 		}
-
-		mLightData[lLightIndex].mPosition.Set(pX, pY, pZ);
+		lData->mPosition = pPos;
 	}
 }
 
-void Renderer::SetLightDirection(LightID pLightID, float pX, float pY, float pZ)
+void Renderer::SetLightDirection(LightID pLightId, const Vector3DF& pDir)
 {
-	int lLightIndex = (int)pLightID;
+	LightData* lData = GetLightData(pLightId);
+	assert(lData);
 
-	if (lLightIndex == INVALID_LIGHT)
-		return;
-
-	if (mLightData[lLightIndex].mType == Renderer::LIGHT_DIRECTIONAL ||
-	   mLightData[lLightIndex].mType == Renderer::LIGHT_SPOT)
+	if (lData->mType == Renderer::LIGHT_DIRECTIONAL ||
+	   lData->mType == Renderer::LIGHT_SPOT)
 	{
-		Vector3DF lPrevDir(mLightData[lLightIndex].mDirection);
-		mLightData[lLightIndex].mDirection.Set(pX, pY, pZ);
-		mLightData[lLightIndex].mDirection.Normalize();
+		Vector3DF lPrevDir(lData->mDirection);
+		lData->mDirection = pDir;
+		lData->mDirection.Normalize();
 
-		if (lPrevDir != mLightData[lLightIndex].mDirection)
+		if (lPrevDir != lData->mDirection)
 		{
-			mLightData[lLightIndex].mTransformationChanged = true;
+			lData->mTransformationChanged = true;
 		}
 
-		if (mLightData[lLightIndex].mType == Renderer::LIGHT_SPOT)
+		if (lData->mType == Renderer::LIGHT_SPOT)
 		{
 			const float lEpsilon = 1e-6f;
 
@@ -622,140 +621,131 @@ void Renderer::SetLightDirection(LightID pLightID, float pX, float pY, float pZ)
 			Vector3DF lAxisZ;
 
 			// If light direction is pointing up.
-			if (mLightData[lLightIndex].mDirection.y >= (1.0f - lEpsilon))
+			if (lData->mDirection.y >= (1.0f - lEpsilon))
 			{
-				lAxisX = mLightData[lLightIndex].mDirection / Vector3DF(1, 0, 0);
-				lAxisY = mLightData[lLightIndex].mDirection / lAxisX;
-				lAxisZ = mLightData[lLightIndex].mDirection;
+				lAxisX = lData->mDirection / Vector3DF(1, 0, 0);
+				lAxisY = lData->mDirection / lAxisX;
+				lAxisZ = lData->mDirection;
 			}
 			else
 			{
-				lAxisX = Vector3DF(0, 1, 0) / mLightData[lLightIndex].mDirection;
-				lAxisY = mLightData[lLightIndex].mDirection / lAxisX;
-				lAxisZ = mLightData[lLightIndex].mDirection;
+				lAxisX = Vector3DF(0, 1, 0) / lData->mDirection;
+				lAxisY = lData->mDirection / lAxisX;
+				lAxisZ = lData->mDirection;
 			}
 
 			lAxisX.Normalize();
 			lAxisY.Normalize();
 			lAxisZ.Normalize();
 
-			mLightData[lLightIndex].mOrientation.SetAxisX(lAxisX);
-			mLightData[lLightIndex].mOrientation.SetAxisY(lAxisY);
-			mLightData[lLightIndex].mOrientation.SetAxisZ(lAxisZ);
+			lData->mOrientation.SetAxisX(lAxisX);
+			lData->mOrientation.SetAxisY(lAxisY);
+			lData->mOrientation.SetAxisZ(lAxisZ);
 		}
 	}
 }
 
-void Renderer::SetLightColor(LightID pLightID, float r, float g, float b)
+void Renderer::SetLightColor(LightID pLightId, const Vector3DF& pColor)
 {
-	const int lLightIndex = (int)pLightID;
-	if (lLightIndex == INVALID_LIGHT)
-		return;
+	LightData* lData = GetLightData(pLightId);
+	assert(lData);
 
-	mLightData[lLightIndex].mColor[0] = r;
-	mLightData[lLightIndex].mColor[1] = g;
-	mLightData[lLightIndex].mColor[2] = b;
+	lData->mColor[0] = pColor.x;
+	lData->mColor[1] = pColor.y;
+	lData->mColor[2] = pColor.z;
 }
 
-void Renderer::GetLightPosition(LightID pLightID, float& pX, float& pY, float& pZ)
+Vector3DF Renderer::GetLightPosition(LightID pLightId) const
 {
-	int lLightIndex = (int)pLightID;
-
-	pX = 0;
-	pY = 0;
-	pZ = 0;
-
-	if (lLightIndex != INVALID_LIGHT)
+	const LightData* lData = GetLightData(pLightId);
+	assert(lData);
+	if (lData)
 	{
-		pX = (float)mLightData[lLightIndex].mPosition.x;
-		pY = (float)mLightData[lLightIndex].mPosition.y;
-		pZ = (float)mLightData[lLightIndex].mPosition.z;
+		return lData->mPosition;
 	}
+	return Vector3DF();
 }
 
-void Renderer::GetLightDirection(LightID pLightID, float& pX, float& pY, float& pZ)
+Vector3DF Renderer::GetLightDirection(LightID pLightId) const
 {
-	int lLightIndex = (int)pLightID;
-
-	pX = 0;
-	pY = 0;
-	pZ = 0;
-
-	if (lLightIndex != INVALID_LIGHT)
+	const LightData* lData = GetLightData(pLightId);
+	assert(lData);
+	if (lData)
 	{
-		pX = (float)mLightData[lLightIndex].mDirection.x;
-		pY = (float)mLightData[lLightIndex].mDirection.y;
-		pZ = (float)mLightData[lLightIndex].mDirection.z;
+		return lData->mDirection;
 	}
+	return Vector3DF();
 }
 
-void Renderer::GetLightColor(LightID pLightID, float& pR, float& pG, float& pB)
+Vector3DF Renderer::GetLightColor(LightID pLightId) const
 {
-	int lLightIndex = (int)pLightID;
-
-	pR = 0;
-	pG = 0;
-	pB = 0;
-
-	if (lLightIndex != INVALID_LIGHT && mLightData[lLightIndex].mEnabled == true)
+	const LightData* lData = GetLightData(pLightId);
+	assert(lData);
+	if (lData)
 	{
-		pR = mLightData[lLightIndex].mColor[0];
-		pG = mLightData[lLightIndex].mColor[1];
-		pB = mLightData[lLightIndex].mColor[2];
+		return Vector3DF(lData->mColor[0], lData->mColor[1], lData->mColor[2]);
 	}
+	return Vector3DF();
 }
 
-Renderer::LightType Renderer::GetLightType(LightID pLightID)
+Renderer::LightType Renderer::GetLightType(LightID pLightId)
 {
-	int lLightIndex = (int)pLightID;
-
-	if (lLightIndex == INVALID_LIGHT)
-		return LIGHT_INVALID;
-
-	return mLightData[lLightIndex].mType;
+	const LightData* lData = GetLightData(pLightId);
+	assert(lData);
+	if (lData)
+	{
+		return lData->mType;
+	}
+	return LIGHT_INVALID;
 }
 
-float Renderer::GetLightCutoffAngle(LightID pLightID)
+float Renderer::GetLightCutoffAngle(LightID pLightId)
 {
-	int lLightIndex = (int)pLightID;
-
-	if (lLightIndex == INVALID_LIGHT)
-		return 180;
-
-	return mLightData[lLightIndex].mCutoffAngle;
+	const LightData* lData = GetLightData(pLightId);
+	assert(lData);
+	if (lData)
+	{
+		return lData->mCutoffAngle;
+	}
+	return 180;
 }
 
-float Renderer::GetLightSpotExponent(LightID pLightID)
+float Renderer::GetLightSpotExponent(LightID pLightId)
 {
-	int lLightIndex = (int)pLightID;
-
-	if (lLightIndex == INVALID_LIGHT)
-		return 180;
-
-	return mLightData[lLightIndex].mSpotExponent;
+	const LightData* lData = GetLightData(pLightId);
+	assert(lData);
+	if (lData)
+	{
+		return lData->mSpotExponent;
+	}
+	return 180;
 }
 
 void Renderer::SortLights(const Vector3DF& pReferencePosition)
 {
 	smRenderer = this;
+	int i = 0;
+	LightDataMap::iterator x = mLightDataMap.begin();
+	for (; x != mLightDataMap.end(); ++i, ++x)
+	{
+		mSortedLights[i] = x->first;
+	}
 	smReferencePosition = pReferencePosition;
-	::qsort(mLightIndex, mLightCount, sizeof(int), LightCompare);
+	::qsort(mSortedLights, i, sizeof(mSortedLights[0]), LightCompare);
 }
 
 int Renderer::LightCompare(const void* pLight1, const void* pLight2)
 {
-	const LightData& lLight1 = smRenderer->GetLightData(*(int*)pLight1);
-	const LightData& lLight2 = smRenderer->GetLightData(*(int*)pLight2);
+	const LightData* lLight1 = smRenderer->GetLightData(*(LightID*)pLight1);
+	const LightData* lLight2 = smRenderer->GetLightData(*(LightID*)pLight2);
 
-	float lInfluence1 = GetLightInfluence(lLight1);
-	float lInfluence2 = GetLightInfluence(lLight2);
-
+	const float lInfluence1 = GetLightInfluence(*lLight1);
+	const float lInfluence2 = GetLightInfluence(*lLight2);
 	if (lInfluence1 < lInfluence2)
-		return -1;
+		return +1;	// Sort in descending order of influence.
 	else if (lInfluence1 > lInfluence2)
-		return 1;
-	else
-		return 0;
+		return -1;	// Sort in descending order of influence.
+	return 0;
 }
 
 float Renderer::GetLightInfluence(const LightData& pLightData)
@@ -778,6 +768,11 @@ float Renderer::GetLightInfluence(const LightData& pLightData)
 		case LIGHT_POINT:
 		{
 			lInfluence /= smReferencePosition.GetDistanceSquared(pLightData.mPosition);
+		} // TRICKY: Fall through.
+		case LIGHT_DIRECTIONAL:
+		{
+			lInfluence *= 1 + pLightData.mShadowRange;
+			lInfluence *= pLightData.mEnabled? 1 : 0;
 		}
 		break;
 		default: break;
@@ -787,7 +782,7 @@ float Renderer::GetLightInfluence(const LightData& pLightData)
 
 Renderer::LightID Renderer::GetClosestLight(int pIndex)
 {
-	return (LightID)GetLightIndex(pIndex);
+	return mSortedLights[pIndex];
 }
 
 Renderer::TextureID Renderer::AddTexture(Texture* pTexture)
@@ -1060,13 +1055,13 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 		RemoveShadowVolumes(lGeometryData);
 
 		// Remove the geometry from all spot lights, in case it's added there.
-		for (int i = 0; i < mLightCount; i++)
+		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 		{
-			LightData& lLight = mLightData[mLightIndex[i]];
-			if (lLight.mType == Renderer::LIGHT_SPOT)
+			LightData* lLight = x->second;
+			if (lLight->mType == Renderer::LIGHT_SPOT)
 			{
-				if (lLight.mShadowMapGeometrySet.Remove(lGeometryData) == true)
-					lLight.mShadowMapNeedUpdate = true;
+				if (lLight->mShadowMapGeometrySet.Remove(lGeometryData) == true)
+					lLight->mShadowMapNeedUpdate = true;
 			}
 		}
 
@@ -1180,8 +1175,8 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 {
 	GeometryData* lGeometry = (GeometryData*)pGeometry->GetRendererData();
 #define MATH_SQUARE(x) (x)*(x)
-	const bool lDenyShadows = (lGeometry->mShadow == FORCE_NO_SHADOWS || mShadowMode <= NO_SHADOWS || mLightCount == 0 ||
-		pGeometry->GetTransformation().GetPosition().GetDistanceSquared(mCameraTransformation.GetPosition()) >= MATH_SQUARE(mLightData[0].mShadowRange * 4));
+	const bool lDenyShadows = (lGeometry->mShadow == FORCE_NO_SHADOWS || mShadowMode <= NO_SHADOWS || mLightDataMap.empty() ||
+		pGeometry->GetTransformation().GetPosition().GetDistanceSquared(mCameraTransformation.GetPosition()) >= MATH_SQUARE(GetLightData((LightID)0)->mShadowRange * 4));
 	const bool lForceShadows = (mShadowMode == FORCE_CAST_SHADOWS);
 	const bool lEscapeShadows = (lGeometry->mShadow == NO_SHADOWS);
 	if (lDenyShadows || (!lForceShadows && lEscapeShadows))
@@ -1200,28 +1195,32 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 	*/
 	if (mShadowHint == Renderer::SH_VOLUMES_AND_MAPS)
 	{
-		for (int i = 0; i < mLightCount; i++)
+		for (int i = 0; i < GetLightCount(); i++)
 		{
-			LightData& lLight = mLightData[mLightIndex[i]];
+			LightData* lLight = GetLightData(GetClosestLight(i));
+			if (lLight->mShadowRange <= 0)
+			{
+				continue;
+			}
 
-			if (lLight.mType == Renderer::LIGHT_SPOT)
+			if (lLight->mType == Renderer::LIGHT_SPOT)
 			{
 				if (pGeometry->GetTransformationChanged() == true)
-					lLight.mShadowMapNeedUpdate = true;
+					lLight->mShadowMapNeedUpdate = true;
 
-				float lDist = lLight.mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
-				float lMinDist = lLight.mRadius + pGeometry->GetBoundingRadius();
+				float lDist = lLight->mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
+				float lMinDist = lLight->mRadius + pGeometry->GetBoundingRadius();
 				lMinDist *= lMinDist;
 
 				if (lDist < lMinDist)
 				{
-					if (lLight.mShadowMapGeometrySet.Insert(lGeometry) == true)
-						lLight.mShadowMapNeedUpdate = true;
+					if (lLight->mShadowMapGeometrySet.Insert(lGeometry) == true)
+						lLight->mShadowMapNeedUpdate = true;
 				}
 				else
 				{
-					if (lLight.mShadowMapGeometrySet.Remove(lGeometry) == true)
-						lLight.mShadowMapNeedUpdate = true;
+					if (lLight->mShadowMapGeometrySet.Remove(lGeometry) == true)
+						lLight->mShadowMapNeedUpdate = true;
 				}
 			}
 		}
@@ -1234,28 +1233,31 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 
 	// Iterate over all the closest light sources and update shadow volumes.
 	unsigned lActiveLightCount = 0;
-	int lLoopMax = MAX_SHADOW_VOLUMES < mLightCount ? MAX_SHADOW_VOLUMES : mLightCount;
+	int lLoopMax = MAX_SHADOW_VOLUMES < GetLightCount() ? MAX_SHADOW_VOLUMES : GetLightCount();
 	int i;
 	for (i = 0; i < lLoopMax; i++)
 	{
 		bool lProcessLight = false;
-		LightData& lLight = mLightData[mLightIndex[i]];
-
-		if (lLight.mEnabled == true)
+		LightData* lLight = GetLightData(GetClosestLight(i));
+		if (lLight->mShadowRange <= 0)
 		{
-			if (lLight.mType == Renderer::LIGHT_POINT ||
-			   (lLight.mType == Renderer::LIGHT_SPOT && mShadowHint == Renderer::SH_VOLUMES_ONLY))
-			{
-				float lDist = lLight.mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
-				float lMinDist = lLight.mRadius + pGeometry->GetBoundingRadius();
-				lMinDist *= lMinDist;
+			continue;
+		}
 
-				if (lDist < lMinDist)
+		if (lLight->mEnabled == true)
+		{
+			if (lLight->mType == Renderer::LIGHT_POINT ||
+			   (lLight->mType == Renderer::LIGHT_SPOT && mShadowHint == Renderer::SH_VOLUMES_ONLY))
+			{
+				float lDist = lLight->mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
+				float lMinDist = lLight->mRadius + pGeometry->GetBoundingRadius();
+
+				if (lDist < lMinDist*lMinDist)
 				{
 					lProcessLight = true;
 				}
 			}
-			else if(lLight.mType == Renderer::LIGHT_DIRECTIONAL)
+			else if(lLight->mType == Renderer::LIGHT_DIRECTIONAL)
 			{
 				lProcessLight = true;
 			}
@@ -1276,32 +1278,32 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 					lShadowGeom->mGeometry = lShadowVolume;
 					lShadowVolume->SetRendererData(lShadowGeom);
 
-					if (lLight.mType == Renderer::LIGHT_DIRECTIONAL)
+					if (lLight->mType == Renderer::LIGHT_DIRECTIONAL)
 					{
-						lShadowVolume->UpdateShadowVolume(lLight.mDirection,
-										    lLight.mShadowRange, 
+						lShadowVolume->UpdateShadowVolume(lLight->mDirection,
+										    lLight->mShadowRange, 
 										    true);
 					}
 					else
 					{
-						lShadowVolume->UpdateShadowVolume(lLight.mPosition,
-										    lLight.mShadowRange, 
+						lShadowVolume->UpdateShadowVolume(lLight->mPosition,
+										    lLight->mShadowRange, 
 										    false);
 					}
 
 					mShadowVolumeTable.Insert(lId, lShadowGeom);
 					lGeometry->mShadowVolume[i] = (GeometryID)lId;
 
-					lShadowsUpdated = BindShadowGeometry(lShadowVolume, lLight.mHint);
+					lShadowsUpdated = BindShadowGeometry(lShadowVolume, lLight->mHint);
 				}
 
-				lGeometry->mLightID[i] = mLightIndex[i];
+				lGeometry->mLightID[i] = GetClosestLight(i);
 			}
 			else
 			{
 				if ((lGeomTransformationChanged || pGeometry->GetVertexDataChanged() ||
-					lGeometry->mLightID[i] != mLightIndex[i]) ||
-					(lLight.mTransformationChanged &&
+					lGeometry->mLightID[i] != GetClosestLight(i)) ||
+					(lLight->mTransformationChanged &&
 					mCurrentFrame - lGeometry->mLastFrameShadowsUpdated >= mShadowUpdateFrameDelay))
 				{
 					ShadowVolumeTable::Iterator x = mShadowVolumeTable.Find(lGeometry->mShadowVolume[i]);
@@ -1310,26 +1312,26 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 					{
 						GeometryData* lShadowGeom = *x;
 						ShadowVolume* lShadowVolume = (ShadowVolume*)lShadowGeom->mGeometry;
-						if (lLight.mType == Renderer::LIGHT_DIRECTIONAL)
+						if (lLight->mType == Renderer::LIGHT_DIRECTIONAL)
 						{
-							lShadowVolume->UpdateShadowVolume(lLight.mDirection,
-											    lLight.mShadowRange, 
+							lShadowVolume->UpdateShadowVolume(lLight->mDirection,
+											    lLight->mShadowRange, 
 											    true);
 						}
 						else
 						{
-							lShadowVolume->UpdateShadowVolume(lLight.mPosition,
-											    lLight.mShadowRange, 
+							lShadowVolume->UpdateShadowVolume(lLight->mPosition,
+											    lLight->mShadowRange, 
 											    false);
 						}
 
 						lShadowsUpdated = true;
-						lGeometry->mLightID[i] = mLightIndex[i];
+						lGeometry->mLightID[i] = GetClosestLight(i);
 					}
 					else
 					{
 						lGeometry->mShadowVolume[i] = (GeometryID)0;
-						lGeometry->mLightID[i] = -1;
+						lGeometry->mLightID[i] = INVALID_LIGHT;
 					}
 				}
 			}
@@ -1338,7 +1340,7 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 		{
 			// Light is too far away or has been disabled. Remove shadow volume.
 			RemoveShadowVolume(lGeometry->mShadowVolume[i]);
-			lGeometry->mLightID[i] = -1;
+			lGeometry->mLightID[i] = INVALID_LIGHT;
 		}
 	}// End for(i < Renderer::MAX_SHADOW_VOLUMES)
 
@@ -1353,6 +1355,16 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 	return 0;
 }
 
+void Renderer::Tick(float pTime)
+{
+	DynamicRendererMap::iterator x = mDynamicRendererMap.begin();
+	for (; x != mDynamicRendererMap.end(); ++x)
+	{
+		DynamicRenderer* lRenderer = x->second;
+		lRenderer->Tick(pTime);
+	}
+}
+
 unsigned Renderer::GetCurrentFrame() const
 {
 	return mCurrentFrame;
@@ -1361,21 +1373,6 @@ unsigned Renderer::GetCurrentFrame() const
 bool Renderer::CheckFlag(unsigned pFlags, unsigned pFlag)
 {
 	return (pFlags & pFlag) != 0;
-}
-
-Renderer::LightID Renderer::AddDirectionalLight(LightHint pHint, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pShadowRange)
-{
-	return AddDirectionalLight(pHint, (float)pDir.x, (float)pDir.y, (float)pDir.z, pLightIntensity * (float)pColor.mRed / 255.0f, pLightIntensity * (float)pColor.mGreen / 255.0f, pLightIntensity * (float)pColor.mBlue  / 255.0f, pShadowRange);
-}
-
-Renderer::LightID Renderer::AddPointLight(LightHint pHint, const Vector3DF& pPos, const Color& pColor, float pLightIntensity, float pLightRadius, float pShadowRange)
-{
-	return AddPointLight(pHint, (float)pPos.x, (float)pPos.y, (float)pPos.z, pLightIntensity * (float)pColor.mRed   / 255.0f, pLightIntensity * (float)pColor.mGreen / 255.0f, pLightIntensity * (float)pColor.mBlue  / 255.0f, pLightRadius, pShadowRange);
-}
-
-Renderer::LightID Renderer::AddSpotLight(LightHint pHint, const Vector3DF& pPos, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pCutoffAngle, float pSpotExponent, float pLightRadius, float pShadowRange)
-{
-	return AddSpotLight(pHint, (float)pPos.x, (float)pPos.y, (float)pPos.z, (float)pDir.x, (float)pDir.y, (float)pDir.z, pLightIntensity * (float)pColor.mRed   / 255.0f, pLightIntensity * (float)pColor.mGreen / 255.0f, pLightIntensity * (float)pColor.mBlue  / 255.0f, pCutoffAngle, pSpotExponent, pLightRadius, pShadowRange);
 }
 
 Material* Renderer::GetMaterial(MaterialType pMaterialType) const
@@ -1399,14 +1396,9 @@ Renderer::TextureData* Renderer::GetEnvTexture() const
 	return mEnvTexture;
 }
 
-Renderer::LightData& Renderer::GetLightData(int pLightIndex)
+Renderer::LightData* Renderer::GetLightData(LightID pLightId) const
 {
-	return mLightData[pLightIndex];
-}
-
-int Renderer::GetLightIndex(int pIndex) const
-{
-	return mLightIndex[pIndex];
+	return HashUtil::FindMapObject(mLightDataMap, pLightId);
 }
 
 int Renderer::GetNumSpotLights() const
@@ -1642,13 +1634,13 @@ void Renderer::ReleaseTextureMaps()
 void Renderer::ReleaseShadowMaps()
 {
 	// Release shadow maps.
-	for (int i = 0; i < mLightCount; i++)
+	LightDataMap::iterator x = mLightDataMap.begin();
+	for (; x != mLightDataMap.end(); ++x)
 	{
-		int lIndex = mLightIndex[i];
-
-		if (mLightData[lIndex].mType == Renderer::LIGHT_SPOT)
+		LightData* lData = x->second;
+		if (lData->mType == Renderer::LIGHT_SPOT)
 		{
-			mLightData[lIndex].mShadowMapID = ReleaseShadowMap(mLightData[lIndex].mShadowMapID);
+			lData->mShadowMapID = ReleaseShadowMap(lData->mShadowMapID);
 		}
 	}
 }

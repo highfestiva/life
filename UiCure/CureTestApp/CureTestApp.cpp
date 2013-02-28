@@ -152,6 +152,7 @@ int CureTestApplication::Run()
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
 		&lFileLogger, &lPerformanceLogger, &lMemLogger);
 	LogType::GetLog(LogType::SUB_ROOT)->SetLevelThreashold(LEVEL_TRACE);
+	LogType::GetLog(LogType::SUB_NETWORK)->SetLevelThreashold(LEVEL_ERROR);
 
 	mLog.Headline(_T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"));
 

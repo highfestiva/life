@@ -457,7 +457,7 @@ class PhysWriter(ChunkyWriter):
 
 	def _writeshape(self, shape):
 		# Write all general parameters first.
-		types = {"capsule":1, "sphere":2, "box":3, "mesh":4}
+		types = {"capsule":1, "cylinder":2, "sphere":3, "box":4, "mesh":5}
 		self._writeint(types[shape.type])
 		node = shape.getnode()
 		totalmass = self._gettotalmass()

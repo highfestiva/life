@@ -59,7 +59,6 @@ const FireControl& ClientOptionsManager::GetFireControl() const
 
 void ClientOptionsManager::DoRefreshConfiguration()
 {
-	typedef std::pair<const str, float*> KeyValue;
 	const KeyValue lEntries[] =
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
@@ -68,7 +67,7 @@ void ClientOptionsManager::DoRefreshConfiguration()
 		KeyValue(_T(RTVAR_CTRL_STEER_BACK), &mSteeringControl.mControl[Steering::CONTROL_BACKWARD]),
 		KeyValue(_T(RTVAR_CTRL_STEER_FWD3D), &mSteeringControl.mControl[Steering::CONTROL_FORWARD3D]),
 		KeyValue(_T(RTVAR_CTRL_STEER_BACK3D), &mSteeringControl.mControl[Steering::CONTROL_BACKWARD3D]),
-		KeyValue(_T(RTVAR_CTRL_STEER_BRKBACK), &mSteeringControl.mControl[Steering::CONTROL_BREAKANDBACK]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BRKBACK), &mSteeringControl.mControl[Steering::CONTROL_BRAKEANDBACK]),
 		KeyValue(_T(RTVAR_CTRL_STEER_LEFT), &mSteeringControl.mControl[Steering::CONTROL_LEFT]),
 		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT), &mSteeringControl.mControl[Steering::CONTROL_RIGHT]),
 		KeyValue(_T(RTVAR_CTRL_STEER_LEFT3D), &mSteeringControl.mControl[Steering::CONTROL_LEFT3D]),

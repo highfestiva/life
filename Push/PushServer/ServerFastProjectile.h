@@ -34,7 +34,7 @@ public:
 private:
 	virtual void OnLoaded();
 	virtual void OnMicroTick(float pFrameTime);
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
 
 	Life::Launcher* mLauncher;
 	float mMaxVelocity;

@@ -79,6 +79,13 @@ void ClientConsoleManager::Join()
 
 
 
+bool ClientConsoleManager::ToggleVisible()
+{
+	const bool lConsoleActive = mUiConsole->ToggleVisible();
+	mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(lConsoleActive);
+	return lConsoleActive;
+}
+
 UiConsole* ClientConsoleManager::GetUiConsole() const
 {
 	return (mUiConsole);
@@ -247,6 +254,11 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 					mLog.AError("Could not add another player!");
 					lResult = 1;
 				}
+			}
+			break;
+			default:
+			{
+				lResult = -1;
 			}
 			break;
 		}

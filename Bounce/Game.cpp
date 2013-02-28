@@ -272,9 +272,9 @@ void Game::DidPhysicsTick()
 	PostPhysicsTick();
 }
 
-void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId, const Vector3DF& pNormal)
 {
-	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId);
+	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId, pNormal);
 }
 
 void Game::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
@@ -357,7 +357,7 @@ bool Game::Initialize()
 		const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
-			Color::Color(255, 255, 255), lPixelShadersEnabled? 1.0f : 1.5f, 300);
+			Vector3DF(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 300);
 		mUiManager->GetRenderer()->EnableAllLights(true);
 	}
 	return lOk;

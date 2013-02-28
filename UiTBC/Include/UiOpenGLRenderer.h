@@ -1,11 +1,8 @@
-/*
-	Class:  OpenGLRenderer
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
-#ifndef UIOPENGLRENDERER_H
-#define UIOPENGLRENDERER_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2013, Pixel Doctrine
+
+#pragma once
 
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Graphics2D.h"
@@ -20,13 +17,10 @@
 #include "UiTBC.h"
 #include <list>
 
+
+
 namespace UiTbc
 {
-
-/*
-	Some storage classes shared by OpenGLRenderer and the material classes.
-	They should all be private to everyone but the material classes.
-*/
 
 
 
@@ -90,31 +84,31 @@ public:
 	void SetAmbientLight(float pRed, float pGreen, float pBlue);
 	void AddAmbience(float pRed, float pGreen, float pBlue);
 
-	LightID AddDirectionalLight(LightHint pHint,
-				    float pDirX, float pDirY, float pDirZ,
-				    float pRed, float pGreen, float pBlue,
-				    float pShadowRange);
+	virtual LightID AddDirectionalLight(LightHint pHint,
+		const Vector3DF& pDir,
+		const Vector3DF& pColor,
+		float pShadowRange);
 
-	LightID AddPointLight(LightHint pHint,
-			      float pPosX, float pPosY, float pPosZ,
-			      float pRed, float pGreen, float pBlue,
-			      float pLightRadius,
-			      float pShadowRange);
+	virtual LightID AddPointLight(LightHint pHint,
+		const Vector3DF& pPos,
+		const Vector3DF& pColor,
+		float pLightRadius,
+		float pShadowRange);
 
-	LightID AddSpotLight(LightHint pHint,
-			     float pPosX, float pPosY, float pPosZ,
-			     float pDirX, float pDirY, float pDirZ,
-			     float pRed, float pGreen, float pBlue,
-			     float pCutoffAngle,
-			     float pSpotExponent,
-			     float pLightRadius,
-			     float pShadowRange);
+	virtual LightID AddSpotLight(LightHint pHint,
+		const Vector3DF& pPos,
+		const Vector3DF& pDir,
+		const Vector3DF& pColor,
+		float pCutoffAngle,
+		float pSpotExponent,
+		float pLightRadius,
+		float pShadowRange);
 
 	virtual void RemoveLight(LightID pLightID);
 	virtual void EnableAllLights(bool pEnable);
 
-	void SetLightPosition(LightID pLightID, float pX, float pY, float pZ);
-	void SetLightDirection(LightID pLightID, float pX, float pY, float pZ);
+	void SetLightPosition(LightID pLightID, const Vector3DF& pPos);
+	void SetLightDirection(LightID pLightID, const Vector3DF& pDir);
 
 	virtual TextureID AddTexture(Texture* pTexture);
 
@@ -122,6 +116,7 @@ public:
 	bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType);
 
 	virtual unsigned RenderScene();
+	virtual void RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards);
 	virtual void RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation);
 
 	// Only used by the OpenGL material classes.
@@ -160,7 +155,7 @@ private:
 	Material* CreateMaterial(MaterialType pMaterialType);
 
 	void ProcessLights();
-	void SetupGLLight(int pLightIndex, const LightData& pLight);
+	void SetupGLLight(int pLightIndex, const LightData* pLight);
 
 	// Shadow volumes are used with directional lights and point lights.
 	void RenderShadowVolumes();
@@ -195,6 +190,6 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-} // End namespace.
 
-#endif
+
+}

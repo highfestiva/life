@@ -232,9 +232,11 @@ void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	}
 }
 
-void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, float pStrength)
+void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
 	(void)pExplosiveGeometry;
+	(void)pVelocity;
+	(void)pNormal;
 
 	float lIndicateHit;
 	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
@@ -261,7 +263,7 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
 			if (lHealth)
 			{
-				DrainHealth(pExplosive, lObject, lHealth, lForce*(float)Random::Normal(0.51, 0.05, 0.3, 0.5));
+				DrainHealth(pExplosive, lObject, lHealth, lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f));
 			}
 			x->second->ForceSend();
 		}
@@ -277,15 +279,16 @@ void PushServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::Context
 	Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pHitObject->GetAttribute(_T("float_health"));
 	if (lHealth)
 	{
-		DrainHealth(pBullet, pHitObject, lHealth, (float)Random::Normal(0.17, 0.01, 0.1, 0.3));
-		const float lIncomingAngle = 2*PIF * (float)Random::Uniform();
+		DrainHealth(pBullet, pHitObject, lHealth, Random::Normal(0.17f, 0.01f, 0.1f, 0.3f));
+		const float lIncomingAngle = 2*PIF * Random::Uniform(0.0f, 1.0f);
 		OrderAirStrike(pHitObject->GetPosition(), lIncomingAngle);
-		Vector3DF v(25*::sin(lIncomingAngle), 25*::cos(lIncomingAngle), 0);
+		Vector3DF v(27*::sin(lIncomingAngle), 27*::cos(lIncomingAngle), 2);
 		QuaternionF q = QuaternionF();
 		q.RotateAroundWorldZ(PIF/4);
-		OrderAirStrike(pHitObject->GetPosition() + q*v, lIncomingAngle);
+		const Vector3DF r = RNDVEC(3.0f);
+		OrderAirStrike(pHitObject->GetPosition() + q*v+r, lIncomingAngle);
 		q.RotateAroundWorldZ(-PIF/2);
-		OrderAirStrike(pHitObject->GetPosition() + q*v, lIncomingAngle);
+		OrderAirStrike(pHitObject->GetPosition() + q*v+r, lIncomingAngle);
 	}
 }
 
@@ -295,14 +298,14 @@ Cure::ContextObject* PushServerDelegate::CreateAvatarForNpc(Npc* pNpc)
 {
 	double lSpawnPart;
 	CURE_RTVAR_GET(lSpawnPart, =, mGameServerManager->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
-	if (Random::Uniform(0, 0.999) >= lSpawnPart)
+	if (Random::Uniform(0.0, 0.999) >= lSpawnPart)
 	{
 		return 0;
 	}
 
 	Cure::ContextObject* lAvatar = mGameServerManager->GameManager::CreateContextObject(_T("hover_tank_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 	TransformationF lTransform;
-	lTransform.SetPosition(Vector3DF((float)Random::Uniform(3, 100), (float)Random::Uniform(-100, +100), 10));
+	lTransform.SetPosition(Vector3DF(Random::Uniform(3.0f, 100.0f), Random::Uniform(-100.0f, +100.0f), 10));
 	const float a = 1.0f/::sqrt(2.0f);
 	lTransform.SetOrientation(QuaternionF(0, 0, -a, -a));
 	lAvatar->SetInitialTransform(lTransform);

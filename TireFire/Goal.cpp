@@ -49,9 +49,11 @@ void Goal::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 	mTrigger = pTrigger;
 }
 
-void Goal::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject*)
+void Goal::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, const Vector3DF& pNormal)
 {
 	(void)pTriggerId;
+	(void)pOtherObject;
+	(void)pNormal;
 	mIsTriggered = true;
 }
 

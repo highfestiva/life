@@ -463,11 +463,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiBillboardGeometry.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiChunkyClass.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Source\UiChunkyLoader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiDynamicRenderer.cpp"
 				>
 			</File>
 			<File
@@ -544,6 +552,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiPainter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiParticleRenderer.cpp"
 				>
 			</File>
 			<File
@@ -857,11 +869,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\UiBillboardGeometry.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiBillboardRenderInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\UiChunkyClass.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Include\UiChunkyLoader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiDynamicRenderer.h"
 				>
 			</File>
 			<File
@@ -906,6 +930,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiPainter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiParticleRenderer.h"
 				>
 			</File>
 			<File

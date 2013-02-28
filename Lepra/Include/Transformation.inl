@@ -329,7 +329,16 @@ TEMPLATE void QUAL::GetAs4x4Matrix(_TVarType pMatrix[16]) const
 
 TEMPLATE void QUAL::GetAs4x4TransposeMatrix(_TVarType pMatrix[16]) const
 {
+	GetAs4x4TransposeMatrix(1, pMatrix);
+}
+
+TEMPLATE void QUAL::GetAs4x4TransposeMatrix(_TVarType pScale, _TVarType pMatrix[16]) const
+{
 	RotationMatrix<_TVarType> lOrientation(mOrientation.GetAsRotationMatrix());
+	if (pScale != 1)
+	{
+		lOrientation *= pScale;
+	}
 
 	pMatrix[0]  = lOrientation.GetElement(0);
 	pMatrix[1]  = lOrientation.GetElement(3);

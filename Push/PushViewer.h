@@ -28,6 +28,8 @@ public:
 	virtual ~PushViewer();
 
 private:
+	virtual void LoadSettings();
+	virtual void SaveSettings();
 	virtual bool Open();
 	virtual void TickUiInput();
 	virtual void TickUiUpdate();

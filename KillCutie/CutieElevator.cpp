@@ -26,13 +26,13 @@ CutieElevator::~CutieElevator()
 {
 }
 
-void CutieElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody)
+void CutieElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
 {
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
 	assert(lTrigger);
 	if (lTrigger->GetPriority() > -100)
 	{
-		Parent::OnTrigger(pTriggerId, pBody);
+		Parent::OnTrigger(pTriggerId, pBody, pNormal);
 		return;
 	}
 	if (!pBody || !mGame->GetCutie())
@@ -43,7 +43,7 @@ void CutieElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Context
 	Cure::ContextObject* lObject = (Cure::ContextObject*)pBody;
 	if (lObject->GetInstanceId() == mGame->GetCutie()->GetInstanceId())
 	{
-		Parent::OnTrigger(pTriggerId, pBody);
+		Parent::OnTrigger(pTriggerId, pBody, pNormal);
 	}
 }
 

@@ -17,6 +17,7 @@
 #include "../Life/LifeClient/ClientOptions.h"
 #include "../Life/LifeClient/MassObject.h"
 #include "../Life/LifeClient/UiConsole.h"
+#include "../Life/ProjectileUtil.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
@@ -25,6 +26,8 @@
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "../UiTBC/Include/UiParticleRenderer.h"
+#include "ExplodingMachine.h"
 #include "Explosion.h"
 #include "FastProjectile.h"
 #include "Level.h"
@@ -129,10 +132,6 @@ PushManager::~PushManager()
 	mStickLeft = 0;
 	delete mStickRight;
 	mStickRight = 0;
-
-#ifndef EMULATE_TOUCH
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
-#endif // Computer or touch device.
 }
 
 void PushManager::LoadSettings()
@@ -356,60 +355,20 @@ bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 
 
 
-void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, float pStrength)
+void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
 	(void)pExplosive;
 
 	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
-	{
-		// Shattered pieces, stones or mud.
-		const float lScale = VISUAL_SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
-		const int lParticleCount = (Random::GetRandomNumber() % 7) + 2;
-		for (int i = 0; i < lParticleCount; ++i)
-		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
-			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->DisableRootShadow();
-			float x = (float)Random::Uniform(-1, 1);
-			float y = (float)Random::Uniform(-1, 1);
-			float z = -1;
-			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
-			lPuff->SetInitialTransform(lTransform);
-			const float lAngle = (float)Random::Uniform(0, 2*PIF);
-			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
-			y = (6 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
-			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(3, 7) * lScale, 0.5f, (float)Random::Uniform(3, 7));
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-			lPuff->SetFadeOutTime(0.3f);
-#endif // Touch L&F
-			lPuff->StartLoading();
-		}
-	}
-
-	{
-		// Release gas puffs.
-		const int lParticleCount = (Random::GetRandomNumber() % 4) + 1;
-		for (int i = 0; i < lParticleCount; ++i)
-		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
-			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->DisableRootShadow();
-			float x = (float)Random::Uniform(-1, 1);
-			float y = (float)Random::Uniform(-1, 1);
-			float z = (float)Random::Uniform(-1, 1);
-			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
-			lPuff->SetInitialTransform(lTransform);
-			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
-			lPuff->SetOpacity(lOpacity);
-			x = x*12;
-			y = y*12;
-			z = (float)Random::Uniform(0, 7);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(1.5, 4));
-			lPuff->StartLoading();
-		}
-	}
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	//mLog.Infof(_T("Hit object normal is (%.1f; %.1f; %.1f)"), pNormal.x, pNormal.y, pNormal.z);
+	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
+	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
+	u -= pVelocity;	// Mirror and inverse.
+	u.Normalize();
+	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
+	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, Vector3DF(0,0,1), 1, lParticles*2, lParticles*2, lParticles, lParticles/2);
 
 	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
 	{
@@ -651,7 +610,7 @@ void PushManager::TickUiInput()
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 #if 1
-			const float lLeftPowerFwdRev = S(FORWARD) - S(BREAKANDBACK);
+			const float lLeftPowerFwdRev = S(FORWARD) - S(BRAKEANDBACK);
 			//const float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
 			const float lLeftPowerLR = S(RIGHT)-S(LEFT);
 			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
@@ -667,18 +626,21 @@ void PushManager::TickUiInput()
 			SetAvatarEnginePower(lObject, 5, lLeftPowerLR);
 			SetAvatarEnginePower(lObject, 8, lRightPowerLR);
 #else
+			const float lForward = S(FORWARD);
+			const float lBack = S(BACKWARD);
+			const float lBrakeAndBack = S(BRAKEANDBACK);
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
-			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
+			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBrakeAndBack);
 			SetAvatarEnginePower(lObject, 0, lPowerFwdRev);
 			float lPowerLR = S(RIGHT)-S(LEFT);
 			SetAvatarEnginePower(lObject, 1, lPowerLR);
-			float lPower = S(HANDBRAKE) - std::max(S(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
-			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
-				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
+			float lPower = S(HANDBRAKE) - std::max(S(BREAK), lIsMovingForward? lBrakeAndBack : 0.0f);
+			if (!SetAvatarEnginePower(lObject, 2, lPower) &&
+				lBrakeAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
 			{
 				// Someone is apparently trying to stop/break, but no engine configured for breaking.
 				// Just apply it as a reverse motion.
-				lPowerFwdRev = lForward - lBreakAndBack;
+				lPowerFwdRev = lForward - lBrakeAndBack;
 				SetAvatarEnginePower(lObject, 0, lPowerFwdRev);
 			}
 			lPower = S(UP)-S(DOWN);
@@ -1217,6 +1179,10 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 		lObject = new UiCure::CppContextObject(GetResourceManager(), _T("score_info"), mUiManager);
 		lObject->SetLoadResult(true);
 	}
+	else if (strutil::StartsWith(pClassId, _T("hover_tank")))
+	{
+		lObject = new ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+	}
 	else
 	{
 		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
@@ -1333,6 +1299,15 @@ void PushManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition());
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
+
+	if (pWeapon >= 0)
+	{
+		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+		TransformationF t;
+		Vector3DF v;
+		Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
+		lParticleRenderer->CreateFlare(0.3f, 7.5f, t.GetPosition(), v);
+	}
 }
 
 
@@ -1488,7 +1463,7 @@ void PushManager::DrawScore()
 				s.mDeaths = 0;
 				s.mPing = 0;
 				lScoreArray.push_back(s);
-				x = lScoreMap.insert(std::pair<str, Score*>(lName, &lScoreArray.back())).first;
+				x = lScoreMap.insert(ScoreMap::value_type(lName, &lScoreArray.back())).first;
 			}
 			switch (lMode)
 			{

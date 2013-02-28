@@ -34,6 +34,7 @@ public:
 	enum GeometryType
 	{
 		GEOMETRY_CAPSULE = 1,
+		GEOMETRY_CYLINDER,
 		GEOMETRY_SPHERE,
 		GEOMETRY_BOX,
 		GEOMETRY_MESH,
@@ -157,21 +158,37 @@ class ChunkyBoneCapsule: public ChunkyBoneGeometry
 	typedef ChunkyBoneGeometry Parent;
 public:
 	ChunkyBoneCapsule(const BodyData& pBodyData);
-	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
+	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const TransformationF& pTransform);
-	bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
+	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 		const TransformationF& pTransform);
 
 	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
-private:
+protected:
 	Vector3DF GetShapeSize() const;
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
-	GeometryType GetGeometryType() const;
+	virtual GeometryType GetGeometryType() const;
 
 	float32 mRadius;
 	float32 mLength;
+};
+
+
+
+class ChunkyBoneCylinder: public ChunkyBoneCapsule
+{
+	typedef ChunkyBoneCapsule Parent;
+public:
+	ChunkyBoneCylinder(const BodyData& pBodyData);
+	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
+		PhysicsManager::BodyType pType, const TransformationF& pTransform);
+	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
+		const TransformationF& pTransform);
+
+private:
+	virtual GeometryType GetGeometryType() const;
 };
 
 
@@ -181,9 +198,9 @@ class ChunkyBoneSphere: public ChunkyBoneGeometry
 	typedef ChunkyBoneGeometry Parent;
 public:
 	ChunkyBoneSphere(const BodyData& pBodyData);
-	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
+	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const TransformationF& pTransform);
-	bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
+	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 		const TransformationF& pTransform);
 
 	unsigned GetChunkySize(const void* pData = 0) const;
@@ -192,7 +209,7 @@ public:
 private:
 	Vector3DF GetShapeSize() const;
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
-	GeometryType GetGeometryType() const;
+	virtual GeometryType GetGeometryType() const;
 
 	float32 mRadius;
 };
@@ -204,9 +221,9 @@ class ChunkyBoneBox: public ChunkyBoneGeometry
 	typedef ChunkyBoneGeometry Parent;
 public:
 	ChunkyBoneBox(const BodyData& pBodyData);
-	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
+	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const TransformationF& pTransform);
-	bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
+	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 		const TransformationF& pTransform);
 
 	unsigned GetChunkySize(const void* pData = 0) const;
@@ -216,7 +233,7 @@ public:
 
 private:
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
-	GeometryType GetGeometryType() const;
+	virtual GeometryType GetGeometryType() const;
 
 	Vector3DF mSize;
 };
@@ -229,9 +246,9 @@ class ChunkyBoneMesh: public ChunkyBoneGeometry
 public:
 	ChunkyBoneMesh(const BodyData& pBodyData);
 	virtual ~ChunkyBoneMesh();
-	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
+	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const TransformationF& pTransform);
-	bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
+	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 		const TransformationF& pTransform);
 
 	unsigned GetChunkySize(const void* pData = 0) const;
@@ -241,7 +258,7 @@ private:
 	Vector3DF GetShapeSize() const;
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	void Clear();
-	GeometryType GetGeometryType() const;
+	virtual GeometryType GetGeometryType() const;
 	virtual void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal);
 
 	uint32 mVertexCount;

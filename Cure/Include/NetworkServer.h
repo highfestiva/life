@@ -80,11 +80,8 @@ private:
 	typedef std::hash_set<VSocket*, LEPRA_VOIDP_HASHER> SocketSet;
 	typedef SocketSet PendingSocketTable;
 	typedef std::hash_map<UserAccount::AccountId, UserConnection*> LoggedInIdUserTable;
-	typedef std::pair<UserAccount::AccountId, UserConnection*> LoggedInIdUserPair;
 	typedef std::hash_map<wstr, UserConnection*> LoggedInNameUserTable;
-	typedef std::pair<wstr, UserConnection*> LoggedInNameUserPair;
 	typedef std::hash_map<VSocket*, UserConnection*, LEPRA_VOIDP_HASHER> SocketUserTable;
-	typedef std::pair<VSocket*, UserConnection*> SocketUserPair;
 	typedef SocketSet SocketTimeoutTable;
 	typedef std::hash_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
 	typedef std::hash_set<UserAccount::AccountId> AccountIdSet;

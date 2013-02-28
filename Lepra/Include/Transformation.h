@@ -78,6 +78,7 @@ public:
 	void Get(_TVarType pMatrix[7]) const;
 	void GetAs4x4Matrix(_TVarType pMatrix[16]) const;
 	void GetAs4x4TransposeMatrix(_TVarType pMatrix[16]) const;
+	void GetAs4x4TransposeMatrix(_TVarType pScale, _TVarType pMatrix[16]) const;
 	void GetAs4x4InverseMatrix(_TVarType pMatrix[16]) const;
 	void GetAs4x4InverseTransposeMatrix(_TVarType pMatrix[16]) const;
 

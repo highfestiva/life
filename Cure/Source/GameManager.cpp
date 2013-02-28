@@ -363,7 +363,7 @@ void GameManager::GetBandwidthData(BandwidthData& pSent, BandwidthData& pReceive
 
 
 
-void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId)
+void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId, const Vector3DF& pNormal)
 {
 	ContextObject* lObject1 = GetContext()->GetObject(pTriggerListenerId);
 	if (lObject1)
@@ -371,7 +371,7 @@ void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTrigge
 		ContextObject* lObject2 = GetContext()->GetObject(pOtherBodyId);
 		if (lObject2)
 		{
-			lObject1->OnTrigger(pTrigger, lObject2);
+			lObject1->OnTrigger(pTrigger, lObject2, pNormal);
 		}
 	}
 }

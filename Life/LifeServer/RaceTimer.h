@@ -28,7 +28,7 @@ public:
 private:
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody);
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
 
 	typedef std::hash_map<Cure::GameObjectId, int> DoneMap;
 

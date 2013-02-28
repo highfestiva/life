@@ -35,8 +35,9 @@ public:
 
 	GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
 
-	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
-	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer);
+	void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
+	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, Renderer* pRenderer);
+	void ResetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
 
 	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
@@ -70,8 +71,8 @@ public:
 
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
 	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry);
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 };
 
 
@@ -121,6 +122,7 @@ public:
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
 
 private:
 	LOG_CLASS_DECLARE();
@@ -169,11 +171,11 @@ public:
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
 	virtual void PreRender();
 	virtual void PostRender();
+	void BindTexture(int pTextureID, int pMipMapLevelCount);
 
 protected:
-	
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	void BindTexture(int pTextureID, int pMipMapLevelCount);
+	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
 
 	GLint mTextureParamMin;
 	GLint mTextureParamMag;
@@ -271,7 +273,6 @@ public:
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 
 	bool mSingleColorPass;
 	GLint mTextureParamMin;
@@ -296,9 +297,6 @@ public:
 	inline virtual ~OpenGLMatSingleColorEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-
-protected:
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 };
 
 
@@ -324,7 +322,7 @@ public:
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
+	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
 
 	bool mSingleTexturePass;
 
@@ -347,9 +345,6 @@ public:
 	inline virtual ~OpenGLMatSingleTextureEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-
-protected:
-	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 };
 
 
@@ -369,6 +364,7 @@ public:
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
 
 	bool mFirstPass;
 
@@ -520,9 +516,9 @@ private:
 
 
 
-class OpenGLMatTextureAndLightmapPXS: public OpenGLMatSingleTextureSolid, public OpenGLMatPXS
+class OpenGLMatTextureAndLightmapPXS: public OpenGLMatTextureAndLightmap, public OpenGLMatPXS
 {
-	typedef OpenGLMatSingleTextureSolid Parent;
+	typedef OpenGLMatTextureAndLightmap Parent;
 public:
 	OpenGLMatTextureAndLightmapPXS(OpenGLRenderer* pRenderer,
 				       Material* pFallBackMaterial);
@@ -532,6 +528,7 @@ public:
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
 
 	static const astr smVP;
 	static const astr smFP[NUM_FP];
@@ -558,6 +555,7 @@ public:
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
 
 	static const astr smVP;
 	static const astr smFP[NUM_FP];

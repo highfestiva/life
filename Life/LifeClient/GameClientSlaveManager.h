@@ -49,6 +49,7 @@ public:
 	virtual ~GameClientSlaveManager();
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 	virtual void LoadSettings();
+	virtual void SaveSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();
@@ -131,7 +132,6 @@ protected:
 	void DrawSyncDebugInfo();
 
 	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
-	typedef std::pair<Cure::GameObjectId, int> ObjectFrameIndexPair;
 	typedef std::hash_set<Cure::GameObjectId> ObjectIdSet;
 
 	UiCure::GameUiManager* mUiManager;

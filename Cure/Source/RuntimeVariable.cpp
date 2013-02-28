@@ -698,7 +698,7 @@ void RuntimeVariableScope::CreateLocalVariable(const str& pName, DataType pType,
 		case RuntimeVariable::DATATYPE_REAL:	lVariable = new RuntimeVariable(pName, pDoubleValue, pSetMode);	break;
 	}
 	ScopeLock lLock(&mLock);
-	mVariableTable.insert(VariablePair(pName, lVariable));
+	mVariableTable.insert(VariableTable::value_type(pName, lVariable));
 }
 
 bool RuntimeVariableScope::DeleteLocalVariable(const str& pName)

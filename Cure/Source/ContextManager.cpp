@@ -68,7 +68,7 @@ void ContextManager::AddObject(ContextObject* pObject)
 	assert(pObject->GetInstanceId() != 0);
 	assert(mObjectTable.find(pObject->GetInstanceId()) == mObjectTable.end());
 	assert(pObject->GetManager() == this);
-	mObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+	mObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
 void ContextManager::RemoveObject(ContextObject* pObject)
@@ -148,7 +148,7 @@ void ContextManager::AddPhysicsSenderObject(ContextObject* pObject)
 	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
 	assert(pObject->GetManager() == this);
 	assert(pObject->GetManager()->GetGameManager()->GetTickLock()->IsOwner());
-	mPhysicsSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+	mPhysicsSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
 void ContextManager::AddPhysicsBody(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId)
@@ -169,7 +169,7 @@ void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
 	assert(pObject->GetInstanceId() != 0);
 	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
 	assert(pObject->GetManager() == this);
-	mAttributeSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+	mAttributeSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
 void ContextManager::UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize)
@@ -223,7 +223,7 @@ bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
 void ContextManager::EnableTickCallback(ContextObject* pObject)
 {
 	assert(pObject->GetInstanceId());
-	mTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+	mTickCallbackObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
 void ContextManager::DisableTickCallback(ContextObject* pObject)
@@ -235,7 +235,7 @@ void ContextManager::EnableMicroTickCallback(ContextObject* pObject)
 {
 	if (pObject->GetNetworkObjectType() == NETWORK_OBJECT_LOCAL_ONLY || GetGameManager()->IsPrimaryManager())
 	{
-		mMicroTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+		mMicroTickCallbackObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 	}
 }
 

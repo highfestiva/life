@@ -5,6 +5,8 @@
 
 
 #include "UiServerConsoleManager.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiLepra/Include/UiInput.h"
 #include "UiConsole.h"
 
 
@@ -48,6 +50,13 @@ void UiServerConsoleManager::Join()
 }
 
 
+
+bool UiServerConsoleManager::ToggleVisible()
+{
+	const bool lConsoleActive = mUiConsole->ToggleVisible();
+	mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(lConsoleActive);
+	return lConsoleActive;
+}
 
 UiConsole* UiServerConsoleManager::GetUiConsole() const
 {

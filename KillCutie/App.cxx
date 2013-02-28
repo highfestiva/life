@@ -1087,7 +1087,9 @@ bool App::Poll()
 		lOk = mGame->Tick();
 	}
 	mResourceManager->Tick();
-	mUiManager->EndRender();
+	float lRealTimeRatio;
+	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	mUiManager->EndRender(lRealTimeRatio/FPS);
 
 	if (mMusicPlayer)
 	{
@@ -2338,7 +2340,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			{
 				delete mDialog;
 				mDialog = 0;
-				mGame->AddScore(Random::Uniform(500, 5000), Random::Uniform(500, 5000));
+				mGame->AddScore(Random::Uniform(500.0, 5000.0), Random::Uniform(500.0, 5000.0));
 				EnterHiscore(str(), WHITE);
 			}
 		}
@@ -2988,7 +2990,7 @@ void App::OnTapSound(UiTbc::Button*)
 {
 	if (mTapClick->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), 1, (float)Random::Uniform(0.7, 1.4));
+		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), 1, Random::Uniform(0.7f, 1.4f));
 	}
 }
 

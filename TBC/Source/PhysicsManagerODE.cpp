@@ -163,7 +163,6 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Tra
 
 	// TODO: Create a real cylinder when ODE supports it.
 	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
-	mLog.AWarning("Warning! Cylinders are not accurately supported by ODE!");
 
 	lObject->mForceFeedbackId = pForceListenerId;
 	//assert(pType == STATIC || lObject->mForceFeedbackId);
@@ -206,7 +205,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Tran
 	if (pType == PhysicsManager::DYNAMIC)
 	{
 		dMass lMass;
-		::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
+		::dMassSetCapsuleTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
 		lObject->mBodyID = dBodyCreate(mWorldID);
 		::dBodySetMass(lObject->mBodyID, &lMass);
 		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
@@ -767,7 +766,6 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Transfo
 
 	// TODO: Create a real cylinder when ODE supports it.
 	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
-	mLog.AWarning("Warning! Cylinders are not accurately supported by ODE!");
 
 	dGeomSetData(lObject->mGeomID, lObject);
 
@@ -3253,7 +3251,7 @@ void PhysicsManagerODE::DoForceFeedback()
 	for (y = mTriggerInfoList.begin(); y != mTriggerInfoList.end(); ++y)
 	{
 		const TriggerInfo& lTriggerInfo = *y;
-		mTriggerCallback->OnTrigger(lTriggerInfo.mTriggerId, lTriggerInfo.mTriggerListenerId, lTriggerInfo.mBodyListenerId);
+		mTriggerCallback->OnTrigger(lTriggerInfo.mTriggerId, lTriggerInfo.mTriggerListenerId, lTriggerInfo.mBodyListenerId, lTriggerInfo.mNormal);
 	}
 	mTriggerInfoList.clear();
 
@@ -3343,7 +3341,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	}
 
 	dContact lContact[8];
-	const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
+	const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(lContact[0]));
 	if (lTriggerContactPointCount <= 0)
 	{
 		// In AABB range (since call came here), but no real contact.
@@ -3357,7 +3355,9 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		{
 			return;
 		}
-		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId));
+		const dVector3& n = lContact[0].geom.normal;
+		Vector3DF lNormal(n[0], n[1], n[2]);
+		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, lNormal));
 		return;
 	}
 	if(lObject2->mTriggerListenerId != 0)	// Only trig, no force application.
@@ -3366,7 +3366,9 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		{
 			return;
 		}
-		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId));
+		const dVector3& n = lContact[0].geom.normal;
+		Vector3DF lNormal(n[0], n[1], n[2]);
+		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, lNormal));
 		return;
 	}
 

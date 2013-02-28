@@ -49,9 +49,9 @@ void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVel
 	mParticleType = pParticleType;
 	mVelocity = pStartVelocity;
 	mScale = pScale;
-	mAngularVelocity.Set((float)Random::Uniform(-pAngularRange, pAngularRange),
-		(float)Random::Uniform(-pAngularRange, pAngularRange),
-		(float)Random::Uniform(-pAngularRange*0.1f, pAngularRange*0.1f));
+	mAngularVelocity.Set(Random::Uniform(-pAngularRange, pAngularRange),
+		Random::Uniform(-pAngularRange, pAngularRange),
+		Random::Uniform(-pAngularRange*0.1f, pAngularRange*0.1f));
 	mLifeTime = pTime;
 	GetManager()->AddAlarmCallback(this, 5, mLifeTime, 0);
 }
@@ -68,7 +68,7 @@ void Props::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 	if (mParticleType != PARTICLE_NONE && pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		pMeshResource->GetRamData()->SetIsSimpleObject();
-		pMeshResource->GetRamData()->SetScale((float)Random::Uniform(0.4, 1.6) * mScale);
+		pMeshResource->GetRamData()->SetScale(Random::Uniform(0.4f, 1.6f) * mScale);
 	}
 }
 

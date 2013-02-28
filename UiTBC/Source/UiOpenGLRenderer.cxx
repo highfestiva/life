@@ -10,6 +10,7 @@
 #include "../../Lepra/Include/Transformation.h"
 #include "../../TBC/Include/GeometryBase.h"
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
+#include "../Include/UiDynamicRenderer.h"
 #include "../Include/UiOpenGLMaterials.h"
 #include "../Include/UiTexture.h"
 
@@ -230,41 +231,41 @@ int OpenGLRenderer::ReleaseShadowMap(int pShadowMapID)
 
 
 Renderer::LightID OpenGLRenderer::AddDirectionalLight(LightHint pHint,
-						      float pDirX, float pDirY, float pDirZ,
-						      float pRed, float pGreen, float pBlue,
-						      float pShadowRange)
+		const Vector3DF& pDir,
+		const Vector3DF& pColor,
+		float pShadowRange)
 {
-	LightID lLightID = Parent::AddDirectionalLight(pHint, pDirX, pDirY, pDirZ, pRed, pGreen, pBlue, pShadowRange);
+	LightID lLightID = Parent::AddDirectionalLight(pHint, pDir, pColor, pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
 	OGL_ASSERT();
 	return lLightID;
 }
 
 Renderer::LightID OpenGLRenderer::AddPointLight(LightHint pHint,
-						float pPosX, float pPosY, float pPosZ,
-						float pRed, float pGreen, float pBlue,
-						float pLightRadius,
-						float pShadowRange)
+		const Vector3DF& pPos,
+		const Vector3DF& pColor,
+		float pLightRadius,
+		float pShadowRange)
 {
-	LightID lLightID = Parent::AddPointLight(pHint, pPosX, pPosY, pPosZ, pRed, pGreen, pBlue, pLightRadius, pShadowRange);
+	LightID lLightID = Parent::AddPointLight(pHint, pPos, pColor, pLightRadius, pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
 	OGL_ASSERT();
 	return lLightID;
 }
 
 Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint pHint,
-					       float pPosX, float pPosY, float pPosZ,
-					       float pDirX, float pDirY, float pDirZ,
-					       float pRed, float pGreen, float pBlue,
-					       float pCutoffAngle,
-					       float pSpotExponent,
-					       float pLightRadius,
-					       float pShadowRange)
+		const Vector3DF& pPos,
+		const Vector3DF& pDir,
+		const Vector3DF& pColor,
+		float pCutoffAngle,
+		float pSpotExponent,
+		float pLightRadius,
+		float pShadowRange)
 {
 	LightID lLightID = Parent::AddSpotLight(pHint, 
-		pPosX, pPosY, pPosZ, 
-		pDirX, pDirY, pDirZ, 
-		pRed, pGreen, pBlue, 
+		pPos,
+		pDir,
+		pColor,
 		pCutoffAngle, 
 		pSpotExponent, 
 		pLightRadius, 
@@ -274,12 +275,12 @@ Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint pHint,
 	return lLightID;
 }
 
-void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
+void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData* pLight)
 {
 	GLenum lLight = GL_LIGHT0 + pLightIndex;
 	glEnable(lLight);
 
-	if (pLight.mType != LIGHT_SPOT)
+	if (pLight->mType != LIGHT_SPOT)
 	{
 		float l180 = 180.0f;
 		glLightf(lLight, GL_SPOT_CUTOFF, l180);
@@ -289,18 +290,18 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
 	}
 
 	float lPos[4];
-	if (pLight.mType == LIGHT_POINT ||
-	   pLight.mType == LIGHT_SPOT)
+	if (pLight->mType == LIGHT_POINT ||
+	   pLight->mType == LIGHT_SPOT)
 	{
-		Vector3DF lLightPos = GetCameraTransformation().InverseTransform(pLight.mPosition);
+		Vector3DF lLightPos = GetCameraTransformation().InverseTransform(pLight->mPosition);
 		lPos[0] = (float)lLightPos.x;
 		lPos[1] = (float)lLightPos.y;
 		lPos[2] = (float)lLightPos.z;
 		lPos[3] = 1.0f;
 
-		if (pLight.mType == LIGHT_SPOT)
+		if (pLight->mType == LIGHT_SPOT)
 		{
-			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(pLight.mDirection);
+			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(pLight->mDirection);
 
 			float lDir[3];
 			lDir[0] = (float)lLightDir.x;
@@ -308,7 +309,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
 			lDir[2] = (float)lLightDir.z;
 
 			glLightfv(lLight, GL_SPOT_DIRECTION, lDir);
-			glLightfv(lLight, GL_SPOT_CUTOFF, &pLight.mCutoffAngle);
+			glLightfv(lLight, GL_SPOT_CUTOFF, &pLight->mCutoffAngle);
 		}
 
 		float lConst = 0.0f;
@@ -318,11 +319,11 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
 		glLightfv(lLight, GL_LINEAR_ATTENUATION, &lLinear);
 		glLightfv(lLight, GL_QUADRATIC_ATTENUATION, &lQuad);
 	}
-	else if(pLight.mType == LIGHT_DIRECTIONAL)
+	else if(pLight->mType == LIGHT_DIRECTIONAL)
 	{
-		lPos[0] = -(float)pLight.mDirection.x;
-		lPos[1] = -(float)pLight.mDirection.y;
-		lPos[2] = -(float)pLight.mDirection.z;
+		lPos[0] = -(float)pLight->mDirection.x;
+		lPos[1] = -(float)pLight->mDirection.y;
+		lPos[2] = -(float)pLight->mDirection.z;
 		lPos[3] = 0.0f;
 
 		float lConst = 1.0f;
@@ -337,7 +338,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
 
 	glLightfv(lLight, GL_POSITION, lPos);
 	glLightfv(lLight, GL_AMBIENT, lBlack);
-	glLightfv(lLight, GL_DIFFUSE, pLight.mColor);
+	glLightfv(lLight, GL_DIFFUSE, pLight->mColor);
 	glLightfv(lLight, GL_SPECULAR, lBlack);
 	OGL_ASSERT();
 }
@@ -352,78 +353,79 @@ void OpenGLRenderer::RemoveLight(LightID pLightID)
 
 void OpenGLRenderer::EnableAllLights(bool pEnable)
 {
-	for (int i = 0; i < GetLightCount(); ++i)
+	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 	{
-		GetLightData(i).mEnabled = pEnable;
+		LightData* lLight = x->second;
+		lLight->mEnabled = pEnable;
 		if (pEnable)
 		{
-			::glEnable(GL_LIGHT0 + GetLightIndex(i));
+			::glEnable(GL_LIGHT0 + x->first);
 		}
 		else
 		{
-			::glDisable(GL_LIGHT0 + GetLightIndex(i));
+			::glDisable(GL_LIGHT0 + x->first);
 		}
 	}
 }
 
 
 
-void OpenGLRenderer::SetLightPosition(LightID pLightID, float pX, float pY, float pZ)
+void OpenGLRenderer::SetLightPosition(LightID pLightID, const Vector3DF& pPos)
 {
-	Parent::SetLightPosition(pLightID, pX, pY, pZ);
-	int lLightIndex = (int)pLightID;
+	Parent::SetLightPosition(pLightID, pPos);
 
+	int lLightIndex = (int)pLightID;
 	if (lLightIndex == INVALID_LIGHT)
 		return;
 
-	LightData& lLightData = GetLightData(lLightIndex);
-	if (lLightData.mType == LIGHT_POINT ||
-	   lLightData.mType == LIGHT_SPOT)
+	LightData* lLightData = GetLightData(lLightIndex);
+	if (lLightData->mType == LIGHT_POINT ||
+	   lLightData->mType == LIGHT_SPOT)
 	{
-		float lVector[4];
-		lVector[0] = pX;
-		lVector[1] = pY;
-		lVector[2] = pZ;
-		lVector[3] = 1.0f;
+		Vector3DF lLightPos = GetCameraTransformation().InverseTransform(pPos);
+		float lPos[4];
+		lPos[0] = (float)lLightPos.x;
+		lPos[1] = (float)lLightPos.y;
+		lPos[2] = (float)lLightPos.z;
+		lPos[3] = 1.0f;
 
 		GLenum lLight = GL_LIGHT0 + lLightIndex;
-		glLightfv(lLight, GL_POSITION, lVector);
+		glLightfv(lLight, GL_POSITION, lPos);
 	}
 	OGL_ASSERT();
 }
 
 
 
-void OpenGLRenderer::SetLightDirection(LightID pLightID, float pX, float pY, float pZ)
+void OpenGLRenderer::SetLightDirection(LightID pLightID, const Vector3DF& pDir)
 {
-	Parent::SetLightDirection(pLightID, pX, pY, pZ);
+	Parent::SetLightDirection(pLightID, pDir);
 
 	int lLightIndex = (int)pLightID;
-
 	if (lLightIndex == INVALID_LIGHT)
 		return;
 
-	LightData& lLightData = GetLightData(lLightIndex);
-	if (lLightData.mType == LIGHT_DIRECTIONAL ||
-	   lLightData.mType == LIGHT_SPOT)
+	LightData* lLightData = GetLightData(lLightIndex);
+	if (lLightData->mType == LIGHT_DIRECTIONAL ||
+	   lLightData->mType == LIGHT_SPOT)
 	{
 		GLenum lLight = GL_LIGHT0 + lLightIndex;
 
-		if (lLightData.mType == LIGHT_DIRECTIONAL)
+		if (lLightData->mType == LIGHT_DIRECTIONAL)
 		{
 			float lVector[4];
-			lVector[0] = -pX;
-			lVector[1] = -pY;
-			lVector[2] = -pZ;
+			lVector[0] = -pDir.x;
+			lVector[1] = -pDir.y;
+			lVector[2] = -pDir.z;
 			lVector[3] = 0.0f;
 			glLightfv(lLight, GL_POSITION, lVector);
 		}
 		else
 		{
 			float lVector[3];
-			lVector[0] = pX;
-			lVector[1] = pY;
-			lVector[2] = pZ;
+			lVector[0] = pDir.x;
+			lVector[1] = pDir.y;
+			lVector[2] = pDir.z;
 			glLightfv(lLight, GL_SPOT_DIRECTION, lVector);
 		}
 	}
@@ -450,16 +452,15 @@ void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, floa
 	pGreen += 0.01f;
 	pBlue += 0.01f;
 
-	for (int i = 0; i < GetLightCount(); i++)
+	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 	{
-		int lLightIndex = GetLightIndex(i);
-		LightData& lLightData = GetLightData(lLightIndex);
+		LightData* lLightData = x->second;
 
-		if (lLightData.mEnabled == true)
+		if (lLightData->mEnabled == true)
 		{
-			const float lRed   = lLightData.mColor[0] * pRed;
-			const float lGreen = lLightData.mColor[1] * pGreen;
-			const float lBlue  = lLightData.mColor[2] * pBlue;
+			const float lRed   = lLightData->mColor[0] * pRed;
+			const float lGreen = lLightData->mColor[1] * pGreen;
+			const float lBlue  = lLightData->mColor[2] * pBlue;
 
 			float lSpecular[] =
 			{
@@ -479,7 +480,7 @@ void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, floa
 
 			float lAmbient[] = {0, 0, 0, 1.0f};
 
-			GLenum lLight = GL_LIGHT0 + lLightIndex;
+			GLenum lLight = GL_LIGHT0 + x->first;
 			glLightfv(lLight, GL_DIFFUSE, lDiffuse);
 			glLightfv(lLight, GL_SPECULAR, lSpecular);
 			glLightfv(lLight, GL_AMBIENT, lAmbient);
@@ -540,14 +541,6 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
 		strutil::Format(_T("AddTexture() - the texture has an invalid pixel size of %i bytes!"), lSize));
 	OGL_ASSERT();
-
-	switch (lSize)
-	{
-		case 1:	lSize = GL_ALPHA;	break;
-		case 3:	lSize = GL_RGB;		break;
-		default:
-		case 4: lSize = GL_RGBA;	break;
-	}
 
 	for (int i = 0; i < pTexture->GetNumMipMapLevels(); i++)
 	{
@@ -1100,20 +1093,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		assert(mCamSpaceTransformation.GetPosition().GetDistanceSquared(lCamSpaceTransformation.GetPosition()) < 1e-8);
 		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);*/
 		float lModelViewMatrix[16];
-		mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
-		const float lScale = pGeometry->GetScale();
-		if (lScale != 1)
-		{
-			lModelViewMatrix[0]  *= lScale;
-			lModelViewMatrix[1]  *= lScale;
-			lModelViewMatrix[2]  *= lScale;
-			lModelViewMatrix[4]  *= lScale;
-			lModelViewMatrix[5]  *= lScale;
-			lModelViewMatrix[6]  *= lScale;
-			lModelViewMatrix[8]  *= lScale;
-			lModelViewMatrix[9]  *= lScale;
-			lModelViewMatrix[10] *= lScale;
-		}
+		mCamSpaceTransformation.GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(lModelViewMatrix);
 		OGL_ASSERT();
@@ -1226,9 +1206,12 @@ unsigned OpenGLRenderer::RenderScene()
 		UpdateShadowMaps();
 
 		// Disable all lights (for shadow rendering).
-		for (int i = 0; i < GetLightCount(); ++i)
+		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 		{
-			::glDisable(GL_LIGHT0 + GetLightIndex(i));
+			if (x->second->mShadowRange > 0)
+			{
+				::glDisable(GL_LIGHT0 + x->first);
+			}
 		}
 
 		if (IsOutlineRenderingEnabled())
@@ -1269,9 +1252,13 @@ unsigned OpenGLRenderer::RenderScene()
 		::glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 		// Enable all lights again.
-		for (int i = 0; i < GetLightCount(); ++i)
+		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 		{
-			::glEnable(GL_LIGHT0 + GetLightIndex(i));
+			LightData* lLight = x->second;
+			if (lLight->mEnabled)
+			{
+				::glEnable(GL_LIGHT0 + x->first);
+			}
 		}
 	}
 
@@ -1334,13 +1321,19 @@ unsigned OpenGLRenderer::RenderScene()
 				Material::RenderAllGeometry(GetCurrentFrame(), lMaterial);
 			}
 		}
+
+		DynamicRendererMap::iterator x = mDynamicRendererMap.begin();
+		for (; x != mDynamicRendererMap.end(); ++x)
+		{
+			x->second->Render();
+		}
 	}
 
 	{
-		for (int i = 0; i < GetLightCount(); i++)
+		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 		{
-			LightData& lLight = GetLightData(GetLightIndex(i));
-			lLight.mTransformationChanged = false;
+			LightData* lLight = x->second;
+			lLight->mTransformationChanged = false;
 		}
 
 		StepCurrentFrame();
@@ -1355,6 +1348,73 @@ unsigned OpenGLRenderer::RenderScene()
 	return (GetCurrentFrame());
 }
 
+void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards)
+{
+	Material* lMaterial;
+	if (pRenderTexture)
+	{
+		lMaterial = GetMaterial(MAT_SINGLE_TEXTURE_BLENDED);
+		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
+		((OpenGLMatSingleTextureBlended*)lMaterial)->BindTexture(
+			lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP],
+			lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
+	}
+	else
+	{
+		lMaterial = GetMaterial(MAT_SINGLE_COLOR_BLENDED);
+	}
+	lMaterial->PreRender();
+	if (pAddativeBlending)
+	{
+		::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	}
+	else
+	{
+		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+	::glEnable(GL_DEPTH_TEST);
+	::glDepthMask(GL_FALSE);
+	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glMatrixMode(GL_TEXTURE);
+	::glLoadIdentity();
+	::glMatrixMode(GL_MODELVIEW);
+	const float lAmbient[]  = { 0.4f, 0.4f, 0.4f, 1 };
+	const float lDiffuse[]  = { 0.5f, 0.5f, 0.5f, 1 };
+	const float lSpecular[] = { 0, 0, 0, 1 };
+
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbient);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lDiffuse);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lSpecular);
+	::glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
+	::glDisable(GL_LIGHTING);
+	::glDisable(GL_COLOR_MATERIAL);
+	::glDisable(GL_NORMALIZE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	TBC::GeometryBase::BasicMaterialSettings lMaterialSettings(Vector3DF(), Vector3DF(), Vector3DF(), 0, 0, false);
+	BillboardRenderInfoArray::const_iterator x = pBillboards.begin();
+	for (; x != pBillboards.end(); ++x)
+	{
+		lMaterialSettings.mDiffuse = x->mColor;
+		lMaterialSettings.mAlpha = x->mOpacity;
+		//lMaterial->SetBasicMaterial(lMaterialSettings);
+		glColor4f(x->mColor.x, x->mColor.y, x->mColor.z, x->mOpacity);
+
+		TransformationF lCamSpace;
+		QuaternionF lRot = mCameraTransformation.GetOrientation();
+		lRot.RotateAroundOwnY(x->mAngle);
+		lCamSpace.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, TransformationF(lRot, x->mPosition));
+		float lModelViewMatrix[16];
+		lCamSpace.GetAs4x4TransposeMatrix(x->mScale, lModelViewMatrix);
+		::glLoadMatrixf(lModelViewMatrix);
+
+		lMaterial->RawRender(pGeometry, x->mUVIndex);
+	}
+	lMaterial->PostRender();
+}
+
 void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation)
 {
 	OGL_ASSERT();
@@ -1362,21 +1422,21 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 	::glMatrixMode(GL_MODELVIEW);
 	::glPushMatrix();
 	float lModelViewMatrix[16];
-	pGeometry->GetTransformation().GetAs4x4TransposeMatrix(lModelViewMatrix);
+	pGeometry->GetTransformation().GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 	::glLoadMatrixf(lModelViewMatrix);
 
 	::glEnable(GL_DEPTH_TEST);
 
-	const int lLightIndex = GetLightIndex(GetLightCount()-1);
-	const LightData& lLightData = GetLightData(lLightIndex);
+	const LightID lLightId = GetClosestLight(GetLightCount()-1);
+	const LightData* lLightData = GetLightData(lLightId);
 	if (pLightOrientation)
 	{
 		::glEnable(GL_LIGHTING);
 		QuaternionF lOrientation = pGeometry->GetTransformation().GetOrientation().GetInverse();
-		LightData lDataCopy = lLightData;
+		LightData lDataCopy = *lLightData;
 		lOrientation *= *pLightOrientation;
-		lDataCopy.mDirection = lOrientation * lLightData.mDirection;
-		SetupGLLight(lLightIndex, lDataCopy);
+		lDataCopy.mDirection = lOrientation * lLightData->mDirection;
+		SetupGLLight(lLightId, &lDataCopy);
 	}
 
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
@@ -1390,7 +1450,7 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 
 	if (pLightOrientation)
 	{
-		SetupGLLight(lLightIndex, lLightData);
+		SetupGLLight(lLightId, lLightData);
 	}
 
 	PostRender(pGeometry);
@@ -1429,8 +1489,6 @@ int OpenGLRenderer::GetNumTextureUnits() const
 
 void OpenGLRenderer::ProcessLights()
 {
-	int i;
-
 	if (GetLightsEnabled() == true)
 	{
 		glEnable(GL_LIGHTING);
@@ -1441,13 +1499,13 @@ void OpenGLRenderer::ProcessLights()
 	}
 	
 	// Transform all light positions.
-	for (i = 0; i < GetLightCount(); i++)
+	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 	{
-		LightData& lLight = GetLightData(GetLightIndex(i));
+		LightData* lLight = x->second;
 
-		if (lLight.mType == LIGHT_DIRECTIONAL)
+		if (lLight->mType == LIGHT_DIRECTIONAL)
 		{
-			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight.mDirection);
+			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight->mDirection);
 			float lPos[4] =
 			{
 				(float)-lLightDir.x,
@@ -1456,11 +1514,11 @@ void OpenGLRenderer::ProcessLights()
 				0.0f
 			};
 
-			glLightfv(GL_LIGHT0 + GetLightIndex(i), GL_POSITION, lPos);
+			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
 		}
-		else if(lLight.mType == LIGHT_POINT)
+		else if(lLight->mType == LIGHT_POINT)
 		{
-			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight.mPosition);
+			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight->mPosition);
 			float lPos[4] =
 			{
 				(float)lLightPos.x,
@@ -1469,12 +1527,12 @@ void OpenGLRenderer::ProcessLights()
 				1.0f
 			};
 
-			glLightfv(GL_LIGHT0 + GetLightIndex(i), GL_POSITION, lPos);
+			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
 		}
-		else if(lLight.mType == LIGHT_SPOT)
+		else if(lLight->mType == LIGHT_SPOT)
 		{
-			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight.mPosition);
-			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight.mDirection);
+			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight->mPosition);
+			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight->mDirection);
 			float lPos[4] =
 			{
 				(float)lLightPos.x,
@@ -1490,22 +1548,25 @@ void OpenGLRenderer::ProcessLights()
 				(float)lLightDir.z
 			};
 
-			glLightfv(GL_LIGHT0 + GetLightIndex(i), GL_POSITION, lPos);
-			glLightfv(GL_LIGHT0 + GetLightIndex(i), GL_SPOT_DIRECTION, lDir);
+			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
+			glLightfv(GL_LIGHT0 + x->first, GL_SPOT_DIRECTION, lDir);
 
 			if (GetShadowHint() == SH_VOLUMES_AND_MAPS)
 			{
 				/*
 					Update shadow map.
 				*/
-				if (lLight.mTransformationChanged == true)
+				if (lLight->mTransformationChanged == true)
 				{
-					lLight.mShadowMapNeedUpdate = true;
-					lLight.mTransformationChanged = false;
+					if (lLight->mShadowRange > 0)
+					{
+						lLight->mShadowMapNeedUpdate = true;
+					}
+					lLight->mTransformationChanged = false;
 				}
 
-				if (lLight.mShadowMapNeedUpdate == true)
-					RegenerateShadowMap(&lLight);
+				if (lLight->mShadowMapNeedUpdate == true)
+					RegenerateShadowMap(lLight);
 			}
 		}
 	}
@@ -1573,20 +1634,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 			{
 				mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, lShadowVolume->GetTransformation());
 				float lModelViewMatrix[16];
-				mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
-				const float lScale = lShadowVolume->GetScale();
-				if (lScale != 1)
-				{
-					lModelViewMatrix[0]  *= lScale;
-					lModelViewMatrix[1]  *= lScale;
-					lModelViewMatrix[2]  *= lScale;
-					lModelViewMatrix[4]  *= lScale;
-					lModelViewMatrix[5]  *= lScale;
-					lModelViewMatrix[6]  *= lScale;
-					lModelViewMatrix[8]  *= lScale;
-					lModelViewMatrix[9]  *= lScale;
-					lModelViewMatrix[10] *= lScale;
-				}
+				mCamSpaceTransformation.GetAs4x4TransposeMatrix(lShadowVolume->GetScale(), lModelViewMatrix);
 				glLoadMatrixf(lModelViewMatrix);
 
 				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
@@ -1601,10 +1649,8 @@ void OpenGLRenderer::RenderShadowVolumes()
 					if (lShadowVolume->GetVertexDataChanged() == true)
 					{
 						// Upload new vertices.
-						UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
-															0,
-															lShadowVolume->GetVertexCount() * sizeof(float) * 3,
-															(void*)lShadowVolume->GetVertexData());
+						UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 0,
+							lShadowVolume->GetVertexCount() * sizeof(float) * 3, (void*)lShadowVolume->GetVertexData());
 						lShadowVolume->SetVertexDataChanged(false);
 					}
 
@@ -1612,24 +1658,16 @@ void OpenGLRenderer::RenderShadowVolumes()
 					
 					if (lShadowVolume->GetIndexDataChanged() == true)
 					{
-						UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
-															0,
-															lShadowVolume->GetTriangleCount() * 3 * sizeof(vtx_idx_t),
-															(void*)lShadowVolume->GetIndexData());
+						UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
+							lShadowVolume->GetTriangleCount() * 3 * sizeof(vtx_idx_t), (void*)lShadowVolume->GetIndexData());
 					}
 
-					glDrawElements(GL_TRIANGLES,
-								lShadowVolume->GetTriangleCount() * 3,
-								LEPRA_GL_INDEX_TYPE,
-								0);
+					glDrawElements(GL_TRIANGLES, lShadowVolume->GetTriangleCount() * 3, LEPRA_GL_INDEX_TYPE, 0);
 				}
 				else
 				{
 					glVertexPointer(3, GL_FLOAT, 0, lShadowVolume->GetVertexData());
-					glDrawElements(GL_TRIANGLES,
-								lShadowVolume->GetTriangleCount() * 3,
-								LEPRA_GL_INDEX_TYPE,
-								lShadowVolume->GetIndexData());
+					glDrawElements(GL_TRIANGLES, lShadowVolume->GetTriangleCount() * 3, LEPRA_GL_INDEX_TYPE, lShadowVolume->GetIndexData());
 				}
 			}
 		}
@@ -1702,15 +1740,14 @@ int OpenGLRenderer::RenderShadowMaps()
 	glDisable(GL_BLEND);
 	glAlphaFunc(GL_LESS, 0.5f);
 
-	int i;
 	int lCount = 0;
-	for (i = 0; i < GetLightCount(); i++)
+	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 	{
-		LightData& lLight = GetLightData(GetLightIndex(i));
+		LightData* lLight = x->second;
 
-		if (lLight.mType == LIGHT_SPOT && lLight.mShadowMapID != 0)
+		if (lLight->mType == LIGHT_SPOT && lLight->mShadowMapID != 0)
 		{
-			glBindTexture(GL_TEXTURE_2D, lLight.mShadowMapID);
+			glBindTexture(GL_TEXTURE_2D, lLight->mShadowMapID);
 
 			// Prepare the texture projection matrix.
 			static float slTextureMatrix[16];
@@ -1718,12 +1755,12 @@ int OpenGLRenderer::RenderShadowMaps()
 			glLoadIdentity();
 			glTranslatef(0.5f, 0.5f, 0.5f);
 			glScalef(0.5f, 0.5f, 0.5f);
-			glMultMatrixf(lLight.mLightProjectionMatrix);
+			glMultMatrixf(lLight->mLightProjectionMatrix);
 			glGetFloatv(GL_TEXTURE_MATRIX, slTextureMatrix);
 
 			LightData::GeometrySet::Iterator lGeoIter;
-			for (lGeoIter = lLight.mShadowMapGeometrySet.First();
-				lGeoIter != lLight.mShadowMapGeometrySet.End();
+			for (lGeoIter = lLight->mShadowMapGeometrySet.First();
+				lGeoIter != lLight->mShadowMapGeometrySet.End();
 				++lGeoIter)
 			{
 				OGLGeometryData* lGeometry = (OGLGeometryData*)*lGeoIter;
@@ -1732,7 +1769,7 @@ int OpenGLRenderer::RenderShadowMaps()
 				(GetCameraTransformation().InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
 
 				float lLightModelViewMatrix[16];
-				TransformationF lLightTransformation(lLight.mOrientation, lLight.mPosition);
+				TransformationF lLightTransformation(lLight->mOrientation, lLight->mPosition);
 				(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lLightModelViewMatrix);
 
 				// Camera model view matrix.
@@ -2000,18 +2037,13 @@ void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pComp
 {
 	switch(pSize)
 	{
-	case 4:
-		pPixelFormat = GL_RGBA;
-		break;
-	case 3: 
-		pPixelFormat = GL_RGB;
-		break;
-	case 1:
-		pPixelFormat = GL_LUMINANCE;
-		break;
+	case 4:	pPixelFormat	= GL_RGBA;	break;
+	case 3:	pPixelFormat	= GL_RGB;	break;
+	case 1:	pPixelFormat	= GL_LUMINANCE;	break;
 	default:
-		pPixelFormat = GL_RGB;
+		pPixelFormat	= GL_RGB;
 		mLog.Info(pErrorMessage);
+	break;
 	}
 
 #ifndef LEPRA_GL_ES
@@ -2019,7 +2051,17 @@ void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pComp
 	{
 		pSize = (pSize == 4) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB;
 	}
+	else
 #endif // !GLES
+	{
+		switch(pSize)
+		{
+			case 4:		pSize = GL_RGBA;	break;
+			case 3:		pSize = GL_RGB;		break;
+			case 1:		pSize = GL_ALPHA;	break;
+			default:	pSize = GL_RGB;		break;
+		}
+	}
 }
 
 

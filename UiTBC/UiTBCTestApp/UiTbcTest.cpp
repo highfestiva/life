@@ -1616,14 +1616,14 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 					lContext = _T("add point light 0");
 					gRenderer->SetAmbientLight(0.1f, 0.1f, 0.1f);
 					gRenderer->SetLightsEnabled(true);
-					lLights[0] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, 30, OBJECT_DISTANCE - 60, -30, 50, 100, 50, OBJECT_DISTANCE, OBJECT_DISTANCE*10);
+					lLights[0] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, Vector3DF(30, OBJECT_DISTANCE - 60, -30), Vector3DF(50, 100, 50), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
 					lTestOk = (lLights[0] != UiTbc::Renderer::INVALID_LIGHT);
 					assert(lTestOk);
 				}
 				if (lTestOk)
 				{
 					lContext = _T("add point light 1");
-					lLights[1] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, -30, OBJECT_DISTANCE - 60, 30, 50, 50, 100, OBJECT_DISTANCE, OBJECT_DISTANCE*10);
+					lLights[1] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, Vector3DF(-30, OBJECT_DISTANCE - 60, 30), Vector3DF(50, 50, 100), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
 					lTestOk = (lLights[1] != UiTbc::Renderer::INVALID_LIGHT);
 					assert(lTestOk);
 				}
@@ -1981,8 +1981,8 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	Lepra::TransformationF lPositions[100];
 	for (int i = 0; i < 100; i++)
 	{
-		lPositions[i].GetPosition().x = (float)Lepra::Random::Uniform(0, 50);
-		lPositions[i].GetPosition().y = (float)Lepra::Random::Uniform(0, 50);
+		lPositions[i].GetPosition().x = Lepra::Random::Uniform(0.0f, 50.0f);
+		lPositions[i].GetPosition().y = Lepra::Random::Uniform(0.0f, 50.0f);
 		lPositions[i].GetPosition().z = 0;
 	}
 
@@ -2098,7 +2098,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 
 	//mLightID = gRenderer->AddSpotLight(UiTbc::Renderer::LIGHT_MOVABLE, lLightPos, lLightDir, lLightColor, 30, 32, 100, 500);
 	//mLightID = gRenderer->AddDirectionalLight(UiTbc::Renderer::LIGHT_MOVABLE, lLightDir, lLightColor, 500);
-	mLightID = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_MOVABLE, mLightPos, Lepra::WHITE, 2.0f, 1000, 500);
+	mLightID = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_MOVABLE, mLightPos, Vector3DF(2.0f, 2.0f, 2.0f), 1000, 500);
 }
 
 BumpMapSceneTest::~BumpMapSceneTest()
@@ -2248,7 +2248,7 @@ void BumpMapSceneTest::InitTerrain()
 void BumpMapSceneTest::UpdateScene(double pTotalTime, double pDeltaTime)
 {
 	Lepra::Vector3DF lTempPos(mLightPos + Lepra::Vector3DF(10.0f * (float)sin(pTotalTime * 2.0), 0, 0));
-	gRenderer->SetLightPosition(mLightID, lTempPos.x, lTempPos.y, lTempPos.z);
+	gRenderer->SetLightPosition(mLightID, lTempPos);
 	Lepra::TransformationF lTransf;
 	lTransf.SetPosition(lTempPos);
 	mSphere->SetTransformation(lTransf);

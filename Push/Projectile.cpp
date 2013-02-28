@@ -34,7 +34,7 @@ Projectile::~Projectile()
 {
 	delete mShreekSound;
 	mShreekSound = 0;
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), mExplosiveEnergy);
+	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy);
 }
 
 
@@ -90,14 +90,13 @@ void Projectile::OnForceApplied(ContextObject* pOtherObject,
 	(void)pForce;
 	(void)pTorque;
 	(void)pPosition;
-	(void)pRelativeVelocity;
 
 	if (mTickCounter < 3 && pOtherObject->GetInstanceId() == GetOwnerInstanceId())	// Don't detonate on oneself immediately.
 	{
 		return;
 	}
 
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, mExplosiveEnergy);
+	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, Vector3DF(), mExplosiveEnergy);
 }
 
 void Projectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)

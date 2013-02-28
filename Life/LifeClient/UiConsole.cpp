@@ -169,6 +169,11 @@ void UiConsole::Tick()
 	}
 }
 
+UiCure::GameUiManager* UiConsole::GetUiManager() const
+{
+	return mUiManager;
+}
+
 
 
 void UiConsole::InitGraphics()

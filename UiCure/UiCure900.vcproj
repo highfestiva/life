@@ -503,6 +503,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiParticleLoader.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiProps.cpp"
 				>
 			</File>
@@ -566,6 +570,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiMusicPlayer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiParticleLoader.h"
 				>
 			</File>
 			<File

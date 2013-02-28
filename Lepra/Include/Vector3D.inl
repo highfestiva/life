@@ -337,38 +337,12 @@ V3D_TEMPLATE _TVarType V3D_QUAL::GetAngle(const Vector3D<_TVarType>& pV) const
 V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleZ() const
 {
 	_TVarType lX = (_TVarType)sqrt(x * x + z * z);
-	_TVarType lY = y;
-
-	if (lX > MathTraits<_TVarType>::FullEps())
-		return atan(lY / lX);
-	else
-		return (_TVarType)(PI / 2.0);
+	return ::atan2(y, lX);
 }
 
 V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleY() const
 {
-	_TVarType lX = x;
-	_TVarType lY = z;
-
-	if (fabs(lX) <= MathTraits<_TVarType>::FullEps())
-	{
-		if (lY >= 0)
-			return (_TVarType)(PI / 2.0);
-		else
-			return (_TVarType)(-PI / 2.0);
-	}
-
-	if (lX >= 0)
-	{
-		return atan(lY / lX);
-	}
-	else
-	{
-		if (lY >= 0)
-			return (_TVarType)((PI / 2) - atan(lY / lX));
-		else
-			return (_TVarType)(-(PI / 2) - atan(lY / lX));
-	}
+	return ::atan2(z, x);
 }
 
 V3D_TEMPLATE const Vector3D<_TVarType>& V3D_QUAL::operator= (const Vector3D<_TVarType>& pV)

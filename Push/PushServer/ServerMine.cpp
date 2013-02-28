@@ -45,7 +45,7 @@ void ServerMine::OnTick()
 	{
 		if (--mTicksTilDetonation == 0)
 		{
-			Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), 1);
+			Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 1);
 		}
 		return;
 	}

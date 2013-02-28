@@ -14,15 +14,15 @@
 
 using namespace Lepra;
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
+void ReportTestResult(const LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 
-bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
+bool TestLooseBintree(const LogDecorator& pAccount)
 {
 	str lContext;
-	Lepra::LooseBinTree<int, str, double> lLBT(Lepra::EmptyString);
+	LooseBinTree<int, str, double> lLBT(EmptyString);
 
-	double lMin  = Lepra::Random::Uniform(-1000.0, 1000.0);
-	double lMax  = Lepra::Random::Uniform(-1000.0, 1000.0);
+	double lMin  = Random::Uniform(-1000.0, 1000.0);
+	double lMax  = Random::Uniform(-1000.0, 1000.0);
 	if (lMax < lMin)
 	{
 		double lTemp = lMax;
@@ -30,12 +30,12 @@ bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 		lMin = lTemp;
 	}
 
-	double lPos1 = Lepra::Random::Uniform(lMin, lMax);
-	double lPos2 = Lepra::Random::Uniform(lMin, lMax);
-	double lPos3 = Lepra::Random::Uniform(lMin, lMax);
-	double lSize1 = Lepra::Random::Uniform(0, lMax - lMin);
-	double lSize2 = Lepra::Random::Uniform(0, lMax - lMin);
-	double lSize3 = Lepra::Random::Uniform(0, lMax - lMin);
+	double lPos1 = Random::Uniform(lMin, lMax);
+	double lPos2 = Random::Uniform(lMin, lMax);
+	double lPos3 = Random::Uniform(lMin, lMax);
+	double lSize1 = Random::Uniform(0.0, lMax - lMin);
+	double lSize2 = Random::Uniform(0.0, lMax - lMin);
+	double lSize3 = Random::Uniform(0.0, lMax - lMin);
 
 	lLBT.InsertObject(1, str(_T("my")), lPos1, lSize1);
 	// Triggers a warning, which is good, but ugly to see in the console.
@@ -50,7 +50,7 @@ bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 		lContext = _T("Object count");
 		lTestOk = (lLBT.GetNumObjects() == 3);
 	}
-	Lepra::LooseBinTree<int, str, double>::ObjectList lList;
+	LooseBinTree<int, str, double>::ObjectList lList;
 	if(lTestOk)
 	{
 		// Retreive all objects.
@@ -63,7 +63,7 @@ bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 	{
 		// All strings should be either "my", "name" or "is".
 		lContext = _T("Get objects, contents, 1");
-		Lepra::LooseBinTree<int, str, double>::ObjectList::iterator lIter;
+		LooseBinTree<int, str, double>::ObjectList::iterator lIter;
 		int i;
 		for(lIter = lList.begin(), i = 0; lIter != lList.end(); ++lIter, ++i)
 		{
@@ -95,14 +95,14 @@ bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 	return true;
 }
 
-bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
+bool TestLooseQuadtree(const LogDecorator& pAccount)
 {
 	str lContext;
-	typedef Lepra::LooseQuadtree<int, str, double> QuadTree;
-	QuadTree lLQT(Lepra::EmptyString);
+	typedef LooseQuadtree<int, str, double> QuadTree;
+	QuadTree lLQT(EmptyString);
 
-	double lMin  = Lepra::Random::Uniform(-1000.0, 1000.0);
-	double lMax  = Lepra::Random::Uniform(-1000.0, 1000.0);
+	double lMin  = Random::Uniform(-1000.0, 1000.0);
+	double lMax  = Random::Uniform(-1000.0, 1000.0);
 	if (lMax < lMin)
 	{
 		double lTemp = lMax;
@@ -110,17 +110,17 @@ bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
 		lMin = lTemp;
 	}
 
-	Lepra::Vector2DD lPos1(Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax));
-	Lepra::Vector2DD lPos2(Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax));
-	Lepra::Vector2DD lPos3(Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax));
+	Vector2DD lPos1(Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax));
+	Vector2DD lPos2(Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax));
+	Vector2DD lPos3(Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax));
 
-	double lSize1 = Lepra::Random::Uniform(0, lMax - lMin);
-	double lSize2 = Lepra::Random::Uniform(0, lMax - lMin);
-	double lSize3 = Lepra::Random::Uniform(0, lMax - lMin);
+	double lSize1 = Random::Uniform(0.0, lMax - lMin);
+	double lSize2 = Random::Uniform(0.0, lMax - lMin);
+	double lSize3 = Random::Uniform(0.0, lMax - lMin);
 
-	Lepra::LQRectArea<double> lArea1(lPos1, Lepra::Vector2D<double>(lSize1, lSize1));
-	Lepra::LQRectArea<double> lArea2(lPos2, Lepra::Vector2D<double>(lSize2, lSize2));
-	Lepra::LQRectArea<double> lArea3(lPos3, Lepra::Vector2D<double>(lSize3, lSize3));
+	LQRectArea<double> lArea1(lPos1, Vector2D<double>(lSize1, lSize1));
+	LQRectArea<double> lArea2(lPos2, Vector2D<double>(lSize2, lSize2));
+	LQRectArea<double> lArea3(lPos3, Vector2D<double>(lSize3, lSize3));
 
 	lLQT.InsertObject(1, &lArea1, str(_T("my")));
 	lLQT.InsertObject(2, &lArea2, str(_T("name")));
@@ -170,8 +170,8 @@ bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
 		lContext = _T("Move and get single object");
 		lList.clear();
 		// Make sure object 1 is alone.
-		lLQT.MoveObject(1, Lepra::Vector2DD(4000, 4000));
-		lLQT.GetObjects(lList, QuadTree::BC(Lepra::Vector2DD(4010, 4010), 20));
+		lLQT.MoveObject(1, Vector2DD(4000, 4000));
+		lLQT.GetObjects(lList, QuadTree::BC(Vector2DD(4010, 4010), 20));
 		lTestOk = (lList.size() == 1 && lList.front() == _T("my"));
 	}
 
@@ -180,26 +180,26 @@ bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
 	return true;
 }
 
-bool TestLooseOctree(const Lepra::LogDecorator& pAccount)
+bool TestLooseOctree(const LogDecorator& pAccount)
 {
 	str lContext;
-	typedef Lepra::LooseOctree<int, str, double> Octree;
-	Octree lLOct(Lepra::EmptyString);
+	typedef LooseOctree<int, str, double> Octree;
+	Octree lLOct(EmptyString);
 
 	double lMin  = -1000.0;
 	double lMax  = 1000.0;
 
-	Lepra::Vector3DD lPos1(Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax));
-	Lepra::Vector3DD lPos2(Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax));
-	Lepra::Vector3DD lPos3(Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax), Lepra::Random::Uniform(lMin, lMax));
+	Vector3DD lPos1(Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax));
+	Vector3DD lPos2(Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax));
+	Vector3DD lPos3(Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax), Random::Uniform(lMin, lMax));
 
-	double lSize1 = Lepra::Random::Uniform(0, lMax - lMin);
-	double lSize2 = Lepra::Random::Uniform(0, lMax - lMin);
-	double lSize3 = Lepra::Random::Uniform(0, lMax - lMin);
+	double lSize1 = Random::Uniform(0.0, lMax - lMin);
+	double lSize2 = Random::Uniform(0.0, lMax - lMin);
+	double lSize3 = Random::Uniform(0.0, lMax - lMin);
 
-	Lepra::LOAABBVolume<double> lVolume1(lPos1, Lepra::Vector3D<double>(lSize1, lSize1, lSize1));
-	Lepra::LOAABBVolume<double> lVolume2(lPos2, Lepra::Vector3D<double>(lSize2, lSize2, lSize2));
-	Lepra::LOAABBVolume<double> lVolume3(lPos3, Lepra::Vector3D<double>(lSize3, lSize3, lSize3));
+	LOAABBVolume<double> lVolume1(lPos1, Vector3D<double>(lSize1, lSize1, lSize1));
+	LOAABBVolume<double> lVolume2(lPos2, Vector3D<double>(lSize2, lSize2, lSize2));
+	LOAABBVolume<double> lVolume3(lPos3, Vector3D<double>(lSize3, lSize3, lSize3));
 
 	lLOct.InsertObject(1, &lVolume1, str(_T("my")));
 	lLOct.InsertObject(2, &lVolume2, str(_T("name")));
@@ -217,10 +217,10 @@ bool TestLooseOctree(const Lepra::LogDecorator& pAccount)
 	{
 		// Retreive all objects.
 		lContext = _T("Get objects, count");
-		Lepra::Vector3DD lSearchPos((lMax + lMin) * 0.5, (lMax + lMin) * 0.5, (lMax + lMin) * 0.5);
-		Lepra::Vector3DD lSearchSize((lMax - lMin) * 0.5, (lMax - lMin) * 0.5, (lMax - lMin) * 0.5);
+		Vector3DD lSearchPos((lMax + lMin) * 0.5, (lMax + lMin) * 0.5, (lMax + lMin) * 0.5);
+		Vector3DD lSearchSize((lMax - lMin) * 0.5, (lMax - lMin) * 0.5, (lMax - lMin) * 0.5);
 
-		lLOct.GetObjects(lList, Lepra::AABB<double>(lSearchPos, lSearchSize));
+		lLOct.GetObjects(lList, AABB<double>(lSearchPos, lSearchSize));
 		lTestOk = (lList.size() == 3);
 	}
 	str lStr[3];
@@ -251,8 +251,8 @@ bool TestLooseOctree(const Lepra::LogDecorator& pAccount)
 		lContext = _T("Move and get single object");
 		lList.clear();
 		// Make sure object 1 is alone.
-		lLOct.MoveObject(1, Lepra::Vector3DD(4000, 4000, 4000));
-		lLOct.GetObjects(lList, Lepra::Sphere<double>(Lepra::Vector3DD(4010, 4010, 4010), 20));
+		lLOct.MoveObject(1, Vector3DD(4000, 4000, 4000));
+		lLOct.GetObjects(lList, Sphere<double>(Vector3DD(4010, 4010, 4010), 20));
 		lTestOk = (lList.size() == 1 && lList.front() == _T("my"));
 	}
 

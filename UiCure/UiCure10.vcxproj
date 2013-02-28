@@ -264,6 +264,7 @@
     <ClCompile Include="Source\UiProps.cpp" />
     <ClCompile Include="Source\UiResourceManager.cpp" />
     <ClCompile Include="Source\UiSound.cpp" />
+    <ClCompile Include="Source\UiSoundReleaser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\UiGameUiManager.mm" />
@@ -282,6 +283,7 @@
     <ClInclude Include="Include\UiResourceManager.h" />
     <ClInclude Include="Include\UiRuntimeVariableName.h" />
     <ClInclude Include="Include\UiSound.h" />
+    <ClInclude Include="Include\UiSoundReleaser.h" />
     <ClInclude Include="Include\UiTerrainManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
