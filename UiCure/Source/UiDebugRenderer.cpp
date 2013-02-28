@@ -7,7 +7,7 @@
 #include "../Include/UiDebugRenderer.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
-#include "../../UiTbc/Include/UiRenderer.h"
+#include "../../UiTBC/Include/UiRenderer.h"
 #include "../Include/UiCppContextObject.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiRuntimeVariableName.h"

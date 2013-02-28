@@ -16,6 +16,8 @@ Helicopter flying and shooting.
 
 Getaway - flee from tanks (and perhaps other military craft) which try to blow you out of orbit.
 
+Cute game with nice graphics! Anything to learn!
+
 Flocking game. School of fish? Birds? Something! The prototype should be fun without trying, so everything else should be a bonus.
 
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
@@ -39,6 +41,8 @@ Robo Arm - optimize a movement scheme to make the robot pick something up and mo
 Space ship flight. Fly though predefined map, steer using swipe left/right/up/down? Or accelerometer? Fly close to ground, to give impression of moving VERY fast.
 
 MMO space flight. Ships parks in "bee hives", LoD the whole world. Fly, shoot. Guild vs. guild.
+
+Gothenburg game - could be stopping foreign power invasion, alien space invasion, crime fighting/SWAT, on a massive scale with real maps! Premiere on a large theatre!
 
 Single player vehicle simulation puzzle. Sorta like light-Bot, but in more dimentsions and with vehicles. The steering is a chart with different input (at interval times) and a slider next to each which determins "how much". Also add a road sign selector at the top of the chart (iPhone-like slider left/right?) where you can pick your vechile. Start/stop button. Done!
 

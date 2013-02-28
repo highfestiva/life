@@ -1,4 +1,6 @@
-﻿#pragma once
+
+#pragma once
+
 #include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/HiResTimer.h"
 #include "../Lepra/Include/Thread.h"

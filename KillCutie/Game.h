@@ -8,7 +8,7 @@
 
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/GameTicker.h"
-#include "../UiTbc/Include/UiRenderer.h"
+#include "../UiTBC/Include/UiRenderer.h"
 
 
 
