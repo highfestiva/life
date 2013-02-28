@@ -1360,6 +1360,9 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 		((OpenGLMatSingleTextureBlended*)lMaterial)->BindTexture(
 			lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP],
 			lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
+		::glMatrixMode(GL_TEXTURE);
+		::glLoadIdentity();
+		::glMatrixMode(GL_MODELVIEW);
 	}
 	else
 	{
@@ -1378,34 +1381,23 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	::glDepthMask(GL_FALSE);
 	::glDisable(GL_CULL_FACE);
 	::glDisableClientState(GL_NORMAL_ARRAY);
-	::glMatrixMode(GL_TEXTURE);
-	::glLoadIdentity();
-	::glMatrixMode(GL_MODELVIEW);
-	const float lAmbient[]  = { 0.4f, 0.4f, 0.4f, 1 };
-	const float lDiffuse[]  = { 0.5f, 0.5f, 0.5f, 1 };
-	const float lSpecular[] = { 0, 0, 0, 1 };
-
-	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbient);
-	::glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lDiffuse);
-	::glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lSpecular);
-	::glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
 	::glDisable(GL_LIGHTING);
 	::glDisable(GL_COLOR_MATERIAL);
 	::glDisable(GL_NORMALIZE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	TBC::GeometryBase::BasicMaterialSettings lMaterialSettings(Vector3DF(), Vector3DF(), Vector3DF(), 0, 0, false);
+	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	TransformationF lCamSpace;
+	//TBC::GeometryBase::BasicMaterialSettings lMaterialSettings(Vector3DF(), Vector3DF(), Vector3DF(), 0, 0, false);
 	BillboardRenderInfoArray::const_iterator x = pBillboards.begin();
 	for (; x != pBillboards.end(); ++x)
 	{
-		lMaterialSettings.mDiffuse = x->mColor;
-		lMaterialSettings.mAlpha = x->mOpacity;
+		//lMaterialSettings.mDiffuse = x->mColor;
+		//lMaterialSettings.mAlpha = x->mOpacity;
 		//lMaterial->SetBasicMaterial(lMaterialSettings);
 		glColor4f(x->mColor.x, x->mColor.y, x->mColor.z, x->mOpacity);
 
-		TransformationF lCamSpace;
 		QuaternionF lRot = mCameraTransformation.GetOrientation();
 		lRot.RotateAroundOwnY(x->mAngle);
 		lCamSpace.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, TransformationF(lRot, x->mPosition));
@@ -1416,6 +1408,10 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 		lMaterial->RawRender(pGeometry, x->mUVIndex);
 	}
 	lMaterial->PostRender();
+	::glDepthMask(GL_TRUE);
+	::glEnable(GL_NORMALIZE);
+	::glDisable(GL_BLEND);
+	::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	OGL_ASSERT();
 }
