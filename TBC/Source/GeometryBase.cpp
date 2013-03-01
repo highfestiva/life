@@ -1080,6 +1080,10 @@ void GeometryBase::GenerateVertexNormalData()
 
 	unsigned int lVertexCount  = GetMaxVertexCount();
 	unsigned int lTriangleCount = GetTriangleCount();
+	if (lVertexCount == 0 || lTriangleCount == 0)
+	{
+		return;
+	}
 
 	AllocVertexNormalData();
 	::memset(mVertexNormalData, 0, lVertexCount * 3 * sizeof(float));

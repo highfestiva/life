@@ -1350,6 +1350,11 @@ unsigned OpenGLRenderer::RenderScene()
 
 void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards)
 {
+	if (pBillboards.size() == 0)
+	{
+		return;
+	}
+
 	OGL_ASSERT();
 
 	Material* lMaterial;
@@ -1409,7 +1414,7 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	}
 	lMaterial->PostRender();
 	::glDepthMask(GL_TRUE);
-	::glEnable(GL_NORMALIZE);
+	//::glEnable(GL_NORMALIZE);
 	::glDisable(GL_BLEND);
 	::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 

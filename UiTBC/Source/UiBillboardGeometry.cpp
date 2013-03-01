@@ -17,6 +17,8 @@ namespace UiTbc
 BillboardGeometry::BillboardGeometry(unsigned pUVSetCount):
 	mUVSetCount(pUVSetCount)
 {
+	SetAlwaysVisible(false);
+
 	const float lTriStrip[] =
 	{
 		-1,0,+1,
