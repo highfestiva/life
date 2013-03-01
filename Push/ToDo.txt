@@ -16,27 +16,35 @@ Game
 + Mouse look
 + Port server to Linux.
 + Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and shrapnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
-. Check multiplayer on two computers and one iPhone.
 . Fix the bomber planes showing up after dropping payload in out of process server.
 . Object should start spinning when hit by a grenade/in an explosion.
-. Test which of Arena or Adventure play is best. Make a real map!
+
+. Check multiplayer on two computers and one iPhone.
+. Improve mouselook.
+. Orient spawn engines correctly (for instance mines).
 . Not possible to log in when someone is moving/shooting.
+. Spawn engines for players, not hard-coded positions.
+. Refactor (code -> Life?) and split Push and HoverTank.
+
+. Test which of Arena or Adventure play is best. Make a real map!
 . Simple path finding.
 . AI (where is the user probably going to appear after disappearing behind a building).
-. Goal seeking missiles.
-. Dynamic levels.
-. Orient spawn engines correctly (for instance mines).
-. Spawn engines for players, not hard-coded positions.
+. Homing missiles.
+. Add lobbing missiles/homing grenades, which travel to high altitude and can be used to take out bomb planes!
+. Dynamic, moving objects in levels.
 . Fix cam moves behind walls (like in Kill Cutie: cam moves up).
 . UX design/menus.
 . Money in the game.
 . Get weapons, shield, health and ammo in "stores" in the game. (Triggers which add up your inventory after some time or at regular intervals.)
 . One defence turret per team.
-. Nice looks.
+. Nice tank looks -- env mapping on vehicles?
+. Make level look nice. Lighted textures? Light maps? Env maps?
 . Improve sound quality (doppler on grenades especially).
+. Refactor Life/Push/HoverTank to be able to reuse code for future projects.
 
 
 Engine
 ----------
-. GLES2.
+. GLES2?
+. iPhone 3GS performance.
 . Beautify rendering.
