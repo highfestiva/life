@@ -146,7 +146,7 @@ void ParticleRenderer::CreateTempLight(float pStrength, const Vector3DF& pPositi
 	if (mLights.size() < mMaxLightCount)
 	{
 		mLights.push_back(Light(pStrength, pPosition, pVelocity, pTargetVelocity, pTimeFactor));
-		mLog.Infof(_T("Creating new light with strength %f"), pStrength);
+		//mLog.Infof(_T("Creating new light with strength %f"), pStrength);
 	}
 	else
 	{
@@ -164,7 +164,7 @@ void ParticleRenderer::CreateTempLight(float pStrength, const Vector3DF& pPositi
 		}
 		if (pStrength >= lDarkestLightStrength && lDarkestLightIndex >= 0)
 		{
-			mLog.Infof(_T("Overtaking light with render ID %i (had strength %f, got strength %f)"), mLights[lDarkestLightIndex].mRenderLightId, mLights[lDarkestLightIndex].mStrength, pStrength);
+			//mLog.Infof(_T("Overtaking light with render ID %i (had strength %f, got strength %f)"), mLights[lDarkestLightIndex].mRenderLightId, mLights[lDarkestLightIndex].mStrength, pStrength);
 			// TRICKY: don't overwrite! We must not leak the previosly allocated hardware light!
 			mLights[lDarkestLightIndex].mStrength = pStrength;
 			mLights[lDarkestLightIndex].mPosition = pPosition;
@@ -190,7 +190,7 @@ void ParticleRenderer::StepLights(float pTime, float pFriction)
 		{
 			if (x->mRenderLightId != Renderer::INVALID_LIGHT)
 			{
-				mLog.Infof(_T("Dropping light with render ID %i."), x->mRenderLightId);
+				//mLog.Infof(_T("Dropping light with render ID %i."), x->mRenderLightId);
 				mRenderer->RemoveLight(x->mRenderLightId);
 			}
 			x = mLights.erase(x);
@@ -200,7 +200,7 @@ void ParticleRenderer::StepLights(float pTime, float pFriction)
 			if (x->mRenderLightId == Renderer::INVALID_LIGHT)
 			{
 				x->mRenderLightId = mRenderer->AddPointLight(Renderer::LIGHT_MOVABLE, x->mPosition, Vector3DF(1,1,1)*x->mStrength*10, x->mStrength*10, 0);
-				mLog.Infof(_T("Creating render ID %i for light with strength %f"), x->mRenderLightId, x->mStrength);
+				//mLog.Infof(_T("Creating render ID %i for light with strength %f"), x->mRenderLightId, x->mStrength);
 			}
 			++x;
 		}

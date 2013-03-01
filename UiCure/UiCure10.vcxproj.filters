@@ -56,6 +56,9 @@
     <ClCompile Include="Source\UiSoundReleaser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\UiParticleLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\UiGameUiManager.mm">
@@ -106,6 +109,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\UiSoundReleaser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiParticleLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

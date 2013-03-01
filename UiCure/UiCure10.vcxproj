@@ -261,6 +261,7 @@
     <ClCompile Include="Source\UiLineGraph2d.cpp" />
     <ClCompile Include="Source\UiMachine.cpp" />
     <ClCompile Include="Source\UiMusicPlayer.cpp" />
+    <ClCompile Include="Source\UiParticleLoader.cpp" />
     <ClCompile Include="Source\UiProps.cpp" />
     <ClCompile Include="Source\UiResourceManager.cpp" />
     <ClCompile Include="Source\UiSound.cpp" />
@@ -279,6 +280,7 @@
     <ClInclude Include="Include\UiLineGraph2d.h" />
     <ClInclude Include="Include\UiMachine.h" />
     <ClInclude Include="Include\UiMusicPlayer.h" />
+    <ClInclude Include="Include\UiParticleLoader.h" />
     <ClInclude Include="Include\UiProps.h" />
     <ClInclude Include="Include\UiResourceManager.h" />
     <ClInclude Include="Include\UiRuntimeVariableName.h" />
