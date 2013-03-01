@@ -9,8 +9,8 @@
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/File.h"
 #include "../../Lepra/Include/ImageLoader.h"
-#include "../../UiTbc/Include/UiBillboardGeometry.h"
-#include "../../UiTbc/Include/UiParticleRenderer.h"
+#include "../../UiTBC/Include/UiBillboardGeometry.h"
+#include "../../UiTBC/Include/UiParticleRenderer.h"
 
 
 
