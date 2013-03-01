@@ -59,7 +59,15 @@ bool NetworkClient::Open(const str& pLocalAddress)
 	if (lOk)
 	{
 		lOk = lLocalAddress.ResolveRange(pLocalAddress, lEndPort);
-		assert(lOk);
+		if (!lOk)
+		{
+			mLog.AWarning("Unable to resolve public local address, network down?");
+			lOk = true;
+			uint8 lIpv4[] = {0,0,0,0};
+			IPAddress lIpAddress(lIpv4, sizeof(lIpv4));
+			lLocalAddress.Set(lIpAddress, 1025);
+			lEndPort = 65534;
+		}
 	}
 	if (lOk)
 	{

@@ -161,6 +161,12 @@ void PushManager::LoadSettings()
 	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
 	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
 #endif // Touch device or emulated touch device
+
+#ifdef LEPRA_TOUCH
+	// TODO: remove hard-coding!
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("pixeldoctrine.dyndns.org:16650"));
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
+#endif // Touch device
 }
 
 void PushManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -545,7 +551,7 @@ void PushManager::UpdateTouchstickPlacement()
 	{
 		int lScreenPixelWidth;
 		CURE_RTVAR_GET(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
-		const int lFingerPixels = (int)(lScreenPixelWidth/(44*lTouchScale));	// 30 pixels in iPhone classic.
+		const int lFingerPixels = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
 		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lFingerPixels);
 		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
 		mStickLeft->SetUniqueIdentifier(lLeftName);

@@ -46,6 +46,8 @@ PushViewer::~PushViewer()
 
 void PushViewer::LoadSettings()
 {
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
+
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
