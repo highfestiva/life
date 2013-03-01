@@ -46,6 +46,7 @@ public:
 	// from call to call.
 	static uint64 QueryCpuFrequency();
 	static inline uint64 GetCpuTick();
+	static str GetHwName();
 	static unsigned GetLogicalCpuCount();
 	static unsigned GetPhysicalCpuCount();
 	static unsigned GetCoreCount();

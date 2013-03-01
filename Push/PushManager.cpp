@@ -539,12 +539,17 @@ void PushManager::UpdateTouchstickPlacement()
 	mTouchstickTimer.ClearTimeDiff();
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
+	const float lTouchSideScale = 1.28f;	// Inches.
+	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
 	if (!mStickLeft)
 	{
-		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, 30);
+		int lScreenPixelWidth;
+		CURE_RTVAR_GET(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
+		const int lFingerPixels = (int)(lScreenPixelWidth/(44*lTouchScale));	// 30 pixels in iPhone classic.
+		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lFingerPixels);
 		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
 		mStickLeft->SetUniqueIdentifier(lLeftName);
-		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0, 30);
+		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0, lFingerPixels);
 		const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
 		mStickRight->SetUniqueIdentifier(lRightName);
 	}
@@ -555,8 +560,8 @@ void PushManager::UpdateTouchstickPlacement()
 	{
 		PixelRect lLeftStickArea(mRenderArea);
 		PixelRect lRightStickArea(mRenderArea);
-		lLeftStickArea.mBottom = mRenderArea.GetHeight() / 3;
-		lRightStickArea.mTop = mRenderArea.GetHeight() * 2 / 3;
+		lLeftStickArea.mBottom = mRenderArea.GetHeight() * lTouchScale;
+		lRightStickArea.mTop = mRenderArea.GetHeight() * (1-lTouchScale);
 		lLeftStickArea.mRight = lLeftStickArea.mLeft + lLeftStickArea.GetHeight();
 		lRightStickArea.mRight = lLeftStickArea.mRight;
 
@@ -580,8 +585,8 @@ void PushManager::UpdateTouchstickPlacement()
 	{
 		PixelRect lLeftStickArea(mRenderArea);
 		PixelRect lRightStickArea(mRenderArea);
-		lLeftStickArea.mRight = mRenderArea.GetWidth() / 3;
-		lRightStickArea.mLeft = mRenderArea.GetWidth() * 2 / 3;
+		lLeftStickArea.mRight = mRenderArea.GetWidth() * lTouchScale;
+		lRightStickArea.mLeft = mRenderArea.GetWidth() * (1-lTouchScale);
 		lLeftStickArea.mTop = lLeftStickArea.mBottom - (lLeftStickArea.mRight - lLeftStickArea.mLeft);
 		lRightStickArea.mTop = lLeftStickArea.mTop;
 		mStickLeft->Move(lLeftStickArea, 0);

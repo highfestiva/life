@@ -16,6 +16,7 @@
 #define RTVAR_UI_DISPLAY_FREQUENCY		"Ui.Display.Frequency"
 #define RTVAR_UI_DISPLAY_FULLSCREEN		"Ui.Display.FullScreen"
 #define RTVAR_UI_DISPLAY_ORIENTATION		"Ui.Display.Orientation"
+#define RTVAR_UI_DISPLAY_PHYSICALSIZE		"Ui.Display.PhysicalSize"
 #define RTVAR_UI_DISPLAY_ENABLEVSYNC		"Ui.Display.EnableVSync"
 #define RTVAR_UI_DISPLAY_RENDERENGINE		"Ui.Display.RenderEngine"
 

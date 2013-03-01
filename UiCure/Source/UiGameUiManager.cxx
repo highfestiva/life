@@ -132,6 +132,8 @@ bool GameUiManager::OpenDraw()
 	if (lOk)
 	{
 		mDisplay->AddResizeObserver(this);
+		const double lPhysicalScreenSize = mDisplay->GetPhysicalScreenSize();
+		CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
 	}

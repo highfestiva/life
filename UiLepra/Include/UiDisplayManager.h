@@ -174,6 +174,7 @@ public:
 	virtual unsigned GetBitDepth() const = 0;
 	virtual unsigned GetRefreshRate() const = 0;
 	virtual bool IsFullScreen() const = 0;
+	virtual double GetPhysicalScreenSize() const = 0;
 
 	// Returns the canvas describing the screen. In accelerated modes 
 	// (OpenGL, DirectX etc) you can't assume that there is a valid pointer
