@@ -163,6 +163,11 @@ bool Win32DisplayManager::IsFullScreen() const
 	return (mScreenMode == DisplayManager::FULLSCREEN);
 }
 
+double Win32DisplayManager::GetPhysicalScreenSize() const
+{
+	return 23.000;	// Estimated average user's screen size at time of playing any one of my games. Extremely accurate.
+}
+
 void Win32DisplayManager::SetCaption(const str& pCaption)
 {
 	SetCaption(pCaption, false);

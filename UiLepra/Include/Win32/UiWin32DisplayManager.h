@@ -49,6 +49,7 @@ public:
 	virtual unsigned GetBitDepth() const;
 	virtual unsigned GetRefreshRate() const;
 	virtual bool IsFullScreen() const;
+	virtual double GetPhysicalScreenSize() const;
 
 	HWND GetHWND();
 

@@ -75,11 +75,11 @@ bool Network::ResolveHostname(const str& pHostname, IPAddress& pIPAddress)
 		lHostent = ::gethostbyname(astrutil::Encode(pHostname).c_str());
 	}
 
-	if (lHostent != 0)
+	if (lHostent)
 	{
-		for(int i = 0; lHostent->h_addr_list[i]; ++i)
+		if (lHostent->h_addr_list[0])
 		{
-			pIPAddress.Set((const uint8*)lHostent->h_addr_list[i], lHostent->h_length);
+			pIPAddress.Set((const uint8*)lHostent->h_addr_list[0], lHostent->h_length);
 			return true;
 		}
 	}
