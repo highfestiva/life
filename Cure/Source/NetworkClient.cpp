@@ -488,6 +488,11 @@ void NetworkClient::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallba
 	mSocketReceiveFilterTable.insert(SocketReceiveFilterTable::value_type(pSocket, pOnDropCallback));
 }
 
+void NetworkClient::RemoveAllFilterIoSockets()
+{
+	mSocketReceiveFilterTable.clear();
+}
+
 void NetworkClient::KillIoSocket(VIoSocket* pSocket)
 {
 	if (pSocket)
@@ -503,6 +508,10 @@ void NetworkClient::KillIoSocket(VIoSocket* pSocket)
 	if (pSocket)
 	{
 		mMuxSocket->CloseSocket(pSocket);
+		if (pSocket == mSocket)
+		{
+			mSocket = 0;
+		}
 	}
 }
 

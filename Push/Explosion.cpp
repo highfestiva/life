@@ -26,8 +26,9 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 	}
 	// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
 	const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -0.75f);
-	const int lBoneStart = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 0 : 1;
-	const int lBoneCount = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
+	const bool lIsDynamic = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const int lBoneStart = lIsDynamic? 0 : 1;
+	const int lBoneCount = lIsDynamic? 1 : lPhysics->GetBoneCount();
 	float lForce = 0;
 	for (int y = lBoneStart; y < lBoneCount; ++y)
 	{
@@ -37,7 +38,8 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 		{
 			continue;
 		}
-		const Vector3DF lBodyCenter = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+		// Only done once in a dynamic object.
+		Vector3DF lBodyCenter = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
 		Vector3DF f = lBodyCenter - lEpicenter;
 		float d = f.GetLength();
 		if (d > 80*pStrength)
@@ -59,7 +61,20 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 			f.z += 0.3f;
 		}
 		f *= ff;
-		pPhysicsManager->AddForce(lGeometry->GetBodyId(), f);
+
+		if (lIsDynamic)
+		{
+			// Use forward or backward direction to offset some from the body center.
+			Vector3DF lImpactPoint = pObject->GetForwardDirection();
+			if (lImpactPoint*f > 0)
+			{
+				lImpactPoint = -lImpactPoint;
+			}
+			lImpactPoint += (pPosition - lBodyCenter).GetNormalized();
+			lBodyCenter += lImpactPoint;
+		}
+
+		pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), f, lBodyCenter);
 	}
 	return lForce;
 }

@@ -79,7 +79,7 @@ void PushServerDelegate::OnOpen()
 {
 	new PushServerConsole(this, mGameServerManager->GetConsoleManager()->GetConsoleCommandManager());
 
-	SetLevel(_T("level_01"));
+	SetLevel(_T("level_02"));
 
 	Cure::ContextObject* lScoreInfo = mGameServerManager->GameManager::CreateContextObject(_T("score_info"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 	mScoreInfoId = lScoreInfo->GetInstanceId();

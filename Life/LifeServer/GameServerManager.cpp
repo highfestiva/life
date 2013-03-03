@@ -1277,6 +1277,7 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 		return;
 	}
 
+	bool lIsEngineControlled = false;
 	TransformationF lTransform;
 	if (pObject->GetPhysics())
 	{
@@ -1287,10 +1288,11 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 			lBody = lStructureGeometry->GetTriggerId();
 		}
 		GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
+		lIsEngineControlled = (pObject->GetPhysics()->GetEngineCount() > 0);
 	}
 	BroadcastCreateObject(pObject->GetInstanceId(), lTransform, pObject->GetClassId(), pObject->GetOwnerInstanceId());
 	OnAttributeSend(pObject);
-	if (pObject->GetVelocity().GetLengthSquared() > 0.1f)
+	if (lIsEngineControlled || pObject->GetVelocity().GetLengthSquared() > 0.1f)
 	{
 		OnPhysicsSend(pObject);
 	}

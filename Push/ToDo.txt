@@ -17,8 +17,10 @@ Game
 + Port server to Linux.
 + Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and shrapnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
 + Check multiplayer on two computers and one iPhone.
-. Drop the old particle systems! Or make them use the new one!
-. Fix the bomber planes showing up after dropping payload in out of process server.
++ Drop the old particle systems! Or make them use the new one!
++ Fix the bomber planes showing up after dropping payload in out of process server.
++ Fix crash bug in networking code destruction (always crashes on client when destructing, but never when not).
++ Fix objects blinking by in origo first frame after load (out-of-process server).
 . Object should start spinning when hit by a grenade/in an explosion.
 . Disconnect should happen when you suspend, cancellable connect should happen when you resume.
 . Improve mouselook.

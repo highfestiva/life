@@ -100,15 +100,13 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	const float lRollLength = lRollSpeed.GetLength();
 	const float lCollisionLength = lRelativeVelocity.GetLength();
 	lRelativeVelocity += lRollSpeed;
-	lRelativeVelocity.z += lCollisionLength*0.2f + lRollLength*0.3f;
-	lRelativeVelocity.x += Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
-	lRelativeVelocity.y += Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
-	lRelativeVelocity.z += Random::Uniform(-lCollisionLength*0.02f, +lCollisionLength*0.05f);
+	lRelativeVelocity.z += lCollisionLength*0.2f + lRollLength*0.2f;
+	lRelativeVelocity += RNDVEC(lCollisionLength*0.2f);
 	if (lRelativeVelocity.GetLengthSquared() < pRelativeVelocity.GetLengthSquared()*200*200)
 	{
 		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-		const float lAngularVelocity = Random::Uniform(-2.0f, 2.0f);
-		lParticleRenderer->CreatePebble(mLifeTime, mScale, lAngularVelocity, lPosition, lRelativeVelocity);
+		const float lAngularVelocity = Random::Uniform(-5.0f, 5.0f);
+		lParticleRenderer->CreatePebble(mLifeTime, mScale, lAngularVelocity, Vector3DF(0.3f, 0.15f, 0.0f), lPosition, lRelativeVelocity);
 		mParticleTimer.ClearTimeDiff();
 	}
 }

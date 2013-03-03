@@ -374,7 +374,8 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
 	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
-	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, Vector3DF(0,0,1), 1, lParticles*2, lParticles*2, lParticles, lParticles/2);
+	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
+	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
 
 	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
 	{
@@ -1130,7 +1131,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 		{
 			mAvatarId = pInteger;
 			mOwnedObjectList.insert(mAvatarId);
-			mLog.Infof(_T("Got control over avatar with ID %i."), pInteger);
+			log_volatile(mLog.Debugf(_T("Got control over avatar with ID %i."), pInteger));
 		}
 		return;
 		case Cure::MessageNumber::INFO_FALL_APART:
@@ -1141,7 +1142,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			{
 				Explosion::FallApart(GetPhysicsManager(), lObject);
 				lObject->CenterMeshes();
-				mLog.Infof(_T("Object %i falling apart."), pInteger);
+				log_volatile(mLog.Debugf(_T("Object %i falling apart."), pInteger));
 			}
 		}
 		return;
@@ -1197,7 +1198,7 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	else
 	{
 		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
-		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 3, 0.6f, 2.0f));
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, 3, 0.6f, 2.0f));
 		lObject = lMachine;
 	}
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
@@ -1217,6 +1218,7 @@ void PushManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
 		}
 		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);
+		((UiCure::CppContextObject*)pObject)->UiMove();
 	}
 	else
 	{

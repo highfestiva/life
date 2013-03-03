@@ -61,6 +61,7 @@ private:
 
 	virtual MuxIoSocket* GetMuxIoSocket() const;
 	virtual void AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback);
+	virtual void RemoveAllFilterIoSockets();
 	virtual void KillIoSocket(VIoSocket* pSocket);
 
 	//void OnCloseSocket(VSocket*);

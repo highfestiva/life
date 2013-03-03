@@ -628,6 +628,11 @@ void NetworkServer::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallba
 	mSocketReceiveFilterTable.insert(SocketReceiveFilterTable::value_type(pSocket, pOnDropCallback));
 }
 
+void NetworkServer::RemoveAllFilterIoSockets()
+{
+	mSocketReceiveFilterTable.clear();
+}
+
 void NetworkServer::KillIoSocket(VIoSocket* pSocket)
 {
 	DropSocket(pSocket);

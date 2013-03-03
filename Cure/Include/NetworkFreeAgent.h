@@ -26,6 +26,7 @@ public:
 private:
 	virtual MuxIoSocket* GetMuxIoSocket() const;
 	virtual void AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback);
+	virtual void RemoveAllFilterIoSockets();
 	virtual void KillIoSocket(VIoSocket* pSocket);
 
 	typedef std::hash_map<VIoSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;

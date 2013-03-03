@@ -8,7 +8,10 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiTBC/Include/UiParticleRenderer.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
 
@@ -19,10 +22,9 @@ namespace UiCure
 
 
 
-ExhaustEmitter::ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, const str& pParticleClass, float pScale, float pAmount, float pLifeTime):
+ExhaustEmitter::ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, float pScale, float pAmount, float pLifeTime):
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
-	mParticleClass(pParticleClass),
 	mScale(pScale),
 	mDelay(1/pAmount),
 	mLifeTime(pLifeTime)
@@ -91,6 +93,7 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
 	lVelocity = lOriginalOrientation*lVelocity;
 	lVelocity += pObject->GetVelocity()*0.5f;
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
 		TBC::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
@@ -102,14 +105,9 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform);
 			lTransform = lMesh->GetBaseTransformation() * lTransform;
 			lTransform.GetPosition() += lOffset;
-			Props* lPuff = new Props(mResourceManager, mParticleClass, mUiManager);
-			pObject->GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			//mLog.Infof(_T("ExhaustEmitter %i creates fume particle %i."), GetInstanceId(), lPuff->GetInstanceId());
-			lPuff->DisableRootShadow();
-			lPuff->SetInitialTransform(lTransform);
-			lPuff->SetOpacity(lOpacity);
-			lPuff->StartParticle(Props::PARTICLE_GAS, lVelocity, mScale, 0.5f, mLifeTime);
-			lPuff->StartLoading();
+
+			const float lAngularVelocity = Random::Uniform(-15.5f, +15.5f);
+			lParticleRenderer->CreateFume(mLifeTime, mScale, lAngularVelocity, lOpacity, lTransform.GetPosition(), lVelocity);
 		}
 	}
 }

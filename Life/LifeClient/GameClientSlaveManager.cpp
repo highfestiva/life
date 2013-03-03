@@ -800,6 +800,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			//const float a = 1.0f/::sqrt(2.0f);
 			//lTransformation.SetOrientation(QuaternionF(0, 0, -a, -a));
 			lMessageCreateObject->GetClassId(lClassId);
+			//mLog.Infof(_T("Creating network instance of type %s at pos (%f; %f; %f)."), lClassId.c_str(),
+			//	lTransformation.GetPosition().x, lTransformation.GetPosition().y, lTransformation.GetPosition().z);
 			Cure::ContextObject* lObject = CreateObject(lMessageCreateObject->GetObjectId(),
 				strutil::Encode(lClassId), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
 			if (lType == Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT)

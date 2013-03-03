@@ -18,14 +18,13 @@ namespace UiCure
 class ExhaustEmitter
 {
 public:
-	ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, const str& pParticleClass, float pScale, float pAmount, float pLifeTime);
+	ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, float pScale, float pAmount, float pLifeTime);
 	virtual ~ExhaustEmitter();
 
 	void EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
 
 	Cure::ResourceManager* mResourceManager;
 	GameUiManager* mUiManager;
-	str mParticleClass;
 	float mExhaustTimeout;
 	float mScale;
 	float mDelay;
