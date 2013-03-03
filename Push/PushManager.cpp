@@ -1180,7 +1180,7 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	}
 	else if (strutil::StartsWith(pClassId, _T("level_")))
 	{
-		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
+		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Level* mLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
 		mLevel->DisableRootShadow();
 		lObject = mLevel;

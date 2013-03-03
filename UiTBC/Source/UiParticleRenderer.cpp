@@ -139,6 +139,21 @@ void ParticleRenderer::CreateExplosion(const Vector3DF& pPosition, float pStreng
 	}
 }
 
+void ParticleRenderer::CreatePebble(float pTime, float pScale, float pAngularVelocity, const Vector3DF& pPosition, const Vector3DF& pVelocity)
+{
+	const float lTimeFactor = PIF*0.5f/pTime;	// Split in two, as we're only using latter half of sine curve (don't fade into existance).
+	const float lRandomXYEndSpeed = 1.0f;
+
+	CreateBillboards(pPosition, 0, Vector3DF(0,0,1), Vector3DF(0, 0, -10), lRandomXYEndSpeed, lTimeFactor, pScale*0.1f, mShrapnels, 1);
+	Billboard& lPebbleBillboard = mShrapnels.back();
+	lPebbleBillboard.mVelocity = pVelocity;
+	lPebbleBillboard.mPosition.z -= 0.5f;
+	lPebbleBillboard.mAngularVelocity = Random::Uniform(-pAngularVelocity, +pAngularVelocity);
+	lPebbleBillboard.mOpacity = 1;
+	lPebbleBillboard.mOpacityTime += PIF/2;
+	lPebbleBillboard.mTimeFactor = Random::Uniform(lTimeFactor*0.7f, lTimeFactor*1.3f);
+}
+
 
 
 void ParticleRenderer::CreateTempLight(float pStrength, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pTargetVelocity, float pTimeFactor)

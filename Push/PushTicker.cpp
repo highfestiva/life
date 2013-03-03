@@ -243,7 +243,7 @@ void PushTicker::PreWaitPhysicsTick()
 	{
 		return;
 	}
-	const int lAdjustmentIndex = (mPerformanceAdjustmentTicks >> 6);
+	const int lAdjustmentIndex = (mPerformanceAdjustmentTicks >> 7);
 
 	bool lEnableAutoPerformance;
 	CURE_RTVAR_GET(lEnableAutoPerformance, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEAUTOPERFORMANCE, true);
@@ -294,20 +294,6 @@ void PushTicker::PreWaitPhysicsTick()
 		}
 		break;
 		case 3:
-		{
-			bool lEnableGravelFading;
-			CURE_RTVAR_GET(lEnableGravelFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, true);
-			if (lPerformanceLoad > 1)
-			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, false);
-			}
-			else if (lPerformanceLoad < 0.75)
-			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, true);
-			}
-		}
-		break;
-		case 4:
 		{
 			bool lEnableMassObjects;
 			CURE_RTVAR_GET(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);

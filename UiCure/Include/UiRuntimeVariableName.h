@@ -23,7 +23,6 @@
 #define RTVAR_UI_3D_ENABLELIGHTS		"Ui.3D.EnableLights"
 #define RTVAR_UI_3D_ENABLECLEAR			"Ui.3D.EnableClear"
 #define RTVAR_UI_3D_ENABLEAUTOPERFORMANCE	"Ui.3D.EnableAutoPerformance"
-#define RTVAR_UI_3D_ENABLEGRAVELFADING		"Ui.3D.EnableGravelFading"
 #define RTVAR_UI_3D_ENABLEMASSOBJECTS		"Ui.3D.EnableMassObjects"
 #define RTVAR_UI_3D_ENABLEMASSOBJECTFADING	"Ui.3D.EnableMassObjectFading"
 #define RTVAR_UI_3D_ENABLEPARTICLES		"Ui.3D.EnableParticles"

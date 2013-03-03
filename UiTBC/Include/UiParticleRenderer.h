@@ -32,6 +32,7 @@ public:
 
 	void CreateFlare(float pStrength, float pTimeFactor, const Vector3DF& pPosition, const Vector3DF& pVelocity);
 	void CreateExplosion(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, float pFalloff, const Vector3DF& pEllipsoidNorthPole, float pEllipsoidRatio, int pFires, int pSmokes, int pSparks, int pShrapnels);
+	void CreatePebble(float pTime, float pScale, float pAngularVelocity, const Vector3DF& pPosition, const Vector3DF& pVelocity);
 
 protected:
 	struct Light

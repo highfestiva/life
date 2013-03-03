@@ -112,7 +112,7 @@ bool PushViewer::InitializeUniverse()
 		return (false);
 	}
 
-	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 0.5f, 1, 10, 2);
+	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 	mLevel = new Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
 	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, 0);
 	mLevel->DisableRootShadow();
