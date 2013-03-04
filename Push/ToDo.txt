@@ -21,9 +21,10 @@ Game
 + Fix the bomber planes showing up after dropping payload in out of process server.
 + Fix crash bug in networking code destruction (always crashes on client when destructing, but never when not).
 + Fix objects blinking by in origo first frame after load (out-of-process server).
-. Object should start spinning when hit by a grenade/in an explosion.
++ Object should start spinning when hit by a grenade/in an explosion.
 . Disconnect should happen when you suspend, cancellable connect should happen when you resume.
-. Improve mouselook.
+. Improve mouselook on PC.
+. Mouselook should work on Mac.
 . Orient spawn engines correctly (for instance mines).
 . Not possible to log in when someone is moving/shooting.
 . Spawn engines for players, not hard-coded positions.
@@ -42,7 +43,6 @@ Game
 . Nice tank looks -- env mapping on vehicles?
 . Make level look nice. Lighted textures? Light maps? Env maps?
 . Improve sound quality (doppler on grenades especially).
-. Refactor Life/Push/HoverTank to be able to reuse code for future projects.
 
 
 Engine

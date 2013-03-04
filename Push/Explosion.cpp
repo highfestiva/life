@@ -64,14 +64,9 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 
 		if (lIsDynamic)
 		{
-			// Use forward or backward direction to offset some from the body center.
-			Vector3DF lImpactPoint = pObject->GetForwardDirection();
-			if (lImpactPoint*f > 0)
-			{
-				lImpactPoint = -lImpactPoint;
-			}
-			lImpactPoint += (pPosition - lBodyCenter).GetNormalized();
-			lBodyCenter += lImpactPoint;
+			// Use forward direction to offset some from the body center. Not perfect, but good enough for now.
+			lBodyCenter += pObject->GetForwardDirection();
+			lBodyCenter.z += 0.05f;
 		}
 
 		pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), f, lBodyCenter);
