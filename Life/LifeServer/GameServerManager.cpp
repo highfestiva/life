@@ -16,6 +16,7 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsSpawner.h"
 #include "../LifeMaster/MasterServer.h"
 #include "../LifeApplication.h"
 #include "../LifeString.h"
@@ -304,42 +305,35 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 	}
 }
 
+Spawner* GameServerManager::GetAvatarSpawner(Cure::GameObjectId pLevelId) const
+{
+	Cure::ContextObject* lLevel = GetContext()->GetObject(pLevelId);
+	if (!lLevel)
+	{
+		return 0;
+	}
+	const Cure::ContextObject::Array& lChildArray = lLevel->GetChildArray();
+	Cure::ContextObject::Array::const_iterator x = lChildArray.begin();
+	for (; x != lChildArray.end(); ++x)
+	{
+		Life::Spawner* lSpawner = dynamic_cast<Life::Spawner*>(*x);
+		if (!lSpawner)
+		{
+			continue;
+		}
+		const TBC::PhysicsSpawner* lSpawnShape = lSpawner->GetSpawner();
+		if (lSpawnShape->GetNumber() == 0)
+		{
+			return lSpawner;
+		}
+	}
+	return 0;
+}
+
 void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)
 {
 	ScopeLock lTickLock(GetTickLock());
-
-	TransformationF lTransform;
-	lTransform.SetPosition(Vector3DF(0, 0, 10));
-	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
-	const float a = 1.0f/::sqrt(2.0f);
-	lTransform.SetOrientation(QuaternionF(0, 0, -a, -a));
-	if (lPreviousAvatarId)
-	{
-		mLog.Info(_T("User ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
-		pClient->SetAvatarId(0);
-		Cure::ContextObject* lObject = GetContext()->GetObject(lPreviousAvatarId);
-		if (lObject)
-		{
-			lTransform.SetPosition(lObject->GetPosition());
-			lTransform.GetPosition() += Vector3DF(0, 0, 2);
-			Vector3DF lEulerAngles;
-			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
-			QuaternionF q;
-			q.SetEulerAngles(lEulerAngles.x, 0, 0);
-			lTransform.SetOrientation(q * lTransform.GetOrientation());
-		}
-		DeleteContextObject(lPreviousAvatarId);
-	}
-
-	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T("."));
-	Cure::ContextObject* lObject = Parent::CreateContextObject(pAvatarId,
-		Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	//const QuaternionF& q = lTransform.GetOrientation();
-	//mLog.Infof(_T("Setting avatar quaternion (%f;%f;%f;%f)."), q.GetA(), q.GetB(), q.GetC(), q.GetD());
-	lObject->SetInitialTransform(lTransform);
-	pClient->SetAvatarId(lObject->GetInstanceId());
-	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());
-	lObject->StartLoading();
+	mDelegate->OnSelectAvatar(pClient, pAvatarId);
 }
 
 void GameServerManager::LoanObject(Client* pClient, Cure::GameObjectId pInstanceId)

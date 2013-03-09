@@ -319,6 +319,8 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	mMouse(0),
 	mKeyboard(0)
 {
+	::ShowCursor(FALSE);	// Start by decreasing the mouse show counter to 0, so it can be hidden (-1) or shown again (0).
+
 	Refresh();
 
 	POINT lPoint;
@@ -542,7 +544,6 @@ BOOL CALLBACK Win32InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, L
 
 void Win32InputManager::SetCursorVisible(bool pVisible)
 {
-	::ShowCursor(pVisible? TRUE : FALSE);
 	if (!pVisible)
 	{
 		RECT lRect;
@@ -555,6 +556,7 @@ void Win32InputManager::SetCursorVisible(bool pVisible)
 	{
 		::ClipCursor(0);
 	}
+	::ShowCursor(pVisible? TRUE : FALSE);
 }
 
 float Win32InputManager::GetCursorX()

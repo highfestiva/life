@@ -67,12 +67,12 @@ ContextObject::~ContextObject()
 		mParent = 0;
 	}
 
-	for (ChildList::iterator x = mChildList.begin(); x != mChildList.end(); ++x)
+	for (Array::iterator x = mChildArray.begin(); x != mChildArray.end(); ++x)
 	{
 		(*x)->SetParent(0);
 		delete (*x);
 	}
-	mChildList.clear();
+	mChildArray.clear();
 
 	mTriggerMap.clear();
 	mSpawner = 0;
@@ -383,13 +383,18 @@ const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
 void ContextObject::AddChild(ContextObject* pChild)
 {
 	assert(pChild->GetInstanceId() != 0);
-	if (std::find(mChildList.begin(), mChildList.end(), pChild) != mChildList.end())
+	if (std::find(mChildArray.begin(), mChildArray.end(), pChild) != mChildArray.end())
 	{
 		// Already added.
 		return;
 	}
-	mChildList.push_back(pChild);
+	mChildArray.push_back(pChild);
 	pChild->SetParent(this);
+}
+
+const ContextObject::Array& ContextObject::GetChildArray() const
+{
+	return mChildArray;
 }
 
 
@@ -847,7 +852,7 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 
 void ContextObject::RemoveChild(ContextObject* pChild)
 {
-	mChildList.remove(pChild);
+	mChildArray.erase(std::remove(mChildArray.begin(), mChildArray.end(), pChild), mChildArray.end());
 }
 
 void ContextObject::SetParent(ContextObject* pParent)

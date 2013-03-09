@@ -32,6 +32,7 @@ class MasterServerConnection;
 class ServerDelegate;
 struct ServerInfo;
 class ServerMessageProcessor;
+class Spawner;
 
 
 
@@ -45,8 +46,6 @@ public:
 	GameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
 		Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
-
-	void SetLevel(const str& pLevelName);
 
 	virtual bool BeginTick();
 	virtual void PreEndTick();
@@ -64,6 +63,7 @@ public:
 	void SetMessageProcessor(ServerMessageProcessor* pMessageProcessor);
 	void AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex);
 	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
+	Spawner* GetAvatarSpawner(Cure::GameObjectId pLevelId) const;
 	void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
 	void LoanObject(Client* pClient, Cure::GameObjectId pInstanceId);
 	wstrutil::strvec ListUsers();

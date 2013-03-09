@@ -99,8 +99,8 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
 	mCameraTargetXyDistance(20),
 	mCameraMaxSpeed(500),
-	mIsSameSteering(false),
-	mSteeringLockDirection(0),
+	mCameraTargetAngle(0),
+	mCameraTargetAngleFactor(0),
 	mLoginWindow(0),
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	mFireButton(0),
@@ -632,6 +632,54 @@ void PushManager::TickUiInput()
 			assert(lLeftPowerLR     >=  -3 &&     lLeftPowerLR <=  +3);
 			assert(lRightPowerLR    >= -12 &&    lRightPowerLR <= +12);
 
+			// Mouse controls yaw angle.
+			const float lAngleDelta = S(YAW_ANGLE) * 0.05f;
+			static HiResTimer lAngleTimer;
+			static float lAngle = 0;
+			const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+			const bool lIsUpdatingYaw = !!lAngleDelta;
+			const bool lIsTimedYawUpdate = (lAngleTimer.QueryTimeDiff() < 1.5f);
+			if (lAvatar && (lIsUpdatingYaw || lIsTimedYawUpdate))
+			{
+				float lCurrentAngle = 0;
+				float _;
+				lAvatar->GetOrientation().GetEulerAngles(lCurrentAngle, _, _);
+				const bool lIsFirstYawUpdate = !lIsTimedYawUpdate;
+				if (lIsFirstYawUpdate)
+				{
+					lAngle = lCurrentAngle;
+				}
+				if (lIsUpdatingYaw)
+				{
+					lAngleTimer.ClearTimeDiff();
+				}
+				lAngle -= lAngleDelta;
+				Math::RangeAngles(lCurrentAngle, lAngle);
+				mCameraTargetAngle = lAngle;
+				mCameraTargetAngleFactor = 1;
+				float lAngleDiff = lCurrentAngle - lAngle;
+				const Vector3DF lRotationVelocity = lAvatar->GetAngularVelocity();
+				float lRotationFriction = -lRotationVelocity.z * 0.2f;
+				if ((lAngleDelta < 0) == (lAngleDiff > 0))
+				{
+					lRotationFriction = 0;
+				}
+				/*static int pc = 0;
+				if (++pc > 5)
+				{
+					pc = 0;
+					mLog.Infof(_T("angle=%f, delta=%f, current=%f, diff=%f, friction=%f"), lAngle, lAngleDelta, lCurrentAngle, lCurrentAngle - lAngle, lRotationFriction);
+				}*/
+				const float lStrength = Math::Lerp(1.0f, 2.0f, std::max(std::abs(lLeftPowerFwdRev), std::abs(lLeftPowerLR)));
+				lAngleDiff *= 4;
+				lAngleDiff -= lRotationFriction * lStrength;
+				lRightPowerLR += lAngleDiff;
+			}
+			else
+			{
+				mCameraTargetAngleFactor *= 0.5f;
+			}
+
 			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR);
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR);
 			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev-lRightPowerLR);
@@ -791,6 +839,15 @@ void PushManager::TickUiUpdate()
 	if (lPivotXyPosition.y-mCameraPosition.y < 0)
 	{
 		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
+	}
+	{
+		float lCameraTargetAngle = mCameraTargetAngle + PIF/2;
+		Math::RangeAngles(lTargetCameraOrientation.x, mCameraTargetAngle);
+		lTargetCameraOrientation.x = Math::Lerp(lTargetCameraOrientation.x, lCameraTargetAngle, mCameraTargetAngleFactor);
+		if (mCameraTargetAngleFactor != 1)
+		{
+			mCameraTargetAngle = lTargetCameraOrientation.x - PIF/2;
+		}
 	}
 	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);

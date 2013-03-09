@@ -505,9 +505,15 @@ void MasterServerConnection::Close(bool pError)
 	if (mMuxSocket && mVSocket)
 	{
 		Send(_T(MASTER_SERVER_DC));
-		mSocketIoHandler->KillIoSocket(mVSocket);
+		if (mSocketIoHandler)
+		{
+			mSocketIoHandler->KillIoSocket(mVSocket);
+		}
 	}
-	mSocketIoHandler->RemoveAllFilterIoSockets();
+	if (mSocketIoHandler)
+	{
+		mSocketIoHandler->RemoveAllFilterIoSockets();
+	}
 	assert(mVSocket == 0);
 	mState = DISCONNECTED;
 	mStateList.clear();	// A) we lost connection, no use trying for a while, or B) nothing more to do (=already empty).

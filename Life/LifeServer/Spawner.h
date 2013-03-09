@@ -24,6 +24,8 @@ public:
 	Spawner(Cure::ContextManager* pManager);
 	virtual ~Spawner();
 
+	void PlaceObject(Cure::ContextObject* pObject);
+
 private:
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	void OnCreate(float pCreateInterval);

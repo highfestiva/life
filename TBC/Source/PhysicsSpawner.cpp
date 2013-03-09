@@ -80,6 +80,7 @@ TransformationF PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, c
 	lPoint.y = (pScaledPoint.y-0.5f) * lPoint.y;
 	lPoint.z = (pScaledPoint.z-0.5f) * lPoint.z;
 	const TransformationF& lTransformation = pStructure->GetTransformation(mSpawnerNode);
+	lPoint = lTransformation.GetOrientation() * lPoint;
 	return TransformationF(lTransformation.GetOrientation(), lTransformation.GetPosition()+lPoint);
 }
 

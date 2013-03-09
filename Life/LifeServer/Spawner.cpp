@@ -33,6 +33,14 @@ Spawner::~Spawner()
 
 
 
+void Spawner::PlaceObject(Cure::ContextObject* pObject)
+{
+	const Vector3DF lScalePoint = RNDPOSVEC();
+	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint));
+}
+
+
+
 void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 {
 	Parent::OnAlarm(pAlarmId, pExtraData);
@@ -57,19 +65,23 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 
 void Spawner::OnCreate(float pCreateInterval)
 {
+	if (!pCreateInterval)
+	{
+		return;
+	}
+
 	float lSpawnPart;
 	CURE_RTVAR_GET(lSpawnPart, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 	const int lSpawnCount = (int)(GetSpawner()->GetNumber() * lSpawnPart);
 
-	if ((int)mChildList.size() < lSpawnCount)
+	if ((int)mChildArray.size() < lSpawnCount)
 	{
 		const str lSpawnObject = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
 		if (!lSpawnObject.empty())
 		{
 			ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 			AddChild(lObject);
-			const Vector3DF lScalePoint = RNDPOSVEC();
-			lObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint));
+			PlaceObject(lObject);
 			lObject->StartLoading();
 		}
 	}
@@ -79,16 +91,18 @@ void Spawner::OnCreate(float pCreateInterval)
 
 void Spawner::OnDestroy(float pDestroyInterval)
 {
-	if (pDestroyInterval)
+	if (!pDestroyInterval)
 	{
-		if (!mChildList.empty())
-		{
-			const ContextObject* lObject = mChildList.front();
-			mChildList.pop_front();
-			GetManager()->DeleteObject(lObject->GetInstanceId());
-		}
-		GetManager()->AddAlarmCallback(this, 1, pDestroyInterval, 0);
+		return;
 	}
+
+	if (!mChildArray.empty())
+	{
+		const ContextObject* lObject = mChildArray.front();
+		mChildArray.erase(mChildArray.begin());
+		GetManager()->DeleteObject(lObject->GetInstanceId());
+	}
+	GetManager()->AddAlarmCallback(this, 1, pDestroyInterval, 0);
 }
 
 

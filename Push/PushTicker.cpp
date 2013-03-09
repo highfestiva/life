@@ -331,6 +331,7 @@ bool PushTicker::QueryQuit()
 
 	if (Parent::QueryQuit())
 	{
+		PrepareQuit();
 		for (int x = 0; x < 4; ++x)
 		{
 			DeleteSlave(mSlaveArray[x], false);

@@ -12,6 +12,7 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Life/LifeServer/GameServerManager.h"
+#include "../../Life/LifeServer/Spawner.h"
 #include "../../Life/ProjectileUtil.h"
 #include "../RtVar.h"
 #include "../RtVar.h"
@@ -121,6 +122,42 @@ void PushServerDelegate::OnLogout(Life::Client* pClient)
 }
 
 
+
+void PushServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)
+{
+	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
+	if (lPreviousAvatarId)
+	{
+		mLog.Info(_T("User ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
+		pClient->SetAvatarId(0);
+		Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lPreviousAvatarId);
+		if (lObject)
+		{
+			TransformationF lTransform;
+			lTransform.SetPosition(lObject->GetPosition());
+			lTransform.GetPosition() += Vector3DF(0, 0, 2);
+			Vector3DF lEulerAngles;
+			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
+			QuaternionF q;
+			q.SetEulerAngles(lEulerAngles.x, 0, 0);
+			lTransform.SetOrientation(q * lTransform.GetOrientation());
+		}
+		mGameServerManager->DeleteContextObject(lPreviousAvatarId);
+	}
+
+	Life::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
+	if (!lSpawner)
+	{
+		mLog.AError("No player spawner in level!");
+		return;
+	}
+	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T("."));
+	Cure::ContextObject* lObject = mGameServerManager->Parent::CreateContextObject(pAvatarId, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	lSpawner->PlaceObject(lObject);
+	pClient->SetAvatarId(lObject->GetInstanceId());
+	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());
+	lObject->StartLoading();
+}
 
 void PushServerDelegate::OnLoadAvatar(Life::Client* pClient, Cure::ContextObject* pAvatar)
 {
@@ -253,7 +290,9 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 		{
 			continue;
 		}
-		if (strutil::StartsWith(lObject->GetClassId(), _T("bomb")))	// Prevent bombs from pushing each other away from the target!
+		const str& lClassId = lObject->GetClassId();
+		if (strutil::StartsWith(lClassId, _T("bomb")) ||	// Prevent bombs from pushing each other away from the target!
+			strutil::StartsWith(lClassId, _T("deltawing")))	// Prevent bombers from getting their noses pushed upwards when bombs go off!
 		{
 			continue;
 		}
@@ -303,12 +342,15 @@ Cure::ContextObject* PushServerDelegate::CreateAvatarForNpc(Npc* pNpc)
 		return 0;
 	}
 
+	Life::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
+	if (!lSpawner)
+	{
+		mLog.AError("No NPC spawner in level!");
+		return 0;
+	}
+
 	Cure::ContextObject* lAvatar = mGameServerManager->GameManager::CreateContextObject(_T("hover_tank_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	TransformationF lTransform;
-	lTransform.SetPosition(Vector3DF(Random::Uniform(3.0f, 100.0f), Random::Uniform(-100.0f, +100.0f), 10));
-	const float a = 1.0f/::sqrt(2.0f);
-	lTransform.SetOrientation(QuaternionF(0, 0, -a, -a));
-	lAvatar->SetInitialTransform(lTransform);
+	lSpawner->PlaceObject(lAvatar);
 	lAvatar->SetExtraData((void*)-1);
 	lAvatar->StartLoading();
 	pNpc->SetAvatarId(lAvatar->GetInstanceId());

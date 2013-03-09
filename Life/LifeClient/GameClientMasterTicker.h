@@ -50,6 +50,7 @@ public:
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 
 	virtual bool CreateSlave() = 0;
+	virtual void PrepareQuit();
 
 	bool Tick();
 	void PollRoundTrip();

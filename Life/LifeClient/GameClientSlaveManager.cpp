@@ -668,8 +668,8 @@ void GameClientSlaveManager::HandleUnusedRelativeAxis()
 	{
 		UiLepra::InputElement* lAxis = (*x);
 
-		const str lSuffixes[2] = { _T("+"), _T("-") };
-		for (int y = 0; y < 2; ++y)
+		const str lSuffixes[] = { _T(""), _T("+"), _T("-") };
+		for (int y = 0; y < LEPRA_ARRAY_COUNT(lSuffixes); ++y)
 		{
 			str lAxisName = lAxis->GetFullName() + lSuffixes[y];
 			bool lIsSteering = false;
@@ -681,7 +681,7 @@ void GameClientSlaveManager::HandleUnusedRelativeAxis()
 			Options::OptionsManager::ValueArray::iterator x = lValuePointers->begin();
 			for (; x != lValuePointers->end(); ++x)
 			{
-				if (std::abs(**x) > 0.06f)
+				if (std::abs(**x) > 0.02f)
 				{
 					**x *= lMouseFilter;
 				}

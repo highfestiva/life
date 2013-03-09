@@ -44,6 +44,7 @@ private:
 	virtual void OnLogin(Life::Client* pClient);
 	virtual void OnLogout(Life::Client* pClient);
 
+	virtual void OnSelectAvatar(Life::Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
 	virtual void OnLoadAvatar(Life::Client* pClient, Cure::ContextObject* pAvatar);
 	virtual void OnLoadObject(Cure::ContextObject* pObject);
 	virtual void OnDeleteObject(Cure::ContextObject* pObject);

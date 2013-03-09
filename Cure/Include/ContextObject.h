@@ -90,6 +90,7 @@ public:
 	const TBC::PhysicsSpawner* GetSpawner() const;
 
 	void AddChild(ContextObject* pChild);
+	const Array& GetChildArray() const;
 
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);	// Fetch full phys position (and update object graph as necessary).
 	static bool UpdateFullPosition(ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure);
@@ -162,7 +163,6 @@ protected:
 	};
 	typedef std::list<Connection> ConnectionList;
 	typedef std::hash_map<TBC::PhysicsManager::TriggerID, const void*> TriggerMap;
-	typedef std::list<ContextObject*> ChildList;
 
 	ContextManager* mManager;
 	ResourceManager* mResourceManager;
@@ -173,7 +173,7 @@ protected:
 	NetworkObjectType mNetworkObjectType;
 	ContextObject* mParent;
 	void* mExtraData;
-	ChildList mChildList;
+	Array mChildArray;
 	TriggerMap mTriggerMap;
 	const TBC::PhysicsSpawner* mSpawner;
 	bool mIsLoaded;

@@ -139,23 +139,23 @@ protected:
 	Cure::GameObjectId mLevelId;
 	Level* mLevel;
 	ObjectArray mMassObjectArray;
-	Cure::ContextObject* mSun;	// TODO: remove hack (should context object controlled)!
-	std::vector<Cure::ContextObject*> mCloudArray;	// TODO: remove hack (should context object controlled)!
+	Cure::ContextObject* mSun;
+	std::vector<Cure::ContextObject*> mCloudArray;
 
 	Cure::GameObjectId mScoreInfoId;
 
-	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
-	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
-	//Vector3DF mCameraFollowVelocity;	// TODO: remove hack (should context object controlled)!
-	Vector3DF mCameraUp;			// TODO: remove hack (should context object controlled)!
-	Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
-	Vector3DF mCameraPivotPosition;		// TODO: remove hack (should context object controlled)!
-	Vector3DF mCameraPivotVelocity;		// TODO: remove hack (should context object controlled)!
-	float mCameraTargetXyDistance;		// TODO: remove hack (should context object controlled)!
-	float mCameraMaxSpeed;			// TODO: remove hack (should context object controlled)!
-	bool mIsSameSteering;
-	float mSteeringLockDirection;
-	Vector3DF mMicrophoneSpeed;		// TODO: remove hack (should context object controlled)!
+	Vector3DF mCameraPosition;
+	Vector3DF mCameraPreviousPosition;
+	//Vector3DF mCameraFollowVelocity;
+	Vector3DF mCameraUp;
+	Vector3DF mCameraOrientation;
+	Vector3DF mCameraPivotPosition;
+	Vector3DF mCameraPivotVelocity;
+	float mCameraTargetXyDistance;
+	float mCameraMaxSpeed;
+	float mCameraTargetAngle;
+	float mCameraTargetAngleFactor;
+	Vector3DF mMicrophoneSpeed;
 	UiTbc::Window* mLoginWindow;
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	UiTbc::Button* mFireButton;

@@ -22,18 +22,25 @@ Game
 + Fix crash bug in networking code destruction (always crashes on client when destructing, but never when not).
 + Fix objects blinking by in origo first frame after load (out-of-process server).
 + Object should start spinning when hit by a grenade/in an explosion.
++ Improve mouselook on PC.
++ Orient spawn engines correctly (for instance mines).
++ Bombers' noses are pushed upwards by the explosion when dropping bombs! Don't let it happen, noooo!
 . Disconnect should happen when you suspend, cancellable connect should happen when you resume.
-. Improve mouselook on PC.
 . Mouselook should work on Mac.
-. Orient spawn engines correctly (for instance mines).
 . Not possible to log in when someone is moving/shooting.
 . Spawn engines for players, not hard-coded positions.
 . Refactor (code -> Life?) and split Push and HoverTank.
 . Test which of Arena or Adventure play is best. Make a real map!
+. The first levels should be easy with target practice and simply crossing a simple square into a goal.
+. Show reticle or indication of target. Perhaps something like a fighter jet's "shoot!" indicator?
+. Show pictures of players in multiplayer! Great idea!
+. Hover tanks should have moving parts, if only in gfx. Pontoons, rotors or jets should indicate movement direction.
+. Make mine explosions bio-hazardous green instead of default yellow/red.
 . Simple path finding.
 . AI (where is the user probably going to appear after disappearing behind a building).
 . Homing missiles.
 . Add lobbing missiles/homing grenades, which travel to high altitude and can be used to take out bomb planes!
+. Add homing, high-flying missiles - fired at a 70 deg angle - which can be fired at a distance. Takes out both bombers and tanks.
 . Dynamic, moving objects in levels.
 . Fix cam moves behind walls (like in Kill Cutie: cam moves up).
 . UX design/menus.
