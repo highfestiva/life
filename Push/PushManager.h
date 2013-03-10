@@ -126,6 +126,7 @@ protected:
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
 	bool mHadAvatar;
+	bool mUpdateCameraForAvatar;
 	Life::Options::Steering mLastSteering;
 	float mCamRotateExtra;
 	int mActiveWeapon;

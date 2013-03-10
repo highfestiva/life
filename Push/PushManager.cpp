@@ -84,6 +84,7 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCollisionSoundManager(0),
 	mAvatarId(0),
 	mHadAvatar(false),
+	mUpdateCameraForAvatar(false),
 	mCamRotateExtra(0),
 	mActiveWeapon(0),
 	mPickVehicleButton(0),
@@ -639,6 +640,18 @@ void PushManager::TickUiInput()
 			const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 			const bool lIsUpdatingYaw = !!lAngleDelta;
 			const bool lIsTimedYawUpdate = (lAngleTimer.QueryTimeDiff() < 1.5f);
+			if (lAvatar && mUpdateCameraForAvatar)
+			{
+				mUpdateCameraForAvatar = false;
+				float lCurrentAngle = 0;
+				float _;
+				lAvatar->GetOrientation().GetEulerAngles(lCurrentAngle, _, _);
+				lCurrentAngle = +PIF/2 - lCurrentAngle;
+				mLog.Infof(_T("Setting cam from avatar angle %f"), lCurrentAngle);
+				lAngle = lCurrentAngle;
+				mCameraTargetAngle = lCurrentAngle;
+				mCameraOrientation.x = lCurrentAngle + PIF/2;
+			}
 			if (lAvatar && (lIsUpdatingYaw || lIsTimedYawUpdate))
 			{
 				float lCurrentAngle = 0;
@@ -844,7 +857,7 @@ void PushManager::TickUiUpdate()
 		float lCameraTargetAngle = mCameraTargetAngle + PIF/2;
 		Math::RangeAngles(lTargetCameraOrientation.x, mCameraTargetAngle);
 		lTargetCameraOrientation.x = Math::Lerp(lTargetCameraOrientation.x, lCameraTargetAngle, mCameraTargetAngleFactor);
-		if (mCameraTargetAngleFactor != 1)
+		if (mCameraTargetAngleFactor < 0.1f)
 		{
 			mCameraTargetAngle = lTargetCameraOrientation.x - PIF/2;
 		}
@@ -1188,6 +1201,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 		{
 			mAvatarId = pInteger;
 			mOwnedObjectList.insert(mAvatarId);
+			mUpdateCameraForAvatar = true;
 			log_volatile(mLog.Debugf(_T("Got control over avatar with ID %i."), pInteger));
 		}
 		return;
