@@ -26,8 +26,11 @@ BombPlane::BombPlane(Cure::ResourceManager* pResourceManager, const str& pClassI
 	Parent(pResourceManager, pClassId),
 	mLauncher(pLauncher),
 	mTarget(pTarget),
-	mLastBombTick(0)
+	mLastBombTick(0),
+	mIsDetonated(false)
 {
+	new Cure::FloatAttribute(this, _T("float_health"), 0.1f);	// Partially excempted in explosion logic, so definitely higher in practice.
+
 	// Randomize so bombers won't have perfect (robotic) synchronization.
 	mBombingRadiusSquared = BOMBING_RADIUS*BOMBING_RADIUS * Random::Uniform(0.6f, 1.7f);
 	mDropInterval = Random::Uniform(0.5f, 0.8f);
@@ -49,6 +52,12 @@ void BombPlane::OnLoaded()
 
 void BombPlane::OnTick()
 {
+	const float lHealth = ((Cure::FloatAttribute*)GetAttribute(_T("float_health")))->GetValue();
+	if (lHealth <= 0)
+	{
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 1);
+	}
+
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	if (lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mLastBombTick)) < mDropInterval)
 	{

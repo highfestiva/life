@@ -100,6 +100,7 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
 	mCameraTargetXyDistance(20),
 	mCameraMaxSpeed(500),
+	mCameraMouseAngle(0),
 	mCameraTargetAngle(0),
 	mCameraTargetAngleFactor(0),
 	mLoginWindow(0),
@@ -635,23 +636,38 @@ void PushManager::TickUiInput()
 
 			// Mouse controls yaw angle.
 			const float lAngleDelta = S(YAW_ANGLE) * 0.05f;
-			static HiResTimer lAngleTimer;
-			static float lAngle = 0;
 			const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 			const bool lIsUpdatingYaw = !!lAngleDelta;
-			const bool lIsTimedYawUpdate = (lAngleTimer.QueryTimeDiff() < 1.5f);
+			const bool lIsTimedYawUpdate = (mCameraMouseAngleTimer.QueryTimeDiff() < 1.5f);
 			if (lAvatar && mUpdateCameraForAvatar)
 			{
 				mUpdateCameraForAvatar = false;
 				float lCurrentAngle = 0;
 				float _;
 				lAvatar->GetOrientation().GetEulerAngles(lCurrentAngle, _, _);
-				lCurrentAngle = +PIF/2 - lCurrentAngle;
-				mLog.Infof(_T("Setting cam from avatar angle %f"), lCurrentAngle);
-				lAngle = lCurrentAngle;
+				//lCurrentAngle = +PIF/2 - lCurrentAngle;
+				//const Vector3DF fwd = lAvatar->GetForwardDirection();
+				//mLog.Infof(_T("Setting cam from avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
+				//const QuaternionF r = lAvatar->GetOrientation();
+				//mLog.Infof(_T("Setting cam from Q=%f, %f, %f, %f"), r.mA, r.mB, r.mC, r.mD);
+				mCameraMouseAngle = lCurrentAngle;
 				mCameraTargetAngle = lCurrentAngle;
 				mCameraOrientation.x = lCurrentAngle + PIF/2;
 			}
+			/*if (lAvatar)
+			{
+				static int pc = 0;
+				if (++pc > 20)
+				{
+					pc = 0;
+					//const Vector3DF fwd = lAvatar->GetForwardDirection();
+					//mLog.Infof(_T("Avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
+					//const QuaternionF q = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
+					//mLog.Infof(_T("Avatar original Q=%f, %f, %f, %f"), q.mA, q.mB, q.mC, q.mD);
+					const QuaternionF r = lAvatar->GetOrientation();
+					mLog.Infof(_T("Avatar Q=%f, %f, %f, %f"), r.mA, r.mB, r.mC, r.mD);
+				}
+			}*/
 			if (lAvatar && (lIsUpdatingYaw || lIsTimedYawUpdate))
 			{
 				float lCurrentAngle = 0;
@@ -660,17 +676,17 @@ void PushManager::TickUiInput()
 				const bool lIsFirstYawUpdate = !lIsTimedYawUpdate;
 				if (lIsFirstYawUpdate)
 				{
-					lAngle = lCurrentAngle;
+					mCameraMouseAngle = lCurrentAngle;
 				}
 				if (lIsUpdatingYaw)
 				{
-					lAngleTimer.ClearTimeDiff();
+					mCameraMouseAngleTimer.ClearTimeDiff();
 				}
-				lAngle -= lAngleDelta;
-				Math::RangeAngles(lCurrentAngle, lAngle);
-				mCameraTargetAngle = lAngle;
+				mCameraMouseAngle -= lAngleDelta;
+				Math::RangeAngles(lCurrentAngle, mCameraMouseAngle);
+				mCameraTargetAngle = mCameraMouseAngle;
 				mCameraTargetAngleFactor = 1;
-				float lAngleDiff = lCurrentAngle - lAngle;
+				float lAngleDiff = lCurrentAngle - mCameraMouseAngle;
 				const Vector3DF lRotationVelocity = lAvatar->GetAngularVelocity();
 				float lRotationFriction = -lRotationVelocity.z * 0.2f;
 				if ((lAngleDelta < 0) == (lAngleDiff > 0))
@@ -681,7 +697,7 @@ void PushManager::TickUiInput()
 				if (++pc > 5)
 				{
 					pc = 0;
-					mLog.Infof(_T("angle=%f, delta=%f, current=%f, diff=%f, friction=%f"), lAngle, lAngleDelta, lCurrentAngle, lCurrentAngle - lAngle, lRotationFriction);
+					mLog.Infof(_T("angle=%f, delta=%f, current=%f, diff=%f, friction=%f"), mCameraMouseAngle, lAngleDelta, lCurrentAngle, lCurrentAngle - mCameraMouseAngle, lRotationFriction);
 				}*/
 				const float lStrength = Math::Lerp(1.0f, 2.0f, std::max(std::abs(lLeftPowerFwdRev), std::abs(lLeftPowerLR)));
 				lAngleDiff *= 4;
@@ -1202,6 +1218,8 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			mAvatarId = pInteger;
 			mOwnedObjectList.insert(mAvatarId);
 			mUpdateCameraForAvatar = true;
+			mCameraMouseAngleTimer.ReduceTimeDiff(-10.0f);
+			mCameraTargetAngleFactor = 0;
 			log_volatile(mLog.Debugf(_T("Got control over avatar with ID %i."), pInteger));
 		}
 		return;
@@ -1262,7 +1280,8 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 		lObject = new UiCure::CppContextObject(GetResourceManager(), _T("score_info"), mUiManager);
 		lObject->SetLoadResult(true);
 	}
-	else if (strutil::StartsWith(pClassId, _T("hover_tank")))
+	else if (strutil::StartsWith(pClassId, _T("hover_tank")) ||
+		strutil::StartsWith(pClassId, _T("deltawing")))
 	{
 		lObject = new ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 	}

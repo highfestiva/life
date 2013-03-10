@@ -544,7 +544,7 @@ BOOL CALLBACK Win32InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, L
 
 void Win32InputManager::SetCursorVisible(bool pVisible)
 {
-	if (!pVisible)
+	if (!pVisible && GetDisplayManager())
 	{
 		RECT lRect;
 		::GetClientRect(GetDisplayManager()->GetHWND(), &lRect);

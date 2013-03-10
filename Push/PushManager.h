@@ -154,6 +154,8 @@ protected:
 	Vector3DF mCameraPivotVelocity;
 	float mCameraTargetXyDistance;
 	float mCameraMaxSpeed;
+	float mCameraMouseAngle;
+	HiResTimer mCameraMouseAngleTimer;
 	float mCameraTargetAngle;
 	float mCameraTargetAngleFactor;
 	Vector3DF mMicrophoneSpeed;

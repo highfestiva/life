@@ -74,8 +74,13 @@ Cure::ContextObject* PushServerDelegate::CreateContextObject(const str& pClassId
 	{
 		return new ServerMine(mGameServerManager->GetResourceManager(), pClassId, (PushServerDelegate*)this);
 	}
+	else if (strutil::StartsWith(pClassId, _T("deltawing")))
+	{
+		return new BombPlane(mGameServerManager->GetResourceManager(), pClassId, (PushServerDelegate*)this, Vector3DF());
+	}
 	return new Cure::CppContextObject(mGameServerManager->GetResourceManager(), pClassId);
 }
+
 void PushServerDelegate::OnOpen()
 {
 	new PushServerConsole(this, mGameServerManager->GetConsoleManager()->GetConsoleCommandManager());
@@ -291,12 +296,16 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 			continue;
 		}
 		const str& lClassId = lObject->GetClassId();
-		if (strutil::StartsWith(lClassId, _T("bomb")) ||	// Prevent bombs from pushing each other away from the target!
-			strutil::StartsWith(lClassId, _T("deltawing")))	// Prevent bombers from getting their noses pushed upwards when bombs go off!
+		if (strutil::StartsWith(lClassId, _T("bomb")))	// Prevent bombs from pushing each other away from the target!
 		{
 			continue;
 		}
-		const float lForce = Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength);
+		float lEnduranceReciproc = 1;
+		if (strutil::StartsWith(lClassId, _T("deltawing")))	// Prevent bombers from getting their noses pushed upwards when bombs go off!
+		{
+			lEnduranceReciproc = 0.1f;
+		}
+		const float lForce = Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));

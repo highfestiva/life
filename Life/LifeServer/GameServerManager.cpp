@@ -937,6 +937,11 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mLog.Infof(_T("Loaded avatar for %s with instance id %i."),
 					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
 					pObject->GetInstanceId());
+				/*const QuaternionF q = pObject->GetOrientation();
+				mLog.Infof(_T("Avatar %s/%i has q=(%f, %f, %f, %f)."),
+					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
+					pObject->GetInstanceId(),
+					q.mA, q.mB, q.mC, q.mD);*/
 				BroadcastAvatar(lClient);
 			}
 			else

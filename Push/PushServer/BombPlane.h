@@ -40,6 +40,7 @@ private:
 	int mLastBombTick;
 	float mBombingRadiusSquared;
 	float mDropInterval;
+	bool mIsDetonated;
 
 	LOG_CLASS_DECLARE();
 };
