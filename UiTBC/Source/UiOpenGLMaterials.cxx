@@ -358,23 +358,7 @@ bool OpenGLMatSingleTextureSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 	return Parent::AddGeometry(pGeometry);
 }
 
-void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
-{
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
-	
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
-
-	RawRender(pGeometry, 0);
-
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-}
-
-void OpenGLMatSingleTextureSolid::RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex)
+void OpenGLMatSingleTextureSolid::DoRawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex)
 {
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -400,6 +384,28 @@ void OpenGLMatSingleTextureSolid::RawRender(TBC::GeometryBase* pGeometry, int pU
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
 	}
+	OGL_ASSERT();
+}
+
+void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
+{
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+
+	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
+	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
+	
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
+
+	RawRender(pGeometry, 0);
+
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+}
+
+void OpenGLMatSingleTextureSolid::RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex)
+{
+	DoRawRender(pGeometry, pUVSetIndex);
 }
 
 void OpenGLMatSingleTextureSolid::PreRender()
@@ -431,38 +437,40 @@ void OpenGLMatSingleTextureSolid::PostRender()
 void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID, int pMipMapLevelCount)
 {
 	glBindTexture(GL_TEXTURE_2D, pTextureID);
+	OGL_ASSERT();
 
-	mTextureParamMin = GL_NEAREST;
-	mTextureParamMag = GL_NEAREST;
+	GLint lTextureParamMin = GL_NEAREST;
+	GLint lTextureParamMag = GL_NEAREST;
 
-	if (pMipMapLevelCount <= 1)
+	if (pMipMapLevelCount <= 1 || !((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled())
 	{
 		// Just use plain vanilla.
 	}
 	else if (((OpenGLRenderer*)GetRenderer())->GetTrilinearFilteringEnabled() == true)
 	{
 		// The trilinear setting overrides the other ones.
-		mTextureParamMin = GL_LINEAR_MIPMAP_LINEAR;
-		mTextureParamMag = GL_LINEAR;
+		lTextureParamMin = GL_LINEAR_MIPMAP_LINEAR;
+		lTextureParamMag = GL_LINEAR;
 	}
 	else if(((OpenGLRenderer*)GetRenderer())->GetBilinearFilteringEnabled() == true)
 	{
 		if (((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
-			mTextureParamMin = GL_LINEAR_MIPMAP_NEAREST;
+			lTextureParamMin = GL_LINEAR_MIPMAP_NEAREST;
 		else
-			mTextureParamMin = GL_LINEAR;
+			lTextureParamMin = GL_LINEAR;
 
-		mTextureParamMag = GL_LINEAR;
+		lTextureParamMag = GL_LINEAR;
 	}
 	else if(((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
 	{
-		mTextureParamMin = GL_NEAREST_MIPMAP_NEAREST;
+		lTextureParamMin = GL_NEAREST_MIPMAP_NEAREST;
 	}
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mTextureParamMin);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mTextureParamMag);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, lTextureParamMin);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, lTextureParamMag);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	OGL_ASSERT();
 }
 
 
@@ -524,7 +532,7 @@ void OpenGLMatSingleTextureAlphaTested::RenderGeometry(TBC::GeometryBase* pGeome
 		pGeometry->GetBasicMaterialSettings();
 	glAlphaFunc(GL_GEQUAL, lMatSettings.mAlpha);
 
-	OpenGLMatSingleTextureSolid::RenderGeometry(pGeometry);
+	Parent::RenderGeometry(pGeometry);
 }
 
 
@@ -540,136 +548,131 @@ bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 		}
 		return false;
 	}
-	return Parent::AddGeometry(pGeometry);
+	return OpenGLMatSingleColorSolid::AddGeometry(pGeometry);
 }
 
 void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
+	if (!GetRenderer()->GetEnvTexture())
+	{
+		mFallBackMaterial->DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+		return;
+	}
+
 	// This material requires two rendering passes, since OpenGL doesn't
 	// support blending the texture with the base color of the material.
 	// So, first we render a "single color material" pass,
 	// and then we blend in the environment map on top of that.
 #ifndef LEPRA_GL_ES
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	::glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 #endif // !GLES
 
 	// Pass 1, single color.
 	mSingleColorPass = true;
-	glDisable(GL_TEXTURE_2D);
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
-	glEnable(GL_TEXTURE_2D);
+	//::glDisable(GL_TEXTURE_2D);
+	//OpenGLMatSingleColorSolid::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	//::glEnable(GL_TEXTURE_2D);
 
 	// Pass 2, Render the enviroment map.
 	mSingleColorPass = false;
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	//::glDepthFunc(GL_LEQUAL);
+	//::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	::glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-#ifndef LEPRA_GL_ES
-	int lEnvMapID = ((OpenGLRenderer*)GetRenderer())->GetEnvMapID();
-#endif // !GLES
-
-	mTextureParamMin = GL_NEAREST;
-	mTextureParamMag = GL_NEAREST;
-	
-	if (((OpenGLRenderer*)GetRenderer())->GetTrilinearFilteringEnabled() == true)
-	{
-		// The trilinear setting overrides the other ones.
-		mTextureParamMin = GL_LINEAR_MIPMAP_LINEAR;
-		mTextureParamMag = GL_LINEAR;
-	}
-	else if(((OpenGLRenderer*)GetRenderer())->GetBilinearFilteringEnabled() == true)
-	{
-		if (((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
-			mTextureParamMin = GL_LINEAR_MIPMAP_NEAREST;
-		else
-			mTextureParamMin = GL_LINEAR;
-
-		mTextureParamMag = GL_LINEAR;
-	}
-	else if(((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
-	{
-		mTextureParamMin = GL_NEAREST_MIPMAP_NEAREST;
-	}
+	BindTexture(GetRenderer()->GetEnvTexture()->mTMapID[Texture::COLOR_MAP], GetRenderer()->GetEnvTexture()->mTMipMapLevelCount[Texture::COLOR_MAP]);
 
 #ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		// Use cube mapping.
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_TEXTURE_CUBE_MAP);
-		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
-		glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
-		glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
-		glEnable(GL_TEXTURE_GEN_S);
-		glEnable(GL_TEXTURE_GEN_T);
-		glEnable(GL_TEXTURE_GEN_R);
+		::glDisable(GL_TEXTURE_2D);
+		::glEnable(GL_TEXTURE_CUBE_MAP);
+		::glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+		::glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+		::glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+		::glEnable(GL_TEXTURE_GEN_S);
+		::glEnable(GL_TEXTURE_GEN_T);
+		::glEnable(GL_TEXTURE_GEN_R);
 
-		glBindTexture(GL_TEXTURE_CUBE_MAP, lEnvMapID);
+		int lEnvMapID = ((OpenGLRenderer*)GetRenderer())->GetEnvMapID();
+		::glBindTexture(GL_TEXTURE_CUBE_MAP, lEnvMapID);
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, mTextureParamMin);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, mTextureParamMag);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
+		::glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
 	}
 	else
 	{
 		// Use sphere mapping.
-		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-		glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-		glEnable(GL_TEXTURE_GEN_S);
-		glEnable(GL_TEXTURE_GEN_T);
-
-		glBindTexture(GL_TEXTURE_2D, lEnvMapID);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mTextureParamMin);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mTextureParamMag);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		::glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+		::glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+		::glEnable(GL_TEXTURE_GEN_S);
+		::glEnable(GL_TEXTURE_GEN_T);
 	}
 #endif // !GLES
 
-	glMatrixMode(GL_TEXTURE);
+	::glMatrixMode(GL_TEXTURE);
 	float lTextureMatrix[16];
 	((OpenGLRenderer*)GetRenderer())->GetCameraTransformation().GetAs4x4OrientationMatrix(lTextureMatrix);
 
-	glLoadMatrixf(lTextureMatrix);
-	glMatrixMode(GL_MODELVIEW);
+	::glLoadMatrixf(lTextureMatrix);
+	::glMatrixMode(GL_MODELVIEW);
 
-	float lAmbientRed;
+	/*float lAmbientRed;
 	float lAmbientGreen;
 	float lAmbientBlue;
 	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);
+	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);*/
 
-	GLboolean lBlendEnabled = glIsEnabled(GL_BLEND);
-
-	glEnable(GL_BLEND);
 	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 
-	if (!lBlendEnabled)
-		glDisable(GL_BLEND);
-
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	//((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 
 #ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
-		glDisable(GL_TEXTURE_GEN_S);
-		glDisable(GL_TEXTURE_GEN_T);
-		glDisable(GL_TEXTURE_GEN_R);
-		glDisable(GL_TEXTURE_CUBE_MAP);
+		::glDisable(GL_TEXTURE_GEN_S);
+		::glDisable(GL_TEXTURE_GEN_T);
+		::glDisable(GL_TEXTURE_GEN_R);
+		::glDisable(GL_TEXTURE_CUBE_MAP);
 	}
 	else
 	{
-		glDisable(GL_TEXTURE_GEN_S);
-		glDisable(GL_TEXTURE_GEN_T);
+		::glDisable(GL_TEXTURE_GEN_S);
+		::glDisable(GL_TEXTURE_GEN_T);
 	}
 #endif // !GLES
 
-	glMatrixMode(GL_TEXTURE);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
+	//::glDepthFunc(GL_LESS);
+
+	::glMatrixMode(GL_TEXTURE);
+	::glLoadIdentity();
+	::glMatrixMode(GL_MODELVIEW);
+}
+
+void OpenGLMatSingleColorEnvMapSolid::PreRender()
+{
+	if (mSingleColorPass)
+	{
+		OpenGLMatSingleColorSolid::PreRender();
+	}
+	else
+	{
+		Parent::PreRender();
+		//::glEnable(GL_BLEND);
+	}
+}
+
+void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
+{
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	if (mSingleColorPass)
+	{
+		OpenGLMatSingleColorSolid::RawRender(pGeometry, 0);
+	}
+	else
+	{
+		Parent::DoRawRender(pGeometry, 0);
+	}
+	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 
@@ -683,9 +686,9 @@ void OpenGLMatSingleColorEnvMapBlended::RenderAllGeometry(unsigned pCurrentFrame
 
 void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported())
+	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported() || !GetRenderer()->GetEnvTexture())
 	{
-		Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+		mFallBackMaterial->DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 		return;
 	}
 
@@ -695,7 +698,7 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 	// So, first we render a normal "single texture" pass,
 	// and then we blend in the environment map on top of that.
 #ifndef LEPRA_GL_ES
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	::glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 #endif // !GLES
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -718,32 +721,7 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-#ifndef LEPRA_GL_ES
-	int lEnvMapID = ((OpenGLRenderer*)GetRenderer())->GetEnvMapID();
-#endif // !GLES
-
-	mTextureParamMin = GL_NEAREST;
-	mTextureParamMag = GL_NEAREST;
-	
-	if (((OpenGLRenderer*)GetRenderer())->GetTrilinearFilteringEnabled() == true)
-	{
-		// The trilinear setting overrides the other ones.
-		mTextureParamMin = GL_LINEAR_MIPMAP_LINEAR;
-		mTextureParamMag = GL_LINEAR;
-	}
-	else if(((OpenGLRenderer*)GetRenderer())->GetBilinearFilteringEnabled() == true)
-	{
-		if (((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
-			mTextureParamMin = GL_LINEAR_MIPMAP_NEAREST;
-		else
-			mTextureParamMin = GL_LINEAR;
-
-		mTextureParamMag = GL_LINEAR;
-	}
-	else if(((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
-	{
-		mTextureParamMin = GL_NEAREST_MIPMAP_NEAREST;
-	}
+	BindTexture(GetRenderer()->GetEnvTexture()->mTMapID[Texture::COLOR_MAP], GetRenderer()->GetEnvTexture()->mTMipMapLevelCount[Texture::COLOR_MAP]);
 
 #ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
@@ -758,12 +736,9 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 		glEnable(GL_TEXTURE_GEN_T);
 		glEnable(GL_TEXTURE_GEN_R);
 
+		int lEnvMapID = ((OpenGLRenderer*)GetRenderer())->GetEnvMapID();
 		glBindTexture(GL_TEXTURE_CUBE_MAP, lEnvMapID);
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, mTextureParamMin);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, mTextureParamMag);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
 	}
 	else
@@ -774,13 +749,6 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 		glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 		glEnable(GL_TEXTURE_GEN_S);
 		glEnable(GL_TEXTURE_GEN_T);
-
-		glBindTexture(GL_TEXTURE_2D, lEnvMapID);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mTextureParamMin);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mTextureParamMag);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 #endif // !GLES
 
@@ -932,7 +900,7 @@ void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned pCurrentFrame, co
 	//    (cout = c * lm + c * L = c(L + lm).
 
 #ifndef LEPRA_GL_ES
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	::glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 #endif // !GLES
 
 	//

@@ -25,14 +25,15 @@ Game
 + Improve mouselook on PC.
 + Orient spawn engines correctly (for instance mines).
 + Bombers' noses are pushed upwards by the explosion when dropping bombs! Don't let it happen, noooo!
++ Spawn engines for players, not hard-coded positions.
 . Fix camera "shakes like mad" when you fly away in an explosion.
+. Add typical "game cam shakes" to a camera when nearby an explosion.
 . Fix "all energy invested in main body" when exploading a hover_tank.
 . Fix "on explosion meshes get weird physics center points" and that "physics objects seem created at an offset".
 . Fix bombers being so sensitive to non-explosive damage. (For instance add extra parameter for "pushability" in explosion algo?)
 . Disconnect should happen when you suspend, cancellable connect should happen when you resume.
 . Mouselook should work on Mac.
 . Not possible to log in when someone is moving/shooting.
-. Spawn engines for players, not hard-coded positions.
 . Refactor (code -> Life?) and split Push and HoverTank.
 . Test which of Arena or Adventure play is best. Make a real map!
 . The first levels should be easy with target practice and simply crossing a simple square into a goal.
@@ -58,6 +59,6 @@ Game
 
 Engine
 ----------
++ Beautify rendering.
 . GLES2?
 . iPhone 3GS performance.
-. Beautify rendering.

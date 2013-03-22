@@ -483,28 +483,6 @@ void GameUiManager::AssertDesktopLayout(UiTbc::Layout* pLayout, int pLayer)
 
 
 
-void GameUiManager::OnResize(int pWidth, int pHeight)
-{
-	if (mCanvas)
-	{
-		mCanvas->Reset(pWidth, pHeight, mCanvas->GetBitDepth());
-		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mDesktopWindow->SetSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mInput->Refresh();
-	}
-}
-
-void GameUiManager::OnMinimize()
-{
-}
-
-void GameUiManager::OnMaximize(int pWidth, int pHeight)
-{
-	OnResize(pWidth, pHeight);
-}
-
-
-
 void GameUiManager::UpdateSettings()
 {
 	// Display.
@@ -648,6 +626,27 @@ void GameUiManager::UpdateSettings()
 			mSound->SetDopplerFactor((float)lSoundDoppler);
 		}
 	}
+}
+
+
+void GameUiManager::OnResize(int pWidth, int pHeight)
+{
+	if (mCanvas)
+	{
+		mCanvas->Reset(pWidth, pHeight, mCanvas->GetBitDepth());
+		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
+		mDesktopWindow->SetSize(mCanvas->GetWidth(), mCanvas->GetHeight());
+		mInput->Refresh();
+	}
+}
+
+void GameUiManager::OnMinimize()
+{
+}
+
+void GameUiManager::OnMaximize(int pWidth, int pHeight)
+{
+	OnResize(pWidth, pHeight);
 }
 
 

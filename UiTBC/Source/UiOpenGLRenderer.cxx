@@ -48,7 +48,7 @@ Material* OpenGLRenderer::CreateMaterial(MaterialType pMaterialType)
 	case MAT_SINGLE_TEXTURE_SOLID_PXS:
 		return new OpenGLMatSingleTextureSolidPXS(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID));
 	case MAT_SINGLE_COLOR_ENVMAP_SOLID:
-		return new OpenGLMatSingleColorEnvMapSolid(this, 0);
+		return new OpenGLMatSingleColorEnvMapSolid(this, GetMaterial(MAT_SINGLE_COLOR_SOLID));
 	case MAT_SINGLE_TEXTURE_ENVMAP_SOLID:
 		return new OpenGLMatSingleTextureEnvMapSolid(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID));
 	case MAT_TEXTURE_AND_LIGHTMAP:

@@ -81,12 +81,12 @@ public:
 
 	void AssertDesktopLayout(UiTbc::Layout* pLayout, int pLayer);
 
+	void UpdateSettings();
+
 private:
 	void OnResize(int pWidth, int pHeight);
 	void OnMinimize();
 	void OnMaximize(int pWidth, int pHeight);
-
-	void UpdateSettings();
 
 	Cure::RuntimeVariableScope* mVariableScope;
 	UiLepra::DisplayManager* mDisplay;

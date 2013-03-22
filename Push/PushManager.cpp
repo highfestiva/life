@@ -849,6 +849,13 @@ void PushManager::TickUiUpdate()
 		mCameraPivotPosition = lObject->GetPosition();
 		UpdateMassObjects(mCameraPivotPosition);
 
+		if (lObject->GetAngularVelocity().GetLengthSquared() > 15.0f)
+		{
+			Vector3DF lTarget = mCameraPivotPosition  - GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance, 0);
+			mCameraPosition = Math::Lerp(mCameraPosition, lTarget, 0.2f);
+			return;
+		}
+
 		const Vector3DF lForward3d = lObject->GetForwardDirection();
 		//const Vector3DF lRight3d = lForward3d.Cross(Vector3DF(0, 0, 1));
 		Vector3DF lBackward2d = -lForward3d.ProjectOntoPlane(Vector3DF(0, 0, 1));

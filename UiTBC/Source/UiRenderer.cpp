@@ -907,6 +907,11 @@ bool Renderer::IsEnvMapCubeMap()
 		return false;
 }
 
+Renderer::TextureData* Renderer::GetEnvTexture() const
+{
+	return mEnvTexture;
+}
+
 Renderer::GeometryID Renderer::AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows)
 {
 	if ((int)pMaterialType < 0 || (int)pMaterialType >= Renderer::MAT_COUNT)
@@ -1389,11 +1394,6 @@ Renderer::GeometryTable& Renderer::GetGeometryTable()
 Renderer::ShadowVolumeTable& Renderer::GetShadowVolumeTable()
 {
 	return mShadowVolumeTable;
-}
-
-Renderer::TextureData* Renderer::GetEnvTexture() const
-{
-	return mEnvTexture;
 }
 
 Renderer::LightData* Renderer::GetLightData(LightID pLightId) const

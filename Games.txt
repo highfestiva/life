@@ -20,6 +20,8 @@ Getaway - flee from tanks (and perhaps other military craft) which try to blow y
 
 Cute game with nice graphics! Anything to learn!
 
+Horse game! Inspiration: Da Win3.11 horse mouse cursor!
+
 Flocking game. School of fish? Birds? Something! The prototype should be fun without trying, so everything else should be a bonus.
 
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.

@@ -303,8 +303,13 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
 		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
 		const bool lIsHighlight = (lShader == _T("highlight"));
+		const bool lIsEnv = (lShader == _T("env"));
 		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
-		if (lIsHighlight)
+		if (lIsEnv)
+		{
+			lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_ENVMAP_SOLID;
+		}
+		else if (lIsHighlight)
 		{
 			lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_HIGHLIGHT;
 		}

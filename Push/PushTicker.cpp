@@ -103,9 +103,22 @@ bool PushTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
+		mUiManager->UpdateSettings();
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
 		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
 		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4);
+	}
+	if (lOk)
+	{
+		UiCure::RendererImageResource* lEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), true);
+		if (lEnvMap->Load())
+		{
+			if (lEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
+			{
+				UiTbc::Renderer::TextureID lTextureId = lEnvMap->GetUserData(0);
+				mUiManager->GetRenderer()->SetEnvironmentMap(lTextureId);
+			}
+		}
 	}
 	if (lOk)
 	{

@@ -470,9 +470,8 @@ public:
 
 	virtual void SetEnvironmentMap(TextureID pTextureID);
 
+	TextureData* GetEnvTexture() const;
 	bool IsEnvMapCubeMap(); // Returns true if environment map is a cube map.
-
-
 
 	// Adds/updates/removes geometry to/in/from the renderer.
 	virtual GeometryID AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows);
@@ -549,7 +548,6 @@ protected:
 	Material* GetMaterial(MaterialType pMaterialType) const;
 	GeometryTable& GetGeometryTable();
 	ShadowVolumeTable& GetShadowVolumeTable();
-	TextureData* GetEnvTexture() const;
 	LightData* GetLightData(LightID pLightId) const;
 	int GetNumSpotLights() const;
 	void StepCurrentFrame();

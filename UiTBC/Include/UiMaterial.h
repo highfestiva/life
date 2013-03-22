@@ -143,7 +143,6 @@ public:
 	TBC::GeometryBase* GetFirstGeometry();
 	TBC::GeometryBase* GetNextGeometry();
 
-protected:
 	typedef std::list<TBC::GeometryBase*> GeometryList;
 	typedef std::list<GeometryGroup*> GeometryGroupList;
 
@@ -154,6 +153,7 @@ protected:
 	Renderer::TextureID GetGroupTextureID(TBC::GeometryBase* pGeometry) const;
 	const GeometryGroupList& GetGeometryGroupList() const;
 
+protected:
 	static TBC::GeometryBase::BasicMaterialSettings mCurrentMaterial;
 
 	GeometryGroupList mGeometryGroupList;

@@ -112,10 +112,11 @@ public:
 
 	UserData GetUserData(const Cure::UserResource* pUserResource) const;
 
+	Cure::ResourceLoadState PostProcess();
+
 protected:
 	RendererImageBaseResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~RendererImageBaseResource();
-	Cure::ResourceLoadState PostProcess();
 };
 
 class RendererImageResource: public RendererImageBaseResource
