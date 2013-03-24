@@ -149,9 +149,9 @@ void Npc::OnTick()
 	}
 	assert(lPhi >= -10000);
 	assert(lPhi <= +10000);
-	lMyAvatar->SetEnginePower(0, lFwd+lPhi);
+	lMyAvatar->SetEnginePower(0, lFwd-lPhi);
 	lMyAvatar->SetEnginePower(1, lRight);
-	lMyAvatar->SetEnginePower(4, lFwd-lPhi);
+	lMyAvatar->SetEnginePower(4, lFwd+lPhi);
 	lMyAvatar->SetEnginePower(5, lRight);
 	lMyAvatar->SetEnginePower(8, +lPhi);
 

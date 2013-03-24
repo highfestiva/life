@@ -48,6 +48,11 @@ void GeometryReference::AddOffset(const Vector3DF& pOffset)
 	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 
+const TransformationF& GeometryReference::GetExtraOffsetTransformation() const
+{
+	return mExtraOffset;
+}
+
 void GeometryReference::SetExtraOffsetTransformation(const TransformationF& pOffset)
 {
 	mExtraOffset = pOffset;

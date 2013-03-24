@@ -95,7 +95,7 @@ void Machine::OnTick()
 		}
 		else if (lTag.mTagName == _T("engine_mesh_offset"))
 		{
-			HandleTagEngineMeshOffset(lTag, lPhysicsManager, lFrameTime, lRealTimeRatio);
+			HandleTagEngineMeshOffset(lTag, lFrameTime, lRealTimeRatio);
 		}
 		else if (lTag.mTagName == _T("exhaust"))
 		{
@@ -347,14 +347,11 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TB
 	mUiManager->GetSoundManager()->SetPitch(lEngineSound->GetData(), lPitch * lRtrPitch);
 }
 
-void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, float pFrameTime, float pRealTimeRatio)
+void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime, float pRealTimeRatio)
 {
 	// Mesh offset controlled by engine.
-	(void)pPhysicsManager;
-	(void)pFrameTime;
-	(void)pRealTimeRatio;
 
-	if (pTag.mFloatValueList.size() != 7 ||
+	if (pTag.mFloatValueList.size() != 9 ||
 		pTag.mStringValueList.size() != 0 ||
 		pTag.mBodyIndexList.size() != 0 ||
 		pTag.mEngineIndexList.size() != 1 ||
@@ -370,9 +367,6 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, con
 	{
 		return;
 	}
-	TBC::PhysicsEngine* lEngine = GetPhysics()->GetEngine(lEngineIndex);
-	const float lEngineFactor = Math::Clamp(lEngine->GetValue(), -1.0f, 1.0f);
-	const float lEngineAbsFactor = std::abs(lEngineFactor);
 
 	enum FloatValue
 	{
@@ -383,12 +377,20 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, con
 		FV_ROTATION_AXIS_Y,
 		FV_ROTATION_AXIS_Z,
 		FV_ROTATION_ANGLE,
+		FV_INERTIA,
+		FV_SECONDARY_FACTOR,
 	};
+
+	TBC::PhysicsEngine* lEngine = GetPhysics()->GetEngine(lEngineIndex);
+	const float lEngineFactor = lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_PRIMARY] + std::abs(lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_SECONDARY]) * pTag.mFloatValueList[FV_SECONDARY_FACTOR];
+	const float lEngineAbsFactor = std::abs(lEngineFactor);
+
 	const QuaternionF lOrientation = GetOrientation();
 	const Vector3DF lOffsetPosition(Vector3DF(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]) * lEngineAbsFactor);
 	const float a = pTag.mFloatValueList[FV_ROTATION_ANGLE] * lEngineFactor;
 	QuaternionF lOffsetOrientation(a, Vector3DF(pTag.mFloatValueList[FV_ROTATION_AXIS_X], pTag.mFloatValueList[FV_ROTATION_AXIS_Y], pTag.mFloatValueList[FV_ROTATION_AXIS_Z]));
-	TransformationF lOffset(lOffsetOrientation, lOffsetPosition);
+	const TransformationF lOffset(lOffsetOrientation, lOffsetPosition);
+	const float t = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_INERTIA], pFrameTime*pRealTimeRatio);
 
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
@@ -398,7 +400,9 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, con
 			continue;
 		}
 		TBC::GeometryReference* lMeshRef = (TBC::GeometryReference*)lMesh;
-		lMeshRef->SetExtraOffsetTransformation(lOffset);
+		TransformationF lCurrentOffset;
+		lCurrentOffset.Interpolate(lMeshRef->GetExtraOffsetTransformation(), lOffset, t);
+		lMeshRef->SetExtraOffsetTransformation(lCurrentOffset);
 	}
 }
 
