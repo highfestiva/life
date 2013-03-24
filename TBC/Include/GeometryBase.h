@@ -295,7 +295,6 @@ public:
 	BoneAnimator* GetUVAnimator();
 	const TransformationF& GetUVTransform();
 
-protected:
 	void SetSurfaceNormalData(float* pSurfaceNormalData);
 	void SetVertexNormalData(float* pVertexNormalData, unsigned int pNumVertices);
 	void SetTangentAndBitangentData(float* pTangentData, float* pBitangentData, unsigned int pNumVertices);

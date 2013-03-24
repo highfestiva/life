@@ -39,6 +39,7 @@ private:
 	void HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag);
 	void HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, const Vector3DF& pVelocity,
 		float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex);
+	void HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, float pFrameTime, float pRealTimeRatio);
 
 	void LoadPlaySound3d(UserSound3dResource* pSoundResource);
 

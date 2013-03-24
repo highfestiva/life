@@ -709,9 +709,9 @@ void PushManager::TickUiInput()
 				mCameraTargetAngleFactor *= 0.5f;
 			}
 
-			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev+lRightPowerLR);
+			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev-lRightPowerLR);
 			SetAvatarEnginePower(lObject, 1, lLeftPowerLR);
-			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev-lRightPowerLR);
+			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev+lRightPowerLR);
 			SetAvatarEnginePower(lObject, 5, lLeftPowerLR);
 			SetAvatarEnginePower(lObject, 8, lRightPowerLR);
 #else

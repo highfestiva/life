@@ -26,6 +26,7 @@ Game
 + Orient spawn engines correctly (for instance mines).
 + Bombers' noses are pushed upwards by the explosion when dropping bombs! Don't let it happen, noooo!
 + Spawn engines for players, not hard-coded positions.
+. Hover tanks should have moving parts, if only in gfx. Pontoons, rotors or jets should indicate movement direction.
 . Fix camera "shakes like mad" when you fly away in an explosion.
 . Add typical "game cam shakes" to a camera when nearby an explosion.
 . Fix "all energy invested in main body" when exploading a hover_tank.
@@ -39,7 +40,6 @@ Game
 . The first levels should be easy with target practice and simply crossing a simple square into a goal.
 . Show reticle or indication of target. Perhaps something like a fighter jet's "shoot!" indicator?
 . Show pictures of players in multiplayer! Great idea!
-. Hover tanks should have moving parts, if only in gfx. Pontoons, rotors or jets should indicate movement direction.
 . Make mine explosions bio-hazardous green instead of default yellow/red.
 . Simple path finding.
 . AI (where is the user probably going to appear after disappearing behind a building).
