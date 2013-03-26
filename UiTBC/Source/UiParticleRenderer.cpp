@@ -55,8 +55,10 @@ void ParticleRenderer::Render()
 	for (; x != mSmokes.end(); ++x)
 	{
 		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
-		const float rgb = Math::Lerp(0.4f, 0.2f, x->mOpacityTime/PARTICLE_TIME);
-		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, Vector3DF(rgb, rgb, rgb), x->mOpacity, x->mTextureIndex));
+		const float r = Math::Lerp(0.4f, x->mColor.x, x->mOpacityTime/PARTICLE_TIME);
+		const float g = Math::Lerp(0.4f, x->mColor.y, x->mOpacityTime/PARTICLE_TIME);
+		const float b = Math::Lerp(0.4f, x->mColor.z, x->mOpacityTime/PARTICLE_TIME);
+		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, Vector3DF(r, g, b), x->mOpacity, x->mTextureIndex));
 	}
 	mRenderer->RenderBillboards(mBillboardGas, true, false, lBillboards);
 
@@ -89,9 +91,9 @@ void ParticleRenderer::Render()
 	for (; x != mFires.end(); ++x)
 	{
 		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
-		const float r = Math::Lerp(1.0f, 0.6f, x->mOpacityTime/PARTICLE_TIME);
-		const float g = Math::Lerp(1.0f, 0.4f, x->mOpacityTime/PARTICLE_TIME);
-		const float b = Math::Lerp(0.3f, 0.2f, x->mOpacityTime/PARTICLE_TIME);
+		const float r = Math::Lerp(1.0f, x->mColor.x, x->mOpacityTime/PARTICLE_TIME);
+		const float g = Math::Lerp(1.0f, x->mColor.y, x->mOpacityTime/PARTICLE_TIME);
+		const float b = Math::Lerp(0.3f, x->mColor.z, x->mOpacityTime/PARTICLE_TIME);
 		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, Vector3DF(r, g, b), x->mOpacity, x->mTextureIndex));
 	}
 	mRenderer->RenderBillboards(mBillboardGas, true, true, lBillboards);
@@ -119,23 +121,25 @@ void ParticleRenderer::Tick(float pTime)
 	StepBillboards(mShrapnels, pTime, -0.2f);
 }
 
-void ParticleRenderer::CreateFlare(float pStrength, float pTimeFactor, const Vector3DF& pPosition, const Vector3DF& pVelocity)
+void ParticleRenderer::CreateFlare(const Vector3DF& pColor, float pStrength, float pTimeFactor, const Vector3DF& pPosition, const Vector3DF& pVelocity)
 {
-	CreateTempLight(pStrength, pPosition, pVelocity, pVelocity, pTimeFactor);
+	CreateTempLight(pColor, pStrength, pPosition, pVelocity, pVelocity, pTimeFactor);
 }
 
-void ParticleRenderer::CreateExplosion(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, float pFalloff, const Vector3DF& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels)
+void ParticleRenderer::CreateExplosion(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, float pFalloff, const Vector3DF& pFireColor,
+	const Vector3DF& pSmokeColor, const Vector3DF& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels)
 {
 	const float lRandomXYEndSpeed = 1.0f;
-	CreateBillboards(pPosition, pStrength* 7, pDirection, Vector3DF(0, 0,  +9)*pFalloff, lRandomXYEndSpeed, 5.3f, pStrength*0.4f, Vector3DF(), mFires, pFires);
-	CreateBillboards(pPosition, pStrength* 8, pDirection, Vector3DF(0, 0,  +5)*pFalloff, lRandomXYEndSpeed,    3, pStrength*0.8f, Vector3DF(), mSmokes, pSmokes);
-	CreateBillboards(pPosition, pStrength*10, pDirection, Vector3DF(0, 0,  -8)*pFalloff, lRandomXYEndSpeed, 4.5f, ::sqrtf(pStrength)*0.25f, Vector3DF(), mSparks, pSparks);
-	CreateBillboards(pPosition, pStrength* 5, pDirection, Vector3DF(0, 0, -10)*pFalloff, lRandomXYEndSpeed, 1.5f, ::sqrtf(pStrength)*0.10f, pSharpnelColor, mShrapnels, pShrapnels);
+	const float lSparkSize = (pStrength > 1)? ::sqrt(pStrength)*0.25f : pStrength*0.15f;
+	CreateBillboards(pPosition, pStrength* 7, pDirection, Vector3DF(0, 0,  +9)*pFalloff, lRandomXYEndSpeed, 5.3f, pStrength*0.4f, pFireColor, mFires, pFires);
+	CreateBillboards(pPosition, pStrength* 8, pDirection, Vector3DF(0, 0,  +5)*pFalloff, lRandomXYEndSpeed,    3, pStrength*0.8f, pSmokeColor, mSmokes, pSmokes);
+	CreateBillboards(pPosition, pStrength*10, pDirection, Vector3DF(0, 0,  -8)*pFalloff, lRandomXYEndSpeed, 4.5f, lSparkSize, Vector3DF(), mSparks, pSparks);
+	CreateBillboards(pPosition, pStrength* 5, pDirection, Vector3DF(0, 0, -10)*pFalloff, lRandomXYEndSpeed, 1.5f, ::sqrtf(pStrength)*0.20f, pSharpnelColor, mShrapnels, pShrapnels);
 
 	if (pFires > 0)
 	{
 		const Billboard& lFire = mFires.back();
-		CreateTempLight(pStrength, lFire.mPosition, lFire.mVelocity, lFire.mTargetVelocity, lFire.mTimeFactor);
+		CreateTempLight(pFireColor, pStrength, lFire.mPosition, lFire.mVelocity, lFire.mTargetVelocity, lFire.mTimeFactor);
 	}
 }
 
@@ -167,11 +171,11 @@ void ParticleRenderer::CreateFume(float pTime, float pScale, float pAngularVeloc
 
 
 
-void ParticleRenderer::CreateTempLight(float pStrength, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pTargetVelocity, float pTimeFactor)
+void ParticleRenderer::CreateTempLight(const Vector3DF& pColor, float pStrength, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pTargetVelocity, float pTimeFactor)
 {
 	if (mLights.size() < mMaxLightCount)
 	{
-		mLights.push_back(Light(pStrength, pPosition, pVelocity, pTargetVelocity, pTimeFactor));
+		mLights.push_back(Light(pColor, pStrength, pPosition, pVelocity, pTargetVelocity, pTimeFactor));
 		//mLog.Infof(_T("Creating new light with strength %f"), pStrength);
 	}
 	else
@@ -192,6 +196,7 @@ void ParticleRenderer::CreateTempLight(float pStrength, const Vector3DF& pPositi
 		{
 			//mLog.Infof(_T("Overtaking light with render ID %i (had strength %f, got strength %f)"), mLights[lDarkestLightIndex].mRenderLightId, mLights[lDarkestLightIndex].mStrength, pStrength);
 			// TRICKY: don't overwrite! We must not leak the previosly allocated hardware light!
+			mLights[lDarkestLightIndex].mColor = pColor;
 			mLights[lDarkestLightIndex].mStrength = pStrength;
 			mLights[lDarkestLightIndex].mPosition = pPosition;
 			mLights[lDarkestLightIndex].mVelocity = pVelocity;
@@ -225,7 +230,7 @@ void ParticleRenderer::StepLights(float pTime, float pFriction)
 		{
 			if (x->mRenderLightId == Renderer::INVALID_LIGHT)
 			{
-				x->mRenderLightId = mRenderer->AddPointLight(Renderer::LIGHT_MOVABLE, x->mPosition, Vector3DF(1,1,1)*x->mStrength*10, x->mStrength*10, 0);
+				x->mRenderLightId = mRenderer->AddPointLight(Renderer::LIGHT_MOVABLE, x->mPosition, x->mColor*x->mStrength*10, x->mStrength*10, 0);
 				//mLog.Infof(_T("Creating render ID %i for light with strength %f"), x->mRenderLightId, x->mStrength);
 			}
 			++x;

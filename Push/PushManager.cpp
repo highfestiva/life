@@ -376,8 +376,16 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
 	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
+	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
+	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
+	if (dynamic_cast<Mine*>(pExplosive))
+	{
+		lFireColor.Set(0.2f, 0.7f, 0.2f);
+		lSmokeColor.Set(0.1f, 0.5f, 0.1f);
+		lShrapnelColor.Set(0.5f, 0.5f, 0.1f);
+	}
+	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lFireColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
 
 	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
 	{
@@ -1416,7 +1424,7 @@ void PushManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 		TransformationF t;
 		Vector3DF v;
 		Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
-		lParticleRenderer->CreateFlare(0.3f, 7.5f, t.GetPosition(), v);
+		lParticleRenderer->CreateFlare(Vector3DF(0.9f, 0.7f, 0.5f), 0.3f, 7.5f, t.GetPosition(), v);
 	}
 }
 
