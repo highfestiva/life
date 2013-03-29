@@ -316,11 +316,11 @@ Spawner* GameServerManager::GetAvatarSpawner(Cure::GameObjectId pLevelId) const
 	Cure::ContextObject::Array::const_iterator x = lChildArray.begin();
 	for (; x != lChildArray.end(); ++x)
 	{
-		Life::Spawner* lSpawner = dynamic_cast<Life::Spawner*>(*x);
-		if (!lSpawner)
+		if ((*x)->GetClassId() != "Spawner")
 		{
 			continue;
 		}
+		Spawner* lSpawner = (Spawner*)*x;
 		const TBC::PhysicsSpawner* lSpawnShape = lSpawner->GetSpawner();
 		if (lSpawnShape->GetNumber() == 0)
 		{
@@ -597,7 +597,7 @@ Client* GameServerManager::GetClientByObject(Cure::ContextObject*& pObject) cons
 	Client* lClient = 0;
 	{
 		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
-		if (lAccountId != 0 && lAccountId != -1)
+		if (lAccountId != 0 && lAccountId != (Cure::UserAccount::AccountId)-1)
 		{
 			lClient = GetClientByAccount(lAccountId);
 			if (!lClient)
