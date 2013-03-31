@@ -316,7 +316,7 @@ Spawner* GameServerManager::GetAvatarSpawner(Cure::GameObjectId pLevelId) const
 	Cure::ContextObject::Array::const_iterator x = lChildArray.begin();
 	for (; x != lChildArray.end(); ++x)
 	{
-		if ((*x)->GetClassId() != "Spawner")
+		if ((*x)->GetClassId() != _T("Spawner"))
 		{
 			continue;
 		}

@@ -351,7 +351,7 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 {
 	// Mesh offset controlled by engine.
 
-	if (pTag.mFloatValueList.size() != 9 ||
+	if (pTag.mFloatValueList.size() != 10 ||
 		pTag.mStringValueList.size() != 0 ||
 		pTag.mBodyIndexList.size() != 0 ||
 		pTag.mEngineIndexList.size() != 1 ||
@@ -378,11 +378,13 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 		FV_ROTATION_AXIS_Z,
 		FV_ROTATION_ANGLE,
 		FV_INERTIA,
+		FV_PRIMARY_FACTOR,
 		FV_SECONDARY_FACTOR,
 	};
 
 	TBC::PhysicsEngine* lEngine = GetPhysics()->GetEngine(lEngineIndex);
-	const float lEngineFactor = lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_PRIMARY] + std::abs(lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_SECONDARY]) * pTag.mFloatValueList[FV_SECONDARY_FACTOR];
+	const float lEngineFactor = lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_PRIMARY] * pTag.mFloatValueList[FV_PRIMARY_FACTOR] +
+			lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_SECONDARY] * pTag.mFloatValueList[FV_SECONDARY_FACTOR];
 	const float lEngineAbsFactor = std::abs(lEngineFactor);
 
 	const QuaternionF lOrientation = GetOrientation();
@@ -390,7 +392,7 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 	const float a = pTag.mFloatValueList[FV_ROTATION_ANGLE] * lEngineFactor;
 	QuaternionF lOffsetOrientation(a, Vector3DF(pTag.mFloatValueList[FV_ROTATION_AXIS_X], pTag.mFloatValueList[FV_ROTATION_AXIS_Y], pTag.mFloatValueList[FV_ROTATION_AXIS_Z]));
 	const TransformationF lOffset(lOffsetOrientation, lOffsetPosition);
-	const float t = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_INERTIA], pFrameTime*pRealTimeRatio);
+	const float t = Math::GetIterateLerpTime(1/pTag.mFloatValueList[FV_INERTIA], pFrameTime*pRealTimeRatio);
 
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{

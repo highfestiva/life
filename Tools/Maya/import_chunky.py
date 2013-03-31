@@ -146,6 +146,7 @@ class GroupReader(DefaultMAReader):
 		self.mesh_instance_reuse(group)
 		self.setphyspivot(group)
 
+
 ##		# Check again to assert no internal failure when splitting vertices / joining normals.
 ##		if not self.validate_mesh_group(group, checknorms=True):
 ##			print("Internal error: meshes are invalid after splitting vertices and joining normals! Terminating due to error.")
@@ -1242,16 +1243,18 @@ class GroupReader(DefaultMAReader):
 
 
 	def adjustorientation(self, group):
-		for node in group:
-			if node.getName().startswith("phys_") and node.nodetype == "transform":
-				shape.Shape(node, node.shape)
+		for phys in group:
+			if phys.getName().startswith("phys_") and phys.nodetype == "transform":
+				shape.Shape(phys, phys.shape)
 				# Some primitives have different orientation in the editor compared to
-				# the runtime environment (Maya along Y-axis, RGE along Z-axis).
-				if node.pointup:
-					#print("%s before:\n%s." % (node.getName(), node.gettransformto(None)))
-					del(node.localmat4)
-					node.gettransformto(None)
-					#print("%s after:\n%s." % (node.getName(), node.gettransformto(None)))
+				# the runtime environment (Maya along Y-axis, PDE along Z-axis).
+				if phys.pointup:
+					#print("\n".join(dir(phys)))
+					#print(phys.mesh_ref, phys.loose_mesh_ref, phys.phys_root, phys._parents, phys.nodetype)
+					#print("%s before:\n%s." % (phys.getName(), phys.get_final_local_transform()))
+					del(phys.localmat4)
+					phys.gettransformto(None)
+					#print("%s after:\n%s." % (phys.getName(), phys.get_final_local_transform()))
 		#shape.disable_ortho_check = True
 
 
@@ -1294,6 +1297,9 @@ class GroupReader(DefaultMAReader):
 			#print(parent_branch_xform.inverse())
 			#print(node.getName(), "is trying to work out localmat4 with xp = ", node.xformparent, "phroot =", phroot.getName(), "and phxp =", phroot.xformparent)
 			node.localmat4 = parent_branch_xform.inverse() * own_branch_xform
+			if node.pointup and not node.loose_mesh_ref:
+				# TODO: might be wrong rotation order? Perhaps this should happen before... some other stuff.
+				node.localmat4.rotate(math.pi/2, vec3(1,0,0))
 			node.xformparent = phroot
 			#sys.exit(1)
 			
