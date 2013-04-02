@@ -872,6 +872,13 @@ void PushManager::TickUiUpdate()
 		float lCamHeight;
 		CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 		lBackward2d.z = lCamHeight;
+		{
+			float lRotationFactor;
+			CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+			lRotationFactor += mCamRotateExtra * 0.06f;
+			mCameraPivotVelocity.x += lRotationFactor;
+			lBackward2d = QuaternionF(mCameraPivotVelocity.x, Vector3DF(0,0,1)) * lBackward2d;
+		}
 		mCameraPreviousPosition = mCameraPosition;
 		mCameraPosition = Math::Lerp(mCameraPosition, mCameraPivotPosition + lBackward2d, 0.2f);
 	}
@@ -900,24 +907,6 @@ void PushManager::TickUiUpdate()
 	lTargetCameraOrientation.z = -lYawChange;
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
 	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, 0.4f);
-
-	float lRotationFactor;
-	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	lRotationFactor += mCamRotateExtra;
-	if (lRotationFactor)
-	{
-		mCameraPivotVelocity.x += lRotationFactor;
-		TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
-		lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), mCameraPivotVelocity.x * lPhysicsTime);
-		mCameraPosition = lTransform.GetPosition();
-		float lTheta;
-		float lPhi;
-		float lGimbal;
-		lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
-		mCameraOrientation.x = lTheta+PIF/2;
-		mCameraOrientation.y = PIF/2-lPhi;
-		mCameraOrientation.z = lGimbal;
-	}
 #else
 	// TODO: remove camera hack (camera position should be context object controlled).
 	mCameraPreviousPosition = mCameraPosition;

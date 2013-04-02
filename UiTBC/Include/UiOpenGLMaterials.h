@@ -270,6 +270,7 @@ public:
 
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
 	virtual void PreRender();
+	virtual void PostRender();
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);

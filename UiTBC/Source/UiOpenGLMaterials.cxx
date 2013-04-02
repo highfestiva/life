@@ -569,9 +569,9 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 
 	// Pass 1, single color.
 	mSingleColorPass = true;
-	//::glDisable(GL_TEXTURE_2D);
-	//OpenGLMatSingleColorSolid::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
-	//::glEnable(GL_TEXTURE_2D);
+	::glDisable(GL_TEXTURE_2D);
+	OpenGLMatSingleColorSolid::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	::glEnable(GL_TEXTURE_2D);
 
 	// Pass 2, Render the enviroment map.
 	mSingleColorPass = false;
@@ -602,8 +602,8 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	else
 	{
 		// Use sphere mapping.
-		::glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-		::glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+		::glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+		::glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
 		::glEnable(GL_TEXTURE_GEN_S);
 		::glEnable(GL_TEXTURE_GEN_T);
 	}
@@ -612,19 +612,19 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	::glMatrixMode(GL_TEXTURE);
 	float lTextureMatrix[16];
 	((OpenGLRenderer*)GetRenderer())->GetCameraTransformation().GetAs4x4OrientationMatrix(lTextureMatrix);
-
+	lTextureMatrix[15] *= 3.0f;
 	::glLoadMatrixf(lTextureMatrix);
 	::glMatrixMode(GL_MODELVIEW);
 
-	/*float lAmbientRed;
+	float lAmbientRed;
 	float lAmbientGreen;
 	float lAmbientBlue;
 	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);*/
+	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);
 
 	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 
-	//((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 
 #ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
@@ -657,22 +657,39 @@ void OpenGLMatSingleColorEnvMapSolid::PreRender()
 	else
 	{
 		Parent::PreRender();
-		//::glEnable(GL_BLEND);
+		::glEnable(GL_BLEND);
+		::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		::glColor4f(1, 1, 1, 1);
+		const float c[] = {1,1,1,1};
+		::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, c);
+	}
+}
+
+void OpenGLMatSingleColorEnvMapSolid::PostRender()
+{
+	if (mSingleColorPass)
+	{
+		OpenGLMatSingleColorSolid::PostRender();
+	}
+	else
+	{
+		Parent::PostRender();
+		::glDisable(GL_BLEND);
 	}
 }
 
 void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	if (mSingleColorPass)
 	{
+		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 		OpenGLMatSingleColorSolid::RawRender(pGeometry, 0);
+		ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	}
 	else
 	{
 		Parent::DoRawRender(pGeometry, 0);
 	}
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 
