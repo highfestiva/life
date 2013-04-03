@@ -11,6 +11,7 @@ from vec3 import *
 from vec4 import *
 import rgnode
 import chunkywriter
+import mesh
 import options
 import shape
 
@@ -142,7 +143,7 @@ class GroupReader(DefaultMAReader):
 			print("Internal vector math failed! Terminating due to error.")
 			sys.exit(3)
 		self.makevertsrelative(group)
-		self.splitverts(group)
+		mesh.splitverts_group(group, options.options.verbose)
 		self.mesh_instance_reuse(group)
 		self.setphyspivot(group)
 
@@ -435,135 +436,6 @@ class GroupReader(DefaultMAReader):
 					vp[:3] = vtx[idx:idx+3]
 					vp = transform*vp
 					vtx[idx:idx+3] = vp[:3]
-
-
-	@staticmethod
-	def getvertex(vs, idx):
-		return vec3(vs[idx*3+0], vs[idx*3+1], vs[idx*3+2])
-
-
-	def splitverts(self, group):
-		"""Split mesh vertices that have different normals or UVs (=hard edges).
-		   But to complicate things, I keep vertices together that share a similar normal/UV."""
-		for node in group:
-			vs = node.get_fixed_attribute("rgvtx", optional=True)
-			ts = node.get_fixed_attribute("rgtri", optional=True)
-			ns = node.get_fixed_attribute("rgn", optional=True)
-			uvs = node.get_fixed_attribute("rguv", optional=True)
-			#if uvs:
-			#	print("UVs before split:")
-			#	print(uvs)
-			if ns:
-				def textureuv(idx):
-					if uvs:
-						idx *= 2
-						return (uvs[idx], uvs[idx+1])
-					return (0.0, 0.0)
-				def normal(idx):
-					idx *= 3
-					return vec3(ns[idx], ns[idx+1], ns[idx+2])
-				def angle(n1, n2):
-					m1, m2 = n1.max(), n2.max()
-					if m1 == 0 or m2 == 0:
-						if m1 == 0 and m2 == 0:
-							return 0
-						return 180
-					return math.degrees(math.fabs(vec3.acos(n1*n2)))
-				def angle_fast(n1, n2x, n2y, n2z):
-					x = n1.x*n2x + n1.y*n2y + n1.z*n2z
-					if x < 0.65:    # Ugly, hard-coded optimization.
-						return 0.7
-					return vec3.acos(x)
-				def uvdiff_sqr(t1, t2):
-					dx = t1[0]-t2[0]
-					dy = t1[1]-t2[1]
-					return dx*dx + dy*dy
-
-				original_vsc = len(vs)
-
-				# Create a number of UNIQUE empty lists. Hence the for loop.
-				shared_indices = []
-				for u in range(len(vs)//3):
-					shared_indices.append([])
-
-				end = len(ts)
-				x = 0
-				while x < end:
-					shared_indices[ts[x]] += [x]
-					x += 1
-
-				# Normalize normal vectors (length=1) for optimization purposes.
-				ncnt = len(ns)
-				x = 0
-				while x < ncnt:
-					l = ns[x]*ns[x] + ns[x+1]*ns[x+1] + ns[x+2]*ns[x+2]
-					if l:
-						f = 1 / math.sqrt(l)
-						ns[x]   *= f
-						ns[x+1] *= f
-						ns[x+2] *= f
-					x += 3
-
-				x = 0
-				ang_cmp = 40*math.pi/180
-				while x < end:
-					c = normal(shared_indices[ts[x]][0])
-					d = textureuv(shared_indices[ts[x]][0])
-					split = []
-					for s in shared_indices[ts[x]][1:]:
-						#if angle(c, normal(s)) > 40 or uvdiff_sqr(d, textureuv(s)) > 0.0001:
-						i = s*3
-						if angle_fast(c, ns[i],ns[i+1],ns[i+2]) > ang_cmp or uvdiff_sqr(d, textureuv(s)) > 0.0001:
-							split += [s]
-					# Push all the once that we don't join together at the end.
-					if split:
-						new_index = len(vs)//3
-						v = __class__.getvertex(vs, ts[x])
-						vs += v[:]
-						shared_indices += [[]]
-						for s in split:
-							shared_indices[ts[s]].remove(s)
-							ts[s] = new_index
-							shared_indices[ts[s]] += [s]
-						if len(shared_indices) != len(vs)/3:
-							print("Internal error: normals/UVs no longer corresponds to vertices!")
-							sys.exit(4)
-					x += 1
-
-				normals = [0.0]*len(vs)
-				textureuvs = [0.0]*(len(vs)*2//3)
-				for join_indices in shared_indices:
-					# Join 'em by simply adding normals together and normalizing.
-					n = vec3(0,0,0)
-					uv = [0.0, 0.0]
-					cnt = 0;
-					for j in join_indices:
-						n += normal(j)
-						uv2 = textureuv(j)
-						uv[0] += uv2[0]
-						uv[1] += uv2[1]
-						cnt += 1
-					idx = ts[join_indices[0]]
-					n_idx = idx*3+0
-					uv_idx = idx*2+0
-					try:
-						normals[n_idx:n_idx+3] = n.normalize()[:]
-					except ZeroDivisionError:
-						pass
-					try:
-						textureuvs[uv_idx:uv_idx+2] = [uv[0]/cnt, uv[1]/cnt]
-					except ZeroDivisionError:
-						pass
-				node.fix_attribute("rgvtx", vs)
-				node.fix_attribute("rgtri", ts)
-				node.fix_attribute("rgn", normals)
-				if uvs:
-					node.fix_attribute("rguv", textureuvs)
-					#print("UVs after split:")
-					#print(textureuvs)
-				if options.options.verbose:
-					print("Mesh %s was made %.1f times larger due to (hard?) edges, and %.1f %% of worst-case size." %
-					      (node.getName(), len(normals)/original_vsc-1, len(normals)*100/len(ns)))
 
 
 	def mesh_instance_reuse(self, group):
