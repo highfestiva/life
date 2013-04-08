@@ -8,7 +8,11 @@
 
 Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
 
+Knobbelen
+
 Tank vs. Tank, similar to the Cyber Sled remake.
+
+Ball-into-hole using basic building blocks. Programming (x,y,z, rotation)? Placement? Time contraint? Score higher on lower time? Fewer programming lines? How to separate it from the 2D ballgame I played before? Many balls? Flowing through the start point? YEAH!
 
 Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
@@ -61,3 +65,5 @@ A game in which a server is also a client listening to other servers, and where 
 Soap bubble game? Produce and catch 'em all.
 
 Car Jumpin'
+
+Make a game with speech controls, for instance using http://www.politepix.com/openears/.

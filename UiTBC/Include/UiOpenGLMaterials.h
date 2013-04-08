@@ -90,6 +90,8 @@ public:
 	inline virtual ~OpenGLMatSingleColorBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	static void DoPreRender();
+	static void DoPostRender();
 	virtual void PreRender();
 	virtual void PostRender();
 
@@ -297,6 +299,8 @@ public:
 	inline virtual ~OpenGLMatSingleColorEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void PreRender();
+	virtual void PostRender();
 };
 
 

@@ -89,6 +89,10 @@ void Machine::OnTick()
 		{
 			HandleTagBrakeLight(lTag);
 		}
+		else if (lTag.mTagName == _T("engine_light"))
+		{
+			HandleTagEngineLight(lTag);
+		}
 		else if (lTag.mTagName == _T("engine_sound"))
 		{
 			HandleTagEngineSound(lTag, lPhysicsManager, lVelocity, lFrameTime, lRealTimeRatio, lEngineSoundIndex);
@@ -247,6 +251,42 @@ void Machine::HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag)
 			{
 				lAmbient.Set(0, 0, 0);
 			}
+		}
+	}
+}
+
+void Machine::HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag)
+{
+	if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
+	{
+		return;
+	}
+	if (pTag.mFloatValueList.size() != 2 ||
+		pTag.mStringValueList.size() != 0 ||
+		pTag.mBodyIndexList.size() != 0 ||
+		pTag.mEngineIndexList.size() != 1 ||
+		pTag.mMeshIndexList.size() < 1)
+	{
+		mLog.Errorf(_T("The engine_light tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		assert(false);
+		return;
+	}
+	const int lEngineIndex = pTag.mEngineIndexList[0];
+	if (lEngineIndex >= mPhysics->GetEngineCount())
+	{
+		return;
+	}
+	const float lGlowFactor = pTag.mFloatValueList[0];
+	const float lEngineThrottleLerpFactor = pTag.mFloatValueList[1];
+	const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
+	const float lEngineThrottle = lEngine->GetLerpThrottle(lEngineThrottleLerpFactor*0.5f, lEngineThrottleLerpFactor, true);
+	const float lAmbientChannel = Math::Lerp(lGlowFactor, 1.0f, lEngineThrottle);
+	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
+	{
+		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		if (lMesh)
+		{
+			lMesh->GetBasicMaterialSettings().mAmbient.Set(lAmbientChannel, lAmbientChannel, lAmbientChannel);
 		}
 	}
 }

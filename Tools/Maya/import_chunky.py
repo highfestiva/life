@@ -388,10 +388,10 @@ class GroupReader(DefaultMAReader):
 						def thinness(p0, p1, p2):
 							return min(a(p0, p1, p2), a(p1, p0, p2), a(p2, p0, p1))
 						def is_best_split(i0, i1, i2, i3):      # Based on poly thinness.
-							v0 = __class__.getvertex(vs, face[i0])
-							v1 = __class__.getvertex(vs, face[i1])
-							v2 = __class__.getvertex(vs, face[i2])
-							v3 = __class__.getvertex(vs, face[i3])
+							v0 = mesh._getvertex(vs, face[i0])
+							v1 = mesh._getvertex(vs, face[i1])
+							v2 = mesh._getvertex(vs, face[i2])
+							v3 = mesh._getvertex(vs, face[i3])
 							a = min(thinness(v0, v1, v3), thinness(v2, v1, v3))
 							b = min(thinness(v1, v0, v2), thinness(v3, v0, v2))
 							return a*0.99 <= b
@@ -848,7 +848,7 @@ class GroupReader(DefaultMAReader):
 
 			elif section.startswith("tag:"):
 				tagtype = stripQuotes(config.get(section, "type"))
-				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "engine_mesh_offset", "exhaust", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "anything"]
+				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "engine_sound", "engine_mesh_offset", "exhaust", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "anything"]
 				allApplied &= tagOk
 				if not tagOk:
 					print("Error: invalid tag type '%s'." % tagtype)

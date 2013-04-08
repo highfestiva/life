@@ -231,7 +231,7 @@ void OpenGLMatSingleColorBlended::RenderAllGeometry(unsigned pCurrentFrame, cons
 	}
 }
 
-void OpenGLMatSingleColorBlended::PreRender()
+void OpenGLMatSingleColorBlended::DoPreRender()
 {
 	::glDisable(GL_ALPHA_TEST);
 	::glEnable(GL_BLEND);
@@ -244,10 +244,21 @@ void OpenGLMatSingleColorBlended::PreRender()
 #endif // !GLES
 }
 
-void OpenGLMatSingleColorBlended::PostRender()
+void OpenGLMatSingleColorBlended::DoPostRender()
 {
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	//::glDisableClientState(GL_VERTEX_ARRAY);
+	::glDisable(GL_BLEND);
+}
+
+void OpenGLMatSingleColorBlended::PreRender()
+{
+	DoPreRender();
+}
+
+void OpenGLMatSingleColorBlended::PostRender()
+{
+	DoPostRender();
 }
 
 
@@ -616,15 +627,11 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	::glLoadMatrixf(lTextureMatrix);
 	::glMatrixMode(GL_MODELVIEW);
 
-	float lAmbientRed;
-	float lAmbientGreen;
-	float lAmbientBlue;
-	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);
+	((OpenGLRenderer*)GetRenderer())->AddAmbience(1.0f, 1.0f, 1.0f);
 
 	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight(true);
 
 #ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
@@ -697,6 +704,30 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometr
 void OpenGLMatSingleColorEnvMapBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
 	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
+}
+
+void OpenGLMatSingleColorEnvMapBlended::PreRender()
+{
+	if (mSingleColorPass)
+	{
+		OpenGLMatSingleColorBlended::DoPreRender();
+	}
+	else
+	{
+		Parent::PreRender();
+	}
+}
+
+void OpenGLMatSingleColorEnvMapBlended::PostRender()
+{
+	if (mSingleColorPass)
+	{
+		OpenGLMatSingleColorBlended::DoPostRender();
+	}
+	else
+	{
+		::glDisable(GL_BLEND);
+	}
 }
 
 

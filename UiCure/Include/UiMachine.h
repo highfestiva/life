@@ -37,6 +37,7 @@ protected:
 private:
 	void HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, bool pIsChild);
 	void HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag);
+	void HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag);
 	void HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, const Vector3DF& pVelocity,
 		float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex);
 	void HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime, float pRealTimeRatio);

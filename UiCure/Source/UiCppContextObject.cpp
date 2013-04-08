@@ -30,6 +30,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mUiClassResource(0),
 	mEnableUi(true),
 	mAllowRootShadow(true),
+	mUseDefaultTexture(false),
 	mEnablePixelShader(true),
 	mEnableMeshMove(true),
 	mEnableMeshSlide(false),
@@ -72,6 +73,11 @@ void CppContextObject::EnableUi(bool pEnable)
 void CppContextObject::DisableRootShadow()
 {
 	mAllowRootShadow = false;
+}
+
+void CppContextObject::SetUseDefaultTexture(bool pUseDefaultTexture)
+{
+	mUseDefaultTexture = pUseDefaultTexture;
 }
 
 void CppContextObject::EnablePixelShader(bool pEnable)
@@ -280,9 +286,9 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
 	UserGeometryReferenceResource* lMesh = mMeshResourceArray[pMeshIndex];
 	const bool lTransparent = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1);
+	UserRendererImageResource* lTexture = 0;
 	if (lMesh->GetRamData()->GetUVData(0) && mTextureResourceArray.size() > 0)
 	{
-		UserRendererImageResource* lTexture = 0;
 		TextureArray::iterator tx = mTextureResourceArray.begin();
 		for (; !lTexture && tx != mTextureResourceArray.end(); ++tx)
 		{
@@ -296,16 +302,24 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 				}
 			}
 		}
-		if (!lTexture)
+		if (!lTexture && mUseDefaultTexture)
 		{
 			lTexture = mTextureResourceArray[0];
 		}
+	}
+	if (lTexture)
+	{
 		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
 		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
 		const bool lIsHighlight = (lShader == _T("highlight"));
 		const bool lIsEnv = (lShader == _T("env"));
+		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == _T("env_blend"));
 		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
-		if (lIsEnv)
+		if (lIsEnvBlend)
+		{
+			lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_ENVMAP_BLENDED;
+		}
+		else if (lIsEnv)
 		{
 			lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_ENVMAP_SOLID;
 		}
@@ -326,7 +340,12 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
 		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
 		const bool lIsEnv = (lShader == _T("env"));
-		if (lIsEnv)
+		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == _T("env_blend"));
+		if (lIsEnvBlend)
+		{
+			lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_ENVMAP_BLENDED;
+		}
+		else if (lIsEnv)
 		{
 			lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_ENVMAP_SOLID;
 		}
