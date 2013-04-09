@@ -20,6 +20,7 @@
 #include "../Life/ProjectileUtil.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
+#include "../UiCure/Include/UiFireEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
@@ -376,16 +377,20 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
 	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
+	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
 	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
+	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
 	if (dynamic_cast<Mine*>(pExplosive))
 	{
-		lFireColor.Set(0.2f, 0.7f, 0.2f);
-		lSmokeColor.Set(0.1f, 0.5f, 0.1f);
+		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
+		lFireColor.Set(0.3f, 0.7f, 0.2f);
+		lStartSmokeColor.Set(0.3f, 0.35f, 0.3f);
+		lSmokeColor.Set(0.2f, 0.4f, 0.2f);
 		lShrapnelColor.Set(0.5f, 0.5f, 0.1f);
 	}
-	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lFireColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
+	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
 
 	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
 	{
@@ -1287,7 +1292,9 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	else if (strutil::StartsWith(pClassId, _T("hover_tank")) ||
 		strutil::StartsWith(pClassId, _T("deltawing")))
 	{
-		lObject = new ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+		UiCure::Machine* lMachine = new ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+		lMachine->SetFireEmitter(new UiCure::FireEmitter(GetResourceManager(), mUiManager));
+		lObject = lMachine;
 	}
 	else
 	{

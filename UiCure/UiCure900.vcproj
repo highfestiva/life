@@ -475,6 +475,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiFireEmitter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiGameUiManager.cxx"
 				>
 			</File>
@@ -546,6 +550,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiExhaustEmitter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiFireEmitter.h"
 				>
 			</File>
 			<File

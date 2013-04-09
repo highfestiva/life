@@ -16,6 +16,7 @@
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiExhaustEmitter.h"
+#include "../Include/UiFireEmitter.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
 
@@ -28,6 +29,7 @@ namespace UiCure
 
 Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
+	mFireEmitter(0),
 	mExhaustEmitter(0)
 {
 	EnableMeshSlide(true);
@@ -36,6 +38,11 @@ Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, G
 Machine::~Machine()
 {
 	DeleteEngineSounds();
+}
+
+void Machine::SetFireEmitter(FireEmitter* pEmitter)
+{
+	mFireEmitter = pEmitter;
 }
 
 void Machine::SetExhaustEmitter(ExhaustEmitter* pEmitter)
@@ -65,11 +72,16 @@ void Machine::OnTick()
 	{
 		return;
 	}
+	if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
+	{
+		return;
+	}
+
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
-	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
-	const bool lIsChild = IsAttributeTrue(_T("float_childishness"));
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime()) * lRealTimeRatio;
+	const bool lIsChild = IsAttributeTrue(_T("float_childishness"));
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;
 	TBC::PhysicsManager::BodyID lBodyId = lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId();
@@ -91,7 +103,15 @@ void Machine::OnTick()
 		}
 		else if (lTag.mTagName == _T("engine_light"))
 		{
-			HandleTagEngineLight(lTag);
+			HandleTagEngineLight(lTag, lFrameTime);
+		}
+		else if (lTag.mTagName == _T("fire"))
+		{
+			// Faijah!
+			if (mFireEmitter)
+			{
+				mFireEmitter->EmitFromTag(this, lTag, lFrameTime);
+			}
 		}
 		else if (lTag.mTagName == _T("engine_sound"))
 		{
@@ -99,16 +119,11 @@ void Machine::OnTick()
 		}
 		else if (lTag.mTagName == _T("engine_mesh_offset"))
 		{
-			HandleTagEngineMeshOffset(lTag, lFrameTime, lRealTimeRatio);
+			HandleTagEngineMeshOffset(lTag, lFrameTime);
 		}
 		else if (lTag.mTagName == _T("exhaust"))
 		{
 			// Particles coming out of exhaust.
-			if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
-			{
-				continue;
-			}
-
 			if (mExhaustEmitter)
 			{
 				mExhaustEmitter->EmitFromTag(this, lTag, lFrameTime);
@@ -129,10 +144,6 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 	// Eyes follow steered wheels. Get wheel corresponding to eye and
 	// move eye accordingly á là Lightning McQueen.
 
-	if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
-	{
-		return;
-	}
 	if (pTag.mFloatValueList.size() != 1 ||
 		pTag.mStringValueList.size() != 0 ||
 		pTag.mBodyIndexList.size()+pTag.mEngineIndexList.size() != 1 ||
@@ -217,10 +228,6 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 
 void Machine::HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag)
 {
-	if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
-	{
-		return;
-	}
 	if (pTag.mFloatValueList.size() != 3 ||
 		pTag.mStringValueList.size() != 0 ||
 		pTag.mBodyIndexList.size() != 0 ||
@@ -255,12 +262,8 @@ void Machine::HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag)
 	}
 }
 
-void Machine::HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag)
+void Machine::HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)
 {
-	if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
-	{
-		return;
-	}
 	if (pTag.mFloatValueList.size() != 2 ||
 		pTag.mStringValueList.size() != 0 ||
 		pTag.mBodyIndexList.size() != 0 ||
@@ -277,9 +280,10 @@ void Machine::HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag)
 		return;
 	}
 	const float lGlowFactor = pTag.mFloatValueList[0];
-	const float lEngineThrottleLerpFactor = pTag.mFloatValueList[1];
+	const float lThrottleUpSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[1]*0.5f, pFrameTime);
+	const float lThrottleDownSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[1], pFrameTime);
 	const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
-	const float lEngineThrottle = lEngine->GetLerpThrottle(lEngineThrottleLerpFactor*0.5f, lEngineThrottleLerpFactor, true);
+	const float lEngineThrottle = lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true);
 	const float lAmbientChannel = Math::Lerp(lGlowFactor, 1.0f, lEngineThrottle);
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
@@ -387,7 +391,7 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TB
 	mUiManager->GetSoundManager()->SetPitch(lEngineSound->GetData(), lPitch * lRtrPitch);
 }
 
-void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime, float pRealTimeRatio)
+void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)
 {
 	// Mesh offset controlled by engine.
 
@@ -432,7 +436,7 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 	const float a = pTag.mFloatValueList[FV_ROTATION_ANGLE] * lEngineFactor;
 	QuaternionF lOffsetOrientation(a, Vector3DF(pTag.mFloatValueList[FV_ROTATION_AXIS_X], pTag.mFloatValueList[FV_ROTATION_AXIS_Y], pTag.mFloatValueList[FV_ROTATION_AXIS_Z]));
 	const TransformationF lOffset(lOffsetOrientation, lOffsetPosition);
-	const float t = Math::GetIterateLerpTime(1/pTag.mFloatValueList[FV_INERTIA], pFrameTime*pRealTimeRatio);
+	const float t = Math::GetIterateLerpTime(1/pTag.mFloatValueList[FV_INERTIA], pFrameTime);
 
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
