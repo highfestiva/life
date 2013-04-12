@@ -18,7 +18,7 @@ namespace UiCure
 
 
 class ExhaustEmitter;
-class FireEmitter;
+class JetEngineEmitter;
 
 
 
@@ -29,7 +29,7 @@ public:
 
 	Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~Machine();
-	void SetFireEmitter(FireEmitter* pEmitter);
+	void SetJetEngineEmitter(JetEngineEmitter* pEmitter);
 	void SetExhaustEmitter(ExhaustEmitter* pEmitter);
 	void DeleteEngineSounds();
 
@@ -49,7 +49,7 @@ private:
 	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
 	typedef std::vector<float> TagSoundIntensityArray;
 
-	FireEmitter* mFireEmitter;
+	JetEngineEmitter* mJetEngineEmitter;
 	ExhaustEmitter* mExhaustEmitter;
 	TagSoundTable mEngineSoundTable;
 	TagSoundIntensityArray mEngineSoundIntensity;

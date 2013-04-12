@@ -22,7 +22,8 @@ namespace UiTbc
 ParticleRenderer::ParticleRenderer(Renderer* pRenderer, int pMaxLightCount):
 	Parent(pRenderer),
 	mMaxLightCount(pMaxLightCount),
-	mTextureCount(1),
+	mGasTextureCount(1),
+	mTotalTextureCount(1),
 	mBillboardGas(0),
 	mBillboardShrapnel(0),
 	mBillboardSpark(0)
@@ -33,9 +34,12 @@ ParticleRenderer::~ParticleRenderer()
 {
 }
 
-void ParticleRenderer::SetData(int pTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark)
+void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark)
 {
-	mTextureCount = pTextureCount;
+	mGasTextureCount = pGasTextureCount;
+	mTotalTextureCount = pTotalTextureCount;
+	assert(mTotalTextureCount >= mGasTextureCount);
+	assert(mTotalTextureCount > 0);
 	mBillboardGas = pGas;
 	mBillboardShrapnel = pShrapnel;
 	mBillboardSpark = pSpark;
@@ -98,6 +102,14 @@ void ParticleRenderer::Render()
 	}
 	mRenderer->RenderBillboards(mBillboardGas, true, true, lBillboards);
 
+	lBillboards.clear();
+	x = mTempFires.begin();
+	for (; x != mTempFires.end(); ++x)
+	{
+		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, x->mSizeFactor, x->mColor, x->mOpacity, x->mTextureIndex));
+	}
+	mRenderer->RenderBillboards(mBillboardGas, true, true, lBillboards);
+
 	// Update lights.
 	LightArray::iterator y = mLights.begin();
 	for (; y < mLights.end(); ++y)
@@ -119,6 +131,7 @@ void ParticleRenderer::Tick(float pTime)
 	StepBillboards(mSmokes, pTime, 5);
 	StepBillboards(mSparks, pTime, -0.4f);
 	StepBillboards(mShrapnels, pTime, -0.2f);
+	mTempFires.clear();
 }
 
 void ParticleRenderer::CreateFlare(const Vector3DF& pColor, float pStrength, float pTimeFactor, const Vector3DF& pPosition, const Vector3DF& pVelocity)
@@ -172,10 +185,24 @@ void ParticleRenderer::CreateFume(float pTime, float pScale, float pAngularVeloc
 void ParticleRenderer::CreateGlow(float pTime, float pScale, const Vector3DF& pStartColor, const Vector3DF& pColor, float pOpacity, const Vector3DF& pPosition, const Vector3DF& pVelocity)
 {
 	const float lTimeFactor = PARTICLE_TIME/pTime;
-	const float lRandomXYEndSpeed = 0.5f;
-	CreateBillboards(pPosition, pScale*2.2f, pVelocity, pVelocity*0.5f, lRandomXYEndSpeed, lTimeFactor, pScale, pStartColor, pColor, mFires, 1);
+	CreateBillboards(pPosition, 0, Vector3DF(), Vector3DF(), 0, lTimeFactor, pScale, pStartColor, pColor, mFires, 1);
 	Billboard& lGlowBillboard = mFires.back();
 	lGlowBillboard.mOpacityFactor = pOpacity;
+	lGlowBillboard.mVelocity = pVelocity;
+	lGlowBillboard.mTargetVelocity = pVelocity;
+}
+
+void ParticleRenderer::RenderFireBillboard(float pAngle, float pSize, const Vector3DF& pColor, float pOpacity, const Vector3DF& pPosition)
+{
+	mTempFires.push_back(Billboard());
+	Billboard& lBillboard = mTempFires.back();
+	lBillboard.mPosition = pPosition;
+	lBillboard.mColor = pColor;
+	lBillboard.mTextureIndex = mTotalTextureCount-1;
+	lBillboard.mDepth = 1000.0f;
+	lBillboard.mSizeFactor = pSize;
+	lBillboard.mAngle = pAngle;
+	lBillboard.mOpacity = pOpacity;
 }
 
 
@@ -260,7 +287,7 @@ void ParticleRenderer::CreateBillboards(const Vector3DF& pPosition, float pStren
 		lBillboard.mPosition = pPosition + lBillboard.mVelocity * 0.05f + pDirection*0.5f;
 		lBillboard.mStartColor = RNDCOL(pStartColor, 0.9f, 1.1f);
 		lBillboard.mColor = RNDCOL(pColor, 0.7f, 1.3f);
-		lBillboard.mTextureIndex = Random::GetRandomNumber() % mTextureCount;
+		lBillboard.mTextureIndex = Random::GetRandomNumber() % mGasTextureCount;
 		lBillboard.mDepth = 1000.0f;
 		lBillboard.mSizeFactor = Random::Uniform(pSizeFactor*0.7f, pSizeFactor*1.4f);
 		lBillboard.mAngle = Random::Uniform(0.0f, 2*PIF);

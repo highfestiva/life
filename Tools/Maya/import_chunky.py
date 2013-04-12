@@ -848,7 +848,7 @@ class GroupReader(DefaultMAReader):
 
 			elif section.startswith("tag:"):
 				tagtype = stripQuotes(config.get(section, "type"))
-				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "engine_sound", "engine_mesh_offset", "exhaust", "fire", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "anything"]
+				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "engine_sound", "engine_mesh_offset", "exhaust", "jet_engine_emitter", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "anything"]
 				allApplied &= tagOk
 				if not tagOk:
 					print("Error: invalid tag type '%s'." % tagtype)
@@ -869,6 +869,26 @@ class GroupReader(DefaultMAReader):
 							if not (cn.nodetype.startswith(cntype)):
 								print("Error: node %s not of %s type, but %s." % (cn.getName(), cntype, cn.nodetype))
 					return ok
+				def check_name(l, required, disallowed):
+					ok = True
+					for e in l:
+						connected_to = self._regexpnodes(e, group)
+						for cn in connected_to:
+							for req in required:
+								if cn.getFullName().find(req) < 0:
+									print("Error: list containing node %s requires name to contain %s." % (cn.getName(), req))
+									ok = False
+							for dis in disallowed:
+								if cn.getFullName().find(dis) >= 0:
+									print("Error: list containing node %s disallows name containing %s." % (cn.getName(), dis))
+									ok = False
+					return ok
+				def check_connected_phys(l):
+					return check_connected_to(l, "transform") and \
+							check_name(l, ["phys_"], ["Shape"])
+				def check_connected_mesh(l):
+					return check_connected_to(l, "transform") and \
+							check_name(l, ["m_"], ["phys_", "Shape"])
 				def check_connected_transform(l):
 					return check_connected_to(l, "transform")
 				def check_connected_engine(l):
@@ -876,9 +896,9 @@ class GroupReader(DefaultMAReader):
 				required = [("type", lambda x: type(x) == str),
 					    ("float_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: isinstance(i, (int, float)), x)))),
 					    ("string_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: type(i) == str, x)))),
-					    ("phys_list", check_connected_transform),
+					    ("phys_list", check_connected_phys),
 					    ("engine_list", check_connected_engine),
-					    ("mesh_list", check_connected_transform)]
+					    ("mesh_list", check_connected_mesh)]
 				for name, check in required:
 					allApplied &= self._query_attribute(node, name, check)[0]
 				group.append(node)

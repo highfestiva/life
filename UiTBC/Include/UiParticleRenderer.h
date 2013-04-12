@@ -25,7 +25,7 @@ public:
 	ParticleRenderer(Renderer* pRenderer, int pMaxLightCount);
 	virtual ~ParticleRenderer();
 
-	void SetData(int pTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark);
+	void SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark);
 
 	virtual void Render();
 	virtual void Tick(float pTime);
@@ -36,6 +36,7 @@ public:
 	void CreatePebble(float pTime, float pScale, float pAngularVelocity, const Vector3DF& pColor, const Vector3DF& pPosition, const Vector3DF& pVelocity);
 	void CreateFume(float pTime, float pScale, float pAngularVelocity, float pOpacity, const Vector3DF& pPosition, const Vector3DF& pVelocity);
 	void CreateGlow(float pTime, float pScale, const Vector3DF& pStartColor, const Vector3DF& pColor, float pOpacity, const Vector3DF& pPosition, const Vector3DF& pVelocity);
+	void RenderFireBillboard(float pAngle, float pSize, const Vector3DF& pColor, float pOpacity, const Vector3DF& pPosition);
 
 protected:
 	struct Light
@@ -89,7 +90,8 @@ protected:
 
 	LightArray mLights;
 	size_t mMaxLightCount;
-	size_t mTextureCount;
+	size_t mGasTextureCount;
+	size_t mTotalTextureCount;
 	BillboardGeometry* mBillboardGas;
 	BillboardGeometry* mBillboardShrapnel;
 	BillboardGeometry* mBillboardSpark;
@@ -98,6 +100,7 @@ protected:
 	BillboardArray mSmokes;
 	BillboardArray mSparks;
 	BillboardArray mShrapnels;
+	BillboardArray mTempFires;
 
 	LOG_CLASS_DECLARE();
 };

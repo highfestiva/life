@@ -475,10 +475,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiFireEmitter.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\UiGameUiManager.cxx"
 				>
 			</File>
@@ -492,6 +488,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiIconButton.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiJetEngineEmitter.cpp"
 				>
 			</File>
 			<File
@@ -553,10 +553,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiFireEmitter.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\UiGameUiManager.h"
 				>
 			</File>
@@ -566,6 +562,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiIconButton.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiJetEngineEmitter.h"
 				>
 			</File>
 			<File

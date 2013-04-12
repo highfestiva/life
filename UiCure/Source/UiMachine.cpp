@@ -16,7 +16,7 @@
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiExhaustEmitter.h"
-#include "../Include/UiFireEmitter.h"
+#include "../Include/UiJetEngineEmitter.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
 
@@ -29,7 +29,7 @@ namespace UiCure
 
 Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
-	mFireEmitter(0),
+	mJetEngineEmitter(0),
 	mExhaustEmitter(0)
 {
 	EnableMeshSlide(true);
@@ -40,9 +40,9 @@ Machine::~Machine()
 	DeleteEngineSounds();
 }
 
-void Machine::SetFireEmitter(FireEmitter* pEmitter)
+void Machine::SetJetEngineEmitter(JetEngineEmitter* pEmitter)
 {
-	mFireEmitter = pEmitter;
+	mJetEngineEmitter = pEmitter;
 }
 
 void Machine::SetExhaustEmitter(ExhaustEmitter* pEmitter)
@@ -105,12 +105,12 @@ void Machine::OnTick()
 		{
 			HandleTagEngineLight(lTag, lFrameTime);
 		}
-		else if (lTag.mTagName == _T("fire"))
+		else if (lTag.mTagName == _T("jet_engine_emitter"))
 		{
 			// Faijah!
-			if (mFireEmitter)
+			if (mJetEngineEmitter)
 			{
-				mFireEmitter->EmitFromTag(this, lTag, lFrameTime);
+				mJetEngineEmitter->EmitFromTag(this, lTag, lFrameTime);
 			}
 		}
 		else if (lTag.mTagName == _T("engine_sound"))

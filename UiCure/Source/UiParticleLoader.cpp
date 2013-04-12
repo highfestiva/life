@@ -19,7 +19,7 @@ namespace UiCure
 
 
 
-ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::Renderer* pRenderer, const str& pTextureName, size_t pSubTextureCount)
+ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::Renderer* pRenderer, const str& pTextureName, size_t pSubFeatureTextureCount, size_t pSubTotalTextureCount)
 {
 	File* lFile = pResourceManager->QueryFile(pTextureName);
 	if (!lFile)
@@ -40,9 +40,9 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 		return;
 	}
 
-	UiTbc::BillboardGeometry* lBillboardGas = new UiTbc::BillboardGeometry(4);
+	UiTbc::BillboardGeometry* lBillboardGas = new UiTbc::BillboardGeometry(pSubTotalTextureCount);
 	UiTbc::Renderer::GeometryID lBillboardGasId = pRenderer->AddGeometry(lBillboardGas, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
-	UiTbc::BillboardGeometry* lBillboardShrapnel = new UiTbc::BillboardGeometry(4);
+	UiTbc::BillboardGeometry* lBillboardShrapnel = new UiTbc::BillboardGeometry(0);
 	const float lShrapnelTriStrip[] =
 	{
 		-0.6f,0,+1.2f,
@@ -52,7 +52,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	};
 	lBillboardShrapnel->SetVertexData(lShrapnelTriStrip);
 	pRenderer->AddGeometry(lBillboardShrapnel, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
-	UiTbc::BillboardGeometry* lBillboardSpark = new UiTbc::BillboardGeometry(4);
+	UiTbc::BillboardGeometry* lBillboardSpark = new UiTbc::BillboardGeometry(0);
 	const float lSparkTriStrip[] =
 	{
 		+0.0f,0,+0.3f,
@@ -67,7 +67,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	pRenderer->TryAddGeometryTexture(lBillboardGasId, lTextureId);
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)pRenderer->GetDynamicRenderer(_T("particle"));
-	lParticleRenderer->SetData(pSubTextureCount, lBillboardGas, lBillboardShrapnel, lBillboardSpark);
+	lParticleRenderer->SetData(pSubFeatureTextureCount, pSubTotalTextureCount, lBillboardGas, lBillboardShrapnel, lBillboardSpark);
 }
 
 

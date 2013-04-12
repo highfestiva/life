@@ -10,6 +10,21 @@ Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single play
 
 Knobbelen
 
+Sandbox: place things in the world, make them go.
+ - Completed missions are things like "scored a goal", "killed the bus" or "demolished the house" or "blew up the convoy",
+ - Free play mode.
+ - Place stones, cars, hovercraft, houses.
+ - Activate engines at certain times.
+ - Place travel route for vehicle.
+ - Perhaps it should be: play as an alien, using a flying saucer?
+ - Map-like controls: pinch zoom, move stuff, rotate stuff.
+ - Play, pause, stop functionality. Can play, pause, change some, play some more.
+ - Possible to interact during play.
+ - (Multi player?)
+ - Save/upload maps.
+ - Download maps.
+ - WOW!
+
 Tank vs. Tank, similar to the Cyber Sled remake.
 
 Ball-into-hole using basic building blocks. Programming (x,y,z, rotation)? Placement? Time contraint? Score higher on lower time? Fewer programming lines? How to separate it from the 2D ballgame I played before? Many balls? Flowing through the start point? YEAH!

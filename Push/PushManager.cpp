@@ -20,7 +20,7 @@
 #include "../Life/ProjectileUtil.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
-#include "../UiCure/Include/UiFireEmitter.h"
+#include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
@@ -1293,7 +1293,7 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 		strutil::StartsWith(pClassId, _T("deltawing")))
 	{
 		UiCure::Machine* lMachine = new ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
-		lMachine->SetFireEmitter(new UiCure::FireEmitter(GetResourceManager(), mUiManager));
+		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
 	else
