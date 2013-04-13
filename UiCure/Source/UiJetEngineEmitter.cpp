@@ -101,7 +101,7 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 	const Vector3DF lColor(pTag.mFloatValueList[FV_END_R], pTag.mFloatValueList[FV_END_B], pTag.mFloatValueList[FV_END_B]);
 
 	Vector3DF lDirection = lOrientation * Vector3DF(pTag.mFloatValueList[FV_DIRECTION_X], pTag.mFloatValueList[FV_DIRECTION_Y], pTag.mFloatValueList[FV_DIRECTION_Z]);
-	const Vector3DF lCamDirection = mUiManager->GetRenderer()->GetCameraTransformation().GetOrientation() * Vector3DF(0,1,0);
+	const Vector3DF lCamDirection = (lPosition - mUiManager->GetRenderer()->GetCameraTransformation().GetPosition()).GetNormalized();
 	float lOvershootFactor = -(lCamDirection*lDirection);
 	if (lOvershootFactor > pTag.mFloatValueList[FV_OVERSHOOT_CUTOFF_DOT])
 	{
@@ -198,7 +198,7 @@ void JetEngineEmitter::DrawOvershoot(const Vector3DF& pPosition, const Quaternio
 	}
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	const float lMaxFlameDistance = std::max(std::max(pRadius.x, pRadius.y), pRadius.z);
-	lParticleRenderer->RenderFireBillboard(0, s*s, pColor, pOpacity+0.6f, pPosition-(pCameraDirection*lMaxFlameDistance));
+	lParticleRenderer->RenderFireBillboard(0, s, pColor, pOpacity+0.6f, pPosition-3*(pCameraDirection*lMaxFlameDistance));
 }
 
 

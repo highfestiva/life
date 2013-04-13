@@ -26,7 +26,8 @@ ParticleRenderer::ParticleRenderer(Renderer* pRenderer, int pMaxLightCount):
 	mTotalTextureCount(1),
 	mBillboardGas(0),
 	mBillboardShrapnel(0),
-	mBillboardSpark(0)
+	mBillboardSpark(0),
+	mBillboardGlow(0)
 {
 }
 
@@ -34,7 +35,7 @@ ParticleRenderer::~ParticleRenderer()
 {
 }
 
-void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark)
+void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark, BillboardGeometry* pGlow)
 {
 	mGasTextureCount = pGasTextureCount;
 	mTotalTextureCount = pTotalTextureCount;
@@ -43,6 +44,7 @@ void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, Bil
 	mBillboardGas = pGas;
 	mBillboardShrapnel = pShrapnel;
 	mBillboardSpark = pSpark;
+	mBillboardGlow = pGlow;
 }
 
 void ParticleRenderer::Render()
@@ -108,7 +110,7 @@ void ParticleRenderer::Render()
 	{
 		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, x->mSizeFactor, x->mColor, x->mOpacity, x->mTextureIndex));
 	}
-	mRenderer->RenderBillboards(mBillboardGas, true, true, lBillboards);
+	mRenderer->RenderBillboards(mBillboardGlow, true, true, lBillboards);
 
 	// Update lights.
 	LightArray::iterator y = mLights.begin();

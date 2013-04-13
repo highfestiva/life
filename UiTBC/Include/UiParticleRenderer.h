@@ -25,7 +25,7 @@ public:
 	ParticleRenderer(Renderer* pRenderer, int pMaxLightCount);
 	virtual ~ParticleRenderer();
 
-	void SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark);
+	void SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark, BillboardGeometry* pGlow);
 
 	virtual void Render();
 	virtual void Tick(float pTime);
@@ -95,6 +95,7 @@ protected:
 	BillboardGeometry* mBillboardGas;
 	BillboardGeometry* mBillboardShrapnel;
 	BillboardGeometry* mBillboardSpark;
+	BillboardGeometry* mBillboardGlow;
 
 	BillboardArray mFires;
 	BillboardArray mSmokes;

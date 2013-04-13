@@ -23,7 +23,7 @@ namespace UiTbc
 class BillboardGeometry: public TBC::GeometryBase
 {
 public:
-	BillboardGeometry(unsigned pUVSetCount);
+	BillboardGeometry(float pAspectRatio, unsigned pUVSetCount);
 	virtual ~BillboardGeometry();
 
 	virtual unsigned GetMaxVertexCount() const;
