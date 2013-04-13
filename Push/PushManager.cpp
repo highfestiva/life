@@ -845,236 +845,7 @@ bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pA
 void PushManager::TickUiUpdate()
 {
 	((PushConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
-
 	mCollisionSoundManager->Tick(mCameraPosition);
-
-	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
-	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
-	if (lPhysicsTime < 1e-5)
-	{
-		return;
-	}
-
-#if 1
-	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	if (lObject)
-	{
-		mCameraPivotPosition = lObject->GetPosition();
-		UpdateMassObjects(mCameraPivotPosition);
-
-		if (lObject->GetAngularVelocity().GetLengthSquared() > 15.0f)
-		{
-			Vector3DF lTarget = mCameraPivotPosition  - GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance, 0);
-			mCameraPosition = Math::Lerp(mCameraPosition, lTarget, 0.2f);
-			return;
-		}
-
-		const Vector3DF lForward3d = lObject->GetForwardDirection();
-		//const Vector3DF lRight3d = lForward3d.Cross(Vector3DF(0, 0, 1));
-		Vector3DF lBackward2d = -lForward3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
-		//Vector3DF lBackward2d = lRight3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
-		lBackward2d.Normalize(mCameraTargetXyDistance);
-		float lCamHeight;
-		CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-		lBackward2d.z = lCamHeight;
-		{
-			float lRotationFactor;
-			CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-			lRotationFactor += mCamRotateExtra * 0.06f;
-			mCameraPivotVelocity.x += lRotationFactor;
-			lBackward2d = QuaternionF(mCameraPivotVelocity.x, Vector3DF(0,0,1)) * lBackward2d;
-		}
-		mCameraPreviousPosition = mCameraPosition;
-		mCameraPosition = Math::Lerp(mCameraPosition, mCameraPivotPosition + lBackward2d, 0.2f);
-	}
-
-	Vector3DF lPivotXyPosition = mCameraPivotPosition;
-	lPivotXyPosition.z = mCameraPosition.z;
-	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
-	Vector3DF lTargetCameraOrientation(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2, 4*PIF/7, 0);
-	if (lPivotXyPosition.y-mCameraPosition.y < 0)
-	{
-		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
-	}
-	{
-		float lCameraTargetAngle = mCameraTargetAngle + PIF/2;
-		Math::RangeAngles(lTargetCameraOrientation.x, mCameraTargetAngle);
-		lTargetCameraOrientation.x = Math::Lerp(lTargetCameraOrientation.x, lCameraTargetAngle, mCameraTargetAngleFactor);
-		if (mCameraTargetAngleFactor < 0.1f)
-		{
-			mCameraTargetAngle = lTargetCameraOrientation.x - PIF/2;
-		}
-	}
-	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
-	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
-	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x) * 0.5f;
-	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
-	lTargetCameraOrientation.z = -lYawChange;
-	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
-	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, 0.4f);
-#else
-	// TODO: remove camera hack (camera position should be context object controlled).
-	mCameraPreviousPosition = mCameraPosition;
-	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	Vector3DF lAvatarPosition = mCameraPivotPosition;
-	float lCameraPivotSpeed = 0;
-	if (lObject)
-	{
-		// Target position is <cam> distance from the avatar along a straight line
-		// (in the XY plane) to where the camera currently is.
-		lAvatarPosition = lObject->GetPosition();
-		mCameraPivotPosition = lAvatarPosition;
-		Vector3DF lAvatarVelocity = lObject->GetVelocity();
-		lAvatarVelocity.z *= 0.2f;	// Don't take very much action on the up/down speed, that has it's own algo.
-		mCameraPivotVelocity = Math::Lerp(mCameraPivotVelocity, lAvatarVelocity, 0.5f*lPhysicsTime/0.1f);
-		mCameraPivotPosition += mCameraPivotVelocity * 0.6f;	// Look to where the avatar will be in a while.
-		lCameraPivotSpeed = mCameraPivotVelocity.GetLength();
-
-		UpdateMassObjects(mCameraPivotPosition);
-	}
-	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
-	Vector3DF lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
-	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetLength();
-	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + lCameraPivotSpeed*0.6f;
-	lTargetCameraPosition = lPivotXyPosition + lTargetCameraPosition*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
-	float lCamHeight;
-	CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	lTargetCameraPosition.z = mCameraPivotPosition.z + lCamHeight;
-
-	if (lObject)
-	{
-		/* Almost tried out "stay behind velocity". Was too jerky, since velocity varies too much.
-		Vector3DF lVelocity = lObject->GetVelocity();
-		mCameraFollowVelocity = lVelocity;
-		float lSpeed = lVelocity.GetLength();
-		if (lSpeed > 0.1f)
-		{
-			lVelocity.Normalize();
-			mCameraFollowVelocity = Math::Lerp(mCameraFollowVelocity, lVelocity, 0.1f).GetNormalized();
-		}
-		// Project previous "camera up" onto plane orthogonal to the velocity to get new "up".
-		Vector3DF lCameraUp = mCameraUp.ProjectOntoPlane(mCameraFollowVelocity) + Vector3DF(0, 0, 0.01f);
-		if (lCameraUp.GetLengthSquared() > 0.1f)
-		{
-			mCameraUp = lCameraUp;
-		}
-		lSpeed *= 0.05f;
-		lSpeed = (lSpeed > 0.4f)? 0.4f : lSpeed;
-		mCameraUp.Normalize();
-		lTargetCameraPosition = Math::Lerp(lTargetCameraPosition, mCameraPivotPosition - 
-			mCameraFollowVelocity * mCameraTargetXyDistance +
-			mCameraUp * mCameraTargetXyDistance * 0.3f, 0.0f);*/
-
-		/*// Temporary: changed to "cam stay behind" mode.
-		lTargetCameraPosition = lObject->GetOrientation() *
-			Vector3DF(0, -mCameraTargetXyDistance, mCameraTargetXyDistance/4) +
-			mCameraPivotPosition;*/
-	}
-
-	lTargetCameraPosition.x = Math::Clamp(lTargetCameraPosition.x, -1000.0f, 1000.0f);
-	lTargetCameraPosition.y = Math::Clamp(lTargetCameraPosition.y, -1000.0f, 1000.0f);
-	lTargetCameraPosition.z = Math::Clamp(lTargetCameraPosition.z, -20.0f, 200.0f);
-
-	// Now that we've settled where we should be, it's time to check where we actually can see our avatar.
-	// TODO: currently only checks against terrain. Add a ray to world, that we can use for this kinda thing.
-	if (mLevel)
-	{
-		const float lCameraAboveGround = 0.3f;
-		lTargetCameraPosition.z -= lCameraAboveGround;
-		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-		Vector3DF lCollisionPoint;
-		float lStepSize = (lTargetCameraPosition - lAvatarPosition).GetLength() * 0.5f;
-		for (int y = 0; y < 5; ++y)
-		{
-			int x;
-			for (x = 0; x < 2; ++x)
-			{
-				const Vector3DF lRay = lTargetCameraPosition - lAvatarPosition;
-				const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
-					lAvatarPosition, lRay, lRay.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
-				if (lIsCollision)
-				{
-					lTargetCameraPosition.z += lStepSize;
-				}
-				else
-				{
-					if (x != 0)
-					{
-						lTargetCameraPosition.z -= lStepSize;
-					}
-					break;
-				}
-			}
-			if (x == 0 && y == 0)
-			{
-				break;
-			}
-			lStepSize *= 1/3.0f;
-			//lTargetCameraPosition.z += lStepSize;
-		}
-		lTargetCameraPosition.z += lCameraAboveGround;
-	}
-
-	const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
-	float lMovingAveragePart = 0.5f*lPhysicsTime/lHalfDistanceTime;
-	if (lMovingAveragePart > 0.8f)
-	{
-		lMovingAveragePart = 0.8f;
-	}
-	//lMovingAveragePart = 1;
-	const Vector3DF lNewPosition = Math::Lerp<Vector3DF, float>(mCameraPosition,
-		lTargetCameraPosition, lMovingAveragePart);
-	const Vector3DF lDirection = lNewPosition-mCameraPosition;
-	const float lDistance = lDirection.GetLength();
-	if (lDistance > mCameraMaxSpeed*lPhysicsTime)
-	{
-		mCameraPosition += lDirection*(mCameraMaxSpeed*lPhysicsTime/lDistance);
-	}
-	else
-	{
-		mCameraPosition = lNewPosition;
-	}
-	if (lNewPosition.z > mCameraPosition.z)	// Dolly cam up pretty quick to avoid looking "through the ground."
-	{
-		mCameraPosition.z = Math::Lerp(mCameraPosition.z, lNewPosition.z, lHalfDistanceTime);
-	}
-
-	// "Roll" camera towards avatar.
-	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
-	const float lNewTargetCameraDistance = mCameraPosition.GetDistance(mCameraPivotPosition);
-	Vector3DF lTargetCameraOrientation;
-	lTargetCameraOrientation.Set(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2,
-		::acos((mCameraPivotPosition.z-mCameraPosition.z)/lNewTargetCameraDistance), 0);
-	if (lPivotXyPosition.y-mCameraPosition.y < 0)
-	{
-		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
-	}
-	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
-	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x)*3;
-	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
-	lTargetCameraOrientation.z = -lYawChange;
-	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
-	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
-	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
-	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
-
-	float lRotationFactor;
-	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	lRotationFactor += mCamRotateExtra;
-	if (lRotationFactor)
-	{
-		TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
-		lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), lRotationFactor * lPhysicsTime);
-		mCameraPosition = lTransform.GetPosition();
-		float lTheta;
-		float lPhi;
-		float lGimbal;
-		lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
-		mCameraOrientation.x = lTheta+PIF/2;
-		mCameraOrientation.y = PIF/2-lPhi;
-		mCameraOrientation.z = lGimbal;
-	}
-#endif
 }
 
 bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
@@ -1607,6 +1378,243 @@ void PushManager::DrawScore()
 }
 
 
+
+void PushManager::ScriptPhysicsTick()
+{
+	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
+	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
+	if (lPhysicsTime > 1e-5)
+	{
+		MoveCamera();
+		UpdateCameraPosition(false);
+	}
+
+	Parent::ScriptPhysicsTick();
+}
+
+void PushManager::MoveCamera()
+{
+#if 1
+	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+	if (lObject)
+	{
+		mCameraPivotPosition = lObject->GetPosition();
+		UpdateMassObjects(mCameraPivotPosition);
+
+		if (lObject->GetAngularVelocity().GetLengthSquared() > 15.0f)
+		{
+			Vector3DF lTarget = mCameraPivotPosition  - GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance, 0);
+			mCameraPosition = Math::Lerp(mCameraPosition, lTarget, 0.2f);
+			return;
+		}
+
+		const Vector3DF lForward3d = lObject->GetForwardDirection();
+		//const Vector3DF lRight3d = lForward3d.Cross(Vector3DF(0, 0, 1));
+		Vector3DF lBackward2d = -lForward3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
+		//Vector3DF lBackward2d = lRight3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
+		lBackward2d.Normalize(mCameraTargetXyDistance);
+		float lCamHeight;
+		CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+		lBackward2d.z = lCamHeight;
+		{
+			float lRotationFactor;
+			CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+			lRotationFactor += mCamRotateExtra * 0.06f;
+			mCameraPivotVelocity.x += lRotationFactor;
+			lBackward2d = QuaternionF(mCameraPivotVelocity.x, Vector3DF(0,0,1)) * lBackward2d;
+		}
+		mCameraPreviousPosition = mCameraPosition;
+		mCameraPosition = Math::Lerp(mCameraPosition, mCameraPivotPosition + lBackward2d, 0.2f);
+	}
+
+	Vector3DF lPivotXyPosition = mCameraPivotPosition;
+	lPivotXyPosition.z = mCameraPosition.z;
+	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
+	Vector3DF lTargetCameraOrientation(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2, 4*PIF/7, 0);
+	if (lPivotXyPosition.y-mCameraPosition.y < 0)
+	{
+		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
+	}
+	{
+		float lCameraTargetAngle = mCameraTargetAngle + PIF/2;
+		Math::RangeAngles(lTargetCameraOrientation.x, mCameraTargetAngle);
+		lTargetCameraOrientation.x = Math::Lerp(lTargetCameraOrientation.x, lCameraTargetAngle, mCameraTargetAngleFactor);
+		if (mCameraTargetAngleFactor < 0.1f)
+		{
+			mCameraTargetAngle = lTargetCameraOrientation.x - PIF/2;
+		}
+	}
+	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
+	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x) * 0.5f;
+	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
+	lTargetCameraOrientation.z = -lYawChange;
+	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
+	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, 0.4f);
+#else
+	// TODO: remove camera hack (camera position should be context object controlled).
+	mCameraPreviousPosition = mCameraPosition;
+	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+	Vector3DF lAvatarPosition = mCameraPivotPosition;
+	float lCameraPivotSpeed = 0;
+	if (lObject)
+	{
+		// Target position is <cam> distance from the avatar along a straight line
+		// (in the XY plane) to where the camera currently is.
+		lAvatarPosition = lObject->GetPosition();
+		mCameraPivotPosition = lAvatarPosition;
+		Vector3DF lAvatarVelocity = lObject->GetVelocity();
+		lAvatarVelocity.z *= 0.2f;	// Don't take very much action on the up/down speed, that has it's own algo.
+		mCameraPivotVelocity = Math::Lerp(mCameraPivotVelocity, lAvatarVelocity, 0.5f*lPhysicsTime/0.1f);
+		mCameraPivotPosition += mCameraPivotVelocity * 0.6f;	// Look to where the avatar will be in a while.
+		lCameraPivotSpeed = mCameraPivotVelocity.GetLength();
+
+		UpdateMassObjects(mCameraPivotPosition);
+	}
+	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
+	Vector3DF lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
+	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetLength();
+	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + lCameraPivotSpeed*0.6f;
+	lTargetCameraPosition = lPivotXyPosition + lTargetCameraPosition*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
+	float lCamHeight;
+	CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	lTargetCameraPosition.z = mCameraPivotPosition.z + lCamHeight;
+
+	if (lObject)
+	{
+		/* Almost tried out "stay behind velocity". Was too jerky, since velocity varies too much.
+		Vector3DF lVelocity = lObject->GetVelocity();
+		mCameraFollowVelocity = lVelocity;
+		float lSpeed = lVelocity.GetLength();
+		if (lSpeed > 0.1f)
+		{
+			lVelocity.Normalize();
+			mCameraFollowVelocity = Math::Lerp(mCameraFollowVelocity, lVelocity, 0.1f).GetNormalized();
+		}
+		// Project previous "camera up" onto plane orthogonal to the velocity to get new "up".
+		Vector3DF lCameraUp = mCameraUp.ProjectOntoPlane(mCameraFollowVelocity) + Vector3DF(0, 0, 0.01f);
+		if (lCameraUp.GetLengthSquared() > 0.1f)
+		{
+			mCameraUp = lCameraUp;
+		}
+		lSpeed *= 0.05f;
+		lSpeed = (lSpeed > 0.4f)? 0.4f : lSpeed;
+		mCameraUp.Normalize();
+		lTargetCameraPosition = Math::Lerp(lTargetCameraPosition, mCameraPivotPosition - 
+			mCameraFollowVelocity * mCameraTargetXyDistance +
+			mCameraUp * mCameraTargetXyDistance * 0.3f, 0.0f);*/
+
+		/*// Temporary: changed to "cam stay behind" mode.
+		lTargetCameraPosition = lObject->GetOrientation() *
+			Vector3DF(0, -mCameraTargetXyDistance, mCameraTargetXyDistance/4) +
+			mCameraPivotPosition;*/
+	}
+
+	lTargetCameraPosition.x = Math::Clamp(lTargetCameraPosition.x, -1000.0f, 1000.0f);
+	lTargetCameraPosition.y = Math::Clamp(lTargetCameraPosition.y, -1000.0f, 1000.0f);
+	lTargetCameraPosition.z = Math::Clamp(lTargetCameraPosition.z, -20.0f, 200.0f);
+
+	// Now that we've settled where we should be, it's time to check where we actually can see our avatar.
+	// TODO: currently only checks against terrain. Add a ray to world, that we can use for this kinda thing.
+	if (mLevel)
+	{
+		const float lCameraAboveGround = 0.3f;
+		lTargetCameraPosition.z -= lCameraAboveGround;
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		Vector3DF lCollisionPoint;
+		float lStepSize = (lTargetCameraPosition - lAvatarPosition).GetLength() * 0.5f;
+		for (int y = 0; y < 5; ++y)
+		{
+			int x;
+			for (x = 0; x < 2; ++x)
+			{
+				const Vector3DF lRay = lTargetCameraPosition - lAvatarPosition;
+				const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
+					lAvatarPosition, lRay, lRay.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
+				if (lIsCollision)
+				{
+					lTargetCameraPosition.z += lStepSize;
+				}
+				else
+				{
+					if (x != 0)
+					{
+						lTargetCameraPosition.z -= lStepSize;
+					}
+					break;
+				}
+			}
+			if (x == 0 && y == 0)
+			{
+				break;
+			}
+			lStepSize *= 1/3.0f;
+			//lTargetCameraPosition.z += lStepSize;
+		}
+		lTargetCameraPosition.z += lCameraAboveGround;
+	}
+
+	const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
+	float lMovingAveragePart = 0.5f*lPhysicsTime/lHalfDistanceTime;
+	if (lMovingAveragePart > 0.8f)
+	{
+		lMovingAveragePart = 0.8f;
+	}
+	//lMovingAveragePart = 1;
+	const Vector3DF lNewPosition = Math::Lerp<Vector3DF, float>(mCameraPosition,
+		lTargetCameraPosition, lMovingAveragePart);
+	const Vector3DF lDirection = lNewPosition-mCameraPosition;
+	const float lDistance = lDirection.GetLength();
+	if (lDistance > mCameraMaxSpeed*lPhysicsTime)
+	{
+		mCameraPosition += lDirection*(mCameraMaxSpeed*lPhysicsTime/lDistance);
+	}
+	else
+	{
+		mCameraPosition = lNewPosition;
+	}
+	if (lNewPosition.z > mCameraPosition.z)	// Dolly cam up pretty quick to avoid looking "through the ground."
+	{
+		mCameraPosition.z = Math::Lerp(mCameraPosition.z, lNewPosition.z, lHalfDistanceTime);
+	}
+
+	// "Roll" camera towards avatar.
+	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
+	const float lNewTargetCameraDistance = mCameraPosition.GetDistance(mCameraPivotPosition);
+	Vector3DF lTargetCameraOrientation;
+	lTargetCameraOrientation.Set(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2,
+		::acos((mCameraPivotPosition.z-mCameraPosition.z)/lNewTargetCameraDistance), 0);
+	if (lPivotXyPosition.y-mCameraPosition.y < 0)
+	{
+		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
+	}
+	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x)*3;
+	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
+	lTargetCameraOrientation.z = -lYawChange;
+	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
+	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
+	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
+
+	float lRotationFactor;
+	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	lRotationFactor += mCamRotateExtra;
+	if (lRotationFactor)
+	{
+		TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
+		lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), lRotationFactor * lPhysicsTime);
+		mCameraPosition = lTransform.GetPosition();
+		float lTheta;
+		float lPhi;
+		float lGimbal;
+		lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
+		mCameraOrientation.x = lTheta+PIF/2;
+		mCameraOrientation.y = PIF/2-lPhi;
+		mCameraOrientation.z = lGimbal;
+	}
+#endif
+}
 
 void PushManager::UpdateCameraPosition(bool pUpdateMicPosition)
 {

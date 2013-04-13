@@ -711,6 +711,8 @@ class MeshWriter(ChunkyWriter):
 			polys = [(CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri"))]
 			normals = [] # node.get_fixed_attribute("rgn", optional=True)
 			uvs = node.get_fixed_attribute("rguv", optional=True)
+			# if uvs and options.options.verbose:
+				# print("Mesh %s has UVs." % node.getFullName())
 			textureuvs = [(CHUNK_MESH_UV, uvs)] if uvs else []
 			inner_data = volatility+shadows+verts+polys+normals+textureuvs
 			data = (

@@ -93,58 +93,52 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 	const float lEngineThrottle = lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true);
 	const QuaternionF lOrientation = pObject->GetOrientation();
 	Vector3DF lRadius(pTag.mFloatValueList[FV_RADIUS_X], pTag.mFloatValueList[FV_RADIUS_Y], pTag.mFloatValueList[FV_RADIUS_Z]);
-	lRadius.x *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_RADIUS_X], lEngineThrottle);
-	lRadius.y *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_RADIUS_Y], lEngineThrottle);
-	lRadius.z *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_RADIUS_Z], lEngineThrottle);
+	lRadius.x *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_X], lEngineThrottle);
+	lRadius.y *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_Y], lEngineThrottle);
+	lRadius.z *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_Z], lEngineThrottle);
 	Vector3DF lPosition(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
-	lPosition = lOrientation * lPosition + pObject->GetPosition();
+	lPosition = lOrientation * lPosition;
 	const Vector3DF lColor(pTag.mFloatValueList[FV_END_R], pTag.mFloatValueList[FV_END_B], pTag.mFloatValueList[FV_END_B]);
 
-	Vector3DF lDirection = lOrientation * Vector3DF(pTag.mFloatValueList[FV_DIRECTION_X], pTag.mFloatValueList[FV_DIRECTION_Y], pTag.mFloatValueList[FV_DIRECTION_Z]);
-	const Vector3DF lCamDirection = (lPosition - mUiManager->GetRenderer()->GetCameraTransformation().GetPosition()).GetNormalized();
-	float lOvershootFactor = -(lCamDirection*lDirection);
-	if (lOvershootFactor > pTag.mFloatValueList[FV_OVERSHOOT_CUTOFF_DOT])
-	{
-		lOvershootFactor = Math::Lerp(lOvershootFactor*0.5f, lOvershootFactor, lEngineThrottle);
-		DrawOvershoot(lPosition, lOrientation, lRadius, lColor, lOvershootFactor, lCamDirection);
-	}
-
-	/*float lExhaustIntensity;
-	CURE_RTVAR_GET(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
-	mInterleaveTimeout -= std::max(1.0f, lEngineThrottle) * lExhaustIntensity * pFrameTime;
-	if (mInterleaveTimeout > 0)	// Release particle this frame?
-	{
-		return;
-	}
+	bool lCreateParticle = false;
 	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
-	mInterleaveTimeout = 0.05f / lDensity;
+	float lExhaustIntensity;
+	CURE_RTVAR_GET(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
+	mInterleaveTimeout -= Math::Lerp(0.3f, 1.0f, lEngineThrottle) * lExhaustIntensity * pFrameTime;
+	if (mInterleaveTimeout <= 0)	// Release particle this frame?
+	{
+		lCreateParticle = true;
+		mInterleaveTimeout = 0.05f / lDensity;
+	}
+	else
+	{
+		lCreateParticle = false;
+	}
 
 	const float dx = pTag.mFloatValueList[FV_RADIUS_X];
 	const float dy = pTag.mFloatValueList[FV_RADIUS_Y];
 	const float dz = pTag.mFloatValueList[FV_RADIUS_Z];
-	const float sx = Random::Normal(0.0f, pTag.mFloatValueList[FV_SCALE_X]*dx, -dx, +dx);
-	const float sy = Random::Normal(0.0f, pTag.mFloatValueList[FV_SCALE_Y]*dy, -dy, +dy);
-	const float sz = Random::Normal(0.0f, pTag.mFloatValueList[FV_SCALE_Z]*dz, -dz, +dz);
-	lOffset += lOrientation * Vector3DF(sx, sy, sz);
-	const Vector3DF lVelocity += pObject->GetVelocity();
 	const Vector3DF lStartColor(pTag.mFloatValueList[FV_START_R], pTag.mFloatValueList[FV_START_B], pTag.mFloatValueList[FV_START_B]);
 	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
+	const Vector3DF lDirection = lOrientation * Vector3DF(pTag.mFloatValueList[FV_DIRECTION_X], pTag.mFloatValueList[FV_DIRECTION_Y], pTag.mFloatValueList[FV_DIRECTION_Z]);
+	const Vector3DF lVelocity = lDirection + pObject->GetVelocity();
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	const float lTime = 0.25f * lDensity;
-	float lSize;	// Pick second size.
+	const float lParticleTime = lDensity;
+	float lParticleSize;	// Pick second size.
 	if (dx > dy && dy > dz)
 	{
-		lSize = dy;
+		lParticleSize = dy;
 	}
 	else if (dy > dx && dx > dz)
 	{
-		lSize = dx;
+		lParticleSize = dx;
 	}
 	else
 	{
-		lSize = dz;
+		lParticleSize = dz;
 	}
-	lSize *= 0.2f;
+	lParticleSize *= 0.2f;
+
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
 		TBC::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
@@ -155,11 +149,26 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 			TransformationF lTransform;
 			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform);
 			lTransform = lMesh->GetBaseTransformation() * lTransform;
-			lTransform.GetPosition() += lOffset;
+			Vector3DF lMeshPos = lTransform.GetPosition() + lPosition;
 
-			lParticleRenderer->CreateGlow(lTime, lSize, lStartColor, lColor, lOpacity, lTransform.GetPosition(), lVelocity);
+			const Vector3DF lCamDirection = (lMeshPos - mUiManager->GetRenderer()->GetCameraTransformation().GetPosition()).GetNormalized();
+			float lOvershootFactor = -(lCamDirection*lDirection);
+			if (lOvershootFactor > pTag.mFloatValueList[FV_OVERSHOOT_CUTOFF_DOT])
+			{
+				lOvershootFactor = Math::Lerp(lOvershootFactor*0.5f, lOvershootFactor, lEngineThrottle);
+				DrawOvershoot(lMeshPos, lOrientation, lRadius, lColor, lOvershootFactor, lCamDirection);
+			}
+
+			if (lCreateParticle)
+			{
+				const float sx = Random::Normal(0.0f, dx*0.5f, -dx, +dx);
+				const float sy = Random::Normal(0.0f, dy*0.5f, -dy, +dy);
+				const float sz = Random::Normal(0.0f, dz*0.5f, -dz, +dz);
+				lMeshPos += lOrientation * Vector3DF(sx, sy, sz);
+				lParticleRenderer->CreateGlow(lParticleTime, lParticleSize, lStartColor, lColor, lOpacity, lMeshPos, lVelocity);
+			}
 		}
-	}*/
+	}
 }
 
 

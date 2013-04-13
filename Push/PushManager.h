@@ -87,6 +87,8 @@ protected:
 	void ClearRoadSigns();
 	void SetRoadSignsVisible(bool pVisible);
 
+	virtual void ScriptPhysicsTick();
+	virtual void MoveCamera();
 	virtual void TickInput();
 
 	void UpdateTouchstickPlacement();

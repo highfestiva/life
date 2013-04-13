@@ -452,6 +452,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 	{
 		uint8* lBuffer = 0;
 		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
+		assert(lOk);
 		int32 lPhysicsIndex = -1;
 		str lMeshBaseName;
 		int lIndex = 0;
@@ -463,6 +464,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			int lStrSize = PackerUnicodeString::Unpack(lMeshBaseName, &lBuffer[lIndex], pSize-lExcludeByteCount);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize < (int)(pSize-lExcludeByteCount));
+			assert(lOk);
 			lIndex += lStrSize;
 		}
 		if (lOk)
@@ -475,6 +477,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			}
 			lIndex += lTransformFloatCount * sizeof(float);
 			lOk = (lIndex < (int)(pSize - 11*sizeof(float) - 4));
+			assert(lOk);
 			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, TransformationF(lTransformArray));
 		}
 		UiTbc::ChunkyClass::Material lMaterial;
@@ -488,6 +491,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			}
 			lIndex += lMaterialFloatCount * sizeof(float);
 			lOk = (lIndex <= (int)(pSize-4-4));
+			assert(lOk);
 			lMaterial.mAmbient.Set(lMaterialArray[0], lMaterialArray[1], lMaterialArray[2]);
 			lMaterial.mDiffuse.Set(lMaterialArray[3], lMaterialArray[4], lMaterialArray[5]);
 			lMaterial.mSpecular.Set(lMaterialArray[6], lMaterialArray[7], lMaterialArray[8]);
@@ -499,12 +503,14 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			int32 lTextureCount = Endian::BigToHost(*(int32*)&lBuffer[lIndex]);
 			lIndex += sizeof(lTextureCount);
 			lOk = (lIndex <= (int)(pSize-2*lTextureCount-2));
+			assert(lOk);
 			for (int x = 0; lOk && x < lTextureCount; ++x)
 			{
 				str lTextureName;
 				int lStrSize = PackerUnicodeString::Unpack(lTextureName, &lBuffer[lIndex], pSize-lIndex);
 				lStrSize = (lStrSize+3)&(~3);
 				lOk = (lStrSize <= (int)(pSize-2));
+				assert(lOk);
 				lIndex += lStrSize;
 				lMaterial.mTextureList.push_back(lTextureName);
 			}
@@ -514,6 +520,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			int lStrSize = PackerUnicodeString::Unpack(lMaterial.mShaderName, &lBuffer[lIndex], pSize-lIndex);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize == (int)(pSize-lIndex));
+			assert(lOk);
 			lIndex += lStrSize;
 		}
 		if (lOk)
