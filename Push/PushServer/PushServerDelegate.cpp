@@ -305,7 +305,7 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 		{
 			lEnduranceReciproc = 0.1f;
 		}
-		const float lForce = Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
+		const float lForce = Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
@@ -315,6 +315,7 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 			}
 			x->second->ForceSend();
 		}
+		Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
 	}
 }
 

@@ -1401,7 +1401,7 @@ void PushManager::MoveCamera()
 		mCameraPivotPosition = lObject->GetPosition();
 		UpdateMassObjects(mCameraPivotPosition);
 
-		if (lObject->GetAngularVelocity().GetLengthSquared() > 15.0f)
+		if (lObject->GetAngularVelocity().GetLengthSquared() > 30.0f)
 		{
 			Vector3DF lTarget = mCameraPivotPosition  - GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance, 0);
 			mCameraPosition = Math::Lerp(mCameraPosition, lTarget, 0.2f);
@@ -1424,7 +1424,7 @@ void PushManager::MoveCamera()
 			lBackward2d = QuaternionF(mCameraPivotVelocity.x, Vector3DF(0,0,1)) * lBackward2d;
 		}
 		mCameraPreviousPosition = mCameraPosition;
-		mCameraPosition = Math::Lerp(mCameraPosition, mCameraPivotPosition + lBackward2d, 0.2f);
+		mCameraPosition = Math::Lerp(mCameraPosition, mCameraPivotPosition + lBackward2d, 0.4f);
 	}
 
 	Vector3DF lPivotXyPosition = mCameraPivotPosition;
