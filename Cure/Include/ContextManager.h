@@ -7,6 +7,7 @@
 #pragma once
 
 #include <hash_map>
+#include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "Cure.h"
@@ -82,6 +83,18 @@ private:
 	void DispatchAlarmCallbacks();
 
 	typedef IdManager<GameObjectId> ObjectIdManager;
+	struct GameObjectIdRecycleInfo
+	{
+		GameObjectIdRecycleInfo(GameObjectId pInstanceId, NetworkObjectType pNetworkType):
+			mInstanceId(pInstanceId),
+			mNetworkType(pNetworkType)
+		{
+		}
+		HiResTimer mTimer;
+		GameObjectId mInstanceId;
+		NetworkObjectType mNetworkType;
+	};
+	typedef std::vector<GameObjectIdRecycleInfo> RecycledIdQueue;
 	struct Alarm
 	{
 		ContextObject* mObject;
@@ -127,6 +140,7 @@ private:
 	GameManager* mGameManager;
 
 	bool mIsObjectOwner;
+	RecycledIdQueue mRecycledIdQueue;
 	ObjectIdManager mLocalObjectIdManager;
 	ObjectIdManager mRemoteObjectIdManager;
 	ContextObjectTable mObjectTable;

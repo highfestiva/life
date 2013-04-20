@@ -34,8 +34,9 @@ Game
   + Nice-looing normals.
   . Textured stripes in the grill.
   . Glowing engine with fire in the rear. (Glow tag would be nice, with configurable sine for each channel, RGB, and period.)
+. Fix "extra light (for shots/flares) creates shadows that stick!"
 . Make nice-looking level. The first levels should be easy with target practice and simply crossing a simple square into a goal.
- . Add fog setting to level.
+  . Add fog setting to level.
 . Make mine explosions infectious, so that when the hover tank blows up, it too will use green smoke. Also take some continous damage during infection.
 . Fix camera "shakes like mad" when you fly away in an explosion.
 . Add typical "game cam shakes" to a camera when nearby an explosion.

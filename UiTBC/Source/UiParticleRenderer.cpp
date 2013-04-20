@@ -26,7 +26,8 @@ ParticleRenderer::ParticleRenderer(Renderer* pRenderer, int pMaxLightCount):
 	mTotalTextureCount(1),
 	mBillboardGas(0),
 	mBillboardShrapnel(0),
-	mBillboardSpark(0)
+	mBillboardSpark(0),
+	mBillboardGlow(0)
 {
 }
 
@@ -34,7 +35,7 @@ ParticleRenderer::~ParticleRenderer()
 {
 }
 
-void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark)
+void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark, BillboardGeometry* pGlow)
 {
 	mGasTextureCount = pGasTextureCount;
 	mTotalTextureCount = pTotalTextureCount;
@@ -43,6 +44,7 @@ void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, Bil
 	mBillboardGas = pGas;
 	mBillboardShrapnel = pShrapnel;
 	mBillboardSpark = pSpark;
+	mBillboardGlow = pGlow;
 }
 
 void ParticleRenderer::Render()
@@ -108,7 +110,7 @@ void ParticleRenderer::Render()
 	{
 		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, x->mSizeFactor, x->mColor, x->mOpacity, x->mTextureIndex));
 	}
-	mRenderer->RenderBillboards(mBillboardGas, true, true, lBillboards);
+	mRenderer->RenderBillboards(mBillboardGlow, true, true, lBillboards);
 
 	// Update lights.
 	LightArray::iterator y = mLights.begin();
@@ -320,7 +322,7 @@ void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, 
 
 		x->mOpacityTime += pTime * x->mTimeFactor;
 		x->mOpacity = (::sin(x->mOpacityTime) + 0.7f) * x->mOpacityFactor;
-		if (x->mOpacity <= 0.0f)
+		if (x->mOpacity <= 0.0f || x->mOpacityTime > PARTICLE_TIME)
 		{
 			assert(x->mOpacityTime > PIF);	// Verify that the particle was visible at all, or the algo's wrong.
 			x = pBillboards.erase(x);

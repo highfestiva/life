@@ -23,6 +23,7 @@
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiMusicPlayer.h"
+#include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiCure/Include/UiSound.h"
 #include "../UiLepra/Include/Mac/UiIosInput.h"
@@ -38,6 +39,7 @@
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
 #include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiFontManager.h"
+#include "../UiTBC/Include/UiParticleRenderer.h"
 #include "Cutie.h"
 #include "Game.h"
 #include "Launcher.h"
@@ -594,6 +596,12 @@ bool App::Open()
 			}
 		};
 		mUiManager->GetSoundManager()->SetFileOpener(new ResourceOpener(mResourceManager));
+	}
+	if (lOk)
+	{
+		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
 	}
 	if (lOk)
 	{

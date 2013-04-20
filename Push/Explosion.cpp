@@ -17,7 +17,7 @@ namespace Push
 
 
 
-float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength)
+float Explosion::CalculateForce(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength)
 {
 	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
 	if (!lPhysics)
@@ -28,17 +28,16 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 	const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -0.75f);
 	const bool lIsDynamic = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
 	const int lBoneStart = lIsDynamic? 0 : 1;
-	const int lBoneCount = lIsDynamic? 1 : lPhysics->GetBoneCount();
+	const int lBoneCount = lPhysics->GetBoneCount();
 	float lForce = 0;
 	for (int y = lBoneStart; y < lBoneCount; ++y)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(y);
 		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY
-			|| (y != 0 && lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE))
+			|| pPhysicsManager->IsStaticBody(lGeometry->GetBodyId()))
 		{
 			continue;
 		}
-		// Only done once in a dynamic object.
 		Vector3DF lBodyCenter = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
 		Vector3DF f = lBodyCenter - lEpicenter;
 		float d = f.GetLength();
@@ -62,12 +61,68 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 		}
 		f *= ff;
 
-		if (lIsDynamic)
+		/*if (lIsDynamic)
 		{
 			// Use forward direction to offset some from the body center. Not perfect, but good enough for now.
 			lBodyCenter += pObject->GetForwardDirection();
 			lBodyCenter.z += 0.05f;
+		}*/
+
+		//pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), f, lBodyCenter);
+	}
+	return lForce;
+}
+
+float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength)
+{
+	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
+	if (!lPhysics)
+	{
+		return 0;
+	}
+	// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
+	const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -0.75f);
+	const bool lIsDynamic = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const int lBoneStart = lIsDynamic? 0 : 1;
+	const int lBoneCount = lPhysics->GetBoneCount();
+	float lForce = 0;
+	for (int y = lBoneStart; y < lBoneCount; ++y)
+	{
+		const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(y);
+		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY
+			|| pPhysicsManager->IsStaticBody(lGeometry->GetBodyId()))
+		{
+			continue;
 		}
+		Vector3DF lBodyCenter = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+		Vector3DF f = lBodyCenter - lEpicenter;
+		float d = f.GetLength();
+		if (d > 80*pStrength)
+		{
+			continue;
+		}
+		d = 1/d;
+		f *= d;
+		d *= 8;	// Just so we have at least some cubic strength.
+		d = d*d*d;
+		d = std::min(1.0f, d);
+		d *= pStrength;
+		//mLog.Infof(_T("Explosion for %s with strength %f at (%f;%f;%f)."), pObject->GetClassId().c_str(), d, pPosition.x, pPosition.y, pPosition.z);
+		lForce += d;
+		const float lForceFactor = 3000.0f;	// To be able to pass a sensible strength factor to this method.
+		const float ff = lForceFactor * pObject->GetMass() * d;
+		if (f.z <= 0.1f)
+		{
+			f.z += 0.3f;
+		}
+		f *= ff;
+
+		/*if (lIsDynamic)
+		{
+			// Use forward direction to offset some from the body center. Not perfect, but good enough for now.
+			lBodyCenter += pObject->GetForwardDirection();
+			lBodyCenter.z += 0.05f;
+		}*/
 
 		pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), f, lBodyCenter);
 	}

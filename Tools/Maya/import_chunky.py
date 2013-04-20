@@ -325,6 +325,8 @@ class GroupReader(DefaultMAReader):
 				node.fix_attribute("rgn", n)
 			uv = node.getAttrValue("rguv0", "rguv0", None, n=None)
 			if uv:
+				if options.options.verbose:
+					print("%s has UVs." % node.getFullName())
 				for x in range(1, len(uv), 3):
 					uv[x] = -uv[x]
 				node.fix_attribute("rguv", uv)

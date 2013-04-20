@@ -413,6 +413,17 @@ void GameManager::SetNetworkAgent(NetworkAgent* pNetwork)
 
 
 
+void GameManager::ScriptPhysicsTick()
+{
+	//if (mTime->GetAffordedPhysicsStepCount() > 0)
+	{
+		mContext->HandlePostKill();
+		mContext->TickPhysics();
+	}
+}
+
+
+
 void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNodes, int pRecursion)
 {
 	const str lIndent = str(pRecursion*3, ' ');
@@ -435,15 +446,6 @@ void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNode
 bool GameManager::IsThreadSafe() const
 {
 	return (mIsThreadSafe);
-}
-
-void GameManager::ScriptPhysicsTick()
-{
-	//if (mTime->GetAffordedPhysicsStepCount() > 0)
-	{
-		mContext->HandlePostKill();
-		mContext->TickPhysics();
-	}
 }
 
 void GameManager::HandleWorldBoundaries()

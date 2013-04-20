@@ -203,14 +203,7 @@ GameObjectId ContextManager::AllocateGameObjectId(NetworkObjectType pNetworkType
 
 void ContextManager::FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
-	if (pNetworkType == NETWORK_OBJECT_LOCAL_ONLY)
-	{
-		mLocalObjectIdManager.RecycleId(pInstanceId);
-	}
-	else
-	{
-		mRemoteObjectIdManager.RecycleId(pInstanceId);
-	}
+	mRecycledIdQueue.push_back(GameObjectIdRecycleInfo(pInstanceId, pNetworkType));
 }
 
 bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
@@ -356,6 +349,24 @@ void ContextManager::HandlePostKill()
 		mGameManager->DeleteContextObject(*x);
 	}
 	mPostKillSet.clear();
+
+	RecycledIdQueue::iterator y = mRecycledIdQueue.begin();
+	while (y != mRecycledIdQueue.end())
+	{
+		if (y->mTimer.QueryTimeDiff() < 10.0)
+		{
+			break;
+		}
+		if (y->mNetworkType == NETWORK_OBJECT_LOCAL_ONLY)
+		{
+			mLocalObjectIdManager.RecycleId(y->mInstanceId);
+		}
+		else
+		{
+			mRemoteObjectIdManager.RecycleId(y->mInstanceId);
+		}
+		y = mRecycledIdQueue.erase(y);
+	}
 }
 
 

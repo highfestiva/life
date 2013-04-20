@@ -307,7 +307,7 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 			lTexture = mTextureResourceArray[0];
 		}
 	}
-	if (lTexture)
+	if (lMesh->GetRamData()->GetUVData(0) && lTexture)
 	{
 		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
 		const bool lIsBlended = (lTransparent || lShader == _T("blend"));

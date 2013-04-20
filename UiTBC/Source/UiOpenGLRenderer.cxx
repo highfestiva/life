@@ -1083,15 +1083,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 	if (pGeometry->IsSimpleObject() || CheckCamCulling(pGeometry->GetTransformation().GetPosition(), pGeometry->GetBoundingRadius()))
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();
-		// Transform the geometry.
-		/*TransformationF t = GetCameraTransformation();
-		t.GetOrientation().Div(t.GetOrientation().GetMagnitude());
-		SetCameraTransformation(t);*/
 		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
-		//mCamSpaceTransformation = mCameraTransformation.InverseTransform(pGeometry->GetTransformation());
-		/*TransformationF lCamSpaceTransformation = GetCameraTransformation().InverseTransform(pGeometry->GetTransformation());
-		assert(mCamSpaceTransformation.GetPosition().GetDistanceSquared(lCamSpaceTransformation.GetPosition()) < 1e-8);
-		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);*/
 		float lModelViewMatrix[16];
 		mCamSpaceTransformation.GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);

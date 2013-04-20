@@ -97,13 +97,13 @@ protected:
 	virtual void TickInput() = 0;
 
 	virtual ContextObject* CreateContextObject(const str& pClassId) const = 0;
+	virtual void ScriptPhysicsTick();
 
 	void ReportPerformance(const ScopePerformanceData::NodeArray& pNodes, int pRecursion);
 
 	bool IsThreadSafe() const;
 
 private:
-	void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
 
 	mutable Lock mLock;
