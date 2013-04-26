@@ -592,7 +592,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 
 	BindTexture(GetRenderer()->GetEnvTexture()->mTMapID[Texture::COLOR_MAP], GetRenderer()->GetEnvTexture()->mTMipMapLevelCount[Texture::COLOR_MAP]);
 
-#ifndef LEPRA_GL_ES
+/*#ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		// Use cube mapping.
@@ -618,7 +618,17 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 		::glEnable(GL_TEXTURE_GEN_S);
 		::glEnable(GL_TEXTURE_GEN_T);
 	}
-#endif // !GLES
+#endif // !GLES*/
+	/*::glMatrixMode(GL_TEXTURE);
+	GLfloat m[4][4] =
+	{
+		{ 1, 0, 0, 0 },
+		{ 0, 1, 0, 0 },
+		{ 0, 0, 1, 0 },
+		{ 0, 0, 0, 1 },
+	};
+	::glLoadMatrixf((GLfloat*)m);
+	::glMatrixMode(GL_MODELVIEW);*/
 
 	::glMatrixMode(GL_TEXTURE);
 	float lTextureMatrix[16];
@@ -633,7 +643,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 
 	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight(true);
 
-#ifndef LEPRA_GL_ES
+/*#ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		::glDisable(GL_TEXTURE_GEN_S);
@@ -646,7 +656,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 		::glDisable(GL_TEXTURE_GEN_S);
 		::glDisable(GL_TEXTURE_GEN_T);
 	}
-#endif // !GLES
+#endif // !GLES*/
 
 	//::glDepthFunc(GL_LESS);
 
@@ -669,6 +679,7 @@ void OpenGLMatSingleColorEnvMapSolid::PreRender()
 		::glColor4f(1, 1, 1, 1);
 		const float c[] = {1,1,1,1};
 		::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, c);
+		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 }
 
@@ -682,6 +693,7 @@ void OpenGLMatSingleColorEnvMapSolid::PostRender()
 	{
 		Parent::PostRender();
 		::glDisable(GL_BLEND);
+		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 }
 
@@ -695,7 +707,31 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometr
 	}
 	else
 	{
-		Parent::DoRawRender(pGeometry, 0);
+		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
+		{
+			OpenGLRenderer::OGLGeometryData* lGeometryData = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
+
+			GLuint lVertexBufferID = (GLuint)lGeometryData->mVertexBufferID;
+			GLuint lIndexBufferID  = (GLuint)lGeometryData->mIndexBufferID;
+
+			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+
+			glVertexPointer(3, GL_FLOAT, 0, 0);
+			glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometryData->mNormalOffset);
+			glTexCoordPointer(3, GL_FLOAT, 0, 0);	// Use vertex coordinates instead.
+
+			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
+
+			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, 0);
+		}
+		else
+		{
+			glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
+			glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+			glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());	// Use vertex coordinates instead.
+			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
+		}
+		OGL_ASSERT();
 	}
 }
 
