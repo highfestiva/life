@@ -658,8 +658,6 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	}
 #endif // !GLES*/
 
-	//::glDepthFunc(GL_LESS);
-
 	::glMatrixMode(GL_TEXTURE);
 	::glLoadIdentity();
 	::glMatrixMode(GL_MODELVIEW);
@@ -680,6 +678,7 @@ void OpenGLMatSingleColorEnvMapSolid::PreRender()
 		const float c[] = {1,1,1,1};
 		::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, c);
 		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		::glDepthFunc(GL_LEQUAL);
 	}
 }
 
@@ -694,6 +693,7 @@ void OpenGLMatSingleColorEnvMapSolid::PostRender()
 		Parent::PostRender();
 		::glDisable(GL_BLEND);
 		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		::glDepthFunc(GL_LESS);
 	}
 }
 

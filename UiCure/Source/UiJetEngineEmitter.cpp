@@ -206,8 +206,8 @@ void JetEngineEmitter::DrawOvershoot(const Vector3DF& pPosition, const Quaternio
 		x2d = z2d/s;
 	}
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	const float lMaxFlameDistance = std::max(std::max(pRadius.x, pRadius.y), pRadius.z);
-	lParticleRenderer->RenderFireBillboard(0, s, pColor, pOpacity+0.6f, pPosition-3*(pCameraDirection*lMaxFlameDistance));
+	const float lMaxFlameDistance = 3 * std::max(std::max(pRadius.x, pRadius.y), pRadius.z);
+	lParticleRenderer->RenderFireBillboard(0, s, pColor, pOpacity+0.6f, pPosition-pCameraDirection*lMaxFlameDistance);
 }
 
 
