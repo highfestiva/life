@@ -6,20 +6,17 @@
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "Push.h"
+#include "../../UiCure/Include/UiMachine.h"
+#include "../Life.h"
 
 
 
 namespace Life
 {
+
+
+
 class Launcher;
-}
-
-
-
-namespace Push
-{
 
 
 
@@ -28,14 +25,14 @@ class ExplodingMachine: public UiCure::Machine
 public:
 	typedef UiCure::Machine Parent;
 
-	ExplodingMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher);
+	ExplodingMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
 	virtual ~ExplodingMachine();
 
 protected:
 	void OnTick();
 
 private:
-	Life::Launcher* mLauncher;
+	Launcher* mLauncher;
 	bool mIsDetonated;
 
 	LOG_CLASS_DECLARE();

@@ -443,6 +443,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Explosion.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Life.cpp"
 				>
 			</File>
@@ -466,6 +470,10 @@
 			>
 			<File
 				RelativePath=".\ConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Explosion.h"
 				>
 			</File>
 			<File

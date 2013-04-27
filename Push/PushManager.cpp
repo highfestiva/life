@@ -15,8 +15,14 @@
 #include "../Lepra/Include/Time.h"
 #include "../Life/LifeClient/ClientOptions.h"
 #include "../Life/LifeClient/ClientOptions.h"
+#include "../Life/LifeClient/ExplodingMachine.h"
+#include "../Life/LifeClient/FastProjectile.h"
+#include "../Life/LifeClient/Level.h"
 #include "../Life/LifeClient/MassObject.h"
+#include "../Life/LifeClient/Mine.h"
+#include "../Life/LifeClient/Projectile.h"
 #include "../Life/LifeClient/UiConsole.h"
+#include "../Life/Explosion.h"
 #include "../Life/ProjectileUtil.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
@@ -28,12 +34,6 @@
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
-#include "ExplodingMachine.h"
-#include "Explosion.h"
-#include "FastProjectile.h"
-#include "Level.h"
-#include "Mine.h"
-#include "Projectile.h"
 #include "PushConsoleManager.h"
 #include "PushTicker.h"
 #include "RoadSignButton.h"
@@ -383,7 +383,7 @@ void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	if (dynamic_cast<Mine*>(pExplosive))
+	if (dynamic_cast<Life::Mine*>(pExplosive))
 	{
 		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
 		lFireColor.Set(0.3f, 0.7f, 0.2f);
@@ -1010,7 +1010,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)GetContext()->GetObject(lInstanceId);
 			if (lObject)
 			{
-				Explosion::FallApart(GetPhysicsManager(), lObject);
+				Life::Explosion::FallApart(GetPhysicsManager(), lObject);
 				lObject->CenterMeshes();
 				log_volatile(mLog.Debugf(_T("Object %i falling apart."), pInteger));
 			}
@@ -1035,15 +1035,15 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	Cure::CppContextObject* lObject;
 	if (pClassId == _T("grenade") || pClassId == _T("rocket"))
 	{
-		lObject = new FastProjectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+		lObject = new Life::FastProjectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 	}
 	else if (pClassId == _T("bomb"))
 	{
-		lObject = new Projectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+		lObject = new Life::Projectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 	}
 	else if (strutil::StartsWith(pClassId, _T("mine")))
 	{
-		lObject = new Mine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+		lObject = new Life::Mine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 	}
 	else if (pClassId == _T("stone") || pClassId == _T("cube"))
 	{
@@ -1052,9 +1052,9 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	else if (strutil::StartsWith(pClassId, _T("level_")))
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
-		Level* mLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
-		mLevel->DisableRootShadow();
-		lObject = mLevel;
+		Life::Level* lLevel = new Life::Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
+		lLevel->DisableRootShadow();
+		lObject = lLevel;
 	}
 	else if (pClassId == _T("score_info"))
 	{
@@ -1064,7 +1064,7 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	else if (strutil::StartsWith(pClassId, _T("hover_tank")) ||
 		strutil::StartsWith(pClassId, _T("deltawing")))
 	{
-		UiCure::Machine* lMachine = new ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
+		UiCure::Machine* lMachine = new Life::ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
@@ -1179,7 +1179,7 @@ void PushManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 		case 0:	lAmmo = _T("bullet");	break;
 		default: assert(false); return;
 	}
-	FastProjectile* lProjectile = new FastProjectile(GetResourceManager(), lAmmo, mUiManager, this);
+	Life::FastProjectile* lProjectile = new Life::FastProjectile(GetResourceManager(), lAmmo, mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
 	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition());

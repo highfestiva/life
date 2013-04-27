@@ -7,17 +7,17 @@
 #include "ServerFastProjectile.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
-#include "../../Life/Launcher.h"
-#include "../../Life/ProjectileUtil.h"
+#include "../Launcher.h"
+#include "../ProjectileUtil.h"
 
 
 
-namespace Push
+namespace Life
 {
 
 
 
-ServerFastProjectile::ServerFastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher):
+ServerFastProjectile::ServerFastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, Launcher* pLauncher):
 	Parent(pResourceManager, pClassId),
 	mLauncher(pLauncher),
 	mMaxVelocity(0),
@@ -40,7 +40,7 @@ void ServerFastProjectile::OnLoaded()
 	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
 	assert(lTag);
 	const float lMuzzleVelocity = lTag->mFloatValueList[0];
-	Life::ProjectileUtil::StartBullet(this, lMuzzleVelocity, true);
+	ProjectileUtil::StartBullet(this, lMuzzleVelocity, true);
 	mMaxVelocity = lTag->mFloatValueList[1];
 	mAcceleration = lTag->mFloatValueList[2];
 	mExplosiveEnergy = lTag->mFloatValueList[3];
@@ -50,7 +50,7 @@ void ServerFastProjectile::OnMicroTick(float pFrameTime)
 {
 	Parent::OnMicroTick(pFrameTime);
 
-	Life::ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
+	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
 }
 
 void ServerFastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
@@ -58,11 +58,11 @@ void ServerFastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, 
 	(void)pTriggerId;
 	if (mExplosiveEnergy)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), pNormal, mExplosiveEnergy);
+		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), pNormal, mExplosiveEnergy);
 	}
 	else
 	{
-		Life::ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
+		ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
 	}
 }
 

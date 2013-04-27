@@ -12,18 +12,18 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Life/LifeServer/GameServerManager.h"
+#include "../../Life/LifeServer/ServerFastProjectile.h"
+#include "../../Life/LifeServer/ServerMine.h"
+#include "../../Life/LifeServer/ServerProjectile.h"
 #include "../../Life/LifeServer/Spawner.h"
+#include "../../Life/Explosion.h"
 #include "../../Life/ProjectileUtil.h"
 #include "../RtVar.h"
 #include "../RtVar.h"
-#include "../Explosion.h"
 #include "../Version.h"
 #include "BombPlane.h"
 #include "Npc.h"
 #include "PushServerConsole.h"
-#include "ServerFastProjectile.h"
-#include "ServerMine.h"
-#include "ServerProjectile.h"
 
 #define KILLS	_T("int_kills:")
 #define DEATHS	_T("int_deaths:")
@@ -72,7 +72,7 @@ Cure::ContextObject* PushServerDelegate::CreateContextObject(const str& pClassId
 {
 	if (strutil::StartsWith(pClassId, _T("mine_")))
 	{
-		return new ServerMine(mGameServerManager->GetResourceManager(), pClassId, (PushServerDelegate*)this);
+		return new Life::ServerMine(mGameServerManager->GetResourceManager(), pClassId, (PushServerDelegate*)this);
 	}
 	else if (strutil::StartsWith(pClassId, _T("deltawing")))
 	{
@@ -249,11 +249,11 @@ void PushServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	Cure::ContextObject* lProjectile;
 	if (lIsFast)
 	{
-		lProjectile = new ServerFastProjectile(mGameServerManager->GetResourceManager(), lAmmo, this);
+		lProjectile = new Life::ServerFastProjectile(mGameServerManager->GetResourceManager(), lAmmo, this);
 	}
 	else
 	{
-		lProjectile = new ServerProjectile(mGameServerManager->GetResourceManager(), lAmmo, 0, this);
+		lProjectile = new Life::ServerProjectile(mGameServerManager->GetResourceManager(), lAmmo, 0, this);
 	}
 	mGameServerManager->AddContextObject(lProjectile, lNetworkType, 0);
 	log_volatile(mLog.Debugf(_T("Shooting projectile with ID %i!"), (int)lProjectile->GetInstanceId()));
@@ -305,7 +305,7 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 		{
 			lEnduranceReciproc = 0.1f;
 		}
-		const float lForce = Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
+		const float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
@@ -315,7 +315,7 @@ void PushServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::Ch
 			}
 			x->second->ForceSend();
 		}
-		Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
+		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
 	}
 }
 
@@ -562,7 +562,7 @@ void PushServerDelegate::DrainHealth(Cure::ContextObject* pExplosive, Cure::Cont
 
 void PushServerDelegate::Die(Cure::ContextObject* pAvatar)
 {
-	Explosion::FallApart(mGameServerManager->GetPhysicsManager(), pAvatar);
+	Life::Explosion::FallApart(mGameServerManager->GetPhysicsManager(), pAvatar);
 	mGameServerManager->DeleteContextObjectDelay(pAvatar, 2);
 	mGameServerManager->BroadcastNumberMessage(0, true, Cure::MessageNumber::INFO_FALL_APART, pAvatar->GetInstanceId(), 0);
 }

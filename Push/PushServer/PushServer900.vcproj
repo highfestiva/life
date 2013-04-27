@@ -552,18 +552,6 @@
 				RelativePath=".\PushServerTicker.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\ServerFastProjectile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerMine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerProjectile.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -594,34 +582,6 @@
 			</File>
 			<File
 				RelativePath=".\PushServerTicker.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerFastProjectile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerLauncher.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerMine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerProjectile.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Util"
-			>
-			<File
-				RelativePath="..\Explosion.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Explosion.h"
 				>
 			</File>
 		</Filter>

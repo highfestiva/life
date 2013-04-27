@@ -5,21 +5,21 @@
 
 
 #include "FastProjectile.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/GameManager.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiSoundReleaser.h"
-#include "../Life/Launcher.h"
-#include "../Life/ProjectileUtil.h"
+#include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiCure/Include/UiSoundReleaser.h"
+#include "../Launcher.h"
+#include "../ProjectileUtil.h"
 
 
 
-namespace Push
+namespace Life
 {
 
 
 
-FastProjectile::FastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
+FastProjectile::FastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mShreekSound(0),
 	mLauncher(pLauncher),
@@ -40,7 +40,7 @@ FastProjectile::~FastProjectile()
 
 	if (mExplosiveEnergy)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy);
+		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy);
 	}
 }
 
@@ -65,7 +65,7 @@ void FastProjectile::OnLoaded()
 	{
 		TransformationF lParentTransform;
 		Vector3DF lParentVelocity;
-		if (Life::ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
+		if (ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
 		{
 			UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
 			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, 1.0f);
@@ -82,14 +82,14 @@ void FastProjectile::OnLoaded()
 void FastProjectile::StartBullet(float pMuzzleVelocity)
 {
 	const bool lIsSynchronized = !GetManager()->IsLocalGameObjectId(GetInstanceId());
-	Life::ProjectileUtil::StartBullet(this, pMuzzleVelocity, !lIsSynchronized);
+	ProjectileUtil::StartBullet(this, pMuzzleVelocity, !lIsSynchronized);
 
 	if (lIsSynchronized)
 	{
 		// Move mesh to muzzle and let it lerp towards object.
 		TransformationF lTransform;
 		Vector3DF lVelocity;
-		Life::ProjectileUtil::GetBarrel(this, lTransform, lVelocity);
+		ProjectileUtil::GetBarrel(this, lTransform, lVelocity);
 		for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 		{
 			UiCure::UserGeometryReferenceResource* lResource = mMeshResourceArray[x];
@@ -117,7 +117,7 @@ void FastProjectile::OnMicroTick(float pFrameTime)
 	//	mLog.Infof(_T("Fast projectile BEFORE bullet tick (ID %u, frame %i): (%f;%f;%f;%f)."), GetInstanceId(), lFrame, lTransform.GetOrientation().GetA(), lTransform.GetOrientation().GetB(), lTransform.GetOrientation().GetC(), lTransform.GetOrientation().GetD());
 	//	q = lTransform.GetOrientation();
 	//}
-	Life::ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
+	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
 	//GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
 	//if ((q - lTransform.GetOrientation()).GetNorm() >= 0.01f)
 	//{
@@ -153,11 +153,11 @@ void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Contex
 
 	if (mExplosiveEnergy)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), pNormal, mExplosiveEnergy);
+		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), pNormal, mExplosiveEnergy);
 	}
 	else
 	{
-		Life::ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
+		ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
 	}
 }
 

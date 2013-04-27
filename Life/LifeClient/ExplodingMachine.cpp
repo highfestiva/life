@@ -5,17 +5,17 @@
 
 
 #include "ExplodingMachine.h"
-#include "../Cure/Include/FloatAttribute.h"
-#include "../Life/ProjectileUtil.h"
+#include "../../Cure/Include/FloatAttribute.h"
+#include "../ProjectileUtil.h"
 
 
 
-namespace Push
+namespace Life
 {
 
 
 
-ExplodingMachine::ExplodingMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
+ExplodingMachine::ExplodingMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mLauncher(pLauncher),
 	mIsDetonated(false)
@@ -35,7 +35,7 @@ void ExplodingMachine::OnTick()
 	Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)GetAttribute(_T("float_health"));
 	if (lHealth && lHealth->GetValue() <= 0)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 2);
+		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 2);
 	}
 }
 

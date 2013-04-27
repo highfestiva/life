@@ -8,17 +8,17 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/GameManager.h"
-#include "../../Life/Launcher.h"
-#include "../../Life/ProjectileUtil.h"
+#include "../Launcher.h"
+#include "../ProjectileUtil.h"
 
 
 
-namespace Push
+namespace Life
 {
 
 
 
-ServerMine::ServerMine(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher):
+ServerMine::ServerMine(Cure::ResourceManager* pResourceManager, const str& pClassId, Launcher* pLauncher):
 	Parent(pResourceManager, pClassId),
 	mLauncher(pLauncher),
 	mTicksTilFullyActivated(100),
@@ -45,7 +45,7 @@ void ServerMine::OnTick()
 	{
 		if (--mTicksTilDetonation == 0)
 		{
-			Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 1);
+			ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 1);
 		}
 		return;
 	}

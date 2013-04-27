@@ -5,21 +5,21 @@
 
 
 #include "Projectile.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/GameManager.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiSoundReleaser.h"
-#include "../Life/Launcher.h"
-#include "../Life/ProjectileUtil.h"
+#include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiCure/Include/UiSoundReleaser.h"
+#include "../Launcher.h"
+#include "../ProjectileUtil.h"
 
 
 
-namespace Push
+namespace Life
 {
 
 
 
-Projectile::Projectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
+Projectile::Projectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mShreekSound(0),
 	mLauncher(pLauncher),
@@ -34,7 +34,7 @@ Projectile::~Projectile()
 {
 	delete mShreekSound;
 	mShreekSound = 0;
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy);
 }
 
 
@@ -53,7 +53,7 @@ void Projectile::OnLoaded()
 	{
 		TransformationF lParentTransform;
 		Vector3DF lParentVelocity;
-		if (Life::ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
+		if (ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
 		{
 			UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
 			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, 1.0f);
@@ -62,7 +62,7 @@ void Projectile::OnLoaded()
 	if (!lShreekSoundName.empty())
 	{
 		mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
-		mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
+		mShreekSound->Load(GetResourceManager(), lShreekSoundName,
 			UiCure::UserSound3dResource::TypeLoadCallback(this, &Projectile::LoadPlaySound3d));
 	}
 }
@@ -96,7 +96,7 @@ void Projectile::OnForceApplied(ContextObject* pOtherObject,
 		return;
 	}
 
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, Vector3DF(), mExplosiveEnergy);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, Vector3DF(), mExplosiveEnergy);
 }
 
 void Projectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)

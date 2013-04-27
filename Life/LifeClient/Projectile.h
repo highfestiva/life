@@ -6,20 +6,17 @@
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "Push.h"
+#include "../../UiCure/Include/UiMachine.h"
+#include "../Life.h"
 
 
 
 namespace Life
 {
+
+
+
 class Launcher;
-}
-
-
-
-namespace Push
-{
 
 
 
@@ -28,7 +25,7 @@ class Projectile: public UiCure::Machine
 public:
 	typedef UiCure::Machine Parent;
 
-	Projectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher);
+	Projectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
 	virtual ~Projectile();
 
 private:
@@ -41,7 +38,7 @@ private:
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	UiCure::UserSound3dResource* mShreekSound;
-	Life::Launcher* mLauncher;
+	Launcher* mLauncher;
 	int mTickCounter;
 	bool mIsDetonated;
 	float mExplosiveEnergy;

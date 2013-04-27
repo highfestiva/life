@@ -15,9 +15,9 @@
 #include "../UiCure/Include/UiMachine.h"
 #include "../Life/LifeClient/ClientConsoleManager.h"
 #include "../Life/LifeClient/GameClientMasterTicker.h"
+#include "../Life/LifeClient/Level.h"
 #include "../Life/LifeClient/UiConsole.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
-#include "Level.h"
 #include "RtVar.h"
 
 
@@ -113,7 +113,7 @@ bool PushViewer::InitializeUniverse()
 	}
 
 	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
-	mLevel = new Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
+	mLevel = new Life::Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
 	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, 0);
 	mLevel->DisableRootShadow();
 	mLevel->SetAllowNetworkLogic(false);

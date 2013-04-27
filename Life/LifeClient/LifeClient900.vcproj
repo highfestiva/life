@@ -448,6 +448,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExplodingMachine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FastProjectile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameClientMasterTicker.cpp"
 				>
 			</File>
@@ -456,7 +464,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Level.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Mine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\OptionsManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Projectile.cpp"
 				>
 			</File>
 			<File
@@ -482,6 +502,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExplodingMachine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FastProjectile.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GameClientMasterTicker.h"
 				>
 			</File>
@@ -494,7 +522,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Level.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Mine.h"
+				>
+			</File>
+			<File
 				RelativePath=".\OptionsManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Projectile.h"
 				>
 			</File>
 			<File

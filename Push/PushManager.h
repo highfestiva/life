@@ -30,6 +30,7 @@ class CollisionSoundManager;
 namespace Life
 {
 class GameClientMasterTicker;
+class Level;
 }
 
 
@@ -39,7 +40,6 @@ namespace Push
 
 
 
-class Level;
 class RoadSignButton;
 
 
@@ -140,7 +140,7 @@ protected:
 	RoadSignMap mRoadSignMap;
 
 	Cure::GameObjectId mLevelId;
-	Level* mLevel;
+	Life::Level* mLevel;
 	ObjectArray mMassObjectArray;
 	Cure::ContextObject* mSun;
 	std::vector<Cure::ContextObject*> mCloudArray;

@@ -7,41 +7,38 @@
 #pragma once
 
 #include "../../Cure/Include/CppContextObject.h"
-#include "../Push.h"
+#include "../Life.h"
 
 
 
 namespace Life
 {
+
+
+
 class Launcher;
-}
 
 
 
-namespace Push
-{
-
-
-
-class ServerMine: public Cure::CppContextObject
+class ServerProjectile: public Cure::CppContextObject
 {
 public:
 	typedef Cure::CppContextObject Parent;
 
-	ServerMine(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher);
-	virtual ~ServerMine();
+	ServerProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, float pMuzzleVelocity, Launcher* pLauncher);
+	virtual ~ServerProjectile();
 
 private:
-	virtual void OnTick();
+	virtual void OnLoaded();
 	virtual void OnForceApplied(Cure::ContextObject* pOtherObject,
 		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 		const Vector3DF& pForce, const Vector3DF& pTorque,
 		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
-	Life::Launcher* mLauncher;
-	int mTicksTilFullyActivated;
-	int mTicksTilDetonation;
+	float mMuzzleVelocity;
+	Launcher* mLauncher;
 	bool mIsDetonated;
+	float mExplosiveEnergy;
 
 	LOG_CLASS_DECLARE();
 };

@@ -7,17 +7,17 @@
 #include "ServerProjectile.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
-#include "../../Life/Launcher.h"
-#include "../../Life/ProjectileUtil.h"
+#include "../Launcher.h"
+#include "../ProjectileUtil.h"
 
 
 
-namespace Push
+namespace Life
 {
 
 
 
-ServerProjectile::ServerProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, float pMuzzleVelocity, Life::Launcher* pLauncher):
+ServerProjectile::ServerProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, float pMuzzleVelocity, Launcher* pLauncher):
 	Parent(pResourceManager, pClassId),
 	mMuzzleVelocity(pMuzzleVelocity),
 	mLauncher(pLauncher),
@@ -42,7 +42,7 @@ void ServerProjectile::OnLoaded()
 
 	TransformationF lTransform;
 	Vector3DF lParentVelocity;
-	Life::ProjectileUtil::GetBarrel(this, lTransform, lParentVelocity);
+	ProjectileUtil::GetBarrel(this, lTransform, lParentVelocity);
 	Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
 	lVelocity += lParentVelocity;
 	lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 0, +3);
@@ -63,7 +63,7 @@ void ServerProjectile::OnForceApplied(Cure::ContextObject* pOtherObject,
 	(void)pTorque;
 	(void)pRelativeVelocity;
 
-	Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, Vector3DF(), mExplosiveEnergy);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, Vector3DF(), mExplosiveEnergy);
 }
 
 
