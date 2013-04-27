@@ -181,7 +181,7 @@ void ParticleRenderer::CreateFume(float pTime, float pScale, float pAngularVeloc
 	lPebbleBillboard.mVelocity = pVelocity;
 	lPebbleBillboard.mAngularVelocity = Random::Uniform(-pAngularVelocity, +pAngularVelocity);
 	lPebbleBillboard.mOpacityFactor = pOpacity;
-	lPebbleBillboard.mOpacityTime -= OPACITY_FADE_IN_TIME_OFFSET;	// Go back to fade in time, at sine curve near origo.
+	//lPebbleBillboard.mOpacityTime += OPACITY_FADE_IN_TIME_OFFSET * 0.5f;	// Move forward some in time to ensure that we're very visible when we come out of the pipe.
 }
 
 void ParticleRenderer::CreateGlow(float pTime, float pScale, const Vector3DF& pStartColor, const Vector3DF& pColor, float pOpacity, const Vector3DF& pPosition, const Vector3DF& pVelocity)

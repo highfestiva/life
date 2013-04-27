@@ -521,31 +521,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\BombPlane.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameServerLogic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Npc.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\PushServer.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PushServerConsole.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\PushServerDelegate.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServerMessageProcessor.cpp"
 				>
 			</File>
 			<File
@@ -557,27 +537,7 @@
 			Name="Header Files"
 			>
 			<File
-				RelativePath=".\BombPlane.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameServerLogic.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Npc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServerConsole.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PushServerDelegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServerMessageProcessor.h"
 				>
 			</File>
 			<File

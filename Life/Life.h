@@ -27,10 +27,6 @@ using namespace Lepra;
 
 const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;	// TODO: REMOVE ME!!!
 
-//#define LIFE_DEMO
-
-
-
 Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
 
 

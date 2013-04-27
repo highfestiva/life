@@ -19,7 +19,7 @@ using namespace Lepra;
 
 const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;
 
-//#define LIFE_DEMO
+//#define PUSH_DEMO
 
 
 

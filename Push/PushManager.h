@@ -44,7 +44,7 @@ class RoadSignButton;
 
 
 
-class PushManager: public Life::GameClientSlaveManager, private ClientLoginObserver, private Life::Launcher
+class PushManager: public Life::GameClientSlaveManager, private ClientLoginObserver
 {
 	typedef Life::GameClientSlaveManager Parent;
 public:
@@ -54,7 +54,6 @@ public:
 	virtual ~PushManager();
 	virtual void LoadSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
-	virtual bool Open();
 	virtual void Close();
 	virtual void SetIsQuitting();
 	virtual void SetFade(float pFadeAmount);
@@ -70,9 +69,6 @@ public:
 	Cure::GameObjectId GetAvatarInstanceId() const;
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
-
-	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
-	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 protected:
 	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
@@ -108,17 +104,12 @@ protected:
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
-	void OnFireButton(UiTbc::Button*);
-	void AvatarShoot();
-	void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
-
 	void CancelLogin();
 	void OnVehicleSelect(UiTbc::Button* pButton);
 	void OnAvatarSelect(UiTbc::Button* pButton);
 	void DropAvatar();
 
 	void DrawStick(Touchstick* pStick);
-	void DrawScore();
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
 	QuaternionF GetCameraQuaternion() const;
@@ -131,7 +122,6 @@ protected:
 	bool mUpdateCameraForAvatar;
 	Life::Options::Steering mLastSteering;
 	float mCamRotateExtra;
-	int mActiveWeapon;
 	HiResTimer mFireTimeout;
 
 	RoadSignButton* mPickVehicleButton;
@@ -140,16 +130,14 @@ protected:
 	RoadSignMap mRoadSignMap;
 
 	Cure::GameObjectId mLevelId;
-	Life::Level* mLevel;
+	mutable Life::Level* mLevel;
 	ObjectArray mMassObjectArray;
 	Cure::ContextObject* mSun;
 	std::vector<Cure::ContextObject*> mCloudArray;
 
-	Cure::GameObjectId mScoreInfoId;
-
 	Vector3DF mCameraPosition;
 	Vector3DF mCameraPreviousPosition;
-	//Vector3DF mCameraFollowVelocity;
+	Vector3DF mCameraFollowVelocity;
 	Vector3DF mCameraUp;
 	Vector3DF mCameraOrientation;
 	Vector3DF mCameraPivotPosition;
@@ -162,9 +150,6 @@ protected:
 	float mCameraTargetAngleFactor;
 	Vector3DF mMicrophoneSpeed;
 	UiTbc::Window* mLoginWindow;
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	UiTbc::Button* mFireButton;
-#endif // Touch or emulated touch.
 
 	HiResTimer mTouchstickTimer;
 	Touchstick* mStickLeft;
@@ -178,7 +163,7 @@ protected:
 	float mEnginePlaybackTime;	// Used for recording vechile steering playback.
 	EnginePower mEnginePowerShadow[TBC::PhysicsEngine::ASPECT_COUNT];	// Used for recording vechile steering playback.
 
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 	HiResTimer mDemoTime;
 #endif // Demo version
 

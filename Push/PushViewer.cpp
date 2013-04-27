@@ -48,7 +48,6 @@ void PushViewer::LoadSettings()
 {
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
 
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
@@ -113,7 +112,7 @@ bool PushViewer::InitializeUniverse()
 	}
 
 	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
-	mLevel = new Life::Level(GetResourceManager(), _T("level_02"), mUiManager, lGravelParticleEmitter);
+	mLevel = new Life::Level(GetResourceManager(), _T("level_01"), mUiManager, lGravelParticleEmitter);
 	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, 0);
 	mLevel->DisableRootShadow();
 	mLevel->SetAllowNetworkLogic(false);

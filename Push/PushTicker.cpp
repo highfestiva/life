@@ -9,6 +9,7 @@
 #include "../Lepra/Include/SystemManager.h"
 #include "../Life/LifeClient/UiGameServerManager.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
+#include "../Life/LifeServer/ServerMessageProcessor.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiLepra/Include/UiCore.h"
@@ -16,7 +17,6 @@
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "PushServer/PushServerDelegate.h"
-#include "PushServer/PushServerMessageProcessor.h"
 #include "RtVar.h"
 #include "PushDemo.h"
 #include "PushViewer.h"
@@ -74,7 +74,7 @@ void PushTicker::OnServerCreated(Life::UiGameServerManager* pServer)
 {
 	PushServerDelegate* lDelegate = new PushServerDelegate(pServer);
 	pServer->SetDelegate(lDelegate);
-	pServer->SetMessageProcessor(new PushServerMessageProcessor(pServer, lDelegate));
+	pServer->SetMessageProcessor(new Life::ServerMessageProcessor(pServer));
 }
 
 
@@ -242,10 +242,10 @@ void PushTicker::BeginRender(Vector3DF& pColor)
 	mSunlight->AddSunColor(pColor, 2);
 	Parent::BeginRender(pColor);
 
-	//Vector3DF lColor(1.2f, 1.2f, 1.2f);
-	//mSunlight->AddSunColor(lColor, 1);
-	const Color lFillColor = OFF_BLACK;
-	//lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
+	Vector3DF lColor(1.2f, 1.2f, 1.2f);
+	mSunlight->AddSunColor(lColor, 1);
+	Color lFillColor;
+	lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
 	mUiManager->GetRenderer()->SetOutlineFillColor(lFillColor);
 }
 
@@ -350,7 +350,7 @@ bool PushTicker::QueryQuit()
 			DeleteSlave(mSlaveArray[x], false);
 		}
 		DeleteServer();
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 		if (!mUiManager->CanRender())
 		{
 			return true;
@@ -389,7 +389,7 @@ Life::GameClientSlaveManager* PushTicker::CreateDemo(Life::GameClientMasterTicke
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
 	int pSlaveIndex, const PixelRect& pRenderArea)
 {
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 	return new PushDemo(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 #else // !Demo
 	return new PushViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);

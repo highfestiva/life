@@ -15,18 +15,13 @@
 #include "../Lepra/Include/Time.h"
 #include "../Life/LifeClient/ClientOptions.h"
 #include "../Life/LifeClient/ClientOptions.h"
-#include "../Life/LifeClient/ExplodingMachine.h"
-#include "../Life/LifeClient/FastProjectile.h"
 #include "../Life/LifeClient/Level.h"
 #include "../Life/LifeClient/MassObject.h"
-#include "../Life/LifeClient/Mine.h"
-#include "../Life/LifeClient/Projectile.h"
 #include "../Life/LifeClient/UiConsole.h"
 #include "../Life/Explosion.h"
 #include "../Life/ProjectileUtil.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
-#include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
@@ -51,33 +46,6 @@ namespace Push
 
 
 
-namespace
-{
-
-struct Score
-{
-	str mName;
-	int mKills;
-	int mDeaths;
-	int mPing;
-};
-
-struct DeathsAscendingOrder
-{
-	bool operator() (const Score& a, const Score& b) { return a.mDeaths < b.mDeaths; }
-}
-gDeathsAscendingOrder;
-
-struct KillsDecendingOrder
-{
-	bool operator() (const Score& a, const Score& b) { return a.mKills > b.mKills; }
-}
-gKillsDecendingOrder;
-
-}
-
-
-
 PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
@@ -87,16 +55,14 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mHadAvatar(false),
 	mUpdateCameraForAvatar(false),
 	mCamRotateExtra(0),
-	mActiveWeapon(0),
 	mPickVehicleButton(0),
 	mAvatarInvisibleCount(0),
 	mRoadSignIndex(0),
 	mLevelId(0),
 	mLevel(0),
 	mSun(0),
-	mScoreInfoId(0),
 	mCameraPosition(0, -200, 100),
-	//mCameraFollowVelocity(0, 1, 0),
+	mCameraFollowVelocity(0, 1, 0),
 	mCameraUp(0, 0, 1),
 	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
 	mCameraTargetXyDistance(20),
@@ -105,9 +71,6 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCameraTargetAngle(0),
 	mCameraTargetAngleFactor(0),
 	mLoginWindow(0),
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	mFireButton(0),
-#endif // Touch or emulated touch.
 	mStickLeft(0),
 	mStickRight(0),
 	mEnginePlaybackTime(0)
@@ -139,8 +102,6 @@ PushManager::~PushManager()
 
 void PushManager::LoadSettings()
 {
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
-
 	Parent::LoadSettings();
 
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
@@ -187,31 +148,10 @@ void PushManager::SetRenderArea(const PixelRect& pRenderArea)
 	CURE_RTVAR_GET(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
 
-bool PushManager::Open()
-{
-	bool lOk = Parent::Open();
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	if (lOk)
-	{
-		mFireButton = ICONBTNA("grenade.png", "");
-		int x = mRenderArea.GetCenterX() - 32;
-		int y = mRenderArea.mBottom - 76;
-		mUiManager->GetDesktopWindow()->AddChild(mFireButton, x, y);
-		mFireButton->SetVisible(true);
-		mFireButton->SetOnClick(PushManager, OnFireButton);
-	}
-#endif // Touch or emulated touch.
-	return lOk;
-}
-
 void PushManager::Close()
 {
 	ScopeLock lLock(GetTickLock());
 	ClearRoadSigns();
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	delete mFireButton;
-	mFireButton = 0;
-#endif // Touch or emulated touch.
 	Parent::Close();
 	CloseLoginGui();
 }
@@ -245,24 +185,7 @@ bool PushManager::Paint()
 		mStickRight->ResetTap();
 	}
 
-	const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	if (lObject)
-	{
-		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
-		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("");
-		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 255), 0);
-		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
-		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 10, 10);
-	}
-
-	bool lDrawScore;
-	CURE_RTVAR_GET(lDrawScore, =, GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
-	if (lDrawScore)
-	{
-		DrawScore();
-	}
-
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 	const double lTime = mDemoTime.QueryTimeDiff();
 	if ((mSlaveIndex >= 2 || (mSlaveIndex == 1 && lTime > 10*60))
 		&& !IsQuitting())
@@ -365,56 +288,6 @@ bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 
 
 
-void PushManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
-{
-	(void)pExplosive;
-
-	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
-
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	//mLog.Infof(_T("Hit object normal is (%.1f; %.1f; %.1f)"), pNormal.x, pNormal.y, pNormal.z);
-	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
-	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
-	u -= pVelocity;	// Mirror and inverse.
-	u.Normalize();
-	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
-	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
-	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
-	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
-	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
-	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	if (dynamic_cast<Life::Mine*>(pExplosive))
-	{
-		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
-		lFireColor.Set(0.3f, 0.7f, 0.2f);
-		lStartSmokeColor.Set(0.3f, 0.35f, 0.3f);
-		lSmokeColor.Set(0.2f, 0.4f, 0.2f);
-		lShrapnelColor.Set(0.5f, 0.5f, 0.1f);
-	}
-	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
-
-	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a push.
-	{
-		const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-		if (lObject)
-		{
-			Explosion::PushObject(GetPhysicsManager(), lObject, pPosition, 1.0f);
-		}
-	}*/
-}
-
-void PushManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
-{
-	(void)pHitObject;
-
-	TBC::ChunkyPhysics* lPhysics = pBullet->GetPhysics();
-	if (lPhysics)
-	{
-		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
-		mCollisionSoundManager->OnCollision(5.0f, pBullet->GetPosition(), lGeometry, lGeometry->GetMaterial());
-	}
-}
-
 Cure::RuntimeVariableScope* PushManager::GetVariableScope() const
 {
 	return (Parent::GetVariableScope());
@@ -425,7 +298,6 @@ Cure::RuntimeVariableScope* PushManager::GetVariableScope() const
 bool PushManager::Reset()	// Run when disconnected. Removes all objects and displays login GUI.
 {
 	ScopeLock lLock(GetTickLock());
-	mScoreInfoId = 0;
 	ClearRoadSigns();
 	bool lOk = Parent::Reset();
 	if (lOk)
@@ -627,9 +499,6 @@ void PushManager::TickUiInput()
 	{
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 
-		// Show billboard.
-		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_GAME_DRAWSCORE, !lObject || mOptions.GetShowScore());
-
 		if (lObject)
 		{
 			QuerySetChildishness(lObject);
@@ -637,98 +506,6 @@ void PushManager::TickUiInput()
 			// Control steering.
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
-#if 1
-			const float lLeftPowerFwdRev = S(FORWARD) - S(BRAKEANDBACK);
-			//const float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
-			const float lLeftPowerLR = S(RIGHT)-S(LEFT);
-			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
-			const float lSteeringPower = std::abs(lLeftPowerFwdRev);
-			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
-			assert(lLeftPowerFwdRev >=  -3 && lLeftPowerFwdRev <=  +3);
-			assert(lLeftPowerLR     >=  -3 &&     lLeftPowerLR <=  +3);
-			assert(lRightPowerLR    >= -12 &&    lRightPowerLR <= +12);
-
-			// Mouse controls yaw angle.
-			const float lAngleDelta = S(YAW_ANGLE) * 0.05f;
-			const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-			const bool lIsUpdatingYaw = !!lAngleDelta;
-			const bool lIsTimedYawUpdate = (mCameraMouseAngleTimer.QueryTimeDiff() < 1.5f);
-			if (lAvatar && mUpdateCameraForAvatar)
-			{
-				mUpdateCameraForAvatar = false;
-				float lCurrentAngle = 0;
-				float _;
-				lAvatar->GetOrientation().GetEulerAngles(lCurrentAngle, _, _);
-				//lCurrentAngle = +PIF/2 - lCurrentAngle;
-				//const Vector3DF fwd = lAvatar->GetForwardDirection();
-				//mLog.Infof(_T("Setting cam from avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
-				//const QuaternionF r = lAvatar->GetOrientation();
-				//mLog.Infof(_T("Setting cam from Q=%f, %f, %f, %f"), r.mA, r.mB, r.mC, r.mD);
-				mCameraMouseAngle = lCurrentAngle;
-				mCameraTargetAngle = lCurrentAngle;
-				mCameraOrientation.x = lCurrentAngle + PIF/2;
-			}
-			/*if (lAvatar)
-			{
-				static int pc = 0;
-				if (++pc > 20)
-				{
-					pc = 0;
-					//const Vector3DF fwd = lAvatar->GetForwardDirection();
-					//mLog.Infof(_T("Avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
-					//const QuaternionF q = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-					//mLog.Infof(_T("Avatar original Q=%f, %f, %f, %f"), q.mA, q.mB, q.mC, q.mD);
-					const QuaternionF r = lAvatar->GetOrientation();
-					mLog.Infof(_T("Avatar Q=%f, %f, %f, %f"), r.mA, r.mB, r.mC, r.mD);
-				}
-			}*/
-			if (lAvatar && (lIsUpdatingYaw || lIsTimedYawUpdate))
-			{
-				float lCurrentAngle = 0;
-				float _;
-				lAvatar->GetOrientation().GetEulerAngles(lCurrentAngle, _, _);
-				const bool lIsFirstYawUpdate = !lIsTimedYawUpdate;
-				if (lIsFirstYawUpdate)
-				{
-					mCameraMouseAngle = lCurrentAngle;
-				}
-				if (lIsUpdatingYaw)
-				{
-					mCameraMouseAngleTimer.ClearTimeDiff();
-				}
-				mCameraMouseAngle -= lAngleDelta;
-				Math::RangeAngles(lCurrentAngle, mCameraMouseAngle);
-				mCameraTargetAngle = mCameraMouseAngle;
-				mCameraTargetAngleFactor = 1;
-				float lAngleDiff = lCurrentAngle - mCameraMouseAngle;
-				const Vector3DF lRotationVelocity = lAvatar->GetAngularVelocity();
-				float lRotationFriction = -lRotationVelocity.z * 0.2f;
-				if ((lAngleDelta < 0) == (lAngleDiff > 0))
-				{
-					lRotationFriction = 0;
-				}
-				/*static int pc = 0;
-				if (++pc > 5)
-				{
-					pc = 0;
-					mLog.Infof(_T("angle=%f, delta=%f, current=%f, diff=%f, friction=%f"), mCameraMouseAngle, lAngleDelta, lCurrentAngle, lCurrentAngle - mCameraMouseAngle, lRotationFriction);
-				}*/
-				const float lStrength = Math::Lerp(1.0f, 2.0f, std::max(std::abs(lLeftPowerFwdRev), std::abs(lLeftPowerLR)));
-				lAngleDiff *= 4;
-				lAngleDiff -= lRotationFriction * lStrength;
-				lRightPowerLR += lAngleDiff;
-			}
-			else
-			{
-				mCameraTargetAngleFactor *= 0.5f;
-			}
-
-			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev-lRightPowerLR);
-			SetAvatarEnginePower(lObject, 1, lLeftPowerLR);
-			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev+lRightPowerLR);
-			SetAvatarEnginePower(lObject, 5, lLeftPowerLR);
-			SetAvatarEnginePower(lObject, 8, lRightPowerLR);
-#else
 			const float lForward = S(FORWARD);
 			const float lBack = S(BACKWARD);
 			const float lBrakeAndBack = S(BRAKEANDBACK);
@@ -755,7 +532,6 @@ void PushManager::TickUiInput()
 			// Engine aspect 6 is not currently in use (3D handbraking). Might come in useful some day though.
 			lPower = S(UP3D) - S(DOWN3D);
 			SetAvatarEnginePower(lObject, 7, lPower);
-#endif
 			const float lSteeringChange = mLastSteering-s;
 			if (lSteeringChange > 0.5f)
 			{
@@ -776,14 +552,6 @@ void PushManager::TickUiInput()
 			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
 			lCamPower = C(BACKWARD)-C(FORWARD);
 			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lCamPower*lScale, 3.0, 100.0);
-
-			// Control fire.
-			const Life::Options::FireControl& f = mOptions.GetFireControl();
-#define F(alt) f.mControl[Life::Options::FireControl::FIRE##alt]
-			if (F(0) > 0.5f)
-			{
-				AvatarShoot();
-			}
 
 			mAvatarInvisibleCount = 0;
 		}
@@ -853,7 +621,6 @@ bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
 {
 	bool lOk = true;
 
-#if 0
 	if (mLevel && mMassObjectArray.empty())
 	{
 		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
@@ -874,7 +641,6 @@ bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
 			lBushes->StartLoading();
 		}
 	}
-#endif 
 
 	ObjectArray::const_iterator x = mMassObjectArray.begin();
 	for (; x != mMassObjectArray.end(); ++x)
@@ -1016,16 +782,6 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			}
 		}
 		return;
-		case Cure::MessageNumber::INFO_TOOL_0:
-		{
-			const Cure::GameObjectId lAvatarId = pInteger;
-			UiCure::CppContextObject* lAvatar = (UiCure::CppContextObject*)GetContext()->GetObject(lAvatarId);
-			if (lAvatar)
-			{
-				Shoot(lAvatar, (int)pFloat);
-			}
-		}
-		return;
 	}
 	Parent::ProcessNumber(pType, pInteger, pFloat);
 }
@@ -1033,19 +789,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 {
 	Cure::CppContextObject* lObject;
-	if (pClassId == _T("grenade") || pClassId == _T("rocket"))
-	{
-		lObject = new Life::FastProjectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
-	}
-	else if (pClassId == _T("bomb"))
-	{
-		lObject = new Life::Projectile(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
-	}
-	else if (strutil::StartsWith(pClassId, _T("mine")))
-	{
-		lObject = new Life::Mine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
-	}
-	else if (pClassId == _T("stone") || pClassId == _T("cube"))
+	if (pClassId == _T("stone") || pClassId == _T("cube"))
 	{
 		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
 	}
@@ -1054,19 +798,8 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Life::Level* lLevel = new Life::Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
 		lLevel->DisableRootShadow();
+		mLevel = lLevel;
 		lObject = lLevel;
-	}
-	else if (pClassId == _T("score_info"))
-	{
-		lObject = new UiCure::CppContextObject(GetResourceManager(), _T("score_info"), mUiManager);
-		lObject->SetLoadResult(true);
-	}
-	else if (strutil::StartsWith(pClassId, _T("hover_tank")) ||
-		strutil::StartsWith(pClassId, _T("deltawing")))
-	{
-		UiCure::Machine* lMachine = new Life::ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (PushManager*)this);
-		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
-		lObject = lMachine;
 	}
 	else
 	{
@@ -1134,65 +867,6 @@ void PushManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 				log_adebug("Sending loan request to server.");
 			}
 		}
-	}
-}
-
-
-
-void PushManager::OnFireButton(UiTbc::Button*)
-{
-	AvatarShoot();
-}
-
-void PushManager::AvatarShoot()
-{
-	if (mFireTimeout.QueryTimeDiff() < 0.15f)
-	{
-		return;
-	
-	}
-
-	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	if (!lAvatar)
-	{
-		return;
-	}
-
-	mFireTimeout.ClearTimeDiff();
-	GetNetworkClient()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
-		Cure::MessageNumber::INFO_TOOL_0, 0, (float)mActiveWeapon);
-
-	if (mActiveWeapon == 0)
-	{
-		Shoot(lAvatar, mActiveWeapon);
-	}
-
-	++mActiveWeapon;
-	mActiveWeapon %= 3;
-}
-
-void PushManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
-{
-	str lAmmo;
-	switch (pWeapon)
-	{
-		case 0:	lAmmo = _T("bullet");	break;
-		default: assert(false); return;
-	}
-	Life::FastProjectile* lProjectile = new Life::FastProjectile(GetResourceManager(), lAmmo, mUiManager, this);
-	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
-	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition());
-	lProjectile->SetInitialTransform(t);
-	lProjectile->StartLoading();
-
-	if (pWeapon >= 0)
-	{
-		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-		TransformationF t;
-		Vector3DF v;
-		Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
-		lParticleRenderer->CreateFlare(Vector3DF(0.9f, 0.7f, 0.5f), 0.3f, 7.5f, t.GetPosition(), v);
 	}
 }
 
@@ -1277,107 +951,6 @@ void PushManager::DrawStick(Touchstick* pStick)
 	}
 }
 
-void PushManager::DrawScore()
-{
-	typedef Cure::ContextObject::AttributeArray AttributeArray;
-	if (!mScoreInfoId)
-	{
-		const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();
-		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
-		for (; x != lObjectTable.end(); ++x)
-		{
-			Cure::ContextObject* lObject = x->second;
-			const AttributeArray& lAttributeArray = lObject->GetAttributes();
-			AttributeArray::const_iterator y = lAttributeArray.begin();
-			for (; y != lAttributeArray.end(); ++y)
-			{
-				Cure::ContextObjectAttribute* lAttribute = *y;
-				if (strutil::StartsWith(lAttribute->GetName(), _T("int_kills:")))
-				{
-					mScoreInfoId = lObject->GetInstanceId();
-					return;	// Better luck next time.
-				}
-			}
-		}
-	}
-
-	Cure::ContextObject* lScoreInfo = GetContext()->GetObject(mScoreInfoId);
-	if (!lScoreInfo)
-	{
-		mScoreInfoId = 0;
-		return;
-	}
-
-	typedef std::hash_map<str, Score*> ScoreMap;
-	typedef std::vector<Score> ScoreArray;
-	ScoreMap lScoreMap;
-	ScoreArray lScoreArray;
-	const AttributeArray& lAttributeArray = lScoreInfo->GetAttributes();
-	AttributeArray::const_iterator y = lAttributeArray.begin();
-	for (; y != lAttributeArray.end(); ++y)
-	{
-		Cure::ContextObjectAttribute* lAttribute = *y;
-		str lName;
-		int lValue = 0;
-		int lMode = 0;
-		if (strutil::StartsWith(lAttribute->GetName(), _T("int_kills:")))
-		{
-			lName = lAttribute->GetName().substr(10);
-			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
-			lMode = 0;
-		}
-		else if (strutil::StartsWith(lAttribute->GetName(), _T("int_deaths:")))
-		{
-			lName = lAttribute->GetName().substr(11);
-			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
-			lMode = 1;
-		}
-		else if (strutil::StartsWith(lAttribute->GetName(), _T("int_ping:")))
-		{
-			lName = lAttribute->GetName().substr(9);
-			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
-			lMode = 2;
-		}
-		if (!lName.empty())
-		{
-			ScoreMap::iterator x = lScoreMap.find(lName);
-			if (x == lScoreMap.end())
-			{
-				Score s;
-				s.mName = lName;
-				s.mKills = 0;
-				s.mDeaths = 0;
-				s.mPing = 0;
-				lScoreArray.push_back(s);
-				x = lScoreMap.insert(ScoreMap::value_type(lName, &lScoreArray.back())).first;
-			}
-			switch (lMode)
-			{
-				case 0:	x->second->mKills	= lValue;	break;
-				case 1:	x->second->mDeaths	= lValue;	break;
-				case 2:	x->second->mPing	= lValue;	break;
-			}
-		}
-	}
-	std::sort(lScoreArray.begin(), lScoreArray.end(), gDeathsAscendingOrder);
-	std::sort(lScoreArray.begin(), lScoreArray.end(), gKillsDecendingOrder);
-	mUiManager->GetPainter()->SetTabSize(140);
-	str lScore = _T("Name\tKills\tDeaths\tPing");
-	ScoreArray::iterator x = lScoreArray.begin();
-	for (; x != lScoreArray.end(); ++x)
-	{
-		lScore += strutil::Format(_T("\n%s\t%i\t%i\t%i"), x->mName.c_str(), x->mKills, x->mDeaths, x->mPing);
-	}
-	mUiManager->GetPainter()->SetColor(Color(1, 1, 1, 190), 0);
-	mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
-	mUiManager->GetPainter()->SetAlphaValue(140);
-	int lHeight = mUiManager->GetFontManager()->GetStringHeight(lScore);
-	mUiManager->GetPainter()->FillRect(mRenderArea.mLeft + 10, 30, mRenderArea.mLeft + 450, 30+lHeight+20);
-	mUiManager->GetPainter()->SetColor(Color(140, 140, 140, 255), 0);
-	mUiManager->GetPainter()->SetAlphaValue(255);
-	mUiManager->GetPainter()->PrintText(lScore, mRenderArea.mLeft + 20, 40);
-}
-
 
 
 void PushManager::ScriptPhysicsTick()
@@ -1395,65 +968,7 @@ void PushManager::ScriptPhysicsTick()
 
 void PushManager::MoveCamera()
 {
-#if 1
-	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	if (lObject)
-	{
-		mCameraPivotPosition = lObject->GetPosition();
-		UpdateMassObjects(mCameraPivotPosition);
-
-		if (lObject->GetAngularVelocity().GetLengthSquared() > 30.0f)
-		{
-			Vector3DF lTarget = mCameraPivotPosition  - GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance, 0);
-			mCameraPosition = Math::Lerp(mCameraPosition, lTarget, 0.2f);
-			return;
-		}
-
-		const Vector3DF lForward3d = lObject->GetForwardDirection();
-		//const Vector3DF lRight3d = lForward3d.Cross(Vector3DF(0, 0, 1));
-		Vector3DF lBackward2d = -lForward3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
-		//Vector3DF lBackward2d = lRight3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
-		lBackward2d.Normalize(mCameraTargetXyDistance);
-		float lCamHeight;
-		CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-		lBackward2d.z = lCamHeight;
-		{
-			float lRotationFactor;
-			CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-			lRotationFactor += mCamRotateExtra * 0.06f;
-			mCameraPivotVelocity.x += lRotationFactor;
-			lBackward2d = QuaternionF(mCameraPivotVelocity.x, Vector3DF(0,0,1)) * lBackward2d;
-		}
-		mCameraPreviousPosition = mCameraPosition;
-		mCameraPosition = Math::Lerp(mCameraPosition, mCameraPivotPosition + lBackward2d, 0.4f);
-	}
-
-	Vector3DF lPivotXyPosition = mCameraPivotPosition;
-	lPivotXyPosition.z = mCameraPosition.z;
-	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
-	Vector3DF lTargetCameraOrientation(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2, 4*PIF/7, 0);
-	if (lPivotXyPosition.y-mCameraPosition.y < 0)
-	{
-		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
-	}
-	{
-		float lCameraTargetAngle = mCameraTargetAngle + PIF/2;
-		Math::RangeAngles(lTargetCameraOrientation.x, mCameraTargetAngle);
-		lTargetCameraOrientation.x = Math::Lerp(lTargetCameraOrientation.x, lCameraTargetAngle, mCameraTargetAngleFactor);
-		if (mCameraTargetAngleFactor < 0.1f)
-		{
-			mCameraTargetAngle = lTargetCameraOrientation.x - PIF/2;
-		}
-	}
-	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
-	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
-	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x) * 0.5f;
-	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
-	lTargetCameraOrientation.z = -lYawChange;
-	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
-	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, 0.4f);
-#else
-	// TODO: remove camera hack (camera position should be context object controlled).
+	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	Vector3DF lAvatarPosition = mCameraPivotPosition;
@@ -1517,7 +1032,7 @@ void PushManager::MoveCamera()
 
 	// Now that we've settled where we should be, it's time to check where we actually can see our avatar.
 	// TODO: currently only checks against terrain. Add a ray to world, that we can use for this kinda thing.
-	if (mLevel)
+	if (mLevel && mLevel->IsLoaded())
 	{
 		const float lCameraAboveGround = 0.3f;
 		lTargetCameraPosition.z -= lCameraAboveGround;
@@ -1614,7 +1129,6 @@ void PushManager::MoveCamera()
 		mCameraOrientation.y = PIF/2-lPhi;
 		mCameraOrientation.z = lGimbal;
 	}
-#endif
 }
 
 void PushManager::UpdateCameraPosition(bool pUpdateMicPosition)

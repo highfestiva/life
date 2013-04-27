@@ -629,7 +629,7 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 	}
 	else
 	{
-		mLog.AError("Could not load texture. Gah!");
+		mLog.Errorf(_T("Could not load texture %s. Gah!"), pTextureResource->GetName().c_str());
 		assert(false);
 	}
 }

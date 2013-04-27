@@ -639,51 +639,11 @@
 			Name="Server"
 			>
 			<File
-				RelativePath=".\PushServer\BombPlane.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\BombPlane.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\GameServerLogic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\GameServerLogic.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\Npc.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\Npc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\PushServerConsole.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\PushServerConsole.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PushServer\PushServerDelegate.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\PushServer\PushServerDelegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\PushServerMessageProcessor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\PushServerMessageProcessor.h"
 				>
 			</File>
 			<File

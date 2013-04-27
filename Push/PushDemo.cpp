@@ -5,7 +5,7 @@
 
 
 #include "PushDemo.h"
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
