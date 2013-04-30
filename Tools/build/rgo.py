@@ -385,6 +385,9 @@ def macappify_push():
 def macappify_ht():
 	_macappify("HoverTank", "HoverTank")
 
+def macappify_hf():
+	_macappify("HeliForce", "HeliForce")
+
 def macappify_tf():
 	_macappify("TireFire", "Tire Fire")
 
@@ -405,6 +408,9 @@ def cleandata_push():
 
 def cleandata_ht():
 	_cleandata_source("HoverTank")
+
+def cleandata_hf():
+	_cleandata_source("HeliForce")
 
 def cleandata_tf():
 	_cleandata_source("TireFire")
@@ -436,6 +442,14 @@ def builddata_ht():
 
 def zipdata_ht():
 	os.chdir('HoverTank/Data')
+	rgohelp._zipdir('', _include_data_files, "Data.pk3")
+	os.chdir('../../')
+
+def builddata_hf():
+	_builddata("HeliForce", bindir, default_build_mode)
+
+def zipdata_hf():
+	os.chdir('HeliForce/Data')
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
 	os.chdir('../../')
 

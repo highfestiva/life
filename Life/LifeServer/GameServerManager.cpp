@@ -20,6 +20,7 @@
 #include "../LifeMaster/MasterServer.h"
 #include "../LifeApplication.h"
 #include "../LifeString.h"
+#include "../Spawner.h"
 #include "BulletTime.h"
 #include "MasterServerConnection.h"
 #include "RaceTimer.h"
@@ -27,7 +28,6 @@
 #include "ServerConsoleManager.h"
 #include "ServerDelegate.h"
 #include "ServerMessageProcessor.h"
-#include "Spawner.h"
 
 
 
@@ -303,31 +303,6 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 		// This input data is already old or too much ahead! Skip it.
 		log_volatile(mLog.Debugf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset));
 	}
-}
-
-Spawner* GameServerManager::GetAvatarSpawner(Cure::GameObjectId pLevelId) const
-{
-	Cure::ContextObject* lLevel = GetContext()->GetObject(pLevelId);
-	if (!lLevel)
-	{
-		return 0;
-	}
-	const Cure::ContextObject::Array& lChildArray = lLevel->GetChildArray();
-	Cure::ContextObject::Array::const_iterator x = lChildArray.begin();
-	for (; x != lChildArray.end(); ++x)
-	{
-		if ((*x)->GetClassId() != _T("Spawner"))
-		{
-			continue;
-		}
-		Spawner* lSpawner = (Spawner*)*x;
-		const TBC::PhysicsSpawner* lSpawnShape = lSpawner->GetSpawner();
-		if (lSpawnShape->GetNumber() == 0)
-		{
-			return lSpawner;
-		}
-	}
-	return 0;
 }
 
 void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)

@@ -9,10 +9,10 @@
 #include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/IntAttribute.h"
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/Spawner.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Life/LifeServer/GameServerManager.h"
-#include "../../Life/LifeServer/Spawner.h"
 #include "../RtVar.h"
 #include "../RtVar.h"
 #include "../Version.h"
@@ -92,7 +92,7 @@ void PushServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::UserA
 		mGameServerManager->DeleteContextObject(lPreviousAvatarId);
 	}
 
-	Life::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
+	Cure::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
 	if (!lSpawner)
 	{
 		mLog.AError("No player spawner in level!");

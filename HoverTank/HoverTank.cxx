@@ -79,7 +79,7 @@ HoverTank* HoverTank::GetApp()
 
 
 HoverTank::HoverTank(const strutil::strvec& pArgumentList):
-	Parent(_T(PUSH_APPLICATION_NAME), pArgumentList),
+	Parent(_T(HT_APPLICATION_NAME), pArgumentList),
 	mUiManager(0)
 {
 	mApp = this;

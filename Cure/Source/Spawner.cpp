@@ -4,23 +4,21 @@
 
 
 
-#include "Spawner.h"
+#include "../Include/Spawner.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/PhysicsSpawner.h"
-#include "RtVar.h"
 
 
 
-namespace Life
+namespace Cure
 {
 
 
 
-Spawner::Spawner(Cure::ContextManager* pManager):
-	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Spawner"))
+Spawner::Spawner(ContextManager* pManager):
+	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Spawner"))
 {
 	pManager->AddLocalObject(this);
 	pManager->AddAlarmCallback(this, 0, 0.5, 0);	// Create.
@@ -33,7 +31,7 @@ Spawner::~Spawner()
 
 
 
-void Spawner::PlaceObject(Cure::ContextObject* pObject)
+void Spawner::PlaceObject(ContextObject* pObject)
 {
 	const Vector3DF lScalePoint = RNDPOSVEC();
 	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint));
@@ -70,16 +68,12 @@ void Spawner::OnCreate(float pCreateInterval)
 		return;
 	}
 
-	float lSpawnPart;
-	CURE_RTVAR_GET(lSpawnPart, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
-	const int lSpawnCount = (int)(GetSpawner()->GetNumber() * lSpawnPart);
-
-	if ((int)mChildArray.size() < lSpawnCount)
+	if ((int)mChildArray.size() < GetSpawnCount())
 	{
 		const str lSpawnObject = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
 		if (!lSpawnObject.empty())
 		{
-			ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+			ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, NETWORK_OBJECT_LOCALLY_CONTROLLED);
 			AddChild(lObject);
 			PlaceObject(lObject);
 			lObject->StartLoading();
@@ -103,6 +97,11 @@ void Spawner::OnDestroy(float pDestroyInterval)
 		GetManager()->DeleteObject(lObject->GetInstanceId());
 	}
 	GetManager()->AddAlarmCallback(this, 1, pDestroyInterval, 0);
+}
+
+int Spawner::GetSpawnCount() const
+{
+	return (int)GetSpawner()->GetNumber();
 }
 
 

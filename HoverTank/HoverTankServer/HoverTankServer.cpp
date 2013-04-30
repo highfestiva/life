@@ -51,7 +51,7 @@ namespace HoverTank
 
 
 HoverTankServer::HoverTankServer(const strutil::strvec& pArgumentList):
-	Parent(_T(PUSH_APPLICATION_NAME), pArgumentList)
+	Parent(_T(HT_APPLICATION_NAME), pArgumentList)
 {
 }
 

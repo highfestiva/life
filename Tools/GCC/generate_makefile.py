@@ -345,6 +345,7 @@ def main():
         ["KillCutie",       "gfx_bin",    "KillCutie/KillCutie900.vcproj", "UiCure"],
         ["Push",            "gfx_bin",    "Push/Push900.vcproj", "LifeClient"],
         ["HoverTank",       "gfx_bin",    "HoverTank/HoverTank900.vcproj", "LifeClient"],
+        ["HeliForce",       "gfx_bin",    "HeliForce/HeliForce900.vcproj", "LifeClient"],
         ["PushServer",      "bin",        "Push/PushServer/PushServer900.vcproj", "LifeServer"],
         ["HoverTankServer", "bin",        "HoverTank/HoverTankServer/HoverTankServer900.vcproj", "LifeServer"],
         ["PushMaster",      "bin",        "Push/PushMaster/PushMaster900.vcproj", "LifeMaster"],

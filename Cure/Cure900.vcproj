@@ -535,6 +535,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\Spawner.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\TerrainFunctionManager.cpp"
 				>
 			</File>
@@ -686,6 +690,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\RuntimeVariableName.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\Spawner.h"
 				>
 			</File>
 			<File

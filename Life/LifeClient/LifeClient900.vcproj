@@ -622,14 +622,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\LifeServer\Spawner.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeServer\Spawner.h"
-				>
-			</File>
-			<File
 				RelativePath=".\UiGameServerManager.cpp"
 				>
 			</File>

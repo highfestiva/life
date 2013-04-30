@@ -462,6 +462,10 @@
 				RelativePath=".\RaceScore.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Spawner.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -506,6 +510,10 @@
 			</File>
 			<File
 				RelativePath=".\ServerInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Spawner.h"
 				>
 			</File>
 		</Filter>

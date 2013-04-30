@@ -1,0 +1,421 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Final|Win32">
+      <Configuration>Final</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Candidate|Win32">
+      <Configuration>Release Candidate</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Unicode Debug|Win32">
+      <Configuration>Unicode Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Unicode Final|Win32">
+      <Configuration>Unicode Final</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Unicode Release Candidate|Win32">
+      <Configuration>Unicode Release Candidate</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>HeliForce</ProjectName>
+    <ProjectGuid>{FC909F86-B037-11E2-8316-0019213B7B87}</ProjectGuid>
+    <RootNamespace>HeliForce</RootNamespace>
+    <Keyword>ManagedCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;$(LEPRA_DX)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;$(LEPRA_DX)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;$(LEPRA_DX)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;$(LEPRA_DX)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AssemblyDebug>true</AssemblyDebug>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;$(LEPRA_DX)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\ThirdParty\stlport\stlport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>..\ThirdParty\stlport\lib;$(LEPRA_DX)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Data">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+  </ItemGroup>
+   <ItemGroup>
+    <ClCompile Include="ExplodingMachine.cpp" />
+    <ClCompile Include="Explosion.cpp" />
+    <ClCompile Include="FastProjectile.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="LoginView.cpp" />
+    <ClCompile Include="Mine.cpp" />
+    <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="HeliForce.cxx" />
+    <ClCompile Include="HeliForceConsoleManager.cpp" />
+    <ClCompile Include="HeliForceDemo.cpp" />
+    <ClCompile Include="HeliForceManager.cpp" />
+    <ClCompile Include="HeliForceTicker.cpp" />
+    <ClCompile Include="HeliForceViewer.cpp" />
+    <ClCompile Include="RoadSignButton.cpp" />
+    <ClCompile Include="ServerListView.cpp" />
+    <ClCompile Include="Sunlight.cpp" />
+    <ClCompile Include="View.cpp" />
+    <ClCompile Include="HeliForceServer\BombPlane.cpp" />
+    <ClCompile Include="..\Life\LifeServer\BulletTime.cpp" />
+    <ClCompile Include="..\Life\LifeServer\Client.cpp" />
+    <ClCompile Include="HeliForceServer\GameServerLogic.cpp" />
+    <ClCompile Include="..\Life\LifeServer\GameServerManager.cpp" />
+    <ClCompile Include="HeliForceServer\Npc.cpp" />
+    <ClCompile Include="HeliForceServer\HeliForceServerConsole.cpp" />
+    <ClCompile Include="HeliForceServer\HeliForceServerDelegate.cpp" />
+    <ClCompile Include="HeliForceServer\HeliForceServerMessageProcessor.cpp" />
+    <ClCompile Include="..\Life\LifeServer\RaceTimer.cpp" />
+    <ClCompile Include="..\Life\LifeServer\ServerConsoleManager.cpp" />
+    <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp" />
+    <ClCompile Include="HeliForceServer\ServerFastProjectile.cpp" />
+    <ClCompile Include="..\Life\LifeServer\ServerMessageProcessor.cpp" />
+    <ClCompile Include="HeliForceServer\ServerMine.cpp" />
+    <ClCompile Include="HeliForceServer\ServerProjectile.cpp" />
+    <ClCompile Include="..\Life\LifeServer\Spawner.cpp" />
+    <ClCompile Include="..\Life\LifeClient\UiGameServerManager.cpp" />
+    <ClCompile Include="..\Life\LifeClient\UiServerConsoleManager.cpp" />
+    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp" />
+    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\HeliForce.ico" />
+    <None Include="HeliForce.mm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HeliForce.rc" />
+  </ItemGroup>
+    <ItemGroup>
+    <ClInclude Include="ExplodingMachine.h" />
+    <ClInclude Include="Explosion.h" />
+    <ClInclude Include="FastProjectile.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="LoginView.h" />
+    <ClInclude Include="Mine.h" />
+    <ClInclude Include="Projectile.h" />
+    <ClInclude Include="HeliForce.h" />
+    <ClInclude Include="HeliForceConsoleManager.h" />
+    <ClInclude Include="HeliForceDemo.h" />
+    <ClInclude Include="HeliForceManager.h" />
+    <ClInclude Include="HeliForceTicker.h" />
+    <ClInclude Include="HeliForceViewer.h" />
+    <ClInclude Include="RoadSignButton.h" />
+    <ClInclude Include="RtVar.h" />
+    <ClInclude Include="ServerListView.h" />
+    <ClInclude Include="Sunlight.h" />
+    <ClInclude Include="Version.h" />
+    <ClInclude Include="View.h" />
+    <ClInclude Include="HeliForceServer\BombPlane.h" />
+    <ClInclude Include="..\Life\LifeServer\BulletTime.h" />
+    <ClInclude Include="..\Life\LifeServer\Client.h" />
+    <ClInclude Include="HeliForceServer\GameServerLogic.h" />
+    <ClInclude Include="..\Life\LifeServer\GameServerManager.h" />
+    <ClInclude Include="HeliForceServer\Npc.h" />
+    <ClInclude Include="HeliForceServer\HeliForceServerConsole.h" />
+    <ClInclude Include="HeliForceServer\HeliForceServerDelegate.h" />
+    <ClInclude Include="HeliForceServer\HeliForceServerMessageProcessor.h" />
+    <ClInclude Include="..\Life\LifeServer\RaceTimer.h" />
+    <ClInclude Include="..\Life\LifeServer\ServerConsoleManager.h" />
+    <ClInclude Include="..\Life\LifeServer\ServerDelegate.h" />
+    <ClInclude Include="HeliForceServer\ServerFastProjectile.h" />
+    <ClInclude Include="..\Life\LifeServer\ServerMessageProcessor.h" />
+    <ClInclude Include="HeliForceServer\ServerMine.h" />
+    <ClInclude Include="HeliForceServer\ServerProjectile.h" />
+    <ClInclude Include="..\Life\LifeServer\Spawner.h" />
+    <ClInclude Include="..\Life\LifeClient\UiGameServerManager.h" />
+    <ClInclude Include="..\Life\LifeClient\UiServerConsoleManager.h" />
+    <ClInclude Include="..\Life\LifeMaster\MasterServer.h" />
+    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h" />
+    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h" />
+    <ClInclude Include="HeliForceMaster\MasterServerPort.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cure\Cure10.vcxproj">
+      <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Lepra\Lepra10.vcxproj">
+      <Project>{e7dda722-45e3-45c9-b051-e99288accdd2}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\TBC\TBC10.vcxproj">
+      <Project>{bdbf3606-e371-454b-b162-27fd92b67d50}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\freealut-1.1.0\admin\VisualStudioDotNET\alut\alut10.vcxproj">
+      <Project>{07149bcb-be8a-4503-be18-815d64233116}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\openal-soft-1.10.622\OpenAL_10.vcxproj">
+      <Project>{00e79e9d-7870-4921-9022-9ad4951bc225}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\ThirdPartyLib_10.vcxproj">
+      <Project>{00f89e9d-7870-4921-9022-9ad4951bc224}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\UiCure\UiCure10.vcxproj">
+      <Project>{6dbf3606-e311-454b-b162-27fd92b67d54}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\UiLepra\UiLepra10.vcxproj">
+      <Project>{e7dda722-45e3-45c9-b051-e99288accdd3}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\UiTBC\UiTBC10.vcxproj">
+      <Project>{bdbf3606-e371-454b-b162-27fd92b67d51}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Life\Life10.vcxproj">
+      <Project>{3c64c2e1-43ef-49c2-9d3c-1c698bcfdcaa}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Life\LifeClient\LifeClient10.vcxproj">
+      <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

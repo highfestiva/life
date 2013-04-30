@@ -67,7 +67,6 @@ private:
 		int pSlaveIndex, const PixelRect& pRenderArea);
 
 	bool mIsPlayerCountViewActive;
-	HiResTimer* mDemoTime;
 	Sunlight* mSunlight;		// TODO: remove hack and come up with something better?
 	int mPerformanceAdjustmentTicks;
 

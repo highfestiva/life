@@ -30,7 +30,6 @@ namespace HoverTank
 HoverTankTicker::HoverTankTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mIsPlayerCountViewActive(false),
-	mDemoTime(0),
 	mSunlight(0),
 	mPerformanceAdjustmentTicks(0)
 {
@@ -335,12 +334,6 @@ void HoverTankTicker::CloseMainMenu()
 
 bool HoverTankTicker::QueryQuit()
 {
-	if (mDemoTime)
-	{
-		// We quit if user tried quitting twice or more, or demo time is over.
-		return (SystemManager::GetQuitRequest() >= 2 || mDemoTime->QueryTimeDiff() > 30.0f);
-	}
-
 	if (Parent::QueryQuit())
 	{
 		PrepareQuit();

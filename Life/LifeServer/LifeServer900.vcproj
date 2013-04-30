@@ -487,10 +487,6 @@
 				RelativePath=".\ServerProjectile.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\Spawner.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -547,10 +543,6 @@
 			</File>
 			<File
 				RelativePath=".\ServerProjectile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Spawner.h"
 				>
 			</File>
 		</Filter>
