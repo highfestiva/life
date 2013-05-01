@@ -36,6 +36,7 @@
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
+#include "CenteredMachine.h"
 #include "HeliForceConsoleManager.h"
 #include "HeliForceTicker.h"
 #include "RtVar.h"
@@ -426,6 +427,7 @@ void HeliForceManager::TickUiInput()
 			SetAvatarEnginePower(lObject, 5, lPower);
 			// Engine aspect 6 is not currently in use (3D handbraking). Might come in useful some day though.
 			lPower = S(UP3D) - S(DOWN3D);
+			lPower = Math::Lerp(0.5f, 1.0f, lPower);
 			SetAvatarEnginePower(lObject, 7, lPower);
 			const float lSteeringChange = mLastSteering-s;
 			if (lSteeringChange > 0.5f)
@@ -540,7 +542,7 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	}
 	else if (strutil::StartsWith(pClassId, _T("helicopter_")))
 	{
-		UiCure::Machine* lMachine = new Life::ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		UiCure::Machine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
