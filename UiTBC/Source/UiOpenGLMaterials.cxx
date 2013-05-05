@@ -27,8 +27,7 @@ namespace UiTbc
 
 
 OpenGLMaterial::OpenGLMaterial(OpenGLRenderer* pRenderer, Material::DepthSortHint pSortHint, Material* pFallBackMaterial) :
-	Material(pRenderer, pSortHint),
-	mFallBackMaterial(pFallBackMaterial)
+	Material(pRenderer, pSortHint, pFallBackMaterial)
 {
 }
 
@@ -106,7 +105,7 @@ void OpenGLMaterial::RenderAllBlendedGeometry(unsigned pCurrentFrame, const Geom
 {
 	::glDepthMask(GL_FALSE);
 	::glDisable(GL_CULL_FACE);
-#ifndef LEPRA_GL_ES
+#ifndef LEPRA_GL_E
 	GLint lOldFill[2];
 	::glGetIntegerv(GL_POLYGON_MODE, lOldFill);
 	::glPolygonMode(GL_FRONT_AND_BACK, GetRenderer()->IsWireframeEnabled()? GL_LINE : GL_FILL);
@@ -550,7 +549,7 @@ void OpenGLMatSingleTextureAlphaTested::RenderGeometry(TBC::GeometryBase* pGeome
 
 bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (pGeometry->GetUVSetCount() == 0)
+	/*if (pGeometry->GetUVSetCount() == 0)
 	{
 		if (mFallBackMaterial)
 		{
@@ -558,7 +557,7 @@ bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 			return mFallBackMaterial->AddGeometry(pGeometry);
 		}
 		return false;
-	}
+	}*/
 	return OpenGLMatSingleColorSolid::AddGeometry(pGeometry);
 }
 

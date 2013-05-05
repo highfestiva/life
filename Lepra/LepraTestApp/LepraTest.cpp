@@ -356,6 +356,48 @@ bool TestRandom(const LogDecorator& pAccount)
 	return (lTestOk);
 }
 
+bool TestMath(const LogDecorator& pAccount)
+{
+	str lContext;
+	bool lTestOk = true;
+	double lResult;
+
+	if (lTestOk)
+	{
+		lContext = _T("smooth clamp narrow below max exp");
+		lResult = Math::SmoothClamp(0.9, 0.0, 1.0, 0.1);
+		lTestOk = (lResult == 0.9);
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("smooth clamp wide above max exp");
+		lResult = Math::SmoothClamp(0.95, 0.0, 1.0, 0.5);
+		lTestOk = (lResult < 0.8);
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("smooth clamp above min exp");
+		lResult = Math::SmoothClamp(0.3, 0.0, 1.0, 0.3);
+		lTestOk = (lResult == 0.3);
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("smooth clamp below min exp");
+		lResult = Math::SmoothClamp(0.2, 0.0, 1.0, 0.4);
+		lTestOk = (lResult > 0.23);
+		assert(lTestOk);
+	}
+
+	ReportTestResult(pAccount, _T("Math"), lContext, lTestOk);
+	return (lTestOk);
+}
+
 bool TestNumber(const LogDecorator& pAccount)
 {
 	// Verify Number basics.
@@ -3000,6 +3042,10 @@ bool TestLepra()
 	if (lTestOk)
 	{
 		lTestOk = TestRandom(gLLog);
+	}
+	if (lTestOk)
+	{
+		lTestOk = TestMath(gLLog);
 	}
 	if (lTestOk)
 	{

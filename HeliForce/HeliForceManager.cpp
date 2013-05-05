@@ -90,6 +90,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mActiveWeapon(0),
 	mLevel(0),
 	mCameraPosition(0, -200, 100),
+	mCameraSpeed(0),
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	mFireButton(0),
 #endif // Touch or emulated touch.
@@ -105,6 +106,8 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 
 	SetConsoleManager(new HeliForceConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
+
+	GetPhysicsManager()->SetSimulationParameters(0.005f, 0.0f, 0.2f);
 }
 
 HeliForceManager::~HeliForceManager()
@@ -310,7 +313,16 @@ bool HeliForceManager::InitializeUniverse()
 	return true;
 }
 
-
+void HeliForceManager::CreateChopper(const str& pClassId)
+{
+	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
+	assert(lSpawner);
+	Cure::ContextObject* lAvatar = Parent::CreateContextObject(pClassId, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	lSpawner->PlaceObject(lAvatar);
+	mAvatarId = lAvatar->GetInstanceId();
+	mAvatarCreateTimer.Start();
+	lAvatar->StartLoading();
+}
 
 void HeliForceManager::TickInput()
 {
@@ -402,53 +414,18 @@ void HeliForceManager::TickUiInput()
 			// Control steering.
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
-			const float lForward = S(FORWARD);
-			const float lBack = S(BACKWARD);
-			const float lBrakeAndBack = S(BRAKEANDBACK);
-			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
-			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBrakeAndBack);
-			SetAvatarEnginePower(lObject, 0, lPowerFwdRev);
-			float lPowerLR = S(RIGHT)-S(LEFT);
-			SetAvatarEnginePower(lObject, 1, lPowerLR);
-			float lPower = S(HANDBRAKE) - std::max(S(BREAK), lIsMovingForward? lBrakeAndBack : 0.0f);
-			if (!SetAvatarEnginePower(lObject, 2, lPower) &&
-				lBrakeAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
-			{
-				// Someone is apparently trying to stop/break, but no engine configured for breaking.
-				// Just apply it as a reverse motion.
-				lPowerFwdRev = lForward - lBrakeAndBack;
-				SetAvatarEnginePower(lObject, 0, lPowerFwdRev);
-			}
-			lPower = S(UP)-S(DOWN);
-			SetAvatarEnginePower(lObject, 3, lPower);
-			lPower = S(FORWARD3D) - S(BACKWARD3D);
-			SetAvatarEnginePower(lObject, 4, lPower);
-			lPower = S(RIGHT3D) - S(LEFT3D);
-			SetAvatarEnginePower(lObject, 5, lPower);
-			// Engine aspect 6 is not currently in use (3D handbraking). Might come in useful some day though.
-			lPower = S(UP3D) - S(DOWN3D);
-			lPower = Math::Lerp(0.5f, 1.0f, lPower);
+			float lYaw, _;
+			lObject->GetOrientation().GetEulerAngles(lYaw, _, _);
+			const float lWantedDirection = S(RIGHT3D) - S(LEFT3D);
+			const float lCurrentDirection = lObject->GetVelocity().x * 0.05f;
+			const float lWantedChange = lWantedDirection-lCurrentDirection;
+			const float lPowerFwdRev = -::sin(lYaw) * lWantedChange;
+			const float lPowerLeftRight = ::cos(lYaw) * lWantedChange;
+			SetAvatarEnginePower(lObject, 4, lPowerFwdRev);
+			SetAvatarEnginePower(lObject, 5, lPowerLeftRight);
+			float lPower = S(UP3D) - S(DOWN3D);
+			lPower = Math::Lerp(0.0f, 1.0f, lPower);
 			SetAvatarEnginePower(lObject, 7, lPower);
-			const float lSteeringChange = mLastSteering-s;
-			if (lSteeringChange > 0.5f)
-			{
-				mInputExpireAlarm.Set();
-			}
-			else if (!Math::IsEpsEqual(lSteeringChange, 0.0f, 0.01f))
-			{
-				mInputExpireAlarm.Push(0.1f);
-			}
-			mLastSteering = s;
-
-			// Control camera.
-			const float lScale = 50.0f * GetTimeManager()->GetAffordedPhysicsTotalTime();
-			const Life::Options::CamControl& c = mOptions.GetCamControl();
-#define C(dir) c.mControl[Life::Options::CamControl::CAMDIR_##dir]
-			float lCamPower = C(UP)-C(DOWN);
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lCamPower*lScale, -5.0, 30.0);
-			//mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
-			lCamPower = C(BACKWARD)-C(FORWARD);
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lCamPower*lScale, 3.0, 100.0);
 
 			// Control fire.
 			const Life::Options::FireControl& f = mOptions.GetFireControl();
@@ -587,19 +564,9 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else if (pObject == mLevel)
 		{
-			Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
-			assert(lSpawner);
-			Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-			if (!lAvatar)
+			if (!GetContext()->GetObject(mAvatarId))
 			{
-				lAvatar = Parent::CreateContextObject(_T("helicopter_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-				lSpawner->PlaceObject(lAvatar);
-				mAvatarId = lAvatar->GetInstanceId();
-				lAvatar->StartLoading();
-			}
-			else
-			{
-				lSpawner->PlaceObject(lAvatar);
+				CreateChopper(_T("helicopter_01"));
 			}
 		}
 		else
@@ -621,6 +588,32 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
+
+	if (pObject1->GetInstanceId() == mAvatarId && mAvatarCreateTimer.IsStarted())
+	{
+		if (mAvatarCreateTimer.QueryTimeDiff() > 3.0)
+		{
+			mAvatarCreateTimer.Stop();
+		}
+		return;
+	}
+
+	const float lForce = pForce.GetLength();
+	if (lForce > 20000)
+	{
+		float lForce2 = lForce;
+		lForce2 /= 5000;
+		lForce2 *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
+		lForce2 *= 10 - 9*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
+		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pObject1->GetAttribute(_T("float_health"));
+		if (lHealth && lHealth->GetValue() > 0)
+		{
+			mLog.Infof(_T("lForce=%f, lForce2=%f"), lForce, lForce2);
+			lForce2 *= lForce2;
+			lForce2 /= pObject1->GetMass();
+			lHealth->SetValue(lHealth->GetValue() - lForce2);
+		}
+	}
 }
 
 
@@ -689,6 +682,19 @@ void HeliForceManager::ScriptPhysicsTick()
 		UpdateCameraPosition(false);
 	}
 
+	if (mAvatarCreateTimer.IsStarted() || (mAvatarId && GetContext()->GetObject(mAvatarId)))
+	{
+		mAvatarDied.Stop();
+	}
+	else if (mAvatarId)
+	{
+		mAvatarDied.TryStart();
+		if (mAvatarDied.QueryTimeDiff() > 0)
+		{
+			CreateChopper(_T("helicopter_01"));
+		}
+	}
+
 	Parent::ScriptPhysicsTick();
 }
 
@@ -698,7 +704,12 @@ void HeliForceManager::MoveCamera()
 	if (lObject)
 	{
 		mCameraPreviousPosition = mCameraPosition;
-		mCameraPosition = lObject->GetPosition() + Vector3DF(0, -40, 0);
+		mCameraPosition = Math::Lerp(mCameraPosition, lObject->GetPosition() + Vector3DF(0, -40, 0), 0.5f);
+		mCameraSpeed = Math::Lerp(mCameraSpeed, lObject->GetVelocity().GetLength()/10, 0.02f);
+		float lFoV = Math::Lerp(40.0f, 80.0f, mCameraSpeed);
+		lFoV = Math::SmoothClamp(lFoV, 40.0f, 80.0f, 0.4f);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);
+
 		UpdateMassObjects(mCameraPosition);
 	}
 }

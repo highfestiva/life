@@ -29,6 +29,7 @@ public:
 	PhysicsManagerODE(float pRadius, int pLevels, float pSensitivity);
 	virtual ~PhysicsManagerODE();
 
+	virtual void SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy);
 	virtual bool InitCurrentThread();
 
 	virtual int QueryRayCollisionAgainst(const Vector3DF& pRayPosition, const Vector3DF& pRayDirection,

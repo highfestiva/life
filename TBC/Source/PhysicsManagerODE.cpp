@@ -80,6 +80,13 @@ PhysicsManagerODE::~PhysicsManagerODE()
 	::dJointGroupDestroy(mContactJointGroupID);
 }
 
+void PhysicsManagerODE::SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy)
+{
+	::dWorldSetCFM(mWorldID, Math::Lerp(1e-9f, 1e-2f, pSoftness));		// World softness and numerical stability.
+	::dWorldSetERP(mWorldID, Math::Lerp(0.9f, 0.2f, pRubberbanding));	// Error reduction.
+	::dWorldSetQuickStepNumIterations(mWorldID, (int)Math::Lerp(1, 20, pAccuracy));
+}
+
 bool PhysicsManagerODE::InitCurrentThread()
 {
 	return ::dAllocateODEDataForThread((unsigned)dAllocateMaskAll) != 0;

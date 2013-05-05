@@ -43,8 +43,6 @@ public:
 
 protected:
 	void UpdateTextureMatrix(TBC::GeometryBase* pGeometry);
-
-	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
 };
 
 

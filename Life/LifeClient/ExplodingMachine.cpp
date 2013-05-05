@@ -35,8 +35,13 @@ void ExplodingMachine::OnTick()
 	Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)GetAttribute(_T("float_health"));
 	if (lHealth && lHealth->GetValue() <= 0)
 	{
-		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 2);
+		OnDie();
 	}
+}
+
+void ExplodingMachine::OnDie()
+{
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 2);
 }
 
 

@@ -103,7 +103,6 @@ private:
 class Material
 {
 public:
-	
 	enum RemoveStatus
 	{
 		NOT_REMOVED = 0,
@@ -118,7 +117,7 @@ public:
 		DEPTHSORT_B2F,     // Back-to-front
 	};
 
-	Material(Renderer* pRenderer, DepthSortHint pSortHint);
+	Material(Renderer* pRenderer, DepthSortHint pSortHint, Material* pFallBackMaterial);
 	virtual ~Material();
 
 	static void SetEnableDepthSorting(bool pEnabled);
@@ -158,6 +157,8 @@ protected:
 
 	GeometryGroupList mGeometryGroupList;
 
+	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
+
 private:
 	Renderer* mRenderer;
 	DepthSortHint mSortHint;
@@ -174,7 +175,7 @@ class NullMaterial : public Material
 {
 public:
 	NullMaterial(Renderer* pListener) :
-	      Material(pListener, Material::NO_DEPTHSORT)
+	      Material(pListener, Material::NO_DEPTHSORT, 0)
 	{
 	}
 

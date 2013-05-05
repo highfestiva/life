@@ -107,8 +107,6 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 	assert(pValue >= -10000);
 	assert(pValue <= +10000);
 
-	pValue = Math::Clamp(pValue, -1.0f, +1.0f);
-
 	switch (mEngineType)
 	{
 		case ENGINE_WALK:

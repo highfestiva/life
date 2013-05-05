@@ -77,6 +77,7 @@ protected:
 
 	virtual bool Reset();
 	virtual bool InitializeUniverse();
+	void CreateChopper(const str& pClassId);
 
 	virtual void ScriptPhysicsTick();
 	virtual void MoveCamera();
@@ -110,6 +111,8 @@ protected:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
+	StopWatch mAvatarCreateTimer;
+	StopWatch mAvatarDied;
 	bool mHadAvatar;
 	bool mUpdateCameraForAvatar;
 	Life::Options::Steering mLastSteering;
@@ -121,6 +124,7 @@ protected:
 
 	Vector3DF mCameraPosition;
 	Vector3DF mCameraPreviousPosition;
+	float mCameraSpeed;
 	Vector3DF mMicrophoneSpeed;
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	UiTbc::Button* mFireButton;

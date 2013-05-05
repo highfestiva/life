@@ -25,6 +25,7 @@ public:
 
 protected:
 	virtual void OnMicroTick(float pFrameTime);
+	virtual void OnDie();
 };
 
 

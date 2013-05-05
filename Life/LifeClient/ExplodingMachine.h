@@ -29,9 +29,9 @@ public:
 	virtual ~ExplodingMachine();
 
 protected:
-	void OnTick();
+	virtual void OnTick();
+	virtual void OnDie();
 
-private:
 	Launcher* mLauncher;
 	bool mIsDetonated;
 

@@ -1142,7 +1142,7 @@ void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObjec
 	// Server manages this.
 }
 
-void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void*)
+void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData)
 {
 	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
 	{
@@ -1153,7 +1153,7 @@ void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject,
 	}
 	else
 	{
-		assert(false);
+		Parent::OnAlarm(pAlarmId, pObject, pExtraData);
 	}
 }
 
