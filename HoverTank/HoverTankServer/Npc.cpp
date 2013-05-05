@@ -149,11 +149,11 @@ void Npc::OnTick()
 	}
 	assert(lPhi >= -10000);
 	assert(lPhi <= +10000);
-	lMyAvatar->SetEnginePower(0, lFwd-lPhi);
-	lMyAvatar->SetEnginePower(1, lRight);
-	lMyAvatar->SetEnginePower(4, lFwd+lPhi);
-	lMyAvatar->SetEnginePower(5, lRight);
-	lMyAvatar->SetEnginePower(8, +lPhi);
+	lMyAvatar->SetEnginePower(0, Math::Clamp(lFwd-lPhi, -1.0f, +1.0f));
+	lMyAvatar->SetEnginePower(1, Math::Clamp(lRight, -1.0f, +1.0f));
+	lMyAvatar->SetEnginePower(4, Math::Clamp(lFwd+lPhi, -1.0f, +1.0f));
+	lMyAvatar->SetEnginePower(5, Math::Clamp(lRight, -1.0f, +1.0f));
+	lMyAvatar->SetEnginePower(8, Math::Clamp(+lPhi, -1.0f, +1.0f));
 
 	if (lCanShoot &&
 		std::abs(lPhi) < Math::Lerp(0.1f, 0.015f, mIntelligence) &&

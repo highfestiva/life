@@ -10,12 +10,12 @@
 #include "../../Cure/Include/IntAttribute.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
+#include "../../Cure/Include/Spawner.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Life/LifeServer/GameServerManager.h"
 #include "../../Life/LifeServer/ServerFastProjectile.h"
 #include "../../Life/LifeServer/ServerMine.h"
 #include "../../Life/LifeServer/ServerProjectile.h"
-#include "../../Life/LifeServer/Spawner.h"
 #include "../../Life/Explosion.h"
 #include "../../Life/ProjectileUtil.h"
 #include "../RtVar.h"
@@ -150,7 +150,7 @@ void HoverTankServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::
 		mGameServerManager->DeleteContextObject(lPreviousAvatarId);
 	}
 
-	Life::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
+	Cure::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
 	if (!lSpawner)
 	{
 		mLog.AError("No player spawner in level!");
@@ -352,7 +352,7 @@ Cure::ContextObject* HoverTankServerDelegate::CreateAvatarForNpc(Npc* pNpc)
 		return 0;
 	}
 
-	Life::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
+	Cure::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
 	if (!lSpawner)
 	{
 		mLog.AError("No NPC spawner in level!");

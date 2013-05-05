@@ -629,13 +629,6 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	::glLoadMatrixf((GLfloat*)m);
 	::glMatrixMode(GL_MODELVIEW);*/
 
-	::glMatrixMode(GL_TEXTURE);
-	float lTextureMatrix[16];
-	((OpenGLRenderer*)GetRenderer())->GetCameraTransformation().GetAs4x4OrientationMatrix(lTextureMatrix);
-	lTextureMatrix[15] *= 3.0f;
-	::glLoadMatrixf(lTextureMatrix);
-	::glMatrixMode(GL_MODELVIEW);
-
 	((OpenGLRenderer*)GetRenderer())->AddAmbience(1.0f, 1.0f, 1.0f);
 
 	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
@@ -706,6 +699,14 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometr
 	}
 	else
 	{
+		::glMatrixMode(GL_TEXTURE);
+		float lTextureMatrix[16];
+		TransformationF lObjectTransform = pGeometry->GetTransformation();
+		lObjectTransform.RotateWorldX(PIF/2);
+		(lObjectTransform.Inverse() * ((OpenGLRenderer*)GetRenderer())->GetCameraTransformation()).GetAs4x4OrientationMatrix(lTextureMatrix);
+		lTextureMatrix[15] *= 3.0f;
+		::glLoadMatrixf(lTextureMatrix);
+
 		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
 			OpenGLRenderer::OGLGeometryData* lGeometryData = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
@@ -717,7 +718,7 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometr
 
 			glVertexPointer(3, GL_FLOAT, 0, 0);
 			glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometryData->mNormalOffset);
-			glTexCoordPointer(3, GL_FLOAT, 0, 0);	// Use vertex coordinates instead.
+			glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometryData->mNormalOffset);	// Use vertex coordinates instead.
 
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 
@@ -727,7 +728,7 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometr
 		{
 			glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
 			glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
-			glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());	// Use vertex coordinates instead.
+			glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetNormalData());	// Use vertex coordinates instead.
 			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
 		}
 		OGL_ASSERT();

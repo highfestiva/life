@@ -599,16 +599,15 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	}
 
 	const float lForce = pForce.GetLength();
-	if (lForce > 20000)
+	if (lForce > 15000)
 	{
 		float lForce2 = lForce;
-		lForce2 /= 5000;
+		lForce2 /= 3000;
 		lForce2 *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
 		lForce2 *= 10 - 9*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
 		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pObject1->GetAttribute(_T("float_health"));
 		if (lHealth && lHealth->GetValue() > 0)
 		{
-			mLog.Infof(_T("lForce=%f, lForce2=%f"), lForce, lForce2);
 			lForce2 *= lForce2;
 			lForce2 /= pObject1->GetMass();
 			lHealth->SetValue(lHealth->GetValue() - lForce2);

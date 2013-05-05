@@ -210,7 +210,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 100);
 				++y;
 				lData->mValue = lEngine->GetValue();
-				assert(lData->mValue >= -1 && lData->mValue <= 1);
+				//assert(lData->mValue >= -1 && lData->mValue <= 1);
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_GLUE:
