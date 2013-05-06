@@ -70,6 +70,9 @@ public:
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
+	virtual void DidFinishLevel();
+	virtual void NextLevel();
+
 protected:
 	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
 
@@ -105,7 +108,6 @@ protected:
 	void DrawStick(Touchstick* pStick);
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
-	QuaternionF GetCameraQuaternion() const;
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 
@@ -122,9 +124,11 @@ protected:
 	Life::Level* mLevel;
 	ObjectArray mMassObjectArray;
 
-	Vector3DF mCameraPosition;
+	TransformationF mCameraTransform;
 	Vector3DF mCameraPreviousPosition;
 	float mCameraSpeed;
+	int mHitGroundFrameCount;
+	bool mIsHitThisFrame;
 	Vector3DF mMicrophoneSpeed;
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	UiTbc::Button* mFireButton;

@@ -6,9 +6,7 @@
 
 #pragma once
 
-#include "../../Cure/Include/CppContextObject.h"
-#include "../../Lepra/Include/Timer.h"
-#include "../Life.h"
+#include "../StuntTrigger.h"
 
 
 
@@ -17,32 +15,16 @@ namespace Life
 
 
 
-class BulletTime: public Cure::CppContextObject
+class BulletTime: public StuntTrigger
 {
-	typedef Cure::CppContextObject Parent;
+	typedef StuntTrigger Parent;
 public:
 	BulletTime(Cure::ContextManager* pManager);
 	virtual ~BulletTime();
 
-private:
-	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
-	virtual void OnTick();
+protected:
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
-
-	bool mAllowBulletTime;
-
-	bool mLastFrameTriggered;
-	bool mIsTriggerTimerStarted;
-	Timer mTriggerTimer;
-
-	float mMinSpeed;
-	float mMaxSpeed;
-	float mMinTime;
-	float mRealTimeRatio;
-	float mBulletTimeDuration;
-	str mClientStartCommand;
-	str mClientStopCommand;
+	virtual void DidTrigger();
 
 	LOG_CLASS_DECLARE();
 };

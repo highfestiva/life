@@ -13,6 +13,7 @@
 #include "../Cure/Include/Spawner.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Random.h"
+#include "../Lepra/Include/SystemManager.h"
 #include "../Lepra/Include/Time.h"
 #include "../Life/LifeClient/ClientOptions.h"
 #include "../Life/LifeClient/ClientOptions.h"
@@ -39,11 +40,13 @@
 #include "CenteredMachine.h"
 #include "HeliForceConsoleManager.h"
 #include "HeliForceTicker.h"
+#include "LandingTrigger.h"
 #include "RtVar.h"
 #include "Version.h"
 
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
+#define STILL_FRAMES_UNTIL_CAM_PANS	2
 
 
 
@@ -89,8 +92,10 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mUpdateCameraForAvatar(false),
 	mActiveWeapon(0),
 	mLevel(0),
-	mCameraPosition(0, -200, 100),
+	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 100)),
 	mCameraSpeed(0),
+	mHitGroundFrameCount(STILL_FRAMES_UNTIL_CAM_PANS),
+	mIsHitThisFrame(false),
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	mFireButton(0),
 #endif // Touch or emulated touch.
@@ -228,7 +233,7 @@ void HeliForceManager::OnLoginSuccess()
 
 bool HeliForceManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
 {
-	return (pPosition.GetDistanceSquared(mCameraPosition) <= pDistance*pDistance);
+	return (pPosition.GetDistanceSquared(mCameraTransform.GetPosition()) <= pDistance*pDistance);
 }
 
 Cure::GameObjectId HeliForceManager::GetAvatarInstanceId() const
@@ -292,6 +297,21 @@ void HeliForceManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextOb
 	}
 }
 
+
+
+void HeliForceManager::DidFinishLevel()
+{
+	mLog.AHeadline("DONE!");
+	// TODO:PlaySong(Whatever);
+}
+
+void HeliForceManager::NextLevel()
+{
+	mLog.AHeadline("NextLevel!");
+}
+
+
+
 Cure::RuntimeVariableScope* HeliForceManager::GetVariableScope() const
 {
 	return (Parent::GetVariableScope());
@@ -315,6 +335,7 @@ bool HeliForceManager::InitializeUniverse()
 
 void HeliForceManager::CreateChopper(const str& pClassId)
 {
+	mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
 	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 	assert(lSpawner);
 	Cure::ContextObject* lAvatar = Parent::CreateContextObject(pClassId, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
@@ -445,8 +466,14 @@ bool HeliForceManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsign
 
 void HeliForceManager::TickUiUpdate()
 {
+	if (!mIsHitThisFrame)
+	{
+		mHitGroundFrameCount = 0;
+	}
+	mIsHitThisFrame = false;
+
 	((HeliForceConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
-	mCollisionSoundManager->Tick(mCameraPosition);
+	mCollisionSoundManager->Tick(mCameraTransform.GetPosition());
 }
 
 bool HeliForceManager::UpdateMassObjects(const Vector3DF& pPosition)
@@ -539,15 +566,16 @@ Cure::ContextObject* HeliForceManager::CreateLogicHandler(const str& pType)
 	{
 		return new Cure::Elevator(GetContext());
 	}
-	else*/ if (pType == _T("spawner"))
+	else*/
+	if (pType == _T("spawner"))
 	{
 		return new Life::Spawner(GetContext());
 	}
-	/*else if (pType == _T("real_time_ratio"))
+	else if (pType == _T("real_time_ratio"))
 	{
-		return new BulletTime(GetContext());
+		return new LandingTrigger(GetContext());
 	}
-	else if (pType == _T("race_timer"))
+	/*else if (pType == _T("race_timer"))
 	{
 		return new RaceTimer(GetContext());
 	}*/
@@ -588,6 +616,12 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
+
+	if (!mIsHitThisFrame && pObject1->GetInstanceId() == mAvatarId)
+	{
+		mIsHitThisFrame = true;
+		++mHitGroundFrameCount;
+	}
 
 	if (pObject1->GetInstanceId() == mAvatarId && mAvatarCreateTimer.IsStarted())
 	{
@@ -702,27 +736,33 @@ void HeliForceManager::MoveCamera()
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
-		mCameraPreviousPosition = mCameraPosition;
-		mCameraPosition = Math::Lerp(mCameraPosition, lObject->GetPosition() + Vector3DF(0, -40, 0), 0.5f);
+		mCameraPreviousPosition = mCameraTransform.GetPosition();
+		TransformationF lTargetTransform(QuaternionF(), lObject->GetPosition() + Vector3DF(0, -60, 0));
+		if (mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
+		{
+			lTargetTransform.GetOrientation().RotateAroundOwnX(-0.5f);
+			lTargetTransform.GetPosition().z += 30;
+		}
+		mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 0.08f);
+		mCameraTransform.GetPosition()		= Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f);
 		mCameraSpeed = Math::Lerp(mCameraSpeed, lObject->GetVelocity().GetLength()/10, 0.02f);
-		float lFoV = Math::Lerp(40.0f, 80.0f, mCameraSpeed);
-		lFoV = Math::SmoothClamp(lFoV, 40.0f, 80.0f, 0.4f);
+		float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
+		lFoV = Math::SmoothClamp(lFoV, 30.0f, 60.0f, 0.4f);
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);
 
-		UpdateMassObjects(mCameraPosition);
+		UpdateMassObjects(mCameraTransform.GetPosition());
 	}
 }
 
 void HeliForceManager::UpdateCameraPosition(bool pUpdateMicPosition)
 {
-	TransformationF lCameraTransform(GetCameraQuaternion(), mCameraPosition);
-	mUiManager->SetCameraPosition(lCameraTransform);
+	mUiManager->SetCameraPosition(mCameraTransform);
 	if (pUpdateMicPosition)
 	{
 		const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
 		if (lFrameTime > 1e-4)
 		{
-			Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+			Vector3DF lVelocity = (mCameraTransform.GetPosition()-mCameraPreviousPosition) / lFrameTime;
 			const float lMicrophoneMaxVelocity = 100.0f;
 			if (lVelocity.GetLength() > lMicrophoneMaxVelocity)
 			{
@@ -730,37 +770,9 @@ void HeliForceManager::UpdateCameraPosition(bool pUpdateMicPosition)
 			}
 			const float lLerpTime = Math::GetIterateLerpTime(0.9f, lFrameTime);
 			mMicrophoneSpeed = Math::Lerp(mMicrophoneSpeed, lVelocity, lLerpTime);
-			mUiManager->SetMicrophonePosition(lCameraTransform, mMicrophoneSpeed);
+			mUiManager->SetMicrophonePosition(mCameraTransform, mMicrophoneSpeed);
 		}
 	}
-}
-
-QuaternionF HeliForceManager::GetCameraQuaternion() const
-{
-	/*const float lTheta = mCameraOrientation.x;
-	const float lPhi = mCameraOrientation.y;
-	const float lGimbal = mCameraOrientation.z;*/
-	QuaternionF lOrientation;
-	//lOrientation.SetEulerAngles(lTheta-PIF/2, PIF/2-lPhi, lGimbal);
-
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	int lIndex = 0;
-	int lCount = 0;
-	GetMaster()->GetSlaveInfo(this, lIndex, lCount);
-	if (lCount == 2)
-	{
-		if (lIndex == 0)
-		{
-			lOrientation.RotateAroundOwnY(-PIF/2);
-		}
-		else
-		{
-			lOrientation.RotateAroundOwnY(+PIF/2);
-		}
-	}
-#endif // Touch or emulated touch.
-
-	return (lOrientation);
 }
 
 

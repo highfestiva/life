@@ -556,6 +556,10 @@
 				RelativePath=".\HeliForceViewer.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\LandingTrigger.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -584,6 +588,10 @@
 			</File>
 			<File
 				RelativePath=".\HeliForceViewer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LandingTrigger.h"
 				>
 			</File>
 			<File
