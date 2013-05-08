@@ -3247,6 +3247,14 @@ void PhysicsManagerODE::StepFast(float32 pStepSize)
 	}
 }
 
+bool PhysicsManagerODE::IsColliding(int pForceFeedbackId)
+{
+	mNoteForceFeedbackId = pForceFeedbackId;
+	mNoteIsCollided = false;
+	dSpaceCollide(mSpaceID, this, CollisionNoteCallback);
+	return mNoteIsCollided;
+}
+
 void PhysicsManagerODE::PostSteps()
 {
 	HandleMovableObjects();
@@ -3487,6 +3495,36 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			}
 		}
 	}
+}
+
+void PhysicsManagerODE::CollisionNoteCallback(void* pData, dGeomID pGeom1, dGeomID pGeom2)
+{
+	Object* lObject1 = (Object*)dGeomGetData(pGeom1);
+	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
+
+	if (!lObject1->mForceFeedbackId ||
+		!lObject2->mForceFeedbackId ||
+		lObject1->mForceFeedbackId == lObject2->mForceFeedbackId)	// One is trigger, or same body.
+	{
+		return;
+	}
+
+	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
+	if (lObject1->mForceFeedbackId != lThis->mNoteForceFeedbackId &&
+		lObject2->mForceFeedbackId != lThis->mNoteForceFeedbackId)	// Not observed body.
+	{
+		return;
+	}
+
+	dContact lContact[1];
+	const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 1, &lContact[0].geom, sizeof(lContact[0]));
+	if (lTriggerContactPointCount <= 0)
+	{
+		// In AABB range (since call came here), but no real contact.
+		return;
+	}
+
+	lThis->mNoteIsCollided = true;
 }
 
 

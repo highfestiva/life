@@ -27,12 +27,14 @@
 #include "../Life/Explosion.h"
 #include "../Life/ProjectileUtil.h"
 #include "../Life/Spawner.h"
+#include "../TBC/Include/PhysicsTrigger.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
+#include "../UiCure/Include/UiSoundReleaser.h"
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
@@ -92,8 +94,10 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mUpdateCameraForAvatar(false),
 	mActiveWeapon(0),
 	mLevel(0),
+	mOldLevel(0),
 	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 100)),
 	mCameraSpeed(0),
+	mZoomHeli(false),
 	mHitGroundFrameCount(STILL_FRAMES_UNTIL_CAM_PANS),
 	mIsHitThisFrame(false),
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
@@ -301,13 +305,25 @@ void HeliForceManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextOb
 
 void HeliForceManager::DidFinishLevel()
 {
-	mLog.AHeadline("DONE!");
-	// TODO:PlaySong(Whatever);
+	mLog.AHeadline("Level done!");
+	if (GetContext()->GetObject(mAvatarId))
+	{
+		UiCure::UserSound3dResource* lFinishSound = new UiCure::UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, mCameraTransform.GetPosition(), Vector3DF(), 5.0f, 1.0f);
+		mZoomHeli = true;
+	}
 }
 
 void HeliForceManager::NextLevel()
 {
-	mLog.AHeadline("NextLevel!");
+	if (GetContext()->GetObject(mAvatarId))
+	{
+		mOldLevel = mLevel;
+		const str lLevelName = (mOldLevel->GetClassId() == _T("level_00"))? _T("level_01") : _T("level_00");
+		mLevel = (Life::Level*)Parent::CreateContextObject(lLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+		mLevel->StartLoading();
+	}
+	mZoomHeli = false;
 }
 
 
@@ -328,7 +344,7 @@ bool HeliForceManager::Reset()	// Run when disconnected. Removes all objects and
 bool HeliForceManager::InitializeUniverse()
 {
 	mMassObjectArray.clear();
-	mLevel = (Life::Level*)Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Life::Level*)Parent::CreateContextObject(_T("level_00"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
 	return true;
 }
@@ -336,6 +352,8 @@ bool HeliForceManager::InitializeUniverse()
 void HeliForceManager::CreateChopper(const str& pClassId)
 {
 	mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
+	mZoomHeli = false;
+
 	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 	assert(lSpawner);
 	Cure::ContextObject* lAvatar = Parent::CreateContextObject(pClassId, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
@@ -461,6 +479,10 @@ void HeliForceManager::TickUiInput()
 
 bool HeliForceManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower)
 {
+	if (mZoomHeli)
+	{
+		return false;
+	}
 	return pAvatar->SetEnginePower(pAspect, pPower);
 }
 
@@ -592,9 +614,40 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else if (pObject == mLevel)
 		{
-			if (!GetContext()->GetObject(mAvatarId))
+			Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+			if (!lAvatar)
 			{
 				CreateChopper(_T("helicopter_01"));
+			}
+			else
+			{
+				Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
+				lHealth->SetValue(1.0f);
+				mAvatarCreateTimer.Start();
+				Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
+				assert(lSpawner);
+				const Vector3DF lHeliDelta = lAvatar->GetPosition() - GetLandingTriggerPosition(mOldLevel);
+				const Vector3DF lNewPosition = lSpawner->GetSpawnPoint().GetPosition() + lHeliDelta;
+				const Vector3DF lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lAvatar->GetPosition();
+
+				GetContext()->DeleteObject(mOldLevel->GetInstanceId());
+				mOldLevel = 0;
+
+				const Cure::ObjectPositionalData* lPositionalData = 0;
+				lAvatar->UpdateFullPosition(lPositionalData);
+				Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
+				lNewPositionalData->mPosition.mTransformation.SetPosition(lNewPosition);
+				EaseDown(lAvatar, *lNewPositionalData);
+				mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
+				delete lNewPositionalData;
+
+				mCameraPreviousPosition += lCamDelta;
+				mCameraTransform.GetPosition() += lCamDelta;
+			}
+			if (mOldLevel)
+			{
+				GetContext()->DeleteObject(mOldLevel->GetInstanceId());
+				mOldLevel = 0;
 			}
 		}
 		else
@@ -613,7 +666,7 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 
 void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
+	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
 
@@ -632,7 +685,23 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		return;
 	}
 
-	const float lForce = pForce.GetLength();
+	// Check if we're colliding with a smooth landing pad.
+	float lCollisionImpactFactor = 3;
+	if (pObject1->GetInstanceId() == mAvatarId && pObject2 == mLevel)
+	{
+		const TBC::ChunkyClass::Tag* lTag = mLevel->GetClass()->GetTag(_T("anything"));
+		std::vector<int>::const_iterator x = lTag->mBodyIndexList.begin();
+		for (; x != lTag->mBodyIndexList.end(); ++x)
+		{
+			if (pObject2->GetPhysics()->GetBoneGeometry(*x)->GetBodyId() == pBody2Id)
+			{
+				lCollisionImpactFactor = 1;
+				break;
+			}
+		}
+	}
+
+	const float lForce = pForce.GetLength() * lCollisionImpactFactor;
 	if (lForce > 15000)
 	{
 		float lForce2 = lForce;
@@ -649,6 +718,47 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	}
 }
 
+
+
+Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLevel) const
+{
+	assert(pLevel);
+	Cure::ContextObject::Array::const_iterator x = pLevel->GetChildArray().begin();
+	for (; x != pLevel->GetChildArray().end(); ++x)
+	{
+		LandingTrigger* lLandingTrigger = dynamic_cast<LandingTrigger*>(*x);
+		if (lLandingTrigger)
+		{
+			const int lTriggerCount = pLevel->GetPhysics()->GetTriggerCount();
+			for (int x = 0; x < lTriggerCount; ++x)
+			{
+				const TBC::PhysicsTrigger* lTrigger = pLevel->GetPhysics()->GetTrigger(x);
+				if (pLevel->GetTrigger(lTrigger->GetPhysicsTriggerId(0)) == lLandingTrigger)
+				{
+					TransformationF lTransform;
+					GetPhysicsManager()->GetTriggerTransform(lTrigger->GetPhysicsTriggerId(0), lTransform);
+					return lTransform.GetPosition();
+				}
+			}
+		}
+	}
+	assert(false);
+	return Vector3DF();
+}
+
+void HeliForceManager::EaseDown(Cure::ContextObject* pObject, Cure::ObjectPositionalData& pPositionalData)
+{
+	for (int x = 0; x < 100; ++x)
+	{
+		pObject->SetFullPosition(pPositionalData, 0);
+		if (GetPhysicsManager()->IsColliding(pObject->GetInstanceId()))
+		{
+			break;
+		}
+		pPositionalData.mPosition.mTransformation.GetPosition().z -= 0.1f;
+	}
+
+}
 
 
 void HeliForceManager::Shoot(Cure::ContextObject*, int)
@@ -738,12 +848,21 @@ void HeliForceManager::MoveCamera()
 	{
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		TransformationF lTargetTransform(QuaternionF(), lObject->GetPosition() + Vector3DF(0, -60, 0));
-		if (mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
+		if (mZoomHeli)
 		{
-			lTargetTransform.GetOrientation().RotateAroundOwnX(-0.5f);
+			//lTargetTransform.GetOrientation().RotateAroundOwnX(-PIF/2);
+			lTargetTransform.GetPosition() = GetLandingTriggerPosition(mLevel) + Vector3DF(0, 0, 15);
+		}
+		else if (mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
+		{
+			//lTargetTransform.GetOrientation().RotateAroundOwnX(-0.5f);
 			lTargetTransform.GetPosition().z += 30;
 		}
-		mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 0.08f);
+		const float x = lObject->GetPosition().y - mCameraTransform.GetPosition().y;
+		const float y = lObject->GetPosition().z - mCameraTransform.GetPosition().z;
+		const float lAngle = ::atan2(y, x);
+		lTargetTransform.GetOrientation().RotateAroundOwnX(lAngle);
+		mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 1.0f);
 		mCameraTransform.GetPosition()		= Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f);
 		mCameraSpeed = Math::Lerp(mCameraSpeed, lObject->GetVelocity().GetLength()/10, 0.02f);
 		float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);

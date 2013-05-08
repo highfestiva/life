@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: level_01.ma
-//Last modified: Tue, May 07, 2013 12:19:57 AM
+//Last modified: Wed, May 08, 2013 10:58:07 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -12,20 +12,19 @@ fileInfo "cutIdentifier" "200904080023-749524";
 fileInfo "osv" "Microsoft Windows XP Service Pack 3 (Build 2600)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 369.14388455631683 36.91376932956409 373.14462493893382 ;
-	setAttr ".r" -type "double3" -0.93835272949725412 46.200000000000067 -2.872016586971202e-016 ;
-	setAttr ".rp" -type "double3" -7.1054273576010019e-015 -3.5527136788005009e-015 
-		-1.4210854715202004e-014 ;
-	setAttr ".rpt" -type "double3" -1.3703648489568875e-016 -2.954579427469229e-015 
-		1.1625169638452247e-015 ;
+	setAttr ".t" -type "double3" 141.38556143718725 58.741928806589634 21.140558397292914 ;
+	setAttr ".r" -type "double3" -32.738352729497429 71.000000000000469 0 ;
+	setAttr ".rp" -type "double3" -7.1054273576010019e-015 -1.7763568394002505e-014 
+		0 ;
+	setAttr ".rpt" -type "double3" 1.6458028019526739e-014 1.0112831108699977e-014 -1.7703435601606859e-015 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 539.32555798530257;
+	setAttr ".coi" 73.257358141229489;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
-	setAttr ".tp" -type "double3" -43.0779170705692 30.616145099911265 -0.40930867159823947 ;
+	setAttr ".tp" -type "double3" 83.122374839392819 19.124093776986456 1.0789344134242924 ;
 	setAttr ".hc" -type "string" "viewSet -p %camera";
 createNode transform -s -n "top";
 	setAttr ".v" no;
@@ -144,7 +143,7 @@ createNode mesh -n "m_terrainShape" -p "m_terrain";
 		 8.5622758865356445 -3.2872648239135742 -2.0948624610900879 9.3004970550537109 -3.0549907684326172 1.0235414505004883
 		 8.960301399230957 -3.0549907684326172 4.3936314582824707 8.516789436340332 -3.0549907684326172 7.6180000305175781
 		 8.3090753555297852 -3.0549907684326172 10.715764045715332 8.3007345199584961 -3.0549907684326172 -12.381220817565918
-		 12.448869705200195 1.9269266128540039 -9.6804714202880859 10.783113479614258 1.9269266128540039 -6.4329147338867188
+		 12.448869705200195 1.9269266128540039 -9.6804714202880859 10.783112525939941 1.9269266128540039 -6.4329147338867188
 		 9.1033554077148438 2.3289079666137695 -2.0948622226715088 11.482246398925781 1.9269266128540039 1.4740957021713257
 		 4.0437593460083008 -0.25645256042480469 3.9430780410766602 4.0717206001281738 -0.25645256042480469 7.6180000305175781
 		 10.80988883972168 1.9269266128540039 10.715764045715332 10.801548004150391 1.9269266128540039 -11.418840408325195
@@ -239,14 +238,14 @@ createNode mesh -n "m_terrainShape" -p "m_terrain";
 		 0.50834691524505615 0.0023688583169132471 0.87979215383529663 0.47535267472267151 0.00057482923148199916
 		 0.21348799765110016 0.97694551944732666 -0.066636316478252411 0.17162527143955231
 		 0.98290598392486572 0.48176565766334534 0.11370328813791275 0.8688921332359314 0.27726635336875916
-		 0.15654411911964417 0.94795423746109009 -0.36383447051048279 -0.77293103933334351
-		 0.51980984210968018 -0.36506056785583496 -0.77322733402252197 0.51850777864456177 0.27726635336875916
+		 0.15654411911964417 0.94795423746109009 -0.36383447051048279 -0.77293109893798828
+		 0.5198097825050354 -0.36506062746047974 -0.77322721481323242 0.51850771903991699 0.27726635336875916
 		 0.15654411911964417 0.94795423746109009 0.068488098680973053 0.21073172986507416
-		 0.97514182329177856 -0.088551782071590424 -0.80057978630065918 0.59264719486236572 -0.36383447051048279
-		 -0.77293103933334351 0.51980984210968018 0.068488098680973053 0.21073172986507416
+		 0.97514182329177856 -0.088551744818687439 -0.80057984590530396 0.59264713525772095 -0.36383447051048279
+		 -0.77293109893798828 0.5198097825050354 0.068488098680973053 0.21073172986507416
 		 0.97514182329177856 0.072843492031097412 0.18447209894657135 0.98013460636138916 -0.1560683399438858
-		 -0.790260910987854 0.59256255626678467 -0.088551782071590424 -0.80057978630065918
-		 0.59264719486236572 0.072843492031097412 0.18447209894657135 0.98013460636138916 0.054897725582122803
+		 -0.790260910987854 0.59256255626678467 -0.088551744818687439 -0.80057984590530396
+		 0.59264713525772095 0.072843492031097412 0.18447209894657135 0.98013460636138916 0.054897725582122803
 		 0.11012107878923416 0.99240100383758545 -0.3887779712677002 -0.86386573314666748
 		 0.32029309868812561 -0.1560683399438858 -0.790260910987854 0.59256255626678467 0.054897725582122803
 		 0.11012107878923416 0.99240100383758545 -0.069510594010353088 0.10851989686489105
@@ -256,15 +255,15 @@ createNode mesh -n "m_terrainShape" -p "m_terrain";
 		 -0.76702553033828735 0.60599184036254883 0.26752299070358276 -0.90668570995330811
 		 0.32611739635467529 -0.066636316478252411 0.17162527143955231 0.98290598392486572 0.00057482923148199916
 		 0.21348799765110016 0.97694551944732666 -0.0019726355094462633 -0.73263072967529297
-		 0.68062353134155273 0.2108214944601059 -0.76702553033828735 0.60599184036254883 -0.36506056785583496
-		 -0.77322733402252197 0.51850777864456177 -0.36383447051048279 -0.77293103933334351
-		 0.51980984210968018 -0.3836643397808075 -0.90889561176300049 0.16343337297439575 -0.41534674167633057
-		 -0.89863193035125732 0.14123675227165222 -0.36383447051048279 -0.77293103933334351
-		 0.51980984210968018 -0.088551782071590424 -0.80057978630065918 0.59264719486236572 -0.026332050561904907
-		 -0.9808661937713623 0.19289425015449524 -0.3836643397808075 -0.90889561176300049
-		 0.16343337297439575 -0.088551782071590424 -0.80057978630065918 0.59264719486236572 -0.1560683399438858
+		 0.68062353134155273 0.2108214944601059 -0.76702553033828735 0.60599184036254883 -0.36506062746047974
+		 -0.77322721481323242 0.51850771903991699 -0.36383447051048279 -0.77293109893798828
+		 0.5198097825050354 -0.3836643397808075 -0.90889555215835571 0.16343337297439575 -0.41534686088562012
+		 -0.89863187074661255 0.14123675227165222 -0.36383447051048279 -0.77293109893798828
+		 0.5198097825050354 -0.088551744818687439 -0.80057984590530396 0.59264713525772095 -0.026331992819905281
+		 -0.98086613416671753 0.19289429485797882 -0.3836643397808075 -0.90889555215835571
+		 0.16343337297439575 -0.088551744818687439 -0.80057984590530396 0.59264713525772095 -0.1560683399438858
 		 -0.790260910987854 0.59256255626678467 -0.30402651429176331 -0.94392675161361694
-		 0.12872524559497833 -0.026332050561904907 -0.9808661937713623 0.19289425015449524 -0.1560683399438858
+		 0.12872524559497833 -0.026331992819905281 -0.98086613416671753 0.19289429485797882 -0.1560683399438858
 		 -0.790260910987854 0.59256255626678467 -0.3887779712677002 -0.86386573314666748 0.32029309868812561 -0.55010676383972168
 		 -0.83204013109207153 -0.071356259286403656 -0.30402651429176331 -0.94392675161361694
 		 0.12872524559497833 -0.3887779712677002 -0.86386573314666748 0.32029309868812561 0.26752299070358276
@@ -275,15 +274,15 @@ createNode mesh -n "m_terrainShape" -p "m_terrain";
 		 -0.87749147415161133 -0.11088065057992935 0.2108214944601059 -0.76702553033828735
 		 0.60599184036254883 -0.0019726355094462633 -0.73263072967529297 0.68062353134155273 -0.0026280994061380625
 		 -0.97606873512268066 0.21744656562805176 0.41311004757881165 -0.90518313646316528
-		 0.099917225539684296 -0.41534674167633057 -0.89863193035125732 0.14123675227165222 -0.3836643397808075
-		 -0.90889561176300049 0.16343337297439575 -0.33705991506576538 -0.92543196678161621
-		 0.17310760915279388 -0.41030159592628479 -0.9081915020942688 0.082709528505802155 -0.3836643397808075
-		 -0.90889561176300049 0.16343337297439575 -0.026332050561904907 -0.9808661937713623
-		 0.19289425015449524 0.0032940655946731567 -0.97987359762191772 0.19959209859371185 -0.33705991506576538
-		 -0.92543196678161621 0.17310760915279388 -0.026332050561904907 -0.9808661937713623
-		 0.19289425015449524 -0.30402651429176331 -0.94392675161361694 0.12872524559497833 -0.3294355571269989
-		 -0.91961210966110229 0.21397586166858673 0.0032940655946731567 -0.97987359762191772
-		 0.19959209859371185 -0.30402651429176331 -0.94392675161361694 0.12872524559497833 -0.55010676383972168
+		 0.099917225539684296 -0.41534686088562012 -0.89863187074661255 0.14123675227165222 -0.3836643397808075
+		 -0.90889555215835571 0.16343337297439575 -0.33705991506576538 -0.92543190717697144
+		 0.17310778796672821 -0.41030171513557434 -0.90819144248962402 0.082709521055221558 -0.3836643397808075
+		 -0.90889555215835571 0.16343337297439575 -0.026331992819905281 -0.98086613416671753
+		 0.19289429485797882 0.0032941275276243687 -0.97987353801727295 0.19959227740764618 -0.33705991506576538
+		 -0.92543190717697144 0.17310778796672821 -0.026331992819905281 -0.98086613416671753
+		 0.19289429485797882 -0.30402651429176331 -0.94392675161361694 0.12872524559497833 -0.3294355571269989
+		 -0.91961210966110229 0.21397586166858673 0.0032941275276243687 -0.97987353801727295
+		 0.19959227740764618 -0.30402651429176331 -0.94392675161361694 0.12872524559497833 -0.55010676383972168
 		 -0.83204013109207153 -0.071356259286403656 -0.46658486127853394 -0.7578732967376709
 		 0.45598971843719482 -0.3294355571269989 -0.91961210966110229 0.21397586166858673 -0.55010676383972168
 		 -0.83204013109207153 -0.071356259286403656 0.46659857034683228 -0.87749147415161133
@@ -457,13 +456,17 @@ createNode mesh -n "m_phys_terrainShape" -p "phys_terrain";
 		 0 -0.23447844386100769 0.97212129831314087 0 -0.23447844386100769 0.97212129831314087
 		 0 -0.22193677723407745 0.97506099939346313 0 -0.23447844386100769 0.97212129831314087
 		 0 0 1 0 0 1 0 -0.23447844386100769 0.97212129831314087 0 ;
-createNode transform -n "m_startingpad" -p "m_terrain";
-	setAttr ".t" -type "double3" -4.0739570387654815 2.2360854321750785 -1.9984014443252818e-016 ;
+createNode transform -n "m_landingpad" -p "m_terrain";
+	setAttr ".t" -type "double3" 8.2889947223920171 1.6064685588876562 -1.9984014443252816e-016 ;
 	setAttr ".s" -type "double3" 0.2 0.2 0.2 ;
-	setAttr ".rp" -type "double3" 4.0739570387654815 -2.2360854321750789 1.9428902930940239e-016 ;
-	setAttr ".sp" -type "double3" 20.369785193827408 -11.180427160875395 9.7144514654701197e-016 ;
-	setAttr ".spt" -type "double3" -16.295828155061926 8.9443417287003157 -7.7715611723760958e-016 ;
-createNode mesh -n "m_landingpadShape" -p "m_startingpad";
+	setAttr ".rp" -type "double3" -8.2889947223920188 -1.6064685588876566 1.9984014443252818e-016 ;
+	setAttr ".sp" -type "double3" -41.444973611960087 -8.0323427944382804 9.9920072216264089e-016 ;
+	setAttr ".spt" -type "double3" 33.155978889568068 6.4258742355506246 -7.9936057773011273e-016 ;
+createNode transform -n "phys_landingpad" -p "m_landingpad";
+	setAttr ".t" -type "double3" 0 1.7763568394002505e-015 6.6613381477509392e-016 ;
+	setAttr ".rp" -type "double3" -41.444973611960087 -8.0323427944382875 3.3306690738754701e-016 ;
+	setAttr ".sp" -type "double3" -41.444973611960087 -8.0323427944382804 3.3306690738754701e-016 ;
+createNode mesh -n "m_landingpadShape" -p "phys_landingpad";
 	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
 	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
@@ -482,27 +485,45 @@ createNode mesh -n "m_landingpadShape" -p "m_startingpad";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -3 -1.9999996423721313 3 3 -1.9999995231628418
-		 3 -3 2.0000004768371582 3 3 2.0000004768371582 3 -3 2.0000004768371582 -3.0000002384185791 3
-		 2.0000004768371582 -3.0000002384185791 -3 -1.9999996423721313 -3.0000002384185791 3
-		 -1.9999995231628418 -3.0000002384185791 ;
+	setAttr ".rgvtx" -type "vectorArray" 8 -3 -2.0000002384185791 3 3 -2.0000002384185791
+		 3 -3 1.9999997615814209 3 3 1.9999997615814209 3 -3 1.9999997615814209 -3.0000002384185791 3
+		 1.9999997615814209 -3.0000002384185791 -3 -2.0000002384185791 -3.0000002384185791 3
+		 -2.0000002384185791 -3.0000002384185791 ;
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 	setAttr ".rgn" -type "vectorArray" 24 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 1
-		 0 0 1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 1.9868215517249155e-008 -1 0 1.9868215517249155e-008
-		 -1 0 1.9868215517249155e-008 -1 0 1.9868215517249155e-008 -1 0 1 0 0 1 0 0 1 0 0 1
+		 0 0 1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1
 		 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 ;
-	setAttr ".rguv0" -type "vectorArray" 24 0.125 0.125 0 0.875 0.125 0 0.875 0.125
-		 0 0.125 0.125 0 0.125 0.125 0 0.875 0.125 0 0.875 0.875 0 0.125 0.875 0 0.125 0.875
-		 0 0.875 0.875 0 0.875 0.875 0 0.125 0.875 0 0.125 0.875 0 0.875 0.875 0 0.875 0.125
-		 0 0.125 0.125 0 0.875 0.125 0 0.875 0.875 0 0.875 0.875 0 0.875 0.125 0 0.125 0.875
-		 0 0.125 0.125 0 0.125 0.125 0 0.125 0.875 0 ;
+	setAttr ".rguv0" -type "vectorArray" 24 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 1 0 0 1
+		 1 0 0 1 0 0 1 0 1 1 0 1 1 0 0 1 0 0 1 0 1 1 0 1 0 0 0 0 0 1 0 0 1 1 0 1 1 0 1 0 0 0
+		 1 0 0 0 0 0 0 0 0 1 0 ;
+createNode transform -n "phys_trig_landing" -p "m_landingpad";
+	setAttr ".t" -type "double3" -0.10202169147094509 2.1139647063773754 9.9920072216264089e-016 ;
+	setAttr ".s" -type "double3" 0.5 0.5 0.5 ;
+	setAttr ".rp" -type "double3" -41.342951920489135 -10.146307500815658 0 ;
+	setAttr ".sp" -type "double3" -82.68590384097827 -20.292615001631315 0 ;
+	setAttr ".spt" -type "double3" 41.342951920489135 10.146307500815658 0 ;
+createNode mesh -n "phys_trig_landingShape" -p "phys_trig_landing";
+	setAttr -k off ".v";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+createNode transform -n "m_startingpad" -p "m_terrain";
+	setAttr ".t" -type "double3" -4.0739570387654815 2.2360854321750785 -1.9984014443252818e-016 ;
+	setAttr ".s" -type "double3" 0.2 0.2 0.2 ;
+	setAttr ".rp" -type "double3" 4.0739570387654815 -2.2360854321750789 1.9428902930940239e-016 ;
+	setAttr ".sp" -type "double3" 20.369785193827408 -11.180427160875395 9.7144514654701197e-016 ;
+	setAttr ".spt" -type "double3" -16.295828155061926 8.9443417287003157 -7.7715611723760958e-016 ;
 createNode transform -n "phys_startingpad" -p "m_startingpad";
 	setAttr ".t" -type "double3" 0 0 6.6613381477509392e-016 ;
 	setAttr ".rp" -type "double3" 20.369785193827408 -11.180427160875393 5.5511151231257827e-016 ;
 	setAttr ".sp" -type "double3" 20.369785193827408 -11.180427160875393 3.3306690738754696e-016 ;
 createNode transform -n "phys_pos_start" -p "m_startingpad";
 	addAttr -ci true -sn "nts" -ln "notes" -dt "string";
-	setAttr ".t" -type "double3" 0 2.9016894284948709 1.2516606683072287e-014 ;
+	setAttr ".t" -type "double3" 0 2.9016894284948709 1.6069320361872788e-014 ;
 	setAttr ".r" -type "double3" 0 -89.999999999999986 0 ;
 	setAttr ".s" -type "double3" 2.5 2.5 2.5 ;
 	setAttr ".rp" -type "double3" -3.4416913763379845e-015 -14.082116589370262 -20.369785193827408 ;
@@ -519,34 +540,9 @@ createNode mesh -n "phys_pos_startShape" -p "phys_pos_start";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "m_landingpad" -p "m_terrain";
-	setAttr ".t" -type "double3" 8.2889947223920171 1.6064685588876562 -1.9984014443252816e-016 ;
-	setAttr ".s" -type "double3" 0.2 0.2 0.2 ;
-	setAttr ".rp" -type "double3" -8.2889947223920188 -1.6064685588876566 1.9984014443252818e-016 ;
-	setAttr ".sp" -type "double3" -41.444973611960087 -8.0323427944382804 9.9920072216264089e-016 ;
-	setAttr ".spt" -type "double3" 33.155978889568068 6.4258742355506246 -7.9936057773011273e-016 ;
-createNode transform -n "phys_landingpad1" -p "m_landingpad";
-	setAttr ".t" -type "double3" 0 1.7763568394002505e-015 6.6613381477509392e-016 ;
-	setAttr ".rp" -type "double3" -41.444973611960087 -8.0323427944382875 3.3306690738754701e-016 ;
-	setAttr ".sp" -type "double3" -41.444973611960087 -8.0323427944382804 3.3306690738754701e-016 ;
-createNode transform -n "phys_trig_landing" -p "m_landingpad";
-	setAttr ".t" -type "double3" -0.10202169147094509 2.1139647063773754 9.9920072216264089e-016 ;
-	setAttr ".s" -type "double3" 0.5 0.5 0.5 ;
-	setAttr ".rp" -type "double3" -41.342951920489135 -10.146307500815658 0 ;
-	setAttr ".sp" -type "double3" -82.68590384097827 -20.292615001631315 0 ;
-	setAttr ".spt" -type "double3" 41.342951920489135 10.146307500815658 0 ;
-createNode mesh -n "phys_trig_landingShape" -p "phys_trig_landing";
-	setAttr -k off ".v";
-	setAttr ".vir" yes;
-	setAttr ".vif" yes;
-	setAttr ".uvst[0].uvsn" -type "string" "map1";
-	setAttr ".cuvs" -type "string" "map1";
-	setAttr ".dcc" -type "string" "Ambient+Diffuse";
-	setAttr ".covm[0]"  0 1 1;
-	setAttr ".cdvm[0]"  0 1 1;
-parent -s -nc -r -add "|m_terrain|m_startingpad|m_landingpadShape" "phys_startingpad";
-parent -s -nc -r -add "|m_terrain|m_startingpad|m_landingpadShape" "m_landingpad";
-parent -s -nc -r -add "|m_terrain|m_startingpad|m_landingpadShape" "phys_landingpad1";
+parent -s -nc -r -add "|m_terrain|m_landingpad|phys_landingpad|m_landingpadShape" "m_startingpad";
+parent -s -nc -r -add "|m_terrain|m_landingpad|phys_landingpad|m_landingpadShape" "phys_startingpad";
+parent -s -nc -r -add "|m_terrain|m_landingpad|phys_landingpad|m_landingpadShape" "m_landingpad";
 createNode lightLinker -n "lightLinker1";
 	setAttr -s 5 ".lnk";
 	setAttr -s 5 ".slnk";
@@ -658,8 +654,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n"
 		+ "                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"clipEditorPanel\" (localizedPanelLabel(\"Trax Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"clipEditorPanel\" -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n"
 		+ "\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n"
-		+ "                -mergeConnections 1\n                -zoom 0.8425\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_trigger_landing\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_landingpad\" \n                -dropNode \"phys_trigger_landing\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n"
-		+ "\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.8425\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_trigger_landing\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_landingpad\" \n                -dropNode \"phys_trigger_landing\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n"
+		+ "                -mergeConnections 1\n                -zoom 0.8425\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_startingpad\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"m_startingpad\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n"
+		+ "\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.8425\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_startingpad\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"m_startingpad\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n"
 		+ "                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperShadePanel\" (localizedPanelLabel(\"Hypershade\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperShadePanel\" -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"visorPanel\" (localizedPanelLabel(\"Visor\")) `;\n\tif (\"\" == $panelName) {\n"
 		+ "\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"visorPanel\" -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"polyTexturePlacementPanel\" (localizedPanelLabel(\"UV Texture Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"multiListerPanel\" (localizedPanelLabel(\"Multilister\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"multiListerPanel\" -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"renderWindowPanel\" (localizedPanelLabel(\"Render View\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"renderWindowPanel\" -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextPanel \"blendShapePanel\" (localizedPanelLabel(\"Blend Shape\")) `;\n"
@@ -676,8 +672,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -textures 1\n                -strokes 1\n                -shadows 0\n                -displayMode \"centerEye\" \n                -viewColor 0 0 0 1 \n                $editorName;\nstereoCameraView -e -viewSelected 0 $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\tif ($useSceneConfig) {\n        string $configName = `getPanel -cwl (localizedPanelLabel(\"Current Layout\"))`;\n        if (\"\" != $configName) {\n\t\t\tpanelConfiguration -edit -label (localizedPanelLabel(\"Current Layout\")) \n\t\t\t\t-defaultImage \"\"\n\t\t\t\t-image \"\"\n\t\t\t\t-sc false\n\t\t\t\t-configString \"global string $gMainPane; paneLayout -e -cn \\\"horizontal2\\\" -ps 1 100 46 -ps 2 100 54 $gMainPane;\"\n\t\t\t\t-removeAllPanels\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Persp View\")) \n\t\t\t\t\t\"modelPanel\"\n"
 		+ "\t\t\t\t\t\"$panelName = `modelPanel -unParent -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels `;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 1\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
 		+ "\t\t\t\t\t\"modelPanel -edit -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels  $panelName;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 1\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
-		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.8425\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_trigger_landing\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_landingpad\\\" \\n                -dropNode \\\"phys_trigger_landing\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
-		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.8425\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_trigger_landing\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_landingpad\\\" \\n                -dropNode \\\"phys_trigger_landing\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.8425\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"m_startingpad\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"m_startingpad\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.8425\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"m_startingpad\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"m_startingpad\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
 		+ "\t\t\t\t$configName;\n\n            setNamedPanelLayout (localizedPanelLabel(\"Current Layout\"));\n        }\n\n        panelHistory -e -clear mainPanelHistory;\n        setFocus `paneLayout -q -p1 $gMainPane`;\n        sceneUIReplacement -deleteRemaining;\n        sceneUIReplacement -clear;\n\t}\n\n\ngrid -spacing 5 -size 12 -divisions 5 -displayAxes yes -displayGridLines yes -displayDivisionLines yes -displayPerspectiveLabels no -displayOrthographicLabels no -displayAxesBold yes -perspectiveLabelPosition axis -orthographicLabelPosition edge;\nviewManip -drawCompass 0 -compassAngle 0 -frontParameters \"\" -homeParameters \"\" -selectionLockParameters \"\";\n}\n");
 	setAttr ".st" 3;
 createNode script -n "sceneConfigurationScriptNode";
@@ -728,9 +724,19 @@ createNode polyCube -n "polyCube3";
 	setAttr ".h" 0.5;
 	setAttr ".d" 6;
 	setAttr ".cuv" 4;
+createNode polyPlanarProj -n "polyPlanarProj2";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 1 "f[0:5]";
+	setAttr ".ix" -type "matrix" 2 0 0 0 0 2 0 0 0 0 2 0 -40.739570387654815 22.360854321750786 -1.9984014443252818e-015 1;
+	setAttr ".ws" yes;
+	setAttr ".pc" -type "double3" -40.739570617675781 22.360855102539063 -2.384185791015625e-007 ;
+	setAttr ".ro" -type "double3" -90 0 0 ;
+	setAttr ".ps" -type "double2" 12 12.000000476837158 ;
+	setAttr ".uvs" -type "string" "helipad_map";
+	setAttr ".cam" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2013-05-07T00:19:56.968000";
+	setAttr ".time" -type "string" "2013-05-08T22:58:07.422000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;
@@ -758,10 +764,10 @@ select -ne :defaultHardwareRenderGlobals;
 connectAttr "polyTweakUV1.out" "m_terrainShape.i";
 connectAttr "polyTweakUV1.uvtk[0]" "m_terrainShape.uvst[0].uvtw";
 connectAttr "deleteComponent2.og" "m_phys_terrainShape.i";
-connectAttr "polyPlanarProj1.out" "|m_terrain|m_startingpad|m_landingpadShape.i"
+connectAttr "polyPlanarProj2.out" "|m_terrain|m_landingpad|phys_landingpad|m_landingpadShape.i"
 		;
-connectAttr "polyCube2.out" "phys_pos_startShape.i";
 connectAttr "polyCube3.out" "phys_trig_landingShape.i";
+connectAttr "polyCube2.out" "phys_pos_startShape.i";
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[0].llnk";
 connectAttr ":initialShadingGroup.msg" "lightLinker1.lnk[0].olnk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[1].llnk";
@@ -825,7 +831,7 @@ connectAttr "|m_terrain|m_startingpad|m_landingpadShape.iog" "phong3SG.dsm" -na;
 connectAttr "|m_terrain|m_startingpad|phys_startingpad|m_landingpadShape.iog" "phong3SG.dsm"
 		 -na;
 connectAttr "|m_terrain|m_landingpad|m_landingpadShape.iog" "phong3SG.dsm" -na;
-connectAttr "|m_terrain|m_landingpad|phys_landingpad1|m_landingpadShape.iog" "phong3SG.dsm"
+connectAttr "|m_terrain|m_landingpad|phys_landingpad|m_landingpadShape.iog" "phong3SG.dsm"
 		 -na;
 connectAttr "phong3SG.msg" "materialInfo3.sg";
 connectAttr "mat_platform.msg" "materialInfo3.m";
@@ -851,6 +857,9 @@ connectAttr "place2dTexture2.o" "file2.uv";
 connectAttr "place2dTexture2.ofs" "file2.fs";
 connectAttr "polyCube1.out" "polyPlanarProj1.ip";
 connectAttr "|m_terrain|m_startingpad|m_landingpadShape.wm" "polyPlanarProj1.mp"
+		;
+connectAttr "polyPlanarProj1.out" "polyPlanarProj2.ip";
+connectAttr "|m_terrain|m_startingpad|m_landingpadShape.wm" "polyPlanarProj2.mp"
 		;
 connectAttr "phong1SG.pa" ":renderPartition.st" -na;
 connectAttr "phong2SG.pa" ":renderPartition.st" -na;

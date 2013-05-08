@@ -101,6 +101,9 @@ protected:
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
+	Vector3DF GetLandingTriggerPosition(Cure::ContextObject* pLevel) const;
+	void EaseDown(Cure::ContextObject* pObject, Cure::ObjectPositionalData& pPositionalData);
+
 	void Shoot(Cure::ContextObject*, int);
 
 	void OnFireButton(UiTbc::Button*);
@@ -122,11 +125,13 @@ protected:
 	HiResTimer mFireTimeout;
 
 	Life::Level* mLevel;
+	Life::Level* mOldLevel;
 	ObjectArray mMassObjectArray;
 
 	TransformationF mCameraTransform;
 	Vector3DF mCameraPreviousPosition;
 	float mCameraSpeed;
+	bool mZoomHeli;
 	int mHitGroundFrameCount;
 	bool mIsHitThisFrame;
 	Vector3DF mMicrophoneSpeed;

@@ -24,6 +24,7 @@ public:
 	virtual ~Spawner();
 
 	void PlaceObject(ContextObject* pObject);
+	TransformationF GetSpawnPoint() const;
 
 private:
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);

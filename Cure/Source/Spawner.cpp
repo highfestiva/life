@@ -37,6 +37,11 @@ void Spawner::PlaceObject(ContextObject* pObject)
 	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint));
 }
 
+TransformationF Spawner::GetSpawnPoint() const
+{
+	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF());
+}
+
 
 
 void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
