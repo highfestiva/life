@@ -323,7 +323,6 @@ void HeliForceManager::NextLevel()
 		mLevel = (Life::Level*)Parent::CreateContextObject(lLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 		mLevel->StartLoading();
 	}
-	mZoomHeli = false;
 }
 
 
@@ -611,6 +610,8 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		if (pObject->GetInstanceId() == mAvatarId)
 		{
 			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
+			EaseDown(pObject, 0);
+			mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
 		}
 		else if (pObject == mLevel)
 		{
@@ -626,29 +627,25 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mAvatarCreateTimer.Start();
 				Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 				assert(lSpawner);
-				const Vector3DF lHeliDelta = lAvatar->GetPosition() - GetLandingTriggerPosition(mOldLevel);
+				const Vector3DF lLandingPosition = GetLandingTriggerPosition(mOldLevel);
+				const Vector3DF lHeliPosition = lAvatar->GetPosition();
+				const Vector3DF lHeliDelta = lHeliPosition - lLandingPosition;
 				const Vector3DF lNewPosition = lSpawner->GetSpawnPoint().GetPosition() + lHeliDelta;
-				const Vector3DF lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lAvatar->GetPosition();
+				const float lCamAboveHeli = mCameraTransform.GetPosition().z - lHeliPosition.z;
+				const Vector3DF lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lLandingPosition;
 
 				GetContext()->DeleteObject(mOldLevel->GetInstanceId());
 				mOldLevel = 0;
 
-				const Cure::ObjectPositionalData* lPositionalData = 0;
-				lAvatar->UpdateFullPosition(lPositionalData);
-				Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
-				lNewPositionalData->mPosition.mTransformation.SetPosition(lNewPosition);
-				EaseDown(lAvatar, *lNewPositionalData);
+				EaseDown(lAvatar, &lNewPosition);
 				mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
-				delete lNewPositionalData;
 
-				mCameraPreviousPosition += lCamDelta;
 				mCameraTransform.GetPosition() += lCamDelta;
+				mCameraTransform.GetPosition().z = lAvatar->GetPosition().z + lCamAboveHeli;
+				mCameraPreviousPosition = mCameraTransform.GetPosition();
+				UpdateCameraPosition(true);
 			}
-			if (mOldLevel)
-			{
-				GetContext()->DeleteObject(mOldLevel->GetInstanceId());
-				mOldLevel = 0;
-			}
+			mZoomHeli = false;
 		}
 		else
 		{
@@ -746,20 +743,30 @@ Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLeve
 	return Vector3DF();
 }
 
-void HeliForceManager::EaseDown(Cure::ContextObject* pObject, Cure::ObjectPositionalData& pPositionalData)
+float HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition)
 {
+	const Cure::ObjectPositionalData* lPositionalData = 0;
+	pObject->UpdateFullPosition(lPositionalData);
+	Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
+	if (pStartPosition)
+	{
+		lNewPositionalData->mPosition.mTransformation.SetPosition(*pStartPosition);
+	}
+	float lDistanceToGround = 0;
+	const float lStep = 0.1f;
 	for (int x = 0; x < 100; ++x)
 	{
-		pObject->SetFullPosition(pPositionalData, 0);
+		pObject->SetFullPosition(*lNewPositionalData, 0);
 		if (GetPhysicsManager()->IsColliding(pObject->GetInstanceId()))
 		{
 			break;
 		}
-		pPositionalData.mPosition.mTransformation.GetPosition().z -= 0.1f;
+		lNewPositionalData->mPosition.mTransformation.GetPosition().z -= lStep;
+		lDistanceToGround += lStep;
 	}
-
+	delete lNewPositionalData;
+	return lDistanceToGround;
 }
-
 
 void HeliForceManager::Shoot(Cure::ContextObject*, int)
 {
@@ -843,28 +850,38 @@ void HeliForceManager::ScriptPhysicsTick()
 
 void HeliForceManager::MoveCamera()
 {
-	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	if (lObject)
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	if (lAvatar)
 	{
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
-		TransformationF lTargetTransform(QuaternionF(), lObject->GetPosition() + Vector3DF(0, -60, 0));
+		Vector3DF lAvatarPosition = lAvatar->GetPosition();
+		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -60, 0));
 		if (mZoomHeli)
 		{
-			//lTargetTransform.GetOrientation().RotateAroundOwnX(-PIF/2);
-			lTargetTransform.GetPosition() = GetLandingTriggerPosition(mLevel) + Vector3DF(0, 0, 15);
+			Cure::ContextObject* lLevel = mOldLevel? mOldLevel : mLevel;
+			lTargetTransform.GetPosition() = GetLandingTriggerPosition(lLevel) + Vector3DF(0, 0, 10);
 		}
 		else if (mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
 		{
-			//lTargetTransform.GetOrientation().RotateAroundOwnX(-0.5f);
 			lTargetTransform.GetPosition().z += 30;
 		}
-		const float x = lObject->GetPosition().y - mCameraTransform.GetPosition().y;
-		const float y = lObject->GetPosition().z - mCameraTransform.GetPosition().z;
+		Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
+
+		const float lCamDistance = mCameraTransform.GetPosition().GetDistance(lAvatarPosition);
+		const float lMaxCamSpeed = Math::SmoothClamp(lCamDistance/40, 0.1f, 5.0f, 0.3f);
+		if (lDelta.GetLength() > lMaxCamSpeed)
+		{
+			lDelta.Normalize(lMaxCamSpeed);
+		}
+		mCameraTransform.GetPosition() += lDelta;
+
+		// Angle.
+		const float x = lAvatarPosition.y - mCameraTransform.GetPosition().y;
+		const float y = lAvatarPosition.z - mCameraTransform.GetPosition().z;
 		const float lAngle = ::atan2(y, x);
 		lTargetTransform.GetOrientation().RotateAroundOwnX(lAngle);
 		mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 1.0f);
-		mCameraTransform.GetPosition()		= Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f);
-		mCameraSpeed = Math::Lerp(mCameraSpeed, lObject->GetVelocity().GetLength()/10, 0.02f);
+		mCameraSpeed = Math::Lerp(mCameraSpeed, lAvatar->GetVelocity().GetLength()/10, 0.02f);
 		float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
 		lFoV = Math::SmoothClamp(lFoV, 30.0f, 60.0f, 0.4f);
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);
@@ -878,19 +895,7 @@ void HeliForceManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	mUiManager->SetCameraPosition(mCameraTransform);
 	if (pUpdateMicPosition)
 	{
-		const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
-		if (lFrameTime > 1e-4)
-		{
-			Vector3DF lVelocity = (mCameraTransform.GetPosition()-mCameraPreviousPosition) / lFrameTime;
-			const float lMicrophoneMaxVelocity = 100.0f;
-			if (lVelocity.GetLength() > lMicrophoneMaxVelocity)
-			{
-				lVelocity.Normalize(lMicrophoneMaxVelocity);
-			}
-			const float lLerpTime = Math::GetIterateLerpTime(0.9f, lFrameTime);
-			mMicrophoneSpeed = Math::Lerp(mMicrophoneSpeed, lVelocity, lLerpTime);
-			mUiManager->SetMicrophonePosition(mCameraTransform, mMicrophoneSpeed);
-		}
+		mUiManager->SetMicrophonePosition(mCameraTransform, mMicrophoneSpeed);
 	}
 }
 

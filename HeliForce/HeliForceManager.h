@@ -102,7 +102,7 @@ protected:
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
 	Vector3DF GetLandingTriggerPosition(Cure::ContextObject* pLevel) const;
-	void EaseDown(Cure::ContextObject* pObject, Cure::ObjectPositionalData& pPositionalData);
+	float EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition);
 
 	void Shoot(Cure::ContextObject*, int);
 
