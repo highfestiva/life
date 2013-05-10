@@ -464,6 +464,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\HomingProjectile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Level.cpp"
 				>
 			</File>
@@ -515,6 +519,10 @@
 			</File>
 			<File
 				RelativePath=".\GameClientSlaveManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\HomingProjectile.h"
 				>
 			</File>
 			<File

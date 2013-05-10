@@ -28,7 +28,7 @@ public:
 	FastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
 	virtual ~FastProjectile();
 
-private:
+protected:
 	virtual void OnLoaded();
 	void StartBullet(float pMuzzleVelocity);
 	virtual void OnMicroTick(float pFrameTime);

@@ -50,6 +50,7 @@ void CenteredMachine::OnDie()
 {
 	if (mIsDetonated)
 	{
+		GetManager()->GetGameManager()->DeleteContextObjectDelay(this, 3.0);
 		return;
 	}
 	mIsDetonated = true;

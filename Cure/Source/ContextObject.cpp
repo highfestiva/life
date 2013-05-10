@@ -330,6 +330,17 @@ float ContextObject::GetAttributeFloatValue(const str& pAttributeName) const
 	return lFloatAttribute->GetValue();
 }
 
+void ContextObject::QuerySetChildishness(float pChildishness)
+{
+	const str lName = _T("float_childishness");
+	Cure::FloatAttribute* lAttribute = (Cure::FloatAttribute*)GetAttribute(lName);
+	if (!lAttribute)
+	{
+		lAttribute = new Cure::FloatAttribute(this, lName, 0);
+	}
+	lAttribute->SetValue(pChildishness);
+}
+
 bool ContextObject::IsAttributeTrue(const str& pAttributeName) const
 {
 	return (GetAttributeFloatValue(pAttributeName) > 0.5f);
@@ -432,7 +443,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 	}
 
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (!lGeometry || (lGeometry->GetBodyId() == TBC::INVALID_BODY && lGeometry->GetBodyId() == TBC::INVALID_TRIGGER))
+	if (!lGeometry || (lGeometry->GetBodyId() == TBC::INVALID_BODY && lGeometry->GetTriggerId() == TBC::INVALID_TRIGGER))
 	{
 		return;
 	}
@@ -750,12 +761,13 @@ void ContextObject::OnLoaded()
 {
 	if (GetPhysics() && GetManager())
 	{
-		OnTick();
-
 		// Calculate total mass.
 		assert(mTotalMass == 0);
 		TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 		mTotalMass = mPhysics->QueryTotalMass(lPhysicsManager);
+
+		OnTick();
+
 		PositionHauler::Set(mPosition, lPhysicsManager, mPhysics, mTotalMass, mAllowMoveRoot);
 
 		GetManager()->EnableTickCallback(this);
@@ -771,7 +783,7 @@ void ContextObject::OnTick()
 void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositionalData)
 {
 	mPosition.CopyData(&pPositionalData);
-	assert(mTotalMass != 0);
+	assert(mTotalMass != 0 || GetPhysics()->GetBoneGeometry(0)->GetTriggerId() != TBC::INVALID_TRIGGER);
 	PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mTotalMass, mAllowMoveRoot);
 }
 

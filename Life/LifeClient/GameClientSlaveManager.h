@@ -121,8 +121,6 @@ protected:
 	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 
-	float QuerySetChildishness(Cure::ContextObject* pOwnedObject) const;
-
 	Cure::NetworkClient* GetNetworkClient() const;
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition) = 0;

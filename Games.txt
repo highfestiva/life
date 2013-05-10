@@ -79,6 +79,8 @@ A game in which a server is also a client listening to other servers, and where 
 
 Soap bubble game? Produce and catch 'em all.
 
+Something inflatable... For instance spheres... Mm... something!
+
 Car Jumpin'
 
 Make a game with speech controls, for instance using http://www.politepix.com/openears/.

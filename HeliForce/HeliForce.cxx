@@ -173,6 +173,19 @@ void HeliForce::Init()
 
 	Parent::Init();
 
+	/*Vector3DF lDelta(1, 0, 1);
+	QuaternionF q8(PIF/8, lDelta);
+	QuaternionF q4(PIF/4, lDelta);
+	QuaternionF q2(PIF/2, lDelta);
+	QuaternionF q1(PIF/1, lDelta);
+	Vector3DF v(0,1,0);
+	struct c { static str s(Vector3DF v) { return strutil::Format(_T("%.2f,%.2f,%.2f"), v.x, v.y, v.z); } };
+	mLog.Infof(_T("8:%s, 4:%s, 2:%s, 1:%s"),
+		c::s(q8*v).c_str(),
+		c::s(q4*v).c_str(),
+		c::s(q2*v).c_str(),
+		c::s(q1*v).c_str());
+	::exit(0);*/
 }
 
 bool HeliForce::MainLoop()

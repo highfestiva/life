@@ -1197,7 +1197,7 @@ void GameServerManager::HandleWorldBoundaries()
 	for (; x != lObjectTable.end(); ++x)
 	{
 		Cure::ContextObject* lObject = x->second;
-		if (lObject->IsLoaded())
+		if (lObject->IsLoaded() && lObject->GetPhysics())
 		{
 			const Vector3DF lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -2000.0f, +2000.0f) ||

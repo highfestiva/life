@@ -19,6 +19,7 @@
 #include "../Life/LifeClient/ClientOptions.h"
 #include "../Life/LifeClient/ExplodingMachine.h"
 #include "../Life/LifeClient/FastProjectile.h"
+#include "../Life/LifeClient/HomingProjectile.h"
 #include "../Life/LifeClient/Level.h"
 #include "../Life/LifeClient/MassObject.h"
 #include "../Life/LifeClient/Mine.h"
@@ -44,6 +45,7 @@
 #include "HeliForceTicker.h"
 #include "LandingTrigger.h"
 #include "RtVar.h"
+#include "Sunlight.h"
 #include "Version.h"
 
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
@@ -95,6 +97,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mActiveWeapon(0),
 	mLevel(0),
 	mOldLevel(0),
+	mSunlight(0),
 	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 100)),
 	mCameraSpeed(0),
 	mZoomHeli(false),
@@ -139,6 +142,8 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lLeftName  = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
@@ -188,6 +193,11 @@ void HeliForceManager::Close()
 	delete mFireButton;
 	mFireButton = 0;
 #endif // Touch or emulated touch.
+	if (mSunlight)
+	{
+		delete mSunlight;
+		mSunlight = 0;
+	}
 	Parent::Close();
 }
 
@@ -262,8 +272,6 @@ bool HeliForceManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 
 void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
-	(void)pExplosive;
-
 	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
@@ -278,7 +286,7 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	if (dynamic_cast<Life::Mine*>(pExplosive))
+	if (pExplosive->GetClassId().find(_T("mine")) != str::npos)
 	{
 		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
 		lFireColor.Set(0.3f, 0.7f, 0.2f);
@@ -287,6 +295,31 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 		lShrapnelColor.Set(0.5f, 0.5f, 0.1f);
 	}
 	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
+
+	// Shove!
+	ScopeLock lLock(GetTickLock());
+	TBC::PhysicsManager* lPhysicsManager = GetPhysicsManager();
+	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
+	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
+	for (; x != lObjectTable.end(); ++x)
+	{
+		Cure::ContextObject* lObject = x->second;
+		if (!lObject->IsLoaded())
+		{
+			continue;
+		}
+		const float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength);
+		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
+		{
+			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
+			if (lHealth)
+			{
+				lHealth->SetValue(lHealth->GetValue() - lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f));
+			}
+			x->second->ForceSend();
+		}
+		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength*0.1f);
+	}
 }
 
 void HeliForceManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
@@ -345,6 +378,7 @@ bool HeliForceManager::InitializeUniverse()
 	mMassObjectArray.clear();
 	mLevel = (Life::Level*)Parent::CreateContextObject(_T("level_00"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
+	mSunlight = new Sunlight(mUiManager);
 	return true;
 }
 
@@ -356,6 +390,7 @@ void HeliForceManager::CreateChopper(const str& pClassId)
 	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 	assert(lSpawner);
 	Cure::ContextObject* lAvatar = Parent::CreateContextObject(pClassId, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	lAvatar->QuerySetChildishness(1);
 	lSpawner->PlaceObject(lAvatar);
 	mAvatarId = lAvatar->GetInstanceId();
 	mAvatarCreateTimer.Start();
@@ -447,8 +482,6 @@ void HeliForceManager::TickUiInput()
 		// Show billboard.
 		if (lObject)
 		{
-			QuerySetChildishness(lObject);
-
 			// Control steering.
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
@@ -542,7 +575,11 @@ void HeliForceManager::SetMassRender(bool pRender)
 Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) const
 {
 	Cure::CppContextObject* lObject;
-	if (pClassId == _T("grenade") || pClassId == _T("rocket"))
+	if (pClassId == _T("missile"))
+	{
+		lObject = new Life::HomingProjectile(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+	}
+	else if (pClassId == _T("grenade") || pClassId == _T("rocket"))
 	{
 		lObject = new Life::FastProjectile(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 	}
@@ -671,15 +708,6 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	{
 		mIsHitThisFrame = true;
 		++mHitGroundFrameCount;
-	}
-
-	if (pObject1->GetInstanceId() == mAvatarId && mAvatarCreateTimer.IsStarted())
-	{
-		if (mAvatarCreateTimer.QueryTimeDiff() > 3.0)
-		{
-			mAvatarCreateTimer.Stop();
-		}
-		return;
 	}
 
 	// Check if we're colliding with a smooth landing pad.
@@ -832,7 +860,14 @@ void HeliForceManager::ScriptPhysicsTick()
 		UpdateCameraPosition(false);
 	}
 
-	if (mAvatarCreateTimer.IsStarted() || (mAvatarId && GetContext()->GetObject(mAvatarId)))
+	if (mAvatarCreateTimer.IsStarted())
+	{
+		if (mAvatarCreateTimer.QueryTimeDiff() > 1.0)
+		{
+			mAvatarCreateTimer.Stop();
+		}
+	}
+	if (mAvatarCreateTimer.IsStarted() || GetContext()->GetObject(mAvatarId))
 	{
 		mAvatarDied.Stop();
 	}
@@ -848,6 +883,52 @@ void HeliForceManager::ScriptPhysicsTick()
 	Parent::ScriptPhysicsTick();
 }
 
+void HeliForceManager::HandleWorldBoundaries()
+{
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	if (lAvatar && !mTooFarAwayTimer.IsStarted() && lAvatar->GetPosition().GetLength() > 300)
+	{
+		mTooFarAwayTimer.Start();
+		Life::HomingProjectile* lRocket = (Life::HomingProjectile*)Parent::CreateContextObject(_T("missile"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
+		lRocket->SetTarget(mAvatarId);
+		const Vector3DF lFirePosition(-10, -300, 100);
+		lRocket->SetInitialTransform(TransformationF(QuaternionF(), lFirePosition));
+		lRocket->StartLoading();
+	}
+	else if (mTooFarAwayTimer.IsStarted() && mTooFarAwayTimer.QueryTimeDiff() > 5.0)
+	{
+		mTooFarAwayTimer.Stop();
+	}
+
+	std::vector<Cure::GameObjectId> lLostObjectArray;
+	typedef Cure::ContextManager::ContextObjectTable ContextTable;
+	const ContextTable& lObjectTable = GetContext()->GetObjectTable();
+	ContextTable::const_iterator x = lObjectTable.begin();
+	for (; x != lObjectTable.end(); ++x)
+	{
+		Cure::ContextObject* lObject = x->second;
+		if (lObject->IsLoaded() && lObject->GetPhysics())
+		{
+			const Vector3DF lPosition = lObject->GetPosition();
+			if (!Math::IsInRange(lPosition.x, -1000.0f, +1000.0f) ||
+				!Math::IsInRange(lPosition.y, -1000.0f, +1000.0f) ||
+				!Math::IsInRange(lPosition.z, -1000.0f, +1000.0f))
+			{
+				lLostObjectArray.push_back(lObject->GetInstanceId());
+			}
+		}
+	}
+	if (!lLostObjectArray.empty())
+	{
+		ScopeLock lLock(GetTickLock());
+		std::vector<Cure::GameObjectId>::const_iterator y = lLostObjectArray.begin();
+		for (; y != lLostObjectArray.end(); ++y)
+		{
+			DeleteContextObject(*y);
+		}
+	}
+}
+
 void HeliForceManager::MoveCamera()
 {
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
@@ -856,7 +937,11 @@ void HeliForceManager::MoveCamera()
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
 		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -60, 0));
-		if (mZoomHeli)
+		if (lAvatar->GetAttributeFloatValue(_T("float_health")) <= 0)
+		{
+			return;
+		}
+		else if (mZoomHeli)
 		{
 			Cure::ContextObject* lLevel = mOldLevel? mOldLevel : mLevel;
 			lTargetTransform.GetPosition() = GetLandingTriggerPosition(lLevel) + Vector3DF(0, 0, 10);
@@ -867,11 +952,14 @@ void HeliForceManager::MoveCamera()
 		}
 		Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
 
-		const float lCamDistance = mCameraTransform.GetPosition().GetDistance(lAvatarPosition);
-		const float lMaxCamSpeed = Math::SmoothClamp(lCamDistance/40, 0.1f, 5.0f, 0.3f);
-		if (lDelta.GetLength() > lMaxCamSpeed)
+		const float lCamNormalizedDistance = mCameraTransform.GetPosition().GetDistance(lAvatarPosition) / 40;
+		if (lCamNormalizedDistance < 2.5f)
 		{
-			lDelta.Normalize(lMaxCamSpeed);
+			const float lMaxCamSpeed = Math::SmoothClamp(lCamNormalizedDistance, 0.1f, 5.0f, 0.3f);
+			if (lDelta.GetLength() > lMaxCamSpeed)
+			{
+				lDelta.Normalize(lMaxCamSpeed);
+			}
 		}
 		mCameraTransform.GetPosition() += lDelta;
 
@@ -885,6 +973,12 @@ void HeliForceManager::MoveCamera()
 		float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
 		lFoV = Math::SmoothClamp(lFoV, 30.0f, 60.0f, 0.4f);
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);
+
+		/*CURE_RTVAR_ARITHMETIC(GetVariableScope(), "cam_ang", double, +, 0.01, 0.0, 3000.0);
+		QuaternionF q;
+		mCameraTransform = TransformationF(QuaternionF(), Vector3DF(0, -300, 50));
+		mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(0,0,1), (float)CURE_RTVAR_SLOW_TRYGET(GetVariableScope(), "cam_ang", 0.0));
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);*/
 
 		UpdateMassObjects(mCameraTransform.GetPosition());
 	}

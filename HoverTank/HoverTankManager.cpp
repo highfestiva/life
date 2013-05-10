@@ -602,7 +602,9 @@ void HoverTankManager::TickUiInput()
 
 		if (lObject)
 		{
-			QuerySetChildishness(lObject);
+			float lChildishness;
+			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+			lObject->QuerySetChildishness(lChildishness);
 
 			// Control steering.
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();

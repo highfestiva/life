@@ -120,7 +120,7 @@ void ParticleRenderer::Render()
 		{
 			mRenderer->SetLightPosition(y->mRenderLightId, y->mPosition);
 			mRenderer->SetLightColor(y->mRenderLightId, Vector3DF(0.6f, 0.4f, 0.2f) * y->mStrength * 30.0f);
-			assert(y->mStrength >= 0 && y->mStrength < 10);
+			assert(y->mStrength >= 0 && y->mStrength < 1000);
 		}
 	}
 }

@@ -8,7 +8,6 @@
 #include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/ContextObjectAttribute.h"
-#include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -1187,22 +1186,6 @@ void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::
 	{
 		assert(false);
 	}
-}
-
-
-
-float GameClientSlaveManager::QuerySetChildishness(Cure::ContextObject* pOwnedObject) const
-{
-	const str lName = _T("float_childishness");
-	Cure::FloatAttribute* lAttribute = (Cure::FloatAttribute*)pOwnedObject->GetAttribute(lName);
-	if (!lAttribute)
-	{
-		lAttribute = new Cure::FloatAttribute(pOwnedObject, lName, 0);
-	}
-	float lChildishness;
-	CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
-	lAttribute->SetValue(lChildishness);
-	return lChildishness;
 }
 
 

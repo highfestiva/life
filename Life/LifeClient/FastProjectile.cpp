@@ -38,7 +38,7 @@ FastProjectile::~FastProjectile()
 	delete mShreekSound;
 	mShreekSound = 0;
 
-	if (mExplosiveEnergy)
+	if (mExplosiveEnergy && GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 	{
 		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy);
 	}
@@ -82,9 +82,10 @@ void FastProjectile::OnLoaded()
 void FastProjectile::StartBullet(float pMuzzleVelocity)
 {
 	const bool lIsSynchronized = !GetManager()->IsLocalGameObjectId(GetInstanceId());
-	ProjectileUtil::StartBullet(this, pMuzzleVelocity, !lIsSynchronized);
+	const bool lHasBarrel = (GetOwnerInstanceId() != 0);
+	ProjectileUtil::StartBullet(this, pMuzzleVelocity, !lIsSynchronized && lHasBarrel);
 
-	if (lIsSynchronized)
+	if (lIsSynchronized && lHasBarrel)
 	{
 		// Move mesh to muzzle and let it lerp towards object.
 		TransformationF lTransform;
@@ -105,25 +106,7 @@ void FastProjectile::OnMicroTick(float pFrameTime)
 {
 	Parent::OnMicroTick(pFrameTime);
 
-	//const TBC::ChunkyBoneGeometry* lRootGeometry = GetPhysics()->GetBoneGeometry(0);
-	//TBC::PhysicsManager::BodyID lBody = lRootGeometry->GetTriggerId();
-	//TransformationF lTransform;
-	//GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
-	//static QuaternionF q;
-	//static int lFrame = 0;
-	//++lFrame;
-	//if ((q - lTransform.GetOrientation()).GetNorm() >= 0.01f)
-	//{
-	//	mLog.Infof(_T("Fast projectile BEFORE bullet tick (ID %u, frame %i): (%f;%f;%f;%f)."), GetInstanceId(), lFrame, lTransform.GetOrientation().GetA(), lTransform.GetOrientation().GetB(), lTransform.GetOrientation().GetC(), lTransform.GetOrientation().GetD());
-	//	q = lTransform.GetOrientation();
-	//}
 	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
-	//GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
-	//if ((q - lTransform.GetOrientation()).GetNorm() >= 0.01f)
-	//{
-	//	mLog.Infof(_T("Fast projectile AFTER bullet tick (ID %u, frame %i): (%f;%f;%f;%f)."), GetInstanceId(), lFrame, lTransform.GetOrientation().GetA(), lTransform.GetOrientation().GetB(), lTransform.GetOrientation().GetC(), lTransform.GetOrientation().GetD());
-	//	q = lTransform.GetOrientation();
-	//}
 }
 
 void FastProjectile::OnTick()

@@ -43,6 +43,10 @@ namespace HeliForce
 
 
 
+class Sunlight;
+
+
+
 class HeliForceManager: public Life::GameClientSlaveManager, private Life::Launcher
 {
 	typedef Life::GameClientSlaveManager Parent;
@@ -83,6 +87,7 @@ protected:
 	void CreateChopper(const str& pClassId);
 
 	virtual void ScriptPhysicsTick();
+	virtual void HandleWorldBoundaries();
 	virtual void MoveCamera();
 	virtual void TickInput();
 
@@ -116,6 +121,7 @@ protected:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
+	StopWatch mTooFarAwayTimer;
 	StopWatch mAvatarCreateTimer;
 	StopWatch mAvatarDied;
 	bool mHadAvatar;
@@ -126,6 +132,7 @@ protected:
 
 	Life::Level* mLevel;
 	Life::Level* mOldLevel;
+	Sunlight* mSunlight;
 	ObjectArray mMassObjectArray;
 
 	TransformationF mCameraTransform;

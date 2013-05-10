@@ -6,7 +6,7 @@
 
 #include "Explosion.h"
 #include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextObject.h"
+#include "../Cure/Include/CppContextObject.h"
 #include "../TBC/Include/ChunkyBoneGeometry.h"
 #include "../TBC/Include/ChunkyPhysics.h"
 
@@ -143,21 +143,23 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::ContextObj
 		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
 		{
 			pPhysicsManager->DetachToDynamic(lGeometry->GetBodyId(), lGeometry->GetMass());
-			if (x == 0)
+			/*if (x == 0)
 			{
 				pPhysicsManager->SetBodyVelocity(lGeometry->GetBodyId(), Vector3DF());
-			}
+			}*/
 		}
 		else if (lGeometry->GetJointId() != TBC::INVALID_JOINT)
 		{
 			pPhysicsManager->DeleteJoint(lGeometry->GetJointId());
 			lGeometry->ResetJointId();
 		}
-		pObject->GetManager()->RemovePhysicsBody(lGeometry->GetBodyId());
-		pPhysicsManager->SetForceFeedbackListener(lGeometry->GetBodyId(), 0);
+		/*pObject->GetManager()->RemovePhysicsBody(lGeometry->GetBodyId());
+		pPhysicsManager->SetForceFeedbackListener(lGeometry->GetBodyId(), 0);*/
 	}
 
 	lPhysics->ClearEngines();
+
+	pObject->QuerySetChildishness(0);
 }
 
 
