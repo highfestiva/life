@@ -479,6 +479,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			lOk = (lIndex < (int)(pSize - 11*sizeof(float) - 4));
 			assert(lOk);
 			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, TransformationF(lTransformArray));
+			lClass->AddPhysRoot(lPhysicsIndex);
 		}
 		UiTbc::ChunkyClass::Material lMaterial;
 		if (lOk)

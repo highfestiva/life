@@ -58,7 +58,8 @@ private:
 		TransformationF mTransform;
 		Material mMaterial;
 	};
-	std::vector<PhysMeshEntry> mMeshArray;
+	typedef std::vector<PhysMeshEntry> PhysMeshArray;
+	PhysMeshArray mMeshArray;
 
 	LOG_CLASS_DECLARE();
 };

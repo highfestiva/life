@@ -44,7 +44,6 @@ void HomingProjectile::OnTick()
 		{
 			Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
 
-			const Vector3DF lFirePosition = Vector3DF(0, 0, 100);
 			Vector3DF lDelta = (lObject->GetPosition() - lPositionalData->mPosition.mTransformation.GetPosition()).GetNormalized();
 			if (mMaxVelocity > 0)
 			{

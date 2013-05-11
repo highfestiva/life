@@ -10,6 +10,7 @@
 #include "../TBC/Include/PhysicsEngine.h"
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/Launcher.h"
+#include "../UiCure/Include/UiResourceManager.h"
 #include "HeliForce.h"
 #include "Version.h"
 
@@ -25,9 +26,11 @@ class TouchstickInputDevice;
 namespace UiCure
 {
 class CollisionSoundManager;
+class CppContextObject;
 }
 namespace UiTbc
 {
+class BillboardGeometry;
 class Button;
 }
 namespace Life
@@ -62,6 +65,7 @@ public:
 	virtual void SetIsQuitting();
 	virtual void SetFade(float pFadeAmount);
 
+	virtual bool Render();
 	virtual bool Paint();
 
 	virtual void OnLoginSuccess();
@@ -74,7 +78,7 @@ public:
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
-	virtual void DidFinishLevel();
+	virtual bool DidFinishLevel();
 	virtual void NextLevel();
 
 protected:
@@ -108,6 +112,7 @@ protected:
 
 	Vector3DF GetLandingTriggerPosition(Cure::ContextObject* pLevel) const;
 	float EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition);
+	TransformationF GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const;
 
 	void Shoot(Cure::ContextObject*, int);
 
@@ -116,6 +121,8 @@ protected:
 	void DrawStick(Touchstick* pStick);
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
+
+	void RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource);
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 
@@ -138,7 +145,8 @@ protected:
 	TransformationF mCameraTransform;
 	Vector3DF mCameraPreviousPosition;
 	float mCameraSpeed;
-	bool mZoomHeli;
+	bool mZoomPlatform;
+	int mPostZoomPlatformFrameCount;
 	int mHitGroundFrameCount;
 	bool mIsHitThisFrame;
 	Vector3DF mMicrophoneSpeed;
@@ -149,6 +157,12 @@ protected:
 	HiResTimer mTouchstickTimer;
 	Touchstick* mStickLeft;
 	Touchstick* mStickRight;
+
+	UiCure::UserRendererImageResource* mArrow;
+	UiTbc::BillboardGeometry* mArrowBillboard;
+	UiTbc::Renderer::GeometryID mArrowBillboardId;
+	float mArrowTotalPower;
+	float mArrowAngle;
 
 	LOG_CLASS_DECLARE();
 };

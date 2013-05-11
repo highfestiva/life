@@ -19,6 +19,7 @@
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../Lepra/Include/Transformation.h"
+#include "../../Lepra/Include/Vector2D.h"
 #include "UiTBC.h"
 #include "UiBillboardRenderInfo.h"
 #include "UiTexture.h"

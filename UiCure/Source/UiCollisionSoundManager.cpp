@@ -136,9 +136,18 @@ void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPositio
 		}
 		else
 		{
-			// We are newer or different! Replay!
-			StopSound(pKey);
-			PlaySound(pKey, pSoundName, pPosition, pImpact);
+			// We are newer or different.
+			if (pImpact > lSoundInfo->mBaseImpact * 0.7f)
+			{
+				// ... and we almost as load! Play us instead!
+				StopSound(pKey);
+				PlaySound(pKey, pSoundName, pPosition, pImpact);
+			}
+			else
+			{
+				// We must play both sounds at once. This hack (using key+1) will allow us to fire-and-forget.
+				OnCollision(pImpact, pPosition, pKey+1, pSoundName);
+			}
 		}
 	}
 	else

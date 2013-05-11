@@ -672,7 +672,7 @@ void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
 	OGL_ASSERT();
 }
 
-void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF> pCoords, const std::vector<Vector2DF> pTexCoords)
+void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF>& pCoords, const std::vector<Vector2DF>& pTexCoords)
 {
 	OGL_ASSERT();
 	assert(pCoords.size() == pTexCoords.size());
@@ -711,7 +711,7 @@ void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF> 
 
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glTexCoordPointer(2, GL_FLOAT, 0, &pTexCoords[0]);
-	::glVertexPointer(2, GL_FLOAT, 0, &pCoords[0]);
+	::glVertexPointer(3, GL_FLOAT, 0, &pCoords[0]);
 	::glDrawArrays(GL_TRIANGLE_FAN, 0, pCoords.size());
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glDisable(GL_TEXTURE_2D);

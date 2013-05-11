@@ -1210,6 +1210,25 @@ bool ChunkyClassLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int6
 		}
 		delete[] (lBuffer);
 	}
+	else if (pType == TBC::CHUNK_CLASS_MESH_LIST)
+	{
+		FileElementList lLoadList;
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
+		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
+		assert(lOk);
+	}
+	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
+	{
+		uint8* lBuffer = 0;
+		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
+		assert(lOk);
+		if (lOk)
+		{
+			int32 lPhysicsIndex = Endian::BigToHost(*(int32*)lBuffer);
+			lClass->AddPhysRoot(lPhysicsIndex);
+		}
+		delete[] (lBuffer);
+	}
 	else
 	{
 		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);

@@ -50,14 +50,14 @@ void CenteredMachine::OnDie()
 {
 	if (mIsDetonated)
 	{
-		GetManager()->GetGameManager()->DeleteContextObjectDelay(this, 3.0);
+		//GetManager()->GetGameManager()->DeleteContextObjectDelay(this, 3.0);
 		return;
 	}
 	mIsDetonated = true;
 
-	mLauncher->Detonate(this, GetPhysics()->GetBoneGeometry(0), GetPosition(), GetVelocity(), Vector3DF(), 2);
 	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this);
-	CenterMeshes();
+	mLauncher->Detonate(this, GetPhysics()->GetBoneGeometry(0), GetPosition(), GetVelocity(), Vector3DF(), 2);
+	//CenterMeshes();
 	GetManager()->GetGameManager()->DeleteContextObjectDelay(this, 3.0);
 }
 

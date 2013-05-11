@@ -13,7 +13,7 @@
 
 namespace Cure
 {
-class ContextObject;
+class CppContextObject;
 }
 namespace TBC
 {
@@ -32,7 +32,7 @@ class Explosion
 public:
 	static float CalculateForce(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength);
 	static float PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength);
-	static void FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::ContextObject* pObject);
+	static void FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject);
 
 	LOG_CLASS_DECLARE();
 };

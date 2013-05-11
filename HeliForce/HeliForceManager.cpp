@@ -39,6 +39,7 @@
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "../UiTBC/Include/UiBillboardGeometry.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "CenteredMachine.h"
 #include "HeliForceConsoleManager.h"
@@ -100,14 +101,20 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mSunlight(0),
 	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 100)),
 	mCameraSpeed(0),
-	mZoomHeli(false),
+	mZoomPlatform(false),
+	mPostZoomPlatformFrameCount(100),
 	mHitGroundFrameCount(STILL_FRAMES_UNTIL_CAM_PANS),
 	mIsHitThisFrame(false),
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	mFireButton(0),
 #endif // Touch or emulated touch.
 	mStickLeft(0),
-	mStickRight(0)
+	mStickRight(0),
+	mArrow(0),
+	mArrowBillboard(0),
+	mArrowBillboardId(0),
+	mArrowTotalPower(0),
+	mArrowAngle(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
@@ -144,6 +151,7 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, true);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lLeftName  = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
@@ -183,6 +191,14 @@ bool HeliForceManager::Open()
 		mFireButton->SetOnClick(HeliForceManager, OnFireButton);
 	}
 #endif // Touch or emulated touch.
+	if (lOk)
+	{
+		mArrow = new UiCure::UserRendererImageResource(mUiManager, false);
+		mArrow->Load(GetResourceManager(), _T("arrow.png"),
+			UiCure::UserRendererImageResource::TypeLoadCallback(this, &HeliForceManager::RendererTextureLoadCallback));
+		mArrowBillboard = new UiTbc::BillboardGeometry(1/4.0f, 1);
+		mArrowBillboardId = mUiManager->GetRenderer()->AddGeometry(mArrowBillboard, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
+	}
 	return lOk;
 }
 
@@ -213,6 +229,50 @@ void HeliForceManager::SetFade(float pFadeAmount)
 }
 
 
+
+bool HeliForceManager::Render()
+{
+	bool lOk = Parent::Render();
+
+	if (!lOk)
+	{
+		return lOk;
+	}
+	const UiCure::CppContextObject* lObject = (const UiCure::CppContextObject*)GetContext()->GetObject(mAvatarId);
+	if (!lObject || mPostZoomPlatformFrameCount < 10)
+	{
+		return true;
+	}
+	if (mArrow->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE || lObject->GetPhysics()->GetEngineCount() < 3)
+	{
+		return true;
+	}
+	const Life::Options::Steering& s = mOptions.GetSteeringControl();
+#define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
+	const float lWantedDirection = S(RIGHT3D) - S(LEFT3D);
+	const float lPower = S(UP3D) - S(DOWN3D);
+	if (lPower < 0.2f)
+	{
+		return true;
+	}
+	TransformationF lTransform = GetMainRotorTransform(lObject);
+	const float lTotalPower = ::sqrt(lWantedDirection*lWantedDirection + lPower*lPower);
+	mArrowTotalPower = Math::Lerp(mArrowTotalPower, lTotalPower, 0.3f);
+	mArrowAngle = Math::Lerp(mArrowAngle, ::atan2(lWantedDirection, lPower), 0.3f);
+	float lSize = mArrowTotalPower*0.5f;
+	float lFoV;
+	CURE_RTVAR_GET(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+	lSize *= lTransform.GetPosition().GetDistance(mCameraTransform.GetPosition()) * lFoV / 2400;
+	Vector3DF lPosition = lTransform.GetPosition();
+	lPosition.x += ::sin(mArrowAngle) * lSize * 3.4f;
+	lPosition.z += ::cos(mArrowAngle) * lSize * 3.4f;
+
+	UiTbc::BillboardRenderInfoArray lBillboards;
+	lBillboards.push_back(UiTbc::BillboardRenderInfo(mArrowAngle, lPosition, lSize, Vector3DF(1, 1, 1), 1, 0));
+	mUiManager->GetRenderer()->RenderBillboards(mArrowBillboard, true, false, lBillboards);
+
+	return true;
+}
 
 bool HeliForceManager::Paint()
 {
@@ -336,15 +396,18 @@ void HeliForceManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextOb
 
 
 
-void HeliForceManager::DidFinishLevel()
+bool HeliForceManager::DidFinishLevel()
 {
 	mLog.AHeadline("Level done!");
-	if (GetContext()->GetObject(mAvatarId))
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
 	{
 		UiCure::UserSound3dResource* lFinishSound = new UiCure::UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, mCameraTransform.GetPosition(), Vector3DF(), 5.0f, 1.0f);
-		mZoomHeli = true;
+		mZoomPlatform = true;
+		return true;
 	}
+	return false;
 }
 
 void HeliForceManager::NextLevel()
@@ -385,7 +448,7 @@ bool HeliForceManager::InitializeUniverse()
 void HeliForceManager::CreateChopper(const str& pClassId)
 {
 	mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
-	mZoomHeli = false;
+	mZoomPlatform = false;
 
 	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 	assert(lSpawner);
@@ -479,7 +542,6 @@ void HeliForceManager::TickUiInput()
 	{
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 
-		// Show billboard.
 		if (lObject)
 		{
 			// Control steering.
@@ -494,8 +556,7 @@ void HeliForceManager::TickUiInput()
 			const float lPowerLeftRight = ::cos(lYaw) * lWantedChange;
 			SetAvatarEnginePower(lObject, 4, lPowerFwdRev);
 			SetAvatarEnginePower(lObject, 5, lPowerLeftRight);
-			float lPower = S(UP3D) - S(DOWN3D);
-			lPower = Math::Lerp(0.0f, 1.0f, lPower);
+			const float lPower = S(UP3D) - S(DOWN3D);
 			SetAvatarEnginePower(lObject, 7, lPower);
 
 			// Control fire.
@@ -511,7 +572,7 @@ void HeliForceManager::TickUiInput()
 
 bool HeliForceManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower)
 {
-	if (mZoomHeli)
+	if (mZoomPlatform)
 	{
 		return false;
 	}
@@ -682,7 +743,7 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mCameraPreviousPosition = mCameraTransform.GetPosition();
 				UpdateCameraPosition(true);
 			}
-			mZoomHeli = false;
+			mZoomPlatform = false;
 		}
 		else
 		{
@@ -723,6 +784,17 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 				lCollisionImpactFactor = 1;
 				break;
 			}
+		}
+	}
+
+	// Check if it's a rotor!
+	if (pObject1->GetClassId().find(_T("helicopter_")) != str::npos)
+	{
+		TBC::ChunkyBoneGeometry* lGeometry = pObject1->GetStructureGeometry(pBody1Id);
+		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_HINGE &&
+			lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
+		{
+			lCollisionImpactFactor *= 1000;
 		}
 	}
 
@@ -796,6 +868,23 @@ float HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* 
 	return lDistanceToGround;
 }
 
+TransformationF HeliForceManager::GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const
+{
+	int lPhysIndex;
+	str lMeshName;
+	TransformationF lTransform;
+	size_t lMeshCount = ((UiTbc::ChunkyClass*)pChopper->GetClass())->GetMeshCount();
+	for (size_t x = 0; x < lMeshCount; ++x)
+	{
+		((UiTbc::ChunkyClass*)pChopper->GetClass())->GetMesh(x, lPhysIndex, lMeshName, lTransform);
+		if (lMeshName.find(_T("_rotor")) != str::npos)
+		{
+			return pChopper->GetMesh(x)->GetBaseTransformation();
+		}
+	}
+	return lTransform;
+}
+
 void HeliForceManager::Shoot(Cure::ContextObject*, int)
 {
 }
@@ -862,7 +951,7 @@ void HeliForceManager::ScriptPhysicsTick()
 
 	if (mAvatarCreateTimer.IsStarted())
 	{
-		if (mAvatarCreateTimer.QueryTimeDiff() > 1.0)
+		if (mAvatarCreateTimer.QueryTimeDiff() > 2.0)
 		{
 			mAvatarCreateTimer.Stop();
 		}
@@ -874,7 +963,7 @@ void HeliForceManager::ScriptPhysicsTick()
 	else if (mAvatarId)
 	{
 		mAvatarDied.TryStart();
-		if (mAvatarDied.QueryTimeDiff() > 0)
+		if (mAvatarDied.QueryTimeDiff() > 0.1f)
 		{
 			CreateChopper(_T("helicopter_01"));
 		}
@@ -891,11 +980,14 @@ void HeliForceManager::HandleWorldBoundaries()
 		mTooFarAwayTimer.Start();
 		Life::HomingProjectile* lRocket = (Life::HomingProjectile*)Parent::CreateContextObject(_T("missile"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		lRocket->SetTarget(mAvatarId);
-		const Vector3DF lFirePosition(-10, -300, 100);
+		Vector3DF lFirePosition(lAvatar->GetPosition().x, 0, 0);
+		lFirePosition.Normalize(500);
+		lFirePosition += lAvatar->GetPosition();
+		lFirePosition.z += 200;
 		lRocket->SetInitialTransform(TransformationF(QuaternionF(), lFirePosition));
 		lRocket->StartLoading();
 	}
-	else if (mTooFarAwayTimer.IsStarted() && mTooFarAwayTimer.QueryTimeDiff() > 5.0)
+	else if (mTooFarAwayTimer.IsStarted() && mTooFarAwayTimer.QueryTimeDiff() > 25.0)
 	{
 		mTooFarAwayTimer.Stop();
 	}
@@ -937,14 +1029,16 @@ void HeliForceManager::MoveCamera()
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
 		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -60, 0));
+		++mPostZoomPlatformFrameCount;
 		if (lAvatar->GetAttributeFloatValue(_T("float_health")) <= 0)
 		{
 			return;
 		}
-		else if (mZoomHeli)
+		else if (mZoomPlatform)
 		{
 			Cure::ContextObject* lLevel = mOldLevel? mOldLevel : mLevel;
 			lTargetTransform.GetPosition() = GetLandingTriggerPosition(lLevel) + Vector3DF(0, 0, 10);
+			mPostZoomPlatformFrameCount = 0;
 		}
 		else if (mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
 		{
@@ -966,9 +1060,17 @@ void HeliForceManager::MoveCamera()
 		// Angle.
 		const float x = lAvatarPosition.y - mCameraTransform.GetPosition().y;
 		const float y = lAvatarPosition.z - mCameraTransform.GetPosition().z;
-		const float lAngle = ::atan2(y, x);
-		lTargetTransform.GetOrientation().RotateAroundOwnX(lAngle);
-		mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 1.0f);
+		const float lXAngle = ::atan2(y, x);
+		lTargetTransform.GetOrientation().RotateAroundOwnX(lXAngle);
+		if (mPostZoomPlatformFrameCount > 10)
+		{
+			const float z = lAvatarPosition.x - mCameraTransform.GetPosition().x;
+			const int lSmoothSteps = mPostZoomPlatformFrameCount-10;
+			const float lSmoothFactor = (lSmoothSteps >= 100)? 1.0f : lSmoothSteps/100.0f;
+			const float lZAngle = -::atan2(z, x) * lSmoothFactor;
+			lTargetTransform.GetOrientation().RotateAroundWorldZ(lZAngle);
+		}
+		mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 0.5f);
 		mCameraSpeed = Math::Lerp(mCameraSpeed, lAvatar->GetVelocity().GetLength()/10, 0.02f);
 		float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
 		lFoV = Math::SmoothClamp(lFoV, 30.0f, 60.0f, 0.4f);
@@ -977,7 +1079,7 @@ void HeliForceManager::MoveCamera()
 		/*CURE_RTVAR_ARITHMETIC(GetVariableScope(), "cam_ang", double, +, 0.01, 0.0, 3000.0);
 		QuaternionF q;
 		mCameraTransform = TransformationF(QuaternionF(), Vector3DF(0, -300, 50));
-		mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(0,0,1), (float)CURE_RTVAR_SLOW_TRYGET(GetVariableScope(), "cam_ang", 0.0));
+		mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(1,0,1), (float)CURE_RTVAR_SLOW_TRYGET(GetVariableScope(), "cam_ang", 0.0));
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);*/
 
 		UpdateMassObjects(mCameraTransform.GetPosition());
@@ -991,6 +1093,13 @@ void HeliForceManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	{
 		mUiManager->SetMicrophonePosition(mCameraTransform, mMicrophoneSpeed);
 	}
+}
+
+
+
+void HeliForceManager::RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource)
+{
+	mUiManager->GetRenderer()->TryAddGeometryTexture(mArrowBillboardId, pResource->GetData());
 }
 
 

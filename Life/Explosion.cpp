@@ -110,7 +110,7 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 		//mLog.Infof(_T("Explosion for %s with strength %f at (%f;%f;%f)."), pObject->GetClassId().c_str(), d, pPosition.x, pPosition.y, pPosition.z);
 		lForce += d;
 		const float lForceFactor = 3000.0f;	// To be able to pass a sensible strength factor to this method.
-		const float ff = lForceFactor * pObject->GetMass() * d;
+		const float ff = lForceFactor * lGeometry->GetMass() * d;
 		if (f.z <= 0.1f)
 		{
 			f.z += 0.3f;
@@ -129,7 +129,7 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 	return lForce;
 }
 
-void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::ContextObject* pObject)
+void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject)
 {
 	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
 	const int lBoneCount = lPhysics->GetBoneCount();
@@ -142,19 +142,19 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::ContextObj
 		}
 		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
 		{
-			pPhysicsManager->DetachToDynamic(lGeometry->GetBodyId(), lGeometry->GetMass());
-			/*if (x == 0)
+			if (pObject->GetClass()->IsPhysRoot(x))
 			{
-				pPhysicsManager->SetBodyVelocity(lGeometry->GetBodyId(), Vector3DF());
-			}*/
+				pPhysicsManager->DetachToDynamic(lGeometry->GetBodyId(), lGeometry->GetMass());
+			}
 		}
 		else if (lGeometry->GetJointId() != TBC::INVALID_JOINT)
 		{
 			pPhysicsManager->DeleteJoint(lGeometry->GetJointId());
 			lGeometry->ResetJointId();
 		}
-		/*pObject->GetManager()->RemovePhysicsBody(lGeometry->GetBodyId());
-		pPhysicsManager->SetForceFeedbackListener(lGeometry->GetBodyId(), 0);*/
+		// This is so that the different parts of the now broken object can collide with each other.
+		pObject->GetManager()->RemovePhysicsBody(lGeometry->GetBodyId());
+		pPhysicsManager->SetForceFeedbackListener(lGeometry->GetBodyId(), 0);
 	}
 
 	lPhysics->ClearEngines();

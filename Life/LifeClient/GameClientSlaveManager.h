@@ -59,7 +59,7 @@ public:
 
 	GameClientMasterTicker* GetMaster() const;
 
-	bool Render();
+	virtual bool Render();
 	virtual bool Paint();
 	virtual bool IsPrimaryManager() const;
 	virtual void PreEndTick();

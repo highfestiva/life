@@ -28,8 +28,10 @@ LandingTrigger::~LandingTrigger()
 
 void LandingTrigger::DidTrigger()
 {
-	((HeliForceManager*)GetManager()->GetGameManager())->DidFinishLevel();
-	GetManager()->AddAlarmCallback(this, 0, mBulletTimeDuration, 0);
+	if (((HeliForceManager*)GetManager()->GetGameManager())->DidFinishLevel())
+	{
+		GetManager()->AddAlarmCallback(this, 0, mBulletTimeDuration, 0);
+	}
 }
 
 void LandingTrigger::OnAlarm(int pAlarmId, void* pExtraData)
