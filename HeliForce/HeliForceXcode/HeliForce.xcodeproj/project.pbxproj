@@ -12,12 +12,37 @@
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
 		35128A4D147262150006467C /* UiSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A4C147262150006467C /* UiSound.cpp */; };
 		B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04914AB36A7007A84E4 /* ContextPath.cpp */; };
-		B110A04D14AB36CC007A84E4 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04B14AB36CC007A84E4 /* Level.cpp */; };
 		B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05114AB3720007A84E4 /* xmplay.cpp */; };
 		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
 		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
 		B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */; };
 		B11732CA16DD51DD00C2DA5B /* UiDynamicRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B11732C916DD51DD00C2DA5B /* UiDynamicRenderer.cpp */; };
+		B13DA597173ED81600A73400 /* Explosion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA594173ED81600A73400 /* Explosion.cpp */; };
+		B13DA598173ED81600A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA595173ED81600A73400 /* Spawner.cpp */; };
+		B13DA599173ED81600A73400 /* StuntTrigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA596173ED81600A73400 /* StuntTrigger.cpp */; };
+		B13DA59C173ED82D00A73400 /* CenteredMachine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA59A173ED82D00A73400 /* CenteredMachine.cpp */; };
+		B13DA59D173ED82D00A73400 /* LandingTrigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA59B173ED82D00A73400 /* LandingTrigger.cpp */; };
+		B13DA5C9173EDA9600A73400 /* BulletTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5BD173EDA9600A73400 /* BulletTime.cpp */; };
+		B13DA5CA173EDA9600A73400 /* Client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5BE173EDA9600A73400 /* Client.cpp */; };
+		B13DA5CB173EDA9600A73400 /* GameServerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5BF173EDA9600A73400 /* GameServerManager.cpp */; };
+		B13DA5CC173EDA9600A73400 /* GameServerTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C0173EDA9600A73400 /* GameServerTicker.cpp */; };
+		B13DA5CD173EDA9600A73400 /* MasterServerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C1173EDA9600A73400 /* MasterServerConnection.cpp */; };
+		B13DA5CE173EDA9600A73400 /* RaceTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C2173EDA9600A73400 /* RaceTimer.cpp */; };
+		B13DA5CF173EDA9600A73400 /* ServerConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C3173EDA9600A73400 /* ServerConsoleManager.cpp */; };
+		B13DA5D0173EDA9600A73400 /* ServerDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C4173EDA9600A73400 /* ServerDelegate.cpp */; };
+		B13DA5D1173EDA9600A73400 /* ServerFastProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C5173EDA9600A73400 /* ServerFastProjectile.cpp */; };
+		B13DA5D2173EDA9600A73400 /* ServerMessageProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C6173EDA9600A73400 /* ServerMessageProcessor.cpp */; };
+		B13DA5D3173EDA9600A73400 /* ServerMine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C7173EDA9600A73400 /* ServerMine.cpp */; };
+		B13DA5D4173EDA9600A73400 /* ServerProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5C8173EDA9600A73400 /* ServerProjectile.cpp */; };
+		B13DA5EA173EDB1200A73400 /* ExplodingMachine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5E7173EDB1200A73400 /* ExplodingMachine.cpp */; };
+		B13DA5EB173EDB1200A73400 /* HomingProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5E8173EDB1200A73400 /* HomingProjectile.cpp */; };
+		B13DA5EC173EDB1200A73400 /* UiGameServerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5E9173EDB1200A73400 /* UiGameServerManager.cpp */; };
+		B13DA5F2173EDB4300A73400 /* FastProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5F1173EDB4300A73400 /* FastProjectile.cpp */; };
+		B13DA5F7173EDB6D00A73400 /* MasterServerNetworkParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5F6173EDB6D00A73400 /* MasterServerNetworkParser.cpp */; };
+		B13DA5FA173EDB9800A73400 /* Mine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5F8173EDB9800A73400 /* Mine.cpp */; };
+		B13DA5FB173EDB9800A73400 /* Projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5F9173EDB9800A73400 /* Projectile.cpp */; };
+		B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA600173EDBD200A73400 /* Spawner.cpp */; };
+		B13DA607173EDBF400A73400 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA606173EDBF400A73400 /* Level.cpp */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -462,21 +487,6 @@
 		B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B1A1DD9813AA6CC60097B8D0 /* window.c */; };
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
-		B1A8B18316C7E0FB00F57DC1 /* Explosion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B17F16C7E0FB00F57DC1 /* Explosion.cpp */; };
-		B1A8B18416C7E0FB00F57DC1 /* FastProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B18016C7E0FB00F57DC1 /* FastProjectile.cpp */; };
-		B1A8B18516C7E0FB00F57DC1 /* Mine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B18116C7E0FB00F57DC1 /* Mine.cpp */; };
-		B1A8B18616C7E0FB00F57DC1 /* Projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B18216C7E0FB00F57DC1 /* Projectile.cpp */; };
-		B1A8B19D16C7E87400F57DC1 /* BombPlane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19416C7E87400F57DC1 /* BombPlane.cpp */; };
-		B1A8B19E16C7E87400F57DC1 /* GameServerLogic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19516C7E87400F57DC1 /* GameServerLogic.cpp */; };
-		B1A8B19F16C7E87400F57DC1 /* Npc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19616C7E87400F57DC1 /* Npc.cpp */; };
-		B1A8B1A016C7E87400F57DC1 /* HeliForceServerConsole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19716C7E87400F57DC1 /* HeliForceServerConsole.cpp */; };
-		B1A8B1A116C7E87400F57DC1 /* HeliForceServerDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19816C7E87400F57DC1 /* HeliForceServerDelegate.cpp */; };
-		B1A8B1A216C7E87400F57DC1 /* HeliForceServerMessageProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19916C7E87400F57DC1 /* HeliForceServerMessageProcessor.cpp */; };
-		B1A8B1A316C7E87400F57DC1 /* ServerFastProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19A16C7E87400F57DC1 /* ServerFastProjectile.cpp */; };
-		B1A8B1A416C7E87400F57DC1 /* ServerMine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19B16C7E87400F57DC1 /* ServerMine.cpp */; };
-		B1A8B1A516C7E87400F57DC1 /* ServerProjectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B19C16C7E87400F57DC1 /* ServerProjectile.cpp */; };
-		B1A8B1AA16C7E8BB00F57DC1 /* ServerDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1A816C7E8BB00F57DC1 /* ServerDelegate.cpp */; };
-		B1A8B1AB16C7E8BB00F57DC1 /* ServerMessageProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1A916C7E8BB00F57DC1 /* ServerMessageProcessor.cpp */; };
 		B1A8B1AD16C7E8D900F57DC1 /* IntAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */; };
 		B1A8B1B116C7EA7100F57DC1 /* ProjectileUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */; };
 		B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */; };
@@ -494,27 +504,13 @@
 		B1D37EFD166AB37000536CE5 /* OptionsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF2166AB37000536CE5 /* OptionsManager.cpp */; };
 		B1D37EFE166AB37000536CE5 /* StopWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF3166AB37000536CE5 /* StopWatch.cpp */; };
 		B1D37EFF166AB37000536CE5 /* UiConsole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF4166AB37000536CE5 /* UiConsole.cpp */; };
-		B1D37F00166AB37000536CE5 /* UiGameServerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF5166AB37000536CE5 /* UiGameServerManager.cpp */; };
 		B1D37F01166AB37000536CE5 /* UiRaceScore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF6166AB37000536CE5 /* UiRaceScore.cpp */; };
 		B1D37F02166AB37000536CE5 /* UiServerConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF7166AB37000536CE5 /* UiServerConsoleManager.cpp */; };
-		B1D37F0B166AB3B400536CE5 /* BulletTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F04166AB3B400536CE5 /* BulletTime.cpp */; };
-		B1D37F0C166AB3B400536CE5 /* Client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F05166AB3B400536CE5 /* Client.cpp */; };
-		B1D37F0D166AB3B400536CE5 /* GameServerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F06166AB3B400536CE5 /* GameServerManager.cpp */; };
-		B1D37F0E166AB3B400536CE5 /* MasterServerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F07166AB3B400536CE5 /* MasterServerConnection.cpp */; };
-		B1D37F0F166AB3B400536CE5 /* RaceTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F08166AB3B400536CE5 /* RaceTimer.cpp */; };
-		B1D37F10166AB3B400536CE5 /* ServerConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F09166AB3B400536CE5 /* ServerConsoleManager.cpp */; };
-		B1D37F11166AB3B400536CE5 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F0A166AB3B400536CE5 /* Spawner.cpp */; };
-		B1D37F1F166AB3F100536CE5 /* LoginView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F14166AB3F100536CE5 /* LoginView.cpp */; };
 		B1D37F20166AB3F100536CE5 /* HeliForce.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F15166AB3F100536CE5 /* HeliForce.mm */; };
 		B1D37F21166AB3F100536CE5 /* HeliForceConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F16166AB3F100536CE5 /* HeliForceConsoleManager.cpp */; };
-		B1D37F22166AB3F100536CE5 /* HeliForceDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F17166AB3F100536CE5 /* HeliForceDemo.cpp */; };
 		B1D37F23166AB3F100536CE5 /* HeliForceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F18166AB3F100536CE5 /* HeliForceManager.cpp */; };
 		B1D37F24166AB3F100536CE5 /* HeliForceTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F19166AB3F100536CE5 /* HeliForceTicker.cpp */; };
-		B1D37F25166AB3F100536CE5 /* HeliForceViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1A166AB3F100536CE5 /* HeliForceViewer.cpp */; };
-		B1D37F26166AB3F100536CE5 /* RoadSignButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1B166AB3F100536CE5 /* RoadSignButton.cpp */; };
-		B1D37F27166AB3F100536CE5 /* ServerListView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1C166AB3F100536CE5 /* ServerListView.cpp */; };
 		B1D37F28166AB3F100536CE5 /* Sunlight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */; };
-		B1D37F29166AB3F100536CE5 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1E166AB3F100536CE5 /* View.cpp */; };
 		B1D37F38166AB53A00536CE5 /* MacThread.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F37166AB53A00536CE5 /* MacThread.mm */; };
 		B1D37F40166AB57A00536CE5 /* GameTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */; };
 		B1D37F41166AB57A00536CE5 /* PhysicsSharedResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */; };
@@ -524,7 +520,6 @@
 		B1D37F48166AB59C00536CE5 /* UiGravelEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */; };
 		B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */; };
 		B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */; };
-		B1D37F4F166AB5F200536CE5 /* MasterServerNetworkParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4E166AB5F200536CE5 /* MasterServerNetworkParser.cpp */; };
 		B1D5E29F172B1F6C00984602 /* UiJetEngineEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
 		B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */; };
@@ -536,7 +531,6 @@
 		B1F3C40B16E0027100B2EFB5 /* UiBillboardGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */; };
 		B1F3C40C16E0027100B2EFB5 /* UiParticleRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */; };
 		B1F3C40E16E0029C00B2EFB5 /* UiParticleLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */; };
-		B1F3C41C16E007C300B2EFB5 /* ExplodingMachine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C41B16E007C300B2EFB5 /* ExplodingMachine.cpp */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
 /* End PBXBuildFile section */
 
@@ -547,12 +541,37 @@
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		35128A4C147262150006467C /* UiSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSound.cpp; path = ../../UiCure/Source/UiSound.cpp; sourceTree = "<group>"; };
 		B110A04914AB36A7007A84E4 /* ContextPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextPath.cpp; path = ../../Cure/Source/ContextPath.cpp; sourceTree = SOURCE_ROOT; };
-		B110A04B14AB36CC007A84E4 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Level.cpp; sourceTree = "<group>"; };
 		B110A05114AB3720007A84E4 /* xmplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmplay.cpp; path = ChibiXM/xmplay.cpp; sourceTree = "<group>"; };
 		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
 		B11732C916DD51DD00C2DA5B /* UiDynamicRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiDynamicRenderer.cpp; sourceTree = "<group>"; };
+		B13DA594173ED81600A73400 /* Explosion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Explosion.cpp; path = ../../Life/Explosion.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA595173ED81600A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Life/Spawner.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA596173ED81600A73400 /* StuntTrigger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StuntTrigger.cpp; path = ../../Life/StuntTrigger.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA59A173ED82D00A73400 /* CenteredMachine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CenteredMachine.cpp; sourceTree = "<group>"; };
+		B13DA59B173ED82D00A73400 /* LandingTrigger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LandingTrigger.cpp; sourceTree = "<group>"; };
+		B13DA5BD173EDA9600A73400 /* BulletTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BulletTime.cpp; path = ../../Life/LifeServer/BulletTime.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5BE173EDA9600A73400 /* Client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Client.cpp; path = ../../Life/LifeServer/Client.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5BF173EDA9600A73400 /* GameServerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameServerManager.cpp; path = ../../Life/LifeServer/GameServerManager.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C0173EDA9600A73400 /* GameServerTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameServerTicker.cpp; path = ../../Life/LifeServer/GameServerTicker.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C1173EDA9600A73400 /* MasterServerConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MasterServerConnection.cpp; path = ../../Life/LifeServer/MasterServerConnection.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C2173EDA9600A73400 /* RaceTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RaceTimer.cpp; path = ../../Life/LifeServer/RaceTimer.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C3173EDA9600A73400 /* ServerConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerConsoleManager.cpp; path = ../../Life/LifeServer/ServerConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C4173EDA9600A73400 /* ServerDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerDelegate.cpp; path = ../../Life/LifeServer/ServerDelegate.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C5173EDA9600A73400 /* ServerFastProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerFastProjectile.cpp; path = ../../Life/LifeServer/ServerFastProjectile.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C6173EDA9600A73400 /* ServerMessageProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerMessageProcessor.cpp; path = ../../Life/LifeServer/ServerMessageProcessor.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C7173EDA9600A73400 /* ServerMine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerMine.cpp; path = ../../Life/LifeServer/ServerMine.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5C8173EDA9600A73400 /* ServerProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerProjectile.cpp; path = ../../Life/LifeServer/ServerProjectile.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5E7173EDB1200A73400 /* ExplodingMachine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ExplodingMachine.cpp; path = ../../Life/LifeClient/ExplodingMachine.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5E8173EDB1200A73400 /* HomingProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HomingProjectile.cpp; path = ../../Life/LifeClient/HomingProjectile.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5E9173EDB1200A73400 /* UiGameServerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiGameServerManager.cpp; path = ../../Life/LifeClient/UiGameServerManager.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5F1173EDB4300A73400 /* FastProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FastProjectile.cpp; path = ../../Life/LifeClient/FastProjectile.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5F6173EDB6D00A73400 /* MasterServerNetworkParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MasterServerNetworkParser.cpp; path = ../../Life/LifeMaster/MasterServerNetworkParser.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5F8173EDB9800A73400 /* Mine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Mine.cpp; path = ../../Life/LifeClient/Mine.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA5F9173EDB9800A73400 /* Projectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Projectile.cpp; path = ../../Life/LifeClient/Projectile.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA600173EDBD200A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Cure/Source/Spawner.cpp; sourceTree = SOURCE_ROOT; };
+		B13DA606173EDBF400A73400 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Level.cpp; path = ../../Life/LifeClient/Level.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1185,21 +1204,6 @@
 		B1A1DD9913AA6CC60097B8D0 /* window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
 		B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiOggAlStream.cpp; sourceTree = "<group>"; };
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
-		B1A8B17F16C7E0FB00F57DC1 /* Explosion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Explosion.cpp; sourceTree = "<group>"; };
-		B1A8B18016C7E0FB00F57DC1 /* FastProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FastProjectile.cpp; sourceTree = "<group>"; };
-		B1A8B18116C7E0FB00F57DC1 /* Mine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mine.cpp; sourceTree = "<group>"; };
-		B1A8B18216C7E0FB00F57DC1 /* Projectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Projectile.cpp; sourceTree = "<group>"; };
-		B1A8B19416C7E87400F57DC1 /* BombPlane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BombPlane.cpp; path = HeliForceServer/BombPlane.cpp; sourceTree = "<group>"; };
-		B1A8B19516C7E87400F57DC1 /* GameServerLogic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameServerLogic.cpp; path = HeliForceServer/GameServerLogic.cpp; sourceTree = "<group>"; };
-		B1A8B19616C7E87400F57DC1 /* Npc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Npc.cpp; path = HeliForceServer/Npc.cpp; sourceTree = "<group>"; };
-		B1A8B19716C7E87400F57DC1 /* HeliForceServerConsole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HeliForceServerConsole.cpp; path = HeliForceServer/HeliForceServerConsole.cpp; sourceTree = "<group>"; };
-		B1A8B19816C7E87400F57DC1 /* HeliForceServerDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HeliForceServerDelegate.cpp; path = HeliForceServer/HeliForceServerDelegate.cpp; sourceTree = "<group>"; };
-		B1A8B19916C7E87400F57DC1 /* HeliForceServerMessageProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HeliForceServerMessageProcessor.cpp; path = HeliForceServer/HeliForceServerMessageProcessor.cpp; sourceTree = "<group>"; };
-		B1A8B19A16C7E87400F57DC1 /* ServerFastProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerFastProjectile.cpp; path = HeliForceServer/ServerFastProjectile.cpp; sourceTree = "<group>"; };
-		B1A8B19B16C7E87400F57DC1 /* ServerMine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerMine.cpp; path = HeliForceServer/ServerMine.cpp; sourceTree = "<group>"; };
-		B1A8B19C16C7E87400F57DC1 /* ServerProjectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerProjectile.cpp; path = HeliForceServer/ServerProjectile.cpp; sourceTree = "<group>"; };
-		B1A8B1A816C7E8BB00F57DC1 /* ServerDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerDelegate.cpp; path = ../../Life/LifeServer/ServerDelegate.cpp; sourceTree = SOURCE_ROOT; };
-		B1A8B1A916C7E8BB00F57DC1 /* ServerMessageProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerMessageProcessor.cpp; path = ../../Life/LifeServer/ServerMessageProcessor.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IntAttribute.cpp; path = ../../Cure/Source/IntAttribute.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectileUtil.cpp; path = ../../Life/ProjectileUtil.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSoundReleaser.cpp; path = ../../UiCure/Source/UiSoundReleaser.cpp; sourceTree = SOURCE_ROOT; };
@@ -1219,27 +1223,13 @@
 		B1D37EF2166AB37000536CE5 /* OptionsManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsManager.cpp; path = ../../Life/LifeClient/OptionsManager.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37EF3166AB37000536CE5 /* StopWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StopWatch.cpp; path = ../../Life/LifeClient/StopWatch.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37EF4166AB37000536CE5 /* UiConsole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiConsole.cpp; path = ../../Life/LifeClient/UiConsole.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37EF5166AB37000536CE5 /* UiGameServerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiGameServerManager.cpp; path = ../../Life/LifeClient/UiGameServerManager.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37EF6166AB37000536CE5 /* UiRaceScore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiRaceScore.cpp; path = ../../Life/LifeClient/UiRaceScore.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37EF7166AB37000536CE5 /* UiServerConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiServerConsoleManager.cpp; path = ../../Life/LifeClient/UiServerConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F04166AB3B400536CE5 /* BulletTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BulletTime.cpp; path = ../../Life/LifeServer/BulletTime.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F05166AB3B400536CE5 /* Client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Client.cpp; path = ../../Life/LifeServer/Client.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F06166AB3B400536CE5 /* GameServerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameServerManager.cpp; path = ../../Life/LifeServer/GameServerManager.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F07166AB3B400536CE5 /* MasterServerConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MasterServerConnection.cpp; path = ../../Life/LifeServer/MasterServerConnection.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F08166AB3B400536CE5 /* RaceTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RaceTimer.cpp; path = ../../Life/LifeServer/RaceTimer.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F09166AB3B400536CE5 /* ServerConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerConsoleManager.cpp; path = ../../Life/LifeServer/ServerConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F0A166AB3B400536CE5 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Life/LifeServer/Spawner.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F14166AB3F100536CE5 /* LoginView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoginView.cpp; sourceTree = "<group>"; };
 		B1D37F15166AB3F100536CE5 /* HeliForce.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HeliForce.mm; sourceTree = "<group>"; };
 		B1D37F16166AB3F100536CE5 /* HeliForceConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeliForceConsoleManager.cpp; sourceTree = "<group>"; };
-		B1D37F17166AB3F100536CE5 /* HeliForceDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeliForceDemo.cpp; sourceTree = "<group>"; };
 		B1D37F18166AB3F100536CE5 /* HeliForceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeliForceManager.cpp; sourceTree = "<group>"; };
 		B1D37F19166AB3F100536CE5 /* HeliForceTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeliForceTicker.cpp; sourceTree = "<group>"; };
-		B1D37F1A166AB3F100536CE5 /* HeliForceViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeliForceViewer.cpp; sourceTree = "<group>"; };
-		B1D37F1B166AB3F100536CE5 /* RoadSignButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RoadSignButton.cpp; sourceTree = "<group>"; };
-		B1D37F1C166AB3F100536CE5 /* ServerListView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ServerListView.cpp; sourceTree = "<group>"; };
 		B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sunlight.cpp; sourceTree = "<group>"; };
-		B1D37F1E166AB3F100536CE5 /* View.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = View.cpp; sourceTree = "<group>"; };
 		B1D37F37166AB53A00536CE5 /* MacThread.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacThread.mm; sourceTree = "<group>"; };
 		B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameTicker.cpp; path = ../../Cure/Source/GameTicker.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhysicsSharedResource.cpp; path = ../../Cure/Source/PhysicsSharedResource.cpp; sourceTree = SOURCE_ROOT; };
@@ -1249,7 +1239,6 @@
 		B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiGravelEmitter.cpp; path = ../../UiCure/Source/UiGravelEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchDrag.cpp; sourceTree = "<group>"; };
 		B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchstick.cpp; sourceTree = "<group>"; };
-		B1D37F4E166AB5F200536CE5 /* MasterServerNetworkParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MasterServerNetworkParser.cpp; path = ../../Life/LifeMaster/MasterServerNetworkParser.cpp; sourceTree = SOURCE_ROOT; };
 		B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiJetEngineEmitter.cpp; path = ../../UiCure/Source/UiJetEngineEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
 		B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HiscoreAgent.cpp; path = ../../Cure/Source/HiscoreAgent.cpp; sourceTree = SOURCE_ROOT; };
@@ -1261,7 +1250,6 @@
 		B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBillboardGeometry.cpp; sourceTree = "<group>"; };
 		B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiParticleRenderer.cpp; sourceTree = "<group>"; };
 		B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiParticleLoader.cpp; path = ../../UiCure/Source/UiParticleLoader.cpp; sourceTree = SOURCE_ROOT; };
-		B1F3C41B16E007C300B2EFB5 /* ExplodingMachine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExplodingMachine.cpp; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1349,9 +1337,37 @@
 			name = ChibiXM;
 			sourceTree = "<group>";
 		};
+		B13DA5BC173EDA6900A73400 /* LifeServer */ = {
+			isa = PBXGroup;
+			children = (
+				B13DA5BD173EDA9600A73400 /* BulletTime.cpp */,
+				B13DA5BE173EDA9600A73400 /* Client.cpp */,
+				B13DA5BF173EDA9600A73400 /* GameServerManager.cpp */,
+				B13DA5C0173EDA9600A73400 /* GameServerTicker.cpp */,
+				B13DA5C1173EDA9600A73400 /* MasterServerConnection.cpp */,
+				B13DA5C2173EDA9600A73400 /* RaceTimer.cpp */,
+				B13DA5C3173EDA9600A73400 /* ServerConsoleManager.cpp */,
+				B13DA5C4173EDA9600A73400 /* ServerDelegate.cpp */,
+				B13DA5C5173EDA9600A73400 /* ServerFastProjectile.cpp */,
+				B13DA5C6173EDA9600A73400 /* ServerMessageProcessor.cpp */,
+				B13DA5C7173EDA9600A73400 /* ServerMine.cpp */,
+				B13DA5C8173EDA9600A73400 /* ServerProjectile.cpp */,
+			);
+			name = LifeServer;
+			sourceTree = "<group>";
+		};
+		B13DA5F5173EDB5A00A73400 /* LifeMaster */ = {
+			isa = PBXGroup;
+			children = (
+				B13DA5F6173EDB6D00A73400 /* MasterServerNetworkParser.cpp */,
+			);
+			name = LifeMaster;
+			sourceTree = "<group>";
+		};
 		B15F791D13FC597B00E01A90 /* Cure */ = {
 			isa = PBXGroup;
 			children = (
+				B13DA600173EDBD200A73400 /* Spawner.cpp */,
 				B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */,
 				B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */,
 				B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */,
@@ -1534,24 +1550,13 @@
 		B19A146913A122DE0051A61C /* HeliForce */ = {
 			isa = PBXGroup;
 			children = (
-				B1A8B19316C7E82000F57DC1 /* HeliForceServer */,
-				B1A8B17F16C7E0FB00F57DC1 /* Explosion.cpp */,
-				B1F3C41B16E007C300B2EFB5 /* ExplodingMachine.cpp */,
-				B1A8B18016C7E0FB00F57DC1 /* FastProjectile.cpp */,
-				B1A8B18116C7E0FB00F57DC1 /* Mine.cpp */,
-				B1A8B18216C7E0FB00F57DC1 /* Projectile.cpp */,
-				B1D37F14166AB3F100536CE5 /* LoginView.cpp */,
+				B13DA59A173ED82D00A73400 /* CenteredMachine.cpp */,
+				B13DA59B173ED82D00A73400 /* LandingTrigger.cpp */,
 				B1D37F15166AB3F100536CE5 /* HeliForce.mm */,
 				B1D37F16166AB3F100536CE5 /* HeliForceConsoleManager.cpp */,
-				B1D37F17166AB3F100536CE5 /* HeliForceDemo.cpp */,
 				B1D37F18166AB3F100536CE5 /* HeliForceManager.cpp */,
 				B1D37F19166AB3F100536CE5 /* HeliForceTicker.cpp */,
-				B1D37F1A166AB3F100536CE5 /* HeliForceViewer.cpp */,
-				B1D37F1B166AB3F100536CE5 /* RoadSignButton.cpp */,
-				B1D37F1C166AB3F100536CE5 /* ServerListView.cpp */,
 				B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */,
-				B1D37F1E166AB3F100536CE5 /* View.cpp */,
-				B110A04B14AB36CC007A84E4 /* Level.cpp */,
 				B1B489A313F9BE4A0047C78A /* HeliForce_Prefix.pch */,
 			);
 			name = HeliForce;
@@ -2394,28 +2399,15 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		B1A8B19316C7E82000F57DC1 /* HeliForceServer */ = {
-			isa = PBXGroup;
-			children = (
-				B1A8B19416C7E87400F57DC1 /* BombPlane.cpp */,
-				B1A8B19516C7E87400F57DC1 /* GameServerLogic.cpp */,
-				B1A8B19616C7E87400F57DC1 /* Npc.cpp */,
-				B1A8B19716C7E87400F57DC1 /* HeliForceServerConsole.cpp */,
-				B1A8B19816C7E87400F57DC1 /* HeliForceServerDelegate.cpp */,
-				B1A8B19916C7E87400F57DC1 /* HeliForceServerMessageProcessor.cpp */,
-				B1A8B19A16C7E87400F57DC1 /* ServerFastProjectile.cpp */,
-				B1A8B19B16C7E87400F57DC1 /* ServerMine.cpp */,
-				B1A8B19C16C7E87400F57DC1 /* ServerProjectile.cpp */,
-			);
-			name = HeliForceServer;
-			sourceTree = "<group>";
-		};
 		B1D37EE3166AB29400536CE5 /* Life */ = {
 			isa = PBXGroup;
 			children = (
-				B1D37F4D166AB5D600536CE5 /* LifeMaster */,
-				B1D37F03166AB38700536CE5 /* LifeServer */,
+				B13DA5F5173EDB5A00A73400 /* LifeMaster */,
+				B13DA5BC173EDA6900A73400 /* LifeServer */,
 				B1D37EEC166AB33F00536CE5 /* LifeClient */,
+				B13DA594173ED81600A73400 /* Explosion.cpp */,
+				B13DA595173ED81600A73400 /* Spawner.cpp */,
+				B13DA596173ED81600A73400 /* StuntTrigger.cpp */,
 				B1D37EE8166AB32700536CE5 /* LifeApplication.cpp */,
 				B1D37EE9166AB32700536CE5 /* RaceScore.cpp */,
 				B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */,
@@ -2428,6 +2420,13 @@
 		B1D37EEC166AB33F00536CE5 /* LifeClient */ = {
 			isa = PBXGroup;
 			children = (
+				B13DA606173EDBF400A73400 /* Level.cpp */,
+				B13DA5F8173EDB9800A73400 /* Mine.cpp */,
+				B13DA5F9173EDB9800A73400 /* Projectile.cpp */,
+				B13DA5F1173EDB4300A73400 /* FastProjectile.cpp */,
+				B13DA5E7173EDB1200A73400 /* ExplodingMachine.cpp */,
+				B13DA5E8173EDB1200A73400 /* HomingProjectile.cpp */,
+				B13DA5E9173EDB1200A73400 /* UiGameServerManager.cpp */,
 				B1D37EED166AB37000536CE5 /* ClientConsoleManager.cpp */,
 				B1D37EEE166AB37000536CE5 /* ClientOptionsManager.cpp */,
 				B1D37EEF166AB37000536CE5 /* GameClientMasterTicker.cpp */,
@@ -2436,35 +2435,10 @@
 				B1D37EF2166AB37000536CE5 /* OptionsManager.cpp */,
 				B1D37EF3166AB37000536CE5 /* StopWatch.cpp */,
 				B1D37EF4166AB37000536CE5 /* UiConsole.cpp */,
-				B1D37EF5166AB37000536CE5 /* UiGameServerManager.cpp */,
 				B1D37EF6166AB37000536CE5 /* UiRaceScore.cpp */,
 				B1D37EF7166AB37000536CE5 /* UiServerConsoleManager.cpp */,
 			);
 			name = LifeClient;
-			sourceTree = "<group>";
-		};
-		B1D37F03166AB38700536CE5 /* LifeServer */ = {
-			isa = PBXGroup;
-			children = (
-				B1A8B1A816C7E8BB00F57DC1 /* ServerDelegate.cpp */,
-				B1A8B1A916C7E8BB00F57DC1 /* ServerMessageProcessor.cpp */,
-				B1D37F04166AB3B400536CE5 /* BulletTime.cpp */,
-				B1D37F05166AB3B400536CE5 /* Client.cpp */,
-				B1D37F06166AB3B400536CE5 /* GameServerManager.cpp */,
-				B1D37F07166AB3B400536CE5 /* MasterServerConnection.cpp */,
-				B1D37F08166AB3B400536CE5 /* RaceTimer.cpp */,
-				B1D37F09166AB3B400536CE5 /* ServerConsoleManager.cpp */,
-				B1D37F0A166AB3B400536CE5 /* Spawner.cpp */,
-			);
-			name = LifeServer;
-			sourceTree = "<group>";
-		};
-		B1D37F4D166AB5D600536CE5 /* LifeMaster */ = {
-			isa = PBXGroup;
-			children = (
-				B1D37F4E166AB5F200536CE5 /* MasterServerNetworkParser.cpp */,
-			);
-			name = LifeMaster;
 			sourceTree = "<group>";
 		};
 		B1D88DC614DEA9070000CD85 /* HappyHTTP */ = {
@@ -2987,7 +2961,6 @@
 				B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */,
 				35128A4D147262150006467C /* UiSound.cpp in Sources */,
 				B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */,
-				B110A04D14AB36CC007A84E4 /* Level.cpp in Sources */,
 				B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */,
 				B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */,
 				B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */,
@@ -3011,27 +2984,13 @@
 				B1D37EFD166AB37000536CE5 /* OptionsManager.cpp in Sources */,
 				B1D37EFE166AB37000536CE5 /* StopWatch.cpp in Sources */,
 				B1D37EFF166AB37000536CE5 /* UiConsole.cpp in Sources */,
-				B1D37F00166AB37000536CE5 /* UiGameServerManager.cpp in Sources */,
 				B1D37F01166AB37000536CE5 /* UiRaceScore.cpp in Sources */,
 				B1D37F02166AB37000536CE5 /* UiServerConsoleManager.cpp in Sources */,
-				B1D37F0B166AB3B400536CE5 /* BulletTime.cpp in Sources */,
-				B1D37F0C166AB3B400536CE5 /* Client.cpp in Sources */,
-				B1D37F0D166AB3B400536CE5 /* GameServerManager.cpp in Sources */,
-				B1D37F0E166AB3B400536CE5 /* MasterServerConnection.cpp in Sources */,
-				B1D37F0F166AB3B400536CE5 /* RaceTimer.cpp in Sources */,
-				B1D37F10166AB3B400536CE5 /* ServerConsoleManager.cpp in Sources */,
-				B1D37F11166AB3B400536CE5 /* Spawner.cpp in Sources */,
-				B1D37F1F166AB3F100536CE5 /* LoginView.cpp in Sources */,
 				B1D37F20166AB3F100536CE5 /* HeliForce.mm in Sources */,
 				B1D37F21166AB3F100536CE5 /* HeliForceConsoleManager.cpp in Sources */,
-				B1D37F22166AB3F100536CE5 /* HeliForceDemo.cpp in Sources */,
 				B1D37F23166AB3F100536CE5 /* HeliForceManager.cpp in Sources */,
 				B1D37F24166AB3F100536CE5 /* HeliForceTicker.cpp in Sources */,
-				B1D37F25166AB3F100536CE5 /* HeliForceViewer.cpp in Sources */,
-				B1D37F26166AB3F100536CE5 /* RoadSignButton.cpp in Sources */,
-				B1D37F27166AB3F100536CE5 /* ServerListView.cpp in Sources */,
 				B1D37F28166AB3F100536CE5 /* Sunlight.cpp in Sources */,
-				B1D37F29166AB3F100536CE5 /* View.cpp in Sources */,
 				B1D37F38166AB53A00536CE5 /* MacThread.mm in Sources */,
 				B1D37F40166AB57A00536CE5 /* GameTicker.cpp in Sources */,
 				B1D37F41166AB57A00536CE5 /* PhysicsSharedResource.cpp in Sources */,
@@ -3041,22 +3000,6 @@
 				B1D37F48166AB59C00536CE5 /* UiGravelEmitter.cpp in Sources */,
 				B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */,
 				B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */,
-				B1D37F4F166AB5F200536CE5 /* MasterServerNetworkParser.cpp in Sources */,
-				B1A8B18316C7E0FB00F57DC1 /* Explosion.cpp in Sources */,
-				B1A8B18416C7E0FB00F57DC1 /* FastProjectile.cpp in Sources */,
-				B1A8B18516C7E0FB00F57DC1 /* Mine.cpp in Sources */,
-				B1A8B18616C7E0FB00F57DC1 /* Projectile.cpp in Sources */,
-				B1A8B19D16C7E87400F57DC1 /* BombPlane.cpp in Sources */,
-				B1A8B19E16C7E87400F57DC1 /* GameServerLogic.cpp in Sources */,
-				B1A8B19F16C7E87400F57DC1 /* Npc.cpp in Sources */,
-				B1A8B1A016C7E87400F57DC1 /* HeliForceServerConsole.cpp in Sources */,
-				B1A8B1A116C7E87400F57DC1 /* HeliForceServerDelegate.cpp in Sources */,
-				B1A8B1A216C7E87400F57DC1 /* HeliForceServerMessageProcessor.cpp in Sources */,
-				B1A8B1A316C7E87400F57DC1 /* ServerFastProjectile.cpp in Sources */,
-				B1A8B1A416C7E87400F57DC1 /* ServerMine.cpp in Sources */,
-				B1A8B1A516C7E87400F57DC1 /* ServerProjectile.cpp in Sources */,
-				B1A8B1AA16C7E8BB00F57DC1 /* ServerDelegate.cpp in Sources */,
-				B1A8B1AB16C7E8BB00F57DC1 /* ServerMessageProcessor.cpp in Sources */,
 				B1A8B1AD16C7E8D900F57DC1 /* IntAttribute.cpp in Sources */,
 				B1A8B1B116C7EA7100F57DC1 /* ProjectileUtil.cpp in Sources */,
 				B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */,
@@ -3064,8 +3007,33 @@
 				B1F3C40B16E0027100B2EFB5 /* UiBillboardGeometry.cpp in Sources */,
 				B1F3C40C16E0027100B2EFB5 /* UiParticleRenderer.cpp in Sources */,
 				B1F3C40E16E0029C00B2EFB5 /* UiParticleLoader.cpp in Sources */,
-				B1F3C41C16E007C300B2EFB5 /* ExplodingMachine.cpp in Sources */,
 				B1D5E29F172B1F6C00984602 /* UiJetEngineEmitter.cpp in Sources */,
+				B13DA597173ED81600A73400 /* Explosion.cpp in Sources */,
+				B13DA598173ED81600A73400 /* Spawner.cpp in Sources */,
+				B13DA599173ED81600A73400 /* StuntTrigger.cpp in Sources */,
+				B13DA59C173ED82D00A73400 /* CenteredMachine.cpp in Sources */,
+				B13DA59D173ED82D00A73400 /* LandingTrigger.cpp in Sources */,
+				B13DA5C9173EDA9600A73400 /* BulletTime.cpp in Sources */,
+				B13DA5CA173EDA9600A73400 /* Client.cpp in Sources */,
+				B13DA5CB173EDA9600A73400 /* GameServerManager.cpp in Sources */,
+				B13DA5CC173EDA9600A73400 /* GameServerTicker.cpp in Sources */,
+				B13DA5CD173EDA9600A73400 /* MasterServerConnection.cpp in Sources */,
+				B13DA5CE173EDA9600A73400 /* RaceTimer.cpp in Sources */,
+				B13DA5CF173EDA9600A73400 /* ServerConsoleManager.cpp in Sources */,
+				B13DA5D0173EDA9600A73400 /* ServerDelegate.cpp in Sources */,
+				B13DA5D1173EDA9600A73400 /* ServerFastProjectile.cpp in Sources */,
+				B13DA5D2173EDA9600A73400 /* ServerMessageProcessor.cpp in Sources */,
+				B13DA5D3173EDA9600A73400 /* ServerMine.cpp in Sources */,
+				B13DA5D4173EDA9600A73400 /* ServerProjectile.cpp in Sources */,
+				B13DA5EA173EDB1200A73400 /* ExplodingMachine.cpp in Sources */,
+				B13DA5EB173EDB1200A73400 /* HomingProjectile.cpp in Sources */,
+				B13DA5EC173EDB1200A73400 /* UiGameServerManager.cpp in Sources */,
+				B13DA5F2173EDB4300A73400 /* FastProjectile.cpp in Sources */,
+				B13DA5F7173EDB6D00A73400 /* MasterServerNetworkParser.cpp in Sources */,
+				B13DA5FA173EDB9800A73400 /* Mine.cpp in Sources */,
+				B13DA5FB173EDB9800A73400 /* Projectile.cpp in Sources */,
+				B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */,
+				B13DA607173EDBF400A73400 /* Level.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

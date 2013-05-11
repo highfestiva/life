@@ -7,7 +7,6 @@
 #include "../Lepra/Include/LepraTarget.h"
 #include "HeliForceTicker.h"
 #include "../Lepra/Include/SystemManager.h"
-#include "../Life/LifeClient/UiGameServerManager.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiCure/Include/UiResourceManager.h"
