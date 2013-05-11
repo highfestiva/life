@@ -53,6 +53,7 @@ public:
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~PushManager();
 	virtual void LoadSettings();
+	virtual void SaveSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual void Close();
 	virtual void SetIsQuitting();

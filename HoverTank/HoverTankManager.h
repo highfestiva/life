@@ -53,6 +53,7 @@ public:
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~HoverTankManager();
 	virtual void LoadSettings();
+	virtual void SaveSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();

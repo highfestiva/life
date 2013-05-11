@@ -121,13 +121,6 @@ void GameClientSlaveManager::LoadSettings()
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 }
 
-void GameClientSlaveManager::SaveSettings()
-{
-#ifndef EMULATE_TOUCH
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
-#endif // Computer or touch device.
-}
-
 void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
 {
 	mRenderArea = pRenderArea;

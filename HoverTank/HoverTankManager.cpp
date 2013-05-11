@@ -172,6 +172,13 @@ void HoverTankManager::LoadSettings()
 #endif // Touch device
 }
 
+void HoverTankManager::SaveSettings()
+{
+#ifndef EMULATE_TOUCH
+	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+#endif // Computer or touch device.
+}
+
 void HoverTankManager::SetRenderArea(const PixelRect& pRenderArea)
 {
 	Parent::SetRenderArea(pRenderArea);
@@ -538,11 +545,11 @@ void HoverTankManager::UpdateTouchstickPlacement()
 	{
 		int lScreenPixelWidth;
 		CURE_RTVAR_GET(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
-		const int lFingerPixels = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
-		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lFingerPixels);
+		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
+		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
 		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
 		mStickLeft->SetUniqueIdentifier(lLeftName);
-		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0, lFingerPixels);
+		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0, lMinimumTouchRadius);
 		const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
 		mStickRight->SetUniqueIdentifier(lRightName);
 	}

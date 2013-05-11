@@ -59,6 +59,7 @@ public:
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~HeliForceManager();
 	virtual void LoadSettings();
+	virtual void SaveSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();
@@ -155,8 +156,7 @@ protected:
 #endif // Touch or emulated touch.
 
 	HiResTimer mTouchstickTimer;
-	Touchstick* mStickLeft;
-	Touchstick* mStickRight;
+	Touchstick* mStick;
 
 	UiCure::UserRendererImageResource* mArrow;
 	UiTbc::BillboardGeometry* mArrowBillboard;

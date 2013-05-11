@@ -553,10 +553,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\HeliForceViewer.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\LandingTrigger.cpp"
 				>
 			</File>
@@ -588,10 +584,6 @@
 			</File>
 			<File
 				RelativePath=".\HeliForceTicker.h"
-				>
-			</File>
-			<File
-				RelativePath=".\HeliForceViewer.h"
 				>
 			</File>
 			<File

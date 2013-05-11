@@ -17,7 +17,6 @@
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "RtVar.h"
 #include "HeliForceManager.h"
-#include "HeliForceViewer.h"
 
 
 

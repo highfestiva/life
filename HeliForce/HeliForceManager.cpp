@@ -108,8 +108,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	mFireButton(0),
 #endif // Touch or emulated touch.
-	mStickLeft(0),
-	mStickRight(0),
+	mStick(0),
 	mArrow(0),
 	mArrowBillboard(0),
 	mArrowBillboardId(0),
@@ -133,10 +132,8 @@ HeliForceManager::~HeliForceManager()
 {
 	Close();
 
-	delete mStickLeft;
-	mStickLeft = 0;
-	delete mStickRight;
-	mStickRight = 0;
+	delete mStick;
+	mStick = 0;
 }
 
 void HeliForceManager::LoadSettings()
@@ -154,21 +151,19 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, true);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	const str lLeftName  = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
-	const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
+	const str lSchtickName = _T("Touchstick");
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lSchtickName+_T(".AxisY-"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lSchtickName+_T(".AxisY+"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lSchtickName+_T(".AxisX-"));
+	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lSchtickName+_T(".AxisX+"));
 #endif // Touch device or emulated touch device
+}
+
+void HeliForceManager::SaveSettings()
+{
+#ifndef EMULATE_TOUCH
+	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+#endif // Computer or touch device.
 }
 
 void HeliForceManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -276,12 +271,10 @@ bool HeliForceManager::Render()
 
 bool HeliForceManager::Paint()
 {
-	if (mStickLeft)
+	if (mStick)
 	{
-		DrawStick(mStickLeft);
-		DrawStick(mStickRight);
-		mStickLeft->ResetTap();
-		mStickRight->ResetTap();
+		DrawStick(mStick);
+		mStick->ResetTap();
 	}
 
 	const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
@@ -470,7 +463,7 @@ void HeliForceManager::TickInput()
 
 void HeliForceManager::UpdateTouchstickPlacement()
 {
-	if (mTouchstickTimer.QueryTimeDiff() < 3.0)
+	if (mTouchstickTimer.QueryTimeDiff() < 2.0)
 	{
 		return;
 	}
@@ -479,57 +472,20 @@ void HeliForceManager::UpdateTouchstickPlacement()
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const float lTouchSideScale = 1.28f;	// Inches.
 	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	if (!mStickLeft)
+	if (!mStick)
 	{
 		int lScreenPixelWidth;
 		CURE_RTVAR_GET(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
-		const int lFingerPixels = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
-		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lFingerPixels);
-		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
-		mStickLeft->SetUniqueIdentifier(lLeftName);
-		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0, lFingerPixels);
-		const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
-		mStickRight->SetUniqueIdentifier(lRightName);
+		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// Touched area is a fraction of the required 32px/iPhone classic.
+		mStick  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
+		mStick->SetUniqueIdentifier(_T("Touchstick"));
 	}
-	int lIndex = 0;
-	int lCount = 0;
-	GetMaster()->GetSlaveInfo(this, lIndex, lCount);
-	if (lCount == 2)
-	{
-		PixelRect lLeftStickArea(mRenderArea);
-		PixelRect lRightStickArea(mRenderArea);
-		lLeftStickArea.mBottom = mRenderArea.GetHeight() * lTouchScale;
-		lRightStickArea.mTop = mRenderArea.GetHeight() * (1-lTouchScale);
-		lLeftStickArea.mRight = lLeftStickArea.mLeft + lLeftStickArea.GetHeight();
-		lRightStickArea.mRight = lLeftStickArea.mRight;
-
-		if (lIndex == 0)
-		{
-			mStickLeft->Move(lLeftStickArea, -90);
-			mStickRight->Move(lRightStickArea, -90);
-		}
-		else
-		{
-			lLeftStickArea.mLeft += mRenderArea.GetWidth() - lLeftStickArea.GetWidth();
-			lRightStickArea.mLeft = lLeftStickArea.mLeft;
-			lLeftStickArea.mRight = lLeftStickArea.mLeft + lLeftStickArea.GetHeight();
-			lRightStickArea.mRight = lLeftStickArea.mRight;
-			std::swap(lLeftStickArea, lRightStickArea);
-			mStickLeft->Move(lLeftStickArea, +90);
-			mStickRight->Move(lRightStickArea, +90);
-		}
-	}
-	else
-	{
-		PixelRect lLeftStickArea(mRenderArea);
-		PixelRect lRightStickArea(mRenderArea);
-		lLeftStickArea.mRight = mRenderArea.GetWidth() * lTouchScale;
-		lRightStickArea.mLeft = mRenderArea.GetWidth() * (1-lTouchScale);
-		lLeftStickArea.mTop = lLeftStickArea.mBottom - (lLeftStickArea.mRight - lLeftStickArea.mLeft);
-		lRightStickArea.mTop = lLeftStickArea.mTop;
-		mStickLeft->Move(lLeftStickArea, 0);
-		mStickRight->Move(lRightStickArea, 0);
-	}
+	PixelRect lRightStickArea(mRenderArea);
+	int lFingerSize = (int)(lRightStickArea.GetWidth() * lTouchScale);
+	lRightStickArea.mLeft = mRenderArea.GetWidth() - (int)(lFingerSize*2.3f);
+	lRightStickArea.mTop = lRightStickArea.mBottom - lFingerSize;
+	lRightStickArea.mBottom += (int)(lFingerSize*1.1f);
+	mStick->Move(lRightStickArea, 0);
 #endif // Touch or emulated touch
 }
 
