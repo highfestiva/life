@@ -290,6 +290,8 @@ GeometryBase::GeometryBase() :
 	mParentCell(0),
 	mLastFrameVisible(0),
 	mUVAnimator(0),
+	mPreRenderCallback(0),
+	mPostRenderCallback(0),
 	mExtraData(0)
 {
 }
@@ -318,6 +320,26 @@ void GeometryBase::AddListener(Listener* pListener)
 void GeometryBase::RemoveListener(Listener* pListener)
 {
 	mListenerList.remove(pListener);
+}
+
+const GeometryBase::RenderCallback& GeometryBase::GetPreRenderCallback() const
+{
+	return mPreRenderCallback;
+}
+
+void GeometryBase::SetPreRenderCallback(const RenderCallback& pCallback)
+{
+	mPreRenderCallback = pCallback;
+}
+
+const GeometryBase::RenderCallback& GeometryBase::GetPostRenderCallback() const
+{
+	return mPostRenderCallback;
+}
+
+void GeometryBase::SetPostRenderCallback(const RenderCallback& pCallback)
+{
+	mPostRenderCallback = pCallback;
 }
 
 bool GeometryBase::IsGeometryReference()

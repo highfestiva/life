@@ -370,6 +370,11 @@ bool OpenGLMatSingleTextureSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleTextureSolid::DoRawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex)
 {
+	if (!pGeometry->GetPreRenderCallback().empty())
+	{
+		pGeometry->GetPreRenderCallback()();
+	}
+
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		OpenGLRenderer::OGLGeometryData* lGeometryData = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
@@ -394,6 +399,12 @@ void OpenGLMatSingleTextureSolid::DoRawRender(TBC::GeometryBase* pGeometry, int 
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
 	}
+
+	if (!pGeometry->GetPostRenderCallback().empty())
+	{
+		pGeometry->GetPostRenderCallback()();
+	}
+
 	OGL_ASSERT();
 }
 

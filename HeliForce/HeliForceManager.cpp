@@ -36,11 +36,13 @@
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiSoundReleaser.h"
+#include "../UiLepra/Include/UiOpenGLExtensions.h"
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiBillboardGeometry.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTBC/Include/UiRenderer.h"
 #include "CenteredMachine.h"
 #include "HeliForceConsoleManager.h"
 #include "HeliForceTicker.h"
@@ -98,6 +100,8 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mActiveWeapon(0),
 	mLevel(0),
 	mOldLevel(0),
+	mHemisphere(0),
+	mHemisphereUvTransform(0),
 	mSunlight(0),
 	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 100)),
 	mCameraSpeed(0),
@@ -408,8 +412,15 @@ void HeliForceManager::NextLevel()
 	if (GetContext()->GetObject(mAvatarId))
 	{
 		mOldLevel = mLevel;
-		const str lLevelName = (mOldLevel->GetClassId() == _T("level_00"))? _T("level_01") : _T("level_00");
-		mLevel = (Life::Level*)Parent::CreateContextObject(lLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+		int lLevelNumber = 0;
+		strutil::StringToInt(mOldLevel->GetClassId().substr(6), lLevelNumber);
+		++lLevelNumber;
+		if (lLevelNumber >= 3)
+		{
+			lLevelNumber = 0;
+		}
+		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
+		mLevel = (Life::Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 		mLevel->StartLoading();
 	}
 }
@@ -434,6 +445,15 @@ bool HeliForceManager::InitializeUniverse()
 	mMassObjectArray.clear();
 	mLevel = (Life::Level*)Parent::CreateContextObject(_T("level_00"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
+	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
+	lTransformBones->SetBoneCount(1);
+	lTransformBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+	mHemisphereUvTransform = new TBC::BoneAnimator(lTransformBones);
+	mHemisphere = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("hemisphere"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mHemisphere->DisableRootShadow();
+	mHemisphere->EnableMeshMove(false);
+	mHemisphere->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
+	mHemisphere->StartLoading();
 	mSunlight = new Sunlight(mUiManager);
 	return true;
 }
@@ -550,6 +570,25 @@ void HeliForceManager::TickUiUpdate()
 bool HeliForceManager::UpdateMassObjects(const Vector3DF& pPosition)
 {
 	bool lOk = true;
+
+	if (mHemisphere && mHemisphere->IsLoaded())
+	{
+		TransformationF lTransform = mHemisphere->GetMesh(0)->GetBaseTransformation();
+		lTransform.SetPosition(pPosition + Vector3DF(0, 50, 0));
+		mHemisphere->GetMesh(0)->SetTransformation(lTransform);
+
+		if (!mHemisphere->GetMesh(0)->GetUVAnimator())
+		{
+			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
+			mHemisphere->GetMesh(0)->SetPreRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::DisableDepth));
+			mHemisphere->GetMesh(0)->SetPostRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::EnableDepth));
+		}
+		Vector3DF lPosition = lTransform.GetPosition();
+		lPosition.x = -lPosition.x;
+		lPosition.y = 0;
+		mHemisphereUvTransform->GetBones()[0].GetRelativeBoneTransformation(0).GetPosition() = lPosition * 0.003f;
+	}
+
 	ObjectArray::const_iterator x = mMassObjectArray.begin();
 	for (; x != mMassObjectArray.end(); ++x)
 	{
@@ -1010,8 +1049,12 @@ void HeliForceManager::MoveCamera()
 			{
 				lDelta.Normalize(lMaxCamSpeed);
 			}
+			mCameraTransform.GetPosition() += lDelta;
 		}
-		mCameraTransform.GetPosition() += lDelta;
+		else
+		{
+			mCameraTransform = lTargetTransform;
+		}
 
 		// Angle.
 		const float x = lAvatarPosition.y - mCameraTransform.GetPosition().y;
@@ -1056,6 +1099,20 @@ void HeliForceManager::UpdateCameraPosition(bool pUpdateMicPosition)
 void HeliForceManager::RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource)
 {
 	mUiManager->GetRenderer()->TryAddGeometryTexture(mArrowBillboardId, pResource->GetData());
+}
+
+
+
+void HeliForceManager::DisableDepth()
+{
+	mUiManager->GetRenderer()->EnableAllLights(false);
+	mUiManager->GetRenderer()->SetDepthWriteEnabled(false);
+}
+
+void HeliForceManager::EnableDepth()
+{
+	mUiManager->GetRenderer()->EnableAllLights(true);
+	mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
 }
 
 

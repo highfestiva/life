@@ -125,6 +125,9 @@ protected:
 
 	void RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource);
 
+	void DisableDepth();
+	void EnableDepth();
+
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 
 	// Network transmission and keepalive info.
@@ -140,6 +143,8 @@ protected:
 
 	Life::Level* mLevel;
 	Life::Level* mOldLevel;
+	UiCure::CppContextObject* mHemisphere;
+	TBC::BoneAnimator* mHemisphereUvTransform;
 	Sunlight* mSunlight;
 	ObjectArray mMassObjectArray;
 

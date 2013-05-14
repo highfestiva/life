@@ -1080,10 +1080,11 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 
 bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 {
-	if (pGeometry->IsSimpleObject() || CheckCamCulling(pGeometry->GetTransformation().GetPosition(), pGeometry->GetBoundingRadius()))
+	const TransformationF t = pGeometry->GetTransformation();
+	if (pGeometry->IsSimpleObject() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();
-		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
+		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, t);
 		float lModelViewMatrix[16];
 		mCamSpaceTransformation.GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);
