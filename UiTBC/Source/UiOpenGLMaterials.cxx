@@ -105,7 +105,7 @@ void OpenGLMaterial::RenderAllBlendedGeometry(unsigned pCurrentFrame, const Geom
 {
 	::glDepthMask(GL_FALSE);
 	::glDisable(GL_CULL_FACE);
-#ifndef LEPRA_GL_E
+#ifndef LEPRA_GL_ES
 	GLint lOldFill[2];
 	::glGetIntegerv(GL_POLYGON_MODE, lOldFill);
 	::glPolygonMode(GL_FRONT_AND_BACK, GetRenderer()->IsWireframeEnabled()? GL_LINE : GL_FILL);

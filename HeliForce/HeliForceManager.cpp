@@ -502,7 +502,7 @@ void HeliForceManager::UpdateTouchstickPlacement()
 	}
 	PixelRect lRightStickArea(mRenderArea);
 	int lFingerSize = (int)(lRightStickArea.GetWidth() * lTouchScale);
-	lRightStickArea.mLeft = mRenderArea.GetWidth() - (int)(lFingerSize*2.3f);
+	lRightStickArea.mLeft = mRenderArea.GetWidth() - lFingerSize;
 	lRightStickArea.mTop = lRightStickArea.mBottom - lFingerSize;
 	lRightStickArea.mBottom += (int)(lFingerSize*1.1f);
 	mStick->Move(lRightStickArea, 0);
@@ -901,8 +901,11 @@ void HeliForceManager::DrawStick(Touchstick* pStick)
 	}
 
 	PixelRect lArea = pStick->GetArea();
+	const int s = lArea.GetWidth();
+	lArea.mTop += s/2;
+	lArea.mBottom -= s/2;
 	const int ow = lArea.GetWidth();
-	const int lMargin = pStick->GetFingerRadius() / 8;
+	const int lMargin = pStick->GetFingerRadius() / 2;
 	const int r = pStick->GetFingerRadius() - lMargin;
 	lArea.Shrink(lMargin*2);
 	mUiManager->GetPainter()->DrawArc(lArea.mLeft, lArea.mTop, lArea.GetWidth(), lArea.GetHeight(), 0, 360, false);
@@ -914,6 +917,7 @@ void HeliForceManager::DrawStick(Touchstick* pStick)
 	{
 		Vector2DF v(x, y);
 		v.Mul((ow+lMargin*2) / (float)ow);
+		v.y *= 2.0f;
 		const float lLength = v.GetLength();
 		if (lLength > 1)
 		{
