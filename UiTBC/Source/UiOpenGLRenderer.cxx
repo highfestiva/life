@@ -1265,6 +1265,7 @@ unsigned OpenGLRenderer::RenderScene()
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_FRONT);
 #ifndef LEPRA_GL_ES
@@ -1276,6 +1277,7 @@ unsigned OpenGLRenderer::RenderScene()
 		SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_BACK);
 #ifndef LEPRA_GL_ES
@@ -1300,7 +1302,7 @@ unsigned OpenGLRenderer::RenderScene()
 		for (int i = 0; i < (int)MAT_COUNT; ++i)
 		{
 			if (lSkipOutlined && (i == MAT_SINGLE_COLOR_SOLID || i == MAT_SINGLE_COLOR_OUTLINE_BLENDED ||
-				i == MAT_SINGLE_COLOR_SOLID_PXS))
+				i == MAT_SINGLE_COLOR_ENVMAP_SOLID || i == MAT_SINGLE_COLOR_SOLID_PXS))
 			{
 				continue;
 			}
@@ -1409,7 +1411,7 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	::glDepthMask(GL_TRUE);
 	//::glEnable(GL_NORMALIZE);
 	::glDisable(GL_BLEND);
-	::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	OGL_ASSERT();
 }
@@ -1681,6 +1683,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glDepthFunc(GL_LEQUAL);
 //	glPolygonOffset(0, 0);
 //	glDisable(GL_POLYGON_OFFSET_EXT);
+	glDepthMask(GL_TRUE);
 
 	OGL_ASSERT();
 }

@@ -90,6 +90,7 @@ protected:
 	virtual bool Reset();
 	virtual bool InitializeUniverse();
 	void CreateChopper(const str& pClassId);
+	void UpdateChopperColor(float pLerp);
 
 	virtual void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
@@ -126,7 +127,6 @@ protected:
 	void RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource);
 
 	void DisableDepth();
-	void EnableDepth();
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 

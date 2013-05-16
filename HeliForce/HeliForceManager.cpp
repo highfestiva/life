@@ -36,7 +36,6 @@
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiSoundReleaser.h"
-#include "../UiLepra/Include/UiOpenGLExtensions.h"
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
@@ -55,6 +54,7 @@
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	2
 
+#include "../UiLepra/Include/UiOpenGLExtensions.h"	// TODO: remove!
 
 
 namespace HeliForce
@@ -152,7 +152,7 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, true);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lSchtickName = _T("Touchstick");
@@ -231,12 +231,31 @@ void HeliForceManager::SetFade(float pFadeAmount)
 
 bool HeliForceManager::Render()
 {
+	if (mHemisphere && mHemisphere->IsLoaded())
+	{
+		if (!mHemisphere->GetMesh(0)->GetUVAnimator())
+		{
+			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
+			mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
+			mHemisphere->GetMesh(0)->SetPreRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::DisableDepth));
+		}
+		Vector3DF lPosition = mCameraTransform.GetPosition();
+		lPosition.x = -lPosition.x;
+		lPosition.y = 0;
+		mHemisphereUvTransform->GetBones()[0].GetRelativeBoneTransformation(0).GetPosition() = lPosition * 0.003f;
+
+		mUiManager->GetRenderer()->RenderRelative(mHemisphere->GetMesh(0), 0);
+		mUiManager->GetRenderer()->SetDepthTestEnabled(true);
+		mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
+	}
+
 	bool lOk = Parent::Render();
 
 	if (!lOk)
 	{
 		return lOk;
 	}
+
 	const UiCure::CppContextObject* lObject = (const UiCure::CppContextObject*)GetContext()->GetObject(mAvatarId);
 	if (!lObject || mPostZoomPlatformFrameCount < 10)
 	{
@@ -443,7 +462,7 @@ bool HeliForceManager::Reset()	// Run when disconnected. Removes all objects and
 bool HeliForceManager::InitializeUniverse()
 {
 	mMassObjectArray.clear();
-	mLevel = (Life::Level*)Parent::CreateContextObject(_T("level_00"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Life::Level*)Parent::CreateContextObject(_T("level_02"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
 	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
@@ -453,6 +472,7 @@ bool HeliForceManager::InitializeUniverse()
 	mHemisphere->DisableRootShadow();
 	mHemisphere->EnableMeshMove(false);
 	mHemisphere->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
+	mHemisphere->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 25, 0)));
 	mHemisphere->StartLoading();
 	mSunlight = new Sunlight(mUiManager);
 	return true;
@@ -471,6 +491,23 @@ void HeliForceManager::CreateChopper(const str& pClassId)
 	mAvatarId = lAvatar->GetInstanceId();
 	mAvatarCreateTimer.Start();
 	lAvatar->StartLoading();
+}
+
+void HeliForceManager::UpdateChopperColor(float pLerp)
+{
+	UiCure::CppContextObject* lAvatar = (UiCure::CppContextObject*)GetContext()->GetObject(mAvatarId);
+	if (!lAvatar || !mLevel || !mLevel->IsLoaded())
+	{
+		return;
+	}
+	const float lLevelBrightness = std::min(1.0f, mLevel->GetMesh(0)->GetBasicMaterialSettings().mDiffuse.GetLength() * 2);
+	UiTbc::ChunkyClass* lClass = (UiTbc::ChunkyClass*)lAvatar->GetClass();
+	const size_t lMeshCount = lClass->GetMeshCount();
+	for (size_t x = 0; x < lMeshCount; ++x)
+	{
+		lAvatar->GetMesh(x)->GetBasicMaterialSettings().mAmbient = Math::Lerp(lAvatar->GetMesh(x)->GetBasicMaterialSettings().mAmbient, lClass->GetMaterial(x).mAmbient * lLevelBrightness, pLerp);
+		lAvatar->GetMesh(x)->GetBasicMaterialSettings().mDiffuse = Math::Lerp(lAvatar->GetMesh(x)->GetBasicMaterialSettings().mDiffuse, lClass->GetMaterial(x).mDiffuse * lLevelBrightness, pLerp);
+	}
 }
 
 void HeliForceManager::TickInput()
@@ -570,24 +607,6 @@ void HeliForceManager::TickUiUpdate()
 bool HeliForceManager::UpdateMassObjects(const Vector3DF& pPosition)
 {
 	bool lOk = true;
-
-	if (mHemisphere && mHemisphere->IsLoaded())
-	{
-		TransformationF lTransform = mHemisphere->GetMesh(0)->GetBaseTransformation();
-		lTransform.SetPosition(pPosition + Vector3DF(0, 50, 0));
-		mHemisphere->GetMesh(0)->SetTransformation(lTransform);
-
-		if (!mHemisphere->GetMesh(0)->GetUVAnimator())
-		{
-			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
-			mHemisphere->GetMesh(0)->SetPreRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::DisableDepth));
-			mHemisphere->GetMesh(0)->SetPostRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::EnableDepth));
-		}
-		Vector3DF lPosition = lTransform.GetPosition();
-		lPosition.x = -lPosition.x;
-		lPosition.y = 0;
-		mHemisphereUvTransform->GetBones()[0].GetRelativeBoneTransformation(0).GetPosition() = lPosition * 0.003f;
-	}
 
 	ObjectArray::const_iterator x = mMassObjectArray.begin();
 	for (; x != mMassObjectArray.end(); ++x)
@@ -703,6 +722,7 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		if (pObject->GetInstanceId() == mAvatarId)
 		{
 			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
+			UpdateChopperColor(1.0f);
 			EaseDown(pObject, 0);
 			mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
 		}
@@ -764,6 +784,12 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	{
 		mIsHitThisFrame = true;
 		++mHitGroundFrameCount;
+	}
+
+	// Check if we're just stabilizing on starting pad.
+	if (pObject1->GetInstanceId() == mAvatarId && mAvatarCreateTimer.IsStarted())
+	{
+		return;
 	}
 
 	// Check if we're colliding with a smooth landing pad.
@@ -1025,6 +1051,8 @@ void HeliForceManager::MoveCamera()
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (lAvatar)
 	{
+		UpdateChopperColor(0.1f);
+
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
 		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -60, 0));
@@ -1111,12 +1139,7 @@ void HeliForceManager::DisableDepth()
 {
 	mUiManager->GetRenderer()->EnableAllLights(false);
 	mUiManager->GetRenderer()->SetDepthWriteEnabled(false);
-}
-
-void HeliForceManager::EnableDepth()
-{
-	mUiManager->GetRenderer()->EnableAllLights(true);
-	mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
+	mUiManager->GetRenderer()->SetDepthTestEnabled(false);
 }
 
 

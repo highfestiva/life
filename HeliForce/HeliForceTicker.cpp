@@ -30,7 +30,7 @@ HeliForceTicker::HeliForceTicker(UiCure::GameUiManager* pUiManager, Cure::Resour
 	mPerformanceAdjustmentTicks(0)
 {
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 }
 
 HeliForceTicker::~HeliForceTicker()

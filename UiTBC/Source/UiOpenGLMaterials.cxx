@@ -399,13 +399,12 @@ void OpenGLMatSingleTextureSolid::DoRawRender(TBC::GeometryBase* pGeometry, int 
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
 	}
+	OGL_ASSERT();
 
 	if (!pGeometry->GetPostRenderCallback().empty())
 	{
 		pGeometry->GetPostRenderCallback()();
 	}
-
-	OGL_ASSERT();
 }
 
 void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
@@ -695,6 +694,7 @@ void OpenGLMatSingleColorEnvMapSolid::PostRender()
 	{
 		Parent::PostRender();
 		::glDisable(GL_BLEND);
+		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		::glDepthFunc(GL_LESS);
 	}
