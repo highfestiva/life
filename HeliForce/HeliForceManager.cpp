@@ -7,6 +7,7 @@
 #include "HeliForceManager.h"
 #include <algorithm>
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/ContextPath.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/IntAttribute.h"
 #include "../Cure/Include/NetworkClient.h"
@@ -43,9 +44,11 @@
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "../UiTBC/Include/UiRenderer.h"
 #include "CenteredMachine.h"
+#include "Autopilot.h"
 #include "HeliForceConsoleManager.h"
 #include "HeliForceTicker.h"
 #include "LandingTrigger.h"
+#include "Level.h"
 #include "RtVar.h"
 #include "Sunlight.h"
 #include "Version.h"
@@ -439,9 +442,26 @@ void HeliForceManager::NextLevel()
 			lLevelNumber = 0;
 		}
 		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
-		mLevel = (Life::Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 		mLevel->StartLoading();
 	}
+}
+
+
+
+Level* HeliForceManager::GetLevel() const
+{
+	if (mLevel && mLevel->IsLoaded())
+	{
+		return mLevel;
+	}
+	return 0;
+}
+
+Cure::ContextObject* HeliForceManager::GetAvatar() const
+{
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	return lAvatar;
 }
 
 
@@ -462,7 +482,7 @@ bool HeliForceManager::Reset()	// Run when disconnected. Removes all objects and
 bool HeliForceManager::InitializeUniverse()
 {
 	mMassObjectArray.clear();
-	mLevel = (Life::Level*)Parent::CreateContextObject(_T("level_02"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(_T("level_02"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
 	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
@@ -475,6 +495,7 @@ bool HeliForceManager::InitializeUniverse()
 	mHemisphere->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 25, 0)));
 	mHemisphere->StartLoading();
 	mSunlight = new Sunlight(mUiManager);
+	mAutopilot = new Autopilot(this);
 	return true;
 }
 
@@ -558,18 +579,19 @@ void HeliForceManager::TickUiInput()
 		if (lObject)
 		{
 			// Control steering.
+			const Vector3DF lAutoPilot = mAutopilot->GetSteering();
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 			float lYaw, _;
 			lObject->GetOrientation().GetEulerAngles(lYaw, _, _);
-			const float lWantedDirection = S(RIGHT3D) - S(LEFT3D);
+			const float lWantedDirection = S(RIGHT3D) - S(LEFT3D) + lAutoPilot.x;
 			const float lCurrentDirection = lObject->GetVelocity().x * 0.05f;
 			const float lWantedChange = lWantedDirection-lCurrentDirection;
 			const float lPowerFwdRev = -::sin(lYaw) * lWantedChange;
 			const float lPowerLeftRight = ::cos(lYaw) * lWantedChange;
 			SetAvatarEnginePower(lObject, 4, lPowerFwdRev);
 			SetAvatarEnginePower(lObject, 5, lPowerLeftRight);
-			const float lPower = S(UP3D) - S(DOWN3D);
+			const float lPower = S(UP3D) - S(DOWN3D) + lAutoPilot.z;
 			SetAvatarEnginePower(lObject, 7, lPower);
 
 			// Control fire.
@@ -673,7 +695,7 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	else if (strutil::StartsWith(pClassId, _T("level_")))
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
-		Life::Level* lLevel = new Life::Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
+		Level* lLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
 		lLevel->DisableRootShadow();
 		lObject = lLevel;
 	}
@@ -695,11 +717,6 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 
 Cure::ContextObject* HeliForceManager::CreateLogicHandler(const str& pType)
 {
-	/*if (pType == _T("trig_elevator"))
-	{
-		return new Cure::Elevator(GetContext());
-	}
-	else*/
 	if (pType == _T("spawner"))
 	{
 		return new Life::Spawner(GetContext());
@@ -708,10 +725,10 @@ Cure::ContextObject* HeliForceManager::CreateLogicHandler(const str& pType)
 	{
 		return new LandingTrigger(GetContext());
 	}
-	/*else if (pType == _T("race_timer"))
+	else if (pType == _T("context_path"))
 	{
-		return new RaceTimer(GetContext());
-	}*/
+		return mLevel->QueryPath();
+	}
 	return (0);
 }
 

@@ -46,6 +46,8 @@ namespace HeliForce
 
 
 
+class Autopilot;
+class Level;
 class Sunlight;
 
 
@@ -81,6 +83,9 @@ public:
 
 	virtual bool DidFinishLevel();
 	virtual void NextLevel();
+
+	virtual Level* GetLevel() const;
+	virtual Cure::ContextObject* GetAvatar() const;
 
 protected:
 	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
@@ -141,8 +146,9 @@ protected:
 	int mActiveWeapon;
 	HiResTimer mFireTimeout;
 
-	Life::Level* mLevel;
-	Life::Level* mOldLevel;
+	Level* mLevel;
+	Level* mOldLevel;
+	Autopilot* mAutopilot;
 	UiCure::CppContextObject* mHemisphere;
 	TBC::BoneAnimator* mHemisphereUvTransform;
 	Sunlight* mSunlight;

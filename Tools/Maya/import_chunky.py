@@ -664,8 +664,13 @@ class GroupReader(DefaultMAReader):
 			if node.getName().startswith("m_") and node.nodetype == "transform":
 				node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node, "m_", group, False)))
 				node.phys_children = self._listchildnodes(node, "phys_", group, False)
+				for phys in node.phys_children:
+					if phys.getName()[5:] == node.getName()[2:]:
+						node.phys_children.remove(phys)
+						node.phys_children = [phys] + node.phys_children
+						break
 				if options.options.verbose:
-					print("Phys children are", node.phys_children)
+					print("Phys children to %s are %s." % (node, node.phys_children))
 		return isGroupValid
 
 				
