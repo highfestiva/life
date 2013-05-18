@@ -70,6 +70,7 @@ public:
 
 	virtual bool Render();
 	virtual bool Paint();
+	virtual void DrawSyncDebugInfo();
 
 	virtual void OnLoginSuccess();
 

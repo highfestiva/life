@@ -13,8 +13,8 @@
 #include "HeliForceManager.h"
 #include "Level.h"
 
-#define AIM_DISTANCE			5.0f
-#define AHEAD_TIME			2.0f
+#define AIM_DISTANCE			2.0f
+#define AHEAD_TIME			0.5f
 
 
 
@@ -56,39 +56,37 @@ Vector3DF Autopilot::GetSteering()
 
 	const Vector3DF lPosition = lChopper->GetPosition();
 	const Vector3DF lVelocity = lChopper->GetVelocity();
+	const Vector3DF lUp = lChopper->GetOrientation() * Vector3DF(0,0,1);
 	const Vector3DF lTowards = lPosition + lVelocity*AHEAD_TIME;
 
-	const float lWillHaveDistance = GetClosestPathDistance(lTowards);
-	const float lCurrentDistance = GetClosestPathDistance(lPosition);
+	Vector3DF lClosestPoint;
+	/*const float lFutureDistance =*/ GetClosestPathDistance(lTowards, lClosestPoint);
+	//const float lCurrentDistance = GetClosestPathDistance(lPosition);
 	Spline* lPath = lLevel->QueryPath()->GetPath(0);
-	Vector3DF lAim;
-	if (lWillHaveDistance < lCurrentDistance+0.1f)
-	{
-		GetClosestPathDistance(lTowards);
-		lAim = lPath->GetValue() - lTowards;
-		lAim *= 0.3f;
-	}
-	else
-	{
-		lAim = lPath->GetValue() - lVelocity*AHEAD_TIME - lTowards;
-	}
-	lAim.x = Math::Clamp(lAim.x, -1.0f, +1.0f);
+	Vector3DF lAim = lPath->GetValue() - lTowards;
+	const Vector3DF lDirection = lPath->GetSlope();
+	const Vector3DF lXVelocity(lVelocity.x, 0, 0);
+	const float lMoveRightDirectionFactor = lDirection.GetNormalized() * lXVelocity;
+	lAim.x += 0.5f * lVelocity.x * Math::Lerp(-1.0f, +1.0f, lMoveRightDirectionFactor);
+	lAim.x += -50 * lUp.x;// * Math::Lerp(0.0f, 1.0f, std::min(1.0f, lFutureDistance/5));
+	lAim += Math::Lerp(lAim, -lVelocity, lVelocity.GetLength()/15);
+	lAim.x = Math::Clamp(lAim.x, -0.7f, +0.7f);
 	lAim.z = Math::Clamp(lAim.z, -0.0f, +1.0f);
+	lAim.z = Math::Lerp(0.05f, 0.6f, lAim.z);
 	return lAim;
 }
 
 
 
-float Autopilot::GetClosestPathDistance(const Vector3DF& pPosition) const
+float Autopilot::GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint) const
 {
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(0);
 	const float lCurrentTime = lPath->GetCurrentInterpolationTime();
 
 	float lNearestDistance;
-	Vector3DF lClosestPoint;
-	const float lSearchStepLength = 0.0125f;
-	const int lSearchSteps = 2;
-	lPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, lClosestPoint, lSearchSteps);
+	const float lSearchStepLength = 0.03f;
+	const int lSearchSteps = 3;
+	lPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, pClosestPoint, lSearchSteps);
 
 	{
 		const float lWantedDistance = AIM_DISTANCE;

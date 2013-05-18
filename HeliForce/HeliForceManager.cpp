@@ -31,6 +31,7 @@
 #include "../Life/Spawner.h"
 #include "../TBC/Include/PhysicsTrigger.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
+#include "../UiCure/Include/UiDebugRenderer.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
@@ -154,7 +155,7 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+	//CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
@@ -314,6 +315,17 @@ bool HeliForceManager::Paint()
 	}
 
 	return true;
+}
+
+void HeliForceManager::DrawSyncDebugInfo()
+{
+	Parent::DrawSyncDebugInfo();
+
+	if (GetLevel())
+	{
+		UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), GetContext(), 0, GetTickLock());
+		lDebugRenderer.RenderSpline(mUiManager, GetLevel()->QueryPath()->GetPath(0));
+	}
 }
 
 
@@ -579,7 +591,9 @@ void HeliForceManager::TickUiInput()
 		if (lObject)
 		{
 			// Control steering.
-			const Vector3DF lAutoPilot = mAutopilot->GetSteering();
+			float lChildishness;
+			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+			const Vector3DF lAutoPilot = mAutopilot->GetSteering() * lChildishness;
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 			float lYaw, _;
@@ -797,21 +811,25 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
 
-	if (!mIsHitThisFrame && pObject1->GetInstanceId() == mAvatarId)
+	bool lIsAvatar = (pObject1->GetInstanceId() == mAvatarId);
+
+	float lChildishness = 0.0f;
+
+	if (!mIsHitThisFrame && lIsAvatar)
 	{
 		mIsHitThisFrame = true;
 		++mHitGroundFrameCount;
 	}
 
 	// Check if we're just stabilizing on starting pad.
-	if (pObject1->GetInstanceId() == mAvatarId && mAvatarCreateTimer.IsStarted())
+	if (lIsAvatar && mAvatarCreateTimer.IsStarted())
 	{
 		return;
 	}
 
 	// Check if we're colliding with a smooth landing pad.
 	float lCollisionImpactFactor = 3;
-	if (pObject1->GetInstanceId() == mAvatarId && pObject2 == mLevel)
+	if (lIsAvatar && pObject2 == mLevel)
 	{
 		const TBC::ChunkyClass::Tag* lTag = mLevel->GetClass()->GetTag(_T("anything"));
 		std::vector<int>::const_iterator x = lTag->mBodyIndexList.begin();
@@ -825,6 +843,11 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		}
 	}
 
+	if (lIsAvatar)
+	{
+		CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+	}
+
 	// Check if it's a rotor!
 	if (pObject1->GetClassId().find(_T("helicopter_")) != str::npos)
 	{
@@ -832,11 +855,12 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_HINGE &&
 			lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
 		{
-			lCollisionImpactFactor *= 1000;
+			lCollisionImpactFactor *= Math::Lerp(1000.0f, 1.0f, lChildishness);
 		}
 	}
 
-	const float lForce = pForce.GetLength() * lCollisionImpactFactor;
+	float lForce = pForce.GetLength() * lCollisionImpactFactor;
+	lForce *= Math::Lerp(1.0f, 0.05f, lChildishness);
 	if (lForce > 15000)
 	{
 		float lForce2 = lForce;

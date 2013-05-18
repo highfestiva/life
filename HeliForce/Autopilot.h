@@ -29,7 +29,7 @@ public:
 	Vector3DF GetSteering();
 
 private:
-	float GetClosestPathDistance(const Vector3DF& pPosition) const;
+	float GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint) const;
 
 	HeliForceManager* mGame;
 	LOG_CLASS_DECLARE();

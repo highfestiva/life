@@ -125,9 +125,9 @@ protected:
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition) = 0;
 
-	void DrawAsyncDebugInfo();
+	virtual void DrawAsyncDebugInfo();
 	void DrawDebugStaple(int pIndex, int pHeight, const Color& pColor);
-	void DrawSyncDebugInfo();
+	virtual void DrawSyncDebugInfo();
 
 	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
 	typedef std::hash_set<Cure::GameObjectId> ObjectIdSet;
