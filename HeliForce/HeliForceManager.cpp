@@ -58,7 +58,6 @@
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	2
 
-#include "../UiLepra/Include/UiOpenGLExtensions.h"	// TODO: remove!
 
 
 namespace HeliForce
@@ -352,11 +351,11 @@ bool HeliForceManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 {
 	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	if (lObject)
+	if (lObject && !mZoomPlatform)
 	{
 		return SetAvatarEnginePower(lObject, pAspect, pPower);
 	}
-	return false;
+	return SetAvatarEnginePower(lObject, pAspect, 0.0f);
 }
 
 

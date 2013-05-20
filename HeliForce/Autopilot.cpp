@@ -68,8 +68,12 @@ Vector3DF Autopilot::GetSteering()
 	const Vector3DF lXVelocity(lVelocity.x, 0, 0);
 	const float lMoveRightDirectionFactor = lDirection.GetNormalized() * lXVelocity;
 	lAim.x += 0.5f * lVelocity.x * Math::Lerp(-1.0f, +1.0f, lMoveRightDirectionFactor);
+	lAim += Math::Lerp(lAim, -lVelocity+Vector3DF(0,0,0.1f), lVelocity.GetLength()/15);
+	if (lPath->GetCurrentInterpolationTime() > 0.7f)
+	{
+		lAim = Math::Lerp(lAim, -0.8f*lVelocity+Vector3DF(0,0,0.1f), lPath->GetCurrentInterpolationTime());
+	}
 	lAim.x += -50 * lUp.x;// * Math::Lerp(0.0f, 1.0f, std::min(1.0f, lFutureDistance/5));
-	lAim += Math::Lerp(lAim, -lVelocity, lVelocity.GetLength()/15);
 	lAim.x = Math::Clamp(lAim.x, -0.7f, +0.7f);
 	lAim.z = Math::Clamp(lAim.z, -0.0f, +1.0f);
 	lAim.z = Math::Lerp(0.05f, 0.6f, lAim.z);
