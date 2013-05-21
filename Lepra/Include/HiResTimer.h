@@ -75,7 +75,7 @@ public:
 	static inline double GetPeriod();
 	static inline uint64 GetSystemCounter();
 
-private:
+protected:
 	uint64 mPrevCounter;
 	uint64 mCounter;
 	bool mIsManualUpdateEnabled;
@@ -288,11 +288,14 @@ public:
 	inline StopWatch();
 	inline bool TryStart();
 	inline void Start();
+	inline bool ResumeFromLapTime();
+	inline bool ResumeFromStop();
 	inline void Stop();
 	inline bool IsStarted() const;
+	inline double QuerySplitTime();
 	inline int GetStartCount() const;
 
-private:
+protected:
 	bool mIsStarted;
 	int mStartCount;
 };
@@ -323,6 +326,31 @@ void StopWatch::Start()
 	++mStartCount;
 }
 
+bool StopWatch::ResumeFromLapTime()
+{
+	if (mIsStarted)
+	{
+		return false;
+	}
+	mIsStarted = true;
+	++mStartCount;
+	return true;
+}
+
+bool StopWatch::ResumeFromStop()
+{
+	if (mIsStarted)
+	{
+		return false;
+	}
+	const uint64 lCounter = mCounter;
+	UpdateTimer();
+	mPrevCounter += mCounter - lCounter;
+	mIsStarted = true;
+	++mStartCount;
+	return true;
+}
+
 void StopWatch::Stop()
 {
 	mIsStarted = false;
@@ -331,6 +359,11 @@ void StopWatch::Stop()
 bool StopWatch::IsStarted() const
 {
 	return mIsStarted;
+}
+
+double StopWatch::QuerySplitTime()
+{
+	return mIsStarted? QueryTimeDiff() : GetTimeDiff();
 }
 
 int StopWatch::GetStartCount() const

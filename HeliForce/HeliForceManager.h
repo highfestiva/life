@@ -141,6 +141,7 @@ protected:
 	StopWatch mTooFarAwayTimer;
 	StopWatch mAvatarCreateTimer;
 	StopWatch mAvatarDied;
+	StopWatch mFlyTime;
 	bool mHadAvatar;
 	bool mUpdateCameraForAvatar;
 	Life::Options::Steering mLastSteering;

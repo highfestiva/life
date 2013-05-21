@@ -1,72 +1,28 @@
-Game
----------
-+ Random damage.
-+ NPC:s.
-+ Team play.
-+ Tab score
-+ Two computers.
-+ The vehicle "jumps" when receiving an old server position from an explosion.
-+ Server sometimes skips network positioning when a client just logged in.
-+ Explode vehicle when health <= 0.
-- Creating temporary, local missiles, which are taken over by the server later on (including extrapolation).
-+ Make sure shooting oneself can't happen (using extrapolation? On server or client?).
-+ Ramps, bridges, elevators, doors.
-+ Destructable obstacles.
-+ Implement machine gun.
-+ Mouse look
-+ Port server to Linux.
-+ Particles, explosions. Fire and white-hot sparks (GL_SRC_ALPHA, GL_ONE); smoke and shrapnel (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA). Use grayscale texture with GL shading. Set a light on the explosion. Orient all billboards in one direction, not simply towards the camera. (http://www.idevgames.com/forums/thread-5399.html)
-+ Check multiplayer on two computers and one iPhone.
-+ Drop the old particle systems! Or make them use the new one!
-+ Fix the bomber planes showing up after dropping payload in out of process server.
-+ Fix crash bug in networking code destruction (always crashes on client when destructing, but never when not).
-+ Fix objects blinking by in origo first frame after load (out-of-process server).
-+ Object should start spinning when hit by a grenade/in an explosion.
-+ Improve mouselook on PC.
-+ Orient spawn engines correctly (for instance mines).
-+ Bombers' noses are heli_forceed upwards by the explosion when dropping bombs! Don't let it happen, noooo!
-+ Spawn engines for players, not hard-coded positions.
-+ Hover tanks should have moving parts, if only in gfx. Pontoons, rotors or jets should indicate movement direction.
-+ Mouselook should work on Mac.
-+ Make mine explosions bio-hazardous green instead of default yellow/red.
-. Make nice-looking tank!
-  + Env mapping.
-  + Nice-looing normals.
-  . Textured stripes in the grill.
-  . Glowing engine with fire in the rear. (Glow tag would be nice, with configurable sine for each channel, RGB, and period.)
-. Fix "extra light (for shots/flares) creates shadows that stick!"
-. Make nice-looking level. The first levels should be easy with target practice and simply crossing a simple square into a goal.
-  . Add fog setting to level.
-. Make mine explosions infectious, so that when the hover tank blows up, it too will use green smoke. Also take some continous damage during infection.
-. Fix camera "shakes like mad" when you fly away in an explosion.
-. Add typical "game cam shakes" to a camera when nearby an explosion.
-. Fix "all energy invested in main body" when exploading a heli_force.
-. Fix "on explosion meshes get weird physics center points" and that "physics objects seem created at an offset".
-. Fix bombers being so sensitive to non-explosive damage. (For instance add extra parameter for "heli_forceability" in explosion algo?)
-. Disconnect should happen when you suspend, cancellable connect should happen when you resume.
-. Not possible to log in when someone is moving/shooting.
-. Refactor (code -> Life?) and split HeliForce and HeliForce.
-. Test which of Arena or Adventure play is best. Make a real map!
-. Show reticle or indication of target. Perhaps something like a fighter jet's "shoot!" indicator?
-. Show pictures of players in multiplayer! Great idea!
-. Simple path finding.
-. AI (where is the user probably going to appear after disappearing behind a building).
-. Homing missiles.
-. Add lobbing missiles/homing grenades, which travel to high altitude and can be used to take out bomb planes!
-. Add homing, high-flying missiles - fired at a 70 deg angle - which can be fired at a distance. Takes out both bombers and tanks.
-. Dynamic, moving objects in levels.
-. Fix cam moves behind walls (like in Kill Cutie: cam moves up).
-. UX design/menus.
-. Money in the game.
-. Get weapons, shield, health and ammo in "stores" in the game. (Triggers which add up your inventory after some time or at regular intervals.)
-. One defence turret per team.
-. Nice tank looks -- env mapping on vehicles?
-. Make level look nice. Lighted textures? Light maps? Env maps?
-. Improve sound quality (doppler on grenades especially).
-
-
-Engine
-----------
-+ Beautify rendering.
-. GLES2?
-. iPhone 3GS performance.
++ Measure time. Nice font.
++ Heli exhaust.
+. Simpler controls for kids.
+. Beautify!
+. Shadows on iOS.
+. Helper direction arrow (points along auto pilot spline).
+. Reference points in foreground/background.
+. Varying background image.
+. Monster truck jumping over landing pad.
+. Music.
+. Auto pilot landings.
+. Sounds. Ambient. Moving stuff.
+. Moving cars on level.
+. Show health bar instead of text.
+. More helis. One with glowing engine in the rear.
+. Traps with smoke and sound!
+. Falling stones!
+. Automatic doors.
+. Push stones over edges to open...
+. Break hot-air ballon to open...
+. Add turrets to some levels.
+. Pilot name and high score.
+. Change pilot name.
+. Replay level.
+. Pick level.
+. Land on moving truck.
+. Land on moving boat.
+. Pause button.

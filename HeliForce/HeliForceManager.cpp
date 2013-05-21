@@ -133,6 +133,10 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	SetConsoleManager(new HeliForceConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
 	GetPhysicsManager()->SetSimulationParameters(0.005f, 0.0f, 0.2f);
+
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 1);
 }
 
 HeliForceManager::~HeliForceManager()
@@ -306,11 +310,20 @@ bool HeliForceManager::Paint()
 	const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
+
 		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
 		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("");
 		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 255), 0);
 		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
-		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 10, 10);
+		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 200, 10);
+
+		const bool lIsFlying = mFlyTime.IsStarted();
+		const double lTime = mFlyTime.QuerySplitTime();
+		const int lSec = (int)lTime;
+		const str lIntTimeString = strutil::Format(_T("%i"), lSec);
+		const str lTimeString = strutil::Format((lIsFlying || !lTime)? _T("%.1f s") : _T("%.3f s"), lTime);
+		int w = mUiManager->GetPainter()->GetStringWidth(lIntTimeString);
+		mUiManager->GetPainter()->PrintText(lTimeString, 50 - w, 3);
 	}
 
 	return true;
@@ -622,6 +635,7 @@ bool HeliForceManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsign
 {
 	if (mZoomPlatform)
 	{
+		pAvatar->SetEnginePower(pAspect, 0);
 		return false;
 	}
 	return pAvatar->SetEnginePower(pAspect, pPower);
@@ -634,6 +648,29 @@ void HeliForceManager::TickUiUpdate()
 		mHitGroundFrameCount = 0;
 	}
 	mIsHitThisFrame = false;
+
+	const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	if (mHitGroundFrameCount <= 0 && mLevel && mLevel->IsLoaded() && lAvatar)
+	{
+		if (lAvatar->GetPhysics()->GetEngineCount() < 3)
+		{
+			mFlyTime.Stop();
+		}
+		else if (!mFlyTime.IsStarted())
+		{
+			Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
+			assert(lSpawner);
+			const float lDistanceToHome = GetContext()->GetObject(mAvatarId)->GetPosition().GetDistance(lSpawner->GetSpawnPoint().GetPosition());
+			if (lDistanceToHome < 15)
+			{
+				mFlyTime.TryStart();
+			}
+			else
+			{
+				mFlyTime.ResumeFromLapTime();
+			}
+		}
+	}
 
 	((HeliForceConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 	mCollisionSoundManager->Tick(mCameraTransform.GetPosition());
@@ -716,6 +753,7 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	{
 		UiCure::Machine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, 4, 1.0f, 1.5f));
 		lObject = lMachine;
 	}
 	else
@@ -837,6 +875,7 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 			if (pObject2->GetPhysics()->GetBoneGeometry(*x)->GetBodyId() == pBody2Id)
 			{
 				lCollisionImpactFactor = 1;
+				mFlyTime.Stop();
 				break;
 			}
 		}
@@ -854,12 +893,17 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_HINGE &&
 			lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
 		{
-			lCollisionImpactFactor *= Math::Lerp(1000.0f, 1.0f, lChildishness);
+			lCollisionImpactFactor *= Math::Lerp(1000.0f, 2.0f, lChildishness);
 		}
 	}
 
 	float lForce = pForce.GetLength() * lCollisionImpactFactor;
-	lForce *= Math::Lerp(1.0f, 0.05f, lChildishness);
+	if (lChildishness > 0.1f)
+	{
+		float lUpFactor = 1 + 0.5f*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));
+		lUpFactor *= lUpFactor;
+		lForce *= Math::Lerp(1.0f, 0.05f, lChildishness * lUpFactor);
+	}
 	if (lForce > 15000)
 	{
 		float lForce2 = lForce;
@@ -906,6 +950,9 @@ Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLeve
 
 float HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition)
 {
+	mFlyTime.Stop();
+	mFlyTime.PopTimeDiff();
+
 	const Cure::ObjectPositionalData* lPositionalData = 0;
 	pObject->UpdateFullPosition(lPositionalData);
 	Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
