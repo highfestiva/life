@@ -1,14 +1,15 @@
 + Measure time. Nice font.
 + Heli exhaust.
-. Simpler controls for kids.
 . Beautify!
 . Shadows on iOS.
 . Helper direction arrow (points along auto pilot spline).
 . Reference points in foreground/background.
+. Simpler controls for kids.
+  - Auto pilot landings.
+  - Test on Loke.
 . Varying background image.
 . Monster truck jumping over landing pad.
 . Music.
-. Auto pilot landings.
 . Sounds. Ambient. Moving stuff.
 . Moving cars on level.
 . Show health bar instead of text.
