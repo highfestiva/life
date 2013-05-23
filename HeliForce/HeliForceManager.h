@@ -130,6 +130,9 @@ protected:
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
 
+	void DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const;
+
+	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 	void RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource);
 
 	void DisableDepth();
@@ -171,6 +174,7 @@ protected:
 	HiResTimer mTouchstickTimer;
 	Touchstick* mStick;
 
+	UiCure::UserPainterKeepImageResource* mStickImage;
 	UiCure::UserRendererImageResource* mArrow;
 	UiTbc::BillboardGeometry* mArrowBillboard;
 	UiTbc::Renderer::GeometryID mArrowBillboardId;

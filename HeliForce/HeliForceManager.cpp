@@ -116,6 +116,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mFireButton(0),
 #endif // Touch or emulated touch.
 	mStick(0),
+	mStickImage(0),
 	mArrow(0),
 	mArrowBillboard(0),
 	mArrowBillboardId(0),
@@ -199,6 +200,10 @@ bool HeliForceManager::Open()
 #endif // Touch or emulated touch.
 	if (lOk)
 	{
+		mStickImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mStickImage->Load(GetResourceManager(), _T("stick.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
+
 		mArrow = new UiCure::UserRendererImageResource(mUiManager, false);
 		mArrow->Load(GetResourceManager(), _T("arrow.png"),
 			UiCure::UserRendererImageResource::TypeLoadCallback(this, &HeliForceManager::RendererTextureLoadCallback));
@@ -276,12 +281,14 @@ bool HeliForceManager::Render()
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 	const float lWantedDirection = S(RIGHT3D) - S(LEFT3D);
 	const float lPower = S(UP3D) - S(DOWN3D);
-	if (lPower < 0.2f)
+	TransformationF lTransform = GetMainRotorTransform(lObject);
+	float lTotalPower = ::sqrt(lWantedDirection*lWantedDirection + lPower*lPower);
+	if (!lTotalPower)
 	{
 		return true;
 	}
-	TransformationF lTransform = GetMainRotorTransform(lObject);
-	const float lTotalPower = ::sqrt(lWantedDirection*lWantedDirection + lPower*lPower);
+	lTotalPower = Math::Lerp(0.4f, 1.0f, lTotalPower);
+	lTotalPower *= Math::Lerp(0.4f, 1.0f, lPower);
 	mArrowTotalPower = Math::Lerp(mArrowTotalPower, lTotalPower, 0.3f);
 	mArrowAngle = Math::Lerp(mArrowAngle, ::atan2(lWantedDirection, lPower), 0.3f);
 	float lSize = mArrowTotalPower*0.5f;
@@ -301,6 +308,11 @@ bool HeliForceManager::Render()
 
 bool HeliForceManager::Paint()
 {
+	if (!Parent::Paint())
+	{
+		return false;
+	}
+
 	if (mStick)
 	{
 		DrawStick(mStick);
@@ -593,6 +605,8 @@ void HeliForceManager::UpdateTouchstickPlacement()
 
 void HeliForceManager::TickUiInput()
 {
+	mUiManager->GetInputManager()->SetCursorVisible(true);
+
 	SteeringPlaybackMode lPlaybackMode;
 	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
@@ -1008,45 +1022,15 @@ void HeliForceManager::OnFireButton(UiTbc::Button*)
 void HeliForceManager::DrawStick(Touchstick* pStick)
 {
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	if (!pStick || !lAvatar)
+	if (!pStick || mStickImage->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE  || !lAvatar)
 	{
 		return;
 	}
 
 	PixelRect lArea = pStick->GetArea();
-	const int s = lArea.GetWidth();
-	lArea.mTop += s/2;
-	lArea.mBottom -= s/2;
-	const int ow = lArea.GetWidth();
-	const int lMargin = pStick->GetFingerRadius() / 2;
-	const int r = pStick->GetFingerRadius() - lMargin;
-	lArea.Shrink(lMargin*2);
-	mUiManager->GetPainter()->DrawArc(lArea.mLeft, lArea.mTop, lArea.GetWidth(), lArea.GetHeight(), 0, 360, false);
-	float x;
-	float y;
-	bool lIsPressing;
-	pStick->GetValue(x, y, lIsPressing);
-	if (lIsPressing)
-	{
-		Vector2DF v(x, y);
-		v.Mul((ow+lMargin*2) / (float)ow);
-		v.y *= 2.0f;
-		const float lLength = v.GetLength();
-		if (lLength > 1)
-		{
-			v.Div(lLength);
-		}
-		x = v.x;
-		y = v.y;
-		x = 0.5f*x + 0.5f;
-		y = 0.5f*y + 0.5f;
-		const int w = lArea.GetWidth()  - r*2;
-		const int h = lArea.GetHeight() - r*2;
-		mUiManager->GetPainter()->DrawArc(
-			lArea.mLeft + (int)(w*x),
-			lArea.mTop  + (int)(h*y),
-			r*2, r*2, 0, 360, true);
-	}
+	lArea.mBottom = lArea.mTop + lArea.GetWidth();
+	lArea.Shrink(8);
+	DrawImage(mStickImage->GetData(), (float)lArea.GetCenterX(), (float)lArea.GetCenterY(), (float)lArea.GetWidth(), (float)lArea.GetHeight(), 0);
 }
 
 
@@ -1214,6 +1198,29 @@ void HeliForceManager::UpdateCameraPosition(bool pUpdateMicPosition)
 }
 
 
+
+void HeliForceManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
+{
+	cx -= 0.5f;
+
+	const float ca = ::cos(pAngle);
+	const float sa = ::sin(pAngle);
+	const float w2 = w*0.5f;
+	const float h2 = h*0.5f;
+	const float x = cx - w2*ca - h2*sa;
+	const float y = cy - h2*ca + w2*sa;
+	const Vector2DF c[] = { Vector2DF(x, y), Vector2DF(x+w*ca, y-w*sa), Vector2DF(x+w*ca+h*sa, y+h*ca-w*sa), Vector2DF(x+h*sa, y+h*ca) };
+	const Vector2DF t[] = { Vector2DF(0, 0), Vector2DF(1, 0), Vector2DF(1, 1), Vector2DF(0, 1) };
+#define V(z) std::vector<Vector2DF>(z, z+LEPRA_ARRAY_COUNT(z))
+	mUiManager->GetPainter()->DrawImageFan(pImageId, V(c), V(t));
+}
+
+
+
+void HeliForceManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)
+{
+	(void)pResource;
+}
 
 void HeliForceManager::RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource)
 {
