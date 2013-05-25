@@ -813,7 +813,7 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	else
 	{
 		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
-		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, 3, 0.6f, 2.0f));
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.

@@ -29,7 +29,8 @@ typedef Cure::ContextPath::SplinePath Spline;
 
 Autopilot::Autopilot(HeliForceManager* pGame):
 	Parent(pGame->GetResourceManager(), _T("Autopilot")),
-	mGame(pGame)
+	mGame(pGame),
+	mClosestPathDistance(5.0f)
 {
 }
 
@@ -54,30 +55,37 @@ Vector3DF Autopilot::GetSteering()
 		return Vector3DF();
 	}
 
-	const Vector3DF lPosition = lChopper->GetPosition();
+	mLastAvatarPosition = lChopper->GetPosition();
 	const Vector3DF lVelocity = lChopper->GetVelocity();
 	const Vector3DF lUp = lChopper->GetOrientation() * Vector3DF(0,0,1);
-	const Vector3DF lTowards = lPosition + lVelocity*AHEAD_TIME;
+	const Vector3DF lTowards = mLastAvatarPosition + lVelocity*AHEAD_TIME;
 
 	Vector3DF lClosestPoint;
-	/*const float lFutureDistance =*/ GetClosestPathDistance(lTowards, lClosestPoint);
-	//const float lCurrentDistance = GetClosestPathDistance(lPosition);
+	mClosestPathDistance = GetClosestPathDistance(lTowards, lClosestPoint);
 	Spline* lPath = lLevel->QueryPath()->GetPath(0);
 	Vector3DF lAim = lPath->GetValue() - lTowards;
-	const Vector3DF lDirection = lPath->GetSlope();
-	const Vector3DF lXVelocity(lVelocity.x, 0, 0);
-	const float lMoveRightDirectionFactor = lDirection.GetNormalized() * lXVelocity;
-	lAim.x += 0.5f * lVelocity.x * Math::Lerp(-1.0f, +1.0f, lMoveRightDirectionFactor);
-	lAim += Math::Lerp(lAim, -lVelocity+Vector3DF(0,0,0.1f), lVelocity.GetLength()/15);
-	if (lPath->GetCurrentInterpolationTime() > 0.7f)
+	Vector3DF lAimNear(0, 0, ::std::max(lAim.z, 0.0f));
+	const float lSpeedLimit = (lPath->GetDistanceLeft() < 20.0f) ? 4.0f : 60.0f;
+	if (lSpeedLimit < 30.0f && (-lVelocity.x<0) == (lAim.x<0))
 	{
-		lAim = Math::Lerp(lAim, -0.8f*lVelocity+Vector3DF(0,0,0.1f), lPath->GetCurrentInterpolationTime());
+		lAimNear.x = lAim.x;
 	}
-	lAim.x += -50 * lUp.x;// * Math::Lerp(0.0f, 1.0f, std::min(1.0f, lFutureDistance/5));
+	lAim = Math::Lerp(lAim, lAimNear-lVelocity, lVelocity.GetLength()/lSpeedLimit);
+	lAim.x += -30 * lUp.x;
 	lAim.x = Math::Clamp(lAim.x, -0.7f, +0.7f);
 	lAim.z = Math::Clamp(lAim.z, -0.0f, +1.0f);
 	lAim.z = Math::Lerp(0.05f, 0.6f, lAim.z);
 	return lAim;
+}
+
+float Autopilot::GetClosestPathDistance() const
+{
+	return mClosestPathDistance;
+}
+
+Vector3DF Autopilot::GetLastAvatarPosition() const
+{
+	return mLastAvatarPosition;
 }
 
 

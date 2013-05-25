@@ -117,6 +117,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 #endif // Touch or emulated touch.
 	mStick(0),
 	mStickImage(0),
+	mDirectionImage(0),
 	mArrow(0),
 	mArrowBillboard(0),
 	mArrowBillboardId(0),
@@ -202,6 +203,10 @@ bool HeliForceManager::Open()
 	{
 		mStickImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mStickImage->Load(GetResourceManager(), _T("stick.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
+
+		mDirectionImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mDirectionImage->Load(GetResourceManager(), _T("direction.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
 
 		mArrow = new UiCure::UserRendererImageResource(mUiManager, false);
@@ -319,11 +324,11 @@ bool HeliForceManager::Paint()
 		mStick->ResetTap();
 	}
 
-	const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	if (lObject)
+	const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	if (lAvatar)
 	{
 
-		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
+		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
 		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("");
 		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 255), 0);
 		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
@@ -336,6 +341,56 @@ bool HeliForceManager::Paint()
 		const str lTimeString = strutil::Format((lIsFlying || !lTime)? _T("%.1f s") : _T("%.3f s"), lTime);
 		int w = mUiManager->GetPainter()->GetStringWidth(lIntTimeString);
 		mUiManager->GetPainter()->PrintText(lTimeString, 50 - w, 3);
+
+		if (lAvatar->GetPhysics()->GetEngineCount() >= 3 && mDirectionImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+			mLevel && mLevel->IsLoaded())
+		{
+			if (mDirectionImageTimer.QueryTimeDiff() >= 0.5)
+			{
+				if (mDirectionImageTimer.IsStarted())
+				{
+					mDirectionImageTimer.PopTimeDiff();
+					mDirectionImageTimer.Stop();
+				}
+				else
+				{
+					mDirectionImageTimer.Start();
+				}
+			}
+			const float lPathDistance = mAutopilot->GetClosestPathDistance();
+			if (lPathDistance > 40.0f)
+			{
+				if (mDirectionImageTimer.IsStarted())
+				{
+					const Vector3DF lPos3d = mCameraTransform.GetPosition();
+					const Vector2DF lPos(lPos3d.x, lPos3d.z);
+					const Vector3DF lGoal3d = mLastLandingTriggerPosition;
+					const Vector2DF lGoal(lGoal3d.x, lGoal3d.z);
+					const float a = (lGoal-lPos).GetAngle() - PIF/2;
+					const float lTouchSideScale = 1.28f;	// Inches.
+					const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
+					const float lWantedSize = mUiManager->GetCanvas()->GetWidth() * lTouchScale * 2;
+					float lSize = (float)mDirectionImage->GetRamData()->GetWidth();
+					while (lWantedSize >= lSize*2) lSize *= 2;
+					while (lWantedSize <= lSize/2) lSize /= 2;
+					// Find out the screen coordinate of the chopper, so we can place our arrow around that.
+					const Vector3DF lCamDirection = mCameraTransform.GetOrientation() * Vector3DF(0,1,0);
+					const Vector3DF lCamLookAtPointInChopperPlane = lPos3d + lCamDirection * -lPos3d.y;
+					float lFoV;
+					CURE_RTVAR_GET(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+					lFoV /= 45.0f;
+					const Vector3DF lDelta = (mAutopilot->GetLastAvatarPosition() - lPos3d) / (-lPos3d.y * lFoV);
+					const float lDistance = mUiManager->GetCanvas()->GetWidth() / 6.0f;
+					const float x = mUiManager->GetCanvas()->GetWidth() /2.0f - lDistance*::sin(a);
+					const float y = mUiManager->GetCanvas()->GetHeight()/2.0f - lDistance*::cos(a);
+					DrawImage(mDirectionImage->GetData(), x, y, lSize, lSize, a);
+				}
+			}
+			else
+			{
+				mDirectionImageTimer.Start();
+			}
+		}
 	}
 
 	return true;
@@ -619,6 +674,10 @@ void HeliForceManager::TickUiInput()
 			// Control steering.
 			float lChildishness;
 			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+			if (mFlyTime.GetTimeDiff() < 0.01f)
+			{
+				lChildishness = 0;	// Don't help when not even started yet.
+			}
 			const Vector3DF lAutoPilot = mAutopilot->GetSteering() * lChildishness;
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
@@ -840,6 +899,7 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mCameraPreviousPosition = mCameraTransform.GetPosition();
 				UpdateCameraPosition(true);
 			}
+			GetLandingTriggerPosition(mLevel);	// Update shadow landing trigger position.
 			mZoomPlatform = false;
 		}
 		else
@@ -953,7 +1013,8 @@ Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLeve
 				{
 					TransformationF lTransform;
 					GetPhysicsManager()->GetTriggerTransform(lTrigger->GetPhysicsTriggerId(0), lTransform);
-					return lTransform.GetPosition();
+					mLastLandingTriggerPosition = lTransform.GetPosition();
+					return mLastLandingTriggerPosition;
 				}
 			}
 		}

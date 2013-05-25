@@ -161,6 +161,7 @@ protected:
 
 	TransformationF mCameraTransform;
 	Vector3DF mCameraPreviousPosition;
+	mutable Vector3DF mLastLandingTriggerPosition;
 	float mCameraSpeed;
 	bool mZoomPlatform;
 	int mPostZoomPlatformFrameCount;
@@ -175,6 +176,8 @@ protected:
 	Touchstick* mStick;
 
 	UiCure::UserPainterKeepImageResource* mStickImage;
+	UiCure::UserPainterKeepImageResource* mDirectionImage;
+	StopWatch mDirectionImageTimer;
 	UiCure::UserRendererImageResource* mArrow;
 	UiTbc::BillboardGeometry* mArrowBillboard;
 	UiTbc::Renderer::GeometryID mArrowBillboardId;

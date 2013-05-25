@@ -1210,7 +1210,7 @@ Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 	}
 	if (lMachine)
 	{
-		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, 3, 0.6f, 2.0f));
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 	}
 	return lMachine;
 }
