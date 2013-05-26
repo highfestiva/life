@@ -573,7 +573,7 @@ bool HeliForceManager::Reset()	// Run when disconnected. Removes all objects and
 bool HeliForceManager::InitializeUniverse()
 {
 	mMassObjectArray.clear();
-	mLevel = (Level*)Parent::CreateContextObject(_T("level_02"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(_T("level_03"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
 	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
