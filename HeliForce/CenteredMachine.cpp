@@ -29,6 +29,16 @@ CenteredMachine::~CenteredMachine()
 }
 
 
+bool CenteredMachine::TryComplete()
+{
+	if (Parent::TryComplete())
+	{
+		GetManager()->EnableMicroTickCallback(this);
+		return true;
+	}
+	return false;
+}
+
 void CenteredMachine::OnMicroTick(float pFrameTime)
 {
 	Parent::OnMicroTick(pFrameTime);

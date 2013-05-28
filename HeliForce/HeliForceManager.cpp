@@ -51,9 +51,11 @@
 #include "LandingTrigger.h"
 #include "Level.h"
 #include "RtVar.h"
+#include "StoneEater.h"
 #include "Sunlight.h"
 #include "Version.h"
 
+#define LAST_LEVEL			3
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	2
@@ -131,10 +133,11 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mCollisionSoundManager->AddSound(_T("plastic"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
 	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound(_T("thump"),		UiCure::CollisionSoundManager::SoundResourceInfo(5.0f, 0.5f, 1.0f));
 
 	SetConsoleManager(new HeliForceConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
-	GetPhysicsManager()->SetSimulationParameters(0.005f, 0.0f, 0.2f);
+	GetPhysicsManager()->SetSimulationParameters(0.0f, -0.1f, 0.2f);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
@@ -400,7 +403,7 @@ void HeliForceManager::DrawSyncDebugInfo()
 {
 	Parent::DrawSyncDebugInfo();
 
-	if (GetLevel())
+	if (GetLevel() && GetLevel()->QueryPath()->GetPath(0))
 	{
 		UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), GetContext(), 0, GetTickLock());
 		lDebugRenderer.RenderSpline(mUiManager, GetLevel()->QueryPath()->GetPath(0));
@@ -528,7 +531,7 @@ void HeliForceManager::NextLevel()
 		int lLevelNumber = 0;
 		strutil::StringToInt(mOldLevel->GetClassId().substr(6), lLevelNumber);
 		++lLevelNumber;
-		if (lLevelNumber >= 3)
+		if (lLevelNumber > LAST_LEVEL)
 		{
 			lLevelNumber = 0;
 		}
@@ -673,24 +676,27 @@ void HeliForceManager::TickUiInput()
 		{
 			// Control steering.
 			float lChildishness;
-			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 			if (mFlyTime.GetTimeDiff() < 0.01f)
 			{
 				lChildishness = 0;	// Don't help when not even started yet.
 			}
+			const float lChildSteerFactor = 1 - lChildishness * 0.5f;
 			const Vector3DF lAutoPilot = mAutopilot->GetSteering() * lChildishness;
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 			float lYaw, _;
 			lObject->GetOrientation().GetEulerAngles(lYaw, _, _);
-			const float lWantedDirection = S(RIGHT3D) - S(LEFT3D) + lAutoPilot.x;
+			const float lUserWantedDirection = (S(RIGHT3D) - S(LEFT3D)) * lChildSteerFactor;
+			const float lWantedDirection = lUserWantedDirection + lAutoPilot.x;
 			const float lCurrentDirection = lObject->GetVelocity().x * 0.05f;
 			const float lWantedChange = lWantedDirection-lCurrentDirection;
 			const float lPowerFwdRev = -::sin(lYaw) * lWantedChange;
 			const float lPowerLeftRight = ::cos(lYaw) * lWantedChange;
 			SetAvatarEnginePower(lObject, 4, lPowerFwdRev);
 			SetAvatarEnginePower(lObject, 5, lPowerLeftRight);
-			const float lPower = S(UP3D) - S(DOWN3D) + lAutoPilot.z;
+			const float lUserPower = (S(UP3D) - S(DOWN3D)) * lChildSteerFactor;
+			const float lPower = lUserPower + lAutoPilot.z;
 			SetAvatarEnginePower(lObject, 7, lPower);
 
 			// Control fire.
@@ -813,7 +819,8 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	}
 	else if (pClassId == _T("stone") || pClassId == _T("cube"))
 	{
-		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
+		lObject = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		lObject->DeleteAttribute(_T("float_health"));
 	}
 	else if (strutil::StartsWith(pClassId, _T("level_")))
 	{
@@ -848,6 +855,10 @@ Cure::ContextObject* HeliForceManager::CreateLogicHandler(const str& pType)
 	else if (pType == _T("real_time_ratio"))
 	{
 		return new LandingTrigger(GetContext());
+	}
+	else if (pType == _T("stone_eater"))
+	{
+		return new StoneEater(GetContext());
 	}
 	else if (pType == _T("context_path"))
 	{
@@ -920,7 +931,7 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
 
 	bool lIsAvatar = (pObject1->GetInstanceId() == mAvatarId);
 
@@ -957,7 +968,7 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 
 	if (lIsAvatar)
 	{
-		CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+		CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	}
 
 	// Check if it's a rotor!

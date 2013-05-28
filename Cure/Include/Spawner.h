@@ -7,6 +7,7 @@
 #pragma once
 
 #include "CppContextObject.h"
+#include "../../Lepra/Include/HiResTimer.h"
 #include "Cure.h"
 
 
@@ -30,7 +31,11 @@ private:
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	void OnCreate(float pCreateInterval);
 	void OnDestroy(float pDestroyInterval);
+	void OnRecreate(float pRecreateInterval);
+	void Create();
 	virtual int GetSpawnCount() const;
+
+	StopWatch mRecreateTimer;
 
 	LOG_CLASS_DECLARE();
 };

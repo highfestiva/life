@@ -170,6 +170,7 @@ void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKe
 	lGotSound &= (SoundInfo::GetVolume(pImpact, lResource) >= mLightImpact*MINIMUM_PLAYED_VOLUME_FACTOR);
 	if (!lGotSound)
 	{
+		//mLog.Warningf(_T("Unable to play sound %s."), pSoundName.c_str());
 		return;
 	}
 

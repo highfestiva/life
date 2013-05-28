@@ -702,7 +702,7 @@ bool ContextObject::SetEnginePower(unsigned pAspect, float pPower)
 
 float ContextObject::GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass, float pSidewaysFactor) const
 {
-	const float lMassFactor = 1/(GetMass() + pExtraMass);
+	const float lMassFactor = 1 / (GetMass() + pExtraMass);
 	const float lGravityInvertFactor = 1/pGravity.GetLength();
 	const Vector3DF lGravityDirection(pGravity * lGravityInvertFactor);
 	// High angle against direction of gravity means high impact.

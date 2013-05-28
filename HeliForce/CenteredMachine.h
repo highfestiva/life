@@ -24,6 +24,7 @@ public:
 	virtual ~CenteredMachine();
 
 protected:
+	virtual bool TryComplete();
 	virtual void OnMicroTick(float pFrameTime);
 	virtual void OnDie();
 };

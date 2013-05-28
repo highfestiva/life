@@ -565,6 +565,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StoneEater.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Sunlight.cpp"
 				>
 			</File>
@@ -608,6 +612,10 @@
 			</File>
 			<File
 				RelativePath=".\RtVar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StoneEater.h"
 				>
 			</File>
 			<File
