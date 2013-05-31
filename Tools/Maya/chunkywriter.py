@@ -272,16 +272,19 @@ class ChunkyWriter:
 
 	def _writematerial(self, name, mat):
 		self._writematerial_(name, mat.ambient, mat.diffuse, mat.specular, \
-			mat.shininess, mat.alpha, mat.textures, mat.shader)
+			mat.shininess, mat.alpha, mat.smooth, mat.textures, mat.shader)
 
 
-	def _writematerial_(self, name, ambient, diffuse, specular, shininess, alpha, textures, shader):
+	def _writematerial_(self, name, ambient, diffuse, specular, shininess, alpha, smooth, textures, shader):
 		if len(ambient) != 3 or len(diffuse) != 3 or len(specular) != 3:
 			print("Error: bad number of material elements for %s:" % name, diffuse)
 			#print(ambient, diffuse, specular)
 			sys.exit(18)
 		for f in ambient+diffuse+specular+[shininess,alpha]:
 			self._writefloat(f)
+		if options.options.verbose and not smooth:
+			print("Flat shading on %s." % name)
+		self._writeint(int(smooth))
 		self._writeint(len(textures))
 		for texture in textures:
 			self._writestr(os.path.basename(texture))

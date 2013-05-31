@@ -28,6 +28,7 @@ protected:
 	enum CommandClient
 	{
 		COMMAND_SET_AVATAR = Parent::COMMAND_COUNT_LIFE_CLIENT,
+		COMMAND_NEXT_LEVEL,
 	};
 
 	virtual unsigned GetCommandCount() const;

@@ -606,7 +606,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 			((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(lMeshIndex);
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(lLoadedMaterial.mAmbient,
 			lLoadedMaterial.mDiffuse, lLoadedMaterial.mSpecular,
-			lLoadedMaterial.mShininess, lLoadedMaterial.mAlpha, true);
+			lLoadedMaterial.mShininess, lLoadedMaterial.mAlpha, lLoadedMaterial.mSmooth);
 		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
 
 		((TBC::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);

@@ -28,6 +28,7 @@ public:
 		Vector3DF mSpecular;
 		float mShininess;
 		float mAlpha;
+		bool mSmooth;
 		std::vector<str> mTextureList;
 		str mShaderName;
 

@@ -484,7 +484,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 		UiTbc::ChunkyClass::Material lMaterial;
 		if (lOk)
 		{
-			const int lMaterialFloatCount = 11;
+			const int lMaterialFloatCount = 12;
 			float lMaterialArray[lMaterialFloatCount];
 			for (int x = 0; x < lMaterialFloatCount; ++x)
 			{
@@ -498,6 +498,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			lMaterial.mSpecular.Set(lMaterialArray[6], lMaterialArray[7], lMaterialArray[8]);
 			lMaterial.mShininess = lMaterialArray[9];
 			lMaterial.mAlpha = lMaterialArray[10];
+			lMaterial.mSmooth = (lMaterialArray[11] != 0);
 		}
 		if (lOk)
 		{

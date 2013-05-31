@@ -1,11 +1,11 @@
 + Measure time. Nice font.
 + Heli exhaust.
++ Helper direction arrow (points along auto pilot spline).
+- Reference points in foreground/background. (Using exhaust works.)
 . Beautify!
 . Shadows on iOS.
-. Helper direction arrow (points along auto pilot spline).
-. Reference points in foreground/background.
 . Simpler controls for kids.
-  - Auto pilot landings.
+  + Auto pilot landings.
   - Test on Loke.
 . Varying background image.
 . Monster truck jumping over landing pad.

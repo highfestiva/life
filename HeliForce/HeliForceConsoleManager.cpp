@@ -23,6 +23,7 @@ namespace HeliForce
 const HeliForceConsoleManager::CommandPair HeliForceConsoleManager::mCommandIdList[] =
 {
 	{_T("set-avatar"), COMMAND_SET_AVATAR},
+	{_T("next-level"), COMMAND_NEXT_LEVEL},
 };
 
 
@@ -74,6 +75,11 @@ int HeliForceConsoleManager::OnCommand(const str& pCommand, const strutil::strve
 				{
 					mLog.Warningf(_T("usage: %s <avatar>"), pCommand.c_str());
 				}
+			}
+			break;
+			case COMMAND_NEXT_LEVEL:
+			{
+				((HeliForceManager*)GetGameManager())->NextLevel();
 			}
 			break;
 			default:

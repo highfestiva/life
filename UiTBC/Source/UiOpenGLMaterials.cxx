@@ -1022,12 +1022,11 @@ void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned pCurrentFrame, co
 	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);
 
-	bool lLightsEnabled = glIsEnabled(GL_LIGHTING) != 0;
 	glDisable(GL_LIGHTING);
 
 	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 
-	if (lLightsEnabled == true)
+	if (GetRenderer()->GetLightsEnabled())
 		glEnable(GL_LIGHTING);
 	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 

@@ -49,7 +49,7 @@ def splitverts_group(group, verbose=False):
 	"""Split mesh vertices that have different normals or UVs (=hard edges).
 	   But to complicate things, I keep vertices together that share a similar normal/UV."""
 	for node in group:
-		splitverts_node(node)
+		splitverts_node(node, verbose)
 
 
 def splitverts_node(node, verbose=False):
