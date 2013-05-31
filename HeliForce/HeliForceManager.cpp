@@ -258,6 +258,7 @@ bool HeliForceManager::Render()
 			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
 			mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
 			mHemisphere->GetMesh(0)->SetPreRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::DisableDepth));
+			mHemisphere->GetMesh(0)->SetPostRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::EnableDepth));
 		}
 		Vector3DF lPosition = mCameraTransform.GetPosition();
 		lPosition.x = -lPosition.x;
@@ -1306,6 +1307,13 @@ void HeliForceManager::DisableDepth()
 	mUiManager->GetRenderer()->EnableAllLights(false);
 	mUiManager->GetRenderer()->SetDepthWriteEnabled(false);
 	mUiManager->GetRenderer()->SetDepthTestEnabled(false);
+}
+
+void HeliForceManager::EnableDepth()
+{
+	mUiManager->GetRenderer()->EnableAllLights(true);
+	mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
+	mUiManager->GetRenderer()->SetDepthTestEnabled(true);
 }
 
 

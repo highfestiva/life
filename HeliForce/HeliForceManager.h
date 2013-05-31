@@ -136,6 +136,7 @@ protected:
 	void RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource);
 
 	void DisableDepth();
+	void EnableDepth();
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 

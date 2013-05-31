@@ -278,97 +278,6 @@
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </Reference>
   </ItemGroup>
-   <ItemGroup>
-    <ClCompile Include="ExplodingMachine.cpp" />
-    <ClCompile Include="Explosion.cpp" />
-    <ClCompile Include="FastProjectile.cpp" />
-    <ClCompile Include="Level.cpp" />
-    <ClCompile Include="LoginView.cpp" />
-    <ClCompile Include="Mine.cpp" />
-    <ClCompile Include="Projectile.cpp" />
-    <ClCompile Include="HeliForce.cxx" />
-    <ClCompile Include="HeliForceConsoleManager.cpp" />
-    <ClCompile Include="HeliForceDemo.cpp" />
-    <ClCompile Include="HeliForceManager.cpp" />
-    <ClCompile Include="HeliForceTicker.cpp" />
-    <ClCompile Include="HeliForceViewer.cpp" />
-    <ClCompile Include="RoadSignButton.cpp" />
-    <ClCompile Include="ServerListView.cpp" />
-    <ClCompile Include="Sunlight.cpp" />
-    <ClCompile Include="View.cpp" />
-    <ClCompile Include="HeliForceServer\BombPlane.cpp" />
-    <ClCompile Include="..\Life\LifeServer\BulletTime.cpp" />
-    <ClCompile Include="..\Life\LifeServer\Client.cpp" />
-    <ClCompile Include="HeliForceServer\GameServerLogic.cpp" />
-    <ClCompile Include="..\Life\LifeServer\GameServerManager.cpp" />
-    <ClCompile Include="HeliForceServer\Npc.cpp" />
-    <ClCompile Include="HeliForceServer\HeliForceServerConsole.cpp" />
-    <ClCompile Include="HeliForceServer\HeliForceServerDelegate.cpp" />
-    <ClCompile Include="HeliForceServer\HeliForceServerMessageProcessor.cpp" />
-    <ClCompile Include="..\Life\LifeServer\RaceTimer.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerConsoleManager.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp" />
-    <ClCompile Include="HeliForceServer\ServerFastProjectile.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerMessageProcessor.cpp" />
-    <ClCompile Include="HeliForceServer\ServerMine.cpp" />
-    <ClCompile Include="HeliForceServer\ServerProjectile.cpp" />
-    <ClCompile Include="..\Life\LifeServer\Spawner.cpp" />
-    <ClCompile Include="..\Life\LifeClient\UiGameServerManager.cpp" />
-    <ClCompile Include="..\Life\LifeClient\UiServerConsoleManager.cpp" />
-    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp" />
-    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Icons\HeliForce.ico" />
-    <None Include="HeliForce.mm" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="HeliForce.rc" />
-  </ItemGroup>
-    <ItemGroup>
-    <ClInclude Include="ExplodingMachine.h" />
-    <ClInclude Include="Explosion.h" />
-    <ClInclude Include="FastProjectile.h" />
-    <ClInclude Include="Level.h" />
-    <ClInclude Include="LoginView.h" />
-    <ClInclude Include="Mine.h" />
-    <ClInclude Include="Projectile.h" />
-    <ClInclude Include="HeliForce.h" />
-    <ClInclude Include="HeliForceConsoleManager.h" />
-    <ClInclude Include="HeliForceDemo.h" />
-    <ClInclude Include="HeliForceManager.h" />
-    <ClInclude Include="HeliForceTicker.h" />
-    <ClInclude Include="HeliForceViewer.h" />
-    <ClInclude Include="RoadSignButton.h" />
-    <ClInclude Include="RtVar.h" />
-    <ClInclude Include="ServerListView.h" />
-    <ClInclude Include="Sunlight.h" />
-    <ClInclude Include="Version.h" />
-    <ClInclude Include="View.h" />
-    <ClInclude Include="HeliForceServer\BombPlane.h" />
-    <ClInclude Include="..\Life\LifeServer\BulletTime.h" />
-    <ClInclude Include="..\Life\LifeServer\Client.h" />
-    <ClInclude Include="HeliForceServer\GameServerLogic.h" />
-    <ClInclude Include="..\Life\LifeServer\GameServerManager.h" />
-    <ClInclude Include="HeliForceServer\Npc.h" />
-    <ClInclude Include="HeliForceServer\HeliForceServerConsole.h" />
-    <ClInclude Include="HeliForceServer\HeliForceServerDelegate.h" />
-    <ClInclude Include="HeliForceServer\HeliForceServerMessageProcessor.h" />
-    <ClInclude Include="..\Life\LifeServer\RaceTimer.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerConsoleManager.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerDelegate.h" />
-    <ClInclude Include="HeliForceServer\ServerFastProjectile.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerMessageProcessor.h" />
-    <ClInclude Include="HeliForceServer\ServerMine.h" />
-    <ClInclude Include="HeliForceServer\ServerProjectile.h" />
-    <ClInclude Include="..\Life\LifeServer\Spawner.h" />
-    <ClInclude Include="..\Life\LifeClient\UiGameServerManager.h" />
-    <ClInclude Include="..\Life\LifeClient\UiServerConsoleManager.h" />
-    <ClInclude Include="..\Life\LifeMaster\MasterServer.h" />
-    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h" />
-    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h" />
-    <ClInclude Include="HeliForceMaster\MasterServerPort.h" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cure\Cure10.vcxproj">
       <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
@@ -414,6 +323,38 @@
       <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Autopilot.cpp" />
+    <ClCompile Include="CenteredMachine.cpp" />
+    <ClCompile Include="HeliForce.cxx" />
+    <ClCompile Include="HeliForceConsoleManager.cpp" />
+    <ClCompile Include="HeliForceManager.cpp" />
+    <ClCompile Include="HeliForceTicker.cpp" />
+    <ClCompile Include="LandingTrigger.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="StoneEater.cpp" />
+    <ClCompile Include="Sunlight.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Autopilot.h" />
+    <ClInclude Include="CenteredMachine.h" />
+    <ClInclude Include="HeliForce.h" />
+    <ClInclude Include="HeliForceConsoleManager.h" />
+    <ClInclude Include="HeliForceManager.h" />
+    <ClInclude Include="HeliForceTicker.h" />
+    <ClInclude Include="LandingTrigger.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="RtVar.h" />
+    <ClInclude Include="StoneEater.h" />
+    <ClInclude Include="Sunlight.h" />
+    <ClInclude Include="Version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HeliForce.mm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HeliForce.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

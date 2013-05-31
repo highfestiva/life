@@ -81,6 +81,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Push", "..\Push\Push10.vcxp
 		{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B} = {3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeliForce", "..\HeliForce\HeliForce10.vcxproj", "{FC909F86-B037-11E2-8316-0019213B7B87}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -386,6 +388,20 @@ Global
 		{5EC8E38C-35C2-11E2-A98D-0019213B7B87}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
 		{5EC8E38C-35C2-11E2-A98D-0019213B7B87}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
 		{5EC8E38C-35C2-11E2-A98D-0019213B7B87}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Debug|Win32.Build.0 = Debug|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Final|Win32.ActiveCfg = Final|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Final|Win32.Build.0 = Final|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Release Candidate|Win32.ActiveCfg = Release Candidate|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Release Candidate|Win32.Build.0 = Release Candidate|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Release|Win32.ActiveCfg = Release Candidate|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Release|Win32.Build.0 = Release Candidate|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Unicode Final|Win32.ActiveCfg = Unicode Final|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
+		{FC909F86-B037-11E2-8316-0019213B7B87}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

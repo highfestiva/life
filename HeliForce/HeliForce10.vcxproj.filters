@@ -9,36 +9,18 @@
       <UniqueIdentifier>{FD00AE0B-B037-11E2-8510-0019213B7B87}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Server">
-      <UniqueIdentifier>{FD00AE0C-B037-11E2-ACF3-0019213B7B87}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Master">
-      <UniqueIdentifier>{FD00AE0D-B037-11E2-87E5-0019213B7B87}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Explosion.cpp">
+    <ClCompile Include="Autopilot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Grenade.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoginView.cpp">
+    <ClCompile Include="CenteredMachine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HeliForce.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HeliForceBarrel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HeliForceConsoleManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HeliForceDemo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HeliForceManager.cpp">
@@ -47,106 +29,30 @@
     <ClCompile Include="HeliForceTicker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HeliForceViewer.cpp">
+    <ClCompile Include="LandingTrigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RoadSignButton.cpp">
+    <ClCompile Include="Level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerListView.cpp">
+    <ClCompile Include="StoneEater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Sunlight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="View.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\BulletTime.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\Client.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\GameServerManager.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="HeliForceServer\HeliForceServerMessageProcessor.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\RaceTimer.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\ServerConsoleManager.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="HeliForceServer\ServerGrenade.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\ServerMessageProcessor.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\Spawner.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeClient\UiGameServerManager.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeClient\UiServerConsoleManager.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp">
-      <Filter>Master</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp">
-      <Filter>Master</Filter>
-    </ClCompile>
-    <ClCompile Include="HeliForceServer\HeliForceServerDelegate.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Icons\HeliForce.ico">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="HeliForce.mm">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="HeliForce.rc">
-      <Filter>Source Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Explosion.h">
+    <ClInclude Include="Autopilot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grenade.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Launcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Level.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LoginView.h">
+    <ClInclude Include="CenteredMachine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HeliForce.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HeliForceBarrel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HeliForceConsoleManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HeliForceDemo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HeliForceManager.h">
@@ -155,16 +61,16 @@
     <ClInclude Include="HeliForceTicker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HeliForceViewer.h">
+    <ClInclude Include="LandingTrigger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RoadSignButton.h">
+    <ClInclude Include="Level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RtVar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerListView.h">
+    <ClInclude Include="StoneEater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sunlight.h">
@@ -173,62 +79,11 @@
     <ClInclude Include="Version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="View.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\BulletTime.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\Client.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\GameServerManager.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="HeliForceServer\HeliForceServerMessageProcessor.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\RaceTimer.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\ServerConsoleManager.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="HeliForceServer\ServerGrenade.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="HeliForceServer\ServerLauncher.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\ServerMessageProcessor.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\Spawner.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeClient\UiGameServerManager.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeClient\UiServerConsoleManager.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeMaster\MasterServer.h">
-      <Filter>Master</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h">
-      <Filter>Master</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h">
-      <Filter>Master</Filter>
-    </ClInclude>
-    <ClInclude Include="HeliForceMaster\MasterServerPort.h">
-      <Filter>Master</Filter>
-    </ClInclude>
-    <ClInclude Include="HeliForceServer\HeliForceServerDelegate.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\ServerDelegate.h">
-      <Filter>Server</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HeliForce.mm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HeliForce.rc" />
   </ItemGroup>
 </Project>
