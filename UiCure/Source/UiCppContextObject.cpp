@@ -359,6 +359,31 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 
 
 
+void CppContextObject::ReplaceTexture(int pTextureIndex, const str& pNewTextureName)
+{
+	UserRendererImageResource* lTexture = mTextureResourceArray[pTextureIndex];
+	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+	{
+		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
+		if (lMesh->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			if (mUiManager->GetRenderer()->DisconnectGeometryTexture(lMesh->GetData(), lTexture->GetData()))
+			{
+				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), UiTbc::Renderer::MAT_NULL);
+			}
+		}
+	}
+	mUseDefaultTexture = true;
+	--mTextureLoadCount;
+	UserRendererImageResource* lNewTexture = new UserRendererImageResource(mUiManager, mUiManager->GetRenderer()->GetMipMappingEnabled());
+	mTextureResourceArray[pTextureIndex] = lNewTexture;
+	lNewTexture->Load(GetResourceManager(), pNewTextureName,
+		UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
+	delete lTexture;
+}
+
+
+
 void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 {
 	if (!mPhysics)

@@ -477,6 +477,7 @@ public:
 	// Adds/updates/removes geometry to/in/from the renderer.
 	virtual GeometryID AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows);
 	virtual bool TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture);	// Only adds a texture ID if it hasn't been added already.
+	virtual bool DisconnectGeometryTexture(GeometryID pGeometryId, TextureID pTexture);
 	virtual void UpdateGeometry(GeometryID pGeometryID) = 0;
 	virtual void RemoveGeometry(GeometryID pGeometryID);
 	virtual void RemoveAllGeometry();

@@ -911,6 +911,7 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mCameraPreviousPosition = mCameraTransform.GetPosition();
 				UpdateCameraPosition(true);
 			}
+			mHemisphere->ReplaceTexture(0, mLevel->GetBackgroundName());
 			GetLandingTriggerPosition(mLevel);	// Update shadow landing trigger position.
 			mZoomPlatform = false;
 		}

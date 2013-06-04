@@ -2,12 +2,12 @@
 + Heli exhaust.
 + Helper direction arrow (points along auto pilot spline).
 - Reference points in foreground/background. (Using exhaust works.)
++ Varying background image.
 . Beautify!
 . Shadows on iOS.
 . Simpler controls for kids.
   + Auto pilot landings.
   - Test on Loke.
-. Varying background image.
 . Monster truck jumping over landing pad.
 . Music.
 . Sounds. Ambient. Moving stuff.

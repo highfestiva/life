@@ -1042,6 +1042,43 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 	return (lOk);
 }
 
+bool Renderer::DisconnectGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
+{
+	bool lOk = false;
+	if (pGeometryId == INVALID_GEOMETRY)
+	{
+		assert(false);
+		return false;
+	}
+
+	GeometryTable::Iterator lGeomIter;
+	lGeomIter = mGeometryTable.Find(pGeometryId);
+	assert(lGeomIter != mGeometryTable.End());
+	GeometryData* lGeometryData = *lGeomIter;
+
+	const int lTextureCount = Texture::NUM_MAPS;
+	if (!lGeometryData->mTA)
+	{
+		assert(false);
+		return false;
+	}
+	for (int x = 0; !lOk && x < lTextureCount; ++x)
+	{
+		if (lGeometryData->mTA->mTextureID[x] == pTexture)
+		{
+			lGeometryData->mTA->mTextureID[x] = INVALID_TEXTURE;
+			for (int y = 0; y < Texture::NUM_MAPS; ++y)
+			{
+				lGeometryData->mTA->mMaps[x].mMapID[y] = INVALID_TEXTURE;
+				lGeometryData->mTA->mMaps[x].mMipMapLevelCount[y] = 0;
+			}
+			return true;
+		}
+	}
+	assert(false);
+	return false;
+}
+
 void Renderer::RemoveGeometry(GeometryID pGeometryID)
 {
 	if (pGeometryID == INVALID_GEOMETRY)

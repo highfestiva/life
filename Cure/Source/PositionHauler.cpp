@@ -434,7 +434,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 					mLog.AError("Could not fetch the right type of network positional!");
 					return;
 				}
-				assert(lData->mValue >= -1 && lData->mValue <= 1);
+				assert(lData->mValue >= -2 && lData->mValue <= 2);
 				pStructure->SetEnginePower(lEngine->GetControllerIndex(), lData->mValue);
 			}
 			break;

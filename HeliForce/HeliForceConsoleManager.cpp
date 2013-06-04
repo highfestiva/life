@@ -79,7 +79,9 @@ int HeliForceConsoleManager::OnCommand(const str& pCommand, const strutil::strve
 			break;
 			case COMMAND_NEXT_LEVEL:
 			{
+				GetGameManager()->GetTickLock()->Acquire();
 				((HeliForceManager*)GetGameManager())->NextLevel();
+				GetGameManager()->GetTickLock()->Release();
 			}
 			break;
 			default:

@@ -25,6 +25,20 @@ Level::~Level()
 {
 }
 
+void Level::OnLoaded()
+{
+	Parent::OnLoaded();
+
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("textures"), 0, 1);
+	assert(lTag);
+	mBackgroundName = lTag->mStringValueList[0];
+}
+
+const str& Level::GetBackgroundName() const
+{
+	return mBackgroundName;
+}
+
 Cure::ContextPath* Level::QueryPath()
 {
 	if (!mPath)

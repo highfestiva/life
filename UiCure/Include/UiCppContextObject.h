@@ -56,6 +56,8 @@ public:
 	void CenterMeshes();
 	virtual void UpdateMaterial(int pMeshIndex);
 
+	virtual void ReplaceTexture(int pTextureIndex, const str& pNewTextureName);
+
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
 	GameUiManager* GetUiManager() const;
