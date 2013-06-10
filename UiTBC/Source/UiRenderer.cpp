@@ -1265,6 +1265,17 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 						lLight->mShadowMapNeedUpdate = true;
 				}
 			}
+			/*else
+			{
+				if (pGeometry->GetTransformationChanged() == true)
+				{
+					lLight->mShadowMapNeedUpdate = true;
+				}
+				if (lLight->mShadowMapGeometrySet.Insert(lGeometry) == true)
+				{
+					lLight->mShadowMapNeedUpdate = true;
+				}
+			}*/
 		}
 	}
 

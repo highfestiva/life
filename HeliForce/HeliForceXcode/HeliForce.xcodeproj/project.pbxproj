@@ -77,6 +77,7 @@
 		B15F796713FC5A0500E01A90 /* UiResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F795D13FC5A0500E01A90 /* UiResourceManager.cpp */; };
 		B15F796813FC5A0500E01A90 /* UiTerrainManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F795E13FC5A0500E01A90 /* UiTerrainManager.cpp */; };
 		B15F798113FC5E1500E01A90 /* UiGameUiManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */; };
+		B16D6A531759406200B8F0E4 /* StoneEater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16D6A521759406200B8F0E4 /* StoneEater.cpp */; };
 		B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1942D2114E08E86002F37E1 /* StoreKit.framework */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
@@ -520,6 +521,8 @@
 		B1D37F48166AB59C00536CE5 /* UiGravelEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */; };
 		B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */; };
 		B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */; };
+		B1D4C4C9174AB9F6005E1587 /* Autopilot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D4C4C8174AB9F6005E1587 /* Autopilot.cpp */; };
+		B1D4C4CC174ABA9B005E1587 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D4C4CB174ABA9B005E1587 /* Level.cpp */; };
 		B1D5E29F172B1F6C00984602 /* UiJetEngineEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
 		B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */; };
@@ -606,6 +609,7 @@
 		B15F795D13FC5A0500E01A90 /* UiResourceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiResourceManager.cpp; path = ../../UiCure/Source/UiResourceManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F795E13FC5A0500E01A90 /* UiTerrainManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiTerrainManager.cpp; path = ../../UiCure/Source/UiTerrainManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = UiGameUiManager.mm; path = ../../UiCure/Source/UiGameUiManager.mm; sourceTree = SOURCE_ROOT; };
+		B16D6A521759406200B8F0E4 /* StoneEater.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StoneEater.cpp; sourceTree = "<group>"; };
 		B1942D2114E08E86002F37E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
 		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
@@ -1239,6 +1243,8 @@
 		B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiGravelEmitter.cpp; path = ../../UiCure/Source/UiGravelEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchDrag.cpp; sourceTree = "<group>"; };
 		B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchstick.cpp; sourceTree = "<group>"; };
+		B1D4C4C8174AB9F6005E1587 /* Autopilot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Autopilot.cpp; sourceTree = "<group>"; };
+		B1D4C4CB174ABA9B005E1587 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Level.cpp; sourceTree = "<group>"; };
 		B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiJetEngineEmitter.cpp; path = ../../UiCure/Source/UiJetEngineEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
 		B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HiscoreAgent.cpp; path = ../../Cure/Source/HiscoreAgent.cpp; sourceTree = SOURCE_ROOT; };
@@ -1550,6 +1556,9 @@
 		B19A146913A122DE0051A61C /* HeliForce */ = {
 			isa = PBXGroup;
 			children = (
+				B16D6A521759406200B8F0E4 /* StoneEater.cpp */,
+				B1D4C4CB174ABA9B005E1587 /* Level.cpp */,
+				B1D4C4C8174AB9F6005E1587 /* Autopilot.cpp */,
 				B13DA59A173ED82D00A73400 /* CenteredMachine.cpp */,
 				B13DA59B173ED82D00A73400 /* LandingTrigger.cpp */,
 				B1D37F15166AB3F100536CE5 /* HeliForce.mm */,
@@ -3034,6 +3043,9 @@
 				B13DA5FB173EDB9800A73400 /* Projectile.cpp in Sources */,
 				B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */,
 				B13DA607173EDBF400A73400 /* Level.cpp in Sources */,
+				B1D4C4C9174AB9F6005E1587 /* Autopilot.cpp in Sources */,
+				B1D4C4CC174ABA9B005E1587 /* Level.cpp in Sources */,
+				B16D6A531759406200B8F0E4 /* StoneEater.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3143,6 +3155,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = HeliForce_Prefix.pch;
@@ -3175,6 +3188,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/gcc/so_stlg\"",
 				);
 				PRODUCT_NAME = HeliForce;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Distribution;
