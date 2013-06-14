@@ -1238,7 +1238,7 @@ unsigned OpenGLRenderer::RenderScene()
 
 		// Render all shadow maps. In this step, we only render the shadows
 		// using alpha testing to the stencil buffer (no output to the color buffer).
-		if (/*GetNumSpotLights() > 0 &&*/ GetShadowHint() == SH_VOLUMES_AND_MAPS)
+		if (GetNumSpotLights() > 0 && GetShadowHint() == SH_VOLUMES_AND_MAPS)
 		{
 			RenderShadowMaps();
 		}
@@ -1247,9 +1247,19 @@ unsigned OpenGLRenderer::RenderScene()
 		RenderShadowVolumes();
 
 		// Go back to normal stencil buffer operations.
+		::glDepthFunc(GL_LEQUAL);
 		::glEnable(GL_STENCIL_TEST);
 		::glStencilFunc(GL_GEQUAL, 128, 0xFF);
 		::glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+		if (GetLightsEnabled())
+		{
+			::glEnable(GL_LIGHTING);
+		}
+		else
+		{
+			::glDisable(GL_LIGHTING);
+		}
 
 		// Enable all lights again.
 		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
@@ -1521,23 +1531,7 @@ void OpenGLRenderer::ProcessLights()
 				(float)-lLightDir.z,
 				0.0f
 			};
-
 			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
-
-			/*if (GetShadowHint() == SH_VOLUMES_AND_MAPS)
-			{
-				if (lLight->mTransformationChanged == true)
-				{
-					if (lLight->mShadowRange > 0)
-					{
-						lLight->mShadowMapNeedUpdate = true;
-					}
-					lLight->mTransformationChanged = false;
-				}
-
-				if (lLight->mShadowMapNeedUpdate == true)
-					RegenerateShadowMap(lLight);
-			}*/
 		}
 		else if(lLight->mType == LIGHT_POINT)
 		{
@@ -1549,7 +1543,6 @@ void OpenGLRenderer::ProcessLights()
 				(float)lLightPos.z,
 				1.0f
 			};
-
 			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
 		}
 		else if(lLight->mType == LIGHT_SPOT)
@@ -1703,16 +1696,15 @@ void OpenGLRenderer::RenderShadowVolumes()
 //	glPolygonOffset(0, 0);
 //	glDisable(GL_POLYGON_OFFSET_EXT);
 	glDepthMask(GL_TRUE);
-	if (GetLightsEnabled())
-	{
-		glEnable(GL_LIGHTING);
-	}
 
 	OGL_ASSERT();
 }
 
 int OpenGLRenderer::RenderShadowMaps()
 {
+	int lCount = 0;
+#ifndef LEPRA_GL_ES
+
 	OGL_ASSERT();
 
 	// TODO: use flat maps instead of cube maps for directional/spot shadow maps.
@@ -1734,25 +1726,25 @@ int OpenGLRenderer::RenderShadowMaps()
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	/*glEnable(GL_TEXTURE_GEN_S);
+	glEnable(GL_TEXTURE_GEN_S);
 	glEnable(GL_TEXTURE_GEN_T);
 	glEnable(GL_TEXTURE_GEN_R);
 	glEnable(GL_TEXTURE_GEN_Q);
 	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR);
 	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR);
 	glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR);
-	glTexGeni(GL_Q, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR);*/
+	glTexGeni(GL_Q, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);*/
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	/*glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);*/
+	glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
 
-	/*static const GLfloat slSPlane[4] = {1.0f, 0.0f, 0.0f, 0.0f};
+	static const GLfloat slSPlane[4] = {1.0f, 0.0f, 0.0f, 0.0f};
 	static const GLfloat slTPlane[4] = {0.0f, 1.0f, 0.0f, 0.0f};
 	static const GLfloat slRPlane[4] = {0.0f, 0.0f, 1.0f, 0.0f};
 	static const GLfloat slQPlane[4] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -1760,13 +1752,12 @@ int OpenGLRenderer::RenderShadowMaps()
 	glTexGenfv(GL_S, GL_EYE_PLANE, slSPlane);
 	glTexGenfv(GL_T, GL_EYE_PLANE, slTPlane);
 	glTexGenfv(GL_R, GL_EYE_PLANE, slRPlane);
-	glTexGenfv(GL_Q, GL_EYE_PLANE, slQPlane);*/
+	glTexGenfv(GL_Q, GL_EYE_PLANE, slQPlane);
 
 	glEnable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
 	glAlphaFunc(GL_LESS, 0.5f);
 
-	int lCount = 0;
 	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 	{
 		LightData* lLight = x->second;
@@ -1808,10 +1799,10 @@ int OpenGLRenderer::RenderShadowMaps()
 				glMultMatrixf(lLightModelViewMatrix);
 
 				// Need to call these here to update the model view transform.
-				/*glTexGenfv(GL_S, GL_EYE_PLANE, slSPlane);
+				glTexGenfv(GL_S, GL_EYE_PLANE, slSPlane);
 				glTexGenfv(GL_T, GL_EYE_PLANE, slTPlane);
 				glTexGenfv(GL_R, GL_EYE_PLANE, slRPlane);
-				glTexGenfv(GL_Q, GL_EYE_PLANE, slQPlane);*/
+				glTexGenfv(GL_Q, GL_EYE_PLANE, slQPlane);
 
 				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 				{
@@ -1843,15 +1834,15 @@ int OpenGLRenderer::RenderShadowMaps()
 		}
 	}
 
-	/*glDisable(GL_TEXTURE_GEN_S);
+	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);
 	glDisable(GL_TEXTURE_GEN_R);
-	glDisable(GL_TEXTURE_GEN_Q);*/
+	glDisable(GL_TEXTURE_GEN_Q);
 	glDisable(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
@@ -1861,12 +1852,9 @@ int OpenGLRenderer::RenderShadowMaps()
 	glColorMask(1, 1, 1, 1);
 
 	glDisable(GL_TEXTURE_2D);
-	if (GetLightsEnabled())
-	{
-		glEnable(GL_LIGHTING);
-	}
 
 	OGL_ASSERT();
+#endif // !GLES
 
 	return lCount;
 }
