@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
+#include "../Cure/Include/Elevator.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/IntAttribute.h"
 #include "../Cure/Include/NetworkClient.h"
@@ -107,6 +108,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mOldLevel(0),
 	mHemisphere(0),
 	mHemisphereUvTransform(0),
+	mRenderHemisphere(true),
 	mSunlight(0),
 	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 100)),
 	mCameraSpeed(0),
@@ -251,7 +253,7 @@ void HeliForceManager::SetFade(float pFadeAmount)
 
 bool HeliForceManager::Render()
 {
-	if (mHemisphere && mHemisphere->IsLoaded())
+	if (mHemisphere && mHemisphere->IsLoaded() && mRenderHemisphere)
 	{
 		if (!mHemisphere->GetMesh(0)->GetUVAnimator())
 		{
@@ -486,7 +488,7 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
-			if (lHealth)
+			if (lHealth && !mZoomPlatform)
 			{
 				lHealth->SetValue(lHealth->GetValue() - lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f));
 			}
@@ -577,7 +579,7 @@ bool HeliForceManager::Reset()	// Run when disconnected. Removes all objects and
 bool HeliForceManager::InitializeUniverse()
 {
 	mMassObjectArray.clear();
-	mLevel = (Level*)Parent::CreateContextObject(_T("level_03"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(_T("level_04"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
 	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
@@ -865,6 +867,12 @@ Cure::ContextObject* HeliForceManager::CreateLogicHandler(const str& pType)
 	{
 		return mLevel->QueryPath();
 	}
+	else if (pType == _T("trig_elevator"))
+	{
+		Cure::Elevator* lElevator = new Cure::Elevator(GetContext());
+		lElevator->SetStopDelay(0.5f);
+		return lElevator;
+	}
 	return (0);
 }
 
@@ -881,39 +889,7 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else if (pObject == mLevel)
 		{
-			Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-			if (!lAvatar)
-			{
-				CreateChopper(_T("helicopter_01"));
-			}
-			else
-			{
-				Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
-				lHealth->SetValue(1.0f);
-				mAvatarCreateTimer.Start();
-				Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
-				assert(lSpawner);
-				const Vector3DF lLandingPosition = GetLandingTriggerPosition(mOldLevel);
-				const Vector3DF lHeliPosition = lAvatar->GetPosition();
-				const Vector3DF lHeliDelta = lHeliPosition - lLandingPosition;
-				const Vector3DF lNewPosition = lSpawner->GetSpawnPoint().GetPosition() + lHeliDelta;
-				const float lCamAboveHeli = mCameraTransform.GetPosition().z - lHeliPosition.z;
-				const Vector3DF lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lLandingPosition;
-
-				GetContext()->DeleteObject(mOldLevel->GetInstanceId());
-				mOldLevel = 0;
-
-				EaseDown(lAvatar, &lNewPosition);
-				mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
-
-				mCameraTransform.GetPosition() += lCamDelta;
-				mCameraTransform.GetPosition().z = lAvatar->GetPosition().z + lCamAboveHeli;
-				mCameraPreviousPosition = mCameraTransform.GetPosition();
-				UpdateCameraPosition(true);
-			}
-			mHemisphere->ReplaceTexture(0, mLevel->GetBackgroundName());
-			GetLandingTriggerPosition(mLevel);	// Update shadow landing trigger position.
-			mZoomPlatform = false;
+			OnLevelLoadCompleted();
 		}
 		else
 		{
@@ -927,6 +903,61 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
+}
+
+void HeliForceManager::OnLevelLoadCompleted()
+{
+	/*// Kickstart all elevators.
+	for (int x = 0; x < 20; ++x)
+	{
+		mLevel->SetEnginePower(x, 1);
+	}*/
+
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	if (lAvatar && lAvatar->IsLoaded() && lAvatar->GetPhysics()->GetEngineCount() < 3)
+	{
+		// Avatar somehow crashed after landing last level... Well done, but not impossible in a dynamic world.
+	}
+	else if (!lAvatar)
+	{
+		CreateChopper(_T("helicopter_01"));
+	}
+	else
+	{
+		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
+		lHealth->SetValue(1.0f);
+		mAvatarCreateTimer.Start();
+		Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
+		assert(lSpawner);
+		const Vector3DF lLandingPosition = GetLandingTriggerPosition(mOldLevel);
+		const Vector3DF lHeliPosition = lAvatar->GetPosition();
+		const Vector3DF lHeliDelta = lHeliPosition - lLandingPosition;
+		const Vector3DF lNewPosition = lSpawner->GetSpawnPoint().GetPosition() + lHeliDelta;
+		const float lCamAboveHeli = mCameraTransform.GetPosition().z - lHeliPosition.z;
+		const Vector3DF lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lLandingPosition;
+
+		GetContext()->DeleteObject(mOldLevel->GetInstanceId());
+		mOldLevel = 0;
+
+		EaseDown(lAvatar, &lNewPosition);
+		mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
+
+		mCameraTransform.GetPosition() += lCamDelta;
+		mCameraTransform.GetPosition().z = lAvatar->GetPosition().z + lCamAboveHeli;
+		mCameraPreviousPosition = mCameraTransform.GetPosition();
+		UpdateCameraPosition(true);
+	}
+	if (mLevel->GetBackgroundName().empty())
+	{
+		mRenderHemisphere = false;
+	}
+	else
+	{
+		mRenderHemisphere = true;
+		mHemisphere->ReplaceTexture(0, mLevel->GetBackgroundName());
+	}
+	GetLandingTriggerPosition(mLevel);	// Update shadow landing trigger position.
+	mZoomPlatform = false;
 }
 
 void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -998,7 +1029,7 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		lForce2 *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
 		lForce2 *= 10 - 9*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
 		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pObject1->GetAttribute(_T("float_health"));
-		if (lHealth && lHealth->GetValue() > 0)
+		if (lHealth && lHealth->GetValue() > 0 && !mZoomPlatform)
 		{
 			lForce2 *= lForce2;
 			lForce2 /= pObject1->GetMass();

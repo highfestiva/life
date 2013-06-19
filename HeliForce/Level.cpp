@@ -30,8 +30,10 @@ void Level::OnLoaded()
 	Parent::OnLoaded();
 
 	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("textures"), 0, 1);
-	assert(lTag);
-	mBackgroundName = lTag->mStringValueList[0];
+	if (lTag)
+	{
+		mBackgroundName = lTag->mStringValueList[0];
+	}
 }
 
 const str& Level::GetBackgroundName() const

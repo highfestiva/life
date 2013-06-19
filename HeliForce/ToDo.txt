@@ -3,11 +3,14 @@
 + Helper direction arrow (points along auto pilot spline).
 - Reference points in foreground/background. (Using exhaust works.)
 + Varying background image.
-. Beautify!
-. Shadows on iOS.
-. Simpler controls for kids.
++ Shadows on iOS.
++ Simpler controls for kids.
   + Auto pilot landings.
-  - Test on Loke.
+  + Test on Loke.
+. Levels.
+. Save times.
+. Beautify!
+. Large fonts on iOS.
 . Monster truck jumping over landing pad.
 . Music.
 . Sounds. Ambient. Moving stuff.

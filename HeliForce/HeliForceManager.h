@@ -114,6 +114,7 @@ protected:
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	virtual void OnLevelLoadCompleted();
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
@@ -157,6 +158,7 @@ protected:
 	Autopilot* mAutopilot;
 	UiCure::CppContextObject* mHemisphere;
 	TBC::BoneAnimator* mHemisphereUvTransform;
+	bool mRenderHemisphere;
 	Sunlight* mSunlight;
 	ObjectArray mMassObjectArray;
 
