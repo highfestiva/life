@@ -338,15 +338,18 @@ bool HeliForceManager::Paint()
 		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("");
 		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 255), 0);
 		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
-		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 200, 10);
+		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 400, 10);
 
 		const bool lIsFlying = mFlyTime.IsStarted();
 		const double lTime = mFlyTime.QuerySplitTime();
-		const int lSec = (int)lTime;
-		const str lIntTimeString = strutil::Format(_T("%i"), lSec);
-		const str lTimeString = strutil::Format((lIsFlying || !lTime)? _T("%.1f s") : _T("%.3f s"), lTime);
-		int w = mUiManager->GetPainter()->GetStringWidth(lIntTimeString);
-		mUiManager->GetPainter()->PrintText(lTimeString, 50 - w, 3);
+		const bool lIsSloppy = (lIsFlying || !lTime);
+		PrintTime(_T(""), lTime, lIsSloppy, 50, 3);
+
+		const double lLevelBestTime = GetCurrentLevelBestTime();
+		if (lLevelBestTime > 0)
+		{
+			PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 250, 3);
+		}
 
 		if (lAvatar->GetPhysics()->GetEngineCount() >= 3 && mDirectionImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 			mLevel && mLevel->IsLoaded())
@@ -400,6 +403,15 @@ bool HeliForceManager::Paint()
 	}
 
 	return true;
+}
+
+void HeliForceManager::PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y)
+{
+	const int lSec = (int)pTime;
+	const str lIntTimeString = pPrefix + strutil::Format(_T("%i"), lSec);
+	const str lTimeString = pPrefix + strutil::Format(lIsSloppy? _T("%.1f s") : _T("%.3f s"), pTime);
+	int w = mUiManager->GetPainter()->GetStringWidth(lIntTimeString);
+	mUiManager->GetPainter()->PrintText(lTimeString, x - w, y);
 }
 
 void HeliForceManager::DrawSyncDebugInfo()
@@ -518,6 +530,13 @@ bool HeliForceManager::DidFinishLevel()
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
 	{
+		const double lTime = mFlyTime.QuerySplitTime();
+		const double lLevelBestTime = GetCurrentLevelBestTime();
+		if (lTime < lLevelBestTime || lLevelBestTime <= 0)
+		{
+			SetCurrentLevelBestTime(lTime);
+		}
+
 		UiCure::UserSound3dResource* lFinishSound = new UiCure::UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, mCameraTransform.GetPosition(), Vector3DF(), 5.0f, 1.0f);
 		mZoomPlatform = true;
@@ -531,8 +550,7 @@ void HeliForceManager::NextLevel()
 	if (GetContext()->GetObject(mAvatarId))
 	{
 		mOldLevel = mLevel;
-		int lLevelNumber = 0;
-		strutil::StringToInt(mOldLevel->GetClassId().substr(6), lLevelNumber);
+		int lLevelNumber = GetCurrentLevelNumber();
 		++lLevelNumber;
 		if (lLevelNumber > LAST_LEVEL)
 		{
@@ -553,6 +571,32 @@ Level* HeliForceManager::GetLevel() const
 		return mLevel;
 	}
 	return 0;
+}
+
+int HeliForceManager::GetCurrentLevelNumber() const
+{
+	int lLevelNumber = 0;
+	strutil::StringToInt(mLevel->GetClassId().substr(6), lLevelNumber);
+	return lLevelNumber;
+}
+
+double HeliForceManager::GetCurrentLevelBestTime() const
+{
+	const int lLevelIndex = GetCurrentLevelNumber();
+	const str lLevelTimeVarName = strutil::Format(_T(RTVAR_GAME_RECORDTIME_LEVEL) _T("_%i"), lLevelIndex);
+	static HashedString lFastName(lLevelTimeVarName);
+	if (lFastName != lLevelTimeVarName)
+	{
+		lFastName = lLevelTimeVarName;
+	}
+	return GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, lFastName, 0.0);
+}
+
+void HeliForceManager::SetCurrentLevelBestTime(double pTime)
+{
+	const int lLevelIndex = GetCurrentLevelNumber();
+	const str lLevelTimeVarName = strutil::Format(_T(RTVAR_GAME_RECORDTIME_LEVEL) _T("_%i"), lLevelIndex);
+	GetVariableScope()->SetValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, lLevelTimeVarName, pTime);
 }
 
 Cure::ContextObject* HeliForceManager::GetAvatar() const

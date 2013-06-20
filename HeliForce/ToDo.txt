@@ -8,7 +8,8 @@
   + Auto pilot landings.
   + Test on Loke.
 . Levels.
-. Save times.
++ Save personal times.
+. Save WR times.
 . Beautify!
 . Large fonts on iOS.
 . Monster truck jumping over landing pad.

@@ -13,6 +13,8 @@
 
 
 
+#define RTVAR_GAME_RECORDTIME_LEVEL	"Game.RecordTime.Level"
+
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
 
 #define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"

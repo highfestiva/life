@@ -70,6 +70,7 @@ public:
 
 	virtual bool Render();
 	virtual bool Paint();
+	void PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y);
 	virtual void DrawSyncDebugInfo();
 
 	virtual void OnLoginSuccess();
@@ -86,6 +87,9 @@ public:
 	virtual void NextLevel();
 
 	virtual Level* GetLevel() const;
+	virtual int GetCurrentLevelNumber() const;
+	virtual double GetCurrentLevelBestTime() const;
+	virtual void SetCurrentLevelBestTime(double pTime);
 	virtual Cure::ContextObject* GetAvatar() const;
 
 protected:
