@@ -56,7 +56,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			3
+#define LAST_LEVEL			4
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	2
@@ -121,7 +121,8 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 #endif // Touch or emulated touch.
 	mStick(0),
 	mStickImage(0),
-	mDirectionImage(0),
+	mWrongDirectionImage(0),
+	mHealthBarImage(0),
 	mArrow(0),
 	mArrowBillboard(0),
 	mArrowBillboardId(0),
@@ -210,8 +211,12 @@ bool HeliForceManager::Open()
 		mStickImage->Load(GetResourceManager(), _T("stick.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
 
-		mDirectionImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mDirectionImage->Load(GetResourceManager(), _T("direction.png"),
+		mWrongDirectionImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mWrongDirectionImage->Load(GetResourceManager(), _T("direction.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
+
+		mHealthBarImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mHealthBarImage->Load(GetResourceManager(), _T("healthbar.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
 
 		mArrow = new UiCure::UserRendererImageResource(mUiManager, false);
@@ -333,12 +338,16 @@ bool HeliForceManager::Paint()
 	const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (lAvatar)
 	{
-
 		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
-		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("");
-		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 255), 0);
-		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
-		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 400, 10);
+		if (lHealth && mHealthBarImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			const int lRemaining = Math::Clamp((int)(lHealth->GetValue()*206), 0, 206);
+			const uint8 r = (int8)Math::Clamp((int)((1-lHealth->GetValue())*6*255), 0, 255);
+			const uint8 g = (int8)Math::Clamp((int)((lHealth->GetValue()-0.3f)*3*255), 0, 255);
+			mUiManager->GetPainter()->SetColor(Color(r, g, 0, 255), 0);
+			mUiManager->GetPainter()->FillRect(397, 6, 397+lRemaining, 32);
+			DrawImage(mHealthBarImage->GetData(), 500, 19, 256, 32, 0);
+		}
 
 		const bool lIsFlying = mFlyTime.IsStarted();
 		const double lTime = mFlyTime.QuerySplitTime();
@@ -351,7 +360,7 @@ bool HeliForceManager::Paint()
 			PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 250, 3);
 		}
 
-		if (lAvatar->GetPhysics()->GetEngineCount() >= 3 && mDirectionImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+		if (lAvatar->GetPhysics()->GetEngineCount() >= 3 && mWrongDirectionImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 			mLevel && mLevel->IsLoaded())
 		{
 			if (mDirectionImageTimer.QueryTimeDiff() >= 0.5)
@@ -379,7 +388,7 @@ bool HeliForceManager::Paint()
 					const float lTouchSideScale = 1.28f;	// Inches.
 					const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
 					const float lWantedSize = mUiManager->GetCanvas()->GetWidth() * lTouchScale * 2;
-					float lSize = (float)mDirectionImage->GetRamData()->GetWidth();
+					float lSize = (float)mWrongDirectionImage->GetRamData()->GetWidth();
 					while (lWantedSize >= lSize*2) lSize *= 2;
 					while (lWantedSize <= lSize/2) lSize /= 2;
 					// Find out the screen coordinate of the chopper, so we can place our arrow around that.
@@ -392,7 +401,7 @@ bool HeliForceManager::Paint()
 					const float lDistance = mUiManager->GetCanvas()->GetWidth() / 6.0f;
 					const float x = mUiManager->GetCanvas()->GetWidth() /2.0f - lDistance*::sin(a);
 					const float y = mUiManager->GetCanvas()->GetHeight()/2.0f - lDistance*::cos(a);
-					DrawImage(mDirectionImage->GetData(), x, y, lSize, lSize, a);
+					DrawImage(mWrongDirectionImage->GetData(), x, y, lSize, lSize, a);
 				}
 			}
 			else
@@ -623,7 +632,7 @@ bool HeliForceManager::Reset()	// Run when disconnected. Removes all objects and
 bool HeliForceManager::InitializeUniverse()
 {
 	mMassObjectArray.clear();
-	mLevel = (Level*)Parent::CreateContextObject(_T("level_04"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(_T("level_00"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
 	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
@@ -1069,9 +1078,9 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	if (lForce > 15000)
 	{
 		float lForce2 = lForce;
-		lForce2 /= 3000;
+		lForce2 /= 4000;
 		lForce2 *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
-		lForce2 *= 10 - 9*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
+		lForce2 *= 5 - 4*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
 		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pObject1->GetAttribute(_T("float_health"));
 		if (lHealth && lHealth->GetValue() > 0 && !mZoomPlatform)
 		{

@@ -8,15 +8,17 @@
   + Auto pilot landings.
   + Test on Loke.
 . Levels.
++ Show health bar instead of text.
 + Save personal times.
 . Save WR times.
+. Show high score.
+. Preload the explosion data, so the first explosion won't cause LAAAG!
 . Beautify!
 . Large fonts on iOS.
 . Monster truck jumping over landing pad.
 . Music.
 . Sounds. Ambient. Moving stuff.
 . Moving cars on level.
-. Show health bar instead of text.
 . More helis. One with glowing engine in the rear.
 . Traps with smoke and sound!
 . Falling stones!
