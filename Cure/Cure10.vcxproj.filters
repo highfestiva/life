@@ -232,9 +232,15 @@
     <ClInclude Include="Include\Spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\DelayedDeleter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\ResourceManager.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Include\DelayedDeleter.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

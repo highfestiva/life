@@ -137,6 +137,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 	mCollisionSoundManager->AddSound(_T("thump"),		UiCure::CollisionSoundManager::SoundResourceInfo(5.0f, 0.5f, 1.0f));
+	mCollisionSoundManager->PreLoadSound(_T("explosion"));
 
 	SetConsoleManager(new HeliForceConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -472,7 +473,6 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	//mLog.Infof(_T("Hit object normal is (%.1f; %.1f; %.1f)"), pNormal.x, pNormal.y, pNormal.z);
 	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
 	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
@@ -631,6 +631,11 @@ bool HeliForceManager::Reset()	// Run when disconnected. Removes all objects and
 
 bool HeliForceManager::InitializeUniverse()
 {
+	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	const Vector3DF v;
+	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
+
 	mMassObjectArray.clear();
 	mLevel = (Level*)Parent::CreateContextObject(_T("level_00"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();

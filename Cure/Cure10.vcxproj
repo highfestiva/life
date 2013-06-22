@@ -293,6 +293,7 @@
     <ClInclude Include="Include\ContextPath.h" />
     <ClInclude Include="Include\CppContextObject.h" />
     <ClInclude Include="Include\Cure.h" />
+    <ClInclude Include="Include\DelayedDeleter.h" />
     <ClInclude Include="Include\Elevator.h" />
     <ClInclude Include="Include\FloatAttribute.h" />
     <ClInclude Include="Include\GameManager.h" />
@@ -323,6 +324,7 @@
     <ClInclude Include="Include\UserConnection.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Include\DelayedDeleter.inl" />
     <None Include="Include\ResourceManager.inl" />
   </ItemGroup>
   <ItemGroup>

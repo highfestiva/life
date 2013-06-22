@@ -7,6 +7,7 @@
 #include "../Include/UiCollisionSoundManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/HashUtil.h"
+#include "../../Cure/Include/DelayedDeleter.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../Include/UiGameUiManager.h"
@@ -47,6 +48,12 @@ void CollisionSoundManager::AddSound(const str& pName, const SoundResourceInfo& 
 	mSoundNameMap.insert(SoundNameMap::value_type(pName, pInfo));
 }
 
+void CollisionSoundManager::PreLoadSound(const str& pName)
+{
+	CollisionSoundResource* lSound = new CollisionSoundResource(mUiManager, 0);
+	lSound->Load(mGameManager->GetResourceManager(), _T("collision_")+pName+_T(".wav"),
+		UiCure::UserSound3dResource::TypeLoadCallback(this, &CollisionSoundManager::OnSoundPreLoaded));
+}
 
 
 void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
@@ -196,6 +203,11 @@ void CollisionSoundManager::OnSoundLoaded(UiCure::UserSound3dResource* pSoundRes
 		lSoundInfo->UpdateImpact();
 		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), lSoundInfo->mVolume, lSoundInfo->mPitch * lRealTimeRatio);
 	}
+}
+
+void CollisionSoundManager::OnSoundPreLoaded(UiCure::UserSound3dResource* pSoundResource)
+{
+	new Cure::DelayedDeleter<UiCure::UserSound3dResource>(mGameManager->GetResourceManager(), mGameManager->GetContext(), pSoundResource);
 }
 
 void CollisionSoundManager::UpdateSound(SoundInfo* pSoundInfo)

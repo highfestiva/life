@@ -78,7 +78,7 @@ bool HeliForceTicker::OpenUiManager()
 	{
 		mUiManager->UpdateSettings();
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
+		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 0));
 		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
 	}
 	if (lOk)

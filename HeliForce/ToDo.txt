@@ -9,10 +9,11 @@
   + Test on Loke.
 . Levels.
 + Show health bar instead of text.
++ Preload the explosion data, so the first explosion won't cause LAAAG!
 + Save personal times.
 . Save WR times.
 . Show high score.
-. Preload the explosion data, so the first explosion won't cause LAAAG!
+. Only zoom out once hemisphere texture is loaded.
 . Beautify!
 . Large fonts on iOS.
 . Monster truck jumping over landing pad.
