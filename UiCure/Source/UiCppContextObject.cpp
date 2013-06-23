@@ -362,6 +362,10 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 void CppContextObject::ReplaceTexture(int pTextureIndex, const str& pNewTextureName)
 {
 	UserRendererImageResource* lTexture = mTextureResourceArray[pTextureIndex];
+	if (lTexture->GetName() == pNewTextureName)
+	{
+		return;
+	}
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
 		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];

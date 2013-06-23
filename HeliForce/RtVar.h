@@ -13,7 +13,8 @@
 
 
 
-#define RTVAR_GAME_RECORDTIME_LEVEL	"Game.RecordTime.Level"
+#define RTVAR_GAME_PERSONALRECORD_LEVEL	"Game.PersonalRecord.Level"
+#define RTVAR_GAME_WORLDRECORD_LEVEL	"Game.WorldRecord.Level"
 
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
 

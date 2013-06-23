@@ -342,23 +342,31 @@ bool HeliForceManager::Paint()
 		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
 		if (lHealth && mHealthBarImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 		{
-			const int lRemaining = Math::Clamp((int)(lHealth->GetValue()*206), 0, 206);
-			const uint8 r = (int8)Math::Clamp((int)((1-lHealth->GetValue())*6*255), 0, 255);
+			const uint8 r = (int8)Math::Clamp((int)((1-lHealth->GetValue())*1.9f*255), 0, 255);
 			const uint8 g = (int8)Math::Clamp((int)((lHealth->GetValue()-0.3f)*3*255), 0, 255);
 			mUiManager->GetPainter()->SetColor(Color(r, g, 0, 255), 0);
-			mUiManager->GetPainter()->FillRect(397, 6, 397+lRemaining, 32);
+			const float lRemaining = Math::Clamp(lHealth->GetValue()*203, 0.0f, 203.0f);
+			std::vector<Vector2DF> lCoords;
+			lCoords.push_back(Vector2DF(398, 7));
+			lCoords.push_back(Vector2DF(398, 30));
+			lCoords.push_back(Vector2DF(398+lRemaining, 30));
+			lCoords.push_back(Vector2DF(398+lRemaining, 7));
+			lCoords.push_back(lCoords[0]);
+			mUiManager->GetPainter()->DrawFan(lCoords, false);
 			DrawImage(mHealthBarImage->GetData(), 500, 19, 256, 32, 0);
 		}
 
 		const bool lIsFlying = mFlyTime.IsStarted();
 		const double lTime = mFlyTime.QuerySplitTime();
 		const bool lIsSloppy = (lIsFlying || !lTime);
+		mUiManager->GetPainter()->SetColor(Color(40, 40, 40, 255), 0);
 		PrintTime(_T(""), lTime, lIsSloppy, 50, 3);
 
-		const double lLevelBestTime = GetCurrentLevelBestTime();
+		const double lLevelBestTime = GetCurrentLevelBestTime(false);
 		if (lLevelBestTime > 0)
 		{
-			PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 250, 3);
+			mUiManager->GetPainter()->SetColor(Color(210, 40, 40, 255), 0);
+			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 250, 3);
 		}
 
 		if (lAvatar->GetPhysics()->GetEngineCount() >= 3 && mWrongDirectionImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
@@ -540,10 +548,10 @@ bool HeliForceManager::DidFinishLevel()
 	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
 	{
 		const double lTime = mFlyTime.QuerySplitTime();
-		const double lLevelBestTime = GetCurrentLevelBestTime();
-		if (lTime < lLevelBestTime || lLevelBestTime <= 0)
+		const double lLevelBestTime = GetCurrentLevelBestTime(false);
+		if (lTime > 0 && (lTime < lLevelBestTime || lLevelBestTime <= 0))
 		{
-			SetCurrentLevelBestTime(lTime);
+			SetCurrentLevelBestTime(false, lTime);
 		}
 
 		UiCure::UserSound3dResource* lFinishSound = new UiCure::UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
@@ -589,10 +597,11 @@ int HeliForceManager::GetCurrentLevelNumber() const
 	return lLevelNumber;
 }
 
-double HeliForceManager::GetCurrentLevelBestTime() const
+double HeliForceManager::GetCurrentLevelBestTime(bool pWorld) const
 {
 	const int lLevelIndex = GetCurrentLevelNumber();
-	const str lLevelTimeVarName = strutil::Format(_T(RTVAR_GAME_RECORDTIME_LEVEL) _T("_%i"), lLevelIndex);
+	const str lRecordFormat = pWorld? _T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i") : _T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i");
+	const str lLevelTimeVarName = strutil::Format(lRecordFormat.c_str(), lLevelIndex);
 	static HashedString lFastName(lLevelTimeVarName);
 	if (lFastName != lLevelTimeVarName)
 	{
@@ -601,10 +610,11 @@ double HeliForceManager::GetCurrentLevelBestTime() const
 	return GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, lFastName, 0.0);
 }
 
-void HeliForceManager::SetCurrentLevelBestTime(double pTime)
+void HeliForceManager::SetCurrentLevelBestTime(bool pWorld, double pTime)
 {
 	const int lLevelIndex = GetCurrentLevelNumber();
-	const str lLevelTimeVarName = strutil::Format(_T(RTVAR_GAME_RECORDTIME_LEVEL) _T("_%i"), lLevelIndex);
+	const str lRecordFormat = pWorld? _T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i") : _T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i");
+	const str lLevelTimeVarName = strutil::Format(lRecordFormat.c_str(), lLevelIndex);
 	GetVariableScope()->SetValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, lLevelTimeVarName, pTime);
 }
 
@@ -665,7 +675,6 @@ void HeliForceManager::CreateChopper(const str& pClassId)
 	lAvatar->QuerySetChildishness(1);
 	lSpawner->PlaceObject(lAvatar);
 	mAvatarId = lAvatar->GetInstanceId();
-	mAvatarCreateTimer.Start();
 	lAvatar->StartLoading();
 }
 
@@ -785,12 +794,16 @@ void HeliForceManager::TickUiUpdate()
 {
 	if (!mIsHitThisFrame)
 	{
-		mHitGroundFrameCount = 0;
+		--mHitGroundFrameCount;
+		if (mHitGroundFrameCount > 0)
+		{
+			mHitGroundFrameCount = 0;
+		}
 	}
 	mIsHitThisFrame = false;
 
 	const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	if (mHitGroundFrameCount <= 0 && mLevel && mLevel->IsLoaded() && lAvatar)
+	if (mHitGroundFrameCount <= -1 && mLevel && mLevel->IsLoaded() && lAvatar)
 	{
 		if (lAvatar->GetPhysics()->GetEngineCount() < 3)
 		{
@@ -943,7 +956,6 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
 			UpdateChopperColor(1.0f);
 			EaseDown(pObject, 0);
-			mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
 		}
 		else if (pObject == mLevel)
 		{
@@ -984,7 +996,6 @@ void HeliForceManager::OnLevelLoadCompleted()
 	{
 		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
 		lHealth->SetValue(1.0f);
-		mAvatarCreateTimer.Start();
 		Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 		assert(lSpawner);
 		const Vector3DF lLandingPosition = GetLandingTriggerPosition(mOldLevel);
@@ -998,7 +1009,6 @@ void HeliForceManager::OnLevelLoadCompleted()
 		mOldLevel = 0;
 
 		EaseDown(lAvatar, &lNewPosition);
-		mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
 
 		mCameraTransform.GetPosition() += lCamDelta;
 		mCameraTransform.GetPosition().z = lAvatar->GetPosition().z + lCamAboveHeli;
@@ -1031,6 +1041,10 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	if (!mIsHitThisFrame && lIsAvatar)
 	{
 		mIsHitThisFrame = true;
+		if (mHitGroundFrameCount < 0)
+		{
+			mHitGroundFrameCount = 0;
+		}
 		++mHitGroundFrameCount;
 	}
 
@@ -1041,6 +1055,7 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	}
 
 	// Check if we're colliding with a smooth landing pad.
+	bool lIsLandingPad = false;
 	float lCollisionImpactFactor = 3;
 	if (lIsAvatar && pObject2 == mLevel)
 	{
@@ -1050,6 +1065,7 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		{
 			if (pObject2->GetPhysics()->GetBoneGeometry(*x)->GetBodyId() == pBody2Id)
 			{
+				lIsLandingPad = true;
 				lCollisionImpactFactor = 1;
 				mFlyTime.Stop();
 				break;
@@ -1063,12 +1079,14 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	}
 
 	// Check if it's a rotor!
+	bool lIsRotor = false;
 	if (pObject1->GetClassId().find(_T("helicopter_")) != str::npos)
 	{
 		TBC::ChunkyBoneGeometry* lGeometry = pObject1->GetStructureGeometry(pBody1Id);
 		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_HINGE &&
 			lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
 		{
+			lIsRotor = true;
 			lCollisionImpactFactor *= Math::Lerp(1000.0f, 2.0f, lChildishness);
 		}
 	}
@@ -1079,6 +1097,11 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		float lUpFactor = 1 + 0.5f*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));
 		lUpFactor *= lUpFactor;
 		lForce *= Math::Lerp(1.0f, 0.05f, lChildishness * lUpFactor);
+	}
+	// Take velocity into calculation if we're landing on a helipad (not using our rotors).
+	if (lIsLandingPad && !lIsRotor)
+	{
+		lForce *= pForce*pObject1->GetVelocity() * (lCollisionImpactFactor / 15000);
 	}
 	if (lForce > 15000)
 	{
@@ -1127,8 +1150,11 @@ Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLeve
 
 float HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition)
 {
+	mAvatarCreateTimer.Start();
 	mFlyTime.Stop();
 	mFlyTime.PopTimeDiff();
+	mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
+	mIsHitThisFrame = true;
 
 	const Cure::ObjectPositionalData* lPositionalData = 0;
 	pObject->UpdateFullPosition(lPositionalData);
@@ -1210,7 +1236,7 @@ void HeliForceManager::ScriptPhysicsTick()
 
 	if (mAvatarCreateTimer.IsStarted())
 	{
-		if (mAvatarCreateTimer.QueryTimeDiff() > 2.0)
+		if (mAvatarCreateTimer.QueryTimeDiff() > 0.5)
 		{
 			mAvatarCreateTimer.Stop();
 		}

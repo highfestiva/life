@@ -88,8 +88,8 @@ public:
 
 	virtual Level* GetLevel() const;
 	virtual int GetCurrentLevelNumber() const;
-	virtual double GetCurrentLevelBestTime() const;
-	virtual void SetCurrentLevelBestTime(double pTime);
+	virtual double GetCurrentLevelBestTime(bool pWorld) const;
+	virtual void SetCurrentLevelBestTime(bool pWorld, double pTime);
 	virtual Cure::ContextObject* GetAvatar() const;
 
 protected:
