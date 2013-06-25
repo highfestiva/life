@@ -15,12 +15,12 @@ namespace HeliForce
 
 
 
-class StoneEater: public Cure::CppContextObject
+class Eater: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
-	StoneEater(Cure::ContextManager* pManager);
-	virtual ~StoneEater();
+	Eater(Cure::ContextManager* pManager);
+	virtual ~Eater();
 
 protected:
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);

@@ -28,6 +28,12 @@ Spawner::Spawner(ContextManager* pManager):
 
 Spawner::~Spawner()
 {
+	while (!mChildArray.empty())
+	{
+		const ContextObject* lObject = mChildArray.front();
+		mChildArray.erase(mChildArray.begin());
+		GetManager()->DeleteObject(lObject->GetInstanceId());
+	}
 }
 
 

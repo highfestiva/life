@@ -5,11 +5,7 @@
 
 
 #include "Autopilot.h"
-//#include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
-/*#include "../Cure/Include/Elevator.h"
-#include "../Cure/Include/TimeManager.h"
-#include "../Lepra/Include/Random.h"*/
 #include "HeliForceManager.h"
 #include "Level.h"
 

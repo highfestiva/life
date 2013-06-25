@@ -5,7 +5,7 @@
 
 
 #include "ExplodingMachine.h"
-#include "../../Cure/Include/FloatAttribute.h"
+#include "../../Cure/Include/Health.h"
 #include "../ProjectileUtil.h"
 
 
@@ -32,8 +32,7 @@ void ExplodingMachine::OnTick()
 {
 	Parent::OnTick();
 
-	Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)GetAttribute(_T("float_health"));
-	if (lHealth && lHealth->GetValue() <= 0)
+	if (Cure::Health::Get(this) <= 0)
 	{
 		OnDie();
 	}

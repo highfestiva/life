@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../Cure/Include/CppContextObject.h"
-#include "../Lepra/Include/Timer.h"
+#include "../Lepra/Include/HiResTimer.h"
 #include "Life.h"
 
 
@@ -28,13 +28,12 @@ protected:
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
-	virtual void DidTrigger() = 0;
+	virtual void DidTrigger(Cure::ContextObject* pBody) = 0;
 
 	bool mAllowBulletTime;
 
 	bool mLastFrameTriggered;
-	bool mIsTriggerTimerStarted;
-	Timer mTriggerTimer;
+	StopWatch mTriggerTimer;
 
 	float mMinSpeed;
 	float mMaxSpeed;

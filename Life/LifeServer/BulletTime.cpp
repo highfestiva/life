@@ -43,8 +43,9 @@ void BulletTime::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 }
 
-void BulletTime::DidTrigger()
+void BulletTime::DidTrigger(Cure::ContextObject* pBody)
 {
+	(void)pBody;
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_RTR, mRealTimeRatio);
 	((GameServerManager*)GetManager()->GetGameManager())->BroadcastStatusMessage(
 		Cure::MessageStatus::INFO_COMMAND,

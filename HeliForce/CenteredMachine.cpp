@@ -6,7 +6,7 @@
 
 #include "CenteredMachine.h"
 #include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/FloatAttribute.h"
+#include "../Cure/Include/Health.h"
 #include "../Cure/Include/GameManager.h"
 #include "../Life/Explosion.h"
 #include "../Life/Launcher.h"
@@ -21,7 +21,7 @@ namespace HeliForce
 CenteredMachine::CenteredMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
 	Parent(pResourceManager, pClassId, pUiManager, pLauncher)
 {
-	new Cure::FloatAttribute(this, _T("float_health"), 1);
+	Cure::Health::Set(this, 1);
 }
 
 CenteredMachine::~CenteredMachine()

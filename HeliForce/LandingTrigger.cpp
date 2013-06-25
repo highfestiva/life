@@ -26,8 +26,13 @@ LandingTrigger::~LandingTrigger()
 
 
 
-void LandingTrigger::DidTrigger()
+void LandingTrigger::DidTrigger(Cure::ContextObject* pBody)
 {
+	if (!strutil::StartsWith(pBody->GetClassId(), _T("helicopter")))
+	{
+		mAllowBulletTime = true;
+		return;
+	}
 	if (((HeliForceManager*)GetManager()->GetGameManager())->DidFinishLevel())
 	{
 		GetManager()->AddAlarmCallback(this, 0, mBulletTimeDuration, 0);

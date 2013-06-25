@@ -521,11 +521,19 @@
 			UniqueIdentifier="{C734F7F1-C7A5-4376-A066-2A32FFD752A2}"
 			>
 			<File
+				RelativePath=".\Automan.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Autopilot.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\CenteredMachine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Eater.cpp"
 				>
 			</File>
 			<File
@@ -565,10 +573,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StoneEater.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Sunlight.cpp"
 				>
 			</File>
@@ -579,11 +583,19 @@
 			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
 			<File
+				RelativePath=".\Automan.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Autopilot.h"
 				>
 			</File>
 			<File
 				RelativePath=".\CenteredMachine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Eater.h"
 				>
 			</File>
 			<File
@@ -612,10 +624,6 @@
 			</File>
 			<File
 				RelativePath=".\RtVar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\StoneEater.h"
 				>
 			</File>
 			<File

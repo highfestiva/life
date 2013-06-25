@@ -6,6 +6,7 @@
 
 #include "HoverTankServerDelegate.h"
 #include "../../Cure/Include/ConsoleManager.h"
+#include "../../Cure/Include/Health.h"
 #include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/IntAttribute.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -166,7 +167,7 @@ void HoverTankServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::
 
 void HoverTankServerDelegate::OnLoadAvatar(Life::Client* pClient, Cure::ContextObject* pAvatar)
 {
-	new Cure::FloatAttribute(pAvatar, _T("float_health"), 1);
+	Cure::Health::Set(pAvatar, 1);
 	if (pClient)
 	{
 		// User avatar.
@@ -308,7 +309,7 @@ void HoverTankServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TB
 		const float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
-			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
+			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
 			if (lHealth)
 			{
 				DrainHealth(pExplosive, lObject, lHealth, lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f));
@@ -325,7 +326,7 @@ void HoverTankServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::Co
 	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
 	mGameServerManager->IndicatePosition(pBullet->GetPosition(), lIndicateHit);
 
-	Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pHitObject->GetAttribute(_T("float_health"));
+	Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(pHitObject);
 	if (lHealth)
 	{
 		DrainHealth(pBullet, pHitObject, lHealth, Random::Normal(0.17f, 0.01f, 0.1f, 0.3f));

@@ -7,6 +7,7 @@
 #include "HoverTankManager.h"
 #include <algorithm>
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/Health.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/IntAttribute.h"
 #include "../Cure/Include/NetworkClient.h"
@@ -254,7 +255,7 @@ bool HoverTankManager::Paint()
 	const Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
-		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
+		Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
 		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("");
 		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 255), 0);
 		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);

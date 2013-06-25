@@ -6,7 +6,7 @@
 
 #include "ServerMine.h"
 #include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/FloatAttribute.h"
+#include "../../Cure/Include/Health.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../Launcher.h"
 #include "../ProjectileUtil.h"
@@ -25,7 +25,7 @@ ServerMine::ServerMine(Cure::ResourceManager* pResourceManager, const str& pClas
 	mTicksTilDetonation(-1),
 	mIsDetonated(false)
 {
-	new Cure::FloatAttribute(this, _T("float_health"), 0.34f);
+	Cure::Health::Set(this, 0.34f);
 }
 
 ServerMine::~ServerMine()
@@ -50,7 +50,7 @@ void ServerMine::OnTick()
 		return;
 	}
 
-	const float lHealth = ((Cure::FloatAttribute*)GetAttribute(_T("float_health")))->GetValue();
+	const float lHealth = Cure::Health::Get(this);
 	if (lHealth <= -0.5f)
 	{
 		mTicksTilDetonation = 1;
@@ -90,9 +90,7 @@ void ServerMine::OnForceApplied(Cure::ContextObject* pOtherObject,
 	}
 	if (lForce > 1)
 	{
-		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)GetAttribute(_T("float_health"));
-		const float lResult = std::max(0.0f, lHealth->GetValue() - lForce * 0.045f);
-		lHealth->SetValue(lResult);
+		Cure::Health::Add(this, lForce * -0.045f, true);
 	}
 }
 

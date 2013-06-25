@@ -105,7 +105,7 @@ ResourceLoadState PhysicsSharedResource::PostProcess()
 bool PhysicsSharedResource::FinalizeInit()
 {
 	TBC::ChunkyPhysics* lStructure = GetRamData();
-	TransformationF& lTransformation = mInitData.mTransformation;	// TRICKY: will change as we don't use reference!
+	TransformationF lTransformation = mInitData.mTransformation;
 	if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
 		return lStructure->FinalizeInit(0, 0, &lTransformation, 0, 0);

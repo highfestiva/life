@@ -9,6 +9,7 @@
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
 #include "../Cure/Include/Elevator.h"
+#include "../Cure/Include/Health.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/IntAttribute.h"
 #include "../Cure/Include/NetworkClient.h"
@@ -46,17 +47,18 @@
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "../UiTBC/Include/UiRenderer.h"
 #include "CenteredMachine.h"
+#include "Automan.h"
 #include "Autopilot.h"
 #include "HeliForceConsoleManager.h"
 #include "HeliForceTicker.h"
 #include "LandingTrigger.h"
 #include "Level.h"
 #include "RtVar.h"
-#include "StoneEater.h"
+#include "Eater.h"
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			4
+#define LAST_LEVEL			5
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	2
@@ -110,7 +112,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mHemisphereUvTransform(0),
 	mRenderHemisphere(true),
 	mSunlight(0),
-	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 100)),
+	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 10)),
 	mCameraSpeed(0),
 	mZoomPlatform(false),
 	mPostZoomPlatformFrameCount(100),
@@ -337,24 +339,21 @@ bool HeliForceManager::Paint()
 	}
 
 	const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	if (lAvatar)
+	if (lAvatar && mHealthBarImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
-		if (lHealth && mHealthBarImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-		{
-			const uint8 r = (int8)Math::Clamp((int)((1-lHealth->GetValue())*1.9f*255), 0, 255);
-			const uint8 g = (int8)Math::Clamp((int)((lHealth->GetValue()-0.3f)*3*255), 0, 255);
-			mUiManager->GetPainter()->SetColor(Color(r, g, 0, 255), 0);
-			const float lRemaining = Math::Clamp(lHealth->GetValue()*203, 0.0f, 203.0f);
-			std::vector<Vector2DF> lCoords;
-			lCoords.push_back(Vector2DF(398, 7));
-			lCoords.push_back(Vector2DF(398, 30));
-			lCoords.push_back(Vector2DF(398+lRemaining, 30));
-			lCoords.push_back(Vector2DF(398+lRemaining, 7));
-			lCoords.push_back(lCoords[0]);
-			mUiManager->GetPainter()->DrawFan(lCoords, false);
-			DrawImage(mHealthBarImage->GetData(), 500, 19, 256, 32, 0);
-		}
+		const float lHealth = Cure::Health::Get(lAvatar);
+		const uint8 r = (int8)Math::Clamp((int)((1-lHealth)*1.9f*255), 0, 255);
+		const uint8 g = (int8)Math::Clamp((int)((lHealth-0.3f)*3*255), 0, 255);
+		mUiManager->GetPainter()->SetColor(Color(r, g, 0, 255), 0);
+		const float lRemaining = Math::Clamp(lHealth*203, 0.0f, 203.0f);
+		std::vector<Vector2DF> lCoords;
+		lCoords.push_back(Vector2DF(398, 7));
+		lCoords.push_back(Vector2DF(398, 30));
+		lCoords.push_back(Vector2DF(398+lRemaining, 30));
+		lCoords.push_back(Vector2DF(398+lRemaining, 7));
+		lCoords.push_back(lCoords[0]);
+		mUiManager->GetPainter()->DrawFan(lCoords, false);
+		DrawImage(mHealthBarImage->GetData(), 500, 19, 256, 32, 0);
 
 		const bool lIsFlying = mFlyTime.IsStarted();
 		const double lTime = mFlyTime.QuerySplitTime();
@@ -513,10 +512,10 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 		{
 			continue;
 		}
-		const float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength);
+		const float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength) * 0.5f;
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
-			Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lObject->GetAttribute(_T("float_health"));
+			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
 			if (lHealth && !mZoomPlatform)
 			{
 				lHealth->SetValue(lHealth->GetValue() - lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f));
@@ -647,7 +646,7 @@ bool HeliForceManager::InitializeUniverse()
 	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	mMassObjectArray.clear();
-	mLevel = (Level*)Parent::CreateContextObject(_T("level_00"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(_T("level_05"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
 	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
@@ -894,7 +893,7 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	else if (pClassId == _T("stone") || pClassId == _T("cube"))
 	{
 		lObject = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
-		lObject->DeleteAttribute(_T("float_health"));
+		Cure::Health::DeleteAttribute(lObject);
 	}
 	else if (strutil::StartsWith(pClassId, _T("level_")))
 	{
@@ -903,7 +902,7 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 		lLevel->DisableRootShadow();
 		lObject = lLevel;
 	}
-	else if (strutil::StartsWith(pClassId, _T("helicopter_")))
+	else if (strutil::StartsWith(pClassId, _T("helicopter_")) || strutil::StartsWith(pClassId, _T("monster")))
 	{
 		UiCure::Machine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
@@ -930,9 +929,9 @@ Cure::ContextObject* HeliForceManager::CreateLogicHandler(const str& pType)
 	{
 		return new LandingTrigger(GetContext());
 	}
-	else if (pType == _T("stone_eater"))
+	else if (pType == _T("eater"))
 	{
-		return new StoneEater(GetContext());
+		return new Eater(GetContext());
 	}
 	else if (pType == _T("context_path"))
 	{
@@ -960,6 +959,11 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		else if (pObject == mLevel)
 		{
 			OnLevelLoadCompleted();
+		}
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")))
+		{
+			new Automan(this, pObject->GetInstanceId(), Vector3DF(-1,0,0));
+			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = RNDPOSVEC();
 		}
 		else
 		{
@@ -994,8 +998,7 @@ void HeliForceManager::OnLevelLoadCompleted()
 	}
 	else
 	{
-		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)lAvatar->GetAttribute(_T("float_health"));
-		lHealth->SetValue(1.0f);
+		Cure::Health::Set(lAvatar, 1);
 		Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 		assert(lSpawner);
 		const Vector3DF lLandingPosition = GetLandingTriggerPosition(mOldLevel);
@@ -1090,6 +1093,10 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 			lCollisionImpactFactor *= Math::Lerp(1000.0f, 2.0f, lChildishness);
 		}
 	}
+	else
+	{
+		lCollisionImpactFactor = 0.01f;
+	}
 
 	float lForce = pForce.GetLength() * lCollisionImpactFactor;
 	if (lChildishness > 0.1f)
@@ -1109,12 +1116,11 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		lForce2 /= 4000;
 		lForce2 *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
 		lForce2 *= 5 - 4*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
-		Cure::FloatAttribute* lHealth = (Cure::FloatAttribute*)pObject1->GetAttribute(_T("float_health"));
-		if (lHealth && lHealth->GetValue() > 0 && !mZoomPlatform)
+		if (Cure::Health::Get(pObject1) > 0 && !mZoomPlatform)
 		{
 			lForce2 *= lForce2;
 			lForce2 /= pObject1->GetMass();
-			lHealth->SetValue(lHealth->GetValue() - lForce2);
+			Cure::Health::Add(pObject1, -lForce2, false);
 		}
 	}
 }
@@ -1317,7 +1323,7 @@ void HeliForceManager::MoveCamera()
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
 		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -60, 0));
 		++mPostZoomPlatformFrameCount;
-		if (lAvatar->GetAttributeFloatValue(_T("float_health")) <= 0)
+		if (Cure::Health::Get(lAvatar) <= 0)
 		{
 			return;
 		}

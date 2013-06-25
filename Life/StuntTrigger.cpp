@@ -22,7 +22,6 @@ StuntTrigger::StuntTrigger(Cure::ContextManager* pManager, const str& pClassId):
 	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), pClassId),
 	mAllowBulletTime(true),
 	mLastFrameTriggered(false),
-	mIsTriggerTimerStarted(false),
 	mMinSpeed(0),
 	mMaxSpeed(-1),
 	mMinTime(-1),
@@ -68,10 +67,9 @@ void StuntTrigger::OnTick()
 {
 	if (!mLastFrameTriggered)
 	{
-		mIsTriggerTimerStarted = false;
+		mTriggerTimer.Stop();
 	}
 	mLastFrameTriggered = false;
-	mTriggerTimer.UpdateTimer();
 }
 
 void StuntTrigger::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
@@ -90,21 +88,17 @@ void StuntTrigger::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextO
 	const float lSpeed = lObject->GetVelocity().GetLength();
 	if (lSpeed < mMinSpeed || lSpeed > mMaxSpeed)
 	{
-		mIsTriggerTimerStarted = false;
+		mTriggerTimer.Stop();
 		return;
 	}
-	if (!mIsTriggerTimerStarted)
-	{
-		mIsTriggerTimerStarted = true;
-		mTriggerTimer.PopTimeDiff();
-	}
-	if (mTriggerTimer.GetTimeDiff() < mMinTime)
+	mTriggerTimer.TryStart();
+	if (mTriggerTimer.QueryTimeDiff() < mMinTime)
 	{
 		return;
 	}
 
 	mAllowBulletTime = false;
-	DidTrigger();
+	DidTrigger(lObject);
 }
 
 
