@@ -25,6 +25,10 @@ Sandbox: place things in the world, make them go.
  - Download maps.
  - WOW!
 
+Make your contraption move the longest/fastest. Build and race, timelapsed multiplayer.
+
+Create your own game, share with friends. Construct basic physics, add looks and simple rules.
+
 Tank vs. Tank, similar to the Cyber Sled remake.
 
 Ball-into-hole using basic building blocks. Programming (x,y,z, rotation)? Placement? Time contraint? Score higher on lower time? Fewer programming lines? How to separate it from the 2D ballgame I played before? Many balls? Flowing through the start point? YEAH!

@@ -15,6 +15,8 @@
 . Save WR times.
 . Show high score.
 . Beautify!
+. Only show exhausts in heli when damaged.
+. Move ramps further apart to allow for offset landings ibnprev level.
 . Large fonts on iOS.
 . Monster truck jumping over landing pad.
 . Music.
