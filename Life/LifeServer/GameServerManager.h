@@ -46,8 +46,6 @@ public:
 		Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
 
-	void SetLevel(const str& pLevelName);
-
 	virtual bool BeginTick();
 	virtual void PreEndTick();
 

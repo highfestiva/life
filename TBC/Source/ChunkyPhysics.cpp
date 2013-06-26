@@ -110,7 +110,7 @@ float ChunkyPhysics::QueryTotalMass(PhysicsManager* pPhysicsManager) const
 			lTotalMass += pPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
 		}
 	}
-	if (lTotalMass == 0)
+	if (lTotalMass < 0.01f)
 	{
 		lTotalMass = 0.1f;
 	}

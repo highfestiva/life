@@ -67,6 +67,7 @@ std::string SystemManager::GetSystemPseudoId()
 str SystemManager::GetUniqueHardwareString()
 {
 	str s;
+	s += GetHwName();
 	s += strutil::IntToString(GetLogicalCpuCount(), 16);
 	s += strutil::IntToString(GetPhysicalCpuCount(), 16);
 	s += strutil::IntToString(GetCoreCount(), 16);

@@ -318,13 +318,13 @@ bool Win32OpenGLDisplay::SetGLPixelFormat()
 	lPixelDesc.cAccumBlueBits		= 0;
 	lPixelDesc.cAccumAlphaBits		= 0;
 	lPixelDesc.cDepthBits			= 32;	// Depth buffer.
-	lPixelDesc.cStencilBits		= 8;	// Stencil buffer.
+	lPixelDesc.cStencilBits			= 8;	// Stencil buffer.
 	lPixelDesc.cAuxBuffers			= 0;
 	lPixelDesc.iLayerType			= PFD_MAIN_PLANE;
 	lPixelDesc.bReserved			= 0;
 	lPixelDesc.dwLayerMask			= 0;
 	lPixelDesc.dwVisibleMask		= 0;
-	lPixelDesc.dwDamageMask		= 0;
+	lPixelDesc.dwDamageMask			= 0;
 
 	lGLPixelIndex = ::ChoosePixelFormat(mDC, &lPixelDesc);
 

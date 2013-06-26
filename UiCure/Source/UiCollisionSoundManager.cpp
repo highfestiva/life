@@ -7,6 +7,7 @@
 #include "../Include/UiCollisionSoundManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/HashUtil.h"
+#include "../../Cure/Include/DelayedDeleter.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../Include/UiGameUiManager.h"
@@ -47,6 +48,12 @@ void CollisionSoundManager::AddSound(const str& pName, const SoundResourceInfo& 
 	mSoundNameMap.insert(SoundNameMap::value_type(pName, pInfo));
 }
 
+void CollisionSoundManager::PreLoadSound(const str& pName)
+{
+	CollisionSoundResource* lSound = new CollisionSoundResource(mUiManager, 0);
+	lSound->Load(mGameManager->GetResourceManager(), _T("collision_")+pName+_T(".wav"),
+		UiCure::UserSound3dResource::TypeLoadCallback(this, &CollisionSoundManager::OnSoundPreLoaded));
+}
 
 
 void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
@@ -136,9 +143,18 @@ void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPositio
 		}
 		else
 		{
-			// We are newer or different! Replay!
-			StopSound(pKey);
-			PlaySound(pKey, pSoundName, pPosition, pImpact);
+			// We are newer or different.
+			if (pImpact > lSoundInfo->mBaseImpact * 0.7f)
+			{
+				// ... and we almost as load! Play us instead!
+				StopSound(pKey);
+				PlaySound(pKey, pSoundName, pPosition, pImpact);
+			}
+			else
+			{
+				// We must play both sounds at once. This hack (using key+1) will allow us to fire-and-forget.
+				OnCollision(pImpact, pPosition, pKey+1, pSoundName);
+			}
 		}
 	}
 	else
@@ -161,6 +177,7 @@ void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKe
 	lGotSound &= (SoundInfo::GetVolume(pImpact, lResource) >= mLightImpact*MINIMUM_PLAYED_VOLUME_FACTOR);
 	if (!lGotSound)
 	{
+		//mLog.Warningf(_T("Unable to play sound %s."), pSoundName.c_str());
 		return;
 	}
 
@@ -186,6 +203,11 @@ void CollisionSoundManager::OnSoundLoaded(UiCure::UserSound3dResource* pSoundRes
 		lSoundInfo->UpdateImpact();
 		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), lSoundInfo->mVolume, lSoundInfo->mPitch * lRealTimeRatio);
 	}
+}
+
+void CollisionSoundManager::OnSoundPreLoaded(UiCure::UserSound3dResource* pSoundResource)
+{
+	new Cure::DelayedDeleter<UiCure::UserSound3dResource>(mGameManager->GetResourceManager(), mGameManager->GetContext(), pSoundResource);
 }
 
 void CollisionSoundManager::UpdateSound(SoundInfo* pSoundInfo)

@@ -19,7 +19,8 @@ ChunkyClass::Material::Material():
 	mDiffuse(1,1,1),
 	mSpecular(0.1f,0.1f,0.1f),
 	mShininess(0),
-	mAlpha(1)
+	mAlpha(1),
+	mSmooth(true)
 {
 }
 

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <assert.h>
 #include <math.h>
 #include <vector>
 
@@ -97,6 +98,25 @@ public:
 			value = max;
 		}
 		return (value);
+	}
+	template<class _T> static inline _T SmoothClamp(_T value, _T min, _T max, _T part)
+	{
+		assert(part <= (_T)0.5);
+		const _T k = max-min;
+		_T x = (value-min) / k;	// Transpose to [min,max] -> [0-1].
+		const _T x0 = part;
+		const _T x1 = 1-part;
+		if (x > x1)
+		{
+			x = 1 - exp((x1-x)/x0 + log(x0));
+			return k*x+min;	// Transpose back [0,1] -> [min,max].
+		}
+		else if (x < x0)
+		{
+			x = exp(x/x0 + log(x0)-1);
+			return k*x+min;	// Transpose back [0,1] -> [min,max].
+		}
+		return value;
 	}
 	
 	template<class _Type> static bool IsInRange(_Type value, _Type min, _Type max)

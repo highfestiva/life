@@ -72,6 +72,11 @@ void NetworkFreeAgent::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCal
 	mSocketReceiveFilterTable.insert(SocketReceiveFilterTable::value_type(pSocket, pOnDropCallback));
 }
 
+void NetworkFreeAgent::RemoveAllFilterIoSockets()
+{
+	mSocketReceiveFilterTable.clear();
+}
+
 void NetworkFreeAgent::KillIoSocket(VIoSocket* pSocket)
 {
 	SocketReceiveFilterTable::iterator x = mSocketReceiveFilterTable.find(pSocket);

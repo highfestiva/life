@@ -37,6 +37,7 @@ public:
 
 	virtual MuxIoSocket* GetMuxIoSocket() const = 0;
 	virtual void AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback) = 0;
+	virtual void RemoveAllFilterIoSockets() = 0;
 	virtual void KillIoSocket(VIoSocket* pSocket) = 0;
 };
 

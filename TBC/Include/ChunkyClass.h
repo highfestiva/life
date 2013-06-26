@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <set>
 #include "TBC.h"
 
 
@@ -45,10 +46,14 @@ public:
 	const Tag& GetTag(size_t pTagIndex) const;
 	const Tag* GetTag(const str& pTagName) const;
 
+	void AddPhysRoot(int pPhysIndex);
+	bool IsPhysRoot(int pPhysIndex) const;
+
 protected:
 private:
 	str mPhysicsBaseName;
 	std::vector<Tag> mTagArray;
+	std::set<int> mPhysRootSet;
 
 	LOG_CLASS_DECLARE();
 };

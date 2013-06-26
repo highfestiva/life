@@ -58,6 +58,11 @@ public:
 
 		return -1;
 	}
+
+	template<class _ListType> static bool Contains(const _ListType& pList, const typename _ListType::value_type& pValue)
+	{
+		return std::find(pList.begin(), pList.end(), pValue) != pList.end();
+	}
 };
 
 

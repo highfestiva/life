@@ -8,6 +8,7 @@
 
 #include <math.h>
 #include <list>
+#include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../../Lepra/Include/Transformation.h"
@@ -36,6 +37,8 @@ public:
 	public:
 		virtual void DeletingGeometry(GeometryBase* pGeometry) = 0;
 	};
+
+	typedef fastdelegate::FastDelegate0<void> RenderCallback;
 
 	friend class BasicMeshCreator;
 	friend class PortalManager;
@@ -160,6 +163,10 @@ public:
 	
 	void AddListener(Listener* pListener);
 	void RemoveListener(Listener* pListener);
+	const RenderCallback& GetPreRenderCallback() const;
+	void SetPreRenderCallback(const RenderCallback& pCallback);
+	const RenderCallback& GetPostRenderCallback() const;
+	void SetPostRenderCallback(const RenderCallback& pCallback);
 
 	virtual bool IsGeometryReference();
 	void SetIsSimpleObject();
@@ -295,7 +302,6 @@ public:
 	BoneAnimator* GetUVAnimator();
 	const TransformationF& GetUVTransform();
 
-protected:
 	void SetSurfaceNormalData(float* pSurfaceNormalData);
 	void SetVertexNormalData(float* pVertexNormalData, unsigned int pNumVertices);
 	void SetTangentAndBitangentData(float* pTangentData, float* pBitangentData, unsigned int pNumVertices);
@@ -379,6 +385,8 @@ private:
 	BoneAnimator* mUVAnimator;
 
 	ListenerList mListenerList;
+	RenderCallback mPreRenderCallback;
+	RenderCallback mPostRenderCallback;
 
 	size_t mExtraData;
 

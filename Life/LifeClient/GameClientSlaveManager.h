@@ -49,7 +49,7 @@ public:
 	virtual ~GameClientSlaveManager();
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 	virtual void LoadSettings();
-	virtual void SaveSettings();
+	virtual void SaveSettings() = 0;
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();
@@ -59,7 +59,7 @@ public:
 
 	GameClientMasterTicker* GetMaster() const;
 
-	bool Render();
+	virtual bool Render();
 	virtual bool Paint();
 	virtual bool IsPrimaryManager() const;
 	virtual void PreEndTick();
@@ -121,15 +121,13 @@ protected:
 	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 
-	float QuerySetChildishness(Cure::ContextObject* pOwnedObject) const;
-
 	Cure::NetworkClient* GetNetworkClient() const;
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition) = 0;
 
-	void DrawAsyncDebugInfo();
+	virtual void DrawAsyncDebugInfo();
 	void DrawDebugStaple(int pIndex, int pHeight, const Color& pColor);
-	void DrawSyncDebugInfo();
+	virtual void DrawSyncDebugInfo();
 
 	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
 	typedef std::hash_set<Cure::GameObjectId> ObjectIdSet;

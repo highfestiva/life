@@ -45,6 +45,11 @@ Elevator::~Elevator()
 
 
 
+void Elevator::SetStopDelay(double pStopDelay)
+{
+	mStopDelay = pStopDelay;
+}
+
 Vector3DF Elevator::GetPosition() const
 {
 	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(GetFirstBody()->GetBodyId());

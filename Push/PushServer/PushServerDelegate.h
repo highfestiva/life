@@ -12,7 +12,6 @@
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Life/Launcher.h"
 #include "../Push.h"
-#include "GameServerLogic.h"
 
 
 
@@ -28,7 +27,7 @@ namespace Push
 
 
 
-class PushServerDelegate: public Life::ServerDelegate, public GameServerLogic, public Life::Launcher
+class PushServerDelegate: public Life::ServerDelegate
 {
 	typedef Life::ServerDelegate Parent;
 public:
@@ -44,6 +43,7 @@ private:
 	virtual void OnLogin(Life::Client* pClient);
 	virtual void OnLogout(Life::Client* pClient);
 
+	virtual void OnSelectAvatar(Life::Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
 	virtual void OnLoadAvatar(Life::Client* pClient, Cure::ContextObject* pAvatar);
 	virtual void OnLoadObject(Cure::ContextObject* pObject);
 	virtual void OnDeleteObject(Cure::ContextObject* pObject);
@@ -52,40 +52,7 @@ private:
 
 	virtual void PreEndTick();
 
-	void OrderAirStrike(const Vector3DF& pPosition, float pFlyInAngle);
-
-	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
-	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
-	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
-
-	virtual Cure::ContextObject* CreateAvatarForNpc(Npc* pNpc);
-	virtual void AddAvatarToTeam(Cure::ContextObject* pAvatar, int pTeam);
-	virtual void RemoveAvatar(Cure::ContextObject* pAvatar);
-	virtual const AvatarIdSet& GetAvatarsInTeam(int pTeam);
-
-	void CreateNpc();
-	void DeleteNpc();
-	Npc* GetNpcByAvatar(Cure::GameObjectId pAvatarId) const;
-	void CreateScore(const str& pPlayerName, bool pCreatePing);
-	void DeleteScore(const str& pPlayerName);
-	void UpdatePing();
-	void AddPoint(const str& pPrefix, const Cure::ContextObject* pAvatar, int pPoints);
-	void SetPoints(const str& pPrefix, const Life::Client* pClient, int pPoints);
-	void DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pAvatar, Cure::FloatAttribute* pHealth, float pDamage);
-	void Die(Cure::ContextObject* pAvatar);
-	bool IsAvatarObject(const Cure::ContextObject* pObject) const;
-	void TickNpcGhosts();
-
-	enum Command
-	{
-		COMMAND_SET_LEVEL,
-	};
-
 	Cure::GameObjectId mLevelId;
-	Cure::GameObjectId mScoreInfoId;
-	AvatarIdSet mAvatarTeamSets[2];
-	AvatarIdSet mNpcSet;
-	HiResTimer mPingUpdateTimer;
 
 	LOG_CLASS_DECLARE();
 };

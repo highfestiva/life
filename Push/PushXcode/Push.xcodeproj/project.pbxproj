@@ -525,6 +525,7 @@
 		B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */; };
 		B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */; };
 		B1D37F4F166AB5F200536CE5 /* MasterServerNetworkParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4E166AB5F200536CE5 /* MasterServerNetworkParser.cpp */; };
+		B1D5E29F172B1F6C00984602 /* UiJetEngineEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
 		B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */; };
 		B1D88DC814DEA9190000CD85 /* happyhttp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DC714DEA9190000CD85 /* happyhttp.cpp */; };
@@ -1249,6 +1250,7 @@
 		B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchDrag.cpp; sourceTree = "<group>"; };
 		B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchstick.cpp; sourceTree = "<group>"; };
 		B1D37F4E166AB5F200536CE5 /* MasterServerNetworkParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MasterServerNetworkParser.cpp; path = ../../Life/LifeMaster/MasterServerNetworkParser.cpp; sourceTree = SOURCE_ROOT; };
+		B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiJetEngineEmitter.cpp; path = ../../UiCure/Source/UiJetEngineEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
 		B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HiscoreAgent.cpp; path = ../../Cure/Source/HiscoreAgent.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DC714DEA9190000CD85 /* happyhttp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = happyhttp.cpp; path = "happyhttp-0.1/happyhttp.cpp"; sourceTree = "<group>"; };
@@ -1388,6 +1390,7 @@
 		B15F795413FC59E300E01A90 /* UiCure */ = {
 			isa = PBXGroup;
 			children = (
+				B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */,
 				B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */,
 				B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */,
 				B1D37F43166AB59C00536CE5 /* UiDebugRenderer.cpp */,
@@ -3062,6 +3065,7 @@
 				B1F3C40C16E0027100B2EFB5 /* UiParticleRenderer.cpp in Sources */,
 				B1F3C40E16E0029C00B2EFB5 /* UiParticleLoader.cpp in Sources */,
 				B1F3C41C16E007C300B2EFB5 /* ExplodingMachine.cpp in Sources */,
+				B1D5E29F172B1F6C00984602 /* UiJetEngineEmitter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -132,6 +132,8 @@ bool GameUiManager::OpenDraw()
 	if (lOk)
 	{
 		mDisplay->AddResizeObserver(this);
+		const double lPhysicalScreenSize = mDisplay->GetPhysicalScreenSize();
+		CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
 	}
@@ -182,6 +184,8 @@ bool GameUiManager::OpenRest()
 		CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 		double lFontHeight;
 		CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		int lFontFlags;
+		CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
 		UiTbc::FontManager::FontId lFontId = mFontManager->QueryAddFont(lFont, lFontHeight);
 		const tchar* lFontNames[] =
 		{
@@ -194,7 +198,7 @@ bool GameUiManager::OpenRest()
 		};
 		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
 		{
-			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight);
+			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight, lFontFlags);
 		}
 	}
 	if (lOk)
@@ -481,28 +485,6 @@ void GameUiManager::AssertDesktopLayout(UiTbc::Layout* pLayout, int pLayer)
 
 
 
-void GameUiManager::OnResize(int pWidth, int pHeight)
-{
-	if (mCanvas)
-	{
-		mCanvas->Reset(pWidth, pHeight, mCanvas->GetBitDepth());
-		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mDesktopWindow->SetSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mInput->Refresh();
-	}
-}
-
-void GameUiManager::OnMinimize()
-{
-}
-
-void GameUiManager::OnMaximize(int pWidth, int pHeight)
-{
-	OnResize(pWidth, pHeight);
-}
-
-
-
 void GameUiManager::UpdateSettings()
 {
 	// Display.
@@ -646,6 +628,27 @@ void GameUiManager::UpdateSettings()
 			mSound->SetDopplerFactor((float)lSoundDoppler);
 		}
 	}
+}
+
+
+void GameUiManager::OnResize(int pWidth, int pHeight)
+{
+	if (mCanvas)
+	{
+		mCanvas->Reset(pWidth, pHeight, mCanvas->GetBitDepth());
+		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
+		mDesktopWindow->SetSize(mCanvas->GetWidth(), mCanvas->GetHeight());
+		mInput->Refresh();
+	}
+}
+
+void GameUiManager::OnMinimize()
+{
+}
+
+void GameUiManager::OnMaximize(int pWidth, int pHeight)
+{
+	OnResize(pWidth, pHeight);
 }
 
 

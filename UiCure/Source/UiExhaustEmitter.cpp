@@ -8,7 +8,10 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiTBC/Include/UiParticleRenderer.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
 
@@ -19,13 +22,9 @@ namespace UiCure
 
 
 
-ExhaustEmitter::ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, const str& pParticleClass, float pScale, float pAmount, float pLifeTime):
+ExhaustEmitter::ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager):
 	mResourceManager(pResourceManager),
-	mUiManager(pUiManager),
-	mParticleClass(pParticleClass),
-	mScale(pScale),
-	mDelay(1/pAmount),
-	mLifeTime(pLifeTime)
+	mUiManager(pUiManager)
 {
 }
 
@@ -54,8 +53,10 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 		FV_VX,
 		FV_VY,
 		FV_VZ,
+		FV_SCALE,
 		FV_DENSITY,
 		FV_OPACITY,
+		FV_TTL,
 		FV_COUNT
 	};
 	if (pTag.mFloatValueList.size() != FV_COUNT ||
@@ -74,15 +75,18 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 		return;
 	}
 	const TBC::PhysicsEngine* lEngine = pObject->GetPhysics()->GetEngine(lEngineIndex);
-	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
 	float lExhaustIntensity;
 	CURE_RTVAR_GET(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
-	mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity() * lDensity) * lExhaustIntensity * pFrameTime * 25;
+	mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity()) * lExhaustIntensity * pFrameTime * 25;
 	if (mExhaustTimeout > 0)
 	{
 		return;
 	}
-	mExhaustTimeout = mDelay;
+	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
+	mExhaustTimeout = 1/lDensity;
+
+	const float lScale = pTag.mFloatValueList[FV_SCALE];
+	const float lLifeTime = pTag.mFloatValueList[FV_TTL];
 
 	const QuaternionF lOriginalOrientation = pObject->GetOrientation();
 	Vector3DF lOffset(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
@@ -90,7 +94,8 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 	Vector3DF lVelocity(pTag.mFloatValueList[FV_VX], pTag.mFloatValueList[FV_VY], pTag.mFloatValueList[FV_VZ]);
 	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
 	lVelocity = lOriginalOrientation*lVelocity;
-	lVelocity += pObject->GetVelocity()*0.5f;
+	lVelocity += pObject->GetVelocity();
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
 		TBC::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
@@ -102,14 +107,9 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform);
 			lTransform = lMesh->GetBaseTransformation() * lTransform;
 			lTransform.GetPosition() += lOffset;
-			Props* lPuff = new Props(mResourceManager, mParticleClass, mUiManager);
-			pObject->GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			//mLog.Infof(_T("ExhaustEmitter %i creates fume particle %i."), GetInstanceId(), lPuff->GetInstanceId());
-			lPuff->DisableRootShadow();
-			lPuff->SetInitialTransform(lTransform);
-			lPuff->SetOpacity(lOpacity);
-			lPuff->StartParticle(Props::PARTICLE_GAS, lVelocity, mScale, 0.5f, mLifeTime);
-			lPuff->StartLoading();
+
+			const float lAngularVelocity = Random::Uniform(-15.5f, +15.5f);
+			lParticleRenderer->CreateFume(lLifeTime, lScale, lAngularVelocity, lOpacity, lTransform.GetPosition(), lVelocity);
 		}
 	}
 }

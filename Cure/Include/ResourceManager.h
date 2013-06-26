@@ -436,6 +436,7 @@ private:
 	typedef OrderedMap<str, Resource*> ResourceMap;
 	typedef OrderedMap<Resource*, Resource*, LEPRA_VOIDP_HASHER> ResourceMapList;
 	typedef std::hash_set<Resource*, LEPRA_VOIDP_HASHER> ResourceSet;
+	typedef std::vector<Resource*> ResourceArray;
 
 	TerrainFunctionManager* mTerrainFunctionManager;
 
@@ -448,6 +449,7 @@ private:
 	ResourceTable mCachedResourceTable;	// On the way out. Holds non-unique resources.
 	ResourceMapList mRequestLoadList;	// Under way to be loaded by worker thread. TODO: priority map thingie!
 	ResourceMapList mLoadedList;		// Loaded by worker thread, worker thread will injected into the system at end of tick.
+	ResourceArray mPostLoadDeleteArray;	// Currently loading, or probably loading, worker thread will delete on next iteration.
 	ResourceSet mResourceSafeLookup;	// Data owner for Resource*.
 	Lock* mZipLock;
 	ZipArchive* mZipFile;

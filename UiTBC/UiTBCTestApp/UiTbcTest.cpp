@@ -520,6 +520,8 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		{
 			assert(false);
 		}
+		gRenderer->SetMipMappingEnabled(true);
+
 		gFontManager = UiTbc::FontManager::Create(gDisplay);
 		UiTbc::FontManager::FontId lFontId = gFontManager->AddFont(_T("Arial"), 16, 0, UiTbc::FontManager::NATIVE);
 		gFontManager->SetActiveFont(lFontId);
@@ -546,7 +548,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 			lContext = _T("load texturemap");
 			Lepra::Canvas lCanvas;
 			Lepra::PngLoader lLoader;
-			lOk = (lLoader.Load(_T("Data/megaphone.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/nuclear.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
 
 			lTextureMap.Set(lCanvas);
 			if (lOk)
@@ -569,7 +571,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 			lContext = _T("load lightmap");
 			Lepra::Canvas lCanvas;
 			Lepra::PngLoader lLoader;
-			lOk = (lLoader.Load(_T("Data/megaphone.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/env.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
 
 			lLightMap.Set(lCanvas);
 
@@ -593,7 +595,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 			lContext = _T("load envmap");
 			Lepra::Canvas lCanvas;
 			Lepra::PngLoader lLoader;
-			lOk = (lLoader.Load(_T("Data/megaphone.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/env.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
 
 			lEnvMap.Set(lCanvas);
 
@@ -617,7 +619,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 			lContext = _T("load specmap");
 			Lepra::Canvas lCanvas;
 			Lepra::PngLoader lLoader;
-			lOk = (lLoader.Load(_T("Data/megaphone.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/env.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
 
 			lSpecMap.Set(lCanvas);
 
@@ -641,7 +643,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 			lContext = _T("load normalmap");
 			Lepra::Canvas lCanvas;
 			Lepra::PngLoader lLoader;
-			lOk = (lLoader.Load(_T("Data/megaphone.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/env.png"), lCanvas) == Lepra::PngLoader::STATUS_SUCCESS);
 
 			lNormalMap.Set(lCanvas);
 
@@ -1000,8 +1002,7 @@ bool AddMappingCoords(UiTbc::TriangleBasedGeometry* pGeometry)
 	UiTbc::UVMapper::ApplyCubeMapping(pGeometry, 0, pGeometry->GetBoundingRadius(), lUVOffset);
 	pGeometry->DupUVSet(0);
 
-/*
-	if (lOk)
+	/*if (lOk)
 	{
 		unsigned lCorner = 0;
 		unsigned lVertexCount = pGeometry->GetVertexCount();
@@ -1040,8 +1041,8 @@ bool AddMappingCoords(UiTbc::TriangleBasedGeometry* pGeometry)
 		pGeometry->AddUVSet(lUVCoords);	// Add for texturemap.
 		pGeometry->AddUVSet(lUVCoords);	// Add for lightmap.
 		delete[] (lUVCoords);
-	}
-*/
+	}*/
+
 	return (lOk);
 }
 
@@ -2414,32 +2415,31 @@ bool TestUiTbc()
 #endif // TEST_D3D_RENDERER/!TEST_D3D_RENDERER
 	{
 		LEPRA_MEASURE_SCOPE(Graphics);
-		bool lRendererOpenedOk = false;
 		if (lTestOk)
 		{
 			LEPRA_MEASURE_SCOPE(OpenRenderer);
 			if (y == 0)
 			{
-				lRendererOpenedOk = OpenRenderer(gUiTbcLog, UiLepra::DisplayManager::OPENGL_CONTEXT);
+				lTestOk = OpenRenderer(gUiTbcLog, UiLepra::DisplayManager::OPENGL_CONTEXT);
 			}
 			else
 			{
 				assert(false);
 			}
-			lTestOk = lRendererOpenedOk;
+			assert(lTestOk);
 		}
-		//TestOpenGLPainter();
+		/*//TestOpenGLPainter();
 		if (lTestOk)
 		{
 			LEPRA_MEASURE_SCOPE(GenerateTest);
 			lTestOk = TestGenerate(gUiTbcLog, 2.0);
-		}
+		}*/
 		if (lTestOk)
 		{
 			LEPRA_MEASURE_SCOPE(MaterialTest);
-			lTestOk = TestMaterials(gUiTbcLog, 2.0);
+			lTestOk = TestMaterials(gUiTbcLog, 20.0);
 		}
-		if (lTestOk)
+		/*if (lTestOk)
 		{
 			lTestOk = TestFps(gUiTbcLog, 150.0);
 		}
@@ -2504,7 +2504,7 @@ bool TestUiTbc()
 					assert(lTestOk);
 				}
 			}
-		}
+		}*/
 	}
 	return (lTestOk);
 }

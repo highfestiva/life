@@ -26,6 +26,7 @@ class ConsoleManager;
 class ContextManager;
 class GameTicker;
 class NetworkAgent;
+class Spawner;
 class TerrainManager;
 class TimeManager;
 
@@ -65,6 +66,7 @@ public:
 	virtual void DeleteContextObjectDelay(Cure::ContextObject* pObject, float pDelay);
 	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	virtual ContextObject* CreateLogicHandler(const str& pType);
+	virtual Spawner* GetAvatarSpawner(Cure::GameObjectId pLevelId) const;
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -97,13 +99,13 @@ protected:
 	virtual void TickInput() = 0;
 
 	virtual ContextObject* CreateContextObject(const str& pClassId) const = 0;
+	virtual void ScriptPhysicsTick();
 
 	void ReportPerformance(const ScopePerformanceData::NodeArray& pNodes, int pRecursion);
 
 	bool IsThreadSafe() const;
 
 private:
-	void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
 
 	mutable Lock mLock;

@@ -240,6 +240,11 @@ const TransformationF& BoneHierarchy::GetRelativeBoneTransformation(int pBoneInd
 	return mRelativeBoneTransformation[pBoneIndex];
 }
 
+TransformationF& BoneHierarchy::GetRelativeBoneTransformation(int pBoneIndex)
+{
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	return mRelativeBoneTransformation[pBoneIndex];
+}
 
 
 void BoneHierarchy::UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation)

@@ -112,7 +112,7 @@ bool OptionsManager::SetValue(const str& pKey, float pValue, bool pAdd)
 		if (pAdd)
 		{
 			lInputChanged = true;
-			*(*x) = Math::Clamp(*(*x) + pValue, 0.0f, 1.0f);
+			*(*x) += Math::Clamp(pValue, -1.0f, 1.0f);
 		}
 		else if (!Math::IsEpsEqual(*(*x), pValue, 0.06f))
 		{

@@ -40,6 +40,7 @@ public:
 
 	void EnableUi(bool pEnable);
 	void DisableRootShadow();
+	void SetUseDefaultTexture(bool pUseDefaultTexture);
 	void EnablePixelShader(bool pEnable);
 	void EnableMeshMove(bool pEnable);
 	void EnableMeshSlide(bool pEnable);
@@ -54,6 +55,8 @@ public:
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
 	void CenterMeshes();
 	virtual void UpdateMaterial(int pMeshIndex);
+
+	virtual void ReplaceTexture(int pTextureIndex, const str& pNewTextureName);
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
@@ -84,6 +87,7 @@ protected:
 	UserClassResource* mUiClassResource;
 	bool mEnableUi;
 	bool mAllowRootShadow;
+	bool mUseDefaultTexture;
 	bool mEnablePixelShader;
 	bool mEnableMeshMove;
 	bool mEnableMeshSlide;

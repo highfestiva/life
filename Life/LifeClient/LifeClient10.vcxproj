@@ -224,9 +224,15 @@
   <ItemGroup>
     <ClCompile Include="ClientConsoleManager.cpp" />
     <ClCompile Include="ClientOptionsManager.cpp" />
+    <ClCompile Include="ExplodingMachine.cpp" />
+    <ClCompile Include="FastProjectile.cpp" />
     <ClCompile Include="GameClientMasterTicker.cpp" />
     <ClCompile Include="GameClientSlaveManager.cpp" />
+    <ClCompile Include="HomingProjectile.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="Mine.cpp" />
     <ClCompile Include="OptionsManager.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="UiConsole.cpp" />
     <ClCompile Include="MassObject.cpp" />
     <ClCompile Include="StopWatch.cpp" />
@@ -236,7 +242,6 @@
     <ClCompile Include="..\LifeServer\GameServerManager.cpp" />
     <ClCompile Include="..\LifeServer\RaceTimer.cpp" />
     <ClCompile Include="..\LifeServer\ServerConsoleManager.cpp" />
-    <ClCompile Include="..\LifeServer\Spawner.cpp" />
     <ClCompile Include="UiGameServerManager.cpp" />
     <ClCompile Include="UiServerConsoleManager.cpp" />
     <ClCompile Include="..\LifeServer\MasterServerConnection.cpp" />
@@ -246,10 +251,16 @@
     <ClInclude Include="ClientConsoleManager.h" />
     <ClInclude Include="ClientOptions.h" />
     <ClInclude Include="ClientOptionsManager.h" />
+    <ClInclude Include="ExplodingMachine.h" />
+    <ClInclude Include="FastProjectile.h" />
     <ClInclude Include="GameClientMasterTicker.h" />
     <ClInclude Include="GameClientSlaveManager.h" />
+    <ClInclude Include="HomingProjectile.h" />
     <ClInclude Include="InputObserver.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="Mine.h" />
     <ClInclude Include="OptionsManager.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="RtVar.h" />
     <ClInclude Include="UiConsole.h" />
     <ClInclude Include="MassObject.h" />
@@ -261,7 +272,6 @@
     <ClInclude Include="..\LifeServer\GameServerManager.h" />
     <ClInclude Include="..\LifeServer\RaceTimer.h" />
     <ClInclude Include="..\LifeServer\ServerConsoleManager.h" />
-    <ClInclude Include="..\LifeServer\Spawner.h" />
     <ClInclude Include="UiGameServerManager.h" />
     <ClInclude Include="UiServerConsoleManager.h" />
     <ClInclude Include="..\LifeServer\MasterServerConnection.h" />

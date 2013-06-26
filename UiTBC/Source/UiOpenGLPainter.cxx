@@ -672,13 +672,12 @@ void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
 	OGL_ASSERT();
 }
 
-void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF> pCoords, const std::vector<Vector2DF> pTexCoords)
+void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF>& pCoords, const std::vector<Vector2DF>& pTexCoords)
 {
 	OGL_ASSERT();
 	assert(pCoords.size() == pTexCoords.size());
 
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
-
 	if (lIter == mTextureTable.End())
 	{
 		return;

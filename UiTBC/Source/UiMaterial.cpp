@@ -5,6 +5,7 @@
 
 #include "../Include/UiMaterial.h"
 #include "../../TBC/Include/GeometryBase.h"
+#include "../../Lepra/Include/ListUtil.h"
 #include "../../Lepra/Include/Math.h"
 
 
@@ -27,6 +28,7 @@ GeometryGroup::GeometryGroup(Material* pMaterial, int pAllocSize) :
 GeometryGroup::~GeometryGroup()
 {
 	delete[] mGeomArray;
+	mGeomArray = 0;
 }
 
 void GeometryGroup::AddGeometry(TBC::GeometryBase* pGeometry)
@@ -204,9 +206,10 @@ int GeometryGroup::B2FCompare(const void* pPair1, const void* pPair2)
 
 
 
-Material::Material(Renderer* pRenderer, DepthSortHint pSortHint) :
+Material::Material(Renderer* pRenderer, DepthSortHint pSortHint, Material* pFallBackMaterial) :
 	mRenderer(pRenderer),
-	mSortHint(pSortHint)
+	mSortHint(pSortHint),
+	mFallBackMaterial(pFallBackMaterial)
 {
 }
 
@@ -272,9 +275,18 @@ Material::RemoveStatus Material::RemoveGeometry(TBC::GeometryBase* pGeometry)
 
 	if (lGeomData->mGeometryGroup->GetGeometryCount() == 0)
 	{
-		mGeometryGroupList.remove(lGeomData->mGeometryGroup);
-		delete lGeomData->mGeometryGroup;
-		lGeomData->mGeometryGroup = 0;
+		Material* lMaterial = this;
+		while (lMaterial && !ListUtil::Contains(lMaterial->mGeometryGroupList, lGeomData->mGeometryGroup))
+		{
+			lMaterial = lMaterial->mFallBackMaterial;
+		}
+		assert(lMaterial);
+		if (lMaterial)
+		{
+			lMaterial->mGeometryGroupList.remove(lGeomData->mGeometryGroup);
+			delete lGeomData->mGeometryGroup;
+			lGeomData->mGeometryGroup = 0;
+		}
 	}
 
 	return lStatus;

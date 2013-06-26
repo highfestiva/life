@@ -11,6 +11,7 @@
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../UiTBC/Include/UiParticleRenderer.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
@@ -22,10 +23,9 @@ namespace UiCure
 
 
 
-GravelEmitter::GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, const str& pParticleClass, float pSensitivity, float pScale, float pAmount, float pLifeTime):
+GravelEmitter::GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, float pSensitivity, float pScale, float pAmount, float pLifeTime):
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
-	mParticleClass(pParticleClass),
 	mParticleTimer(false),
 	mSensitivityFactor(1/pSensitivity),
 	mScale(pScale),
@@ -100,23 +100,13 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	const float lRollLength = lRollSpeed.GetLength();
 	const float lCollisionLength = lRelativeVelocity.GetLength();
 	lRelativeVelocity += lRollSpeed;
-	lRelativeVelocity.z += lCollisionLength*0.2f + lRollLength*0.3f;
-	lRelativeVelocity.x += Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
-	lRelativeVelocity.y += Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
-	lRelativeVelocity.z += Random::Uniform(-lCollisionLength*0.02f, +lCollisionLength*0.05f);
-	bool lEnableGravelFading;
-	CURE_RTVAR_GET(lEnableGravelFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, false);
+	lRelativeVelocity.z += lCollisionLength*0.2f + lRollLength*0.2f;
+	lRelativeVelocity += RNDVEC(lCollisionLength*0.2f);
 	if (lRelativeVelocity.GetLengthSquared() < pRelativeVelocity.GetLengthSquared()*200*200)
 	{
-		Props* lPuff = new Props(mResourceManager, mParticleClass, mUiManager);
-		pObject->GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lPuff->SetInitialTransform(TransformationF(gIdentityQuaternionF, lPosition));
-		lPuff->StartParticle(Props::PARTICLE_SOLID, lRelativeVelocity, mScale, 2, mLifeTime);
-		if (!lEnableGravelFading)
-		{
-			lPuff->SetFadeOutTime(-10.0f);
-		}
-		lPuff->StartLoading();
+		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+		const float lAngularVelocity = Random::Uniform(-5.0f, 5.0f);
+		lParticleRenderer->CreatePebble(mLifeTime, mScale, lAngularVelocity, Vector3DF(0.3f, 0.15f, 0.0f), lPosition, lRelativeVelocity);
 		mParticleTimer.ClearTimeDiff();
 	}
 }

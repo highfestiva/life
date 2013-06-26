@@ -9,6 +9,7 @@
 #include "../Lepra/Include/SystemManager.h"
 #include "../Life/LifeClient/UiGameServerManager.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
+#include "../Life/LifeServer/ServerMessageProcessor.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiLepra/Include/UiCore.h"
@@ -16,7 +17,6 @@
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "PushServer/PushServerDelegate.h"
-#include "PushServer/PushServerMessageProcessor.h"
 #include "RtVar.h"
 #include "PushDemo.h"
 #include "PushViewer.h"
@@ -74,7 +74,7 @@ void PushTicker::OnServerCreated(Life::UiGameServerManager* pServer)
 {
 	PushServerDelegate* lDelegate = new PushServerDelegate(pServer);
 	pServer->SetDelegate(lDelegate);
-	pServer->SetMessageProcessor(new PushServerMessageProcessor(pServer, lDelegate));
+	pServer->SetMessageProcessor(new Life::ServerMessageProcessor(pServer));
 }
 
 
@@ -103,9 +103,22 @@ bool PushTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
+		mUiManager->UpdateSettings();
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
 		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
-		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4);
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
+	}
+	if (lOk)
+	{
+		UiCure::RendererImageResource* lEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), true);
+		if (lEnvMap->Load())
+		{
+			if (lEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
+			{
+				UiTbc::Renderer::TextureID lTextureId = lEnvMap->GetUserData(0);
+				mUiManager->GetRenderer()->SetEnvironmentMap(lTextureId);
+			}
+		}
 	}
 	if (lOk)
 	{
@@ -229,10 +242,10 @@ void PushTicker::BeginRender(Vector3DF& pColor)
 	mSunlight->AddSunColor(pColor, 2);
 	Parent::BeginRender(pColor);
 
-	//Vector3DF lColor(1.2f, 1.2f, 1.2f);
-	//mSunlight->AddSunColor(lColor, 1);
-	const Color lFillColor = OFF_BLACK;
-	//lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
+	Vector3DF lColor(1.2f, 1.2f, 1.2f);
+	mSunlight->AddSunColor(lColor, 1);
+	Color lFillColor;
+	lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
 	mUiManager->GetRenderer()->SetOutlineFillColor(lFillColor);
 }
 
@@ -243,7 +256,7 @@ void PushTicker::PreWaitPhysicsTick()
 	{
 		return;
 	}
-	const int lAdjustmentIndex = (mPerformanceAdjustmentTicks >> 6);
+	const int lAdjustmentIndex = (mPerformanceAdjustmentTicks >> 7);
 
 	bool lEnableAutoPerformance;
 	CURE_RTVAR_GET(lEnableAutoPerformance, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEAUTOPERFORMANCE, true);
@@ -295,20 +308,6 @@ void PushTicker::PreWaitPhysicsTick()
 		break;
 		case 3:
 		{
-			bool lEnableGravelFading;
-			CURE_RTVAR_GET(lEnableGravelFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, true);
-			if (lPerformanceLoad > 1)
-			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, false);
-			}
-			else if (lPerformanceLoad < 0.75)
-			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEGRAVELFADING, true);
-			}
-		}
-		break;
-		case 4:
-		{
 			bool lEnableMassObjects;
 			CURE_RTVAR_GET(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 			if (lPerformanceLoad > 1)
@@ -345,12 +344,13 @@ bool PushTicker::QueryQuit()
 
 	if (Parent::QueryQuit())
 	{
+		PrepareQuit();
 		for (int x = 0; x < 4; ++x)
 		{
 			DeleteSlave(mSlaveArray[x], false);
 		}
 		DeleteServer();
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 		if (!mUiManager->CanRender())
 		{
 			return true;
@@ -389,7 +389,7 @@ Life::GameClientSlaveManager* PushTicker::CreateDemo(Life::GameClientMasterTicke
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
 	int pSlaveIndex, const PixelRect& pRenderArea)
 {
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 	return new PushDemo(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 #else // !Demo
 	return new PushViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);

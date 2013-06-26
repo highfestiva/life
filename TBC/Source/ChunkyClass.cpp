@@ -7,6 +7,7 @@
 #include "../Include/ChunkyClass.h"
 #include <assert.h>
 #include "../../Lepra/Include/Endian.h"
+#include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Packer.h"
 
 
@@ -168,6 +169,18 @@ const ChunkyClass::Tag* ChunkyClass::GetTag(const str& pTagName) const
 		}
 	}
 	return 0;
+}
+
+
+
+void ChunkyClass::AddPhysRoot(int pPhysIndex)
+{
+	mPhysRootSet.insert(pPhysIndex);
+}
+
+bool ChunkyClass::IsPhysRoot(int pPhysIndex) const
+{
+	return (HashUtil::FindSetObjectDefault(mPhysRootSet, pPhysIndex, -1) == pPhysIndex);
 }
 
 

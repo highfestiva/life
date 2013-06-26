@@ -67,12 +67,12 @@ ContextObject::~ContextObject()
 		mParent = 0;
 	}
 
-	for (ChildList::iterator x = mChildList.begin(); x != mChildList.end(); ++x)
+	for (Array::iterator x = mChildArray.begin(); x != mChildArray.end(); ++x)
 	{
 		(*x)->SetParent(0);
 		delete (*x);
 	}
-	mChildList.clear();
+	mChildArray.clear();
 
 	mTriggerMap.clear();
 	mSpawner = 0;
@@ -330,6 +330,17 @@ float ContextObject::GetAttributeFloatValue(const str& pAttributeName) const
 	return lFloatAttribute->GetValue();
 }
 
+void ContextObject::QuerySetChildishness(float pChildishness)
+{
+	const str lName = _T("float_childishness");
+	Cure::FloatAttribute* lAttribute = (Cure::FloatAttribute*)GetAttribute(lName);
+	if (!lAttribute)
+	{
+		lAttribute = new Cure::FloatAttribute(this, lName, 0);
+	}
+	lAttribute->SetValue(pChildishness);
+}
+
 bool ContextObject::IsAttributeTrue(const str& pAttributeName) const
 {
 	return (GetAttributeFloatValue(pAttributeName) > 0.5f);
@@ -383,13 +394,18 @@ const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
 void ContextObject::AddChild(ContextObject* pChild)
 {
 	assert(pChild->GetInstanceId() != 0);
-	if (std::find(mChildList.begin(), mChildList.end(), pChild) != mChildList.end())
+	if (std::find(mChildArray.begin(), mChildArray.end(), pChild) != mChildArray.end())
 	{
 		// Already added.
 		return;
 	}
-	mChildList.push_back(pChild);
+	mChildArray.push_back(pChild);
 	pChild->SetParent(this);
+}
+
+const ContextObject::Array& ContextObject::GetChildArray() const
+{
+	return mChildArray;
 }
 
 
@@ -427,7 +443,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 	}
 
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (!lGeometry || (lGeometry->GetBodyId() == TBC::INVALID_BODY && lGeometry->GetBodyId() == TBC::INVALID_TRIGGER))
+	if (!lGeometry || (lGeometry->GetBodyId() == TBC::INVALID_BODY && lGeometry->GetTriggerId() == TBC::INVALID_TRIGGER))
 	{
 		return;
 	}
@@ -686,7 +702,7 @@ bool ContextObject::SetEnginePower(unsigned pAspect, float pPower)
 
 float ContextObject::GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass, float pSidewaysFactor) const
 {
-	const float lMassFactor = 1/(GetMass() + pExtraMass);
+	const float lMassFactor = 1 / (GetMass() + pExtraMass);
 	const float lGravityInvertFactor = 1/pGravity.GetLength();
 	const Vector3DF lGravityDirection(pGravity * lGravityInvertFactor);
 	// High angle against direction of gravity means high impact.
@@ -745,12 +761,13 @@ void ContextObject::OnLoaded()
 {
 	if (GetPhysics() && GetManager())
 	{
-		OnTick();
-
 		// Calculate total mass.
 		assert(mTotalMass == 0);
 		TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 		mTotalMass = mPhysics->QueryTotalMass(lPhysicsManager);
+
+		OnTick();
+
 		PositionHauler::Set(mPosition, lPhysicsManager, mPhysics, mTotalMass, mAllowMoveRoot);
 
 		GetManager()->EnableTickCallback(this);
@@ -766,7 +783,7 @@ void ContextObject::OnTick()
 void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositionalData)
 {
 	mPosition.CopyData(&pPositionalData);
-	assert(mTotalMass != 0);
+	assert(mTotalMass != 0 || GetPhysics()->GetBoneGeometry(0)->GetTriggerId() != TBC::INVALID_TRIGGER);
 	PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mTotalMass, mAllowMoveRoot);
 }
 
@@ -847,7 +864,7 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 
 void ContextObject::RemoveChild(ContextObject* pChild)
 {
-	mChildList.remove(pChild);
+	mChildArray.erase(std::remove(mChildArray.begin(), mChildArray.end(), pChild), mChildArray.end());
 }
 
 void ContextObject::SetParent(ContextObject* pParent)

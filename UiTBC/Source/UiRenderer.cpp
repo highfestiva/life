@@ -907,6 +907,11 @@ bool Renderer::IsEnvMapCubeMap()
 		return false;
 }
 
+Renderer::TextureData* Renderer::GetEnvTexture() const
+{
+	return mEnvTexture;
+}
+
 Renderer::GeometryID Renderer::AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows)
 {
 	if ((int)pMaterialType < 0 || (int)pMaterialType >= Renderer::MAT_COUNT)
@@ -1035,6 +1040,43 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 		}*/
 	}
 	return (lOk);
+}
+
+bool Renderer::DisconnectGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
+{
+	bool lOk = false;
+	if (pGeometryId == INVALID_GEOMETRY)
+	{
+		assert(false);
+		return false;
+	}
+
+	GeometryTable::Iterator lGeomIter;
+	lGeomIter = mGeometryTable.Find(pGeometryId);
+	assert(lGeomIter != mGeometryTable.End());
+	GeometryData* lGeometryData = *lGeomIter;
+
+	const int lTextureCount = Texture::NUM_MAPS;
+	if (!lGeometryData->mTA)
+	{
+		assert(false);
+		return false;
+	}
+	for (int x = 0; !lOk && x < lTextureCount; ++x)
+	{
+		if (lGeometryData->mTA->mTextureID[x] == pTexture)
+		{
+			lGeometryData->mTA->mTextureID[x] = INVALID_TEXTURE;
+			for (int y = 0; y < Texture::NUM_MAPS; ++y)
+			{
+				lGeometryData->mTA->mMaps[x].mMapID[y] = INVALID_TEXTURE;
+				lGeometryData->mTA->mMaps[x].mMipMapLevelCount[y] = 0;
+			}
+			return true;
+		}
+	}
+	assert(false);
+	return false;
 }
 
 void Renderer::RemoveGeometry(GeometryID pGeometryID)
@@ -1389,11 +1431,6 @@ Renderer::GeometryTable& Renderer::GetGeometryTable()
 Renderer::ShadowVolumeTable& Renderer::GetShadowVolumeTable()
 {
 	return mShadowVolumeTable;
-}
-
-Renderer::TextureData* Renderer::GetEnvTexture() const
-{
-	return mEnvTexture;
 }
 
 Renderer::LightData* Renderer::GetLightData(LightID pLightId) const

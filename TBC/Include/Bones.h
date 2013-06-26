@@ -96,6 +96,7 @@ public:
 	const TransformationF& GetBoneObjectTransformation(int pBoneIndex) const;
 	// Same as above, but relative to the original transform.
 	const TransformationF& GetRelativeBoneTransformation(int pBoneIndex) const;
+	TransformationF& GetRelativeBoneTransformation(int pBoneIndex);
 
 	void UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation);
 

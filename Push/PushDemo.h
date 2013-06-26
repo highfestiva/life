@@ -11,7 +11,7 @@
 
 
 
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 namespace Push
 {
 

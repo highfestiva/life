@@ -258,14 +258,17 @@
     <ClCompile Include="Source\UiGameUiManager.cxx" />
     <ClCompile Include="Source\UiGravelEmitter.cpp" />
     <ClCompile Include="Source\UiIconButton.cpp" />
+    <ClCompile Include="Source\UiJetEngineEmitter.cpp" />
     <ClCompile Include="Source\UiLineGraph2d.cpp" />
     <ClCompile Include="Source\UiMachine.cpp" />
     <ClCompile Include="Source\UiMusicPlayer.cpp" />
     <ClCompile Include="Source\UiParticleLoader.cpp" />
     <ClCompile Include="Source\UiProps.cpp" />
+    <ClCompile Include="Source\UiPythonInterface.cpp" />
     <ClCompile Include="Source\UiResourceManager.cpp" />
     <ClCompile Include="Source\UiSound.cpp" />
     <ClCompile Include="Source\UiSoundReleaser.cpp" />
+    <ClCompile Include="Source\UiTerrainManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\UiGameUiManager.mm" />
@@ -275,13 +278,18 @@
     <ClInclude Include="Include\UiCollisionSoundManager.h" />
     <ClInclude Include="Include\UiCppContextObject.h" />
     <ClInclude Include="Include\UiCure.h" />
+    <ClInclude Include="Include\UiDebugRenderer.h" />
+    <ClInclude Include="Include\UiExhaustEmitter.h" />
     <ClInclude Include="Include\UiGameUiManager.h" />
+    <ClInclude Include="Include\UiGravelEmitter.h" />
     <ClInclude Include="Include\UiIconButton.h" />
+    <ClInclude Include="Include\UiJetEngineEmitter.h" />
     <ClInclude Include="Include\UiLineGraph2d.h" />
     <ClInclude Include="Include\UiMachine.h" />
     <ClInclude Include="Include\UiMusicPlayer.h" />
     <ClInclude Include="Include\UiParticleLoader.h" />
     <ClInclude Include="Include\UiProps.h" />
+    <ClInclude Include="Include\UiPythonInterface.h" />
     <ClInclude Include="Include\UiResourceManager.h" />
     <ClInclude Include="Include\UiRuntimeVariableName.h" />
     <ClInclude Include="Include\UiSound.h" />

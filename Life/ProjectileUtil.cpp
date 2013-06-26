@@ -90,7 +90,17 @@ void ProjectileUtil::BulletMicroTick(Cure::ContextObject* pBullet, float pFrameT
 	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyPosition(lBody, lTransform.GetPosition());
 	if (pAcceleration && lVelocity.GetLengthSquared() < pMaxVelocity*pMaxVelocity)
 	{
-		lVelocity += lTransform.GetOrientation() * Vector3DF(0, 0, pAcceleration*pFrameTime);
+		// TODO: fix Maya hack!!!
+		Vector3DF lForward;
+		if (lRootGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_CAPSULE || lRootGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_CYLINDER)
+		{
+			lForward.Set(0, 0, pAcceleration*pFrameTime);
+		}
+		else
+		{
+			lForward.Set(0, pAcceleration*pFrameTime, 0);
+		}
+		lVelocity += lTransform.GetOrientation() * lForward;
 		pBullet->SetRootVelocity(lVelocity);
 	}
 }

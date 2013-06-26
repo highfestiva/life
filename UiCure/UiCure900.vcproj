@@ -491,6 +491,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiJetEngineEmitter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiLineGraph2d.cpp"
 				>
 			</File>
@@ -558,6 +562,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiIconButton.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiJetEngineEmitter.h"
 				>
 			</File>
 			<File

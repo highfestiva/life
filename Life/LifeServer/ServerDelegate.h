@@ -8,6 +8,7 @@
 
 
 
+#include "../../Cure/Include/UserAccount.h"
 #include "../Life.h"
 
 
@@ -41,6 +42,7 @@ public:
 	virtual void OnLogin(Client* pClient) = 0;
 	virtual void OnLogout(Client* pClient) = 0;
 
+	virtual void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId) = 0;
 	virtual void OnLoadAvatar(Client* pClient, Cure::ContextObject* pAvatar) = 0;
 	virtual void OnLoadObject(Cure::ContextObject* pObject) = 0;
 	virtual void OnDeleteObject(Cure::ContextObject* pObject) = 0;

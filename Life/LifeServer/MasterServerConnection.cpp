@@ -46,6 +46,7 @@ const str& MasterServerConnection::GetMasterAddress() const
 void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandler, double pConnectTimeout)
 {
 	mConnectTimeout = pConnectTimeout;
+	assert(!mSocketIoHandler || mSocketIoHandler == pSocketIoHandler);	// If this is not valid, you must at least remove *this* as a FilterIo listener from the socket before replacing it.
 	mSocketIoHandler = pSocketIoHandler;
 	if (!pSocketIoHandler)
 	{
@@ -504,7 +505,14 @@ void MasterServerConnection::Close(bool pError)
 	if (mMuxSocket && mVSocket)
 	{
 		Send(_T(MASTER_SERVER_DC));
-		mSocketIoHandler->KillIoSocket(mVSocket);
+		if (mSocketIoHandler)
+		{
+			mSocketIoHandler->KillIoSocket(mVSocket);
+		}
+	}
+	if (mSocketIoHandler)
+	{
+		mSocketIoHandler->RemoveAllFilterIoSockets();
 	}
 	assert(mVSocket == 0);
 	mState = DISCONNECTED;
@@ -526,6 +534,8 @@ bool MasterServerConnection::QueryMuxValid()
 void MasterServerConnection::OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSocket)
 {
 	//assert(pSocket == mVSocket);
+	assert(mState == CONNECT || mState == CONNECTED || mState == UPLOAD_INFO || mState == DOWNLOAD_LIST ||
+		mState == OPEN_FIREWALL || mState == DISCONNECTED || mState == CONNECTING);	// Just to make sure we're not deleted and gets callbacked anyhoo.
 	if (pSocket == mVSocket || pSocket == 0)	// NULL means MUX socket is closing down!
 	{
 		if (mState == CONNECTING)

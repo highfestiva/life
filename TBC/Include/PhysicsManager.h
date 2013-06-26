@@ -122,6 +122,8 @@ public:
 	void SetTriggerListener(TriggerListener* pTriggerCallback);
 	void SetForceFeedbackListener(ForceFeedbackListener* pForceFeedbackCallback);
 
+	// The parameters scale up, so normally a value in [0,1] should suffice.
+	virtual void SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy) = 0;
 	virtual bool InitCurrentThread() = 0;
 
 	int QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
@@ -315,6 +317,7 @@ public:
 	virtual void PreSteps() = 0;
 	virtual void StepAccurate(float32 pStepSize) = 0;
 	virtual void StepFast(float32 pStepSize) = 0;
+	virtual bool IsColliding(int pForceFeedbackId) = 0;
 	virtual void PostSteps() = 0;
 
 	// Returns the bodies that were "idled" last step.

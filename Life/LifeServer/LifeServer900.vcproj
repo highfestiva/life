@@ -472,11 +472,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ServerFastProjectile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ServerMessageProcessor.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Spawner.cpp"
+				RelativePath=".\ServerMine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerProjectile.cpp"
 				>
 			</File>
 		</Filter>
@@ -522,11 +530,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ServerFastProjectile.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ServerMessageProcessor.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Spawner.h"
+				RelativePath=".\ServerMine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerProjectile.h"
 				>
 			</File>
 		</Filter>

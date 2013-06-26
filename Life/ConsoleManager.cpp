@@ -51,6 +51,8 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 	{_T("help"), COMMAND_HELP},
 	{_T("system-info"), COMMAND_SHOW_SYSTEM_INFO},
 	{_T("game-info"), COMMAND_SHOW_GAME_INFO},
+	{_T("game-hang"), COMMAND_HANG_GAME},
+	{_T("game-unhang"), COMMAND_UNHANG_GAME},
 };
 
 
@@ -360,6 +362,22 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				mLog.Infof(_T("Current frame rate:    %g"), 1/mGameManager->GetTimeManager()->GetRealNormalFrameTime());
 				mLog.Infof(_T("Absolute time:	      %g"), mGameManager->GetTimeManager()->GetAbsoluteTime());
 				mLog.Infof(_T("Current physics frame: %i"), mGameManager->GetTimeManager()->GetCurrentPhysicsFrame());
+			}
+		}
+		break;
+		case COMMAND_HANG_GAME:
+		{
+			if (mGameManager)
+			{
+				mGameManager->GetTickLock()->Acquire();
+			}
+		}
+		break;
+		case COMMAND_UNHANG_GAME:
+		{
+			if (mGameManager)
+			{
+				mGameManager->GetTickLock()->Release();
 			}
 		}
 		break;

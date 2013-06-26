@@ -101,13 +101,39 @@ void MacInputDevice::PollEvents()
 {
 	if (IsActive() == true)
 	{
+		typedef std::vector<MacInputElement*> MacElementArray;
+		MacElementArray lRelativeAxes;
 		ElementArray::iterator x;
 		for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
 		{
 			MacInputElement* lElement = (MacInputElement*)*x;
+			if (lElement->GetInterpretation() == InputElement::RELATIVE_AXIS)
+			{
+				lRelativeAxes.push_back(lElement);
+				continue;
+			}
 			pRecElement lNativeElement = lElement->GetNativeElement();
 			const int32 lValue = HIDGetElementValue(mNativeDevice, lNativeElement);
 			lElement->SetValue(lValue);
+		}
+
+		if (!lRelativeAxes.empty())
+		{
+			IOHIDEventStruct lHidEvent;
+			for (int z = 0; z < 20 && HIDGetEvent(mNativeDevice, &lHidEvent); ++z)
+			{
+				MacElementArray::iterator y = lRelativeAxes.begin();
+				for (; y != lRelativeAxes.end(); ++y)
+				{
+					MacInputElement* lElement = *y;
+					if (lElement->GetNativeElement()->cookie == lHidEvent.elementCookie)
+					{
+						const int lValue = lHidEvent.value;
+						lElement->SetValue(lValue);
+						break;
+					}
+				}
+			}
 		}
 	}
 }
@@ -135,6 +161,10 @@ void MacInputDevice::EnumElements()
 					lInterpretation = InputElement::RELATIVE_AXIS;
 				}
 				lElement = new MacInputElement(InputElement::ANALOGUE, lInterpretation, mAnalogueCount, this, lCurrentElement);
+				if (lCurrentElement->relative)
+				{
+					HIDQueueElement(mNativeDevice, lCurrentElement);
+				}
 				++mAnalogueCount;
 			}
 			break;
@@ -171,6 +201,10 @@ void MacInputDevice::EnumElements()
 								lInterpretation = InputElement::RELATIVE_AXIS;
 							}
 							lElement = new MacInputElement(InputElement::ANALOGUE, lInterpretation, mAnalogueCount, this, lCurrentElement);
+							if (lCurrentElement->relative)
+							{
+								HIDQueueElement(mNativeDevice, lCurrentElement);
+							}
 							++mAnalogueCount;
 						}
 						break;

@@ -11,6 +11,7 @@ from vec3 import *
 from vec4 import *
 import rgnode
 import chunkywriter
+import mesh
 import options
 import shape
 
@@ -61,7 +62,7 @@ class GroupReader(DefaultMAReader):
 				     "polyBridgeEdge", "polySeparate", "polyChipOff", \
 				     "deleteUVSet", "plusMinusAverage", "transformGeometry", \
 				     "cameraView", "directionalLight", "brush", \
-				     "createUVSet"]
+				     "createUVSet", "animCurveTU", "animCurveTA"]
 		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", "polyAutoProj"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
 				     "file"]
@@ -142,9 +143,10 @@ class GroupReader(DefaultMAReader):
 			print("Internal vector math failed! Terminating due to error.")
 			sys.exit(3)
 		self.makevertsrelative(group)
-		self.splitverts(group)
+		mesh.splitverts_group(group, options.options.verbose)
 		self.mesh_instance_reuse(group)
 		self.setphyspivot(group)
+
 
 ##		# Check again to assert no internal failure when splitting vertices / joining normals.
 ##		if not self.validate_mesh_group(group, checknorms=True):
@@ -323,6 +325,8 @@ class GroupReader(DefaultMAReader):
 				node.fix_attribute("rgn", n)
 			uv = node.getAttrValue("rguv0", "rguv0", None, n=None)
 			if uv:
+				if options.options.verbose:
+					print("%s has UVs." % node.getFullName())
 				for x in range(1, len(uv), 3):
 					uv[x] = -uv[x]
 				node.fix_attribute("rguv", uv)
@@ -386,10 +390,10 @@ class GroupReader(DefaultMAReader):
 						def thinness(p0, p1, p2):
 							return min(a(p0, p1, p2), a(p1, p0, p2), a(p2, p0, p1))
 						def is_best_split(i0, i1, i2, i3):      # Based on poly thinness.
-							v0 = __class__.getvertex(vs, face[i0])
-							v1 = __class__.getvertex(vs, face[i1])
-							v2 = __class__.getvertex(vs, face[i2])
-							v3 = __class__.getvertex(vs, face[i3])
+							v0 = mesh._getvertex(vs, face[i0])
+							v1 = mesh._getvertex(vs, face[i1])
+							v2 = mesh._getvertex(vs, face[i2])
+							v3 = mesh._getvertex(vs, face[i3])
 							a = min(thinness(v0, v1, v3), thinness(v2, v1, v3))
 							b = min(thinness(v1, v0, v2), thinness(v3, v0, v2))
 							return a*0.99 <= b
@@ -434,135 +438,6 @@ class GroupReader(DefaultMAReader):
 					vp[:3] = vtx[idx:idx+3]
 					vp = transform*vp
 					vtx[idx:idx+3] = vp[:3]
-
-
-	@staticmethod
-	def getvertex(vs, idx):
-		return vec3(vs[idx*3+0], vs[idx*3+1], vs[idx*3+2])
-
-
-	def splitverts(self, group):
-		"""Split mesh vertices that have different normals or UVs (=hard edges).
-		   But to complicate things, I keep vertices together that share a similar normal/UV."""
-		for node in group:
-			vs = node.get_fixed_attribute("rgvtx", optional=True)
-			ts = node.get_fixed_attribute("rgtri", optional=True)
-			ns = node.get_fixed_attribute("rgn", optional=True)
-			uvs = node.get_fixed_attribute("rguv", optional=True)
-			#if uvs:
-			#	print("UVs before split:")
-			#	print(uvs)
-			if ns:
-				def textureuv(idx):
-					if uvs:
-						idx *= 2
-						return (uvs[idx], uvs[idx+1])
-					return (0.0, 0.0)
-				def normal(idx):
-					idx *= 3
-					return vec3(ns[idx], ns[idx+1], ns[idx+2])
-				def angle(n1, n2):
-					m1, m2 = n1.max(), n2.max()
-					if m1 == 0 or m2 == 0:
-						if m1 == 0 and m2 == 0:
-							return 0
-						return 180
-					return math.degrees(math.fabs(vec3.acos(n1*n2)))
-				def angle_fast(n1, n2x, n2y, n2z):
-					x = n1.x*n2x + n1.y*n2y + n1.z*n2z
-					if x < 0.65:    # Ugly, hard-coded optimization.
-						return 0.7
-					return vec3.acos(x)
-				def uvdiff_sqr(t1, t2):
-					dx = t1[0]-t2[0]
-					dy = t1[1]-t2[1]
-					return dx*dx + dy*dy
-
-				original_vsc = len(vs)
-
-				# Create a number of UNIQUE empty lists. Hence the for loop.
-				shared_indices = []
-				for u in range(len(vs)//3):
-					shared_indices.append([])
-
-				end = len(ts)
-				x = 0
-				while x < end:
-					shared_indices[ts[x]] += [x]
-					x += 1
-
-				# Normalize normal vectors (length=1) for optimization purposes.
-				ncnt = len(ns)
-				x = 0
-				while x < ncnt:
-					l = ns[x]*ns[x] + ns[x+1]*ns[x+1] + ns[x+2]*ns[x+2]
-					if l:
-						f = 1 / math.sqrt(l)
-						ns[x]   *= f
-						ns[x+1] *= f
-						ns[x+2] *= f
-					x += 3
-
-				x = 0
-				ang_cmp = 40*math.pi/180
-				while x < end:
-					c = normal(shared_indices[ts[x]][0])
-					d = textureuv(shared_indices[ts[x]][0])
-					split = []
-					for s in shared_indices[ts[x]][1:]:
-						#if angle(c, normal(s)) > 40 or uvdiff_sqr(d, textureuv(s)) > 0.0001:
-						i = s*3
-						if angle_fast(c, ns[i],ns[i+1],ns[i+2]) > ang_cmp or uvdiff_sqr(d, textureuv(s)) > 0.0001:
-							split += [s]
-					# Push all the once that we don't join together at the end.
-					if split:
-						new_index = len(vs)//3
-						v = __class__.getvertex(vs, ts[x])
-						vs += v[:]
-						shared_indices += [[]]
-						for s in split:
-							shared_indices[ts[s]].remove(s)
-							ts[s] = new_index
-							shared_indices[ts[s]] += [s]
-						if len(shared_indices) != len(vs)/3:
-							print("Internal error: normals/UVs no longer corresponds to vertices!")
-							sys.exit(4)
-					x += 1
-
-				normals = [0.0]*len(vs)
-				textureuvs = [0.0]*(len(vs)*2//3)
-				for join_indices in shared_indices:
-					# Join 'em by simply adding normals together and normalizing.
-					n = vec3(0,0,0)
-					uv = [0.0, 0.0]
-					cnt = 0;
-					for j in join_indices:
-						n += normal(j)
-						uv2 = textureuv(j)
-						uv[0] += uv2[0]
-						uv[1] += uv2[1]
-						cnt += 1
-					idx = ts[join_indices[0]]
-					n_idx = idx*3+0
-					uv_idx = idx*2+0
-					try:
-						normals[n_idx:n_idx+3] = n.normalize()[:]
-					except ZeroDivisionError:
-						pass
-					try:
-						textureuvs[uv_idx:uv_idx+2] = [uv[0]/cnt, uv[1]/cnt]
-					except ZeroDivisionError:
-						pass
-				node.fix_attribute("rgvtx", vs)
-				node.fix_attribute("rgtri", ts)
-				node.fix_attribute("rgn", normals)
-				if uvs:
-					node.fix_attribute("rguv", textureuvs)
-					#print("UVs after split:")
-					#print(textureuvs)
-				if options.options.verbose:
-					print("Mesh %s was made %.1f times larger due to (hard?) edges, and %.1f %% of worst-case size." %
-					      (node.getName(), len(normals)/original_vsc-1, len(normals)*100/len(ns)))
 
 
 	def mesh_instance_reuse(self, group):
@@ -621,6 +496,7 @@ class GroupReader(DefaultMAReader):
 				specular = [0.5]*3
 				shininess = 0.0
 				alpha = 1.0
+				smooth = node.get_fixed_attribute("smooth", optional=True, default=True)
 				textureNames = []
 				shaderName = node.get_fixed_attribute("shader", optional=True, default="plain")
 
@@ -703,6 +579,7 @@ class GroupReader(DefaultMAReader):
 ##					print("Error:", node, node.mat.ambient, node.mat.diffuse, node.mat.specular)
 				node.mat.shininess = shininess
 				node.mat.alpha     = alpha
+				node.mat.smooth    = smooth
 				node.mat.textures  = textureNames
 				node.mat.shader    = shaderName
 				if textureNames and options.options.verbose:
@@ -789,8 +666,13 @@ class GroupReader(DefaultMAReader):
 			if node.getName().startswith("m_") and node.nodetype == "transform":
 				node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node, "m_", group, False)))
 				node.phys_children = self._listchildnodes(node, "phys_", group, False)
+				for phys in node.phys_children:
+					if phys.getName()[5:] == node.getName()[2:]:
+						node.phys_children.remove(phys)
+						node.phys_children = [phys] + node.phys_children
+						break
 				if options.options.verbose:
-					print("Phys children are", node.phys_children)
+					print("Phys children to %s are %s." % (node, node.phys_children))
 		return isGroupValid
 
 				
@@ -975,7 +857,7 @@ class GroupReader(DefaultMAReader):
 
 			elif section.startswith("tag:"):
 				tagtype = stripQuotes(config.get(section, "type"))
-				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "anything"]
+				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "engine_sound", "engine_mesh_offset", "exhaust", "jet_engine_emitter", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "textures", "anything"]
 				allApplied &= tagOk
 				if not tagOk:
 					print("Error: invalid tag type '%s'." % tagtype)
@@ -996,6 +878,26 @@ class GroupReader(DefaultMAReader):
 							if not (cn.nodetype.startswith(cntype)):
 								print("Error: node %s not of %s type, but %s." % (cn.getName(), cntype, cn.nodetype))
 					return ok
+				def check_name(l, required, disallowed):
+					ok = True
+					for e in l:
+						connected_to = self._regexpnodes(e, group)
+						for cn in connected_to:
+							for req in required:
+								if cn.getFullName().find(req) < 0:
+									print("Error: list containing node %s requires name to contain %s." % (cn.getName(), req))
+									ok = False
+							for dis in disallowed:
+								if cn.getFullName().find(dis) >= 0:
+									print("Error: list containing node %s disallows name containing %s." % (cn.getName(), dis))
+									ok = False
+					return ok
+				def check_connected_phys(l):
+					return check_connected_to(l, "transform") and \
+							check_name(l, ["phys_"], ["Shape"])
+				def check_connected_mesh(l):
+					return check_connected_to(l, "transform") and \
+							check_name(l, ["m_"], ["phys_", "Shape"])
 				def check_connected_transform(l):
 					return check_connected_to(l, "transform")
 				def check_connected_engine(l):
@@ -1003,9 +905,9 @@ class GroupReader(DefaultMAReader):
 				required = [("type", lambda x: type(x) == str),
 					    ("float_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: isinstance(i, (int, float)), x)))),
 					    ("string_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: type(i) == str, x)))),
-					    ("phys_list", check_connected_transform),
+					    ("phys_list", check_connected_phys),
 					    ("engine_list", check_connected_engine),
-					    ("mesh_list", check_connected_transform)]
+					    ("mesh_list", check_connected_mesh)]
 				for name, check in required:
 					allApplied &= self._query_attribute(node, name, check)[0]
 				group.append(node)
@@ -1242,16 +1144,18 @@ class GroupReader(DefaultMAReader):
 
 
 	def adjustorientation(self, group):
-		for node in group:
-			if node.getName().startswith("phys_") and node.nodetype == "transform":
-				shape.Shape(node, node.shape)
+		for phys in group:
+			if phys.getName().startswith("phys_") and phys.nodetype == "transform":
+				shape.Shape(phys, phys.shape)
 				# Some primitives have different orientation in the editor compared to
-				# the runtime environment (Maya along Y-axis, RGE along Z-axis).
-				if node.pointup:
-					#print("%s before:\n%s." % (node.getName(), node.gettransformto(None)))
-					del(node.localmat4)
-					node.gettransformto(None)
-					#print("%s after:\n%s." % (node.getName(), node.gettransformto(None)))
+				# the runtime environment (Maya along Y-axis, PDE along Z-axis).
+				if phys.pointup:
+					#print("\n".join(dir(phys)))
+					#print(phys.mesh_ref, phys.loose_mesh_ref, phys.phys_root, phys._parents, phys.nodetype)
+					#print("%s before:\n%s." % (phys.getName(), phys.get_final_local_transform()))
+					del(phys.localmat4)
+					phys.gettransformto(None)
+					#print("%s after:\n%s." % (phys.getName(), phys.get_final_local_transform()))
 		#shape.disable_ortho_check = True
 
 
@@ -1294,6 +1198,9 @@ class GroupReader(DefaultMAReader):
 			#print(parent_branch_xform.inverse())
 			#print(node.getName(), "is trying to work out localmat4 with xp = ", node.xformparent, "phroot =", phroot.getName(), "and phxp =", phroot.xformparent)
 			node.localmat4 = parent_branch_xform.inverse() * own_branch_xform
+			if node.pointup and not node.loose_mesh_ref:
+				# TODO: might be wrong rotation order? Perhaps this should happen before... some other stuff.
+				node.localmat4.rotate(math.pi/2, vec3(1,0,0))
 			node.xformparent = phroot
 			#sys.exit(1)
 			

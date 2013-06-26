@@ -1210,7 +1210,7 @@ Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 	}
 	if (lMachine)
 	{
-		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 3, 0.6f, 2.0f));
+		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 	}
 	return lMachine;
 }
@@ -1263,7 +1263,7 @@ bool Game::InitializeUniverse()
 	if (lOk)
 	{
 		delete mLevel;
-		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, _T("mud_particle_01"), 1, 1, 10, 2);
+		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 1, 1, 10, 2);
 		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager, lGravelParticleEmitter);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);

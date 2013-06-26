@@ -279,22 +279,32 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BombPlane.cpp" />
+    <ClCompile Include="GameServerLogic.cpp" />
+    <ClCompile Include="Npc.cpp" />
     <ClCompile Include="PushServer.cpp" />
+    <ClCompile Include="PushServerConsole.cpp" />
     <ClCompile Include="PushServerDelegate.cpp" />
     <ClCompile Include="PushServerMessageProcessor.cpp" />
     <ClCompile Include="PushServerTicker.cpp" />
-    <ClCompile Include="ServerGrenade.cpp" />
+    <ClCompile Include="ServerFastProjectile.cpp" />
     <ClCompile Include="..\Explosion.cpp" />
-    <ClCompile Include="..\PushBarrel.cpp" />
+    <ClCompile Include="ServerMine.cpp" />
+    <ClCompile Include="ServerProjectile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BombPlane.h" />
+    <ClInclude Include="GameServerLogic.h" />
+    <ClInclude Include="Npc.h" />
+    <ClInclude Include="PushServerConsole.h" />
     <ClInclude Include="PushServerDelegate.h" />
     <ClInclude Include="PushServerMessageProcessor.h" />
     <ClInclude Include="PushServerTicker.h" />
-    <ClInclude Include="ServerGrenade.h" />
+    <ClInclude Include="ServerFastProjectile.h" />
     <ClInclude Include="ServerLauncher.h" />
     <ClInclude Include="..\Explosion.h" />
-    <ClInclude Include="..\PushBarrel.h" />
+    <ClInclude Include="ServerMine.h" />
+    <ClInclude Include="ServerProjectile.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Cure\Cure10.vcxproj">

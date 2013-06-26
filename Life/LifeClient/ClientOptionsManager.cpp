@@ -78,6 +78,8 @@ void ClientOptionsManager::DoRefreshConfiguration()
 		KeyValue(_T(RTVAR_CTRL_STEER_DOWN3D), &mSteeringControl.mControl[Steering::CONTROL_DOWN3D]),
 		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mSteeringControl.mControl[Steering::CONTROL_HANDBRAKE]),
 		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mSteeringControl.mControl[Steering::CONTROL_BREAK]),
+		KeyValue(_T(RTVAR_CTRL_STEER_YAW), &mSteeringControl.mControl[Steering::CONTROL_YAW_ANGLE]),
+		KeyValue(_T(RTVAR_CTRL_STEER_PITCH), &mSteeringControl.mControl[Steering::CONTROL_PITCH_ANGLE]),
 		KeyValue(_T(RTVAR_CTRL_UI_CAMLEFT), &mCamControl.mControl[CamControl::CAMDIR_LEFT]),
 		KeyValue(_T(RTVAR_CTRL_UI_CAMRIGHT), &mCamControl.mControl[CamControl::CAMDIR_RIGHT]),
 		KeyValue(_T(RTVAR_CTRL_UI_CAMFORWARD), &mCamControl.mControl[CamControl::CAMDIR_FORWARD]),
@@ -105,27 +107,28 @@ bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 		if (lIsRelative)
 		{
 			lValue *= mMouseSensitivity * 0.03f;	// Relative values are more sensitive.
+			lValueSet |= SetValue(lInputElementName, lValue, true);
 		}
 		else if (Math::IsEpsEqual(lValue, 0.0f, 0.1f))
 		{
 			// Clamp absolute+analogue to neutral when close enough.
-			lValueSet = SetValue(lInputElementName+_T("+"), 0, false);
+			lValueSet |= SetValue(lInputElementName+_T("+"), 0, false);
 			SetValue(lInputElementName+_T("-"), 0, false);
 		}
 		if (lValue > 0)
 		{
-			lValueSet = SetValue(lInputElementName+_T("+"), lValue, lIsRelative);
+			lValueSet |= SetValue(lInputElementName+_T("+"), lValue, lIsRelative);
 			SetValue(lInputElementName+_T("-"), 0, false);
 		}
 		else if (lValue < 0)
 		{
-			lValueSet = SetValue(lInputElementName+_T("-"), -lValue, lIsRelative);
+			lValueSet |= SetValue(lInputElementName+_T("-"), -lValue, lIsRelative);
 			SetValue(lInputElementName+_T("+"), 0, false);
 		}
 	}
 	else
 	{
-		lValueSet = SetValue(lInputElementName, lValue, false);
+		lValueSet |= SetValue(lInputElementName, lValue, false);
 	}
 	return lValueSet;
 }
@@ -167,6 +170,8 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.NUMPAD_1"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_0"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.END"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
@@ -192,6 +197,8 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Device0.AbsoluteAxis0+"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Device0.Button5"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE0, _T("Device0.Button2"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
@@ -217,6 +224,8 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.Q"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.E"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.LCTRL"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
@@ -242,6 +251,8 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.NUMPAD_7"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_9"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T("Key.NUMPAD_7"));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
+			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.NUMPAD_PLUS"));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
 			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));

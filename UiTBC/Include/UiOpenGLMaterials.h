@@ -33,7 +33,7 @@ public:
 
 	virtual Material::RemoveStatus RemoveGeometry(TBC::GeometryBase* pGeometry);
 
-	GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
+	static GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
 
 	void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
 	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, Renderer* pRenderer);
@@ -43,8 +43,6 @@ public:
 
 protected:
 	void UpdateTextureMatrix(TBC::GeometryBase* pGeometry);
-
-	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
 };
 
 
@@ -90,6 +88,8 @@ public:
 	inline virtual ~OpenGLMatSingleColorBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	static void DoPreRender();
+	static void DoPostRender();
 	virtual void PreRender();
 	virtual void PostRender();
 
@@ -173,12 +173,11 @@ public:
 	virtual void PostRender();
 	void BindTexture(int pTextureID, int pMipMapLevelCount);
 
+	static void DoRawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
+
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
-
-	GLint mTextureParamMin;
-	GLint mTextureParamMag;
 
 private:
 	LOG_CLASS_DECLARE();
@@ -251,32 +250,33 @@ protected:
 
 
 
-class OpenGLMatSingleColorEnvMapSolid: public OpenGLMatSingleColorSolid
+class OpenGLMatSingleColorEnvMapSolid: public OpenGLMatSingleTextureSolid
 {
-	typedef OpenGLMatSingleColorSolid Parent;
+	typedef OpenGLMatSingleTextureSolid Parent;
 public:
 	inline OpenGLMatSingleColorEnvMapSolid(OpenGLRenderer* pRenderer,
 					       Material* pFallBackMaterial) :
-		OpenGLMatSingleColorSolid(pRenderer, Material::DEPTHSORT_F2B, pFallBackMaterial)
+		Parent(pRenderer, Material::DEPTHSORT_F2B, pFallBackMaterial)
 	{
 	}
 	inline OpenGLMatSingleColorEnvMapSolid(OpenGLRenderer* pRenderer,
 					       Material::DepthSortHint pSortHint,
 					       Material* pFallBackMaterial) :
-		OpenGLMatSingleColorSolid(pRenderer, pSortHint, pFallBackMaterial)
+		Parent(pRenderer, pSortHint, pFallBackMaterial)
 	{
 	}
 
 	inline virtual ~OpenGLMatSingleColorEnvMapSolid(){}
 
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
+	virtual void PreRender();
+	virtual void PostRender();
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	bool mSingleColorPass;
-	GLint mTextureParamMin;
-	GLint mTextureParamMag;
 
 private:
 	LOG_CLASS_DECLARE();
@@ -297,6 +297,8 @@ public:
 	inline virtual ~OpenGLMatSingleColorEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void PreRender();
+	virtual void PostRender();
 };
 
 

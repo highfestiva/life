@@ -7,8 +7,14 @@
 #ifndef CURE_TEST_WITHOUT_UI
 
 #include <assert.h>
+#include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/GameTicker.h"
+#include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Random.h"
+#include "../Include/UiCppContextObject.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiResourceManager.h"
 #include "../Include/UiCure.h"
@@ -32,8 +38,27 @@ public:
 	bool TestAtom();
 	bool TestClass();
 	bool TestStress();
+	bool TestReloadContextObject();
 
 private:
+	class TickRM
+	{
+	public:
+		inline TickRM(Cure::ResourceManager* pRM, double pSleepTime = 0.001)
+		{
+			const int lTickCount = 2;
+			for (int x = 0; x < lTickCount; ++x)
+			{
+				pRM->Tick();
+			}
+			Lepra::Thread::Sleep(pSleepTime);
+			for (int x = 0; x < lTickCount; ++x)
+			{
+				pRM->Tick();
+			}
+		}
+	};
+
 	void RendererImageLoadCallback(UiCure::UserRendererImageResource* pResource)
 	{
 		LoadCallback(pResource);
@@ -100,6 +125,7 @@ private:
 			++gResourceLoadErrorCount;
 		}
 	}
+	bool InternalLoadTransformation(Cure::ContextManager& pContextManager);
 
 	Cure::ResourceManager* mResourceManager;
 	UiCure::GameUiManager* mUiManager;
@@ -109,6 +135,59 @@ private:
 
 	LOG_CLASS_DECLARE();
 };
+
+
+
+class TestGameTicker: public Cure::GameTicker
+{
+public:
+	typedef Cure::GameTicker Parent;
+
+	TestGameTicker():
+		Parent(1, 1, 1)
+	{
+	}
+
+	virtual bool Initialize() {return true;}
+	virtual bool Tick() {return true;}
+	virtual void PollRoundTrip() {}
+	virtual float GetTickTimeReduction() const {return 0;}
+	virtual float GetPowerSaveAmount() const {return 0;}
+	virtual void WillMicroTick(float pTimeDelta) {(void)pTimeDelta;}
+	virtual void DidPhysicsTick() {}
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID, int, int, const Vector3DF&) {}
+	virtual void OnForceApplied(int, int,
+		TBC::PhysicsManager::BodyID, TBC::PhysicsManager::BodyID,
+		const Vector3DF&, const Vector3DF&,
+		const Vector3DF&, const Vector3DF&) {}
+};
+
+
+
+class TestGameManager: public Cure::GameManager
+{
+public:
+	typedef Cure::GameManager Parent;
+
+	TestGameManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
+		Parent(pTime, pVariableScope, pResourceManager)
+	{
+	}
+
+	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const {(void)pClassId; return 0;}
+	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk) {(void)pObject; (void)pOk;}
+	virtual void OnCollision(const Vector3DF&, const Vector3DF&, const Vector3DF&,
+		Cure::ContextObject*, Cure::ContextObject*,
+		TBC::PhysicsManager::BodyID, TBC::PhysicsManager::BodyID) {}
+	virtual bool OnPhysicsSend(Cure::ContextObject* pObject) {(void)pObject; return true;}
+	virtual bool OnAttributeSend(Cure::ContextObject* pObject) {(void)pObject; return true;}
+	virtual bool IsServer() {return false;}
+	virtual void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned) {}
+	virtual void SendDetach(Cure::ContextObject*, Cure::ContextObject*) {}
+	virtual void TickInput() {}
+};
+
+
 
 ResourceTest::ResourceTest()
 {
@@ -227,7 +306,7 @@ bool ResourceTest::TestClass()
 		gResourceLoadCount = 0;
 		gResourceLoadErrorCount = 0;
 		UiCure::UserClassResource lClass(mUiManager);
-		lClass.Load(mResourceManager, _T("Data/tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
+		lClass.Load(mResourceManager, _T("UI:Data/tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
 		for (int x = 0; gResourceLoadCount != 12 && x < 100; ++x)
 		{
 			Lepra::Thread::Sleep(0.01);
@@ -259,24 +338,6 @@ bool ResourceTest::TestStress()
 {
 	str lContext;
 	bool lTestOk = true;
-
-	class TickRM
-	{
-	public:
-		inline TickRM(Cure::ResourceManager* pRM, double pSleepTime = 0.001)
-		{
-			const int lTickCount = 2;
-			for (int x = 0; x < lTickCount; ++x)
-			{
-				pRM->Tick();
-			}
-			Lepra::Thread::Sleep(pSleepTime);
-			for (int x = 0; x < lTickCount; ++x)
-			{
-				pRM->Tick();
-			}
-		}
-	};
 
 	if (lTestOk)
 	{
@@ -311,27 +372,29 @@ bool ResourceTest::TestStress()
 			if ((x&7) == 0)
 			{
 				lTestOk = false;
+				size_t lCount = 0;
 				for (int i = 0; i < 250 && !lTestOk; ++i)
 				{
 					TickRM lTick(mResourceManager);
-					const size_t lCount = mResourceManager->QueryResourceCount();
+					lCount = mResourceManager->QueryResourceCount();
 					lTestOk = (lCount <= 2);
 				}
 				assert(lTestOk);
 			}
 		}
+		TickRM lTick(mResourceManager);
 	}
 
 	if (lTestOk)
 	{
 		lContext = _T("caching 1");
-		lTestOk = (mResourceManager->QueryCachedResourceCount() == 1);
+		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("clearing cache 1");
-		lTestOk = (mResourceManager->ForceFreeCache() == 1);
+		lTestOk = (mResourceManager->ForceFreeCache() == 0);
 		assert(lTestOk);
 		if (lTestOk)
 		{
@@ -371,7 +434,7 @@ bool ResourceTest::TestStress()
 	if (lTestOk)
 	{
 		lContext = _T("caching 2");
-		lTestOk = (mResourceManager->QueryCachedResourceCount() == 1);
+		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -396,7 +459,7 @@ bool ResourceTest::TestStress()
 			for (int y = 0; y < lAddCount; ++y)
 			{
 				UiCure::UserClassResource* lClass = new UiCure::UserClassResource(mUiManager);
-				lClass->LoadUnique(mResourceManager, _T("Data/tractor_01.class"),
+				lClass->LoadUnique(mResourceManager, _T("UI:Data/tractor_01.class"),
 					UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::DumbClassLoadCallback));
 				lResources.push_back(lClass);
 			}
@@ -404,7 +467,7 @@ bool ResourceTest::TestStress()
 			assert(c == (size_t)(x*(lAddCount-lDecCount)+lAddCount));
 			for (int z = 0; z < lDecCount; ++z)
 			{
-				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
+				int lDropIndex = Lepra::Random::GetRandomNumber()%lResources.size();
 				ClassList::reverse_iterator u = lResources.rbegin();
 				for (int v = 0; v < lDropIndex; ++u, ++v)
 					;
@@ -483,7 +546,7 @@ bool ResourceTest::TestStress()
 			assert(c <= 2);
 			for (int z = 0; z < lDecCount; ++z)
 			{
-				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
+				int lDropIndex = Lepra::Random::GetRandomNumber()%lResources.size();
 				MeshList::reverse_iterator u = lResources.rbegin();
 				for (int v = 0; v < lDropIndex; ++u, ++v)
 					;
@@ -548,6 +611,78 @@ bool ResourceTest::TestStress()
 	return (lTestOk);
 }
 
+/// This is a pretty complete application test, with game tickers, managers, loading and so forth. Wow!
+bool ResourceTest::TestReloadContextObject()
+{
+	str lContext;
+	bool lTestOk = true;
+
+	delete mResourceManager;
+	mResourceManager = new Cure::ResourceManager(1, _T("Data/"));
+	mResourceManager->InitDefault();
+	TestGameTicker lTicker;
+	Cure::TimeManager lTimeManager;
+	TestGameManager lGameManager(&lTimeManager, new Cure::RuntimeVariableScope(UiCure::GetSettings()), mResourceManager);
+	lGameManager.SetTicker(&lTicker);
+	Cure::ContextManager lContextManager(&lGameManager);
+	if (lTestOk)
+	{
+		lContext = _T("init transformation suxx");
+		lTestOk = InternalLoadTransformation(lContextManager);
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("reload transformation suxx");
+		lTestOk = InternalLoadTransformation(lContextManager);
+		assert(lTestOk);
+	}
+
+	ReportTestResult(mLog, _T("ReloadTransform"), lContext, lTestOk);
+	return (lTestOk);
+}
+
+bool ResourceTest::InternalLoadTransformation(Cure::ContextManager& pContextManager)
+{
+	// Generate orientation to set and to test against.
+	QuaternionF q;
+	q.RotateAroundOwnX(PIF/5);
+	q.RotateAroundOwnY(PIF/5);
+	q.RotateAroundOwnZ(PIF/5);
+	QuaternionF lFlip;
+	lFlip.RotateAroundOwnZ(PIF);
+	lFlip.RotateAroundOwnX(PIF/2);
+	QuaternionF Q = -(q * lFlip);
+
+	UiCure::CppContextObject lObject(mResourceManager, _T("hover_tank_01"), mUiManager);
+	pContextManager.AddLocalObject(&lObject);
+	TransformationF lTransform(q, Vector3DF(1, 2, 3));
+	lObject.SetInitialTransform(lTransform);
+	lObject.StartLoading();
+	for (int x = 0; x < 10 && !lObject.IsLoaded(); ++x)
+	{
+		TickRM lTick(mResourceManager);
+	}
+	bool lTestOk = lObject.IsLoaded();
+	assert(lTestOk);
+	if (lTestOk)
+	{
+		lTestOk = (lObject.GetPosition() == Vector3DF(1, 2, 3));
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		QuaternionF r = lObject.GetOrientation();
+		lTestOk = (Math::IsEpsEqual(r.mA, Q.mA, 0.1f) &&
+			Math::IsEpsEqual(r.mB, Q.mB, 0.1f) &&
+			Math::IsEpsEqual(r.mC, Q.mC, 0.1f) &&
+			Math::IsEpsEqual(r.mD, Q.mD, 0.1f));
+		assert(lTestOk);
+	}
+	return lTestOk;
+}
+
+
 LOG_CLASS_DEFINE(TEST, ResourceTest);
 
 
@@ -571,6 +706,10 @@ bool TestUiCure()
 	if (lTestOk)
 	{
 		lTestOk = lResourceTest.TestStress();
+	}
+	if (lTestOk)
+	{
+		lTestOk = lResourceTest.TestReloadContextObject();
 	}
 	return (lTestOk);
 }

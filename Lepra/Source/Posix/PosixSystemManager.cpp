@@ -172,6 +172,16 @@ void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBod
 		::exit(0);
 	}
 }
+
+str SystemManager::GetHwName()
+{
+	char lMachine[4096];
+	size_t lSize = sizeof(lMachine);
+	::memset(lMachine, 0, lSize);
+	::sysctlbyname("hw.machine", lMachine, &lSize, 0, 0);
+	return strutil::Encode(astr(lMachine));
+}
+
 unsigned SystemManager::GetLogicalCpuCount()
 {
 	return GetPhysicalCpuCount();

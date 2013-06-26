@@ -33,18 +33,29 @@ bool GeometryReference::IsGeometryReference()
 
 const TransformationF& GeometryReference::GetOffsetTransformation() const
 {
-	return mOffset;
+	return mOriginalOffset;
 }
 
 void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)
 {
-	mOffset = pOffset;
+	mOriginalOffset = pOffset;
 	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 
 void GeometryReference::AddOffset(const Vector3DF& pOffset)
 {
-	mOffset.GetPosition() += pOffset;
+	mOriginalOffset.GetPosition() += pOffset;
+	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
+}
+
+const TransformationF& GeometryReference::GetExtraOffsetTransformation() const
+{
+	return mExtraOffset;
+}
+
+void GeometryReference::SetExtraOffsetTransformation(const TransformationF& pOffset)
+{
+	mExtraOffset = pOffset;
 	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 
@@ -54,8 +65,8 @@ const TransformationF& GeometryReference::GetTransformation()
 	{
 /*#ifdef LEPRA_DEBUG
 		TransformationF lReturnTransformation = GetBaseTransformation();
-		lReturnTransformation.GetPosition() += lReturnTransformation.GetOrientation() * mOffset.GetPosition();
-		lReturnTransformation.GetOrientation() *= mOffset.GetOrientation();
+		lReturnTransformation.GetPosition() += lReturnTransformation.GetOrientation() * mOriginalOffset.GetPosition();
+		lReturnTransformation.GetOrientation() *= mOriginalOffset.GetOrientation();
 		assert(lReturnTransformation == mReturnTransformation);
 #endif // Debug.*/
 		return mReturnTransformation;
@@ -64,9 +75,13 @@ const TransformationF& GeometryReference::GetTransformation()
 
 	mReturnTransformation = GetBaseTransformation();
 	Vector3DF lDelta;
-	mReturnTransformation.GetOrientation().FastRotatedVector(mReturnTransformation.GetOrientation().GetConjugate(), lDelta, mOffset.GetPosition());
+	mReturnTransformation.GetOrientation().FastRotatedVector(
+		mReturnTransformation.GetOrientation().GetConjugate(),
+		lDelta,
+		mOriginalOffset.GetPosition() + mExtraOffset.GetPosition());
 	mReturnTransformation.GetPosition() += lDelta;
-	mReturnTransformation.GetOrientation() *= mOffset.GetOrientation();
+	mReturnTransformation.GetOrientation() *= mOriginalOffset.GetOrientation();
+	mReturnTransformation.GetOrientation() *= mExtraOffset.GetOrientation();
 	return mReturnTransformation;
 }
 

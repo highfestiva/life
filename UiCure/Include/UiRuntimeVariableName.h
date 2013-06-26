@@ -16,13 +16,13 @@
 #define RTVAR_UI_DISPLAY_FREQUENCY		"Ui.Display.Frequency"
 #define RTVAR_UI_DISPLAY_FULLSCREEN		"Ui.Display.FullScreen"
 #define RTVAR_UI_DISPLAY_ORIENTATION		"Ui.Display.Orientation"
+#define RTVAR_UI_DISPLAY_PHYSICALSIZE		"Ui.Display.PhysicalSize"
 #define RTVAR_UI_DISPLAY_ENABLEVSYNC		"Ui.Display.EnableVSync"
 #define RTVAR_UI_DISPLAY_RENDERENGINE		"Ui.Display.RenderEngine"
 
 #define RTVAR_UI_3D_ENABLELIGHTS		"Ui.3D.EnableLights"
 #define RTVAR_UI_3D_ENABLECLEAR			"Ui.3D.EnableClear"
 #define RTVAR_UI_3D_ENABLEAUTOPERFORMANCE	"Ui.3D.EnableAutoPerformance"
-#define RTVAR_UI_3D_ENABLEGRAVELFADING		"Ui.3D.EnableGravelFading"
 #define RTVAR_UI_3D_ENABLEMASSOBJECTS		"Ui.3D.EnableMassObjects"
 #define RTVAR_UI_3D_ENABLEMASSOBJECTFADING	"Ui.3D.EnableMassObjectFading"
 #define RTVAR_UI_3D_ENABLEPARTICLES		"Ui.3D.EnableParticles"
@@ -50,6 +50,7 @@
 #define RTVAR_UI_2D_PAINTMODE			"Ui.2D.PaintMode"
 #define RTVAR_UI_2D_FONT			"Ui.2D.Font"
 #define RTVAR_UI_2D_FONTHEIGHT			"Ui.2D.FontHeight"
+#define RTVAR_UI_2D_FONTFLAGS			"Ui.2D.FontFlags"
 
 #define RTVAR_UI_SOUND_ENGINE			"Ui.Sound.Engine"
 #define RTVAR_UI_SOUND_ROLLOFF			"Ui.Sound.RollOff"

@@ -65,16 +65,10 @@ class Shape:
 			self.type = "cylinder"
 			scalenode.pointup = True
 			r = shapenode.getAttrValue("r", "r", None, default=1.0)*v0.length()
-			# Reduce height the radius in each end, so it won't bulge out.
-			h = shapenode.getAttrValue("h", "h", None, default=2.0)*v0.length() - 2*r
-			if r <= 0 or h <= 0:
-				print("Error: the %s shape is used as a capsule for %s, and must have a greater height than radius*2. (r=%f, h=%f)" %
-				      (shapenode.nodetype, scalenode.getFullName(), r, h))
+			h = shapenode.getAttrValue("h", "h", None, default=2.0)*v0.length()
 			d += [r, h]
-			#print("Capsule r, h is %s." % str(d))
 		elif shapenode.nodetype == "mesh":
 			self.type = "mesh"
-			#print(shapenode._fixattr)
 			vtx = shapenode.get_fixed_attribute("rgvtx")
 			tri = shapenode.get_fixed_attribute("rgtri")
 			d += [len(vtx)//3, len(tri)//3]
@@ -87,6 +81,14 @@ class Shape:
 		override_shapetype = scalenode.get_fixed_attribute("override_shapetype", optional=True)
 		if override_shapetype:
 			self.type = override_shapetype
+			if self.type == "capsule":
+				r = shapenode.getAttrValue("r", "r", None, default=1.0)*v0.length()
+				# Reduce height by the radius in each end, so it won't bulge out.
+				h = shapenode.getAttrValue("h", "h", None, default=2.0)*v0.length() - 2*r
+				if r <= 0 or h <= 0:
+					print("Error: the %s shape is used as a capsule for %s, and must have a greater height than radius*2. (r=%f, h=%f)" %
+						(shapenode.nodetype, scalenode.getFullName(), r, h))
+				d[-1] = h
 
 		if not disable_ortho_check and check_orthonormal:
 			if math.fabs(v0.length()-v1.length()) > 0.1 or math.fabs(v0.length()-v2.length()) > 0.1 or math.fabs(v1.length()-v2.length()) > 0.1:

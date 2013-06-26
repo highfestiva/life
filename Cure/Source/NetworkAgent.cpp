@@ -133,7 +133,6 @@ bool NetworkAgent::PlaceInSendBuffer(bool pSafe, VSocket* pSocket, Packet* pPack
 	if (!pSocket)
 	{
 		mLog.AError("PlaceInSendBuffer(): unable send data via uninitialized socket.");
-		assert(false);
 		return false;
 	}
 

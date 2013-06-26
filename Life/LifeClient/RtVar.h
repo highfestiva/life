@@ -39,6 +39,8 @@
 #define RTVAR_CTRL_STEER_DOWN3D			"Control.Steer.Down3d"
 #define RTVAR_CTRL_STEER_HANDBRK		"Control.Steer.HandBrake"
 #define RTVAR_CTRL_STEER_BRK			"Control.Steer.Break"
+#define RTVAR_CTRL_STEER_YAW			"Control.Steer.Yaw"
+#define RTVAR_CTRL_STEER_PITCH			"Control.Steer.Pitch"
 
 #define RTVAR_CTRL_FIRE0			"Control.Fire0"
 #define RTVAR_CTRL_FIRE1			"Control.Fire1"

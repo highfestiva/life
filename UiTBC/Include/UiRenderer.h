@@ -19,6 +19,7 @@
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../Lepra/Include/Transformation.h"
+#include "../../Lepra/Include/Vector2D.h"
 #include "UiTBC.h"
 #include "UiBillboardRenderInfo.h"
 #include "UiTexture.h"
@@ -470,13 +471,13 @@ public:
 
 	virtual void SetEnvironmentMap(TextureID pTextureID);
 
+	TextureData* GetEnvTexture() const;
 	bool IsEnvMapCubeMap(); // Returns true if environment map is a cube map.
-
-
 
 	// Adds/updates/removes geometry to/in/from the renderer.
 	virtual GeometryID AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows);
 	virtual bool TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture);	// Only adds a texture ID if it hasn't been added already.
+	virtual bool DisconnectGeometryTexture(GeometryID pGeometryId, TextureID pTexture);
 	virtual void UpdateGeometry(GeometryID pGeometryID) = 0;
 	virtual void RemoveGeometry(GeometryID pGeometryID);
 	virtual void RemoveAllGeometry();
@@ -549,7 +550,6 @@ protected:
 	Material* GetMaterial(MaterialType pMaterialType) const;
 	GeometryTable& GetGeometryTable();
 	ShadowVolumeTable& GetShadowVolumeTable();
-	TextureData* GetEnvTexture() const;
 	LightData* GetLightData(LightID pLightId) const;
 	int GetNumSpotLights() const;
 	void StepCurrentFrame();

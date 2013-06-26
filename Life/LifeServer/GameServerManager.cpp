@@ -16,9 +16,11 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsSpawner.h"
 #include "../LifeMaster/MasterServer.h"
 #include "../LifeApplication.h"
 #include "../LifeString.h"
+#include "../Spawner.h"
 #include "BulletTime.h"
 #include "MasterServerConnection.h"
 #include "RaceTimer.h"
@@ -26,7 +28,6 @@
 #include "ServerConsoleManager.h"
 #include "ServerDelegate.h"
 #include "ServerMessageProcessor.h"
-#include "Spawner.h"
 
 
 
@@ -307,39 +308,7 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)
 {
 	ScopeLock lTickLock(GetTickLock());
-
-	TransformationF lTransform;
-	lTransform.SetPosition(Vector3DF(0, 0, 10));
-	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
-	const float a = 1.0f/::sqrt(2.0f);
-	lTransform.SetOrientation(QuaternionF(0, 0, -a, -a));
-	if (lPreviousAvatarId)
-	{
-		mLog.Info(_T("User ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
-		pClient->SetAvatarId(0);
-		Cure::ContextObject* lObject = GetContext()->GetObject(lPreviousAvatarId);
-		if (lObject)
-		{
-			lTransform.SetPosition(lObject->GetPosition());
-			lTransform.GetPosition() += Vector3DF(0, 0, 2);
-			Vector3DF lEulerAngles;
-			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
-			QuaternionF q;
-			q.SetEulerAngles(lEulerAngles.x, 0, 0);
-			lTransform.SetOrientation(q * lTransform.GetOrientation());
-		}
-		DeleteContextObject(lPreviousAvatarId);
-	}
-
-	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T("."));
-	Cure::ContextObject* lObject = Parent::CreateContextObject(pAvatarId,
-		Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	//const QuaternionF& q = lTransform.GetOrientation();
-	//mLog.Infof(_T("Setting avatar quaternion (%f;%f;%f;%f)."), q.GetA(), q.GetB(), q.GetC(), q.GetD());
-	lObject->SetInitialTransform(lTransform);
-	pClient->SetAvatarId(lObject->GetInstanceId());
-	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());
-	lObject->StartLoading();
+	mDelegate->OnSelectAvatar(pClient, pAvatarId);
 }
 
 void GameServerManager::LoanObject(Client* pClient, Cure::GameObjectId pInstanceId)
@@ -603,7 +572,7 @@ Client* GameServerManager::GetClientByObject(Cure::ContextObject*& pObject) cons
 	Client* lClient = 0;
 	{
 		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
-		if (lAccountId != 0 && lAccountId != -1)
+		if (lAccountId != 0 && lAccountId != (Cure::UserAccount::AccountId)-1)
 		{
 			lClient = GetClientByAccount(lAccountId);
 			if (!lClient)
@@ -943,6 +912,11 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mLog.Infof(_T("Loaded avatar for %s with instance id %i."),
 					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
 					pObject->GetInstanceId());
+				/*const QuaternionF q = pObject->GetOrientation();
+				mLog.Infof(_T("Avatar %s/%i has q=(%f, %f, %f, %f)."),
+					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
+					pObject->GetInstanceId(),
+					q.mA, q.mB, q.mC, q.mD);*/
 				BroadcastAvatar(lClient);
 			}
 			else
@@ -1223,7 +1197,7 @@ void GameServerManager::HandleWorldBoundaries()
 	for (; x != lObjectTable.end(); ++x)
 	{
 		Cure::ContextObject* lObject = x->second;
-		if (lObject->IsLoaded())
+		if (lObject->IsLoaded() && lObject->GetPhysics())
 		{
 			const Vector3DF lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -2000.0f, +2000.0f) ||
@@ -1277,6 +1251,7 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 		return;
 	}
 
+	bool lIsEngineControlled = false;
 	TransformationF lTransform;
 	if (pObject->GetPhysics())
 	{
@@ -1287,10 +1262,11 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 			lBody = lStructureGeometry->GetTriggerId();
 		}
 		GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
+		lIsEngineControlled = (pObject->GetPhysics()->GetEngineCount() > 0);
 	}
 	BroadcastCreateObject(pObject->GetInstanceId(), lTransform, pObject->GetClassId(), pObject->GetOwnerInstanceId());
 	OnAttributeSend(pObject);
-	if (pObject->GetVelocity().GetLengthSquared() > 0.1f)
+	if (lIsEngineControlled || pObject->GetVelocity().GetLengthSquared() > 0.1f)
 	{
 		OnPhysicsSend(pObject);
 	}

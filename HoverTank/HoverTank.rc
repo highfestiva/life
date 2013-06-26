@@ -1,0 +1,2 @@
+#define IDI_MAIN_ICON 1001
+IDI_MAIN_ICON ICON "Icons/HoverTank.ico"

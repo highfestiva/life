@@ -144,7 +144,7 @@ ContextPath::SplinePath* ContextPath::GetPath(int pIndex) const
 	if (!(pIndex >= 0 && pIndex < GetPathCount()))
 	{
 		// This shouldn't happen... Probably already killed.
-		return mPathArray[0];
+		return 0;
 	}
 	return mPathArray[pIndex];
 }

@@ -5,6 +5,7 @@
 
 
 #include "../Include/ResourceManager.h"
+#include <algorithm>
 #include <assert.h>
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/HiResTimer.h"
@@ -1139,10 +1140,18 @@ bool ResourceManager::PrepareRemoveInLoadProgress(Resource* pResource)
 	bool lAllowDelete = true;
 	if (pResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS)
 	{
+		// This is a bit complex, but the resource can enter the "loaded list", which it does when it's
+		// "Load" method is first called. However, it may still depend asynchronously on other resources
+		// which are currently loading. So it keeps its "load in progress" state, but remains in the
+		// "loaded list".
+		//assert(mRequestLoadList.Exists(pResource) && !mLoadedList.Exists(pResource));
+
 		// Only the first object in the 'request load' list may be currently loading.
 		if (mRequestLoadList.GetCount() > 0 && pResource == mRequestLoadList.First().GetObject())
 		{
 			lAllowDelete = false;
+			mPostLoadDeleteArray.push_back(pResource);
+			mLoadSemaphore.Signal();	// Kick it, this may be a recursive delete request.
 		}
 		else
 		{
@@ -1192,7 +1201,7 @@ void ResourceManager::LoadSingleResource()
 			if (lResource == mRequestLoadList.First().GetObject())
 			{
 				assert(mRequestLoadList.GetCount() < 10000);
-				mRequestLoadList.Remove(mRequestLoadList.First());
+				mRequestLoadList.Remove(lResource);
 				assert(mRequestLoadList.GetCount() < 10000);
 				mLoadedList.PushBack(lResource, lResource);
 			}
@@ -1207,6 +1216,21 @@ void ResourceManager::LoadSingleResource()
 				mLog.Info(_T("Deleting just loaded resource '")+lResource->GetName()+_T("'."));
 				DeleteResource(lResource);
 			}
+
+			// Delete any remaining (usually depending-upon) resources.
+			while (!mPostLoadDeleteArray.empty())
+			{
+				DeleteResource(mPostLoadDeleteArray.back());
+			}
+		}
+	}
+	else
+	{
+		ScopeLock lLock(&mThreadLock);
+		// Delete any remaining (usually depending-upon) resources.
+		while (!mPostLoadDeleteArray.empty())
+		{
+			DeleteResource(mPostLoadDeleteArray.back());
 		}
 	}
 }
@@ -1230,6 +1254,9 @@ void ResourceManager::DeleteResource(Resource* pResource)
 	assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 	mResourceSafeLookup.erase(pResource);
 	delete (pResource);
+
+	// Drop resource from post load delete array.
+	mPostLoadDeleteArray.erase(std::remove(mPostLoadDeleteArray.begin(), mPostLoadDeleteArray.end(), pResource), mPostLoadDeleteArray.end());
 }
 
 

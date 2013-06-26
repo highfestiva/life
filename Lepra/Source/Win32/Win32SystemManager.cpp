@@ -211,6 +211,11 @@ void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBod
 	::ShellExecute(0, _T("open"), lUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
 }
 
+str SystemManager::GetHwName()
+{
+	return _T("PC");
+}
+
 unsigned SystemManager::GetLogicalCpuCount()
 {
 	unsigned lLogicalCpuPerPhysicalCpu = 1;

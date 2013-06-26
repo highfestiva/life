@@ -172,9 +172,16 @@ bool SocketAddress::Resolve(const str& pAddress)
 	if (lOk)
 	{
 		lVector = strutil::Split(pAddress, _T(":"));
-		lOk = (lVector.size() == 2 &&
-			lVector[1].length() > 0 &&
-			strutil::StringToInt(lVector[1], lPort));
+		lOk = (lVector.size() == 2);
+		if (lOk)
+		{
+			lOk = (lVector[1].length() > 0 &&
+				strutil::StringToInt(lVector[1], lPort));
+			if (!lOk && lPort > 1024)
+			{
+				lOk = true;
+			}
+		}
 	}
 	if (lOk)
 	{

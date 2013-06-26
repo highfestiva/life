@@ -784,6 +784,7 @@ bool HiscoreTest::Test()
 		lTestOk = (lPosition >= 0 && lPosition <= 7);
 		assert(lTestOk);
 	}
+	Network::Stop();
 
 	ReportTestResult(mLog, _T("Hiscore"), lContext, lTestOk);
 	return (lTestOk);

@@ -8,7 +8,6 @@
 #include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/ContextObjectAttribute.h"
-#include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -120,13 +119,6 @@ void GameClientSlaveManager::LoadSettings()
 	}
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-}
-
-void GameClientSlaveManager::SaveSettings()
-{
-#ifndef EMULATE_TOUCH
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
-#endif // Computer or touch device.
 }
 
 void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -668,8 +660,8 @@ void GameClientSlaveManager::HandleUnusedRelativeAxis()
 	{
 		UiLepra::InputElement* lAxis = (*x);
 
-		const str lSuffixes[2] = { _T("+"), _T("-") };
-		for (int y = 0; y < 2; ++y)
+		const str lSuffixes[] = { _T(""), _T("+"), _T("-") };
+		for (int y = 0; y < LEPRA_ARRAY_COUNT(lSuffixes); ++y)
 		{
 			str lAxisName = lAxis->GetFullName() + lSuffixes[y];
 			bool lIsSteering = false;
@@ -681,7 +673,7 @@ void GameClientSlaveManager::HandleUnusedRelativeAxis()
 			Options::OptionsManager::ValueArray::iterator x = lValuePointers->begin();
 			for (; x != lValuePointers->end(); ++x)
 			{
-				if (std::abs(**x) > 0.06f)
+				if (std::abs(**x) > 0.02f)
 				{
 					**x *= lMouseFilter;
 				}
@@ -800,6 +792,10 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			//const float a = 1.0f/::sqrt(2.0f);
 			//lTransformation.SetOrientation(QuaternionF(0, 0, -a, -a));
 			lMessageCreateObject->GetClassId(lClassId);
+			/*mLog.Infof(_T("Creating network instance %u of type %s at pos (%f; %f; %f), q (%f, %f, %f, %f)."),
+				lMessageCreateObject->GetObjectId(), lClassId.c_str(),
+				lTransformation.GetPosition().x, lTransformation.GetPosition().y, lTransformation.GetPosition().z,
+				lTransformation.GetOrientation().mA, lTransformation.GetOrientation().mB, lTransformation.GetOrientation().mC, lTransformation.GetOrientation().mD);*/
 			Cure::ContextObject* lObject = CreateObject(lMessageCreateObject->GetObjectId(),
 				strutil::Encode(lClassId), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
 			if (lType == Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT)
@@ -1138,7 +1134,7 @@ void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObjec
 	// Server manages this.
 }
 
-void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void*)
+void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData)
 {
 	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
 	{
@@ -1149,7 +1145,7 @@ void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject,
 	}
 	else
 	{
-		assert(false);
+		Parent::OnAlarm(pAlarmId, pObject, pExtraData);
 	}
 }
 
@@ -1183,22 +1179,6 @@ void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::
 	{
 		assert(false);
 	}
-}
-
-
-
-float GameClientSlaveManager::QuerySetChildishness(Cure::ContextObject* pOwnedObject) const
-{
-	const str lName = _T("float_childishness");
-	Cure::FloatAttribute* lAttribute = (Cure::FloatAttribute*)pOwnedObject->GetAttribute(lName);
-	if (!lAttribute)
-	{
-		lAttribute = new Cure::FloatAttribute(pOwnedObject, lName, 0);
-	}
-	float lChildishness;
-	CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
-	lAttribute->SetValue(lChildishness);
-	return lChildishness;
 }
 
 

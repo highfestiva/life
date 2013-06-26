@@ -214,6 +214,46 @@ bool MacDisplayManager::IsFullScreen() const
 	return (mScreenMode == DisplayManager::FULLSCREEN);
 }
 
+double MacDisplayManager::GetPhysicalScreenSize() const
+{
+#ifndef LEPRA_IOS
+	return 24.0;	// Who knows how big an average Mac user's screen is when this game runs.
+#else // iOS
+#define SCREEN_SIZE_IPHONE_CLASSIC	3.5
+#define SCREEN_SIZE_IPHONE_TALL		4.0
+#define SCREEN_SIZE_IPAD_CLASSIC	9.7
+#define SCREEN_SIZE_IPAD_MINI		7.9
+
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+	{
+		CGSize size = [[UIScreen mainScreen] bounds].size;
+		if (size.height < 500)
+		{
+			return SCREEN_SIZE_IPHONE_CLASSIC;	// iPhone 4S / 4th Gen iPod Touch or earlier.
+		}
+		else
+		{
+			return SCREEN_SIZE_IPHONE_TALL;	// iPhone 5.
+		}
+	}
+	else
+	{
+		const str lHwName = SystemManager::GetHwName();
+		const bool lIsMini = (lHwName == _T("iPad2,5") ||
+			lHwName == _T("iPad2,6") || lHwName == _T("iPad2,7"));
+		if (!lIsMini)
+		{
+			return SCREEN_SIZE_IPAD_CLASSIC;
+		}
+		else
+		{
+			return SCREEN_SIZE_IPAD_MINI;
+		}
+
+	}
+#endif // !iOS / iOS
+}
+
 void MacDisplayManager::SetCaption(const str& pCaption)
 {
 	SetCaption(pCaption, false);
