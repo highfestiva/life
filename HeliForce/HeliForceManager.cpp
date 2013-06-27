@@ -963,7 +963,13 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")))
 		{
 			new Automan(this, pObject->GetInstanceId(), Vector3DF(-1,0,0));
-			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = RNDPOSVEC();
+			Vector3DF lColor;
+			do
+			{
+				lColor = RNDPOSVEC();
+			} while (lColor.GetDistanceSquared(mLastVehicleColor) < 1);
+			mLastVehicleColor = lColor;
+			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
 		}
 		else
 		{
@@ -1247,7 +1253,8 @@ void HeliForceManager::ScriptPhysicsTick()
 			mAvatarCreateTimer.Stop();
 		}
 	}
-	if (mAvatarCreateTimer.IsStarted() || GetContext()->GetObject(mAvatarId))
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId, true);
+	if (mAvatarCreateTimer.IsStarted() || lAvatar)
 	{
 		mAvatarDied.Stop();
 	}

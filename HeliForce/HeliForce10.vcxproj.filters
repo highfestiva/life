@@ -35,10 +35,13 @@
     <ClCompile Include="Level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StoneEater.cpp">
+    <ClCompile Include="Sunlight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sunlight.cpp">
+    <ClCompile Include="Automan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Eater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -70,13 +73,16 @@
     <ClInclude Include="RtVar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StoneEater.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Sunlight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Automan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Eater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

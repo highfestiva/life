@@ -325,20 +325,23 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Automan.cpp" />
     <ClCompile Include="Autopilot.cpp" />
     <ClCompile Include="CenteredMachine.cpp" />
+    <ClCompile Include="Eater.cpp" />
     <ClCompile Include="HeliForce.cxx" />
     <ClCompile Include="HeliForceConsoleManager.cpp" />
     <ClCompile Include="HeliForceManager.cpp" />
     <ClCompile Include="HeliForceTicker.cpp" />
     <ClCompile Include="LandingTrigger.cpp" />
     <ClCompile Include="Level.cpp" />
-    <ClCompile Include="StoneEater.cpp" />
     <ClCompile Include="Sunlight.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Automan.h" />
     <ClInclude Include="Autopilot.h" />
     <ClInclude Include="CenteredMachine.h" />
+    <ClInclude Include="Eater.h" />
     <ClInclude Include="HeliForce.h" />
     <ClInclude Include="HeliForceConsoleManager.h" />
     <ClInclude Include="HeliForceManager.h" />
@@ -346,7 +349,6 @@
     <ClInclude Include="LandingTrigger.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="RtVar.h" />
-    <ClInclude Include="StoneEater.h" />
     <ClInclude Include="Sunlight.h" />
     <ClInclude Include="Version.h" />
   </ItemGroup>

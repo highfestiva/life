@@ -151,6 +151,7 @@ protected:
 	StopWatch mAvatarCreateTimer;
 	StopWatch mAvatarDied;
 	StopWatch mFlyTime;
+	Vector3DF mLastVehicleColor;
 	bool mHadAvatar;
 	bool mUpdateCameraForAvatar;
 	Life::Options::Steering mLastSteering;
