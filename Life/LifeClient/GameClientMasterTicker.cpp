@@ -145,7 +145,7 @@ void GameClientMasterTicker::PrepareQuit()
 
 bool GameClientMasterTicker::Tick()
 {
-	LEPRA_MEASURE_SCOPE(MasterTicker);
+	LEPRA_DO_MEASURE_SCOPE(MasterTicker);
 
 	GetTimeManager()->Tick();
 

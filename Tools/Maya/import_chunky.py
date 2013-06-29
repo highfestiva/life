@@ -857,7 +857,7 @@ class GroupReader(DefaultMAReader):
 
 			elif section.startswith("tag:"):
 				tagtype = stripQuotes(config.get(section, "type"))
-				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "engine_sound", "engine_mesh_offset", "exhaust", "jet_engine_emitter", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "textures", "anything"]
+				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "engine_sound", "engine_mesh_offset", "burn", "exhaust", "jet_engine_emitter", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "textures", "anything"]
 				allApplied &= tagOk
 				if not tagOk:
 					print("Error: invalid tag type '%s'." % tagtype)

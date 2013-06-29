@@ -1,29 +1,28 @@
-/*
-	File:   ShadowVolume.h
-	Class:  ShadowVolume
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
-#ifndef UISHADOWVOLUME_H
-#define UISHADOWVOLUME_H
+// Author: Jonas Byström
+// Copyright (c) 2002-2013, Pixel Doctrine
+
+
+
+#pragma once
 
 #include "UiTBC.h"
 #include "../../TBC/Include/GeometryBase.h"
 #include "../../Lepra/Include/Transformation.h"
 
+
+
 namespace UiTbc
 {
 
-class ShadowVolume : public TBC::GeometryBase
+
+
+class ShadowVolume: public TBC::GeometryBase
 {
 public:
-	
-	ShadowVolume();
 	ShadowVolume(TBC::GeometryBase* pParentGeometry);
 	virtual ~ShadowVolume();
 
-	// Light position in world coordinates. 
 	void UpdateShadowVolume(const Vector3DF& pLightPos, float pLightRadius, bool pDirectional);
 
 	TBC::GeometryBase* GetParentGeometry();
@@ -47,22 +46,17 @@ public:
 	Lepra::uint8*  GetColorData() const;
 	float*         GetNormalData() const;
 
-	ColorFormat GetColorFormat() const;
-
-	void GetReplacementColor(float& pRed, float& pGreen, float& pBlue) const;
-	void SetReplacementColor(float pRed, float pGreen, float pBlue);
-
 protected:
 	void ExtrudeEdges();
 private:
 
 	struct TriangleOrientation
 	{
-		bool mIsFrontFacing;
-		unsigned long mV0;
-		unsigned long mV1;
-		unsigned long mV2;
+		unsigned mV0;
+		unsigned mV1;
+		unsigned mV2;
 		bool mChecked;
+		bool mIsFrontFacing;
 	};
 
 	void InitVertices();
@@ -79,19 +73,12 @@ private:
 	unsigned int mParentVertexCount;
 	unsigned int mMaxTriangleCount;
 
-	// Replacement color, in case textures are missing or whatever.
-	float mRed;
-	float mGreen;
-	float mBlue;
-
-	TransformationF mTransformation;
-
-	bool mTransformationChanged;
+	QuaternionF mPreviousOrientation;
 
 	// The geometry that cast this shadow.
 	TBC::GeometryBase* mParentGeometry;
 };
 
-} // End namespace.
 
-#endif
+
+}

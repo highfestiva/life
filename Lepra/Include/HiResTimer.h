@@ -21,7 +21,7 @@ namespace Lepra
 class HiResTimer
 {
 public:
-	inline HiResTimer(bool pIsManualUpdate = false);
+	inline HiResTimer(bool pUseShadow = true);
 	inline HiResTimer(uint64 pCount);
 	inline HiResTimer(const HiResTimer& pTimer);
 	inline ~HiResTimer();
@@ -78,33 +78,33 @@ public:
 protected:
 	uint64 mPrevCounter;
 	uint64 mCounter;
-	bool mIsManualUpdateEnabled;
+	bool mUseShadow;
 
 	static uint64 mFrequency;
 	static double mPeriod;
 	static uint64 mLastSystemCounter;
 };
 
-HiResTimer::HiResTimer(bool pIsManualUpdate) :
+HiResTimer::HiResTimer(bool pUseShadow):
 	mPrevCounter(0),
 	mCounter(0),
-	mIsManualUpdateEnabled(pIsManualUpdate)
+	mUseShadow(pUseShadow)
 {
 	UpdateTimer();
 	mPrevCounter = mCounter;
 }
 
-HiResTimer::HiResTimer(uint64 pCount) :
+HiResTimer::HiResTimer(uint64 pCount):
 	mPrevCounter(pCount),
 	mCounter(pCount),
-	mIsManualUpdateEnabled(false)
+	mUseShadow(true)
 {
 }
 
-HiResTimer::HiResTimer(const HiResTimer& pTimer) :
+HiResTimer::HiResTimer(const HiResTimer& pTimer):
 	mPrevCounter(pTimer.mPrevCounter),
 	mCounter(pTimer.mCounter),
-	mIsManualUpdateEnabled(false)
+	mUseShadow(pTimer.mUseShadow)
 {
 }
 
@@ -114,7 +114,7 @@ HiResTimer::~HiResTimer()
 
 void HiResTimer::EnableShadowCounter(bool pEnable)
 {
-	mIsManualUpdateEnabled = pEnable;
+	mUseShadow = pEnable;
 }
 
 void HiResTimer::StepCounterShadow()
@@ -225,7 +225,7 @@ HiResTimer& HiResTimer::operator -= (const HiResTimer& pTimer)
 
 uint64 HiResTimer::GetSystemCounterShadow()
 {
-	if (!mIsManualUpdateEnabled)
+	if (!mUseShadow)
 	{
 		return GetSystemCounter();
 	}

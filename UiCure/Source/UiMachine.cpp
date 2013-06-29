@@ -7,6 +7,7 @@
 #include "../Include/UiMachine.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/Health.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/HashUtil.h"
@@ -14,8 +15,9 @@
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
-#include "../Include/UiGameUiManager.h"
+#include "../Include/UiBurnEmitter.h"
 #include "../Include/UiExhaustEmitter.h"
+#include "../Include/UiGameUiManager.h"
 #include "../Include/UiJetEngineEmitter.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
@@ -30,7 +32,8 @@ namespace UiCure
 Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mJetEngineEmitter(0),
-	mExhaustEmitter(0)
+	mExhaustEmitter(0),
+	mBurnEmitter(0)
 {
 	EnableMeshSlide(true);
 }
@@ -48,6 +51,11 @@ void Machine::SetJetEngineEmitter(JetEngineEmitter* pEmitter)
 void Machine::SetExhaustEmitter(ExhaustEmitter* pEmitter)
 {
 	mExhaustEmitter = pEmitter;
+}
+
+void Machine::SetBurnEmitter(BurnEmitter* pEmitter)
+{
+	mBurnEmitter = pEmitter;
 }
 
 void Machine::DeleteEngineSounds()
@@ -127,6 +135,15 @@ void Machine::OnTick()
 			if (mExhaustEmitter)
 			{
 				mExhaustEmitter->EmitFromTag(this, lTag, lFrameTime);
+			}
+		}
+		else if (lTag.mTagName == _T("burn"))
+		{
+			// Particles caused by burning.
+			if (mBurnEmitter)
+			{
+				const float lHealth = Math::Clamp(Cure::Health::Get(this), 0.0f, 1.0f);
+				mBurnEmitter->EmitFromTag(this, lTag, lFrameTime, -lHealth + 0.7f);
 			}
 		}
 	}

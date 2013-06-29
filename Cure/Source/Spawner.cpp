@@ -66,7 +66,8 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 
 	if (pAlarmId == 0)
 	{
-		OnCreate(lIntervals[0]);
+		const bool lHasRecreate = (lIntervalCount >= 3 && lIntervals[2]);
+		OnCreate(lIntervals[0], lHasRecreate);
 	}
 	else if (pAlarmId == 1)
 	{
@@ -78,7 +79,7 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 }
 
-void Spawner::OnCreate(float pCreateInterval)
+void Spawner::OnCreate(float pCreateInterval, bool pHasRecreate)
 {
 	if (!pCreateInterval)
 	{
@@ -90,7 +91,10 @@ void Spawner::OnCreate(float pCreateInterval)
 		Create();
 	}
 
-	GetManager()->AddAlarmCallback(this, 0, pCreateInterval, 0);
+	if (!pHasRecreate)
+	{
+		GetManager()->AddAlarmCallback(this, 0, pCreateInterval, 0);
+	}
 }
 
 void Spawner::OnDestroy(float pDestroyInterval)

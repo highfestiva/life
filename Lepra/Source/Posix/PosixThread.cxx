@@ -214,7 +214,7 @@ void PosixSemaphore::Wait()
 
 bool PosixSemaphore::Wait(float64 pMaxWaitTime)
 {
-	HiResTimer lTimer;
+	HiResTimer lTimer(false);
 	pthread_mutex_lock(&mMutex);
 	while (mPermitCount == 0 && lTimer.GetTimeDiff() < pMaxWaitTime)
 	{

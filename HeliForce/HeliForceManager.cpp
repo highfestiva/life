@@ -32,9 +32,9 @@
 #include "../Life/ProjectileUtil.h"
 #include "../Life/Spawner.h"
 #include "../TBC/Include/PhysicsTrigger.h"
+#include "../UiCure/Include/UiBurnEmitter.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiDebugRenderer.h"
-#include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiIconButton.h"
@@ -512,7 +512,11 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 		{
 			continue;
 		}
-		const float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength) * 0.5f;
+		float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength) * 0.5f;
+		if (pExplosive->GetClassId().find(_T("missile")) != str::npos)
+		{
+			lForce *= 5;
+		}
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
@@ -675,6 +679,7 @@ void HeliForceManager::CreateChopper(const str& pClassId)
 	lSpawner->PlaceObject(lAvatar);
 	mAvatarId = lAvatar->GetInstanceId();
 	lAvatar->StartLoading();
+	mAutopilot->Reset();
 }
 
 void HeliForceManager::UpdateChopperColor(float pLerp)
@@ -906,13 +911,14 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	{
 		UiCure::Machine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
-		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
+		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
+		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
 	else
 	{
 		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
-		lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
+		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
 	lObject->SetAllowNetworkLogic(true);
@@ -1162,6 +1168,8 @@ Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLeve
 
 float HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition)
 {
+	mAllLoadedTimer.Start();
+
 	mAvatarCreateTimer.Start();
 	mFlyTime.Stop();
 	mFlyTime.PopTimeDiff();
@@ -1246,6 +1254,23 @@ void HeliForceManager::ScriptPhysicsTick()
 		UpdateCameraPosition(false);
 	}
 
+	if (mAllLoadedTimer.IsStarted())
+	{
+		if (mAllLoadedTimer.QueryTimeDiff() > 5.0)
+		{
+			mAllLoadedTimer.Stop();
+			strutil::strvec lResourceTypes;
+			lResourceTypes.push_back(_T("RenderImg"));
+			lResourceTypes.push_back(_T("Geometry"));
+			lResourceTypes.push_back(_T("GeometryRef"));
+			lResourceTypes.push_back(_T("Physics"));
+			lResourceTypes.push_back(_T("PhysicsShared"));
+			lResourceTypes.push_back(_T("RamImg"));
+			GetResourceManager()->ForceFreeCache(lResourceTypes);
+			GetResourceManager()->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
+		}
+	}
+
 	if (mAvatarCreateTimer.IsStarted())
 	{
 		if (mAvatarCreateTimer.QueryTimeDiff() > 0.5)
@@ -1328,6 +1353,7 @@ void HeliForceManager::MoveCamera()
 
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
+		mHelicopterPosition = lAvatarPosition;
 		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -60, 0));
 		++mPostZoomPlatformFrameCount;
 		if (Cure::Health::Get(lAvatar) <= 0)
@@ -1395,7 +1421,13 @@ void HeliForceManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	mUiManager->SetCameraPosition(mCameraTransform);
 	if (pUpdateMicPosition)
 	{
-		mUiManager->SetMicrophonePosition(mCameraTransform, mMicrophoneSpeed);
+		Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+		if (lAvatar && lAvatar->IsLoaded())
+		{
+			TransformationF lMicPos(QuaternionF(), mHelicopterPosition);
+			lMicPos.GetPosition().z -= 2;
+			mUiManager->SetMicrophonePosition(lMicPos, mMicrophoneSpeed);
+		}
 	}
 }
 

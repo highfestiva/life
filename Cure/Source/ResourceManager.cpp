@@ -1032,7 +1032,7 @@ void ResourceManager::StartLoad(Resource* pResource)
 
 void ResourceManager::InjectResourceLoop()
 {
-	HiResTimer lTimer;
+	HiResTimer lTimer(false);
 	ResourceMapList lInjectList;
 	{
 		ScopeLock lLock(&mThreadLock);

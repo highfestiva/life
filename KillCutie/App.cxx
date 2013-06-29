@@ -483,6 +483,7 @@ bool App::Open()
 		mUiManager->GetDisplayManager()->SetCaption(_T("Kill Cutie"));
 		mUiManager->GetDisplayManager()->AddResizeObserver(this);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
+		mUiManager->GetInputManager()->SetCursorVisible(true);
 #if !defined(LEPRA_TOUCH) && defined(LEPRA_TOUCH_LOOKANDFEEL)
 		mIsMouseDown = false;
 		mUiManager->GetInputManager()->GetMouse()->AddFunctor(new UiLepra::TInputFunctor<App>(this, &App::OnMouseInput));
@@ -777,7 +778,7 @@ bool App::Poll()
 	bool lOk = true;
 	if (lOk)
 	{
-		mLoopTimer.StepCounterShadow();
+		HiResTimer::StepCounterShadow();
 	}
 	if (lOk)
 	{
@@ -803,7 +804,6 @@ bool App::Poll()
 		{
 			Thread::Sleep(lDelayTime-0.001);
 			UiLepra::Core::ProcessMessages();
-			mLoopTimer.StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
 		}
 		mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_TOUCH_LOOKANDFEEL
@@ -2189,7 +2189,7 @@ void App::Resume()
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
-	mLoopTimer.StepCounterShadow();
+	HiResTimer::StepCounterShadow();
 	mLoopTimer.PopTimeDiff();
 	if (mMusicPlayer)
 	{

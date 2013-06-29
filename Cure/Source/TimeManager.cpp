@@ -23,7 +23,8 @@ static const int gPhysicsFrameWrapLimit = gTimeWrapLimit*CURE_STANDARD_FRAME_RAT
 
 
 TimeManager::TimeManager():
-	mTargetFrameRate(CURE_STANDARD_FRAME_RATE)
+	mTargetFrameRate(CURE_STANDARD_FRAME_RATE),
+	mTime(false)
 {
 	Clear(0);
 }

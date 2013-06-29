@@ -244,7 +244,7 @@ void Application::TickSleep() const
 		if (lSleepTime >= 0)
 		{
 			double lSleepTimeLeft = lSleepTime;
-			HiResTimer lSleepTimer;
+			HiResTimer lSleepTimer(false);
 			while (lSleepTimeLeft >= 0)
 			{
 				if (lSleepTimeLeft > MAXIMUM_SLEEP_TIME*1.7)

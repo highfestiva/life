@@ -17,6 +17,7 @@ namespace UiCure
 
 
 
+class BurnEmitter;
 class ExhaustEmitter;
 class JetEngineEmitter;
 
@@ -31,6 +32,7 @@ public:
 	virtual ~Machine();
 	void SetJetEngineEmitter(JetEngineEmitter* pEmitter);
 	void SetExhaustEmitter(ExhaustEmitter* pEmitter);
+	void SetBurnEmitter(BurnEmitter* pEmitter);
 	void DeleteEngineSounds();
 
 protected:
@@ -51,6 +53,7 @@ private:
 
 	JetEngineEmitter* mJetEngineEmitter;
 	ExhaustEmitter* mExhaustEmitter;
+	BurnEmitter* mBurnEmitter;
 	TagSoundTable mEngineSoundTable;
 	TagSoundIntensityArray mEngineSoundIntensity;
 

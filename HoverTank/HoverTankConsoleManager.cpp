@@ -40,6 +40,17 @@ HoverTankConsoleManager::~HoverTankConsoleManager()
 
 
 
+bool HoverTankConsoleManager::Start()
+{
+#ifndef LEPRA_TOUCH
+	return Parent::Start();
+#else // Touch
+	return true;	// Touch device don't need an interactive console.
+#endif // Computer / touch
+}
+
+
+
 unsigned HoverTankConsoleManager::GetCommandCount() const
 {
 	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);

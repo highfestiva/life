@@ -58,9 +58,9 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	const float lSparkTriStrip[] =
 	{
 		+0.0f,0,+0.3f,
-		-0.4f,0,-0.0f,
-		+0.4f,0,+0.0f,
-		+0.0f,0,-4.5f,
+		-0.2f,0,-0.0f,
+		+0.2f,0,+0.0f,
+		+0.0f,0,-4.0f,
 	};
 	lBillboardSpark->SetVertexData(lSparkTriStrip);
 	pRenderer->AddGeometry(lBillboardSpark, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);

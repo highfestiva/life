@@ -23,6 +23,7 @@ public:
 	HoverTankConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
 		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
 	virtual ~HoverTankConsoleManager();
+	bool Start();
 
 protected:
 	enum CommandClient

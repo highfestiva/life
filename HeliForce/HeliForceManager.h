@@ -147,6 +147,7 @@ protected:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
+	StopWatch mAllLoadedTimer;
 	StopWatch mTooFarAwayTimer;
 	StopWatch mAvatarCreateTimer;
 	StopWatch mAvatarDied;
@@ -169,6 +170,7 @@ protected:
 
 	TransformationF mCameraTransform;
 	Vector3DF mCameraPreviousPosition;
+	Vector3DF mHelicopterPosition;
 	mutable Vector3DF mLastLandingTriggerPosition;
 	float mCameraSpeed;
 	bool mZoomPlatform;

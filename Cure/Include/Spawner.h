@@ -29,7 +29,7 @@ public:
 
 private:
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
-	void OnCreate(float pCreateInterval);
+	void OnCreate(float pCreateInterval, bool pHasRecreate);
 	void OnDestroy(float pDestroyInterval);
 	void OnRecreate(float pRecreateInterval);
 	void Create();

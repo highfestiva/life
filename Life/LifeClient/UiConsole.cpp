@@ -118,6 +118,11 @@ void UiConsole::SetVisible(bool pVisible)
 
 void UiConsole::Tick()
 {
+	if (!mConsoleComponent)
+	{
+		return;
+	}
+
 	const float lFrameTime = mManager->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
 	const float lConsoleSpeed = Math::GetIterateLerpTime(0.9f, lFrameTime);
 	if (mIsConsoleVisible)
@@ -224,6 +229,11 @@ void UiConsole::CloseGraphics()
 
 void UiConsole::OnConsoleChange()
 {
+	if (!mConsoleComponent)
+	{
+		return;
+	}
+
 	if (mIsConsoleVisible)
 	{
 		mConsoleComponent->SetVisible(true);

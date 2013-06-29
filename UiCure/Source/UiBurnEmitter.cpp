@@ -4,7 +4,7 @@
 
 
 
-#include "../Include/UiExhaustEmitter.h"
+#include "../Include/UiBurnEmitter.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -22,14 +22,14 @@ namespace UiCure
 
 
 
-ExhaustEmitter::ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager):
+BurnEmitter::BurnEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager):
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
-	mExhaustTimeout(0)
+	mBurnTimeout(0)
 {
 }
 
-ExhaustEmitter::~ExhaustEmitter()
+BurnEmitter::~BurnEmitter()
 {
 	mResourceManager = 0;
 	mUiManager = 0;
@@ -37,11 +37,11 @@ ExhaustEmitter::~ExhaustEmitter()
 
 
 
-void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)
+void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime, float pIntensity)
 {
 	bool lParticlesEnabled;
 	CURE_RTVAR_GET(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
-	if (!lParticlesEnabled)
+	if (!lParticlesEnabled || pIntensity <= 0)
 	{
 		return;
 	}
@@ -62,29 +62,23 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 	};
 	if (pTag.mFloatValueList.size() != FV_COUNT ||
 		pTag.mStringValueList.size() != 0 ||
-		pTag.mEngineIndexList.size() != 1 ||
+		pTag.mEngineIndexList.size() != 0 ||
 		pTag.mBodyIndexList.size() != 0 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The exhaust tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf(_T("The burn tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
 		assert(false);
 		return;
 	}
-	const int lEngineIndex = pTag.mEngineIndexList[0];
-	if (lEngineIndex >= pObject->GetPhysics()->GetEngineCount())
-	{
-		return;
-	}
-	const TBC::PhysicsEngine* lEngine = pObject->GetPhysics()->GetEngine(lEngineIndex);
-	float lExhaustIntensity;
-	CURE_RTVAR_GET(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
-	mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity()) * lExhaustIntensity * pFrameTime * 25;
-	if (mExhaustTimeout > 0)
+	float lBurnIntensity;
+	CURE_RTVAR_GET(lBurnIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
+	mBurnTimeout -= pIntensity * lBurnIntensity * pFrameTime * 25;
+	if (mBurnTimeout > 0)
 	{
 		return;
 	}
 	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
-	mExhaustTimeout = 1/lDensity;
+	mBurnTimeout = 1/lDensity;
 
 	const float lScale = pTag.mFloatValueList[FV_SCALE];
 	const float lLifeTime = pTag.mFloatValueList[FV_TTL];
@@ -117,7 +111,7 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, ExhaustEmitter);
+LOG_CLASS_DEFINE(GAME_CONTEXT, BurnEmitter);
 
 
 

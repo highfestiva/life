@@ -148,8 +148,19 @@ void ParticleRenderer::CreateExplosion(const Vector3DF& pPosition, float pStreng
 	const float lSparkSize = (pStrength > 1)? ::sqrt(pStrength)*0.25f : pStrength*0.15f;
 	CreateBillboards(pPosition, pStrength* 7, pDirection, Vector3DF(0, 0,  +9)*pFalloff, lRandomXYEndSpeed, 5.3f, pStrength*0.4f, pStartFireColor, pFireColor, mFires, pFires);
 	CreateBillboards(pPosition, pStrength* 8, pDirection, Vector3DF(0, 0,  +5)*pFalloff, lRandomXYEndSpeed,    3, pStrength*0.8f, pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
-	CreateBillboards(pPosition, pStrength*10, pDirection, Vector3DF(0, 0,  -8)*pFalloff, lRandomXYEndSpeed, 4.5f, lSparkSize, Vector3DF(), Vector3DF(), mSparks, pSparks);
+	CreateBillboards(pPosition, pStrength*13, pDirection, Vector3DF(0, 0,  -8)*pFalloff, lRandomXYEndSpeed, 4.5f, lSparkSize, Vector3DF(), Vector3DF(), mSparks, pSparks);
 	CreateBillboards(pPosition, pStrength* 5, pDirection, Vector3DF(0, 0, -10)*pFalloff, lRandomXYEndSpeed, 1.5f, ::sqrtf(pStrength)*0.20f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
+
+	const float lMinSparkVelocity2 = pStrength*9*1.2f*pStrength*8*1.2f;
+	BillboardArray::reverse_iterator x = mSparks.rbegin();
+	for (int y = 0; y < pSparks; ++y, ++x)
+	{
+		float lSpeed2 = x->mVelocity.GetLengthSquared();
+		if (lSpeed2 < lMinSparkVelocity2)
+		{
+			x->mVelocity.Mul(::sqrt(lMinSparkVelocity2/lSpeed2));
+		}
+	}
 
 	if (pFires > 0)
 	{

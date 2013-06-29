@@ -22,14 +22,14 @@ FloatAttribute* Health::GetAttribute(const ContextObject* pObject)
 	return (FloatAttribute*)pObject->GetAttribute(HEALTH_NAME);
 }
 
-float Health::Get(const ContextObject* pObject)
+float Health::Get(const ContextObject* pObject, float pDefault)
 {
 	FloatAttribute* lHealth = GetAttribute(pObject);
 	if (lHealth)
 	{
 		return lHealth->GetValue();
 	}
-	return 0;
+	return pDefault;
 }
 
 float Health::Add(ContextObject* pObject, float pDelta, bool pLowLimit)

@@ -38,11 +38,13 @@ template<class _Data> void SequencialPerformanceData<_Data>::Append(double pTime
 
 
 
-template<class _T> BasicScopeTimer<_T>::BasicScopeTimer()
+template<class _T> BasicScopeTimer<_T>::BasicScopeTimer():
+	mTime(false)
 {
 }
 
 template<class _T> BasicScopeTimer<_T>::BasicScopeTimer(_T* pData):
+	mTime(false),
 	mData(pData)
 {
 }

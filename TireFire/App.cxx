@@ -567,7 +567,7 @@ bool App::Poll()
 	bool lOk = true;
 	if (lOk)
 	{
-		mLoopTimer.StepCounterShadow();
+		HiResTimer::StepCounterShadow();
 	}
 	if (lOk)
 	{
@@ -593,7 +593,6 @@ bool App::Poll()
 		{
 			Thread::Sleep(lDelayTime-0.001);
 			UiLepra::Core::ProcessMessages();
-			mLoopTimer.StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
 		}
 		mLoopTimer.PopTimeDiff();
 		if (lInstantLoopTime >= 1.0/FPS && mAverageFastLoopTime > 1.0/FPS)
@@ -882,7 +881,7 @@ void App::Resume()
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
-	mLoopTimer.StepCounterShadow();
+	HiResTimer::StepCounterShadow();
 	mLoopTimer.PopTimeDiff();
 	if (mMusicPlayer)
 	{

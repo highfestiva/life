@@ -32,7 +32,7 @@ void ExplodingMachine::OnTick()
 {
 	Parent::OnTick();
 
-	if (Cure::Health::Get(this) <= 0)
+	if (Cure::Health::Get(this, 1) <= 0)
 	{
 		OnDie();
 	}

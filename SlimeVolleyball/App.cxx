@@ -272,6 +272,7 @@ bool App::Open()
 		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
 		mInput->ActivateAll();
 		mInput->AddKeyCodeInputObserver(this);
+		mInput->SetCursorVisible(true);
 	}
 	if (lOk)
 	{

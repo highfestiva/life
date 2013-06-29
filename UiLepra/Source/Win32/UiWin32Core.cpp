@@ -5,6 +5,7 @@
 
 
 #include "../../Include/Win32/UiWin32Core.h"
+#include "../../../Lepra/Include/HiResTimer.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/SystemManager.h"
 #include "../../../Lepra/Include/Thread.h"
@@ -41,6 +42,7 @@ void Core::Shutdown()
 
 void Core::ProcessMessages()
 {
+	HiResTimer::StepCounterShadow();
 	Win32Core::ProcessMessages();
 }
 

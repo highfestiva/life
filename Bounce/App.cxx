@@ -744,7 +744,7 @@ void App::Resume()
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
-	mLoopTimer.StepCounterShadow();
+	HiResTimer::StepCounterShadow();
 	mLoopTimer.PopTimeDiff();
 	if (mMusicPlayer)
 	{

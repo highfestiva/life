@@ -36,6 +36,17 @@ Autopilot::~Autopilot()
 
 
 
+void Autopilot::Reset()
+{
+	Level* lLevel = mGame->GetLevel();
+	if (!lLevel || lLevel->QueryPath()->GetPathCount() < 1)
+	{
+		return;
+	}
+	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(0);
+	lPath->GotoAbsoluteTime(0);
+}
+
 Vector3DF Autopilot::GetSteering()
 {
 	Level* lLevel = mGame->GetLevel();

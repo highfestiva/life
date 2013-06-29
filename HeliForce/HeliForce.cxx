@@ -204,6 +204,8 @@ bool HeliForce::MainLoop()
 
 bool HeliForce::Tick()
 {
+	HiResTimer::StepCounterShadow();
+
 #if defined(EMULATE_TOUCH)
 	mDragManager.UpdateDragByMouse(mUiManager->GetInputManager());
 #elif defined(LEPRA_TOUCH)

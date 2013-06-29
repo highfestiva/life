@@ -26,6 +26,7 @@ class Autopilot: public Cure::CppContextObject
 public:
 	Autopilot(HeliForceManager* pGame);
 	virtual ~Autopilot();
+	void Reset();
 	Vector3DF GetSteering();
 	float GetClosestPathDistance() const;
 	Vector3DF GetLastAvatarPosition() const;
