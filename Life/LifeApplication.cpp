@@ -127,7 +127,6 @@ bool Application::MainLoop()
 	bool lQuit = false;
 	while (lOk && !lQuit)
 	{
-		LEPRA_DO_MEASURE_SCOPE(AppTick);
 		lOk = Tick();
 		lQuit = mGameTicker->QueryQuit();
 	}
@@ -155,6 +154,8 @@ bool Application::MainLoop()
 
 bool Application::Tick()
 {
+	LEPRA_DO_MEASURE_SCOPE(AppTick);
+
 	bool lDebug;
 	CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	if (lDebug)

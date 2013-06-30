@@ -77,7 +77,7 @@
 		B15F796713FC5A0500E01A90 /* UiResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F795D13FC5A0500E01A90 /* UiResourceManager.cpp */; };
 		B15F796813FC5A0500E01A90 /* UiTerrainManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F795E13FC5A0500E01A90 /* UiTerrainManager.cpp */; };
 		B15F798113FC5E1500E01A90 /* UiGameUiManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */; };
-		B16D6A531759406200B8F0E4 /* StoneEater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16D6A521759406200B8F0E4 /* StoneEater.cpp */; };
+		B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16F032717808366000C31E0 /* UiBurnEmitter.cpp */; };
 		B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1942D2114E08E86002F37E1 /* StoreKit.framework */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
@@ -488,6 +488,9 @@
 		B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B1A1DD9813AA6CC60097B8D0 /* window.c */; };
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
+		B1A8301D177A42BF0078D5E8 /* Automan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8301B177A42BF0078D5E8 /* Automan.cpp */; };
+		B1A8301E177A42BF0078D5E8 /* Eater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8301C177A42BF0078D5E8 /* Eater.cpp */; };
+		B1A83020177A42E40078D5E8 /* Health.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8301F177A42E40078D5E8 /* Health.cpp */; };
 		B1A8B1AD16C7E8D900F57DC1 /* IntAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */; };
 		B1A8B1B116C7EA7100F57DC1 /* ProjectileUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */; };
 		B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */; };
@@ -609,7 +612,7 @@
 		B15F795D13FC5A0500E01A90 /* UiResourceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiResourceManager.cpp; path = ../../UiCure/Source/UiResourceManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F795E13FC5A0500E01A90 /* UiTerrainManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiTerrainManager.cpp; path = ../../UiCure/Source/UiTerrainManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = UiGameUiManager.mm; path = ../../UiCure/Source/UiGameUiManager.mm; sourceTree = SOURCE_ROOT; };
-		B16D6A521759406200B8F0E4 /* StoneEater.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StoneEater.cpp; sourceTree = "<group>"; };
+		B16F032717808366000C31E0 /* UiBurnEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiBurnEmitter.cpp; path = ../../UiCure/Source/UiBurnEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1942D2114E08E86002F37E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
 		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
@@ -1208,6 +1211,9 @@
 		B1A1DD9913AA6CC60097B8D0 /* window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
 		B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiOggAlStream.cpp; sourceTree = "<group>"; };
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
+		B1A8301B177A42BF0078D5E8 /* Automan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Automan.cpp; sourceTree = "<group>"; };
+		B1A8301C177A42BF0078D5E8 /* Eater.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Eater.cpp; sourceTree = "<group>"; };
+		B1A8301F177A42E40078D5E8 /* Health.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Health.cpp; path = ../../Cure/Source/Health.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IntAttribute.cpp; path = ../../Cure/Source/IntAttribute.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectileUtil.cpp; path = ../../Life/ProjectileUtil.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSoundReleaser.cpp; path = ../../UiCure/Source/UiSoundReleaser.cpp; sourceTree = SOURCE_ROOT; };
@@ -1373,6 +1379,7 @@
 		B15F791D13FC597B00E01A90 /* Cure */ = {
 			isa = PBXGroup;
 			children = (
+				B1A8301F177A42E40078D5E8 /* Health.cpp */,
 				B13DA600173EDBD200A73400 /* Spawner.cpp */,
 				B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */,
 				B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */,
@@ -1412,6 +1419,7 @@
 		B15F795413FC59E300E01A90 /* UiCure */ = {
 			isa = PBXGroup;
 			children = (
+				B16F032717808366000C31E0 /* UiBurnEmitter.cpp */,
 				B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */,
 				B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */,
 				B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */,
@@ -1556,7 +1564,8 @@
 		B19A146913A122DE0051A61C /* HeliForce */ = {
 			isa = PBXGroup;
 			children = (
-				B16D6A521759406200B8F0E4 /* StoneEater.cpp */,
+				B1A8301B177A42BF0078D5E8 /* Automan.cpp */,
+				B1A8301C177A42BF0078D5E8 /* Eater.cpp */,
 				B1D4C4CB174ABA9B005E1587 /* Level.cpp */,
 				B1D4C4C8174AB9F6005E1587 /* Autopilot.cpp */,
 				B13DA59A173ED82D00A73400 /* CenteredMachine.cpp */,
@@ -3045,7 +3054,10 @@
 				B13DA607173EDBF400A73400 /* Level.cpp in Sources */,
 				B1D4C4C9174AB9F6005E1587 /* Autopilot.cpp in Sources */,
 				B1D4C4CC174ABA9B005E1587 /* Level.cpp in Sources */,
-				B16D6A531759406200B8F0E4 /* StoneEater.cpp in Sources */,
+				B1A8301D177A42BF0078D5E8 /* Automan.cpp in Sources */,
+				B1A8301E177A42BF0078D5E8 /* Eater.cpp in Sources */,
+				B1A83020177A42E40078D5E8 /* Health.cpp in Sources */,
+				B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
