@@ -33,6 +33,7 @@ HeliForceConsoleManager::HeliForceConsoleManager(Cure::ResourceManager* pResourc
 	Parent(pResourceManager, pGameManager, pUiManager, pVariableScope, pArea)
 {
 	InitCommands();
+	SetSecurityLevel(1);
 }
 
 HeliForceConsoleManager::~HeliForceConsoleManager()

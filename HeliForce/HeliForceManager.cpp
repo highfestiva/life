@@ -58,7 +58,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			5
+#define LAST_LEVEL			6
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	2
@@ -148,6 +148,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 1);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_00"));
 }
 
 HeliForceManager::~HeliForceManager()
@@ -261,12 +262,15 @@ void HeliForceManager::SetFade(float pFadeAmount)
 
 bool HeliForceManager::Render()
 {
+	if (mHemisphere && mHemisphere->IsLoaded())
+	{
+		mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
+	}
 	if (mHemisphere && mHemisphere->IsLoaded() && mRenderHemisphere)
 	{
 		if (!mHemisphere->GetMesh(0)->GetUVAnimator())
 		{
 			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
-			mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
 			mHemisphere->GetMesh(0)->SetPreRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::DisableDepth));
 			mHemisphere->GetMesh(0)->SetPostRenderCallback(TBC::GeometryBase::RenderCallback(this, &HeliForceManager::EnableDepth));
 		}
@@ -500,6 +504,24 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 	}
 	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
 
+
+	// Slowmo check.
+	bool lNormalDeath = true;
+	if (pExplosive->GetInstanceId() == mAvatarId && Cure::Health::Get(pExplosive) < -5500)
+	{
+		if (Random::Uniform(0.0f, 1.0f) > 0.7f)
+		{
+			lNormalDeath = false;
+			mSlowmoTimer.TryStart();
+			DeleteContextObjectDelay(pExplosive, 6.5);
+		}
+	}
+	if (lNormalDeath)
+	{
+		DeleteContextObjectDelay(pExplosive, 3.0);
+	}
+
+
 	// Shove!
 	ScopeLock lLock(GetTickLock());
 	TBC::PhysicsManager* lPhysicsManager = GetPhysicsManager();
@@ -522,7 +544,8 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
 			if (lHealth && !mZoomPlatform)
 			{
-				lHealth->SetValue(lHealth->GetValue() - lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f));
+				const float lValue = lHealth->GetValue() - lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f);
+				lHealth->SetValue(lValue);
 			}
 			x->second->ForceSend();
 		}
@@ -649,8 +672,10 @@ bool HeliForceManager::InitializeUniverse()
 	const Vector3DF v;
 	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
 
+	str lStartLevel;
+	CURE_RTVAR_GET(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_00"));
 	mMassObjectArray.clear();
-	mLevel = (Level*)Parent::CreateContextObject(_T("level_05"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
 	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
@@ -915,6 +940,14 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
+	else if (strutil::StartsWith(pClassId, _T("forklift")))
+	{
+		UiCure::Machine* lMachine = new Life::ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		Cure::Health::Set(lMachine, 1);
+		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
+		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
+		lObject = lMachine;
+	}
 	else
 	{
 		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
@@ -966,9 +999,15 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			OnLevelLoadCompleted();
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")))
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")) ||
+			strutil::StartsWith(pObject->GetClassId(), _T("forklift")))
 		{
-			new Automan(this, pObject->GetInstanceId(), Vector3DF(-1,0,0));
+			Vector3DF lDirection(-1,0,0);
+			if (strutil::StartsWith(pObject->GetClassId(), _T("forklift")))
+			{
+				lDirection.Set(0,1,0);
+			}
+			new Automan(this, pObject->GetInstanceId(), lDirection);
 			Vector3DF lColor;
 			do
 			{
@@ -1116,6 +1155,10 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		float lUpFactor = 1 + 0.5f*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));
 		lUpFactor *= lUpFactor;
 		lForce *= Math::Lerp(1.0f, 0.05f, lChildishness * lUpFactor);
+		if (lForce < 0)
+		{
+			lForce = 0;
+		}
 	}
 	// Take velocity into calculation if we're landing on a helipad (not using our rotors).
 	if (lIsLandingPad && !lIsRotor)
@@ -1271,6 +1314,19 @@ void HeliForceManager::ScriptPhysicsTick()
 		}
 	}
 
+	if (mSlowmoTimer.IsStarted())
+	{
+		if (mSlowmoTimer.QueryTimeDiff() < 3.5f)
+		{
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.3f);
+		}
+		else
+		{
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0f);
+			mSlowmoTimer.Stop();
+		}
+	}
+
 	if (mAvatarCreateTimer.IsStarted())
 	{
 		if (mAvatarCreateTimer.QueryTimeDiff() > 0.5)
@@ -1385,6 +1441,7 @@ void HeliForceManager::MoveCamera()
 		else
 		{
 			mCameraTransform = lTargetTransform;
+			mCameraSpeed = 0;
 		}
 
 		// Angle.
@@ -1394,17 +1451,19 @@ void HeliForceManager::MoveCamera()
 		lTargetTransform.GetOrientation().RotateAroundOwnX(lXAngle);
 		if (mPostZoomPlatformFrameCount > 10)
 		{
-			const float z = lAvatarPosition.x - mCameraTransform.GetPosition().x;
+			const float lSpeedX = lAvatar->GetVelocity().x;
+			mCameraSpeed = Math::Lerp(mCameraSpeed, lSpeedX*0.4f, 0.05f);
+			//mCameraSpeed = Math::Clamp(mCameraSpeed, -3.0f, +4.0f);
+			const float z = lAvatarPosition.x + mCameraSpeed - mCameraTransform.GetPosition().x;
 			const int lSmoothSteps = mPostZoomPlatformFrameCount-10;
 			const float lSmoothFactor = (lSmoothSteps >= 100)? 1.0f : lSmoothSteps/100.0f;
 			const float lZAngle = -::atan2(z, x) * lSmoothFactor;
 			lTargetTransform.GetOrientation().RotateAroundWorldZ(lZAngle);
 		}
 		mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 0.5f);
-		mCameraSpeed = Math::Lerp(mCameraSpeed, lAvatar->GetVelocity().GetLength()/10, 0.02f);
-		float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
+		/*float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
 		lFoV = Math::SmoothClamp(lFoV, 30.0f, 60.0f, 0.4f);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);*/
 
 		/*CURE_RTVAR_ARITHMETIC(GetVariableScope(), "cam_ang", double, +, 0.01, 0.0, 3000.0);
 		QuaternionF q;

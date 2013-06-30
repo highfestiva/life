@@ -127,7 +127,7 @@ bool Application::MainLoop()
 	bool lQuit = false;
 	while (lOk && !lQuit)
 	{
-		LEPRA_MEASURE_SCOPE(AppTick);
+		LEPRA_DO_MEASURE_SCOPE(AppTick);
 		lOk = Tick();
 		lQuit = mGameTicker->QueryQuit();
 	}
@@ -171,7 +171,7 @@ bool Application::Tick()
 	}
 	if (lOk)
 	{
-		LEPRA_MEASURE_SCOPE(AppSleep);
+		LEPRA_DO_MEASURE_SCOPE(AppSleep);
 		TickSleep();
 	}
 	return lOk;

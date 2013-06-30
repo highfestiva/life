@@ -103,7 +103,7 @@ float Autopilot::GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& p
 	const float lCurrentTime = lPath->GetCurrentInterpolationTime();
 
 	float lNearestDistance;
-	const float lSearchStepLength = 0.03f;
+	const float lSearchStepLength = 0.06f;
 	const int lSearchSteps = 3;
 	lPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, pClosestPoint, lSearchSteps);
 

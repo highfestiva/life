@@ -61,6 +61,7 @@ ConsoleManager::ConsoleManager(Cure::ResourceManager* pResourceManager, Cure::Ga
 	Cure::RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
 	ConsolePrompt* pConsolePrompt):
 	Cure::ConsoleManager(pVariableScope, pConsoleLogger, pConsolePrompt),
+	mSecurityLevel(0),
 	mGameManager(pGameManager),
 	mResourceManager(pResourceManager),
 	mLogger(0)

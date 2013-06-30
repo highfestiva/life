@@ -22,6 +22,14 @@
 . Levels.
   . Reference points in foreground/background.
   . Real worlds - villages, houses, garages, lightposts, signs, walls, trees, bushes, cars, stairs, toys...
+  . Traps with smoke and sound!
+  . Falling stones!
+  . Automatic doors.
+  . Push stones over edges to open...
+  . Break hot-air ballon to open...
+  . Add turrets to some levels.
+  . Land on moving truck.
+  . Land on moving boat.
 . Beautify!
 . Make burn smoke billow up if rotor is off!
 . Large fonts on iOS.
@@ -29,16 +37,8 @@
 . Sounds. Ambient. Moving stuff.
 . Make sure the "close to the path" indicator gets back on track when restarting the level.
 . More helis. One with glowing engine in the rear.
-. Traps with smoke and sound!
-. Falling stones!
-. Automatic doors.
-. Push stones over edges to open...
-. Break hot-air ballon to open...
-. Add turrets to some levels.
 . Pilot name and high score.
 . Change pilot name.
 . Restart/replay level.
 . Pick level.
-. Land on moving truck.
-. Land on moving boat.
 . Pause button.

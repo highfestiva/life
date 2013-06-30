@@ -1028,7 +1028,7 @@ class GroupReader(DefaultMAReader):
 			if node.nodetype == "mesh":
 				for parent in node.getparents():
 					if parent.nodetype == "transform":
-						if not parent.shape:
+						if not hasattr(parent, "shape") or not parent.shape:
 							in_nodename = node.getInNode("i", "i")[0]
 							if node.getName().startswith("m_phys_"):
 								parent.shape = node     # Use triangle mesh as physics shape.
@@ -1072,9 +1072,11 @@ class GroupReader(DefaultMAReader):
 			for mesh in phys.mesh_ref:
 				if not self._is_valid_phys_ref(group, phys, mesh, False):
 					ok = False
+					print("Error: '%s' is not a valid phys for mesh '%s'." % (phys.getFullName(), mesh.getFullName()))
 			for mesh in phys.loose_mesh_ref:
 				if not self._is_valid_phys_ref(group, phys, mesh, True):
 					ok = False
+					print("Error: '%s' is not a valid loose phys for mesh '%s'." % (phys.getFullName(), mesh.getFullName()))
 		for mesh in group:
 			if not mesh.getName().startswith("m_"):
 				continue
