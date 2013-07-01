@@ -346,6 +346,8 @@ private:
 	static void CollisionNoteCallback(void* pData, dGeomID pObject1, dGeomID pObject2);
 
 	dWorldID mWorldID;
+	static float mWorldErp;
+	static float mWorldCfm;
 	dSpaceID mSpaceID;
 	dJointGroupID mContactJointGroupID;
 	int mNoteForceFeedbackId;

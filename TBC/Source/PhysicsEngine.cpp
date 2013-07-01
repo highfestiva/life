@@ -228,7 +228,10 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					{
 						break;
 					}
-					lOffset -= lGeometry->GetOriginalOffset();
+					Vector3DF lMayaOffset = lGeometry->GetOriginalOffset();
+					std::swap(lMayaOffset.y, lMayaOffset.z);
+					lMayaOffset.y = -lMayaOffset.y;
+					lOffset += lMayaOffset;
 					lGeometry = lParent;
 				}
 				Vector3DF lVelocityVector;

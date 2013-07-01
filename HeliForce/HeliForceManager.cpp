@@ -948,6 +948,14 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
+	else if (strutil::StartsWith(pClassId, _T("air_balloon")))
+	{
+		UiCure::Machine* lBalloon = new Life::ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		Cure::Health::Set(lBalloon, 1);
+		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
+		lBalloon->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
+		lObject = lBalloon;
+	}
 	else
 	{
 		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
@@ -1015,6 +1023,10 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			} while (lColor.GetDistanceSquared(mLastVehicleColor) < 1);
 			mLastVehicleColor = lColor;
 			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
+		}
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("air_balloon")))
+		{
+			pObject->SetEnginePower(3, 1);
 		}
 		else
 		{
@@ -1141,7 +1153,8 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 			lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
 		{
 			lIsRotor = true;
-			lCollisionImpactFactor *= Math::Lerp(1000.0f, 2.0f, lChildishness);
+			TBC::ChunkyBoneGeometry* lHitBone = pObject2->GetPhysics()->GetBoneGeometry(pBody2Id);
+			lCollisionImpactFactor *= Math::Lerp(1000.0f * lHitBone->GetImpactFactor(), 2.0f, lChildishness);
 		}
 	}
 	else

@@ -33,9 +33,7 @@ PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels, float pSensitiv
 	mWorldID = dWorldCreate();
 	
 	// Play with these to make the simulation behave better.
-	::dWorldSetCFM(mWorldID, 1e-9f);	// World softness and numerical stability.
-	::dWorldSetERP(mWorldID, 0.9f);		// Error reduction.
-	::dWorldSetQuickStepNumIterations(mWorldID, 20);
+	SetSimulationParameters(0, 0, 1);
 
 	if (pSensitivity)
 	{
@@ -82,8 +80,10 @@ PhysicsManagerODE::~PhysicsManagerODE()
 
 void PhysicsManagerODE::SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy)
 {
-	::dWorldSetCFM(mWorldID, Math::Lerp(1e-9f, 1e-2f, pSoftness));		// World softness and numerical stability.
-	::dWorldSetERP(mWorldID, Math::Lerp(0.9f, 0.2f, pRubberbanding));	// Error reduction.
+	mWorldCfm = Math::Lerp(1e-9f, 1e-2f, pSoftness);	// World softness and numerical stability, i.e peneraation.
+	::dWorldSetCFM(mWorldID, mWorldCfm);
+	mWorldErp = Math::Lerp(0.9f, 0.2f, pRubberbanding);
+	::dWorldSetERP(mWorldID, mWorldErp);	// Error reduction.
 	::dWorldSetQuickStepNumIterations(mWorldID, (int)Math::Lerp(1, 20, pAccuracy));
 }
 
@@ -3463,10 +3463,15 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			}
 			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
 			lC.surface.bounce_vel = (dReal)0.000001;
-			if (lC.surface.bounce < 0.1f)
+			if (lC.surface.bounce < 1e-1f)
 			{
 				lC.surface.mode |= dContactSoftERP;
-				lC.surface.soft_erp = Math::Lerp(0.0f, 1.0f, lC.surface.bounce * 10);
+				lC.surface.soft_erp = lC.surface.bounce * 1e1f * mWorldErp;
+			}
+			if (lC.surface.bounce < 1e-7f)
+			{
+				lC.surface.mode |= dContactSoftCFM;
+				lC.surface.soft_cfm = Math::Lerp(1e8f, 1.0f, lC.surface.bounce * 1e7f) * mWorldCfm;
 			}
 
 			if (lObject1->mForceFeedbackId != 0 ||
@@ -3587,6 +3592,8 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 
 
 
+float PhysicsManagerODE::mWorldErp;
+float PhysicsManagerODE::mWorldCfm;
 LOG_CLASS_DEFINE(PHYSICS, PhysicsManagerODE);
 
 
