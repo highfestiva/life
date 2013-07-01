@@ -28,6 +28,7 @@ public:
 			str pType,
 			float pDistanceNormal,
 			float pLikeliness);
+		SplinePath(const SplinePath& pOriginal);
 		const str& GetType() const;
 		float GetDistanceNormal() const;
 		float GetLikeliness() const;
@@ -45,6 +46,7 @@ public:
 	virtual void SetTagIndex(int pIndex);
 	int GetPathCount() const;
 	SplinePath* GetPath(int pIndex) const;
+	SplinePath* GetPath(const str& pType) const;
 
 private:
 	typedef std::vector<SplinePath*> PathArray;

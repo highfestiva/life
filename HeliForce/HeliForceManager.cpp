@@ -47,6 +47,7 @@
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "../UiTBC/Include/UiRenderer.h"
 #include "CenteredMachine.h"
+#include "AirBalloonPilot.h"
 #include "Automan.h"
 #include "Autopilot.h"
 #include "HeliForceConsoleManager.h"
@@ -443,7 +444,15 @@ void HeliForceManager::DrawSyncDebugInfo()
 	if (GetLevel() && GetLevel()->QueryPath()->GetPath(0))
 	{
 		UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), GetContext(), 0, GetTickLock());
-		lDebugRenderer.RenderSpline(mUiManager, GetLevel()->QueryPath()->GetPath(0));
+		for (int x = 0; x < 20; ++x)
+		{
+			Cure::ContextPath::SplinePath* lPath = GetLevel()->QueryPath()->GetPath(x);
+			if (!lPath)
+			{
+				break;
+			}
+			lDebugRenderer.RenderSpline(mUiManager, lPath);
+		}
 	}
 }
 
@@ -1028,6 +1037,16 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("air_balloon")))
 		{
 			pObject->SetEnginePower(3, 1);
+			new AirBalloonPilot(this, pObject->GetInstanceId());
+			if (mLastVehicleColor.y > 0.4f && mLastVehicleColor.x < 0.3f && mLastVehicleColor.z < 0.3f)
+			{
+				mLastVehicleColor = Vector3DF(0.6f, 0.2f, 0.2f);
+				((UiCure::CppContextObject*)pObject)->GetMesh(2)->GetBasicMaterialSettings().mDiffuse = mLastVehicleColor;
+			}
+			else
+			{
+				mLastVehicleColor = Vector3DF(0, 1, 0);
+			}
 		}
 		else
 		{

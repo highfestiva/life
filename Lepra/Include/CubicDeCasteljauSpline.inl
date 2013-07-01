@@ -6,16 +6,45 @@
 
 template<class T, class TimeType, class TBase>
 CubicDeCasteljauSpline<T, TimeType, TBase>::CubicDeCasteljauSpline(T* pKeyFrames,
-	TimeType* pTimeTags, int pCount, SplineType pSplineType, DataPolicy pPolicy):
-	mKeyFrames(pKeyFrames),
-	mTempBuffer(0),
-	mTimeTags(pTimeTags),
-	mCount(pCount),
-	mSplineType(pSplineType),
-	mPolicy(pPolicy),
-	mCurrentTime(0),
-	mEnableModulo(true)
+	TimeType* pTimeTags, int pCount, SplineType pSplineType, DataPolicy pPolicy)
 {
+	Set(pKeyFrames, pTimeTags, pCount, pSplineType, pPolicy);
+}
+
+template<class T, class TimeType, class TBase>
+CubicDeCasteljauSpline<T, TimeType, TBase>::CubicDeCasteljauSpline(const CubicDeCasteljauSpline& pOriginal, DataPolicy pPolicy)
+{
+	Set(pOriginal.mKeyFrames, pOriginal.mTimeTags, pOriginal.mCount, pOriginal.mSplineType, pPolicy);
+}
+
+template<class T, class TimeType, class TBase>
+CubicDeCasteljauSpline<T, TimeType, TBase>::~CubicDeCasteljauSpline()
+{
+	if (mPolicy != COPY_REFERENCE)
+	{
+		delete[] mKeyFrames;
+		delete[] mTimeTags;
+	}
+
+	if (mTempBuffer != 0)
+	{
+		delete[] mTempBuffer;
+	}
+}
+
+template<class T, class TimeType, class TBase>
+void CubicDeCasteljauSpline<T, TimeType, TBase>::Set(T* pKeyFrames,
+	TimeType* pTimeTags, int pCount, SplineType pSplineType, DataPolicy pPolicy)
+{
+	mKeyFrames = pKeyFrames;
+	mTempBuffer = 0;
+	mTimeTags = pTimeTags;
+	mCount = pCount;
+	mSplineType = pSplineType;
+	mPolicy = pPolicy;
+	mCurrentTime = 0;
+	mEnableModulo = true;
+
 	if (mPolicy == FULL_COPY)
 	{
 		mKeyFrames = new T[mCount];
@@ -35,21 +64,6 @@ CubicDeCasteljauSpline<T, TimeType, TBase>::CubicDeCasteljauSpline(T* pKeyFrames
 	{
 		assert(mTimeTags[i - 1] < mTimeTags[i]);
 	}*/
-}
-
-template<class T, class TimeType, class TBase>
-CubicDeCasteljauSpline<T, TimeType, TBase>::~CubicDeCasteljauSpline()
-{
-	if (mPolicy != COPY_REFERENCE)
-	{
-		delete[] mKeyFrames;
-		delete[] mTimeTags;
-	}
-
-	if (mTempBuffer != 0)
-	{
-		delete[] mTempBuffer;
-	}
 }
 
 template<class T, class TimeType, class TBase>

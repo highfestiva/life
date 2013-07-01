@@ -28,6 +28,14 @@ ContextPath::SplinePath::SplinePath(Vector3DF* pKeyFrames,
 	EnableModulo(false);
 }
 
+ContextPath::SplinePath::SplinePath(const SplinePath& pOriginal):
+	Parent(pOriginal),
+	mType(pOriginal.mType),
+	mDistanceNormal(pOriginal.mDistanceNormal),
+	mLikeliness(pOriginal.mLikeliness)
+{
+}
+
 const str& ContextPath::SplinePath::GetType() const
 {
 	return mType;
@@ -147,6 +155,19 @@ ContextPath::SplinePath* ContextPath::GetPath(int pIndex) const
 		return 0;
 	}
 	return mPathArray[pIndex];
+}
+
+ContextPath::SplinePath* ContextPath::GetPath(const str& pType) const
+{
+	PathArray::const_iterator x = mPathArray.begin();
+	for (; x != mPathArray.end(); ++x)
+	{
+		if ((*x)->GetType() == pType)
+		{
+			return *x;
+		}
+	}
+	return 0;
 }
 
 

@@ -43,7 +43,7 @@ void Autopilot::Reset()
 	{
 		return;
 	}
-	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(0);
+	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(_T("player_path"));
 	lPath->GotoAbsoluteTime(0);
 }
 
@@ -57,7 +57,7 @@ Vector3DF Autopilot::GetSteering()
 	Cure::ContextObject* lChopper = mGame->GetAvatar();
 	if (!lChopper || !lChopper->IsLoaded() || lChopper->GetPhysics()->GetEngineCount() < 3)
 	{
-		Spline* lPath = lLevel->QueryPath()->GetPath(0);
+		Spline* lPath = lLevel->QueryPath()->GetPath(_T("player_path"));
 		lPath->GotoAbsoluteTime(0);
 		return Vector3DF();
 	}
@@ -69,7 +69,7 @@ Vector3DF Autopilot::GetSteering()
 
 	Vector3DF lClosestPoint;
 	mClosestPathDistance = GetClosestPathDistance(lTowards, lClosestPoint);
-	Spline* lPath = lLevel->QueryPath()->GetPath(0);
+	Spline* lPath = lLevel->QueryPath()->GetPath(_T("player_path"));
 	Vector3DF lAim = lPath->GetValue() - lTowards;
 	Vector3DF lAimNear(0, 0, ::std::max(lAim.z, 0.0f));
 	const float lSpeedLimit = (lPath->GetDistanceLeft() < 20.0f) ? 4.0f : 60.0f;
@@ -99,7 +99,7 @@ Vector3DF Autopilot::GetLastAvatarPosition() const
 
 float Autopilot::GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint) const
 {
-	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(0);
+	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(_T("player_path"));
 	const float lCurrentTime = lPath->GetCurrentInterpolationTime();
 
 	float lNearestDistance;
