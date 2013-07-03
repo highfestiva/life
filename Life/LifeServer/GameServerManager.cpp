@@ -647,7 +647,7 @@ void GameServerManager::TickInput()
 			case Cure::NetworkAgent::RECEIVE_OK:
 			{
 				Client* lClient = GetClientByAccount(lAccountId);
-				assert (lClient);
+				deb_assert (lClient);
 				//log_volatile(mLog.Debugf(_T("Received data from %s."), lClient->GetUserConnection()->GetLoginName().c_str()));
 				Cure::Packet::ParseResult lParseResult;
 				// Walk packets.

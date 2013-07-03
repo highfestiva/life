@@ -88,7 +88,7 @@ void Log::AddListener(LogListener* pLogger, LogLevel pLevel)
 	if (pLevel >= LEVEL_INFO)
 #endif // !NO_LEVEL_DEBUG_INFO
 	{
-		assert (pLevel >= LEVEL_LOWEST_TYPE && pLevel < LEVEL_TYPE_COUNT);
+		deb_assert(pLevel >= LEVEL_LOWEST_TYPE && pLevel < LEVEL_TYPE_COUNT);
 		if (pLevel >= LEVEL_LOWEST_TYPE && pLevel < LEVEL_TYPE_COUNT)
 		{
 			ScopeSpinLock lScopeLock(mLoggerListLock);

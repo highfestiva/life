@@ -27,7 +27,7 @@ template<class _Data> void SequencialPerformanceData<_Data>::Set(double pMinimum
 
 template<class _Data> void SequencialPerformanceData<_Data>::Append(double pTime, double pStartTime, _Data pValue)
 {
-	assert (pTime >= 0);
+	deb_assert (pTime >= 0);
 	if (pTime > 0)
 	{
 		double lPeriodValue = (pValue-mPreviousValue)/pTime;
