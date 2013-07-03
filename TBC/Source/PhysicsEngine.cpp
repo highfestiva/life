@@ -19,7 +19,8 @@ namespace TBC
 
 
 
-#define CUBE_DIAGONAL	1.2247448713915890490986420373529f
+#define MAX_ASPECT_INDEX	40
+#define CUBE_DIAGONAL		1.2247448713915890490986420373529f
 
 
 
@@ -103,7 +104,7 @@ PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const
 
 bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 {
-	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
+	assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
 	assert(pValue >= -10000);
 	assert(pValue <= +10000);
 
@@ -641,7 +642,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 
 float PhysicsEngine::GetValue() const
 {
-	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
+	assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
 	if (mEngineType == ENGINE_PUSH_RELATIVE || mEngineType == ENGINE_PUSH_ABSOLUTE)
 	{
 		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
@@ -746,7 +747,7 @@ void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 	mMaxSpeed2 = Endian::BigToHostF(lData[3]);
 	mFriction = Endian::BigToHostF(lData[4]);
 	mControllerIndex = Endian::BigToHost(lData[5]);
-	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
+	assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
 	const int lControlledNodeCount = Endian::BigToHost(lData[6]);
 	int x;
 	for (x = 0; x < lControlledNodeCount; ++x)

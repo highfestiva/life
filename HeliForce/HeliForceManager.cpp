@@ -1110,6 +1110,12 @@ void HeliForceManager::OnLevelLoadCompleted()
 		mRenderHemisphere = true;
 		mHemisphere->ReplaceTexture(0, mLevel->GetBackgroundName());
 	}
+
+	for (int lEngine = 30; lEngine < 40; ++lEngine)
+	{
+		mLevel->SetEnginePower(lEngine, 1.0f);
+	}
+
 	GetLandingTriggerPosition(mLevel);	// Update shadow landing trigger position.
 	mZoomPlatform = false;
 }

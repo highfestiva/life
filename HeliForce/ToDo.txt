@@ -25,6 +25,7 @@
   . Traps with smoke and sound!
   . Falling stones!
   . Automatic doors.
+  . Propellers.
   . Push stones over edges to open...
   . Break hot-air ballon to open...
   . Add turrets to some levels.

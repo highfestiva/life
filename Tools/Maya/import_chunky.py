@@ -62,9 +62,9 @@ class GroupReader(DefaultMAReader):
 				     "polyBridgeEdge", "polySeparate", "polyChipOff", \
 				     "deleteUVSet", "plusMinusAverage", "transformGeometry", \
 				     "cameraView", "directionalLight", "brush", \
-				     "createUVSet", "animCurveTU", "animCurveTA", "polyPlane"]
+				     "createUVSet", "animCurveTU", "animCurveTA"]
 		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", \
-		                     "polyAutoProj"]
+		                     "polyAutoProj", "polyPlane"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
 				     "file"]
 		self.basename = basename
@@ -759,7 +759,7 @@ class GroupReader(DefaultMAReader):
 				required = [("type", lambda x: type(x) == str),
 					    ("strength", lambda x: x > 0 and x < 30000),
 					    ("max_velocity", lambda x: len(x)==2 and x[0]>=-300 and x[0]<=300 and x[1]>=-300 and x[1]<=300),
-					    ("controller_index", lambda x: x >= 0 and x < 20),
+					    ("controller_index", lambda x: x >= 0 and x < 40),
 					    ("connected_to", check_connected_to)]
 				for name, engine_check in required:
 					allApplied &= self._query_attribute(node, name, engine_check)[0]
