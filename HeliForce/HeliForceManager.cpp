@@ -1443,7 +1443,7 @@ void HeliForceManager::MoveCamera()
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
 		mHelicopterPosition = lAvatarPosition;
-		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -60, 0));
+		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -75, 0));
 		++mPostZoomPlatformFrameCount;
 		if (Cure::Health::Get(lAvatar) <= 0)
 		{
@@ -1457,11 +1457,11 @@ void HeliForceManager::MoveCamera()
 		}
 		else if (mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
 		{
-			lTargetTransform.GetPosition().z += 30;
+			lTargetTransform.GetPosition().z += 37;
 		}
 		Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
 
-		const float lCamNormalizedDistance = mCameraTransform.GetPosition().GetDistance(lAvatarPosition) / 40;
+		const float lCamNormalizedDistance = mCameraTransform.GetPosition().GetDistance(lAvatarPosition) / 50;
 		if (lCamNormalizedDistance < 2.5f)
 		{
 			const float lMaxCamSpeed = Math::SmoothClamp(lCamNormalizedDistance, 0.1f, 5.0f, 0.3f);

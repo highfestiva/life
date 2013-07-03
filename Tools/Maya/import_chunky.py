@@ -62,8 +62,9 @@ class GroupReader(DefaultMAReader):
 				     "polyBridgeEdge", "polySeparate", "polyChipOff", \
 				     "deleteUVSet", "plusMinusAverage", "transformGeometry", \
 				     "cameraView", "directionalLight", "brush", \
-				     "createUVSet", "animCurveTU", "animCurveTA"]
-		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", "polyAutoProj"]
+				     "createUVSet", "animCurveTU", "animCurveTA", "polyPlane"]
+		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", \
+		                     "polyAutoProj"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
 				     "file"]
 		self.basename = basename

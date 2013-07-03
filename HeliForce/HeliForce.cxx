@@ -257,7 +257,7 @@ str HeliForce::GetVersion() const
 
 Cure::ApplicationTicker* HeliForce::CreateTicker() const
 {
-	return new HeliForceTicker(mUiManager, mResourceManager, 200, 5, 1);
+	return new HeliForceTicker(mUiManager, mResourceManager, 200, 5, 5);
 }
 
 
