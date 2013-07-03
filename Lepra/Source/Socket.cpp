@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/Socket.h"
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include <algorithm>
 #include <fcntl.h>
 #include "../Include/HashUtil.h"
@@ -294,12 +294,12 @@ IOError BufferedIo::AppendSendBuffer(const void* pData, int pLength)
 		if (!mInSendBuffer)
 		{
 			SetInSenderList(true);
-			assert(!mMuxIo->IsSender(this));
+			deb_assert(!mMuxIo->IsSender(this));
 			mMuxIo->AddSender(this);
 		}
 		else
 		{
-			assert(mMuxIo->IsSender(this));
+			deb_assert(mMuxIo->IsSender(this));
 		}
 		::memcpy(&mSendBuffer.mDataBuffer[mSendBuffer.mDataSize], pData, pLength);
 		mSendBuffer.mDataSize += (int)pLength;
@@ -621,8 +621,8 @@ int TcpSocket::Receive(void* pData, int pMaxSize, double pTimeout)
 
 bool TcpSocket::Unreceive(void* pData, int pByteCount)
 {
-	assert(mUnreceivedByteCount == 0);
-	assert(pByteCount <= (int)sizeof(mUnreceivedArray));
+	deb_assert(mUnreceivedByteCount == 0);
+	deb_assert(pByteCount <= (int)sizeof(mUnreceivedArray));
 	bool lOk = (mUnreceivedByteCount == 0 && pByteCount <= (int)sizeof(mUnreceivedArray));
 	if (lOk)
 	{
@@ -919,7 +919,7 @@ int TcpMuxSocket::BuildConnectedSocketSet(FdSet& pSocketSet)
 	{
 		lSocketCount = FdSetHelper::Copy(pSocketSet, mBackupFdSet);
 	}
-	assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&pSocketSet));
+	deb_assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&pSocketSet));
 	return (lSocketCount);
 }
 
@@ -1046,7 +1046,7 @@ void TcpMuxSocket::SelectThreadEntry()
 			timeval lTimeout;
 			lTimeout.tv_sec = 0;
 			lTimeout.tv_usec = 200000;
-			assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&lReadSet));
+			deb_assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&lReadSet));
 			FdSet lExceptionSet;
 			FdSetHelper::Copy(lExceptionSet, lReadSet);
 			int lSelectCount = ::select(LEPRA_FD_GET_MAX_HANDLE(&lReadSet)+1, LEPRA_FDS(&lReadSet), 0, LEPRA_FDS(&lExceptionSet), &lTimeout);
@@ -1317,7 +1317,7 @@ UdpVSocket* UdpMuxSocket::Connect(const SocketAddress& pTargetAddress, const std
 			lSocket = *lIter;
 			if (lSocket->GetTargetAddress() != pTargetAddress)
 			{
-				assert(false);
+				deb_assert(false);
 				lSocket = 0;
 			}
 		}
@@ -2013,7 +2013,7 @@ DualSocket* DualMuxSocket::PopSenderSocket()
 		}
 	}
 
-	assert(!lSocket || lSocket->IsOpen());
+	deb_assert(!lSocket || lSocket->IsOpen());
 	return (lSocket);
 }
 
@@ -2110,7 +2110,7 @@ void DualMuxSocket::DispatchCloseSocket(DualSocket* pSocket)
 void DualMuxSocket::AddUdpReceiverSocket(UdpVSocket* pUdpSocket)
 {
 	ScopeLock lLock(&mLock);
-	assert(HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
+	deb_assert(HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
 	mUdpMuxSocket->AddReceiver(pUdpSocket);
 }
 
@@ -2118,17 +2118,17 @@ void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 {
 	if (pTcpSocket && pUdpSocket)
 	{
-		assert(!HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()));
+		deb_assert(!HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()));
 	}
 	if (pTcpSocket)
 	{
-		assert(!HashUtil::FindMapObject(mTcpSocketMap, pTcpSocket));
+		deb_assert(!HashUtil::FindMapObject(mTcpSocketMap, pTcpSocket));
 		pSocket->SetSocket(pTcpSocket);
 		mTcpSocketMap.insert(TcpSocketMap::value_type(pTcpSocket, pSocket));
 	}
 	if (pUdpSocket)
 	{
-		assert(!HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
+		deb_assert(!HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
 		pSocket->SetSocket(pUdpSocket);
 		mUdpSocketMap.insert(UdpSocketMap::value_type(pUdpSocket, pSocket));
 	}
@@ -2212,7 +2212,7 @@ DualSocket::DualSocket(DualMuxSocket* pMuxSocket, const std::string& pConnection
 bool DualSocket::SetSocket(TcpVSocket* pSocket)
 {
 	bool lOk = (!mTcpSocket);
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		mTcpSocket = pSocket;
@@ -2223,7 +2223,7 @@ bool DualSocket::SetSocket(TcpVSocket* pSocket)
 bool DualSocket::SetSocket(UdpVSocket* pSocket)
 {
 	bool lOk = (!mUdpSocket);
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		mUdpSocket = pSocket;

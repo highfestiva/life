@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -45,7 +45,7 @@ void Props::SetOpacity(float pOpacity)
 
 void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale, float pAngularRange, float pTime)
 {
-	//assert(pStartVelocity.GetLengthSquared() < 1000*1000);
+	//deb_assert(pStartVelocity.GetLengthSquared() < 1000*1000);
 	mParticleType = pParticleType;
 	mVelocity = pStartVelocity;
 	mScale = pScale;
@@ -161,7 +161,7 @@ void Props::OnAlarm(int pAlarmId, void* /*pExtraData*/)
 {
 	if (pAlarmId == 5)
 	{
-		assert(mParticleType != PARTICLE_NONE);
+		deb_assert(mParticleType != PARTICLE_NONE);
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }

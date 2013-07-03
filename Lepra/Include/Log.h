@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 // Use LogDecorator and pass typeid(class) as constructor parameter.
 

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2013, Pixel Doctrine
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -39,8 +39,8 @@ void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, Bil
 {
 	mGasTextureCount = pGasTextureCount;
 	mTotalTextureCount = pTotalTextureCount;
-	assert(mTotalTextureCount >= mGasTextureCount);
-	assert(mTotalTextureCount > 0);
+	deb_assert(mTotalTextureCount >= mGasTextureCount);
+	deb_assert(mTotalTextureCount > 0);
 	mBillboardGas = pGas;
 	mBillboardShrapnel = pShrapnel;
 	mBillboardSpark = pSpark;
@@ -120,7 +120,7 @@ void ParticleRenderer::Render()
 		{
 			mRenderer->SetLightPosition(y->mRenderLightId, y->mPosition);
 			mRenderer->SetLightColor(y->mRenderLightId, Vector3DF(0.6f, 0.4f, 0.2f) * y->mStrength * 30.0f);
-			assert(y->mStrength >= 0 && y->mStrength < 1000);
+			deb_assert(y->mStrength >= 0 && y->mStrength < 1000);
 		}
 	}
 }
@@ -308,7 +308,7 @@ void ParticleRenderer::CreateBillboards(const Vector3DF& pPosition, float pStren
 		lBillboard.mOpacity = 0;
 		lBillboard.mOpacityFactor = 1;
 		lBillboard.mOpacityTime = Random::Uniform(0.0f, 0.3f);
-		assert(pTimeFactor > 0);
+		deb_assert(pTimeFactor > 0);
 		lBillboard.mTimeFactor = Random::Uniform(pTimeFactor*0.7f, pTimeFactor*1.3f);
 	}
 }
@@ -335,7 +335,7 @@ void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, 
 		x->mOpacity = (::sin(x->mOpacityTime) + 0.7f) * x->mOpacityFactor;
 		if (x->mOpacity <= 0.0f || x->mOpacityTime > PARTICLE_TIME)
 		{
-			assert(x->mOpacityTime > PIF);	// Verify that the particle was visible at all, or the algo's wrong.
+			deb_assert(x->mOpacityTime > PIF);	// Verify that the particle was visible at all, or the algo's wrong.
 			x = pBillboards.erase(x);
 		}
 		else

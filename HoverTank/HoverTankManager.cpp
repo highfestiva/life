@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -332,7 +332,7 @@ Cure::GameObjectId HoverTankManager::GetAvatarInstanceId() const
 
 bool HoverTankManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 {
-	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
+	deb_assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
@@ -457,7 +457,7 @@ bool HoverTankManager::InitializeUniverse()
 		mSun = new UiCure::Props(GetResourceManager(), _T("sun"), mUiManager);
 		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			mSun->StartLoading();
@@ -623,9 +623,9 @@ void HoverTankManager::TickUiInput()
 			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
 			const float lSteeringPower = std::abs(lLeftPowerFwdRev);
 			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
-			assert(lLeftPowerFwdRev >=  -3 && lLeftPowerFwdRev <=  +3);
-			assert(lLeftPowerLR     >=  -3 &&     lLeftPowerLR <=  +3);
-			assert(lRightPowerLR    >= -12 &&    lRightPowerLR <= +12);
+			deb_assert(lLeftPowerFwdRev >=  -3 && lLeftPowerFwdRev <=  +3);
+			deb_assert(lLeftPowerLR     >=  -3 &&     lLeftPowerLR <=  +3);
+			deb_assert(lRightPowerLR    >= -12 &&    lRightPowerLR <= +12);
 
 			// Mouse controls yaw angle.
 			const float lAngleDelta = S(YAW_ANGLE) * 0.05f;
@@ -807,7 +807,7 @@ bool HoverTankManager::UpdateMassObjects(const Vector3DF& pPosition)
 	for (; x != mMassObjectArray.end(); ++x)
 	{
 		Life::MassObject* lObject = (Life::MassObject*)GetContext()->GetObject(*x, true);
-		assert(lObject);
+		deb_assert(lObject);
 		lObject->SetRootPosition(pPosition);
 	}
 	return lOk;
@@ -1104,7 +1104,7 @@ void HoverTankManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	switch (pWeapon)
 	{
 		case 0:	lAmmo = _T("bullet");	break;
-		default: assert(false); return;
+		default: deb_assert(false); return;
 	}
 	Life::FastProjectile* lProjectile = new Life::FastProjectile(GetResourceManager(), lAmmo, mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);

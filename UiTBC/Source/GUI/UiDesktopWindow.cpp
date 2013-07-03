@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -374,7 +374,7 @@ void DesktopWindow::PostDeleteComponent(Component* pComponent, int /*pLayer*/)
 
 Painter* DesktopWindow::GetPainter()
 {
-	assert(this);
+	deb_assert(this);
 	return (mPainter);
 }
 

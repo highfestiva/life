@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -41,7 +41,7 @@ GameManager* ContextManager::GetGameManager() const
 
 void ContextManager::SetLocalRange(unsigned pIndex, unsigned pCount)
 {
-	assert(mObjectTable.empty());
+	deb_assert(mObjectTable.empty());
 	const GameObjectId lStartId = 0x40000000;
 	const GameObjectId lBlockSize = (0x7FFFFFFF-lStartId-pCount)/pCount;
 	const GameObjectId lOffset = lStartId + lBlockSize*pIndex;
@@ -56,18 +56,18 @@ void ContextManager::SetIsObjectOwner(bool pIsObjectOwner)
 
 void ContextManager::AddLocalObject(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId() == 0);
+	deb_assert(pObject->GetInstanceId() == 0);
 	pObject->SetInstanceId(AllocateGameObjectId(NETWORK_OBJECT_LOCAL_ONLY));
-	assert(pObject->GetManager() == 0);
+	deb_assert(pObject->GetManager() == 0);
 	pObject->SetManager(this);
 	AddObject(pObject);
 }
 
 void ContextManager::AddObject(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId() != 0);
-	assert(mObjectTable.find(pObject->GetInstanceId()) == mObjectTable.end());
-	assert(pObject->GetManager() == this);
+	deb_assert(pObject->GetInstanceId() != 0);
+	deb_assert(mObjectTable.find(pObject->GetInstanceId()) == mObjectTable.end());
+	deb_assert(pObject->GetManager() == this);
 	mObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
@@ -144,10 +144,10 @@ void ContextManager::ClearObjects()
 
 void ContextManager::AddPhysicsSenderObject(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId() != 0);
-	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
-	assert(pObject->GetManager() == this);
-	assert(pObject->GetManager()->GetGameManager()->GetTickLock()->IsOwner());
+	deb_assert(pObject->GetInstanceId() != 0);
+	deb_assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
+	deb_assert(pObject->GetManager() == this);
+	deb_assert(pObject->GetManager()->GetGameManager()->GetTickLock()->IsOwner());
 	mPhysicsSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
@@ -166,9 +166,9 @@ void ContextManager::RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId)
 
 void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId() != 0);
-	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
-	assert(pObject->GetManager() == this);
+	deb_assert(pObject->GetInstanceId() != 0);
+	deb_assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
+	deb_assert(pObject->GetManager() == this);
 	mAttributeSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
@@ -215,7 +215,7 @@ bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
 
 void ContextManager::EnableTickCallback(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId());
+	deb_assert(pObject->GetInstanceId());
 	mTickCallbackObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
@@ -239,7 +239,7 @@ void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
 
 void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
-	assert(pObject->GetInstanceId() != 0);
+	deb_assert(pObject->GetInstanceId() != 0);
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
 	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));

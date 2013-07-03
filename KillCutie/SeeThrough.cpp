@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -47,13 +47,13 @@ void SeeThrough::SetTagIndex(int pIndex)
 	else
 	{
 		mLog.AError("Badly configured see-through tag!");
-		assert(false);
+		deb_assert(false);
 	}
 }
 
 void SeeThrough::OnTick()
 {
-	assert(mTag);
+	deb_assert(mTag);
 	if (!mTag)
 	{
 		return;

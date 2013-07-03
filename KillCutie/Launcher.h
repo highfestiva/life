@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2011, Pixel Doctrine
+// Copyright (c) Pixel Doctrine
 
 
 

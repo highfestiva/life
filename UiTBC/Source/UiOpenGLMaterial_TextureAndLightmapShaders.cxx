@@ -1,8 +1,8 @@
 /*
 	File:   OpenGLMaterials_TextureAndLightmapShaders.cpp
 	Class:  -
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 #include "../Include/UiOpenGLMaterials.h"

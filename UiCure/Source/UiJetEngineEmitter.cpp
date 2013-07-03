@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -79,7 +79,7 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 		pTag.mMeshIndexList.size() < 1)
 	{
 		mLog.Errorf(_T("The fire tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	const int lEngineIndex = pTag.mEngineIndexList[0];

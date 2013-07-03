@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -147,8 +147,8 @@ void Npc::OnTick()
 		lRight *= mIntelligence;
 		lPhi /= mIntelligence;
 	}
-	assert(lPhi >= -10000);
-	assert(lPhi <= +10000);
+	deb_assert(lPhi >= -10000);
+	deb_assert(lPhi <= +10000);
 	lMyAvatar->SetEnginePower(0, Math::Clamp(lFwd-lPhi, -1.0f, +1.0f));
 	lMyAvatar->SetEnginePower(1, Math::Clamp(lRight, -1.0f, +1.0f));
 	lMyAvatar->SetEnginePower(4, Math::Clamp(lFwd+lPhi, -1.0f, +1.0f));

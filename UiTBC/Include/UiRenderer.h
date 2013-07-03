@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2013, Pixel Doctrine
+// Copyright (c) Pixel Doctrine
 
 // This class is a high level interface to the sublevel rendering API (which can be OpenGL, Direct3D or some other API). 
 // The renderer uses a right handed coordinate system:

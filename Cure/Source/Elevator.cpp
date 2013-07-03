@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -160,7 +160,7 @@ void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObjec
 	(void)pNormal;
 
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
-	assert(lTrigger);
+	deb_assert(lTrigger);
 	if (lTrigger == mActiveTrigger)
 	{
 		mTrigTime.PopTimeDiff();
@@ -191,11 +191,11 @@ TBC::ChunkyBoneGeometry* Elevator::GetFirstBody() const
 {
 	const TBC::PhysicsTrigger* lTrigger = 0;
 	GetTriggerCount((const void*&)lTrigger);
-	assert(lTrigger && lTrigger->GetControlledEngineCount() > 0);
+	deb_assert(lTrigger && lTrigger->GetControlledEngineCount() > 0);
 	const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = lTrigger->GetControlledEngine(0);
 	typedef TBC::PhysicsEngine::GeometryList BodyList;
 	BodyList lBodyList = lEngineTrigger.mEngine->GetControlledGeometryList();
-	assert(!lBodyList.empty());
+	deb_assert(!lBodyList.empty());
 	return lBodyList[0];
 }
 
@@ -267,7 +267,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
 	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
 	mElevatorIsActive = true;

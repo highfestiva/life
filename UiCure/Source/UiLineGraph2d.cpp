@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiLineGraph2d.h"
 #include "../../Lepra/Include/CyclicArray.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 
 
 
@@ -46,7 +46,7 @@ LineGraph2d::~LineGraph2d()
 
 void LineGraph2d::TickLine(size_t pNewSize)
 {
-	assert(pNewSize > 0);
+	deb_assert(pNewSize > 0);
 	while (mData.size()+1 > pNewSize)
 	{
 		mData.pop_front();
@@ -57,7 +57,7 @@ void LineGraph2d::TickLine(size_t pNewSize)
 
 void LineGraph2d::AddSegment(const str& pName, double p1, double p2)
 {
-	assert(mData.size() > 0);
+	deb_assert(mData.size() > 0);
 	mData.back().push_back(Segment(p1, p2));
 	mNames.push_back(pName);
 }
@@ -82,7 +82,7 @@ void LineGraph2d::Render(int pMarginX, float pScaleX, int& pOffsetY) const
 
 void LineGraph2d::RenderNames(int x, int& pIoY) const
 {
-	assert(mData.size() > 0);
+	deb_assert(mData.size() > 0);
 	const Segments& lLines = mData.front();
 	int lIndex = 0;
 	Segments::const_iterator ix = lLines.begin();
@@ -130,7 +130,7 @@ LineGraph2d::ColorPicker::ColorPicker(int pIndex, UiTbc::Painter* mPainter)
 
 void LineGraph2d::operator=(const LineGraph2d&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

@@ -1,11 +1,11 @@
 
-// Author: Alexander Hugestrand, Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström, Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/Thread.h"
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include <stdio.h>
 #include "../Include/LepraTypes.h"
 #include "../Include/BusLock.h"
@@ -41,14 +41,14 @@ OwnedLock::OwnedLock():
 
 OwnedLock::~OwnedLock()
 {
-	assert(mAcquireCount == 0);
+	deb_assert(mAcquireCount == 0);
 }
 
 void OwnedLock::Reference()
 {
 	if (mAcquireCount == 0)
 	{
-		assert(!mOwner);
+		deb_assert(!mOwner);
 		mOwner = Thread::GetCurrentThread();
 	}
 	++mAcquireCount;
@@ -56,7 +56,7 @@ void OwnedLock::Reference()
 
 void OwnedLock::Dereference()
 {
-	assert(IsOwner());
+	deb_assert(IsOwner());
 	--mAcquireCount;
 	if (mAcquireCount == 0)
 	{

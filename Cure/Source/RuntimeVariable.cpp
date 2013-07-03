@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 // Warning: optimized code.
 
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../Include/RuntimeVariable.h"
 
@@ -228,7 +228,7 @@ str RuntimeVariable::GetTypeName(DataType pType)
 		case RuntimeVariable::DATATYPE_INT:	return _T("int");
 		case RuntimeVariable::DATATYPE_REAL:	return _T("real");
 	}
-	assert(false);
+	deb_assert(false);
 	return _T("void");
 }
 
@@ -240,7 +240,7 @@ bool RuntimeVariable::CheckType(DataType pType) const
 	}
 	mLog.Warningf(_T("Type error using variable %s; type should be %s, not %s!"),
 		mName.c_str(), GetTypeName(mDataType).c_str(), GetTypeName(pType).c_str());
-	//assert(false);
+	//deb_assert(false);
 	return false;
 }
 
@@ -735,7 +735,7 @@ RuntimeVariable* RuntimeVariableScope::GetVariable(const HashedString& pName, bo
 	}
 	if (lVariable)
 	{
-		assert(lVariable->GetName() == pName);
+		deb_assert(lVariable->GetName() == pName);
 	}
 	return (lVariable);
 }

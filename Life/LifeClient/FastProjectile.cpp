@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -51,7 +51,7 @@ void FastProjectile::OnLoaded()
 	Parent::OnLoaded();
 
 	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
-	assert(lTag);
+	deb_assert(lTag);
 
 	const float lMuzzleVelocity = lTag->mFloatValueList[0];
 	StartBullet(lMuzzleVelocity);
@@ -146,7 +146,7 @@ void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Contex
 
 void FastProjectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 {
-	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), GetPosition(), GetVelocity());

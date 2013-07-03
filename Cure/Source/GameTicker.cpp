@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -91,7 +91,7 @@ TBC::PhysicsManager* GameTicker::GetPhysicsManager(bool pIsThreadSafe) const
 		size_t lThisThreadId = Thread::GetCurrentThreadId();
 		// Make sure we're the physics thread, otherwise we're not allowed to
 		// read/write any physical stuff.
-		assert(lPhysicsThreadId == lThisThreadId);
+		deb_assert(lPhysicsThreadId == lThisThreadId);
 	}
 #endif // LEPRA_DEBUG
 	return mPhysicsManager;

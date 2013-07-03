@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -191,7 +191,7 @@ void Game::SetVehicleName(const str& pVehicle)
 	delete mVehicle;
 	mVehicle = (Vehicle*)GameManager::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (mVehicle != 0);
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		mVehicle->SetInitialTransform(GetVehicleStart());
@@ -624,7 +624,7 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (pOk && pObject == mVehicle)
 	{
-		assert(pObject->GetPhysics()->GetEngineCount() == 3);
+		deb_assert(pObject->GetPhysics()->GetEngineCount() == 3);
 		const str lName = _T("float_childishness");
 		new Cure::FloatAttribute(mVehicle, lName, 0.67f);
 	}
@@ -717,7 +717,7 @@ bool Game::InitializeUniverse()
 		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			mLevel->DisableRootShadow();

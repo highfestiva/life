@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -60,7 +60,7 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 	if (lIntervalCount < 2 || lIntervalCount > 3)
 	{
 		mLog.AError("Error: spawner has badly configured intervals!");
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 

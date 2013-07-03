@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -561,7 +561,7 @@ bool App::Poll()
 						delete mHiscoreAgent;
 						mHiscoreAgent = 0;
 						mLog.AError("Oops! Completed hiscore communication, but something went wrong.");
-						assert(false);
+						deb_assert(false);
 						MainMenu(false);	// Well... assume some super-shitty state...
 					}
 					break;

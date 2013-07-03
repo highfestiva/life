@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/CppContextObject.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
@@ -75,7 +75,7 @@ void CppContextObject::StabilizeTick()
 					lTag.mMeshIndexList.size() != 0)
 				{
 					mLog.Errorf(_T("The upright_stabilizer tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
-					assert(false);
+					deb_assert(false);
 					return;
 				}
 				lStabilityFactor = lTag.mFloatValueList[0];
@@ -92,7 +92,7 @@ void CppContextObject::StabilizeTick()
 					lTag.mMeshIndexList.size() != 0)
 				{
 					mLog.Errorf(_T("The forward_stabilizer tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
-					assert(false);
+					deb_assert(false);
 					return;
 				}
 				lStabilityFactor = lTag.mFloatValueList[0];
@@ -108,7 +108,7 @@ void CppContextObject::StabilizeTick()
 
 void CppContextObject::StartLoading()
 {
-	assert(mClassResource == 0);
+	deb_assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
 	const str lAssetName = GetClassId()+_T(".class");
 	mClassResource->Load(GetResourceManager(), lAssetName,
@@ -174,7 +174,7 @@ void CppContextObject::SetForceLoadUnique(bool pLoadUnique)
 
 void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 {
-	assert(mPhysicsResource == 0);
+	deb_assert(mPhysicsResource == 0);
 	const str lInstanceId = strutil::IntToString(GetInstanceId(), 10);
 	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPhysicsOverride, mManager->GetGameManager()->GetPhysicsManager(),
@@ -342,7 +342,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
-		assert(false);
+		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
@@ -357,7 +357,7 @@ void CppContextObject::OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResou
 	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load physics class '%s'."), pPhysicsResource->GetName().c_str());
-		assert(false);
+		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}

@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -502,7 +502,7 @@ void Button::SetText(const str& pText,
 		     const Color& pTextColor,
 		     const Color& pBackgColor)
 {
-	assert(pTextColor != BLACK);
+	deb_assert(pTextColor != BLACK);
 	mText           = pText;
 	SetFontColor(pTextColor);
 	mTextBackgColor = pBackgColor;

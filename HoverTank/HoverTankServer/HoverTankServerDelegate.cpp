@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -98,7 +98,7 @@ void HoverTankServerDelegate::OnLogin(Life::Client* pClient)
 #ifdef LEPRA_DEBUG
 	if (mGameServerManager->GetLoggedInClientCount() == 1)
 	{
-		assert(mNpcSet.empty());
+		deb_assert(mNpcSet.empty());
 	}
 #endif // Debug
 
@@ -122,7 +122,7 @@ void HoverTankServerDelegate::OnLogout(Life::Client* pClient)
 #ifdef LEPRA_DEBUG
 	if (mGameServerManager->GetLoggedInClientCount() == 0)
 	{
-		assert(mNpcSet.empty());
+		deb_assert(mNpcSet.empty());
 	}
 #endif // Debug
 }
@@ -245,7 +245,7 @@ void HoverTankServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 		case 1:		lAmmo = _T("grenade");							break;
 		case 2:		lAmmo = _T("rocket");							break;
 		case -10:	lAmmo = _T("bomb");	lIsFast = false;				break;
-		default: assert(false); return;
+		default: deb_assert(false); return;
 	}
 	Cure::ContextObject* lProjectile;
 	if (lIsFast)
@@ -370,9 +370,9 @@ Cure::ContextObject* HoverTankServerDelegate::CreateAvatarForNpc(Npc* pNpc)
 
 void HoverTankServerDelegate::AddAvatarToTeam(Cure::ContextObject* pAvatar, int pTeam)
 {
-	assert(pAvatar);
-	assert(pTeam == 0 || pTeam == 1);
-	assert(!IsAvatarObject(pAvatar));
+	deb_assert(pAvatar);
+	deb_assert(pTeam == 0 || pTeam == 1);
+	deb_assert(!IsAvatarObject(pAvatar));
 	mAvatarTeamSets[pTeam].insert(pAvatar->GetInstanceId());
 	Cure::IntAttribute* lTeam = (Cure::IntAttribute*)pAvatar->GetAttribute(_T("int_team"));
 	if (lTeam)
@@ -413,7 +413,7 @@ void HoverTankServerDelegate::RemoveAvatar(Cure::ContextObject* pAvatar)
 
 const HoverTankServerDelegate::AvatarIdSet& HoverTankServerDelegate::GetAvatarsInTeam(int pTeam)
 {
-	assert(pTeam == 0 || pTeam == 1);
+	deb_assert(pTeam == 0 || pTeam == 1);
 	return mAvatarTeamSets[pTeam];
 }
 
@@ -432,7 +432,7 @@ void HoverTankServerDelegate::CreateNpc()
 
 void HoverTankServerDelegate::DeleteNpc()
 {
-	assert(!mNpcSet.empty());
+	deb_assert(!mNpcSet.empty());
 	AvatarIdSet::iterator x = mNpcSet.begin();
 	mLog.Headlinef(_T("Deleting NPC %u."), *x);
 	mGameServerManager->GetContext()->PostKillObject(*x);
@@ -458,9 +458,9 @@ Npc* HoverTankServerDelegate::GetNpcByAvatar(Cure::GameObjectId pAvatarId) const
 
 void HoverTankServerDelegate::CreateScore(const str& pPlayerName, bool pCreatePing)
 {
-	assert(mScoreInfoId);
+	deb_assert(mScoreInfoId);
 	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
-	assert(lScoreInfo);
+	deb_assert(lScoreInfo);
 	new Cure::IntAttribute(lScoreInfo, KILLS + pPlayerName, 0);
 	new Cure::IntAttribute(lScoreInfo, DEATHS + pPlayerName, 0);
 	if (pCreatePing)
@@ -471,9 +471,9 @@ void HoverTankServerDelegate::CreateScore(const str& pPlayerName, bool pCreatePi
 
 void HoverTankServerDelegate::DeleteScore(const str& pPlayerName)
 {
-	assert(mScoreInfoId);
+	deb_assert(mScoreInfoId);
 	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
-	assert(lScoreInfo);
+	deb_assert(lScoreInfo);
 	lScoreInfo->DeleteAttribute(KILLS + pPlayerName);
 	lScoreInfo->DeleteAttribute(DEATHS + pPlayerName);
 	lScoreInfo->DeleteAttribute(PING + pPlayerName);
@@ -515,9 +515,9 @@ void HoverTankServerDelegate::AddPoint(const str& pPrefix, const Cure::ContextOb
 		}
 		lPlayerName = strutil::Format(_T("NPC %u"), lNpc->GetInstanceId());
 	}
-	assert(mScoreInfoId);
+	deb_assert(mScoreInfoId);
 	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
-	assert(lScoreInfo);
+	deb_assert(lScoreInfo);
 	Cure::IntAttribute* lAttribute = (Cure::IntAttribute*)lScoreInfo->GetAttribute(pPrefix+lPlayerName);
 	if (lAttribute)
 	{
@@ -528,11 +528,11 @@ void HoverTankServerDelegate::AddPoint(const str& pPrefix, const Cure::ContextOb
 void HoverTankServerDelegate::SetPoints(const str& pPrefix, const Life::Client* pClient, int pPoints)
 {
 	const str lPlayerName = strutil::Encode(pClient->GetUserConnection()->GetLoginName());
-	assert(mScoreInfoId);
+	deb_assert(mScoreInfoId);
 	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
-	assert(lScoreInfo);
+	deb_assert(lScoreInfo);
 	Cure::IntAttribute* lAttribute = (Cure::IntAttribute*)lScoreInfo->GetAttribute(pPrefix+lPlayerName);
-	assert(lAttribute);
+	deb_assert(lAttribute);
 	if (lAttribute)
 	{
 		lAttribute->SetValue(pPoints);
@@ -541,7 +541,7 @@ void HoverTankServerDelegate::SetPoints(const str& pPrefix, const Life::Client* 
 
 void HoverTankServerDelegate::DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pObject, Cure::FloatAttribute* pHealth, float pDamage)
 {
-	assert(pHealth);
+	deb_assert(pHealth);
 	const float lPriorHealth = pHealth->GetValue();
 	float lRemainingHealth = lPriorHealth - pDamage;
 	if (lPriorHealth > 0)

@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include <assert.h>
+#include "LepraAssert.h"
 #include <math.h>
 #include <vector>
 
@@ -101,7 +101,7 @@ public:
 	}
 	template<class _T> static inline _T SmoothClamp(_T value, _T min, _T max, _T part)
 	{
-		assert(part <= (_T)0.5);
+		deb_assert(part <= (_T)0.5);
 		const _T k = max-min;
 		_T x = (value-min) / k;	// Transpose to [min,max] -> [0-1].
 		const _T x0 = part;

@@ -1,11 +1,11 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiDisplayManager.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 
 
 
@@ -30,7 +30,7 @@ DisplayManager::~DisplayManager()
 	mEnumeratedDisplayModeCount = 0;
 
 	RemoveResizeObserver(this);
-	assert(mResizeObserverSet.empty());
+	deb_assert(mResizeObserverSet.empty());
 }
 
 

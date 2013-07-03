@@ -1,13 +1,13 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../../../Lepra/Include/Math.h"
+#include "../../../Lepra/Include/LepraAssert.h"
 #include "../../../Lepra/Include/ListUtil.h"
 #include "../../Include/GUI/UiTextArea.h"
-#include <assert.h>
 
 
 namespace UiTbc
@@ -245,7 +245,7 @@ void TextArea::ForceRepaint()
 
 TextArea::TextLineList::iterator TextArea::GetIterator(unsigned pLineIndex)
 {
-	assert(pLineIndex <= GetLineCount());
+	deb_assert(pLineIndex <= GetLineCount());
 	return ListUtil::FindByIndex(mLineList, pLineIndex);
 }
 

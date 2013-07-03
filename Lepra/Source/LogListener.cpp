@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Jonas Byström
+// Copyright (c) Jonas Byström
 
 
 
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include "../Include/Posix/MacLog.h"
 #include "../Include/LepraTarget.h"
 #include "../Include/LogListener.h"
@@ -33,7 +33,7 @@ LogListener::~LogListener()
 
 void LogListener::AddLog(Log* pLog)
 {
-	assert(mLog == 0 || mLog == pLog);
+	deb_assert(mLog == 0 || mLog == pLog);
 	if (mLog == 0 || mLog == pLog)
 	{
 		mLog = pLog;
@@ -42,7 +42,7 @@ void LogListener::AddLog(Log* pLog)
 
 void LogListener::RemoveLog(Log* pLog)
 {
-	assert(mLog == pLog);
+	deb_assert(mLog == pLog);
 	if (mLog == pLog)
 	{
 		mLog = 0;
@@ -54,7 +54,7 @@ void LogListener::KillSelf()
 	if (mLog)
 	{
 		mLog->RemoveListener(this);
-		assert(mLog == 0);
+		deb_assert(mLog == 0);
 	}
 }
 
@@ -396,7 +396,7 @@ void MemFileLogListener::WriteLog(const str& pFullMessage, LogLevel pLogLevel)
 	{
 		static size_t lSessionLogSize = 0;
 		lSessionLogSize += pFullMessage.length();
-		assert(lSessionLogSize < 4*1024*1024);	// TODO: something smarter using time as well (checking rate, opposed to size).
+		deb_assert(lSessionLogSize < 4*1024*1024);	// TODO: something smarter using time as well (checking rate, opposed to size).
 	}
 #endif // NO_ASSERT_ON_LOG_FLOOD
 

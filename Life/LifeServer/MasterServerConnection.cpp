@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
  
 
 
@@ -46,7 +46,7 @@ const str& MasterServerConnection::GetMasterAddress() const
 void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandler, double pConnectTimeout)
 {
 	mConnectTimeout = pConnectTimeout;
-	assert(!mSocketIoHandler || mSocketIoHandler == pSocketIoHandler);	// If this is not valid, you must at least remove *this* as a FilterIo listener from the socket before replacing it.
+	deb_assert(!mSocketIoHandler || mSocketIoHandler == pSocketIoHandler);	// If this is not valid, you must at least remove *this* as a FilterIo listener from the socket before replacing it.
 	mSocketIoHandler = pSocketIoHandler;
 	if (!pSocketIoHandler)
 	{
@@ -69,7 +69,7 @@ void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandl
 
 void MasterServerConnection::SendLocalInfo(const str& pLocalServerInfo)
 {
-	assert(!pLocalServerInfo.empty());
+	deb_assert(!pLocalServerInfo.empty());
 	if (mLocalServerInfo != pLocalServerInfo || mUploadTimeout.QueryTimeDiff() >= mServerInfoTimeout)
 	{
 		mLocalServerInfo = pLocalServerInfo;
@@ -243,13 +243,13 @@ bool MasterServerConnection::TickReceive(ServerInfo& pServerInfo)
 	if (!Receive(lCommandLine))
 	{
 		mLog.Error(_T("Someone snatched data received from master server!"));
-		assert(false);
+		deb_assert(false);
 		return false;
 	}
 	if (!MasterServerNetworkParser::ExtractServerInfo(lCommandLine, pServerInfo, &mVSocket->GetTargetAddress()))
 	{
 		mLog.Error(_T("Got bad formatted command from master server!"));
-		assert(false);
+		deb_assert(false);
 		return false;
 	}
 	return true;
@@ -299,8 +299,8 @@ void MasterServerConnection::StepState()
 			else
 			{
 				mLog.Warning(_T("Trying to connect while connecter still running!"));
-				assert(!mVSocket);
-				assert(false);
+				deb_assert(!mVSocket);
+				deb_assert(false);
 			}
 		}
 		break;
@@ -343,7 +343,7 @@ void MasterServerConnection::ConnectEntry()
 	if (mState != CONNECTING || mVSocket != 0)
 	{
 		mLog.Warning(_T("Starting connector thread while already working/connected!"));
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 
@@ -371,7 +371,7 @@ void MasterServerConnection::ConnectEntry()
 		return;
 	}
 	mSocketIoHandler->AddFilterIoSocket(mVSocket, lDropCallback);
-	assert(mState == CONNECTING);
+	deb_assert(mState == CONNECTING);
 	mState = CONNECTED;
 	mIdleTimer.PopTimeDiff();
 	mLog.Headlinef(_T("Connected to master server @ %s."), mMasterServerAddress.c_str());
@@ -514,7 +514,7 @@ void MasterServerConnection::Close(bool pError)
 	{
 		mSocketIoHandler->RemoveAllFilterIoSockets();
 	}
-	assert(mVSocket == 0);
+	deb_assert(mVSocket == 0);
 	mState = DISCONNECTED;
 	mStateList.clear();	// A) we lost connection, no use trying for a while, or B) nothing more to do (=already empty).
 }
@@ -533,8 +533,8 @@ bool MasterServerConnection::QueryMuxValid()
 
 void MasterServerConnection::OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSocket)
 {
-	//assert(pSocket == mVSocket);
-	assert(mState == CONNECT || mState == CONNECTED || mState == UPLOAD_INFO || mState == DOWNLOAD_LIST ||
+	//deb_assert(pSocket == mVSocket);
+	deb_assert(mState == CONNECT || mState == CONNECTED || mState == UPLOAD_INFO || mState == DOWNLOAD_LIST ||
 		mState == OPEN_FIREWALL || mState == DISCONNECTED || mState == CONNECTING);	// Just to make sure we're not deleted and gets callbacked anyhoo.
 	if (pSocket == mVSocket || pSocket == 0)	// NULL means MUX socket is closing down!
 	{

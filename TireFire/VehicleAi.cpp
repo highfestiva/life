@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -216,7 +216,7 @@ void VehicleAi::OnTick()
 				}
 				mLog.Headlinef(_T("Getting off elevator: distance to path %.1f."), lBestPathDistance);
 			}
-			assert(!lRelevantPaths.empty());
+			deb_assert(!lRelevantPaths.empty());
 			if (lRelevantPaths.empty())
 			{
 				return;
@@ -1045,7 +1045,7 @@ bool VehicleAi::IsVertical(const Vector3DF& pVector)
 
 float VehicleAi::GetRelativeDriveOnAngle(const Vector3DF& pDirection) const
 {
-	assert(mActivePath >= 0);
+	deb_assert(mActivePath >= 0);
 	if (mActivePath < 0)
 	{
 		return 0;

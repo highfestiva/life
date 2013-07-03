@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -55,7 +55,7 @@
 
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include <list>
 #include "../../Lepra/Include/File.h"
 #include "TBC.h"

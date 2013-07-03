@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -143,7 +143,7 @@ ScopePerformanceData* ScopePerformanceData::Insert(const str& pName, size_t pHas
 		}
 		else
 		{
-			assert(lNode->GetName() == pName);
+			deb_assert(lNode->GetName() == pName);
 		}
 	}
 	SetActive(lNode);
@@ -274,12 +274,12 @@ ScopePerformanceData* ScopePerformanceData::GetActive()
 ScopePerformanceData::ScopePerformanceData(const ScopePerformanceData&):
 	mHash(0)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 void ScopePerformanceData::operator=(const ScopePerformanceData&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 ScopePerformanceData::NodeArray ScopePerformanceData::mRoots;

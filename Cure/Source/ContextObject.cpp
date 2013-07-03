@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/ContextObject.h"
 #include <algorithm>
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include <math.h>
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Math.h"
@@ -52,7 +52,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mSendCount(0),
 	mAllowMoveRoot(true)
 {
-	assert(!pClassId.empty());
+	deb_assert(!pClassId.empty());
 }
 
 ContextObject::~ContextObject()
@@ -117,7 +117,7 @@ ContextManager* ContextObject::GetManager() const
 
 void ContextObject::SetManager(ContextManager* pManager)
 {
-	assert(mManager == 0 || pManager == 0);
+	deb_assert(mManager == 0 || pManager == 0);
 	mManager = pManager;
 }
 
@@ -128,7 +128,7 @@ GameObjectId ContextObject::GetInstanceId() const
 
 void ContextObject::SetInstanceId(GameObjectId pInstanceId)
 {
-	assert(mInstanceId == 0);
+	deb_assert(mInstanceId == 0);
 	mInstanceId = pInstanceId;
 }
 
@@ -166,7 +166,7 @@ NetworkObjectType ContextObject::GetNetworkObjectType() const
 
 void ContextObject::SetNetworkObjectType(NetworkObjectType pType)
 {
-	assert((mNetworkObjectType == pType) ||
+	deb_assert((mNetworkObjectType == pType) ||
 		(mNetworkObjectType == NETWORK_OBJECT_LOCALLY_CONTROLLED && pType == NETWORK_OBJECT_REMOTE_CONTROLLED) ||
 		(mNetworkObjectType == NETWORK_OBJECT_REMOTE_CONTROLLED && pType == NETWORK_OBJECT_LOCALLY_CONTROLLED) ||
 		(mNetworkObjectType == NETWORK_OBJECT_LOCAL_ONLY));
@@ -194,7 +194,7 @@ bool ContextObject::IsLoaded() const
 
 void ContextObject::SetLoadResult(bool pOk)
 {
-	assert(!mIsLoaded);
+	deb_assert(!mIsLoaded);
 	mIsLoaded = true;
 	if (pOk)
 	{
@@ -226,7 +226,7 @@ void ContextObject::AttachToObject(unsigned pBody1Index, ContextObject* pObject2
 {
 	if (IsAttachedTo(pObject2))
 	{
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	AttachToObject(mPhysics->GetBoneGeometry(pBody1Index), pObject2, pObject2->GetStructureGeometry(pBody2Index), false);
@@ -393,7 +393,7 @@ const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
 
 void ContextObject::AddChild(ContextObject* pChild)
 {
-	assert(pChild->GetInstanceId() != 0);
+	deb_assert(pChild->GetInstanceId() != 0);
 	if (std::find(mChildArray.begin(), mChildArray.end(), pChild) != mChildArray.end())
 	{
 		// Already added.
@@ -498,14 +498,14 @@ Vector3DF ContextObject::GetPosition() const
 			}
 			return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lBodyId));
 		}
-		//assert(false);
+		//deb_assert(false);
 	}
 	return mPosition.mPosition.mTransformation.GetPosition();
 }
 
 void ContextObject::SetRootPosition(const Vector3DF& pPosition)
 {
-	//assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
+	//deb_assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
 	mPosition.mPosition.mTransformation.SetPosition(pPosition);
 
 	if (mPhysics && mPhysics->GetBoneCount() > 0)
@@ -516,7 +516,7 @@ void ContextObject::SetRootPosition(const Vector3DF& pPosition)
 
 void ContextObject::SetRootOrientation(const QuaternionF& pOrientation)
 {
-	//assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
+	//deb_assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
 	mPosition.mPosition.mTransformation.SetOrientation(pOrientation);
 
 	if (mPhysics && mPhysics->GetBoneCount() > 0)
@@ -540,7 +540,7 @@ QuaternionF ContextObject::GetOrientation() const
 			return mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
 				mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
 		}
-		//assert(false);
+		//deb_assert(false);
 	}
 	return (mPosition.mPosition.mTransformation.GetOrientation());
 }
@@ -616,7 +616,7 @@ float ContextObject::GetForwardSpeed() const
 	}
 	/*else
 	{
-		assert(false);
+		deb_assert(false);
 	}*/
 	return (lSpeed);
 }
@@ -762,7 +762,7 @@ void ContextObject::OnLoaded()
 	if (GetPhysics() && GetManager())
 	{
 		// Calculate total mass.
-		assert(mTotalMass == 0);
+		deb_assert(mTotalMass == 0);
 		TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 		mTotalMass = mPhysics->QueryTotalMass(lPhysicsManager);
 
@@ -783,14 +783,14 @@ void ContextObject::OnTick()
 void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositionalData)
 {
 	mPosition.CopyData(&pPositionalData);
-	assert(mTotalMass != 0 || GetPhysics()->GetBoneGeometry(0)->GetTriggerId() != TBC::INVALID_TRIGGER);
+	deb_assert(mTotalMass != 0 || GetPhysics()->GetBoneGeometry(0)->GetTriggerId() != TBC::INVALID_TRIGGER);
 	PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mTotalMass, mAllowMoveRoot);
 }
 
 void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend)
 {
-	assert(pObject2);
-	assert(!IsAttachedTo(pObject2));
+	deb_assert(pObject2);
+	deb_assert(!IsAttachedTo(pObject2));
 	if (!pObject2 || !pBoneGeometry1 || !pBoneGeometry2)
 	{
 		return;
@@ -852,7 +852,7 @@ bool ContextObject::IsAttachedTo(ContextObject* pObject) const
 
 void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine)
 {
-	assert(!IsAttachedTo(pObject));
+	deb_assert(!IsAttachedTo(pObject));
 	mConnectionList.push_back(Connection(pObject, pJoint, pEngine));
 	if (pEngine)
 	{

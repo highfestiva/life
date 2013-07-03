@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/ImageLoader.h"
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include "../Include/BmpLoader.h"
 #include "../Include/DiskFile.h"
 #include "../Include/JpegLoader.h"

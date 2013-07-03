@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -10,7 +10,7 @@
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "../Include/PositionalData.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 
 
 
@@ -173,7 +173,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 			break;
 			default:
 			{
-				assert(false);
+				deb_assert(false);
 			}
 			break;
 		}
@@ -210,7 +210,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 100);
 				++y;
 				lData->mValue = lEngine->GetValue();
-				//assert(lData->mValue >= -1 && lData->mValue <= 1);
+				//deb_assert(lData->mValue >= -1 && lData->mValue <= 1);
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_GLUE:
@@ -221,7 +221,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 			break;
 			default:
 			{
-				assert(false);
+				deb_assert(false);
 			}
 			break;
 		}
@@ -271,10 +271,10 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 		{
 			case TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
 			{
-				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
+				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData2, lData, PositionalData::TYPE_POSITION_2);
 				++y;
-				assert(lData);
+				deb_assert(lData);
 				if (!lData)
 				{
 					mLog.AError("Could not fetch the right type of network positional!");
@@ -292,10 +292,10 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			break;
 			case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
 			{
-				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
+				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData3, lData, PositionalData::TYPE_POSITION_3);
 				++y;
-				assert(lData);
+				deb_assert(lData);
 				if (!lData)
 				{
 					mLog.AError("Could not fetch the right type of network positional!");
@@ -314,10 +314,10 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
 			case TBC::ChunkyBoneGeometry::JOINT_SLIDER:
 			{
-				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_1);
+				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_1);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData1, lData, PositionalData::TYPE_POSITION_1);
 				++y;
-				assert(lData);
+				deb_assert(lData);
 				if (!lData)
 				{
 					mLog.AError("Could not fetch the right type of network positional!");
@@ -334,10 +334,10 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			break;
 			case TBC::ChunkyBoneGeometry::JOINT_BALL:
 			{
-				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
+				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData3, lData, PositionalData::TYPE_POSITION_3);
 				++y;
-				assert(lData);
+				deb_assert(lData);
 				if (!lData)
 				{
 					mLog.AError("Could not fetch the right type of network positional!");
@@ -355,10 +355,10 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			break;
 			case TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL:
 			{
-				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
+				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData2, lData, PositionalData::TYPE_POSITION_2);
 				++y;
-				assert(lData);
+				deb_assert(lData);
 				if (!lData)
 				{
 					mLog.AError("Could not fetch the right type of network positional!");
@@ -380,7 +380,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			break;
 			default:
 			{
-				assert(false);
+				deb_assert(false);
 			}
 			break;
 		}
@@ -396,11 +396,11 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_PUSH_RELATIVE:
 			case TBC::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
 			{
-				assert(pPosition.mBodyPositionArray.size() > y);
-				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_3);
+				deb_assert(pPosition.mBodyPositionArray.size() > y);
+				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_3);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const RealData3, lData, PositionalData::TYPE_REAL_3);
 				++y;
-				assert(lData);
+				deb_assert(lData);
 				if (!lData)
 				{
 					mLog.AError("Could not fetch the right type of network positional!");
@@ -424,17 +424,17 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
 			case TBC::PhysicsEngine::ENGINE_AIR_BRAKE:
 			{
-				assert(pPosition.mBodyPositionArray.size() > y);
-				assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
+				deb_assert(pPosition.mBodyPositionArray.size() > y);
+				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const RealData1, lData, PositionalData::TYPE_REAL_1);
 				++y;
-				assert(lData);
+				deb_assert(lData);
 				if (!lData)
 				{
 					mLog.AError("Could not fetch the right type of network positional!");
 					return;
 				}
-				assert(lData->mValue >= -2 && lData->mValue <= 2);
+				deb_assert(lData->mValue >= -2 && lData->mValue <= 2);
 				pStructure->SetEnginePower(lEngine->GetControllerIndex(), lData->mValue);
 			}
 			break;
@@ -446,7 +446,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 			break;
 			default:
 			{
-				assert(false);
+				deb_assert(false);
 			}
 			break;
 		}

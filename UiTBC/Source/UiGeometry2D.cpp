@@ -1,11 +1,11 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiGeometry2D.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/UiTBC.h"
 
 
@@ -84,7 +84,7 @@ void Geometry2D::Init(unsigned pVertexFormat, int pVertexCapacity, int pTriangle
 	}
 	else
 	{
-		assert(!IsFlagSet(VTX_INTERLEAVED));	// Cannot handle interleaved yet.
+		deb_assert(!IsFlagSet(VTX_INTERLEAVED));	// Cannot handle interleaved yet.
 
 		if (IsFlagSet(VTX_UV) != (mUVData != 0))
 		{
@@ -334,12 +334,12 @@ void Geometry2D::Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy)
 
 Geometry2D::Geometry2D(const Geometry2D&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 void Geometry2D::operator=(const Geometry2D&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

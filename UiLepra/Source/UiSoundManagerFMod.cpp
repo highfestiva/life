@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -439,7 +439,7 @@ void SoundManagerFMod::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vecto
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
 	{
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 
@@ -464,7 +464,7 @@ int SoundManagerFMod::GetChannel(SoundInstanceID pSoundIID)
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
 	{
-		assert(false);
+		deb_assert(false);
 		return -1;
 	}
 

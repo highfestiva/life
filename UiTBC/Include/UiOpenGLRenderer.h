@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2013, Pixel Doctrine
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 #pragma once
 

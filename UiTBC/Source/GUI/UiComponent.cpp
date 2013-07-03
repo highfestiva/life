@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -207,7 +207,7 @@ void Component::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer
 {
 	if (pLayer >= 0 && pLayer < mLayerCount && mLayout[pLayer] != 0)
 	{
-		assert(pChild->GetParentLayout() == 0);
+		deb_assert(pChild->GetParentLayout() == 0);
 		pChild->SetParent(this);
 		mLayout[pLayer]->Add(pChild, pParam1, pParam2);
 		pChild->SetParentLayout(mLayout[pLayer]);

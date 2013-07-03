@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -226,7 +226,7 @@ void VehicleAi::OnTick()
 				}
 				mLog.Headlinef(_T("Getting off elevator: distance to path %.1f."), lBestPathDistance);
 			}
-			assert(!lRelevantPaths.empty());
+			deb_assert(!lRelevantPaths.empty());
 			if (lRelevantPaths.empty())
 			{
 				return;
@@ -969,7 +969,7 @@ bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVeloc
 				continue;
 			}
 			t = (-b + sqrt(b2 - _4ac)) / (2*a);
-			assert(t > 0);
+			deb_assert(t > 0);
 		}
 		const Vector2DF lGrenadeTarget(lGrenadePosition.x + lGrenadeVelocity.x * t,
 			lGrenadePosition.y + lGrenadeVelocity.y * t);
@@ -1218,13 +1218,13 @@ int VehicleAi::GetVehicleIndex() const
 	{
 		return 3;
 	}
-	assert(false);
+	deb_assert(false);
 	return -1;
 }
 
 float VehicleAi::GetRelativeDriveOnAngle(const Vector3DF& pDirection) const
 {
-	assert(mActivePath >= 0);
+	deb_assert(mActivePath >= 0);
 	if (mActivePath < 0)
 	{
 		return 0;

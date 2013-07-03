@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2012, Righteous Games
+// Copyright (c) 2002-2012, Pixel Doctrine
 
 
 

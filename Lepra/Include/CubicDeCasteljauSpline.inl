@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -62,7 +62,7 @@ void CubicDeCasteljauSpline<T, TimeType, TBase>::Set(T* pKeyFrames,
 	// Check if valid.
 	/*for (int i = 1; i <= mCount; i++)
 	{
-		assert(mTimeTags[i - 1] < mTimeTags[i]);
+		deb_assert(mTimeTags[i - 1] < mTimeTags[i]);
 	}*/
 }
 
@@ -290,7 +290,7 @@ T CubicDeCasteljauSpline<T, TimeType, TBase>::GetValue(TimeType t12, TimeType t2
 template<class T, class TimeType, class TBase>
 int CubicDeCasteljauSpline<T, TimeType, TBase>::FindFrameAtTime(TimeType pTime, int pStartFrame) const
 {
-	assert(pTime >= mTimeTags[0] && pTime <= mTimeTags[mCount]);
+	deb_assert(pTime >= mTimeTags[0] && pTime <= mTimeTags[mCount]);
 
 	int lCurrent = Math::Mod(pStartFrame, mCount + 1);
 	int lNext = Math::Mod(lCurrent + 1, mCount + 1);

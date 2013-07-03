@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -415,7 +415,7 @@ bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) 
 			return false;
 		}
 	}
-	assert(false);
+	deb_assert(false);
 	return false;
 }
 
@@ -567,7 +567,7 @@ bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 				break;
 			}
 		}
-		assert(lFreeSlaveIndex < 4);
+		deb_assert(lFreeSlaveIndex < 4);
 		Cure::RuntimeVariableScope* lVariables = new Cure::RuntimeVariableScope(UiCure::GetSettings());
 		GameClientSlaveManager* lSlave = pCreate(this, GetTimeManager(), lVariables, mResourceManager,
 			mUiManager, lFreeSlaveIndex, lRenderArea);
@@ -616,7 +616,7 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 	{
 		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
-		assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);
+		deb_assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);
 		mSlaveArray[pSlave->GetSlaveIndex()] = pSlave;
 		pSlave->GetContext()->SetLocalRange(pSlave->GetSlaveIndex()+1, mSlaveArray.size()+1);	// Local server is first one, so skip that part in the rance.
 		++mActiveSlaveCount;
@@ -631,7 +631,7 @@ void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pA
 	}
 
 	ScopeLock lLock(&mLock);
-	assert(mSlaveArray[pSlave->GetSlaveIndex()] == pSlave);
+	deb_assert(mSlaveArray[pSlave->GetSlaveIndex()] == pSlave);
 	pSlave->SaveSettings();
 	mSlaveArray[pSlave->GetSlaveIndex()] = 0;
 	delete (pSlave);
@@ -892,7 +892,7 @@ void GameClientMasterTicker::SlideSlaveLayout()
 
 int GameClientMasterTicker::GetSlaveAnimationTarget(int pSlaveIndex) const
 {
-	assert(pSlaveIndex >= 0 && pSlaveIndex < 4);
+	deb_assert(pSlaveIndex >= 0 && pSlaveIndex < 4);
 	GameClientSlaveManager* lSlave = mSlaveArray[pSlaveIndex];
 	return (lSlave && !lSlave->IsQuitting())? 1 : 0;
 }

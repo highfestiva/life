@@ -1,13 +1,13 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
-#include <assert.h>
+#include "../../Include/LepraAssert.h"
 #include <math.h>
 #include <pthread.h>
 #include <signal.h>
@@ -221,7 +221,7 @@ bool PosixSemaphore::Wait(float64 pMaxWaitTime)
 		timespec lTimeSpec;
 		GetAbsTime(pMaxWaitTime-lTimer.GetTimeDiff(), lTimeSpec);
 		int lResult = pthread_cond_timedwait(&mCondition, &mMutex, &lTimeSpec);
-		assert(lResult != EINVAL);
+		deb_assert(lResult != EINVAL);
 		if (lResult == ETIMEDOUT)
 		{
 			break;
@@ -284,8 +284,8 @@ void* ThreadEntry(void* pThread)
 	Thread* lThread = (Thread*)pThread;
 	gThreadStorage.SetPointer(lThread);
 	gExtraDataStorage.SetPointer(0);
-	assert(gThreadStorage.GetPointer() == lThread);
-	assert(Thread::GetCurrentThread() == lThread);
+	deb_assert(gThreadStorage.GetPointer() == lThread);
+	deb_assert(Thread::GetCurrentThread() == lThread);
 	//InitializeSignalMask();
 #ifdef LEPRA_MAC
 	NSAutoreleasePool* lPool = [[NSAutoreleasePool alloc] init];
@@ -302,8 +302,8 @@ void Thread::InitializeThread(Thread* pThread)
 	gThreadStorage.SetPointer(pThread);
 	gExtraDataStorage.SetPointer(0);
 	pThread->SetThreadId(GetCurrentThreadId());
-	assert(gThreadStorage.GetPointer() == pThread);
-	assert(Thread::GetCurrentThread() == pThread);
+	deb_assert(gThreadStorage.GetPointer() == pThread);
+	deb_assert(Thread::GetCurrentThread() == pThread);
 	InitializeSignalMask();
 #ifdef LEPRA_MAC
 	[[NSAutoreleasePool alloc] init];
@@ -394,9 +394,9 @@ bool Thread::Join()
 	SetStopRequest(true);
 	if (GetThreadHandle() != 0)
 	{
-		assert(GetThreadId() != GetCurrentThreadId());
+		deb_assert(GetThreadId() != GetCurrentThreadId());
 		::pthread_join((pthread_t)mThreadHandle, 0);
-		assert(!IsRunning());
+		deb_assert(!IsRunning());
 		mThreadHandle = 0;
 		mThreadId = 0;
 	}
@@ -408,7 +408,7 @@ bool Thread::GraceJoin(float64 pTimeOut)
 {
 	if (GetThreadHandle() != 0)
 	{
-		assert(GetThreadId() != GetCurrentThreadId());
+		deb_assert(GetThreadId() != GetCurrentThreadId());
 		if (!mSemaphore.Wait(pTimeOut))
 		{
 			// Possible dead lock...
@@ -433,7 +433,7 @@ void Thread::Kill()
 {
 	if (GetThreadHandle() != 0)
 	{
-		assert(GetThreadId() != GetCurrentThreadId());
+		deb_assert(GetThreadId() != GetCurrentThreadId());
 		mLog.Warning(_T("Forcing kill of thread ") + strutil::Encode(GetThreadName()));
 		::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
 		Join();

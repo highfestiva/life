@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -67,7 +67,7 @@ void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::Chun
 		pTag.mMeshIndexList.size() < 1)
 	{
 		mLog.Errorf(_T("The burn tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	float lBurnIntensity;

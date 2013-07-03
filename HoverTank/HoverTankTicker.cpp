@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -62,7 +62,7 @@ bool HoverTankTicker::CreateSlave()
 void HoverTankTicker::OnSlavesKilled()
 {
 	DeleteServer();
-	//assert(!mIsPlayerCountViewActive);
+	//deb_assert(!mIsPlayerCountViewActive);
 	mIsPlayerCountViewActive = true;
 	mSlaveTopSplit = 1.0f;
 	Parent::CreateSlave(&HoverTankTicker::CreateViewer);

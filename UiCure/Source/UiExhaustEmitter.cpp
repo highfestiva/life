@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -67,7 +67,7 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 		pTag.mMeshIndexList.size() < 1)
 	{
 		mLog.Errorf(_T("The exhaust tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	const int lEngineIndex = pTag.mEngineIndexList[0];

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2011, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 // Loads icon from resource manager and shows it once loaded. Frees the icon
 // when deleted.

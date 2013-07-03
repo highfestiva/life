@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -288,8 +288,8 @@ void GameManager::OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID 
 {
 #ifdef LEPRA_DEBUG
 	const unsigned lRootIndex = 0;
-	assert(pObject->GetStructureGeometry(lRootIndex));
-	assert(pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId);
+	deb_assert(pObject->GetStructureGeometry(lRootIndex));
+	deb_assert(pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId);
 #endif // Debug / !Debug
 	(void)pBodyId;
 

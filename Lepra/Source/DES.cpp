@@ -1,12 +1,12 @@
 /*
 	Class:  Checksum
 	Author: Jonas Byström
-	Copyright (c) 2002-2009, Righteous Games
+	Copyright (c) Pixel Doctrine
 */
 
 
 
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include <memory.h>
 #include "../Include/DES.h"
 
@@ -54,7 +54,7 @@ void DES::SetKey(uint64 pKey)
 
 void DES::Encrypt(uint8* pData, unsigned pLength) const
 {
-	assert(pLength%8 == 0);
+	deb_assert(pLength%8 == 0);
 	pLength >>= 3;
 	uint64* lBlock = (uint64*)pData;
 	unsigned u;
@@ -66,7 +66,7 @@ void DES::Encrypt(uint8* pData, unsigned pLength) const
 
 void DES::Decrypt(uint8* pData, unsigned pLength) const
 {
-	assert(pLength%8 == 0);
+	deb_assert(pLength%8 == 0);
 	pLength >>= 3;
 	uint64* lBlock = (uint64*)pData;
 	for (unsigned u = 0; u < pLength; ++u)

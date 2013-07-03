@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -25,7 +25,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	if (!lFile)
 	{
 		mLog.Errorf(_T("Unable to open particle image file '%s'."), pTextureName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	Canvas lImage;
@@ -36,7 +36,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	if (!lLoadedOk)
 	{
 		mLog.Errorf(_T("Unable to load particle image file '%s'."), pTextureName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 

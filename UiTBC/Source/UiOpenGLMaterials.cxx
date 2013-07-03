@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -14,7 +14,7 @@
 
 
 #ifdef LEPRA_DEBUG
-#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); assert(lGlError == GL_NO_ERROR); }
+#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
 #else // !Debug
 #define OGL_ASSERT()
 #endif // Debug / !Debug
@@ -58,7 +58,7 @@ GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 		case TBC::GeometryBase::LINES:		return (GL_LINES);
 		case TBC::GeometryBase::LINE_LOOP:	return (GL_LINE_LOOP);
 	}
-	assert(false);
+	deb_assert(false);
 	return (GL_TRIANGLES);
 }
 

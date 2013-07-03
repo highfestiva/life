@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiResourceManager.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/TerrainFunctionManager.h"
 #include "../../Lepra/Include/MemFile.h"
 #include "../../UiTBC/Include/UiTriangleBasedGeometry.h"
@@ -78,8 +78,8 @@ PainterImageResource::UserData PainterImageResource::GetUserData(const Cure::Use
 
 bool PainterImageResource::Load()
 {
-	assert(!IsUnique());
-	assert(GetRamData() == 0);
+	deb_assert(!IsUnique());
+	deb_assert(GetRamData() == 0);
 	SetRamData(new Canvas());
 	File* lFile = GetManager()->QueryFile(GetName());
 	bool lOk = (lFile != 0);
@@ -94,9 +94,9 @@ bool PainterImageResource::Load()
 
 Cure::ResourceLoadState PainterImageResource::PostProcess()
 {
-	assert(mOptimizedData == UiTbc::Painter::INVALID_IMAGEID);
+	deb_assert(mOptimizedData == UiTbc::Painter::INVALID_IMAGEID);
 	mOptimizedData = GetUiManager()->GetPainter()->AddImage(GetRamData(), 0);
-	assert(mOptimizedData != UiTbc::Painter::INVALID_IMAGEID);
+	deb_assert(mOptimizedData != UiTbc::Painter::INVALID_IMAGEID);
 	switch (mReleaseMode)
 	{
 		case RELEASE_DELETE:		SetRamData(0);			break;
@@ -150,9 +150,9 @@ RendererImageBaseResource::UserData RendererImageBaseResource::GetUserData(const
 
 Cure::ResourceLoadState RendererImageBaseResource::PostProcess()
 {
-	assert(mOptimizedData == UiTbc::Renderer::INVALID_TEXTURE);
+	deb_assert(mOptimizedData == UiTbc::Renderer::INVALID_TEXTURE);
 	mOptimizedData = GetUiManager()->GetRenderer()->AddTexture(GetRamData());
-	assert(mOptimizedData != UiTbc::Renderer::INVALID_TEXTURE);
+	deb_assert(mOptimizedData != UiTbc::Renderer::INVALID_TEXTURE);
 	SetRamData(0);
 	Cure::ResourceLoadState lLoadState;
 	if (mOptimizedData == UiTbc::Renderer::INVALID_TEXTURE)
@@ -187,8 +187,8 @@ const str RendererImageResource::GetType() const
 
 bool RendererImageResource::Load()
 {
-	assert(!IsUnique());
-	assert(GetRamData() == 0);
+	deb_assert(!IsUnique());
+	deb_assert(GetRamData() == 0);
 	Canvas lImage;
 	File* lFile = GetManager()->QueryFile(GetName());
 	bool lOk = (lFile != 0);
@@ -228,8 +228,8 @@ const str TextureResource::GetType() const
 
 bool TextureResource::Load()
 {
-	assert(!IsUnique());
-	assert(GetRamData() == 0);
+	deb_assert(!IsUnique());
+	deb_assert(GetRamData() == 0);
 	SetRamData(new UiTbc::Texture());
 	UiTbc::TEXLoader lLoader;
 	bool lOk = false;
@@ -281,7 +281,7 @@ GeometryResource::UserData GeometryResource::GetUserData(const Cure::UserResourc
 
 bool GeometryResource::Load()
 {
-	assert(!IsUnique());
+	deb_assert(!IsUnique());
 
 	//float lCubeMappingScale = -1;
 	TBC::GeometryBase::BasicMaterialSettings lMaterial;
@@ -303,14 +303,14 @@ bool GeometryResource::Load()
 		lOk = lLoader.Load(lGeometry, mCastsShadows);
 		if (!lOk)
 		{
-			assert(false);
+			deb_assert(false);
 			delete (lGeometry);
 			lGeometry = 0;
 		}
 	}
 	delete lFile;
 	lFile = 0;
-	assert(lGeometry);
+	deb_assert(lGeometry);
 
 	if (lGeometry)
 	{
@@ -331,14 +331,14 @@ bool GeometryResource::Load()
 Cure::ResourceLoadState GeometryResource::PostProcess()
 {
 	typedef UiTbc::Renderer R;
-	assert(mOptimizedData == R::INVALID_GEOMETRY);
+	deb_assert(mOptimizedData == R::INVALID_GEOMETRY);
 	if (!GetUiManager()->CanRender())
 	{
 		return Cure::RESOURCE_LOAD_IN_PROGRESS;
 	}
 	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(GetRamData(), R::MAT_NULL,
 		mCastsShadows? R::CAST_SHADOWS : R::NO_SHADOWS);
-	assert(mOptimizedData != R::INVALID_GEOMETRY);
+	deb_assert(mOptimizedData != R::INVALID_GEOMETRY);
 	Cure::ResourceLoadState lLoadState;
 	if (mOptimizedData == R::INVALID_GEOMETRY)
 	{
@@ -397,13 +397,13 @@ bool GeometryReferenceResource::IsReferenceType() const
 
 bool GeometryReferenceResource::Load()
 {
-	//assert(IsUnique());
+	//deb_assert(IsUnique());
 	bool lOk = (mClassResource != 0);
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
-		assert(lFilename != GetName());
+		deb_assert(lFilename != GetName());
 		mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this,
 			&GeometryReferenceResource::OnLoadClass));
 	}
@@ -412,13 +412,13 @@ bool GeometryReferenceResource::Load()
 
 Cure::ResourceLoadState GeometryReferenceResource::PostProcess()
 {
-	assert(mClassResource);
+	deb_assert(mClassResource);
 	return (CreateInstance());
 }
 
 Cure::ResourceLoadState GeometryReferenceResource::CreateInstance()
 {
-	assert(mClassResource);
+	deb_assert(mClassResource);
 	Cure::ResourceLoadState lLoadState = mClassResource->GetLoadState();
 	if (lLoadState == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -432,7 +432,7 @@ Cure::ResourceLoadState GeometryReferenceResource::CreateInstance()
 
 void GeometryReferenceResource::Resume()
 {
-	assert(!mClassResource);
+	deb_assert(!mClassResource);
 	mClassResource = new ClassResource(GetUiManager());
 }
 
@@ -475,8 +475,8 @@ UserGeometryReferenceResource::~UserGeometryReferenceResource()
 
 //void UserGeometryReferenceResource::PostProcess()
 //{
-//	assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
-//	assert(mGeometryReference == 0);
+//	deb_assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
+//	deb_assert(mGeometryReference == 0);
 //
 //	TBC::GeometryBase* lOriginal = Parent::GetRamData();
 //	mGeometryReference = new TBC::GeometryReference(lOriginal);
@@ -484,7 +484,7 @@ UserGeometryReferenceResource::~UserGeometryReferenceResource()
 //	mGeometryReference->SetBasicMaterialSettings(lOriginal->GetBasicMaterialSettings());
 //	mGeometryReferenceId = GetUiManager()->GetRenderer()->AddGeometry(
 //		mGeometryReference, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
-//	assert(mGeometryReferenceId != UiTbc::Renderer::INVALID_GEOMETRY);
+//	deb_assert(mGeometryReferenceId != UiTbc::Renderer::INVALID_GEOMETRY);
 //}
 
 const GeometryOffset& UserGeometryReferenceResource::GetOffset() const
@@ -543,8 +543,8 @@ SoundResource::~SoundResource()
 
 bool SoundResource::Load()
 {
-	assert(!IsUnique());
-	assert(GetRamData() == UiLepra::INVALID_SOUNDID);
+	deb_assert(!IsUnique());
+	deb_assert(GetRamData() == UiLepra::INVALID_SOUNDID);
 	File* lFile = GetManager()->QueryFile(GetName());
 	bool lOk = (lFile != 0);
 	bool lOwnData = false;
@@ -576,7 +576,7 @@ bool SoundResource::Load()
 			lSoundId = GetUiManager()->GetSoundManager()->LoadSound3D(GetName(), lData, lDataSize, mLoopMode, 0);
 		}
 		lOk = (lSoundId != UiLepra::INVALID_SOUNDID);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			SetRamDataType(lSoundId);

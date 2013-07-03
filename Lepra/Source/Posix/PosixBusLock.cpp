@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand, Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström, Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 

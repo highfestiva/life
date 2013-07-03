@@ -1,5 +1,5 @@
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2010, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -45,7 +45,7 @@ void GeometryGroup::AddGeometry(TBC::GeometryBase* pGeometry)
 	}
 
 	Renderer::GeometryData* lGeomData = (Renderer::GeometryData*)pGeometry->GetRendererData();
-	assert(lGeomData != 0);
+	deb_assert(lGeomData != 0);
 	lGeomData->mGeometryGroup = this;
 	mGeomArray[mGeometryCount++].mGeometry = pGeometry;
 }
@@ -280,7 +280,7 @@ Material::RemoveStatus Material::RemoveGeometry(TBC::GeometryBase* pGeometry)
 		{
 			lMaterial = lMaterial->mFallBackMaterial;
 		}
-		assert(lMaterial);
+		deb_assert(lMaterial);
 		if (lMaterial)
 		{
 			lMaterial->mGeometryGroupList.remove(lGeomData->mGeometryGroup);

@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -133,8 +133,8 @@ MacDisplayManager::MacDisplayManager():
 	// Obtain number of available displays.
 	CGDisplayCount lDisplayCount = 0;
 	CGDisplayErr lError = CGGetActiveDisplayList(0, 0, &lDisplayCount);
-	assert(lError == CGDisplayNoErr);
-	assert(lDisplayCount >= 1);
+	deb_assert(lError == CGDisplayNoErr);
+	deb_assert(lDisplayCount >= 1);
 	if (lError != CGDisplayNoErr || lDisplayCount < 1)
 	{
 		throw std::runtime_error("CoreGraphics error: fetch of number of screens failed.");
@@ -143,8 +143,8 @@ MacDisplayManager::MacDisplayManager():
 	// Allocate and convert.
 	CGDirectDisplayID* lDisplays = (CGDirectDisplayID*)new char[sizeof(CGDirectDisplayID) * lDisplayCount];
 	lError = CGGetActiveDisplayList(lDisplayCount, lDisplays, &lDisplayCount);
-	assert(lError == CGDisplayNoErr);
-	assert(lDisplayCount >= 1);
+	deb_assert(lError == CGDisplayNoErr);
+	deb_assert(lDisplayCount >= 1);
 	if (lError != CGDisplayNoErr || lDisplayCount < 1)
 	{
 		throw std::runtime_error("CoreGraphics error: fetch of number of screens failed 2.");
@@ -502,7 +502,7 @@ void MacDisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 		pSizeX = 0;
 		pSizeY = 0;
 	}

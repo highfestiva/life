@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
  
 
 
@@ -52,7 +52,7 @@ bool NetworkClient::Open(const str& pLocalAddress)
 	if (!lOk)
 	{
 		mLog.AWarning("Already connecting (from some other thread?)...");
-		assert(false);
+		deb_assert(false);
 	}
 	SocketAddress lLocalAddress;
 	uint16 lEndPort = 0;
@@ -90,7 +90,7 @@ bool NetworkClient::Open(const str& pLocalAddress)
 void NetworkClient::Stop()
 {
 	ScopeLock lLock(&mLock);
-	assert(!mIsSocketConnecting);
+	deb_assert(!mIsSocketConnecting);
 	if (mSocket)
 	{
 		mMuxSocket->CloseSocket(mSocket);
@@ -114,7 +114,7 @@ bool NetworkClient::Connect(const str& pServerAddress, double pTimeout)
 	if (!lOk)
 	{
 		mLog.AWarning("Already connecting (from some other thread?)...");
-		assert(false);
+		deb_assert(false);
 	}
 
 	SocketAddress lTargetAddress;
@@ -162,9 +162,9 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 
 void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTimeout, const Cure::LoginId& pLoginToken)
 {
-	assert(mMuxSocket);
-	assert(!mIsConnecting);
-	assert(!mIsLoggingIn);
+	deb_assert(mMuxSocket);
+	deb_assert(!mIsConnecting);
+	deb_assert(!mIsLoggingIn);
 	mLoginAccountId = 0;
 	mIsConnecting = true;
 	mIsLoggingIn = true;
@@ -173,11 +173,11 @@ void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTim
 	{
 		mServerHost = pServerHost;
 	}
-	assert(pConnectTimeout >= 0);
+	deb_assert(pConnectTimeout >= 0);
 	mConnectTimeout = pConnectTimeout;
 	mLoginToken = pLoginToken;
 	CURE_RTVAR_GET(mLoginTimeout, =, mVariableScope, RTVAR_NETWORK_LOGIN_TIMEOUT, 3.0);
-	assert(mLoginTimeout > 0);
+	deb_assert(mLoginTimeout > 0);
 	StopLoginThread();
 	mLoginThread.Start(this, &NetworkClient::LoginEntry);
 }
@@ -407,7 +407,7 @@ void NetworkClient::SendDisconnect()
 
 void NetworkClient::LoginEntry()
 {
-	assert(mMuxSocket);
+	deb_assert(mMuxSocket);
 
 	bool lOk = true;
 	if (lOk && mConnectTimeout > 0)

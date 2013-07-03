@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../../Include/LepraAssert.h"
 #include "../../Include/Thread.h"
 #include "../../Include/Lepra.h"
 #include "../../Include/Log.h"
@@ -75,8 +75,8 @@ DWORD __stdcall ThreadEntry(void* pThread)
 	Thread* lThread = (Thread*)pThread;
 	gThreadStorage.SetPointer(lThread);
 	gExtraDataStorage.SetPointer(0);
-	assert(gThreadStorage.GetPointer() == lThread);
-	assert(Thread::GetCurrentThread() == lThread);
+	deb_assert(gThreadStorage.GetPointer() == lThread);
+	deb_assert(Thread::GetCurrentThread() == lThread);
 	SetVisualStudioThreadName(lThread->GetThreadName().c_str(), (DWORD)-1);
 	RunThread(lThread);
 	return 0;
@@ -706,8 +706,8 @@ void Thread::InitializeThread(Thread* pThread)
 	gThreadStorage.SetPointer(pThread);
 	gExtraDataStorage.SetPointer(0);
 	pThread->SetThreadId(GetCurrentThreadId());
-	assert(gThreadStorage.GetPointer() == pThread);
-	assert(Thread::GetCurrentThread() == pThread);
+	deb_assert(gThreadStorage.GetPointer() == pThread);
+	deb_assert(Thread::GetCurrentThread() == pThread);
 	SetVisualStudioThreadName(pThread->GetThreadName().c_str(), (DWORD)-1);
 }
 
@@ -776,10 +776,10 @@ bool Thread::Join()
 	SetStopRequest(true);
 	if (GetThreadHandle() != 0)
 	{
-		assert(GetThreadId() != GetCurrentThreadId());
+		deb_assert(GetThreadId() != GetCurrentThreadId());
 		Thread::YieldCpu();	// Try to let thread self destruct.
 		::WaitForSingleObject((HANDLE)GetThreadHandle(), INFINITE);
-		assert(!IsRunning());
+		deb_assert(!IsRunning());
 		if (GetThreadHandle())
 		{
 			::CloseHandle((HANDLE)GetThreadHandle());
@@ -796,7 +796,7 @@ bool Thread::GraceJoin(float64 pTimeOut)
 {
 	if (GetThreadHandle() != 0)
 	{
-		assert(GetThreadId() != GetCurrentThreadId());
+		deb_assert(GetThreadId() != GetCurrentThreadId());
 		if (::WaitForSingleObject((HANDLE)GetThreadHandle(), (DWORD)(pTimeOut * 1000.0)) == WAIT_TIMEOUT)
 		{
 			// Possible dead lock...
@@ -823,7 +823,7 @@ void Thread::Kill()
 {
 	if (GetThreadHandle() != 0)
 	{
-		assert(GetThreadId() != GetCurrentThreadId());
+		deb_assert(GetThreadId() != GetCurrentThreadId());
 		mLog.Warning(_T("Forcing kill of thread ") + strutil::Encode(GetThreadName()));
 		::TerminateThread((HANDLE)GetThreadHandle(), 0);
 		SetRunning(false);

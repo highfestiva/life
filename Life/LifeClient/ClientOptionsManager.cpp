@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "ClientOptionsManager.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Math.h"
@@ -267,7 +267,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 
 void ClientOptionsManager::operator=(const ClientOptionsManager&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

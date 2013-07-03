@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include <iomanip>
 #include <iostream>
 #include <strstream>
@@ -83,7 +83,7 @@ void Log::SetupBasicListeners(LogListener* pConsole, LogListener* pDebug,
 
 void Log::AddListener(LogListener* pLogger, LogLevel pLevel)
 {
-	assert(pLogger);
+	deb_assert(pLogger);
 #ifdef NO_LEVEL_DEBUG_INFO	// Final (public release) version gets no debug messages.
 	if (pLevel >= LEVEL_INFO)
 #endif // !NO_LEVEL_DEBUG_INFO
@@ -100,7 +100,7 @@ void Log::AddListener(LogListener* pLogger, LogLevel pLevel)
 
 void Log::RemoveListener(LogListener* pLogger)
 {
-	assert(pLogger);
+	deb_assert(pLogger);
 	ScopeSpinLock lScopeLock(mLoggerListLock);
 	for (int x = LEVEL_LOWEST_TYPE; x < LEVEL_TYPE_COUNT; ++x)
 	{

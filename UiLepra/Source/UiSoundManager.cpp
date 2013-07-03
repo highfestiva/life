@@ -1,9 +1,9 @@
 
 // Author: Jonas Byström
-//Copyright (c) 2002-2009, Righteous Games
+//Copyright (c) Pixel Doctrine
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/UiSoundManagerFMod.h"
 #include "../Include/UiSoundManagerOpenAL.h"
 
@@ -25,7 +25,7 @@ SoundManager* SoundManager::CreateSoundManager(ContextType pType)
 		case CONTEXT_OPENAL:
 			return (new SoundManagerOpenAL(44100));
 	}
-	assert(false);
+	deb_assert(false);
 	return (0);
 }
 
@@ -54,7 +54,7 @@ void SoundManager::SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& 
 void SoundManager::SetCurrentListener(int pListenerIndex, int pListenerCount)
 {
 	ScopeLock lLock(&mLock);
-	assert(pListenerIndex < pListenerCount);
+	deb_assert(pListenerIndex < pListenerCount);
 	mCurrentMicrophone = pListenerIndex;
 	if (mMicrophoneArray.size() != (size_t)pListenerCount)
 	{

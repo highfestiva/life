@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiSoundManagerOpenAL.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../ThirdParty/freealut-1.1.0/include/AL/alut.h"
 #include "../Include/UiChibiXmAlStream.h"
 #include "../Include/UiOggAlStream.h"
@@ -161,7 +161,7 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 		delete (lSample);
 		lSample = 0;
 	}
@@ -235,7 +235,7 @@ SoundManager::SoundInstanceID SoundManagerOpenAL::CreateSoundInstance(SoundID pS
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 		delete (lSource);
 		lSource = 0;
 	}
@@ -422,7 +422,7 @@ void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vec
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 
@@ -446,7 +446,7 @@ SoundManagerOpenAL::Sample* SoundManagerOpenAL::GetSample(SoundID pSoundID) cons
 	SampleSet::const_iterator x = mSampleSet.find(lSample);
 	if (x == mSampleSet.end())
 	{
-		assert(false);
+		deb_assert(false);
 		lSample = 0;
 	}
 	return (lSample);
@@ -459,7 +459,7 @@ SoundManagerOpenAL::Source* SoundManagerOpenAL::GetSource(SoundInstanceID pSound
 	SourceSet::const_iterator x = mSourceSet.find(lSource);
 	if (x == mSourceSet.end())
 	{
-		assert(false);
+		deb_assert(false);
 		lSource = 0;
 	}
 	return (lSource);
@@ -486,14 +486,14 @@ SoundManagerOpenAL::Sample::~Sample()
 
 bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 {
-	assert(mBuffer == AL_NONE);
+	deb_assert(mBuffer == AL_NONE);
 	mBuffer = ::alutCreateBufferFromFile(astrutil::Encode(pFileName).c_str());
 	return (mBuffer != AL_NONE);
 }
 
 bool SoundManagerOpenAL::Sample::Load(const void* pData, size_t pDataSize)
 {
-	assert(mBuffer == AL_NONE);
+	deb_assert(mBuffer == AL_NONE);
 	mBuffer = ::alutCreateBufferFromFileImage(pData, pDataSize);
 	return (mBuffer != AL_NONE);
 }
@@ -524,11 +524,11 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 	::alGenSources(1, &mSid);
 	if (mSid == (ALuint)-1)
 	{
-		assert(false);
+		deb_assert(false);
 		return false;
 	}
 
-	assert(mSample == 0);
+	deb_assert(mSample == 0);
 	mSample = pSample;
 	mSample->mSourceList.insert(this);
 

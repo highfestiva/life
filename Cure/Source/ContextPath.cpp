@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -84,10 +84,10 @@ ContextPath::~ContextPath()
 void ContextPath::SetTagIndex(int pIndex)
 {
 	const TBC::ChunkyClass::Tag& lTag = ((CppContextObject*)mParent)->GetClass()->GetTag(pIndex);
-	assert(lTag.mFloatValueList.size() == 1);
-	assert(lTag.mStringValueList.size() <= 1);
+	deb_assert(lTag.mFloatValueList.size() == 1);
+	deb_assert(lTag.mStringValueList.size() <= 1);
 	const size_t lBodyCount = lTag.mBodyIndexList.size();
-	assert(lBodyCount >= 2);
+	deb_assert(lBodyCount >= 2);
 	if (lTag.mFloatValueList.size() != 1 || lBodyCount < 2)
 	{
 		return;
@@ -115,7 +115,7 @@ void ContextPath::SetTagIndex(int pIndex)
 		const int lBoneIndex = lTag.mBodyIndexList[x];
 #ifdef LEPRA_DEBUG
 		TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBoneIndex);
-		assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
+		deb_assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
 #endif // Debug
 		lPathPositions[x+1] = lPhysics->GetBoneTransformation(lBoneIndex).GetPosition();
 		if (x > 0)	// We only start from the start position (not origo).

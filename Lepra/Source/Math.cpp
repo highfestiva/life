@@ -1,5 +1,5 @@
-// Author: Alexander Hugestrand and Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström and Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 #include "../Include/LepraTarget.h"
 #include "../Include/Math.h"

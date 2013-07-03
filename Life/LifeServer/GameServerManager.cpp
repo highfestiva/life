@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -170,7 +170,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection, co
 					lOk = mUserAccountManager->AddUserAvatarId(lUserName, lId);
 				}
 			}
-			assert(!mUserAccountManager->GetUserAvatarIdSet(lUserName)->empty());
+			deb_assert(!mUserAccountManager->GetUserAvatarIdSet(lUserName)->empty());
 		}
 	}
 
@@ -236,7 +236,7 @@ float GameServerManager::GetPowerSaveAmount() const
 #ifdef LEPRA_DEBUG
 TBC::PhysicsManager* GameServerManager::GetPhysicsManager() const
 {
-	assert(!GetNetworkAgent()->GetLock()->IsOwner() ||
+	deb_assert(!GetNetworkAgent()->GetLock()->IsOwner() ||
 		(GetNetworkAgent()->GetLock()->IsOwner() && GetTickLock()->IsOwner()));
 	return Parent::GetPhysicsManager();
 }
@@ -246,7 +246,7 @@ TBC::PhysicsManager* GameServerManager::GetPhysicsManager() const
 
 void GameServerManager::DeleteContextObject(Cure::GameObjectId pInstanceId)
 {
-	assert(GetTickLock()->IsOwner());
+	deb_assert(GetTickLock()->IsOwner());
 
 	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId);
 	mDelegate->OnDeleteObject(lObject);
@@ -267,13 +267,13 @@ ServerDelegate* GameServerManager::GetDelegate() const
 
 void GameServerManager::SetDelegate(ServerDelegate* pDelegate)
 {
-	assert(!mDelegate);
+	deb_assert(!mDelegate);
 	mDelegate = pDelegate;
 }
 
 void GameServerManager::SetMessageProcessor(ServerMessageProcessor* pMessageProcessor)
 {
-	assert(!mMessageProcessor);
+	deb_assert(!mMessageProcessor);
 	mMessageProcessor = pMessageProcessor;
 }
 
@@ -344,7 +344,7 @@ wstrutil::strvec GameServerManager::ListUsers()
 {
 	wstrutil::strvec lVector;
 	{
-		assert(!GetNetworkAgent()->GetLock()->IsOwner());
+		deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 		ScopeLock lTickLock(GetTickLock());
 		ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
@@ -472,7 +472,7 @@ void GameServerManager::BroadcastObjectPosition(Cure::GameObjectId pInstanceId,
 	lPacket->AddMessage(lPosition);
 	lPosition->Store(lPacket, pInstanceId, GetTimeManager()->GetCurrentPhysicsFrame(), pPosition);
 
-	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	BroadcastPacket(pExcludeClient, lPacket, pSafe);
 
@@ -489,7 +489,7 @@ bool GameServerManager::BroadcastStatusMessage(Cure::MessageStatus::InfoType pTy
 	bool lOk = false;
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	{
-		assert(!GetNetworkAgent()->GetLock()->IsOwner());
+		deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 		ScopeLock lTickLock(GetTickLock());
 		ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 		AccountClientTable::Iterator x = mAccountClientTable.First();
@@ -517,7 +517,7 @@ void GameServerManager::BroadcastNumberMessage(Client* pExcludeClient, bool pSaf
 
 bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr& pMessage)
 {
-	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
@@ -555,7 +555,7 @@ void GameServerManager::IndicatePosition(const Vector3DF pPosition, float pTime)
 
 int GameServerManager::GetLoggedInClientCount() const
 {
-	assert(!GetNetworkAgent()->GetLock()->IsOwner() || GetTickLock()->IsOwner());
+	deb_assert(!GetNetworkAgent()->GetLock()->IsOwner() || GetTickLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 	return (mAccountClientTable.GetCount());
@@ -595,7 +595,7 @@ const GameServerManager::AccountClientTable& GameServerManager::GetAccountClient
 
 void GameServerManager::Build(const str& pWhat)
 {
-	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
@@ -734,7 +734,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 	ScopeLock lLock(GetNetworkAgent()->GetLock());
 
 	Client* lClient = GetClientByAccount(pUserConnection->GetAccountId());
-	assert(!lClient);
+	deb_assert(!lClient);
 	if (lClient)
 	{
 		mLog.Errorf(_T("user %s already has an account!"), pUserConnection->GetLoginName().c_str());
@@ -774,7 +774,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 
 void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 {
-	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	Cure::GameObjectId lAvatarId = 0;
 	ScopeLock lTickLock(GetTickLock());
 	{
@@ -783,9 +783,9 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 		// TODO: logout with some timer, and also be able to reconnect the
 		// client with his/her avatar again if logged in within the time frame.
 		Client* lClient = GetClientByAccount(pUserConnection->GetAccountId());
-		assert(lClient);
+		deb_assert(lClient);
 		lAvatarId = lClient->GetAvatarId();
-		assert(IsThreadSafe());
+		deb_assert(IsThreadSafe());
 		mAccountClientTable.Remove(pUserConnection->GetAccountId());
 		mDelegate->OnLogout(lClient);
 		delete (lClient);
@@ -840,7 +840,7 @@ void GameServerManager::ApplyStoredMovement()
 		MovementList lMovementList = mMovementArrayList[lFrameCycleIndex];
 		LEPRA_DEBUG_CODE(size_t lMovementCount = lMovementList.size();)
 		mMovementArrayList[lFrameCycleIndex].clear();
-		LEPRA_DEBUG_CODE(assert(lMovementCount == lMovementList.size()));
+		LEPRA_DEBUG_CODE(deb_assert(lMovementCount == lMovementList.size()));
 		MovementList::iterator x = lMovementList.begin();
 		for (; x != lMovementList.end(); ++x)
 		{
@@ -1106,7 +1106,7 @@ bool GameServerManager::OnAttributeSend(Cure::ContextObject* pObject)
 			lPacket->AddMessage(lAttribMessage);
 			lAttribute->Pack(lAttribMessage->GetWriteBuffer(lPacket, pObject->GetInstanceId(), lSendSize));
 
-			assert(!GetNetworkAgent()->GetLock()->IsOwner());
+			deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 			ScopeLock lTickLock(GetTickLock());
 			switch (lAttribute->GetNetworkType())
 			{
@@ -1368,7 +1368,7 @@ bool GameServerManager::HandleMasterCommand(const ServerInfo& pServerInfo)
 	else
 	{
 		mLog.Errorf(_T("Got bad command (%s) from master server!"), pServerInfo.mCommand.c_str());
-		assert(false);
+		deb_assert(false);
 	}
 	return false;
 }

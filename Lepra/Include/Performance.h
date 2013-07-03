@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include <assert.h>
+#include "LepraAssert.h"
 #include <list>
 #include "HiResTimer.h"
 #include "SpinLock.h"

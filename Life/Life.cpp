@@ -1,13 +1,13 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "Life.h"
-#include <assert.h>
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/IntAttribute.h"
+#include "../Lepra/Include/LepraAssert.h"
 
 
 
@@ -28,7 +28,7 @@ Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject
 	}
 	(void)pObject;
 	(void)pAttributeName;
-	assert(false);
+	deb_assert(false);
 	return 0;
 }
 

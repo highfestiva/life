@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -259,7 +259,7 @@ void Game::SetVehicle(const str& pVehicle)
 	delete mVehicle;
 	mVehicle = (Cutie*)GameManager::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (mVehicle != 0);
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		mVehicle->SetInitialTransform(GetCutieStart());
@@ -365,7 +365,7 @@ bool Game::Shoot()
 
 	Grenade* lGrenade = (Grenade*)GameManager::CreateContextObject(_T("grenade"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (lGrenade != 0);
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		TransformationF t(mLauncher->GetOrientation(), mLauncher->GetPosition()+Vector3DF(0, 0, +2.5f));
@@ -380,7 +380,7 @@ bool Game::Shoot()
 Cure::ContextObject* Game::CreateRoboBall()
 {
 	RoboBall* lRoboBall = (RoboBall*)GameManager::CreateContextObject(_T("robo_ball"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	assert(lRoboBall);
+	deb_assert(lRoboBall);
 	if (lRoboBall)
 	{
 		TransformationF t(QuaternionF(), Vector3DF(0, 0, 30));
@@ -662,7 +662,7 @@ void Game::ResetWinnerIndex()
 
 void Game::SetComputerIndex(int pIndex)
 {
-	assert(pIndex >= -1 && pIndex <= 1);
+	deb_assert(pIndex >= -1 && pIndex <= 1);
 	mFlipRenderSide = 0;
 	mFlipRenderSideFactor = 0;
 	mComputerIndex = pIndex;
@@ -704,7 +704,7 @@ float Game::GetComputerDifficulty() const
 
 void Game::SetComputerDifficulty(float pDifficulty)
 {
-	assert(pDifficulty >= -1 && pDifficulty <= 1);
+	deb_assert(pDifficulty >= -1 && pDifficulty <= 1);
 	mComputerDifficulty = pDifficulty;
 }
 
@@ -1132,7 +1132,7 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (pOk && pObject == mVehicle)
 	{
-		assert(pObject->GetPhysics()->GetEngineCount() == 3);
+		deb_assert(pObject->GetPhysics()->GetEngineCount() == 3);
 		const str lName = _T("float_childishness");
 		new Cure::FloatAttribute(mVehicle, lName, 0.67f);
 	}
@@ -1267,7 +1267,7 @@ bool Game::InitializeUniverse()
 		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager, lGravelParticleEmitter);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			mLevel->DisableRootShadow();

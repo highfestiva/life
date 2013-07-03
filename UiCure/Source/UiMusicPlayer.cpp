@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiMusicPlayer.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../UiLepra/Include/UiSoundStream.h"
 
@@ -122,7 +122,7 @@ bool MusicPlayer::Update()
 		break;
 		case MODE_PLAYBACK:
 		{
-			assert(mMusicStream);
+			deb_assert(mMusicStream);
 			if (!mMusicStream)
 			{
 				return false;

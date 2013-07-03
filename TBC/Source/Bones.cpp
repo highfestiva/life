@@ -1,12 +1,12 @@
  
-// Author: Alexander Hugestrand, Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström, Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../../Lepra/Include/CubicSpline.h"
 #include "../Include/Bones.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 
 
 namespace TBC
@@ -41,7 +41,7 @@ int Bone::GetChildCount()
 
 void Bone::SetChild(int pChildIndex, int pIndexValue)
 {
-	assert(pChildIndex >= 0 && pChildIndex < GetChildCount());
+	deb_assert(pChildIndex >= 0 && pChildIndex < GetChildCount());
 	mChildIndex[pChildIndex] = pIndexValue;
 }
 
@@ -52,7 +52,7 @@ void Bone::AddChild(int pIndexValue)
 
 int Bone::GetChild(int pChildIndex)
 {
-	assert(pChildIndex >= 0 && pChildIndex < GetChildCount());
+	deb_assert(pChildIndex >= 0 && pChildIndex < GetChildCount());
 	return (mChildIndex[pChildIndex]);
 }
 
@@ -112,7 +112,7 @@ void BoneHierarchy::ClearAll(PhysicsManager*)
 
 void BoneHierarchy::SetBoneCount(int pBoneCount)
 {
-	assert(mBoneCount == 0);
+	deb_assert(mBoneCount == 0);
 
 	mBoneCount = pBoneCount;
 
@@ -130,51 +130,51 @@ int BoneHierarchy::GetBoneCount() const
 
 /*void BoneHierarchy::SetRootBone(int pRootBoneIndex)
 {
-	assert(pRootBoneIndex < mBoneCount);
+	deb_assert(pRootBoneIndex < mBoneCount);
 	mRootBoneIndex = pRootBoneIndex;
 }*/
 
 int BoneHierarchy::GetRootBone() const
 {
-	assert(mRootBoneIndex == 0);
+	deb_assert(mRootBoneIndex == 0);
 	return (mRootBoneIndex);
 }
 
 void BoneHierarchy::SetBoneChildCount(int pBoneIndex, int pChildCount)
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	mBone[pBoneIndex].SetChildCount(pChildCount);
 }
 
 int BoneHierarchy::GetBoneChildCount(int pBoneIndex) const
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return (mBone[pBoneIndex].GetChildCount());
 }
 
 void BoneHierarchy::SetChildIndex(int pParentBoneIndex, int pParentChildIndex, int pChildBoneIndex)
 {
-	assert(pParentBoneIndex >= 0 && pParentBoneIndex < mBoneCount);
-	assert(pChildBoneIndex >= 0 && pChildBoneIndex < mBoneCount);
+	deb_assert(pParentBoneIndex >= 0 && pParentBoneIndex < mBoneCount);
+	deb_assert(pChildBoneIndex >= 0 && pChildBoneIndex < mBoneCount);
 	mBone[pParentBoneIndex].SetChild(pParentChildIndex, pChildBoneIndex);
 }
 
 void BoneHierarchy::AddChild(int pParentBoneIndex, int pChildBoneIndex)
 {
-	assert(pParentBoneIndex >= 0 && pParentBoneIndex < mBoneCount);
-	assert(pChildBoneIndex >= 0 && pChildBoneIndex < mBoneCount);
+	deb_assert(pParentBoneIndex >= 0 && pParentBoneIndex < mBoneCount);
+	deb_assert(pChildBoneIndex >= 0 && pChildBoneIndex < mBoneCount);
 	mBone[pParentBoneIndex].AddChild(pChildBoneIndex);
 }
 
 int BoneHierarchy::GetChildIndex(int pParentBoneIndex, int pParentChildIndex) const
 {
-	assert(pParentBoneIndex < mBoneCount);
+	deb_assert(pParentBoneIndex < mBoneCount);
 	return (mBone[pParentBoneIndex].GetChild(pParentChildIndex));
 }
 
 void BoneHierarchy::SetOriginalBoneTransformation(int pBoneIndex, const TransformationF& pTransformation, int pParentBoneIndex)
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	mOriginalBoneTransformation[pBoneIndex] = pTransformation;
 	if (pParentBoneIndex >= 0)
 	{
@@ -184,13 +184,13 @@ void BoneHierarchy::SetOriginalBoneTransformation(int pBoneIndex, const Transfor
 
 const TransformationF& BoneHierarchy::GetOriginalBoneTransformation(int pBoneIndex) const
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return (mOriginalBoneTransformation[pBoneIndex]);
 }
 
 bool BoneHierarchy::FinalizeInit(TransformOperation pTransformOperation)
 {
-	assert(mBoneCount > 0);
+	deb_assert(mBoneCount > 0);
 	mRootBoneIndex = 0;
 	for (int i = 0; i < mBoneCount; i++)
 	{
@@ -212,44 +212,44 @@ void BoneHierarchy::Connect(BoneHierarchy* pParentBones, int pParentBoneIndex)
 
 const TransformationF& BoneHierarchy::GetBoneTransformation(int pBoneIndex) const
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mCurrentBoneTransformation[pBoneIndex];
 }
 
 TransformationF& BoneHierarchy::GetBoneTransformation(int pBoneIndex)
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mCurrentBoneTransformation[pBoneIndex];
 }
 
 void BoneHierarchy::SetBoneTransformation(int pBoneIndex, const TransformationF& pTransformation)
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	mCurrentBoneTransformation[pBoneIndex] = pTransformation;
 }
 
 const TransformationF& BoneHierarchy::GetBoneObjectTransformation(int pBoneIndex) const
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mCurrentBoneObjectTransformation[pBoneIndex];
 }
 
 const TransformationF& BoneHierarchy::GetRelativeBoneTransformation(int pBoneIndex) const
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mRelativeBoneTransformation[pBoneIndex];
 }
 
 TransformationF& BoneHierarchy::GetRelativeBoneTransformation(int pBoneIndex)
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mRelativeBoneTransformation[pBoneIndex];
 }
 
 
 void BoneHierarchy::UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation)
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 
 	mCurrentBoneObjectTransformation[pBoneIndex] = pParentTransformation * mCurrentBoneTransformation[pBoneIndex];
 	TransformationF lOrgObjTransf(pParentTransformation * mOriginalBoneTransformation[pBoneIndex]);
@@ -267,12 +267,12 @@ void BoneHierarchy::UpdateBonesObjectTransformation(int pBoneIndex, const Transf
 
 void BoneHierarchy::Transform(int pBoneIndex, TransformOperation pTransformOperation)
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	for (int i = 0; i < mBone[pBoneIndex].GetChildCount(); i++)
 	{
 		const int lChildIndex = mBone[pBoneIndex].GetChild(i);
-		assert(lChildIndex >= 0 && lChildIndex < mBoneCount);
-		assert(lChildIndex != pBoneIndex);
+		deb_assert(lChildIndex >= 0 && lChildIndex < mBoneCount);
+		deb_assert(lChildIndex != pBoneIndex);
 
 		if (pTransformOperation == TRANSFORM_LOCAL2WORLD)
 		{

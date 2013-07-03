@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -284,7 +284,7 @@ Cure::GameObjectId PushManager::GetAvatarInstanceId() const
 
 bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 {
-	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
+	deb_assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
@@ -358,7 +358,7 @@ bool PushManager::InitializeUniverse()
 		mSun = new UiCure::Props(GetResourceManager(), _T("sun"), mUiManager);
 		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			mSun->StartLoading();
@@ -655,7 +655,7 @@ bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
 	for (; x != mMassObjectArray.end(); ++x)
 	{
 		Life::MassObject* lObject = (Life::MassObject*)GetContext()->GetObject(*x, true);
-		assert(lObject);
+		deb_assert(lObject);
 		lObject->SetRootPosition(pPosition);
 	}
 	return lOk;

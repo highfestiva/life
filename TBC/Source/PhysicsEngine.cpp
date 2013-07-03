@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/PhysicsEngine.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Vector2D.h"
@@ -48,7 +48,7 @@ void PhysicsEngine::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyP
 	for (size_t x = 0; x < cnt; ++x)
 	{
 		const int lBoneIndex = pSource->GetIndex(pOriginal.mEngineNodeArray[x].mGeometry);
-		assert(lBoneIndex >= 0);
+		deb_assert(lBoneIndex >= 0);
 		mEngineNodeArray[x].mGeometry = pTarget->GetBoneGeometry(lBoneIndex);
 	}
 }
@@ -61,7 +61,7 @@ PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData,
 	if (pByteCount != sizeof(uint32)*7 + Endian::BigToHost(lData[6])*sizeof(uint32)*3)
 	{
 		mLog.AError("Could not load; wrong data size.");
-		assert(false);
+		deb_assert(false);
 		return (0);
 	}
 
@@ -69,7 +69,7 @@ PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData,
 	lEngine->LoadChunkyData(pStructure, pData);
 	if (lEngine->GetChunkySize() != pByteCount)
 	{
-		assert(false);
+		deb_assert(false);
 		mLog.AError("Corrupt data or error in loading algo.");
 		delete (lEngine);
 		lEngine = 0;
@@ -104,15 +104,15 @@ PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const
 
 bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 {
-	assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
-	assert(pValue >= -10000);
-	assert(pValue <= +10000);
+	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
+	deb_assert(pValue >= -10000);
+	deb_assert(pValue <= +10000);
 
 	switch (mEngineType)
 	{
 		case ENGINE_WALK:
 		{
-			assert(false);
+			deb_assert(false);
 			mLog.AError("Walk not implemented!");
 		}
 		break;
@@ -161,7 +161,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 		break;
 		default:
 		{
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -170,7 +170,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 
 void PhysicsEngine::ForceSetValue(unsigned pAspect, float pValue)
 {
-	assert(pValue >= -1 && pValue <= +1);
+	deb_assert(pValue >= -1 && pValue <= +1);
 	mValue[pAspect] = pValue;
 }
 
@@ -197,7 +197,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 		{
 			case ENGINE_WALK:
 			{
-				assert(false);
+				deb_assert(false);
 				mLog.AError("Walk not implemented!");
 			}
 			break;
@@ -284,7 +284,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				// Apply a fake gyro torque to parent in order to emulate a heavier gyro than
 				// it actually is. The gyro must be light weight, or physics simulation will be
 				// unstable when rolling bodies around any other axis than the hinge one.
-				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT && mFriction >= 0)
 				{
 					Vector3DF lAxis;
@@ -303,7 +303,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			// TRICKY: fall through.
 			case ENGINE_HINGE_ROLL:
 			{
-				//assert(lGeometry->GetJointId() != INVALID_JOINT);
+				//deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
 					float lValue = lPrimaryForce;
@@ -347,7 +347,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			case ENGINE_HINGE_BRAKE:
 			{
-				//assert(lGeometry->GetJointId() != INVALID_JOINT);
+				//deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
 					// "Max speed" used as a type of "break threashold", so that a joystick or similar
@@ -380,7 +380,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			case ENGINE_ROTOR:
 			{
-				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
 					const Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
@@ -431,7 +431,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			case ENGINE_TILTER:
 			{
-				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
 					const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * ::fabs(lPrimaryForce);
@@ -479,7 +479,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			case ENGINE_SLIDER_FORCE:
 			{
-				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
 					if (!lPrimaryForce && lEngineNode.mMode == MODE_NORMAL)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
@@ -511,7 +511,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			case ENGINE_GLUE:
 			case ENGINE_BALL_BRAKE:
 			{
-				assert(lGeometry->GetJointId() != INVALID_JOINT);
+				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
 					pPhysicsManager->StabilizeJoint(lGeometry->GetJointId());
@@ -550,7 +550,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			default:
 			{
-				assert(false);
+				deb_assert(false);
 			}
 			break;
 		}
@@ -642,7 +642,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 
 float PhysicsEngine::GetValue() const
 {
-	assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
+	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
 	if (mEngineType == ENGINE_PUSH_RELATIVE || mEngineType == ENGINE_PUSH_ABSOLUTE)
 	{
 		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
@@ -747,13 +747,13 @@ void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 	mMaxSpeed2 = Endian::BigToHostF(lData[3]);
 	mFriction = Endian::BigToHostF(lData[4]);
 	mControllerIndex = Endian::BigToHost(lData[5]);
-	assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
+	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
 	const int lControlledNodeCount = Endian::BigToHost(lData[6]);
 	int x;
 	for (x = 0; x < lControlledNodeCount; ++x)
 	{
 		ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(Endian::BigToHost(lData[7+x*3]));
-		assert(lGeometry);
+		deb_assert(lGeometry);
 		float lScale = Endian::BigToHostF(lData[8+x*3]);
 		EngineMode lMode = (EngineMode)Endian::BigToHost(lData[9+x*3]);
 		AddControlledGeometry(lGeometry, lScale, lMode);
@@ -776,7 +776,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 {
 	pFrameTime;
 
-	//assert(pGeometry->GetJointId() != INVALID_JOINT);
+	//deb_assert(pGeometry->GetJointId() != INVALID_JOINT);
 	if (pGeometry->GetJointId() == INVALID_JOINT)
 	{
 		mLog.AError("Missing torque joint!");

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -478,7 +478,7 @@ Cure::GameObjectId HeliForceManager::GetAvatarInstanceId() const
 
 bool HeliForceManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 {
-	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
+	deb_assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject && !mZoomPlatform)
 	{
@@ -708,7 +708,7 @@ void HeliForceManager::CreateChopper(const str& pClassId)
 	mZoomPlatform = false;
 
 	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
-	assert(lSpawner);
+	deb_assert(lSpawner);
 	Cure::ContextObject* lAvatar = Parent::CreateContextObject(pClassId, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	lAvatar->QuerySetChildishness(1);
 	lSpawner->PlaceObject(lAvatar);
@@ -851,7 +851,7 @@ void HeliForceManager::TickUiUpdate()
 		else if (!mFlyTime.IsStarted())
 		{
 			Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
-			assert(lSpawner);
+			deb_assert(lSpawner);
 			const float lDistanceToHome = GetContext()->GetObject(mAvatarId)->GetPosition().GetDistance(lSpawner->GetSpawnPoint().GetPosition());
 			if (lDistanceToHome < 15)
 			{
@@ -876,7 +876,7 @@ bool HeliForceManager::UpdateMassObjects(const Vector3DF& pPosition)
 	for (; x != mMassObjectArray.end(); ++x)
 	{
 		Life::MassObject* lObject = (Life::MassObject*)GetContext()->GetObject(*x, true);
-		assert(lObject);
+		deb_assert(lObject);
 		lObject->SetRootPosition(pPosition);
 	}
 	return lOk;
@@ -1083,7 +1083,7 @@ void HeliForceManager::OnLevelLoadCompleted()
 	{
 		Cure::Health::Set(lAvatar, 1);
 		Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
-		assert(lSpawner);
+		deb_assert(lSpawner);
 		const Vector3DF lLandingPosition = GetLandingTriggerPosition(mOldLevel);
 		const Vector3DF lHeliPosition = lAvatar->GetPosition();
 		const Vector3DF lHeliDelta = lHeliPosition - lLandingPosition;
@@ -1223,7 +1223,7 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 
 Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLevel) const
 {
-	assert(pLevel);
+	deb_assert(pLevel);
 	Cure::ContextObject::Array::const_iterator x = pLevel->GetChildArray().begin();
 	for (; x != pLevel->GetChildArray().end(); ++x)
 	{
@@ -1244,7 +1244,7 @@ Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLeve
 			}
 		}
 	}
-	assert(false);
+	deb_assert(false);
 	return Vector3DF();
 }
 

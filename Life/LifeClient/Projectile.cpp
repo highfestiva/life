@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -44,7 +44,7 @@ void Projectile::OnLoaded()
 	Parent::OnLoaded();
 
 	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 1, 2);
-	assert(lTag);
+	deb_assert(lTag);
 	mExplosiveEnergy = lTag->mFloatValueList[0];
 
 	const str lLaunchSoundName = lTag->mStringValueList[0];
@@ -101,7 +101,7 @@ void Projectile::OnForceApplied(ContextObject* pOtherObject,
 
 void Projectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 {
-	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), GetPosition(), GetVelocity());

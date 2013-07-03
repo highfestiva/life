@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -31,7 +31,7 @@ MassObject::MassObject(Cure::ResourceManager* pResourceManager, const str& pClas
 	mMiddleSquareX(0x80000000),
 	mMiddleSquareY(0x80000000)
 {
-	assert(mSquareInstanceCount > 0);
+	deb_assert(mSquareInstanceCount > 0);
 	::memset(mSquareArray, 0, sizeof(mSquareArray));
 	mFullyVisibleDistance = mSquareSideLength * (SQUARE_MID_TO_CORNER - 1.0f);
 	mVisibleDistanceFactor = (1+mVisibleAddTerm)/mSquareSideLength;
@@ -151,8 +151,8 @@ void MassObject::MoveToSquare(int pX, int pY)
 
 void MassObject::CreateSquare(size_t pX, size_t pY)
 {
-	assert(pX < SQUARE_SIDE && pY < SQUARE_SIDE);
-	assert(!mSquareArray[pY*SQUARE_SIDE+pX]);
+	deb_assert(pX < SQUARE_SIDE && pY < SQUARE_SIDE);
+	deb_assert(!mSquareArray[pY*SQUARE_SIDE+pX]);
 
 	uint32 lSeed = (uint32)((pY<<16)+pX);
 	std::vector<TransformationF> lDisplacementArray;

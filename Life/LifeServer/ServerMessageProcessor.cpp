@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -59,7 +59,7 @@ void ServerMessageProcessor::ProcessNetworkInputMessage(Client* pClient, Cure::M
 					break;
 					default:
 					{
-						assert(false);
+						deb_assert(false);
 					}
 					break;
 				}

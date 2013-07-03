@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/ResourceManager.h"
 #include <algorithm>
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/MemFile.h"
@@ -40,7 +40,7 @@ UserResource::~UserResource()
 	}
 	/*else
 	{
-		assert(false);
+		deb_assert(false);
 	}*/
 	SetParentResource(0);
 }
@@ -55,8 +55,8 @@ void UserResource::SetParentResource(UserResource* pParentResource)
 {
 	if (pParentResource)
 	{
-		assert(!mParentResource);
-		assert(pParentResource != this);
+		deb_assert(!mParentResource);
+		deb_assert(pParentResource != this);
 		mParentResource = pParentResource;
 		mParentResource->IncreaseCallbackBlockCount();
 	}
@@ -189,7 +189,7 @@ int Resource::Reference()
 int Resource::Dereference()
 {
 	BusLock::Add(&mReferenceCount, -1);
-	assert(mReferenceCount >= 0);
+	deb_assert(mReferenceCount >= 0);
 	return (mReferenceCount);
 }
 
@@ -327,7 +327,7 @@ void Resource::FreeDiversified(UserResource*)
 
 UserResource* Resource::GetFirstUserResource() const
 {
-	assert(mLoadCallbackList.size() == 1);
+	deb_assert(mLoadCallbackList.size() == 1);
 	if (!mLoadCallbackList.empty())
 	{
 		return (mLoadCallbackList.front().mUserResource);
@@ -337,7 +337,7 @@ UserResource* Resource::GetFirstUserResource() const
 
 void Resource::operator=(const Resource&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 Lock Resource::mMutex;
@@ -377,7 +377,7 @@ bool PhysicsResource::Load()
 
 bool PhysicsResource::LoadName(const str& pName)
 {
-	assert(GetRamData() == 0);
+	deb_assert(GetRamData() == 0);
 	SetRamData(new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
 	File* lFile = GetManager()->QueryFile(pName);
 	bool lOk = (lFile != 0);
@@ -435,7 +435,7 @@ bool PhysicalTerrainResource::Load()
 {
 	log_atrace("Loading actual TBC::TerrainPatch.");
 
-	assert(!IsUnique());
+	deb_assert(!IsUnique());
 	// TODO: parse constants out of resource name string.
 	const TerrainPatchLoader::PatchArea lArea(0, 0, 0, 0);
 	const float lLod = 0;
@@ -482,8 +482,8 @@ RamImageResource::UserData RamImageResource::GetUserData(const Cure::UserResourc
 
 bool RamImageResource::Load()
 {
-	assert(!IsUnique());
-	assert(GetRamData() == 0);
+	deb_assert(!IsUnique());
+	deb_assert(GetRamData() == 0);
 	SetRamData(new Canvas());
 	File* lFile = GetManager()->QueryFile(GetName());
 	bool lOk = (lFile != 0);
@@ -568,7 +568,7 @@ void ResourceManager::StopClear()
 		while (x != mActiveResourceTable.End())
 		{
 			Resource* lResource = *x;
-			assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
+			deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 			if ((!lKillReferencesOnly || lResource->IsReferenceType()) &&
 				lResource->GetReferenceCount() <= lRefCountThreshold)
 			{
@@ -800,12 +800,12 @@ void ResourceManager::SafeRelease(UserResource* pUserResource)
 		}
 		else
 		{
-			assert(false);
+			deb_assert(false);
 		}
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
 }
 
@@ -813,7 +813,7 @@ void ResourceManager::Release(Resource* pResource)
 {
 	if (pResource->Dereference() <= 0)
 	{
-		assert(pResource->GetReferenceCount() == 0);
+		deb_assert(pResource->GetReferenceCount() == 0);
 		ScopeLock lMutex(&mThreadLock);
 
 		if (!pResource->IsUnique())
@@ -831,13 +831,13 @@ void ResourceManager::Release(Resource* pResource)
 				if (PrepareRemoveInLoadProgress(pResource))
 				{
 					log_volatile(mLog.Trace(_T("Incomplete resource ")+pResource->GetName()+_T(" dereferenced. Not cached - deleted immediately.")));
-					assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
+					deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 					DeleteResource(pResource);
 				}
 				else
 				{
 					mLog.Info(_T("Currently loading resource ")+pResource->GetName()+_T(" dereferenced. Not cached - will be deleted immediately after loader thread is done."));
-					assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
+					deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 				}
 			}
 		}
@@ -847,13 +847,13 @@ void ResourceManager::Release(Resource* pResource)
 			if (PrepareRemoveInLoadProgress(pResource))
 			{
 				log_volatile(mLog.Trace(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Deleted immediately.")));
-				assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
+				deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 				DeleteResource(pResource);
 			}
 			else
 			{
 				mLog.Info(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Will be deleted immediately after loader thread is done."));
-				assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
+				deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 			}
 		}
 	}
@@ -912,7 +912,7 @@ unsigned ResourceManager::ForceFreeCache(const strutil::strvec& pResourceTypeLis
 	while (x != mCachedResourceTable.End())
 	{
 		Resource* lResource = *x;
-		assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
+		deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		bool lDrop = pResourceTypeList.empty();
 		const str& lType = lResource->GetType();
 		strutil::strvec::const_iterator y = pResourceTypeList.begin();
@@ -975,20 +975,20 @@ Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* 
 		{
 			// Resource found on the way out, move it back into the system.
 			mCachedResourceTable.Remove(lResource->GetName());
-			assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
-			assert(lResource->GetLoadState() == RESOURCE_LOAD_COMPLETE);
+			deb_assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
+			deb_assert(lResource->GetLoadState() == RESOURCE_LOAD_COMPLETE);
 			mActiveResourceTable.Insert(lResource->GetName(), lResource);
 			lResource->Resume();
 		}
 	}
 	if (!lResource)
 	{
-		//assert(mRequestLoadList.Find(pName) == mRequestLoadList.End());
+		//deb_assert(mRequestLoadList.Find(pName) == mRequestLoadList.End());
 		lResource = CreateResource(pUserResource, pName);
-		assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
-		assert(lResource->GetLoadState() == RESOURCE_LOAD_ERROR);
+		deb_assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
+		deb_assert(lResource->GetLoadState() == RESOURCE_LOAD_ERROR);
 		mActiveResourceTable.Insert(lResource->GetName(), lResource);
-		assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
+		deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		pMustLoad = true;
 		log_volatile(mLog.Trace(_T("Resource ")+pName+_T(" created + starts loading.")));
 	}
@@ -1008,7 +1008,7 @@ Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* 
 			log_volatile(mLog.Trace(_T("Resource ")+pName+_T(" already loaded, will use it instead of reloading.")));
 		}
 	}
-	//assert(!lResource->IsUnique());
+	//deb_assert(!lResource->IsUnique());
 	lResource->Reference();
 	return (lResource);
 }
@@ -1018,12 +1018,12 @@ void ResourceManager::StartLoad(Resource* pResource)
 	AssertIsMutexOwner();
 
 	// Pass on to loader thread.
-	assert(pResource->GetReferenceCount() > 0);
+	deb_assert(pResource->GetReferenceCount() > 0);
 	pResource->SetLoadState(RESOURCE_LOAD_IN_PROGRESS);
-	assert(mRequestLoadList.GetCount() < 10000);	// Just run GetCount() to validate internal integrity.
+	deb_assert(mRequestLoadList.GetCount() < 10000);	// Just run GetCount() to validate internal integrity.
 	log_volatile(const str& lName = pResource->GetName());
 	log_volatile(mLog.Tracef(_T("Requesting load of '%s' (%s)."), lName.c_str(), pResource->GetType().c_str()));
-	assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
+	deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 	mRequestLoadList.PushBack(pResource, pResource);
 	mLoadSemaphore.Signal();
 }
@@ -1144,7 +1144,7 @@ bool ResourceManager::PrepareRemoveInLoadProgress(Resource* pResource)
 		// "Load" method is first called. However, it may still depend asynchronously on other resources
 		// which are currently loading. So it keeps its "load in progress" state, but remains in the
 		// "loaded list".
-		//assert(mRequestLoadList.Exists(pResource) && !mLoadedList.Exists(pResource));
+		//deb_assert(mRequestLoadList.Exists(pResource) && !mLoadedList.Exists(pResource));
 
 		// Only the first object in the 'request load' list may be currently loading.
 		if (mRequestLoadList.GetCount() > 0 && pResource == mRequestLoadList.First().GetObject())
@@ -1157,14 +1157,14 @@ bool ResourceManager::PrepareRemoveInLoadProgress(Resource* pResource)
 		{
 			// If it's in the 'request load' list, but not first, simply remove it
 			// and it's safe to delete.
-			assert(mRequestLoadList.Find(pResource) != mRequestLoadList.End() ||
+			deb_assert(mRequestLoadList.Find(pResource) != mRequestLoadList.End() ||
 				mLoadedList.Find(pResource) != mLoadedList.End());
 		}
 		mRequestLoadList.Remove(pResource);
 	}
-	assert(mRequestLoadList.GetCount() < 10000);
+	deb_assert(mRequestLoadList.GetCount() < 10000);
 	mLoadedList.Remove(pResource);
-	assert(mLoadedList.GetCount() < 1000);
+	deb_assert(mLoadedList.GetCount() < 1000);
 	return (lAllowDelete);
 }
 
@@ -1187,11 +1187,11 @@ void ResourceManager::LoadSingleResource()
 
 	if (lResource)
 	{
-		assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
+		deb_assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
 		log_volatile(mLog.Tracef(_T("Loading %s with %i resources in list (inclusive)."),
 			lResource->GetName().c_str(), lListCount));
 		const bool lIsLoaded = lResource->Load();
-		assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
+		deb_assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
 		if (!lIsLoaded)
 		{
 			lResource->SetLoadState(RESOURCE_LOAD_ERROR);
@@ -1200,9 +1200,9 @@ void ResourceManager::LoadSingleResource()
 			ScopeLock lLock(&mThreadLock);
 			if (lResource == mRequestLoadList.First().GetObject())
 			{
-				assert(mRequestLoadList.GetCount() < 10000);
+				deb_assert(mRequestLoadList.GetCount() < 10000);
 				mRequestLoadList.Remove(lResource);
-				assert(mRequestLoadList.GetCount() < 10000);
+				deb_assert(mRequestLoadList.GetCount() < 10000);
 				mLoadedList.PushBack(lResource, lResource);
 			}
 			else
@@ -1211,8 +1211,8 @@ void ResourceManager::LoadSingleResource()
 				// thread was loading it. Therefore we delete it here. No use trying to cache
 				// this resource, since it needs both Suspend() and PostProcess(); in addition
 				// the last call must also come from the main thread.
-				assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
-				assert(lResource->GetReferenceCount() == 0);
+				deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
+				deb_assert(lResource->GetReferenceCount() == 0);
 				mLog.Info(_T("Deleting just loaded resource '")+lResource->GetName()+_T("'."));
 				DeleteResource(lResource);
 			}
@@ -1250,8 +1250,8 @@ void ResourceManager::DeleteResource(Resource* pResource)
 {
 	AssertIsMutexOwner();
 
-	assert(mResourceSafeLookup.find(pResource) != mResourceSafeLookup.end());
-	assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
+	deb_assert(mResourceSafeLookup.find(pResource) != mResourceSafeLookup.end());
+	deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 	mResourceSafeLookup.erase(pResource);
 	delete (pResource);
 

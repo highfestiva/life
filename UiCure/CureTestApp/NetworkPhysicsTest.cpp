@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #ifndef CURE_TEST_WITHOUT_UI
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include <list>
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/NetworkServer.h"
@@ -307,7 +307,7 @@ bool NetworkLoginClients()
 	{
 		Cure::NetworkClient* lClient = new Cure::NetworkClient(Cure::GetSettings());
 		lTestOk = lClient->Open(_T(":11233"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		gClient[x].mNetworkAgent = lClient;
 		lContext = _T("client connect+login");
 		wstr lBadPassword(L"feddo");
@@ -336,10 +336,10 @@ bool NetworkLoginClients()
 
 void NetworkShutdown()
 {
-	assert(gServer.mNetworkAgent->GetConnectionCount() == (size_t)CLIENT_COUNT);
+	deb_assert(gServer.mNetworkAgent->GetConnectionCount() == (size_t)CLIENT_COUNT);
 	for (int x = 0; x < CLIENT_COUNT; ++x)
 	{
-		assert(gClient[x].mNetworkAgent->GetConnectionCount() == 1);
+		deb_assert(gClient[x].mNetworkAgent->GetConnectionCount() == 1);
 		delete (gClient[x].mNetworkAgent);
 		gClient[x].mNetworkAgent = 0;
 	}
@@ -639,7 +639,7 @@ void ClientReceive(int pAgentIndex)
 			lParseResult = lPacket->ParseMore();
 		}
 		while (lParseResult == Cure::Packet::PARSE_OK);
-		assert(lParseResult == Cure::Packet::PARSE_NO_DATA);
+		deb_assert(lParseResult == Cure::Packet::PARSE_NO_DATA);
 	}
 	else if (lReceived != Cure::NetworkAgent::RECEIVE_NO_DATA)
 	{
@@ -774,7 +774,7 @@ void ServerReceive()
 				lParseResult = lPacket->ParseMore();
 			}
 			while (lParseResult == Cure::Packet::PARSE_OK);
-			assert(lParseResult == Cure::Packet::PARSE_NO_DATA);
+			deb_assert(lParseResult == Cure::Packet::PARSE_NO_DATA);
 		}
 		else if (lReceived != Cure::NetworkAgent::RECEIVE_NO_DATA)
 		{

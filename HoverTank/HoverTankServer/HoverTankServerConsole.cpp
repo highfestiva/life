@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -54,7 +54,7 @@ void HoverTankServerConsole::OnExecutionError(const str& pCommand, const strutil
 	(void)pCommand;
 	(void)pParameterVector;
 	(void)pResult;
-	assert(false);
+	deb_assert(false);
 }
 
 

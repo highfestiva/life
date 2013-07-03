@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -53,7 +53,7 @@ TBC::TerrainPatch* TerrainPatchLoader::LoadPatchMesh(const PatchArea&, float)
 TBC::TerrainPatch* TerrainPatchLoader::GeneratePatchMesh(const PatchArea& pArea, float pLod)
 {
 	TerrainFunctionManager* lFunctionManager = mResourceManager->GetTerrainFunctionManager();
-	assert(lFunctionManager);
+	deb_assert(lFunctionManager);
 	lFunctionManager->LoadFunctions(pArea, pLod);
 	TBC::TerrainPatch* lPatch = lFunctionManager->GeneratePatchMesh(pArea, pLod);
 	return (lPatch);

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -54,7 +54,7 @@ Win32FontManager::~Win32FontManager()
 
 void Win32FontManager::SetColor(const Color& pColor, unsigned pColorIndex)
 {
-	assert(pColorIndex <= 1);
+	deb_assert(pColorIndex <= 1);
 
 	COLORREF lColor = RGB(pColor.mRed, pColor.mGreen, pColor.mBlue);
 	mColorRef[pColorIndex] = lColor;

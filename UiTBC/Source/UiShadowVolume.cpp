@@ -1,11 +1,11 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiShadowVolume.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Thread.h"
 
 
@@ -458,7 +458,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			*lIndexData++ = lV0 + mParentVertexCount;
 
 			mTriangleCount += 2;
-			assert(mTriangleCount < mMaxTriangleCount);
+			deb_assert(mTriangleCount < mMaxTriangleCount);
 		}
 	}
 

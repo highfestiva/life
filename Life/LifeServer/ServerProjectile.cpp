@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -37,7 +37,7 @@ void ServerProjectile::OnLoaded()
 	Parent::OnLoaded();
 
 	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 1, 2);
-	assert(lTag);
+	deb_assert(lTag);
 	mExplosiveEnergy = lTag->mFloatValueList[0];
 
 	TransformationF lTransform;

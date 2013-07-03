@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -134,9 +134,9 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 		{
 			lHeadPosition = mFile->Tell();
 			lOk = LoadHead(lType, lSize, lChunkEndPosition);
-			assert(lOk);
+			deb_assert(lOk);
 #define C(t)	lType == t
-			assert(C(CHUNK_MESH) || C(CHUNK_MESH_VERTICES) || C(CHUNK_MESH_NORMALS) || C(CHUNK_MESH_UV) ||
+			deb_assert(C(CHUNK_MESH) || C(CHUNK_MESH_VERTICES) || C(CHUNK_MESH_NORMALS) || C(CHUNK_MESH_UV) ||
 				C(CHUNK_MESH_COLOR) || C(CHUNK_MESH_COLOR_FORMAT) || C(CHUNK_MESH_TRIANGLES) || C(CHUNK_MESH_STRIPS) ||
 				C(CHUNK_MESH_VOLATILITY) || C(CHUNK_MESH_CASTS_SHADOWS) ||
 				C(CHUNK_SKIN) || C(CHUNK_SKIN_BONE_WEIGHT_GROUP) || C(CHUNK_SKIN_BWG_BONES) ||
@@ -196,12 +196,12 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						if (lElement.mLoadCallback)
 						{
 							lOk = LoadElementCallback(lType, lSize, lChunkEndPosition, lElement.mPointer);
-							assert(lOk);
+							deb_assert(lOk);
 						}
 						else if (lElement.mIntPointer)
 						{
 							lOk = (mFile->Read(lElement.mIntPointer[y]) == IO_OK);
-							assert(lOk);
+							deb_assert(lOk);
 							if (lElement.mFieldSize)
 							{
 								*lElement.mFieldSize += sizeof(int32);
@@ -210,7 +210,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						else if (lElement.mPointer)
 						{
 							lOk = (mFile->AllocReadData(&lElement.mPointer[y], lSize) == IO_OK);
-							assert(lOk);
+							deb_assert(lOk);
 							if (lOk)
 							{
 								lElement.mFieldSize[y] = lSize;
@@ -220,17 +220,17 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						{
 							uint8* lString = 0;
 							lOk = (lSize >= 4 && (lSize&1) == 0);
-							assert(lOk);
+							deb_assert(lOk);
 							if (lOk)
 							{
 								lOk = (mFile->AllocReadData((void**)&lString, lSize) == IO_OK);
-								assert(lOk);
+								deb_assert(lOk);
 							}
 							if (lOk)
 							{
 								int lStringLength = PackerUnicodeString::Unpack(lElement.mString[y], lString, lSize);
 								lOk = (lStringLength == (int)lSize || lStringLength == (int)lSize-2);
-								assert(lOk);
+								deb_assert(lOk);
 								if (!lOk)
 								{
 									mLog.AError("Could not unpack string!");
@@ -242,7 +242,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						if (mFile->Tell() >= lChunkEndPosition)
 						{
 							lOk = (y == lElement.mElementCount-1 || lElement.mElementCount <= 0);
-							assert(lOk);
+							deb_assert(lOk);
 							if (!lOk)
 							{
 								mLog.Errorf(_T("Trying to load %i elements,")
@@ -259,13 +259,13 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 				if (lElementFound)
 				{
 					lOk = (mFile->Tell() == lChunkEndPosition);
-					assert(lOk);	// This probably means we put in too few elements in our load array when calling.
+					deb_assert(lOk);	// This probably means we put in too few elements in our load array when calling.
 				}
 				else
 				{
 					// Unknown element, try to load it separately.
 					lOk = (mFile->Skip(lSize) == IO_OK);
-					assert(lOk);
+					deb_assert(lOk);
 				}
 			}
 		}
@@ -293,7 +293,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 	{
 		lOk = (mFile->Tell() <= pChunkEnd);
 	}
-	assert(lOk);
+	deb_assert(lOk);
 	return (lOk);
 }
 
@@ -757,7 +757,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_COUNT, &lTriggerCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_SPAWNER_COUNT, &lSpawnerCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -781,17 +781,17 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_CONTAINER, (void*)pPhysics, lTriggerCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_SPAWNER_CONTAINER, (void*)pPhysics, lSpawnerCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
 		lOk = (lEngineCount == pPhysics->GetEngineCount());
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
 		lOk = (lTriggerCount == pPhysics->GetTriggerCount());
-		assert(lOk);
+		deb_assert(lOk);
 	}
 
 	return (lOk);
@@ -888,7 +888,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 				{
 					char* lData = new char[lSize];
 					lGeometry->SaveChunkyData(pPhysics, lData);
-					assert(lGeometry->GetChunkySize(lData) == lSize);
+					deb_assert(lGeometry->GetChunkySize(lData) == lSize);
 					lOk = (mFile->WriteData(lData, lSize) == IO_OK);
 					delete (lData);
 				}
@@ -912,7 +912,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	for (int e = 0; lOk && e < lEngineCount; ++e)
 	{
 		PhysicsEngine* lEngine = pPhysics->GetEngine(e);
-		assert(lEngine);
+		deb_assert(lEngine);
 		int64 lChunkEndPosition = 0;
 		unsigned lSize = lEngine->GetChunkySize();
 		lOk = SaveHead(CHUNK_PHYSICS_ENGINE, lSize, lChunkEndPosition);
@@ -941,7 +941,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	for (int t = 0; lOk && t < lTriggerCount; ++t)
 	{
 		const PhysicsTrigger* lTrigger = pPhysics->GetTrigger(t);
-		assert(lTrigger);
+		deb_assert(lTrigger);
 		int64 lChunkEndPosition = 0;
 		unsigned lSize = lTrigger->GetChunkySize();
 		lOk = SaveHead(CHUNK_PHYSICS_TRIGGER, lSize, lChunkEndPosition);
@@ -969,7 +969,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	for (int t = 0; lOk && t < lSpawnerCount; ++t)
 	{
 		const PhysicsSpawner* lSpawner = pPhysics->GetSpawner(t);
-		assert(lSpawner);
+		deb_assert(lSpawner);
 		int64 lChunkEndPosition = 0;
 		unsigned lSize = lSpawner->GetChunkySize();
 		lOk = SaveHead(CHUNK_PHYSICS_SPAWNER, lSize, lChunkEndPosition);
@@ -1064,7 +1064,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 			}
 		}
 
-		assert(lOk);
+		deb_assert(lOk);
 
 		delete[] (lGeometryArray);
 		delete[] (lTransformArray);
@@ -1104,7 +1104,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 		{
 			lTrigger = PhysicsTrigger::Load(lPhysics, lTriggerArray, lTriggerByteSize);
 			lOk = (lTrigger != 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -1126,7 +1126,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 		{
 			lSpawner = PhysicsSpawner::Load(lPhysics, lSpawnerArray, lSpawnerByteSize);
 			lOk = (lSpawner != 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -1139,7 +1139,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 	{
 		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
 	}
-	assert(lOk);
+	deb_assert(lOk);
 	return (lOk);
 }
 
@@ -1196,17 +1196,17 @@ bool ChunkyClassLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int6
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(CHUNK_CLASS_TAG, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	else if (pType == CHUNK_CLASS_TAG)
 	{
 		uint8* lBuffer = 0;
 		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			lOk = lClass->UnpackTag(lBuffer, pSize);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		delete[] (lBuffer);
 	}
@@ -1215,13 +1215,13 @@ bool ChunkyClassLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int6
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
 	{
 		uint8* lBuffer = 0;
 		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			int32 lPhysicsIndex = Endian::BigToHost(*(int32*)lBuffer);
@@ -1232,7 +1232,7 @@ bool ChunkyClassLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int6
 	else
 	{
 		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	return (lOk);
 }

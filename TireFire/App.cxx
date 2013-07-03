@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -459,16 +459,16 @@ void App::Close()
 
 void App::Init()
 {
-	assert(Int2Str(-123) == _T("-123"));
-	assert(Int2Str(-1234) == _T("-1,234"));
-	assert(Int2Str(-12345) == _T("-12,345"));
-	assert(Int2Str(-123456) == _T("-123,456"));
-	assert(Int2Str(-1234567) == _T("-1,234,567"));
-	assert(Int2Str(+123) == _T("123"));
-	assert(Int2Str(+1234) == _T("1,234"));
-	assert(Int2Str(+12345) == _T("12,345"));
-	assert(Int2Str(+123456) == _T("123,456"));
-	assert(Int2Str(+1234567) == _T("1,234,567"));
+	deb_assert(Int2Str(-123) == _T("-123"));
+	deb_assert(Int2Str(-1234) == _T("-1,234"));
+	deb_assert(Int2Str(-12345) == _T("-12,345"));
+	deb_assert(Int2Str(-123456) == _T("-123,456"));
+	deb_assert(Int2Str(-1234567) == _T("-1,234,567"));
+	deb_assert(Int2Str(+123) == _T("123"));
+	deb_assert(Int2Str(+1234) == _T("1,234"));
+	deb_assert(Int2Str(+12345) == _T("12,345"));
+	deb_assert(Int2Str(+123456) == _T("123,456"));
+	deb_assert(Int2Str(+1234567) == _T("1,234,567"));
 	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
@@ -650,7 +650,7 @@ bool App::Poll()
 						delete mHiscoreAgent;
 						mHiscoreAgent = 0;
 						mLog.AError("Oops! Completed hiscore communication, but something went wrong.");
-						assert(false);
+						deb_assert(false);
 						MainMenu();	// Well... assume some super-shitty state...
 					}
 					break;

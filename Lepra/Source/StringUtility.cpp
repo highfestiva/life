@@ -1,11 +1,11 @@
 
 // Author: Jonas Bystrröm
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/StringUtility.h"
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #ifdef _MSC_VER
 #pragma warning(disable: 4127)	// Conditional if (sizeof()...) results in constant expression.
 #pragma warning(disable: 4244)	// Converting UTF-32 code point to wchar_t on 16-bit system.
@@ -245,7 +245,7 @@ template<> const astr astrutil::Encode(const wstr& pString)
 	}
 	else
 	{
-		assert(sizeof(wchar_t) == 4);
+		deb_assert(sizeof(wchar_t) == 4);
 		utf8::unchecked::utf32to8(pString.begin(), pString.end(), back_inserter(lAnsi));
 	}
 	return (lAnsi);
@@ -261,7 +261,7 @@ template<> const wstr wstrutil::Encode(const astr& pString)
 	}
 	else
 	{
-		assert(sizeof(wchar_t) == 4);
+		deb_assert(sizeof(wchar_t) == 4);
 		utf8::unchecked::utf8to32(pString.begin(), pString.end(), back_inserter(lUnicode));
 	}
 	return (lUnicode);

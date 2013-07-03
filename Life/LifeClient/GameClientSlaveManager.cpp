@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -802,7 +802,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				Cure::MessageCreateOwnedObject* lMessageCreateOwnedObject = (Cure::MessageCreateOwnedObject*)lMessageCreateObject;
 				lObject->SetOwnerInstanceId(lMessageCreateOwnedObject->GetOwnerInstanceId());
-				//assert(GetContext()->GetObject(lObject->GetOwnerInstanceId(), true));	Owning object may have been destroyed.
+				//deb_assert(GetContext()->GetObject(lObject->GetOwnerInstanceId(), true));	Owning object may have been destroyed.
 			}
 
 		}
@@ -907,7 +907,7 @@ void GameClientSlaveManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pM
 		break;
 		case Cure::MessageStatus::INFO_LOGIN:
 		{
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 		case Cure::MessageStatus::INFO_COMMAND:
@@ -985,7 +985,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 		break;
 		default:
 		{
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1108,7 +1108,7 @@ bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject* pObject)
 			lPacket->AddMessage(lAttribMessage);
 			lAttribute->Pack(lAttribMessage->GetWriteBuffer(lPacket, pObject->GetInstanceId(), lSendSize));
 
-			assert(!GetNetworkAgent()->GetLock()->IsOwner());
+			deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 			ScopeLock lTickLock(GetTickLock());
 			GetNetworkAgent()->PlaceInSendBuffer(true, GetNetworkClient()->GetSocket(), lPacket);
 
@@ -1126,7 +1126,7 @@ bool GameClientSlaveManager::IsServer()
 void GameClientSlaveManager::SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned)
 {
 	// Server manages this.
-	assert(false);
+	deb_assert(false);
 }
 
 void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObject*)
@@ -1138,7 +1138,7 @@ void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject,
 {
 	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
 	{
-		assert(IsOwned(pObject->GetInstanceId()));
+		deb_assert(IsOwned(pObject->GetInstanceId()));
 		mOwnedObjectList.erase(pObject->GetInstanceId());
 		pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 		pObject->DeleteNetworkOutputGhost();
@@ -1160,7 +1160,7 @@ void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, unsign
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
 }
 
@@ -1172,12 +1172,12 @@ void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::
 	{
 		if (!lObject1->DetachFromObject(lObject2))
 		{
-			assert(false);
+			deb_assert(false);
 		}
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
 }
 

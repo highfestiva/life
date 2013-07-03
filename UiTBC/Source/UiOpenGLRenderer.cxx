@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 #include "../Include/UiOpenGLRenderer.h"
 #include "../../Lepra/Include/Canvas.h"
@@ -22,7 +22,7 @@ namespace UiTbc
 
 
 #ifdef LEPRA_DEBUG
-#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); assert(lGlError == GL_NO_ERROR); }
+#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
 #else // !Debug
 #define OGL_ASSERT()
 #endif // Debug / !Debug
@@ -512,7 +512,7 @@ const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pU
 		case Texture::SPECULAR_MAP:
 			return pUserTexture->GetSpecularMap(pMipMapLevel);
 		default:
-			assert(false);
+			deb_assert(false);
 			return 0;
 	};
 }
@@ -520,7 +520,7 @@ const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pU
 void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* pTexture)
 {
 	OGL_ASSERT();
-	assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
+	deb_assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
 
 	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 					GetCompressedTexturesEnabled();
@@ -535,7 +535,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	OGL_ASSERT();
 
 	int lSize = GetMap(pMapType, 0, pTexture)->GetPixelByteSize();
-	assert(lSize == 1 || lSize == 3 || lSize == 4);
+	deb_assert(lSize == 1 || lSize == 3 || lSize == 4);
 	
 	GLenum lPixelFormat;
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
@@ -1035,7 +1035,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 			// Make sure the geometry is properly removed -- otherwise we have a leak!
 			// Hugge: In case fallback materials are disabled, the material may not
 			//        have added the geometry in the first place.
-			assert(false);
+			deb_assert(false);
 		}
 	}
 

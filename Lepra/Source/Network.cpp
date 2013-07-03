@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include "../Include/Network.h"
 
 #ifdef LEPRA_WINDOWS
@@ -21,7 +21,7 @@ namespace Lepra
 
 bool Network::Start()
 {
-	assert(!mStarted);
+	deb_assert(!mStarted);
 	if (mStarted == false)
 	{
 #ifdef LEPRA_WINDOWS
@@ -40,7 +40,7 @@ bool Network::Start()
 
 bool Network::Stop()
 {
-	assert(mStarted);
+	deb_assert(mStarted);
 	if (mStarted == true)
 	{
 		mStarted = false;

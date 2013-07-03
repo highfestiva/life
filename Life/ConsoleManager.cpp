@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -233,7 +233,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 #ifdef LEPRA_MSVC
 			::DebugBreak();
 #else // Other compilers
-			assert(false);
+			deb_assert(false);
 #endif // MSVC / others
 #else // Release
 			log_atrace("debug break is not available in non-debug builds.");

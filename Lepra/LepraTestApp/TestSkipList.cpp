@@ -1,11 +1,11 @@
 /*
 	File:   TestSkipList.cpp
 	Class:  -
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/Log.h"
 #include "../Include/String.h"
 #include "../Include/SkipList.h"
@@ -42,7 +42,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 		lTestOk = !(lIter1 != lSkipList.End() || !(lIter1 == lSkipList.End()) ||
 			lIter2 != lSkipList.End() || !(lIter2 == lSkipList.End()) ||
 			lIter3 != lSkipList.End() || !(lIter3 == lSkipList.End()));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	lSkipList.Insert(1, 20);
@@ -60,7 +60,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 			lSkipList.Find(3) == lSkipList.End() || lSkipList.Find(4) == lSkipList.End() ||
 			lSkipList.Find(5) == lSkipList.End() || lSkipList.Find(6) == lSkipList.End() ||
 			lSkipList.Find(7) == lSkipList.End() || lSkipList.Find(8) == lSkipList.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -69,7 +69,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 			lSkipList.Find(123) != lSkipList.End() || lSkipList.Find(-34) != lSkipList.End() ||
 			lSkipList.Find(45) != lSkipList.End() || lSkipList.Find(-56) != lSkipList.End() ||
 			lSkipList.Find(67) != lSkipList.End() || lSkipList.Find(-78) != lSkipList.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	lIter2 = lSkipList.Last();
@@ -78,7 +78,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 	{
 		lContext = _T("iterator test A");
 		lTestOk = !(lIter2 == lSkipList.End() || lIter3 == lSkipList.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// These should become end pointers.
 	lIter2++;
@@ -87,7 +87,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 	{
 		lContext = _T("iterator test B");
 		lTestOk = !(lIter2 != lSkipList.End() || lIter3 != lSkipList.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Check iterating.
@@ -101,7 +101,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 	{
 		lContext = _T("iterator counting");
 		lTestOk = !(lCount != 8 || lCount != lSkipList.GetCount());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Check if sorted.
@@ -112,7 +112,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 		{
 			lContext = _T("sorting failed");
 			lTestOk = !((*lIter1) != lCount);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -125,7 +125,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 			lSkipList.Find(3) == lSkipList.End() || lSkipList.Find(4) != lSkipList.End() ||
 			lSkipList.Find(5) == lSkipList.End() || lSkipList.Find(6) == lSkipList.End() ||
 			lSkipList.Find(7) == lSkipList.End() || lSkipList.Find(8) == lSkipList.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Now, do some random input and removal.
@@ -141,7 +141,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 		{
 			lContext = _T("random remove failed");
 			lTestOk = !(lSkipList.GetCount() != 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -164,7 +164,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 	{
 		lContext = _T("entries failed A");
 		lTestOk = !(lCount != lSkipList.GetCount());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Remove all, and count again.
@@ -178,7 +178,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 	{
 		lContext = _T("entries found");
 		lTestOk = !(lCount != 0 || lCount != lSkipList.GetCount());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("SkipList"), lContext, lTestOk);

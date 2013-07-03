@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -80,7 +80,7 @@ void FontTexture::StoreGlyph(tchar pChar, FontManager* pFontManager)
 bool FontTexture::GetGlyphX(tchar pChar, int& pX, int& pWidth) const
 {
 	GlyphXMap::const_iterator x = mGlyphXOffsetMap.find(pChar);
-	assert(x != mGlyphXOffsetMap.end());
+	deb_assert(x != mGlyphXOffsetMap.end());
 	if (x != mGlyphXOffsetMap.end())
 	{
 		pX = x->second.first;

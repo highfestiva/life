@@ -1,7 +1,7 @@
 /*
 	Class:  TreeNode
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 #include "../../Include/GUI/UiTreeNode.h"

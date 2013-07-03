@@ -1,10 +1,10 @@
 /*
 	Class:  -
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/Log.h"
 #include "../Include/String.h"
 #include "../Include/BinTree.h"
@@ -41,7 +41,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 		lTestOk = !(lIter1 != lBinTree.End() || !(lIter1 == lBinTree.End()) ||
 			lIter2 != lBinTree.End() || !(lIter2 == lBinTree.End()) ||
 			lIter3 != lBinTree.End() || !(lIter3 == lBinTree.End()));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	lBinTree.Insert(1, 20);
@@ -59,7 +59,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 			lBinTree.Find(3) == lBinTree.End() || lBinTree.Find(4) == lBinTree.End() ||
 			lBinTree.Find(5) == lBinTree.End() || lBinTree.Find(6) == lBinTree.End() ||
 			lBinTree.Find(7) == lBinTree.End() || lBinTree.Find(8) == lBinTree.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -68,7 +68,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 			lBinTree.Find(123)  != lBinTree.End() || lBinTree.Find(-34)  != lBinTree.End() ||
 			lBinTree.Find(45)   != lBinTree.End() || lBinTree.Find(-56)  != lBinTree.End() ||
 			lBinTree.Find(67)   != lBinTree.End() || lBinTree.Find(-78)  != lBinTree.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	lIter2 = lBinTree.Last();
@@ -77,7 +77,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	{
 		lContext = _T("iterator test A");
 		lTestOk = !(lIter2 == lBinTree.End() || lIter3 == lBinTree.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// These should become end pointers.
 	lIter2++;
@@ -86,7 +86,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	{
 		lContext = _T("iterator test B");
 		lTestOk = !(lIter2 != lBinTree.End() || lIter3 != lBinTree.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Check iterating.
@@ -100,7 +100,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	{
 		lContext = _T("iterator counting");
 		lTestOk = !(lCount != 8 || lCount != lBinTree.GetCount());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Check if sorted.
@@ -111,7 +111,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 		{
 			lContext = _T("sorting failed");
 			lTestOk = !((*lIter1) != lCount);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -124,7 +124,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 			lBinTree.Find(3) == lBinTree.End() || lBinTree.Find(4) != lBinTree.End() ||
 			lBinTree.Find(5) == lBinTree.End() || lBinTree.Find(6) == lBinTree.End() ||
 			lBinTree.Find(7) == lBinTree.End() || lBinTree.Find(8) == lBinTree.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Now, do some random input and removal.
@@ -140,7 +140,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 		{
 			lContext = _T("random remove failed");
 			lTestOk = !(lBinTree.GetCount() != 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -162,7 +162,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	{
 		lContext = _T("entries failed A");
 		lTestOk = !(lCount != lBinTree.GetCount());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Balance the tree.
@@ -178,7 +178,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	{
 		lContext = _T("entries failed B");
 		lTestOk = !(lCount != lBinTree.GetCount());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Remove all, and count again.
@@ -192,7 +192,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	{
 		lContext = _T("entries found");
 		lTestOk = !(lCount != 0 || lCount != lBinTree.GetCount());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("BinTree"), lContext, lTestOk);

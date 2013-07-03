@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -193,7 +193,7 @@ void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKe
 void CollisionSoundManager::OnSoundLoaded(UiCure::UserSound3dResource* pSoundResource)
 {
 	SoundInfo* lSoundInfo = ((CollisionSoundResource*)pSoundResource)->mSoundInfo;
-	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		float lRealTimeRatio;
@@ -295,7 +295,7 @@ float CollisionSoundManager::SoundInfo::GetVolume(float pBaseImpact, const Sound
 
 void CollisionSoundManager::SoundInfo::operator=(const SoundInfo&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 
@@ -309,7 +309,7 @@ CollisionSoundManager::CollisionSoundResource::CollisionSoundResource(UiCure::Ga
 
 void CollisionSoundManager::CollisionSoundResource::operator=(const CollisionSoundResource&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

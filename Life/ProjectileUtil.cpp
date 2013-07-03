@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -19,8 +19,8 @@ namespace Life
 
 bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF& pTransform, Vector3DF& pVelocity)
 {
-	assert(pProjectile);
-	//assert(pProjectile->GetOwnerInstanceId());
+	deb_assert(pProjectile);
+	//deb_assert(pProjectile->GetOwnerInstanceId());
 	Cure::CppContextObject* lAvatar = (Cure::CppContextObject*)pProjectile->GetManager()->GetObject(pProjectile->GetOwnerInstanceId());
 	if (!lAvatar)
 	{
@@ -38,7 +38,7 @@ bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF
 		const int lBoneIndex = lTag->mBodyIndexList[0];
 #ifdef LEPRA_DEBUG
 		const TBC::ChunkyBoneGeometry* lBone = lAvatar->GetPhysics()->GetBoneGeometry(lBoneIndex);
-		assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
+		deb_assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
 		//TBC::ChunkyBoneGeometry* lRootGeometry = lAvatar->GetPhysics()->GetBoneGeometry(0);
 		//QuaternionF q = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootGeometry->GetBodyId());
 		//QuaternionF p = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();

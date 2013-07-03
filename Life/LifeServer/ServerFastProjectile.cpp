@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -38,7 +38,7 @@ void ServerFastProjectile::OnLoaded()
 	Parent::OnLoaded();
 
 	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
-	assert(lTag);
+	deb_assert(lTag);
 	const float lMuzzleVelocity = lTag->mFloatValueList[0];
 	ProjectileUtil::StartBullet(this, lMuzzleVelocity, true);
 	mMaxVelocity = lTag->mFloatValueList[1];

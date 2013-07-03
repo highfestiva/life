@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -19,7 +19,7 @@
 
 //#define TEST_WEB_AND_MAIL
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include <math.h>
 #include "../Include/Canvas.h"
 #include "../Include/DES.h"
@@ -98,7 +98,7 @@ bool TestString(const LogDecorator& pAccount)
 		lTestOk = (lString == _T("hannesSABCdefghijOAoaklmnopqrstUvw yz*!\"#%&/()=97531efghijklmnopqrstUvw yz02468") &&
 			lString.find(_T('S'), 0) == 6 &&
 			lString.rfind(_T('S'), lString.length()-1) == 6);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Verify str basics.
@@ -110,7 +110,7 @@ bool TestString(const LogDecorator& pAccount)
 			!strutil::StartsWith(lData, _T("That is")) &&
 			strutil::EndsWith(lData, _T(" new!")) &&
 			!strutil::EndsWith(lData, _T(" old!")));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Verify strutil::Format.
@@ -121,7 +121,7 @@ bool TestString(const LogDecorator& pAccount)
 		float f = 123.321f;
 		str lString = _T("String ") + strutil::Format(_T("format test: %i, %.4f, %s"), i, f, _T("Hello World!"));
 		lTestOk = (lString == _T("String format test: 123, 123.3210, Hello World!"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Verify str conversion to/from Ansi/Unicode.
@@ -133,7 +133,7 @@ bool TestString(const LogDecorator& pAccount)
 		wstr lUnicode = wstrutil::Encode(astr(lTestData1));
 		astr lAnsi = astrutil::Encode(wstr(lTestData2));
 		lTestOk = (lAnsi == lTestData1 && lUnicode == lTestData2);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Test empty int conversion.
@@ -142,7 +142,7 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("empty int conversion");
 		int lValue = 0;
 		lTestOk = !strutil::StringToInt(_T(""), lValue);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Test floating point conversion.
@@ -156,7 +156,7 @@ bool TestString(const LogDecorator& pAccount)
 		{
 			lTestOk = (lString == _T("1.50000") && lValue == 1.5f);
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Test empty floating point conversion.
@@ -165,7 +165,7 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("empty float conversion");
 		double lValue = 0;
 		lTestOk = !strutil::StringToDouble(_T(""), lValue);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Test fast floating point conversion.
@@ -173,21 +173,21 @@ bool TestString(const LogDecorator& pAccount)
 	{
 		lContext = _T("fast float conversion");
 		lTestOk = (strutil::FastDoubleToString(0.0) == _T("0.0"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lTestOk = (strutil::FastDoubleToString(10.0) == _T("10.0"));
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = (strutil::FastDoubleToString(-287.75) == _T("-287.75"));
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = (strutil::FastDoubleToString(-2.625) == _T("-2.625"));
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -195,7 +195,7 @@ bool TestString(const LogDecorator& pAccount)
 	{
 		lContext = _T("string -> C string");
 		lTestOk = (strutil::StringToCString(_T("Hej\"\\\n'!#\r\t")) == _T("Hej\\\"\\\\\\n'!#\\r\\t"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -203,11 +203,11 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("C string -> string");
 		str lValue;
 		lTestOk = strutil::CStringToString(_T("Hej\\\"\\\\\\n'!#\\r\\t"), lValue);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lTestOk = (lValue == _T("Hej\"\\\n'!#\r\t"));
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -219,7 +219,7 @@ bool TestString(const LogDecorator& pAccount)
 		lTestOk = (lTestWords.size() == 6 && lTestWords[0] == _T("Den") && lTestWords[1] == _T("\"kyliga") &&
 			lTestWords[2] == _T("Trazan'\"") && lTestWords[3] == _T("apansson") && lTestWords[4] == _T(".") &&
 			lTestWords[5].empty());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -235,7 +235,7 @@ bool TestString(const LogDecorator& pAccount)
 		{
 			lTestOk = (strutil::Strip(_T("  Jonte  "), _T(" ")) == _T("Jonte"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -243,7 +243,7 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("string joining");
 		str lString = strutil::Join(lTestWords, _T(" "));
 		lTestOk = (lString == _T("Den kyliga Trazan'\" apansson . "));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -258,7 +258,7 @@ bool TestString(const LogDecorator& pAccount)
 		const str& lWord4 = lWords[4];
 		lTestOk = (lPhraseCount == 5 && lWord0 == _T("Hej du glade") && lWord1 == _T("sade") &&
 			lWord2 == _T("jag") && lWord3 == _T("till") && lWord4 == _T("\n\n\r\vhonom igen."));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -267,7 +267,7 @@ bool TestString(const LogDecorator& pAccount)
 		strutil::strvec lWords = strutil::BlockSplit(_T("\"Hej du glade \" sade jag  \t\"till\n\"\n\r\vhan..\nhonom igen."), _T(" \t\v\r\n"), true, false, 4);
 		lTestOk = (lWords.size() == 5 && lWords[0] == _T("\"Hej du glade \"") && lWords[1] == _T("sade") &&
 			lWords[2] == _T("jag") && lWords[3] == _T("\"till\n\"") && lWords[4] == _T("\n\r\vhan..\nhonom igen."));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -275,7 +275,7 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("block string splitting 3");
 		strutil::strvec lWords = strutil::BlockSplit(_T("\"a\\\"b\""), _T(" \t\v\r\n\""), false, true, 4);
 		lTestOk = (lWords.size() == 1 && lWords[0] == _T("a\\\"b"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -285,12 +285,12 @@ bool TestString(const LogDecorator& pAccount)
 		const str lJson = _T("\"\\u00E5\\u00E4\\u00F6abc\\u00C5\\u00C4\\u00D6ACQ\\u00F1\\u00EF\"");
 		const str lJsonString = JsonString::ToJson(lC);
 		lTestOk = (lJsonString == lJson);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			const str lString = JsonString::FromJson(lJson);
 			lTestOk = (lString == lC);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -314,7 +314,7 @@ bool TestRandom(const LogDecorator& pAccount)
 		{
 			const double lResult = Random::Uniform(lLow, lHigh);
 			lTestOk = (lResult >= lLow && lResult <= lHigh);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			lAverage += lResult;
 		}
 		if (lTestOk)
@@ -322,7 +322,7 @@ bool TestRandom(const LogDecorator& pAccount)
 			lContext = _T("uniform mean");
 			lAverage /= cnt;
 			lTestOk = (lAverage >= 1.24 && lAverage <= 1.26);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -336,19 +336,19 @@ bool TestRandom(const LogDecorator& pAccount)
 		for (int x = 0; x < cnt; ++x)
 		{
 			lValues.push_back(Random::Normal(lMean, lStdDev, -10.0, +10.0));
-			assert(lValues[x] >= -10 && lValues[x] <= +10);
+			deb_assert(lValues[x] >= -10 && lValues[x] <= +10);
 			lAverage += lValues[x];
 		}
 		lContext = _T("normal mean");
 		lAverage /= cnt;
 		lTestOk = (lAverage >= lMean-0.03*lStdDev && lAverage <= lMean+0.03*lStdDev);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lContext = _T("normal distribuion");
 			const double lActualStdDev = Math::CalculateDeviation<double>(lValues, lMean);
 			lTestOk = (lActualStdDev >= lStdDev-0.03 && lActualStdDev <= lStdDev+0.03);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -367,7 +367,7 @@ bool TestMath(const LogDecorator& pAccount)
 		lContext = _T("smooth clamp narrow below max exp");
 		lResult = Math::SmoothClamp(0.9, 0.0, 1.0, 0.1);
 		lTestOk = (lResult == 0.9);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -375,7 +375,7 @@ bool TestMath(const LogDecorator& pAccount)
 		lContext = _T("smooth clamp wide above max exp");
 		lResult = Math::SmoothClamp(0.95, 0.0, 1.0, 0.5);
 		lTestOk = (lResult < 0.8);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -383,7 +383,7 @@ bool TestMath(const LogDecorator& pAccount)
 		lContext = _T("smooth clamp above min exp");
 		lResult = Math::SmoothClamp(0.3, 0.0, 1.0, 0.3);
 		lTestOk = (lResult == 0.3);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -391,7 +391,7 @@ bool TestMath(const LogDecorator& pAccount)
 		lContext = _T("smooth clamp below min exp");
 		lResult = Math::SmoothClamp(0.2, 0.0, 1.0, 0.4);
 		lTestOk = (lResult > 0.23);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Math"), lContext, lTestOk);
@@ -412,7 +412,7 @@ bool TestNumber(const LogDecorator& pAccount)
 		lContext = _T("testing ")+lDesiredResult;
 		lResult = Number::ConvertToPostfixNumber(1, 2);
 		lTestOk = (lResult == lDesiredResult);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -421,7 +421,7 @@ bool TestNumber(const LogDecorator& pAccount)
 		lContext = _T("testing ")+lDesiredResult;
 		lResult = Number::ConvertToPostfixNumber(1.414444e3, 2);
 		lTestOk = (lResult == lDesiredResult);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -430,7 +430,7 @@ bool TestNumber(const LogDecorator& pAccount)
 		lContext = _T("rounding ")+lDesiredResult;
 		lResult = Number::ConvertToPostfixNumber(7.66666666666666e-3, 4);
 		lTestOk = (lResult == lDesiredResult);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -439,7 +439,7 @@ bool TestNumber(const LogDecorator& pAccount)
 		lContext = _T("testing ")+lDesiredResult;
 		lResult = Number::ConvertToPostfixNumber(10e6, 0);
 		lTestOk = (lResult == lDesiredResult);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Number"), lContext, lTestOk);
@@ -460,14 +460,14 @@ bool TestVector3D(const LogDecorator& pAccount)
 		lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
 		lResult = Vector3DF(1,0,0).GetPolarCoordAngleY();
 		lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lDesiredResult = PIF/2;
 			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
 			lResult = Vector3DF(0,0,1).GetPolarCoordAngleY();
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 
 		if (lTestOk)
@@ -477,7 +477,7 @@ bool TestVector3D(const LogDecorator& pAccount)
 			//lResult = Vector3DF(-sqrtf(3),0,-1).GetPolarCoordAngleY();
 			lResult = atan2(-1, -sqrtf(3));
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 
 		if (lTestOk)
@@ -487,7 +487,7 @@ bool TestVector3D(const LogDecorator& pAccount)
 			//lResult = Vector3DF(-1,0,0).GetPolarCoordAngleY();
 			lResult = atan2(0.0f, -1.0f);
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -505,21 +505,21 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	{
 		lContext = _T("empty start");
 		lTestOk = (lMap.GetCount() == 0 && lMap.Find("4") == lMap.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("insert unique");
 		lMap.PushBack("4",  5);
 		lTestOk = (lMap.GetCount() == 1 && lMap.Find("4").GetObject() == 5);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("erase -> empty");
 		lMap.Remove(lMap.Find("4"));
 		lTestOk = (lMap.GetCount() == 0 && lMap.Find("4") == lMap.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -527,7 +527,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		lMap.PushBack("4",  5);
 		lMap.PushBack("5",  4);
 		lTestOk = (lMap.GetCount() == 2 && lMap.Find("4").GetObject() == 5 && lMap.Find("5").GetObject() == 4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -536,7 +536,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		int lValue;
 		lMap.PopFront(lKey, lValue);
 		lTestOk = (lKey == "4" && lValue == 5 && lMap.GetCount() == 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -545,7 +545,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		int lValue;
 		lMap.PopBack(lKey, lValue);
 		lTestOk = (lKey == "5" && lValue == 4 && lMap.GetCount() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -555,7 +555,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		lMap.PushFront("3",  3);
 		lTestOk = (lMap.GetCount() == 3 && lMap.Find("3").GetObject() == 3 &&
 			lMap.Find("4").GetObject() == 5 && lMap.Find("5").GetObject() == 4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -563,7 +563,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		lMap.Remove("4");
 		lTestOk = (lMap.GetCount() == 2 && lMap.Find("3").GetObject() == 3 &&
 			lMap.Find("4") == lMap.End() && lMap.Find("5").GetObject() == 4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -571,7 +571,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		lMap.Remove("5");
 		lTestOk = (lMap.GetCount() == 1 && lMap.Find("3").GetObject() == 3 &&
 			lMap.Find("4") == lMap.End() && lMap.Find("5") == lMap.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -579,7 +579,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		lMap.Remove("3");
 		lTestOk = (lMap.GetCount() == 0 && lMap.Find("3") == lMap.End() &&
 			lMap.Find("4") == lMap.End() && lMap.Find("5") == lMap.End());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -589,7 +589,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		size_t lSetCount = 0;
 		for (int x = 1; lTestOk && x < 10000; ++x)
 		{
-			assert(lMap.GetCount() == lSetCount);
+			deb_assert(lMap.GetCount() == lSetCount);
 			int lIndex = Random::GetRandomNumber()%lEntries;
 			if (!(x%59))
 			{
@@ -600,13 +600,13 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 				lMap.RemoveAll();
 				lSetCount = 0;
 				lTestOk = (lMap.GetCount() == lSetCount);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 			else if (lSet[lIndex].empty())
 			{
 				lSet[lIndex] = ":"+astrutil::Format("%i", x);
 				lTestOk = lMap.Find(lSet[lIndex]) == lMap.End();
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				if (lTestOk)
 				{
 					lMap.PushBack(lSet[lIndex], x);
@@ -614,19 +614,19 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 					lTestOk = (lMap.GetCount() == lSetCount &&
 						lMap.Find(lSet[lIndex]).GetObject() == x &&
 						lMap.Find(lSet[lIndex]) == lMap.Last());
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 			}
 			else
 			{
 				lTestOk = (lMap.Find(lSet[lIndex]) != lMap.End());
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				if (lTestOk)
 				{
 					int lValue = -1;
 					astrutil::StringToInt(lSet[lIndex].c_str()+1, lValue, 10);
 					lTestOk = (lTestOk && lMap.Find(lSet[lIndex]).GetObject() == lValue);
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 				if (lTestOk)
 				{
@@ -643,12 +643,12 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 					lSet[lIndex].clear();
 					--lSetCount;
 					lTestOk = (lMap.GetCount() == lSetCount && lMap.Find(lSet[lIndex]) == lMap.End());
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 			}
 		}
 		lTestOk = (lMap.GetCount() == lSetCount);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("OrderedMap"), lContext, lTestOk);
@@ -666,34 +666,34 @@ bool TestIdManager(const LogDecorator& pAccount)
 	{
 		lContext = _T("min ID");
 		lTestOk = (lIdManager.GetMinId() == 3);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("max ID");
 		lTestOk = (lIdManager.GetMaxId() == 100);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid ID");
 		lTestOk = (lIdManager.GetInvalidId() == -2);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("reserve ID (4)");
 		lTestOk = lIdManager.ReserveId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager.GetDebugState();
 		lTestOk = (lDebugState == _T("3-2, 3-3,\n4-4, 5-100,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("alloc ID (3)");
 		lTestOk = (lIdManager.GetFreeId() == 3);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -701,88 +701,88 @@ bool TestIdManager(const LogDecorator& pAccount)
 		lTestOk = (lIdManager.GetFreeId() == 5);
 		lDebugState = lIdManager.GetDebugState();
 		lTestOk = (lDebugState == _T("3-5, 6-100,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("recycle ID (4)");
 		lTestOk = lIdManager.RecycleId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid recycle ID (4)");
 		lTestOk = !lIdManager.RecycleId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid recycle ID (4)");
 		lTestOk = !lIdManager.RecycleId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid recycle ID (7)");
 		lTestOk = !lIdManager.RecycleId(7);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid recycle ID (1000)");
 		lTestOk = !lIdManager.RecycleId(1000);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid recycle ID (-2)");
 		lTestOk = !lIdManager.RecycleId(-2);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("reserve ID (4)");
 		lTestOk = lIdManager.ReserveId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid reserve ID (3)");
 		lTestOk = !lIdManager.ReserveId(3);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid reserve ID (4)");
 		lTestOk = !lIdManager.ReserveId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid reserve ID (2)");
 		lTestOk = !lIdManager.ReserveId(2);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("invalid reserve ID (-2)");
 		lTestOk = !lIdManager.ReserveId(-2);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	for (int x = 6; lTestOk && x <= 100; ++x)
 	{
 		lContext = _T("alloc many IDs");
 		lTestOk = (lIdManager.GetFreeId() == x);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("no free IDs");
 		lTestOk = (lIdManager.GetFreeId() == -2);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager.GetDebugState();
 		lTestOk = (lDebugState == _T("3-100, 101-100,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	for (int y = 0; y < 1000; ++y)
 	{
@@ -790,25 +790,25 @@ bool TestIdManager(const LogDecorator& pAccount)
 		{
 			lContext = _T("free dec-loop");
 			lTestOk = lIdManager.RecycleId(z);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		for (int u = 100; lTestOk && u >= 3; u -= 2)
 		{
 			lContext = _T("reserve dec-loop");
 			lTestOk = lIdManager.ReserveId(u);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		for (int v = 3; lTestOk && v <= 100; ++v)
 		{
 			lContext = _T("free inc-loop");
 			lTestOk = lIdManager.RecycleId(v);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		for (int w = 3; lTestOk && w <= 100; ++w)
 		{
 			lContext = _T("alloc inc-loop");
 			lTestOk = (lIdManager.GetFreeId() == w);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	if (lTestOk)
@@ -817,151 +817,151 @@ bool TestIdManager(const LogDecorator& pAccount)
 		IdManager<int> lIdManager2(1, 0x7FFFFFFF-1, 0xFFFFFFFF);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-1, 2-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(5);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-1, 2-4,\n5-5, 6-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(3);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-1, 2-2,\n3-3, 4-4,\n5-5, 6-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(2147483646);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = !lIdManager2.RecycleId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = !lIdManager2.RecycleId(6);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = !lIdManager2.RecycleId(1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = !lIdManager2.RecycleId(2147483645);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(5);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(2147483646);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(3);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-1, 2-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(7);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-1, 2-6,\n7-7, 8-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(8);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-1, 2-6,\n7-8, 9-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-1, 2-3,\n4-4, 5-6,\n7-8, 9-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-3,\n4-4, 5-6,\n7-8, 9-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-6,\n7-8, 9-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(8);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-6,\n7-7, 8-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(7);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(8);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-7,\n8-8, 9-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(7);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-6,\n7-8, 9-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(8);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-6,\n7-7, 8-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(7);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("IdManager"), lContext, lTestOk);
@@ -981,7 +981,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		lTransformation.SetPosition(Vector3DD(4, 1, 1));
 		lTransformation.RotateAroundAnchor(Vector3DD(3, 0, -0.41), Vector3DD(0, 0, 1), PIF/2);
 		lTestOk = (lTransformation.GetPosition().GetDistance(Vector3DD(2, 1, 1)) < 0.0001);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -995,7 +995,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		Vector3DD lNewPosition2 = lMatrix2*Vector3DD(-2, -2, -2);
 		lTestOk = (lNewPosition1.GetDistance(lNewPosition2) < 0.0001 &&
 			lNewPosition1.GetDistance(Vector3DD(0.4142, 0.4142, 3.4142)) < 0.0001);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1007,7 +1007,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		Vector3DD lNewPosition2 = lQuaternion2*Vector3DD(-2, -2, -2);
 		lTestOk = (lNewPosition1.GetDistance(lNewPosition2) < 0.0001 &&
 			lNewPosition1.GetDistance(Vector3DD(0.4142, 0.4142, 3.4142)) < 0.0001);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1016,13 +1016,13 @@ bool TestTransformation(const LogDecorator& pAccount)
 		QuaternionD q1(PI/2, Vector3DD(0, -1, 0));
 		x = q1*x;
 		lTestOk = (x.GetDistance(Vector3DD(0, 0, 1)) < 0.0001);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			QuaternionD q2(-PI*1.5, Vector3DD(1, 0, 0));
 			x = (q1*q2)*x;
 			lTestOk = (x.GetDistance(Vector3DD(0, -1, 0)) < 0.0001);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	if (lTestOk)
@@ -1036,7 +1036,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		double l2Side = lDiff1.GetLength()/::sqrt(2.0);
 		lTransformation2.SetPosition(Vector3DD(-l2Side, l2Side-1, -1));
 		const Vector3DD lDiff2(lTransformation2.GetPosition()-lAnchor);
-		assert(::fabs(lDiff1.GetLength()-lDiff2.GetLength()) < 0.0001);
+		deb_assert(::fabs(lDiff1.GetLength()-lDiff2.GetLength()) < 0.0001);
 
 		const Vector3DD lAxis1(1, -1, 0);
 		lTransformation1.RotateAroundAnchor(lAnchor, lAxis1, PI/2);
@@ -1044,7 +1044,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		lTransformation2.RotateAroundAnchor(lAnchor, lAxis2, PI/2);
 		lTestOk = (lTransformation1.GetPosition().GetDistance(lTransformation2.GetPosition()) < 0.0001 &&
 			lTransformation1.GetPosition().GetDistance(Vector3DD(0, -1, lDiff1.GetLength()-1)) < 0.0001);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1060,7 +1060,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		lQ.MakeInverse();
 		lVector = lQ*lVector;
 		lTestOk = (lVector.GetDistance(Vector3DD(0, 1, 0)) < 0.0001);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1070,26 +1070,26 @@ bool TestTransformation(const LogDecorator& pAccount)
 		const QuaternionD lChildAbsoluteQ = lChildRelativeQ*lParentQ;
 		Vector3DD lVector = lChildAbsoluteQ*Vector3DD(-1, 1, 1);
 		lTestOk = (lVector.GetDistance(Vector3DD(0, -1.2, 1.2)) < 0.06);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lVector = (lChildAbsoluteQ/lParentQ)*Vector3DD(0, 1, 0);
 			lTestOk = (lVector.GetDistance(Vector3DD(0, 0.707, 0.707)) < 0.001);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		Vector3DD lEulerAngles1;
 		if (lTestOk)
 		{
 			(lChildAbsoluteQ/lParentQ).GetEulerAngles(lEulerAngles1);
 			lTestOk = (lEulerAngles1.GetDistance(Vector3DD(0, PI/4, 0)) < 2e-11);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			Vector3DD lEulerAngles2;
 			lChildRelativeQ.GetEulerAngles(lEulerAngles2);
 			lTestOk = (lEulerAngles1.GetDistance(lEulerAngles1) < 2e-11);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	if (lTestOk)
@@ -1108,7 +1108,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 			Math::IsEpsEqual(lQ.GetB(), lTarget.GetB()) &&
 			Math::IsEpsEqual(lQ.GetC(), lTarget.GetC()) &&
 			Math::IsEpsEqual(lQ.GetD(), lTarget.GetD()));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1119,7 +1119,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		Vector3DD(l45, l45, 1).GetSphericalAngles(lTheta, lPhi);
 		lTestOk = (Math::IsEpsEqual(lTheta, PI/4) &&
 			Math::IsEpsEqual(lPhi, PI/4));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1130,7 +1130,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		Vector3DD(-l45, -l45, -1).GetSphericalAngles(lTheta, lPhi);
 		lTestOk = (Math::IsEpsEqual(lTheta, PI*3/4) &&
 			Math::IsEpsEqual(lPhi, PI*5/4));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1140,7 +1140,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		Vector3DD(1, 0, 0).GetSphericalAngles(lTheta, lPhi);
 		lTestOk = (Math::IsEpsEqual(lTheta, PI/2) &&
 			Math::IsEpsEqual(lPhi, 0.0));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1150,7 +1150,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		Vector3DD(0, 0, 1).GetSphericalAngles(lTheta, lPhi);
 		lTestOk = (Math::IsEpsEqual(lTheta, 0.0) &&
 			Math::IsEpsEqual(lPhi, 0.0));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1160,7 +1160,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		Vector3DD(0, -1, -1).GetSphericalAngles(lTheta, lPhi);
 		lTestOk = (Math::IsEpsEqual(lTheta, PI*3/4) &&
 			Math::IsEpsEqual(lPhi, PI*6/4));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1188,7 +1188,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 			Vector3DD lTest2 = lTest*lQ2;
 			double lDistance = lTest1.GetDistance(lTest2);
 			lTestOk = (Math::IsEpsEqual(lDistance, 0.0, 2e-11));
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -1213,7 +1213,7 @@ bool TestTimers(const LogDecorator& pAccount)
 		const double lLoTime = lLoTimer.QueryTimeDiff();
 		lTestOk = (lHiTime > 0.090 && lHiTime < 0.150 &&
 			lLoTime > 0.090 && lLoTime < 0.150);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Timers"), lContext, lTestOk);
@@ -1244,14 +1244,14 @@ bool TestSystemManager(const LogDecorator& pAccount)
 #else // <Unknown target>
 #error "Unknown target!"
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("current/documents directory");
 		lTestOk = (SystemManager::GetCurrentDirectory().length() >= 4 &&
 			SystemManager::GetUserDirectory().length() >= 4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Platform/user test.
@@ -1266,19 +1266,19 @@ bool TestSystemManager(const LogDecorator& pAccount)
 #else // <Unknown target>
 #error "Not implemented for this platform!"
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("login name");
 		lTestOk = (SystemManager::GetLoginName().length() >= 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("user name");
 		lTestOk = (SystemManager::QueryFullUserName().length() >= 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Cpu test.
@@ -1286,19 +1286,19 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	{
 		lContext = _T("physical CPU count");
 		lTestOk = (SystemManager::GetPhysicalCpuCount() >= 1 && SystemManager::GetPhysicalCpuCount() <= 4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("logical CPU count");
 		lTestOk = (SystemManager::GetLogicalCpuCount() >= 1 && SystemManager::GetLogicalCpuCount() <= 16);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("CPU core count");
 		lTestOk = (SystemManager::GetCoreCount() >= 1 && SystemManager::GetCoreCount() <= 4);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1306,7 +1306,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 		str lCpuName = SystemManager::GetCpuName();
 		lTestOk = (lCpuName == _T("GenuineIntel") || lCpuName == _T("AuthenticAMD") ||
 			lCpuName == _T("x64") || lCpuName == _T("x86") || lCpuName == _T("PowerPC"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1314,14 +1314,14 @@ bool TestSystemManager(const LogDecorator& pAccount)
 		uint64 lCpuFrequency = SystemManager::QueryCpuFrequency();
 		lTestOk = (lCpuFrequency >= 700*1000*1000 &&
 			lCpuFrequency <= (uint64)6*1000*1000*1000);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("Cpu MIPS");
 		unsigned lCpuMips = SystemManager::QueryCpuMips();
 		lTestOk = (lCpuMips >= 50 && lCpuMips <= 3500);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Memory test.
@@ -1330,40 +1330,40 @@ bool TestSystemManager(const LogDecorator& pAccount)
 		lContext = _T("Ram size");
 		lTestOk = (SystemManager::GetAmountRam() >= 64*1024*1024 &&
 			SystemManager::GetAmountRam() <= (uint64)4*1024*1024*1024);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("available Ram >= total Ram");
 		lTestOk = (SystemManager::GetAvailRam() <= SystemManager::GetAmountRam());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("available Ram size");
 		lTestOk = (SystemManager::GetAvailRam() >= 30*1024*1024 &&
 			SystemManager::GetAvailRam() <= (uint64)4*1024*1024*1024);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("virtual memory size");
 		lTestOk = (SystemManager::GetAmountVirtualMemory() >= 150*1024*1024 &&
 			SystemManager::GetAmountVirtualMemory() <= (uint64)20*1024*1024*1024);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("available virtual memory > total virtual memory");
 		lTestOk = (SystemManager::GetAvailVirtualMemory() <= SystemManager::GetAmountVirtualMemory());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("available virtual memory size");
 		lTestOk = (SystemManager::GetAvailVirtualMemory() >= 100*1024*1024 &&
 			SystemManager::GetAvailVirtualMemory() <= (uint64)19*1024*1024*1024);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 #ifdef TEST_WEB_AND_MAIL
 	if (lTestOk)
@@ -1391,14 +1391,14 @@ bool TestNetwork(const LogDecorator& pAccount)
 	{
 		lContext = _T("network start");
 		lTestOk = Network::Start();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("local resolve");
 		SocketAddress lAddress;
 		lTestOk = lAddress.Resolve(_T(":1024"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			const str lLocalAddress = lAddress.GetAsString();
@@ -1406,7 +1406,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 				strutil::EndsWith(lLocalAddress, _T(".1:1024"))) ||
 				(strutil::StartsWith(lLocalAddress, _T("192.168.")) &&
 				strutil::EndsWith(lLocalAddress, _T(":1024"))));
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	if (lTestOk)
@@ -1414,7 +1414,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		lContext = _T("DNS resolve");
 		IPAddress lAddress;
 		lTestOk = Network::ResolveHostname(_T("ftp.sunet.se"), lAddress);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -1425,7 +1425,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		UdpSocket lSocket1(lAddress, true);
 		UdpSocket lSocket2(lAddress, true);
 		lTestOk = (lSocket1.IsOpen() && !lSocket2.IsOpen());
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -1436,11 +1436,11 @@ bool TestNetwork(const LogDecorator& pAccount)
 		SocketAddress lSendAddress;
 		lSendAddress.Resolve(_T(":47347"));
 		UdpSocket lReceiver(lReceiveAddress, true);
-		assert(lReceiver.IsOpen());
+		deb_assert(lReceiver.IsOpen());
 		UdpSocket lSender(lSendAddress, true);
-		assert(lSender.IsOpen());
+		deb_assert(lSender.IsOpen());
 		lTestOk = (lSender.SendTo((const uint8*)"Hello World", 12, lReceiveAddress) == 12);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lContext = _T("UDP receive");
@@ -1449,7 +1449,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 			int lRecvCount = lReceiver.ReceiveFrom(lMessage, sizeof(lMessage), lSourceAddress);
 			lTestOk = (lRecvCount == 12 && ::strncmp("Hello World", (const char*)lMessage, 12) == 0 &&
 				lSourceAddress.GetIP() == lSendAddress.GetIP() && lSourceAddress.GetPort() == lSendAddress.GetPort());
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -1462,7 +1462,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		lSendAddress.Resolve(_T(":47347"));
 		TcpListenerSocket lServer(lReceiveAddress, true);
 		lTestOk = lServer.IsOpen();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		class DummyAcceptor: public Thread
 		{
@@ -1476,7 +1476,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 			void Run()
 			{
 				mConnectSocket = mServerSocket->Accept();
-				assert(mConnectSocket);
+				deb_assert(mConnectSocket);
 			}
 			TcpListenerSocket* mServerSocket;
 			TcpSocket* mConnectSocket;
@@ -1487,7 +1487,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 			lContext = _T("TCP acceptor start");
 			lAcceptor = new DummyAcceptor(&lServer);
 			lTestOk = lAcceptor->Start();
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		TcpSocket lSender(lSendAddress);
 		if (lTestOk)
@@ -1499,7 +1499,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 				Thread::Sleep(0.01);
 				lTestOk	= lSender.Connect(lReceiveAddress);
 			}
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		TcpSocket* lReceiver = 0;
 		if (lTestOk)
@@ -1514,7 +1514,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 				}
 			}
 			lTestOk = (lReceiver != 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		const int lPacketCount = 300;
 		const int lPacketByteCount = 100;
@@ -1529,7 +1529,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 					lValue[y] = (uint8)x;
 				}
 				lTestOk = (lSender.Send(lValue, lPacketByteCount) == lPacketByteCount);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 		if (lTestOk)
@@ -1542,14 +1542,14 @@ bool TestNetwork(const LogDecorator& pAccount)
 				uint8 lValue[lReadSize];
 				int lActualReadSize = lReceiver->Receive(lValue, lReadSize);
 				lTestOk = (lActualReadSize == lReadSize);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				if (lTestOk)
 				{
 					for (int y = 0; lTestOk && y < lReadSize; ++y)
 					{
 						int z = x*10+y/lPacketByteCount;
 						lTestOk = (lValue[y] == (uint8)z);
-						assert(lTestOk);
+						deb_assert(lTestOk);
 					}
 				}
 			}
@@ -1574,12 +1574,12 @@ bool TestNetwork(const LogDecorator& pAccount)
 			char lBuffer[6] = {0, 1, 2, 3, 4, 5};
 			int lReceiveCount = lReceiver->ReceiveDatagram(lBuffer, 6);
 			lTestOk = (lReceiveCount == 4 && lBuffer[0] == 'A' && lBuffer[3] == '2');
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			if (lTestOk)
 			{
 				lReceiveCount = lReceiver->ReceiveDatagram(lBuffer, 6);
 				lTestOk = (lReceiveCount == 2 && lBuffer[0] == 'C' && lBuffer[1] == '3');
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 	}
@@ -1588,7 +1588,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 	{
 		lContext = _T("network stop");
 		lTestOk = Network::Stop();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Network"), lContext, lTestOk);
@@ -1608,7 +1608,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 		lContext = _T("resolving acceptor");
 		lTestOk = lAcceptAddress.Resolve(_T(":46767"));
 		//lAcceptAddress.SetPort(lAcceptPort);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1616,7 +1616,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 		lAcceptSocket = new TcpMuxSocket(_T("T1"), lAcceptAddress, true);
 		lAcceptSocket->SetConnectIdTimeout(5.0);
 		lTestOk = lAcceptSocket->IsOpen();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	//uint16 lConnectPort = (uint16)Random::Uniform(40000, 50000);
 	SocketAddress lConnectorAddress;
@@ -1626,14 +1626,14 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 		lContext = _T("resolving connector");
 		lTestOk = lConnectorAddress.Resolve(_T(":47676"));
 		//lConnectorAddress.SetPort(lConnectPort);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("creating TCP");
 		lConnectSocket = new TcpSocket(lConnectorAddress);
 		lTestOk = lConnectSocket->IsOpen();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1644,7 +1644,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 			lTestOk = lConnectSocket->Connect(lAcceptAddress);
 			Thread::Sleep(0.001);
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1656,7 +1656,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 			Thread::Sleep(0.001f);
 		}
 		lTestOk = (lConnectionCount == 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1670,7 +1670,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 			unsigned lConnectionCount = lAcceptSocket->GetConnectionCount();
 			lTestOk = (lConnectionCount == 0);
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lConnectSocket)
@@ -1718,7 +1718,7 @@ public:
 		bool started = Start();
 		if (!started)
 		{
-			assert(false);
+			deb_assert(false);
 		}
 	}
 	~ServerSocketHandler()
@@ -1766,7 +1766,7 @@ bool DualSocketClientTest::Test()
 	{
 		lContext = _T("network startup error");
 		lTestOk = Network::Start();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	SocketAddress lLocalAddress;
@@ -1774,7 +1774,7 @@ bool DualSocketClientTest::Test()
 	{
 		lContext = _T("address resolve");
 		lTestOk = lLocalAddress.Resolve(_T(":1025"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Create client.
@@ -1785,7 +1785,7 @@ bool DualSocketClientTest::Test()
 	{
 		lContext = _T("client socket open");
 		lTestOk = lClientMuxSocket.IsOpen();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Make sure server connect fails (server not up yet).
@@ -1799,7 +1799,7 @@ bool DualSocketClientTest::Test()
 		const std::string lId = SystemManager::GetRandomId();
 		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 0.5);
 		lTestOk = (lClientSocket == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Create and start TCP server (connect should fail if not UDP is up).
@@ -1810,7 +1810,7 @@ bool DualSocketClientTest::Test()
 		{
 			lContext = _T("server TCP socket open");
 			lTestOk = lServerTcpMuxSocket->IsOpen();
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		ServerSocketHandler<TcpMuxSocket, TcpVSocket>* lServer =
 			new ServerSocketHandler<TcpMuxSocket, TcpVSocket>(
@@ -1821,7 +1821,7 @@ bool DualSocketClientTest::Test()
 			const std::string lId = SystemManager::GetRandomId();
 			lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 1.0);
 			lTestOk = (lClientSocket == 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -1832,7 +1832,7 @@ bool DualSocketClientTest::Test()
 			{
 				char a[1];
 				lTestOk = (lConnectorSocket->Receive(a, 1, false) < 0);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 		delete (lServer);	// Must delete manually, due to dependency on scope MUX socket.
@@ -1846,7 +1846,7 @@ bool DualSocketClientTest::Test()
 	{
 		lContext = _T("server UDP socket open");
 		lTestOk = lServerUdpMuxSocket.IsOpen();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	ServerSocketHandler<UdpMuxSocket, UdpVSocket>* lUdpServer =
 		new ServerSocketHandler<UdpMuxSocket, UdpVSocket>(
@@ -1857,20 +1857,20 @@ bool DualSocketClientTest::Test()
 		const std::string lId = SystemManager::GetRandomId();
 		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 0.5);
 		lTestOk = (lClientSocket == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("UDP server did not accept MUX connection");
 		lTestOk = (lServerUdpMuxSocket.GetConnectionCount() == 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lUdpServer->CloseSocket();
 	}
 	if (lTestOk)
 	{
 		lContext = _T("server did not drop client UDP connection");
 		lTestOk = (lServerUdpMuxSocket.GetConnectionCount() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// With both TCP and UDP sockets setup, connect should pull through.
@@ -1880,7 +1880,7 @@ bool DualSocketClientTest::Test()
 	{
 		lContext = _T("server TCP socket open");
 		lTestOk = lServerTcpMuxSocket.IsOpen();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	ServerSocketHandler<TcpMuxSocket, TcpVSocket>* lTcpServer =
 		new ServerSocketHandler<TcpMuxSocket, TcpVSocket>(
@@ -1892,7 +1892,7 @@ bool DualSocketClientTest::Test()
 		const std::string lId = SystemManager::GetRandomId();
 		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 2.0);
 		lTestOk = (lClientSocket != 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -1912,7 +1912,7 @@ bool DualSocketClientTest::Test()
 	{
 		lContext = _T("network shutdown error");
 		lTestOk = Network::Stop();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(mLog, _T("GameClientSocket"), lContext, lTestOk);
@@ -1928,21 +1928,21 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 		pContext = _T("server append send");
 		IOError lError = pServer.mServerSocket->AppendSendBuffer("Hi", 3);
 		lTestOk = (lError == IO_OK);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		pContext = _T("server pop sender");
 		typename _Server::VSocket* lSocket = pServer.mServerMuxSocket.PopSenderSocket();
 		lTestOk = (lSocket == pServer.mServerSocket);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		pContext = _T("server send");
 		int lLength = pServer.mServerSocket->SendBuffer();
 		lTestOk = (lLength == 3);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1954,7 +1954,7 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 			Thread::Sleep(0.001f);
 		}
 		lTestOk = (lSocket == pClientSocket);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1962,28 +1962,28 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 		uint8 lBuffer[16];
 		int lLength = pClientSocket->Receive(pSafe, lBuffer, 16);
 		lTestOk = (lLength == 3 && memcmp("Hi", lBuffer, 3) == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		pContext = _T("client append send");
 		IOError lError = pClientSocket->AppendSendBuffer(pSafe, "Hi", 3);
 		lTestOk = (lError == IO_OK);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		pContext = _T("client pop sender");
 		DualSocket* lSocket = pClientMuxSocket.PopSenderSocket();
 		lTestOk = (lSocket == pClientSocket);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		pContext = _T("client send");
 		int lLength = pClientSocket->SendBuffer();
 		lTestOk = (lLength == 3);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -1995,7 +1995,7 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 			Thread::Sleep(0.001f);
 		}
 		lTestOk = (lSocket != 0 && lSocket == pServer.mServerSocket);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2003,7 +2003,7 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 		uint8 lBuffer[16];
 		int lLength = pServer.mServerSocket->Receive(lBuffer, 16);
 		lTestOk = (lLength == 3 && memcmp("Hi", lBuffer, 3) == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	return (lTestOk);
 }
@@ -2027,7 +2027,7 @@ bool DualSocketServerTest::Test()
 	{
 		lContext = _T("network startup error");
 		lTestOk = Network::Start();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	SocketAddress lLocalAddress;
@@ -2035,7 +2035,7 @@ bool DualSocketServerTest::Test()
 	{
 		lContext = _T("address resolve");
 		lTestOk = lLocalAddress.Resolve(_T(":1025"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Create server.
@@ -2047,7 +2047,7 @@ bool DualSocketServerTest::Test()
 	{
 		lContext = _T("server socket open");
 		lTestOk = lServerMuxSocket.IsOpen();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	class ServerSocketHandler: public Thread
 	{
@@ -2059,7 +2059,7 @@ bool DualSocketServerTest::Test()
 			bool started = Start();
 			if (!started)
 			{
-				assert(false);
+				deb_assert(false);
 			}
 		}
 	private:
@@ -2083,7 +2083,7 @@ bool DualSocketServerTest::Test()
 		lContext = _T("client TCP connect failed");
 		ServerSocketHandler lHandler(lServerMuxSocket);
 		lTestOk = (lClientTcpSocket.Connect(lServerAddress, "Hejsan", 0.5) != 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2093,7 +2093,7 @@ bool DualSocketServerTest::Test()
 			Thread::Sleep(0.001);
 		}
 		lTestOk = (lServerMuxSocket.GetConnectionCount() == 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2104,7 +2104,7 @@ bool DualSocketServerTest::Test()
 			Thread::Sleep(0.001);
 		}
 		lTestOk = (lServerMuxSocket.GetConnectionCount() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 
@@ -2112,7 +2112,7 @@ bool DualSocketServerTest::Test()
 	{
 		lContext = _T("network shutdown error");
 		lTestOk = Network::Stop();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(mLog, _T("GameServerSocket"), lContext, lTestOk);
@@ -2134,7 +2134,7 @@ bool TestArchive(const LogDecorator& pAccount)
 		// TODO: implement!
 		lContext = _T("?");
 		lTestOk = true;
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Archive"), lContext, lTestOk);
@@ -2180,7 +2180,7 @@ bool TestFFT(const LogDecorator& pAccount)
 			}
 		}
 
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -2221,7 +2221,7 @@ bool TestFFT(const LogDecorator& pAccount)
 			}
 		}
 
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("FFT"), lContext, lTestOk);
@@ -2244,13 +2244,13 @@ bool TestCrypto(const LogDecorator& pAccount)
 		::memcpy(lData, lString, sizeof(lData));
 		lDES.Encrypt(lData, 16);
 		lTestOk = (::memcmp(lData, lString, sizeof(lData)) != 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lContext = _T("DES decrypt failed.");
 			lDES.Decrypt(lData, 16);
 			lTestOk = (::memcmp(lData, lString, sizeof(lData)) == 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -2265,13 +2265,13 @@ bool TestCrypto(const LogDecorator& pAccount)
 //		::memcpy(lData, lString, sizeof(lData));
 //		lDES.Encrypt(lData, 17);
 //		lTestOk = (::memcmp(lData, lString, sizeof(lData)) != 0);
-//		assert(lTestOk);
+//		deb_assert(lTestOk);
 //		if (lTestOk)
 //		{
 //			lContext = _T("RSA decrypt failed.");
 //			lDES.Decrypt(lData, 17);
 //			lTestOk = (::memcmp(lData, lString, sizeof(lData)) == 0);
-//			assert(lTestOk);
+//			deb_assert(lTestOk);
 //		}
 	}
 
@@ -2283,7 +2283,7 @@ bool TestCrypto(const LogDecorator& pAccount)
 		lSHA1.Hash((const uint8*)"Hello World!", 12, lHash);
 		uint8 lWanted[20] = { 0x2e,0xf7,0xbd,0xe6,0x08,0xce,0x54,0x04,0xe9,0x7d,0x5f,0x04,0x2f,0x95,0xf8,0x9f,0x1c,0x23,0x28,0x71 };
 		lTestOk = (::memcmp(lHash, lWanted, sizeof(lHash)) == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Crypto"), lContext, lTestOk);
@@ -2500,7 +2500,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 					LEPRA_MEASURE_SCOPE(Join);
 					lThread.Join();
 				}
-				assert(!lThread.IsRunning());
+				deb_assert(!lThread.IsRunning());
 			}
 		}
 
@@ -2511,7 +2511,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(sys_socket(UDP));
 				sys_socket fd = ::socket(PF_INET, SOCK_DGRAM, 0);
-				assert(fd > 0);
+				deb_assert(fd > 0);
 				sockaddr_in sa;
 				::memset(&sa, 0, sizeof(sa));
 				sa.sin_family = AF_INET;
@@ -2520,7 +2520,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 				sa.sin_addr.s_addr = *(unsigned int*)(gethostbyname(lHostname)->h_addr_list[0]);
 				sa.sin_port = Endian::HostToBig((uint16)46666);
 				lTestOk = (::bind(fd, (sockaddr*)&sa, sizeof(sa)) >= 0);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				{
 					LEPRA_MEASURE_SCOPE(sendto);
 					::sendto(fd, "Hello World", 12, 0, (sockaddr*)&sa, sizeof(sa));
@@ -2530,7 +2530,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 					char buf[12] = "";
 					socklen_t fromlen = sizeof(sa);
 					::recvfrom(fd, buf, 12, 0, (sockaddr*)&sa, &fromlen);
-					assert(::strcmp(buf, "Hello World") == 0);
+					deb_assert(::strcmp(buf, "Hello World") == 0);
 				}
 #ifdef LEPRA_WINDOWS
 				::closesocket(fd);
@@ -2553,7 +2553,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 					LEPRA_MEASURE_SCOPE(ReceiveFrom);
 					char lBuffer[12] = "";
 					lSocket.ReceiveFrom((uint8*)lBuffer, 12, lAddress);
-					assert(::strcmp(lBuffer, "Hello World") == 0);
+					deb_assert(::strcmp(lBuffer, "Hello World") == 0);
 				}
 			}
 
@@ -2579,18 +2579,18 @@ bool TestPerformance(const LogDecorator& pAccount)
 					void Run()
 					{
 						UdpVSocket* lSocket = mSocket->Accept();
-						assert(lSocket);
+						deb_assert(lSocket);
 						IOError lIo = lSocket->AppendSendBuffer("Hello Client", 13);
-						assert(lIo == IO_OK);
+						deb_assert(lIo == IO_OK);
 						if (lIo == IO_OK) {}	// TRICKY.
 						int r = lSocket->SendBuffer();
-						assert(r == 13);
+						deb_assert(r == 13);
 						if (r == 13) {}	// TRICKY.
 						lSocket->WaitAvailable(0.5);
 						char lBuffer[13] = "";
 						lSocket->ReadRaw(lBuffer, 13);
 						bool lTestOk = (::strcmp(lBuffer, "Hello Server") == 0);
-						assert(lTestOk);
+						deb_assert(lTestOk);
 						if (lTestOk) {}	// TRICKY.
 						mSocket->CloseSocket(lSocket);
 					}
@@ -2601,15 +2601,15 @@ bool TestPerformance(const LogDecorator& pAccount)
 				{
 					LEPRA_MEASURE_SCOPE(Connect);
 					lSocket = lMuxSocket1.Connect(lAddress2, "", 0.5);
-					assert(lSocket);
+					deb_assert(lSocket);
 				}
 				{
 					LEPRA_MEASURE_SCOPE(WriteRaw+Flush);
 					IOError lIo = lSocket->AppendSendBuffer("Hello Server", 13);
-					assert(lIo == IO_OK);
+					deb_assert(lIo == IO_OK);
 					if (lIo == IO_OK) {}	// TRICKY.
 					int r = lSocket->SendBuffer();
-					assert(r == 13);
+					deb_assert(r == 13);
 					if (r == 13) {}	// TRICKY.
 				}
 				{
@@ -2618,7 +2618,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 					char lBuffer[13] = "";
 					lSocket->ReadRaw(lBuffer, 13);
 					lTestOk = (::strcmp(lBuffer, "Hello Client") == 0);
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 				{
 					LEPRA_MEASURE_SCOPE(Close);
@@ -2638,7 +2638,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 	{
 		lContext = _T("?");
 		lTestOk = true;
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Performance"), lContext, lTestOk);
@@ -2659,14 +2659,14 @@ bool TestPath(const LogDecorator& pAccount)
 		lContext = _T("extension 1");
 		str lExtension = Path::GetExtension(lTestPath1);
 		lTestOk = (lExtension == _T(""));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("file 1");
 		str lFile = Path::GetFileBase(lTestPath1);
 		lTestOk = (lFile == _T(".hid"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2675,7 +2675,7 @@ bool TestPath(const LogDecorator& pAccount)
 		str lFile = Path::GetFileBase(lTestPath3);
 		str lExt = Path::GetExtension(lTestPath3);
 		lTestOk = (lDir == _T("") && lFile == _T("apa_bepa0") && lExt == _T("cepa"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2684,21 +2684,21 @@ bool TestPath(const LogDecorator& pAccount)
 		str lFile = Path::GetFileBase(lTestPath4);
 		str lExt = Path::GetExtension(lTestPath4);
 		lTestOk = (lDir == _T("d1/") && lFile == _T("f3") && lExt == _T(""));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("directory 1");
 		str lDirectory = Path::GetDirectory(lTestPath1);
 		lTestOk = (lDirectory == _T("/usr/bin/"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("extension 2");
 		str lExtension = Path::GetExtension(lTestPath2);
 		lTestOk = (lExtension == _T("apansson"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 #ifdef LEPRA_WINDOWS
 	if (lTestOk)
@@ -2706,7 +2706,7 @@ bool TestPath(const LogDecorator& pAccount)
 		lContext = _T("file 2");
 		str lFile = Path::GetFileBase(lTestPath2);
 		lTestOk = (lFile == _T(".skit.."));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	str lDirectory;
 	if (lTestOk)
@@ -2714,7 +2714,7 @@ bool TestPath(const LogDecorator& pAccount)
 		lContext = _T("directory 2");
 		lDirectory = Path::GetDirectory(lTestPath2);
 		lTestOk = (lDirectory == _T("C:\\Documents and settings\\Sverker\\Mina dokument\\"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2723,14 +2723,14 @@ bool TestPath(const LogDecorator& pAccount)
 		lTestOk = (lDirectoryArray.size() == 4 && lDirectoryArray[0] == _T("C:") &&
 			lDirectoryArray[1] == _T("Documents and settings") && lDirectoryArray[2] == _T("Sverker") &&
 			lDirectoryArray[3] == _T("Mina dokument"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("directory 4");
 		strutil::strvec lDirectoryArray = Path::SplitNodes(_T("\\WINDOWS.0\\"));
 		lTestOk = (lDirectoryArray.size() == 1 && lDirectoryArray[0] == _T("WINDOWS.0"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 #endif // Windows
 	if (lTestOk)
@@ -2739,7 +2739,7 @@ bool TestPath(const LogDecorator& pAccount)
 		strutil::strvec lDirectoryArray = Path::SplitNodes(lTestPath1);
 		lTestOk = (lDirectoryArray.size() == 3 && lDirectoryArray[0] == _T("usr") &&
 			lDirectoryArray[1] == _T("bin") && lDirectoryArray[2] == _T(".hid"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2747,7 +2747,7 @@ bool TestPath(const LogDecorator& pAccount)
 		strutil::strvec lPathParts = Path::SplitPath(_T("a/b.c/d.e"));
 		lTestOk = (lPathParts.size() == 3 && lPathParts[0] == _T("a/b.c/") &&
 			lPathParts[1] == _T("d") && lPathParts[2] == _T("e"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2758,7 +2758,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("/"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2769,7 +2769,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("/sune./"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2780,7 +2780,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("./"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2791,7 +2791,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("."));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2802,7 +2802,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("."));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2813,7 +2813,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("/"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2824,7 +2824,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("/fagott"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2835,7 +2835,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T(".."));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2846,7 +2846,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("./"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2857,7 +2857,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("/a"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 #ifdef LEPRA_WINDOWS
 	if (lTestOk)
@@ -2869,7 +2869,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("C:/a../c"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2880,7 +2880,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("\\\\.\\C:/a/b/c/"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2891,7 +2891,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("\\\\MyServer/$Share_1$/Bible/NT.txt"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -2902,7 +2902,7 @@ bool TestPath(const LogDecorator& pAccount)
 		{
 			lTestOk = (lPath == _T("../../"));
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 #endif // Windows
 	if (lTestOk)
@@ -2910,30 +2910,30 @@ bool TestPath(const LogDecorator& pAccount)
 		lContext = _T("normalize error 1");
 		str lPath;
 		lTestOk = !Path::NormalizePath(_T("/../"), lPath);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("wildcard error");
-		lTestOk &=  Path::IsWildcardMatch(_T("/a/b/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("/a/*/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("/a/b/*.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("/*/*/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("/a/*/c.txt"),	_T("/a/bug/c.txt"));	assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("*/c.txt"),	_T("banana/c.txt"));	assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("c.*"),		_T("c.txt"));		assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("*.*"),		_T("c.txt"));		assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("*.txt"),		_T("c.txt"));		assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("*.t*t"),		_T("c.txt"));		assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/a/c/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/a*/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/*/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("*/*.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("*.txt"),		_T("/a/b/c.txt"));	assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/a/b*"),		_T("/a/bug/c.txt"));	assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/a/b/c.t*x"),	_T("banana/c.txt"));	assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("t*"),		_T("c.txt"));		assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("*c"),		_T("c.txt"));		assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/a/b/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/a/*/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/a/b/*.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/*/*/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/a/*/c.txt"),	_T("/a/bug/c.txt"));	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("*/c.txt"),	_T("banana/c.txt"));	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("c.*"),		_T("c.txt"));		deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("*.*"),		_T("c.txt"));		deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("*.txt"),		_T("c.txt"));		deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("*.t*t"),		_T("c.txt"));		deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/a/c/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/a*/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/*/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("*/*.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("*.txt"),		_T("/a/b/c.txt"));	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/a/b*"),		_T("/a/bug/c.txt"));	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/a/b/c.t*x"),	_T("banana/c.txt"));	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("t*"),		_T("c.txt"));		deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("*c"),		_T("c.txt"));		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Path"), lContext, lTestOk);

@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 // This class extends TBC::Model with one or more geometries of different types.
 // It also provides functionality for the determination of the LOD-level.

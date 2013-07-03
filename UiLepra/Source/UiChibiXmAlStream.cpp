@@ -4,7 +4,7 @@
 
 
 #include "../Include/UiChibiXmAlStream.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/File.h"
 #include "../../Lepra/Include/FileOpener.h"
 #include "../Include/UiSoundManager.h"
@@ -162,7 +162,7 @@ void ChibiXmAlStream::SetFileOpener(FileOpener* pOpener)
 ChibiXmAlStream::ChibiXmAlStream(SoundManager* pSoundManager, const str& pFilename, bool pLoop):
 	Parent(pSoundManager)
 {
-	assert(gFileOpener);
+	deb_assert(gFileOpener);
 
 	mIsLooping = pLoop;
 

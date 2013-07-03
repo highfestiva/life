@@ -1,11 +1,11 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiProgressiveTriangleGeometry.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ListUtil.h"
 
 
@@ -621,7 +621,7 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 				   lTriangle->mV1 == lTriangle->mV3 ||
 				   lTriangle->mV2 == lTriangle->mV3)
 				{
-					assert(false);
+					deb_assert(false);
 				}
 			}
 		}
@@ -728,9 +728,9 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 			unsigned long lIndex1 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
 			unsigned long lIndex2 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
 
-			assert(lIndex0 >= 0);
-			assert(lIndex1 >= 0);
-			assert(lIndex2 >= 0);
+			deb_assert(lIndex0 >= 0);
+			deb_assert(lIndex1 >= 0);
+			deb_assert(lIndex2 >= 0);
 
 			mBaseIndices[i * 3 + 0] = lIndex0;
 			mBaseIndices[i * 3 + 1] = lIndex1;
@@ -807,8 +807,8 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 			{
 				Triangle* lTriangle = *lTriIter;
 
-				assert(lTriangle->mVertexIndexHistory.size() > 0);
-				assert(lTriangle->mVertexHistory.size() > 0);
+				deb_assert(lTriangle->mVertexIndexHistory.size() > 0);
+				deb_assert(lTriangle->mVertexHistory.size() > 0);
 
 				int lTriIndex = ListUtil::FindIndexOf(lTriangleList, lTriangle);
 				int lVertex = lTriangle->mVertexIndexHistory.back();

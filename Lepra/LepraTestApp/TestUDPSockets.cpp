@@ -1,11 +1,11 @@
 /*
 	File:   TestUDPSockets.cpp
 	Class:  -
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/Log.h"
 #include "../Include/String.h"
 #include "../Include/Network.h"
@@ -30,7 +30,7 @@ public:
 		if (lLocalAddress.Resolve(_T(":10000")))
 		{
 			mUdpMuxSocket = new UdpMuxSocket(_T("Srv "), lLocalAddress, true);
-			assert(mUdpMuxSocket->IsOpen());
+			deb_assert(mUdpMuxSocket->IsOpen());
 		}
 	}
 
@@ -55,7 +55,7 @@ private:
 void ServerThread::Run()
 {
 	UdpVSocket* lSocket = mUdpMuxSocket->Accept();
-	assert(lSocket);
+	deb_assert(lSocket);
 	Reader lReader(lSocket);
 	Writer lWriter(lSocket);
 
@@ -67,7 +67,7 @@ void ServerThread::Run()
 //	printf("\nServer received \"%s\".", astrutil::Encode(lString).c_str());
 	
 	mTestOk = (lString == _T("Hi Server! I am Client!"));
-	assert(mTestOk);
+	deb_assert(mTestOk);
 
 	lWriter.WriteString<Lepra::tchar>(_T("Hi Client! I am Server!\n"));
 	lSocket->Flush();
@@ -91,7 +91,7 @@ public:
 		if (lLocalAddress.Resolve(_T(":10001")))
 		{
 			mUdpMuxSocket = new UdpMuxSocket(_T("Client "), lLocalAddress, false);
-			assert(mUdpMuxSocket->IsOpen());
+			deb_assert(mUdpMuxSocket->IsOpen());
 		}
 	}
 
@@ -119,7 +119,7 @@ void ClientThread::Run()
 	if (lLocalAddress.Resolve(_T(":10000")))
 	{
 		UdpVSocket* lSocket = mUdpMuxSocket->Connect(lLocalAddress, "", 0.5);
-		assert(lSocket);
+		deb_assert(lSocket);
 		Reader lReader(lSocket);
 		Writer lWriter(lSocket);
 
@@ -133,7 +133,7 @@ void ClientThread::Run()
 	//	printf("Client received \"%s\".", astrutil::Encode(lString).c_str());
 		
 		mTestOk = (lString == _T("Hi Client! I am Server!"));
-		assert(mTestOk);
+		deb_assert(mTestOk);
 
 		mUdpMuxSocket->CloseSocket(lSocket);
 	}
@@ -161,7 +161,7 @@ bool TestUDPSockets(const LogDecorator& pAccount)
 
 		lContext = _T("Client/Server UdpMuxSocket communication failed");
 		lTestOk = lClient.GetTestOK() && lServer.GetTestOK();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 
 		Network::Stop();
 	}

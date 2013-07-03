@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) 2002-, Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include <math.h>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -99,7 +99,7 @@ void CppContextObject::EnableMeshSlide(bool pEnable)
 
 void CppContextObject::StartLoading()
 {
-	assert(mUiClassResource == 0);
+	deb_assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
 	const str lClassName = _T("UI:")+GetClassId()+_T(".class");
 	mUiClassResource->Load(GetResourceManager(), lClassName,
@@ -256,7 +256,7 @@ UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) con
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
 	return (0);
 }
@@ -455,7 +455,7 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 						}
 						else
 						{
-							assert(false);
+							deb_assert(false);
 						}
 						if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis2(lJoint, lAxis))
 						{
@@ -464,7 +464,7 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 					}
 					else
 					{
-						assert(false);
+						deb_assert(false);
 					}
 				}
 			}
@@ -497,7 +497,7 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 			break;
 			default:
 			{
-				assert(false);
+				deb_assert(false);
 			}
 			break;
 		}
@@ -528,7 +528,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
-		assert(false);
+		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
@@ -536,7 +536,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	const size_t lMeshCount = lClass->GetMeshCount();
 	if (mEnableUi)
 	{
-		assert(lMeshCount > 0);
+		deb_assert(lMeshCount > 0);
 		for (size_t x = 0; x < lMeshCount; ++x)
 		{
 			int lPhysIndex = -1;
@@ -556,9 +556,9 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		return;
 	}
 
-	assert(mMeshLoadCount == 0);
-	//assert(mTextureLoadCount == 0);
-	assert(lMeshCount == mMeshResourceArray.size());
+	deb_assert(mMeshLoadCount == 0);
+	//deb_assert(mTextureLoadCount == 0);
+	deb_assert(lMeshCount == mMeshResourceArray.size());
 	size_t x = 0;
 	MeshArray::iterator y = mMeshResourceArray.begin();
 	for (; y != mMeshResourceArray.end(); ++x, ++y)
@@ -593,7 +593,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 void CppContextObject::LoadTextures()
 {
 	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
-	assert(lClass);
+	deb_assert(lClass);
 	for (size_t x = 0; x < lClass->GetMeshCount(); ++x)
 	{
 		const std::vector<str>& lTextureList = lClass->GetMaterial(x).mTextureList;
@@ -626,7 +626,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 				break;
 			}
 		}
-		assert((int)lMeshIndex >= 0);
+		deb_assert((int)lMeshIndex >= 0);
 		if (lMeshIndex == 0 && !mAllowRootShadow)
 		{
 			mUiManager->GetRenderer()->SetShadows(pMeshResource->GetData(), UiTbc::Renderer::FORCE_NO_SHADOWS);
@@ -644,7 +644,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 	else
 	{
 		mLog.AError("Could not load mesh! Sheit.");
-		assert(false);
+		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }
@@ -659,7 +659,7 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 	else
 	{
 		mLog.Errorf(_T("Could not load texture %s. Gah!"), pTextureResource->GetName().c_str());
-		assert(false);
+		deb_assert(false);
 	}
 }
 

@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #ifndef CURE_TEST_WITHOUT_UI
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/GameTicker.h"
@@ -220,7 +220,7 @@ bool ResourceTest::TestAtom()
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lImage);
 		lTestOk = (gResourceLoadCount == 1 && gResourceLoadErrorCount == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Test loading a 2D image into a texture.
@@ -236,7 +236,7 @@ bool ResourceTest::TestAtom()
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lImage);
 		lTestOk = (gResourceLoadCount == 2 && gResourceLoadErrorCount == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Test loading a 3D texture (own, mipmapped format).
@@ -250,7 +250,7 @@ bool ResourceTest::TestAtom()
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lTexture);
 		lTestOk = (gResourceLoadCount == 2 && gResourceLoadErrorCount == 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	/*// Test loading a 3D texture that we actually do have (at least if we've ever run the UiTbc tests).
@@ -267,7 +267,7 @@ bool ResourceTest::TestAtom()
 		{
 			mLog.AError("texture not available, try running UiTbc test first!");
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}*/
 
 	// Test loading a sound.
@@ -279,16 +279,16 @@ bool ResourceTest::TestAtom()
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		lTestOk = (gResourceLoadCount == 3 && gResourceLoadErrorCount == 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lContext = _T("play sound");
 			lTestOk = mUiManager->GetSoundManager()->Play(lSound.GetData(), 1.0, 1.0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			Lepra::Thread::Sleep(0.5);
 		}
 		mResourceManager->SafeRelease(&lSound);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(mLog, _T("ResourceAtom"), lContext, lTestOk);
@@ -317,7 +317,7 @@ bool ResourceTest::TestClass()
 		mResourceManager->Tick();
 		lTestOk = (gResourceLoadCount == 12 && gResourceLoadErrorCount == 0);
 		mResourceManager->SafeRelease(&lClass);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	delete (mPhysicsResource);
@@ -343,13 +343,13 @@ bool ResourceTest::TestStress()
 	{
 		lContext = _T("no loaded resources");
 		lTestOk = (mResourceManager->QueryResourceCount() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("caching 0");
 		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -379,7 +379,7 @@ bool ResourceTest::TestStress()
 					lCount = mResourceManager->QueryResourceCount();
 					lTestOk = (lCount <= 2);
 				}
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 		TickRM lTick(mResourceManager);
@@ -389,17 +389,17 @@ bool ResourceTest::TestStress()
 	{
 		lContext = _T("caching 1");
 		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("clearing cache 1");
 		lTestOk = (mResourceManager->ForceFreeCache() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lTestOk = (mResourceManager->QueryResourceCount() == 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -426,7 +426,7 @@ bool ResourceTest::TestStress()
 					const size_t lCount = mResourceManager->QueryResourceCount();
 					lTestOk = (lCount <= 1);
 				}
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 	}
@@ -435,14 +435,14 @@ bool ResourceTest::TestStress()
 	{
 		lContext = _T("caching 2");
 		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("clearing cache 2");
 		mResourceManager->ForceFreeCache();
 		lTestOk = (mResourceManager->QueryResourceCount() == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	const int lLoopCount = 100;
@@ -464,7 +464,7 @@ bool ResourceTest::TestStress()
 				lResources.push_back(lClass);
 			}
 			size_t c = mResourceManager->QueryResourceCount();
-			assert(c == (size_t)(x*(lAddCount-lDecCount)+lAddCount));
+			deb_assert(c == (size_t)(x*(lAddCount-lDecCount)+lAddCount));
 			for (int z = 0; z < lDecCount; ++z)
 			{
 				int lDropIndex = Lepra::Random::GetRandomNumber()%lResources.size();
@@ -481,10 +481,10 @@ bool ResourceTest::TestStress()
 				c = mResourceManager->QueryResourceCount();
 				lTestOk = (c == (size_t)((x+1)*(lAddCount-lDecCount)));
 			}
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lAddCount/3));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lContext = _T("unique load completeness");
@@ -506,7 +506,7 @@ bool ResourceTest::TestStress()
 					}*/
 				}
 			}
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -518,7 +518,7 @@ bool ResourceTest::TestStress()
 			}
 			lResources.clear();
 			lTestOk = (mResourceManager->QueryResourceCount() == 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -543,7 +543,7 @@ bool ResourceTest::TestStress()
 				lResources.push_back(lMesh);
 			}
 			size_t c = mResourceManager->QueryResourceCount();
-			assert(c <= 2);
+			deb_assert(c <= 2);
 			for (int z = 0; z < lDecCount; ++z)
 			{
 				int lDropIndex = Lepra::Random::GetRandomNumber()%lResources.size();
@@ -560,7 +560,7 @@ bool ResourceTest::TestStress()
 				c = mResourceManager->QueryResourceCount();
 				lTestOk = (c <= 2);
 			}
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -568,7 +568,7 @@ bool ResourceTest::TestStress()
 			TickRM lTick(mResourceManager, 0.1);
 			size_t c = mResourceManager->QueryResourceCount();
 			lTestOk = (c == 2);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -584,7 +584,7 @@ bool ResourceTest::TestStress()
 						u, lResources.size(), (*y)->GetLoadState());
 				}
 			}
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -596,14 +596,14 @@ bool ResourceTest::TestStress()
 			}
 			lResources.clear();
 			lTestOk = (mResourceManager->QueryResourceCount() == 2);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lContext = _T("mass cache clear");
 			mResourceManager->ForceFreeCache();
 			lTestOk = (mResourceManager->QueryResourceCount() == 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -629,13 +629,13 @@ bool ResourceTest::TestReloadContextObject()
 	{
 		lContext = _T("init transformation suxx");
 		lTestOk = InternalLoadTransformation(lContextManager);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("reload transformation suxx");
 		lTestOk = InternalLoadTransformation(lContextManager);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(mLog, _T("ReloadTransform"), lContext, lTestOk);
@@ -664,11 +664,11 @@ bool ResourceTest::InternalLoadTransformation(Cure::ContextManager& pContextMana
 		TickRM lTick(mResourceManager);
 	}
 	bool lTestOk = lObject.IsLoaded();
-	assert(lTestOk);
+	deb_assert(lTestOk);
 	if (lTestOk)
 	{
 		lTestOk = (lObject.GetPosition() == Vector3DF(1, 2, 3));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -677,7 +677,7 @@ bool ResourceTest::InternalLoadTransformation(Cure::ContextManager& pContextMana
 			Math::IsEpsEqual(r.mB, Q.mB, 0.1f) &&
 			Math::IsEpsEqual(r.mC, Q.mC, 0.1f) &&
 			Math::IsEpsEqual(r.mD, Q.mD, 0.1f));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	return lTestOk;
 }

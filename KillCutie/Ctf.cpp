@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -60,7 +60,7 @@ void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 	mTrigger = pTrigger;
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
 	const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
-	assert(lTag && lTag->mMeshIndexList.size() == 2);
+	deb_assert(lTag && lTag->mMeshIndexList.size() == 2);
 	if (lTag && lTag->mMeshIndexList.size() == 2)
 	{
 		mFlagOffset.x		= lTag->mFloatValueList[0];

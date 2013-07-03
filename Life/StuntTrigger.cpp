@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -46,11 +46,11 @@ void StuntTrigger::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 	for (int x = 0; x < lBoneCount; ++x)
 	{
 		const int lBoneIndex = lPhysics->GetIndex(pTrigger->GetTriggerGeometry(x));
-		assert(lBoneIndex >= 0);
+		deb_assert(lBoneIndex >= 0);
 		lTriggerIndexArray.push_back(lBoneIndex);
 	}
 	const TBC::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("stunt_trigger_data"), 5, 2, &lTriggerIndexArray);
-	assert(lTag);
+	deb_assert(lTag);
 	if (lTag)
 	{
 		mMinSpeed		= lTag->mFloatValueList[0];

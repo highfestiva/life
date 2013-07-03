@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -167,7 +167,7 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 		pTag.mMeshIndexList.size() < 1)
 	{
 		mLog.Errorf(_T("The eye tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 
@@ -210,7 +210,7 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 			default:
 			{
 				mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), pTag.mTagName.c_str());
-				assert(false);
+				deb_assert(false);
 			}
 			break;
 		}
@@ -252,7 +252,7 @@ void Machine::HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag)
 		pTag.mMeshIndexList.size() < 1)
 	{
 		mLog.Errorf(_T("The brake_light tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	const int lEngineIndex = pTag.mEngineIndexList[0];
@@ -288,7 +288,7 @@ void Machine::HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pF
 		pTag.mMeshIndexList.size() < 1)
 	{
 		mLog.Errorf(_T("The engine_light tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	const int lEngineIndex = pTag.mEngineIndexList[0];
@@ -324,7 +324,7 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TB
 		pTag.mMeshIndexList.size() != 0)
 	{
 		mLog.Errorf(_T("The engine_sound tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	UserSound3dResource* lEngineSound = HashUtil::FindMapObject(mEngineSoundTable, &pTag);
@@ -419,7 +419,7 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 		pTag.mMeshIndexList.size() < 1)
 	{
 		mLog.Errorf(_T("The engine_sound tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 
@@ -473,7 +473,7 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 
 void Machine::LoadPlaySound3d(UserSound3dResource* pSoundResource)
 {
-	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0, 1.0);

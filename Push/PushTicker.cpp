@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -64,7 +64,7 @@ bool PushTicker::CreateSlave()
 void PushTicker::OnSlavesKilled()
 {
 	DeleteServer();
-	//assert(!mIsPlayerCountViewActive);
+	//deb_assert(!mIsPlayerCountViewActive);
 	mIsPlayerCountViewActive = true;
 	mSlaveTopSplit = 1.0f;
 	Parent::CreateSlave(&PushTicker::CreateViewer);

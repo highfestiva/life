@@ -1,7 +1,7 @@
 /*
 	Class:  Renderer
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 #include "../Include/UiRenderer.h"
@@ -173,7 +173,7 @@ bool Renderer::IsPixelShadersEnabled() const
 
 void Renderer::SetViewport(const PixelRect& pViewport)
 {
-	assert(pViewport.mLeft <= pViewport.mRight && 
+	deb_assert(pViewport.mLeft <= pViewport.mRight && 
 		pViewport.mTop <= pViewport.mBottom);
 	mViewport = pViewport;
 	RecalculateFrustumPlanes();
@@ -405,7 +405,7 @@ Renderer::LightID Renderer::AddDirectionalLight(LightHint pHint,
 		return INVALID_LIGHT;
 
 	LightData* lData = GetLightData(lLightId);
-	assert(lData);
+	deb_assert(lData);
 	lData->mType			= LIGHT_DIRECTIONAL;
 	lData->mHint			= pHint;
 	lData->mPosition		= Vector3DF();
@@ -434,7 +434,7 @@ Renderer::LightID Renderer::AddPointLight(LightHint pHint,
 		return INVALID_LIGHT;
 
 	LightData* lData = GetLightData(lLightId);
-	assert(lData);
+	deb_assert(lData);
 	lData->mType			= LIGHT_POINT;
 	lData->mHint			= pHint;
 	lData->mPosition		= pPos;
@@ -472,7 +472,7 @@ Renderer::LightID Renderer::AddSpotLight(LightHint pHint,
 	pCutoffAngle = pCutoffAngle > 89.0f ? 89.0f : pCutoffAngle;
 
 	LightData* lData = GetLightData(lLightId);
-	assert(lData);
+	deb_assert(lData);
 	lData->mType			= LIGHT_SPOT;
 	lData->mHint			= pHint;
 	lData->mPosition		= pPos;
@@ -524,7 +524,7 @@ Renderer::LightID Renderer::AddSpotLight(LightHint pHint,
 void Renderer::RemoveLight(LightID pLightId)
 {
 	LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 
 	if (lData->mType == Renderer::LIGHT_SPOT)
 	{
@@ -566,7 +566,7 @@ void Renderer::SetShadowMapOptions(LightID pLightId,
 				   float pFarPlane)
 {
 	LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 
 	// Can't change settings when the shadow map has been generated.
 	// TODO: Replace '0' with something else...
@@ -581,7 +581,7 @@ void Renderer::SetShadowMapOptions(LightID pLightId,
 void Renderer::SetLightPosition(LightID pLightId, const Vector3DF& pPos)
 {
 	LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 
 	if (lData->mType == Renderer::LIGHT_POINT ||
 	   lData->mType == Renderer::LIGHT_SPOT)
@@ -597,7 +597,7 @@ void Renderer::SetLightPosition(LightID pLightId, const Vector3DF& pPos)
 void Renderer::SetLightDirection(LightID pLightId, const Vector3DF& pDir)
 {
 	LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 
 	if (lData->mType == Renderer::LIGHT_DIRECTIONAL ||
 	   lData->mType == Renderer::LIGHT_SPOT)
@@ -648,7 +648,7 @@ void Renderer::SetLightDirection(LightID pLightId, const Vector3DF& pDir)
 void Renderer::SetLightColor(LightID pLightId, const Vector3DF& pColor)
 {
 	LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 
 	lData->mColor[0] = pColor.x;
 	lData->mColor[1] = pColor.y;
@@ -658,7 +658,7 @@ void Renderer::SetLightColor(LightID pLightId, const Vector3DF& pColor)
 Vector3DF Renderer::GetLightPosition(LightID pLightId) const
 {
 	const LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 	if (lData)
 	{
 		return lData->mPosition;
@@ -669,7 +669,7 @@ Vector3DF Renderer::GetLightPosition(LightID pLightId) const
 Vector3DF Renderer::GetLightDirection(LightID pLightId) const
 {
 	const LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 	if (lData)
 	{
 		return lData->mDirection;
@@ -680,7 +680,7 @@ Vector3DF Renderer::GetLightDirection(LightID pLightId) const
 Vector3DF Renderer::GetLightColor(LightID pLightId) const
 {
 	const LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 	if (lData)
 	{
 		return Vector3DF(lData->mColor[0], lData->mColor[1], lData->mColor[2]);
@@ -691,7 +691,7 @@ Vector3DF Renderer::GetLightColor(LightID pLightId) const
 Renderer::LightType Renderer::GetLightType(LightID pLightId)
 {
 	const LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 	if (lData)
 	{
 		return lData->mType;
@@ -702,7 +702,7 @@ Renderer::LightType Renderer::GetLightType(LightID pLightId)
 float Renderer::GetLightCutoffAngle(LightID pLightId)
 {
 	const LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 	if (lData)
 	{
 		return lData->mCutoffAngle;
@@ -713,7 +713,7 @@ float Renderer::GetLightCutoffAngle(LightID pLightId)
 float Renderer::GetLightSpotExponent(LightID pLightId)
 {
 	const LightData* lData = GetLightData(pLightId);
-	assert(lData);
+	deb_assert(lData);
 	if (lData)
 	{
 		return lData->mSpotExponent;
@@ -836,7 +836,7 @@ void Renderer::UpdateTexture(TextureID pTextureID, Texture* pTexture)
 	TextureData* lTexture = *x;
 
 	// Cube map or not, it has to remain the same type...
-	assert(lTexture->mIsCubeMap == pTexture->IsCubeMap());
+	deb_assert(lTexture->mIsCubeMap == pTexture->IsCubeMap());
 
 	if (pTexture->IsCubeMap() == false)
 	{
@@ -969,14 +969,14 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 
 	GeometryTable::Iterator lGeomIter;
 	lGeomIter = mGeometryTable.Find(pGeometryId);
-	assert(lGeomIter != mGeometryTable.End());
+	deb_assert(lGeomIter != mGeometryTable.End());
 	GeometryData* lGeometryData = *lGeomIter;
 
 	/*JMB
 	if (lGeometryData->mGeometry->IsGeometryReference() == true)
 	{
 		mLog.AError("Could not add texture to geometry reference!");
-		assert(false);
+		deb_assert(false);
 	}
 	else*/
 	{
@@ -992,7 +992,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 			lOk = (lGeometryData->mTA->mTextureID[x] != pTexture);
 			if (!lOk)
 			{
-				//assert(lOk);
+				//deb_assert(lOk);
 				log_atrace("Skipping add of texture to geometry a second time.");
 			}
 		}
@@ -1019,7 +1019,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 			if (!lOk)
 			{
 				mLog.AError("Could not add texture - no more slots available!");
-				assert(false);
+				deb_assert(false);
 			}
 		}
 		/*JMB
@@ -1030,7 +1030,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 			{
 				// Remove references recursively.
 				GeometryTable::Iterator y = mGeometryTable.Find(*x);
-				assert(y != mGeometryTable.End());
+				deb_assert(y != mGeometryTable.End());
 				if (y != mGeometryTable.End())
 				{
 					GeometryData* lGeometryClone = *lGeomIter;
@@ -1047,19 +1047,19 @@ bool Renderer::DisconnectGeometryTexture(GeometryID pGeometryId, TextureID pText
 	bool lOk = false;
 	if (pGeometryId == INVALID_GEOMETRY)
 	{
-		assert(false);
+		deb_assert(false);
 		return false;
 	}
 
 	GeometryTable::Iterator lGeomIter;
 	lGeomIter = mGeometryTable.Find(pGeometryId);
-	assert(lGeomIter != mGeometryTable.End());
+	deb_assert(lGeomIter != mGeometryTable.End());
 	GeometryData* lGeometryData = *lGeomIter;
 
 	const int lTextureCount = Texture::NUM_MAPS;
 	if (!lGeometryData->mTA)
 	{
-		assert(false);
+		deb_assert(false);
 		return false;
 	}
 	for (int x = 0; !lOk && x < lTextureCount; ++x)
@@ -1075,7 +1075,7 @@ bool Renderer::DisconnectGeometryTexture(GeometryID pGeometryId, TextureID pText
 			return true;
 		}
 	}
-	assert(false);
+	deb_assert(false);
 	return false;
 }
 
@@ -1088,7 +1088,7 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 
 	GeometryTable::Iterator lGeomIter;
 	lGeomIter = mGeometryTable.Find(pGeometryID);
-	assert(lGeomIter != mGeometryTable.End());
+	deb_assert(lGeomIter != mGeometryTable.End());
 	if (lGeomIter != mGeometryTable.End())
 	{
 		GeometryData* lGeometryData = *lGeomIter;
@@ -1127,7 +1127,7 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 			// Remove references recursively.
 			LEPRA_DEBUG_CODE(const size_t lReferenceCount = lGeometryData->mReferenceSet.size());
 			RemoveGeometry(*lGeometryData->mReferenceSet.begin());
-			LEPRA_DEBUG_CODE(assert(lReferenceCount == lGeometryData->mReferenceSet.size()+1));
+			LEPRA_DEBUG_CODE(deb_assert(lReferenceCount == lGeometryData->mReferenceSet.size()+1));
 		}
 
 		lGeometryData->mGeometry->SetRendererData(0);
@@ -1149,10 +1149,10 @@ void Renderer::RemoveAllGeometry()
 
 Renderer::MaterialType Renderer::GetMaterialType(GeometryID pGeometryID)
 {
-	assert(pGeometryID != INVALID_GEOMETRY);
+	deb_assert(pGeometryID != INVALID_GEOMETRY);
 	MaterialType lMaterial = MAT_NULL;
 	GeometryTable::Iterator x = mGeometryTable.Find(pGeometryID);
-	assert(x != mGeometryTable.End());
+	deb_assert(x != mGeometryTable.End());
 	if (x != mGeometryTable.End())
 	{
 		GeometryData* lGeometryData = *x;
@@ -1164,7 +1164,7 @@ Renderer::MaterialType Renderer::GetMaterialType(GeometryID pGeometryID)
 void Renderer::SetShadows(GeometryID pGeometryID, Renderer::Shadows pShadowMode)
 {
 	GeometryTable::Iterator x = mGeometryTable.Find(pGeometryID);
-	assert(x != mGeometryTable.End());
+	deb_assert(x != mGeometryTable.End());
 	if (x != mGeometryTable.End())
 	{
 		GeometryData* lGeometryData = *x;
@@ -1174,10 +1174,10 @@ void Renderer::SetShadows(GeometryID pGeometryID, Renderer::Shadows pShadowMode)
 
 Renderer::Shadows Renderer::GetShadows(GeometryID pGeometryID)
 {
-	assert(pGeometryID != INVALID_GEOMETRY);
+	deb_assert(pGeometryID != INVALID_GEOMETRY);
 	Shadows lShadows = NO_SHADOWS;
 	GeometryTable::Iterator x = mGeometryTable.Find(pGeometryID);
-	assert(x != mGeometryTable.End());
+	deb_assert(x != mGeometryTable.End());
 	if (x != mGeometryTable.End())
 	{
 		GeometryData* lGeometryData = *x;
@@ -1419,7 +1419,7 @@ bool Renderer::CheckFlag(unsigned pFlags, unsigned pFlag)
 
 Material* Renderer::GetMaterial(MaterialType pMaterialType) const
 {
-	assert(pMaterialType >= MAT_NULL && pMaterialType <= MAT_COUNT);
+	deb_assert(pMaterialType >= MAT_NULL && pMaterialType <= MAT_COUNT);
 	return mMaterial[pMaterialType];
 }
 

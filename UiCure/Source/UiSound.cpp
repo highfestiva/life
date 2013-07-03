@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -39,7 +39,7 @@ void Sound::SetManager(Cure::ContextManager* pManager)
 
 void Sound::LoadPlaySound2d(UserSound2dResource* pSoundResource)
 {
-	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		return;

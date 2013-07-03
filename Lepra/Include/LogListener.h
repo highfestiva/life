@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 // An abstract callback class (Observer) used receive log events.
 // The derived, implementing class may write to console, file
