@@ -836,7 +836,7 @@ void ResourceManager::Release(Resource* pResource)
 				}
 				else
 				{
-					mLog.Info(_T("Currently loading resource ")+pResource->GetName()+_T(" dereferenced. Not cached - will be deleted immediately after loader thread is done."));
+					log_volatile(mLog.Trace(_T("Currently loading resource ")+pResource->GetName()+_T(" dereferenced. Not cached - will be deleted immediately after loader thread is done.")));
 					deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 				}
 			}
@@ -852,7 +852,7 @@ void ResourceManager::Release(Resource* pResource)
 			}
 			else
 			{
-				mLog.Info(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Will be deleted immediately after loader thread is done."));
+				log_volatile(mLog.Trace(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Will be deleted immediately after loader thread is done.")));
 				deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 			}
 		}
@@ -1034,13 +1034,18 @@ void ResourceManager::InjectResourceLoop()
 {
 	HiResTimer lTimer(false);
 	ResourceMapList lInjectList;
+
+	// ---------------------------
+	// NOTE: this lock must be here, as the state otherwise changes outside of the lock state, which causes all sorts
+	//       of problems, especially when deleting just loaded resources which have not yet been postprocessed. Also,
+	//       there is no way to stop injection once the resource has been postprocessed by the injection thread.
+	ScopeLock lLock(&mThreadLock);
+	// ---------------------------
+
+	if (mLoadedList.GetCount() > 0)
 	{
-		ScopeLock lLock(&mThreadLock);
-		if (mLoadedList.GetCount() > 0)
-		{
-			lInjectList = mLoadedList;
-			mLoadedList.RemoveAll();
-		}
+		lInjectList = mLoadedList;
+		mLoadedList.RemoveAll();
 	}
 	for (ResourceMapList::Iterator x = lInjectList.First(); x != lInjectList.End();)
 	{
@@ -1061,9 +1066,9 @@ void ResourceManager::InjectResourceLoop()
 			break;
 		}
 	}
+	// Put the stuff back in the "to be injected list".
 	if (lInjectList.GetCount() > 0)
 	{
-		ScopeLock lLock(&mThreadLock);
 		for (ResourceMapList::Iterator x = lInjectList.First(); x != lInjectList.End(); ++x)
 		{
 			mLoadedList.PushBack(x.GetKey(), x.GetObject());

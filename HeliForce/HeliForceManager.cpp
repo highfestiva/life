@@ -167,7 +167,7 @@ void HeliForceManager::LoadSettings()
 
 	Parent::LoadSettings();
 
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 150.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
@@ -1446,7 +1446,9 @@ void HeliForceManager::MoveCamera()
 	{
 		UpdateChopperColor(0.1f);
 
-		const float lHalfCamDistance = 75;
+		float lHalfCamDistance;
+		CURE_RTVAR_GET(lHalfCamDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 150.0);
+		lHalfCamDistance /= 2;
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
 		mHelicopterPosition = lAvatarPosition;
@@ -1466,22 +1468,18 @@ void HeliForceManager::MoveCamera()
 		{
 			lTargetTransform.GetPosition().z += lHalfCamDistance;
 		}
-		Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
 
-		const float lCamNormalizedDistance = mCameraTransform.GetPosition().GetDistance(lAvatarPosition) / (1.2f*lHalfCamDistance);
-		if (lCamNormalizedDistance < 2.5f)
-		{
-			const float lMaxCamSpeed = Math::SmoothClamp(lCamNormalizedDistance, 0.1f, 5.0f, 0.3f);
-			if (lDelta.GetLength() > lMaxCamSpeed)
-			{
-				lDelta.Normalize(lMaxCamSpeed);
-			}
-			mCameraTransform.GetPosition() += lDelta;
-		}
-		else
+		Vector3DF lCamXZPos(mCameraTransform.GetPosition());
+		lCamXZPos.y = 0;
+		if (lCamXZPos.GetDistance(lAvatarPosition) > 2*lHalfCamDistance)
 		{
 			mCameraTransform = lTargetTransform;
 			mCameraSpeed = 0;
+		}
+		else
+		{
+			Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
+			mCameraTransform.GetPosition() += lDelta;
 		}
 
 		// Angle.
