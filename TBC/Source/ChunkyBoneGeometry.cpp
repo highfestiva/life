@@ -516,6 +516,11 @@ bool ChunkyBoneCylinder::CreateTrigger(PhysicsManager* pPhysics, int pTrigListen
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
+Vector3DF ChunkyBoneCylinder::GetShapeSize() const
+{
+	return (Vector3DF(mRadius*2, mRadius*2, mLength));
+}
+
 ChunkyBoneGeometry::GeometryType ChunkyBoneCylinder::GetGeometryType() const
 {
 	return GEOMETRY_CYLINDER;

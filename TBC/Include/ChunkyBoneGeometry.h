@@ -163,12 +163,12 @@ public:
 	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 		const TransformationF& pTransform);
 
-	unsigned GetChunkySize(const void* pData = 0) const;
-	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* pData = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 protected:
-	Vector3DF GetShapeSize() const;
-	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual Vector3DF GetShapeSize() const;
 	virtual GeometryType GetGeometryType() const;
 
 	float32 mRadius;
@@ -188,6 +188,7 @@ public:
 		const TransformationF& pTransform);
 
 private:
+	virtual Vector3DF GetShapeSize() const;
 	virtual GeometryType GetGeometryType() const;
 };
 
@@ -203,12 +204,12 @@ public:
 	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 		const TransformationF& pTransform);
 
-	unsigned GetChunkySize(const void* pData = 0) const;
-	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* pData = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 private:
-	Vector3DF GetShapeSize() const;
-	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual Vector3DF GetShapeSize() const;
+	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	virtual GeometryType GetGeometryType() const;
 
 	float32 mRadius;
@@ -226,13 +227,13 @@ public:
 	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 		const TransformationF& pTransform);
 
-	unsigned GetChunkySize(const void* pData = 0) const;
-	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* pData = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
-	Vector3DF GetShapeSize() const;
+	virtual Vector3DF GetShapeSize() const;
 
 private:
-	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	virtual GeometryType GetGeometryType() const;
 
 	Vector3DF mSize;
@@ -251,12 +252,12 @@ public:
 	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
 		const TransformationF& pTransform);
 
-	unsigned GetChunkySize(const void* pData = 0) const;
-	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* pData = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 private:
-	Vector3DF GetShapeSize() const;
-	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual Vector3DF GetShapeSize() const;
+	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	void Clear();
 	virtual GeometryType GetGeometryType() const;
 	virtual void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal);

@@ -101,6 +101,9 @@ class Shape:
 	def __str__(self):
 		return "<Shape %s %s>" % (self.type, " ".join(map(lambda x: str(x), self.data)))
 
+	def __repr__(self):
+		return self.__str__()
+
 
 	def get_lowest_world_point(self):
 		p = self._scalenode.get_world_translation() - self._scalenode.getphysmaster().get_world_translation()

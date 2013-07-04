@@ -467,7 +467,7 @@ class GroupReader(DefaultMAReader):
 			if v > 1:
 				instancecount += 1
 				#print("Got mesh instance:", k, v)
-		if len(group) >= 25 and instancecount == 0:
+		if len(meshnames) >= 25 and instancecount == 0:
 			print("%s: warning: has no mesh instances (total of %i nodes); highly unlikely! At least the wheels should be, right?" % (self.basename, len(group)))
 
 
@@ -1155,10 +1155,10 @@ class GroupReader(DefaultMAReader):
 				if phys.pointup:
 					#print("\n".join(dir(phys)))
 					#print(phys.mesh_ref, phys.loose_mesh_ref, phys.phys_root, phys._parents, phys.nodetype)
-					#print("%s before:\n%s." % (phys.getName(), phys.get_final_local_transform()))
+					#print("%s before:\n%s." % (phys.getName(), quat(phys.get_world_transform().decompose()[1])))
 					del(phys.localmat4)
 					phys.gettransformto(None)
-					#print("%s after:\n%s." % (phys.getName(), phys.get_final_local_transform()))
+					#print("%s after:\n%s." % (phys.getName(), quat(phys.get_world_transform().decompose()[1])))
 		#shape.disable_ortho_check = True
 
 
