@@ -529,7 +529,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AutoPathDriver.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Autopilot.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BaseMachine.cpp"
 				>
 			</File>
 			<File
@@ -595,7 +603,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AutoPathDriver.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Autopilot.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BaseMachine.h"
 				>
 			</File>
 			<File

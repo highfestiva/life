@@ -93,8 +93,9 @@ class Shape:
 		if not disable_ortho_check and check_orthonormal:
 			if math.fabs(v0.length()-v1.length()) > 0.1 or math.fabs(v0.length()-v2.length()) > 0.1 or math.fabs(v1.length()-v2.length()) > 0.1:
 				print("Error: scale for physical shape '%s' is not orthonormal!" % scalenode.getFullName())
+				print(v0, v1, v2)
+				print(scalenode, scalenode.get_world_transform())
 				print(disable_ortho_check)
-				raise Error("tjaba!")
 				sys.exit(21)
 
 

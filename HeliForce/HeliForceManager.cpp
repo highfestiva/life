@@ -49,6 +49,7 @@
 #include "CenteredMachine.h"
 #include "AirBalloonPilot.h"
 #include "Automan.h"
+#include "AutoPathDriver.h"
 #include "Autopilot.h"
 #include "HeliForceConsoleManager.h"
 #include "HeliForceTicker.h"
@@ -167,7 +168,7 @@ void HeliForceManager::LoadSettings()
 
 	Parent::LoadSettings();
 
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 150.0);
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
@@ -952,16 +953,14 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	}
 	else if (strutil::StartsWith(pClassId, _T("forklift")))
 	{
-		UiCure::Machine* lMachine = new Life::ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
-		Cure::Health::Set(lMachine, 1);
+		UiCure::Machine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
 	else if (strutil::StartsWith(pClassId, _T("air_balloon")))
 	{
-		UiCure::Machine* lBalloon = new Life::ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
-		Cure::Health::Set(lBalloon, 1);
+		UiCure::Machine* lBalloon = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lBalloon->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lBalloon;
@@ -1017,15 +1016,21 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			OnLevelLoadCompleted();
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")) ||
-			strutil::StartsWith(pObject->GetClassId(), _T("forklift")))
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")))
 		{
 			Vector3DF lDirection(-1,0,0);
-			if (strutil::StartsWith(pObject->GetClassId(), _T("forklift")))
-			{
-				lDirection.Set(0,1,0);
-			}
 			new Automan(this, pObject->GetInstanceId(), lDirection);
+			Vector3DF lColor;
+			do
+			{
+				lColor = RNDPOSVEC();
+			} while (lColor.GetDistanceSquared(mLastVehicleColor) < 1);
+			mLastVehicleColor = lColor;
+			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
+		}
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("forklift")))
+		{
+			new AutoPathDriver(this, pObject->GetInstanceId(), _T("forklift_path"));
 			Vector3DF lColor;
 			do
 			{
@@ -1036,7 +1041,6 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("air_balloon")))
 		{
-			pObject->SetEnginePower(3, 1);
 			new AirBalloonPilot(this, pObject->GetInstanceId());
 			if (mLastVehicleColor.y > 0.4f && mLastVehicleColor.x < 0.3f && mLastVehicleColor.z < 0.3f)
 			{
@@ -1447,7 +1451,7 @@ void HeliForceManager::MoveCamera()
 		UpdateChopperColor(0.1f);
 
 		float lHalfCamDistance;
-		CURE_RTVAR_GET(lHalfCamDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 150.0);
+		CURE_RTVAR_GET(lHalfCamDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
 		lHalfCamDistance /= 2;
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();

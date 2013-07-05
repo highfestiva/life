@@ -42,6 +42,8 @@ public:
 	Cure::GameManager* GetGameManager() const;
 	void SetGameManager(Cure::GameManager* pGameManager);
 
+	void OnKey(const str& pKeyName);
+
 protected:
 	enum CommandCommon
 	{
@@ -49,6 +51,7 @@ protected:
 
 		COMMAND_ALIAS,
 		COMMAND_ALIAS_VALUE,
+		COMMAND_BIND_KEY,
 		COMMAND_ECHO,
 		COMMAND_EXECUTE_FILE,
 		COMMAND_EXECUTE_VARIABLE,
@@ -92,11 +95,13 @@ private:
 
 	static const CommandPair mCommandIdList[];
 	typedef std::hash_map<str, str> AliasMap;
+	typedef AliasMap KeyMap;
 
 	int mSecurityLevel;
 	Cure::GameManager* mGameManager;
 	Cure::ResourceManager* mResourceManager;
 	AliasMap mAliasMap;
+	KeyMap mKeyMap;
 	LogListener* mLogger;
 	LOG_CLASS_DECLARE();
 };

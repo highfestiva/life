@@ -336,8 +336,13 @@ Cure::ResourceLoadState GeometryResource::PostProcess()
 	{
 		return Cure::RESOURCE_LOAD_IN_PROGRESS;
 	}
-	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(GetRamData(), R::MAT_NULL,
-		mCastsShadows? R::CAST_SHADOWS : R::NO_SHADOWS);
+	R::Shadows lShadows = R::NO_SHADOWS;
+	switch (mCastsShadows)
+	{
+		case 1:		lShadows = R::CAST_SHADOWS;	break;
+		case -1:	lShadows = R::FORCE_NO_SHADOWS;	break;
+	}
+	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(GetRamData(), R::MAT_NULL, lShadows);
 	deb_assert(mOptimizedData != R::INVALID_GEOMETRY);
 	Cure::ResourceLoadState lLoadState;
 	if (mOptimizedData == R::INVALID_GEOMETRY)
@@ -354,7 +359,7 @@ Cure::ResourceLoadState GeometryResource::PostProcess()
 	return (lLoadState);
 }
 
-bool GeometryResource::GetCastsShadows() const
+int GeometryResource::GetCastsShadows() const
 {
 	return (mCastsShadows);
 }

@@ -26,7 +26,7 @@ ChunkyMeshLoader::~ChunkyMeshLoader()
 {
 }
 
-bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadows)
+bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows)
 {
 	bool lOk = true;
 	if (lOk)
@@ -157,7 +157,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadow
 			pMeshData->AddUVSet(lUvs[x]);
 		}
 
-		pCastsShadows = (lCastsShadows != 0);
+		pCastsShadows = lCastsShadows;
 	}
 	// TODO: reuse memory, don't new/delete constantly!
 	delete[] (lLoadVertices);
@@ -173,7 +173,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadow
 	return (lOk);
 }
 
-bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, bool pCastsShadows)
+bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsShadows)
 {
 	// Write file header. We will come back to it later to re-write the actual size.
 	bool lOk = true;
@@ -217,7 +217,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, bool pCastsS
 	}
 	int32 lColorFormat = pMeshData->GetColorFormat();
 	int32 lGeometryVolatility = pMeshData->GetGeometryVolatility();
-	int32 lCastsShadows = pCastsShadows? 1 : 0;
+	int32 lCastsShadows = pCastsShadows;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lSaveList;

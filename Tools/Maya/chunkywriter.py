@@ -701,6 +701,18 @@ class MeshWriter(ChunkyWriter):
 			for p in node.getparents():
 				p.writecount += 1
 			return
+		def getshadows(node):
+			for parent in node.getparents():
+				casts_shadows = parent.get_fixed_attribute("casts_shadows", optional=True)
+				if casts_shadows:
+					break
+			if casts_shadows == None:
+				casts_shadows = self.config.get("casts_shadows")
+			if casts_shadows == None:
+				return []
+			elif casts_shadows:
+				return [(CHUNK_MESH_CASTS_SHADOWS, +1)]
+			return [(CHUNK_MESH_CASTS_SHADOWS, -1)]
 		#print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
 		self._addfeat("mesh:meshes", 1)
 		self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
@@ -709,7 +721,7 @@ class MeshWriter(ChunkyWriter):
 			default_mesh_type = {"static":1, "semi_static":2, "dynamic":3, "volatile":4}
 			mesh_type = "static" if self.config["type"] == "static" else "semi_static"
 			volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type[mesh_type])]
-			shadows = [(CHUNK_MESH_CASTS_SHADOWS, 1)] if self.config.get("casts_shadows") else []
+			shadows = getshadows(node)
 			verts = [(CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx"))]
 			polys = [(CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri"))]
 			normals = [] # node.get_fixed_attribute("rgn", optional=True)

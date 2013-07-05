@@ -29,6 +29,7 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 {
 	// IO.
 	{_T("alias"), COMMAND_ALIAS},
+	{_T("bind-key"), COMMAND_BIND_KEY},
 	{_T("echo"), COMMAND_ECHO},
 	{_T("execute-file"), COMMAND_EXECUTE_FILE},
 	{_T("execute-variable"), COMMAND_EXECUTE_VARIABLE},
@@ -118,6 +119,17 @@ void ConsoleManager::SetGameManager(Cure::GameManager* pGameManager)
 
 
 
+void ConsoleManager::OnKey(const str& pKeyName)
+{
+	KeyMap::iterator x = mKeyMap.find(pKeyName);
+	if (x != mKeyMap.end())
+	{
+		ExecuteCommand(x->second);
+	}
+}
+
+
+
 unsigned ConsoleManager::GetCommandCount() const
 {
 	return LEPRA_ARRAY_COUNT(mCommandIdList);
@@ -187,6 +199,26 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			{
 				mLog.Warningf(_T("Alias %s is removed."), pCommand.c_str());
 				lResult = 1;
+			}
+		}
+		break;
+		case COMMAND_BIND_KEY:
+		{
+			if (pParameterVector.size() == 2)
+			{
+				mKeyMap.insert(KeyMap::value_type(pParameterVector[0], pParameterVector[1]));
+			}
+			else if (pParameterVector.size() == 1)
+			{
+				mKeyMap.erase(pParameterVector[0]);
+			}
+			else
+			{
+				mLog.AInfo("List of keys:");
+				for (KeyMap::iterator x = mKeyMap.begin(); x != mKeyMap.end(); ++x)
+				{
+					mLog.Infof(_T("  %s -> %s"), x->first.c_str(), x->second.c_str());
+				}
 			}
 		}
 		break;
@@ -825,6 +857,19 @@ bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<s
 		lDefaultValue = (lValue != lDefaultValue)? _T("\t// Default is ")+lDefaultValue+_T(".\n") : _T("\n");
 		pFile->WriteString(wstrutil::Encode(_T("#")+pPrefix+lVariable+_T(" ")+lValue+lDefaultValue));
 	}
+
+	pFile->WriteString<wchar_t>(L"\n");
+	for (AliasMap::iterator x = mAliasMap.begin(); x != mAliasMap.end(); ++x)
+	{
+		pFile->WriteString(wstrutil::Encode(_T("alias \"") + x->first + _T("\" \"") + x->second + _T("\"\n")));
+	}
+
+	pFile->WriteString<wchar_t>(L"\n");
+	for (KeyMap::iterator x = mKeyMap.begin(); x != mKeyMap.end(); ++x)
+	{
+		pFile->WriteString(wstrutil::Encode(_T("bind-key \"") + x->first + _T("\" \"") + x->second + _T("\"\n")));
+	}
+
 	pFile->WriteString<wchar_t>(L"\nset-stdout-log-level 1\n");
 	pFile->WriteString<wchar_t>(L"\n" USER_SECTION_MARK L" -- User config. Everything but variable values will be overwritten above this section!\n");
 	pFile->WriteString(pUserConfig);

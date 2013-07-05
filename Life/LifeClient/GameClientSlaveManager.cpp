@@ -620,6 +620,7 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	mOptions.Options::OptionsManager::UpdateInput(pKeyCode, false);
+	((ConsoleManager*)GetConsoleManager())->OnKey(UiLepra::InputManager::GetKeyName(pKeyCode));
 	return (false);
 }
 
