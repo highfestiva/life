@@ -63,7 +63,7 @@
 #define LAST_LEVEL			6
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
-#define STILL_FRAMES_UNTIL_CAM_PANS	2
+#define STILL_FRAMES_UNTIL_CAM_PANS	4
 
 
 
@@ -787,7 +787,7 @@ void HeliForceManager::TickUiInput()
 			// Control steering.
 			float lChildishness;
 			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
-			if (mFlyTime.GetTimeDiff() < 0.01f)
+			if (mHitGroundFrameCount >= -STILL_FRAMES_UNTIL_CAM_PANS)
 			{
 				lChildishness = 0;	// Don't help when not even started yet.
 			}
@@ -1169,6 +1169,13 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		}
 	}
 
+	// Don't do collisions if heli hasn't moved, such as in the case of standing on
+	// an elevator.
+	if (lIsAvatar && lIsLandingPad && mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
+	{
+		return;
+	}
+
 	if (lIsAvatar)
 	{
 		CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
@@ -1208,15 +1215,14 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	{
 		lForce *= pForce*pObject1->GetVelocity() * (lCollisionImpactFactor / 15000);
 	}
+	lForce *= 5 - 4*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
 	if (lForce > 15000)
 	{
-		float lForce2 = lForce;
-		lForce2 /= 4000;
-		lForce2 *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
-		lForce2 *= 5 - 4*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
+		lForce /= 4000;
+		lForce *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
 		if (Cure::Health::Get(pObject1) > 0 && !mZoomPlatform)
 		{
-			lForce2 *= lForce2;
+			float lForce2 = lForce*lForce;
 			lForce2 /= pObject1->GetMass();
 			Cure::Health::Add(pObject1, -lForce2, false);
 		}
@@ -1269,6 +1275,10 @@ float HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* 
 	{
 		lNewPositionalData->mPosition.mTransformation.SetPosition(*pStartPosition);
 	}
+	lNewPositionalData->mPosition.mAcceleration = Vector3DF();
+	lNewPositionalData->mPosition.mVelocity = Vector3DF();
+	lNewPositionalData->mPosition.mAngularAcceleration = Vector3DF();
+	lNewPositionalData->mPosition.mAngularVelocity = Vector3DF();
 	float lDistanceToGround = 0;
 	const float lStep = 0.1f;
 	for (int x = 0; x < 100; ++x)
@@ -1468,7 +1478,7 @@ void HeliForceManager::MoveCamera()
 			lTargetTransform.GetPosition() = GetLandingTriggerPosition(lLevel) + Vector3DF(0, 0, 10);
 			mPostZoomPlatformFrameCount = 0;
 		}
-		else if (mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
+		else if (mHitGroundFrameCount >= -STILL_FRAMES_UNTIL_CAM_PANS)
 		{
 			lTargetTransform.GetPosition().z += lHalfCamDistance;
 		}
