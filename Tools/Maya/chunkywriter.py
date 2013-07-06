@@ -284,7 +284,7 @@ class ChunkyWriter:
 			self._writefloat(f)
 		if options.options.verbose and not smooth:
 			print("Flat shading on %s." % name)
-		self._writeint(int(smooth))
+		self._writefloat(float(smooth))
 		self._writeint(len(textures))
 		for texture in textures:
 			self._writestr(os.path.basename(texture))

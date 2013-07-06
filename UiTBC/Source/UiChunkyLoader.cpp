@@ -498,7 +498,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			lMaterial.mSpecular.Set(lMaterialArray[6], lMaterialArray[7], lMaterialArray[8]);
 			lMaterial.mShininess = lMaterialArray[9];
 			lMaterial.mAlpha = lMaterialArray[10];
-			lMaterial.mSmooth = (lMaterialArray[11] != 0);
+			lMaterial.mSmooth = (lMaterialArray[11] > 0.5f);
 		}
 		if (lOk)
 		{
