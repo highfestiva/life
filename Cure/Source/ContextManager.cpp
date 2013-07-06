@@ -73,6 +73,7 @@ void ContextManager::AddObject(ContextObject* pObject)
 
 void ContextManager::RemoveObject(ContextObject* pObject)
 {
+	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
 	CancelPendingAlarmCallbacks(pObject);
 	DisableMicroTickCallback(pObject);
 	DisableTickCallback(pObject);
@@ -240,6 +241,9 @@ void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
 void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
 	deb_assert(pObject->GetInstanceId() != 0);
+	deb_assert(pObject->GetManager() == this);
+
+	ScopeLock lLock(&mAlarmMutex);
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
 	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
@@ -247,6 +251,9 @@ void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, floa
 
 void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
 {
+	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
+
+	ScopeLock lLock(&mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
@@ -263,6 +270,9 @@ void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int
 
 void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 {
+	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
+
+	ScopeLock lLock(&mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
@@ -282,12 +292,12 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 void ContextManager::MicroTick(float pTimeDelta)
 {
 	DispatchMicroTickCallbacks(pTimeDelta);
-	DispatchAlarmCallbacks();
 }
 
 void ContextManager::TickPhysics()
 {
 	DispatchTickCallbacks();
+	DispatchAlarmCallbacks();
 }
 
 void ContextManager::HandleIdledBodies()
@@ -396,12 +406,15 @@ void ContextManager::DispatchAlarmCallbacks()
 	// 1. Extract due alarms into list.
 	// 2. Callback alarms.
 
+	ScopeLock lLock(&mAlarmMutex);
+
 	std::list<Alarm> lCallbackList;
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
 		if (mGameManager->GetTimeManager()->GetCurrentPhysicsFrameDelta(x->mFrameTime) >= 0)
 		{
+			deb_assert(!x->mObject->GetClassId().empty());
 			lCallbackList.push_back(*x);
 			mAlarmCallbackObjectSet.erase(x++);
 		}

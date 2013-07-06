@@ -84,7 +84,7 @@ public:
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 	virtual bool DidFinishLevel();
-	virtual void NextLevel();
+	virtual str NextLevel();
 
 	virtual Level* GetLevel() const;
 	virtual int GetCurrentLevelNumber() const;
@@ -92,10 +92,10 @@ public:
 	virtual void SetCurrentLevelBestTime(bool pWorld, double pTime);
 	virtual Cure::ContextObject* GetAvatar() const;
 
+	Cure::RuntimeVariableScope* GetVariableScope() const;
+
 protected:
 	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
-
-	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	virtual bool Reset();
 	virtual bool InitializeUniverse();

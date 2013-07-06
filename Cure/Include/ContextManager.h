@@ -9,6 +9,7 @@
 #include <hash_map>
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/IdManager.h"
+#include "../../Lepra/Include/Thread.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "Cure.h"
 
@@ -149,6 +150,7 @@ private:
 	ContextObjectTable mAttributeSenderObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
 	ContextObjectTable mMicroTickCallbackObjectTable;
+	Lock mAlarmMutex;
 	AlarmSet mAlarmCallbackObjectSet;
 	IdSet mPostKillSet;
 

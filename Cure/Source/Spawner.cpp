@@ -95,6 +95,10 @@ void Spawner::OnCreate(float pCreateInterval, bool pHasRecreate)
 	{
 		GetManager()->AddAlarmCallback(this, 0, pCreateInterval, 0);
 	}
+	else if (pCreateInterval < 0 && (int)mChildArray.size() < GetSpawnCount())
+	{
+		GetManager()->AddAlarmCallback(this, 0, -pCreateInterval, 0);
+	}
 }
 
 void Spawner::OnDestroy(float pDestroyInterval)

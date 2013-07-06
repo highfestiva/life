@@ -1033,7 +1033,6 @@ void ResourceManager::StartLoad(Resource* pResource)
 void ResourceManager::InjectResourceLoop()
 {
 	HiResTimer lTimer(false);
-	ResourceMapList lInjectList;
 
 	// ---------------------------
 	// NOTE: this lock must be here, as the state otherwise changes outside of the lock state, which causes all sorts
@@ -1042,19 +1041,14 @@ void ResourceManager::InjectResourceLoop()
 	ScopeLock lLock(&mThreadLock);
 	// ---------------------------
 
-	if (mLoadedList.GetCount() > 0)
-	{
-		lInjectList = mLoadedList;
-		mLoadedList.RemoveAll();
-	}
-	for (ResourceMapList::Iterator x = lInjectList.First(); x != lInjectList.End();)
+	for (ResourceMapList::Iterator x = mLoadedList.First(); x != mLoadedList.End();)
 	{
 		Resource* lResource = x.GetObject();
 		if (InjectSingleResource(lResource))
 		{
 			ResourceMapList::Iterator y = x;
 			++y;
-			lInjectList.Remove(x);
+			mLoadedList.Remove(x);
 			x = y;
 		}
 		else
@@ -1064,14 +1058,6 @@ void ResourceManager::InjectResourceLoop()
 		if (lTimer.QueryTimeDiff() > 0.01)	// Time's up, have a go later.
 		{
 			break;
-		}
-	}
-	// Put the stuff back in the "to be injected list".
-	if (lInjectList.GetCount() > 0)
-	{
-		for (ResourceMapList::Iterator x = lInjectList.First(); x != lInjectList.End(); ++x)
-		{
-			mLoadedList.PushBack(x.GetKey(), x.GetObject());
 		}
 	}
 }

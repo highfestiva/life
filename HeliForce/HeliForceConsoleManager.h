@@ -30,6 +30,7 @@ protected:
 	{
 		COMMAND_SET_AVATAR = Parent::COMMAND_COUNT_LIFE_CLIENT,
 		COMMAND_NEXT_LEVEL,
+		COMMAND_DIE,
 	};
 
 	virtual unsigned GetCommandCount() const;

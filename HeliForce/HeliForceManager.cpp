@@ -599,7 +599,7 @@ bool HeliForceManager::DidFinishLevel()
 	return false;
 }
 
-void HeliForceManager::NextLevel()
+str HeliForceManager::NextLevel()
 {
 	if (GetContext()->GetObject(mAvatarId))
 	{
@@ -613,7 +613,9 @@ void HeliForceManager::NextLevel()
 		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
 		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 		mLevel->StartLoading();
+		return lNewLevelName;
 	}
+	return _T("");
 }
 
 
@@ -708,11 +710,13 @@ void HeliForceManager::CreateChopper(const str& pClassId)
 	mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
 	mZoomPlatform = false;
 
-	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
-	deb_assert(lSpawner);
 	Cure::ContextObject* lAvatar = Parent::CreateContextObject(pClassId, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
+	if (lSpawner)
+	{
+		lSpawner->PlaceObject(lAvatar);
+	}
 	lAvatar->QuerySetChildishness(1);
-	lSpawner->PlaceObject(lAvatar);
 	mAvatarId = lAvatar->GetInstanceId();
 	lAvatar->StartLoading();
 	mAutopilot->Reset();
@@ -1105,6 +1109,11 @@ void HeliForceManager::OnLevelLoadCompleted()
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		UpdateCameraPosition(true);
 	}
+	if (mOldLevel)
+	{
+		GetContext()->DeleteObject(mOldLevel->GetInstanceId());
+		mOldLevel = 0;
+	}
 	if (mLevel->GetBackgroundName().empty())
 	{
 		mRenderHemisphere = false;
@@ -1121,6 +1130,7 @@ void HeliForceManager::OnLevelLoadCompleted()
 	}
 
 	GetLandingTriggerPosition(mLevel);	// Update shadow landing trigger position.
+	mAutopilot->Reset();
 	mZoomPlatform = false;
 }
 
@@ -1152,6 +1162,7 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 
 	// Check if we're colliding with a smooth landing pad.
 	bool lIsLandingPad = false;
+	bool lIsLandingOnElevator = false;
 	float lCollisionImpactFactor = 3;
 	if (lIsAvatar && pObject2 == mLevel)
 	{
@@ -1159,19 +1170,26 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 		std::vector<int>::const_iterator x = lTag->mBodyIndexList.begin();
 		for (; x != lTag->mBodyIndexList.end(); ++x)
 		{
-			if (pObject2->GetPhysics()->GetBoneGeometry(*x)->GetBodyId() == pBody2Id)
+			TBC::ChunkyBoneGeometry* lBone = pObject2->GetPhysics()->GetBoneGeometry(*x);
+			if (lBone->GetBodyId() == pBody2Id)
 			{
 				lIsLandingPad = true;
 				lCollisionImpactFactor = 1;
 				mFlyTime.Stop();
+				if (lBone->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+				{
+					lIsLandingOnElevator = true;
+				}
 				break;
 			}
 		}
 	}
 
+	const float lOrientationFactor = (pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));
+
 	// Don't do collisions if heli hasn't moved, such as in the case of standing on
 	// an elevator.
-	if (lIsAvatar && lIsLandingPad && mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS)
+	if (lIsLandingOnElevator && lIsAvatar && lIsLandingPad && mHitGroundFrameCount >= STILL_FRAMES_UNTIL_CAM_PANS && lOrientationFactor > 0.95f)
 	{
 		return;
 	}
@@ -1213,12 +1231,12 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 	// Take velocity into calculation if we're landing on a helipad (not using our rotors).
 	if (lIsLandingPad && !lIsRotor)
 	{
-		lForce *= pForce*pObject1->GetVelocity() * (lCollisionImpactFactor / 15000);
+		lForce *= pForce*pObject1->GetVelocity() * (lCollisionImpactFactor / -15000);
 	}
-	lForce *= 5 - 4*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));	// Sideways orientation means chopper not aligned.
+	lForce *= 5 - 4*lOrientationFactor;	// Sideways orientation means chopper not aligned.
 	if (lForce > 15000)
 	{
-		lForce /= 4000;
+		lForce /= 30000;
 		lForce *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
 		if (Cure::Health::Get(pObject1) > 0 && !mZoomPlatform)
 		{
@@ -1493,7 +1511,9 @@ void HeliForceManager::MoveCamera()
 		else
 		{
 			Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
-			mCameraTransform.GetPosition() += lDelta;
+			mCameraTransform.GetPosition().x += lDelta.x;
+			mCameraTransform.GetPosition().z += lDelta.z;
+			mCameraTransform.GetPosition().y += Math::SmoothClamp(lDelta.y, -1.3f, +2.0f, 0.2f);
 		}
 
 		// Angle.

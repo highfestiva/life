@@ -96,7 +96,7 @@ void Elevator::OnTick()
 		{
 			mStopTimer.ClearTimeDiff();
 			const bool lStopEngines = !lIsNonStop;
-			if (mElevatorHasBeenMoving || lIsNonStop)
+			if (mElevatorHasBeenMoving)
 			{
 				log_adebug("TRIGGER - elevator has stopped.");
 				HaltActiveEngines(lStopEngines);

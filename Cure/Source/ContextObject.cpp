@@ -57,6 +57,8 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 
 ContextObject::~ContextObject()
 {
+	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
+
 	log_volatile(mLog.Tracef(_T("Destructing context object %s."), mClassId.c_str()));
 
 	DeleteNetworkOutputGhost();

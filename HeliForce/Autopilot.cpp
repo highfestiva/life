@@ -5,7 +5,7 @@
 
 
 #include "Autopilot.h"
-#include "../Cure/Include/ContextPath.h"
+#include "../Cure/Include/Health.h"
 #include "HeliForceManager.h"
 #include "Level.h"
 
@@ -19,19 +19,18 @@ namespace HeliForce
 
 
 
-typedef Cure::ContextPath::SplinePath Spline;
-
-
-
 Autopilot::Autopilot(HeliForceManager* pGame):
 	Parent(pGame->GetResourceManager(), _T("Autopilot")),
 	mGame(pGame),
-	mClosestPathDistance(5.0f)
+	mClosestPathDistance(5.0f),
+	mPath(0)
 {
 }
 
 Autopilot::~Autopilot()
 {
+	delete mPath;
+	mPath = 0;
 }
 
 
@@ -43,8 +42,10 @@ void Autopilot::Reset()
 	{
 		return;
 	}
-	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(_T("player_path"));
-	lPath->GotoAbsoluteTime(0);
+	delete mPath;
+	mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath(_T("player_path")));
+	mPath->StartInterpolation(0);
+	mStalledRotorTimer.Stop();
 }
 
 Vector3DF Autopilot::GetSteering()
@@ -57,10 +58,11 @@ Vector3DF Autopilot::GetSteering()
 	Cure::ContextObject* lChopper = mGame->GetAvatar();
 	if (!lChopper || !lChopper->IsLoaded() || lChopper->GetPhysics()->GetEngineCount() < 3)
 	{
-		Spline* lPath = lLevel->QueryPath()->GetPath(_T("player_path"));
-		lPath->GotoAbsoluteTime(0);
+		mPath->GotoAbsoluteTime(0);
 		return Vector3DF();
 	}
+
+	CheckStalledRotor(lChopper);
 
 	mLastAvatarPosition = lChopper->GetPosition();
 	const Vector3DF lVelocity = lChopper->GetVelocity();
@@ -69,19 +71,26 @@ Vector3DF Autopilot::GetSteering()
 
 	Vector3DF lClosestPoint;
 	mClosestPathDistance = GetClosestPathDistance(lTowards, lClosestPoint);
-	Spline* lPath = lLevel->QueryPath()->GetPath(_T("player_path"));
-	Vector3DF lAim = lPath->GetValue() - lTowards;
+	Vector3DF lAim = lClosestPoint - lTowards;
 	Vector3DF lAimNear(0, 0, ::std::max(lAim.z, 0.0f));
-	const float lSpeedLimit = (lPath->GetDistanceLeft() < 20.0f) ? 4.0f : 60.0f;
+	const float lSpeedLimit = (mPath->GetDistanceLeft() < 20.0f) ? 4.0f : 60.0f;
 	if (lSpeedLimit < 30.0f && (-lVelocity.x<0) == (lAim.x<0))
 	{
 		lAimNear.x = lAim.x;
 	}
 	lAim = Math::Lerp(lAim, lAimNear-lVelocity, lVelocity.GetLength()/lSpeedLimit);
-	lAim.x += -30 * lUp.x;
+
+	// Brake before upcoming drops.
+	const float lTime = mPath->GetCurrentInterpolationTime();
+	GetClosestPathDistance(mLastAvatarPosition + lVelocity*AHEAD_TIME*20, lClosestPoint);
+	const Vector3DF lUpcomingSlope = mPath->GetSlope().GetNormalized();
+	mPath->GotoAbsoluteTime(lTime);
+	lAim.x += Math::Lerp(-15.0f, -50.0f, ::fabs(lUpcomingSlope.z)) * lUp.x;
+	// End braking before drops.
+
 	lAim.x = Math::Clamp(lAim.x, -0.7f, +0.7f);
 	lAim.z = Math::Clamp(lAim.z, -0.0f, +1.0f);
-	lAim.z = Math::Lerp(0.05f, 0.6f, lAim.z);
+	lAim.z = Math::Lerp(0.05f, 0.7f, lAim.z);
 	return lAim;
 }
 
@@ -96,25 +105,47 @@ Vector3DF Autopilot::GetLastAvatarPosition() const
 }
 
 
+void Autopilot::CheckStalledRotor(Cure::ContextObject* pChopper)
+{
+	const int lRotorIndex = pChopper->GetPhysics()->GetChildIndex(0, 0);
+	TBC::ChunkyBoneGeometry* lBone = pChopper->GetPhysics()->GetBoneGeometry(lRotorIndex);
+	Vector3DF lRotorSpeed;
+	mGame->GetPhysicsManager()->GetBodyAngularVelocity(lBone->GetBodyId(), lRotorSpeed);
+	if (lRotorSpeed.GetLengthSquared() < 20.0f)
+	{
+		mStalledRotorTimer.TryStart();
+		if (mStalledRotorTimer.QueryTimeDiff() > 2.0f)
+		{
+			Cure::Health::Add(pChopper, -0.01f, true);
+		}
+	}
+	else
+	{
+		mStalledRotorTimer.Stop();
+	}
+}
 
 float Autopilot::GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint) const
 {
-	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(_T("player_path"));
-	const float lCurrentTime = lPath->GetCurrentInterpolationTime();
+	const float lCurrentTime = mPath->GetCurrentInterpolationTime();
 
 	float lNearestDistance;
 	const float lSearchStepLength = 0.06f;
 	const int lSearchSteps = 3;
-	lPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, pClosestPoint, lSearchSteps);
+	mPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, pClosestPoint, lSearchSteps);
 
 	{
 		const float lWantedDistance = AIM_DISTANCE;
-		float lDeltaTime = lWantedDistance * lPath->GetDistanceNormal();
-		if (lCurrentTime+lDeltaTime < 0)
+		float lDeltaTime = lWantedDistance * mPath->GetDistanceNormal();
+		if (lCurrentTime+lDeltaTime < 0.965f)	// Only move forward if we stay within the curve; otherwise we would loop.
 		{
-			lDeltaTime = -lCurrentTime;
+			if (lCurrentTime+lDeltaTime < 0)
+			{
+				lDeltaTime = -lCurrentTime;
+			}
+			mPath->StepInterpolation(lDeltaTime);
+			pClosestPoint = mPath->GetValue();
 		}
-		lPath->StepInterpolation(lDeltaTime);
 	}
 
 	return lNearestDistance;

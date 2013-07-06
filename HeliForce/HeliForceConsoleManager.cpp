@@ -24,6 +24,7 @@ const HeliForceConsoleManager::CommandPair HeliForceConsoleManager::mCommandIdLi
 {
 	{_T("set-avatar"), COMMAND_SET_AVATAR},
 	{_T("next-level"), COMMAND_NEXT_LEVEL},
+	{_T("die"), COMMAND_DIE},
 };
 
 
@@ -90,7 +91,16 @@ int HeliForceConsoleManager::OnCommand(const str& pCommand, const strutil::strve
 			case COMMAND_NEXT_LEVEL:
 			{
 				GetGameManager()->GetTickLock()->Acquire();
-				((HeliForceManager*)GetGameManager())->NextLevel();
+				const str lNewLevelName = ((HeliForceManager*)GetGameManager())->NextLevel();
+				CURE_RTVAR_SET(((HeliForceManager*)GetGameManager())->GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
+				GetGameManager()->GetTickLock()->Release();
+			}
+			// TRICKY: fall through.
+			case COMMAND_DIE:
+			{
+				GetGameManager()->GetTickLock()->Acquire();
+				const Cure::GameObjectId lAvatarId = ((HeliForceManager*)GetGameManager())->GetAvatarInstanceId();
+				GetGameManager()->GetContext()->PostKillObject(lAvatarId);
 				GetGameManager()->GetTickLock()->Release();
 			}
 			break;

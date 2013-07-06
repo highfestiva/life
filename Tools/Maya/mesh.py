@@ -59,6 +59,13 @@ def splitverts_node(node, verbose=False):
 	uvs = node.get_fixed_attribute("rguv", optional=True)
 	if not ns:
 		return
+
+	for parent in node.getparents():
+		nosplit = parent.get_fixed_attribute("nosplit", optional=True)
+		if nosplit:
+			if verbose: print("Not splitting mesh", node)
+			return
+
 	original_vsc = len(vs)
 	original_nsc = len(ns)
 	# print(node.getName()+":")

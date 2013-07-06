@@ -51,7 +51,7 @@ void AirBalloonPilot::OnTick()
 		mManager->PostKillObject(GetInstanceId());
 		return;
 	}
-	if (!lBalloon->IsLoaded() || lBalloon->GetPhysics()->GetEngineCount() < 3)
+	if (!lBalloon->IsLoaded() || lBalloon->GetPhysics()->GetEngineCount() < 1)
 	{
 		return;
 	}
