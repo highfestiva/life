@@ -878,6 +878,20 @@ bool HeliForceManager::UpdateMassObjects(const Vector3DF& pPosition)
 {
 	bool lOk = true;
 
+	if (mLevel && mLevel->IsLoaded() && mMassObjectArray.empty())
+	{
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		if (lOk)
+		{
+			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
+			mMassObjectArray.push_back(lMassObjectId);
+			Cure::ContextObject* lFlowers = new Life::MassObject(GetResourceManager(), _T("flower"), mUiManager, lTerrainBodyId, 600, 170);
+			AddContextObject(lFlowers, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
+			lFlowers->StartLoading();
+			mLevel->AddChild(lFlowers);
+		}
+	}
+
 	ObjectArray::const_iterator x = mMassObjectArray.begin();
 	for (; x != mMassObjectArray.end(); ++x)
 	{
@@ -1100,6 +1114,7 @@ void HeliForceManager::OnLevelLoadCompleted()
 		const float lCamAboveHeli = mCameraTransform.GetPosition().z - lHeliPosition.z;
 		const Vector3DF lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lLandingPosition;
 
+		mMassObjectArray.clear();
 		GetContext()->DeleteObject(mOldLevel->GetInstanceId());
 		mOldLevel = 0;
 
@@ -1113,6 +1128,7 @@ void HeliForceManager::OnLevelLoadCompleted()
 	}
 	if (mOldLevel)
 	{
+		mMassObjectArray.clear();
 		GetContext()->DeleteObject(mOldLevel->GetInstanceId());
 		mOldLevel = 0;
 	}
@@ -1546,7 +1562,8 @@ void HeliForceManager::MoveCamera()
 		mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(1,0,1), (float)CURE_RTVAR_SLOW_TRYGET(GetVariableScope(), "cam_ang", 0.0));
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);*/
 
-		UpdateMassObjects(mCameraTransform.GetPosition());
+		lAvatarPosition.y += 5.0f;	// Tip towards mass objects on the far end.
+		UpdateMassObjects(lAvatarPosition);
 	}
 }
 
