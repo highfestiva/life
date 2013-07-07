@@ -342,6 +342,7 @@ Cure::ResourceLoadState GeometryResource::PostProcess()
 		case 1:		lShadows = R::CAST_SHADOWS;	break;
 		case -1:	lShadows = R::FORCE_NO_SHADOWS;	break;
 	}
+	log_volatile(mLog.Debugf(_T("%s has casts shadows = %i."), GetName().c_str(), mCastsShadows));
 	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(GetRamData(), R::MAT_NULL, lShadows);
 	deb_assert(mOptimizedData != R::INVALID_GEOMETRY);
 	Cure::ResourceLoadState lLoadState;
@@ -448,7 +449,7 @@ void GeometryReferenceResource::Suspend()
 
 void GeometryReferenceResource::OnLoadClass(ClassResource* pResource)
 {
-	mCastsShadows = ((GeometryResource*)pResource->GetConstResource())->GetCastsShadows();
+	mCastsShadows = ((const GeometryResource*)pResource->GetConstResource())->GetCastsShadows();
 }
 
 LOG_CLASS_DEFINE(UI_GFX_3D, GeometryReferenceResource);

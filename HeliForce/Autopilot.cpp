@@ -94,6 +94,25 @@ Vector3DF Autopilot::GetSteering()
 	return lAim;
 }
 
+void Autopilot::AttemptCloserPathDistance()
+{
+	float lStartTime = mPath->GetCurrentInterpolationTime();
+	float lShortestTime = lStartTime;
+	float lShortestDistance = mPath->GetValue().GetDistanceSquared(mLastAvatarPosition);
+	for (float x = 0; x < 1; x += 0.05f)
+	{
+		const float lTime = fmod(lStartTime + x, 1.0f);
+		mPath->GotoAbsoluteTime(lTime);
+		const float lDistance = mPath->GetValue().GetDistanceSquared(mLastAvatarPosition);
+		if (lDistance < lShortestDistance)
+		{
+			lShortestTime = lTime;
+			lShortestDistance = lDistance;
+		}
+	}
+	mPath->GotoAbsoluteTime(lShortestTime);
+}
+
 float Autopilot::GetClosestPathDistance() const
 {
 	return mClosestPathDistance;

@@ -712,6 +712,8 @@ class MeshWriter(ChunkyWriter):
 				return []
 			elif casts_shadows:
 				return [(CHUNK_MESH_CASTS_SHADOWS, +1)]
+			if options.options.verbose:
+				print("%s will not cast shadows!" % node.getName())
 			return [(CHUNK_MESH_CASTS_SHADOWS, -1)]
 		#print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
 		self._addfeat("mesh:meshes", 1)

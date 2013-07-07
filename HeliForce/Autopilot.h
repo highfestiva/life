@@ -29,6 +29,7 @@ public:
 	virtual ~Autopilot();
 	void Reset();
 	Vector3DF GetSteering();
+	void AttemptCloserPathDistance();
 	float GetClosestPathDistance() const;
 	Vector3DF GetLastAvatarPosition() const;
 

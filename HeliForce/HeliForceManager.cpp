@@ -388,6 +388,7 @@ bool HeliForceManager::Paint()
 				else
 				{
 					mDirectionImageTimer.Start();
+					mAutopilot->AttemptCloserPathDistance();
 				}
 			}
 			const float lPathDistance = mAutopilot->GetClosestPathDistance();
@@ -403,18 +404,18 @@ bool HeliForceManager::Paint()
 					const float lTouchSideScale = 1.28f;	// Inches.
 					const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
 					const float lWantedSize = mUiManager->GetCanvas()->GetWidth() * lTouchScale * 2;
-					float lSize = (float)mWrongDirectionImage->GetRamData()->GetWidth();
+					const float lSize = lWantedSize;
+					/*const float lSize = (float)mWrongDirectionImage->GetRamData()->GetWidth();
 					while (lWantedSize >= lSize*2) lSize *= 2;
-					while (lWantedSize <= lSize/2) lSize /= 2;
+					while (lWantedSize <= lSize/2) lSize /= 2;*/
 					// Find out the screen coordinate of the chopper, so we can place our arrow around that.
 					const Vector3DF lCamDirection = mCameraTransform.GetOrientation() * Vector3DF(0,1,0);
 					const Vector3DF lCamLookAtPointInChopperPlane = lPos3d + lCamDirection * -lPos3d.y;
 					float lFoV;
 					CURE_RTVAR_GET(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
 					lFoV /= 45.0f;
-					const Vector3DF lDelta = (mAutopilot->GetLastAvatarPosition() - lPos3d) / (-lPos3d.y * lFoV);
 					const float lDistance = mUiManager->GetCanvas()->GetWidth() / 6.0f;
-					const float x = mUiManager->GetCanvas()->GetWidth() /2.0f - lDistance*::sin(a);
+					const float x = mUiManager->GetCanvas()->GetWidth() /2.0f - 2*lDistance*::sin(a);
 					const float y = mUiManager->GetCanvas()->GetHeight()/2.0f - lDistance*::cos(a);
 					DrawImage(mWrongDirectionImage->GetData(), x, y, lSize, lSize, a);
 				}
@@ -580,7 +581,7 @@ void HeliForceManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextOb
 
 bool HeliForceManager::DidFinishLevel()
 {
-	mLog.AHeadline("Level done!");
+	mLog.Headlinef(_T("Level %s done!"), mLevel->GetClassId().c_str());
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
 	{
@@ -1095,13 +1096,14 @@ void HeliForceManager::OnLevelLoadCompleted()
 		const Vector3DF lLandingPosition = GetLandingTriggerPosition(mOldLevel);
 		const Vector3DF lHeliPosition = lAvatar->GetPosition();
 		const Vector3DF lHeliDelta = lHeliPosition - lLandingPosition;
-		const Vector3DF lNewPosition = lSpawner->GetSpawnPoint().GetPosition() + lHeliDelta;
+		Vector3DF lNewPosition = lSpawner->GetSpawnPoint().GetPosition() + lHeliDelta;
 		const float lCamAboveHeli = mCameraTransform.GetPosition().z - lHeliPosition.z;
 		const Vector3DF lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lLandingPosition;
 
 		GetContext()->DeleteObject(mOldLevel->GetInstanceId());
 		mOldLevel = 0;
 
+		lNewPosition.z += 1.0f;
 		EaseDown(lAvatar, &lNewPosition);
 
 		mCameraTransform.GetPosition() += lCamDelta;
@@ -1512,7 +1514,8 @@ void HeliForceManager::MoveCamera()
 		{
 			Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
 			mCameraTransform.GetPosition().x += lDelta.x;
-			mCameraTransform.GetPosition().z += lDelta.z;
+			//mCameraTransform.GetPosition().z += lDelta.z;
+			mCameraTransform.GetPosition().z += Math::SmoothClamp(lDelta.z, -2.0f, +2.0f, 0.2f);
 			mCameraTransform.GetPosition().y += Math::SmoothClamp(lDelta.y, -1.3f, +2.0f, 0.2f);
 		}
 
