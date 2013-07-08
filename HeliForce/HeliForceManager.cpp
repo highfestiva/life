@@ -876,19 +876,20 @@ void HeliForceManager::TickUiUpdate()
 
 bool HeliForceManager::UpdateMassObjects(const Vector3DF& pPosition)
 {
-	bool lOk = true;
-
 	if (mLevel && mLevel->IsLoaded() && mMassObjectArray.empty())
 	{
-		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-		if (lOk)
+		const Level::MassObjectList lMassObjects = mLevel->GetMassObjects();
+		for (Level::MassObjectList::const_iterator x = lMassObjects.begin(); x != lMassObjects.end(); ++x)
 		{
+			const Level::MassObjectInfo& lInfo = *x;
+			const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(lInfo.mGroundBodyIndex)->GetBodyId();
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
 			mMassObjectArray.push_back(lMassObjectId);
-			Cure::ContextObject* lFlowers = new Life::MassObject(GetResourceManager(), _T("flower"), mUiManager, lTerrainBodyId, 600, 170);
-			AddContextObject(lFlowers, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
-			lFlowers->StartLoading();
-			mLevel->AddChild(lFlowers);
+			Life::MassObject* lMassObject = new Life::MassObject(GetResourceManager(), lInfo.mClassId, mUiManager, lTerrainBodyId, lInfo.mCount, 120);
+			lMassObject->SetSeed((unsigned)HashString(lInfo.mClassId.c_str()));
+			AddContextObject(lMassObject, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
+			lMassObject->StartLoading();
+			mLevel->AddChild(lMassObject);
 		}
 	}
 
@@ -899,7 +900,8 @@ bool HeliForceManager::UpdateMassObjects(const Vector3DF& pPosition)
 		deb_assert(lObject);
 		lObject->SetRootPosition(pPosition);
 	}
-	return lOk;
+
+	return true;
 }
 
 void HeliForceManager::SetLocalRender(bool pRender)
@@ -1562,7 +1564,7 @@ void HeliForceManager::MoveCamera()
 		mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(1,0,1), (float)CURE_RTVAR_SLOW_TRYGET(GetVariableScope(), "cam_ang", 0.0));
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);*/
 
-		lAvatarPosition.y += 5.0f;	// Tip towards mass objects on the far end.
+		lAvatarPosition.y -= 5.0f;	// Move closer to edge to avoid jitter.
 		UpdateMassObjects(lAvatarPosition);
 	}
 }

@@ -101,10 +101,6 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const Vector3DF& pRayPosition, c
 		return 0;
 	}
 
-	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
-	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
-		pRayDirection.x, pRayDirection.y, pRayDirection.z);
-
 	ObjectTable::iterator x = mObjectTable.find((Object*)pBody);
 	if (x == mObjectTable.end())
 	{
@@ -113,18 +109,28 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const Vector3DF& pRayPosition, c
 	}
 	const Object* lObject = *x;
 
+	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
+	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
+		pRayDirection.x, pRayDirection.y, pRayDirection.z);
+
 	dContactGeom lContact[8];
-	const int lMaxCount = std::min((int)LEPRA_ARRAY_COUNT(lContact), pMaxCollisionCount);
+	const int lMaxCount = std::min((int)LEPRA_ARRAY_COUNT(lContact), pMaxCollisionCount*2);
 	const int lCollisionCount = ::dCollide(lObject->mGeomID, lRayGeometryId, lMaxCount, &lContact[0], sizeof(lContact[0]));
 
 	::dGeomDestroy(lRayGeometryId);
 
+	int lFoundCollisionPoints = 0;
 	for (int x = 0; x < lCollisionCount; ++x)
 	{
-		pCollisionPoints[x].Set(lContact[x].pos[0], lContact[x].pos[1], lContact[x].pos[2]);
+		// Check that we've found a surface turned towards the given direction.
+		const Vector3DF lNormal(lContact[x].normal[0], lContact[x].normal[1], lContact[x].normal[2]);
+		if (lNormal*pRayDirection > 0)
+		{
+			pCollisionPoints[lFoundCollisionPoints++].Set(lContact[x].pos[0], lContact[x].pos[1], lContact[x].pos[2]);
+		}
 	}
 
-	return lCollisionCount;
+	return lFoundCollisionPoints;
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const TransformationF& pTransform,

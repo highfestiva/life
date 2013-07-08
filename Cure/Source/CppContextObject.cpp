@@ -149,8 +149,8 @@ const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int 
 	{
 		const TBC::ChunkyClass::Tag& lTag = lClass->GetTag(x);
 		if (lTag.mTagName == pTagType &&
-			lTag.mFloatValueList.size() == (size_t)pFloatValueCount &&
-			lTag.mStringValueList.size() == (size_t)pStringValueCount &&
+			(pFloatValueCount < 0 || lTag.mFloatValueList.size() == (size_t)pFloatValueCount) &&
+			(pStringValueCount < 0 || lTag.mStringValueList.size() == (size_t)pStringValueCount) &&
 			(!pTriggerIndexArray || (lTag.mBodyIndexList.size() == pTriggerIndexArray->size() &&
 				std::equal(lTag.mBodyIndexList.begin(), lTag.mBodyIndexList.end(), pTriggerIndexArray->begin()))))
 		{

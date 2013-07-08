@@ -25,6 +25,34 @@ Level::~Level()
 	mGravelEmitter = 0;
 }
 
+void Level::OnLoaded()
+{
+	Parent::OnLoaded();
+
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("mass_objects"), -1, -1);
+	if (lTag)
+	{
+		deb_assert(lTag->mStringValueList.size() == lTag->mFloatValueList.size());
+		deb_assert(lTag->mStringValueList.size() == lTag->mBodyIndexList.size());
+		const size_t lCount = lTag->mBodyIndexList.size();
+		for (size_t x = 0; x < lCount; ++x)
+		{
+			MassObjectInfo lInfo;
+			lInfo.mClassId = lTag->mStringValueList[x];
+			lInfo.mGroundBodyIndex = lTag->mBodyIndexList[x];
+			lInfo.mCount = (int)lTag->mFloatValueList[x];
+			mMassObjects.push_back(lInfo);
+		}
+	}
+}
+
+
+
+Level::MassObjectList Level::GetMassObjects() const
+{
+	return mMassObjects;
+}
+
 
 
 void Level::OnForceApplied(Cure::ContextObject* pOtherObject,

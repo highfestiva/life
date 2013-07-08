@@ -32,6 +32,7 @@ public:
 		float pSideLength);
 	virtual ~MassObject();
 
+	void SetSeed(unsigned pSeed);
 	void SetRender(bool pRender);
 	virtual void UiMove();
 
@@ -74,6 +75,7 @@ private:
 	int mSquareSideLength;
 	int mMiddleSquareX;
 	int mMiddleSquareY;
+	unsigned mSeed;
 
 	LOG_CLASS_DECLARE();
 };

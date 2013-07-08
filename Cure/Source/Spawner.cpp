@@ -110,9 +110,12 @@ void Spawner::OnDestroy(float pDestroyInterval)
 
 	if (!mChildArray.empty())
 	{
-		const ContextObject* lObject = mChildArray.front();
-		mChildArray.erase(mChildArray.begin());
-		GetManager()->DeleteObject(lObject->GetInstanceId());
+		if (pDestroyInterval > 0 || (int)mChildArray.size() == GetSpawnCount())
+		{
+			const ContextObject* lObject = mChildArray.front();
+			mChildArray.erase(mChildArray.begin());
+			GetManager()->DeleteObject(lObject->GetInstanceId());
+		}
 	}
 	GetManager()->AddAlarmCallback(this, 1, pDestroyInterval, 0);
 }

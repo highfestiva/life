@@ -29,7 +29,8 @@ MassObject::MassObject(Cure::ResourceManager* pResourceManager, const str& pClas
 	mVisibleAddTerm(0.1f),
 	mSquareSideLength((int)(pSideLength/SQUARE_SIDE)),
 	mMiddleSquareX(0x80000000),
-	mMiddleSquareY(0x80000000)
+	mMiddleSquareY(0x80000000),
+	mSeed(0)
 {
 	deb_assert(mSquareInstanceCount > 0);
 	::memset(mSquareArray, 0, sizeof(mSquareArray));
@@ -48,6 +49,11 @@ MassObject::~MassObject()
 }
 
 
+
+void MassObject::SetSeed(unsigned pSeed)
+{
+	mSeed = pSeed;
+}
 
 void MassObject::SetRender(bool pRender)
 {
@@ -154,7 +160,7 @@ void MassObject::CreateSquare(size_t pX, size_t pY)
 	deb_assert(pX < SQUARE_SIDE && pY < SQUARE_SIDE);
 	deb_assert(!mSquareArray[pY*SQUARE_SIDE+pX]);
 
-	uint32 lSeed = (uint32)((pY<<16)+pX);
+	uint32 lSeed = mSeed + (uint32)((pY<<16)+pX);
 	std::vector<TransformationF> lDisplacementArray;
 	for (size_t x = 0; x < mSquareInstanceCount; ++x)
 	{
@@ -183,12 +189,18 @@ bool MassObject::GetObjectPlacement(Vector3DF& pPosition) const
 	QuaternionF lOrientation;
 	lOrientation.RotateAroundOwnX(PIF);
 	TransformationF lTransform(lOrientation, pPosition);
-	Vector3DF lCollisionPosition;
+	Vector3DF lCollisionPosition[3];
 	const int lCollisions = GetManager()->GetGameManager()->GetPhysicsManager()->QueryRayCollisionAgainst(
-		lTransform, lRayLength, mTerrainBodyId, &lCollisionPosition, 1);
-	if (lCollisions == 1)
+		lTransform, lRayLength, mTerrainBodyId, lCollisionPosition, 3);
+	if (lCollisions >= 1)
 	{
-		pPosition.z = lCollisionPosition.z;
+		unsigned lIndex = 0;
+		if (lCollisions > 1)
+		{
+			unsigned lSeed = ((int)pPosition.y << 10) + (int)pPosition.x;
+			lIndex = Random::GetRandomNumber(lSeed) % lCollisions;
+		}
+		pPosition.z = lCollisionPosition[lIndex].z;
 		return true;
 	}
 	return false;
