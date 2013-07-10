@@ -640,7 +640,7 @@ void PushManager::TickUiInput()
 			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
 			assert(lLeftPowerFwdRev >=  -3 && lLeftPowerFwdRev <=  +3);
 			assert(lLeftPowerLR     >=  -3 &&     lLeftPowerLR <=  +3);
-			assert(lRightPowerLR    >= -12 &&    lRightPowerLR <= +12);
+			assert(lRightPowerLR    >= -18 &&    lRightPowerLR <= +18);
 
 			// Mouse controls yaw angle.
 			const float lAngleDelta = S(YAW_ANGLE) * 0.05f;
