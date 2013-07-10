@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -27,7 +27,7 @@ template<class _Data> void SequencialPerformanceData<_Data>::Set(double pMinimum
 
 template<class _Data> void SequencialPerformanceData<_Data>::Append(double pTime, double pStartTime, _Data pValue)
 {
-	assert (pTime >= 0);
+	deb_assert (pTime >= 0);
 	if (pTime > 0)
 	{
 		double lPeriodValue = (pValue-mPreviousValue)/pTime;
@@ -38,11 +38,13 @@ template<class _Data> void SequencialPerformanceData<_Data>::Append(double pTime
 
 
 
-template<class _T> BasicScopeTimer<_T>::BasicScopeTimer()
+template<class _T> BasicScopeTimer<_T>::BasicScopeTimer():
+	mTime(false)
 {
 }
 
 template<class _T> BasicScopeTimer<_T>::BasicScopeTimer(_T* pData):
+	mTime(false),
 	mData(pData)
 {
 }

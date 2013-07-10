@@ -344,8 +344,12 @@ def main():
         ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball900.vcproj", "UiTBC"],
         ["KillCutie",       "gfx_bin",    "KillCutie/KillCutie900.vcproj", "UiCure"],
         ["Push",            "gfx_bin",    "Push/Push900.vcproj", "LifeClient"],
+        ["HoverTank",       "gfx_bin",    "HoverTank/HoverTank900.vcproj", "LifeClient"],
+        ["HeliForce",       "gfx_bin",    "HeliForce/HeliForce900.vcproj", "LifeClient"],
         ["PushServer",      "bin",        "Push/PushServer/PushServer900.vcproj", "LifeServer"],
+        ["HoverTankServer", "bin",        "HoverTank/HoverTankServer/HoverTankServer900.vcproj", "LifeServer"],
         ["PushMaster",      "bin",        "Push/PushMaster/PushMaster900.vcproj", "LifeMaster"],
+        ["HoverTankMaster", "bin",        "HoverTank/HoverTankMaster/HoverTankMaster900.vcproj", "LifeMaster"],
         ["TireFire",        "gfx_bin",    "TireFire/TireFire900.vcproj", "UiCure"],
         ["Bounce",          "gfx_bin",    "Bounce/Bounce900.vcproj", "UiCure"],
         ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]

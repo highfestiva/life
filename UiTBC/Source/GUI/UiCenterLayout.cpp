@@ -1,7 +1,7 @@
 /*
 	Class:  CenterLayout
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 #include "../../Include/GUI/UiCenterLayout.h"
@@ -32,7 +32,7 @@ void CenterLayout::Add(Component* pComponent, int /*pParam1*/, int /*pParam2*/)
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
 }
 

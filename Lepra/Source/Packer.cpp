@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 // TODO: check if IEEE-doubles are stored in network byte order by the FPU.
 //       If not - add ntohll() on each long long (__int64).
@@ -8,7 +8,7 @@
 
 
 #include "../Include/Packer.h"
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include "../Include/Endian.h"
 
 
@@ -241,7 +241,7 @@ int PackerUnicodeString::UnpackRaw(wstr* pDestination, const uint8* pSource, int
 			}
 		}
 	}
-	assert(lSize > 0);
+	deb_assert(lSize > 0);
 	return (lSize);
 }
 

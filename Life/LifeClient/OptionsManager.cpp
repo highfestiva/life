@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "OptionsManager.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Math.h"
@@ -157,7 +157,7 @@ void OptionsManager::SetValuePointers(const KeyValue pEntries[], size_t pEntryCo
 
 void OptionsManager::operator=(const OptionsManager&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

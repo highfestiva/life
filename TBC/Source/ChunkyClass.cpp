@@ -1,12 +1,13 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/ChunkyClass.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Endian.h"
+#include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Packer.h"
 
 
@@ -49,7 +50,7 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 		int lStrSize = PackerUnicodeString::Unpack(lTag.mTagName, &pBuffer[lIndex], pSize-lIndex);
 		lStrSize = (lStrSize+3)&(~3);
 		lOk = (lIndex+lStrSize < (int)pSize);
-		assert(lOk);
+		deb_assert(lOk);
 		lIndex += lStrSize;
 	}
 	if (lOk)
@@ -73,7 +74,7 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 			int lStrSize = PackerUnicodeString::Unpack(lValue, &pBuffer[lIndex], pSize-lIndex);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lIndex+lStrSize < (int)pSize);
-			assert(lOk);
+			deb_assert(lOk);
 			if (!lOk)
 			{
 				mLog.Errorf(_T("String index %i had wrong length (%i)."), x, lStrSize);
@@ -89,7 +90,7 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 		for (int x = 0; x < lBodyIndexCount; ++x)
 		{
 			const int32 lBodyIndex = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-			assert(lBodyIndex >= 0 && lBodyIndex < 200);
+			deb_assert(lBodyIndex >= 0 && lBodyIndex < 200);
 			lIndex += sizeof(lBodyIndex);
 			lTag.mBodyIndexList.push_back(lBodyIndex);
 		}
@@ -101,7 +102,7 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 		for (int x = 0; x < lEngineIndexCount; ++x)
 		{
 			const int32 lEngineIndex = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-			assert(lEngineIndex >= 0 && lEngineIndex < 20);
+			deb_assert(lEngineIndex >= 0 && lEngineIndex < 20);
 			lIndex += sizeof(lEngineIndex);
 			lTag.mEngineIndexList.push_back(lEngineIndex);
 		}
@@ -113,13 +114,13 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 		for (int x = 0; x < lMeshIndexCount; ++x)
 		{
 			const int32 lMeshIndex = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-			//assert(lMeshIndex >= 0 && lMeshIndex < (int32)GetMeshCount());
+			//deb_assert(lMeshIndex >= 0 && lMeshIndex < (int32)GetMeshCount());
 			lIndex += sizeof(lMeshIndex);
 			lTag.mMeshIndexList.push_back(lMeshIndex);
 		}
 	}
 	lOk = (lIndex == (int)pSize);
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		AddTag(lTag);
@@ -140,7 +141,7 @@ void ChunkyClass::RemoveTag(size_t pTagIndex)
 {
 	if (pTagIndex >= GetTagCount())
 	{
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	mTagArray.erase(&mTagArray[pTagIndex]);
@@ -153,7 +154,7 @@ size_t ChunkyClass::GetTagCount() const
 
 const ChunkyClass::Tag& ChunkyClass::GetTag(size_t pTagIndex) const
 {
-	assert(pTagIndex < GetTagCount());
+	deb_assert(pTagIndex < GetTagCount());
 	return (mTagArray[pTagIndex]);
 }
 
@@ -168,6 +169,18 @@ const ChunkyClass::Tag* ChunkyClass::GetTag(const str& pTagName) const
 		}
 	}
 	return 0;
+}
+
+
+
+void ChunkyClass::AddPhysRoot(int pPhysIndex)
+{
+	mPhysRootSet.insert(pPhysIndex);
+}
+
+bool ChunkyClass::IsPhysRoot(int pPhysIndex) const
+{
+	return (HashUtil::FindSetObjectDefault(mPhysRootSet, pPhysIndex, -1) == pPhysIndex);
 }
 
 

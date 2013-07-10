@@ -1,7 +1,7 @@
 /*
 	Class:  MemberThread
 	Author: Jonas Byström
-	Copyright (c) 2002-2009, Righteous Games
+	Copyright (c) Pixel Doctrine
 
 	NOTES:
 
@@ -21,7 +21,7 @@
 
 
 
-#include <assert.h>
+#include "LepraAssert.h"
 #include "Thread.h"
 
 
@@ -70,8 +70,8 @@ template<class _Base, class _Object> bool MemberThread<_Base, _Object>::Start(_B
 {
 	Join(10.0);
 	Kill();
-	assert(pObject);
-	assert(pThreadEntry);
+	deb_assert(pObject);
+	deb_assert(pThreadEntry);
 	mObject = pObject;
 	mThreadEntry = pThreadEntry;
 	return (Thread::Start());	// Will call Run() when the new thread starts.
@@ -90,8 +90,8 @@ template<class _Base, class _Object> void MemberThread<_Base, _Object>::SetObjec
 
 template<class _Base, class _Object> void MemberThread<_Base, _Object>::Run()
 {
-	assert(mObject);
-	assert(mThreadEntry);
+	deb_assert(mObject);
+	deb_assert(mThreadEntry);
 	(mObject->*mThreadEntry)();
 }
 

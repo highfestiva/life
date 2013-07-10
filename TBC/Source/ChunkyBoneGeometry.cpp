@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/ChunkyBoneGeometry.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/Packer.h"
@@ -44,7 +44,7 @@ ChunkyBoneGeometry::ChunkyBoneGeometry(const BodyData& pBodyData):
 ChunkyBoneGeometry::~ChunkyBoneGeometry()
 {
 	// Ensure all resources has been released prior to delete.
-	assert(mJointId == INVALID_JOINT && mBodyId == INVALID_BODY && mTriggerId == INVALID_TRIGGER);
+	deb_assert(mJointId == INVALID_JOINT && mBodyId == INVALID_BODY && mTriggerId == INVALID_TRIGGER);
 }
 
 void ChunkyBoneGeometry::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal)
@@ -52,7 +52,7 @@ void ChunkyBoneGeometry::RelocatePointers(const ChunkyPhysics* pTarget, const Ch
 	if (pOriginal.mBodyData.mParent)
 	{
 		const int lBoneIndex = pSource->GetIndex(pOriginal.mBodyData.mParent);
-		assert(lBoneIndex >= 0);
+		deb_assert(lBoneIndex >= 0);
 		mBodyData.mParent = pTarget->GetBoneGeometry(lBoneIndex);
 	}
 }
@@ -77,7 +77,7 @@ ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const vo
 	if (pByteCount < sizeof(uint32))
 	{
 		mLog.AError("Could not load; very small data size.");
-		assert(false);
+		deb_assert(false);
 		return (0);
 	}
 
@@ -97,12 +97,12 @@ ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const vo
 		if (pByteCount == lGeometry->GetChunkySize(lData))
 		{
 			lGeometry->LoadChunkyData(pStructure, lData);
-			assert(lGeometry->GetChunkySize() == pByteCount);
+			deb_assert(lGeometry->GetChunkySize() == pByteCount);
 		}
 		else
 		{
 			mLog.AError("Could not load; wrong data size.");
-			assert(false);
+			deb_assert(false);
 			delete (lGeometry);
 			lGeometry = 0;
 		}
@@ -219,15 +219,15 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		}
 		else
 		{
-			assert(false);
+			deb_assert(false);
 		}
 	}
 	else
 	{
-		assert(mBodyData.mJointType == JOINT_EXCLUDE);
+		deb_assert(mBodyData.mJointType == JOINT_EXCLUDE);
 		lOk = true;
 	}
-	assert(lOk);
+	deb_assert(lOk);
 	return (lOk);
 }
 
@@ -283,7 +283,7 @@ bool ChunkyBoneGeometry::IsAffectedByGravity() const
 
 ChunkyBoneGeometry::BoneType ChunkyBoneGeometry::GetBoneType() const
 {
-	assert(mBodyData.mBoneType >= BONE_BODY && mBodyData.mBoneType <= BONE_POSITION);
+	deb_assert(mBodyData.mBoneType >= BONE_BODY && mBodyData.mBoneType <= BONE_POSITION);
 	return (mBodyData.mBoneType);
 }
 
@@ -409,7 +409,7 @@ void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* p
 {
 	const uint32* lData = (const uint32*)pData;
 
-	assert((GeometryType)Endian::BigToHost(lData[0]) == GetGeometryType());
+	deb_assert((GeometryType)Endian::BigToHost(lData[0]) == GetGeometryType());
 	mBodyData.mMass = Endian::BigToHostF(lData[1]);
 	mBodyData.mFriction = Endian::BigToHostF(lData[2]);
 	mBodyData.mBounce = Endian::BigToHostF(lData[3]);
@@ -514,6 +514,11 @@ bool ChunkyBoneCylinder::CreateTrigger(PhysicsManager* pPhysics, int pTrigListen
 	RemovePhysics(pPhysics);
 	mTriggerId = pPhysics->CreateCylinderTrigger(pTransform, mRadius, mLength, pTrigListenerId);
 	return (mTriggerId != INVALID_TRIGGER);
+}
+
+Vector3DF ChunkyBoneCylinder::GetShapeSize() const
+{
+	return (Vector3DF(mRadius*2, mRadius*2, mLength));
 }
 
 ChunkyBoneGeometry::GeometryType ChunkyBoneCylinder::GetGeometryType() const
@@ -666,7 +671,7 @@ bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 
 bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, int, const TransformationF&)
 {
-	assert(false);
+	deb_assert(false);
 	return (false);
 }
 
@@ -723,7 +728,7 @@ void ChunkyBoneMesh::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	const uint32* lData = (const uint32*)&((const char*)pData)[Parent::GetChunkySize()];
 	mVertexCount = Endian::BigToHost(lData[0]);
 	mTriangleCount = Endian::BigToHost(lData[1]);
-	assert(!mVertices && !mIndices);
+	deb_assert(!mVertices && !mIndices);
 	mVertices = new float[mVertexCount*3];
 	mIndices = new uint32[mTriangleCount*3];
 	uint32 lBase = 2;

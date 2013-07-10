@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -26,7 +26,7 @@ ChunkyMeshLoader::~ChunkyMeshLoader()
 {
 }
 
-bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadows)
+bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows)
 {
 	bool lOk = true;
 	if (lOk)
@@ -87,7 +87,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadow
 			lGeometryVolatility == TBC::GeometryBase::GEOM_DYNAMIC ||
 			lGeometryVolatility == TBC::GeometryBase::GEOM_VOLATILE);
 	}
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		lOk = (lTriangleIndicesSize%(sizeof(uint32)*3) == 0 &&
@@ -95,12 +95,12 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadow
 			lUvCount >= 0 &&
 			lUvCount <= 8);
 	}
-	assert(lOk);
+	deb_assert(lOk);
 	for (unsigned x = 0; lOk && lUvsSize[x] && x < lUvCount; ++x)
 	{
 		lOk = (lUvsSize[x] == lVerticesSize*2/3);
 	}
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		// TODO: add checks on normal and color sizes, so that we don't overrun buffers.
@@ -143,7 +143,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadow
 	{
 		if (lStripsIndices)
 		{
-			assert(false);	// Currently not supported.
+			deb_assert(false);	// Currently not supported.
 		}
 		const TBC::GeometryBase::PrimitiveType lType = lTriangleIndices? TBC::GeometryBase::TRIANGLES : TBC::GeometryBase::TRIANGLE_STRIP;
 		// Alex/TODO: Volatility of TriangleBasedGeometry should always be GEOM_STATIC.
@@ -157,7 +157,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadow
 			pMeshData->AddUVSet(lUvs[x]);
 		}
 
-		pCastsShadows = (lCastsShadows != 0);
+		pCastsShadows = lCastsShadows;
 	}
 	// TODO: reuse memory, don't new/delete constantly!
 	delete[] (lLoadVertices);
@@ -169,11 +169,11 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadow
 		delete[] (lLoadUvs[x]);
 	}
 	delete[] (lColors);
-	assert(lOk);
+	deb_assert(lOk);
 	return (lOk);
 }
 
-bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, bool pCastsShadows)
+bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsShadows)
 {
 	// Write file header. We will come back to it later to re-write the actual size.
 	bool lOk = true;
@@ -217,7 +217,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, bool pCastsS
 	}
 	int32 lColorFormat = pMeshData->GetColorFormat();
 	int32 lGeometryVolatility = pMeshData->GetGeometryVolatility();
-	int32 lCastsShadows = pCastsShadows? 1 : 0;
+	int32 lCastsShadows = pCastsShadows;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lSaveList;
@@ -446,12 +446,13 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
 	{
 		uint8* lBuffer = 0;
 		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
+		deb_assert(lOk);
 		int32 lPhysicsIndex = -1;
 		str lMeshBaseName;
 		int lIndex = 0;
@@ -463,6 +464,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			int lStrSize = PackerUnicodeString::Unpack(lMeshBaseName, &lBuffer[lIndex], pSize-lExcludeByteCount);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize < (int)(pSize-lExcludeByteCount));
+			deb_assert(lOk);
 			lIndex += lStrSize;
 		}
 		if (lOk)
@@ -475,12 +477,14 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			}
 			lIndex += lTransformFloatCount * sizeof(float);
 			lOk = (lIndex < (int)(pSize - 11*sizeof(float) - 4));
+			deb_assert(lOk);
 			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, TransformationF(lTransformArray));
+			lClass->AddPhysRoot(lPhysicsIndex);
 		}
 		UiTbc::ChunkyClass::Material lMaterial;
 		if (lOk)
 		{
-			const int lMaterialFloatCount = 11;
+			const int lMaterialFloatCount = 12;
 			float lMaterialArray[lMaterialFloatCount];
 			for (int x = 0; x < lMaterialFloatCount; ++x)
 			{
@@ -488,23 +492,27 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			}
 			lIndex += lMaterialFloatCount * sizeof(float);
 			lOk = (lIndex <= (int)(pSize-4-4));
+			deb_assert(lOk);
 			lMaterial.mAmbient.Set(lMaterialArray[0], lMaterialArray[1], lMaterialArray[2]);
 			lMaterial.mDiffuse.Set(lMaterialArray[3], lMaterialArray[4], lMaterialArray[5]);
 			lMaterial.mSpecular.Set(lMaterialArray[6], lMaterialArray[7], lMaterialArray[8]);
 			lMaterial.mShininess = lMaterialArray[9];
 			lMaterial.mAlpha = lMaterialArray[10];
+			lMaterial.mSmooth = (lMaterialArray[11] > 0.5f);
 		}
 		if (lOk)
 		{
 			int32 lTextureCount = Endian::BigToHost(*(int32*)&lBuffer[lIndex]);
 			lIndex += sizeof(lTextureCount);
 			lOk = (lIndex <= (int)(pSize-2*lTextureCount-2));
+			deb_assert(lOk);
 			for (int x = 0; lOk && x < lTextureCount; ++x)
 			{
 				str lTextureName;
 				int lStrSize = PackerUnicodeString::Unpack(lTextureName, &lBuffer[lIndex], pSize-lIndex);
 				lStrSize = (lStrSize+3)&(~3);
 				lOk = (lStrSize <= (int)(pSize-2));
+				deb_assert(lOk);
 				lIndex += lStrSize;
 				lMaterial.mTextureList.push_back(lTextureName);
 			}
@@ -514,19 +522,20 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			int lStrSize = PackerUnicodeString::Unpack(lMaterial.mShaderName, &lBuffer[lIndex], pSize-lIndex);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize == (int)(pSize-lIndex));
+			deb_assert(lOk);
 			lIndex += lStrSize;
 		}
 		if (lOk)
 		{
 			lClass->SetLastMeshMaterial(lMaterial);
 		}
-		assert(lOk);
+		deb_assert(lOk);
 		delete[] (lBuffer);
 	}
 	else
 	{
 		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	return (lOk);
 }

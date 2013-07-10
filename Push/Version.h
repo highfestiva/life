@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -17,5 +17,3 @@
 #ifndef LEPRA_TOUCH
 //#define EMULATE_TOUCH	1
 #endif // !iOS
-
-#define VISUAL_SCALE_FACTOR	1.0f

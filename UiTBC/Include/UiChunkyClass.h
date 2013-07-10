@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -28,6 +28,7 @@ public:
 		Vector3DF mSpecular;
 		float mShininess;
 		float mAlpha;
+		bool mSmooth;
 		std::vector<str> mTextureList;
 		str mShaderName;
 
@@ -58,7 +59,8 @@ private:
 		TransformationF mTransform;
 		Material mMaterial;
 	};
-	std::vector<PhysMeshEntry> mMeshArray;
+	typedef std::vector<PhysMeshEntry> PhysMeshArray;
+	PhysMeshArray mMeshArray;
 
 	LOG_CLASS_DECLARE();
 };

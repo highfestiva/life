@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) 2002-, Pixel Doctrine
 
 
 
@@ -157,10 +157,10 @@ public:
 	bool Load();
 	Cure::ResourceLoadState PostProcess();
 
-	bool GetCastsShadows() const;
+	int GetCastsShadows() const;
 
 protected:
-	bool mCastsShadows;
+	int mCastsShadows;
 
 private:
 	LOG_CLASS_DECLARE();

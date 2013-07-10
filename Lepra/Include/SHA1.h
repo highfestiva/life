@@ -1,7 +1,7 @@
 /*
 	Class:  SHA1
 	Author: Jonas Byström
-	Copyright (c) 2002-2009, Righteous Games
+	Copyright (c) Pixel Doctrine
 
 	SHA stands for Secure Hash Algoritm. SHA-1
 	delivers a 20 byte digest from arbitrary input

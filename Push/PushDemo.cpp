@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "PushDemo.h"
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"

@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -257,22 +257,22 @@ TEMPLATE QUAL::~OrderedMap()
 
 TEMPLATE typename QUAL::Iterator QUAL::PushFront(KeyType pKey, ObjectType pObject)
 {
-	assert(mTable.Find(pKey) == mTable.End());
+	deb_assert(mTable.Find(pKey) == mTable.End());
 	mList.push_front(Node(pKey, pObject));
 	typename NodeList::iterator lIter = mList.begin();
 	mTable.Insert(pKey, lIter);
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 	return Iterator(lIter);
 }
 
 TEMPLATE typename QUAL::Iterator QUAL::PushBack(KeyType pKey, ObjectType pObject)
 {
-	assert(mTable.Find(pKey) == mTable.End());
+	deb_assert(mTable.Find(pKey) == mTable.End());
 	mList.push_back(Node(pKey, pObject));
 	typename NodeList::iterator lIter = mList.end();
 	--lIter;
 	mTable.Insert(pKey, lIter);
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 	return Iterator(lIter);
 }
 
@@ -286,7 +286,7 @@ TEMPLATE void QUAL::PopFront(KeyType& pKey, ObjectType& pObject)
 		mTable.Remove(lNode.mKey);
 		mList.pop_front();
 	}
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 }
 
 TEMPLATE void QUAL::PopBack(KeyType& pKey, ObjectType& pObject)
@@ -299,7 +299,7 @@ TEMPLATE void QUAL::PopBack(KeyType& pKey, ObjectType& pObject)
 		mTable.Remove(lNode.mKey);
 		mList.pop_back();
 	}
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 }
 
 TEMPLATE typename QUAL::Iterator QUAL::InsertBefore(const Iterator& pBeforeHere, KeyType pKey, ObjectType pObject)
@@ -318,15 +318,15 @@ TEMPLATE typename QUAL::Iterator QUAL::InsertAfter(const Iterator& pAfterHere, K
 
 TEMPLATE void QUAL::Remove(const Iterator& pIter)
 {
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 	mTable.Remove(pIter.GetKey());
 	mList.erase(pIter.mIter);
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 }
 
 TEMPLATE bool QUAL::Remove(KeyType pKey)
 {
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 	typename TTable::Iterator lIter(mTable.Find(pKey));
 	const bool lErased = (lIter != mTable.End());
 	if (lErased)
@@ -334,16 +334,16 @@ TEMPLATE bool QUAL::Remove(KeyType pKey)
 		mList.erase((*lIter).mIt);
 		mTable.Remove(lIter);
 	}
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 	return (lErased);
 }
 
 TEMPLATE void QUAL::RemoveAll()
 {
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 	mList.clear();
 	mTable.RemoveAll();
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 }
 
 TEMPLATE typename QUAL::Iterator QUAL::Find(KeyType pKey)
@@ -424,13 +424,13 @@ TEMPLATE size_t QUAL::GetCountSafe() const
 
 TEMPLATE size_t QUAL::GetCount() const
 {
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 	return (GetCountSafe());
 }
 
 TEMPLATE bool QUAL::IsEmpty() const
 {
-	assert(mTable.GetCount() == (int)mList.size());
+	deb_assert(mTable.GetCount() == (int)mList.size());
 	return (mTable.IsEmpty());
 }
 

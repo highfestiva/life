@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -11,7 +11,7 @@
 
 
 
-#ifdef LIFE_DEMO
+#ifdef PUSH_DEMO
 namespace Push
 {
 

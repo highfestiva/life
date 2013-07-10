@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include <assert.h>
+#include "LepraAssert.h"
 #include <list>
 #include "HiResTimer.h"
 #include "SpinLock.h"
@@ -130,7 +130,7 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 // The reason the timer is created separately from the attaching of the performance data container
 // is that we want the performance data container CREATION time listed in THIS scope, not in the
 // parent scope.
-#define LEPRA_MEASURE_SCOPE(name)	\
+#define LEPRA_DO_MEASURE_SCOPE(name)	\
 	CallScopeTimer __lMeasureTimer;	\
 	static volatile bool __lMeasureNameInitialized = false;	\
 	static str __lMeasureName;	\
@@ -147,6 +147,13 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 		}	\
 	}	\
 	__lMeasureTimer.Attach(ScopePerformanceData::Insert(__lMeasureName, __lMeasureHash))
+
+#define LEPRA_MEASURE	0
+#if LEPRA_MEASURE
+#define LEPRA_MEASURE_SCOPE(name)	LEPRA_DO_MEASURE_SCOPE(name)
+#else // !Measure
+#define LEPRA_MEASURE_SCOPE(name)
+#endif // Measure / !measure
 
 
 

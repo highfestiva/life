@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -292,8 +292,7 @@ bool MacOpenGLDisplay::InitScreen()
 	::glEnable(GL_SCISSOR_TEST);
 	if (mContextUserCount == 1)
 	{
-		// TODO: ?
-		//OpenGLExtensions::InitExtensions();
+		OpenGLExtensions::InitExtensions();
 	}
 
 #ifndef LEPRA_IOS

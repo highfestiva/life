@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand, Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström, Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -96,6 +96,7 @@ public:
 	const TransformationF& GetBoneObjectTransformation(int pBoneIndex) const;
 	// Same as above, but relative to the original transform.
 	const TransformationF& GetRelativeBoneTransformation(int pBoneIndex) const;
+	TransformationF& GetRelativeBoneTransformation(int pBoneIndex);
 
 	void UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation);
 

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -348,7 +348,7 @@ MemoryLeakDetector gLeakDetector;
 #include <new>
 #include <exception>
 #include <cstdlib>
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 
 void* operator new(size_t pSize)
 {
@@ -373,9 +373,9 @@ void operator delete(void* pPointer)
 #else // Overwrite detection - YEAH!
 	if (!pPointer) return;
 	char* lPointer = (char*)pPointer - 8;
-	assert(*(int*)lPointer == 0x5AF00FA5);
+	deb_assert(*(int*)lPointer == 0x5AF00FA5);
 	int lSize = *(int*)(lPointer+4);
-	assert(*(int*)(lPointer+lSize+8) == 0x55C3F0A9);
+	deb_assert(*(int*)(lPointer+lSize+8) == 0x55C3F0A9);
 	free(lPointer);
 #endif // Normal alloc / With overwrite detection.
 }
@@ -387,9 +387,9 @@ void operator delete[](void* pPointer)
 #else // Overwrite detection - YEAH!
 	if (!pPointer) return;
 	char* lPointer = (char*)pPointer - 8;
-	assert(*(int*)lPointer == 0x5AF00FA5);
+	deb_assert(*(int*)lPointer == 0x5AF00FA5);
 	int lSize = *(int*)(lPointer+4);
-	assert(*(int*)(lPointer+lSize+8) == 0x55C3F0A9);
+	deb_assert(*(int*)(lPointer+lSize+8) == 0x55C3F0A9);
 	free(lPointer);
 #endif // Normal alloc / With overwrite detection.
 }

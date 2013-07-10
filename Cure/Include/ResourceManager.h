@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -425,7 +425,7 @@ protected:
 
 	inline void AssertIsMutexOwner()
 	{
-		assert(mThreadLock.IsOwner());
+		deb_assert(mThreadLock.IsOwner());
 	}
 
 private:

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -26,7 +26,6 @@ namespace UiCure
 GravelEmitter::GravelEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, float pSensitivity, float pScale, float pAmount, float pLifeTime):
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
-	mParticleTimer(false),
 	mSensitivityFactor(1/pSensitivity),
 	mScale(pScale),
 	mDelay(1/pAmount),

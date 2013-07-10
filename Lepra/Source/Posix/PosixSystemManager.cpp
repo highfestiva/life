@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <termios.h>
 #include "../../Include/DiskFile.h"
-#include "../../Include/HiResTimer.h"
 #include "../../Include/JsonString.h"
 #include "../../Include/Lepra.h"
 #include "../../Include/Log.h"

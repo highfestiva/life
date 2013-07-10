@@ -272,16 +272,19 @@ class ChunkyWriter:
 
 	def _writematerial(self, name, mat):
 		self._writematerial_(name, mat.ambient, mat.diffuse, mat.specular, \
-			mat.shininess, mat.alpha, mat.textures, mat.shader)
+			mat.shininess, mat.alpha, mat.smooth, mat.textures, mat.shader)
 
 
-	def _writematerial_(self, name, ambient, diffuse, specular, shininess, alpha, textures, shader):
+	def _writematerial_(self, name, ambient, diffuse, specular, shininess, alpha, smooth, textures, shader):
 		if len(ambient) != 3 or len(diffuse) != 3 or len(specular) != 3:
 			print("Error: bad number of material elements for %s:" % name, diffuse)
 			#print(ambient, diffuse, specular)
 			sys.exit(18)
 		for f in ambient+diffuse+specular+[shininess,alpha]:
 			self._writefloat(f)
+		if options.options.verbose and not smooth:
+			print("Flat shading on %s." % name)
+		self._writefloat(float(smooth))
 		self._writeint(len(textures))
 		for texture in textures:
 			self._writestr(os.path.basename(texture))
@@ -698,6 +701,20 @@ class MeshWriter(ChunkyWriter):
 			for p in node.getparents():
 				p.writecount += 1
 			return
+		def getshadows(node):
+			for parent in node.getparents():
+				casts_shadows = parent.get_fixed_attribute("casts_shadows", optional=True)
+				if casts_shadows:
+					break
+			if casts_shadows == None:
+				casts_shadows = self.config.get("casts_shadows")
+			if casts_shadows == None:
+				return []
+			elif casts_shadows:
+				return [(CHUNK_MESH_CASTS_SHADOWS, +1)]
+			if options.options.verbose:
+				print("%s will not cast shadows!" % node.getName())
+			return [(CHUNK_MESH_CASTS_SHADOWS, -1)]
 		#print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
 		self._addfeat("mesh:meshes", 1)
 		self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
@@ -706,11 +723,13 @@ class MeshWriter(ChunkyWriter):
 			default_mesh_type = {"static":1, "semi_static":2, "dynamic":3, "volatile":4}
 			mesh_type = "static" if self.config["type"] == "static" else "semi_static"
 			volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type[mesh_type])]
-			shadows = [(CHUNK_MESH_CASTS_SHADOWS, 1)] if self.config.get("casts_shadows") else []
+			shadows = getshadows(node)
 			verts = [(CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx"))]
 			polys = [(CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri"))]
 			normals = [] # node.get_fixed_attribute("rgn", optional=True)
 			uvs = node.get_fixed_attribute("rguv", optional=True)
+			# if uvs and options.options.verbose:
+				# print("Mesh %s has UVs." % node.getFullName())
 			textureuvs = [(CHUNK_MESH_UV, uvs)] if uvs else []
 			inner_data = volatility+shadows+verts+polys+normals+textureuvs
 			data = (

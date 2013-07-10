@@ -30,12 +30,6 @@ def renameFiles(tooldir, dadir, fromnames, toname):
 			renameFiles(tooldir, fn, fromnames, toname)
 	os.chdir('..')
 
-def removeCrapFiles(todir):
-	for filename in glob.glob(os.path.join(todir, '*.user')):
-		os.remove(filename)
-	for filename in glob.glob(os.path.join(todir, 'makefile')):
-		os.remove(filename)
-
 def add_makefile_generator(filename, fromname, toname):
 	outfn = filename+".tmp"
 	with open(filename, "rt") as r:
@@ -103,9 +97,9 @@ def fix_guids(toname):
 def clone_project(fromnames, toname):
 	print("Copying files...")
 	fromname = fromnames[0]
-	shutil.copytree(fromname, toname)
+	pat = ('*.user', 'makefile', '*.mesh', '*.class', '*.phys', 'Unicode Debug', 'Unicode Release Candiate', 'Unicode Final', 'Final', 'Debug', 'Release')
+	shutil.copytree(fromname, toname, ignore=shutil.ignore_patterns(*pat))
 	todir = toname
-	removeCrapFiles(todir)
 	renameFiles('Tools/Util', todir, fromnames, toname)
 	print("Files and contents renamed successfully.")
 	add_makefile_generator('Tools/GCC/generate_makefile.py', fromname, toname)

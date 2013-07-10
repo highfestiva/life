@@ -1,21 +1,50 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 template<class T, class TimeType, class TBase>
 CubicDeCasteljauSpline<T, TimeType, TBase>::CubicDeCasteljauSpline(T* pKeyFrames,
-	TimeType* pTimeTags, int pCount, SplineType pSplineType, DataPolicy pPolicy):
-	mKeyFrames(pKeyFrames),
-	mTempBuffer(0),
-	mTimeTags(pTimeTags),
-	mCount(pCount),
-	mSplineType(pSplineType),
-	mPolicy(pPolicy),
-	mCurrentTime(0),
-	mEnableModulo(true)
+	TimeType* pTimeTags, int pCount, SplineType pSplineType, DataPolicy pPolicy)
 {
+	Set(pKeyFrames, pTimeTags, pCount, pSplineType, pPolicy);
+}
+
+template<class T, class TimeType, class TBase>
+CubicDeCasteljauSpline<T, TimeType, TBase>::CubicDeCasteljauSpline(const CubicDeCasteljauSpline& pOriginal, DataPolicy pPolicy)
+{
+	Set(pOriginal.mKeyFrames, pOriginal.mTimeTags, pOriginal.mCount, pOriginal.mSplineType, pPolicy);
+}
+
+template<class T, class TimeType, class TBase>
+CubicDeCasteljauSpline<T, TimeType, TBase>::~CubicDeCasteljauSpline()
+{
+	if (mPolicy != COPY_REFERENCE)
+	{
+		delete[] mKeyFrames;
+		delete[] mTimeTags;
+	}
+
+	if (mTempBuffer != 0)
+	{
+		delete[] mTempBuffer;
+	}
+}
+
+template<class T, class TimeType, class TBase>
+void CubicDeCasteljauSpline<T, TimeType, TBase>::Set(T* pKeyFrames,
+	TimeType* pTimeTags, int pCount, SplineType pSplineType, DataPolicy pPolicy)
+{
+	mKeyFrames = pKeyFrames;
+	mTempBuffer = 0;
+	mTimeTags = pTimeTags;
+	mCount = pCount;
+	mSplineType = pSplineType;
+	mPolicy = pPolicy;
+	mCurrentTime = 0;
+	mEnableModulo = true;
+
 	if (mPolicy == FULL_COPY)
 	{
 		mKeyFrames = new T[mCount];
@@ -33,23 +62,8 @@ CubicDeCasteljauSpline<T, TimeType, TBase>::CubicDeCasteljauSpline(T* pKeyFrames
 	// Check if valid.
 	/*for (int i = 1; i <= mCount; i++)
 	{
-		assert(mTimeTags[i - 1] < mTimeTags[i]);
+		deb_assert(mTimeTags[i - 1] < mTimeTags[i]);
 	}*/
-}
-
-template<class T, class TimeType, class TBase>
-CubicDeCasteljauSpline<T, TimeType, TBase>::~CubicDeCasteljauSpline()
-{
-	if (mPolicy != COPY_REFERENCE)
-	{
-		delete[] mKeyFrames;
-		delete[] mTimeTags;
-	}
-
-	if (mTempBuffer != 0)
-	{
-		delete[] mTempBuffer;
-	}
 }
 
 template<class T, class TimeType, class TBase>
@@ -276,7 +290,7 @@ T CubicDeCasteljauSpline<T, TimeType, TBase>::GetValue(TimeType t12, TimeType t2
 template<class T, class TimeType, class TBase>
 int CubicDeCasteljauSpline<T, TimeType, TBase>::FindFrameAtTime(TimeType pTime, int pStartFrame) const
 {
-	assert(pTime >= mTimeTags[0] && pTime <= mTimeTags[mCount]);
+	deb_assert(pTime >= mTimeTags[0] && pTime <= mTimeTags[mCount]);
 
 	int lCurrent = Math::Mod(pStartFrame, mCount + 1);
 	int lNext = Math::Mod(lCurrent + 1, mCount + 1);

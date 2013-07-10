@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -9,6 +9,7 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "../../TBC/Include/PhysicsManagerFactory.h"
+#include "../../TBC/Include/PhysicsSpawner.h"
 #include "../Include/ConsoleManager.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObject.h"
@@ -16,6 +17,7 @@
 #include "../Include/NetworkAgent.h"
 #include "../Include/RuntimeVariable.h"
 #include "../Include/RuntimeVariableName.h"
+#include "../Include/Spawner.h"
 #include "../Include/TerrainManager.h"
 #include "../Include/TimeManager.h"
 
@@ -222,12 +224,12 @@ ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObje
 	return (lObject);
 }
 
-void GameManager::DeleteContextObject(Cure::GameObjectId pInstanceId)
+void GameManager::DeleteContextObject(GameObjectId pInstanceId)
 {
 	mContext->DeleteObject(pInstanceId);
 }
 
-void GameManager::DeleteContextObjectDelay(Cure::ContextObject* pObject, float pDelay)
+void GameManager::DeleteContextObjectDelay(ContextObject* pObject, float pDelay)
 {
 	mContext->AddAlarmCallback(pObject, ContextManager::SYSTEM_ALARM_ID_KILL, pDelay, 0);
 }
@@ -252,6 +254,31 @@ ContextObject* GameManager::CreateLogicHandler(const str&)
 	return 0;
 }
 
+Spawner* GameManager::GetAvatarSpawner(GameObjectId pLevelId) const
+{
+	ContextObject* lLevel = GetContext()->GetObject(pLevelId);
+	if (!lLevel)
+	{
+		return 0;
+	}
+	const ContextObject::Array& lChildArray = lLevel->GetChildArray();
+	ContextObject::Array::const_iterator x = lChildArray.begin();
+	for (; x != lChildArray.end(); ++x)
+	{
+		if ((*x)->GetClassId() != _T("Spawner"))
+		{
+			continue;
+		}
+		Spawner* lSpawner = (Spawner*)*x;
+		const TBC::PhysicsSpawner* lSpawnShape = lSpawner->GetSpawner();
+		if (lSpawnShape->GetNumber() == 0)
+		{
+			return lSpawner;
+		}
+	}
+	return 0;
+}
+
 bool GameManager::IsUiMoveForbidden(GameObjectId) const
 {
 	return false;	// Non-UI implementors need not bother.
@@ -261,12 +288,12 @@ void GameManager::OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID 
 {
 #ifdef LEPRA_DEBUG
 	const unsigned lRootIndex = 0;
-	assert(pObject->GetStructureGeometry(lRootIndex));
-	assert(pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId);
+	deb_assert(pObject->GetStructureGeometry(lRootIndex));
+	deb_assert(pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId);
 #endif // Debug / !Debug
 	(void)pBodyId;
 
-	if (pObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+	if (pObject->GetNetworkObjectType() == NETWORK_OBJECT_LOCALLY_CONTROLLED)
 	{
 		log_volatile(mLog.Debugf(_T("Object %u/%s stopped, sending position."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
 		GetContext()->AddPhysicsSenderObject(pObject);
@@ -413,6 +440,17 @@ void GameManager::SetNetworkAgent(NetworkAgent* pNetwork)
 
 
 
+void GameManager::ScriptPhysicsTick()
+{
+	//if (mTime->GetAffordedPhysicsStepCount() > 0)
+	{
+		mContext->HandlePostKill();
+		mContext->TickPhysics();
+	}
+}
+
+
+
 void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNodes, int pRecursion)
 {
 	const str lIndent = str(pRecursion*3, ' ');
@@ -435,15 +473,6 @@ void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNode
 bool GameManager::IsThreadSafe() const
 {
 	return (mIsThreadSafe);
-}
-
-void GameManager::ScriptPhysicsTick()
-{
-	//if (mTime->GetAffordedPhysicsStepCount() > 0)
-	{
-		mContext->HandlePostKill();
-		mContext->TickPhysics();
-	}
 }
 
 void GameManager::HandleWorldBoundaries()

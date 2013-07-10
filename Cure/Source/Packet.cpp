@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/Packet.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../Include/PositionalData.h"
 
@@ -169,16 +169,16 @@ unsigned Packet::GetPacketSize() const
 
 void Packet::SetPacketSize(int pSize)
 {
-	assert(pSize > 0);
+	deb_assert(pSize > 0);
 	mPacketSize = pSize;
-	assert((int)mPacketSize <= PACKET_LENGTH);
+	deb_assert((int)mPacketSize <= PACKET_LENGTH);
 }
 
 void Packet::AddPacketSize(int pSize)
 {
-	assert(pSize > 0);
+	deb_assert(pSize > 0);
 	mPacketSize += pSize;
-	assert((int)mPacketSize <= PACKET_LENGTH);
+	deb_assert((int)mPacketSize <= PACKET_LENGTH);
 }
 
 int Packet::GetMessageCount() const
@@ -188,7 +188,7 @@ int Packet::GetMessageCount() const
 
 Message* Packet::GetMessageAt(int pIndex) const
 {
-	assert((int)mMessageVector.size() > pIndex);
+	deb_assert((int)mMessageVector.size() > pIndex);
 	return (mMessageVector[pIndex]);
 }
 
@@ -214,7 +214,7 @@ int Packet::Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize)
 	uint8* lBuffer = (uint8*)pBuffer;
 	int lCurrentOffset = 0;
 	const int lReadQuickLength = 4;
-	assert(lReadQuickLength >= PACKET_SIZE_MARKER_LENGTH);
+	deb_assert(lReadQuickLength >= PACKET_SIZE_MARKER_LENGTH);
 	int lReceiveCount = 0;
 	bool lOk = (pMaxSize > lCurrentOffset+lReadQuickLength);
 	if (lOk)
@@ -735,7 +735,7 @@ int MessageObjectPosition::Parse(const uint8* pData, int pSize)
 			else
 			{
 				lTotalSize += lPositionSize;
-				assert(lTotalSize <= pSize);
+				deb_assert(lTotalSize <= pSize);
 			}
 		}
 	}

@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/HiscoreAgent.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/NetworkServer.h"
@@ -37,12 +37,12 @@ bool TestPacker(const LogDecorator& pAccount)
 	{
 		lContext = _T("pack unicode");
 		lTestOk = (PackerUnicodeString::Pack(lRawData, L"ABC") == 8);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lTestOk = (lRawData[0] == 4 && lRawData[1] == 0 && lRawData[2] == 'A' &&
 				lRawData[3] == 'B' && lRawData[4] == 'C' && lRawData[5] == 0);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	if (lTestOk)
@@ -50,11 +50,11 @@ bool TestPacker(const LogDecorator& pAccount)
 		lContext = _T("unpack unicode");
 		wstr lUnpacked;
 		lTestOk = (PackerUnicodeString::Unpack(lUnpacked, lRawData, 8) == 8);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lTestOk = (lUnpacked == L"ABC");
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -91,7 +91,7 @@ bool TerrainTest::Test()
 		int lErrorCount = 0;
 		lTerrainManager.GetLoadCount(lOkCount, lErrorCount);
 		lTestOk = (lOkCount == 1 && lErrorCount == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	lTerrainManager.Clear();
@@ -139,7 +139,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" network startup error");
 		lTestOk = Network::Start();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Create client.
@@ -151,7 +151,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lClient->Open(_T(":11332"));
 		lTestOk = !lClient->Connect(_T(":25344"), 0.5);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	// Create and start server.
@@ -179,7 +179,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lContext = pPrefix+_T(" start server");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lServer->Start(_T(":25344"));	// Server picks up ID.
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Make sure that client1 can't connect to wrong port.
 	if (lTestOk)
@@ -187,9 +187,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lContext = pPrefix+_T(" invalid client1 port connect");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lClient->Open(_T(":11332"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lTestOk = !lClient->Connect(_T(":25343"), 0.5);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	class ServerPoller: public Thread
@@ -229,7 +229,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lClient->StartConnectLogin(_T(":25344"), 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_NO_CONNECTION);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Make sure that client1 can connect correctly.
 	if (lTestOk)
@@ -237,9 +237,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lContext = pPrefix+_T(" connect client1");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lClient->Open(_T(":11332"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lTestOk = lClient->Connect(_T(":25344"), 0.5);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Make sure that bad username login is denied.
 	if (lTestOk)
@@ -252,7 +252,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lClient->StartConnectLogin(_T(""), 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ERRONOUS_DATA);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Make sure that client1 connect #2 works.
 	if (lTestOk)
@@ -260,9 +260,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lContext = pPrefix+_T(" connect client1 second time");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lClient->Open(_T(":11332"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lTestOk = lClient->Connect(_T(":25344"), 0.5);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Make sure that bad password login is denied.
 	if (lTestOk)
@@ -275,7 +275,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lClient->StartConnectLogin(_T(""), 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ERRONOUS_DATA);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Create user on server side.
 	if (lTestOk)
@@ -286,7 +286,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
 		lTestOk = lUserAccountManager->AddUserAccount(lUser);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Connect+login client.
 	if (lTestOk)
@@ -297,11 +297,11 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
 		lTestOk = lClient->Open(_T(":11332"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lClient->StartConnectLogin(_T(":25344"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_OK);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Second login checks.
 	Cure::NetworkClient* lClient2 = new Cure::NetworkClient(Cure::GetSettings());
@@ -311,9 +311,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lContext = pPrefix+_T(" connect client2");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lClient2->Open(_T(":11333"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lTestOk = lClient2->Connect(_T(":25344"), 0.5);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Make sure double login fails.
 	if (lTestOk)
@@ -326,7 +326,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lClient2->StartConnectLogin(_T(""), 0, lUser);
 		Cure::RemoteStatus lStatus = lClient2->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ALREADY);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Create user #2 on server side.
 	if (lTestOk)
@@ -337,7 +337,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client2"), lPassword);
 		lTestOk = lUserAccountManager->AddUserAccount(lUser);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Make sure second connect+login works.
 	if (lTestOk)
@@ -348,11 +348,11 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client2"), lPassword);
 		lTestOk = lClient2->Open(_T(":11333"));
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		lClient2->StartConnectLogin(_T(":25344"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient2->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_OK);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	uint32 lClient2Id = 0;
@@ -362,7 +362,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lClient2Id = lClient2->GetLoginAccountId();
 		lTestOk = (lClient2Id >= 1000 && lClient2Id < 0x7FFFFFFF);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	uint32 lClientId = 0;
 	if (lTestOk)
@@ -371,7 +371,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lClientId = lClient->GetLoginAccountId();
 		lTestOk = (lClientId >= 1000 && lClientId < 0x7FFFFFFF);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	// Done with server thread. We take over from here.
 	lServerThread.Join();
@@ -391,12 +391,12 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		for (int x = 0; lTestOk && x < lPacketCount; ++x)
 		{
 			lTestOk = lClient2->PlaceInSendBuffer(pSafe, lClient2->GetSocket(), lPacket);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			if (lTestOk)
 			{
 				lContext = pPrefix+_T(" client2 flush");
 				lTestOk = lClient2->SendAll();
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 		lClient2->GetPacketFactory()->Release(lPacket);
@@ -409,19 +409,19 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		Cure::Packet* lPacket = lServer->GetPacketFactory()->Allocate();
 		uint32 lId = 0xFFFFFFFF;
 		lTestOk = (lServer->ReceiveFirstPacket(lPacket, lId) == Cure::NetworkAgent::RECEIVE_OK && lId == lClient2Id);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		for (int x = 0; lTestOk && x < lPacketCount; ++x)
 		{
 			lContext = pPrefix+_T(" server parse client2 packet");
 			lTestOk = (lPacket->GetMessageCount() == 1 && lPacket->GetMessageAt(0)->GetType() == Cure::MESSAGE_TYPE_STATUS);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			if (lTestOk)
 			{
 				Cure::MessageStatus* lMessage = (Cure::MessageStatus*)(lPacket->GetMessageAt(0));
 				wstr lText;
 				lMessage->GetMessageString(lText);
 				lTestOk = (lText == L"Client2ToServer");
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 			if (lTestOk)
 			{
@@ -454,7 +454,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 						lTestOk = (lServer->ReceiveFirstPacket(lPacket, lId) == Cure::NetworkAgent::RECEIVE_OK && lId == lClient2Id);
 					}
 				}
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 		lServer->GetPacketFactory()->Release(lPacket);
@@ -472,7 +472,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lTestOk = lServer->PlaceInSendBuffer(pSafe, lPacket, lClient2Id);
 		lServer->GetPacketFactory()->Release(lPacket);
 		lServer->SendAll();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -493,7 +493,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 			}
 		}
 		lClient2->GetPacketFactory()->Release(lPacket);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -511,7 +511,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 			lTestOk = lClient->SendAll();
 		}
 		lClient->GetPacketFactory()->Release(lPacket);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -526,7 +526,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 			lTestOk = lMessage.IsEqual((const uint8*)"123456", 6);
 		}*/
 		lServer->GetPacketFactory()->Release(lPacket);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -541,7 +541,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lTestOk = lServer->PlaceInSendBuffer(pSafe, lPacket, lClientId);
 		lServer->GetPacketFactory()->Release(lPacket);
 		lServer->SendAll();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
@@ -555,7 +555,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 			lTestOk = lMessage.IsEqual((const uint8*)"BajsOxe", 7);
 		}*/
 		lClient->GetPacketFactory()->Release(lPacket);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	delete (lClient2);
@@ -567,7 +567,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" network shutdown error");
 		lTestOk = Network::Stop();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(mLog, pPrefix+_T("ClientServer"), lContext, lTestOk);
@@ -605,7 +605,7 @@ bool HiscoreTest::Test()
 	{
 		lContext = _T("network startup error");
 		lTestOk = Network::Start();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	Cure::HiscoreAgent lHiscore(_T("gamehiscore.pixeldoctrine.com"), 80, _T("UnitTest"));
@@ -615,54 +615,54 @@ bool HiscoreTest::Test()
 		lContext = _T("list parse");
 		astr a = "{\"offset\":2,\"total_count\":5,\"list\":[{\"name\":\"Jonte\",\"score\":4},{\"name\":\"Bea Sune\",\"score\":34567}]}";
 		lTestOk = lHiscore.ParseList(a);
-		assert(lHiscore.GetDownloadedList().mOffset == 2);
-		assert(lHiscore.GetDownloadedList().mTotalCount == 5);
-		assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
-		assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Jonte"));
-		assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 4);
-		assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("Bea Sune"));
-		assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 34567);
+		deb_assert(lHiscore.GetDownloadedList().mOffset == 2);
+		deb_assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+		deb_assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+		deb_assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Jonte"));
+		deb_assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 4);
+		deb_assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("Bea Sune"));
+		deb_assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 34567);
 		lHiscore.Close();
 		if (lTestOk)
 		{
 			a = "{ \"offset\" : 13 , \"total_count\" : 5 , \"list\" : [ { \"name\" : \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" , \"score\" : 42 } , { \"name\" : \"A\" , \"score\" : 4321 } ] }";
 			lTestOk = lHiscore.ParseList(a);
-			assert(lHiscore.GetDownloadedList().mOffset == 13);
-			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
-			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
-			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
-			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
+			deb_assert(lHiscore.GetDownloadedList().mOffset == 13);
+			deb_assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
 			lHiscore.Close();
 		}
 		if (lTestOk)
 		{
 			a = "{ \"total_count\": 5 , \"list\": [ { \"name\": \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" , \"score\" :42 } , { \"name\" : \"A\" , \"score\":4321 } ], \"offset\" :13}";
 			lTestOk = lHiscore.ParseList(a);
-			assert(lHiscore.GetDownloadedList().mOffset == 13);
-			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
-			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
-			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
-			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
+			deb_assert(lHiscore.GetDownloadedList().mOffset == 13);
+			deb_assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
 			lHiscore.Close();
 		}
 		if (lTestOk)
 		{
 			a = "{\"list\":[ { \"score\" :42,\"name\": \"Mea Culpa~*'-.,;:_\\\"\\\\@#%&\" } , { \"score\":4321,\"name\" : \"A\"}],\"total_count\" :5,\"offset\" :13 }";
 			lTestOk = lHiscore.ParseList(a);
-			assert(lHiscore.GetDownloadedList().mOffset == 13);
-			assert(lHiscore.GetDownloadedList().mTotalCount == 5);
-			assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
-			assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
-			assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
-			assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
+			deb_assert(lHiscore.GetDownloadedList().mOffset == 13);
+			deb_assert(lHiscore.GetDownloadedList().mTotalCount == 5);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList.size() == 2);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[0].mName == _T("Mea Culpa~*'-.,;:_\"\\@#%&"));
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[0].mScore == 42);
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[1].mName == _T("A"));
+			deb_assert(lHiscore.GetDownloadedList().mEntryList[1].mScore == 4321);
 			lHiscore.Close();
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -670,16 +670,16 @@ bool HiscoreTest::Test()
 		lContext = _T("score parse");
 		astr a = "{ \"offset\" : 15 }";
 		lTestOk = lHiscore.ParseScore(a);
-		assert(lHiscore.GetUploadedPlace() == 15);
+		deb_assert(lHiscore.GetUploadedPlace() == 15);
 		lHiscore.Close();
 		if (lTestOk)
 		{
 			a = "{\"offset\":3429}";
 			lTestOk = lHiscore.ParseScore(a);
-			assert(lHiscore.GetUploadedPlace() == 3429);
+			deb_assert(lHiscore.GetUploadedPlace() == 3429);
 			lHiscore.Close();
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	/*// Upload some scores.
@@ -697,14 +697,14 @@ bool HiscoreTest::Test()
 				break;
 			}
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}*/
 
 	if (lTestOk)
 	{
 		lContext = _T("init score download");
 		lTestOk = lHiscore.StartDownloadingList(_T("Computer"), _T("Level"), _T("Avatar"), 0, 10);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -720,7 +720,7 @@ bool HiscoreTest::Test()
 				break;
 			}
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -728,21 +728,21 @@ bool HiscoreTest::Test()
 		lContext = _T("checking score");
 		Cure::HiscoreAgent::List lHiscoreList = lHiscore.GetDownloadedList();
 		lTestOk = (lHiscoreList.mOffset == 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lTestOk = (lHiscoreList.mEntryList.size() == 8);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = (lHiscoreList.mEntryList[0].mName.size() >= 1 && lHiscoreList.mEntryList[0].mName.size() <= 13);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = (lHiscoreList.mEntryList[0].mScore >= 1000 && lHiscoreList.mEntryList[0].mScore < 2000);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -750,7 +750,7 @@ bool HiscoreTest::Test()
 				lHiscoreList.mEntryList[1].mScore >= lHiscoreList.mEntryList[2].mScore &&
 				lHiscoreList.mEntryList[2].mScore >= lHiscoreList.mEntryList[3].mScore &&
 				lHiscoreList.mEntryList[3].mScore >= lHiscoreList.mEntryList[4].mScore);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 
@@ -758,7 +758,7 @@ bool HiscoreTest::Test()
 	{
 		lContext = _T("init score upload");
 		lTestOk = lHiscore.StartUploadingScore(_T("Computer"), _T("Level"), _T("Avatar"), _T("high_festiva!"), Lepra::Random::GetRandomNumber()%1000 + 1000);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -774,7 +774,7 @@ bool HiscoreTest::Test()
 				break;
 			}
 		}
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -782,7 +782,7 @@ bool HiscoreTest::Test()
 		lContext = _T("score place");
 		int lPosition = lHiscore.GetUploadedPlace();
 		lTestOk = (lPosition >= 0 && lPosition <= 7);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	Network::Stop();
 

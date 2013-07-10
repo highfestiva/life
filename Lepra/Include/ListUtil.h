@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -57,6 +57,11 @@ public:
 		}
 
 		return -1;
+	}
+
+	template<class _ListType> static bool Contains(const _ListType& pList, const typename _ListType::value_type& pValue)
+	{
+		return std::find(pList.begin(), pList.end(), pValue) != pList.end();
 	}
 };
 

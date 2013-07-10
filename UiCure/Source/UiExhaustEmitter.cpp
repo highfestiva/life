@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -22,12 +22,10 @@ namespace UiCure
 
 
 
-ExhaustEmitter::ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, float pScale, float pAmount, float pLifeTime):
+ExhaustEmitter::ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager):
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
-	mScale(pScale),
-	mDelay(1/pAmount),
-	mLifeTime(pLifeTime)
+	mExhaustTimeout(0)
 {
 }
 
@@ -56,8 +54,10 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 		FV_VX,
 		FV_VY,
 		FV_VZ,
+		FV_SCALE,
 		FV_DENSITY,
 		FV_OPACITY,
+		FV_TTL,
 		FV_COUNT
 	};
 	if (pTag.mFloatValueList.size() != FV_COUNT ||
@@ -67,7 +67,7 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 		pTag.mMeshIndexList.size() < 1)
 	{
 		mLog.Errorf(_T("The exhaust tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 	const int lEngineIndex = pTag.mEngineIndexList[0];
@@ -76,15 +76,18 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 		return;
 	}
 	const TBC::PhysicsEngine* lEngine = pObject->GetPhysics()->GetEngine(lEngineIndex);
-	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
 	float lExhaustIntensity;
 	CURE_RTVAR_GET(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
-	mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity() * lDensity) * lExhaustIntensity * pFrameTime * 25;
+	mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity()) * lExhaustIntensity * pFrameTime * 25;
 	if (mExhaustTimeout > 0)
 	{
 		return;
 	}
-	mExhaustTimeout = mDelay;
+	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
+	mExhaustTimeout = 1/lDensity;
+
+	const float lScale = pTag.mFloatValueList[FV_SCALE];
+	const float lLifeTime = pTag.mFloatValueList[FV_TTL];
 
 	const QuaternionF lOriginalOrientation = pObject->GetOrientation();
 	Vector3DF lOffset(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
@@ -92,7 +95,7 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 	Vector3DF lVelocity(pTag.mFloatValueList[FV_VX], pTag.mFloatValueList[FV_VY], pTag.mFloatValueList[FV_VZ]);
 	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
 	lVelocity = lOriginalOrientation*lVelocity;
-	lVelocity += pObject->GetVelocity()*0.5f;
+	lVelocity += pObject->GetVelocity();
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
@@ -107,7 +110,7 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 			lTransform.GetPosition() += lOffset;
 
 			const float lAngularVelocity = Random::Uniform(-15.5f, +15.5f);
-			lParticleRenderer->CreateFume(mLifeTime, mScale, lAngularVelocity, lOpacity, lTransform.GetPosition(), lVelocity);
+			lParticleRenderer->CreateFume(lLifeTime, lScale, lAngularVelocity, lOpacity, lTransform.GetPosition(), lVelocity);
 		}
 	}
 }

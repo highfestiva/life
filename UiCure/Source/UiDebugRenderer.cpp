@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2011, Pixel Doctrine
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -85,6 +85,16 @@ void DebugRenderer::Render(const GameUiManager* pUiManager, const PixelRect& pRe
 	}
 }
 
+void DebugRenderer::RenderSpline(const GameUiManager* pUiManager, Spline* pSpline)
+{
+	const float t = pSpline->GetCurrentInterpolationTime();
+	for (float x = 0; x < 1; x += 0.01f)
+	{
+		pSpline->GotoAbsoluteTime(x);
+		pUiManager->GetRenderer()->DrawLine(pSpline->GetValue(), pSpline->GetSlope() * 2, WHITE);
+	}
+	pSpline->GotoAbsoluteTime(t);
+}
 
 
 }

@@ -455,6 +455,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\Source\UiBurnEmitter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiCollisionSoundManager.cpp"
 				>
 			</File>
@@ -488,6 +492,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiIconButton.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiJetEngineEmitter.cpp"
 				>
 			</File>
 			<File
@@ -529,6 +537,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\Include\UiBurnEmitter.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\UiCollisionSoundManager.h"
 				>
 			</File>
@@ -558,6 +570,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiIconButton.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiJetEngineEmitter.h"
 				>
 			</File>
 			<File

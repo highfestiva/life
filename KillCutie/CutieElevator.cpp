@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -29,7 +29,7 @@ CutieElevator::~CutieElevator()
 void CutieElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
 {
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
-	assert(lTrigger);
+	deb_assert(lTrigger);
 	if (lTrigger->GetPriority() > -100)
 	{
 		Parent::OnTrigger(pTriggerId, pBody, pNormal);

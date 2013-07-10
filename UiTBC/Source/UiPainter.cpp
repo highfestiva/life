@@ -1,11 +1,11 @@
 
-// Author: Alexander Hugestrand, Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström, Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiPainter.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../Include/UiFontManager.h"
 
@@ -293,7 +293,7 @@ void Painter::SetFontManager(FontManager* pFontManager)
 
 FontManager* Painter::GetFontManager() const
 {
-	assert(mFontManager);
+	deb_assert(mFontManager);
 	return (mFontManager);
 }
 

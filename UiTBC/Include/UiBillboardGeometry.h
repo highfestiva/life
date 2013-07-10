@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -23,7 +23,7 @@ namespace UiTbc
 class BillboardGeometry: public TBC::GeometryBase
 {
 public:
-	BillboardGeometry(unsigned pUVSetCount);
+	BillboardGeometry(float pAspectRatio, unsigned pUVSetCount);
 	virtual ~BillboardGeometry();
 
 	virtual unsigned GetMaxVertexCount() const;

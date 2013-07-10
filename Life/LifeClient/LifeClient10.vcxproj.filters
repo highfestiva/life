@@ -62,9 +62,6 @@
     <ClCompile Include="..\LifeServer\ServerConsoleManager.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="..\LifeServer\Spawner.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
     <ClCompile Include="UiGameServerManager.cpp">
       <Filter>Server</Filter>
     </ClCompile>
@@ -76,6 +73,24 @@
     </ClCompile>
     <ClCompile Include="..\LifeMaster\MasterServerNetworkParser.cpp">
       <Filter>Master</Filter>
+    </ClCompile>
+    <ClCompile Include="ExplodingMachine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FastProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HomingProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -133,9 +148,6 @@
     <ClInclude Include="..\LifeServer\ServerConsoleManager.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="..\LifeServer\Spawner.h">
-      <Filter>Server</Filter>
-    </ClInclude>
     <ClInclude Include="UiGameServerManager.h">
       <Filter>Server</Filter>
     </ClInclude>
@@ -147,6 +159,24 @@
     </ClInclude>
     <ClInclude Include="..\LifeMaster\MasterServerNetworkParser.h">
       <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="ExplodingMachine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FastProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HomingProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

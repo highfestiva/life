@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
  
 
 
 #include "MasterServerNetworkParser.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Checksum.h"
 #include "../../Lepra/Include/DES.h"
 #include "../../Lepra/Include/Packer.h"
@@ -37,8 +37,8 @@ unsigned MasterServerNetworkParser::StrToRaw(uint8* pRawData, const wstr& pStr)
 	lDes.Encrypt(&pRawData[lHeaderSize+lDataSize], lFooterSize);
 	const int lSize = lHeaderSize + lDataSize + lFooterSize;
 	LEPRA_DEBUG_CODE(wstr lTextStr);
-	LEPRA_DEBUG_CODE(assert(MasterServerNetworkParser::RawToStr(lTextStr, pRawData, lSize)));
-	LEPRA_DEBUG_CODE(assert(lTextStr == pStr));
+	LEPRA_DEBUG_CODE(deb_assert(MasterServerNetworkParser::RawToStr(lTextStr, pRawData, lSize)));
+	LEPRA_DEBUG_CODE(deb_assert(lTextStr == pStr));
 	return lSize;
 }
 

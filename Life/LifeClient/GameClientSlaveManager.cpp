@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -8,7 +8,6 @@
 #include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/ContextObjectAttribute.h"
-#include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -120,13 +119,6 @@ void GameClientSlaveManager::LoadSettings()
 	}
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-}
-
-void GameClientSlaveManager::SaveSettings()
-{
-#ifndef EMULATE_TOUCH
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
-#endif // Computer or touch device.
 }
 
 void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -628,6 +620,7 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	mOptions.Options::OptionsManager::UpdateInput(pKeyCode, false);
+	((ConsoleManager*)GetConsoleManager())->OnKey(UiLepra::InputManager::GetKeyName(pKeyCode));
 	return (false);
 }
 
@@ -810,7 +803,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				Cure::MessageCreateOwnedObject* lMessageCreateOwnedObject = (Cure::MessageCreateOwnedObject*)lMessageCreateObject;
 				lObject->SetOwnerInstanceId(lMessageCreateOwnedObject->GetOwnerInstanceId());
-				//assert(GetContext()->GetObject(lObject->GetOwnerInstanceId(), true));	Owning object may have been destroyed.
+				//deb_assert(GetContext()->GetObject(lObject->GetOwnerInstanceId(), true));	Owning object may have been destroyed.
 			}
 
 		}
@@ -915,7 +908,7 @@ void GameClientSlaveManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pM
 		break;
 		case Cure::MessageStatus::INFO_LOGIN:
 		{
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 		case Cure::MessageStatus::INFO_COMMAND:
@@ -993,7 +986,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 		break;
 		default:
 		{
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1116,7 +1109,7 @@ bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject* pObject)
 			lPacket->AddMessage(lAttribMessage);
 			lAttribute->Pack(lAttribMessage->GetWriteBuffer(lPacket, pObject->GetInstanceId(), lSendSize));
 
-			assert(!GetNetworkAgent()->GetLock()->IsOwner());
+			deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 			ScopeLock lTickLock(GetTickLock());
 			GetNetworkAgent()->PlaceInSendBuffer(true, GetNetworkClient()->GetSocket(), lPacket);
 
@@ -1134,7 +1127,7 @@ bool GameClientSlaveManager::IsServer()
 void GameClientSlaveManager::SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned)
 {
 	// Server manages this.
-	assert(false);
+	deb_assert(false);
 }
 
 void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObject*)
@@ -1142,18 +1135,18 @@ void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObjec
 	// Server manages this.
 }
 
-void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void*)
+void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData)
 {
 	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
 	{
-		assert(IsOwned(pObject->GetInstanceId()));
+		deb_assert(IsOwned(pObject->GetInstanceId()));
 		mOwnedObjectList.erase(pObject->GetInstanceId());
 		pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 		pObject->DeleteNetworkOutputGhost();
 	}
 	else
 	{
-		assert(false);
+		Parent::OnAlarm(pAlarmId, pObject, pExtraData);
 	}
 }
 
@@ -1168,7 +1161,7 @@ void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, unsign
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
 }
 
@@ -1180,29 +1173,13 @@ void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::
 	{
 		if (!lObject1->DetachFromObject(lObject2))
 		{
-			assert(false);
+			deb_assert(false);
 		}
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
-}
-
-
-
-float GameClientSlaveManager::QuerySetChildishness(Cure::ContextObject* pOwnedObject) const
-{
-	const str lName = _T("float_childishness");
-	Cure::FloatAttribute* lAttribute = (Cure::FloatAttribute*)pOwnedObject->GetAttribute(lName);
-	if (!lAttribute)
-	{
-		lAttribute = new Cure::FloatAttribute(pOwnedObject, lName, 0);
-	}
-	float lChildishness;
-	CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
-	lAttribute->SetValue(lChildishness);
-	return lChildishness;
 }
 
 

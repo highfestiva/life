@@ -1,7 +1,7 @@
 /*
 	Class:  CollisionDetector3D
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 template<class _TVarType>
@@ -235,7 +235,7 @@ template<class _TVarType>
 bool CollisionDetector3D<_TVarType>::IsAACylinder1EnclosingAACylinder2(const Cylinder<_TVarType>& pCylinder1,
 									const Cylinder<_TVarType>& pCylinder2)
 {
-	assert(pCylinder1.GetAlignment() == pCylinder2.GetAlignment());
+	deb_assert(pCylinder1.GetAlignment() == pCylinder2.GetAlignment());
 
 	// It's impossible for a smaller cylinder to enclose a larger one.
 	if(pCylinder1.GetRadius() < pCylinder2.GetRadius())

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -45,8 +45,8 @@ class ChunkyMeshLoader: public TBC::ChunkyLoader	// Contains the mesh. Excluded 
 public:
 	ChunkyMeshLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyMeshLoader();
-	bool Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadows);
-	bool Save(const TriangleBasedGeometry* pMeshData, bool pCastsShadows);
+	bool Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows);
+	bool Save(const TriangleBasedGeometry* pMeshData, int pCastsShadows);
 };
 
 class ChunkySkinLoader: public TBC::ChunkyLoader	// Contains mesh skin weight information. 1-1 relation to meshes.

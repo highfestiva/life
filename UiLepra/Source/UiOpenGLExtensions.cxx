@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 #include "../Include/UiOpenGLExtensions.h"
 
@@ -59,10 +59,16 @@ void OpenGLExtensions::InitExtensions()
 			mIsGLVersion14 = true;
 		}
 	}
-	else if(lVersion[0] >= '2' && lVersion[0] <= '9')
+	else if (lVersion[0] >= '2' && lVersion[0] <= '9')
 	{
 		// This must be an OpenGL version way higher than the versions
 		// that existed when this was written. Assume backward compatibility.
+		mIsGLVersion14 = true;
+		mIsGLVersion15 = true;
+	}
+	else if (lVersion[0] < '0' || lVersion[0] > '9')
+	{
+		// NaN hopefully means some extremely well developed system.
 		mIsGLVersion14 = true;
 		mIsGLVersion15 = true;
 	}

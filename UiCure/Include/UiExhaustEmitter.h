@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -18,7 +18,7 @@ namespace UiCure
 class ExhaustEmitter
 {
 public:
-	ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, float pScale, float pAmount, float pLifeTime);
+	ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager);
 	virtual ~ExhaustEmitter();
 
 	void EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
@@ -26,9 +26,6 @@ public:
 	Cure::ResourceManager* mResourceManager;
 	GameUiManager* mUiManager;
 	float mExhaustTimeout;
-	float mScale;
-	float mDelay;
-	float mLifeTime;
 
 	LOG_CLASS_DECLARE();
 };

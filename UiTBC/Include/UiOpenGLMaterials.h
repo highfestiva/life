@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -43,8 +43,6 @@ public:
 
 protected:
 	void UpdateTextureMatrix(TBC::GeometryBase* pGeometry);
-
-	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
 };
 
 
@@ -90,6 +88,8 @@ public:
 	inline virtual ~OpenGLMatSingleColorBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	static void DoPreRender();
+	static void DoPostRender();
 	virtual void PreRender();
 	virtual void PostRender();
 
@@ -297,6 +297,8 @@ public:
 	inline virtual ~OpenGLMatSingleColorEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void PreRender();
+	virtual void PostRender();
 };
 
 

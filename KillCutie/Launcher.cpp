@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -93,7 +93,7 @@ void Launcher::GetAngles(const Vector3DF& pTargetPosition, const Vector3DF& pTar
 
 void Launcher::CreateEngines()
 {
-	assert(GetPhysics()->GetEngineCount() == 0);
+	deb_assert(GetPhysics()->GetEngineCount() == 0);
 	TBC::PhysicsEngine* lPitchEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_TILTER, 1, 1, 1, 1, 0);
 	GetPhysics()->AddEngine(lPitchEngine);
 	TBC::PhysicsEngine* lYawEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 1, 1, 1, 1, 1);
@@ -130,7 +130,7 @@ void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pP
 	else
 	{
 		const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
-		//assert(t > 0);
+		//deb_assert(t > 0);
 		pTime = t;
 		const float vfwd = lYawVector.GetLength() / t;
 		pGuidePitch = -::atan(vfwd/vup);

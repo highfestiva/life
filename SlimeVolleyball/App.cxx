@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -272,6 +272,7 @@ bool App::Open()
 		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
 		mInput->ActivateAll();
 		mInput->AddKeyCodeInputObserver(this);
+		mInput->SetCursorVisible(true);
 	}
 	if (lOk)
 	{

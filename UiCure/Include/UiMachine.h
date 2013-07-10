@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -17,7 +17,9 @@ namespace UiCure
 
 
 
+class BurnEmitter;
 class ExhaustEmitter;
+class JetEngineEmitter;
 
 
 
@@ -28,7 +30,9 @@ public:
 
 	Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~Machine();
+	void SetJetEngineEmitter(JetEngineEmitter* pEmitter);
 	void SetExhaustEmitter(ExhaustEmitter* pEmitter);
+	void SetBurnEmitter(BurnEmitter* pEmitter);
 	void DeleteEngineSounds();
 
 protected:
@@ -37,16 +41,19 @@ protected:
 private:
 	void HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, bool pIsChild);
 	void HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag);
+	void HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
 	void HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, const Vector3DF& pVelocity,
 		float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex);
-	void HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime, float pRealTimeRatio);
+	void HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
 
 	void LoadPlaySound3d(UserSound3dResource* pSoundResource);
 
 	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
 	typedef std::vector<float> TagSoundIntensityArray;
 
+	JetEngineEmitter* mJetEngineEmitter;
 	ExhaustEmitter* mExhaustEmitter;
+	BurnEmitter* mBurnEmitter;
 	TagSoundTable mEngineSoundTable;
 	TagSoundIntensityArray mEngineSoundIntensity;
 

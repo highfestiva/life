@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -54,6 +54,7 @@ RoadSignButton::RoadSignButton(Life::ScreenPart* pScreenPart, Cure::ResourceMana
 	mButton.SetOnIsOver(RoadSignButton, IsOverButton);
 
 	SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
+	SetUseDefaultTexture(true);
 	UiCure::UserRendererImageResource* lTexture = new UiCure::UserRendererImageResource(mUiManager, false);
 	mTextureResourceArray.push_back(lTexture);
 	lTexture->Load(GetResourceManager(), pTextureResourceName,

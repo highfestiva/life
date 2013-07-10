@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -28,7 +28,7 @@ PhysicsSharedInitData::PhysicsSharedInitData(TransformationF pTransformation, Ph
 
 void PhysicsSharedInitData::operator=(const PhysicsSharedInitData&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 
@@ -68,11 +68,11 @@ bool PhysicsSharedResource::IsReferenceType() const
 bool PhysicsSharedResource::Load()
 {
 	bool lOk = (mClassResource == 0);
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
-		assert(lFilename != GetName());
+		deb_assert(lFilename != GetName());
 		mClassResource = new ClassResource;
 		mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this, &PhysicsSharedResource::OnLoadClass));
 	}
@@ -105,7 +105,7 @@ ResourceLoadState PhysicsSharedResource::PostProcess()
 bool PhysicsSharedResource::FinalizeInit()
 {
 	TBC::ChunkyPhysics* lStructure = GetRamData();
-	TransformationF& lTransformation = mInitData.mTransformation;	// TRICKY: will change as we don't use reference!
+	TransformationF lTransformation = mInitData.mTransformation;
 	if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
 		return lStructure->FinalizeInit(0, 0, &lTransformation, 0, 0);
@@ -117,7 +117,7 @@ bool PhysicsSharedResource::FinalizeInit()
 
 	const int lPhysicsFps = mInitData.mPhysicsFps;
 	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation, mInitData.mInstanceId, mInitData.mInstanceId);
-	assert(lOk);
+	deb_assert(lOk);
 
 	// Set orienation (as given in initial transform). The orientation in initial transform
 	// is relative to the initial root bone orientation.
@@ -129,7 +129,7 @@ bool PhysicsSharedResource::FinalizeInit()
 			const float lTotalMass = lStructure->QueryTotalMass(mInitData.mPhysicsManager);
 			ObjectPositionalData lPlacement;
 			lOk = PositionHauler::Get(lPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass);
-			assert(lOk);
+			deb_assert(lOk);
 			if (lOk)
 			{
 				ObjectPositionalData* lNewPlacement = (ObjectPositionalData*)lPlacement.Clone();

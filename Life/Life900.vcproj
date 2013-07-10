@@ -443,6 +443,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Explosion.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Life.cpp"
 				>
 			</File>
@@ -458,6 +462,14 @@
 				RelativePath=".\RaceScore.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Spawner.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StuntTrigger.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -466,6 +478,10 @@
 			>
 			<File
 				RelativePath=".\ConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Explosion.h"
 				>
 			</File>
 			<File
@@ -498,6 +514,14 @@
 			</File>
 			<File
 				RelativePath=".\ServerInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Spawner.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StuntTrigger.h"
 				>
 			</File>
 		</Filter>

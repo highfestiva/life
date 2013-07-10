@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include "../Include/Log.h"
 
 
@@ -61,10 +61,10 @@ Log* LogType::GetLog(Subsystem pSubsystem)
 
 	if (pSubsystem >= SUB_LOWEST_TYPE && pSubsystem < SUB_TYPE_COUNT)
 	{
-		assert(mLogArray[pSubsystem]);
+		deb_assert(mLogArray[pSubsystem]);
 		return (mLogArray[pSubsystem]);
 	}
-	assert(false);
+	deb_assert(false);
 	return (mLogArray[0]);
 }
 

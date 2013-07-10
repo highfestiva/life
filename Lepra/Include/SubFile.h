@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 // A subfile takes an OPEN file and allows you to work an a PART of that file.
 // This class does not allow any operations outside the file area given by

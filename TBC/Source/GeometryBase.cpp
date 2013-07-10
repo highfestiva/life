@@ -1,11 +1,11 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/GeometryBase.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/Bones.h"
 #include "../../Lepra/Include/Vector2D.h"
 
@@ -290,6 +290,8 @@ GeometryBase::GeometryBase() :
 	mParentCell(0),
 	mLastFrameVisible(0),
 	mUVAnimator(0),
+	mPreRenderCallback(0),
+	mPostRenderCallback(0),
 	mExtraData(0)
 {
 }
@@ -318,6 +320,26 @@ void GeometryBase::AddListener(Listener* pListener)
 void GeometryBase::RemoveListener(Listener* pListener)
 {
 	mListenerList.remove(pListener);
+}
+
+const GeometryBase::RenderCallback& GeometryBase::GetPreRenderCallback() const
+{
+	return mPreRenderCallback;
+}
+
+void GeometryBase::SetPreRenderCallback(const RenderCallback& pCallback)
+{
+	mPreRenderCallback = pCallback;
+}
+
+const GeometryBase::RenderCallback& GeometryBase::GetPostRenderCallback() const
+{
+	return mPostRenderCallback;
+}
+
+void GeometryBase::SetPostRenderCallback(const RenderCallback& pCallback)
+{
+	mPostRenderCallback = pCallback;
 }
 
 bool GeometryBase::IsGeometryReference()
@@ -357,7 +379,7 @@ unsigned int GeometryBase::GetMaxTriangleCount() const
 		case LINES:
 			return GetMaxIndexCount() / 2;
 		default:
-			assert(false);
+			deb_assert(false);
 			return (0);
 	}
 }
@@ -374,7 +396,7 @@ unsigned int GeometryBase::GetTriangleCount() const
 		case LINES:
 			return GetIndexCount() / 2;
 		default:
-			assert(false);
+			deb_assert(false);
 			return (0);
 	}
 }
@@ -419,7 +441,7 @@ void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3])
 		break;
 		default:
 		{
-			assert(false);
+			deb_assert(false);
 			// These values should hopefully cause a crash.
 			pIndices[0] = (uint32)-100000;
 			pIndices[1] = (uint32)-100000;
@@ -499,7 +521,7 @@ void GeometryBase::SetIndexDataChanged(bool pChanged)
 
 void GeometryBase::SetRendererData(void* pRendererData)
 {
-	assert(!mRendererData || !pRendererData);
+	deb_assert(!mRendererData || !pRendererData);
 	mRendererData = pRendererData;
 }
 

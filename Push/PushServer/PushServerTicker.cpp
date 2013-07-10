@@ -1,13 +1,13 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "PushServerTicker.h"
 #include "../../Life/LifeServer/GameServerManager.h"
+#include "../../Life/LifeServer/ServerMessageProcessor.h"
 #include "PushServerDelegate.h"
-#include "PushServerMessageProcessor.h"
 
 
 
@@ -21,7 +21,7 @@ PushServerTicker::PushServerTicker(Cure::ResourceManager* pResourceManager, floa
 {
 	PushServerDelegate* lDelegate = new PushServerDelegate(mGameManager);
 	mGameManager->SetDelegate(lDelegate);
-	mGameManager->SetMessageProcessor(new PushServerMessageProcessor(mGameManager, lDelegate));
+	mGameManager->SetMessageProcessor(new Life::ServerMessageProcessor(mGameManager));
 }
 
 PushServerTicker::~PushServerTicker()

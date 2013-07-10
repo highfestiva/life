@@ -1,12 +1,12 @@
 /*
 	Class:  AnimatedGeometry
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 #include "../Include/UiAnimatedGeometry.h"
 #include "../../TBC/Include/Bones.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 
 namespace UiTbc
 {
@@ -138,13 +138,13 @@ void AnimatedGeometry::UpdateAnimatedGeometry()
 	for (int x = 0; x < mBoneWeightGroupCount; ++x)
 	{
 		const BoneWeightGroup& lGroup = mBoneWeightGroupArray[x];
-		assert(lGroup.mBoneCount <= mBones->GetBoneCount());
+		deb_assert(lGroup.mBoneCount <= mBones->GetBoneCount());
 
 		unsigned lVectorWeightIndex = 0;
 		for (int y = 0; y < lGroup.mVectorIndexCount; ++y)
 		{
 			const unsigned lVectorIndex = lGroup.mVectorIndexArray[y] * 3;
-			assert(lVectorIndex+2 < mOriginalGeometry->GetVertexCount()*3);
+			deb_assert(lVectorIndex+2 < mOriginalGeometry->GetVertexCount()*3);
 
 			const Vector3DF v(lOriginalVData[lVectorIndex+0], lOriginalVData[lVectorIndex+1], lOriginalVData[lVectorIndex+2]);
 			const Vector3DF n(lOriginalNData[lVectorIndex+0], lOriginalNData[lVectorIndex+1], lOriginalNData[lVectorIndex+2]);

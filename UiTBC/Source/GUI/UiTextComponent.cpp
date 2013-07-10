@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -28,21 +28,21 @@ TextComponent::~TextComponent()
 
 void TextComponent::SetFontColor(const Color& pTextColor)
 {
-	assert(pTextColor != BLACK);
+	deb_assert(pTextColor != BLACK);
 	mTextColor = pTextColor;
 	ForceRepaint();
 }
 
 void TextComponent::SetFontId(const FontManager::FontId& pFontId)
 {
-	assert(!mIsFontActive);
+	deb_assert(!mIsFontActive);
 	mFontId = pFontId;
 	ForceRepaint();
 }
 
 void TextComponent::ActivateFont(Painter* pPainter)
 {
-	assert(!mIsFontActive);
+	deb_assert(!mIsFontActive);
 	if (mIsFontActive)
 	{
 		return;
@@ -58,7 +58,7 @@ void TextComponent::ActivateFont(Painter* pPainter)
 
 void TextComponent::DeactivateFont(Painter* pPainter)
 {
-	assert(mIsFontActive || mFontId == FontManager::INVALID_FONTID);
+	deb_assert(mIsFontActive || mFontId == FontManager::INVALID_FONTID);
 	if (mIsFontActive && mFontId != FontManager::INVALID_FONTID)
 	{
 		const FontManager::FontId lOurFontId = pPainter->GetFontManager()->GetActiveFontId();

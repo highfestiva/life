@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -51,7 +51,7 @@ bool IconButton::IsComplete() const
 
 void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResource)
 {
-	assert(pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	deb_assert(pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		Canvas lCanvas(*pResource->GetRamData(), true);

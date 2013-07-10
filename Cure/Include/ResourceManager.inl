@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -224,7 +224,7 @@ template<class RamData, class DiversifiedData>
 DiversifiedResource<RamData, DiversifiedData>::~DiversifiedResource()
 {
 	// Diviersified table must be entirely free'd and cleared out by child class.
-	assert(mUserDiversifiedTable.empty());
+	deb_assert(mUserDiversifiedTable.empty());
 }
 
 template<class RamData, class DiversifiedData>
@@ -242,7 +242,7 @@ DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const
 		lInstanceId = CreateDiversifiedData();
 		mUserDiversifiedTable.insert(typename UserDataTable::value_type(pUserResource, lInstanceId));
 	}
-	assert(lInstanceId != 0);
+	deb_assert(lInstanceId != 0);
 	return (lInstanceId);
 }
 
@@ -298,7 +298,7 @@ bool ClassResourceBase<_Class, _ClassLoader>::Load()
 template<class _Class, class _ClassLoader>
 bool ClassResourceBase<_Class, _ClassLoader>::LoadWithName(const str& pName)
 {
-	assert(Parent::GetRamData() == 0);
+	deb_assert(Parent::GetRamData() == 0);
 	Parent::SetRamData(new _Class());
 	File* lFile = Resource::GetManager()->QueryFile(pName);
 	bool lOk = (lFile != 0);

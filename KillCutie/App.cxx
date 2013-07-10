@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -23,6 +23,7 @@
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiMusicPlayer.h"
+#include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiCure/Include/UiSound.h"
 #include "../UiLepra/Include/Mac/UiIosInput.h"
@@ -38,6 +39,7 @@
 #include "../UiTBC/Include/GUI/UiScrollBar.h"
 #include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiFontManager.h"
+#include "../UiTBC/Include/UiParticleRenderer.h"
 #include "Cutie.h"
 #include "Game.h"
 #include "Launcher.h"
@@ -481,6 +483,7 @@ bool App::Open()
 		mUiManager->GetDisplayManager()->SetCaption(_T("Kill Cutie"));
 		mUiManager->GetDisplayManager()->AddResizeObserver(this);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
+		mUiManager->GetInputManager()->SetCursorVisible(true);
 #if !defined(LEPRA_TOUCH) && defined(LEPRA_TOUCH_LOOKANDFEEL)
 		mIsMouseDown = false;
 		mUiManager->GetInputManager()->GetMouse()->AddFunctor(new UiLepra::TInputFunctor<App>(this, &App::OnMouseInput));
@@ -597,6 +600,12 @@ bool App::Open()
 	}
 	if (lOk)
 	{
+		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
+	}
+	if (lOk)
+	{
 		mTapClick = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 		mTapClick->Load(mResourceManager, _T("tap.wav"),
 			UiCure::UserSound2dResource::TypeLoadCallback(this, &App::SoundLoadCallback));
@@ -641,16 +650,16 @@ void App::Close()
 
 void App::Init()
 {
-	assert(Int2Str(-123) == _T("-123"));
-	assert(Int2Str(-1234) == _T("-1,234"));
-	assert(Int2Str(-12345) == _T("-12,345"));
-	assert(Int2Str(-123456) == _T("-123,456"));
-	assert(Int2Str(-1234567) == _T("-1,234,567"));
-	assert(Int2Str(+123) == _T("123"));
-	assert(Int2Str(+1234) == _T("1,234"));
-	assert(Int2Str(+12345) == _T("12,345"));
-	assert(Int2Str(+123456) == _T("123,456"));
-	assert(Int2Str(+1234567) == _T("1,234,567"));
+	deb_assert(Int2Str(-123) == _T("-123"));
+	deb_assert(Int2Str(-1234) == _T("-1,234"));
+	deb_assert(Int2Str(-12345) == _T("-12,345"));
+	deb_assert(Int2Str(-123456) == _T("-123,456"));
+	deb_assert(Int2Str(-1234567) == _T("-1,234,567"));
+	deb_assert(Int2Str(+123) == _T("123"));
+	deb_assert(Int2Str(+1234) == _T("1,234"));
+	deb_assert(Int2Str(+12345) == _T("12,345"));
+	deb_assert(Int2Str(+123456) == _T("123,456"));
+	deb_assert(Int2Str(+1234567) == _T("1,234,567"));
 	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
@@ -769,7 +778,7 @@ bool App::Poll()
 	bool lOk = true;
 	if (lOk)
 	{
-		mLoopTimer.StepCounterShadow();
+		HiResTimer::StepCounterShadow();
 	}
 	if (lOk)
 	{
@@ -795,7 +804,6 @@ bool App::Poll()
 		{
 			Thread::Sleep(lDelayTime-0.001);
 			UiLepra::Core::ProcessMessages();
-			mLoopTimer.StepCounterShadow();	// TRICKY: after sleep we must manually step the counter shadow.
 		}
 		mLoopTimer.PopTimeDiff();
 #ifndef LEPRA_TOUCH_LOOKANDFEEL
@@ -864,7 +872,7 @@ bool App::Poll()
 						delete mHiscoreAgent;
 						mHiscoreAgent = 0;
 						mLog.AError("Oops! Completed hiscore communication, but something went wrong.");
-						assert(false);
+						deb_assert(false);
 						MainMenu();	// Well... assume some super-shitty state...
 					}
 					break;
@@ -2181,7 +2189,7 @@ void App::Resume()
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
-	mLoopTimer.StepCounterShadow();
+	HiResTimer::StepCounterShadow();
 	mLoopTimer.PopTimeDiff();
 	if (mMusicPlayer)
 	{

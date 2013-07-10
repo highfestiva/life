@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -24,6 +24,7 @@ public:
 	Elevator(ContextManager* pManager);
 	virtual ~Elevator();
 
+	void SetStopDelay(double pStopDelay);
 	Vector3DF GetPosition() const;
 	Vector3DF GetVelocity() const;
 	float GetRadius() const;
@@ -44,8 +45,8 @@ private:
 	const TBC::PhysicsTrigger* mActiveTrigger;
 	HiResTimer mTrigTime;
 	StopWatch mStopTimer;
-	const double mExitDelay;
-	const double mStopDelay;
+	double mExitDelay;
+	double mStopDelay;
 	bool mElevatorHasBeenMoving;
 	bool mElevatorIsActive;
 	float mEngineActivity;

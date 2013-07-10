@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -41,7 +41,7 @@ GameManager* ContextManager::GetGameManager() const
 
 void ContextManager::SetLocalRange(unsigned pIndex, unsigned pCount)
 {
-	assert(mObjectTable.empty());
+	deb_assert(mObjectTable.empty());
 	const GameObjectId lStartId = 0x40000000;
 	const GameObjectId lBlockSize = (0x7FFFFFFF-lStartId-pCount)/pCount;
 	const GameObjectId lOffset = lStartId + lBlockSize*pIndex;
@@ -56,23 +56,24 @@ void ContextManager::SetIsObjectOwner(bool pIsObjectOwner)
 
 void ContextManager::AddLocalObject(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId() == 0);
+	deb_assert(pObject->GetInstanceId() == 0);
 	pObject->SetInstanceId(AllocateGameObjectId(NETWORK_OBJECT_LOCAL_ONLY));
-	assert(pObject->GetManager() == 0);
+	deb_assert(pObject->GetManager() == 0);
 	pObject->SetManager(this);
 	AddObject(pObject);
 }
 
 void ContextManager::AddObject(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId() != 0);
-	assert(mObjectTable.find(pObject->GetInstanceId()) == mObjectTable.end());
-	assert(pObject->GetManager() == this);
+	deb_assert(pObject->GetInstanceId() != 0);
+	deb_assert(mObjectTable.find(pObject->GetInstanceId()) == mObjectTable.end());
+	deb_assert(pObject->GetManager() == this);
 	mObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
 void ContextManager::RemoveObject(ContextObject* pObject)
 {
+	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
 	CancelPendingAlarmCallbacks(pObject);
 	DisableMicroTickCallback(pObject);
 	DisableTickCallback(pObject);
@@ -144,10 +145,10 @@ void ContextManager::ClearObjects()
 
 void ContextManager::AddPhysicsSenderObject(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId() != 0);
-	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
-	assert(pObject->GetManager() == this);
-	assert(pObject->GetManager()->GetGameManager()->GetTickLock()->IsOwner());
+	deb_assert(pObject->GetInstanceId() != 0);
+	deb_assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
+	deb_assert(pObject->GetManager() == this);
+	deb_assert(pObject->GetManager()->GetGameManager()->GetTickLock()->IsOwner());
 	mPhysicsSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
@@ -166,9 +167,9 @@ void ContextManager::RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId)
 
 void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId() != 0);
-	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
-	assert(pObject->GetManager() == this);
+	deb_assert(pObject->GetInstanceId() != 0);
+	deb_assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
+	deb_assert(pObject->GetManager() == this);
 	mAttributeSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
@@ -203,14 +204,7 @@ GameObjectId ContextManager::AllocateGameObjectId(NetworkObjectType pNetworkType
 
 void ContextManager::FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
-	if (pNetworkType == NETWORK_OBJECT_LOCAL_ONLY)
-	{
-		mLocalObjectIdManager.RecycleId(pInstanceId);
-	}
-	else
-	{
-		mRemoteObjectIdManager.RecycleId(pInstanceId);
-	}
+	mRecycledIdQueue.push_back(GameObjectIdRecycleInfo(pInstanceId, pNetworkType));
 }
 
 bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
@@ -222,7 +216,7 @@ bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
 
 void ContextManager::EnableTickCallback(ContextObject* pObject)
 {
-	assert(pObject->GetInstanceId());
+	deb_assert(pObject->GetInstanceId());
 	mTickCallbackObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
@@ -246,7 +240,10 @@ void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
 
 void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
-	assert(pObject->GetInstanceId() != 0);
+	deb_assert(pObject->GetInstanceId() != 0);
+	deb_assert(pObject->GetManager() == this);
+
+	ScopeLock lLock(&mAlarmMutex);
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
 	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
@@ -254,6 +251,9 @@ void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, floa
 
 void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
 {
+	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
+
+	ScopeLock lLock(&mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
@@ -270,6 +270,9 @@ void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int
 
 void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 {
+	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
+
+	ScopeLock lLock(&mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
@@ -289,12 +292,12 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 void ContextManager::MicroTick(float pTimeDelta)
 {
 	DispatchMicroTickCallbacks(pTimeDelta);
-	DispatchAlarmCallbacks();
 }
 
 void ContextManager::TickPhysics()
 {
 	DispatchTickCallbacks();
+	DispatchAlarmCallbacks();
 }
 
 void ContextManager::HandleIdledBodies()
@@ -356,6 +359,24 @@ void ContextManager::HandlePostKill()
 		mGameManager->DeleteContextObject(*x);
 	}
 	mPostKillSet.clear();
+
+	RecycledIdQueue::iterator y = mRecycledIdQueue.begin();
+	while (y != mRecycledIdQueue.end())
+	{
+		if (y->mTimer.QueryTimeDiff() < 10.0)
+		{
+			break;
+		}
+		if (y->mNetworkType == NETWORK_OBJECT_LOCAL_ONLY)
+		{
+			mLocalObjectIdManager.RecycleId(y->mInstanceId);
+		}
+		else
+		{
+			mRemoteObjectIdManager.RecycleId(y->mInstanceId);
+		}
+		y = mRecycledIdQueue.erase(y);
+	}
 }
 
 
@@ -385,12 +406,15 @@ void ContextManager::DispatchAlarmCallbacks()
 	// 1. Extract due alarms into list.
 	// 2. Callback alarms.
 
+	ScopeLock lLock(&mAlarmMutex);
+
 	std::list<Alarm> lCallbackList;
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
 		if (mGameManager->GetTimeManager()->GetCurrentPhysicsFrameDelta(x->mFrameTime) >= 0)
 		{
+			deb_assert(!x->mObject->GetClassId().empty());
 			lCallbackList.push_back(*x);
 			mAlarmCallbackObjectSet.erase(x++);
 		}

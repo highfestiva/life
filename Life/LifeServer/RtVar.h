@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -13,7 +13,6 @@
 #define RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER	"Application.AutoExitOnEmptyServer"	// Not debug, might be desirable on dedicated servers.
 
 #define RTVAR_GAME_AUTOFLIPENABLED		"Game.AutoFlipEnabled"
-#define RTVAR_GAME_SPAWNPART			"Game.SpawnPart"
 
 #define RTVAR_NETWORK_LOGINGREETING		"Network.Login.Greeting"
 #define RTVAR_NETWORK_PUBLISHSERVER		"Network.PublishServer"

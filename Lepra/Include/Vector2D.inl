@@ -1,7 +1,7 @@
 /*
 	Class:  Vector2D
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 #define V2D_TEMPLATE template<class _TVarType>

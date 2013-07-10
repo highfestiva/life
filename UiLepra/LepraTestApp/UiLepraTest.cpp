@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #ifndef CURE_TEST_WITHOUT_UI
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include <math.h>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/SystemManager.h"
@@ -43,20 +43,20 @@ bool TestInput(const Lepra::LogDecorator& pLog)
 	{
 		lContext = _T("no keyboard available");
 		lTestOk = (lInputManager->GetKeyboard() != 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("no mouse available");
 		lTestOk = (lInputManager->GetMouse() != 0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("number of devices");
 		lTestOk = (lInputManager->GetDeviceList().size() >= 2 &&
 			lInputManager->GetDeviceList().size() <= 7);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lInputManager)
 	{
@@ -74,20 +74,20 @@ bool TestGraphics(const Lepra::LogDecorator& pLog)
 	bool lTestOk = true;
 
 	UiLepra::DisplayManager* lDisplay = UiLepra::DisplayManager::CreateDisplayManager(UiLepra::DisplayManager::OPENGL_CONTEXT);
-	assert(lDisplay);
+	deb_assert(lDisplay);
 
 	UiLepra::DisplayMode lDisplayMode;
 	if (lTestOk)
 	{
 		lContext = _T("find display mode");
 		lTestOk = lDisplay->FindDisplayMode(lDisplayMode, 640, 480);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("open screen");
 		lTestOk = lDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
@@ -120,13 +120,13 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 
 	UiLepra::SoundManager::SoundID lSound = UiLepra::INVALID_SOUNDID;
 	UiLepra::SoundManager* lSoundManager = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
-	assert(lSoundManager);
+	deb_assert(lSoundManager);
 	if (lTestOk)
 	{
 		lContext = _T("load sound");
 		lSound = lSoundManager->LoadSound3D(_T("Data/logo_trumpet.wav"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		lTestOk = (lSound != UiLepra::INVALID_SOUNDID);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	UiLepra::SoundManager::SoundInstanceID lSoundInstance = UiLepra::INVALID_SOUNDINSTANCEID;
 	if (lTestOk)
@@ -134,7 +134,7 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 		lContext = _T("create sound instance");
 		lSoundInstance = lSoundManager->CreateSoundInstance(lSound);
 		lTestOk = (lSoundInstance != UiLepra::INVALID_SOUNDID);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{

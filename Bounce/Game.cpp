@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 #include "Game.h"
 #include "../Cure/Include/ContextManager.h"
@@ -372,7 +372,7 @@ bool Game::InitializeUniverse()
 		mRacket = new Racket(GetResourceManager(), _T("racket"), mUiManager);
 		AddContextObject(mRacket, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mRacket != 0);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			mRacket->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0)));
@@ -386,7 +386,7 @@ bool Game::InitializeUniverse()
 		mBall = new Ball(GetResourceManager(), _T("ball"), mUiManager);
 		AddContextObject(mBall, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mBall != 0);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			mBall->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0.4f)));

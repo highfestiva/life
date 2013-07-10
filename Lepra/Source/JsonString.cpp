@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include <utf8.h>
 #include "../Include/JsonString.h"
 #include "../Include/StringUtility.h"
@@ -70,7 +70,7 @@ str JsonString::FromJson(const str& pJsonString)
 {
 	if (pJsonString.size() < 2 || pJsonString[0] != '"' || pJsonString[pJsonString.size()-1] != '"')
 	{
-		assert(false);
+		deb_assert(false);
 		return str();
 	}
 	str::const_iterator lEnd = pJsonString.end()-1;

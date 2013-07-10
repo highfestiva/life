@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2012, Righteous Games
+// Copyright (c) 2002-2012, Pixel Doctrine
 
 
 
@@ -19,7 +19,7 @@ using namespace Lepra;
 
 const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;
 
-//#define LIFE_DEMO
+//#define PUSH_DEMO
 
 
 

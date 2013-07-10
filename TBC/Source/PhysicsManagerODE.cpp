@@ -1,10 +1,10 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #pragma warning(push)
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
 #pragma warning(disable: 4127)	// Warning: conditional expression is constant (in ODE).
@@ -33,9 +33,7 @@ PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels, float pSensitiv
 	mWorldID = dWorldCreate();
 	
 	// Play with these to make the simulation behave better.
-	::dWorldSetCFM(mWorldID, 1e-9f);	// World softness and numerical stability.
-	::dWorldSetERP(mWorldID, 0.9f);		// Error reduction.
-	::dWorldSetQuickStepNumIterations(mWorldID, 20);
+	SetSimulationParameters(0, 0, 1);
 
 	if (pSensitivity)
 	{
@@ -80,6 +78,15 @@ PhysicsManagerODE::~PhysicsManagerODE()
 	::dJointGroupDestroy(mContactJointGroupID);
 }
 
+void PhysicsManagerODE::SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy)
+{
+	mWorldCfm = Math::Lerp(1e-9f, 1e-2f, pSoftness);	// World softness and numerical stability, i.e peneraation.
+	::dWorldSetCFM(mWorldID, mWorldCfm);
+	mWorldErp = Math::Lerp(0.9f, 0.2f, pRubberbanding);
+	::dWorldSetERP(mWorldID, mWorldErp);	// Error reduction.
+	::dWorldSetQuickStepNumIterations(mWorldID, (int)Math::Lerp(1, 20, pAccuracy));
+}
+
 bool PhysicsManagerODE::InitCurrentThread()
 {
 	return ::dAllocateODEDataForThread((unsigned)dAllocateMaskAll) != 0;
@@ -90,34 +97,40 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const Vector3DF& pRayPosition, c
 {
 	if (pMaxCollisionCount <= 0)
 	{
-		assert(false);
+		deb_assert(false);
 		return 0;
 	}
+
+	ObjectTable::iterator x = mObjectTable.find((Object*)pBody);
+	if (x == mObjectTable.end())
+	{
+		deb_assert(false);
+		return 0;
+	}
+	const Object* lObject = *x;
 
 	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
 	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
 		pRayDirection.x, pRayDirection.y, pRayDirection.z);
 
-	ObjectTable::iterator x = mObjectTable.find((Object*)pBody);
-	if (x == mObjectTable.end())
-	{
-		assert(false);
-		return 0;
-	}
-	const Object* lObject = *x;
-
 	dContactGeom lContact[8];
-	const int lMaxCount = std::min((int)LEPRA_ARRAY_COUNT(lContact), pMaxCollisionCount);
+	const int lMaxCount = std::min((int)LEPRA_ARRAY_COUNT(lContact), pMaxCollisionCount*2);
 	const int lCollisionCount = ::dCollide(lObject->mGeomID, lRayGeometryId, lMaxCount, &lContact[0], sizeof(lContact[0]));
 
 	::dGeomDestroy(lRayGeometryId);
 
+	int lFoundCollisionPoints = 0;
 	for (int x = 0; x < lCollisionCount; ++x)
 	{
-		pCollisionPoints[x].Set(lContact[x].pos[0], lContact[x].pos[1], lContact[x].pos[2]);
+		// Check that we've found a surface turned towards the given direction.
+		const Vector3DF lNormal(lContact[x].normal[0], lContact[x].normal[1], lContact[x].normal[2]);
+		if (lNormal*pRayDirection > 0)
+		{
+			pCollisionPoints[lFoundCollisionPoints++].Set(lContact[x].pos[0], lContact[x].pos[1], lContact[x].pos[2]);
+		}
 	}
 
-	return lCollisionCount;
+	return lFoundCollisionPoints;
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const TransformationF& pTransform,
@@ -127,7 +140,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Trans
 	Object* lObject = new Object(mWorldID, pIsRoot);
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
 	lObject->mForceFeedbackId = pForceListenerId;
-	//assert(pType == STATIC || lObject->mForceFeedbackId);
+	//deb_assert(pType == STATIC || lObject->mForceFeedbackId);
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -165,7 +178,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Tra
 	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 
 	lObject->mForceFeedbackId = pForceListenerId;
-	//assert(pType == STATIC || lObject->mForceFeedbackId);
+	//deb_assert(pType == STATIC || lObject->mForceFeedbackId);
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -200,7 +213,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Tran
 
 	lObject->mGeomID = ::dCreateCapsule(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	lObject->mForceFeedbackId = pForceListenerId;
-	//assert(pType == STATIC || lObject->mForceFeedbackId);
+	//deb_assert(pType == STATIC || lObject->mForceFeedbackId);
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -235,7 +248,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const Transfor
 
 	lObject->mGeomID = ::dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 	lObject->mForceFeedbackId = pForceListenerId;
-	//assert(pType == STATIC || lObject->mForceFeedbackId);
+	//deb_assert(pType == STATIC || lObject->mForceFeedbackId);
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -268,13 +281,13 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	ObjectTable::iterator x = mObjectTable.find((Object*)pStaticBody);
 	if (x == mObjectTable.end())
 	{
-		assert(false);
+		deb_assert(false);
 		return (false);
 	}
 	ObjectTable::iterator y = mObjectTable.find((Object*)pMainBody);
 	if (y == mObjectTable.end() || x == y)
 	{
-		assert(false);
+		deb_assert(false);
 		return (false);
 	}
 	Object* lStaticObject = *x;
@@ -282,7 +295,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	if (lStaticObject->mBodyID)
 	{
 		mLog.AError("Attach() with non-static.");
-		assert(false);
+		deb_assert(false);
 		return (false);
 	}
 	dVector3 lPos;
@@ -303,7 +316,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 
 			dMass lMass;
 			const dReal lMassScalar = (dReal)lStaticObject->mMass;
-			assert(lMassScalar > 0);
+			deb_assert(lMassScalar > 0);
 			float* lSize = lStaticObject->mGeometryData;
 			// Adding mass to the dynamic object.
 			switch (lStaticObject->mGeomID->type)
@@ -316,7 +329,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 				default:
 				{
 					mLog.AError("Trying to attach object of unknown type!");
-					assert(false);
+					deb_assert(false);
 					return (false);
 				}
 			}
@@ -351,7 +364,7 @@ bool PhysicsManagerODE::DetachToDynamic(BodyID pStaticBody, float32 pMass)
 		default:
 		{
 			mLog.AError("Trying to detach object of unknown type!");
-			assert(false);
+			deb_assert(false);
 		}
 		return (false);
 	}
@@ -396,7 +409,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned p
 	//::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	::dGeomSetData(lObject->mGeomID, lObject);
 	lObject->mForceFeedbackId = pForceListenerId;
-	assert(lObject->mForceFeedbackId);
+	deb_assert(lObject->mForceFeedbackId);
 
 //	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
 
@@ -447,7 +460,7 @@ void PhysicsManagerODE::DeleteBody(BodyID pBodyId)
 	else
 	{
 		mLog.AError("DeleteBody() - Can't find body to delete!");
-		assert(false);
+		deb_assert(false);
 	}
 }
 
@@ -597,14 +610,14 @@ void PhysicsManagerODE::SetBodyForce(BodyID pBodyId, const Vector3DF& pAccelerat
 
 void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const
 {
-	assert(pTotalMass > 0);
+	deb_assert(pTotalMass > 0);
 	GetBodyForce(pBodyId, pAcceleration);
 	pAcceleration /= pTotalMass;
 }
 
 void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration)
 {
-	assert(pTotalMass > 0);
+	deb_assert(pTotalMass > 0);
 	SetBodyForce(pBodyId, pAcceleration * pTotalMass);
 }
 
@@ -1233,7 +1246,7 @@ bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
 		default:
 		{
 			mLog.Errorf(_T("Joint type %i of non-1-type!"), lJointInfo->mType);
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1274,7 +1287,7 @@ bool PhysicsManagerODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Di
 		default:
 		{
 			mLog.Errorf(_T("Joint type %i of non-1-type!"), lJointInfo->mType);
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1306,7 +1319,7 @@ bool PhysicsManagerODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Jo
 		default:
 		{
 			mLog.Errorf(_T("Joint type %i of non-1-type!"), lJointInfo->mType);
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1333,7 +1346,7 @@ bool PhysicsManagerODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Di
 		default:
 		{
 			mLog.Errorf(_T("Joint type %i of non-2-type!"), lJointInfo->mType);
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1360,7 +1373,7 @@ bool PhysicsManagerODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Jo
 		default:
 		{
 			mLog.Errorf(_T("Joint type %i of non-2-type!"), lJointInfo->mType);
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1392,7 +1405,7 @@ bool PhysicsManagerODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 		default:
 		{
 			mLog.Errorf(_T("Joint type %i of non-3-type!"), lJointInfo->mType);
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1424,7 +1437,7 @@ bool PhysicsManagerODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Jo
 		default:
 		{
 			mLog.Errorf(_T("Joint type %i of non-3-type!"), lJointInfo->mType);
-			assert(false);
+			deb_assert(false);
 		}
 		break;
 	}
@@ -1443,7 +1456,7 @@ void PhysicsManagerODE::RemoveJoint(JointInfo* pJointInfo)
 bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	assert(lJointInfo->mType == JOINT_HINGE);
+	deb_assert(lJointInfo->mType == JOINT_HINGE);
 	if (lJointInfo->mType != JOINT_HINGE)
 	{
 		mLog.Errorf(_T("Joint type %i of non-hinge-type!"), lJointInfo->mType);
@@ -1474,7 +1487,7 @@ bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Dif
 bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	assert(lJointInfo->mType == JOINT_HINGE);
+	deb_assert(lJointInfo->mType == JOINT_HINGE);
 	if (lJointInfo->mType != JOINT_HINGE)
 	{
 		mLog.Errorf(_T("Joint type %i of non-hinge-type!"), lJointInfo->mType);
@@ -1487,7 +1500,7 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	{
 		return (false);
 	}
-	assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
+	deb_assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
 
 	dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 
@@ -1502,7 +1515,7 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	}
 	else
 	{
-		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		lParentQ.Set(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
 	}
@@ -1567,7 +1580,7 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	assert(lJointInfo->mType == JOINT_SLIDER);
+	deb_assert(lJointInfo->mType == JOINT_SLIDER);
 	if (lJointInfo->mType != JOINT_SLIDER)
 	{
 		mLog.Errorf(_T("Joint type %i of non-slider-type!"), lJointInfo->mType);
@@ -1579,7 +1592,7 @@ bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Di
 	{
 		return (false);
 	}
-	assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
+	deb_assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
 
 	GetSliderPos(pJointId, pDiff.mValue);
 	GetSliderSpeed(pJointId, pDiff.mVelocity);
@@ -1599,7 +1612,7 @@ bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Di
 bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	assert(lJointInfo->mType == JOINT_SLIDER);
+	deb_assert(lJointInfo->mType == JOINT_SLIDER);
 	if (lJointInfo->mType != JOINT_SLIDER)
 	{
 		mLog.Errorf(_T("Joint type %i of non-hinge-type!"), lJointInfo->mType);
@@ -1611,7 +1624,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 	{
 		return (false);
 	}
-	assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
+	deb_assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
 
 	dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 
@@ -1626,7 +1639,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 	}
 	else
 	{
-		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		lParentQ.Set(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
 		const dReal* lParentV = ::dBodyGetLinearVel(lParentBody);
@@ -1682,7 +1695,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	LEPRA_DEBUG_CODE(assert(lJointInfo->mType == JOINT_UNIVERSAL));
+	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_UNIVERSAL));
 
 	Vector3DF lAxis1;
 	Vector3DF lAxis2;
@@ -1692,8 +1705,8 @@ bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint
 		{
 			return (false);
 		}
-		assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
-		assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
+		deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
+		deb_assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
 	}
 
 	{
@@ -1716,7 +1729,7 @@ bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint
 bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff)
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	assert(lJointInfo->mType == JOINT_UNIVERSAL);
+	deb_assert(lJointInfo->mType == JOINT_UNIVERSAL);
 
 	Vector3DF lAxis1;
 	Vector3DF lAxis2;
@@ -1725,11 +1738,11 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 	{
 		return (false);
 	}
-	assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
+	deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
 
 	{
 		// Fetch parent orientation.
-		assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		deb_assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		const QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
@@ -1809,7 +1822,7 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	LEPRA_DEBUG_CODE(assert(lJointInfo->mType == JOINT_HINGE2));
+	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_HINGE2));
 
 	Vector3DF lAxis1;
 	Vector3DF lAxis2;
@@ -1821,8 +1834,8 @@ bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 		{
 			return (false);
 		}
-		assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
-		assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
+		deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
+		deb_assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
 		const Vector3DF lDiff(lTransform.GetPosition()-lAnchor);
 		float lPosition;
 		lPosition = -(lAxis1 * lDiff);
@@ -1859,7 +1872,7 @@ bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	LEPRA_DEBUG_CODE(assert(lJointInfo->mType == JOINT_HINGE2));
+	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_HINGE2));
 
 	Vector3DF lAxis1;
 	Vector3DF lAxis2;
@@ -1869,8 +1882,8 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 		{
 			return (false);
 		}
-		assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
-		assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
+		deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
+		deb_assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
 		const Vector3DF lDiff = lAxis1 * -pDiff.mValue;
 		TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
@@ -1955,10 +1968,10 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	assert(lJointInfo->mType == JOINT_BALL);
+	deb_assert(lJointInfo->mType == JOINT_BALL);
 
 	{
-		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
@@ -1991,10 +2004,10 @@ bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff
 bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	assert(lJointInfo->mType == JOINT_BALL);
+	deb_assert(lJointInfo->mType == JOINT_BALL);
 
 	{
-		assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		deb_assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
@@ -2449,7 +2462,7 @@ bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAng
 	{
 		case JOINT_HINGE:
 		{
-			assert(::dJointGetBody(lJoint->mJointID, 1) == lObject->mBodyID);
+			deb_assert(::dJointGetBody(lJoint->mJointID, 1) == lObject->mBodyID);
 			const float lCurrentAngle = ::dJointGetHingeAngle(lJoint->mJointID);
 			if (lCurrentAngle == pAngle)
 			{
@@ -2478,7 +2491,7 @@ bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAng
 		break;
 		case JOINT_HINGE2:
 		{
-			assert(::dJointGetBody(lJoint->mJointID, 1) == lObject->mBodyID);
+			deb_assert(::dJointGetBody(lJoint->mJointID, 1) == lObject->mBodyID);
 			const float lCurrentAngle = ::dJointGetHinge2Angle1(lJoint->mJointID);
 			if (lCurrentAngle == pAngle)
 			{
@@ -3240,6 +3253,14 @@ void PhysicsManagerODE::StepFast(float32 pStepSize)
 	}
 }
 
+bool PhysicsManagerODE::IsColliding(int pForceFeedbackId)
+{
+	mNoteForceFeedbackId = pForceFeedbackId;
+	mNoteIsCollided = false;
+	dSpaceCollide(mSpaceID, this, CollisionNoteCallback);
+	return mNoteIsCollided;
+}
+
 void PhysicsManagerODE::PostSteps()
 {
 	HandleMovableObjects();
@@ -3448,10 +3469,15 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			}
 			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
 			lC.surface.bounce_vel = (dReal)0.000001;
-			if (lC.surface.bounce < 0.1f)
+			if (lC.surface.bounce < 1e-1f)
 			{
 				lC.surface.mode |= dContactSoftERP;
-				lC.surface.soft_erp = Math::Lerp(0.0f, 1.0f, lC.surface.bounce * 10);
+				lC.surface.soft_erp = lC.surface.bounce * 1e1f * mWorldErp;
+			}
+			if (lC.surface.bounce < 1e-7f)
+			{
+				lC.surface.mode |= dContactSoftCFM;
+				lC.surface.soft_cfm = Math::Lerp(1e8f, 1.0f, lC.surface.bounce * 1e7f) * mWorldCfm;
 			}
 
 			if (lObject1->mForceFeedbackId != 0 ||
@@ -3480,6 +3506,36 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			}
 		}
 	}
+}
+
+void PhysicsManagerODE::CollisionNoteCallback(void* pData, dGeomID pGeom1, dGeomID pGeom2)
+{
+	Object* lObject1 = (Object*)dGeomGetData(pGeom1);
+	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
+
+	if (!lObject1->mForceFeedbackId ||
+		!lObject2->mForceFeedbackId ||
+		lObject1->mForceFeedbackId == lObject2->mForceFeedbackId)	// One is trigger, or same body.
+	{
+		return;
+	}
+
+	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
+	if (lObject1->mForceFeedbackId != lThis->mNoteForceFeedbackId &&
+		lObject2->mForceFeedbackId != lThis->mNoteForceFeedbackId)	// Not observed body.
+	{
+		return;
+	}
+
+	dContact lContact[1];
+	const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 1, &lContact[0].geom, sizeof(lContact[0]));
+	if (lTriggerContactPointCount <= 0)
+	{
+		// In AABB range (since call came here), but no real contact.
+		return;
+	}
+
+	lThis->mNoteIsCollided = true;
 }
 
 
@@ -3542,6 +3598,8 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 
 
 
+float PhysicsManagerODE::mWorldErp;
+float PhysicsManagerODE::mWorldCfm;
 LOG_CLASS_DEFINE(PHYSICS, PhysicsManagerODE);
 
 

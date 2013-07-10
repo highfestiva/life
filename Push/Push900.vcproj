@@ -521,31 +521,7 @@
 			UniqueIdentifier="{C734F7F1-C7A5-4376-A066-2A32FFD752A2}"
 			>
 			<File
-				RelativePath=".\ExplodingMachine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Explosion.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FastProjectile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Level.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\LoginView.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Mine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Projectile.cpp"
 				>
 			</File>
 			<File
@@ -607,31 +583,7 @@
 			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
 			<File
-				RelativePath=".\ExplodingMachine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Explosion.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FastProjectile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Level.h"
-				>
-			</File>
-			<File
 				RelativePath=".\LoginView.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Mine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Projectile.h"
 				>
 			</File>
 			<File
@@ -687,62 +639,6 @@
 			Name="Server"
 			>
 			<File
-				RelativePath=".\PushServer\BombPlane.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\BombPlane.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\BulletTime.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\BulletTime.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\Client.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\Client.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\GameServerLogic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\GameServerLogic.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\GameServerManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\GameServerManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\Npc.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\Npc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\PushServerConsole.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\PushServerConsole.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PushServer\PushServerDelegate.cpp"
 				>
 			</File>
@@ -751,91 +647,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PushServer\PushServerMessageProcessor.cpp"
+				RelativePath=".\PushServer\PushServerTicker.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PushServer\PushServerMessageProcessor.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\RaceTimer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\RaceTimer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\ServerConsoleManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\ServerConsoleManager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\ServerDelegate.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\ServerDelegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\ServerFastProjectile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\ServerFastProjectile.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\ServerMessageProcessor.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\ServerMessageProcessor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\ServerMine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\ServerMine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\ServerProjectile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PushServer\ServerProjectile.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\Spawner.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeServer\Spawner.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeClient\UiGameServerManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeClient\UiGameServerManager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeClient\UiServerConsoleManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Life\LifeClient\UiServerConsoleManager.h"
+				RelativePath=".\PushServer\PushServerTicker.h"
 				>
 			</File>
 		</Filter>

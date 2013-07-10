@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/PhysicsTrigger.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Packer.h"
@@ -51,7 +51,7 @@ void PhysicsTrigger::RelocatePointers(const ChunkyPhysics* pTarget, const Chunky
 	for (size_t x = 0; x < cnt; ++x)
 	{
 		const int lBoneIndex = pSource->GetIndex(pOriginal.mTriggerArray[x]);
-		assert(lBoneIndex >= 0);
+		deb_assert(lBoneIndex >= 0);
 		mTriggerArray[x] = pTarget->GetBoneGeometry(lBoneIndex);
 	}
 
@@ -59,7 +59,7 @@ void PhysicsTrigger::RelocatePointers(const ChunkyPhysics* pTarget, const Chunky
 	for (size_t x = 0; x < cnt; ++x)
 	{
 		const int lEngineIndex = pSource->GetEngineIndex(pOriginal.mConnectionArray[x].mEngine);
-		assert(lEngineIndex >= 0);
+		deb_assert(lEngineIndex >= 0);
 		mConnectionArray[x].mEngine = pTarget->GetEngine(lEngineIndex);
 	}
 }
@@ -71,7 +71,7 @@ PhysicsTrigger* PhysicsTrigger::Load(ChunkyPhysics* pStructure, const void* pDat
 	if (pByteCount < sizeof(uint32)*6 /*+ ...*/)
 	{
 		mLog.AError("Could not load; wrong data size.");
-		assert(false);
+		deb_assert(false);
 		return (0);
 	}
 
@@ -80,7 +80,7 @@ PhysicsTrigger* PhysicsTrigger::Load(ChunkyPhysics* pStructure, const void* pDat
 	if (lTrigger->GetChunkySize() != pByteCount)
 	{
 		mLog.AError("Corrupt data or error in loading algo.");
-		assert(false);
+		deb_assert(false);
 		delete (lTrigger);
 		lTrigger = 0;
 	}
@@ -96,8 +96,8 @@ PhysicsTrigger::Type PhysicsTrigger::GetType() const
 
 PhysicsManager::TriggerID PhysicsTrigger::GetPhysicsTriggerId(int pTriggerGeometryIndex) const
 {
-	assert((size_t)pTriggerGeometryIndex < mTriggerArray.size());
-	assert(mTriggerArray[pTriggerGeometryIndex]->GetTriggerId() != 0);
+	deb_assert((size_t)pTriggerGeometryIndex < mTriggerArray.size());
+	deb_assert(mTriggerArray[pTriggerGeometryIndex]->GetTriggerId() != 0);
 	return mTriggerArray[pTriggerGeometryIndex]->GetTriggerId();
 }
 
@@ -130,7 +130,7 @@ int PhysicsTrigger::GetTriggerGeometryCount() const
 
 ChunkyBoneGeometry* PhysicsTrigger::GetTriggerGeometry(int pIndex) const
 {
-	assert((size_t)pIndex < mTriggerArray.size());
+	deb_assert((size_t)pIndex < mTriggerArray.size());
 	return mTriggerArray[pIndex];
 }
 
@@ -150,7 +150,7 @@ int PhysicsTrigger::GetControlledEngineCount() const
 
 const PhysicsTrigger::EngineTrigger& PhysicsTrigger::GetControlledEngine(int pIndex) const
 {
-	assert((size_t)pIndex < mConnectionArray.size());
+	deb_assert((size_t)pIndex < mConnectionArray.size());
 	return (mConnectionArray[pIndex]);
 }
 
@@ -191,7 +191,7 @@ void PhysicsTrigger::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 		lData[i++] = Endian::HostToBig(pStructure->GetEngineIndex(lConnection.mEngine));
 		lData[i++] = Endian::HostToBigF(lConnection.mDelay);
 		int lStringRawLength = PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(lConnection.mFunction));
-		assert(lStringRawLength % sizeof(lData[0]) == 0);
+		deb_assert(lStringRawLength % sizeof(lData[0]) == 0);
 		i += lStringRawLength / sizeof(lData[0]);
 	}
 }
@@ -210,18 +210,18 @@ void PhysicsTrigger::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	{
 		const uint32 lPhysTriggerIndex = Endian::BigToHost(lData[i++]);
 		ChunkyBoneGeometry* lBoneTrigger = pStructure->GetBoneGeometry(lPhysTriggerIndex);
-		assert(lBoneTrigger);
+		deb_assert(lBoneTrigger);
 		AddTriggerGeometry(lBoneTrigger);
 	}
 	const int lEngineCount = Endian::BigToHost(lData[i++]);
 	for (int x = 0; x < lEngineCount; ++x)
 	{
 		PhysicsEngine* lEngine = pStructure->GetEngine(Endian::BigToHost(lData[i++]));
-		assert(lEngine);
+		deb_assert(lEngine);
 		float lDelay = Endian::BigToHostF(lData[i++]);
 		str lFunction;
 		int lStringRawLength = PackerUnicodeString::Unpack(lFunction, (uint8*)&lData[i], 1024);
-		assert(lStringRawLength % sizeof(lData[0]) == 0);
+		deb_assert(lStringRawLength % sizeof(lData[0]) == 0);
 		i += lStringRawLength / sizeof(lData[0]);
 		AddControlledEngine(lEngine, lDelay, strutil::Encode(lFunction));
 	}

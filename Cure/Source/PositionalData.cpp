@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/PositionalData.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Packer.h"
 
 
@@ -18,14 +18,14 @@ namespace Cure
 #define CHECK_SIZE(size)		\
 	if (pSize < (int)(size))	\
 	{				\
-		assert(false);		\
+		deb_assert(false);		\
 		return (-1);		\
 	}
 
 #define CHECK_TYPE(type)			\
 	if (type != (Type)pData[lSize++])	\
 	{					\
-		assert(false);			\
+		deb_assert(false);			\
 		return (-1);			\
 	}
 
@@ -139,7 +139,7 @@ PositionalData::Type PositionalData6::GetType() const
 
 void PositionalData6::CopyData(const PositionalData* pData)
 {
-	assert(pData->GetType() == GetType());
+	deb_assert(pData->GetType() == GetType());
 	const PositionalData6& lCopy = *(PositionalData6*)pData;
 	*this = lCopy;
 }
@@ -214,7 +214,7 @@ PositionalData::Type PositionalData3::GetType() const
 
 void PositionalData3::CopyData(const PositionalData* pData)
 {
-	assert(pData->GetType() == GetType());
+	deb_assert(pData->GetType() == GetType());
 	const PositionalData3& lCopy = *(PositionalData3*)pData;
 	*this = lCopy;
 }
@@ -284,7 +284,7 @@ PositionalData::Type PositionalData2::GetType() const
 
 void PositionalData2::CopyData(const PositionalData* pData)
 {
-	assert(pData->GetType() == GetType());
+	deb_assert(pData->GetType() == GetType());
 	const PositionalData2& lCopy = *(PositionalData2*)pData;
 	*this = lCopy;
 }
@@ -345,7 +345,7 @@ PositionalData::Type PositionalData1::GetType() const
 
 void PositionalData1::CopyData(const PositionalData* pData)
 {
-	assert(pData->GetType() == GetType());
+	deb_assert(pData->GetType() == GetType());
 	const PositionalData1& lCopy = *(PositionalData1*)pData;
 	*this = lCopy;
 }
@@ -437,25 +437,25 @@ int ObjectPositionalData::Unpack(const uint8* pData, int pSize)
 	CHECK_SIZE((int)(1+sizeof(int16)+PositionalData6::GetStaticPackSize()));
 	int lSize = 0;
 	CHECK_TYPE(TYPE_OBJECT);
-	assert(mBodyPositionArray.size() == 0);
+	deb_assert(mBodyPositionArray.size() == 0);
 	int lDataSize;
 	int lSubSize = PackerInt16::Unpack(lDataSize, &pData[lSize], pSize-lSize);
 	if (lSubSize <= 0)
 	{
-		assert(false);
+		deb_assert(false);
 		return (-1);
 	}
 	lSize += lSubSize;
 	if (lDataSize < PositionalData6::GetStaticPackSize() || lDataSize > pSize-lSize)
 	{
-		assert(false);
+		deb_assert(false);
 		return (-1);
 	}
 	pSize = lDataSize+lSize;
 	lSubSize = mPosition.Unpack(&pData[lSize], pSize-lSize);
 	if (lSubSize <= 0)
 	{
-		assert(false);
+		deb_assert(false);
 		return (-1);
 	}
 	lSize += lSubSize;
@@ -473,7 +473,7 @@ int ObjectPositionalData::Unpack(const uint8* pData, int pSize)
 		}
 		if (!lPosition)
 		{
-			assert(false);
+			deb_assert(false);
 			lSize = -1;
 			break;
 		}
@@ -499,9 +499,9 @@ float ObjectPositionalData::GetBiasedDifference(const PositionalData* pReference
 
 float ObjectPositionalData::GetBiasedTypeDifference(const PositionalData* pReference, bool pPositionOnly) const
 {
-	assert(GetType() == pReference->GetType());
+	deb_assert(GetType() == pReference->GetType());
 	const ObjectPositionalData& lReference = (const ObjectPositionalData&)*pReference;
-	assert(IsSameStructure(lReference));
+	deb_assert(IsSameStructure(lReference));
 	float lDiff = 0;
 	lDiff += mPosition.GetBiasedDifference(&lReference.mPosition);
 	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
@@ -509,7 +509,7 @@ float ObjectPositionalData::GetBiasedTypeDifference(const PositionalData* pRefer
 	int lBodyCount = 1 + mBodyPositionArray.size();
 	for (; x != mBodyPositionArray.end(); ++x, ++y)
 	{
-		assert(y != lReference.mBodyPositionArray.end());
+		deb_assert(y != lReference.mBodyPositionArray.end());
 		if (pPositionOnly)
 		{
 			const Type lType = (*x)->GetType();
@@ -522,7 +522,7 @@ float ObjectPositionalData::GetBiasedTypeDifference(const PositionalData* pRefer
 		}
 		lDiff += (*x)->GetScaledDifference(*y);
 	}
-	assert((x == mBodyPositionArray.end()) && (y == lReference.mBodyPositionArray.end()));
+	deb_assert((x == mBodyPositionArray.end()) && (y == lReference.mBodyPositionArray.end()));
 	return lDiff / lBodyCount;
 }
 
@@ -552,7 +552,7 @@ void ObjectPositionalData::SetAt(size_t pIndex, PositionalData* pData)
 	else
 	{
 		mLog.AError("Trying to set positional data out of range!");
-		assert(false);
+		deb_assert(false);
 	}
 }
 
@@ -572,7 +572,7 @@ PositionalData::Type ObjectPositionalData::GetType() const
 
 void ObjectPositionalData::CopyData(const PositionalData* pData)
 {
-	assert(pData->GetType() == GetType());
+	deb_assert(pData->GetType() == GetType());
 	const ObjectPositionalData& lCopy = *(ObjectPositionalData*)pData;
 	if (IsSameStructure(lCopy))
 	{
@@ -639,12 +639,12 @@ bool ObjectPositionalData::IsSameStructure(const ObjectPositionalData& pCopy) co
 
 ObjectPositionalData::ObjectPositionalData(const ObjectPositionalData&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 void ObjectPositionalData::operator=(const ObjectPositionalData&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 LOG_CLASS_DEFINE(NETWORK, ObjectPositionalData);
@@ -694,7 +694,7 @@ PositionalData::Type RealData3::GetType() const
 
 void RealData3::CopyData(const PositionalData* pData)
 {
-	assert(pData->GetType() == GetType());
+	deb_assert(pData->GetType() == GetType());
 	const RealData3& lCopy = *(RealData3*)pData;
 	*this = lCopy;
 }
@@ -743,7 +743,7 @@ PositionalData::Type RealData1::GetType() const
 
 void RealData1::CopyData(const PositionalData* pData)
 {
-	assert(pData->GetType() == GetType());
+	deb_assert(pData->GetType() == GetType());
 	const RealData1& lCopy = *(RealData1*)pData;
 	*this = lCopy;
 }

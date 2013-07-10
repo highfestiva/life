@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -53,6 +53,7 @@ public:
 	void SetScale(float pSmallMass, float pLightImpact, float pSoundCutoffDuration);
 
 	void AddSound(const str& pName, const SoundResourceInfo& pInfo);
+	void PreLoadSound(const str& pName);
 
 	void Tick(const Vector3DF& pCameraPosition);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -111,6 +112,7 @@ private:
 	SoundInfo* GetPlayingSound(const TBC::ChunkyBoneGeometry* pGeometryKey) const;
 	void PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKey, const str& pSoundName, const Vector3DF& pPosition, float pImpact);
 	void OnSoundLoaded(UiCure::UserSound3dResource* pSoundResource);
+	void OnSoundPreLoaded(UiCure::UserSound3dResource* pSoundResource);
 	void UpdateSound(SoundInfo* pSoundInfo);
 	void StopSound(const TBC::ChunkyBoneGeometry* pGeometryKey);
 

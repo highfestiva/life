@@ -1,13 +1,15 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
 #include <hash_map>
+#include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/IdManager.h"
+#include "../../Lepra/Include/Thread.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "Cure.h"
 
@@ -82,6 +84,18 @@ private:
 	void DispatchAlarmCallbacks();
 
 	typedef IdManager<GameObjectId> ObjectIdManager;
+	struct GameObjectIdRecycleInfo
+	{
+		GameObjectIdRecycleInfo(GameObjectId pInstanceId, NetworkObjectType pNetworkType):
+			mInstanceId(pInstanceId),
+			mNetworkType(pNetworkType)
+		{
+		}
+		HiResTimer mTimer;
+		GameObjectId mInstanceId;
+		NetworkObjectType mNetworkType;
+	};
+	typedef std::vector<GameObjectIdRecycleInfo> RecycledIdQueue;
 	struct Alarm
 	{
 		ContextObject* mObject;
@@ -127,6 +141,7 @@ private:
 	GameManager* mGameManager;
 
 	bool mIsObjectOwner;
+	RecycledIdQueue mRecycledIdQueue;
 	ObjectIdManager mLocalObjectIdManager;
 	ObjectIdManager mRemoteObjectIdManager;
 	ContextObjectTable mObjectTable;
@@ -135,6 +150,7 @@ private:
 	ContextObjectTable mAttributeSenderObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
 	ContextObjectTable mMicroTickCallbackObjectTable;
+	Lock mAlarmMutex;
 	AlarmSet mAlarmCallbackObjectSet;
 	IdSet mPostKillSet;
 

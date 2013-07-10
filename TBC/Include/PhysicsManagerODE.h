@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -29,6 +29,7 @@ public:
 	PhysicsManagerODE(float pRadius, int pLevels, float pSensitivity);
 	virtual ~PhysicsManagerODE();
 
+	virtual void SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy);
 	virtual bool InitCurrentThread();
 
 	virtual int QueryRayCollisionAgainst(const Vector3DF& pRayPosition, const Vector3DF& pRayDirection,
@@ -205,6 +206,7 @@ public:
 	virtual void PreSteps();
 	virtual void StepAccurate(float32 pStepSize);
 	virtual void StepFast(float32 pStepSize);
+	virtual bool IsColliding(int pForceFeedbackId);
 	virtual void PostSteps();
 
 	virtual const BodySet& GetIdledBodies() const;
@@ -341,10 +343,15 @@ private:
 	void DoForceFeedback();
 
 	static void CollisionCallback(void* pData, dGeomID pObject1, dGeomID pObject2);
+	static void CollisionNoteCallback(void* pData, dGeomID pObject1, dGeomID pObject2);
 
 	dWorldID mWorldID;
+	static float mWorldErp;
+	static float mWorldCfm;
 	dSpaceID mSpaceID;
 	dJointGroupID mContactJointGroupID;
+	int mNoteForceFeedbackId;
+	bool mNoteIsCollided;
 
 	ObjectTable mObjectTable;
 	BodySet mAutoDisabledObjectSet;

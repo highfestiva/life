@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -127,7 +127,6 @@ bool Application::MainLoop()
 	bool lQuit = false;
 	while (lOk && !lQuit)
 	{
-		LEPRA_MEASURE_SCOPE(AppTick);
 		lOk = Tick();
 		lQuit = mGameTicker->QueryQuit();
 	}
@@ -155,6 +154,8 @@ bool Application::MainLoop()
 
 bool Application::Tick()
 {
+	LEPRA_DO_MEASURE_SCOPE(AppTick);
+
 	bool lDebug;
 	CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	if (lDebug)
@@ -171,7 +172,7 @@ bool Application::Tick()
 	}
 	if (lOk)
 	{
-		LEPRA_MEASURE_SCOPE(AppSleep);
+		LEPRA_DO_MEASURE_SCOPE(AppSleep);
 		TickSleep();
 	}
 	return lOk;
@@ -244,7 +245,7 @@ void Application::TickSleep() const
 		if (lSleepTime >= 0)
 		{
 			double lSleepTimeLeft = lSleepTime;
-			HiResTimer lSleepTimer;
+			HiResTimer lSleepTimer(false);
 			while (lSleepTimeLeft >= 0)
 			{
 				if (lSleepTimeLeft > MAXIMUM_SLEEP_TIME*1.7)

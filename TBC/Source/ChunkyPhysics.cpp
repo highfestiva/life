@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/ChunkyPhysics.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ListUtil.h"
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/PhysicsEngine.h"
@@ -60,7 +60,7 @@ ChunkyPhysics::ChunkyPhysics(const ChunkyPhysics& pOriginal):
 
 ChunkyPhysics::~ChunkyPhysics()
 {
-	//assert(mGeometryArray.empty());	// Ensure all resources has been released prior to delete.
+	//deb_assert(mGeometryArray.empty());	// Ensure all resources has been released prior to delete.
 	ClearAll(0);
 }
 
@@ -110,7 +110,7 @@ float ChunkyPhysics::QueryTotalMass(PhysicsManager* pPhysicsManager) const
 			lTotalMass += pPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
 		}
 	}
-	if (lTotalMass == 0)
+	if (lTotalMass < 0.01f)
 	{
 		lTotalMass = 0.1f;
 	}
@@ -121,7 +121,7 @@ float ChunkyPhysics::QueryTotalMass(PhysicsManager* pPhysicsManager) const
 
 ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int pBoneIndex) const
 {
-	assert(pBoneIndex >= 0 && pBoneIndex < GetBoneCount());
+	deb_assert(pBoneIndex >= 0 && pBoneIndex < GetBoneCount());
 	return ((pBoneIndex < (int)mGeometryArray.size())? mGeometryArray[pBoneIndex] : 0);
 }
 
@@ -136,13 +136,13 @@ ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(PhysicsManager::BodyID pBodyI
 			return (lGeometry);	// TRICKY: RAII.
 		}
 	}
-	assert(false);
+	deb_assert(false);
 	return (0);
 }
 
 void ChunkyPhysics::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
 {
-	assert((int)mGeometryArray.size() < GetBoneCount());
+	deb_assert((int)mGeometryArray.size() < GetBoneCount());
 	mGeometryArray.push_back(pGeometry);
 }
 
@@ -186,7 +186,7 @@ int ChunkyPhysics::GetIndex(const ChunkyBoneGeometry* pGeometry) const
 			return (x);
 		}
 	}
-	assert(false);
+	deb_assert(false);
 	mLog.AError("Trying to get uncontained geometry!");
 	return (-1);
 }
@@ -237,7 +237,7 @@ int ChunkyPhysics::GetEngineCount() const
 
 PhysicsEngine* ChunkyPhysics::GetEngine(int pEngineIndex) const
 {
-	assert((size_t)pEngineIndex < mEngineArray.size());
+	deb_assert((size_t)pEngineIndex < mEngineArray.size());
 	return (mEngineArray[pEngineIndex]);
 }
 
@@ -300,7 +300,7 @@ int ChunkyPhysics::GetTriggerCount() const
 
 const PhysicsTrigger* ChunkyPhysics::GetTrigger(int pTriggerIndex) const
 {
-	assert((size_t)pTriggerIndex < mTriggerArray.size());
+	deb_assert((size_t)pTriggerIndex < mTriggerArray.size());
 	return (mTriggerArray[pTriggerIndex]);
 }
 
@@ -328,7 +328,7 @@ int ChunkyPhysics::GetSpawnerCount() const
 
 const PhysicsSpawner* ChunkyPhysics::GetSpawner(int pSpawnerIndex) const
 {
-	assert((size_t)pSpawnerIndex < mSpawnerArray.size());
+	deb_assert((size_t)pSpawnerIndex < mSpawnerArray.size());
 	return mSpawnerArray[pSpawnerIndex];
 }
 
@@ -362,7 +362,7 @@ void ChunkyPhysics::SetBoneCount(int pBoneCount)
 {
 	BoneHierarchy::SetBoneCount(pBoneCount);
 
-	assert(mGeometryArray.empty());
+	deb_assert(mGeometryArray.empty());
 	mGeometryArray.clear();
 
 	mUniqeGeometryIndex = GetBoneCount();
@@ -372,7 +372,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 	int pTrigListenerId, int pForceListenerId)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
-	assert(lOk);
+	deb_assert(lOk);
 	if (lOk)
 	{
 		if (pTransform)
@@ -417,7 +417,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 			lOk = lGeometry->CreateJoint(this, pPhysics, pPhysicsFps);
 		}
 	}
-	assert(lOk);
+	deb_assert(lOk);
 	return (lOk);
 }
 

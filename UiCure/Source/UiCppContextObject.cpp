@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) 2002-, Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include <math.h>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -30,6 +30,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mUiClassResource(0),
 	mEnableUi(true),
 	mAllowRootShadow(true),
+	mUseDefaultTexture(false),
 	mEnablePixelShader(true),
 	mEnableMeshMove(true),
 	mEnableMeshSlide(false),
@@ -74,6 +75,11 @@ void CppContextObject::DisableRootShadow()
 	mAllowRootShadow = false;
 }
 
+void CppContextObject::SetUseDefaultTexture(bool pUseDefaultTexture)
+{
+	mUseDefaultTexture = pUseDefaultTexture;
+}
+
 void CppContextObject::EnablePixelShader(bool pEnable)
 {
 	mEnablePixelShader = pEnable;
@@ -93,7 +99,7 @@ void CppContextObject::EnableMeshSlide(bool pEnable)
 
 void CppContextObject::StartLoading()
 {
-	assert(mUiClassResource == 0);
+	deb_assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
 	const str lClassName = _T("UI:")+GetClassId()+_T(".class");
 	mUiClassResource->Load(GetResourceManager(), lClassName,
@@ -250,7 +256,7 @@ UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) con
 	}
 	else
 	{
-		assert(false);
+		deb_assert(false);
 	}
 	return (0);
 }
@@ -280,9 +286,9 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
 	UserGeometryReferenceResource* lMesh = mMeshResourceArray[pMeshIndex];
 	const bool lTransparent = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1);
+	UserRendererImageResource* lTexture = 0;
 	if (lMesh->GetRamData()->GetUVData(0) && mTextureResourceArray.size() > 0)
 	{
-		UserRendererImageResource* lTexture = 0;
 		TextureArray::iterator tx = mTextureResourceArray.begin();
 		for (; !lTexture && tx != mTextureResourceArray.end(); ++tx)
 		{
@@ -296,16 +302,24 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 				}
 			}
 		}
-		if (!lTexture)
+		if (!lTexture && mUseDefaultTexture)
 		{
 			lTexture = mTextureResourceArray[0];
 		}
+	}
+	if (lMesh->GetRamData()->GetUVData(0) && lTexture)
+	{
 		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
 		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
 		const bool lIsHighlight = (lShader == _T("highlight"));
 		const bool lIsEnv = (lShader == _T("env"));
+		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == _T("env_blend"));
 		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
-		if (lIsEnv)
+		if (lIsEnvBlend)
+		{
+			lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_ENVMAP_BLENDED;
+		}
+		else if (lIsEnv)
 		{
 			lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_ENVMAP_SOLID;
 		}
@@ -326,7 +340,12 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
 		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
 		const bool lIsEnv = (lShader == _T("env"));
-		if (lIsEnv)
+		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == _T("env_blend"));
+		if (lIsEnvBlend)
+		{
+			lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_ENVMAP_BLENDED;
+		}
+		else if (lIsEnv)
 		{
 			lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_ENVMAP_SOLID;
 		}
@@ -336,6 +355,35 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 		}
 		mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
 	}
+}
+
+
+
+void CppContextObject::ReplaceTexture(int pTextureIndex, const str& pNewTextureName)
+{
+	UserRendererImageResource* lTexture = mTextureResourceArray[pTextureIndex];
+	if (lTexture->GetName() == pNewTextureName)
+	{
+		return;
+	}
+	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+	{
+		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
+		if (lMesh->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			if (mUiManager->GetRenderer()->DisconnectGeometryTexture(lMesh->GetData(), lTexture->GetData()))
+			{
+				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), UiTbc::Renderer::MAT_NULL);
+			}
+		}
+	}
+	mUseDefaultTexture = true;
+	--mTextureLoadCount;
+	UserRendererImageResource* lNewTexture = new UserRendererImageResource(mUiManager, mUiManager->GetRenderer()->GetMipMappingEnabled());
+	mTextureResourceArray[pTextureIndex] = lNewTexture;
+	lNewTexture->Load(GetResourceManager(), pNewTextureName,
+		UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
+	delete lTexture;
 }
 
 
@@ -407,7 +455,7 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 						}
 						else
 						{
-							assert(false);
+							deb_assert(false);
 						}
 						if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis2(lJoint, lAxis))
 						{
@@ -416,7 +464,7 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 					}
 					else
 					{
-						assert(false);
+						deb_assert(false);
 					}
 				}
 			}
@@ -449,7 +497,7 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 			break;
 			default:
 			{
-				assert(false);
+				deb_assert(false);
 			}
 			break;
 		}
@@ -480,7 +528,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
-		assert(false);
+		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
@@ -488,7 +536,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	const size_t lMeshCount = lClass->GetMeshCount();
 	if (mEnableUi)
 	{
-		assert(lMeshCount > 0);
+		deb_assert(lMeshCount > 0);
 		for (size_t x = 0; x < lMeshCount; ++x)
 		{
 			int lPhysIndex = -1;
@@ -508,9 +556,9 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		return;
 	}
 
-	assert(mMeshLoadCount == 0);
-	//assert(mTextureLoadCount == 0);
-	assert(lMeshCount == mMeshResourceArray.size());
+	deb_assert(mMeshLoadCount == 0);
+	//deb_assert(mTextureLoadCount == 0);
+	deb_assert(lMeshCount == mMeshResourceArray.size());
 	size_t x = 0;
 	MeshArray::iterator y = mMeshResourceArray.begin();
 	for (; y != mMeshResourceArray.end(); ++x, ++y)
@@ -545,7 +593,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 void CppContextObject::LoadTextures()
 {
 	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
-	assert(lClass);
+	deb_assert(lClass);
 	for (size_t x = 0; x < lClass->GetMeshCount(); ++x)
 	{
 		const std::vector<str>& lTextureList = lClass->GetMaterial(x).mTextureList;
@@ -578,7 +626,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 				break;
 			}
 		}
-		assert((int)lMeshIndex >= 0);
+		deb_assert((int)lMeshIndex >= 0);
 		if (lMeshIndex == 0 && !mAllowRootShadow)
 		{
 			mUiManager->GetRenderer()->SetShadows(pMeshResource->GetData(), UiTbc::Renderer::FORCE_NO_SHADOWS);
@@ -587,7 +635,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 			((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(lMeshIndex);
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(lLoadedMaterial.mAmbient,
 			lLoadedMaterial.mDiffuse, lLoadedMaterial.mSpecular,
-			lLoadedMaterial.mShininess, lLoadedMaterial.mAlpha, true);
+			lLoadedMaterial.mShininess, lLoadedMaterial.mAlpha, lLoadedMaterial.mSmooth);
 		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
 
 		((TBC::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);
@@ -596,7 +644,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 	else
 	{
 		mLog.AError("Could not load mesh! Sheit.");
-		assert(false);
+		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }
@@ -610,8 +658,8 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 	}
 	else
 	{
-		mLog.AError("Could not load texture. Gah!");
-		assert(false);
+		mLog.Errorf(_T("Could not load texture %s. Gah!"), pTextureResource->GetName().c_str());
+		deb_assert(false);
 	}
 }
 

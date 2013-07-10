@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/IntAttribute.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
@@ -76,7 +76,7 @@ int IntAttribute::Unpack(const uint8* pSource, int pMaxSize)
 
 void IntAttribute::operator=(const IntAttribute&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

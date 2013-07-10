@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -79,7 +79,7 @@ str SystemManager::GetUniqueHardwareString()
 
 uint64 SystemManager::SingleCpuTest()
 {
-	HiResTimer lTimer;
+	HiResTimer lTimer(false);
 	int64 lDeltaTime = HiResTimer::GetFrequency() / 100;
 	uint64 lStartTick;
 	uint64 lEndTick;
@@ -157,7 +157,7 @@ double SystemManager::GetSleepResolution()
 	const int lMeasurementCount = 3;
 	for (int x = 0; x < lMeasurementCount; ++x)
 	{
-		HiResTimer lSleepTime;
+		HiResTimer lSleepTime(false);
 		Thread::Sleep(0.001);
 		lMeasuredTimes.push_back(lSleepTime.QueryTimeDiff());
 	}
@@ -205,7 +205,7 @@ void SystemManager::SetQuitRequestCallback(const QuitRequestCallback& pCallback)
 unsigned SystemManager::SingleMipsTest()
 {
 	unsigned lLoops = 0x10;
-	HiResTimer lTimer;
+	HiResTimer lTimer(false);
 	do
 	{
 		lLoops <<= 1;

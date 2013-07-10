@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-/*#include <assert.h>
+/*#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
@@ -85,7 +85,7 @@ bool ExportStructure()
 			lOk = WriteStructure(lFilename, lStructure);
 		}
 		lStructure.ClearAll(lPhysics);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -94,12 +94,12 @@ bool ExportStructure()
 
 		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			Lepra::TransformationF lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -108,7 +108,7 @@ bool ExportStructure()
 				lStructure.GetBoneGeometry(0) != 0 &&
 				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
 				lStructure.GetEngineCount() == 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
 	}
@@ -135,10 +135,10 @@ bool ExportStructure()
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -147,12 +147,12 @@ bool ExportStructure()
 
 		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			Lepra::TransformationF lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -161,7 +161,7 @@ bool ExportStructure()
 				lStructure.GetBoneGeometry(0) != 0 &&
 				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
 				lStructure.GetEngineCount() == 1);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
 	}
@@ -264,7 +264,7 @@ bool ExportStructure()
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -276,10 +276,10 @@ bool ExportStructure()
 			{
 				lOk = (lLowStop == -0.5f && lHighStop == 0.5f && lBounce == 0.0f);
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -288,13 +288,13 @@ bool ExportStructure()
 
 		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			Lepra::TransformationF lTransform;
 			lTransform.SetPosition(Lepra::Vector3DF(100, 100, 100));
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransform, 0, 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -304,7 +304,7 @@ bool ExportStructure()
 				lStructure.GetBoneGeometry(4)->GetBodyId() != TBC::INVALID_BODY &&
 				lStructure.GetBoneGeometry(4)->GetJointId() != TBC::INVALID_JOINT &&
 				lStructure.GetEngineCount() == 4);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -312,7 +312,7 @@ bool ExportStructure()
 			lOk = (Lepra::Math::IsInRange(lPosition.x, 99.1f, 99.3f) &&
 				Lepra::Math::IsInRange(lPosition.y, 98.0f, 98.1f) &&
 				Lepra::Math::IsInRange(lPosition.z, 99.6f, 99.8f));
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -324,7 +324,7 @@ bool ExportStructure()
 			{
 				lOk = (lLowStop == -0.5f && lHighStop == 0.5f && lBounce == 0.0f);
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -338,7 +338,7 @@ bool ExportStructure()
 				const float lCorrectCfm = 1 / (lFrameTime * lVolvoSpringConstant + lVolvoDampingConstant);
 				lOk = (lErp == lCorrectErp && lCfm == lCorrectCfm);
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -349,12 +349,12 @@ bool ExportStructure()
 			TBC::PhysicsManager::Joint3Diff lDiff;
 			lOk = lPhysics->GetJoint3Diff(lStructure.GetBoneGeometry(4)->GetBodyId(),
 				lStructure.GetBoneGeometry(4)->GetJointId(), lDiff);
-			assert(lOk);
+			deb_assert(lOk);
 			if (lOk)
 			{
 				lOk = (Lepra::Math::IsEpsEqual(lDiff.mValue, -1.0f));
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
 	}
@@ -452,10 +452,10 @@ bool ExportStructure()
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -464,12 +464,12 @@ bool ExportStructure()
 
 		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			Lepra::TransformationF lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -478,7 +478,7 @@ bool ExportStructure()
 				lStructure.GetBoneGeometry(0) != 0 &&
 				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
 				lStructure.GetEngineCount() == 4);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
 	}
@@ -695,15 +695,15 @@ bool ExportStructure()
 		{
 			const Lepra::Vector3DF& lBucketPosition = lStructure.GetBoneTransformation(11).GetPosition();
 			lOk = (Lepra::Math::IsInRange(lBucketPosition.x, -0.01f, 0.01f));
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -713,19 +713,19 @@ bool ExportStructure()
 		gTbcLog.Debugf(_T("--> Loading excavator. <--"));
 		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			const Lepra::Vector3DF& lBucketPosition = lStructure.GetOriginalBoneTransformation(11).GetPosition();
 			lOk = (Lepra::Math::IsInRange(lBucketPosition.x, -0.01f, 0.01f));
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			Lepra::TransformationF lTransformation;
 			lTransformation.SetPosition(Lepra::Vector3DF(4, 5, 6));
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -735,7 +735,7 @@ bool ExportStructure()
 				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
 				lStructure.GetBoneGeometry(8)->GetParent() == lStructure.GetBoneGeometry(0) &&
 				lStructure.GetEngineCount() == 5);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -745,7 +745,7 @@ bool ExportStructure()
 			lOk = (lPhysics->GetAnchorPos(lStructure.GetBoneGeometry(8)->GetJointId(), lBoomAnchor) &&
 				lPhysics->GetAnchorPos(lStructure.GetBoneGeometry(10)->GetJointId(), lArmAnchor) &&
 				lPhysics->GetAnchorPos(lStructure.GetBoneGeometry(11)->GetJointId(), lBucketAnchor));
-			assert(lOk);
+			deb_assert(lOk);
 			if (lOk)
 			{
 				lOk = (Lepra::Math::IsInRange(lBoomAnchor.x, 3.45f, 3.55f) &&
@@ -757,7 +757,7 @@ bool ExportStructure()
 					Lepra::Math::IsInRange(lBucketAnchor.x, 3.45f, 3.55f) &&
 					Lepra::Math::IsInRange(lBucketAnchor.y, 1.98f-3, 1.99f-3) &&
 					Lepra::Math::IsInRange(lBucketAnchor.z, 11.51f, 11.52f));
-				assert(lOk);
+				deb_assert(lOk);
 			}
 		}
 		lStructure.ClearAll(lPhysics);
@@ -862,10 +862,10 @@ bool ExportStructure()
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -874,12 +874,12 @@ bool ExportStructure()
 
 		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			Lepra::TransformationF lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -888,7 +888,7 @@ bool ExportStructure()
 				lStructure.GetBoneGeometry(0) != 0 &&
 				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
 				lStructure.GetEngineCount() == 1);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
 	}
@@ -964,10 +964,10 @@ bool ExportStructure()
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -976,12 +976,12 @@ bool ExportStructure()
 
 		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			Lepra::TransformationF lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -990,7 +990,7 @@ bool ExportStructure()
 				lStructure.GetBoneGeometry(0) != 0 &&
 				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
 				lStructure.GetEngineCount() == 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
 	}
@@ -1001,12 +1001,12 @@ bool ExportStructure()
 
 		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
-		assert(lOk);
+		deb_assert(lOk);
 		if (lOk)
 		{
 			Lepra::TransformationF lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		if (lOk)
 		{
@@ -1015,7 +1015,7 @@ bool ExportStructure()
 				lStructure.GetBoneGeometry(0) != 0 &&
 				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
 				lStructure.GetEngineCount() == 4);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
 	}

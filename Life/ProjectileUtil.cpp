@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -19,8 +19,8 @@ namespace Life
 
 bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF& pTransform, Vector3DF& pVelocity)
 {
-	assert(pProjectile);
-	//assert(pProjectile->GetOwnerInstanceId());
+	deb_assert(pProjectile);
+	//deb_assert(pProjectile->GetOwnerInstanceId());
 	Cure::CppContextObject* lAvatar = (Cure::CppContextObject*)pProjectile->GetManager()->GetObject(pProjectile->GetOwnerInstanceId());
 	if (!lAvatar)
 	{
@@ -38,7 +38,7 @@ bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF
 		const int lBoneIndex = lTag->mBodyIndexList[0];
 #ifdef LEPRA_DEBUG
 		const TBC::ChunkyBoneGeometry* lBone = lAvatar->GetPhysics()->GetBoneGeometry(lBoneIndex);
-		assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
+		deb_assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
 		//TBC::ChunkyBoneGeometry* lRootGeometry = lAvatar->GetPhysics()->GetBoneGeometry(0);
 		//QuaternionF q = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootGeometry->GetBodyId());
 		//QuaternionF p = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
@@ -90,7 +90,17 @@ void ProjectileUtil::BulletMicroTick(Cure::ContextObject* pBullet, float pFrameT
 	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyPosition(lBody, lTransform.GetPosition());
 	if (pAcceleration && lVelocity.GetLengthSquared() < pMaxVelocity*pMaxVelocity)
 	{
-		lVelocity += lTransform.GetOrientation() * Vector3DF(0, 0, pAcceleration*pFrameTime);
+		// TODO: fix Maya hack!!!
+		Vector3DF lForward;
+		if (lRootGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_CAPSULE || lRootGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_CYLINDER)
+		{
+			lForward.Set(0, 0, pAcceleration*pFrameTime);
+		}
+		else
+		{
+			lForward.Set(0, pAcceleration*pFrameTime, 0);
+		}
+		lVelocity += lTransform.GetOrientation() * lForward;
 		pBullet->SetRootVelocity(lVelocity);
 	}
 }

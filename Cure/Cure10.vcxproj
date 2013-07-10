@@ -261,6 +261,7 @@
     <ClCompile Include="Source\FloatAttribute.cpp" />
     <ClCompile Include="Source\GameManager.cpp" />
     <ClCompile Include="Source\GameTicker.cpp" />
+    <ClCompile Include="Source\Health.cpp" />
     <ClCompile Include="Source\HiscoreAgent.cpp" />
     <ClCompile Include="Source\IntAttribute.cpp" />
     <ClCompile Include="Source\NetworkAgent.cpp" />
@@ -269,8 +270,10 @@
     <ClCompile Include="Source\PhysicsSharedResource.cpp" />
     <ClCompile Include="Source\PositionalData.cpp" />
     <ClCompile Include="Source\PositionHauler.cpp" />
+    <ClCompile Include="Source\PythonInterface.cpp" />
     <ClCompile Include="Source\ResourceManager.cpp" />
     <ClCompile Include="Source\RuntimeVariable.cpp" />
+    <ClCompile Include="Source\Spawner.cpp" />
     <ClCompile Include="Source\TerrainFunctionManager.cpp" />
     <ClCompile Include="Source\TerrainManager.cpp" />
     <ClCompile Include="Source\TerrainPatchLoader.cpp" />
@@ -284,25 +287,32 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\ConsoleManager.h" />
+    <ClInclude Include="Include\ContextForceListener.h" />
     <ClInclude Include="Include\ContextManager.h" />
     <ClInclude Include="Include\ContextObject.h" />
     <ClInclude Include="Include\ContextObjectAttribute.h" />
     <ClInclude Include="Include\ContextPath.h" />
     <ClInclude Include="Include\CppContextObject.h" />
     <ClInclude Include="Include\Cure.h" />
+    <ClInclude Include="Include\DelayedDeleter.h" />
     <ClInclude Include="Include\Elevator.h" />
     <ClInclude Include="Include\FloatAttribute.h" />
     <ClInclude Include="Include\GameManager.h" />
+    <ClInclude Include="Include\GameTicker.h" />
+    <ClInclude Include="Include\Health.h" />
     <ClInclude Include="Include\HiscoreAgent.h" />
     <ClInclude Include="Include\IntAttribute.h" />
     <ClInclude Include="Include\NetworkAgent.h" />
     <ClInclude Include="Include\NetworkFreeAgent.h" />
     <ClInclude Include="Include\Packet.h" />
+    <ClInclude Include="Include\PhysicsSharedResource.h" />
     <ClInclude Include="Include\PositionalData.h" />
+    <ClInclude Include="Include\PositionHauler.h" />
     <ClInclude Include="Include\RemoteStatus.h" />
     <ClInclude Include="Include\ResourceManager.h" />
     <ClInclude Include="Include\RuntimeVariable.h" />
     <ClInclude Include="Include\RuntimeVariableName.h" />
+    <ClInclude Include="Include\Spawner.h" />
     <ClInclude Include="Include\TerrainFunctionManager.h" />
     <ClInclude Include="Include\TerrainManager.h" />
     <ClInclude Include="Include\TerrainPatchLoader.h" />
@@ -316,6 +326,7 @@
     <ClInclude Include="Include\UserConnection.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Include\DelayedDeleter.inl" />
     <None Include="Include\ResourceManager.inl" />
   </ItemGroup>
   <ItemGroup>

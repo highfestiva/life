@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -10,6 +10,8 @@
 
 #define RTVAR_DEBUG_ENABLE			"Debug.Enable"
 #define RTVAR_DEBUG_EXTRASLEEPTIME		"Debug.ExtraSleepTime"
+
+#define RTVAR_GAME_SPAWNPART			"Game.SpawnPart"
 
 #define RTVAR_NETWORK_ENABLEOPENSERVER		"Network.EnableOpenServer"
 

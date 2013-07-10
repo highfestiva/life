@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiChunkyClass.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 
 
 
@@ -19,7 +19,8 @@ ChunkyClass::Material::Material():
 	mDiffuse(1,1,1),
 	mSpecular(0.1f,0.1f,0.1f),
 	mShininess(0),
-	mAlpha(1)
+	mAlpha(1),
+	mSmooth(true)
 {
 }
 
@@ -48,7 +49,7 @@ size_t ChunkyClass::GetMeshCount() const
 void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName,
 	TransformationF& pTransform) const
 {
-	assert(pIndex < mMeshArray.size());
+	deb_assert(pIndex < mMeshArray.size());
 	pPhysIndex = mMeshArray[pIndex].mPhysIndex;
 	pMeshBaseName = mMeshArray[pIndex].mMeshBaseName;
 	pTransform = mMeshArray[pIndex].mTransform;
@@ -56,14 +57,14 @@ void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName,
 
 void ChunkyClass::SetLastMeshMaterial(const Material& pMaterial)
 {
-	assert(!mMeshArray.empty());
+	deb_assert(!mMeshArray.empty());
 	const size_t lLastMesh = mMeshArray.size()-1;
 	mMeshArray[lLastMesh].mMaterial = pMaterial;
 }
 
 const ChunkyClass::Material& ChunkyClass::GetMaterial(size_t pMeshIndex) const
 {
-	assert(pMeshIndex < mMeshArray.size());
+	deb_assert(pMeshIndex < mMeshArray.size());
 	return (mMeshArray[pMeshIndex].mMaterial);
 }
 

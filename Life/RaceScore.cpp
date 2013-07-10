@@ -1,15 +1,15 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "RaceScore.h"
-#include <assert.h>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextObject.h"
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../Lepra/Include/LepraAssert.h"
 #include "../Lepra/Include/Packer.h"
 
 
@@ -127,7 +127,7 @@ int RaceScore::Unpack(const uint8* pSource, int pMaxSize)
 
 void RaceScore::operator=(const RaceScore&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

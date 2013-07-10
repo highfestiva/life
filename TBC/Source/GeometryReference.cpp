@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/GeometryReference.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 
 
 
@@ -67,7 +67,7 @@ const TransformationF& GeometryReference::GetTransformation()
 		TransformationF lReturnTransformation = GetBaseTransformation();
 		lReturnTransformation.GetPosition() += lReturnTransformation.GetOrientation() * mOriginalOffset.GetPosition();
 		lReturnTransformation.GetOrientation() *= mOriginalOffset.GetOrientation();
-		assert(lReturnTransformation == mReturnTransformation);
+		deb_assert(lReturnTransformation == mReturnTransformation);
 #endif // Debug.*/
 		return mReturnTransformation;
 	}

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -29,7 +29,7 @@ namespace UiCure
 class ParticleLoader
 {
 public:
-	ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::Renderer* pRenderer, const str& pTextureName, size_t pSubTextureCount);
+	ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::Renderer* pRenderer, const str& pTextureName, size_t pSubFeatureTextureCount, size_t pSubTotalTextureCount);
 
 private:
 	LOG_CLASS_DECLARE();

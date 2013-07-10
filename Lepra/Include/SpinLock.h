@@ -1,13 +1,13 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
 #include "Thread.h"
-#include <assert.h>
+#include "LepraAssert.h"
 #include "BusLock.h"
 
 
@@ -50,7 +50,7 @@ inline SpinLock::~SpinLock()
 
 inline void SpinLock::Acquire()
 {
-	assert(!IsOwner());
+	deb_assert(!IsOwner());
 	UncheckedAcquire();
 }
 
@@ -73,7 +73,7 @@ inline void SpinLock::UncheckedAcquire()
 
 inline bool SpinLock::TryAcquire()
 {
-	assert(!IsOwner());
+	deb_assert(!IsOwner());
 	bool lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
 	if (lAcquired)
 	{
@@ -85,7 +85,7 @@ inline bool SpinLock::TryAcquire()
 inline void SpinLock::Release()
 {
 	Dereference();
-	assert(mLocked == LOCKED);
+	deb_assert(mLocked == LOCKED);
 	BusLock::CompareAndSwap(&mLocked, UNLOCKED, LOCKED);
 }
 

@@ -1,7 +1,7 @@
 /*
 	Class:  CubicDeCasteljauSpline
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 
 	NOTES:
 
@@ -56,7 +56,13 @@ public:
 			      int pCount,
 			      SplineType pSplineType = TYPE_BSPLINE,
 			      DataPolicy pPolicy = FULL_COPY);
+	CubicDeCasteljauSpline(const CubicDeCasteljauSpline& pOriginal, DataPolicy pPolicy = COPY_REFERENCE);
 	~CubicDeCasteljauSpline();
+	void Set(T* pKeyFrames,		// pCount + 1 elements.
+		TimeType* pTimeTags,	// pCount + 1 elements.
+		int pCount,
+		SplineType pSplineType = TYPE_BSPLINE,
+		DataPolicy pPolicy = FULL_COPY);
 
 	void EnableModulo(bool pEnable);
 	void StartInterpolation(TimeType pTime);

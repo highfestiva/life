@@ -1,7 +1,7 @@
 /*
 	Class:  TerrainPatch
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 #include "../Include/TerrainPatch.h"
@@ -9,7 +9,7 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../../Lepra/Include/Math.h"
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 
 namespace TBC
 {
@@ -23,8 +23,8 @@ void TerrainPatch::SetDimensions(int pPatchResLog2,
 				 float pPatchUnitSize,
 				 int pPatchSizeMultiplier)
 {
-	assert(pPatchResLog2 >= 0 && pPatchResLog2 < 16);
-	assert(pPatchUnitSize > 0.0f);
+	deb_assert(pPatchResLog2 >= 0 && pPatchResLog2 < 16);
+	deb_assert(pPatchUnitSize > 0.0f);
 
 	if (smNumPatches == 0)
 	{
@@ -309,7 +309,7 @@ void TerrainPatch::GenerateIndexData(uint8* pHoleMap)
 	}
 
 	GeometryBase::SetIndexDataChanged(true);
-	assert((lTriIndex % 3) == 0 && (lTriIndex / 3) == mTriangleCount);
+	deb_assert((lTriIndex % 3) == 0 && (lTriIndex / 3) == mTriangleCount);
 }
 
 void TerrainPatch::AddTriangles(int pTriCount, int pExtraVertexStartIndex,
@@ -614,12 +614,12 @@ float* TerrainPatch::GetEdgeVertex(int pIndex, unsigned int pEdgeFlag, int pRegu
 {
 	if (CheckFlag(mHiResEdgeFlags, pEdgeFlag) == false)
 	{
-		assert(pIndex >= 0 && pIndex < smPatchRes + 1);
+		deb_assert(pIndex >= 0 && pIndex < smPatchRes + 1);
 		return &pVertexData[(pRegularStartIndex + pIndex * pPitch) * 3];
 	}
 	else
 	{
-		assert(pIndex >= 0 && pIndex < smPatchRes * smPatchSizeMultiplier + 1);
+		deb_assert(pIndex >= 0 && pIndex < smPatchRes * smPatchSizeMultiplier + 1);
 
 		// Index of previous regular vertex (not an "extra vertex").
 		int lRegularVertexIndex = pIndex / smPatchSizeMultiplier;
@@ -753,14 +753,14 @@ void TerrainPatch::ProcessSharedEdge(TerrainPatch& pNeighbour,
 	(this->*pAssertAlignment)(lSouthWest, lNorthEast, lSouthWestNeighbour, lNorthEastNeighbour);
 
 	// The size can only differ with one step.
-	assert(mSizeMultiplier == pNeighbour.mSizeMultiplier ||
+	deb_assert(mSizeMultiplier == pNeighbour.mSizeMultiplier ||
 	       mSizeMultiplier == pNeighbour.mSizeMultiplier - smPatchSizeMultiplier ||
 	       mSizeMultiplier == pNeighbour.mSizeMultiplier + smPatchSizeMultiplier);
 
 	// The big patch adapts to the smaller patch.
 	if (mSizeMultiplier >= pNeighbour.mSizeMultiplier)
 	{
-		assert(pNeighbour.CheckFlag(pNeighbour.mHiResEdgeFlags, pOppositeEdge) == false &&
+		deb_assert(pNeighbour.CheckFlag(pNeighbour.mHiResEdgeFlags, pOppositeEdge) == false &&
 			((mSizeMultiplier == pNeighbour.mSizeMultiplier && CheckFlag(mHiResEdgeFlags, pEdge) == false) ||
 			CheckFlag(mHiResEdgeFlags, pEdge) == true));
 
@@ -785,7 +785,7 @@ void TerrainPatch::ProcessSharedEdge(TerrainPatch& pNeighbour,
 void TerrainPatch::AssertNorthAlignment(const Vector2D<int>&, const Vector2D<int>& pNorthEast, const Vector2D<int>& pSouthWestNeighbour,	const Vector2D<int>&)
 {
 	// TODO: Implement a check along the x-axis!?
-	assert(pNorthEast.y == pSouthWestNeighbour.y);
+	deb_assert(pNorthEast.y == pSouthWestNeighbour.y);
 	pNorthEast;
 	pSouthWestNeighbour;
 }
@@ -793,7 +793,7 @@ void TerrainPatch::AssertNorthAlignment(const Vector2D<int>&, const Vector2D<int
 void TerrainPatch::AssertSouthAlignment(const Vector2D<int>& pSouthWest, const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>& pNorthEastNeighbour)
 {
 	// TODO: Implement a check along the x-axis!?
-	assert(pSouthWest.y == pNorthEastNeighbour.y);
+	deb_assert(pSouthWest.y == pNorthEastNeighbour.y);
 	pSouthWest;
 	pNorthEastNeighbour;
 }
@@ -801,7 +801,7 @@ void TerrainPatch::AssertSouthAlignment(const Vector2D<int>& pSouthWest, const V
 void TerrainPatch::AssertEastAlignment(const Vector2D<int>&, const Vector2D<int>& pNorthEast, const Vector2D<int>& pSouthWestNeighbour, const Vector2D<int>&)
 {
 	// TODO: Implement a check along the y-axis!?
-	assert(pNorthEast.x == pSouthWestNeighbour.x);
+	deb_assert(pNorthEast.x == pSouthWestNeighbour.x);
 	pNorthEast;
 	pSouthWestNeighbour;
 }
@@ -809,7 +809,7 @@ void TerrainPatch::AssertEastAlignment(const Vector2D<int>&, const Vector2D<int>
 void TerrainPatch::AssertWestAlignment(const Vector2D<int>& pSouthWest, const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>& pNorthEastNeighbour)
 {
 	// TODO: Implement a check along the y-axis!?
-	assert(pSouthWest.x == pNorthEastNeighbour.x);
+	deb_assert(pSouthWest.x == pNorthEastNeighbour.x);
 	pSouthWest;
 	pNorthEastNeighbour;
 }
@@ -938,7 +938,7 @@ uint8* TerrainPatch::GetColorData() const
 
 void TerrainPatch::operator=(const TerrainPatch&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

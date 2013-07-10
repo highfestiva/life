@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -67,7 +67,7 @@ Painter::ImageID GUIImageManager::AddImage(const Canvas& pImage, ImageStyle pSty
 
 void GUIImageManager::AddLoadedImage(const Canvas& pImage, Painter::ImageID pImageId, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue)
 {
-	assert(!HasImage(pImageId));
+	deb_assert(!HasImage(pImageId));
 	mImageTable.Insert(pImageId, new Image(pImageId, pImage, pStyle, pBlendFunc, pAlphaValue));
 }
 
@@ -91,7 +91,7 @@ bool GUIImageManager::DropImage(Painter::ImageID pImageId)
 		delete lImage;
 		return true;
 	}
-	assert(false);
+	deb_assert(false);
 	return false;
 }
 
@@ -127,7 +127,7 @@ void GUIImageManager::DrawImage(Painter::ImageID pImageID, int x, int y)
 	if (pImageID != Painter::INVALID_IMAGEID)
 	{
 		ImageTable::Iterator lIter = mImageTable.Find(pImageID);
-		assert(lIter != mImageTable.End());
+		deb_assert(lIter != mImageTable.End());
 		if (lIter != mImageTable.End())
 		{
 			Image* lImage = *lIter;

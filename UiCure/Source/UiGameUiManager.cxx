@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -184,6 +184,8 @@ bool GameUiManager::OpenRest()
 		CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 		double lFontHeight;
 		CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		int lFontFlags;
+		CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
 		UiTbc::FontManager::FontId lFontId = mFontManager->QueryAddFont(lFont, lFontHeight);
 		const tchar* lFontNames[] =
 		{
@@ -196,7 +198,7 @@ bool GameUiManager::OpenRest()
 		};
 		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
 		{
-			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight);
+			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight, lFontFlags);
 		}
 	}
 	if (lOk)

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
  
 
 
@@ -357,7 +357,7 @@ bool MasterServer::Send(UdpVSocket* pRemote, const str& pData)
 
 void MasterServer::DropSocket(UdpVSocket* pRemote)
 {
-	assert(mSocketTable.find(pRemote) != mSocketTable.end());
+	deb_assert(mSocketTable.find(pRemote) != mSocketTable.end());
 	mSocketTimeoutTable.erase(pRemote);
 	mSocketTable.erase(pRemote);
 	mMuxSocket->CloseSocket(pRemote);

@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/TimeManager.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Performance.h"
 #include "../Include/RuntimeVariable.h"
@@ -23,7 +23,8 @@ static const int gPhysicsFrameWrapLimit = gTimeWrapLimit*CURE_STANDARD_FRAME_RAT
 
 
 TimeManager::TimeManager():
-	mTargetFrameRate(CURE_STANDARD_FRAME_RATE)
+	mTargetFrameRate(CURE_STANDARD_FRAME_RATE),
+	mTime(false)
 {
 	Clear(0);
 }
@@ -161,13 +162,13 @@ int TimeManager::GetCurrentPhysicsFrameAddFrames(int pFrames) const
 
 int TimeManager::GetCurrentPhysicsFrameAddSeconds(float pSeconds) const
 {
-	assert(pSeconds <= 10*60);
+	deb_assert(pSeconds <= 10*60);
 	return GetCurrentPhysicsFrameAddFrames(ConvertSecondsToPhysicsFrames(pSeconds));
 }
 
 int TimeManager::GetPhysicsFrameAddFrames(int pFrameCounter, int pFrames) const
 {
-	assert(pFrames > -gPhysicsFrameWrapLimit/2 &&
+	deb_assert(pFrames > -gPhysicsFrameWrapLimit/2 &&
 		pFrames < gPhysicsFrameWrapLimit/2);
 
 	int lNewFrame = pFrameCounter + pFrames;
@@ -180,7 +181,7 @@ int TimeManager::GetPhysicsFrameAddFrames(int pFrameCounter, int pFrames) const
 		lNewFrame -= gPhysicsFrameWrapLimit;
 	}
 
-	assert(lNewFrame >= 0 && lNewFrame < gPhysicsFrameWrapLimit);
+	deb_assert(lNewFrame >= 0 && lNewFrame < gPhysicsFrameWrapLimit);
 	return lNewFrame;
 }
 
@@ -193,11 +194,11 @@ int TimeManager::GetPhysicsFrameDelta(int pEnd, int pStart) const
 {
 	if (pStart >= gPhysicsFrameWrapLimit || pEnd >= gPhysicsFrameWrapLimit)
 	{
-		assert(false);
+		deb_assert(false);
 		return -1;
 	}
-	assert(pEnd >= 0);
-	assert(pStart >= 0);
+	deb_assert(pEnd >= 0);
+	deb_assert(pStart >= 0);
 
 	int lDiff = pEnd - pStart;
 	if (lDiff > gPhysicsFrameWrapLimit/2)
@@ -209,7 +210,7 @@ int TimeManager::GetPhysicsFrameDelta(int pEnd, int pStart) const
 		lDiff += gPhysicsFrameWrapLimit;
 	}
 
-	assert(lDiff >= -gPhysicsFrameWrapLimit/2 && lDiff <= gPhysicsFrameWrapLimit/2);
+	deb_assert(lDiff >= -gPhysicsFrameWrapLimit/2 && lDiff <= gPhysicsFrameWrapLimit/2);
 	return lDiff;
 }
 

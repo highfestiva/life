@@ -63,7 +63,8 @@ class GroupReader(DefaultMAReader):
 				     "deleteUVSet", "plusMinusAverage", "transformGeometry", \
 				     "cameraView", "directionalLight", "brush", \
 				     "createUVSet", "animCurveTU", "animCurveTA"]
-		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", "polyAutoProj"]
+		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", \
+		                     "polyAutoProj", "polyPlane"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
 				     "file"]
 		self.basename = basename
@@ -325,6 +326,8 @@ class GroupReader(DefaultMAReader):
 				node.fix_attribute("rgn", n)
 			uv = node.getAttrValue("rguv0", "rguv0", None, n=None)
 			if uv:
+				if options.options.verbose:
+					print("%s has UVs." % node.getFullName())
 				for x in range(1, len(uv), 3):
 					uv[x] = -uv[x]
 				node.fix_attribute("rguv", uv)
@@ -464,7 +467,7 @@ class GroupReader(DefaultMAReader):
 			if v > 1:
 				instancecount += 1
 				#print("Got mesh instance:", k, v)
-		if len(group) >= 25 and instancecount == 0:
+		if len(meshnames) >= 25 and instancecount == 0:
 			print("%s: warning: has no mesh instances (total of %i nodes); highly unlikely! At least the wheels should be, right?" % (self.basename, len(group)))
 
 
@@ -494,6 +497,7 @@ class GroupReader(DefaultMAReader):
 				specular = [0.5]*3
 				shininess = 0.0
 				alpha = 1.0
+				smooth = node.get_fixed_attribute("smooth", optional=True, default=True)
 				textureNames = []
 				shaderName = node.get_fixed_attribute("shader", optional=True, default="plain")
 
@@ -576,6 +580,7 @@ class GroupReader(DefaultMAReader):
 ##					print("Error:", node, node.mat.ambient, node.mat.diffuse, node.mat.specular)
 				node.mat.shininess = shininess
 				node.mat.alpha     = alpha
+				node.mat.smooth    = smooth
 				node.mat.textures  = textureNames
 				node.mat.shader    = shaderName
 				if textureNames and options.options.verbose:
@@ -662,8 +667,13 @@ class GroupReader(DefaultMAReader):
 			if node.getName().startswith("m_") and node.nodetype == "transform":
 				node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node, "m_", group, False)))
 				node.phys_children = self._listchildnodes(node, "phys_", group, False)
+				for phys in node.phys_children:
+					if phys.getName()[5:] == node.getName()[2:]:
+						node.phys_children.remove(phys)
+						node.phys_children = [phys] + node.phys_children
+						break
 				if options.options.verbose:
-					print("Phys children are", node.phys_children)
+					print("Phys children to %s are %s." % (node, node.phys_children))
 		return isGroupValid
 
 				
@@ -749,7 +759,7 @@ class GroupReader(DefaultMAReader):
 				required = [("type", lambda x: type(x) == str),
 					    ("strength", lambda x: x > 0 and x < 30000),
 					    ("max_velocity", lambda x: len(x)==2 and x[0]>=-300 and x[0]<=300 and x[1]>=-300 and x[1]<=300),
-					    ("controller_index", lambda x: x >= 0 and x < 20),
+					    ("controller_index", lambda x: x >= 0 and x < 40),
 					    ("connected_to", check_connected_to)]
 				for name, engine_check in required:
 					allApplied &= self._query_attribute(node, name, engine_check)[0]
@@ -848,7 +858,8 @@ class GroupReader(DefaultMAReader):
 
 			elif section.startswith("tag:"):
 				tagtype = stripQuotes(config.get(section, "type"))
-				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "engine_mesh_offset", "exhaust", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "anything"]
+				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "engine_sound", "engine_mesh_offset", "burn", "exhaust", "jet_engine_emitter", "stunt_trigger_data", \
+						    "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "textures", "mass_objects", "anything"]
 				allApplied &= tagOk
 				if not tagOk:
 					print("Error: invalid tag type '%s'." % tagtype)
@@ -869,6 +880,26 @@ class GroupReader(DefaultMAReader):
 							if not (cn.nodetype.startswith(cntype)):
 								print("Error: node %s not of %s type, but %s." % (cn.getName(), cntype, cn.nodetype))
 					return ok
+				def check_name(l, required, disallowed):
+					ok = True
+					for e in l:
+						connected_to = self._regexpnodes(e, group)
+						for cn in connected_to:
+							for req in required:
+								if cn.getFullName().find(req) < 0:
+									print("Error: list containing node %s requires name to contain %s." % (cn.getName(), req))
+									ok = False
+							for dis in disallowed:
+								if cn.getFullName().find(dis) >= 0:
+									print("Error: list containing node %s disallows name containing %s." % (cn.getName(), dis))
+									ok = False
+					return ok
+				def check_connected_phys(l):
+					return check_connected_to(l, "transform") and \
+							check_name(l, ["phys_"], ["Shape"])
+				def check_connected_mesh(l):
+					return check_connected_to(l, "transform") and \
+							check_name(l, ["m_"], ["phys_", "Shape"])
 				def check_connected_transform(l):
 					return check_connected_to(l, "transform")
 				def check_connected_engine(l):
@@ -876,9 +907,9 @@ class GroupReader(DefaultMAReader):
 				required = [("type", lambda x: type(x) == str),
 					    ("float_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: isinstance(i, (int, float)), x)))),
 					    ("string_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: type(i) == str, x)))),
-					    ("phys_list", check_connected_transform),
+					    ("phys_list", check_connected_phys),
 					    ("engine_list", check_connected_engine),
-					    ("mesh_list", check_connected_transform)]
+					    ("mesh_list", check_connected_mesh)]
 				for name, check in required:
 					allApplied &= self._query_attribute(node, name, check)[0]
 				group.append(node)
@@ -999,7 +1030,7 @@ class GroupReader(DefaultMAReader):
 			if node.nodetype == "mesh":
 				for parent in node.getparents():
 					if parent.nodetype == "transform":
-						if not parent.shape:
+						if not hasattr(parent, "shape") or not parent.shape:
 							in_nodename = node.getInNode("i", "i")[0]
 							if node.getName().startswith("m_phys_"):
 								parent.shape = node     # Use triangle mesh as physics shape.
@@ -1043,9 +1074,11 @@ class GroupReader(DefaultMAReader):
 			for mesh in phys.mesh_ref:
 				if not self._is_valid_phys_ref(group, phys, mesh, False):
 					ok = False
+					print("Error: '%s' is not a valid phys for mesh '%s'." % (phys.getFullName(), mesh.getFullName()))
 			for mesh in phys.loose_mesh_ref:
 				if not self._is_valid_phys_ref(group, phys, mesh, True):
 					ok = False
+					print("Error: '%s' is not a valid loose phys for mesh '%s'." % (phys.getFullName(), mesh.getFullName()))
 		for mesh in group:
 			if not mesh.getName().startswith("m_"):
 				continue
@@ -1123,10 +1156,10 @@ class GroupReader(DefaultMAReader):
 				if phys.pointup:
 					#print("\n".join(dir(phys)))
 					#print(phys.mesh_ref, phys.loose_mesh_ref, phys.phys_root, phys._parents, phys.nodetype)
-					#print("%s before:\n%s." % (phys.getName(), phys.get_final_local_transform()))
+					#print("%s before:\n%s." % (phys.getName(), quat(phys.get_world_transform().decompose()[1])))
 					del(phys.localmat4)
 					phys.gettransformto(None)
-					#print("%s after:\n%s." % (phys.getName(), phys.get_final_local_transform()))
+					#print("%s after:\n%s." % (phys.getName(), quat(phys.get_world_transform().decompose()[1])))
 		#shape.disable_ortho_check = True
 
 

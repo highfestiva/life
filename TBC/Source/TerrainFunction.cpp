@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/CubicSpline.h"
 #include "../../Lepra/Include/Math.h"
 #include "../Include/TerrainFunction.h"
@@ -20,7 +20,7 @@ TerrainFunction::TerrainFunction(float pAmplitude, const Vector2DF& pPosition, f
 	mInnerRadius(pInnerRadius),
 	mOuterRadius(pOuterRadius)
 {
-	assert(mInnerRadius <= mOuterRadius);	// Outer radius should be AT LEAST as big as the inner ditto.
+	deb_assert(mInnerRadius <= mOuterRadius);	// Outer radius should be AT LEAST as big as the inner ditto.
 }
 
 TerrainFunction::~TerrainFunction()
@@ -387,7 +387,7 @@ TerrainAmplitudeFunction::TerrainAmplitudeFunction(const float* pAmplitudeVector
 	TerrainDecorator(pFunction),
 	mAmplitudeSpline(0)
 {
-	assert(pAmplitudeVectorLength >= 2);
+	deb_assert(pAmplitudeVectorLength >= 2);
 
 	const float lTimeStep = 2.0f/(pAmplitudeVectorLength+1-1);
 	float lTime = -1;
@@ -462,7 +462,7 @@ TerrainPushFunction::TerrainPushFunction(const float* pPushVector, unsigned pPus
 	TerrainDecorator(pFunction),
 	mPushSpline(0)
 {
-	assert(pPushVectorLength >= 2);
+	deb_assert(pPushVectorLength >= 2);
 
 	const float lTimeStep = 2.0f/(pPushVectorLength+1-1);
 	float lTime = -1;

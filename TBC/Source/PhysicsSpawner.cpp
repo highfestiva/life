@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/PhysicsSpawner.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../Include/ChunkyBoneGeometry.h"
@@ -31,7 +31,7 @@ PhysicsSpawner::~PhysicsSpawner()
 void PhysicsSpawner::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsSpawner& pOriginal)
 {
 	const int lBoneIndex = pSource->GetIndex(pOriginal.mSpawnerNode);
-	assert(lBoneIndex >= 0);
+	deb_assert(lBoneIndex >= 0);
 	mSpawnerNode = pTarget->GetBoneGeometry(lBoneIndex);
 }
 
@@ -42,7 +42,7 @@ PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* pStructure, const void* pDat
 	if (pByteCount < sizeof(uint32)*6 /*+ ...*/)
 	{
 		mLog.AError("Could not load; wrong data size.");
-		assert(false);
+		deb_assert(false);
 		return (0);
 	}
 
@@ -51,7 +51,7 @@ PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* pStructure, const void* pDat
 	if (lSpawner->GetChunkySize() != pByteCount)
 	{
 		mLog.AError("Corrupt data or error in loading algo.");
-		assert(false);
+		deb_assert(false);
 		delete (lSpawner);
 		lSpawner = 0;
 	}
@@ -72,8 +72,8 @@ const str& PhysicsSpawner::GetFunction() const
 
 TransformationF PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint) const
 {
-	assert(mSpawnerNode);
-	assert(mSpawnerNode->GetGeometryType() == ChunkyBoneGeometry::GEOMETRY_BOX);
+	deb_assert(mSpawnerNode);
+	deb_assert(mSpawnerNode->GetGeometryType() == ChunkyBoneGeometry::GEOMETRY_BOX);
 	TBC::ChunkyBoneBox* lSpawnBox = (TBC::ChunkyBoneBox*)mSpawnerNode;
 	Vector3DF lPoint = lSpawnBox->GetShapeSize();
 	lPoint.x = (pScaledPoint.x-0.5f) * lPoint.x;
@@ -145,7 +145,7 @@ void PhysicsSpawner::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	for (; x != mSpawnObjectArray.end(); ++x)
 	{
 		int lStringRawLength = PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(x->mSpawnObject));
-		assert(lStringRawLength % sizeof(lData[0]) == 0);
+		deb_assert(lStringRawLength % sizeof(lData[0]) == 0);
 		i += lStringRawLength / sizeof(lData[0]);
 		lData[i++] = Endian::HostToBigF(x->mProbability);
 	}
@@ -171,7 +171,7 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	{
 		str lSpawnObject;
 		const int lStringRawLength = PackerUnicodeString::Unpack(lSpawnObject, (uint8*)&lData[i], 1024);
-		assert(lStringRawLength % sizeof(lData[0]) == 0);
+		deb_assert(lStringRawLength % sizeof(lData[0]) == 0);
 		i += lStringRawLength / sizeof(lData[0]);
 		const float lProbability = Endian::BigToHostF(lData[i++]);
 		mSpawnObjectArray.push_back(SpawnObject(strutil::Encode(lSpawnObject), lProbability));

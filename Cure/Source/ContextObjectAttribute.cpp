@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/ContextObjectAttribute.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../Include/ContextObject.h"
 
@@ -40,7 +40,7 @@ const str& ContextObjectAttribute::GetName() const
 
 void ContextObjectAttribute::SetCreator(const Factory& pFactory)
 {
-	assert(mFactory == 0);
+	deb_assert(mFactory == 0);
 	mFactory = pFactory;
 }
 
@@ -71,7 +71,7 @@ int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* p
 	ContextObjectAttribute* lAttribute = pContextObject->GetAttribute(lAttributeName);
 	if (!lAttribute)
 	{
-		assert(mFactory);
+		deb_assert(mFactory);
 		lAttribute = mFactory(pContextObject, lAttributeName);
 		if (!lAttribute)
 		{
@@ -103,7 +103,7 @@ void ContextObjectAttribute::SetNetworkType(NetworkType pNetworkType)
 
 void ContextObjectAttribute::operator=(const ContextObjectAttribute&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

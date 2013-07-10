@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -14,17 +14,17 @@ namespace UiTbc
 
 
 
-BillboardGeometry::BillboardGeometry(unsigned pUVSetCount):
+BillboardGeometry::BillboardGeometry(float pAspectRatio, unsigned pUVSetCount):
 	mUVSetCount(pUVSetCount)
 {
 	SetAlwaysVisible(false);
 
 	const float lTriStrip[] =
 	{
-		-1,0,+1,
-		+1,0,+1,
-		-1,0,-1,
-		+1,0,-1,
+		-1,0,+1/pAspectRatio,
+		+1,0,+1/pAspectRatio,
+		-1,0,-1/pAspectRatio,
+		+1,0,-1/pAspectRatio,
 	};
 	::memcpy(mVertexData, lTriStrip, sizeof(mVertexData));
 	mIndexData[0] = 0;
@@ -34,12 +34,13 @@ BillboardGeometry::BillboardGeometry(unsigned pUVSetCount):
 
 	mUVData = new float[2*4*mUVSetCount];
 	const float lWidth = 1.0f/mUVSetCount;
+	const float lMarginX = 1/256.0;
 	const float lUvTriStripData[] =
 	{
-		0,0,
-		1,0,
-		0,1,
-		1,1,
+		lMarginX,   0,
+		1-lMarginX, 0,
+		lMarginX,   1,
+		1-lMarginX, 1,
 	};
 	for (unsigned x = 0; x < mUVSetCount; ++x)
 	{

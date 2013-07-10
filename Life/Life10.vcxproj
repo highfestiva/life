@@ -235,13 +235,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleManager.cpp" />
+    <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="Life.cpp" />
     <ClCompile Include="LifeApplication.cpp" />
     <ClCompile Include="ProjectileUtil.cpp" />
     <ClCompile Include="RaceScore.cpp" />
+    <ClCompile Include="Spawner.cpp" />
+    <ClCompile Include="StuntTrigger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleManager.h" />
+    <ClInclude Include="Explosion.h" />
+    <ClInclude Include="Launcher.h" />
     <ClInclude Include="Life.h" />
     <ClInclude Include="LifeApplication.h" />
     <ClInclude Include="LifeString.h" />
@@ -249,12 +254,18 @@
     <ClInclude Include="RaceScore.h" />
     <ClInclude Include="RtVar.h" />
     <ClInclude Include="ServerInfo.h" />
+    <ClInclude Include="Spawner.h" />
+    <ClInclude Include="StuntTrigger.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cure\Cure10.vcxproj">
       <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Life.sln" />
+    <None Include="Life.vcproj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

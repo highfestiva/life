@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -18,7 +18,7 @@ namespace UiTbc
 
 
 #ifdef LEPRA_DEBUG
-#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); assert(lGlError == GL_NO_ERROR); }
+#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
 #else // !Debug
 #define OGL_ASSERT()
 #endif // Debug / !Debug
@@ -672,13 +672,12 @@ void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
 	OGL_ASSERT();
 }
 
-void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF> pCoords, const std::vector<Vector2DF> pTexCoords)
+void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF>& pCoords, const std::vector<Vector2DF>& pTexCoords)
 {
 	OGL_ASSERT();
-	assert(pCoords.size() == pTexCoords.size());
+	deb_assert(pCoords.size() == pTexCoords.size());
 
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
-
 	if (lIter == mTextureTable.End())
 	{
 		return;
@@ -1341,7 +1340,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	const int lTabSize = (GetTabSize() > 0)? GetTabSize() : lSpaceSize*4;
 
 	const Color lColor = GetColorInternal(0);
-	assert(lColor != BLACK);	// Does not show.
+	deb_assert(lColor != BLACK);	// Does not show.
 	GetFontManager()->SetColor(Color(255, 255, 255, 255));
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
 	const uint32 lFontHash = (GetFontManager()->GetActiveFontId() << 16) + lFontHeight;
@@ -1405,7 +1404,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 			int lCharWidth = 5;
 			if (!lFontTexture->GetGlyphX(lChar, lTextureX, lCharWidth))
 			{
-				assert(false);
+				deb_assert(false);
 				continue;
 			}
 			const float lTextureWidth = (float)lFontTexture->GetWidth();
@@ -1609,7 +1608,7 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 
 		if (lGeneratedGeometry->GetImageID() != INVALID_IMAGEID)
 		{
-			assert(lGeneratedGeometry->GetGeometry().GetUVData() != 0);
+			deb_assert(lGeneratedGeometry->GetGeometry().GetUVData() != 0);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(2, GL_FLOAT, 0, lGeneratedGeometry->GetGeometry().GetUVData());
 

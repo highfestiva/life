@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2010, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/MemFile.h"
-#include <assert.h>
+#include "../Include/LepraAssert.h"
 #include "../Include/String.h"
 
 
@@ -174,7 +174,7 @@ void MemFile::Resize(size_t pSize)
 void MemFile::CropHead(size_t pFinalSize)
 {
 	ScopeLock lLock(&mLock);
-	assert(pFinalSize <= mSize);
+	deb_assert(pFinalSize <= mSize);
 	if (pFinalSize <= mSize)
 	{
 		return;
@@ -190,7 +190,7 @@ void MemFile::CropHead(size_t pFinalSize)
 	{
 		mCurrentPos = 0;
 	}
-	assert(mCurrentPos <= mSize);
+	deb_assert(mCurrentPos <= mSize);
 }
 
 void* MemFile::GetBuffer(size_t pMinimumSize)

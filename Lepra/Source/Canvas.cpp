@@ -1,7 +1,7 @@
 /*
 	Class:  Canvas
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
+	Author: Jonas Byström
+	Copyright (c) Pixel Doctrine
 */
 
 #include <math.h>
@@ -2922,7 +2922,7 @@ void Canvas::ConvertTo32()
 	switch(mBitDepth)
 	{
 	case BITDEPTH_8_BIT:
-		for (i = 0; i < lImageSize; i++)
+		for (i = 0; i < lImageSize && mBuffer; i++)
 		{
 			lTemp[(i<<2) + 0] = mPalette[((uint8*)mBuffer)[i]].mBlue;
 			lTemp[(i<<2) + 1] = mPalette[((uint8*)mBuffer)[i]].mGreen;

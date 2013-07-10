@@ -1,10 +1,10 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "LepraAssert.h"
 
 
 
@@ -17,7 +17,7 @@ ID_TEMPLATE
 ID_QUAL::IdManager(_TInt pMinId, _TInt pMaxId, _TInt pInvalidId):
 	mInvalidId(pInvalidId)
 {
-	assert(pMaxId+1 > pMaxId);	// Our ID segmentation model assumes that ID doesn't wrap on max+1.
+	deb_assert(pMaxId+1 > pMaxId);	// Our ID segmentation model assumes that ID doesn't wrap on max+1.
 	mIdSegmentList.push_back(AllocFreeSegment(pMinId, pMinId, pMaxId));
 }
 

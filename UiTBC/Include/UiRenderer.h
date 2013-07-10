@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2013, Pixel Doctrine
+// Copyright (c) Pixel Doctrine
 
 // This class is a high level interface to the sublevel rendering API (which can be OpenGL, Direct3D or some other API). 
 // The renderer uses a right handed coordinate system:
@@ -19,6 +19,7 @@
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../Lepra/Include/Transformation.h"
+#include "../../Lepra/Include/Vector2D.h"
 #include "UiTBC.h"
 #include "UiBillboardRenderInfo.h"
 #include "UiTexture.h"
@@ -476,6 +477,7 @@ public:
 	// Adds/updates/removes geometry to/in/from the renderer.
 	virtual GeometryID AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows);
 	virtual bool TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture);	// Only adds a texture ID if it hasn't been added already.
+	virtual bool DisconnectGeometryTexture(GeometryID pGeometryId, TextureID pTexture);
 	virtual void UpdateGeometry(GeometryID pGeometryID) = 0;
 	virtual void RemoveGeometry(GeometryID pGeometryID);
 	virtual void RemoveAllGeometry();

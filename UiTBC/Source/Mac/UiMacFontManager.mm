@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -55,7 +55,7 @@ MacFontManager::~MacFontManager()
 
 void MacFontManager::SetColor(const Color& pColor, unsigned pColorIndex)
 {
-	assert(pColorIndex <= 1);
+	deb_assert(pColorIndex <= 1);
 }
 
 MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSize, int pFlags, CharacterSet pCharSet)

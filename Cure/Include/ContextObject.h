@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -78,6 +78,7 @@ public:
 	ContextObjectAttribute* GetAttribute(const str& pName) const;
 	const AttributeArray& GetAttributes() const;
 	float GetAttributeFloatValue(const str& pAttributeName) const;
+	void QuerySetChildishness(float pChildishness);
 	bool IsAttributeTrue(const str& pAttributeName) const;
 	void OnAttributeUpdated(ContextObjectAttribute* pAttribute);
 

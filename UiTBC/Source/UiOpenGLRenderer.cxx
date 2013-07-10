@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 #include "../Include/UiOpenGLRenderer.h"
 #include "../../Lepra/Include/Canvas.h"
@@ -22,7 +22,7 @@ namespace UiTbc
 
 
 #ifdef LEPRA_DEBUG
-#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); assert(lGlError == GL_NO_ERROR); }
+#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
 #else // !Debug
 #define OGL_ASSERT()
 #endif // Debug / !Debug
@@ -512,7 +512,7 @@ const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pU
 		case Texture::SPECULAR_MAP:
 			return pUserTexture->GetSpecularMap(pMipMapLevel);
 		default:
-			assert(false);
+			deb_assert(false);
 			return 0;
 	};
 }
@@ -520,7 +520,7 @@ const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pU
 void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* pTexture)
 {
 	OGL_ASSERT();
-	assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
+	deb_assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
 
 	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 					GetCompressedTexturesEnabled();
@@ -535,7 +535,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	OGL_ASSERT();
 
 	int lSize = GetMap(pMapType, 0, pTexture)->GetPixelByteSize();
-	assert(lSize == 1 || lSize == 3 || lSize == 4);
+	deb_assert(lSize == 1 || lSize == 3 || lSize == 4);
 	
 	GLenum lPixelFormat;
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
@@ -1035,9 +1035,16 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 			// Make sure the geometry is properly removed -- otherwise we have a leak!
 			// Hugge: In case fallback materials are disabled, the material may not
 			//        have added the geometry in the first place.
-			assert(false);
+			deb_assert(false);
 		}
 	}
+
+	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
+	{
+		LightData* lLight = x->second;
+		lLight->mShadowMapGeometrySet.Remove(lGeometry);
+	}
+
 	//OGL_ASSERT();
 }
 
@@ -1080,18 +1087,11 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 
 bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 {
-	if (pGeometry->IsSimpleObject() || CheckCamCulling(pGeometry->GetTransformation().GetPosition(), pGeometry->GetBoundingRadius()))
+	const TransformationF t = pGeometry->GetTransformation();
+	if (pGeometry->IsSimpleObject() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();
-		// Transform the geometry.
-		/*TransformationF t = GetCameraTransformation();
-		t.GetOrientation().Div(t.GetOrientation().GetMagnitude());
-		SetCameraTransformation(t);*/
-		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
-		//mCamSpaceTransformation = mCameraTransformation.InverseTransform(pGeometry->GetTransformation());
-		/*TransformationF lCamSpaceTransformation = GetCameraTransformation().InverseTransform(pGeometry->GetTransformation());
-		assert(mCamSpaceTransformation.GetPosition().GetDistanceSquared(lCamSpaceTransformation.GetPosition()) < 1e-8);
-		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);*/
+		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, t);
 		float lModelViewMatrix[16];
 		mCamSpaceTransformation.GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);
@@ -1247,9 +1247,19 @@ unsigned OpenGLRenderer::RenderScene()
 		RenderShadowVolumes();
 
 		// Go back to normal stencil buffer operations.
+		::glDepthFunc(GL_LEQUAL);
 		::glEnable(GL_STENCIL_TEST);
 		::glStencilFunc(GL_GEQUAL, 128, 0xFF);
 		::glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+		if (GetLightsEnabled())
+		{
+			::glEnable(GL_LIGHTING);
+		}
+		else
+		{
+			::glDisable(GL_LIGHTING);
+		}
 
 		// Enable all lights again.
 		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
@@ -1272,6 +1282,7 @@ unsigned OpenGLRenderer::RenderScene()
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_FRONT);
 #ifndef LEPRA_GL_ES
@@ -1283,6 +1294,7 @@ unsigned OpenGLRenderer::RenderScene()
 		SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_BACK);
 #ifndef LEPRA_GL_ES
@@ -1307,7 +1319,7 @@ unsigned OpenGLRenderer::RenderScene()
 		for (int i = 0; i < (int)MAT_COUNT; ++i)
 		{
 			if (lSkipOutlined && (i == MAT_SINGLE_COLOR_SOLID || i == MAT_SINGLE_COLOR_OUTLINE_BLENDED ||
-				i == MAT_SINGLE_COLOR_SOLID_PXS))
+				i == MAT_SINGLE_COLOR_ENVMAP_SOLID || i == MAT_SINGLE_COLOR_SOLID_PXS))
 			{
 				continue;
 			}
@@ -1416,7 +1428,7 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	::glDepthMask(GL_TRUE);
 	//::glEnable(GL_NORMALIZE);
 	::glDisable(GL_BLEND);
-	::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	OGL_ASSERT();
 }
@@ -1519,7 +1531,6 @@ void OpenGLRenderer::ProcessLights()
 				(float)-lLightDir.z,
 				0.0f
 			};
-
 			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
 		}
 		else if(lLight->mType == LIGHT_POINT)
@@ -1532,7 +1543,6 @@ void OpenGLRenderer::ProcessLights()
 				(float)lLightPos.z,
 				1.0f
 			};
-
 			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
 		}
 		else if(lLight->mType == LIGHT_SPOT)
@@ -1559,9 +1569,6 @@ void OpenGLRenderer::ProcessLights()
 
 			if (GetShadowHint() == SH_VOLUMES_AND_MAPS)
 			{
-				/*
-					Update shadow map.
-				*/
 				if (lLight->mTransformationChanged == true)
 				{
 					if (lLight->mShadowRange > 0)
@@ -1688,17 +1695,22 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glDepthFunc(GL_LEQUAL);
 //	glPolygonOffset(0, 0);
 //	glDisable(GL_POLYGON_OFFSET_EXT);
+	glDepthMask(GL_TRUE);
 
 	OGL_ASSERT();
 }
 
 int OpenGLRenderer::RenderShadowMaps()
 {
+	int lCount = 0;
+#ifndef LEPRA_GL_ES
+
 	OGL_ASSERT();
 
-#ifndef LEPRA_GL_ES
-	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
-	glDisable(GL_LOGIC_OP);
+	// TODO: use flat maps instead of cube maps for directional/spot shadow maps.
+
+	//glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
+	//glDisable(GL_LOGIC_OP);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_NORMALIZE);
@@ -1746,12 +1758,11 @@ int OpenGLRenderer::RenderShadowMaps()
 	glDisable(GL_BLEND);
 	glAlphaFunc(GL_LESS, 0.5f);
 
-	int lCount = 0;
 	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 	{
 		LightData* lLight = x->second;
 
-		if (lLight->mType == LIGHT_SPOT && lLight->mShadowMapID != 0)
+		if (lLight->mShadowMapID != 0)
 		{
 			glBindTexture(GL_TEXTURE_2D, lLight->mShadowMapID);
 
@@ -1772,7 +1783,7 @@ int OpenGLRenderer::RenderShadowMaps()
 				OGLGeometryData* lGeometry = (OGLGeometryData*)*lGeoIter;
 
 				float lModelViewMatrix[16];
-				(GetCameraTransformation().InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
+				GetCameraTransformation().InverseTransform(lGeometry->mGeometry->GetTransformation()).GetAs4x4TransposeMatrix(lModelViewMatrix);
 
 				float lLightModelViewMatrix[16];
 				TransformationF lLightTransformation(lLight->mOrientation, lLight->mPosition);
@@ -1837,30 +1848,27 @@ int OpenGLRenderer::RenderShadowMaps()
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 
-	glPopAttrib();
+	//glPopAttrib();
 	glColorMask(1, 1, 1, 1);
 
 	glDisable(GL_TEXTURE_2D);
 
 	OGL_ASSERT();
+#endif // !GLES
 
 	return lCount;
-#else // GLES
-	return 0;
-#endif // !GLES/GLES
 }
 
 void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 {
-#ifndef LEPRA_GL_ES
-	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
+	//glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_NORMALIZE);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
-	glDisable(GL_LOGIC_OP);
+	//glDisable(GL_LOGIC_OP);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -1946,14 +1954,21 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, pLight->mShadowMapID);
 
+#ifndef LEPRA_GL_ES
 	// And finally read it from the back buffer.
 	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
 					 0, 0, pLight->mShadowMapRes, pLight->mShadowMapRes, 0);
+#endif // !GLES
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
-	glPopAttrib();
+	glDisable(GL_TEXTURE_2D);
+	//glPopAttrib();
 	glShadeModel(GL_SMOOTH);
 	glColorMask(1, 1, 1, 1);
+	if (GetLightsEnabled())
+	{
+		glEnable(GL_LIGHTING);
+	}
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -1961,7 +1976,6 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	pLight->mShadowMapNeedUpdate = false;
 
 	OGL_ASSERT();
-#endif // !GLES
 }
 
 void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNear, float pFar)

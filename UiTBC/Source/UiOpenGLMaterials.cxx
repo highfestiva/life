@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -14,7 +14,7 @@
 
 
 #ifdef LEPRA_DEBUG
-#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); assert(lGlError == GL_NO_ERROR); }
+#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
 #else // !Debug
 #define OGL_ASSERT()
 #endif // Debug / !Debug
@@ -27,8 +27,7 @@ namespace UiTbc
 
 
 OpenGLMaterial::OpenGLMaterial(OpenGLRenderer* pRenderer, Material::DepthSortHint pSortHint, Material* pFallBackMaterial) :
-	Material(pRenderer, pSortHint),
-	mFallBackMaterial(pFallBackMaterial)
+	Material(pRenderer, pSortHint, pFallBackMaterial)
 {
 }
 
@@ -59,7 +58,7 @@ GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 		case TBC::GeometryBase::LINES:		return (GL_LINES);
 		case TBC::GeometryBase::LINE_LOOP:	return (GL_LINE_LOOP);
 	}
-	assert(false);
+	deb_assert(false);
 	return (GL_TRIANGLES);
 }
 
@@ -231,7 +230,7 @@ void OpenGLMatSingleColorBlended::RenderAllGeometry(unsigned pCurrentFrame, cons
 	}
 }
 
-void OpenGLMatSingleColorBlended::PreRender()
+void OpenGLMatSingleColorBlended::DoPreRender()
 {
 	::glDisable(GL_ALPHA_TEST);
 	::glEnable(GL_BLEND);
@@ -244,10 +243,21 @@ void OpenGLMatSingleColorBlended::PreRender()
 #endif // !GLES
 }
 
-void OpenGLMatSingleColorBlended::PostRender()
+void OpenGLMatSingleColorBlended::DoPostRender()
 {
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	//::glDisableClientState(GL_VERTEX_ARRAY);
+	::glDisable(GL_BLEND);
+}
+
+void OpenGLMatSingleColorBlended::PreRender()
+{
+	DoPreRender();
+}
+
+void OpenGLMatSingleColorBlended::PostRender()
+{
+	DoPostRender();
 }
 
 
@@ -360,6 +370,11 @@ bool OpenGLMatSingleTextureSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleTextureSolid::DoRawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex)
 {
+	if (!pGeometry->GetPreRenderCallback().empty())
+	{
+		pGeometry->GetPreRenderCallback()();
+	}
+
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		OpenGLRenderer::OGLGeometryData* lGeometryData = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
@@ -385,6 +400,11 @@ void OpenGLMatSingleTextureSolid::DoRawRender(TBC::GeometryBase* pGeometry, int 
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
 	}
 	OGL_ASSERT();
+
+	if (!pGeometry->GetPostRenderCallback().empty())
+	{
+		pGeometry->GetPostRenderCallback()();
+	}
 }
 
 void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
@@ -539,7 +559,7 @@ void OpenGLMatSingleTextureAlphaTested::RenderGeometry(TBC::GeometryBase* pGeome
 
 bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (pGeometry->GetUVSetCount() == 0)
+	/*if (pGeometry->GetUVSetCount() == 0)
 	{
 		if (mFallBackMaterial)
 		{
@@ -547,7 +567,7 @@ bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 			return mFallBackMaterial->AddGeometry(pGeometry);
 		}
 		return false;
-	}
+	}*/
 	return OpenGLMatSingleColorSolid::AddGeometry(pGeometry);
 }
 
@@ -581,7 +601,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 
 	BindTexture(GetRenderer()->GetEnvTexture()->mTMapID[Texture::COLOR_MAP], GetRenderer()->GetEnvTexture()->mTMipMapLevelCount[Texture::COLOR_MAP]);
 
-#ifndef LEPRA_GL_ES
+/*#ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		// Use cube mapping.
@@ -607,26 +627,25 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 		::glEnable(GL_TEXTURE_GEN_S);
 		::glEnable(GL_TEXTURE_GEN_T);
 	}
-#endif // !GLES
+#endif // !GLES*/
+	/*::glMatrixMode(GL_TEXTURE);
+	GLfloat m[4][4] =
+	{
+		{ 1, 0, 0, 0 },
+		{ 0, 1, 0, 0 },
+		{ 0, 0, 1, 0 },
+		{ 0, 0, 0, 1 },
+	};
+	::glLoadMatrixf((GLfloat*)m);
+	::glMatrixMode(GL_MODELVIEW);*/
 
-	::glMatrixMode(GL_TEXTURE);
-	float lTextureMatrix[16];
-	((OpenGLRenderer*)GetRenderer())->GetCameraTransformation().GetAs4x4OrientationMatrix(lTextureMatrix);
-	lTextureMatrix[15] *= 3.0f;
-	::glLoadMatrixf(lTextureMatrix);
-	::glMatrixMode(GL_MODELVIEW);
-
-	float lAmbientRed;
-	float lAmbientGreen;
-	float lAmbientBlue;
-	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);
+	((OpenGLRenderer*)GetRenderer())->AddAmbience(1.0f, 1.0f, 1.0f);
 
 	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight(true);
 
-#ifndef LEPRA_GL_ES
+/*#ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		::glDisable(GL_TEXTURE_GEN_S);
@@ -639,9 +658,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 		::glDisable(GL_TEXTURE_GEN_S);
 		::glDisable(GL_TEXTURE_GEN_T);
 	}
-#endif // !GLES
-
-	//::glDepthFunc(GL_LESS);
+#endif // !GLES*/
 
 	::glMatrixMode(GL_TEXTURE);
 	::glLoadIdentity();
@@ -662,6 +679,8 @@ void OpenGLMatSingleColorEnvMapSolid::PreRender()
 		::glColor4f(1, 1, 1, 1);
 		const float c[] = {1,1,1,1};
 		::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, c);
+		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		::glDepthFunc(GL_LEQUAL);
 	}
 }
 
@@ -675,6 +694,9 @@ void OpenGLMatSingleColorEnvMapSolid::PostRender()
 	{
 		Parent::PostRender();
 		::glDisable(GL_BLEND);
+		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		::glDepthFunc(GL_LESS);
 	}
 }
 
@@ -688,7 +710,39 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometr
 	}
 	else
 	{
-		Parent::DoRawRender(pGeometry, 0);
+		::glMatrixMode(GL_TEXTURE);
+		float lTextureMatrix[16];
+		TransformationF lObjectTransform = pGeometry->GetTransformation();
+		lObjectTransform.RotateWorldX(PIF/2);
+		(lObjectTransform.Inverse() * ((OpenGLRenderer*)GetRenderer())->GetCameraTransformation()).GetAs4x4OrientationMatrix(lTextureMatrix);
+		lTextureMatrix[15] *= 3.0f;
+		::glLoadMatrixf(lTextureMatrix);
+
+		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
+		{
+			OpenGLRenderer::OGLGeometryData* lGeometryData = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
+
+			GLuint lVertexBufferID = (GLuint)lGeometryData->mVertexBufferID;
+			GLuint lIndexBufferID  = (GLuint)lGeometryData->mIndexBufferID;
+
+			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+
+			glVertexPointer(3, GL_FLOAT, 0, 0);
+			glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometryData->mNormalOffset);
+			glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometryData->mNormalOffset);	// Use vertex coordinates instead.
+
+			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
+
+			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, 0);
+		}
+		else
+		{
+			glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
+			glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+			glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetNormalData());	// Use vertex coordinates instead.
+			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
+		}
+		OGL_ASSERT();
 	}
 }
 
@@ -697,6 +751,30 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeometr
 void OpenGLMatSingleColorEnvMapBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
 	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
+}
+
+void OpenGLMatSingleColorEnvMapBlended::PreRender()
+{
+	if (mSingleColorPass)
+	{
+		OpenGLMatSingleColorBlended::DoPreRender();
+	}
+	else
+	{
+		Parent::PreRender();
+	}
+}
+
+void OpenGLMatSingleColorEnvMapBlended::PostRender()
+{
+	if (mSingleColorPass)
+	{
+		OpenGLMatSingleColorBlended::DoPostRender();
+	}
+	else
+	{
+		::glDisable(GL_BLEND);
+	}
 }
 
 
@@ -944,12 +1022,11 @@ void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned pCurrentFrame, co
 	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);
 
-	bool lLightsEnabled = glIsEnabled(GL_LIGHTING) != 0;
 	glDisable(GL_LIGHTING);
 
 	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 
-	if (lLightsEnabled == true)
+	if (GetRenderer()->GetLightsEnabled())
 		glEnable(GL_LIGHTING);
 	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 

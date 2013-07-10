@@ -49,7 +49,7 @@ def splitverts_group(group, verbose=False):
 	"""Split mesh vertices that have different normals or UVs (=hard edges).
 	   But to complicate things, I keep vertices together that share a similar normal/UV."""
 	for node in group:
-		splitverts_node(node)
+		splitverts_node(node, verbose)
 
 
 def splitverts_node(node, verbose=False):
@@ -59,6 +59,13 @@ def splitverts_node(node, verbose=False):
 	uvs = node.get_fixed_attribute("rguv", optional=True)
 	if not ns:
 		return
+
+	for parent in node.getparents():
+		nosplit = parent.get_fixed_attribute("nosplit", optional=True)
+		if nosplit:
+			if verbose: print("Not splitting mesh", node)
+			return
+
 	original_vsc = len(vs)
 	original_nsc = len(ns)
 	# print(node.getName()+":")
@@ -72,8 +79,6 @@ def splitverts_node(node, verbose=False):
 	node.fix_attribute("rgn", ns)
 	if uvs:
 		node.fix_attribute("rguv", uvs)
-		#print("UVs after split:")
-		#print(uvs)
 	if verbose:
 		print("Mesh %s was made %.1f times larger due to (hard?) edges, and %.1f %% of worst-case size." %
 				(node.getName(), len(ns)/original_vsc-1, len(ns)*100/original_nsc))
@@ -151,7 +156,7 @@ def splitverts(vs, ts, ns, uvs):
 		x += 1
 
 	normals = [0.0]*len(vs)
-	textureuvs = [0.0]*(len(vs)*2//3)
+	textureuvs = None if not uvs else [0.0]*(len(vs)*2//3)
 	for join_indices in shared_indices:
 		# Join 'em by simply adding normals together and normalizing.
 		n = vec3(0,0,0)
@@ -159,9 +164,10 @@ def splitverts(vs, ts, ns, uvs):
 		cnt = 0;
 		for j in join_indices:
 			n += _normal(j, ns)
-			uv2 = _textureuv(j, uvs)
-			uv[0] += uv2[0]
-			uv[1] += uv2[1]
+			if uvs:
+				uv2 = _textureuv(j, uvs)
+				uv[0] += uv2[0]
+				uv[1] += uv2[1]
 			cnt += 1
 		idx = ts[join_indices[0]]
 		n_idx = idx*3+0
@@ -170,8 +176,9 @@ def splitverts(vs, ts, ns, uvs):
 			normals[n_idx:n_idx+3] = n.normalize()[:]
 		except ZeroDivisionError:
 			pass
-		try:
-			textureuvs[uv_idx:uv_idx+2] = [uv[0]/cnt, uv[1]/cnt]
-		except ZeroDivisionError:
-			pass
+		if uvs:
+			try:
+				textureuvs[uv_idx:uv_idx+2] = [uv[0]/cnt, uv[1]/cnt]
+			except ZeroDivisionError:
+				pass
 	return vs, ts, normals, textureuvs

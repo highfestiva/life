@@ -1,11 +1,11 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/UiShadowVolume.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Thread.h"
 
 
@@ -15,22 +15,6 @@ namespace UiTbc
 
 
 
-ShadowVolume::ShadowVolume() :
-	mVertexData(0),
-	mIndexData(0),
-	mTriangleOrientation(0),
-	mVertexCount(0),
-	mTriangleCount(0),
-	mParentVertexCount(0),
-	mMaxTriangleCount(0),
-	mRed(0),
-	mGreen(0),
-	mBlue(0),
-	mTransformationChanged(false),
-	mParentGeometry(0)
-{
-}
-
 ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
 	mVertexData(0),
 	mIndexData(0),
@@ -39,10 +23,6 @@ ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
 	mTriangleCount(0),
 	mParentVertexCount(0),
 	mMaxTriangleCount(0),
-	mRed(0),
-	mGreen(0),
-	mBlue(0),
-	mTransformationChanged(false),
 	mParentGeometry(pParentGeometry)
 {
 	LEPRA_DEBUG_CODE(mName = _T("Shdw->") + pParentGeometry->mName);
@@ -136,26 +116,6 @@ uint8* ShadowVolume::GetColorData() const
 float* ShadowVolume::GetNormalData() const
 {
 	return 0;
-}
-
-TBC::GeometryBase::ColorFormat ShadowVolume::GetColorFormat() const
-{
-	return TBC::GeometryBase::COLOR_RGB;
-}
-
-
-void ShadowVolume::GetReplacementColor(float& pRed, float& pGreen, float& pBlue) const
-{
-	pRed   = mRed;
-	pGreen = mGreen;
-	pBlue  = mBlue;
-}
-
-void ShadowVolume::SetReplacementColor(float pRed, float pGreen, float pBlue)
-{
-	mRed   = pRed;
-	mGreen = pGreen;
-	mBlue  = pBlue;
 }
 
 TBC::GeometryBase::GeometryVolatility ShadowVolume::GetGeometryVolatility() const
@@ -278,14 +238,8 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	InitVertices();
 	InitTO();
 
-	mTriangleCount = 0;
-
-	//
 	// Transform the light position in object space.
-	//
-
 	Vector3DF lLightPos;
-	
 	if (pDirectional == true)
 	{
 		lLightPos = mParentGeometry->GetTransformation().GetOrientation().GetInverseRotatedVector(pLightPos);
@@ -296,10 +250,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		lLightPos = mParentGeometry->GetTransformation().InverseTransform(pLightPos);
 	}
 
-	//
-	// Calculate the shadow meshs' vertex positions.
-	//
-
+	// Calculate the shadow meshes' vertex positions.
 	mParentGeometry->GenerateSurfaceNormalData();
 	const vtx_idx_t* lIndices = mParentGeometry->GetIndexData();
 	const float* lSurfaceNormalData = mParentGeometry->GetSurfaceNormalData();
@@ -310,28 +261,19 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	if (pDirectional)
 	{
 		// Calculate triangle orientations relative to light source.
-		for (unsigned i = 0; i < lTriangleCount; i++)
+		TriangleOrientation* lT = mTriangleOrientation;
+		TriangleOrientation* lEnd = lT + lTriangleCount;
+		for (; lT != lEnd; ++lT)
 		{
-			const unsigned lTriIndex = i * 3;
-
 			// Get the vector between one corner of the triangle and the light source.
-			mTriangleOrientation[i].mV0 = lIndices[lTriIndex + 0];
-			mTriangleOrientation[i].mV1 = lIndices[lTriIndex + 1];
-			mTriangleOrientation[i].mV2 = lIndices[lTriIndex + 2];
-			mTriangleOrientation[i].mChecked = false;
+			lT->mV0 = *lIndices++;
+			lT->mV1 = *lIndices++;
+			lT->mV2 = *lIndices++;
+			lT->mChecked = false;
 
 			// Light position is now treated as a direction instead.
-			if (lLightPos.Dot(lSurfaceNormalData[lTriIndex + 0], lSurfaceNormalData[lTriIndex + 1],
-				lSurfaceNormalData[lTriIndex + 2]) <= 0)
-			{
-				// Front towards light source.
-				mTriangleOrientation[i].mIsFrontFacing = true;
-			}
-			else
-			{
-				// Back towards light source.
-				mTriangleOrientation[i].mIsFrontFacing = false;
-			}
+			lT->mIsFrontFacing = (lLightPos.Dot(lSurfaceNormalData[0], lSurfaceNormalData[1], lSurfaceNormalData[2]) <= 0);
+			lSurfaceNormalData += 3;
 		}
 
 		// Move vertex twins away from lightsource.
@@ -379,17 +321,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 						  lVertexData[lIndex + 2] - lLightPos.z);
 
 			mTriangleOrientation[i].mChecked = false;
-
-			if (lVector.Dot(lSurfaceNormal) <= 0.0f)
-			{
-				// Front towards light source.
-				mTriangleOrientation[i].mIsFrontFacing = true;
-			}
-			else
-			{
-				// Back towards light source.
-				mTriangleOrientation[i].mIsFrontFacing = false;
-			}
+			mTriangleOrientation[i].mIsFrontFacing = (lVector.Dot(lSurfaceNormal) <= 0.0f);
 		}
 
 		const float lShadowRangeSquared = pShadowRange * pShadowRange;
@@ -415,16 +347,29 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		}
 	}
 
+	TBC::GeometryBase::SetVertexDataChanged(true);
 
-	//
+
+	// Check if we actually need to update triangle definitions, or if vertex data will suffice.
+	if (mTriangleCount != 0)
+	{
+		// We check if orientation has changed.
+		const QuaternionF& lCasterOrientation = mParentGeometry->GetTransformation().GetOrientation();
+		const float lOrientationDiff = (mPreviousOrientation-lCasterOrientation).GetNorm();
+		if (lOrientationDiff < 0.03f)
+		{
+			return;	// We only need to generate triangles if orientation has changed significantly.
+		}
+		mPreviousOrientation = lCasterOrientation;
+	}
+
+
 	// Generate triangles.
-	//
-
+	mTriangleCount = 0;
 	if (mParentGeometry->GetEdgeData() == 0)
 	{
 		mParentGeometry->GenerateEdgeData();
 	}
-
 	const TBC::GeometryBase::Edge* lEdges = mParentGeometry->GetEdgeData();
 	const unsigned lEdgeCount = mParentGeometry->GetEdgeCount();
 	vtx_idx_t* lIndexData = mIndexData;
@@ -513,11 +458,10 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			*lIndexData++ = lV0 + mParentVertexCount;
 
 			mTriangleCount += 2;
-			assert(mTriangleCount < mMaxTriangleCount);
+			deb_assert(mTriangleCount < mMaxTriangleCount);
 		}
 	}
 
-	TBC::GeometryBase::SetVertexDataChanged(true);
 	TBC::GeometryBase::SetIndexDataChanged(true);
 }
 

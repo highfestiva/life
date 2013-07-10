@@ -1,12 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #ifndef CURE_TEST_WITHOUT_UI
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ArchiveFile.h"
 #include "../../Lepra/Include/CubicDeCasteljauSpline.h"
 #include "../../Lepra/Include/HiResTimer.h"
@@ -239,7 +239,7 @@ protected:
 private:
 	void operator=(const SceneTest&)
 	{
-		assert(false);
+		deb_assert(false);
 	}
 	str mSceneName;
 	float mCamRotSpeed;
@@ -518,7 +518,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		}
 		else
 		{
-			assert(false);
+			deb_assert(false);
 		}
 		gRenderer->SetMipMappingEnabled(true);
 
@@ -556,7 +556,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 				UiTbc::TEXLoader lTEXLoader;
 				lTEXLoader.Save(_T("texturemap.tex"), lTextureMap, false);
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 	}
 
@@ -580,7 +580,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 				UiTbc::TEXLoader lTEXLoader;
 				lTEXLoader.Save(_T("lightmap.tex"), lLightMap, false);
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 	}
 
@@ -604,7 +604,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 				UiTbc::TEXLoader lTEXLoader;
 				lTEXLoader.Save(_T("envmap.tex"), lEnvMap, false);
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 	}
 
@@ -628,7 +628,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 				UiTbc::TEXLoader lTEXLoader;
 				lTEXLoader.Save(_T("specmap.tex"), lSpecMap, false);
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 	}
 
@@ -652,7 +652,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 				UiTbc::TEXLoader lTEXLoader;
 				lTEXLoader.Save(_T("normalmap.tex"), lNormalMap, false);
 			}
-			assert(lOk);
+			deb_assert(lOk);
 		}
 	}
 
@@ -669,7 +669,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 			lTEXLoader.Save(_T("multiMap.tex"), lMultiMap, false);
 			lOk = true;
 		}
-		assert(lOk);
+		deb_assert(lOk);
 	}
 
 	if (lOk)
@@ -680,14 +680,14 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[TEXTUREMAP] = gRenderer->AddTexture(&lTextureMap);
 		lOk = (gTextureId[TEXTUREMAP] != 0);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
 		lContext = _T("add texturemap to painter");
 		gImageId[TEXTUREMAP] = gPainter->AddImage(lTextureMap.GetColorMap(0), lTextureMap.GetAlphaMap(0));
 		lOk = (gImageId[TEXTUREMAP] != 0);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -697,7 +697,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[LIGHTMAP] = gRenderer->AddTexture(&lLightMap);
 		lOk = (gTextureId[LIGHTMAP] != 0);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -711,7 +711,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		{
 			gRenderer->SetEnvironmentMap(gTextureId[ENVMAP]);
 		}
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -721,7 +721,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[SPECMAP] = gRenderer->AddTexture(&lSpecMap);
 		lOk = (gTextureId[SPECMAP] != 0);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -731,7 +731,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[NORMALMAP] = gRenderer->AddTexture(&lNormalMap);
 		lOk = (gTextureId[NORMALMAP] != 0);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 	if (lOk)
 	{
@@ -741,7 +741,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[MULTIMAP] = gRenderer->AddTexture(&lMultiMap);
 		lOk = (gTextureId[MULTIMAP] != 0);
-		assert(lOk);
+		deb_assert(lOk);
 	}
 
 	if (lOk)
@@ -862,11 +862,11 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 	{
 		lGraphicId = gRenderer->AddGeometry(pGeometry, pMaterial, UiTbc::Renderer::NO_SHADOWS);
 		lOk = (lGraphicId != UiTbc::Renderer::INVALID_GEOMETRY);
-		assert(lOk);
+		deb_assert(lOk);
 		for (int x = 0; lOk && x < gTextureMapCount; ++x)
 		{
 			lOk = gRenderer->TryAddGeometryTexture(lGraphicId, gTextureId[x]);
-			assert(lOk);
+			deb_assert(lOk);
 		}
 	}
 	if (lOk)
@@ -1125,11 +1125,11 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			lGeometry->Translate(Lepra::Vector3DF(0, lDisplacement, 0));
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_WRITE);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			if (lTestOk)
 			{
 				lTestOk = InitializeGeometry(lGeometry);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 			if (lTestOk)
 			{
@@ -1139,7 +1139,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			{
 				UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
 				lTestOk = lMeshLoader.Save(lGeometry, true);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 			delete (lGeometry);
 		}
@@ -1148,13 +1148,13 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			lContext = _T("load chain mesh");
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_READ);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			if (lTestOk)
 			{
 				UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
 				bool lCastsShadows;
 				lTestOk = lMeshLoader.Load(&lGeometry[lMeshIndex], lCastsShadows);
-				assert(lTestOk && lCastsShadows);
+				deb_assert(lTestOk && lCastsShadows);
 			}
 		}
 		Lepra::DiskFile::Delete(lThisMeshName);
@@ -1170,12 +1170,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			UiTbc::BasicMeshCreator::CreateYBonedSkin(-lCuboidLength/2.0f, +lCuboidLength/2.0f, &lGeometry[lSkinIndex], &lSkin[lSkinIndex], 2);
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_WRITE);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			if (lTestOk)
 			{
 				UiTbc::ChunkySkinLoader lSkinLoader(&lFile, false);
 				lTestOk = lSkinLoader.Save(&lSkin[lSkinIndex]);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 		if (lTestOk)
@@ -1183,12 +1183,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			lContext = _T("load chain skin");
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_READ);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			if (lTestOk)
 			{
 				UiTbc::ChunkySkinLoader lSkinLoader(&lFile, false);
 				lTestOk = lSkinLoader.Load(&lSkin[lSkinIndex]);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 			}
 		}
 		Lepra::DiskFile::Delete(lThisSkinName);
@@ -1217,12 +1217,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lAnimation.SetBoneTransformation(1, 1, lTransform1);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_WRITE);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			TBC::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
 			lTestOk = lAnimationLoader.Save(&lAnimation);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	TBC::BoneAnimation lAnimation;
@@ -1231,12 +1231,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("load chain animation");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_READ);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			TBC::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
 			lTestOk = lAnimationLoader.Load(&lAnimation);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	Lepra::DiskFile::Delete(lAnimationName);
@@ -1255,15 +1255,15 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lStructure.SetPhysicsType(TBC::ChunkyPhysics::DYNAMIC);
 		lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 		lTestOk = (lStructure.GetBoneChildCount(lStructure.GetRootBone()) == 1);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			TBC::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Save(&lStructure);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyPhysics::DYNAMIC);
@@ -1272,22 +1272,22 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("load chain structure");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_READ);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			TBC::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Load(&lStructure);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = (lStructure.GetBoneChildCount(lStructure.GetRootBone()) == 1);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 	}
 	Lepra::DiskFile::Delete(lStructureName);
@@ -1296,7 +1296,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	{
 		lContext = _T("clear screen");
 		lTestOk = ResetAndClearFrame();
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	TBC::BoneAnimator lAnimator(&lStructure);
 	if (lTestOk)
@@ -1317,12 +1317,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		if (lTestOk)
 		{
 			lTestOk = QuickRender(&lSkin[0], UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, false, &lObjectTransform, -1.0, 0, true);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = QuickRender(&lSkin[1], UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, &lObjectTransform, -1.0, _T("Loaded from disk!"), false);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -1353,18 +1353,18 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 		const str lMeshName = _T("Data/tractor_01_rear_wheel0.mesh");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lMeshName, Lepra::DiskFile::MODE_READ);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
 			bool lCastsShadows;
 			lTestOk = lMeshLoader.Load(&lGeometry, lCastsShadows);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = (lGeometry.GetVertexCount() == 442 && lGeometry.GetIndexCount() == 2640);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -1416,7 +1416,7 @@ bool TestLoadClass(const Lepra::LogDecorator& pLog)
 		lContext = _T("open file");
 		const str lClassName = _T("Data/tractor_01.class");
 		lTestOk = lFile.Open(lClassName, Lepra::DiskFile::MODE_READ);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	UiTbc::ChunkyClass lClass;
 	if (lTestOk)
@@ -1424,7 +1424,7 @@ bool TestLoadClass(const Lepra::LogDecorator& pLog)
 		lContext = _T("load class");
 		UiTbc::ChunkyClassLoader lLoader(&lFile, false);
 		lTestOk = lLoader.Load(&lClass);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 
 	ReportTestResult(pLog, _T("LoadClass"), lContext, lTestOk);
@@ -1469,7 +1469,7 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 			lPushFunction.AddFunction(*lPatch[x]);
 		}
 		//mTestOk = (lGrid[2*lVertexCountX*((lVertexCountY+1)/4)+(lVertexCountX-1)*2].z >= lConeAmplitude*0.8);
-		assert(mTestOk);
+		deb_assert(mTestOk);
 	}
 	if (mTestOk)
 	{
@@ -1486,7 +1486,7 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 			lHemisphereFunction2.AddFunction(*lPatch[x]);
 		}
 		//mTestOk = (lGrid[2*lVertexCountX*((lVertexCountY+1)/4)+(lVertexCountX-1)*2].z >= lConeAmplitude*0.8);
-		assert(mTestOk);
+		deb_assert(mTestOk);
 	}
 	if (mTestOk)
 	{
@@ -1503,13 +1503,13 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 			lRotateFunction.AddFunction(*lPatch[x]);
 		}
 		//mTestOk = (lGrid[2*lVertexCountX*((lVertexCountY+1)/4)+(lVertexCountX-1)*2].z >= lConeAmplitude*0.9);
-		assert(mTestOk);
+		deb_assert(mTestOk);
 	}
 	if (mTestOk)
 	{
 		mContext = _T("zero effect validation");
 		//mTestOk = (lGrid[0].z == 0 && lGrid[1].z == 0);
-		assert(mTestOk);
+		deb_assert(mTestOk);
 	}
 	if (mTestOk)
 	{
@@ -1517,7 +1517,7 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 		for (int x = 0; mTestOk && x < lPatchCount; ++x)
 		{
 			mTestOk = InitializeGeometry(lPatch[x]);
-			assert(mTestOk);
+			deb_assert(mTestOk);
 		}
 	}
 	if (mTestOk)
@@ -1592,7 +1592,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 		if (lTestOk)
 		{
 			lTestOk = ClearBackground();
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 
 		// ----------------------- Draw all frames and geometry within. -----------------------
@@ -1619,20 +1619,20 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 					gRenderer->SetLightsEnabled(true);
 					lLights[0] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, Vector3DF(30, OBJECT_DISTANCE - 60, -30), Vector3DF(50, 100, 50), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
 					lTestOk = (lLights[0] != UiTbc::Renderer::INVALID_LIGHT);
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 				if (lTestOk)
 				{
 					lContext = _T("add point light 1");
 					lLights[1] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, Vector3DF(-30, OBJECT_DISTANCE - 60, 30), Vector3DF(50, 50, 100), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
 					lTestOk = (lLights[1] != UiTbc::Renderer::INVALID_LIGHT);
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 				if (lTestOk)
 				{
 					lContext = _T("add # lights");
 					lTestOk = (gRenderer->GetLightCount() == 2);
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 			}
 
@@ -1642,7 +1642,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				lContext = _T("single solid");
 				ClearSubframe(0, 0+y, 5, 4, 30, false);
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				PrintInfo(_T("Flat\nSolid\n") + lModeInfo);
 			}
 			if (lTestOk)
@@ -1651,7 +1651,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				ClearSubframe(1, 0+y, 5, 4, 30, false);
 				// TODO: make this render correctly with vertex colors.
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				PrintInfo(_T("Vertex color\nSolid\n") + lModeInfo);
 			}
 			if (lTestOk)
@@ -1660,7 +1660,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				ClearSubframe(2, 0+y, 5, 4, 30, false);
 				gTextureMapCount = 1;
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				gTextureMapCount = 0;
 				PrintInfo(_T("Tex\nTransparent\n") + lModeInfo);
 			}
@@ -1670,7 +1670,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				ClearSubframe(3, 0+y, 5, 4, 30, false);
 				gTextureMapCount = 2;
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_TEXTURE_AND_LIGHTMAP, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				gTextureMapCount = 0;
 				PrintInfo(_T("Tex&lightmap\nSolid\n") + lModeInfo);
 			}
@@ -1682,7 +1682,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				gTextureMapCount = 1;
 				gTextureIndex = ENVMAP;
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_ENVMAP_SOLID, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				gTextureMapCount = 0;
 				gTextureIndex = TEXTUREMAP;
 				PrintInfo(_T("Envmap\nSolid\n") + lModeInfo);
@@ -1692,7 +1692,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				lContext = _T("single solid PXS");
 				ClearSubframe(0, 1+y, 5, 4, 30, false);
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				PrintInfo(_T("Flat PXS\nSolid\n") + lModeInfo);
 			}
 			if (lTestOk)
@@ -1701,7 +1701,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				ClearSubframe(2, 1+y, 5, 4, 30, false);
 				gTextureMapCount = 1;
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				gTextureMapCount = 0;
 				PrintInfo(_T("Texture PXS\nSolid\n") + lModeInfo);
 			}
@@ -1711,7 +1711,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				ClearSubframe(3, 1+y, 5, 4, 30, false);
 				gTextureMapCount = 2;
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_TEXTURE_AND_LIGHTMAP_PXS, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				gTextureMapCount = 0;
 				PrintInfo(_T("Tex&light PXS\nSolid\n") + lModeInfo);
 			}
@@ -1722,7 +1722,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				gTextureMapCount = 1;
 				gTextureIndex = MULTIMAP;
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_TEXTURE_SBMAP_PXS, false, &lObjectTransform);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				gTextureMapCount = 0;
 				gTextureIndex = TEXTUREMAP;
 				PrintInfo(_T("Tex&sbmap PXS\nSolid\n") + lModeInfo);
@@ -1739,7 +1739,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				{
 					lContext = _T("remove # lights");
 					lTestOk = (gRenderer->GetLightCount() == 0);
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 			}
 		}
@@ -1789,12 +1789,12 @@ bool TestFps(const Lepra::LogDecorator& pLog, double pAverageFps)
 {
 	str lContext = _T("too low");
 	bool lTestOk = (gTotalFps > pAverageFps/8.0);
-	assert(lTestOk);
+	deb_assert(lTestOk);
 	if (lTestOk)
 	{
 		lContext = _T("too high");
 		lTestOk = (gTotalFps < pAverageFps*8.0);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 	}
 	ReportTestResult(pLog, Lepra::strutil::Format(_T("FPS (%.1f)"), gTotalFps), lContext, lTestOk);
 	return (lTestOk);
@@ -1812,13 +1812,13 @@ bool TestGenerate(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("box");
 		UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(20, 10, 5, 1, 1, 1);
 		lTestOk = InitializeGeometry(lGeometry);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			AddRandomVertexColor(lGeometry);
 			ClearSubframe();
 			lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, 0, pShowTime/5, 0, true, lRotationSpeed);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		delete (lGeometry);
 	}
@@ -1828,13 +1828,13 @@ bool TestGenerate(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("cone");
 		UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateCone(10, 20, 11);
 		lTestOk = InitializeGeometry(lGeometry);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			AddRandomVertexColor(lGeometry);
 			ClearSubframe();
 			lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, 0, pShowTime/5, 0, true, lRotationSpeed);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		delete (lGeometry);
 	}
@@ -1844,13 +1844,13 @@ bool TestGenerate(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("cylinder");
 		UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(10, 15, 25, 5);
 		lTestOk = InitializeGeometry(lGeometry);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			AddRandomVertexColor(lGeometry);
 			ClearSubframe();
 			lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, 0, pShowTime/5, 0, true, lRotationSpeed);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		delete (lGeometry);
 	}
@@ -1860,13 +1860,13 @@ bool TestGenerate(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("ellipsoid");
 		UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(10, 15, 20, 8, 8);
 		lTestOk = InitializeGeometry(lGeometry);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			AddRandomVertexColor(lGeometry);
 			ClearSubframe();
 			lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, 0, pShowTime/5, 0, true, lRotationSpeed);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		delete (lGeometry);
 	}
@@ -1876,13 +1876,13 @@ bool TestGenerate(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("torus");
 		UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateTorus(15, 4, 8, 14, 10);
 		lTestOk = InitializeGeometry(lGeometry);
-		assert(lTestOk);
+		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			AddRandomVertexColor(lGeometry);
 			ClearSubframe();
 			lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, 0, pShowTime/5, 0, true, lRotationSpeed);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		delete (lGeometry);
 	}
@@ -2424,9 +2424,9 @@ bool TestUiTbc()
 			}
 			else
 			{
-				assert(false);
+				deb_assert(false);
 			}
-			assert(lTestOk);
+			deb_assert(lTestOk);
 		}
 		/*//TestOpenGLPainter();
 		if (lTestOk)
@@ -2492,16 +2492,16 @@ bool TestUiTbc()
 			bool lCastShadows = false;
 			DiskFile lFile;
 			lTestOk = lFile.Open(_T("Data/road_sign_01_sign.mesh"), DiskFile::MODE_READ);
-			assert(lTestOk);
+			deb_assert(lTestOk);
 			if (lTestOk)
 			{
 				UiTbc::ChunkyMeshLoader lLoader(&lFile, false);
 				lTestOk = lLoader.Load(&lMesh, lCastShadows);
-				assert(lTestOk);
+				deb_assert(lTestOk);
 				if (lTestOk)
 				{
 					lTestOk = (lMesh.GetUVSetCount() == 1);
-					assert(lTestOk);
+					deb_assert(lTestOk);
 				}
 			}
 		}*/

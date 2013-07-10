@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
@@ -21,7 +21,7 @@ namespace Lepra
 class HiResTimer
 {
 public:
-	inline HiResTimer(bool pIsManualUpdate = false);
+	inline HiResTimer(bool pUseShadow = true);
 	inline HiResTimer(uint64 pCount);
 	inline HiResTimer(const HiResTimer& pTimer);
 	inline ~HiResTimer();
@@ -75,36 +75,36 @@ public:
 	static inline double GetPeriod();
 	static inline uint64 GetSystemCounter();
 
-private:
+protected:
 	uint64 mPrevCounter;
 	uint64 mCounter;
-	bool mIsManualUpdateEnabled;
+	bool mUseShadow;
 
 	static uint64 mFrequency;
 	static double mPeriod;
 	static uint64 mLastSystemCounter;
 };
 
-HiResTimer::HiResTimer(bool pIsManualUpdate) :
+HiResTimer::HiResTimer(bool pUseShadow):
 	mPrevCounter(0),
 	mCounter(0),
-	mIsManualUpdateEnabled(pIsManualUpdate)
+	mUseShadow(pUseShadow)
 {
 	UpdateTimer();
 	mPrevCounter = mCounter;
 }
 
-HiResTimer::HiResTimer(uint64 pCount) :
+HiResTimer::HiResTimer(uint64 pCount):
 	mPrevCounter(pCount),
 	mCounter(pCount),
-	mIsManualUpdateEnabled(false)
+	mUseShadow(true)
 {
 }
 
-HiResTimer::HiResTimer(const HiResTimer& pTimer) :
+HiResTimer::HiResTimer(const HiResTimer& pTimer):
 	mPrevCounter(pTimer.mPrevCounter),
 	mCounter(pTimer.mCounter),
-	mIsManualUpdateEnabled(false)
+	mUseShadow(pTimer.mUseShadow)
 {
 }
 
@@ -114,7 +114,7 @@ HiResTimer::~HiResTimer()
 
 void HiResTimer::EnableShadowCounter(bool pEnable)
 {
-	mIsManualUpdateEnabled = pEnable;
+	mUseShadow = pEnable;
 }
 
 void HiResTimer::StepCounterShadow()
@@ -225,7 +225,7 @@ HiResTimer& HiResTimer::operator -= (const HiResTimer& pTimer)
 
 uint64 HiResTimer::GetSystemCounterShadow()
 {
-	if (!mIsManualUpdateEnabled)
+	if (!mUseShadow)
 	{
 		return GetSystemCounter();
 	}
@@ -288,11 +288,14 @@ public:
 	inline StopWatch();
 	inline bool TryStart();
 	inline void Start();
+	inline bool ResumeFromLapTime();
+	inline bool ResumeFromStop();
 	inline void Stop();
 	inline bool IsStarted() const;
+	inline double QuerySplitTime();
 	inline int GetStartCount() const;
 
-private:
+protected:
 	bool mIsStarted;
 	int mStartCount;
 };
@@ -323,6 +326,31 @@ void StopWatch::Start()
 	++mStartCount;
 }
 
+bool StopWatch::ResumeFromLapTime()
+{
+	if (mIsStarted)
+	{
+		return false;
+	}
+	mIsStarted = true;
+	++mStartCount;
+	return true;
+}
+
+bool StopWatch::ResumeFromStop()
+{
+	if (mIsStarted)
+	{
+		return false;
+	}
+	const uint64 lCounter = mCounter;
+	UpdateTimer();
+	mPrevCounter += mCounter - lCounter;
+	mIsStarted = true;
+	++mStartCount;
+	return true;
+}
+
 void StopWatch::Stop()
 {
 	mIsStarted = false;
@@ -331,6 +359,11 @@ void StopWatch::Stop()
 bool StopWatch::IsStarted() const
 {
 	return mIsStarted;
+}
+
+double StopWatch::QuerySplitTime()
+{
+	return mIsStarted? QueryTimeDiff() : GetTimeDiff();
 }
 
 int StopWatch::GetStartCount() const

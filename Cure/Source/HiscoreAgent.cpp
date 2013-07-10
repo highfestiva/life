@@ -1,11 +1,11 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
 #include "../Include/HiscoreAgent.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include <happyhttp.h>
 #include "../../Lepra/Include/Obfuxator.h"
 #include "../../Lepra/Include/JsonString.h"
@@ -106,7 +106,7 @@ bool HiscoreAgent::StartDownloadingList(const str& pPlatform, const str& pLevel,
 {
 	if (!mConnectorThread.Join(0.1))
 	{
-		assert(false);
+		deb_assert(false);
 		return false;
 	}
 	const str lFormat = _O("o@y+_.R2=*8/,1ay+x2&9(92Qay+x=(=*=,ayL+x/8e8+9*ay5x2515&*ay5g", "/%s?platform=%s&level=%s&avatar=%s&offset=%i&limit=%i");
@@ -124,13 +124,13 @@ bool HiscoreAgent::StartUploadingScore(const str& pPlatform, const str& pLevel, 
 {
 	if (!mConnectorThread.Join(0.1))
 	{
-		assert(false);
+		deb_assert(false);
 		return false;
 	}
 	str lJsonName = JsonString::ToJson(pName);
 	if (lJsonName.empty())
 	{
-		assert(false);
+		deb_assert(false);
 		return false;
 	}
 	lJsonName = lJsonName.substr(1, lJsonName.length()-2);
@@ -468,7 +468,7 @@ void HiscoreAgent::UploadThreadEntry()
 
 void HiscoreAgent::operator=(const HiscoreAgent&)
 {
-	assert(false);
+	deb_assert(false);
 }
 
 

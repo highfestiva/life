@@ -1,9 +1,9 @@
 // Author: Jonas Byström
-// Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) Pixel Doctrine
 
 
 
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/Cure.h"
 #include "../../Lepra/Include/Application.h"
 #include "../../Lepra/Include/Log.h"
@@ -114,7 +114,7 @@ CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 		}
 		else
 		{
-			assert(false);	// Unknown command line argument.
+			deb_assert(false);	// Unknown command line argument.
 		}
 		if ((lMask&(~MASTER_BITS)) && ((mTestBits&(~MASTER_BITS)) == ~MASTER_BITS))
 		{
