@@ -6,6 +6,7 @@
 
 #include "Autopilot.h"
 #include "../Cure/Include/Health.h"
+#include "../Cure/Include/RuntimeVariable.h"
 #include "HeliForceManager.h"
 #include "Level.h"
 
@@ -133,7 +134,9 @@ void Autopilot::CheckStalledRotor(Cure::ContextObject* pChopper)
 	if (lRotorSpeed.GetLengthSquared() < 20.0f)
 	{
 		mStalledRotorTimer.TryStart();
-		if (mStalledRotorTimer.QueryTimeDiff() > 2.0f)
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), mGame->GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
+		if (mStalledRotorTimer.QueryTimeDiff()*lRealTimeRatio > 2.0f)
 		{
 			Cure::Health::Add(pChopper, -0.01f, true);
 		}

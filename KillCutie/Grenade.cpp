@@ -137,7 +137,7 @@ void Grenade::OnTick()
 bool Grenade::TryComplete()
 {
 	bool lOk = Parent::TryComplete();
-	if (GetPhysics())
+	if (mIsLoaded)
 	{
 		GetPhysics()->EnableGravity(GetManager()->GetGameManager()->GetPhysicsManager(), false);
 		mTimeFrameCreated = GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();

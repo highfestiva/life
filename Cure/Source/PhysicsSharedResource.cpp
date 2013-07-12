@@ -53,6 +53,31 @@ PhysicsSharedResource::~PhysicsSharedResource()
 	}
 }
 
+ResourceLoadState PhysicsSharedResource::InjectPostProcess()
+{
+	// TODO: leave this code be, if you try calling PostProcess() instead you won't
+	//       be able to discover an already initialized resource.
+	if (mPhysicsLoadState != RESOURCE_UNLOADED)
+	{
+		// Already initialized for another context object.
+		return mPhysicsLoadState;
+	}
+
+	ResourceLoadState lLoadState = mClassResource->GetLoadState();
+	if (lLoadState != RESOURCE_LOAD_COMPLETE)
+	{
+		return lLoadState;	// Probably "in progress", die another day.
+	}
+
+	// First initalization of shared reference or unique instance.
+	mPhysicsLoadState = RESOURCE_LOAD_ERROR;
+	if (FinalizeInit())
+	{
+		mPhysicsLoadState = Parent::PostProcess();
+	}
+	return mPhysicsLoadState;
+}
+
 const str PhysicsSharedResource::GetType() const
 {
 	return _T("PhysicsShared");
@@ -90,16 +115,10 @@ ResourceLoadState PhysicsSharedResource::PostProcess()
 	ResourceLoadState lLoadState = mClassResource->GetLoadState();
 	if (lLoadState != RESOURCE_LOAD_COMPLETE)
 	{
-		return lLoadState;      // Probably "in progress", die another day.
+		return lLoadState;	// Probably "in progress", die another day.
 	}
 
-	// First initalization of shared reference or unique instance.
-	mPhysicsLoadState = RESOURCE_LOAD_ERROR;
-	if (FinalizeInit())
-	{
-		mPhysicsLoadState = Parent::PostProcess();
-	}
-	return mPhysicsLoadState;
+	return RESOURCE_LOAD_COMPLETE;
 }
 
 bool PhysicsSharedResource::FinalizeInit()

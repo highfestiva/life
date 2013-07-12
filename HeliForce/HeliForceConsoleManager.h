@@ -29,6 +29,7 @@ protected:
 	enum CommandClient
 	{
 		COMMAND_SET_AVATAR = Parent::COMMAND_COUNT_LIFE_CLIENT,
+		COMMAND_PREV_LEVEL,
 		COMMAND_NEXT_LEVEL,
 		COMMAND_DIE,
 	};

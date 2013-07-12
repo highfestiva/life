@@ -23,6 +23,7 @@ namespace HeliForce
 const HeliForceConsoleManager::CommandPair HeliForceConsoleManager::mCommandIdList[] =
 {
 	{_T("set-avatar"), COMMAND_SET_AVATAR},
+	{_T("prev-level"), COMMAND_PREV_LEVEL},
 	{_T("next-level"), COMMAND_NEXT_LEVEL},
 	{_T("die"), COMMAND_DIE},
 };
@@ -88,14 +89,24 @@ int HeliForceConsoleManager::OnCommand(const str& pCommand, const strutil::strve
 				}
 			}
 			break;
+			case COMMAND_PREV_LEVEL:
+			{
+				GetGameManager()->GetTickLock()->Acquire();
+				const str lNewLevelName = ((HeliForceManager*)GetGameManager())->StepLevel(-1);
+				CURE_RTVAR_SET(((HeliForceManager*)GetGameManager())->GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
+				GetGameManager()->GetTickLock()->Release();
+				return OnCommand(_T("die"), pParameterVector);
+			}
+			break;
 			case COMMAND_NEXT_LEVEL:
 			{
 				GetGameManager()->GetTickLock()->Acquire();
-				const str lNewLevelName = ((HeliForceManager*)GetGameManager())->NextLevel();
+				const str lNewLevelName = ((HeliForceManager*)GetGameManager())->StepLevel(+1);
 				CURE_RTVAR_SET(((HeliForceManager*)GetGameManager())->GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 				GetGameManager()->GetTickLock()->Release();
+				return OnCommand(_T("die"), pParameterVector);
 			}
-			// TRICKY: fall through.
+			break;
 			case COMMAND_DIE:
 			{
 				GetGameManager()->GetTickLock()->Acquire();

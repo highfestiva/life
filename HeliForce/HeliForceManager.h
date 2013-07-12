@@ -84,7 +84,7 @@ public:
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 	virtual bool DidFinishLevel();
-	virtual str NextLevel();
+	virtual str StepLevel(int pCount);
 
 	virtual Level* GetLevel() const;
 	virtual int GetCurrentLevelNumber() const;
@@ -124,7 +124,7 @@ protected:
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
 	Vector3DF GetLandingTriggerPosition(Cure::ContextObject* pLevel) const;
-	float EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition);
+	void EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition);
 	TransformationF GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const;
 
 	void Shoot(Cure::ContextObject*, int);

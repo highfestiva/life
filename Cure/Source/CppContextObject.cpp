@@ -200,6 +200,21 @@ bool CppContextObject::TryComplete()
 		return (false);
 	}
 
+	// This is the way to post-process physics (create physical bodies) only after the rest have been created, so
+	// that they are not created on different frames.
+	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
+	{
+		PhysicsSharedResource* lPhysicsResource = (PhysicsSharedResource*)mPhysicsResource->GetConstResource();
+		if (lPhysicsResource->InjectPostProcess() == RESOURCE_LOAD_COMPLETE)
+		{
+			SetPhysics(mPhysicsResource->GetData());
+			if (GetAllowNetworkLogic())
+			{
+				SetupChildHandlers();
+			}
+		}
+	}
+
 	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
 		for (Array::iterator x = mChildArray.begin(); x != mChildArray.end(); ++x)
@@ -362,11 +377,6 @@ void CppContextObject::OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResou
 		return;
 	}
 
-	SetPhysics(pPhysicsResource->GetData());
-	if (GetAllowNetworkLogic())
-	{
-		SetupChildHandlers();
-	}
 	TryComplete();
 }
 

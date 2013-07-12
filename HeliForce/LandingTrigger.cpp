@@ -42,7 +42,7 @@ void LandingTrigger::DidTrigger(Cure::ContextObject* pBody)
 void LandingTrigger::OnAlarm(int pAlarmId, void* pExtraData)
 {
 	Parent::OnAlarm(pAlarmId, pExtraData);
-	((HeliForceManager*)GetManager()->GetGameManager())->NextLevel();
+	((HeliForceManager*)GetManager()->GetGameManager())->StepLevel(+1);
 }
 
 

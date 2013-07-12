@@ -147,10 +147,6 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, -0.1f, 0.2f);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 1);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_00"));
 }
 
@@ -168,13 +164,26 @@ void HeliForceManager::LoadSettings()
 
 	Parent::LoadSettings();
 
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 1);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
 
-	//CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, _T("Key.LEFT"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, _T("Key.RIGHT"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, _T("Key.UP"));
+
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 250.0\""));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 \"#Game.Childishness 1.0\""));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 \"#Game.Childishness 0.5\""));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F4 \"#Game.Childishness 0.0\""));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 prev-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F6 next-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F7 trace-log-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F8 info-log-level"));
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lSchtickName = _T("Touchstick");
@@ -600,16 +609,20 @@ bool HeliForceManager::DidFinishLevel()
 	return false;
 }
 
-str HeliForceManager::NextLevel()
+str HeliForceManager::StepLevel(int pCount)
 {
 	if (GetContext()->GetObject(mAvatarId))
 	{
 		mOldLevel = mLevel;
 		int lLevelNumber = GetCurrentLevelNumber();
-		++lLevelNumber;
+		lLevelNumber += pCount;
 		if (lLevelNumber > LAST_LEVEL)
 		{
 			lLevelNumber = 0;
+		}
+		else if (lLevelNumber < 0)
+		{
+			lLevelNumber = LAST_LEVEL;
 		}
 		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
 		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
@@ -780,10 +793,8 @@ void HeliForceManager::TickUiInput()
 {
 	mUiManager->GetInputManager()->SetCursorVisible(true);
 
-	SteeringPlaybackMode lPlaybackMode;
-	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
-	if (lPlaybackMode != PLAYBACK_PLAY && lPhysicsStepCount > 0 && mAllowMovementInput)
+	if (lPhysicsStepCount > 0 && mAllowMovementInput)
 	{
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 
@@ -1120,8 +1131,9 @@ void HeliForceManager::OnLevelLoadCompleted()
 		GetContext()->DeleteObject(mOldLevel->GetInstanceId());
 		mOldLevel = 0;
 
-		lNewPosition.z += 1.0f;
+		//lNewPosition.z += 4.0f;
 		EaseDown(lAvatar, &lNewPosition);
+		//CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.1);
 
 		mCameraTransform.GetPosition() += lCamDelta;
 		mCameraTransform.GetPosition().z = lAvatar->GetPosition().z + lCamAboveHeli;
@@ -1296,7 +1308,7 @@ Vector3DF HeliForceManager::GetLandingTriggerPosition(Cure::ContextObject* pLeve
 	return Vector3DF();
 }
 
-float HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition)
+void HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition)
 {
 	mAllLoadedTimer.Start();
 
@@ -1317,20 +1329,26 @@ float HeliForceManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* 
 	lNewPositionalData->mPosition.mVelocity = Vector3DF();
 	lNewPositionalData->mPosition.mAngularAcceleration = Vector3DF();
 	lNewPositionalData->mPosition.mAngularVelocity = Vector3DF();
-	float lDistanceToGround = 0;
-	const float lStep = 0.1f;
+	bool lHasTouchedGround = false;
+	float lStep = 1.0f;
 	for (int x = 0; x < 100; ++x)
 	{
 		pObject->SetFullPosition(*lNewPositionalData, 0);
-		if (GetPhysicsManager()->IsColliding(pObject->GetInstanceId()))
+		const bool lIsColliding = GetPhysicsManager()->IsColliding(pObject->GetInstanceId());
+		//mLog.Infof(_T("%s at step %f"), lIsColliding? _T("Is colliding") : _T("Not colliding"), lStep);
+		if (lStep < 0.0001f && lIsColliding)
 		{
 			break;
 		}
-		lNewPositionalData->mPosition.mTransformation.GetPosition().z -= lStep;
-		lDistanceToGround += lStep;
+		lNewPositionalData->mPosition.mTransformation.GetPosition().z += lIsColliding? +lStep : -lStep;
+		lHasTouchedGround |= lIsColliding;
+		if (lHasTouchedGround)
+		{
+			lStep /= 2;
+		}
 	}
+	pObject->SetFullPosition(*lNewPositionalData, 0);
 	delete lNewPositionalData;
-	return lDistanceToGround;
 }
 
 TransformationF HeliForceManager::GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const

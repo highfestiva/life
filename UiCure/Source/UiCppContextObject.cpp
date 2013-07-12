@@ -709,7 +709,7 @@ bool CppContextObject::TryComplete()
 	{
 		return (false);
 	}
-	for (size_t x = 0;  x < mTextureResourceArray.size(); ++x)
+	for (size_t x = 0; x < mTextureResourceArray.size(); ++x)
 	{
 		UserRendererImageResource* lTexture = mTextureResourceArray[x];
 		if (lTexture->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
@@ -717,7 +717,7 @@ bool CppContextObject::TryComplete()
 			return (false);
 		}
 	}
-	for (size_t x = 0;  x < mMeshResourceArray.size(); ++x)
+	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
 		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
 		if (lMesh->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)

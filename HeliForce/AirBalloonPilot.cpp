@@ -46,7 +46,7 @@ void AirBalloonPilot::OnTick()
 	Parent::OnTick();
 
 	Cure::ContextObject* lBalloon = mManager->GetObject(mBalloonId, true);
-	if (!lBalloon)
+	if (!lBalloon || !mGame->GetLevel())
 	{
 		mManager->PostKillObject(GetInstanceId());
 		return;

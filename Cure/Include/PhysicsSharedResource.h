@@ -53,6 +53,8 @@ public:
 	PhysicsSharedResource(ResourceManager* pManager, const str& pName, const PhysicsSharedInitData& pInitData);
 	virtual ~PhysicsSharedResource();
 
+	ResourceLoadState InjectPostProcess();
+
 private:
 	void ReleasePhysics();
 	const str GetType() const;

@@ -3529,13 +3529,7 @@ void PhysicsManagerODE::CollisionNoteCallback(void* pData, dGeomID pGeom1, dGeom
 
 	dContact lContact[1];
 	const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 1, &lContact[0].geom, sizeof(lContact[0]));
-	if (lTriggerContactPointCount <= 0)
-	{
-		// In AABB range (since call came here), but no real contact.
-		return;
-	}
-
-	lThis->mNoteIsCollided = true;
+	lThis->mNoteIsCollided |= (lTriggerContactPointCount > 0);	// False means in AABB range (since call came here), but no real contact.
 }
 
 

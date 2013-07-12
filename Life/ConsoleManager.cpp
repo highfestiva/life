@@ -164,7 +164,8 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			//bool lUsage = false;
 			if (pParameterVector.size() == 2)
 			{
-				mAliasMap.insert(AliasMap::value_type(pParameterVector[0], pParameterVector[1]));
+				GetConsoleCommandManager()->RemoveCommand(pParameterVector[0]);
+				mAliasMap[pParameterVector[0]] = pParameterVector[1];
 				GetConsoleCommandManager()->AddCommand(pParameterVector[0]);
 			}
 			else if (pParameterVector.size() == 1)
@@ -206,7 +207,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		{
 			if (pParameterVector.size() == 2)
 			{
-				mKeyMap.insert(KeyMap::value_type(pParameterVector[0], pParameterVector[1]));
+				mKeyMap[pParameterVector[0]] = pParameterVector[1];
 			}
 			else if (pParameterVector.size() == 1)
 			{
