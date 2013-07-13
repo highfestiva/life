@@ -31,6 +31,9 @@
   . Add turrets to some levels.
   . Land on moving truck.
   . Land on moving boat.
+  . Make grass for mass-object.
+  . Wrap backgrounds.
+  + Reduce stretch on backgrounds, so the lush textures appear. Right now it looks like shit!
 . Beautify!
 . Make burn smoke billow up if rotor is off!
 . Large fonts on iOS.
