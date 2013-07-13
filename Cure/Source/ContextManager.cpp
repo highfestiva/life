@@ -18,6 +18,10 @@ namespace Cure
 
 
 
+#define CHECK_OBJ_ALARM_ERASED(obj)	LEPRA_DEBUG_CODE( for (AlarmSet::iterator x = mAlarmCallbackObjectSet.begin(); x != mAlarmCallbackObjectSet.end(); ++x) { deb_assert(x->mObject != obj); } )
+
+
+
 ContextManager::ContextManager(GameManager* pGameManager):
 	mGameManager(pGameManager),
 	mIsObjectOwner(true),
@@ -242,6 +246,7 @@ void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, floa
 {
 	deb_assert(pObject->GetInstanceId() != 0);
 	deb_assert(pObject->GetManager() == this);
+	deb_assert(GetObject(pObject->GetInstanceId(), true) == pObject);
 
 	ScopeLock lLock(&mAlarmMutex);
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
@@ -259,7 +264,8 @@ void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int
 	{
 		if (x->mObject == pObject && x->mAlarmId == pAlarmId)
 		{
-			mAlarmCallbackObjectSet.erase(x++);
+			mAlarmCallbackObjectSet.erase(x);
+			x = mAlarmCallbackObjectSet.begin();	// Shouldn't be necessary, but is!
 		}
 		else
 		{
@@ -278,13 +284,16 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 	{
 		if (x->mObject == pObject)
 		{
-			mAlarmCallbackObjectSet.erase(x++);
+			mAlarmCallbackObjectSet.erase(x);
+			x = mAlarmCallbackObjectSet.begin();	// Shouldn't be necessary, but is!
 		}
 		else
 		{
 			++x;
 		}
 	}
+
+	CHECK_OBJ_ALARM_ERASED(pObject);
 }
 
 
@@ -416,11 +425,11 @@ void ContextManager::DispatchAlarmCallbacks()
 		{
 			deb_assert(!x->mObject->GetClassId().empty());
 			lCallbackList.push_back(*x);
-			mAlarmCallbackObjectSet.erase(x++);
+			mAlarmCallbackObjectSet.erase(x);
+			x = mAlarmCallbackObjectSet.begin();	// Shouldn't be necessary, but is!
 		}
 		else
 		{
-			//break;
 			++x;
 		}
 	}

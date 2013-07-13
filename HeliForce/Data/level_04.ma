@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: level_04.ma
-//Last modified: Sat, Jul 06, 2013 03:12:12 AM
+//Last modified: Sat, Jul 13, 2013 11:03:46 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -12,30 +12,32 @@ fileInfo "cutIdentifier" "200904080023-749524";
 fileInfo "osv" "Microsoft Windows XP Service Pack 3 (Build 2600)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" -2.4704908072910232 3.2671806997608819 107.8955538969112 ;
-	setAttr ".r" -type "double3" -2.1383527295637252 -4.5999999999980306 4.9856761586716016e-017 ;
-	setAttr ".rp" -type "double3" 0 -5.3290705182007514e-015 0 ;
-	setAttr ".rpt" -type "double3" 1.0090513288177178e-014 1.3688904443604985e-014 -6.8736808185090603e-016 ;
+	setAttr ".t" -type "double3" -5.7557194534404372 6.5652324954842092 104.59840887682272 ;
+	setAttr ".r" -type "double3" -8.1383527295604381 -0.19999999999789461 -2.8886072993227214e-016 ;
+	setAttr ".rp" -type "double3" -8.8817841970012523e-015 -7.1054273576010019e-015 
+		0 ;
+	setAttr ".rpt" -type "double3" 8.1703711188964933e-015 -2.0929616394572752e-014 
+		4.4551004151203859e-014 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
 	setAttr ".fcp" 3000;
-	setAttr ".coi" 164.65714615451677;
+	setAttr ".coi" 93.480481345968968;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
-	setAttr ".tp" -type "double3" 36.112211796634533 -1.618598126954101 3.2538152287952471 ;
+	setAttr ".tp" -type "double3" 19.524106996494311 -19.214632800552863 17.278325304165946 ;
 	setAttr ".hc" -type "string" "viewSet -p %camera";
 createNode transform -s -n "top";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" -1.430511474609375e-006 101.66299974393458 17.393325611504714 ;
+	setAttr ".t" -type "double3" -1.3625470767258037 101.66670557928654 -2.2320375431706094 ;
 	setAttr ".r" -type "double3" -89.999999999999986 0 0 ;
 createNode camera -s -n "topShape" -p "top";
 	setAttr -k off ".v" no;
 	setAttr ".rnd" no;
 	setAttr ".fcp" 3000;
 	setAttr ".coi" 100.1;
-	setAttr ".ow" 99.186049784739112;
+	setAttr ".ow" 831.43816139667081;
 	setAttr ".imn" -type "string" "top";
 	setAttr ".den" -type "string" "top_depth";
 	setAttr ".man" -type "string" "top_mask";
@@ -43,17 +45,17 @@ createNode camera -s -n "topShape" -p "top";
 	setAttr ".o" yes;
 createNode transform -s -n "front";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" -376.7009082669025 -192.35142157785714 232.21935211301161 ;
+	setAttr ".t" -type "double3" -57.491553262221288 -54.522568481194611 585.34303725495647 ;
 createNode camera -s -n "frontShape" -p "front";
 	setAttr -k off ".v" no;
 	setAttr ".rnd" no;
 	setAttr ".fcp" 3000;
-	setAttr ".coi" 232.21934090075493;
-	setAttr ".ow" 86.904461270903965;
+	setAttr ".coi" 585.34302604269965;
+	setAttr ".ow" 85.905272522815338;
 	setAttr ".imn" -type "string" "front";
 	setAttr ".den" -type "string" "front_depth";
 	setAttr ".man" -type "string" "front_mask";
-	setAttr ".tp" -type "double3" 398.66929497101069 -190.50847051397091 1.1212256680437349e-005 ;
+	setAttr ".tp" -type "double3" -120.95054984393217 -108.10823924189437 1.1212256822545896e-005 ;
 	setAttr ".hc" -type "string" "viewSet -f %camera";
 	setAttr ".o" yes;
 createNode transform -s -n "side";
@@ -908,6 +910,10 @@ createNode transform -n "phys_terrain" -p "m_terrain";
 	setAttr ".rp" -type "double3" 0 5.3295613112728883 0 ;
 	setAttr ".sp" -type "double3" 0 5.3295613112728883 0 ;
 createNode mesh -n "m_phys_terrainShape" -p "phys_terrain";
+	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
+	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
@@ -919,62 +925,121 @@ createNode mesh -n "m_phys_terrainShape" -p "phys_terrain";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr -s 30 ".pt[0:29]" -type "float3"  69.460663 -177.54266 0 162.65536 
-		-119.63711 0 204.38379 -78.610512 0 185.79291 -68.311752 0 139.49063 -40.606781 0 
-		105.85669 -12.200038 0 54.870152 -3.9856668 0 -3.3049033 0.32091126 0 -57.356445 
-		-3.9077842 0 -114.89284 -14.48223 0 -143.5817 -43.30407 0 -173.93727 -61.859367 0 
-		-202.89839 -89.355179 0 -162.7776 -130.15019 0 -70.642426 -180.79713 0 69.460663 
-		-177.54266 0 162.65536 -119.63711 0 204.38379 -78.610512 0 185.79291 -68.311752 0 
-		139.49063 -40.606781 0 105.85669 -12.200038 0 54.870152 -3.9856668 0 -3.3049033 0.32091126 
-		0 -57.356445 -3.9077842 0 -114.89284 -14.48223 0 -143.5817 -43.30407 0 -173.93727 
-		-61.859367 0 -202.89839 -89.355179 0 -162.7776 -130.15019 0 -70.642426 -180.79713 
-		0;
-	setAttr ".rgvtx" -type "vectorArray" 30 -399.93173217773437 -177.54266357421875
-		 7.5 -239.68096923828125 -119.63710784912109 7.5 -130.896484375 -78.610511779785156
-		 7.5 -82.43133544921875 -68.311752319335938 7.5 -61.67755126953125 -40.606781005859375
-		 7.5 -28.25543212890625 -12.200037956237793 7.5 -12.185939788818359 -3.9856667518615723
-		 7.5 -3.3049337863922119 0.32091125845909119 7.5 9.6995849609375 -3.9077842235565186
-		 7.5 19.219223022460938 -14.482230186462402 7.5 57.586456298828125 -43.304069519042969
-		 7.5 94.286911010742188 -61.859367370605469 7.5 132.38182067871094 -89.355178833007813
-		 7.5 239.55870056152344 -130.15019226074219 7.5 398.74990844726562 -180.79713439941406
-		 7.5 -399.93173217773437 -177.54266357421875 -7.5 -239.68096923828125 -119.63710784912109
-		 -7.5 -130.896484375 -78.610511779785156 -7.5 -82.43133544921875 -68.311752319335938
-		 -7.5 -61.67755126953125 -40.606781005859375 -7.5 -28.25543212890625 -12.200037956237793
-		 -7.5 -12.185939788818359 -3.9856667518615723 -7.5 -3.3049337863922119 0.32091125845909119
-		 -7.5 9.6995849609375 -3.9077842235565186 -7.5 19.219223022460938 -14.482230186462402
-		 -7.5 57.586456298828125 -43.304069519042969 -7.5 94.286911010742188 -61.859367370605469
-		 -7.5 132.38182067871094 -89.355178833007813 -7.5 239.55870056152344 -130.15019226074219
-		 -7.5 398.74990844726562 -180.79713439941406 -7.5 ;
-	setAttr ".rgf" -type "string" "[[0,1,16,15],[1,2,17,16],[2,3,18,17],[3,4,19,18],[4,5,20,19],[5,6,21,20],[6,7,22,21],[7,8,23,22],[8,9,24,23],[9,10,25,24],[10,11,26,25],[11,12,27,26],[12,13,28,27],[13,14,29,28]]";
-	setAttr ".rgn" -type "vectorArray" 56 -0.3398377001285553 0.94048410654067993
-		 0 -0.34636488556861877 0.93809980154037476 0 -0.34636488556861877 0.93809980154037476
-		 0 -0.3398377001285553 0.94048410654067993 0 -0.34636488556861877 0.93809980154037476
-		 0 -0.28116998076438904 0.95965802669525146 0 -0.28116998076438904 0.95965802669525146
-		 0 -0.34636488556861877 0.93809980154037476 0 -0.28116998076438904 0.95965802669525146
-		 0 -0.53847622871398926 0.84264063835144043 0 -0.53847622871398926 0.84264063835144043
-		 0 -0.28116998076438904 0.95965802669525146 0 -0.53847622871398926 0.84264063835144043
-		 0 -0.72852414846420288 0.68502002954483032 0 -0.72852414846420288 0.68502002954483032
-		 0 -0.53847622871398926 0.84264063835144043 0 -0.72852414846420288 0.68502002954483032
-		 0 -0.55511736869812012 0.83177191019058228 0 -0.55511736869812012 0.83177191019058228
-		 0 -0.72852414846420288 0.68502002954483032 0 -0.55511736869812012 0.83177191019058228
-		 0 -0.44576659798622131 0.89514917135238647 0 -0.44576659798622131 0.89514917135238647
-		 0 -0.55511736869812012 0.83177191019058228 0 -0.44576659798622131 0.89514917135238647
-		 0 -0.068508438766002655 0.99765050411224365 0 -0.068508438766002655 0.99765050411224365
-		 0 -0.44576659798622131 0.89514917135238647 0 -0.068508438766002655 0.99765050411224365
-		 0 0.54477030038833618 0.83858537673950195 0 0.54477030038833618 0.83858537673950195
-		 0 -0.068508438766002655 0.99765050411224365 0 0.54477030038833618 0.83858537673950195
-		 0 0.67506968975067139 0.73775392770767212 0 0.67506968975067139 0.73775392770767212
-		 0 0.54477030038833618 0.83858537673950195 0 0.67506968975067139 0.73775392770767212
-		 0 0.52795541286468506 0.84927207231521606 0 0.52795541286468506 0.84927207231521606
-		 0 0.67506968975067139 0.73775392770767212 0 0.52795541286468506 0.84927207231521606
-		 0 0.51982676982879639 0.85427170991897583 0 0.51982676982879639 0.85427170991897583
-		 0 0.52795541286468506 0.84927207231521606 0 0.51982676982879639 0.85427170991897583
-		 0 0.47454246878623962 0.88023263216018677 0 0.47454246878623962 0.88023263216018677
-		 0 0.51982676982879639 0.85427170991897583 0 0.47454246878623962 0.88023263216018677
-		 0 0.32958364486694336 0.94412636756896973 0 0.32958364486694336 0.94412636756896973
-		 0 0.47454246878623962 0.88023263216018677 0 0.32958364486694336 0.94412636756896973
-		 0 0.30317753553390503 0.95293402671813965 0 0.30317753553390503 0.95293402671813965
-		 0 0.32958364486694336 0.94412636756896973 0 ;
+	setAttr -s 43 ".pt";
+	setAttr ".pt[0:30]" -type "float3" 0 -0.44539484 0  0 -0.55457836 0  0 
+		-1.658141 0  0.35195091 0.21985254 0  0 -1.9235305 0  0 -3.103153 0  0 -3.3999469 
+		0  0.37584475 -3.9507246 0  0 -3.5448351 0  0 -3.3999469 0  0 -1.6471913 0  0 -0.73245907 
+		0  0.11090106 -0.088918507 0  0.06740129 -0.35547167 0  0 -0.40349394 0  0 -0.44539484 
+		0  0 -0.55457836 0  0 -1.658141 0  0.35195091 0.21985254 0  0 -1.9235305 0  0 -3.103153 
+		0  0 -3.3999469 0  0.37584475 -3.9507246 0  0 -3.5448351 0  0 -3.3999469 0  0 -1.6471913 
+		0  0 -0.73245907 0  0.11090106 -0.088918507 0  0.06740129 -0.35547167 0  0 -0.40349394 
+		0  0 0.35431463 0 ;
+	setAttr ".pt[32:33]" -type "float3" 0.14078037 0.21117057 0  0.35195091 
+		0.1906355 0 ;
+	setAttr ".pt[35:44]" -type "float3" 0 0.13480258 0  0 0.13480258 0  -4.1909516e-009 
+		0 0  -0.06740129 0.06740129 0  -0.20220387 0.23590451 0  -0.06740129 0.06740129 0  
+		0 0.0085167885 0  0.11090106 0.19453266 0  0.06740129 0.14965641 0  0 0.39621562 
+		0 ;
+	setAttr ".rgvtx" -type "vectorArray" 45 -399.93173217773437 -177.98805236816406
+		 7.5 -239.68096923828125 -120.19168853759766 7.5 -130.896484375 -80.268653869628906
+		 7.5 -82.079383850097656 -68.091896057128906 7.5 -61.67755126953125 -42.530311584472656
+		 7.5 -28.25543212890625 -15.303190231323242 7.5 -12.185939788818359 -7.3856134414672852
+		 7.5 -2.9290890693664551 -3.6298131942749023 7.5 9.6995849609375 -7.4526195526123047
+		 7.5 19.219223022460938 -17.882175445556641 7.5 57.586456298828125 -44.951259613037109
+		 7.5 94.286911010742188 -62.591827392578125 7.5 132.49272155761719 -89.444099426269531
+		 7.5 239.6260986328125 -130.50566101074219 7.5 398.74990844726562 -181.20062255859375
+		 7.5 -399.93173217773437 -177.98805236816406 -7.5 -239.68096923828125 -120.19168853759766
+		 -7.5 -130.896484375 -80.268653869628906 -7.5 -82.079383850097656 -68.091896057128906
+		 -7.5 -61.67755126953125 -42.530311584472656 -7.5 -28.25543212890625 -15.303190231323242
+		 -7.5 -12.185939788818359 -7.3856134414672852 -7.5 -2.9290890693664551 -3.6298131942749023
+		 -7.5 9.6995849609375 -7.4526195526123047 -7.5 19.219223022460938 -17.882175445556641
+		 -7.5 57.586456298828125 -44.951259613037109 -7.5 94.286911010742188 -62.591827392578125
+		 -7.5 132.49272155761719 -89.444099426269531 -7.5 239.6260986328125 -130.50566101074219
+		 -7.5 398.74990844726562 -181.20062255859375 -7.5 -399.93173217773437 -177.1883544921875
+		 0.071437835693359375 -239.68096923828125 -119.63710784912109 0.071437835693359375 -130.75570678710937
+		 -78.399337768554688 0.071437835693359375 -82.079383850097656 -68.121116638183594
+		 0.071437835693359375 -61.67755126953125 -40.606781005859375 0.071437835693359375 -28.25543212890625
+		 -12.065234184265137 0.071437835693359375 -12.185939788818359 -3.8508636951446533
+		 0.071437835693359375 -3.3049337863922119 0.32091140747070313 0.071437835693359375 9.6321840286254883
+		 -3.8403830528259277 0.071437835693359375 19.017019271850586 -14.24632453918457 0.071437835693359375 57.519054412841797
+		 -43.236667633056641 0.071437835693359375 94.286911010742188 -61.850849151611328 0.071437835693359375 132.49272155761719
+		 -89.16064453125 0.071437835693359375 239.6260986328125 -130.00053405761719 0.071437835693359375 398.74990844726562
+		 -180.40092468261719 0.071437835693359375 ;
+	setAttr ".rgf" -type "string" "[[0,1,31,30],[1,2,32,31],[2,3,33,32],[3,4,34,33],[4,5,35,34],[5,6,36,35],[6,7,37,36],[7,8,38,37],[8,9,39,38],[9,10,40,39],[10,11,41,40],[11,12,42,41],[12,13,43,42],[13,14,44,43],[30,31,16,15],[31,32,17,16],[32,33,18,17],[33,34,19,18],[34,35,20,19],[35,36,21,20],[36,37,22,21],[37,38,23,22],[38,39,24,23],[39,40,25,24],[40,41,26,25],[41,42,27,26],[42,43,28,27],[43,44,29,28]]";
+	setAttr ".rgn" -type "vectorArray" 112 -0.33739516139030457 0.93747639656066895
+		 0.08545394241809845 -0.34160590171813965 0.93256425857543945 0.11674363166093826 -0.34395799040794373
+		 0.93898439407348633 0.0010910945711657405 -0.33863374590873718 0.94091790914535522
+		 0.00080343021545559168 -0.34160590171813965 0.93256425857543945 0.11674363166093826 -0.2848045825958252
+		 0.94929713010787964 0.13312135636806488 -0.28736433386802673 0.9578205943107605 0.0012445111060515046 -0.34395799040794373
+		 0.93898439407348633 0.0010910945711657405 -0.2848045825958252 0.94929713010787964
+		 0.13312135636806488 -0.53805738687515259 0.83650988340377808 0.10366019606590271 -0.54096031188964844
+		 0.84104746580123901 0.00097298028413206339 -0.28736433386802673 0.9578205943107605
+		 0.0012445111060515046 -0.53805738687515259 0.83650988340377808 0.10366019606590271 -0.71184384822845459
+		 0.6816246509552002 0.16931100189685822 -0.72224903106689453 0.69163137674331665 0.001537551055662334 -0.54096031188964844
+		 0.84104746580123901 0.00097298028413206339 -0.71184384822845459 0.6816246509552002
+		 0.16931100189685822 -0.52134054899215698 0.79105478525161743 0.3200567364692688 -0.55024993419647217
+		 0.83499515056610107 0.0028379445429891348 -0.72224903106689453 0.69163137674331665
+		 0.001537551055662334 -0.52134054899215698 0.79105478525161743 0.3200567364692688 -0.38908159732818604
+		 0.82873547077178955 0.40225982666015625 -0.42497462034225464 0.90519857406616211
+		 0.0034787638578563929 -0.55024993419647217 0.83499515056610107 0.0028379445429891348 -0.38908159732818604
+		 0.82873547077178955 0.40225982666015625 -0.04909057542681694 0.89078271389007568
+		 0.45177030563354492 -0.055019751191139221 0.9984775185585022 0.0039136242121458054 -0.42497462034225464
+		 0.90519857406616211 0.0034787638578563929 -0.04909057542681694 0.89078271389007568
+		 0.45177030563354492 0.50424987077713013 0.77665024995803833 0.37755292654037476 0.54444819688796997
+		 0.83878797292709351 0.0032937645446509123 -0.055019751191139221 0.9984775185585022
+		 0.0039136242121458054 0.50424987077713013 0.77665024995803833 0.37755292654037476 0.64006537199020386
+		 0.71298956871032715 0.28629019856452942 0.66803085803985596 0.74412894248962402 0.002592454431578517 0.54444819688796997
+		 0.83878797292709351 0.0032937645446509123 0.64006537199020386 0.71298956871032715
+		 0.28629019856452942 0.50543338060379028 0.83731281757354736 0.20843289792537689 0.51680070161819458
+		 0.85610359907150269 0.0019027830567210913 0.66803085803985596 0.74412894248962402
+		 0.002592454431578517 0.50543338060379028 0.83731281757354736 0.20843289792537689 0.50970035791397095
+		 0.85442328453063965 0.10082870721817017 0.51230531930923462 0.8588029146194458 0.00094126100884750485 0.51680070161819458
+		 0.85610359907150269 0.0019027830567210913 0.50970035791397095 0.85442328453063965
+		 0.10082870721817017 0.47069767117500305 0.88068544864654541 0.053261619061231613 0.4713670015335083
+		 0.88193690776824951 0.00050185178406536579 0.51230531930923462 0.8588029146194458
+		 0.00094126100884750485 0.47069767117500305 0.88068544864654541 0.053261619061231613 0.32933658361434937
+		 0.9418676495552063 0.066502951085567474 0.33006665110588074 0.94395744800567627 0.00062560674268752337 0.4713670015335083
+		 0.88193690776824951 0.00050185178406536579 0.32933658361434937 0.9418676495552063
+		 0.066502951085567474 0.30169916152954102 0.94974732398986816 0.083413079380989075 0.30275413393974304
+		 0.95306837558746338 0.00078437873162329197 0.33006665110588074 0.94395744800567627
+		 0.00062560674268752337 -0.33863374590873718 0.94091790914535522 0.00080343021545559168 -0.34395799040794373
+		 0.93898439407348633 0.0010910945711657405 -0.34169349074363708 0.93280130624771118
+		 -0.11457400768995285 -0.33744120597839355 0.93760442733764648 -0.083852849900722504 -0.34395799040794373
+		 0.93898439407348633 0.0010910945711657405 -0.28736433386802673 0.9578205943107605
+		 0.0012445111060515046 -0.28490355610847473 0.94961017370223999 -0.13065369427204132 -0.34169349074363708
+		 0.93280130624771118 -0.11457400768995285 -0.28736433386802673 0.9578205943107605
+		 0.0012445111060515046 -0.54096031188964844 0.84104746580123901 0.00097298028413206339 -0.53814327716827393
+		 0.83669209480285645 -0.10172608494758606 -0.28490355610847473 0.94961017370223999
+		 -0.13065369427204132 -0.54096031188964844 0.84104746580123901 0.00097298028413206339 -0.72224903106689453
+		 0.69163137674331665 0.001537551055662334 -0.71217679977416992 0.68202883005142212
+		 -0.16625575721263885 -0.53814327716827393 0.83669209480285645 -0.10172608494758606 -0.72224903106689453
+		 0.69163137674331665 0.001537551055662334 -0.55024993419647217 0.83499515056610107
+		 0.0028379445429891348 -0.52226871252059937 0.79260498285293579 -0.31466245651245117 -0.71217679977416992
+		 0.68202883005142212 -0.16625575721263885 -0.55024993419647217 0.83499515056610107
+		 0.0028379445429891348 -0.42497462034225464 0.90519857406616211 0.0034787638578563929 -0.39025387167930603
+		 0.83125394582748413 -0.39587736129760742 -0.52226871252059937 0.79260498285293579
+		 -0.31466245651245117 -0.42497462034225464 0.90519857406616211 0.0034787638578563929 -0.055019751191139221
+		 0.9984775185585022 0.0039136242121458054 -0.049268536269664764 0.89420115947723389
+		 -0.44494596123695374 -0.39025387167930603 0.83125394582748413 -0.39587736129760742 -0.055019751191139221
+		 0.9984775185585022 0.0039136242121458054 0.54444819688796997 0.83878797292709351
+		 0.0032937645446509123 0.50539612770080566 0.7788311243057251 -0.37147918343544006 -0.049268536269664764
+		 0.89420115947723389 -0.44494596123695374 0.54444819688796997 0.83878797292709351
+		 0.0032937645446509123 0.66803085803985596 0.74412894248962402 0.002592454431578517 0.6410595178604126
+		 0.71407347917556763 -0.28132152557373047 0.50539612770080566 0.7788311243057251 -0.37147918343544006 0.66803085803985596
+		 0.74412894248962402 0.002592454431578517 0.51680070161819458 0.85610359907150269
+		 0.0019027830567210913 0.50587612390518188 0.83796703815460205 -0.20469604432582855 0.6410595178604126
+		 0.71407347917556763 -0.28132152557373047 0.51680070161819458 0.85610359907150269
+		 0.0019027830567210913 0.51230531930923462 0.8588029146194458 0.00094126100884750485 0.50978553295135498
+		 0.8545917272567749 -0.098952092230319977 0.50587612390518188 0.83796703815460205
+		 -0.20469604432582855 0.51230531930923462 0.8588029146194458 0.00094126100884750485 0.4713670015335083
+		 0.88193690776824951 0.00050185178406536579 0.47072339057922363 0.88073176145553589
+		 -0.052259348332881927 0.50978553295135498 0.8545917272567749 -0.098952092230319977 0.4713670015335083
+		 0.88193690776824951 0.00050185178406536579 0.33006665110588074 0.94395744800567627
+		 0.00062560674268752337 0.32936269044876099 0.94194597005844116 -0.065254122018814087 0.47072339057922363
+		 0.88073176145553589 -0.052259348332881927 0.33006665110588074 0.94395744800567627
+		 0.00062560674268752337 0.30275413393974304 0.95306837558746338 0.00078437873162329197 0.30173841118812561
+		 0.94987082481384277 -0.081849686801433563 0.32936269044876099 0.94194597005844116
+		 -0.065254122018814087 ;
 parent -s -nc -r -add "|m_terrain|m_startingpad|phys_startingpad|m_helipadShape" "m_landingpad";
 parent -s -nc -r -add "|m_terrain|m_startingpad|phys_startingpad|m_helipadShape" "phys_landingpad";
 parent -s -nc -r -add "|m_terrain|m_startingpad|phys_startingpad|m_helipadShape" "m_startingpad";
@@ -1286,8 +1351,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n"
 		+ "                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"clipEditorPanel\" (localizedPanelLabel(\"Trax Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"clipEditorPanel\" -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n"
 		+ "                -snapValue \"none\" \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n"
-		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.863835\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_pos_path_land\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"m_door_frame1\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
-		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.863835\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_pos_path_land\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"m_door_frame1\" \n                -freeform 1\n                -imagePosition 0 0 \n"
+		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.813853\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_terrain\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"phys_terrain\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
+		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.813853\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_terrain\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"phys_terrain\" \n                -freeform 1\n                -imagePosition 0 0 \n"
 		+ "                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperShadePanel\" (localizedPanelLabel(\"Hypershade\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperShadePanel\" -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"visorPanel\" (localizedPanelLabel(\"Visor\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"visorPanel\" -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"polyTexturePlacementPanel\" (localizedPanelLabel(\"UV Texture Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"multiListerPanel\" (localizedPanelLabel(\"Multilister\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"multiListerPanel\" -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"renderWindowPanel\" (localizedPanelLabel(\"Render View\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"renderWindowPanel\" -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextPanel \"blendShapePanel\" (localizedPanelLabel(\"Blend Shape\")) `;\n"
@@ -1304,8 +1369,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -textures 1\n                -strokes 1\n                -shadows 0\n                -displayMode \"centerEye\" \n                -viewColor 0 0 0 1 \n                $editorName;\nstereoCameraView -e -viewSelected 0 $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\tif ($useSceneConfig) {\n        string $configName = `getPanel -cwl (localizedPanelLabel(\"Current Layout\"))`;\n        if (\"\" != $configName) {\n\t\t\tpanelConfiguration -edit -label (localizedPanelLabel(\"Current Layout\")) \n\t\t\t\t-defaultImage \"\"\n\t\t\t\t-image \"\"\n\t\t\t\t-sc false\n\t\t\t\t-configString \"global string $gMainPane; paneLayout -e -cn \\\"horizontal2\\\" -ps 1 100 46 -ps 2 100 54 $gMainPane;\"\n\t\t\t\t-removeAllPanels\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Persp View\")) \n\t\t\t\t\t\"modelPanel\"\n"
 		+ "\t\t\t\t\t\"$panelName = `modelPanel -unParent -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels `;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 0\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
 		+ "\t\t\t\t\t\"modelPanel -edit -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels  $panelName;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 0\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
-		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.863835\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_pos_path_land\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"m_door_frame1\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
-		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.863835\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_pos_path_land\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"m_door_frame1\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.813853\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_terrain\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"phys_terrain\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.813853\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_terrain\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"phys_terrain\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
 		+ "\t\t\t\t$configName;\n\n            setNamedPanelLayout (localizedPanelLabel(\"Current Layout\"));\n        }\n\n        panelHistory -e -clear mainPanelHistory;\n        setFocus `paneLayout -q -p1 $gMainPane`;\n        sceneUIReplacement -deleteRemaining;\n        sceneUIReplacement -clear;\n\t}\n\n\ngrid -spacing 5 -size 12 -divisions 5 -displayAxes yes -displayGridLines yes -displayDivisionLines yes -displayPerspectiveLabels no -displayOrthographicLabels no -displayAxesBold yes -perspectiveLabelPosition axis -orthographicLabelPosition edge;\nviewManip -drawCompass 0 -compassAngle 0 -frontParameters \"\" -homeParameters \"\" -selectionLockParameters \"\";\n}\n");
 	setAttr ".st" 3;
 createNode script -n "sceneConfigurationScriptNode";
@@ -1313,9 +1378,28 @@ createNode script -n "sceneConfigurationScriptNode";
 	setAttr ".st" 6;
 createNode polySphere -n "polySphere1";
 	setAttr ".r" 0.64416762874189715;
+createNode polyCut -n "polyCut1";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 1 "f[0:13]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 -5.3295613112728883 0 1;
+	setAttr ".pc" -type "double3" 31.512545430442771 -95.567671775817871 0.071437856300922586 ;
+	setAttr ".ro" -type "double3" -1.2694687576444745e-014 0 180 ;
+	setAttr ".ps" -type "double2" 798.681640625 181.11804389953613 ;
+createNode polyTweak -n "polyTweak4";
+	setAttr ".uopa" yes;
+	setAttr -s 30 ".tk[0:29]" -type "float3"  69.460663 -177.54266 0 162.65536 
+		-119.63711 0 204.38379 -78.610512 0 185.79291 -68.311752 0 139.49063 -40.606781 0 
+		105.85669 -12.200038 0 54.870152 -3.9856668 0 -3.3049033 0.32091126 0 -57.356445 
+		-3.9077842 0 -114.89284 -14.48223 0 -143.5817 -43.30407 0 -173.93727 -61.859367 0 
+		-202.89839 -89.355179 0 -162.7776 -130.15019 0 -70.642426 -180.79713 0 69.460663 
+		-177.54266 0 162.65536 -119.63711 0 204.38379 -78.610512 0 185.79291 -68.311752 0 
+		139.49063 -40.606781 0 105.85669 -12.200038 0 54.870152 -3.9856668 0 -3.3049033 0.32091126 
+		0 -57.356445 -3.9077842 0 -114.89284 -14.48223 0 -143.5817 -43.30407 0 -173.93727 
+		-61.859367 0 -202.89839 -89.355179 0 -162.7776 -130.15019 0 -70.642426 -180.79713 
+		0;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2013-07-06T03:12:12.546000";
+	setAttr ".time" -type "string" "2013-07-13T23:03:45.796000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;
@@ -1341,6 +1425,8 @@ select -ne :hardwareRenderGlobals;
 select -ne :defaultHardwareRenderGlobals;
 	setAttr ".fn" -type "string" "im";
 	setAttr ".res" -type "string" "ntsc_4d 646 485 1.333";
+select -ne :ikSystem;
+	setAttr -s 4 ".sol";
 select -ne :hyperGraphLayout;
 	setAttr -s 9 ".hyp";
 	setAttr ".hyp[35].x" 486.48785400390625;
@@ -1389,7 +1475,7 @@ connectAttr "polyPlanarProj6.out" "m_signShape.i";
 connectAttr "polyCube3.out" "phys_trig_landingShape.i";
 connectAttr "polySphere1.out" "|m_terrain|phys_pos_path_start|phys_pos_path_Shape1.i"
 		;
-connectAttr "polyPlane1.out" "m_phys_terrainShape.i";
+connectAttr "polyCut1.out" "m_phys_terrainShape.i";
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[0].llnk";
 connectAttr ":initialShadingGroup.msg" "lightLinker1.lnk[0].olnk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[1].llnk";
@@ -1624,6 +1710,9 @@ connectAttr "m_poleShape.wm" "polyCylProj1.mp";
 connectAttr "polyTweak3.out" "polyPlanarProj6.ip";
 connectAttr "m_signShape.wm" "polyPlanarProj6.mp";
 connectAttr "polyCube5.out" "polyTweak3.ip";
+connectAttr "polyTweak4.out" "polyCut1.ip";
+connectAttr "m_phys_terrainShape.wm" "polyCut1.mp";
+connectAttr "polyPlane1.out" "polyTweak4.ip";
 connectAttr "pasted__blinn1SG.pa" ":renderPartition.st" -na;
 connectAttr "pasted__blinn2SG.pa" ":renderPartition.st" -na;
 connectAttr "pasted__blinn1SG1.pa" ":renderPartition.st" -na;

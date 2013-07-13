@@ -85,6 +85,11 @@ void AutoPathDriver::GetClosestPathDistance(const Vector3DF& pPosition, Vector3D
 {
 	if (!mPath)
 	{
+		if (!mGame->GetLevel() || !mGame->GetLevel()->QueryPath()->GetPath(mPathName))
+		{
+			mManager->PostKillObject(GetInstanceId());
+			return;
+		}
 		mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath(mPathName));
 		mPath->StartInterpolation(0);
 	}

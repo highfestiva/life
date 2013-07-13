@@ -79,6 +79,7 @@ ContextObject::~ContextObject()
 	mTriggerMap.clear();
 	mSpawner = 0;
 
+	deb_assert(mManager);
 	if (mManager)
 	{
 		mManager->RemoveObject(this);
@@ -398,7 +399,7 @@ void ContextObject::AddChild(ContextObject* pChild)
 	deb_assert(pChild->GetInstanceId() != 0);
 	if (std::find(mChildArray.begin(), mChildArray.end(), pChild) != mChildArray.end())
 	{
-		// Already added.
+		// Already added. This may for instance happen when another path for a level is added.
 		return;
 	}
 	mChildArray.push_back(pChild);

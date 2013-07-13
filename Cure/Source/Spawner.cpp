@@ -21,9 +21,9 @@ Spawner::Spawner(ContextManager* pManager):
 	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Spawner"))
 {
 	pManager->AddLocalObject(this);
-	pManager->AddAlarmCallback(this, 0, 0.5, 0);	// Create.
-	pManager->AddAlarmCallback(this, 1, 0.5, 0);	// Destroy.
-	pManager->AddAlarmCallback(this, 2, 0.5, 0);	// Recreate.
+	mManager->AddAlarmCallback(this, 0, 0.5, 0);	// Create.
+	mManager->AddAlarmCallback(this, 1, 0.5, 0);	// Destroy.
+	mManager->AddAlarmCallback(this, 2, 0.5, 0);	// Recreate.
 }
 
 Spawner::~Spawner()
