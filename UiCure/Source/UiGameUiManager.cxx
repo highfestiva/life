@@ -611,13 +611,16 @@ void GameUiManager::UpdateSettings()
 	const bool lSmoothFonts = true;
 	mPainter->SetFontSmoothness(lSmoothFonts);
 
-	str lFont;
-	CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
-	double lFontHeight;
-	CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
-	int lFontFlags;
-	CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
-	//mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
+	if (mFontManager)
+	{
+		str lFont;
+		CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+		double lFontHeight;
+		CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		int lFontFlags;
+		CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
+		mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
+	}
 
 	// --------------
 	// Sound settings

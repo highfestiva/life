@@ -161,6 +161,7 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 	}
 	else
 	{
+		mLog.Errorf(_T("Could not get load sound %s, thus not possible to create sound."), pFileName.c_str());
 		deb_assert(false);
 		delete (lSample);
 		lSample = 0;
@@ -225,6 +226,7 @@ SoundManager::SoundInstanceID SoundManagerOpenAL::CreateSoundInstance(SoundID pS
 	Sample* lSample = GetSample(pSoundID);
 	if (!lSample)
 	{
+		mLog.Errorf(_T("Could not get sound sample %u, thus not possible to create sound instance."), pSoundID);
 		return (INVALID_SOUNDINSTANCEID);
 	}
 
@@ -248,6 +250,7 @@ void SoundManagerOpenAL::DeleteSoundInstance(SoundInstanceID pSoundIID)
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
+		deb_assert(false);
 		return;
 	}
 
@@ -525,6 +528,7 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 	if (mSid == (ALuint)-1)
 	{
 		deb_assert(false);
+		mLog.AError("Could not generate OpenAL source, thus not possible to create sound instance.");
 		return false;
 	}
 

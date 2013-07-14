@@ -167,7 +167,7 @@ void HeliForceManager::LoadSettings()
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 1);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
 
@@ -1375,6 +1375,7 @@ void HeliForceManager::Shoot(Cure::ContextObject*, int)
 
 void HeliForceManager::OnFireButton(UiTbc::Button*)
 {
+	GetConsoleManager()->ExecuteCommand(_T("list-active-resources"));
 }
 
 
@@ -1417,6 +1418,8 @@ void HeliForceManager::ScriptPhysicsTick()
 			lResourceTypes.push_back(_T("Physics"));
 			lResourceTypes.push_back(_T("PhysicsShared"));
 			lResourceTypes.push_back(_T("RamImg"));
+			lResourceTypes.push_back(_T("Sound3D"));
+			lResourceTypes.push_back(_T("Sound2D"));
 			GetResourceManager()->ForceFreeCache(lResourceTypes);
 			GetResourceManager()->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
 		}

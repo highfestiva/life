@@ -37,6 +37,7 @@ namespace Cure
 class Resource;
 class ResourceManager;
 class TerrainFunctionManager;
+typedef std::pair<str, str> ResourceInfo;
 
 
 
@@ -178,6 +179,8 @@ public:
 	virtual void FreeDiversified(UserResource*);
 	UserResource* GetFirstUserResource() const;
 
+	virtual void PatchInfo(ResourceInfo& pInfo) const;
+
 private:
 	struct UserResourceCallbackInfo
 	{
@@ -253,17 +256,19 @@ template<class RamData, class DiversifiedData>
 class DiversifiedResource: public RamResource<RamData>
 {
 public:
+	typedef std::hash_map<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
+
 	DiversifiedResource(ResourceManager* pManager, const str& pName);
 	virtual ~DiversifiedResource();
 
 	DiversifiedData GetUserData(const UserResource* pUserResource);
 	void FreeDiversified(UserResource* pUserResource);
 
+	const typename UserDataTable& GetDiversifiedData() const;
+
 protected:
 	virtual DiversifiedData CreateDiversifiedData() const = 0;
 	virtual void ReleaseDiversifiedData(DiversifiedData pData) const = 0;
-
-	typedef std::hash_map<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
 
 	Lock mLock;
 	UserDataTable mUserDiversifiedTable;
@@ -374,8 +379,7 @@ typedef UserTypeResource<RamImageResource>		UserRamImageResource;
 class ResourceManager
 {
 public:
-	typedef std::pair<str, str> StringPair;
-	typedef std::list<StringPair> NameTypeList;
+	typedef std::list<ResourceInfo> ResourceInfoList;
 
 	ResourceManager(unsigned pLoaderThreadCount, const str& pPathPrefix);
 	virtual ~ResourceManager();
@@ -406,7 +410,7 @@ public:
 
 	size_t QueryResourceCount() const;
 	size_t QueryCachedResourceCount() const;
-	NameTypeList QueryResourceNames();
+	ResourceInfoList QueryResourceNames();
 
 protected:
 	Resource* GetAddCachedResource(const str& pName, UserResource* pUserResource, bool& pMustLoad);

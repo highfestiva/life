@@ -6,9 +6,15 @@
 
 -Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
 
-Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
+.Helicopter Gravity Force 2D/3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
 Knobbelen
+
+Crazy hoArse - mad, galloping horse using rigging+skinning. Spinning eyes, flailing limbs, strange obstacles. Make it look EXTREMELY organic!
+
+Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
+
+Fleeing animal made up by particles and can shape-shift. Tiger to run across trees, cliffs; horse to run across plains and mountains; bird to span gaps. Run during night. Full moon.
 
 Sandbox: place things in the world, make them go.
  - Completed missions are things like "scored a goal", "killed the bus" or "demolished the house" or "blew up the convoy",
@@ -32,8 +38,6 @@ Create your own game, share with friends. Construct basic physics, add looks and
 Tank vs. Tank, similar to the Cyber Sled remake.
 
 Ball-into-hole using basic building blocks. Programming (x,y,z, rotation)? Placement? Time contraint? Score higher on lower time? Fewer programming lines? How to separate it from the 2D ballgame I played before? Many balls? Flowing through the start point? YEAH!
-
-Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
 Helicopter flying and shooting.
 

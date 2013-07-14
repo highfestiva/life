@@ -335,6 +335,10 @@ UserResource* Resource::GetFirstUserResource() const
 	return (0);
 }
 
+void Resource::PatchInfo(ResourceInfo&) const
+{
+}
+
 void Resource::operator=(const Resource&)
 {
 	deb_assert(false);
@@ -948,15 +952,16 @@ size_t ResourceManager::QueryCachedResourceCount() const
 	return (mCachedResourceTable.GetCount());
 }
 
-ResourceManager::NameTypeList ResourceManager::QueryResourceNames()
+ResourceManager::ResourceInfoList ResourceManager::QueryResourceNames()
 {
-	NameTypeList lNames;
+	ResourceInfoList lNames;
 	ScopeLock lLock(&mThreadLock);
 	ResourceSet::iterator x = mResourceSafeLookup.begin();
 	for (; x != mResourceSafeLookup.end(); ++x)
 	{
 		Resource* lResource = *x;
-		StringPair lPair(lResource->GetName(), lResource->GetType());
+		ResourceInfo lPair(lResource->GetName(), lResource->GetType());
+		lResource->PatchInfo(lPair);
 		lNames.push_back(lPair);
 	}
 	return (lNames);

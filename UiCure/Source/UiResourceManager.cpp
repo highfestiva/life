@@ -547,6 +547,11 @@ SoundResource::~SoundResource()
 	}
 }
 
+void SoundResource::PatchInfo(Cure::ResourceInfo& pInfo) const
+{
+	pInfo.second += strutil::Format(_T(" (%u instances)"), GetDiversifiedData().size());
+}
+
 bool SoundResource::Load()
 {
 	deb_assert(!IsUnique());

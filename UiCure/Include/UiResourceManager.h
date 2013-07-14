@@ -266,6 +266,8 @@ protected:
 		SoundDimension pDimension, LoopMode pLoopMode);
 	virtual ~SoundResource();
 
+	virtual void PatchInfo(Cure::ResourceInfo& pInfo) const;
+
 private:
 	SoundDimension mDimension;
 	LoopMode mLoopMode;

@@ -513,11 +513,11 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		break;
 		case COMMAND_LIST_ACTIVE_RESOURCES:
 		{
-			typedef Cure::ResourceManager::NameTypeList NameTypeList;
-			NameTypeList lNameTypeList = mResourceManager->QueryResourceNames();
+			typedef Cure::ResourceManager::ResourceInfoList ResourceInfoList;
+			ResourceInfoList lNameTypeList = mResourceManager->QueryResourceNames();
 			mLog.Infof(_T("Currently %u active resources:"), lNameTypeList.size());
 			lNameTypeList.sort();
-			for (NameTypeList::iterator x = lNameTypeList.begin(); x != lNameTypeList.end(); ++x)
+			for (ResourceInfoList::iterator x = lNameTypeList.begin(); x != lNameTypeList.end(); ++x)
 			{
 				mLog.Info(_T("  ")+x->first+_T(" [")+x->second+_T("]."));
 			}

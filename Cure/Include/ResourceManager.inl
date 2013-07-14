@@ -259,6 +259,12 @@ void DiversifiedResource<RamData, DiversifiedData>::FreeDiversified(UserResource
 	}
 }
 
+template<class RamData, class DiversifiedData>
+const typename DiversifiedResource<RamData, DiversifiedData>::UserDataTable& DiversifiedResource<RamData, DiversifiedData>::GetDiversifiedData() const
+{
+	return mUserDiversifiedTable;
+}
+
 
 
 // ----------------------------------------------------------------------------
