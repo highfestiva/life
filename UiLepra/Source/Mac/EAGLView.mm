@@ -9,8 +9,11 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import "../../Include/Mac/EAGLView.h"
+#import "../../../Cure/Include/RuntimeVariable.h"
 #import "../../../Lepra/Include/Posix/MacLog.h"
 #import "../../../Lepra/Include/StringUtility.h"
+#import "../../../UiCure/Include/UiRuntimeVariableName.h"
+#import "../../../UiCure/Include/UiCure.h"
 
 static EAGLView* gSharedView;
 
@@ -134,6 +137,8 @@ static EAGLView* gSharedView;
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
 			NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+			glGetError();
+			CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
 		}
 	}
 }

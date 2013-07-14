@@ -264,7 +264,7 @@ public:
 	DiversifiedData GetUserData(const UserResource* pUserResource);
 	void FreeDiversified(UserResource* pUserResource);
 
-	const typename UserDataTable& GetDiversifiedData() const;
+	const UserDataTable& GetDiversifiedData() const;
 
 protected:
 	virtual DiversifiedData CreateDiversifiedData() const = 0;

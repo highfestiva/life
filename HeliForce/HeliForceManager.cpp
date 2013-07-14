@@ -131,7 +131,8 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mArrowBillboard(0),
 	mArrowBillboardId(0),
 	mArrowTotalPower(0),
-	mArrowAngle(0)
+	mArrowAngle(0),
+	mSlowSystemCounter(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
@@ -148,7 +149,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, -0.1f, 0.2f);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_00"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_05"));
 }
 
 HeliForceManager::~HeliForceManager()
@@ -372,7 +373,7 @@ bool HeliForceManager::Paint()
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
 		DrawImage(mHealthBarImage->GetData(), 500, 19, 256, 32, 0);
 
-		const bool lIsFlying = mFlyTime.IsStarted();
+		/*const bool lIsFlying = mFlyTime.IsStarted();
 		const double lTime = mFlyTime.QuerySplitTime();
 		const bool lIsSloppy = (lIsFlying || !lTime);
 		mUiManager->GetPainter()->SetColor(Color(40, 40, 40, 255), 0);
@@ -383,7 +384,7 @@ bool HeliForceManager::Paint()
 		{
 			mUiManager->GetPainter()->SetColor(Color(210, 40, 40, 255), 0);
 			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 250, 3);
-		}
+		}*/
 
 		if (lAvatar->GetPhysics()->GetEngineCount() >= 3 && mWrongDirectionImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 			mLevel && mLevel->IsLoaded())
@@ -856,6 +857,19 @@ void HeliForceManager::TickUiUpdate()
 		}
 	}
 	mIsHitThisFrame = false;
+
+	if (GetTimeManager()->GetAffordedPhysicsStepTime() > 1.1f/PHYSICS_FPS)
+	{
+		if (++mSlowSystemCounter > 30)
+		{
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+		}
+	}
+	else
+	{
+		mSlowSystemCounter = 0;
+	}
+
 
 	const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (mHitGroundFrameCount <= -1 && mLevel && mLevel->IsLoaded() && lAvatar)

@@ -195,6 +195,7 @@ protected:
 	UiTbc::Renderer::GeometryID mArrowBillboardId;
 	float mArrowTotalPower;
 	float mArrowAngle;
+	int mSlowSystemCounter;
 
 	LOG_CLASS_DECLARE();
 };

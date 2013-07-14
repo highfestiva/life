@@ -106,6 +106,8 @@ OpenGLRenderer::~OpenGLRenderer()
 
 void OpenGLRenderer::Clear(unsigned pClearFlags)
 {
+	OGL_ASSERT();
+
 	mGLClearMask = 0;
 
 	if (CheckFlag(pClearFlags, CLEAR_COLORBUFFER))
