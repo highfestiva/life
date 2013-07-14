@@ -77,6 +77,8 @@
 		B15F796713FC5A0500E01A90 /* UiResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F795D13FC5A0500E01A90 /* UiResourceManager.cpp */; };
 		B15F796813FC5A0500E01A90 /* UiTerrainManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F795E13FC5A0500E01A90 /* UiTerrainManager.cpp */; };
 		B15F798113FC5E1500E01A90 /* UiGameUiManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */; };
+		B16C558A1788404A0081DE46 /* AutoPathDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16C55881788404A0081DE46 /* AutoPathDriver.cpp */; };
+		B16C558B1788404A0081DE46 /* BaseMachine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16C55891788404A0081DE46 /* BaseMachine.cpp */; };
 		B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16F032717808366000C31E0 /* UiBurnEmitter.cpp */; };
 		B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1942D2114E08E86002F37E1 /* StoreKit.framework */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
@@ -613,6 +615,8 @@
 		B15F795D13FC5A0500E01A90 /* UiResourceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiResourceManager.cpp; path = ../../UiCure/Source/UiResourceManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F795E13FC5A0500E01A90 /* UiTerrainManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiTerrainManager.cpp; path = ../../UiCure/Source/UiTerrainManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = UiGameUiManager.mm; path = ../../UiCure/Source/UiGameUiManager.mm; sourceTree = SOURCE_ROOT; };
+		B16C55881788404A0081DE46 /* AutoPathDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AutoPathDriver.cpp; sourceTree = "<group>"; };
+		B16C55891788404A0081DE46 /* BaseMachine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseMachine.cpp; sourceTree = "<group>"; };
 		B16F032717808366000C31E0 /* UiBurnEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiBurnEmitter.cpp; path = ../../UiCure/Source/UiBurnEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1942D2114E08E86002F37E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
@@ -1566,6 +1570,8 @@
 		B19A146913A122DE0051A61C /* HeliForce */ = {
 			isa = PBXGroup;
 			children = (
+				B16C55881788404A0081DE46 /* AutoPathDriver.cpp */,
+				B16C55891788404A0081DE46 /* BaseMachine.cpp */,
 				B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */,
 				B1A8301B177A42BF0078D5E8 /* Automan.cpp */,
 				B1A8301C177A42BF0078D5E8 /* Eater.cpp */,
@@ -3062,6 +3068,8 @@
 				B1A83020177A42E40078D5E8 /* Health.cpp in Sources */,
 				B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */,
 				B1B185341784BCC200853D12 /* AirBalloonPilot.cpp in Sources */,
+				B16C558A1788404A0081DE46 /* AutoPathDriver.cpp in Sources */,
+				B16C558B1788404A0081DE46 /* BaseMachine.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

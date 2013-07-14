@@ -364,10 +364,10 @@ bool HeliForceManager::Paint()
 		mUiManager->GetPainter()->SetColor(Color(r, g, 0, 255), 0);
 		const float lRemaining = Math::Clamp(lHealth*203, 0.0f, 203.0f);
 		std::vector<Vector2DF> lCoords;
-		lCoords.push_back(Vector2DF(398, 7));
-		lCoords.push_back(Vector2DF(398, 30));
-		lCoords.push_back(Vector2DF(398+lRemaining, 30));
-		lCoords.push_back(Vector2DF(398+lRemaining, 7));
+		lCoords.push_back(Vector2DF(397, 8));
+		lCoords.push_back(Vector2DF(397, 31));
+		lCoords.push_back(Vector2DF(397+lRemaining, 31));
+		lCoords.push_back(Vector2DF(397+lRemaining, 7));
 		lCoords.push_back(lCoords[0]);
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
 		DrawImage(mHealthBarImage->GetData(), 500, 19, 256, 32, 0);
@@ -411,9 +411,7 @@ bool HeliForceManager::Paint()
 					const Vector3DF lGoal3d = mLastLandingTriggerPosition;
 					const Vector2DF lGoal(lGoal3d.x, lGoal3d.z);
 					const float a = (lGoal-lPos).GetAngle() - PIF/2;
-					const float lTouchSideScale = 1.28f;	// Inches.
-					const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-					const float lWantedSize = mUiManager->GetCanvas()->GetWidth() * lTouchScale * 2;
+					const float lWantedSize = mUiManager->GetCanvas()->GetWidth() * 0.1f;
 					const float lSize = lWantedSize;
 					/*const float lSize = (float)mWrongDirectionImage->GetRamData()->GetWidth();
 					while (lWantedSize >= lSize*2) lSize *= 2;

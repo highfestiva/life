@@ -258,8 +258,8 @@ public:
 	typedef UiLepra::SoundManager::LoopMode LoopMode;
 
 	bool Load();
-	UserData CreateDiversifiedData() const;
-	void ReleaseDiversifiedData(UserData pData) const;
+	virtual UserData CreateDiversifiedData() const;
+	virtual void ReleaseDiversifiedData(UserData pData) const;
 
 protected:
 	SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,

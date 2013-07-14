@@ -33,12 +33,15 @@ FontManager::FontId FontManager::QueryAddFont(const str& pFontName, double pSize
 		if (lFont->mName == pFontName && Math::IsEpsEqual(lFont->mSize, pSize, 0.1) && lFont->mFlags == pFlags)
 		{
 			SetActiveFont(lFont->mFontId);
-			return (lFont->mFontId);
+			return lFont->mFontId;
 		}
 	}
 	const FontId lFontId = AddFont(pFontName, pSize, pFlags, pCharSet);
-	SetActiveFont(lFontId);
-	return (lFontId);
+	if (lFontId)
+	{
+		SetActiveFont(lFontId);
+	}
+	return lFontId;
 }
 
 void FontManager::SetActiveFont(FontId pFontId)

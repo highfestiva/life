@@ -77,7 +77,7 @@ MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSiz
 		}
 	}
 
-	return ((FontId)lId);
+	return lId;
 }
 
 bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect)
