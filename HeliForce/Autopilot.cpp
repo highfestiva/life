@@ -5,6 +5,7 @@
 
 
 #include "Autopilot.h"
+#include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "HeliForceManager.h"
@@ -26,6 +27,7 @@ Autopilot::Autopilot(HeliForceManager* pGame):
 	mClosestPathDistance(5.0f),
 	mPath(0)
 {
+	mGame->GetContext()->AddLocalObject(this);
 }
 
 Autopilot::~Autopilot()

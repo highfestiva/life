@@ -92,11 +92,7 @@ int Component::CreateLayer(Layout* pLayout)
 		pLayout->SetOwner(this);
 	}
 
-	if (mLayout != 0)
-	{
-		delete[] mLayout;
-	}
-
+	delete[] mLayout;
 	mLayout = lLayout;
 	++mLayerCount;
 

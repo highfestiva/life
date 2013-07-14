@@ -408,7 +408,6 @@ private:
 	UiTbc::TriangleBasedGeometry* mTorus;
 	UiTbc::TriangleBasedGeometry* mCone;
 
-	TBC::BoneHierarchy* mTransformBones;
 	TBC::BoneAnimation* mAnimation;
 	TBC::BoneAnimator* mAnimator;
 	UiTbc::DefaultStaticGeometryHandler* mTorusHandler;
@@ -2013,9 +2012,9 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	mModel.SetTransformation(lTransf);
 
 	// Setup a transform animation bone.
-	mTransformBones = new TBC::BoneHierarchy;
-	mTransformBones->SetBoneCount(1);
-	mTransformBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
+	lTransformBones->SetBoneCount(1);
+	lTransformBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 
 	mAnimation = new TBC::BoneAnimation;
 	mAnimation->SetKeyframeCount(8, true);
@@ -2054,7 +2053,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
 				       Lepra::Vector3DF(1, -1, -1)));
 
-	mAnimator = new TBC::BoneAnimator(mTransformBones);
+	mAnimator = new TBC::BoneAnimator(lTransformBones);
 	mAnimator->AddAnimation(_T("TransformAnimation"), mAnimation);
 
 	mModel.AddAnimator(_T("TransformAnimator"), mAnimator);
@@ -2107,7 +2106,6 @@ BumpMapSceneTest::~BumpMapSceneTest()
 	delete mTorusHandler;
 	delete mAnimator;
 	delete mAnimation;
-	delete mTransformBones;
 }
 
 void BumpMapSceneTest::InitTerrain()

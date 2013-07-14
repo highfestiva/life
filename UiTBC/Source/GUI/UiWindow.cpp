@@ -165,6 +165,10 @@ Window::~Window()
 	delete mTLBorder;
 	delete mTBorder;
 	delete mLBorder;
+	delete mClientRect;
+
+	Parent::RemoveChild(mCenterComponent, 0);
+	delete mCenterComponent;
 }
 
 void Window::Init()

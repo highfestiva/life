@@ -66,6 +66,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	pRenderer->AddGeometry(lBillboardSpark, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
 	UiTbc::Texture* lTexture = new UiTbc::Texture(lImage, Canvas::RESIZE_FAST, -1);
 	UiTbc::Renderer::TextureID lTextureId = pRenderer->AddTexture(lTexture);
+	delete lTexture;
 	pRenderer->TryAddGeometryTexture(lBillboardGasId, lTextureId);
 	pRenderer->TryAddGeometryTexture(lBillboardGlowId, lTextureId);
 

@@ -11,6 +11,10 @@
 
 
 
+namespace UiCure
+{
+class RendererImageResource;
+}
 namespace Life
 {
 class GameClientSlaveManager;
@@ -58,6 +62,7 @@ private:
 
 	bool mIsPlayerCountViewActive;
 	int mPerformanceAdjustmentTicks;
+	UiCure::RendererImageResource* mEnvMap;
 
 	LOG_CLASS_DECLARE();
 };

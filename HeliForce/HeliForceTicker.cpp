@@ -27,7 +27,8 @@ namespace HeliForce
 HeliForceTicker::HeliForceTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mIsPlayerCountViewActive(false),
-	mPerformanceAdjustmentTicks(0)
+	mPerformanceAdjustmentTicks(0),
+	mEnvMap(0)
 {
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
@@ -36,6 +37,8 @@ HeliForceTicker::HeliForceTicker(UiCure::GameUiManager* pUiManager, Cure::Resour
 HeliForceTicker::~HeliForceTicker()
 {
 	CloseMainMenu();
+	delete mEnvMap;
+	mEnvMap = 0;
 }
 
 
@@ -83,12 +86,12 @@ bool HeliForceTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
-		UiCure::RendererImageResource* lEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), true);
-		if (lEnvMap->Load())
+		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), true);
+		if (mEnvMap->Load())
 		{
-			if (lEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
+			if (mEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
 			{
-				UiTbc::Renderer::TextureID lTextureId = lEnvMap->GetUserData(0);
+				UiTbc::Renderer::TextureID lTextureId = mEnvMap->GetUserData(0);
 				mUiManager->GetRenderer()->SetEnvironmentMap(lTextureId);
 			}
 		}

@@ -156,8 +156,25 @@ HeliForceManager::~HeliForceManager()
 {
 	Close();
 
+	//delete mAutopilot;	NOTE: owned by context manager.
+	mAutopilot = 0;
 	delete mStick;
 	mStick = 0;
+	delete mCollisionSoundManager;
+	mCollisionSoundManager = 0;
+	delete mHemisphereUvTransform;
+	mHemisphereUvTransform = 0;
+	delete mStickImage;
+	mStickImage = 0;
+	delete mWrongDirectionImage;
+	mWrongDirectionImage = 0;
+	delete mHealthBarImage;
+	mHealthBarImage = 0;
+	delete mArrow;
+	mArrow = 0;
+	delete mArrowBillboard;
+	mArrowBillboard = 0;
+
 }
 
 void HeliForceManager::LoadSettings()

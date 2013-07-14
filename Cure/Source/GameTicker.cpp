@@ -61,6 +61,8 @@ GameTicker::~GameTicker()
 	DeletePhysicsThread();
 	delete (mPhysicsManager);
 	mPhysicsManager = 0;
+	delete mTimeManager;
+	mTimeManager = 0;
 }
 
 const TimeManager* GameTicker::GetTimeManager() const

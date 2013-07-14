@@ -41,6 +41,12 @@ Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, G
 Machine::~Machine()
 {
 	DeleteEngineSounds();
+	delete mJetEngineEmitter;
+	mJetEngineEmitter = 0;
+	delete mExhaustEmitter;
+	mExhaustEmitter = 0;
+	delete mBurnEmitter;
+	mBurnEmitter = 0;
 }
 
 void Machine::SetJetEngineEmitter(JetEngineEmitter* pEmitter)

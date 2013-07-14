@@ -33,6 +33,14 @@ ParticleRenderer::ParticleRenderer(Renderer* pRenderer, int pMaxLightCount):
 
 ParticleRenderer::~ParticleRenderer()
 {
+	delete mBillboardGas;
+	mBillboardGas = 0;
+	delete mBillboardShrapnel;
+	mBillboardShrapnel = 0;
+	delete mBillboardSpark;
+	mBillboardSpark = 0;
+	delete mBillboardGlow;
+	mBillboardGlow = 0;
 }
 
 void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark, BillboardGeometry* pGlow)

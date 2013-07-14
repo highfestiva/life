@@ -34,10 +34,8 @@ GridLayout::GridLayout(int pRows, int pCols) :
 
 GridLayout::~GridLayout()
 {
-	if (mComponent != 0)
-	{
-		delete[] mComponent;
-	}
+	delete[] mComponent;
+	mComponent = 0;
 }
 
 Component** GridLayout::AllocComponentGrid(int pRows, int pCols)
@@ -575,11 +573,7 @@ void GridLayout::InsertRow(int pRow)
 		}
 	}
 
-	if (mComponent != 0)
-	{
-		delete[] mComponent;
-	}
-
+	delete[] mComponent;
 	mComponent = lComponent;
 	mNumRows++;
 }
@@ -616,11 +610,7 @@ void GridLayout::InsertColumn(int pColumn)
 		}
 	}
 
-	if (mComponent != 0)
-	{
-		delete[] mComponent;
-	}
-
+	delete[] mComponent;
 	mComponent = lComponent;
 	mNumCols++;
 }
@@ -655,11 +645,7 @@ void GridLayout::DeleteRow(int pRow)
 			}
 		}
 
-		if (mComponent != 0)
-		{
-			delete[] mComponent;
-		}
-
+		delete[] mComponent;
 		mComponent = lComponent;
 		mNumRows--;
 	}
@@ -691,11 +677,7 @@ void GridLayout::DeleteColumn(int pColumn)
 			}
 		}
 
-		if (mComponent != 0)
-		{
-			delete[] mComponent;
-		}
-
+		delete[] mComponent;
 		mComponent = lComponent;
 		mNumCols--;
 	}

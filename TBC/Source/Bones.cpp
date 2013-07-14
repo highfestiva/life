@@ -665,6 +665,8 @@ BoneAnimator::BoneAnimator(BoneHierarchy* pBones) :
 
 BoneAnimator::~BoneAnimator()
 {
+	delete mBones;
+	mBones = 0;
 }
 
 
