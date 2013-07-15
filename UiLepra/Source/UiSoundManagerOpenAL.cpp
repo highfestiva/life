@@ -6,6 +6,7 @@
 
 #include "../Include/UiSoundManagerOpenAL.h"
 #include "../../Lepra/Include/LepraAssert.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include "../../ThirdParty/freealut-1.1.0/include/AL/alut.h"
 #include "../Include/UiChibiXmAlStream.h"
 #include "../Include/UiOggAlStream.h"
@@ -16,6 +17,12 @@
 extern "C" ALC_API void ALC_APIENTRY alc_init(void);	// Not intended for this type of use, but LGPL OpenAL can't load dsound.dll from DllMain.
 extern "C" ALC_API void ALC_APIENTRY alc_deinit(void);	// Not intended for this type of use, but LGPL OpenAL can't load dsound.dll from DllMain.
 #endif // Windows
+
+#ifdef LEPRA_DEBUG
+#define OAL_ASSERT()	{ ALenum lAlError = alGetError(); deb_assert(lAlError == AL_NO_ERROR); }
+#else // !Debug
+#define OAL_ASSERT()
+#endif // Debug / !Debug
 
 
 
@@ -59,10 +66,14 @@ SoundManagerOpenAL::SoundManagerOpenAL(int pMixRate):
 	::alListenerfv(AL_POSITION, lPos);
 	::alListenerfv(AL_VELOCITY, lVel);
 	::alListenerfv(AL_ORIENTATION, lDirection);
+
+	OAL_ASSERT();
 }
 
 SoundManagerOpenAL::~SoundManagerOpenAL()
 {
+	OAL_ASSERT();
+
 	SetFileOpener(0);
 
 	StopAll();
@@ -76,6 +87,8 @@ SoundManagerOpenAL::~SoundManagerOpenAL()
 	{
 		delete (*y);
 	}
+
+	OAL_ASSERT();
 
 	::alcMakeContextCurrent(0);
 	if (mContext)
@@ -171,6 +184,8 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 
 SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int)
 {
+	OAL_ASSERT();
+
 	SoundStream* lSoundStream;
 	if (strutil::EndsWith(pFileName, _T(".xm")))
 	{
@@ -185,6 +200,9 @@ SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMod
 		delete lSoundStream;
 		lSoundStream = 0;
 	}
+
+	OAL_ASSERT();
+
 	return lSoundStream;;
 }
 
@@ -216,6 +234,7 @@ double SoundManagerOpenAL::GetStreamTime(SoundID pSoundID)
 		Source* lSource = *lSample->mSourceList.begin();
 		::alGetSourcef(lSource->mSid, AL_SEC_OFFSET, &lSourceTime);
 	}
+	OAL_ASSERT();
 	return (lSourceTime);
 
 }
@@ -270,6 +289,7 @@ bool SoundManagerOpenAL::Play(SoundInstanceID pSoundIID, float pVolume, float pP
 	::alSourcef(lSource->mSid, AL_GAIN, pVolume * mMasterVolume);
 	::alSourcef(lSource->mSid, AL_PITCH, pPitch);
 	::alSourcePlay(lSource->mSid);
+	OAL_ASSERT();
 	return (true);
 }
 
@@ -281,6 +301,7 @@ void SoundManagerOpenAL::StopAll()
 	{
 		::alSourceStop((*x)->mSid);
 	}
+	OAL_ASSERT();
 }
 
 void SoundManagerOpenAL::Stop(SoundInstanceID pSoundIID)
@@ -292,6 +313,7 @@ void SoundManagerOpenAL::Stop(SoundInstanceID pSoundIID)
 		return;
 	}
 	::alSourceStop(lSource->mSid);
+	OAL_ASSERT();
 }
 
 void SoundManagerOpenAL::TogglePause(SoundInstanceID pSoundIID)
@@ -312,6 +334,7 @@ void SoundManagerOpenAL::TogglePause(SoundInstanceID pSoundIID)
 	{
 		::alSourcePause(lSource->mSid);
 	}
+	OAL_ASSERT();
 }
 
 bool SoundManagerOpenAL::IsPlaying(SoundInstanceID pSoundIID)
@@ -324,6 +347,7 @@ bool SoundManagerOpenAL::IsPlaying(SoundInstanceID pSoundIID)
 	}
 	ALint lState = AL_PAUSED;
 	alGetSourcei(lSource->mSid, AL_SOURCE_STATE, &lState);
+	OAL_ASSERT();
 	return (lState == AL_PLAYING);
 }
 
@@ -352,6 +376,7 @@ void SoundManagerOpenAL::SetVolume(SoundInstanceID pSoundIID, float pVolume)
 		return;
 	}
 	::alSourcef(lSource->mSid, AL_GAIN, pVolume * mMasterVolume);
+	OAL_ASSERT();
 }
 
 void SoundManagerOpenAL::SetPitch(SoundInstanceID pSoundIID, float pPitch)
@@ -363,6 +388,7 @@ void SoundManagerOpenAL::SetPitch(SoundInstanceID pSoundIID, float pPitch)
 		return;
 	}
 	::alSourcef(lSource->mSid, AL_PITCH, pPitch);
+	OAL_ASSERT();
 }
 
 void SoundManagerOpenAL::SetFrequency(SoundInstanceID, int)
@@ -377,6 +403,7 @@ int SoundManagerOpenAL::GetFrequency(SoundInstanceID)
 void SoundManagerOpenAL::SetDopplerFactor(float pFactor)
 {
 	::alDopplerFactor(pFactor);
+	OAL_ASSERT();
 }
 
 void SoundManagerOpenAL::SetRollOffFactor(float pFactor)
@@ -388,6 +415,7 @@ void SoundManagerOpenAL::SetRollOffFactor(float pFactor)
 	{
 		::alSourcef((*x)->mSid, AL_ROLLOFF_FACTOR, pFactor);
 	}
+	OAL_ASSERT();
 }
 
 void SoundManagerOpenAL::SetChorus(SoundInstanceID, int, float, float, float, float, float)
@@ -439,6 +467,8 @@ void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vec
 	lVel[2] = pVel.z;
 	::alSourcefv(lSource->mSid, AL_POSITION, lPos);
 	::alSourcefv(lSource->mSid, AL_VELOCITY, lVel);
+
+	OAL_ASSERT();
 }
 
 
@@ -485,12 +515,14 @@ SoundManagerOpenAL::Sample::~Sample()
 		::alDeleteBuffers(1, &mBuffer);
 		mBuffer = AL_NONE;
 	}
+	OAL_ASSERT();
 }
 
 bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 {
 	deb_assert(mBuffer == AL_NONE);
 	mBuffer = ::alutCreateBufferFromFile(astrutil::Encode(pFileName).c_str());
+	OAL_ASSERT();
 	return (mBuffer != AL_NONE);
 }
 
@@ -498,6 +530,7 @@ bool SoundManagerOpenAL::Sample::Load(const void* pData, size_t pDataSize)
 {
 	deb_assert(mBuffer == AL_NONE);
 	mBuffer = ::alutCreateBufferFromFileImage(pData, pDataSize);
+	OAL_ASSERT();
 	return (mBuffer != AL_NONE);
 }
 
@@ -519,12 +552,17 @@ SoundManagerOpenAL::Source::~Source()
 	if (mSid != (ALuint)-1)
 	{
 		::alDeleteSources(1, &mSid);
+		LEPRA_RELEASE_RESOURCE(alSources);
+		mSid = (ALuint)-1;
 	}
+	OAL_ASSERT();
 }
 
 bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor)
 {
+	deb_assert(mSid == (ALuint)-1);
 	::alGenSources(1, &mSid);
+	LEPRA_ACQUIRE_RESOURCE(alSources);
 	if (mSid == (ALuint)-1)
 	{
 		deb_assert(false);
@@ -549,6 +587,7 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 		::alSourcef(mSid, AL_ROLLOFF_FACTOR, pRollOffFactor);
 	}
 	::alSourcei(mSid, AL_BUFFER, mSample->mBuffer);
+	OAL_ASSERT();
 	return true;
 }
 

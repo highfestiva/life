@@ -11,6 +11,7 @@
 #include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Number.h"
+#include "../Lepra/Include/ResourceTracker.h"
 #include "../Lepra/Include/SystemManager.h"
 
 
@@ -520,6 +521,15 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			for (ResourceInfoList::iterator x = lNameTypeList.begin(); x != lNameTypeList.end(); ++x)
 			{
 				mLog.Info(_T("  ")+x->first+_T(" [")+x->second+_T("]."));
+			}
+
+			ResourceTracker::CounterMap lResourceMap = gResourceTracker.GetAll();
+			mLog.Infof(_T("Currently %u resource trackers:"), lResourceMap.size());
+			ResourceTracker::CounterMap::iterator y = lResourceMap.begin();
+			for (; y != lResourceMap.end(); ++y)
+			{
+				Cure::ResourceInfo lPair(y->first, strutil::IntToString(y->second, 10));
+				mLog.Info(strutil::Format(_T("  %s acquired %i times"), y->first.c_str(), y->second));
 			}
 		}
 		break;

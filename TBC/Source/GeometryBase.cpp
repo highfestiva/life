@@ -605,21 +605,15 @@ void GeometryBase::ClearAll()
 
 void GeometryBase::ClearVertexNormalData()
 {
-	if (mVertexNormalData != 0)
-	{
-		delete[] mVertexNormalData;
-		mVertexNormalData = 0;
-	}
+	delete[] mVertexNormalData;
+	mVertexNormalData = 0;
 	ClearFlag(VERTEX_NORMALS_VALID);
 }
 
 void GeometryBase::ClearSurfaceNormalData()
 {
-	if (mSurfaceNormalData != 0)
-	{
-		delete[] mSurfaceNormalData;
-		mSurfaceNormalData = 0;
-	}
+	delete[] mSurfaceNormalData;
+	mSurfaceNormalData = 0;
 	ClearFlag(SURFACE_NORMALS_VALID);
 	mSurfaceNormalCount = 0;
 }
@@ -627,28 +621,17 @@ void GeometryBase::ClearSurfaceNormalData()
 
 void GeometryBase::ClearEdgeData()
 {
-	if (mEdgeData != 0)
-	{
-		delete[] mEdgeData;
-		mEdgeData = 0;
-	}
-
+	delete[] mEdgeData;
+	mEdgeData = 0;
 	mEdgeCount = 0;
 }
 
 void GeometryBase::ClearTangentAndBitangentData()
 {
-	if (mTangentData != 0)
-	{
-		delete[] mTangentData;
-		mTangentData = 0;
-	}
-
-	if (mBitangentData != 0)
-	{
-		delete[] mBitangentData;
-		mBitangentData = 0;
-	}
+	delete[] mTangentData;
+	mTangentData = 0;
+	delete[] mBitangentData;
+	mBitangentData = 0;
 
 	ClearFlag(TANGENTS_VALID);
 }

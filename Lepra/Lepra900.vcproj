@@ -785,6 +785,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\ResourceTracker.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\RotationMatrix.h"
 				>
 			</File>
@@ -1193,6 +1197,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\Reader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\ResourceTracker.cpp"
 				>
 			</File>
 			<File

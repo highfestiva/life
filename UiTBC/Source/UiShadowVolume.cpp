@@ -6,6 +6,7 @@
 
 #include "../Include/UiShadowVolume.h"
 #include "../../Lepra/Include/LepraAssert.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include "../../Lepra/Include/Thread.h"
 
 
@@ -25,6 +26,8 @@ ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
 	mMaxTriangleCount(0),
 	mParentGeometry(pParentGeometry)
 {
+	LEPRA_ACQUIRE_RESOURCE(ShadowVolume);
+
 	LEPRA_DEBUG_CODE(mName = _T("Shdw->") + pParentGeometry->mName);
 
 	if (mParentGeometry->GetEdgeData() == 0)
@@ -40,14 +43,14 @@ ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
 
 ShadowVolume::~ShadowVolume()
 {
-	if (mVertexData != 0)
-		delete[] mVertexData;
+	delete[] mVertexData;
+	mVertexData = 0;
+	delete[] mIndexData;
+	mIndexData = 0;
+	delete[] mTriangleOrientation;
+	mTriangleOrientation = 0;
 
-	if (mIndexData != 0)
-		delete[] mIndexData;
-
-	if (mTriangleOrientation != 0)
-		delete[] mTriangleOrientation;
+	LEPRA_RELEASE_RESOURCE(ShadowVolume);
 }
 
 TBC::GeometryBase* ShadowVolume::GetParentGeometry()

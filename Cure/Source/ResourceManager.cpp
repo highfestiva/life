@@ -11,6 +11,7 @@
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/MemFile.h"
 #include "../../Lepra/Include/Path.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../Lepra/Include/ZipArchive.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
@@ -964,7 +965,7 @@ ResourceManager::ResourceInfoList ResourceManager::QueryResourceNames()
 		lResource->PatchInfo(lPair);
 		lNames.push_back(lPair);
 	}
-	return (lNames);
+	return lNames;
 }
 
 
