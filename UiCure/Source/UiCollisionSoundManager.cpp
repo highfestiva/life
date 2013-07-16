@@ -94,8 +94,9 @@ void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
 		}
 		else
 		{
-			mSoundMap.erase(x++);
+			mSoundMap.erase(x);
 			delete lSoundInfo;
+			break;	// Map disallows further interation after erase, update next loop.
 		}
 	}
 }
@@ -185,6 +186,11 @@ void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKe
 		return;
 	}
 
+	if (GetPlayingSound(pGeometryKey))
+	{
+		mLog.Warningf(_T("Already playing sound %s, can't play it again!"), pSoundName.c_str());
+		return;
+	}
 	SoundInfo* lSoundInfo = new SoundInfo(lResource);
 	lSoundInfo->mPosition = pPosition;
 	lSoundInfo->mBaseImpact = pImpact;
@@ -196,6 +202,7 @@ void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKe
 
 void CollisionSoundManager::OnSoundLoaded(UiCure::UserSound3dResource* pSoundResource)
 {
+	ScopeLock lLock(&mLock);
 	SoundInfo* lSoundInfo = ((CollisionSoundResource*)pSoundResource)->mSoundInfo;
 	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -239,7 +246,10 @@ void CollisionSoundManager::StopSound(const TBC::ChunkyBoneGeometry* pGeometryKe
 	}
 	SoundInfo* lSoundInfo = x->second;
 	mSoundMap.erase(x);
-	mUiManager->GetSoundManager()->Stop(lSoundInfo->mSound->GetData());
+	if (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mUiManager->GetSoundManager()->Stop(lSoundInfo->mSound->GetData());
+	}
 	delete lSoundInfo;
 }
 

@@ -30,9 +30,11 @@ class SoundManagerOpenAL: public SoundManager
 public:
 	SoundManagerOpenAL(int pMixRate);
 	virtual ~SoundManagerOpenAL();
-
+	virtual bool Open();
+	virtual void Close();
 	virtual void Suspend();
 	virtual void Resume();
+	virtual bool IsIrreparableErrorState() const;
 
 	virtual float GetMasterVolume() const;
 	virtual void SetMasterVolume(float pVolume);
@@ -154,6 +156,8 @@ private:
 	ALCcontext* mContext;
 	float mRollOffFactor;
 	float mMasterVolume;
+	int mMixRate;
+	bool mIsIrreparableErrorState;
 
 	SampleSet mSampleSet;
 	SourceSet mSourceSet;
