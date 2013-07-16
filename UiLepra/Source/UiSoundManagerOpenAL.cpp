@@ -18,9 +18,13 @@ extern "C" ALC_API void ALC_APIENTRY alc_init(void);	// Not intended for this ty
 extern "C" ALC_API void ALC_APIENTRY alc_deinit(void);	// Not intended for this type of use, but LGPL OpenAL can't load dsound.dll from DllMain.
 #endif // Windows
 
+#ifdef LEPRA_DEBUG
 #define OAL_ASSERT()	{ ALenum lAlError = alGetError(); assert(lAlError == AL_NO_ERROR); }
 #define OALUT_ASSERT()	{ ALenum lAlutError = alutGetError(); assert(lAlutError == ALUT_ERROR_NO_ERROR); }
-
+#else // !Debug
+#define OAL_ASSERT()	alGetError()
+#define OALUT_ASSERT()	alutGetError()
+#endif // Debug / !debug
 
 
 namespace UiLepra
@@ -91,6 +95,7 @@ bool SoundManagerOpenAL::Open()
 	mIsIrreparableErrorState = false;
 
 	OAL_ASSERT();
+
 	return true;
 }
 
@@ -114,8 +119,19 @@ void SoundManagerOpenAL::Close()
 
 	::alutExit();
 	OALUT_ASSERT();
-	mContext = 0;
-	mDevice = 0;
+
+	::alcMakeContextCurrent(0);
+	if (mContext)
+	{
+		::alcDestroyContext(mContext);
+		mContext = 0;
+	}
+	if (mDevice)
+	{
+		::alcCloseDevice(mDevice);
+		mDevice = 0;
+	}
+
 #ifdef LEPRA_WINDOWS
 	alc_deinit();
 #endif // Windows
