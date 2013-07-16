@@ -42,8 +42,8 @@ extern ResourceTracker gResourceTracker;
 
 
 #define LEPRA_ADD_RESOURCE(name, val)	\
-	static HashedString __lTrackName(_T(#name));	\
-	gResourceTracker.Add(__lTrackName, val);
+	static HashedString __lTrackName##name(_T(#name));	\
+	gResourceTracker.Add(__lTrackName##name, val);
 #define LEPRA_DO_ACQUIRE_RESOURCE(name)	LEPRA_ADD_RESOURCE(name, +1)
 #define LEPRA_DO_RELEASE_RESOURCE(name)	LEPRA_ADD_RESOURCE(name, -1)
 

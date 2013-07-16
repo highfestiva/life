@@ -46,7 +46,10 @@ Application::Application(const str& pBaseName, const strutil::strvec& pArgumentL
 Application::~Application()
 {
 	mLog.RawPrint(LEVEL_HEADLINE, _T("The end. Baba!\n"));
-	mFileLogger->WriteLog(_T("---\n\n"), LEVEL_INFO);
+	if (mFileLogger)
+	{
+		mFileLogger->WriteLog(_T("---\n\n"), LEVEL_INFO);
+	}
 
 	// Kill all loggers, hopefully we don't need to log anything else.
 	delete (mConsoleLogger);
@@ -81,11 +84,13 @@ void Application::Init()
 	mDebugLogger = new DebuggerLogListener();
 #endif // !Apple
 #endif // Showing debug information.
+#ifdef LEPRA_DEBUG
 	mFileLogger = new FileLogListener(GetIoFile(GetTypeName(), _T("log"), false));
 	//mFileLogger->SetLevelThreashold(LEVEL_INFO);
 	mFileLogger->WriteLog(_T("\n---\n"), LEVEL_INFO);
 	//mPerformanceLogger = new FileLogListener(GetIoFile(GetTypeName()+_T("Performance"), _T("log"), false));
 	mMemLogger = new MemFileLogListener(20*1024);
+#endif // Debug
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
 	str lStartMessage = _T("Starting ") + mBaseName + _T(" ") + GetTypeName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");

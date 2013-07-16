@@ -49,6 +49,7 @@ ShadowVolume::~ShadowVolume()
 	mIndexData = 0;
 	delete[] mTriangleOrientation;
 	mTriangleOrientation = 0;
+	LEPRA_ADD_RESOURCE(ShadowVolume_Triangles, -(int)mMaxTriangleCount);
 
 	LEPRA_RELEASE_RESOURCE(ShadowVolume);
 }
@@ -174,6 +175,7 @@ void ShadowVolume::InitTO()
 	{
 		delete[] mTriangleOrientation;
 		mTriangleOrientation = 0;
+		LEPRA_ADD_RESOURCE(ShadowVolume_Triangles, -(int)mMaxTriangleCount);
 		delete[] mIndexData;
 		mIndexData = 0;
 
@@ -183,6 +185,7 @@ void ShadowVolume::InitTO()
 	if (mTriangleOrientation == 0)
 	{
 		mTriangleOrientation = new TriangleOrientation[mMaxTriangleCount];
+		LEPRA_ADD_RESOURCE(ShadowVolume_Triangles, +(int)mMaxTriangleCount);
 	}
 
 	if (mIndexData == 0)

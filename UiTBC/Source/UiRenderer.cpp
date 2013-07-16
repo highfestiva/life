@@ -1435,6 +1435,7 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 					}
 					else
 					{
+						deb_assert(false);
 						lGeometry->mShadowVolume[i] = (GeometryID)0;
 						lGeometry->mLightID[i] = INVALID_LIGHT;
 					}
