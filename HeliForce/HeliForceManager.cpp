@@ -313,8 +313,6 @@ bool HeliForceManager::Render()
 		mHemisphereUvTransform->GetBones()[0].GetRelativeBoneTransformation(0).GetPosition() = lPosition * 0.003f;
 
 		mUiManager->GetRenderer()->RenderRelative(mHemisphere->GetMesh(0), 0);
-		mUiManager->GetRenderer()->SetDepthTestEnabled(true);
-		mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
 	}
 
 	bool lOk = Parent::Render();
@@ -392,7 +390,7 @@ bool HeliForceManager::Paint()
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
 		DrawImage(mHealthBarImage->GetData(), 500, 19, 256, 32, 0);
 
-		/*const bool lIsFlying = mFlyTime.IsStarted();
+		const bool lIsFlying = mFlyTime.IsStarted();
 		const double lTime = mFlyTime.QuerySplitTime();
 		const bool lIsSloppy = (lIsFlying || !lTime);
 		mUiManager->GetPainter()->SetColor(Color(40, 40, 40, 255), 0);
@@ -403,7 +401,7 @@ bool HeliForceManager::Paint()
 		{
 			mUiManager->GetPainter()->SetColor(Color(210, 40, 40, 255), 0);
 			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 250, 3);
-		}*/
+		}
 
 		if (lAvatar->GetPhysics()->GetEngineCount() >= 3 && mWrongDirectionImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 			mLevel && mLevel->IsLoaded())

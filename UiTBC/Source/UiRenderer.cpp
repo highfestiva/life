@@ -1003,6 +1003,7 @@ Renderer::GeometryID Renderer::AddGeometry(TBC::GeometryBase* pGeometry, Materia
 	{
 		TBC::GeometryBase* lParentGeometry = ((TBC::GeometryReference*)pGeometry)->GetParentGeometry();
 		GeometryData* lParentGeometryData = (GeometryData*)lParentGeometry->GetRendererData();
+		lGeometryData->CopyReferenceData(lParentGeometryData);
 		lParentGeometryData->mReferenceSet.insert((GeometryID)lID);
 	}
 	else
