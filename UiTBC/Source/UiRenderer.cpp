@@ -9,6 +9,7 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include "../../TBC/Include/GeometryReference.h"
 #include "../Include/UiDynamicRenderer.h"
 #include "../Include/UiMaterial.h"
@@ -20,7 +21,69 @@ namespace UiTbc
 
 
 
-Renderer::Renderer(Canvas* pScreen) :
+Renderer::TextureAssociation::TextureAssociation(int pNumTextures):
+	mNumTextures(pNumTextures),
+	mTextureID(0),
+	mMaps(0)
+{
+	LEPRA_ACQUIRE_RESOURCE(TextureAssociation);
+
+	mTextureID = new TextureID[mNumTextures];
+	mMaps = new Maps[mNumTextures];
+	for (int i = 0; i < mNumTextures; i++)
+	{
+		mTextureID[i] = INVALID_TEXTURE;
+		mMaps[i].mMapID[Texture::COLOR_MAP]    = 0;
+		mMaps[i].mMapID[Texture::ALPHA_MAP]    = 0;
+		mMaps[i].mMapID[Texture::NORMAL_MAP]   = 0;
+		mMaps[i].mMapID[Texture::SPECULAR_MAP] = 0;
+		mMaps[i].mMapID[Texture::CUBE_MAP] = 0;
+		mMaps[i].mMipMapLevelCount[Texture::COLOR_MAP]    = 0;
+		mMaps[i].mMipMapLevelCount[Texture::ALPHA_MAP]    = 0;
+		mMaps[i].mMipMapLevelCount[Texture::NORMAL_MAP]   = 0;
+		mMaps[i].mMipMapLevelCount[Texture::SPECULAR_MAP] = 0;
+		mMaps[i].mMipMapLevelCount[Texture::CUBE_MAP] = 0;
+	}
+}
+
+Renderer::TextureAssociation::~TextureAssociation()
+{
+	delete[] mMaps;
+	delete[] mTextureID;
+	LEPRA_RELEASE_RESOURCE(TextureAssociation);
+};
+
+
+
+Renderer::GeometryData::GeometryData():
+	mGeometryID(INVALID_GEOMETRY),
+	mGeometry(0),
+	mMaterialType(Renderer::MAT_SINGLE_COLOR_SOLID),
+	mGeometryGroup(0),
+	mTA(0),
+	mShadow(NO_SHADOWS),
+	mLastFrameShadowsUpdated(0)
+{
+	LEPRA_ACQUIRE_RESOURCE(GeometryData);
+	for (int i = 0; i < Renderer::MAX_SHADOW_VOLUMES; i++)
+	{
+		mShadowVolume[i] = INVALID_GEOMETRY;
+		mLightID[i] = INVALID_LIGHT;
+	}
+}
+
+Renderer::GeometryData::~GeometryData()
+{
+	LEPRA_RELEASE_RESOURCE(GeometryData);
+}
+
+void Renderer::GeometryData::CopyReferenceData(GeometryData*)
+{
+}
+
+
+
+Renderer::Renderer(Canvas* pScreen):
 	mCurrentFrame(0),
 	mVisibleTriangleCount(0),
 	mCulledTriangleCount(0),
@@ -940,7 +1003,6 @@ Renderer::GeometryID Renderer::AddGeometry(TBC::GeometryBase* pGeometry, Materia
 	{
 		TBC::GeometryBase* lParentGeometry = ((TBC::GeometryReference*)pGeometry)->GetParentGeometry();
 		GeometryData* lParentGeometryData = (GeometryData*)lParentGeometry->GetRendererData();
-		lGeometryData->CopyReferenceData(lParentGeometryData);
 		lParentGeometryData->mReferenceSet.insert((GeometryID)lID);
 	}
 	else

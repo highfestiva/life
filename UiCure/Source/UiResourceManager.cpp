@@ -549,7 +549,7 @@ SoundResource::~SoundResource()
 
 void SoundResource::PatchInfo(Cure::ResourceInfo& pInfo) const
 {
-	pInfo.second += strutil::Format(_T(" (%u instances)"), GetDiversifiedData().size());
+	pInfo.mType += strutil::Format(_T(" (%u instances)"), GetDiversifiedData().size());
 }
 
 bool SoundResource::Load()

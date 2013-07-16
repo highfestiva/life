@@ -37,7 +37,15 @@ namespace Cure
 class Resource;
 class ResourceManager;
 class TerrainFunctionManager;
-typedef std::pair<str, str> ResourceInfo;
+
+
+
+struct ResourceInfo
+{
+	str mName;
+	str mType;
+	int mReferenceCount;
+};
 
 
 

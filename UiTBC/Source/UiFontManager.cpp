@@ -5,6 +5,7 @@
 
 
 #include "../Include/UiFontManager.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 
 
 
@@ -133,6 +134,8 @@ int FontManager::GetLineHeight() const
 
 bool FontManager::InternalAddFont(Font* pFont)
 {
+	LEPRA_ACQUIRE_RESOURCE(Font);
+
 	const int lId = mFontIdManager.GetFreeId();
 	bool lOk = (lId != 0);
 	if (lOk)

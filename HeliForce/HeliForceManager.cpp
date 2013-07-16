@@ -293,11 +293,13 @@ void HeliForceManager::SetFade(float pFadeAmount)
 
 bool HeliForceManager::Render()
 {
-	if (mHemisphere && mHemisphere->IsLoaded())
+	if (!mHemisphere || !mHemisphere->IsLoaded() || !mLevel || !mLevel->IsLoaded())
 	{
-		mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
+		return true;
 	}
-	if (mHemisphere && mHemisphere->IsLoaded() && mRenderHemisphere)
+
+	mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
+	if (mRenderHemisphere)
 	{
 		if (!mHemisphere->GetMesh(0)->GetUVAnimator())
 		{

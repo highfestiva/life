@@ -146,34 +146,8 @@ public:
 			int mMipMapLevelCount[Texture::NUM_MAPS];
 		};
 
-		TextureAssociation(int pNumTextures) :
-			mNumTextures(pNumTextures),
-			mTextureID(0),
-			mMaps(0)
-		{
-			mTextureID = new TextureID[mNumTextures];
-			mMaps = new Maps[mNumTextures];
-			for (int i = 0; i < mNumTextures; i++)
-			{
-				mTextureID[i] = INVALID_TEXTURE;
-				mMaps[i].mMapID[Texture::COLOR_MAP]    = 0;
-				mMaps[i].mMapID[Texture::ALPHA_MAP]    = 0;
-				mMaps[i].mMapID[Texture::NORMAL_MAP]   = 0;
-				mMaps[i].mMapID[Texture::SPECULAR_MAP] = 0;
-				mMaps[i].mMapID[Texture::CUBE_MAP] = 0;
-				mMaps[i].mMipMapLevelCount[Texture::COLOR_MAP]    = 0;
-				mMaps[i].mMipMapLevelCount[Texture::ALPHA_MAP]    = 0;
-				mMaps[i].mMipMapLevelCount[Texture::NORMAL_MAP]   = 0;
-				mMaps[i].mMipMapLevelCount[Texture::SPECULAR_MAP] = 0;
-				mMaps[i].mMipMapLevelCount[Texture::CUBE_MAP] = 0;
-			}
-		}
-
-		~TextureAssociation()
-		{
-			delete[] mMaps;
-			delete[] mTextureID;
-		};
+		TextureAssociation(int pNumTextures);
+		~TextureAssociation();
 
 		int mNumTextures;
 		TextureID* mTextureID; // One ID per texture.
@@ -183,26 +157,9 @@ public:
 	class GeometryData
 	{
 	public:
-		GeometryData() :
-			mGeometryID(INVALID_GEOMETRY),
-			mGeometry(0),
-			mMaterialType(Renderer::MAT_SINGLE_COLOR_SOLID),
-			mGeometryGroup(0),
-			mTA(0),
-			mShadow(NO_SHADOWS),
-			mLastFrameShadowsUpdated(0)
-		{
-			for (int i = 0; i < Renderer::MAX_SHADOW_VOLUMES; i++)
-			{
-				mShadowVolume[i] = INVALID_GEOMETRY;
-				mLightID[i] = INVALID_LIGHT;
-			}
-		}
-
-		virtual void CopyReferenceData(GeometryData*)
-		{
-			// JMB: mTA = pGeom->mTA;
-		}
+		GeometryData();
+		virtual ~GeometryData();
+		virtual void CopyReferenceData(GeometryData*);
 
 		typedef std::hash_set<GeometryID, LEPRA_ENUM_HASHER> GeometryIDSet;
 

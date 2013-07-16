@@ -961,9 +961,12 @@ ResourceManager::ResourceInfoList ResourceManager::QueryResourceNames()
 	for (; x != mResourceSafeLookup.end(); ++x)
 	{
 		Resource* lResource = *x;
-		ResourceInfo lPair(lResource->GetName(), lResource->GetType());
-		lResource->PatchInfo(lPair);
-		lNames.push_back(lPair);
+		ResourceInfo lInfo;
+		lInfo.mName = lResource->GetName();
+		lInfo.mType = lResource->GetType();
+		lInfo.mReferenceCount = lResource->GetReferenceCount();
+		lResource->PatchInfo(lInfo);
+		lNames.push_back(lInfo);
 	}
 	return lNames;
 }

@@ -12,6 +12,7 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Cure/Include/UserConnection.h"
 #include "../../Lepra/Include/Math.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include "../Life.h"
 #include "RtVar.h"
 
@@ -35,6 +36,7 @@ Client::Client(const Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetwo
 	mStriveSendUnpauseFrame(pTimeManager->GetCurrentPhysicsFrame()),
 	mIgnoreStriveErrorTimeCounter(0)
 {
+	LEPRA_ACQUIRE_RESOURCE(Client);
 }
 
 Client::~Client()
@@ -46,6 +48,8 @@ Client::~Client()
 	mUserConnection = 0;
 	mNetworkAgent = 0;
 	mTimeManager = 0;
+
+	LEPRA_RELEASE_RESOURCE(Client);
 }
 
 

@@ -514,6 +514,7 @@ SoundManagerOpenAL::Sample::~Sample()
 	{
 		::alDeleteBuffers(1, &mBuffer);
 		mBuffer = AL_NONE;
+		LEPRA_RELEASE_RESOURCE(alBuffer);
 	}
 	OAL_ASSERT();
 }
@@ -521,6 +522,7 @@ SoundManagerOpenAL::Sample::~Sample()
 bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 {
 	deb_assert(mBuffer == AL_NONE);
+	LEPRA_ACQUIRE_RESOURCE(alBuffer);
 	mBuffer = ::alutCreateBufferFromFile(astrutil::Encode(pFileName).c_str());
 	OAL_ASSERT();
 	return (mBuffer != AL_NONE);
@@ -529,6 +531,7 @@ bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 bool SoundManagerOpenAL::Sample::Load(const void* pData, size_t pDataSize)
 {
 	deb_assert(mBuffer == AL_NONE);
+	LEPRA_ACQUIRE_RESOURCE(alBuffer);
 	mBuffer = ::alutCreateBufferFromFileImage(pData, pDataSize);
 	OAL_ASSERT();
 	return (mBuffer != AL_NONE);
@@ -551,9 +554,10 @@ SoundManagerOpenAL::Source::~Source()
 	}
 	if (mSid != (ALuint)-1)
 	{
+		::alSourceStop(mSid);
 		::alDeleteSources(1, &mSid);
-		LEPRA_RELEASE_RESOURCE(alSources);
 		mSid = (ALuint)-1;
+		LEPRA_RELEASE_RESOURCE(alSources);
 	}
 	OAL_ASSERT();
 }
@@ -561,8 +565,8 @@ SoundManagerOpenAL::Source::~Source()
 bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor)
 {
 	deb_assert(mSid == (ALuint)-1);
-	::alGenSources(1, &mSid);
 	LEPRA_ACQUIRE_RESOURCE(alSources);
+	::alGenSources(1, &mSid);
 	if (mSid == (ALuint)-1)
 	{
 		deb_assert(false);

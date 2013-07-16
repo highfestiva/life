@@ -6,11 +6,12 @@
 
 #include "../Include/ContextObject.h"
 #include <algorithm>
-#include "../../Lepra/Include/LepraAssert.h"
 #include <math.h>
 #include "../../Lepra/Include/HashUtil.h"
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
@@ -53,6 +54,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mAllowMoveRoot(true)
 {
 	deb_assert(!pClassId.empty());
+	LEPRA_ACQUIRE_RESOURCE(ContextObject);
 }
 
 ContextObject::~ContextObject()
@@ -109,6 +111,8 @@ ContextObject::~ContextObject()
 		mManager->FreeGameObjectId(mNetworkObjectType, mInstanceId);
 	}
 	mInstanceId = 0;
+
+	LEPRA_RELEASE_RESOURCE(ContextObject);
 }
 
 

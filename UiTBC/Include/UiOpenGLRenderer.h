@@ -43,7 +43,7 @@ public:
 		{
 		}
 
-		void CopyReferenceData(GeometryData* pGeom)
+		virtual void CopyReferenceData(GeometryData* pGeom)
 		{
 			GeometryData::CopyReferenceData(pGeom);
 			OGLGeometryData* lGeom = (OGLGeometryData*)pGeom;

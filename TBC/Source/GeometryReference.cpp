@@ -6,6 +6,7 @@
 
 #include "../Include/GeometryReference.h"
 #include "../../Lepra/Include/LepraAssert.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 
 
 
@@ -18,12 +19,14 @@ GeometryReference::GeometryReference(GeometryBase* pGeometry) :
 	mGeometry(pGeometry)
 {
 	LEPRA_DEBUG_CODE(mName = _T("Ref->") + pGeometry->mName);
+	LEPRA_ACQUIRE_RESOURCE(GeometryReference);
 	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 
 GeometryReference::~GeometryReference()
 {
 	mGeometry = 0;
+	LEPRA_RELEASE_RESOURCE(GeometryReference);
 }
 
 bool GeometryReference::IsGeometryReference()

@@ -6,8 +6,9 @@
 
 #include "../Include/GeometryBase.h"
 #include "../../Lepra/Include/LepraAssert.h"
-#include "../Include/Bones.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include "../../Lepra/Include/Vector2D.h"
+#include "../Include/Bones.h"
 
 
 
@@ -294,6 +295,7 @@ GeometryBase::GeometryBase() :
 	mPostRenderCallback(0),
 	mExtraData(0)
 {
+	LEPRA_ACQUIRE_RESOURCE(GeometryBase);
 }
 
 GeometryBase::~GeometryBase()
@@ -310,6 +312,8 @@ GeometryBase::~GeometryBase()
 	ClearVertexNormalData();
 	ClearTangentAndBitangentData();
 	ClearEdgeData();
+
+	LEPRA_RELEASE_RESOURCE(GeometryBase);
 }
 
 void GeometryBase::AddListener(Listener* pListener)

@@ -64,8 +64,8 @@ MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSiz
 	{
 		MacFont* lFont = new MacFont();
 		lFont->mName = pFontName;
-		lFont->mSize = pSize * FONT_SIZE_FACTOR;
-		lFont->mActualSize = pSize;
+		lFont->mSize = pSize;
+		lFont->mActualSize = pSize * FONT_SIZE_FACTOR;
 		lFont->mFlags = pFlags;
 		if (!InternalAddFont(lFont))
 		{
@@ -86,7 +86,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	pImage.CreateBuffer();
 	::memset(pImage.GetBuffer(), 0, pImage.GetWidth()*pImage.GetPixelByteSize()*pImage.GetHeight());
 
-	const float lCorrectedFontSize = mCurrentFont->mSize;	// Similar to other platforms...
+	const float lCorrectedFontSize = ((MacFont*)mCurrentFont)->mActualSize;	// Similar to other platforms...
 	CGContextRef textcontext; // This is our rendering context.
 	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB(); // We need some colorspace.
 	// Create a bitmap context.
@@ -106,7 +106,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
 	CGContextSetRGBStrokeColor(textcontext, 1,1,1,0.5);
 #ifdef LEPRA_IOS
-	int y = (pRect.GetHeight() - ((MacFont*)mCurrentFont)->mActualSize) / 2;
+	int y = (pRect.GetHeight() - mCurrentFont->mSize) / 2;
 	UIGraphicsPushContext(textcontext);
 	tchar lTmpString[2] = {pChar, 0};
 	NSString* lChar = MacLog::Encode(lTmpString);
@@ -115,7 +115,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	CGContextFlush(textcontext);
 	UIGraphicsPopContext();
 #else // !iOS
-	int y = pRect.GetHeight() - mCurrentFont->mSize;
+	int y = pRect.GetHeight() - ((MacFont*)mCurrentFont)->mActualSize;
 	CGContextShowTextAtPoint(textcontext, 0, y, &pChar, 1);
 	CGContextFlush(textcontext);
 	pImage.FlipVertical();
@@ -166,7 +166,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 int MacFontManager::GetCharWidth(const tchar pChar) const
 {
 	NSString* lFontName = MacLog::Encode(mCurrentFont->mName);
-	const float lCorrectedFontSize = mCurrentFont->mSize;	// Similar to other platforms...
+	const float lCorrectedFontSize = ((MacFont*)mCurrentFont)->mActualSize;	// Similar to other platforms...
 	TBC_APPLE_FONT* lFont = [TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize];
 #ifdef LEPRA_IOS
 	wchar_t lTempBigString[2] = {pChar, 0};

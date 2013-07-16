@@ -172,17 +172,10 @@ void ShadowVolume::InitTO()
 
 	if (lNumMaxTriangles > mMaxTriangleCount)
 	{
-		if (mTriangleOrientation != 0)
-		{
-			delete[] mTriangleOrientation;
-			mTriangleOrientation = 0;
-		}
-
-		if (mIndexData != 0)
-		{
-			delete[] mIndexData;
-			mIndexData = 0;
-		}
+		delete[] mTriangleOrientation;
+		mTriangleOrientation = 0;
+		delete[] mIndexData;
+		mIndexData = 0;
 
 		mMaxTriangleCount = lNumMaxTriangles;
 	}

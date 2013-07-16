@@ -5,6 +5,7 @@
 
 
 #include "../Include/UiFontTexture.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include "../Include/UiFontManager.h"
 
 
@@ -20,11 +21,13 @@ FontTexture::FontTexture(uint32 pFontHash, int pFontHeight):
 	mFreeXOffset(0),
 	mIsUpdated(false)
 {
+	LEPRA_ACQUIRE_RESOURCE(FontTexture);
 	mCanvas.CreateBuffer();
 }
 
 FontTexture::~FontTexture()
 {
+	LEPRA_RELEASE_RESOURCE(FontTexture);
 }
 
 uint32 FontTexture::GetFontHash() const

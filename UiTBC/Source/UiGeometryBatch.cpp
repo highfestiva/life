@@ -6,6 +6,7 @@
 
 #include "../Include/UiGeometryBatch.h"
 #include "../../Lepra/Include/Random.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 
 
 
@@ -24,12 +25,14 @@ GeometryBatch::GeometryBatch(TBC::GeometryBase* pGeometry):
 	mUVSetCount(0),
 	mGeometryInstance(pGeometry)
 {
+	LEPRA_ACQUIRE_RESOURCE(GeometryBatch);
 	SetBasicMaterialSettings(mGeometryInstance->GetBasicMaterialSettings());
 }
 
 GeometryBatch::~GeometryBatch()
 {
 	ClearAllInstances();
+	LEPRA_RELEASE_RESOURCE(GeometryBatch);
 }
 
 void GeometryBatch::SetInstances(const TransformationF* pDisplacement, const Vector3DF& pRootOffset,

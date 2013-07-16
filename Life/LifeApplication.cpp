@@ -77,7 +77,9 @@ void Application::Init()
 	mConsoleLogger = CreateConsoleLogListener();
 	//mConsoleLogger->SetLevelThreashold(LEVEL_INFO);
 #ifndef NO_LOG_DEBUG_INFO
+#ifndef LEPRA_MAC
 	mDebugLogger = new DebuggerLogListener();
+#endif // !Apple
 #endif // Showing debug information.
 	mFileLogger = new FileLogListener(GetIoFile(GetTypeName(), _T("log"), false));
 	//mFileLogger->SetLevelThreashold(LEVEL_INFO);

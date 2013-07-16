@@ -6,6 +6,7 @@
 
 #include "../Include/UiTriangleBasedGeometry.h"
 #include "../../Lepra/Include/LepraAssert.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 
 
 
@@ -29,6 +30,7 @@ TriangleBasedGeometry::TriangleBasedGeometry() :
 	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
 	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
 {
+	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
 }
 
 TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& pGeometry) :
@@ -46,6 +48,7 @@ TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& pGeome
 	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
 	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
 {
+	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
 	Copy(pGeometry);
 }
 
@@ -73,6 +76,8 @@ TriangleBasedGeometry::TriangleBasedGeometry(Vector3DF* pVertices,
 	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
 	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
 {
+	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
+
 	Set(pVertices,
 		pVertexNormals,
 		pUV,
@@ -109,6 +114,8 @@ TriangleBasedGeometry::TriangleBasedGeometry(float* pVertexData,
 	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
 	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
 {
+	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
+
 	Set(pVertexData,
 		pVertexNormals,
 		pUVData,
@@ -385,6 +392,8 @@ void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
 
 TriangleBasedGeometry::~TriangleBasedGeometry()
 {
+	LEPRA_RELEASE_RESOURCE(TriangleBasedGeometry);
+
 	ClearAll();
 }
 

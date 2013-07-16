@@ -8,6 +8,7 @@
 #include "../Include/UiTBC.h"
 #include "../Include/UiTexture.h"
 #include "../../Lepra/Include/Canvas.h"
+#include "../../Lepra/Include/ResourceTracker.h"
 #include <math.h>
 
 namespace UiTbc
@@ -27,6 +28,7 @@ Texture::Texture():
 	mCubeMapPosZ(0),
 	mCubeMapNegZ(0)
 {
+	LEPRA_ACQUIRE_RESOURCE(Texture);
 }
 
 Texture::Texture(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint, int pGenerateMipMapLevels):
@@ -43,6 +45,7 @@ Texture::Texture(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint, int pG
 	mCubeMapPosZ(0),
 	mCubeMapNegZ(0)
 {
+	LEPRA_ACQUIRE_RESOURCE(Texture);
 	Set(pColorMap, pResizeHint, pGenerateMipMapLevels);
 }
 
@@ -60,75 +63,38 @@ Texture::Texture(Texture* pTexture):
 	mCubeMapPosZ(0),
 	mCubeMapNegZ(0)
 {
+	LEPRA_ACQUIRE_RESOURCE(Texture);
 	Copy(pTexture);
 }
 
 Texture::~Texture()
 {
 	ClearAll();
+	LEPRA_RELEASE_RESOURCE(Texture);
 }
 
 void Texture::ClearAll()
 {
-	if (mColorMap != 0)
-	{
-		delete[] mColorMap;
-		mColorMap = 0;
-	}
-
-	if (mAlphaMap != 0)
-	{
-		delete[] mAlphaMap;
-		mAlphaMap = 0;
-	}
-
-	if (mNormalMap != 0)
-	{
-		delete[] mNormalMap;
-		mNormalMap = 0;
-	}
-
-	if (mSpecularMap != 0)
-	{
-		delete[] mSpecularMap;
-		mSpecularMap = 0;
-	}
-
-	if (mCubeMapPosX != 0)
-	{
-		delete[] mCubeMapPosX;
-		mCubeMapPosX = 0;
-	}
-
-	if (mCubeMapNegX != 0)
-	{
-		delete[] mCubeMapNegX;
-		mCubeMapNegX = 0;
-	}
-
-	if (mCubeMapPosY != 0)
-	{
-		delete[] mCubeMapPosY;
-		mCubeMapPosY = 0;
-	}
-
-	if (mCubeMapNegY != 0)
-	{
-		delete[] mCubeMapNegY;
-		mCubeMapNegY = 0;
-	}
-
-	if (mCubeMapPosZ != 0)
-	{
-		delete[] mCubeMapPosZ;
-		mCubeMapPosZ = 0;
-	}
-
-	if (mCubeMapNegZ != 0)
-	{
-		delete[] mCubeMapNegZ;
-		mCubeMapNegZ = 0;
-	}
+	delete[] mColorMap;
+	mColorMap = 0;
+	delete[] mAlphaMap;
+	mAlphaMap = 0;
+	delete[] mNormalMap;
+	mNormalMap = 0;
+	delete[] mSpecularMap;
+	mSpecularMap = 0;
+	delete[] mCubeMapPosX;
+	mCubeMapPosX = 0;
+	delete[] mCubeMapNegX;
+	mCubeMapNegX = 0;
+	delete[] mCubeMapPosY;
+	mCubeMapPosY = 0;
+	delete[] mCubeMapNegY;
+	mCubeMapNegY = 0;
+	delete[] mCubeMapPosZ;
+	mCubeMapPosZ = 0;
+	delete[] mCubeMapNegZ;
+	mCubeMapNegZ = 0;
 
 	mNumMipMapLevels = 0;
 	mIsCubeMap = false;

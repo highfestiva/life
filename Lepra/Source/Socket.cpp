@@ -5,10 +5,11 @@
 
 
 #include "../Include/Socket.h"
-#include "../Include/LepraAssert.h"
 #include <algorithm>
 #include <fcntl.h>
 #include "../Include/HashUtil.h"
+#include "../Include/LepraAssert.h"
+#include "../Include/ResourceTracker.h"
 #include "../Include/SystemManager.h"
 
 
@@ -41,12 +42,14 @@ sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize, bool pReuse)
 
 sys_socket SocketBase::CreateTcpSocket()
 {
+	LEPRA_ACQUIRE_RESOURCE(Socket);
 	sys_socket s = ::socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	return (InitSocket(s, 32*1024, true));
 }
 
 sys_socket SocketBase::CreateUdpSocket()
 {
+	LEPRA_ACQUIRE_RESOURCE(Socket);
 	sys_socket s = ::socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	return (InitSocket(s, 8*1024, false));
 }
@@ -58,6 +61,7 @@ void SocketBase::CloseSysSocket(sys_socket pSocket)
 #else // !LEPRA_WINDOWS
 	::close(pSocket);
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
+	LEPRA_RELEASE_RESOURCE(Socket);
 }
 
 
