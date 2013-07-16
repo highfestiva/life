@@ -971,6 +971,35 @@ ResourceManager::ResourceInfoList ResourceManager::QueryResourceNames()
 	return lNames;
 }
 
+ResourceManager::ResourceList ResourceManager::HookAllResourcesOfType(const str& pType)
+{
+	ResourceList lList;
+	mThreadLock.Acquire();
+	ResourceSet::iterator x = mResourceSafeLookup.begin();
+	for (; x != mResourceSafeLookup.end(); ++x)
+	{
+		Resource* lResource = *x;
+		if (strutil::StartsWith(lResource->GetType(), pType))
+		{
+			lResource->Reference();
+			lList.push_back(lResource);
+		}
+	}
+	return lList;
+}
+
+void ResourceManager::UnhookResources(ResourceList& pResourceList)
+{
+	ResourceList::iterator x = pResourceList.begin();
+	for (; x != pResourceList.end(); ++x)
+	{
+		Resource* lResource = *x;
+		lResource->Dereference();
+	}
+	pResourceList.clear();
+	mThreadLock.Release();
+}
+
 
 
 Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* pUserResource, bool& pMustLoad)

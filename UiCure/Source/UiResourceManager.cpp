@@ -533,6 +533,11 @@ SoundResource::SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* p
 
 SoundResource::~SoundResource()
 {
+	Release();
+}
+
+void SoundResource::Release()
+{
 	UserDataTable::iterator x = mUserDiversifiedTable.begin();
 	for (; x != mUserDiversifiedTable.end(); ++x)
 	{

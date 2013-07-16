@@ -328,6 +328,8 @@ bool GameClientMasterTicker::Tick()
 		UpdateSlaveLayout();
 	}
 
+	Repair();
+
 	if (mRestartUi)
 	{
 		if (!Reinitialize())
@@ -765,6 +767,30 @@ bool GameClientMasterTicker::Reinitialize()
 bool GameClientMasterTicker::OpenUiManager()
 {
 	return mUiManager->Open();
+}
+
+void GameClientMasterTicker::Repair()
+{
+	// OpenAL/iOS bug: after some time playback stops working. We solve this by locking down the whole system,
+	// re-initialize the sound system, loading all the sound resources again, then unlocking.
+	if (mUiManager->GetSoundManager()->IsIrreparableErrorState())
+	{
+		typedef Cure::ResourceManager::ResourceList ResourceList;
+		ResourceList lResourceList = mResourceManager->HookAllResourcesOfType(_T("Sound"));
+		for (ResourceList::iterator x = lResourceList.begin(); x != lResourceList.end(); ++x)
+		{
+			UiCure::SoundResource* lSound = (UiCure::SoundResource*)*x;
+			lSound->Release();
+		}
+		mUiManager->GetSoundManager()->Close();
+		mUiManager->GetSoundManager()->Open();
+		for (ResourceList::iterator x = lResourceList.begin(); x != lResourceList.end(); ++x)
+		{
+			UiCure::SoundResource* lSound = (UiCure::SoundResource*)*x;
+			lSound->Load();
+		}
+		mResourceManager->UnhookResources(lResourceList);
+	}
 }
 
 void GameClientMasterTicker::UpdateSlaveLayout()

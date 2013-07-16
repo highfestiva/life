@@ -388,6 +388,7 @@ class ResourceManager
 {
 public:
 	typedef std::list<ResourceInfo> ResourceInfoList;
+	typedef std::list<Resource*> ResourceList;
 
 	ResourceManager(unsigned pLoaderThreadCount, const str& pPathPrefix);
 	virtual ~ResourceManager();
@@ -419,6 +420,9 @@ public:
 	size_t QueryResourceCount() const;
 	size_t QueryCachedResourceCount() const;
 	ResourceInfoList QueryResourceNames();
+
+	ResourceList HookAllResourcesOfType(const str& pType);	// Be cautious!
+	void UnhookResources(ResourceList& pResourceList);
 
 protected:
 	Resource* GetAddCachedResource(const str& pName, UserResource* pUserResource, bool& pMustLoad);

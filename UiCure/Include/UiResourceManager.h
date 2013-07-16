@@ -257,6 +257,7 @@ public:
 	typedef UiLepra::SoundManager::SoundInstanceID UserData;
 	typedef UiLepra::SoundManager::LoopMode LoopMode;
 
+	void Release();
 	bool Load();
 	virtual UserData CreateDiversifiedData() const;
 	virtual void ReleaseDiversifiedData(UserData pData) const;

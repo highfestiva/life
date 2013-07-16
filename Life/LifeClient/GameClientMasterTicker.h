@@ -93,6 +93,7 @@ protected:
 	virtual bool Initialize();
 	virtual bool Reinitialize();
 	virtual bool OpenUiManager();
+	void Repair();
 	void UpdateSlaveLayout();
 	void SlideSlaveLayout();
 	int GetSlaveAnimationTarget(int pSlaveIndex) const;

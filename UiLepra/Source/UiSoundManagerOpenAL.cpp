@@ -76,8 +76,10 @@ bool SoundManagerOpenAL::Open()
 		return false;
 	}
 	::alcMakeContextCurrent(mContext);
+	OAL_ASSERT();
 
 	::alutInitWithoutContext(0, 0);
+	OALUT_ASSERT();
 
 	const float lPos[3] = {0, 0, 0};
 	const float lVel[3] = {0, 0, 0};
@@ -85,6 +87,8 @@ bool SoundManagerOpenAL::Open()
 	::alListenerfv(AL_POSITION, lPos);
 	::alListenerfv(AL_VELOCITY, lVel);
 	::alListenerfv(AL_ORIENTATION, lDirection);
+
+	mIsIrreparableErrorState = false;
 
 	OAL_ASSERT();
 	return true;
@@ -108,17 +112,10 @@ void SoundManagerOpenAL::Close()
 
 	OAL_ASSERT();
 
-	::alcMakeContextCurrent(0);
-	if (mContext)
-	{
-		::alcDestroyContext(mContext);
-		mContext = 0;
-	}
-	if (mDevice)
-	{
-		::alcCloseDevice(mDevice);
-		mDevice = 0;
-	}
+	::alutExit();
+	OALUT_ASSERT();
+	mContext = 0;
+	mDevice = 0;
 #ifdef LEPRA_WINDOWS
 	alc_deinit();
 #endif // Windows
