@@ -10,8 +10,9 @@
 #include "../Life/LifeApplication.h"
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiLepra/Include/UiTouchDrag.h"
 #include "../UiLepra/Include/UiCore.h"
+#include "../UiLepra/Include/UiSoundManager.h"
+#include "../UiLepra/Include/UiTouchDrag.h"
 #include "../UiTBC/Include/UiTBC.h"
 #include "HeliForce.h"
 #include "HeliForceTicker.h"
@@ -226,6 +227,7 @@ void HeliForce::Suspend()
 	//	mMusicPlayer->Pause();
 	//}
 	//DoPause();
+	mUiManager->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
 #endif // iOS
@@ -236,6 +238,7 @@ void HeliForce::Resume()
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
+	mUiManager->GetSoundManager()->Resume();
 	//if (mMusicPlayer)
 	//{
 	//	mMusicPlayer->Stop();

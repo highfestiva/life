@@ -43,6 +43,9 @@ public:
 	SoundManager();
 	virtual ~SoundManager();
 
+	virtual void Suspend() = 0;
+	virtual void Resume() = 0;
+
 	virtual float GetMasterVolume() const = 0;
 	virtual void SetMasterVolume(float pVolume) = 0;
 

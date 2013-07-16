@@ -31,6 +31,9 @@ public:
 	SoundManagerOpenAL(int pMixRate);
 	virtual ~SoundManagerOpenAL();
 
+	virtual void Suspend();
+	virtual void Resume();
+
 	virtual float GetMasterVolume() const;
 	virtual void SetMasterVolume(float pVolume);
 
