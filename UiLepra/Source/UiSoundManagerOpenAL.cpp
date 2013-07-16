@@ -110,12 +110,14 @@ SoundManagerOpenAL::~SoundManagerOpenAL()
 
 void SoundManagerOpenAL::Suspend()
 {
+	ScopeLock lLock(&mLock);
 	::alcMakeContextCurrent(0);
 	::alcSuspendContext(mContext);
 }
 
 void SoundManagerOpenAL::Resume()
 {
+	ScopeLock lLock(&mLock);
 	::alcMakeContextCurrent(mContext);
 	::alcProcessContext(mContext);
 }
@@ -161,10 +163,6 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, Loop
 
 SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority)
 {
-	ScopeLock lLock(&mLock);
-
-	(void)pFileName;
-
 	Sample* lSample = new Sample(pLoopMode != LOOP_NONE, pPriority);
 	bool lOk = false;
 	for (int x = 0; !lOk && x < 3; ++x)	// TRICKY: retry to avoid anti-virus glitches (for the file version) and sound driver glitches (for the raw data version).
@@ -184,6 +182,7 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 	}
 	if (lOk)
 	{
+		ScopeLock lLock(&mLock);
 		mSampleSet.insert(lSample);
 	}
 	else
@@ -300,6 +299,9 @@ bool SoundManagerOpenAL::Play(SoundInstanceID pSoundIID, float pVolume, float pP
 		return (false);
 	}
 
+	assert(pVolume >= 0);
+	assert(mMasterVolume >= 0);
+	assert(pPitch >= 0);
 	::alSourcef(lSource->mSid, AL_GAIN, pVolume * mMasterVolume);
 	::alSourcef(lSource->mSid, AL_PITCH, pPitch);
 	::alSourcePlay(lSource->mSid);
@@ -416,6 +418,7 @@ int SoundManagerOpenAL::GetFrequency(SoundInstanceID)
 
 void SoundManagerOpenAL::SetDopplerFactor(float pFactor)
 {
+	ScopeLock lLock(&mLock);
 	::alDopplerFactor(pFactor);
 	OAL_ASSERT();
 }
@@ -501,7 +504,6 @@ SoundManagerOpenAL::Sample* SoundManagerOpenAL::GetSample(SoundID pSoundID) cons
 
 SoundManagerOpenAL::Source* SoundManagerOpenAL::GetSource(SoundInstanceID pSoundInstanceID) const
 {
-	ScopeLock lLock(&mLock);
 	Source* lSource = (Source*)pSoundInstanceID;
 	SourceSet::const_iterator x = mSourceSet.find(lSource);
 	if (x == mSourceSet.end())

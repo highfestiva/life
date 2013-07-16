@@ -127,6 +127,7 @@ private:
 	float mSoundCutoffDuration;
 	SoundMap mSoundMap;
 	SoundNameMap mSoundNameMap;
+	mutable Lock mLock;
 
 	LOG_CLASS_DECLARE();
 };

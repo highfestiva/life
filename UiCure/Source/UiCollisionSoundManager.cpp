@@ -45,6 +45,7 @@ void CollisionSoundManager::SetScale(float pSmallMass, float pLightImpact, float
 
 void CollisionSoundManager::AddSound(const str& pName, const SoundResourceInfo& pInfo)
 {
+	ScopeLock lLock(&mLock);
 	mSoundNameMap.insert(SoundNameMap::value_type(pName, pInfo));
 }
 
@@ -58,6 +59,8 @@ void CollisionSoundManager::PreLoadSound(const str& pName)
 
 void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
 {
+	ScopeLock lLock(&mLock);
+
 	mCameraPosition = pCameraPosition;
 
 	float lRealTimeRatio;
@@ -128,6 +131,7 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 
 void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPosition, const TBC::ChunkyBoneGeometry* pKey, const str& pSoundName)
 {
+	ScopeLock lLock(&mLock);
 	SoundInfo* lSoundInfo = GetPlayingSound(pKey);
 	if (lSoundInfo)
 	{
