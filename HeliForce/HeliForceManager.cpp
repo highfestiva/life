@@ -57,10 +57,11 @@
 #include "Level.h"
 #include "RtVar.h"
 #include "Eater.h"
+#include "SimulatorDriver.h"
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			6
+#define LAST_LEVEL			7
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	4
@@ -1113,6 +1114,10 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			{
 				mLastVehicleColor = Vector3DF(0, 1, 0);
 			}
+		}
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("simulator")))
+		{
+			new SimulatorDriver(this, pObject->GetInstanceId());
 		}
 		else
 		{

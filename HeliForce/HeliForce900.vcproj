@@ -585,6 +585,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SimulatorDriver.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Sunlight.cpp"
 				>
 			</File>
@@ -648,6 +652,10 @@
 			</File>
 			<File
 				RelativePath=".\RtVar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SimulatorDriver.h"
 				>
 			</File>
 			<File

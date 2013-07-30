@@ -1151,9 +1151,9 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			if (lTestOk)
 			{
 				UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
-				bool lCastsShadows;
+				int lCastsShadows;
 				lTestOk = lMeshLoader.Load(&lGeometry[lMeshIndex], lCastsShadows);
-				deb_assert(lTestOk && lCastsShadows);
+				deb_assert(lTestOk && lCastsShadows == 1);
 			}
 		}
 		Lepra::DiskFile::Delete(lThisMeshName);
@@ -1356,9 +1356,9 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 		if (lTestOk)
 		{
 			UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
-			bool lCastsShadows;
+			int lCastsShadows;
 			lTestOk = lMeshLoader.Load(&lGeometry, lCastsShadows);
-			deb_assert(lTestOk);
+			deb_assert(lTestOk && lCastsShadows == 1);
 		}
 		if (lTestOk)
 		{

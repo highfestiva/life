@@ -146,6 +146,7 @@ class GroupReader(DefaultMAReader):
 		self.makevertsrelative(group)
 		mesh.splitverts_group(group, options.options.verbose)
 		self.mesh_instance_reuse(group)
+		self.propagate_spawn_scale(group)
 		self.setphyspivot(group)
 
 
@@ -1169,6 +1170,18 @@ class GroupReader(DefaultMAReader):
 			if node.getName().startswith("phys_") and node.nodetype == "transform":
 				ok &= self._physrelativemat4(node)
 		return ok
+
+
+	def propagate_spawn_scale(self, group):
+		for spawn in group:
+			if not spawn.nodetype.startswith("spawner"):
+				continue
+			scale = spawn.get_fixed_attribute("scale", default=1)
+			def propagate_to(nodename):
+				connected_to = self.findNode(nodename)
+				connected_to.fix_attribute("scale", scale)
+			connected_to_nodename = spawn.get_fixed_attribute("connected_to")
+			propagate_to(connected_to_nodename)
 
 
 	def _regexpnodes(self, regexp, group):

@@ -523,9 +523,13 @@ class PhysWriter(ChunkyWriter):
 		j = wp-wt
 		j = ir * j
 
+		#print(node.getName(), "\n", mp, "\n", mt, "\n", wp, "\n", wt, "\n", ir, "\n", j)
 		parameters[6:9] = j[:3]
 
 		parameters[9] = node.get_fixed_attribute("impact_factor", True, 1.0)
+
+		if options.options.verbose:
+			print("%s parameters:" % node.getName(), parameters)
 
 		for x in parameters:
 			self._writefloat(float(x))
@@ -549,8 +553,10 @@ class PhysWriter(ChunkyWriter):
 		self._writestr(material)
 
 		# Write shape data (dimensions of shape).
+		scale = node.get_fixed_attribute("scale", default=1)
+		shape.data = [type(x)(scale*x) for x in shape.data]
 		if options.options.verbose:
-			print("Writing shape %s with rootindex %i." % (node.getName(), rootindex))
+			print("Writing shape %s with rootindex %i: %s (scale=%f)." % (node.getName(), rootindex, str(shape.data), scale))
 		for x in shape.data:
 			self._writenumber(x)
 		self._addfeat("physical geometry:physical geometries", 1)

@@ -33,6 +33,8 @@
   . Land on moving boat.
   . Make grass for mass-object.
   . Wrap backgrounds.
+  . Djungle sounds on djungle levels, etc. Parrots, birds, tiger roars...
+  . Butterflies, things like that.
   + Reduce stretch on backgrounds, so the lush textures appear. Right now it looks like shit!
 . Beautify!
 . Make burn smoke billow up if rotor is off!
