@@ -522,6 +522,8 @@ class PhysWriter(ChunkyWriter):
 		#j = wt-wp
 		j = wp-wt
 		j = ir * j
+		if node.is_phys_root and node.xformparent == node.getphysmaster():
+			j = node._pointup_adjust_mat() * j
 
 		#print(node.getName(), "\n", mp, "\n", mt, "\n", wp, "\n", wt, "\n", ir, "\n", j)
 		parameters[6:9] = j[:3]
@@ -790,12 +792,14 @@ class ClassWriter(ChunkyWriter):
 				phys.writecount = 1
 				m.writecount += 1
 				tm = m.get_world_transform()
-				tp = phys.get_world_transform()
+				tp = phys.gettransformto(None, "actual", getparent=lambda n: n.getParent())
 				tmt, tmr, _ = tm.decompose()
 				tpt, tpr, _ = tp.decompose()
 				q = quat(tpr.inverse()).normalize()
 				p = tmt-tpt
 				p = q.toMat4() * vec4(p[:])
+				if options.options.verbose:
+					print(m.getName(), "has displacement", p, "compared to", phys.getName(), tmt, tpt)
 				q = quat(tpr.inverse() * tmr).normalize()
 				p = p[0:3]
 				t = self._normalizexform(q[:]+p[:])
@@ -840,10 +844,9 @@ class ClassWriter(ChunkyWriter):
 		self._writeint(physmeshptr.physidx)
 		self._writestr(physmeshptr.meshbasename)
 		self._writexform(physmeshptr.t)
-		col = [1.0, 0.0, 0.0, 1.0]
-		#self._writematerial(col, col, col, ["da_texture"], "da_shader")
 		self._writematerial(physmeshptr.meshbasename, physmeshptr.mat)
 		if options.options.verbose:
+			print("Wrote %s's transform %s." % (physmeshptr.meshbasename, physmeshptr.t))
 			print("Wrote material diffuse %s for %s." % (str(physmeshptr.mat.diffuse), physmeshptr.meshbasename))
 		self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
 

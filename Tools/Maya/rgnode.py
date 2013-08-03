@@ -37,6 +37,9 @@ def adjustnode(node):
 		if not self.phys_root:
 			wt = node.gettransformto(None, "inverse_initial_r")
 		m = pm.inverse() * wt
+		jointtype = self.get_fixed_attribute("joint", True)
+		if self.is_phys_root and jointtype not in (None, "exclude"):
+			m *= self._pointup_adjust_mat()
 		t, r, _ = m.decompose()
 		q = quat(r).normalize()
 		ps = pm.decompose()[2]
@@ -76,7 +79,7 @@ def adjustnode(node):
 		# My multiplications are reversed order, since matrices already transposed.
 		#m = t * rt * rpi * r * ar * rp * st * spi * sh * s * sp
 		mup = mat4.identity()
-		mup *= self.pointup_adjust_mat()
+		mup *= self._pointup_adjust_mat()
 		m = wt * (rp * st * spi * sh * s * sp * mup).inverse()
 		return m
 		#lp = self._get_local_pivot()
@@ -140,7 +143,7 @@ def adjustnode(node):
 		# See http://download.autodesk.com/us/maya/2010help/CommandsPython/xform.html for more info.
 		# My multiplications are reversed order, since matrices already transposed.
 		m = t * rt * rpi * r * ar * rp * st * spi * sh * s * sp
-		m *= self.pointup_adjust_mat()
+		m *= self._pointup_adjust_mat()
 		#print("Matrix for", self.getName())
 		#print(m)
 		setattr(self, matname, m)
@@ -171,7 +174,7 @@ def adjustnode(node):
 						#print("cos(a) of %s is %f." % (self.getFullName(), a))
 						return False
 		return True
-	def pointup_adjust_mat(self):
+	def _pointup_adjust_mat(self):
 		if hasattr(self, "pointup") and self.pointup:
 			# Some primitives have different orientation in the editor compared to
 			# the runtime environment (Maya along Y-axis, RGE along Z-axis).
@@ -221,7 +224,6 @@ def adjustnode(node):
 		root = self.getphysmaster().getParent()
 		#print("getabsirot checking", root)
 		ir = root.gettransformto(None, "inverse_initial_r").decompose()[1]
-		ir *= self.pointup_adjust_mat()
 		if root.flipjoints:
 			ir = ir.rotate(math.pi, vec3(1,0,0))
 		return ir
@@ -246,5 +248,5 @@ def adjustnode(node):
 	node.setprinttransform = types.MethodType(setprinttransform, node)
 	node.getphysmaster = types.MethodType(getphysmaster, node)
 	node.getabsirot = types.MethodType(getabsirot, node)
-	node.pointup_adjust_mat = types.MethodType(pointup_adjust_mat, node)
+	node._pointup_adjust_mat = types.MethodType(_pointup_adjust_mat, node)
 	return node

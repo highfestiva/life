@@ -1235,7 +1235,7 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 	bool lDrawLocalServer;
 	CURE_RTVAR_GET(lDrawLocalServer, =, GetVariableScope(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
 	const Cure::ContextManager* lServerContext = (lDrawLocalServer && GetMaster()->IsLocalServer())? GetMaster()->GetLocalServer()->GetContext() : 0;
-	UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), GetContext(), lServerContext, GetTickLock());
+	UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), mUiManager, GetContext(), lServerContext, GetTickLock());
 	lDebugRenderer.Render(mUiManager, mRenderArea);
 }
 

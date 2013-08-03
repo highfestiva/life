@@ -256,8 +256,6 @@ void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, floa
 
 void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
 {
-	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
-
 	ScopeLock lLock(&mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())

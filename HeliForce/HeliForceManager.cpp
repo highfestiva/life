@@ -196,7 +196,7 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, _T("Key.RIGHT"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, _T("Key.UP"));
 
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 250.0\""));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 100.0\""));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 \"#Game.Childishness 1.0\""));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 \"#Game.Childishness 0.5\""));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F4 \"#Game.Childishness 0.0\""));
@@ -472,7 +472,7 @@ void HeliForceManager::DrawSyncDebugInfo()
 
 	if (GetLevel() && GetLevel()->QueryPath()->GetPath(0))
 	{
-		UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), GetContext(), 0, GetTickLock());
+		UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), mUiManager, GetContext(), 0, GetTickLock());
 		for (int x = 0; x < 20; ++x)
 		{
 			Cure::ContextPath::SplinePath* lPath = GetLevel()->QueryPath()->GetPath(x);

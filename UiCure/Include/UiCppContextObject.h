@@ -28,13 +28,6 @@ class CppContextObject: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
-	enum DebugPrimitive
-	{
-		DEBUG_AXES = 1,
-		DEBUG_JOINTS,
-		DEBUG_SHAPES,
-	};
-
 	CppContextObject(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
 
@@ -57,8 +50,6 @@ public:
 	virtual void UpdateMaterial(int pMeshIndex);
 
 	virtual void ReplaceTexture(int pTextureIndex, const str& pNewTextureName);
-
-	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
 	GameUiManager* GetUiManager() const;
 	virtual const TBC::ChunkyClass* GetClass() const;
