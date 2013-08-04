@@ -7,6 +7,7 @@
 #include "SimulatorDriver.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
+#include "../Lepra/Include/Random.h"
 #include "Level.h"
 
 
@@ -22,8 +23,8 @@ SimulatorDriver::SimulatorDriver(Cure::GameManager* pGame, Cure::GameObjectId pS
 	mSimulatorId(pSimulatorId)
 {
 	pGame->GetContext()->AddLocalObject(this);
-	pGame->GetContext()->AddAlarmCallback(this, 0, 5.0f, 0);
-	pGame->GetContext()->AddAlarmCallback(this, 1, 10.0f, 0);
+	pGame->GetContext()->AddAlarmCallback(this, 0, 1.0f, 0);
+	pGame->GetContext()->AddAlarmCallback(this, 1, 1.7f, 0);
 }
 
 SimulatorDriver::~SimulatorDriver()
@@ -44,9 +45,14 @@ void SimulatorDriver::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 	if (lSimulator->IsLoaded() && lSimulator->GetPhysics()->GetEngineCount() >= 2)
 	{
-		lSimulator->GetPhysics()->GetEngine(pAlarmId)->SetValue(pAlarmId, 1.0f);
+		float lForce = 0;
+		const unsigned r = (Random::GetRandomNumber() % 21) + 1;
+		const unsigned lMiddle = (pAlarmId == 0)? 11 : 14;
+		if (r <= lMiddle-1) lForce = -1;
+		if (r >= lMiddle+1) lForce = +1;
+		lSimulator->GetPhysics()->GetEngine(pAlarmId)->SetValue(pAlarmId, lForce);
 	}
-	GetManager()->AddAlarmCallback(this, pAlarmId, 3.0f, 0);
+	GetManager()->AddAlarmCallback(this, pAlarmId, Random::Uniform(0.5f, 1.5f), 0);
 }
 
 

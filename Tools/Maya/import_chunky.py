@@ -975,7 +975,8 @@ class GroupReader(DefaultMAReader):
 				root = node
 				current_parent = node.phys_parent
 				del node.phys_parent
-				isValid, hasJoint = self._query_attribute(root, "joint", jointCheck, False)
+				nodeIsValid, nodeHasJoint = self._query_attribute(root, "joint", jointCheck, False)
+				isValid, hasJoint = nodeIsValid, nodeHasJoint
 				while root and isValid and not hasJoint:
 					if not hasattr(root, "phys_root"):
 						isGroupValid = False
@@ -999,6 +1000,8 @@ class GroupReader(DefaultMAReader):
 						isValid, hasJoint = self._query_attribute(root, "joint", jointCheck, False)
 				if node.phys_root:
 					node.phys_root.is_phys_root = True
+				if nodeIsValid and nodeHasJoint:
+					node.is_phys_root = True
 		# Make it so that we only have one physical root.
 		physroots = 0
 		for node in group:
@@ -1176,10 +1179,10 @@ class GroupReader(DefaultMAReader):
 		for spawn in group:
 			if not spawn.nodetype.startswith("spawner"):
 				continue
-			scale = spawn.get_fixed_attribute("scale", default=1)
+			pos_scale = spawn.get_fixed_attribute("pos_scale", default=1)
 			def propagate_to(nodename):
 				connected_to = self.findNode(nodename)
-				connected_to.fix_attribute("scale", scale)
+				connected_to.fix_attribute("scale", pos_scale)
 			connected_to_nodename = spawn.get_fixed_attribute("connected_to")
 			propagate_to(connected_to_nodename)
 
