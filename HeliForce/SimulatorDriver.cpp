@@ -50,9 +50,10 @@ void SimulatorDriver::OnAlarm(int pAlarmId, void* pExtraData)
 		const unsigned lMiddle = (pAlarmId == 0)? 11 : 14;
 		if (r <= lMiddle-1) lForce = -1;
 		if (r >= lMiddle+1) lForce = +1;
-		lSimulator->GetPhysics()->GetEngine(pAlarmId)->SetValue(pAlarmId, lForce);
+		lSimulator->GetPhysics()->SetEnginePower(pAlarmId, lForce);
 	}
-	GetManager()->AddAlarmCallback(this, pAlarmId, Random::Uniform(0.5f, 1.5f), 0);
+	//GetManager()->AddAlarmCallback(this, pAlarmId, Random::Uniform(0.5f, 1.5f), 0);
+	GetManager()->AddAlarmCallback(this, pAlarmId, 1.5f, 0);
 }
 
 
