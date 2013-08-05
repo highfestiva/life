@@ -61,7 +61,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			7
+#define LAST_LEVEL			8
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	4
