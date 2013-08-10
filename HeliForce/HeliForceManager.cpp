@@ -749,7 +749,7 @@ void HeliForceManager::CreateChopper(const str& pClassId)
 	Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 	if (lSpawner)
 	{
-		lSpawner->PlaceObject(lAvatar);
+		lSpawner->PlaceObject(lAvatar, -1);
 	}
 	lAvatar->QuerySetChildishness(1);
 	mAvatarId = lAvatar->GetInstanceId();
@@ -1043,7 +1043,7 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 
 Cure::ContextObject* HeliForceManager::CreateLogicHandler(const str& pType)
 {
-	if (pType == _T("spawner"))
+	if (pType == _T("spawner") || pType == _T("spawner_init"))
 	{
 		return new Life::Spawner(GetContext());
 	}

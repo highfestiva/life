@@ -834,9 +834,13 @@ class GroupReader(DefaultMAReader):
 				for name, value in params:
 					node.fix_attribute(name, value)
 				def check_connected_to(l):
-					ok = (type(l) == str)
-					connected_to = self.findNode(l)
-					ok &= (connected_to != None)
+					ok = (type(l) == list)
+					for e in l:
+						ok &= (type(e) == str)
+						connected_to = self._regexpnodes(e, group)
+						ok &= (len(connected_to) >= 1)
+						for cn in connected_to:
+							ok &= cn.getName().startswith("phys_pos_")
 					return ok
 				def check_spawn_objects(l):
 					ok = (len(l) >= 1)
@@ -1181,11 +1185,13 @@ class GroupReader(DefaultMAReader):
 			if not spawn.nodetype.startswith("spawner"):
 				continue
 			pos_scale = spawn.get_fixed_attribute("pos_scale", default=1)
-			def propagate_to(nodename):
-				connected_to = self.findNode(nodename)
-				connected_to.fix_attribute("scale", pos_scale)
-			connected_to_nodename = spawn.get_fixed_attribute("connected_to")
-			propagate_to(connected_to_nodename)
+			def propagate_to(nodenames):
+				for noderegex in nodenames:
+					connected_to = self._regexpnodes(noderegex, group)
+					for cn in connected_to:
+						cn.fix_attribute("scale", pos_scale)
+			connected_to_nodenames = spawn.get_fixed_attribute("connected_to")
+			propagate_to(connected_to_nodenames)
 
 
 	def _regexpnodes(self, regexp, group):
@@ -1195,6 +1201,9 @@ class GroupReader(DefaultMAReader):
 				found += [node]
 		if options.options.verbose:
 			print("Identified these nodes (on regexp %s):\n" % regexp, found)
+		if not found:
+			print("Error: no node found on regex '%s'!" % regexp)
+			sys.exit(1)
 		return found
 
 

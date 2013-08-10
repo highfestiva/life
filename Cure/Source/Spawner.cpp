@@ -18,7 +18,8 @@ namespace Cure
 
 
 Spawner::Spawner(ContextManager* pManager):
-	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Spawner"))
+	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Spawner")),
+	mSpawnPointIndex(0)
 {
 	pManager->AddLocalObject(this);
 	mManager->AddAlarmCallback(this, 0, 0.5, 0);	// Create.
@@ -38,15 +39,19 @@ Spawner::~Spawner()
 
 
 
-void Spawner::PlaceObject(ContextObject* pObject)
+void Spawner::PlaceObject(ContextObject* pObject, int pSpawnPointIndex)
 {
 	const Vector3DF lScalePoint = RNDPOSVEC();
-	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint));
+	if (pSpawnPointIndex < 0)
+	{
+		pSpawnPointIndex = Random::GetRandomNumber() % GetSpawner()->GetSpawnPointCount();
+	}
+	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint, pSpawnPointIndex));
 }
 
 TransformationF Spawner::GetSpawnPoint() const
 {
-	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF());
+	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF(), 0);
 }
 
 
@@ -141,7 +146,19 @@ void Spawner::Create()
 	{
 		ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		AddChild(lObject);
-		PlaceObject(lObject);
+		PlaceObject(lObject, mSpawnPointIndex);
+		if (++mSpawnPointIndex >= GetSpawner()->GetSpawnPointCount())
+		{
+			if (GetSpawner()->GetFunction() == _T("spawner_init"))
+			{
+				deb_assert(GetSpawner()->GetSpawnPointCount() >= 2);
+				mSpawnPointIndex = 1;
+			}
+			else
+			{
+				mSpawnPointIndex = 0;
+			}
+		}
 		lObject->StartLoading();
 	}
 }

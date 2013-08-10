@@ -638,12 +638,14 @@ class PhysWriter(ChunkyWriter):
 		self._writeint(types[node.get_fixed_attribute("type")])
 		self._writestr(node.get_fixed_attribute("function"))
 
-		connected_to_name = node.get_fixed_attribute("connected_to")
-		connected_to = self._findglobalnode(connected_to_name)
-		idx = self.bodies.index(connected_to)
-		if options.options.verbose:
-			print("Spawner '%s' connected to body index %i."% (node.getName(), idx))
-		self._writeint(idx)
+		connected_to = node.get_fixed_attribute("connected_to")
+		connected_to = self._expand_connected_list(connected_to, self.bodies)
+		self._writeint(len(connected_to))
+		for connected in connected_to:
+			idx = self.bodies.index(connected)
+			if options.options.verbose:
+				print("Spawner '%s' connected to body index %i."% (node.getName(), idx))
+			self._writeint(idx)
 		self._writefloat(float(node.get_fixed_attribute("number")))
 		intervals = node.get_fixed_attribute("intervals")
 		self._writeint(len(intervals))
@@ -872,6 +874,7 @@ class ClassWriter(ChunkyWriter):
 		for x in range(len(names)):
 			connected_to_names = node.get_fixed_attribute(names[x])
 			connected_to = self._expand_connected_list(connected_to_names, objectlists[x])
+			print("%s %s: %s" % (node.getName(), names[x], connected_to))
 			self._writeint(len(connected_to))
 			for cn in connected_to:
 				self._writeint(objectlists[x].index(cn))

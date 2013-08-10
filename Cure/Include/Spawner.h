@@ -24,7 +24,7 @@ public:
 	Spawner(ContextManager* pManager);
 	virtual ~Spawner();
 
-	void PlaceObject(ContextObject* pObject);
+	void PlaceObject(ContextObject* pObject, int pSpawnPointIndex);
 	TransformationF GetSpawnPoint() const;
 
 private:
@@ -36,6 +36,7 @@ private:
 	virtual int GetSpawnCount() const;
 
 	StopWatch mRecreateTimer;
+	int mSpawnPointIndex;
 
 	LOG_CLASS_DECLARE();
 };

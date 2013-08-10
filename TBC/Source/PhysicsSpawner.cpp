@@ -19,8 +19,7 @@ namespace TBC
 
 
 PhysicsSpawner::PhysicsSpawner():
-	mSpawnerType(SPAWNER_INVALID),
-	mSpawnerNode(0)
+	mSpawnerType(SPAWNER_INVALID)
 {
 }
 
@@ -30,9 +29,14 @@ PhysicsSpawner::~PhysicsSpawner()
 
 void PhysicsSpawner::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsSpawner& pOriginal)
 {
-	const int lBoneIndex = pSource->GetIndex(pOriginal.mSpawnerNode);
-	deb_assert(lBoneIndex >= 0);
-	mSpawnerNode = pTarget->GetBoneGeometry(lBoneIndex);
+	const int lCount = pOriginal.GetSpawnPointCount();
+	mSpawnerNodeArray.clear();
+	for (int x = 0; x < lCount; ++x)
+	{
+		const int lBoneIndex = pSource->GetIndex(pOriginal.mSpawnerNodeArray[x]);
+		deb_assert(lBoneIndex >= 0);
+		mSpawnerNodeArray.push_back(pTarget->GetBoneGeometry(lBoneIndex));
+	}
 }
 
 
@@ -70,16 +74,21 @@ const str& PhysicsSpawner::GetFunction() const
 	return (mFunction);
 }
 
-TransformationF PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint) const
+int PhysicsSpawner::GetSpawnPointCount() const
 {
-	deb_assert(mSpawnerNode);
-	deb_assert(mSpawnerNode->GetGeometryType() == ChunkyBoneGeometry::GEOMETRY_BOX);
-	TBC::ChunkyBoneBox* lSpawnBox = (TBC::ChunkyBoneBox*)mSpawnerNode;
+	return mSpawnerNodeArray.size();
+}
+
+TransformationF PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint, int pIndex) const
+{
+	deb_assert((size_t)pIndex < mSpawnerNodeArray.size() && pIndex >= 0);
+	deb_assert(mSpawnerNodeArray[pIndex]->GetGeometryType() == ChunkyBoneGeometry::GEOMETRY_BOX);
+	TBC::ChunkyBoneBox* lSpawnBox = (TBC::ChunkyBoneBox*)mSpawnerNodeArray[pIndex];
 	Vector3DF lPoint = lSpawnBox->GetShapeSize();
 	lPoint.x = (pScaledPoint.x-0.5f) * lPoint.x;
 	lPoint.y = (pScaledPoint.y-0.5f) * lPoint.y;
 	lPoint.z = (pScaledPoint.z-0.5f) * lPoint.z;
-	const TransformationF& lTransformation = pStructure->GetTransformation(mSpawnerNode);
+	const TransformationF& lTransformation = pStructure->GetTransformation(lSpawnBox);
 	QuaternionF q = lTransformation.GetOrientation();
 	lPoint = q * lPoint;
 	q.RotateAroundWorldZ(PIF);	// This is so since the level ("the spawner") has a 180 degree orientation offset compared to objects.
@@ -121,6 +130,7 @@ unsigned PhysicsSpawner::GetChunkySize() const
 		lStringSize += PackerUnicodeString::Pack(0, wstrutil::Encode(x->mSpawnObject));
 	}
 	return ((unsigned)(sizeof(uint32) * 4 +
+		sizeof(uint32) * mSpawnerNodeArray.size() +
 		sizeof(float) +
 		sizeof(float) * mIntervalArray.size() +
 		sizeof(float) * mSpawnObjectArray.size() +
@@ -133,7 +143,11 @@ void PhysicsSpawner::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	int i = 0;
 	lData[i++] = Endian::HostToBig(mSpawnerType);
 	i += PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(mFunction));
-	lData[i++] = Endian::HostToBig(pStructure->GetIndex(mSpawnerNode));
+	lData[i++] = Endian::HostToBig((uint32)mSpawnerNodeArray.size());
+	for (int z = 0; (size_t)z < mSpawnerNodeArray.size(); ++z)
+	{
+		lData[i++] = Endian::HostToBig(pStructure->GetIndex(mSpawnerNodeArray[z]));
+	}
 	lData[i++] = Endian::HostToBigF(mNumber);
 	lData[i++] = Endian::HostToBig((uint32)mIntervalArray.size());
 	IntervalArray::const_iterator y = mIntervalArray.begin();
@@ -158,8 +172,13 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	int i = 0;
 	mSpawnerType = (Type)Endian::BigToHost(lData[i++]);
 	i += PackerUnicodeString::Unpack(mFunction, (uint8*)&lData[i], 1024) / sizeof(lData[0]);
-	const int lBodyIndex = Endian::BigToHost(lData[i++]);
-	mSpawnerNode = pStructure->GetBoneGeometry(lBodyIndex);
+	mSpawnerNodeArray.clear();
+	const int lSpawnerNodeCount = Endian::BigToHost(lData[i++]);
+	for (int x = 0; x < lSpawnerNodeCount; ++x)
+	{
+		const int lBodyIndex = Endian::BigToHost(lData[i++]);
+		mSpawnerNodeArray.push_back(pStructure->GetBoneGeometry(lBodyIndex));
+	}
 	mNumber = Endian::BigToHostF(lData[i++]);
 	const int lIntervalCount = Endian::BigToHost(lData[i++]);
 	for (int x = 0; x < lIntervalCount; ++x)
