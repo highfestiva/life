@@ -401,14 +401,21 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 					{
 						pPhysics->EnableGravity(lGeometry->GetBodyId(), lGeometry->IsAffectedByGravity());
 					}
+					if (lOk)
+					{
+						pPhysics->EnableCollideWithSelf(lGeometry->GetBodyId(), lGeometry->IsCollideWithSelf());
+					}
 				}
 				break;
 				case ChunkyBoneGeometry::BONE_TRIGGER:
 				{
 					lOk = lGeometry->CreateTrigger(pPhysics, pTrigListenerId, GetBoneTransformation(x));
+					if (lOk)
+					{
+						pPhysics->EnableTriggerBySelf(lGeometry->GetTriggerId(), lGeometry->IsCollideWithSelf());
+					}
 				}
 				break;
-
 			}
 		}
 		for (int x = 0; lOk && x < lBoneCount; ++x)

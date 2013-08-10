@@ -114,6 +114,7 @@ public:
 	ChunkyBoneGeometry* GetParent() const;
 	JointType GetJointType() const;
 	bool IsAffectedByGravity() const;
+	bool IsCollideWithSelf() const;
 	BoneType GetBoneType() const;
 	PhysicsManager::JointID GetJointId() const;
 	void ResetJointId();

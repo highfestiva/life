@@ -964,6 +964,7 @@ class GroupReader(DefaultMAReader):
 				isGroupValid &= self._query_attribute(node, "bounce", lambda x: (x >= -2 and x <= 3))[0]
 				isGroupValid &= self._query_attribute(node, "friction", lambda x: (x >= -100 and x <= 100))[0]
 				isGroupValid &= self._query_attribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
+				isGroupValid &= self._query_attribute(node, "collide_with_self", lambda x: x==True or x==False, err_missing=False)[0]
 				isGroupValid &= self._query_attribute(node, "material", lambda x: type(x) == str)[0]
 				jointtype = node.get_fixed_attribute("joint", True, "")
 				if hasJoint and (jointtype == "suspend_hinge" or jointtype == "hinge2"):

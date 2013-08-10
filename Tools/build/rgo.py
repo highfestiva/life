@@ -9,12 +9,14 @@ import sys
 import rgohelp
 
 
-#appnames = [""UiCure/CureTestApp"", "Life", "SlimeVolleyball", "KillCutie", "TireFire"]
-appnames = ["Push", "PushServer", "PushMaster"]
+#appnames = ["UiCure/CureTestApp", "Life", "SlimeVolleyball", "KillCutie", "TireFire"]
+appnames = ["KillCutie", "UiCure/CureTestApp"]
+fullname = "Kill Cutie"
 osname = rgohelp._getosname()
 hwname = rgohelp._gethwname()
 datename = rgohelp._getdatename()
 
+args = []
 bindir = "bin"
 buildtypes = ["debug", "rc", "final"]
 default_build_mode = buildtypes[0]
@@ -27,6 +29,34 @@ makefilescriptdir = "Tools/GCC"
 makefilescript = "generate_makefile.py"
 
 showed_result = False
+
+
+def _load_target_app():
+	try:
+		home = os.path.expanduser("~")
+		with open(home+"/.rgoapp", "rt") as appfile:
+			for line in appfile:
+				words = eval(line)
+				if len(words) >= 2:
+					global appnames
+					global fullname
+					appnames = words[:-1]
+					fullname = words[-1]
+	except FileNotFoundError:
+		print("Error: you have not yet set_target, do that first!")
+		sys.exit(1)
+
+def _save_target_app(words):
+	if len(words) < 2:
+		print("Error:   insczane method and app names!")
+		print("Example: should be something like \"KillCutie 'Kill Cutie'\"")
+		sys.exit(1)
+	home = os.path.expanduser("~")
+	with open(home+"/.rgoapp", "wt") as appfile:
+		appfile.write(str(words) + "\n")
+		global updates
+		updates += 1
+	_load_target_app()
 
 
 def _buildstl():
@@ -209,12 +239,12 @@ def _checkplatform():
 
 
 def _printresult():
-	global showed_result, updates, removes
+	global showed_result, updates, removes, fullname
 	if showed_result:
 		return
 	showed_result = True
-	if updates+removes:	print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
-	else:			print("Build up-to-date.")
+	if updates+removes:	print("%s operation successful, %i resulting files updated(/removed)." % (fullname, updates+removes))
+	else:			print("%s build up-to-date." % fullname)
 
 
 def _createmakes(force=False):
@@ -367,169 +397,6 @@ def _include_data_files(fn):
 		fn.endswith(".xm")
 
 
-#-------------------- High-level build stuff below. --------------------
-
-
-def macappify_life_client():
-	_macappify("LifeClient", "Da Client")
-
-def macappify_slime():
-	_macappify("SlimeVolleyball", "Slime Volleyball")
-
-def macappify_kc():
-	_macappify("KillCutie", "Kill Cutie")
-
-def macappify_push():
-	_macappify("Push", "Push")
-
-def macappify_ht():
-	_macappify("HoverTank", "HoverTank")
-
-def macappify_hf():
-	_macappify("HeliForce", "HeliForce")
-
-def macappify_tf():
-	_macappify("TireFire", "Tire Fire")
-
-def demacappify():
-	_demacappify("*.app")
-
-def cleandata_life():
-	_cleandata_source("Life")
-
-def cleandata_slime():
-	_cleandata_source("SlimeVolleyball")
-
-def cleandata_kc():
-	_cleandata_source("KillCutie")
-
-def cleandata_push():
-	_cleandata_source("Push")
-
-def cleandata_ht():
-	_cleandata_source("HoverTank")
-
-def cleandata_hf():
-	_cleandata_source("HeliForce")
-
-def cleandata_tf():
-	_cleandata_source("TireFire")
-
-def builddata_life():
-	_builddata("Life", bindir, default_build_mode)
-
-def builddata_slime():
-	_builddata("SlimeVolleyball", bindir, default_build_mode)
-
-def builddata_kc():
-	_builddata("KillCutie", bindir, default_build_mode)
-
-def zipdata_kc():
-	os.chdir('KillCutie/Data')
-	rgohelp._zipdir('', _include_data_files, "Data.pk3")
-	os.chdir('../../')
-
-def builddata_push():
-	_builddata("Push", bindir, default_build_mode)
-
-def zipdata_push():
-	os.chdir('Push/Data')
-	rgohelp._zipdir('', _include_data_files, "Data.pk3")
-	os.chdir('../../')
-
-def builddata_ht():
-	_builddata("HoverTank", bindir, default_build_mode)
-
-def zipdata_ht():
-	os.chdir('HoverTank/Data')
-	rgohelp._zipdir('', _include_data_files, "Data.pk3")
-	os.chdir('../../')
-
-def builddata_hf():
-	_builddata("HeliForce", bindir, default_build_mode)
-
-def zipdata_hf():
-	os.chdir('HeliForce/Data')
-	rgohelp._zipdir('', _include_data_files, "Data.pk3")
-	os.chdir('../../')
-
-def builddata_tf():
-	_builddata("TireFire", bindir, default_build_mode)
-
-def zipdata_tf():
-	os.chdir('TireFire/Data')
-	rgohelp._zipdir('', _include_data_files, "Data.pk3")
-	os.chdir('../../')
-
-def builddata_b():
-	_builddata("Bounce", bindir, default_build_mode)
-
-def zipdata_b():
-	os.chdir('Bounce/Data')
-	rgohelp._zipdir('', _include_data_files, "Data.pk3")
-	os.chdir('../../')
-
-
-def buildcode():
-	targetdir=bindir
-	buildtype=default_build_mode
-	if rgohelp._hasdevenv(verbose=True):
-		_createmakes()
-		_buildcode("build", buildtype)
-		_incremental_copy_code(targetdir, buildtype)
-
-
-def copycode():
-	targetdir=bindir
-	buildtype=default_build_mode
-	_createmakes()
-	_incremental_copy_code(targetdir, buildtype)
-
-
-def build_life():
-	rgohelp._verify_base_dir()
-	buildcode()
-	builddata_life()
-
-
-def rebuild_life():
-	_rebuild("Life", bindir, default_build_mode)
-
-
-def zipdata_dirty():
-	os.chdir(bindir+'/Data')
-	rgohelp._zipdir('', _include_data_files, "Data.pk3")
-	files = os.listdir('.')
-	for f in files:
-		if _include_data_files(f):
-			os.remove(f)
-	os.chdir('../../')
-
-
-def clean():
-	targetdir=bindir
-	buildtype=default_build_mode
-	rgohelp._verify_base_dir()
-	global removes
-	if rgohelp._hasdevenv(verbose=True):
-		removes += _cleandir(targetdir)
-		_buildcode("clean", buildtype)
-	else:
-		removes += _cleandir(targetdir+"/Data")
-	_cleandata("Life/Data")
-	_cleandata("Life/Data")
-	_cleandata("Life/Data")
-
-
-#def buildzip():
-#	_buildzip(_rebuild)
-#
-#
-#def builddirtyzip():
-#	build()
-#	_buildzip(_copybin, default_build_mode)
-
-
 def _prepare_run():
 	os.chdir(bindir)
 	pre = "./"
@@ -542,8 +409,6 @@ def _prepare_run():
 		print("Could not run %s due to %s." % (appnames[0], reason))
 		sys.exit(2)
 	return pre, post
-
-
 def _bgrun(name):
 	_printresult()
 	pre, post = _prepare_run()
@@ -555,23 +420,6 @@ def _fgrun(name, app=""):
 	pre, post = _prepare_run()
 	os.system(app+pre+name+post)
 	os.chdir("..")
-#def startclient():
-#	_fgrun("LifeClient")
-#def bgclient():
-#	_bgrun("LifeClient")
-#def startserver():
-#	_fgrun("LifeServer")
-#def bgserver():
-#	_bgrun("LifeServer")
-#def start():
-#	bgclient()
-#	startserver()
-def start():
-	_fgrun("KillCutie")
-#def gdbtest():
-#	_fgrun("CureTestApp", "gdb ")
-#def gdbclient():
-#	_fgrun("LifeClient", "gdb ")
 
 
 def _getmethods():
@@ -581,6 +429,74 @@ def _getmethods():
 	return methods
 
 
+#-------------------- High-level build stuff below. --------------------
+
+
+def macappify():
+	global appnames
+	global fullname
+	_macappify(appnames[0], fullname)
+
+def demacappify():
+	_demacappify("*.app")
+
+def cleandata():
+	global appnames
+	_cleandata_source(appnames[0])
+
+def builddata():
+	global appnames
+	_builddata(appnames[0], bindir, default_build_mode)
+
+def zipdata():
+	global appnames, updates
+	os.chdir(appnames[0] + '/Data')
+	rgohelp._zipdir('', _include_data_files, "Data.pk3")
+	os.chdir('../../')
+	updates += 1
+
+def buildcode():
+	targetdir=bindir
+	buildtype=default_build_mode
+	if rgohelp._hasdevenv(verbose=True):
+		_createmakes()
+		_buildcode("build", buildtype)
+		_incremental_copy_code(targetdir, buildtype)
+
+def copycode():
+	targetdir=bindir
+	buildtype=default_build_mode
+	_createmakes()
+	_incremental_copy_code(targetdir, buildtype)
+
+def clean():
+	targetdir=bindir
+	buildtype=default_build_mode
+	rgohelp._verify_base_dir()
+	cleandata()
+	if rgohelp._hasdevenv(verbose=True):
+		global removes
+		removes += _cleandir(targetdir)
+		_buildcode("clean", buildtype)
+
+#def archive_app():
+#	_buildzip(_rebuild)
+
+def run():
+	_fgrun(appnames[0])
+
+def go():
+	builddata()
+	copycode()
+	run()
+
+def set_target():
+	global args
+	appdata = args
+	args = []
+	_save_target_app(appdata)
+
+
 def _main():
 	usage = "usage: %prog [options] <filespec>\n" + \
 		"Runs some type of build command. Try build, rebuild, clean, builddata, or something like that."
@@ -588,6 +504,7 @@ def _main():
 	parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: %s. Default is debug." % ", ".join(buildtypes))
 	ismac = (rgohelp._getosname() == "Mac")
 	parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
+	global args
 	options, args = parser.parse_args()
 
 	if len(args) < 1:
@@ -607,8 +524,13 @@ def _main():
 
 	_checkplatform()
 
-	for arg in args:
+	if args[0] != "set_target":
+		_load_target_app()
+
+	while args:
 		try:
+			arg = args[0]
+			args = args[1:]
 			exec(arg+"()")
 		except NameError as e:
 			print("Error: no such command %s!" % arg)

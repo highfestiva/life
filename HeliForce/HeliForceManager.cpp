@@ -189,12 +189,15 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, _T("Key.LEFT"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, _T("Key.RIGHT"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, _T("Key.UP"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 100.0\""));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 \"#Game.Childishness 1.0\""));
@@ -1213,12 +1216,16 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 
 	if (!mIsHitThisFrame && lIsAvatar)
 	{
-		mIsHitThisFrame = true;
-		if (mHitGroundFrameCount < 0)
+		// If it's a lever or something like that, this is not a landing!
+		if (!pObject2->GetPhysics()->GetBoneGeometry(pBody2Id)->IsCollideWithSelf())
 		{
-			mHitGroundFrameCount = 0;
+			mIsHitThisFrame = true;
+			if (mHitGroundFrameCount < 0)
+			{
+				mHitGroundFrameCount = 0;
+			}
+			++mHitGroundFrameCount;
 		}
-		++mHitGroundFrameCount;
 	}
 
 	// Check if we're just stabilizing on starting pad.
@@ -1559,6 +1566,11 @@ void HeliForceManager::MoveCamera()
 		lHalfCamDistance /= 2;
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
+		float ox, oz;
+		CURE_RTVAR_GET(ox, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
+		CURE_RTVAR_GET(oz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
+		lAvatarPosition.x += ox;
+		lAvatarPosition.z += oz;
 		mHelicopterPosition = lAvatarPosition;
 		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -2*lHalfCamDistance, 0));
 		++mPostZoomPlatformFrameCount;

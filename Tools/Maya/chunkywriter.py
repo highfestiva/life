@@ -374,7 +374,9 @@ class ChunkyWriter:
 				else:
 					#print("%s != %s..." % (noderegexp, body.getFullName()))
 					pass
-			subgroup = sorted(subgroup, key=lambda li: li.getFullName() if type(e) == str else li[0].getName())
+			def natural_sort_key(s):
+				return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)] 
+			subgroup = sorted(subgroup, key=lambda li: natural_sort_key(li.getFullName() if type(e) == str else li[0].getName()))
 			expanded += subgroup
 		if len(expanded) < len(unexpanded):
 			print("Error: could not expand %s into more than %i nodes!" % (str(unexpanded), len(expanded)))
@@ -529,6 +531,7 @@ class PhysWriter(ChunkyWriter):
 		parameters[6:9] = j[:3]
 
 		parameters[9] = node.get_fixed_attribute("impact_factor", True, 1.0)
+		parameters[10] = 1.0 if node.get_fixed_attribute("collide_with_self", True, False) else 0.0
 
 		if options.options.verbose:
 			print("%s parameters:" % node.getName(), parameters)

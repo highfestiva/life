@@ -126,28 +126,18 @@ public:
 	virtual void SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy) = 0;
 	virtual bool InitCurrentThread() = 0;
 
-	int QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
-		Vector3DF* pCollisionPoints, int pMaxCollisionCount);
-	virtual int QueryRayCollisionAgainst(const Vector3DF& pRayPosition, const Vector3DF& pRayDirection,
-		float pLength, BodyID pBody, Vector3DF* pCollisionPoints, int pMaxCollisionCount) = 0;
+	int QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody, Vector3DF* pCollisionPoints, int pMaxCollisionCount);
+	virtual int QueryRayCollisionAgainst(const Vector3DF& pRayPosition, const Vector3DF& pRayDirection, float pLength, BodyID pBody, Vector3DF* pCollisionPoints, int pMaxCollisionCount) = 0;
 
 	// The "friction" parameter is a factor such that the friction coefficient
 	// between two bodies is calculated as mu = body1.friction * body2.friction.
 	// This is indeed a "hack", but it's there to make life easier writing games.
 	//
 	// The cylinder and capsule are both created along the local Z-axis.
-	virtual BodyID CreateSphere(bool pIsRoot, const Transformation<float32>& pTransform,
-		float32 pMass, float32 pRadius, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, int pForceListenerId = 0) = 0;
-	virtual BodyID CreateCylinder(bool pIsRoot, const Transformation<float32>& pTransform,
-		float32 pMass, float32 pRadius, float32 pLength, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
-	virtual BodyID CreateCapsule(bool pIsRoot, const Transformation<float32>& pTransform,
-		float32 pMass, float32 pRadius, float32 pLength, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
-	virtual BodyID CreateBox(bool pIsRoot, const Transformation<float32>& pTransform,
-		float32 pMass, const Vector3DF& pSize, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
+	virtual BodyID CreateSphere(bool pIsRoot, const TransformationF& pTransform, float32 pMass, float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
+	virtual BodyID CreateCylinder(bool pIsRoot, const TransformationF& pTransform, float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
+	virtual BodyID CreateCapsule(bool pIsRoot, const TransformationF& pTransform, float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
+	virtual BodyID CreateBox(bool pIsRoot, const TransformationF& pTransform, float32 pMass, const Vector3DF& pSize, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
 	virtual bool DetachToDynamic(BodyID pStaticBody, float32 pMass) = 0;
 
@@ -164,8 +154,8 @@ public:
 	virtual Vector3DF GetBodyPosition(BodyID pBodyId) const = 0;
 	virtual void SetBodyPosition(BodyID pBodyId, const Vector3DF& pPosition) const = 0;
 	virtual QuaternionF GetBodyOrientation(BodyID pBodyId) const = 0;
-	virtual void GetBodyTransform(BodyID pBodyId, Transformation<float32>& pTransform) const = 0;
-	virtual void SetBodyTransform(BodyID pBodyId, const Transformation<float32>& pTransform) = 0;
+	virtual void GetBodyTransform(BodyID pBodyId, TransformationF& pTransform) const = 0;
+	virtual void SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform) = 0;
 	virtual void GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const = 0;
 	virtual void SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVelocity) = 0;
 	virtual void GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const = 0;
@@ -191,24 +181,11 @@ public:
 	// affect the simulation. It's only purpose is to tell the listener
 	// when an object intersects the trigger volume.
 	//
-	virtual TriggerID CreateSphereTrigger(const Transformation<float32>& pTransform,
-						  float32 pRadius,
-						  int pTriggerListenerId) = 0;
-	virtual TriggerID CreateCylinderTrigger(const Transformation<float32>& pTransform,
-						float32 pRadius,
-						float32 pLength,
-						int pTriggerListenerId) = 0;
-	virtual TriggerID CreateCapsuleTrigger(const Transformation<float32>& pTransform,
-						float32 pRadius,
-						float32 pLength,
-						int pTriggerListenerId) = 0;
-	virtual TriggerID CreateBoxTrigger(const Transformation<float32>& pTransform,
-						const Vector3DF& pSize,
-						int pTriggerListenerId) = 0;
-	virtual TriggerID CreateRayTrigger(const Transformation<float32>& pTransform,
-						const Vector3DF& pFromPos,
-						const Vector3DF& pToPos,
-						int pTriggerListenerId) = 0;
+	virtual TriggerID CreateSphereTrigger(const TransformationF& pTransform, float32 pRadius, int pTriggerListenerId) = 0;
+	virtual TriggerID CreateCylinderTrigger(const TransformationF& pTransform, float32 pRadius, float32 pLength, int pTriggerListenerId) = 0;
+	virtual TriggerID CreateCapsuleTrigger(const TransformationF& pTransform, float32 pRadius, float32 pLength, int pTriggerListenerId) = 0;
+	virtual TriggerID CreateBoxTrigger(const TransformationF& pTransform, const Vector3DF& pSize, int pTriggerListenerId) = 0;
+	virtual TriggerID CreateRayTrigger(const TransformationF& pTransform, const Vector3DF& pFromPos, const Vector3DF& pToPos, int pTriggerListenerId) = 0;
 
 	virtual void DeleteTrigger(TriggerID pTriggerID) = 0;
 
@@ -216,38 +193,20 @@ public:
 	virtual int GetForceFeedbackListenerId(BodyID pBody) = 0;
 	virtual void SetForceFeedbackListener(BodyID pBody, int pForceFeedbackId) = 0;
 
-	virtual void GetTriggerTransform(TriggerID pTriggerID, Transformation<float32>& pTransform) = 0;
-	virtual void SetTriggerTransform(TriggerID pTriggerID, const Transformation<float32>& pTransform) = 0;
+	virtual void GetTriggerTransform(TriggerID pTriggerID, TransformationF& pTransform) = 0;
+	virtual void SetTriggerTransform(TriggerID pTriggerID, const TransformationF& pTransform) = 0;
 
 	//
 	// Create/delete joints.
 	//
 
-	virtual JointID CreateBallJoint(BodyID pBody1, 
-					BodyID pBody2, 
-					const Vector3DF& pAnchorPos) = 0;
-	virtual JointID CreateHingeJoint(BodyID pBody1, 
-					 BodyID pBody2, 
-					 const Vector3DF& pAnchorPos, 
-					 const Vector3DF& pAxis) = 0;
-	virtual JointID CreateHinge2Joint(BodyID pBody1, 
-					  BodyID pBody2, 
-					  const Vector3DF& pAnchorPos, 
-					  const Vector3DF& pAxis1, 
-					  const Vector3DF& pAxis2) = 0;
-	virtual JointID CreateUniversalJoint(BodyID pBody1, 
-						 BodyID pBody2, 
-						 const Vector3DF& pAnchorPos, 
-						 const Vector3DF& pAxis1, 
-						 const Vector3DF& pAxis2) = 0;
-	virtual JointID CreateSliderJoint(BodyID pBody1, 
-					  BodyID pBody2, 
-					  const Vector3DF& pAxis) = 0;
-	virtual JointID CreateFixedJoint(BodyID pBody1, 
-					 BodyID pBody2) = 0;
-	virtual JointID CreateAngularMotorJoint(BodyID pBody1, 
-						BodyID pBody2, 
-						const Vector3DF& pAxis) = 0;
+	virtual JointID CreateBallJoint(BodyID pBody1, BodyID pBody2, const Vector3DF& pAnchorPos) = 0;
+	virtual JointID CreateHingeJoint(BodyID pBody1, BodyID pBody2, const Vector3DF& pAnchorPos, const Vector3DF& pAxis) = 0;
+	virtual JointID CreateHinge2Joint(BodyID pBody1, BodyID pBody2, const Vector3DF& pAnchorPos, const Vector3DF& pAxis1, const Vector3DF& pAxis2) = 0;
+	virtual JointID CreateUniversalJoint(BodyID pBody1, BodyID pBody2, const Vector3DF& pAnchorPos, const Vector3DF& pAxis1, const Vector3DF& pAxis2) = 0;
+	virtual JointID CreateSliderJoint(BodyID pBody1, BodyID pBody2, const Vector3DF& pAxis) = 0;
+	virtual JointID CreateFixedJoint(BodyID pBody1, BodyID pBody2) = 0;
+	virtual JointID CreateAngularMotorJoint(BodyID pBody1, BodyID pBody2, const Vector3DF& pAxis) = 0;
 
 	virtual void DeleteJoint(JointID pJointId) = 0;
 
@@ -299,14 +258,10 @@ public:
 	virtual void AddTorque           (BodyID pBodyId, const Vector3DF& pTorque) = 0;
 	virtual void AddRelForce         (BodyID pBodyId, const Vector3DF& pForce) = 0;
 	virtual void AddRelTorque        (BodyID pBodyId, const Vector3DF& pTorque) = 0;
-	virtual void AddForceAtPos       (BodyID pBodyId, const Vector3DF& pForce,
-													   const Vector3DF& pPos) = 0;
-	virtual void AddForceAtRelPos    (BodyID pBodyId, const Vector3DF& pForce,
-													   const Vector3DF& pPos) = 0;
-	virtual void AddRelForceAtPos    (BodyID pBodyId, const Vector3DF& pForce,
-													   const Vector3DF& pPos) = 0;
-	virtual void AddRelForceAtRelPos (BodyID pBodyId, const Vector3DF& pForce,
-													   const Vector3DF& pPos) = 0;
+	virtual void AddForceAtPos       (BodyID pBodyId, const Vector3DF& pForce, const Vector3DF& pPos) = 0;
+	virtual void AddForceAtRelPos    (BodyID pBodyId, const Vector3DF& pForce, const Vector3DF& pPos) = 0;
+	virtual void AddRelForceAtPos    (BodyID pBodyId, const Vector3DF& pForce, const Vector3DF& pPos) = 0;
+	virtual void AddRelForceAtRelPos (BodyID pBodyId, const Vector3DF& pForce, const Vector3DF& pPos) = 0;
 
 	virtual void RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 pMaxAngularSpeed) = 0;
 
@@ -314,9 +269,12 @@ public:
 	virtual void SetGravity(const Vector3DF& pGravity) = 0;
 	virtual Vector3DF GetGravity() const = 0;
 
+	virtual void EnableTriggerBySelf(TriggerID pTriggerId, bool pEnable) = 0;
+	virtual void EnableCollideWithSelf(BodyID pBodyId, bool pEnable) = 0;
+
 	virtual void PreSteps() = 0;
-	virtual void StepAccurate(float32 pStepSize) = 0;
-	virtual void StepFast(float32 pStepSize) = 0;
+	virtual void StepAccurate(float32 pStepSize, bool pCollide) = 0;
+	virtual void StepFast(float32 pStepSize, bool pCollide) = 0;
 	virtual bool IsColliding(int pForceFeedbackId) = 0;
 	virtual void PostSteps() = 0;
 

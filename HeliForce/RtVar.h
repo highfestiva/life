@@ -18,3 +18,5 @@
 #define RTVAR_GAME_WORLDRECORD_LEVEL	"Game.WorldRecord.Level"
 
 #define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
+#define RTVAR_UI_3D_CAMXOFFSET		"Ui.3D.CamXOffset"
+#define RTVAR_UI_3D_CAMZOFFSET		"Ui.3D.CamZOffset"

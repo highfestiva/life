@@ -184,6 +184,8 @@ void GameTicker::PhysicsTick()
 	}
 	bool lFastAlgo;
 	CURE_RTVAR_GET(lFastAlgo, =, GetSettings(), RTVAR_PHYSICS_FASTALGO, true);
+	bool lNoClip;
+	CURE_RTVAR_GET(lNoClip, =, GetSettings(), RTVAR_PHYSICS_NOCLIP, false);
 	try
 	{
 		for (int x = 0; x < lAffordedMicroStepCount; ++x)
@@ -191,11 +193,11 @@ void GameTicker::PhysicsTick()
 			WillMicroTick(lStepIncrement);	// Ticks engines, so needs to be run every physics step.
 			if (lFastAlgo)
 			{
-				mPhysicsManager->StepFast(lStepIncrement);
+				mPhysicsManager->StepFast(lStepIncrement, !lNoClip);
 			}
 			else
 			{
-				mPhysicsManager->StepAccurate(lStepIncrement);
+				mPhysicsManager->StepAccurate(lStepIncrement, !lNoClip);
 			}
 		}
 	}

@@ -18,16 +18,17 @@ namespace TBC
 
 
 
-const int PARAM_SPRING_CONSTANT	= 0;
-const int PARAM_SPRING_DAMPING	= 1;
-const int PARAM_EULER_THETA	= 2;
-const int PARAM_EULER_PHI	= 3;
-const int PARAM_LOW_STOP	= 4;
-const int PARAM_HIGH_STOP	= 5;
-const int PARAM_OFFSET_X	= 6;
-const int PARAM_OFFSET_Y	= 7;
-const int PARAM_OFFSET_Z	= 8;
-const int PARAM_IMPACT_FACTOR	= 9;
+const int PARAM_SPRING_CONSTANT		=  0;
+const int PARAM_SPRING_DAMPING		=  1;
+const int PARAM_EULER_THETA		=  2;
+const int PARAM_EULER_PHI		=  3;
+const int PARAM_LOW_STOP		=  4;
+const int PARAM_HIGH_STOP		=  5;
+const int PARAM_OFFSET_X		=  6;
+const int PARAM_OFFSET_Y		=  7;
+const int PARAM_OFFSET_Z		=  8;
+const int PARAM_IMPACT_FACTOR		=  9;
+const int PARAM_COLLIDE_WITH_SELF	= 10;
 
 
 
@@ -279,6 +280,11 @@ ChunkyBoneGeometry::JointType ChunkyBoneGeometry::GetJointType() const
 bool ChunkyBoneGeometry::IsAffectedByGravity() const
 {
 	return mBodyData.mIsAffectedByGravity;
+}
+
+bool ChunkyBoneGeometry::IsCollideWithSelf() const
+{
+	return (mBodyData.mParameter[PARAM_COLLIDE_WITH_SELF] != 0);
 }
 
 ChunkyBoneGeometry::BoneType ChunkyBoneGeometry::GetBoneType() const

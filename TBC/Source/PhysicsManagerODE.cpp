@@ -3224,32 +3224,58 @@ Vector3DF PhysicsManagerODE::GetGravity() const
 	return (Vector3DF(lGravity[0], lGravity[1], lGravity[2]));
 }
 
+void PhysicsManagerODE::EnableTriggerBySelf(TriggerID pTriggerId, bool pEnable)
+{
+	EnableCollideWithSelf((BodyID)pTriggerId, pEnable);
+}
+
+void PhysicsManagerODE::EnableCollideWithSelf(BodyID pBodyId, bool pEnable)
+{
+	ObjectTable::iterator x = mObjectTable.find((Object*)pBodyId);
+	if (x != mObjectTable.end())
+	{
+		(*x)->mCollideWithSelf = pEnable;
+	}
+	else
+	{
+		mLog.Errorf(_T("EnableCollideWithSelf() - body %p is not part of this world!"), pBodyId);
+		deb_assert(false);
+		return;
+	}
+}
+
 void PhysicsManagerODE::PreSteps()
 {
 	FlagMovingObjects();
 }
 
-void PhysicsManagerODE::StepAccurate(float32 pStepSize)
+void PhysicsManagerODE::StepAccurate(float32 pStepSize, bool pCollide)
 {
 	if (pStepSize > 0)
 	{
-		dSpaceCollide(mSpaceID, this, CollisionCallback);
+		if (pCollide) dSpaceCollide(mSpaceID, this, CollisionCallback);
 		dWorldStep(mWorldID, pStepSize);
 
-		DoForceFeedback();
-		dJointGroupEmpty(mContactJointGroupID);
+		if (pCollide)
+		{
+			DoForceFeedback();
+			dJointGroupEmpty(mContactJointGroupID);
+		}
 	}
 }
 
-void PhysicsManagerODE::StepFast(float32 pStepSize)
+void PhysicsManagerODE::StepFast(float32 pStepSize, bool pCollide)
 {
 	if (pStepSize > 0)
 	{
-		dSpaceCollide(mSpaceID, this, CollisionCallback);
+		if (pCollide) dSpaceCollide(mSpaceID, this, CollisionCallback);
 		dWorldQuickStep(mWorldID, pStepSize);
 		
-		DoForceFeedback();
-		dJointGroupEmpty(mContactJointGroupID);
+		if (pCollide)
+		{
+			DoForceFeedback();
+			dJointGroupEmpty(mContactJointGroupID);
+		}
 	}
 }
 
@@ -3341,7 +3367,10 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	if ((lObject1->mForceFeedbackId && lObject1->mForceFeedbackId == lObject2->mForceFeedbackId) ||	// Same body.
 		(lObject1->mTriggerListenerId && lObject2->mTriggerListenerId))	// Elevator platform trigger moves into down trigger.
 	{
-		return;
+		if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
+		{
+			return;
+		}
 	}
 
 	dBodyID lBody1 = ::dGeomGetBody(pGeom1);
@@ -3358,7 +3387,10 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	// Exit without doing anything if the two bodies are connected by a joint.
 	if (lBody1 && lBody2 && ::dAreConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)
 	{
-		return;
+		if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
+		{
+			return;
+		}
 	}
 
 	dContact lContact[8];
@@ -3374,7 +3406,10 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	{
 		if (lObject1->mTriggerListenerId == lObject2->mForceFeedbackId)
 		{
-			return;
+			if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
+			{
+				return;
+			}
 		}
 		const dVector3& n = lContact[0].geom.normal;
 		Vector3DF lNormal(n[0], n[1], n[2]);
@@ -3385,7 +3420,10 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	{
 		if (lObject2->mTriggerListenerId == lObject1->mForceFeedbackId)
 		{
-			return;
+			if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
+			{
+				return;
+			}
 		}
 		const dVector3& n = lContact[0].geom.normal;
 		Vector3DF lNormal(n[0], n[1], n[2]);
