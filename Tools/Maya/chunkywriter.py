@@ -56,6 +56,7 @@ CHUNK_MESH_TRIANGLES			= "METR"
 CHUNK_MESH_STRIPS			= "MEST"
 CHUNK_MESH_VOLATILITY			= "MEVO"
 CHUNK_MESH_CASTS_SHADOWS		= "MECS"
+CHUNK_MESH_TWO_SIDED			= "METS"
 
 
 
@@ -728,6 +729,20 @@ class MeshWriter(ChunkyWriter):
 			if options.options.verbose:
 				print("%s will not cast shadows!" % node.getName())
 			return [(CHUNK_MESH_CASTS_SHADOWS, -1)]
+		def gettwosided(node):
+			for parent in node.getparents():
+				two_sided = parent.get_fixed_attribute("two_sided", optional=True)
+				if two_sided:
+					break
+			if two_sided == None:
+				two_sided = self.config.get("two_sided")
+			if two_sided == None:
+				return []
+			elif two_sided:
+				return [(CHUNK_MESH_TWO_SIDED, +1)]
+			if options.options.verbose:
+				print("%s will not be two-sided!" % node.getName())
+			return [(CHUNK_MESH_TWO_SIDED, -1)]
 		#print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
 		self._addfeat("mesh:meshes", 1)
 		self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
@@ -736,7 +751,8 @@ class MeshWriter(ChunkyWriter):
 			default_mesh_type = {"static":1, "semi_static":2, "dynamic":3, "volatile":4}
 			mesh_type = "static" if self.config["type"] == "static" else "semi_static"
 			volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type[mesh_type])]
-			shadows = getshadows(node)
+			casts_shadows = getshadows(node)
+			two_sided = gettwosided(node)
 			verts = [(CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx"))]
 			polys = [(CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri"))]
 			normals = [] # node.get_fixed_attribute("rgn", optional=True)
@@ -744,7 +760,7 @@ class MeshWriter(ChunkyWriter):
 			# if uvs and options.options.verbose:
 				# print("Mesh %s has UVs." % node.getFullName())
 			textureuvs = [(CHUNK_MESH_UV, uvs)] if uvs else []
-			inner_data = volatility+shadows+verts+polys+normals+textureuvs
+			inner_data = volatility+casts_shadows+two_sided+verts+polys+normals+textureuvs
 			data = (
 					CHUNK_MESH,
 					inner_data
@@ -874,7 +890,8 @@ class ClassWriter(ChunkyWriter):
 		for x in range(len(names)):
 			connected_to_names = node.get_fixed_attribute(names[x])
 			connected_to = self._expand_connected_list(connected_to_names, objectlists[x])
-			print("%s %s: %s" % (node.getName(), names[x], connected_to))
+			if options.options.verbose:
+				print("%s %s: %s" % (node.getName(), names[x], connected_to))
 			self._writeint(len(connected_to))
 			for cn in connected_to:
 				self._writeint(objectlists[x].index(cn))

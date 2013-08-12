@@ -1022,6 +1022,16 @@ bool GeometryBase::IsConvexVolume()
 	return CheckFlag(IS_CONVEX_VOLUME);
 }
 
+bool GeometryBase::IsTwoSided() const
+{
+	return CheckFlag(IS_TWO_SIDED);
+}
+
+void GeometryBase::SetTwoSided(bool pIsTwoSided)
+{
+	SetFlag(IS_TWO_SIDED, pIsTwoSided);
+}
+
 void GeometryBase::CalculateBoundingRadius()
 {
 	float* lVertexData = GetVertexData();

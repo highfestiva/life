@@ -1089,6 +1089,11 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 
 bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 {
+	if (pGeometry->IsTwoSided())
+	{
+		::glDisable(GL_CULL_FACE);
+	}
+
 	const TransformationF t = pGeometry->GetTransformation();
 	if (pGeometry->IsSimpleObject() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
 	{
@@ -1111,6 +1116,10 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 void OpenGLRenderer::PostRender(TBC::GeometryBase* pGeometry)
 {
 	pGeometry->SetTransformationChanged(false);
+	if (pGeometry->IsTwoSided())
+	{
+		::glEnable(GL_CULL_FACE);
+	}
 }
 
 

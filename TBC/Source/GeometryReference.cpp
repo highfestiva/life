@@ -20,7 +20,7 @@ GeometryReference::GeometryReference(GeometryBase* pGeometry) :
 {
 	LEPRA_DEBUG_CODE(mName = _T("Ref->") + pGeometry->mName);
 	LEPRA_ACQUIRE_RESOURCE(GeometryReference);
-	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
+	SetFlag(pGeometry->GetFlags()&(~VALID_FLAGS_MASK) | TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 
 GeometryReference::~GeometryReference()

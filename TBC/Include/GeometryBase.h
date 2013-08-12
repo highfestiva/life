@@ -292,6 +292,8 @@ public:
 	bool IsConvexVolume();	// Returns true if it is a solid volume, and
 				// there is no concave angle between any two triangles.
 				// Will generate surface normals if needed.
+	bool IsTwoSided() const;
+	void SetTwoSided(bool pIsTwoSided);
 
 	// Debug functions.
 	bool VerifyIndexData();
@@ -319,31 +321,35 @@ public:
 
 	enum //Flags
 	{
-		VERTEX_DATA_CHANGED		= (1 << 0),
-		UV_DATA_CHANGED			= (1 << 1),
-		COLOR_DATA_CHANGED		= (1 << 2),
-		INDEX_DATA_CHANGED		= (1 << 3),
-		BOUNDING_RADIUS_VALID		= (1 << 4),
-		BOUNDING_RADIUS_ALWAYS_VALID	= (1 << 5),
-		SURFACE_NORMALS_VALID		= (1 << 6),
-		VERTEX_NORMALS_VALID		= (1 << 7),
-		TANGENTS_VALID			= (1 << 8),
-		IS_SOLID_VOLUME			= (1 << 9),
-		IS_SINGLE_OBJECT		= (1 << 10),
-		IS_CONVEX_VOLUME		= (1 << 11),
-		SOLID_VOLUME_VALID		= (1 << 12),
-		SINGLE_OBJECT_VALID		= (1 << 13),
-		CONVEX_VOLUME_VALID		= (1 << 14),
+		BOUNDING_RADIUS_VALID		= (1 << 0),
+		BOUNDING_RADIUS_ALWAYS_VALID	= (1 << 1),
+		SURFACE_NORMALS_VALID		= (1 << 2),
+		VERTEX_NORMALS_VALID		= (1 << 3),
+		TANGENTS_VALID			= (1 << 4),
+		SOLID_VOLUME_VALID		= (1 << 5),
+		SINGLE_OBJECT_VALID		= (1 << 6),
+		CONVEX_VOLUME_VALID		= (1 << 7),
+		VALID_FLAGS_MASK		= CONVEX_VOLUME_VALID-1,
+
+		VERTEX_DATA_CHANGED		= (1 << 8),
+		UV_DATA_CHANGED			= (1 << 9),
+		COLOR_DATA_CHANGED		= (1 << 10),
+		INDEX_DATA_CHANGED		= (1 << 11),
+		IS_SOLID_VOLUME			= (1 << 12),
+		IS_SINGLE_OBJECT		= (1 << 13),
+		IS_CONVEX_VOLUME		= (1 << 14),
 		ALWAYS_VISIBLE			= (1 << 15),
 		TRANSFORMATION_CHANGED		= (1 << 16),
 		REF_TRANSFORMATION_CHANGED	= (1 << 17),
 		IS_SIMPLE_OBJECT		= (1 << 18),
+		IS_TWO_SIDED			= (1 << 19),
 	};
 
-	void SetFlag(Lepra::uint32 pFlag, bool pValue) { if(pValue) SetFlag(pFlag); else ClearFlag(pFlag); }
+	void SetFlag(Lepra::uint32 pFlag, bool pValue) { if (pValue) SetFlag(pFlag); else ClearFlag(pFlag); }
 	void SetFlag(Lepra::uint32 pFlag) { mFlags |= pFlag; }
 	void ClearFlag(Lepra::uint32 pFlag) { mFlags &= (~pFlag); }
 	bool CheckFlag(Lepra::uint32 pFlag) const { return (mFlags & pFlag) != 0; }
+	uint32 GetFlags() const { return mFlags; }
 
 private:
 	typedef std::list<Listener*> ListenerList;

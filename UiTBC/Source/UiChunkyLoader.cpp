@@ -50,12 +50,14 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	int32 lColorFormat = 0x7FFFFFFD;
 	int32 lGeometryVolatility = 0x7FFFFFFD;
 	int32 lCastsShadows = 0;
+	int32 lIsTwoSided = 0;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lLoadList;
 		// TRICKY: these have to be in the exact same order as when saved.
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TWO_SIDED, &lIsTwoSided));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VERTICES, (void**)&lLoadVertices, &lVerticesSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_STRIPS, (void**)&lStripsIndices, &lStripsIndicesSize));
@@ -157,6 +159,11 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 			pMeshData->AddUVSet(lUvs[x]);
 		}
 
+		if (lIsTwoSided)
+		{
+			pMeshData->SetTwoSided(true);
+		}
+
 		pCastsShadows = lCastsShadows;
 	}
 	// TODO: reuse memory, don't new/delete constantly!
@@ -218,11 +225,13 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	int32 lColorFormat = pMeshData->GetColorFormat();
 	int32 lGeometryVolatility = pMeshData->GetGeometryVolatility();
 	int32 lCastsShadows = pCastsShadows;
+	int32 lIsTwoSided = pMeshData->IsTwoSided()? 1 : 0;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lSaveList;
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
+		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TWO_SIDED, &lIsTwoSided));
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VERTICES, (void**)&lVertices, &lVerticesSize));
 		if (lTriangleIndices)
 		{

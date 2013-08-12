@@ -33,7 +33,8 @@ Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, G
 	Parent(pResourceManager, pClassId, pUiManager),
 	mJetEngineEmitter(0),
 	mExhaustEmitter(0),
-	mBurnEmitter(0)
+	mBurnEmitter(0),
+	mBlinkTime(0)
 {
 	EnableMeshSlide(true);
 }
@@ -118,6 +119,10 @@ void Machine::OnTick()
 		else if (lTag.mTagName == _T("engine_light"))
 		{
 			HandleTagEngineLight(lTag, lFrameTime);
+		}
+		else if (lTag.mTagName == _T("blink_light"))
+		{
+			HandleTagBlinkLight(lTag, lFrameTime);
 		}
 		else if (lTag.mTagName == _T("jet_engine_emitter"))
 		{
@@ -316,6 +321,39 @@ void Machine::HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pF
 			lMesh->GetBasicMaterialSettings().mAmbient.Set(lAmbientChannel, lAmbientChannel, lAmbientChannel);
 		}
 	}
+}
+
+void Machine::HandleTagBlinkLight(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)
+{
+	if (pTag.mFloatValueList.size() != 9 ||
+		pTag.mStringValueList.size() != 0 ||
+		pTag.mBodyIndexList.size() != 0 ||
+		pTag.mEngineIndexList.size() != 0 ||
+		pTag.mMeshIndexList.size() < 1)
+	{
+		mLog.Errorf(_T("The blink_light tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		deb_assert(false);
+		return;
+	}
+	enum
+	{
+		R_OFF = 0, R_AMP, R_SPEED,
+		G_OFF,     G_AMP, G_SPEED,
+		B_OFF,     B_AMP, B_SPEED,
+	};
+#define V(i)	pTag.mFloatValueList[i]
+	const float r = V(R_OFF) + V(R_AMP) * sin(mBlinkTime*2*PIF*V(R_SPEED));
+	const float g = V(G_OFF) + V(G_AMP) * sin(mBlinkTime*2*PIF*V(G_SPEED));
+	const float b = V(B_OFF) + V(B_AMP) * sin(mBlinkTime*2*PIF*V(B_SPEED));
+	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
+	{
+		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		if (lMesh)
+		{
+			lMesh->GetBasicMaterialSettings().mAmbient.Set(r, g, b);
+		}
+	}
+	mBlinkTime += pFrameTime;
 }
 
 void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, const Vector3DF& pVelocity,
