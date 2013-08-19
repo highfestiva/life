@@ -61,7 +61,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			8
+#define LAST_LEVEL			9
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	4
@@ -1009,7 +1009,8 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 		lLevel->DisableRootShadow();
 		lObject = lLevel;
 	}
-	else if (strutil::StartsWith(pClassId, _T("helicopter_")) || strutil::StartsWith(pClassId, _T("monster")))
+	else if (strutil::StartsWith(pClassId, _T("helicopter_")) || strutil::StartsWith(pClassId, _T("monster")) ||
+		strutil::StartsWith(pClassId, _T("fighter")))
 	{
 		UiCure::Machine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
@@ -1117,6 +1118,12 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			{
 				mLastVehicleColor = Vector3DF(0, 1, 0);
 			}
+		}
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("fighter")))
+		{
+			//pObject->SetEnginePower(0, 1);
+			pObject->SetEnginePower(1, 1);
+			//pObject->SetEnginePower(2, 1);
 		}
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("simulator")))
 		{

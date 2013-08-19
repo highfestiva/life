@@ -14,7 +14,11 @@ Crazy hoArse - mad, galloping horse using rigging+skinning. Spinning eyes, flail
 
 Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
 
-Fleeing animal made up by particles and can shape-shift. Tiger to run across trees, cliffs; horse to run across plains and mountains; bird to span gaps. Run during night. Full moon.
+Fleeing animal made up by particles and can shape-shift. Tiger to run across trees, cliffs; horse to run across plains and mountains; bird to span gaps. Run during night. Full moon. A bit like a DEMO!
+
+Dinosaur game!
+
+Clone of Bloons, but in 3D?
 
 Sandbox: place things in the world, make them go.
  - Completed missions are things like "scored a goal", "killed the bus" or "demolished the house" or "blew up the convoy",
@@ -54,6 +58,8 @@ Flocking game. School of fish? Birds? Something! The prototype should be fun wit
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
 
 UFO Counter - Saucers come and land, and ET's emegerge. Take 'em out before they blow up planet Earth!
+
+UFO Strike - Be a flying saucer and take out Earth's defenses. UFO flies automatically, you can set speed. Shoot tanks/planes/canons by tapping, and pick up speed boosts by tapping.
 
 Crazy game using genitals as obstacles.
 

@@ -62,7 +62,7 @@ class GroupReader(DefaultMAReader):
 				     "polyBridgeEdge", "polySeparate", "polyChipOff", \
 				     "deleteUVSet", "plusMinusAverage", "transformGeometry", \
 				     "cameraView", "directionalLight", "brush", \
-				     "createUVSet", "animCurveTU", "animCurveTA"]
+				     "createUVSet", "animCurveTU", "animCurveTA", "bump2d"]
 		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", \
 		                     "polyAutoProj", "polyPlane"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
@@ -544,9 +544,11 @@ class GroupReader(DefaultMAReader):
 						texturename = os.path.relpath(os.path.normpath(texturename), curdir)
 						texturename = texturename.replace("\\", "/")
 						while not texturename.startswith("Data/"):
-							texturename = "/".join(texturename.split("/")[1:])
+							lastpart = "/".join(texturename.split("/")[1:])
+							if lastpart:
+								texturename = lastpart
 							if texturename.find("Data/") < 0:
-								print("Error: this path will become a problem for you:", texturename)
+								print("Error: this texture path will become a problem for you:", texturename)
 								sys.exit(1)
 						textureNames += [texturename]
 
