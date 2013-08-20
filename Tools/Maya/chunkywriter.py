@@ -79,6 +79,9 @@ class ChunkyWriter:
 
 	def write(self):
 		self.bodies, self.meshes, self.engines, self.phys_triggers = self._sortgroup(self.group)
+		self.physrootpos, q = self.bodies[0].get_final_local_transform()
+		self.physrootpos.y = 0
+		self.physrootpos.z = 0
 		self.dowrite()
 
 
@@ -444,7 +447,8 @@ class PhysWriter(ChunkyWriter):
 	def _writebone(self, node):
 		pos, q = node.get_final_local_transform()
 		if not node.phys_root and node.getParent().phys_children[0] == node:
-			pos = [pos.x, pos.y, -node.lowestpos.z]
+			pos.z = -node.lowestpos.z
+		pos -= self.physrootpos
 		data = q[:]+pos[:3]
 		self._normalizexform(data)
 		if options.options.verbose:
@@ -527,6 +531,7 @@ class PhysWriter(ChunkyWriter):
 		j = ir * j
 		if node.is_phys_root and node.xformparent == node.getphysmaster():
 			j = node._pointup_adjust_mat() * j
+		j -= self.physrootpos
 
 		#print(node.getName(), "\n", mp, "\n", mt, "\n", wp, "\n", wt, "\n", ir, "\n", j)
 		parameters[6:9] = j[:3]
@@ -563,6 +568,8 @@ class PhysWriter(ChunkyWriter):
 		shape.data = [type(x)(scale*x) for x in shape.data]
 		if options.options.verbose:
 			print("Writing shape %s with rootindex %i: %s (scale=%f)." % (node.getName(), rootindex, str(shape.data), scale))
+		if node == self.bodies[0]:
+			shape.adjustmesh(self.physrootpos)
 		for x in shape.data:
 			self._writenumber(x)
 		self._addfeat("physical geometry:physical geometries", 1)
@@ -822,9 +829,11 @@ class ClassWriter(ChunkyWriter):
 				if options.options.verbose:
 					print(m.getName(), "has displacement", p, "compared to", phys.getName(), tmt, tpt)
 				q = quat(tpr.inverse() * tmr).normalize()
+				physidx = self.bodies.index(phys)
+				if physidx == 0:
+					p -= self.physrootpos
 				p = p[0:3]
 				t = self._normalizexform(q[:]+p[:])
-				physidx = self.bodies.index(phys)
 				meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, os.path.basename(m.meshbasename), t, m.mat))]
 			tags = []
 			for node in self.group:

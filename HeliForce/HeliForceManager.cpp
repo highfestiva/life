@@ -1527,9 +1527,9 @@ void HeliForceManager::HandleWorldBoundaries()
 		Life::HomingProjectile* lRocket = (Life::HomingProjectile*)Parent::CreateContextObject(_T("missile"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		lRocket->SetTarget(mAvatarId);
 		Vector3DF lFirePosition(lAvatar->GetPosition().x, 0, 0);
-		lFirePosition.Normalize(500);
+		lFirePosition.Normalize(200);
 		lFirePosition += lAvatar->GetPosition();
-		lFirePosition.z += 200;
+		lFirePosition.z += 50;
 		lRocket->SetInitialTransform(TransformationF(QuaternionF(), lFirePosition));
 		lRocket->StartLoading();
 	}

@@ -123,13 +123,24 @@ class Shape:
 			lp[1] -= self.data[0]
 			lp[2] -= self.data[0]
 		elif self._shapenode.nodetype == "mesh":
-			# Could be improved; currently seem unnecessary.
 			pass
 		else:
 			print("Error: (2) primitive physics shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
 			sys.exit(22)
 		#print("Shape %s at %s says it has a lowest point of %s with size %s." %(self._scalenode.getName(), p, lp, self.data))
 		return vec3(lp[:3])
+
+
+	def adjustmesh(self, pos):
+		"We move the mesh, as the underlying physical object's origin has been moved (to coordinate system's origin)."
+		if self._shapenode.nodetype != "mesh":
+			return
+		d = self.data
+		vtxcnt = self.data[0]	# [0]=vtxcnt, [1]=tricnt
+		for x in range(vtxcnt):
+			d[2+x*3+0] -= pos.x
+			d[2+x*3+1] -= pos.y
+			d[2+x*3+2] -= pos.z
 
 
 	def getnode(self):
