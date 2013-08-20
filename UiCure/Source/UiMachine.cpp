@@ -65,6 +65,11 @@ void Machine::SetBurnEmitter(BurnEmitter* pEmitter)
 	mBurnEmitter = pEmitter;
 }
 
+BurnEmitter* Machine::GetBurnEmitter() const
+{
+	return mBurnEmitter;
+}
+
 void Machine::DeleteEngineSounds()
 {
 	TagSoundTable::iterator x = mEngineSoundTable.begin();

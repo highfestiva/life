@@ -33,6 +33,7 @@ public:
 	void SetJetEngineEmitter(JetEngineEmitter* pEmitter);
 	void SetExhaustEmitter(ExhaustEmitter* pEmitter);
 	void SetBurnEmitter(BurnEmitter* pEmitter);
+	BurnEmitter* GetBurnEmitter() const;
 	void DeleteEngineSounds();
 
 protected:

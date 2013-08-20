@@ -25,7 +25,8 @@ namespace UiCure
 BurnEmitter::BurnEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager):
 	mResourceManager(pResourceManager),
 	mUiManager(pUiManager),
-	mBurnTimeout(0)
+	mBurnTimeout(0),
+	mFreeFlow(false)
 {
 }
 
@@ -88,7 +89,14 @@ void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::Chun
 	lOffset = lOriginalOrientation*lOffset;
 	Vector3DF lVelocity(pTag.mFloatValueList[FV_VX], pTag.mFloatValueList[FV_VY], pTag.mFloatValueList[FV_VZ]);
 	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
-	lVelocity = lOriginalOrientation*lVelocity;
+	if (!mFreeFlow)
+	{
+		lVelocity = lOriginalOrientation*lVelocity;
+	}
+	else
+	{
+		lVelocity.Set(0, 0, lVelocity.GetLength()*0.6f);
+	}
 	lVelocity += pObject->GetVelocity();
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
@@ -107,6 +115,11 @@ void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::Chun
 			lParticleRenderer->CreateFume(lLifeTime, lScale, lAngularVelocity, lOpacity, lTransform.GetPosition(), lVelocity);
 		}
 	}
+}
+
+void BurnEmitter::SetFreeFlow()
+{
+	mFreeFlow = true;
 }
 
 

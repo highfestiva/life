@@ -10,6 +10,8 @@
 
 Knobbelen
 
+UFO Strike - Be a flying saucer and take out Earth's defenses. UFO flies automatically. Tap to shoot houses, sky scrapers, tanks, planes, canons, and pick up boosts by tapping. Program: generate terrain, cities with destructable blocks! Going to be awesome!
+
 Crazy hoArse - mad, galloping horse using rigging+skinning. Spinning eyes, flailing limbs, strange obstacles. Make it look EXTREMELY organic!
 
 Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
@@ -58,8 +60,6 @@ Flocking game. School of fish? Birds? Something! The prototype should be fun wit
 Scare-crow Soccer / Soccer for Dummies - a rag-doll, you, is the goal-keeper; the computer does the shooting.
 
 UFO Counter - Saucers come and land, and ET's emegerge. Take 'em out before they blow up planet Earth!
-
-UFO Strike - Be a flying saucer and take out Earth's defenses. UFO flies automatically, you can set speed. Shoot tanks/planes/canons by tapping, and pick up speed boosts by tapping.
 
 Crazy game using genitals as obstacles.
 

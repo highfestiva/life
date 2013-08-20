@@ -18,6 +18,8 @@ namespace Life
 ExplodingMachine::ExplodingMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mLauncher(pLauncher),
+	mTriggerDeathFrame(-1),
+	mDeathFrameDelay(1),
 	mIsDetonated(false)
 {
 }
@@ -28,13 +30,25 @@ ExplodingMachine::~ExplodingMachine()
 
 
 
+void ExplodingMachine::SetDeathFrameDelay(int pDeathFrameDelay)
+{
+	mDeathFrameDelay = pDeathFrameDelay;
+}
+
 void ExplodingMachine::OnTick()
 {
 	Parent::OnTick();
 
-	if (Cure::Health::Get(this, 1) <= 0)
+	if (Cure::Health::Get(this, 1) <= 0 && mTriggerDeathFrame < 0)
 	{
-		OnDie();
+		mTriggerDeathFrame = 0;
+	}
+	if (mTriggerDeathFrame >= 0)
+	{
+		if (++mTriggerDeathFrame > mDeathFrameDelay)
+		{
+			OnDie();
+		}
 	}
 }
 

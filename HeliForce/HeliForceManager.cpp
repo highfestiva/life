@@ -548,8 +548,9 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 
 
 	// Slowmo check.
+	const bool lIsAvatar = (pExplosive->GetInstanceId() == mAvatarId);
 	bool lNormalDeath = true;
-	if (pExplosive->GetInstanceId() == mAvatarId && Cure::Health::Get(pExplosive) < -5500)
+	if (lIsAvatar && Cure::Health::Get(pExplosive) < -5500)
 	{
 		if (Random::Uniform(0.0f, 1.0f) > 0.7f)
 		{
@@ -561,6 +562,10 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 	if (lNormalDeath)
 	{
 		DeleteContextObjectDelay(pExplosive, 3.0);
+	}
+	if (lIsAvatar)
+	{
+		((UiCure::Machine*)pExplosive)->GetBurnEmitter()->SetFreeFlow();
 	}
 
 
@@ -1085,6 +1090,7 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")))
 		{
+			((Life::ExplodingMachine*)pObject)->SetDeathFrameDelay(5);
 			Vector3DF lDirection(-1,0,0);
 			new Automan(this, pObject->GetInstanceId(), lDirection);
 			Vector3DF lColor;

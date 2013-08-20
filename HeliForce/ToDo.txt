@@ -16,6 +16,7 @@
 + Unload resources between levels to ensure memory will suffice.
 + Optimize to ensure high frame rates on touch devices.
 + Make explosion sparks never go slower than X, otherwise it looks like shit.
++ Make burn smoke billow up if rotor is off!
 + Save personal times.
 . Save WR times.
 . Show high score.
@@ -37,7 +38,6 @@
   . Butterflies, things like that.
   + Reduce stretch on backgrounds, so the lush textures appear. Right now it looks like shit!
 . Beautify!
-. Make burn smoke billow up if rotor is off!
 . Large fonts on iOS.
 . Music.
 . Sounds. Ambient. Moving stuff.
