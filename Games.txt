@@ -12,6 +12,8 @@ Knobbelen
 
 UFO Strike - Be a flying saucer and take out Earth's defenses. UFO flies automatically. Tap to shoot houses, sky scrapers, tanks, planes, canons, and pick up boosts by tapping. Program: generate terrain, cities with destructable blocks! Going to be awesome!
 
+Tank and or FPS shooter in Gbg, generated through Google maps/street view.
+
 Crazy hoArse - mad, galloping horse using rigging+skinning. Spinning eyes, flailing limbs, strange obstacles. Make it look EXTREMELY organic!
 
 Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
