@@ -422,9 +422,10 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 			int lPhysIndex = -1;
 			str lMeshName;
 			TransformationF lTransform;
-			lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform);
+			float lScale;
+			lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform, lScale);
 			UserGeometryReferenceResource* lMesh = new UserGeometryReferenceResource(
-				mUiManager, GeometryOffset(lPhysIndex, lTransform));
+				mUiManager, GeometryOffset(lPhysIndex, lTransform, lScale));
 			mMeshResourceArray.push_back(lMesh);
 		}
 	}
@@ -446,7 +447,8 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		int lPhysIndex = -1;
 		str lMeshName;
 		TransformationF lTransform;
-		lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform);
+		float lScale;
+		lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform, lScale);
 		str lMeshInstance;
 		strutil::strvec lMeshNameList = strutil::Split(lMeshName, _T(";"), 1);
 		lMeshName = lMeshNameList[0];
@@ -519,6 +521,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
 
 		((TBC::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);
+		pMeshResource->GetRamData()->SetScale(pMeshResource->GetOffset().mScale);
 		TryAddTexture();
 	}
 	else

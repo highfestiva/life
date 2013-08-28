@@ -398,6 +398,8 @@ private:
 
 public:
 	LEPRA_DEBUG_CODE(str mName);
+
+	LOG_CLASS_DECLARE();
 };
 
 

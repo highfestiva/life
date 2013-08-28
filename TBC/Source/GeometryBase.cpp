@@ -369,6 +369,10 @@ float GeometryBase::GetScale() const
 void GeometryBase::SetScale(float pScale)
 {
 	mScale = pScale;
+	if (mScale != 1)
+	{
+		log_volatile(mLog.Debugf(_T("Setting scale %f on mesh %s."), mScale, mName.c_str()));
+	}
 }
 
 unsigned int GeometryBase::GetMaxTriangleCount() const
@@ -1493,6 +1497,10 @@ const TransformationF& GeometryBase::GetUVTransform()
 		return gIdentityTransformationF;
 	}
 }
+
+
+
+LOG_CLASS_DEFINE(UI_GFX, GeometryBase);
 
 
 

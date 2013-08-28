@@ -105,7 +105,8 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 			int lPhysIndex = -1;
 			str lMeshName;
 			TransformationF lTransform;
-			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform);
+			float lMeshScale;
+			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform, lMeshScale);
 			lTransform = lMesh->GetBaseTransformation() * lTransform;
 			lTransform.GetPosition() += lOffset;
 

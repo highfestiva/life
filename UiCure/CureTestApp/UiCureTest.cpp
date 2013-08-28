@@ -90,9 +90,10 @@ private:
 			int lPhysIndex = -1;
 			str lName;
 			Lepra::TransformationF lTransform;
-			lClass->GetMesh(x, lPhysIndex, lName, lTransform);
+			float lMeshScale;
+			lClass->GetMesh(x, lPhysIndex, lName, lTransform, lMeshScale);
 			mMeshResourceArray.push_back(new UiCure::UserGeometryReferenceResource(
-				mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform)));
+				mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform, lMeshScale)));
 			mMeshResourceArray[x]->Load(pResource->GetConstResource()->GetManager(),
 				_T("Data/") + lName+_T(".mesh;0"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,

@@ -1411,10 +1411,11 @@ TransformationF HeliForceManager::GetMainRotorTransform(const UiCure::CppContext
 	int lPhysIndex;
 	str lMeshName;
 	TransformationF lTransform;
+	float lMeshScale;
 	size_t lMeshCount = ((UiTbc::ChunkyClass*)pChopper->GetClass())->GetMeshCount();
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
-		((UiTbc::ChunkyClass*)pChopper->GetClass())->GetMesh(x, lPhysIndex, lMeshName, lTransform);
+		((UiTbc::ChunkyClass*)pChopper->GetClass())->GetMesh(x, lPhysIndex, lMeshName, lTransform, lMeshScale);
 		if (lMeshName.find(_T("_rotor")) != str::npos)
 		{
 			return pChopper->GetMesh(x)->GetBaseTransformation();

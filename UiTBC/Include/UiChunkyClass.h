@@ -38,9 +38,9 @@ public:
 	ChunkyClass();
 	virtual ~ChunkyClass();
 
-	void AddMesh(int pPhysIndex, const str& pMeshBaseName, const TransformationF& pTransform);
+	void AddMesh(int pPhysIndex, const str& pMeshBaseName, const TransformationF& pTransform, float pScale);
 	size_t GetMeshCount() const;
-	void GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName, TransformationF& pTransform) const;
+	void GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName, TransformationF& pTransform, float& pScale) const;
 	void SetLastMeshMaterial(const Material& pMaterial);
 	const Material& GetMaterial(size_t pMeshIndex) const;
 
@@ -48,15 +48,17 @@ private:
 	struct PhysMeshEntry
 	{
 		PhysMeshEntry(int pPhysIndex, const str& pMeshBaseName,
-			const TransformationF& pTransform):
+			const TransformationF& pTransform, float pScale):
 			mPhysIndex(pPhysIndex),
 			mMeshBaseName(pMeshBaseName),
-			mTransform(pTransform)
+			mTransform(pTransform),
+			mScale(pScale)
 		{
 		}
 		int mPhysIndex;
 		str mMeshBaseName;
 		TransformationF mTransform;
+		float mScale;
 		Material mMaterial;
 	};
 	typedef std::vector<PhysMeshEntry> PhysMeshArray;

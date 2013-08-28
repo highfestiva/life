@@ -1048,7 +1048,11 @@ class GroupReader(DefaultMAReader):
 								parent.shape = node     # Use triangle mesh as physics shape.
 							elif in_nodename:
 								while in_nodename:
-									parent.shape = self.findNode(in_nodename)
+									try:
+										parent.shape = self.findNode(in_nodename)
+									except KeyError:
+										if node.getName().startswith("m_"):
+											break
 									if not parent.shape:
 										print("Error: %s's input node %s does not exist!" % (node.getFullName(), in_nodename))
 										isGroupValid = False
@@ -1057,7 +1061,7 @@ class GroupReader(DefaultMAReader):
 										in_nodename = parent.shape.getInNode("ig", "ig")[0]
 										if not in_nodename:
 											in_nodename = parent.shape.getInNode("ip", "ip")[0]
-								if not parent.shape:
+								if not parent.shape and node.getName().startswith("phys_"):
 									print("Error: %s's input node not found!" % node.getFullName())
 									isGroupValid = False
 							elif node.getName().startswith("phys_"):

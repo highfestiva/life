@@ -102,3 +102,5 @@ Something inflatable... For instance spheres... Mm... something!
 Car Jumpin'
 
 Make a game with speech controls, for instance using http://www.politepix.com/openears/.
+
+(Mind map web app - i.e. not a game - med googleapis/jQuery. Bygg ett dynamiskt träd där orden pekar ut sina föräldrar och antal kopplingar... Layouta svajande. Börja med en textinmatningsruta som omvandlas till rotnod.)

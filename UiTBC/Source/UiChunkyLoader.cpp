@@ -480,14 +480,16 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 		{
 			const int lTransformFloatCount = 7;
 			float lTransformArray[lTransformFloatCount];
-			for (int x = 0; x < lTransformFloatCount; ++x)
+			int x = 0;
+			for (; x < lTransformFloatCount; ++x)
 			{
 				lTransformArray[x] = Endian::BigToHostF(*(uint32*)&lBuffer[lIndex+x*sizeof(float)]);
 			}
-			lIndex += lTransformFloatCount * sizeof(float);
-			lOk = (lIndex < (int)(pSize - 11*sizeof(float) - 4));
+			const float lScale = Endian::BigToHostF(*(uint32*)&lBuffer[lIndex+x*sizeof(float)]);
+			lIndex += (lTransformFloatCount + 1) * sizeof(float);
+			lOk = (lIndex < (int)(pSize - 12*sizeof(float) - 4));
 			deb_assert(lOk);
-			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, TransformationF(lTransformArray));
+			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, TransformationF(lTransformArray), lScale);
 			lClass->AddPhysRoot(lPhysicsIndex);
 		}
 		UiTbc::ChunkyClass::Material lMaterial;

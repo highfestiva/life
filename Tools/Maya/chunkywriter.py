@@ -61,10 +61,11 @@ CHUNK_MESH_TWO_SIDED			= "METS"
 
 
 class PhysMeshPtr:
-	def __init__(self, physidx, meshbasename, t, mat):
+	def __init__(self, physidx, meshbasename, t, scale, mat):
 		self.physidx = physidx
 		self.meshbasename = meshbasename
 		self.t = t
+		self.scale = scale
 		self.mat = mat
 
 
@@ -783,6 +784,7 @@ class ClassWriter(ChunkyWriter):
 	"""Translates a node/attribute class and writes it to disk as a class chunky file."""
 
 	def __init__(self, basename, group, config):
+		self.firstmeshscale = {}
 		ChunkyWriter.__init__(self, basename, group, config)
 
 
@@ -821,7 +823,7 @@ class ClassWriter(ChunkyWriter):
 				m.writecount += 1
 				tm = m.get_world_transform()
 				tp = phys.gettransformto(None, "actual", getparent=lambda n: n.getParent())
-				tmt, tmr, _ = tm.decompose()
+				tmt, tmr, mscale = tm.decompose()
 				tpt, tpr, _ = tp.decompose()
 				q = quat(tpr.inverse()).normalize()
 				p = tmt-tpt
@@ -834,7 +836,14 @@ class ClassWriter(ChunkyWriter):
 					p -= self.physrootpos
 				p = p[0:3]
 				t = self._normalizexform(q[:]+p[:])
-				meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, os.path.basename(m.meshbasename), t, m.mat))]
+				mscale = mscale.length() / (1+1+1)**.5
+				try:
+					mscale /= self.firstmeshscale[m.meshbasename]
+				except:
+					self.firstmeshscale[m.meshbasename] = mscale
+					mscale = 1.0
+				if mscale > 0.97 and mscale < 1.03: mscale = 1.0
+				meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, os.path.basename(m.meshbasename), t, mscale, m.mat))]
 			tags = []
 			for node in self.group:
 				if node.getName().startswith("tag:"):
@@ -874,6 +883,7 @@ class ClassWriter(ChunkyWriter):
 		self._writeint(physmeshptr.physidx)
 		self._writestr(physmeshptr.meshbasename)
 		self._writexform(physmeshptr.t)
+		self._writefloat(physmeshptr.scale)
 		self._writematerial(physmeshptr.meshbasename, physmeshptr.mat)
 		if options.options.verbose:
 			print("Wrote %s's transform %s." % (physmeshptr.meshbasename, physmeshptr.t))

@@ -198,22 +198,26 @@ private:
 struct GeometryOffset
 {
 	GeometryOffset(unsigned pPhysicsNodeId):
-		mGeometryIndex(pPhysicsNodeId)
+		mGeometryIndex(pPhysicsNodeId),
+		mScale(1)
 	{
 	}
 	GeometryOffset(unsigned pPhysicsNodeId, Vector3DF pOffset):
-		mGeometryIndex(pPhysicsNodeId)
+		mGeometryIndex(pPhysicsNodeId),
+		mScale(1)
 	{
 		mOffset.SetPosition(pOffset);
 	}
-	GeometryOffset(unsigned pPhysicsNodeId, TransformationF pOffset):
+	GeometryOffset(unsigned pPhysicsNodeId, TransformationF pOffset, float pScale):
 		mGeometryIndex(pPhysicsNodeId),
-		mOffset(pOffset)
+		mOffset(pOffset),
+		mScale(pScale)
 	{
 	}
 
 	unsigned mGeometryIndex;
 	TransformationF mOffset;
+	float mScale;
 };
 
 

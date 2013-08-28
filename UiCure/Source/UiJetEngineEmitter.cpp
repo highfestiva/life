@@ -147,7 +147,8 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 			int lPhysIndex = -1;
 			str lMeshName;
 			TransformationF lTransform;
-			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform);
+			float lMeshScale;
+			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform, lMeshScale);
 			lTransform = lMesh->GetBaseTransformation() * lTransform;
 			Vector3DF lMeshPos = lTransform.GetPosition() + lPosition;
 

@@ -36,9 +36,9 @@ ChunkyClass::~ChunkyClass()
 
 
 
-void ChunkyClass::AddMesh(int pPhysIndex, const str& pMeshBaseName, const TransformationF& pTransform)
+void ChunkyClass::AddMesh(int pPhysIndex, const str& pMeshBaseName, const TransformationF& pTransform, float pScale)
 {
-	mMeshArray.push_back(PhysMeshEntry(pPhysIndex, pMeshBaseName, pTransform));
+	mMeshArray.push_back(PhysMeshEntry(pPhysIndex, pMeshBaseName, pTransform, pScale));
 }
 
 size_t ChunkyClass::GetMeshCount() const
@@ -46,13 +46,13 @@ size_t ChunkyClass::GetMeshCount() const
 	return (mMeshArray.size());
 }
 
-void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName,
-	TransformationF& pTransform) const
+void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName, TransformationF& pTransform, float& pScale) const
 {
 	deb_assert(pIndex < mMeshArray.size());
 	pPhysIndex = mMeshArray[pIndex].mPhysIndex;
 	pMeshBaseName = mMeshArray[pIndex].mMeshBaseName;
 	pTransform = mMeshArray[pIndex].mTransform;
+	pScale = mMeshArray[pIndex].mScale;
 }
 
 void ChunkyClass::SetLastMeshMaterial(const Material& pMaterial)
