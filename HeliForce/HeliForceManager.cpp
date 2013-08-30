@@ -61,7 +61,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			9
+#define LAST_LEVEL			10
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	4
@@ -121,6 +121,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mPostZoomPlatformFrameCount(100),
 	mHitGroundFrameCount(STILL_FRAMES_UNTIL_CAM_PANS),
 	mIsHitThisFrame(false),
+	mLevelCompleted(false),
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	mFireButton(0),
 #endif // Touch or emulated touch.
@@ -630,6 +631,7 @@ bool HeliForceManager::DidFinishLevel()
 		UiCure::UserSound3dResource* lFinishSound = new UiCure::UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, mCameraTransform.GetPosition(), Vector3DF(), 5.0f, 1.0f);
 		mZoomPlatform = true;
+		mLevelCompleted = true;
 		return true;
 	}
 	return false;
@@ -640,6 +642,7 @@ str HeliForceManager::StepLevel(int pCount)
 	if (GetContext()->GetObject(mAvatarId))
 	{
 		mOldLevel = mLevel;
+		mLevelCompleted = false;
 		int lLevelNumber = GetCurrentLevelNumber();
 		lLevelNumber += pCount;
 		if (lLevelNumber > LAST_LEVEL)
@@ -904,7 +907,7 @@ void HeliForceManager::TickUiUpdate()
 		{
 			mFlyTime.Stop();
 		}
-		else if (!mFlyTime.IsStarted())
+		else if (!mFlyTime.IsStarted() && !mLevelCompleted)
 		{
 			Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 			deb_assert(lSpawner);

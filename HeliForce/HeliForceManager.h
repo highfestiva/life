@@ -178,6 +178,7 @@ protected:
 	int mPostZoomPlatformFrameCount;
 	int mHitGroundFrameCount;
 	bool mIsHitThisFrame;
+	bool mLevelCompleted;
 	Vector3DF mMicrophoneSpeed;
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	UiTbc::Button* mFireButton;

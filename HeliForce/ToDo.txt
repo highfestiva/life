@@ -1,3 +1,4 @@
+- More helis. One with glowing engine in the rear.
 + Measure time. Nice font.
 + Heli exhaust.
 + Helper direction arrow (points along auto pilot spline).
@@ -42,7 +43,6 @@
 . Music.
 . Sounds. Ambient. Moving stuff.
 . Make sure the "close to the path" indicator gets back on track when restarting the level.
-. More helis. One with glowing engine in the rear.
 . Pilot name and high score.
 . Change pilot name.
 . Restart/replay level.

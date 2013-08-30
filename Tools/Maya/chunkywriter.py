@@ -81,6 +81,8 @@ class ChunkyWriter:
 	def write(self):
 		self.bodies, self.meshes, self.engines, self.phys_triggers = self._sortgroup(self.group)
 		self.physrootpos, q = self.bodies[0].get_final_local_transform()
+		if not self.config["center_phys"]:
+			self.physrootpos.x = 0
 		self.physrootpos.y = 0
 		self.physrootpos.z = 0
 		self.dowrite()
