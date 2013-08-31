@@ -483,6 +483,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\Driver.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\FloatAttribute.cpp"
 				>
 			</File>
@@ -630,6 +634,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\Cure.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\Driver.h"
 				>
 			</File>
 			<File

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
+#include "../Cure/Include/Driver.h"
 #include "../Cure/Include/Elevator.h"
 #include "../Cure/Include/Health.h"
 #include "../Cure/Include/FloatAttribute.h"
@@ -1073,6 +1074,10 @@ Cure::ContextObject* HeliForceManager::CreateLogicHandler(const str& pType)
 		Cure::Elevator* lElevator = new Cure::Elevator(GetContext());
 		lElevator->SetStopDelay(0.5f);
 		return lElevator;
+	}
+	else if (strutil::StartsWith(pType, _T("driver:")))
+	{
+		return new Cure::Driver(GetContext());
 	}
 	return (0);
 }
