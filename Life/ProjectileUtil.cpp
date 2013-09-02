@@ -32,7 +32,7 @@ bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF
 	pTransform.GetOrientation().RotateAroundOwnX(-PIF/2);
 	pTransform.SetPosition(lAvatar->GetPosition());
 	pVelocity = lAvatar->GetVelocity();
-	const TBC::ChunkyClass::Tag* lTag = lAvatar->FindTag(_T("context_path"), 0, 0);
+	const TBC::ChunkyClass::Tag* lTag = lAvatar->FindTag(_T("muzzle"), 0, 0);
 	if (lTag)
 	{
 		const int lBoneIndex = lTag->mBodyIndexList[0];
@@ -46,10 +46,12 @@ bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF
 		//	q.GetA(), q.GetB(), q.GetC(), q.GetD(),
 		//	p.GetA(), p.GetB(), p.GetC(), p.GetD());
 #endif // Debug
-		const TBC::PhysicsManager::BodyID lRootBodyId = lAvatar->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-		const QuaternionF lRootOrientation = lAvatar->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lRootBodyId);
+		const int lParentIndex = lAvatar->GetPhysics()->GetIndex(lBone->GetParent());
+		const TBC::PhysicsManager::BodyID lParentBodyId = lAvatar->GetPhysics()->GetBoneGeometry(lParentIndex)->GetBodyId();
+		const QuaternionF lParentOrientation = lAvatar->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lParentBodyId);
 		const Vector3DF lMuzzleOffset = lAvatar->GetPhysics()->GetOriginalBoneTransformation(lBoneIndex).GetPosition();
-		pTransform.GetPosition() += lRootOrientation * lMuzzleOffset;
+		pTransform.GetPosition() += lParentOrientation * lMuzzleOffset;
+		pTransform.SetOrientation(lParentOrientation);
 	}
 	return true;
 }

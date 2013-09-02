@@ -80,6 +80,7 @@ public:
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
+	virtual void Shoot(Cure::ContextObject* pCanon, int);
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
@@ -126,8 +127,6 @@ protected:
 	Vector3DF GetLandingTriggerPosition(Cure::ContextObject* pLevel) const;
 	void EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition);
 	TransformationF GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const;
-
-	void Shoot(Cure::ContextObject*, int);
 
 	void OnFireButton(UiTbc::Button*);
 

@@ -541,6 +541,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CanonDriver.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CenteredMachine.cpp"
 				>
 			</File>
@@ -616,6 +620,10 @@
 			</File>
 			<File
 				RelativePath=".\BaseMachine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CanonDriver.h"
 				>
 			</File>
 			<File

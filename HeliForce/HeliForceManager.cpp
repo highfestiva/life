@@ -47,11 +47,12 @@
 #include "../UiTBC/Include/UiBillboardGeometry.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "../UiTBC/Include/UiRenderer.h"
-#include "CenteredMachine.h"
 #include "AirBalloonPilot.h"
 #include "Automan.h"
 #include "AutoPathDriver.h"
 #include "Autopilot.h"
+#include "CenteredMachine.h"
+#include "CanonDriver.h"
 #include "HeliForceConsoleManager.h"
 #include "HeliForceTicker.h"
 #include "LandingTrigger.h"
@@ -523,6 +524,21 @@ bool HeliForceManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 
 
 
+void HeliForceManager::Shoot(Cure::ContextObject* pCanon, int)
+{
+	Life::FastProjectile* lProjectile = new Life::FastProjectile(GetResourceManager(), _T("bullet"), mUiManager, this);
+	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	lProjectile->SetOwnerInstanceId(pCanon->GetInstanceId());
+	TransformationF t(pCanon->GetOrientation(), pCanon->GetPosition());
+	lProjectile->SetInitialTransform(t);
+	lProjectile->StartLoading();
+
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	Vector3DF v;
+	Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
+	lParticleRenderer->CreateFlare(Vector3DF(0.9f, 0.7f, 0.5f), 0.3f, 7.5f, t.GetPosition(), v);
+}
+
 void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
 	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
@@ -611,6 +627,7 @@ void HeliForceManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextOb
 	{
 		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
 		mCollisionSoundManager->OnCollision(5.0f, pBullet->GetPosition(), lGeometry, lGeometry->GetMaterial());
+		Cure::Health::Add(pHitObject, -0.2f, false);
 	}
 }
 
@@ -1027,7 +1044,7 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
-	else if (strutil::StartsWith(pClassId, _T("forklift")))
+	else if (strutil::StartsWith(pClassId, _T("forklift")) || strutil::StartsWith(pClassId, _T("corvette")))
 	{
 		UiCure::Machine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
@@ -1109,9 +1126,11 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			mLastVehicleColor = lColor;
 			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("forklift")))
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("forklift")) ||
+			strutil::StartsWith(pObject->GetClassId(), _T("corvette")))
 		{
-			new AutoPathDriver(this, pObject->GetInstanceId(), _T("forklift_path"));
+			str lBaseName = strutil::Split(pObject->GetClassId(), _T("_"))[0];
+			new AutoPathDriver(this, pObject->GetInstanceId(), lBaseName+_T("_path"));
 			Vector3DF lColor;
 			do
 			{
@@ -1119,6 +1138,10 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			} while (lColor.GetDistanceSquared(mLastVehicleColor) < 1);
 			mLastVehicleColor = lColor;
 			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
+		}
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("turret")))
+		{
+			new CanonDriver(this, pObject->GetInstanceId());
 		}
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("air_balloon")))
 		{
@@ -1430,10 +1453,6 @@ TransformationF HeliForceManager::GetMainRotorTransform(const UiCure::CppContext
 		}
 	}
 	return lTransform;
-}
-
-void HeliForceManager::Shoot(Cure::ContextObject*, int)
-{
 }
 
 
