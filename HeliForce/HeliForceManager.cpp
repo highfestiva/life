@@ -63,7 +63,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			10
+#define LAST_LEVEL			11
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	4
@@ -548,7 +548,7 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
-	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
+	const int lParticles = Math::Lerp(8, 20, pStrength * 0.2f);
 	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
 	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
@@ -562,7 +562,7 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 		lSmokeColor.Set(0.2f, 0.4f, 0.2f);
 		lShrapnelColor.Set(0.5f, 0.5f, 0.1f);
 	}
-	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
+	lParticleRenderer->CreateExplosion(pPosition, pStrength, u, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
 
 
 	// Slowmo check.
