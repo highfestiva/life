@@ -77,6 +77,11 @@ void ChunkyPhysics::OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTim
 
 
 
+void ChunkyPhysics::SetTransformOperation(TransformOperation pOperation)
+{
+	mTransformOperation = pOperation;
+}
+
 ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const
 {
 	return (mPhysicsType);

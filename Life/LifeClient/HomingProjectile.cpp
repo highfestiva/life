@@ -36,14 +36,12 @@ void HomingProjectile::OnTick()
 	Parent::OnTick();
 
 	Cure::ContextObject* lObject = GetManager()->GetObject(mTarget);
-	if (lObject)
+	if (lObject && lObject->GetPhysics()->GetEngineCount() >= 1)
 	{
 		const Cure::ObjectPositionalData* lPositionalData = 0;
 		UpdateFullPosition(lPositionalData);
 		if (lPositionalData)
 		{
-			Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
-
 			Vector3DF lDelta = (lObject->GetPosition() - lPositionalData->mPosition.mTransformation.GetPosition()).GetNormalized();
 			if (mMaxVelocity > 0)
 			{
@@ -53,14 +51,10 @@ void HomingProjectile::OnTick()
 			const float xy = lDelta.ProjectOntoPlane(Vector3DF(0,0,1)).GetLength();
 			QuaternionF q;
 			q.SetEulerAngles(-::atan2(lDelta.x, lDelta.y), ::atan2(lDelta.z, xy), 0);
-			/*QuaternionF lMayaCompensatedQ(q);
-			lMayaCompensatedQ.RotateAroundOwnX(-PIF/2);
-			lNewPositionalData->mPosition.mTransformation.GetOrientation() = lMayaCompensatedQ;*/
-			lNewPositionalData->mPosition.mTransformation.GetOrientation() = q;
-			const float v = lNewPositionalData->mPosition.mVelocity.GetLength();
-			lNewPositionalData->mPosition.mVelocity = q * Vector3DF(0, v, 0);
-			SetFullPosition(*lNewPositionalData, 0);
-			delete lNewPositionalData;
+			const float v = lPositionalData->mPosition.mVelocity.GetLength();
+			const Vector3DF lVelocity = q * Vector3DF(0, v, 0);
+			SetRootOrientation(q);
+			SetRootVelocity(lVelocity);
 		}
 	}
 }

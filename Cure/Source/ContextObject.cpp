@@ -355,7 +355,10 @@ bool ContextObject::IsAttributeTrue(const str& pAttributeName) const
 
 void ContextObject::OnAttributeUpdated(ContextObjectAttribute*)
 {
-	mManager->AddAttributeSenderObject(this);
+	if (mManager)
+	{
+		mManager->AddAttributeSenderObject(this);
+	}
 }
 
 
@@ -775,7 +778,10 @@ void ContextObject::OnLoaded()
 
 		OnTick();
 
-		PositionHauler::Set(mPosition, lPhysicsManager, mPhysics, mTotalMass, mAllowMoveRoot);
+		/*if (mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
+		{
+			PositionHauler::Set(mPosition, lPhysicsManager, mPhysics, mTotalMass, mAllowMoveRoot);
+		}*/
 
 		GetManager()->EnableTickCallback(this);
 	}

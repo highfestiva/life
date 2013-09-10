@@ -63,7 +63,6 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define LAST_LEVEL			11
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	4
@@ -154,6 +153,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, -0.1f, 0.2f);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_05"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 13);
 }
 
 HeliForceManager::~HeliForceManager()
@@ -193,7 +193,9 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
@@ -208,8 +210,8 @@ void HeliForceManager::LoadSettings()
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F4 \"#Game.Childishness 0.0\""));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 prev-level"));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F6 next-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F7 trace-log-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F8 info-log-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F7 \"#Physics.NoClip true\""));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F8 \"#Physics.NoClip false\""));
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lSchtickName = _T("Touchstick");
@@ -524,9 +526,24 @@ bool HeliForceManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 
 
 
-void HeliForceManager::Shoot(Cure::ContextObject* pCanon, int)
+void HeliForceManager::Shoot(Cure::ContextObject* pCanon, int pAmmo)
 {
-	Life::FastProjectile* lProjectile = new Life::FastProjectile(GetResourceManager(), _T("bullet"), mUiManager, this);
+	Life::FastProjectile* lProjectile = 0;
+	switch (pAmmo)
+	{
+		default:
+		{
+			lProjectile = new Life::FastProjectile(GetResourceManager(), _T("bullet"), mUiManager, this);
+		}
+		break;
+		case 1:
+		{
+			Life::HomingProjectile* lHoming = new Life::HomingProjectile(GetResourceManager(), _T("missile"), mUiManager, this);
+			lHoming->SetTarget(mAvatarId);
+			lProjectile = lHoming;
+		}
+		break;
+	}
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	lProjectile->SetOwnerInstanceId(pCanon->GetInstanceId());
 	TransformationF t(pCanon->GetOrientation(), pCanon->GetPosition());
@@ -554,7 +571,7 @@ void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	if (pExplosive->GetClassId().find(_T("mine")) != str::npos)
+	if (pExplosive->GetClassId().find(_T("barrel")) != str::npos)
 	{
 		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
 		lFireColor.Set(0.3f, 0.7f, 0.2f);
@@ -663,13 +680,15 @@ str HeliForceManager::StepLevel(int pCount)
 		mLevelCompleted = false;
 		int lLevelNumber = GetCurrentLevelNumber();
 		lLevelNumber += pCount;
-		if (lLevelNumber > LAST_LEVEL)
+		int lLevelCount;
+		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 13);
+		if (lLevelNumber >= lLevelCount)
 		{
 			lLevelNumber = 0;
 		}
 		else if (lLevelNumber < 0)
 		{
-			lLevelNumber = LAST_LEVEL;
+			lLevelNumber = lLevelCount-1;
 		}
 		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
 		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
@@ -1019,9 +1038,15 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	{
 		lObject = new Life::Projectile(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 	}
-	else if (strutil::StartsWith(pClassId, _T("mine")))
+	else if (strutil::StartsWith(pClassId, _T("barrel")))
 	{
-		lObject = new Life::Mine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		Life::Mine* lMine = new Life::Mine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		Cure::Health::Set(lMine, 0.3f);
+		lMine->EnableDeleteDetonation(false);
+		lMine->SetExplosiveStrength(5);
+		new Cure::FloatAttribute(lMine, _T("DamageAbsorption"), 0.2f);
+		new Cure::FloatAttribute(lMine, _T("DamageReduction"), 0.3f);
+		lObject = lMine;
 	}
 	else if (pClassId == _T("stone") || pClassId == _T("cube"))
 	{
@@ -1038,25 +1063,28 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	else if (strutil::StartsWith(pClassId, _T("helicopter_")) || strutil::StartsWith(pClassId, _T("monster")) ||
 		strutil::StartsWith(pClassId, _T("fighter")))
 	{
-		UiCure::Machine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		CenteredMachine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		if (strutil::StartsWith(pClassId, _T("helicopter_")))
+		{
+			new Cure::FloatAttribute(lMachine, _T("DamageAbsorption"), 1);
+			lMachine->SetDeathFrameDelay(2);
+		}
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
-	else if (strutil::StartsWith(pClassId, _T("forklift")) || strutil::StartsWith(pClassId, _T("corvette")))
+	else if (strutil::StartsWith(pClassId, _T("forklift")) || strutil::StartsWith(pClassId, _T("corvette")) ||
+		strutil::StartsWith(pClassId, _T("air_balloon")) || strutil::StartsWith(pClassId, _T("turret2")))
 	{
 		UiCure::Machine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		if (strutil::StartsWith(pClassId, _T("turret")))
+		{
+			new Cure::FloatAttribute(lMachine, _T("DamageAbsorption"), 1);
+		}
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
-	}
-	else if (strutil::StartsWith(pClassId, _T("air_balloon")))
-	{
-		UiCure::Machine* lBalloon = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
-		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
-		lBalloon->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
-		lObject = lBalloon;
 	}
 	else
 	{
@@ -1139,9 +1167,13 @@ void HeliForceManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			mLastVehicleColor = lColor;
 			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("turret")))
+		else if (pObject->GetClassId() == _T("turret"))
 		{
-			new CanonDriver(this, pObject->GetInstanceId());
+			new CanonDriver(this, pObject->GetInstanceId(), 0, 5);
+		}
+		else if (pObject->GetClassId() == _T("turret2"))
+		{
+			new CanonDriver(this, pObject->GetInstanceId(), 1, 0.5f);
 		}
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("air_balloon")))
 		{
@@ -1319,8 +1351,10 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 
 	// Check if it's a rotor!
 	bool lIsRotor = false;
-	if (pObject1->GetClassId().find(_T("helicopter_")) != str::npos)
+	const float lDamageFactor = pObject1->GetAttributeFloatValue(_T("DamageAbsorption"));
+	if (lDamageFactor)
 	{
+		lCollisionImpactFactor *= lDamageFactor;
 		TBC::ChunkyBoneGeometry* lGeometry = pObject1->GetStructureGeometry(pBody1Id);
 		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_HINGE &&
 			lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
@@ -1329,10 +1363,22 @@ void HeliForceManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTo
 			TBC::ChunkyBoneGeometry* lHitBone = pObject2->GetPhysics()->GetBoneGeometry(pBody2Id);
 			lCollisionImpactFactor *= Math::Lerp(1000.0f * lHitBone->GetImpactFactor(), 2.0f, lChildishness);
 		}
+		else if (lIsAvatar && pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
+		{
+			const float lDamageReduction = pObject2->GetAttributeFloatValue(_T("DamageReduction"));
+			if (lDamageReduction)
+			{
+				lCollisionImpactFactor *= lDamageReduction;
+			}
+		}
+		else if (!lIsAvatar && pObject2->GetInstanceId() == mAvatarId)
+		{
+			lCollisionImpactFactor *= 0.1f;
+		}
 	}
 	else
 	{
-		lCollisionImpactFactor = 0.01f;
+		lCollisionImpactFactor *= 0.01f;
 	}
 
 	float lForce = pForce.GetLength() * lCollisionImpactFactor;
@@ -1607,10 +1653,13 @@ void HeliForceManager::MoveCamera()
 		lHalfCamDistance /= 2;
 		mCameraPreviousPosition = mCameraTransform.GetPosition();
 		Vector3DF lAvatarPosition = lAvatar->GetPosition();
-		float ox, oz;
+		float ox, oy, oz, ax;
 		CURE_RTVAR_GET(ox, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
+		CURE_RTVAR_GET(oy, =(float), GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
 		CURE_RTVAR_GET(oz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
+		CURE_RTVAR_GET(ax, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
 		lAvatarPosition.x += ox;
+		lAvatarPosition.y += oy;
 		lAvatarPosition.z += oz;
 		mHelicopterPosition = lAvatarPosition;
 		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -2*lHalfCamDistance, 0));
@@ -1649,7 +1698,7 @@ void HeliForceManager::MoveCamera()
 		// Angle.
 		const float x = lAvatarPosition.y - mCameraTransform.GetPosition().y;
 		const float y = lAvatarPosition.z - mCameraTransform.GetPosition().z;
-		const float lXAngle = ::atan2(y, x);
+		const float lXAngle = ::atan2(y, x) + ax;
 		lTargetTransform.GetOrientation().RotateAroundOwnX(lXAngle);
 		if (mPostZoomPlatformFrameCount > 10)
 		{

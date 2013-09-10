@@ -18,7 +18,7 @@ import re
 import struct
 import sys
 
-physics_type = {"world":1, "static":1, "dynamic":2, "collision_detect_only":3}
+physics_type = {"world":1, "static":2, "dynamic":3, "collision_detect_only":4}
 guide_mode = {"never":0, "external":1, "always":2, None:1}
 
 CHUNK_CLASS				= "CLAS"
@@ -449,8 +449,13 @@ class PhysWriter(ChunkyWriter):
 
 	def _writebone(self, node):
 		pos, q = node.get_final_local_transform()
-		if not node.phys_root and node.getParent().phys_children[0] == node:
-			pos.z = -node.lowestpos.z
+		center_baseline = (self.config["center_phys"] and self.config["center_phys"] != "ignore_baseline")
+		if self.config["type"] == "dynamic" and center_baseline:
+			if not node.phys_root and node.getParent().phys_children[0] == node:
+				pos.z = -node.lowestpos.z
+		#v = vec4(self.physrootpos)
+		#v.y, v.z = -v.z, v.y
+		#if node != self.bodies[0]:
 		pos -= self.physrootpos
 		data = q[:]+pos[:3]
 		self._normalizexform(data)
@@ -728,7 +733,7 @@ class MeshWriter(ChunkyWriter):
 		def getshadows(node):
 			for parent in node.getparents():
 				casts_shadows = parent.get_fixed_attribute("casts_shadows", optional=True)
-				if casts_shadows:
+				if casts_shadows != None:
 					break
 			if casts_shadows == None:
 				casts_shadows = self.config.get("casts_shadows")
@@ -759,7 +764,7 @@ class MeshWriter(ChunkyWriter):
 		with self._fileopenwrite(filename) as f:
 			self.f = f
 			default_mesh_type = {"static":1, "semi_static":2, "dynamic":3, "volatile":4}
-			mesh_type = "static" if self.config["type"] == "static" else "semi_static"
+			mesh_type = "static" if self.config["type"] in ("world", "static") else "semi_static"
 			volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type[mesh_type])]
 			casts_shadows = getshadows(node)
 			two_sided = gettwosided(node)

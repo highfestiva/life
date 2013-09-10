@@ -236,15 +236,18 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 {
 	if (pAllowMoveRoot)
 	{
-		if (pStructure->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
+		const TBC::ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(pStructure->GetRootBone());
+		const TBC::PhysicsManager::BodyID lBody = lRootGeometry->GetBodyId();
+		if (lBody)
 		{
-			const TBC::ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(pStructure->GetRootBone());
-			TBC::PhysicsManager::BodyID lBody = lRootGeometry->GetBodyId();
 			pPhysicsManager->SetBodyTransform(lBody, pPosition.mPosition.mTransformation);
-			pPhysicsManager->SetBodyVelocity(lBody, pPosition.mPosition.mVelocity);
-			pPhysicsManager->SetBodyAcceleration(lBody, pTotalMass, pPosition.mPosition.mAcceleration);
-			pPhysicsManager->SetBodyAngularVelocity(lBody, pPosition.mPosition.mAngularVelocity);
-			pPhysicsManager->SetBodyAngularAcceleration(lBody, pTotalMass, pPosition.mPosition.mAngularAcceleration);
+			if (pStructure->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
+			{
+				pPhysicsManager->SetBodyVelocity(lBody, pPosition.mPosition.mVelocity);
+				pPhysicsManager->SetBodyAcceleration(lBody, pTotalMass, pPosition.mPosition.mAcceleration);
+				pPhysicsManager->SetBodyAngularVelocity(lBody, pPosition.mPosition.mAngularVelocity);
+				pPhysicsManager->SetBodyAngularAcceleration(lBody, pTotalMass, pPosition.mPosition.mAngularAcceleration);
+			}
 		}
 	}
 	else

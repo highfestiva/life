@@ -21,7 +21,7 @@ class CanonDriver: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
-	CanonDriver(HeliForceManager* pGame, Cure::GameObjectId pCanonId);
+	CanonDriver(HeliForceManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType, float pShotsPerSecond);
 	virtual ~CanonDriver();
 
 private:
@@ -29,7 +29,10 @@ private:
 
 	HeliForceManager* mGame;
 	Cure::GameObjectId mCanonId;
+	int mAmmoType;
+	float mShootPeriod;
 	HiResTimer mLastShot;
+	float mJointStartAngle;
 	LOG_CLASS_DECLARE();
 };
 

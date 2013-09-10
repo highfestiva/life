@@ -28,6 +28,7 @@ public:
 	ExplodingMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
 	virtual ~ExplodingMachine();
 
+	void SetExplosiveStrength(float pExplosiveStrength);
 	void SetDeathFrameDelay(int pDeathFrameDelay);
 
 protected:
@@ -38,6 +39,7 @@ protected:
 	int mTriggerDeathFrame;
 	int mDeathFrameDelay;
 	bool mIsDetonated;
+	float mExplosiveStrength;
 
 	LOG_CLASS_DECLARE();
 };

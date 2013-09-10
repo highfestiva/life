@@ -323,7 +323,7 @@ void RunRotationalAgreementTest()
 			lRenderer.ResetClippingRect();
 			lRenderer.Clear();
 			lRenderer.RenderScene();
-			lPhysics->StepAccurate(0.05f);
+			lPhysics->StepAccurate(0.05f, true);
 			lDisp->UpdateScreen();
 
 			lDeltaTimer.UpdateTimer();

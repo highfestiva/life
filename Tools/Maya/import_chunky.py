@@ -931,7 +931,7 @@ class GroupReader(DefaultMAReader):
 		required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
 		optional = [("two_sided", lambda x: x == None or type(x) == bool),
 			    ("casts_shadows", lambda x: x == None or type(x) == bool),
-			    ("center_phys", lambda x: x == None or type(x) == bool),
+			    ("center_phys", lambda x: x == None or type(x) == bool or x == "ignore_baseline"),
 			    ("guide_mode", lambda x: x == None or x in ("never", "external", "always"))]
 		for name, config_check in required+optional:
 			ok = config_check(self.config.get(name))

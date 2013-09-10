@@ -134,6 +134,11 @@ bool PhysicsSharedResource::FinalizeInit()
 		lStructure->SetPhysicsType(TBC::ChunkyPhysics::STATIC);
 	}
 
+	// Pick desired orientation, but reset for FinalizeInit() to work with proper joint orientations.
+	//const bool lIsDynamic = (lStructure->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	QuaternionF lTargetOrientation = lTransformation.GetOrientation();
+	lTransformation.SetOrientation(QuaternionF());
+
 	const int lPhysicsFps = mInitData.mPhysicsFps;
 	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation, mInitData.mInstanceId, mInitData.mInstanceId);
 	deb_assert(lOk);
@@ -142,9 +147,8 @@ bool PhysicsSharedResource::FinalizeInit()
 	// is relative to the initial root bone orientation.
 	if (lOk)
 	{
-		if (lStructure->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
+		if (lStructure->GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY)
 		{
-			const QuaternionF lPhysOrientation(mInitData.mPhysicsManager->GetBodyOrientation(lStructure->GetBoneGeometry(0)->GetBodyId()));
 			const float lTotalMass = lStructure->QueryTotalMass(mInitData.mPhysicsManager);
 			ObjectPositionalData lPlacement;
 			lOk = PositionHauler::Get(lPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass);
@@ -152,9 +156,17 @@ bool PhysicsSharedResource::FinalizeInit()
 			if (lOk)
 			{
 				ObjectPositionalData* lNewPlacement = (ObjectPositionalData*)lPlacement.Clone();
+				if (lStructure->GetPhysicsType() == TBC::ChunkyPhysics::WORLD)
+				{
+					lTargetOrientation *= lNewPlacement->mPosition.mTransformation.GetOrientation();
+				}
+				/*else if (lStructure->GetPhysicsType() == TBC::ChunkyPhysics::STATIC)
+				{
+					lTargetOrientation.RotateAroundOwnY(PIF);
+				}*/
 				lNewPlacement->mPosition.mTransformation =
-					TransformationF(lTransformation.GetOrientation() * lPhysOrientation,
-						lTransformation.GetPosition());
+					TransformationF(lTargetOrientation,
+						lNewPlacement->mPosition.mTransformation.GetPosition());
 				PositionHauler::Set(*lNewPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass, true);
 				delete lNewPlacement;
 			}

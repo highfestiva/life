@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../../UiCure/Include/UiMachine.h"
 #include "../Life.h"
+#include "ExplodingMachine.h"
 
 
 
@@ -20,17 +20,19 @@ class Launcher;
 
 
 
-class Mine: public UiCure::Machine
+class Mine: public ExplodingMachine
 {
 public:
-	typedef UiCure::Machine Parent;
+	typedef ExplodingMachine Parent;
 
 	Mine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
 	virtual ~Mine();
 
+	void EnableDeleteDetonation(bool pEnable);
+	virtual void OnDie();
+
 private:
-	Launcher* mLauncher;
-	bool mIsDetonated;
+	bool mEnableDeleteDetonation;
 
 	LOG_CLASS_DECLARE();
 };

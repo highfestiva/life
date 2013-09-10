@@ -1008,7 +1008,7 @@ void StepPhysics(int pAgentIndex, int pStepCount)
 	}
 	const float lThisStepTime = PHYSICS_SECONDS_PER_FRAME*pStepCount;
 	lAgentData->mPhysics->PreSteps();
-	lAgentData->mPhysics->StepFast(lThisStepTime);
+	lAgentData->mPhysics->StepFast(lThisStepTime, true);
 	lAgentData->mPhysics->PostSteps();
 	lAgentData->mCurrentPhysicsFrameIndex += pStepCount;
 	lAgentData->mTickTimeModulo -= lThisStepTime;

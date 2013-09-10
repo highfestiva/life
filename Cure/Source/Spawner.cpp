@@ -22,9 +22,9 @@ Spawner::Spawner(ContextManager* pManager):
 	mSpawnPointIndex(0)
 {
 	pManager->AddLocalObject(this);
-	mManager->AddAlarmCallback(this, 0, 0.5, 0);	// Create.
-	mManager->AddAlarmCallback(this, 1, 0.5, 0);	// Destroy.
-	mManager->AddAlarmCallback(this, 2, 0.5, 0);	// Recreate.
+	mManager->AddAlarmCallback(this, 0, 0.5f, 0);	// Create.
+	mManager->AddAlarmCallback(this, 1, 0.6f, 0);	// Destroy.
+	mManager->AddAlarmCallback(this, 2, 0.7f, 0);	// Recreate.
 }
 
 Spawner::~Spawner()
@@ -98,10 +98,12 @@ void Spawner::OnCreate(float pCreateInterval, bool pHasRecreate)
 
 	if (!pHasRecreate)
 	{
+		mRecreateTimer.Stop();	// Make sure re-create starts over when we're done.
 		GetManager()->AddAlarmCallback(this, 0, pCreateInterval, 0);
 	}
 	else if (pCreateInterval < 0 && (int)mChildArray.size() < GetSpawnCount())
 	{
+		mRecreateTimer.Stop();	// Make sure re-create starts over when we're done.
 		GetManager()->AddAlarmCallback(this, 0, -pCreateInterval, 0);
 	}
 }

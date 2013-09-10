@@ -91,7 +91,7 @@ TransformationF PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, c
 	const TransformationF& lTransformation = pStructure->GetTransformation(lSpawnBox);
 	QuaternionF q = lTransformation.GetOrientation();
 	lPoint = q * lPoint;
-	q.RotateAroundWorldZ(PIF);	// This is so since the level ("the spawner") has a 180 degree orientation offset compared to objects.
+	q.RotateAroundOwnY(PIF);	// This is so since the level ("the spawner") has a 180 degree orientation offset compared to objects.
 	return TransformationF(q, lTransformation.GetPosition()+lPoint);
 }
 

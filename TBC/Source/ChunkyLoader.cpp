@@ -763,7 +763,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 	{
 		// Check that all mandatories have been found.
 		lOk = (lBoneCount >= 1 && lBoneCount < 10000 &&
-			(lPhysicsType == ChunkyPhysics::STATIC || lPhysicsType == ChunkyPhysics::DYNAMIC) &&
+			(lPhysicsType == ChunkyPhysics::WORLD || lPhysicsType == ChunkyPhysics::STATIC || lPhysicsType == ChunkyPhysics::DYNAMIC) &&
 			(lGuideMode >= ChunkyPhysics::GUIDE_NEVER && lGuideMode <= ChunkyPhysics::GUIDE_ALWAYS) &&
 			lEngineCount >= 0 && lEngineCount < 1000 &&
 			lTriggerCount >= 0 && lTriggerCount < 1000);
@@ -818,7 +818,8 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	if (lOk)
 	{
 		lOk = (lBoneCount > 0 && lBoneCount < 10000 &&
-			lPhysicsType >= ChunkyPhysics::STATIC &&
+			lPhysicsType >= ChunkyPhysics::WORLD &&
+			lPhysicsType <= ChunkyPhysics::DYNAMIC &&
 			lGuideMode >= ChunkyPhysics::GUIDE_NEVER &&
 			lEngineCount >= 0 && lEngineCount < 1000 &&
 			lTriggerCount >= 0 && lTriggerCount < 1000);

@@ -30,8 +30,9 @@ class ChunkyPhysics: public BoneHierarchy
 public:
 	enum PhysicsType
 	{
-		STATIC = 1,	// Static world object.
-		DYNAMIC		// Dynamic object within the world.
+		WORLD = 1,	// World object (the level itself).
+		STATIC,		// Static object (turret).
+		DYNAMIC		// Dynamic object within the world (car).
 	};
 	enum GuideMode
 	{
@@ -46,6 +47,7 @@ public:
 
 	void OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime);
 
+	void SetTransformOperation(TransformOperation pOperation);
 	PhysicsType GetPhysicsType() const;
 	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
 	GuideMode GetGuideMode() const;	// Gets help with automatic motions, such as flipping over.

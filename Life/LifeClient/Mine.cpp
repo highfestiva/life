@@ -5,6 +5,8 @@
 
 
 #include "Mine.h"
+#include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/Health.h"
 #include "../ProjectileUtil.h"
 
 
@@ -15,15 +17,29 @@ namespace Life
 
 
 Mine::Mine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mLauncher(pLauncher),
-	mIsDetonated(false)
+	Parent(pResourceManager, pClassId, pUiManager, pLauncher),
+	mEnableDeleteDetonation(true)
 {
+	Cure::Health::Set(this, 1);
 }
 
 Mine::~Mine()
 {
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 2);
+	if (mEnableDeleteDetonation)
+	{
+		OnDie();
+	}
+}
+
+void Mine::EnableDeleteDetonation(bool pEnable)
+{
+	mEnableDeleteDetonation = pEnable;
+}
+
+void Mine::OnDie()
+{
+	Parent::OnDie();
+	GetManager()->PostKillObject(GetInstanceId());
 }
 
 

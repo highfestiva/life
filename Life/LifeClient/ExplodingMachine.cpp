@@ -20,7 +20,8 @@ ExplodingMachine::ExplodingMachine(Cure::ResourceManager* pResourceManager, cons
 	mLauncher(pLauncher),
 	mTriggerDeathFrame(-1),
 	mDeathFrameDelay(1),
-	mIsDetonated(false)
+	mIsDetonated(false),
+	mExplosiveStrength(2)
 {
 }
 
@@ -29,6 +30,11 @@ ExplodingMachine::~ExplodingMachine()
 }
 
 
+
+void ExplodingMachine::SetExplosiveStrength(float pExplosiveStrength)
+{
+	mExplosiveStrength = pExplosiveStrength;
+}
 
 void ExplodingMachine::SetDeathFrameDelay(int pDeathFrameDelay)
 {
@@ -54,7 +60,7 @@ void ExplodingMachine::OnTick()
 
 void ExplodingMachine::OnDie()
 {
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 2);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveStrength);
 }
 
 

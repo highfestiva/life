@@ -80,7 +80,7 @@ public:
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
-	virtual void Shoot(Cure::ContextObject* pCanon, int);
+	virtual void Shoot(Cure::ContextObject* pCanon, int pAmmo);
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 

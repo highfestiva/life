@@ -8,6 +8,7 @@
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
 #include "../Lepra/Include/Random.h"
+#include "../Life/ProjectileUtil.h"
 #include "Level.h"
 
 
@@ -17,13 +18,22 @@ namespace HeliForce
 
 
 
-CanonDriver::CanonDriver(HeliForceManager* pGame, Cure::GameObjectId pCanonId):
+CanonDriver::CanonDriver(HeliForceManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType, float pShotsPerSecond):
 	Parent(pGame->GetResourceManager(), _T("CanonDriver")),
 	mGame(pGame),
-	mCanonId(pCanonId)
+	mCanonId(pCanonId),
+	mAmmoType(pAmmoType),
+	mShootPeriod(1/pShotsPerSecond)
 {
 	pGame->GetContext()->AddLocalObject(this);
 	pGame->GetContext()->EnableTickCallback(this);
+
+	Cure::CppContextObject* lCanon = (Cure::CppContextObject*)mManager->GetObject(mCanonId, true);
+	assert(lCanon);
+	TransformationF lMuzzleTransform;
+	Vector3DF _;
+	Life::ProjectileUtil::GetBarrelByShooter(lCanon, lMuzzleTransform, _);
+	mJointStartAngle = (lMuzzleTransform.GetOrientation() * Vector3DF(0,0,1)).GetAngle(Vector3DF(0,0,1));
 }
 
 CanonDriver::~CanonDriver()
@@ -58,15 +68,22 @@ void CanonDriver::OnTick()
 	TBC::ChunkyBoneGeometry* lBarrel = lCanon->GetPhysics()->GetBoneGeometry(1);
 	TBC::PhysicsManager::Joint1Diff lDiff;
 	mGame->GetPhysicsManager()->GetJoint1Diff(lBarrel->GetBodyId(), lBarrel->GetJointId(), lDiff);
-	const float lAngle = -d.GetAngle() - lDiff.mValue;
+	const float lAngle = -d.GetAngle() - (mJointStartAngle + lDiff.mValue);
 	const float lTargetAngle = Math::Clamp(lAngle*20, -2.0f, +2.0f);
 	lCanon->SetEnginePower(1, -lTargetAngle);
 
-	if (std::abs(lAngle) < 0.4f && mLastShot.QueryTimeDiff() >= 0)
+	if (mLastShot.QueryTimeDiff() >= 0)
 	{
-		mLastShot.PopTimeDiff();
-		mLastShot.ReduceTimeDiff(Random::Normal(0.2f, 0.05f, 0.15f, 0.25f));
-		mGame->Shoot(lCanon, 0);
+		float lLowAngle = 0;
+		float lHighAngle = 0;
+		float lBounce;
+		mGame->GetPhysicsManager()->GetJointParams(lBarrel->GetJointId(), lLowAngle, lHighAngle, lBounce);
+		if (std::abs(lAngle) < std::abs(lHighAngle-lLowAngle)*0.2f)
+		{
+			mLastShot.PopTimeDiff();
+			mLastShot.ReduceTimeDiff(Random::Normal(mShootPeriod, mShootPeriod/4, mShootPeriod*0.75f, mShootPeriod*1.25f));
+			mGame->Shoot(lCanon, mAmmoType);
+		}
 	}
 }
 
