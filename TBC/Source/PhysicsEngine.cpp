@@ -180,7 +180,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 {
 	const float lLimitedFrameTime = std::min(pFrameTime, 0.1f);
 	const float lNormalizedFrameTime = lLimitedFrameTime * 90;
-	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > ::fabs(mValue[ASPECT_PRIMARY]))? mValue[ASPECT_LOCAL_PRIMARY] : mValue[ASPECT_PRIMARY];
+	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > std::abs(mValue[ASPECT_PRIMARY]))? mValue[ASPECT_LOCAL_PRIMARY] : mValue[ASPECT_PRIMARY];
 	mIntensity = 0;
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
@@ -311,7 +311,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					float lRotationSpeed;
 					pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lRotationSpeed);
 					const float lIntensity = lRotationSpeed / mMaxSpeed;
-					mIntensity += ::fabs(lIntensity);
+					mIntensity += std::abs(lIntensity);
 					if (mEngineType == ENGINE_HINGE_GYRO)
 					{
 						lValue = (lValue+1)*0.5f;
@@ -331,7 +331,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 							lValue *= -8 * lSquare * lSquare * (lIntensity-0.02f) + 1;
 						}
 					}
-					const float lUsedStrength = mStrength*(::fabs(lValue) + ::fabs(mFriction));
+					const float lUsedStrength = mStrength*(std::abs(lValue) + std::abs(mFriction));
 					float lPreviousStrength = 0;
 					float lPreviousTargetSpeed = 0;
 					pPhysicsManager->GetAngularMotorRoll(lGeometry->GetJointId(), lPreviousStrength, lPreviousTargetSpeed);
@@ -353,7 +353,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					// "Max speed" used as a type of "break threashold", so that a joystick or similar
 					// won't start breaking on the tiniest movement. "Scaling" here determines part of
 					// functionality (such as only affecting some wheels), may be positive or negative.
-					const float lAbsValue = ::fabs(lPrimaryForce);
+					const float lAbsValue = std::abs(lPrimaryForce);
 					if (lAbsValue > mMaxSpeed && lPrimaryForce < lScale)
 					{
 						const float lBreakForceUsed = mStrength*lAbsValue;
@@ -397,7 +397,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 						Vector3DF(0, 0, mMaxSpeed*lScale);
 					lRotorPivot += lOffset;
 
-					const float lAbsFriction = ::fabs(mFriction);
+					const float lAbsFriction = std::abs(mFriction);
 					if (mFriction < 0)
 					{
 						// Arcade stabilization for VTOL rotor.
@@ -434,7 +434,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
-					const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * ::fabs(lPrimaryForce);
+					const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * std::abs(lPrimaryForce);
 					const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
 					const float lPlacement = (lPrimaryForce >= 0)? 1.0f : -1.0f;
 					const Vector3DF lOffset =
@@ -488,7 +488,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 						pPhysicsManager->GetSliderPos(lGeometry->GetJointId(), lPosition);
 						if (!Math::IsEpsEqual(lPosition, 0.0f, 0.1f))
 						{
-							float lValue = -lPosition*::fabs(lScale);
+							float lValue = -lPosition*std::abs(lScale);
 							lValue = (lValue > 0)? lValue*mMaxSpeed : lValue*mMaxSpeed2;
 							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue);
 						}
@@ -504,7 +504,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					}
 					float lSpeed = 0;
 					pPhysicsManager->GetSliderSpeed(lGeometry->GetJointId(), lSpeed);
-					mIntensity += ::fabs(lSpeed) / mMaxSpeed;
+					mIntensity += std::abs(lSpeed) / mMaxSpeed;
 				}
 			}
 			break;
@@ -645,9 +645,9 @@ float PhysicsEngine::GetValue() const
 	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
 	if (mEngineType == ENGINE_PUSH_RELATIVE || mEngineType == ENGINE_PUSH_ABSOLUTE)
 	{
-		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
-		const float b = ::fabs(mValue[ASPECT_SECONDARY]);
-		const float c = ::fabs(mValue[ASPECT_TERTIARY]);
+		const float a = std::abs(mValue[ASPECT_PRIMARY]);
+		const float b = std::abs(mValue[ASPECT_SECONDARY]);
+		const float c = std::abs(mValue[ASPECT_TERTIARY]);
 		if (a > b && a > c)
 		{
 			return mValue[ASPECT_PRIMARY];
@@ -680,7 +680,7 @@ float PhysicsEngine::GetLerpThrottle(float pUp, float pDown, bool pAbs) const
 {
 	float& lLerpShadow = pAbs? mSmoothValue[ASPECT_LOCAL_SHADOW] : mSmoothValue[ASPECT_LOCAL_SHADOW_ABS];
 	float lValue = GetPrimaryValue();
-	lValue = pAbs? ::fabs(lValue) : lValue;
+	lValue = pAbs? std::abs(lValue) : lValue;
 	lLerpShadow = Math::Lerp(lLerpShadow, lValue, (lValue > lLerpShadow)? pUp : pDown);
 	return lLerpShadow;
 }
@@ -731,7 +731,7 @@ void PhysicsEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData)
 float PhysicsEngine::GetPrimaryValue() const
 {
 	const float lForce = GetValue();
-	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > ::fabs(lForce))? mValue[ASPECT_LOCAL_PRIMARY] : lForce;
+	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > std::abs(lForce))? mValue[ASPECT_LOCAL_PRIMARY] : lForce;
 	return lPrimaryForce;
 }
 
@@ -786,7 +786,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	float lForce = GetPrimaryValue();
 
 	const float lScale = pEngineNode.mScale;
-	const float lReverseScale = (lScale + 1) * 0.5f;	// Move towards linear scaling.
+	//const float lReverseScale = (lScale + 1) * 0.5f;	// Move towards linear scaling.
 	float lLoStop;
 	float lHiStop;
 	float lBounce;
@@ -800,7 +800,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
 		float lActualSpeed = 0;
 		pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lActualSpeed);
-		mIntensity += ::fabs(lTargetSpeed - lActualSpeed) / mMaxSpeed;
+		mIntensity += std::abs(lTargetSpeed - lActualSpeed) / mMaxSpeed;
 		return;
 	}
 
@@ -817,7 +817,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		if ((lForce < 0.02f && lIrlAngleDirection < lTarget) ||
 			(lForce > -0.02f && lIrlAngleDirection > lTarget))
 		{
-			if (::fabs(lForce) > 0.02)
+			if (std::abs(lForce) > 0.02)
 			{
 				pEngineNode.mLock = lForce;
 			}
@@ -844,9 +844,9 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	const float lAngleSpan = (lHiStop-lLoStop)*0.9f;
 	const float lTargetAngle = (lForce < 0)? -lForce*lLoStop+lTarget : lForce*lHiStop+lTarget;
 	const float lDiff = (lTargetAngle-lIrlAngle);
-	const float lAbsDiff = ::fabs(lDiff);
+	const float lAbsDiff = std::abs(lDiff);
 	float lTargetSpeed;
-	const float lAbsBigDiff = ::fabs(lAngleSpan/7);
+	const float lAbsBigDiff = std::abs(lAngleSpan/7);
 	const bool lCloseToGoal = (lAbsDiff > lAbsBigDiff);
 	if (lCloseToGoal)
 	{
@@ -856,7 +856,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	{
 		lTargetSpeed = mMaxSpeed*lDiff/lAbsBigDiff;
 	}
-	lTargetSpeed *= (lForce > 0)? lScale : lReverseScale;
+	//lTargetSpeed *= (lForce > 0)? lScale : lReverseScale;
 	// If we're far from the desired target speed, we speed up.
 	float lCurrentSpeed = 0;
 	if (mEngineType == ENGINE_HINGE2_TURN)
@@ -864,7 +864,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lCurrentSpeed);
 		if (lCloseToGoal)
 		{
-			lTargetSpeed *= 1+::fabs(lCurrentSpeed)/30;
+			lTargetSpeed *= 1+std::abs(lCurrentSpeed)/30;
 		}
 	}
 	else
@@ -872,7 +872,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lCurrentSpeed);
 		if (lCloseToGoal)
 		{
-			lTargetSpeed += (lTargetSpeed-lCurrentSpeed) * lScale;
+			lTargetSpeed += (lTargetSpeed-lCurrentSpeed) * std::abs(lScale);
 		}
 	}
 	/*if (Math::IsEpsEqual(lTargetSpeed, 0.0f, 0.01f))	// Stop when almost already at a halt.
@@ -880,7 +880,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		lTargetSpeed = 0;
 	}*/
 	pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
-	mIntensity += fabs(lTargetSpeed / (mMaxSpeed * lScale));
+	mIntensity += std::abs(lTargetSpeed / (mMaxSpeed * lScale));
 }
 
 

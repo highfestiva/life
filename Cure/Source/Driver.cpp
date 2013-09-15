@@ -55,7 +55,7 @@ void Driver::OnTick()
 		}
 		TBC::PhysicsEngine* lEngine = mParent->GetPhysics()->GetEngine(lEngineIndex);
 
-		float f = 0;
+		float f = 1;
 		if (mTag.mFloatValueList.size() > 0)
 		{
 			f = mTag.mFloatValueList[0];
@@ -64,9 +64,10 @@ void Driver::OnTick()
 		{
 			assert(mTag.mFloatValueList.size() == 1);
 			lEngine->SetValue(lEngine->GetControllerIndex(), (float)::cos(mTime.QueryTimeDiff()*f));
-			if (mTime.GetTimeDiff() > 2*PI)
+			const double lPeriod = 2*PI/f;
+			if (mTime.GetTimeDiff() > lPeriod)
 			{
-				mTime.ReduceTimeDiff(2*PI);
+				mTime.ReduceTimeDiff(lPeriod);
 			}
 		}
 	}
