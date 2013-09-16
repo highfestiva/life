@@ -810,6 +810,11 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		mLog.AError("Bad joint angle!");
 		return;
 	}
+	// Flip angle if parent is "world".
+	if (pGeometry->GetParent() && pGeometry->GetParent()->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_BODY)
+	{
+		lIrlAngle = -lIrlAngle;
+	}
 	const float lIrlAngleDirection = (lHiStop < lLoStop)? -lIrlAngle : lIrlAngle;
 
 	if (pEngineNode.mMode == MODE_HALF_LOCK)
@@ -842,13 +847,13 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		lLoStop *= lRangeFactor;
 	}
 	const float lAngleSpan = (lHiStop-lLoStop)*0.9f;
-	const float lTargetAngle = (lForce < 0)? -lForce*lLoStop+lTarget : lForce*lHiStop+lTarget;
+	const float lTargetAngle = Math::Lerp(lLoStop, lHiStop, lScale*lForce*0.5f+0.5f);
 	const float lDiff = (lTargetAngle-lIrlAngle);
 	const float lAbsDiff = std::abs(lDiff);
 	float lTargetSpeed;
 	const float lAbsBigDiff = std::abs(lAngleSpan/7);
-	const bool lCloseToGoal = (lAbsDiff > lAbsBigDiff);
-	if (lCloseToGoal)
+	const bool lCloseToGoal = (lAbsDiff < lAbsBigDiff);
+	if (!lCloseToGoal)
 	{
 		lTargetSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
 	}
@@ -862,7 +867,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	if (mEngineType == ENGINE_HINGE2_TURN)
 	{
 		pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lCurrentSpeed);
-		if (lCloseToGoal)
+		if (!lCloseToGoal)
 		{
 			lTargetSpeed *= 1+std::abs(lCurrentSpeed)/30;
 		}
@@ -870,7 +875,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	else
 	{
 		pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lCurrentSpeed);
-		if (lCloseToGoal)
+		if (!lCloseToGoal)
 		{
 			lTargetSpeed += (lTargetSpeed-lCurrentSpeed) * std::abs(lScale);
 		}
