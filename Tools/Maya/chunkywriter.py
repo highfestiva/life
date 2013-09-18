@@ -662,6 +662,10 @@ class PhysWriter(ChunkyWriter):
 			if options.options.verbose:
 				print("Spawner '%s' connected to body index %i."% (node.getName(), idx))
 			self._writeint(idx)
+		v = node.get_fixed_attribute("initial_velocity", True, vec3())
+		if options.options.verbose:
+			print("Spawner '%s' has an initial velocity of %s." % (node.getName(), str(v)))
+		[self._writefloat(float(u)) for u in v]
 		self._writefloat(float(node.get_fixed_attribute("number")))
 		intervals = node.get_fixed_attribute("intervals")
 		self._writeint(len(intervals))

@@ -177,8 +177,8 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 	deb_assert(mPhysicsResource == 0);
 	const str lInstanceId = strutil::IntToString(GetInstanceId(), 10);
 	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();
-	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPhysicsOverride, mManager->GetGameManager()->GetPhysicsManager(),
-		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
+		mManager->GetGameManager()->GetPhysicsManager(), mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
 	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
 	if (!mForceLoadUnique)
 	{

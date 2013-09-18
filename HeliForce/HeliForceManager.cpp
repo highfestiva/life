@@ -1053,6 +1053,15 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 		lObject = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		Cure::Health::DeleteAttribute(lObject);
 	}
+	else if (pClassId == _T("beach_ball") || pClassId == _T("dino_bubble") || pClassId == _T("clown_bubble"))
+	{
+		CenteredMachine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
+		new Cure::FloatAttribute(lMachine, _T("DamageAbsorption"), 1e-3f);
+		new Cure::FloatAttribute(lMachine, _T("DamageReduction"), 0.2f);
+		lMachine->SetDeathFrameDelay(0);
+		lMachine->SetDisappearAfterDeathDelay(0.2f);
+		lObject = lMachine;
+	}
 	else if (strutil::StartsWith(pClassId, _T("level_")))
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);

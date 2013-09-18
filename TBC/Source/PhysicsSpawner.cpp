@@ -43,7 +43,7 @@ void PhysicsSpawner::RelocatePointers(const ChunkyPhysics* pTarget, const Chunky
 
 PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
 {
-	if (pByteCount < sizeof(uint32)*6 /*+ ...*/)
+	if (pByteCount < sizeof(uint32)*9 /*+ ...*/)
 	{
 		mLog.AError("Could not load; wrong data size.");
 		deb_assert(false);
@@ -59,7 +59,7 @@ PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* pStructure, const void* pDat
 		delete (lSpawner);
 		lSpawner = 0;
 	}
-	return (lSpawner);
+	return lSpawner;
 }
 
 
@@ -79,16 +79,17 @@ int PhysicsSpawner::GetSpawnPointCount() const
 	return mSpawnerNodeArray.size();
 }
 
-TransformationF PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint, int pIndex) const
+TransformationF PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint, int pIndex, Vector3DF& pInitialVelocity) const
 {
+	pInitialVelocity = mInitialVelocity;
+
 	deb_assert((size_t)pIndex < mSpawnerNodeArray.size() && pIndex >= 0);
-	deb_assert(mSpawnerNodeArray[pIndex]->GetGeometryType() == ChunkyBoneGeometry::GEOMETRY_BOX);
-	TBC::ChunkyBoneBox* lSpawnBox = (TBC::ChunkyBoneBox*)mSpawnerNodeArray[pIndex];
-	Vector3DF lPoint = lSpawnBox->GetShapeSize();
+	TBC::ChunkyBoneGeometry* lSpawnGeometry = mSpawnerNodeArray[pIndex];
+	Vector3DF lPoint = lSpawnGeometry->GetShapeSize();
 	lPoint.x = (pScaledPoint.x-0.5f) * lPoint.x;
 	lPoint.y = (pScaledPoint.y-0.5f) * lPoint.y;
 	lPoint.z = (pScaledPoint.z-0.5f) * lPoint.z;
-	const TransformationF& lTransformation = pStructure->GetTransformation(lSpawnBox);
+	const TransformationF& lTransformation = pStructure->GetTransformation(lSpawnGeometry);
 	QuaternionF q = lTransformation.GetOrientation();
 	lPoint = q * lPoint;
 	q.RotateAroundOwnY(PIF);	// This is so since the level ("the spawner") has a 180 degree orientation offset compared to objects.
@@ -131,6 +132,7 @@ unsigned PhysicsSpawner::GetChunkySize() const
 	}
 	return ((unsigned)(sizeof(uint32) * 4 +
 		sizeof(uint32) * mSpawnerNodeArray.size() +
+		sizeof(float) * 3 +
 		sizeof(float) +
 		sizeof(float) * mIntervalArray.size() +
 		sizeof(float) * mSpawnObjectArray.size() +
@@ -179,6 +181,10 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 		const int lBodyIndex = Endian::BigToHost(lData[i++]);
 		mSpawnerNodeArray.push_back(pStructure->GetBoneGeometry(lBodyIndex));
 	}
+	const float x = Endian::BigToHostF(lData[i++]);
+	const float y = Endian::BigToHostF(lData[i++]);
+	const float z = Endian::BigToHostF(lData[i++]);
+	mInitialVelocity.Set(x, y, z);
 	mNumber = Endian::BigToHostF(lData[i++]);
 	const int lIntervalCount = Endian::BigToHost(lData[i++]);
 	for (int x = 0; x < lIntervalCount; ++x)

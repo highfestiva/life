@@ -39,7 +39,9 @@ void Spawner::SetSpawner(const TBC::PhysicsSpawner* pSpawner)
 		const str lSpawnObject = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
 		ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		AddChild(lObject);
-		lObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF(0.5f,0.5f,0.5f), 0));
+		Vector3DF lInitialVelocity;
+		lObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF(0.5f,0.5f,0.5f), 0, lInitialVelocity));
+		lObject->SetRootVelocity(lInitialVelocity);
 		lObject->StartLoading();
 	}
 }

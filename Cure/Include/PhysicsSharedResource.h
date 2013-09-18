@@ -32,12 +32,14 @@ enum PhysicsOverride
 struct PhysicsSharedInitData
 {
 	TransformationF mTransformation;
+	Vector3DF mVelocity;
 	PhysicsOverride mPhysicsOverride;
 	TBC::PhysicsManager* mPhysicsManager;
 	const int mPhysicsFps;
 	const GameObjectId mInstanceId;
 
-	PhysicsSharedInitData(TransformationF pTransformation, PhysicsOverride pPhysicsOverride, TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
+	PhysicsSharedInitData(const TransformationF& pTransformation, const Vector3DF& pVelocity, PhysicsOverride pPhysicsOverride,
+		TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
 	void operator=(const PhysicsSharedInitData&);
 };
 

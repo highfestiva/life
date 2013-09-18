@@ -30,6 +30,7 @@ public:
 
 	void SetExplosiveStrength(float pExplosiveStrength);
 	void SetDeathFrameDelay(int pDeathFrameDelay);
+	void SetDisappearAfterDeathDelay(float pDisappearDelay);
 
 protected:
 	virtual void OnTick();
@@ -38,6 +39,7 @@ protected:
 	Launcher* mLauncher;
 	int mTriggerDeathFrame;
 	int mDeathFrameDelay;
+	float mDisappearAfterDeathDelay;
 	bool mIsDetonated;
 	float mExplosiveStrength;
 

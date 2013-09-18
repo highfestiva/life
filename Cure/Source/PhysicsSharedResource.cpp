@@ -17,8 +17,10 @@ namespace Cure
 
 
 
-PhysicsSharedInitData::PhysicsSharedInitData(TransformationF pTransformation, PhysicsOverride pPhysicsOverride, TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
+PhysicsSharedInitData::PhysicsSharedInitData(const TransformationF& pTransformation, const Vector3DF& pVelocity, PhysicsOverride pPhysicsOverride,
+		TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
 	mTransformation(pTransformation),
+	mVelocity(pVelocity),
 	mPhysicsOverride(pPhysicsOverride),
 	mPhysicsManager(pPhysicsManager),
 	mPhysicsFps(pPhysicsFps),
@@ -167,6 +169,7 @@ bool PhysicsSharedResource::FinalizeInit()
 				lNewPlacement->mPosition.mTransformation =
 					TransformationF(lTargetOrientation,
 						lNewPlacement->mPosition.mTransformation.GetPosition());
+				lNewPlacement->mPosition.mVelocity = mInitData.mVelocity;
 				PositionHauler::Set(*lNewPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass, true);
 				delete lNewPlacement;
 			}

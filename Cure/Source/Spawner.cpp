@@ -46,12 +46,15 @@ void Spawner::PlaceObject(ContextObject* pObject, int pSpawnPointIndex)
 	{
 		pSpawnPointIndex = Random::GetRandomNumber() % GetSpawner()->GetSpawnPointCount();
 	}
-	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint, pSpawnPointIndex));
+	Vector3DF lInitialVelocity;
+	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint, pSpawnPointIndex, lInitialVelocity));
+	pObject->SetRootVelocity(lInitialVelocity);
 }
 
 TransformationF Spawner::GetSpawnPoint() const
 {
-	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF(), 0);
+	Vector3DF lInitialVelocity;
+	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF(), 0, lInitialVelocity);
 }
 
 

@@ -5,6 +5,8 @@
 
 
 #include "ExplodingMachine.h"
+#include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/Health.h"
 #include "../ProjectileUtil.h"
 
@@ -20,6 +22,7 @@ ExplodingMachine::ExplodingMachine(Cure::ResourceManager* pResourceManager, cons
 	mLauncher(pLauncher),
 	mTriggerDeathFrame(-1),
 	mDeathFrameDelay(1),
+	mDisappearAfterDeathDelay(-1),
 	mIsDetonated(false),
 	mExplosiveStrength(2)
 {
@@ -39,6 +42,11 @@ void ExplodingMachine::SetExplosiveStrength(float pExplosiveStrength)
 void ExplodingMachine::SetDeathFrameDelay(int pDeathFrameDelay)
 {
 	mDeathFrameDelay = pDeathFrameDelay;
+}
+
+void ExplodingMachine::SetDisappearAfterDeathDelay(float pDisappearDelay)
+{
+	mDisappearAfterDeathDelay = pDisappearDelay;
 }
 
 void ExplodingMachine::OnTick()
@@ -61,6 +69,10 @@ void ExplodingMachine::OnTick()
 void ExplodingMachine::OnDie()
 {
 	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveStrength);
+	if (mDisappearAfterDeathDelay >= 0)
+	{
+		GetManager()->GetGameManager()->DeleteContextObjectDelay(this, mDisappearAfterDeathDelay);
+	}
 }
 
 

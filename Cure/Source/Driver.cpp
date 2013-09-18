@@ -8,9 +8,8 @@
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
 #include "../Include/TimeManager.h"
-#include "../../Lepra/Include/HashUtil.h"
+#include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/PhysicsEngine.h"
-#include "../../TBC/Include/PhysicsTrigger.h"
 
 
 
@@ -68,6 +67,32 @@ void Driver::OnTick()
 			if (mTime.GetTimeDiff() > lPeriod)
 			{
 				mTime.ReduceTimeDiff(lPeriod);
+			}
+		}
+		else if (mType == _T("random_jerker"))
+		{
+			assert(mTag.mFloatValueList.size() == 2);
+			const float g = mTag.mFloatValueList[1];
+			const float t = (float)mTime.QueryTimeDiff();
+			if (t < f)
+			{
+				lEngine->SetValue(lEngine->GetControllerIndex()+0, 0);
+				lEngine->SetValue(lEngine->GetControllerIndex()+1, 0);
+				lEngine->SetValue(lEngine->GetControllerIndex()+3, 0);	// 3 for Z... Yup, I know!
+			}
+			else
+			{
+				Vector3DF lPush = RNDVEC(1.0f);
+				lPush.x = ::pow(std::abs(lPush.x), 0.1f) * ((lPush.x <= 0)? -1 : +1);
+				lPush.y = ::pow(std::abs(lPush.y), 0.1f) * ((lPush.y <= 0)? -1 : +1);
+				lPush.z = ::pow(std::abs(lPush.z), 0.1f) * ((lPush.z <= 0)? -1 : +1);
+				lEngine->SetValue(lEngine->GetControllerIndex()+0, lPush.x);
+				lEngine->SetValue(lEngine->GetControllerIndex()+1, lPush.y);
+				lEngine->SetValue(lEngine->GetControllerIndex()+3, lPush.z);	// 3 for Z... Yup, I know!
+				if (t > f+g)
+				{
+					mTime.ReduceTimeDiff(f+g);
+				}
 			}
 		}
 	}

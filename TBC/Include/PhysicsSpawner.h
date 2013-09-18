@@ -44,7 +44,7 @@ public:
 	Type GetType() const;
 	const str& GetFunction() const;
 	int GetSpawnPointCount() const;
-	TransformationF GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint, int pIndex) const;
+	TransformationF GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint, int pIndex, Vector3DF& pInitialVelocity) const;
 	float GetNumber() const;
 	const IntervalArray& GetIntervals() const;
 	const str GetSpawnObject(float pProbabilityThreshold) const;
@@ -67,6 +67,7 @@ private:
 	Type mSpawnerType;
 	str mFunction;
 	SpawnNodeArray mSpawnerNodeArray;
+	Vector3DF mInitialVelocity;
 	float mNumber;
 	IntervalArray mIntervalArray;
 	SpawnObjectArray mSpawnObjectArray;

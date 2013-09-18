@@ -37,10 +37,9 @@ void BaseMachine::OnDie()
 		//GetManager()->GetGameManager()->DeleteContextObjectDelay(this, 3.0);
 		return;
 	}
-	mIsDetonated = true;
 
 	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this);
-	mLauncher->Detonate(this, GetPhysics()->GetBoneGeometry(0), GetPosition(), GetVelocity(), Vector3DF(), 2);
+	Parent::OnDie();
 	//CenterMeshes();
 }
 

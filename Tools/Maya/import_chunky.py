@@ -861,6 +861,11 @@ class GroupReader(DefaultMAReader):
 					    ("spawn_objects", check_spawn_objects)]
 				for name, spawner_check in required:
 					allApplied &= self._query_attribute(node, name, spawner_check)[0]
+				initial_velocity = node.get_fixed_attribute("initial_velocity", optional=True, default=vec3())
+				if len(initial_velocity) != 3:
+					allApplied = False
+					print("Error: %s of %s must be a vec3!" % ("initial_velocity", node.getName()))
+				node.fix_attribute("initial_velocity", initial_velocity)
 				group.append(node)
 				used_sections[section] = True
 
