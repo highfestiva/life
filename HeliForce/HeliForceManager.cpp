@@ -318,7 +318,7 @@ bool HeliForceManager::Render()
 		}
 		Vector3DF lPosition = mCameraTransform.GetPosition();
 		lPosition.x = -lPosition.x;
-		lPosition.y = lPosition.z * -0.1f;
+		lPosition.y = lPosition.z * -0.09f;
 		Vector3DF lAngle = mCameraTransform.GetOrientation()*Vector3DF(0,250,0);
 		lPosition.x -= lAngle.x;
 		lPosition.y -= lAngle.z;
