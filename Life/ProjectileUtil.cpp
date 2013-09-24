@@ -104,7 +104,8 @@ void ProjectileUtil::BulletMicroTick(Cure::ContextObject* pBullet, float pFrameT
 	}
 }
 
-void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated, Launcher* pLauncher, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
+void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated, Launcher* pLauncher, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal,
+	float pStrength, float pDeleteDelay)
 {
 	/*if (pOtherObject->GetInstanceId() == GetOwnerInstanceId())
 	{
@@ -120,7 +121,14 @@ void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated,
 	if (lPhysics)
 	{
 		pLauncher->Detonate(pGrenade, lPhysics->GetBoneGeometry(0), pPosition, pVelocity, pNormal, pStrength);
-		pGrenade->GetManager()->PostKillObject(pGrenade->GetInstanceId());
+		if (pDeleteDelay == 0)
+		{
+			pGrenade->GetManager()->PostKillObject(pGrenade->GetInstanceId());
+		}
+		else if (pDeleteDelay > 0)
+		{
+			pGrenade->GetManager()->GetGameManager()->DeleteContextObjectDelay(pGrenade, pDeleteDelay);
+		}
 	}
 }
 

@@ -40,7 +40,7 @@ FastProjectile::~FastProjectile()
 
 	if (mExplosiveEnergy && GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 	{
-		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy);
+		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy, 0);
 	}
 }
 
@@ -136,7 +136,7 @@ void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Contex
 
 	if (mExplosiveEnergy)
 	{
-		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), pNormal, mExplosiveEnergy);
+		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), pNormal, mExplosiveEnergy, 0);
 	}
 	else
 	{

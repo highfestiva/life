@@ -30,6 +30,8 @@ private:
 	HeliForceManager* mGame;
 	Cure::GameObjectId mCanonId;
 	int mAmmoType;
+	float mDistance;
+	bool mDistanceSet;
 	float mShootPeriod;
 	HiResTimer mLastShot;
 	float mJointStartAngle;

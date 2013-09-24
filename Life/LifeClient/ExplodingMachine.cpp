@@ -68,11 +68,7 @@ void ExplodingMachine::OnTick()
 
 void ExplodingMachine::OnDie()
 {
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveStrength);
-	if (mDisappearAfterDeathDelay >= 0)
-	{
-		GetManager()->GetGameManager()->DeleteContextObjectDelay(this, mDisappearAfterDeathDelay);
-	}
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveStrength, mDisappearAfterDeathDelay);
 }
 
 

@@ -811,7 +811,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		return;
 	}
 	// Flip angle if parent is "world".
-	if (pGeometry->GetParent() && pGeometry->GetParent()->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_BODY)
+	if (pPhysicsManager->IsStaticBody(pGeometry->GetParent()->GetBodyId()))
 	{
 		lIrlAngle = -lIrlAngle;
 	}

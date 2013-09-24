@@ -102,7 +102,10 @@ int HeliForceConsoleManager::OnCommand(const str& pCommand, const strutil::strve
 			{
 				GetGameManager()->GetTickLock()->Acquire();
 				const str lNewLevelName = ((HeliForceManager*)GetGameManager())->StepLevel(+1);
-				CURE_RTVAR_SET(((HeliForceManager*)GetGameManager())->GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
+				if (!lNewLevelName.empty())
+				{
+					CURE_RTVAR_SET(((HeliForceManager*)GetGameManager())->GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
+				}
 				GetGameManager()->GetTickLock()->Release();
 				return OnCommand(_T("die"), pParameterVector);
 			}

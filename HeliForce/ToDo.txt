@@ -22,27 +22,28 @@
 . Save WR times.
 . Show high score.
 . Levels.
-  . Reference points in foreground/background.
-  . Real worlds - villages, houses, garages, lightposts, signs, walls, trees, bushes, cars, stairs, toys...
-  . Traps with smoke and sound!
-  . Falling stones!
-  . Automatic doors.
-  . Propellers.
-  . Push stones over edges to open...
-  . Break hot-air ballon to open...
-  . Add turrets to some levels.
-  . Land on moving truck.
-  . Land on moving boat.
-  . Make grass for mass-object.
+  + Reference points in foreground/background.
+  - Real worlds - villages, houses, garages, lightposts, signs, walls, trees, bushes, cars, stairs, toys...
+  - Traps with smoke and sound!
+  + Falling stones!
+  + Automatic doors.
+  + Propellers.
+  + Push stones over edges to open...
+  - Break hot-air ballon to open...
+  + Add turrets to some levels.
+  - Land on moving truck.
+  + Land on moving boat.
+  - Make grass for mass-object.
   . Wrap backgrounds.
   . Djungle sounds on djungle levels, etc. Parrots, birds, tiger roars...
-  . Butterflies, things like that.
+  - Butterflies, things like that.
   + Reduce stretch on backgrounds, so the lush textures appear. Right now it looks like shit!
-. Beautify!
+  . Create more background textures.
+- Beautify!
 . Large fonts on iOS.
 . Music.
 . Sounds. Ambient. Moving stuff.
-. Make sure the "close to the path" indicator gets back on track when restarting the level.
++ Make sure the "close to the path" indicator gets back on track when restarting the level.
 . Pilot name and high score.
 . Change pilot name.
 . Restart/replay level.

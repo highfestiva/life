@@ -55,7 +55,7 @@ void BombPlane::OnTick()
 	const float lHealth = Cure::Health::Get(this);
 	if (lHealth <= 0)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 1);
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 1, 0, 0);
 	}
 
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();

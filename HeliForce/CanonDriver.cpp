@@ -23,6 +23,8 @@ CanonDriver::CanonDriver(HeliForceManager* pGame, Cure::GameObjectId pCanonId, i
 	mGame(pGame),
 	mCanonId(pCanonId),
 	mAmmoType(pAmmoType),
+	mDistance(1000),
+	mDistanceSet(false),
 	mShootPeriod(1/pShotsPerSecond)
 {
 	pGame->GetContext()->AddLocalObject(this);
@@ -46,7 +48,7 @@ void CanonDriver::OnTick()
 {
 	Parent::OnTick();
 
-	Cure::ContextObject* lCanon = mManager->GetObject(mCanonId, true);
+	Cure::CppContextObject* lCanon = (Cure::CppContextObject*)mManager->GetObject(mCanonId, true);
 	if (!lCanon)
 	{
 		mManager->PostKillObject(GetInstanceId());
@@ -56,15 +58,26 @@ void CanonDriver::OnTick()
 	{
 		return;
 	}
+	if (!mDistanceSet)
+	{
+		const TBC::ChunkyClass::Tag* lTag = lCanon->FindTag(_T("behavior"), 1, 0);
+		deb_assert(lTag);
+		mDistance = lTag->mFloatValueList[0];
+		mDistanceSet = true;
+	}
 
 	Cure::ContextObject* lAvatar = mManager->GetObject(mGame->GetAvatarInstanceId());
-	if (!lAvatar || !lAvatar->IsLoaded())
+	if (!lAvatar)
 	{
 		return;
 	}
 
 	const Vector3DF lTarget(lAvatar->GetPosition() + lAvatar->GetVelocity()*0.2f);
 	const Vector2DF d(lTarget.z - lCanon->GetPosition().z, lTarget.x - lCanon->GetPosition().x);
+	if (d.GetLengthSquared() >= mDistance*mDistance)
+	{
+		return;	// Don't shoot at distant objects.
+	}
 	TBC::ChunkyBoneGeometry* lBarrel = lCanon->GetPhysics()->GetBoneGeometry(1);
 	TBC::PhysicsManager::Joint1Diff lDiff;
 	mGame->GetPhysicsManager()->GetJoint1Diff(lBarrel->GetBodyId(), lBarrel->GetJointId(), lDiff);

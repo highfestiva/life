@@ -153,7 +153,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, -0.1f, 0.2f);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_05"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 13);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 }
 
 HeliForceManager::~HeliForceManager()
@@ -318,7 +318,10 @@ bool HeliForceManager::Render()
 		}
 		Vector3DF lPosition = mCameraTransform.GetPosition();
 		lPosition.x = -lPosition.x;
-		lPosition.y = 0;
+		lPosition.y = lPosition.z * -0.1f;
+		Vector3DF lAngle = mCameraTransform.GetOrientation()*Vector3DF(0,250,0);
+		lPosition.x -= lAngle.x;
+		lPosition.y -= lAngle.z;
 		mHemisphereUvTransform->GetBones()[0].GetRelativeBoneTransformation(0).GetPosition() = lPosition * 0.003f;
 
 		mUiManager->GetRenderer()->RenderRelative(mHemisphere->GetMesh(0), 0);
@@ -676,24 +679,27 @@ str HeliForceManager::StepLevel(int pCount)
 {
 	if (GetContext()->GetObject(mAvatarId))
 	{
-		mOldLevel = mLevel;
-		mLevelCompleted = false;
 		int lLevelNumber = GetCurrentLevelNumber();
 		lLevelNumber += pCount;
 		int lLevelCount;
-		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 13);
-		if (lLevelNumber >= lLevelCount)
+		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+		if (lLevelNumber < lLevelCount)
 		{
-			lLevelNumber = 0;
+			if (lLevelNumber < 0)
+			{
+				lLevelNumber = lLevelCount-1;
+			}
+			mOldLevel = mLevel;
+			mLevelCompleted = false;
+			str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
+			mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+			mLevel->StartLoading();
+			return lNewLevelName;
 		}
-		else if (lLevelNumber < 0)
+		else
 		{
-			lLevelNumber = lLevelCount-1;
+			SystemManager::AddQuitRequest(true);	// TODO: go to menu!
 		}
-		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
-		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-		mLevel->StartLoading();
-		return lNewLevelName;
 	}
 	return _T("");
 }
@@ -1057,7 +1063,6 @@ Cure::ContextObject* HeliForceManager::CreateContextObject(const str& pClassId) 
 	{
 		CenteredMachine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (HeliForceManager*)this);
 		new Cure::FloatAttribute(lMachine, _T("DamageAbsorption"), 1e-3f);
-		new Cure::FloatAttribute(lMachine, _T("DamageReduction"), 0.2f);
 		lMachine->SetDeathFrameDelay(0);
 		lMachine->SetDisappearAfterDeathDelay(0.2f);
 		lObject = lMachine;

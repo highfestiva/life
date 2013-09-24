@@ -25,7 +25,7 @@ public:
 	virtual ~SeeThrough();
 
 private:
-	void SetTagIndex(int pIndex);
+	virtual void SetTagIndex(int pIndex);
 	virtual void OnTick();
 
 	typedef TBC::ChunkyClass::Tag Tag;
