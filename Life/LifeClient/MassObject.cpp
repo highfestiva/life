@@ -201,7 +201,10 @@ bool MassObject::GetObjectPlacement(Vector3DF& pPosition) const
 			lIndex = Random::GetRandomNumber(lSeed) % lCollisions;
 		}
 		pPosition.z = lCollisionPosition[lIndex].z;
-		return true;
+		if (pPosition.GetLengthSquared() > 1)	// Some bug making us create stuff in origin, I'm guessing async loading of physical objects.
+		{
+			return true;
+		}
 	}
 	return false;
 }

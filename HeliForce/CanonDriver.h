@@ -8,6 +8,7 @@
 
 #include "../Cure/Include/ContextPath.h"
 #include "../Cure/Include/CppContextObject.h"
+#include "../Lepra/Include/GameTimer.h"
 #include "HeliForceManager.h"
 
 
@@ -33,7 +34,7 @@ private:
 	float mDistance;
 	bool mDistanceSet;
 	float mShootPeriod;
-	HiResTimer mLastShot;
+	GameTimer mLastShot;
 	float mJointStartAngle;
 	LOG_CLASS_DECLARE();
 };

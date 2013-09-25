@@ -8,6 +8,8 @@
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/CppContextObject.h"
 #include "../Cure/Include/GameManager.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "../Lepra/Include/Random.h"
 #include "Launcher.h"
 
 
@@ -146,6 +148,20 @@ void ProjectileUtil::OnBulletHit(Cure::ContextObject* pBullet, bool* pIsDetonate
 
 	pLauncher->OnBulletHit(pBullet, pTarget);
 	pBullet->GetManager()->PostKillObject(pBullet->GetInstanceId());
+}
+
+float ProjectileUtil::GetShotSounds(Cure::ContextManager* pManager, const strutil::strvec& pSoundNames, str& pLaunchSoundName, str& pShreekSoundName)
+{
+	const size_t lSoundCount = pSoundNames.size() / 2;	// First half are launch sounds, last half are shreek sounds.
+	if (lSoundCount)
+	{
+		pLaunchSoundName = pSoundNames[Random::GetRandomNumber()%lSoundCount];
+		pShreekSoundName = pSoundNames[Random::GetRandomNumber()%lSoundCount + lSoundCount];
+		float lPitch;
+		CURE_RTVAR_GET(lPitch, = (float), pManager->GetGameManager()->GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
+		return lPitch;
+	}
+	return 0;
 }
 
 

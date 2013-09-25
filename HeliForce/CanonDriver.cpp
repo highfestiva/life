@@ -91,10 +91,9 @@ void CanonDriver::OnTick()
 		float lHighAngle = 0;
 		float lBounce;
 		mGame->GetPhysicsManager()->GetJointParams(lBarrel->GetJointId(), lLowAngle, lHighAngle, lBounce);
-		if (std::abs(lAngle) < std::abs(lHighAngle-lLowAngle)*0.2f)
+		if (std::abs(lAngle) < std::abs(lHighAngle-lLowAngle)*0.1f)
 		{
-			mLastShot.PopTimeDiff();
-			mLastShot.ReduceTimeDiff(Random::Normal(mShootPeriod, mShootPeriod/4, mShootPeriod*0.75f, mShootPeriod*1.25f));
+			mLastShot.Start(-Random::Normal(mShootPeriod, mShootPeriod/4, mShootPeriod*0.75f, mShootPeriod*1.25f));
 			mGame->Shoot(lCanon, mAmmoType);
 		}
 	}

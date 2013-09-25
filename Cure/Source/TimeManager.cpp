@@ -6,6 +6,7 @@
 
 #include "../Include/TimeManager.h"
 #include "../../Lepra/Include/LepraAssert.h"
+#include "../../Lepra/Include/GameTimer.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Performance.h"
 #include "../Include/RuntimeVariable.h"
@@ -55,6 +56,7 @@ void TimeManager::Tick()
 {
 	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	GameTimer::SetRealTimeRatio(mRealTimeRatio);
 	bool lIsFixedFps;
 	CURE_RTVAR_GET(lIsFixedFps, =, Cure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 

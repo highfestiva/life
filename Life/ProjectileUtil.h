@@ -13,6 +13,7 @@
 
 namespace Cure
 {
+class ContextManager;
 class ContextObject;
 class CppContextObject;
 class GameManager;
@@ -38,6 +39,7 @@ public:
 	static void BulletMicroTick(Cure::ContextObject* pBullet, float pFrameTime, float pMaxVelocity, float pAcceleration);
 	static void Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated, Launcher* pLauncher, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength, float pDeleteDelay);
 	static void OnBulletHit(Cure::ContextObject* pBullet, bool* pIsDetonated, Launcher* pLauncher, Cure::ContextObject* pTarget);
+	static float GetShotSounds(Cure::ContextManager* pManager, const strutil::strvec& pSoundNames, str& pLaunchSoundName, str& pShreekSoundName);
 
 private:
 	LOG_CLASS_DECLARE();

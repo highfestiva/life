@@ -7,7 +7,7 @@
 #pragma once
 
 #include "UiCppContextObject.h"
-#include "../../Lepra/Include/HiResTimer.h"
+#include "../../Lepra/Include/GameTimer.h"
 #include "../../UiTBC/Include/UiChunkyClass.h"
 
 
@@ -40,6 +40,7 @@ protected:
 	void OnTick();
 
 private:
+	void HandleTagAmbientSounds(const UiTbc::ChunkyClass::Tag& pTag, float pRealTimeRatio);
 	void HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, bool pIsChild);
 	void HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag);
 	void HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
@@ -58,6 +59,7 @@ private:
 	BurnEmitter* mBurnEmitter;
 	TagSoundTable mEngineSoundTable;
 	TagSoundIntensityArray mEngineSoundIntensity;
+	GameTimer mAmbientSoundTimer;
 	float mBlinkTime;
 
 	LOG_CLASS_DECLARE();

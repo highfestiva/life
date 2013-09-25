@@ -21,6 +21,7 @@
 #include "../Include/UiJetEngineEmitter.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
+#include "../Include/UiSoundReleaser.h"
 
 
 
@@ -98,9 +99,8 @@ void Machine::OnTick()
 	}
 
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
-	float lRealTimeRatio;
-	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime()) * lRealTimeRatio;
+	float lRealTimeRatio = lTimeManager->GetRealTimeRatio();
+	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
 	const bool lIsChild = IsAttributeTrue(_T("float_childishness"));
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;
@@ -113,7 +113,11 @@ void Machine::OnTick()
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{
 		const UiTbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
-		if (lTag.mTagName == _T("eye"))
+		if (lTag.mTagName == _T("ambient_sounds"))
+		{
+			HandleTagAmbientSounds(lTag, lRealTimeRatio);
+		}
+		else if (lTag.mTagName == _T("eye"))
 		{
 			HandleTagEye(lTag, lPhysicsManager, lIsChild);
 		}
@@ -171,6 +175,40 @@ void Machine::OnTick()
 }
 
 
+
+void Machine::HandleTagAmbientSounds(const UiTbc::ChunkyClass::Tag& pTag, float pRealTimeRatio)
+{
+	if (pTag.mFloatValueList.size() != 6 ||
+		pTag.mStringValueList.size() < 1 ||
+		pTag.mBodyIndexList.size() != 0 ||
+		pTag.mEngineIndexList.size() != 0 ||
+		pTag.mMeshIndexList.size() != 0)
+	{
+		mLog.Errorf(_T("The ambient_sounds tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		deb_assert(false);
+		return;
+	}
+	enum
+	{
+		MIN_DELAY,	MAX_DELAY,
+		MIN_PITCH,	MAX_PITCH,
+		MIN_VOLUME,	MAX_VOLUME,
+	};
+	if (!mAmbientSoundTimer.IsStarted())
+	{
+		mAmbientSoundTimer.Start(-pTag.mFloatValueList[MIN_DELAY]);
+	}
+	else if (mAmbientSoundTimer.QueryTimeDiff() >= 0)
+	{
+		mAmbientSoundTimer.Start(-Random::Uniform(pTag.mFloatValueList[MIN_DELAY], pTag.mFloatValueList[MAX_DELAY]));
+		const size_t lRandomSoundIndex = Random::GetRandomNumber() % pTag.mStringValueList.size();
+		const str lSoundName = pTag.mStringValueList[lRandomSoundIndex];
+		UiCure::UserSound2dResource* lSound = new UiCure::UserSound2dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
+		const float lPitch = Random::Uniform(pTag.mFloatValueList[MIN_PITCH], pTag.mFloatValueList[MAX_PITCH]);
+		const float lVolume = Random::Uniform(pTag.mFloatValueList[MIN_VOLUME], pTag.mFloatValueList[MAX_VOLUME]);
+		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lSoundName, lSound, lVolume, lPitch*pRealTimeRatio);
+	}
+}
 
 void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, bool pIsChild)
 {

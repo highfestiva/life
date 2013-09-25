@@ -569,6 +569,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\GameTimer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\GammaLookup.h"
 				>
 			</File>
@@ -1084,6 +1088,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\FileArchive.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\GameTimer.cpp"
 				>
 			</File>
 			<File

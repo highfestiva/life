@@ -50,7 +50,7 @@ void FastProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
 	deb_assert(lTag);
 
 	const float lMuzzleVelocity = lTag->mFloatValueList[0];
@@ -59,8 +59,9 @@ void FastProjectile::OnLoaded()
 	mAcceleration = lTag->mFloatValueList[2];
 	mExplosiveEnergy = lTag->mFloatValueList[3];
 
-	const str lLaunchSoundName = lTag->mStringValueList[0];
-	const str lShreekSoundName = lTag->mStringValueList[1];
+	str lLaunchSoundName;
+	str lShreekSoundName;
+	const float lPitch = ProjectileUtil::GetShotSounds(GetManager(), lTag->mStringValueList, lLaunchSoundName, lShreekSoundName);
 	if (!lLaunchSoundName.empty())
 	{
 		TransformationF lParentTransform;
@@ -68,7 +69,7 @@ void FastProjectile::OnLoaded()
 		if (ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
 		{
 			UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
-			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, 1.0f);
+			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, lPitch);
 		}
 	}
 	if (!lShreekSoundName.empty())
