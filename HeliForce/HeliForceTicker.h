@@ -13,6 +13,7 @@
 
 namespace UiCure
 {
+class MusicPlayer;
 class RendererImageResource;
 }
 namespace Life
@@ -35,6 +36,8 @@ public:
 	virtual ~HeliForceTicker();
 
 private:
+	void Suspend();
+	void Resume();
 	virtual bool CreateSlave();
 	virtual void OnSlavesKilled();
 	virtual void OnServerCreated(Life::UiGameServerManager* pServer);
@@ -62,6 +65,7 @@ private:
 
 	bool mIsPlayerCountViewActive;
 	int mPerformanceAdjustmentTicks;
+	UiCure::MusicPlayer* mMusicPlayer;
 	UiCure::RendererImageResource* mEnvMap;
 
 	LOG_CLASS_DECLARE();

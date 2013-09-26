@@ -93,7 +93,6 @@ private:
 	UiLepra::InputManager* mInput;
 	UiLepra::SoundManager* mSound;
 	UiLepra::SoundStream* mMusicStreamer;
-	str mPathPrefix;
 	int mLayoutFrameCounter;
 	UiTbc::Button* mLazyButton;
 	UiTbc::Button* mHardButton;
@@ -314,7 +313,7 @@ bool App::Open()
 	if (lOk)
 	{
 		mMusicStreamer = 0;
-		mMusicStreamer = mSound->CreateSoundStream(mPathPrefix+_T("Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		mMusicStreamer = mSound->CreateSoundStream(_T("Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));
@@ -362,7 +361,6 @@ void App::Close()
 
 void App::Init()
 {
-	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
 

@@ -26,16 +26,19 @@ public:
 	static void Init();
 	static void Shutdown();
 
+	static void SetArgumentVector(const strutil::strvec& pArgumentVector);
+	static const strutil::strvec& GetArgumentVector();
+	static str GetDataDirectory();
 	// Get root directory ( '/', 'C:\', 'Macintosh HD', etc..).
 	static str GetRootDirectory();
 	static str GetCurrentDirectory();
 	static str GetUserDirectory();
 	static str GetIoDirectory(const str& pAppName);
-	static str GetDataDirectory(const str& pArgv0);
+	static str GetDataDirectoryFromPath(const str& pArgv0);
 	static str GetLoginName();
 	static str QueryFullUserName();
-	static std::string GetRandomId();
-	static std::string GetSystemPseudoId();
+	static astr GetRandomId();
+	static astr GetSystemPseudoId();
 
 	static void WebBrowseTo(const str& pUrl);
 	static void EmailTo(const str& pTo, const str& pSubject, const str& pBody);
@@ -68,6 +71,8 @@ private:
 	static uint64 SingleCpuTest();
 	static inline unsigned SingleMipsTest();
 	static inline void BOGOMIPSDelay(unsigned pLoopCount);
+
+	static strutil::strvec mArgumentVector;
 
 	static int mQuitRequest;
 	static QuitRequestCallback mQuitRequestCallback;

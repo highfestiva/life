@@ -23,8 +23,8 @@ SimulatorDriver::SimulatorDriver(Cure::GameManager* pGame, Cure::GameObjectId pS
 	mSimulatorId(pSimulatorId)
 {
 	pGame->GetContext()->AddLocalObject(this);
-	pGame->GetContext()->AddAlarmCallback(this, 0, 1.0f, 0);
-	pGame->GetContext()->AddAlarmCallback(this, 1, 1.7f, 0);
+	pGame->GetContext()->AddAlarmCallback(this, 0, 5.0f, 0);
+	pGame->GetContext()->AddAlarmCallback(this, 1, 5.7f, 0);
 }
 
 SimulatorDriver::~SimulatorDriver()

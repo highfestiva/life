@@ -33,6 +33,14 @@ ApplicationTicker::~ApplicationTicker()
 {
 }
 
+void ApplicationTicker::Suspend()
+{
+}
+
+void ApplicationTicker::Resume()
+{
+}
+
 void ApplicationTicker::Profile()
 {
 }

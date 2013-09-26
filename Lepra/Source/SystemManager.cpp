@@ -18,7 +18,22 @@ namespace Lepra
 
 
 
-std::string SystemManager::GetRandomId()
+void SystemManager::SetArgumentVector(const strutil::strvec& pArgumentVector)
+{
+	mArgumentVector = pArgumentVector;
+}
+
+const strutil::strvec& SystemManager::GetArgumentVector()
+{
+	return mArgumentVector;
+}
+
+str SystemManager::GetDataDirectory()
+{
+	return GetDataDirectoryFromPath(mArgumentVector[0]);
+}
+
+astr SystemManager::GetRandomId()
 {
 	str s;
 	s += GetLoginName();
@@ -29,17 +44,17 @@ std::string SystemManager::GetRandomId()
 	s += strutil::IntToString(GetAvailVirtualMemory(), 16);
 	uint8 lHashData[20];
 	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(tchar), lHashData);
-	return (std::string((const char*)lHashData, sizeof(lHashData)));
+	return (astr((const char*)lHashData, sizeof(lHashData)));
 }
 
-std::string SystemManager::GetSystemPseudoId()
+astr SystemManager::GetSystemPseudoId()
 {
 	str s;
 	s += GetLoginName();
 	s += GetUniqueHardwareString();
 	uint8 lHashData[20];
 	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(tchar), lHashData);
-	std::string lResult;
+	astr lResult;
 	for (unsigned x = 0; x < sizeof(lHashData); ++x)
 	{
 		if (lHashData[x] == '\\')
@@ -234,6 +249,7 @@ BogoLoop:	loop	BogoLoop
 
 
 
+strutil::strvec SystemManager::mArgumentVector;
 int SystemManager::mQuitRequest = 0;
 SystemManager::QuitRequestCallback SystemManager::mQuitRequestCallback;
 double SystemManager::mSleepResolution = 0;

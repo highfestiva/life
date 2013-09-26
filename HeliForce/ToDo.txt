@@ -13,7 +13,7 @@
 - Only zoom out once hemisphere texture is loaded.
 + Only show exhausts in heli when damaged.
 + Monster truck jumping over landing pad.
-- Slow down "grown up easy level" to ensure fairness. Otherwise the nightmare level has no edge as you can start+land at 100 mph. (Set to right Childishness levels will suffice.)
++ Slow down "grown up easy level" to ensure fairness. Otherwise the nightmare level has no edge as you can start+land at 100 mph. (Set to right Childishness levels will suffice.)
 + Unload resources between levels to ensure memory will suffice.
 + Optimize to ensure high frame rates on touch devices.
 + Make explosion sparks never go slower than X, otherwise it looks like shit.
@@ -39,7 +39,8 @@
   - Butterflies, things like that.
   + Reduce stretch on backgrounds, so the lush textures appear. Right now it looks like shit!
   + Create more background textures.
-  . Reorder them.
+  + Reorder them.
+  + Building textures are needed!
 . Menu using 3D buttons with shadows! Cewl!
 - Beautify!
 . Large fonts on iOS.

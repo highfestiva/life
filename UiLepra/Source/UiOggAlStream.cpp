@@ -45,7 +45,7 @@ bool OggAlStream::Playback()
 	}
 
 	alSourceQueueBuffers(mAlSource, 2, mAlBuffers);
-	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMasterVolume());
+	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMusicVolume());
 	alSourcePlay(mAlSource);
 	return true;
 }
@@ -79,7 +79,7 @@ bool OggAlStream::Update()
 	bool lIsActive = true;
 	int lProcessedBufferCount;
 	alGetSourcei(mAlSource, AL_BUFFERS_PROCESSED, &lProcessedBufferCount);
-	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMasterVolume());
+	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMusicVolume());
 	AL_CHECK();
 	while (lProcessedBufferCount--)
 	{

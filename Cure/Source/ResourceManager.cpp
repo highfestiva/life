@@ -507,10 +507,10 @@ bool RamImageResource::Load()
 
 
 
-ResourceManager::ResourceManager(unsigned pLoaderThreadCount, const str& pPathPrefix):
+ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
 	mTerrainFunctionManager(0),
 	mLoaderThreadCount(pLoaderThreadCount),
-	mPathPrefix(pPathPrefix),
+	mPathPrefix(SystemManager::GetDataDirectory()),
 	mLoaderThread("ResourceLoader"),
 	mZipLock(new Lock),
 	mZipFile(new ZipArchive)
@@ -725,7 +725,6 @@ strutil::strvec ResourceManager::ListFiles(const str& pWildcard)
 	}
 	return lFilenameArray;
 }
-
 
 
 TerrainFunctionManager* ResourceManager::GetTerrainFunctionManager() const

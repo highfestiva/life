@@ -101,7 +101,7 @@ str SystemManager::GetIoDirectory(const str& pAppName)
 	return (lIoDir);
 }
 
-str SystemManager::GetDataDirectory(const str& pArgv0)
+str SystemManager::GetDataDirectoryFromPath(const str& pArgv0)
 {
 #if defined(LEPRA_IOS)
 	return Path::GetDirectory(pArgv0);

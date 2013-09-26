@@ -5,6 +5,7 @@
 
 
 #include "../Include/Application.h"
+#include "../Include/SystemManager.h"
 
 
 
@@ -19,9 +20,9 @@ namespace Lepra
 
 
 
-Application::Application(const strutil::strvec& pArgumentVector):
-	mArgumentVector(pArgumentVector)
+Application::Application(const strutil::strvec& pArgumentVector)
 {
+	SystemManager::SetArgumentVector(pArgumentVector);
 }
 
 Application::~Application()

@@ -8,6 +8,7 @@
 #include "HeliForceTicker.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiMusicPlayer.h"
 #include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiCure/Include/UiResourceManager.h"
 #include "../UiLepra/Include/UiCore.h"
@@ -28,6 +29,7 @@ HeliForceTicker::HeliForceTicker(UiCure::GameUiManager* pUiManager, Cure::Resour
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mIsPlayerCountViewActive(false),
 	mPerformanceAdjustmentTicks(0),
+	mMusicPlayer(0),
 	mEnvMap(0)
 {
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
@@ -37,11 +39,31 @@ HeliForceTicker::HeliForceTicker(UiCure::GameUiManager* pUiManager, Cure::Resour
 HeliForceTicker::~HeliForceTicker()
 {
 	CloseMainMenu();
+	delete mMusicPlayer;
+	mMusicPlayer = 0;
 	delete mEnvMap;
 	mEnvMap = 0;
 }
 
 
+
+void HeliForceTicker::Suspend()
+{
+	if (mMusicPlayer)
+	{
+		mMusicPlayer->Pause();
+	}
+}
+
+void HeliForceTicker::Resume()
+{
+	HiResTimer::StepCounterShadow();
+	if (mMusicPlayer)
+	{
+		mMusicPlayer->Stop();
+		mMusicPlayer->Playback();
+	}
+}
 
 bool HeliForceTicker::CreateSlave()
 {
@@ -66,7 +88,11 @@ void HeliForceTicker::OnServerCreated(Life::UiGameServerManager*)
 
 bool HeliForceTicker::OpenUiManager()
 {
-	bool lOk = mUiManager->OpenDraw();
+	bool lOk = true;
+	if (lOk)
+	{
+		lOk = mUiManager->OpenDraw();
+	}
 	if (lOk)
 	{
 #ifdef LEPRA_TOUCH
@@ -102,6 +128,21 @@ bool HeliForceTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
+		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
+		mMusicPlayer->SetVolume(0.5f);
+		mMusicPlayer->SetSongPauseTime(2, 6);
+		mMusicPlayer->AddSong(_T("Dub Feral.ogg"));
+		mMusicPlayer->AddSong(_T("Easy Jam.ogg"));
+		mMusicPlayer->AddSong(_T("Firmament.ogg"));
+		mMusicPlayer->AddSong(_T("Mandeville.ogg"));
+		mMusicPlayer->AddSong(_T("Slow Ska Game Loop.ogg"));
+		mMusicPlayer->AddSong(_T("Stealth Groover.ogg"));
+		mMusicPlayer->AddSong(_T("Yallahs.ogg"));
+		mMusicPlayer->Shuffle();
+		lOk = mMusicPlayer->Playback();
+	}
+	if (lOk)
+	{
 		mUiManager->GetDesktopWindow()->CreateLayer(new UiTbc::FloatingLayout());
 	}
 	return lOk;
@@ -115,6 +156,11 @@ void HeliForceTicker::BeginRender(Vector3DF& pColor)
 
 void HeliForceTicker::PreWaitPhysicsTick()
 {
+	if (mMusicPlayer)
+	{
+		mMusicPlayer->Update();
+	}
+
 	++mPerformanceAdjustmentTicks;
 	if (mPerformanceAdjustmentTicks & 0x3F)
 	{

@@ -55,4 +55,5 @@
 #define RTVAR_UI_SOUND_ENGINE			"Ui.Sound.Engine"
 #define RTVAR_UI_SOUND_ROLLOFF			"Ui.Sound.RollOff"
 #define RTVAR_UI_SOUND_DOPPLER			"Ui.Sound.Doppler"
-#define RTVAR_UI_SOUND_VOLUME			"Ui.Sound.Volume"
+#define RTVAR_UI_SOUND_MASTERVOLUME		"Ui.Sound.MasterVolume"
+#define RTVAR_UI_SOUND_MUSICVOLUME		"Ui.Sound.MusicVolume"

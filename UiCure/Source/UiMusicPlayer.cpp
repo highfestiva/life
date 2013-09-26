@@ -178,6 +178,10 @@ bool MusicPlayer::StartPlayback()
 		mMusicStream->SetVolume(mVolume);
 		return mMusicStream->Playback();
 	}
+	else
+	{
+		mLog.Errorf(_T("Unable to load song %s!"), mSongNameList[mCurrentSongIndex].c_str());
+	}
 	return false;
 }
 

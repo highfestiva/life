@@ -308,8 +308,11 @@ void GameUiManager::BeginRender(const Vector3DF& pBackgroundColor)
 		}
 
 		float lMasterVolume;
-		CURE_RTVAR_GET(lMasterVolume, =(float), mVariableScope, RTVAR_UI_SOUND_VOLUME, 1.0);
+		CURE_RTVAR_GET(lMasterVolume, =(float), mVariableScope, RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 		mSound->SetMasterVolume(lMasterVolume);
+		float lMusicVolume;
+		CURE_RTVAR_GET(lMusicVolume, =(float), mVariableScope, RTVAR_UI_SOUND_MUSICVOLUME, 1.0);
+		mSound->SetMusicVolume(lMusicVolume);
 	}
 	else
 	{

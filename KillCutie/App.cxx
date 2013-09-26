@@ -190,7 +190,6 @@ public:
 #endif // Touch
 	Game* mGame;
 
-	str mPathPrefix;
 	UiLepra::SoundStream* mIntroStreamer;
 
 	double mAverageLoopTime;
@@ -660,7 +659,6 @@ void App::Init()
 	deb_assert(Int2Str(+12345) == _T("12,345"));
 	deb_assert(Int2Str(+123456) == _T("123,456"));
 	deb_assert(Int2Str(+1234567) == _T("1,234,567"));
-	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
 
@@ -695,8 +693,7 @@ int App::Run()
 	}
 	if (lOk)
 	{
-		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
-		mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
+		mResourceManager = new Cure::ResourceManager(1);
 	}
 	if (lOk)
 	{
@@ -3154,7 +3151,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		mGame->ResetLauncher();
 		mGame->SetComputerDifficulty(0);
 		delete mIntroStreamer;
-		mIntroStreamer = mUiManager->GetSoundManager()->CreateSoundStream(mPathPrefix+_T("voice_intro.ogg"), UiLepra::SoundManager::LOOP_NONE, 0);
+		mIntroStreamer = mUiManager->GetSoundManager()->CreateSoundStream(_T("voice_intro.ogg"), UiLepra::SoundManager::LOOP_NONE, 0);
 		if (mIntroStreamer && mIntroStreamer->Playback())
 		{
 			SuperReset(false);

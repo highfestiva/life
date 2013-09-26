@@ -1762,13 +1762,15 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		// Set orientation.
 		TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
-		lTransform.SetOrientation(lQ);
+		// TODO: fix your linear algebra shit first!
+		//lTransform.SetOrientation(lQ);
 		// Align anchors (happen after rotation) and store.
 		Vector3DF lAnchor2(lUniversal->anchor2[0], lUniversal->anchor2[1], lUniversal->anchor2[2]);
 		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
 		dVector3 lRealAnchor;
 		::dJointGetUniversalAnchor2(lUniversal, lRealAnchor);
-		lTransform.GetPosition() += lAnchor-lAnchor2;
+		// TODO: fix your linear algebra shit first!
+		//lTransform.GetPosition() += lAnchor-lAnchor2;
 		SetBodyTransform(pBodyId, lTransform);
 	}
 

@@ -153,7 +153,6 @@ public:
 #endif // Touch
 	Game* mGame;
 
-	str mPathPrefix;
 
 	double mAverageLoopTime;
 	double mAverageFastLoopTime;
@@ -469,7 +468,6 @@ void App::Init()
 	deb_assert(Int2Str(+12345) == _T("12,345"));
 	deb_assert(Int2Str(+123456) == _T("123,456"));
 	deb_assert(Int2Str(+1234567) == _T("1,234,567"));
-	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
 
@@ -504,8 +502,7 @@ int App::Run()
 	}
 	if (lOk)
 	{
-		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
-		mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
+		mResourceManager = new Cure::ResourceManager(1);
 	}
 	if (lOk)
 	{

@@ -79,9 +79,6 @@ public:
 
 	virtual void Suspend();
 	virtual void Resume();
-
-protected:
-	strutil::strvec mArgumentVector;
 };
 
 

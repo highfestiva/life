@@ -7,6 +7,7 @@
 #include "../Include/UiSoundManagerOpenAL.h"
 #include <assert.h>
 #include "../../Lepra/Include/ResourceTracker.h"
+#include "../../Lepra/Include/SystemManager.h"
 #include "../../ThirdParty/freealut-1.1.0/include/AL/alut.h"
 #include "../Include/UiChibiXmAlStream.h"
 #include "../Include/UiOggAlStream.h"
@@ -37,6 +38,7 @@ SoundManagerOpenAL::SoundManagerOpenAL(int pMixRate):
 	mContext(0),
 	mRollOffFactor(1),
 	mMasterVolume(1),
+	mMusicVolume(1),
 	mMixRate(pMixRate),
 	mIsIrreparableErrorState(false)
 {
@@ -169,6 +171,16 @@ void SoundManagerOpenAL::SetMasterVolume(float pVolume)
 	mMasterVolume = pVolume;
 }
 
+float SoundManagerOpenAL::GetMusicVolume() const
+{
+	return mMasterVolume * mMusicVolume;
+}
+
+void SoundManagerOpenAL::SetMusicVolume(float pVolume)
+{
+	mMusicVolume = pVolume;
+}
+
 
 
 SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority)
@@ -242,7 +254,7 @@ SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMod
 	}
 	else
 	{
-		lSoundStream = new OggAlStream(this, pFileName, pLoopMode == LOOP_FORWARD);
+		lSoundStream = new OggAlStream(this, SystemManager::GetDataDirectory()+pFileName, pLoopMode == LOOP_FORWARD);
 	}
 	if (!lSoundStream->IsOpen())
 	{

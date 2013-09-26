@@ -50,6 +50,8 @@ public:
 
 	virtual float GetMasterVolume() const = 0;
 	virtual void SetMasterVolume(float pVolume) = 0;
+	virtual float GetMusicVolume() const = 0;
+	virtual void SetMusicVolume(float pVolume) = 0;
 
 	enum LoopMode
 	{

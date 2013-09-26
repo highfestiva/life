@@ -38,6 +38,8 @@ public:
 
 	virtual float GetMasterVolume() const;
 	virtual void SetMasterVolume(float pVolume);
+	virtual float GetMusicVolume() const;
+	virtual void SetMusicVolume(float pVolume);
 
 	virtual SoundID LoadSound2D(const str& pFileName, LoopMode LoopMode, int pPriority);
 	virtual SoundID LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
@@ -156,6 +158,7 @@ private:
 	ALCcontext* mContext;
 	float mRollOffFactor;
 	float mMasterVolume;
+	float mMusicVolume;
 	int mMixRate;
 	bool mIsIrreparableErrorState;
 

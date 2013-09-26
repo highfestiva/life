@@ -137,7 +137,7 @@ void GameClientMasterTicker::PrepareQuit()
 	if (mUiManager->GetSoundManager())
 	{
 		// Keep quiet so there won't be a lot of noise when destroying explosives, and so forth.
-		mUiManager->GetSoundManager()->SetMasterVolume(0.0f);
+		mUiManager->GetSoundManager()->SetMasterVolume(0);
 	}
 }
 

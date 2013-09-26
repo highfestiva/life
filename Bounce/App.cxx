@@ -137,8 +137,6 @@ public:
 #endif // Touch
 	Game* mGame;
 
-	str mPathPrefix;
-
 	double mAverageLoopTime;
 	HiResTimer mLoopTimer;
 
@@ -404,7 +402,6 @@ void App::Close()
 
 void App::Init()
 {
-	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
 
@@ -440,8 +437,7 @@ int App::Run()
 	}
 	if (lOk)
 	{
-		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
-		mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
+		mResourceManager = new Cure::ResourceManager(1);
 	}
 	if (lOk)
 	{

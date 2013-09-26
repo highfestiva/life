@@ -390,7 +390,7 @@ public:
 	typedef std::list<ResourceInfo> ResourceInfoList;
 	typedef std::list<Resource*> ResourceList;
 
-	ResourceManager(unsigned pLoaderThreadCount, const str& pPathPrefix);
+	ResourceManager(unsigned pLoaderThreadCount);
 	virtual ~ResourceManager();
 	bool InitDefault();
 	void StopClear();

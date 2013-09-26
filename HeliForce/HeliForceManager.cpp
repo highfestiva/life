@@ -97,6 +97,9 @@ struct KillsDecendingOrder
 }
 gKillsDecendingOrder;
 
+const int ORDERED_LEVELNO[]	= { 6, 7, 8, 9, 5, 10, 0, 4, 11, 2, 1, 3, 12, 13 };
+const int REVERSED_LEVELNO[]	= { 6, 10, 9, 11, 7, 4, 0, 1, 2, 3, 5, 8, 12, 13 };
+
 }
 
 
@@ -152,7 +155,7 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, -0.1f, 0.2f);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_05"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_06"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 }
 
@@ -561,7 +564,7 @@ void HeliForceManager::Shoot(Cure::ContextObject* pCanon, int pAmmo)
 
 void HeliForceManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
-	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
+	mCollisionSoundManager->OnCollision(pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
@@ -689,6 +692,7 @@ str HeliForceManager::StepLevel(int pCount)
 			{
 				lLevelNumber = lLevelCount-1;
 			}
+			lLevelNumber = ORDERED_LEVELNO[lLevelNumber];
 			mOldLevel = mLevel;
 			mLevelCompleted = false;
 			str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
@@ -719,7 +723,7 @@ int HeliForceManager::GetCurrentLevelNumber() const
 {
 	int lLevelNumber = 0;
 	strutil::StringToInt(mLevel->GetClassId().substr(6), lLevelNumber);
-	return lLevelNumber;
+	return REVERSED_LEVELNO[lLevelNumber];
 }
 
 double HeliForceManager::GetCurrentLevelBestTime(bool pWorld) const
