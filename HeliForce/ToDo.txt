@@ -58,3 +58,7 @@
 . Fix Z-fighting.
 . Change to better "level done" jingle.
 . Fix back buffer flicking while still loading but not yet rendering.
+. "Unfix" landing pad ambient on simulator level.
+. Fix mass objects starting in origin (possibly colliding with not-yet-loaded level or summat).
+. Bedside volume option in menu.
+. Make yacht start in middle of slider joint to avoid bouncy sounds.
