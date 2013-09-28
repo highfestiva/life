@@ -130,7 +130,6 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 	mFireButton(0),
 #endif // Touch or emulated touch.
 	mStick(0),
-	mStickImage(0),
 	mWrongDirectionImage(0),
 	mHealthBarImage(0),
 	mArrow(0),
@@ -155,6 +154,8 @@ HeliForceManager::HeliForceManager(Life::GameClientMasterTicker* pMaster, const 
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, -0.1f, 0.2f);
 
+	mTouchstickTimer.ReduceTimeDiff(-5);
+
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_06"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 }
@@ -171,8 +172,6 @@ HeliForceManager::~HeliForceManager()
 	mCollisionSoundManager = 0;
 	delete mHemisphereUvTransform;
 	mHemisphereUvTransform = 0;
-	delete mStickImage;
-	mStickImage = 0;
 	delete mWrongDirectionImage;
 	mWrongDirectionImage = 0;
 	delete mHealthBarImage;
@@ -254,10 +253,6 @@ bool HeliForceManager::Open()
 #endif // Touch or emulated touch.
 	if (lOk)
 	{
-		mStickImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mStickImage->Load(GetResourceManager(), _T("stick.png"),
-			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
-
 		mWrongDirectionImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mWrongDirectionImage->Load(GetResourceManager(), _T("direction.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
@@ -853,14 +848,19 @@ void HeliForceManager::UpdateTouchstickPlacement()
 		int lScreenPixelWidth;
 		CURE_RTVAR_GET(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
 		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// Touched area is a fraction of the required 32px/iPhone classic.
-		mStick  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
+		mStick = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
 		mStick->SetUniqueIdentifier(_T("Touchstick"));
+		mStick->SetValueScale(-1,+1, -1,-0.2f);
 	}
 	PixelRect lRightStickArea(mRenderArea);
 	int lFingerSize = (int)(lRightStickArea.GetWidth() * lTouchScale);
-	lRightStickArea.mLeft = mRenderArea.GetWidth() - lFingerSize;
-	lRightStickArea.mTop = lRightStickArea.mBottom - lFingerSize;
-	lRightStickArea.mBottom += (int)(lFingerSize*1.1f);
+	int lJoystickSize = lFingerSize*2;
+	lRightStickArea.mLeft = mRenderArea.GetWidth() - lJoystickSize;
+	lRightStickArea.mTop = lRightStickArea.mBottom - lJoystickSize;
+	const int ow = lRightStickArea.GetWidth();
+	const int r = (int)(ow*0.27f);	// Knob radius.
+	const int lMargin = (int)(r*0.2f);
+	mStick->SetFingerRadius(r+lMargin);
 	mStick->Move(lRightStickArea, 0);
 #endif // Touch or emulated touch
 }
@@ -1531,15 +1531,51 @@ void HeliForceManager::OnFireButton(UiTbc::Button*)
 void HeliForceManager::DrawStick(Touchstick* pStick)
 {
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	if (!pStick || mStickImage->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE  || !lAvatar)
+	if (!pStick || !lAvatar)
 	{
 		return;
 	}
 
-	PixelRect lArea = pStick->GetArea();
-	lArea.mBottom = lArea.mTop + lArea.GetWidth();
-	lArea.Shrink(8);
-	DrawImage(mStickImage->GetData(), (float)lArea.GetCenterX(), (float)lArea.GetCenterY(), (float)lArea.GetWidth(), (float)lArea.GetHeight(), 0);
+	const PixelRect lArea = pStick->GetArea();
+	std::vector<Vector2DF> lBoardShape;
+	lBoardShape.push_back(Vector2DF((float)lArea.GetCenterX(), (float)lArea.GetCenterY()));
+	lBoardShape.push_back(Vector2DF((float)lArea.mLeft, (float)lArea.mBottom));
+	lBoardShape.push_back(Vector2DF((float)lArea.mRight, (float)lArea.mBottom));
+	lBoardShape.push_back(Vector2DF((float)lArea.mRight, (float)lArea.mTop));
+	const int lBoardRadius = lArea.GetWidth()/2;
+	UiTbc::RectComponent::AddRadius(lBoardShape, lArea.mLeft+lBoardRadius, lArea.mTop+lBoardRadius, lBoardRadius, 0, +PIF/2);
+	lBoardShape.push_back(lBoardShape[1]);
+	mUiManager->GetPainter()->SetColor(OFF_BLACK);
+	mUiManager->GetPainter()->DrawFan(lBoardShape, true);
+
+	const int ow = lArea.GetWidth();
+	const int r = (int)(ow*0.27f);	// Knob radius.
+	const int lMargin = (int)(r*0.2f);
+	float x, y;
+	bool lIsPressing = false;
+	pStick->GetValue(x, y, lIsPressing);
+	if (!lIsPressing)
+	{
+		y = 0;
+	}
+	Vector2DF v(x, y);
+	//v.Mul(2.0f * (ow - pStick->GetFingerRadius()-lMargin*2) / ow);
+	const float lLength = v.GetLength();
+	if (lLength > 1)
+	{
+		v.Div(lLength);
+	}
+	x = v.x;
+	y = v.y;
+	x = 0.5f*x + 0.5f;
+	y = 0.5f*y + 0.5f;
+	const int w = lArea.GetWidth()  - r*2 - lMargin*2;
+	const int h = lArea.GetHeight() - r*2 - lMargin*2;
+	mUiManager->GetPainter()->SetColor(lIsPressing? Color(0xD0, 0x50, 0x40) : Color(0xC0, 0x30, 0x20));
+	mUiManager->GetPainter()->DrawArc(
+		lArea.mLeft + lMargin + (int)(w*x),
+		lArea.mTop  + lMargin + (int)(h*y),
+		r*2, r*2, 0, 360, true);
 }
 
 

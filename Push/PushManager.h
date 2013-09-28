@@ -123,7 +123,6 @@ protected:
 	bool mUpdateCameraForAvatar;
 	Life::Options::Steering mLastSteering;
 	float mCamRotateExtra;
-	HiResTimer mFireTimeout;
 
 	RoadSignButton* mPickVehicleButton;
 	int mAvatarInvisibleCount;

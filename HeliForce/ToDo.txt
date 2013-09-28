@@ -41,14 +41,17 @@
   + Create more background textures.
   + Reorder them.
   + Building textures are needed!
++ Better controls, using a rounded patch in the bottom and a circular indicator above.
 . Menu using 3D buttons with shadows! Cewl!
+. Save some RTVARs on key/value in iOS.
 - Beautify!
 . Large fonts on iOS.
-. Music.
-. Sounds. Ambient. Moving stuff.
++ Music.
++ Sounds. Ambient. Moving stuff.
 + Make sure the "close to the path" indicator gets back on track when restarting the level.
 . Pilot name and high score.
 . Change pilot name.
 . Restart/replay level.
 . Pick level.
 . Pause button.
+. Better health meter.

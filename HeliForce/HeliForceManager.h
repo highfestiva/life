@@ -157,7 +157,6 @@ protected:
 	bool mUpdateCameraForAvatar;
 	Life::Options::Steering mLastSteering;
 	int mActiveWeapon;
-	HiResTimer mFireTimeout;
 
 	Level* mLevel;
 	Level* mOldLevel;
@@ -186,7 +185,6 @@ protected:
 	HiResTimer mTouchstickTimer;
 	Touchstick* mStick;
 
-	UiCure::UserPainterKeepImageResource* mStickImage;
 	UiCure::UserPainterKeepImageResource* mWrongDirectionImage;
 	UiCure::UserPainterKeepImageResource* mHealthBarImage;
 	StopWatch mDirectionImageTimer;

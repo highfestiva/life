@@ -618,6 +618,7 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 	{
 		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
+		pSlave->RefreshOptions();
 		deb_assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);
 		mSlaveArray[pSlave->GetSlaveIndex()] = pSlave;
 		pSlave->GetContext()->SetLocalRange(pSlave->GetSlaveIndex()+1, mSlaveArray.size()+1);	// Local server is first one, so skip that part in the rance.

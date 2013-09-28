@@ -20,12 +20,30 @@ using namespace Lepra;
 
 
 TouchstickInputElement::TouchstickInputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, TouchstickInputDevice* pParentDevice):
-	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice)
+	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
+	mScale(1),
+	mOffset(0)
 {
 }
 
 TouchstickInputElement::~TouchstickInputElement()
 {
+}
+
+float TouchstickInputElement::GetValueScaled() const
+{
+	return (GetValue()-mOffset) / mScale;
+}
+
+void TouchstickInputElement::SetValueScaled(float pValue)
+{
+	SetValue(pValue*mScale + mOffset);
+}
+
+void TouchstickInputElement::SetScale(float pMinimum, float pMaximum)
+{
+	mOffset = (pMaximum+pMinimum) / 2;
+	mScale  = (pMaximum-pMinimum) / 2;	// Default scale is one, between -1 and +1.
 }
 
 
@@ -110,6 +128,11 @@ int TouchstickInputDevice::GetFingerRadius() const
 	return mFingerRadius;
 }
 
+void TouchstickInputDevice::SetFingerRadius(int pFingerRadius)
+{
+	mFingerRadius = pFingerRadius;
+}
+
 void TouchstickInputDevice::ResetTap()
 {
 	mElementArray[0]->SetValue(0.0f);
@@ -180,14 +203,22 @@ void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 	}
 
 	mElementArray[0]->SetValue(mIsPressing? 1.0f : 0.0f);
-	mElementArray[1]->SetValue(mIsPressing? rx : 0.0f);
-	mElementArray[2]->SetValue(mIsPressing? ry : 0.0f);
+	if (mIsPressing)
+	{
+		((TouchstickInputElement*)mElementArray[1])->SetValueScaled(rx);
+		((TouchstickInputElement*)mElementArray[2])->SetValueScaled(ry);
+	}
+	else
+	{
+		mElementArray[1]->SetValue(0.0f);
+		mElementArray[2]->SetValue(0.0f);
+	}
 }
 
 void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
 {
-	x = mElementArray[1]->GetValue();
-	y = mElementArray[2]->GetValue();
+	x = ((TouchstickInputElement*)mElementArray[1])->GetValueScaled();
+	y = ((TouchstickInputElement*)mElementArray[2])->GetValueScaled();
 	pIsPressing = mElementArray[0]->GetBooleanValue();
 
 	if (mAngle < 45)
@@ -208,6 +239,12 @@ void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
 		y = -y;
 		std::swap(x, y);
 	}
+}
+
+void TouchstickInputDevice::SetValueScale(float pMinX, float pMaxX, float pMinY, float pMaxY)
+{
+	((TouchstickInputElement*)mElementArray[1])->SetScale(pMinX, pMaxX);
+	((TouchstickInputElement*)mElementArray[2])->SetScale(pMinY, pMaxY);
 }
 
 

@@ -50,6 +50,7 @@ public:
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 	virtual void LoadSettings();
 	virtual void SaveSettings() = 0;
+	virtual void RefreshOptions();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();

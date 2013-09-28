@@ -103,20 +103,13 @@ void HeliForce::Init()
 	UiTbc::Init();
 	UiCure::Init();
 
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	const bool lStartLogo = false;
-	const bool lOnlineMaster = false;
-#else // Computer
-	const bool lStartLogo = true;
-	const bool lOnlineMaster = true;
-#endif // Touch / computer
 #if defined(LEPRA_IOS)
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	const int lDisplayWidth = lSize.height;
 	const int lDisplayHeight = lSize.width;
 #elif defined(EMULATE_TOUCH)
-	const int lDisplayWidth = 480;
-	const int lDisplayHeight = 320;
+	const int lDisplayWidth = 1024;
+	const int lDisplayHeight = 768;
 #else // Computer L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
@@ -166,8 +159,6 @@ void HeliForce::Init()
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, lStartLogo);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEONLINEMASTER, lOnlineMaster);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 4.0);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 4.0);
@@ -175,20 +166,6 @@ void HeliForce::Init()
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 
 	Parent::Init();
-
-	/*Vector3DF lDelta(1, 0, 1);
-	QuaternionF q8(PIF/8, lDelta);
-	QuaternionF q4(PIF/4, lDelta);
-	QuaternionF q2(PIF/2, lDelta);
-	QuaternionF q1(PIF/1, lDelta);
-	Vector3DF v(0,1,0);
-	struct c { static str s(Vector3DF v) { return strutil::Format(_T("%.2f,%.2f,%.2f"), v.x, v.y, v.z); } };
-	mLog.Infof(_T("8:%s, 4:%s, 2:%s, 1:%s"),
-		c::s(q8*v).c_str(),
-		c::s(q4*v).c_str(),
-		c::s(q2*v).c_str(),
-		c::s(q1*v).c_str());
-	::exit(0);*/
 }
 
 bool HeliForce::MainLoop()

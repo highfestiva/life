@@ -29,7 +29,13 @@ public:
 	TouchstickInputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex, TouchstickInputDevice* pParentDevice);
 	virtual ~TouchstickInputElement();
 
+	float GetValueScaled() const;
+	void SetValueScaled(float pValue);
+	void SetScale(float pMinimum, float pMaximum);
+
 private:
+	float mScale;
+	float mOffset;
 	LOG_CLASS_DECLARE();
 };
 
@@ -56,10 +62,12 @@ public:
 	void Move(const PixelRect& pArea, int pAngle);
 	const PixelRect& GetArea() const;
 	int GetFingerRadius() const;
+	void SetFingerRadius(int pFingerRadius);
 
 	void ResetTap();
 	void SetTap(const PixelCoord& pCoord, bool pIsPress);
 	void GetValue(float& x, float& y, bool& pIsPressing);
+	void SetValueScale(float pMinX, float pMaxX, float pMinY, float pMaxY);
 
 private:
 	void AddElement(InputElement* pElement);
