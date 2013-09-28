@@ -61,7 +61,7 @@ void Driver::OnTick()
 		}
 		if (mType == _T("cos"))
 		{
-			assert(mTag.mFloatValueList.size() == 1);
+			deb_assert(mTag.mFloatValueList.size() == 1);
 			lEngine->SetValue(lEngine->GetControllerIndex(), (float)::cos(mTime.QueryTimeDiff()*f));
 			const double lPeriod = 2*PI/f;
 			if (mTime.GetTimeDiff() > lPeriod)
@@ -71,7 +71,7 @@ void Driver::OnTick()
 		}
 		else if (mType == _T("random_jerker"))
 		{
-			assert(mTag.mFloatValueList.size() == 2);
+			deb_assert(mTag.mFloatValueList.size() == 2);
 			const float g = mTag.mFloatValueList[1];
 			const float t = (float)mTime.QueryTimeDiff();
 			if (t < f)

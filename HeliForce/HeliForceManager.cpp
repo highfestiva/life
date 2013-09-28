@@ -193,7 +193,10 @@ void HeliForceManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
+
+	double lCamDistance = 11.3 * mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
+	lCamDistance = (lCamDistance+110)/2;	// Smooth towards a sensible cam distance.
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, lCamDistance);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
@@ -852,9 +855,13 @@ void HeliForceManager::UpdateTouchstickPlacement()
 		mStick->SetUniqueIdentifier(_T("Touchstick"));
 		mStick->SetValueScale(-1,+1, -1,-0.2f);
 	}
+	int lFingerSize = (int)(mRenderArea.GetWidth() * lTouchScale);
+	if (lFingerSize > mRenderArea.GetHeight()/3)
+	{
+		lFingerSize = mRenderArea.GetHeight()/3;
+	}
+	int lJoystickSize = lFingerSize*4/3;
 	PixelRect lRightStickArea(mRenderArea);
-	int lFingerSize = (int)(lRightStickArea.GetWidth() * lTouchScale);
-	int lJoystickSize = lFingerSize*2;
 	lRightStickArea.mLeft = mRenderArea.GetWidth() - lJoystickSize;
 	lRightStickArea.mTop = lRightStickArea.mBottom - lJoystickSize;
 	const int ow = lRightStickArea.GetWidth();

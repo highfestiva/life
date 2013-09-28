@@ -31,7 +31,7 @@ CanonDriver::CanonDriver(HeliForceManager* pGame, Cure::GameObjectId pCanonId, i
 	pGame->GetContext()->EnableTickCallback(this);
 
 	Cure::CppContextObject* lCanon = (Cure::CppContextObject*)mManager->GetObject(mCanonId, true);
-	assert(lCanon);
+	deb_assert(lCanon);
 	TransformationF lMuzzleTransform;
 	Vector3DF _;
 	Life::ProjectileUtil::GetBarrelByShooter(lCanon, lMuzzleTransform, _);

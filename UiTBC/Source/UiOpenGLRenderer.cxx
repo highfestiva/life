@@ -1605,6 +1605,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 #ifndef LEPRA_GL_ES
 	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_LOGIC_OP);
+	glEnable(GL_POLYGON_OFFSET_EXT);
 #endif // !GLES
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
@@ -1623,7 +1624,6 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glEnable(GL_STENCIL_TEST);
 
 	glDepthFunc(GL_LESS);
-	glEnable(GL_POLYGON_OFFSET_EXT);
 	glPolygonOffset(0.05f, 0);
 
 
@@ -1700,12 +1700,12 @@ void OpenGLRenderer::RenderShadowVolumes()
 	// Reset all settings.
 #ifndef LEPRA_GL_ES
 	glPopAttrib();
+	glDisable(GL_POLYGON_OFFSET_EXT);
 #endif // !GLES
 	glShadeModel(GL_SMOOTH);
 	glColorMask(1, 1, 1, 1);
 	glDepthFunc(GL_LEQUAL);
 	glPolygonOffset(0, 0);
-	glDisable(GL_POLYGON_OFFSET_EXT);
 	glDepthMask(GL_TRUE);
 
 	OGL_ASSERT();

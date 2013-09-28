@@ -55,3 +55,6 @@
 . Pick level.
 . Pause button.
 . Better health meter.
+. Fix Z-fighting.
+. Change to better "level done" jingle.
+. Fix back buffer flicking while still loading but not yet rendering.

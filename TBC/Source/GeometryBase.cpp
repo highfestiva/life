@@ -371,7 +371,7 @@ void GeometryBase::SetScale(float pScale)
 	mScale = pScale;
 	if (mScale != 1)
 	{
-		log_volatile(mLog.Debugf(_T("Setting scale %f on mesh %s."), mScale, mName.c_str()));
+		LEPRA_DEBUG_CODE(mLog.Debugf(_T("Setting scale %f on mesh %s."), mScale, mName.c_str()));
 	}
 }
 

@@ -42,9 +42,9 @@ bool ProjectileUtil::GetBarrelByShooter(Cure::CppContextObject* pShooter, Transf
 	if (lTag)
 	{
 		const int lBoneIndex = lTag->mBodyIndexList[0];
-#ifdef LEPRA_DEBUG
 		const TBC::ChunkyBoneGeometry* lBone = pShooter->GetPhysics()->GetBoneGeometry(lBoneIndex);
 		deb_assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
+#ifdef LEPRA_DEBUG
 		//TBC::ChunkyBoneGeometry* lRootGeometry = pShooter->GetPhysics()->GetBoneGeometry(0);
 		//QuaternionF q = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootGeometry->GetBodyId());
 		//QuaternionF p = pShooter->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();

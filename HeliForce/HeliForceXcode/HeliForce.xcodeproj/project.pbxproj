@@ -43,6 +43,13 @@
 		B13DA5FB173EDB9800A73400 /* Projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5F9173EDB9800A73400 /* Projectile.cpp */; };
 		B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA600173EDBD200A73400 /* Spawner.cpp */; };
 		B13DA607173EDBF400A73400 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA606173EDBF400A73400 /* Level.cpp */; };
+		B15B6CCA17F7919300AB487F /* Dub Feral.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC317F7919300AB487F /* Dub Feral.ogg */; };
+		B15B6CCB17F7919300AB487F /* Easy Jam.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC417F7919300AB487F /* Easy Jam.ogg */; };
+		B15B6CCC17F7919300AB487F /* Firmament.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC517F7919300AB487F /* Firmament.ogg */; };
+		B15B6CCD17F7919300AB487F /* Mandeville.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC617F7919300AB487F /* Mandeville.ogg */; };
+		B15B6CCE17F7919300AB487F /* Slow Ska Game Loop.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC717F7919300AB487F /* Slow Ska Game Loop.ogg */; };
+		B15B6CCF17F7919300AB487F /* Stealth Groover.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC817F7919300AB487F /* Stealth Groover.ogg */; };
+		B15B6CD017F7919300AB487F /* Yallahs.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC917F7919300AB487F /* Yallahs.ogg */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -498,6 +505,10 @@
 		B1A8B1B116C7EA7100F57DC1 /* ProjectileUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */; };
 		B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */; };
 		B1B185341784BCC200853D12 /* AirBalloonPilot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */; };
+		B1B559CD17F77E1C00A4BB17 /* CanonDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CB17F77E1C00A4BB17 /* CanonDriver.cpp */; };
+		B1B559CE17F77E1C00A4BB17 /* SimulatorDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */; };
+		B1B559D017F77E5800A4BB17 /* GameTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */; };
+		B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559E917F7800A00A4BB17 /* Driver.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 		B1D37EE6166AB2FC00536CE5 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */; };
@@ -582,6 +593,13 @@
 		B13DA5F9173EDB9800A73400 /* Projectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Projectile.cpp; path = ../../Life/LifeClient/Projectile.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA600173EDBD200A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Cure/Source/Spawner.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA606173EDBF400A73400 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Level.cpp; path = ../../Life/LifeClient/Level.cpp; sourceTree = SOURCE_ROOT; };
+		B15B6CC317F7919300AB487F /* Dub Feral.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Dub Feral.ogg"; path = "../Data/Dub Feral.ogg"; sourceTree = SOURCE_ROOT; };
+		B15B6CC417F7919300AB487F /* Easy Jam.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Easy Jam.ogg"; path = "../Data/Easy Jam.ogg"; sourceTree = SOURCE_ROOT; };
+		B15B6CC517F7919300AB487F /* Firmament.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Firmament.ogg; path = ../Data/Firmament.ogg; sourceTree = SOURCE_ROOT; };
+		B15B6CC617F7919300AB487F /* Mandeville.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Mandeville.ogg; path = ../Data/Mandeville.ogg; sourceTree = SOURCE_ROOT; };
+		B15B6CC717F7919300AB487F /* Slow Ska Game Loop.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Slow Ska Game Loop.ogg"; path = "../Data/Slow Ska Game Loop.ogg"; sourceTree = SOURCE_ROOT; };
+		B15B6CC817F7919300AB487F /* Stealth Groover.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Stealth Groover.ogg"; path = "../Data/Stealth Groover.ogg"; sourceTree = SOURCE_ROOT; };
+		B15B6CC917F7919300AB487F /* Yallahs.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Yallahs.ogg; path = ../Data/Yallahs.ogg; sourceTree = SOURCE_ROOT; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1227,6 +1245,10 @@
 		B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AirBalloonPilot.cpp; sourceTree = "<group>"; };
 		B1B4898F13F9BD6C0047C78A /* HeliForce-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "HeliForce-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* HeliForce_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HeliForce_Prefix.pch; path = HeliForceXcode/HeliForce_Prefix.pch; sourceTree = "<group>"; };
+		B1B559CB17F77E1C00A4BB17 /* CanonDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CanonDriver.cpp; sourceTree = "<group>"; };
+		B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimulatorDriver.cpp; sourceTree = "<group>"; };
+		B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameTimer.cpp; sourceTree = "<group>"; };
+		B1B559E917F7800A00A4BB17 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Driver.cpp; path = ../../Cure/Source/Driver.cpp; sourceTree = SOURCE_ROOT; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
 		B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Life/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
@@ -1387,6 +1409,7 @@
 		B15F791D13FC597B00E01A90 /* Cure */ = {
 			isa = PBXGroup;
 			children = (
+				B1B559E917F7800A00A4BB17 /* Driver.cpp */,
 				B1A8301F177A42E40078D5E8 /* Health.cpp */,
 				B13DA600173EDBD200A73400 /* Spawner.cpp */,
 				B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */,
@@ -1572,6 +1595,8 @@
 		B19A146913A122DE0051A61C /* HeliForce */ = {
 			isa = PBXGroup;
 			children = (
+				B1B559CB17F77E1C00A4BB17 /* CanonDriver.cpp */,
+				B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */,
 				B16C55881788404A0081DE46 /* AutoPathDriver.cpp */,
 				B16C55891788404A0081DE46 /* BaseMachine.cpp */,
 				B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */,
@@ -1620,6 +1645,7 @@
 		B19A14CC13A124940051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */,
 				B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */,
 				B1DAC7E314F1D97700B285C5 /* JsonString.cpp */,
 				B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */,
@@ -2482,6 +2508,13 @@
 		B1FB291E1450C8A600F1C762 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				B15B6CC317F7919300AB487F /* Dub Feral.ogg */,
+				B15B6CC417F7919300AB487F /* Easy Jam.ogg */,
+				B15B6CC517F7919300AB487F /* Firmament.ogg */,
+				B15B6CC617F7919300AB487F /* Mandeville.ogg */,
+				B15B6CC717F7919300AB487F /* Slow Ska Game Loop.ogg */,
+				B15B6CC817F7919300AB487F /* Stealth Groover.ogg */,
+				B15B6CC917F7919300AB487F /* Yallahs.ogg */,
 				B1FB29391450CAD600F1C762 /* Data.pk3 */,
 			);
 			name = Data;
@@ -2541,6 +2574,13 @@
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
+				B15B6CCA17F7919300AB487F /* Dub Feral.ogg in Resources */,
+				B15B6CCB17F7919300AB487F /* Easy Jam.ogg in Resources */,
+				B15B6CCC17F7919300AB487F /* Firmament.ogg in Resources */,
+				B15B6CCD17F7919300AB487F /* Mandeville.ogg in Resources */,
+				B15B6CCE17F7919300AB487F /* Slow Ska Game Loop.ogg in Resources */,
+				B15B6CCF17F7919300AB487F /* Stealth Groover.ogg in Resources */,
+				B15B6CD017F7919300AB487F /* Yallahs.ogg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3074,6 +3114,10 @@
 				B16C558A1788404A0081DE46 /* AutoPathDriver.cpp in Sources */,
 				B16C558B1788404A0081DE46 /* BaseMachine.cpp in Sources */,
 				B1740478179469EB00DB7AD5 /* ResourceTracker.cpp in Sources */,
+				B1B559CD17F77E1C00A4BB17 /* CanonDriver.cpp in Sources */,
+				B1B559CE17F77E1C00A4BB17 /* SimulatorDriver.cpp in Sources */,
+				B1B559D017F77E5800A4BB17 /* GameTimer.cpp in Sources */,
+				B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
