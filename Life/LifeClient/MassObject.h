@@ -37,6 +37,7 @@ public:
 	virtual void UiMove();
 
 private:
+	virtual void OnLoaded();
 	void PositionToGrid(const Vector3DF& pPosition, int& pX, int& pY) const;
 	void GridToPosition(int pX, int pY, Vector3DF& pPosition) const;
 	void MoveToSquare(int pX, int pY);

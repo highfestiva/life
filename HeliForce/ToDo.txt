@@ -19,9 +19,8 @@
 + Make explosion sparks never go slower than X, otherwise it looks like shit.
 + Make burn smoke billow up if rotor is off!
 + Save personal times.
-. Save WR times.
-. Show high score.
-. Levels.
+. Save/show WR times.
++ Levels.
   + Reference points in foreground/background.
   - Real worlds - villages, houses, garages, lightposts, signs, walls, trees, bushes, cars, stairs, toys...
   - Traps with smoke and sound!
@@ -42,23 +41,33 @@
   + Reorder them.
   + Building textures are needed!
 + Better controls, using a rounded patch in the bottom and a circular indicator above.
-. Menu using 3D buttons with shadows! Cewl!
 . Save some RTVARs on key/value in iOS.
 - Beautify!
-. Large fonts on iOS.
++ Large fonts on iOS.
++ Make text show on bad background.
 + Music.
 + Sounds. Ambient. Moving stuff.
 + Make sure the "close to the path" indicator gets back on track when restarting the level.
-. Pilot name and high score.
-. Change pilot name.
-. Restart/replay level.
-. Pick level.
-. Pause button.
 . Better health meter.
-. Fix Z-fighting.
-. Change to better "level done" jingle.
-. Fix back buffer flicking while still loading but not yet rendering.
-. "Unfix" landing pad ambient on simulator level.
-. Fix mass objects starting in origin (possibly colliding with not-yet-loaded level or summat).
-. Bedside volume option in menu.
-. Make yacht start in middle of slider joint to avoid bouncy sounds.
+. Fix Z-fighting on iPad.
++ Change to better "level done" jingle.
++ Fix back buffer flicking while still loading but not yet rendering.
++ "Unfix" landing pad ambient on simulator level.
++ Fix mass objects starting in origin (possibly colliding with not-yet-loaded level or summat).
++ Make yacht start in middle of slider joint to avoid bouncy sounds.
++ Raise heli volume.
++ Lower music volume.
+. Start with correct orientation.
+. Let iOS control orientation change.
+. Fix the shadow of the chopper windows in origin (null material shadow rendering?).
+. Make touchstick board semi-transparent.
+. Menu using 3D buttons with shadows! Cewl!
+  . Pilot name and high score.
+  . Change pilot name.
+  . Restart/replay level.
+  . Pick level.
+  . Pause button.
+  . Bedside volume option in menu.
+  . Show high score.
+. Make splash screen images to iPad, iPhone and retina.
+. Icon for all resolutions... including 1024x1024 and possibly double hi-res for backup?

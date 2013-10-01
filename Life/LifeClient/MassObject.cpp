@@ -106,6 +106,20 @@ void MassObject::UiMove()
 
 
 
+void MassObject::OnLoaded()
+{
+	Parent::OnLoaded();
+
+	for (MeshArray::const_iterator y = mMeshResourceArray.begin(); y != mMeshResourceArray.end(); ++y)
+	{
+		TBC::GeometryReference* lMesh = (TBC::GeometryReference*)(*y)->GetRamData();
+		if (lMesh)
+		{
+			lMesh->SetAlwaysVisible(false);
+		}
+	}
+}
+
 void MassObject::PositionToGrid(const Vector3DF& pPosition, int& pX, int& pY) const
 {
 	// 2's complement...
@@ -201,10 +215,7 @@ bool MassObject::GetObjectPlacement(Vector3DF& pPosition) const
 			lIndex = Random::GetRandomNumber(lSeed) % lCollisions;
 		}
 		pPosition.z = lCollisionPosition[lIndex].z;
-		if (pPosition.GetLengthSquared() > 1)	// Some bug making us create stuff in origin, I'm guessing async loading of physical objects.
-		{
-			return true;
-		}
+		return true;
 	}
 	return false;
 }
@@ -226,11 +237,9 @@ MassObject::Square::Square(uint32 pSeed, const MeshArray& pResourceArray,
 	for (MeshArray::const_iterator y = pResourceArray.begin(); y != pResourceArray.end(); ++y)
 	{
 		TBC::GeometryReference* lMesh = (TBC::GeometryReference*)(*y)->GetRamData();
-		lMesh->SetAlwaysVisible(false);
 
 		UiTbc::GeometryBatch* lBatch = new UiTbc::GeometryBatch(lMesh);
 		lBatch->SetBasicMaterialSettings(lMesh->GetBasicMaterialSettings());
-		//lBatch->SetAlwaysVisible(true);
 		lBatch->SetTransformation(TransformationF(lRotation, Vector3DF(0, 0, 0)));
 		lBatch->SetInstances(&pDisplacementArray[0], lMesh->GetTransformation().GetPosition(),
 			pDisplacementArray.size(), pSeed, 0.8f, 1.3f, 0.6f, 2.0f, 0.7f, 1.2f);

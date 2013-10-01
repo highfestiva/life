@@ -1279,9 +1279,11 @@ void Renderer::UpdateShadowMaps()
 unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 {
 	GeometryData* lGeometry = (GeometryData*)pGeometry->GetRendererData();
-#define MATH_SQUARE(x) (x)*(x)
-	const bool lDenyShadows = (lGeometry->mShadow == FORCE_NO_SHADOWS || mShadowMode <= NO_SHADOWS || mLightDataMap.empty() ||
-		pGeometry->GetTransformation().GetPosition().GetDistanceSquared(mCameraTransformation.GetPosition()) >= MATH_SQUARE(GetLightData((LightID)0)->mShadowRange * 4));
+	const float lLightShadowRange = GetLightData((LightID)0)->mShadowRange * 4;
+	const bool lDenyShadows =
+		(lGeometry->mShadow == FORCE_NO_SHADOWS || mShadowMode <= NO_SHADOWS || 
+		lGeometry->mMaterialType == MAT_NULL || mLightDataMap.empty() ||
+		pGeometry->GetTransformation().GetPosition().GetDistanceSquared(mCameraTransformation.GetPosition()) >= lLightShadowRange*lLightShadowRange);
 	const bool lForceShadows = (mShadowMode == FORCE_CAST_SHADOWS);
 	const bool lEscapeShadows = (lGeometry->mShadow == NO_SHADOWS);
 	if (lDenyShadows || (!lForceShadows && lEscapeShadows))

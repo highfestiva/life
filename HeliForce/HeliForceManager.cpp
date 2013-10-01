@@ -196,6 +196,7 @@ void HeliForceManager::LoadSettings()
 
 	double lCamDistance = 11.3 * mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
 	lCamDistance = (lCamDistance+110)/2;	// Smooth towards a sensible cam distance.
+	lCamDistance = std::max(110.0, lCamDistance);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, lCamDistance);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
@@ -260,6 +261,10 @@ bool HeliForceManager::Open()
 		mWrongDirectionImage->Load(GetResourceManager(), _T("direction.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
 
+		mWinImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mWinImage->Load(GetResourceManager(), _T("win.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
+
 		mHealthBarImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mHealthBarImage->Load(GetResourceManager(), _T("healthbar.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &HeliForceManager::PainterImageLoadCallback));
@@ -305,6 +310,10 @@ bool HeliForceManager::Render()
 {
 	if (!mHemisphere || !mHemisphere->IsLoaded() || !mLevel || !mLevel->IsLoaded())
 	{
+		if (!mHemisphere || !mHemisphere->IsLoaded() || !mOldLevel || !mOldLevel->IsLoaded())
+		{
+			mUiManager->GetRenderer()->Clear(UiTbc::Renderer::CLEAR_COLORBUFFER);
+		}
 		return true;
 	}
 
@@ -406,13 +415,17 @@ bool HeliForceManager::Paint()
 		const bool lIsFlying = mFlyTime.IsStarted();
 		const double lTime = mFlyTime.QuerySplitTime();
 		const bool lIsSloppy = (lIsFlying || !lTime);
-		mUiManager->GetPainter()->SetColor(Color(40, 40, 40, 255), 0);
+		mUiManager->GetPainter()->SetColor(Color(255, 255, 255, 128));
+		PrintTime(_T(""), lTime, lIsSloppy, 51, 4);
+		mUiManager->GetPainter()->SetColor(Color(15, 22, 21, 255));
 		PrintTime(_T(""), lTime, lIsSloppy, 50, 3);
 
 		const double lLevelBestTime = GetCurrentLevelBestTime(false);
 		if (lLevelBestTime > 0)
 		{
-			mUiManager->GetPainter()->SetColor(Color(210, 40, 40, 255), 0);
+			mUiManager->GetPainter()->SetColor(Color(1, 1, 1, 128));
+			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 251, 4);
+			mUiManager->GetPainter()->SetColor(Color(210, 40, 40, 255));
 			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 250, 3);
 		}
 
@@ -463,6 +476,25 @@ bool HeliForceManager::Paint()
 			{
 				mDirectionImageTimer.Start();
 			}
+		}
+	}
+	if (mWinImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE && mWinTimer.IsStarted())
+	{
+		const float sf = ::sin((float)mWinTimer.QueryTimeDiff()*PIF/2.7f);
+		const float f = std::min(1.0f, sf*1.3f);
+		if (f < 0)
+		{
+			mWinTimer.Stop();
+		}
+		else
+		{
+			float x = 5;
+			float s = Math::Clamp(mUiManager->GetCanvas()->GetWidth() / 4.0f, 128.0f, 256.0f);
+			float y = f*s;
+			y = mRenderArea.GetHeight()-y;
+			x += s*0.5f;
+			y += s*0.5f;
+			DrawImage(mWinImage->GetData(), x, y, s, s, 0);
 		}
 	}
 
@@ -667,10 +699,11 @@ bool HeliForceManager::DidFinishLevel()
 			SetCurrentLevelBestTime(false, lTime);
 		}
 
-		UiCure::UserSound3dResource* lFinishSound = new UiCure::UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, mCameraTransform.GetPosition(), Vector3DF(), 5.0f, 1.0f);
+		UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 1.0f, 1.0f);
 		mZoomPlatform = true;
 		mLevelCompleted = true;
+		mWinTimer.Start();
 		return true;
 	}
 	return false;

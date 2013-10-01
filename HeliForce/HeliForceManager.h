@@ -186,8 +186,10 @@ protected:
 	Touchstick* mStick;
 
 	UiCure::UserPainterKeepImageResource* mWrongDirectionImage;
+	UiCure::UserPainterKeepImageResource* mWinImage;
 	UiCure::UserPainterKeepImageResource* mHealthBarImage;
 	StopWatch mDirectionImageTimer;
+	StopWatch mWinTimer;
 	UiCure::UserRendererImageResource* mArrow;
 	UiTbc::BillboardGeometry* mArrowBillboard;
 	UiTbc::Renderer::GeometryID mArrowBillboardId;
