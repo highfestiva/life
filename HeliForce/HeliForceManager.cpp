@@ -1585,8 +1585,10 @@ void HeliForceManager::DrawStick(Touchstick* pStick)
 	const int lBoardRadius = lArea.GetWidth()/2;
 	UiTbc::RectComponent::AddRadius(lBoardShape, lArea.mLeft+lBoardRadius, lArea.mTop+lBoardRadius, lBoardRadius, 0, +PIF/2);
 	lBoardShape.push_back(lBoardShape[1]);
-	mUiManager->GetPainter()->SetColor(OFF_BLACK);
+	mUiManager->GetPainter()->SetColor(Color(1, 1, 1, 128));
+	mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 	mUiManager->GetPainter()->DrawFan(lBoardShape, true);
+	mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 
 	const int ow = lArea.GetWidth();
 	const int r = (int)(ow*0.27f);	// Knob radius.

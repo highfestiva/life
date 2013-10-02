@@ -70,5 +70,5 @@
   . Bedside volume option in menu.
   . Show high score.
 . Remove constraint on points in GAE hiscore server, so negative times can be used for ordering.
-+ Make splash screen images to iPad, iPhone and retina.
+. Make splash screen images to iPad, iPhone and retina.
 + Icon for all resolutions... including 1024x1024 and possibly double hi-res for backup?
