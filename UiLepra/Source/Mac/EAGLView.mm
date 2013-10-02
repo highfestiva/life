@@ -239,6 +239,29 @@ static EAGLView* gSharedView;
 	return YES;
 }
 
+- (BOOL)shouldAutorotate
+{
+	if (_orientationStrictness >= 2)
+	{
+		return NO;
+	}
+	return YES;
+}
+
+-(NSUInteger)supportedInterfaceOrientations
+{
+	if (_orientationStrictness >= 2)
+	{
+		return UIInterfaceOrientationLandscapeLeft;
+	}
+	else if (_orientationStrictness == 1)
+	{
+		return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight;
+	}
+	return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight
+		| UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown;
+}
+
 -(void) orientationDidChange:(NSNotification*)notification
 {
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];

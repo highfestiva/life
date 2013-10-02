@@ -57,7 +57,7 @@
 + Make yacht start in middle of slider joint to avoid bouncy sounds.
 + Raise heli volume.
 + Lower music volume.
-. Start with correct orientation.
+. Start with correct canvas orientation on iOS.
 . Let iOS control orientation change.
 . Fix the shadow of the chopper windows in origin (null material shadow rendering?).
 . Make touchstick board semi-transparent.
@@ -69,5 +69,6 @@
   . Pause button.
   . Bedside volume option in menu.
   . Show high score.
-. Make splash screen images to iPad, iPhone and retina.
-. Icon for all resolutions... including 1024x1024 and possibly double hi-res for backup?
+. Remove constraint on points in GAE hiscore server, so negative times can be used for ordering.
++ Make splash screen images to iPad, iPhone and retina.
++ Icon for all resolutions... including 1024x1024 and possibly double hi-res for backup?
