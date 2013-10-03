@@ -506,6 +506,14 @@ void GameUiManager::UpdateSettings()
 	{
 		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
 	}
+	else if (lDisplayOrientation == _T("AllowAnyInternal"))
+	{
+		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY_INTERNAL;
+	}
+	else if (lDisplayOrientation == _T("AllowUpsideDownInternal"))
+	{
+		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN_INTERNAL;
+	}
 	else if (lDisplayOrientation == _T("Fixed"))
 	{
 		lOrientation = UiLepra::DisplayManager::ORIENTATION_FIXED;

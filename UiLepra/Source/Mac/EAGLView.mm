@@ -64,6 +64,7 @@ static EAGLView* gSharedView;
 	gSharedView = self;
 	isOpen = false;
 	responder = nil;
+	_baseAngle = 0;
 	_orientationStrictness = 1;
 	_preResponderStrictness = -1;
 
@@ -248,7 +249,7 @@ static EAGLView* gSharedView;
 	return YES;
 }
 
--(NSUInteger)supportedInterfaceOrientations
+- (NSUInteger)supportedInterfaceOrientations
 {
 	if (_orientationStrictness >= 2)
 	{
@@ -258,21 +259,33 @@ static EAGLView* gSharedView;
 	{
 		return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight;
 	}
-	return UIInterfaceOrientationLandscapeMaskAll;
+	return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight
+		| UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown;
 }
 
--(void) orientationDidChange:(NSNotification*)notification
+- (void)orientationDidChange:(NSNotification*)notification
 {
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	if (_canvas && _orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation.
+	if (_canvas)
 	{
 		int angle = _baseAngle;
-		switch (orientation)
+		if (_orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation.
 		{
-			case UIDeviceOrientationLandscapeLeft:		angle = 90 + _baseAngle;	break;
-			case UIDeviceOrientationLandscapeRight:		angle = -90 + _baseAngle;	break;
-			case UIDeviceOrientationPortrait:		angle = 0 + _baseAngle;		break;
-			case UIDeviceOrientationPortraitUpsideDown:	angle = 180 + _baseAngle;	break;
+			switch (orientation)
+			{
+				case UIDeviceOrientationLandscapeLeft:		angle = 0 + _baseAngle;		break;
+				case UIDeviceOrientationLandscapeRight:		angle = 180 + _baseAngle;	break;
+				case UIDeviceOrientationPortrait:
+				{
+					if (_orientationStrictness == 3) angle = 90 + _baseAngle;
+				}
+				break;
+				case UIDeviceOrientationPortraitUpsideDown:
+				{
+					if (_orientationStrictness == 3) angle = -90 + _baseAngle;
+				}
+				break;
+			}
 		}
 		angle += (angle < -90)? 360 : 0;
 		angle -= (angle > 180)? 360 : 0;

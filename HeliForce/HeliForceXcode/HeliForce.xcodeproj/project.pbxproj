@@ -504,6 +504,7 @@
 		B1A8B1AD16C7E8D900F57DC1 /* IntAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */; };
 		B1A8B1B116C7EA7100F57DC1 /* ProjectileUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */; };
 		B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */; };
+		B1B0C87E17FE08B4000953EF /* RotatingController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1B0C87D17FE08B4000953EF /* RotatingController.mm */; };
 		B1B185341784BCC200853D12 /* AirBalloonPilot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */; };
 		B1B559CD17F77E1C00A4BB17 /* CanonDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CB17F77E1C00A4BB17 /* CanonDriver.cpp */; };
 		B1B559CE17F77E1C00A4BB17 /* SimulatorDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */; };
@@ -1242,6 +1243,7 @@
 		B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IntAttribute.cpp; path = ../../Cure/Source/IntAttribute.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectileUtil.cpp; path = ../../Life/ProjectileUtil.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSoundReleaser.cpp; path = ../../UiCure/Source/UiSoundReleaser.cpp; sourceTree = SOURCE_ROOT; };
+		B1B0C87D17FE08B4000953EF /* RotatingController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RotatingController.mm; sourceTree = "<group>"; };
 		B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AirBalloonPilot.cpp; sourceTree = "<group>"; };
 		B1B4898F13F9BD6C0047C78A /* HeliForce-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "HeliForce-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* HeliForce_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HeliForce_Prefix.pch; path = HeliForceXcode/HeliForce_Prefix.pch; sourceTree = "<group>"; };
@@ -1742,6 +1744,7 @@
 		B19A154A13A124AB0051A61C /* Mac */ = {
 			isa = PBXGroup;
 			children = (
+				B1B0C87D17FE08B4000953EF /* RotatingController.mm */,
 				B1CC28E313BA906B009BD34A /* UiIosInput.mm */,
 				B19A154B13A124AB0051A61C /* EAGLView.mm */,
 				B19A154C13A124AB0051A61C /* UiMacCore.mm */,
@@ -3118,6 +3121,7 @@
 				B1B559CE17F77E1C00A4BB17 /* SimulatorDriver.cpp in Sources */,
 				B1B559D017F77E5800A4BB17 /* GameTimer.cpp in Sources */,
 				B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */,
+				B1B0C87E17FE08B4000953EF /* RotatingController.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

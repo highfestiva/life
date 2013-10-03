@@ -4,7 +4,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface RotationController: UINavigationController
+@interface RotatingController: UINavigationController
 {
 }
 

@@ -352,8 +352,8 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 	mGlView.orientationStrictness = (int)mOrientation;
 	// Add the controller, and add the subview by setting root controller.
 	RotatingController* controller = [[RotatingController alloc] init];
+	controller.navigationBarHidden = YES;
 	controller.view = mGlView;
-	controller.window = mWnd;
 	mWnd.rootViewController = controller;
 	[mWnd makeKeyAndVisible];	// Only visible after we add the view.
 #else // !iOS

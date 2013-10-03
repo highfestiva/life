@@ -95,9 +95,6 @@ bool HeliForceTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
-#ifdef LEPRA_TOUCH
-		mUiManager->GetCanvas()->SetOutputRotation(90);
-#endif // Touch
 		UiLepra::Core::ProcessMessages();
 		//mUiManager->GetPainter()->ResetClippingRect();
 		//mUiManager->GetPainter()->Clear(BLACK);
