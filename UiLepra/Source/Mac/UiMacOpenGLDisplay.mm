@@ -7,8 +7,7 @@
 #include "../../Include/Mac/UiMacOpenGLDisplay.h"
 #include <stdio.h>
 #include "../../../Lepra/Include/String.h"
-//#include "../../Include/Mac/UiMacInput.h"
-//#include "../../Include/UiLepra.h"
+#include "../../Include/Mac/RotatingController.h"
 #include "../../Include/UiOpenGLExtensions.h"
 
 
@@ -89,12 +88,7 @@ void MacOpenGLDisplay::SetOrientation(Orientation pOrientation)
 {
 	Parent::SetOrientation(pOrientation);
 #ifdef LEPRA_IOS
-	switch (mOrientation)
-	{
-		case ORIENTATION_ALLOW_ANY:		mGlView.orientationStrictness = 0;	break;
-		case ORIENTATION_ALLOW_UPSIDE_DOWN:	mGlView.orientationStrictness = 1;	break;
-		case ORIENTATION_FIXED:			mGlView.orientationStrictness = 2;	break;
-	}
+	mGlView.orientationStrictness = (int)mOrientation;
 #endif // iOS
 }
 
@@ -355,15 +349,11 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 {
 #ifdef LEPRA_IOS
 	mGlView = [[EAGLView alloc] initWithFrame:mWnd.bounds];
-	switch (mOrientation)
-	{
-		case ORIENTATION_ALLOW_ANY:		mGlView.orientationStrictness = 0;	break;
-		case ORIENTATION_ALLOW_UPSIDE_DOWN:	mGlView.orientationStrictness = 1;	break;
-		case ORIENTATION_FIXED:			mGlView.orientationStrictness = 2;	break;
-	}
+	mGlView.orientationStrictness = (int)mOrientation;
 	// Add the controller, and add the subview by setting root controller.
-	UIViewController* controller = [[UIViewController alloc] init];
+	RotatingController* controller = [[RotatingController alloc] init];
 	controller.view = mGlView;
+	controller.window = mWnd;
 	mWnd.rootViewController = controller;
 	[mWnd makeKeyAndVisible];	// Only visible after we add the view.
 #else // !iOS

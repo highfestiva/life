@@ -258,31 +258,27 @@ static EAGLView* gSharedView;
 	{
 		return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight;
 	}
-	return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight
-		| UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown;
+	return UIInterfaceOrientationLandscapeMaskAll;
 }
 
 -(void) orientationDidChange:(NSNotification*)notification
 {
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	if ([self shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation])
+	if (_canvas && _orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation.
 	{
-		if (_canvas)
+		int angle = _baseAngle;
+		switch (orientation)
 		{
-			int angle = _baseAngle;
-			switch (orientation)
-			{
-				case UIDeviceOrientationLandscapeLeft:		angle = 90 + _baseAngle;	break;
-				case UIDeviceOrientationLandscapeRight:		angle = -90 + _baseAngle;	break;
-				case UIDeviceOrientationPortrait:		angle = 0 + _baseAngle;		break;
-				case UIDeviceOrientationPortraitUpsideDown:	angle = 180 + _baseAngle;	break;
-			}
-			angle += (angle < -90)? 360 : 0;
-			angle -= (angle > 180)? 360 : 0;
-			_canvas->SetOutputRotation(angle);
+			case UIDeviceOrientationLandscapeLeft:		angle = 90 + _baseAngle;	break;
+			case UIDeviceOrientationLandscapeRight:		angle = -90 + _baseAngle;	break;
+			case UIDeviceOrientationPortrait:		angle = 0 + _baseAngle;		break;
+			case UIDeviceOrientationPortraitUpsideDown:	angle = 180 + _baseAngle;	break;
 		}
-		[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
+		angle += (angle < -90)? 360 : 0;
+		angle -= (angle > 180)? 360 : 0;
+		_canvas->SetOutputRotation(angle);
 	}
+	[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
 }
 
 -(BOOL) becomeFirstResponder

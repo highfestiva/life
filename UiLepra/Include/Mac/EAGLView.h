@@ -34,7 +34,7 @@
 	int _preResponderStrictness;
 }
 
-@property(nonatomic, retain) EAGLContext *context;
+@property(nonatomic, retain) EAGLContext* context;
 @property(nonatomic, assign) Lepra::Canvas* canvas;
 @property(nonatomic, assign) int baseAngle;
 @property(nonatomic, readonly) bool isOpen;
