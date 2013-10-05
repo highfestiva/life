@@ -8,6 +8,7 @@
 
 
 #import "../../Include/Mac/RotatingController.h"
+#import "../../Include/Mac/EAGLView.h"
 
 @implementation RotatingController
 

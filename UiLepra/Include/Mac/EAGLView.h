@@ -57,4 +57,9 @@
 - (void)powerUpAcc;
 - (void)powerDownAcc;
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
+- (BOOL)shouldAutorotate;
+- (NSUInteger)supportedInterfaceOrientations;
+- (void)orientationDidChange:(NSNotification*)notification;
+
 @end
