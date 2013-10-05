@@ -1629,6 +1629,17 @@ void OpenGLRenderer::RenderShadowVolumes()
 
 	glMatrixMode(GL_MODELVIEW);
 
+	// Offset shadow in light direction to avoid Z-fighting.
+	Vector3DF lCamShadowOffset;
+	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
+	{
+		LightData* lLight = x->second;
+		if (lLight->mEnabled && lLight->mType == LIGHT_DIRECTIONAL)
+		{
+			lCamShadowOffset = lLight->mDirection*0.1f;
+		}
+	}
+
 	// Render shadow volumes in two steps.
 	for (int lStep = 0; lStep < 2; lStep++)
 	{
@@ -1656,10 +1667,12 @@ void OpenGLRenderer::RenderShadowVolumes()
 			if (lShadowVolume->GetParentGeometry()->GetAlwaysVisible() == true ||
 			   lShadowVolume->GetParentGeometry()->GetLastFrameVisible() == GetCurrentFrame())
 			{
-				mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, lShadowVolume->GetTransformation());
+				TransformationF lShadowTransformation(lShadowVolume->GetTransformation());
+				lShadowTransformation.GetPosition() += lCamShadowOffset;
+				mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, lShadowTransformation);
 				float lModelViewMatrix[16];
 				mCamSpaceTransformation.GetAs4x4TransposeMatrix(lShadowVolume->GetScale(), lModelViewMatrix);
-				glLoadMatrixf(lModelViewMatrix);
+				::glLoadMatrixf(lModelViewMatrix);
 
 				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 				{
