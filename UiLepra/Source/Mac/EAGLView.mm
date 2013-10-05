@@ -25,7 +25,7 @@ static EAGLView* gSharedView;
 @implementation EAGLView
 
 @dynamic context;
-@synthesize canvas = _canvas;
+@dynamic canvas;
 @synthesize baseAngle = _baseAngle;
 @synthesize isOpen;
 @synthesize responder;
@@ -65,7 +65,7 @@ static EAGLView* gSharedView;
 	isOpen = false;
 	responder = nil;
 	_baseAngle = 0;
-	_orientationStrictness = 1;
+	_orientationStrictness = 0;
 	_preResponderStrictness = -1;
 
 	autocapitalizationType = UITextAutocapitalizationTypeWords;
@@ -83,7 +83,7 @@ static EAGLView* gSharedView;
 - (void)dealloc
 {
 	[self deleteFramebuffer];
-	_canvas = 0;
+	canvas = 0;
 	[context release];
 
 	[super dealloc];
@@ -107,6 +107,15 @@ static EAGLView* gSharedView;
 		context = [newContext retain];
 
 		[EAGLContext setCurrentContext:nil];
+	}
+}
+
+- (void)setCanvas:(Lepra::Canvas*)newCanvas
+{
+	if (canvas != newCanvas)
+	{
+		canvas = newCanvas;
+		[self orientationDidChange:nil];
 	}
 }
 
@@ -266,36 +275,45 @@ static EAGLView* gSharedView;
 - (void)orientationDidChange:(NSNotification*)notification
 {
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	if (_canvas)
+	if (canvas)
 	{
 		int angle = _baseAngle;
-		if (_orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation.
+		switch (orientation)
 		{
-			switch (orientation)
+			case UIDeviceOrientationLandscapeLeft:
 			{
-				case UIDeviceOrientationLandscapeLeft:		angle = 0 + _baseAngle;		break;
-				case UIDeviceOrientationLandscapeRight:		angle = 180 + _baseAngle;	break;
-				case UIDeviceOrientationPortrait:
-				{
-					if (_orientationStrictness == 3) angle = 90 + _baseAngle;
-				}
-				break;
-				case UIDeviceOrientationPortraitUpsideDown:
-				{
-					if (_orientationStrictness == 3) angle = -90 + _baseAngle;
-				}
-				break;
+				angle = 0 + _baseAngle;
 			}
-		}
+			break;
+			case UIDeviceOrientationLandscapeRight:
+			{
+				angle = 180 + _baseAngle;
+			}
+			break;
+			case UIDeviceOrientationPortrait:
+			{
+				if (_orientationStrictness == 3) angle = 90 + _baseAngle;
+			}
+			break;
+			case UIDeviceOrientationPortraitUpsideDown:
+			{
+				if (_orientationStrictness == 3) angle = -90 + _baseAngle;
+			}
+			break;
+			default:
+			{
+				return;	// Face up and what not: should not be acted upon!
+			}
+ 		}
 		angle += (angle < -90)? 360 : 0;
 		angle -= (angle > 180)? 360 : 0;
 		if (_orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation (used when native screen orientation inappropriate).
 		{
-			_canvas->SetOutputRotation(angle);
+			canvas->SetOutputRotation(angle);
 		}
 		else if (_orientationStrictness <= 1)
 		{
-			_canvas->SetDeviceRotation(angle);
+			canvas->SetDeviceRotation(angle);
 		}
 	}
 	[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
@@ -304,7 +322,7 @@ static EAGLView* gSharedView;
 -(BOOL) becomeFirstResponder
 {
 	_preResponderStrictness = _orientationStrictness;
-	_orientationStrictness = 2;
+	_orientationStrictness = 4;
 	return [super becomeFirstResponder];
 }
 
