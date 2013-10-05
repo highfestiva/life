@@ -464,9 +464,6 @@ bool App::Open()
 	bool lOk = mUiManager->OpenDraw();
 	if (lOk)
 	{
-#ifdef LEPRA_TOUCH
-		mUiManager->GetCanvas()->SetOutputRotation(90);
-#endif // Touch
 		UiLepra::Core::ProcessMessages();
 		mUiManager->GetPainter()->ResetClippingRect();
 		mUiManager->GetPainter()->Clear(BLACK);
@@ -2330,11 +2327,11 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			{
 				if (mUiManager->GetCanvas()->GetOutputRotation() == 0)
 				{
-					mUiManager->GetCanvas()->SetOutputRotation(180);
+					mUiManager->GetCanvas()->SetOutputRotation(90);
 				}
 				else
 				{
-					mUiManager->GetCanvas()->SetOutputRotation(0);
+					mUiManager->GetCanvas()->SetOutputRotation(-90);
 				}
 			}
 		}
@@ -3034,7 +3031,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 			mGame->SetComputerIndex(-1);
 #ifdef LEPRA_TOUCH
 			// Dual play requires original canvas orientation.
-			mUiManager->GetCanvas()->SetOutputRotation(90);
+			mUiManager->GetCanvas()->SetOutputRotation(0);
 #endif // Touch
 		}
 		break;

@@ -174,7 +174,7 @@ using namespace Lepra;
 
 -(CGPoint) xform:(const CGPoint&)pLocation
 {
-	if (_canvas->GetOutputRotation() == 90)
+	if (_canvas->GetDeviceOutputRotation() == 90)
 	{
 		return pLocation;
 	}

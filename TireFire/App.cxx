@@ -354,9 +354,6 @@ bool App::Open()
 	bool lOk = mUiManager->OpenDraw();
 	if (lOk)
 	{
-#ifdef LEPRA_TOUCH
-		mUiManager->GetCanvas()->SetOutputRotation(90);
-#endif // Touch
 		UiLepra::Core::ProcessMessages();
 		mUiManager->GetPainter()->ResetClippingRect();
 		mUiManager->GetPainter()->Clear(BLACK);
@@ -1004,7 +1001,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		{
 			if (!pFactor)
 			{
-				if (mUiManager->GetCanvas()->GetOutputRotation() == 0)
+				if (mUiManager->GetCanvas()->GetDeviceOutputRotation() == 0)
 				{
 					mUiManager->GetCanvas()->SetOutputRotation(180);
 				}

@@ -36,6 +36,7 @@ Canvas::Canvas()
 	mPitch = 0;
 	mPixelSize = 1;
 	mOutputRotation = 0;
+	mDeviceRotation = 0;
 }
 
 Canvas::Canvas(unsigned pWidth, unsigned pHeight, BitDepth pBitDepth)
@@ -47,6 +48,7 @@ Canvas::Canvas(unsigned pWidth, unsigned pHeight, BitDepth pBitDepth)
 	mHeight = pHeight;
 	mPitch = pWidth;
 	mOutputRotation = 0;
+	mDeviceRotation = 0;
 
 	switch(mBitDepth)
 	{
@@ -79,6 +81,7 @@ Canvas::Canvas(const Canvas& pCanvas, bool pCopy)
 	mHeight = pCanvas.GetHeight();
 	mPitch = pCanvas.GetPitch();
 	mOutputRotation = 0;
+	mDeviceRotation = 0;
 
 	SetPalette(pCanvas.GetPalette());
 
@@ -4077,6 +4080,16 @@ int Canvas::GetOutputRotation() const
 void Canvas::SetOutputRotation(int pRotation)
 {
 	mOutputRotation = pRotation;
+}
+
+int Canvas::GetDeviceOutputRotation() const
+{
+	return mDeviceRotation + mOutputRotation;
+}
+
+void Canvas::SetDeviceRotation(int pRotation)
+{
+	mDeviceRotation = pRotation;
 }
 
 unsigned Canvas::GetActualWidth() const

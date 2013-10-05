@@ -203,6 +203,8 @@ public:
 
 	int GetOutputRotation() const;
 	void SetOutputRotation(int pRotation);
+	int GetDeviceOutputRotation() const;
+	void SetDeviceRotation(int pRotation);
 	unsigned GetActualWidth() const;
 	unsigned GetActualHeight() const;
 
@@ -268,6 +270,7 @@ private:
 	unsigned mPitch;
 	unsigned mPixelSize;
 	int mOutputRotation;
+	int mDeviceRotation;
 
 	void* mBuffer;
 

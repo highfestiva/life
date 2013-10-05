@@ -228,9 +228,6 @@ bool App::Open()
 		mDisplay->AddResizeObserver(this);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
-#ifdef LEPRA_TOUCH
-		mCanvas->SetOutputRotation(90);
-#endif // iOS
 	}
 	if (lOk)
 	{

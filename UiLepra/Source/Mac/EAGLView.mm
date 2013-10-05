@@ -264,7 +264,7 @@ static EAGLView* gSharedView;
 -(void) orientationDidChange:(NSNotification*)notification
 {
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	if (_canvas && _orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation.
+	if (_canvas)
 	{
 		int angle = _baseAngle;
 		switch (orientation)
@@ -276,7 +276,14 @@ static EAGLView* gSharedView;
 		}
 		angle += (angle < -90)? 360 : 0;
 		angle -= (angle > 180)? 360 : 0;
-		_canvas->SetOutputRotation(angle);
+		if (_orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation (used when native screen orientation inappropriate).
+		{
+			_canvas->SetOutputRotation(angle);
+		}
+		else if (_orientationStrictness <= 1)
+		{
+			_canvas->SetDeviceRotation(angle);
+		}
 	}
 	[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
 }
