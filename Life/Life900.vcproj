@@ -470,6 +470,14 @@
 				RelativePath=".\StuntTrigger.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\SystemUtil.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\SystemUtil.mm"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -522,6 +530,10 @@
 			</File>
 			<File
 				RelativePath=".\StuntTrigger.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SystemUtil.h"
 				>
 			</File>
 		</Filter>

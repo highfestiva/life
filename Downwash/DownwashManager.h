@@ -153,6 +153,8 @@ protected:
 	StopWatch mFlyTime;
 	StopWatch mSlowmoTimer;
 	Vector3DF mLastVehicleColor;
+	Vector3DF mLastChopperColor;
+	bool mSetRandomChopperColor;
 	bool mHadAvatar;
 	bool mUpdateCameraForAvatar;
 	Life::Options::Steering mLastSteering;
@@ -187,7 +189,6 @@ protected:
 
 	UiCure::UserPainterKeepImageResource* mWrongDirectionImage;
 	UiCure::UserPainterKeepImageResource* mWinImage;
-	UiCure::UserPainterKeepImageResource* mHealthBarImage;
 	StopWatch mDirectionImageTimer;
 	StopWatch mWinTimer;
 	UiCure::UserRendererImageResource* mArrow;

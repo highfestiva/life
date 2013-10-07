@@ -119,6 +119,29 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	mFreeNetworkAgent = 0;
 }
 
+void GameClientMasterTicker::AddBackedRtvar(const str& pRtvarName)
+{
+	mRtvars.push_back(pRtvarName);
+}
+
+void GameClientMasterTicker::Suspend()
+{
+	strutil::strvec::iterator x = mRtvars.begin();
+	for (; x != mRtvars.end(); ++x)
+	{
+		SystemHelper::SaveRtvar(*x);
+	}
+}
+
+void GameClientMasterTicker::Resume()
+{
+	strutil::strvec::iterator x = mRtvars.begin();
+	for (; x != mRtvars.end(); ++x)
+	{
+		SystemHelper::LoadRtvar(*x);
+	}
+}
+
 MasterServerConnection* GameClientMasterTicker::GetMasterServerConnection() const
 {
 	return mMasterConnection;

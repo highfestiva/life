@@ -110,6 +110,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mCollisionSoundManager(0),
 	mAvatarId(0),
+	mSetRandomChopperColor(false),
 	mHadAvatar(false),
 	mUpdateCameraForAvatar(false),
 	mActiveWeapon(0),
@@ -131,7 +132,6 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 #endif // Touch or emulated touch.
 	mStick(0),
 	mWrongDirectionImage(0),
-	mHealthBarImage(0),
 	mArrow(0),
 	mArrowBillboard(0),
 	mArrowBillboardId(0),
@@ -174,8 +174,6 @@ DownwashManager::~DownwashManager()
 	mHemisphereUvTransform = 0;
 	delete mWrongDirectionImage;
 	mWrongDirectionImage = 0;
-	delete mHealthBarImage;
-	mHealthBarImage = 0;
 	delete mArrow;
 	mArrow = 0;
 	delete mArrowBillboard;
@@ -263,10 +261,6 @@ bool DownwashManager::Open()
 
 		mWinImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mWinImage->Load(GetResourceManager(), _T("win.png"),
-			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
-
-		mHealthBarImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mHealthBarImage->Load(GetResourceManager(), _T("healthbar.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 
 		mArrow = new UiCure::UserRendererImageResource(mUiManager, false);
@@ -396,43 +390,74 @@ bool DownwashManager::Paint()
 	}
 
 	const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	if (lAvatar && mHealthBarImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	if (lAvatar)
 	{
+		mUiManager->GetPainter()->SetAlphaValue(160);
+
+		// Draw health bar first.
+		const int w = mUiManager->GetDisplayManager()->GetWidth();
+		const int m = w / 2;
+		const float lWidth = (float)(((int)(w * 134.0f/480.0f)) & ~1);
+		float lMin = m-lWidth/2;
+		lMin = (lMin < 193)? 193 : lMin;
 		const float lHealth = Cure::Health::Get(lAvatar);
 		const uint8 r = (int8)Math::Clamp((int)((1-lHealth)*1.9f*255), 0, 255);
 		const uint8 g = (int8)Math::Clamp((int)((lHealth-0.3f)*3*255), 0, 255);
-		mUiManager->GetPainter()->SetColor(Color(r, g, 0, 255), 0);
-		const float lRemaining = Math::Clamp(lHealth*203, 0.0f, 203.0f);
+		mUiManager->GetPainter()->SetColor(Color(r, g, 0), 0);
+		const float lRemaining = Math::Clamp(lHealth*lWidth, 0.0f, lWidth);
 		std::vector<Vector2DF> lCoords;
-		lCoords.push_back(Vector2DF(397, 8));
-		lCoords.push_back(Vector2DF(397, 31));
-		lCoords.push_back(Vector2DF(397+lRemaining, 31));
-		lCoords.push_back(Vector2DF(397+lRemaining, 7));
+		lCoords.push_back(Vector2DF(lMin, 16+0.4f));
+		lCoords.push_back(Vector2DF(lMin, 24+0.6f));
+		lCoords.push_back(Vector2DF(lMin+lRemaining, 24+0.6f));
+		lCoords.push_back(Vector2DF(lMin+lRemaining, 16+0.4f));
 		lCoords.push_back(lCoords[0]);
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
-		DrawImage(mHealthBarImage->GetData(), 500, 19, 256, 32, 0);
+		// Draw surrounding frame after.
+		mUiManager->GetPainter()->SetColor(Color(10, 30, 40), 0);
+		lCoords.clear();
+		lCoords.push_back(Vector2DF(lMin-2, 16-2+0.4f));
+		lCoords.push_back(Vector2DF(lMin-2, 24+2+0.6f));
+		lCoords.push_back(Vector2DF(lMin+lWidth+2, 24+2+0.6f));
+		lCoords.push_back(Vector2DF(lMin+lWidth+2, 16-2+0.4f));
+		lCoords.push_back(lCoords[0]);
+		mUiManager->GetPainter()->DrawFan(lCoords, false);
 
 		const bool lIsFlying = mFlyTime.IsStarted();
 		const double lTime = mFlyTime.QuerySplitTime();
 		const bool lIsSloppy = (lIsFlying || !lTime);
-		mUiManager->GetPainter()->SetColor(Color(255, 255, 255, 128));
-		PrintTime(_T(""), lTime, lIsSloppy, 51, 4);
-		mUiManager->GetPainter()->SetColor(Color(15, 22, 21, 255));
-		PrintTime(_T(""), lTime, lIsSloppy, 50, 3);
+		mUiManager->GetPainter()->SetColor(Color(10, 10, 10, 128));
+		PrintTime(_T(""), lTime, lIsSloppy, 101, 4);
+		mUiManager->GetPainter()->SetColor(Color(192, 210, 220), 0);
+		PrintTime(_T(""), lTime, lIsSloppy, 100, 3);
 
-		const double lLevelBestTime = GetCurrentLevelBestTime(false);
+		double lLevelBestTime = GetCurrentLevelBestTime(false);
 		if (lLevelBestTime > 0)
 		{
-			mUiManager->GetPainter()->SetColor(Color(1, 1, 1, 128));
-			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 251, 4);
-			mUiManager->GetPainter()->SetColor(Color(210, 40, 40, 255));
-			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 250, 3);
+			mUiManager->GetPainter()->SetColor(Color(192, 192, 192, 128));
+			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 101, 44);
+			mUiManager->GetPainter()->SetColor(Color(10, 30, 40), 0);
+			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 100, 43);
 		}
+		lLevelBestTime = GetCurrentLevelBestTime(true);
+		if (lLevelBestTime > 0)
+		{
+			mUiManager->GetPainter()->SetColor(Color(40, 10, 10, 128));
+			PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 101, 84);
+			mUiManager->GetPainter()->SetColor(Color(210, 40, 40, 255));
+			PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 100, 83);
+		}
+
+		mUiManager->GetPainter()->SetAlphaValue(255);
 
 		if (lAvatar->GetPhysics()->GetEngineCount() >= 3 && mWrongDirectionImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
 			mLevel && mLevel->IsLoaded())
 		{
-			if (mDirectionImageTimer.QueryTimeDiff() >= 0.5)
+			const double lImageTime = mDirectionImageTimer.QueryTimeDiff();
+			if (!mDirectionImageTimer.IsStarted() && lImageTime > 2.0)
+			{
+				mAutopilot->AttemptCloserPathDistance();
+			}
+			if (lImageTime >= 0.5)
 			{
 				if (mDirectionImageTimer.IsStarted())
 				{
@@ -442,7 +467,6 @@ bool DownwashManager::Paint()
 				else
 				{
 					mDirectionImageTimer.Start();
-					mAutopilot->AttemptCloserPathDistance();
 				}
 			}
 			const float lPathDistance = mAutopilot->GetClosestPathDistance();
@@ -507,7 +531,9 @@ void DownwashManager::PrintTime(const str pPrefix, double pTime, bool lIsSloppy,
 	const str lIntTimeString = pPrefix + strutil::Format(_T("%i"), lSec);
 	const str lTimeString = pPrefix + strutil::Format(lIsSloppy? _T("%.1f s") : _T("%.3f s"), pTime);
 	int w = mUiManager->GetPainter()->GetStringWidth(lIntTimeString);
-	mUiManager->GetPainter()->PrintText(lTimeString, x - w, y);
+	x -= w;
+	x = (x < 4)? 4 : x;
+	mUiManager->GetPainter()->PrintText(lTimeString, x, y);
 }
 
 void DownwashManager::DrawSyncDebugInfo()
@@ -855,8 +881,9 @@ void DownwashManager::UpdateChopperColor(float pLerp)
 	const size_t lMeshCount = lClass->GetMeshCount();
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
+		const Vector3DF d = (x == 0 && mSetRandomChopperColor)? mLastChopperColor : lClass->GetMaterial(x).mDiffuse;
 		lAvatar->GetMesh(x)->GetBasicMaterialSettings().mAmbient = Math::Lerp(lAvatar->GetMesh(x)->GetBasicMaterialSettings().mAmbient, lClass->GetMaterial(x).mAmbient * lLevelBrightness, pLerp);
-		lAvatar->GetMesh(x)->GetBasicMaterialSettings().mDiffuse = Math::Lerp(lAvatar->GetMesh(x)->GetBasicMaterialSettings().mDiffuse, lClass->GetMaterial(x).mDiffuse * lLevelBrightness, pLerp);
+		lAvatar->GetMesh(x)->GetBasicMaterialSettings().mDiffuse = Math::Lerp(lAvatar->GetMesh(x)->GetBasicMaterialSettings().mDiffuse, d * lLevelBrightness, pLerp);
 	}
 }
 
@@ -1192,6 +1219,17 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		if (pObject->GetInstanceId() == mAvatarId)
 		{
 			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
+			if (mSetRandomChopperColor)
+			{
+				Vector3DF lColor;
+				do
+				{
+					lColor = RNDPOSVEC();
+				} while (lColor.GetDistanceSquared(mLastVehicleColor) < 1);
+				mLastVehicleColor = lColor;
+				mLastChopperColor = lColor;
+				((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
+			}
 			UpdateChopperColor(1.0f);
 			EaseDown(pObject, 0);
 		}
@@ -1681,6 +1719,7 @@ void DownwashManager::ScriptPhysicsTick()
 		mAvatarDied.TryStart();
 		if (mAvatarDied.QueryTimeDiff() > 0.1f)
 		{
+			mSetRandomChopperColor = true;
 			CreateChopper(_T("helicopter_01"));
 		}
 	}

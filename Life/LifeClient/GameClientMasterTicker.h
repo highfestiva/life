@@ -46,6 +46,10 @@ public:
 	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameClientMasterTicker();
 
+	virtual void AddBackedRtvar(const str& pRtvarName);
+	virtual void Suspend();
+	virtual void Resume();
+
 	MasterServerConnection* GetMasterServerConnection() const;
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 
@@ -136,6 +140,8 @@ protected:
 	UiGameServerManager* mServer;
 	MasterServerConnection* mMasterConnection;
 	Cure::NetworkFreeAgent* mFreeNetworkAgent;
+
+	strutil::strvec mRtvars;
 
 	ConsoleManager* mConsole;
 	bool mRestartUi;

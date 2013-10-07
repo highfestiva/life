@@ -49,8 +49,8 @@
 + Music.
 + Sounds. Ambient. Moving stuff.
 + Make sure the "close to the path" indicator gets back on track when restarting the level.
-. Better health meter.
-. Fix Z-fighting on iPad.
++ Better health meter.
++ Fix Z-fighting on iPad.
 + Change to better "level done" jingle.
 + Fix back buffer flicking while still loading but not yet rendering.
 + "Unfix" landing pad ambient on simulator level.
@@ -60,7 +60,7 @@
 + Lower music volume.
 + Start with correct canvas orientation on iOS.
 + Let iOS control orientation change.
-. Fix the shadow of the chopper windows in origin (null material shadow rendering?).
++ Fix the shadow of the chopper windows in origin (null material shadow rendering?).
 + Make touchstick board semi-transparent.
 . Menu using 3D buttons with shadows! Cewl!
   . Pilot name and high score.
