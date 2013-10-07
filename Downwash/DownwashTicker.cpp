@@ -35,14 +35,14 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 
+	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
 	for (int x = 0; x < 20; ++x)
 	{
-		const str wr = strutil::Format((_T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i")).c_str(), x);
+		const str wr = strutil::Format(str(_T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i")).c_str(), x);
 		AddBackedRtvar(wr);
-		const str pr = strutil::Format((_T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i")).c_str(), x);
+		const str pr = strutil::Format(str(_T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i")).c_str(), x);
 		AddBackedRtvar(pr);
 	}
-	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
 }
 
 DownwashTicker::~DownwashTicker()
@@ -58,6 +58,8 @@ DownwashTicker::~DownwashTicker()
 
 void DownwashTicker::Suspend()
 {
+	Parent::Suspend();
+
 	if (mMusicPlayer)
 	{
 		mMusicPlayer->Pause();
@@ -66,7 +68,8 @@ void DownwashTicker::Suspend()
 
 void DownwashTicker::Resume()
 {
-	HiResTimer::StepCounterShadow();
+	Parent::Resume();
+
 	if (mMusicPlayer)
 	{
 		mMusicPlayer->Stop();

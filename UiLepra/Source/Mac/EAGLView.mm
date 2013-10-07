@@ -67,6 +67,7 @@ static EAGLView* gSharedView;
 	_baseAngle = 0;
 	_orientationStrictness = 0;
 	_preResponderStrictness = -1;
+	isLayoutSet = false;
 
 	autocapitalizationType = UITextAutocapitalizationTypeWords;
 	autocorrectionType = UITextAutocorrectionTypeNo;
@@ -302,9 +303,15 @@ static EAGLView* gSharedView;
 			break;
 			default:
 			{
-				return;	// Face up and what not: should not be acted upon!
+				if (isLayoutSet)
+				{
+					return;	// Face up and what not: should not be acted upon!
+				}
+				orientation = UIDeviceOrientationLandscapeRight;
+				angle = 0 + _baseAngle;
 			}
  		}
+		isLayoutSet = true;
 		angle += (angle < -90)? 360 : 0;
 		angle -= (angle > 180)? 360 : 0;
 		if (_orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation (used when native screen orientation inappropriate).
@@ -315,14 +322,15 @@ static EAGLView* gSharedView;
 		{
 			canvas->SetDeviceRotation(angle);
 		}
+
+		[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
 	}
-	[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
 }
 
 -(BOOL) becomeFirstResponder
 {
 	_preResponderStrictness = _orientationStrictness;
-	_orientationStrictness = 4;
+	//_orientationStrictness = 4;
 	return [super becomeFirstResponder];
 }
 

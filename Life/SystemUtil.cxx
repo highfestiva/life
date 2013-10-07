@@ -5,6 +5,8 @@
 
 
 #include "SystemUtil.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "../Lepra/Include/Posix/MacLog.h"
 
 
 
@@ -35,9 +37,13 @@ void SystemUtil::LoadRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvar
 	(void)pRtvarName;
 #ifdef LEPRA_IOS
 	NSString* key = [MacLog::Encode(pRtvarName) retain];
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	NSString* value = [defaults stringForKey:key];
-	const str lValue = MacLog::Decode(value);
-	pScope->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, pRtvarName, lValue);
+	if (value != nil)
+	{
+		const str lValue = MacLog::Decode(value);
+		pScope->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, pRtvarName, lValue);
+	}
 	[key release];
 #endif // iOS
 }

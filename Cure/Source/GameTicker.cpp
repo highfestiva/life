@@ -39,6 +39,7 @@ void ApplicationTicker::Suspend()
 
 void ApplicationTicker::Resume()
 {
+	HiResTimer::StepCounterShadow();
 }
 
 void ApplicationTicker::Profile()

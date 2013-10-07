@@ -49,6 +49,8 @@ public:
 	virtual void AddBackedRtvar(const str& pRtvarName);
 	virtual void Suspend();
 	virtual void Resume();
+	virtual void LoadRtvars(Cure::RuntimeVariableScope* pScope);
+	virtual void SaveRtvars(Cure::RuntimeVariableScope* pScope);
 
 	MasterServerConnection* GetMasterServerConnection() const;
 	void SetMasterServerConnection(MasterServerConnection* pConnection);

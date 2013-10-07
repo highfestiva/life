@@ -511,6 +511,16 @@
 		B1B559D017F77E5800A4BB17 /* GameTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */; };
 		B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559E917F7800A00A4BB17 /* Driver.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
+		B1C4116718033EC7007D64F7 /* SystemUtil.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1C4116618033EC7007D64F7 /* SystemUtil.mm */; };
+		B1C4123A18035E90007D64F7 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123318035E90007D64F7 /* Default-568h@2x.png */; };
+		B1C4123B18035E90007D64F7 /* Default-Landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123418035E90007D64F7 /* Default-Landscape.png */; };
+		B1C4123C18035E90007D64F7 /* Default-Landscape@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123518035E90007D64F7 /* Default-Landscape@2x.png */; };
+		B1C4123D18035E90007D64F7 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123618035E90007D64F7 /* Default@2x.png */; };
+		B1C4123E18035E90007D64F7 /* Downwash.ico in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123718035E90007D64F7 /* Downwash.ico */; };
+		B1C4123F18035E90007D64F7 /* Icon-72@2.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123818035E90007D64F7 /* Icon-72@2.png */; };
+		B1C4124018035E90007D64F7 /* Icon-76.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123918035E90007D64F7 /* Icon-76.png */; };
+		B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4124118035EA0007D64F7 /* Icon-120.png */; };
+		B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4124218035EA0007D64F7 /* Icon-152.png */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 		B1D37EE6166AB2FC00536CE5 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */; };
 		B1D37EE7166AB2FC00536CE5 /* Life.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE5166AB2FC00536CE5 /* Life.cpp */; };
@@ -1252,6 +1262,16 @@
 		B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameTimer.cpp; sourceTree = "<group>"; };
 		B1B559E917F7800A00A4BB17 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Driver.cpp; path = ../../Cure/Source/Driver.cpp; sourceTree = SOURCE_ROOT; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
+		B1C4116618033EC7007D64F7 /* SystemUtil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SystemUtil.mm; path = ../../Life/SystemUtil.mm; sourceTree = SOURCE_ROOT; };
+		B1C4123318035E90007D64F7 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Icons/Default-568h@2x.png"; sourceTree = SOURCE_ROOT; };
+		B1C4123418035E90007D64F7 /* Default-Landscape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape.png"; path = "../Icons/Default-Landscape.png"; sourceTree = SOURCE_ROOT; };
+		B1C4123518035E90007D64F7 /* Default-Landscape@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape@2x.png"; path = "../Icons/Default-Landscape@2x.png"; sourceTree = SOURCE_ROOT; };
+		B1C4123618035E90007D64F7 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Icons/Default@2x.png"; sourceTree = SOURCE_ROOT; };
+		B1C4123718035E90007D64F7 /* Downwash.ico */ = {isa = PBXFileReference; lastKnownFileType = image.ico; name = Downwash.ico; path = ../Icons/Downwash.ico; sourceTree = SOURCE_ROOT; };
+		B1C4123818035E90007D64F7 /* Icon-72@2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72@2.png"; path = "../Icons/Icon-72@2.png"; sourceTree = SOURCE_ROOT; };
+		B1C4123918035E90007D64F7 /* Icon-76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-76.png"; path = "../Icons/Icon-76.png"; sourceTree = SOURCE_ROOT; };
+		B1C4124118035EA0007D64F7 /* Icon-120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-120.png"; path = "../Icons/Icon-120.png"; sourceTree = SOURCE_ROOT; };
+		B1C4124218035EA0007D64F7 /* Icon-152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-152.png"; path = "../Icons/Icon-152.png"; sourceTree = SOURCE_ROOT; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
 		B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Life/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37EE5166AB2FC00536CE5 /* Life.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Life.cpp; path = ../../Life/Life.cpp; sourceTree = SOURCE_ROOT; };
@@ -2450,6 +2470,15 @@
 			isa = PBXGroup;
 			children = (
 				B1FB291E1450C8A600F1C762 /* Data */,
+				B1C4124118035EA0007D64F7 /* Icon-120.png */,
+				B1C4124218035EA0007D64F7 /* Icon-152.png */,
+				B1C4123318035E90007D64F7 /* Default-568h@2x.png */,
+				B1C4123418035E90007D64F7 /* Default-Landscape.png */,
+				B1C4123518035E90007D64F7 /* Default-Landscape@2x.png */,
+				B1C4123618035E90007D64F7 /* Default@2x.png */,
+				B1C4123718035E90007D64F7 /* Downwash.ico */,
+				B1C4123818035E90007D64F7 /* Icon-72@2.png */,
+				B1C4123918035E90007D64F7 /* Icon-76.png */,
 				B196562413BE6F94006A1422 /* Default.png */,
 				B196560E13BE6C3B006A1422 /* Icon-72.png */,
 				B196560713BE6AB5006A1422 /* Icon.png */,
@@ -2471,6 +2500,7 @@
 				B1D37EE9166AB32700536CE5 /* RaceScore.cpp */,
 				B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */,
 				B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */,
+				B1C4116618033EC7007D64F7 /* SystemUtil.mm */,
 				B1D37EE5166AB2FC00536CE5 /* Life.cpp */,
 			);
 			name = Life;
@@ -2584,6 +2614,15 @@
 				B15B6CCE17F7919300AB487F /* Slow Ska Game Loop.ogg in Resources */,
 				B15B6CCF17F7919300AB487F /* Stealth Groover.ogg in Resources */,
 				B15B6CD017F7919300AB487F /* Yallahs.ogg in Resources */,
+				B1C4123A18035E90007D64F7 /* Default-568h@2x.png in Resources */,
+				B1C4123B18035E90007D64F7 /* Default-Landscape.png in Resources */,
+				B1C4123C18035E90007D64F7 /* Default-Landscape@2x.png in Resources */,
+				B1C4123D18035E90007D64F7 /* Default@2x.png in Resources */,
+				B1C4123E18035E90007D64F7 /* Downwash.ico in Resources */,
+				B1C4123F18035E90007D64F7 /* Icon-72@2.png in Resources */,
+				B1C4124018035E90007D64F7 /* Icon-76.png in Resources */,
+				B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */,
+				B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3122,6 +3161,7 @@
 				B1B559D017F77E5800A4BB17 /* GameTimer.cpp in Sources */,
 				B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */,
 				B1B0C87E17FE08B4000953EF /* RotatingController.mm in Sources */,
+				B1C4116718033EC7007D64F7 /* SystemUtil.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

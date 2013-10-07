@@ -73,3 +73,5 @@
 + Make splash screen images to iPad, iPhone and retina.
 + Icon for all resolutions... including 1024x1024 and possibly double hi-res for backup?
 + Rename all files and titles to Downwash.
+. Fix second level's ceiling, should be raised.
+

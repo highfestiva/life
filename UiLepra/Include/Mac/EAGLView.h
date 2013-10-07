@@ -32,6 +32,7 @@
 	UIResponder* responder;
 	int _orientationStrictness;
 	int _preResponderStrictness;
+	bool isLayoutSet;
 }
 
 @property(nonatomic, retain) EAGLContext* context;

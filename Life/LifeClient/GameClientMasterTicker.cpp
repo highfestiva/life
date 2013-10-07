@@ -22,6 +22,7 @@
 #include "../LifeServer/MasterServerConnection.h"
 #include "../ConsoleManager.h"
 #include "../LifeApplication.h"
+#include "../SystemUtil.h"
 #include "GameClientSlaveManager.h"
 #include "RtVar.h"
 #include "UiGameServerManager.h"
@@ -126,19 +127,37 @@ void GameClientMasterTicker::AddBackedRtvar(const str& pRtvarName)
 
 void GameClientMasterTicker::Suspend()
 {
-	strutil::strvec::iterator x = mRtvars.begin();
-	for (; x != mRtvars.end(); ++x)
-	{
-		SystemHelper::SaveRtvar(*x);
-	}
+	Parent::Suspend();
+
+	Cure::RuntimeVariableScope* lScope = UiCure::GetSettings();
+	lScope = mSlaveArray[0]? mSlaveArray[0]->GetVariableScope() : lScope;
+	SaveRtvars(lScope);
 }
 
 void GameClientMasterTicker::Resume()
 {
+	Parent::Resume();
+
+	Cure::RuntimeVariableScope* lScope = UiCure::GetSettings();
+	lScope = mSlaveArray[0]? mSlaveArray[0]->GetVariableScope() : lScope;
+	LoadRtvars(lScope);
+}
+
+void GameClientMasterTicker::LoadRtvars(Cure::RuntimeVariableScope* pScope)
+{
 	strutil::strvec::iterator x = mRtvars.begin();
 	for (; x != mRtvars.end(); ++x)
 	{
-		SystemHelper::LoadRtvar(*x);
+		SystemUtil::LoadRtvar(pScope, *x);
+	}
+}
+
+void GameClientMasterTicker::SaveRtvars(Cure::RuntimeVariableScope* pScope)
+{
+	strutil::strvec::iterator x = mRtvars.begin();
+	for (; x != mRtvars.end(); ++x)
+	{
+		SystemUtil::SaveRtvar(pScope, *x);
 	}
 }
 
@@ -641,6 +660,7 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 	{
 		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
+		LoadRtvars(pSlave->GetVariableScope());
 		pSlave->RefreshOptions();
 		deb_assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);
 		mSlaveArray[pSlave->GetSlaveIndex()] = pSlave;

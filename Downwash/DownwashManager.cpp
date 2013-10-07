@@ -755,6 +755,7 @@ str DownwashManager::StepLevel(int pCount)
 			str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
 			mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 			mLevel->StartLoading();
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 			return lNewLevelName;
 		}
 		else
