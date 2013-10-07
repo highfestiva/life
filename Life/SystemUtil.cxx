@@ -34,6 +34,7 @@ void SystemUtil::SaveRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvar
 
 void SystemUtil::LoadRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvarName)
 {
+	(void)pScope;
 	(void)pRtvarName;
 #ifdef LEPRA_IOS
 	NSString* key = [MacLog::Encode(pRtvarName) retain];
