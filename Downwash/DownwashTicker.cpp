@@ -36,6 +36,7 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 
 	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
+	AddBackedRtvar(_T(RTVAR_GAME_CHILDISHNESS));
 	for (int x = 0; x < 20; ++x)
 	{
 		const str wr = strutil::Format(str(_T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i")).c_str(), x);

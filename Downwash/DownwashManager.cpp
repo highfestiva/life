@@ -1602,7 +1602,15 @@ TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextO
 
 void DownwashManager::OnFireButton(UiTbc::Button*)
 {
-	GetConsoleManager()->ExecuteCommand(_T("list-active-resources"));
+	//GetConsoleManager()->ExecuteCommand(_T("list-active-resources"));
+	double lChildishness;
+	CURE_RTVAR_GET(lChildishness, =, GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.6);
+	lChildishness = ::floor(16 * (lChildishness-1/5.0)) / 16;
+	if (lChildishness < 0)
+	{
+		lChildishness = 1;
+	}
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, lChildishness);
 }
 
 

@@ -274,7 +274,7 @@ void Button::Repaint(Painter* pPainter)
 			break;
 		}
 		if (mHighlightedIconId != Painter::INVALID_IMAGEID &&
-			(mState == PRESSED || mState == PRESSING || mState == PRESSED_HOOVER || mState == RELEASED_HOOVER))
+			(mState == PRESSED || mState == PRESSING))
 		{
 			lIMan->DrawImage(mHighlightedIconId, x, y);
 		}
