@@ -74,3 +74,4 @@
 + Icon for all resolutions... including 1024x1024 and possibly double hi-res for backup?
 + Rename all files and titles to Downwash.
 + Fix third level's ceiling, should be raised.
++ Add a pinch of replayability by adding toy mode when played through whole game (=hi rtr, strange colors).

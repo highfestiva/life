@@ -44,6 +44,7 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 		const str pr = strutil::Format(str(_T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i")).c_str(), x);
 		AddBackedRtvar(pr);
 	}
+	AddBackedRtvar(_T(RTVAR_PHYSICS_RTR_OFFSET));
 }
 
 DownwashTicker::~DownwashTicker()
@@ -70,6 +71,10 @@ void DownwashTicker::Suspend()
 void DownwashTicker::Resume()
 {
 	Parent::Resume();
+
+	double lRtrOffset;
+	CURE_RTVAR_GET(lRtrOffset, =, mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+	CURE_RTVAR_SET(mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
 
 	if (mMusicPlayer)
 	{

@@ -158,6 +158,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_06"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 }
 
 DownwashManager::~DownwashManager()
@@ -309,6 +310,15 @@ bool DownwashManager::Render()
 			mUiManager->GetRenderer()->Clear(UiTbc::Renderer::CLEAR_COLORBUFFER);
 		}
 		return true;
+	}
+
+	{
+		double lRtrOffset;
+		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+		const double lColorOffset = (lRtrOffset > 0.5)? 2.5 : 0.5;
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTRED, lColorOffset);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTGREEN, lColorOffset);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTBLUE, lColorOffset);
 	}
 
 	mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
@@ -743,25 +753,28 @@ str DownwashManager::StepLevel(int pCount)
 		lLevelNumber += pCount;
 		int lLevelCount;
 		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
-		if (lLevelNumber < lLevelCount)
+		if (lLevelNumber >= lLevelCount)
 		{
-			if (lLevelNumber < 0)
-			{
-				lLevelNumber = lLevelCount-1;
-			}
-			lLevelNumber = ORDERED_LEVELNO[lLevelNumber];
-			mOldLevel = mLevel;
-			mLevelCompleted = false;
-			str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
-			mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-			mLevel->StartLoading();
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
-			return lNewLevelName;
+			lLevelNumber = 0;
+
+			double lRtrOffset;
+			CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+			lRtrOffset += 1;
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, lRtrOffset);
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
 		}
-		else
+		if (lLevelNumber < 0)
 		{
-			SystemManager::AddQuitRequest(true);	// TODO: go to menu!
+			lLevelNumber = lLevelCount-1;
 		}
+		lLevelNumber = ORDERED_LEVELNO[lLevelNumber];
+		mOldLevel = mLevel;
+		mLevelCompleted = false;
+		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
+		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+		mLevel->StartLoading();
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
+		return lNewLevelName;
 	}
 	return _T("");
 }
@@ -1342,9 +1355,7 @@ void DownwashManager::OnLevelLoadCompleted()
 		GetContext()->DeleteObject(mOldLevel->GetInstanceId());
 		mOldLevel = 0;
 
-		//lNewPosition.z += 4.0f;
 		EaseDown(lAvatar, &lNewPosition);
-		//CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.1);
 
 		mCameraTransform.GetPosition() += lCamDelta;
 		mCameraTransform.GetPosition().z = lAvatar->GetPosition().z + lCamAboveHeli;
@@ -1700,13 +1711,15 @@ void DownwashManager::ScriptPhysicsTick()
 
 	if (mSlowmoTimer.IsStarted())
 	{
+		double lRtrOffset;
+		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 		if (mSlowmoTimer.QueryTimeDiff() < 3.5f)
 		{
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.3f);
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.3*(lRtrOffset+1));
 		}
 		else
 		{
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0f);
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
 			mSlowmoTimer.Stop();
 		}
 	}
