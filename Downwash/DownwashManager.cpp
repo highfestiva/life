@@ -1279,11 +1279,11 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else if (pObject->GetClassId() == _T("turret"))
 		{
-			new CanonDriver(this, pObject->GetInstanceId(), 0, 5);
+			new CanonDriver(this, pObject->GetInstanceId(), 0);
 		}
 		else if (pObject->GetClassId() == _T("turret2"))
 		{
-			new CanonDriver(this, pObject->GetInstanceId(), 1, 0.5f);
+			new CanonDriver(this, pObject->GetInstanceId(), 1);
 		}
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("air_balloon")))
 		{

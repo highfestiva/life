@@ -74,9 +74,7 @@ void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
 		if (i->mIsNew)
 		{
 			pInputManager->SetMousePosition(i->mLast.x, i->mLast.y);
-			// We click-release to make it into an ordinary click-relese (button press).
-			pInputManager->GetMouse()->GetButton(0)->SetValue(1);
-			pInputManager->GetMouse()->GetButton(0)->SetValue(0);
+			pInputManager->GetMouse()->GetButton(0)->SetValue(i->mIsPress);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: level_11.ma
-//Last modified: Thu, Sep 26, 2013 11:49:15 PM
+//Last modified: Sun, Oct 13, 2013 10:09:59 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -12,20 +12,19 @@ fileInfo "cutIdentifier" "200904080023-749524";
 fileInfo "osv" "Microsoft Windows XP Service Pack 3 (Build 2600)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 289.57686363036925 -29.117074067460017 241.4086353557762 ;
-	setAttr ".r" -type "double3" -3.9383527294373066 39.399999999995636 -5.1449729741071955e-016 ;
-	setAttr ".rp" -type "double3" 0 -1.7763568394002505e-015 7.1054273576010019e-015 ;
-	setAttr ".rpt" -type "double3" 5.3295087514867436e-015 -2.0756450616340944e-014 
-		4.6412870992539334e-014 ;
+	setAttr ".t" -type "double3" -7.990851594043658 -32.498666621612578 215.64433426167699 ;
+	setAttr ".r" -type "double3" -3.9383527294614438 2.2000000000065558 9.9465648292798861e-017 ;
+	setAttr ".rp" -type "double3" 0 -7.1054273576010019e-015 2.8421709430404007e-014 ;
+	setAttr ".rpt" -type "double3" 1.300588496007418e-014 -1.707397455083368e-014 4.6428892165400878e-014 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
 	setAttr ".fcp" 3000;
-	setAttr ".coi" 413.12900288632812;
+	setAttr ".coi" 149.95795084567669;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
-	setAttr ".tp" -type "double3" -6.0440169832044468 -16.600448905994462 -15.509500957710486 ;
+	setAttr ".tp" -type "double3" 0.66913645543095868 -44.076126005301219 65.685511512322876 ;
 	setAttr ".hc" -type "string" "viewSet -p %camera";
 createNode transform -s -n "top";
 	setAttr ".v" no;
@@ -880,6 +879,171 @@ createNode transform -n "phys_pos_balloon_path3" -p "m_terrain";
 createNode transform -n "phys_pos_balloon_path4" -p "m_terrain";
 	setAttr ".t" -type "double3" -76.617093569164666 -8.1150710713317338 -2.3834060312868601 ;
 	setAttr ".s" -type "double3" 1 1 0.68045129385175562 ;
+createNode transform -n "m_barrel1" -p "m_terrain";
+	setAttr ".t" -type "double3" -78.884096657058478 -72.825264446898615 -9.3473387744002707 ;
+	setAttr ".r" -type "double3" 4.3314935850955036 -25.365734095572137 -25.443152531480528 ;
+	setAttr ".s" -type "double3" 0.90802517074964162 0.99778060808019375 0.75104178064435612 ;
+	setAttr ".sh" -type "double3" -0.027956473188309496 -0.36745909016080069 -0.05853805497575286 ;
+	setAttr ".rp" -type "double3" 40.099614298325676 98.712711436070649 -16.168306138517789 ;
+	setAttr ".rpt" -type "double3" 38.784482358732816 -25.88744698917202 25.515644912918059 ;
+	setAttr ".sp" -type "double3" 40.628414252429842 97.983714506718115 -21.527838470778807 ;
+	setAttr ".spt" -type "double3" -0.52879995410418523 0.72899692935254268 5.3595323322610193 ;
+createNode mesh -n "m_barrel1Shape" -p "m_barrel1";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
+	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
+	addAttr -ci true -sn "rguv0" -ln "rguv0" -dt "vectorArray";
+	setAttr -k off ".v";
+	setAttr -s 4 ".iog";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".pv" -type "double2" 0.68719887733459473 1 ;
+	setAttr ".uvst[0].uvsn" -type "string" "map_barrel";
+	setAttr ".cuvs" -type "string" "map_barrel";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+	setAttr ".rgvtx" -type "vectorArray" 30 0.90096890926361084 -1.5 -0.43388345837593079 0.62348991632461548
+		 -1.5 -0.78183126449584961 0.222521111369133 -1.5 -0.97492778301239014 -0.22252070903778076
+		 -1.5 -0.97492784261703491 -0.62348955869674683 -1.5 -0.78183150291442871 -0.90096867084503174
+		 -1.5 -0.43388384580612183 -0.99999988079071045 -1.5 -1.7881393432617188e-007 -0.90096884965896606
+		 -1.5 0.43388354778289795 -0.6234898567199707 -1.5 0.78183132410049438 -0.22252103686332703
+		 -1.5 0.97492778301239014 0.22252082824707031 -1.5 0.97492790222167969 0.62348973751068115
+		 -1.5 0.78183150291442871 0.90096884965896606 -1.5 0.43388375639915466 1 -1.5 0 0.90096890926361084
+		 1.5 -0.43388345837593079 0.62348991632461548 1.5 -0.78183126449584961 0.222521111369133
+		 1.5 -0.97492778301239014 -0.22252070903778076 1.5 -0.97492784261703491 -0.62348955869674683
+		 1.5 -0.78183150291442871 -0.90096867084503174 1.5 -0.43388384580612183 -0.99999988079071045
+		 1.5 -1.7881393432617188e-007 -0.90096884965896606 1.5 0.43388354778289795 -0.6234898567199707
+		 1.5 0.78183132410049438 -0.22252103686332703 1.5 0.97492778301239014 0.22252082824707031
+		 1.5 0.97492790222167969 0.62348973751068115 1.5 0.78183150291442871 0.90096884965896606
+		 1.5 0.43388375639915466 1 1.5 0 0 -1.5 0 0 1.5 0 ;
+	setAttr ".rgf" -type "string" "[[0,1,15,14],[1,2,16,15],[2,3,17,16],[3,4,18,17],[4,5,19,18],[5,6,20,19],[6,7,21,20],[7,8,22,21],[8,9,23,22],[9,10,24,23],[10,11,25,24],[11,12,26,25],[12,13,27,26],[13,0,14,27],[1,0,28],[2,1,28],[3,2,28],[4,3,28],[5,4,28],[6,5,28],[7,6,28],[8,7,28],[9,8,28],[10,9,28],[11,10,28],[12,11,28],[13,12,28],[0,13,28],[14,15,29],[15,16,29],[16,17,29],[17,18,29],[18,19,29],[19,20,29],[20,21,29],[21,22,29],[22,23,29],[23,24,29],[24,25,29],[25,26,29],[26,27,29],[27,14,29]]";
+	setAttr ".rgn" -type "vectorArray" 140 0.90096890926361084 0 -0.43388372659683228 0.62348997592926025
+		 0 -0.78183138370513916 0.62348997592926025 0 -0.78183138370513916 0.90096890926361084
+		 0 -0.43388372659683228 0.62348997592926025 0 -0.78183138370513916 0.22252112627029419
+		 0 -0.97492790222167969 0.22252112627029419 0 -0.97492790222167969 0.62348997592926025
+		 0 -0.78183138370513916 0.22252112627029419 0 -0.97492790222167969 -0.22252072393894196
+		 0 -0.97492790222167969 -0.22252072393894196 0 -0.97492790222167969 0.22252112627029419
+		 0 -0.97492790222167969 -0.22252072393894196 0 -0.97492790222167969 -0.62348967790603638
+		 0 -0.78183162212371826 -0.62348967790603638 0 -0.78183162212371826 -0.22252072393894196
+		 0 -0.97492790222167969 -0.62348967790603638 0 -0.78183162212371826 -0.90096879005432129
+		 0 -0.4338839054107666 -0.90096879005432129 0 -0.4338839054107666 -0.62348967790603638
+		 0 -0.78183162212371826 -0.90096879005432129 0 -0.4338839054107666 -1 0 -2.1398122385107854e-007 -1
+		 0 -2.1398122385107854e-007 -0.90096879005432129 0 -0.4338839054107666 -1 0 -2.1398122385107854e-007 -0.90096890926361084
+		 0 0.43388351798057556 -0.90096890926361084 0 0.43388351798057556 -1 0 -2.1398122385107854e-007 -0.90096890926361084
+		 0 0.43388351798057556 -0.62348991632461548 0 0.78183144330978394 -0.62348991632461548
+		 0 0.78183144330978394 -0.90096890926361084 0 0.43388351798057556 -0.62348991632461548
+		 0 0.78183144330978394 -0.22252112627029419 0 0.97492790222167969 -0.22252112627029419
+		 0 0.97492790222167969 -0.62348991632461548 0 0.78183144330978394 -0.22252112627029419
+		 0 0.97492790222167969 0.22252070903778076 0 0.97492796182632446 0.22252070903778076
+		 0 0.97492796182632446 -0.22252112627029419 0 0.97492790222167969 0.22252070903778076
+		 0 0.97492796182632446 0.62348973751068115 0 0.78183150291442871 0.62348973751068115
+		 0 0.78183150291442871 0.22252070903778076 0 0.97492796182632446 0.62348973751068115
+		 0 0.78183150291442871 0.90096884965896606 0 0.43388375639915466 0.90096884965896606
+		 0 0.43388375639915466 0.62348973751068115 0 0.78183150291442871 0.90096884965896606
+		 0 0.43388375639915466 1 0 -7.6421864392273164e-009 1 0 -7.6421864392273164e-009 0.90096884965896606
+		 0 0.43388375639915466 1 0 -7.6421864392273164e-009 0.90096890926361084 0 -0.43388372659683228 0.90096890926361084
+		 0 -0.43388372659683228 1 0 -7.6421864392273164e-009 0 -1 5.4949884997768095e-007 0
+		 -1 5.4949884997768095e-007 0 -1 5.4949884997768095e-007 0 -1 -2.7474939656713104e-007 0
+		 -1 -2.7474939656713104e-007 0 -1 -2.7474939656713104e-007 0 -1 0 0 -1 0 0 -1 0 0
+		 -0.99999994039535522 2.747494534105499e-007 0 -0.99999994039535522 2.747494534105499e-007 0
+		 -0.99999994039535522 2.747494534105499e-007 0 -0.99999994039535522 -5.4949890682109981e-007 0
+		 -0.99999994039535522 -5.4949890682109981e-007 0 -0.99999994039535522 -5.4949890682109981e-007 0
+		 -0.99999994039535522 5.4949890682109981e-007 0 -0.99999994039535522 5.4949890682109981e-007 0
+		 -0.99999994039535522 5.4949890682109981e-007 0 -1 -5.4949884997768095e-007 0 -1 -5.4949884997768095e-007 0
+		 -1 -5.4949884997768095e-007 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1
+		 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0
+		 -1 0 0 -1 0 0 1 5.4949884997768095e-007 0 1 5.4949884997768095e-007 0 1 5.4949884997768095e-007 0
+		 1 -2.7474942498884047e-007 0 1 -2.7474942498884047e-007 0 1 -2.7474942498884047e-007 0
+		 1 0 0 1 0 0 1 0 0 0.99999994039535522 2.747494534105499e-007 0 0.99999994039535522
+		 2.747494534105499e-007 0 0.99999994039535522 2.747494534105499e-007 0 0.99999994039535522
+		 -5.4949890682109981e-007 0 0.99999994039535522 -5.4949890682109981e-007 0 0.99999994039535522
+		 -5.4949890682109981e-007 0 0.99999994039535522 5.4949890682109981e-007 0 0.99999994039535522
+		 5.4949890682109981e-007 0 0.99999994039535522 5.4949890682109981e-007 0 1 -5.4949884997768095e-007 0
+		 1 -5.4949884997768095e-007 0 1 -5.4949884997768095e-007 0 1 0 0 1 0 0 1 0 0 1 0 0
+		 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 2.7474936814542161e-007 0 1 2.7474936814542161e-007 0
+		 1 2.7474936814542161e-007 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 ;
+	setAttr ".rguv0" -type "vectorArray" 140 1.1428887844085693 0 0 1.2857459783554077
+		 0 0 1.2857459783554077 1 0 1.1428887844085693 1 0 1.2857459783554077 0 0 1.4286031723022461
+		 0 0 1.4286031723022461 1 0 1.2857459783554077 1 0 1.4286031723022461 0 0 1.5714602470397949
+		 0 0 1.5714602470397949 1 0 1.4286031723022461 1 0 -0.4285396933555603 0 0 -0.28568249940872192
+		 0 0 -0.28568249940872192 1 0 -0.4285396933555603 1 0 -0.28568249940872192 0 0 -0.14282530546188354
+		 0 0 -0.14282530546188354 1 0 -0.28568249940872192 1 0 -0.14282530546188354 0 0 3.1828880310058594e-005
+		 0 0 3.1828880310058594e-005 1 0 -0.14282530546188354 1 0 3.1828880310058594e-005
+		 0 0 0.14288899302482605 0 0 0.14288899302482605 1 0 3.1828880310058594e-005 1 0 0.14288899302482605
+		 0 0 0.28574615716934204 0 0 0.28574615716934204 1 0 0.14288899302482605 1 0 0.28574615716934204
+		 0 0 0.42860326170921326 0 0 0.42860326170921326 1 0 0.28574615716934204 1 0 0.42860326170921326
+		 0 0 0.57146036624908447 0 0 0.57146036624908447 1 0 0.42860326170921326 1 0 0.57146036624908447
+		 0 0 0.71431750059127808 0 0 0.71431750059127808 1 0 0.57146036624908447 1 0 0.71431750059127808
+		 0 0 0.85717463493347168 0 0 0.85717463493347168 1 0 0.71431750059127808 1 0 0.85717463493347168
+		 0 0 1.0000317096710205 0 0 1.0000317096710205 1 0 0.85717463493347168 1 0 1.0000317096710205
+		 0 0 1.1428887844085693 0 0 1.1428887844085693 1 0 1.0000317096710205 1 0 1.2857459783554077
+		 0 0 1.1428887844085693 0 0 0.68719887733459473 0 0 1.4286031723022461 0 0 1.2857459783554077
+		 0 0 0.68719887733459473 0 0 1.5714602470397949 0 0 1.4286031723022461 0 0 0.68719887733459473
+		 0 0 -0.28568249940872192 0 0 1.5714602470397949 0 0 0.68719887733459473 0 0 -0.14282530546188354
+		 0 0 -0.28568249940872192 0 0 0.68719887733459473 0 0 3.1828880310058594e-005 0 0 -0.14282530546188354
+		 0 0 0.68719887733459473 0 0 0.14288899302482605 0 0 3.1828880310058594e-005 0 0 0.68719887733459473
+		 0 0 0.28574615716934204 0 0 0.14288899302482605 0 0 0.68719887733459473 0 0 0.42860326170921326
+		 0 0 0.28574615716934204 0 0 0.68719887733459473 0 0 0.57146036624908447 0 0 0.42860326170921326
+		 0 0 0.68719887733459473 0 0 0.71431750059127808 0 0 0.57146036624908447 0 0 0.68719887733459473
+		 0 0 0.85717463493347168 0 0 0.71431750059127808 0 0 0.68719887733459473 0 0 1.0000317096710205
+		 0 0 0.85717463493347168 0 0 0.68719887733459473 0 0 1.1428887844085693 0 0 1.0000317096710205
+		 0 0 0.68719887733459473 0 0 1.1428887844085693 1 0 1.2857459783554077 1 0 0.68719887733459473
+		 1 0 1.2857459783554077 1 0 1.4286031723022461 1 0 0.68719887733459473 1 0 1.4286031723022461
+		 1 0 1.5714602470397949 1 0 0.68719887733459473 1 0 1.5714602470397949 1 0 1.7143175601959229
+		 1 0 0.68719887733459473 1 0 -0.28568249940872192 1 0 -0.14282530546188354 1 0 0.68719887733459473
+		 1 0 -0.14282530546188354 1 0 3.1828880310058594e-005 1 0 0.68719887733459473 1 0 3.1828880310058594e-005
+		 1 0 0.14288899302482605 1 0 0.68719887733459473 1 0 0.14288899302482605 1 0 0.28574615716934204
+		 1 0 0.68719887733459473 1 0 0.28574615716934204 1 0 0.42860326170921326 1 0 0.68719887733459473
+		 1 0 0.42860326170921326 1 0 0.57146036624908447 1 0 0.68719887733459473 1 0 0.57146036624908447
+		 1 0 0.71431750059127808 1 0 0.68719887733459473 1 0 0.71431750059127808 1 0 0.85717463493347168
+		 1 0 0.68719887733459473 1 0 0.85717463493347168 1 0 1.0000317096710205 1 0 0.68719887733459473
+		 1 0 1.0000317096710205 1 0 1.1428887844085693 1 0 0.68719887733459473 1 0 ;
+createNode transform -n "m_barrel2" -p "m_terrain";
+	setAttr ".t" -type "double3" -81.352559443026308 -73.085233406426283 -9.3473387744002707 ;
+	setAttr ".r" -type "double3" 59.353726939611839 -4.2001077933956621 67.677769934512526 ;
+	setAttr ".s" -type "double3" 0.99690389367086973 0.73550565498690645 0.92802085444178128 ;
+	setAttr ".sh" -type "double3" -0.072430538057423721 -0.023215284109625395 -0.27197105340498656 ;
+	setAttr ".rp" -type "double3" 98.927376305289755 -22.397922800379554 41.937695260304636 ;
+	setAttr ".rpt" -type "double3" -17.57481686226344 95.48315620680583 -32.590356485904358 ;
+	setAttr ".sp" -type "double3" 99.412601266999843 -14.944934234737964 45.190466420639645 ;
+	setAttr ".spt" -type "double3" -0.485224961710081 -7.4529885656415846 -3.25277116033502 ;
+createNode transform -n "m_barrel3" -p "m_terrain";
+	setAttr ".t" -type "double3" -80.206993555269108 -71.964923550385151 -8.2895193399374048 ;
+	setAttr ".r" -type "double3" -47.588218488300022 13.108404333463367 -16.0083952127295 ;
+	setAttr ".s" -type "double3" 0.97144485609908671 0.79912513643765659 0.87652458060553184 ;
+	setAttr ".sh" -type "double3" -0.17848971040598166 0.10412441374082398 0.33013895115932462 ;
+	setAttr ".rp" -type "double3" 53.878510684716154 46.026181729955312 81.605911853449783 ;
+	setAttr ".rpt" -type "double3" 26.328482870552946 25.938741820429879 -73.316392513512369 ;
+	setAttr ".sp" -type "double3" 50.221893111615429 23.882231595584411 93.101680955796738 ;
+	setAttr ".spt" -type "double3" 3.6566175731007258 22.143950134370897 -11.49576910234698 ;
+createNode transform -n "m_barrel4" -p "m_terrain";
+	setAttr ".t" -type "double3" -87.242096774322235 -73.978687965277032 -8.2895193399374048 ;
+	setAttr ".r" -type "double3" 147.53125090112539 64.074853682504965 -113.13534417432714 ;
+	setAttr ".s" -type "double3" 0.71831292234976685 0.98391464918572547 0.96277751287772728 ;
+	setAttr ".sh" -type "double3" 0.12631470850731513 -0.19217828340124107 0.0501520920095571 ;
+	setAttr ".rp" -type "double3" -52.183613479963221 -90.612272172249206 47.106607492869458 ;
+	setAttr ".rpt" -type "double3" 139.42571025428543 164.59096013752625 -38.817088152932058 ;
+	setAttr ".sp" -type "double3" -43.69497601340008 -94.494748261380551 48.927822744912817 ;
+	setAttr ".spt" -type "double3" -8.4886374665631319 3.8824760891313477 -1.8212152520433607 ;
+createNode transform -n "phys_pos_coffin1" -p "m_terrain";
+	setAttr ".t" -type "double3" 60.902644014607773 -80.911931834288566 0 ;
+	setAttr ".r" -type "double3" 0 0 -11.429976741912469 ;
+	setAttr ".s" -type "double3" 1 1 0.68045129385175562 ;
+createNode mesh -n "phys_pos_coffinShape1" -p "phys_pos_coffin1";
+	setAttr -k off ".v";
+	setAttr -s 2 ".iog";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+createNode transform -n "phys_pos_coffin2" -p "m_terrain";
+	setAttr ".t" -type "double3" 58.059717020346518 -79.588998119532135 0 ;
+	setAttr ".r" -type "double3" 0 0 33.023641921707515 ;
+	setAttr ".s" -type "double3" 1 1 0.68045129385175562 ;
 parent -s -nc -r -add "|m_terrain|m_startingpad|phys_startingpad|m_helipadShape" "m_landingpad";
 parent -s -nc -r -add "|m_terrain|m_startingpad|phys_startingpad|m_helipadShape" "phys_landingpad";
 parent -s -nc -r -add "|m_terrain|m_startingpad|phys_startingpad|m_helipadShape" "m_startingpad";
@@ -890,9 +1054,13 @@ parent -s -nc -r -add "|m_terrain|phys_pos_path_start|phys_pos_path_Shape1" "phy
 parent -s -nc -r -add "|m_terrain|phys_pos_balloon_path1|phys_pos_balloon_pathShape1" "phys_pos_balloon_path2";
 parent -s -nc -r -add "|m_terrain|phys_pos_balloon_path1|phys_pos_balloon_pathShape1" "phys_pos_balloon_path3";
 parent -s -nc -r -add "|m_terrain|phys_pos_balloon_path1|phys_pos_balloon_pathShape1" "phys_pos_balloon_path4";
+parent -s -nc -r -add "|m_terrain|m_barrel1|m_barrel1Shape" "m_barrel2";
+parent -s -nc -r -add "|m_terrain|m_barrel1|m_barrel1Shape" "m_barrel3";
+parent -s -nc -r -add "|m_terrain|m_barrel1|m_barrel1Shape" "m_barrel4";
+parent -s -nc -r -add "|m_terrain|phys_pos_coffin1|phys_pos_coffinShape1" "phys_pos_coffin2";
 createNode lightLinker -n "lightLinker1";
-	setAttr -s 12 ".lnk";
-	setAttr -s 12 ".slnk";
+	setAttr -s 14 ".lnk";
+	setAttr -s 16 ".slnk";
 createNode displayLayerManager -n "layerManager";
 createNode displayLayer -n "defaultLayer";
 createNode renderLayerManager -n "renderLayerManager";
@@ -981,7 +1149,7 @@ createNode groupId -n "pasted__groupId2";
 createNode materialInfo -n "pasted__materialInfo7";
 createNode shadingEngine -n "pasted__blinn2SG2";
 	setAttr ".ihi" 0;
-	setAttr -s 13 ".dsm";
+	setAttr -s 15 ".dsm";
 	setAttr ".ro" yes;
 createNode blinn -n "mat_phys";
 	setAttr ".c" -type "float3" 0.98738587 0.28600001 1 ;
@@ -1132,20 +1300,20 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "            -organizeByLayer 1\n            -showAnimLayerWeight 1\n            -autoExpandLayers 1\n            -autoExpand 0\n            -showDagOnly 1\n            -showAssets 1\n            -showContainedOnly 1\n            -showPublishedAsConnected 0\n            -showContainerContents 1\n            -ignoreDagHierarchy 0\n            -expandConnections 0\n            -showUnitlessCurves 1\n            -showCompounds 1\n            -showLeafs 1\n            -showNumericAttrsOnly 0\n            -highlightActive 1\n            -autoSelectNewObjects 0\n            -doNotSelectNewObjects 0\n            -dropIsParent 1\n            -transmitFilters 0\n            -setFilter \"defaultSetFilter\" \n            -showSetMembers 1\n            -allowMultiSelection 1\n            -alwaysToggleSelect 0\n            -directSelect 0\n            -displayMode \"DAG\" \n            -expandObjects 0\n            -setsIgnoreFilters 1\n            -containersIgnoreFilters 0\n            -editAttrName 0\n            -showAttrValues 0\n            -highlightSecondary 0\n"
 		+ "            -showUVAttrsOnly 0\n            -showTextureNodesOnly 0\n            -attrAlphaOrder \"default\" \n            -animLayerFilterOptions \"allAffecting\" \n            -sortOrder \"none\" \n            -longNames 0\n            -niceNames 1\n            -showNamespace 1\n            $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"graphEditor\" (localizedPanelLabel(\"Graph Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"graphEditor\" -l (localizedPanelLabel(\"Graph Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"OutlineEd\");\n            outlinerEditor -e \n                -showShapes 1\n                -showAttributes 1\n                -showConnected 1\n                -showAnimCurvesOnly 1\n                -showMuteInfo 0\n                -organizeByLayer 1\n                -showAnimLayerWeight 1\n                -autoExpandLayers 1\n                -autoExpand 1\n"
 		+ "                -showDagOnly 0\n                -showAssets 1\n                -showContainedOnly 0\n                -showPublishedAsConnected 0\n                -showContainerContents 0\n                -ignoreDagHierarchy 0\n                -expandConnections 1\n                -showUnitlessCurves 1\n                -showCompounds 0\n                -showLeafs 1\n                -showNumericAttrsOnly 1\n                -highlightActive 0\n                -autoSelectNewObjects 1\n                -doNotSelectNewObjects 0\n                -dropIsParent 1\n                -transmitFilters 1\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n"
-		+ "                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"GraphEd\");\n            animCurveEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 1\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -showResults \"off\" \n                -showBufferCurves \"off\" \n                -smoothness \"fine\" \n                -resultSamples 1\n                -resultScreenSamples 0\n                -resultUpdate \"delayed\" \n                -constrainDrag 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Graph Editor\")) -mbv $menusOkayInPanels  $panelName;\n"
-		+ "\t\t\t$editorName = ($panelName+\"OutlineEd\");\n            outlinerEditor -e \n                -showShapes 1\n                -showAttributes 1\n                -showConnected 1\n                -showAnimCurvesOnly 1\n                -showMuteInfo 0\n                -organizeByLayer 1\n                -showAnimLayerWeight 1\n                -autoExpandLayers 1\n                -autoExpand 1\n                -showDagOnly 0\n                -showAssets 1\n                -showContainedOnly 0\n                -showPublishedAsConnected 0\n                -showContainerContents 0\n                -ignoreDagHierarchy 0\n                -expandConnections 1\n                -showUnitlessCurves 1\n                -showCompounds 0\n                -showLeafs 1\n                -showNumericAttrsOnly 1\n                -highlightActive 0\n                -autoSelectNewObjects 1\n                -doNotSelectNewObjects 0\n                -dropIsParent 1\n                -transmitFilters 1\n                -setFilter \"0\" \n                -showSetMembers 0\n"
-		+ "                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"GraphEd\");\n            animCurveEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 1\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n"
-		+ "                -showResults \"off\" \n                -showBufferCurves \"off\" \n                -smoothness \"fine\" \n                -resultSamples 1\n                -resultScreenSamples 0\n                -resultUpdate \"delayed\" \n                -constrainDrag 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"dopeSheetPanel\" (localizedPanelLabel(\"Dope Sheet\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"dopeSheetPanel\" -l (localizedPanelLabel(\"Dope Sheet\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"OutlineEd\");\n            outlinerEditor -e \n                -showShapes 1\n                -showAttributes 1\n                -showConnected 1\n                -showAnimCurvesOnly 1\n                -showMuteInfo 0\n                -organizeByLayer 1\n                -showAnimLayerWeight 1\n                -autoExpandLayers 1\n                -autoExpand 0\n"
-		+ "                -showDagOnly 0\n                -showAssets 1\n                -showContainedOnly 0\n                -showPublishedAsConnected 0\n                -showContainerContents 0\n                -ignoreDagHierarchy 0\n                -expandConnections 1\n                -showUnitlessCurves 0\n                -showCompounds 1\n                -showLeafs 1\n                -showNumericAttrsOnly 1\n                -highlightActive 0\n                -autoSelectNewObjects 0\n                -doNotSelectNewObjects 1\n                -dropIsParent 1\n                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n"
-		+ "                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Dope Sheet\")) -mbv $menusOkayInPanels  $panelName;\n"
-		+ "\t\t\t$editorName = ($panelName+\"OutlineEd\");\n            outlinerEditor -e \n                -showShapes 1\n                -showAttributes 1\n                -showConnected 1\n                -showAnimCurvesOnly 1\n                -showMuteInfo 0\n                -organizeByLayer 1\n                -showAnimLayerWeight 1\n                -autoExpandLayers 1\n                -autoExpand 0\n                -showDagOnly 0\n                -showAssets 1\n                -showContainedOnly 0\n                -showPublishedAsConnected 0\n                -showContainerContents 0\n                -ignoreDagHierarchy 0\n                -expandConnections 1\n                -showUnitlessCurves 0\n                -showCompounds 1\n                -showLeafs 1\n                -showNumericAttrsOnly 1\n                -highlightActive 0\n                -autoSelectNewObjects 0\n                -doNotSelectNewObjects 1\n                -dropIsParent 1\n                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n"
-		+ "                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n"
-		+ "                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"clipEditorPanel\" (localizedPanelLabel(\"Trax Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"clipEditorPanel\" -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n"
-		+ "\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n"
-		+ "                -mergeConnections 1\n                -zoom 0.704653\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_pos_balloon_path4\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"phys_pos_balloon_start\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n"
-		+ "\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.704653\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_pos_balloon_path4\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"phys_pos_balloon_start\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n"
-		+ "                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperShadePanel\" (localizedPanelLabel(\"Hypershade\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperShadePanel\" -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"visorPanel\" (localizedPanelLabel(\"Visor\")) `;\n\tif (\"\" == $panelName) {\n"
-		+ "\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"visorPanel\" -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"polyTexturePlacementPanel\" (localizedPanelLabel(\"UV Texture Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"multiListerPanel\" (localizedPanelLabel(\"Multilister\")) `;\n"
+		+ "                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"GraphEd\");\n            animCurveEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 1\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -showResults \"off\" \n                -showBufferCurves \"off\" \n                -smoothness \"fine\" \n                -resultSamples 1\n                -resultScreenSamples 0\n                -resultUpdate \"delayed\" \n                -clipTime \"on\" \n                -constrainDrag 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n"
+		+ "\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Graph Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"OutlineEd\");\n            outlinerEditor -e \n                -showShapes 1\n                -showAttributes 1\n                -showConnected 1\n                -showAnimCurvesOnly 1\n                -showMuteInfo 0\n                -organizeByLayer 1\n                -showAnimLayerWeight 1\n                -autoExpandLayers 1\n                -autoExpand 1\n                -showDagOnly 0\n                -showAssets 1\n                -showContainedOnly 0\n                -showPublishedAsConnected 0\n                -showContainerContents 0\n                -ignoreDagHierarchy 0\n                -expandConnections 1\n                -showUnitlessCurves 1\n                -showCompounds 0\n                -showLeafs 1\n                -showNumericAttrsOnly 1\n                -highlightActive 0\n                -autoSelectNewObjects 1\n                -doNotSelectNewObjects 0\n                -dropIsParent 1\n"
+		+ "                -transmitFilters 1\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"GraphEd\");\n            animCurveEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 1\n                -displayInfinities 0\n"
+		+ "                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -showResults \"off\" \n                -showBufferCurves \"off\" \n                -smoothness \"fine\" \n                -resultSamples 1\n                -resultScreenSamples 0\n                -resultUpdate \"delayed\" \n                -clipTime \"on\" \n                -constrainDrag 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"dopeSheetPanel\" (localizedPanelLabel(\"Dope Sheet\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"dopeSheetPanel\" -l (localizedPanelLabel(\"Dope Sheet\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"OutlineEd\");\n            outlinerEditor -e \n                -showShapes 1\n                -showAttributes 1\n                -showConnected 1\n                -showAnimCurvesOnly 1\n                -showMuteInfo 0\n                -organizeByLayer 1\n"
+		+ "                -showAnimLayerWeight 1\n                -autoExpandLayers 1\n                -autoExpand 0\n                -showDagOnly 0\n                -showAssets 1\n                -showContainedOnly 0\n                -showPublishedAsConnected 0\n                -showContainerContents 0\n                -ignoreDagHierarchy 0\n                -expandConnections 1\n                -showUnitlessCurves 0\n                -showCompounds 1\n                -showLeafs 1\n                -showNumericAttrsOnly 1\n                -highlightActive 0\n                -autoSelectNewObjects 0\n                -doNotSelectNewObjects 1\n                -dropIsParent 1\n                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n"
+		+ "                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n"
+		+ "\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Dope Sheet\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"OutlineEd\");\n            outlinerEditor -e \n                -showShapes 1\n                -showAttributes 1\n                -showConnected 1\n                -showAnimCurvesOnly 1\n                -showMuteInfo 0\n                -organizeByLayer 1\n                -showAnimLayerWeight 1\n                -autoExpandLayers 1\n                -autoExpand 0\n                -showDagOnly 0\n                -showAssets 1\n                -showContainedOnly 0\n                -showPublishedAsConnected 0\n                -showContainerContents 0\n                -ignoreDagHierarchy 0\n                -expandConnections 1\n                -showUnitlessCurves 0\n                -showCompounds 1\n                -showLeafs 1\n                -showNumericAttrsOnly 1\n                -highlightActive 0\n                -autoSelectNewObjects 0\n                -doNotSelectNewObjects 1\n                -dropIsParent 1\n"
+		+ "                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n"
+		+ "                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"clipEditorPanel\" (localizedPanelLabel(\"Trax Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"clipEditorPanel\" -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n"
+		+ "                -snapValue \"none\" \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n"
+		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.704653\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_pos_coffin2\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"phys_pos_coffin1\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
+		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.704653\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_pos_coffin2\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_terrain\" \n                -dropNode \"phys_pos_coffin1\" \n                -freeform 1\n                -imagePosition 0 0 \n"
+		+ "                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperShadePanel\" (localizedPanelLabel(\"Hypershade\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperShadePanel\" -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"visorPanel\" (localizedPanelLabel(\"Visor\")) `;\n"
+		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"visorPanel\" -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"polyTexturePlacementPanel\" (localizedPanelLabel(\"UV Texture Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"multiListerPanel\" (localizedPanelLabel(\"Multilister\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"multiListerPanel\" -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"renderWindowPanel\" (localizedPanelLabel(\"Render View\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"renderWindowPanel\" -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextPanel \"blendShapePanel\" (localizedPanelLabel(\"Blend Shape\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\tblendShapePanel -unParent -l (localizedPanelLabel(\"Blend Shape\")) -mbv $menusOkayInPanels ;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tblendShapePanel -edit -l (localizedPanelLabel(\"Blend Shape\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"dynRelEdPanel\" (localizedPanelLabel(\"Dynamic Relationships\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"dynRelEdPanel\" -l (localizedPanelLabel(\"Dynamic Relationships\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Dynamic Relationships\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextPanel \"devicePanel\" (localizedPanelLabel(\"Devices\")) `;\n\tif (\"\" == $panelName) {\n"
 		+ "\t\tif ($useSceneConfig) {\n\t\t\tdevicePanel -unParent -l (localizedPanelLabel(\"Devices\")) -mbv $menusOkayInPanels ;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tdevicePanel -edit -l (localizedPanelLabel(\"Devices\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"relationshipPanel\" (localizedPanelLabel(\"Relationship Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"relationshipPanel\" -l (localizedPanelLabel(\"Relationship Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Relationship Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"referenceEditorPanel\" (localizedPanelLabel(\"Reference Editor\")) `;\n\tif (\"\" == $panelName) {\n"
@@ -1160,8 +1328,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -textures 1\n                -strokes 1\n                -shadows 0\n                -displayMode \"centerEye\" \n                -viewColor 0 0 0 1 \n                $editorName;\nstereoCameraView -e -viewSelected 0 $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\tif ($useSceneConfig) {\n        string $configName = `getPanel -cwl (localizedPanelLabel(\"Current Layout\"))`;\n        if (\"\" != $configName) {\n\t\t\tpanelConfiguration -edit -label (localizedPanelLabel(\"Current Layout\")) \n\t\t\t\t-defaultImage \"\"\n\t\t\t\t-image \"\"\n\t\t\t\t-sc false\n\t\t\t\t-configString \"global string $gMainPane; paneLayout -e -cn \\\"horizontal2\\\" -ps 1 100 60 -ps 2 100 40 $gMainPane;\"\n\t\t\t\t-removeAllPanels\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Persp View\")) \n\t\t\t\t\t\"modelPanel\"\n"
 		+ "\t\t\t\t\t\"$panelName = `modelPanel -unParent -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels `;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 0\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
 		+ "\t\t\t\t\t\"modelPanel -edit -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels  $panelName;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 0\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 1\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
-		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.704653\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_pos_balloon_path4\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"phys_pos_balloon_start\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
-		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.704653\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_pos_balloon_path4\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"phys_pos_balloon_start\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy\")) \n\t\t\t\t\t\"scriptedPanel\"\n\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.704653\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_pos_coffin2\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"phys_pos_coffin1\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.704653\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"phys_pos_coffin2\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_terrain\\\" \\n                -dropNode \\\"phys_pos_coffin1\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range 0 0 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
 		+ "\t\t\t\t$configName;\n\n            setNamedPanelLayout (localizedPanelLabel(\"Current Layout\"));\n        }\n\n        panelHistory -e -clear mainPanelHistory;\n        setFocus `paneLayout -q -p1 $gMainPane`;\n        sceneUIReplacement -deleteRemaining;\n        sceneUIReplacement -clear;\n\t}\n\n\ngrid -spacing 5 -size 12 -divisions 5 -displayAxes yes -displayGridLines yes -displayDivisionLines yes -displayPerspectiveLabels no -displayOrthographicLabels no -displayAxesBold yes -perspectiveLabelPosition axis -orthographicLabelPosition edge;\nviewManip -drawCompass 0 -compassAngle 0 -frontParameters \"\" -homeParameters \"\" -selectionLockParameters \"\";\n}\n");
 	setAttr ".st" 3;
 createNode script -n "sceneConfigurationScriptNode";
@@ -1214,23 +1382,107 @@ createNode polyTweakUV -n "polyTweakUV2";
 	setAttr ".uvtk[214]" -type "float2" -0.021638338 0.086553276 ;
 createNode polySphere -n "polySphere2";
 	setAttr ".r" 1.6778620506330242;
+createNode phong -n "phong1";
+	setAttr ".dc" 1;
+	setAttr ".c" -type "float3" 1 0.58399999 0.99209601 ;
+	setAttr ".it" -type "float3" 0.78512001 0.78512001 0.78512001 ;
+createNode shadingEngine -n "barrel_phong1SG";
+	setAttr ".ihi" 0;
+	setAttr ".ro" yes;
+createNode materialInfo -n "barrel_materialInfo1";
+createNode phong -n "mat_mine";
+	setAttr ".dc" 1;
+createNode shadingEngine -n "barrel_phong2SG";
+	setAttr ".ihi" 0;
+	setAttr -s 4 ".dsm";
+	setAttr ".ro" yes;
+createNode materialInfo -n "barrel_materialInfo2";
+createNode file -n "barrel_file1";
+	setAttr ".ftn" -type "string" "C:/RnD/PD/trunk/Downwash/Data//nuclear.png";
+createNode place2dTexture -n "barrel_place2dTexture1";
+createNode polyCylinder -n "polyCylinder2";
+	setAttr ".uvs" -type "string" "map_barrel";
+	setAttr ".h" 3;
+	setAttr ".sa" 14;
+	setAttr ".sc" 1;
+	setAttr ".cuv" 3;
+createNode polyCylProj -n "polyCylProj1";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 1 "f[0:59]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".ws" yes;
+	setAttr ".pc" -type "double3" -1.1920928955078125e-007 0 -1.7881393432617188e-007 ;
+	setAttr ".ps" -type "double2" 180 3 ;
+	setAttr ".uvs" -type "string" "map_barrel";
+	setAttr ".r" 2.0000005960464478;
+createNode polySoftEdge -n "polySoftEdge1";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 2 "e[0:27]" "e[42:69]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".a" 0;
+createNode polySoftEdge -n "polySoftEdge2";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 2 "e[0:27]" "e[42:69]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".mp" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".a" 0;
+createNode polySoftEdge -n "polySoftEdge3";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 1 "e[0:41]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".a" 180;
+createNode polySoftEdge -n "polySoftEdge4";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 1 "e[0:41]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".mp" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".a" 180;
+createNode polySoftEdge -n "polySoftEdge5";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 2 "e[0:27]" "e[42:69]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".a" 0;
+createNode polySoftEdge -n "polySoftEdge6";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 2 "e[0:27]" "e[42:69]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".mp" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".a" 0;
+createNode polySoftEdge -n "polySoftEdge7";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 1 "e[0:41]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".a" 180;
+createNode polySoftEdge -n "polySoftEdge8";
+	setAttr ".uopa" yes;
+	setAttr ".ics" -type "componentList" 1 "e[0:27]";
+	setAttr ".ix" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".a" 0;
+createNode script -n "barrel_rg_export";
+	addAttr -ci true -sn "time" -ln "time" -dt "string";
+	setAttr ".time" -type "string" "2013-09-23T22:52:35.065000";
+createNode polyCube -n "polyCube5";
+	setAttr ".w" 3;
+	setAttr ".h" 2;
+	setAttr ".d" 2;
+	setAttr ".cuv" 4;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2013-09-26T23:49:15.218000";
+	setAttr ".time" -type "string" "2013-10-13T22:09:59.453000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;
-	setAttr -s 12 ".st";
+	setAttr -s 14 ".st";
 select -ne :renderGlobalsList1;
 select -ne :defaultShaderList1;
-	setAttr -s 12 ".s";
+	setAttr -s 14 ".s";
 select -ne :postProcessList1;
 	setAttr -s 2 ".p";
 select -ne :defaultRenderUtilityList1;
-	setAttr -s 5 ".u";
+	setAttr -s 6 ".u";
 select -ne :lightList1;
 select -ne :defaultTextureList1;
-	setAttr -s 5 ".tx";
+	setAttr -s 6 ".tx";
 select -ne :initialShadingGroup;
 	setAttr ".ro" yes;
 	setAttr -s 3 ".gn";
@@ -1243,7 +1495,7 @@ select -ne :defaultHardwareRenderGlobals;
 	setAttr ".fn" -type "string" "im";
 	setAttr ".res" -type "string" "ntsc_4d 646 485 1.333";
 select -ne :hyperGraphLayout;
-	setAttr -s 12 ".hyp";
+	setAttr -s 17 ".hyp";
 	setAttr ".hyp[35].x" 486.48785400390625;
 	setAttr ".hyp[35].y" -27.641510009765625;
 	setAttr ".hyp[35].isf" yes;
@@ -1277,6 +1529,24 @@ select -ne :hyperGraphLayout;
 	setAttr ".hyp[472].x" 556.6602783203125;
 	setAttr ".hyp[472].y" -226;
 	setAttr ".hyp[472].isf" yes;
+	setAttr ".hyp[473].x" 732.31671142578125;
+	setAttr ".hyp[473].y" -7.7722439765930176;
+	setAttr ".hyp[473].isf" yes;
+	setAttr ".hyp[474].x" 732.2479248046875;
+	setAttr ".hyp[474].y" -48.155006408691406;
+	setAttr ".hyp[474].isf" yes;
+	setAttr ".hyp[475].x" 732.49578857421875;
+	setAttr ".hyp[475].y" -89.310012817382813;
+	setAttr ".hyp[475].isf" yes;
+	setAttr ".hyp[476].x" 734.162841796875;
+	setAttr ".hyp[476].y" -127.62674713134766;
+	setAttr ".hyp[476].isf" yes;
+	setAttr ".hyp[477].x" 917.31671142578125;
+	setAttr ".hyp[477].y" -6.7951869964599609;
+	setAttr ".hyp[477].isf" yes;
+	setAttr ".hyp[478].x" 918.66705322265625;
+	setAttr ".hyp[478].y" -48.758811950683594;
+	setAttr ".hyp[478].isf" yes;
 connectAttr "polyTweakUV1.out" "m_terrainShape.i";
 connectAttr "polyTweakUV1.uvtk[0]" "m_terrainShape.uvst[0].uvtw";
 connectAttr "pasted__groupId6.id" "|m_terrain|m_landingpad|m_helipadShape.iog.og[0].gid"
@@ -1297,6 +1567,9 @@ connectAttr "polyTweakUV2.uvtk[0]" "|m_terrain|phys_pos_path_start|phys_pos_path
 		;
 connectAttr "polyCut1.out" "m_phys_terrainShape.i";
 connectAttr "polySphere2.out" "|m_terrain|phys_pos_balloon_path1|phys_pos_balloon_pathShape1.i"
+		;
+connectAttr "polySoftEdge8.out" "|m_terrain|m_barrel1|m_barrel1Shape.i";
+connectAttr "polyCube5.out" "|m_terrain|phys_pos_coffin1|phys_pos_coffinShape1.i"
 		;
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[0].llnk";
 connectAttr ":initialShadingGroup.msg" "lightLinker1.lnk[0].olnk";
@@ -1322,6 +1595,10 @@ connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[10].llnk";
 connectAttr "phong2SG.msg" "lightLinker1.lnk[10].olnk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[11].llnk";
 connectAttr "phong3SG.msg" "lightLinker1.lnk[11].olnk";
+connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[12].llnk";
+connectAttr "barrel_phong1SG.msg" "lightLinker1.lnk[12].olnk";
+connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[13].llnk";
+connectAttr "barrel_phong2SG.msg" "lightLinker1.lnk[13].olnk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[0].sllk";
 connectAttr ":initialShadingGroup.msg" "lightLinker1.slnk[0].solk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[1].sllk";
@@ -1330,6 +1607,10 @@ connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[4].sllk";
 connectAttr "pasted__blinn1SG.msg" "lightLinker1.slnk[4].solk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[5].sllk";
 connectAttr "pasted__blinn2SG.msg" "lightLinker1.slnk[5].solk";
+connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[6].sllk";
+connectAttr "barrel_phong1SG.msg" "lightLinker1.slnk[6].solk";
+connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[7].sllk";
+connectAttr "barrel_phong2SG.msg" "lightLinker1.slnk[7].solk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[8].sllk";
 connectAttr "pasted__blinn1SG1.msg" "lightLinker1.slnk[8].solk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.slnk[9].sllk";
@@ -1468,6 +1749,10 @@ connectAttr "|m_terrain|phys_pos_balloon_path3|phys_pos_balloon_pathShape1.iog" 
 		 -na;
 connectAttr "|m_terrain|phys_pos_balloon_path4|phys_pos_balloon_pathShape1.iog" "pasted__blinn2SG2.dsm"
 		 -na;
+connectAttr "|m_terrain|phys_pos_coffin1|phys_pos_coffinShape1.iog" "pasted__blinn2SG2.dsm"
+		 -na;
+connectAttr "|m_terrain|phys_pos_coffin2|phys_pos_coffinShape1.iog" "pasted__blinn2SG2.dsm"
+		 -na;
 connectAttr "pasted__blinn2SG3.msg" "pasted__materialInfo8.sg";
 connectAttr "pasted__mat_phys2.msg" "pasted__materialInfo8.m";
 connectAttr "pasted__mat_phys2.oc" "pasted__blinn2SG3.ss";
@@ -1534,6 +1819,52 @@ connectAttr "m_phys_terrainShape.wm" "polyCut1.mp";
 connectAttr "polyPlane1.out" "polyTweak4.ip";
 connectAttr "polyPlanarProj5.out" "polyTweakUV1.ip";
 connectAttr "polySphere1.out" "polyTweakUV2.ip";
+connectAttr "phong1.oc" "barrel_phong1SG.ss";
+connectAttr "barrel_phong1SG.msg" "barrel_materialInfo1.sg";
+connectAttr "phong1.msg" "barrel_materialInfo1.m";
+connectAttr "barrel_file1.oc" "mat_mine.c";
+connectAttr "barrel_file1.ot" "mat_mine.it";
+connectAttr "mat_mine.oc" "barrel_phong2SG.ss";
+connectAttr "|m_terrain|m_barrel1|m_barrel1Shape.iog" "barrel_phong2SG.dsm" -na;
+connectAttr "|m_terrain|m_barrel2|m_barrel1Shape.iog" "barrel_phong2SG.dsm" -na;
+connectAttr "|m_terrain|m_barrel3|m_barrel1Shape.iog" "barrel_phong2SG.dsm" -na;
+connectAttr "|m_terrain|m_barrel4|m_barrel1Shape.iog" "barrel_phong2SG.dsm" -na;
+connectAttr "barrel_phong2SG.msg" "barrel_materialInfo2.sg";
+connectAttr "mat_mine.msg" "barrel_materialInfo2.m";
+connectAttr "barrel_file1.msg" "barrel_materialInfo2.t" -na;
+connectAttr "barrel_place2dTexture1.c" "barrel_file1.c";
+connectAttr "barrel_place2dTexture1.tf" "barrel_file1.tf";
+connectAttr "barrel_place2dTexture1.rf" "barrel_file1.rf";
+connectAttr "barrel_place2dTexture1.mu" "barrel_file1.mu";
+connectAttr "barrel_place2dTexture1.mv" "barrel_file1.mv";
+connectAttr "barrel_place2dTexture1.s" "barrel_file1.s";
+connectAttr "barrel_place2dTexture1.wu" "barrel_file1.wu";
+connectAttr "barrel_place2dTexture1.wv" "barrel_file1.wv";
+connectAttr "barrel_place2dTexture1.re" "barrel_file1.re";
+connectAttr "barrel_place2dTexture1.of" "barrel_file1.of";
+connectAttr "barrel_place2dTexture1.r" "barrel_file1.ro";
+connectAttr "barrel_place2dTexture1.n" "barrel_file1.n";
+connectAttr "barrel_place2dTexture1.vt1" "barrel_file1.vt1";
+connectAttr "barrel_place2dTexture1.vt2" "barrel_file1.vt2";
+connectAttr "barrel_place2dTexture1.vt3" "barrel_file1.vt3";
+connectAttr "barrel_place2dTexture1.vc1" "barrel_file1.vc1";
+connectAttr "barrel_place2dTexture1.o" "barrel_file1.uv";
+connectAttr "barrel_place2dTexture1.ofs" "barrel_file1.fs";
+connectAttr "polyCylinder2.out" "polyCylProj1.ip";
+connectAttr "|m_terrain|m_barrel1|m_barrel1Shape.wm" "polyCylProj1.mp";
+connectAttr "polyCylProj1.out" "polySoftEdge1.ip";
+connectAttr "|m_terrain|m_barrel1|m_barrel1Shape.wm" "polySoftEdge1.mp";
+connectAttr "polySoftEdge1.out" "polySoftEdge2.ip";
+connectAttr "polySoftEdge2.out" "polySoftEdge3.ip";
+connectAttr "|m_terrain|m_barrel1|m_barrel1Shape.wm" "polySoftEdge3.mp";
+connectAttr "polySoftEdge3.out" "polySoftEdge4.ip";
+connectAttr "polySoftEdge4.out" "polySoftEdge5.ip";
+connectAttr "|m_terrain|m_barrel1|m_barrel1Shape.wm" "polySoftEdge5.mp";
+connectAttr "polySoftEdge5.out" "polySoftEdge6.ip";
+connectAttr "polySoftEdge6.out" "polySoftEdge7.ip";
+connectAttr "|m_terrain|m_barrel1|m_barrel1Shape.wm" "polySoftEdge7.mp";
+connectAttr "polySoftEdge7.out" "polySoftEdge8.ip";
+connectAttr "|m_terrain|m_barrel1|m_barrel1Shape.wm" "polySoftEdge8.mp";
 connectAttr "pasted__blinn1SG.pa" ":renderPartition.st" -na;
 connectAttr "pasted__blinn2SG.pa" ":renderPartition.st" -na;
 connectAttr "pasted__blinn1SG1.pa" ":renderPartition.st" -na;
@@ -1544,6 +1875,8 @@ connectAttr "pasted__blinn2SG3.pa" ":renderPartition.st" -na;
 connectAttr "phong1SG.pa" ":renderPartition.st" -na;
 connectAttr "phong2SG.pa" ":renderPartition.st" -na;
 connectAttr "phong3SG.pa" ":renderPartition.st" -na;
+connectAttr "barrel_phong1SG.pa" ":renderPartition.st" -na;
+connectAttr "barrel_phong2SG.pa" ":renderPartition.st" -na;
 connectAttr "pasted__mat_helipad.msg" ":defaultShaderList1.s" -na;
 connectAttr "pasted__mat_phys.msg" ":defaultShaderList1.s" -na;
 connectAttr "pasted__mat_helipad1.msg" ":defaultShaderList1.s" -na;
@@ -1554,22 +1887,26 @@ connectAttr "pasted__mat_phys2.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_damper.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_terrain.msg" ":defaultShaderList1.s" -na;
 connectAttr "mat_wood.msg" ":defaultShaderList1.s" -na;
+connectAttr "phong1.msg" ":defaultShaderList1.s" -na;
+connectAttr "mat_mine.msg" ":defaultShaderList1.s" -na;
 connectAttr "pasted__place2dTexture2.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "pasted__place2dTexture3.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "pasted__place2dTexture4.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "place2dTexture1.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "place2dTexture2.msg" ":defaultRenderUtilityList1.u" -na;
+connectAttr "barrel_place2dTexture1.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "lightLinker1.msg" ":lightList1.ln" -na;
 connectAttr "pasted__file2.msg" ":defaultTextureList1.tx" -na;
 connectAttr "pasted__file3.msg" ":defaultTextureList1.tx" -na;
 connectAttr "pasted__file4.msg" ":defaultTextureList1.tx" -na;
 connectAttr "file1.msg" ":defaultTextureList1.tx" -na;
 connectAttr "file2.msg" ":defaultTextureList1.tx" -na;
+connectAttr "barrel_file1.msg" ":defaultTextureList1.tx" -na;
+connectAttr "|m_terrain|m_landingpad|m_helipadShape.iog.og[0]" ":initialShadingGroup.dsm"
+		 -na;
 connectAttr "pasted__groupId1.msg" ":initialShadingGroup.gn" -na;
 connectAttr "pasted__groupId2.msg" ":initialShadingGroup.gn" -na;
 connectAttr "pasted__groupId6.msg" ":initialShadingGroup.gn" -na;
-connectAttr "|m_terrain|m_landingpad|m_helipadShape.iog.og[0]" ":initialShadingGroup.dsm"
-		 -na;
 connectAttr "m_landingpad.msg" ":hyperGraphLayout.hyp[35].dn";
 connectAttr "phys_pos_start.msg" ":hyperGraphLayout.hyp[36].dn";
 connectAttr "m_terrain.msg" ":hyperGraphLayout.hyp[39].dn";
@@ -1581,4 +1918,10 @@ connectAttr "phys_pos_balloon_path1.msg" ":hyperGraphLayout.hyp[469].dn";
 connectAttr "phys_pos_balloon_path2.msg" ":hyperGraphLayout.hyp[470].dn";
 connectAttr "phys_pos_balloon_path3.msg" ":hyperGraphLayout.hyp[471].dn";
 connectAttr "phys_pos_balloon_path4.msg" ":hyperGraphLayout.hyp[472].dn";
+connectAttr "m_barrel1.msg" ":hyperGraphLayout.hyp[473].dn";
+connectAttr "m_barrel2.msg" ":hyperGraphLayout.hyp[474].dn";
+connectAttr "m_barrel3.msg" ":hyperGraphLayout.hyp[475].dn";
+connectAttr "m_barrel4.msg" ":hyperGraphLayout.hyp[476].dn";
+connectAttr "phys_pos_coffin1.msg" ":hyperGraphLayout.hyp[477].dn";
+connectAttr "phys_pos_coffin2.msg" ":hyperGraphLayout.hyp[478].dn";
 // End of level_11.ma

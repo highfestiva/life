@@ -42,7 +42,7 @@
   + Reorder them.
   + Building textures are needed!
 + Better controls, using a rounded patch in the bottom and a circular indicator above.
-. Save some RTVARs on key/value in iOS.
++ Save some RTVARs on key/value in iOS.
 - Beautify!
 + Large fonts on iOS.
 + Make text show on bad background.
@@ -74,4 +74,8 @@
 + Icon for all resolutions... including 1024x1024 and possibly double hi-res for backup?
 + Rename all files and titles to Downwash.
 + Fix third level's ceiling, should be raised.
-+ Add a pinch of replayability by adding toy mode when played through whole game (=hi rtr, strange colors).
++ Add a pinch of replayability by adding toy mode when played through whole game (=hi rtr, strange colors, RTR=2).
++ Make machine gun slightly easier to get by by lowering fire rate.
++ Fix edge on wall on last level.
++ Move flags further apart on last level.
++ Add some content to levels. Looks too boring. Add a couple of barrels and a few coffins to make levels less sterile.

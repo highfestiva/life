@@ -22,7 +22,7 @@ class CanonDriver: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
-	CanonDriver(DownwashManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType, float pShotsPerSecond);
+	CanonDriver(DownwashManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType);
 	virtual ~CanonDriver();
 
 private:
@@ -32,8 +32,8 @@ private:
 	Cure::GameObjectId mCanonId;
 	int mAmmoType;
 	float mDistance;
-	bool mDistanceSet;
 	float mShootPeriod;
+	bool mTagSet;
 	GameTimer mLastShot;
 	float mJointStartAngle;
 	LOG_CLASS_DECLARE();

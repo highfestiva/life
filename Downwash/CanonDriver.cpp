@@ -18,14 +18,14 @@ namespace Downwash
 
 
 
-CanonDriver::CanonDriver(DownwashManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType, float pShotsPerSecond):
+CanonDriver::CanonDriver(DownwashManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType):
 	Parent(pGame->GetResourceManager(), _T("CanonDriver")),
 	mGame(pGame),
 	mCanonId(pCanonId),
 	mAmmoType(pAmmoType),
 	mDistance(1000),
-	mDistanceSet(false),
-	mShootPeriod(1/pShotsPerSecond)
+	mShootPeriod(1),
+	mTagSet(false)
 {
 	pGame->GetContext()->AddLocalObject(this);
 	pGame->GetContext()->EnableTickCallback(this);
@@ -58,12 +58,13 @@ void CanonDriver::OnTick()
 	{
 		return;
 	}
-	if (!mDistanceSet)
+	if (!mTagSet)
 	{
-		const TBC::ChunkyClass::Tag* lTag = lCanon->FindTag(_T("behavior"), 1, 0);
+		const TBC::ChunkyClass::Tag* lTag = lCanon->FindTag(_T("behavior"), 2, 0);
 		deb_assert(lTag);
 		mDistance = lTag->mFloatValueList[0];
-		mDistanceSet = true;
+		mShootPeriod = 1/lTag->mFloatValueList[1];
+		mTagSet = true;
 	}
 
 	Cure::ContextObject* lAvatar = mManager->GetObject(mGame->GetAvatarInstanceId());

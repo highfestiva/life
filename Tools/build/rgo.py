@@ -404,8 +404,8 @@ def _prepare_run():
 	if os.name == "nt":
 		pre = ""
 		post = ".exe"
-	if not os.path.exists(appnames[0]+post) or not os.path.exists(appnames[0]+post):
-		reason = "binaries not compiled" if rgohelp._hasdevenv() else "missing C++ build environment"
+	if not os.path.exists(appnames[0]+post):
+		reason = ("binaries (%s) not compiled" % (bindir+'/'+appnames[0]+post)) if rgohelp._hasdevenv() else "missing C++ build environment"
 		print("Could not run %s due to %s." % (appnames[0], reason))
 		sys.exit(2)
 	return pre, post
