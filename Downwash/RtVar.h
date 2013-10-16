@@ -13,6 +13,7 @@
 
 
 
+#define RTVAR_GAME_ALLOWTOYMODE		"Game.AllowToyMode"
 #define RTVAR_GAME_LEVELCOUNT		"Game.LevelCount"
 #define RTVAR_GAME_PERSONALRECORD_LEVEL	"Game.PersonalRecord.Level"
 #define RTVAR_GAME_STARTLEVEL		"Game.StartLevel"

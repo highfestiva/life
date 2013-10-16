@@ -73,6 +73,7 @@ UiTbc::Dialog* Menu::CreateTbcDialog(const ButtonAction& pAction, float pWidth, 
 	d->SetSize((int)(pWidth*mUiManager->GetCanvas()->GetWidth()), (int)(pHeight*mUiManager->GetCanvas()->GetHeight()));
 	d->SetPreferredSize(d->GetSize());
 	d->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
+	d->SetCornerRadius(d->GetSize().y/6);
 	mDialog = d;
 	return d;
 }
@@ -81,9 +82,10 @@ UiTbc::Button* Menu::CreateButton(const str& pText, const Color& pColor)
 {
 	UiTbc::Button* lButton = new UiTbc::Button(pColor, pText);
 	lButton->SetText(pText);
-	const float lTouchScale = 1.28f * mUiManager->GetCanvas()->GetWidth() / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	lButton->SetPreferredSize(int(6*lTouchScale), int(1.5f*lTouchScale));
-	lButton->SetRoundedStyle(int(0.32f*lTouchScale));
+	const int w = mDialog->GetSize().x*3/4;
+	const int h = mDialog->GetSize().y/5;
+	lButton->SetPreferredSize(w, h);
+	lButton->SetRoundedStyle(h/3);
 	lButton->UpdateLayout();
 	return lButton;
 }
