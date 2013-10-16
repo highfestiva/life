@@ -39,7 +39,7 @@ Window::Window(const str& pName,
 	mClientRect = new RectComponent(_T("ClientRect"), pLayout);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	Init();
+	//Init();
 }
 
 Window::Window(unsigned pBorderStyle,
@@ -68,7 +68,7 @@ Window::Window(unsigned pBorderStyle,
 	//mClientRect->SetPreferredSize(0, 0, true);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	InitBorder();
+	//InitBorder();
 }
 
 Window::Window(unsigned pBorderStyle,
@@ -97,7 +97,7 @@ Window::Window(unsigned pBorderStyle,
 	//mClientRect->SetPreferredSize(0, 0, true);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	InitBorder();
+	//InitBorder();
 }
 
 Window::Window(const Color& pColor,
@@ -124,7 +124,7 @@ Window::Window(const Color& pColor,
 	//mClientRect->SetPreferredSize(0, 0, true);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	InitBorder();
+	//InitBorder();
 }
 
 Window::Window(Painter::ImageID pImageID,
@@ -152,7 +152,7 @@ Window::Window(Painter::ImageID pImageID,
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	Parent::AddChild(mCenterComponent);
-	InitBorder();
+	//InitBorder();
 }
 
 Window::~Window()
@@ -267,7 +267,7 @@ void Window::InitBorder()
 	Parent::AddChild(mTBorder, 0, 1);
 	Parent::AddChild(mLBorder, 1, 0);
 
-	Init();
+	SetNeedsRepaint(true);
 }
 
 void Window::SetBorder(unsigned pBorderStyle, int pWidth)

@@ -24,6 +24,7 @@ TextArea::TextArea(const Color& pColor, const str& pName):
 	mScrollLock(false),
 	mMaxLineCount(50)
 {
+	Init();
 }
 
 TextArea::TextArea(Painter::ImageID pImageId, const str& pName):
@@ -35,6 +36,7 @@ TextArea::TextArea(Painter::ImageID pImageId, const str& pName):
 	mScrollLock(false),
 	mMaxLineCount(50)
 {
+	Init();
 }
 
 TextArea::~TextArea()

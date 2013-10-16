@@ -45,6 +45,9 @@ public:
 	Window(Painter::ImageID pImageID, const str& pName, Layout* pLayout = 0);
 	virtual ~Window();
 
+	void Init();
+	void InitBorder();
+
 	void SetBorder(unsigned pBorderStyle, int pWidth);
 	void SetBorder(unsigned pBorderStyle,
 				   Painter::ImageID pTopLeftID,
@@ -91,16 +94,13 @@ public:
 	virtual PixelRect GetClientRect() const;
 	RectComponent* GetClientRectComponent() const;
 
-protected:
 	virtual void SetActive(bool pActive);
 
 	virtual void DoSetSize(int pWidth, int pHeight);
 
-private:
-	void Init();
-	void InitBorder();
 	bool Check(unsigned pFlags, unsigned pFlag);
 
+private:
 	BorderComponent* mTLBorder;
 	BorderComponent* mTRBorder;
 	BorderComponent* mBRBorder;

@@ -25,6 +25,7 @@ const DownwashConsoleManager::CommandPair DownwashConsoleManager::mCommandIdList
 	{_T("set-avatar"), COMMAND_SET_AVATAR},
 	{_T("prev-level"), COMMAND_PREV_LEVEL},
 	{_T("next-level"), COMMAND_NEXT_LEVEL},
+	{_T("set-level-index"), COMMAND_SET_LEVEL_INDEX},
 	{_T("die"), COMMAND_DIE},
 };
 
@@ -103,6 +104,23 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 				((DownwashManager*)GetGameManager())->StepLevel(+1);
 				GetGameManager()->GetTickLock()->Release();
 				return OnCommand(_T("die"), pParameterVector);
+			}
+			break;
+			case COMMAND_SET_LEVEL_INDEX:
+			{
+				int lTargetLevelIndex = -1;
+				if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lTargetLevelIndex))
+				{
+					GetGameManager()->GetTickLock()->Acquire();
+					const int lLevelDelta = lTargetLevelIndex - ((DownwashManager*)GetGameManager())->GetCurrentLevelNumber();
+					((DownwashManager*)GetGameManager())->StepLevel(lLevelDelta);
+					GetGameManager()->GetTickLock()->Release();
+					return OnCommand(_T("die"), pParameterVector);
+				}
+				else
+				{
+					mLog.Warningf(_T("usage: %s <index>"), pCommand.c_str());
+				}
 			}
 			break;
 			case COMMAND_DIE:

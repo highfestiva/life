@@ -138,6 +138,8 @@ bool GameManager::EndTick()
 		TickNetworkOutput();
 	}
 
+	GetConsoleManager()->ExecuteYieldCommand();
+
 	return true;
 }
 

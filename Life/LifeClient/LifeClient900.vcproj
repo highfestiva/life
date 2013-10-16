@@ -472,6 +472,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Menu.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Mine.cpp"
 				>
 			</File>
@@ -531,6 +535,10 @@
 			</File>
 			<File
 				RelativePath=".\Level.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Menu.h"
 				>
 			</File>
 			<File

@@ -36,6 +36,7 @@ TextField::TextField(Component* pTopParent, const str& pName) :
 	mListControl(0),
 	mDeleteListControl(false)
 {
+	Init();
 }
 
 TextField::TextField(Component* pTopParent, 
@@ -59,6 +60,7 @@ TextField::TextField(Component* pTopParent,
 	mListControl(0),
 	mDeleteListControl(false)
 {
+	Init();
 }
 
 TextField::TextField(Component* pTopParent, 
@@ -82,6 +84,7 @@ TextField::TextField(Component* pTopParent,
 	mListControl(0),
 	mDeleteListControl(false)
 {
+	Init();
 }
 
 TextField::TextField(Component* pTopParent, 
@@ -104,6 +107,7 @@ TextField::TextField(Component* pTopParent,
 	mListControl(0),
 	mDeleteListControl(false)
 {
+	Init();
 }
 
 TextField::TextField(Component* pTopParent, 
@@ -126,6 +130,7 @@ TextField::TextField(Component* pTopParent,
 	mListControl(0),
 	mDeleteListControl(false)
 {
+	Init();
 }
 
 TextField::~TextField()

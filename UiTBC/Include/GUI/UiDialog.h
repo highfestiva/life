@@ -31,14 +31,16 @@ public:
 	void SetPreClickTarget(Action pPreClickTarget);
 	virtual void Center();
 	Label* SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId);
-	void AddButton(int pTag, const str& pText);	// Tag < 0 to layout yourself.
-	void AddButton(int pTag, Button* pButton);	// Tag < 0 to layout yourself.
+	void AddButton(int pTag, const str& pText, bool pAutoDismiss);	// Tag < 0 to layout yourself.
+	void AddButton(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
+	bool IsAutoDismissButton(Button* pButton) const;
 	void SetOffset(PixelCoord pOffset);
 	virtual void UpdateLayout();
 
 protected:
 	virtual void Repaint(Painter* pPainter);
 	void Animate();
+	void OnDismissClick(Button* pButton);
 	void OnClick(Button* pButton);
 
 	typedef std::vector<Button*> ButtonList;

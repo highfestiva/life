@@ -147,12 +147,10 @@ public:
 	State GetState();
 	void SetState(State pState);
 
-protected:
 	virtual void ForceRepaint();
 	virtual void OnTextChanged();
 	virtual StateComponentList GetStateList(ComponentState pState);
 
-protected:
 	Delegate* mOnPress;
 	Delegate* mOnRelease;
 	Delegate* mOnClick;
@@ -182,6 +180,8 @@ private:
 	State mState;
 
 	void* mExtraData;
+
+	LOG_CLASS_DECLARE();
 };
 
 

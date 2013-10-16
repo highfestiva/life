@@ -24,6 +24,7 @@ ProgressBar::ProgressBar(Style pStyle,
 	mProgressColorRight(pProgressColorRight),
 	mProgressImageID(Painter::INVALID_IMAGEID)
 {
+	Init();
 }
 
 ProgressBar::ProgressBar(Style pStyle,
@@ -40,6 +41,7 @@ ProgressBar::ProgressBar(Style pStyle,
 	mProgressColorRight(0, 0, 0),
 	mProgressImageID(pProgressImageID)
 {
+	Init();
 }
 
 void ProgressBar::SetProgressMax(int pMax)

@@ -104,6 +104,7 @@ public:
 		Window(UiTbc::Window::BORDER_LINEARSHADING | UiTbc::Window::BORDER_RESIZABLE, 
 			10, Lepra::LIGHT_GREEN, _T("TestWindow1"), new UiTbc::GridLayout(5, 1))
 	{
+		Init();
 		SetPreferredSize(200, 300);
 
 		UiTbc::Caption* lCaption = new UiTbc::Caption(Lepra::BLUE, Lepra::DARK_BLUE, Lepra::BLUE, Lepra::DARK_BLUE,

@@ -31,6 +31,7 @@ Button::Button(const str& pName) :
 	mExtraData(0)
 {
 	SetBaseColor(GetColor());
+	Init();
 }
 
 Button::Button(const Color& pColor, const str& pName):
@@ -50,6 +51,7 @@ Button::Button(const Color& pColor, const str& pName):
 	mExtraData(0)
 {
 	SetBaseColor(GetColor());
+	Init();
 }
 
 Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Color& pColor,
@@ -70,6 +72,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mExtraData(0)
 {
 	SetBaseColor(GetColor());
+	Init();
 }
 
 Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImageID,
@@ -98,6 +101,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mExtraData(0)
 {
 	SetBaseColor(GetColor());
+	Init();
 }
 
 Button::~Button()
@@ -139,13 +143,14 @@ void Button::SetPressed(bool pPressed)
 
 void Button::SetState(State pState)
 {
-	bool lChangedState = false;
-	if (mState != pState)
+	if (mState == pState)
 	{
-		SetNeedsRepaint(true);
-		lChangedState = true;
+		return;
 	}
 
+	SetNeedsRepaint(true);
+
+	log_volatile(mLog.Debugf(_T("Button changing state from %i->%i."), mState, pState));
 	mState = pState;
 
 	if (mImageButton == true)
@@ -183,6 +188,8 @@ void Button::SetState(State pState)
 		else if (mState == RELEASED_HOOVER)
 		{
 			Parent::SetColor(mHooverColor);
+			unsigned lStyle = Parent::GetBorderStyle() | Parent::BORDER_SUNKEN;
+			Parent::SetBorder(lStyle, Parent::GetBorderWidth());
 		}
 		else
 		{
@@ -192,29 +199,26 @@ void Button::SetState(State pState)
 		}
 	}
 
-	if (lChangedState == true)
+	switch(mState)
 	{
-		switch(mState)
+	case RELEASED:
+	case RELEASED_HOOVER:
+		if (mOnRelease != 0)
 		{
-		case RELEASED:
-		case RELEASED_HOOVER:
-			if (mOnRelease != 0)
-			{
-				(*mOnRelease)(this);
-			}
-			break;
-		case RELEASING:
-			break;
-		case PRESSED:
-		case PRESSED_HOOVER:
-			break;
-		case PRESSING:
-			if (mOnPress != 0)
-			{
-				(*mOnPress)(this);
-			}
-			break;
+			(*mOnRelease)(this);
 		}
+		break;
+	case RELEASING:
+		break;
+	case PRESSED:
+	case PRESSED_HOOVER:
+		break;
+	case PRESSING:
+		if (mOnPress != 0)
+		{
+			(*mOnPress)(this);
+		}
+		break;
 	}
 }
 
@@ -274,7 +278,11 @@ void Button::Repaint(Painter* pPainter)
 			break;
 		}
 		if (mHighlightedIconId != Painter::INVALID_IMAGEID &&
-			(mState == PRESSED || mState == PRESSING))
+			(mState == PRESSED || mState == PRESSING
+#ifndef LEPRA_TOUCH	// Hoover states only exist and work on non-touch devices (i.e. computers w/ mouse/trackball).
+			|| mState == PRESSED_HOOVER || mState == RELEASED_HOOVER
+#endif // !Touch
+			))
 		{
 			lIMan->DrawImage(mHighlightedIconId, x, y);
 		}
@@ -349,7 +357,7 @@ void Button::SetTag(int pTag)
 
 int Button::GetTag() const
 {
-  return (int)(intptr_t)GetExtraData();
+	return (int)(intptr_t)GetExtraData();
 }
 
 bool Button::OnLButtonDown(int pMouseX, int pMouseY)
@@ -376,11 +384,14 @@ bool Button::OnLButtonUp(int pMouseX, int pMouseY)
 {
 	bool lCallFunctor = HasMouseFocus();
 
-	if (IsOver(pMouseX, pMouseY) == true &&
-		lCallFunctor == true)
+	if (IsOver(pMouseX, pMouseY) == true)
 	{
 		SetPressed(false);
-		Click(true);
+		if (lCallFunctor)
+		{
+			Click(true);
+		}
+		ReleaseMouseFocus();
 	}
 	else
 	{
@@ -552,6 +563,10 @@ void Button::SetOnDragDelegate(const DelegateXYXY& pOnDrag)
 	delete mOnDrag;
 	mOnDrag = new DelegateXYXY(pOnDrag);
 }
+
+
+
+LOG_CLASS_DEFINE(UI_GFX_2D, Button);
 
 
 

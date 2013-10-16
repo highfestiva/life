@@ -20,6 +20,7 @@ namespace HoverTank
 View::View(const str& pTitle, UiTbc::Layout* pLayout):
 	UiTbc::Window(UiTbc::Window::BORDER_LINEARSHADING, 2, DARK_GRAY, pTitle, pLayout)
 {
+	Init();
 	UiTbc::Caption* lCaption = new UiTbc::Caption(DARK_GRAY, GRAY, GRAY, LIGHT_GRAY,
 		BLACK, DARK_GRAY, DARK_GRAY, GRAY, 20);
 	lCaption->SetText(pTitle, WHITE, BLACK, GRAY, BLACK);

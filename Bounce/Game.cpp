@@ -20,11 +20,6 @@
 
 
 
-#define GRENADE_RELAUNCH_DELAY	2.7f
-#define CUTIE_START		Vector3DF(-57.67f, -28.33f, 2.33f)
-
-
-
 namespace Bounce
 {
 

@@ -37,6 +37,7 @@ namespace Life
 {
 class GameClientMasterTicker;
 class Level;
+class Menu;
 }
 
 
@@ -128,7 +129,8 @@ protected:
 	void EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition);
 	TransformationF GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const;
 
-	void OnFireButton(UiTbc::Button*);
+	void OnPauseButton(UiTbc::Button*);
+	void OnMenuAlternative(UiTbc::Button* pButton);
 
 	void DrawStick(Touchstick* pStick);
 
@@ -143,6 +145,7 @@ protected:
 	void EnableDepth();
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
+	Life::Menu* mMenu;
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
@@ -181,7 +184,7 @@ protected:
 	bool mLevelCompleted;
 	Vector3DF mMicrophoneSpeed;
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	UiTbc::Button* mFireButton;
+	UiTbc::Button* mPauseButton;
 #endif // Touch or emulated touch.
 
 	HiResTimer mTouchstickTimer;

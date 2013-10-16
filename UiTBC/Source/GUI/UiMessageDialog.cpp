@@ -31,7 +31,7 @@ void MessageDialog::Repaint(Painter* pPainter)
 {
 	if (mButtonList.empty())
 	{
-		AddButton(100, _T("OK"));
+		AddButton(100, _T("OK"), true);
 	}
 	Parent::Repaint(pPainter);
 }

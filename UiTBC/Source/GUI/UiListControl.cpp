@@ -95,6 +95,8 @@ void ListControl::Init(ListLayout::ListType pListType)
 	Parent::AddChild(mHScrollBar, 1, 0);
 	Parent::AddChild(mVScrollBar, 0, 1);
 	Parent::AddChild(mCornerRect, 1, 1);
+
+	Parent::Init();
 }
 
 void ListControl::SetScrollBars(ScrollBar* pHScrollBar,

@@ -4,8 +4,8 @@
 
 
 
-#include "../../Include/GUI/UiDesktopWindow.h"
 #include "../../Include/GUI/UiDialog.h"
+#include "../../Include/GUI/UiDesktopWindow.h"
 
 #define SPEED		30
 #define ACCELERATION	20
@@ -47,7 +47,12 @@ Dialog::~Dialog()
 
 void Dialog::Dismiss()
 {
-	OnClick(0);
+	if (!mIsClosing)
+	{
+		GetTopParent()->ReleaseKeyboardFocus(RECURSE_DOWN);
+		mAnimationStep = -SPEED * mDirection;
+		mIsClosing = true;
+	}
 }
 
 
@@ -129,23 +134,35 @@ Label* Dialog::SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontI
 	return mLabel;
 }
 
-void Dialog::AddButton(int pTag, const str& pText)
+void Dialog::AddButton(int pTag, const str& pText, bool pAutoDismiss)
 {
 	Button* lButton = new Button(BorderComponent::ZIGZAG, 3, Color(mColor[0], mColor[1], 0.2f), pText);
 	lButton->SetText(pText, mColor[1]);
 	lButton->SetPreferredSize(57, 57);
-	AddButton(pTag, lButton);
+	AddButton(pTag, lButton, pAutoDismiss);
 }
 
-void Dialog::AddButton(int pTag, Button* pButton)
+void Dialog::AddButton(int pTag, Button* pButton, bool pAutoDismiss)
 {
 	//pButton->SetBaseColor(Color(0, 0, 0, 0));
 	pButton->SetText(pButton->GetText(), mColor[1]);
 	pButton->SetTag(pTag);
 	AddChild(pButton);
 	mButtonList.push_back(pButton);
-	pButton->SetOnClick(Dialog, OnClick);
+	if (pAutoDismiss)
+	{
+		pButton->SetOnClick(Dialog, OnDismissClick);
+	}
+	else
+	{
+		pButton->SetOnClick(Dialog, OnClick);
+	}
 	UpdateLayout();
+}
+
+bool Dialog::IsAutoDismissButton(Button* pButton) const
+{
+	return *pButton->mOnClick == UiTbc::ButtonType<UiTbc::Button>::Delegate((UiTbc::Dialog*)this, &Dialog::OnDismissClick);
 }
 
 void Dialog::SetOffset(PixelCoord pOffset)
@@ -170,7 +187,8 @@ void Dialog::UpdateLayout()
 	{
 		Button* lButton = mButtonList[0];
 		const PixelCoord lButtonSize = lButton->GetPreferredSize();
-		if (lSize.x > lSize.y)
+		const bool lLayoutX = ((lSize.x - lButtonSize.x*lButtonCount) > (lSize.y - lButtonSize.y*lButtonCount));
+		if (lLayoutX)
 		{
 			const int lSpacePerEach = lButtonSize.x*3/2;
 			const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
@@ -249,14 +267,17 @@ void Dialog::Animate()
 			if ((mDirection > 0 && (lPos.x+GetSize().x < -MARGIN || mAnimationStep >= 0)) ||
 				(mDirection < 0 && (lPos.x > lParentSize.x+MARGIN || mAnimationStep <= 0)))
 			{
-				mTarget(mClickedButton);
+				if (mClickedButton)
+				{
+					mTarget(mClickedButton);
+				}
 				((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->PostDeleteComponent(this, 0);
 			}
 		}
 	}
 }
 
-void Dialog::OnClick(Button* pButton)
+void Dialog::OnDismissClick(Button* pButton)
 {
 	if (!mClickedButton)
 	{
@@ -264,11 +285,18 @@ void Dialog::OnClick(Button* pButton)
 		{
 			mPreClickTarget(pButton);
 		}
-		GetTopParent()->ReleaseKeyboardFocus(RECURSE_DOWN);
 		mClickedButton = pButton;
-		mAnimationStep = -SPEED * mDirection;
-		mIsClosing = true;
+		Dismiss();
 	}
+}
+
+void Dialog::OnClick(Button* pButton)
+{
+	if (mPreClickTarget)
+	{
+		mPreClickTarget(pButton);
+	}
+	mTarget(pButton);
 }
 
 

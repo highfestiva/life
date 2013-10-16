@@ -610,6 +610,7 @@ bool App::Poll()
 	if (lOk && !lIsPaused)
 	{
 		mGame->BeginTick();
+		mGame->StartPhysicsTick();
 	}
 	bool lRender = false;
 	if (lOk)

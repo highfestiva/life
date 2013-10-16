@@ -33,7 +33,7 @@ PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels, float pSensitiv
 	mWorldID = dWorldCreate();
 	
 	// Play with these to make the simulation behave better.
-	SetSimulationParameters(0, 0, 1);
+	SetSimulationParameters(0, 0.1f, 1);
 
 	if (pSensitivity)
 	{
@@ -82,7 +82,7 @@ void PhysicsManagerODE::SetSimulationParameters(float pSoftness, float pRubberba
 {
 	mWorldCfm = Math::Lerp(1e-9f, 1e-2f, pSoftness);	// World softness and numerical stability, i.e peneraation.
 	::dWorldSetCFM(mWorldID, mWorldCfm);
-	mWorldErp = Math::Lerp(0.9f, 0.2f, pRubberbanding);
+	mWorldErp = Math::Lerp(1.0f, 0.2f, pRubberbanding);
 	::dWorldSetERP(mWorldID, mWorldErp);	// Error reduction.
 	::dWorldSetQuickStepNumIterations(mWorldID, (int)Math::Lerp(1, 20, pAccuracy));
 }

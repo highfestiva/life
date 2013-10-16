@@ -19,13 +19,12 @@
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../Lepra/Include/Time.h"
-#include "../Life/LifeClient/ClientOptions.h"
-#include "../Life/LifeClient/ClientOptions.h"
 #include "../Life/LifeClient/ExplodingMachine.h"
 #include "../Life/LifeClient/FastProjectile.h"
 #include "../Life/LifeClient/HomingProjectile.h"
 #include "../Life/LifeClient/Level.h"
 #include "../Life/LifeClient/MassObject.h"
+#include "../Life/LifeClient/Menu.h"
 #include "../Life/LifeClient/Mine.h"
 #include "../Life/LifeClient/Projectile.h"
 #include "../Life/LifeClient/UiConsole.h"
@@ -36,14 +35,12 @@
 #include "../UiCure/Include/UiBurnEmitter.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiDebugRenderer.h"
+#include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
-#include "../UiCure/Include/UiIconButton.h"
-#include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiSoundReleaser.h"
 #include "../UiLepra/Include/UiTouchstick.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiBillboardGeometry.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "../UiTBC/Include/UiRenderer.h"
@@ -63,8 +60,6 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
-#define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
 #define STILL_FRAMES_UNTIL_CAM_PANS	4
 
 
@@ -128,7 +123,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mIsHitThisFrame(false),
 	mLevelCompleted(false),
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	mFireButton(0),
+	mPauseButton(0),
 #endif // Touch or emulated touch.
 	mStick(0),
 	mWrongDirectionImage(0),
@@ -152,7 +147,10 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 
 	SetConsoleManager(new DownwashConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
-	GetPhysicsManager()->SetSimulationParameters(0.0f, -0.1f, 0.2f);
+	mMenu = new Life::Menu(mUiManager, GetResourceManager());
+	mMenu->SetButtonTapSound(_T("tap.wav"), 0.3f);
+
+	GetPhysicsManager()->SetSimulationParameters(0.0f, 0.03f, 0.2f);
 
 	mTouchstickTimer.ReduceTimeDiff(-5);
 
@@ -246,12 +244,12 @@ bool DownwashManager::Open()
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	if (lOk)
 	{
-		mFireButton = ICONBTNA("grenade.png", "");
+		mPauseButton = ICONBTNA("grenade.png", "");
 		int x = mRenderArea.GetCenterX() - 32;
 		int y = mRenderArea.mBottom - 76;
-		mUiManager->GetDesktopWindow()->AddChild(mFireButton, x, y);
-		mFireButton->SetVisible(true);
-		mFireButton->SetOnClick(DownwashManager, OnFireButton);
+		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
+		mPauseButton->SetVisible(true);
+		mPauseButton->SetOnClick(DownwashManager, OnPauseButton);
 	}
 #endif // Touch or emulated touch.
 	if (lOk)
@@ -277,8 +275,8 @@ void DownwashManager::Close()
 {
 	ScopeLock lLock(GetTickLock());
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	delete mFireButton;
-	mFireButton = 0;
+	delete mPauseButton;
+	mPauseButton = 0;
 #endif // Touch or emulated touch.
 	if (mSunlight)
 	{
@@ -1611,17 +1609,30 @@ TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextO
 
 
 
-void DownwashManager::OnFireButton(UiTbc::Button*)
+void DownwashManager::OnPauseButton(UiTbc::Button*)
 {
-	//GetConsoleManager()->ExecuteCommand(_T("list-active-resources"));
-	double lChildishness;
-	CURE_RTVAR_GET(lChildishness, =, GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.6);
-	lChildishness = ::floor(16 * (lChildishness-1/5.0)) / 16;
-	if (lChildishness < 0)
+	mMenu->CreateTestDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative));
+}
+
+void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
+{
+	if (pButton->GetTag() == 1)
 	{
-		lChildishness = 1;
+		double lChildishness;
+		CURE_RTVAR_GET(lChildishness, =, GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.6);
+		lChildishness = ::floor(100 * (lChildishness-0.1)) / 100;
+		if (lChildishness < 0)
+		{
+			lChildishness = 1;
+		}
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, lChildishness);
+		pButton->SetText(strutil::Format(_T("%.0f %%"), lChildishness*100));
 	}
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, lChildishness);
+	else if (pButton->GetTag() == 2)
+	{
+		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
+		mMenu->DismissDialog();
+	}
 }
 
 
