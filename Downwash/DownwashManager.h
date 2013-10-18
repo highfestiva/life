@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../Lepra/Include/DiskFile.h"
+#include "../Lepra/Include/GameTimer.h"
 #include "../TBC/Include/PhysicsEngine.h"
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/Launcher.h"
@@ -153,7 +154,7 @@ protected:
 	StopWatch mTooFarAwayTimer;
 	StopWatch mAvatarCreateTimer;
 	StopWatch mAvatarDied;
-	StopWatch mFlyTime;
+	GameTimer mFlyTime;
 	StopWatch mSlowmoTimer;
 	Vector3DF mLastVehicleColor;
 	Vector3DF mLastChopperColor;

@@ -56,7 +56,9 @@ void TimeManager::Tick()
 {
 	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-	GameTimer::SetRealTimeRatio(mRealTimeRatio);
+	bool lPhysicsHalt;
+	CURE_RTVAR_GET(lPhysicsHalt, =, Cure::GetSettings(), RTVAR_PHYSICS_HALT, false);
+	GameTimer::SetRealTimeRatio(lPhysicsHalt? 0 : mRealTimeRatio);
 	bool lIsFixedFps;
 	CURE_RTVAR_GET(lIsFixedFps, =, Cure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 

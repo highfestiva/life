@@ -105,6 +105,8 @@ private:
 };
 
 
+template<class _TVarType> inline Vector2D<_TVarType> operator * (_TVarType pScalar, const Vector2D<_TVarType>& pVec);
+template<class _TVarType> inline Vector2D<_TVarType> operator / (_TVarType pScalar, const Vector2D<_TVarType>& pVec);
 
 // PoL: Point on line 
 // Dir: Direction of line

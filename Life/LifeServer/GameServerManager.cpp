@@ -47,7 +47,10 @@ GameServerManager::GameServerManager(const Cure::TimeManager* pTime,
 	mDelegate(0),
 	mMessageProcessor(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE),
-	mMasterConnection(0)
+	mMasterConnection(0),
+	mPhysicsFpsShadow(24),
+	mPhysicsRtrShadow(1),
+	mPhysicsHaltShadow(false)
 {
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
@@ -1393,6 +1396,16 @@ void GameServerManager::MonitorRtvars()
 			mPhysicsRtrShadow = lPhysicsRtr;
 			BroadcastStatusMessage(Cure::MessageStatus::INFO_COMMAND,
 				wstrutil::Format(L"#" _WIDE(RTVAR_PHYSICS_RTR) L" %f;", lPhysicsRtr));
+		}
+	}
+	{
+		bool lPhysicsHalt;
+		CURE_RTVAR_GET(lPhysicsHalt, =, GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+		if (lPhysicsHalt != mPhysicsHaltShadow)
+		{
+			mPhysicsHaltShadow = lPhysicsHalt;
+			BroadcastStatusMessage(Cure::MessageStatus::INFO_COMMAND,
+				wstrutil::Format(L"#" _WIDE(RTVAR_PHYSICS_RTR) L" %s;", wstrutil::BoolToString(lPhysicsHalt).c_str()));
 		}
 	}
 }

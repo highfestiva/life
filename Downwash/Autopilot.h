@@ -31,6 +31,7 @@ public:
 	Vector3DF GetSteering();
 	void AttemptCloserPathDistance();
 	float GetClosestPathDistance() const;
+	Vector3DF GetClosestPathVector() const;
 	Vector3DF GetLastAvatarPosition() const;
 
 private:
@@ -42,6 +43,7 @@ private:
 	DownwashManager* mGame;
 	StopWatch mStalledRotorTimer;
 	float mClosestPathDistance;
+	Vector3DF mClosestPathPosition;
 	Vector3DF mLastAvatarPosition;
 	Spline* mPath;
 	LOG_CLASS_DECLARE();

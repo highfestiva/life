@@ -315,7 +315,8 @@ void GameManager::OnAlarm(int pAlarmId, ContextObject* pObject, void*)
 bool GameManager::ValidateVariable(int pSecurityLevel, const str& pVariable, str& pValue) const
 {
 	if (pSecurityLevel < 1 && (pVariable == _T(RTVAR_PHYSICS_FPS) ||
-		pVariable == _T(RTVAR_PHYSICS_RTR)))
+		pVariable == _T(RTVAR_PHYSICS_RTR) ||
+		pVariable == _T(RTVAR_PHYSICS_HALT)))
 	{
 		mLog.Warning(_T("You're not authorized to change this variable."));
 		return false;
@@ -333,6 +334,12 @@ bool GameManager::ValidateVariable(int pSecurityLevel, const str& pVariable, str
 		if (!strutil::StringToDouble(pValue, lValue)) return false;
 		lValue = Math::Clamp(lValue, 0.01, 4.0);
 		strutil::DoubleToString(lValue, 4, pValue);
+	}
+	else if (pVariable == _T(RTVAR_PHYSICS_HALT))
+	{
+		bool lValue = false;
+		if (!strutil::StringToBool(pValue, lValue)) return false;
+		pValue = strutil::BoolToString(lValue);
 	}
 	return true;
 }

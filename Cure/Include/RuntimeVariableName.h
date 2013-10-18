@@ -48,6 +48,7 @@
 #define RTVAR_PHYSICS_RTR			"Physics.RealTimeRatio"
 #define RTVAR_PHYSICS_MICROSTEPS		"Physics.MicroSteps"
 #define RTVAR_PHYSICS_FASTALGO			"Physics.FastAlgo"
+#define RTVAR_PHYSICS_HALT			"Physics.Halt"
 #define RTVAR_PHYSICS_PARALLEL			"Physics.Parallel"
 #define RTVAR_PHYSICS_ISFIXEDFPS		"Physics.IsFixedFps"
 #define RTVAR_PHYSICS_NOCLIP			"Physics.NoClip"

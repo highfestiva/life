@@ -369,6 +369,18 @@ V2D_TEMPLATE Vector2D<double> V2D_QUAL::ToDouble() const
 	return Vector2D<double>((double)x, (double)y);
 }
 
+template<class _TVarType>
+inline Vector2D<_TVarType> operator*(_TVarType pScalar, const Vector2D<_TVarType>& pVec)
+{
+	return pVec * pScalar;
+}
+
+template<class _TVarType>
+inline Vector2D<_TVarType> operator / (_TVarType pScalar, const Vector2D<_TVarType>& pVec)
+{
+	return pVec / pScalar;
+}
+
 inline float LineDistance(const Vector2D<float>& pPoL, const Vector2D<float>& pDir, const Vector2D<float>& pPoint)
 {
 	Vector2D<float> lNormDir(pDir);

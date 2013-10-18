@@ -79,3 +79,12 @@
 + Fix edge on wall on last level.
 + Move flags further apart on last level.
 + Add some content to levels. Looks too boring. Add a couple of barrels and a few coffins to make levels less sterile.
+. What should one do?
+. Which direction should one go?
+. Bad controls for kids:
+  . Hardly possible going opposite direction of auto pilot. Fix!
+  . Flies into the roof a lot (was a bug due to the above). Fix!
+  . Wants helicopter to take less damage, but wants (seemlessly) less intervention from the auto pilot.
+  . Wants helicopter to "stand still in mid air" rather than dropping when one release the controls.
+  . When pulling the "virtual joystick" to the bottom of the screen, he doesn't want that to mean "low throttle", but rather "go down" (the auto pilot used to "help" him climb).
+  . Wants more direct power over the chopper.

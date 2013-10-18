@@ -118,6 +118,7 @@ void GameClientSlaveManager::LoadSettings()
 	}
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_HALT, false);
 }
 
 void GameClientSlaveManager::RefreshOptions()

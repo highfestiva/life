@@ -478,6 +478,7 @@ bool DownwashManager::Paint()
 				}
 			}
 			const float lPathDistance = mAutopilot->GetClosestPathDistance();
+			//const bool lForceShowDirection = (GetCurrentLevelNumber() == 0 && mAllLoadedTimer.QueryTimeDiff() < 3.0);
 			if (lPathDistance > 40.0f)
 			{
 				if (mDirectionImageTimer.IsStarted())
@@ -962,23 +963,42 @@ void DownwashManager::TickUiInput()
 			{
 				lChildishness = 0;	// Don't help when not even started yet.
 			}
-			const float lChildSteerFactor = 1 - lChildishness * 0.5f;
-			const Vector3DF lAutoPilot = mAutopilot->GetSteering() * lChildishness;
+			const Vector3DF lAutoPilot3d = mAutopilot->GetSteering();
+			const Vector2DF lAutoPilot(lAutoPilot3d.x, lAutoPilot3d.z);
+			const Vector3DF lAutoPilotDirection3d = mAutopilot->GetClosestPathVector().GetNormalized();
+			const Vector2DF lAutoPilotDirection(lAutoPilotDirection3d.x, lAutoPilotDirection3d.z);
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
+			Vector2DF lUserDirection(S(RIGHT3D) - S(LEFT3D), S(UP3D) - S(DOWN3D));
+			if (lUserDirection.GetLengthSquared() < 0.01f)	// User is not controlling, AI is.
+			{
+				lUserDirection = lAutoPilot * lChildishness;
+			}
+			else if (lUserDirection.Dot(lAutoPilotDirection) >= 0)	// User wants to go in the same direction as AI, so AI helps.
+			{
+				lUserDirection = Math::Lerp(lUserDirection, lAutoPilot, lChildishness*0.5f);
+			}
+			else
+			{
+				// User wants to go in opposite direction of AI, so let him.
+				// At the same time we can check if he's on to something new.
+				static int cntHack = 0;
+				if (++cntHack > 30)
+				{
+					mAutopilot->AttemptCloserPathDistance();
+				}
+			}
+			// Pull the brakes a little bit.
+			const float lCurrentFlyingDirectionX = lObject->GetVelocity().x * 0.05f;
+			lUserDirection.x -= lCurrentFlyingDirectionX;
+			// X follows helicopter yaw.
 			float lYaw, _;
 			lObject->GetOrientation().GetEulerAngles(lYaw, _, _);
-			const float lUserWantedDirection = (S(RIGHT3D) - S(LEFT3D)) * lChildSteerFactor;
-			const float lWantedDirection = lUserWantedDirection + lAutoPilot.x;
-			const float lCurrentDirection = lObject->GetVelocity().x * 0.05f;
-			const float lWantedChange = lWantedDirection-lCurrentDirection;
-			const float lPowerFwdRev = -::sin(lYaw) * lWantedChange;
-			const float lPowerLeftRight = ::cos(lYaw) * lWantedChange;
+			const float lPowerFwdRev = -::sin(lYaw) * lUserDirection.x;
+			const float lPowerLeftRight = ::cos(lYaw) * lUserDirection.x;
 			SetAvatarEnginePower(lObject, 4, lPowerFwdRev);
 			SetAvatarEnginePower(lObject, 5, lPowerLeftRight);
-			const float lUserPower = (S(UP3D) - S(DOWN3D)) * lChildSteerFactor;
-			const float lPower = lUserPower + lAutoPilot.z;
-			SetAvatarEnginePower(lObject, 7, lPower);
+			SetAvatarEnginePower(lObject, 7, lUserDirection.y);
 
 			// Control fire.
 			const Life::Options::FireControl& f = mOptions.GetFireControl();
@@ -1612,6 +1632,7 @@ TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextO
 void DownwashManager::OnPauseButton(UiTbc::Button*)
 {
 	mMenu->CreateTestDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 }
 
 void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
@@ -1632,6 +1653,13 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	{
 		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
 		mMenu->DismissDialog();
+		HiResTimer::StepCounterShadow();
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+	}
+	else if (pButton->GetTag() == 3)
+	{
+		HiResTimer::StepCounterShadow();
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
 	}
 }
 

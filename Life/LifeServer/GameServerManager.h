@@ -135,6 +135,7 @@ private:
 	MasterServerConnection* mMasterConnection;
 	int mPhysicsFpsShadow;
 	float mPhysicsRtrShadow;
+	bool mPhysicsHaltShadow;
 
 	LOG_CLASS_DECLARE();
 };
