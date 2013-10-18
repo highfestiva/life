@@ -1421,7 +1421,8 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 	if (!mIsHitThisFrame && lIsAvatar)
 	{
 		// If it's a lever or something like that, this is not a landing!
-		if (!pObject2->GetPhysics()->GetBoneGeometry(pBody2Id)->IsCollideWithSelf())
+		if (pObject2->GetPhysics()->GetPhysicsType() != TBC::ChunkyPhysics::DYNAMIC &&
+			!pObject2->GetPhysics()->GetBoneGeometry(pBody2Id)->IsCollideWithSelf())
 		{
 			mIsHitThisFrame = true;
 			if (mHitGroundFrameCount < 0)
