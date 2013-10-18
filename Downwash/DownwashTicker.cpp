@@ -45,6 +45,7 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 		AddBackedRtvar(pr);
 	}
 	AddBackedRtvar(_T(RTVAR_PHYSICS_RTR_OFFSET));
+	AddBackedRtvar(_T(RTVAR_GAME_ALLOWTOYMODE));
 }
 
 DownwashTicker::~DownwashTicker()

@@ -510,6 +510,7 @@
 		B1B559CE17F77E1C00A4BB17 /* SimulatorDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */; };
 		B1B559D017F77E5800A4BB17 /* GameTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */; };
 		B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559E917F7800A00A4BB17 /* Driver.cpp */; };
+		B1B80C3D180F4294003AE676 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B80C3C180F4294003AE676 /* Menu.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1C4116718033EC7007D64F7 /* SystemUtil.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1C4116618033EC7007D64F7 /* SystemUtil.mm */; };
 		B1C4123A18035E90007D64F7 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123318035E90007D64F7 /* Default-568h@2x.png */; };
@@ -1261,6 +1262,7 @@
 		B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimulatorDriver.cpp; sourceTree = "<group>"; };
 		B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameTimer.cpp; sourceTree = "<group>"; };
 		B1B559E917F7800A00A4BB17 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Driver.cpp; path = ../../Cure/Source/Driver.cpp; sourceTree = SOURCE_ROOT; };
+		B1B80C3C180F4294003AE676 /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Menu.cpp; path = ../../Life/LifeClient/Menu.cpp; sourceTree = SOURCE_ROOT; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1C4116618033EC7007D64F7 /* SystemUtil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SystemUtil.mm; path = ../../Life/SystemUtil.mm; sourceTree = SOURCE_ROOT; };
 		B1C4123318035E90007D64F7 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Icons/Default-568h@2x.png"; sourceTree = SOURCE_ROOT; };
@@ -1367,8 +1369,8 @@
 		29B97315FDCFA39411CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				B1D37EE3166AB29400536CE5 /* Life */,
 				B19A146913A122DE0051A61C /* Downwash */,
+				B1D37EE3166AB29400536CE5 /* Life */,
 				B15F795413FC59E300E01A90 /* UiCure */,
 				B15F791D13FC597B00E01A90 /* Cure */,
 				B19A15AA13A127E40051A61C /* ThirdParty */,
@@ -2509,6 +2511,7 @@
 		B1D37EEC166AB33F00536CE5 /* LifeClient */ = {
 			isa = PBXGroup;
 			children = (
+				B1B80C3C180F4294003AE676 /* Menu.cpp */,
 				B13DA606173EDBF400A73400 /* Level.cpp */,
 				B13DA5F8173EDB9800A73400 /* Mine.cpp */,
 				B13DA5F9173EDB9800A73400 /* Projectile.cpp */,
@@ -3162,6 +3165,7 @@
 				B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */,
 				B1B0C87E17FE08B4000953EF /* RotatingController.mm in Sources */,
 				B1C4116718033EC7007D64F7 /* SystemUtil.mm in Sources */,
+				B1B80C3D180F4294003AE676 /* Menu.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -95,7 +95,8 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 				GetGameManager()->GetTickLock()->Acquire();
 				((DownwashManager*)GetGameManager())->StepLevel(-1);
 				GetGameManager()->GetTickLock()->Release();
-				return OnCommand(_T("die"), pParameterVector);
+				PushYieldCommand(_T("die"));
+				return 0;
 			}
 			break;
 			case COMMAND_NEXT_LEVEL:
@@ -103,7 +104,8 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 				GetGameManager()->GetTickLock()->Acquire();
 				((DownwashManager*)GetGameManager())->StepLevel(+1);
 				GetGameManager()->GetTickLock()->Release();
-				return OnCommand(_T("die"), pParameterVector);
+				PushYieldCommand(_T("die"));
+				return 0;
 			}
 			break;
 			case COMMAND_SET_LEVEL_INDEX:
@@ -115,7 +117,8 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 					const int lLevelDelta = lTargetLevelIndex - ((DownwashManager*)GetGameManager())->GetCurrentLevelNumber();
 					((DownwashManager*)GetGameManager())->StepLevel(lLevelDelta);
 					GetGameManager()->GetTickLock()->Release();
-					return OnCommand(_T("die"), pParameterVector);
+					PushYieldCommand(_T("die"));
+					return 0;
 				}
 				else
 				{
