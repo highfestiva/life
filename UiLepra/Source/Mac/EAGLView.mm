@@ -221,10 +221,7 @@ static EAGLView* gSharedView;
 
 - (void)powerUpAcc
 {
-	if (canvas)
-	{
-		canvas->SetDeviceRotation(0);	// Always 0 when resuming?
-	}
+	[self orientationDidChange:nil];
 	UIDevice* lDevice = [UIDevice currentDevice];
 	[lDevice beginGeneratingDeviceOrientationNotifications];
 	[[NSNotificationCenter defaultCenter] addObserver:self
@@ -333,16 +330,16 @@ static EAGLView* gSharedView;
 
 -(BOOL) becomeFirstResponder
 {
-	_preResponderStrictness = _orientationStrictness;
+	//_preResponderStrictness = _orientationStrictness;
 	//_orientationStrictness = 4;
 	return [super becomeFirstResponder];
 }
 
 -(BOOL) resignFirstResponder
 {
-	_orientationStrictness = _preResponderStrictness;
-	_preResponderStrictness = -1;
-	[self orientationDidChange:nil];
+	//_orientationStrictness = _preResponderStrictness;
+	//_preResponderStrictness = -1;
+	//[self orientationDidChange:nil];
 	return [super resignFirstResponder];
 }
 

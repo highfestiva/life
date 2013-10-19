@@ -5,6 +5,7 @@
 
 
 #include "../Lepra/Include/LepraTarget.h"
+#include "../UiLepra/Include/Mac/UiMacTouchHandler.h"
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
 #endif // iOS
@@ -145,23 +146,7 @@ using namespace Lepra;
 
 -(void) touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	NSEnumerator* e = [touches objectEnumerator];
-	UITouch* lTouch;
-	while ((lTouch = (UITouch*)[e nextObject]))
-	{
-		CGPoint lTapPosition = [lTouch locationInView:nil];
-		CGPoint lPrevTapPosition = [lTouch previousLocationInView:nil];
-		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
-		NSLog(@"Touch: %f, %f", lTapPosition.x, lTapPosition.y);
-		PixelCoord lPreviousTap(lPrevTapPosition.y, _canvas->GetActualHeight() - lPrevTapPosition.x);
-		PixelCoord lThisTap(lTapPosition.y, _canvas->GetActualHeight() - lTapPosition.x);
-		if (_canvas && _canvas->GetDeviceOutputRotation() != 0)
-		{
-			lPreviousTap = PixelCoord(_canvas->GetActualWidth() - lPrevTapPosition.y, lPrevTapPosition.x);
-			lThisTap = PixelCoord(_canvas->GetActualWidth() - lTapPosition.y, lTapPosition.x);
-		}
-		Downwash::Downwash::GetApp()->mDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed);
-	}
+	UiLepra::Touch::TouchHandler::HandleTouches(touches, _canvas, Downwash::Downwash::GetApp()->mDragManager);
 }
 
 -(void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event

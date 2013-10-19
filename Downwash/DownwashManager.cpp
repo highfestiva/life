@@ -440,9 +440,9 @@ bool DownwashManager::Paint()
 		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 		if (lRtrOffset > 0.1)
 		{
-			uint8 r = Random::GetRandomNumber()%255;
-			uint8 g = Random::GetRandomNumber()%255;
-			uint8 b = Random::GetRandomNumber()%255;
+			uint8 r = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*3)*120+128);
+			uint8 g = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*5)*120+128);
+			uint8 b = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*7)*120+128);
 			mUiManager->GetPainter()->SetColor(Color(10, 10, 10, 128));
 			mUiManager->GetPainter()->PrintText(_T("Toy Mode"), 5, 5);
 			mUiManager->GetPainter()->SetColor(Color(r, g, b, 255));
