@@ -104,6 +104,7 @@ void Downwash::Init()
 	UiCure::Init();
 
 #if defined(LEPRA_IOS)
+	Thread::Sleep(3.0);	// Wait a bit longer so Pixel Doctrine splash is visible.
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	const int lDisplayWidth = lSize.height;
 	const int lDisplayHeight = lSize.width;

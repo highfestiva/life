@@ -992,7 +992,7 @@ void DownwashManager::TickUiInput()
 			}
 			else if (lUserDirection.Dot(lAutoPilotDirection) >= 0)	// User wants to go in the same direction as AI, so AI helps.
 			{
-				lUserDirection = Math::Lerp(lUserDirection, lAutoPilot, lChildishness*0.5f);
+				lUserDirection = Math::Lerp(lUserDirection, lAutoPilot, lChildishness*0.35f);
 			}
 			else
 			{
