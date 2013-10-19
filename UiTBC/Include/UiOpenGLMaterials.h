@@ -35,6 +35,7 @@ public:
 
 	static GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
 
+	void EnableDisableTexturing();
 	void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
 	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, Renderer* pRenderer);
 	void ResetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);

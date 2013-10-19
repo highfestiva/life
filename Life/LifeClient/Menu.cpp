@@ -99,6 +99,11 @@ void Menu::DismissDialog()
 	}
 }
 
+bool Menu::IsDialogVisible() const
+{
+	return mDialog != 0;
+}
+
 Cure::ResourceManager* Menu::GetResourceManager() const
 {
 	return mResourceManager;

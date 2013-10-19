@@ -382,6 +382,16 @@ bool Renderer::GetTrilinearFilteringEnabled()
 	return mTrilinearEnabled;
 }
 
+void Renderer::SetTexturingEnabled(bool pEnabled)
+{
+	mTexturingEnabled = pEnabled;
+}
+
+bool Renderer::GetTexturingEnabled()
+{
+	return mTexturingEnabled;
+}
+
 void Renderer::SetCompressedTexturesEnabled(bool pEnabled)
 {
 	mCompressedTexturesEnabled = pEnabled;

@@ -137,12 +137,10 @@ void Autopilot::CheckStalledRotor(Cure::ContextObject* pChopper)
 	TBC::ChunkyBoneGeometry* lBone = pChopper->GetPhysics()->GetBoneGeometry(lRotorIndex);
 	Vector3DF lRotorSpeed;
 	mGame->GetPhysicsManager()->GetBodyAngularVelocity(lBone->GetBodyId(), lRotorSpeed);
-	if (lRotorSpeed.GetLengthSquared() < 20.0f)
+	if (lRotorSpeed.GetLengthSquared() < 20.0f*Lepra::GameTimer::GetRealTimeRatio())
 	{
 		mStalledRotorTimer.TryStart();
-		float lRealTimeRatio;
-		CURE_RTVAR_GET(lRealTimeRatio, =(float), mGame->GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
-		if (mStalledRotorTimer.QueryTimeDiff()*lRealTimeRatio > 2.0f)
+		if (mStalledRotorTimer.QueryTimeDiff() > 2.0f)
 		{
 			Cure::Health::Add(pChopper, -0.01f, true);
 		}

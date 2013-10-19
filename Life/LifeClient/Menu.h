@@ -42,6 +42,7 @@ public:
 	UiTbc::Dialog* CreateTbcDialog(const ButtonAction& pAction, float pWidth, float pHeight);
 	UiTbc::Button* CreateButton(const str& pText, const Color& pColor);
 	void DismissDialog();
+	bool IsDialogVisible() const;
 
 	Cure::ResourceManager* GetResourceManager() const;
 

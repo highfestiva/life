@@ -49,6 +49,20 @@ Material::RemoveStatus OpenGLMaterial::RemoveGeometry(TBC::GeometryBase* pGeomet
 	return lStatus;
 }
 
+void OpenGLMaterial::EnableDisableTexturing()
+{
+	if (GetRenderer()->GetTexturingEnabled())
+	{
+		glEnable(GL_TEXTURE_2D);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+	else
+	{
+		glDisable(GL_TEXTURE_2D);
+		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+}
+
 GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 {
 	switch (pGeometry->GetPrimitiveType())
@@ -178,8 +192,6 @@ void OpenGLMatSingleColorSolid::RawRender(TBC::GeometryBase* pGeometry, int pUVS
 
 void OpenGLMatSingleColorSolid::RenderBaseGeometry(TBC::GeometryBase* pGeometry)
 {
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-
 	if (pGeometry->GetNormalData() == 0)
 	{
 		glDisableClientState(GL_NORMAL_ARRAY);
@@ -191,6 +203,8 @@ void OpenGLMatSingleColorSolid::RenderBaseGeometry(TBC::GeometryBase* pGeometry)
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
+		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
+
 		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
@@ -433,12 +447,11 @@ void OpenGLMatSingleTextureSolid::PreRender()
 	::glDisable(GL_ALPHA_TEST);
 	::glDisable(GL_BLEND);
 	//::glDisable(GL_LOGIC_OP);
-	::glEnable(GL_TEXTURE_2D);
+	EnableDisableTexturing();
 
 	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_COLOR_ARRAY);
-	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glEnable(GL_COLOR_MATERIAL);
 #ifndef LEPRA_GL_ES
 	::glColorMaterial(GL_FRONT, GL_AMBIENT);
@@ -679,6 +692,7 @@ void OpenGLMatSingleColorEnvMapSolid::PreRender()
 		::glColor4f(1, 1, 1, 1);
 		const float c[] = {1,1,1,1};
 		::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, c);
+		::glEnable(GL_TEXTURE_2D);
 		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		::glDepthFunc(GL_LEQUAL);
 	}
@@ -795,12 +809,11 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 #ifndef LEPRA_GL_ES
 	::glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 #endif // !GLES
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 
 	// Pass 1, single texture.
 	mSingleTexturePass = true;
-	glEnable(GL_TEXTURE_2D);
+	EnableDisableTexturing();
 	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
@@ -811,6 +824,8 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 
 	// Pass 2, Render the enviroment map.
 	mSingleTexturePass = false;
+	glEnable(GL_TEXTURE_2D);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);

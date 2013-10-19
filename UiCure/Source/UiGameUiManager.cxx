@@ -530,6 +530,7 @@ void GameUiManager::UpdateSettings()
 	bool lEnableTrilinearFiltering;
 	bool lEnableBilinearFiltering;
 	bool lEnableMipMapping;
+	bool lEnableTexturing;
 	bool lEnablePixelShaders;
 	double lFOV;
 	double lClipNear;
@@ -553,6 +554,7 @@ void GameUiManager::UpdateSettings()
 	CURE_RTVAR_GET(lEnableTrilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
 	CURE_RTVAR_GET(lEnableBilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
 	CURE_RTVAR_GET(lEnableMipMapping, =, mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	CURE_RTVAR_GET(lEnableTexturing, =, mVariableScope, RTVAR_UI_3D_ENABLETEXTURING, false);
 	CURE_RTVAR_GET(lEnablePixelShaders, =, mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
 	CURE_RTVAR_GET(lFOV, =, mVariableScope, RTVAR_UI_3D_FOV, 45.0);
 	CURE_RTVAR_GET(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
@@ -564,6 +566,7 @@ void GameUiManager::UpdateSettings()
 	mRenderer->SetTrilinearFilteringEnabled(lEnableTrilinearFiltering);
 	mRenderer->SetBilinearFilteringEnabled(lEnableBilinearFiltering);
 	mRenderer->SetMipMappingEnabled(lEnableMipMapping);
+	mRenderer->SetTexturingEnabled(lEnableTexturing);
 	mRenderer->EnablePixelShaders(lEnablePixelShaders);
 	mRenderer->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
 

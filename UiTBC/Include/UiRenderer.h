@@ -349,6 +349,9 @@ public:
 	virtual void SetTrilinearFilteringEnabled(bool pEnabled);
 	bool GetTrilinearFilteringEnabled();
 
+	virtual void SetTexturingEnabled(bool pEnabled);
+	bool GetTexturingEnabled();
+
 	// Will only affect textures added AFTER calling one of these.
 	virtual void SetCompressedTexturesEnabled(bool pEnabled);
 	bool GetCompressedTexturesEnabled();
@@ -605,6 +608,7 @@ protected:
 	bool mMipMapEnabled;
 	bool mBilinearEnabled;
 	bool mTrilinearEnabled;
+	bool mTexturingEnabled;
 	bool mCompressedTexturesEnabled;
 	bool mLightsEnabled;
 

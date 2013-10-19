@@ -41,7 +41,7 @@ private:
 	typedef Cure::ContextPath::SplinePath Spline;
 
 	DownwashManager* mGame;
-	StopWatch mStalledRotorTimer;
+	GameTimer mStalledRotorTimer;
 	float mClosestPathDistance;
 	Vector3DF mClosestPathPosition;
 	Vector3DF mLastAvatarPosition;

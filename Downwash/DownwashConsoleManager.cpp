@@ -95,7 +95,7 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 				GetGameManager()->GetTickLock()->Acquire();
 				((DownwashManager*)GetGameManager())->StepLevel(-1);
 				GetGameManager()->GetTickLock()->Release();
-				PushYieldCommand(_T("die"));
+				ExecuteCommand(_T("die"));
 				return 0;
 			}
 			break;
@@ -104,7 +104,7 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 				GetGameManager()->GetTickLock()->Acquire();
 				((DownwashManager*)GetGameManager())->StepLevel(+1);
 				GetGameManager()->GetTickLock()->Release();
-				PushYieldCommand(_T("die"));
+				ExecuteCommand(_T("die"));
 				return 0;
 			}
 			break;
@@ -117,7 +117,7 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 					const int lLevelDelta = lTargetLevelIndex - ((DownwashManager*)GetGameManager())->GetCurrentLevelNumber();
 					((DownwashManager*)GetGameManager())->StepLevel(lLevelDelta);
 					GetGameManager()->GetTickLock()->Release();
-					PushYieldCommand(_T("die"));
+					ExecuteCommand(_T("die"));
 					return 0;
 				}
 				else

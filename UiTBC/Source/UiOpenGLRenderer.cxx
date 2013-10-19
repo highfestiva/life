@@ -1405,10 +1405,12 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	{
 		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
+	::glEnable(GL_TEXTURE_2D);
 	::glEnable(GL_DEPTH_TEST);
 	::glDepthMask(GL_FALSE);
 	::glDisable(GL_CULL_FACE);
 	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glDisable(GL_LIGHTING);
 	::glDisable(GL_COLOR_MATERIAL);
 	::glDisable(GL_NORMALIZE);
@@ -1440,6 +1442,11 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	//::glEnable(GL_NORMALIZE);
 	::glDisable(GL_BLEND);
 	::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (!GetTexturingEnabled())
+	{
+		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		::glDisable(GL_TEXTURE_2D);
+	}
 
 	OGL_ASSERT();
 }

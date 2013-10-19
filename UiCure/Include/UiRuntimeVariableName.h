@@ -42,6 +42,7 @@
 #define RTVAR_UI_3D_ENABLETRILINEARFILTERING	"Ui.3D.EnableTrilinearFiltering"
 #define RTVAR_UI_3D_ENABLEBILINEARFILTERING	"Ui.3D.EnableBilinearFiltering"
 #define RTVAR_UI_3D_ENABLEMIPMAPPING		"Ui.3D.EnableMipMapping"
+#define RTVAR_UI_3D_ENABLETEXTURING		"Ui.3D.EnableTexturing"
 #define RTVAR_UI_3D_FOV				"Ui.3D.FOV"
 #define RTVAR_UI_3D_CLIPNEAR			"Ui.3D.ClipNear"
 #define RTVAR_UI_3D_CLIPFAR			"Ui.3D.ClipFar"

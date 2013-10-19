@@ -314,10 +314,15 @@ bool DownwashManager::Render()
 	{
 		double lRtrOffset;
 		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
-		const double lColorOffset = (lRtrOffset > 0.5)? 2.5 : 0.5;
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTRED, lColorOffset);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTGREEN, lColorOffset);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTBLUE, lColorOffset);
+		const bool lToyMode = lRtrOffset > 0.5;
+		const double r = lToyMode? sin(mToyModeColorTimer.QueryTimeDiff()*1.0) : 0.5;
+		const double g = lToyMode? sin(mToyModeColorTimer.QueryTimeDiff()*0.7) : 0.5;
+		const double b = lToyMode? sin(mToyModeColorTimer.QueryTimeDiff()*0.3) : 0.5;
+		const bool lEnableTexturing = lToyMode? false : true;
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTRED, r);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTGREEN, g);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTBLUE, b);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLETEXTURING, lEnableTexturing);
 	}
 
 	mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
@@ -392,7 +397,7 @@ bool DownwashManager::Paint()
 		return false;
 	}
 
-	if (mStick)
+	if (mStick && !mMenu->IsDialogVisible())
 	{
 		DrawStick(mStick);
 		mStick->ResetTap();
@@ -431,29 +436,35 @@ bool DownwashManager::Paint()
 		lCoords.push_back(lCoords[0]);
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
 
-		const bool lIsFlying = mFlyTime.IsStarted();
-		const double lTime = mFlyTime.QuerySplitTime();
-		const bool lIsSloppy = (lIsFlying || !lTime);
-		mUiManager->GetPainter()->SetColor(Color(10, 10, 10, 128));
-		PrintTime(_T(""), lTime, lIsSloppy, 101, 4);
-		mUiManager->GetPainter()->SetColor(Color(192, 210, 220), 0);
-		PrintTime(_T(""), lTime, lIsSloppy, 100, 3);
-
-		double lLevelBestTime = GetCurrentLevelBestTime(false);
-		if (lLevelBestTime > 0)
+		double lRtrOffset;
+		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+		if (lRtrOffset > 0.1)
 		{
-			mUiManager->GetPainter()->SetColor(Color(192, 192, 192, 128));
-			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 101, 44);
-			mUiManager->GetPainter()->SetColor(Color(10, 30, 40), 0);
-			PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 100, 43);
+			uint8 r = Random::GetRandomNumber()%255;
+			uint8 g = Random::GetRandomNumber()%255;
+			uint8 b = Random::GetRandomNumber()%255;
+			mUiManager->GetPainter()->SetColor(Color(10, 10, 10, 128));
+			mUiManager->GetPainter()->PrintText(_T("Toy Mode"), 5, 5);
+			mUiManager->GetPainter()->SetColor(Color(r, g, b, 255));
+			mUiManager->GetPainter()->PrintText(_T("Toy Mode"), 4, 4);
 		}
-		lLevelBestTime = GetCurrentLevelBestTime(true);
-		if (lLevelBestTime > 0)
+		else
 		{
-			mUiManager->GetPainter()->SetColor(Color(40, 10, 10, 128));
-			PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 101, 84);
-			mUiManager->GetPainter()->SetColor(Color(210, 40, 40, 255));
-			PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 100, 83);
+			const bool lIsFlying = mFlyTime.IsStarted();
+			const double lTime = mFlyTime.QuerySplitTime();
+			const bool lIsSloppy = (lIsFlying || !lTime);
+			PrintTime(_T(""), lTime, lIsSloppy, 100, 3, Color(192, 210, 220), Color(10, 10, 10, 128));
+
+			double lLevelBestTime = GetCurrentLevelBestTime(false);
+			if (lLevelBestTime > 0)
+			{
+				PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 100, 43, Color(10, 30, 40), Color(192, 192, 192, 128));
+			}
+			lLevelBestTime = GetCurrentLevelBestTime(true);
+			if (lLevelBestTime > 0)
+			{
+				PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 100, 83, Color(210, 40, 40, 255), Color(40, 10, 10, 128));
+			}
 		}
 
 		mUiManager->GetPainter()->SetAlphaValue(255);
@@ -535,7 +546,7 @@ bool DownwashManager::Paint()
 	return true;
 }
 
-void DownwashManager::PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y)
+void DownwashManager::PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg)
 {
 	const int lSec = (int)pTime;
 	const str lIntTimeString = pPrefix + strutil::Format(_T("%i"), lSec);
@@ -543,6 +554,9 @@ void DownwashManager::PrintTime(const str pPrefix, double pTime, bool lIsSloppy,
 	int w = mUiManager->GetPainter()->GetStringWidth(lIntTimeString);
 	x -= w;
 	x = (x < 4)? 4 : x;
+	mUiManager->GetPainter()->SetColor(bg, 0);
+	mUiManager->GetPainter()->PrintText(lTimeString, x+1, y+1);
+	mUiManager->GetPainter()->SetColor(c, 0);
 	mUiManager->GetPainter()->PrintText(lTimeString, x, y);
 }
 
@@ -716,7 +730,7 @@ void DownwashManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObj
 	{
 		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
 		mCollisionSoundManager->OnCollision(5.0f, pBullet->GetPosition(), lGeometry, lGeometry->GetMaterial());
-		Cure::Health::Add(pHitObject, -0.2f, false);
+		Cure::Health::Add(pHitObject, -0.12f, false);
 	}
 }
 
@@ -1658,6 +1672,9 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
+		mSetRandomChopperColor = false;
 	}
 	else if (pButton->GetTag() == 3)
 	{
@@ -1783,8 +1800,16 @@ void DownwashManager::ScriptPhysicsTick()
 		mAvatarDied.TryStart();
 		if (mAvatarDied.QueryTimeDiff() > 0.1f)
 		{
-			mSetRandomChopperColor = true;
-			CreateChopper(_T("helicopter_01"));
+			// If we're currently loading level, we'll load a chopper when level is complete.
+			// Otherwise we just load one right away.
+			if (mOldLevel)
+			{
+				mAvatarId = 0;
+			}
+			else
+			{
+				CreateChopper(_T("helicopter_01"));
+			}
 		}
 	}
 
@@ -1865,6 +1890,7 @@ void DownwashManager::MoveCamera()
 		++mPostZoomPlatformFrameCount;
 		if (Cure::Health::Get(lAvatar) <= 0)
 		{
+			mSetRandomChopperColor = true;
 			return;
 		}
 		else if (mZoomPlatform)

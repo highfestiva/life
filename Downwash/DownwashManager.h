@@ -72,7 +72,7 @@ public:
 
 	virtual bool Render();
 	virtual bool Paint();
-	void PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y);
+	void PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg);
 	virtual void DrawSyncDebugInfo();
 
 	virtual void OnLoginSuccess();
@@ -156,6 +156,7 @@ protected:
 	StopWatch mAvatarDied;
 	GameTimer mFlyTime;
 	StopWatch mSlowmoTimer;
+	HiResTimer mToyModeColorTimer;
 	Vector3DF mLastVehicleColor;
 	Vector3DF mLastChopperColor;
 	bool mSetRandomChopperColor;

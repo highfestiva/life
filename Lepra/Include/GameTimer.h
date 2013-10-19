@@ -34,6 +34,7 @@ public:
 	inline double QuerySplitTime();
 	inline int GetStartCount() const;
 
+	inline static double GetRealTimeRatio();
 	inline static void SetRealTimeRatio(double pRealTimeRatio);
 
 protected:
@@ -104,6 +105,11 @@ double GameTimer::QuerySplitTime()
 int GameTimer::GetStartCount() const
 {
 	return mTimer.GetStartCount();
+}
+
+double GameTimer::GetRealTimeRatio()
+{
+	return mRealTimeRatio;
 }
 
 void GameTimer::SetRealTimeRatio(double pRealTimeRatio)

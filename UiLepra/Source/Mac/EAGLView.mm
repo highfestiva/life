@@ -221,6 +221,10 @@ static EAGLView* gSharedView;
 
 - (void)powerUpAcc
 {
+	if (canvas)
+	{
+		canvas->SetDeviceRotation(0);	// Always 0 when resuming?
+	}
 	UIDevice* lDevice = [UIDevice currentDevice];
 	[lDevice beginGeneratingDeviceOrientationNotifications];
 	[[NSNotificationCenter defaultCenter] addObserver:self
