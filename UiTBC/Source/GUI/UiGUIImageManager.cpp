@@ -127,7 +127,7 @@ void GUIImageManager::DrawImage(Painter::ImageID pImageID, int x, int y)
 	if (pImageID != Painter::INVALID_IMAGEID)
 	{
 		ImageTable::Iterator lIter = mImageTable.Find(pImageID);
-		deb_assert(lIter != mImageTable.End());
+		deb_assert(lIter != mImageTable.End());	// We need this, otherwise components won't be able to know how big the image is, etc.
 		if (lIter != mImageTable.End())
 		{
 			Image* lImage = *lIter;

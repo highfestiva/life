@@ -356,7 +356,7 @@ bool GameClientMasterTicker::Tick()
 
 	{
 		LEPRA_MEASURE_SCOPE(UiEndRender);
-		mUiManager->EndRender(GetTimeManager()->GetNormalFrameTime());
+		mUiManager->EndRender(GetTimeManager()->GetNormalGameFrameTime());
 	}
 
 	{

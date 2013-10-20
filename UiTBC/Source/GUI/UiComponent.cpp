@@ -29,6 +29,7 @@ Component::Component(const str& pName, Layout* pLayout) :
 	mVisible(true),
 	mAdaptivePreferredSize(false),
 	mSelected(false),
+	mEnabled(true),
 	mImageID(Painter::INVALID_IMAGEID),
 	mLayerCount(0)
 {
@@ -785,6 +786,11 @@ void Component::SetSelected(bool pSelected)
 	{
 		SetKeyboardFocus();
 	}
+}
+
+void Component::Enable(bool pEnable)
+{
+	mEnabled = pEnable;
 }
 
 void Component::SetMouseFocus()

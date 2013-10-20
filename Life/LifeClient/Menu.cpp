@@ -78,16 +78,21 @@ UiTbc::Dialog* Menu::CreateTbcDialog(const ButtonAction& pAction, float pWidth, 
 	return d;
 }
 
-UiTbc::Button* Menu::CreateButton(const str& pText, const Color& pColor)
+UiTbc::Button* Menu::CreateButton(const str& pText, const Color& pColor) const
 {
 	UiTbc::Button* lButton = new UiTbc::Button(pColor, pText);
 	lButton->SetText(pText);
+	InitButton(lButton);
+	return lButton;
+}
+
+void Menu::InitButton(UiTbc::Button* pButton) const
+{
 	const int w = mDialog->GetSize().x*3/4;
 	const int h = mDialog->GetSize().y/5;
-	lButton->SetPreferredSize(w, h);
-	lButton->SetRoundedStyle(h/3);
-	lButton->UpdateLayout();
-	return lButton;
+	pButton->SetPreferredSize(w, h);
+	pButton->SetRoundedRadius(h/3);
+	pButton->UpdateLayout();
 }
 
 void Menu::DismissDialog()

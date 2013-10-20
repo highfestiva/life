@@ -646,10 +646,20 @@ int Window::GetTotalBorderWidth()
 		return mBorderWidth * 2;
 }
 
-void Window::SetRoundedStyle(int pRadius)
+int Window::GetRoundedRadius() const
+{
+	return GetClientRectComponent()->GetCornerRadius();
+}
+
+void Window::SetRoundedRadius(int pRadius)
 {
 	GetClientRectComponent()->SetCornerRadius(pRadius);
 	GetClientRectComponent()->SetIsHollow(false);
+}
+
+void Window::SetRoundedRadiusMask(int pMask)
+{
+	GetClientRectComponent()->SetCornerRadiusMask(pMask);
 }
 
 Component::Type Window::GetType() const

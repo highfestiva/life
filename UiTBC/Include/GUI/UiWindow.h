@@ -63,7 +63,9 @@ public:
 	int GetBorderWidth();
 	int GetTotalBorderWidth();
 
-	void SetRoundedStyle(int pRadius);
+	int GetRoundedRadius() const;
+	void SetRoundedRadius(int pRadius);
+	void SetRoundedRadiusMask(int pMask);
 
 	virtual bool IsOver(int pScreenX, int pScreenY);
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);

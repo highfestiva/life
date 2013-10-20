@@ -130,19 +130,28 @@ Vector3DF Autopilot::GetLastAvatarPosition() const
 	return mLastAvatarPosition;
 }
 
-
-void Autopilot::CheckStalledRotor(Cure::ContextObject* pChopper)
+float Autopilot::GetRotorSpeed(const Cure::ContextObject* pChopper) const
 {
+	if (pChopper->GetPhysics()->GetEngineCount() < 3)
+	{
+		return 0;
+	}
 	const int lRotorIndex = pChopper->GetPhysics()->GetChildIndex(0, 0);
 	TBC::ChunkyBoneGeometry* lBone = pChopper->GetPhysics()->GetBoneGeometry(lRotorIndex);
 	Vector3DF lRotorSpeed;
 	mGame->GetPhysicsManager()->GetBodyAngularVelocity(lBone->GetBodyId(), lRotorSpeed);
-	if (lRotorSpeed.GetLengthSquared() < 40.0f*Lepra::GameTimer::GetRealTimeRatio())
+	return lRotorSpeed.GetLength();
+}
+
+void Autopilot::CheckStalledRotor(Cure::ContextObject* pChopper)
+{
+	const float lRotorSpeed = GetRotorSpeed(pChopper);
+	if (lRotorSpeed < 6.0f*Lepra::GameTimer::GetRealTimeRatio())
 	{
 		mStalledRotorTimer.TryStart();
-		if (mStalledRotorTimer.QueryTimeDiff() > 2.0f)
+		if (mStalledRotorTimer.QueryTimeDiff() > 3.0f)
 		{
-			Cure::Health::Add(pChopper, -0.015f, true);
+			Cure::Health::Add(pChopper, -0.02f, true);
 		}
 	}
 	else

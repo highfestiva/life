@@ -110,7 +110,10 @@ protected:
 	virtual void MoveCamera();
 	virtual void TickInput();
 
+	void UpdateCameraDistance();
 	void UpdateTouchstickPlacement();
+	int GetControlMode() const;
+	void UpdateControlMode();
 	virtual void TickUiInput();
 	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower);
 	virtual void TickUiUpdate();
@@ -194,6 +197,8 @@ protected:
 
 	UiCure::UserPainterKeepImageResource* mWrongDirectionImage;
 	UiCure::UserPainterKeepImageResource* mWinImage;
+	UiCure::UserPainterKeepImageResource* mCheckIcon;
+	UiCure::UserPainterKeepImageResource* mLockIcon;
 	StopWatch mDirectionImageTimer;
 	StopWatch mWinTimer;
 	UiCure::UserRendererImageResource* mArrow;

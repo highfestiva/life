@@ -35,6 +35,7 @@ public:
 	void SetFontId(const FontManager::FontId& pFontId);
 	void ActivateFont(Painter* pPainter);
 	void DeactivateFont(Painter* pPainter);
+	void SetHorizontalMargin(int pHorizontalMargin);
 	void SetVericalAlignment(VAlign pAlignment);
 
 protected:
@@ -45,10 +46,10 @@ protected:
 	Color GetTextColor() const;
 	VAlign GetVAlign() const;
 
-private:
 	Color mTextColor;
 	bool mIsFontActive;
 	FontManager::FontId mFontId;
+	int mHorizontalMargin;
 	VAlign mVAlignment;
 };
 

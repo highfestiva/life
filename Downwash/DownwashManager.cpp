@@ -40,7 +40,11 @@
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiSoundReleaser.h"
 #include "../UiLepra/Include/UiTouchstick.h"
+#include "../UiTBC/Include/GUI/UiCheckButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../UiTBC/Include/GUI/UiFixedLayouter.h"
+#include "../UiTBC/Include/GUI/UiRadioButton.h"
+#include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiBillboardGeometry.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "../UiTBC/Include/UiRenderer.h"
@@ -128,6 +132,8 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mStick(0),
 	mWrongDirectionImage(0),
 	mArrow(0),
+	mCheckIcon(0),
+	mLockIcon(0),
 	mArrowBillboard(0),
 	mArrowBillboardId(0),
 	mArrowTotalPower(0),
@@ -158,6 +164,8 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Pilot"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 }
 
@@ -177,6 +185,10 @@ DownwashManager::~DownwashManager()
 	mWrongDirectionImage = 0;
 	delete mArrow;
 	mArrow = 0;
+	delete mCheckIcon;
+	mCheckIcon = 0;
+	delete mLockIcon;
+	mLockIcon = 0;
 	delete mArrowBillboard;
 	mArrowBillboard = 0;
 
@@ -193,10 +205,7 @@ void DownwashManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
 
-	double lCamDistance = 11.3 * mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	lCamDistance = (lCamDistance+110)/2;	// Smooth towards a sensible cam distance.
-	lCamDistance = std::min(110.0, lCamDistance);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, lCamDistance);
+	UpdateCameraDistance();
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
@@ -261,6 +270,14 @@ bool DownwashManager::Open()
 
 		mWinImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mWinImage->Load(GetResourceManager(), _T("win.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
+
+		mCheckIcon = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mCheckIcon->Load(GetResourceManager(), _T("icon_check.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
+
+		mLockIcon = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mLockIcon->Load(GetResourceManager(), _T("icon_lock.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 
 		mArrow = new UiCure::UserRendererImageResource(mUiManager, false);
@@ -444,9 +461,9 @@ bool DownwashManager::Paint()
 			uint8 g = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*5)*120+128);
 			uint8 b = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*7)*120+128);
 			mUiManager->GetPainter()->SetColor(Color(10, 10, 10, 128));
-			mUiManager->GetPainter()->PrintText(_T("Toy Mode"), 5, 5);
+			mUiManager->GetPainter()->PrintText(_T("Toy mode"), 11, 5);
 			mUiManager->GetPainter()->SetColor(Color(r, g, b, 255));
-			mUiManager->GetPainter()->PrintText(_T("Toy Mode"), 4, 4);
+			mUiManager->GetPainter()->PrintText(_T("Toy mode"), 10, 4);
 		}
 		else
 		{
@@ -455,15 +472,18 @@ bool DownwashManager::Paint()
 			const bool lIsSloppy = (lIsFlying || !lTime);
 			PrintTime(_T(""), lTime, lIsSloppy, 100, 3, Color(192, 210, 220), Color(10, 10, 10, 128));
 
-			double lLevelBestTime = GetCurrentLevelBestTime(false);
-			if (lLevelBestTime > 0)
+			if (GetControlMode() != 2)
 			{
-				PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 100, 43, Color(10, 30, 40), Color(192, 192, 192, 128));
-			}
-			lLevelBestTime = GetCurrentLevelBestTime(true);
-			if (lLevelBestTime > 0)
-			{
-				PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 100, 83, Color(210, 40, 40, 255), Color(40, 10, 10, 128));
+				double lLevelBestTime = GetCurrentLevelBestTime(false);
+				if (lLevelBestTime > 0)
+				{
+					PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 100, 43, Color(10, 30, 40), Color(192, 192, 192, 128));
+				}
+				lLevelBestTime = GetCurrentLevelBestTime(true);
+				if (lLevelBestTime > 0)
+				{
+					PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 100, 83, Color(210, 40, 40, 255), Color(40, 10, 10, 128));
+				}
 			}
 		}
 
@@ -924,6 +944,18 @@ void DownwashManager::TickInput()
 
 
 
+void DownwashManager::UpdateCameraDistance()
+{
+	double lCamDistance = 11.3 * mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
+	lCamDistance = (lCamDistance+110)/2;	// Smooth towards a sensible cam distance.
+	if (mMenu->IsDialogVisible())
+	{
+		lCamDistance *= 0.3f;
+	}
+	lCamDistance = std::min(110.0, lCamDistance);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, lCamDistance);
+}
+
 void DownwashManager::UpdateTouchstickPlacement()
 {
 	if (mTouchstickTimer.QueryTimeDiff() < 2.0)
@@ -961,9 +993,49 @@ void DownwashManager::UpdateTouchstickPlacement()
 #endif // Touch or emulated touch
 }
 
+int DownwashManager::GetControlMode() const
+{
+	// Three modes: easy, medium, hard.
+	float lChildishness;
+	CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+	if (lChildishness > 0.95f)
+	{
+		return 2;	// Easy.
+	}
+	else if (lChildishness >= 0.1f)
+	{
+		return 1;	// Medium.
+	}
+	return 0;	// Hard.
+}
+
+void DownwashManager::UpdateControlMode()
+{
+	Cure::CppContextObject* lAvatar = (Cure::CppContextObject*)GetContext()->GetObject(mAvatarId);
+	if (!lAvatar || lAvatar->GetPhysics()->GetEngineCount() < 3)
+	{
+		return;
+	}
+	const int lHelperEngineIndex = lAvatar->GetPhysics()->GetEngineCount() - 1;
+	if (GetControlMode() == 2)
+	{
+		// Helper engine on + upright stabilization high.
+		lAvatar->GetPhysics()->GetEngine(lHelperEngineIndex)->SetStrength(1000.0f);
+		((TBC::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 3;
+	}
+	else
+	{
+		// Engine off, low upright stabilization. Arcade mode compensates by having high autopilot and high durability.
+		lAvatar->GetPhysics()->GetEngine(lHelperEngineIndex)->SetStrength(0.0f);
+		((TBC::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 0.3f;
+	}
+}
+
 void DownwashManager::TickUiInput()
 {
 	mUiManager->GetInputManager()->SetCursorVisible(true);
+
+	UpdateControlMode();
 
 	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
 	if (lPhysicsStepCount > 0 && mAllowMovementInput)
@@ -985,10 +1057,12 @@ void DownwashManager::TickUiInput()
 			const Vector2DF lAutoPilotDirection(lAutoPilotDirection3d.x, lAutoPilotDirection3d.z);
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
-			Vector2DF lUserDirection(S(RIGHT3D) - S(LEFT3D), S(UP3D) - S(DOWN3D));
+			Vector2DF lUserControls(S(RIGHT3D) - S(LEFT3D), S(UP3D) - S(DOWN3D));
+			Vector2DF lUserDirection = lUserControls;
 			if (lUserDirection.GetLengthSquared() < 0.01f)	// User is not controlling, AI is.
 			{
-				lUserDirection = lAutoPilot * lChildishness;
+				lUserControls = lAutoPilot * lChildishness;
+				lUserDirection = lUserControls;
 			}
 			else if (lUserDirection.Dot(lAutoPilotDirection) >= 0)	// User wants to go in the same direction as AI, so AI helps.
 			{
@@ -1015,6 +1089,17 @@ void DownwashManager::TickUiInput()
 			SetAvatarEnginePower(lObject, 4, lPowerFwdRev);
 			SetAvatarEnginePower(lObject, 5, lPowerLeftRight);
 			SetAvatarEnginePower(lObject, 7, lUserDirection.y);
+			// Kids' push engine.
+			if (mAutopilot)
+			{
+				const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+				if (lAvatar)
+				{
+					const float f = std::min(1.0f, mAutopilot->GetRotorSpeed(lAvatar) / 14.0f);
+					SetAvatarEnginePower(lObject,  9, lUserControls.x*f);
+					SetAvatarEnginePower(lObject, 11, Math::Lerp(-0.8f, 1.0f, lUserDirection.y*f));
+				}
+			}
 
 			// Control fire.
 			const Life::Options::FireControl& f = mOptions.GetFireControl();
@@ -1648,35 +1733,118 @@ TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextO
 
 void DownwashManager::OnPauseButton(UiTbc::Button*)
 {
-	mMenu->CreateTestDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative));
+	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
+	if (!d)
+	{
+		return;
+	}
+	d->SetColor(Color(110, 110, 110, 160), OFF_BLACK, BLACK, BLACK);
+
+	UiTbc::FixedLayouter lLayouter(d);
+	lLayouter.SetContentWidthPart(0.7f);
+	lLayouter.SetContentHeightPart(0.7f);
+	const int lMargin = d->GetPreferredHeight() / 30;
+	lLayouter.SetContentMargin(lMargin);
+
+	str lPilotName;
+	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Pilot"));
+	const int lDifficultyMode = GetControlMode();
+	double lMasterVolume;
+	CURE_RTVAR_GET(lMasterVolume, =, GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
+	bool lAllowToyMode;
+	CURE_RTVAR_GET(lAllowToyMode, =, GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
+	double lRtrOffset;
+	CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+
+	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE, _T("pilot_name_field"));
+	lNameField->SetText(lPilotName);
+	lLayouter.AddWindow(lNameField, 0, 5, 0, 1);
+	lNameField->SetHorizontalMargin(lNameField->GetPreferredHeight() / 3);
+	//lNameField->SetKeyboardFocus();
+
+	lLayouter.SetContentXMargin(0);
+	UiTbc::RadioButton* lEasyButton = new UiTbc::RadioButton(Color(20, 30, 20), _T("Easy"));
+	lEasyButton->SetPressColor(Color(50, 210, 40));
+	lEasyButton->SetRoundedRadiusMask(0x9);
+	lEasyButton->SetPressed(lDifficultyMode == 2);
+	lLayouter.AddButton(lEasyButton, -2, 1, 5, 0, 3, false);
+	UiTbc::RadioButton* lMediumButton = new UiTbc::RadioButton(Color(30, 30, 20), _T("Medium"));
+	lMediumButton->SetPressColor(Color(170, 165, 10));
+	lMediumButton->SetRoundedRadiusMask(0);
+	lMediumButton->SetPressed(lDifficultyMode == 1);
+	lLayouter.AddButton(lMediumButton, -3, 1, 5, 1, 3, false);
+	UiTbc::RadioButton* lHardButton = new UiTbc::RadioButton(Color(30, 20, 20), _T("Hard"));
+	lHardButton->SetPressColor(Color(230, 40, 30));
+	lHardButton->SetRoundedRadiusMask(0x6);
+	lHardButton->SetPressed(lDifficultyMode == 0);
+	lLayouter.AddButton(lHardButton, -4, 1, 5, 2, 3, false);
+	lLayouter.SetContentXMargin(lMargin);
+
+	UiTbc::CheckButton* lToyModeButton = new UiTbc::CheckButton(Color(30, 70, 220), _T("Toy mode"));
+	lToyModeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
+	lToyModeButton->SetCheckedIcon(mCheckIcon->GetData());
+	lToyModeButton->SetDisabledIcon(mLockIcon->GetData());
+	lToyModeButton->Enable(lAllowToyMode);
+	lToyModeButton->SetPressed(lRtrOffset > 0.1);
+	lLayouter.AddButton(lToyModeButton, -5, 2, 5, 0, 2, false);
+
+	UiTbc::CheckButton* lBedsideVolumeButton = new UiTbc::CheckButton(Color(190, 50, 180), _T("Bedside volume"));
+	lBedsideVolumeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
+	lBedsideVolumeButton->SetCheckedIcon(mCheckIcon->GetData());
+	lBedsideVolumeButton->SetPressed(lMasterVolume < 0.5);
+	lLayouter.AddButton(lBedsideVolumeButton, -6, 3, 5, 0, 2, false);
+	UiTbc::Button* lHiscoreButton = new UiTbc::Button(Color(90, 50, 10), _T("High score"));
+	lHiscoreButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
+	lLayouter.AddButton(lHiscoreButton, -7, 3, 5, 1, 2, true);
+
+	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(220, 110, 20), _T("Restart from first level"));
+	lRestartButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
+	lLayouter.AddButton(lRestartButton, -8, 4, 5, 0, 1, true);
+
+	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
+	lLayouter.AddCornerButton(lCloseButton, -9);
+
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 }
 
 void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 {
-	if (pButton->GetTag() == 1)
+	if (pButton->GetTag() == -2)
 	{
-		double lChildishness;
-		CURE_RTVAR_GET(lChildishness, =, GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.6);
-		lChildishness = ::floor(100 * (lChildishness-0.1)) / 100;
-		if (lChildishness < 0)
-		{
-			lChildishness = 1;
-		}
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, lChildishness);
-		pButton->SetText(strutil::Format(_T("%.0f %%"), lChildishness*100));
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	}
-	else if (pButton->GetTag() == 2)
+	else if (pButton->GetTag() == -3)
+	{
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.5);
+	}
+	else if (pButton->GetTag() == -4)
+	{
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+	}
+	else if (pButton->GetTag() == -5)
+	{
+		const bool lToyMode = (pButton->GetState() == UiTbc::Button::PRESSED);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, lToyMode? 2.0 : 1.0);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, lToyMode? 1.0 : 0.0);
+	}
+	else if (pButton->GetTag() == -6)
+	{
+		const bool lBedsideVolume = (pButton->GetState() == UiTbc::Button::PRESSED);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lBedsideVolume? 0.05 : 1.0);
+	}
+	else if (pButton->GetTag() == -7)
+	{
+		// Show hiscore!
+	}
+	else if (pButton->GetTag() == -8)
 	{
 		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
 		mSetRandomChopperColor = false;
 	}
-	else if (pButton->GetTag() == 3)
+	else if (pButton->GetTag() == -9)
 	{
 		HiResTimer::StepCounterShadow();
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
@@ -1791,6 +1959,10 @@ void DownwashManager::ScriptPhysicsTick()
 		}
 	}
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId, true);
+	if (Lepra::GameTimer::GetRealTimeRatio() < 0.01f)
+	{
+		return;	// Wait until game runs again before resetting chopper.
+	}
 	if (mAvatarCreateTimer.IsStarted() || lAvatar)
 	{
 		mAvatarDied.Stop();
@@ -1867,89 +2039,92 @@ void DownwashManager::HandleWorldBoundaries()
 
 void DownwashManager::MoveCamera()
 {
-	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	if (lAvatar)
-	{
-		UpdateChopperColor(0.1f);
+	UpdateChopperColor(0.05f);
+	UpdateCameraDistance();
 
-		float lHalfCamDistance;
-		CURE_RTVAR_GET(lHalfCamDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
-		lHalfCamDistance /= 2;
-		mCameraPreviousPosition = mCameraTransform.GetPosition();
-		Vector3DF lAvatarPosition = lAvatar->GetPosition();
-		float ox, oy, oz, ax;
+	float lHalfCamDistance;
+	CURE_RTVAR_GET(lHalfCamDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
+	lHalfCamDistance /= 2;
+	mCameraPreviousPosition = mCameraTransform.GetPosition();
+	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+	Vector3DF lAvatarPosition = mHelicopterPosition;
+	float lSpeedX = 0;
+	float ax;
+	CURE_RTVAR_GET(ax, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
+	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
+	{
+		lAvatarPosition = lAvatar->GetPosition();
+		float ox, oy, oz;
 		CURE_RTVAR_GET(ox, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
 		CURE_RTVAR_GET(oy, =(float), GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
 		CURE_RTVAR_GET(oz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
-		CURE_RTVAR_GET(ax, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
 		lAvatarPosition.x += ox;
 		lAvatarPosition.y += oy;
 		lAvatarPosition.z += oz;
 		mHelicopterPosition = lAvatarPosition;
-		TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -2*lHalfCamDistance, 0));
-		++mPostZoomPlatformFrameCount;
+		lSpeedX = lAvatar->GetVelocity().x;
 		if (Cure::Health::Get(lAvatar) <= 0)
 		{
 			mSetRandomChopperColor = true;
-			return;
 		}
-		else if (mZoomPlatform)
-		{
-			Cure::ContextObject* lLevel = mOldLevel? mOldLevel : mLevel;
-			lTargetTransform.GetPosition() = GetLandingTriggerPosition(lLevel) + Vector3DF(0, 0, 10);
-			mPostZoomPlatformFrameCount = 0;
-		}
-		else if (mHitGroundFrameCount >= -STILL_FRAMES_UNTIL_CAM_PANS)
-		{
-			lTargetTransform.GetPosition().z += lHalfCamDistance;
-		}
-
-		Vector3DF lCamXZPos(mCameraTransform.GetPosition());
-		lCamXZPos.y = 0;
-		if (lCamXZPos.GetDistance(lAvatarPosition) > 2*lHalfCamDistance)
-		{
-			mCameraTransform = lTargetTransform;
-			mCameraSpeed = 0;
-		}
-		else
-		{
-			Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
-			mCameraTransform.GetPosition().x += lDelta.x;
-			//mCameraTransform.GetPosition().z += lDelta.z;
-			mCameraTransform.GetPosition().z += Math::SmoothClamp(lDelta.z, -2.0f, +2.0f, 0.2f);
-			mCameraTransform.GetPosition().y += Math::SmoothClamp(lDelta.y, -1.3f, +2.0f, 0.2f);
-		}
-
-		// Angle.
-		const float x = lAvatarPosition.y - mCameraTransform.GetPosition().y;
-		const float y = lAvatarPosition.z - mCameraTransform.GetPosition().z;
-		const float lXAngle = ::atan2(y, x) + ax;
-		lTargetTransform.GetOrientation().RotateAroundOwnX(lXAngle);
-		if (mPostZoomPlatformFrameCount > 10)
-		{
-			const float lSpeedX = lAvatar->GetVelocity().x;
-			mCameraSpeed = Math::Lerp(mCameraSpeed, lSpeedX*0.4f, 0.05f);
-			//mCameraSpeed = Math::Clamp(mCameraSpeed, -3.0f, +4.0f);
-			const float z = lAvatarPosition.x + mCameraSpeed - mCameraTransform.GetPosition().x;
-			const int lSmoothSteps = mPostZoomPlatformFrameCount-10;
-			const float lSmoothFactor = (lSmoothSteps >= 100)? 1.0f : lSmoothSteps/100.0f;
-			const float lZAngle = -::atan2(z, x) * lSmoothFactor;
-			lTargetTransform.GetOrientation().RotateAroundWorldZ(lZAngle);
-		}
-		mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 0.5f);
-		/*float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
-		lFoV = Math::SmoothClamp(lFoV, 30.0f, 60.0f, 0.4f);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);*/
-
-		/*CURE_RTVAR_ARITHMETIC(GetVariableScope(), "cam_ang", double, +, 0.01, 0.0, 3000.0);
-		QuaternionF q;
-		mCameraTransform = TransformationF(QuaternionF(), Vector3DF(0, -300, 50));
-		mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(1,0,1), (float)CURE_RTVAR_SLOW_TRYGET(GetVariableScope(), "cam_ang", 0.0));
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);*/
-
-		lAvatarPosition.y -= 5.0f;	// Move closer to edge to avoid jitter.
-		UpdateMassObjects(lAvatarPosition);
 	}
+	TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -2*lHalfCamDistance, 0));
+	++mPostZoomPlatformFrameCount;
+	if (mZoomPlatform)
+	{
+		Cure::ContextObject* lLevel = mOldLevel? mOldLevel : mLevel;
+		lTargetTransform.GetPosition() = GetLandingTriggerPosition(lLevel) + Vector3DF(0, 0, 10);
+		mPostZoomPlatformFrameCount = 0;
+	}
+	else if (mHitGroundFrameCount >= -STILL_FRAMES_UNTIL_CAM_PANS)
+	{
+		lTargetTransform.GetPosition().z += lHalfCamDistance;
+	}
+
+	Vector3DF lCamXZPos(mCameraTransform.GetPosition());
+	lCamXZPos.y = 0;
+	if (lCamXZPos.GetDistance(lAvatarPosition) > 2*lHalfCamDistance)
+	{
+		mCameraTransform = lTargetTransform;
+		mCameraSpeed = 0;
+	}
+	else
+	{
+		Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
+		mCameraTransform.GetPosition().x += lDelta.x;
+		//mCameraTransform.GetPosition().z += lDelta.z;
+		mCameraTransform.GetPosition().z += Math::SmoothClamp(lDelta.z, -2.0f, +2.0f, 0.2f);
+		mCameraTransform.GetPosition().y += Math::SmoothClamp(lDelta.y, -1.3f, +2.0f, 0.2f);
+	}
+
+	// Angle.
+	const float x = lAvatarPosition.y - mCameraTransform.GetPosition().y;
+	const float y = lAvatarPosition.z - mCameraTransform.GetPosition().z;
+	const float lXAngle = ::atan2(y, x) + ax;
+	lTargetTransform.GetOrientation().RotateAroundOwnX(lXAngle);
+	if (mPostZoomPlatformFrameCount > 10)
+	{
+		mCameraSpeed = Math::Lerp(mCameraSpeed, lSpeedX*0.4f, 0.05f);
+		//mCameraSpeed = Math::Clamp(mCameraSpeed, -3.0f, +4.0f);
+		const float z = lAvatarPosition.x + mCameraSpeed - mCameraTransform.GetPosition().x;
+		const int lSmoothSteps = mPostZoomPlatformFrameCount-10;
+		const float lSmoothFactor = (lSmoothSteps >= 100)? 1.0f : lSmoothSteps/100.0f;
+		const float lZAngle = -::atan2(z, x) * lSmoothFactor;
+		lTargetTransform.GetOrientation().RotateAroundWorldZ(lZAngle);
+	}
+	mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 0.5f);
+	/*float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
+	lFoV = Math::SmoothClamp(lFoV, 30.0f, 60.0f, 0.4f);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);*/
+
+	/*CURE_RTVAR_ARITHMETIC(GetVariableScope(), "cam_ang", double, +, 0.01, 0.0, 3000.0);
+	QuaternionF q;
+	mCameraTransform = TransformationF(QuaternionF(), Vector3DF(0, -300, 50));
+	mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(1,0,1), (float)CURE_RTVAR_SLOW_TRYGET(GetVariableScope(), "cam_ang", 0.0));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);*/
+
+	lAvatarPosition.y -= 5.0f;	// Move closer to edge to avoid jitter.
+	UpdateMassObjects(lAvatarPosition);
 }
 
 void DownwashManager::UpdateCameraPosition(bool pUpdateMicPosition)
@@ -1989,7 +2164,8 @@ void DownwashManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, floa
 
 void DownwashManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)
 {
-	(void)pResource;
+	mUiManager->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*pResource->GetRamData(), pResource->GetData(),
+		UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
 }
 
 void DownwashManager::RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource)

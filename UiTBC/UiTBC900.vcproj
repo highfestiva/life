@@ -658,6 +658,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Source\GUI\UiFixedLayouter.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\GUI\UiFloatingLayout.cpp"
 					>
 				</File>
@@ -1033,6 +1037,10 @@
 				</File>
 				<File
 					RelativePath=".\Include\GUI\UiFileNameField.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\GUI\UiFixedLayouter.h"
 					>
 				</File>
 				<File

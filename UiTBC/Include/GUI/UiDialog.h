@@ -33,6 +33,7 @@ public:
 	Label* SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId);
 	void AddButton(int pTag, const str& pText, bool pAutoDismiss);	// Tag < 0 to layout yourself.
 	void AddButton(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
+	void SetButtonHandler(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
 	bool IsAutoDismissButton(Button* pButton) const;
 	void SetOffset(PixelCoord pOffset);
 	virtual void UpdateLayout();

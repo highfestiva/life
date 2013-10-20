@@ -14,7 +14,7 @@ namespace UiTbc
 
 
 
-Button::Button(const str& pName) :
+Button::Button(const str& pName):
 	Window(pName),
 	mOnPress(0),
 	mOnRelease(0),
@@ -22,6 +22,7 @@ Button::Button(const str& pName) :
 	mOnDrag(0),
 	mIconID(Painter::INVALID_IMAGEID),
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
+	mDisabledIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
 	mTextBackgColor(255, 255, 255),
@@ -32,6 +33,7 @@ Button::Button(const str& pName) :
 {
 	SetBaseColor(GetColor());
 	Init();
+	SetText(pName);
 }
 
 Button::Button(const Color& pColor, const str& pName):
@@ -42,6 +44,7 @@ Button::Button(const Color& pColor, const str& pName):
 	mOnDrag(0),
 	mIconID(Painter::INVALID_IMAGEID),
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
+	mDisabledIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
 	mTextBackgColor(255, 255, 255),
@@ -52,6 +55,7 @@ Button::Button(const Color& pColor, const str& pName):
 {
 	SetBaseColor(GetColor());
 	Init();
+	SetText(pName);
 }
 
 Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Color& pColor,
@@ -63,6 +67,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mOnDrag(0),
 	mIconID(Painter::INVALID_IMAGEID),
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
+	mDisabledIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
 	mTextBackgColor(255, 255, 255),
@@ -73,6 +78,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 {
 	SetBaseColor(GetColor());
 	Init();
+	SetText(pName);
 }
 
 Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImageID,
@@ -92,6 +98,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mPressingImageID(pPressingImageID),
 	mIconID(Painter::INVALID_IMAGEID),
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
+	mDisabledIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
 	mTextBackgColor(255, 255, 255),
@@ -102,6 +109,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 {
 	SetBaseColor(GetColor());
 	Init();
+	SetText(pName);
 }
 
 Button::~Button()
@@ -119,6 +127,11 @@ void Button::SetBaseColor(const Color& pColor)
 	mPressColor = GetColor() * 0.95f;
 	GetClientRectComponent()->SetIsHollow(false);
 	SetPressed(false);
+}
+
+void Button::SetPressColor(const Color& pColor)
+{
+	mPressColor = pColor;
 }
 
 void Button::SetPressed(bool pPressed)
@@ -143,7 +156,7 @@ void Button::SetPressed(bool pPressed)
 
 void Button::SetState(State pState)
 {
-	if (mState == pState)
+	if (mState == pState || !mEnabled)
 	{
 		return;
 	}
@@ -244,52 +257,45 @@ void Button::Repaint(Painter* pPainter)
 	//pPainter->ReduceClippingRect(lRect);
 
 	int lOffset = GetPressed() ? 1 : 0;
-	int lTextX = lRect.mLeft;
-
-	if (mIconID != Painter::INVALID_IMAGEID)
+	int lTextX = lRect.mLeft + mHorizontalMargin;
+	switch(mIconAlignment)
 	{
-		PixelCoord lImageSize(lIMan->GetImageSize(mIconID));
+		case ICON_CENTER:
+			lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
+		break;
+	}
+
+	Painter::ImageID lIconId = GetCurrentIcon();
+	if (lIconId != Painter::INVALID_IMAGEID)
+	{
+		PixelCoord lImageSize(lIMan->GetImageSize(lIconId));
 
 		int x = 0;
 		int y = 0;
-		switch(mIconAlignment)
+		switch (mIconAlignment)
 		{
 			case ICON_LEFT:
 				x = lRect.mLeft + lOffset;
 				y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2 + lOffset;
-				lTextX = lRect.mLeft + lImageSize.x;
+				lTextX = lRect.mLeft + lImageSize.x + mHorizontalMargin;
 			break;
 			case ICON_CENTER:
 				x = lRect.mLeft + (lRect.GetWidth()  - lImageSize.x) / 2 + lOffset;
 				if (!mText.empty())
 				{
 					y = lRect.mTop;
-					lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
 				}
 				else
 				{
 					y = lRect.GetCenterY() - lImageSize.y/2;
-					lTextX = 0;
 				}
 			break;
 			case ICON_RIGHT:
-				x = lRect.mRight - lImageSize.x + lOffset;
+				x = lRect.mRight - lImageSize.x + lOffset - mHorizontalMargin;
 				y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2 + lOffset;
 			break;
 		}
-		if (mHighlightedIconId != Painter::INVALID_IMAGEID &&
-			(mState == PRESSED || mState == PRESSING
-#ifndef LEPRA_TOUCH	// Hoover states only exist and work on non-touch devices (i.e. computers w/ mouse/trackball).
-			|| mState == PRESSED_HOOVER || mState == RELEASED_HOOVER
-#endif // !Touch
-			))
-		{
-			lIMan->DrawImage(mHighlightedIconId, x, y);
-		}
-		else
-		{
-			lIMan->DrawImage(mIconID, x, y);
-		}
+		lIMan->DrawImage(lIconId, x, y);
 	}
 
 	RepaintComponents(pPainter);
@@ -310,7 +316,7 @@ void Button::Repaint(Painter* pPainter)
 	else
 	{
 		PrintText(pPainter, 
-			  lRect.mLeft + (lRect.GetWidth() - pPainter->GetStringWidth(mText.c_str())) / 2 + lOffset, 
+			  lTextX + lOffset, 
 			  lRect.mTop + (lRect.GetHeight() - pPainter->GetFontHeight()) / 2 + lOffset);
 	}
 
@@ -478,7 +484,7 @@ bool Button::GetPressed()
 	return mPressed;
 }
 
-Button::State Button::GetState()
+Button::State Button::GetState() const
 {
 	return mState;
 }
@@ -489,11 +495,14 @@ void Button::SetIcon(Painter::ImageID pIconID,
 	mIconID = pIconID;
 	mIconAlignment = pAlignment;
 
-	PixelCoord lSize = GetImageManager()->GetImageSize(mIconID);
-	DesktopWindow* lTopmost = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-	const int lFontHeight = lTopmost? lTopmost->GetPainter()->GetFontHeight()*3/2 : 21;	// Just try anything if not into system yet.
-	const int dh = GetText().empty()? 0 : lFontHeight;
-	SetPreferredSize(lSize.x, lSize.y + dh);
+	if (mIconID != Painter::INVALID_IMAGEID && mIconAlignment == ICON_CENTER)
+	{
+		PixelCoord lSize = GetImageManager()->GetImageSize(mIconID);
+		DesktopWindow* lTopmost = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
+		const int lFontHeight = lTopmost? lTopmost->GetPainter()->GetFontHeight()*3/2 : 21;	// Just try anything if not into system yet.
+		const int dh = GetText().empty()? 0 : lFontHeight;
+		SetPreferredSize(lSize.x, lSize.y + dh);
+	}
 
 	SetNeedsRepaint(true);
 }
@@ -507,6 +516,30 @@ void Button::SetHighlightedIcon(Painter::ImageID pIconId)
 {
 	mHighlightedIconId = pIconId;
 	SetNeedsRepaint(true);
+}
+
+void Button::SetDisabledIcon(Painter::ImageID pIconId)
+{
+	mDisabledIconId = pIconId;
+	SetNeedsRepaint(true);
+}
+
+Painter::ImageID Button::GetCurrentIcon() const
+{
+	if (mDisabledIconId != Painter::INVALID_IMAGEID && !mEnabled)
+	{
+		return mDisabledIconId;
+	}
+	else if (mHighlightedIconId != Painter::INVALID_IMAGEID &&
+		(mState == PRESSED || mState == PRESSING
+#ifndef LEPRA_TOUCH	// Hoover states only exist and work on non-touch devices (i.e. computers w/ mouse/trackball).
+		|| mState == PRESSED_HOOVER || mState == RELEASED_HOOVER
+#endif // !Touch
+		))
+	{
+		return mHighlightedIconId;
+	}
+	return mIconID;
 }
 
 void Button::SetText(const str& pText, 

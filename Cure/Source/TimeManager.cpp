@@ -45,6 +45,7 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mAbsoluteTime = 0;
 	mTickTimeOverhead = 0;
 	mRealTimeRatio = 1.0;
+	mGameRealTimeRatio = 1.0f;
 	mPhysicsFrameCounter = pPhysicsFrameCounter;
 	mCurrentFrameTime = 1/(float)mTargetFrameRate;
 	mAverageFrameTime = mCurrentFrameTime;
@@ -58,7 +59,8 @@ void TimeManager::Tick()
 	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	bool lPhysicsHalt;
 	CURE_RTVAR_GET(lPhysicsHalt, =, Cure::GetSettings(), RTVAR_PHYSICS_HALT, false);
-	GameTimer::SetRealTimeRatio(lPhysicsHalt? 0 : mRealTimeRatio);
+	mGameRealTimeRatio = lPhysicsHalt? 0 : mRealTimeRatio;
+	GameTimer::SetRealTimeRatio(mGameRealTimeRatio);
 	bool lIsFixedFps;
 	CURE_RTVAR_GET(lIsFixedFps, =, Cure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 
@@ -221,6 +223,11 @@ int TimeManager::GetPhysicsFrameDelta(int pEnd, int pStart) const
 float TimeManager::GetNormalFrameTime() const
 {
 	return mAverageFrameTime * mRealTimeRatio;
+}
+
+float TimeManager::GetNormalGameFrameTime() const
+{
+	return mAverageFrameTime * mGameRealTimeRatio;
 }
 
 float TimeManager::GetRealNormalFrameTime() const

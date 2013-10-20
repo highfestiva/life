@@ -146,9 +146,15 @@ void Dialog::AddButton(int pTag, Button* pButton, bool pAutoDismiss)
 {
 	//pButton->SetBaseColor(Color(0, 0, 0, 0));
 	pButton->SetText(pButton->GetText(), mColor[1]);
-	pButton->SetTag(pTag);
 	AddChild(pButton);
 	mButtonList.push_back(pButton);
+	SetButtonHandler(pTag, pButton, pAutoDismiss);
+	UpdateLayout();
+}
+
+void Dialog::SetButtonHandler(int pTag, Button* pButton, bool pAutoDismiss)
+{
+	pButton->SetTag(pTag);
 	if (pAutoDismiss)
 	{
 		pButton->SetOnClick(Dialog, OnDismissClick);
@@ -157,7 +163,6 @@ void Dialog::AddButton(int pTag, Button* pButton, bool pAutoDismiss)
 	{
 		pButton->SetOnClick(Dialog, OnClick);
 	}
-	UpdateLayout();
 }
 
 bool Dialog::IsAutoDismissButton(Button* pButton) const
@@ -185,7 +190,16 @@ void Dialog::UpdateLayout()
 	const int lButtonCount = (int)mButtonList.size();
 	if (lButtonCount)
 	{
-		Button* lButton = mButtonList[0];
+		// Find first auto-layouted button.
+		Button* lButton = 0;
+		for (int i = 0; i < lButtonCount; ++i)
+		{
+			lButton = mButtonList[i];
+			if (lButton->GetTag() >= 0)
+			{
+				break;
+			}
+		}
 		const PixelCoord lButtonSize = lButton->GetPreferredSize();
 		const bool lLayoutX = ((lSize.x - lButtonSize.x*lButtonCount) > (lSize.y - lButtonSize.y*lButtonCount));
 		if (lLayoutX)

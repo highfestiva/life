@@ -22,7 +22,6 @@ TextField::TextField(Component* pTopParent, const str& pName) :
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
-	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -46,7 +45,6 @@ TextField::TextField(Component* pTopParent,
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
-	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -70,7 +68,6 @@ TextField::TextField(Component* pTopParent,
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
-	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -93,7 +90,6 @@ TextField::TextField(Component* pTopParent,
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
-	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -116,7 +112,6 @@ TextField::TextField(Component* pTopParent,
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
-	mTextPadX(3),
 	mMarkerID(Painter::INVALID_IMAGEID),
 	mMarkerPos(0),
 	mMarkerVisible(false),
@@ -512,8 +507,7 @@ void TextField::SetupMarkerBlink()
 	{
 		lDesktopWin->AddIdleSubscriber(this);
 		lDesktopWin->ActivateKeyboard();
-		mMarkerTimer.UpdateTimer();
-		mMarkerTimer.ClearTimeDiff();
+		mMarkerTimer.PopTimeDiff();
 		mMarkerVisible = true;
 		SetNeedsRepaint(true);
 
@@ -589,7 +583,7 @@ void TextField::Repaint(Painter* pPainter)
 	pPainter->ReduceClippingRect(lRect);
 #endif // !Touch
 
-	int lMarkerX  = mTextX + mTextPadX + pPainter->GetStringWidth(GetVisibleText().substr(0, mMarkerPos));
+	int lMarkerX  = mTextX + mHorizontalMargin + pPainter->GetStringWidth(GetVisibleText().substr(0, mMarkerPos));
 	int lMarkerWidth = 1;
 
 	if (mMarkerID != Painter::INVALID_IMAGEID)
@@ -609,7 +603,7 @@ void TextField::Repaint(Painter* pPainter)
 		lMarkerX = 0;
 	}
 
-	int lTextX = lRect.mLeft + mTextX + mTextPadX;
+	int lTextX = lRect.mLeft + mTextX + mHorizontalMargin;
 	int lTextY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
 
 	PrintTextDeactivate(pPainter, GetVisibleText(), lTextX, lTextY);
@@ -655,7 +649,7 @@ Component::StateComponentList TextField::GetStateList(ComponentState pState)
 void TextField::UpdateMarkerPos(Painter* pPainter)
 {
 	PixelRect lRect(GetClientRect());
-	int lTextX = (mClickX - lRect.mLeft) - mTextX - mTextPadX;
+	int lTextX = (mClickX - lRect.mLeft) - mTextX - mHorizontalMargin;
 
 	// Search for the correct marker position using binary search.
 	size_t lMin = 0;

@@ -18,7 +18,8 @@ TextComponent::TextComponent():
 	mTextColor(OFF_BLACK),
 	mFontId(FontManager::INVALID_FONTID),
 	mIsFontActive(false),
-	mVAlignment(VALIGN_CENTER)
+	mVAlignment(VALIGN_CENTER),
+	mHorizontalMargin(3)
 {
 }
 
@@ -66,6 +67,11 @@ void TextComponent::DeactivateFont(Painter* pPainter)
 		mFontId = lOurFontId;
 		mIsFontActive = false;
 	}
+}
+
+void TextComponent::SetHorizontalMargin(int pHorizontalMargin)
+{
+	mHorizontalMargin = pHorizontalMargin;
 }
 
 void TextComponent::SetVericalAlignment(VAlign pAlignment)

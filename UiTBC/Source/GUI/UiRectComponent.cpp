@@ -1,32 +1,38 @@
-/*
-	Class:  RectComponent
-	Author: Jonas Byström
-	Copyright (c) Pixel Doctrine
-*/
+
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
+
+
 
 #include "../../Include/GUI/UiRectComponent.h"
 #include "../../Include/GUI/UiDesktopWindow.h"
 
+
+
 namespace UiTbc
 {
 
-RectComponent::RectComponent(const str& pName, Layout* pLayout) :
+
+
+RectComponent::RectComponent(const str& pName, Layout* pLayout):
 	Component(pName, pLayout),
 	mShaded(false),
 	mHollow(true),
 	mBehaveSolid(false),
 	mImageID(Painter::INVALID_IMAGEID),
-	mCornerRadius(0)
+	mCornerRadius(0),
+	mCornerRadiusMask(0xF)
 {
 }
 
-RectComponent::RectComponent(const Color& pColor, const str& pName, Layout* pLayout) :
+RectComponent::RectComponent(const Color& pColor, const str& pName, Layout* pLayout):
 	Component(pName, pLayout),
 	mShaded(false),
 	mHollow(false),
 	mBehaveSolid(false),
 	mImageID(Painter::INVALID_IMAGEID),
-	mCornerRadius(0)
+	mCornerRadius(0),
+	mCornerRadiusMask(0xF)
 {
 	mColor[0] = pColor;
 	mColor[1].Set(0, 0, 0, 0);
@@ -39,12 +45,13 @@ RectComponent::RectComponent(const Color& pTopLeftColor,
 			     const Color& pBottomRightColor,
 			     const Color& pBottomLeftColor,
 			     const str& pName,
-			     Layout* pLayout) :
+			     Layout* pLayout):
 	Component(pName, pLayout),
 	mShaded(true),
 	mHollow(false),
 	mBehaveSolid(false),
 	mCornerRadius(0),
+	mCornerRadiusMask(0xF),
 	mImageID(Painter::INVALID_IMAGEID)
 {
 	mColor[0] = pTopLeftColor;
@@ -53,12 +60,13 @@ RectComponent::RectComponent(const Color& pTopLeftColor,
 	mColor[3] = pBottomLeftColor;
 }
 
-RectComponent::RectComponent(Painter::ImageID pImageID, const str& pName, Layout* pLayout) :
+RectComponent::RectComponent(Painter::ImageID pImageID, const str& pName, Layout* pLayout):
 	Component(pName, pLayout),
 	mShaded(false),
 	mHollow(false),
 	mBehaveSolid(false),
 	mCornerRadius(0),
+	mCornerRadiusMask(0xF),
 	mImageID(pImageID)
 {
 	mColor[0].Set(0, 0, 0, 0);
@@ -125,10 +133,10 @@ void RectComponent::RepaintBackground(Painter* pPainter)
 			const int dy = lRect.GetHeight()/2;
 			std::vector<Vector2DF> lCoords;
 			lCoords.push_back(Vector2DF((float)x, (float)y));
-			AddRadius(lCoords, x-dx+mCornerRadius, y-dy+mCornerRadius, mCornerRadius, +PIF/2, 0);
-			AddRadius(lCoords, x+dx-mCornerRadius, y-dy+mCornerRadius, mCornerRadius, 0,      -PIF/2);
-			AddRadius(lCoords, x+dx-mCornerRadius, y+dy-mCornerRadius, mCornerRadius, -PIF/2, -PIF);
-			AddRadius(lCoords, x-dx+mCornerRadius, y+dy-mCornerRadius, mCornerRadius, +PIF,   +PIF/2);
+			TryAddRadius(lCoords, x-dx+mCornerRadius, y-dy+mCornerRadius, mCornerRadius, +PIF/2, 0,      0x1);
+			TryAddRadius(lCoords, x+dx-mCornerRadius, y-dy+mCornerRadius, mCornerRadius, 0,      -PIF/2, 0x2);
+			TryAddRadius(lCoords, x+dx-mCornerRadius, y+dy-mCornerRadius, mCornerRadius, -PIF/2, -PIF,   0x4);
+			TryAddRadius(lCoords, x-dx+mCornerRadius, y+dy-mCornerRadius, mCornerRadius, +PIF,   +PIF/2, 0x8);
 			// Back to start.
 			lCoords.push_back(lCoords[1]);
 			pPainter->DrawFan(lCoords, true);
@@ -267,9 +275,19 @@ bool RectComponent::GetBehaveSolid() const
 
 
 
+int RectComponent::GetCornerRadius() const
+{
+	return mCornerRadius;
+}
+
 void RectComponent::SetCornerRadius(int pRadius)
 {
 	mCornerRadius = pRadius;
+}
+
+void RectComponent::SetCornerRadiusMask(int pMask)
+{
+	mCornerRadiusMask = pMask;
 }
 
 void RectComponent::AddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle)
@@ -283,6 +301,26 @@ void RectComponent::AddRadius(VertexList& pVertexList, int x, int y, int r, floa
 		pVertexList.push_back(Vector2DF(x-r*::sin(a), y-r*::cos(a)));
 	}
 }
+
+void RectComponent::TryAddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pMask)
+{
+	if (mCornerRadiusMask&pMask)
+	{
+		AddRadius(pVertexList, x, y, r, pStartAngle, pEndAngle);
+	}
+	else
+	{
+		switch (pMask)
+		{
+			case 1:	x -= r;	y -= r;	break;
+			case 2:	x += r;	y -= r;	break;
+			case 4:	x += r;	y += r;	break;
+			case 8:	x -= r;	y += r;	break;
+		}
+		pVertexList.push_back(Vector2DF((float)x, (float)y));
+	}
+}
+
 
 
 }

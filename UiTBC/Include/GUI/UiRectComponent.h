@@ -61,10 +61,13 @@ public:
 	void SetBehaveSolid(bool pBehaveSolid);
 	bool GetBehaveSolid() const;
 
+	int GetCornerRadius() const;
 	void SetCornerRadius(int pRadius);
+	void SetCornerRadiusMask(int pMask);
 	static void AddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle);
 
 protected:
+	void TryAddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pMask);
 	bool IsHollow();
 	bool IsShaded();
 
@@ -75,6 +78,7 @@ private:
 	bool mHollow;
 	bool mBehaveSolid;
 	int mCornerRadius;
+	int mCornerRadiusMask;
 
 	Painter::ImageID mImageID;
 };

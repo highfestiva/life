@@ -18,6 +18,7 @@
 #define RTVAR_GAME_PERSONALRECORD_LEVEL	"Game.PersonalRecord.Level"
 #define RTVAR_GAME_STARTLEVEL		"Game.StartLevel"
 #define RTVAR_GAME_WORLDRECORD_LEVEL	"Game.WorldRecord.Level"
+#define RTVAR_GAME_PILOTNAME		"Game.PilotName"
 
 #define RTVAR_PHYSICS_RTR_OFFSET	"Physics.RTR.Offset"
 

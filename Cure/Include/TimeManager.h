@@ -59,6 +59,8 @@ public:
 	int GetPhysicsFrameDelta(int pEnd, int pStart) const;
 	// Returns the frame time we normally reach on this system (filtered, sliding average frame time, includes real time ratio).
 	float GetNormalFrameTime() const;
+	// Returns the game frame time we normally reach on this system (filtered, sliding average frame time, includes real time ratio and halted physics).
+	float GetNormalGameFrameTime() const;
 	// Returns the frame time we normally reach on this system IRL, i.e. not counting real time ratio.
 	float GetRealNormalFrameTime() const;
 	// Returns the physics:real time ratio.
@@ -95,6 +97,7 @@ private:
 	float mTickTimeModulo;	// Contains the time that was "left over" since last physics step.
 	float mTickTimeOverhead;	// How much slower the call frequency is compared to what we would want.
 	float mRealTimeRatio;
+	float mGameRealTimeRatio;
 	float mPhysicsSpeedAdjustmentTime;	// Total number of seconds that our our physics time needs adjusting.
 	int mPhysicsSpeedAdjustmentFrameCount;	// The number of physics steps to adjust our physics time over.
 	int mPhysicsFrameCounter;	// Holds the index of the current physics frame.

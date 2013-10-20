@@ -885,7 +885,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	Color c = Color(210, 50, 40);
 	lCancelButton->SetBaseColor(c);
 	lCancelButton->SetText(_T("Cancel"), FGCOLOR_DIALOG, CLEAR_COLOR);
-	lCancelButton->SetRoundedStyle(8);
+	lCancelButton->SetRoundedRadius(8);
 	lCancelButton->SetPreferredSize(d->GetSize().x - mHiscoreTextField->GetPos().x*2 - mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
 	d->AddButton(-1, lCancelButton);
 	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
@@ -1154,7 +1154,7 @@ UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor)
 	UiTbc::Button* lButton = new UiTbc::Button(pColor, pText);
 	lButton->SetText(pText);
 	lButton->SetPreferredSize(200, 48);
-	lButton->SetRoundedStyle(10);
+	lButton->SetRoundedRadius(10);
 	lButton->UpdateLayout();
 	return lButton;
 }

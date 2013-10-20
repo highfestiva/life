@@ -100,7 +100,7 @@ void Machine::OnTick()
 
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	float lRealTimeRatio = lTimeManager->GetRealTimeRatio();
-	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
+	const float lFrameTime = lTimeManager->GetNormalGameFrameTime();
 	const bool lIsChild = IsAttributeTrue(_T("float_childishness"));
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;

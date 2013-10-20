@@ -1,63 +1,36 @@
-/*
-	Class:  CheckButton
-	Author: Jonas Byström
-	Copyright (c) Pixel Doctrine
-*/
 
-#ifndef UICHECKBUTTON_H
-#define UICHECKBUTTON_H
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
+
+
+#pragma once
 #include "UiButton.h"
+
+
 
 namespace UiTbc
 {
 
-class CheckButton : public Button
+
+
+class CheckButton: public Button
 {
+	typedef Button Parent;
 public:
-
 	CheckButton(const Color& pBodyColor, const str& pName);
-	CheckButton(Painter::ImageID pReleasedImageID,
-		    Painter::ImageID pPressedImageID,
-		    Painter::ImageID pReleasedActiveImageID,	// Mouse over.
-		    Painter::ImageID pPressedActiveImageID,
-		    Painter::ImageID pReleasingImageID,
-		    Painter::ImageID pPressingImageID,
-		    const str& pName);
-
 	virtual ~CheckButton();
 
 	virtual void Repaint(Painter* pPainter);
-	virtual bool IsOver(int pScreenX, int pScreenY);
-
 	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
 
+	void SetCheckedIcon(Painter::ImageID pIconId);
+	virtual Painter::ImageID GetCurrentIcon() const;
+
 protected:
-
-	virtual void OnTextChanged();
-
-private:
-
-	static Painter::ImageID smCheckIconID;
-	static const uint8 smIconCheck[];
-	static Painter* smPrevPainter;
-
-	bool mUserDefinedGfx;
-	bool mUpdateSize;
-
-	Color mBodyColor;
-	Color mLightColor;
-	Color mDarkColor1;
-	Color mDarkColor2;
-
-	Painter::ImageID mReleasedID;
-	Painter::ImageID mReleasedActiveID;
-	Painter::ImageID mReleasingID;
-	Painter::ImageID mPressedID;
-	Painter::ImageID mPressedActiveID;
-	Painter::ImageID mPressingID;
+	Painter::ImageID mCheckedIconId;
 };
 
-} // End namespace.
 
-#endif
+
+}

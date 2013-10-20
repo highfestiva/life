@@ -78,6 +78,7 @@ public:
 
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
 	GeometryList GetControlledGeometryList() const;
+	void SetStrength(float pStrength);
 	bool SetValue(unsigned pAspect, float pValue);
 	void ForceSetValue(unsigned pAspect, float pValue);
 

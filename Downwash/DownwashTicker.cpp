@@ -46,6 +46,8 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 	}
 	AddBackedRtvar(_T(RTVAR_PHYSICS_RTR_OFFSET));
 	AddBackedRtvar(_T(RTVAR_GAME_ALLOWTOYMODE));
+	AddBackedRtvar(_T(RTVAR_GAME_PILOTNAME));
+	AddBackedRtvar(_T(RTVAR_UI_SOUND_MASTERVOLUME));
 }
 
 DownwashTicker::~DownwashTicker()

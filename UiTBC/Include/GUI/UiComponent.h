@@ -106,6 +106,8 @@ public:
 	virtual void SetSelected(bool pSelected);
 	bool GetSelected() const;
 
+	virtual void Enable(bool pEnable);
+
 	// The exact interpretation of pParam1 and pParam2 depends on the layout.
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
@@ -238,7 +240,6 @@ protected:
 
 	void DeleteLayout(int pLayer);
 
-private:
 	typedef std::hash_set<UiLepra::TextInputObserver*, LEPRA_VOIDP_HASHER> TextListenerSet;
 	typedef std::hash_set<UiLepra::KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyListenerSet;
 	TextListenerSet mTextListenerSet;
@@ -260,6 +261,7 @@ private:
 	bool mVisible;
 	bool mAdaptivePreferredSize;
 	bool mSelected;
+	bool mEnabled;
 
 	// Used by DesktopWindow to optimize rendering.
 	Painter::ImageID mImageID;

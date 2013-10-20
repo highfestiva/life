@@ -102,6 +102,11 @@ PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const
 	return lList;
 }
 
+void PhysicsEngine::SetStrength(float pStrength)
+{
+	mStrength = pStrength;
+}
+
 bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 {
 	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);

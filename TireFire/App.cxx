@@ -1268,7 +1268,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	Color c = Color(180, 50, 40);
 	lCancelButton->SetBaseColor(c);
 	lCancelButton->SetText(_T("Cancel"), FGCOLOR_DIALOG, CLEAR_COLOR);
-	lCancelButton->SetRoundedStyle(8);
+	lCancelButton->SetRoundedRadius(8);
 	lCancelButton->SetPreferredSize(300-mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
 	d->AddButton(-1, lCancelButton);
 	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);

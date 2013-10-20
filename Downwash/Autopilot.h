@@ -33,6 +33,7 @@ public:
 	float GetClosestPathDistance() const;
 	Vector3DF GetClosestPathVector() const;
 	Vector3DF GetLastAvatarPosition() const;
+	float GetRotorSpeed(const Cure::ContextObject* pChopper) const;
 
 private:
 	void CheckStalledRotor(Cure::ContextObject* pChopper);

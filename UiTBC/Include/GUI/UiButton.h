@@ -107,6 +107,7 @@ public:
 	virtual ~Button();
 
 	virtual void SetBaseColor(const Color& pColor);
+	virtual void SetPressColor(const Color& pColor);
 
 	virtual void SetPressed(bool pPressed);
 	bool GetPressed();
@@ -122,6 +123,8 @@ public:
 	void SetIcon(Painter::ImageID pIconID, IconAlignment pAlignment);
 	Painter::ImageID GetIconCanvas() const;
 	void SetHighlightedIcon(Painter::ImageID pIconId);
+	void SetDisabledIcon(Painter::ImageID pIconId);
+	virtual Painter::ImageID GetCurrentIcon() const;
 
 	void SetText(const str& pText, const Color& pTextColor = Lepra::WHITE, const Color& pBackgColor = Lepra::BLACK);
 	const str& GetText();
@@ -144,7 +147,7 @@ public:
 	void SetTag(int pTag);
 	int GetTag() const;
 
-	State GetState();
+	State GetState() const;
 	void SetState(State pState);
 
 	virtual void ForceRepaint();
@@ -156,7 +159,7 @@ public:
 	Delegate* mOnClick;
 	DelegateXYXY* mOnDrag;
 
-private:
+protected:
 	Painter::ImageID mReleasedImageID;
 	Painter::ImageID mPressedImageID;
 	Painter::ImageID mReleasedActiveImageID;
@@ -166,9 +169,11 @@ private:
 
 	Painter::ImageID mIconID;
 	Painter::ImageID mHighlightedIconId;
+	Painter::ImageID mDisabledIconId;
 	IconAlignment mIconAlignment;
 
 	str mText;
+	int mTextMargin;
 	Color mTextBackgColor;
 
 	Color mHooverColor;
