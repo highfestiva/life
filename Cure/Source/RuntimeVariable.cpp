@@ -384,7 +384,7 @@ str RuntimeVariableScope::GetUntypedDefaultValue(GetMode pMode, const str& pName
 		case RuntimeVariable::DATATYPE_REAL:
 		{
 			double d = GetDefaultValue(pMode, pName, lVariable, 0.0);
-			return strutil::Format(_T("%.1f"), d);
+			return strutil::Format(_T("%.4f"), d);
 		}
 	}
 	return EmptyString;

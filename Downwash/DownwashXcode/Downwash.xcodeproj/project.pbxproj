@@ -504,6 +504,7 @@
 		B1A8B1AD16C7E8D900F57DC1 /* IntAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */; };
 		B1A8B1B116C7EA7100F57DC1 /* ProjectileUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */; };
 		B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */; };
+		B1A971B918148AB30029E569 /* UiFixedLayouter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A971B818148AB30029E569 /* UiFixedLayouter.cpp */; };
 		B1B0C87E17FE08B4000953EF /* RotatingController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1B0C87D17FE08B4000953EF /* RotatingController.mm */; };
 		B1B185341784BCC200853D12 /* AirBalloonPilot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */; };
 		B1B559CD17F77E1C00A4BB17 /* CanonDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CB17F77E1C00A4BB17 /* CanonDriver.cpp */; };
@@ -1254,6 +1255,7 @@
 		B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IntAttribute.cpp; path = ../../Cure/Source/IntAttribute.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1B016C7EA7100F57DC1 /* ProjectileUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectileUtil.cpp; path = ../../Life/ProjectileUtil.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSoundReleaser.cpp; path = ../../UiCure/Source/UiSoundReleaser.cpp; sourceTree = SOURCE_ROOT; };
+		B1A971B818148AB30029E569 /* UiFixedLayouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiFixedLayouter.cpp; sourceTree = "<group>"; };
 		B1B0C87D17FE08B4000953EF /* RotatingController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RotatingController.mm; sourceTree = "<group>"; };
 		B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AirBalloonPilot.cpp; sourceTree = "<group>"; };
 		B1B4898F13F9BD6C0047C78A /* Downwash-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Downwash-Info.plist"; sourceTree = "<group>"; };
@@ -1587,6 +1589,7 @@
 				B19A13CA13A122CE0051A61C /* UiCustomButton.cpp */,
 				B19A13CB13A122CE0051A61C /* UiDesktopWindow.cpp */,
 				B19A13CC13A122CE0051A61C /* UiFileNameField.cpp */,
+				B1A971B818148AB30029E569 /* UiFixedLayouter.cpp */,
 				B19A13CD13A122CE0051A61C /* UiFloatingLayout.cpp */,
 				B19A13CE13A122CE0051A61C /* UiGridLayout.cpp */,
 				B19A13CF13A122CE0051A61C /* UiGUIImageManager.cpp */,
@@ -3166,6 +3169,7 @@
 				B1B0C87E17FE08B4000953EF /* RotatingController.mm in Sources */,
 				B1C4116718033EC7007D64F7 /* SystemUtil.mm in Sources */,
 				B1B80C3D180F4294003AE676 /* Menu.cpp in Sources */,
+				B1A971B918148AB30029E569 /* UiFixedLayouter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

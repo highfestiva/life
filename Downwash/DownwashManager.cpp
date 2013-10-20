@@ -951,7 +951,7 @@ void DownwashManager::UpdateCameraDistance()
 	lCamDistance = (lCamDistance+110)/2;	// Smooth towards a sensible cam distance.
 	if (mMenu->GetDialog() != 0)
 	{
-		lCamDistance *= 0.3f;
+		lCamDistance *= 0.4f;
 	}
 	lCamDistance = std::min(110.0, lCamDistance);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, lCamDistance);
@@ -1732,7 +1732,7 @@ TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextO
 
 
 
-void DownwashManager::OnPauseButton(UiTbc::Button*)
+void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 {
 	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
 	if (!d)
@@ -1740,6 +1740,7 @@ void DownwashManager::OnPauseButton(UiTbc::Button*)
 		return;
 	}
 	d->SetColor(Color(110, 110, 110, 160), OFF_BLACK, BLACK, BLACK);
+	pButton->SetVisible(false);
 
 	UiTbc::FixedLayouter lLayouter(d);
 	lLayouter.SetContentWidthPart(0.7f);
@@ -1788,12 +1789,15 @@ void DownwashManager::OnPauseButton(UiTbc::Button*)
 	lToyModeButton->Enable(lAllowToyMode);
 	lToyModeButton->SetPressed(lRtrOffset > 0.1);
 	lLayouter.AddButton(lToyModeButton, -5, 2, 5, 0, 2, false);
-	UiTbc::TextArea* lUnlockLabel = new UiTbc::TextArea(BLACK);
-	lUnlockLabel->GetClientRectComponent()->SetIsHollow(true);
-	lUnlockLabel->SetFontColor(WHITE);
-	lUnlockLabel->AddText(_T("Finish all levels to\nunlock toy mode"));
-	lLayouter.AddComponent(lUnlockLabel, 2, 5, 1, 2);
-	lUnlockLabel->SetHorizontalMargin(lUnlockLabel->GetPreferredHeight() / 3);
+	if (!lAllowToyMode)
+	{
+		UiTbc::TextArea* lUnlockLabel = new UiTbc::TextArea(BLACK);
+		lUnlockLabel->GetClientRectComponent()->SetIsHollow(true);
+		lUnlockLabel->SetFontColor(WHITE);
+		lUnlockLabel->AddText(_T("Finish all levels to\nunlock toy mode"));
+		lLayouter.AddComponent(lUnlockLabel, 2, 5, 1, 2);
+		lUnlockLabel->SetHorizontalMargin(lUnlockLabel->GetPreferredHeight() / 3);
+	}
 
 	UiTbc::CheckButton* lBedsideVolumeButton = new UiTbc::CheckButton(Color(190, 50, 180), _T("Bedside volume"));
 	lBedsideVolumeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
@@ -1837,7 +1841,7 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	else if (pButton->GetTag() == -6)
 	{
 		const bool lBedsideVolume = (pButton->GetState() == UiTbc::Button::PRESSED);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lBedsideVolume? 0.05 : 1.0);
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lBedsideVolume? 0.02 : 1.0);
 	}
 	else if (pButton->GetTag() == -7)
 	{
@@ -1847,6 +1851,7 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	else if (pButton->GetTag() == -8)
 	{
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, ((UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0))->GetText());	// Always save pilot name.
+		mPauseButton->SetVisible(true);
 		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
@@ -1856,6 +1861,7 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	else if (pButton->GetTag() == -9)
 	{
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, ((UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0))->GetText());	// Always save pilot name.
+		mPauseButton->SetVisible(true);
 		HiResTimer::StepCounterShadow();
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
 	}
@@ -2093,7 +2099,7 @@ void DownwashManager::MoveCamera()
 
 	Vector3DF lCamXZPos(mCameraTransform.GetPosition());
 	lCamXZPos.y = 0;
-	if (lCamXZPos.GetDistance(lAvatarPosition) > 2*lHalfCamDistance)
+	if (lCamXZPos.GetDistance(lAvatarPosition) > 110.0)
 	{
 		mCameraTransform = lTargetTransform;
 		mCameraSpeed = 0;
