@@ -24,6 +24,7 @@ TextArea::TextArea(const Color& pColor, const str& pName):
 	mScrollLock(false),
 	mMaxLineCount(50)
 {
+	mHorizontalMargin = 0;
 	Init();
 }
 
@@ -36,6 +37,7 @@ TextArea::TextArea(Painter::ImageID pImageId, const str& pName):
 	mScrollLock(false),
 	mMaxLineCount(50)
 {
+	mHorizontalMargin = 0;
 	Init();
 }
 
@@ -229,7 +231,7 @@ void TextArea::Repaint(Painter* pPainter)
 	for (int y = lBeginY; s != mLineList.end() && y < lEndY; ++y, ++s)
 	{
 		pPainter->SetColor(s->mColor);
-		pPainter->PrintText(s->mText, lRect.mLeft, lRect.mTop+y*mLineHeight+lPixelOffsetY);
+		pPainter->PrintText(s->mText, lRect.mLeft+mHorizontalMargin, lRect.mTop+y*mLineHeight+lPixelOffsetY);
 	}
 
 	pPainter->PopAttrib();

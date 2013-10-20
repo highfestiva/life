@@ -104,9 +104,9 @@ void Menu::DismissDialog()
 	}
 }
 
-bool Menu::IsDialogVisible() const
+UiTbc::Dialog* Menu::GetDialog()
 {
-	return mDialog != 0;
+	return mDialog;
 }
 
 Cure::ResourceManager* Menu::GetResourceManager() const

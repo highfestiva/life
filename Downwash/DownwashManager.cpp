@@ -44,6 +44,7 @@
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFixedLayouter.h"
 #include "../UiTBC/Include/GUI/UiRadioButton.h"
+#include "../UiTBC/Include/GUI/UiTextArea.h"
 #include "../UiTBC/Include/GUI/UiTextField.h"
 #include "../UiTBC/Include/UiBillboardGeometry.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
@@ -162,9 +163,9 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_06"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Pilot"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 }
@@ -254,7 +255,7 @@ bool DownwashManager::Open()
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	if (lOk)
 	{
-		mPauseButton = ICONBTNA("grenade.png", "");
+		mPauseButton = ICONBTNA("icon_pause.png", "");
 		int x = mRenderArea.GetCenterX() - 32;
 		int y = mRenderArea.mBottom - 76;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
@@ -414,7 +415,7 @@ bool DownwashManager::Paint()
 		return false;
 	}
 
-	if (mStick && !mMenu->IsDialogVisible())
+	if (mStick && !mMenu->GetDialog() != 0)
 	{
 		DrawStick(mStick);
 		mStick->ResetTap();
@@ -948,7 +949,7 @@ void DownwashManager::UpdateCameraDistance()
 {
 	double lCamDistance = 11.3 * mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
 	lCamDistance = (lCamDistance+110)/2;	// Smooth towards a sensible cam distance.
-	if (mMenu->IsDialogVisible())
+	if (mMenu->GetDialog() != 0)
 	{
 		lCamDistance *= 0.3f;
 	}
@@ -1747,7 +1748,7 @@ void DownwashManager::OnPauseButton(UiTbc::Button*)
 	lLayouter.SetContentMargin(lMargin);
 
 	str lPilotName;
-	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Pilot"));
+	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
 	const int lDifficultyMode = GetControlMode();
 	double lMasterVolume;
 	CURE_RTVAR_GET(lMasterVolume, =, GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
@@ -1756,7 +1757,7 @@ void DownwashManager::OnPauseButton(UiTbc::Button*)
 	double lRtrOffset;
 	CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 
-	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE, _T("pilot_name_field"));
+	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE, _T("pilot_name"));
 	lNameField->SetText(lPilotName);
 	lLayouter.AddWindow(lNameField, 0, 5, 0, 1);
 	lNameField->SetHorizontalMargin(lNameField->GetPreferredHeight() / 3);
@@ -1787,6 +1788,12 @@ void DownwashManager::OnPauseButton(UiTbc::Button*)
 	lToyModeButton->Enable(lAllowToyMode);
 	lToyModeButton->SetPressed(lRtrOffset > 0.1);
 	lLayouter.AddButton(lToyModeButton, -5, 2, 5, 0, 2, false);
+	UiTbc::TextArea* lUnlockLabel = new UiTbc::TextArea(BLACK);
+	lUnlockLabel->GetClientRectComponent()->SetIsHollow(true);
+	lUnlockLabel->SetFontColor(WHITE);
+	lUnlockLabel->AddText(_T("Finish all levels to\nunlock toy mode"));
+	lLayouter.AddComponent(lUnlockLabel, 2, 5, 1, 2);
+	lUnlockLabel->SetHorizontalMargin(lUnlockLabel->GetPreferredHeight() / 3);
 
 	UiTbc::CheckButton* lBedsideVolumeButton = new UiTbc::CheckButton(Color(190, 50, 180), _T("Bedside volume"));
 	lBedsideVolumeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
@@ -1834,10 +1841,12 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	}
 	else if (pButton->GetTag() == -7)
 	{
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, ((UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0))->GetText());	// Always save pilot name.
 		// Show hiscore!
 	}
 	else if (pButton->GetTag() == -8)
 	{
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, ((UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0))->GetText());	// Always save pilot name.
 		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
@@ -1846,6 +1855,7 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	}
 	else if (pButton->GetTag() == -9)
 	{
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, ((UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0))->GetText());	// Always save pilot name.
 		HiResTimer::StepCounterShadow();
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
 	}
