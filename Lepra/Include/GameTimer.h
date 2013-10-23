@@ -23,6 +23,8 @@ public:
 	inline double PopTimeDiff();
 	// May only be used once per frame, or couting will be off!
 	inline double QueryTimeDiff();
+	inline double GetTimeDiff() const;
+	inline void ReduceTimeDiff(double pSeconds);
 
 	inline bool TryStart();
 	inline void Start(double pOffset = 0);
@@ -59,6 +61,16 @@ double GameTimer::QueryTimeDiff()
 {
 	mGameTime += mTimer.PopTimeDiff()*mRealTimeRatio;
 	return mGameTime;
+}
+
+double GameTimer::GetTimeDiff() const
+{
+	return mGameTime;
+}
+
+void GameTimer::ReduceTimeDiff(double pSeconds)
+{
+	mGameTime -= pSeconds;
 }
 
 bool GameTimer::TryStart()

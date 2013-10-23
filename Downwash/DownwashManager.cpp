@@ -465,6 +465,10 @@ bool DownwashManager::Paint()
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
 		mUiManager->GetPainter()->SetLineWidth(1);
 
+		// TRICKY: this needs to be run every loop, or time is not updated. Especially important
+		//         when user is able to toggle between toy mode and normal mode.
+		const double lTime = mFlyTime.QuerySplitTime();
+
 		double lRtrOffset;
 		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 		if (lRtrOffset > 0.1)
@@ -480,7 +484,6 @@ bool DownwashManager::Paint()
 		else
 		{
 			const bool lIsFlying = mFlyTime.IsStarted();
-			const double lTime = mFlyTime.QuerySplitTime();
 			const bool lIsSloppy = (lIsFlying || !lTime);
 			PrintTime(_T(""), lTime, lIsSloppy, 100, 3, Color(192, 210, 220), Color(10, 10, 10, 128));
 
@@ -777,7 +780,10 @@ bool DownwashManager::DidFinishLevel()
 		const double lTime = mFlyTime.QuerySplitTime();
 		const double lLevelBestTime = GetCurrentLevelBestTime(false);
 		const bool lIsEasyMode = (GetControlMode() == 2);
-		if (lTime > 0 && (lTime < lLevelBestTime || lLevelBestTime <= 0) && !lIsEasyMode)
+		double lRtrOffset;
+		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+		const bool lIsToyMode = (lRtrOffset >= 0.5);
+		if (lTime > 0 && (lTime < lLevelBestTime || lLevelBestTime <= 0) && !lIsEasyMode && !lIsToyMode)
 		{
 			SetLevelBestTime(GetCurrentLevelNumber(), false, lTime);
 
@@ -1867,11 +1873,11 @@ void DownwashManager::ShowHiscoreDialog(int pDirection)
 	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
 	lLayouter.AddCornerButton(lCloseButton, -9);
 
-	lLayouter.SetContentWidthPart(0.95f);
+	lLayouter.SetContentWidthPart(1);
 	UiTbc::Button* lPrevLevelButton = ICONBTNA("btn_prev.png", "");
 	UiTbc::Button* lNextLevelButton = ICONBTNA("btn_next.png", "");
-	lLayouter.AddButton(lPrevLevelButton, -100, 2, 5, 0, 1, 8, true);
-	lLayouter.AddButton(lNextLevelButton, -101, 2, 5, 7, 1, 8, true);
+	lLayouter.AddButton(lPrevLevelButton, -100, 0, 1, 0, 1, 7, true);
+	lLayouter.AddButton(lNextLevelButton, -101, 0, 1, 6, 1, 7, true);
 	lPrevLevelButton->GetClientRectComponent()->SetIsHollow(true);
 	lPrevLevelButton->GetClientRectComponent()->SetBehaveSolid(true);
 	lNextLevelButton->GetClientRectComponent()->SetIsHollow(true);
@@ -1954,6 +1960,8 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, lPilotNameField->GetText());
 	}
 
+	float lPreChildishness;
+	CURE_RTVAR_GET(lPreChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	if (pButton->GetTag() == -2)
 	{
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
@@ -1961,10 +1969,13 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	else if (pButton->GetTag() == -3)
 	{
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.5);
+		if (lPreChildishness > 0.75f) mFlyTime.ReduceTimeDiff(-mFlyTime.GetTimeDiff());	// Penalty for changing from easy mode.
 	}
 	else if (pButton->GetTag() == -4)
 	{
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+		if (lPreChildishness > 0.75f) mFlyTime.ReduceTimeDiff(-mFlyTime.GetTimeDiff());	// Penalty for changing from easy mode.
+		if (lPreChildishness > 0.25f) mFlyTime.ReduceTimeDiff(-mFlyTime.GetTimeDiff());	// Penalty for changing from medium mode.
 	}
 	else if (pButton->GetTag() == -5)
 	{
