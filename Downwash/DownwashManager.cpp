@@ -113,9 +113,10 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mLastHiscoreButton(0),
 	mStick(0),
 	mWrongDirectionImage(0),
-	mArrow(0),
+	mWinImage(0),
 	mCheckIcon(0),
 	mLockIcon(0),
+	mArrow(0),
 	mArrowBillboard(0),
 	mArrowBillboardId(0),
 	mArrowTotalPower(0),
@@ -268,10 +269,6 @@ bool DownwashManager::Open()
 	{
 		mWrongDirectionImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mWrongDirectionImage->Load(GetResourceManager(), _T("direction.png"),
-			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
-
-		mWinImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mWinImage->Load(GetResourceManager(), _T("win.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 
 		mCheckIcon = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
@@ -566,23 +563,47 @@ bool DownwashManager::Paint()
 			}
 		}
 	}
-	if (mWinImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE && mWinImageTimer.IsStarted())
+	if (mWinImageTimer.IsStarted())
 	{
-		const float sf = ::sin((float)mWinImageTimer.QueryTimeDiff()*PIF/2.7f);
-		const float f = std::min(1.0f, sf*1.3f);
-		if (f < 0)
+		if (!mWinImage)
 		{
-			mWinImageTimer.Stop();
+			mWinImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+			const str lName = strutil::Format(_T("win%i.png"), Random::GetRandomNumber()%9);
+			mLog.Infof(_T("Showing win image %s."), lName.c_str());
+			mWinImage->LoadUnique(GetResourceManager(), lName,
+				UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
+		}
+		if (mWinImage->GetLoadState() == Cure::RESOURCE_LOAD_IN_PROGRESS)
+		{
+			mWinImageTimer.PopTimeDiff();	// Reset timer as long as we're not loaded.
+		}
+		else if (mWinImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			const float sf = ::sin((float)mWinImageTimer.QueryTimeDiff()*PIF/2.7f);
+			const float f = std::min(1.0f, sf*1.3f);
+			if (f < 0)
+			{
+				mWinImageTimer.Stop();
+				mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(mWinImage->GetData());
+				delete mWinImage;
+				mWinImage = 0;
+			}
+			else
+			{
+				float x = 12*2+64;
+				float s = Math::Clamp(mUiManager->GetCanvas()->GetWidth() / 4.0f, 128.0f, 256.0f);
+				float y = f*s;
+				y = mRenderArea.GetHeight()-y;
+				x += s*0.5f;
+				y += s*0.5f;
+				DrawImage(mWinImage->GetData(), x, y, s, s, 0);
+			}
 		}
 		else
 		{
-			float x = 12*2+64;
-			float s = Math::Clamp(mUiManager->GetCanvas()->GetWidth() / 4.0f, 128.0f, 256.0f);
-			float y = f*s;
-			y = mRenderArea.GetHeight()-y;
-			x += s*0.5f;
-			y += s*0.5f;
-			DrawImage(mWinImage->GetData(), x, y, s, s, 0);
+			deb_assert(false);
+			delete mWinImage;
+			mWinImage = 0;
 		}
 	}
 
@@ -1121,7 +1142,7 @@ void DownwashManager::TickUiInput()
 			}
 			// Pull the brakes a little bit.
 			const float lCurrentFlyingDirectionX = lObject->GetVelocity().x * 0.05f;
-			lUserDirection.x -= lCurrentFlyingDirectionX;
+			lUserDirection.x = Math::Clamp(lUserDirection.x-lCurrentFlyingDirectionX, -1.0f, +1.0f);
 			// X follows helicopter yaw.
 			float lYaw, _;
 			lObject->GetOrientation().GetEulerAngles(lYaw, _, _);
@@ -1133,13 +1154,9 @@ void DownwashManager::TickUiInput()
 			// Kids' push engine.
 			if (mAutopilot)
 			{
-				const Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-				if (lAvatar)
-				{
-					const float f = std::min(1.0f, mAutopilot->GetRotorSpeed(lAvatar) / 14.0f);
-					SetAvatarEnginePower(lObject,  9, lUserControls.x*f);
-					SetAvatarEnginePower(lObject, 11, Math::Lerp(-1.9f, 1.0f, lUserDirection.y*f));
-				}
+				const float f = std::min(1.0f, mAutopilot->GetRotorSpeed(lObject) / 14.0f);
+				SetAvatarEnginePower(lObject,  9, lUserControls.x*f);
+				SetAvatarEnginePower(lObject, 11, Math::Lerp(-1.0f, 1.0f, lUserDirection.y*f));
 			}
 
 			// Control fire.
@@ -2451,8 +2468,11 @@ void DownwashManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, floa
 
 void DownwashManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)
 {
-	mUiManager->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*pResource->GetRamData(), pResource->GetData(),
-		UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
+	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mUiManager->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*pResource->GetRamData(), pResource->GetData(),
+			UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
+	}
 }
 
 void DownwashManager::RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource)

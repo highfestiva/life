@@ -78,7 +78,7 @@ PainterImageResource::UserData PainterImageResource::GetUserData(const Cure::Use
 
 bool PainterImageResource::Load()
 {
-	deb_assert(!IsUnique());
+	//deb_assert(!IsUnique());
 	deb_assert(GetRamData() == 0);
 	SetRamData(new Canvas());
 	File* lFile = GetManager()->QueryFile(GetName());

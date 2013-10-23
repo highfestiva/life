@@ -126,6 +126,7 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 		}
 		lImpact = mLightImpact;
 	}
+	lImpact = std::min(2.0f, lImpact);
 	const TBC::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
 	OnCollision(lImpact, pPosition, lKey, lKey->GetMaterial());
 }
