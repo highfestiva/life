@@ -75,6 +75,10 @@ void GameClientSlaveManager::SetMasterServerConnection(MasterServerConnection* p
 	mMasterServerConnection = pConnection;
 }
 
+void GameClientSlaveManager::Suspend()
+{
+}
+
 void GameClientSlaveManager::LoadSettings()
 {
 	str lExternalServerAddress;

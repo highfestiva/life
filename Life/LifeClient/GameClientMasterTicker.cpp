@@ -129,6 +129,18 @@ void GameClientMasterTicker::Suspend()
 {
 	Parent::Suspend();
 
+	ScopeLock lLock(&mLock);
+
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->Suspend();
+		}
+	}
+
 	Cure::RuntimeVariableScope* lScope = UiCure::GetSettings();
 	lScope = mSlaveArray[0]? mSlaveArray[0]->GetVariableScope() : lScope;
 	SaveRtvars(lScope);

@@ -66,6 +66,7 @@ public:
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~DownwashManager();
+	virtual void Suspend();
 	virtual void LoadSettings();
 	virtual void SaveSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);

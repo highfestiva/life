@@ -176,6 +176,14 @@ DownwashManager::~DownwashManager()
 
 }
 
+void DownwashManager::Suspend()
+{
+	if (!mMenu->GetDialog())
+	{
+		OnPauseButton(mPauseButton);
+	}
+}
+
 void DownwashManager::LoadSettings()
 {
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
@@ -1130,7 +1138,7 @@ void DownwashManager::TickUiInput()
 				{
 					const float f = std::min(1.0f, mAutopilot->GetRotorSpeed(lAvatar) / 14.0f);
 					SetAvatarEnginePower(lObject,  9, lUserControls.x*f);
-					SetAvatarEnginePower(lObject, 11, Math::Lerp(-0.8f, 1.0f, lUserDirection.y*f));
+					SetAvatarEnginePower(lObject, 11, Math::Lerp(-1.9f, 1.0f, lUserDirection.y*f));
 				}
 			}
 
@@ -1855,6 +1863,7 @@ void DownwashManager::OnLastHiscoreButton(UiTbc::Button* pButton)
 void DownwashManager::ShowHiscoreDialog(int pDirection)
 {
 	mPauseButton->SetVisible(false);
+	mHiscoreJustUploadedTimer.Stop();
 	mMenu->DismissDialog();
 	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
