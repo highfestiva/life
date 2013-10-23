@@ -73,12 +73,6 @@ public:
 	typedef ButtonType<Button>::DelegateXY DelegateXY;
 	typedef ButtonType<Button>::DelegateXYXY DelegateXYXY;
 
-	enum IconAlignment
-	{
-		ICON_LEFT = 0,
-		ICON_CENTER,
-		ICON_RIGHT,
-	};
 	enum State
 	{
 		RELEASED = 0,

@@ -49,7 +49,7 @@ Caption::Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHe
 	SetMinSize(0, pHeight);
 	SetPreferredSize(PixelCoord(0, pHeight));
 
-	mLabel = new Label(false, _T("Label"));
+	mLabel = new Label(GetTextColor(), _T(""));
 	mLabel->SetPreferredHeight(pHeight);
 
 	RectComponent* lTopLayer = new RectComponent(_T("TopLayer"), new GridLayout(1, 2));
@@ -111,7 +111,7 @@ Caption::Caption(const Color& pActiveTopLeftColor, const Color& pActiveTopRightC
 	SetMinSize(0, pHeight);
 	SetPreferredSize(PixelCoord(0, pHeight));
 
-	mLabel = new Label(false, _T("Label"));
+	mLabel = new Label(GetTextColor(), _T(""));
 	mLabel->SetPreferredHeight(pHeight);
 
 	RectComponent* lTopLayer = new RectComponent(_T("TopLayer"), new GridLayout(1, 2));
@@ -177,7 +177,7 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 	SetMinSize(lLeftImageSize.x + lRightImageSize.x, pHeight);
 	SetPreferredSize(0, pHeight);
 
-	mLabel = new Label(false, _T("Label"));
+	mLabel = new Label(GetTextColor(), _T(""));
 	mLabel->SetPreferredHeight(pHeight);
 
 	RectComponent* lBottomLayer = new RectComponent(_T("BottomLayer"), new GridLayout(1, 3));
@@ -329,11 +329,11 @@ void Caption::SetActive(bool pActive)
 
 	if (mActive == true)
 	{
-		mLabel->SetText(mText, GetTextColor(), mActiveTextBackgColor);
+		mLabel->SetFontColor(GetTextColor());
 	}
 	else
 	{
-		mLabel->SetText(mText, mInactiveTextColor, mInactiveTextBackgColor);
+		mLabel->SetFontColor(mInactiveTextColor);
 	}
 }
 
@@ -395,7 +395,7 @@ bool Caption::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 
 void Caption::SetIcon(Painter::ImageID pIconID)
 {
-	mLabel->SetIcon(pIconID);
+	mLabel->SetIcon(pIconID, Label::ICON_LEFT);
 }
 
 void Caption::SetText(const str& pText,
@@ -410,7 +410,7 @@ void Caption::SetText(const str& pText,
 	mInactiveTextBackgColor = pInactiveBackgColor;
 	SetFontColor(pActiveTextColor);
 
-	mLabel->SetText(mText, GetTextColor(), mActiveTextBackgColor);
+	mLabel->SetText(mText);
 }
 
 bool Caption::Check(unsigned pFlags, unsigned pFlag)

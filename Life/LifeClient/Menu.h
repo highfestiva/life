@@ -47,12 +47,12 @@ public:
 
 	Cure::ResourceManager* GetResourceManager() const;
 
-protected:
 	void OnAction(UiTbc::Button* pButton);
 	void OnTapSound(UiTbc::Button* pButton);
 
 	void SoundLoadCallback(UiCure::UserSound2dResource* pResource);
 
+protected:
 	UiCure::GameUiManager* mUiManager;
 	Cure::ResourceManager* mResourceManager;
 	UiTbc::Dialog* mDialog;

@@ -11,11 +11,13 @@
 #include "../Cure/Include/Driver.h"
 #include "../Cure/Include/Elevator.h"
 #include "../Cure/Include/Health.h"
+#include "../Cure/Include/HiscoreAgent.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/IntAttribute.h"
 #include "../Cure/Include/NetworkClient.h"
 #include "../Cure/Include/Spawner.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../Lepra/Include/Obfuxator.h"
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../Lepra/Include/Time.h"
@@ -66,6 +68,7 @@
 #include "Version.h"
 
 #define STILL_FRAMES_UNTIL_CAM_PANS	4
+#define BG_COLOR			Color(110, 110, 110, 160)
 
 
 
@@ -74,33 +77,11 @@ namespace Downwash
 
 
 
-namespace
-{
-
-struct Score
-{
-	str mName;
-	int mKills;
-	int mDeaths;
-	int mPing;
-};
-
-struct DeathsAscendingOrder
-{
-	bool operator() (const Score& a, const Score& b) { return a.mDeaths < b.mDeaths; }
-}
-gDeathsAscendingOrder;
-
-struct KillsDecendingOrder
-{
-	bool operator() (const Score& a, const Score& b) { return a.mKills > b.mKills; }
-}
-gKillsDecendingOrder;
-
 const int ORDERED_LEVELNO[]	= { 6, 7, 8, 9, 5, 10, 0, 4, 11, 2, 1, 3, 12, 13 };
 const int REVERSED_LEVELNO[]	= { 6, 10, 9, 11, 7, 4, 0, 1, 2, 3, 5, 8, 12, 13 };
 
-}
+const str gPlatform = _T("any_system");
+const str gVehicleName = _T("helicopter_01");
 
 
 
@@ -109,6 +90,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
 	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mCollisionSoundManager(0),
+	mMenu(0),
 	mAvatarId(0),
 	mSetRandomChopperColor(false),
 	mHadAvatar(false),
@@ -127,9 +109,8 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mHitGroundFrameCount(STILL_FRAMES_UNTIL_CAM_PANS),
 	mIsHitThisFrame(false),
 	mLevelCompleted(false),
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	mPauseButton(0),
-#endif // Touch or emulated touch.
+	mLastHiscoreButton(0),
 	mStick(0),
 	mWrongDirectionImage(0),
 	mArrow(0),
@@ -139,7 +120,10 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mArrowBillboardId(0),
 	mArrowTotalPower(0),
 	mArrowAngle(0),
-	mSlowSystemCounter(0)
+	mSlowSystemCounter(0),
+	mHiscoreLevelIndex(-1),
+	mMyHiscoreIndex(-1),
+	mHiscoreAgent(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
@@ -153,9 +137,6 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mCollisionSoundManager->PreLoadSound(_T("explosion"));
 
 	SetConsoleManager(new DownwashConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
-
-	mMenu = new Life::Menu(mUiManager, GetResourceManager());
-	mMenu->SetButtonTapSound(_T("tap.wav"), 0.3f);
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, 0.03f, 0.2f);
 
@@ -252,17 +233,29 @@ void DownwashManager::SetRenderArea(const PixelRect& pRenderArea)
 bool DownwashManager::Open()
 {
 	bool lOk = Parent::Open();
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	if (lOk)
 	{
-		mPauseButton = ICONBTNA("icon_pause.png", "");
+		mPauseButton = ICONBTNA("btn_pause.png", "");
 		int x = mRenderArea.GetCenterX() - 32;
 		int y = mRenderArea.mBottom - 76;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
 		mPauseButton->SetVisible(true);
 		mPauseButton->SetOnClick(DownwashManager, OnPauseButton);
 	}
-#endif // Touch or emulated touch.
+	if (lOk)
+	{
+		mLastHiscoreButton = ICONBTNA("btn_hiscore.png", "");
+		int x = 12;
+		int y = mRenderArea.mBottom - 76;
+		mUiManager->GetDesktopWindow()->AddChild(mLastHiscoreButton, x, y);
+		mLastHiscoreButton->SetVisible(false);
+		mLastHiscoreButton->SetOnClick(DownwashManager, OnLastHiscoreButton);
+	}
+	if (lOk)
+	{
+		mMenu = new Life::Menu(mUiManager, GetResourceManager());
+		mMenu->SetButtonTapSound(_T("tap.wav"), 0.3f);
+	}
 	if (lOk)
 	{
 		mWrongDirectionImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
@@ -293,10 +286,12 @@ bool DownwashManager::Open()
 void DownwashManager::Close()
 {
 	ScopeLock lLock(GetTickLock());
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	delete mPauseButton;
 	mPauseButton = 0;
-#endif // Touch or emulated touch.
+	delete mLastHiscoreButton;
+	mLastHiscoreButton = 0;
+	delete mMenu;
+	mMenu = 0;
 	if (mSunlight)
 	{
 		delete mSunlight;
@@ -410,6 +405,19 @@ bool DownwashManager::Render()
 
 bool DownwashManager::Paint()
 {
+	{
+		int x = mRenderArea.GetCenterX() - 32;
+		int y = mRenderArea.mBottom - 76;
+		mPauseButton->SetPos(x, y);
+		x = 12;
+		mLastHiscoreButton->SetPos(x, y);
+		mLastHiscoreButton->SetVisible(mHiscoreJustUploadedTimer.IsStarted());
+		if (mHiscoreJustUploadedTimer.QuerySplitTime() > 10)
+		{
+			mHiscoreJustUploadedTimer.Stop();
+		}
+	}
+
 	if (!Parent::Paint())
 	{
 		return false;
@@ -427,6 +435,7 @@ bool DownwashManager::Paint()
 		mUiManager->GetPainter()->SetAlphaValue(160);
 
 		// Draw health bar first.
+		mUiManager->GetPainter()->SetLineWidth(2);
 		const int w = mUiManager->GetDisplayManager()->GetWidth();
 		const int m = w / 2;
 		const float lWidth = (float)(((int)(w * 134.0f/480.0f)) & ~1);
@@ -446,13 +455,15 @@ bool DownwashManager::Paint()
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
 		// Draw surrounding frame after.
 		mUiManager->GetPainter()->SetColor(Color(10, 30, 40), 0);
+		const int lPadding = 4;
 		lCoords.clear();
-		lCoords.push_back(Vector2DF(lMin-2, 16-2+0.4f));
-		lCoords.push_back(Vector2DF(lMin-2, 24+2+0.6f));
-		lCoords.push_back(Vector2DF(lMin+lWidth+2, 24+2+0.6f));
-		lCoords.push_back(Vector2DF(lMin+lWidth+2, 16-2+0.4f));
+		lCoords.push_back(Vector2DF(lMin-lPadding, 16-lPadding+0.4f));
+		lCoords.push_back(Vector2DF(lMin-lPadding, 24+lPadding+0.6f));
+		lCoords.push_back(Vector2DF(lMin+lWidth+lPadding, 24+lPadding+0.6f));
+		lCoords.push_back(Vector2DF(lMin+lWidth+lPadding, 16-lPadding+0.4f));
 		lCoords.push_back(lCoords[0]);
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
+		mUiManager->GetPainter()->SetLineWidth(1);
 
 		double lRtrOffset;
 		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
@@ -544,17 +555,17 @@ bool DownwashManager::Paint()
 			}
 		}
 	}
-	if (mWinImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE && mWinTimer.IsStarted())
+	if (mWinImage->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE && mWinImageTimer.IsStarted())
 	{
-		const float sf = ::sin((float)mWinTimer.QueryTimeDiff()*PIF/2.7f);
+		const float sf = ::sin((float)mWinImageTimer.QueryTimeDiff()*PIF/2.7f);
 		const float f = std::min(1.0f, sf*1.3f);
 		if (f < 0)
 		{
-			mWinTimer.Stop();
+			mWinImageTimer.Stop();
 		}
 		else
 		{
-			float x = 5;
+			float x = 12*2+64;
 			float s = Math::Clamp(mUiManager->GetCanvas()->GetWidth() / 4.0f, 128.0f, 256.0f);
 			float y = f*s;
 			y = mRenderArea.GetHeight()-y;
@@ -765,16 +776,31 @@ bool DownwashManager::DidFinishLevel()
 	{
 		const double lTime = mFlyTime.QuerySplitTime();
 		const double lLevelBestTime = GetCurrentLevelBestTime(false);
-		if (lTime > 0 && (lTime < lLevelBestTime || lLevelBestTime <= 0))
+		const bool lIsEasyMode = (GetControlMode() == 2);
+		if (lTime > 0 && (lTime < lLevelBestTime || lLevelBestTime <= 0) && !lIsEasyMode)
 		{
-			SetCurrentLevelBestTime(false, lTime);
+			SetLevelBestTime(GetCurrentLevelNumber(), false, lTime);
+
+			mHiscoreLevelIndex = GetCurrentLevelNumber();
+			mMyHiscoreIndex = -1;
+			mHiscoreJustUploadedTimer.Stop();
+			CreateHiscoreAgent();
+			const str lLevelName = strutil::Format(_T("level_%i"), GetCurrentLevelNumber());
+			str lPilotName;
+			CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
+			const int lNegativeTime = (int)(lTime*-1000);
+			if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, gVehicleName, lPilotName, lNegativeTime))
+			{
+				delete mHiscoreAgent;
+				mHiscoreAgent = 0;
+			}
 		}
 
 		UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 1.0f, 1.0f);
 		mZoomPlatform = true;
 		mLevelCompleted = true;
-		mWinTimer.Start();
+		mWinImageTimer.Start();
 		return true;
 	}
 	return false;
@@ -846,11 +872,10 @@ double DownwashManager::GetCurrentLevelBestTime(bool pWorld) const
 	return GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, lFastName, 0.0);
 }
 
-void DownwashManager::SetCurrentLevelBestTime(bool pWorld, double pTime)
+void DownwashManager::SetLevelBestTime(int pLevelIndex, bool pWorld, double pTime)
 {
-	const int lLevelIndex = GetCurrentLevelNumber();
 	const str lRecordFormat = pWorld? _T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i") : _T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i");
-	const str lLevelTimeVarName = strutil::Format(lRecordFormat.c_str(), lLevelIndex);
+	const str lLevelTimeVarName = strutil::Format(lRecordFormat.c_str(), pLevelIndex);
 	GetVariableScope()->SetValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, lLevelTimeVarName, pTime);
 }
 
@@ -941,6 +966,7 @@ void DownwashManager::TickInput()
 {
 	TickNetworkInput();
 	TickUiInput();
+	TickHiscore();
 }
 
 
@@ -949,7 +975,7 @@ void DownwashManager::UpdateCameraDistance()
 {
 	double lCamDistance = 11.3 * mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
 	lCamDistance = (lCamDistance+110)/2;	// Smooth towards a sensible cam distance.
-	if (mMenu->GetDialog() != 0)
+	if (mMenu && mMenu->GetDialog() != 0)
 	{
 		lCamDistance *= 0.4f;
 	}
@@ -1021,7 +1047,7 @@ void DownwashManager::UpdateControlMode()
 	if (GetControlMode() == 2)
 	{
 		// Helper engine on + upright stabilization high.
-		lAvatar->GetPhysics()->GetEngine(lHelperEngineIndex)->SetStrength(1000.0f);
+		lAvatar->GetPhysics()->GetEngine(lHelperEngineIndex)->SetStrength(8000.0f);
 		((TBC::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 3;
 	}
 	else
@@ -1125,7 +1151,7 @@ bool DownwashManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigne
 
 void DownwashManager::TickUiUpdate()
 {
-	if (!mIsHitThisFrame)
+	if (!mIsHitThisFrame && !mMenu->GetDialog())
 	{
 		--mHitGroundFrameCount;
 		if (mHitGroundFrameCount > 0)
@@ -1457,7 +1483,7 @@ void DownwashManager::OnLevelLoadCompleted()
 	}
 	else if (!lAvatar)
 	{
-		CreateChopper(_T("helicopter_01"));
+		CreateChopper(gVehicleName);
 	}
 	else
 	{
@@ -1503,6 +1529,7 @@ void DownwashManager::OnLevelLoadCompleted()
 		mLevel->SetEnginePower(lEngine, 1.0f);
 	}
 
+	UpdateHiscoreDialogTitle();
 	GetLandingTriggerPosition(mLevel);	// Update shadow landing trigger position.
 	mAutopilot->Reset();
 	mZoomPlatform = false;
@@ -1734,19 +1761,13 @@ TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextO
 
 void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 {
-	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
-	if (!d)
-	{
-		return;
-	}
-	d->SetColor(Color(110, 110, 110, 160), OFF_BLACK, BLACK, BLACK);
+	mMenu->OnTapSound(pButton);
 	pButton->SetVisible(false);
 
+	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
+	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
+
 	UiTbc::FixedLayouter lLayouter(d);
-	lLayouter.SetContentWidthPart(0.7f);
-	lLayouter.SetContentHeightPart(0.7f);
-	const int lMargin = d->GetPreferredHeight() / 30;
-	lLayouter.SetContentMargin(lMargin);
 
 	str lPilotName;
 	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
@@ -1760,7 +1781,7 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 
 	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE, _T("pilot_name"));
 	lNameField->SetText(lPilotName);
-	lLayouter.AddWindow(lNameField, 0, 5, 0, 1);
+	lLayouter.AddWindow(lNameField, 0, 5, 0, 1, 1);
 	lNameField->SetHorizontalMargin(lNameField->GetPreferredHeight() / 3);
 	//lNameField->SetKeyboardFocus();
 
@@ -1769,18 +1790,18 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	lEasyButton->SetPressColor(Color(50, 210, 40));
 	lEasyButton->SetRoundedRadiusMask(0x9);
 	lEasyButton->SetPressed(lDifficultyMode == 2);
-	lLayouter.AddButton(lEasyButton, -2, 1, 5, 0, 3, false);
+	lLayouter.AddButton(lEasyButton, -2, 1, 5, 0, 1, 3, false);
 	UiTbc::RadioButton* lMediumButton = new UiTbc::RadioButton(Color(30, 30, 20), _T("Medium"));
 	lMediumButton->SetPressColor(Color(170, 165, 10));
 	lMediumButton->SetRoundedRadiusMask(0);
 	lMediumButton->SetPressed(lDifficultyMode == 1);
-	lLayouter.AddButton(lMediumButton, -3, 1, 5, 1, 3, false);
+	lLayouter.AddButton(lMediumButton, -3, 1, 5, 1, 1, 3, false);
 	UiTbc::RadioButton* lHardButton = new UiTbc::RadioButton(Color(30, 20, 20), _T("Hard"));
 	lHardButton->SetPressColor(Color(230, 40, 30));
 	lHardButton->SetRoundedRadiusMask(0x6);
 	lHardButton->SetPressed(lDifficultyMode == 0);
-	lLayouter.AddButton(lHardButton, -4, 1, 5, 2, 3, false);
-	lLayouter.SetContentXMargin(lMargin);
+	lLayouter.AddButton(lHardButton, -4, 1, 5, 2, 1, 3, false);
+	lLayouter.SetContentXMargin(lLayouter.GetContentYMargin());
 
 	UiTbc::CheckButton* lToyModeButton = new UiTbc::CheckButton(Color(30, 70, 220), _T("Toy mode"));
 	lToyModeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
@@ -1788,14 +1809,14 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	lToyModeButton->SetDisabledIcon(mLockIcon->GetData());
 	lToyModeButton->Enable(lAllowToyMode);
 	lToyModeButton->SetPressed(lRtrOffset > 0.1);
-	lLayouter.AddButton(lToyModeButton, -5, 2, 5, 0, 2, false);
+	lLayouter.AddButton(lToyModeButton, -5, 2, 5, 0, 1, 2, false);
 	if (!lAllowToyMode)
 	{
 		UiTbc::TextArea* lUnlockLabel = new UiTbc::TextArea(BLACK);
 		lUnlockLabel->GetClientRectComponent()->SetIsHollow(true);
 		lUnlockLabel->SetFontColor(WHITE);
 		lUnlockLabel->AddText(_T("Finish all levels to\nunlock toy mode"));
-		lLayouter.AddComponent(lUnlockLabel, 2, 5, 1, 2);
+		lLayouter.AddComponent(lUnlockLabel, 2, 5, 1, 1, 2);
 		lUnlockLabel->SetHorizontalMargin(lUnlockLabel->GetPreferredHeight() / 3);
 	}
 
@@ -1803,14 +1824,14 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	lBedsideVolumeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lBedsideVolumeButton->SetCheckedIcon(mCheckIcon->GetData());
 	lBedsideVolumeButton->SetPressed(lMasterVolume < 0.5);
-	lLayouter.AddButton(lBedsideVolumeButton, -6, 3, 5, 0, 2, false);
+	lLayouter.AddButton(lBedsideVolumeButton, -6, 3, 5, 0, 1, 2, false);
 	UiTbc::Button* lHiscoreButton = new UiTbc::Button(Color(90, 50, 10), _T("High score"));
 	lHiscoreButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
-	lLayouter.AddButton(lHiscoreButton, -7, 3, 5, 1, 2, true);
+	lLayouter.AddButton(lHiscoreButton, -7, 3, 5, 1, 1, 2, true);
 
 	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(220, 110, 20), _T("Restart from first level"));
 	lRestartButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
-	lLayouter.AddButton(lRestartButton, -8, 4, 5, 0, 1, true);
+	lLayouter.AddButton(lRestartButton, -8, 4, 5, 0, 1, 1, true);
 
 	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
 	lLayouter.AddCornerButton(lCloseButton, -9);
@@ -1818,8 +1839,121 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 }
 
+void DownwashManager::OnLastHiscoreButton(UiTbc::Button* pButton)
+{
+	mHiscoreJustUploadedTimer.Stop();
+	pButton->SetVisible(false);
+	ShowHiscoreDialog(+1);
+}
+
+void DownwashManager::ShowHiscoreDialog(int pDirection)
+{
+	mPauseButton->SetVisible(false);
+	mMenu->DismissDialog();
+	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
+	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
+	d->SetName(_T("hiscore_dialog"));
+	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &DownwashManager::OnPreHiscoreAction));
+	d->SetDirection(pDirection, true);
+
+	UiTbc::FixedLayouter lLayouter(d);
+
+	UiTbc::Label* lLoadingLabel = new UiTbc::Label(WHITE, _T("Please wait while loading..."));
+	lLoadingLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_CENTER);
+	lLayouter.AddComponent(lLoadingLabel, 2, 5, 0, 1, 1);
+	lLoadingLabel->SetAdaptive(false);
+	d->SetQueryLabel(lLoadingLabel);
+
+	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
+	lLayouter.AddCornerButton(lCloseButton, -9);
+
+	lLayouter.SetContentWidthPart(0.95f);
+	UiTbc::Button* lPrevLevelButton = ICONBTNA("btn_prev.png", "");
+	UiTbc::Button* lNextLevelButton = ICONBTNA("btn_next.png", "");
+	lLayouter.AddButton(lPrevLevelButton, -100, 2, 5, 0, 1, 8, true);
+	lLayouter.AddButton(lNextLevelButton, -101, 2, 5, 7, 1, 8, true);
+	lPrevLevelButton->GetClientRectComponent()->SetIsHollow(true);
+	lPrevLevelButton->GetClientRectComponent()->SetBehaveSolid(true);
+	lNextLevelButton->GetClientRectComponent()->SetIsHollow(true);
+	lNextLevelButton->GetClientRectComponent()->SetBehaveSolid(true);
+
+	CreateHiscoreAgent();
+	mHiscoreLevelIndex = (mHiscoreLevelIndex >= 0)? mHiscoreLevelIndex : GetCurrentLevelNumber();
+	const str lLevelName = strutil::Format(_T("level_%i"), mHiscoreLevelIndex);
+	const int lOffset = std::max(0, mMyHiscoreIndex-5);
+	if (!mHiscoreAgent->StartDownloadingList(gPlatform, lLevelName, gVehicleName, lOffset, 10))
+	{
+		delete mHiscoreAgent;
+		mHiscoreAgent = 0;
+	}
+}
+
+void DownwashManager::UpdateHiscoreDialog()
+{
+	UiTbc::Dialog* d = mMenu->GetDialog();
+	// If dialog still open: show it. Otherwise just fuck it.
+	if (!d || d->GetName() != _T("hiscore_dialog"))
+	{
+		return;
+	}
+
+	UiTbc::FixedLayouter lLayouter(d);
+
+	str lPilotName;
+	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
+	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
+	typedef Cure::HiscoreAgent::List HiscoreList;
+	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
+	str lHiscore;
+	const int lBasePlace = lHiscoreList.mOffset;
+	const int lMaxEntryCount = 10;
+	const int lScoreCount = (int)lHiscoreList.mEntryList.size();
+	const str lLevelTitle = GetHiscoreLevelTitle();
+	UiTbc::Label* lHeader = new UiTbc::Label(WHITE, lLevelTitle);
+	lHeader->SetName(_T("level_header"));
+	lHeader->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_CENTER);
+	lLayouter.AddComponent(lHeader, 0, 2+lMaxEntryCount, 0, 1, 1);
+	lHeader->SetAdaptive(false);
+	for (int x = 0; x < lScoreCount; ++x)
+	{
+		d->SetQueryLabel(0);
+		const int lPlace = x + 1 + lBasePlace;
+		const HiscoreEntry& lEntry = lHiscoreList.mEntryList[x];
+		const double lTime = -lEntry.mScore/1000.0;
+		if (lPlace == 1)
+		{
+			SetLevelBestTime(mHiscoreLevelIndex, true, lTime);
+		}
+		str lTimeStr;
+		strutil::DoubleToString(lTime, 3, lTimeStr);
+		const Color lColor = (lPilotName == lEntry.mName)? YELLOW : WHITE;
+		UiTbc::Label* lPlaceLabel = new UiTbc::Label(lColor, strutil::Format(_T("%i."), lPlace));
+		lPlaceLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_LEFT);
+		UiTbc::Label* lNameLabel = new UiTbc::Label(lColor, lEntry.mName);
+		UiTbc::Label* lTimeLabel = new UiTbc::Label(lColor, lTimeStr);
+		lTimeLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_LEFT);
+		lLayouter.AddComponent(lPlaceLabel, 2+x, 2+lMaxEntryCount, 0, 1, 7);
+		lLayouter.AddComponent(lNameLabel,  2+x, 2+lMaxEntryCount, 1, 4, 7);
+		lLayouter.AddComponent(lTimeLabel,  2+x, 2+lMaxEntryCount, 5, 2, 7);
+		lPlaceLabel->SetAdaptive(false);
+		lNameLabel->SetAdaptive(false);
+		lTimeLabel->SetAdaptive(false);
+	}
+	if (!lScoreCount)
+	{
+		d->UpdateQueryLabel(_T("No high score entered. Yet."), WHITE);
+	}
+}
+
 void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 {
+	// Always save pilot name.
+	UiTbc::TextField* lPilotNameField = (UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0);
+	if (lPilotNameField)
+	{
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, lPilotNameField->GetText());
+	}
+
 	if (pButton->GetTag() == -2)
 	{
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
@@ -1840,17 +1974,18 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	}
 	else if (pButton->GetTag() == -6)
 	{
-		const bool lBedsideVolume = (pButton->GetState() == UiTbc::Button::PRESSED);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lBedsideVolume? 0.02 : 1.0);
+		double lBedsideVolume = (pButton->GetState() == UiTbc::Button::PRESSED)? 0.02 : 1.0;
+		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lBedsideVolume);
+		mUiManager->GetSoundManager()->SetMasterVolume((float)lBedsideVolume);	// Set right away for button volume.
 	}
 	else if (pButton->GetTag() == -7)
 	{
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, ((UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0))->GetText());	// Always save pilot name.
-		// Show hiscore!
+		mHiscoreLevelIndex = GetCurrentLevelNumber();
+		mMyHiscoreIndex = -1;
+		ShowHiscoreDialog(+1);
 	}
 	else if (pButton->GetTag() == -8)
 	{
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, ((UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0))->GetText());	// Always save pilot name.
 		mPauseButton->SetVisible(true);
 		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
 		mMenu->DismissDialog();
@@ -1860,10 +1995,126 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	}
 	else if (pButton->GetTag() == -9)
 	{
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, ((UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0))->GetText());	// Always save pilot name.
 		mPauseButton->SetVisible(true);
 		HiResTimer::StepCounterShadow();
+		mHitGroundFrameCount = 2;
 		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+	}
+	else if (pButton->GetTag() == -100)
+	{
+		int lLevelCount;
+		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+		mHiscoreLevelIndex = (mHiscoreLevelIndex-1 < 0)? lLevelCount-1 : mHiscoreLevelIndex-1;
+		ShowHiscoreDialog(-1);
+	}
+	else if (pButton->GetTag() == -101)
+	{
+		int lLevelCount;
+		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+		mHiscoreLevelIndex = (mHiscoreLevelIndex+1 >= lLevelCount)? 0 : mHiscoreLevelIndex+1;
+		ShowHiscoreDialog(+1);
+	}
+}
+
+void DownwashManager::OnPreHiscoreAction(UiTbc::Button* pButton)
+{
+	switch (pButton->GetTag())
+	{
+		case -100:
+		{
+			mMenu->GetDialog()->SetDirection(-1, false);
+		}
+		break;
+		default:
+		{
+			mMenu->GetDialog()->SetDirection(+1, false);
+		}
+		break;
+	}
+}
+
+
+void DownwashManager::UpdateHiscoreDialogTitle()
+{
+	UiTbc::Dialog* d = mMenu->GetDialog();
+	if (d)
+	{
+		UiTbc::Label* lHeader = (UiTbc::Label*)d->GetChild(_T("level_header"), 0);
+		if (lHeader)
+		{
+			lHeader->SetText(GetHiscoreLevelTitle());
+		}
+	}
+}
+
+str DownwashManager::GetHiscoreLevelTitle() const
+{
+	str lHiscoreLevelInfo;
+	if (GetCurrentLevelNumber() == mHiscoreLevelIndex || mHiscoreLevelIndex == -1)
+	{
+		lHiscoreLevelInfo = strutil::Format(_T("Current level (%i) high score"), mHiscoreLevelIndex+1);
+	}
+	else if (GetCurrentLevelNumber()-1 == mHiscoreLevelIndex)
+	{
+		lHiscoreLevelInfo = strutil::Format(_T("Previous level (%i) high score"), mHiscoreLevelIndex+1);
+	}
+	else
+	{
+		lHiscoreLevelInfo = strutil::Format(_T("Level %i high score"), mHiscoreLevelIndex+1);
+	}
+	return lHiscoreLevelInfo;
+}
+
+void DownwashManager::CreateHiscoreAgent()
+{
+	delete mHiscoreAgent;
+	const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
+	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("downwash"));
+	//mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("downwash"));
+}
+
+void DownwashManager::TickHiscore()
+{
+	// Download any pending hiscore request.
+	if (!mHiscoreAgent)
+	{
+		return;
+	}
+	Cure::ResourceLoadState lLoadState = mHiscoreAgent->Poll();
+	if (lLoadState != Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		if (lLoadState == Cure::RESOURCE_LOAD_ERROR)
+		{
+			delete mHiscoreAgent;
+			mHiscoreAgent = 0;
+			UiTbc::Dialog* d = mMenu->GetDialog();
+			// If dialog still open: show it. Otherwise just fuck it.
+			if (d && d->GetName() == _T("hiscore_dialog"))
+			{
+				d->UpdateQueryLabel(_T("Network problem."), RED);
+			}
+		}
+		return;
+	}
+
+	switch (mHiscoreAgent->GetAction())
+	{
+		case Cure::HiscoreAgent::ACTION_DOWNLOAD_LIST:
+		{
+			mMyHiscoreIndex = -1;
+			UpdateHiscoreDialog();
+			delete mHiscoreAgent;
+			mHiscoreAgent = 0;
+		}
+		break;
+		case Cure::HiscoreAgent::ACTION_UPLOAD_SCORE:
+		{
+			mMyHiscoreIndex = mHiscoreAgent->GetUploadedPlace();
+			delete mHiscoreAgent;
+			mHiscoreAgent = 0;
+			mHiscoreJustUploadedTimer.Start();
+		}
+		break;
 	}
 }
 
@@ -1996,7 +2247,7 @@ void DownwashManager::ScriptPhysicsTick()
 			}
 			else
 			{
-				CreateChopper(_T("helicopter_01"));
+				CreateChopper(gVehicleName);
 			}
 		}
 	}

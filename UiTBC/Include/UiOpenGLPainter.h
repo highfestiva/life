@@ -53,6 +53,7 @@ public:
 	void ResetClippingRect();
 
 	void SetColor(const Color& pColor, unsigned pColorIndex = 0);
+	virtual void SetLineWidth(float pPixels);
 
 	ImageID AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer);
 	void UpdateImage(ImageID pImageID, 

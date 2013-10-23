@@ -158,6 +158,8 @@ public:
 	void SetColor(Lepra::uint8 pRed, Lepra::uint8 pGreen, Lepra::uint8 pBlue, Lepra::uint8 pPaletteIndex, unsigned pColorIndex = 0);
 	Color GetColor(unsigned pColorIndex) const;
 
+	virtual void SetLineWidth(float pPixels) = 0;
+
 	void DrawPixel(int x, int y);
 	void DrawPixel(const PixelCoord& pCoords);
 

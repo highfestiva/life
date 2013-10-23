@@ -43,6 +43,7 @@ Dialog::~Dialog()
 {
 	mTarget.clear();
 	mPreClickTarget.clear();
+	mPostClickTarget.clear();
 }
 
 void Dialog::Dismiss()
@@ -60,10 +61,9 @@ void Dialog::Dismiss()
 void Dialog::SetColor(const Color& pTopLeftColor, const Color& pTopRightColor, const Color& pBottomRightColor, const Color& pBottomLeftColor)
 {
 	Parent::SetColor(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor);
-	UiTbc::Painter* lPainter = ((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->GetPainter();
 	if (mLabel)
 	{
-		mLabel->SetText(mLabel->GetText(), mColor[1], CLEAR_COLOR, lPainter);
+		mLabel->SetText(mLabel->GetText());
 	}
 }
 
@@ -99,6 +99,11 @@ void Dialog::SetPreClickTarget(Action pPreClickTarget)
 	mPreClickTarget = pPreClickTarget;
 }
 
+void Dialog::SetPostClickTarget(Action pPostClickTarget)
+{
+	mPostClickTarget = pPostClickTarget;
+}
+
 void Dialog::Center()
 {
 	if (mAnimationStep)
@@ -114,12 +119,12 @@ Label* Dialog::SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontI
 {
 	if (!mLabel)
 	{
-		mLabel = new UiTbc::Label;
+		mLabel = new UiTbc::Label(mColor[1], pText);
 	}
-	UiTbc::Painter* lPainter = ((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->GetPainter();
 	mLabel->SetFontId(pFontId);
 	//mLabel->ActivateFont(lPainter);
-	mLabel->SetText(pText, mColor[1], CLEAR_COLOR, lPainter);
+	mLabel->SetText(pText);
+	UiTbc::Painter* lPainter = ((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->GetPainter();
 	const int w = lPainter->GetStringWidth(pText);
 	const int h = lPainter->GetFontHeight();
 	mLabel->SetPreferredSize(w+2, h);
@@ -132,6 +137,22 @@ Label* Dialog::SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontI
 	mLabel->SetPos(lCoord+mOffset);
 	//mLabel->DeactivateFont(lPainter);
 	return mLabel;
+}
+
+void Dialog::SetQueryLabel(Label* pLabel)
+{
+	delete mLabel;
+	mLabel = pLabel;
+}
+
+void Dialog::UpdateQueryLabel(const str& pText, const Color& pColor)
+{
+	deb_assert(mLabel);
+	if (mLabel)
+	{
+		mLabel->SetText(pText);
+		mLabel->SetFontColor(pColor);
+	}
 }
 
 void Dialog::AddButton(int pTag, const str& pText, bool pAutoDismiss)
@@ -178,6 +199,13 @@ void Dialog::SetOffset(PixelCoord pOffset)
 
 void Dialog::UpdateLayout()
 {
+	const int lButtonCount = (int)mButtonList.size();
+	if (!lButtonCount)
+	{
+		Parent::UpdateLayout();
+		return;
+	}
+
 	const PixelCoord& lSize = GetSize();
 
 	if (mLabel)
@@ -187,52 +215,48 @@ void Dialog::UpdateLayout()
 		mLabel->SetPos(lCoord + mOffset);
 	}
 
-	const int lButtonCount = (int)mButtonList.size();
-	if (lButtonCount)
+	// Find first auto-layouted button.
+	Button* lButton = 0;
+	for (int i = 0; i < lButtonCount; ++i)
 	{
-		// Find first auto-layouted button.
-		Button* lButton = 0;
+		lButton = mButtonList[i];
+		if (lButton->GetTag() >= 0)
+		{
+			break;
+		}
+	}
+	const PixelCoord lButtonSize = lButton->GetPreferredSize();
+	const bool lLayoutX = ((lSize.x - lButtonSize.x*lButtonCount) > (lSize.y - lButtonSize.y*lButtonCount));
+	if (lLayoutX)
+	{
+		const int lSpacePerEach = lButtonSize.x*3/2;
+		const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
+		int x = lSize.x/2 + lHalfGap - lSpacePerEach*lButtonCount/2;
+		const int y = mLabel? lSize.y/2 : lSize.y/2-lButtonSize.y/2;
 		for (int i = 0; i < lButtonCount; ++i)
 		{
-			lButton = mButtonList[i];
+			Button* lButton = mButtonList[i];
 			if (lButton->GetTag() >= 0)
 			{
-				break;
+				lButton->SetPos(PixelCoord(x, y) + mOffset);
+				x += lSpacePerEach;
 			}
 		}
-		const PixelCoord lButtonSize = lButton->GetPreferredSize();
-		const bool lLayoutX = ((lSize.x - lButtonSize.x*lButtonCount) > (lSize.y - lButtonSize.y*lButtonCount));
-		if (lLayoutX)
+	}
+	else
+	{
+		const int lSpacePerEach = lButtonSize.y*3/2;
+		const int lHalfGap = (lSpacePerEach - lButtonSize.y)/2;
+		const int x = lSize.x/2 - lButtonSize.x/2;
+		int y = lSize.y/2 + lHalfGap - lSpacePerEach*lButtonCount/2;
+		y += mLabel? lButtonSize.y/2 : 0;
+		for (int i = 0; i < lButtonCount; ++i)
 		{
-			const int lSpacePerEach = lButtonSize.x*3/2;
-			const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
-			int x = lSize.x/2 + lHalfGap - lSpacePerEach*lButtonCount/2;
-			const int y = mLabel? lSize.y/2 : lSize.y/2-lButtonSize.y/2;
-			for (int i = 0; i < lButtonCount; ++i)
+			Button* lButton = mButtonList[i];
+			if (lButton->GetTag() >= 0)
 			{
-				Button* lButton = mButtonList[i];
-				if (lButton->GetTag() >= 0)
-				{
-					lButton->SetPos(PixelCoord(x, y) + mOffset);
-					x += lSpacePerEach;
-				}
-			}
-		}
-		else
-		{
-			const int lSpacePerEach = lButtonSize.y*3/2;
-			const int lHalfGap = (lSpacePerEach - lButtonSize.y)/2;
-			const int x = lSize.x/2 - lButtonSize.x/2;
-			int y = lSize.y/2 + lHalfGap - lSpacePerEach*lButtonCount/2;
-			y += mLabel? lButtonSize.y/2 : 0;
-			for (int i = 0; i < lButtonCount; ++i)
-			{
-				Button* lButton = mButtonList[i];
-				if (lButton->GetTag() >= 0)
-				{
-					lButton->SetPos(PixelCoord(x, y) + mOffset);
-					y += lSpacePerEach;
-				}
+				lButton->SetPos(PixelCoord(x, y) + mOffset);
+				y += lSpacePerEach;
 			}
 		}
 	}
@@ -281,10 +305,7 @@ void Dialog::Animate()
 			if ((mDirection > 0 && (lPos.x+GetSize().x < -MARGIN || mAnimationStep >= 0)) ||
 				(mDirection < 0 && (lPos.x > lParentSize.x+MARGIN || mAnimationStep <= 0)))
 			{
-				if (mClickedButton)
-				{
-					mTarget(mClickedButton);
-				}
+				DoClick(mClickedButton);
 				((DesktopWindow*)GetParentOfType(DESKTOPWINDOW))->PostDeleteComponent(this, 0);
 			}
 		}
@@ -310,9 +331,21 @@ void Dialog::OnClick(Button* pButton)
 	{
 		mPreClickTarget(pButton);
 	}
-	mTarget(pButton);
+	DoClick(pButton);
 }
 
+void Dialog::DoClick(Button* pButton)
+{
+	Action lPostClickTarget = mPostClickTarget;	// Save in case of destruction.
+	if (pButton)
+	{
+		mTarget(pButton);
+	}
+	if (lPostClickTarget)
+	{
+		lPostClickTarget(pButton);
+	}
+}
 
 
 

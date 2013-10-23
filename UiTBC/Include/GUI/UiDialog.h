@@ -29,8 +29,11 @@ public:
 	virtual void SetColor(const Color& pTopLeftColor, const Color& pTopRightColor, const Color& pBottomRightColor, const Color& pBottomLeftColor);
 	void SetDirection(int pDirection, bool pSetPos);
 	void SetPreClickTarget(Action pPreClickTarget);
+	void SetPostClickTarget(Action pPostClickTarget);
 	virtual void Center();
 	Label* SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId);
+	void SetQueryLabel(Label* pLabel);
+	void UpdateQueryLabel(const str& pText, const Color& pColor);
 	void AddButton(int pTag, const str& pText, bool pAutoDismiss);	// Tag < 0 to layout yourself.
 	void AddButton(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
 	void SetButtonHandler(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
@@ -38,18 +41,20 @@ public:
 	void SetOffset(PixelCoord pOffset);
 	virtual void UpdateLayout();
 
-protected:
 	virtual void Repaint(Painter* pPainter);
 	void Animate();
 	void OnDismissClick(Button* pButton);
 	void OnClick(Button* pButton);
+	void DoClick(Button* pButton);
 
+protected:
 	typedef std::vector<Button*> ButtonList;
 
 	PixelCoord mOffset;
 	Label* mLabel;
 	Action mTarget;
 	Action mPreClickTarget;
+	Action mPostClickTarget;
 	ButtonList mButtonList;
 	Button* mClickedButton;
 	bool mIsClosing;

@@ -258,7 +258,7 @@ void Button::Repaint(Painter* pPainter)
 
 	int lOffset = GetPressed() ? 1 : 0;
 	int lTextX = lRect.mLeft + mHorizontalMargin;
-	switch(mIconAlignment)
+	switch (mIconAlignment)
 	{
 		case ICON_CENTER:
 			lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
@@ -489,8 +489,7 @@ Button::State Button::GetState() const
 	return mState;
 }
 
-void Button::SetIcon(Painter::ImageID pIconID,
-		     IconAlignment pAlignment)
+void Button::SetIcon(Painter::ImageID pIconID, IconAlignment pAlignment)
 {
 	mIconID = pIconID;
 	mIconAlignment = pAlignment;

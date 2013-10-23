@@ -23,7 +23,8 @@ StopWatch::StopWatch(ScreenPart* pScreenPart, UiCure::GameUiManager* pUiManager,
 	const str& pAttributeName):
 	Parent(0, pClassResourceName, pUiManager),
 	mScreenPart(pScreenPart),
-	mAttributeName(pAttributeName)
+	mAttributeName(pAttributeName),
+	mLabel(RED, _T(""))
 {
 	mLabel.SetPreferredSize(50, 20);
 	mLabel.SetMinSize(30, 15);
@@ -65,7 +66,7 @@ void StopWatch::OnTick()
 	const int lMinute = (int)(lTime / 60);
 	const int lSecond = (int)::fmod(lTime, 60);
 	const int lCentiSecond = (int)(100 * (lTime - lMinute*60 - lSecond));
-	mLabel.SetText(strutil::Format(_T("%i:%2.2i.%2.2i"), lMinute, lSecond, lCentiSecond), RED, BLACK);
+	mLabel.SetText(strutil::Format(_T("%i:%2.2i.%2.2i"), lMinute, lSecond, lCentiSecond));
 }
 
 

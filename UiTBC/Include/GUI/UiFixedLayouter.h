@@ -29,12 +29,14 @@ public:
 	void SetContentWidthPart(float pContentWidthPart);
 	void SetContentHeightPart(float pContentHeightPart);
 	void SetContentMargin(int pContentMargin);
+	int GetContentXMargin() const;
 	void SetContentXMargin(int pContentXMargin);
+	int GetContentYMargin() const;
 	void SetContentYMargin(int pContentYMargin);
 
-	void AddComponent(Component* pComponent, int r, int rc, int c, int cc);
-	void AddWindow(Window* pWindow, int r, int rc, int c, int cc);
-	void AddButton(Button* pButton, int pTag, int r, int rc, int c, int cc, bool pAutoDismiss);
+	void AddComponent(Component* pComponent, int r, int rc, int c, int cw, int cc);
+	void AddWindow(Window* pWindow, int r, int rc, int c, int cw, int cc);
+	void AddButton(Button* pButton, int pTag, int r, int rc, int c, int cw, int cc, bool pAutoDismiss);
 	void AddCornerButton(Button* pButton, int pTag);
 
 protected:

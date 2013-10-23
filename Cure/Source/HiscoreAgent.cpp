@@ -220,7 +220,7 @@ bool HiscoreAgent::ParseList(astr& pData)
 	for (sv::iterator x = lStrings.begin(); x != lStrings.end(); ++x)
 	{
 		sv lTagValue = strutil::BlockSplit(*x, _T(": \t\r\n"), true, true);
-		if (lTagValue.empty())
+		if (lTagValue.size() < 2)
 		{
 			continue;
 		}
@@ -379,7 +379,7 @@ str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& 
 	//::memset((void*)lUtfString.c_str(), 0, lUtfString.length());
 	astr lInputHexdigest = astrutil::DumpData(lSha1Hash, sizeof(lSha1Hash));
 	astrutil::ToLower(lInputHexdigest);
-	mLog.Infof(_T("sha1 = %s"), strutil::Encode(lInputHexdigest).c_str());
+	//mLog.Infof(_T("sha1 = %s"), strutil::Encode(lInputHexdigest).c_str());
 
 	// Shuffle:
 	//input_hexdigest = list(input_hexdigest)

@@ -32,6 +32,7 @@ Menu::Menu(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceMa
 
 Menu::~Menu()
 {
+	delete mDialog;
 	mDialog = 0;
 	mResourceManager = 0;
 	mUiManager = 0;
@@ -69,7 +70,7 @@ UiTbc::Dialog* Menu::CreateTbcDialog(const ButtonAction& pAction, float pWidth, 
 	}
 	mButtonDelegate = pAction;
 	UiTbc::Dialog* d = new UiTbc::Dialog(mUiManager->GetDesktopWindow(), UiTbc::Dialog::Action(this, &Menu::OnAction));
-	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &Menu::OnTapSound));
+	d->SetPostClickTarget(UiTbc::Dialog::Action(this, &Menu::OnTapSound));
 	d->SetSize((int)(pWidth*mUiManager->GetCanvas()->GetWidth()), (int)(pHeight*mUiManager->GetCanvas()->GetHeight()));
 	d->SetPreferredSize(d->GetSize());
 	d->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
@@ -118,7 +119,7 @@ void Menu::OnAction(UiTbc::Button* pButton)
 {
 	UiTbc::Dialog* d = mDialog;
 	mButtonDelegate(pButton);
-	if (d->IsAutoDismissButton(pButton))
+	if (d == mDialog && d->IsAutoDismissButton(pButton))
 	{
 		mButtonDelegate.clear();
 		mDialog = 0;

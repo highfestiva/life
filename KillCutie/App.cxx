@@ -2726,9 +2726,8 @@ void App::UpdateHiscore(bool pError)
 	}
 	if (pError)
 	{
-		UiTbc::Label* lText = new UiTbc::Label;
+		UiTbc::Label* lText = new UiTbc::Label(LIGHT_RED, _T("Network problem, try again l8r."));
 		lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-		lText->SetText(_T("Network problem, try again l8r."), LIGHT_RED, CLEAR_COLOR);
 		mDialog->AddChild(lText, 135, 75);
 		return;
 	}

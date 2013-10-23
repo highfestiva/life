@@ -177,7 +177,7 @@ void TreeNode::SetExpanded(bool pExpanded, ListControl* pListControl)
 				}
 			}
 		
-			mIconLabel->SetIcon(mExpandedIconID);
+			mIconLabel->SetIcon(mExpandedIconID, Label::ICON_LEFT);
 		}
 		else
 		{
@@ -196,7 +196,7 @@ void TreeNode::SetExpanded(bool pExpanded, ListControl* pListControl)
 				}
 			}
 
-			mIconLabel->SetIcon(mCollapsedIconID);
+			mIconLabel->SetIcon(mCollapsedIconID, Label::ICON_LEFT);
 		}
 
 		pListControl->UpdateLayout();
@@ -350,12 +350,13 @@ bool TreeNode::ValidateIconRect(const str& pText)
 	{
 		GUIImageManager* lIMan = GetImageManager();
 
-		mIconLabel = new Label(smFactoryTextBackgColor, smFactoryTextSelectedBackgColor);
-		mIconLabel->SetIcon(mCollapsedIconID);
+		//mIconLabel = new Label(smFactoryTextBackgColor, smFactoryTextSelectedBackgColor);
+		mIconLabel = new Label(smFactoryTextColor, pText);
+		mIconLabel->SetIcon(mCollapsedIconID, Label::ICON_LEFT);
 
-		mIconLabel->SetText(pText,
+		/*mIconLabel->SetText(pText,
 			smFactoryTextColor, smFactoryTextBackgColor, 
-			smFactoryTextSelectedColor, smFactoryTextSelectedBackgColor);
+			smFactoryTextSelectedColor, smFactoryTextSelectedBackgColor);*/
 
 		int lImageHeight = lIMan->GetImageSize(mCollapsedIconID).y;
 		int lFontHeight = lIMan->GetPainter()->GetFontHeight();

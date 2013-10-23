@@ -17,6 +17,10 @@
 
 
 
+namespace Cure
+{
+class HiscoreAgent;
+}
 namespace UiLepra
 {
 namespace Touch
@@ -92,7 +96,7 @@ public:
 	virtual Level* GetLevel() const;
 	virtual int GetCurrentLevelNumber() const;
 	virtual double GetCurrentLevelBestTime(bool pWorld) const;
-	virtual void SetCurrentLevelBestTime(bool pWorld, double pTime);
+	virtual void SetLevelBestTime(int pLevelIndex, bool pWorld, double pTime);
 	virtual Cure::ContextObject* GetAvatar() const;
 
 	Cure::RuntimeVariableScope* GetVariableScope() const;
@@ -134,7 +138,17 @@ protected:
 	TransformationF GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const;
 
 	void OnPauseButton(UiTbc::Button*);
+	void OnLastHiscoreButton(UiTbc::Button*);
+	void ShowHiscoreDialog(int pDirection);
+	void UpdateHiscoreDialog();
 	void OnMenuAlternative(UiTbc::Button* pButton);
+	void OnPreHiscoreAction(UiTbc::Button* pButton);
+
+	void UpdateHiscoreDialogTitle();
+	str GetHiscoreLevelTitle() const;
+
+	void CreateHiscoreAgent();
+	void TickHiscore();
 
 	void DrawStick(Touchstick* pStick);
 
@@ -188,9 +202,8 @@ protected:
 	bool mIsHitThisFrame;
 	bool mLevelCompleted;
 	Vector3DF mMicrophoneSpeed;
-#if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	UiTbc::Button* mPauseButton;
-#endif // Touch or emulated touch.
+	UiTbc::Button* mLastHiscoreButton;
 
 	HiResTimer mTouchstickTimer;
 	Touchstick* mStick;
@@ -200,13 +213,18 @@ protected:
 	UiCure::UserPainterKeepImageResource* mCheckIcon;
 	UiCure::UserPainterKeepImageResource* mLockIcon;
 	StopWatch mDirectionImageTimer;
-	StopWatch mWinTimer;
+	StopWatch mWinImageTimer;
 	UiCure::UserRendererImageResource* mArrow;
 	UiTbc::BillboardGeometry* mArrowBillboard;
 	UiTbc::Renderer::GeometryID mArrowBillboardId;
 	float mArrowTotalPower;
 	float mArrowAngle;
 	int mSlowSystemCounter;
+
+	int mHiscoreLevelIndex;
+	int mMyHiscoreIndex;
+	Cure::HiscoreAgent* mHiscoreAgent;
+	StopWatch mHiscoreJustUploadedTimer;
 
 	LOG_CLASS_DECLARE();
 };

@@ -21,6 +21,12 @@ class Painter;
 class TextComponent
 {
 public:
+	enum IconAlignment
+	{
+		ICON_LEFT = 0,
+		ICON_CENTER,
+		ICON_RIGHT,
+	};
 	enum VAlign
 	{
 		VALIGN_TOP,

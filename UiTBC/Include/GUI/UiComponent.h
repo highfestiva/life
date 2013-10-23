@@ -67,7 +67,8 @@ public:
 	virtual ~Component();
 	void DeleteAllLayers();
 
-	const str& GetName();
+	const str& GetName() const;
+	void SetName(const str& pName);
 
 	Component* GetParent();
 	Layout* GetLayout(int pLayer = 0) const;

@@ -95,13 +95,7 @@ PopupList* FileNameField::CreatePopupList()
 		int lLabelHeight = 0;
 		for (lIter = lFileList.begin(); lIter != lFileList.end(); ++lIter)
 		{
-			Label* lLabel = new Label(WHITE, LIGHT_BLUE);
-			lLabel->SetText((*lIter).mName, 
-					 GetTextColor(),
-					 WHITE,
-					 BLACK,
-					 LIGHT_BLUE,
-					 lPainter);
+			Label* lLabel = new Label(GetTextColor(), (*lIter).mName);
 			lLabel->SetPreferredSize(0, 12);
 			lPopupList->AddChild(lLabel);
 

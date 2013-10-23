@@ -891,9 +891,14 @@ void Component::ReleaseKeyboardFocus(RecurseDir pDir, Component* pFocusedCompone
 	}
 }
 
-const str& Component::GetName()
+const str& Component::GetName() const
 {
 	return mName;
+}
+
+void Component::SetName(const str& pName)
+{
+	mName = pName;
 }
 
 Component* Component::GetParent()

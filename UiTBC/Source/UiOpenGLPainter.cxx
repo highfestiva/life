@@ -214,6 +214,11 @@ void OpenGLPainter::SetColor(const Color& pColor, unsigned pColorIndex)
 			       (float)pColor.mBlue / 255.0f);
 }
 
+void OpenGLPainter::SetLineWidth(float pPixels)
+{
+	::glLineWidth(pPixels);
+}
+
 void OpenGLPainter::DoSetRenderMode() const
 {
 	OGL_ASSERT();
