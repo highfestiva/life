@@ -11,6 +11,7 @@
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
 #include "../../Include/UiLepra.h"
+#include "../../Include/Mac/UiIosDef.h"
 #include "../../Include/Mac/UiMacOpenGLDisplay.h"
 
 
@@ -219,11 +220,6 @@ double MacDisplayManager::GetPhysicalScreenSize() const
 #ifndef LEPRA_IOS
 	return 24.0;	// Who knows how big an average Mac user's screen is when this game runs.
 #else // iOS
-#define SCREEN_SIZE_IPHONE_CLASSIC	3.5
-#define SCREEN_SIZE_IPHONE_TALL		4.0
-#define SCREEN_SIZE_IPAD_CLASSIC	9.7
-#define SCREEN_SIZE_IPAD_MINI		7.9
-
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
 	{
 		CGSize size = [[UIScreen mainScreen] bounds].size;
