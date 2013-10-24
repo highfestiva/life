@@ -192,7 +192,6 @@ void DownwashManager::LoadSettings()
 	Parent::LoadSettings();
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
 

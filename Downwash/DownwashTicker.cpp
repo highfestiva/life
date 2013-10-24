@@ -142,6 +142,16 @@ bool DownwashTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
+		if (mUiManager->GetCanvas()->GetHeight() < 640)
+		{
+			double lFontHeight;
+			CURE_RTVAR_GET(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+			if (lFontHeight > 29.0)
+			{
+				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/640.0;
+				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
+			}
+		}
 		lOk = mUiManager->OpenRest();
 	}
 	if (lOk)
