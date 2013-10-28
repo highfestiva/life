@@ -56,7 +56,7 @@ protected:
 		bool mIsAnySteeringValue;
 		ValueArray mValuePointerArray;
 	};
-	typedef std::hash_map<str, InputEntry> InputMap;
+	typedef std::unordered_map<str, InputEntry> InputMap;
 
 	Cure::RuntimeVariableScope* mVariableScope;
 	float mConsoleToggle;

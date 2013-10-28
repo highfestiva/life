@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include "String.h"
 #include "Thread.h"
 
@@ -24,7 +24,7 @@ class ResourceTracker;
 class ResourceTracker
 {
 public:
-	typedef std::hash_map<HashedString, int> CounterMap;
+	typedef std::unordered_map<HashedString, int> CounterMap;
 
 	ResourceTracker();
 	void Add(const HashedString& pResourceName, int pValue);

@@ -11,7 +11,7 @@
 #pragma once
 
 #include "../../TBC/Include/GeometryBase.h"
-#include <hash_set>
+#include <unordered_set>
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/IdManager.h"
@@ -85,7 +85,7 @@ public:
 		MAT_COUNT,
 	};
 
-	typedef std::hash_map<str, DynamicRenderer*> DynamicRendererMap;
+	typedef std::unordered_map<str, DynamicRenderer*> DynamicRendererMap;
 
 	enum LightType
 	{
@@ -161,7 +161,7 @@ public:
 		virtual ~GeometryData();
 		virtual void CopyReferenceData(GeometryData*);
 
-		typedef std::hash_set<GeometryID, LEPRA_ENUM_HASHER> GeometryIDSet;
+		typedef std::unordered_set<GeometryID, LEPRA_ENUM_HASHER> GeometryIDSet;
 
 		// List of geometries that refer to this geometry.
 		GeometryIDSet mReferenceSet;
@@ -593,7 +593,7 @@ protected:
 	TextureData* mEnvTexture;
 
 	// Lights.
-	typedef std::hash_map<LightID, LightData*> LightDataMap;
+	typedef std::unordered_map<LightID, LightData*> LightDataMap;
 	LightDataMap mLightDataMap;
 	LightID mSortedLights[MAX_LIGHTS];
 	int mNumSpotLights;

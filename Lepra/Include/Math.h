@@ -7,7 +7,7 @@
 #pragma once
 
 #include "LepraAssert.h"
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 

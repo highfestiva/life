@@ -116,8 +116,8 @@ private:
 	void UpdateSound(SoundInfo* pSoundInfo);
 	void StopSound(const TBC::ChunkyBoneGeometry* pGeometryKey);
 
-	typedef std::hash_map<const TBC::ChunkyBoneGeometry*, SoundInfo*, LEPRA_VOIDP_HASHER> SoundMap;
-	typedef std::hash_map<str, SoundResourceInfo> SoundNameMap;
+	typedef std::unordered_map<const TBC::ChunkyBoneGeometry*, SoundInfo*, LEPRA_VOIDP_HASHER> SoundMap;
+	typedef std::unordered_map<str, SoundResourceInfo> SoundNameMap;
 
 	Cure::GameManager* mGameManager;
 	UiCure::GameUiManager* mUiManager;

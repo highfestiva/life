@@ -105,7 +105,7 @@ MacDisplayManager::MacDisplayManager():
 {
 #ifdef LEPRA_IOS
 	mScreenMode = FULLSCREEN;
-	mEnumeratedDisplayModeCount = 8;
+	mEnumeratedDisplayModeCount = 10;
 	mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
 	DisplayMode lDisplayMode;
 	lDisplayMode.mWidth = 320;
@@ -120,16 +120,21 @@ MacDisplayManager::MacDisplayManager():
 	mEnumeratedDisplayMode[2] = lDisplayMode;
 	std::swap(lDisplayMode.mWidth, lDisplayMode.mHeight);
 	mEnumeratedDisplayMode[3] = lDisplayMode;
-	lDisplayMode.mWidth = 1024;
-	lDisplayMode.mHeight = 768;
+	lDisplayMode.mWidth = 640;
+	lDisplayMode.mHeight = 1136;
 	mEnumeratedDisplayMode[4] = lDisplayMode;
 	std::swap(lDisplayMode.mWidth, lDisplayMode.mHeight);
 	mEnumeratedDisplayMode[5] = lDisplayMode;
-	lDisplayMode.mWidth = 2048;
-	lDisplayMode.mHeight = 1536;
+	lDisplayMode.mWidth = 1024;
+	lDisplayMode.mHeight = 768;
 	mEnumeratedDisplayMode[6] = lDisplayMode;
 	std::swap(lDisplayMode.mWidth, lDisplayMode.mHeight);
 	mEnumeratedDisplayMode[7] = lDisplayMode;
+	lDisplayMode.mWidth = 2048;
+	lDisplayMode.mHeight = 1536;
+	mEnumeratedDisplayMode[8] = lDisplayMode;
+	std::swap(lDisplayMode.mWidth, lDisplayMode.mHeight);
+	mEnumeratedDisplayMode[9] = lDisplayMode;
 #else // !iOS
 	// Obtain number of available displays.
 	CGDisplayCount lDisplayCount = 0;
@@ -387,7 +392,10 @@ bool MacDisplayManager::InitWindow()
 	mWnd = lWnd;
 	lWnd->mDisplayManager = this;
 #ifdef LEPRA_IOS
-	[mWnd initWithFrame:[UIScreen mainScreen].bounds];
+	CGRect r = [UIScreen mainScreen].bounds;
+	int s = [[UIScreen mainScreen] scale];
+	r.size = CGSizeMake(r.size.width*s, r.size.height*s);
+	[mWnd initWithFrame:r];
 #else // !iOS
 	[mWnd initWithContentRect:NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 			styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask

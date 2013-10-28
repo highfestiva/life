@@ -55,7 +55,7 @@ protected:
 	bool GetAllowNetworkLogic() const;
 
 private:
-	typedef std::hash_map<int, const TBC::PhysicsTrigger*> ActiveTriggerGroupMap;
+	typedef std::unordered_map<int, const TBC::PhysicsTrigger*> ActiveTriggerGroupMap;
 
 	UserClassResource* mClassResource;
 	UserPhysicsReferenceResource* mPhysicsResource;

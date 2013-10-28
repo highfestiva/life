@@ -39,7 +39,7 @@ private:
 	virtual int Pack(uint8* pDestination);
 	virtual int Unpack(const uint8* pSource, int pMaxSize);	// Retuns number of bytes unpacked, or -1.
 
-	typedef std::hash_set<TBC::PhysicsManager::TriggerID> TriggerSet;
+	typedef std::unordered_set<TBC::PhysicsManager::TriggerID> TriggerSet;
 
 	bool mIsUpdated;
 	int mLapCountLeft;

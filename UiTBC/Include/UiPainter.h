@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include <list>
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Graphics2D.h"
@@ -401,7 +401,7 @@ protected:
 	Color& GetColorInternal(int pColorIndex);
 
 private:
-	typedef std::hash_map<unsigned, std::vector<DisplayEntity*>* > DisplayListMap;
+	typedef std::unordered_map<unsigned, std::vector<DisplayEntity*>* > DisplayListMap;
 
 	FontManager* mFontManager;
 

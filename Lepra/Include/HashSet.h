@@ -25,7 +25,7 @@
 #include "FastAllocator.h"
 #include "Hasher.h"
 #include "LepraTypes.h"
-#include <hash_set>
+#include <unordered_set>
 
 #define TEMPLATE template<class _TSetObject, class _THash, unsigned SIZE>
 #define QUAL HashSet<_TSetObject, _THash, SIZE>
@@ -39,7 +39,7 @@ class HashSet
 public:
 	friend class Iterator;
 
-	typedef std::hash_set<_TSetObject, _THash> _HashSet;
+	typedef std::unordered_set<_TSetObject, _THash> _HashSet;
 
 	class Iterator
 	{

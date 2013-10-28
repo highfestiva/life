@@ -48,7 +48,7 @@ void MusicPlayer::Shuffle()
 		const size_t lIndex = Random::GetRandomNumber() % mSongNameList.size();
 		const str& lName = mSongNameList[lIndex];
 		lShuffeledList.push_back(lName);
-		mSongNameList.erase(&mSongNameList[lIndex]);
+		mSongNameList.erase(mSongNameList.begin()+lIndex);
 	}
 	mSongNameList = lShuffeledList;
 }

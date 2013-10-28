@@ -14,7 +14,7 @@
 
 namespace UiLepra
 {
-class UiLepra::SoundManager;
+class SoundManager;
 }
 
 

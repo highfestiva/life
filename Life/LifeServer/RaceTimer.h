@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../Cure/Include/CppContextObject.h"
-#include <hash_map>
+#include <unordered_map>
 #include "../../Lepra/Include/Timer.h"
 #include "../Life.h"
 
@@ -30,7 +30,7 @@ private:
 	virtual void OnTick();
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
 
-	typedef std::hash_map<Cure::GameObjectId, int> DoneMap;
+	typedef std::unordered_map<Cure::GameObjectId, int> DoneMap;
 
 	str mAttributeName;
 	unsigned mTriggerCount;

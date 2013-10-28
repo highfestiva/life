@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_set>
+#include <unordered_set>
 #include <list>
 #include <vector>
 #include "../../Lepra/Include/LepraTypes.h"
@@ -508,9 +508,9 @@ protected:
 
 private:
 
-	typedef std::hash_set<TextInputObserver*, LEPRA_VOIDP_HASHER> TextObserverList;
-	typedef std::hash_set<KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyCodeObserverList;
-	typedef std::hash_set<MouseInputObserver*, LEPRA_VOIDP_HASHER> MouseObserverList;
+	typedef std::unordered_set<TextInputObserver*, LEPRA_VOIDP_HASHER> TextObserverList;
+	typedef std::unordered_set<KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyCodeObserverList;
+	typedef std::unordered_set<MouseInputObserver*, LEPRA_VOIDP_HASHER> MouseObserverList;
 	TextObserverList mTextObserverList;
 	KeyCodeObserverList mKeyCodeObserverList;
 	MouseObserverList mMouseObserverList;

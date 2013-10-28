@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <hash_map>
-#include <hash_set>
+#include <unordered_map>
+#include <unordered_set>
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Timer.h"
@@ -78,14 +78,14 @@ private:
 	virtual void RemoveAllFilterIoSockets();
 	virtual void KillIoSocket(VIoSocket* pSocket);
 
-	typedef std::hash_set<VSocket*, LEPRA_VOIDP_HASHER> SocketSet;
+	typedef std::unordered_set<VSocket*, LEPRA_VOIDP_HASHER> SocketSet;
 	typedef SocketSet PendingSocketTable;
-	typedef std::hash_map<UserAccount::AccountId, UserConnection*> LoggedInIdUserTable;
-	typedef std::hash_map<wstr, UserConnection*> LoggedInNameUserTable;
-	typedef std::hash_map<VSocket*, UserConnection*, LEPRA_VOIDP_HASHER> SocketUserTable;
+	typedef std::unordered_map<UserAccount::AccountId, UserConnection*> LoggedInIdUserTable;
+	typedef std::unordered_map<wstr, UserConnection*> LoggedInNameUserTable;
+	typedef std::unordered_map<VSocket*, UserConnection*, LEPRA_VOIDP_HASHER> SocketUserTable;
 	typedef SocketSet SocketTimeoutTable;
-	typedef std::hash_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
-	typedef std::hash_set<UserAccount::AccountId> AccountIdSet;
+	typedef std::unordered_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
+	typedef std::unordered_set<UserAccount::AccountId> AccountIdSet;
 
 	UserConnectionFactory* mUserConnectionFactory;
 	LoginListener* mLoginListener;

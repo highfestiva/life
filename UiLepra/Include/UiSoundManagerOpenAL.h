@@ -14,7 +14,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #endif
-#include <hash_set>
+#include <unordered_set>
 #include "../../Lepra/Include/String.h"
 
 
@@ -138,7 +138,7 @@ private:
 		bool mIsLooping;
 		int mPriority;
 		bool mIsAmbient;
-		std::hash_set<Source*, LEPRA_VOIDP_HASHER> mSourceList;
+		std::unordered_set<Source*, LEPRA_VOIDP_HASHER> mSourceList;
 	};
 
 	struct Source
@@ -151,8 +151,8 @@ private:
 		ALuint mSid;
 	};
 
-	typedef std::hash_set<Sample*, LEPRA_VOIDP_HASHER> SampleSet;
-	typedef std::hash_set<Source*, LEPRA_VOIDP_HASHER> SourceSet;
+	typedef std::unordered_set<Sample*, LEPRA_VOIDP_HASHER> SampleSet;
+	typedef std::unordered_set<Source*, LEPRA_VOIDP_HASHER> SourceSet;
 
 	ALCdevice* mDevice;
 	ALCcontext* mContext;

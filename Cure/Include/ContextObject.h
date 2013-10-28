@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../TBC/Include/PhysicsManager.h"
-#include <hash_map>
+#include <unordered_map>
 #include <list>
 #include <vector>
 #include "../../Lepra/Include/String.h"
@@ -163,7 +163,7 @@ protected:
 		TBC::PhysicsEngine* mEngine;
 	};
 	typedef std::list<Connection> ConnectionList;
-	typedef std::hash_map<TBC::PhysicsManager::TriggerID, const void*> TriggerMap;
+	typedef std::unordered_map<TBC::PhysicsManager::TriggerID, const void*> TriggerMap;
 
 	ContextManager* mManager;
 	ResourceManager* mResourceManager;

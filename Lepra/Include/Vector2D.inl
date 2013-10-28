@@ -386,7 +386,7 @@ inline float LineDistance(const Vector2D<float>& pPoL, const Vector2D<float>& pD
 	Vector2D<float> lNormDir(pDir);
 	lNormDir.Normalize();
 	Vector2D<float> lV(pPoint - pPoL);
-	return abs(lNormDir.GetPerpCW().Dot(lV));
+	return std::abs(lNormDir.GetPerpCW().Dot(lV));
 }
 
 inline double LineDistance(const Vector2D<double>& pPoL, const Vector2D<double>& pDir, const Vector2D<double>& pPoint)
@@ -394,7 +394,7 @@ inline double LineDistance(const Vector2D<double>& pPoL, const Vector2D<double>&
 	Vector2D<double> lNormDir(pDir);
 	lNormDir.Normalize();
 	Vector2D<double> lV(pPoint - pPoL);
-	return abs(lNormDir.GetPerpCW().Dot(lV));
+	return std::abs(lNormDir.GetPerpCW().Dot(lV));
 }
 
 inline float LineDistance(const Vector2D<float>& pPoL, const Vector2D<float>& pDir, const Vector2D<float>& pPoint, Vector2D<float>& pClosestPoint, float& pDirDistance)
@@ -405,7 +405,7 @@ inline float LineDistance(const Vector2D<float>& pPoL, const Vector2D<float>& pD
 	pDirDistance = lNormDir.Dot(lV);
 	Vector2D<float> lD(lNormDir * pDirDistance);
 	pClosestPoint = pPoL + lD;
-	return abs(lNormDir.GetPerpCW().Dot(lV));
+	return std::abs(lNormDir.GetPerpCW().Dot(lV));
 }
 
 inline double LineDistance(const Vector2D<double>& pPoL, const Vector2D<double>& pDir, const Vector2D<double>& pPoint, Vector2D<double>& pClosestPoint, double& pDirDistance)
@@ -416,7 +416,7 @@ inline double LineDistance(const Vector2D<double>& pPoL, const Vector2D<double>&
 	pDirDistance = lNormDir.Dot(lV);
 	Vector2D<double> lD(lNormDir * pDirDistance);
 	pClosestPoint = pPoL + lD;
-	return abs(lNormDir.GetPerpCW().Dot(lV));
+	return std::abs(lNormDir.GetPerpCW().Dot(lV));
 }
 
 inline float LineSegmentDistance(const Vector2D<float>& pStart, const Vector2D<float>& pEnd, const Vector2D<float>& pPoint, Vector2D<float>& pClosestPoint, float& pDirDistance)

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_set>
+#include <unordered_set>
 #include "TBC.h"
 #include "PhysicsManager.h"
 #include "../../Lepra/Include/FastAllocator.h"
@@ -239,8 +239,8 @@ private:
 
 	class TriggerInfo;
 	class JointInfo;
-	typedef std::hash_set<Object*, LEPRA_VOIDP_HASHER> ObjectTable;
-	typedef std::hash_set<JointInfo*, LEPRA_VOIDP_HASHER> JointTable;
+	typedef std::unordered_set<Object*, LEPRA_VOIDP_HASHER> ObjectTable;
+	typedef std::unordered_set<JointInfo*, LEPRA_VOIDP_HASHER> JointTable;
 	typedef std::vector<TriggerInfo> TriggerInfoList;
 	typedef std::vector<JointInfo*> JointList;
 

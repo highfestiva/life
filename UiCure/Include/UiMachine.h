@@ -51,7 +51,7 @@ private:
 
 	void LoadPlaySound3d(UserSound3dResource* pSoundResource);
 
-	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
+	typedef std::unordered_map<const UiTbc::ChunkyClass::Tag*, UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
 	typedef std::vector<float> TagSoundIntensityArray;
 
 	JetEngineEmitter* mJetEngineEmitter;

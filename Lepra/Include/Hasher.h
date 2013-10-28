@@ -2,7 +2,7 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
-#include <hash_set>	// To get ahold of std::hash<>.
+#include <unordered_set>	// To get ahold of std::hash<>.
 
 //#pragma once
 #ifndef LEPRAHASHER_H

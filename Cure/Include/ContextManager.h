@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "../../Lepra/Include/Thread.h"
@@ -29,7 +29,7 @@ class TimeManager;
 class ContextManager
 {
 public:
-	typedef std::hash_map<GameObjectId, ContextObject*> ContextObjectTable;
+	typedef std::unordered_map<GameObjectId, ContextObject*> ContextObjectTable;
 	enum
 	{
 		SYSTEM_ALARM_ID = 1000,
@@ -133,9 +133,9 @@ private:
 				(size_t)pAlarm.mObject);
 		}
 	};
-	typedef std::hash_set<Alarm, AlarmHasher> AlarmSet;
-	typedef std::hash_map<TBC::PhysicsManager::BodyID, ContextObject*> BodyTable;
-	typedef std::hash_set<GameObjectId> IdSet;
+	typedef std::unordered_set<Alarm, AlarmHasher> AlarmSet;
+	typedef std::unordered_map<TBC::PhysicsManager::BodyID, ContextObject*> BodyTable;
+	typedef std::unordered_set<GameObjectId> IdSet;
 	typedef BodyTable::value_type BodyPair;
 
 	GameManager* mGameManager;

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../Cure/Include/ConsoleManager.h"
-#include <hash_map>
+#include <unordered_map>
 #include "Life.h"
 
 
@@ -94,7 +94,7 @@ private:
 	bool SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const wstr& pUserConfig);
 
 	static const CommandPair mCommandIdList[];
-	typedef std::hash_map<str, str> AliasMap;
+	typedef std::unordered_map<str, str> AliasMap;
 	typedef AliasMap KeyMap;
 
 	int mSecurityLevel;

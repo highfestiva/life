@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_set>
+#include <unordered_set>
 #include "../../Lepra/Include/Transformation.h"
 #include "../Include/TBC.h"
 
@@ -25,7 +25,7 @@ public:
 	typedef void* GeomID;
 	typedef void* TriggerID;
 
-	typedef std::hash_set<BodyID> BodySet;
+	typedef std::unordered_set<BodyID> BodySet;
 
 	class TriggerListener
 	{

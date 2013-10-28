@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../Lepra/Include/LepraTarget.h"	// Must be first.
-#include <hash_map>
+#include <unordered_map>
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "../../Lepra/Include/String.h"
@@ -76,7 +76,7 @@ protected:
 		int mFlags;
 		FontId mFontId;
 	};
-	typedef std::hash_map<int, Font*> FontTable;
+	typedef std::unordered_map<int, Font*> FontTable;
 
 	bool InternalAddFont(Font* pFont);
 

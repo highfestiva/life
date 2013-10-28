@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_set>
+#include <unordered_set>
 #include "../UiDisplayManager.h"
 #include "UiMacCore.h"
 
@@ -112,7 +112,7 @@ private:
 
 	bool mConsumeChar;
 
-	typedef std::hash_set<MacObserver*, LEPRA_VOIDP_HASHER> ObserverSet;
+	typedef std::unordered_set<MacObserver*, LEPRA_VOIDP_HASHER> ObserverSet;
 	typedef HashTable<int, ObserverSet*> ObserverSetTable;
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;

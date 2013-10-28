@@ -62,7 +62,7 @@ class UserAccount: public LoginId
 public:
 	typedef uint32 AccountId;
 	typedef str AvatarId;
-	typedef std::hash_set<AvatarId> AvatarIdSet;
+	typedef std::unordered_set<AvatarId> AvatarIdSet;
 	enum Availability
 	{
 		STATUS_OK		= 1,

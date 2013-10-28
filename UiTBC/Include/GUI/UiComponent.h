@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <hash_set>
+#include <unordered_set>
 #include "../../../Lepra/Include/Graphics2D.h"
 #include "../../../Lepra/Include/HashTable.h"
 #include "../../../Lepra/Include/String.h"
@@ -241,8 +241,8 @@ protected:
 
 	void DeleteLayout(int pLayer);
 
-	typedef std::hash_set<UiLepra::TextInputObserver*, LEPRA_VOIDP_HASHER> TextListenerSet;
-	typedef std::hash_set<UiLepra::KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyListenerSet;
+	typedef std::unordered_set<UiLepra::TextInputObserver*, LEPRA_VOIDP_HASHER> TextListenerSet;
+	typedef std::unordered_set<UiLepra::KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyListenerSet;
 	TextListenerSet mTextListenerSet;
 	KeyListenerSet mKeyListenerSet;
 

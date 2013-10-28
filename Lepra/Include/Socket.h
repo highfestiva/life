@@ -138,7 +138,7 @@ protected:
 	static const uint8 mAcceptionString[15];
 
 private:
-	typedef std::hash_set<BufferedIo*, LEPRA_VOIDP_HASHER> IoSet;
+	typedef std::unordered_set<BufferedIo*, LEPRA_VOIDP_HASHER> IoSet;
 
 	IoSet mSenderSet;
 	IoSet mReceiverSet;
@@ -326,7 +326,7 @@ private:
 	void SelectThreadEntry();
 
 	typedef OrderedMap<TcpVSocket*, HiResTimer, LEPRA_VOIDP_HASHER> SocketTimeMap;
-	typedef std::hash_map<sys_socket, TcpVSocket*> SocketVMap;
+	typedef std::unordered_map<sys_socket, TcpVSocket*> SocketVMap;
 
 	MemberThread<TcpMuxSocket> mAcceptThread;
 	MemberThread<TcpMuxSocket> mSelectThread;
@@ -553,9 +553,9 @@ private:
 
 	void OnCloseTcpSocket(TcpVSocket* pTcpSocket);
 
-	typedef std::hash_map<TcpVSocket*, DualSocket*, LEPRA_VOIDP_HASHER> TcpSocketMap;
-	typedef std::hash_map<UdpVSocket*, DualSocket*, LEPRA_VOIDP_HASHER> UdpSocketMap;
-	typedef std::hash_map<std::string, DualSocket*> IdSocketMap;
+	typedef std::unordered_map<TcpVSocket*, DualSocket*, LEPRA_VOIDP_HASHER> TcpSocketMap;
+	typedef std::unordered_map<UdpVSocket*, DualSocket*, LEPRA_VOIDP_HASHER> UdpSocketMap;
+	typedef std::unordered_map<std::string, DualSocket*> IdSocketMap;
 	typedef OrderedMap<DualSocket*, HiResTimer, LEPRA_VOIDP_HASHER> SocketTimeMap;
 
 	mutable Lock mLock;

@@ -77,7 +77,7 @@ public:
 	void Logout();
 	bool IsLoggingIn() const;
 	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;
-	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet);
+	void AddLocalObjects(std::unordered_set<Cure::GameObjectId>& pLocalObjectSet);
 	virtual bool IsOwned(Cure::GameObjectId pObjectId) const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
@@ -92,7 +92,7 @@ public:
 
 protected:
 	typedef std::vector<Cure::GameObjectId> ObjectArray;
-	typedef std::hash_set<UiLepra::InputElement*, LEPRA_VOIDP_HASHER> InputElementSet;
+	typedef std::unordered_set<UiLepra::InputElement*, LEPRA_VOIDP_HASHER> InputElementSet;
 	enum SteeringPlaybackMode
 	{
 		PLAYBACK_NONE = 0,
@@ -131,8 +131,8 @@ protected:
 	void DrawDebugStaple(int pIndex, int pHeight, const Color& pColor);
 	virtual void DrawSyncDebugInfo();
 
-	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
-	typedef std::hash_set<Cure::GameObjectId> ObjectIdSet;
+	typedef std::unordered_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
+	typedef std::unordered_set<Cure::GameObjectId> ObjectIdSet;
 
 	UiCure::GameUiManager* mUiManager;
 	const int mSlaveIndex;

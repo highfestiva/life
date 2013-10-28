@@ -34,6 +34,7 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 {
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
 	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
 	AddBackedRtvar(_T(RTVAR_GAME_CHILDISHNESS));
@@ -142,13 +143,13 @@ bool DownwashTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
-		if (mUiManager->GetCanvas()->GetHeight() < 640)
+		if (mUiManager->GetCanvas()->GetHeight() < 600)
 		{
 			double lFontHeight;
 			CURE_RTVAR_GET(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 			if (lFontHeight > 29.0)
 			{
-				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/640.0;
+				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/600.0;
 				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 			}
 		}
