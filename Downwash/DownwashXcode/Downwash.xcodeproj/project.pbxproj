@@ -529,7 +529,7 @@
 		B1F3C40B16E0027100B2EFB5 /* UiBillboardGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */; };
 		B1F3C40C16E0027100B2EFB5 /* UiParticleRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */; };
 		B1F3C40E16E0029C00B2EFB5 /* UiParticleLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */; };
-		B1F594F3181EE8A100FCC9F0 /* Default-568@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F0181EE8A100FCC9F0 /* Default-568@2x.png */; };
+		B1F594F3181EE8A100FCC9F0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F0181EE8A100FCC9F0 /* Default-568h@2x.png */; };
 		B1F594F4181EE8A100FCC9F0 /* Default-Landscape@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F1181EE8A100FCC9F0 /* Default-Landscape@2x.png */; };
 		B1F594F5181EE8A100FCC9F0 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F2181EE8A100FCC9F0 /* Default@2x.png */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
@@ -1239,7 +1239,7 @@
 		B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBillboardGeometry.cpp; sourceTree = "<group>"; };
 		B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiParticleRenderer.cpp; sourceTree = "<group>"; };
 		B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiParticleLoader.cpp; path = ../../UiCure/Source/UiParticleLoader.cpp; sourceTree = SOURCE_ROOT; };
-		B1F594F0181EE8A100FCC9F0 /* Default-568@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568@2x.png"; path = "../Icons/Default-568@2x.png"; sourceTree = "<group>"; };
+		B1F594F0181EE8A100FCC9F0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Icons/Default-568h@2x.png"; sourceTree = "<group>"; };
 		B1F594F1181EE8A100FCC9F0 /* Default-Landscape@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape@2x.png"; path = "../Icons/Default-Landscape@2x.png"; sourceTree = "<group>"; };
 		B1F594F2181EE8A100FCC9F0 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Icons/Default@2x.png"; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
@@ -2352,7 +2352,7 @@
 				B1F594F2181EE8A100FCC9F0 /* Default@2x.png */,
 				B1C4123418035E90007D64F7 /* Default-Landscape.png */,
 				B1F594F1181EE8A100FCC9F0 /* Default-Landscape@2x.png */,
-				B1F594F0181EE8A100FCC9F0 /* Default-568@2x.png */,
+				B1F594F0181EE8A100FCC9F0 /* Default-568h@2x.png */,
 				B196560713BE6AB5006A1422 /* Icon.png */,
 				B196560813BE6AB5006A1422 /* Icon@2x.png */,
 				B196560E13BE6C3B006A1422 /* Icon-72.png */,
@@ -2482,7 +2482,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B1F594F3181EE8A100FCC9F0 /* Default-568@2x.png in Resources */,
+				B1F594F3181EE8A100FCC9F0 /* Default-568h@2x.png in Resources */,
 				B196560B13BE6AB5006A1422 /* Icon.png in Resources */,
 				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
@@ -3104,6 +3104,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -3160,6 +3161,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PREBINDING = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -3174,6 +3176,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PREBINDING = NO;
 				SDKROOT = iphoneos;

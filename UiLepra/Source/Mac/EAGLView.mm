@@ -272,7 +272,7 @@ static EAGLView* gSharedView;
 
 - (NSUInteger)supportedInterfaceOrientations
 {
-	if (_orientationStrictness >= 2)
+	/*if (_orientationStrictness >= 2)
 	{
 		return UIInterfaceOrientationLandscapeLeft;
 	}
@@ -281,7 +281,8 @@ static EAGLView* gSharedView;
 		return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight;
 	}
 	return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight
-		| UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown;
+		| UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown;*/
+    return UIInterfaceOrientationMaskAll;
 }
 
 - (void)orientationDidChange:(NSNotification*)notification

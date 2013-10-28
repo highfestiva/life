@@ -4,8 +4,6 @@
 
 
 
-#pragma once
-
 #include "../Include/LepraAssert.h"
 #include "../Include/ResourceTracker.h"
 
