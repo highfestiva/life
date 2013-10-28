@@ -106,8 +106,9 @@ void Downwash::Init()
 #if defined(LEPRA_IOS)
 	Thread::Sleep(3.0);	// Wait a bit longer so Pixel Doctrine splash is visible.
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
-	const int lDisplayWidth = lSize.height;
-	const int lDisplayHeight = lSize.width;
+	int lScale = [[UIScreen mainScreen] scale];
+	const int lDisplayWidth = lSize.height * lScale;
+	const int lDisplayHeight = lSize.width * lScale;
 #elif defined(EMULATE_TOUCH)
 	const int lDisplayWidth = 1024;
 	const int lDisplayHeight = 768;

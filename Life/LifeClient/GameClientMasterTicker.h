@@ -157,7 +157,7 @@ protected:
 	float mSlaveVSplit;
 	float mSlaveFade;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
-	std::hash_set<Cure::GameObjectId> mLocalObjectSet;
+	std::unordered_set<Cure::GameObjectId> mLocalObjectSet;
 
 	LOG_CLASS_DECLARE();
 };

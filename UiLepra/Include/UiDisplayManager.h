@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_set>
+#include <unordered_set>
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Log.h"
 #include "../Include/UiLepra.h"
@@ -191,7 +191,7 @@ public:
 	virtual void ShowMessageBox(const str& pMsg, const str& pCaption) = 0;
 
 protected:
-	typedef std::hash_set<DisplayResizeObserver*, LEPRA_VOIDP_HASHER> ResizeObserverSet;
+	typedef std::unordered_set<DisplayResizeObserver*, LEPRA_VOIDP_HASHER> ResizeObserverSet;
 	ResizeObserverSet mResizeObserverSet;
 
 	DisplayMode mDisplayMode;

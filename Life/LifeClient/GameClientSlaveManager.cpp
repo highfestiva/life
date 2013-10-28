@@ -600,7 +600,7 @@ bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) con
 	return !lMoveAllowed;
 }
 
-void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet)
+void GameClientSlaveManager::AddLocalObjects(std::unordered_set<Cure::GameObjectId>& pLocalObjectSet)
 {
 	pLocalObjectSet.insert(mOwnedObjectList.begin(), mOwnedObjectList.end());
 }

@@ -17,6 +17,7 @@
 #include "../Cure/Include/NetworkClient.h"
 #include "../Cure/Include/Spawner.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../Lepra/Include/Math.h"
 #include "../Lepra/Include/Obfuxator.h"
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/SystemManager.h"
@@ -57,6 +58,7 @@
 #include "Autopilot.h"
 #include "CenteredMachine.h"
 #include "CanonDriver.h"
+#include "Downwash.h"
 #include "DownwashConsoleManager.h"
 #include "DownwashTicker.h"
 #include "LandingTrigger.h"
@@ -82,6 +84,7 @@ const int REVERSED_LEVELNO[]	= { 6, 10, 9, 11, 7, 4, 0, 1, 2, 3, 5, 8, 12, 13 };
 
 const str gPlatform = _T("any_system");
 const str gVehicleName = _T("helicopter_01");
+const str gDefaultPilotName = _T("Anonymous pilot");
 
 
 
@@ -147,7 +150,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 }
@@ -181,7 +184,8 @@ void DownwashManager::Suspend()
 {
 	if (!mMenu->GetDialog())
 	{
-		OnPauseButton(mPauseButton);
+		mPauseButton->SetVisible(false);
+		OnPauseButton(0);
 	}
 }
 
@@ -391,7 +395,7 @@ bool DownwashManager::Render()
 	lTotalPower = Math::Lerp(0.4f, 1.0f, lTotalPower);
 	lTotalPower *= Math::Lerp(0.4f, 1.0f, lPower);
 	mArrowTotalPower = Math::Lerp(mArrowTotalPower, lTotalPower, 0.3f);
-	mArrowAngle = Math::Lerp(mArrowAngle, ::atan2(lWantedDirection, lPower), 0.3f);
+	mArrowAngle = Math::Lerp(mArrowAngle, std::atan2(lWantedDirection, lPower), 0.3f);
 	float lSize = mArrowTotalPower*0.5f;
 	float lFoV;
 	CURE_RTVAR_GET(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
@@ -546,7 +550,6 @@ bool DownwashManager::Paint()
 					while (lWantedSize <= lSize/2) lSize /= 2;*/
 					// Find out the screen coordinate of the chopper, so we can place our arrow around that.
 					const Vector3DF lCamDirection = mCameraTransform.GetOrientation() * Vector3DF(0,1,0);
-					const Vector3DF lCamLookAtPointInChopperPlane = lPos3d + lCamDirection * -lPos3d.y;
 					float lFoV;
 					CURE_RTVAR_GET(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
 					lFoV /= 45.0f;
@@ -815,18 +818,22 @@ bool DownwashManager::DidFinishLevel()
 		{
 			SetLevelBestTime(GetCurrentLevelNumber(), false, lTime);
 
-			mHiscoreLevelIndex = GetCurrentLevelNumber();
-			mMyHiscoreIndex = -1;
-			mHiscoreJustUploadedTimer.Stop();
-			CreateHiscoreAgent();
-			const str lLevelName = strutil::Format(_T("level_%i"), GetCurrentLevelNumber());
 			str lPilotName;
-			CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
-			const int lNegativeTime = (int)(lTime*-1000);
-			if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, gVehicleName, lPilotName, lNegativeTime))
+			CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
+			const bool lIsNonDefaultPilotName =  (lPilotName != gDefaultPilotName);
+			if (lIsNonDefaultPilotName)
 			{
-				delete mHiscoreAgent;
-				mHiscoreAgent = 0;
+				mHiscoreLevelIndex = GetCurrentLevelNumber();
+				mMyHiscoreIndex = -1;
+				mHiscoreJustUploadedTimer.Stop();
+				CreateHiscoreAgent();
+				const str lLevelName = strutil::Format(_T("level_%i"), GetCurrentLevelNumber());
+				const int lNegativeTime = (int)(lTime*-1000);
+				if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, gVehicleName, lPilotName, lNegativeTime))
+				{
+					delete mHiscoreAgent;
+					mHiscoreAgent = 0;
+				}
 			}
 		}
 
@@ -1791,16 +1798,20 @@ TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextO
 
 void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 {
-	mMenu->OnTapSound(pButton);
-	pButton->SetVisible(false);
+	if (pButton)
+	{
+		mMenu->OnTapSound(pButton);
+		pButton->SetVisible(false);
+	}
 
 	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
+	d->SetDirection(+1, false);
 
 	UiTbc::FixedLayouter lLayouter(d);
 
 	str lPilotName;
-	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
+	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
 	const int lDifficultyMode = GetControlMode();
 	double lMasterVolume;
 	CURE_RTVAR_GET(lMasterVolume, =, GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
@@ -1931,7 +1942,7 @@ void DownwashManager::UpdateHiscoreDialog()
 	UiTbc::FixedLayouter lLayouter(d);
 
 	str lPilotName;
-	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, _T("Anonymous pilot"));
+	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
 	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
 	typedef Cure::HiscoreAgent::List HiscoreList;
 	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();

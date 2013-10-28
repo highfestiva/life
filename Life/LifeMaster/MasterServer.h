@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_map>
+#include <unordered_map>
 #include <set>
 #include "../../Cure/Include/GameTicker.h"
 #include "../../Lepra/Include/MemberThread.h"
@@ -72,7 +72,7 @@ private:
 		GameServerInfo(const ServerInfo& pServerInfo);
 	};
 
-	typedef std::hash_map<str, GameServerInfo> GameServerTable;
+	typedef std::unordered_map<str, GameServerInfo> GameServerTable;
 	typedef std::set<UdpVSocket*> SocketTable;
 
 	UdpMuxSocket* mMuxSocket;

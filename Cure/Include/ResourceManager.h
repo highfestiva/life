@@ -264,7 +264,7 @@ template<class RamData, class DiversifiedData>
 class DiversifiedResource: public RamResource<RamData>
 {
 public:
-	typedef std::hash_map<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
+	typedef std::unordered_map<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
 
 	DiversifiedResource(ResourceManager* pManager, const str& pName);
 	virtual ~DiversifiedResource();
@@ -451,7 +451,7 @@ private:
 	typedef HashTable<str, Resource*> ResourceTable;
 	typedef OrderedMap<str, Resource*> ResourceMap;
 	typedef OrderedMap<Resource*, Resource*, LEPRA_VOIDP_HASHER> ResourceMapList;
-	typedef std::hash_set<Resource*, LEPRA_VOIDP_HASHER> ResourceSet;
+	typedef std::unordered_set<Resource*, LEPRA_VOIDP_HASHER> ResourceSet;
 	typedef std::vector<Resource*> ResourceArray;
 
 	TerrainFunctionManager* mTerrainFunctionManager;

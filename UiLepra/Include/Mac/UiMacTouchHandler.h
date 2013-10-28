@@ -30,13 +30,14 @@ static void HandleTouches(NSSet* pTouches, const Canvas* pCanvas, DragManager& p
 		CGPoint lTapPosition = [lTouch locationInView:nil];
 		CGPoint lPrevTapPosition = [lTouch previousLocationInView:nil];
 		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
-		//NSLog(@"Touch: %f, %f", lTapPosition.x, lTapPosition.y);
-		PixelCoord lPreviousTap(lPrevTapPosition.y, pCanvas->GetActualHeight() - lPrevTapPosition.x);
-		PixelCoord lThisTap(lTapPosition.y, pCanvas->GetActualHeight() - lTapPosition.x);
+		const int s = [[UIScreen mainScreen] scale];
+		//NSLog(@"Touch: %f, %f", lTapPosition.x*s, lTapPosition.y*s);
+		PixelCoord lPreviousTap(lPrevTapPosition.y*s, pCanvas->GetActualHeight() - lPrevTapPosition.x*s);
+		PixelCoord lThisTap(lTapPosition.y*s, pCanvas->GetActualHeight() - lTapPosition.x*s);
 		if (pCanvas && pCanvas->GetDeviceOutputRotation() != 0)
 		{
-			lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.y, lPrevTapPosition.x);
-			lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.y, lTapPosition.x);
+			lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.y*s, lPrevTapPosition.x*s);
+			lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.y*s, lTapPosition.x*s);
 		}
 		pDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed);
 	}

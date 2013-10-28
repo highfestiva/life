@@ -29,7 +29,7 @@ private:
 	virtual void RemoveAllFilterIoSockets();
 	virtual void KillIoSocket(VIoSocket* pSocket);
 
-	typedef std::hash_map<VIoSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
+	typedef std::unordered_map<VIoSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
 
 	MuxIoSocket* mMuxSocket;
 	SocketReceiveFilterTable mSocketReceiveFilterTable;

@@ -106,7 +106,7 @@ str JsonString::FromJson(const str& pJsonString)
 							lString += '?';
 							return lString;
 						}
-						str lNumber = str(x+1, 4);
+						str lNumber = str(x+1, x+5);
 						int lValue = 0;
 						if (strutil::StringToInt(lNumber, lValue, 16))
 						{

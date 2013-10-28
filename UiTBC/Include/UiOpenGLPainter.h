@@ -120,7 +120,7 @@ private:
 	};
 
 	typedef HashTable<int, Texture*> TextureTable;
-	typedef std::hash_map<uint32, FontTexture*> FontTextureTable;
+	typedef std::unordered_map<uint32, FontTexture*> FontTextureTable;
 
 	IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;

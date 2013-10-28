@@ -66,7 +66,7 @@ private:
 
 	//void OnCloseSocket(VSocket*);
 
-	typedef std::hash_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
+	typedef std::unordered_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
 
 	VSocket* mSocket;
 	uint32 mLoginAccountId;

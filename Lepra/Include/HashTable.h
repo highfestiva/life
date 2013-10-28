@@ -11,7 +11,7 @@
 #pragma once
 
 #include "String.h"	// Pulls in both basich hashing and narrow and wide string hashing.
-#include <hash_map>
+#include <unordered_map>
 
 #define HASHTABLE_TEMPLATE template<class _TTableKey, class _TTableObject, class _THash, unsigned SIZE>
 #define HASHTABLE_QUAL HashTable<_TTableKey, _TTableObject, _THash, SIZE>
@@ -29,7 +29,7 @@ class HashTable
 public:
 	friend class Iterator;
 
-	typedef std::hash_map<_TTableKey, _TTableObject, _THash> HashMap;
+	typedef std::unordered_map<_TTableKey, _TTableObject, _THash> HashMap;
 
 	class Iterator
 	{

@@ -67,3 +67,5 @@ ipch
 Doc/Dated
 Doc/getting_real.pdf
 Downwash/Icons/icon_data/
+project.xcworkspace/
+xcuserdata/

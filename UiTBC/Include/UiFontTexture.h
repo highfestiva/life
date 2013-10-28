@@ -7,7 +7,7 @@
 #pragma once
 
 #include "UiTBC.h"
-#include <hash_map>
+#include <unordered_map>
 #include "../../Lepra/Include/Canvas.h"
 
 
@@ -42,7 +42,7 @@ public:
 
 private:
 	typedef std::pair<int, int> GlyphX;
-	typedef std::hash_map<int32, GlyphX> GlyphXMap;
+	typedef std::unordered_map<int32, GlyphX> GlyphXMap;
 	GlyphXMap mGlyphXOffsetMap;
 
 	Canvas mCanvas;

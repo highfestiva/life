@@ -21,7 +21,7 @@
 
 
 
-#include <hash_set>
+#include <unordered_set>
 #include <list>
 #include <vector>
 #include "String.h"
@@ -99,10 +99,10 @@ public:
 	void AppendHistory(const str& pCommand);
 
 private:
-	typedef std::hash_set<ConsoleCommandExecutor*, LEPRA_VOIDP_HASHER> CommandExecutorSet;
-	typedef std::hash_set<str> CommandSet;
+	typedef std::unordered_set<ConsoleCommandExecutor*, LEPRA_VOIDP_HASHER> CommandExecutorSet;
+	typedef std::unordered_set<str> CommandSet;
 	typedef std::vector<str> CommandVector;
-	typedef std::hash_set<CommandCompleter*, LEPRA_VOIDP_HASHER> CommandCompleterSet;
+	typedef std::unordered_set<CommandCompleter*, LEPRA_VOIDP_HASHER> CommandCompleterSet;
 	CommandExecutorSet mCommandExecutorSet;
 	CommandCompleterSet mCommandCompleterList;
 	CommandSet mCommandSet;

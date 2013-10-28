@@ -59,6 +59,11 @@ static EAGLView* gSharedView;
 	eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
 		kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+	if ([self respondsToSelector:@selector(setContentScaleFactor:)])
+	{
+		self.contentScaleFactor = [[UIScreen mainScreen] scale];
+		eaglLayer.contentsScale = [[UIScreen mainScreen] scale];
+	}
 
 	self.multipleTouchEnabled = YES;
 	gSharedView = self;
@@ -141,9 +146,14 @@ static EAGLView* gSharedView;
 		// Create depth and stencil render buffer
 		glGenRenderbuffers(1, &depthRenderbuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+#if 0 // Simulator
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+#else // Device
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, framebufferWidth, framebufferHeight);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+#endif // Simulator / device
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{

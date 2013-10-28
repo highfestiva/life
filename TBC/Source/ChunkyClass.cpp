@@ -144,7 +144,7 @@ void ChunkyClass::RemoveTag(size_t pTagIndex)
 		deb_assert(false);
 		return;
 	}
-	mTagArray.erase(&mTagArray[pTagIndex]);
+	mTagArray.erase(mTagArray.begin()+pTagIndex);
 }
 
 size_t ChunkyClass::GetTagCount() const
