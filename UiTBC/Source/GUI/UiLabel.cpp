@@ -5,6 +5,7 @@
 
 
 #include "../../Include/GUI/UiLabel.h"
+#include <algorithm>
 #include "../../Include/GUI/UiDesktopWindow.h"
 #include "../../Include/UiPainter.h"
 

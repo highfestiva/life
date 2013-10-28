@@ -16,6 +16,7 @@ namespace std
 
 template<> struct LEPRA_STD_HASHER<const void *>
 {
+	enum { bucket_size = 1 };	// MSVC2010 compatibility. (Perhaps some type of optimization, unsure.)
 	union __vp
 	{
 		size_t s;
@@ -27,12 +28,16 @@ template<> struct LEPRA_STD_HASHER<const void *>
 		vp.p = __x;
 		return (vp.s);
 	}
+	bool operator()(const void* k1, const void* k2) const	// MSVC2010 compatibility. (Perhaps some type of ordering, unsure.)
+	{
+		return k1 == k2;
+	}
 };
 
 }
 
 typedef std::LEPRA_STD_HASHER<const void*> LEPRA_VOIDP_HASHER;
-typedef std::hash<int> LEPRA_ENUM_HASHER;
+typedef std::LEPRA_STD_HASHER<int> LEPRA_ENUM_HASHER;
 
 #endif
 

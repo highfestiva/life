@@ -126,6 +126,16 @@ template<> void astrutil::DoubleToString(double pValue, int pNumDecimals, astr& 
 	pString = lResult;
 }
 
+template<> astr astrutil::BoolToString(bool pValue)
+{
+	return pValue? "true" : "false";
+}
+
+template<> wstr wstrutil::BoolToString(bool pValue)
+{
+	return pValue? L"true" : L"false";
+}
+
 template<> void wstrutil::DoubleToString(double pValue, int pNumDecimals, wstr& pString)
 {
 	wchar_t lFormat[32];

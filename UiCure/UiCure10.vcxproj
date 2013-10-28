@@ -250,6 +250,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\UiBurnEmitter.cpp" />
     <ClCompile Include="Source\UiCollisionSoundManager.cpp" />
     <ClCompile Include="Source\UiCppContextObject.cpp" />
     <ClCompile Include="Source\UiCure.cpp" />
@@ -271,10 +272,18 @@
     <ClCompile Include="Source\UiTerrainManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Source\UiGameUiManager.mm" />
+    <None Include="Source\UiGameUiManager.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    </None>
     <None Include="Include\UiResourceManager.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\UiBurnEmitter.h" />
     <ClInclude Include="Include\UiCollisionSoundManager.h" />
     <ClInclude Include="Include\UiCppContextObject.h" />
     <ClInclude Include="Include\UiCure.h" />

@@ -258,6 +258,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\GUI\UiDialog.cpp" />
+    <ClCompile Include="Source\GUI\UiFixedLayouter.cpp" />
     <ClCompile Include="Source\GUI\UiMessageDialog.cpp" />
     <ClCompile Include="Source\UiAnimatedGeometry.cpp" />
     <ClCompile Include="Source\UiBasicMeshCreator.cpp" />
@@ -320,7 +321,14 @@
     <ClCompile Include="Source\GUI\UiTextField.cpp" />
     <ClCompile Include="Source\GUI\UiTreeNode.cpp" />
     <ClCompile Include="Source\GUI\UiWindow.cpp" />
-    <ClCompile Include="Source\Win32\UiWin32DirectX9Painter.cpp" />
+    <ClCompile Include="Source\Win32\UiWin32DirectX9Painter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Source\Win32\UiWin32FontManager.cpp" />
     <ClCompile Include="Source\X11\UiX11FontManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -347,6 +355,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\GUI\UiFixedLayouter.h" />
     <ClInclude Include="Include\GUI\UiMessageDialog.h" />
     <ClInclude Include="Include\UiAnimatedGeometry.h" />
     <ClInclude Include="Include\UiBasicMeshCreator.h" />

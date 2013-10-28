@@ -68,6 +68,9 @@
     <ClCompile Include="Source\UiTerrainManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\UiBurnEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\UiGameUiManager.mm">
@@ -136,6 +139,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\UiPythonInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiBurnEmitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

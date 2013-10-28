@@ -6,6 +6,7 @@
 
 #include "../Include/UiBasicMeshCreator.h"
 #include "../../Lepra/Include/LepraAssert.h"
+#include <algorithm>
 #include <list>
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Vector3D.h"

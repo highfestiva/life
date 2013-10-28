@@ -209,9 +209,6 @@
     <ClCompile Include="Source\GUI\UiWindow.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Win32\UiWin32DirectX9Painter.cpp">
-      <Filter>Source Files\Win32</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Win32\UiWin32FontManager.cpp">
       <Filter>Source Files\Win32</Filter>
     </ClCompile>
@@ -235,6 +232,12 @@
     </ClCompile>
     <ClCompile Include="Source\UiBillboardGeometry.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Win32\UiWin32DirectX9Painter.cpp">
+      <Filter>Source Files\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GUI\UiFixedLayouter.cpp">
+      <Filter>Source Files\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -446,6 +449,9 @@
     </ClInclude>
     <ClInclude Include="Include\UiBillboardGeometry.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\GUI\UiFixedLayouter.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

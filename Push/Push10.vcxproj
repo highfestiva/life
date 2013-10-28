@@ -110,6 +110,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -278,7 +279,7 @@
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </Reference>
   </ItemGroup>
-   <ItemGroup>
+  <ItemGroup>
     <ClCompile Include="ExplodingMachine.cpp" />
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="FastProjectile.cpp" />
@@ -325,7 +326,7 @@
   <ItemGroup>
     <ResourceCompile Include="Push.rc" />
   </ItemGroup>
-    <ItemGroup>
+  <ItemGroup>
     <ClInclude Include="ExplodingMachine.h" />
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="FastProjectile.h" />

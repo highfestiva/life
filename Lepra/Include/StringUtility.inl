@@ -573,18 +573,6 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::FastDoubleToString(double pValue)
 	}
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::BoolToString(bool pValue)
-{
-	if (pValue)
-	{
-		return (_T("true"));	// RAII simplifies here.
-	}
-	else
-	{
-		return (_T("false"));	// RAII simplifies here.
-	}
-}
-
 
 
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Reverse(const _String& pString)

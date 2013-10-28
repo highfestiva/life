@@ -5,6 +5,7 @@
 
 
 #include "../Include/UiFontManager.h"
+#include <algorithm>
 #include "../../Lepra/Include/ResourceTracker.h"
 
 

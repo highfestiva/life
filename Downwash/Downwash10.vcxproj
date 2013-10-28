@@ -110,6 +110,12 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -325,8 +331,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AirBalloonPilot.cpp" />
     <ClCompile Include="Automan.cpp" />
+    <ClCompile Include="AutoPathDriver.cpp" />
     <ClCompile Include="Autopilot.cpp" />
+    <ClCompile Include="BaseMachine.cpp" />
+    <ClCompile Include="CanonDriver.cpp" />
     <ClCompile Include="CenteredMachine.cpp" />
     <ClCompile Include="Eater.cpp" />
     <ClCompile Include="Downwash.cxx" />
@@ -335,11 +345,16 @@
     <ClCompile Include="DownwashTicker.cpp" />
     <ClCompile Include="LandingTrigger.cpp" />
     <ClCompile Include="Level.cpp" />
+    <ClCompile Include="SimulatorDriver.cpp" />
     <ClCompile Include="Sunlight.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AirBalloonPilot.h" />
     <ClInclude Include="Automan.h" />
+    <ClInclude Include="AutoPathDriver.h" />
     <ClInclude Include="Autopilot.h" />
+    <ClInclude Include="BaseMachine.h" />
+    <ClInclude Include="CanonDriver.h" />
     <ClInclude Include="CenteredMachine.h" />
     <ClInclude Include="Eater.h" />
     <ClInclude Include="Downwash.h" />
@@ -349,11 +364,19 @@
     <ClInclude Include="LandingTrigger.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="RtVar.h" />
+    <ClInclude Include="SimulatorDriver.h" />
     <ClInclude Include="Sunlight.h" />
     <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Downwash.mm" />
+    <None Include="Downwash.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Downwash.rc" />

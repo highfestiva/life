@@ -257,6 +257,7 @@
     <ClCompile Include="Source\ContextPath.cpp" />
     <ClCompile Include="Source\CppContextObject.cpp" />
     <ClCompile Include="Source\Cure.cpp" />
+    <ClCompile Include="Source\Driver.cpp" />
     <ClCompile Include="Source\Elevator.cpp" />
     <ClCompile Include="Source\FloatAttribute.cpp" />
     <ClCompile Include="Source\GameManager.cpp" />
@@ -295,6 +296,7 @@
     <ClInclude Include="Include\CppContextObject.h" />
     <ClInclude Include="Include\Cure.h" />
     <ClInclude Include="Include\DelayedDeleter.h" />
+    <ClInclude Include="Include\Driver.h" />
     <ClInclude Include="Include\Elevator.h" />
     <ClInclude Include="Include\FloatAttribute.h" />
     <ClInclude Include="Include\GameManager.h" />

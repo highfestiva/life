@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 
 
 namespace Lepra

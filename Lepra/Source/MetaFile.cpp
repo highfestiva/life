@@ -3,6 +3,7 @@
 // Copyright (c) Pixel Doctrine
 
 #include "../Include/MetaFile.h"
+#include <algorithm>
 #include "../Include/Path.h"
 
 namespace Lepra

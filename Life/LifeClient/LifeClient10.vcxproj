@@ -230,6 +230,7 @@
     <ClCompile Include="GameClientSlaveManager.cpp" />
     <ClCompile Include="HomingProjectile.cpp" />
     <ClCompile Include="Level.cpp" />
+    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Mine.cpp" />
     <ClCompile Include="OptionsManager.cpp" />
     <ClCompile Include="Projectile.cpp" />
@@ -258,6 +259,7 @@
     <ClInclude Include="HomingProjectile.h" />
     <ClInclude Include="InputObserver.h" />
     <ClInclude Include="Level.h" />
+    <ClInclude Include="Menu.h" />
     <ClInclude Include="Mine.h" />
     <ClInclude Include="OptionsManager.h" />
     <ClInclude Include="Projectile.h" />

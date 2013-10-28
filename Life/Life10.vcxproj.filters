@@ -35,6 +35,9 @@
     <ClCompile Include="StuntTrigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SystemUtil.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleManager.h">
@@ -73,9 +76,15 @@
     <ClInclude Include="StuntTrigger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SystemUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Life.sln" />
     <None Include="Life.vcproj" />
+    <None Include="SystemUtil.mm">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

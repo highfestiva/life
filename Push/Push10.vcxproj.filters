@@ -20,9 +20,6 @@
     <ClCompile Include="Explosion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Grenade.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -30,9 +27,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Push.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PushBarrel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PushConsoleManager.cpp">
@@ -80,9 +74,6 @@
     <ClCompile Include="..\Life\LifeServer\ServerConsoleManager.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="PushServer\ServerGrenade.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
     <ClCompile Include="..\Life\LifeServer\ServerMessageProcessor.cpp">
       <Filter>Server</Filter>
     </ClCompile>
@@ -107,6 +98,39 @@
     <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp">
       <Filter>Server</Filter>
     </ClCompile>
+    <ClCompile Include="ExplodingMachine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FastProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\BombPlane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\GameServerLogic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\Npc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\PushServerConsole.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\ServerFastProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\ServerMine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PushServer\ServerProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Icons\Push.ico">
@@ -125,12 +149,6 @@
     <ClInclude Include="Explosion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grenade.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Launcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -138,9 +156,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Push.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PushBarrel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PushConsoleManager.h">
@@ -194,12 +209,6 @@
     <ClInclude Include="..\Life\LifeServer\ServerConsoleManager.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="PushServer\ServerGrenade.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="PushServer\ServerLauncher.h">
-      <Filter>Server</Filter>
-    </ClInclude>
     <ClInclude Include="..\Life\LifeServer\ServerMessageProcessor.h">
       <Filter>Server</Filter>
     </ClInclude>
@@ -229,6 +238,39 @@
     </ClInclude>
     <ClInclude Include="..\Life\LifeServer\ServerDelegate.h">
       <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="ExplodingMachine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FastProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\BombPlane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\GameServerLogic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\Npc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\PushServerConsole.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\ServerFastProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\ServerMine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServer\ServerProjectile.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -265,6 +265,7 @@
     <ClInclude Include="Include\File.h" />
     <ClInclude Include="Include\FileArchive.h" />
     <ClInclude Include="Include\FileOpener.h" />
+    <ClInclude Include="Include\GameTimer.h" />
     <ClInclude Include="Include\GammaLookup.h" />
     <ClInclude Include="Include\Graphics2D.h" />
     <ClInclude Include="Include\Hasher.h" />
@@ -312,6 +313,7 @@
     <ClInclude Include="Include\QuickList.h" />
     <ClInclude Include="Include\Random.h" />
     <ClInclude Include="Include\Reader.h" />
+    <ClInclude Include="Include\ResourceTracker.h" />
     <ClInclude Include="Include\RotationMatrix.h" />
     <ClInclude Include="Include\SHA1.h" />
     <ClInclude Include="Include\SkipList.h" />
@@ -370,6 +372,7 @@
     <None Include="Include\Transformation.inl" />
     <None Include="Include\Vector2D.inl" />
     <None Include="Include\Vector3D.inl" />
+    <ClCompile Include="Source\GameTimer.cpp" />
     <ClCompile Include="Source\JsonString.cpp" />
     <ClCompile Include="Source\Obfuxator.cpp" />
     <ClCompile Include="Source\Posix\MacLog.mm">
@@ -425,6 +428,7 @@
     <ClCompile Include="Source\ProgressCallback.cpp" />
     <ClCompile Include="Source\Random.cpp" />
     <ClCompile Include="Source\Reader.cpp" />
+    <ClCompile Include="Source\ResourceTracker.cpp" />
     <ClCompile Include="Source\SHA1.cpp" />
     <ClCompile Include="Source\Socket.cpp" />
     <ClCompile Include="Source\SocketAddress.cpp" />

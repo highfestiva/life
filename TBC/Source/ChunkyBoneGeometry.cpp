@@ -5,6 +5,7 @@
 
 
 #include "../Include/ChunkyBoneGeometry.h"
+#include <algorithm>
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Endian.h"
