@@ -92,7 +92,7 @@ void ClientOptionsManager::DoRefreshConfiguration()
 	};
 	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 
-	CURE_RTVAR_GET(mMouseSensitivity, =(float), mVariableScope, RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
+	CURE_RTVAR_TRYGET(mMouseSensitivity, =(float), mVariableScope, RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
 }
 
 bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)

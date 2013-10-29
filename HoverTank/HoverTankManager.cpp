@@ -300,7 +300,7 @@ void HoverTankManager::SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId
 	SetRoadSignsVisible(false);
 }
 
-void HoverTankManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet)
+void HoverTankManager::AddLocalObjects(std::unordered_set<Cure::GameObjectId>& pLocalObjectSet)
 {
 	if (mAvatarId)
 	{
@@ -1235,7 +1235,7 @@ void HoverTankManager::DrawScore()
 		return;
 	}
 
-	typedef std::hash_map<str, Score*> ScoreMap;
+	typedef std::unordered_map<str, Score*> ScoreMap;
 	typedef std::vector<Score> ScoreArray;
 	ScoreMap lScoreMap;
 	ScoreArray lScoreArray;

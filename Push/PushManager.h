@@ -65,14 +65,14 @@ public:
 	virtual void OnLoginSuccess();
 
 	void SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId);
-	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet);
+	void AddLocalObjects(std::unordered_set<Cure::GameObjectId>& pLocalObjectSet);
 	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
 	Cure::GameObjectId GetAvatarInstanceId() const;
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
 protected:
-	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
+	typedef std::unordered_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
 	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
 
 	Cure::RuntimeVariableScope* GetVariableScope() const;

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_set>
+#include "../../Lepra/Include/Unordered.h"
 #include "../UiDisplayManager.h"
 #include "UiWin32Core.h"
 
@@ -120,7 +120,7 @@ private:
 
 	bool mConsumeChar;
 
-	typedef std::hash_set<Win32Observer*, LEPRA_VOIDP_HASHER> ObserverSet;
+	typedef std::unordered_set<Win32Observer*, LEPRA_VOIDP_HASHER> ObserverSet;
 	typedef HashTable<unsigned int, ObserverSet*> ObserverSetTable;
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;

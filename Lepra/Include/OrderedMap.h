@@ -419,7 +419,7 @@ TEMPLATE typename QUAL::ConstIterator QUAL::End() const
 
 TEMPLATE size_t QUAL::GetCountSafe() const
 {
-	return (mTable.GetCount());	// This is safe as long as STLport is using member integer for size() for hash_map type.
+	return (mTable.GetCount());	// This is safe as long as STLport is using member integer for size() for unordered_map type.
 }
 
 TEMPLATE size_t QUAL::GetCount() const

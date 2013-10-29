@@ -36,9 +36,9 @@ void ServerProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 1, 2);
+	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
 	deb_assert(lTag);
-	mExplosiveEnergy = lTag->mFloatValueList[0];
+	mExplosiveEnergy = lTag->mFloatValueList[3];
 
 	TransformationF lTransform;
 	Vector3DF lParentVelocity;

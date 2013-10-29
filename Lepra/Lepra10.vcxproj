@@ -333,6 +333,7 @@
     <ClInclude Include="Include\Time.h" />
     <ClInclude Include="Include\Timer.h" />
     <ClInclude Include="Include\Transformation.h" />
+    <ClInclude Include="Include\Unordered.h" />
     <ClInclude Include="Include\Vector2D.h" />
     <ClInclude Include="Include\Vector3D.h" />
     <ClInclude Include="Include\Writer.h" />

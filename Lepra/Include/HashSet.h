@@ -25,7 +25,7 @@
 #include "FastAllocator.h"
 #include "Hasher.h"
 #include "LepraTypes.h"
-#include <unordered_set>
+#include "Unordered.h"
 
 #define TEMPLATE template<class _TSetObject, class _THash, unsigned SIZE>
 #define QUAL HashSet<_TSetObject, _THash, SIZE>

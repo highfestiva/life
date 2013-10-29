@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hash_set>
+#include "../../Lepra/Include/Unordered.h"
 #include "../UiDisplayManager.h"
 #include "UiX11Core.h"
 
@@ -114,7 +114,7 @@ private:
 
 	bool mConsumeChar;
 
-	typedef std::hash_set<X11Observer*, LEPRA_VOIDP_HASHER> ObserverSet;
+	typedef std::unordered_set<X11Observer*, LEPRA_VOIDP_HASHER> ObserverSet;
 	typedef HashTable<int, ObserverSet*> ObserverSetTable;
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;

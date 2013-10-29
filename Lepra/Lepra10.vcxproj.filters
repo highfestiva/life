@@ -329,6 +329,9 @@
     <ClInclude Include="Include\GameTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Unordered.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\CollisionDetector2D.inl">

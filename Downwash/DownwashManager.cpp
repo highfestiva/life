@@ -571,7 +571,7 @@ bool DownwashManager::Paint()
 		{
 			mWinImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 			const str lName = strutil::Format(_T("win%i.png"), Random::GetRandomNumber()%9);
-			mLog.Infof(_T("Showing win image %s."), lName.c_str());
+			//mLog.Infof(_T("Showing win image %s."), lName.c_str());
 			mWinImage->LoadUnique(GetResourceManager(), lName,
 				UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 		}

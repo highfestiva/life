@@ -6,8 +6,6 @@
 
 #pragma once
 
-
-
 #include "../HoverTank.h"
 
 
@@ -31,7 +29,7 @@ class Npc;
 class GameServerLogic
 {
 public:
-	typedef std::hash_set<Cure::GameObjectId> AvatarIdSet;
+	typedef std::unordered_set<Cure::GameObjectId> AvatarIdSet;
 
 	GameServerLogic();
 	virtual ~GameServerLogic();
