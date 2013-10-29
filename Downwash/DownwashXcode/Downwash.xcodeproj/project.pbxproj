@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -89,7 +89,6 @@
 		B16C558B1788404A0081DE46 /* BaseMachine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16C55891788404A0081DE46 /* BaseMachine.cpp */; };
 		B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16F032717808366000C31E0 /* UiBurnEmitter.cpp */; };
 		B1740478179469EB00DB7AD5 /* ResourceTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */; };
-		B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1942D2114E08E86002F37E1 /* StoreKit.framework */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
 		B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560E13BE6C3B006A1422 /* Icon-72.png */; };
@@ -619,7 +618,6 @@
 		B16C55891788404A0081DE46 /* BaseMachine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseMachine.cpp; sourceTree = "<group>"; };
 		B16F032717808366000C31E0 /* UiBurnEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiBurnEmitter.cpp; path = ../../UiCure/Source/UiBurnEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ResourceTracker.cpp; sourceTree = "<group>"; };
-		B1942D2114E08E86002F37E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
 		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
 		B196560E13BE6C3B006A1422 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../Icons/Icon-72.png"; sourceTree = SOURCE_ROOT; };
@@ -1256,7 +1254,6 @@
 				B19A295813A137400051A61C /* OpenAL.framework in Frameworks */,
 				B19A295A13A137400051A61C /* OpenGLES.framework in Frameworks */,
 				B19A29E213A13B9B0051A61C /* QuartzCore.framework in Frameworks */,
-				B1942D2214E08E86002F37E1 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1287,10 +1284,13 @@
 				29B97315FDCFA39411CA2CEA /* Sources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				B1942D2114E08E86002F37E1 /* StoreKit.framework */,
 			);
+			indentWidth = 8;
 			name = CustomTemplate;
 			sourceTree = "<group>";
+			tabWidth = 8;
+			usesTabs = 1;
+			wrapsLines = 0;
 		};
 		29B97315FDCFA39411CA2CEA /* Sources */ = {
 			isa = PBXGroup;
@@ -2457,14 +2457,20 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				ORGANIZATIONNAME = "Pixel Doctrine";
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = Z5H6E5KH6Q;
+						SystemCapabilities = {
+							com.apple.InAppPurchase = {
+								enabled = 0;
+							};
+						};
 					};
 				};
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Downwash" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -3026,6 +3032,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3059,6 +3067,7 @@
 					"\"$(SRCROOT)/../../TBC\"",
 				);
 				PRODUCT_NAME = Downwash;
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -3066,6 +3075,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -3097,62 +3108,10 @@
 					"\"$(SRCROOT)/../../TBC\"",
 				);
 				PRODUCT_NAME = Downwash;
+				PROVISIONING_PROFILE = "";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
-		};
-		B196571713BE9B2B006A1422 /* Distribution */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
-				PREBINDING = NO;
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Distribution;
-		};
-		B196571813BE9B2B006A1422 /* Distribution */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Downwash_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"HAVE_STDINT_H=1",
-					"HAVE_STAT=1",
-					"HAVE_UNISTD_H=1",
-					"HAVE_USLEEP=1",
-					LEPRA_WITHOUT_FMOD,
-					LEPRA_IPHONE_SIMULATOR,
-					LEPRA_UNICODE,
-					USE_FILE32API,
-				);
-				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/../../ThirdParty/ode-0.11.1/include\"",
-					"\"$(SRCROOT)/../../ThirdParty/utf8cpp\"",
-					"\"$(SRCROOT)/../../ThirdParty/freealut-1.1.0/include\"",
-					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
-					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/include\"",
-					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/lib\"",
-					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
-					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
-				);
-				INFOPLIST_FILE = "Downwash-Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../Lepra\"",
-					"\"$(SRCROOT)/../../TBC\"",
-				);
-				PRODUCT_NAME = Downwash;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Distribution;
 		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -3191,7 +3150,6 @@
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
 				1D6058950D05DD3E006BFB54 /* Release */,
-				B196571813BE9B2B006A1422 /* Distribution */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -3201,7 +3159,6 @@
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
-				B196571713BE9B2B006A1422 /* Distribution */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
