@@ -34,10 +34,17 @@ LineGraph2d::LineGraph2d(const LineGraph2d& pCopy):
 	mData(pCopy.mData),
 	mNames(pCopy.mNames)
 {
-	
 	mDisplayListId = mPainter->NewDisplayList();
 }
 
+void LineGraph2d::operator=(const LineGraph2d& pCopy)
+{
+	mPainter = pCopy.mPainter;
+	mData = pCopy.mData;
+	mNames = pCopy.mNames;
+	mDisplayListId = mPainter->NewDisplayList();
+}
+    
 LineGraph2d::~LineGraph2d()
 {
 	mPainter->DeleteDisplayList(mDisplayListId);
@@ -125,14 +132,6 @@ LineGraph2d::ColorPicker::ColorPicker(int pIndex, UiTbc::Painter* mPainter)
 	typedef uint8 u8;
 	mPainter->SetColor((u8)(lColor>>16), (u8)(lColor>>8), (u8)lColor, 255);
 }
-
-
-
-void LineGraph2d::operator=(const LineGraph2d&)
-{
-	deb_assert(false);
-}
-
 
 
 

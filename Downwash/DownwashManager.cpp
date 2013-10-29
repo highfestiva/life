@@ -549,7 +549,6 @@ bool DownwashManager::Paint()
 					while (lWantedSize >= lSize*2) lSize *= 2;
 					while (lWantedSize <= lSize/2) lSize /= 2;*/
 					// Find out the screen coordinate of the chopper, so we can place our arrow around that.
-					const Vector3DF lCamDirection = mCameraTransform.GetOrientation() * Vector3DF(0,1,0);
 					float lFoV;
 					CURE_RTVAR_GET(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
 					lFoV /= 45.0f;
@@ -592,7 +591,7 @@ bool DownwashManager::Paint()
 			}
 			else
 			{
-				float x = 12*2+64;
+				float x = 12+64;
 				float s = Math::Clamp(mUiManager->GetCanvas()->GetWidth() / 4.0f, 128.0f, 256.0f);
 				float y = f*s;
 				y = mRenderArea.GetHeight()-y;

@@ -22,6 +22,7 @@ struct LineGraph2d
 {
 	LineGraph2d(UiTbc::Painter* mPainter);
 	LineGraph2d(const LineGraph2d&);
+	void operator=(const LineGraph2d&);
 	virtual ~LineGraph2d();
 
 	void TickLine(size_t pNewSize);	// Rolls up the graph by one step and inserts a "blank line".
@@ -50,8 +51,6 @@ private:
 
 	Fill mData;
 	SegmentNames mNames;
-
-	void operator=(const LineGraph2d&);
 };
 
 

@@ -240,7 +240,7 @@ bool DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int 
 		   mEnumeratedDisplayMode[i].mHeight == pHeight)
 		{
 			if (mEnumeratedDisplayMode[i].mBitDepth == pDisplayMode.mBitDepth &&
-			   mEnumeratedDisplayMode[i].mRefreshRate > pDisplayMode.mRefreshRate)
+			   mEnumeratedDisplayMode[i].mRefreshRate >= pDisplayMode.mRefreshRate)
 			{
 				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
 				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
