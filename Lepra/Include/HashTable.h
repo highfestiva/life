@@ -11,7 +11,7 @@
 #pragma once
 
 #include "String.h"	// Pulls in both basich hashing and narrow and wide string hashing.
-#include <unordered_map>
+#include "Unordered.h"
 
 #define HASHTABLE_TEMPLATE template<class _TTableKey, class _TTableObject, class _THash, unsigned SIZE>
 #define HASHTABLE_QUAL HashTable<_TTableKey, _TTableObject, _THash, SIZE>

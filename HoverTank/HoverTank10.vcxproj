@@ -110,6 +110,12 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -278,96 +284,51 @@
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </Reference>
   </ItemGroup>
-   <ItemGroup>
-    <ClCompile Include="ExplodingMachine.cpp" />
-    <ClCompile Include="Explosion.cpp" />
-    <ClCompile Include="FastProjectile.cpp" />
-    <ClCompile Include="Level.cpp" />
-    <ClCompile Include="LoginView.cpp" />
-    <ClCompile Include="Mine.cpp" />
-    <ClCompile Include="Projectile.cpp" />
+  <ItemGroup>
     <ClCompile Include="HoverTank.cxx" />
     <ClCompile Include="HoverTankConsoleManager.cpp" />
-    <ClCompile Include="HoverTankDemo.cpp" />
     <ClCompile Include="HoverTankManager.cpp" />
+    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp" />
+    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp" />
+    <ClCompile Include="HoverTankServer\BombPlane.cpp" />
+    <ClCompile Include="HoverTankServer\GameServerLogic.cpp" />
+    <ClCompile Include="HoverTankServer\HoverTankServerConsole.cpp" />
+    <ClCompile Include="HoverTankServer\HoverTankServerDelegate.cpp" />
+    <ClCompile Include="HoverTankServer\HoverTankServerMessageProcessor.cpp" />
+    <ClCompile Include="HoverTankServer\HoverTankServerTicker.cpp" />
+    <ClCompile Include="HoverTankServer\Npc.cpp" />
     <ClCompile Include="HoverTankTicker.cpp" />
     <ClCompile Include="HoverTankViewer.cpp" />
+    <ClCompile Include="LoginView.cpp" />
     <ClCompile Include="RoadSignButton.cpp" />
     <ClCompile Include="ServerListView.cpp" />
     <ClCompile Include="Sunlight.cpp" />
     <ClCompile Include="View.cpp" />
-    <ClCompile Include="HoverTankServer\BombPlane.cpp" />
-    <ClCompile Include="..\Life\LifeServer\BulletTime.cpp" />
-    <ClCompile Include="..\Life\LifeServer\Client.cpp" />
-    <ClCompile Include="HoverTankServer\GameServerLogic.cpp" />
-    <ClCompile Include="..\Life\LifeServer\GameServerManager.cpp" />
-    <ClCompile Include="HoverTankServer\Npc.cpp" />
-    <ClCompile Include="HoverTankServer\HoverTankServerConsole.cpp" />
-    <ClCompile Include="HoverTankServer\HoverTankServerDelegate.cpp" />
-    <ClCompile Include="HoverTankServer\HoverTankServerMessageProcessor.cpp" />
-    <ClCompile Include="..\Life\LifeServer\RaceTimer.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerConsoleManager.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp" />
-    <ClCompile Include="HoverTankServer\ServerFastProjectile.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerMessageProcessor.cpp" />
-    <ClCompile Include="HoverTankServer\ServerMine.cpp" />
-    <ClCompile Include="HoverTankServer\ServerProjectile.cpp" />
-    <ClCompile Include="..\Life\LifeServer\Spawner.cpp" />
-    <ClCompile Include="..\Life\LifeClient\UiGameServerManager.cpp" />
-    <ClCompile Include="..\Life\LifeClient\UiServerConsoleManager.cpp" />
-    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp" />
-    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Icons\HoverTank.ico" />
-    <None Include="HoverTank.mm" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="HoverTank.rc" />
-  </ItemGroup>
-    <ItemGroup>
-    <ClInclude Include="ExplodingMachine.h" />
-    <ClInclude Include="Explosion.h" />
-    <ClInclude Include="FastProjectile.h" />
-    <ClInclude Include="Level.h" />
-    <ClInclude Include="LoginView.h" />
-    <ClInclude Include="Mine.h" />
-    <ClInclude Include="Projectile.h" />
     <ClInclude Include="HoverTank.h" />
     <ClInclude Include="HoverTankConsoleManager.h" />
-    <ClInclude Include="HoverTankDemo.h" />
     <ClInclude Include="HoverTankManager.h" />
+    <ClInclude Include="..\Life\LifeMaster\MasterServer.h" />
+    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h" />
+    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h" />
+    <ClInclude Include="HoverTankMaster\MasterServerPort.h" />
+    <ClInclude Include="HoverTankServer\BombPlane.h" />
+    <ClInclude Include="HoverTankServer\GameServerLogic.h" />
+    <ClInclude Include="HoverTankServer\HoverTankServerConsole.h" />
+    <ClInclude Include="HoverTankServer\HoverTankServerDelegate.h" />
+    <ClInclude Include="HoverTankServer\HoverTankServerMessageProcessor.h" />
+    <ClInclude Include="HoverTankServer\HoverTankServerTicker.h" />
+    <ClInclude Include="HoverTankServer\Npc.h" />
     <ClInclude Include="HoverTankTicker.h" />
     <ClInclude Include="HoverTankViewer.h" />
+    <ClInclude Include="LoginView.h" />
     <ClInclude Include="RoadSignButton.h" />
     <ClInclude Include="RtVar.h" />
     <ClInclude Include="ServerListView.h" />
     <ClInclude Include="Sunlight.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="View.h" />
-    <ClInclude Include="HoverTankServer\BombPlane.h" />
-    <ClInclude Include="..\Life\LifeServer\BulletTime.h" />
-    <ClInclude Include="..\Life\LifeServer\Client.h" />
-    <ClInclude Include="HoverTankServer\GameServerLogic.h" />
-    <ClInclude Include="..\Life\LifeServer\GameServerManager.h" />
-    <ClInclude Include="HoverTankServer\Npc.h" />
-    <ClInclude Include="HoverTankServer\HoverTankServerConsole.h" />
-    <ClInclude Include="HoverTankServer\HoverTankServerDelegate.h" />
-    <ClInclude Include="HoverTankServer\HoverTankServerMessageProcessor.h" />
-    <ClInclude Include="..\Life\LifeServer\RaceTimer.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerConsoleManager.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerDelegate.h" />
-    <ClInclude Include="HoverTankServer\ServerFastProjectile.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerMessageProcessor.h" />
-    <ClInclude Include="HoverTankServer\ServerMine.h" />
-    <ClInclude Include="HoverTankServer\ServerProjectile.h" />
-    <ClInclude Include="..\Life\LifeServer\Spawner.h" />
-    <ClInclude Include="..\Life\LifeClient\UiGameServerManager.h" />
-    <ClInclude Include="..\Life\LifeClient\UiServerConsoleManager.h" />
-    <ClInclude Include="..\Life\LifeMaster\MasterServer.h" />
-    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h" />
-    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h" />
-    <ClInclude Include="HoverTankMaster\MasterServerPort.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cure\Cure10.vcxproj">
@@ -414,6 +375,20 @@
       <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\Life\LifeServer\LifeServer10.vcxproj">
+      <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCDAA}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HoverTank.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

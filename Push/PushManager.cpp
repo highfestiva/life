@@ -252,7 +252,7 @@ void PushManager::SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId)
 	SetRoadSignsVisible(false);
 }
 
-void PushManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet)
+void PushManager::AddLocalObjects(std::unordered_set<Cure::GameObjectId>& pLocalObjectSet)
 {
 	if (mAvatarId)
 	{

@@ -230,8 +230,11 @@
     <ClCompile Include="RaceTimer.cpp" />
     <ClCompile Include="ServerConsoleManager.cpp" />
     <ClCompile Include="ServerDelegate.cpp" />
+    <ClCompile Include="ServerFastProjectile.cpp" />
     <ClCompile Include="ServerMessageProcessor.cpp" />
     <ClCompile Include="..\LifeMaster\MasterServerNetworkParser.cpp" />
+    <ClCompile Include="ServerMine.cpp" />
+    <ClCompile Include="ServerProjectile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BulletTime.h" />

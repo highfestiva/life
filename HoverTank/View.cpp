@@ -53,10 +53,9 @@ UiTbc::RectComponent* View::AddCentering(int pLayer, UiTbc::Component* pParent)
 
 UiTbc::Label* View::AddLabel(const str& pText, const Color& pColor, int pPreferredWidth, UiTbc::Component* pParent, int pLayer)
 {
-	UiTbc::Label* lLabel = new UiTbc::Label;
+	UiTbc::Label* lLabel = new UiTbc::Label(pColor, pText);
 	lLabel->SetIsHollow(true);
 	lLabel->SetPreferredSize(pPreferredWidth, 24, (pPreferredWidth == 0)? false : true);
-	lLabel->SetText(pText, pColor, RED);
 	if (pParent)
 	{
 		pParent->AddChild(lLabel, 0, 0, pLayer);

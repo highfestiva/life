@@ -1226,7 +1226,7 @@ void ResourceManager::LoadSingleResource()
 		}
 		{
 			ScopeLock lLock(&mThreadLock);
-			if (lResource == mRequestLoadList.First().GetObject())
+			if (!mRequestLoadList.IsEmpty() && lResource == mRequestLoadList.First().GetObject())
 			{
 				deb_assert(mRequestLoadList.GetCount() < 10000);
 				mRequestLoadList.Remove(lResource);

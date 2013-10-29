@@ -17,28 +17,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Explosion.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp">
+      <Filter>Master</Filter>
     </ClCompile>
-    <ClCompile Include="Grenade.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp">
+      <Filter>Master</Filter>
     </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoginView.cpp">
+    <ClCompile Include="View.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HoverTank.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HoverTankBarrel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HoverTankConsoleManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HoverTankDemo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HoverTankManager.cpp">
@@ -50,6 +41,9 @@
     <ClCompile Include="HoverTankViewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LoginView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="RoadSignButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -59,94 +53,48 @@
     <ClCompile Include="Sunlight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="View.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\BulletTime.cpp">
+    <ClCompile Include="HoverTankServer\BombPlane.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\Client.cpp">
+    <ClCompile Include="HoverTankServer\GameServerLogic.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\GameServerManager.cpp">
+    <ClCompile Include="HoverTankServer\HoverTankServerConsole.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="HoverTankServer\HoverTankServerDelegate.cpp">
       <Filter>Server</Filter>
     </ClCompile>
     <ClCompile Include="HoverTankServer\HoverTankServerMessageProcessor.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\RaceTimer.cpp">
+    <ClCompile Include="HoverTankServer\HoverTankServerTicker.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\ServerConsoleManager.cpp">
+    <ClCompile Include="HoverTankServer\Npc.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="HoverTankServer\ServerGrenade.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\ServerMessageProcessor.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\Spawner.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeClient\UiGameServerManager.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeClient\UiServerConsoleManager.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp">
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Life\LifeMaster\MasterServer.h">
       <Filter>Master</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp">
+    </ClInclude>
+    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h">
       <Filter>Master</Filter>
-    </ClCompile>
-    <ClCompile Include="HoverTankServer\HoverTankServerDelegate.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Icons\HoverTank.ico">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="HoverTank.mm">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="HoverTank.rc">
-      <Filter>Source Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Explosion.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grenade.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h">
+      <Filter>Master</Filter>
     </ClInclude>
-    <ClInclude Include="Launcher.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="HoverTankMaster\MasterServerPort.h">
+      <Filter>Master</Filter>
     </ClInclude>
-    <ClInclude Include="Level.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LoginView.h">
+    <ClInclude Include="View.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HoverTank.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HoverTankBarrel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HoverTankConsoleManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HoverTankDemo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HoverTankManager.h">
@@ -156,6 +104,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HoverTankViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RoadSignButton.h">
@@ -173,62 +124,31 @@
     <ClInclude Include="Version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="View.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\BulletTime.h">
+    <ClInclude Include="HoverTankServer\BombPlane.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\Client.h">
+    <ClInclude Include="HoverTankServer\GameServerLogic.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\GameServerManager.h">
+    <ClInclude Include="HoverTankServer\HoverTankServerConsole.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="HoverTankServer\HoverTankServerDelegate.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="HoverTankServer\HoverTankServerMessageProcessor.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\RaceTimer.h">
+    <ClInclude Include="HoverTankServer\HoverTankServerTicker.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\ServerConsoleManager.h">
+    <ClInclude Include="HoverTankServer\Npc.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="HoverTankServer\ServerGrenade.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="HoverTankServer\ServerLauncher.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\ServerMessageProcessor.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\Spawner.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeClient\UiGameServerManager.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeClient\UiServerConsoleManager.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeMaster\MasterServer.h">
-      <Filter>Master</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h">
-      <Filter>Master</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h">
-      <Filter>Master</Filter>
-    </ClInclude>
-    <ClInclude Include="HoverTankMaster\MasterServerPort.h">
-      <Filter>Master</Filter>
-    </ClInclude>
-    <ClInclude Include="HoverTankServer\HoverTankServerDelegate.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Life\LifeServer\ServerDelegate.h">
-      <Filter>Server</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HoverTank.mm">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -45,7 +45,7 @@ void Projectile::OnLoaded()
 
 	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
 	deb_assert(lTag);
-	mExplosiveEnergy = lTag->mFloatValueList[0];
+	mExplosiveEnergy = lTag->mFloatValueList[3];
 
 	str lLaunchSoundName;
 	str lShreekSoundName;
