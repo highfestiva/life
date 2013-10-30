@@ -1140,10 +1140,10 @@ void App::MainMenu()
 	// TRICKY-END!
 
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
-	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"));
-	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"));
-	d->AddButton(3, ICONBTNA("btn_hiscore.png", "Hiscore"));
-	d->AddButton(4, ICONBTNA("btn_credits.png", "Credits"));
+	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"), true);
+	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"), true);
+	d->AddButton(3, ICONBTNA("btn_hiscore.png", "Hiscore"), true);
+	d->AddButton(4, ICONBTNA("btn_credits.png", "Credits"), true);
 }
 
 void App::UpdateHiscore(bool pError)
@@ -1154,9 +1154,8 @@ void App::UpdateHiscore(bool pError)
 	}
 	if (pError)
 	{
-		UiTbc::Label* lText = new UiTbc::Label;
+		UiTbc::Label* lText = new UiTbc::Label(LIGHT_RED, _T("Network problem, try again l8r."));
 		lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-		lText->SetText(_T("Network problem, try again l8r."), LIGHT_RED, CLEAR_COLOR);
 		mDialog->AddChild(lText, 135, 75);
 		return;
 	}
@@ -1199,10 +1198,9 @@ void App::UpdateHiscore(bool pError)
 	{
 		lHiscore = _T("No score entered. Yet.");
 	}
-	UiTbc::Label* lText = new UiTbc::Label;
+	UiTbc::Label* lText = new UiTbc::Label(FGCOLOR_DIALOG, lHiscore);
 	lText->SetFontId(mMonospacedFontId);
 	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-	lText->SetText(lHiscore, FGCOLOR_DIALOG, CLEAR_COLOR);
 	const UiTbc::FontManager::FontId lPreviousFontId = mUiManager->GetFontManager()->GetActiveFontId();
 	mUiManager->GetFontManager()->SetActiveFont(mMonospacedFontId);
 	const int lCharWidth = mUiManager->GetFontManager()->GetStringWidth(_T(" "));
@@ -1231,7 +1229,7 @@ void App::HiscoreMenu(int pDirection)
 	d->SetQueryLabel(_T("Hiscore ") + lLevelName + _T("/") + lVehicleName, mBigFontId);
 	UiTbc::Button* lMainMenuButton = ICONBTNA("btn_back.png", "");
 	lMainMenuButton->SetPreferredSize(d->GetPreferredWidth() / 2, d->GetPreferredHeight());
-	d->AddButton(-1, lMainMenuButton);
+	d->AddButton(-1, lMainMenuButton, true);
 	lMainMenuButton->SetPos(d->GetPreferredWidth()/4, 0);
 	if (!mHiscoreAgent)
 	{
@@ -1249,8 +1247,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	d->SetQueryLabel(_T("Enter hiscore name (")+Int2Str((int)mGame->GetScore())+_T(" points)"), mBigFontId);
 	if (!pMessage.empty())
 	{
-		UiTbc::Label* lMessage = new UiTbc::Label;
-		lMessage->SetText(pMessage, pColor, CLEAR_COLOR);
+		UiTbc::Label* lMessage = new UiTbc::Label(pColor, pMessage);
 		const int lStringWidth = mUiManager->GetPainter()->GetStringWidth(pMessage);
 		d->AddChild(lMessage, d->GetSize().x/2 - lStringWidth/2, 80);
 	}
@@ -1270,7 +1267,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	lCancelButton->SetText(_T("Cancel"), FGCOLOR_DIALOG, CLEAR_COLOR);
 	lCancelButton->SetRoundedRadius(8);
 	lCancelButton->SetPreferredSize(300-mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
-	d->AddButton(-1, lCancelButton);
+	d->AddButton(-1, lCancelButton, true);
 	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
 }
 
@@ -1316,8 +1313,8 @@ void App::Purchase(const str& pProductName)
 	UiTbc::MessageDialog* lMessage = new UiTbc::MessageDialog(mUiManager->GetDesktopWindow(), mButtonDelegate,
 		_T("Content purchase not yet implemented on this platform."));
 	lMessage->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
-	lMessage->AddButton(+10, _T("OK"));
-	lMessage->AddButton(+33, _T("Nooo!"));
+	lMessage->AddButton(+10, _T("OK"), true);
+	lMessage->AddButton(+33, _T("Nooo!"), true);
 	mDialog = lMessage;
 #endif // iOS
 }
@@ -1406,23 +1403,21 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 			UiTbc::Dialog* d = CreateTbcDialog(&App::OnCreditsAction);
 			d->SetOffset(PixelCoord(0, -30));
 			d->SetQueryLabel(_T("Credits"), mBigFontId);
-			UiTbc::Label* lText = new UiTbc::Label;
+			str s =	_T("Game    Pixel Doctrine\n")
+				_T("Music   Jonas Kapla\n")
+				_T("Thanks  ODE, STLport, ChibiXM, Ogg/Vorbis, OpenAL, ALUT\n")
+				_T("        libpng, Minizip, zlib, FastDelegate, UTF-8 CPP,\n")
+				_T("        DMI, freesound, HappyHTTP, GAE, Python, py-cgkit\n")
+				_T("\n")
+				_T("Idiots kill civilians for real. Visit Avaaz.org if you\n")
+				_T("too belive media attention eventually can crush tyrants.");
+			UiTbc::Label* lText = new UiTbc::Label(FGCOLOR_DIALOG, s);
 			lText->SetFontId(mMonospacedFontId);
 			lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-			lText->SetText(
-					_T("Game    Pixel Doctrine\n")
-					_T("Music   Jonas Kapla\n")
-					_T("Thanks  ODE, STLport, ChibiXM, Ogg/Vorbis, OpenAL, ALUT\n")
-					_T("        libpng, Minizip, zlib, FastDelegate, UTF-8 CPP,\n")
-					_T("        DMI, freesound, HappyHTTP, GAE, Python, py-cgkit\n")
-					_T("\n")
-					_T("Idiots kill civilians for real. Visit Avaaz.org if you\n")
-					_T("too belive media attention eventually can crush tyrants."),
-					FGCOLOR_DIALOG, CLEAR_COLOR);
 			d->AddChild(lText, 25, 85);
 			UiTbc::Button* lBackButton = new UiTbc::CustomButton(_T("back"));
 			lBackButton->SetPreferredSize(d->GetPreferredSize());
-			d->AddButton(-1, lBackButton);
+			d->AddButton(-1, lBackButton, true);
 			lBackButton->SetPos(0, 0);
 		}
 		return;
@@ -1574,12 +1569,12 @@ void App::DoPause()
 		return;
 	}
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
-	d->AddButton(1, ICONBTNA("btn_resume.png", "Resume"));
+	d->AddButton(1, ICONBTNA("btn_resume.png", "Resume"), true);
 	if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE)	// Restart not available in tutorial mode.
 	{
-		d->AddButton(2, ICONBTNA("btn_restart.png", "Restart"));
+		d->AddButton(2, ICONBTNA("btn_restart.png", "Restart"), true);
 	}
-	d->AddButton(3, ICONBTNA("btn_main_menu.png", "Main menu"));
+	d->AddButton(3, ICONBTNA("btn_main_menu.png", "Main menu"), true);
 }
 
 void App::OnPauseClickWithSound(UiTbc::Button* pButton)

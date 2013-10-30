@@ -119,7 +119,7 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 	bool lTestOk = true;
 
 	UiLepra::SoundManager::SoundID lSound = UiLepra::INVALID_SOUNDID;
-	UiLepra::SoundManager* lSoundManager = UiLepra::SoundManager::CreateSoundManager(str(), UiLepra::SoundManager::CONTEXT_OPENAL);
+	UiLepra::SoundManager* lSoundManager = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
 	deb_assert(lSoundManager);
 	if (lTestOk)
 	{

@@ -60,11 +60,11 @@ void PushServerDelegate::OnOpen()
 	SetLevel(_T("level_01"));
 }
 
-void PushServerDelegate::OnLogin(Life::Client* pClient)
+void PushServerDelegate::OnLogin(Life::Client*)
 {
 }
 
-void PushServerDelegate::OnLogout(Life::Client* pClient)
+void PushServerDelegate::OnLogout(Life::Client*)
 {
 }
 
@@ -127,6 +127,7 @@ void PushServerDelegate::OnDeleteObject(Cure::ContextObject* pObject)
 bool PushServerDelegate::IsObjectLendable(Life::Client* pClient, Cure::ContextObject* pObject)
 {
 	(void)pClient;
+	(void)pObject;
 	return true;
 }
 

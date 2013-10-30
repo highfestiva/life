@@ -280,34 +280,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BombPlane.cpp" />
-    <ClCompile Include="GameServerLogic.cpp" />
-    <ClCompile Include="Npc.cpp" />
-    <ClCompile Include="PushServer.cpp" />
-    <ClCompile Include="PushServerConsole.cpp" />
-    <ClCompile Include="PushServerDelegate.cpp" />
-    <ClCompile Include="PushServerMessageProcessor.cpp" />
-    <ClCompile Include="PushServerTicker.cpp" />
-    <ClCompile Include="ServerFastProjectile.cpp" />
-    <ClCompile Include="..\Explosion.cpp" />
-    <ClCompile Include="ServerMine.cpp" />
-    <ClCompile Include="ServerProjectile.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="BombPlane.h" />
-    <ClInclude Include="GameServerLogic.h" />
-    <ClInclude Include="Npc.h" />
-    <ClInclude Include="PushServerConsole.h" />
-    <ClInclude Include="PushServerDelegate.h" />
-    <ClInclude Include="PushServerMessageProcessor.h" />
-    <ClInclude Include="PushServerTicker.h" />
-    <ClInclude Include="ServerFastProjectile.h" />
-    <ClInclude Include="ServerLauncher.h" />
-    <ClInclude Include="..\Explosion.h" />
-    <ClInclude Include="ServerMine.h" />
-    <ClInclude Include="ServerProjectile.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Cure\Cure10.vcxproj">
       <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -332,6 +304,15 @@
       <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCDAA}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PushServerDelegate.h" />
+    <ClInclude Include="PushServerTicker.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PushServer.cpp" />
+    <ClCompile Include="PushServerDelegate.cpp" />
+    <ClCompile Include="PushServerTicker.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

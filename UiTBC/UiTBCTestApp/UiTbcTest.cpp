@@ -162,17 +162,15 @@ public:
 		lTextField->SetText(_T("Hullo!"));
 		AddChild(lTextField);
 
-		UiTbc::Label* lLabel = new UiTbc::Label(Lepra::LIGHT_GRAY, Lepra::RED);
+		UiTbc::Label* lLabel = new UiTbc::Label(Lepra::OFF_BLACK, _T("A Row List:"));
 		lLabel->SetPreferredSize(0, 24, false);
-		lLabel->SetText(_T("A Row List:"), Lepra::OFF_BLACK, Lepra::BLACK);
 		AddChild(lLabel);
 
 		UiTbc::ListControl* lListControl = new UiTbc::ListControl(UiTbc::ListControl::BORDER_LINEARSHADING | UiTbc::ListControl::BORDER_SUNKEN, 3, Lepra::LIGHT_GRAY, UiTbc::ListLayout::ROW);
 		lListControl->SetPreferredHeight(30);
 		for (int i = 0; i < 20; i++)
 		{
-			UiTbc::Label* lListItem = new UiTbc::Label(Lepra::LIGHT_GRAY, Lepra::LIGHT_BLUE);
-			lListItem->SetText(Lepra::strutil::Format(_T("Apa %i"), i), Lepra::OFF_BLACK, Lepra::BLACK);
+			UiTbc::Label* lListItem = new UiTbc::Label(Lepra::OFF_BLACK, Lepra::strutil::Format(_T("Apa %i"), i));
 			lListItem->SetPreferredWidth(12 * 6);
 			lListControl->AddChild(lListItem);
 		}

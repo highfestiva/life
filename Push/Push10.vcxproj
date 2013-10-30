@@ -280,64 +280,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ExplodingMachine.cpp" />
-    <ClCompile Include="Explosion.cpp" />
-    <ClCompile Include="FastProjectile.cpp" />
-    <ClCompile Include="Level.cpp" />
     <ClCompile Include="LoginView.cpp" />
-    <ClCompile Include="Mine.cpp" />
-    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="Push.cxx" />
     <ClCompile Include="PushConsoleManager.cpp" />
     <ClCompile Include="PushDemo.cpp" />
     <ClCompile Include="PushManager.cpp" />
+    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp" />
+    <ClCompile Include="PushServer\PushServerDelegate.cpp" />
     <ClCompile Include="PushTicker.cpp" />
     <ClCompile Include="PushViewer.cpp" />
     <ClCompile Include="RoadSignButton.cpp" />
     <ClCompile Include="ServerListView.cpp" />
     <ClCompile Include="Sunlight.cpp" />
     <ClCompile Include="View.cpp" />
-    <ClCompile Include="PushServer\BombPlane.cpp" />
-    <ClCompile Include="..\Life\LifeServer\BulletTime.cpp" />
-    <ClCompile Include="..\Life\LifeServer\Client.cpp" />
-    <ClCompile Include="PushServer\GameServerLogic.cpp" />
-    <ClCompile Include="..\Life\LifeServer\GameServerManager.cpp" />
-    <ClCompile Include="PushServer\Npc.cpp" />
-    <ClCompile Include="PushServer\PushServerConsole.cpp" />
-    <ClCompile Include="PushServer\PushServerDelegate.cpp" />
-    <ClCompile Include="PushServer\PushServerMessageProcessor.cpp" />
-    <ClCompile Include="..\Life\LifeServer\RaceTimer.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerConsoleManager.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerDelegate.cpp" />
-    <ClCompile Include="PushServer\ServerFastProjectile.cpp" />
-    <ClCompile Include="..\Life\LifeServer\ServerMessageProcessor.cpp" />
-    <ClCompile Include="PushServer\ServerMine.cpp" />
-    <ClCompile Include="PushServer\ServerProjectile.cpp" />
-    <ClCompile Include="..\Life\LifeServer\Spawner.cpp" />
-    <ClCompile Include="..\Life\LifeClient\UiGameServerManager.cpp" />
-    <ClCompile Include="..\Life\LifeClient\UiServerConsoleManager.cpp" />
-    <ClCompile Include="..\Life\LifeServer\MasterServerConnection.cpp" />
-    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Icons\Push.ico" />
-    <None Include="Push.mm" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Push.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="ExplodingMachine.h" />
-    <ClInclude Include="Explosion.h" />
-    <ClInclude Include="FastProjectile.h" />
-    <ClInclude Include="Level.h" />
     <ClInclude Include="LoginView.h" />
-    <ClInclude Include="Mine.h" />
-    <ClInclude Include="Projectile.h" />
     <ClInclude Include="Push.h" />
     <ClInclude Include="PushConsoleManager.h" />
     <ClInclude Include="PushDemo.h" />
     <ClInclude Include="PushManager.h" />
+    <ClInclude Include="..\Life\LifeMaster\MasterServer.h" />
+    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h" />
+    <ClInclude Include="PushMaster\MasterServerPort.h" />
+    <ClInclude Include="PushServer\PushServerDelegate.h" />
     <ClInclude Include="PushTicker.h" />
     <ClInclude Include="PushViewer.h" />
     <ClInclude Include="RoadSignButton.h" />
@@ -346,29 +312,6 @@
     <ClInclude Include="Sunlight.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="View.h" />
-    <ClInclude Include="PushServer\BombPlane.h" />
-    <ClInclude Include="..\Life\LifeServer\BulletTime.h" />
-    <ClInclude Include="..\Life\LifeServer\Client.h" />
-    <ClInclude Include="PushServer\GameServerLogic.h" />
-    <ClInclude Include="..\Life\LifeServer\GameServerManager.h" />
-    <ClInclude Include="PushServer\Npc.h" />
-    <ClInclude Include="PushServer\PushServerConsole.h" />
-    <ClInclude Include="PushServer\PushServerDelegate.h" />
-    <ClInclude Include="PushServer\PushServerMessageProcessor.h" />
-    <ClInclude Include="..\Life\LifeServer\RaceTimer.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerConsoleManager.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerDelegate.h" />
-    <ClInclude Include="PushServer\ServerFastProjectile.h" />
-    <ClInclude Include="..\Life\LifeServer\ServerMessageProcessor.h" />
-    <ClInclude Include="PushServer\ServerMine.h" />
-    <ClInclude Include="PushServer\ServerProjectile.h" />
-    <ClInclude Include="..\Life\LifeServer\Spawner.h" />
-    <ClInclude Include="..\Life\LifeClient\UiGameServerManager.h" />
-    <ClInclude Include="..\Life\LifeClient\UiServerConsoleManager.h" />
-    <ClInclude Include="..\Life\LifeMaster\MasterServer.h" />
-    <ClInclude Include="..\Life\LifeServer\MasterServerConnection.h" />
-    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h" />
-    <ClInclude Include="PushMaster\MasterServerPort.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cure\Cure10.vcxproj">
@@ -413,6 +356,10 @@
     </ProjectReference>
     <ProjectReference Include="..\Life\LifeClient\LifeClient10.vcxproj">
       <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\Life\LifeServer\LifeServer10.vcxproj">
+      <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCDAA}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>

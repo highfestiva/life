@@ -5,7 +5,7 @@
 
 
 #include "VehicleElevator.h"
-#include "../../../TBC/Include/PhysicsTrigger.h"
+#include "../TBC/Include/PhysicsTrigger.h"
 #include "Vehicle.h"
 #include "Game.h"
 

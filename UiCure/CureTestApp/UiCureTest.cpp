@@ -194,7 +194,7 @@ ResourceTest::ResourceTest()
 {
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 	mUiManager->Open();
-	mResourceManager = new Cure::ResourceManager(1, str());
+	mResourceManager = new Cure::ResourceManager(1);
 	mResourceManager->InitDefault();
 
 	mPhysicsResource = new Cure::UserPhysicsResource();
@@ -619,7 +619,7 @@ bool ResourceTest::TestReloadContextObject()
 	bool lTestOk = true;
 
 	delete mResourceManager;
-	mResourceManager = new Cure::ResourceManager(1, _T("Data/"));
+	mResourceManager = new Cure::ResourceManager(1);
 	mResourceManager->InitDefault();
 	TestGameTicker lTicker;
 	Cure::TimeManager lTimeManager;

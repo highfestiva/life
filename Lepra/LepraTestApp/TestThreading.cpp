@@ -4,8 +4,6 @@
 */
 
 #include "../../Lepra/Include/LepraAssert.h"
-#include <../src/stlport_prefix.h>
-//#include <stl/_threads.h>
 #include <locale>
 #include "../Include/Timer.h"
 #include "../Include/HiResTimer.h"
@@ -25,7 +23,6 @@ volatile int gThreadTestCounter;
 
 Lock gThreadTestLock;
 Semaphore gThreadTestSemaphore;
-std::_STLP_mutex gStlLock;
 int* gAllocMem = 0;
 
 void IncreaseThread(void*)
@@ -53,15 +50,6 @@ void LockThread(void*)
 	{
 		Thread::Sleep(0.001);
 	}
-	++gThreadTestCounter;
-}
-
-void StlThreadEntry(void*)
-{
-	++gThreadTestCounter;
-	gStlLock._M_acquire_lock();
-	++gThreadTestCounter;
-	gStlLock._M_release_lock();
 	++gThreadTestCounter;
 }
 
@@ -333,33 +321,6 @@ bool TestThreading(const LogDecorator& pAccount)
 	{
 		lContext = _T("semaphore permit reset");
 		lTestOk = !lSemaphore.Wait(0.0001);
-		deb_assert(lTestOk);
-	}
-
-	StaticThread lStlLockerThread("STL locker");
-	if (lTestOk)
-	{
-		lContext = _T("STL lock exclusive");
-		gThreadTestCounter = 0;
-		gStlLock._M_acquire_lock();
-		lStlLockerThread.Start(StlThreadEntry, 0);
-		for (int x = 0; x < 10 && gThreadTestCounter != 1; ++x)
-		{
-			Thread::Sleep(0.001);
-		}
-		lTestOk = (gThreadTestCounter == 1 && lStlLockerThread.IsRunning());
-		deb_assert(lTestOk);
-	}
-	if (lTestOk)
-	{
-		lContext = _T("STL lock release");
-		gStlLock._M_release_lock();
-		lTestOk = false;
-		for (int x = 0; !lTestOk && x < 10; ++x)
-		{
-			lTestOk = (gThreadTestCounter == 3 && !lStlLockerThread.IsRunning());
-			Thread::Sleep(0.06);
-		}
 		deb_assert(lTestOk);
 	}
 

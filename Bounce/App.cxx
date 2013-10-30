@@ -821,9 +821,9 @@ void App::MainMenu()
 		return;
 	}
 	const str lPlayText = mIsResume? _T("Resume") : _T("Play");
-	d->AddButton(1, CreateButton(lPlayText, Color(40, 210, 40)));
-	d->AddButton(2, CreateButton(_T("High score"), Color(50, 90, 210)));
-	d->AddButton(3, CreateButton(_T("A number"), Color(210, 50, 40)));
+	d->AddButton(1, CreateButton(lPlayText, Color(40, 210, 40)), true);
+	d->AddButton(2, CreateButton(_T("High score"), Color(50, 90, 210)), true);
+	d->AddButton(3, CreateButton(_T("A number"), Color(210, 50, 40)), true);
 }
 
 void App::HiscoreMenu()
@@ -843,7 +843,7 @@ void App::HiscoreMenu()
 	d->SetQueryLabel(_T("High Score List"), mBigFontId);
 	UiTbc::Button* lMainMenuButton = ICONBTNA("btn_back.png", "");
 	lMainMenuButton->SetPreferredSize(d->GetPreferredSize());
-	d->AddButton(-1, lMainMenuButton);
+	d->AddButton(-1, lMainMenuButton, true);
 	lMainMenuButton->SetPos(0, 0);
 	if (!mHiscoreAgent)
 	{
@@ -858,9 +858,9 @@ void App::NumberDialog()
 	const str lExecutionCount = Int2Str(GetExecutionCount());
 	d->SetQueryLabel(lExecutionCount, mBigFontId);
 	UiTbc::Button* lWhatsThis = CreateButton(_T("What's this?"), Color(210, 50, 40));
-	d->AddButton(1, lWhatsThis);
+	d->AddButton(1, lWhatsThis, true);
 	lWhatsThis->SetOnClick(App, OnWhatsThisClick);
-	d->AddButton(2, CreateButton(_T("Main menu"), Color(40, 210, 40)));
+	d->AddButton(2, CreateButton(_T("Main menu"), Color(40, 210, 40)), true);
 }
 
 void App::EnterHiscore(const str& pMessage, const Color& pColor)
@@ -870,8 +870,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	d->SetQueryLabel(_T("Wow - ")+Int2Str((int)mGame->GetScore())+_T(" points"), mBigFontId);
 	if (!pMessage.empty())
 	{
-		UiTbc::Label* lMessage = new UiTbc::Label;
-		lMessage->SetText(pMessage, pColor, CLEAR_COLOR);
+		UiTbc::Label* lMessage = new UiTbc::Label(pColor, pMessage);
 		const int lStringWidth = mUiManager->GetPainter()->GetStringWidth(pMessage);
 		d->AddChild(lMessage, d->GetSize().x/2 - lStringWidth/2, 90);
 	}
@@ -887,7 +886,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	lCancelButton->SetText(_T("Cancel"), FGCOLOR_DIALOG, CLEAR_COLOR);
 	lCancelButton->SetRoundedRadius(8);
 	lCancelButton->SetPreferredSize(d->GetSize().x - mHiscoreTextField->GetPos().x*2 - mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
-	d->AddButton(-1, lCancelButton);
+	d->AddButton(-1, lCancelButton, true);
 	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
 }
 
@@ -907,9 +906,8 @@ void App::UpdateHiscore(bool pError)
 	}
 	if (pError)
 	{
-		UiTbc::Label* lText = new UiTbc::Label;
+		UiTbc::Label* lText = new UiTbc::Label(LIGHT_RED, _T("Network problem, try again l8r."));
 		lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-		lText->SetText(_T("Network problem, try again l8r."), LIGHT_RED, CLEAR_COLOR);
 		mDialog->AddChild(lText, 45, 30);
 		return;
 	}
@@ -952,10 +950,9 @@ void App::UpdateHiscore(bool pError)
 	{
 		lHiscore = _T("No score entered. Yet.");
 	}
-	UiTbc::Label* lText = new UiTbc::Label;
+	UiTbc::Label* lText = new UiTbc::Label(FGCOLOR_DIALOG, lHiscore);
 	lText->SetFontId(mMonospacedFontId);
 	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-	lText->SetText(lHiscore, FGCOLOR_DIALOG, CLEAR_COLOR);
 	const UiTbc::FontManager::FontId lPreviousFontId = mUiManager->GetFontManager()->GetActiveFontId();
 	mUiManager->GetFontManager()->SetActiveFont(mMonospacedFontId);
 	const int lCharWidth = mUiManager->GetFontManager()->GetStringWidth(_T(" "));
