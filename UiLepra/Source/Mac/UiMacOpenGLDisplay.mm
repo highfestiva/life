@@ -7,7 +7,9 @@
 #include "../../Include/Mac/UiMacOpenGLDisplay.h"
 #include <stdio.h>
 #include "../../../Lepra/Include/String.h"
+#ifdef LEPRA_IOS
 #include "../../Include/Mac/RotatingController.h"
+#endif // iOS
 #include "../../Include/UiOpenGLExtensions.h"
 
 

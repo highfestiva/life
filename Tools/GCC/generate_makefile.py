@@ -20,8 +20,10 @@ is_mac = (sys.platform == 'darwin')
 #print("iOS: %s, iOS sim: %s, mac: %s" % (is_ios, is_ios_sim, is_mac))
 
 cextraflags = ''
+cppflags = ''
 glframework = 'OpenGL'
 gcc = 'gcc'
+gpp = 'g++'
 if is_mac:
     cextraflags = ' -D_DARWIN_C_SOURCE -DUSE_FILE32API'
     if is_ios:
@@ -29,7 +31,10 @@ if is_mac:
         glframework = 'OpenGLES'
         gcc = 'i686-apple-darwin10-gcc' if is_ios_sim else 'armv6-apple-darwin10-gcc'
     else:
-        darwin_kit = '-framework AppKit -framework Cocoa -framework CoreServices -lIOKit'
+        darwin_kit = '-framework AppKit -framework Cocoa -framework CoreServices -framework IOKit'
+        gcc = 'clang'
+        gpp = 'clang++'
+        cppflags = '-std=c++11 -stdlib=libc++'
 
 platform_extraflags = ''
 if is_ios:
@@ -42,18 +47,19 @@ if is_ios:
 else:
     compiler_path = ''
     if is_mac:
-        platform_extraflags = ' -mmacosx-version-min=10.5'
+        platform_extraflags = ' -mmacosx-version-min=10.7'
 cextraflags += platform_extraflags
 
 c_current_flags = '-O0 -ggdb -D_DEBUG' if is_debug else '-O3'
-link_type_flag = '-shared' #if is_debug else '-static'
-link_bin_type_flag = '' #if is_debug else '-static'
+link_type_flag = '-shared '+cppflags #if is_debug else '-static'
+link_bin_type_flag = ''+cppflags #if is_debug else '-static'
 link_output_ext = '.so' #if is_debug else '.a'
 
-cflags_1 = "C_COMPILER = "+compiler_path+"""gcc
-CPP_COMPILER = """+compiler_path+"""g++
+cflags_1 = "C_COMPILER = "+compiler_path+gcc+"""
+CPP_COMPILER = """+compiler_path+gpp+"""
 
-CFLAGS = """+c_current_flags+" -fPIC"+cextraflags+" -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"
+CFLAGS = """+c_current_flags+" -fPIC"+cextraflags+""" -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD
+CPPFLAGS = $(CFLAGS) """+cppflags
 cflags_2 = "-Wno-unknown-pragmas"
 ldflags = platform_extraflags
 
@@ -91,18 +97,18 @@ extra_foot_rule_head = "\n.SUFFIXES: .o .mm" if is_mac else "\n.SUFFIXES: .o .cx
 extra_foot_rule_tail = """.m.o:
 \t$(C_COMPILER) $(CFLAGS) -o $@ -c $<
 .mm.o:
-\t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<""" if is_mac else ""
+\t$(CPP_COMPILER) $(CPPFLAGS) -o $@ -c $<""" if is_mac else ""
 foot_rules = extra_foot_rule_head + """
 depend:
-\tmakedepend -- $(CFLAGS) -- $(SRCS)
+\tmakedepend -- $(CPPFLAGS) -- $(SRCS)
 \t#@grep -Ev "\\.o: .*([T]hirdParty|/[u]sr)/" makefile >.tmpmake
 \t#@mv .tmpmake makefile
 .c.o:
 \t$(C_COMPILER) $(CFLAGS) -o $@ -c $<
 .cpp.o:
-\t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<
+\t$(CPP_COMPILER) $(CPPFLAGS) -o $@ -c $<
 .cxx.o:
-\t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<
+\t$(CPP_COMPILER) $(CPPFLAGS) -o $@ -c $<
 """ + extra_foot_rule_tail + "\n\n"
 
 foot_lib = """

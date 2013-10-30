@@ -146,4 +146,4 @@ def _zipdir(dirname, include, arcname):
 
 
 def _targzdir(dirname, arcname):
-	run(["tar","-czf",arcname,dirname], "taring archive")
+	_run(["tar","-czf",arcname,dirname], "taring archive")

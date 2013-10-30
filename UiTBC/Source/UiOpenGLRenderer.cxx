@@ -1609,7 +1609,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 	OGL_ASSERT();
 
 	// Disable all fancy gfx.
-#ifndef LEPRA_GL_ES
+#if !defined(LEPRA_GL_ES) && !defined(LEPRA_MAC)
 	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_LOGIC_OP);
 	glEnable(GL_POLYGON_OFFSET_EXT);
@@ -1718,7 +1718,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 	}	
 
 	// Reset all settings.
-#ifndef LEPRA_GL_ES
+#if !defined(LEPRA_GL_ES) && !defined(LEPRA_MAC)
 	glPopAttrib();
 	glDisable(GL_POLYGON_OFFSET_EXT);
 #endif // !GLES
