@@ -22,10 +22,8 @@ is_mac = (sys.platform == 'darwin')
 cextraflags = ''
 glframework = 'OpenGL'
 gcc = 'gcc'
-stllibext = '.so.5.2'
 if is_mac:
-    cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS -DUSE_FILE32API'
-    stllibext = '.5.2.dylib'
+    cextraflags = ' -D_DARWIN_C_SOURCE -DUSE_FILE32API'
     if is_ios:
         darwin_kit = '-framework UIKit -framework Foundation -framework QuartzCore -framework CoreGraphics'
         glframework = 'OpenGLES'
@@ -48,13 +46,9 @@ else:
 cextraflags += platform_extraflags
 
 c_current_flags = '-O0 -ggdb -D_DEBUG' if is_debug else '-O3'
-stl_subdir = 'so' #'so_stlg' if is_debug else 'so'
-stl_lib = 'stlport' #'stlportstlg' if is_debug else 'stlport'
-#stllibext = stllibext if is_debug else '.a'
 link_type_flag = '-shared' #if is_debug else '-static'
 link_bin_type_flag = '' #if is_debug else '-static'
 link_output_ext = '.so' #if is_debug else '.a'
-stlport_path = 'ThirdParty/stlport/build/lib/obj/'+gcc+'/'+stl_subdir
 
 cflags_1 = "C_COMPILER = "+compiler_path+"""gcc
 CPP_COMPILER = """+compiler_path+"""g++
@@ -80,18 +74,14 @@ if is_mac:
     cflags_1 += ' -framework '+glframework+' -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
     ldflags += ' '+darwin_kit+' -lobjc -headerpad_max_install_names '
 
-shared_if_copy_stlport_lib = """\t@if test -f """+stlport_path+"/lib"+stl_lib + stllibext + "; then cp "+stlport_path+"/lib"+stl_lib + stllibext + """ bin/; fi
-"""
-static_if_copy_stlport_lib = ""
-current_if_copy_stlport_lib = shared_if_copy_stlport_lib #if is_debug else static_if_copy_stlport_lib
 link_line = "$(CPP_COMPILER) "+link_type_flag+" $(LIBS) " + ldflags + ' ' + openal_noui + " -o $@ $(OBJS)"
 #if not is_debug:
 #    link_line = 'ar -r -s $@ $(OBJS)'
 
 cflags_head = cflags_1+" -Wall "+cflags_2+"\n"
 cflags_nowarn_head = cflags_1+" "+cflags_2+"\n"
-libs_head = "LIBS = %(deplib_switches)s -l"+stl_lib+" -lpthread -ldl " + librt + " %(libs)s\n"
-gfx_libs_head = "LIBS = %(deplib_switches)s " + openal_ui + " -l"+stl_lib+" -lpthread -ldl " + librt + " " + libgl + " %(libs)s\n"
+libs_head = "LIBS = %(deplib_switches)s -lpthread -ldl " + librt + " %(libs)s\n"
+gfx_libs_head = "LIBS = %(deplib_switches)s " + openal_ui + " -lpthread -ldl " + librt + " " + libgl + " %(libs)s\n"
 
 head_lib = cflags_head+libs_head
 head_lib_nowarn = cflags_nowarn_head+libs_head
@@ -165,7 +155,7 @@ depend:
 \tdone
 
 $(BINS):\t$(OBJS)
-"""+current_if_copy_stlport_lib+"""\t@cp $@ bin/
+\t@cp $@ bin/
 
 $(OBJS):\t$(SRCS)
 \t$(MAKE) -C $@
@@ -278,8 +268,7 @@ def generate_makefiles(basedir, vcfileinfolist):
 
         vcfile = os.path.join(basedir, vcfile)
         projdir = os.path.dirname(vcfile)
-        includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
-                       os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
+        includedirs = [os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
                        os.path.relpath(basedir+"ThirdParty/ChibiXM", projdir),
                        os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
                        os.path.relpath(basedir+"ThirdParty/happyhttp-0.1/", projdir),
@@ -292,8 +281,7 @@ def generate_makefiles(basedir, vcfileinfolist):
                        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
                        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
                        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
-        libdirs = [os.path.relpath(basedir+stlport_path, projdir),
-                   os.path.relpath(basedir+"ThirdParty", projdir),
+        libdirs = [os.path.relpath(basedir+"ThirdParty", projdir),
                    os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
                    os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),
                    os.path.relpath(basedir+"Lepra", projdir),

@@ -20,8 +20,11 @@ args = []
 bindir = "bin"
 buildtypes = ["debug", "rc", "final"]
 default_build_mode = buildtypes[0]
-ziptype = buildtypes[1]
-own_tt = {"debug":"Unicode Debug", "rc":"Unicode Release Candidate", "final":"Unicode Final"}
+ziptype = default_build_mode
+builddir_ansi = {"debug":"Debug", "rc":"Release Candidate", "final":"Final"}
+builddir_unicode = {"debug":"Unicode Debug", "rc":"Unicode Release Candidate", "final":"Unicode Final"}
+builddir_types = {"ansi":builddir_ansi, "unicode":builddir_unicode}
+own_tt = builddir_types["ansi"]
 updates = 0
 removes = 0
 importscript = "Tools/Maya/import_chunky.py"
@@ -59,24 +62,8 @@ def _save_target_app(words):
 	_load_target_app()
 
 
-def _buildstl():
-	if os.path.exists("ThirdParty/stlport/lib") or os.path.exists("ThirdParty/stlport/build/lib/obj/gcc/so_stlg"):
-		return
-	print("Building STLport...")
-	os.chdir("ThirdParty/stlport/")
-	if rgohelp._getvcver():
-		rgohelp._run(["configure.bat", "msvc"+str(rgohelp._getvcver())], "configuring STLport for MSVC")
-	else:
-		rgohelp._run(["./configure"], "configuring STLport")
-	os.chdir("build/lib")
-	"cd build/lib"
-	make = rgohelp._getmake(rgohelp.NMAKE)
-	if rgohelp._getvcver():
-		rgohelp._run([make, "/fmsvc.mak", "install"], "building STLport for MSVC")
-	else:
-		rgohelp._run([make, "-f", "gcc.mak", "depend"], "building STLport dependancies")
-		rgohelp._run([make, "-f", "gcc.mak", "install"], "building STLport installation")
-	os.chdir("../../../..")
+def _buildext():
+	pass	# Yey - STLport gone!
 
 
 def _buildcode(command, buildtype):
@@ -84,12 +71,12 @@ def _buildcode(command, buildtype):
 	ver = rgohelp._getvcver()
 	projext = "900" if ver == 9 else "10";
 	if command == "build":
-		_buildstl()
+		_buildext()
 		if osname == "Windows":	args = [make, "/useenv", "/M2", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
 		else:			args = [make]
 		what = "incremental building code"
 	elif command == "rebuild":
-		_buildstl()
+		_buildext()
 		if osname == "Windows": args = [make, "/useenv", "/M2", "/rebuild", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
 		else:			args = [make, "clean", "all"]
 		what = "rebuilding code"
@@ -285,21 +272,25 @@ def _create_zip(targetdir, buildtype):
 	return targetfile
 
 
-def _buildzip(builder, buildtype=ziptype):
+def _buildzip(builder, buildtype):
 	rgohelp._verify_base_dir()
-	#print(appname, osname, hwname, buildtype, datename)
-	#print(type(appname), type(osname), type(hwname), type(buildtype), type(datename))
-	targetdir=appnames[0]+"."+osname+"."+hwname+"."+buildtype+"."+datename
+	subdir = appnames[0]
+	targetdir = subdir
 	if buildtype == "rc":
 		targetdir = "PRE_ALPHA."+targetdir
 	elif buildtype != "final":
 		targetdir = "NO_RELEASE."+targetdir
-	os.mkdir(targetdir)
+	targetdir = 'tmp/'+targetdir
+	os.makedirs(targetdir)
 	builder(targetdir, buildtype)
-	targetfile = _create_zip(targetdir, buildtype)
-	_cleandir(targetdir)
-	os.rmdir(targetdir)
-	print("Built and zipped into %s." % targetfile)
+	os.chdir('tmp')
+	targetfile = _create_zip(subdir, buildtype)
+	os.chdir('..')
+	nicefile = appnames[0]+"."+osname+"."+hwname+"."+buildtype+"."+datename+'.'+targetfile.split('.',1)[1]
+	os.rename('tmp/'+targetfile, nicefile)
+	_cleandir('tmp')
+	os.rmdir('tmp')
+	print("Built and zipped into %s." % nicefile)
 
 
 def _copybin(targetdir, buildtype):
@@ -450,10 +441,17 @@ def builddata():
 
 def zipdata():
 	global appnames, updates
-	os.chdir(appnames[0] + '/Data')
+	datadir = appnames[0] + '/Data'
+	os.chdir(datadir)
 	rgohelp._zipdir('', _include_data_files, "Data.pk3")
-	os.chdir('../../')
+	os.chdir('../..')
 	updates += 1
+	# Replace bin/Data too.
+	_cleandata_source(bindir)
+	import glob
+	fl = [datadir+"/Data.pk3"] + glob.glob(datadir+"/*.ogg") + glob.glob(datadir+"/*.mp3")	# Music goes outside of the .zip.
+	targetdata = os.path.join(bindir, "Data")
+	_incremental_copy(fl, targetdata, default_build_mode)
 
 def buildcode():
 	targetdir=bindir
@@ -479,9 +477,6 @@ def clean():
 		removes += _cleandir(targetdir)
 		_buildcode("clean", buildtype)
 
-#def archive_app():
-#	_buildzip(_rebuild)
-
 def run():
 	_fgrun(appnames[0])
 
@@ -489,6 +484,12 @@ def go():
 	builddata()
 	copycode()
 	run()
+
+def archive():
+	if default_build_mode != "final":
+		print("Warning: archiving should probably be run on final (=release) artifacts.")
+	_buildzip(_copybin, ziptype)
+	sys.exit(0)
 
 def set_target():
 	global args
@@ -502,6 +503,7 @@ def _main():
 		"Runs some type of build command. Try build, rebuild, clean, builddata, or something like that."
 	parser = optparse.OptionParser(usage=usage, version="%prog 0.2")
 	parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: %s. Default is debug." % ", ".join(buildtypes))
+	parser.add_option("-c", "--chartype", dest="chartype", default="ansi", help="Pick char type: ansi/unicode (i.e. char/wchar_t). Default is ansi.")
 	ismac = (rgohelp._getosname() == "Mac")
 	parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
 	global args
@@ -515,9 +517,10 @@ def _main():
 		sys.exit(1)
 	global default_build_mode
 	default_build_mode = options.buildmode
-	if buildtypes.index(options.buildmode) > 0:
-		global ziptype
-		ziptype = options.buildmode
+	global ziptype
+	ziptype = default_build_mode
+	global own_tt
+	own_tt = builddir_types[options.chartype]
 
 	if options.demacappify:
 		demacappify()

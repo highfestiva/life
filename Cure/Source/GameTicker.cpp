@@ -86,6 +86,7 @@ TimeManager* GameTicker::GetTimeManager()
 
 TBC::PhysicsManager* GameTicker::GetPhysicsManager(bool pIsThreadSafe) const
 {
+	(void)pIsThreadSafe;
 #ifdef LEPRA_DEBUG
 	// This is a check to see if the code that fetches the physics manager
 	// is thread-safe. We definitely don't want to impose mutex locks on

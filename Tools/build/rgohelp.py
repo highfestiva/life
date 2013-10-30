@@ -49,9 +49,9 @@ def _filetime(filename):
 
 
 def _verify_base_dir():
-	if not os.path.exists(".git") or not os.path.exists("Data"):
-		print("Must be in base dir to build!")
-		sys.exit(1)
+	if not os.path.exists(".git"):
+		print("Must be in base dir to build (currently in %s)!" % os.path.abspath(os.path.curdir))
+		raise BaseException("Shit hit the fan!")
 
 
 def _sorted_natural(l):
@@ -131,7 +131,7 @@ def _zipfiles(zf, include, filenames):
 			continue
 		if os.path.isdir(filename):
 			fs = glob.glob(os.path.join(filename, "*"))
-			_zipfiles(zf, fs)
+			_zipfiles(zf, include, fs)
 		else:
 			zf.write(filename)
 
