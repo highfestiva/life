@@ -92,7 +92,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	// Create a bitmap context.
 	textcontext = CGBitmapContextCreate(pImage.GetBuffer(), pImage.GetWidth(), pImage.GetHeight(), 8,
 		pImage.GetWidth()*pImage.GetPixelByteSize(), colorspace, kCGImageAlphaPremultipliedLast);
-	CGFloat rect[4] = { pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom };
+	CGFloat rect[4] = { (CGFloat)pRect.mLeft, (CGFloat)pRect.mTop, (CGFloat)pRect.mRight, (CGFloat)pRect.mBottom };
 	CGFloat transparent[4] = { 1, 1, 1, 0 };
 	CGFloat text_color[4] = { 1, 1, 1, 1 };
 	// if you do this a lot store the color somewhere and release it when you are done with it.
@@ -169,12 +169,12 @@ int MacFontManager::GetCharWidth(const tchar pChar) const
 	const float lCorrectedFontSize = ((MacFont*)mCurrentFont)->mActualSize;	// Similar to other platforms...
 	TBC_APPLE_FONT* lFont = [TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize];
 #ifdef LEPRA_IOS
-	wchar_t lTempBigString[2] = {pChar, 0};
+	wchar_t lTempBigString[2] = {(wchar_t)pChar, 0};
 	NSString* tmpString = MacLog::Encode(wstr(lTempBigString));
 	CGSize lSize = [tmpString sizeWithFont:lFont];
 	--lSize.width;
 #else // !iOS
-	UniChar lTempBigString[2] = {pChar, 0};
+	UniChar lTempBigString[2] = {(UniChar)pChar, 0};
 	CGGlyph lGlyph;
 	CTFontGetGlyphsForCharacters((CTFontRef)lFont, lTempBigString, &lGlyph, 1);
 	NSSize lSize = [lFont advancementForGlyph:lGlyph];

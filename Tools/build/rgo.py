@@ -15,6 +15,7 @@ fullname = "Kill Cutie"
 osname = rgohelp._getosname()
 hwname = rgohelp._gethwname()
 datename = rgohelp._getdatename()
+ismac = (osname == "Mac")
 
 args = []
 bindir = "bin"
@@ -32,6 +33,8 @@ makefilescriptdir = "Tools/GCC"
 makefilescript = "generate_makefile.py"
 
 showed_result = False
+
+exclude_demacappify=['archive']
 
 
 def _load_target_app():
@@ -127,7 +130,7 @@ def _incremental_build_data(sourcedir):
 				break
 
 
-def _incremental_copy(filelist, targetdir, buildtype):
+def _incremental_copy(filelist, targetdir, buildtype, recursiveNixDir=False):
 	global updates
 	import shutil
 	for filename in filelist:
@@ -135,17 +138,18 @@ def _incremental_copy(filelist, targetdir, buildtype):
 		if buildtype != default_build_mode and filename.lower().find("test") >= 0:
 			print("Skipping test binary named '%s'." % filename)
 			continue
-		if os.path.isdir(filename):
+		if os.path.isdir(filename) and not recursiveNixDir:
 			continue
 		if not os.path.exists(targetdir):
 			os.makedirs(targetdir)
 		targetfile = os.path.join(targetdir, os.path.split(filename)[1])
 		if not os.path.exists(targetfile) or rgohelp._filetime(filename) > rgohelp._filetime(targetfile):
+			print("Copying %s -> %s." % (filename, targetfile))
 			if os.name == "nt":
-				#print("Copying %s." % filename)
 				shutil.copyfile(filename, targetfile)
 			else:
-				rgohelp._run(["cp", filename, targetfile], "copying of file")
+				runargs = ["cp", filename, targetfile] if not recursiveNixDir else ["cp", "-R", filename, targetfile]
+				rgohelp._run(runargs, "copying of file")
 			updates += 1
 
 
@@ -202,7 +206,7 @@ def _cleandata_source(sourcedir):
 def _cleandir(da_dir):
 	global removes
 	import glob
-	fl = glob.glob(da_dir + "/*")
+	fl = glob.glob(da_dir + "/*") + glob.glob(da_dir + '/.*')
 	for filename in fl:
 		if os.path.isdir(filename):
 			removes += _cleandir(filename)
@@ -283,11 +287,13 @@ def _buildzip(builder, buildtype):
 	targetdir = 'tmp/'+targetdir
 	os.makedirs(targetdir)
 	builder(targetdir, buildtype)
-	os.chdir('tmp')
+	tmpdirs = ('tmp', '..') if not ismac else (targetdir, '../..')
+	subdir = subdir if not ismac else subdir+'.app'
+	os.chdir(tmpdirs[0])
 	targetfile = _create_zip(subdir, buildtype)
-	os.chdir('..')
+	os.chdir(tmpdirs[1])
 	nicefile = appnames[0]+"."+osname+"."+hwname+"."+buildtype+"."+datename+'.'+targetfile.split('.',1)[1]
-	os.rename('tmp/'+targetfile, nicefile)
+	os.rename(tmpdirs[0]+'/'+targetfile, nicefile)
 	_cleandir('tmp')
 	os.rmdir('tmp')
 	print("Built and zipped into %s." % nicefile)
@@ -296,7 +302,7 @@ def _buildzip(builder, buildtype):
 def _copybin(targetdir, buildtype):
 	import glob
 	fl = glob.glob("bin/*")
-	_incremental_copy(fl, targetdir, buildtype)
+	_incremental_copy(fl, targetdir, buildtype, ismac)
 	fl = glob.glob("bin/Data/*")
 	_incremental_copy(fl, os.path.join(targetdir, "Data"), buildtype)
 
@@ -339,6 +345,8 @@ def _macappify(exe, name):
 		updates += 1
 	try:
 		os.rename("Data", exe+".app/Contents/Resources/Data")
+		updates += 1
+		shutil.copy("../"+exe+"/Icons/Main.icns", exe+".app/Contents/Resources")
 		updates += 1
 	except:
 		pass
@@ -504,7 +512,6 @@ def _main():
 	parser = optparse.OptionParser(usage=usage, version="%prog 0.2")
 	parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: %s. Default is debug." % ", ".join(buildtypes))
 	parser.add_option("-c", "--chartype", dest="chartype", default="ansi", help="Pick char type: ansi/unicode (i.e. char/wchar_t). Default is ansi.")
-	ismac = (rgohelp._getosname() == "Mac")
 	parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
 	global args
 	options, args = parser.parse_args()
@@ -522,7 +529,7 @@ def _main():
 	global own_tt
 	own_tt = builddir_types[options.chartype]
 
-	if options.demacappify:
+	if options.demacappify and not any(a in exclude_demacappify for a in args):
 		demacappify()
 
 	_checkplatform()
