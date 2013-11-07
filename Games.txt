@@ -6,27 +6,51 @@
 
 -Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
 
-.Helicopter Gravity Force 2D/3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
++Downwash, i.e. Helicopter Gravity Force 2D/3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
 Knobbelen
 
-UFO Strike - Be a flying saucer and take out Earth's defenses. UFO flies automatically. Tap to shoot houses, sky scrapers, tanks, planes, canons, and pick up boosts by tapping. Program: generate terrain, cities with destructable blocks! Going to be awesome!
-
-For web: https://konklone.com/post/switch-to-https-now-for-free?hn
-
-Tank and or FPS shooter in Gbg, generated through Google maps/street view.
+Cowboy bank shooter. In comes a robber or a citizen, shoot by tapping - fast! Reload by tapping some button near the bottom of the screen.
 
 Crazy hoArse - mad, galloping horse using rigging+skinning. Spinning eyes, flailing limbs, strange obstacles. Make it look EXTREMELY organic!
 
+Puzzle game! YEAH! The big one!
+
+Kill the Commies! Use your stationed grenade launcher to take out all the red cars driving in and out of town. Have fun with physics! This could really rock!!! All buildings, the land and the other commuters are beige. They all travel on highways in and out of the city. Bridges, too. You can monitor 1, 2 or 3 roads on different levels. Avoid killing Americans. Different ammo, nuke for instance. Air strike?
+
+Pick up toys using a "Liseberg crane".
+
 Cyber Sled re-make. Buy hull, engine, primary and secondary weapons. Single player, one on one. And perhaps network?
+
+Hold off attacking robots. Either using cranes (Loke's idea, one for stomping, one for piercing, one for shooting, etc.) or using contraptions. A bit like Plants vs. Zombies?
+
+Clone of Bloons, but in 3D?
+
+Something very physical - stack boxes? Get all the balls in the hole? Keep the balls from falling into the hole?
+
+Something highly unphysical. Draw stuff fast? Circle the right symbol fast? Mimic the swipe-pattern?
+
+Avoid the attackers (robots, tanks, something else?). You control the avatar by instant swipes, so the game is very fast!
+
+UFO Strike - Be a flying saucer and take out Earth's defenses. UFO flies automatically. Tap to shoot houses, sky scrapers, tanks, planes, canons, and pick up boosts by tapping. Program: generate terrain, cities with destructable blocks! Going to be awesome!
+
+WW2 tank vs. tank, similar to the Cyber Sled remake.
+
+For web: https://konklone.com/post/switch-to-https-now-for-free?hn
+
+Multiplayer tank game in Gbg, generated through Google maps/street view.
 
 Fleeing animal made up by particles and can shape-shift. Tiger to run across trees, cliffs; horse to run across plains and mountains; bird to span gaps. Run during night. Full moon. A bit like a DEMO!
 
+Sniper game. Shoot people off the sky scrapers?
+
+Agent game, a bit like Amiga's Impossible Mission, but darker and using guns and a suit.
+
 Dinosaur game!
 
-Modern clone of Bards Tail!
+Int. Karate+ remake. Or Tekken.
 
-Clone of Bloons, but in 3D?
+Modern clone of Bards Tail!
 
 Sandbox: place things in the world, make them go.
  - Completed missions are things like "scored a goal", "killed the bus" or "demolished the house" or "blew up the convoy",
@@ -47,19 +71,7 @@ Make your contraption move the longest/fastest. Build and race, timelapsed multi
 
 Create your own game, share with friends. Construct basic physics, add looks and simple rules.
 
-Tank vs. Tank, similar to the Cyber Sled remake.
-
 Ball-into-hole using basic building blocks. Programming (x,y,z, rotation)? Placement? Time contraint? Score higher on lower time? Fewer programming lines? How to separate it from the 2D ballgame I played before? Many balls? Flowing through the start point? YEAH!
-
-Helicopter flying and shooting.
-
-Kill the Commies! Use your stationed grenade launcher to take out all the red cars driving in and out of town. Have fun with physics! This could really rock!!! All buildings, the land and the other commuters are beige. They all travel on highways in and out of the city. Bridges, too. You can monitor 1, 2 or 3 roads on different levels. Avoid killing Americans. Different ammo, nuke for instance. Air strike?
-
-Getaway - flee from tanks (and perhaps other military craft) which try to blow you out of orbit.
-
-Cute game with nice graphics! Anything to learn!
-
-Horse game! Inspiration: Da Win3.11 horse mouse cursor!
 
 Flocking game. School of fish? Birds? Something! The prototype should be fun without trying, so everything else should be a bonus.
 
@@ -83,7 +95,7 @@ Robo Arm - optimize a movement scheme to make the robot pick something up and mo
 
 Space ship flight. Fly though predefined map, steer using swipe left/right/up/down? Or accelerometer? Fly close to ground, to give impression of moving VERY fast.
 
-MMO space flight. Ships parks in "bee hives", LoD the whole world. Fly, shoot. Guild vs. guild.
+MMO space flight. Looks a bit like Terminal Velocity. Ships parks in "bee hives", LoD the whole world. Fly, shoot. Guild vs. guild.
 
 Gothenburg game - could be stopping foreign power invasion, alien space invasion, crime fighting/SWAT, on a massive scale with real maps! Premiere on a large theatre!
 
