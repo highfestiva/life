@@ -8,6 +8,10 @@
 
 +Downwash, i.e. Helicopter Gravity Force 2D/3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
+Bacteria eater. Bacteria will grow exponentially, eat them! Eating grows you reach, moving shrinks it.
+
+3D ball shooter. Bounce the ball into the hole. Easy level is aim and shoot, difficult is irregular with elongated halls and obstacles and moving doors. When shot, the cam will move away from the eye and follow the ball around somewhat.
+
 Knobbelen
 
 Cowboy bank shooter. In comes a robber or a citizen, shoot by tapping - fast! Reload by tapping some button near the bottom of the screen.
