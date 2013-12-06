@@ -14,8 +14,11 @@
 #include "../UiTBC/Include/GUI/UiFixedLayouter.h"
 #include "../UiTBC/Include/UiMaterial.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../Lepra/Include/Random.h"
 #include "../Life/LifeClient/UiConsole.h"
+#include "Ball.h"
 #include "BoundConsoleManager.h"
+#include "Level.h"
 #include "RtVar.h"
 #include "Sunlight.h"
 #include "Version.h"
@@ -96,8 +99,8 @@ bool BoundManager::Open()
 	if (lOk)
 	{
 		mPauseButton = ICONBTNA("btn_pause.png", "");
-		int x = mRenderArea.GetCenterX() - 32;
-		int y = mRenderArea.mBottom - 76;
+		int x = mRenderArea.mRight - 76;
+		int y = mRenderArea.mTop + 12;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
 		mPauseButton->SetVisible(true);
 		mPauseButton->SetOnClick(BoundManager, OnPauseButton);
@@ -269,8 +272,14 @@ bool BoundManager::InitializeUniverse()
 	const Vector3DF v;
 	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
 
-	Cure::ContextObject* lBall = Parent::CreateContextObject("soccerball", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	lBall->StartLoading();
+	Level* lLevel = (Level*)Parent::CreateContextObject("level", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	int lLevelIndex;
+	CURE_RTVAR_GET(lLevelIndex, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	lLevel->GenerateLevel(GetPhysicsManager(), lLevelIndex);
+	for (int x = 0; x < 8; ++x)
+	{
+		CreateBall(x);
+	}
 	mSunlight = new Sunlight(mUiManager);
 	return true;
 }
@@ -293,6 +302,7 @@ void BoundManager::TickUiInput()
 
 void BoundManager::TickUiUpdate()
 {
+	((BoundConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 }
 
 void BoundManager::SetLocalRender(bool pRender)
@@ -302,9 +312,29 @@ void BoundManager::SetLocalRender(bool pRender)
 
 
 
+void BoundManager::CreateBall(int pIndex)
+{
+	Cure::ContextObject* lBall = Parent::CreateContextObject("soccerball", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	int x = pIndex%3;
+	int y = pIndex/3%3;
+	int z = pIndex/9%3;
+	lBall->SetRootPosition(Vector3DF(-0.5f+0.5f*x, -0.5f+0.5f*y, -0.5f+0.5f*z));
+	lBall->SetRootVelocity(RNDVEC(1.0f));
+	lBall->StartLoading();
+	mBalls.push_back(lBall->GetInstanceId());
+}
+
 Cure::ContextObject* BoundManager::CreateContextObject(const str& pClassId) const
 {
-	UiCure::Machine* lObject = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+	UiCure::Machine* lObject = 0;
+	if (pClassId == _T("level"))
+	{
+		lObject = new Level(GetResourceManager(), pClassId, mUiManager);
+	}
+	else
+	{
+		lObject = new Ball(GetResourceManager(), pClassId, mUiManager);
+	}
 	lObject->SetAllowNetworkLogic(true);
 	return (lObject);
 }
@@ -315,99 +345,17 @@ Cure::ContextObject* BoundManager::CreateContextObject(const str& pClassId) cons
 
 void BoundManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
-	(void)pObject; (void)pOk;
-	/*if (pOk)
+	if (pOk)
 	{
-		if (pObject->GetInstanceId() == mAvatarId)
+		/*if (pObject->GetClassId() == _T("soccerball")))
 		{
-			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
-			if (mSetRandomChopperColor)
-			{
-				Vector3DF lColor;
-				do
-				{
-					lColor = RNDPOSVEC();
-				} while (lColor.GetDistanceSquared(mLastVehicleColor) < 1);
-				mLastVehicleColor = lColor;
-				mLastChopperColor = lColor;
-				((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
-			}
-			UpdateChopperColor(1.0f);
-			EaseDown(pObject, 0);
-		}
-		else if (pObject == mLevel)
-		{
-			OnLevelLoadCompleted();
-		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")))
-		{
-			((Life::ExplodingMachine*)pObject)->SetDeathFrameDelay(5);
-			Vector3DF lDirection(-1,0,0);
-			new Automan(this, pObject->GetInstanceId(), lDirection);
-			Vector3DF lColor;
-			do
-			{
-				lColor = RNDPOSVEC();
-			} while (lColor.GetDistanceSquared(mLastVehicleColor) < 1);
-			mLastVehicleColor = lColor;
-			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
-		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("forklift")) ||
-			strutil::StartsWith(pObject->GetClassId(), _T("corvette")))
-		{
-			str lBaseName = strutil::Split(pObject->GetClassId(), _T("_"))[0];
-			new AutoPathDriver(this, pObject->GetInstanceId(), lBaseName+_T("_path"));
-			Vector3DF lColor;
-			do
-			{
-				lColor = RNDPOSVEC();
-			} while (lColor.GetDistanceSquared(mLastVehicleColor) < 1);
-			mLastVehicleColor = lColor;
-			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
-		}
-		else if (pObject->GetClassId() == _T("turret"))
-		{
-			new CanonDriver(this, pObject->GetInstanceId(), 0);
-		}
-		else if (pObject->GetClassId() == _T("turret2"))
-		{
-			new CanonDriver(this, pObject->GetInstanceId(), 1);
-		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("air_balloon")))
-		{
-			new AirBalloonPilot(this, pObject->GetInstanceId());
-			if (mLastVehicleColor.y > 0.4f && mLastVehicleColor.x < 0.3f && mLastVehicleColor.z < 0.3f)
-			{
-				mLastVehicleColor = Vector3DF(0.6f, 0.2f, 0.2f);
-				((UiCure::CppContextObject*)pObject)->GetMesh(2)->GetBasicMaterialSettings().mDiffuse = mLastVehicleColor;
-			}
-			else
-			{
-				mLastVehicleColor = Vector3DF(0, 1, 0);
-			}
-		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("fighter")))
-		{
-			//pObject->SetEnginePower(0, 1);
-			pObject->SetEnginePower(1, 1);
-			//pObject->SetEnginePower(2, 1);
-		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("simulator")))
-		{
-			new SimulatorDriver(this, pObject->GetInstanceId());
-		}
-		else
-		{
-			log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
-		}
-		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);
-		((UiCure::CppContextObject*)pObject)->UiMove();
+		}*/
 	}
 	else
 	{
 		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
-	}*/
+	}
 }
 
 void BoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,

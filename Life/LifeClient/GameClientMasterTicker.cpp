@@ -68,6 +68,7 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	Cure::ContextObjectAttribute::SetCreator(Cure::ContextObjectAttribute::Factory(
 		this, &GameClientMasterTicker::CreateObjectAttribute));
 
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_UI_CONSPEED, 2.7);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);

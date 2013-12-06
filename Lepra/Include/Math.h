@@ -84,7 +84,7 @@ public:
 
 	template<class _Type> static inline _Type GetIterateLerpTime(_Type pTarget, _Type pIterateTime)
 	{
-		return (std::min(pTarget * (_Type)10 * pIterateTime, (_Type)0.95));
+		return (std::min(pTarget * (_Type)10 * pIterateTime, (_Type)1.0));
 	}
 
 	template<class _Type> static _Type Clamp(_Type value, _Type min, _Type max)

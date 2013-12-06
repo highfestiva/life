@@ -124,17 +124,19 @@ void UiConsole::Tick()
 	}
 
 	const float lFrameTime = mManager->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
-	const float lConsoleSpeed = Math::GetIterateLerpTime(0.9f, lFrameTime);
+	float lConsoleSpeed;
+	CURE_RTVAR_GET(lConsoleSpeed, =(float), mManager->GetVariableScope(), RTVAR_CTRL_UI_CONSPEED, 2.7);
+	const float lFrameConsoleSpeed = std::min(1.0f, Math::GetIterateLerpTime(lConsoleSpeed, lFrameTime));
 	if (mIsConsoleVisible)
 	{
 		if (mArea.mTop == 0)	// Slide down.
 		{
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mTop, lConsoleSpeed);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mTop, lFrameConsoleSpeed);
 			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
 		}
 		else	// Slide sideways.
 		{
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mLeft, lConsoleSpeed);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mLeft, lFrameConsoleSpeed);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 		}
 	}
@@ -144,7 +146,7 @@ void UiConsole::Tick()
 		if (mArea.mTop == 0)	// Slide out top.
 		{
 			const int lTarget = -mConsoleComponent->GetSize().y-lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lFrameConsoleSpeed);
 			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
 			if (mConsoleComponent->GetPos().y <= lTarget+lMargin)
 			{
@@ -154,7 +156,7 @@ void UiConsole::Tick()
 		else if (mArea.mLeft == 0)	// Slide out left.
 		{
 			const int lTarget = -mConsoleComponent->GetSize().x-lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lFrameConsoleSpeed);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 			if (mConsoleComponent->GetPos().x <= lTarget+lMargin)
 			{
@@ -164,7 +166,7 @@ void UiConsole::Tick()
 		else	// Slide out right.
 		{
 			const int lTarget = mUiManager->GetDisplayManager()->GetWidth()+lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lFrameConsoleSpeed);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 			if (mConsoleComponent->GetPos().x >= lTarget+lMargin)
 			{

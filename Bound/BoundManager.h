@@ -77,6 +77,7 @@ protected:
 	virtual void TickUiUpdate();
 	virtual void SetLocalRender(bool pRender);
 
+	void CreateBall(int pIndex);
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	//virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
@@ -97,6 +98,7 @@ protected:
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
+	std::vector<Cure::GameObjectId> mBalls;
 	Life::Menu* mMenu;
 	StopWatch mNextLevelTimer;
 	Sunlight* mSunlight;
