@@ -1,0 +1,50 @@
+Idea
+Start with a box ("level") with some balls inside.
+Cut box into smaller pieces, using straight "lines" which are projected into 3D.
+Cutting is not instantaneous. The cut starts as a small, round saw blade which grows. If a ball hits the cutting blade before it's cut off all the intersecting surfaces of the box, that cutting blade is destroyed and "number of lives" is reduced by one.
+If the cutting blade chops off a part of the box, the living space of the box is reduced. All parts of the box which does not contain a ball is eliminated.
+When more than 50% (or so) of the box is cut away, the player has completed the level.
+Each level has one more ball in it than the level before.
+
+Shapes
+Box is a triangle mesh.
+Only use triangles in the box, for simplification.
+Let box be a cuboid which is deeper and wider than it is high.
+Balls are spheres.
+
+Rendering
+Balls are soccer-ball textured.
+Balls cast shadows.
+Cuboid is shining, flat-shaded. Change color each level. Avoid white+black for ball distinction.
+Cutting blade is flat-shaded, double-sided, transparent with saw teeth on the edges. Color is complement or not close to cuboid color.
+
+Cutting
+Cut with line+blade until released. If starting ray does not intersect with any triangle, choose plane through origin as depth midpoint, otherwise use average depth midpoint.
+Don't start cutting until delta dragged >= 4px (so angle can be determined).
+Use cylinder shape as cutting blade trigger.
+Start growing cutting blade cylinder as soon as depth midpoint has been determined.
+
+Movement
+Camera moves as soon as a cutting has been initiated, and as long as there is no cutting in progress.
+Camera moves 2/21 of a revolution counter-clockwise each time it's animated.
+Camera also bobs some up and down to give a clearer view of the 3D space.
+Cutting blade rotates while cutting.
+Balls have a maximum speed, if reached their speed will momentarily be reduced to the maximum.
+The total sum of the speeds of all balls must exceed a threshold, or they will all have their speeds momentarily set to a minimum.
+Balls gain a little energy when colliding with one another, but loose a little energy when colliding with a wall.
+
+Math
+Calculate volume of mesh: http://stackoverflow.com/questions/1410525/volume-of-a-3d-closed-mesh-car-object#1898484.
+Calculate ray against mesh (hopefully using ODE).
+Calculate plane of cutting blade, given a camera angle.
+Cut mesh in two using two planes (to give cutting blade some width+volume).
+Check if a mesh contains a ball. (Otherwise it will be removed.)
+
+Sounds
+Keep 'em subtle.
+Music, let's use XM format. Keep volume low.
+
+Demo
+Banner ads at the top.
+Restart from scratch on each game over.
+Limited to level 10.

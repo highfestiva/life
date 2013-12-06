@@ -5,7 +5,7 @@
 
 
 #include "../Lepra/Include/LepraTarget.h"
-#include "DownwashTicker.h"
+#include "BoundTicker.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiMusicPlayer.h"
@@ -16,16 +16,16 @@
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "RtVar.h"
-#include "DownwashManager.h"
+#include "BoundManager.h"
 
 
 
-namespace Downwash
+namespace Bound
 {
 
 
 
-DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
+BoundTicker::BoundTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mIsPlayerCountViewActive(false),
 	mMusicPlayer(0),
@@ -35,22 +35,11 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
-	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
-	AddBackedRtvar(_T(RTVAR_GAME_CHILDISHNESS));
-	for (int x = 0; x < 20; ++x)
-	{
-		const str wr = strutil::Format(str(_T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i")).c_str(), x);
-		AddBackedRtvar(wr);
-		const str pr = strutil::Format(str(_T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i")).c_str(), x);
-		AddBackedRtvar(pr);
-	}
+	AddBackedRtvar(_T(RTVAR_GAME_LEVEL));
 	AddBackedRtvar(_T(RTVAR_PHYSICS_RTR_OFFSET));
-	AddBackedRtvar(_T(RTVAR_GAME_ALLOWTOYMODE));
-	AddBackedRtvar(_T(RTVAR_GAME_PILOTNAME));
-	AddBackedRtvar(_T(RTVAR_UI_SOUND_MASTERVOLUME));
 }
 
-DownwashTicker::~DownwashTicker()
+BoundTicker::~BoundTicker()
 {
 	CloseMainMenu();
 	delete mMusicPlayer;
@@ -61,7 +50,7 @@ DownwashTicker::~DownwashTicker()
 
 
 
-void DownwashTicker::Suspend()
+void BoundTicker::Suspend()
 {
 	Parent::Suspend();
 
@@ -71,7 +60,7 @@ void DownwashTicker::Suspend()
 	}
 }
 
-void DownwashTicker::Resume()
+void BoundTicker::Resume()
 {
 	Parent::Resume();
 
@@ -86,28 +75,23 @@ void DownwashTicker::Resume()
 	}
 }
 
-bool DownwashTicker::CreateSlave()
+bool BoundTicker::CreateSlave()
 {
-	return (Parent::CreateSlave(&DownwashTicker::CreateSlaveManager));
+	return (Parent::CreateSlave(&BoundTicker::CreateSlaveManager));
 }
 
-void DownwashTicker::OnSlavesKilled()
+void BoundTicker::OnSlavesKilled()
 {
-	/*DeleteServer();
-	//deb_assert(!mIsPlayerCountViewActive);
-	mIsPlayerCountViewActive = true;
-	mSlaveTopSplit = 1.0f;
-	Parent::CreateSlave(&DownwashTicker::CreateViewer);*/
 	CreateSlave();
 }
 
-void DownwashTicker::OnServerCreated(Life::UiGameServerManager*)
+void BoundTicker::OnServerCreated(Life::UiGameServerManager*)
 {
 }
 
 
 
-bool DownwashTicker::OpenUiManager()
+bool BoundTicker::OpenUiManager()
 {
 	bool lOk = true;
 	if (lOk)
@@ -117,9 +101,6 @@ bool DownwashTicker::OpenUiManager()
 	if (lOk)
 	{
 		UiLepra::Core::ProcessMessages();
-		//mUiManager->GetPainter()->ResetClippingRect();
-		//mUiManager->GetPainter()->Clear(BLACK);
-		//DisplaySplashLogo();
 	}
 	if (lOk)
 	{
@@ -159,13 +140,13 @@ bool DownwashTicker::OpenUiManager()
 		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
 		mMusicPlayer->SetVolume(0.5f);
 		mMusicPlayer->SetSongPauseTime(2, 6);
-		mMusicPlayer->AddSong(_T("Dub Feral.ogg"));
+		/*mMusicPlayer->AddSong(_T("Dub Feral.ogg"));
 		mMusicPlayer->AddSong(_T("Easy Jam.ogg"));
 		mMusicPlayer->AddSong(_T("Firmament.ogg"));
 		mMusicPlayer->AddSong(_T("Mandeville.ogg"));
 		mMusicPlayer->AddSong(_T("Slow Ska Game Loop.ogg"));
 		mMusicPlayer->AddSong(_T("Stealth Groover.ogg"));
-		mMusicPlayer->AddSong(_T("Yallahs.ogg"));
+		mMusicPlayer->AddSong(_T("Yallahs.ogg"));*/
 		mMusicPlayer->Shuffle();
 		lOk = mMusicPlayer->Playback();
 	}
@@ -176,13 +157,13 @@ bool DownwashTicker::OpenUiManager()
 	return lOk;
 }
 
-void DownwashTicker::BeginRender(Vector3DF& pColor)
+void BoundTicker::BeginRender(Vector3DF& pColor)
 {
 	Parent::BeginRender(pColor);
 	mUiManager->GetRenderer()->SetOutlineFillColor(OFF_BLACK);
 }
 
-void DownwashTicker::PreWaitPhysicsTick()
+void BoundTicker::PreWaitPhysicsTick()
 {
 	Parent::PreWaitPhysicsTick();
 	if (mMusicPlayer)
@@ -193,7 +174,7 @@ void DownwashTicker::PreWaitPhysicsTick()
 
 
 
-void DownwashTicker::CloseMainMenu()
+void BoundTicker::CloseMainMenu()
 {
 	if (mIsPlayerCountViewActive)
 	{
@@ -202,7 +183,7 @@ void DownwashTicker::CloseMainMenu()
 	}
 }
 
-bool DownwashTicker::QueryQuit()
+bool BoundTicker::QueryQuit()
 {
 	if (Parent::QueryQuit())
 	{
@@ -219,25 +200,17 @@ bool DownwashTicker::QueryQuit()
 
 
 
-Life::GameClientSlaveManager* DownwashTicker::CreateSlaveManager(Life::GameClientMasterTicker* pMaster,
+Life::GameClientSlaveManager* BoundTicker::CreateSlaveManager(Life::GameClientMasterTicker* pMaster,
 	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
 	int pSlaveIndex, const PixelRect& pRenderArea)
 {
-	return new DownwashManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new BoundManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 }
 
-/*Life::GameClientSlaveManager* DownwashTicker::CreateViewer(Life::GameClientMasterTicker* pMaster,
-	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-	int pSlaveIndex, const PixelRect& pRenderArea)
-{
-	return new DownwashViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
-}*/
 
 
-
-LOG_CLASS_DEFINE(GAME, DownwashTicker);
+LOG_CLASS_DEFINE(GAME, BoundTicker);
 
 
 

@@ -80,6 +80,8 @@ public:
 	void SetShadowMode(Shadows pShadowMode, ShadowHint pHint);
 	void SetDepthWriteEnabled(bool pEnabled);
 	void SetDepthTestEnabled(bool pEnabled);
+	void SetLightsEnabled(bool pEnabled);
+	void SetTexturingEnabled(bool pEnabled);
 
 	void SetAmbientLight(float pRed, float pGreen, float pBlue);
 	void AddAmbience(float pRed, float pGreen, float pBlue);

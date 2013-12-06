@@ -572,6 +572,10 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 	GetNetworkClient()->StartConnectLogin(lServerAddress, lConnectTimeout, pLoginToken);
 }
 
+void GameClientSlaveManager::OnLoginSuccess()
+{
+}
+
 void GameClientSlaveManager::Logout()
 {
 	if (GetNetworkClient()->IsActive())

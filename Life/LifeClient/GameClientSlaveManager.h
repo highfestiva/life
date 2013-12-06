@@ -73,7 +73,7 @@ public:
 	void ToggleConsole();
 
 	virtual void RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken);
-	virtual void OnLoginSuccess() = 0;
+	virtual void OnLoginSuccess();
 	void Logout();
 	bool IsLoggingIn() const;
 	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;

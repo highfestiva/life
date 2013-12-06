@@ -340,6 +340,7 @@ def main():
         ["Push",            "gfx_bin",    "Push/Push900.vcproj", "LifeClient"],
         ["HoverTank",       "gfx_bin",    "HoverTank/HoverTank900.vcproj", "LifeClient"],
         ["Downwash",        "gfx_bin",    "Downwash/Downwash900.vcproj", "LifeClient"],
+        ["Bound",        "gfx_bin",    "Bound/Bound900.vcproj", "LifeClient"],
         ["PushServer",      "bin",        "Push/PushServer/PushServer900.vcproj", "LifeServer"],
         ["HoverTankServer", "bin",        "HoverTank/HoverTankServer/HoverTankServer900.vcproj", "LifeServer"],
         ["PushMaster",      "bin",        "Push/PushMaster/PushMaster900.vcproj", "LifeMaster"],

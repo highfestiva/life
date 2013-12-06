@@ -80,8 +80,6 @@ public:
 	void PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg);
 	virtual void DrawSyncDebugInfo();
 
-	virtual void OnLoginSuccess();
-
 	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
 	Cure::GameObjectId GetAvatarInstanceId() const;
 
@@ -105,7 +103,6 @@ public:
 protected:
 	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
 
-	virtual bool Reset();
 	virtual bool InitializeUniverse();
 	void CreateChopper(const str& pClassId);
 	void UpdateChopperColor(float pLerp);

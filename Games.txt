@@ -8,9 +8,13 @@
 
 +Downwash, i.e. Helicopter Gravity Force 2D/3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
+Cutaway - 3D realtime physics puzzle. Box contains balls. Cut out as much of the box as you can by drawing cutting planes. When you've reduced the space for the balls by 50% or so, you've completed the level. The next level contains one more ball.
+
 Knobbelen
 
 Cowboy bank shooter. In comes a robber or a citizen, shoot by tapping - fast! Reload by tapping some button near the bottom of the screen.
+
+Ignition-style game. Generate maps using simple algo: R number of right turns, L number of left turns, J number of jumps, etc. Generate all content except the cars. Use height field. Three cars. Infinite number of levels.
 
 Crazy hoArse - mad, galloping horse using rigging+skinning. Spinning eyes, flailing limbs, strange obstacles. Make it look EXTREMELY organic!
 
@@ -120,3 +124,5 @@ Make a game with speech controls, for instance using http://www.politepix.com/op
 (Mind map web app - i.e. not a game - med googleapis/jQuery. Bygg ett dynamiskt träd där orden pekar ut sina föräldrar och antal kopplingar... Layouta svajande. Börja med en textinmatningsruta som omvandlas till rotnod.)
 
 Pen Friend Thingie - pick language, interest, add photo, find friend, make automatic translations. Great idea!
+
+A game for the blind. For instance a racing game where it tells the driver "100-sharp turn left"? Something like that...

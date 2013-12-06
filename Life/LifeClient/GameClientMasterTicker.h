@@ -156,6 +156,7 @@ protected:
 	float mSlaveBottomSplit;
 	float mSlaveVSplit;
 	float mSlaveFade;
+	int mPerformanceAdjustmentTicks;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 	std::unordered_set<Cure::GameObjectId> mLocalObjectSet;
 

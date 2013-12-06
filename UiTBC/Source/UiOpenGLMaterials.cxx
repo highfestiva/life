@@ -51,16 +51,7 @@ Material::RemoveStatus OpenGLMaterial::RemoveGeometry(TBC::GeometryBase* pGeomet
 
 void OpenGLMaterial::EnableDisableTexturing()
 {
-	if (GetRenderer()->GetTexturingEnabled())
-	{
-		glEnable(GL_TEXTURE_2D);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	else
-	{
-		glDisable(GL_TEXTURE_2D);
-		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
+	GetRenderer()->SetTexturingEnabled(GetRenderer()->GetTexturingEnabled());
 }
 
 GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)

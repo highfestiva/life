@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../Life/LifeClient/GameClientMasterTicker.h"
-#include "Downwash.h"
+#include "Bound.h"
 
 
 
@@ -23,17 +23,17 @@ class GameClientSlaveManager;
 
 
 
-namespace Downwash
+namespace Bound
 {
 
 
 
-class DownwashTicker: public Life::GameClientMasterTicker
+class BoundTicker: public Life::GameClientMasterTicker
 {
 	typedef Life::GameClientMasterTicker Parent;
 public:
-	DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
-	virtual ~DownwashTicker();
+	BoundTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	virtual ~BoundTicker();
 
 private:
 	void Suspend();

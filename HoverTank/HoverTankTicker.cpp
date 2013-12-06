@@ -30,8 +30,7 @@ namespace HoverTank
 HoverTankTicker::HoverTankTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mIsPlayerCountViewActive(false),
-	mSunlight(0),
-	mPerformanceAdjustmentTicks(0)
+	mSunlight(0)
 {
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
@@ -242,80 +241,6 @@ void HoverTankTicker::BeginRender(Vector3DF& pColor)
 	const Color lFillColor = OFF_BLACK;
 	//lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
 	mUiManager->GetRenderer()->SetOutlineFillColor(lFillColor);
-}
-
-void HoverTankTicker::PreWaitPhysicsTick()
-{
-	++mPerformanceAdjustmentTicks;
-	if (mPerformanceAdjustmentTicks & 0x3F)
-	{
-		return;
-	}
-	const int lAdjustmentIndex = (mPerformanceAdjustmentTicks >> 7);
-
-	bool lEnableAutoPerformance;
-	CURE_RTVAR_GET(lEnableAutoPerformance, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEAUTOPERFORMANCE, true);
-	if (!lEnableAutoPerformance)
-	{
-		return;
-	}
-	
-
-	double lPerformanceLoad;
-	CURE_RTVAR_TRYGET(lPerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
-	switch (lAdjustmentIndex)
-	{
-		default:
-		{
-			mPerformanceAdjustmentTicks = 0;
-		}
-		break;
-		case 1:
-		{
-			bool lEnableMassObjects;
-			CURE_RTVAR_GET(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
-			bool lEnableMassObjectFading;
-			CURE_RTVAR_GET(lEnableMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
-			if (lPerformanceLoad > 1)
-			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
-			}
-			else if (lPerformanceLoad < 0.6 && lEnableMassObjects)
-			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
-			}
-		}
-		break;
-		case 2:
-		{
-			double lExhaustIntensity;
-			CURE_RTVAR_GET(lExhaustIntensity, =, UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
-			if (lPerformanceLoad > 0.9)
-			{
-				lExhaustIntensity = Math::Lerp(lExhaustIntensity, 1.9-lPerformanceLoad, 0.1);
-			}
-			else if (lPerformanceLoad < 0.8)
-			{
-				lExhaustIntensity = Math::Lerp(lExhaustIntensity, 1.0, 0.3);
-			}
-			CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, lExhaustIntensity);
-		}
-		break;
-		case 3:
-		{
-			bool lEnableMassObjects;
-			CURE_RTVAR_GET(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
-			if (lPerformanceLoad > 1)
-			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
-			}
-			else if (lPerformanceLoad < 0.2)
-			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
-			}
-		}
-		break;
-	}
 }
 
 

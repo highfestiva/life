@@ -181,6 +181,34 @@ void OpenGLRenderer::SetDepthTestEnabled(bool pEnabled)
 	OGL_ASSERT();
 }
 
+void OpenGLRenderer::SetLightsEnabled(bool pEnabled)
+{
+	Parent::SetLightsEnabled(pEnabled);
+	if (pEnabled)
+	{
+		::glEnable(GL_LIGHTING);
+	}
+	else
+	{
+		::glDisable(GL_LIGHTING);
+	}
+}
+
+void OpenGLRenderer::SetTexturingEnabled(bool pEnabled)
+{
+	Parent::SetTexturingEnabled(pEnabled);
+	if (pEnabled)
+	{
+		::glEnable(GL_TEXTURE_2D);
+		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+	else
+	{
+		::glDisable(GL_TEXTURE_2D);
+		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+}
+
 void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
 {
 	Parent::SetAmbientLight(pRed, pGreen, pBlue);
@@ -1263,14 +1291,7 @@ unsigned OpenGLRenderer::RenderScene()
 		::glStencilFunc(GL_GEQUAL, 128, 0xFF);
 		::glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-		if (GetLightsEnabled())
-		{
-			::glEnable(GL_LIGHTING);
-		}
-		else
-		{
-			::glDisable(GL_LIGHTING);
-		}
+		SetLightsEnabled(GetLightsEnabled());
 
 		// Enable all lights again.
 		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
@@ -1525,14 +1546,7 @@ int OpenGLRenderer::GetNumTextureUnits() const
 
 void OpenGLRenderer::ProcessLights()
 {
-	if (GetLightsEnabled() == true)
-	{
-		glEnable(GL_LIGHTING);
-	}
-	else
-	{
-		glDisable(GL_LIGHTING);
-	}
+	SetLightsEnabled(GetLightsEnabled());
 	
 	// Transform all light positions.
 	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)

@@ -48,15 +48,10 @@ private:
 	void DisplayCompanyLogo();
 
 	virtual void BeginRender(Vector3DF& pColor);
-	void PreWaitPhysicsTick();
 
 	virtual void CloseMainMenu();
 	virtual bool QueryQuit();
 
-	typedef Life::GameClientSlaveManager* (*SlaveFactoryMethod)(Life::GameClientMasterTicker* pMaster,
-		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		int pSlaveIndex, const PixelRect& pRenderArea);
 	static Life::GameClientSlaveManager* CreateSlaveManager(Life::GameClientMasterTicker* pMaster,
 		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
 		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
@@ -68,7 +63,6 @@ private:
 
 	bool mIsPlayerCountViewActive;
 	Sunlight* mSunlight;		// TODO: remove hack and come up with something better?
-	int mPerformanceAdjustmentTicks;
 
 	LOG_CLASS_DECLARE();
 };

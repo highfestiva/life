@@ -646,12 +646,6 @@ void DownwashManager::DrawSyncDebugInfo()
 
 
 
-void DownwashManager::OnLoginSuccess()
-{
-}
-
-
-
 bool DownwashManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
 {
 	return (pPosition.GetDistanceSquared(mCameraTransform.GetPosition()) <= pDistance*pDistance);
@@ -933,12 +927,6 @@ Cure::RuntimeVariableScope* DownwashManager::GetVariableScope() const
 }
 
 
-
-bool DownwashManager::Reset()	// Run when disconnected. Removes all objects and displays login GUI.
-{
-	ScopeLock lLock(GetTickLock());
-	return Parent::Reset();
-}
 
 bool DownwashManager::InitializeUniverse()
 {
