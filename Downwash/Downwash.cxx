@@ -36,7 +36,6 @@ public:
 	virtual ~Downwash();
 	virtual void Init();
 	virtual bool MainLoop();
-	virtual bool Tick();
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -166,7 +165,7 @@ void Downwash::Init()
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 4.0);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 4.0);
 
-	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
+	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), &mDragManager);
 
 	Parent::Init();
 }
@@ -180,21 +179,6 @@ bool Downwash::MainLoop()
 	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
 	return true;
 #endif // !iOS/iOS
-}
-
-bool Downwash::Tick()
-{
-	HiResTimer::StepCounterShadow();
-
-#if defined(EMULATE_TOUCH)
-	mDragManager.UpdateDragByMouse(mUiManager->GetInputManager());
-#elif defined(LEPRA_TOUCH)
-	mDragManager.UpdateMouseByDrag(mUiManager->GetInputManager());
-#endif // Touch
-	mDragManager.UpdateTouchsticks(mUiManager->GetInputManager());
-	mDragManager.DropReleasedDrags();
-
-	return Parent::Tick();
 }
 
 

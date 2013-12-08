@@ -20,6 +20,10 @@ class Canvas;
 }
 namespace UiLepra
 {
+namespace Touch
+{
+class DragManager;
+}
 class InputManager;
 class SoundManager;
 }
@@ -42,7 +46,7 @@ namespace UiCure
 class GameUiManager: public UiLepra::DisplayResizeObserver
 {
 public:
-	GameUiManager(Cure::RuntimeVariableScope* pVariableScope);
+	GameUiManager(Cure::RuntimeVariableScope* pVariableScope, UiLepra::Touch::DragManager* pDragManager);
 	virtual ~GameUiManager();
 
 	bool Open();
@@ -67,6 +71,7 @@ public:
 	UiTbc::Painter* GetPainter() const;
 	UiTbc::FontManager* GetFontManager() const;
 	UiLepra::InputManager* GetInputManager() const;
+	UiLepra::Touch::DragManager* GetDragManager() const;
 	UiTbc::DesktopWindow* GetDesktopWindow() const;
 	UiLepra::SoundManager* GetSoundManager() const;
 
@@ -97,6 +102,7 @@ private:
 	UiTbc::DesktopWindow* mDesktopWindow;
 	UiLepra::InputManager* mInput;
 	UiLepra::SoundManager* mSound;
+	UiLepra::Touch::DragManager* mDragManager;
 	double mSoundRollOffShadow;	// Optimization.
 	double mSoundDopplerShadow;	// Optimization.
 

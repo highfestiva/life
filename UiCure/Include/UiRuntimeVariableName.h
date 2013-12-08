@@ -6,6 +6,11 @@
 
 #pragma once
 
+#define RTVAR_CTRL_EMULATETOUCH			"Control.EmulateTouch"
+#define RTVAR_CTRL_ACCELEROMETER_X		"Control.Accelerometer.X"
+#define RTVAR_CTRL_ACCELEROMETER_Y		"Control.Accelerometer.Y"
+#define RTVAR_CTRL_ACCELEROMETER_Z		"Control.Accelerometer.Z"
+
 #define RTVAR_DEBUG_3D_ENABLEAXES		"Debug.3D.EnableAxes"
 #define RTVAR_DEBUG_3D_ENABLEJOINTS		"Debug.3D.EnableJoints"
 #define RTVAR_DEBUG_3D_ENABLESHAPES		"Debug.3D.EnableShapes"

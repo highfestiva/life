@@ -26,6 +26,7 @@ using namespace Lepra;
 @private
 	Canvas* _canvas;
 	NSTimer* _animationTimer;
+	CMMotionManager* _motionManager;
 	//SKProduct* _requestedProduct;
 }
 
@@ -93,6 +94,7 @@ using namespace Lepra;
 	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeLeft;
 	_canvas = pCanvas;
 	_animationTimer = nil;
+	_motionManager = [[CMMotionManager alloc] init];
 	//[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 	return self;
 }
@@ -108,10 +110,12 @@ using namespace Lepra;
 	_animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0001 target:self selector:@selector(tick) userInfo:nil repeats:YES];
 	[EAGLView sharedView].responder = self;
 	[[EAGLView sharedView] powerUpAcc];
+	[_motionManager startAccelerometerUpdates];
 }
 
 -(void) stopTick
 {
+	[_motionManager stopAccelerometerUpdates];
 	[[EAGLView sharedView] powerDownAcc];
 	[_animationTimer invalidate];
 	_animationTimer = nil;
@@ -127,6 +131,12 @@ using namespace Lepra;
 	else
 	{
 		lGlView.canvas = _canvas;
+		const float x = _motionManager.accelerometerData.acceleration.x;
+		const float y = _motionManager.accelerometerData.acceleration.y;
+		const float z = _motionManager.accelerometerData.acceleration.z;
+		CURE_RTVAR_SET(Bound::Bound::GetApp()->mVariableScope, RTVAR_CTRL_ACCELEROMETER_X, x);
+		CURE_RTVAR_SET(Bound::Bound::GetApp()->mVariableScope, RTVAR_CTRL_ACCELEROMETER_Y, y);
+		CURE_RTVAR_SET(Bound::Bound::GetApp()->mVariableScope, RTVAR_CTRL_ACCELEROMETER_Z, z);
 		Bound::Bound::GetApp()->Tick();
 	}
 }

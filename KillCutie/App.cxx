@@ -460,7 +460,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
 #endif // Kill Cutie full version compile
 
-	mUiManager = new UiCure::GameUiManager(mVariableScope);
+	mUiManager = new UiCure::GameUiManager(mVariableScope, &mDragManager);
 	bool lOk = mUiManager->OpenDraw();
 	if (lOk)
 	{

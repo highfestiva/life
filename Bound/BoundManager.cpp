@@ -10,6 +10,7 @@
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiMachine.h"
+#include "../UiLepra/Include/UiTouchDrag.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFixedLayouter.h"
 #include "../UiTBC/Include/UiMaterial.h"
@@ -23,7 +24,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define BG_COLOR			Color(110, 110, 110, 160)
+#define BG_COLOR Color(110, 110, 110, 160)
 
 
 
@@ -39,7 +40,8 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	mCollisionSoundManager(0),
 	mMenu(0),
 	mSunlight(0),
-	mCameraTransform(QuaternionF(), Vector3DF(0, -10, 0)),
+	mCameraAngle(0),
+	mCameraTransform(QuaternionF(), Vector3DF(0, -6.5, 0)),
 	mLevelCompleted(false),
 	mPauseButton(0)
 {
@@ -82,7 +84,7 @@ void BoundManager::LoadSettings()
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 60.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 prev-level"));
@@ -99,7 +101,7 @@ bool BoundManager::Open()
 	if (lOk)
 	{
 		mPauseButton = ICONBTNA("btn_pause.png", "");
-		int x = mRenderArea.mRight - 76;
+		int x = mRenderArea.mLeft + 12;
 		int y = mRenderArea.mTop + 12;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
 		mPauseButton->SetVisible(true);
@@ -143,15 +145,17 @@ void BoundManager::SetFade(float pFadeAmount)
 
 bool BoundManager::Render()
 {
+	mSunlight->Tick();
+
 	mUiManager->GetPainter()->ResetClippingRect();
 	mUiManager->GetRenderer()->SetDepthWriteEnabled(false);
 	mUiManager->GetRenderer()->SetDepthTestEnabled(false);
 	mUiManager->GetRenderer()->SetLightsEnabled(false);
 	mUiManager->GetRenderer()->SetTexturingEnabled(false);
-	mUiManager->GetPainter()->SetColor(GREEN, 0);
-	mUiManager->GetPainter()->SetColor(GREEN, 1);
-	mUiManager->GetPainter()->SetColor(RED, 2);
-	mUiManager->GetPainter()->SetColor(BLUE, 3);
+	mUiManager->GetPainter()->SetColor(Color(45,68,129), 0);
+	mUiManager->GetPainter()->SetColor(Color(49,83,163), 1);
+	mUiManager->GetPainter()->SetColor(Color(15,25,43), 2);
+	mUiManager->GetPainter()->SetColor(Color(15,39,57), 3);
 	mUiManager->GetPainter()->FillShadedRect(0, 0, mUiManager->GetCanvas()->GetWidth(), mUiManager->GetCanvas()->GetHeight());
 	mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
 	mUiManager->GetRenderer()->SetDepthTestEnabled(true);
@@ -167,7 +171,87 @@ bool BoundManager::Paint()
 	{
 		return false;
 	}
+
+	// Draw frame.
+	const int w = mUiManager->GetCanvas()->GetWidth();
+	const int h = mUiManager->GetCanvas()->GetHeight();
+	const float lTouchSideScale = 1.28f;	// Inches.
+	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
+	const int m = (int)(lTouchScale * w * 0.5f);
+	mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
+	mUiManager->GetPainter()->DrawLine(m*3, m, w-m*3, m);
+	mUiManager->GetPainter()->DrawLine(m, m*3, m, h-m*3);
+	mUiManager->GetPainter()->DrawLine(m*3, h-m, w-m*3, h-m);
+	mUiManager->GetPainter()->DrawLine(w-m, m*3, w-m, h-m*3);
+
+	const int r = m;
+	const int d = r*2;
+	typedef UiLepra::Touch::DragManager::DragList DragList;
+	const DragList lDragList = mUiManager->GetDragManager()->GetDragList();
+	for (DragList::const_iterator x = lDragList.begin(); x != lDragList.end(); ++x)
+	{
+		PixelCoord lFrom = x->mStart;
+		if (!AttachToBorder(lFrom, m, w, h))
+		{
+			continue;
+		}
+		mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
+		mUiManager->GetPainter()->DrawArc(lFrom.x-r, lFrom.y-r, d, d, 0, 360, false);
+
+		PixelCoord lTo = x->mLast;
+		bool lDidFindTargetBorder = AttachToBorder(lTo, m, w, h);
+		mUiManager->GetPainter()->SetColor(Color(30,140,20), 0);
+		mUiManager->GetPainter()->DrawArc(lTo.x-r, lTo.y-r, d, d, 0, 360, false);
+
+		lDidFindTargetBorder &= (std::abs(lFrom.x-lTo.x) >= d*4 || std::abs(lFrom.y-lTo.y) >= d*4);
+		if (!lDidFindTargetBorder)
+		{
+			mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
+		}
+		mUiManager->GetPainter()->DrawLine(lFrom.x, lFrom.y, lTo.x, lTo.y);
+	}
 	return true;
+}
+
+bool BoundManager::AttachToBorder(PixelCoord& pPoint, int pMargin, int w, int h)
+{
+	int dt = std::abs(pPoint.y - pMargin);
+	int dl = std::abs(pPoint.x - pMargin);
+	int db = std::abs(pPoint.y - (h-pMargin));
+	int dr = std::abs(pPoint.x - (w-pMargin));
+	if (dt < dl && dt < dr && dt < db)
+	{
+		if (dt < pMargin*2)
+		{
+			pPoint.y = pMargin;
+			return true;
+		}
+	}
+	else if (db < dl && db < dr)
+	{
+		if (db < pMargin*2)
+		{
+			pPoint.y = h-pMargin;
+			return true;
+		}
+	}
+	else if (dl < dr)
+	{
+		if (dl < pMargin*2)
+		{
+			pPoint.x = pMargin;
+			return true;
+		}
+	}
+	else
+	{
+		if (dr < pMargin*2)
+		{
+			pPoint.x = w-pMargin;
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -276,7 +360,7 @@ bool BoundManager::InitializeUniverse()
 	int lLevelIndex;
 	CURE_RTVAR_GET(lLevelIndex, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	lLevel->GenerateLevel(GetPhysicsManager(), lLevelIndex);
-	for (int x = 0; x < 8; ++x)
+	for (int x = 0; x < 4; ++x)
 	{
 		CreateBall(x);
 	}
@@ -416,7 +500,7 @@ void BoundManager::ScriptPhysicsTick()
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	if (lPhysicsTime > 1e-5)
 	{
-		MoveCamera();
+		MoveCamera(lPhysicsTime);
 		UpdateCameraPosition(false);
 	}
 
@@ -473,8 +557,24 @@ void BoundManager::HandleWorldBoundaries()
 	}
 }
 
-void BoundManager::MoveCamera()
+void BoundManager::MoveCamera(float pFrameTime)
 {
+	if (!mUiManager->GetDragManager()->GetDragList().empty())
+	{
+		return;
+	}
+
+	mCameraAngle += 0.1f*pFrameTime;
+	if (mCameraAngle > 2*PIF)
+	{
+		mCameraAngle -= 2*PIF;
+	}
+	QuaternionF q(0, Vector3DF(0,1,0));
+	Vector3DF p(0,-6.5,0);
+	mCameraTransform = TransformationF(q, p);
+	mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(0,0,1), mCameraAngle);
+	mCameraTransform.RotatePitch(-sin(mCameraAngle)*0.2f);
+	mCameraTransform.MoveUp(sin(mCameraAngle)*1.0f);
 }
 
 void BoundManager::UpdateCameraPosition(bool pUpdateMicPosition)

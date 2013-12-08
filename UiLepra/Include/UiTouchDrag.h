@@ -46,6 +46,8 @@ struct Drag
 class DragManager
 {
 public:
+	typedef std::list<Drag> DragList;
+
 	DragManager();
 	virtual ~DragManager();
 
@@ -54,11 +56,12 @@ public:
 	void UpdateMouseByDrag(InputManager* pInputManager);
 	void UpdateTouchsticks(InputManager* pInputManager) const;
 	void DropReleasedDrags();
+	const DragList& GetDragList() const;
 
 private:
-	typedef std::list<Drag> DragList;
 	DragList mDragList;
 	PixelCoord mLastMouse;
+	bool mLastPressed;
 };
 
 

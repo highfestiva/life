@@ -159,6 +159,8 @@ bool Application::MainLoop()
 
 bool Application::Tick()
 {
+	HiResTimer::StepCounterShadow();
+
 	LEPRA_DO_MEASURE_SCOPE(AppTick);
 
 	bool lDebug;

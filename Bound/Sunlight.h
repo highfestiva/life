@@ -29,6 +29,7 @@ class Sunlight
 public:
 	Sunlight(UiCure::GameUiManager* pUiManager);
 	virtual ~Sunlight();
+	void Tick();
 
 private:
 	UiCure::GameUiManager* mUiManager;

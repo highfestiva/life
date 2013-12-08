@@ -38,6 +38,7 @@ public:
 
 private:
 	static void FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh);
+	static void GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh);
 
 	int mLevel;
 };

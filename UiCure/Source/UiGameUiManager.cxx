@@ -10,6 +10,7 @@
 #include "../../Lepra/Include/Thread.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "../../UiLepra/Include/UiCore.h"
+#include "../../UiLepra/Include/UiTouchDrag.h"
 #include "../../UiLepra/Include/UiInput.h"
 #include "../../UiLepra/Include/UiSoundManager.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
@@ -27,7 +28,7 @@ namespace UiCure
 
 
 
-GameUiManager::GameUiManager(Cure::RuntimeVariableScope* pVariableScope):
+GameUiManager::GameUiManager(Cure::RuntimeVariableScope* pVariableScope, UiLepra::Touch::DragManager* pDragManager):
 	mVariableScope(pVariableScope),
 	mDisplay(0),
 	mCanvas(0),
@@ -36,6 +37,7 @@ GameUiManager::GameUiManager(Cure::RuntimeVariableScope* pVariableScope):
 	mFontManager(0),
 	mDesktopWindow(0),
 	mInput(0),
+	mDragManager(pDragManager),
 	mSound(0),
 	mSoundRollOffShadow(0),
 	mSoundDopplerShadow(0)
@@ -46,6 +48,7 @@ GameUiManager::~GameUiManager()
 {
 	Close();
 	mVariableScope = 0;
+	mDragManager = 0;
 }
 
 
@@ -222,7 +225,7 @@ bool GameUiManager::OpenRest()
 	}
 
 	UiLepra::Core::ProcessMessages();
-	return (lOk);
+	return lOk;
 }
 
 void GameUiManager::Close()
@@ -285,6 +288,23 @@ bool GameUiManager::CanRender() const
 void GameUiManager::InputTick()
 {
 	UiLepra::Core::ProcessMessages();
+
+	if (mDragManager)
+	{
+		mDragManager->DropReleasedDrags();
+#if defined(LEPRA_TOUCH)
+		mDragManager->UpdateMouseByDrag(GetInputManager());
+#else // Not a touch device.
+		bool lEmulateTouch;
+		CURE_RTVAR_GET(lEmulateTouch, =, mVariableScope, RTVAR_CTRL_EMULATETOUCH, false);
+		if (lEmulateTouch)
+		{
+			mDragManager->UpdateDragByMouse(GetInputManager());
+		}
+#endif // Touch device / Not a touch device.
+		mDragManager->UpdateTouchsticks(GetInputManager());
+	}
+
 	if (CanRender())
 	{
 		mInput->PollEvents();
@@ -374,7 +394,7 @@ Cure::RuntimeVariableScope* GameUiManager::GetVariableScope() const
 
 UiLepra::DisplayManager* GameUiManager::GetDisplayManager() const
 {
-	return (mDisplay);
+	return mDisplay;
 }
 
 Canvas* GameUiManager::GetCanvas() const
@@ -384,32 +404,37 @@ Canvas* GameUiManager::GetCanvas() const
 
 UiTbc::Renderer* GameUiManager::GetRenderer() const
 {
-	return (mRenderer);
+	return mRenderer;
 }
 
 UiTbc::Painter* GameUiManager::GetPainter() const
 {
-	return (mPainter);
+	return mPainter;
 }
 
 UiTbc::FontManager* GameUiManager::GetFontManager() const
 {
-	return (mFontManager);
+	return mFontManager;
 }
 
 UiLepra::InputManager* GameUiManager::GetInputManager() const
 {
-	return (mInput);
+	return mInput;
+}
+
+UiLepra::Touch::DragManager* GameUiManager::GetDragManager() const
+{
+	return mDragManager;
 }
 
 UiTbc::DesktopWindow* GameUiManager::GetDesktopWindow() const
 {
-	return (mDesktopWindow);
+	return mDesktopWindow;
 }
 
 UiLepra::SoundManager* GameUiManager::GetSoundManager() const
 {
-	return (mSound);
+	return mSound;
 }
 
 

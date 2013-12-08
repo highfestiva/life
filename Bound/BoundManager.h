@@ -60,6 +60,7 @@ public:
 
 	virtual bool Render();
 	virtual bool Paint();
+	static bool AttachToBorder(PixelCoord& pPoint, int pMargin, int pWidth, int pHeight);
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
@@ -90,7 +91,7 @@ protected:
 
 	virtual void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
-	virtual void MoveCamera();
+	virtual void MoveCamera(float pFrameTime);
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
 
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const;
@@ -102,6 +103,7 @@ protected:
 	Life::Menu* mMenu;
 	StopWatch mNextLevelTimer;
 	Sunlight* mSunlight;
+	float mCameraAngle;
 	TransformationF mCameraTransform;
 	bool mLevelCompleted;
 	UiTbc::Button* mPauseButton;

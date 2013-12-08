@@ -36,7 +36,6 @@ public:
 	virtual ~Bound();
 	virtual void Init();
 	virtual bool MainLoop();
-	virtual bool Tick();
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -109,13 +108,10 @@ void Bound::Init()
 	int lScale = [[UIScreen mainScreen] scale];
 	const int lDisplayWidth = lSize.height * lScale;
 	const int lDisplayHeight = lSize.width * lScale;
-#elif defined(EMULATE_TOUCH)
-	const int lDisplayWidth = 1024;
-	const int lDisplayHeight = 768;
 #else // Computer L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
-#endif // Touch / Emulated / Computer L&F
+#endif // Touch / Computer L&F
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
@@ -126,7 +122,7 @@ void Bound::Init()
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
@@ -139,26 +135,21 @@ void Bound::Init()
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, false);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 20.0);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 3.0);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 200.0);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.5);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 20.0);
 	//CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:Volumes"));
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.0);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.0);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.0);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.3);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.3);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.3);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.1);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_MUSICVOLUME, 0.6);
 
-#if !defined(LEPRA_TOUCH) && !defined(EMULATE_TOUCH)
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, true);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
-	//CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	//CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:VolumesAndMaps"));
-#endif // Computer
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_CTRL_EMULATETOUCH, true);
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
@@ -166,7 +157,7 @@ void Bound::Init()
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 4.0);
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 4.0);
 
-	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
+	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), &mDragManager);
 
 	Parent::Init();
 }
@@ -180,21 +171,6 @@ bool Bound::MainLoop()
 	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
 	return true;
 #endif // !iOS/iOS
-}
-
-bool Bound::Tick()
-{
-	HiResTimer::StepCounterShadow();
-
-#if defined(EMULATE_TOUCH)
-	mDragManager.UpdateDragByMouse(mUiManager->GetInputManager());
-#elif defined(LEPRA_TOUCH)
-	mDragManager.UpdateMouseByDrag(mUiManager->GetInputManager());
-#endif // Touch
-	mDragManager.UpdateTouchsticks(mUiManager->GetInputManager());
-	mDragManager.DropReleasedDrags();
-
-	return Parent::Tick();
 }
 
 

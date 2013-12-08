@@ -287,7 +287,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.7);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
 
-	mUiManager = new UiCure::GameUiManager(mVariableScope);
+	mUiManager = new UiCure::GameUiManager(mVariableScope, &mDragManager);
 	bool lOk = mUiManager->OpenDraw();
 	if (lOk)
 	{

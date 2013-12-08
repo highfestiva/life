@@ -39,7 +39,8 @@ bool Drag::Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress
 
 
 
-DragManager::DragManager()
+DragManager::DragManager():
+	mLastPressed(false)
 {
 }
 
@@ -52,7 +53,10 @@ void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLoc
 	DragList::iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
-		i->Update(pPrevious, pLocation, pIsPressed);
+		if (i->Update(pPrevious, pLocation, pIsPressed))
+		{
+			return;
+		}
 	}
 	mDragList.push_back(Drag(pLocation.x, pLocation.y, pIsPressed));
 }
@@ -62,8 +66,12 @@ void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
 	PixelCoord lMouse;
 	pInputManager->GetMousePosition(lMouse.x, lMouse.y);
 	bool lIsPressed = pInputManager->GetMouse()->GetButton(0)->GetBooleanValue();
-	UpdateDrag(mLastMouse, lMouse, lIsPressed);
+	if (lIsPressed || mLastPressed)
+	{
+		UpdateDrag(mLastMouse, lMouse, lIsPressed);
+	}
 	mLastMouse = lMouse;
+	mLastPressed = lIsPressed;
 }
 
 void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
@@ -111,6 +119,11 @@ void DragManager::DropReleasedDrags()
 			++i;
 		}
 	}
+}
+
+const DragManager::DragList& DragManager::GetDragList() const
+{
+	return mDragList;
 }
 
 

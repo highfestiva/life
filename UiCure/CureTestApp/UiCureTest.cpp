@@ -192,7 +192,7 @@ public:
 
 ResourceTest::ResourceTest()
 {
-	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
+	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), 0);
 	mUiManager->Open();
 	mResourceManager = new Cure::ResourceManager(1);
 	mResourceManager->InitDefault();

@@ -282,13 +282,10 @@ bool OpenGLMatVertexColorSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 	return Parent::AddGeometry(pGeometry);
 }
 
-void OpenGLMatVertexColorSolid::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
+void OpenGLMatVertexColorSolid::PreRender()
 {
-	// This is the only state we need to activate, since the other ones
-	// were activated by OpenGLMatSingleColorSolid.
+	Parent::PreRender();
 	::glEnableClientState(GL_COLOR_ARRAY);
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
-	::glDisableClientState(GL_COLOR_ARRAY);
 }
 
 void OpenGLMatVertexColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
@@ -348,13 +345,10 @@ void OpenGLMatVertexColorBlended::RenderAllGeometry(unsigned pCurrentFrame, cons
 	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
 }
 
-void OpenGLMatVertexColorBlended::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
+void OpenGLMatVertexColorBlended::PreRender()
 {
-	// This is the only state we need to activate, since the other ones
-	// were activated by previous materials.
-	glEnableClientState(GL_COLOR_ARRAY);
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
-	glDisableClientState(GL_COLOR_ARRAY);
+	Parent::PreRender();
+	::glEnable(GL_BLEND);
 }
 
 
@@ -524,11 +518,6 @@ void OpenGLMatSingleTextureBlended::RenderAllGeometry(unsigned pCurrentFrame, co
 	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
 }
 
-void OpenGLMatSingleTextureBlended::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
-}
-
 void OpenGLMatSingleTextureBlended::PreRender()
 {
 	Parent::PreRender();
@@ -543,10 +532,15 @@ void OpenGLMatSingleTextureBlended::PostRender()
 
 
 
-void OpenGLMatSingleTextureAlphaTested::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
+void OpenGLMatSingleTextureAlphaTested::PreRender()
 {
+	Parent::PreRender();
 	glEnable(GL_ALPHA_TEST);
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+}
+
+void OpenGLMatSingleTextureAlphaTested::PostRender()
+{
+	Parent::PostRender();
 	glDisable(GL_ALPHA_TEST);
 }
 
