@@ -41,8 +41,8 @@ class MasterServerConnection;
 
 class GameClientSlaveManager: public Cure::GameManager, public InputObserver, public ScreenPart
 {
-	typedef Cure::GameManager Parent;
 public:
+	typedef Cure::GameManager Parent;
 	GameClientSlaveManager(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);

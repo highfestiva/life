@@ -1267,6 +1267,7 @@ unsigned OpenGLRenderer::RenderScene()
 			if (GetMaterial((MaterialType)i) != 0)
 			{
 				Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial((MaterialType)i));
+                OGL_ASSERT();
 			}
 		}
 

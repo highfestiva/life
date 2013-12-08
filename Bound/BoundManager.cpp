@@ -43,7 +43,8 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	mCameraAngle(0),
 	mCameraTransform(QuaternionF(), Vector3DF(0, -6.5, 0)),
 	mLevelCompleted(false),
-	mPauseButton(0)
+	mPauseButton(0),
+	mIsCutting(false)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
@@ -145,8 +146,9 @@ void BoundManager::SetFade(float pFadeAmount)
 
 bool BoundManager::Render()
 {
-	mSunlight->Tick();
+	mSunlight->Tick(mCameraTransform.GetOrientation());
 
+	mUiManager->GetPainter()->PrePaint(false);
 	mUiManager->GetPainter()->ResetClippingRect();
 	mUiManager->GetRenderer()->SetDepthWriteEnabled(false);
 	mUiManager->GetRenderer()->SetDepthTestEnabled(false);
@@ -177,14 +179,15 @@ bool BoundManager::Paint()
 	const int h = mUiManager->GetCanvas()->GetHeight();
 	const float lTouchSideScale = 1.28f;	// Inches.
 	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	const int m = (int)(lTouchScale * w * 0.5f);
+	const int m = (int)(lTouchScale * w * 0.25f);
 	mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
 	mUiManager->GetPainter()->DrawLine(m*3, m, w-m*3, m);
 	mUiManager->GetPainter()->DrawLine(m, m*3, m, h-m*3);
 	mUiManager->GetPainter()->DrawLine(m*3, h-m, w-m*3, h-m);
 	mUiManager->GetPainter()->DrawLine(w-m, m*3, w-m, h-m*3);
 
-	const int r = m;
+	mIsCutting = false;
+	const int r = m-2;
 	const int d = r*2;
 	typedef UiLepra::Touch::DragManager::DragList DragList;
 	const DragList lDragList = mUiManager->GetDragManager()->GetDragList();
@@ -195,6 +198,7 @@ bool BoundManager::Paint()
 		{
 			continue;
 		}
+		mIsCutting = true;
 		mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
 		mUiManager->GetPainter()->DrawArc(lFrom.x-r, lFrom.y-r, d, d, 0, 360, false);
 
@@ -356,7 +360,7 @@ bool BoundManager::InitializeUniverse()
 	const Vector3DF v;
 	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
 
-	Level* lLevel = (Level*)Parent::CreateContextObject("level", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	Level* lLevel = (Level*)Parent::CreateContextObject(_T("level"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	int lLevelIndex;
 	CURE_RTVAR_GET(lLevelIndex, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	lLevel->GenerateLevel(GetPhysicsManager(), lLevelIndex);
@@ -398,7 +402,7 @@ void BoundManager::SetLocalRender(bool pRender)
 
 void BoundManager::CreateBall(int pIndex)
 {
-	Cure::ContextObject* lBall = Parent::CreateContextObject("soccerball", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	Cure::ContextObject* lBall = Parent::CreateContextObject(_T("soccerball"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	int x = pIndex%3;
 	int y = pIndex/3%3;
 	int z = pIndex/9%3;
@@ -559,7 +563,7 @@ void BoundManager::HandleWorldBoundaries()
 
 void BoundManager::MoveCamera(float pFrameTime)
 {
-	if (!mUiManager->GetDragManager()->GetDragList().empty())
+	if (mIsCutting)
 	{
 		return;
 	}

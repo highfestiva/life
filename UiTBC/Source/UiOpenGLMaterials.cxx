@@ -298,6 +298,7 @@ void OpenGLMatVertexColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 void OpenGLMatVertexColorSolid::RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex)
 {
 	(void)pUVSetIndex;
+	OGL_ASSERT();
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
@@ -338,6 +339,7 @@ void OpenGLMatVertexColorSolid::RawRender(TBC::GeometryBase* pGeometry, int pUVS
 			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
+	OGL_ASSERT();
 }
 
 void OpenGLMatVertexColorBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)

@@ -271,7 +271,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			lT->mChecked = false;
 
 			// Light position is now treated as a direction instead.
-			lT->mIsFrontFacing = (lLightPos.Dot(lSurfaceNormalData[0], lSurfaceNormalData[1], lSurfaceNormalData[2]) <= 0);
+			lT->mIsFrontFacing = (lLightPos.Dot(lSurfaceNormalData[0], lSurfaceNormalData[1], lSurfaceNormalData[2]) < -1e-8f);
 			lSurfaceNormalData += 3;
 		}
 

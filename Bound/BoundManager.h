@@ -107,6 +107,7 @@ protected:
 	TransformationF mCameraTransform;
 	bool mLevelCompleted;
 	UiTbc::Button* mPauseButton;
+    bool mIsCutting;
 	LOG_CLASS_DECLARE();
 };
 

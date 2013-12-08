@@ -1467,7 +1467,8 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 
 	if (lShadowsUpdated == true)
 	{
-		lGeometry->mLastFrameShadowsUpdated = mCurrentFrame + Random::GetRandomNumber() % (mShadowUpdateFrameDelay / 3);
+		const int q = (mShadowUpdateFrameDelay > 3)? mShadowUpdateFrameDelay / 3 : 1;
+		lGeometry->mLastFrameShadowsUpdated = mCurrentFrame + Random::GetRandomNumber() % q;
 		return pGeometry->GetTriangleCount() * lActiveLightCount;
 	}
 	return 0;

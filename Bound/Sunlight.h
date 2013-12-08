@@ -29,11 +29,12 @@ class Sunlight
 public:
 	Sunlight(UiCure::GameUiManager* pUiManager);
 	virtual ~Sunlight();
-	void Tick();
+	void Tick(const QuaternionF& pCameraOrientation);
 
 private:
 	UiCure::GameUiManager* mUiManager;
 	UiTbc::Renderer::LightID mLightId;
+    Vector3DF mLightAverageDirection;
 };
 
 

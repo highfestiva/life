@@ -41,12 +41,18 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 	lLevelMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0.5f,0.5f,0.5f);
 	lLevelMesh->GetBasicMaterialSettings().mShininess	= false;
 	lLevelMesh->GetBasicMaterialSettings().mSmooth		= false;
-	mUiManager->GetRenderer()->AddGeometry(lLevelMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::CAST_SHADOWS);
+	mUiManager->GetRenderer()->AddGeometry(lLevelMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
 
 	const float lFriction = 0.7f;
 	const float lBounce = 1.0f;
+	const int ic = lLevelMesh->GetIndexCount();
+	uint32* lIndexData = new uint32[ic];
+	for (int x = 0; x < ic; ++x)
+	{
+		lIndexData[x] = lLevelMesh->GetIndexData()[x];
+	}
 	pPhysicsManager->CreateTriMesh(true, lLevelMesh->GetVertexCount(), lLevelMesh->GetVertexData(),
-		lLevelMesh->GetTriangleCount(), lLevelMesh->GetIndexData(),
+		lLevelMesh->GetTriangleCount(), lIndexData,
 		TransformationF(), lFriction, lBounce, GetInstanceId());
 }
 
@@ -67,16 +73,17 @@ void Level::GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh)
 	Color lColors[] = { RED, GREEN, MAGENTA, BLUE, YELLOW, DARK_GRAY, };
 	const int lColorCount = LEPRA_ARRAY_COUNT(lColors);
 	const int vc = pMesh->GetVertexCount();
-	uint8* lColorData = new uint8[vc*3];
+	uint8* lColorData = new uint8[vc*4];
 	for (int x = 0; x < vc; ++x)
 	{
 		const int c = x / 4 % lColorCount;
 		Color& lColor = lColors[c];
-		lColorData[x*3+0] = lColor.mRed;
-		lColorData[x*3+1] = lColor.mGreen;
-		lColorData[x*3+2] = lColor.mBlue;
+		lColorData[x*4+0] = lColor.mRed;
+		lColorData[x*4+1] = lColor.mGreen;
+		lColorData[x*4+2] = lColor.mBlue;
+		lColorData[x*4+3] = 255;
 	}
-	pMesh->SetColorData(lColorData, TBC::GeometryBase::COLOR_RGB);
+	pMesh->SetColorData(lColorData, TBC::GeometryBase::COLOR_RGBA);
 	delete lColorData;
 }
 
