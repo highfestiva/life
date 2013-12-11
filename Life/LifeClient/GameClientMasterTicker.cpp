@@ -239,8 +239,6 @@ bool GameClientMasterTicker::Tick()
 		CURE_RTVAR_GET(b, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.85);
 		Vector3DF lColor(r, g, b);
 		BeginRender(lColor);
-
-		mUiManager->InputTick();
 	}
 
 	if (mServer)
@@ -341,6 +339,9 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	PreWaitPhysicsTick();
+
+	mUiManager->InputTick();
+
 	WaitPhysicsTick();
 
 	if (mServer)

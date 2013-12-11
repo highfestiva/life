@@ -41,6 +41,7 @@
 		B13DA5FB173EDB9800A73400 /* Projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5F9173EDB9800A73400 /* Projectile.cpp */; };
 		B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA600173EDBD200A73400 /* Spawner.cpp */; };
 		B13DA607173EDBF400A73400 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA606173EDBF400A73400 /* Level.cpp */; };
+		B14108061859215C005F84F1 /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B14108051859215C005F84F1 /* Plane.cpp */; };
 		B153FDC4181DF12B002D3C5D /* Icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B153FDC3181DF12B002D3C5D /* Icon-72@2x.png */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
@@ -555,6 +556,7 @@
 		B13DA5F9173EDB9800A73400 /* Projectile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Projectile.cpp; path = ../../Life/LifeClient/Projectile.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA600173EDBD200A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Cure/Source/Spawner.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA606173EDBF400A73400 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Level.cpp; path = ../../Life/LifeClient/Level.cpp; sourceTree = SOURCE_ROOT; };
+		B14108051859215C005F84F1 /* Plane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plane.cpp; sourceTree = "<group>"; };
 		B153FDC3181DF12B002D3C5D /* Icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72@2x.png"; path = "../Icons/Icon-72@2x.png"; sourceTree = SOURCE_ROOT; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
@@ -1559,6 +1561,7 @@
 		B19A14CC13A124940051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B14108051859215C005F84F1 /* Plane.cpp */,
 				B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */,
 				B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */,
 				B1DAC7E314F1D97700B285C5 /* JsonString.cpp */,
@@ -2413,6 +2416,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Pixel Doctrine";
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
@@ -2898,6 +2902,7 @@
 				B1D37EEB166AB32700536CE5 /* RaceScore.cpp in Sources */,
 				B1D37EF8166AB37000536CE5 /* ClientConsoleManager.cpp in Sources */,
 				B1D37EF9166AB37000536CE5 /* ClientOptionsManager.cpp in Sources */,
+				B14108061859215C005F84F1 /* Plane.cpp in Sources */,
 				B1D37EFA166AB37000536CE5 /* GameClientMasterTicker.cpp in Sources */,
 				B1D37EFB166AB37000536CE5 /* GameClientSlaveManager.cpp in Sources */,
 				B1D37EFC166AB37000536CE5 /* MassObject.cpp in Sources */,
@@ -3056,11 +3061,11 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -3070,7 +3075,6 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
