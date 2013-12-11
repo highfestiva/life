@@ -304,9 +304,9 @@ public:
 	BoneAnimator* GetUVAnimator();
 	const TransformationF& GetUVTransform();
 
-	void SetSurfaceNormalData(float* pSurfaceNormalData);
-	void SetVertexNormalData(float* pVertexNormalData, unsigned int pNumVertices);
-	void SetTangentAndBitangentData(float* pTangentData, float* pBitangentData, unsigned int pNumVertices);
+	void SetSurfaceNormalData(const float* pSurfaceNormalData);
+	void SetVertexNormalData(const float* pVertexNormalData, unsigned int pNumVertices);
+	void SetTangentAndBitangentData(const float* pTangentData, const float* pBitangentData, unsigned int pNumVertices);
 
 	void Copy(GeometryBase* pGeometry);
 	void ClearAll();

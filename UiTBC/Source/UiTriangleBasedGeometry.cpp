@@ -52,12 +52,12 @@ TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& pGeome
 	Copy(pGeometry);
 }
 
-TriangleBasedGeometry::TriangleBasedGeometry(Vector3DF* pVertices,
-                                             Vector3DF* pVertexNormals,
-                                             Vector2D<float>* pUV,
-                                             Color* pColor,
+TriangleBasedGeometry::TriangleBasedGeometry(const Vector3DF* pVertices,
+                                             const Vector3DF* pVertexNormals,
+                                             const Vector2D<float>* pUV,
+                                             const Color* pColor,
                                              ColorFormat pColorFormat,
-                                             uint32* pIndices,
+                                             const uint32* pIndices,
                                              unsigned int pVertexCount,
                                              unsigned int pIndexCount,
 					     TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -90,12 +90,12 @@ TriangleBasedGeometry::TriangleBasedGeometry(Vector3DF* pVertices,
 		pGeomType);
 }
 
-TriangleBasedGeometry::TriangleBasedGeometry(float* pVertexData,
-                                             float* pVertexNormals,
-                                             float* pUVData,
-                                             uint8* pColorData,
+TriangleBasedGeometry::TriangleBasedGeometry(const float* pVertexData,
+                                             const float* pVertexNormals,
+                                             const float* pUVData,
+                                             const uint8* pColorData,
                                              ColorFormat pColorFormat,
-                                             uint32* pIndices,
+                                             const uint32* pIndices,
                                              unsigned int pVertexCount,
                                              unsigned int pIndexCount,
 					     TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -128,12 +128,12 @@ TriangleBasedGeometry::TriangleBasedGeometry(float* pVertexData,
 		pGeomType);
 }
 
-void TriangleBasedGeometry::Set(Vector3DF* pVertices,
-                                Vector3DF* pVertexNormals,
-                                Vector2D<float>* pUV,
-                                Color* pColor,
+void TriangleBasedGeometry::Set(const Vector3DF* pVertices,
+                                const Vector3DF* pVertexNormals,
+                                const Vector2D<float>* pUV,
+                                const Color* pColor,
                                 ColorFormat pColorFormat,
-                                uint32* pIndices,
+                                const uint32* pIndices,
                                 unsigned int pVertexCount,
                                 unsigned int pIndexCount,
 				TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -214,12 +214,12 @@ void TriangleBasedGeometry::Set(Vector3DF* pVertices,
 	TBC::GeometryBase::CalculateBoundingRadius();
 }
 
-void TriangleBasedGeometry::Set(float* pVertexData,
-                                float* pVertexNormals,
-                                float* pUVData,
-                                uint8* pColorData,
+void TriangleBasedGeometry::Set(const float* pVertexData,
+                                const float* pVertexNormals,
+                                const float* pUVData,
+                                const uint8* pColorData,
                                 ColorFormat pColorFormat,
-                                uint32* pIndices,
+                                const uint32* pIndices,
                                 unsigned int pVertexCount,
                                 unsigned int pIndexCount,
 				TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -434,6 +434,10 @@ void TriangleBasedGeometry::ClearAll()
 	mIndexCount = 0;
 
 	TBC::GeometryBase::ClearAll();
+	SetVertexDataChanged(true);
+	SetUVDataChanged(true);
+	SetColorDataChanged(true);
+	SetIndexDataChanged(true);
 }
 
 void TriangleBasedGeometry::SetPolygon(Vector3DF* pVertices, unsigned int pVertexCount)
@@ -453,7 +457,7 @@ void TriangleBasedGeometry::SetPolygon(Vector3DF* pVertices, unsigned int pVerte
 	TBC::GeometryBase::CalculateBoundingRadius();
 }
 
-int TriangleBasedGeometry::AddUVSet(float* pUVData)
+int TriangleBasedGeometry::AddUVSet(const float* pUVData)
 {
 	unsigned int lUVSetCount = mUVSetCount + 1;
 	float** lUVData = new float*[lUVSetCount];
@@ -493,7 +497,7 @@ int TriangleBasedGeometry::AddUVSet(float* pUVData)
 	return mUVSetCount - 1;
 }
 
-int TriangleBasedGeometry::AddUVSet(Vector2D<float>* pUVData)
+int TriangleBasedGeometry::AddUVSet(const Vector2D<float>* pUVData)
 {
 	unsigned int lUVSetCount = mUVSetCount + 1;
 	float** lUVData = new float*[lUVSetCount];
@@ -1230,7 +1234,7 @@ TBC::GeometryBase::GeometryVolatility TriangleBasedGeometry::GetGeometryVolatili
 void TriangleBasedGeometry::SetGeometryVolatility(TBC::GeometryBase::GeometryVolatility pVolatility)
 {
 	mGeometryVolatility = pVolatility;
-	deb_assert(mGeometryVolatility == GEOM_STATIC);
+	//deb_assert(mGeometryVolatility == GEOM_STATIC);
 }
 
 TriangleBasedGeometry::ColorFormat TriangleBasedGeometry::GetColorFormat() const

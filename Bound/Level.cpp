@@ -19,6 +19,10 @@ namespace Bound
 
 Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
+	mGfxMesh(0),
+	mGfxMeshId(0),
+	mPhysMeshBodyId(0),
+	mBodyIndexData(0),
 	mLevel(0)
 {
 }
@@ -33,30 +37,77 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 {
 	(void)pLevel;
 
-	UiTbc::TriangleBasedGeometry* lLevelMesh = UiTbc::BasicMeshCreator::CreateFlatBox(4.5f, 4.5f, 3, 1, 1, 1);
-	FlipTriangles(lLevelMesh);
-	GenerateVertexColors(lLevelMesh);
-	lLevelMesh->SetAlwaysVisible(true);
-	lLevelMesh->GetBasicMaterialSettings().mDiffuse		= Vector3DF(0.9f,0.85f,0.3f);
-	lLevelMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0.5f,0.5f,0.5f);
-	lLevelMesh->GetBasicMaterialSettings().mShininess	= false;
-	lLevelMesh->GetBasicMaterialSettings().mSmooth		= false;
-	mUiManager->GetRenderer()->AddGeometry(lLevelMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
+	mGfxMesh = CreateTriangleBox(4.5f, 4.5f, 3);
+	FlipTriangles(mGfxMesh);
+	GenerateVertexColors(mGfxMesh);
+	mGfxMesh->SetAlwaysVisible(true);
+	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(0.9f,0.85f,0.3f);
+	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0.5f,0.5f,0.5f);
+	mGfxMesh->GetBasicMaterialSettings().mShininess	= false;
+	mGfxMesh->GetBasicMaterialSettings().mSmooth	= false;
+	mGfxMesh->SetGeometryVolatility(TBC::GeometryBase::GEOM_SEMI_STATIC);
+	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
 
-	const float lFriction = 0.7f;
-	const float lBounce = 1.0f;
-	const int ic = lLevelMesh->GetIndexCount();
-	uint32* lIndexData = new uint32[ic];
-	for (int x = 0; x < ic; ++x)
+	CreatePhysicsMesh(pPhysicsManager);
+}
+
+const UiTbc::TriangleBasedGeometry* Level::GetMesh() const
+{
+	return mGfxMesh;
+}
+
+void Level::SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors)
+{
+	mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
+
+	std::vector<vtx_idx_t> ni;
+	const size_t vc = pVertices.size()/3;
+	for (size_t x = 0; x < vc; ++x)
 	{
-		lIndexData[x] = lLevelMesh->GetIndexData()[x];
+		ni.push_back(x);
 	}
-	pPhysicsManager->CreateTriMesh(true, lLevelMesh->GetVertexCount(), lLevelMesh->GetVertexData(),
-		lLevelMesh->GetTriangleCount(), lIndexData,
-		TransformationF(), lFriction, lBounce, GetInstanceId());
+
+	mGfxMesh->Set(&pVertices[0], 0, 0, &pColors[0], TBC::GeometryBase::COLOR_RGBA, &ni[0], vc, vc, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_SEMI_STATIC);
+	FlipTriangles(mGfxMesh);
+	mGfxMesh->SetAlwaysVisible(true);
+	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
+	CreatePhysicsMesh(pPhysicsManager);
 }
 
 
+
+UiTbc::TriangleBasedGeometry* Level::CreateTriangleBox(float x, float y, float z)
+{
+	// Create all triangles with unique vertices, we don't want triangles sharing
+	// vertices as that would complicate cutting.
+	x *= 0.5f;
+	y *= 0.5f;
+	z *= 0.5f;
+	Vector3DF v[] =
+	{
+		Vector3DF(-x, +y, +z), Vector3DF(+x, +y, +z), Vector3DF(-x, +y, -z),
+		Vector3DF(-x, +y, -z), Vector3DF(+x, +y, +z), Vector3DF(+x, +y, -z),
+		Vector3DF(+x, -y, +z), Vector3DF(-x, -y, +z), Vector3DF(+x, -y, -z),
+		Vector3DF(+x, -y, -z), Vector3DF(-x, -y, +z), Vector3DF(-x, -y, -z),
+
+		Vector3DF(-x, -y, +z), Vector3DF(-x, +y, +z), Vector3DF(-x, -y, -z),
+		Vector3DF(-x, -y, -z), Vector3DF(-x, +y, +z), Vector3DF(-x, +y, -z),
+		Vector3DF(+x, +y, +z), Vector3DF(+x, -y, +z), Vector3DF(+x, +y, -z),
+		Vector3DF(+x, +y, -z), Vector3DF(+x, -y, +z), Vector3DF(+x, -y, -z),
+
+		Vector3DF(-x, -y, +z), Vector3DF(+x, -y, +z), Vector3DF(-x, +y, +z),
+		Vector3DF(-x, +y, +z), Vector3DF(+x, -y, +z), Vector3DF(+x, +y, +z),
+		Vector3DF(-x, +y, -z), Vector3DF(+x, +y, -z), Vector3DF(-x, -y, -z),
+		Vector3DF(-x, -y, -z), Vector3DF(+x, +y, -z), Vector3DF(+x, -y, -z),
+	};
+	std::vector<vtx_idx_t> ni;
+	const size_t vc = LEPRA_ARRAY_COUNT(v);
+	for (size_t x = 0; x < vc; ++x)
+	{
+		ni.push_back(x);
+	}
+	return new UiTbc::TriangleBasedGeometry(&v[0], 0, 0, 0, TBC::GeometryBase::COLOR_RGBA, &ni[0], vc, vc, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_DYNAMIC);
+}
 
 void Level::FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh)
 {
@@ -76,7 +127,7 @@ void Level::GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh)
 	uint8* lColorData = new uint8[vc*4];
 	for (int x = 0; x < vc; ++x)
 	{
-		const int c = x / 4 % lColorCount;
+		const int c = x / 6 % lColorCount;
 		Color& lColor = lColors[c];
 		lColorData[x*4+0] = lColor.mRed;
 		lColorData[x*4+1] = lColor.mGreen;
@@ -85,6 +136,26 @@ void Level::GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh)
 	}
 	pMesh->SetColorData(lColorData, TBC::GeometryBase::COLOR_RGBA);
 	delete lColorData;
+}
+
+void Level::CreatePhysicsMesh(TBC::PhysicsManager* pPhysicsManager)
+{
+	if (mPhysMeshBodyId)
+	{
+		pPhysicsManager->DeleteBody(mPhysMeshBodyId);
+	}
+
+	const float lFriction = 0.7f;
+	const float lBounce = 1.0f;
+	const int ic = mGfxMesh->GetIndexCount();
+	delete[] mBodyIndexData;
+	mBodyIndexData = new uint32[ic];
+	for (int x = 0; x < ic; ++x)
+	{
+		mBodyIndexData[x] = mGfxMesh->GetIndexData()[x];
+	}
+	mPhysMeshBodyId = pPhysicsManager->CreateTriMesh(true, mGfxMesh->GetVertexCount(), mGfxMesh->GetVertexData(),
+		mGfxMesh->GetTriangleCount(), mBodyIndexData, TransformationF(), lFriction, lBounce, GetInstanceId());
 }
 
 

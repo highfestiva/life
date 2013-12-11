@@ -38,6 +38,7 @@ namespace Bound
 
 
 
+class Level;
 class Sunlight;
 
 
@@ -60,7 +61,15 @@ public:
 
 	virtual bool Render();
 	virtual bool Paint();
-	static bool AttachToBorder(PixelCoord& pPoint, int pMargin, int pWidth, int pHeight);
+
+	void HandleCutting(int m, int w, int h);
+	Vector3DF ScreenPlaneToPlane(PixelCoord& pMid, PixelCoord& pNormal, float& d);
+	void Cut(Vector3DF pNormal, float d);
+	void AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors);
+	int CheckIfPlaneSlicesBetweenBalls(const Vector3DF& pNormal, float d);
+	bool CheckBallsPlaneCollition(const Vector3DF& pNormal, float d);
+	void ExplodeBalls();
+	static bool AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int pWidth, int pHeight);
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
@@ -99,15 +108,19 @@ protected:
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
+	Level* mLevel;
+	std::vector<float> mCutVertices;
+	std::vector<uint8> mCutColors;
 	std::vector<Cure::GameObjectId> mBalls;
 	Life::Menu* mMenu;
 	StopWatch mNextLevelTimer;
 	Sunlight* mSunlight;
 	float mCameraAngle;
+	float mCameraRotateSpeed;
 	TransformationF mCameraTransform;
 	bool mLevelCompleted;
 	UiTbc::Button* mPauseButton;
-    bool mIsCutting;
+	bool mIsCutting;
 	LOG_CLASS_DECLARE();
 };
 

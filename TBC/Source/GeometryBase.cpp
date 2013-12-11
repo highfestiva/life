@@ -1058,7 +1058,7 @@ void GeometryBase::CalculateBoundingRadius()
 	SetFlag(BOUNDING_RADIUS_VALID);
 }
 
-void GeometryBase::SetSurfaceNormalData(float* pSurfaceNormalData)
+void GeometryBase::SetSurfaceNormalData(const float* pSurfaceNormalData)
 {
 	unsigned int lTriangleCount = GetTriangleCount();
 	AllocSurfaceNormalData();
@@ -1066,7 +1066,7 @@ void GeometryBase::SetSurfaceNormalData(float* pSurfaceNormalData)
 	SetFlag(SURFACE_NORMALS_VALID);
 }
 
-void GeometryBase::SetVertexNormalData(float* pVertexNormalData, unsigned int pVertexCount)
+void GeometryBase::SetVertexNormalData(const float* pVertexNormalData, unsigned int pVertexCount)
 {
 	if (CheckFlag(VERTEX_NORMALS_VALID) == false)
 	{
@@ -1079,7 +1079,7 @@ void GeometryBase::SetVertexNormalData(float* pVertexNormalData, unsigned int pV
 	SetFlag(VERTEX_NORMALS_VALID);
 }
 
-void GeometryBase::SetTangentAndBitangentData(float* pTangentData, float* pBitangentData, unsigned int pVertexCount)
+void GeometryBase::SetTangentAndBitangentData(const float* pTangentData, const float* pBitangentData, unsigned int pVertexCount)
 {
 	if (CheckFlag(TANGENTS_VALID) == false)
 	{

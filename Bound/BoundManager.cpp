@@ -15,6 +15,7 @@
 #include "../UiTBC/Include/GUI/UiFixedLayouter.h"
 #include "../UiTBC/Include/UiMaterial.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTBC/Include/UiTriangleBasedGeometry.h"
 #include "../Lepra/Include/Random.h"
 #include "../Life/LifeClient/UiConsole.h"
 #include "Ball.h"
@@ -24,7 +25,9 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define BG_COLOR Color(110, 110, 110, 160)
+#define BG_COLOR	Color(110, 110, 110, 160)
+#define CAM_DISTANCE	6.5f
+#define BALL_RADIUS	0.111f
 
 
 
@@ -38,10 +41,12 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
 	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mCollisionSoundManager(0),
+	mLevel(0),
 	mMenu(0),
 	mSunlight(0),
 	mCameraAngle(0),
-	mCameraTransform(QuaternionF(), Vector3DF(0, -6.5, 0)),
+	mCameraRotateSpeed(1.0f),
+	mCameraTransform(QuaternionF(), Vector3DF(0, -CAM_DISTANCE, 0)),
 	mLevelCompleted(false),
 	mPauseButton(0),
 	mIsCutting(false)
@@ -186,15 +191,21 @@ bool BoundManager::Paint()
 	mUiManager->GetPainter()->DrawLine(m*3, h-m, w-m*3, h-m);
 	mUiManager->GetPainter()->DrawLine(w-m, m*3, w-m, h-m*3);
 
+	HandleCutting(m, w, h);
+	return true;
+}
+
+void BoundManager::HandleCutting(int m, int w, int h)
+{
 	mIsCutting = false;
 	const int r = m-2;
 	const int d = r*2;
 	typedef UiLepra::Touch::DragManager::DragList DragList;
-	const DragList lDragList = mUiManager->GetDragManager()->GetDragList();
-	for (DragList::const_iterator x = lDragList.begin(); x != lDragList.end(); ++x)
+	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
+	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
 		PixelCoord lFrom = x->mStart;
-		if (!AttachToBorder(lFrom, m, w, h))
+		if (!AttachTouchToBorder(lFrom, m, w, h))
 		{
 			continue;
 		}
@@ -203,7 +214,7 @@ bool BoundManager::Paint()
 		mUiManager->GetPainter()->DrawArc(lFrom.x-r, lFrom.y-r, d, d, 0, 360, false);
 
 		PixelCoord lTo = x->mLast;
-		bool lDidFindTargetBorder = AttachToBorder(lTo, m, w, h);
+		bool lDidFindTargetBorder = AttachTouchToBorder(lTo, m, w, h);
 		mUiManager->GetPainter()->SetColor(Color(30,140,20), 0);
 		mUiManager->GetPainter()->DrawArc(lTo.x-r, lTo.y-r, d, d, 0, 360, false);
 
@@ -213,11 +224,238 @@ bool BoundManager::Paint()
 			mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
 		}
 		mUiManager->GetPainter()->DrawLine(lFrom.x, lFrom.y, lTo.x, lTo.y);
+
+		// The plane goes through the camera and the projected midpoint of the line.
+		PixelCoord lScreenMid((lFrom.x+lTo.x)/2, (lFrom.y+lTo.y)/2);
+		PixelCoord lScreenNormal(lFrom.y-lTo.y, lFrom.x-lTo.x);
+		float d;
+		Vector3DF lNormal = ScreenPlaneToPlane(lScreenMid, lScreenNormal, d);
+
+		if (lNormal.GetLengthSquared() > 0 && CheckBallsPlaneCollition(lNormal, d))
+		{
+			// Set to middle of screen = invalidate swipe.
+			x->mStart.x = w/2;
+			x->mStart.y = h/2;
+		}
+		else if (lDidFindTargetBorder && !x->mIsPress)
+		{
+			Cut(lNormal, d);
+			mCameraRotateSpeed = (lScreenMid.x < (int)w/2)? +1.0f : -1.0f;
+		}
 	}
-	return true;
 }
 
-bool BoundManager::AttachToBorder(PixelCoord& pPoint, int pMargin, int w, int h)
+Vector3DF BoundManager::ScreenPlaneToPlane(PixelCoord& pMid, PixelCoord& pNormal, float& d)
+{
+	float w2 = mUiManager->GetCanvas()->GetWidth()*0.5f;
+	float h2 = mUiManager->GetCanvas()->GetHeight()*0.5f;
+	float lFOV, lNear, lFar;
+	mUiManager->GetRenderer()->GetViewFrustum(lFOV, lNear, lFar);
+	lFOV = Math::Deg2Rad(lFOV);
+	const float lAspect = h2/w2;
+	float dx = tan(lFOV*0.5f) * (pMid.x/w2-1.0f);
+	float dy = tan(lFOV*0.5f) * (1.0f-pMid.y/h2) * lAspect;
+	Vector3DF lDirectionToPlaneCenter(dx*CAM_DISTANCE, CAM_DISTANCE, dy*CAM_DISTANCE);
+	Vector3DF lBadNormal((float)pNormal.x, 0, (float)pNormal.y);
+	Vector3DF lTangent = lDirectionToPlaneCenter.Cross(lBadNormal);
+	Vector3DF lNormal = lTangent.Cross(lDirectionToPlaneCenter);
+	lNormal.Normalize();
+	lNormal = mCameraTransform.GetOrientation() * lNormal;
+	d = lNormal*mCameraTransform.GetPosition();
+	return lNormal;
+}
+
+void BoundManager::Cut(Vector3DF pNormal, float d)
+{
+	/*{
+		// Debug render plane.
+		Vector3DF lDir = pPosition - mCameraTransform.GetPosition();
+		Vector3DF lTangent = lDir.Cross(pNormal);
+		lTangent.Normalize(3.0f);
+		Vector3DF lBitangent = lDir.GetNormalized(3.0f);
+		Vector3DF v[4];
+		v[0] = pPosition + -lBitangent + -lTangent;
+		v[1] = pPosition +  lBitangent + -lTangent;
+		v[2] = pPosition +  lBitangent +  lTangent;
+		v[3] = pPosition + -lBitangent +  lTangent;
+		uint32 lIndices[] = { 0, 1, 3, 2 };
+		UiTbc::TriangleBasedGeometry* lCutPlane = new UiTbc::TriangleBasedGeometry(v, 0, 0, 0, UiTbc::TriangleBasedGeometry::COLOR_RGBA, lIndices,
+			4, 4, TBC::GeometryBase::TRIANGLE_STRIP, TBC::GeometryBase::GEOM_STATIC);
+		lCutPlane->SetAlwaysVisible(true);
+		mUiManager->GetRenderer()->AddGeometry(lCutPlane, UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED, UiTbc::Renderer::FORCE_NO_SHADOWS);
+	}*/
+
+	const int lSide = CheckIfPlaneSlicesBetweenBalls(pNormal, d);
+	if (lSide == 0)	// 0 == Both sides.
+	{
+		ExplodeBalls();
+		return;
+	}
+	if (lSide < 0)
+	{
+		pNormal = -pNormal;
+		d = -d;
+	}
+	// Plane normal now "points" toward vertices that says. Those on the other side gets cut off. The new triangles will use this normal.
+	const QuaternionF q = mCameraTransform.GetOrientation();
+	const int tc = mLevel->GetMesh()->GetVertexCount() / 3;
+	const float* v = mLevel->GetMesh()->GetVertexData();
+	const uint8* c = mLevel->GetMesh()->GetColorData();
+	mCutVertices.reserve(tc*2*3*3);
+	mCutColors.reserve(tc*2*3*4);
+	mCutVertices.clear();
+	mCutColors.clear();
+	std::vector<Vector3DF> lNGon;
+	for (int x = 0; x < tc; ++x)
+	{
+		Vector3DF p0(v[x*9+0], v[x*9+1], v[x*9+2]);
+		Vector3DF p1(v[x*9+3], v[x*9+4], v[x*9+5]);
+		Vector3DF p2(v[x*9+6], v[x*9+7], v[x*9+8]);
+		const float d0 = pNormal*p0-d;
+		const float d1 = pNormal*p1-d;
+		const float d2 = pNormal*p2-d;
+		if (d0 >= 0 && d1 >= 0 && d2 >= 0)
+		{
+			// All vertices on staying side of mesh. No cut, only copy.
+			mCutVertices.insert(mCutVertices.end(), &v[x*9], &v[x*9+9]);
+			mCutColors.insert(mCutColors.end(), &c[x*12], &c[x*12+12]);
+		}
+		else if (d0 <= 0 && d1 <= 0 && d2 <= 0)
+		{
+			// The whole triangle got cut off - way to go! No cut, only discard.
+		}
+		else
+		{
+			// Go ahead and cut. Ends up with either a triangle (single point on the positive side), or
+			// a quad (two points on the positive side). Quad is cut along pseudo-shortest diagonal.
+			Vector3DF d01 = p1-p0;
+			Vector3DF d12 = p2-p1;
+			Vector3DF d20 = p0-p2;
+			if (d0 > 0 && d1 > 0)
+			{
+				// Quad cut.
+				const float t3 = -d1 / (pNormal*d12);
+				const float t4 = -d0 / (pNormal*d20);
+				Vector3DF p3 = p1+t3*d12;
+				Vector3DF p4 = p0+t4*d20;
+				AddTriangle(p0, p1, p3, &c[x*12]);
+				AddTriangle(p0, p3, p4, &c[x*12]);
+			}
+			else if (d1 > 0 && d2 > 0)
+			{
+				// Quad cut.
+				const float t3 = -d2 / (pNormal*d20);
+				const float t4 = -d1 / (pNormal*d01);
+				Vector3DF p3 = p2+t3*d20;
+				Vector3DF p4 = p1+t4*d01;
+				AddTriangle(p1, p2, p3, &c[x*12]);
+				AddTriangle(p1, p3, p4, &c[x*12]);
+			}
+			else if (d0 > 0 && d2 > 0)
+			{
+				// Quad cut.
+				const float t3 = -d0 / (pNormal*d01);
+				const float t4 = -d2 / (pNormal*d12);
+				Vector3DF p3 = p0+t3*d01;
+				Vector3DF p4 = p2+t4*d12;
+				AddTriangle(p2, p0, p3, &c[x*12]);
+				AddTriangle(p2, p3, p4, &c[x*12]);
+			}
+			else if (d0 > 0)
+			{
+				// Triangle cut.
+				const float t3 = -d0 / (pNormal*d01);
+				const float t4 = -d0 / (pNormal*d20);
+				Vector3DF p3 = p0+t3*d01;
+				Vector3DF p4 = p0+t4*d20;
+				AddTriangle(p0, p3, p4, &c[x*12]);
+			}
+			else if (d1 > 0)
+			{
+				// Triangle cut.
+				const float t3 = -d1 / (pNormal*d12);
+				const float t4 = -d1 / (pNormal*d01);
+				Vector3DF p3 = p1+t3*d12;
+				Vector3DF p4 = p1+t4*d01;
+				AddTriangle(p1, p3, p4, &c[x*12]);
+			}
+			else
+			{
+				// Triangle cut.
+				const float t3 = -d2 / (pNormal*d20);
+				const float t4 = -d2 / (pNormal*d12);
+				Vector3DF p3 = p2+t3*d20;
+				Vector3DF p4 = p2+t4*d12;
+				AddTriangle(p2, p3, p4, &c[x*12]);
+			}
+
+			// Add points to N-gon. Note that there will always be a pair of identical twin vertices per
+			// each edge (second vertex rocketed into cyberspace).
+			lNGon.push_back(p0);
+		}
+	}
+}
+
+void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors)
+{
+	mCutVertices.push_back(v0.x); mCutVertices.push_back(v0.y); mCutVertices.push_back(v0.z);
+	mCutVertices.push_back(v1.x); mCutVertices.push_back(v1.y); mCutVertices.push_back(v1.z);
+	mCutVertices.push_back(v2.x); mCutVertices.push_back(v2.y); mCutVertices.push_back(v2.z);
+	mCutColors.insert(mCutColors.end(), pColors, pColors+12);
+}
+
+int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Vector3DF& pNormal, float d)
+{
+	int lSide = 0;
+	std::vector<Cure::GameObjectId>::iterator x;
+	for (x = mBalls.begin(); x != mBalls.end(); ++x)
+	{
+		Cure::ContextObject* lBall = GetContext()->GetObject(*x);
+		if (!lBall)
+		{
+			continue;
+		}
+		Vector3DF p = lBall->GetRootPosition();
+		const float D = pNormal*p-d;
+		int s = (D < 0)? -1 : +1;
+		if (lSide == 0)
+		{
+			lSide = s;
+		}
+		else if ((s<0) != (lSide<0))
+		{
+			return 0;
+		}
+	}
+	return lSide;
+}
+
+bool BoundManager::CheckBallsPlaneCollition(const Vector3DF& pNormal, float d)
+{
+	std::vector<Cure::GameObjectId>::iterator x;
+	for (x = mBalls.begin(); x != mBalls.end(); ++x)
+	{
+		Cure::ContextObject* lBall = GetContext()->GetObject(*x);
+		if (!lBall)
+		{
+			continue;
+		}
+		Vector3DF p = lBall->GetRootPosition();
+		const float l = std::abs(pNormal*p-d);
+		if (l < BALL_RADIUS)
+		{
+			TODO: check plane extends in the end we're dragging!
+			return true;
+		}
+	}
+	return false;
+}
+
+void BoundManager::ExplodeBalls()
+{
+}
+
+bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, int h)
 {
 	int dt = std::abs(pPoint.y - pMargin);
 	int dl = std::abs(pPoint.x - pMargin);
@@ -360,10 +598,10 @@ bool BoundManager::InitializeUniverse()
 	const Vector3DF v;
 	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
 
-	Level* lLevel = (Level*)Parent::CreateContextObject(_T("level"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(_T("level"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	int lLevelIndex;
 	CURE_RTVAR_GET(lLevelIndex, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-	lLevel->GenerateLevel(GetPhysicsManager(), lLevelIndex);
+	mLevel->GenerateLevel(GetPhysicsManager(), lLevelIndex);
 	for (int x = 0; x < 4; ++x)
 	{
 		CreateBall(x);
@@ -504,6 +742,23 @@ void BoundManager::ScriptPhysicsTick()
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	if (lPhysicsTime > 1e-5)
 	{
+		if (!mCutVertices.empty())
+		{
+			mLevel->SetTriangles(GetPhysicsManager(), mCutVertices, mCutColors);
+			mCutVertices.clear();
+			mCutColors.clear();
+		}
+		std::vector<Cure::GameObjectId>::iterator x;
+		for (x = mBalls.begin(); x != mBalls.end(); ++x)
+		{
+			Cure::ContextObject* lBall = GetContext()->GetObject(*x);
+			if (!lBall)
+			{
+				continue;
+			}
+			Vector3DF p = lBall->GetPosition();
+			lBall->SetInitialTransform(TransformationF(QuaternionF(), p));
+		}
 		MoveCamera(lPhysicsTime);
 		UpdateCameraPosition(false);
 	}
@@ -568,13 +823,13 @@ void BoundManager::MoveCamera(float pFrameTime)
 		return;
 	}
 
-	mCameraAngle += 0.1f*pFrameTime;
+	mCameraAngle += 0.1f*mCameraRotateSpeed*pFrameTime;
 	if (mCameraAngle > 2*PIF)
 	{
 		mCameraAngle -= 2*PIF;
 	}
 	QuaternionF q(0, Vector3DF(0,1,0));
-	Vector3DF p(0,-6.5,0);
+	Vector3DF p(0,-CAM_DISTANCE,0);
 	mCameraTransform = TransformationF(q, p);
 	mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(0,0,1), mCameraAngle);
 	mCameraTransform.RotatePitch(-sin(mCameraAngle)*0.2f);

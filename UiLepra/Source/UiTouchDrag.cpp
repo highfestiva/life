@@ -121,7 +121,7 @@ void DragManager::DropReleasedDrags()
 	}
 }
 
-const DragManager::DragList& DragManager::GetDragList() const
+DragManager::DragList& DragManager::GetDragList()
 {
 	return mDragList;
 }

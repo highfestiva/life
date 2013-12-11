@@ -28,23 +28,23 @@ public:
 	TriangleBasedGeometry();
 	TriangleBasedGeometry(const TriangleBasedGeometry& pGeometry);
 
-	TriangleBasedGeometry(Vector3DF* pVertices,      // Must containt pVertexCount elements.
-			      Vector3DF* pVertexNormals, // NULL or must contain pVertexCount elements.
-			      Vector2D<float>* pUV,      // NULL or must contain pVertexCount elements.
-			      Color* pColor,             // NULL or must contain pVertexCount elements.
+	TriangleBasedGeometry(const Vector3DF* pVertices,      // Must containt pVertexCount elements.
+			      const Vector3DF* pVertexNormals, // NULL or must contain pVertexCount elements.
+			      const Vector2D<float>* pUV,      // NULL or must contain pVertexCount elements.
+			      const Color* pColor,             // NULL or must contain pVertexCount elements.
 			      ColorFormat pColorFormat,
-			      Lepra::uint32* pIndices,
+			      const Lepra::uint32* pIndices,
 			      unsigned int pVertexCount,
 			      unsigned int pIndexCount,
 			      TBC::GeometryBase::PrimitiveType pPrimitiveType,
 			      TBC::GeometryBase::GeometryVolatility pGeomType);
 
-	TriangleBasedGeometry(float* pVertexData,
-			      float* pVertexNormals,
-			      float* pUVData,
-			      Lepra::uint8* pColorData,
+	TriangleBasedGeometry(const float* pVertexData,
+			      const float* pVertexNormals,
+			      const float* pUVData,
+			      const Lepra::uint8* pColorData,
 			      ColorFormat pColorFormat,
-			      Lepra::uint32* pIndices,
+			      const Lepra::uint32* pIndices,
 			      unsigned int pVertexCount,
 			      unsigned int pIndexCount,
 			      TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -53,23 +53,23 @@ public:
 
 	void Copy(const TriangleBasedGeometry& pGeometry);
 
-	void Set(Vector3DF* pVertices,
-		 Vector3DF* pVertexNormals,
-		 Vector2D<float>* pUV,
-		 Color* pColor,
+	void Set(const Vector3DF* pVertices,
+		 const Vector3DF* pVertexNormals,
+		 const Vector2D<float>* pUV,
+		 const Color* pColor,
 		 ColorFormat pColorFormat,
-		 Lepra::uint32* pIndices,
+		 const Lepra::uint32* pIndices,
 		 unsigned int pVertexCount,
 		 unsigned int pIndexCount,
 		 TBC::GeometryBase::PrimitiveType pPrimitiveType,
 		 TBC::GeometryBase::GeometryVolatility pGeomType);
 
-	void Set(float* pVertexData,
-		 float* pVertexNormals,
-		 float* pUVData,
-		 Lepra::uint8* pColorData,
+	void Set(const float* pVertexData,
+		 const float* pVertexNormals,
+		 const float* pUVData,
+		 const Lepra::uint8* pColorData,
 		 ColorFormat pColorFormat,
-		 Lepra::uint32* pIndices,
+		 const Lepra::uint32* pIndices,
 		 unsigned int pVertexCount,
 		 unsigned int pIndexCount,
 		 TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -77,8 +77,8 @@ public:
 
 	// AddUVSet() returns the index of the uv set.
 	// pUVData must contain mVertexCount * 2 elements.
-	int AddUVSet(float* pUVData);
-	int AddUVSet(Vector2D<float>* pUVData);
+	int AddUVSet(const float* pUVData);
+	int AddUVSet(const Vector2D<float>* pUVData);
 	int AddEmptyUVSet();
 	int DupUVSet(int pUVSet);
 

@@ -101,6 +101,7 @@ public:
 	void SetInitialPositionalData(const ObjectPositionalData& pPositionalData);
 	Vector3DF GetPosition() const;
 	void SetRootPosition(const Vector3DF& pPosition);
+	Vector3DF GetRootPosition() const;
 	void SetRootOrientation(const QuaternionF& pOrientation);
 	void SetRootVelocity(const Vector3DF& pVelocity);
 	QuaternionF GetOrientation() const;

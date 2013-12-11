@@ -56,7 +56,7 @@ public:
 	void UpdateMouseByDrag(InputManager* pInputManager);
 	void UpdateTouchsticks(InputManager* pInputManager) const;
 	void DropReleasedDrags();
-	const DragList& GetDragList() const;
+	DragList& GetDragList();
 
 private:
 	DragList mDragList;
