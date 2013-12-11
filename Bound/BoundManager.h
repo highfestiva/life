@@ -70,6 +70,8 @@ public:
 	Plane ScreenLineToPlane(PixelCoord& pCoord, PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter);
 	void Cut(Plane pCutPlane);
 	void AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors);
+	static void AddNGonPoints(std::vector<Vector3DF>& pNGon, const Vector3DF& p0, const Vector3DF& p1);
+	static void AddNGonPoint(std::vector<Vector3DF>& pNGon, const Vector3DF& p);
 	int CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane);
 	bool CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane& pCutPlaneDelimiter);
 	void ExplodeBalls();

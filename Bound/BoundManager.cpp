@@ -337,6 +337,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p4 = p0+t4*d20;
 				AddTriangle(p0, p1, p3, &c[x*12]);
 				AddTriangle(p0, p3, p4, &c[x*12]);
+				AddNGonPoints(lNGon, p3, p4);
 			}
 			else if (d1 > 0 && d2 > 0)
 			{
@@ -347,6 +348,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p4 = p1+t4*d01;
 				AddTriangle(p1, p2, p3, &c[x*12]);
 				AddTriangle(p1, p3, p4, &c[x*12]);
+				AddNGonPoints(lNGon, p3, p4);
 			}
 			else if (d0 > 0 && d2 > 0)
 			{
@@ -357,6 +359,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p4 = p2+t4*d12;
 				AddTriangle(p2, p0, p3, &c[x*12]);
 				AddTriangle(p2, p3, p4, &c[x*12]);
+				AddNGonPoints(lNGon, p3, p4);
 			}
 			else if (d0 > 0)
 			{
@@ -366,6 +369,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p3 = p0+t3*d01;
 				Vector3DF p4 = p0+t4*d20;
 				AddTriangle(p0, p3, p4, &c[x*12]);
+				AddNGonPoints(lNGon, p3, p4);
 			}
 			else if (d1 > 0)
 			{
@@ -375,6 +379,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p3 = p1+t3*d12;
 				Vector3DF p4 = p1+t4*d01;
 				AddTriangle(p1, p3, p4, &c[x*12]);
+				AddNGonPoints(lNGon, p3, p4);
 			}
 			else
 			{
@@ -384,11 +389,28 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p3 = p2+t3*d20;
 				Vector3DF p4 = p2+t4*d12;
 				AddTriangle(p2, p3, p4, &c[x*12]);
+				AddNGonPoints(lNGon, p3, p4);
 			}
-
-			// Add points to N-gon. Note that there will always be a pair of identical twin vertices per
-			// each edge (second vertex rocketed into cyberspace).
-			lNGon.push_back(p0);
+		}
+	}
+	// Create triangles from N-gon.
+	if (lNGon.empty())
+	{
+		return;
+	}
+	const Vector3DF p0 = lNGon[0];
+	for (size_t idx = 1; idx+1 < lNGon.size(); ++idx)
+	{
+		Vector3DF p1 = lNGon[idx+0];
+		Vector3DF p2 = lNGon[idx+1];
+		Vector3DF lTriangleNormal = (p1-p0).Cross(p2-p1);
+		if (pCutPlane.n*lTriangleNormal < 0)
+		{
+			AddTriangle(p0, p1, p2, c);
+		}
+		else
+		{
+			AddTriangle(p0, p2, p1, c);
 		}
 	}
 }
@@ -399,6 +421,25 @@ void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const V
 	mCutVertices.push_back(v1.x); mCutVertices.push_back(v1.y); mCutVertices.push_back(v1.z);
 	mCutVertices.push_back(v2.x); mCutVertices.push_back(v2.y); mCutVertices.push_back(v2.z);
 	mCutColors.insert(mCutColors.end(), pColors, pColors+12);
+}
+
+void BoundManager::AddNGonPoints(std::vector<Vector3DF>& pNGon, const Vector3DF& p0, const Vector3DF& p1)
+{
+	AddNGonPoint(pNGon, p0);
+	AddNGonPoint(pNGon, p1);
+}
+
+void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, const Vector3DF& p)
+{
+	std::vector<Vector3DF>::iterator x;
+	for (x = pNGon.begin(); x != pNGon.end(); ++x)
+	{
+		if (x->GetDistanceSquared(p) < 1e-6)
+		{
+			return;
+		}
+	}
+	pNGon.push_back(p);
 }
 
 int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane)
