@@ -7,6 +7,7 @@
 #include "BoundManager.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../Lepra/Include/Plane.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiMachine.h"
@@ -227,11 +228,10 @@ void BoundManager::HandleCutting(int m, int w, int h)
 
 		// The plane goes through the camera and the projected midpoint of the line.
 		PixelCoord lScreenMid((lFrom.x+lTo.x)/2, (lFrom.y+lTo.y)/2);
-		PixelCoord lScreenNormal(lFrom.y-lTo.y, lFrom.x-lTo.x);
-		float d;
-		Vector3DF lNormal = ScreenPlaneToPlane(lScreenMid, lScreenNormal, d);
+		Plane lCutPlaneDelimiter;
+		const Plane lCutPlane = ScreenLineToPlane(lScreenMid, lTo, lCutPlaneDelimiter);
 
-		if (lNormal.GetLengthSquared() > 0 && CheckBallsPlaneCollition(lNormal, d))
+		if (lCutPlane.n.GetLengthSquared() > 0 && CheckBallsPlaneCollition(lCutPlane, lCutPlaneDelimiter))
 		{
 			// Set to middle of screen = invalidate swipe.
 			x->mStart.x = w/2;
@@ -239,33 +239,31 @@ void BoundManager::HandleCutting(int m, int w, int h)
 		}
 		else if (lDidFindTargetBorder && !x->mIsPress)
 		{
-			Cut(lNormal, d);
+			Cut(lCutPlane);
 			mCameraRotateSpeed = (lScreenMid.x < (int)w/2)? +1.0f : -1.0f;
 		}
 	}
 }
 
-Vector3DF BoundManager::ScreenPlaneToPlane(PixelCoord& pMid, PixelCoord& pNormal, float& d)
+Plane BoundManager::ScreenLineToPlane(PixelCoord& pCoord, PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter)
 {
-	float w2 = mUiManager->GetCanvas()->GetWidth()*0.5f;
-	float h2 = mUiManager->GetCanvas()->GetHeight()*0.5f;
-	float lFOV, lNear, lFar;
-	mUiManager->GetRenderer()->GetViewFrustum(lFOV, lNear, lFar);
-	lFOV = Math::Deg2Rad(lFOV);
-	const float lAspect = h2/w2;
-	float dx = tan(lFOV*0.5f) * (pMid.x/w2-1.0f);
-	float dy = tan(lFOV*0.5f) * (1.0f-pMid.y/h2) * lAspect;
-	Vector3DF lDirectionToPlaneCenter(dx*CAM_DISTANCE, CAM_DISTANCE, dy*CAM_DISTANCE);
-	Vector3DF lBadNormal((float)pNormal.x, 0, (float)pNormal.y);
-	Vector3DF lTangent = lDirectionToPlaneCenter.Cross(lBadNormal);
-	Vector3DF lNormal = lTangent.Cross(lDirectionToPlaneCenter);
-	lNormal.Normalize();
-	lNormal = mCameraTransform.GetOrientation() * lNormal;
-	d = lNormal*mCameraTransform.GetPosition();
-	return lNormal;
+	const PixelCoord lScreenNormal(pCoord.y-pEndPoint.y, pCoord.x-pEndPoint.x);
+	const Vector3DF lDirectionToPlaneCenter = mUiManager->GetRenderer()->ScreenCoordToVector(pCoord);
+	Vector3DF lBadNormal((float)lScreenNormal.x, 0, (float)lScreenNormal.y);
+	lBadNormal = mCameraTransform.GetOrientation() * lBadNormal;
+	const Plane lCutPlane(mCameraTransform.GetPosition(), lDirectionToPlaneCenter, lBadNormal);
+
+	const Vector3DF lDirectionToEndPoint = mUiManager->GetRenderer()->ScreenCoordToVector(pEndPoint);
+	pCutPlaneDelimiter = Plane(mCameraTransform.GetPosition(), lDirectionToEndPoint, lCutPlane.n.Cross(lDirectionToEndPoint));
+	if (pCutPlaneDelimiter.n*lDirectionToPlaneCenter < 0)
+	{
+		pCutPlaneDelimiter = -pCutPlaneDelimiter;
+	}
+
+	return lCutPlane;
 }
 
-void BoundManager::Cut(Vector3DF pNormal, float d)
+void BoundManager::Cut(Plane pCutPlane)
 {
 	/*{
 		// Debug render plane.
@@ -285,7 +283,7 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 		mUiManager->GetRenderer()->AddGeometry(lCutPlane, UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED, UiTbc::Renderer::FORCE_NO_SHADOWS);
 	}*/
 
-	const int lSide = CheckIfPlaneSlicesBetweenBalls(pNormal, d);
+	const int lSide = CheckIfPlaneSlicesBetweenBalls(pCutPlane);
 	if (lSide == 0)	// 0 == Both sides.
 	{
 		ExplodeBalls();
@@ -293,8 +291,7 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 	}
 	if (lSide < 0)
 	{
-		pNormal = -pNormal;
-		d = -d;
+		pCutPlane = -pCutPlane;
 	}
 	// Plane normal now "points" toward vertices that says. Those on the other side gets cut off. The new triangles will use this normal.
 	const QuaternionF q = mCameraTransform.GetOrientation();
@@ -311,9 +308,9 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 		Vector3DF p0(v[x*9+0], v[x*9+1], v[x*9+2]);
 		Vector3DF p1(v[x*9+3], v[x*9+4], v[x*9+5]);
 		Vector3DF p2(v[x*9+6], v[x*9+7], v[x*9+8]);
-		const float d0 = pNormal*p0-d;
-		const float d1 = pNormal*p1-d;
-		const float d2 = pNormal*p2-d;
+		const float d0 = pCutPlane.GetDistance(p0);
+		const float d1 = pCutPlane.GetDistance(p1);
+		const float d2 = pCutPlane.GetDistance(p2);
 		if (d0 >= 0 && d1 >= 0 && d2 >= 0)
 		{
 			// All vertices on staying side of mesh. No cut, only copy.
@@ -334,8 +331,8 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 			if (d0 > 0 && d1 > 0)
 			{
 				// Quad cut.
-				const float t3 = -d1 / (pNormal*d12);
-				const float t4 = -d0 / (pNormal*d20);
+				const float t3 = -d1 / (pCutPlane.n*d12);
+				const float t4 = -d0 / (pCutPlane.n*d20);
 				Vector3DF p3 = p1+t3*d12;
 				Vector3DF p4 = p0+t4*d20;
 				AddTriangle(p0, p1, p3, &c[x*12]);
@@ -344,8 +341,8 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 			else if (d1 > 0 && d2 > 0)
 			{
 				// Quad cut.
-				const float t3 = -d2 / (pNormal*d20);
-				const float t4 = -d1 / (pNormal*d01);
+				const float t3 = -d2 / (pCutPlane.n*d20);
+				const float t4 = -d1 / (pCutPlane.n*d01);
 				Vector3DF p3 = p2+t3*d20;
 				Vector3DF p4 = p1+t4*d01;
 				AddTriangle(p1, p2, p3, &c[x*12]);
@@ -354,8 +351,8 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 			else if (d0 > 0 && d2 > 0)
 			{
 				// Quad cut.
-				const float t3 = -d0 / (pNormal*d01);
-				const float t4 = -d2 / (pNormal*d12);
+				const float t3 = -d0 / (pCutPlane.n*d01);
+				const float t4 = -d2 / (pCutPlane.n*d12);
 				Vector3DF p3 = p0+t3*d01;
 				Vector3DF p4 = p2+t4*d12;
 				AddTriangle(p2, p0, p3, &c[x*12]);
@@ -364,8 +361,8 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 			else if (d0 > 0)
 			{
 				// Triangle cut.
-				const float t3 = -d0 / (pNormal*d01);
-				const float t4 = -d0 / (pNormal*d20);
+				const float t3 = -d0 / (pCutPlane.n*d01);
+				const float t4 = -d0 / (pCutPlane.n*d20);
 				Vector3DF p3 = p0+t3*d01;
 				Vector3DF p4 = p0+t4*d20;
 				AddTriangle(p0, p3, p4, &c[x*12]);
@@ -373,8 +370,8 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 			else if (d1 > 0)
 			{
 				// Triangle cut.
-				const float t3 = -d1 / (pNormal*d12);
-				const float t4 = -d1 / (pNormal*d01);
+				const float t3 = -d1 / (pCutPlane.n*d12);
+				const float t4 = -d1 / (pCutPlane.n*d01);
 				Vector3DF p3 = p1+t3*d12;
 				Vector3DF p4 = p1+t4*d01;
 				AddTriangle(p1, p3, p4, &c[x*12]);
@@ -382,8 +379,8 @@ void BoundManager::Cut(Vector3DF pNormal, float d)
 			else
 			{
 				// Triangle cut.
-				const float t3 = -d2 / (pNormal*d20);
-				const float t4 = -d2 / (pNormal*d12);
+				const float t3 = -d2 / (pCutPlane.n*d20);
+				const float t4 = -d2 / (pCutPlane.n*d12);
 				Vector3DF p3 = p2+t3*d20;
 				Vector3DF p4 = p2+t4*d12;
 				AddTriangle(p2, p3, p4, &c[x*12]);
@@ -404,7 +401,7 @@ void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const V
 	mCutColors.insert(mCutColors.end(), pColors, pColors+12);
 }
 
-int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Vector3DF& pNormal, float d)
+int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane)
 {
 	int lSide = 0;
 	std::vector<Cure::GameObjectId>::iterator x;
@@ -416,8 +413,8 @@ int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Vector3DF& pNormal, float
 			continue;
 		}
 		Vector3DF p = lBall->GetRootPosition();
-		const float D = pNormal*p-d;
-		int s = (D < 0)? -1 : +1;
+		const float d = pCutPlane.GetDistance(p);
+		int s = (d < 0)? -1 : +1;
 		if (lSide == 0)
 		{
 			lSide = s;
@@ -430,7 +427,7 @@ int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Vector3DF& pNormal, float
 	return lSide;
 }
 
-bool BoundManager::CheckBallsPlaneCollition(const Vector3DF& pNormal, float d)
+bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane& pCutPlaneDelimiter)
 {
 	std::vector<Cure::GameObjectId>::iterator x;
 	for (x = mBalls.begin(); x != mBalls.end(); ++x)
@@ -441,11 +438,15 @@ bool BoundManager::CheckBallsPlaneCollition(const Vector3DF& pNormal, float d)
 			continue;
 		}
 		Vector3DF p = lBall->GetRootPosition();
-		const float l = std::abs(pNormal*p-d);
-		if (l < BALL_RADIUS)
+		float lDistance = pCutPlane.GetAbsDistance(p);
+		if (lDistance < BALL_RADIUS)
 		{
-			TODO: check plane extends in the end we're dragging!
-			return true;
+			// Check if the ball is on the "wrong" side of the touch endpoint of the cutting plane.
+			lDistance = pCutPlaneDelimiter.GetDistance(p);
+			if (lDistance >= -BALL_RADIUS)
+			{
+				return true;
+			}
 		}
 	}
 	return false;

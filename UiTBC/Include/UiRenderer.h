@@ -310,7 +310,7 @@ public:
 	// in degrees and defines the angle between the left and the right edge of the 
 	// viewport.
 	virtual void SetViewFrustum(float pFOVAngle, float pNear, float pFar);
-	void GetViewFrustum(float& pFOVAngle, float& pNear, float& pFar);
+	void GetViewFrustum(float& pFOVAngle, float& pNear, float& pFar) const;
 
 	// Given the FOV angle you want on a 4:3 monitor (the reference angle),
 	// and the actual aspect ratio of your screen (which may be 16:9 or 
@@ -478,6 +478,7 @@ public:
 
 	// Returns true if the front face is turned towards the camera.
 	bool IsFacingFront(const Vector3DF* pVertex, int pNumVertices);
+	Vector3DF ScreenCoordToVector(const PixelCoord& pCoord) const;
 
 	// Returns the triangle count in the scene. 
 	// Parameter controls counting visible OR culled triangles.

@@ -15,6 +15,10 @@
 
 
 
+namespace Lepra
+{
+class Plane;
+}
 namespace UiLepra
 {
 namespace Touch
@@ -63,11 +67,11 @@ public:
 	virtual bool Paint();
 
 	void HandleCutting(int m, int w, int h);
-	Vector3DF ScreenPlaneToPlane(PixelCoord& pMid, PixelCoord& pNormal, float& d);
-	void Cut(Vector3DF pNormal, float d);
+	Plane ScreenLineToPlane(PixelCoord& pCoord, PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter);
+	void Cut(Plane pCutPlane);
 	void AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors);
-	int CheckIfPlaneSlicesBetweenBalls(const Vector3DF& pNormal, float d);
-	bool CheckBallsPlaneCollition(const Vector3DF& pNormal, float d);
+	int CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane);
+	bool CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane& pCutPlaneDelimiter);
 	void ExplodeBalls();
 	static bool AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int pWidth, int pHeight);
 

@@ -271,7 +271,7 @@ void Renderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 	RecalculateFrustumPlanes();
 }
 
-void Renderer::GetViewFrustum(float& pFOVAngle, float& pNear, float& pFar)
+void Renderer::GetViewFrustum(float& pFOVAngle, float& pNear, float& pFar) const
 {
 	pFOVAngle = mFOVAngle;
 	pNear = mNear;
@@ -1670,6 +1670,22 @@ bool Renderer::IsFacingFront(const Vector3DF* pVertex, int pNumVertices)
 	Vector3DF lCamVector(pVertex[0] - mCamTransform.GetPosition());
 
 	return lNormal.Dot(lCamVector) > 0;
+}
+
+Vector3DF Renderer::ScreenCoordToVector(const PixelCoord& pCoord) const
+{
+	const float w2 = mClippingRect.GetWidth() * 0.5f;
+	const float h2 = mClippingRect.GetHeight() * 0.5f;
+	float lFOV, lNear, lFar;
+	GetViewFrustum(lFOV, lNear, lFar);
+	lFOV = Math::Deg2Rad(lFOV);
+	const float lAspect = h2/w2;
+	float dx = tan(lFOV*0.5f) * (pCoord.x/w2-1.0f);
+	float dy = tan(lFOV*0.5f) * (1.0f-pCoord.y/h2) * lAspect;
+	Vector3DF lDirection(dx*10, 10, dy*10);
+	lDirection.Normalize();
+	lDirection = mCameraTransformation.GetOrientation() * lDirection;
+	return lDirection;
 }
 
 float Renderer::GetAspectRatio() const

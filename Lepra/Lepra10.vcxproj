@@ -307,6 +307,7 @@
     <ClInclude Include="Include\Packer.h" />
     <ClInclude Include="Include\Path.h" />
     <ClInclude Include="Include\Performance.h" />
+    <ClInclude Include="Include\Plane.h" />
     <ClInclude Include="Include\PngLoader.h" />
     <ClInclude Include="Include\ProgressCallback.h" />
     <ClInclude Include="Include\Quaternion.h" />
@@ -376,6 +377,7 @@
     <ClCompile Include="Source\GameTimer.cpp" />
     <ClCompile Include="Source\JsonString.cpp" />
     <ClCompile Include="Source\Obfuxator.cpp" />
+    <ClCompile Include="Source\Plane.cpp" />
     <ClCompile Include="Source\Posix\MacLog.mm">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
