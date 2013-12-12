@@ -60,7 +60,7 @@ void Level::SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector
 {
 	mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
 
-	std::vector<vtx_idx_t> ni;
+	std::vector<uint32> ni;
 	const size_t vc = pVertices.size()/3;
 	for (size_t x = 0; x < vc; ++x)
 	{
@@ -100,7 +100,7 @@ UiTbc::TriangleBasedGeometry* Level::CreateTriangleBox(float x, float y, float z
 		Vector3DF(-x, +y, -z), Vector3DF(+x, +y, -z), Vector3DF(-x, -y, -z),
 		Vector3DF(-x, -y, -z), Vector3DF(+x, +y, -z), Vector3DF(+x, -y, -z),
 	};
-	std::vector<vtx_idx_t> ni;
+	std::vector<uint32> ni;
 	const size_t vc = LEPRA_ARRAY_COUNT(v);
 	for (size_t x = 0; x < vc; ++x)
 	{
