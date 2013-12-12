@@ -200,7 +200,8 @@ bool BoundManager::Paint()
 	const int h = mUiManager->GetCanvas()->GetHeight();
 	const float lTouchSideScale = 1.28f;	// Inches.
 	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	const int m = (int)(lTouchScale * w * 0.25f);
+	const float lResolutionMargin = w / 14.0f / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
+	const int m = (int)Math::Lerp(lTouchScale * w * 0.25f, lResolutionMargin, 0.7f);
 	mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
 	mUiManager->GetPainter()->SetLineWidth(2);
 	mUiManager->GetPainter()->DrawLine(m*3, m, w-m*3, m);

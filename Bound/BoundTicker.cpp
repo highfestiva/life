@@ -32,7 +32,7 @@ BoundTicker::BoundTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManage
 	mEnvMap(0)
 {
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 45.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 45);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
