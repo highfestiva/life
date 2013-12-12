@@ -64,6 +64,20 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+
+	std::vector<Vector3DF> v;
+	v.push_back(Vector3DF(-1, 0, +1));
+	v.push_back(Vector3DF(+1, 0, +1));
+	v.push_back(Vector3DF(+1, 0, -1));
+	v.push_back(Vector3DF(-1, 0, -1));
+	CreateNGon(v);
+	v.insert(v.begin(), Vector3DF(0, 0, +1.5f));
+	v.insert(v.begin(), Vector3DF(0, 0, -1.5f));
+	v.insert(v.begin(), Vector3DF(+1.5f, 0, 0));
+	CreateNGon(v);
+	std::reverse(v.begin(), v.end());
+	CreateNGon(v);
+	std::reverse(v.begin(), v.end());
 }
 
 BoundManager::~BoundManager()
@@ -92,6 +106,7 @@ void BoundManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 60.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 2);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 prev-level"));
@@ -187,6 +202,7 @@ bool BoundManager::Paint()
 	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
 	const int m = (int)(lTouchScale * w * 0.25f);
 	mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
+	mUiManager->GetPainter()->SetLineWidth(2);
 	mUiManager->GetPainter()->DrawLine(m*3, m, w-m*3, m);
 	mUiManager->GetPainter()->DrawLine(m, m*3, m, h-m*3);
 	mUiManager->GetPainter()->DrawLine(m*3, h-m, w-m*3, h-m);
@@ -211,20 +227,14 @@ void BoundManager::HandleCutting(int m, int w, int h)
 			continue;
 		}
 		mIsCutting = true;
-		mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
-		mUiManager->GetPainter()->DrawArc(lFrom.x-r, lFrom.y-r, d, d, 0, 360, false);
-
 		PixelCoord lTo = x->mLast;
 		bool lDidFindTargetBorder = AttachTouchToBorder(lTo, m, w, h);
-		mUiManager->GetPainter()->SetColor(Color(30,140,20), 0);
-		mUiManager->GetPainter()->DrawArc(lTo.x-r, lTo.y-r, d, d, 0, 360, false);
-
 		lDidFindTargetBorder &= (std::abs(lFrom.x-lTo.x) >= d*4 || std::abs(lFrom.y-lTo.y) >= d*4);
-		if (!lDidFindTargetBorder)
-		{
-			mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
-		}
+
+		mUiManager->GetPainter()->SetColor(lDidFindTargetBorder? Color(30,140,20) : Color(140,30,20), 0);
 		mUiManager->GetPainter()->DrawLine(lFrom.x, lFrom.y, lTo.x, lTo.y);
+		mUiManager->GetPainter()->DrawArc(lFrom.x-r, lFrom.y-r, d, d, 0, 360, true);
+		mUiManager->GetPainter()->DrawArc(lTo.x-r, lTo.y-r, d, d, 0, 360, true);
 
 		// The plane goes through the camera and the projected midpoint of the line.
 		PixelCoord lScreenMid((lFrom.x+lTo.x)/2, (lFrom.y+lTo.y)/2);
@@ -265,24 +275,6 @@ Plane BoundManager::ScreenLineToPlane(PixelCoord& pCoord, PixelCoord& pEndPoint,
 
 void BoundManager::Cut(Plane pCutPlane)
 {
-	/*{
-		// Debug render plane.
-		Vector3DF lDir = pPosition - mCameraTransform.GetPosition();
-		Vector3DF lTangent = lDir.Cross(pNormal);
-		lTangent.Normalize(3.0f);
-		Vector3DF lBitangent = lDir.GetNormalized(3.0f);
-		Vector3DF v[4];
-		v[0] = pPosition + -lBitangent + -lTangent;
-		v[1] = pPosition +  lBitangent + -lTangent;
-		v[2] = pPosition +  lBitangent +  lTangent;
-		v[3] = pPosition + -lBitangent +  lTangent;
-		uint32 lIndices[] = { 0, 1, 3, 2 };
-		UiTbc::TriangleBasedGeometry* lCutPlane = new UiTbc::TriangleBasedGeometry(v, 0, 0, 0, UiTbc::TriangleBasedGeometry::COLOR_RGBA, lIndices,
-			4, 4, TBC::GeometryBase::TRIANGLE_STRIP, TBC::GeometryBase::GEOM_STATIC);
-		lCutPlane->SetAlwaysVisible(true);
-		mUiManager->GetRenderer()->AddGeometry(lCutPlane, UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED, UiTbc::Renderer::FORCE_NO_SHADOWS);
-	}*/
-
 	const int lSide = CheckIfPlaneSlicesBetweenBalls(pCutPlane);
 	if (lSide == 0)	// 0 == Both sides.
 	{
@@ -393,26 +385,24 @@ void BoundManager::Cut(Plane pCutPlane)
 			}
 		}
 	}
-	// Create triangles from N-gon.
-	if (lNGon.empty())
+	CreateNGon(lNGon);
+	if (lNGon.size() < 3)
 	{
 		return;
 	}
-	const Vector3DF p0 = lNGon[0];
-	for (size_t idx = 1; idx+1 < lNGon.size(); ++idx)
+	// Generate random colors and add.
+	std::vector<uint8> lNGonColors;
+	const size_t nvc = (lNGon.size()-2)*3;
+	lNGonColors.resize(nvc*4);
+	Vector3DF lNewColor(RNDPOSVEC());
+	for (size_t x = 0; x < nvc; ++x)
 	{
-		Vector3DF p1 = lNGon[idx+0];
-		Vector3DF p2 = lNGon[idx+1];
-		Vector3DF lTriangleNormal = (p1-p0).Cross(p2-p1);
-		if (pCutPlane.n*lTriangleNormal < 0)
-		{
-			AddTriangle(p0, p1, p2, c);
-		}
-		else
-		{
-			AddTriangle(p0, p2, p1, c);
-		}
+		lNGonColors[x*4+0] = (uint8)(lNewColor.x*255);
+		lNGonColors[x*4+1] = (uint8)(lNewColor.y*255);
+		lNGonColors[x*4+2] = (uint8)(lNewColor.z*255);
+		lNGonColors[x*4+3] = 255;
 	}
+	AddNGonTriangles(pCutPlane, lNGon, &lNGonColors[0]);
 }
 
 void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors)
@@ -440,6 +430,99 @@ void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, const Vector3DF& 
 		}
 	}
 	pNGon.push_back(p);
+}
+
+void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
+{
+	// Create triangles from N-gon.
+	if (pNGon.size() < 3)
+	{
+		return;
+	}
+	// Since the N-gon is convex, we only need to find the smallect angle for each vertex, and
+	// those adjoining vertices will be the neighbours. It will automatically appear in order.
+	// Rendering will determine if it's normal is aligned or perpendicular to the cutting plane.
+	// 1. Start with any two vertices.
+	Vector3DF p0 = pNGon[0];
+	Vector3DF p1 = pNGon[1];
+	Vector3DF t0 = (p1-p0).GetNormalized();
+	// 2. Find the tangent with the smallect angle (biggest dot product) to this tangent.
+	float lBiggestDot = -2;
+	size_t lAdjoiningVertex = 2;
+	const size_t cnt = pNGon.size();
+	Vector3DF lBoundaryVector;
+	for (size_t idx = 2; idx < cnt; ++idx)
+	{
+		Vector3DF p2 = pNGon[idx];
+		Vector3DF t1 = (p2-p1).GetNormalized();
+		float lDot = t0*t1;
+		if (lDot > lBiggestDot)
+		{
+			lBiggestDot = lDot;
+			lAdjoiningVertex = idx;
+			lBoundaryVector = t1;
+		}
+	}
+	// 3. This found vertex and tangent contitutes our second outer point and our first found outer boundary.
+	//    Place the remaining vertices in a list that we are going to search in.
+	p0 = p1;
+	p1 = pNGon[lAdjoiningVertex];
+	t0 = lBoundaryVector;
+	std::list<Vector3DF> lRemainingVertices;
+	for (size_t idx = 0; idx < cnt; ++idx)
+	{
+		if (idx != 1 && idx != lAdjoiningVertex)
+		{
+			lRemainingVertices.push_back(pNGon[idx]);
+		}
+	}
+	// 4. Clear the N-gon array, and append points on the "angle order" they appear, while dropping them in the search list.
+	pNGon.clear();
+	pNGon.push_back(p0);
+	pNGon.push_back(p1);
+	while (!lRemainingVertices.empty())
+	{
+		float lBiggestDot = -2;
+		std::list<Vector3DF>::iterator lAdjoiningVertex = lRemainingVertices.begin();
+		std::list<Vector3DF>::iterator x;
+		for (x = lRemainingVertices.begin(); x != lRemainingVertices.end(); ++x)
+		{
+			Vector3DF p2 = *x;
+			Vector3DF t1 = (p2-p1).GetNormalized();
+			float lDot = t0*t1;
+			if (lDot > lBiggestDot)
+			{
+				lBiggestDot = lDot;
+				lAdjoiningVertex = x;
+			}
+		}
+		p0 = p1;
+		p1 = *lAdjoiningVertex;
+		t0 = (p1-p0).GetNormalized();
+		pNGon.push_back(p1);
+		lRemainingVertices.erase(lAdjoiningVertex);
+	}
+}
+
+void BoundManager::AddNGonTriangles(const Plane& pCutPlane, const std::vector<Vector3DF>& pNGon, const uint8* pColors)
+{
+	// Since the N-gon is convex, we hold on to the first point and step the other two around.
+	Vector3DF p0 = pNGon[0];
+	const size_t cnt = pNGon.size();
+	for (size_t idx = 1; idx+1 < cnt; ++idx)
+	{
+		Vector3DF p1 = pNGon[idx+0];
+		Vector3DF p2 = pNGon[idx+1];
+		Vector3DF lTriangleNormal = (p1-p0).Cross(p2-p1);
+		if (pCutPlane.n*lTriangleNormal < 0)
+		{
+			AddTriangle(p0, p1, p2, pColors);
+		}
+		else
+		{
+			AddTriangle(p0, p2, p1, pColors);
+		}
+	}
 }
 
 int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane)
@@ -505,7 +588,7 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 	int dr = std::abs(pPoint.x - (w-pMargin));
 	if (dt < dl && dt < dr && dt < db)
 	{
-		if (dt < pMargin*2)
+		if (dt < pMargin*4)
 		{
 			pPoint.y = pMargin;
 			return true;
@@ -513,7 +596,7 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 	}
 	else if (db < dl && db < dr)
 	{
-		if (db < pMargin*2)
+		if (db < pMargin*4)
 		{
 			pPoint.y = h-pMargin;
 			return true;
@@ -521,7 +604,7 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 	}
 	else if (dl < dr)
 	{
-		if (dl < pMargin*2)
+		if (dl < pMargin*4)
 		{
 			pPoint.x = pMargin;
 			return true;
@@ -529,7 +612,7 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 	}
 	else
 	{
-		if (dr < pMargin*2)
+		if (dr < pMargin*4)
 		{
 			pPoint.x = w-pMargin;
 			return true;
@@ -865,7 +948,7 @@ void BoundManager::MoveCamera(float pFrameTime)
 		return;
 	}
 
-	mCameraAngle += 0.1f*mCameraRotateSpeed*pFrameTime;
+	mCameraAngle += 0.2f*mCameraRotateSpeed*pFrameTime;
 	if (mCameraAngle > 2*PIF)
 	{
 		mCameraAngle -= 2*PIF;
@@ -874,8 +957,8 @@ void BoundManager::MoveCamera(float pFrameTime)
 	Vector3DF p(0,-CAM_DISTANCE,0);
 	mCameraTransform = TransformationF(q, p);
 	mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(0,0,1), mCameraAngle);
-	mCameraTransform.RotatePitch(-sin(mCameraAngle)*0.2f);
-	mCameraTransform.MoveUp(sin(mCameraAngle)*1.0f);
+	mCameraTransform.RotatePitch(-sin(mCameraAngle*2)*0.3f);
+	mCameraTransform.MoveUp(sin(mCameraAngle*2)*1.5f);
 }
 
 void BoundManager::UpdateCameraPosition(bool pUpdateMicPosition)
