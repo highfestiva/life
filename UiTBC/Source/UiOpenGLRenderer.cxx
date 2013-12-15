@@ -1374,7 +1374,7 @@ unsigned OpenGLRenderer::RenderScene()
 		::glDisable(GL_COLOR_MATERIAL);
 		::glDisable(GL_NORMALIZE);
 		::glDisableClientState(GL_NORMAL_ARRAY);
-		::glDisableClientState(GL_INDEX_ARRAY);
+		//::glDisableClientState(GL_INDEX_ARRAY);
 		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
