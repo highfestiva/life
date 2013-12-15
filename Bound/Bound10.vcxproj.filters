@@ -69,5 +69,6 @@
     <None Include="Bound.mm">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="ToDo.txt" />
   </ItemGroup>
 </Project>

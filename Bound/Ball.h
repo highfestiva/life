@@ -26,6 +26,7 @@ public:
 	virtual void OnTick();
 
 private:
+	float mAverageSpeed;
 };
 
 

@@ -1259,6 +1259,17 @@ Renderer::Shadows Renderer::GetShadows(GeometryID pGeometryID)
 	return (lShadows);
 }
 
+bool Renderer::PreRenderMaterial(MaterialType pMaterialType) 
+{
+	GetMaterial(pMaterialType)->PreRender();
+	return true;
+}
+
+void Renderer::PostRenderMaterial(MaterialType pMaterialType)
+{
+	GetMaterial(pMaterialType)->PostRender();
+}
+
 void Renderer::UpdateShadowMaps()
 {
 	unsigned lTrianglesCalculatedFor = 0;

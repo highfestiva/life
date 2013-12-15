@@ -359,6 +359,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
     </None>
+    <None Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Bound.rc" />

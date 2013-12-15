@@ -450,6 +450,8 @@ public:
 	// Don't use them elsewhere.
 	virtual bool PreRender(TBC::GeometryBase* pGeometry) = 0;
 	virtual void PostRender(TBC::GeometryBase* pGeometry) = 0;
+	virtual bool PreRenderMaterial(MaterialType pMaterialType);
+	virtual void PostRenderMaterial(MaterialType pMaterialType);
 
 	void UpdateShadowMaps();
 	unsigned UpdateShadowMaps(TBC::GeometryBase* pGeometry);	// Returns the number of triangles calculated for.

@@ -68,10 +68,10 @@ public:
 
 	void HandleCutting(int m, int w, int h);
 	Plane ScreenLineToPlane(PixelCoord& pCoord, PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter);
-	void Cut(Plane pCutPlane);
+	bool Cut(Plane pCutPlane);
 	void AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors);
-	static void AddNGonPoints(std::vector<Vector3DF>& pNGon, const Vector3DF& p0, const Vector3DF& p1);
-	static void AddNGonPoint(std::vector<Vector3DF>& pNGon, const Vector3DF& p);
+	void AddNGonPoints(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p0, const Vector3DF& p1);
+	static void AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p);
 	void CreateNGon(std::vector<Vector3DF>& pNGon);
 	void AddNGonTriangles(const Plane& pCutPlane, const std::vector<Vector3DF>& pNGon, const uint8* pColors);
 	int CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane);

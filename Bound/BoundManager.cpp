@@ -8,6 +8,8 @@
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Plane.h"
+#include "../Lepra/Include/TimeLogger.h"
+#include "../Lepra/Include/Unordered.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiMachine.h"
@@ -27,7 +29,7 @@
 #include "Version.h"
 
 #define BG_COLOR	Color(110, 110, 110, 160)
-#define CAM_DISTANCE	6.5f
+#define CAM_DISTANCE	7.0f
 #define BALL_RADIUS	0.111f
 
 
@@ -64,20 +66,6 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
-
-	std::vector<Vector3DF> v;
-	v.push_back(Vector3DF(-1, 0, +1));
-	v.push_back(Vector3DF(+1, 0, +1));
-	v.push_back(Vector3DF(+1, 0, -1));
-	v.push_back(Vector3DF(-1, 0, -1));
-	CreateNGon(v);
-	v.insert(v.begin(), Vector3DF(0, 0, +1.5f));
-	v.insert(v.begin(), Vector3DF(0, 0, -1.5f));
-	v.insert(v.begin(), Vector3DF(+1.5f, 0, 0));
-	CreateNGon(v);
-	std::reverse(v.begin(), v.end());
-	CreateNGon(v);
-	std::reverse(v.begin(), v.end());
 }
 
 BoundManager::~BoundManager()
@@ -105,7 +93,7 @@ void BoundManager::LoadSettings()
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 60.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 52.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
@@ -185,7 +173,14 @@ bool BoundManager::Render()
 	mUiManager->GetRenderer()->SetLightsEnabled(true);
 	mUiManager->GetRenderer()->Renderer::SetTexturingEnabled(true);
 
-	return Parent::Render();
+	bool ok = Parent::Render();
+	if (mLevel)
+	{
+		mUiManager->GetPainter()->SetLineWidth(0.1f);
+		mLevel->RenderOutline();
+	}
+	return ok;
+
 }
 
 bool BoundManager::Paint()
@@ -200,7 +195,7 @@ bool BoundManager::Paint()
 	const int h = mUiManager->GetCanvas()->GetHeight();
 	const float lTouchSideScale = 1.28f;	// Inches.
 	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	const float lResolutionMargin = w / 14.0f / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
+	const float lResolutionMargin = w / 50.0f;
 	const int m = (int)Math::Lerp(lTouchScale * w * 0.25f, lResolutionMargin, 0.7f);
 	mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
 	mUiManager->GetPainter()->SetLineWidth(2);
@@ -222,14 +217,24 @@ void BoundManager::HandleCutting(int m, int w, int h)
 	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
 	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
-		PixelCoord lFrom = x->mStart;
-		if (!AttachTouchToBorder(lFrom, m, w, h))
+		if (x->mFlags&1)	// Invalidated?
 		{
 			continue;
 		}
-		mIsCutting = true;
+		PixelCoord lFrom = x->mStart;
 		PixelCoord lTo = x->mLast;
+		mIsCutting = true;
 		bool lDidFindTargetBorder = AttachTouchToBorder(lTo, m, w, h);
+		if (!AttachTouchToBorder(lFrom, m, w, h))
+		{
+			if (!lDidFindTargetBorder)
+			{
+				continue;
+			}
+			lFrom = lTo;
+			x->mStart.x = lFrom.x;
+			x->mStart.y = lFrom.y;
+		}
 		lDidFindTargetBorder &= (std::abs(lFrom.x-lTo.x) >= d*4 || std::abs(lFrom.y-lTo.y) >= d*4);
 
 		mUiManager->GetPainter()->SetColor(lDidFindTargetBorder? Color(30,140,20) : Color(140,30,20), 0);
@@ -244,14 +249,15 @@ void BoundManager::HandleCutting(int m, int w, int h)
 
 		if (lCutPlane.n.GetLengthSquared() > 0 && CheckBallsPlaneCollition(lCutPlane, lCutPlaneDelimiter))
 		{
-			// Set to middle of screen = invalidate swipe.
-			x->mStart.x = w/2;
-			x->mStart.y = h/2;
+			// Invalidate swipe.
+			x->mFlags |= 1;
 		}
 		else if (lDidFindTargetBorder && !x->mIsPress)
 		{
-			Cut(lCutPlane);
-			mCameraRotateSpeed = (lScreenMid.x < (int)w/2)? +1.0f : -1.0f;
+			if (Cut(lCutPlane))
+			{
+				mCameraRotateSpeed = (lScreenMid.x < (int)w/2)? +6.0f : -6.0f;
+			}
 		}
 	}
 }
@@ -274,13 +280,14 @@ Plane BoundManager::ScreenLineToPlane(PixelCoord& pCoord, PixelCoord& pEndPoint,
 	return lCutPlane;
 }
 
-void BoundManager::Cut(Plane pCutPlane)
+bool BoundManager::Cut(Plane pCutPlane)
 {
+	TimeLogger lTimeLogger(&mLog, _T("CheckIfPlaneSlicesBetweenBalls + prep"));
 	const int lSide = CheckIfPlaneSlicesBetweenBalls(pCutPlane);
 	if (lSide == 0)	// 0 == Both sides.
 	{
 		ExplodeBalls();
-		return;
+		return false;
 	}
 	if (lSide < 0)
 	{
@@ -296,6 +303,9 @@ void BoundManager::Cut(Plane pCutPlane)
 	mCutVertices.clear();
 	mCutColors.clear();
 	std::vector<Vector3DF> lNGon;
+	std::unordered_set<int> pNGonMap;
+	bool lDidCut = false;
+	lTimeLogger.Transfer(_T("CutLoop"));
 	for (int x = 0; x < tc; ++x)
 	{
 		Vector3DF p0(v[x*9+0], v[x*9+1], v[x*9+2]);
@@ -313,9 +323,12 @@ void BoundManager::Cut(Plane pCutPlane)
 		else if (d0 <= 0 && d1 <= 0 && d2 <= 0)
 		{
 			// The whole triangle got cut off - way to go! No cut, only discard.
+			lDidCut = true;
 		}
 		else
 		{
+			lDidCut = true;
+
 			// Go ahead and cut. Ends up with either a triangle (single point on the positive side), or
 			// a quad (two points on the positive side). Quad is cut along pseudo-shortest diagonal.
 			Vector3DF d01 = p1-p0;
@@ -330,7 +343,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p4 = p0+t4*d20;
 				AddTriangle(p0, p1, p3, &c[x*12]);
 				AddTriangle(p0, p3, p4, &c[x*12]);
-				AddNGonPoints(lNGon, p3, p4);
+				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else if (d1 > 0 && d2 > 0)
 			{
@@ -341,7 +354,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p4 = p1+t4*d01;
 				AddTriangle(p1, p2, p3, &c[x*12]);
 				AddTriangle(p1, p3, p4, &c[x*12]);
-				AddNGonPoints(lNGon, p3, p4);
+				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else if (d0 > 0 && d2 > 0)
 			{
@@ -352,7 +365,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p4 = p2+t4*d12;
 				AddTriangle(p2, p0, p3, &c[x*12]);
 				AddTriangle(p2, p3, p4, &c[x*12]);
-				AddNGonPoints(lNGon, p3, p4);
+				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else if (d0 > 0)
 			{
@@ -362,7 +375,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p3 = p0+t3*d01;
 				Vector3DF p4 = p0+t4*d20;
 				AddTriangle(p0, p3, p4, &c[x*12]);
-				AddNGonPoints(lNGon, p3, p4);
+				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else if (d1 > 0)
 			{
@@ -372,7 +385,7 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p3 = p1+t3*d12;
 				Vector3DF p4 = p1+t4*d01;
 				AddTriangle(p1, p3, p4, &c[x*12]);
-				AddNGonPoints(lNGon, p3, p4);
+				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else
 			{
@@ -382,14 +395,17 @@ void BoundManager::Cut(Plane pCutPlane)
 				Vector3DF p3 = p2+t3*d20;
 				Vector3DF p4 = p2+t4*d12;
 				AddTriangle(p2, p3, p4, &c[x*12]);
-				AddNGonPoints(lNGon, p3, p4);
+				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 		}
 	}
+	lTimeLogger.Transfer(_T("CreateNGon()"));
 	CreateNGon(lNGon);
-	if (lNGon.size() < 3)
+	if (lNGon.size() < 3 || !lDidCut)
 	{
-		return;
+		mCutVertices.clear();
+		mCutColors.clear();
+		return false;
 	}
 	// Generate random colors and add.
 	std::vector<uint8> lNGonColors;
@@ -403,7 +419,9 @@ void BoundManager::Cut(Plane pCutPlane)
 		lNGonColors[x*4+2] = (uint8)(lNewColor.z*255);
 		lNGonColors[x*4+3] = 255;
 	}
+	lTimeLogger.Transfer(_T("AddNGonTriangles()"));
 	AddNGonTriangles(pCutPlane, lNGon, &lNGonColors[0]);
+	return true;
 }
 
 void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors)
@@ -414,14 +432,27 @@ void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const V
 	mCutColors.insert(mCutColors.end(), pColors, pColors+12);
 }
 
-void BoundManager::AddNGonPoints(std::vector<Vector3DF>& pNGon, const Vector3DF& p0, const Vector3DF& p1)
+void BoundManager::AddNGonPoints(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p0, const Vector3DF& p1)
 {
-	AddNGonPoint(pNGon, p0);
-	AddNGonPoint(pNGon, p1);
+	bool lAddNGon;
+	CURE_RTVAR_TRYGET(lAddNGon, =, GetVariableScope(), "AddNGon", true);
+	if (!lAddNGon)
+	{
+		return;
+	}
+	AddNGonPoint(pNGon, pNGonMap, p0);
+	AddNGonPoint(pNGon, pNGonMap, p1);
 }
 
-void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, const Vector3DF& p)
+void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p)
 {
+	const int lPositionHash = (int)(p.x*1051 + p.y*1117 + p.z*1187);
+	if (pNGonMap.find(lPositionHash) == pNGonMap.end())
+	{
+		pNGonMap.insert(lPositionHash);
+		pNGon.push_back(p);
+	}
+	/*(void)pNGonMap;
 	std::vector<Vector3DF>::iterator x;
 	for (x = pNGon.begin(); x != pNGon.end(); ++x)
 	{
@@ -430,7 +461,7 @@ void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, const Vector3DF& 
 			return;
 		}
 	}
-	pNGon.push_back(p);
+	pNGon.push_back(p);*/
 }
 
 void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
@@ -486,22 +517,52 @@ void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
 		float lBiggestDot = -2;
 		std::list<Vector3DF>::iterator lAdjoiningVertex = lRemainingVertices.begin();
 		std::list<Vector3DF>::iterator x;
-		for (x = lRemainingVertices.begin(); x != lRemainingVertices.end(); ++x)
+		for (x = lRemainingVertices.begin(); x != lRemainingVertices.end();)
 		{
 			Vector3DF p2 = *x;
 			Vector3DF t1 = (p2-p1).GetNormalized();
 			float lDot = t0*t1;
+			if (lDot < -0.9999)
+			{
+				if (p1.GetDistance(p0) >= p1.GetDistance(p2))
+				{
+					// Midpoint on same line (i.e. in reverse direction). Throw it away.
+					std::list<Vector3DF>::iterator y = x;
+					++y;
+					lRemainingVertices.erase(x);
+					x = y;
+					continue;
+				}
+				// This vertex will come back as we move around one lap; if it's redundant it will be handled then.
+				++x;
+				continue;
+			}
 			if (lDot > lBiggestDot)
 			{
 				lBiggestDot = lDot;
 				lAdjoiningVertex = x;
+				if (lDot > 0.9999)
+				{
+					// Uh-oh! We found two points on the same line; and the second one is better than this one (we can be certain as the N-gon is convex).
+					p1 = p0;
+					pNGon.pop_back();
+					break;
+				}
 			}
+			++x;
 		}
-		p0 = p1;
-		p1 = *lAdjoiningVertex;
-		t0 = (p1-p0).GetNormalized();
-		pNGon.push_back(p1);
-		lRemainingVertices.erase(lAdjoiningVertex);
+		if (lBiggestDot > -1)
+		{
+			p0 = p1;
+			p1 = *lAdjoiningVertex;
+			t0 = (p1-p0).GetNormalized();
+			pNGon.push_back(p1);
+			lRemainingVertices.erase(lAdjoiningVertex);
+		}
+		else
+		{
+			break;
+		}
 	}
 }
 
@@ -509,13 +570,17 @@ void BoundManager::AddNGonTriangles(const Plane& pCutPlane, const std::vector<Ve
 {
 	// Since the N-gon is convex, we hold on to the first point and step the other two around.
 	Vector3DF p0 = pNGon[0];
+	Vector3DF p1 = pNGon[1];
+	Vector3DF p2 = pNGon[2];
+	//const Vector3DF lTriangleNormal = (p1-p0).Cross(p2-p1);
+	//const bool lNoFlip = (pCutPlane.n*lTriangleNormal < 0);
 	const size_t cnt = pNGon.size();
-	for (size_t idx = 1; idx+1 < cnt; ++idx)
+	for (size_t idx = 2; idx < cnt; ++idx)
 	{
-		Vector3DF p1 = pNGon[idx+0];
-		Vector3DF p2 = pNGon[idx+1];
-		Vector3DF lTriangleNormal = (p1-p0).Cross(p2-p1);
-		if (pCutPlane.n*lTriangleNormal < 0)
+		p2 = pNGon[idx];
+		const Vector3DF lTriangleNormal = (p1-p0).Cross(p2-p1);
+		const bool lNoFlip = (pCutPlane.n*lTriangleNormal < 0);
+		if (lNoFlip)
 		{
 			AddTriangle(p0, p1, p2, pColors);
 		}
@@ -523,6 +588,8 @@ void BoundManager::AddNGonTriangles(const Plane& pCutPlane, const std::vector<Ve
 		{
 			AddTriangle(p0, p2, p1, pColors);
 		}
+		p1 = p2;
+		pColors += 4*3;
 	}
 }
 
@@ -589,7 +656,7 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 	int dr = std::abs(pPoint.x - (w-pMargin));
 	if (dt < dl && dt < dr && dt < db)
 	{
-		if (dt < pMargin*4)
+		if (dt < pMargin*8)
 		{
 			pPoint.y = pMargin;
 			return true;
@@ -597,7 +664,7 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 	}
 	else if (db < dl && db < dr)
 	{
-		if (db < pMargin*4)
+		if (db < pMargin*8)
 		{
 			pPoint.y = h-pMargin;
 			return true;
@@ -605,7 +672,7 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 	}
 	else if (dl < dr)
 	{
-		if (dl < pMargin*4)
+		if (dl < pMargin*8)
 		{
 			pPoint.x = pMargin;
 			return true;
@@ -613,7 +680,7 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 	}
 	else
 	{
-		if (dr < pMargin*4)
+		if (dr < pMargin*8)
 		{
 			pPoint.x = w-pMargin;
 			return true;
@@ -870,6 +937,7 @@ void BoundManager::ScriptPhysicsTick()
 	{
 		if (!mCutVertices.empty())
 		{
+			TimeLogger lTimeLogger(&mLog, _T("mLevel->SetTriangles"));
 			mLevel->SetTriangles(GetPhysicsManager(), mCutVertices, mCutColors);
 			mCutVertices.clear();
 			mCutColors.clear();
@@ -949,7 +1017,8 @@ void BoundManager::MoveCamera(float pFrameTime)
 		return;
 	}
 
-	mCameraAngle += 0.2f*mCameraRotateSpeed*pFrameTime;
+	mCameraAngle += 0.3f*mCameraRotateSpeed*pFrameTime;
+	mCameraRotateSpeed = Math::Lerp(mCameraRotateSpeed, (mCameraRotateSpeed < 0)? -1.0f : 1.0f, 0.1f);
 	if (mCameraAngle > 2*PIF)
 	{
 		mCameraAngle -= 2*PIF;

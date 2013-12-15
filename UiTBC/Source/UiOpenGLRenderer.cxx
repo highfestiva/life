@@ -1199,10 +1199,6 @@ unsigned OpenGLRenderer::RenderScene()
 
 		CalcCamCulling();
 
-#ifndef LEPRA_GL_ES
-		::glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_VIEWPORT_BIT);
-#endif // !GLES
-
 		::glDisable(GL_COLOR_LOGIC_OP);
 		::glDisable(GL_ALPHA_TEST);
 		::glDisable(GL_BLEND);
@@ -1226,19 +1222,6 @@ unsigned OpenGLRenderer::RenderScene()
 
 	float lAmbientRed, lAmbientGreen, lAmbientBlue;
 	GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
-
-	/*{
-		float pX1 = 0; float pY1 = 0; float pZ1 = 0;
-		float pX2 = 0; float pY2 = 0; float pZ2 = 100;
-		float pX3 = 100; float pY3 = 100; float pZ3 = 0;
-
-		::glColor4ub(255, 0, 0, 255);
-
-		GLfloat v[] = {pX1, pY1, pZ1, pX2, pY2, pZ2, pX3, pY3, pZ3};
-		::glVertexPointer(3, GL_FLOAT, 0, v);
-		::glDrawArrays(GL_TRIANGLES, 0, 3);
-		return GetCurrentFrame();
-	}*/
 
 	if (GetShadowMode() != NO_SHADOWS && GetLightsEnabled())
 	{
@@ -1267,7 +1250,7 @@ unsigned OpenGLRenderer::RenderScene()
 			if (GetMaterial((MaterialType)i) != 0)
 			{
 				Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial((MaterialType)i));
-                OGL_ASSERT();
+				OGL_ASSERT();
 			}
 		}
 
@@ -1382,10 +1365,22 @@ unsigned OpenGLRenderer::RenderScene()
 		}
 
 		StepCurrentFrame();
+	}
 
-#ifndef LEPRA_GL_ES
-		::glPopAttrib();
-#endif // !GLES
+	{
+		::glDisable(GL_BLEND);
+		::glDisable(GL_TEXTURE_2D);
+		::glDisable(GL_LIGHTING);
+		::glDisable(GL_COLOR_MATERIAL);
+		::glDisable(GL_NORMALIZE);
+		::glDisableClientState(GL_NORMAL_ARRAY);
+		::glDisableClientState(GL_INDEX_ARRAY);
+		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
+		{
+			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
+			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		}
 	}
 
 	OGL_ASSERT();
@@ -1625,7 +1620,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 
 	// Disable all fancy gfx.
 #if !defined(LEPRA_GL_ES) && !defined(LEPRA_MAC)
-	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	//glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_LOGIC_OP);
 	glEnable(GL_POLYGON_OFFSET_EXT);
 #endif // !GLES
@@ -1730,11 +1725,11 @@ void OpenGLRenderer::RenderShadowVolumes()
 				}
 			}
 		}
-	}	
+	}
 
 	// Reset all settings.
 #if !defined(LEPRA_GL_ES) && !defined(LEPRA_MAC)
-	glPopAttrib();
+	//glPopAttrib();
 	glDisable(GL_POLYGON_OFFSET_EXT);
 #endif // !GLES
 	glShadeModel(GL_SMOOTH);

@@ -16,7 +16,8 @@ namespace Bound
 
 
 Ball::Ball(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager)
+	Parent(pResourceManager, pClassId, pUiManager),
+	mAverageSpeed(0)
 {
 }
 
@@ -33,14 +34,16 @@ void Ball::OnTick()
 	Vector3DF lVelocity = GetVelocity();
 	bool lNormalize = false;
 	float lSpeed = lVelocity.GetLength();
-	if (lSpeed < 1.0f)
-	{
-		lSpeed = 4.0f;
-		lNormalize = true;
-	}
+	mAverageSpeed = Math::Lerp(mAverageSpeed, lSpeed, 0.1f);
 	if (lSpeed > 4.1f)
 	{
 		lSpeed = 3.9f;
+		lNormalize = true;
+	}
+	else if (mAverageSpeed < 1.0f)
+	{
+		lSpeed = 3.9f;
+		mAverageSpeed = 3.9f;
 		lNormalize = true;
 	}
 	if (lNormalize)

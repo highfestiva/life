@@ -316,6 +316,7 @@
     <ClInclude Include="Include\Reader.h" />
     <ClInclude Include="Include\ResourceTracker.h" />
     <ClInclude Include="Include\RotationMatrix.h" />
+    <ClInclude Include="Include\TimeLogger.h" />
     <ClInclude Include="Include\SHA1.h" />
     <ClInclude Include="Include\SkipList.h" />
     <ClInclude Include="Include\SmartPointer.h" />
@@ -444,6 +445,7 @@
     <ClCompile Include="Source\Thread.cpp" />
     <ClCompile Include="Source\TiffLoader.cpp" />
     <ClCompile Include="Source\Time.cpp" />
+    <ClCompile Include="Source\TimeLogger.cpp" />
     <ClCompile Include="Source\Writer.cpp" />
     <ClCompile Include="Source\ZipArchive.cpp" />
     <ClCompile Include="Source\Win32\Win32AntiCrack.cpp" />

@@ -39,6 +39,7 @@ struct Drag
 	PixelCoord mLast;
 	bool mIsPress;
 	bool mIsNew;
+	uint32 mFlags;
 };
 
 

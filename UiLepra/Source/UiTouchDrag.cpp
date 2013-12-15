@@ -20,7 +20,8 @@ Drag::Drag(int x, int y, bool pIsPress):
 	mStart(x, y),
 	mLast(x, y),
 	mIsPress(pIsPress),
-	mIsNew(true)
+	mIsNew(true),
+	mFlags(0)
 {
 }
 

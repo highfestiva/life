@@ -74,10 +74,41 @@ void Level::SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector
 	CreatePhysicsMesh(pPhysicsManager);
 }
 
+void Level::RenderOutline()
+{
+	const float x = mSize.x / 2;
+	const float y = mSize.y / 2;
+	const float z = mSize.z / 2;
+	static const Vector3DF v[] =
+	{
+		Vector3DF(-x, +y, +z), Vector3DF(+x, +y, +z),
+		Vector3DF(+x, +y, +z), Vector3DF(+x, +y, -z),
+		Vector3DF(+x, +y, -z), Vector3DF(-x, +y, -z),
+		Vector3DF(-x, +y, -z), Vector3DF(-x, +y, +z),
+
+		Vector3DF(-x, -y, +z), Vector3DF(+x, -y, +z),
+		Vector3DF(+x, -y, +z), Vector3DF(+x, -y, -z),
+		Vector3DF(+x, -y, -z), Vector3DF(-x, -y, -z),
+		Vector3DF(-x, -y, -z), Vector3DF(-x, -y, +z),
+
+		Vector3DF(-x, -y, +z), Vector3DF(-x, +y, +z),
+		Vector3DF(+x, -y, +z), Vector3DF(+x, +y, +z),
+		Vector3DF(-x, -y, -z), Vector3DF(-x, +y, -z),
+		Vector3DF(+x, -y, -z), Vector3DF(+x, +y, -z),
+	};
+	const int cnt = LEPRA_ARRAY_COUNT(v)/2;
+	for (int i = 0; i < cnt; ++i)
+	{
+		mUiManager->GetRenderer()->DrawLine(v[i*2+0], v[i*2+1]-v[i*2+0], ORANGE);
+	}
+}
+
 
 
 UiTbc::TriangleBasedGeometry* Level::CreateTriangleBox(float x, float y, float z)
 {
+	mSize = Vector3DF(x, y, z);
+
 	// Create all triangles with unique vertices, we don't want triangles sharing
 	// vertices as that would complicate cutting.
 	x *= 0.5f;

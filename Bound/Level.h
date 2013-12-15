@@ -37,9 +37,10 @@ public:
 	void GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel);
 	const UiTbc::TriangleBasedGeometry* GetMesh() const;
 	void SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors);
+	void RenderOutline();
 
 private:
-	static UiTbc::TriangleBasedGeometry* CreateTriangleBox(float x, float y, float z);
+	UiTbc::TriangleBasedGeometry* CreateTriangleBox(float x, float y, float z);
 	static void FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh);
 	static void GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh);
 	void CreatePhysicsMesh(TBC::PhysicsManager* pPhysicsManager);
@@ -48,6 +49,7 @@ private:
 	UiTbc::Renderer::GeometryID mGfxMeshId;
 	TBC::PhysicsManager::BodyID mPhysMeshBodyId;
 	uint32* mBodyIndexData;
+	Vector3DF mSize;
 	int mLevel;
 };
 

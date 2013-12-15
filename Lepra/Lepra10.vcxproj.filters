@@ -335,6 +335,9 @@
     <ClInclude Include="Include\Plane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\TimeLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\CollisionDetector2D.inl">
@@ -583,6 +586,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TimeLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
