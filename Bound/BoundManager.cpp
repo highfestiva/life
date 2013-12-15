@@ -31,6 +31,8 @@
 #define BG_COLOR	Color(110, 110, 110, 160)
 #define CAM_DISTANCE	7.0f
 #define BALL_RADIUS	0.111f
+#define DRAG_INVALID	1
+#define DRAG_STARTED	2
 
 
 
@@ -176,7 +178,7 @@ bool BoundManager::Render()
 	bool ok = Parent::Render();
 	if (mLevel)
 	{
-		mUiManager->GetPainter()->SetLineWidth(0.1f);
+		mUiManager->GetPainter()->SetLineWidth(1);
 		mLevel->RenderOutline();
 	}
 	return ok;
@@ -185,74 +187,80 @@ bool BoundManager::Render()
 
 bool BoundManager::Paint()
 {
+	mUiManager->GetPainter()->SetLineWidth(3);
 	if (!Parent::Paint())
 	{
 		return false;
 	}
+	HandleCutting();
+	return true;
+}
 
-	// Draw frame.
+void BoundManager::HandleCutting()
+{
+	mIsCutting = false;
 	const int w = mUiManager->GetCanvas()->GetWidth();
 	const int h = mUiManager->GetCanvas()->GetHeight();
 	const float lTouchSideScale = 1.28f;	// Inches.
 	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
 	const float lResolutionMargin = w / 50.0f;
 	const int m = (int)Math::Lerp(lTouchScale * w * 0.25f, lResolutionMargin, 0.7f);
-	mUiManager->GetPainter()->SetColor(Color(140,30,20), 0);
-	mUiManager->GetPainter()->SetLineWidth(2);
-	mUiManager->GetPainter()->DrawLine(m*3, m, w-m*3, m);
-	mUiManager->GetPainter()->DrawLine(m, m*3, m, h-m*3);
-	mUiManager->GetPainter()->DrawLine(m*3, h-m, w-m*3, h-m);
-	mUiManager->GetPainter()->DrawLine(w-m, m*3, w-m, h-m*3);
-
-	HandleCutting(m, w, h);
-	return true;
-}
-
-void BoundManager::HandleCutting(int m, int w, int h)
-{
-	mIsCutting = false;
 	const int r = m-2;
 	const int d = r*2;
 	typedef UiLepra::Touch::DragManager::DragList DragList;
 	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
 	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
-		if (x->mFlags&1)	// Invalidated?
+		if (x->mFlags&DRAG_INVALID)
 		{
 			continue;
 		}
-		PixelCoord lFrom = x->mStart;
-		PixelCoord lTo = x->mLast;
 		mIsCutting = true;
-		bool lDidFindTargetBorder = AttachTouchToBorder(lTo, m, w, h);
-		if (!AttachTouchToBorder(lFrom, m, w, h))
-		{
-			if (!lDidFindTargetBorder)
-			{
-				continue;
-			}
-			lFrom = lTo;
-			x->mStart.x = lFrom.x;
-			x->mStart.y = lFrom.y;
-		}
-		lDidFindTargetBorder &= (std::abs(lFrom.x-lTo.x) >= d*4 || std::abs(lFrom.y-lTo.y) >= d*4);
 
-		mUiManager->GetPainter()->SetColor(lDidFindTargetBorder? Color(30,140,20) : Color(140,30,20), 0);
-		mUiManager->GetPainter()->DrawLine(lFrom.x, lFrom.y, lTo.x, lTo.y);
-		mUiManager->GetPainter()->DrawArc(lFrom.x-r, lFrom.y-r, d, d, 0, 360, true);
-		mUiManager->GetPainter()->DrawArc(lTo.x-r, lTo.y-r, d, d, 0, 360, true);
+		Vector2DF lFrom((float)x->mStart.x, (float)x->mStart.y);
+		Vector2DF lTo((float)x->mLast.x, (float)x->mLast.y);
+		Vector2DF lVector = lTo-lFrom;
+		bool lIsVeryNewDrag = false;
+		if (!(x->mFlags&DRAG_STARTED))
+		{
+			const float lDragLength = lVector.GetLength();
+			if (lDragLength < 20)
+			{
+				lIsVeryNewDrag = true;
+			}
+			else if (lDragLength > 40)
+			{
+				x->mFlags |= DRAG_STARTED;
+			}
+		}
+		const bool lDragStarted = ((x->mFlags&DRAG_STARTED) == DRAG_STARTED);
+		mUiManager->GetPainter()->SetColor(lDragStarted? Color(30,140,20) : Color(140,30,20), 0);
+		mUiManager->GetPainter()->DrawArc((int)lFrom.x-r, (int)lFrom.y-r, d, d, 0, 360, false);
+		mUiManager->GetPainter()->DrawArc((int)lTo.x-r, (int)lTo.y-r, d, d, 0, 360, false);
+		const float lCutLineLength = (float)(w+h);
+		lVector.Normalize(lCutLineLength);
+		Vector2DF lStart = lIsVeryNewDrag? lFrom : lFrom - lVector;
+		if (!lDragStarted)
+		{
+			mUiManager->GetPainter()->DrawLine((int)lStart.x, (int)lStart.y, (int)lTo.x, (int)lTo.y);
+		}
+		else
+		{
+			Vector2DF lEnd = lTo + lVector;
+			mUiManager->GetPainter()->DrawLine((int)lStart.x, (int)lStart.y, (int)lEnd.x, (int)lEnd.y);
+		}
 
 		// The plane goes through the camera and the projected midpoint of the line.
-		PixelCoord lScreenMid((lFrom.x+lTo.x)/2, (lFrom.y+lTo.y)/2);
+		PixelCoord lScreenMid((int)(lFrom.x+lTo.x)/2, (int)(lFrom.y+lTo.y)/2);
 		Plane lCutPlaneDelimiter;
-		const Plane lCutPlane = ScreenLineToPlane(lScreenMid, lTo, lCutPlaneDelimiter);
+		const Plane lCutPlane = ScreenLineToPlane(lScreenMid, PixelCoord((int)lTo.x, (int)lTo.y), lCutPlaneDelimiter);
 
-		if (lCutPlane.n.GetLengthSquared() > 0 && CheckBallsPlaneCollition(lCutPlane, lCutPlaneDelimiter))
+		if (lCutPlane.n.GetLengthSquared() > 0 && !lIsVeryNewDrag && CheckBallsPlaneCollition(lCutPlane, lDragStarted? 0 : &lCutPlaneDelimiter))
 		{
 			// Invalidate swipe.
 			x->mFlags |= 1;
 		}
-		else if (lDidFindTargetBorder && !x->mIsPress)
+		else if (lDragStarted && !x->mIsPress)
 		{
 			if (Cut(lCutPlane))
 			{
@@ -262,7 +270,7 @@ void BoundManager::HandleCutting(int m, int w, int h)
 	}
 }
 
-Plane BoundManager::ScreenLineToPlane(PixelCoord& pCoord, PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter)
+Plane BoundManager::ScreenLineToPlane(const PixelCoord& pCoord, const PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter)
 {
 	const PixelCoord lScreenNormal(pCoord.y-pEndPoint.y, pCoord.x-pEndPoint.x);
 	const Vector3DF lDirectionToPlaneCenter = mUiManager->GetRenderer()->ScreenCoordToVector(pCoord);
@@ -619,7 +627,7 @@ int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane)
 	return lSide;
 }
 
-bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane& pCutPlaneDelimiter)
+bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter)
 {
 	std::vector<Cure::GameObjectId>::iterator x;
 	for (x = mBalls.begin(); x != mBalls.end(); ++x)
@@ -633,8 +641,12 @@ bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane&
 		float lDistance = pCutPlane.GetAbsDistance(p);
 		if (lDistance < BALL_RADIUS)
 		{
+			if (!pCutPlaneDelimiter)
+			{
+				return true;
+			}
 			// Check if the ball is on the "wrong" side of the touch endpoint of the cutting plane.
-			lDistance = pCutPlaneDelimiter.GetDistance(p);
+			lDistance = pCutPlaneDelimiter->GetDistance(p);
 			if (lDistance >= -BALL_RADIUS)
 			{
 				return true;
