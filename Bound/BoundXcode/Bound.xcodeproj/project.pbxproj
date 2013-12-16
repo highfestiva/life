@@ -511,6 +511,7 @@
 		B1E30E07150E90760076E336 /* Elevator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E30E06150E90760076E336 /* Elevator.cpp */; };
 		B1E4528A14E9FA13001C2BE2 /* UiDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E4528814E9FA13001C2BE2 /* UiDialog.cpp */; };
 		B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E4528914E9FA13001C2BE2 /* UiMessageDialog.cpp */; };
+		B1F2F935185E072800D6C78D /* TimeLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F2F934185E072800D6C78D /* TimeLogger.cpp */; };
 		B1F3C40B16E0027100B2EFB5 /* UiBillboardGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */; };
 		B1F3C40C16E0027100B2EFB5 /* UiParticleRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */; };
 		B1F3C40E16E0029C00B2EFB5 /* UiParticleLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */; };
@@ -1206,6 +1207,7 @@
 		B1E30E06150E90760076E336 /* Elevator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Elevator.cpp; path = ../../Cure/Source/Elevator.cpp; sourceTree = SOURCE_ROOT; };
 		B1E4528814E9FA13001C2BE2 /* UiDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiDialog.cpp; sourceTree = "<group>"; };
 		B1E4528914E9FA13001C2BE2 /* UiMessageDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiMessageDialog.cpp; sourceTree = "<group>"; };
+		B1F2F934185E072800D6C78D /* TimeLogger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimeLogger.cpp; sourceTree = "<group>"; };
 		B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBillboardGeometry.cpp; sourceTree = "<group>"; };
 		B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiParticleRenderer.cpp; sourceTree = "<group>"; };
 		B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiParticleLoader.cpp; path = ../../UiCure/Source/UiParticleLoader.cpp; sourceTree = SOURCE_ROOT; };
@@ -1561,6 +1563,7 @@
 		B19A14CC13A124940051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B1F2F934185E072800D6C78D /* TimeLogger.cpp */,
 				B14108051859215C005F84F1 /* Plane.cpp */,
 				B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */,
 				B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */,
@@ -2682,6 +2685,7 @@
 				B19A222313A127EC0051A61C /* transupp.cpp in Sources */,
 				B19A222613A127EC0051A61C /* wrbmp.cpp in Sources */,
 				B19A222713A127EC0051A61C /* wrgif.cpp in Sources */,
+				B1F2F935185E072800D6C78D /* TimeLogger.cpp in Sources */,
 				B19A222B13A127EC0051A61C /* wrppm.cpp in Sources */,
 				B19A222C13A127EC0051A61C /* wrrle.cpp in Sources */,
 				B19A222D13A127EC0051A61C /* wrtarga.cpp in Sources */,
