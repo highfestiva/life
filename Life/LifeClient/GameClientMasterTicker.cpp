@@ -205,6 +205,8 @@ bool GameClientMasterTicker::Tick()
 
 	GetTimeManager()->Tick();
 
+	mUiManager->InputTick();
+
 	bool lOk = true;
 
 	ScopeLock lLock(&mLock);
@@ -340,8 +342,6 @@ bool GameClientMasterTicker::Tick()
 
 	PreWaitPhysicsTick();
 
-	mUiManager->InputTick();
-
 	WaitPhysicsTick();
 
 	if (mServer)
@@ -386,6 +386,8 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	Repair();
+
+	mUiManager->EndInputTick();
 
 	if (mRestartUi)
 	{

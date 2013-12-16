@@ -25,11 +25,11 @@ Drag::Drag(int x, int y, bool pIsPress):
 {
 }
 
-bool Drag::Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress)
+bool Drag::Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress, int pMaxDragDistance)
 {
 	mIsNew = false;
 
-	if (std::abs(mLast.x-pLast.x) < 44 && std::abs(mLast.y-pLast.y) < 44)
+	if (std::abs(mLast.x-pLast.x) < pMaxDragDistance && std::abs(mLast.y-pLast.y) < pMaxDragDistance)
 	{
 		mLast = pNew;
 		mIsPress = pIsPress;
@@ -41,7 +41,8 @@ bool Drag::Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress
 
 
 DragManager::DragManager():
-	mLastPressed(false)
+	mMouseLastPressed(false),
+	mMaxDragDistance(88)
 {
 }
 
@@ -49,12 +50,17 @@ DragManager::~DragManager()
 {
 }
 
+void DragManager::SetMaxDragDistance(int pMaxDragDistance)
+{
+	mMaxDragDistance = pMaxDragDistance;
+}
+
 void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed)
 {
 	DragList::iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
-		if (i->Update(pPrevious, pLocation, pIsPressed))
+		if (i->Update(pPrevious, pLocation, pIsPressed, mMaxDragDistance))
 		{
 			return;
 		}
@@ -67,12 +73,12 @@ void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
 	PixelCoord lMouse;
 	pInputManager->GetMousePosition(lMouse.x, lMouse.y);
 	bool lIsPressed = pInputManager->GetMouse()->GetButton(0)->GetBooleanValue();
-	if (lIsPressed || mLastPressed)
+	if (lIsPressed || mMouseLastPressed)
 	{
 		UpdateDrag(mLastMouse, lMouse, lIsPressed);
 	}
 	mLastMouse = lMouse;
-	mLastPressed = lIsPressed;
+	mMouseLastPressed = lIsPressed;
 }
 
 void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
@@ -126,6 +132,10 @@ DragManager::DragList& DragManager::GetDragList()
 {
 	return mDragList;
 }
+
+
+
+LOG_CLASS_DEFINE(UI_INPUT, DragManager);
 
 
 

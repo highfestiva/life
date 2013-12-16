@@ -10,6 +10,7 @@
 
 #include "../../Lepra/Include/Transformation.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
+#include "../../UiTbc/Include/UiFontManager.h"
 #include "UiCure.h"
 
 
@@ -30,7 +31,6 @@ class SoundManager;
 namespace UiTbc
 {
 class DesktopWindow;
-class FontManager;
 class Layout;
 class Painter;
 class Renderer;
@@ -58,6 +58,7 @@ public:
 	bool CanRender() const;
 
 	void InputTick();
+	void EndInputTick();
 	void BeginRender(const Vector3DF& pBackgroundColor);
 	void Render(const PixelRect& pArea);
 	void Paint(bool pClearDepthBuffer);
@@ -75,11 +76,15 @@ public:
 	UiTbc::DesktopWindow* GetDesktopWindow() const;
 	UiLepra::SoundManager* GetSoundManager() const;
 
+	Vector3DF GetAccelerometer() const;
 	void SetCameraPosition(const TransformationF& pTransform);
 	void SetMicrophonePosition(const TransformationF& pTransform, const Vector3DF& pVelocity);
 	void SetViewport(int pLeft, int pTop, int pWidth, int pHeight);
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	void ClearDepth();
+
+	void SetScaleFont(float pScale);
+	void SetMasterFont();
 	void PrintText(int pX, int pY, const str& pText);
 
 	PixelCoord GetMouseDisplayPosition() const;
@@ -105,6 +110,7 @@ private:
 	UiLepra::Touch::DragManager* mDragManager;
 	double mSoundRollOffShadow;	// Optimization.
 	double mSoundDopplerShadow;	// Optimization.
+	UiTbc::FontManager::FontId mCurrentFontId;
 
 	LOG_CLASS_DECLARE();
 };

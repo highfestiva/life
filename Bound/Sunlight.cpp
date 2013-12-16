@@ -33,11 +33,7 @@ Sunlight::~Sunlight()
 
 void Sunlight::Tick(const QuaternionF& pCameraOrientation)
 {
-	float x, y, z;
-	CURE_RTVAR_GET(x, =(float), mUiManager->GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_X,  0.0);
-	CURE_RTVAR_GET(y, =(float), mUiManager->GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Y, -1.0);
-	CURE_RTVAR_GET(z, =(float), mUiManager->GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Z,  0.0);
-	Vector3DF d(x,-z,y);
+	Vector3DF d = mUiManager->GetAccelerometer();
 	d = pCameraOrientation*d.GetNormalized();
 	d = Math::Lerp(mLightAverageDirection, d, 0.5f);
 	if (d.GetDistanceSquared(mLightAverageDirection) > 1e-5f)

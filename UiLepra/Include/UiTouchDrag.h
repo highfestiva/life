@@ -33,7 +33,7 @@ using namespace Lepra;
 struct Drag
 {
 	Drag(int x, int y, bool isPress);
-	bool Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress);
+	bool Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress, int pMaxDragDistance);
 
 	PixelCoord mStart;
 	PixelCoord mLast;
@@ -52,6 +52,7 @@ public:
 	DragManager();
 	virtual ~DragManager();
 
+	void SetMaxDragDistance(int pMaxDragDistance);
 	void UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed);
 	void UpdateDragByMouse(const InputManager* pInputManager);
 	void UpdateMouseByDrag(InputManager* pInputManager);
@@ -62,7 +63,10 @@ public:
 private:
 	DragList mDragList;
 	PixelCoord mLastMouse;
-	bool mLastPressed;
+	bool mMouseLastPressed;
+	int mMaxDragDistance;
+
+	LOG_CLASS_DECLARE();
 };
 
 

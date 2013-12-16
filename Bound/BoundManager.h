@@ -132,6 +132,7 @@ protected:
 	bool mLevelCompleted;
 	UiTbc::Button* mPauseButton;
 	bool mIsCutting;
+	int mCutsLeft;
 	LOG_CLASS_DECLARE();
 };
 

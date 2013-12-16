@@ -107,6 +107,36 @@
     <ClInclude Include="Include\Mac\UiMacOpenGLDisplay.h">
       <Filter>Header Files\Mac</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Mac\UiMacTouchHandler.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mac\RotatingController.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mac\UiIosDef.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Mac\UiIosInput.h">
+      <Filter>Header Files\Mac</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiTouchstick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiSoundManagerMock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiSoundStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiTouchDrag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\iosglext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\macglext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\UiChibiXmAlStream.cpp">

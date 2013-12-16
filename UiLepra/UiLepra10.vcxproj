@@ -239,6 +239,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Include\GLEXT.H" />
+    <ClInclude Include="Include\iosglext.h" />
+    <ClInclude Include="Include\macglext.h" />
+    <ClInclude Include="Include\Mac\RotatingController.h" />
+    <ClInclude Include="Include\Mac\UiIosDef.h" />
+    <ClInclude Include="Include\Mac\UiIosInput.h" />
+    <ClInclude Include="Include\Mac\UiMacTouchHandler.h" />
     <ClInclude Include="Include\UiChibiXmAlStream.h" />
     <ClInclude Include="Include\UiCore.h" />
     <ClInclude Include="Include\UiDisplayManager.h" />
@@ -248,7 +254,11 @@
     <ClInclude Include="Include\UiOpenGLExtensions.h" />
     <ClInclude Include="Include\UiSoundManager.h" />
     <ClInclude Include="Include\UiSoundManagerFMod.h" />
+    <ClInclude Include="Include\UiSoundManagerMock.h" />
     <ClInclude Include="Include\UiSoundManagerOpenAL.h" />
+    <ClInclude Include="Include\UiSoundStream.h" />
+    <ClInclude Include="Include\UiTouchDrag.h" />
+    <ClInclude Include="Include\UiTouchstick.h" />
     <ClInclude Include="Include\Win32\UiWin32Core.h" />
     <ClInclude Include="Include\Win32\UiWin32DirectXDisplay.h" />
     <ClInclude Include="Include\Win32\UiWin32DisplayManager.h" />

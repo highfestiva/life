@@ -15,7 +15,6 @@
 #include "../../UiLepra/Include/UiSoundManager.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../../UiTBC/Include/UiFontManager.h"
 #include "../../UiTBC/Include/UiOpenGLPainter.h"
 #include "../../UiTBC/Include/UiOpenGLRenderer.h"
 #include "../Include/UiGameUiManager.h"
@@ -40,7 +39,8 @@ GameUiManager::GameUiManager(Cure::RuntimeVariableScope* pVariableScope, UiLepra
 	mDragManager(pDragManager),
 	mSound(0),
 	mSoundRollOffShadow(0),
-	mSoundDopplerShadow(0)
+	mSoundDopplerShadow(0),
+	mCurrentFontId(UiTbc::FontManager::INVALID_FONTID)
 {
 }
 
@@ -288,13 +288,19 @@ bool GameUiManager::CanRender() const
 void GameUiManager::InputTick()
 {
 	UiLepra::Core::ProcessMessages();
+	if (CanRender())
+	{
+		mInput->PollEvents();
+	}
 
 	if (mDragManager)
 	{
-		mDragManager->DropReleasedDrags();
+		const float lDragLengthInInches = 0.4f;
+		int lDragPixels = (int)(GetCanvas()->GetWidth() * lDragLengthInInches / GetDisplayManager()->GetPhysicalScreenSize());
 #if defined(LEPRA_TOUCH)
 		mDragManager->UpdateMouseByDrag(GetInputManager());
 #else // Not a touch device.
+		lDragPixels *= 10;
 		bool lEmulateTouch;
 		CURE_RTVAR_GET(lEmulateTouch, =, mVariableScope, RTVAR_CTRL_EMULATETOUCH, false);
 		if (lEmulateTouch)
@@ -303,11 +309,15 @@ void GameUiManager::InputTick()
 		}
 #endif // Touch device / Not a touch device.
 		mDragManager->UpdateTouchsticks(GetInputManager());
+		mDragManager->SetMaxDragDistance(lDragPixels);
 	}
+}
 
-	if (CanRender())
+void GameUiManager::EndInputTick()
+{
+	if (mDragManager)
 	{
-		mInput->PollEvents();
+		mDragManager->DropReleasedDrags();
 	}
 }
 
@@ -439,6 +449,15 @@ UiLepra::SoundManager* GameUiManager::GetSoundManager() const
 
 
 
+Vector3DF GameUiManager::GetAccelerometer() const
+{
+	float x, y, z;
+	CURE_RTVAR_GET(x, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_X,  0.0);
+	CURE_RTVAR_GET(y, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Y, -1.0);
+	CURE_RTVAR_GET(z, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Z,  0.0);
+	return Vector3DF(x,-z,y);
+}
+
 void GameUiManager::SetCameraPosition(const TransformationF& pTransform)
 {
 	mRenderer->SetCameraTransformation(pTransform);
@@ -479,6 +498,30 @@ void GameUiManager::Clear(float pRed, float pGreen, float pBlue, bool pClearDept
 void GameUiManager::ClearDepth()
 {
 	mRenderer->Clear(UiTbc::Renderer::CLEAR_DEPTHBUFFER);
+}
+
+
+
+void GameUiManager::SetScaleFont(float pScale)
+{
+	if (mCurrentFontId == UiTbc::FontManager::INVALID_FONTID)
+	{
+		mCurrentFontId = GetFontManager()->GetActiveFontId();
+	}
+	str lFont;
+	CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+	double lFontHeight;
+	CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+	lFontHeight *= pScale;
+	int lFontFlags;
+	CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
+	mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
+}
+
+void GameUiManager::SetMasterFont()
+{
+	mFontManager->SetActiveFont(mCurrentFontId);
+	mCurrentFontId = UiTbc::FontManager::INVALID_FONTID;
 }
 
 void GameUiManager::PrintText(int pX, int pY, const str& pText)
