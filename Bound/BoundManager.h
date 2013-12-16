@@ -73,6 +73,8 @@ public:
 	void AddNGonPoints(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p0, const Vector3DF& p1);
 	static void AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p);
 	void CreateNGon(std::vector<Vector3DF>& pNGon);
+	void LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort);
+	void SimplifyNGon(std::vector<Vector3DF>& pNGon);
 	void AddNGonTriangles(const Plane& pCutPlane, const std::vector<Vector3DF>& pNGon, const uint8* pColors);
 	int CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane);
 	bool CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter);
@@ -126,6 +128,7 @@ protected:
 	float mCameraAngle;
 	float mCameraRotateSpeed;
 	TransformationF mCameraTransform;
+	float mPercentDone;
 	bool mLevelCompleted;
 	UiTbc::Button* mPauseButton;
 	bool mIsCutting;

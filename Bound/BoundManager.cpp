@@ -28,12 +28,14 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define BG_COLOR	Color(110, 110, 110, 160)
-#define CAM_DISTANCE	7.0f
-#define BALL_RADIUS	0.111f
-#define DRAG_INVALID	1
-#define DRAG_STARTED	2
-
+#define BG_COLOR		Color(110, 110, 110, 160)
+#define CAM_DISTANCE		7.0f
+#define BALL_RADIUS		0.111f
+#define DRAG_FLAG_INVALID	1
+#define DRAG_FLAG_STARTED	2
+#define CLOSE_NORMAL		5e-5
+#define SAME_NORMAL		(1-CLOSE_NORMAL)
+#define NGON_INDEX(i)		(((int)i<0)? cnt-1 : (i>=(int)cnt)? 0 : i)
 
 
 namespace Bound
@@ -68,6 +70,40 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+	/*
+#define RNDMZEL \
+	for (int x = 0; x < 20; ++x) \
+	{ \
+		size_t a = Random::GetRandomNumber() % lNGon.size(); \
+		size_t b = Random::GetRandomNumber() % lNGon.size(); \
+		if (a != b) \
+			std::swap(lNGon[1], lNGon[b]); \
+	}
+	std::vector<Vector3DF> lNGon;
+#define CLRL \
+	lNGon.clear(); \
+	lNGon.push_back(Vector3DF(-2.1314f, 0, -0.333f));	\
+	for (int x = 0; x < 10; ++x)	\
+		lNGon.push_back(lNGon[lNGon.size()-1] + Vector3DF(1,0,0.14f)*Random::Uniform(0.001f, 0.1f));	\
+	for (int x = 0; x < 10; ++x)	\
+		lNGon.push_back(lNGon[lNGon.size()-1] + Vector3DF(0.14f,0,-1)*Random::Uniform(0.001f, 0.1f));	\
+	for (int x = 0; x < 10; ++x)	\
+		lNGon.push_back(lNGon[lNGon.size()-1] + Vector3DF(-0.34f,0,-1)*Random::Uniform(0.001f, 0.1f));	\
+	for (int x = 0; x < 10; ++x)	\
+		lNGon.push_back(lNGon[lNGon.size()-1] + Vector3DF(-1,0,-0.14f)*Random::Uniform(0.001f, 0.1f));
+	for (int y = 0; y < 100; ++y)
+	{
+		CLRL;
+		RNDMZEL;
+		std::vector<Vector3DF> lCopy(lNGon);
+		CreateNGon(lNGon);
+		mLog.Infof(_T("----------"));
+		for (int x = 0; x < (int)lNGon.size(); ++x)
+		{
+			mLog.Infof(_T("%f;%f;"), lNGon[x].x, lNGon[x].z);
+		}
+		deb_assert(lNGon.size() == 5);
+	}*/
 }
 
 BoundManager::~BoundManager()
@@ -182,7 +218,6 @@ bool BoundManager::Render()
 		mLevel->RenderOutline();
 	}
 	return ok;
-
 }
 
 bool BoundManager::Paint()
@@ -191,6 +226,13 @@ bool BoundManager::Paint()
 	if (!Parent::Paint())
 	{
 		return false;
+	}
+	if (mLevel)
+	{
+		mPercentDone = 100-mLevel->GetVolumePercent()*100;
+		const str lText = strutil::Format(_T("%.1f%% cut out"), mPercentDone);
+		mUiManager->GetPainter()->SetColor(Color(12, 15, 30));
+		mUiManager->GetPainter()->PrintText(lText, 100, 10);
 	}
 	HandleCutting();
 	return true;
@@ -211,7 +253,7 @@ void BoundManager::HandleCutting()
 	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
 	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
-		if (x->mFlags&DRAG_INVALID)
+		if (x->mFlags&DRAG_FLAG_INVALID)
 		{
 			continue;
 		}
@@ -221,7 +263,7 @@ void BoundManager::HandleCutting()
 		Vector2DF lTo((float)x->mLast.x, (float)x->mLast.y);
 		Vector2DF lVector = lTo-lFrom;
 		bool lIsVeryNewDrag = false;
-		if (!(x->mFlags&DRAG_STARTED))
+		if (!(x->mFlags&DRAG_FLAG_STARTED))
 		{
 			const float lDragLength = lVector.GetLength();
 			if (lDragLength < 20)
@@ -230,10 +272,10 @@ void BoundManager::HandleCutting()
 			}
 			else if (lDragLength > 40)
 			{
-				x->mFlags |= DRAG_STARTED;
+				x->mFlags |= DRAG_FLAG_STARTED;
 			}
 		}
-		const bool lDragStarted = ((x->mFlags&DRAG_STARTED) == DRAG_STARTED);
+		const bool lDragStarted = ((x->mFlags&DRAG_FLAG_STARTED) == DRAG_FLAG_STARTED);
 		mUiManager->GetPainter()->SetColor(lDragStarted? Color(30,140,20) : Color(140,30,20), 0);
 		mUiManager->GetPainter()->DrawArc((int)lFrom.x-r, (int)lFrom.y-r, d, d, 0, 360, false);
 		mUiManager->GetPainter()->DrawArc((int)lTo.x-r, (int)lTo.y-r, d, d, 0, 360, false);
@@ -253,7 +295,7 @@ void BoundManager::HandleCutting()
 		// The plane goes through the camera and the projected midpoint of the line.
 		PixelCoord lScreenMid((int)(lFrom.x+lTo.x)/2, (int)(lFrom.y+lTo.y)/2);
 		Plane lCutPlaneDelimiter;
-		const Plane lCutPlane = ScreenLineToPlane(lScreenMid, PixelCoord((int)lTo.x, (int)lTo.y), lCutPlaneDelimiter);
+		Plane lCutPlane = ScreenLineToPlane(lScreenMid, PixelCoord((int)lTo.x, (int)lTo.y), lCutPlaneDelimiter);
 
 		if (lCutPlane.n.GetLengthSquared() > 0 && !lIsVeryNewDrag && CheckBallsPlaneCollition(lCutPlane, lDragStarted? 0 : &lCutPlaneDelimiter))
 		{
@@ -264,7 +306,13 @@ void BoundManager::HandleCutting()
 		{
 			if (Cut(lCutPlane))
 			{
-				mCameraRotateSpeed = (lScreenMid.x < (int)w/2)? +6.0f : -6.0f;
+				const int lSide = CheckIfPlaneSlicesBetweenBalls(lCutPlane);
+				if (lSide > 0)
+				{
+					lCutPlane = -lCutPlane;
+				}
+				float lCutX = mCameraTransform.GetOrientation().GetInverseRotatedVector(lCutPlane.n).x;
+				mCameraRotateSpeed = (lCutX < 0)? +6.0f : -6.0f;
 			}
 		}
 	}
@@ -474,8 +522,29 @@ void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_se
 
 void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
 {
+	//LineUpNGonSides(pNGon);
+	//SortNGonSides(pNGon);
+	// Iteratively producing better N-gon each loop.
+	/*LineUpNGonBorders(pNGon, false);
+	LineUpNGonBorders(pNGon, true);
+	SimplifyNGon(pNGon);*/
+	size_t lPreSize;
+	size_t lSize;
+	do
+	{
+		lPreSize = pNGon.size();
+		LineUpNGonBorders(pNGon, false);
+		LineUpNGonBorders(pNGon, true);
+		SimplifyNGon(pNGon);
+		lSize = pNGon.size();
+	}
+	while (lSize < lPreSize);
+}
+
+void BoundManager::LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort)
+{
 	// Create triangles from N-gon.
-	if (pNGon.size() < 3)
+	if (pNGon.size() <= 3)
 	{
 		return;
 	}
@@ -489,7 +558,7 @@ void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
 	// 2. Find the tangent with the smallect angle (biggest dot product) to this tangent.
 	float lBiggestDot = -2;
 	size_t lAdjoiningVertex = 2;
-	const size_t cnt = pNGon.size();
+	size_t cnt = pNGon.size();
 	Vector3DF lBoundaryVector;
 	for (size_t idx = 2; idx < cnt; ++idx)
 	{
@@ -522,15 +591,19 @@ void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
 	pNGon.push_back(p1);
 	while (!lRemainingVertices.empty())
 	{
+		float lBestDistance = 1e5f;
+		float lThisDistance = 1e5f;
 		float lBiggestDot = -2;
 		std::list<Vector3DF>::iterator lAdjoiningVertex = lRemainingVertices.begin();
 		std::list<Vector3DF>::iterator x;
 		for (x = lRemainingVertices.begin(); x != lRemainingVertices.end();)
 		{
 			Vector3DF p2 = *x;
-			Vector3DF t1 = (p2-p1).GetNormalized();
-			float lDot = t0*t1;
-			if (lDot < -0.9999)
+			Vector3DF t1 = p2-p1;
+			lThisDistance = t1.GetLength();
+			t1.Div(lThisDistance);
+			float lDot = pSort? t0*t1 : std::abs(t0*t1);
+			/*if (lDot < -SAME_NORMAL)
 			{
 				if (p1.GetDistance(p0) >= p1.GetDistance(p2))
 				{
@@ -541,21 +614,33 @@ void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
 					x = y;
 					continue;
 				}
-				// This vertex will come back as we move around one lap; if it's redundant it will be handled then.
+				// This vertex will come back as we move around one lap; if it's doubly redundant it will be handled then.
 				++x;
 				continue;
-			}
-			if (lDot > lBiggestDot)
+			}*/
+			if (lDot >= lBiggestDot-CLOSE_NORMAL)
 			{
-				lBiggestDot = lDot;
-				lAdjoiningVertex = x;
-				if (lDot > 0.9999)
+				if (lDot >= SAME_NORMAL)
+				{
+					if (lThisDistance < lBestDistance)	// Closer vertex on same border?
+					{
+						lBestDistance = lThisDistance;
+						lBiggestDot = lDot;
+						lAdjoiningVertex = x;
+					}
+				}
+				else	// Best vertex on upcoming border.
+				{
+					lBiggestDot = lDot;
+					lAdjoiningVertex = x;
+				}
+				/*if (lDot > SAME_NORMAL)
 				{
 					// Uh-oh! We found two points on the same line; and the second one is better than this one (we can be certain as the N-gon is convex).
 					p1 = p0;
 					pNGon.pop_back();
 					break;
-				}
+				}*/
 			}
 			++x;
 		}
@@ -571,6 +656,45 @@ void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
 		{
 			break;
 		}
+	}
+}
+
+void BoundManager::SimplifyNGon(std::vector<Vector3DF>& pNGon)
+{
+	// Eliminate redundant vertices. N-gon must be sorted when entering.
+	int cnt = (int)pNGon.size();
+	for (int x = 0; x < cnt;)
+	{
+		size_t xn = NGON_INDEX(x-1);
+		size_t xp = NGON_INDEX(x+1);
+		Vector3DF p0 = pNGon[xn];
+		Vector3DF p1 = pNGon[x];
+		Vector3DF p2 = pNGon[xp];
+		Vector3DF t0 = p1-p0;
+		float l0 = t0.GetLength();
+		t0.Div(l0);
+		Vector3DF t1 = (p2-p1).GetNormalized();
+		const float lDot = t0*t1;
+		if (lDot > SAME_NORMAL)
+		{
+			// Kill middle vertex.
+			pNGon.erase(pNGon.begin() + x);
+			--cnt;
+			continue;
+		}
+		if (lDot < -SAME_NORMAL)
+		{
+			// Kill middle vertex.
+			float l1 = p1.GetDistance(p2);
+			if (l0 < l1)
+			{
+				pNGon[xn] = p2;
+			}
+			pNGon.erase(pNGon.begin() + xp);
+			--cnt;
+			continue;
+		}
+		++x;
 	}
 }
 
@@ -708,6 +832,7 @@ bool BoundManager::DidFinishLevel()
 	int lLevel;
 	CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	mLog.Headlinef(_T("Level %i done!"), lLevel);
+	StepLevel(1);
 	/*Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
 	{
@@ -752,39 +877,21 @@ bool BoundManager::DidFinishLevel()
 
 int BoundManager::StepLevel(int pCount)
 {
-	/*if (GetContext()->GetObject(mAvatarId))
+	int lLevelNumber;
+	CURE_RTVAR_GET(lLevelNumber, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	lLevelNumber += pCount;
+	mLevel->GenerateLevel(GetPhysicsManager(), lLevelNumber);
+	int lBallCount = lLevelNumber + 2;
+	for (int x = 0; x < lBallCount; ++x)
 	{
-		int lLevelNumber = GetCurrentLevelNumber();
-		lLevelNumber += pCount;
-		int lLevelCount;
-		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 0);
-		if (lLevelNumber >= lLevelCount)
-		{
-			lLevelNumber = 0;
-
-			double lRtrOffset;
-			CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
-			lRtrOffset += 1;
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, lRtrOffset);
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, true);
-		}
-		if (lLevelNumber < 0)
-		{
-			lLevelNumber = lLevelCount-1;
-		}
-		lLevelNumber = ORDERED_LEVELNO[lLevelNumber];
-		mOldLevel = mLevel;
-		mLevelCompleted = false;
-		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
-		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-		mLevel->StartLoading();
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, lLevelNumber);
-		return lNewLevelName;
+		CreateBall(x);
 	}
-	return _T("");*/
-	(void)pCount;
-	return 0;
+	/*while (mBalls.size() > lBallCount)
+	{
+		mBalls.
+	}*/
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, lLevelNumber);
+	return lLevelNumber;
 }
 
 
@@ -807,7 +914,7 @@ bool BoundManager::InitializeUniverse()
 	int lLevelIndex;
 	CURE_RTVAR_GET(lLevelIndex, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	mLevel->GenerateLevel(GetPhysicsManager(), lLevelIndex);
-	for (int x = 0; x < 4; ++x)
+	for (int x = 0; x < 2; ++x)
 	{
 		CreateBall(x);
 	}
@@ -845,6 +952,10 @@ void BoundManager::SetLocalRender(bool pRender)
 
 void BoundManager::CreateBall(int pIndex)
 {
+	if ((int)mBalls.size() > pIndex)
+	{
+		return;
+	}
 	Cure::ContextObject* lBall = Parent::CreateContextObject(_T("soccerball"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	int x = pIndex%3;
 	int y = pIndex/3%3;
@@ -953,6 +1064,10 @@ void BoundManager::ScriptPhysicsTick()
 			mLevel->SetTriangles(GetPhysicsManager(), mCutVertices, mCutColors);
 			mCutVertices.clear();
 			mCutColors.clear();
+		}
+		if (mPercentDone >= 70)
+		{
+			DidFinishLevel();
 		}
 		std::vector<Cure::GameObjectId>::iterator x;
 		for (x = mBalls.begin(); x != mBalls.end(); ++x)

@@ -23,7 +23,9 @@ Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCur
 	mGfxMeshId(0),
 	mPhysMeshBodyId(0),
 	mBodyIndexData(0),
-	mLevel(0)
+	mLevel(0),
+	mOriginalVolume(1),
+	mVolume(1)
 {
 }
 
@@ -37,10 +39,12 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 {
 	(void)pLevel;
 
-	mGfxMesh = CreateTriangleBox(4.5f, 4.5f, 3);
-	FlipTriangles(mGfxMesh);
-	GenerateVertexColors(mGfxMesh);
-	mGfxMesh->SetAlwaysVisible(true);
+	if (mGfxMeshId)
+	{
+		mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
+	}
+
+	CreateTriangleBox(4.5f, 4.5f, 3);
 	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(0.9f,0.85f,0.3f);
 	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0.5f,0.5f,0.5f);
 	mGfxMesh->GetBasicMaterialSettings().mShininess	= false;
@@ -49,6 +53,9 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
 
 	CreatePhysicsMesh(pPhysicsManager);
+
+	mOriginalVolume = CalculateVolume();
+	mVolume = mOriginalVolume;
 }
 
 const UiTbc::TriangleBasedGeometry* Level::GetMesh() const
@@ -56,22 +63,20 @@ const UiTbc::TriangleBasedGeometry* Level::GetMesh() const
 	return mGfxMesh;
 }
 
+float Level::GetVolumePercent() const
+{
+	return mVolume / mOriginalVolume;
+}
+
 void Level::SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors)
 {
 	mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
 
-	std::vector<uint32> ni;
-	const size_t vc = pVertices.size()/3;
-	for (size_t x = 0; x < vc; ++x)
-	{
-		ni.push_back(x);
-	}
-
-	mGfxMesh->Set(&pVertices[0], 0, 0, &pColors[0], TBC::GeometryBase::COLOR_RGBA, &ni[0], vc, vc, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_SEMI_STATIC);
-	FlipTriangles(mGfxMesh);
-	mGfxMesh->SetAlwaysVisible(true);
+	SetVertices(&pVertices[0], pVertices.size()/3, pColors);
 	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
 	CreatePhysicsMesh(pPhysicsManager);
+
+	mVolume = CalculateVolume();
 }
 
 void Level::RenderOutline()
@@ -114,30 +119,56 @@ UiTbc::TriangleBasedGeometry* Level::CreateTriangleBox(float x, float y, float z
 	x *= 0.5f;
 	y *= 0.5f;
 	z *= 0.5f;
-	Vector3DF v[] =
+	float v[] =
 	{
-		Vector3DF(-x, +y, +z), Vector3DF(+x, +y, +z), Vector3DF(-x, +y, -z),
-		Vector3DF(-x, +y, -z), Vector3DF(+x, +y, +z), Vector3DF(+x, +y, -z),
-		Vector3DF(+x, -y, +z), Vector3DF(-x, -y, +z), Vector3DF(+x, -y, -z),
-		Vector3DF(+x, -y, -z), Vector3DF(-x, -y, +z), Vector3DF(-x, -y, -z),
+		-x,+y,+z, +x,+y,+z, -x,+y,-z,
+		-x,+y,-z, +x,+y,+z, +x,+y,-z,
+		+x,-y,+z, -x,-y,+z, +x,-y,-z,
+		+x,-y,-z, -x,-y,+z, -x,-y,-z,
 
-		Vector3DF(-x, -y, +z), Vector3DF(-x, +y, +z), Vector3DF(-x, -y, -z),
-		Vector3DF(-x, -y, -z), Vector3DF(-x, +y, +z), Vector3DF(-x, +y, -z),
-		Vector3DF(+x, +y, +z), Vector3DF(+x, -y, +z), Vector3DF(+x, +y, -z),
-		Vector3DF(+x, +y, -z), Vector3DF(+x, -y, +z), Vector3DF(+x, -y, -z),
+		-x,-y,+z, -x,+y,+z, -x,-y,-z,
+		-x,-y,-z, -x,+y,+z, -x,+y,-z,
+		+x,+y,+z, +x,-y,+z, +x,+y,-z,
+		+x,+y,-z, +x,-y,+z, +x,-y,-z,
 
-		Vector3DF(-x, -y, +z), Vector3DF(+x, -y, +z), Vector3DF(-x, +y, +z),
-		Vector3DF(-x, +y, +z), Vector3DF(+x, -y, +z), Vector3DF(+x, +y, +z),
-		Vector3DF(-x, +y, -z), Vector3DF(+x, +y, -z), Vector3DF(-x, -y, -z),
-		Vector3DF(-x, -y, -z), Vector3DF(+x, +y, -z), Vector3DF(+x, -y, -z),
+		-x,-y,+z, +x,-y,+z, -x,+y,+z,
+		-x,+y,+z, +x,-y,+z, +x,+y,+z,
+		-x,+y,-z, +x,+y,-z, -x,-y,-z,
+		-x,-y,-z, +x,+y,-z, +x,-y,-z,
 	};
+	Color lColors[] = { RED, GREEN, MAGENTA, BLUE, YELLOW, DARK_GRAY, };
+	const int lColorCount = LEPRA_ARRAY_COUNT(lColors);
+	const size_t vc = LEPRA_ARRAY_COUNT(v)/3;
+	std::vector<uint8> lColorData;
+	for (int x = 0; x < vc; ++x)
+	{
+		const int c = x / 6 % lColorCount;
+		Color& lColor = lColors[c];
+		lColorData.push_back(lColor.mRed);
+		lColorData.push_back(lColor.mGreen);
+		lColorData.push_back(lColor.mBlue);
+		lColorData.push_back(255);
+	}
+
+	if (!mGfxMesh)
+	{
+		mGfxMesh = new UiTbc::TriangleBasedGeometry;
+	}
+	SetVertices(v, vc, lColorData);
+	return mGfxMesh;
+}
+
+void Level::SetVertices(const float* v, size_t vc, const std::vector<uint8>& pColorData)
+{
 	std::vector<uint32> ni;
-	const size_t vc = LEPRA_ARRAY_COUNT(v);
 	for (size_t x = 0; x < vc; ++x)
 	{
 		ni.push_back(x);
 	}
-	return new UiTbc::TriangleBasedGeometry(&v[0], 0, 0, 0, TBC::GeometryBase::COLOR_RGBA, &ni[0], vc, vc, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_DYNAMIC);
+
+	mGfxMesh->Set(v, 0, 0, &pColorData[0], TBC::GeometryBase::COLOR_RGBA, &ni[0], vc, vc, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_SEMI_STATIC);
+	FlipTriangles(mGfxMesh);
+	mGfxMesh->SetAlwaysVisible(true);
 }
 
 void Level::FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh)
@@ -148,25 +179,6 @@ void Level::FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh)
 	{
 		std::swap(lTriangles[x*3+1], lTriangles[x*3+2]);
 	}
-}
-
-void Level::GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh)
-{
-	Color lColors[] = { RED, GREEN, MAGENTA, BLUE, YELLOW, DARK_GRAY, };
-	const int lColorCount = LEPRA_ARRAY_COUNT(lColors);
-	const int vc = pMesh->GetVertexCount();
-	uint8* lColorData = new uint8[vc*4];
-	for (int x = 0; x < vc; ++x)
-	{
-		const int c = x / 6 % lColorCount;
-		Color& lColor = lColors[c];
-		lColorData[x*4+0] = lColor.mRed;
-		lColorData[x*4+1] = lColor.mGreen;
-		lColorData[x*4+2] = lColor.mBlue;
-		lColorData[x*4+3] = 255;
-	}
-	pMesh->SetColorData(lColorData, TBC::GeometryBase::COLOR_RGBA);
-	delete lColorData;
 }
 
 void Level::CreatePhysicsMesh(TBC::PhysicsManager* pPhysicsManager)
@@ -187,6 +199,34 @@ void Level::CreatePhysicsMesh(TBC::PhysicsManager* pPhysicsManager)
 	}
 	mPhysMeshBodyId = pPhysicsManager->CreateTriMesh(true, mGfxMesh->GetVertexCount(), mGfxMesh->GetVertexData(),
 		mGfxMesh->GetTriangleCount(), mBodyIndexData, TransformationF(), lFriction, lBounce, GetInstanceId());
+}
+
+float Level::CalculateVolume() const
+{
+	float lVolume = 0;
+	const int tc = mGfxMesh->GetVertexCount()/3;
+	const float* v = mGfxMesh->GetVertexData();
+	for (int x = 0; x < tc; ++x)
+	{
+		float Px = v[x*9+0];
+		float Py = v[x*9+1];
+		float Pz = v[x*9+2];
+		float Qx = v[x*9+3];
+		float Qy = v[x*9+4];
+		float Qz = v[x*9+5];
+		float Rx = v[x*9+6];
+		float Ry = v[x*9+7];
+		float Rz = v[x*9+8];
+		lVolume += Px*Qy*Rz + Py*Qz*Rx + Pz*Qx*Ry - Px*Qz*Ry - Py*Qx*Rz - Pz*Qy*Rx;
+		/*Vector3DF p0(v[x*9+0], v[x*9+1], v[x*9+2]);
+		Vector3DF p1(v[x*9+3], v[x*9+4], v[x*9+5]);
+		Vector3DF p2(v[x*9+6], v[x*9+7], v[x*9+8]);
+		p0.x += 100;
+		p1.x += 100;
+		p2.x += 100;
+		lVolume += p0 * p1.Cross(p2);*/
+	}
+	return std::abs(lVolume) / 6;
 }
 
 

@@ -35,15 +35,15 @@ void Ball::OnTick()
 	bool lNormalize = false;
 	float lSpeed = lVelocity.GetLength();
 	mAverageSpeed = Math::Lerp(mAverageSpeed, lSpeed, 0.1f);
-	if (lSpeed > 4.1f)
+	if (lSpeed > 3.1f)
 	{
-		lSpeed = 3.9f;
+		lSpeed = 2.9f;
 		lNormalize = true;
 	}
 	else if (mAverageSpeed < 1.0f)
 	{
-		lSpeed = 3.9f;
-		mAverageSpeed = 3.9f;
+		lSpeed = 2.9f;
+		mAverageSpeed = 2.9f;
 		lNormalize = true;
 	}
 	if (lNormalize)
