@@ -28,8 +28,7 @@ public:
 protected:
 	enum CommandClient
 	{
-		COMMAND_PREV_LEVEL = Parent::COMMAND_COUNT_LIFE_CLIENT,
-		COMMAND_NEXT_LEVEL,
+		COMMAND_STEP_LEVEL = Parent::COMMAND_COUNT_LIFE_CLIENT,
 	};
 
 	virtual unsigned GetCommandCount() const;

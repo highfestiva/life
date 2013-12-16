@@ -22,8 +22,7 @@ namespace Bound
 // Must lie before BoundConsoleManager to compile.
 const BoundConsoleManager::CommandPair BoundConsoleManager::mCommandIdList[] =
 {
-	{_T("prev-level"), COMMAND_PREV_LEVEL},
-	{_T("next-level"), COMMAND_NEXT_LEVEL},
+	{_T("step-level"), COMMAND_STEP_LEVEL},
 };
 
 
@@ -75,20 +74,17 @@ int BoundConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& p
 		CommandClient lCommand = (CommandClient)TranslateCommand(pCommand);
 		switch ((int)lCommand)
 		{
-			case COMMAND_PREV_LEVEL:
+			case COMMAND_STEP_LEVEL:
 			{
-				GetGameManager()->GetTickLock()->Acquire();
-				((BoundManager*)GetGameManager())->StepLevel(-1);
-				GetGameManager()->GetTickLock()->Release();
-				return 0;
-			}
-			break;
-			case COMMAND_NEXT_LEVEL:
-			{
-				GetGameManager()->GetTickLock()->Acquire();
-				((BoundManager*)GetGameManager())->StepLevel(+1);
-				GetGameManager()->GetTickLock()->Release();
-				return 0;
+				int lStep = 0;
+				if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lStep))
+				{
+					GetGameManager()->GetTickLock()->Acquire();
+					((BoundManager*)GetGameManager())->StepLevel(lStep);
+					GetGameManager()->GetTickLock()->Release();
+					return 0;
+				}
+				return 1;
 			}
 			break;
 			default:

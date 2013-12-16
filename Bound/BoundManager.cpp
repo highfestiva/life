@@ -130,7 +130,7 @@ void BoundManager::LoadSettings()
 
 	Parent::LoadSettings();
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Chalkboard SE Regular"));
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 52.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
@@ -272,6 +272,10 @@ bool BoundManager::Paint()
 void BoundManager::HandleCutting()
 {
 	mIsCutting = false;
+	if (mMenu->GetDialog())
+	{
+		return;
+	}
 	const int w = mUiManager->GetCanvas()->GetWidth();
 	const int h = mUiManager->GetCanvas()->GetHeight();
 	const float lTouchSideScale = 1.28f;	// Inches.
@@ -331,13 +335,14 @@ void BoundManager::HandleCutting()
 		if (lCutPlane.n.GetLengthSquared() > 0 && !lIsVeryNewDrag && CheckBallsPlaneCollition(lCutPlane, lDragStarted? 0 : &lCutPlaneDelimiter))
 		{
 			// Invalidate swipe.
+			--mCutsLeft;
 			x->mFlags |= 1;
 		}
 		else if (lDragStarted && !x->mIsPress && mCutsLeft > 0)
 		{
+			--mCutsLeft;
 			if (Cut(lCutPlane))
 			{
-				--mCutsLeft;
 				const int lSide = CheckIfPlaneSlicesBetweenBalls(lCutPlane);
 				if (lSide > 0)
 				{
@@ -370,11 +375,6 @@ Plane BoundManager::ScreenLineToPlane(const PixelCoord& pCoord, const PixelCoord
 
 bool BoundManager::Cut(Plane pCutPlane)
 {
-	if (mMenu->GetDialog())
-	{
-		return false;
-	}
-
 	TimeLogger lTimeLogger(&mLog, _T("CheckIfPlaneSlicesBetweenBalls + prep"));
 	const int lSide = CheckIfPlaneSlicesBetweenBalls(pCutPlane);
 	if (lSide == 0)	// 0 == Both sides.
@@ -916,20 +916,27 @@ bool BoundManager::DidFinishLevel()
 int BoundManager::StepLevel(int pCount)
 {
 	mCutsLeft = 25;
+	mPercentDone = 0;
 
 	int lLevelNumber;
 	CURE_RTVAR_GET(lLevelNumber, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-	lLevelNumber += pCount;
+	lLevelNumber = std::max(0, lLevelNumber+pCount);
 	mLevel->GenerateLevel(GetPhysicsManager(), lLevelNumber);
 	int lBallCount = lLevelNumber + 2;
 	for (int x = 0; x < lBallCount; ++x)
 	{
 		CreateBall(x);
 	}
-	/*while (mBalls.size() > lBallCount)
+	while (mBalls.size() > lBallCount)
 	{
-		mBalls.
-	}*/
+		Cure::ContextObject* lBall = GetContext()->GetObject(mBalls.back());
+		if (!lBall)
+		{
+			break;
+		}
+		mBalls.pop_back();
+		DeleteContextObjectDelay(lBall, 0.1f);
+	}
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, lLevelNumber);
 	return lLevelNumber;
 }
@@ -1064,7 +1071,7 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	d->SetDirection(+1, false);
 	UiTbc::FixedLayouter lLayouter(d);
 
-	UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(20, 110, 220), _T("Next level"));
+	UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(30, 180, 50), _T("Next level"));
 	lLayouter.AddButton(lNextLevelButton, -1, 0, 4, 0, 1, 1, true);
 
 	UiTbc::Button* lPreviousLevelButton = new UiTbc::Button(Color(20, 110, 220), _T("Previous level"));
@@ -1113,11 +1120,11 @@ void BoundManager::ScriptPhysicsTick()
 			mCutVertices.clear();
 			mCutColors.clear();
 		}
-		if (mPercentDone >= 70 && !mMenu->GetDialog())
+		if (mPercentDone >= 85 && !mMenu->GetDialog())
 		{
 			DidFinishLevel();
 		}
-		else if (mCutsLeft <= 0)
+		else if (mCutsLeft <= 0 && !mMenu->GetDialog())
 		{
 			OnPauseButton(0);
 		}
@@ -1145,7 +1152,9 @@ void BoundManager::ScriptPhysicsTick()
 
 			if (lIsShaking)
 			{
-				GetPhysicsManager()->AddForce(lBall->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lAcceleration*9.82f);
+				Vector3DF v = lBall->GetVelocity();
+				v += lAcceleration*3.0f;
+				GetPhysicsManager()->SetBodyVelocity(lBall->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), v);
 			}
 		}
 		MoveCamera(lPhysicsTime);

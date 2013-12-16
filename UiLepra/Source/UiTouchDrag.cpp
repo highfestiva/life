@@ -86,11 +86,8 @@ void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
 	DragList::iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
-		if (i->mIsNew)
-		{
-			pInputManager->SetMousePosition(i->mLast.x, i->mLast.y);
-			pInputManager->GetMouse()->GetButton(0)->SetValue(i->mIsPress);
-		}
+		pInputManager->SetMousePosition(i->mLast.x, i->mLast.y);
+		pInputManager->GetMouse()->GetButton(0)->SetValue(i->mIsPress);
 	}
 }
 
