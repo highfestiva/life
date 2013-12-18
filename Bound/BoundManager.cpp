@@ -203,7 +203,10 @@ void BoundManager::SetFade(float pFadeAmount)
 
 bool BoundManager::Render()
 {
-	mSunlight->Tick(mCameraTransform.GetOrientation());
+	if (!mIsShaking && mShakeTimer.QuerySplitTime() < 4.0)
+	{
+		mSunlight->Tick(mCameraTransform.GetOrientation());
+	}
 
 	mUiManager->GetPainter()->PrePaint(false);
 	mUiManager->GetPainter()->ResetClippingRect();
@@ -217,14 +220,18 @@ bool BoundManager::Render()
 	Vector3DF p3(15,39,57);
 	Vector3DF a = mUiManager->GetAccelerometer();
 	static Vector3DF v;
-	v = Math::Lerp(v, a, 0.5f);
-	v.x = Math::Clamp(v.x*5, -5.0f, +20.0f);
-	v.y = Math::Clamp(v.y*14, -14.0f, +40.0f);
-	v.z = Math::Clamp(v.z*25, -30.0f, +60.0f);
-	p0 += v;
-	p1 += v;
-	p2 += v;
-	p3 += v;
+	if (mIsShaking || mShakeTimer.QuerySplitTime() < 4.5)
+	{
+		v = Math::Lerp(v, a, 0.5f);
+	}
+	Vector3DF o;
+	o.x = v.x*30;
+	o.y = v.y*60;
+	o.z = v.z*130;
+	p0 += o;
+	p1 += o;
+	p2 += o;
+	p3 += o;
 	mUiManager->GetPainter()->SetColor(Color((uint8)p0.x,(uint8)p0.y,(uint8)p0.z), 0);
 	mUiManager->GetPainter()->SetColor(Color((uint8)p1.x,(uint8)p1.y,(uint8)p1.z), 1);
 	mUiManager->GetPainter()->SetColor(Color((uint8)p2.x,(uint8)p2.y,(uint8)p2.z), 2);
@@ -256,7 +263,6 @@ bool BoundManager::Paint()
 	{
 		mUiManager->GetPainter()->SetColor(BRIGHT_TEXT);
 
-		mPercentDone = 100-mLevel->GetVolumePercent()*100;
 		const str lCompletionText = strutil::Format(_T("Reduced: %.1f%%"), mPercentDone);
 		int cw = mUiManager->GetPainter()->GetStringWidth(lCompletionText);
 		mUiManager->GetPainter()->PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 9);
@@ -277,7 +283,8 @@ bool BoundManager::Paint()
 		Vector3DF v = RNDPOSVEC()*255;
 		Color lBlinkCol;
 		lBlinkCol.Set(v.x, v.y, v.z, 1.0f);
-		mUiManager->GetPainter()->SetColor(mIsShaking? lBlinkCol : DIM_TEXT);
+		bool lIsShowingShake = (mIsShaking && mShakeTimer.QuerySplitTime() < 2.5);
+		mUiManager->GetPainter()->SetColor(lIsShowingShake? lBlinkCol : DIM_TEXT);
 		const str lShakesText = strutil::Format(_T("Shakes: %i"), mShakesLeft);
 		mUiManager->GetPainter()->PrintText(lShakesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 48);
 		mUiManager->SetMasterFont();
@@ -366,7 +373,7 @@ bool BoundManager::HandleCutting()
 					lCutPlane = -lCutPlane;
 				}
 				float lCutX = mCameraTransform.GetOrientation().GetInverseRotatedVector(lCutPlane.n).x;
-				mCameraRotateSpeed = (lCutX < 0)? +6.0f : -6.0f;
+				mCameraRotateSpeed = (lCutX < 0)? +3.0f : -3.0f;
 			}
 		}
 		lAnyDragStarted |= lDragStarted;
@@ -1159,13 +1166,20 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 
 	if (LEVEL_DONE())
 	{
+		UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Level completed (85%)"));
+		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
+		mUiManager->SetMasterFont();
+		lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
+		lLabel->SetAdaptive(false);
+		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
+
 		UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(30, 180, 50), _T("Next level"));
 		lLayouter.AddButton(lNextLevelButton, -1, lRow++, lRowCount, 0, 1, 1, true);
 	}
 	else
 	{
 		UiTbc::Label* lLabel;
-		if (pButton)
+		if (mCutsLeft > 0)
 		{
 			lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Paused"));
 		}
@@ -1183,8 +1197,11 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	UiTbc::Button* lResetLevelButton = new UiTbc::Button(Color(220, 110, 20), _T("Reset level"));
 	lLayouter.AddButton(lResetLevelButton, -3, lRow++, lRowCount, 0, 1, 1, true);
 
-	UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(Color(210, 40, 30), _T("Reset game"));
-	lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
+	if (lRow < 3)
+	{
+		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(Color(210, 40, 30), _T("Reset game"));
+		lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
+	}
 
 	if (pButton)
 	{
@@ -1242,6 +1259,7 @@ void BoundManager::ScriptPhysicsTick()
 			mCutColors.clear();
 			mForceCutWindow = false;
 		}
+		mPercentDone = 100-mLevel->GetVolumePercent()*100;
 		if (LEVEL_DONE() && !mMenu->GetDialog())
 		{
 			DidFinishLevel();
@@ -1253,7 +1271,8 @@ void BoundManager::ScriptPhysicsTick()
 		Vector3DF lAcceleration = mUiManager->GetAccelerometer();
 		float lAccelerationLength = lAcceleration.GetLength();
 		mIsShaking = (lAccelerationLength > 1.2f);
-		if (mShakeTimer.QuerySplitTime() > 4.0)
+		bool lIsReallyShaking = false;
+		if (mShakeTimer.QuerySplitTime() > 6.0)
 		{
 			mIsShaking = false;
 			mShakeTimer.Stop();
@@ -1262,7 +1281,7 @@ void BoundManager::ScriptPhysicsTick()
 		else if (mShakeTimer.QuerySplitTime() > 2.5)
 		{
 			// Intermission.
-			mIsShaking = false;
+			mIsShaking = true;
 		}
 		else if (mIsShaking && mShakesLeft > 0)
 		{
@@ -1271,8 +1290,16 @@ void BoundManager::ScriptPhysicsTick()
 				lAcceleration.Normalize(3);
 			}
 			lAcceleration = mCameraTransform.GetOrientation() * lAcceleration;
-			mShakeTimer.TryStart();
-			--mShakesLeft;
+			if (!mShakeTimer.IsStarted())
+			{
+				mShakeTimer.Start();
+				--mShakesLeft;
+			}
+			lIsReallyShaking = true;
+		}
+		else if (mShakeTimer.IsStarted())
+		{
+			mIsShaking = true;
 		}
 		std::vector<Cure::GameObjectId>::iterator x;
 		for (x = mBalls.begin(); x != mBalls.end(); ++x)
@@ -1285,7 +1312,7 @@ void BoundManager::ScriptPhysicsTick()
 			Vector3DF p = lBall->GetPosition();
 			lBall->SetInitialTransform(TransformationF(QuaternionF(), p));
 
-			if (mIsShaking)
+			if (lIsReallyShaking)
 			{
 				Vector3DF v = lBall->GetVelocity();
 				v += lAcceleration*3.0f;
@@ -1365,8 +1392,8 @@ void BoundManager::MoveCamera(float pFrameTime)
 		return;
 	}
 
-	mCameraAngle += 0.3f*mCameraRotateSpeed*pFrameTime;
-	mCameraRotateSpeed = Math::Lerp(mCameraRotateSpeed, (mCameraRotateSpeed < 0)? -1.0f : 1.0f, 0.1f);
+	mCameraAngle += 0.15f*mCameraRotateSpeed*pFrameTime;
+	mCameraRotateSpeed = Math::Lerp(mCameraRotateSpeed, (mCameraRotateSpeed < 0)? -1.0f : 1.0f, 0.07f);
 	if (mCameraAngle > 2*PIF)
 	{
 		mCameraAngle -= 2*PIF;
