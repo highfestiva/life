@@ -266,7 +266,7 @@ bool DownwashManager::Open()
 	if (lOk)
 	{
 		mMenu = new Life::Menu(mUiManager, GetResourceManager());
-		mMenu->SetButtonTapSound(_T("tap.wav"), 0.3f);
+		mMenu->SetButtonTapSound(_T("tap.wav"), 1, 0.3f);
 	}
 	if (lOk)
 	{

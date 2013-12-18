@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "Quaternion.h"
 #include "Vector3D.h"
 
 
@@ -25,6 +26,7 @@ public:
 
 	float GetAbsDistance(const Vector3DF& pPosition) const;
 	float GetDistance(const Vector3DF& pPosition) const;
+	QuaternionF GetOrientation() const;
 
 	Plane operator-() const;
 

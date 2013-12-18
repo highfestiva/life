@@ -6,12 +6,11 @@
 
 #pragma once
 
-//#include "../Lepra/Include/GameTimer.h"
+#include "../Lepra/Include/Plane.h"
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/LifeClient/Menu.h"
 #include "../UiCure/Include/UiResourceManager.h"
 #include "Bound.h"
-//#include "Version.h"
 
 
 
@@ -51,6 +50,13 @@ class BoundManager: public Life::GameClientSlaveManager
 {
 	typedef Life::GameClientSlaveManager Parent;
 public:
+	typedef enum CutMode
+	{
+		CUT_NORMAL,
+		CUT_ADD_WINDOW,
+		CUT_WINDOW_ITSELF,
+	};
+
 	BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
@@ -66,9 +72,10 @@ public:
 	virtual bool Render();
 	virtual bool Paint();
 
-	void HandleCutting();
+	bool HandleCutting();
 	Plane ScreenLineToPlane(const PixelCoord& pCoord, const	PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter);
 	bool Cut(Plane pCutPlane);
+	bool DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPlane, CutMode pCutMode);
 	void AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors);
 	void AddNGonPoints(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p0, const Vector3DF& p1);
 	static void AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p);
@@ -78,7 +85,6 @@ public:
 	void AddNGonTriangles(const Plane& pCutPlane, const std::vector<Vector3DF>& pNGon, const uint8* pColors);
 	int CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane);
 	bool CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter);
-	void ExplodeBalls();
 	static bool AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int pWidth, int pHeight);
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
@@ -120,7 +126,9 @@ protected:
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	Level* mLevel;
 	std::vector<float> mCutVertices;
+	std::vector<float> mCutWindowVertices;
 	std::vector<uint8> mCutColors;
+	bool mForceCutWindow;
 	std::vector<Cure::GameObjectId> mBalls;
 	Life::Menu* mMenu;
 	StopWatch mNextLevelTimer;
@@ -132,7 +140,12 @@ protected:
 	bool mLevelCompleted;
 	UiTbc::Button* mPauseButton;
 	bool mIsCutting;
+	bool mIsShaking;
 	int mCutsLeft;
+	int mShakesLeft;
+	StopWatch mShakeTimer;
+	Plane mLastCutPlane;
+	CutMode mLastCutMode;
 	LOG_CLASS_DECLARE();
 };
 

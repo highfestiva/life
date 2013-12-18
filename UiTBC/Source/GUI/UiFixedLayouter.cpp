@@ -86,7 +86,7 @@ void FixedLayouter::AddComponent(Component* pComponent, int r, int rc, int c, in
 	const float lComponentHeight = lFullRowHeight - lYMarginCount*mContentYMargin/rc;
 	pComponent->SetPos(int(lLeft + c*lFullColWidth), int(lTop + r*lFullRowHeight));
 	pComponent->SetSize(int(cw*lComponentWidth), (int)lComponentHeight);
-	pComponent->SetPreferredSize(pComponent->GetSize());
+	pComponent->SetPreferredSize(pComponent->GetSize(), false);
 }
 
 void FixedLayouter::AddWindow(Window* pWindow, int r, int rc, int c, int cw, int cc)

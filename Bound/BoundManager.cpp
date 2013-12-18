@@ -28,14 +28,19 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define BG_COLOR		Color(110, 110, 110, 160)
+#define BG_COLOR		Color(15, 18, 25, 160)
 #define CAM_DISTANCE		7.0f
-#define BALL_RADIUS		0.111f
+#define BALL_RADIUS		0.15f
 #define DRAG_FLAG_INVALID	1
 #define DRAG_FLAG_STARTED	2
 #define CLOSE_NORMAL		5e-5
 #define SAME_NORMAL		(1-CLOSE_NORMAL)
 #define NGON_INDEX(i)		(((int)i<0)? cnt-1 : (i>=(int)cnt)? 0 : i)
+#define LEVEL_DONE()		(mPercentDone >= 85)
+#define BRIGHT_TEXT		Color(230, 225, 215)
+#define DIM_TEXT		Color(190, 180, 160)
+#define DIM_RED_TEXT		Color(245, 90, 90)
+#define DIM_RED			Color(180, 60, 50)
 
 
 namespace Bound
@@ -49,6 +54,7 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mCollisionSoundManager(0),
 	mLevel(0),
+	mForceCutWindow(false),
 	mMenu(0),
 	mSunlight(0),
 	mCameraAngle(0),
@@ -57,7 +63,10 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	mLevelCompleted(false),
 	mPauseButton(0),
 	mIsCutting(false),
-	mCutsLeft(1)
+	mIsShaking(false),
+	mCutsLeft(1),
+	mShakesLeft(1),
+	mLastCutMode(CUT_NORMAL)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
@@ -159,7 +168,7 @@ bool BoundManager::Open()
 	if (lOk)
 	{
 		mMenu = new Life::Menu(mUiManager, GetResourceManager());
-		mMenu->SetButtonTapSound(_T("tap.wav"), 0.3f);
+		mMenu->SetButtonTapSound(_T("tap.wav"), 0.2f, 0.05f);
 	}
 	return lOk;
 }
@@ -242,9 +251,10 @@ bool BoundManager::Paint()
 	{
 		return false;
 	}
+	bool lIsUsingACut = HandleCutting();
 	if (mLevel)
 	{
-		mUiManager->GetPainter()->SetColor(Color(230, 225, 215));
+		mUiManager->GetPainter()->SetColor(BRIGHT_TEXT);
 
 		mPercentDone = 100-mLevel->GetVolumePercent()*100;
 		const str lCompletionText = strutil::Format(_T("Reduced: %.1f%%"), mPercentDone);
@@ -259,23 +269,30 @@ bool BoundManager::Paint()
 		mUiManager->GetPainter()->PrintText(lLevelText, mUiManager->GetCanvas()->GetWidth()-lw-25, 9);
 		mUiManager->SetMasterFont();
 
-		mUiManager->GetPainter()->SetColor(Color(190, 180, 160));
+		mUiManager->GetPainter()->SetColor(lIsUsingACut? DIM_RED_TEXT : DIM_TEXT);
 		mUiManager->SetScaleFont(0.7f);
 		const str lLinesText = strutil::Format(_T("Cuts: %i"), mCutsLeft);
-		mUiManager->GetPainter()->PrintText(lLinesText, mUiManager->GetCanvas()->GetWidth()-lw-23, 31);
+		mUiManager->GetPainter()->PrintText(lLinesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 31);
+
+		Vector3DF v = RNDPOSVEC()*255;
+		Color lBlinkCol;
+		lBlinkCol.Set(v.x, v.y, v.z, 1.0f);
+		mUiManager->GetPainter()->SetColor(mIsShaking? lBlinkCol : DIM_TEXT);
+		const str lShakesText = strutil::Format(_T("Shakes: %i"), mShakesLeft);
+		mUiManager->GetPainter()->PrintText(lShakesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 48);
 		mUiManager->SetMasterFont();
 	}
-	HandleCutting();
 	return true;
 }
 
-void BoundManager::HandleCutting()
+bool BoundManager::HandleCutting()
 {
 	mIsCutting = false;
 	if (mMenu->GetDialog())
 	{
-		return;
+		return false;
 	}
+	bool lAnyDragStarted = false;
 	const int w = mUiManager->GetCanvas()->GetWidth();
 	const int h = mUiManager->GetCanvas()->GetHeight();
 	const float lTouchSideScale = 1.28f;	// Inches.
@@ -352,7 +369,9 @@ void BoundManager::HandleCutting()
 				mCameraRotateSpeed = (lCutX < 0)? +6.0f : -6.0f;
 			}
 		}
+		lAnyDragStarted |= lDragStarted;
 	}
+	return lAnyDragStarted;
 }
 
 Plane BoundManager::ScreenLineToPlane(const PixelCoord& pCoord, const PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter)
@@ -375,29 +394,49 @@ Plane BoundManager::ScreenLineToPlane(const PixelCoord& pCoord, const PixelCoord
 
 bool BoundManager::Cut(Plane pCutPlane)
 {
-	TimeLogger lTimeLogger(&mLog, _T("CheckIfPlaneSlicesBetweenBalls + prep"));
 	const int lSide = CheckIfPlaneSlicesBetweenBalls(pCutPlane);
-	if (lSide == 0)	// 0 == Both sides.
+	if (lSide == 0)	// Balls on both sides.
 	{
-		ExplodeBalls();
-		return false;
+		return DoCut(mLevel->GetMesh(), pCutPlane, CUT_ADD_WINDOW);
 	}
-	if (lSide < 0)
+	if (lSide == -1)
 	{
 		pCutPlane = -pCutPlane;
 	}
-	// Plane normal now "points" toward vertices that says. Those on the other side gets cut off. The new triangles will use this normal.
+	DoCut(mLevel->GetWindowMesh(), pCutPlane, CUT_WINDOW_ITSELF);
+	return DoCut(mLevel->GetMesh(), pCutPlane, CUT_NORMAL);
+}
+
+bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPlane, CutMode pCutMode)
+{
+	if (!pMesh)
+	{
+		return false;
+	}
+
+	mLastCutMode = pCutMode;
+	// Plane normal now "points" toward vertices that stays. Those on the other side gets cut off. The new triangles will use this normal.
+	TimeLogger lTimeLogger(&mLog, _T("CheckIfPlaneSlicesBetweenBalls + prep"));
 	const QuaternionF q = mCameraTransform.GetOrientation();
-	const int tc = mLevel->GetMesh()->GetVertexCount() / 3;
-	const float* v = mLevel->GetMesh()->GetVertexData();
-	const uint8* c = mLevel->GetMesh()->GetColorData();
-	mCutVertices.reserve(tc*2*3*3);
-	mCutColors.reserve(tc*2*3*4);
-	mCutVertices.clear();
-	mCutColors.clear();
+	const int tc = pMesh->GetVertexCount() / 3;
+	const float* v = pMesh->GetVertexData();
+	const uint8* c = pMesh->GetColorData();
+	if (mLastCutMode == CUT_NORMAL)
+	{
+		mCutVertices.reserve(tc*2*3*3);
+		mCutColors.reserve(tc*2*3*4);
+		mCutVertices.clear();
+		mCutColors.clear();
+	}
+	else
+	{
+		mCutWindowVertices.reserve(tc*2*3*3);
+		mCutWindowVertices.clear();
+	}
 	std::vector<Vector3DF> lNGon;
 	std::unordered_set<int> pNGonMap;
 	bool lDidCut = false;
+	const bool lCreateWindow = (pCutMode == CUT_ADD_WINDOW);
 	lTimeLogger.Transfer(_T("CutLoop"));
 	for (int x = 0; x < tc; ++x)
 	{
@@ -409,14 +448,30 @@ bool BoundManager::Cut(Plane pCutPlane)
 		const float d2 = pCutPlane.GetDistance(p2);
 		if (d0 >= 0 && d1 >= 0 && d2 >= 0)
 		{
-			// All vertices on staying side of mesh. No cut, only copy.
-			mCutVertices.insert(mCutVertices.end(), &v[x*9], &v[x*9+9]);
-			mCutColors.insert(mCutColors.end(), &c[x*12], &c[x*12+12]);
+			if (!lCreateWindow)
+			{
+				// All vertices on staying side of mesh. No cut, only copy.
+				if (pCutMode == CUT_NORMAL)
+				{
+					mCutVertices.insert(mCutVertices.end(), &v[x*9], &v[x*9+9]);
+				}
+				else
+				{
+					mCutWindowVertices.insert(mCutWindowVertices.end(), &v[x*9], &v[x*9+9]);
+				}
+				if (c)
+				{
+					mCutColors.insert(mCutColors.end(), &c[x*12], &c[x*12+12]);
+				}
+			}
 		}
 		else if (d0 <= 0 && d1 <= 0 && d2 <= 0)
 		{
-			// The whole triangle got cut off - way to go! No cut, only discard.
-			lDidCut = true;
+			if (!lCreateWindow)
+			{
+				// The whole triangle got cut off - way to go! No cut, only discard.
+				lDidCut = true;
+			}
 		}
 		else
 		{
@@ -434,8 +489,11 @@ bool BoundManager::Cut(Plane pCutPlane)
 				const float t4 = -d0 / (pCutPlane.n*d20);
 				Vector3DF p3 = p1+t3*d12;
 				Vector3DF p4 = p0+t4*d20;
-				AddTriangle(p0, p1, p3, &c[x*12]);
-				AddTriangle(p0, p3, p4, &c[x*12]);
+				if (!lCreateWindow)
+				{
+					AddTriangle(p0, p1, p3, &c[x*12]);
+					AddTriangle(p0, p3, p4, &c[x*12]);
+				}
 				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else if (d1 > 0 && d2 > 0)
@@ -445,8 +503,11 @@ bool BoundManager::Cut(Plane pCutPlane)
 				const float t4 = -d1 / (pCutPlane.n*d01);
 				Vector3DF p3 = p2+t3*d20;
 				Vector3DF p4 = p1+t4*d01;
-				AddTriangle(p1, p2, p3, &c[x*12]);
-				AddTriangle(p1, p3, p4, &c[x*12]);
+				if (!lCreateWindow)
+				{
+					AddTriangle(p1, p2, p3, &c[x*12]);
+					AddTriangle(p1, p3, p4, &c[x*12]);
+				}
 				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else if (d0 > 0 && d2 > 0)
@@ -456,8 +517,11 @@ bool BoundManager::Cut(Plane pCutPlane)
 				const float t4 = -d2 / (pCutPlane.n*d12);
 				Vector3DF p3 = p0+t3*d01;
 				Vector3DF p4 = p2+t4*d12;
-				AddTriangle(p2, p0, p3, &c[x*12]);
-				AddTriangle(p2, p3, p4, &c[x*12]);
+				if (!lCreateWindow)
+				{
+					AddTriangle(p2, p0, p3, &c[x*12]);
+					AddTriangle(p2, p3, p4, &c[x*12]);
+				}
 				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else if (d0 > 0)
@@ -467,7 +531,10 @@ bool BoundManager::Cut(Plane pCutPlane)
 				const float t4 = -d0 / (pCutPlane.n*d20);
 				Vector3DF p3 = p0+t3*d01;
 				Vector3DF p4 = p0+t4*d20;
-				AddTriangle(p0, p3, p4, &c[x*12]);
+				if (!lCreateWindow)
+				{
+					AddTriangle(p0, p3, p4, &c[x*12]);
+				}
 				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else if (d1 > 0)
@@ -477,7 +544,10 @@ bool BoundManager::Cut(Plane pCutPlane)
 				const float t4 = -d1 / (pCutPlane.n*d01);
 				Vector3DF p3 = p1+t3*d12;
 				Vector3DF p4 = p1+t4*d01;
-				AddTriangle(p1, p3, p4, &c[x*12]);
+				if (!lCreateWindow)
+				{
+					AddTriangle(p1, p3, p4, &c[x*12]);
+				}
 				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 			else
@@ -487,20 +557,33 @@ bool BoundManager::Cut(Plane pCutPlane)
 				const float t4 = -d2 / (pCutPlane.n*d12);
 				Vector3DF p3 = p2+t3*d20;
 				Vector3DF p4 = p2+t4*d12;
-				AddTriangle(p2, p3, p4, &c[x*12]);
+				if (!lCreateWindow)
+				{
+					AddTriangle(p2, p3, p4, &c[x*12]);
+				}
 				AddNGonPoints(lNGon, pNGonMap, p3, p4);
 			}
 		}
+	}
+	if (mLastCutMode == CUT_WINDOW_ITSELF)
+	{
+		if (lDidCut && mLastCutMode == CUT_WINDOW_ITSELF && mCutWindowVertices.empty())
+		{
+			mForceCutWindow = true;
+		}
+		return true;
 	}
 	lTimeLogger.Transfer(_T("CreateNGon()"));
 	CreateNGon(lNGon);
 	if (lNGon.size() < 3 || !lDidCut)
 	{
 		mCutVertices.clear();
+		mCutWindowVertices.clear();
 		mCutColors.clear();
 		return false;
 	}
 	// Generate random colors and add.
+	lTimeLogger.Transfer(_T("AddNGonTriangles()"));
 	std::vector<uint8> lNGonColors;
 	const size_t nvc = (lNGon.size()-2)*3;
 	lNGonColors.resize(nvc*4);
@@ -510,29 +593,31 @@ bool BoundManager::Cut(Plane pCutPlane)
 		lNGonColors[x*4+0] = (uint8)(lNewColor.x*255);
 		lNGonColors[x*4+1] = (uint8)(lNewColor.y*255);
 		lNGonColors[x*4+2] = (uint8)(lNewColor.z*255);
-		lNGonColors[x*4+3] = 255;
+		lNGonColors[x*4+3] = 128;
 	}
-	lTimeLogger.Transfer(_T("AddNGonTriangles()"));
 	AddNGonTriangles(pCutPlane, lNGon, &lNGonColors[0]);
 	return true;
 }
 
 void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors)
 {
-	mCutVertices.push_back(v0.x); mCutVertices.push_back(v0.y); mCutVertices.push_back(v0.z);
-	mCutVertices.push_back(v1.x); mCutVertices.push_back(v1.y); mCutVertices.push_back(v1.z);
-	mCutVertices.push_back(v2.x); mCutVertices.push_back(v2.y); mCutVertices.push_back(v2.z);
-	mCutColors.insert(mCutColors.end(), pColors, pColors+12);
+	if (mLastCutMode == CUT_NORMAL)
+	{
+		mCutVertices.push_back(v0.x); mCutVertices.push_back(v0.y); mCutVertices.push_back(v0.z);
+		mCutVertices.push_back(v1.x); mCutVertices.push_back(v1.y); mCutVertices.push_back(v1.z);
+		mCutVertices.push_back(v2.x); mCutVertices.push_back(v2.y); mCutVertices.push_back(v2.z);
+		mCutColors.insert(mCutColors.end(), pColors, pColors+12);
+	}
+	else
+	{
+		mCutWindowVertices.push_back(v0.x); mCutWindowVertices.push_back(v0.y); mCutWindowVertices.push_back(v0.z);
+		mCutWindowVertices.push_back(v1.x); mCutWindowVertices.push_back(v1.y); mCutWindowVertices.push_back(v1.z);
+		mCutWindowVertices.push_back(v2.x); mCutWindowVertices.push_back(v2.y); mCutWindowVertices.push_back(v2.z);
+	}
 }
 
 void BoundManager::AddNGonPoints(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p0, const Vector3DF& p1)
 {
-	bool lAddNGon;
-	CURE_RTVAR_TRYGET(lAddNGon, =, GetVariableScope(), "AddNGon", true);
-	if (!lAddNGon)
-	{
-		return;
-	}
 	AddNGonPoint(pNGon, pNGonMap, p0);
 	AddNGonPoint(pNGon, pNGonMap, p1);
 }
@@ -760,6 +845,7 @@ void BoundManager::AddNGonTriangles(const Plane& pCutPlane, const std::vector<Ve
 		p1 = p2;
 		pColors += 4*3;
 	}
+	mLastCutPlane = pCutPlane;
 }
 
 int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane)
@@ -815,10 +901,6 @@ bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane*
 		}
 	}
 	return false;
-}
-
-void BoundManager::ExplodeBalls()
-{
 }
 
 bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, int h)
@@ -916,6 +998,7 @@ bool BoundManager::DidFinishLevel()
 int BoundManager::StepLevel(int pCount)
 {
 	mCutsLeft = 25;
+	mShakesLeft = 2;
 	mPercentDone = 0;
 
 	int lLevelNumber;
@@ -927,7 +1010,7 @@ int BoundManager::StepLevel(int pCount)
 	{
 		CreateBall(x);
 	}
-	while (mBalls.size() > lBallCount)
+	while ((int)mBalls.size() > lBallCount)
 	{
 		Cure::ContextObject* lBall = GetContext()->GetObject(mBalls.back());
 		if (!lBall)
@@ -958,6 +1041,7 @@ bool BoundManager::InitializeUniverse()
 	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	mCutsLeft = 25;
+	mShakesLeft = 2;
 	mLevel = (Level*)Parent::CreateContextObject(_T("level"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	int lLevelIndex;
 	CURE_RTVAR_GET(lLevelIndex, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
@@ -1063,28 +1147,50 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	if (pButton)
 	{
 		mMenu->OnTapSound(pButton);
-		pButton->SetVisible(false);
 	}
+	mPauseButton->SetVisible(false);
 
-	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &BoundManager::OnMenuAlternative), 0.8f, 0.8f);
+	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &BoundManager::OnMenuAlternative), 0.6f, 0.6f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
 	d->SetDirection(+1, false);
 	UiTbc::FixedLayouter lLayouter(d);
+	int lRow = 0;
+	const int lRowCount = 3;
 
-	UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(30, 180, 50), _T("Next level"));
-	lLayouter.AddButton(lNextLevelButton, -1, 0, 4, 0, 1, 1, true);
-
-	UiTbc::Button* lPreviousLevelButton = new UiTbc::Button(Color(20, 110, 220), _T("Previous level"));
-	lLayouter.AddButton(lPreviousLevelButton, -2, 1, 4, 0, 1, 1, true);
+	if (LEVEL_DONE())
+	{
+		UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(30, 180, 50), _T("Next level"));
+		lLayouter.AddButton(lNextLevelButton, -1, lRow++, lRowCount, 0, 1, 1, true);
+	}
+	else
+	{
+		UiTbc::Label* lLabel;
+		if (pButton)
+		{
+			lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Paused"));
+		}
+		else
+		{
+			lLabel = new UiTbc::Label(Color(210, 40, 30), _T("Out of cuts!"));
+		}
+		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
+		mUiManager->SetMasterFont();
+		lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
+		lLabel->SetAdaptive(false);
+		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
+	}
 
 	UiTbc::Button* lResetLevelButton = new UiTbc::Button(Color(220, 110, 20), _T("Reset level"));
-	lLayouter.AddButton(lResetLevelButton, -3, 2, 4, 0, 1, 1, true);
+	lLayouter.AddButton(lResetLevelButton, -3, lRow++, lRowCount, 0, 1, 1, true);
 
-	UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(Color(210, 40, 30), _T("1st level"));
-	lLayouter.AddButton(lRestartFrom1stLevelButton, -4, 3, 4, 0, 1, 1, true);
+	UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(Color(210, 40, 30), _T("Reset game"));
+	lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
-	lLayouter.AddCornerButton(lCloseButton, -9);
+	if (pButton)
+	{
+		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, _T("X"));
+		lLayouter.AddCornerButton(lCloseButton, -9);
+	}
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 }
@@ -1113,14 +1219,30 @@ void BoundManager::ScriptPhysicsTick()
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	if (lPhysicsTime > 1e-5)
 	{
-		if (!mCutVertices.empty())
+		if (!mCutVertices.empty() || !mCutWindowVertices.empty() || mForceCutWindow)
 		{
 			TimeLogger lTimeLogger(&mLog, _T("mLevel->SetTriangles"));
-			mLevel->SetTriangles(GetPhysicsManager(), mCutVertices, mCutColors);
+			if (mLastCutMode == CUT_ADD_WINDOW)
+			{
+				mLevel->AddCutPlane(GetPhysicsManager(), mLastCutPlane, mCutWindowVertices, Color(90, 100, 210, 180));
+			}
+			else
+			{
+				if (!mCutVertices.empty())
+				{
+					mLevel->SetTriangles(GetPhysicsManager(), mCutVertices, mCutColors);
+				}
+				if (!mCutWindowVertices.empty() || mForceCutWindow)
+				{
+					mLevel->SetWindowTriangles(mCutWindowVertices);
+				}
+			}
 			mCutVertices.clear();
+			mCutWindowVertices.clear();
 			mCutColors.clear();
+			mForceCutWindow = false;
 		}
-		if (mPercentDone >= 85 && !mMenu->GetDialog())
+		if (LEVEL_DONE() && !mMenu->GetDialog())
 		{
 			DidFinishLevel();
 		}
@@ -1130,14 +1252,27 @@ void BoundManager::ScriptPhysicsTick()
 		}
 		Vector3DF lAcceleration = mUiManager->GetAccelerometer();
 		float lAccelerationLength = lAcceleration.GetLength();
-		const bool lIsShaking = (lAccelerationLength > 1.2f);
-		if (lIsShaking)
+		mIsShaking = (lAccelerationLength > 1.2f);
+		if (mShakeTimer.QuerySplitTime() > 4.0)
+		{
+			mIsShaking = false;
+			mShakeTimer.Stop();
+			mShakeTimer.PopTimeDiff();
+		}
+		else if (mShakeTimer.QuerySplitTime() > 2.5)
+		{
+			// Intermission.
+			mIsShaking = false;
+		}
+		else if (mIsShaking && mShakesLeft > 0)
 		{
 			if (lAccelerationLength > 3)
 			{
 				lAcceleration.Normalize(3);
 			}
 			lAcceleration = mCameraTransform.GetOrientation() * lAcceleration;
+			mShakeTimer.TryStart();
+			--mShakesLeft;
 		}
 		std::vector<Cure::GameObjectId>::iterator x;
 		for (x = mBalls.begin(); x != mBalls.end(); ++x)
@@ -1150,7 +1285,7 @@ void BoundManager::ScriptPhysicsTick()
 			Vector3DF p = lBall->GetPosition();
 			lBall->SetInitialTransform(TransformationF(QuaternionF(), p));
 
-			if (lIsShaking)
+			if (mIsShaking)
 			{
 				Vector3DF v = lBall->GetVelocity();
 				v += lAcceleration*3.0f;
@@ -1195,9 +1330,9 @@ void BoundManager::HandleWorldBoundaries()
 		if (lObject->IsLoaded() && lObject->GetPhysics())
 		{
 			const Vector3DF lPosition = lObject->GetPosition();
-			if (!Math::IsInRange(lPosition.x, -1000.0f, +1000.0f) ||
-				!Math::IsInRange(lPosition.y, -1000.0f, +1000.0f) ||
-				!Math::IsInRange(lPosition.z, -1000.0f, +1000.0f))
+			if (!Math::IsInRange(lPosition.x, -10.0f, +10.0f) ||
+				!Math::IsInRange(lPosition.y, -10.0f, +10.0f) ||
+				!Math::IsInRange(lPosition.z, -10.0f, +10.0f))
 			{
 				lLostObjectArray.push_back(lObject->GetInstanceId());
 			}
@@ -1210,6 +1345,15 @@ void BoundManager::HandleWorldBoundaries()
 		for (; y != lLostObjectArray.end(); ++y)
 		{
 			DeleteContextObject(*y);
+			std::vector<Cure::GameObjectId>::iterator x;
+			for (x = mBalls.begin(); x != mBalls.end(); ++x)
+			{
+				if (*x == *y)
+				{
+					mBalls.erase(x);
+					break;
+				}
+			}
 		}
 	}
 }

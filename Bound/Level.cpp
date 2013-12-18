@@ -6,6 +6,7 @@
 
 #include "Level.h"
 #include "../Lepra/Include/CyclicArray.h"
+#include "../Lepra/Include/Plane.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiTBC/Include/UiBasicMeshCreator.h"
 #include "../UiTBC/Include/UiTriangleBasedGeometry.h"
@@ -20,7 +21,9 @@ namespace Bound
 Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mGfxMesh(0),
+	mGfxWindowMesh(0),
 	mGfxMeshId(0),
+	mGfxWindowMeshId(0),
 	mPhysMeshBodyId(0),
 	mBodyIndexData(0),
 	mLevel(0),
@@ -42,17 +45,27 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 	if (mGfxMeshId)
 	{
 		mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
+		mGfxMeshId = 0;
+	}
+	if (mGfxWindowMeshId)
+	{
+		mUiManager->GetRenderer()->RemoveGeometry(mGfxWindowMeshId);
+		mGfxWindowMeshId = 0;
 	}
 
 	CreateTriangleBox(4.5f, 4.5f, 3);
 	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(0.9f,0.85f,0.3f);
-	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0.5f,0.5f,0.5f);
+	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(1,1,1);
 	mGfxMesh->GetBasicMaterialSettings().mShininess	= false;
 	mGfxMesh->GetBasicMaterialSettings().mSmooth	= false;
 	mGfxMesh->SetGeometryVolatility(TBC::GeometryBase::GEOM_SEMI_STATIC);
 	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
 
+	delete mGfxWindowMesh;
+	mGfxWindowMesh = 0;
+
 	CreatePhysicsMesh(pPhysicsManager);
+	DeleteWindowBoxes(pPhysicsManager);
 
 	mOriginalVolume = CalculateVolume();
 	mVolume = mOriginalVolume;
@@ -61,6 +74,11 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 const UiTbc::TriangleBasedGeometry* Level::GetMesh() const
 {
 	return mGfxMesh;
+}
+
+const UiTbc::TriangleBasedGeometry* Level::GetWindowMesh() const
+{
+	return mGfxWindowMesh;
 }
 
 float Level::GetVolumePercent() const
@@ -72,11 +90,52 @@ void Level::SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector
 {
 	mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
 
-	SetVertices(&pVertices[0], pVertices.size()/3, pColors);
+	SetVertices(mGfxMesh, &pVertices[0], pVertices.size()/3, &pColors[0]);
 	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
 	CreatePhysicsMesh(pPhysicsManager);
 
 	mVolume = CalculateVolume();
+}
+
+void Level::SetWindowTriangles(const std::vector<float>& pVertices)
+{
+	if (mGfxWindowMeshId)
+	{
+		mUiManager->GetRenderer()->RemoveGeometry(mGfxWindowMeshId);
+	}
+
+	SetVertices(mGfxWindowMesh, pVertices.empty()? 0 : &pVertices[0], pVertices.size()/3, 0);
+	mGfxWindowMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxWindowMesh, UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED, UiTbc::Renderer::FORCE_NO_SHADOWS);
+}
+
+void Level::AddCutPlane(TBC::PhysicsManager* pPhysicsManager, const Plane& pWindowPlane, const std::vector<float>& pVertices, const Color& pColor)
+{
+	if (mGfxWindowMeshId)
+	{
+		mUiManager->GetRenderer()->RemoveGeometry(mGfxWindowMeshId);
+	}
+
+	if (!mGfxWindowMesh)
+	{
+		mGfxWindowMesh = new UiTbc::TriangleBasedGeometry;
+	}
+	mGfxWindowMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(pColor.mRed/255.0f, pColor.mGreen/255.0f, pColor.mBlue/255.0f);
+	mGfxWindowMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(1,1,1);
+	mGfxWindowMesh->GetBasicMaterialSettings().mAlpha	= pColor.mAlpha/255.0f;
+	mGfxWindowMesh->GetBasicMaterialSettings().mShininess	= true;
+	mGfxWindowMesh->GetBasicMaterialSettings().mSmooth	= false;
+
+	std::vector<float> lVertices(pVertices);
+	const float* v = mGfxWindowMesh->GetVertexData();
+	int vc = mGfxWindowMesh->GetVertexCount()*3;
+	for (int x = 0; x < vc; ++x)
+	{
+		lVertices.push_back(v[x]);
+	}
+	SetVertices(mGfxWindowMesh, &lVertices[0], lVertices.size()/3, 0);
+	mGfxWindowMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxWindowMesh, UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED, UiTbc::Renderer::FORCE_NO_SHADOWS);
+
+	AddPhysicsWindowBox(pPhysicsManager, pWindowPlane);
 }
 
 void Level::RenderOutline()
@@ -154,11 +213,11 @@ UiTbc::TriangleBasedGeometry* Level::CreateTriangleBox(float x, float y, float z
 	{
 		mGfxMesh = new UiTbc::TriangleBasedGeometry;
 	}
-	SetVertices(v, vc, lColorData);
+	SetVertices(mGfxMesh, v, vc, &lColorData[0]);
 	return mGfxMesh;
 }
 
-void Level::SetVertices(const float* v, size_t vc, const std::vector<uint8>& pColorData)
+void Level::SetVertices(UiTbc::TriangleBasedGeometry* pGfxMesh, const float* v, size_t vc, const uint8* pColorData)
 {
 	std::vector<uint32> ni;
 	for (size_t x = 0; x < vc; ++x)
@@ -166,9 +225,9 @@ void Level::SetVertices(const float* v, size_t vc, const std::vector<uint8>& pCo
 		ni.push_back(x);
 	}
 
-	mGfxMesh->Set(v, 0, 0, &pColorData[0], TBC::GeometryBase::COLOR_RGBA, &ni[0], vc, vc, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_SEMI_STATIC);
-	FlipTriangles(mGfxMesh);
-	mGfxMesh->SetAlwaysVisible(true);
+	pGfxMesh->Set(v, 0, 0, pColorData, TBC::GeometryBase::COLOR_RGBA, ni.empty()? 0 : &ni[0], vc, vc, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_SEMI_STATIC);
+	FlipTriangles(pGfxMesh);
+	pGfxMesh->SetAlwaysVisible(true);
 }
 
 void Level::FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh)
@@ -199,6 +258,26 @@ void Level::CreatePhysicsMesh(TBC::PhysicsManager* pPhysicsManager)
 	}
 	mPhysMeshBodyId = pPhysicsManager->CreateTriMesh(true, mGfxMesh->GetVertexCount(), mGfxMesh->GetVertexData(),
 		mGfxMesh->GetTriangleCount(), mBodyIndexData, TransformationF(), lFriction, lBounce, GetInstanceId());
+}
+
+void Level::AddPhysicsWindowBox(TBC::PhysicsManager* pPhysicsManager, const Plane& pPlane)
+{
+	TransformationF lTransform(pPlane.GetOrientation(), pPlane.n*pPlane.d);
+	const float lFriction = 0.7f;
+	const float lBounce = 1.0f;
+	TBC::PhysicsManager::BodyID lPhysWindowId = pPhysicsManager->CreateBox(true, lTransform, 0, Vector3DF(20,20,0.1f),
+		TBC::PhysicsManager::STATIC, lFriction, lBounce, GetInstanceId());
+	mPhysWindowBoxIds.push_back(lPhysWindowId);
+}
+
+void Level::DeleteWindowBoxes(TBC::PhysicsManager* pPhysicsManager)
+{
+	std::vector<TBC::PhysicsManager::BodyID>::iterator x = mPhysWindowBoxIds.begin();
+	for (; x != mPhysWindowBoxIds.end(); ++x)
+	{
+		pPhysicsManager->DeleteBody(*x);
+	}
+	mPhysWindowBoxIds.clear();
 }
 
 float Level::CalculateVolume() const

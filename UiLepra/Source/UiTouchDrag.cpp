@@ -25,24 +25,23 @@ Drag::Drag(int x, int y, bool pIsPress):
 {
 }
 
-bool Drag::Update(const PixelCoord& pLast, const PixelCoord& pNew, bool pIsPress, int pMaxDragDistance)
+void Drag::Update(const PixelCoord& pCoord, bool pIsPress)
 {
 	mIsNew = false;
+	mLast = pCoord;
+	mIsPress = pIsPress;
+}
 
-	if (std::abs(mLast.x-pLast.x) < pMaxDragDistance && std::abs(mLast.y-pLast.y) < pMaxDragDistance)
-	{
-		mLast = pNew;
-		mIsPress = pIsPress;
-		return true;
-	}
-	return false;
+int Drag::GetDiamondDistanceTo(const PixelCoord& pCoord) const
+{
+	return std::abs(mLast.x-pCoord.x) + std::abs(mLast.y-pCoord.y);
 }
 
 
 
 DragManager::DragManager():
 	mMouseLastPressed(false),
-	mMaxDragDistance(88)
+	mMaxDragDiamondDistance(106)
 {
 }
 
@@ -52,18 +51,27 @@ DragManager::~DragManager()
 
 void DragManager::SetMaxDragDistance(int pMaxDragDistance)
 {
-	mMaxDragDistance = pMaxDragDistance;
+	mMaxDragDiamondDistance = (int)(pMaxDragDistance*1.2f);
 }
 
 void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed)
 {
+	int lClosestDiamondDistance = 1000000;
 	DragList::iterator i = mDragList.begin();
+	DragList::iterator lBestDrag = i;
 	for (; i != mDragList.end(); ++i)
 	{
-		if (i->Update(pPrevious, pLocation, pIsPressed, mMaxDragDistance))
+		int d = i->GetDiamondDistanceTo(pPrevious);
+		if (d < lClosestDiamondDistance)
 		{
-			return;
+			lClosestDiamondDistance = d;
+			lBestDrag = i;
 		}
+	}
+	if (lBestDrag != mDragList.end() && (!pIsPressed || lClosestDiamondDistance <= mMaxDragDiamondDistance))	// If releasing we must do this.
+	{
+		lBestDrag->Update(pLocation, pIsPressed);
+		return;
 	}
 	mDragList.push_back(Drag(pLocation.x, pLocation.y, pIsPressed));
 }
@@ -116,7 +124,7 @@ void DragManager::DropReleasedDrags()
 	{
 		if (!i->mIsPress)
 		{
-			mDragList.erase(i++);
+			i = mDragList.erase(i);
 		}
 		else
 		{

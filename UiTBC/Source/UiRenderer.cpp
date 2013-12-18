@@ -1161,7 +1161,6 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 
 	GeometryTable::Iterator lGeomIter;
 	lGeomIter = mGeometryTable.Find(pGeometryID);
-	deb_assert(lGeomIter != mGeometryTable.End());
 	if (lGeomIter != mGeometryTable.End())
 	{
 		GeometryData* lGeometryData = *lGeomIter;

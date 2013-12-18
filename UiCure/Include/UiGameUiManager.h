@@ -83,7 +83,7 @@ public:
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	void ClearDepth();
 
-	void SetScaleFont(float pScale);
+	UiTbc::FontManager::FontId SetScaleFont(float pScale);
 	void SetMasterFont();
 	void PrintText(int pX, int pY, const str& pText);
 

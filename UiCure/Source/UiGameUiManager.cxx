@@ -295,12 +295,12 @@ void GameUiManager::InputTick()
 
 	if (mDragManager)
 	{
-		const float lDragLengthInInches = 0.4f;
-		int lDragPixels = (int)(GetCanvas()->GetWidth() * lDragLengthInInches / GetDisplayManager()->GetPhysicalScreenSize());
+		const float lDragLengthInInches = 2.0f;
+		const int lDragPixels = (int)(GetCanvas()->GetWidth() * lDragLengthInInches / GetDisplayManager()->GetPhysicalScreenSize());
+		mDragManager->SetMaxDragDistance(lDragPixels);
 #if defined(LEPRA_TOUCH)
 		mDragManager->UpdateMouseByDrag(GetInputManager());
 #else // Not a touch device.
-		lDragPixels *= 10;
 		bool lEmulateTouch;
 		CURE_RTVAR_GET(lEmulateTouch, =, mVariableScope, RTVAR_CTRL_EMULATETOUCH, false);
 		if (lEmulateTouch)
@@ -309,7 +309,6 @@ void GameUiManager::InputTick()
 		}
 #endif // Touch device / Not a touch device.
 		mDragManager->UpdateTouchsticks(GetInputManager());
-		mDragManager->SetMaxDragDistance(lDragPixels);
 	}
 }
 
@@ -502,7 +501,7 @@ void GameUiManager::ClearDepth()
 
 
 
-void GameUiManager::SetScaleFont(float pScale)
+UiTbc::FontManager::FontId GameUiManager::SetScaleFont(float pScale)
 {
 	if (mCurrentFontId == UiTbc::FontManager::INVALID_FONTID)
 	{
@@ -515,7 +514,7 @@ void GameUiManager::SetScaleFont(float pScale)
 	lFontHeight *= pScale;
 	int lFontFlags;
 	CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
-	mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
+	return mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
 }
 
 void GameUiManager::SetMasterFont()

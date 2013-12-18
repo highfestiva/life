@@ -50,6 +50,18 @@ float Plane::GetDistance(const Vector3DF& pPosition) const
 	return n*pPosition-d;
 }
 
+QuaternionF Plane::GetOrientation() const
+{
+	Vector3DF x(1,0,0);
+	if (std::abs(n*x) > 0.7f)
+	{
+		x = Vector3DF(0,1,0);
+	}
+	Vector3DF y = n.Cross(x);
+	x = y.Cross(n);
+	return QuaternionF(RotationMatrixF(x,y,n));
+}
+
 
 
 Plane Plane::operator-() const

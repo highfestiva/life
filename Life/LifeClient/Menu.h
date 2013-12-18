@@ -36,7 +36,7 @@ public:
 	Menu(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager);
 	virtual ~Menu();
 
-	void SetButtonTapSound(const str& pSoundName, float pTapPitchOffset);
+	void SetButtonTapSound(const str& pSoundName, float pTapVolume, float pTapPitchOffset);
 
 	UiTbc::Dialog* CreateTestDialog(const ButtonAction& pAction);
 	UiTbc::Dialog* CreateTbcDialog(const ButtonAction& pAction, float pWidth, float pHeight);
@@ -58,6 +58,7 @@ protected:
 	UiTbc::Dialog* mDialog;
 	UiTbc::Dialog::Action mButtonDelegate;
 	UiCure::UserSound2dResource* mTapClick;
+	float mTapVolume;
 	float mTapPitchOffset;
 };
 
