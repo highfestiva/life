@@ -359,6 +359,7 @@ public:
 	inline Color(const Color& pColor);
 	inline Color(uint8 pRed, uint8 pGreen, uint8 pBlue);
 	inline Color(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex);
+	static inline Color CreateColor(float pRed, float pGreen, float pBlue, float pAlpha);
 
 	// Interpolation constructor.
 	inline Color(const Color& pColor1, const Color& pColor2, float t);
@@ -450,6 +451,13 @@ Color::Color(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex)
 	mGreen = pGreen;
 	mBlue  = pBlue;
 	mAlpha = pColorIndex;
+}
+
+Color Color::CreateColor(float pRed, float pGreen, float pBlue, float pAlpha)
+{
+	Color c;
+	c.Set(pRed, pGreen, pBlue, pAlpha);
+	return c;
 }
 
 Color::Color(const Color& pColor1, const Color& pColor2, float t)

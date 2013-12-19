@@ -13,6 +13,7 @@
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiMachine.h"
+#include "../UiCure/Include/UiSoundReleaser.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFixedLayouter.h"
@@ -28,7 +29,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define BG_COLOR		Color(15, 18, 25, 160)
+#define BG_COLOR		Color(5, 10, 15, 240)
 #define CAM_DISTANCE		7.0f
 #define BALL_RADIUS		0.15f
 #define DRAG_FLAG_INVALID	1
@@ -41,6 +42,9 @@
 #define DIM_TEXT		Color(190, 180, 160)
 #define DIM_RED_TEXT		Color(245, 90, 90)
 #define DIM_RED			Color(180, 60, 50)
+#define GREEN_BUTTON		Color(20, 190, 15)
+#define ORANGE_BUTTON		Color(220, 110, 20)
+#define RED_BUTTON		Color(210, 40, 30)
 
 
 namespace Bound
@@ -66,7 +70,12 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	mIsShaking(false),
 	mCutsLeft(1),
 	mShakesLeft(1),
-	mLastCutMode(CUT_NORMAL)
+	mLastCutMode(CUT_NORMAL),
+	mCutSoundPitch(1),
+	mQuickCutCount(0),
+	mPreviousScore(0),
+	mLevelScore(0),
+	mShakeSound(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
@@ -77,6 +86,7 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, 0.03f, 0.2f);
 
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
@@ -160,7 +170,7 @@ bool BoundManager::Open()
 	{
 		mPauseButton = ICONBTNA("btn_pause.png", "");
 		int x = mRenderArea.mLeft + 12;
-		int y = mRenderArea.mTop + 12;
+		int y = mRenderArea.mBottom - 12 - 32;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
 		mPauseButton->SetVisible(true);
 		mPauseButton->SetOnClick(BoundManager, OnPauseButton);
@@ -208,39 +218,7 @@ bool BoundManager::Render()
 		mSunlight->Tick(mCameraTransform.GetOrientation());
 	}
 
-	mUiManager->GetPainter()->PrePaint(false);
-	mUiManager->GetPainter()->ResetClippingRect();
-	mUiManager->GetRenderer()->SetDepthWriteEnabled(false);
-	mUiManager->GetRenderer()->SetDepthTestEnabled(false);
-	mUiManager->GetRenderer()->SetLightsEnabled(false);
-	mUiManager->GetRenderer()->SetTexturingEnabled(false);
-	Vector3DF p0(45,68,149);
-	Vector3DF p1(49,83,183);
-	Vector3DF p2(15,25,43);
-	Vector3DF p3(15,39,57);
-	Vector3DF a = mUiManager->GetAccelerometer();
-	static Vector3DF v;
-	if (mIsShaking || mShakeTimer.QuerySplitTime() < 4.5)
-	{
-		v = Math::Lerp(v, a, 0.5f);
-	}
-	Vector3DF o;
-	o.x = v.x*30;
-	o.y = v.y*60;
-	o.z = v.z*130;
-	p0 += o;
-	p1 += o;
-	p2 += o;
-	p3 += o;
-	mUiManager->GetPainter()->SetColor(Color((uint8)p0.x,(uint8)p0.y,(uint8)p0.z), 0);
-	mUiManager->GetPainter()->SetColor(Color((uint8)p1.x,(uint8)p1.y,(uint8)p1.z), 1);
-	mUiManager->GetPainter()->SetColor(Color((uint8)p2.x,(uint8)p2.y,(uint8)p2.z), 2);
-	mUiManager->GetPainter()->SetColor(Color((uint8)p3.x,(uint8)p3.y,(uint8)p3.z), 3);
-	mUiManager->GetPainter()->FillShadedRect(0, 0, mUiManager->GetCanvas()->GetWidth(), mUiManager->GetCanvas()->GetHeight());
-	mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
-	mUiManager->GetRenderer()->SetDepthTestEnabled(true);
-	mUiManager->GetRenderer()->SetLightsEnabled(true);
-	mUiManager->GetRenderer()->Renderer::SetTexturingEnabled(true);
+	RenderBackground();
 
 	bool ok = Parent::Render();
 	if (mLevel)
@@ -249,6 +227,57 @@ bool BoundManager::Render()
 		mLevel->RenderOutline();
 	}
 	return ok;
+}
+
+void BoundManager::RenderBackground()
+{
+	if (!mUiManager->CanRender())
+	{
+		return;
+	}
+
+	mUiManager->GetPainter()->PrePaint(false);
+	mUiManager->GetPainter()->ResetClippingRect();
+	mUiManager->GetRenderer()->SetDepthWriteEnabled(false);
+	mUiManager->GetRenderer()->SetDepthTestEnabled(false);
+	mUiManager->GetRenderer()->SetLightsEnabled(false);
+	mUiManager->GetRenderer()->SetTexturingEnabled(false);
+	Vector3DF lTopColor(84,217,245);
+	Vector3DF lBottomColor(0,30,255);
+	Plane lDevicePlane(-mUiManager->GetAccelerometer(), 0);
+	float lYaw, lPitch, lRoll;
+	lDevicePlane.GetOrientation().GetEulerAngles(lYaw, lPitch, lRoll);
+	static float lAngle = 0;
+	if (lPitch > PIF/4)
+	{
+		lAngle = Math::Lerp(lAngle, lYaw, 0.1f);
+	}
+	float x = mUiManager->GetCanvas()->GetWidth() / 2.0f;
+	float y = mUiManager->GetCanvas()->GetHeight() / 2.0f;
+	float l = ::sqrt(x*x + y*y);
+	x /= l;
+	y /= l;
+	Vector2DF tl(-x,+y);
+	Vector2DF tr(+x,+y);
+	Vector2DF bl(-x,-y);
+	Vector2DF br(+x,-y);
+	tl.RotateAround(Vector2DF(), lAngle);
+	tr.RotateAround(Vector2DF(), lAngle);
+	bl.RotateAround(Vector2DF(), lAngle);
+	br.RotateAround(Vector2DF(), lAngle);
+	Vector3DF tlc = Math::Lerp(lBottomColor, lTopColor, tl.y*0.5f+0.5f)/255;
+	Vector3DF trc = Math::Lerp(lBottomColor, lTopColor, tr.y*0.5f+0.5f)/255;
+	Vector3DF blc = Math::Lerp(lBottomColor, lTopColor, bl.y*0.5f+0.5f)/255;
+	Vector3DF brc = Math::Lerp(lBottomColor, lTopColor, br.y*0.5f+0.5f)/255;
+	mUiManager->GetPainter()->SetColor(Color::CreateColor(tlc.x, tlc.y, tlc.z, 1), 0);
+	mUiManager->GetPainter()->SetColor(Color::CreateColor(trc.x, trc.y, trc.z, 1), 1);
+	mUiManager->GetPainter()->SetColor(Color::CreateColor(blc.x, blc.y, blc.z, 1), 2);
+	mUiManager->GetPainter()->SetColor(Color::CreateColor(brc.x, brc.y, brc.z, 1), 3);
+	mUiManager->GetPainter()->FillShadedRect(0, 0, mUiManager->GetCanvas()->GetWidth(), mUiManager->GetCanvas()->GetHeight());
+	mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
+	mUiManager->GetRenderer()->SetDepthTestEnabled(true);
+	mUiManager->GetRenderer()->SetLightsEnabled(true);
+	mUiManager->GetRenderer()->Renderer::SetTexturingEnabled(true);
 }
 
 bool BoundManager::Paint()
@@ -265,15 +294,17 @@ bool BoundManager::Paint()
 
 		const str lCompletionText = strutil::Format(_T("Reduced: %.1f%%"), mPercentDone);
 		int cw = mUiManager->GetPainter()->GetStringWidth(lCompletionText);
-		mUiManager->GetPainter()->PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 9);
+		mUiManager->GetPainter()->PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 7);
 
 		mUiManager->SetScaleFont(0.9f);
+		const str lScoreText = strutil::Format(_T("Score: %.0f"), mLevelScore+mPreviousScore);
+		mUiManager->GetPainter()->PrintText(lScoreText, 25, 9);
+
 		int lLevel;
 		CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 		const str lLevelText = strutil::Format(_T("Level: %i"), lLevel+1);
 		int lw = mUiManager->GetPainter()->GetStringWidth(lLevelText);
 		mUiManager->GetPainter()->PrintText(lLevelText, mUiManager->GetCanvas()->GetWidth()-lw-25, 9);
-		mUiManager->SetMasterFont();
 
 		mUiManager->GetPainter()->SetColor(lIsUsingACut? DIM_RED_TEXT : DIM_TEXT);
 		mUiManager->SetScaleFont(0.7f);
@@ -355,12 +386,27 @@ bool BoundManager::HandleCutting()
 		PixelCoord lScreenMid((int)(lFrom.x+lTo.x)/2, (int)(lFrom.y+lTo.y)/2);
 		Plane lCutPlaneDelimiter;
 		Plane lCutPlane = ScreenLineToPlane(lScreenMid, PixelCoord((int)lTo.x, (int)lTo.y), lCutPlaneDelimiter);
+		Vector3DF lCollisionPoint;
 
-		if (lCutPlane.n.GetLengthSquared() > 0 && !lIsVeryNewDrag && CheckBallsPlaneCollition(lCutPlane, lDragStarted? 0 : &lCutPlaneDelimiter))
+		if (lCutPlane.n.GetLengthSquared() > 0 && !lIsVeryNewDrag && CheckBallsPlaneCollition(lCutPlane, lDragStarted? 0 : &lCutPlaneDelimiter, lCollisionPoint))
 		{
 			// Invalidate swipe.
 			--mCutsLeft;
 			x->mFlags |= 1;
+
+			// Explosions! YES!
+			const int lParticles = Random::Uniform(5, 11);
+			Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
+			Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
+			Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
+			Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
+			Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
+			UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+			lParticleRenderer->CreateExplosion(lCollisionPoint, 0.05f, Vector3DF(), 0.15f, 0.25f, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
+			UiCure::UserSound2dResource* lBreakSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("broken_window.wav"), lBreakSound, 0.5f, Random::Uniform(0.9f, 1.2f));
+			mCutTimer.ReduceTimeDiff(-2.0);
+			mLevelScore -= 200;
 		}
 		else if (lDragStarted && !x->mIsPress && mCutsLeft > 0)
 		{
@@ -372,8 +418,24 @@ bool BoundManager::HandleCutting()
 				{
 					lCutPlane = -lCutPlane;
 				}
+				else
+				{
+					mLevelScore += 500;
+				}
 				float lCutX = mCameraTransform.GetOrientation().GetInverseRotatedVector(lCutPlane.n).x;
 				mCameraRotateSpeed = (lCutX < 0)? +3.0f : -3.0f;
+				if (mCutTimer.PopTimeDiff() < 1.2)
+				{
+					mCutSoundPitch += 0.3f;
+					++mQuickCutCount;
+				}
+				else
+				{
+					mCutSoundPitch = Random::Uniform(0.9f, 1.1f);
+					mQuickCutCount = 0;
+				}
+				UiCure::UserSound2dResource* lCutSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+				new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("cut.wav"), lCutSound, 0.5f, mCutSoundPitch);
 			}
 		}
 		lAnyDragStarted |= lDragStarted;
@@ -594,13 +656,16 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 	std::vector<uint8> lNGonColors;
 	const size_t nvc = (lNGon.size()-2)*3;
 	lNGonColors.resize(nvc*4);
-	Vector3DF lNewColor(RNDPOSVEC());
+	static const Color lColors[] = {ORANGE, RED, BLUE, GREEN, WHITE, CYAN, BLACK, ORANGE, MAGENTA, YELLOW, Color(255, 98, 128), Color(98, 60, 0)};
+	static int lColorIndex = 0;
+	const Color lNewColor = lColors[lColorIndex++];
+	lColorIndex %= LEPRA_ARRAY_COUNT(lColors);
 	for (size_t x = 0; x < nvc; ++x)
 	{
-		lNGonColors[x*4+0] = (uint8)(lNewColor.x*255);
-		lNGonColors[x*4+1] = (uint8)(lNewColor.y*255);
-		lNGonColors[x*4+2] = (uint8)(lNewColor.z*255);
-		lNGonColors[x*4+3] = 128;
+		lNGonColors[x*4+0] = lNewColor.mRed;
+		lNGonColors[x*4+1] = lNewColor.mGreen;
+		lNGonColors[x*4+2] = lNewColor.mBlue;
+		lNGonColors[x*4+3] = 255;
 	}
 	AddNGonTriangles(pCutPlane, lNGon, &lNGonColors[0]);
 	return true;
@@ -881,7 +946,7 @@ int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane)
 	return lSide;
 }
 
-bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter)
+bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter, Vector3DF& pCollisionPoint)
 {
 	std::vector<Cure::GameObjectId>::iterator x;
 	for (x = mBalls.begin(); x != mBalls.end(); ++x)
@@ -897,12 +962,14 @@ bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane*
 		{
 			if (!pCutPlaneDelimiter)
 			{
+				pCollisionPoint = p - pCutPlane.n*pCutPlane.GetDistance(p);
 				return true;
 			}
 			// Check if the ball is on the "wrong" side of the touch endpoint of the cutting plane.
 			lDistance = pCutPlaneDelimiter->GetDistance(p);
 			if (lDistance >= -BALL_RADIUS)
 			{
+				pCollisionPoint = p - pCutPlane.n*pCutPlane.GetDistance(p);
 				return true;
 			}
 		}
@@ -959,6 +1026,8 @@ bool BoundManager::DidFinishLevel()
 	CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	mLog.Headlinef(_T("Level %i done!"), lLevel);
 	OnPauseButton(0);
+	UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 0.5f, Random::Uniform(0.98f, 1.02f));
 	//StepLevel(1);
 	/*Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
@@ -1007,6 +1076,16 @@ int BoundManager::StepLevel(int pCount)
 	mCutsLeft = 25;
 	mShakesLeft = 2;
 	mPercentDone = 0;
+	if (pCount > 0)
+	{
+		mPreviousScore += mLevelScore;
+	}
+	else if (pCount < 0)
+	{
+		mPreviousScore = 0;
+	}
+	mLevelScore = 0;
+	mQuickCutCount = 0;
 
 	int lLevelNumber;
 	CURE_RTVAR_GET(lLevelNumber, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
@@ -1045,18 +1124,12 @@ bool BoundManager::InitializeUniverse()
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	const Vector3DF v;
-	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
+	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	mCutsLeft = 25;
 	mShakesLeft = 2;
 	mLevel = (Level*)Parent::CreateContextObject(_T("level"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	int lLevelIndex;
-	CURE_RTVAR_GET(lLevelIndex, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-	mLevel->GenerateLevel(GetPhysicsManager(), lLevelIndex);
-	for (int x = 0; x < 2; ++x)
-	{
-		CreateBall(x);
-	}
+	StepLevel(0);
 	mSunlight = new Sunlight(mUiManager);
 	return true;
 }
@@ -1149,6 +1222,26 @@ void BoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque
 
 
 
+void BoundManager::ShowInstruction()
+{
+	mPauseButton->SetVisible(false);
+
+	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &BoundManager::OnMenuAlternative), 0.8f, 0.6f);
+	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
+	d->SetDirection(+1, false);
+	UiTbc::FixedLayouter lLayouter(d);
+
+	UiTbc::Label* lLabel1 = new UiTbc::Label(BRIGHT_TEXT, _T("Swipe to cut the box. Avoid hitting the"));
+	lLayouter.AddComponent(lLabel1, 0, 6, 0, 1, 1);
+	UiTbc::Label* lLabel2 = new UiTbc::Label(BRIGHT_TEXT, _T("balls. Cut away 85% to complete level."));
+	lLayouter.AddComponent(lLabel2, 1, 6, 0, 1, 1);
+
+	UiTbc::Button* lResetLevelButton = new UiTbc::Button(GREEN_BUTTON, _T("OK"));
+	lLayouter.AddButton(lResetLevelButton, -9, 2, 3, 0, 1, 1, true);
+
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
+}
+
 void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 {
 	if (pButton)
@@ -1173,7 +1266,7 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		lLabel->SetAdaptive(false);
 		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
 
-		UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(30, 180, 50), _T("Next level"));
+		UiTbc::Button* lNextLevelButton = new UiTbc::Button(GREEN_BUTTON, _T("Next level"));
 		lLayouter.AddButton(lNextLevelButton, -1, lRow++, lRowCount, 0, 1, 1, true);
 	}
 	else
@@ -1185,7 +1278,7 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		}
 		else
 		{
-			lLabel = new UiTbc::Label(Color(210, 40, 30), _T("Out of cuts!"));
+			lLabel = new UiTbc::Label(RED_BUTTON, _T("Out of cuts!"));
 		}
 		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
 		mUiManager->SetMasterFont();
@@ -1194,12 +1287,12 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
 	}
 
-	UiTbc::Button* lResetLevelButton = new UiTbc::Button(Color(220, 110, 20), _T("Reset level"));
+	UiTbc::Button* lResetLevelButton = new UiTbc::Button(ORANGE_BUTTON, _T("Reset level"));
 	lLayouter.AddButton(lResetLevelButton, -3, lRow++, lRowCount, 0, 1, 1, true);
 
 	if (lRow < 3)
 	{
-		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(Color(210, 40, 30), _T("Reset game"));
+		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(RED_BUTTON, _T("Reset game"));
 		lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
@@ -1236,6 +1329,13 @@ void BoundManager::ScriptPhysicsTick()
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	if (lPhysicsTime > 1e-5)
 	{
+		bool lIsFirstTime;
+		CURE_RTVAR_GET(lIsFirstTime, =, GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
+		if (lIsFirstTime)
+		{
+			ShowInstruction();
+			CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTTIME, false);
+		}
 		if (!mCutVertices.empty() || !mCutWindowVertices.empty() || mForceCutWindow)
 		{
 			TimeLogger lTimeLogger(&mLog, _T("mLevel->SetTriangles"));
@@ -1245,6 +1345,7 @@ void BoundManager::ScriptPhysicsTick()
 			}
 			else
 			{
+				float lPreVolume = mLevel->GetVolumePart();
 				if (!mCutVertices.empty())
 				{
 					mLevel->SetTriangles(GetPhysicsManager(), mCutVertices, mCutColors);
@@ -1253,13 +1354,16 @@ void BoundManager::ScriptPhysicsTick()
 				{
 					mLevel->SetWindowTriangles(mCutWindowVertices);
 				}
+				float lPostVolume = mLevel->GetVolumePart();
+				float lAmount = std::max(0.0f, lPreVolume-lPostVolume);
+				mLevelScore += 1000 * lAmount * (1 + mQuickCutCount*0.8f);
 			}
 			mCutVertices.clear();
 			mCutWindowVertices.clear();
 			mCutColors.clear();
 			mForceCutWindow = false;
 		}
-		mPercentDone = 100-mLevel->GetVolumePercent()*100;
+		mPercentDone = 100-mLevel->GetVolumePart()*100;
 		if (LEVEL_DONE() && !mMenu->GetDialog())
 		{
 			DidFinishLevel();
@@ -1268,20 +1372,23 @@ void BoundManager::ScriptPhysicsTick()
 		{
 			OnPauseButton(0);
 		}
-		Vector3DF lAcceleration = mUiManager->GetAccelerometer();
+		Vector3DF lAcceleration = mCameraTransform.GetOrientation()*mUiManager->GetAccelerometer();
 		float lAccelerationLength = lAcceleration.GetLength();
 		mIsShaking = (lAccelerationLength > 1.2f);
 		bool lIsReallyShaking = false;
-		if (mShakeTimer.QuerySplitTime() > 6.0)
+		double lShakeTime = mShakeTimer.QuerySplitTime();
+		if (lShakeTime > 6.0)
 		{
 			mIsShaking = false;
 			mShakeTimer.Stop();
 			mShakeTimer.PopTimeDiff();
 		}
-		else if (mShakeTimer.QuerySplitTime() > 2.5)
+		else if (lShakeTime > 2.5)
 		{
 			// Intermission.
 			mIsShaking = true;
+			delete mShakeSound;
+			mShakeSound = 0;
 		}
 		else if (mIsShaking && mShakesLeft > 0)
 		{
@@ -1293,6 +1400,9 @@ void BoundManager::ScriptPhysicsTick()
 			if (!mShakeTimer.IsStarted())
 			{
 				mShakeTimer.Start();
+				delete mShakeSound;
+				UiCure::UserSound2dResource* lBreakSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD);
+				mShakeSound = new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("shake.wav"), lBreakSound, 0.5f, 1.0);
 				--mShakesLeft;
 			}
 			lIsReallyShaking = true;

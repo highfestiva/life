@@ -503,10 +503,8 @@ void GameUiManager::ClearDepth()
 
 UiTbc::FontManager::FontId GameUiManager::SetScaleFont(float pScale)
 {
-	if (mCurrentFontId == UiTbc::FontManager::INVALID_FONTID)
-	{
-		mCurrentFontId = GetFontManager()->GetActiveFontId();
-	}
+	SetMasterFont();
+	mCurrentFontId = GetFontManager()->GetActiveFontId();
 	str lFont;
 	CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 	double lFontHeight;
@@ -519,8 +517,11 @@ UiTbc::FontManager::FontId GameUiManager::SetScaleFont(float pScale)
 
 void GameUiManager::SetMasterFont()
 {
-	mFontManager->SetActiveFont(mCurrentFontId);
-	mCurrentFontId = UiTbc::FontManager::INVALID_FONTID;
+	if (mCurrentFontId != UiTbc::FontManager::INVALID_FONTID)
+	{
+		mFontManager->SetActiveFont(mCurrentFontId);
+		mCurrentFontId = UiTbc::FontManager::INVALID_FONTID;
+	}
 }
 
 void GameUiManager::PrintText(int pX, int pY, const str& pText)

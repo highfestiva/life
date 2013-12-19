@@ -724,7 +724,7 @@ void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chunk
 		lSmokeColor.Set(0.2f, 0.4f, 0.2f);
 		lShrapnelColor.Set(0.5f, 0.5f, 0.1f);
 	}
-	lParticleRenderer->CreateExplosion(pPosition, pStrength, u, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
+	lParticleRenderer->CreateExplosion(pPosition, pStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
 
 
 	// Slowmo check.
@@ -933,7 +933,7 @@ bool DownwashManager::InitializeUniverse()
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	const Vector3DF v;
-	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, v, v, v, v, v, 1, 1, 1, 1);
+	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	str lStartLevel;
 	CURE_RTVAR_GET(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_00"));

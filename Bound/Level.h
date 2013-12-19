@@ -42,7 +42,7 @@ public:
 	void GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel);
 	const UiTbc::TriangleBasedGeometry* GetMesh() const;
 	const UiTbc::TriangleBasedGeometry* GetWindowMesh() const;
-	float GetVolumePercent() const;
+	float GetVolumePart() const;
 	void SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors);
 	void SetWindowTriangles(const std::vector<float>& pVertices);
 	void AddCutPlane(TBC::PhysicsManager* pPhysicsManager, const Plane& pWindowPlane, const std::vector<float>& pVertices, const Color& pColor);

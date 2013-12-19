@@ -29,6 +29,7 @@ namespace UiCure
 {
 class CollisionSoundManager;
 class CppContextObject;
+class SoundReleaser;
 }
 namespace UiTbc
 {
@@ -70,6 +71,7 @@ public:
 	virtual void SetFade(float pFadeAmount);
 
 	virtual bool Render();
+	void RenderBackground();
 	virtual bool Paint();
 
 	bool HandleCutting();
@@ -84,7 +86,7 @@ public:
 	void SimplifyNGon(std::vector<Vector3DF>& pNGon);
 	void AddNGonTriangles(const Plane& pCutPlane, const std::vector<Vector3DF>& pNGon, const uint8* pColors);
 	int CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane);
-	bool CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter);
+	bool CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter, Vector3DF& pCollisionPoint);
 	static bool AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int pWidth, int pHeight);
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
@@ -111,6 +113,7 @@ protected:
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
+	void ShowInstruction();
 	void OnPauseButton(UiTbc::Button*);
 	void OnMenuAlternative(UiTbc::Button* pButton);
 
@@ -146,6 +149,12 @@ protected:
 	StopWatch mShakeTimer;
 	Plane mLastCutPlane;
 	CutMode mLastCutMode;
+	HiResTimer mCutTimer;
+	float mCutSoundPitch;
+	bool mQuickCutCount;
+	float mPreviousScore;
+	float mLevelScore;
+	UiCure::SoundReleaser* mShakeSound;
 	LOG_CLASS_DECLARE();
 };
 

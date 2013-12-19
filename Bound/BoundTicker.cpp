@@ -36,6 +36,7 @@ BoundTicker::BoundTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManage
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
+	AddBackedRtvar(_T(RTVAR_GAME_FIRSTTIME));
 	AddBackedRtvar(_T(RTVAR_GAME_LEVEL));
 	AddBackedRtvar(_T(RTVAR_PHYSICS_RTR_OFFSET));
 }

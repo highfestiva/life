@@ -369,7 +369,7 @@ void HoverTankManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 		lSmokeColor.Set(0.2f, 0.4f, 0.2f);
 		lShrapnelColor.Set(0.5f, 0.5f, 0.1f);
 	}
-	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
+	lParticleRenderer->CreateExplosion(pPosition, pStrength * 1.5f, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles*2, lParticles*2, lParticles, lParticles/2);
 
 	/*if (!GetMaster()->IsLocalServer())	// If local server, it will already have given us a hover_tank.
 	{

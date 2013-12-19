@@ -12,5 +12,6 @@
 
 
 
+#define RTVAR_GAME_FIRSTTIME		"Game.FirstTime"
 #define RTVAR_GAME_LEVEL		"Game.Level"
 #define RTVAR_PHYSICS_RTR_OFFSET	"Physics.RTR.Offset"

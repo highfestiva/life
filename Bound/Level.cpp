@@ -54,8 +54,8 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 	}
 
 	CreateTriangleBox(4.5f, 4.5f, 3);
-	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(0.9f,0.85f,0.3f);
-	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(1,1,1);
+	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(0.5f,0.5f,0.5f);
+	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0,0,0);
 	mGfxMesh->GetBasicMaterialSettings().mShininess	= false;
 	mGfxMesh->GetBasicMaterialSettings().mSmooth	= false;
 	mGfxMesh->SetGeometryVolatility(TBC::GeometryBase::GEOM_SEMI_STATIC);
@@ -81,7 +81,7 @@ const UiTbc::TriangleBasedGeometry* Level::GetWindowMesh() const
 	return mGfxWindowMesh;
 }
 
-float Level::GetVolumePercent() const
+float Level::GetVolumePart() const
 {
 	return mVolume / mOriginalVolume;
 }

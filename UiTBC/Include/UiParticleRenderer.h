@@ -31,7 +31,7 @@ public:
 	virtual void Tick(float pTime);
 
 	void CreateFlare(const Vector3DF& pColor, float pStrength, float pTimeFactor, const Vector3DF& pPosition, const Vector3DF& pVelocity);
-	void CreateExplosion(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, float pFalloff, const Vector3DF& pStartFireColor, const Vector3DF& pFireColor,
+	void CreateExplosion(const Vector3DF& pPosition, float pStrength, const Vector3DF& pDirection, float pFalloff, float pTime, const Vector3DF& pStartFireColor, const Vector3DF& pFireColor,
 		const Vector3DF& pStartSmokeColor, const Vector3DF& pSmokeColor, const Vector3DF& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels);
 	void CreatePebble(float pTime, float pScale, float pAngularVelocity, const Vector3DF& pColor, const Vector3DF& pPosition, const Vector3DF& pVelocity);
 	void CreateFume(float pTime, float pScale, float pAngularVelocity, float pOpacity, const Vector3DF& pPosition, const Vector3DF& pVelocity);
