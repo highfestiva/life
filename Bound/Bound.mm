@@ -136,9 +136,9 @@ using namespace Lepra;
 		const float x = _motionManager.accelerometerData.acceleration.x;
 		const float y = _motionManager.accelerometerData.acceleration.y;
 		const float z = _motionManager.accelerometerData.acceleration.z;
-		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_X, y);
+		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_X,  y);
 		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Y, -x);
-		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Z, z);
+		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Z,  z);
 		Bound::Bound::GetApp()->Tick();
 	}
 }

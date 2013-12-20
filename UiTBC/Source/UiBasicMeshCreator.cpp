@@ -371,8 +371,8 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCone(float pBaseRadius,
 						    float pHeight, 
 						    unsigned pNumSegments)
 {
-	int lVertexCount = pNumSegments + 1;
-	int lNumTriangles = pNumSegments * 2 - 2;
+	int lVertexCount = pNumSegments + 1 + 1;
+	int lNumTriangles = pNumSegments * 2;
 
 	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
 	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
@@ -418,13 +418,17 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCone(float pBaseRadius,
 
 		lAngle += lAngleStep;
 	}
+	// Bottom vertex.
+	const int lBottomIndex = i+1;
+	lV[lBottomIndex].Set(0, 0, 0);
+	lN[lBottomIndex].Set(0, 0, -1.0f);
 
 	// Setup the bottom triangles...
-	for (i = 0; i < pNumSegments - 2; i++, lIndex += 3)
+	for (i = 0; i < pNumSegments; i++, lIndex += 3)
 	{
-		lI[lIndex + 0] = ((i + 1) % pNumSegments) + 2;
-		lI[lIndex + 1] = 1;
-		lI[lIndex + 2] = (i + 2) % pNumSegments;
+		lI[lIndex + 0] = (i+1)%pNumSegments + 1;
+		lI[lIndex + 1] = lBottomIndex;
+		lI[lIndex + 2] = i+1;
 	}
 
 	TriangleBasedGeometry* lCone = 
@@ -446,8 +450,8 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCylinder(float pBaseRadius,
 							float pHeight,
 							unsigned pNumSegments)
 {
-	int lVertexCount = pNumSegments * 2;
-	int lNumTriangles = pNumSegments * 2 + (pNumSegments - 2) * 2;
+	int lVertexCount = pNumSegments * 2 + 2;
+	int lNumTriangles = pNumSegments * 2 + pNumSegments * 2;
 
 	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
 	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
@@ -475,7 +479,7 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCylinder(float pBaseRadius,
 		lNormYAdd = (float)sin(atan(lRadiusDiff / pHeight));
 	}
 
-	// Setup vertices.
+	// Setup cylindrical vertices.
 	unsigned i;
 	for (i = 0; i < pNumSegments; i++)
 	{
@@ -502,6 +506,13 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCylinder(float pBaseRadius,
 
 		lAngle += lAngleStep;
 	}
+	// Set the top and bottom vertices.
+	const int lTopVertex = pNumSegments*2;
+	const int lBottomVertex = lTopVertex+1;
+	lV[lTopVertex].Set(0, pHeight*0.5f, 0);
+	lN[lTopVertex].Set(0, 1.0f, 0);
+	lV[lBottomVertex].Set(0, -pHeight*0.5f, 0);
+	lN[lBottomVertex].Set(0, -1.0f, 0);
 
 	// Setup triangles.
 	int lIndex = 0;
@@ -518,22 +529,20 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCylinder(float pBaseRadius,
 	}
 
 	// Setup top triangles.
-	for (i = 0; i < pNumSegments - 2; i++)
+	for (i = 0; i < pNumSegments; i++)
 	{
-		lI[lIndex + 0] = 0;
-		lI[lIndex + 1] = i + 2;
-		lI[lIndex + 2] = i + 1;
-		
+		lI[lIndex + 0] = lTopVertex;
+		lI[lIndex + 1] = (i+1) % pNumSegments;
+		lI[lIndex + 2] = i;
 		lIndex += 3;
 	}
 
 	// Setup bottom triangles.
-	for (i = 0; i < pNumSegments - 2; i++)
+	for (i = 0; i < pNumSegments; i++)
 	{
-		lI[lIndex + 0] = pNumSegments;
-		lI[lIndex + 1] = pNumSegments + i + 1;
-		lI[lIndex + 2] = pNumSegments + i + 2;
-		
+		lI[lIndex + 0] = lBottomVertex;
+		lI[lIndex + 1] = pNumSegments + i;
+		lI[lIndex + 2] = pNumSegments + (i+1) % pNumSegments;
 		lIndex += 3;
 	}
 

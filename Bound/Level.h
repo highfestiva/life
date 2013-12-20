@@ -49,7 +49,7 @@ public:
 	void RenderOutline();
 
 private:
-	UiTbc::TriangleBasedGeometry* CreateTriangleBox(float x, float y, float z);
+	UiTbc::TriangleBasedGeometry* CreateMesh(int pLevel, float x, float y, float z);
 	static void SetVertices(UiTbc::TriangleBasedGeometry* pGfxMesh, const float* v, size_t vc, const uint8* pColorData);
 	static void FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh);
 	static void GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh);

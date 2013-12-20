@@ -10,6 +10,7 @@
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiTBC/Include/UiBasicMeshCreator.h"
 #include "../UiTBC/Include/UiTriangleBasedGeometry.h"
+#include "RtVar.h"
 
 
 
@@ -53,7 +54,7 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 		mGfxWindowMeshId = 0;
 	}
 
-	CreateTriangleBox(4.5f, 4.5f, 3);
+	CreateMesh(pLevel, 4.5f, 4.5f, 3);
 	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(0.5f,0.5f,0.5f);
 	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0,0,0);
 	mGfxMesh->GetBasicMaterialSettings().mShininess	= false;
@@ -169,35 +170,47 @@ void Level::RenderOutline()
 
 
 
-UiTbc::TriangleBasedGeometry* Level::CreateTriangleBox(float x, float y, float z)
+UiTbc::TriangleBasedGeometry* Level::CreateMesh(int pLevel, float x, float y, float z)
 {
-	mSize = Vector3DF(x, y, z);
-
-	// Create all triangles with unique vertices, we don't want triangles sharing
-	// vertices as that would complicate cutting.
-	x *= 0.5f;
-	y *= 0.5f;
-	z *= 0.5f;
-	float v[] =
+	if (mGfxMesh)
 	{
-		-x,+y,+z, +x,+y,+z, -x,+y,-z,
-		-x,+y,-z, +x,+y,+z, +x,+y,-z,
-		+x,-y,+z, -x,-y,+z, +x,-y,-z,
-		+x,-y,-z, -x,-y,+z, -x,-y,-z,
+		delete mGfxMesh;
+	}
+	float lMoveZ = 0;
+	bool lHasShapeVariations;
+	CURE_RTVAR_GET(lHasShapeVariations, =, mUiManager->GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
+	const int lShape = lHasShapeVariations? pLevel%4 : 0;
+	switch (lShape)
+	{
+		case 0:
+			mGfxMesh = UiTbc::BasicMeshCreator::CreateFlatBox(x, y, z, 1, 1, 1);
+		break;
+		case 1:
+			mGfxMesh = UiTbc::BasicMeshCreator::CreateEllipsoid(x*0.75f, y*0.75f, z*0.7f, 14, 14);
+		break;
+		case 2:
+			mGfxMesh = UiTbc::BasicMeshCreator::CreateCone((x+y)/2*0.6f, z*1.3f, 16);
+			lMoveZ = -z*1.1f/2;
+		break;
+		case 3:
+			mGfxMesh = UiTbc::BasicMeshCreator::CreateCylinder(z*0.6f, z*0.6f, (x+y)/2*1.2f, 14);
+		break;
+	}
+	// Create unique vertices for each triangle to simplify cutting.
+	std::vector<float> nv;
+	const float* v = mGfxMesh->GetVertexData();
+	const int tc = mGfxMesh->GetTriangleCount();
+	const vtx_idx_t* lIndices = mGfxMesh->GetIndexData();
+	for (int t = 0; t < tc*3; ++t)
+	{
+		nv.push_back(v[lIndices[t]*3+0]);
+		nv.push_back(v[lIndices[t]*3+1]);
+		nv.push_back(v[lIndices[t]*3+2] + lMoveZ);
+	}
 
-		-x,-y,+z, -x,+y,+z, -x,-y,-z,
-		-x,-y,-z, -x,+y,+z, -x,+y,-z,
-		+x,+y,+z, +x,-y,+z, +x,+y,-z,
-		+x,+y,-z, +x,-y,+z, +x,-y,-z,
-
-		-x,-y,+z, +x,-y,+z, -x,+y,+z,
-		-x,+y,+z, +x,-y,+z, +x,+y,+z,
-		-x,+y,-z, +x,+y,-z, -x,-y,-z,
-		-x,-y,-z, +x,+y,-z, +x,-y,-z,
-	};
 	Color lColors[] = { RED, GREEN, MAGENTA, BLUE, YELLOW, DARK_GRAY, };
 	const int lColorCount = LEPRA_ARRAY_COUNT(lColors);
-	const size_t vc = LEPRA_ARRAY_COUNT(v)/3;
+	const int vc = (int)nv.size()/3;
 	std::vector<uint8> lColorData;
 	for (int x = 0; x < vc; ++x)
 	{
@@ -209,11 +222,7 @@ UiTbc::TriangleBasedGeometry* Level::CreateTriangleBox(float x, float y, float z
 		lColorData.push_back(255);
 	}
 
-	if (!mGfxMesh)
-	{
-		mGfxMesh = new UiTbc::TriangleBasedGeometry;
-	}
-	SetVertices(mGfxMesh, v, vc, &lColorData[0]);
+	SetVertices(mGfxMesh, &nv[0], vc, &lColorData[0]);
 	return mGfxMesh;
 }
 

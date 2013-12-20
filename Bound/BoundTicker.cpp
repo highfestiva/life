@@ -38,7 +38,7 @@ BoundTicker::BoundTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManage
 
 	AddBackedRtvar(_T(RTVAR_GAME_FIRSTTIME));
 	AddBackedRtvar(_T(RTVAR_GAME_LEVEL));
-	AddBackedRtvar(_T(RTVAR_PHYSICS_RTR_OFFSET));
+	AddBackedRtvar(_T(RTVAR_GAME_LEVELSHAPEALTERNATE));
 }
 
 BoundTicker::~BoundTicker()
@@ -65,10 +65,6 @@ void BoundTicker::Suspend()
 void BoundTicker::Resume()
 {
 	Parent::Resume();
-
-	double lRtrOffset;
-	CURE_RTVAR_GET(lRtrOffset, =, mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
-	CURE_RTVAR_SET(mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
 
 	if (mMusicPlayer)
 	{

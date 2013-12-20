@@ -452,9 +452,9 @@ Vector3DF GameUiManager::GetAccelerometer() const
 {
 	float x, y, z;
 	CURE_RTVAR_GET(x, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_X,  0.0);
-	CURE_RTVAR_GET(y, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Y, -1.0);
-	CURE_RTVAR_GET(z, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Z,  0.0);
-	return Vector3DF(x,-z,y);
+	CURE_RTVAR_GET(y, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Y,  0.0);
+	CURE_RTVAR_GET(z, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Z, -1.0);
+	return Vector3DF(x,y,z);
 }
 
 void GameUiManager::SetCameraPosition(const TransformationF& pTransform)

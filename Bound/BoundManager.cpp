@@ -38,9 +38,9 @@
 #define SAME_NORMAL		(1-CLOSE_NORMAL)
 #define NGON_INDEX(i)		(((int)i<0)? cnt-1 : (i>=(int)cnt)? 0 : i)
 #define LEVEL_DONE()		(mPercentDone >= 85)
-#define BRIGHT_TEXT		Color(230, 225, 215)
-#define DIM_TEXT		Color(190, 180, 160)
-#define DIM_RED_TEXT		Color(245, 90, 90)
+#define BRIGHT_TEXT		Color(220, 215, 205)
+#define DIM_TEXT		Color(200, 190, 180)
+#define DIM_RED_TEXT		Color(240, 80, 80)
 #define DIM_RED			Color(180, 60, 50)
 #define GREEN_BUTTON		Color(20, 190, 15)
 #define ORANGE_BUTTON		Color(220, 110, 20)
@@ -88,8 +88,8 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 	/*
 #define RNDMZEL \
 	for (int x = 0; x < 20; ++x) \
@@ -244,13 +244,16 @@ void BoundManager::RenderBackground()
 	mUiManager->GetRenderer()->SetTexturingEnabled(false);
 	Vector3DF lTopColor(84,217,245);
 	Vector3DF lBottomColor(0,30,255);
-	Plane lDevicePlane(-mUiManager->GetAccelerometer(), 0);
-	float lYaw, lPitch, lRoll;
-	lDevicePlane.GetOrientation().GetEulerAngles(lYaw, lPitch, lRoll);
 	static float lAngle = 0;
-	if (lPitch > PIF/4)
+	Vector3DF lDeviceAcceleration(-mUiManager->GetAccelerometer());
+	float lAcceleration = lDeviceAcceleration.GetLength();
+	if (lAcceleration > 0.7f && std::abs(lDeviceAcceleration.y) < 0.7f*lAcceleration)
 	{
-		lAngle = Math::Lerp(lAngle, lYaw, 0.1f);
+		Vector2DF lScreenDirection(lDeviceAcceleration.x, lDeviceAcceleration.z);
+		lScreenDirection.Normalize();
+		float lScreenAngle = -lScreenDirection.GetAngle() + PIF/2;
+		Math::RangeAngles(lAngle, lScreenAngle);
+		lAngle = Math::Lerp(lAngle, lScreenAngle, 0.1f);
 	}
 	float x = mUiManager->GetCanvas()->GetWidth() / 2.0f;
 	float y = mUiManager->GetCanvas()->GetHeight() / 2.0f;
@@ -271,8 +274,8 @@ void BoundManager::RenderBackground()
 	Vector3DF brc = Math::Lerp(lBottomColor, lTopColor, br.y*0.5f+0.5f)/255;
 	mUiManager->GetPainter()->SetColor(Color::CreateColor(tlc.x, tlc.y, tlc.z, 1), 0);
 	mUiManager->GetPainter()->SetColor(Color::CreateColor(trc.x, trc.y, trc.z, 1), 1);
-	mUiManager->GetPainter()->SetColor(Color::CreateColor(blc.x, blc.y, blc.z, 1), 2);
-	mUiManager->GetPainter()->SetColor(Color::CreateColor(brc.x, brc.y, brc.z, 1), 3);
+	mUiManager->GetPainter()->SetColor(Color::CreateColor(brc.x, brc.y, brc.z, 1), 2);
+	mUiManager->GetPainter()->SetColor(Color::CreateColor(blc.x, blc.y, blc.z, 1), 3);
 	mUiManager->GetPainter()->FillShadedRect(0, 0, mUiManager->GetCanvas()->GetWidth(), mUiManager->GetCanvas()->GetHeight());
 	mUiManager->GetRenderer()->SetDepthWriteEnabled(true);
 	mUiManager->GetRenderer()->SetDepthTestEnabled(true);
@@ -294,22 +297,22 @@ bool BoundManager::Paint()
 
 		const str lCompletionText = strutil::Format(_T("Reduced: %.1f%%"), mPercentDone);
 		int cw = mUiManager->GetPainter()->GetStringWidth(lCompletionText);
-		mUiManager->GetPainter()->PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 7);
+		PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 7);
 
 		mUiManager->SetScaleFont(0.9f);
 		const str lScoreText = strutil::Format(_T("Score: %.0f"), mLevelScore+mPreviousScore);
-		mUiManager->GetPainter()->PrintText(lScoreText, 25, 9);
+		PrintText(lScoreText, 25, 9);
 
 		int lLevel;
 		CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 		const str lLevelText = strutil::Format(_T("Level: %i"), lLevel+1);
 		int lw = mUiManager->GetPainter()->GetStringWidth(lLevelText);
-		mUiManager->GetPainter()->PrintText(lLevelText, mUiManager->GetCanvas()->GetWidth()-lw-25, 9);
+		PrintText(lLevelText, mUiManager->GetCanvas()->GetWidth()-lw-25, 9);
 
 		mUiManager->GetPainter()->SetColor(lIsUsingACut? DIM_RED_TEXT : DIM_TEXT);
 		mUiManager->SetScaleFont(0.7f);
 		const str lLinesText = strutil::Format(_T("Cuts: %i"), mCutsLeft);
-		mUiManager->GetPainter()->PrintText(lLinesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 31);
+		PrintText(lLinesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 31);
 
 		Vector3DF v = RNDPOSVEC()*255;
 		Color lBlinkCol;
@@ -317,7 +320,7 @@ bool BoundManager::Paint()
 		bool lIsShowingShake = (mIsShaking && mShakeTimer.QuerySplitTime() < 2.5);
 		mUiManager->GetPainter()->SetColor(lIsShowingShake? lBlinkCol : DIM_TEXT);
 		const str lShakesText = strutil::Format(_T("Shakes: %i"), mShakesLeft);
-		mUiManager->GetPainter()->PrintText(lShakesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 48);
+		PrintText(lShakesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 48);
 		mUiManager->SetMasterFont();
 	}
 	return true;
@@ -356,11 +359,11 @@ bool BoundManager::HandleCutting()
 		if (!(x->mFlags&DRAG_FLAG_STARTED))
 		{
 			const float lDragLength = lVector.GetLength();
-			if (lDragLength < 20)
+			if (lDragLength < w*0.042f)
 			{
 				lIsVeryNewDrag = true;
 			}
-			else if (lDragLength > 40)
+			else if (lDragLength > w*0.083f)
 			{
 				x->mFlags |= DRAG_FLAG_STARTED;
 			}
@@ -423,8 +426,8 @@ bool BoundManager::HandleCutting()
 					mLevelScore += 500;
 				}
 				float lCutX = mCameraTransform.GetOrientation().GetInverseRotatedVector(lCutPlane.n).x;
-				mCameraRotateSpeed = (lCutX < 0)? +3.0f : -3.0f;
-				if (mCutTimer.PopTimeDiff() < 1.2)
+				mCameraRotateSpeed = (lCutX < 0)? +3+(float)mQuickCutCount : -3-(float)mQuickCutCount;
+				if (mCutTimer.PopTimeDiff() < 1.4)
 				{
 					mCutSoundPitch += 0.3f;
 					++mQuickCutCount;
@@ -1028,46 +1031,6 @@ bool BoundManager::DidFinishLevel()
 	OnPauseButton(0);
 	UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 0.5f, Random::Uniform(0.98f, 1.02f));
-	//StepLevel(1);
-	/*Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
-	{
-		const double lTime = mFlyTime.QuerySplitTime();
-		const double lLevelBestTime = GetCurrentLevelBestTime(false);
-		const bool lIsEasyMode = (GetControlMode() == 2);
-		double lRtrOffset;
-		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
-		const bool lIsToyMode = (lRtrOffset >= 0.5);
-		if (lTime > 0 && (lTime < lLevelBestTime || lLevelBestTime <= 0) && !lIsEasyMode && !lIsToyMode)
-		{
-			SetLevelBestTime(GetCurrentLevelNumber(), false, lTime);
-
-			str lPilotName;
-			CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
-			const bool lIsNonDefaultPilotName =  (lPilotName != gDefaultPilotName);
-			if (lIsNonDefaultPilotName)
-			{
-				mHiscoreLevelIndex = GetCurrentLevelNumber();
-				mMyHiscoreIndex = -1;
-				mHiscoreJustUploadedTimer.Stop();
-				CreateHiscoreAgent();
-				const str lLevelName = strutil::Format(_T("level_%i"), GetCurrentLevelNumber());
-				const int lNegativeTime = (int)(lTime*-1000);
-				if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, gVehicleName, lPilotName, lNegativeTime))
-				{
-					delete mHiscoreAgent;
-					mHiscoreAgent = 0;
-				}
-			}
-		}
-
-		UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 1.0f, 1.0f);
-		mZoomPlatform = true;
-		mLevelCompleted = true;
-		mWinImageTimer.Start();
-		return true;
-	}*/
 	return true;
 }
 
@@ -1374,7 +1337,7 @@ void BoundManager::ScriptPhysicsTick()
 		}
 		Vector3DF lAcceleration = mCameraTransform.GetOrientation()*mUiManager->GetAccelerometer();
 		float lAccelerationLength = lAcceleration.GetLength();
-		mIsShaking = (lAccelerationLength > 1.2f);
+		mIsShaking = (lAccelerationLength > 1.3f);
 		bool lIsReallyShaking = false;
 		double lShakeTime = mShakeTimer.QuerySplitTime();
 		if (lShakeTime > 6.0)
@@ -1526,6 +1489,15 @@ void BoundManager::UpdateCameraPosition(bool pUpdateMicPosition)
 }
 
 
+
+void BoundManager::PrintText(const str& s, int x, int y) const
+{
+	Color lOldColor = mUiManager->GetPainter()->GetColor(0);
+	mUiManager->GetPainter()->SetColor(DARK_BLUE, 0);
+	mUiManager->GetPainter()->PrintText(s, x, y+1);
+	mUiManager->GetPainter()->SetColor(lOldColor, 0);
+	mUiManager->GetPainter()->PrintText(s, x, y);
+}
 
 void BoundManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
 {
