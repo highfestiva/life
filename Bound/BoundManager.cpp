@@ -29,7 +29,7 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define BG_COLOR		Color(5, 10, 15, 240)
+#define BG_COLOR		Color(5, 10, 15, 230)
 #define CAM_DISTANCE		7.0f
 #define BALL_RADIUS		0.15f
 #define DRAG_FLAG_INVALID	1
@@ -88,7 +88,7 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	/*
 #define RNDMZEL \
@@ -243,18 +243,19 @@ void BoundManager::RenderBackground()
 	mUiManager->GetRenderer()->SetLightsEnabled(false);
 	mUiManager->GetRenderer()->SetTexturingEnabled(false);
 	Vector3DF lTopColor(84,217,245);
-	Vector3DF lBottomColor(0,30,255);
+	Vector3DF lBottomColor(12,19,87);
 	static float lAngle = 0;
 	Vector3DF lDeviceAcceleration(-mUiManager->GetAccelerometer());
 	float lAcceleration = lDeviceAcceleration.GetLength();
+	float lScreenAngle = 0;
 	if (lAcceleration > 0.7f && std::abs(lDeviceAcceleration.y) < 0.7f*lAcceleration)
 	{
 		Vector2DF lScreenDirection(lDeviceAcceleration.x, lDeviceAcceleration.z);
 		lScreenDirection.Normalize();
-		float lScreenAngle = -lScreenDirection.GetAngle() + PIF/2;
-		Math::RangeAngles(lAngle, lScreenAngle);
-		lAngle = Math::Lerp(lAngle, lScreenAngle, 0.1f);
+		lScreenAngle = -lScreenDirection.GetAngle() + PIF/2;
 	}
+	Math::RangeAngles(lAngle, lScreenAngle);
+	lAngle = Math::Lerp(lAngle, lScreenAngle, 0.1f);
 	float x = mUiManager->GetCanvas()->GetWidth() / 2.0f;
 	float y = mUiManager->GetCanvas()->GetHeight() / 2.0f;
 	float l = ::sqrt(x*x + y*y);
@@ -426,7 +427,6 @@ bool BoundManager::HandleCutting()
 					mLevelScore += 500;
 				}
 				float lCutX = mCameraTransform.GetOrientation().GetInverseRotatedVector(lCutPlane.n).x;
-				mCameraRotateSpeed = (lCutX < 0)? +3+(float)mQuickCutCount : -3-(float)mQuickCutCount;
 				if (mCutTimer.PopTimeDiff() < 1.4)
 				{
 					mCutSoundPitch += 0.3f;
@@ -437,6 +437,7 @@ bool BoundManager::HandleCutting()
 					mCutSoundPitch = Random::Uniform(0.9f, 1.1f);
 					mQuickCutCount = 0;
 				}
+				mCameraRotateSpeed = (lCutX < 0)? +3+mQuickCutCount*0.5f : -3-mQuickCutCount*0.5f;
 				UiCure::UserSound2dResource* lCutSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 				new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("cut.wav"), lCutSound, 0.5f, mCutSoundPitch);
 			}
@@ -1057,7 +1058,7 @@ int BoundManager::StepLevel(int pCount)
 	int lBallCount = lLevelNumber + 2;
 	for (int x = 0; x < lBallCount; ++x)
 	{
-		CreateBall(x);
+		CreateBall(x, 0);
 	}
 	while ((int)mBalls.size() > lBallCount)
 	{
@@ -1125,17 +1126,25 @@ void BoundManager::SetLocalRender(bool pRender)
 
 
 
-void BoundManager::CreateBall(int pIndex)
+void BoundManager::CreateBall(int pIndex, const Vector3DF* pPosition)
 {
 	if ((int)mBalls.size() > pIndex)
 	{
 		return;
 	}
 	Cure::ContextObject* lBall = Parent::CreateContextObject(_T("soccerball"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	int x = pIndex%3;
-	int y = pIndex/3%3;
-	int z = pIndex/9%3;
-	lBall->SetRootPosition(Vector3DF(-0.5f+0.5f*x, -0.5f+0.5f*y, -0.5f+0.5f*z));
+	Vector3DF lPosition;
+	if (pPosition)
+	{
+		lPosition = *pPosition;
+	}
+	else
+	{
+		lPosition.x = pIndex%3*0.5f-0.5f;
+		lPosition.x = pIndex/3%3*0.5f-0.5f;
+		lPosition.x = pIndex/9%3*0.5f-0.5f;
+	}
+	lBall->SetRootPosition(lPosition);
 	lBall->SetRootVelocity(RNDVEC(1.0f));
 	lBall->StartLoading();
 	mBalls.push_back(lBall->GetInstanceId());
@@ -1220,6 +1229,7 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	int lRow = 0;
 	const int lRowCount = 3;
 
+	bool lIsPaused = false;
 	if (LEVEL_DONE())
 	{
 		UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Level completed (85%)"));
@@ -1238,6 +1248,7 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		if (mCutsLeft > 0)
 		{
 			lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Paused"));
+			lIsPaused = true;
 		}
 		else
 		{
@@ -1259,7 +1270,7 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
-	if (pButton)
+	if (lIsPaused)
 	{
 		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, _T("X"));
 		lLayouter.AddCornerButton(lCloseButton, -9);
@@ -1335,9 +1346,9 @@ void BoundManager::ScriptPhysicsTick()
 		{
 			OnPauseButton(0);
 		}
-		Vector3DF lAcceleration = mCameraTransform.GetOrientation()*mUiManager->GetAccelerometer();
+		Vector3DF lAcceleration = mUiManager->GetAccelerometer();
 		float lAccelerationLength = lAcceleration.GetLength();
-		mIsShaking = (lAccelerationLength > 1.3f);
+		mIsShaking = (lAccelerationLength > 1.6f);
 		bool lIsReallyShaking = false;
 		double lShakeTime = mShakeTimer.QuerySplitTime();
 		if (lShakeTime > 6.0)
@@ -1373,7 +1384,14 @@ void BoundManager::ScriptPhysicsTick()
 		else if (mShakeTimer.IsStarted())
 		{
 			mIsShaking = true;
+			if (lAccelerationLength > 1.2f)
+			{
+				// Even though the user isn't having high Gs right now, we still follow the user acceleration a bit.
+				lAcceleration = mCameraTransform.GetOrientation() * lAcceleration;
+				lIsReallyShaking = true;
+			}
 		}
+		Vector3DF lCenter;
 		std::vector<Cure::GameObjectId>::iterator x;
 		for (x = mBalls.begin(); x != mBalls.end(); ++x)
 		{
@@ -1383,6 +1401,7 @@ void BoundManager::ScriptPhysicsTick()
 				continue;
 			}
 			Vector3DF p = lBall->GetPosition();
+			lCenter += p;
 			lBall->SetInitialTransform(TransformationF(QuaternionF(), p));
 
 			if (lIsReallyShaking)
@@ -1391,6 +1410,13 @@ void BoundManager::ScriptPhysicsTick()
 				v += lAcceleration*3.0f;
 				GetPhysicsManager()->SetBodyVelocity(lBall->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), v);
 			}
+		}
+		int lLevel;
+		CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+		if (mBalls.size() < lLevel+1)
+		{
+			lCenter /= mBalls.size();
+			CreateBall(mBalls.size(), &lCenter);
 		}
 		MoveCamera(lPhysicsTime);
 		UpdateCameraPosition(false);
@@ -1460,12 +1486,15 @@ void BoundManager::HandleWorldBoundaries()
 
 void BoundManager::MoveCamera(float pFrameTime)
 {
-	if (mIsCutting)
+	if (mIsCutting || mIsShaking)
 	{
 		return;
 	}
 
-	mCameraAngle += 0.15f*mCameraRotateSpeed*pFrameTime;
+	int lLevel;
+	CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	float lBaseSpeed = 0.15f + lLevel * 0.01f;
+	mCameraAngle += lBaseSpeed*mCameraRotateSpeed*pFrameTime;
 	mCameraRotateSpeed = Math::Lerp(mCameraRotateSpeed, (mCameraRotateSpeed < 0)? -1.0f : 1.0f, 0.07f);
 	if (mCameraAngle > 2*PIF)
 	{

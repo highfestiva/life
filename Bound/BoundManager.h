@@ -105,7 +105,7 @@ protected:
 	virtual void TickUiUpdate();
 	virtual void SetLocalRender(bool pRender);
 
-	void CreateBall(int pIndex);
+	void CreateBall(int pIndex, const Vector3DF* pPosition);
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	//virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
