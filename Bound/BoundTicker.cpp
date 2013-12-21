@@ -39,6 +39,7 @@ BoundTicker::BoundTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManage
 	AddBackedRtvar(_T(RTVAR_GAME_FIRSTTIME));
 	AddBackedRtvar(_T(RTVAR_GAME_LEVEL));
 	AddBackedRtvar(_T(RTVAR_GAME_LEVELSHAPEALTERNATE));
+	AddBackedRtvar(_T(RTVAR_GAME_RUNADS));
 }
 
 BoundTicker::~BoundTicker()

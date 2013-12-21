@@ -15,3 +15,4 @@
 #define RTVAR_GAME_FIRSTTIME		"Game.FirstTime"
 #define RTVAR_GAME_LEVEL		"Game.Level"
 #define RTVAR_GAME_LEVELSHAPEALTERNATE	"Game.LevelShapeAlternate"
+#define RTVAR_GAME_RUNADS		"Game.RunAds"

@@ -17,6 +17,8 @@
 		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
 		B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */; };
 		B11732CA16DD51DD00C2DA5B /* UiDynamicRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B11732C916DD51DD00C2DA5B /* UiDynamicRenderer.cpp */; };
+		B11E4155186613CB00C25073 /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B11E4154186613CB00C25073 /* iAd.framework */; };
+		B11E415718662E3B00C25073 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B11E415618662E3B00C25073 /* StoreKit.framework */; };
 		B13DA597173ED81600A73400 /* Explosion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA594173ED81600A73400 /* Explosion.cpp */; };
 		B13DA598173ED81600A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA595173ED81600A73400 /* Spawner.cpp */; };
 		B13DA599173ED81600A73400 /* StuntTrigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA596173ED81600A73400 /* StuntTrigger.cpp */; };
@@ -533,6 +535,8 @@
 		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
 		B11732C916DD51DD00C2DA5B /* UiDynamicRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiDynamicRenderer.cpp; sourceTree = "<group>"; };
+		B11E4154186613CB00C25073 /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
+		B11E415618662E3B00C25073 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B13DA594173ED81600A73400 /* Explosion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Explosion.cpp; path = ../../Life/Explosion.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA595173ED81600A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Life/Spawner.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA596173ED81600A73400 /* StuntTrigger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StuntTrigger.cpp; path = ../../Life/StuntTrigger.cpp; sourceTree = SOURCE_ROOT; };
@@ -1222,6 +1226,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B11E415718662E3B00C25073 /* StoreKit.framework in Frameworks */,
 				B1CF1ED51854E66800765E60 /* CoreMotion.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
@@ -1229,6 +1234,7 @@
 				B19A295813A137400051A61C /* OpenAL.framework in Frameworks */,
 				B19A295A13A137400051A61C /* OpenGLES.framework in Frameworks */,
 				B19A29E213A13B9B0051A61C /* QuartzCore.framework in Frameworks */,
+				B11E4155186613CB00C25073 /* iAd.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1286,6 +1292,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B11E415618662E3B00C25073 /* StoreKit.framework */,
+				B11E4154186613CB00C25073 /* iAd.framework */,
 				B1CF1ED41854E66800765E60 /* CoreMotion.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,

@@ -23,6 +23,7 @@
 #include "../Lepra/Include/Random.h"
 #include "../Life/LifeClient/UiConsole.h"
 #include "Ball.h"
+#include "Bound.h"
 #include "BoundConsoleManager.h"
 #include "Level.h"
 #include "RtVar.h"
@@ -53,6 +54,7 @@ namespace Bound
 
 
 
+void Bound__ShowAd();
 void Bound__Buy();
 
 
@@ -94,6 +96,7 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, true);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_RUNADS, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	/*
 #define RNDMZEL \
@@ -1038,6 +1041,14 @@ bool BoundManager::DidFinishLevel()
 	OnPauseButton(0);
 	UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 0.5f, Random::Uniform(0.98f, 1.02f));
+
+	bool lRunAds;
+	CURE_RTVAR_GET(lRunAds, =, GetVariableScope(), RTVAR_GAME_RUNADS, true);
+	if (lRunAds)
+	{
+		Bound__ShowAd();
+	}
+
 	return true;
 }
 
@@ -1235,7 +1246,9 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	}
 	mPauseButton->SetVisible(false);
 
-	bool lDidBuy = true;
+	bool lRunAds;
+	CURE_RTVAR_GET(lRunAds, =, GetVariableScope(), RTVAR_GAME_RUNADS, true);
+	bool lDidBuy = !lRunAds;
 	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &BoundManager::OnMenuAlternative), 0.6f, lDidBuy? 0.6f : 0.7f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
 	d->SetDirection(+1, false);

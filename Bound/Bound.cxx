@@ -6,6 +6,7 @@
 
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Lepra/Include/SystemManager.h"
+#include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
 #include "../Life/LifeApplication.h"
 #include "../UiCure/Include/UiCure.h"
@@ -39,6 +40,7 @@ public:
 
 	virtual void Suspend();
 	virtual void Resume();
+	void SavePurchase();
 
 	str GetTypeName() const;
 	str GetVersion() const;
@@ -191,6 +193,29 @@ void Bound::Resume()
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
 	mGameTicker->Resume();
+}
+
+void Bound::SavePurchase()
+{
+	Life::GameClientMasterTicker* lTicker = (Life::GameClientMasterTicker*)mGameTicker;
+	Life::GameClientSlaveManager* lManager = lTicker->GetSlave(0);
+	CURE_RTVAR_SET(lManager->GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, true);
+	CURE_RTVAR_SET(lManager->GetVariableScope(), RTVAR_GAME_RUNADS, false);
+	lTicker->SaveRtvars(mUiManager->GetVariableScope());
+}
+
+void Bound__ShowAd()
+{
+#ifdef LEPRA_IOS
+        [Bound::GetApp()->mAnimatedApp showAd];
+#endif // iOS
+}
+
+void Bound__Buy()
+{
+#ifdef LEPRA_IOS
+	[Bound::GetApp()->mAnimatedApp startPurchase:@"full"];
+#endif // iOS
 }
 
 
