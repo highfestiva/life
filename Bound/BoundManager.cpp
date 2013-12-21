@@ -45,10 +45,15 @@
 #define GREEN_BUTTON		Color(20, 190, 15)
 #define ORANGE_BUTTON		Color(220, 110, 20)
 #define RED_BUTTON		Color(210, 40, 30)
+#define BLACK_BUTTON		DARK_GRAY
 
 
 namespace Bound
 {
+
+
+
+void Bound__Buy();
 
 
 
@@ -1230,12 +1235,13 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	}
 	mPauseButton->SetVisible(false);
 
-	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &BoundManager::OnMenuAlternative), 0.6f, 0.6f);
+	bool lDidBuy = true;
+	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &BoundManager::OnMenuAlternative), 0.6f, lDidBuy? 0.6f : 0.7f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
 	d->SetDirection(+1, false);
 	UiTbc::FixedLayouter lLayouter(d);
 	int lRow = 0;
-	const int lRowCount = 3;
+	const int lRowCount = lDidBuy? 3 : 4;
 
 	bool lIsPaused = false;
 	if (LEVEL_DONE())
@@ -1278,6 +1284,13 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
+	if (!lDidBuy)
+	{
+		UiTbc::Button* lBuyButton = new UiTbc::Button(BLACK_BUTTON, _T("Buy full"));
+		lBuyButton->SetFontColor(DIM_TEXT);
+		lLayouter.AddButton(lBuyButton, -5, lRow++, lRowCount, 0, 1, 1, true);
+	}
+
 	if (lIsPaused)
 	{
 		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, _T("X"));
@@ -1297,6 +1310,7 @@ void BoundManager::OnMenuAlternative(UiTbc::Button* pButton)
 		case -2:	GetConsoleManager()->PushYieldCommand(_T("step-level -1"));				break;
 		case -3:	GetConsoleManager()->PushYieldCommand(_T("step-level 0"));				break;
 		case -4:	GetConsoleManager()->PushYieldCommand(strutil::Format(_T("step-level %i"), -lLevel));	break;
+		case -5:	Bound__Buy();										break;
 	}
 	mPauseButton->SetVisible(true);
 	HiResTimer::StepCounterShadow();
