@@ -1413,9 +1413,9 @@ void BoundManager::ScriptPhysicsTick()
 		}
 		int lLevel;
 		CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-		if (mBalls.size() < lLevel+1)
+		if ((int)mBalls.size() < lLevel+1)
 		{
-			lCenter /= mBalls.size();
+			lCenter /= (float)mBalls.size();
 			CreateBall(mBalls.size(), &lCenter);
 		}
 		MoveCamera(lPhysicsTime);
