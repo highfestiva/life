@@ -571,6 +571,16 @@ void GameClientMasterTicker::GetSlaveInfo(const GameClientSlaveManager* pSlave, 
 	pIndex = 0;
 }
 
+GameClientSlaveManager* GameClientMasterTicker::GetSlave(int pIndex) const
+{
+	if ((int)mSlaveArray.size() > pIndex)
+	{
+		return mSlaveArray[pIndex];
+	}
+	deb_assert(false);
+	return 0;
+}
+
 bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const
 {
 	return (mLocalObjectSet.find(pInstanceId) != mLocalObjectSet.end());

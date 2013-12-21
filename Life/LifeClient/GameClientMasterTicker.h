@@ -67,6 +67,7 @@ public:
 
 	bool IsFirstSlave(const GameClientSlaveManager* pSlave) const;
 	void GetSlaveInfo(const GameClientSlaveManager* pSlave, int& pIndex, int& pCount) const;
+	GameClientSlaveManager* GetSlave(int pIndex) const;
 	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
 
 	virtual PixelRect GetRenderArea() const;
