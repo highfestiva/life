@@ -39,7 +39,7 @@ Level::~Level()
 
 
 
-void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
+void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, bool pVaryShapes, int pLevel)
 {
 	(void)pLevel;
 
@@ -54,7 +54,7 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel)
 		mGfxWindowMeshId = 0;
 	}
 
-	CreateMesh(pLevel, 4.5f, 4.5f, 3);
+	CreateMesh(pVaryShapes, pLevel, 4.5f, 4.5f, 3);
 	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(0.5f,0.5f,0.5f);
 	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0,0,0);
 	mGfxMesh->GetBasicMaterialSettings().mShininess	= false;
@@ -170,16 +170,14 @@ void Level::RenderOutline()
 
 
 
-UiTbc::TriangleBasedGeometry* Level::CreateMesh(int pLevel, float x, float y, float z)
+UiTbc::TriangleBasedGeometry* Level::CreateMesh(bool pVaryShapes, int pLevel, float x, float y, float z)
 {
 	if (mGfxMesh)
 	{
 		delete mGfxMesh;
 	}
 	float lMoveZ = 0;
-	bool lHasShapeVariations;
-	CURE_RTVAR_GET(lHasShapeVariations, =, mUiManager->GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
-	const int lShape = lHasShapeVariations? pLevel%4 : 0;
+	const int lShape = pVaryShapes? pLevel%4 : 0;
 	switch (lShape)
 	{
 		case 0:
@@ -189,7 +187,7 @@ UiTbc::TriangleBasedGeometry* Level::CreateMesh(int pLevel, float x, float y, fl
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateEllipsoid(x*0.75f, y*0.75f, z*0.7f, 14, 14);
 		break;
 		case 2:
-			mGfxMesh = UiTbc::BasicMeshCreator::CreateCone((x+y)/2*0.6f, z*1.3f, 16);
+			mGfxMesh = UiTbc::BasicMeshCreator::CreateCone((x+y)/2*0.6f, z*1.4f, 16);
 			lMoveZ = -z*1.1f/2;
 		break;
 		case 3:

@@ -161,6 +161,7 @@ void BoundManager::LoadSettings()
 
 void BoundManager::SaveSettings()
 {
+	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
 }
 
 bool BoundManager::Open()
@@ -1054,7 +1055,9 @@ int BoundManager::StepLevel(int pCount)
 	int lLevelNumber;
 	CURE_RTVAR_GET(lLevelNumber, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	lLevelNumber = std::max(0, lLevelNumber+pCount);
-	mLevel->GenerateLevel(GetPhysicsManager(), lLevelNumber);
+	bool lVaryShapes;
+	CURE_RTVAR_GET(lVaryShapes, =, GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
+	mLevel->GenerateLevel(GetPhysicsManager(), lVaryShapes, lLevelNumber);
 	int lBallCount = lLevelNumber + 2;
 	for (int x = 0; x < lBallCount; ++x)
 	{
@@ -1128,11 +1131,6 @@ void BoundManager::SetLocalRender(bool pRender)
 
 void BoundManager::CreateBall(int pIndex, const Vector3DF* pPosition)
 {
-	if ((int)mBalls.size() > pIndex)
-	{
-		return;
-	}
-	Cure::ContextObject* lBall = Parent::CreateContextObject(_T("soccerball"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	Vector3DF lPosition;
 	if (pPosition)
 	{
@@ -1141,9 +1139,19 @@ void BoundManager::CreateBall(int pIndex, const Vector3DF* pPosition)
 	else
 	{
 		lPosition.x = pIndex%3*0.5f-0.5f;
-		lPosition.x = pIndex/3%3*0.5f-0.5f;
-		lPosition.x = pIndex/9%3*0.5f-0.5f;
+		lPosition.y = pIndex/3%3*0.5f-0.5f;
+		lPosition.z = -pIndex/9%3*0.5f-1.5f;
 	}
+	if ((int)mBalls.size() > pIndex)
+	{
+		Cure::ContextObject* lBall = GetContext()->GetObject(mBalls[pIndex]);
+		if (lBall)
+		{
+			GetPhysicsManager()->SetBodyPosition(lBall->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lPosition);
+		}
+		return;
+	}
+	Cure::ContextObject* lBall = Parent::CreateContextObject(_T("soccerball"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	lBall->SetRootPosition(lPosition);
 	lBall->SetRootVelocity(RNDVEC(1.0f));
 	lBall->StartLoading();

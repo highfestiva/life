@@ -39,7 +39,7 @@ public:
 	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Level();
 
-	void GenerateLevel(TBC::PhysicsManager* pPhysicsManager, int pLevel);
+	void GenerateLevel(TBC::PhysicsManager* pPhysicsManager, bool pVaryShapes, int pLevel);
 	const UiTbc::TriangleBasedGeometry* GetMesh() const;
 	const UiTbc::TriangleBasedGeometry* GetWindowMesh() const;
 	float GetVolumePart() const;
@@ -49,7 +49,7 @@ public:
 	void RenderOutline();
 
 private:
-	UiTbc::TriangleBasedGeometry* CreateMesh(int pLevel, float x, float y, float z);
+	UiTbc::TriangleBasedGeometry* CreateMesh(bool pVaryShapes, int pLevel, float x, float y, float z);
 	static void SetVertices(UiTbc::TriangleBasedGeometry* pGfxMesh, const float* v, size_t vc, const uint8* pColorData);
 	static void FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh);
 	static void GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh);

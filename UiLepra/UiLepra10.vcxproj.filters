@@ -225,5 +225,8 @@
     <None Include="Source\Mac\UiIosInput.mm">
       <Filter>Source Files\Mac</Filter>
     </None>
+    <None Include="Source\Mac\RotatingController.mm">
+      <Filter>Source Files\Mac</Filter>
+    </None>
   </ItemGroup>
 </Project>
