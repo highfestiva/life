@@ -1156,7 +1156,7 @@ void BoundManager::CreateBall(int pIndex, const Vector3DF* pPosition)
 	{
 		lPosition.x = pIndex%3*0.5f-0.5f;
 		lPosition.y = pIndex/3%3*0.5f-0.5f;
-		lPosition.z = -pIndex/9%3*0.5f-1.5f;
+		lPosition.z = -pIndex/9%3*0.5f-0.5f;
 	}
 	if ((int)mBalls.size() > pIndex)
 	{
