@@ -56,6 +56,9 @@
     <ClCompile Include="PushServer\PushServerDelegate.cpp">
       <Filter>Server</Filter>
     </ClCompile>
+    <ClCompile Include="Push.mm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Life\LifeMaster\MasterServer.h">

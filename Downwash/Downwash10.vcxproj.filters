@@ -59,6 +59,9 @@
     <ClCompile Include="SimulatorDriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Downwash.mm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Autopilot.h">
@@ -118,10 +121,5 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Downwash.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Downwash.mm">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

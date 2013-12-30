@@ -74,6 +74,9 @@
     <ClCompile Include="HoverTankServer\Npc.cpp">
       <Filter>Server</Filter>
     </ClCompile>
+    <ClCompile Include="HoverTank.mm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Life\LifeMaster\MasterServer.h">
@@ -145,10 +148,5 @@
     <ClInclude Include="HoverTankServer\Npc.h">
       <Filter>Server</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="HoverTank.mm">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

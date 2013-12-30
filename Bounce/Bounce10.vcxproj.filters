@@ -8,13 +8,11 @@
     <ClCompile Include="Racket.cpp" />
     <ClCompile Include="App.cxx" />
     <ClCompile Include="Ball.cpp" />
+    <ClCompile Include="App.mm" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
     <ClInclude Include="Racket.h" />
     <ClInclude Include="Ball.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.mm" />
   </ItemGroup>
 </Project>
