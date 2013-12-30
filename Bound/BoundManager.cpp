@@ -261,7 +261,7 @@ void BoundManager::RenderBackground()
 	{
 		Vector2DF lScreenDirection(lDeviceAcceleration.x, lDeviceAcceleration.z);
 		lScreenDirection.Normalize();
-		lScreenAngle = -lScreenDirection.GetAngle() + PIF/2;
+		lScreenAngle = -lScreenDirection.GetAngle() - PIF/2;
 	}
 	Math::RangeAngles(lAngle, lScreenAngle);
 	lAngle = Math::Lerp(lAngle, lScreenAngle, 0.1f);

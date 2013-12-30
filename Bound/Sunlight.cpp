@@ -18,7 +18,7 @@ namespace Bound
 
 Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
 	mUiManager(pUiManager),
-	mLightAverageDirection(0,0,+1)
+	mLightAverageDirection(0,0,-1)
 {
 	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
@@ -34,8 +34,6 @@ Sunlight::~Sunlight()
 void Sunlight::Tick(const QuaternionF& pCameraOrientation)
 {
 	Vector3DF d = mUiManager->GetAccelerometer();
-	d.x = -d.x;
-	d.z = -d.z;
 	d = pCameraOrientation*d.GetNormalized();
 	d = Math::Lerp(mLightAverageDirection, d, 0.5f);
 	if (d.GetDistanceSquared(mLightAverageDirection) > 1e-5f)
