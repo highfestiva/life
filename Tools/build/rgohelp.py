@@ -7,7 +7,7 @@ import os
 import sys
 
 
-vcver = None
+vcver = 10
 NMAKE = "bin/nmake.exe"
 VCBUILD = "vcpackages/vcbuild.exe"
 
