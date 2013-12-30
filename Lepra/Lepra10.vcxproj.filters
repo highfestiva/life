@@ -385,6 +385,9 @@
     <None Include="Include\Vector3D.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="Source\Posix\MacThread.mm">
+      <Filter>Source Files\Posix</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Alarm.cpp">
@@ -567,9 +570,6 @@
     <ClCompile Include="Source\Posix\PosixSystemManager.cpp">
       <Filter>Source Files\Posix</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Posix\PosixThread.cpp">
-      <Filter>Source Files\Posix</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Posix\MacLog.mm">
       <Filter>Source Files\Posix</Filter>
     </ClCompile>
@@ -590,6 +590,9 @@
     </ClCompile>
     <ClCompile Include="Source\TimeLogger.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Posix\PosixThread.cxx">
+      <Filter>Source Files\Posix</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
