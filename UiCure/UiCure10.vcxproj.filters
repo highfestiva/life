@@ -71,11 +71,11 @@
     <ClCompile Include="Source\UiBurnEmitter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\UiGameUiManager.mm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Source\UiGameUiManager.mm">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="Include\UiResourceManager.inl">
       <Filter>Header Files</Filter>
     </None>
