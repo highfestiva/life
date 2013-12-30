@@ -214,7 +214,7 @@ void Bound__ShowAd()
 void Bound__Buy()
 {
 #ifdef LEPRA_IOS
-	[Bound::GetApp()->mAnimatedApp startPurchase:@"full"];
+	[Bound::GetApp()->mAnimatedApp startPurchase:@"BoundFullInAppPurchase"];
 #endif // iOS
 }
 

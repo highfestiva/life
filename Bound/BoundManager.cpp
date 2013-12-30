@@ -80,7 +80,6 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	mLastCutMode(CUT_NORMAL),
 	mCutSoundPitch(1),
 	mQuickCutCount(0),
-	mPreviousScore(0),
 	mLevelScore(0),
 	mShakeSound(0)
 {
@@ -95,8 +94,9 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, true);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_RUNADS, true);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	/*
 #define RNDMZEL \
@@ -254,7 +254,7 @@ void BoundManager::RenderBackground()
 	Vector3DF lTopColor(84,217,245);
 	Vector3DF lBottomColor(12,19,87);
 	static float lAngle = 0;
-	Vector3DF lDeviceAcceleration(-mUiManager->GetAccelerometer());
+	Vector3DF lDeviceAcceleration(mUiManager->GetAccelerometer());
 	float lAcceleration = lDeviceAcceleration.GetLength();
 	float lScreenAngle = 0;
 	if (lAcceleration > 0.7f && std::abs(lDeviceAcceleration.y) < 0.7f*lAcceleration)
@@ -310,7 +310,9 @@ bool BoundManager::Paint()
 		PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 7);
 
 		mUiManager->SetScaleFont(0.9f);
-		const str lScoreText = strutil::Format(_T("Score: %.0f"), mLevelScore+mPreviousScore);
+		float lPreviousScore;
+		CURE_RTVAR_GET(lPreviousScore, =(float), GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
+		const str lScoreText = strutil::Format(_T("Score: %.0f"), mLevelScore+lPreviousScore);
 		PrintText(lScoreText, 25, 9);
 
 		int lLevel;
@@ -1057,13 +1059,15 @@ int BoundManager::StepLevel(int pCount)
 	mCutsLeft = 25;
 	mShakesLeft = 2;
 	mPercentDone = 0;
+	float lPreviousScore;
+	CURE_RTVAR_GET(lPreviousScore, =(float), GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
 	if (pCount > 0)
 	{
-		mPreviousScore += mLevelScore;
+		lPreviousScore += mLevelScore;
 	}
 	else if (pCount < 0)
 	{
-		mPreviousScore = 0;
+		lPreviousScore = 0;
 	}
 	mLevelScore = 0;
 	mQuickCutCount = 0;
@@ -1090,6 +1094,7 @@ int BoundManager::StepLevel(int pCount)
 		DeleteContextObjectDelay(lBall, 0.1f);
 	}
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, lLevelNumber);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SCORE, (double)lPreviousScore);
 	return lLevelNumber;
 }
 
@@ -1382,6 +1387,8 @@ void BoundManager::ScriptPhysicsTick()
 			OnPauseButton(0);
 		}
 		Vector3DF lAcceleration = mUiManager->GetAccelerometer();
+		lAcceleration.x = -lAcceleration.x;
+		lAcceleration.z = -lAcceleration.z;
 		float lAccelerationLength = lAcceleration.GetLength();
 		mIsShaking = (lAccelerationLength > 1.6f);
 		bool lIsReallyShaking = false;
@@ -1412,6 +1419,7 @@ void BoundManager::ScriptPhysicsTick()
 				delete mShakeSound;
 				UiCure::UserSound2dResource* lBreakSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD);
 				mShakeSound = new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("shake.wav"), lBreakSound, 0.5f, 1.0);
+				mLevelScore -= 1000;
 				--mShakesLeft;
 			}
 			lIsReallyShaking = true;

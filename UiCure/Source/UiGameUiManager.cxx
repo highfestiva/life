@@ -295,7 +295,7 @@ void GameUiManager::InputTick()
 
 	if (mDragManager)
 	{
-		const float lDragLengthInInches = 2.0f;
+		const float lDragLengthInInches = 0.5f;
 		const int lDragPixels = (int)(GetCanvas()->GetWidth() * lDragLengthInInches / GetDisplayManager()->GetPhysicalScreenSize());
 		mDragManager->SetMaxDragDistance(lDragPixels);
 #if defined(LEPRA_TOUCH)

@@ -153,7 +153,6 @@ protected:
 	HiResTimer mCutTimer;
 	float mCutSoundPitch;
 	int mQuickCutCount;
-	float mPreviousScore;
 	float mLevelScore;
 	UiCure::SoundReleaser* mShakeSound;
 	LOG_CLASS_DECLARE();

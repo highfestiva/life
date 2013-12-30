@@ -29,10 +29,7 @@ using namespace Lepra;
 	NSTimer* _animationTimer;
 	CMMotionManager* _motionManager;
 	ADInterstitialAd* _ad;
-	SKProduct* _requestedProduct;
 }
-
-@property(nonatomic, retain) SKProduct* requestedProduct;
 
 -(id) init:(Canvas*)pCanvas;
 -(void) dealloc;
@@ -62,13 +59,11 @@ using namespace Lepra;
 
 @implementation AnimatedApp
 
-@synthesize requestedProduct = _requestedProduct;
-
 -(id) init:(Canvas*)pCanvas
 {
-	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeLeft;
+	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
 	_canvas = pCanvas;
-	_canvas->SetDeviceRotation(90);
+	_canvas->SetDeviceRotation(+90);
 	_animationTimer = nil;
 	_motionManager = [[CMMotionManager alloc] init];
 	[self createAd];
@@ -78,7 +73,6 @@ using namespace Lepra;
 
 -(void) dealloc
 {
-	self.requestedProduct = nil;
         [super dealloc];
 }
 
@@ -200,21 +194,13 @@ using namespace Lepra;
 -(void) productsRequest:(SKProductsRequest*)request didReceiveResponse:(SKProductsResponse*)response
 {
 	NSArray* products = response.products;
-	self.requestedProduct = [products objectAtIndex:0];
-
-	NSNumberFormatter* priceFormatter = [[NSNumberFormatter alloc] init];
-	[priceFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
-	[priceFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-	[priceFormatter setLocale:self.requestedProduct.priceLocale];
-	NSString* price = [priceFormatter stringFromNumber:self.requestedProduct.price];
-	NSString* message = [self.requestedProduct.localizedDescription stringByAppendingFormat:@"\n\n%@\n\nInterested?", price];
-
-	UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:self.requestedProduct.localizedTitle
-		message:message delegate:self
-		cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
-	[alertView show];
-	[alertView release];
-
+	if ([products count] <= 0)
+	{
+		return;
+	}
+	SKProduct* requestedProduct = [products objectAtIndex:0];
+	SKPayment *payment = [SKPayment paymentWithProduct:requestedProduct];
+	[[SKPaymentQueue defaultQueue] addPayment:payment];
 	[request autorelease];
 }
 
@@ -286,21 +272,14 @@ using namespace Lepra;
 
 -(void) alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	if (buttonIndex < 1 || self.requestedProduct == nil)
-	{
-		[self alertViewCancel:alertView];
-		return;
-	}
-	SKPayment *payment = [SKPayment paymentWithProduct:self.requestedProduct];
-	[[SKPaymentQueue defaultQueue] addPayment:payment];
+	[self alertViewCancel:alertView];
 }
 
 -(void) alertViewCancel:(UIAlertView*)alertView
 {
-	self.requestedProduct = nil;
 	//Bound::Bound::GetApp()->SetIsPurchasing(false);
 }
 
 @end
 
-#endif  iOS
+#endif // iOS

@@ -16,3 +16,4 @@
 #define RTVAR_GAME_LEVEL		"Game.Level"
 #define RTVAR_GAME_LEVELSHAPEALTERNATE	"Game.LevelShapeAlternate"
 #define RTVAR_GAME_RUNADS		"Game.RunAds"
+#define RTVAR_GAME_SCORE		"Game.Score"

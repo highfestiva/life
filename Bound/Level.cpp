@@ -182,16 +182,20 @@ UiTbc::TriangleBasedGeometry* Level::CreateMesh(bool pVaryShapes, int pLevel, fl
 	{
 		case 0:
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateFlatBox(x, y, z, 1, 1, 1);
+			mSize = Vector3DF(x,y,z);
 		break;
 		case 1:
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateEllipsoid(x*0.75f, y*0.75f, z*0.7f, 14, 14);
+			mSize = Vector3DF(x*1.5f,y*1.5f,z*1.4f);
 		break;
 		case 2:
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateCone((x+y)/2*0.6f, z*1.4f, 16);
+			mSize = Vector3DF(x*1.2f,y*1.2f,z*1.125f);
 			lMoveZ = -z*1.1f/2;
 		break;
 		case 3:
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateCylinder(z*0.6f, z*0.6f, (x+y)/2*1.2f, 14);
+			mSize = Vector3DF(x*1.2f,z*1.2f,z*1.2f);
 		break;
 	}
 	// Create unique vertices for each triangle to simplify cutting.
