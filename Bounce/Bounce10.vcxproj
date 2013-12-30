@@ -337,7 +337,9 @@
     <ClInclude Include="Racket.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.mm" />
+    <ClCompile Include="App.mm">
+      <FileType>Document</FileType>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

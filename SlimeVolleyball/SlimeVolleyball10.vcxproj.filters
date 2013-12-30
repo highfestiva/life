@@ -17,11 +17,11 @@
     <ClCompile Include="SlimeAI.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="App.mm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.mm">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="Icons\Slime.ico">
       <Filter>Source Files</Filter>
     </None>

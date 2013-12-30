@@ -32,6 +32,9 @@
     <ClCompile Include="Ball.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Bound.mm">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bound.h">
@@ -66,9 +69,6 @@
     <ResourceCompile Include="Bound.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Bound.mm">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="ToDo.txt" />
   </ItemGroup>
 </Project>
