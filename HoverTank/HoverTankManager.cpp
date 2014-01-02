@@ -617,15 +617,34 @@ void HoverTankManager::TickUiInput()
 			// Control steering.
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
-			const float lLeftPowerFwdRev = S(FORWARD) - S(BRAKEANDBACK);
-			//const float lRightPowerFwdRev = S(FORWARD3D) - S(BACKWARD3D);
-			const float lLeftPowerLR = S(RIGHT)-S(LEFT);
-			float lRightPowerLR = S(RIGHT3D) - S(LEFT3D);
-			const float lSteeringPower = std::abs(lLeftPowerFwdRev);
-			lRightPowerLR *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
-			deb_assert(lLeftPowerFwdRev >=  -3 && lLeftPowerFwdRev <=  +3);
-			deb_assert(lLeftPowerLR     >=  -3 &&     lLeftPowerLR <=  +3);
-			deb_assert(lRightPowerLR    >= -12 &&    lRightPowerLR <= +12);
+			Vector2DF lLeftPower(S(RIGHT)-S(LEFT), S(FORWARD)-S(BRAKEANDBACK));
+			Vector2DF lRightPower(S(RIGHT3D)-S(LEFT3D), S(FORWARD3D)-S(BACKWARD3D));
+			if (lLeftPower*lRightPower > 0.2f)
+			{
+				// Pointing somewhat in the same direction, so let's assume that's what the user is trying to accomplish.
+				lLeftPower = (lLeftPower+lRightPower) * 0.5f;
+				lRightPower = lLeftPower;
+			}
+			/*else if (std::abs(lLeftPower.x) > std::abs(lLeftPower.y)*2 && lRightPower.GetLengthSquared() < 0.05f)
+			{
+				// Left stick moving left/right. Simulate left or right rotation instead of the logically expected one-sided strafe.
+				lLeftPower.y = lLeftPower.x;
+				lRightPower.y = -lLeftPower.x;
+				lLeftPower.x = 0;
+			}
+			else if (std::abs(lRightPower.x) > std::abs(lRightPower.y)*2 && lLeftPower.GetLengthSquared() < 0.05f)
+			{
+				// Right stick moving left/right. Simulate left or right rotation instead of the logically expected one-sided strafe.
+				lRightPower.y = -lRightPower.x;
+				lLeftPower.y = lRightPower.x;
+				lRightPower.x = 0;
+			}*/
+			//const float lSteeringPower = std::abs(lLeftPowerFwdRev);
+			//lRightPowerLR *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
+			deb_assert(lLeftPower.y  >= -3 && lLeftPower.y  <= +3);
+			deb_assert(lRightPower.y >= -3 && lRightPower.y <= +3);
+			deb_assert(lLeftPower.x  >= -3 &&  lLeftPower.x <= +3);
+			deb_assert(lRightPower.x >= -3 && lRightPower.y <= +3);
 
 			// Mouse controls yaw angle.
 			const float lAngleDelta = S(YAW_ANGLE) * 0.05f;
@@ -692,21 +711,21 @@ void HoverTankManager::TickUiInput()
 					pc = 0;
 					mLog.Infof(_T("angle=%f, delta=%f, current=%f, diff=%f, friction=%f"), mCameraMouseAngle, lAngleDelta, lCurrentAngle, lCurrentAngle - mCameraMouseAngle, lRotationFriction);
 				}*/
-				const float lStrength = Math::Lerp(1.0f, 2.0f, std::max(std::abs(lLeftPowerFwdRev), std::abs(lLeftPowerLR)));
+				const float lStrength = Math::Lerp(1.0f, 2.0f, lLeftPower.GetLength());
 				lAngleDiff *= 4;
 				lAngleDiff -= lRotationFriction * lStrength;
-				lRightPowerLR += lAngleDiff;
+				lRightPower.x += lAngleDiff;
 			}
 			else
 			{
 				mCameraTargetAngleFactor *= 0.5f;
 			}
 
-			SetAvatarEnginePower(lObject, 0, lLeftPowerFwdRev-lRightPowerLR);
-			SetAvatarEnginePower(lObject, 1, lLeftPowerLR);
-			SetAvatarEnginePower(lObject, 4, lLeftPowerFwdRev+lRightPowerLR);
-			SetAvatarEnginePower(lObject, 5, lLeftPowerLR);
-			SetAvatarEnginePower(lObject, 8, lRightPowerLR);
+			SetAvatarEnginePower(lObject, 0,  lLeftPower.y);
+			SetAvatarEnginePower(lObject, 1,  lLeftPower.x);
+			SetAvatarEnginePower(lObject, 4, lRightPower.y);
+			SetAvatarEnginePower(lObject, 5, lRightPower.x);
+			SetAvatarEnginePower(lObject, 8, lLeftPower.GetDistance(lRightPower)*0.5f);
 			const float lSteeringChange = mLastSteering-s;
 			if (lSteeringChange > 0.5f)
 			{
