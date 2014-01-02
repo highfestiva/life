@@ -60,23 +60,23 @@ int PackerTransformation::Unpack(TransformationF& pDestination, const uint8* pSo
 int PackerVector::Pack(uint8* pDestination, const Vector3DF& pSource)
 {
 	// TODO: improve packer.
-	typedef Vector3DF::BaseType _T;
+	typedef uint32 _T;
 	int lOffset = 0;
-	*(_T*)&pDestination[lOffset] = Endian::HostToBig(pSource.x);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBig(pSource.y);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBig(pSource.z);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.x);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.y);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.z);	lOffset += sizeof(_T);
 	return (lOffset);
 }
 
 int PackerVector::Unpack(Vector3DF& pDestination, const uint8* pSource, int pSize)
 {
-	typedef Vector3DF::BaseType _T;
+	typedef uint32 _T;
 	int lOffset = 0;
 	if (pSize >= (int)sizeof(_T)*3)
 	{
-		pDestination.x = Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
-		pDestination.y = Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
-		pDestination.z = Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+		pDestination.x = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+		pDestination.y = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+		pDestination.z = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
 	}
 	else
 	{
@@ -161,7 +161,7 @@ int PackerUInt16::Unpack(int& pDestination, const uint8* pSource, int pSize)
 
 int PackerReal::Pack(uint8* pDestination, float pSource)
 {
-	*(float*)pDestination = Endian::HostToBig(pSource);
+	*(uint32*)pDestination = Endian::HostToBigF(pSource);
 	return (sizeof(pSource));
 }
 
@@ -171,7 +171,7 @@ int PackerReal::Unpack(float& pDestination, const uint8* pSource, int pSize)
 	if (pSize >= (int)sizeof(pDestination))
 	{
 		lSize = sizeof(pDestination);
-		pDestination = Endian::BigToHost(*(float*)pSource);
+		pDestination = Endian::BigToHostF(*(uint32*)pSource);
 	}
 	else
 	{

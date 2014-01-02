@@ -158,7 +158,7 @@ void HoverTankServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::
 		return;
 	}
 	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T("."));
-	Cure::ContextObject* lObject = mGameServerManager->Parent::CreateContextObject(pAvatarId, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	Cure::ContextObject* lObject = mGameServerManager->GameServerManager::Parent::CreateContextObject(pAvatarId, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	lSpawner->PlaceObject(lObject, -1);
 	pClient->SetAvatarId(lObject->GetInstanceId());
 	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());
