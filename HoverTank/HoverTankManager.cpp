@@ -623,6 +623,23 @@ void HoverTankManager::TickUiInput()
 			{
 				// Pointing somewhat in the same direction, so let's assume that's what the user is trying to accomplish.
 				lLeftPower = (lLeftPower+lRightPower) * 0.5f;
+				const float lAngle = lLeftPower.GetAngle();
+				if (lAngle >= -PIF/4 && lAngle <= PIF/4)
+				{
+					lLeftPower.Set(+1, 0);
+				}
+				else if (lAngle >= -3*PIF/4 && lAngle <= -PIF/4)
+				{
+					lLeftPower.Set(0, -1);
+				}
+				else if (lAngle <= 3*PIF/4 && lAngle >= PIF/4)
+				{
+					lLeftPower.Set(0, +1);
+				}
+				else
+				{
+					lLeftPower.Set(-1, 0);
+				}
 				lRightPower = lLeftPower;
 			}
 			/*else if (std::abs(lLeftPower.x) > std::abs(lLeftPower.y)*2 && lRightPower.GetLengthSquared() < 0.05f)
