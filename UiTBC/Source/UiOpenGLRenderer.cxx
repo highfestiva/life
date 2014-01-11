@@ -209,6 +209,11 @@ void OpenGLRenderer::SetTexturingEnabled(bool pEnabled)
 	}
 }
 
+void OpenGLRenderer::SetLineWidth(float pPixels)
+{
+	::glLineWidth(pPixels);
+}
+
 void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
 {
 	Parent::SetAmbientLight(pRed, pGreen, pBlue);
@@ -1209,7 +1214,6 @@ unsigned OpenGLRenderer::RenderScene()
 		::glShadeModel(GL_SMOOTH);
 		::glDepthFunc(GL_LESS);
 		::glCullFace(GL_BACK);
-		::glLineWidth(3.0f);
 		::glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 		::glEnable(GL_LINE_SMOOTH);
 #ifndef LEPRA_GL_ES

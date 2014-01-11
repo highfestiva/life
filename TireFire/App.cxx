@@ -350,7 +350,7 @@ bool App::Open()
 	[AnimatedApp updateContent];
 #endif // iOS
 
-	mUiManager = new UiCure::GameUiManager(mVariableScope, &mDragManager);
+	mUiManager = new UiCure::GameUiManager(mVariableScope, 0);
 	bool lOk = mUiManager->OpenDraw();
 	if (lOk)
 	{

@@ -62,7 +62,8 @@ class GroupReader(DefaultMAReader):
 				     "polyBridgeEdge", "polySeparate", "polyChipOff", \
 				     "deleteUVSet", "plusMinusAverage", "transformGeometry", \
 				     "cameraView", "directionalLight", "brush", \
-				     "createUVSet", "animCurveTU", "animCurveTA", "bump2d"]
+				     "createUVSet", "animCurveTU", "animCurveTA", "bump2d",
+				     "nurbsSurface", "nurbsTessellate", "makeNurbPlane"]
 		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", \
 		                     "polyAutoProj", "polyPlane"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
@@ -1448,7 +1449,7 @@ class GroupReader(DefaultMAReader):
 			mt = mesh.get_world_pivot()
 			pt = phys.get_world_pivot()
 			d = vec3((mt-pt)[:3])
-			eps = 0.0001
+			eps = 0.001
 			if d.length() >= eps:
 				valid_ref = False
 				print("Error: mesh '%s' and phys node '%s' do not share the exact same World Space Pivot (%s and %s). " \

@@ -82,6 +82,7 @@ public:
 	void SetDepthTestEnabled(bool pEnabled);
 	void SetLightsEnabled(bool pEnabled);
 	void SetTexturingEnabled(bool pEnabled);
+	virtual void SetLineWidth(float pPixels);
 
 	void SetAmbientLight(float pRed, float pGreen, float pBlue);
 	void AddAmbience(float pRed, float pGreen, float pBlue);
