@@ -74,7 +74,6 @@ public:
 	Application(const strutil::strvec& pArgumentVector);
 	virtual ~Application();
 	virtual void Init() = 0;
-	virtual void Destroy() = 0;
 
 	virtual int Run() = 0;
 
