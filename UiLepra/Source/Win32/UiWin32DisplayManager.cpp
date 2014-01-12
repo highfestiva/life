@@ -28,7 +28,7 @@ DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 	{
 		case DisplayManager::OPENGL_CONTEXT:	lDisplayManager = new Win32OpenGLDisplay;				break;
 		case DisplayManager::DIRECTX_CONTEXT:	lDisplayManager = new Win32DirectXDisplay;				break;
-		default:				mLog.AError("Invalid context type in CreateDisplayManager().");	break;
+		default:				mLog.AError("Invalid context type in CreateDisplayManager().");		break;
 	}
 	return (lDisplayManager);
 }

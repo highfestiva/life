@@ -40,7 +40,6 @@ bool Network::Start()
 
 bool Network::Stop()
 {
-	deb_assert(mStarted);
 	if (mStarted == true)
 	{
 		mStarted = false;

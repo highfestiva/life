@@ -65,7 +65,6 @@ protected:
 	virtual int TranslateCommand(const str& pCommand) const;
 	void PrintCommandList(const std::list<str>& pCommandList);
 
-private:
 	void AddCommands();
 	void ConsoleThreadEntry();
 	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
@@ -79,7 +78,7 @@ private:
 	InteractiveConsoleLogListener* mConsoleLogger;
 	ConsolePrompt* mConsolePrompt;
 	ConsoleCommandManager* mConsoleCommandManager;
-	MemberThread<ConsoleManager> mConsoleThread;
+	MemberThread<ConsoleManager>* mConsoleThread;
 	Lock mLock;
 	std::list<str> mYieldCommandList;
 	typedef std::list<Thread*> ForkList;

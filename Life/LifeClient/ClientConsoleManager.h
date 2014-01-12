@@ -41,6 +41,8 @@ protected:
 	{
 		COMMAND_QUIT = COMMAND_COUNT_COMMON,
 		COMMAND_BYE,
+		COMMAND_ZOMBIE,
+		COMMAND_ECHO_MSGBOX,
 		COMMAND_START_LOGIN,
 		COMMAND_WAIT_LOGIN,
 		COMMAND_LOGOUT,
@@ -56,6 +58,8 @@ protected:
 	virtual unsigned GetCommandCount() const;
 	virtual const CommandPair& GetCommand(unsigned pIndex) const;
 	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
+
+	void HeadlessTick();
 
 	static const CommandPair mCommandIdList[];
 	UiConsole* mUiConsole;

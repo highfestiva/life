@@ -18,6 +18,7 @@
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFileNameField.h"
 #include "../../UiTBC/Include/GUI/UiTextArea.h"
+#include "../LifeApplication.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientMasterTicker.h"
 #include "ClientConsoleManager.h"
@@ -36,6 +37,8 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 {
 	{_T("quit"), COMMAND_QUIT},
 	{_T("bye"), COMMAND_BYE},
+	{_T("zombie"), COMMAND_ZOMBIE},
+	{_T("echo-msgbox"), COMMAND_ECHO_MSGBOX},
 	{_T("start-login"), COMMAND_START_LOGIN},
 	{_T("wait-login"), COMMAND_WAIT_LOGIN},
 	{_T("logout"), COMMAND_LOGOUT},
@@ -179,6 +182,41 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				((GameClientSlaveManager*)GetGameManager())->SetIsQuitting();
 			}
 			break;
+			case COMMAND_ZOMBIE:
+			{
+				Application::GetApplication()->SetZombieTick(Application::ZombieTick(this, &ClientConsoleManager::HeadlessTick));
+				while (Application::GetApplication()->GetTicker())
+				{
+					Thread::Sleep(0.5f);
+				}
+				for (size_t x = 0; x < pParameterVector.size(); ++x)
+				{
+					PushYieldCommand(pParameterVector[x]);
+				}
+				while (!Application::GetApplication()->GetTicker())
+				{
+					Thread::Sleep(0.5f);
+				}
+				Thread::Sleep(1.0f);
+				MemberThread<Cure::ConsoleManager>* lConsoleThread = mConsoleThread;
+				mConsoleThread = 0;
+				lConsoleThread->RequestSelfDestruct();
+				delete this;	// Nice...
+				lConsoleThread->Kill();
+			}
+			break;
+			case COMMAND_ECHO_MSGBOX:
+			{
+				if (pParameterVector.size() == 2)
+				{
+					mUiConsole->GetUiManager()->GetDisplayManager()->ShowMessageBox(pParameterVector[1], pParameterVector[0]);
+				}
+				else
+				{
+					mLog.Warningf(_T("usage: %s <title> <msg>"), pCommand.c_str());
+				}
+			}
+			break;
 			case COMMAND_START_LOGIN:
 			{
 				((GameClientSlaveManager*)GetGameManager())->Logout();
@@ -265,6 +303,36 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 		}
 	}
 	return (lResult);
+}
+
+
+
+void ClientConsoleManager::HeadlessTick()
+{
+	// Check What state our application zombie is in.
+	if (mUiConsole)
+	{
+		// Pre-destroy.
+		delete mUiConsole;
+		mUiConsole = 0;
+		GetGameManager()->SetConsoleManager(0);	// Snip. Now we're free floating.
+		SetGameManager(0);
+	}
+	else if (!Application::GetApplication()->GetTicker())
+	{
+		// Post-destroy, pre-init.
+#ifdef LEPRA_WINDOWS
+		::MessageBox(NULL, _T("Ready?"), _T("Waiting..."), MB_OK);
+#endif // Windows
+		while (ExecuteYieldCommand() >= 0)
+			;
+	}
+	else
+	{
+		// Post-init.
+		SetGameManager(((Life::GameClientMasterTicker*)Application::GetApplication()->GetTicker())->GetSlave(0));
+		Life::Application::GetApplication()->SetZombieTick(Life::Application::ZombieTick());
+	}
 }
 
 

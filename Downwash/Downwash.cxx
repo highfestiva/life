@@ -35,6 +35,7 @@ public:
 	Downwash(const strutil::strvec& pArgumentList);
 	virtual ~Downwash();
 	virtual void Init();
+	virtual void Destroy();
 	virtual bool MainLoop();
 
 	virtual void Suspend();
@@ -87,9 +88,6 @@ Downwash::Downwash(const strutil::strvec& pArgumentList):
 Downwash::~Downwash()
 {
 	Destroy();
-
-	delete (mUiManager);
-	mUiManager = 0;
 
 	UiCure::Shutdown();
 	UiTbc::Shutdown();
@@ -168,6 +166,13 @@ void Downwash::Init()
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), &mDragManager);
 
 	Parent::Init();
+}
+
+void Downwash::Destroy()
+{
+	Parent::Destroy();
+	delete mUiManager;
+	mUiManager = 0;
 }
 
 bool Downwash::MainLoop()

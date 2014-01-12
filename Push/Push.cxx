@@ -35,6 +35,7 @@ public:
 	Push(const strutil::strvec& pArgumentList);
 	virtual ~Push();
 	virtual void Init();
+	virtual void Destroy();
 	virtual bool MainLoop();
 
 	virtual void Suspend();
@@ -87,9 +88,6 @@ Push::Push(const strutil::strvec& pArgumentList):
 Push::~Push()
 {
 	Destroy();
-
-	delete (mUiManager);
-	mUiManager = 0;
 
 	UiCure::Shutdown();
 	UiTbc::Shutdown();
@@ -173,6 +171,13 @@ void Push::Init()
 
 	Parent::Init();
 
+}
+
+void Push::Destroy()
+{
+	Parent::Destroy();
+	delete mUiManager;
+	mUiManager = 0;
 }
 
 bool Push::MainLoop()

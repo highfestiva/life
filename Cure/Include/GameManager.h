@@ -56,6 +56,7 @@ public:
 	const TimeManager* GetTimeManager() const;
 	LEPRA_DEBUG_CODE(virtual) TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
+	void SetConsoleManager(ConsoleManager* pConsole);
 
 	void MicroTick(float pTimeDelta);
 	void PostPhysicsTick();
@@ -91,8 +92,6 @@ public:
 		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
 protected:
-	void SetConsoleManager(ConsoleManager* pConsole);
-
 	NetworkAgent* GetNetworkAgent() const;
 	void SetNetworkAgent(NetworkAgent* pNetwork);
 

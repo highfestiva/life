@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 # Author: Jonas Byström
 # Copyright (c) 2002-2009, Righteous Games
 

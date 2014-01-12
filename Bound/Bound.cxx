@@ -36,6 +36,7 @@ public:
 	Bound(const strutil::strvec& pArgumentList);
 	virtual ~Bound();
 	virtual void Init();
+	virtual void Destroy();
 	virtual bool MainLoop();
 
 	virtual void Suspend();
@@ -89,9 +90,6 @@ Bound::Bound(const strutil::strvec& pArgumentList):
 Bound::~Bound()
 {
 	Destroy();
-
-	delete (mUiManager);
-	mUiManager = 0;
 
 	UiCure::Shutdown();
 	UiTbc::Shutdown();
@@ -162,6 +160,13 @@ void Bound::Init()
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), &mDragManager);
 
 	Parent::Init();
+}
+
+void Bound::Destroy()
+{
+	Parent::Destroy();
+	delete mUiManager;
+	mUiManager = 0;
 }
 
 bool Bound::MainLoop()

@@ -35,6 +35,7 @@ public:
 	Fire(const strutil::strvec& pArgumentList);
 	virtual ~Fire();
 	virtual void Init();
+	virtual void Destroy();
 	virtual bool MainLoop();
 
 	virtual void Suspend();
@@ -87,9 +88,6 @@ Fire::Fire(const strutil::strvec& pArgumentList):
 Fire::~Fire()
 {
 	Destroy();
-
-	delete (mUiManager);
-	mUiManager = 0;
 
 	UiCure::Shutdown();
 	UiTbc::Shutdown();
@@ -168,6 +166,13 @@ void Fire::Init()
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), &mDragManager);
 
 	Parent::Init();
+}
+
+void Fire::Destroy()
+{
+	Parent::Destroy();
+	delete mUiManager;
+	mUiManager = 0;
 }
 
 bool Fire::MainLoop()

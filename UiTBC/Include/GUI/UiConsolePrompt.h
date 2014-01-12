@@ -29,11 +29,12 @@ public:
 
 	void SetInputComponent(TextField* pInputComponent);
 
-protected:
 	bool OnChar(tchar pChar);
 	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void SetFocus(bool pFocus);
+
+protected:
 	int WaitChar();
 	void ReleaseWaitCharThread();
 	void Backspace(size_t pCount);
