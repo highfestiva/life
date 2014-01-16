@@ -35,7 +35,8 @@ Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, G
 	mJetEngineEmitter(0),
 	mExhaustEmitter(0),
 	mBurnEmitter(0),
-	mBlinkTime(0)
+	mBlinkTime(0),
+	mMeshOffsetTime(0)
 {
 	EnableMeshSlide(true);
 }
@@ -127,27 +128,31 @@ void Machine::OnTick()
 		}
 		else if (lTag.mTagName == _T("engine_light"))
 		{
-			HandleTagEngineLight(lTag, lFrameTime);
+			HandleTagEngineLight(lTag, lFrameTime*lRealTimeRatio);
 		}
 		else if (lTag.mTagName == _T("blink_light"))
 		{
-			HandleTagBlinkLight(lTag, lFrameTime);
+			HandleTagBlinkLight(lTag, lFrameTime*lRealTimeRatio);
 		}
 		else if (lTag.mTagName == _T("jet_engine_emitter"))
 		{
 			// Faijah!
 			if (mJetEngineEmitter)
 			{
-				mJetEngineEmitter->EmitFromTag(this, lTag, lFrameTime);
+				mJetEngineEmitter->EmitFromTag(this, lTag, lFrameTime*lRealTimeRatio);
 			}
 		}
 		else if (lTag.mTagName == _T("engine_sound"))
 		{
-			HandleTagEngineSound(lTag, lPhysicsManager, lVelocity, lFrameTime, lRealTimeRatio, lEngineSoundIndex);
+			HandleTagEngineSound(lTag, lPhysicsManager, lVelocity, lFrameTime*lRealTimeRatio, lRealTimeRatio, lEngineSoundIndex);
 		}
 		else if (lTag.mTagName == _T("engine_mesh_offset"))
 		{
 			HandleTagEngineMeshOffset(lTag, lFrameTime);
+		}
+		else if (lTag.mTagName == _T("mesh_offset"))
+		{
+			HandleTagMeshOffset(lTag, lFrameTime*lRealTimeRatio);
 		}
 		else if (lTag.mTagName == _T("exhaust"))
 		{
@@ -505,7 +510,7 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 		pTag.mEngineIndexList.size() != 1 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The engine_sound tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf(_T("The engine_mesh_offset tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -535,7 +540,6 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 			lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_SECONDARY] * pTag.mFloatValueList[FV_SECONDARY_FACTOR];
 	const float lEngineAbsFactor = std::abs(lEngineFactor);
 
-	const QuaternionF lOrientation = GetOrientation();
 	const Vector3DF lOffsetPosition(Vector3DF(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]) * lEngineAbsFactor);
 	const float a = pTag.mFloatValueList[FV_ROTATION_ANGLE] * lEngineFactor;
 	QuaternionF lOffsetOrientation(a, Vector3DF(pTag.mFloatValueList[FV_ROTATION_AXIS_X], pTag.mFloatValueList[FV_ROTATION_AXIS_Y], pTag.mFloatValueList[FV_ROTATION_AXIS_Z]));
@@ -553,6 +557,65 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 		TransformationF lCurrentOffset;
 		lCurrentOffset.Interpolate(lMeshRef->GetExtraOffsetTransformation(), lOffset, t);
 		lMeshRef->SetExtraOffsetTransformation(lCurrentOffset);
+	}
+}
+
+void Machine::HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)
+{
+	// Mesh offset controlled by engine.
+
+	if (pTag.mFloatValueList.size() != 6 ||
+		pTag.mStringValueList.size() != 1 ||
+		pTag.mBodyIndexList.size() != 0 ||
+		pTag.mEngineIndexList.size() != 0 ||
+		pTag.mMeshIndexList.size() < 1)
+	{
+		mLog.Errorf(_T("The mesh_offset tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		deb_assert(false);
+		return;
+	}
+
+	const str lFunction = pTag.mStringValueList[0];
+	enum FloatValue
+	{
+		FV_INITIAL_DELAY,
+		FV_DURATION,
+		FV_FREQUENCY,
+		FV_X,
+		FV_Y,
+		FV_Z,
+	};
+#define V(i)	pTag.mFloatValueList[i]
+
+	float lAmplitude = 0;
+	const float lStartTime = V(FV_INITIAL_DELAY);
+	if (mMeshOffsetTime < lStartTime || mMeshOffsetTime > lStartTime+V(FV_DURATION))
+	{
+		return;
+	}
+	float x = mMeshOffsetTime-lStartTime;
+	if (lFunction == _T("|sin|"))
+	{
+		lAmplitude = std::abs(::sin(x*2*PIF*V(FV_FREQUENCY)));
+	}
+	else
+	{
+		mLog.Errorf(_T("Uknown mesh_offset function '%s'."), lFunction.c_str());
+		deb_assert(false);
+	}
+	mMeshOffsetTime += pFrameTime;
+
+	const Vector3DF lOffsetPosition(GetOrientation().GetInverseRotatedVector(Vector3DF(V(FV_X), V(FV_Y), V(FV_Z)) * lAmplitude));
+	const TransformationF lOffset(QuaternionF(), lOffsetPosition);
+	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
+	{
+		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		if (!lMesh)
+		{
+			continue;
+		}
+		TBC::GeometryReference* lMeshRef = (TBC::GeometryReference*)lMesh;
+		lMeshRef->SetExtraOffsetTransformation(lOffset);
 	}
 }
 

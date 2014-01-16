@@ -48,6 +48,7 @@ private:
 	void HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, const Vector3DF& pVelocity,
 		float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex);
 	void HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
+	void HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
 
 	void LoadPlaySound3d(UserSound3dResource* pSoundResource);
 
@@ -61,6 +62,7 @@ private:
 	TagSoundIntensityArray mEngineSoundIntensity;
 	GameTimer mAmbientSoundTimer;
 	float mBlinkTime;
+	float mMeshOffsetTime;
 
 	LOG_CLASS_DECLARE();
 };

@@ -571,6 +571,10 @@ Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 		lLevel->DisableRootShadow();
 		lObject = lLevel;
 	}
+	else if (strutil::StartsWith(pClassId, _T("indicator")))
+	{
+		lObject = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+	}
 	else
 	{
 		UiCure::Machine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (FireManager*)this);
@@ -611,6 +615,9 @@ void FireManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			pObject->SetEnginePower(0, 1.0f);
 			//pObject->SetEnginePower(2, 1.0f);
+		}
+		else if (strutil::StartsWith(pObject->GetClassId(), _T("indicator")))
+		{
 		}
 		else
 		{

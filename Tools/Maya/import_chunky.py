@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # License: LGPL 2.1 (utilizes Python Computer Graphics Kit (cgkit), see other .py files for more info).
-# Created by Jonas Byström, 2009-07-17 for Righteous Engine tool chain.
+# Created by Jonas Byström, 2009-07-17 for Pixel Doctrine tool chain.
 
 
 from mat4 import *
@@ -872,9 +872,9 @@ class GroupReader(DefaultMAReader):
 
 			elif section.startswith("tag:"):
 				tagtype = stripQuotes(config.get(section, "type")).split(":")[0]
-				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "blink_light", "engine_sound", "engine_mesh_offset", "burn", "exhaust", "jet_engine_emitter", \
-						    "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through", "ammo", "textures", "mass_objects",
-						    "driver", "muzzle", "behavior", "ambient_sounds", "anything"]
+				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "blink_light", "engine_sound", "engine_mesh_offset", "mesh_offset", "burn", "exhaust",
+						    "jet_engine_emitter", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through",
+						    "ammo", "textures", "mass_objects", "driver", "muzzle", "behavior", "ambient_sounds", "anything"]
 				allApplied &= tagOk
 				if not tagOk:
 					print("Error: invalid tag type '%s'." % tagtype)
