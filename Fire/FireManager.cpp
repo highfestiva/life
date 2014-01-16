@@ -84,6 +84,8 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mPauseButton(0)
 	//mCheckIcon(0),
 {
+	mFireDelayTimer.Start();
+
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
 	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
@@ -95,6 +97,7 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, 0.03f, 0.2f);
 
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIREDELAY, 0.5);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
@@ -241,10 +244,13 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	(void)pAvatar;
 	(void)pWeapon;
 
-	if (!mLevel->IsLoaded())
+	double lFireDelay;
+	CURE_RTVAR_GET(lFireDelay, =, GetVariableScope(), RTVAR_GAME_FIREDELAY, 0.5);
+	if (!mLevel->IsLoaded() || mFireDelayTimer.QueryTimeDiff() < lFireDelay)
 	{
 		return;
 	}
+	mFireDelayTimer.Start();
 	Vector3DF lTargetPosition;
 	if (!GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) == 1)
 	{
@@ -285,14 +291,13 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
-	const int lParticles = Math::Lerp(8, 20, pStrength * 0.2f);
+	const int lParticles = Math::Lerp(4, 8, pStrength * 0.2f);
 	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
 	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	lParticleRenderer->CreateExplosion(pPosition, pStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
-
+	lParticleRenderer->CreateExplosion(pPosition, pStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
 
 	// Slowmo check.
 	bool lNormalDeath = true;
@@ -302,16 +307,12 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 		{
 			lNormalDeath = false;
 			mSlowmoTimer.TryStart();
-			DeleteContextObjectDelay(pExplosive, 6.5);
 		}
 	}
-	if (lNormalDeath)
-	{
-		DeleteContextObjectDelay(pExplosive, 3.0);
-	}
-
 
 	// Shove!
+	const bool lIsExplosive = (pExplosive->GetClassId().find(_T("rocket")) != str::npos);
+	const float lExplosionFactor = lIsExplosive? 3.0f : 1.0f;
 	ScopeLock lLock(GetTickLock());
 	TBC::PhysicsManager* lPhysicsManager = GetPhysicsManager();
 	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
@@ -323,11 +324,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 		{
 			continue;
 		}
-		float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength) * 0.5f;
-		/*if (pExplosive->GetClassId().find(_T("rocket")) != str::npos)
-		{
-			lForce *= 5;
-		}*/
+		float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength * lExplosionFactor) * 0.3f;
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
@@ -338,7 +335,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 			}
 			x->second->ForceSend();
 		}
-		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength*0.1f);
+		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength*lExplosionFactor*0.1f);
 	}
 }
 
@@ -577,9 +574,10 @@ Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 	}
 	else
 	{
-		UiCure::Machine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (FireManager*)this);
+		Life::ExplodingMachine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (FireManager*)this);
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
+		lMachine->SetDisappearAfterDeathDelay(30.0);
 		lObject = lMachine;
 	}
 	lObject->SetAllowNetworkLogic(true);

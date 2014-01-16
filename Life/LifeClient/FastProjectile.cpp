@@ -126,11 +126,12 @@ void FastProjectile::OnTick()
 	}*/
 }
 
-void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
+void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	(void)pTriggerId;
+	(void)pBodyId;
 
-	if (++mTickCount < 10 && pBody->GetInstanceId() == GetOwnerInstanceId())	// Disallow self-hit during the first few frames.
+	if (++mTickCount < 10 && pOtherObject->GetInstanceId() == GetOwnerInstanceId())	// Disallow self-hit during the first few frames.
 	{
 		return;
 	}
@@ -141,7 +142,7 @@ void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Contex
 	}
 	else
 	{
-		ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
+		ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pOtherObject);
 	}
 }
 

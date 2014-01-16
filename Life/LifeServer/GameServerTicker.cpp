@@ -149,9 +149,9 @@ void GameServerTicker::DidPhysicsTick()
 
 
 
-void GameServerTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId, const Vector3DF& pNormal)
+void GameServerTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
-	mGameManager->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId, pNormal);
+	mGameManager->OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pNormal);
 }
 
 void GameServerTicker::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,

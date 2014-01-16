@@ -1354,19 +1354,19 @@ float GameClientMasterTicker::GetPowerSaveAmount() const
 
 
 
-void GameClientMasterTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId, const Vector3DF& pNormal)
+void GameClientMasterTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
 		GameClientSlaveManager* lSlave = *x;
 		if (lSlave)
 		{
-			lSlave->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId, pNormal);
+			lSlave->OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pNormal);
 		}
 	}
 	if (mServer)
 	{
-		mServer->OnTrigger(pTrigger, pTriggerListenerId, pOtherBodyId, pNormal);
+		mServer->OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pNormal);
 	}
 }
 

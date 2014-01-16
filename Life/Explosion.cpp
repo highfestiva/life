@@ -30,7 +30,8 @@ float Explosion::CalculateForce(TBC::PhysicsManager* pPhysicsManager, const Cure
 	const int lBoneStart = lIsDynamic? 0 : 1;
 	const int lBoneCount = lPhysics->GetBoneCount();
 	float lForce = 0;
-	for (int y = lBoneStart; y < lBoneCount; ++y)
+	int y;
+	for (y = lBoneStart; y < lBoneCount; ++y)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(y);
 		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY
@@ -70,6 +71,7 @@ float Explosion::CalculateForce(TBC::PhysicsManager* pPhysicsManager, const Cure
 
 		//pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), f, lBodyCenter);
 	}
+	lForce /= y;
 	return lForce;
 }
 
@@ -86,7 +88,8 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 	const int lBoneStart = lIsDynamic? 0 : 1;
 	const int lBoneCount = lPhysics->GetBoneCount();
 	float lForce = 0;
-	for (int y = lBoneStart; y < lBoneCount; ++y)
+	int y;
+	for (y = lBoneStart; y < lBoneCount; ++y)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(y);
 		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY
@@ -126,6 +129,7 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 
 		pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), f, lBodyCenter);
 	}
+	lForce /= y;
 	return lForce;
 }
 
@@ -153,8 +157,7 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContext
 			lGeometry->ResetJointId();
 		}
 		// This is so that the different parts of the now broken object can collide with each other.
-		pObject->GetManager()->RemovePhysicsBody(lGeometry->GetBodyId());
-		pPhysicsManager->SetForceFeedbackListener(lGeometry->GetBodyId(), 0);
+		pPhysicsManager->EnableCollideWithSelf(lGeometry->GetBodyId(), true);
 	}
 
 	lPhysics->ClearEngines();

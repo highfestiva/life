@@ -154,9 +154,10 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 }
 
-void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, const Vector3DF& pNormal)
+void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	(void)pOtherObject;
+	(void)pBodyId;
 	(void)pNormal;
 
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);

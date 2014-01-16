@@ -30,7 +30,7 @@ public:
 	class TriggerListener
 	{
 	public:
-		virtual void OnTrigger(TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId, const Vector3DF& pNormal) = 0;
+		virtual void OnTrigger(TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, BodyID pBodyId, const Vector3DF& pNormal) = 0;
 	};
 
 	class ForceFeedbackListener

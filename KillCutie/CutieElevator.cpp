@@ -26,24 +26,24 @@ CutieElevator::~CutieElevator()
 {
 }
 
-void CutieElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
+void CutieElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
 	deb_assert(lTrigger);
 	if (lTrigger->GetPriority() > -100)
 	{
-		Parent::OnTrigger(pTriggerId, pBody, pNormal);
+		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pNormal);
 		return;
 	}
-	if (!pBody || !mGame->GetCutie())
+	if (!pOtherObject || !mGame->GetCutie())
 	{
 		return;
 	}
 	// We have ourselves a conditional: only Cutie allowed to open.
-	Cure::ContextObject* lObject = (Cure::ContextObject*)pBody;
+	Cure::ContextObject* lObject = (Cure::ContextObject*)pOtherObject;
 	if (lObject->GetInstanceId() == mGame->GetCutie()->GetInstanceId())
 	{
-		Parent::OnTrigger(pTriggerId, pBody, pNormal);
+		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pNormal);
 	}
 }
 

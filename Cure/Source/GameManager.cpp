@@ -404,15 +404,15 @@ void GameManager::GetBandwidthData(BandwidthData& pSent, BandwidthData& pReceive
 
 
 
-void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherBodyId, const Vector3DF& pNormal)
+void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	ContextObject* lObject1 = GetContext()->GetObject(pTriggerListenerId);
 	if (lObject1)
 	{
-		ContextObject* lObject2 = GetContext()->GetObject(pOtherBodyId);
+		ContextObject* lObject2 = GetContext()->GetObject(pOtherObjectId);
 		if (lObject2)
 		{
-			lObject1->OnTrigger(pTrigger, lObject2, pNormal);
+			lObject1->OnTrigger(pTrigger, lObject2, pBodyId, pNormal);
 		}
 	}
 }

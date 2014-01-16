@@ -26,11 +26,11 @@ Eater::~Eater()
 
 
 
-void Eater::OnTrigger(TBC::PhysicsManager::TriggerID, ContextObject* pBody, const Vector3DF&)
+void Eater::OnTrigger(TBC::PhysicsManager::TriggerID, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID, const Vector3DF&)
 {
-	if (pBody->GetClassId().find(_T("helicopter")) == str::npos)
+	if (pOtherObject->GetClassId().find(_T("helicopter")) == str::npos)
 	{
-		GetManager()->PostKillObject(pBody->GetInstanceId());
+		GetManager()->PostKillObject(pOtherObject->GetInstanceId());
 	}
 }
 

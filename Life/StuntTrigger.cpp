@@ -72,9 +72,10 @@ void StuntTrigger::OnTick()
 	mLastFrameTriggered = false;
 }
 
-void StuntTrigger::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
+void StuntTrigger::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	(void)pTriggerId;
+	(void)pBodyId;
 	(void)pNormal;
 
 	if (!mAllowBulletTime)
@@ -84,7 +85,7 @@ void StuntTrigger::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextO
 
 	mLastFrameTriggered = true;
 
-	ContextObject* lObject = pBody;
+	ContextObject* lObject = pOtherObject;
 	const float lSpeed = lObject->GetVelocity().GetLength();
 	if (lSpeed < mMinSpeed || lSpeed > mMaxSpeed)
 	{

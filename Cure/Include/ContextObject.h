@@ -132,7 +132,7 @@ public:
 	virtual void OnLoaded();
 	virtual void OnMicroTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal) = 0;
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal) = 0;
 	virtual void OnForceApplied(ContextObject* pOtherObject,
 		 TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 		 const Vector3DF& pForce, const Vector3DF& pTorque,

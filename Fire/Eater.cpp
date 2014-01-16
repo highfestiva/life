@@ -26,11 +26,11 @@ Eater::~Eater()
 
 
 
-void Eater::OnTrigger(TBC::PhysicsManager::TriggerID, ContextObject* pBody, const Vector3DF&)
+void Eater::OnTrigger(TBC::PhysicsManager::TriggerID, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF&)
 {
-	if (pBody->GetClassId().find(_T("helicopter")) == str::npos)
+	if (pOtherObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId() == pBodyId)	// Only if whole car enters "goal", not only wheel.
 	{
-		GetManager()->PostKillObject(pBody->GetInstanceId());
+		GetManager()->PostKillObject(pOtherObject->GetInstanceId());
 	}
 }
 

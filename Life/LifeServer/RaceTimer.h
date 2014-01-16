@@ -28,7 +28,7 @@ public:
 private:
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal);
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
 
 	typedef std::unordered_map<Cure::GameObjectId, int> DoneMap;
 

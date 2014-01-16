@@ -53,16 +53,17 @@ void ServerFastProjectile::OnMicroTick(float pFrameTime)
 	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
 }
 
-void ServerFastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
+void ServerFastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	(void)pTriggerId;
+	(void)pBodyId;
 	if (mExplosiveEnergy)
 	{
 		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), pNormal, mExplosiveEnergy, 0);
 	}
 	else
 	{
-		ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pBody);
+		ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pOtherObject);
 	}
 }
 

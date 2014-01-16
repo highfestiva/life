@@ -145,10 +145,11 @@ void Ctf::OnTick()
 	mTriggerTimer.UpdateTimer();
 }
 
-void Ctf::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, const Vector3DF& pNormal)
+void Ctf::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	(void)pTriggerId;
 	(void)pOtherObject;
+	(void)pBodyId;
 	(void)pNormal;
 
 	mLastFrameTriggered = true;

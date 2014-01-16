@@ -9,6 +9,7 @@
 //#include "../TBC/Include/PhysicsEngine.h"
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/Launcher.h"
+#include "../Lepra/Include/GameTimer.h"
 #include "../UiCure/Include/UiResourceManager.h"
 #include "Fire.h"
 #include "Version.h"
@@ -114,6 +115,7 @@ protected:
 	Vector3DF mShootDirection;
 	StopWatch mAllLoadedTimer;
 	StopWatch mSlowmoTimer;
+	GameTimer mFireDelayTimer;
 
 	LOG_CLASS_DECLARE();
 };

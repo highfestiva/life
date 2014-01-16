@@ -3300,7 +3300,7 @@ void PhysicsManagerODE::DoForceFeedback()
 	for (y = mTriggerInfoList.begin(); y != mTriggerInfoList.end(); ++y)
 	{
 		const TriggerInfo& lTriggerInfo = *y;
-		mTriggerCallback->OnTrigger(lTriggerInfo.mTriggerId, lTriggerInfo.mTriggerListenerId, lTriggerInfo.mBodyListenerId, lTriggerInfo.mNormal);
+		mTriggerCallback->OnTrigger(lTriggerInfo.mTriggerId, lTriggerInfo.mTriggerListenerId, lTriggerInfo.mBodyListenerId, lTriggerInfo.mBodyId, lTriggerInfo.mNormal);
 	}
 	mTriggerInfoList.clear();
 
@@ -3410,14 +3410,14 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	{
 		const dVector3& n = lContact[0].geom.normal;
 		Vector3DF lNormal(n[0], n[1], n[2]);
-		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, lNormal));
+		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, (BodyID)lObject2, lNormal));
 		return;
 	}
 	if(lObject2->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
 		const dVector3& n = lContact[0].geom.normal;
 		Vector3DF lNormal(n[0], n[1], n[2]);
-		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, lNormal));
+		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, (BodyID)lObject1, lNormal));
 		return;
 	}
 

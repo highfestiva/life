@@ -26,24 +26,24 @@ VehicleElevator::~VehicleElevator()
 {
 }
 
-void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, const Vector3DF& pNormal)
+void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
 {
 	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
 	deb_assert(lTrigger);
 	if (lTrigger->GetPriority() > -100)
 	{
-		Parent::OnTrigger(pTriggerId, pBody, pNormal);
+		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pNormal);
 		return;
 	}
-	if (!pBody || !mGame->GetVehicle())
+	if (!pOtherObject || !mGame->GetVehicle())
 	{
 		return;
 	}
 	// We have ourselves a conditional: only Vehicle allowed to open.
-	Cure::ContextObject* lObject = (Cure::ContextObject*)pBody;
+	Cure::ContextObject* lObject = (Cure::ContextObject*)pOtherObject;
 	if (lObject->GetInstanceId() == mGame->GetVehicle()->GetInstanceId())
 	{
-		Parent::OnTrigger(pTriggerId, pBody, pNormal);
+		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pNormal);
 	}
 }
 

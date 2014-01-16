@@ -13,5 +13,6 @@
 
 
 
-#define RTVAR_GAME_LEVELCOUNT		"Game.LevelCount"
-#define RTVAR_GAME_STARTLEVEL		"Game.StartLevel"
+#define RTVAR_GAME_FIREDELAY	"Game.FireDelay"
+#define RTVAR_GAME_LEVELCOUNT	"Game.LevelCount"
+#define RTVAR_GAME_STARTLEVEL	"Game.StartLevel"
