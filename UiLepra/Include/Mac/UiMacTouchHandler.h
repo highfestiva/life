@@ -34,7 +34,7 @@ static void HandleTouches(NSSet* pTouches, const Canvas* pCanvas, DragManager& p
 		//NSLog(@"Touch: %f, %f", lTapPosition.x*s, lTapPosition.y*s);
 		PixelCoord lPreviousTap(lPrevTapPosition.y*s, pCanvas->GetActualHeight() - lPrevTapPosition.x*s);
 		PixelCoord lThisTap(lTapPosition.y*s, pCanvas->GetActualHeight() - lTapPosition.x*s);
-		if (pCanvas && pCanvas->GetOutputRotation() != 0)
+		if (pCanvas && pCanvas->GetDeviceOutputRotation() != 0)
 		{
 			lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.y*s, lPrevTapPosition.x*s);
 			lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.y*s, lTapPosition.x*s);

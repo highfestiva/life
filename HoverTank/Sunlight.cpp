@@ -38,7 +38,7 @@ void Sunlight::Tick(float pFactor)
 	mAngle += (float)mTime.PopTimeDiff() * pFactor * 0.01f;	// TODO: use global game time, not this local-start-relative shit.
 	if (mAngle > 2*PIF)
 	{
-		mAngle -= 2*PIF;
+		mAngle = ::fmod(mAngle, 2*PIF);
 	}
 	// "Physical" and "light" height actual differ, otherwise sun would never
 	// be seen in the camera, since it would be to far up in the sky.
