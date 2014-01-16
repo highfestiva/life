@@ -102,7 +102,7 @@ void GameClientSlaveManager::LoadSettings()
 	GetConsoleManager()->ExecuteCommand(_T("alias rebuild-data-reset \"rebuild-data; start-reset-ui\""));
 	GetConsoleManager()->ExecuteCommand(_T("alias pause-rebuild-data \"zombie rebuild-data\""));
 #ifdef LEPRA_DEBUG
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 pause-rebuild-data"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 pause-rebuild-data"));
 #endif // Debug
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.

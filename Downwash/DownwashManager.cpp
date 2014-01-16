@@ -215,10 +215,10 @@ void DownwashManager::LoadSettings()
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 \"#Game.Childishness 1.0\""));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 \"#Game.Childishness 0.5\""));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F4 \"#Game.Childishness 0.0\""));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 prev-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F6 next-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F7 \"#Physics.NoClip true\""));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F8 \"#Physics.NoClip false\""));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F6 prev-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F7 next-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F8 \"#Physics.NoClip true\""));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F9 \"#Physics.NoClip false\""));
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lSchtickName = _T("Touchstick");

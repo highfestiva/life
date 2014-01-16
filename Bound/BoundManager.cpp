@@ -163,8 +163,8 @@ void BoundManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 prev-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F6 next-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
 }
 
 void BoundManager::SaveSettings()

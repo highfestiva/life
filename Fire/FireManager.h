@@ -85,6 +85,7 @@ protected:
 	virtual void HandleWorldBoundaries();
 	virtual void MoveCamera();
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
+	virtual void HandleShooting();
 
 	virtual void TickInput();
 	virtual void TickUiInput();
@@ -110,6 +111,7 @@ protected:
 	Sunlight* mSunlight;
 	TransformationF mCameraTransform;
 	UiTbc::Button* mPauseButton;
+	Vector3DF mShootDirection;
 	StopWatch mAllLoadedTimer;
 	StopWatch mSlowmoTimer;
 

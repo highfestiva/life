@@ -3367,7 +3367,9 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
 
 	if ((lObject1->mForceFeedbackId && lObject1->mForceFeedbackId == lObject2->mForceFeedbackId) ||	// Same body.
-		(lObject1->mTriggerListenerId && lObject2->mTriggerListenerId))	// Elevator platform trigger moves into down trigger.
+		(lObject1->mTriggerListenerId && lObject2->mTriggerListenerId) ||	// Elevator platform trigger moves into down trigger.
+		(lObject1->mForceFeedbackId && lObject1->mForceFeedbackId == lObject2->mTriggerListenerId) ||	// Trigger on self.
+		(lObject2->mForceFeedbackId && lObject2->mForceFeedbackId == lObject1->mTriggerListenerId))	// Trigger on self.
 	{
 		if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
 		{
@@ -3406,13 +3408,6 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 	if (lObject1->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
-		if (lObject1->mTriggerListenerId == lObject2->mForceFeedbackId)
-		{
-			if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
-			{
-				return;
-			}
-		}
 		const dVector3& n = lContact[0].geom.normal;
 		Vector3DF lNormal(n[0], n[1], n[2]);
 		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, lNormal));
@@ -3420,13 +3415,6 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	}
 	if(lObject2->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
-		if (lObject2->mTriggerListenerId == lObject1->mForceFeedbackId)
-		{
-			if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
-			{
-				return;
-			}
-		}
 		const dVector3& n = lContact[0].geom.normal;
 		Vector3DF lNormal(n[0], n[1], n[2]);
 		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, lNormal));

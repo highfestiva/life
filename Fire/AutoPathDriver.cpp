@@ -9,8 +9,8 @@
 #include "../Cure/Include/Health.h"
 #include "Level.h"
 
-#define AIM_DISTANCE			3.0f
-#define REAR_WHEEL_STEERING_DISTANCE	5.0f
+#define AIM_DISTANCE			6.0f
+#define REAR_WHEEL_STEERING_DISTANCE	10.0f
 
 
 

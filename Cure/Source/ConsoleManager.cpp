@@ -22,7 +22,7 @@ ConsoleManager::ConsoleManager(RuntimeVariableScope* pVariableScope, Interactive
 	mConsoleLogger(pConsoleLogger),
 	mConsolePrompt(pConsolePrompt),
 	mConsoleCommandManager(0),
-	mConsoleThread(new MemberThread<ConsoleManager>("ConsoleThread"))
+	mConsoleThread(0)
 {
 }
 
@@ -44,12 +44,16 @@ void ConsoleManager::SetConsoleLogger(InteractiveConsoleLogListener* pLogger)
 
 bool ConsoleManager::Start()
 {
+	if (!mConsoleThread)
+	{
+		mConsoleThread = new MemberThread<ConsoleManager>("ConsoleThread");
+	}
 	return (mConsoleThread->Start(this, &ConsoleManager::ConsoleThreadEntry));
 }
 
 void ConsoleManager::Join()
 {
-	if (mConsoleThread)
+	if (mConsoleThread && mConsoleThread->IsRunning())
 	{
 		mConsoleThread->RequestStop();
 	}

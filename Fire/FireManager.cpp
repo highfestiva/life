@@ -42,7 +42,7 @@
 #include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiSoundReleaser.h"
-#include "../UiLepra/Include/UiTouchstick.h"
+#include "../UiLepra/Include/UiTouchDrag.h"
 #include "../UiTBC/Include/GUI/UiCheckButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFixedLayouter.h"
@@ -120,18 +120,17 @@ void FireManager::Suspend()
 void FireManager::LoadSettings()
 {
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
-
-	Parent::LoadSettings();
-
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 80.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 40.0);
+
+	Parent::LoadSettings();
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 prev-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F6 next-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
 }
 
 void FireManager::SaveSettings()
@@ -150,8 +149,8 @@ bool FireManager::Open()
 	if (lOk)
 	{
 		mPauseButton = ICONBTNA("btn_pause.png", "");
-		int x = mRenderArea.GetCenterX() - 32;
-		int y = mRenderArea.mBottom - 76;
+		int x = 12;
+		int y = 12;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
 		mPauseButton->SetVisible(true);
 		mPauseButton->SetOnClick(FireManager, OnPauseButton);
@@ -241,11 +240,38 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 {
 	(void)pAvatar;
 	(void)pWeapon;
-	Life::FastProjectile* lProjectile = new Life::FastProjectile(GetResourceManager(), _T("rocket"), mUiManager, this);
+
+	if (!mLevel->IsLoaded())
+	{
+		return;
+	}
+	Vector3DF lTargetPosition;
+	if (!GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) == 1)
+	{
+		return;
+	}
+
+	{
+		Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+		lObject->SetInitialTransform(TransformationF(gIdentityQuaternionF, lTargetPosition));
+		lObject->StartLoading();
+		DeleteContextObjectDelay(lObject, 1.5f);
+	}
+
+	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), _T("rocket"), mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	TransformationF t(mCameraTransform);
-	t.GetPosition().x += 1.0f;
-	t.GetPosition().y -= 1.0f;
+	t.GetPosition().x += 0.4f;
+	t.GetPosition().y -= 0.7f;
+	t.GetOrientation().RotateAroundWorldX(-PIF/2);	// Tilt rocket.
+	const Vector3DF lDistance = lTargetPosition - t.GetPosition();
+	float lAcceleration;
+	float lTerminalVelocity;
+	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 140.0);
+	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 110.0);
+	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, Vector3DF(0,0,-9.82f));
+	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y);
+	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x);
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
 }
@@ -265,14 +291,6 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	if (pExplosive->GetClassId().find(_T("barrel")) != str::npos)
-	{
-		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
-		lFireColor.Set(0.3f, 0.7f, 0.2f);
-		lStartSmokeColor.Set(0.3f, 0.35f, 0.3f);
-		lSmokeColor.Set(0.2f, 0.4f, 0.2f);
-		lShrapnelColor.Set(0.5f, 0.5f, 0.1f);
-	}
 	lParticleRenderer->CreateExplosion(pPosition, pStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
 
 
@@ -306,10 +324,10 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 			continue;
 		}
 		float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength) * 0.5f;
-		if (pExplosive->GetClassId().find(_T("rocket")) != str::npos)
+		/*if (pExplosive->GetClassId().find(_T("rocket")) != str::npos)
 		{
 			lForce *= 5;
-		}
+		}*/
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
@@ -410,6 +428,7 @@ void FireManager::ScriptPhysicsTick()
 	{
 		MoveCamera();
 		UpdateCameraPosition(false);
+		HandleShooting();
 	}
 
 	if (!GetResourceManager()->IsLoading())
@@ -462,7 +481,7 @@ void FireManager::HandleWorldBoundaries()
 		{
 			const Vector3DF lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -250.0f, +250.0f) ||
-				!Math::IsInRange(lPosition.y, 0.0f, +350.0f) ||
+				!Math::IsInRange(lPosition.y, -10.0f, +350.0f) ||
 				!Math::IsInRange(lPosition.z, -250.0f, +250.0f))
 			{
 				lLostObjectArray.push_back(lObject->GetInstanceId());
@@ -490,6 +509,24 @@ void FireManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	if (pUpdateMicPosition)
 	{
 		mUiManager->SetMicrophonePosition(mCameraTransform, Vector3DF());
+	}
+}
+
+void FireManager::HandleShooting()
+{
+	float lFOV;
+	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 40.0);
+	UpdateFrustum(lFOV);
+
+	typedef UiLepra::Touch::DragManager::DragList DragList;
+	const DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
+	for (DragList::const_iterator x = lDragList.begin(); x != lDragList.end(); ++x)
+	{
+		if (x->mIsNew && !mMenu->GetDialog())
+		{
+			mShootDirection = mUiManager->GetRenderer()->ScreenCoordToVector(x->mLast);
+			Shoot(0, 0);
+		}
 	}
 }
 
@@ -572,6 +609,8 @@ void FireManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("rocket")))
 		{
+			pObject->SetEnginePower(0, 1.0f);
+			//pObject->SetEnginePower(2, 1.0f);
 		}
 		else
 		{
