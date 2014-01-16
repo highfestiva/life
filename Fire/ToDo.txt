@@ -1,0 +1,90 @@
+- More helis. One with glowing engine in the rear.
++ Measure time. Nice font.
++ Heli exhaust.
++ Helper direction arrow (points along auto pilot spline).
++ Varying background image.
++ Shadows on iOS.
++ Simpler controls for kids.
+  + Auto pilot landings.
+  + Test on Loke.
++ Show health bar instead of text.
++ Preload the explosion data, so the first explosion won't cause LAAAG!
++ Move ramps further apart to allow for offset landings in prev level.
+- Only zoom out once hemisphere texture is loaded.
++ Only show exhausts in heli when damaged.
++ Monster truck jumping over landing pad.
++ Slow down "grown up easy level" to ensure fairness. Otherwise the nightmare level has no edge as you can start+land at 100 mph. (Set to right Childishness levels will suffice.)
++ Unload resources between levels to ensure memory will suffice.
++ Optimize to ensure high frame rates on touch devices.
++ Make explosion sparks never go slower than X, otherwise it looks like shit.
++ Make burn smoke billow up if rotor is off!
++ Save personal times.
++ Remove constraint on points in GAE hiscore server, so negative times can be used for ordering.
++ Save/show WR times.
++ Levels.
+  + Reference points in foreground/background.
+  - Real worlds - villages, houses, garages, lightposts, signs, walls, trees, bushes, cars, stairs, toys...
+  - Traps with smoke and sound!
+  + Falling stones!
+  + Automatic doors.
+  + Propellers.
+  + Push stones over edges to open...
+  - Break hot-air ballon to open...
+  + Add turrets to some levels.
+  - Land on moving truck.
+  + Land on moving boat.
+  - Make grass for mass-object.
+  + Wrap backgrounds.
+  + Djungle sounds on djungle levels, etc. Parrots, birds, tiger roars...
+  - Butterflies, things like that.
+  + Reduce stretch on backgrounds, so the lush textures appear. Right now it looks like shit!
+  + Create more background textures.
+  + Reorder them.
+  + Building textures are needed!
++ Better controls, using a rounded patch in the bottom and a circular indicator above.
++ Save some RTVARs on key/value in iOS.
+- Beautify!
++ Large fonts on iOS.
++ Make text show on bad background.
++ Music.
++ Sounds. Ambient. Moving stuff.
++ Make sure the "close to the path" indicator gets back on track when restarting the level.
++ Better health meter.
++ Fix Z-fighting on iPad.
++ Change to better "level done" jingle.
++ Fix back buffer flicking while still loading but not yet rendering.
++ "Unfix" landing pad ambient on simulator level.
++ Fix mass objects starting in origin (possibly colliding with not-yet-loaded level or summat).
++ Make yacht start in middle of slider joint to avoid bouncy sounds.
++ Raise heli volume.
++ Lower music volume.
++ Start with correct canvas orientation on iOS.
++ Let iOS control orientation change.
++ Fix the shadow of the chopper windows in origin (null material shadow rendering?).
++ Make touchstick board semi-transparent.
+- Menu using 3D buttons with shadows! Cewl!
++ Pilot name and high score.
++ Change pilot name.
+- Restart/replay level.
+- Pick level.
++ Pause button.
++ Bedside volume option in menu.
++ Show high score.
++ Make splash screen images to iPad, iPhone and retina.
++ Icon for all resolutions... including 1024x1024 and possibly double hi-res for backup?
++ Rename all files and titles to Fire.
++ Fix third level's ceiling, should be raised.
++ Add a pinch of replayability by adding toy mode when played through whole game (=hi rtr, strange colors, RTR=2).
++ Make machine gun slightly easier to get by by lowering fire rate.
++ Fix edge on wall on last level.
++ Move flags further apart on last level.
++ Add some content to levels. Looks too boring. Add a couple of barrels and a few coffins to make levels less sterile.
+- What should one do?
+- Which direction should one go?
++ Bad controls for kids:
+  + Hardly possible going opposite direction of auto pilot. Fix!
+  + Flies into the roof a lot (was a bug due to the above). Fix!
+  + Wants helicopter to take less damage, but wants (seemlessly) less intervention from the auto pilot.
+  + Wants helicopter to "stand still in mid air" rather than dropping when one release the controls.
+  - When pulling the "virtual joystick" to the bottom of the screen, he doesn't want that to mean "low throttle", but rather "go down" (the auto pilot used to "help" him climb).
+  + Wants more direct power over the chopper.

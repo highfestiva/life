@@ -315,7 +315,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Cont
 	}
 	else
 	{
-		mLog.Errorf(_T("Physical trigger not configured for logical trigging on %s."), GetClassId().c_str());
+		//mLog.Errorf(_T("Physical trigger not configured for logical trigging on %s."), GetClassId().c_str());
 	}
 
 	/*

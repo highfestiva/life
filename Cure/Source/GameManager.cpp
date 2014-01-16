@@ -195,6 +195,11 @@ ConsoleManager* GameManager::GetConsoleManager() const
 	return (mConsole);
 }
 
+void GameManager::SetConsoleManager(ConsoleManager* pConsole)
+{
+	mConsole = pConsole;
+}
+
 
 
 void GameManager::MicroTick(float pTimeDelta)
@@ -424,13 +429,6 @@ void GameManager::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::Physics
 			lObject1->OnForceApplied(lObject2, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 		}
 	}
-}
-
-
-
-void GameManager::SetConsoleManager(ConsoleManager* pConsole)
-{
-	mConsole = pConsole;
 }
 
 

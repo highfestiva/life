@@ -66,7 +66,10 @@ GameClientSlaveManager::~GameClientSlaveManager()
 	SetMasterServerConnection(0);
 	SetTicker(0);
 
-	GetConsoleManager()->Join();
+	if (GetConsoleManager())
+	{
+		GetConsoleManager()->Join();
+	}
 }
 
 void GameClientSlaveManager::SetMasterServerConnection(MasterServerConnection* pConnection)
@@ -85,6 +88,22 @@ void GameClientSlaveManager::LoadSettings()
 	CURE_RTVAR_GET(lExternalServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	GetConsoleManager()->ExecuteCommand(_T("alias gfx-lo \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" false; #") _T(RTVAR_UI_3D_SHADOWS) _T(" No; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" false; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTFADING) _T(" false; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" false\""));
 	GetConsoleManager()->ExecuteCommand(_T("alias gfx-hi \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" true; #") _T(RTVAR_UI_3D_SHADOWS) _T(" Force:Volumes; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" true; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTFADING) _T(" true; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" true\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias iphone4-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 960; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 640; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias iphone5-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 1136; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 640; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias ipad2-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 1024; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 768; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias ipad3-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 2048; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 1536; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias computer-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 960; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 540; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" false; start-reset-ui\""));
+#ifdef LEPRA_WINDOWS
+#define SHELL_REBUILD_DATA	"pause & cd .. & Tools\\build\\rgo.py builddata & pause"
+#else
+#define SHELL_REBUILD_DATA	"read -n 1; cd ..; Tools/build/rgo.py builddata; read -n 1"
+#endif // Windows shell / Posix shell
+	GetConsoleManager()->ExecuteCommand(_T("alias rebuild-data shell-execute \"") _T(SHELL_REBUILD_DATA) _T("\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias rebuild-data-reset \"rebuild-data; start-reset-ui\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias pause-rebuild-data \"zombie rebuild-data\""));
+#ifdef LEPRA_DEBUG
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 pause-rebuild-data"));
+#endif // Debug
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
@@ -153,7 +172,10 @@ void GameClientSlaveManager::Close()
 	ScopeLock lLock(GetTickLock());
 	// Drop all physics and renderer objects.
 	GetContext()->ClearObjects();
-	GetConsoleManager()->Join();
+	if (GetConsoleManager())
+	{
+		GetConsoleManager()->Join();
+	}
 }
 
 bool GameClientSlaveManager::IsQuitting() const

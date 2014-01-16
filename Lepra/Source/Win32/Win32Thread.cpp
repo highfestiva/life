@@ -823,12 +823,23 @@ void Thread::Kill()
 {
 	if (GetThreadHandle() != 0)
 	{
-		deb_assert(GetThreadId() != GetCurrentThreadId());
-		mLog.Warning(_T("Forcing kill of thread ") + strutil::Encode(GetThreadName()));
-		::TerminateThread((HANDLE)GetThreadHandle(), 0);
-		SetRunning(false);
-		::CloseHandle((HANDLE)GetThreadHandle());
-		mThreadHandle = 0;
+		if (GetThreadId() != GetCurrentThreadId())
+		{
+			mLog.Warning(_T("Forcing kill of thread ") + strutil::Encode(GetThreadName()));
+			::TerminateThread((HANDLE)GetThreadHandle(), 0);
+			SetRunning(false);
+			::CloseHandle((HANDLE)GetThreadHandle());
+			mThreadHandle = 0;
+		}
+		else
+		{
+			mLog.Warning(_T("Thread ") + strutil::Encode(GetThreadName()) + _T(" terminating self."));
+			HANDLE lSelf = (HANDLE)mThreadHandle;
+			SetRunning(false);
+			delete this;
+			::TerminateThread(lSelf, 0);
+			::CloseHandle(lSelf);
+		}
 	}
 	SetStopRequest(false);
 }

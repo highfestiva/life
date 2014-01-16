@@ -35,6 +35,7 @@ public:
 	HoverTank(const strutil::strvec& pArgumentList);
 	virtual ~HoverTank();
 	virtual void Init();
+	virtual void Destroy();
 	virtual bool MainLoop();
 
 	virtual void Suspend();
@@ -87,9 +88,6 @@ HoverTank::HoverTank(const strutil::strvec& pArgumentList):
 HoverTank::~HoverTank()
 {
 	Destroy();
-
-	delete (mUiManager);
-	mUiManager = 0;
 
 	UiCure::Shutdown();
 	UiTbc::Shutdown();
@@ -175,6 +173,12 @@ void HoverTank::Init()
 
 }
 
+void HoverTank::Destroy()
+{
+	Parent::Destroy();
+	delete mUiManager;
+	mUiManager = 0;
+}
 bool HoverTank::MainLoop()
 {
 #ifndef LEPRA_IOS

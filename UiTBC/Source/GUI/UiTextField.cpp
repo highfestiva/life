@@ -566,6 +566,8 @@ void TextField::DoSetSize(int pWidth, int pHeight)
 
 void TextField::Repaint(Painter* pPainter)
 {
+	ActivateFont(pPainter);
+
 	Parent::Repaint(pPainter);
 
 	if (mUpdateMarkerPosOnNextRepaint == true)

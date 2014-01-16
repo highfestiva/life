@@ -319,6 +319,35 @@
     <ClInclude Include="VehicleAi.h" />
     <ClInclude Include="VehicleElevator.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cure\Cure10.vcxproj">
+      <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Lepra\Lepra10.vcxproj">
+      <Project>{e7dda722-45e3-45c9-b051-e99288accdd2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TBC\TBC10.vcxproj">
+      <Project>{bdbf3606-e371-454b-b162-27fd92b67d50}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\freealut-1.1.0\admin\VisualStudioDotNET\alut\alut10.vcxproj">
+      <Project>{07149bcb-be8a-4503-be18-815d64233116}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\openal-soft-1.10.622\OpenAL_10.vcxproj">
+      <Project>{00e79e9d-7870-4921-9022-9ad4951bc225}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\ThirdPartyLib_10.vcxproj">
+      <Project>{00f89e9d-7870-4921-9022-9ad4951bc224}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\UiCure\UiCure10.vcxproj">
+      <Project>{6dbf3606-e311-454b-b162-27fd92b67d54}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\UiLepra\UiLepra10.vcxproj">
+      <Project>{e7dda722-45e3-45c9-b051-e99288accdd3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\UiTBC\UiTBC10.vcxproj">
+      <Project>{bdbf3606-e371-454b-b162-27fd92b67d51}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

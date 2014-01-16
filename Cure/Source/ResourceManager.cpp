@@ -48,7 +48,10 @@ UserResource::~UserResource()
 
 void UserResource::SafeRelease(ResourceManager* pManager)
 {
-	pManager->SafeRelease(this);
+	if (pManager)
+	{
+		pManager->SafeRelease(this);
+	}
 	mResource = 0;
 }
 

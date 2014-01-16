@@ -41,6 +41,7 @@ public:
 	static void OnBulletHit(Cure::ContextObject* pBullet, bool* pIsDetonated, Launcher* pLauncher, Cure::ContextObject* pTarget);
 	static float GetShotSounds(Cure::ContextManager* pManager, const strutil::strvec& pSoundNames, str& pLaunchSoundName, str& pShreekSoundName);
 
+	static Vector3DF CalculateInitialProjectileDirection(const Vector3DF& pDistance, float pAcceleration, float pTerminalSpeed, const Vector3DF& pGravity);
 private:
 	LOG_CLASS_DECLARE();
 };

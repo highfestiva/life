@@ -26,7 +26,7 @@ bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, TransformationF
 	Cure::CppContextObject* lShooter = (Cure::CppContextObject*)pProjectile->GetManager()->GetObject(pProjectile->GetOwnerInstanceId());
 	if (!lShooter)
 	{
-		pProjectile->GetManager()->PostKillObject(pProjectile->GetInstanceId());
+		//pProjectile->GetManager()->PostKillObject(pProjectile->GetInstanceId());
 		return false;
 	}
 	return GetBarrelByShooter(lShooter, pTransform, pVelocity);
@@ -162,6 +162,37 @@ float ProjectileUtil::GetShotSounds(Cure::ContextManager* pManager, const struti
 		return lPitch;
 	}
 	return 0;
+}
+
+
+
+Vector3DF ProjectileUtil::CalculateInitialProjectileDirection(const Vector3DF& pDistance, float pAcceleration, float pTerminalSpeed, const Vector3DF& pGravity)
+{
+	// 1. How long time, t, will it take the missile to accelerate to the endpoint?
+	// 2. Given t, how much (d) will the missile fall during it's travel (excluding g for optimization)?
+	// 3. Compensate for projectile acceleration in gravitational direction.
+	// 4. Create a quaternion pointing to dir+d.
+	const float l = pDistance.GetLength();
+	const float a = pAcceleration;
+	const float vt = pTerminalSpeed;
+	const float r = ::exp(l*a/(vt*vt));
+	float d = 0;
+	deb_assert(r >= 1);
+	if (r >= 1)
+	{
+		const float t = vt/a*Math::acosh(r);	// Derived from "free fall with air resistance" in Wikipedia. Thanks a bunch!
+		// 2
+		d = t*t*0.5f;
+	}
+	// 3
+	const Vector3DF g = pGravity.GetNormalized();
+	const float f = 1 + pDistance*g/l;
+	d *= f;
+	// 4
+	const Vector3DF lTarget = pDistance - d*pGravity;
+	const float xy = ::sqrt(lTarget.x*lTarget.x + lTarget.y*lTarget.y);
+	//const float zy = ::sqrt(lTarget.z*lTarget.z + lTarget.y*lTarget.y);
+	return Vector3DF(::atan2(-lTarget.x, lTarget.y), ::atan2(lTarget.z, xy), 0);
 }
 
 

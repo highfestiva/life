@@ -22,7 +22,7 @@ ConsoleManager::ConsoleManager(RuntimeVariableScope* pVariableScope, Interactive
 	mConsoleLogger(pConsoleLogger),
 	mConsolePrompt(pConsolePrompt),
 	mConsoleCommandManager(0),
-	mConsoleThread("ConsoleThread")
+	mConsoleThread(0)
 {
 }
 
@@ -44,12 +44,19 @@ void ConsoleManager::SetConsoleLogger(InteractiveConsoleLogListener* pLogger)
 
 bool ConsoleManager::Start()
 {
-	return (mConsoleThread.Start(this, &ConsoleManager::ConsoleThreadEntry));
+	if (!mConsoleThread)
+	{
+		mConsoleThread = new MemberThread<ConsoleManager>("ConsoleThread");
+	}
+	return (mConsoleThread->Start(this, &ConsoleManager::ConsoleThreadEntry));
 }
 
 void ConsoleManager::Join()
 {
-	mConsoleThread.RequestStop();
+	if (mConsoleThread && mConsoleThread->IsRunning())
+	{
+		mConsoleThread->RequestStop();
+	}
 
 	{
 		// Join forks.
@@ -64,10 +71,15 @@ void ConsoleManager::Join()
 	{
 		mConsolePrompt->ReleaseWaitCharThread();
 	}
-	if (Thread::GetCurrentThread() != &mConsoleThread)
+	if (Thread::GetCurrentThread() != mConsoleThread && mConsoleThread)
 	{
-		mConsoleThread.Join(0.5);
-		mConsoleThread.Kill();
+		if (mConsoleThread->IsRunning())
+		{
+			mConsoleThread->Join(0.5);
+			mConsoleThread->Kill();
+			delete mConsoleThread;
+			mConsoleThread = 0;
+		}
 	}
 
 	// Wait for forks.
@@ -282,7 +294,7 @@ void ConsoleManager::ConsoleThreadEntry()
 	const str lPrompt(_T(">"));
 	str lInputText(_T(""));
 	size_t lEditIndex = 0;
-	while (!SystemManager::GetQuitRequest() && !mConsoleThread.GetStopRequest())
+	while (!SystemManager::GetQuitRequest() && !mConsoleThread->GetStopRequest())
 	{
 		// Execute any pending yield command.
 		if (lInputText.empty())

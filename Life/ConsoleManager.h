@@ -69,6 +69,7 @@ protected:
 
 		COMMAND_DUMP_PERFORMANCE_INFO,
 		COMMAND_CLEAR_PERFORMANCE_INFO,
+		COMMAND_SHELL_EXECUTE,
 		COMMAND_SHOW_SYSTEM_INFO,
 		COMMAND_SHOW_GAME_INFO,
 		COMMAND_HANG_GAME,
@@ -92,6 +93,7 @@ private:
 	wstr LoadUserConfig(File* pFile);
 	bool SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const wstr& pUserConfig);
 	bool SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const wstr& pUserConfig);
+	static str GetQuoted(const str& s);
 
 	static const CommandPair mCommandIdList[];
 	typedef std::unordered_map<str, str> AliasMap;

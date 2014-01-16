@@ -362,6 +362,7 @@ public:
 
 	virtual void SetDepthWriteEnabled(bool pEnabled) = 0;
 	virtual void SetDepthTestEnabled(bool pEnabled) = 0;
+	virtual void SetLineWidth(float pPixels) = 0;
 
 	// These simply forwards the call to Material::SetDepthSortEnabled().
 	void SetEnableDepthSorting(bool pEnabled);

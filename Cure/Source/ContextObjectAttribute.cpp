@@ -40,7 +40,6 @@ const str& ContextObjectAttribute::GetName() const
 
 void ContextObjectAttribute::SetCreator(const Factory& pFactory)
 {
-	deb_assert(mFactory == 0);
 	mFactory = pFactory;
 }
 

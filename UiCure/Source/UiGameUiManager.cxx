@@ -258,11 +258,8 @@ void GameUiManager::Close()
 	delete (mCanvas);
 	mCanvas = 0;
 
-	if (mDisplay)
-	{
-		delete (mDisplay);
-		mDisplay = 0;
-	}
+	delete (mDisplay);
+	mDisplay = 0;
 
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();

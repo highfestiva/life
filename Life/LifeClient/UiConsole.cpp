@@ -91,7 +91,9 @@ void UiConsole::SetRenderArea(const PixelRect& pRenderArea)
 		PixelCoord lSize = mArea.GetSize();
 		lSize.y = (int)(lSize.y*0.6);	// TODO: use setting for how high console should be.
 		mConsoleComponent->SetPreferredSize(lSize);
+		mConsoleInput->ActivateFont(mUiManager->GetPainter());
 		int lInputHeight = mUiManager->GetPainter()->GetFontHeight()+4;
+		mConsoleInput->DeactivateFont(mUiManager->GetPainter());
 		lSize.y -= lInputHeight;
 		mConsoleOutput->SetPreferredSize(lSize);
 		lSize.y = lInputHeight;
@@ -186,6 +188,7 @@ UiCure::GameUiManager* UiConsole::GetUiManager() const
 void UiConsole::InitGraphics()
 {
 	CloseGraphics();
+	UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Courier New"), 14.0f);
 
 	mConsoleComponent = new UiTbc::Component(_T("CON:"), new UiTbc::ListLayout());
 	mConsoleOutput = new UiTbc::TextArea(mColor);
@@ -195,8 +198,11 @@ void UiConsole::InitGraphics()
 
 	SetRenderArea(mArea);
 
+	mConsoleOutput->SetHorizontalMargin(3);
 	mConsoleOutput->SetFocusAnchor(UiTbc::TextArea::ANCHOR_BOTTOM_LINE);
+	mConsoleOutput->SetFontId(lFontId);
 	mConsoleOutput->SetFontColor(WHITE);
+	mConsoleInput->SetFontId(lFontId);
 	mConsoleInput->SetFontColor(WHITE);
 
 	mConsoleComponent->AddChild(mConsoleOutput);

@@ -217,14 +217,15 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					const QuaternionF lOrientation =
 						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
 						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
-					float lYaw;
+					/*float lYaw;
 					float lPitch;
 					float lRoll;
 					lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
 					QuaternionF lRotation;
-					lRotation.RotateAroundWorldZ(lYaw);
-					lAxis[0] = lRotation*lAxis[0];
-					lAxis[1] = lRotation*lAxis[1];
+					lRotation.RotateAroundWorldZ(lYaw);*/
+					lAxis[0] = lOrientation*lAxis[0];
+					lAxis[1] = lOrientation*lAxis[1];
+					lAxis[2] = lOrientation*lAxis[2];
 				}
 				Vector3DF lOffset;
 				while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
@@ -262,10 +263,6 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 						//	lVelocityVector.x, lVelocityVector.y, lVelocityVector.z);						lVelocityVector /= mMaxSpeed;
 						lVelocityVector *= (0.1f + mFriction*0.4f) / mMaxSpeed;
 						lPushVector -= lVelocityVector;
-					}
-					if (mValue[ASPECT_TERTIARY] == 0)
-					{
-						lPushVector.z = 0;
 					}
 					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
 				}

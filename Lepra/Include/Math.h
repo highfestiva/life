@@ -58,6 +58,19 @@ public:
 class Math
 {
 public:
+	static inline float asinh(float x)
+	{
+		return ::log(x + ::sqrt(x*x + 1));
+	}
+	static inline float acosh(float x)
+	{
+		return ::log(x + ::sqrt(x*x - 1));
+	}
+	static inline float atanh(float x)
+	{
+		return (::log(1+x) - ::log(1-x)) / 2;
+	}
+
 	static inline float Deg2Rad(float pDeg)
 	{
 		return pDeg * PIF / 180.0f;

@@ -19,8 +19,13 @@
 
 
 
+namespace
+{
 // Run before main() is started.
 AntiCrack _r__;
+
+Life::Application* gApplication = 0;
+}
 
 
 
@@ -40,6 +45,7 @@ Application::Application(const str& pBaseName, const strutil::strvec& pArgumentL
 	mPerformanceLogger(0),
 	mMemLogger(0)
 {
+	gApplication = this;
 	mBaseName = pBaseName;
 }
 
@@ -98,6 +104,19 @@ void Application::Init()
 
 	mResourceManager = new Cure::ResourceManager(1);
 	mGameTicker = CreateTicker();
+}
+
+void Application::Destroy()
+{
+	// Delete in order of priority.
+
+	// Drop all major components first, while keeping all loggers intact.
+	delete (mGameTicker);
+	mGameTicker = 0;
+	delete (mResourceManager);	// Resource manager lives long enough for all volontary resources to disappear.
+	mResourceManager = 0;
+
+	Network::Stop();
 }
 
 int Application::Run()
@@ -182,23 +201,31 @@ bool Application::Tick()
 		LEPRA_DO_MEASURE_SCOPE(AppSleep);
 		TickSleep();
 	}
+	if (lOk)
+	{
+		HandleZombieMode();
+	}
 	return lOk;
 }
 
-void Application::Destroy()
+
+
+Cure::ApplicationTicker* Application::GetTicker() const
 {
-	// Delete in order of priority.
+	return mGameTicker;
+}
 
-	// Drop all major components first, while keeping all loggers intact.
-	delete (mGameTicker);
-	mGameTicker = 0;
-	delete (mResourceManager);	// Resource manager lives long enough for all volontary resources to disappear.
-	mResourceManager = 0;
-
-	Network::Stop();
+void Application::SetZombieTick(const ZombieTick& pZombieTick)
+{
+	mZombieTick = pZombieTick;
 }
 
 
+
+Application* Application::GetApplication()
+{
+	return gApplication;
+}
 
 str Application::GetIoFile(const str& pName, const str& pExt, bool pAddQuotes)
 {
@@ -279,6 +306,21 @@ void Application::TickSleep() const
 			Thread::YieldCpu();	// Play nice even though time's up!
 #endif	// Not on iOS (which sleeps during timer ticks).
 		}
+	}
+}
+
+void Application::HandleZombieMode()
+{
+	if (mZombieTick)
+	{
+		mZombieTick();
+		Destroy();
+		mZombieTick();
+		SystemManager::AddQuitRequest(-1);
+		Init();
+		Network::Start();
+		mGameTicker->Initialize();
+		mZombieTick();
 	}
 }
 

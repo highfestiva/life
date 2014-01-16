@@ -34,7 +34,7 @@ Projectile::~Projectile()
 {
 	delete mShreekSound;
 	mShreekSound = 0;
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy, 0);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy, -1);
 }
 
 
@@ -54,11 +54,13 @@ void Projectile::OnLoaded()
 	{
 		TransformationF lParentTransform;
 		Vector3DF lParentVelocity;
-		if (ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
+		if (!ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
 		{
-			UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
-			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, lPitch);
+			lParentTransform.SetPosition(GetPosition());
+			lParentVelocity = GetVelocity();
 		}
+		UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
+		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetManager(), lLaunchSoundName, lLaunchSound, lParentTransform.GetPosition(), lParentVelocity, 5.0f, lPitch);
 	}
 	if (!lShreekSoundName.empty())
 	{

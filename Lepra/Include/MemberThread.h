@@ -68,8 +68,11 @@ template<class _Base, class _Object> MemberThread<_Base, _Object>::~MemberThread
 
 template<class _Base, class _Object> bool MemberThread<_Base, _Object>::Start(_Base* pObject, void (_Base::*pThreadEntry)())
 {
-	Join(10.0);
-	Kill();
+	if (IsRunning())
+	{
+		Join(10.0);
+		Kill();
+	}
 	deb_assert(pObject);
 	deb_assert(pThreadEntry);
 	mObject = pObject;

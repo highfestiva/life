@@ -161,8 +161,8 @@ int ConsolePrompt::WaitChar()
 		ScopeLock lLock(&mLock);
 		if (!mBufferedChars.empty())
 		{
-			lChar = mBufferedChars.back();
-			mBufferedChars.pop_back();
+			lChar = mBufferedChars.front();
+			mBufferedChars.pop_front();
 		}
 	}
 	return (lChar);

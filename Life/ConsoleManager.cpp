@@ -5,6 +5,7 @@
 
 
 #include "ConsoleManager.h"
+#include <algorithm>
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
@@ -13,10 +14,21 @@
 #include "../Lepra/Include/Number.h"
 #include "../Lepra/Include/ResourceTracker.h"
 #include "../Lepra/Include/SystemManager.h"
+#include "../UiTBC/Include/GUI/UiConsolePrompt.h"
 
 
 
 #define USER_SECTION_MARK	L"//!MARK!//"
+
+
+
+namespace
+{
+bool is_valid_char(char c)
+{
+	return isalnum(c) || c == '-' || c == '#' || c == '.';
+}
+}
 
 
 
@@ -51,6 +63,7 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 	{_T("debug-break"), COMMAND_DEBUG_BREAK},
 	{_T("dump-performance-info"), COMMAND_DUMP_PERFORMANCE_INFO},
 	{_T("help"), COMMAND_HELP},
+	{_T("shell-execute"), COMMAND_SHELL_EXECUTE},
 	{_T("system-info"), COMMAND_SHOW_SYSTEM_INFO},
 	{_T("game-info"), COMMAND_SHOW_GAME_INFO},
 	{_T("game-hang"), COMMAND_HANG_GAME},
@@ -125,7 +138,12 @@ void ConsoleManager::OnKey(const str& pKeyName)
 	KeyMap::iterator x = mKeyMap.find(pKeyName);
 	if (x != mKeyMap.end())
 	{
-		ExecuteCommand(x->second);
+		// Make it as if though it was typed in, to make the console thread run it.
+		for (str::const_iterator y = x->second.begin(); y != x->second.end(); ++y)
+		{
+			((UiTbc::ConsolePrompt*)mConsolePrompt)->OnChar(*y);
+		}
+		((UiTbc::ConsolePrompt*)mConsolePrompt)->OnChar('\r');
 	}
 }
 
@@ -163,10 +181,22 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		case COMMAND_ALIAS:
 		{
 			//bool lUsage = false;
-			if (pParameterVector.size() == 2)
+			if (pParameterVector.size() >= 2)
 			{
 				GetConsoleCommandManager()->RemoveCommand(pParameterVector[0]);
-				mAliasMap[pParameterVector[0]] = pParameterVector[1];
+				strutil::strvec lArgs(pParameterVector);
+				lArgs.erase(lArgs.begin());
+				if (lArgs.size() > 1)
+				{
+					for (size_t x = 0; x < lArgs.size(); ++x)
+					{
+						if (lArgs[x].find(_T(" ")) != str::npos)
+						{
+							lArgs[x] = _T("\"") + lArgs[x] + _T("\"");
+						}
+					}
+				}
+				mAliasMap[pParameterVector[0]] = strutil::Join(lArgs, _T(" "));;
 				GetConsoleCommandManager()->AddCommand(pParameterVector[0]);
 			}
 			else if (pParameterVector.size() == 1)
@@ -372,6 +402,24 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			else
 			{
 				mLog.AError("Can not clear performance info, since game manager not present in this context.");
+			}
+		}
+		break;
+		case COMMAND_SHELL_EXECUTE:
+		{
+			if (pParameterVector.size() == 1)
+			{
+				const int lErrorCode = ::system(astrutil::Encode(pParameterVector[0]).c_str());
+				if (lErrorCode != 0)
+				{
+					mLog.Errorf(_T("Program '%s' returned error code %i."), pParameterVector[0].c_str(), lErrorCode);
+					lResult = 1;
+				}
+			}
+			else
+			{
+				mLog.Warningf(_T("usage: %s <shell command line>"), pCommand.c_str());
+				lResult = 1;
 			}
 		}
 		break;
@@ -870,19 +918,32 @@ bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<s
 	pFile->WriteString<wchar_t>(L"\n");
 	for (AliasMap::iterator x = mAliasMap.begin(); x != mAliasMap.end(); ++x)
 	{
-		pFile->WriteString(wstrutil::Encode(_T("alias \"") + x->first + _T("\" \"") + x->second + _T("\"\n")));
+		pFile->WriteString(wstrutil::Encode(_T("alias ") + GetQuoted(x->first) + _T(" ") + GetQuoted(x->second) + _T("\n")));
 	}
 
 	pFile->WriteString<wchar_t>(L"\n");
 	for (KeyMap::iterator x = mKeyMap.begin(); x != mKeyMap.end(); ++x)
 	{
-		pFile->WriteString(wstrutil::Encode(_T("bind-key \"") + x->first + _T("\" \"") + x->second + _T("\"\n")));
+		pFile->WriteString(wstrutil::Encode(_T("bind-key ") + GetQuoted(x->first) + _T(" ") + GetQuoted(x->second) + _T("\n")));
 	}
 
 	pFile->WriteString<wchar_t>(L"\nset-stdout-log-level 1\n");
 	pFile->WriteString<wchar_t>(L"\n" USER_SECTION_MARK L" -- User config. Everything but variable values will be overwritten above this section!\n");
 	pFile->WriteString(pUserConfig);
 	return (true);	// TODO: check if all writes went well.
+}
+
+str ConsoleManager::GetQuoted(const str& s)
+{
+	if (std::find_if_not(s.begin(), s.end(), is_valid_char) == s.end())
+	{
+		return s;
+	}
+	if (s.find(_T("\"")) != str::npos)	// Partially quoted strings as is.
+	{
+		return s;
+	}
+	return _T("\"") + s + _T("\"");
 }
 
 
