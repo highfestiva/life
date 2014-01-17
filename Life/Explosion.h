@@ -34,6 +34,9 @@ public:
 	static float PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength);
 	static void FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject);
 
+private:
+	static float Force(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, bool pApplyForce);
+
 	LOG_CLASS_DECLARE();
 };
 

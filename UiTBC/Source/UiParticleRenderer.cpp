@@ -153,16 +153,18 @@ void ParticleRenderer::CreateExplosion(const Vector3DF& pPosition, float pStreng
 	const Vector3DF& pStartSmokeColor, const Vector3DF& pSmokeColor, const Vector3DF& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels)
 {
 	const float lRandomXYEndSpeed = 1.0f;
-	const float lSparkSize = (pStrength > 1)? ::sqrt(pStrength)*0.25f : pStrength*0.15f;
+	const float lSparkSize = ::sqrt(pStrength)*0.8f;
 	CreateBillboards(pPosition, pStrength* 7, pDirection, Vector3DF(0, 0,  +9)*pFalloff, lRandomXYEndSpeed, 5.3f/pTime, pStrength*0.4f, pStartFireColor, pFireColor, mFires, pFires);
 	CreateBillboards(pPosition, pStrength* 8, pDirection, Vector3DF(0, 0,  +5)*pFalloff, lRandomXYEndSpeed,    3/pTime, pStrength*0.8f, pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
-	CreateBillboards(pPosition, pStrength*13, pDirection, Vector3DF(0, 0,  -8)*pFalloff, lRandomXYEndSpeed, 4.5f/pTime, lSparkSize, Vector3DF(), Vector3DF(), mSparks, pSparks);
-	CreateBillboards(pPosition, pStrength* 5, pDirection, Vector3DF(0, 0, -10)*pFalloff, lRandomXYEndSpeed, 0.7f/pTime, ::sqrtf(pStrength)*0.20f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
+	CreateBillboards(pPosition, pStrength*14, pDirection, Vector3DF(0, 0,  -8)*pFalloff, lRandomXYEndSpeed, 4.5f/pTime, lSparkSize, Vector3DF(), Vector3DF(), mSparks, pSparks);
+	CreateBillboards(pPosition, pStrength* 5, pDirection, Vector3DF(0, 0, -10)*pFalloff, lRandomXYEndSpeed, 0.7f/pTime, pStrength*0.20f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
 
-	const float lMinSparkVelocity2 = pStrength*9*1.2f*pStrength*8*1.2f;
+	const float lMinSparkVelocity2 = pStrength*100;
+	const Vector3DF lCamPlane = mRenderer->GetCameraTransformation().GetOrientation() * Vector3DF(0,1,0);
 	BillboardArray::reverse_iterator x = mSparks.rbegin();
 	for (int y = 0; y < pSparks; ++y, ++x)
 	{
+		x->mVelocity = x->mVelocity.ProjectOntoPlane(lCamPlane);
 		float lSpeed2 = x->mVelocity.GetLengthSquared();
 		if (lSpeed2 < lMinSparkVelocity2)
 		{

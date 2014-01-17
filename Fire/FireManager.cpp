@@ -284,6 +284,11 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 
 void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
+	pStrength *= 1.2f;
+	float lExplosiveStrength;
+	CURE_RTVAR_TRYGET(lExplosiveStrength, =(float), GetVariableScope(), "shot.explosivestrength", 1.0);
+	pStrength *= ::pow(lExplosiveStrength, 0.3333333f);
+
 	mCollisionSoundManager->OnCollision(pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
@@ -291,13 +296,14 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
-	const int lParticles = Math::Lerp(4, 8, pStrength * 0.2f);
+	const int lParticles = Math::Lerp(4, 8, pStrength * 0.3f);
 	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
 	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	lParticleRenderer->CreateExplosion(pPosition, pStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
+	Vector3DF lSpritesPosition(pPosition-pPosition.GetNormalized(4.0f));	// We just move it closer to make it less likely to be cut off by ground.
+	lParticleRenderer->CreateExplosion(lSpritesPosition, pStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
 
 	// Slowmo check.
 	bool lNormalDeath = true;
@@ -311,8 +317,6 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	}
 
 	// Shove!
-	const bool lIsExplosive = (pExplosive->GetClassId().find(_T("rocket")) != str::npos);
-	const float lExplosionFactor = lIsExplosive? 3.0f : 1.0f;
 	ScopeLock lLock(GetTickLock());
 	TBC::PhysicsManager* lPhysicsManager = GetPhysicsManager();
 	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
@@ -324,18 +328,18 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 		{
 			continue;
 		}
-		float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength * lExplosionFactor) * 0.3f;
+		float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength);
 		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
 			if (lHealth)
 			{
-				const float lValue = lHealth->GetValue() - lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f);
+				const float lValue = lHealth->GetValue() - lForce*Random::Normal(1.01f, 0.1f, 0.7f, 1.0f);
 				lHealth->SetValue(lValue);
 			}
 			x->second->ForceSend();
 		}
-		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength*lExplosionFactor*0.1f);
+		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength);
 	}
 }
 
@@ -578,6 +582,7 @@ Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetDisappearAfterDeathDelay(30.0);
+		lMachine->SetExplosiveStrength(0.25f);
 		lObject = lMachine;
 	}
 	lObject->SetAllowNetworkLogic(true);
@@ -622,7 +627,8 @@ void FireManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			new Cure::FloatAttribute(pObject, _T("float_childishness"), 1);
 			new AutoPathDriver(this, pObject->GetInstanceId(), _T("input"));
 			Vector3DF lColor = RNDPOSVEC();
-			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
+			Life::ExplodingMachine* lMachine = (Life::ExplodingMachine*)pObject;
+			lMachine->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
 		}
 		log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
 		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);

@@ -130,3 +130,9 @@ Make a game with speech controls, for instance using http://www.politepix.com/op
 Pen Friend Thingie - pick language, interest, add photo, find friend, make automatic translations. Great idea!
 
 A game for the blind. For instance a racing game where it tells the driver "100-sharp turn left"? Something like that...
+
+What gets measured gets better. Make a JSON/REST-gränssnitt for measuring:
+  create: {tag:, title:, description:}
+  put: {tag:[[tidpunkt, mätvärde], …}
+  get: {tag: [[tidpunkt, värde]…], …}
+  Stitch together a web form and a python snippet. Create an app?
