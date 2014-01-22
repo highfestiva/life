@@ -23,8 +23,10 @@
 #include "../ConsoleManager.h"
 #include "../LifeApplication.h"
 #include "../SystemUtil.h"
+#include "ClientConsoleManager.h"
 #include "GameClientSlaveManager.h"
 #include "RtVar.h"
+#include "UiConsole.h"
 #include "UiGameServerManager.h"
 #include "UiRaceScore.h"
 
@@ -55,7 +57,8 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mSlaveBottomSplit(1),
 	mSlaveVSplit(1),
 	mSlaveFade(0),
-	mPerformanceAdjustmentTicks(0)
+	mPerformanceAdjustmentTicks(0),
+	mDebugFontId(UiTbc::FontManager::INVALID_FONTID)
 {
 	mSlaveArray.resize(4, 0);
 	mSlaveArray[0] = 0;
@@ -319,6 +322,10 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(DrawGraph);
 		if (mUiManager->CanRender())
 		{
+			if (mDebugFontId)
+			{
+				mUiManager->GetPainter()->GetFontManager()->SetActiveFont(mDebugFontId);
+			}
 			DrawDebugData();
 			DrawPerformanceLineGraph2d();
 		}
@@ -715,11 +722,7 @@ bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 		AddSlave(lSlave);
 		if (mInitialized)
 		{
-			lOk = lSlave->Open();
-			if (lOk && mConsole->GetGameManager() == 0)
-			{
-				mConsole->SetGameManager(lSlave);
-			}
+			lOk = OpenSlave(lSlave);
 		}
 	}
 	else
@@ -893,7 +896,7 @@ bool GameClientMasterTicker::Reinitialize()
 			GameClientSlaveManager* lSlave = *x;
 			if (lSlave)
 			{
-				lOk = lSlave->Open();
+				lOk = OpenSlave(lSlave);
 			}
 		}
 	}
@@ -903,6 +906,18 @@ bool GameClientMasterTicker::Reinitialize()
 		mLog.AError("Could not initialize game!");
 	}
 	return (lOk);
+}
+
+bool GameClientMasterTicker::OpenSlave(GameClientSlaveManager* pSlave)
+{
+	bool lOk = pSlave->Open();
+	if (lOk && mConsole->GetGameManager() == 0)
+	{
+		mConsole->SetGameManager(pSlave);
+	}
+	// Pick a good font for the debug rendering from the slave console.
+	mDebugFontId = ((ClientConsoleManager*)pSlave->GetConsoleManager())->GetUiConsole()->GetFontId();
+	return lOk;
 }
 
 bool GameClientMasterTicker::OpenUiManager()

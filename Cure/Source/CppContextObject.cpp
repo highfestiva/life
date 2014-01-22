@@ -63,6 +63,7 @@ void CppContextObject::StabilizeTick()
 	{
 		float lStabilityFactor = 1;
 		int lBodyIndex = 0;
+		const float lMicroStepFactor = mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps() / 18.0f;
 		for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 		{
 			const TBC::ChunkyClass::Tag& lTag = lClass->GetTag(x);
@@ -81,7 +82,7 @@ void CppContextObject::StabilizeTick()
 				lStabilityFactor = lTag.mFloatValueList[0];
 				lBodyIndex = lTag.mBodyIndexList[0];
 				TBC::PhysicsEngine::UprightStabilize(mManager->GetGameManager()->GetPhysicsManager(),
-					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*5, 1);
+					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*lMicroStepFactor, 1);
 			}
 			else if (lTag.mTagName == _T("forward_stabilizer"))
 			{
@@ -98,7 +99,7 @@ void CppContextObject::StabilizeTick()
 				lStabilityFactor = lTag.mFloatValueList[0];
 				lBodyIndex = lTag.mBodyIndexList[0];
 				TBC::PhysicsEngine::ForwardStabilize(mManager->GetGameManager()->GetPhysicsManager(),
-					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*5, 1);
+					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*lMicroStepFactor, 1);
 			}
 		}
 	}

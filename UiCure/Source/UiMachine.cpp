@@ -168,7 +168,7 @@ void Machine::OnTick()
 			if (mBurnEmitter)
 			{
 				const float lHealth = Math::Clamp(Cure::Health::Get(this), 0.0f, 1.0f);
-				mBurnEmitter->EmitFromTag(this, lTag, lFrameTime, -lHealth + 0.7f);
+				mBurnEmitter->EmitFromTag(this, lTag, lFrameTime, (-lHealth + 0.7f)/0.7f);
 			}
 		}
 	}

@@ -122,7 +122,7 @@ void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated,
 	TBC::ChunkyPhysics* lPhysics = pGrenade->GetPhysics();
 	if (lPhysics)
 	{
-		const float lStrength = ::pow(pStrength, 1/3.0f);	// Reduce by 3D volume. Explosion spreads in all directions.
+		const float lStrength = ::pow(pStrength*4+1, 1/3.0f) - 1;	// Reduce by 3D volume. Explosion spreads in all directions.
 		pLauncher->Detonate(pGrenade, lPhysics->GetBoneGeometry(0), pPosition, pVelocity, pNormal, lStrength);
 		if (pDeleteDelay == 0)
 		{

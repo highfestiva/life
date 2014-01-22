@@ -31,11 +31,12 @@ class Explosion
 {
 public:
 	static float CalculateForce(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength);
-	static float PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength);
+	static float PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, float pTimeFactor);
 	static void FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject);
+	static void Freeze(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject);
 
 private:
-	static float Force(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, bool pApplyForce);
+	static float Force(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, float pTimeFactor);
 
 	LOG_CLASS_DECLARE();
 };

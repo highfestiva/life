@@ -339,10 +339,6 @@
       <Project>{e7dda722-45e3-45c9-b051-e99288accdd2}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\TBC\TBC10.vcxproj">
-      <Project>{bdbf3606-e371-454b-b162-27fd92b67d50}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\ThirdParty\freealut-1.1.0\admin\VisualStudioDotNET\alut\alut10.vcxproj">
       <Project>{07149bcb-be8a-4503-be18-815d64233116}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

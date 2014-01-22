@@ -39,6 +39,7 @@ public:
 
 	void SetFontColor(const Color& pTextColor);
 	void SetFontId(const FontManager::FontId& pFontId);
+	FontManager::FontId GetFontId() const;
 	void ActivateFont(Painter* pPainter);
 	void DeactivateFont(Painter* pPainter);
 	void SetHorizontalMargin(int pHorizontalMargin);

@@ -115,6 +115,7 @@ Renderer::Renderer(Canvas* pScreen):
 	mLightsEnabled(false),
 	mShadowMode(NO_SHADOWS),
 	mShadowHint(Renderer::SH_VOLUMES_ONLY),
+	mShadowUpdateIntensity(1.0f),
 	mShadowUpdateFrameDelay(100),
 	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight())
 {
@@ -411,6 +412,11 @@ void Renderer::SetShadowMode(Shadows pShadowMode, ShadowHint pHint)
 Renderer::Shadows Renderer::GetShadowMode()
 {
 	return 	mShadowMode;
+}
+
+void Renderer::SetShadowUpdateIntensity(float pUpdateIntensity)
+{
+	mShadowUpdateIntensity = pUpdateIntensity;
 }
 
 void Renderer::SetShadowUpdateFrameDelay(unsigned pFrameDelay)
@@ -1356,7 +1362,6 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 	bool lShadowsUpdated = false;
 
 	// Update shadow volumes.
-	bool lGeomTransformationChanged = pGeometry->GetTransformationChanged();
 
 	// Iterate over all the closest light sources and update shadow volumes.
 	unsigned lActiveLightCount = 0;
@@ -1428,18 +1433,23 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 			}
 			else
 			{
-				if ((lGeomTransformationChanged || pGeometry->GetVertexDataChanged() ||
+				if ((pGeometry->GetTransformationChanged() || pGeometry->GetVertexDataChanged() ||
 					lGeometry->mLightID[i] != GetClosestLight(i)) ||
 					(lLight->mTransformationChanged &&
 					mCurrentFrame - lGeometry->mLastFrameShadowsUpdated >= mShadowUpdateFrameDelay))
 				{
 					ShadowVolumeTable::Iterator x = mShadowVolumeTable.Find(lGeometry->mShadowVolume[i]);
-					
 					if (x != mShadowVolumeTable.End())
 					{
 						GeometryData* lShadowGeom = *x;
 						ShadowVolume* lShadowVolume = (ShadowVolume*)lShadowGeom->mGeometry;
-						if (lLight->mType == Renderer::LIGHT_DIRECTIONAL)
+						if (!pGeometry->GetBigOrientationChanged())
+						{
+							// Only update translation if orientation didn't change much.
+							TransformationF lTransform(pGeometry->GetLastBigOrientation(), pGeometry->GetTransformation().GetPosition());
+							lShadowVolume->SetTransformation(lTransform);
+						}
+						else if (lLight->mType == Renderer::LIGHT_DIRECTIONAL)
 						{
 							lShadowVolume->UpdateShadowVolume(lLight->mDirection,
 											    lLight->mShadowRange, 
@@ -1473,6 +1483,7 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 	}// End for(i < Renderer::MAX_SHADOW_VOLUMES)
 
 	pGeometry->SetTransformationChanged(false);
+	pGeometry->SetBigOrientationChanged(false);
 	pGeometry->SetVertexDataChanged(false);
 
 	if (lShadowsUpdated == true)

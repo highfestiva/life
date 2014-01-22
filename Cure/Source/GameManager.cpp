@@ -241,6 +241,11 @@ void GameManager::DeleteContextObjectDelay(ContextObject* pObject, float pDelay)
 	mContext->AddAlarmCallback(pObject, ContextManager::SYSTEM_ALARM_ID_KILL, pDelay, 0);
 }
 
+void GameManager::AllowCollideWithSelfDelay(Cure::ContextObject* pObject, float pDelay, bool pAllow)
+{
+	mContext->AddAlarmCallback(pObject, ContextManager::SYSTEM_ALARM_ID_COLLIDE_WITH_SELF, pDelay, (void*)(pAllow? 1 : 0));
+}
+
 void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
 	pObject->SetNetworkObjectType(pNetworkType);
@@ -307,11 +312,25 @@ void GameManager::OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID 
 	}
 }
 
-void GameManager::OnAlarm(int pAlarmId, ContextObject* pObject, void*)
+void GameManager::OnAlarm(int pAlarmId, ContextObject* pObject, void* pExtraData)
 {
 	if (pAlarmId == ContextManager::SYSTEM_ALARM_ID_KILL)
 	{
 		GetContext()->PostKillObject(pObject->GetInstanceId());
+	}
+	else if (pAlarmId == ContextManager::SYSTEM_ALARM_ID_COLLIDE_WITH_SELF)
+	{
+		TBC::PhysicsManager* lPhysicsManager = GetPhysicsManager();
+		TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
+		if (pObject->IsLoaded() && lPhysics)
+		{
+			const int lBoneCount = lPhysics->GetBoneCount();
+			for (int x = 0; x < lBoneCount; ++x)
+			{
+				TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
+				lPhysicsManager->EnableCollideWithSelf(lGeometry->GetBodyId(), pExtraData? true : false);
+			}
+		}
 	}
 }
 

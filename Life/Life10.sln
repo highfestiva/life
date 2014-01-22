@@ -2,8 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lepra", "..\Lepra\Lepra10.vcxproj", "{E7DDA722-45E3-45C9-B051-E99288ACCDD2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBC", "..\TBC\TBC10.vcxproj", "{BDBF3606-E371-454B-B162-27FD92B67D50}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThirdPartyLib", "..\ThirdParty\ThirdPartyLib_10.vcxproj", "{00F89E9D-7870-4921-9022-9AD4951BC224}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UiLepra", "..\UiLepra\UiLepra10.vcxproj", "{E7DDA722-45E3-45C9-B051-E99288ACCDD3}"
@@ -93,6 +91,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bound", "..\Bound\Bound10.v
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fire", "..\Fire\Fire10.vcxproj", "{C0BA93B4-79DA-11E3-B6FB-0019213B7B87}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBC", "..\TBC\TBC10.vcxproj", "{BDBF3606-E371-454B-B162-27FD92B67D50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -118,20 +118,6 @@ Global
 		{E7DDA722-45E3-45C9-B051-E99288ACCDD2}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
 		{E7DDA722-45E3-45C9-B051-E99288ACCDD2}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
 		{E7DDA722-45E3-45C9-B051-E99288ACCDD2}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Debug|Win32.ActiveCfg = Debug|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Debug|Win32.Build.0 = Debug|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Final|Win32.ActiveCfg = Final|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Final|Win32.Build.0 = Final|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Release Candidate|Win32.ActiveCfg = Release Candidate|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Release Candidate|Win32.Build.0 = Release Candidate|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Release|Win32.ActiveCfg = Release Candidate|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Release|Win32.Build.0 = Release Candidate|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Final|Win32.ActiveCfg = Unicode Final|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
-		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
 		{00F89E9D-7870-4921-9022-9AD4951BC224}.Debug|Win32.ActiveCfg = Debug|Win32
 		{00F89E9D-7870-4921-9022-9AD4951BC224}.Debug|Win32.Build.0 = Debug|Win32
 		{00F89E9D-7870-4921-9022-9AD4951BC224}.Final|Win32.ActiveCfg = Release|Win32
@@ -454,6 +440,20 @@ Global
 		{C0BA93B4-79DA-11E3-B6FB-0019213B7B87}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
 		{C0BA93B4-79DA-11E3-B6FB-0019213B7B87}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
 		{C0BA93B4-79DA-11E3-B6FB-0019213B7B87}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Debug|Win32.Build.0 = Debug|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Final|Win32.ActiveCfg = Final|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Final|Win32.Build.0 = Final|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Release Candidate|Win32.ActiveCfg = Release Candidate|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Release Candidate|Win32.Build.0 = Release Candidate|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Release|Win32.ActiveCfg = Release Candidate|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Release|Win32.Build.0 = Release Candidate|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Final|Win32.ActiveCfg = Unicode Final|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
+		{BDBF3606-E371-454B-B162-27FD92B67D50}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

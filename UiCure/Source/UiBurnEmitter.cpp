@@ -73,7 +73,7 @@ void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::Chun
 	}
 	float lBurnIntensity;
 	CURE_RTVAR_GET(lBurnIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
-	mBurnTimeout -= pIntensity * lBurnIntensity * pFrameTime * 25;
+	mBurnTimeout -= Math::Lerp(0.4f, 1.0f, pIntensity) * lBurnIntensity * pFrameTime * 25;
 	if (mBurnTimeout > 0)
 	{
 		return;
@@ -88,7 +88,7 @@ void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::Chun
 	Vector3DF lOffset(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
 	lOffset = lOriginalOrientation*lOffset;
 	Vector3DF lVelocity(pTag.mFloatValueList[FV_VX], pTag.mFloatValueList[FV_VY], pTag.mFloatValueList[FV_VZ]);
-	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
+	const float lOpacity = Math::Lerp(0.6f, 1.0f, pIntensity) * pTag.mFloatValueList[FV_OPACITY];
 	if (!mFreeFlow)
 	{
 		lVelocity = lOriginalOrientation*lVelocity;

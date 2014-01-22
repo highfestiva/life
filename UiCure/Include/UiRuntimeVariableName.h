@@ -52,6 +52,7 @@
 #define RTVAR_UI_3D_CLIPNEAR			"Ui.3D.ClipNear"
 #define RTVAR_UI_3D_CLIPFAR			"Ui.3D.ClipFar"
 #define RTVAR_UI_3D_SHADOWS			"Ui.3D.Shadows"
+#define RTVAR_UI_3D_SHADOWDEVIATION		"Ui.3D.ShadowDeviation"
 
 #define RTVAR_UI_2D_PAINTMODE			"Ui.2D.PaintMode"
 #define RTVAR_UI_2D_FONT			"Ui.2D.Font"

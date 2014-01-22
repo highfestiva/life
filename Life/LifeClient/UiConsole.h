@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../Lepra/Include/Graphics2D.h"
+#include "../../UiTBC/Include/UiFontManager.h"
 #include "../Life.h"
 
 namespace UiTbc
@@ -47,6 +48,7 @@ public:
 	void SetVisible(bool pVisible);
 	void Tick();
 	UiCure::GameUiManager* GetUiManager() const;
+	UiTbc::FontManager::FontId GetFontId() const;
 
 private:
 	void InitGraphics();

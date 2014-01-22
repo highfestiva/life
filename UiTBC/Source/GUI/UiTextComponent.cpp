@@ -41,6 +41,11 @@ void TextComponent::SetFontId(const FontManager::FontId& pFontId)
 	ForceRepaint();
 }
 
+FontManager::FontId TextComponent::GetFontId() const
+{
+	return mFontId;
+}
+
 void TextComponent::ActivateFont(Painter* pPainter)
 {
 	deb_assert(!mIsFontActive);

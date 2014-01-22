@@ -34,7 +34,9 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mEnableMeshSlide(false),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
-	mLerpMode(LERP_STOP)
+	mLerpMode(LERP_STOP),
+	mSinkSpeed(0),
+	mSinkOffset(0)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }
@@ -133,10 +135,25 @@ void CppContextObject::UiMove()
 	//	int j = i;
 	//	i = j;
 	//}
+	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
 	const float lLerpFactor = Math::GetIterateLerpTime(0.2f, lFrameTime);
 	Vector3DF lRootPosition;
 	TransformationF lPhysicsTransform;
+	if (mSinkSpeed)
+	{
+		const int lGeometryCount = mPhysics->GetBoneCount();
+		for (int x = 0; x < lGeometryCount; ++x)
+		{
+			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+			if (lGeometry && lGeometry->GetBodyId())
+			{
+				Vector3DF lPosition = lPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+				lPosition.z -= mSinkSpeed * GetManager()->GetGameManager()->GetTimeManager()->GetNormalGameFrameTime();
+				lPhysicsManager->SetBodyPosition(lGeometry->GetBodyId(), lPosition);
+			}
+		}
+	}
 	/*if (mLerpMode == LERP_START)
 	{
 		mLerpOffset.SetIdentity();
@@ -167,7 +184,7 @@ void CppContextObject::UiMove()
 					continue;
 				}
 			}
-			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBodyId, lPhysicsTransform);
+			lPhysicsManager->GetBodyTransform(lBodyId, lPhysicsTransform);
 			/*if (mAutoDisableMeshMove && mPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC && mPhysics->GetBodyType(lGeometry) == TBC::PhysicsManager::STATIC)
 			{
 				mEnableMeshMove = false;
@@ -232,6 +249,11 @@ void CppContextObject::ActivateLerp()
 	{
 		mLerpMode = LERP_START;
 	}
+}
+
+void CppContextObject::SetSinking(float pSinkSpeed)
+{
+	mSinkSpeed = pSinkSpeed;
 }
 
 

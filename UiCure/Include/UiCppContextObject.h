@@ -43,6 +43,7 @@ public:
 	void OnTick();
 	virtual void UiMove();
 	void ActivateLerp();
+	void SetSinking(float pSinkSpeed);
 
 	TBC::GeometryBase* GetMesh(int pIndex) const;
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
@@ -82,6 +83,8 @@ protected:
 	bool mEnablePixelShader;
 	bool mEnableMeshMove;
 	bool mEnableMeshSlide;
+	float mSinkSpeed;
+	float mSinkOffset;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;

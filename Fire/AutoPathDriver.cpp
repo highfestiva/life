@@ -7,10 +7,11 @@
 #include "AutoPathDriver.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
+#include "../Cure/Include/RuntimeVariable.h"
+#include "BaseMachine.h"
 #include "Level.h"
 
-#define AIM_DISTANCE			6.0f
-#define REAR_WHEEL_STEERING_DISTANCE	10.0f
+#define AIM_DISTANCE			10.0f
 
 
 
@@ -37,12 +38,11 @@ AutoPathDriver::~AutoPathDriver()
 }
 
 
-
 void AutoPathDriver::OnTick()
 {
 	Parent::OnTick();
 
-	Cure::ContextObject* lVehicle = mManager->GetObject(mVehicleId, true);
+	BaseMachine* lVehicle = (BaseMachine*)mManager->GetObject(mVehicleId, true);
 	if (!lVehicle)
 	{
 		mManager->PostKillObject(GetInstanceId());
@@ -54,18 +54,21 @@ void AutoPathDriver::OnTick()
 	}
 
 	const Vector3DF lVehicleDirection3d = lVehicle->GetOrientation()*Vector3DF(0,1,0);
-	const Vector3DF lPosition = lVehicle->GetPosition() + lVehicleDirection3d * REAR_WHEEL_STEERING_DISTANCE;
+	const Vector3DF lPosition = lVehicle->GetPosition();
 	Vector3DF lClosestPoint;
 	GetClosestPathDistance(lPosition, lClosestPoint, AIM_DISTANCE);
 	const Vector3DF lDirection(lClosestPoint - lPosition);
 
-	lVehicle->SetEnginePower(0, 1);
+	const float lEnginePower = Math::Lerp(0.4f, 1.0f, lVehicle->mPanicLevel) * lVehicle->mLevelSpeed;
+	lVehicle->SetEnginePower(0, lEnginePower);
 	const Vector2DF lWantedDirection(lDirection.x, lDirection.y);
-	//lWantedDirection.Normalize();
 	const Vector2DF lVehicleDirection(lVehicleDirection3d.x, lVehicleDirection3d.y);
-	//lVehicleDirection.Normalize();
 	const float lSteeringAngle = lWantedDirection.GetAngle(lVehicleDirection);
 	lVehicle->SetEnginePower(1, lSteeringAngle);
+	const float lBrakeLimit = Math::Lerp(10.0f, 50.0f, lVehicle->mPanicLevel);
+	const float lVelocityBrakeFactor = Math::Clamp(lVehicle->GetVelocity().GetLength(), 0.0f, lBrakeLimit) / lBrakeLimit;
+	const float lBrakePower = std::max(0.0f, (std::abs(lSteeringAngle)-0.5f)*0.5f*lVelocityBrakeFactor);
+	lVehicle->SetEnginePower(2, lBrakePower);
 
 	if (lVehicle->GetVelocity().GetLengthSquared() < 1.0f)
 	{

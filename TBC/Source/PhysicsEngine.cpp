@@ -20,7 +20,6 @@ namespace TBC
 
 
 #define MAX_ASPECT_INDEX	40
-#define CUBE_DIAGONAL		1.2247448713915890490986420373529f
 
 
 
@@ -247,7 +246,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				Vector3DF lPushVector;
 				for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
 				{
-					lPushVector += (1/CUBE_DIAGONAL) * mValue[i] * lAxis[i];
+					lPushVector += mValue[i] * lAxis[i];
 				}
 				const float lPushForce = lPushVector.GetLength();
 				if (lPushForce > 0.1f || mFriction != 0)
@@ -261,7 +260,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 						//mLog.Infof(_T("Reducing push vector (%f; %f; %f) with velocity (%f; %f; %f) and friction."),
 						//	lPushVector.x, lPushVector.y, lPushVector.z,
 						//	lVelocityVector.x, lVelocityVector.y, lVelocityVector.z);						lVelocityVector /= mMaxSpeed;
-						lVelocityVector *= (0.1f + mFriction*0.4f) / mMaxSpeed;
+						lVelocityVector *= mFriction*0.5f / mMaxSpeed;
 						lPushVector -= lVelocityVector;
 					}
 					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);

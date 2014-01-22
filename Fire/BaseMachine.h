@@ -23,7 +23,11 @@ public:
 	BaseMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher);
 	virtual ~BaseMachine();
 
+	float mLevelSpeed;
+	float mPanicLevel;
+
 protected:
+	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	virtual void OnDie();
 };
 

@@ -601,6 +601,7 @@ void GameUiManager::UpdateSettings()
 	double lClipNear;
 	double lClipFar;
 	str lShadowsString;
+	double lShadowDeviation;
 	CURE_RTVAR_GET(lEnableLights, =, mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
 	CURE_RTVAR_GET(lAmbientRed, =, mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.1);
 	CURE_RTVAR_GET(lAmbientGreen, =, mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
@@ -625,6 +626,7 @@ void GameUiManager::UpdateSettings()
 	CURE_RTVAR_GET(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	CURE_RTVAR_GET(lClipFar, =, mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
 	CURE_RTVAR_GET(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Volumes"));
+	CURE_RTVAR_GET(lShadowDeviation, =, mVariableScope, RTVAR_UI_3D_SHADOWDEVIATION, 1e-3);
 
 	mRenderer->SetLightsEnabled(lEnableLights);
 	mRenderer->SetAmbientLight((float)lAmbientRed, (float)lAmbientGreen, (float)lAmbientBlue);
@@ -659,6 +661,7 @@ void GameUiManager::UpdateSettings()
 	}
 	mRenderer->SetShadowMode(lShadowMode, lShadowType);
 	mRenderer->SetShadowUpdateFrameDelay(60);
+	TBC::GeometryBase::SetDefaultBigOrientationThreshold((float)lShadowDeviation);
 
 	// ----------------------------------------
 	// 2D rendering settings.

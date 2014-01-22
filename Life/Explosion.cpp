@@ -7,6 +7,7 @@
 #include "Explosion.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/CppContextObject.h"
+#include "../Cure/Include/GameManager.h"
 #include "../TBC/Include/ChunkyBoneGeometry.h"
 #include "../TBC/Include/ChunkyPhysics.h"
 
@@ -19,12 +20,12 @@ namespace Life
 
 float Explosion::CalculateForce(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength)
 {
-	return Force(pPhysicsManager, pObject, pPosition, pStrength, false);
+	return Force(pPhysicsManager, pObject, pPosition, pStrength, 0);
 }
 
-float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength)
+float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, float pTimeFactor)
 {
-	return Force(pPhysicsManager, pObject, pPosition, pStrength, true);
+	return Force(pPhysicsManager, pObject, pPosition, pStrength, pTimeFactor);
 }
 
 void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject)
@@ -51,7 +52,7 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContext
 			lGeometry->ResetJointId();
 		}
 		// This is so that the different parts of the now broken object can collide with each other.
-		pPhysicsManager->EnableCollideWithSelf(lGeometry->GetBodyId(), true);
+		pObject->GetManager()->GetGameManager()->AllowCollideWithSelfDelay(pObject, 0.2f, true);
 	}
 
 	lPhysics->ClearEngines();
@@ -59,9 +60,26 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContext
 	pObject->QuerySetChildishness(0);
 }
 
+void Explosion::Freeze(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject)
+{
+	// Make physics static.
+	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
+	const int lBoneCount = lPhysics->GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
+	{
+		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
+		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY)
+		{
+			continue;
+		}
+		pPhysicsManager->EnableCollideWithSelf(lGeometry->GetBodyId(), false);
+		pPhysicsManager->MakeStatic(lGeometry->GetBodyId());
+	}
+}
 
 
-float Explosion::Force(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, bool pApplyForce)
+
+float Explosion::Force(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, float pTimeFactor)
 {
 	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
 	if (!lPhysics)
@@ -69,6 +87,7 @@ float Explosion::Force(TBC::PhysicsManager* pPhysicsManager, const Cure::Context
 		return 0;
 	}
 	const float lExplosiveDig = 0.75f;	// How much below the collision point the explosion "digs" things up. Adds angular velocity to objects.
+	const float lForceFactor = pTimeFactor? 4.8f/pTimeFactor : 0.0f;
 	// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
 	const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -lExplosiveDig);
 	const bool lIsDynamic = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
@@ -101,9 +120,8 @@ float Explosion::Force(TBC::PhysicsManager* pPhysicsManager, const Cure::Context
 		//mLog.Infof(_T("Explosion for %s with strength %f at (%f;%f;%f)."), pObject->GetClassId().c_str(), d, pPosition.x, pPosition.y, pPosition.z);
 		lForce += d;
 
-		if (pApplyForce)
+		if (lForceFactor)
 		{
-			const float lForceFactor = 430.0f;	// To be able to pass a sensible strength factor to this method.
 			const float ff = lForceFactor * lGeometry->GetMass() * d;
 			f *= ff;
 			pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), f, lEpicenter);

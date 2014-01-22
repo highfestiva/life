@@ -278,7 +278,6 @@ GeometryBase::GeometryBase() :
 	mFlags(0),
 	mBoundingRadius(0),
 	mScale(1),
-	mXformUpdateFactor(0),
 	mSurfaceNormalData(0),
 	mSurfaceNormalCount(0),
 	mVertexNormalData(0),
@@ -293,7 +292,8 @@ GeometryBase::GeometryBase() :
 	mUVAnimator(0),
 	mPreRenderCallback(0),
 	mPostRenderCallback(0),
-	mExtraData(0)
+	mExtraData(0),
+	mBigOrientationThreshold(mDefaultBigOrientationThreshold)
 {
 	LEPRA_ACQUIRE_RESOURCE(GeometryBase);
 }
@@ -409,7 +409,7 @@ unsigned int GeometryBase::GetTriangleCount() const
 	}
 }
 
-void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3])
+void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3]) const
 {
 	const vtx_idx_t* lIndices = GetIndexData();
 	switch (GetPrimitiveType())
@@ -687,17 +687,15 @@ unsigned int GeometryBase::GetLastFrameVisible() const
 
 void GeometryBase::SetTransformation(const TransformationF& pTransformation)
 {
-	QuaternionF lOrientation = mTransformation.GetOrientation();
-	lOrientation.Sub(pTransformation.GetOrientation());
-	mXformUpdateFactor += lOrientation.GetNorm() * 25000 + 
-		mTransformation.GetPosition().GetDistanceSquared(pTransformation.GetPosition()) * 2500;
-	mXformUpdateFactor *= 2;
-	if (mXformUpdateFactor >= 1)
-	{
-		SetFlag(TRANSFORMATION_CHANGED);
-		mXformUpdateFactor = 0;
-	}
 	mTransformation = pTransformation;
+	SetTransformationChanged(true);
+
+	const QuaternionF& q = GetTransformation().GetOrientation();	// Must let overrides go to work, so we can store full update.
+	if ((mBigOrientation - q).GetNorm() > mBigOrientationThreshold)
+	{
+		mBigOrientation = q;
+		SetBigOrientationChanged(true);
+	}
 }
 
 const TransformationF& GeometryBase::GetBaseTransformation() const
@@ -708,6 +706,26 @@ const TransformationF& GeometryBase::GetBaseTransformation() const
 const TransformationF& GeometryBase::GetTransformation()
 {
 	return mTransformation;
+}
+
+const QuaternionF& GeometryBase::GetLastBigOrientation() const
+{
+	return mBigOrientation;
+}
+
+float GeometryBase::GetBigOrientationThreshold() const
+{
+	return mBigOrientationThreshold;
+}
+
+void GeometryBase::SetBigOrientationThreshold(float pBigOrientationThreshold)
+{
+	mBigOrientationThreshold = pBigOrientationThreshold;
+}
+
+void GeometryBase::SetDefaultBigOrientationThreshold(float pBigOrientationThreshold)
+{
+	mDefaultBigOrientationThreshold = pBigOrientationThreshold;
 }
 
 void GeometryBase::SetParentCell(PortalManager::Cell* pCell)
@@ -1486,7 +1504,7 @@ bool GeometryBase::VerifyIndexData()
 	return lOk;
 }
 
-const TransformationF& GeometryBase::GetUVTransform()
+const TransformationF& GeometryBase::GetUVTransform() const
 {
 	if(mUVAnimator != 0)
 	{
@@ -1500,6 +1518,155 @@ const TransformationF& GeometryBase::GetUVTransform()
 
 
 
+bool GeometryBase::GetVertexDataChanged() const
+{
+	return CheckFlag(VERTEX_DATA_CHANGED);
+}
+
+bool GeometryBase::GetUVDataChanged() const
+{
+	return CheckFlag(UV_DATA_CHANGED);
+}
+
+bool GeometryBase::GetColorDataChanged() const
+{
+	return CheckFlag(COLOR_DATA_CHANGED);
+}
+
+bool GeometryBase::GetIndexDataChanged() const
+{
+	return CheckFlag(INDEX_DATA_CHANGED);
+}
+
+void GeometryBase::SetVertexNormalsValid()
+{
+	SetFlag(VERTEX_NORMALS_VALID);
+}
+
+void GeometryBase::SetSurfaceNormalsValid()
+{
+	SetFlag(SURFACE_NORMALS_VALID);
+}
+
+GeometryBase::ColorFormat GeometryBase::GetColorFormat() const
+{
+	return COLOR_RGB;
+}
+
+bool GeometryBase::GetTransformationChanged() const
+{
+	return CheckFlag(TRANSFORMATION_CHANGED);
+}
+
+void GeometryBase::SetTransformationChanged(bool pTransformationChanged)
+{
+	pTransformationChanged? SetFlag(TRANSFORMATION_CHANGED|REF_TRANSFORMATION_CHANGED) : ClearFlag(TRANSFORMATION_CHANGED);
+}
+
+bool GeometryBase::GetBigOrientationChanged() const
+{
+	return CheckFlag(BIG_ORIENTATION_CHANGED);
+}
+
+void GeometryBase::SetBigOrientationChanged(bool pOrientationChanged)
+{
+	SetFlag(BIG_ORIENTATION_CHANGED, pOrientationChanged);
+}
+
+void GeometryBase::SetAlwaysVisible(bool pAlwaysVisible)
+{
+	SetFlag(ALWAYS_VISIBLE, pAlwaysVisible);
+}
+
+bool GeometryBase::GetAlwaysVisible() const
+{
+	return CheckFlag(ALWAYS_VISIBLE);
+}
+
+void GeometryBase::SetSolidVolumeCheckValid(bool pValid)
+{
+	SetFlag(SOLID_VOLUME_VALID, pValid);
+}
+
+void GeometryBase::SetSingleObjectCheckValid(bool pValid)
+{
+	SetFlag(SINGLE_OBJECT_VALID, pValid);
+}
+
+void GeometryBase::SetConvexVolumeCheckValid(bool pValid)
+{
+	SetFlag(CONVEX_VOLUME_VALID, pValid);
+}
+
+void GeometryBase::SetFlag(Lepra::uint32 pFlag, bool pValue)
+{
+	if (pValue) SetFlag(pFlag); else ClearFlag(pFlag);
+}
+
+void GeometryBase::SetFlag(Lepra::uint32 pFlag)
+{
+	mFlags |= pFlag;
+}
+
+void GeometryBase::ClearFlag(Lepra::uint32 pFlag)
+{
+	mFlags &= (~pFlag);
+}
+
+bool GeometryBase::CheckFlag(Lepra::uint32 pFlag) const
+{
+	return (mFlags & pFlag) != 0;
+}
+
+uint32 GeometryBase::GetFlags() const
+{
+	return mFlags;
+}
+
+
+
+GeometryBase::BasicMaterialSettings::BasicMaterialSettings():
+	mAmbient(0,0,0),
+	mDiffuse(1,0,1),
+	mSpecular(0,0,0),
+	mShininess(0),
+	mAlpha(1),
+	mSmooth(true)
+{
+}
+
+GeometryBase::BasicMaterialSettings::BasicMaterialSettings(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
+	const Vector3DF& pSpecular, float pShininess,
+	float pAlpha, bool pSmooth):
+	mAmbient(pAmbient),
+	mDiffuse(pDiffuse),
+	mSpecular(pSpecular),
+	mShininess(pShininess),
+	mAlpha(pAlpha),
+	mSmooth(pSmooth)
+{
+}
+
+void GeometryBase::BasicMaterialSettings::SetColor(float pRed, float pGreen, float pBlue)
+{
+	mDiffuse.Set(pRed, pGreen, pBlue);
+}
+
+void GeometryBase::BasicMaterialSettings::Set(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
+	const Vector3DF& pSpecular, float pShininess,
+	float pAlpha, bool pSmooth)
+{
+	mAmbient	= pAmbient;
+	mDiffuse	= pDiffuse;
+	mSpecular	= pSpecular;
+	mShininess	= pShininess;
+	mAlpha		= pAlpha;
+	mSmooth		= pSmooth;
+}
+
+
+
+float GeometryBase::mDefaultBigOrientationThreshold = 1e-3f;
 LOG_CLASS_DEFINE(UI_GFX, GeometryBase);
 
 

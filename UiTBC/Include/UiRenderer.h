@@ -358,6 +358,7 @@ public:
 
 	virtual void SetShadowMode(Shadows pMode, ShadowHint pHint);
 	Shadows GetShadowMode();
+	void SetShadowUpdateIntensity(float pUpdateIntensity);
 	void SetShadowUpdateFrameDelay(unsigned pFrameDelay);
 
 	virtual void SetDepthWriteEnabled(bool pEnabled) = 0;
@@ -618,6 +619,7 @@ protected:
 
 	Shadows mShadowMode;
 	ShadowHint mShadowHint;
+	float mShadowUpdateIntensity;
 	unsigned mShadowUpdateFrameDelay;
 
 	PixelRect mClippingRect;

@@ -9,6 +9,7 @@
 #include "../../Cure/Include/GameTicker.h"
 #include "../../Lepra/Include/Thread.h"
 #include "../../UiCure/Include/UiLineGraph2d.h"
+#include "../../UiTBC/Include/UiFontManager.h"
 #include "../../UiTBC/Include/UiRenderer.h"
 #include "InputObserver.h"
 #include "ScreenPart.h"
@@ -99,6 +100,7 @@ protected:
 
 	virtual bool Initialize();
 	virtual bool Reinitialize();
+	virtual bool OpenSlave(GameClientSlaveManager* pSlave);
 	virtual bool OpenUiManager();
 	void Repair();
 	void UpdateSlaveLayout();
@@ -158,6 +160,7 @@ protected:
 	float mSlaveVSplit;
 	float mSlaveFade;
 	int mPerformanceAdjustmentTicks;
+	UiTbc::FontManager::FontId mDebugFontId;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 	std::unordered_set<Cure::GameObjectId> mLocalObjectSet;
 

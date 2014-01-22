@@ -7,6 +7,7 @@
 #include "Level.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
+#include "../Cure/Include/GameManager.h"
 
 
 
@@ -17,7 +18,8 @@ namespace Fire
 
 Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Cure::ContextForceListener* pGravelEmitter):
 	Parent(pResourceManager, pClassId, pUiManager, pGravelEmitter),
-	mPath(0)
+	mPath(0),
+	mLevelSpeed(1)
 {
 }
 
@@ -29,16 +31,17 @@ void Level::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("textures"), 0, 1);
-	if (lTag)
+	const TBC::ChunkyClass::Tag* lSpeedTag = FindTag(_T("driver"), 1, 0);
+	if (lSpeedTag)
 	{
-		mBackgroundName = lTag->mStringValueList[0];
+		mLevelSpeed = lSpeedTag->mFloatValueList[0];
 	}
-}
-
-const str& Level::GetBackgroundName() const
-{
-	return mBackgroundName;
+	const TBC::ChunkyClass::Tag* lGravityTag = FindTag(_T("behavior"), 3, 0);
+	if (lGravityTag)
+	{
+		Vector3DF lGravity(lGravityTag->mFloatValueList[0], lGravityTag->mFloatValueList[1], lGravityTag->mFloatValueList[2]);
+		mManager->GetGameManager()->GetPhysicsManager()->SetGravity(lGravity);
+	}
 }
 
 Cure::ContextPath* Level::QueryPath()
@@ -49,6 +52,11 @@ Cure::ContextPath* Level::QueryPath()
 		GetManager()->AddLocalObject(mPath);
 	}
 	return mPath;
+}
+
+float Level::GetLevelSpeed() const
+{
+	return mLevelSpeed;
 }
 
 

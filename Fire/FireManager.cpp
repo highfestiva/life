@@ -245,7 +245,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	(void)pWeapon;
 
 	double lFireDelay;
-	CURE_RTVAR_GET(lFireDelay, =, GetVariableScope(), RTVAR_GAME_FIREDELAY, 0.5);
+	CURE_RTVAR_GET(lFireDelay, =, GetVariableScope(), RTVAR_GAME_FIREDELAY, 1.0);
 	if (!mLevel->IsLoaded() || mFireDelayTimer.QueryTimeDiff() < lFireDelay)
 	{
 		return;
@@ -267,17 +267,20 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), _T("rocket"), mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	TransformationF t(mCameraTransform);
-	t.GetPosition().x += 0.4f;
-	t.GetPosition().y -= 0.7f;
+	t.GetPosition().x += 0.3f;
+	t.GetPosition().y += 1.0f;
+	t.GetPosition().z -= 0.1f;
 	t.GetOrientation().RotateAroundWorldX(-PIF/2);	// Tilt rocket.
 	const Vector3DF lDistance = lTargetPosition - t.GetPosition();
 	float lAcceleration;
 	float lTerminalVelocity;
+	float lGravityEffect;
 	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 140.0);
 	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 110.0);
-	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, Vector3DF(0,0,-9.82f));
-	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y);
-	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x);
+	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.0);
+	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, GetPhysicsManager()->GetGravity());
+	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x*lGravityEffect);
+	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y/lGravityEffect);
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
 }
@@ -289,7 +292,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	CURE_RTVAR_TRYGET(lExplosiveStrength, =(float), GetVariableScope(), "shot.explosivestrength", 1.0);
 	pStrength *= ::pow(lExplosiveStrength, 0.3333333f);
 
-	mCollisionSoundManager->OnCollision(pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
+	mCollisionSoundManager->OnCollision(pStrength*2, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
@@ -338,8 +341,13 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 				lHealth->SetValue(lValue);
 			}
 			x->second->ForceSend();
+			Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength, GetTimeManager()->GetNormalGameFrameTime());
 		}
-		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength);
+		BaseMachine* lMachine = dynamic_cast<BaseMachine*>(lObject);
+		if (lMachine && lMachine->GetPosition().GetDistanceSquared(pPosition) < 150*150)
+		{
+			lMachine->mPanicLevel = (lForce > 0)? 1.0f : 0.8f;
+		}
 	}
 }
 
@@ -578,9 +586,11 @@ Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 	}
 	else
 	{
-		Life::ExplodingMachine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (FireManager*)this);
+		BaseMachine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (FireManager*)this);
+		lMachine->mLevelSpeed = mLevel->GetLevelSpeed();
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
+		//lMachine->GetBurnEmitter()->SetFreeFlow();
 		lMachine->SetDisappearAfterDeathDelay(30.0);
 		lMachine->SetExplosiveStrength(0.25f);
 		lObject = lMachine;

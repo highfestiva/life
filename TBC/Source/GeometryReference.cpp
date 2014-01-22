@@ -42,13 +42,13 @@ const TransformationF& GeometryReference::GetOffsetTransformation() const
 void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)
 {
 	mOriginalOffset = pOffset;
-	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
+	SetTransformationChanged(true);
 }
 
 void GeometryReference::AddOffset(const Vector3DF& pOffset)
 {
 	mOriginalOffset.GetPosition() += pOffset;
-	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
+	SetTransformationChanged(true);
 }
 
 const TransformationF& GeometryReference::GetExtraOffsetTransformation() const
@@ -59,12 +59,12 @@ const TransformationF& GeometryReference::GetExtraOffsetTransformation() const
 void GeometryReference::SetExtraOffsetTransformation(const TransformationF& pOffset)
 {
 	mExtraOffset = pOffset;
-	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
+	SetTransformationChanged(true);
 }
 
 const TransformationF& GeometryReference::GetTransformation()
 {
-	if (!CheckFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED))
+	if (!CheckFlag(REF_TRANSFORMATION_CHANGED))
 	{
 /*#ifdef LEPRA_DEBUG
 		TransformationF lReturnTransformation = GetBaseTransformation();

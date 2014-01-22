@@ -111,44 +111,14 @@ public:
 	class BasicMaterialSettings
 	{
 	public:
-		BasicMaterialSettings() :
-			mAmbient(0,0,0),
-			mDiffuse(1,0,1),
-			mSpecular(0,0,0),
-			mShininess(0),
-			mAlpha(1),
-			mSmooth(true)
-		{
-		}
-
+		BasicMaterialSettings();
 		BasicMaterialSettings(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
 			const Vector3DF& pSpecular, float pShininess,
-			float pAlpha, bool pSmooth):
-			mAmbient(pAmbient),
-			mDiffuse(pDiffuse),
-			mSpecular(pSpecular),
-			mShininess(pShininess),
-			mAlpha(pAlpha),
-			mSmooth(pSmooth)
-		{
-		}
-
-		void SetColor(float pRed, float pGreen, float pBlue)
-		{
-			mDiffuse.Set(pRed, pGreen, pBlue);
-		}
-
+			float pAlpha, bool pSmooth);
+		void SetColor(float pRed, float pGreen, float pBlue);
 		void Set(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
 			const Vector3DF& pSpecular, float pShininess,
-			float pAlpha, bool pSmooth)
-		{
-			mAmbient	= pAmbient;
-			mDiffuse	= pDiffuse;
-			mSpecular	= pSpecular;
-			mShininess	= pShininess;
-			mAlpha		= pAlpha;
-			mSmooth		= pSmooth;
-		}
+			float pAlpha, bool pSmooth);
 
 		Vector3DF mAmbient;
 		Vector3DF mDiffuse;
@@ -179,15 +149,15 @@ public:
 
 	virtual PrimitiveType GetPrimitiveType() const = 0;
 
-	virtual unsigned int GetMaxVertexCount()   const = 0;
+	virtual unsigned int GetMaxVertexCount() const = 0;
 	        unsigned int GetMaxTriangleCount() const;
-	virtual unsigned int GetMaxIndexCount()    const = 0;
+	virtual unsigned int GetMaxIndexCount() const = 0;
 
-	virtual unsigned int GetVertexCount()   const = 0;
+	virtual unsigned int GetVertexCount() const = 0;
 	        unsigned int GetTriangleCount() const;
-	virtual unsigned int GetIndexCount()    const = 0;
-	virtual unsigned int GetUVSetCount()    const = 0;
-	unsigned int GetEdgeCount()     const;
+	virtual unsigned int GetIndexCount() const = 0;
+	virtual unsigned int GetUVSetCount() const = 0;
+	unsigned int GetEdgeCount() const;
 
 	// Sets the UV-set to use when generating tangent- and bitangent vectors.
 	// Default is 0. Tangents and bitangents are used with bump/normal mapping.
@@ -207,7 +177,7 @@ public:
 	// 0 <= pTriangle < GetNumTriangles().
 	// Given the triangle index (pTriangle), the function returns the three
 	// indices by setting the values in pIndices.
-	void GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3]);
+	void GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3]) const;
 
 	// Deletes the corresponding arrays and cleans stuff up.
 	virtual void ClearVertexNormalData();
@@ -234,20 +204,20 @@ public:
 	// indices are changed.
 	// Tangents are considered changed if either vertices of uv-coordinates
 	// are changed.
-	bool GetVertexDataChanged() { return CheckFlag(VERTEX_DATA_CHANGED); }
-	bool GetUVDataChanged()     { return CheckFlag(UV_DATA_CHANGED); }
-	bool GetColorDataChanged()  { return CheckFlag(COLOR_DATA_CHANGED); }
-	bool GetIndexDataChanged()  { return CheckFlag(INDEX_DATA_CHANGED); }
+	bool GetVertexDataChanged() const;
+	bool GetUVDataChanged() const;
+	bool GetColorDataChanged() const;
+	bool GetIndexDataChanged() const;
 
 	void SetVertexDataChanged(bool pChanged);
 	void SetUVDataChanged(bool pChanged);
 	void SetColorDataChanged(bool pChanged);
 	void SetIndexDataChanged(bool pChanged);
 
-	void SetVertexNormalsValid()  { SetFlag(VERTEX_NORMALS_VALID); }
-	void SetSurfaceNormalsValid() { SetFlag(SURFACE_NORMALS_VALID); }
+	void SetVertexNormalsValid();
+	void SetSurfaceNormalsValid();
 
-	virtual ColorFormat GetColorFormat() const { return COLOR_RGB; }
+	virtual ColorFormat GetColorFormat() const;
 
 	// This has been renamed from SetUserData(). These functions are used
 	// by the renderer to associate some arbitrary data with the geometry.
@@ -262,13 +232,19 @@ public:
 	void SetTransformation(const TransformationF& pTransformation);
 	const TransformationF& GetBaseTransformation() const;
 	virtual const TransformationF& GetTransformation();
-	bool GetTransformationChanged() const { return CheckFlag(TRANSFORMATION_CHANGED); }
-	void SetTransformationChanged(bool pTransformationChanged) { SetFlag(TRANSFORMATION_CHANGED, pTransformationChanged); }
+	bool GetTransformationChanged() const;
+	void SetTransformationChanged(bool pTransformationChanged);
+	bool GetBigOrientationChanged() const;
+	void SetBigOrientationChanged(bool pOrientationChanged);
+	const QuaternionF& GetLastBigOrientation() const;
+	float GetBigOrientationThreshold() const;
+	void SetBigOrientationThreshold(float pBigOrientationThreshold);
+	static void SetDefaultBigOrientationThreshold(float pBigOrientationThreshold);
 
 	void SetLastFrameVisible(unsigned int pLastFrameVisible);
 	unsigned int GetLastFrameVisible() const;
-	void SetAlwaysVisible(bool pAlwaysVisible) { SetFlag(ALWAYS_VISIBLE, pAlwaysVisible); }
-	bool GetAlwaysVisible() { return CheckFlag(ALWAYS_VISIBLE); }
+	void SetAlwaysVisible(bool pAlwaysVisible);
+	bool GetAlwaysVisible() const;
 
 	const BasicMaterialSettings& GetBasicMaterialSettings() const;
 	BasicMaterialSettings& GetBasicMaterialSettings();
@@ -302,7 +278,7 @@ public:
 	// better place to put this code.
 	void SetUVAnimator(BoneAnimator* pUVAnimator);
 	BoneAnimator* GetUVAnimator();
-	const TransformationF& GetUVTransform();
+	const TransformationF& GetUVTransform() const;
 
 	void SetSurfaceNormalData(const float* pSurfaceNormalData);
 	void SetVertexNormalData(const float* pVertexNormalData, unsigned int pNumVertices);
@@ -311,9 +287,9 @@ public:
 	void Copy(GeometryBase* pGeometry);
 	void ClearAll();
 
-	void SetSolidVolumeCheckValid(bool pValid)  { SetFlag(SOLID_VOLUME_VALID, pValid); }
-	void SetSingleObjectCheckValid(bool pValid) { SetFlag(SINGLE_OBJECT_VALID, pValid); }
-	void SetConvexVolumeCheckValid(bool pValid) { SetFlag(CONVEX_VOLUME_VALID, pValid); }
+	void SetSolidVolumeCheckValid(bool pValid);
+	void SetSingleObjectCheckValid(bool pValid);
+	void SetConvexVolumeCheckValid(bool pValid);
 
 	// Used by PortalManager.
 	void SetParentCell(PortalManager::Cell* pCell);
@@ -343,13 +319,14 @@ public:
 		REF_TRANSFORMATION_CHANGED	= (1 << 17),
 		IS_SIMPLE_OBJECT		= (1 << 18),
 		IS_TWO_SIDED			= (1 << 19),
+		BIG_ORIENTATION_CHANGED		= (1 << 20),
 	};
 
-	void SetFlag(Lepra::uint32 pFlag, bool pValue) { if (pValue) SetFlag(pFlag); else ClearFlag(pFlag); }
-	void SetFlag(Lepra::uint32 pFlag) { mFlags |= pFlag; }
-	void ClearFlag(Lepra::uint32 pFlag) { mFlags &= (~pFlag); }
-	bool CheckFlag(Lepra::uint32 pFlag) const { return (mFlags & pFlag) != 0; }
-	uint32 GetFlags() const { return mFlags; }
+	void SetFlag(Lepra::uint32 pFlag, bool pValue);
+	void SetFlag(Lepra::uint32 pFlag);
+	void ClearFlag(Lepra::uint32 pFlag);
+	bool CheckFlag(Lepra::uint32 pFlag) const;
+	uint32 GetFlags() const;
 
 private:
 	typedef std::list<Listener*> ListenerList;
@@ -360,7 +337,6 @@ private:
 
 	float mBoundingRadius;
 	float mScale;
-	float mXformUpdateFactor;
 
 	// Surface normals are primarily used when generating
 	// the shadow volume (used to perform stencil shadows).
@@ -387,6 +363,7 @@ private:
 	unsigned int mLastFrameVisible;
 
 	TransformationF mTransformation;
+	QuaternionF mBigOrientation;
 
 	BoneAnimator* mUVAnimator;
 
@@ -395,6 +372,9 @@ private:
 	RenderCallback mPostRenderCallback;
 
 	size_t mExtraData;
+
+	float mBigOrientationThreshold;
+	static float mDefaultBigOrientationThreshold;
 
 public:
 	LEPRA_DEBUG_CODE(str mName);

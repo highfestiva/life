@@ -295,7 +295,11 @@
     </ProjectReference>
     <ProjectReference Include="..\TBC\TBC10.vcxproj">
       <Project>{bdbf3606-e371-454b-b162-27fd92b67d50}</Project>
+      <Private>true</Private>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\freealut-1.1.0\admin\VisualStudioDotNET\alut\alut10.vcxproj">
       <Project>{07149bcb-be8a-4503-be18-815d64233116}</Project>

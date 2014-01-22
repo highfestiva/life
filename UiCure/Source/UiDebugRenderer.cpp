@@ -208,6 +208,12 @@ void DebugRenderer::DebugDrawPrimitive(Cure::ContextObject* pObject, DebugPrimit
 
 void DebugRenderer::RenderSpline(const GameUiManager* pUiManager, Spline* pSpline)
 {
+	bool lDebugJoints;
+	CURE_RTVAR_GET(lDebugJoints, =, GetSettings(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
+	if (!lDebugJoints)
+	{
+		return;
+	}
 	const float t = pSpline->GetCurrentInterpolationTime();
 	for (float x = 0; x < 1; x += 0.01f)
 	{

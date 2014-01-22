@@ -183,6 +183,10 @@ UiCure::GameUiManager* UiConsole::GetUiManager() const
 	return mUiManager;
 }
 
+UiTbc::FontManager::FontId UiConsole::GetFontId() const
+{
+	return mConsoleInput->GetFontId();
+}
 
 
 void UiConsole::InitGraphics()

@@ -40,6 +40,7 @@ public:
 	virtual BodyID CreateBox(bool pIsRoot, const TransformationF& pTransform, float32 pMass, const Vector3D<float32>& pSize, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0);
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody);
 	virtual bool DetachToDynamic(BodyID pStaticBody, float32 pMass);
+	virtual bool MakeStatic(BodyID pDynamicBody);
 
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,

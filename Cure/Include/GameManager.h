@@ -65,6 +65,7 @@ public:
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
 	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
 	virtual void DeleteContextObjectDelay(Cure::ContextObject* pObject, float pDelay);
+	virtual void AllowCollideWithSelfDelay(Cure::ContextObject* pObject, float pDelay, bool pAllow);
 	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	virtual ContextObject* CreateLogicHandler(const str& pType);
 	virtual Spawner* GetAvatarSpawner(Cure::GameObjectId pLevelId) const;

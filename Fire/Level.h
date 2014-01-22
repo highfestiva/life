@@ -31,12 +31,12 @@ public:
 	virtual ~Level();
 
 	virtual void OnLoaded();
-	const str& GetBackgroundName() const;
 	Cure::ContextPath* QueryPath();
+	float GetLevelSpeed() const;
 
 private:
-	str mBackgroundName;
 	Cure::ContextPath* mPath;
+	float mLevelSpeed;
 };
 
 

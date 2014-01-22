@@ -703,6 +703,8 @@ class GroupReader(DefaultMAReader):
 		for node in group:
 			if node.nodetype != "transform":
 				continue
+			material_literal = "material:"
+			mesh_literal = "mesh:"
 			for section in config.sections():
 				if section.startswith("body:") and re.search("^"+section[5:]+"$", node.getFullName()[1:]):
 					if not node.getName().startswith("phys_"):
@@ -713,8 +715,9 @@ class GroupReader(DefaultMAReader):
 					params = config.items(section)
 					for name, value in params:
 						node.fix_attribute(name, value)
-				# Graphics sections (such as adding shader settings on top of Maya's).
-				elif section.startswith("material:") and re.search("^"+section[9:]+"$", node.getFullName()[1:]):
+				# Graphics sections (such as adding shader settings on top of Maya's, or shadow update intensity).
+				elif (section.startswith(material_literal) and re.search("^"+section[len(material_literal):]+"$", node.getFullName()[1:])) or \
+				     (section.startswith(mesh_literal) and re.search("^"+section[len(mesh_literal):]+"$", node.getFullName()[1:])):
 					if not node.getName().startswith("m_"):
 						allApplied = False
 						print("Error: node '%s' matched with config rule '%s' must be prefixed with 'm_'" %
@@ -763,7 +766,7 @@ class GroupReader(DefaultMAReader):
 					return ok
 				required = [("type", lambda x: type(x) == str),
 					    ("strength", lambda x: x > 0 and x < 30000),
-					    ("max_velocity", lambda x: len(x)==2 and x[0]>=-300 and x[0]<=300 and x[1]>=-300 and x[1]<=300),
+					    ("max_velocity", lambda x: len(x)==2 and x[0]>=-3000 and x[0]<=3000 and x[1]>=-3000 and x[1]<=3000),
 					    ("controller_index", lambda x: x >= 0 and x < 40),
 					    ("connected_to", check_connected_to)]
 				for name, engine_check in required:
@@ -935,9 +938,7 @@ class GroupReader(DefaultMAReader):
 			if section.startswith("config:") or section.startswith("trigger:"):
 				used_sections[section] = True
 		required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
-		optional = [("two_sided", lambda x: x == None or type(x) == bool),
-			    ("casts_shadows", lambda x: x == None or type(x) == bool),
-			    ("center_phys", lambda x: x == None or type(x) == bool or x == "ignore_baseline"),
+		optional = [("center_phys", lambda x: x == None or type(x) == bool or x == "ignore_baseline"),
 			    ("guide_mode", lambda x: x == None or x in ("never", "external", "always"))]
 		for name, config_check in required+optional:
 			ok = config_check(self.config.get(name))

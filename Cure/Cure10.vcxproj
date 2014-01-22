@@ -331,12 +331,6 @@
     <None Include="Include\DelayedDeleter.inl" />
     <None Include="Include\ResourceManager.inl" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TBC\TBC10.vcxproj">
-      <Project>{bdbf3606-e371-454b-b162-27fd92b67d50}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

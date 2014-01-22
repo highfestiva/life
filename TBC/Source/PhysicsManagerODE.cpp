@@ -389,6 +389,24 @@ bool PhysicsManagerODE::DetachToDynamic(BodyID pStaticBody, float32 pMass)
 	return true;
 }
 
+bool PhysicsManagerODE::MakeStatic(BodyID pDynamicBody)
+{
+	ObjectTable::iterator x = mObjectTable.find((Object*)pDynamicBody);
+	if (x == mObjectTable.end())
+	{
+		deb_assert(false);
+		return (false);
+	}
+	Object* lDynamicObject = *x;
+	if (lDynamicObject->mBodyID)
+	{
+		::dGeomSetBody(lDynamicObject->mGeomID, 0);
+		::dBodyDestroy(lDynamicObject->mBodyID);
+		lDynamicObject->mBodyID = 0;
+	}
+	return true;
+}
+
 PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned pVertexCount,
 	const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,
 	const TransformationF& pTransform, float32 pFriction, float32 pBounce,
