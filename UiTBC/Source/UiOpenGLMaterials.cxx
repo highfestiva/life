@@ -86,7 +86,7 @@ void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSett
 	::glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lSpecular);
 	::glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMaterial.mShininess*0.5f);
 	::glShadeModel(pMaterial.mSmooth ? GL_SMOOTH : GL_FLAT);
-	OGL_ASSERT();
+	//OGL_ASSERT();
 
 	//pRenderer->SetGlobalMaterialReflectance(pMaterial.mDiffuse.x, pMaterial.mDiffuse.y, pMaterial.mDiffuse.z, pMaterial.mShininess);
 

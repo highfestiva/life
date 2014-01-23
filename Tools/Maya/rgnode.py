@@ -45,6 +45,47 @@ def adjustnode(node):
 		ps = pm.decompose()[2]
 		pos = mat4.scaling(ps) * vec4(*t)
 		return pos, q
+	def get_final_mesh_transform(self, physrootpos, bodies, verbose):
+		def _getparentphys(m, bodies):
+			ph = None
+			mesh = m
+			while mesh and not ph:
+				for phys in bodies:
+					meshes = list(filter(None, [ch == mesh for ch in phys.childmeshes]))
+					if len(meshes) == 1:
+						if not ph:
+							ph = phys
+						else:
+							print("Error: both phys %s and %s has mesh refs to %s." % (ph.getFullName(), phys.getFullName(), mesh.getFullName()))
+							print(ph.childmeshes, meshes)
+							sys.exit(3)
+					elif len(meshes) > 1:
+						print("Error: phys %s has multiple mesh children refs to %s." % (phys.getFullName(), mesh.getFullName()))
+						sys.exit(3)
+				mesh = mesh.getParent()
+			if not ph:
+				print("Warning: mesh %s is not attached to any physics object!" % m.getFullName())
+			return ph
+		phys = _getparentphys(self, bodies)
+		if not phys:
+			return None,None,None,None
+		phys.writecount = 1
+		tm = self.get_world_transform()
+		tp = phys.gettransformto(None, "actual", getparent=lambda n: n.getParent())
+		tmt, tmr, mscale = tm.decompose()
+		tpt, tpr, _ = tp.decompose()
+		q = quat(tpr.inverse()).normalize()
+		p = tmt-tpt
+		p = q.toMat4() * vec4(p[:])
+		if verbose:
+			print(self.getName(), "has displacement", p, "compared to", phys.getName(), tmt, tpt)
+		q = quat(tpr.inverse() * tmr).normalize()
+		physidx = bodies.index(phys)
+		if physidx == 0 and physrootpos:
+			p -= physrootpos
+		p = p[0:3]
+		mscale = mscale.length() / (1+1+1)**.5
+		return phys,physidx,q,p,mscale
 	def get_world_pivot(self):
 		return vec4(*self.get_world_pivot_transform().decompose()[0])
 	def get_world_pivot_transform(self):
@@ -231,6 +272,7 @@ def adjustnode(node):
 	node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
 	node.get_final_local_transform = types.MethodType(get_final_local_transform, node)
 	node.get_world_translation = types.MethodType(get_world_translation, node)
+	node.get_final_mesh_transform = types.MethodType(get_final_mesh_transform, node)
 	node.get_world_pivot = types.MethodType(get_world_pivot, node)
 	node.get_world_pivot_transform = types.MethodType(get_world_pivot_transform, node)
 	node.get_world_transform = types.MethodType(get_world_transform, node)

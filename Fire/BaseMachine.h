@@ -23,6 +23,7 @@ public:
 	BaseMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher);
 	virtual ~BaseMachine();
 
+	void AddPanic(float pPanic);
 	float mLevelSpeed;
 	float mPanicLevel;
 

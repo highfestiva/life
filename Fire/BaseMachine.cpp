@@ -37,6 +37,13 @@ BaseMachine::~BaseMachine()
 
 
 
+void BaseMachine::AddPanic(float pPanic)
+{
+	mPanicLevel = Math::Clamp(mPanicLevel+pPanic, 0.0f, 1.1f);
+}
+
+
+
 void BaseMachine::OnAlarm(int pAlarmId, void* pExtraData)
 {
 	Parent::OnAlarm(pAlarmId, pExtraData);
@@ -62,6 +69,7 @@ void BaseMachine::OnDie()
 	}
 
 	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this);
+	ShrinkMeshBigOrientationThreshold(1e-3f);
 	Parent::OnDie();
 	mManager->AddAlarmCallback(this, START_SINKING_ID, DIE_SINK_DELAY, 0);
 }

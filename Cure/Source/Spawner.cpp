@@ -22,6 +22,7 @@ Spawner::Spawner(ContextManager* pManager):
 	mSpawnPointIndex(0)
 {
 	pManager->AddLocalObject(this);
+	pManager->EnableTickCallback(this);
 	mManager->AddAlarmCallback(this, 0, 0.5f, 0);	// Create.
 	mManager->AddAlarmCallback(this, 1, 0.6f, 0);	// Destroy.
 	mManager->AddAlarmCallback(this, 2, 0.7f, 0);	// Recreate.
@@ -57,7 +58,64 @@ TransformationF Spawner::GetSpawnPoint() const
 	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF(), 0, lInitialVelocity);
 }
 
+void Spawner::EaseDown(TBC::PhysicsManager* pPhysicsManager, ContextObject* pObject, const Vector3DF* pStartPosition)
+{
+	const Cure::ObjectPositionalData* lPositionalData = 0;
+	pObject->UpdateFullPosition(lPositionalData);
+	Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
+	if (pStartPosition)
+	{
+		lNewPositionalData->mPosition.mTransformation.SetPosition(*pStartPosition);
+	}
+	lNewPositionalData->mPosition.mAcceleration = Vector3DF();
+	lNewPositionalData->mPosition.mVelocity = Vector3DF();
+	lNewPositionalData->mPosition.mAngularAcceleration = Vector3DF();
+	lNewPositionalData->mPosition.mAngularVelocity = Vector3DF();
+	bool lHasTouchedGround = false;
+	float lStep = 1.0f;
+	for (int x = 0; x < 20; ++x)
+	{
+		pObject->SetFullPosition(*lNewPositionalData, 0);
+		const bool lIsColliding = pPhysicsManager->IsColliding(pObject->GetInstanceId());
+		//mLog.Infof(_T("%s at step %f"), lIsColliding? _T("Is colliding") : _T("Not colliding"), lStep);
+		if (lStep < 0.0001f && lIsColliding)
+		{
+			break;
+		}
+		lNewPositionalData->mPosition.mTransformation.GetPosition().z += lIsColliding? +lStep : -lStep;
+		lHasTouchedGround |= lIsColliding;
+		if (lHasTouchedGround)
+		{
+			lStep /= 2;
+		}
+	}
+	pObject->SetFullPosition(*lNewPositionalData, 0);
+	pObject->SetPositionFinalized();
+	delete lNewPositionalData;
+}
 
+
+
+void Spawner::OnTick()
+{
+	Parent::OnTick();
+
+	for (GameObjectIdArray::iterator x = mEaseDownObjects.begin(); x != mEaseDownObjects.end(); ++x)
+	{
+		ContextObject* lObject = GetManager()->GetObject(*x, true);
+		if (!lObject)
+		{
+			mEaseDownObjects.erase(x);
+			break;
+		}
+		if (lObject->IsLoaded())
+		{
+			EaseDown(GetManager()->GetGameManager()->GetPhysicsManager(), lObject, 0);
+			mEaseDownObjects.erase(x);
+			break;
+		}
+	}
+}
 
 void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 {
@@ -151,6 +209,10 @@ void Spawner::Create()
 	{
 		ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		AddChild(lObject);
+		if (mSpawner->IsEaseDown())
+		{
+			mEaseDownObjects.push_back(lObject->GetInstanceId());
+		}
 		PlaceObject(lObject, mSpawnPointIndex);
 		if (++mSpawnPointIndex >= GetSpawner()->GetSpawnPointCount())
 		{

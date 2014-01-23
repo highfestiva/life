@@ -1730,37 +1730,7 @@ void DownwashManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pS
 	mHitGroundFrameCount = STILL_FRAMES_UNTIL_CAM_PANS;
 	mIsHitThisFrame = true;
 
-	const Cure::ObjectPositionalData* lPositionalData = 0;
-	pObject->UpdateFullPosition(lPositionalData);
-	Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
-	if (pStartPosition)
-	{
-		lNewPositionalData->mPosition.mTransformation.SetPosition(*pStartPosition);
-	}
-	lNewPositionalData->mPosition.mAcceleration = Vector3DF();
-	lNewPositionalData->mPosition.mVelocity = Vector3DF();
-	lNewPositionalData->mPosition.mAngularAcceleration = Vector3DF();
-	lNewPositionalData->mPosition.mAngularVelocity = Vector3DF();
-	bool lHasTouchedGround = false;
-	float lStep = 1.0f;
-	for (int x = 0; x < 100; ++x)
-	{
-		pObject->SetFullPosition(*lNewPositionalData, 0);
-		const bool lIsColliding = GetPhysicsManager()->IsColliding(pObject->GetInstanceId());
-		//mLog.Infof(_T("%s at step %f"), lIsColliding? _T("Is colliding") : _T("Not colliding"), lStep);
-		if (lStep < 0.0001f && lIsColliding)
-		{
-			break;
-		}
-		lNewPositionalData->mPosition.mTransformation.GetPosition().z += lIsColliding? +lStep : -lStep;
-		lHasTouchedGround |= lIsColliding;
-		if (lHasTouchedGround)
-		{
-			lStep /= 2;
-		}
-	}
-	pObject->SetFullPosition(*lNewPositionalData, 0);
-	delete lNewPositionalData;
+	Cure::Spawner::EaseDown(GetPhysicsManager(), pObject, pStartPosition);
 }
 
 TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const

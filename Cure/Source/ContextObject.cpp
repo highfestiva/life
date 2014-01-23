@@ -475,6 +475,10 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 	ForceSetFullPosition(pPositionalData);
 }
 
+void ContextObject::SetPositionFinalized()
+{
+}
+
 void ContextObject::SetInitialTransform(const TransformationF& pTransformation)
 {
 	//const QuaternionF& q = pTransformation.GetOrientation();

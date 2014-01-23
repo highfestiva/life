@@ -3,6 +3,9 @@
 
 
 from vec3 import *
+from vec4 import *
+from mat4 import *
+from quat import *
 import sys
 
 
@@ -43,6 +46,27 @@ def _uvdiff_sqr(t1, t2):
 	dx = t1[0]-t2[0]
 	dy = t1[1]-t2[1]
 	return dx*dx + dy*dy
+
+
+def scaleverts(group):
+	for node in group:
+		vtx = node.get_fixed_attribute("rgvtx", optional=True)
+		if vtx:
+			for p in node.getparents():
+				if not p.shape:
+					p.shape = node
+			mnode = node.getParent()
+			meshroot = None
+			m_tr = mnode.gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
+			if not m_tr:
+				print("Mesh crash!")
+			m_s = m_tr.decompose()[2]
+			transform = mat4.scaling(m_s)
+			vp = vec4(0,0,0,1)
+			for idx in range(0, len(vtx), 3):
+				vp[:3] = vtx[idx:idx+3]
+				vp = transform*vp
+				vtx[idx:idx+3] = vp[:3]
 
 
 def splitverts_group(group, verbose=False):
@@ -182,3 +206,21 @@ def splitverts(vs, ts, ns, uvs):
 			except ZeroDivisionError:
 				pass
 	return vs, ts, normals, textureuvs
+
+
+def centerverts(group, bodies, verbose):
+	for shape in group:
+		vtx = shape.get_fixed_attribute("rgvtx", optional=True)
+		if not vtx:
+			continue
+		mesh = shape.getParent();
+		if not mesh.get_fixed_attribute("center_vertices", optional=True):
+			continue
+		# Center around physics position, by removing translational offset for each vertex.
+		phys,physidx,q,p,s = mesh.get_final_mesh_transform(None, bodies, verbose)
+		p = quat(q).rotateVec(p)
+		if verbose:
+			print("Offsetting %s's %i vertices around %s, moving them %s." % (mesh.getName(), len(vtx)/3, phys.getName(), str(p)))
+		for idx in range(0, len(vtx), 3):
+			v = vec3(vtx[idx:idx+3]) + p
+			vtx[idx:idx+3] = v[:3]

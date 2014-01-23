@@ -97,6 +97,8 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, 0.03f, 0.2f);
 
+	TBC::GeometryBase::SetDefaultFlags(TBC::GeometryBase::EXCLUDE_CULLING);	// Save some math during rendering, as most objects are on stage in this game.
+
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIREDELAY, 0.5);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
@@ -290,7 +292,8 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	pStrength *= 1.2f;
 	float lExplosiveStrength;
 	CURE_RTVAR_TRYGET(lExplosiveStrength, =(float), GetVariableScope(), "shot.explosivestrength", 1.0);
-	pStrength *= ::pow(lExplosiveStrength, 0.3333333f);
+	pStrength *= lExplosiveStrength;
+	const float lCubicStrength = 4*(::pow(pStrength+1, 1/3.0f) - 1);	// Reduce by 3D volume. Explosion spreads in all directions.
 
 	mCollisionSoundManager->OnCollision(pStrength*2, pPosition, pExplosiveGeometry, _T("explosion"));
 
@@ -299,14 +302,14 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
-	const int lParticles = Math::Lerp(4, 8, pStrength * 0.3f);
+	const int lParticles = Math::Lerp(4, 8, lCubicStrength * 0.3f);
 	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
 	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
 	Vector3DF lSpritesPosition(pPosition-pPosition.GetNormalized(4.0f));	// We just move it closer to make it less likely to be cut off by ground.
-	lParticleRenderer->CreateExplosion(lSpritesPosition, pStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
+	lParticleRenderer->CreateExplosion(lSpritesPosition, lCubicStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
 
 	// Slowmo check.
 	bool lNormalDeath = true;
@@ -346,7 +349,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 		BaseMachine* lMachine = dynamic_cast<BaseMachine*>(lObject);
 		if (lMachine && lMachine->GetPosition().GetDistanceSquared(pPosition) < 150*150)
 		{
-			lMachine->mPanicLevel = (lForce > 0)? 1.0f : 0.8f;
+			lMachine->AddPanic((lForce > 0.1f)? 1.0f : 0.45f);
 		}
 	}
 }

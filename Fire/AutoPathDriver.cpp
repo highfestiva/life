@@ -66,9 +66,13 @@ void AutoPathDriver::OnTick()
 	const float lSteeringAngle = lWantedDirection.GetAngle(lVehicleDirection);
 	lVehicle->SetEnginePower(1, lSteeringAngle);
 	const float lBrakeLimit = Math::Lerp(10.0f, 50.0f, lVehicle->mPanicLevel);
-	const float lVelocityBrakeFactor = Math::Clamp(lVehicle->GetVelocity().GetLength(), 0.0f, lBrakeLimit) / lBrakeLimit;
-	const float lBrakePower = std::max(0.0f, (std::abs(lSteeringAngle)-0.5f)*0.5f*lVelocityBrakeFactor);
-	lVehicle->SetEnginePower(2, lBrakePower);
+	const float lSpeed = lVehicle->GetVelocity().GetLength();
+	if (lSpeed > lBrakeLimit/2)
+	{
+		float lVelocityBrakeFactor = Math::Clamp(lSpeed, 0.0f, lBrakeLimit) / lBrakeLimit;
+		const float lBrakePower = std::max(0.0f, (std::abs(lSteeringAngle)-0.5f)*0.5f*lVelocityBrakeFactor);
+		lVehicle->SetEnginePower(2, lBrakePower);
+	}
 
 	if (lVehicle->GetVelocity().GetLengthSquared() < 1.0f)
 	{

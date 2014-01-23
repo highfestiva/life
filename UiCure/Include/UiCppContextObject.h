@@ -37,6 +37,7 @@ public:
 	void EnablePixelShader(bool pEnable);
 	void EnableMeshMove(bool pEnable);
 	void EnableMeshSlide(bool pEnable);
+	void SetPositionFinalized();
 
 	virtual void StartLoading();
 
@@ -44,6 +45,7 @@ public:
 	virtual void UiMove();
 	void ActivateLerp();
 	void SetSinking(float pSinkSpeed);
+	void ShrinkMeshBigOrientationThreshold(float pThreshold);
 
 	TBC::GeometryBase* GetMesh(int pIndex) const;
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;

@@ -275,7 +275,7 @@ bool GeometryBase::Edge::IsSameEdge(int pVertexIndex1,
 
 
 GeometryBase::GeometryBase() :
-	mFlags(0),
+	mFlags(mDefaultFlags),
 	mBoundingRadius(0),
 	mScale(1),
 	mSurfaceNormalData(0),
@@ -351,14 +351,14 @@ bool GeometryBase::IsGeometryReference()
 	return false;
 }
 
-void GeometryBase::SetIsSimpleObject()
+void GeometryBase::SetExcludeCulling()
 {
-	SetFlag(IS_SIMPLE_OBJECT);
+	SetFlag(EXCLUDE_CULLING);
 }
 
-bool GeometryBase::IsSimpleObject() const
+bool GeometryBase::IsExcludeCulling() const
 {
-	return CheckFlag(IS_SIMPLE_OBJECT);
+	return CheckFlag(EXCLUDE_CULLING);
 }
 
 float GeometryBase::GetScale() const
@@ -1623,6 +1623,11 @@ uint32 GeometryBase::GetFlags() const
 	return mFlags;
 }
 
+void GeometryBase::SetDefaultFlags(Lepra::uint32 pFlags)
+{
+	mDefaultFlags = pFlags;
+}
+
 
 
 GeometryBase::BasicMaterialSettings::BasicMaterialSettings():
@@ -1666,6 +1671,7 @@ void GeometryBase::BasicMaterialSettings::Set(const Vector3DF& pAmbient, const V
 
 
 
+Lepra::uint32 GeometryBase::mDefaultFlags = 0;
 float GeometryBase::mDefaultBigOrientationThreshold = 1e-3f;
 LOG_CLASS_DEFINE(UI_GFX, GeometryBase);
 

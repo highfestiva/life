@@ -95,6 +95,12 @@ void CppContextObject::EnableMeshSlide(bool pEnable)
 	mEnableMeshSlide = pEnable;
 }
 
+void CppContextObject::SetPositionFinalized()
+{
+	Parent::SetPositionFinalized();
+	mLerpMode = LERP_STOP;
+}
+
 
 
 void CppContextObject::StartLoading()
@@ -254,6 +260,23 @@ void CppContextObject::ActivateLerp()
 void CppContextObject::SetSinking(float pSinkSpeed)
 {
 	mSinkSpeed = pSinkSpeed;
+}
+
+void CppContextObject::ShrinkMeshBigOrientationThreshold(float pThreshold)
+{
+	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+	{
+		UserGeometryReferenceResource* lResource = mMeshResourceArray[x];
+		if (lResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			continue;
+		}
+		TBC::GeometryBase* lGeometry = lResource->GetRamData();
+		if (lGeometry->GetBigOrientationThreshold() > pThreshold)
+		{
+			lGeometry->SetBigOrientationThreshold(pThreshold);
+		}
+	}
 }
 
 

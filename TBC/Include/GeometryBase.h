@@ -139,8 +139,8 @@ public:
 	void SetPostRenderCallback(const RenderCallback& pCallback);
 
 	virtual bool IsGeometryReference();
-	void SetIsSimpleObject();
-	bool IsSimpleObject() const;
+	void SetExcludeCulling();
+	bool IsExcludeCulling() const;
 	float GetScale() const;
 	void SetScale(float pScale);
 
@@ -317,9 +317,9 @@ public:
 		ALWAYS_VISIBLE			= (1 << 15),
 		TRANSFORMATION_CHANGED		= (1 << 16),
 		REF_TRANSFORMATION_CHANGED	= (1 << 17),
-		IS_SIMPLE_OBJECT		= (1 << 18),
-		IS_TWO_SIDED			= (1 << 19),
-		BIG_ORIENTATION_CHANGED		= (1 << 20),
+		BIG_ORIENTATION_CHANGED		= (1 << 18),
+		EXCLUDE_CULLING			= (1 << 19),
+		IS_TWO_SIDED			= (1 << 20),
 	};
 
 	void SetFlag(Lepra::uint32 pFlag, bool pValue);
@@ -327,6 +327,7 @@ public:
 	void ClearFlag(Lepra::uint32 pFlag);
 	bool CheckFlag(Lepra::uint32 pFlag) const;
 	uint32 GetFlags() const;
+	static void SetDefaultFlags(Lepra::uint32 pFlags);
 
 private:
 	typedef std::list<Listener*> ListenerList;
@@ -374,6 +375,8 @@ private:
 	size_t mExtraData;
 
 	float mBigOrientationThreshold;
+
+	static Lepra::uint32 mDefaultFlags;
 	static float mDefaultBigOrientationThreshold;
 
 public:

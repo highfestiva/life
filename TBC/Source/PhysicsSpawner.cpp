@@ -19,7 +19,9 @@ namespace TBC
 
 
 PhysicsSpawner::PhysicsSpawner():
-	mSpawnerType(SPAWNER_INVALID)
+	mSpawnerType(SPAWNER_INVALID),
+	mNumber(0),
+	mIsEaseDown(false)
 {
 }
 
@@ -120,6 +122,11 @@ const str PhysicsSpawner::GetSpawnObject(float pProbabilityThreshold) const
 	return str();
 }
 
+bool PhysicsSpawner::IsEaseDown() const
+{
+	return mIsEaseDown;
+}
+
 
 
 unsigned PhysicsSpawner::GetChunkySize() const
@@ -136,6 +143,7 @@ unsigned PhysicsSpawner::GetChunkySize() const
 		sizeof(float) +
 		sizeof(float) * mIntervalArray.size() +
 		sizeof(float) * mSpawnObjectArray.size() +
+		sizeof(uint32) +	// bool IsEaseDown
 		lStringSize));
 }
 
@@ -165,6 +173,7 @@ void PhysicsSpawner::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 		i += lStringRawLength / sizeof(lData[0]);
 		lData[i++] = Endian::HostToBigF(x->mProbability);
 	}
+	lData[i++] = Endian::HostToBig(mIsEaseDown? 1 : 0);
 }
 
 void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
@@ -201,6 +210,7 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 		const float lProbability = Endian::BigToHostF(lData[i++]);
 		mSpawnObjectArray.push_back(SpawnObject(strutil::Encode(lSpawnObject), lProbability));
 	}
+	mIsEaseDown = Endian::BigToHost(lData[i++])? true : false;
 }
 
 

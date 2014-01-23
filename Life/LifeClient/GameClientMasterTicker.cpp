@@ -1270,13 +1270,13 @@ void GameClientMasterTicker::DrawDebugData() const
 	double lLoad;
 	CURE_RTVAR_GET(lLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
 	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), 100 * lLoad + 0.5f);
-	int w = 80;
+	int w = 100;
 	int h = 37;
 	bool lShowPerformanceCounters;
 	CURE_RTVAR_GET(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
 	if (lShowPerformanceCounters)
 	{
-		w = 120;
+		w = 130;
 		double lUpBandwidth = 0;
 		double lDownBandwidth = 0;
 		for (int x = 0; x < 4; ++x)

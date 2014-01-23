@@ -26,8 +26,10 @@ public:
 
 	void PlaceObject(ContextObject* pObject, int pSpawnPointIndex);
 	TransformationF GetSpawnPoint() const;
+	static void EaseDown(TBC::PhysicsManager* pPhysicsManager, ContextObject* pObject, const Vector3DF* pStartPosition);
 
-private:
+protected:
+	virtual void OnTick();
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	void OnCreate(float pCreateInterval, bool pHasRecreate);
 	void OnDestroy(float pDestroyInterval);
@@ -35,8 +37,12 @@ private:
 	void Create();
 	virtual int GetSpawnCount() const;
 
+private:
+	typedef std::vector<GameObjectId> GameObjectIdArray;
+
 	StopWatch mRecreateTimer;
 	int mSpawnPointIndex;
+	GameObjectIdArray mEaseDownObjects;
 
 	LOG_CLASS_DECLARE();
 };

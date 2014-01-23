@@ -83,10 +83,15 @@ void TimeManager::Tick()
 
 	const float lTargetPeriod = 1/(float)mTargetFrameRate;
 	mPhysicsFrameTime = lTargetPeriod;
-	while (mPhysicsFrameTime*2 < mAverageFrameTime)	// Half framerate if we're on a slow platform, reiterate.
+	bool lAllowFpsDegradation;
+	CURE_RTVAR_GET(lAllowFpsDegradation, =, Cure::GetSettings(), RTVAR_NETPHYS_ALLOWFPSDEGRADATION, true);
+	if (lAllowFpsDegradation)
 	{
-		mPhysicsFrameTime *= 2;
-		log_adebug("Halfing physics frame rate!");
+		while (mPhysicsFrameTime*2 < mAverageFrameTime)	// Half framerate if we're on a slow platform (multiplayer over network), reiterate.
+		{
+			mPhysicsFrameTime *= 2;
+			log_adebug("Halfing physics frame rate!");
+		}
 	}
 	mPhysicsStepCount = (int)::floor(mTickTimeModulo / mPhysicsFrameTime);
 	mPhysicsFrameTime *= mRealTimeRatio;

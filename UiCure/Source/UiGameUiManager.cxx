@@ -626,7 +626,7 @@ void GameUiManager::UpdateSettings()
 	CURE_RTVAR_GET(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	CURE_RTVAR_GET(lClipFar, =, mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
 	CURE_RTVAR_GET(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Volumes"));
-	CURE_RTVAR_GET(lShadowDeviation, =, mVariableScope, RTVAR_UI_3D_SHADOWDEVIATION, 1e-3);
+	CURE_RTVAR_GET(lShadowDeviation, =, mVariableScope, RTVAR_UI_3D_SHADOWDEVIATION, 0.0);
 
 	mRenderer->SetLightsEnabled(lEnableLights);
 	mRenderer->SetAmbientLight((float)lAmbientRed, (float)lAmbientGreen, (float)lAmbientBlue);

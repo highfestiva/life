@@ -22,9 +22,11 @@ namespace UiTbc
 
 
 #ifdef LEPRA_DEBUG
-#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
+#define OGL_ASSERT()		{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
+#define OGL_FAST_ASSERT()
 #else // !Debug
 #define OGL_ASSERT()
+#define OGL_FAST_ASSERT()
 #endif // Debug / !Debug
 
 
@@ -106,7 +108,7 @@ OpenGLRenderer::~OpenGLRenderer()
 
 void OpenGLRenderer::Clear(unsigned pClearFlags)
 {
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 
 	mGLClearMask = 0;
 
@@ -143,7 +145,7 @@ void OpenGLRenderer::Clear(unsigned pClearFlags)
 void OpenGLRenderer::SetClearColor(const Color& pColor)
 {
 	::glClearColor(pColor.GetRf(), pColor.GetGf(), pColor.GetBf(), 1.0f);
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 bool OpenGLRenderer::IsPixelShadersEnabled() const
@@ -155,7 +157,7 @@ void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 {
 	Parent::SetViewFrustum(pFOVAngle, pNear, pFar);
 	Perspective(pFOVAngle, GetAspectRatio(), pNear, pFar);
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::SetShadowMode(Shadows pShadowMode, ShadowHint pHint)
@@ -169,7 +171,7 @@ void OpenGLRenderer::SetDepthWriteEnabled(bool pEnabled)
 		glDepthMask(GL_TRUE);
 	else
 		glDepthMask(GL_FALSE);
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::SetDepthTestEnabled(bool pEnabled)
@@ -178,7 +180,7 @@ void OpenGLRenderer::SetDepthTestEnabled(bool pEnabled)
 		glEnable(GL_DEPTH_TEST);
 	else
 		glDisable(GL_DEPTH_TEST);
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::SetLightsEnabled(bool pEnabled)
@@ -220,7 +222,7 @@ void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
 
 	float lAmbientLight[] = {pRed, pGreen, pBlue, 1.0f};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
@@ -233,21 +235,21 @@ void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
 		lAmbientLight[3] = 1.0f;
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::DoSetClippingRect(const PixelRect& pRect)
 {
 	::glScissor(pRect.mLeft, GetScreen()->GetActualHeight() - pRect.mBottom, pRect.GetWidth(), pRect.GetHeight());
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::DoSetViewport(const PixelRect& pViewport)
 {
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 	::glViewport(pViewport.mLeft, GetScreen()->GetActualHeight() - pViewport.mBottom, 
 		pViewport.GetWidth(), pViewport.GetHeight());
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 int OpenGLRenderer::ReleaseShadowMap(int pShadowMapID)
@@ -258,7 +260,7 @@ int OpenGLRenderer::ReleaseShadowMap(int pShadowMapID)
 		GLuint lShadowMapID = (GLuint)pShadowMapID;
 		glDeleteTextures(1, &lShadowMapID);
 	}
-	//OGL_ASSERT();
+	//OGL_FAST_ASSERT();
 	return mTMapIDManager.GetInvalidId();
 }
 
@@ -272,7 +274,7 @@ Renderer::LightID OpenGLRenderer::AddDirectionalLight(LightHint pHint,
 {
 	LightID lLightID = Parent::AddDirectionalLight(pHint, pDir, pColor, pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 	return lLightID;
 }
 
@@ -284,7 +286,7 @@ Renderer::LightID OpenGLRenderer::AddPointLight(LightHint pHint,
 {
 	LightID lLightID = Parent::AddPointLight(pHint, pPos, pColor, pLightRadius, pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 	return lLightID;
 }
 
@@ -306,7 +308,7 @@ Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint pHint,
 		pLightRadius, 
 		pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 	return lLightID;
 }
 
@@ -375,7 +377,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData* pLight)
 	glLightfv(lLight, GL_AMBIENT, lBlack);
 	glLightfv(lLight, GL_DIFFUSE, pLight->mColor);
 	glLightfv(lLight, GL_SPECULAR, lBlack);
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::RemoveLight(LightID pLightID)
@@ -383,7 +385,7 @@ void OpenGLRenderer::RemoveLight(LightID pLightID)
 	Parent::RemoveLight(pLightID);
 	GLenum lLight = (int)pLightID;
 	glDisable(GL_LIGHT0+lLight);
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::EnableAllLights(bool pEnable)
@@ -427,7 +429,7 @@ void OpenGLRenderer::SetLightPosition(LightID pLightID, const Vector3DF& pPos)
 		GLenum lLight = GL_LIGHT0 + lLightIndex;
 		glLightfv(lLight, GL_POSITION, lPos);
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 
@@ -464,7 +466,7 @@ void OpenGLRenderer::SetLightDirection(LightID pLightID, const Vector3DF& pDir)
 			glLightfv(lLight, GL_SPOT_DIRECTION, lVector);
 		}
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 Renderer::TextureID OpenGLRenderer::AddTexture(Texture* pTexture)
@@ -521,7 +523,7 @@ void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, floa
 			glLightfv(lLight, GL_AMBIENT, lAmbient);
 		}
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 Renderer::TextureData* OpenGLRenderer::CreateTextureData(TextureID pTextureID)
@@ -554,7 +556,7 @@ const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pU
 
 void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* pTexture)
 {
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 	deb_assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
 
 	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
@@ -567,7 +569,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	}
 
 	glBindTexture(GL_TEXTURE_2D, pTextureData->mTMapID[pMapType]);
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 
 	int lSize = GetMap(pMapType, 0, pTexture)->GetPixelByteSize();
 	deb_assert(lSize == 1 || lSize == 3 || lSize == 4);
@@ -575,7 +577,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	GLenum lPixelFormat;
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
 		strutil::Format(_T("AddTexture() - the texture has an invalid pixel size of %i bytes!"), lSize));
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 
 	for (int i = 0; i < pTexture->GetNumMipMapLevels(); i++)
 	{
@@ -589,13 +591,13 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 			     lPixelFormat, // TODO: Verify that this is GL_LUMINANCE for specular maps.
 			     GL_UNSIGNED_BYTE,
 			     lMap->GetBuffer());
-		OGL_ASSERT();
+		OGL_FAST_ASSERT();
 		if (!GetMipMappingEnabled())
 		{
 			break;
 		}
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
@@ -681,7 +683,7 @@ void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 			     GL_UNSIGNED_BYTE,
 			     pTexture->GetCubeMapNegZ(i)->GetBuffer());
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 #endif // !GLES
 }
 
@@ -703,14 +705,14 @@ void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
 	{
 		SetEnvironmentMap(INVALID_TEXTURE);
 	}
-	//OGL_ASSERT();
+	//OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 				  GeometryID /*pID*/,
 				  MaterialType pMaterialType)
 {
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 
 	// A hard coded check to make life easier for the user.
 	if (pMaterialType == MAT_TEXTURE_SBMAP_PXS ||
@@ -870,7 +872,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 		}
 	}
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, LightHint pLightHint)
@@ -939,7 +941,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 		lOK = true;
 	}
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 	return lOK;
 }
 
@@ -1040,7 +1042,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 			}
 		}
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption)
@@ -1080,7 +1082,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 		lLight->mShadowMapGeometrySet.Remove(lGeometry);
 	}
 
-	//OGL_ASSERT();
+	//OGL_FAST_ASSERT();
 }
 
 
@@ -1114,7 +1116,7 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 			lOk = lMat->AddGeometry(lGeometry->mGeometry);
 		}
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 	return (lOk);
 }
 
@@ -1128,7 +1130,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 	}
 
 	const TransformationF t = pGeometry->GetTransformation();
-	if (pGeometry->IsSimpleObject() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
+	if (pGeometry->IsExcludeCulling() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();
 		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, t);
@@ -1136,7 +1138,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		mCamSpaceTransformation.GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(lModelViewMatrix);
-		OGL_ASSERT();
+		//OGL_FAST_ASSERT();
 		return true;
 	}
 	else
@@ -1171,7 +1173,7 @@ void OpenGLRenderer::DrawLine(const Vector3DF& pPosition, const Vector3DF& pVect
 	::glVertexPointer(3, GL_FLOAT, 0, v);
 	::glDrawArrays(GL_LINES, 0, 2);
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 
@@ -1254,7 +1256,7 @@ unsigned OpenGLRenderer::RenderScene()
 			if (GetMaterial((MaterialType)i) != 0)
 			{
 				Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial((MaterialType)i));
-				OGL_ASSERT();
+				OGL_FAST_ASSERT();
 			}
 		}
 
@@ -1399,7 +1401,7 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 		return;
 	}
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 
 	Material* lMaterial;
 	if (pRenderTexture)
@@ -1469,12 +1471,12 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 		::glDisable(GL_TEXTURE_2D);
 	}
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation)
 {
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 
 	::glMatrixMode(GL_MODELVIEW);
 	::glPushMatrix();
@@ -1518,7 +1520,7 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 	::glMatrixMode(GL_MODELVIEW);
 	::glPopMatrix();
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 int OpenGLRenderer::GetEnvMapID()
@@ -1615,12 +1617,12 @@ void OpenGLRenderer::ProcessLights()
 			}
 		}
 	}
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::RenderShadowVolumes()
 {
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 
 	// Disable all fancy gfx.
 #if !defined(LEPRA_GL_ES) && !defined(LEPRA_MAC)
@@ -1742,7 +1744,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glPolygonOffset(0, 0);
 	glDepthMask(GL_TRUE);
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 int OpenGLRenderer::RenderShadowMaps()
@@ -1750,7 +1752,7 @@ int OpenGLRenderer::RenderShadowMaps()
 	int lCount = 0;
 #ifndef LEPRA_GL_ES
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 
 	// TODO: use flat maps instead of cube maps for directional/spot shadow maps.
 
@@ -1898,7 +1900,7 @@ int OpenGLRenderer::RenderShadowMaps()
 
 	glDisable(GL_TEXTURE_2D);
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 #endif // !GLES
 
 	return lCount;
@@ -2020,7 +2022,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 
 	pLight->mShadowMapNeedUpdate = false;
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNear, float pFar)
@@ -2095,7 +2097,7 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 
 	::glMatrixMode(GL_MODELVIEW);
 
-	OGL_ASSERT();
+	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pCompress, const str& pErrorMessage)

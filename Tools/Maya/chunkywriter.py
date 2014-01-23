@@ -80,7 +80,7 @@ class ChunkyWriter:
 
 
 	def write(self):
-		self.bodies, self.meshes, self.engines, self.phys_triggers = self._sortgroup(self.group)
+		self.bodies, self.meshes, self.engines, self.phys_triggers = ChunkyWriter.sortgroup(self.group)
 		self.physrootpos, q = self.bodies[0].get_final_local_transform()
 		if not self.config["center_phys"]:
 			self.physrootpos.x = 0
@@ -128,12 +128,13 @@ class ChunkyWriter:
 				feats[k] = v
 
 
-	def _sortgroup(self, group):
+	@staticmethod
+	def sortgroup(group):
 		bodies = []
 		meshes = []
 		engines = []
 		phys_triggers = []
-		for node in self.group:
+		for node in group:
 			node.writecount = 0
 			if node.getName().startswith("phys_trig_") and node.nodetype == "transform":
 				phys_triggers += [node]
@@ -681,6 +682,8 @@ class PhysWriter(ChunkyWriter):
 			spawn_class, percent = spawn_class_distribution
 			self._writestr(spawn_class)
 			self._writefloat(float(percent))
+		ease_down = node.get_fixed_attribute("ease_down", optional=True)
+		self._writeint(1 if ease_down else 0)
 
 		node.writecount += 1
 		self._addfeat("spawner:spawners", 1)
@@ -811,54 +814,20 @@ class ClassWriter(ChunkyWriter):
 
 
 	def dowrite(self):
-		self._listchildmeshes()
 		filename = self.basename+".class"
 		with self._fileopenwrite(filename) as f:
 			self.f = f
 			meshptrs = []
 			physidx = 0
 			for m in self.meshes:
-				def _getparentphys(m):
-					ph = None
-					mesh = m
-					while mesh and not ph:
-						for phys in self.bodies:
-							meshes = list(filter(None, [ch == mesh for ch in phys.childmeshes]))
-							if len(meshes) == 1:
-								if not ph:
-									ph = phys
-								else:
-									print("Error: both phys %s and %s has mesh refs to %s." % (ph.getFullName(), phys.getFullName(), mesh.getFullName()))
-									print(ph.childmeshes, meshes)
-									sys.exit(3)
-							elif len(meshes) > 1:
-								print("Error: phys %s has multiple mesh children refs to %s." % (phys.getFullName(), mesh.getFullName()))
-								sys.exit(3)
-						mesh = mesh.getParent()
-					if not ph:
-						print("Warning: mesh %s is not attached to any physics object!" % m.getFullName())
-					return ph
-				phys = _getparentphys(m)
+				phys,physidx,q,p,mscale = m.get_final_mesh_transform(self.physrootpos, self.bodies, options.options.verbose)
 				if not phys:
 					continue
 				phys.writecount = 1
 				m.writecount += 1
-				tm = m.get_world_transform()
-				tp = phys.gettransformto(None, "actual", getparent=lambda n: n.getParent())
-				tmt, tmr, mscale = tm.decompose()
-				tpt, tpr, _ = tp.decompose()
-				q = quat(tpr.inverse()).normalize()
-				p = tmt-tpt
-				p = q.toMat4() * vec4(p[:])
-				if options.options.verbose:
-					print(m.getName(), "has displacement", p, "compared to", phys.getName(), tmt, tpt)
-				q = quat(tpr.inverse() * tmr).normalize()
-				physidx = self.bodies.index(phys)
-				if physidx == 0:
-					p -= self.physrootpos
-				p = p[0:3]
+				if m.get_fixed_attribute("center_vertices", optional=True):
+					p = [0.0,0.0,0.0]
 				t = self._normalizexform(q[:]+p[:])
-				mscale = mscale.length() / (1+1+1)**.5
 				try:
 					mscale /= self.firstmeshscale[m.meshbasename]
 				except:
@@ -938,31 +907,3 @@ class ClassWriter(ChunkyWriter):
 				self._writeint(objectlists[x].index(cn))
 		node.writecount += 1
 		self._addfeat("mesh tag:mesh tags", 1)
-
-
-	def _listchildmeshes(self):
-		for node in self.meshes:
-			node.isphyschild = False
-		for node in self.bodies:
-			node.childmeshes = []
-			if not node.getParent() in self.meshes:
-				continue
-			if node.getParent().isphyschild:
-				continue
-			node.getParent().isphyschild = True
-			parent = node.getParent()
-			node.childmeshes += [parent]
-			def recurselistmeshes(n):
-				mc = []
-				if n and not n.phys_children:
-					#print("Entering mesh", n)
-					for m in n.mesh_children:
-						mc += [n]
-					for cn in n.mesh_children:
-						mc += recurselistmeshes(cn)
-				return mc
-			cm = list(map(lambda x: x[0], filter(None, [recurselistmeshes(c) for c in parent.mesh_children])))
-			#print("Taking ownership of", cm, "to", node.getName())
-			node.childmeshes += cm
-		#for node in self.bodies:
-		#	print(node, "has mesh children", node.childmeshes)

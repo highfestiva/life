@@ -144,8 +144,11 @@ class GroupReader(DefaultMAReader):
 		if not self.makephysrelative(group):
 			print("Internal vector math failed! Terminating due to error.")
 			sys.exit(3)
-		self.makevertsrelative(group)
+		mesh.scaleverts(group)
 		mesh.splitverts_group(group, options.options.verbose)
+		bodies,meshes,engines,phys_triggers = chunkywriter.ChunkyWriter.sortgroup(group)
+		self._setchildmeshes(bodies, meshes)
+		mesh.centerverts(group, bodies, options.options.verbose)
 		self.mesh_instance_reuse(group)
 		self.propagate_spawn_scale(group)
 		self.setphyspivot(group)
@@ -422,25 +425,29 @@ class GroupReader(DefaultMAReader):
 					node.fix_attribute("rguv", newuvs)
 
 
-	def makevertsrelative(self, group):
-		for node in group:
-			vtx = node.get_fixed_attribute("rgvtx", optional=True)
-			if vtx:
-				for p in node.getparents():
-					if not p.shape:
-						p.shape = node
-				mnode = node.getParent()
-				meshroot = None
-				m_tr = mnode.gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
-				if not m_tr:
-					print("Mesh crash!")
-				m_s = m_tr.decompose()[2]
-				transform = mat4.scaling(m_s)
-				vp = vec4(0,0,0,1)
-				for idx in range(0, len(vtx), 3):
-					vp[:3] = vtx[idx:idx+3]
-					vp = transform*vp
-					vtx[idx:idx+3] = vp[:3]
+	def _setchildmeshes(self, bodies, meshes):
+		for node in meshes:
+			node.isphyschild = False
+		for node in bodies:
+			node.childmeshes = []
+			if not node.getParent() in meshes:
+				continue
+			if node.getParent().isphyschild:
+				continue
+			node.getParent().isphyschild = True
+			parent = node.getParent()
+			node.childmeshes += [parent]
+			def recurselistmeshes(n):
+				mc = []
+				if n and not n.phys_children:
+					#print("Entering mesh", n)
+					for m in n.mesh_children:
+						mc += [n]
+					for cn in n.mesh_children:
+						mc += recurselistmeshes(cn)
+				return mc
+			cm = list(map(lambda x: x[0], filter(None, [recurselistmeshes(c) for c in parent.mesh_children])))
+			node.childmeshes += cm
 
 
 	def mesh_instance_reuse(self, group):
@@ -739,7 +746,7 @@ class GroupReader(DefaultMAReader):
 				engineOk = enginetype in pushengines+jointengines
 				allApplied &= engineOk
 				if not engineOk:
-					print("Error: invalid engine typetrigger_engine_groups '%s'." % enginetype)
+					print("Error: invalid engine type '%s'." % enginetype)
 				node = self.onCreateNode("engine:"+enginetype, {"name":[section]})
 				engine_attribute = {}
 				params = config.items(section)
@@ -877,7 +884,7 @@ class GroupReader(DefaultMAReader):
 				tagtype = stripQuotes(config.get(section, "type")).split(":")[0]
 				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "blink_light", "engine_sound", "engine_mesh_offset", "mesh_offset", "burn", "exhaust",
 						    "jet_engine_emitter", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through",
-						    "ammo", "textures", "mass_objects", "driver", "muzzle", "behavior", "ambient_sounds", "anything"]
+						    "ammo", "textures", "mass_objects", "placement", "driver", "muzzle", "behavior", "ambient_sounds", "anything"]
 				allApplied &= tagOk
 				if not tagOk:
 					print("Error: invalid tag type '%s'." % tagtype)
@@ -1559,15 +1566,6 @@ def _maimport(filename):
 	filebasename = os.path.splitext(filename)[0]
 	rd = GroupReader(filebasename)
 	rd.doread()
-
-	#print()
-	#print("This is what the physics look like:")
-	def p_p(n, indent=0):
-		print("  "*indent + n.getName())
-		for child in n.phys_children:
-			p_p(child, indent+1)
-	#[p_p(root) for root in filter(lambda n: n.getName()=="phys_body", rd.group)]
-	#print()
 
 	pwr = chunkywriter.PhysWriter(filebasename, rd.group, rd.config)
 	mwr = chunkywriter.MeshWriter(filebasename, rd.group, rd.config)

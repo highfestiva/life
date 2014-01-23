@@ -48,6 +48,7 @@ public:
 	float GetNumber() const;
 	const IntervalArray& GetIntervals() const;
 	const str GetSpawnObject(float pProbabilityThreshold) const;
+	bool IsEaseDown() const;
 
 	unsigned GetChunkySize() const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
@@ -71,7 +72,7 @@ private:
 	float mNumber;
 	IntervalArray mIntervalArray;
 	SpawnObjectArray mSpawnObjectArray;
-	
+	bool mIsEaseDown;
 
 	LOG_CLASS_DECLARE();
 };

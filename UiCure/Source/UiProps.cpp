@@ -67,7 +67,7 @@ void Props::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 	Parent::DispatchOnLoadMesh(pMeshResource);
 	if (mParticleType != PARTICLE_NONE && pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		pMeshResource->GetRamData()->SetIsSimpleObject();
+		pMeshResource->GetRamData()->SetExcludeCulling();
 		pMeshResource->GetRamData()->SetScale(Random::Uniform(0.4f, 1.6f) * mScale);
 	}
 }
