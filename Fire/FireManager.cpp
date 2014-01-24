@@ -535,11 +535,12 @@ void FireManager::HandleShooting()
 	UpdateFrustum(lFOV);
 
 	typedef UiLepra::Touch::DragManager::DragList DragList;
-	const DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
-	for (DragList::const_iterator x = lDragList.begin(); x != lDragList.end(); ++x)
+	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
+	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
-		if (x->mIsNew && !mMenu->GetDialog())
+		if ((x->mFlags&1) == 0 && !mMenu->GetDialog())
 		{
+			x->mFlags |= 1;
 			mShootDirection = mUiManager->GetRenderer()->ScreenCoordToVector(x->mLast);
 			Shoot(0, 0);
 		}

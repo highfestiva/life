@@ -66,6 +66,7 @@ private:
 	bool mIsConsoleVisible;
 	bool mIsFirstConsoleUse;
 	float mConsoleTargetPosition;
+	UiTbc::FontManager::FontId mFontId;
 
 	LOG_CLASS_DECLARE();
 };

@@ -49,6 +49,8 @@ UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager
 			LogType::GetLog(LogType::SUB_ROOT)->AddListener(mManager->GetConsoleLogger(), (LogLevel)x);
 		}
 	}
+
+	mFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Courier New"), 14.0f);
 }
 
 UiConsole::~UiConsole()
@@ -185,14 +187,13 @@ UiCure::GameUiManager* UiConsole::GetUiManager() const
 
 UiTbc::FontManager::FontId UiConsole::GetFontId() const
 {
-	return mConsoleInput->GetFontId();
+	return mFontId;
 }
 
 
 void UiConsole::InitGraphics()
 {
 	CloseGraphics();
-	UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Courier New"), 14.0f);
 
 	mConsoleComponent = new UiTbc::Component(_T("CON:"), new UiTbc::ListLayout());
 	mConsoleOutput = new UiTbc::TextArea(mColor);
@@ -204,9 +205,9 @@ void UiConsole::InitGraphics()
 
 	mConsoleOutput->SetHorizontalMargin(3);
 	mConsoleOutput->SetFocusAnchor(UiTbc::TextArea::ANCHOR_BOTTOM_LINE);
-	mConsoleOutput->SetFontId(lFontId);
+	mConsoleOutput->SetFontId(mFontId);
 	mConsoleOutput->SetFontColor(WHITE);
-	mConsoleInput->SetFontId(lFontId);
+	mConsoleInput->SetFontId(mFontId);
 	mConsoleInput->SetFontColor(WHITE);
 
 	mConsoleComponent->AddChild(mConsoleOutput);

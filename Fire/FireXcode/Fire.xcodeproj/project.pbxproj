@@ -20,8 +20,6 @@
 		B13DA597173ED81600A73400 /* Explosion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA594173ED81600A73400 /* Explosion.cpp */; };
 		B13DA598173ED81600A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA595173ED81600A73400 /* Spawner.cpp */; };
 		B13DA599173ED81600A73400 /* StuntTrigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA596173ED81600A73400 /* StuntTrigger.cpp */; };
-		B13DA59C173ED82D00A73400 /* CenteredMachine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA59A173ED82D00A73400 /* CenteredMachine.cpp */; };
-		B13DA59D173ED82D00A73400 /* LandingTrigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA59B173ED82D00A73400 /* LandingTrigger.cpp */; };
 		B13DA5C9173EDA9600A73400 /* BulletTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5BD173EDA9600A73400 /* BulletTime.cpp */; };
 		B13DA5CA173EDA9600A73400 /* Client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5BE173EDA9600A73400 /* Client.cpp */; };
 		B13DA5CB173EDA9600A73400 /* GameServerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA5BF173EDA9600A73400 /* GameServerManager.cpp */; };
@@ -44,13 +42,6 @@
 		B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA600173EDBD200A73400 /* Spawner.cpp */; };
 		B13DA607173EDBF400A73400 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA606173EDBF400A73400 /* Level.cpp */; };
 		B153FDC4181DF12B002D3C5D /* Icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B153FDC3181DF12B002D3C5D /* Icon-72@2x.png */; };
-		B15B6CCA17F7919300AB487F /* Dub Feral.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC317F7919300AB487F /* Dub Feral.ogg */; };
-		B15B6CCB17F7919300AB487F /* Easy Jam.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC417F7919300AB487F /* Easy Jam.ogg */; };
-		B15B6CCC17F7919300AB487F /* Firmament.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC517F7919300AB487F /* Firmament.ogg */; };
-		B15B6CCD17F7919300AB487F /* Mandeville.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC617F7919300AB487F /* Mandeville.ogg */; };
-		B15B6CCE17F7919300AB487F /* Slow Ska Game Loop.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC717F7919300AB487F /* Slow Ska Game Loop.ogg */; };
-		B15B6CCF17F7919300AB487F /* Stealth Groover.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC817F7919300AB487F /* Stealth Groover.ogg */; };
-		B15B6CD017F7919300AB487F /* Yallahs.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B15B6CC917F7919300AB487F /* Yallahs.ogg */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -466,7 +457,6 @@
 		B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B1A1DD9813AA6CC60097B8D0 /* window.c */; };
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
-		B1A8301D177A42BF0078D5E8 /* Automan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8301B177A42BF0078D5E8 /* Automan.cpp */; };
 		B1A8301E177A42BF0078D5E8 /* Eater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8301C177A42BF0078D5E8 /* Eater.cpp */; };
 		B1A83020177A42E40078D5E8 /* Health.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8301F177A42E40078D5E8 /* Health.cpp */; };
 		B1A8B1AD16C7E8D900F57DC1 /* IntAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */; };
@@ -474,9 +464,6 @@
 		B1A8B1B416C7EA9700F57DC1 /* UiSoundReleaser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */; };
 		B1A971B918148AB30029E569 /* UiFixedLayouter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A971B818148AB30029E569 /* UiFixedLayouter.cpp */; };
 		B1B0C87E17FE08B4000953EF /* RotatingController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1B0C87D17FE08B4000953EF /* RotatingController.mm */; };
-		B1B185341784BCC200853D12 /* AirBalloonPilot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */; };
-		B1B559CD17F77E1C00A4BB17 /* CanonDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CB17F77E1C00A4BB17 /* CanonDriver.cpp */; };
-		B1B559CE17F77E1C00A4BB17 /* SimulatorDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */; };
 		B1B559D017F77E5800A4BB17 /* GameTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */; };
 		B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B559E917F7800A00A4BB17 /* Driver.cpp */; };
 		B1B80C3D180F4294003AE676 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B80C3C180F4294003AE676 /* Menu.cpp */; };
@@ -515,7 +502,6 @@
 		B1D37F48166AB59C00536CE5 /* UiGravelEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */; };
 		B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */; };
 		B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */; };
-		B1D4C4C9174AB9F6005E1587 /* Autopilot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D4C4C8174AB9F6005E1587 /* Autopilot.cpp */; };
 		B1D4C4CC174ABA9B005E1587 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D4C4CB174ABA9B005E1587 /* Level.cpp */; };
 		B1D5E29F172B1F6C00984602 /* UiJetEngineEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
@@ -549,8 +535,6 @@
 		B13DA594173ED81600A73400 /* Explosion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Explosion.cpp; path = ../../Life/Explosion.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA595173ED81600A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Life/Spawner.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA596173ED81600A73400 /* StuntTrigger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StuntTrigger.cpp; path = ../../Life/StuntTrigger.cpp; sourceTree = SOURCE_ROOT; };
-		B13DA59A173ED82D00A73400 /* CenteredMachine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CenteredMachine.cpp; sourceTree = "<group>"; };
-		B13DA59B173ED82D00A73400 /* LandingTrigger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LandingTrigger.cpp; sourceTree = "<group>"; };
 		B13DA5BD173EDA9600A73400 /* BulletTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BulletTime.cpp; path = ../../Life/LifeServer/BulletTime.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA5BE173EDA9600A73400 /* Client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Client.cpp; path = ../../Life/LifeServer/Client.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA5BF173EDA9600A73400 /* GameServerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameServerManager.cpp; path = ../../Life/LifeServer/GameServerManager.cpp; sourceTree = SOURCE_ROOT; };
@@ -573,13 +557,6 @@
 		B13DA600173EDBD200A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Cure/Source/Spawner.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA606173EDBF400A73400 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Level.cpp; path = ../../Life/LifeClient/Level.cpp; sourceTree = SOURCE_ROOT; };
 		B153FDC3181DF12B002D3C5D /* Icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72@2x.png"; path = "../Icons/Icon-72@2x.png"; sourceTree = SOURCE_ROOT; };
-		B15B6CC317F7919300AB487F /* Dub Feral.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Dub Feral.ogg"; path = "../Data/Dub Feral.ogg"; sourceTree = SOURCE_ROOT; };
-		B15B6CC417F7919300AB487F /* Easy Jam.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Easy Jam.ogg"; path = "../Data/Easy Jam.ogg"; sourceTree = SOURCE_ROOT; };
-		B15B6CC517F7919300AB487F /* Firmament.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Firmament.ogg; path = ../Data/Firmament.ogg; sourceTree = SOURCE_ROOT; };
-		B15B6CC617F7919300AB487F /* Mandeville.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Mandeville.ogg; path = ../Data/Mandeville.ogg; sourceTree = SOURCE_ROOT; };
-		B15B6CC717F7919300AB487F /* Slow Ska Game Loop.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Slow Ska Game Loop.ogg"; path = "../Data/Slow Ska Game Loop.ogg"; sourceTree = SOURCE_ROOT; };
-		B15B6CC817F7919300AB487F /* Stealth Groover.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Stealth Groover.ogg"; path = "../Data/Stealth Groover.ogg"; sourceTree = SOURCE_ROOT; };
-		B15B6CC917F7919300AB487F /* Yallahs.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Yallahs.ogg; path = ../Data/Yallahs.ogg; sourceTree = SOURCE_ROOT; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1173,7 +1150,6 @@
 		B1A1DD9913AA6CC60097B8D0 /* window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
 		B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiOggAlStream.cpp; sourceTree = "<group>"; };
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
-		B1A8301B177A42BF0078D5E8 /* Automan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Automan.cpp; sourceTree = "<group>"; };
 		B1A8301C177A42BF0078D5E8 /* Eater.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Eater.cpp; sourceTree = "<group>"; };
 		B1A8301F177A42E40078D5E8 /* Health.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Health.cpp; path = ../../Cure/Source/Health.cpp; sourceTree = SOURCE_ROOT; };
 		B1A8B1AC16C7E8D900F57DC1 /* IntAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IntAttribute.cpp; path = ../../Cure/Source/IntAttribute.cpp; sourceTree = SOURCE_ROOT; };
@@ -1181,11 +1157,8 @@
 		B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSoundReleaser.cpp; path = ../../UiCure/Source/UiSoundReleaser.cpp; sourceTree = SOURCE_ROOT; };
 		B1A971B818148AB30029E569 /* UiFixedLayouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiFixedLayouter.cpp; sourceTree = "<group>"; };
 		B1B0C87D17FE08B4000953EF /* RotatingController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RotatingController.mm; sourceTree = "<group>"; };
-		B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AirBalloonPilot.cpp; sourceTree = "<group>"; };
 		B1B4898F13F9BD6C0047C78A /* Fire-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Fire-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* Fire_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Fire_Prefix.pch; path = FireXcode/Fire_Prefix.pch; sourceTree = "<group>"; };
-		B1B559CB17F77E1C00A4BB17 /* CanonDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CanonDriver.cpp; sourceTree = "<group>"; };
-		B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimulatorDriver.cpp; sourceTree = "<group>"; };
 		B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameTimer.cpp; sourceTree = "<group>"; };
 		B1B559E917F7800A00A4BB17 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Driver.cpp; path = ../../Cure/Source/Driver.cpp; sourceTree = SOURCE_ROOT; };
 		B1B80C3C180F4294003AE676 /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Menu.cpp; path = ../../Life/LifeClient/Menu.cpp; sourceTree = SOURCE_ROOT; };
@@ -1224,7 +1197,6 @@
 		B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiGravelEmitter.cpp; path = ../../UiCure/Source/UiGravelEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchDrag.cpp; sourceTree = "<group>"; };
 		B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchstick.cpp; sourceTree = "<group>"; };
-		B1D4C4C8174AB9F6005E1587 /* Autopilot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Autopilot.cpp; sourceTree = "<group>"; };
 		B1D4C4CB174ABA9B005E1587 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Level.cpp; sourceTree = "<group>"; };
 		B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiJetEngineEmitter.cpp; path = ../../UiCure/Source/UiJetEngineEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
@@ -1546,17 +1518,10 @@
 		B19A146913A122DE0051A61C /* Fire */ = {
 			isa = PBXGroup;
 			children = (
-				B1B559CB17F77E1C00A4BB17 /* CanonDriver.cpp */,
-				B1B559CC17F77E1C00A4BB17 /* SimulatorDriver.cpp */,
 				B16C55881788404A0081DE46 /* AutoPathDriver.cpp */,
 				B16C55891788404A0081DE46 /* BaseMachine.cpp */,
-				B1B185331784BCC200853D12 /* AirBalloonPilot.cpp */,
-				B1A8301B177A42BF0078D5E8 /* Automan.cpp */,
 				B1A8301C177A42BF0078D5E8 /* Eater.cpp */,
 				B1D4C4CB174ABA9B005E1587 /* Level.cpp */,
-				B1D4C4C8174AB9F6005E1587 /* Autopilot.cpp */,
-				B13DA59A173ED82D00A73400 /* CenteredMachine.cpp */,
-				B13DA59B173ED82D00A73400 /* LandingTrigger.cpp */,
 				B1D37F15166AB3F100536CE5 /* Fire.mm */,
 				B1D37F16166AB3F100536CE5 /* FireConsoleManager.cpp */,
 				B1D37F18166AB3F100536CE5 /* FireManager.cpp */,
@@ -2419,13 +2384,6 @@
 		B1FB291E1450C8A600F1C762 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				B15B6CC317F7919300AB487F /* Dub Feral.ogg */,
-				B15B6CC417F7919300AB487F /* Easy Jam.ogg */,
-				B15B6CC517F7919300AB487F /* Firmament.ogg */,
-				B15B6CC617F7919300AB487F /* Mandeville.ogg */,
-				B15B6CC717F7919300AB487F /* Slow Ska Game Loop.ogg */,
-				B15B6CC817F7919300AB487F /* Stealth Groover.ogg */,
-				B15B6CC917F7919300AB487F /* Yallahs.ogg */,
 				B1FB29391450CAD600F1C762 /* Data.pk3 */,
 			);
 			name = Data;
@@ -2500,14 +2458,7 @@
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
-				B15B6CCA17F7919300AB487F /* Dub Feral.ogg in Resources */,
-				B15B6CCB17F7919300AB487F /* Easy Jam.ogg in Resources */,
-				B15B6CCC17F7919300AB487F /* Firmament.ogg in Resources */,
-				B15B6CCD17F7919300AB487F /* Mandeville.ogg in Resources */,
-				B15B6CCE17F7919300AB487F /* Slow Ska Game Loop.ogg in Resources */,
-				B15B6CCF17F7919300AB487F /* Stealth Groover.ogg in Resources */,
 				B1F594F5181EE8A100FCC9F0 /* Default@2x.png in Resources */,
-				B15B6CD017F7919300AB487F /* Yallahs.ogg in Resources */,
 				B1C4123B18035E90007D64F7 /* Default-Landscape.png in Resources */,
 				B1F594F4181EE8A100FCC9F0 /* Default-Landscape@2x.png in Resources */,
 				B1C4124018035E90007D64F7 /* Icon-76.png in Resources */,
@@ -2982,8 +2933,6 @@
 				B13DA597173ED81600A73400 /* Explosion.cpp in Sources */,
 				B13DA598173ED81600A73400 /* Spawner.cpp in Sources */,
 				B13DA599173ED81600A73400 /* StuntTrigger.cpp in Sources */,
-				B13DA59C173ED82D00A73400 /* CenteredMachine.cpp in Sources */,
-				B13DA59D173ED82D00A73400 /* LandingTrigger.cpp in Sources */,
 				B13DA5C9173EDA9600A73400 /* BulletTime.cpp in Sources */,
 				B13DA5CA173EDA9600A73400 /* Client.cpp in Sources */,
 				B13DA5CB173EDA9600A73400 /* GameServerManager.cpp in Sources */,
@@ -3005,18 +2954,13 @@
 				B13DA5FB173EDB9800A73400 /* Projectile.cpp in Sources */,
 				B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */,
 				B13DA607173EDBF400A73400 /* Level.cpp in Sources */,
-				B1D4C4C9174AB9F6005E1587 /* Autopilot.cpp in Sources */,
 				B1D4C4CC174ABA9B005E1587 /* Level.cpp in Sources */,
-				B1A8301D177A42BF0078D5E8 /* Automan.cpp in Sources */,
 				B1A8301E177A42BF0078D5E8 /* Eater.cpp in Sources */,
 				B1A83020177A42E40078D5E8 /* Health.cpp in Sources */,
 				B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */,
-				B1B185341784BCC200853D12 /* AirBalloonPilot.cpp in Sources */,
 				B16C558A1788404A0081DE46 /* AutoPathDriver.cpp in Sources */,
 				B16C558B1788404A0081DE46 /* BaseMachine.cpp in Sources */,
 				B1740478179469EB00DB7AD5 /* ResourceTracker.cpp in Sources */,
-				B1B559CD17F77E1C00A4BB17 /* CanonDriver.cpp in Sources */,
-				B1B559CE17F77E1C00A4BB17 /* SimulatorDriver.cpp in Sources */,
 				B1B559D017F77E5800A4BB17 /* GameTimer.cpp in Sources */,
 				B1B559EA17F7800A00A4BB17 /* Driver.cpp in Sources */,
 				B1B0C87E17FE08B4000953EF /* RotatingController.mm in Sources */,

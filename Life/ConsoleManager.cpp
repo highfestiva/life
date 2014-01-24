@@ -24,9 +24,9 @@
 
 namespace
 {
-bool is_valid_char(char c)
+bool is_invalid_char(char c)
 {
-	return isalnum(c) || c == '-' || c == '#' || c == '.';
+	return !isalnum(c) && c != '-' && c != '#' && c != '.';
 }
 }
 
@@ -935,7 +935,7 @@ bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<s
 
 str ConsoleManager::GetQuoted(const str& s)
 {
-	if (std::find_if_not(s.begin(), s.end(), is_valid_char) == s.end())
+	if (std::find_if(s.begin(), s.end(), is_invalid_char) == s.end())
 	{
 		return s;
 	}
