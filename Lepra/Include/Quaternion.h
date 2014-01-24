@@ -50,6 +50,9 @@
 #include "Math.h"
 #include "RotationMatrix.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4201)	// Nonstandard extention: unnamed struct.
+
 
 
 namespace Lepra
@@ -61,14 +64,27 @@ template<class _TVarType>
 class Quaternion
 {
 public:
+	union
+	{
+	_TVarType mData[4];
+	struct
+	{
+	_TVarType a; // Real part.
+	_TVarType b; // Imaginary i
+	_TVarType c; // Imaginary j
+	_TVarType d; // Imaginary k
+	};
+	};
 	
 	inline Quaternion();
 	inline Quaternion(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline Quaternion(const _TVarType pData[4]);
 	inline Quaternion(const Quaternion& pQuaternion);
 	inline Quaternion(const RotationMatrix<_TVarType>& pRotMtx);
 	inline Quaternion(_TVarType pAngle, const Vector3D<_TVarType>& pVector);
 
 	inline void Set(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void Set(const _TVarType pData[4]);
 	inline void Set(const Quaternion& pQuaternion);
 	inline void SetConjugate(const Quaternion& pQuaternion);
 	void Set(const RotationMatrix<_TVarType>& pRotMtx);
@@ -76,11 +92,6 @@ public:
 
 	// Angle of rotation around vector (pX, pY, pZ).
 	inline void Set(_TVarType pAngle, const Vector3D<_TVarType>& pVector);
-
-	inline _TVarType GetA() const;
-	inline _TVarType GetB() const;
-	inline _TVarType GetC() const;
-	inline _TVarType GetD() const;
 
 	RotationMatrix<_TVarType> GetAsRotationMatrix() const;
 	void GetAsRotationMatrix(RotationMatrix<_TVarType>& pRotMtx) const;
@@ -95,27 +106,36 @@ public:
 	inline void Div(_TVarType pX);
 
 	inline void Mul(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void Mul(const _TVarType pData[4]);
 	inline void Mul(const Quaternion& pQuaternion);
 
 	// Special multiplication functions which can be used to optimize some calculations.
 	// "this" is A, and the parameter matrix is B.
 	inline void AMulInvB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void AMulInvB(const _TVarType pData[4]);
 	inline void AMulInvB(const Quaternion& pQuaternion);
 	inline void InvAMulB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void InvAMulB(const _TVarType pData[4]);
 	inline void InvAMulB(const Quaternion& pQuaternion);
 	inline void InvAMulInvB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void InvAMulInvB(const _TVarType pData[4]);
 	inline void InvAMulInvB(const Quaternion& pQuaternion);
 
 	inline void BMulA(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void BMulA(const _TVarType pData[4]);
 	inline void BMulA(const Quaternion& pQuaternion);
 	inline void InvBMulA(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void InvBMulA(const _TVarType pData[4]);
 	inline void InvBMulA(const Quaternion& pQuaternion);
 	inline void BMulInvA(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void BMulInvA(const _TVarType pData[4]);
 	inline void BMulInvA(const Quaternion& pQuaternion);
 	inline void InvBMulInvA(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void InvBMulInvA(const _TVarType pData[4]);
 	inline void InvBMulInvA(const Quaternion& pQuaternion);
 
 	inline void Div(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void Div(const _TVarType pData[4]);
 	inline void Div(const Quaternion& pQuaternion);
 
 	inline Vector3D<_TVarType> GetRotatedVector(const Vector3D<_TVarType>& pVector) const;
@@ -205,11 +225,6 @@ public:
 
 	Quaternion<float> ToFloat() const;
 	Quaternion<double> ToDouble() const;
-
-	_TVarType mA; // Real part.
-	_TVarType mB; // Imaginary i
-	_TVarType mC; // Imaginary j
-	_TVarType mD; // Imaginary k
 };
 
 
@@ -221,6 +236,10 @@ typedef Quaternion<float64> QuaternionD;
 
 extern const QuaternionF gIdentityQuaternionF;
 extern const QuaternionD gIdentityQuaternionD;
+
+
+
+#pragma warning(pop)
 
 
 

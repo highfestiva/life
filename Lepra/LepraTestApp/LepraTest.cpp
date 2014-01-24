@@ -1104,10 +1104,10 @@ bool TestTransformation(const LogDecorator& pAccount)
 		const Vector3DD lAz = lQ.GetAxisZ();
 		RotationMatrixD lMatrix(lAx, lAy, lAz);
 		QuaternionD lTarget(lMatrix);
-		lTestOk = (Math::IsEpsEqual(lQ.GetA(), lTarget.GetA()) &&
-			Math::IsEpsEqual(lQ.GetB(), lTarget.GetB()) &&
-			Math::IsEpsEqual(lQ.GetC(), lTarget.GetC()) &&
-			Math::IsEpsEqual(lQ.GetD(), lTarget.GetD()));
+		lTestOk = (Math::IsEpsEqual(lQ.a, lTarget.a) &&
+			Math::IsEpsEqual(lQ.b, lTarget.b) &&
+			Math::IsEpsEqual(lQ.c, lTarget.c) &&
+			Math::IsEpsEqual(lQ.d, lTarget.d));
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)

@@ -456,7 +456,7 @@ public:
 	virtual void PostRenderMaterial(MaterialType pMaterialType);
 
 	void UpdateShadowMaps();
-	unsigned UpdateShadowMaps(TBC::GeometryBase* pGeometry);	// Returns the number of triangles calculated for.
+	unsigned UpdateShadowMaps(TBC::GeometryBase* pGeometry, LightData* pClosestLightData);	// Returns the number of triangles calculated for.
 
 	virtual void Tick(float pTime);
 	virtual unsigned RenderScene() = 0;

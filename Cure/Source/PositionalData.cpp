@@ -116,10 +116,10 @@ void PositionalData6::Stop()
 float PositionalData6::GetDifference(const QuaternionF& pQ1, const QuaternionF& pQ2)
 {
 	float lWeightedDifferenceSum =
-		(::fabs(pQ1.GetA()-pQ2.GetA()) +
-		::fabs(pQ1.GetB()-pQ2.GetB()) +
-		::fabs(pQ1.GetC()-pQ2.GetC()) +
-		::fabs(pQ1.GetD()-pQ2.GetD()));
+		(::fabs(pQ1.a-pQ2.a) +
+		::fabs(pQ1.b-pQ2.b) +
+		::fabs(pQ1.c-pQ2.c) +
+		::fabs(pQ1.d-pQ2.d));
 	return (lWeightedDifferenceSum);
 }
 

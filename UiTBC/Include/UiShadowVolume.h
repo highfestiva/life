@@ -31,8 +31,6 @@ public:
 	TBC::GeometryBase::GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(TBC::GeometryBase::GeometryVolatility pVolatility);
 
-	TBC::GeometryBase::PrimitiveType GetPrimitiveType() const;
-
 	unsigned int GetMaxVertexCount()  const;
 	unsigned int GetMaxIndexCount() const;
 

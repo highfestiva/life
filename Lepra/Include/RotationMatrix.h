@@ -50,6 +50,8 @@ TEMPLATE
 class RotationMatrix
 {
 public:
+	_TVarType mMatrix[9];
+
 	inline RotationMatrix();
 	inline RotationMatrix(_TVarType p11, _TVarType p12, _TVarType p13,
 			      _TVarType p21, _TVarType p22, _TVarType p23,
@@ -190,9 +192,6 @@ public:
 
 	RotationMatrix<float> ToFloat() const;
 	RotationMatrix<double> ToDouble() const;
-private:
-
-	_TVarType mMatrix[9];
 };
 
 

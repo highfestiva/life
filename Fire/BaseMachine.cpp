@@ -11,8 +11,8 @@
 #include "../Life/Explosion.h"
 #include "../Life/Launcher.h"
 #include "../UiCure/Include/UiBurnEmitter.h"
+#include "RtVar.h"
 
-#define DIE_SINK_DELAY		9.0f
 #define SINK_TIME		4.0f
 #define START_SINKING_ID	10
 
@@ -71,7 +71,9 @@ void BaseMachine::OnDie()
 	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this);
 	ShrinkMeshBigOrientationThreshold(1e-3f);
 	Parent::OnDie();
-	mManager->AddAlarmCallback(this, START_SINKING_ID, DIE_SINK_DELAY, 0);
+	float lVehicleRemoveDelay;
+	CURE_RTVAR_GET(lVehicleRemoveDelay, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 9.0);
+	mManager->AddAlarmCallback(this, START_SINKING_ID, lVehicleRemoveDelay, 0);
 }
 
 

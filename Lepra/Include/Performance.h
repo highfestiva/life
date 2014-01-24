@@ -133,7 +133,7 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 #define LEPRA_DO_MEASURE_SCOPE(name)	\
 	CallScopeTimer __lMeasureTimer;	\
 	static volatile bool __lMeasureNameInitialized = false;	\
-	static str __lMeasureName;	\
+	static HashedString __lMeasureName;	\
 	static size_t __lMeasureHash;	\
 	if (!__lMeasureNameInitialized)	\
 	{	\
@@ -141,8 +141,8 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 		ScopeSpinLock __lLock(&__lInitLock);	\
 		if (!__lMeasureNameInitialized)	\
 		{	\
-			__lMeasureName = strutil::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__);	\
-			__lMeasureHash = HashString(__lMeasureName.c_str());	\
+			__lMeasureName = HashedString(strutil::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__));	\
+			__lMeasureHash = __lMeasureName.mHash;	\
 			__lMeasureNameInitialized = true;	\
 		}	\
 	}	\

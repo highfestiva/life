@@ -495,9 +495,10 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TB
 	const float lPitchLerp = ::pow(lIntensity, lPitchExp);
 	const float lPitch = Math::Lerp(pTag.mFloatValueList[FV_PITCH_LOW], pTag.mFloatValueList[FV_PITCH_HIGH], lPitchLerp);
 	const float lRtrPitch = (pRealTimeRatio > 1)? ::pow(pRealTimeRatio, lPitchExp * lPitchExp) : pRealTimeRatio;
-	mUiManager->GetSoundManager()->SetSoundPosition(lEngineSound->GetData(), lPosition, pVelocity);
-	mUiManager->GetSoundManager()->SetVolume(lEngineSound->GetData(), lVolume);
-	mUiManager->GetSoundManager()->SetPitch(lEngineSound->GetData(), lPitch * lRtrPitch);
+	const UiLepra::SoundManager::SoundInstanceID lSoundId = lEngineSound->GetData();
+	mUiManager->GetSoundManager()->SetSoundPosition(lSoundId, lPosition, pVelocity);
+	mUiManager->GetSoundManager()->SetVolume(lSoundId, lVolume);
+	mUiManager->GetSoundManager()->SetPitch(lSoundId, lPitch * lRtrPitch);
 }
 
 void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)

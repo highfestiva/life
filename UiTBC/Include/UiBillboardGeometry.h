@@ -39,8 +39,6 @@ public:
 	virtual vtx_idx_t* GetIndexData() const;
 	virtual uint8* GetColorData() const;
 
-	PrimitiveType GetPrimitiveType() const;
-
 	// Overloads from TBC::GeometryBase.
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility pVolatility);

@@ -237,7 +237,7 @@ void CppContextObject::UiMove()
 	}
 	else if (mLerpMode == LERP_RUN)
 	{
-		if (mLerpOffset.GetPosition().GetLengthSquared() < 0.1f && mLerpOffset.GetOrientation().GetA() > 0.999f)
+		if (mLerpOffset.GetPosition().GetLengthSquared() < 0.1f && mLerpOffset.GetOrientation().a > 0.999f)
 		{
 			mLerpMode = LERP_STOP;
 			mLerpOffset.SetIdentity();

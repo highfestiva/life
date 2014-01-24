@@ -1277,6 +1277,12 @@ void Renderer::PostRenderMaterial(MaterialType pMaterialType)
 
 void Renderer::UpdateShadowMaps()
 {
+	const int lLightCount = GetLightCount();
+	if (lLightCount < 1)
+	{
+		return;
+	}
+	LightData* lLightData = GetLightData(GetClosestLight(0));
 	unsigned lTrianglesCalculatedFor = 0;
 	bool lDidStatic = false;
 	for (int i = 0; i <= (int)MAT_LAST_SOLID; i++)
@@ -1290,7 +1296,7 @@ void Renderer::UpdateShadowMaps()
 				bool lUpdate = (lTrianglesCalculatedFor < 1000 || lVolatility >= TBC::GeometryBase::GEOM_SEMI_STATIC || !lDidStatic);
 				if (lUpdate)
 				{
-					lTrianglesCalculatedFor += UpdateShadowMaps(lGeometry);
+					lTrianglesCalculatedFor += UpdateShadowMaps(lGeometry, lLightData);
 					if (lVolatility == TBC::GeometryBase::GEOM_STATIC)
 					{
 						lDidStatic = true;
@@ -1302,13 +1308,13 @@ void Renderer::UpdateShadowMaps()
 	}
 }
 
-unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
+unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry, LightData* pClosestLightData)
 {
 	GeometryData* lGeometry = (GeometryData*)pGeometry->GetRendererData();
-	const float lLightShadowRange = GetLightData((LightID)0)->mShadowRange * 4;
+	const float lLightShadowRange = pClosestLightData->mShadowRange * 4;
 	const bool lDenyShadows =
 		(lGeometry->mShadow == FORCE_NO_SHADOWS || mShadowMode <= NO_SHADOWS || 
-		lGeometry->mMaterialType == MAT_NULL || mLightDataMap.empty() ||
+		lGeometry->mMaterialType == MAT_NULL ||
 		pGeometry->GetTransformation().GetPosition().GetDistanceSquared(mCameraTransformation.GetPosition()) >= lLightShadowRange*lLightShadowRange);
 	const bool lForceShadows = (mShadowMode == FORCE_CAST_SHADOWS);
 	const bool lEscapeShadows = (lGeometry->mShadow == NO_SHADOWS);
@@ -1323,37 +1329,35 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 
 	SortLights(pGeometry->GetTransformation().GetPosition());
 
-	/*
-		Make sure shadow maps are up to date.
-	*/
+	const int lLightCount = GetLightCount();
 	if (mShadowHint == Renderer::SH_VOLUMES_AND_MAPS)
 	{
-		for (int i = 0; i < GetLightCount(); i++)
+		for (int i = 0; i < lLightCount; i++)
 		{
-			LightData* lLight = GetLightData(GetClosestLight(i));
-			if (lLight->mShadowRange <= 0)
+			LightData* lLightData = (i==0)? pClosestLightData : GetLightData(GetClosestLight(i));
+			if (lLightData->mShadowRange <= 0)
 			{
 				continue;
 			}
 
-			if (lLight->mType == Renderer::LIGHT_SPOT)
+			if (lLightData->mType == Renderer::LIGHT_SPOT)
 			{
 				if (pGeometry->GetTransformationChanged() == true)
-					lLight->mShadowMapNeedUpdate = true;
+					lLightData->mShadowMapNeedUpdate = true;
 
-				float lDist = lLight->mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
-				float lMinDist = lLight->mRadius + pGeometry->GetBoundingRadius();
+				float lDist = lLightData->mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
+				float lMinDist = lLightData->mRadius + pGeometry->GetBoundingRadius();
 				lMinDist *= lMinDist;
 
 				if (lDist < lMinDist)
 				{
-					if (lLight->mShadowMapGeometrySet.Insert(lGeometry) == true)
-						lLight->mShadowMapNeedUpdate = true;
+					if (lLightData->mShadowMapGeometrySet.Insert(lGeometry) == true)
+						lLightData->mShadowMapNeedUpdate = true;
 				}
 				else
 				{
-					if (lLight->mShadowMapGeometrySet.Remove(lGeometry) == true)
-						lLight->mShadowMapNeedUpdate = true;
+					if (lLightData->mShadowMapGeometrySet.Remove(lGeometry) == true)
+						lLightData->mShadowMapNeedUpdate = true;
 				}
 			}
 		}
@@ -1365,31 +1369,31 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 
 	// Iterate over all the closest light sources and update shadow volumes.
 	unsigned lActiveLightCount = 0;
-	int lLoopMax = MAX_SHADOW_VOLUMES < GetLightCount() ? MAX_SHADOW_VOLUMES : GetLightCount();
+	const int lLoopMax = MAX_SHADOW_VOLUMES < GetLightCount() ? MAX_SHADOW_VOLUMES : lLightCount;
 	int i;
 	for (i = 0; i < lLoopMax; i++)
 	{
 		bool lProcessLight = false;
-		LightData* lLight = GetLightData(GetClosestLight(i));
-		if (lLight->mShadowRange <= 0)
+		LightData* lLightData = (i==0)? pClosestLightData : GetLightData(GetClosestLight(i));
+		if (lLightData->mShadowRange <= 0)
 		{
 			continue;
 		}
 
-		if (lLight->mEnabled == true)
+		if (lLightData->mEnabled == true)
 		{
-			if (lLight->mType == Renderer::LIGHT_POINT ||
-			   (lLight->mType == Renderer::LIGHT_SPOT && mShadowHint == Renderer::SH_VOLUMES_ONLY))
+			if (lLightData->mType == Renderer::LIGHT_POINT ||
+			   (lLightData->mType == Renderer::LIGHT_SPOT && mShadowHint == Renderer::SH_VOLUMES_ONLY))
 			{
-				float lDist = lLight->mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
-				float lMinDist = lLight->mRadius + pGeometry->GetBoundingRadius();
+				float lDist = lLightData->mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
+				float lMinDist = lLightData->mRadius + pGeometry->GetBoundingRadius();
 
 				if (lDist < lMinDist*lMinDist)
 				{
 					lProcessLight = true;
 				}
 			}
-			else if(lLight->mType == Renderer::LIGHT_DIRECTIONAL)
+			else if(lLightData->mType == Renderer::LIGHT_DIRECTIONAL)
 			{
 				lProcessLight = true;
 			}
@@ -1410,23 +1414,23 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 					lShadowGeom->mGeometry = lShadowVolume;
 					lShadowVolume->SetRendererData(lShadowGeom);
 
-					if (lLight->mType == Renderer::LIGHT_DIRECTIONAL)
+					if (lLightData->mType == Renderer::LIGHT_DIRECTIONAL)
 					{
-						lShadowVolume->UpdateShadowVolume(lLight->mDirection,
-										    lLight->mShadowRange, 
+						lShadowVolume->UpdateShadowVolume(lLightData->mDirection,
+										    lLightData->mShadowRange, 
 										    true);
 					}
 					else
 					{
-						lShadowVolume->UpdateShadowVolume(lLight->mPosition,
-										    lLight->mShadowRange, 
+						lShadowVolume->UpdateShadowVolume(lLightData->mPosition,
+										    lLightData->mShadowRange, 
 										    false);
 					}
 
 					mShadowVolumeTable.Insert(lId, lShadowGeom);
 					lGeometry->mShadowVolume[i] = (GeometryID)lId;
 
-					lShadowsUpdated = BindShadowGeometry(lShadowVolume, lLight->mHint);
+					lShadowsUpdated = BindShadowGeometry(lShadowVolume, lLightData->mHint);
 				}
 
 				lGeometry->mLightID[i] = GetClosestLight(i);
@@ -1435,7 +1439,7 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 			{
 				if ((pGeometry->GetTransformationChanged() || pGeometry->GetVertexDataChanged() ||
 					lGeometry->mLightID[i] != GetClosestLight(i)) ||
-					(lLight->mTransformationChanged &&
+					(lLightData->mTransformationChanged &&
 					mCurrentFrame - lGeometry->mLastFrameShadowsUpdated >= mShadowUpdateFrameDelay))
 				{
 					ShadowVolumeTable::Iterator x = mShadowVolumeTable.Find(lGeometry->mShadowVolume[i]);
@@ -1449,16 +1453,16 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 							TransformationF lTransform(pGeometry->GetLastBigOrientation(), pGeometry->GetTransformation().GetPosition());
 							lShadowVolume->SetTransformation(lTransform);
 						}
-						else if (lLight->mType == Renderer::LIGHT_DIRECTIONAL)
+						else if (lLightData->mType == Renderer::LIGHT_DIRECTIONAL)
 						{
-							lShadowVolume->UpdateShadowVolume(lLight->mDirection,
-											    lLight->mShadowRange, 
+							lShadowVolume->UpdateShadowVolume(lLightData->mDirection,
+											    lLightData->mShadowRange, 
 											    true);
 						}
 						else
 						{
-							lShadowVolume->UpdateShadowVolume(lLight->mPosition,
-											    lLight->mShadowRange, 
+							lShadowVolume->UpdateShadowVolume(lLightData->mPosition,
+											    lLightData->mShadowRange, 
 											    false);
 						}
 

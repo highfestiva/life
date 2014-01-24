@@ -53,8 +53,6 @@ public:
 
 	void UpdateAnimatedGeometry();
 
-	PrimitiveType GetPrimitiveType() const;
-
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility);
 

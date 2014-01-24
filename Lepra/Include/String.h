@@ -29,33 +29,32 @@ typedef wstr		str;
 typedef astr		str;
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE
 
-inline size_t HashString(const char* __s);
-inline size_t HashString(const wchar_t* __w);
+inline size_t HashString(const char* s);
+inline size_t HashString(const wchar_t* w);
 
 class HashedString: public str
 {
 public:
-	HashedString(const str& pData):
+	inline HashedString()
+	{
+	}
+	inline HashedString(const str& pData):
 		str(pData),
-		mIsHashed(false)
+		mHash(HashString(c_str())),
+		mValue(0),
+		mValueExpireCount(0)
 	{
 	}
-	HashedString(const str::value_type* pData):
+	inline HashedString(const str::value_type* pData):
 		str(pData),
-		mIsHashed(false)
+		mHash(HashString(c_str())),
+		mValue(0),
+		mValueExpireCount(0)
 	{
 	}
-	size_t hash() const
-	{
-		if (!mIsHashed)
-		{
-			mHash = HashString(c_str());
-			mIsHashed = true;
-		}
-		return mHash;
-	}
-	mutable bool mIsHashed;
-	mutable size_t mHash;
+	size_t mHash;
+	mutable void* mValue;
+	mutable int mValueExpireCount;
 };
 }
 
@@ -64,55 +63,55 @@ public:
 // We add our own STL hashers for string and wide.
 namespace std
 {
-inline size_t __stl_hash_astring(const char* __s)
+inline size_t __stl_hash_astring(const char* s)
 {
-	unsigned long __h = 0;
-	for ( ; *__s; ++__s)
-		__h = 5*__h + (unsigned char)*__s;
-	return ((size_t)(__h));
+	size_t h = 0;
+	for (; *s; ++s)
+		h = 101*h + (size_t)*s;
+	return h;
 }
-inline size_t __stl_hash_wstring(const wchar_t* __w)
+inline size_t __stl_hash_wstring(const wchar_t* s)
 {
-	unsigned long __h = 0;
-	for ( ; *__w; ++__w)
-		__h = 5*__h + *__w;
-	return ((size_t)(__h));
+	size_t h = 0;
+	for (; *s; ++s)
+		h = 101*h + (size_t)*s;
+	return h;
 }
 template<> struct LEPRA_STD_HASHER<wchar_t*>
 {
-	size_t operator()(const wchar_t* __s) const
+	size_t operator()(const wchar_t* s) const
 	{
-		return (__stl_hash_wstring(__s));
+		return __stl_hash_wstring(s);
 	}
 };
 template<> struct LEPRA_STD_HASHER<const wchar_t*>
 {
-	size_t operator()(const wchar_t* __s) const
+	size_t operator()(const wchar_t* s) const
 	{
-		return (__stl_hash_wstring(__s));
+		return __stl_hash_wstring(s);
 	}
 };
 /*template<> struct LEPRA_STD_HASHER<Lepra::astr>
 {
 public:
-	size_t operator() (const Lepra::astr& __s) const
+	size_t operator() (const Lepra::astr& s) const
 	{
-		return (priv::__stl_hash_string(__s.c_str()));
+		return (priv::__stl_hash_string(s.c_str()));
 	}
 };
 template<> struct LEPRA_STD_HASHER<Lepra::wstr>
 {
 public:
-	size_t operator() (const Lepra::wstr& __w) const
+	size_t operator() (const Lepra::wstr& w) const
 	{
-		return (__stl_hash_wstring(__w.c_str()));
+		return (__stl_hash_wstring(w.c_str()));
 	}
 };*/
 template<> struct LEPRA_STD_HASHER<Lepra::HashedString>
 {
-	size_t operator()(const Lepra::HashedString& __s) const
+	size_t operator()(const Lepra::HashedString& s) const
 	{
-		return __s.hash();
+		return s.mHash;
 	}
 };
 }
@@ -121,13 +120,13 @@ template<> struct LEPRA_STD_HASHER<Lepra::HashedString>
 
 namespace Lepra
 {
-inline size_t HashString(const char* __s)
+inline size_t HashString(const char* s)
 {
-	return (std::__stl_hash_astring(__s));
+	return std::__stl_hash_astring(s);
 }
-inline size_t HashString(const wchar_t* __w)
+inline size_t HashString(const wchar_t* w)
 {
-	return (std::__stl_hash_wstring(__w));
+	return std::__stl_hash_wstring(w);
 }
 }
 

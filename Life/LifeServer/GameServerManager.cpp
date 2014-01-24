@@ -919,7 +919,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mLog.Infof(_T("Avatar %s/%i has q=(%f, %f, %f, %f)."),
 					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
 					pObject->GetInstanceId(),
-					q.mA, q.mB, q.mC, q.mD);*/
+					q.a, q.b, q.c, q.d);*/
 				BroadcastAvatar(lClient);
 			}
 			else

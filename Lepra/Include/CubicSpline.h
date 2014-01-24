@@ -278,35 +278,35 @@ private:
 
 		inline void Init(int pNumValues)
 		{
-			mA.Init(pNumValues);
-			mB.Init(pNumValues);
-			mC.Init(pNumValues);
-			mD.Init(pNumValues);
+			a.Init(pNumValues);
+			b.Init(pNumValues);
+			c.Init(pNumValues);
+			d.Init(pNumValues);
 		}
 
 		// 0 <= pT <= 1 within the segment.
 		inline float GetValue(int pValueIndex, float pT)
 		{
 			int i = pValueIndex;
-			return ((((mD[i] * pT) + mC[i]) * pT + mB[i]) * pT) + mA[i];
+			return ((((d[i] * pT) + c[i]) * pT + b[i]) * pT) + a[i];
 		}
 
 		inline float GetSlope(int pValueIndex, float pT)
 		{
 			int i = pValueIndex;
-			return 3.0f * mD[i] * pT * pT + 2.0f * mC[i] * pT + mB[i];
+			return 3.0f * d[i] * pT * pT + 2.0f * c[i] * pT + b[i];
 		}
 
 		inline float GetSlopeChange(int pValueIndex, float pT)
 		{
 			int i = pValueIndex;
-			return 6.0f * mD[i] * pT + 2.0f * mC[i];
+			return 6.0f * d[i] * pT + 2.0f * c[i];
 		}
 
-		Values mA;
-		Values mB;
-		Values mC;
-		Values mD;
+		Values a;
+		Values b;
+		Values c;
+		Values d;
 	};
 
 	void StartInterpolation(float pTime, InterpolationMode pMode, Values* pStartSlope, Values* pEndSlope);

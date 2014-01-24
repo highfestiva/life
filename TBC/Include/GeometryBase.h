@@ -147,7 +147,8 @@ public:
 	virtual GeometryVolatility GetGeometryVolatility() const = 0;
 	virtual void SetGeometryVolatility(GeometryVolatility pVolatility) = 0;
 
-	virtual PrimitiveType GetPrimitiveType() const = 0;
+	void SetPrimitiveType(PrimitiveType pType);
+	PrimitiveType GetPrimitiveType() const;
 
 	virtual unsigned int GetMaxVertexCount() const = 0;
 	        unsigned int GetMaxTriangleCount() const;
@@ -329,10 +330,11 @@ public:
 	uint32 GetFlags() const;
 	static void SetDefaultFlags(Lepra::uint32 pFlags);
 
-private:
+protected:
 	typedef std::list<Listener*> ListenerList;
 
 	Lepra::uint32 mFlags;
+	PrimitiveType mPrimitiveType;
 
 	BasicMaterialSettings mMaterialSettings;
 

@@ -158,6 +158,9 @@ void Fire::Init()
 	//CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:VolumesAndMaps"));
 #endif // Computer
 
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1);
+	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETPHYS_ALLOWFPSDEGRADATION, true);
+
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);

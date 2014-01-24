@@ -289,7 +289,7 @@ void Application::TickSleep() const
 				}
 				else if (lSleepTimeLeft > SystemManager::GetSleepResolution())
 				{
-					Thread::Sleep(lSleepTimeLeft - SystemManager::GetSleepResolution());
+					Thread::Sleep(lSleepTimeLeft - SystemManager::GetSleepResolution()/2);
 				}
 				else
 				{

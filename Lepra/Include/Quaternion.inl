@@ -9,27 +9,35 @@
 
 
 TEMPLATE QUAL::Quaternion() :
-	mA(1),
-	mB(0),
-	mC(0),
-	mD(0)
+	a(1),
+	b(0),
+	c(0),
+	d(0)
 {
 }
 
-TEMPLATE QUAL::Quaternion(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD) :
-	mA(pA),
-	mB(pB),
-	mC(pC),
-	mD(pD)
+TEMPLATE QUAL::Quaternion(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
+	mData[0] = pA;
+	mData[1] = pB;
+	mData[2] = pC;
+	mData[3] = pD;
 }
 
-TEMPLATE QUAL::Quaternion(const Quaternion& pQuaternion) :
-	mA(pQuaternion.mA),
-	mB(pQuaternion.mB),
-	mC(pQuaternion.mC),
-	mD(pQuaternion.mD)
+TEMPLATE QUAL::Quaternion(const _TVarType pData[4])
 {
+	mData[0] = pData[0];
+	mData[1] = pData[1];
+	mData[2] = pData[2];
+	mData[3] = pData[3];
+}
+
+TEMPLATE QUAL::Quaternion(const Quaternion& pQuaternion)
+{
+	mData[0] = pQuaternion.mData[0];
+	mData[1] = pQuaternion.mData[1];
+	mData[2] = pQuaternion.mData[2];
+	mData[3] = pQuaternion.mData[3];
 }
 
 TEMPLATE QUAL::Quaternion(const RotationMatrix<_TVarType>& pRotMtx)
@@ -44,34 +52,42 @@ TEMPLATE QUAL::Quaternion(_TVarType pAngle, const Vector3D<_TVarType>& pVector)
 
 TEMPLATE void QUAL::Set(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	mA = pA;
-	mB = pB;
-	mC = pC;
-	mD = pD;
+	mData[0] = pA;
+	mData[1] = pB;
+	mData[2] = pC;
+	mData[3] = pD;
+}
+
+TEMPLATE void QUAL::Set(const _TVarType pData[4])
+{
+	mData[0] = pData[0];
+	mData[1] = pData[1];
+	mData[2] = pData[2];
+	mData[3] = pData[3];
 }
 
 TEMPLATE void QUAL::Set(const Quaternion& pQuaternion)
 {
-	mA = pQuaternion.mA;
-	mB = pQuaternion.mB;
-	mC = pQuaternion.mC;
-	mD = pQuaternion.mD;
+	mData[0] = pQuaternion.mData[0];
+	mData[1] = pQuaternion.mData[1];
+	mData[2] = pQuaternion.mData[2];
+	mData[3] = pQuaternion.mData[3];
 }
 
 TEMPLATE void QUAL::SetConjugate(const Quaternion& pQuaternion)
 {
-	mA =  pQuaternion.mA;
-	mB = -pQuaternion.mB;
-	mC = -pQuaternion.mC;
-	mD = -pQuaternion.mD;
+	a =  pQuaternion.a;
+	b = -pQuaternion.b;
+	c = -pQuaternion.c;
+	d = -pQuaternion.d;
 }
 
 TEMPLATE void QUAL::SetIdentity()
 {
-	mA = 1;
-	mB = 0;
-	mC = 0;
-	mD = 0;
+	a = 1;
+	b = 0;
+	c = 0;
+	d = 0;
 }
 
 TEMPLATE void QUAL::Set(_TVarType pAngle, const Vector3D<_TVarType>& pVector)
@@ -81,10 +97,10 @@ TEMPLATE void QUAL::Set(_TVarType pAngle, const Vector3D<_TVarType>& pVector)
 
 	_TVarType lSinA = (_TVarType)sin(pAngle / (_TVarType)2.0);
 
-	mA = (_TVarType)cos(pAngle / (_TVarType)2.0);
-	mB = lSinA * lV.x;
-	mC = lSinA * lV.y;
-	mD = lSinA * lV.z;
+	a = (_TVarType)cos(pAngle / (_TVarType)2.0);
+	b = lSinA * lV.x;
+	c = lSinA * lV.y;
+	d = lSinA * lV.z;
 
 	Normalize();
 }
@@ -112,12 +128,12 @@ TEMPLATE void QUAL::Set(const RotationMatrix<_TVarType>& pRotMtx)
 	{
 		_TVarType s = (_TVarType)sqrt(lTrace + 1);
 
-		mA = s / (_TVarType)2;
+		a = s / (_TVarType)2;
 		s = (_TVarType)0.5 / s;
 
-		mB = (lMatrix[5] - lMatrix[7]) * s;
-		mC = (lMatrix[6] - lMatrix[2]) * s;
-		mD = (lMatrix[1] - lMatrix[3]) * s;
+		b = (lMatrix[5] - lMatrix[7]) * s;
+		c = (lMatrix[6] - lMatrix[2]) * s;
+		d = (lMatrix[1] - lMatrix[3]) * s;
 	}
 	else // Diagonal is negative.
 	{
@@ -148,32 +164,12 @@ TEMPLATE void QUAL::Set(const RotationMatrix<_TVarType>& pRotMtx)
 		lQ[j] = (lMatrix[i * 3 + j] + lMatrix[j * 3 + i]) * s;
 		lQ[k] = (lMatrix[i * 3 + k] - lMatrix[k * 3 + i]) * s;
 
-		mA = lQ[0];
-		mB = lQ[1];
-		mC = lQ[2];
-		mD = lQ[3];
+		a = lQ[0];
+		b = lQ[1];
+		c = lQ[2];
+		d = lQ[3];
 	}
 */
-}
-
-TEMPLATE _TVarType QUAL::GetA() const
-{
-	return mA;
-}
-
-TEMPLATE _TVarType QUAL::GetB() const
-{
-	return mB;
-}
-
-TEMPLATE _TVarType QUAL::GetC() const
-{
-	return mC;
-}
-
-TEMPLATE _TVarType QUAL::GetD() const
-{
-	return mD;
 }
 
 TEMPLATE RotationMatrix<_TVarType> QUAL::GetAsRotationMatrix() const
@@ -184,21 +180,21 @@ TEMPLATE RotationMatrix<_TVarType> QUAL::GetAsRotationMatrix() const
 	_TVarType lB2, lC2, lD2;
 
 	// Calculate coefficients.
-	lB2 = mB + mB;
-	lC2 = mC + mC;
-	lD2 = mD + mD;
+	lB2 = b + b;
+	lC2 = c + c;
+	lD2 = d + d;
 
-	lBB = mB * lB2;
-	lBC = mB * lC2;
-	lBD = mB * lD2;
+	lBB = b * lB2;
+	lBC = b * lC2;
+	lBD = b * lD2;
 
-	lCC = mC * lC2;
-	lCD = mC * lD2;
-	lDD = mD * lD2;
+	lCC = c * lC2;
+	lCD = c * lD2;
+	lDD = d * lD2;
 
-	lAB = mA * lB2;
-	lAC = mA * lC2;
-	lAD = mA * lD2;
+	lAB = a * lB2;
+	lAC = a * lC2;
+	lAD = a * lD2;
 
 	// And now create the matrix...
 	RotationMatrix<_TVarType> lRotMtx
@@ -241,21 +237,21 @@ TEMPLATE void QUAL::GetAsRotationMatrix(RotationMatrix<_TVarType>& pRotMtx) cons
 	_TVarType lB2, lC2, lD2;
 
 	// Calculate coefficients.
-	lB2 = mB + mB;
-	lC2 = mC + mC;
-	lD2 = mD + mD;
+	lB2 = b + b;
+	lC2 = c + c;
+	lD2 = d + d;
 
-	lBB = mB * lB2;
-	lBC = mB * lC2;
-	lBD = mB * lD2;
+	lBB = b * lB2;
+	lBC = b * lC2;
+	lBD = b * lD2;
 
-	lCC = mC * lC2;
-	lCD = mC * lD2;
-	lDD = mD * lD2;
+	lCC = c * lC2;
+	lCD = c * lD2;
+	lDD = d * lD2;
 
-	lAB = mA * lB2;
-	lAC = mA * lC2;
-	lAD = mA * lD2;
+	lAB = a * lB2;
+	lAC = a * lC2;
+	lAD = a * lD2;
 
 	// And now create the matrix...
 	pRotMtx.Set((_TVarType)1.0 - (lCC + lDD),
@@ -289,227 +285,356 @@ TEMPLATE void QUAL::GetAsRotationMatrix(RotationMatrix<_TVarType>& pRotMtx) cons
 
 TEMPLATE void QUAL::Add(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	mA += pA;
-	mB += pB;
-	mC += pC;
-	mD += pD;
+	a += pA;
+	b += pB;
+	c += pC;
+	d += pD;
 }
 
 TEMPLATE void QUAL::Add(const Quaternion& pQuaternion)
 {
-	mA += pQuaternion.mA;
-	mB += pQuaternion.mB;
-	mC += pQuaternion.mC;
-	mD += pQuaternion.mD;
+	a += pQuaternion.a;
+	b += pQuaternion.b;
+	c += pQuaternion.c;
+	d += pQuaternion.d;
 }
 
 TEMPLATE void QUAL::Sub(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	mA -= pA;
-	mB -= pB;
-	mC -= pC;
-	mD -= pD;
+	a -= pA;
+	b -= pB;
+	c -= pC;
+	d -= pD;
 }
 
 TEMPLATE void QUAL::Sub(const Quaternion& pQuaternion)
 {
-	mA -= pQuaternion.mA;
-	mB -= pQuaternion.mB;
-	mC -= pQuaternion.mC;
-	mD -= pQuaternion.mD;
+	a -= pQuaternion.a;
+	b -= pQuaternion.b;
+	c -= pQuaternion.c;
+	d -= pQuaternion.d;
 }
 
 TEMPLATE void QUAL::Mul(_TVarType pX)
 {
-	mA *= pX;
-	mB *= pX;
-	mC *= pX;
-	mD *= pX;
+	a *= pX;
+	b *= pX;
+	c *= pX;
+	d *= pX;
 }
 
 TEMPLATE void QUAL::Div(_TVarType pX)
 {
-	mA /= pX;
-	mB /= pX;
-	mC /= pX;
-	mD /= pX;
+	a /= pX;
+	b /= pX;
+	c /= pX;
+	d /= pX;
 }
 
 TEMPLATE void QUAL::Mul(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	_TVarType lA = mA * pA - mB * pB - mC * pC - mD * pD;
-	_TVarType lB = mA * pB + mB * pA + mC * pD - mD * pC;
-	_TVarType lC = mA * pC + mC * pA + mD * pB - mB * pD;
-	_TVarType lD = mA * pD + mD * pA + mB * pC - mC * pB;
+	_TVarType lA = a * pA - b * pB - c * pC - d * pD;
+	_TVarType lB = a * pB + b * pA + c * pD - d * pC;
+	_TVarType lC = a * pC + c * pA + d * pB - b * pD;
+	_TVarType lD = a * pD + d * pA + b * pC - c * pB;
 
-	mA = lA;
-	mB = lB;
-	mC = lC;
-	mD = lD;
+	a = lA;
+	b = lB;
+	c = lC;
+	d = lD;
+}
+
+TEMPLATE void QUAL::Mul(const _TVarType pData[4])
+{
+	_TVarType lA = mData[0] * pData[0] - mData[1] * pData[1] - mData[2] * pData[2] - mData[3] * pData[3];
+	_TVarType lB = mData[0] * pData[1] + mData[1] * pData[0] + mData[2] * pData[3] - mData[3] * pData[2];
+	_TVarType lC = mData[0] * pData[2] + mData[2] * pData[0] + mData[3] * pData[1] - mData[1] * pData[3];
+	_TVarType lD = mData[0] * pData[3] + mData[3] * pData[0] + mData[1] * pData[2] - mData[2] * pData[1];
+
+	mData[0] = lA;
+	mData[1] = lB;
+	mData[2] = lC;
+	mData[3] = lD;
 }
 
 TEMPLATE void QUAL::Mul(const Quaternion& pQuaternion)
 {
-	Mul(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	Mul(pQuaternion.mData);
 }
 
 TEMPLATE void QUAL::AMulInvB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	_TVarType lA =  mA * pA + mB * pB + mC * pC + mD * pD;
-	_TVarType lB = -mA * pB + mB * pA - mC * pD + mD * pC;
-	_TVarType lC = -mA * pC + mC * pA - mD * pB + mB * pD;
-	_TVarType lD = -mA * pD + mD * pA - mB * pC + mC * pB;
+	_TVarType lA =  a * pA + b * pB + c * pC + d * pD;
+	_TVarType lB = -a * pB + b * pA - c * pD + d * pC;
+	_TVarType lC = -a * pC + c * pA - d * pB + b * pD;
+	_TVarType lD = -a * pD + d * pA - b * pC + c * pB;
 
 	_TVarType lLRecip = (_TVarType)1.0 / (pA * pA + pB * pB + pC * pC + pD * pD);
 
-	mA = lA * lLRecip;
-	mB = lB * lLRecip;
-	mC = lC * lLRecip;
-	mD = lD * lLRecip;
+	a = lA * lLRecip;
+	b = lB * lLRecip;
+	c = lC * lLRecip;
+	d = lD * lLRecip;
+}
+
+TEMPLATE void QUAL::AMulInvB(const _TVarType pData[4])
+{
+	_TVarType lA =  mData[0] * pData[0] + mData[1] * pData[1] + mData[2] * pData[2] + mData[3] * pData[3];
+	_TVarType lB = -mData[0] * pData[1] + mData[1] * pData[0] - mData[2] * pData[3] + mData[3] * pData[2];
+	_TVarType lC = -mData[0] * pData[2] + mData[2] * pData[0] - mData[3] * pData[1] + mData[1] * pData[3];
+	_TVarType lD = -mData[0] * pData[3] + mData[3] * pData[0] - mData[1] * pData[2] + mData[2] * pData[1];
+
+	_TVarType lLRecip = (_TVarType)1.0 / (pData[0] * pData[0] + pData[1] * pData[1] + pData[2] * pData[2] + pData[3] * pData[3]);
+
+	mData[0] = lA * lLRecip;
+	mData[1] = lB * lLRecip;
+	mData[2] = lC * lLRecip;
+	mData[3] = lD * lLRecip;
 }
 
 TEMPLATE void QUAL::AMulInvB(const Quaternion& pQuaternion)
 {
-	AMulInvB(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	AMulInvB(pQuaternion.mData);
 }
 
 TEMPLATE void QUAL::InvAMulB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	_TVarType lA = mA * pA + mB * pB + mC * pC + mD * pD;
-	_TVarType lB = mA * pB - mB * pA - mC * pD + mD * pC;
-	_TVarType lC = mA * pC - mC * pA - mD * pB + mB * pD;
-	_TVarType lD = mA * pD - mD * pA - mB * pC + mC * pB;
+	_TVarType lA = a * pA + b * pB + c * pC + d * pD;
+	_TVarType lB = a * pB - b * pA - c * pD + d * pC;
+	_TVarType lC = a * pC - c * pA - d * pB + b * pD;
+	_TVarType lD = a * pD - d * pA - b * pC + c * pB;
 
 	_TVarType lLRecip = (_TVarType)1.0 / GetNorm();
 
-	mA = lA * lLRecip;
-	mB = lB * lLRecip;
-	mC = lC * lLRecip;
-	mD = lD * lLRecip;
+	a = lA * lLRecip;
+	b = lB * lLRecip;
+	c = lC * lLRecip;
+	d = lD * lLRecip;
+}
+
+TEMPLATE void QUAL::InvAMulB(const _TVarType pData[4])
+{
+	_TVarType lA = mData[0] * pData[0] + mData[1] * pData[1] + mData[2] * pData[2] + mData[3] * pData[3];
+	_TVarType lB = mData[0] * pData[1] - mData[1] * pData[0] - mData[2] * pData[3] + mData[3] * pData[2];
+	_TVarType lC = mData[0] * pData[2] - mData[2] * pData[0] - mData[3] * pData[1] + mData[1] * pData[3];
+	_TVarType lD = mData[0] * pData[3] - mData[3] * pData[0] - mData[1] * pData[2] + mData[2] * pData[1];
+
+	_TVarType lLRecip = (_TVarType)1.0 / GetNorm();
+
+	mData[0] = lA * lLRecip;
+	mData[1] = lB * lLRecip;
+	mData[2] = lC * lLRecip;
+	mData[3] = lD * lLRecip;
 }
 
 TEMPLATE void QUAL::InvAMulB(const Quaternion& pQuaternion)
 {
-	InvAMulB(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	InvAMulB(pQuaternion.mData);
 }
 
 TEMPLATE void QUAL::InvAMulInvB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	_TVarType lA =  mA * pA - mB * pB - mC * pC - mD * pD;
-	_TVarType lB = -mA * pB - mB * pA + mC * pD - mD * pC;
-	_TVarType lC = -mA * pC - mC * pA + mD * pB - mB * pD;
-	_TVarType lD = -mA * pD - mD * pA + mB * pC - mC * pB;
+	_TVarType lA =  a * pA - b * pB - c * pC - d * pD;
+	_TVarType lB = -a * pB - b * pA + c * pD - d * pC;
+	_TVarType lC = -a * pC - c * pA + d * pB - b * pD;
+	_TVarType lD = -a * pD - d * pA + b * pC - c * pB;
 
 	_TVarType lLRecip = (_TVarType)1.0 / 
 		(
-			(mA * mA + mB * mB + mC * mC + mD * mD) *
+			(a * a + b * b + c * c + d * d) *
 			(pA * pA + pB * pB + pC * pC + pD * pD)
 		);
 
-	mA = lA * lLRecip;
-	mB = lB * lLRecip;
-	mC = lC * lLRecip;
-	mD = lD * lLRecip;
+	a = lA * lLRecip;
+	b = lB * lLRecip;
+	c = lC * lLRecip;
+	d = lD * lLRecip;
+}
+
+TEMPLATE void QUAL::InvAMulInvB(const _TVarType pData[4])
+{
+	_TVarType lA =  mData[0] * pData[0] - mData[1] * pData[1] - mData[2] * pData[2] - mData[3] * pData[3];
+	_TVarType lB = -mData[0] * pData[1] - mData[1] * pData[0] + mData[2] * pData[3] - mData[3] * pData[2];
+	_TVarType lC = -mData[0] * pData[2] - mData[2] * pData[0] + mData[3] * pData[1] - mData[1] * pData[3];
+	_TVarType lD = -mData[0] * pData[3] - mData[3] * pData[0] + mData[1] * pData[2] - mData[2] * pData[1];
+
+	_TVarType lLRecip = (_TVarType)1.0 / 
+		(
+			(mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2] + mData[3] * mData[3]) *
+			(pData[0] * pData[0] + pData[1] * pData[1] + pData[2] * pData[2] + pData[3] * pData[3])
+		);
+
+	mData[0] = lA * lLRecip;
+	mData[1] = lB * lLRecip;
+	mData[2] = lC * lLRecip;
+	mData[3] = lD * lLRecip;
 }
 
 TEMPLATE void QUAL::InvAMulInvB(const Quaternion& pQuaternion)
 {
-	InvAMulInvB(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	InvAMulInvB(pQuaternion.mData);
 }
 
 
 TEMPLATE void QUAL::BMulA(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	_TVarType lA = pA * mA - pB * mB - pC * mC - pD * mD;
-	_TVarType lB = pA * mB + pB * mA + pC * mD - pD * mC;
-	_TVarType lC = pA * mC + pC * mA + pD * mB - pB * mD;
-	_TVarType lD = pA * mD + pD * mA + pB * mC - pC * mB;
+	_TVarType lA = pA * a - pB * b - pC * c - pD * d;
+	_TVarType lB = pA * b + pB * a + pC * d - pD * c;
+	_TVarType lC = pA * c + pC * a + pD * b - pB * d;
+	_TVarType lD = pA * d + pD * a + pB * c - pC * b;
 
-	mA = lA;
-	mB = lB;
-	mC = lC;
-	mD = lD;
+	a = lA;
+	b = lB;
+	c = lC;
+	d = lD;
+}
+
+TEMPLATE void QUAL::BMulA(const _TVarType pData[4])
+{
+	_TVarType lA = pData[0] * mData[0] - pData[1] * mData[1] - pData[2] * mData[2] - pData[3] * mData[3];
+	_TVarType lB = pData[0] * mData[1] + pData[1] * mData[0] + pData[2] * mData[3] - pData[3] * mData[2];
+	_TVarType lC = pData[0] * mData[2] + pData[2] * mData[0] + pData[3] * mData[1] - pData[1] * mData[3];
+	_TVarType lD = pData[0] * mData[3] + pData[3] * mData[0] + pData[1] * mData[2] - pData[2] * mData[1];
+
+	mData[0] = lA;
+	mData[1] = lB;
+	mData[2] = lC;
+	mData[3] = lD;
 }
 
 TEMPLATE void QUAL::BMulA(const Quaternion& pQuaternion)
 {
-	BMulA(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	BMulA(pQuaternion.mData);
 }
 
 
 TEMPLATE void QUAL::InvBMulA(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	_TVarType lA = pA * mA + pB * mB + pC * mC + pD * mD;
-	_TVarType lB = pA * mB - pB * mA - pC * mD + pD * mC;
-	_TVarType lC = pA * mC - pC * mA - pD * mB + pB * mD;
-	_TVarType lD = pA * mD - pD * mA - pB * mC + pC * mB;
+	_TVarType lA = pA * a + pB * b + pC * c + pD * d;
+	_TVarType lB = pA * b - pB * a - pC * d + pD * c;
+	_TVarType lC = pA * c - pC * a - pD * b + pB * d;
+	_TVarType lD = pA * d - pD * a - pB * c + pC * b;
 
 	_TVarType lLRecip = (_TVarType)1.0 / (pA * pA + pB * pB + pC * pC + pD * pD);
 
-	mA = lA * lLRecip;
-	mB = lB * lLRecip;
-	mC = lC * lLRecip;
-	mD = lD * lLRecip;
+	a = lA * lLRecip;
+	b = lB * lLRecip;
+	c = lC * lLRecip;
+	d = lD * lLRecip;
+}
+
+TEMPLATE void QUAL::InvBMulA(const _TVarType pData[4])
+{
+	_TVarType lA = pData[0] * mData[0] + pData[1] * mData[1] + pData[2] * mData[2] + pData[3] * mData[3];
+	_TVarType lB = pData[0] * mData[1] - pData[1] * mData[0] - pData[2] * mData[3] + pData[3] * mData[2];
+	_TVarType lC = pData[0] * mData[2] - pData[2] * mData[0] - pData[3] * mData[1] + pData[1] * mData[3];
+	_TVarType lD = pData[0] * mData[3] - pData[3] * mData[0] - pData[1] * mData[2] + pData[2] * mData[1];
+
+	_TVarType lLRecip = (_TVarType)1.0 / (pData[0] * pData[0] + pData[1] * pData[1] + pData[2] * pData[2] + pData[3] * pData[3]);
+
+	mData[0] = lA * lLRecip;
+	mData[1] = lB * lLRecip;
+	mData[2] = lC * lLRecip;
+	mData[3] = lD * lLRecip;
 }
 
 TEMPLATE void QUAL::InvBMulA(const Quaternion& pQuaternion)
 {
-	InvBMulA(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	InvBMulA(pQuaternion.mData);
 }
 
 TEMPLATE void QUAL::BMulInvA(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	_TVarType lA =  pA * mA + pB * mB + pC * mC + pD * mD;
-	_TVarType lB = -pA * mB + pB * mA - pC * mD + pD * mC;
-	_TVarType lC = -pA * mC + pC * mA - pD * mB + pB * mD;
-	_TVarType lD = -pA * mD + pD * mA - pB * mC + pC * mB;
+	_TVarType lA =  pA * a + pB * b + pC * c + pD * d;
+	_TVarType lB = -pA * b + pB * a - pC * d + pD * c;
+	_TVarType lC = -pA * c + pC * a - pD * b + pB * d;
+	_TVarType lD = -pA * d + pD * a - pB * c + pC * b;
 
 	_TVarType lLRecip = (_TVarType)1.0 / GetNorm();
 
-	mA = lA * lLRecip;
-	mB = lB * lLRecip;
-	mC = lC * lLRecip;
-	mD = lD * lLRecip;
+	a = lA * lLRecip;
+	b = lB * lLRecip;
+	c = lC * lLRecip;
+	d = lD * lLRecip;
+}
+
+TEMPLATE void QUAL::BMulInvA(const _TVarType pData[4])
+{
+	_TVarType lA =  pData[0] * mData[0] + pData[1] * mData[1] + pData[2] * mData[2] + pData[3] * mData[3];
+	_TVarType lB = -pData[0] * mData[1] + pData[1] * mData[0] - pData[2] * mData[3] + pData[3] * mData[2];
+	_TVarType lC = -pData[0] * mData[2] + pData[2] * mData[0] - pData[3] * mData[1] + pData[1] * mData[3];
+	_TVarType lD = -pData[0] * mData[3] + pData[3] * mData[0] - pData[1] * mData[2] + pData[2] * mData[1];
+
+	_TVarType lLRecip = (_TVarType)1.0 / GetNorm();
+
+	mData[0] = lA * lLRecip;
+	mData[1] = lB * lLRecip;
+	mData[2] = lC * lLRecip;
+	mData[3] = lD * lLRecip;
 }
 
 TEMPLATE void QUAL::BMulInvA(const Quaternion& pQuaternion)
 {
-	BMulInvA(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	BMulInvA(pQuaternion.mData);
 }
 
 TEMPLATE void QUAL::InvBMulInvA(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
-	_TVarType lA =  pA * mA - pB * mB - pC * mC - pD * mD;
-	_TVarType lB = -pA * mB - pB * mA + pC * mD - pD * mC;
-	_TVarType lC = -pA * mC - pC * mA + pD * mB - pB * mD;
-	_TVarType lD = -pA * mD - pD * mA + pB * mC - pC * mB;
+	_TVarType lA =  pA * a - pB * b - pC * c - pD * d;
+	_TVarType lB = -pA * b - pB * a + pC * d - pD * c;
+	_TVarType lC = -pA * c - pC * a + pD * b - pB * d;
+	_TVarType lD = -pA * d - pD * a + pB * c - pC * b;
 
 	_TVarType lLRecip = (_TVarType)1.0 / 
 		(
-			(mA * mA + mB * mB + mC * mC + mD * mD) *
+			(a * a + b * b + c * c + d * d) *
 			(pA * pA + pB * pB + pC * pC + pD * pD)
 		);
 
-	mA = lA * lLRecip;
-	mB = lB * lLRecip;
-	mC = lC * lLRecip;
-	mD = lD * lLRecip;
+	a = lA * lLRecip;
+	b = lB * lLRecip;
+	c = lC * lLRecip;
+	d = lD * lLRecip;
+}
+
+TEMPLATE void QUAL::InvBMulInvA(const _TVarType pData[4])
+{
+	_TVarType lA =  pData[0] * mData[0] - pData[1] * mData[1] - pData[2] * mData[2] - pData[3] * mData[3];
+	_TVarType lB = -pData[0] * mData[1] - pData[1] * mData[0] + pData[2] * mData[3] - pData[3] * mData[2];
+	_TVarType lC = -pData[0] * mData[2] - pData[2] * mData[0] + pData[3] * mData[1] - pData[1] * mData[3];
+	_TVarType lD = -pData[0] * mData[3] - pData[3] * mData[0] + pData[1] * mData[2] - pData[2] * mData[1];
+
+	_TVarType lLRecip = (_TVarType)1.0 / 
+		(
+			(mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2] + mData[3] * mData[3]) *
+			(pData[0] * pData[0] + pData[1] * pData[1] + pData[2] * pData[2] + pData[3] * pData[3])
+		);
+
+	mData[0] = lA * lLRecip;
+	mData[1] = lB * lLRecip;
+	mData[2] = lC * lLRecip;
+	mData[3] = lD * lLRecip;
 }
 
 TEMPLATE void QUAL::InvBMulInvA(const Quaternion& pQuaternion)
 {
-	InvBMulInvA(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	InvBMulInvA(pQuaternion.mData);
 }
 
 
 
 TEMPLATE void QUAL::Div(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
+	AMulInvB(pA, pB, pC, pD);
+}
+
+TEMPLATE void QUAL::Div(const _TVarType pData[4])
+{
 	// Division is defined as qp', where q = this, and p' is the inverse
-	// of the quaternion (pA, pB, pC, pD).
+	// of the quaternion pData.
 	// Note that we can redefine division as p'q as well, but with other
 	// results.
-	AMulInvB(pA, pB, pC, pD);
+	AMulInvB(pData);
 
 	// Division is defined as q'p, where q' = inverse of this, and p is the
 	// quaternion (pA, pB, pC, pD).
@@ -518,7 +643,7 @@ TEMPLATE void QUAL::Div(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 
 TEMPLATE void QUAL::Div(const Quaternion& pQuaternion)
 {
-	Div(pQuaternion.mA, pQuaternion.mB, pQuaternion.mC, pQuaternion.mD);
+	Div(pQuaternion.mData);
 }
 
 TEMPLATE Vector3D<_TVarType> QUAL::GetRotatedVector(const Vector3D<_TVarType>& pVector) const
@@ -526,7 +651,7 @@ TEMPLATE Vector3D<_TVarType> QUAL::GetRotatedVector(const Vector3D<_TVarType>& p
 	Quaternion lQ(0, pVector.x, pVector.y, pVector.z);
 	lQ = (*this) * lQ * GetInverse();	// TODO: assume unit, and use conjugate instead of inverse.
 
-	Vector3D<_TVarType> lV(lQ.mB, lQ.mC, lQ.mD);
+	Vector3D<_TVarType> lV(lQ.b, lQ.c, lQ.d);
 	return lV;
 }
 
@@ -535,33 +660,33 @@ TEMPLATE void QUAL::FastRotatedVector(const Quaternion& pInverse, Vector3D<_TVar
 	Quaternion<_TVarType> lQ(*this);
 	lQ.Mul(0, pSource.x, pSource.y, pSource.z);
 	lQ.Mul(pInverse);
-	pTarget.x = lQ.mB;
-	pTarget.y = lQ.mC;
-	pTarget.z = lQ.mD;
+	pTarget.x = lQ.b;
+	pTarget.y = lQ.c;
+	pTarget.z = lQ.d;
 }
 
 TEMPLATE Vector3D<_TVarType> QUAL::GetInverseRotatedVector(const Vector3D<_TVarType>& pVector) const
 {
 	Quaternion lQ(0, pVector.x, pVector.y, pVector.z);
 	lQ = GetInverse() * lQ * (*this);	// TODO: assume unit, and use conjugate instead of inverse.
-	return Vector3D<_TVarType>(lQ.mB, lQ.mC, lQ.mD);
+	return Vector3D<_TVarType>(lQ.b, lQ.c, lQ.d);
 }
 
 TEMPLATE void QUAL::FastInverseRotatedVector(const Quaternion& pInverse, Vector3D<_TVarType>& pTarget, const Vector3D<_TVarType>& pSource) const
 {
 	Quaternion<_TVarType> lQ(pInverse);
 	lQ.Mul(0, pSource.x, pSource.y, pSource.z);
-	lQ.Mul(mA, mB, mC, mD);
-	pTarget.x = lQ.mB;
-	pTarget.y = lQ.mC;
-	pTarget.z = lQ.mD;
+	lQ.Mul(a, b, c, d);
+	pTarget.x = lQ.b;
+	pTarget.y = lQ.c;
+	pTarget.z = lQ.d;
 }
 
 TEMPLATE void QUAL::MakeConjugate()
 {
-	mB = -mB;
-	mC = -mC;
-	mD = -mD;
+	b = -b;
+	c = -c;
+	d = -d;
 }
 
 TEMPLATE Quaternion<_TVarType> QUAL::GetConjugate() const
@@ -588,11 +713,11 @@ TEMPLATE Quaternion<_TVarType> QUAL::GetInverse() const
 TEMPLATE void QUAL::MakeSquare()
 {
 	// Return q*q, where q = this.
-	_TVarType l2xA = mA * 2.0f;
-	mA  = mA * mA - (mB * mB + mC * mC + mD * mD);
-	mB *= l2xA;
-	mC *= l2xA;
-	mD *= l2xA;
+	_TVarType l2xA = a * 2.0f;
+	a  = a * a - (b * b + c * c + d * d);
+	b *= l2xA;
+	c *= l2xA;
+	d *= l2xA;
 	return *this;
 }
 
@@ -605,7 +730,7 @@ TEMPLATE Quaternion<_TVarType> QUAL::GetSquare() const
 
 TEMPLATE _TVarType QUAL::GetNorm() const
 {
-	return mA * mA + mB * mB + mC * mC + mD * mD;
+	return mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2] + mData[3] * mData[3];
 }
 
 TEMPLATE _TVarType QUAL::GetMagnitude() const
@@ -615,10 +740,10 @@ TEMPLATE _TVarType QUAL::GetMagnitude() const
 
 TEMPLATE void QUAL::Negate()
 {
-	mA = -mA;
-	mB = -mB;
-	mC = -mC;
-	mD = -mD;
+	a = -a;
+	b = -b;
+	c = -c;
+	d = -d;
 }
 
 TEMPLATE void QUAL::Normalize(_TVarType pLength)
@@ -640,10 +765,10 @@ TEMPLATE void QUAL::Slerp(const Quaternion<_TVarType>& pFrom,
 			  _TVarType pT)
 {
 	// Calculate cosine (the dot product between two quaternions).
-	_TVarType lCosOmega = pFrom.mA * pTo.mA +
-				pFrom.mB * pTo.mB +
-				pFrom.mC * pTo.mC +
-				pFrom.mD * pTo.mD;
+	_TVarType lCosOmega = pFrom.a * pTo.a +
+				pFrom.b * pTo.b +
+				pFrom.c * pTo.c +
+				pFrom.d * pTo.d;
 
 	_TVarType lTo[4];
 
@@ -651,17 +776,17 @@ TEMPLATE void QUAL::Slerp(const Quaternion<_TVarType>& pFrom,
 	if (lCosOmega < 0)
 	{
 		lCosOmega = -lCosOmega;
-		lTo[0] = -pTo.mA;
-		lTo[1] = -pTo.mB;
-		lTo[2] = -pTo.mC;
-		lTo[3] = -pTo.mD;
+		lTo[0] = -pTo.a;
+		lTo[1] = -pTo.b;
+		lTo[2] = -pTo.c;
+		lTo[3] = -pTo.d;
 	}
 	else
 	{
-		lTo[0] = pTo.mA;
-		lTo[1] = pTo.mB;
-		lTo[2] = pTo.mC;
-		lTo[3] = pTo.mD;
+		lTo[0] = pTo.a;
+		lTo[1] = pTo.b;
+		lTo[2] = pTo.c;
+		lTo[3] = pTo.d;
 	}
 
 	_TVarType lScale0;
@@ -685,10 +810,10 @@ TEMPLATE void QUAL::Slerp(const Quaternion<_TVarType>& pFrom,
 	}
 
 	// And finally, perform the actual interpolation.
-	mA = pFrom.mA * lScale0 + lTo[0] * lScale1;
-	mB = pFrom.mB * lScale0 + lTo[1] * lScale1;
-	mC = pFrom.mC * lScale0 + lTo[2] * lScale1;
-	mD = pFrom.mD * lScale0 + lTo[3] * lScale1;
+	a = pFrom.a * lScale0 + lTo[0] * lScale1;
+	b = pFrom.b * lScale0 + lTo[1] * lScale1;
+	c = pFrom.c * lScale0 + lTo[2] * lScale1;
+	d = pFrom.d * lScale0 + lTo[3] * lScale1;
 }
 
 TEMPLATE void QUAL::RotateAroundWorldX(_TVarType pAngle)
@@ -741,28 +866,28 @@ TEMPLATE void QUAL::RotateAroundVector(const Vector3D<_TVarType>& pVector, _TVar
 
 TEMPLATE void QUAL::GetRotationVector(Vector3D<_TVarType>& pVector) const
 {
-	pVector.Set(mB, mC, mD);
+	pVector.Set(b, c, d);
 }
 
 TEMPLATE Vector3D<_TVarType> QUAL::GetRotationVector() const
 {
-	return Vector3D<_TVarType>(mB, mC, mD);
+	return Vector3D<_TVarType>(b, c, d);
 }
 
 TEMPLATE _TVarType QUAL::GetRotationAngle() const
 {
 	_TVarType lAngle;
-	if (mA <= -1)
+	if (a <= -1)
 	{
 		lAngle = PI;
 	}
-	else if (mA >= 1)
+	else if (a >= 1)
 	{
 		lAngle = 0;
 	}
 	else
 	{
-		lAngle = ::acos(mA);
+		lAngle = ::acos(a);
 	}
 	lAngle *= (_TVarType)2.0;
 	return (lAngle);
@@ -775,31 +900,31 @@ TEMPLATE void QUAL::GetEulerAngles(Vector3D<_TVarType>& pAngles) const
 
 TEMPLATE void QUAL::GetEulerAngles(_TVarType& pYaw, _TVarType& pPitch, _TVarType& pRoll) const
 {
-	const _TVarType lW2 = GetA()*GetA();
-	const _TVarType lX2 = GetB()*GetB();
-	const _TVarType lY2 = GetC()*GetC();
-	const _TVarType lZ2 = GetD()*GetD();
+	const _TVarType lW2 = a*a;
+	const _TVarType lX2 = b*b;
+	const _TVarType lY2 = c*c;
+	const _TVarType lZ2 = d*d;
 	const _TVarType lUnitLength = lW2 + lX2 + lY2 + lZ2;	// Normalised == 1, otherwise correction divisor.
-	const _TVarType abcd = GetA()*GetB() + GetC()*GetD();
+	const _TVarType abcd = a*b + c*d;
 	_TVarType lYaw;
 	_TVarType lPitch;
 	_TVarType lRoll;
 	if (abcd > ((_TVarType)0.5-MathTraits<_TVarType>::FullEps())*lUnitLength)
 	{
-		lYaw = 2 * atan2(GetC(), GetA());
+		lYaw = 2 * atan2(c, a);
 		lPitch = (_TVarType)PI/2;
 		lRoll = 0;
 	}
 	else if (abcd < (-(_TVarType)0.5+MathTraits<_TVarType>::FullEps())*lUnitLength)
 	{
-		lYaw = -2 * ::atan2(GetC(), GetA());
+		lYaw = -2 * ::atan2(c, a);
 		lPitch = -(_TVarType)PI/2;
 		lRoll = 0;
 	}
 	else
 	{
-		const _TVarType adbc = GetA()*GetD() - GetB()*GetC();
-		const _TVarType acbd = GetA()*GetC() - GetB()*GetD();
+		const _TVarType adbc = a*d - b*c;
+		const _TVarType acbd = a*c - b*d;
 		lYaw = ::atan2(2*adbc, 1 - 2*(lZ2+lX2));
 		lPitch = ::asin(2*abcd/lUnitLength);
 		lRoll = ::atan2(2*acbd, 1 - 2*(lY2+lX2));
@@ -831,17 +956,17 @@ TEMPLATE Vector3D<_TVarType> QUAL::GetAxisX() const
 	_TVarType lC2, lD2;
 
 	// Calculate coefficients.
-	lC2 = mC + mC;
-	lD2 = mD + mD;
+	lC2 = c + c;
+	lD2 = d + d;
 
-	lBC = mB * lC2;
-	lBD = mB * lD2;
+	lBC = b * lC2;
+	lBD = b * lD2;
 
-	lCC = mC * lC2;
-	lDD = mD * lD2;
+	lCC = c * lC2;
+	lDD = d * lD2;
 
-	lAC = mA * lC2;
-	lAD = mA * lD2;
+	lAC = a * lC2;
+	lAD = a * lD2;
 
 /*	Vector3D<_TVarType> lV
 	(
@@ -868,18 +993,18 @@ TEMPLATE Vector3D<_TVarType> QUAL::GetAxisY() const
 	_TVarType lB2, lC2, lD2;
 
 	// Calculate coefficients.
-	lB2 = mB + mB;
-	lC2 = mC + mC;
-	lD2 = mD + mD;
+	lB2 = b + b;
+	lC2 = c + c;
+	lD2 = d + d;
 
-	lBB = mB * lB2;
-	lDD = mD * lD2;
+	lBB = b * lB2;
+	lDD = d * lD2;
 
-	lBC = mB * lC2;
-	lCD = mC * lD2;
+	lBC = b * lC2;
+	lCD = c * lD2;
 
-	lAB = mA * lB2;
-	lAD = mA * lD2;
+	lAB = a * lB2;
+	lAD = a * lD2;
 
 /*	Vector3D<_TVarType> lV
 	(
@@ -906,18 +1031,18 @@ TEMPLATE Vector3D<_TVarType> QUAL::GetAxisZ() const
 	_TVarType lB2, lC2, lD2;
 
 	// Calculate coefficients.
-	lB2 = mB + mB;
-	lC2 = mC + mC;
-	lD2 = mD + mD;
+	lB2 = b + b;
+	lC2 = c + c;
+	lD2 = d + d;
 
-	lBB = mB * lB2;
-	lCC = mC * lC2;
+	lBB = b * lB2;
+	lCC = c * lC2;
 
-	lBD = mB * lD2;
-	lCD = mC * lD2;
+	lBD = b * lD2;
+	lCD = c * lD2;
 
-	lAB = mA * lB2;
-	lAC = mA * lC2;
+	lAB = a * lB2;
+	lAC = a * lC2;
 
 /*	Vector3D<_TVarType> lV
 	(
@@ -965,18 +1090,18 @@ TEMPLATE Quaternion<_TVarType> QUAL::operator= (const RotationMatrix<_TVarType>&
 
 TEMPLATE bool QUAL::operator== (const Quaternion<_TVarType>& pQ) const
 {
-	return mA == pQ.mA &&
-	       mB == pQ.mB &&
-	       mC == pQ.mC &&
-	       mD == pQ.mD;
+	return a == pQ.a &&
+	       b == pQ.b &&
+	       c == pQ.c &&
+	       d == pQ.d;
 }
 
 TEMPLATE bool QUAL::operator!= (const Quaternion<_TVarType>& pQ) const
 {
-	return mA != pQ.mA ||
-	       mB != pQ.mB ||
-	       mC != pQ.mC ||
-	       mD != pQ.mD;
+	return a != pQ.a ||
+	       b != pQ.b ||
+	       c != pQ.c ||
+	       d != pQ.d;
 }
 
 TEMPLATE Quaternion<_TVarType> QUAL::operator+= (const Quaternion<_TVarType>& pQ)
@@ -1082,10 +1207,10 @@ TEMPLATE Quaternion<_TVarType> QUAL::operator* (_TVarType pScalar) const
 
 TEMPLATE Quaternion<_TVarType> QUAL::operator*= (_TVarType pScalar)
 {
-	mA *= pScalar;
-	mB *= pScalar;
-	mC *= pScalar;
-	mD *= pScalar;
+	a *= pScalar;
+	b *= pScalar;
+	c *= pScalar;
+	d *= pScalar;
 	return *this;
 }
 
@@ -1112,10 +1237,10 @@ TEMPLATE Quaternion<_TVarType> QUAL::operator/ (_TVarType pScalar) const
 TEMPLATE Quaternion<_TVarType> QUAL::operator/= (_TVarType pScalar)
 {
 	pScalar = 1 / pScalar;
-	mA *= pScalar;
-	mB *= pScalar;
-	mC *= pScalar;
-	mD *= pScalar;
+	a *= pScalar;
+	b *= pScalar;
+	c *= pScalar;
+	d *= pScalar;
 	return *this;
 }
 
@@ -1128,12 +1253,12 @@ TEMPLATE Quaternion<_TVarType> QUAL::operator* () const
 
 TEMPLATE Quaternion<float> QUAL::ToFloat() const
 {
-	return Quaternion<float>((float)mA, (float)mB, (float)mC, (float)mD);
+	return Quaternion<float>((float)a, (float)b, (float)c, (float)d);
 }
 
 TEMPLATE Quaternion<double> QUAL::ToDouble() const
 {
-	return Quaternion<double>((double)mA, (double)mB, (double)mC, (double)mD);
+	return Quaternion<double>((double)a, (double)b, (double)c, (double)d);
 }
 
 #undef TEMPLATE

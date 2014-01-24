@@ -362,11 +362,11 @@ void CubicSpline::InitNaturalCubic(Values* pStartSlope, Values* pEndSlope, bool 
 
 		for (j = 0; j < mNumValuesPerPoint; j++)
 		{
-			mSegment[i].mA.Set(mPoint[i].mValues.mValue);
-			mSegment[i].mB[j] = lD[i][j] * lScaleFactor;
-			mSegment[i].mC[j] = (3.0f * (mPoint[i + 1].mValues[j] - mPoint[i].mValues[j]) -
+			mSegment[i].a.Set(mPoint[i].mValues.mValue);
+			mSegment[i].b[j] = lD[i][j] * lScaleFactor;
+			mSegment[i].c[j] = (3.0f * (mPoint[i + 1].mValues[j] - mPoint[i].mValues[j]) -
 								   2.0f * lD[i][j] * lScaleFactor - lD[i + 1][j] * lScaleFactor);
-			mSegment[i].mD[j] = (2.0f * (mPoint[i].mValues[j] - mPoint[i + 1].mValues[j]) +
+			mSegment[i].d[j] = (2.0f * (mPoint[i].mValues[j] - mPoint[i + 1].mValues[j]) +
 								   lD[i][j] * lScaleFactor + lD[i + 1][j] * lScaleFactor);
 		}
 	}
@@ -446,14 +446,14 @@ void CubicSpline::InitNaturalCubicClosed()
 	for (i = 0; i < lN; i++)
 	{
 		lScaleFactor = (mPoint[i + 1].mT - mPoint[i].mT) / lRefT;
-		mSegment[i].mA.Set(mPoint[i].mValues.mValue);
+		mSegment[i].a.Set(mPoint[i].mValues.mValue);
 
 		for (j = 0; j < mNumValuesPerPoint; j++)
 		{
-			mSegment[i].mB[j] = lD[i][j] * lScaleFactor;
-			mSegment[i].mC[j] = (3.0f * (mPoint[i + 1].mValues[j] - mPoint[i].mValues[j]) -
+			mSegment[i].b[j] = lD[i][j] * lScaleFactor;
+			mSegment[i].c[j] = (3.0f * (mPoint[i + 1].mValues[j] - mPoint[i].mValues[j]) -
 									2.0f * lD[i][j] * lScaleFactor - lD[i + 1][j] * lScaleFactor);
-			mSegment[i].mD[j] = (2.0f * (mPoint[i].mValues[j] - mPoint[i + 1].mValues[j]) +
+			mSegment[i].d[j] = (2.0f * (mPoint[i].mValues[j] - mPoint[i + 1].mValues[j]) +
 									lD[i][j] * lScaleFactor + lD[i + 1][j] * lScaleFactor);
 		}
 	}
@@ -462,14 +462,14 @@ void CubicSpline::InitNaturalCubicClosed()
 
 	for (i = 0; i < mNumValuesPerPoint; i++)
 	{
-		mSegment[lN].mA[i] = mPoint[lN].mValues[i];
-		mSegment[lN].mB[i] = lD[lN][i] * lScaleFactor;
+		mSegment[lN].a[i] = mPoint[lN].mValues[i];
+		mSegment[lN].b[i] = lD[lN][i] * lScaleFactor;
 
 		if (mModularValue[i] == false)
 		{
-			mSegment[lN].mC[i] = (3.0f * (mPoint[0].mValues[i] - mPoint[lN].mValues[i]) -
+			mSegment[lN].c[i] = (3.0f * (mPoint[0].mValues[i] - mPoint[lN].mValues[i]) -
 									   2.0f * lD[lN][i] * lScaleFactor - lD[0][i] * lScaleFactor);
-			mSegment[lN].mD[i] = (2.0f * (mPoint[lN].mValues[i] - mPoint[0].mValues[i]) +
+			mSegment[lN].d[i] = (2.0f * (mPoint[lN].mValues[i] - mPoint[0].mValues[i]) +
 									   lD[lN][i] * lScaleFactor + lD[0][i] * lScaleFactor);
 		}
 		else
@@ -478,17 +478,17 @@ void CubicSpline::InitNaturalCubicClosed()
 														  mPoint[0].mValues[i],
 														  mMinModValue[i],
 														  mMaxModValue[i]);
-			mSegment[lN].mC[i] = (3.0f * (lValue - mPoint[lN].mValues[i]) -
+			mSegment[lN].c[i] = (3.0f * (lValue - mPoint[lN].mValues[i]) -
 									   2.0f * lD[lN][i] * lScaleFactor - lD[0][i] * lScaleFactor);
-			mSegment[lN].mD[i] = (2.0f * (mPoint[lN].mValues[i] - lValue) +
+			mSegment[lN].d[i] = (2.0f * (mPoint[lN].mValues[i] - lValue) +
 									   lD[lN][i] * lScaleFactor + lD[0][i] * lScaleFactor);
 /*
 			float lNewValue;
 			if (OptimizeLastSegment(i, lNewValue) == true)
 			{
-				mSegment[lN].mC[i] = (3.0f * (lNewValue - mPoint[lN].mValues[i]) -
+				mSegment[lN].c[i] = (3.0f * (lNewValue - mPoint[lN].mValues[i]) -
 										   2.0f * lD[lN][i] * lScaleFactor - lD[0][i] * lScaleFactor);
-				mSegment[lN].mD[i] = (2.0f * (mPoint[lN].mValues[i] - lNewValue) +
+				mSegment[lN].d[i] = (2.0f * (mPoint[lN].mValues[i] - lNewValue) +
 										   lD[lN][i] * lScaleFactor + lD[0][i] * lScaleFactor);
 			}
 */
@@ -564,10 +564,10 @@ void CubicSpline::CalcABCD()
 
 	float lDX2 = lDX * lDX;
 
-	mA = lDT / lDX;
-	mB = 1.0f - mA;
-	mC = (mA * mA * mA - mA) * lDX2 * (1.0f / 6.0f);
-	mD = (mB * mB * mB - mB) * lDX2 * (1.0f / 6.0f);
+	a = lDT / lDX;
+	b = 1.0f - a;
+	c = (a * a * a - a) * lDX2 * (1.0f / 6.0f);
+	d = (b * b * b - b) * lDX2 * (1.0f / 6.0f);
 }
 */
 
@@ -621,8 +621,8 @@ bool CubicSpline::OptimizeLastSegment(int pValueIndex, float& pValue)
 
 	if (mModularValue[i] == true)
 	{
-		float lP = (lSeg->mC[i] / lSeg->mD[i]) * (2.0f / 3.0f);
-		float lQ = (lSeg->mB[i] / lSeg->mD[i]) * (1.0f / 3.0f);
+		float lP = (lSeg->c[i] / lSeg->d[i]) * (2.0f / 3.0f);
+		float lQ = (lSeg->b[i] / lSeg->d[i]) * (1.0f / 3.0f);
 		float lS = (lP * lP * 0.25f) - lQ;
 
 		if (lS > 0.0f)

@@ -51,7 +51,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mOptions(pVariableScope, pSlaveIndex)
 {
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, 0.5f);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, -1.0f);	// Disable (optimization).
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 
 	SetTicker(pMaster);
@@ -621,8 +621,11 @@ bool GameClientSlaveManager::IsLoggingIn() const
 
 bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) const
 {
-	const bool lMoveAllowed = (IsOwned(pObjectId) || GetContext()->IsLocalGameObjectId(pObjectId) ||
-		(!GetMaster()->IsLocalObject(pObjectId) && GetMaster()->IsFirstSlave(this)));
+	if (GetContext()->IsLocalGameObjectId(pObjectId))	// Optimization, this is the fastest method.
+	{
+		return false;
+	}
+	const bool lMoveAllowed = (IsOwned(pObjectId) || (!GetMaster()->IsLocalObject(pObjectId) && GetMaster()->IsFirstSlave(this)));
 	return !lMoveAllowed;
 }
 
@@ -688,7 +691,11 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 void GameClientSlaveManager::HandleUnusedRelativeAxis()
 {
 	float lMouseFilter;
-	CURE_RTVAR_GET(lMouseFilter, =(float), GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, 0.5f);
+	CURE_RTVAR_GET(lMouseFilter, =(float), GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, -1.0f);
+	if (lMouseFilter < 0)
+	{
+		return;
+	}
 
 	InputElementSet lUnusedSet = mUnusedRelativeAxis;
 	InputElementSet::iterator x = lUnusedSet.begin();
@@ -831,7 +838,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			/*mLog.Infof(_T("Creating network instance %u of type %s at pos (%f; %f; %f), q (%f, %f, %f, %f)."),
 				lMessageCreateObject->GetObjectId(), lClassId.c_str(),
 				lTransformation.GetPosition().x, lTransformation.GetPosition().y, lTransformation.GetPosition().z,
-				lTransformation.GetOrientation().mA, lTransformation.GetOrientation().mB, lTransformation.GetOrientation().mC, lTransformation.GetOrientation().mD);*/
+				lTransformation.GetOrientation().a, lTransformation.GetOrientation().b, lTransformation.GetOrientation().c, lTransformation.GetOrientation().d);*/
 			Cure::ContextObject* lObject = CreateObject(lMessageCreateObject->GetObjectId(),
 				strutil::Encode(lClassId), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
 			if (lType == Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT)

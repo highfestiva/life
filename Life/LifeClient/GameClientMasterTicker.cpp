@@ -540,6 +540,11 @@ bool GameClientMasterTicker::WaitResetUi()
 
 bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) const
 {
+	if (pSlave == mSlaveArray[0])	// Optimization.
+	{
+		return true;
+	}
+
 	SlaveArray::const_iterator x = mSlaveArray.begin();
 	for (; x != mSlaveArray.end(); ++x)
 	{
@@ -1268,9 +1273,9 @@ void GameClientMasterTicker::DrawDebugData() const
 	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
 	str lInfo = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
 	double lLoad;
-	CURE_RTVAR_GET(lLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
+	CURE_RTVAR_TRYGET(lLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, -1.0);
 	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), 100 * lLoad + 0.5f);
-	int w = 100;
+	int w = 110;
 	int h = 37;
 	bool lShowPerformanceCounters;
 	CURE_RTVAR_GET(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);

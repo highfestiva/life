@@ -30,6 +30,8 @@ ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
 
 	LEPRA_DEBUG_CODE(mName = _T("Shdw->") + pParentGeometry->mName);
 
+	SetPrimitiveType(TBC::GeometryBase::TRIANGLES);
+
 	if (mParentGeometry->GetEdgeData() == 0)
 	{
 		mParentGeometry->GenerateEdgeData();
@@ -140,11 +142,6 @@ void ShadowVolume::SetGeometryVolatility(TBC::GeometryBase::GeometryVolatility p
 	}
 }
 
-TBC::GeometryBase::PrimitiveType ShadowVolume::GetPrimitiveType() const
-{
-	return TBC::GeometryBase::TRIANGLES;
-}
-
 void ShadowVolume::InitVertices()
 {
 	bool lInitVertices = mParentGeometry->GetVertexDataChanged();
@@ -241,7 +238,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	Vector3DF lLightPos;
 	if (pDirectional == true)
 	{
-		lLightPos = mParentGeometry->GetTransformation().GetOrientation().GetInverseRotatedVector(pLightPos);
+		lLightPos = mParentGeometry->GetTransformation().mOrientation.GetInverseRotatedVector(pLightPos);
 		lLightPos.Normalize(pShadowRange);
 	}
 	else
@@ -262,17 +259,20 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		// Calculate triangle orientations relative to light source.
 		TriangleOrientation* lT = mTriangleOrientation;
 		TriangleOrientation* lEnd = lT + lTriangleCount;
-		for (; lT != lEnd; ++lT)
+		for (; lT != lEnd; ++lT, lIndices+=3, lSurfaceNormalData+=3)
 		{
 			// Get the vector between one corner of the triangle and the light source.
-			lT->mV0 = *lIndices++;
-			lT->mV1 = *lIndices++;
-			lT->mV2 = *lIndices++;
+			lT->mV0 = lIndices[0];
+			lT->mV1 = lIndices[1];
+			lT->mV2 = lIndices[2];
 			lT->mChecked = false;
 
+			float dx = lLightPos.mData[0] * lSurfaceNormalData[0];
+			float dy = lLightPos.mData[1] * lSurfaceNormalData[1];
+			float dz = lLightPos.mData[2] * lSurfaceNormalData[2];
+			float dot = dx+dy+dz;
 			// Light position is now treated as a direction instead.
-			lT->mIsFrontFacing = (lLightPos.Dot(lSurfaceNormalData[0], lSurfaceNormalData[1], lSurfaceNormalData[2]) < -1e-8f);
-			lSurfaceNormalData += 3;
+			lT->mIsFrontFacing = (dot < -1e-8f);
 		}
 
 		// Move vertex twins away from lightsource.
@@ -290,15 +290,13 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	{
 		const vtx_idx_t* lIndices = mParentGeometry->GetIndexData();
 		// Calculate triangle orientations relative to light source.
-		for (unsigned i = 0; i < lTriangleCount; i++)
+		for (unsigned i = 0; i < lTriangleCount; i++, lIndices+=3, lSurfaceNormalData+=3)
 		{
-			const unsigned lTriIndex = i * 3;
-
 			//if (mParentGeometry->GetPrimitiveType() == TBC::GeometryBase::TRIANGLES)
 			{
-				mTriangleOrientation[i].mV0 = lIndices[lTriIndex + 0];
-				mTriangleOrientation[i].mV1 = lIndices[lTriIndex + 1];
-				mTriangleOrientation[i].mV2 = lIndices[lTriIndex + 2];
+				mTriangleOrientation[i].mV0 = lIndices[0];
+				mTriangleOrientation[i].mV1 = lIndices[1];
+				mTriangleOrientation[i].mV2 = lIndices[2];
 			}
 			/*else
 			{
@@ -309,18 +307,15 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 				mTriangleOrientation[i].mV2 = lVertexIndex[2];
 			}*/
 			
-			Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
-							 lSurfaceNormalData[lTriIndex + 1],
-							 lSurfaceNormalData[lTriIndex + 2]);
-
 			// Get the vector between one corner of the triangle and the light source.
 			const unsigned lIndex = mTriangleOrientation[i].mV0 * 3;
-			Vector3DF lVector(lVertexData[lIndex + 0] - lLightPos.x,
-						  lVertexData[lIndex + 1] - lLightPos.y,
-						  lVertexData[lIndex + 2] - lLightPos.z);
-
+			// Optimized dot product.
+			float dx = (lVertexData[lIndex + 0] - lLightPos.mData[0]) * lSurfaceNormalData[0];
+			float dy = (lVertexData[lIndex + 1] - lLightPos.mData[1]) * lSurfaceNormalData[1];
+			float dz = (lVertexData[lIndex + 2] - lLightPos.mData[2]) * lSurfaceNormalData[2];
+			float dot = dx+dy+dz;
 			mTriangleOrientation[i].mChecked = false;
-			mTriangleOrientation[i].mIsFrontFacing = (lVector.Dot(lSurfaceNormal) <= 0.0f);
+			mTriangleOrientation[i].mIsFrontFacing = (dot < -1e-8f);
 		}
 
 		const float lShadowRangeSquared = pShadowRange * pShadowRange;

@@ -1237,7 +1237,7 @@ bool DownwashManager::UpdateMassObjects(const Vector3DF& pPosition)
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
 			mMassObjectArray.push_back(lMassObjectId);
 			Life::MassObject* lMassObject = new Life::MassObject(GetResourceManager(), lInfo.mClassId, mUiManager, lTerrainBodyId, lInfo.mCount, 120);
-			lMassObject->SetSeed((unsigned)HashString(lInfo.mClassId.c_str()));
+			lMassObject->SetSeed((size_t)HashString(lInfo.mClassId.c_str()));
 			AddContextObject(lMassObject, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
 			lMassObject->StartLoading();
 			mLevel->AddChild(lMassObject);

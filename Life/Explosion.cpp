@@ -30,7 +30,7 @@ float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::Co
 
 void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject)
 {
-	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
+	TBC::ChunkyPhysics* lPhysics = pObject->GetPhysics();
 	const int lBoneCount = lPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
@@ -52,7 +52,8 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContext
 			lGeometry->ResetJointId();
 		}
 		// This is so that the different parts of the now broken object can collide with each other.
-		pObject->GetManager()->GetGameManager()->AllowCollideWithSelfDelay(pObject, 0.2f, true);
+		//lGeometry->SetFlag(AWAITING_DISCONNECTION_FROM_OTHER_SELF_PART...);
+		pPhysicsManager->EnableCollideWithSelf(lGeometry->GetBodyId(), true);
 	}
 
 	lPhysics->ClearEngines();

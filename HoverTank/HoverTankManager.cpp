@@ -678,7 +678,7 @@ void HoverTankManager::TickUiInput()
 				//const Vector3DF fwd = lAvatar->GetForwardDirection();
 				//mLog.Infof(_T("Setting cam from avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
 				//const QuaternionF r = lAvatar->GetOrientation();
-				//mLog.Infof(_T("Setting cam from Q=%f, %f, %f, %f"), r.mA, r.mB, r.mC, r.mD);
+				//mLog.Infof(_T("Setting cam from Q=%f, %f, %f, %f"), r.a, r.b, r.c, r.d);
 				mCameraMouseAngle = lCurrentAngle;
 				mCameraTargetAngle = lCurrentAngle;
 				mCameraOrientation.x = lCurrentAngle + PIF/2;
@@ -692,9 +692,9 @@ void HoverTankManager::TickUiInput()
 					//const Vector3DF fwd = lAvatar->GetForwardDirection();
 					//mLog.Infof(_T("Avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
 					//const QuaternionF q = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-					//mLog.Infof(_T("Avatar original Q=%f, %f, %f, %f"), q.mA, q.mB, q.mC, q.mD);
+					//mLog.Infof(_T("Avatar original Q=%f, %f, %f, %f"), q.a, q.b, q.c, q.d);
 					const QuaternionF r = lAvatar->GetOrientation();
-					mLog.Infof(_T("Avatar Q=%f, %f, %f, %f"), r.mA, r.mB, r.mC, r.mD);
+					mLog.Infof(_T("Avatar Q=%f, %f, %f, %f"), r.a, r.b, r.c, r.d);
 				}
 			}*/
 			if (lAvatar && (lIsUpdatingYaw || lIsTimedYawUpdate))

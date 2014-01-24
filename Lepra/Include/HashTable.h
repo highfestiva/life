@@ -177,7 +177,6 @@ HASHTABLE_TEMPLATE HASHTABLE_QUAL::HashTable(const HashTable& pOther) :
 
 HASHTABLE_TEMPLATE HASHTABLE_QUAL::~HashTable()
 {
-	RemoveAll();
 }
 
 

@@ -527,7 +527,7 @@ QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 
 	dQuaternion q;
 	::dGeomGetQuaternion(lObject->mGeomID, q);
-	QuaternionF lQuat(q[0], q[1], q[2], q[3]);
+	QuaternionF lQuat(q);
 	return (lQuat);
 }
 
@@ -540,12 +540,8 @@ void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, TransformationF& pTrans
 		return;
 	}
 
-	const dReal* p = ::dGeomGetPosition(lObject->mGeomID);
-	dQuaternion q;
-	::dGeomGetQuaternion(lObject->mGeomID, q);
-
-	pTransform.GetPosition().Set(p[0], p[1], p[2]);
-	pTransform.GetOrientation().Set(q[0], q[1], q[2], q[3]);
+	::dGeomCopyPosition(lObject->mGeomID, pTransform.mPosition.mData);
+	::dGeomGetQuaternion(lObject->mGeomID, pTransform.mOrientation.mData);
 }
 
 void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform)
@@ -561,10 +557,10 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& 
 	const Vector3DF lPos(pTransform.GetPosition());
 	QuaternionF lQuat = pTransform.GetOrientation();
 	dReal lQ[4];
-	lQ[0] = lQuat.GetA();
-	lQ[1] = lQuat.GetB();
-	lQ[2] = lQuat.GetC();
-	lQ[3] = lQuat.GetD();
+	lQ[0] = lQuat.a;
+	lQ[1] = lQuat.b;
+	lQ[2] = lQuat.c;
+	lQ[3] = lQuat.d;
 	if(lObject->mBodyID)
 	{
 		::dBodySetPosition(lObject->mBodyID, lPos.x, lPos.y, lPos.z);
@@ -1524,7 +1520,7 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 
 	// Fetch parent data (or identity if parent is World).
 	const dReal* lPos = ::dBodyGetPosition(lParentBody);
-	const Vector3DF lParentPosition(lPos[0], lPos[1], lPos[2]);
+	const Vector3DF lParentPosition(lPos);
 	QuaternionF lParentQ(-1, 0, 0, 0);
 	Vector3DF lParentVelocity;
 	Vector3DF lParentAcceleration;
@@ -1535,13 +1531,13 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	{
 		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		lParentQ.Set(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		lParentQ.Set(lPQ);
 	}
 
 	{
 		// Rotate to original child (us) orientation.
 		dxJointHinge* lHinge = (dxJointHinge*)lJointInfo->mJointID;
-		QuaternionF lQ(lHinge->qrel[0], lHinge->qrel[1], lHinge->qrel[2], lHinge->qrel[3]);
+		QuaternionF lQ(lHinge->qrel);
 		// Set orientation.
 		TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
@@ -1559,7 +1555,7 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 		if (lJointInfo->mJointID->node[1].body)
 		{
 			// Align anchors (happen after rotation) and store.
-			Vector3DF lAnchor2(lHinge->anchor2[0], lHinge->anchor2[1], lHinge->anchor2[2]);
+			Vector3DF lAnchor2(lHinge->anchor2);
 			lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
 			lTransform.GetPosition() += lAnchor-lAnchor2;
 		}
@@ -1620,7 +1616,7 @@ bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Di
 		GetBodyForce(pBodyId, lAcceleration);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
-		lAcceleration -= Vector3DF(lParentForce[0], lParentForce[1], lParentForce[2]);
+		lAcceleration -= Vector3DF(lParentForce);
 		pDiff.mAcceleration = lAxis * lAcceleration;
 	}
 
@@ -1648,7 +1644,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 
 	// Fetch parent data (or identity if parent is World).
 	const dReal* lPos = ::dBodyGetPosition(lParentBody);
-	const Vector3DF lParentPosition(lPos[0], lPos[1], lPos[2]);
+	const Vector3DF lParentPosition(lPos);
 	QuaternionF lParentQ(-1, 0, 0, 0);
 	Vector3DF lParentVelocity;
 	Vector3DF lParentAcceleration;
@@ -1659,11 +1655,11 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 	{
 		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		lParentQ.Set(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		lParentQ.Set(lPQ);
 		const dReal* lParentV = ::dBodyGetLinearVel(lParentBody);
-		lParentVelocity.Set(lParentV[0], lParentV[1], lParentV[2]);
+		lParentVelocity.Set(lParentV);
 		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
-		lParentAcceleration.Set(lParentForce[0], lParentForce[1], lParentForce[2]);
+		lParentAcceleration.Set(lParentForce);
 		// Downscale acceleration with mass.
 		lParentAcceleration *= lJointInfo->mJointID->node[1].body->mass.mass / lParentBody->mass.mass;
 	}
@@ -1671,9 +1667,9 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 	{
 		// Rotate to original child (us) orientation.
 		dxJointSlider* lSlider = (dxJointSlider*)lJointInfo->mJointID;
-		QuaternionF lQ(lSlider->qrel[0], lSlider->qrel[1], lSlider->qrel[2], lSlider->qrel[3]);
+		QuaternionF lQ(lSlider->qrel);
 		// Relative translation.
-		Vector3DF lOffset(lSlider->offset[0], lSlider->offset[1], lSlider->offset[2]);
+		Vector3DF lOffset(lSlider->offset);
 		if (lJointInfo->mJointID->node[1].body)
 		{
 			lQ = lParentQ * lQ;
@@ -1763,19 +1759,19 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		deb_assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		const QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		const QuaternionF lParentQ(lPQ);
 		// Rotate to cross piece orientation.
 		dxJointUniversal* lUniversal = (dxJointUniversal*)lJointInfo->mJointID;
-		//QuaternionF lRelativeQ(lUniversal->qrel1[0], lUniversal->qrel1[1], lUniversal->qrel1[2], lUniversal->qrel1[3]);
+		//QuaternionF lRelativeQ(lUniversal->qrel1);
 		QuaternionF lQ = lParentQ;
 		//QuaternionF lQ = lParentQ.GetInverse() * lRelativeQ;
 		// Rotate to body 1's input angle.
 		lQ = QuaternionF(-pDiff.mValue, lAxis1) * lQ;
 		// Apply rotation from cross piece to original child (us).
-		//lRelativeQ.Set(lUniversal->qrel2[0], lUniversal->qrel2[1], lUniversal->qrel2[2], lUniversal->qrel2[3]);
+		//lRelativeQ.Set(lUniversal->qrel2);
 		//lQ = lRelativeQ.GetInverse() * lQ;
 		// Rotating around body 1's axis changes body 2's axis. Fetch and act on it AFTER rotation 'round axis1.
-		lAxis2 = lQ * Vector3DF(lUniversal->axis2[0], lUniversal->axis2[1], lUniversal->axis2[2]);
+		lAxis2 = lQ * Vector3DF(lUniversal->axis2);
 		lQ = QuaternionF(-pDiff.mAngle, lAxis2) * lQ;
 		// Set orientation.
 		TransformationF lTransform;
@@ -1783,7 +1779,7 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		// TODO: fix your linear algebra shit first!
 		//lTransform.SetOrientation(lQ);
 		// Align anchors (happen after rotation) and store.
-		Vector3DF lAnchor2(lUniversal->anchor2[0], lUniversal->anchor2[1], lUniversal->anchor2[2]);
+		Vector3DF lAnchor2(lUniversal->anchor2);
 		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
 		dVector3 lRealAnchor;
 		::dJointGetUniversalAnchor2(lUniversal, lRealAnchor);
@@ -1994,7 +1990,7 @@ bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff
 		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		QuaternionF lParentQ(lPQ);
 
 		TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
@@ -2030,14 +2026,14 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 		deb_assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		QuaternionF lParentQ(lPQ);
 
 		TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
 		QuaternionF lRelativeToParentQ(lParentQ/lTransform.GetOrientation());
 		dVector3 lRawAnchor;
 		::dJointGetBallAnchor2(lJointInfo->mJointID, lRawAnchor);
-		Vector3DF lAnchor2(lRawAnchor[0], lRawAnchor[1], lRawAnchor[2]);
+		Vector3DF lAnchor2(lRawAnchor);
 		Vector3DF lPosition = lTransform.GetPosition()-lAnchor2;
 		lPosition = lRelativeToParentQ*lPosition;	// Go to parent space.
 		QuaternionF lRelativeFromParentQ;
@@ -2495,9 +2491,9 @@ bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAng
 			{
 				dVector3 lRawAnchor;
 				::dJointGetHingeAnchor((*x)->mJointID, lRawAnchor);
-				Vector3DF lAnchor(lRawAnchor[0], lRawAnchor[1], lRawAnchor[2]);
+				Vector3DF lAnchor(lRawAnchor);
 				::dJointGetHingeAnchor2((*x)->mJointID, lRawAnchor);
-				Vector3DF lAnchor2(lRawAnchor[0], lRawAnchor[1], lRawAnchor[2]);
+				Vector3DF lAnchor2(lRawAnchor);
 				lTransform.GetPosition() += lAnchor-lAnchor2;
 				lTransform.RotateAroundAnchor(lAnchor, lAxis, -pAngle+lCurrentAngle);
 				SetBodyTransform(pBodyId, lTransform);
@@ -3241,7 +3237,7 @@ Vector3DF PhysicsManagerODE::GetGravity() const
 {
 	dVector3 lGravity;
 	::dWorldGetGravity(mWorldID, lGravity);
-	return (Vector3DF(lGravity[0], lGravity[1], lGravity[2]));
+	return Vector3DF(lGravity);
 }
 
 void PhysicsManagerODE::EnableTriggerBySelf(TriggerID pTriggerId, bool pEnable)
@@ -3340,8 +3336,8 @@ void PhysicsManagerODE::DoForceFeedback()
 					lJointInfo->mListenerId2,
 					lJointInfo->mBody1Id,
 					lJointInfo->mBody2Id,
-					Vector3DF(lFeedback->f1[0], lFeedback->f1[1], lFeedback->f1[2]),
-					Vector3DF(lFeedback->t1[0], lFeedback->t1[1], lFeedback->t1[2]),
+					Vector3DF(lFeedback->f1),
+					Vector3DF(lFeedback->t1),
 					lJointInfo->mPosition,
 					lJointInfo->mRelativeVelocity);
 			}
@@ -3355,8 +3351,8 @@ void PhysicsManagerODE::DoForceFeedback()
 						lJointInfo->mListenerId1,
 						lJointInfo->mBody2Id,
 						lJointInfo->mBody1Id,
-						Vector3DF(lFeedback->f1[0], lFeedback->f1[1], lFeedback->f1[2]),
-						Vector3DF(lFeedback->t1[0], lFeedback->t1[1], lFeedback->t1[2]),
+						Vector3DF(lFeedback->f1),
+						Vector3DF(lFeedback->t1),
 						lJointInfo->mPosition,
 						lJointInfo->mRelativeVelocity);
 				}
@@ -3367,8 +3363,8 @@ void PhysicsManagerODE::DoForceFeedback()
 						lJointInfo->mListenerId1,
 						lJointInfo->mBody2Id,
 						lJointInfo->mBody1Id,
-						Vector3DF(lFeedback->f2[0], lFeedback->f2[1], lFeedback->f2[2]),
-						Vector3DF(lFeedback->t2[0], lFeedback->t2[1], lFeedback->t2[2]),
+						Vector3DF(lFeedback->f2),
+						Vector3DF(lFeedback->t2),
 						lJointInfo->mPosition,
 						lJointInfo->mRelativeVelocity);
 				}
@@ -3426,15 +3422,13 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 	if (lObject1->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
-		const dVector3& n = lContact[0].geom.normal;
-		Vector3DF lNormal(n[0], n[1], n[2]);
+		Vector3DF lNormal(lContact[0].geom.normal);
 		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, (BodyID)lObject2, lNormal));
 		return;
 	}
 	if(lObject2->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
-		const dVector3& n = lContact[0].geom.normal;
-		Vector3DF lNormal(n[0], n[1], n[2]);
+		Vector3DF lNormal(lContact[0].geom.normal);
 		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, (BodyID)lObject1, lNormal));
 		return;
 	}
@@ -3471,7 +3465,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		for (int i = 0; i < lTriggerContactPointCount; i++)
 		{
 			dContact& lC = lContact[i];
-			Vector3DF lPosition(lC.geom.pos[0], lC.geom.pos[1], lC.geom.pos[2]);
+			Vector3DF lPosition(lC.geom.pos);
 			Vector3DF lSpin;
 			const float lTotalFriction = ::fabs(lObject1->mFriction*lObject2->mFriction)+0.0001f;
 			// Negative friction factor means simple friction model.
@@ -3479,8 +3473,8 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			{
 				lC.surface.mode = dContactSlip1 | dContactSlip2 | dContactApprox1 | dContactFDir1 | dContactBounce;
 
-				const Vector3DF lNormal(lC.geom.normal[0], lC.geom.normal[1], lC.geom.normal[2]);
-				const Vector3DF lCollisionPoint(lC.geom.pos[0], lC.geom.pos[1], lC.geom.pos[2]);
+				const Vector3DF lNormal(lC.geom.normal);
+				const Vector3DF lCollisionPoint(lC.geom.pos);
 				const Vector3DF lDistance1(lCollisionPoint-lPosition1);
 				const Vector3DF lDistance2(lCollisionPoint-lPosition2);
 				const Vector3DF lAngularSurfaceVelocity1 = lAngularVelocity1.Cross(lDistance1);

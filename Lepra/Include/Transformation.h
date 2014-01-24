@@ -27,6 +27,9 @@ class Transformation
 public:
 	typedef _TVarType BaseType;
 
+	Quaternion<_TVarType> mOrientation;
+	Vector3D<_TVarType> mPosition;
+
 	Transformation();
 	Transformation(const RotationMatrix<_TVarType>& pOrientation,
 						  const Vector3D<_TVarType>& pPosition);
@@ -117,11 +120,6 @@ public:
 
 	Transformation<float> ToFloat() const;
 	Transformation<double> ToDouble() const;
-
-protected:
-private:
-	Quaternion<_TVarType> mOrientation;
-	Vector3D<_TVarType> mPosition;
 };
 
 

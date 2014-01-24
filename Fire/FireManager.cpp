@@ -102,6 +102,7 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIREDELAY, 0.5);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 9.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 }
 
@@ -133,6 +134,10 @@ void FireManager::LoadSettings()
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
+#ifdef LEPRA_DEBUG
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_ENABLE, true);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
+#endif // Debug
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
@@ -260,7 +265,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	}
 
 	{
-		Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+		Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		lObject->SetInitialTransform(TransformationF(gIdentityQuaternionF, lTargetPosition));
 		lObject->StartLoading();
 		DeleteContextObjectDelay(lObject, 1.5f);
@@ -277,9 +282,9 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	float lAcceleration;
 	float lTerminalVelocity;
 	float lGravityEffect;
-	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 140.0);
-	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 110.0);
-	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.0);
+	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 200.0);
+	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 160.0);
+	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 0.95);
 	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, GetPhysicsManager()->GetGravity());
 	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x*lGravityEffect);
 	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y/lGravityEffect);
@@ -289,7 +294,6 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 
 void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
-	pStrength *= 1.2f;
 	float lExplosiveStrength;
 	CURE_RTVAR_TRYGET(lExplosiveStrength, =(float), GetVariableScope(), "shot.explosivestrength", 1.0);
 	pStrength *= lExplosiveStrength;
@@ -383,7 +387,7 @@ str FireManager::StepLevel(int pCount)
 		lLevelNumber = lLevelCount-1;
 	}
 	str lNewLevelName = strutil::Format(_T("lvl%2.2i"), lLevelNumber);
-	mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	mLevel->StartLoading();
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 	return lNewLevelName;
@@ -427,7 +431,7 @@ bool FireManager::InitializeUniverse()
 
 	str lStartLevel;
 	CURE_RTVAR_GET(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
-	mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	mLevel->StartLoading();
 	mSunlight = new Sunlight(mUiManager);
 	return true;
@@ -595,7 +599,7 @@ Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		//lMachine->GetBurnEmitter()->SetFreeFlow();
 		lMachine->SetDisappearAfterDeathDelay(30.0);
-		lMachine->SetExplosiveStrength(0.25f);
+		lMachine->SetExplosiveStrength(0.6f);
 		lObject = lMachine;
 	}
 	lObject->SetAllowNetworkLogic(true);

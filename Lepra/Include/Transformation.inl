@@ -110,7 +110,7 @@ TEMPLATE void QUAL::FastInverseTransform(const Transformation& pFrom, const Quat
 {
 	mOrientation = pFrom.mOrientation;
 	mOrientation.FastInverseRotatedVector(pInverse, mPosition, pTo.mPosition - pFrom.mPosition);
-	mOrientation.InvAMulB(pTo.mOrientation.mA, pTo.mOrientation.mB, pTo.mOrientation.mC, pTo.mOrientation.mD);
+	mOrientation.InvAMulB(pTo.mOrientation.a, pTo.mOrientation.b, pTo.mOrientation.c, pTo.mOrientation.d);
 }
 
 TEMPLATE Transformation<_TVarType> QUAL::Inverse() const
@@ -293,10 +293,10 @@ TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVe
 
 TEMPLATE void QUAL::Get(_TVarType pData[7]) const
 {
-	pData[0] = mOrientation.GetA();
-	pData[1] = mOrientation.GetB();
-	pData[2] = mOrientation.GetC();
-	pData[3] = mOrientation.GetD();
+	pData[0] = mOrientation.a;
+	pData[1] = mOrientation.b;
+	pData[2] = mOrientation.c;
+	pData[3] = mOrientation.d;
 	pData[4] = mPosition.x;
 	pData[5] = mPosition.y;
 	pData[6] = mPosition.z;

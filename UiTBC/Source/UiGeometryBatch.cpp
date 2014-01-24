@@ -26,6 +26,7 @@ GeometryBatch::GeometryBatch(TBC::GeometryBase* pGeometry):
 	mGeometryInstance(pGeometry)
 {
 	LEPRA_ACQUIRE_RESOURCE(GeometryBatch);
+	SetPrimitiveType(TBC::GeometryBase::TRIANGLES);
 	SetBasicMaterialSettings(mGeometryInstance->GetBasicMaterialSettings());
 }
 
@@ -194,11 +195,6 @@ void GeometryBatch::SetGeometryVolatility(GeometryVolatility)
 TBC::GeometryBase::GeometryVolatility GeometryBatch::GetGeometryVolatility() const
 {
 	return TBC::GeometryBase::GEOM_STATIC;
-}
-
-TBC::GeometryBase::PrimitiveType GeometryBatch::GetPrimitiveType() const
-{
-	return TBC::GeometryBase::TRIANGLES;
 }
 
 TBC::GeometryBase::ColorFormat GeometryBatch::GetColorFormat() const

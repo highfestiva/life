@@ -130,8 +130,6 @@ public:
 	// The caller is responsible of deleting this array.
 	TriangleBasedGeometry* GetSeparateObjects(int& pNumObjects);
 
-	PrimitiveType GetPrimitiveType() const;
-
 	// Overloads from TBC::GeometryBase.
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility pVolatility);

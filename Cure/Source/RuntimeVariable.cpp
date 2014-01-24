@@ -248,6 +248,7 @@ bool RuntimeVariable::CheckType(DataType pType) const
 RuntimeVariableScope::RuntimeVariableScope(RuntimeVariableScope* pParentScope):
 	mParentScope(pParentScope)
 {
+	mVariableTable.rehash(1024);
 }
 
 RuntimeVariableScope::~RuntimeVariableScope()
@@ -718,26 +719,29 @@ bool RuntimeVariableScope::DeleteLocalVariable(const str& pName)
 
 RuntimeVariable* RuntimeVariableScope::GetVariable(const HashedString& pName, bool pRecursive) const
 {
-	ScopeLock lLock(&mLock);
-	RuntimeVariable* lVariable;
-	VariableTable::const_iterator x = mVariableTable.find(pName);
-	if (x != mVariableTable.end())
+	if (pName.mValue)
 	{
-		lVariable = x->second;
+		if (--pName.mValueExpireCount > 0)
+		{
+			return (RuntimeVariable*)pName.mValue;
+		}
 	}
-	else if (pRecursive && mParentScope)
+
 	{
-		lVariable = mParentScope->GetVariable(pName, pRecursive);
+		ScopeLock lLock(&mLock);
+		VariableTable::const_iterator x = mVariableTable.find(pName);
+		if (x != mVariableTable.end())
+		{
+			pName.mValue = x->second;
+			pName.mValueExpireCount += 15 + (pName.mHash & 0x1F);
+			return x->second;
+		}
 	}
-	else
+	if (pRecursive && mParentScope)
 	{
-		lVariable = 0;
+		return mParentScope->GetVariable(pName, pRecursive);
 	}
-	if (lVariable)
-	{
-		deb_assert(lVariable->GetName() == pName);
-	}
-	return (lVariable);
+	return 0;
 }
 
 

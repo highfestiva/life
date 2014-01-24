@@ -19,36 +19,30 @@ TriangleBasedGeometry::TriangleBasedGeometry() :
 	mVertexCount(0),
 	mIndexCount(0),
 	mUVSetCount(0),
-
 	mVertexData(0),
 	mUVData(0),
 	mColorData(0),
 	mIndexData(0),
-
 	mColorFormat(COLOR_RGB),
-
-	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
-	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
+	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC)
 {
 	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
+	SetPrimitiveType(TBC::GeometryBase::TRIANGLES);
 }
 
 TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& pGeometry) :
 	mVertexCount(0),
 	mIndexCount(0),
 	mUVSetCount(0),
-
 	mVertexData(0),
 	mUVData(0),
 	mColorData(0),
 	mIndexData(0),
-
 	mColorFormat(COLOR_RGB),
-
-	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
-	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
+	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC)
 {
 	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
+	SetPrimitiveType(TBC::GeometryBase::TRIANGLES);
 	Copy(pGeometry);
 }
 
@@ -65,16 +59,12 @@ TriangleBasedGeometry::TriangleBasedGeometry(const Vector3DF* pVertices,
 	mVertexCount(0),
 	mIndexCount(0),
 	mUVSetCount(0),
-
 	mVertexData(0),
 	mUVData(0),
 	mColorData(0),
 	mIndexData(0),
-
 	mColorFormat(COLOR_RGB),
-
-	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
-	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
+	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC)
 {
 	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
 
@@ -103,16 +93,12 @@ TriangleBasedGeometry::TriangleBasedGeometry(const float* pVertexData,
 	mVertexCount(0),
 	mIndexCount(0),
 	mUVSetCount(0),
-
 	mVertexData(0),
 	mUVData(0),
 	mColorData(0),
 	mIndexData(0),
-
 	mColorFormat(COLOR_RGB),
-
-	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
-	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
+	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC)
 {
 	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
 
@@ -141,7 +127,7 @@ void TriangleBasedGeometry::Set(const Vector3DF* pVertices,
 {
 	ClearAll();
 
-	mPrimitiveType = pPrimitiveType;
+	SetPrimitiveType(pPrimitiveType);
 	mGeometryVolatility = pGeomType;
 
 	if (pVertexCount > 0 && pVertices != 0)
@@ -227,7 +213,7 @@ void TriangleBasedGeometry::Set(const float* pVertexData,
 {
 	ClearAll();
 
-	mPrimitiveType = pPrimitiveType;
+	SetPrimitiveType(pPrimitiveType);
 	mGeometryVolatility = pGeomType;
 
 	if (pVertexCount > 0 && pVertexData != 0)
@@ -1217,12 +1203,6 @@ uint8* TriangleBasedGeometry::GetColorData() const
 vtx_idx_t* TriangleBasedGeometry::GetIndexData() const
 {
 	return mIndexData;
-}
-
-TBC::GeometryBase::PrimitiveType TriangleBasedGeometry::GetPrimitiveType() const
-{
-	//deb_assert(mPrimitiveType == TRIANGLES);
-	return mPrimitiveType;
 }
 
 TBC::GeometryBase::GeometryVolatility TriangleBasedGeometry::GetGeometryVolatility() const

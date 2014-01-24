@@ -102,7 +102,6 @@ public:
 	// Overloads from GeometryBase
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility pVolatility);
-	PrimitiveType GetPrimitiveType() const;
 
 	unsigned int GetMaxVertexCount() const;
 	unsigned int GetMaxIndexCount() const;

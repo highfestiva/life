@@ -48,7 +48,6 @@ public:
 	virtual void SetGeometryVolatility(GeometryVolatility pVolatility);
 	virtual GeometryVolatility GetGeometryVolatility() const;
 
-	virtual PrimitiveType GetPrimitiveType() const;
 	virtual ColorFormat GetColorFormat() const;
 
 	virtual unsigned int GetMaxVertexCount()  const;

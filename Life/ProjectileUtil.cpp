@@ -49,8 +49,8 @@ bool ProjectileUtil::GetBarrelByShooter(Cure::CppContextObject* pShooter, Transf
 		//QuaternionF q = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootGeometry->GetBodyId());
 		//QuaternionF p = pShooter->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
 		//mLog.Infof(_T("Shooting with body orientation (%f;%f;%f;%f) and initial orientation (%f;%f;%f;%f)."),
-		//	q.GetA(), q.GetB(), q.GetC(), q.GetD(),
-		//	p.GetA(), p.GetB(), p.GetC(), p.GetD());
+		//	q.a, q.b, q.c, q.d,
+		//	p.a, p.b, p.c, p.d);
 #endif // Debug
 		const int lParentIndex = pShooter->GetPhysics()->GetIndex(lBone->GetParent());
 		const TBC::PhysicsManager::BodyID lParentBodyId = pShooter->GetPhysics()->GetBoneGeometry(lParentIndex)->GetBodyId();

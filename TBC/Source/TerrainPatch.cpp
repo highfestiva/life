@@ -53,6 +53,8 @@ TerrainPatch::TerrainPatch(const Vector2D<int>& pPosition,
 	mIndexData(0),
 	mUnitPosition(pPosition)
 {
+	SetPrimitiveType(GeometryBase::TRIANGLES);
+
 	mUVData[0] = 0;
 	mUVData[1] = 0;
 
@@ -879,11 +881,6 @@ GeometryBase::GeometryVolatility TerrainPatch::GetGeometryVolatility() const
 
 void TerrainPatch::SetGeometryVolatility(GeometryVolatility)
 {
-}
-
-GeometryBase::PrimitiveType TerrainPatch::GetPrimitiveType() const
-{
-	return GeometryBase::TRIANGLES;
 }
 
 unsigned int TerrainPatch::GetMaxVertexCount() const

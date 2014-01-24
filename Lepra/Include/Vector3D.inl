@@ -23,11 +23,18 @@ V3D_TEMPLATE V3D_QUAL::Vector3D(_TVarType pX, _TVarType pY, _TVarType pZ):
 {
 }
 
-V3D_TEMPLATE V3D_QUAL::Vector3D(const Vector3D<_TVarType>& pV):
-	x(pV.x),
-	y(pV.y),
-	z(pV.z)
+V3D_TEMPLATE V3D_QUAL::Vector3D(const _TVarType pData[4])
 {
+	mData[0] = pData[0];
+	mData[1] = pData[1];
+	mData[2] = pData[2];
+}
+
+V3D_TEMPLATE V3D_QUAL::Vector3D(const Vector3D<_TVarType>& pV)
+{
+	mData[0] = pV.mData[0];
+	mData[1] = pV.mData[1];
+	mData[2] = pV.mData[2];
 }
 
 // Cross product constructor 1.
@@ -195,6 +202,13 @@ V3D_TEMPLATE void V3D_QUAL::Set(_TVarType pX, _TVarType pY, _TVarType pZ)
 	z = pZ;
 }
 
+V3D_TEMPLATE void V3D_QUAL::Set(const _TVarType pData[4])
+{
+	mData[0] = pData[0];
+	mData[1] = pData[1];
+	mData[2] = pData[2];
+}
+
 V3D_TEMPLATE void V3D_QUAL::Set(const Vector3D<_TVarType>& pV)
 {
 	x = pV.x;
@@ -255,11 +269,16 @@ V3D_TEMPLATE void V3D_QUAL::Add(_TVarType pX, _TVarType pY, _TVarType pZ)
 	z += pZ;
 }
 
+V3D_TEMPLATE void V3D_QUAL::Add(const _TVarType pData[4])
+{
+	mData[0] += pData[0];
+	mData[1] += pData[1];
+	mData[2] += pData[2];
+}
+
 V3D_TEMPLATE void V3D_QUAL::Add(const Vector3D<_TVarType>& pV)
 {
-	x += pV.x; 
-	y += pV.y; 
-	z += pV.z;
+	Add(pV.mData);
 }
 
 V3D_TEMPLATE void V3D_QUAL::Sub(_TVarType pX, _TVarType pY, _TVarType pZ)
@@ -269,36 +288,49 @@ V3D_TEMPLATE void V3D_QUAL::Sub(_TVarType pX, _TVarType pY, _TVarType pZ)
 	z -= pZ;
 }
 
+V3D_TEMPLATE void V3D_QUAL::Sub(const _TVarType pData[4])
+{
+	mData[0] -= pData[0];
+	mData[1] -= pData[1];
+	mData[2] -= pData[2];
+}
+
 V3D_TEMPLATE void V3D_QUAL::Sub(const Vector3D<_TVarType>& pV)
 {
-	x -= pV.x;
-	y -= pV.y;
-	z -= pV.z;
+	Sub(pV.mData);
 }
 
 V3D_TEMPLATE void V3D_QUAL::Mul(_TVarType pScalar)
 {
-	x *= pScalar;
-	y *= pScalar;
-	z *= pScalar;
+	mData[0] *= pScalar;
+	mData[1] *= pScalar;
+	mData[2] *= pScalar;
 }
 
 V3D_TEMPLATE void V3D_QUAL::Div(_TVarType pScalar)
 {
 	_TVarType lInvScalar = 1 / pScalar;
-	x *= lInvScalar; 
-	y *= lInvScalar; 
-	z *= lInvScalar;
+	mData[0] *= lInvScalar; 
+	mData[1] *= lInvScalar; 
+	mData[2] *= lInvScalar;
 }
 
 V3D_TEMPLATE _TVarType V3D_QUAL::Dot(const Vector3D<_TVarType>& pV) const
 {
-	return Dot(pV.x, pV.y, pV.z);
+	return Dot(pV.mData);
 }
 
 V3D_TEMPLATE _TVarType V3D_QUAL::Dot(_TVarType pX, _TVarType pY, _TVarType pZ) const
 {
 	return x*pX + y*pY + z*pZ;
+}
+
+V3D_TEMPLATE _TVarType V3D_QUAL::Dot(const _TVarType pData[4]) const
+{
+	_TVarType dx = mData[0]*pData[0];
+	_TVarType dy = mData[1]*pData[1];
+	_TVarType dz = mData[2]*pData[2];
+	return dx+dy+dz;
 }
 
 V3D_TEMPLATE _TVarType V3D_QUAL::GetLength() const
@@ -347,10 +379,9 @@ V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleY() const
 
 V3D_TEMPLATE const Vector3D<_TVarType>& V3D_QUAL::operator= (const Vector3D<_TVarType>& pV)
 {
-	x = pV.x;
-	y = pV.y;
-	z = pV.z;
-
+	mData[0] = pV.mData[0];
+	mData[1] = pV.mData[1];
+	mData[2] = pV.mData[2];
 	return *this;
 }
 

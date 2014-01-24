@@ -37,6 +37,7 @@ AnimatedGeometry::~AnimatedGeometry()
 void AnimatedGeometry::SetGeometry(TBC::GeometryBase* pGeometry)
 {
 	mOriginalGeometry = pGeometry;
+	SetPrimitiveType(mOriginalGeometry->GetPrimitiveType());
 
 	mVertexCount = mOriginalGeometry->GetMaxVertexCount();
 	mVertexData = new float[mVertexCount * 3];
@@ -168,11 +169,6 @@ void AnimatedGeometry::UpdateAnimatedGeometry()
 	}
 
 	GeometryBase::SetVertexDataChanged(true);
-}
-
-TBC::GeometryBase::PrimitiveType AnimatedGeometry::GetPrimitiveType() const
-{
-	return mOriginalGeometry->GetPrimitiveType();
 }
 
 TBC::GeometryBase::GeometryVolatility AnimatedGeometry::GetGeometryVolatility() const

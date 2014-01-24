@@ -28,7 +28,7 @@ bool PhysicsTrigger::EngineTrigger::operator==(const EngineTrigger& pOther) cons
 
 size_t PhysicsTrigger::EngineTrigger::Hash() const
 {
-	return ((size_t)mEngine + *(int*)&mDelay + HashString(mFunction.c_str()));
+	return ((size_t)mEngine + *(int*)&mDelay + (size_t)HashString(mFunction.c_str()));
 }
 
 

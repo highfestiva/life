@@ -674,10 +674,10 @@ bool ResourceTest::InternalLoadTransformation(Cure::ContextManager& pContextMana
 	if (lTestOk)
 	{
 		QuaternionF r = lObject.GetOrientation();
-		lTestOk = (Math::IsEpsEqual(r.mA, Q.mA, 0.1f) &&
-			Math::IsEpsEqual(r.mB, Q.mB, 0.1f) &&
-			Math::IsEpsEqual(r.mC, Q.mC, 0.1f) &&
-			Math::IsEpsEqual(r.mD, Q.mD, 0.1f));
+		lTestOk = (Math::IsEpsEqual(r.a, Q.a, 0.1f) &&
+			Math::IsEpsEqual(r.b, Q.b, 0.1f) &&
+			Math::IsEpsEqual(r.c, Q.c, 0.1f) &&
+			Math::IsEpsEqual(r.d, Q.d, 0.1f));
 		deb_assert(lTestOk);
 	}
 	return lTestOk;

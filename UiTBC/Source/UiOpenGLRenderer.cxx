@@ -1129,7 +1129,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		::glDisable(GL_CULL_FACE);
 	}
 
-	const TransformationF t = pGeometry->GetTransformation();
+	const TransformationF& t = pGeometry->GetTransformation();
 	if (pGeometry->IsExcludeCulling() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();

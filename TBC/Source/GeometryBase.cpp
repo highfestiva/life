@@ -169,16 +169,7 @@ bool GeometryBase::Edge::HaveTriangle(int pTriangleIndex, int& pTrianglePos)
 
 bool GeometryBase::Edge::IsSameEdge(int pVertexIndex1, int pVertexIndex2)
 {
-	if (mVertex[0] == pVertexIndex1)
-	{
-		return (mVertex[1] == pVertexIndex2);
-	}
-	else if(mVertex[0] == pVertexIndex2)
-	{
-		return (mVertex[1] == pVertexIndex1);
-	}
-	
-	return false;
+	return (mVertex[0] == pVertexIndex1 && mVertex[1] == pVertexIndex2);
 }
 
 bool GeometryBase::Edge::IsSameEdge(int pVertexIndex1, 
@@ -276,6 +267,7 @@ bool GeometryBase::Edge::IsSameEdge(int pVertexIndex1,
 
 GeometryBase::GeometryBase() :
 	mFlags(mDefaultFlags),
+	mPrimitiveType(TRIANGLES),
 	mBoundingRadius(0),
 	mScale(1),
 	mSurfaceNormalData(0),
@@ -375,9 +367,19 @@ void GeometryBase::SetScale(float pScale)
 	}
 }
 
-unsigned int GeometryBase::GetMaxTriangleCount() const
+void GeometryBase::SetPrimitiveType(PrimitiveType pType)
 {
-	switch (GetPrimitiveType())
+	mPrimitiveType = pType;
+}
+
+GeometryBase::PrimitiveType GeometryBase::GetPrimitiveType() const
+{
+	return mPrimitiveType;
+}
+
+unsigned GeometryBase::GetMaxTriangleCount() const
+{
+	switch (mPrimitiveType)
 	{
 		case TRIANGLES:
 		case LINE_LOOP:
@@ -392,9 +394,9 @@ unsigned int GeometryBase::GetMaxTriangleCount() const
 	}
 }
 
-unsigned int GeometryBase::GetTriangleCount() const
+unsigned GeometryBase::GetTriangleCount() const
 {
-	switch (GetPrimitiveType())
+	switch (mPrimitiveType)
 	{
 		case TRIANGLES:
 		case LINE_LOOP:
@@ -412,7 +414,7 @@ unsigned int GeometryBase::GetTriangleCount() const
 void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3]) const
 {
 	const vtx_idx_t* lIndices = GetIndexData();
-	switch (GetPrimitiveType())
+	switch (mPrimitiveType)
 	{
 		case TRIANGLES:
 		case LINE_LOOP:
@@ -459,12 +461,12 @@ void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3]) const
 	}
 }
 
-unsigned int GeometryBase::GetEdgeCount() const
+unsigned GeometryBase::GetEdgeCount() const
 {
 	return mEdgeCount;
 }
 
-void GeometryBase::SetTangentsUVSet(unsigned int pUVSet)
+void GeometryBase::SetTangentsUVSet(unsigned pUVSet)
 {
 	if (pUVSet < GetUVSetCount())
 	{
@@ -656,7 +658,7 @@ void GeometryBase::AllocSurfaceNormalData()
 {
 	if (mSurfaceNormalData == 0)
 	{
-		unsigned int lTriangleCount = GetMaxTriangleCount();
+		unsigned lTriangleCount = GetMaxTriangleCount();
 		mSurfaceNormalData = new float[lTriangleCount * 3];
 		mSurfaceNormalCount = lTriangleCount;
 	}
@@ -675,12 +677,12 @@ void GeometryBase::AllocTangentAndBitangentData()
 	}
 }
 
-void GeometryBase::SetLastFrameVisible(unsigned int pLastFrameVisible)
+void GeometryBase::SetLastFrameVisible(unsigned pLastFrameVisible)
 {
 	mLastFrameVisible = pLastFrameVisible;
 }
 
-unsigned int GeometryBase::GetLastFrameVisible() const
+unsigned GeometryBase::GetLastFrameVisible() const
 {
 	return mLastFrameVisible;
 }
@@ -690,8 +692,9 @@ void GeometryBase::SetTransformation(const TransformationF& pTransformation)
 	mTransformation = pTransformation;
 	SetTransformationChanged(true);
 
-	const QuaternionF& q = GetTransformation().GetOrientation();	// Must let overrides go to work, so we can store full update.
-	if ((mBigOrientation - q).GetNorm() > mBigOrientationThreshold)
+	QuaternionF q(mBigOrientation.mData);
+	q.Sub(GetTransformation().mOrientation.mData);	// Must let overrides go to work, so we can store full update.
+	if (q.GetNorm() > mBigOrientationThreshold)
 	{
 		mBigOrientation = q;
 		SetBigOrientationChanged(true);
@@ -767,7 +770,7 @@ void GeometryBase::Copy(GeometryBase* pGeometry)
 
 	if (pGeometry->mVertexNormalData != 0)
 	{
-		unsigned int lVertexCount = pGeometry->GetVertexCount();
+		unsigned lVertexCount = pGeometry->GetVertexCount();
 		mVertexNormalData = new float[lVertexCount * 3];
 		::memcpy(mVertexNormalData, pGeometry->mVertexNormalData, lVertexCount * 3 * sizeof(float));
 	}
@@ -777,7 +780,7 @@ void GeometryBase::Copy(GeometryBase* pGeometry)
 	{
 		// Copy edge data.
 		mEdgeData = new Edge[mEdgeCount];
-		for (unsigned int i = 0; i < mEdgeCount; i++)
+		for (unsigned i = 0; i < mEdgeCount; i++)
 		{
 			mEdgeData[i].Copy(&pGeometry->mEdgeData[i]);
 		}
@@ -786,7 +789,7 @@ void GeometryBase::Copy(GeometryBase* pGeometry)
 	mTangentsUVSet = pGeometry->mTangentsUVSet;
 	if (pGeometry->mTangentData != 0 && pGeometry->mBitangentData)
 	{
-		unsigned int lVertexCount = pGeometry->GetVertexCount();
+		unsigned lVertexCount = pGeometry->GetVertexCount();
 		mTangentData = new float[lVertexCount * 3];
 		mBitangentData = new float[lVertexCount * 3];
 		::memcpy(mTangentData, pGeometry->mTangentData, lVertexCount * 3 * sizeof(float));
@@ -811,7 +814,7 @@ bool GeometryBase::IsSolidVolume()
 
 		SetFlag(IS_SOLID_VOLUME);
 
-		for (unsigned int i = 0; i < mEdgeCount; i++)
+		for (unsigned i = 0; i < mEdgeCount; i++)
 		{
 			if (mEdgeData[i].mTriangleCount != 2)
 			{
@@ -833,7 +836,7 @@ bool GeometryBase::IsSingleObject()
 		return CheckFlag(IS_SINGLE_OBJECT);
 	}
 
-	unsigned int lTriangleCount = GetTriangleCount();
+	unsigned lTriangleCount = GetTriangleCount();
 	vtx_idx_t* lIndices   = GetIndexData();
 
 	if (lIndices == 0 || lTriangleCount == 0)
@@ -852,7 +855,7 @@ bool GeometryBase::IsSingleObject()
 	// Need this to fill the lEdgeIndices correctly.
 	int* lEdgeCount = new int[lTriangleCount];
 
-	unsigned int i;
+	unsigned i;
 	for (i = 0; i < lTriangleCount; i++)
 	{
 		lEdgeCount[i] = 0;
@@ -955,7 +958,7 @@ bool GeometryBase::IsConvexVolume()
 		return CheckFlag(IS_CONVEX_VOLUME);
 	}
 
-	unsigned int lTriangleCount = GetTriangleCount();
+	unsigned lTriangleCount = GetTriangleCount();
 	float* lVertexData = GetVertexData();
 
 	if (lTriangleCount == 0)
@@ -983,7 +986,7 @@ bool GeometryBase::IsConvexVolume()
 	GenerateSurfaceNormalData();
 
 	const float lEpsilon = 1e-6f;
-	for (unsigned int i = 0; i < mEdgeCount; i++)
+	for (unsigned i = 0; i < mEdgeCount; i++)
 	{
 		int lT0 = mEdgeData[i].mTriangle[0];
 		int lT1 = mEdgeData[i].mTriangle[1];
@@ -1078,13 +1081,13 @@ void GeometryBase::CalculateBoundingRadius()
 
 void GeometryBase::SetSurfaceNormalData(const float* pSurfaceNormalData)
 {
-	unsigned int lTriangleCount = GetTriangleCount();
+	unsigned lTriangleCount = GetTriangleCount();
 	AllocSurfaceNormalData();
 	::memcpy(mSurfaceNormalData, pSurfaceNormalData, lTriangleCount * 3 * sizeof(float));
 	SetFlag(SURFACE_NORMALS_VALID);
 }
 
-void GeometryBase::SetVertexNormalData(const float* pVertexNormalData, unsigned int pVertexCount)
+void GeometryBase::SetVertexNormalData(const float* pVertexNormalData, unsigned pVertexCount)
 {
 	if (CheckFlag(VERTEX_NORMALS_VALID) == false)
 	{
@@ -1097,7 +1100,7 @@ void GeometryBase::SetVertexNormalData(const float* pVertexNormalData, unsigned 
 	SetFlag(VERTEX_NORMALS_VALID);
 }
 
-void GeometryBase::SetTangentAndBitangentData(const float* pTangentData, const float* pBitangentData, unsigned int pVertexCount)
+void GeometryBase::SetTangentAndBitangentData(const float* pTangentData, const float* pBitangentData, unsigned pVertexCount)
 {
 	if (CheckFlag(TANGENTS_VALID) == false)
 	{
@@ -1119,8 +1122,8 @@ void GeometryBase::GenerateVertexNormalData()
 		return;
 	}
 
-	unsigned int lVertexCount  = GetMaxVertexCount();
-	unsigned int lTriangleCount = GetTriangleCount();
+	unsigned lVertexCount  = GetMaxVertexCount();
+	unsigned lTriangleCount = GetTriangleCount();
 	if (lVertexCount == 0 || lTriangleCount == 0)
 	{
 		return;
@@ -1132,8 +1135,8 @@ void GeometryBase::GenerateVertexNormalData()
 	bool lClearSurfaceNormals = (mSurfaceNormalData == 0);
 	GenerateSurfaceNormalData();
 
-	unsigned int i;
-	unsigned int lIndex = 0;
+	unsigned i;
+	unsigned lIndex = 0;
 
 	// Now calculate the vertex normals.
 	for (i = 0; i < lTriangleCount; i++, lIndex += 3)
@@ -1191,7 +1194,7 @@ void GeometryBase::GenerateSurfaceNormalData()
 		return;
 	}
 
-	unsigned int lTriangleCount = GetTriangleCount();
+	unsigned lTriangleCount = GetTriangleCount();
 
 	if (mSurfaceNormalData != 0 && mSurfaceNormalCount < lTriangleCount)
 	{
@@ -1203,7 +1206,7 @@ void GeometryBase::GenerateSurfaceNormalData()
 	float* lVertexData = GetVertexData();
 
 	int lIndex = 0;
-	for (unsigned int i = 0; i < lTriangleCount; i++, lIndex += 3)
+	for (unsigned i = 0; i < lTriangleCount; i++, lIndex += 3)
 	{
 		uint32 lT[3];
 		GetTriangleIndices(i, lT);
@@ -1237,74 +1240,47 @@ void GeometryBase::GenerateEdgeData()
 		return;
 	}
 
-	unsigned int lVertexCount  = GetVertexCount();
-	unsigned int lTriangleCount = GetTriangleCount();
+	unsigned lVertexCount  = GetVertexCount();
+	unsigned lTriangleCount = GetTriangleCount();
 
 	ClearEdgeData();
 
 	// Create buckets to store the edges in to optimize search.
 	// It's almost like a hash table, with as many buckets as there
 	// are vertex indices.
-	Edge** lEdgeBucket = new Edge*[lVertexCount];
-
-	unsigned int i;
-	for (i = 0; i < lVertexCount; i++)
-	{
-		lEdgeBucket[i] = 0;
-	}
+	std::vector<Edge*> lEdgeBucket(lVertexCount);
+	::memset(&lEdgeBucket[0], 0, lVertexCount*sizeof(Edge*));
+	std::vector<Edge> lEdgePool(lTriangleCount*3);	// For avoiding repeated allocations.
+	size_t lEdgePoolIndex = 0;
 
 	// Create edges.
-	int lIndex = 0;
-	for (i = 0; i < lTriangleCount; i++, lIndex += 3)
+	for (unsigned i = 0; i < lTriangleCount; i++)
 	{
 		// Get vertex indices.
 		uint32 lV[3];
 		GetTriangleIndices(i, lV);
 
-		// Sort them.
-		if (lV[0] > lV[1])
-		{
-			uint32 lT = lV[0];
-			lV[0] = lV[1];
-			lV[1] = lT;
-		}
-		if (lV[1] > lV[2])
-		{
-			uint32 lT = lV[1];
-			lV[1] = lV[2];
-			lV[2] = lT;
-		}
-		if (lV[0] > lV[1])
-		{
-			uint32 lT = lV[0];
-			lV[0] = lV[1];
-			lV[1] = lT;
-		}
-
 		// Note:
-		// Edge0 = (lV[0], lV[1])
-		// Edge1 = (lV[1], lV[2])
-		// Edge2 = (lV[0], lV[2])
+		// Edge0 = (lV[2], lV[0])
+		// Edge1 = (lV[0], lV[1])
+		// Edge2 = (lV[1], lV[2])
 
 		int lStart = 2;
 		int lEnd = 0;
-
 		while (lEnd < 3)
 		{
-			unsigned int lV0 = lV[lStart];
-			unsigned int lV1 = lV[lEnd];
-
-			if (lStart > lEnd)
+			unsigned lV0 = lV[lStart];
+			unsigned lV1 = lV[lEnd];
+			if (lV0 > lV1)	// Sorting.
 			{
-				lV0 = lV[lEnd];
-				lV1 = lV[lStart];
+				std::swap(lV0, lV1);
 			}
 
 			// Now check if the edge (lV0, lV1) is already in the table.
-			if (lEdgeBucket[lV0] == 0)
+			if (!lEdgeBucket[lV0])
 			{
 				// This bucket was empty, create a new edge.
-				lEdgeBucket[lV0] = new Edge;
+				lEdgeBucket[lV0] = &lEdgePool[lEdgePoolIndex++];
 				lEdgeBucket[lV0]->mVertex[0] = lV0;
 				lEdgeBucket[lV0]->mVertex[1] = lV1;
 				lEdgeBucket[lV0]->AddTriangle(i);
@@ -1317,19 +1293,13 @@ void GeometryBase::GenerateEdgeData()
 				bool lFound = false;
 				Edge* lPreviousEdge = 0;
 				Edge* lCurrentEdge = lEdgeBucket[lV0];
-				
-				while (lCurrentEdge != 0 && lFound == false)
+				while (lCurrentEdge && !lFound)
 				{
-					if (lCurrentEdge->IsSameEdge(lV0, lV1) == true)
-					{
-						lFound = true;
-					}
-
 					lPreviousEdge = lCurrentEdge;
 					lCurrentEdge = lCurrentEdge->mReserved;
+					lFound = lPreviousEdge->IsSameEdge(lV0, lV1);
 				}
-
-				if (lFound == true)
+				if (lFound)
 				{
 					// We found the edge. Since there can only be two triangles
 					// sharing one edge, the second triangle index must be invalid.
@@ -1339,12 +1309,12 @@ void GeometryBase::GenerateEdgeData()
 				else
 				{
 					// Create new and put in linked list.
-					Edge* lEdge = new Edge;
-					lEdge->mVertex[0] = lV0;
-					lEdge->mVertex[1] = lV1;
-					lEdge->AddTriangle(i);
-					lPreviousEdge->mReserved = lEdge;
-	
+					Edge& lEdge = lEdgePool[lEdgePoolIndex++];
+					lEdge.mVertex[0] = lV0;
+					lEdge.mVertex[1] = lV1;
+					lEdge.AddTriangle(i);
+					lPreviousEdge->mReserved = &lEdge;
+
 					mEdgeCount++;
 				}
 			}
@@ -1358,20 +1328,15 @@ void GeometryBase::GenerateEdgeData()
 	// Delete all temporarily created edges.
 	mEdgeData = new Edge[mEdgeCount];
 	int lEdgeIndex = 0;
-	for (i = 0; i < lVertexCount; i++)
+	for (unsigned i = 0; i < lVertexCount; i++)
 	{
 		Edge* lCurrentEdge = lEdgeBucket[i];
-		while (lCurrentEdge != 0)
+		while (lCurrentEdge)
 		{
 			mEdgeData[lEdgeIndex++].Copy(lCurrentEdge);
-
-			Edge* lPreviousEdge = lCurrentEdge;
 			lCurrentEdge = lCurrentEdge->mReserved;
-			delete lPreviousEdge;
 		}
 	}
-
-	delete[] lEdgeBucket;
 
 	ClearFlag(SOLID_VOLUME_VALID);
 	ClearFlag(SINGLE_OBJECT_VALID);
@@ -1492,11 +1457,11 @@ void GeometryBase::GenerateTangentAndBitangentData()
 bool GeometryBase::VerifyIndexData()
 {
 	vtx_idx_t* lIndex = GetIndexData();
-	unsigned int lNumIndex = GetTriangleCount() * 3;
-	unsigned int lNumVertex = GetVertexCount();
+	unsigned lNumIndex = GetTriangleCount() * 3;
+	unsigned lNumVertex = GetVertexCount();
 
 	bool lOk = true;
-	for (unsigned int i = 0; lOk && i < lNumIndex; i++)
+	for (unsigned i = 0; lOk && i < lNumIndex; i++)
 	{
 		lOk = ((unsigned int)lIndex[i] < lNumVertex);
 	}

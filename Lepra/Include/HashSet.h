@@ -122,7 +122,6 @@ TEMPLATE QUAL::HashSet(unsigned pSize) :
 
 TEMPLATE QUAL::~HashSet()
 {
-	RemoveAll();
 }
 
 TEMPLATE bool QUAL::IsEmpty() const

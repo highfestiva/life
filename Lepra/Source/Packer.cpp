@@ -22,10 +22,10 @@ int PackerTransformation::Pack(uint8* pDestination, const TransformationF& pSour
 {
 	typedef uint32 _T;
 	int lOffset = 0;
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().GetA());	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().GetB());	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().GetC());	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().GetD());	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().a);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().b);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().c);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().d);	lOffset += sizeof(_T);
 	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().x);		lOffset += sizeof(_T);
 	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().y);		lOffset += sizeof(_T);
 	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().z);		lOffset += sizeof(_T);

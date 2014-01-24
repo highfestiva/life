@@ -18,6 +18,7 @@ BillboardGeometry::BillboardGeometry(float pAspectRatio, unsigned pUVSetCount):
 	mUVSetCount(pUVSetCount)
 {
 	SetAlwaysVisible(false);
+	SetPrimitiveType(TRIANGLE_STRIP);
 
 	const float lTriStrip[] =
 	{
@@ -108,11 +109,6 @@ vtx_idx_t* BillboardGeometry::GetIndexData() const
 uint8* BillboardGeometry::GetColorData() const
 {
 	return 0;
-}
-
-TBC::GeometryBase::PrimitiveType BillboardGeometry::GetPrimitiveType() const
-{
-	return TRIANGLE_STRIP;
 }
 
 TBC::GeometryBase::GeometryVolatility BillboardGeometry::GetGeometryVolatility() const
