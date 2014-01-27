@@ -171,7 +171,13 @@ ScopePerformanceData::~ScopePerformanceData()
 	mChildArray.clear();
 }
 
-void ScopePerformanceData::ClearAll()
+void ScopePerformanceData::EraseAll()
+{
+	ScopeSpinLock lLock(&mRootLock);
+	mRoots.clear();
+}
+
+void ScopePerformanceData::ResetAll()
 {
 	ScopeSpinLock lLock(&mRootLock);
 	NodeArray::iterator x = mRoots.begin();
@@ -187,7 +193,7 @@ void ScopePerformanceData::ClearAll()
 			++x;
 		}
 	}
-	ClearAll(mRoots);
+	ResetAll(mRoots);
 }
 
 void ScopePerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
@@ -232,13 +238,13 @@ const ScopePerformanceData* ScopePerformanceData::GetChild(const str& pName) con
 	return 0;
 }
 
-void ScopePerformanceData::ClearAll(NodeArray& pNodes)
+void ScopePerformanceData::ResetAll(NodeArray& pNodes)
 {
 	NodeArray::iterator x = pNodes.begin();
 	for (; x != pNodes.end(); ++x)
 	{
 		(*x)->Clear();
-		ClearAll((*x)->mChildArray);
+		ResetAll((*x)->mChildArray);
 	}
 }
 

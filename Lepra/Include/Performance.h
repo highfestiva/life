@@ -77,7 +77,8 @@ public:
 	ScopePerformanceData(ScopePerformanceData* pParent, const str& pName, size_t pHash);
 	~ScopePerformanceData();
 
-	static void ClearAll();
+	static void EraseAll();
+	static void ResetAll();
 	void Append(double pPeriodValue, double pTimeOfLastMeasure);
 
 	static NodeArray GetRoots();
@@ -86,7 +87,7 @@ public:
 	const ScopePerformanceData* GetChild(const str& pName) const;
 
 protected:
-	static void ClearAll(NodeArray& pNodes);
+	static void ResetAll(NodeArray& pNodes);
 
 	ScopePerformanceData* FindChild(/*const str& pName,*/ size_t pHash) const;
 

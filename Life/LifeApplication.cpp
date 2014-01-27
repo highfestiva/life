@@ -70,8 +70,7 @@ Application::~Application()
 	mDebugLogger = 0;
 
 	// Drop performance measurement resources.
-	ScopePerformanceData::ClearAll();	// Make all useless.
-	ScopePerformanceData::ClearAll();	// Delete all useless.
+	ScopePerformanceData::EraseAll();
 
 	LogType::Close();
 }
@@ -317,6 +316,7 @@ void Application::HandleZombieMode()
 		Destroy();
 		mZombieTick();
 		SystemManager::AddQuitRequest(-1);
+		ScopePerformanceData::EraseAll();
 		Init();
 		Network::Start();
 		mGameTicker->Initialize();

@@ -472,6 +472,7 @@ void MetaFile::AddZipExtension(const str& pExtension)
 	}
 
 	smZipExtensions->push_back(pExtension);
+	smZipExtensions->sort();
 	smZipExtensions->unique();
 }
 
@@ -483,6 +484,7 @@ void MetaFile::AddUncompressedExtension(const str& pExtension)
 	}
 
 	smArchiveExtensions->push_back(pExtension);
+	smArchiveExtensions->sort();
 	smArchiveExtensions->unique();
 }
 

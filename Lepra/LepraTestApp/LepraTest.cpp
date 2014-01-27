@@ -2324,7 +2324,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 	{
 		if (z == 1)	// Reset time from first loop (only measure time second loop).
 		{
-			ScopePerformanceData::ClearAll();
+			ScopePerformanceData::ResetAll();
 			Thread::Sleep(0.3);	// Try to make the scheduler rank us high.
 		}
 

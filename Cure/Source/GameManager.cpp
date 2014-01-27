@@ -394,7 +394,7 @@ void GameManager::ClearPerformanceData()
 	mSendBandwidth.Clear();
 	mReceiveBandwidth.Clear();
 
-	ScopePerformanceData::ClearAll();
+	ScopePerformanceData::ResetAll();
 }
 
 void GameManager::GetBandwidthData(BandwidthData& pSent, BandwidthData& pReceived)

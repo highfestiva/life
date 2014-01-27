@@ -8,6 +8,7 @@
 
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/HashUtil.h"
+#include "../../Lepra/Include/Random.h"
 #include "../Include/RuntimeVariable.h"
 
 
@@ -246,7 +247,8 @@ bool RuntimeVariable::CheckType(DataType pType) const
 
 
 RuntimeVariableScope::RuntimeVariableScope(RuntimeVariableScope* pParentScope):
-	mParentScope(pParentScope)
+	mParentScope(pParentScope),
+	mOwnerSeed(Random::GetRandomNumber())
 {
 	mVariableTable.rehash(1024);
 }
@@ -719,27 +721,28 @@ bool RuntimeVariableScope::DeleteLocalVariable(const str& pName)
 
 RuntimeVariable* RuntimeVariableScope::GetVariable(const HashedString& pName, bool pRecursive) const
 {
-	if (pName.mValue)
+	if (pName.mValue && pName.mValueExpireCount == mOwnerSeed)
 	{
-		if (--pName.mValueExpireCount > 0)
-		{
-			return (RuntimeVariable*)pName.mValue;
-		}
+		return (RuntimeVariable*)pName.mValue;
 	}
 
-	{
-		ScopeLock lLock(&mLock);
-		VariableTable::const_iterator x = mVariableTable.find(pName);
-		if (x != mVariableTable.end())
-		{
-			pName.mValue = x->second;
-			pName.mValueExpireCount += 15 + (pName.mHash & 0x1F);
-			return x->second;
-		}
-	}
+	// We must assume the stored value in the HashedString can be found in the parent class (with a different "owner seed"),
+	// or we're dealing with either a rebooted application or a variable that simply can't be found.
 	if (pRecursive && mParentScope)
 	{
-		return mParentScope->GetVariable(pName, pRecursive);
+		RuntimeVariable* lVariable = mParentScope->GetVariable(pName, pRecursive);
+		if (lVariable)
+		{
+			return lVariable;
+		}
+	}
+	ScopeLock lLock(&mLock);
+	VariableTable::const_iterator x = mVariableTable.find(pName);
+	if (x != mVariableTable.end())
+	{
+		pName.mValue = x->second;
+		pName.mValueExpireCount = mOwnerSeed;
+		return x->second;
 	}
 	return 0;
 }

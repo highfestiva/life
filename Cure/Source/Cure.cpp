@@ -14,20 +14,23 @@ namespace Cure
 
 
 
-RuntimeVariableScope* mCureScope;
+RuntimeVariableScope* gCureScope = 0;
 
 
 
 void Init()
 {
-	mCureScope = new RuntimeVariableScope(0);
-	SetDefault(mCureScope);
+	if (!gCureScope)
+	{
+		gCureScope = new RuntimeVariableScope(0);
+	}
+	SetDefault(gCureScope);
 }
 
 void Shutdown()
 {
-	delete (mCureScope);
-	mCureScope = 0;
+	delete (gCureScope);
+	gCureScope = 0;
 }
 
 void SetDefault(RuntimeVariableScope* pSettings)
@@ -83,7 +86,7 @@ void SetDefault(RuntimeVariableScope* pSettings)
 
 RuntimeVariableScope* GetSettings()
 {
-	return (mCureScope);
+	return (gCureScope);
 }
 
 

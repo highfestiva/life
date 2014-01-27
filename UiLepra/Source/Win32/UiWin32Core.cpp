@@ -50,7 +50,10 @@ void Core::ProcessMessages()
 
 void Win32Core::Init()
 {
-	mLock = new Lock();
+	if (!mLock)
+	{
+		mLock = new Lock();
+	}
 }
 
 void Win32Core::Shutdown()

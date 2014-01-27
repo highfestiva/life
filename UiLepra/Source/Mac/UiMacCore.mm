@@ -227,7 +227,10 @@ void Core::ProcessMessages()
 
 void MacCore::Init()
 {
-	mLock = new Lock();
+	if (!mLock)
+	{
+		mLock = new Lock();
+	}
 }
 
 void MacCore::Shutdown()

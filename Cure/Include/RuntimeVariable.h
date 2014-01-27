@@ -148,6 +148,7 @@ private:
 	RuntimeVariableScope* mParentScope;
 	mutable Lock mLock;
 	VariableTable mVariableTable;
+	int mOwnerSeed;
 
 	LOG_CLASS_DECLARE();
 };

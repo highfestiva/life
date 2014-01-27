@@ -252,7 +252,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	(void)pWeapon;
 
 	double lFireDelay;
-	CURE_RTVAR_GET(lFireDelay, =, GetVariableScope(), RTVAR_GAME_FIREDELAY, 1.0);
+	CURE_RTVAR_GET(lFireDelay, =, GetVariableScope(), RTVAR_GAME_FIREDELAY, 1.5);
 	if (!mLevel->IsLoaded() || mFireDelayTimer.QueryTimeDiff() < lFireDelay)
 	{
 		return;
@@ -274,8 +274,8 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), _T("rocket"), mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	TransformationF t(mCameraTransform);
-	t.GetPosition().x += 0.3f;
-	t.GetPosition().y += 1.0f;
+	t.GetPosition().x += 0.7f;
+	t.GetPosition().y += 3.0f;
 	t.GetPosition().z -= 0.1f;
 	t.GetOrientation().RotateAroundWorldX(-PIF/2);	// Tilt rocket.
 	const Vector3DF lDistance = lTargetPosition - t.GetPosition();
