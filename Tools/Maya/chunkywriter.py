@@ -20,6 +20,7 @@ import sys
 
 physics_type = {"world":1, "static":2, "dynamic":3, "collision_detect_only":4}
 guide_mode = {"never":0, "external":1, "always":2, None:1}
+resize_hints = {"resize_fast":0, "resize_nicest":1, "resize_canvas":2}
 
 CHUNK_CLASS				= "CLAS"
 CHUNK_CLASS_PHYSICS			= "CLPH"
@@ -284,10 +285,10 @@ class ChunkyWriter:
 
 	def _writematerial(self, name, mat):
 		self._writematerial_(name, mat.ambient, mat.diffuse, mat.specular, \
-			mat.shininess, mat.alpha, mat.smooth, mat.textures, mat.shader)
+			mat.shininess, mat.alpha, mat.smooth, mat.resize_hint, mat.textures, mat.shader)
 
 
-	def _writematerial_(self, name, ambient, diffuse, specular, shininess, alpha, smooth, textures, shader):
+	def _writematerial_(self, name, ambient, diffuse, specular, shininess, alpha, smooth, resize_hint, textures, shader):
 		if len(ambient) != 3 or len(diffuse) != 3 or len(specular) != 3:
 			print("Error: bad number of material elements for %s:" % name, diffuse)
 			#print(ambient, diffuse, specular)
@@ -297,6 +298,7 @@ class ChunkyWriter:
 		if options.options.verbose and not smooth:
 			print("Flat shading on %s." % name)
 		self._writefloat(float(smooth))
+		self._writeint(resize_hints[resize_hint])
 		self._writeint(len(textures))
 		for texture in textures:
 			self._writestr(os.path.basename(texture))

@@ -422,7 +422,7 @@ void CppContextObject::ReplaceTexture(int pTextureIndex, const str& pNewTextureN
 	}
 	mUseDefaultTexture = true;
 	--mTextureLoadCount;
-	UserRendererImageResource* lNewTexture = new UserRendererImageResource(mUiManager, mUiManager->GetRenderer()->GetMipMappingEnabled());
+	UserRendererImageResource* lNewTexture = new UserRendererImageResource(mUiManager, ((const RendererImageResource*)lTexture->GetConstResource())->mSettings);
 	mTextureResourceArray[pTextureIndex] = lNewTexture;
 	lNewTexture->Load(GetResourceManager(), pNewTextureName,
 		UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
@@ -523,10 +523,11 @@ void CppContextObject::LoadTextures()
 	deb_assert(lClass);
 	for (size_t x = 0; x < lClass->GetMeshCount(); ++x)
 	{
+		const Canvas::ResizeHint lResizeHint = lClass->GetMaterial(x).mResizeHint;
 		const std::vector<str>& lTextureList = lClass->GetMaterial(x).mTextureList;
 		for (std::vector<str>::const_iterator y = lTextureList.begin(); y != lTextureList.end(); ++y)
 		{
-			UserRendererImageResource* lTexture = new UserRendererImageResource(mUiManager, mUiManager->GetRenderer()->GetMipMappingEnabled());
+			UserRendererImageResource* lTexture = new UserRendererImageResource(mUiManager, ImageProcessSettings(lResizeHint, mUiManager->GetRenderer()->GetMipMappingEnabled()));
 			mTextureResourceArray.push_back(lTexture);
 			lTexture->Load(GetResourceManager(), *y,
 				UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));

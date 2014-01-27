@@ -119,16 +119,26 @@ protected:
 	virtual ~RendererImageBaseResource();
 };
 
+struct ImageProcessSettings
+{
+	Canvas::ResizeHint mResizeHint;
+	bool mMipMap;
+	inline ImageProcessSettings(Canvas::ResizeHint pResizeHint, bool pMipMap):
+		mResizeHint(pResizeHint),
+		mMipMap(pMipMap)
+	{
+	}
+};
+
 class RendererImageResource: public RendererImageBaseResource
 {
 public:
-	RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, bool pMipMap);
+	RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, const ImageProcessSettings& pLoadSettings);
 	virtual ~RendererImageResource();
 	const str GetType() const;
 	bool Load();
 
-private:
-	bool mMipMap;
+	ImageProcessSettings mSettings;
 };
 
 /*class TextureResource: public RendererImageBaseResource
@@ -332,7 +342,7 @@ public:
 
 typedef UserUiTypeResource<PainterImageResource>						UserPainterImageResource;
 typedef UserUiExtraTypeResource<PainterImageResource, PainterImageResource::ImageReleaseMode>	UserPainterKeepImageResource;
-typedef UserUiExtraTypeResource<RendererImageResource, bool>					UserRendererImageResource;
+typedef UserUiExtraTypeResource<RendererImageResource, ImageProcessSettings>			UserRendererImageResource;
 //typedef UserUiTypeResource<TextureResource>							UserTextureResource;
 typedef UserUiExtraTypeResource<SoundResource2d, SoundResource::LoopMode>			UserSound2dResource;
 typedef UserUiExtraTypeResource<SoundResource3d, SoundResource::LoopMode>			UserSound3dResource;

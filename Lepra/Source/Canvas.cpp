@@ -406,10 +406,7 @@ void Canvas::Crop(int pTopLeftX,
 		unsigned lSrcYOffset = (lSrcStartY + y) * mPitch * lPixelSize;
 		unsigned lDestYOffset = (lDestStartY + y) * lNewWidth * lPixelSize;
 
-		for (int x = 0; x < lLoopWidth; x++)
-		{
-			lBuffer[lDestYOffset + lDestStartX * lPixelSize + x] = ((uint8*)mBuffer)[lSrcYOffset + lSrcStartX * lPixelSize + x];
-		}
+		::memcpy(&lBuffer[lDestYOffset + lDestStartX * lPixelSize], &((uint8*)mBuffer)[lSrcYOffset + lSrcStartX * lPixelSize], lLoopWidth);
 	}
 
 	Reset(lNewWidth, lNewHeight, mBitDepth);
@@ -993,6 +990,12 @@ void Canvas::Resize(unsigned pNewWidth, unsigned pNewHeight, ResizeHint pResizeH
 	if (mWidth == pNewWidth && mHeight == pNewHeight)
 		return;
 
+	if (pResizeHint == RESIZE_CANVAS)
+	{
+		Crop(0, 0, pNewWidth, pNewHeight);
+		return;
+	}
+
 	switch(mBitDepth)
 	{
 	case BITDEPTH_8_BIT:
@@ -1000,85 +1003,85 @@ void Canvas::Resize(unsigned pNewWidth, unsigned pNewHeight, ResizeHint pResizeH
 		{
 		case RESIZE_NICEST:
 			Resize8BitSmooth(pNewWidth, pNewHeight);
-			break;
+		break;
 		case RESIZE_FAST:
 		default:
 			Resize8BitFast(pNewWidth, pNewHeight);
-			break;
-		}
 		break;
+		}
+	break;
 	case BITDEPTH_15_BIT:
 		switch(pResizeHint)
-			{
-			case RESIZE_NICEST:
+		{
+		case RESIZE_NICEST:
 			Resize15BitSmooth(pNewWidth, pNewHeight);
-			break;
-		case RESIZE_FAST:
-			default:
-			Resize16BitFast(pNewWidth, pNewHeight);
-			break;
-			}
 		break;
+		case RESIZE_FAST:
+		default:
+			Resize16BitFast(pNewWidth, pNewHeight);
+		break;
+		}
+	break;
 	case BITDEPTH_16_BIT:
 		switch(pResizeHint)
-			{
-			case RESIZE_NICEST:
+		{
+		case RESIZE_NICEST:
 			Resize16BitSmooth(pNewWidth, pNewHeight);
-			break;
-		case RESIZE_FAST:
-			default:
-			Resize16BitFast(pNewWidth, pNewHeight);
-			break;
-			}
 		break;
+		case RESIZE_FAST:
+		default:
+			Resize16BitFast(pNewWidth, pNewHeight);
+		break;
+		}
+	break;
 	case BITDEPTH_24_BIT:
 		switch(pResizeHint)
-			{
-			case RESIZE_NICEST:
+		{
+		case RESIZE_NICEST:
 			Resize24BitSmooth(pNewWidth, pNewHeight);
-			break;
-		case RESIZE_FAST:
-			default:
-			Resize24BitFast(pNewWidth, pNewHeight);
-			break;
-			}
 		break;
+		case RESIZE_FAST:
+		default:
+			Resize24BitFast(pNewWidth, pNewHeight);
+		break;
+		}
+	break;
 	case BITDEPTH_32_BIT:
 		switch(pResizeHint)
-			{
-			case RESIZE_NICEST:
+		{
+		case RESIZE_NICEST:
 			Resize32BitSmooth(pNewWidth, pNewHeight);
-			break;
-		case RESIZE_FAST:
-			default:
-			Resize32BitFast(pNewWidth, pNewHeight);
-			break;
-			}
 		break;
+		case RESIZE_FAST:
+		default:
+			Resize32BitFast(pNewWidth, pNewHeight);
+		break;
+		}
+	break;
 	case BITDEPTH_16_BIT_PER_CHANNEL:
 		switch(pResizeHint)
-			{
-			case RESIZE_NICEST:
+		{
+		case RESIZE_NICEST:
 			Resize48BitSmooth(pNewWidth, pNewHeight);
-			break;
-		case RESIZE_FAST:
-			default:
-			Resize48BitFast(pNewWidth, pNewHeight);
-			break;
-			}
 		break;
+		case RESIZE_FAST:
+		default:
+			Resize48BitFast(pNewWidth, pNewHeight);
+		break;
+		}
+	break;
 	case BITDEPTH_32_BIT_PER_CHANNEL:
 		switch(pResizeHint)
-			{
-			case RESIZE_NICEST:
+		{
+		case RESIZE_NICEST:
 			Resize96BitSmooth(pNewWidth, pNewHeight);
-			break;
-		case RESIZE_FAST:
-			default:
-			Resize96BitFast(pNewWidth, pNewHeight);
-			break;
-			}
 		break;
+		case RESIZE_FAST:
+		default:
+			Resize96BitFast(pNewWidth, pNewHeight);
+		break;
+		}
+	break;
 	}
 }
 

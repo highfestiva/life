@@ -90,9 +90,9 @@ void Application::Init()
 #endif // !Apple
 #endif // Showing debug information.
 #ifdef LEPRA_DEBUG
-	mFileLogger = new FileLogListener(GetIoFile(GetTypeName(), _T("log"), false));
+	//mFileLogger = new FileLogListener(GetIoFile(GetTypeName(), _T("log"), false));
 	//mFileLogger->SetLevelThreashold(LEVEL_INFO);
-	mFileLogger->WriteLog(_T("\n---\n"), LEVEL_INFO);
+	//mFileLogger->WriteLog(_T("\n---\n"), LEVEL_INFO);
 	//mPerformanceLogger = new FileLogListener(GetIoFile(GetTypeName()+_T("Performance"), _T("log"), false));
 	mMemLogger = new MemFileLogListener(20*1024);
 #endif // Debug

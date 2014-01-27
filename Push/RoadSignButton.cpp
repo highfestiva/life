@@ -55,7 +55,7 @@ RoadSignButton::RoadSignButton(Life::ScreenPart* pScreenPart, Cure::ResourceMana
 
 	SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
 	SetUseDefaultTexture(true);
-	UiCure::UserRendererImageResource* lTexture = new UiCure::UserRendererImageResource(mUiManager, false);
+	UiCure::UserRendererImageResource* lTexture = new UiCure::UserRendererImageResource(mUiManager, UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, false));
 	mTextureResourceArray.push_back(lTexture);
 	lTexture->Load(GetResourceManager(), pTextureResourceName,
 		UiCure::UserRendererImageResource::TypeLoadCallback(this, &RoadSignButton::OnLoadTexture));

@@ -93,7 +93,7 @@ bool FireTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
-		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), true);
+		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
 		if (mEnvMap->Load())
 		{
 			if (mEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)

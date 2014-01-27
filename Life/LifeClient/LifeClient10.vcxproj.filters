@@ -74,26 +74,26 @@
     <ClCompile Include="..\LifeMaster\MasterServerNetworkParser.cpp">
       <Filter>Master</Filter>
     </ClCompile>
-    <ClCompile Include="ExplodingMachine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FastProjectile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HomingProjectile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Projectile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Menu.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExplodingMachine.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="FastProjectile.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="HomingProjectile.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Mine.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,26 +163,26 @@
     <ClInclude Include="..\LifeMaster\MasterServerNetworkParser.h">
       <Filter>Master</Filter>
     </ClInclude>
-    <ClInclude Include="ExplodingMachine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FastProjectile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HomingProjectile.h">
+    <ClInclude Include="Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Level.h">
-      <Filter>Header Files</Filter>
+      <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Mine.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="ExplodingMachine.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="FastProjectile.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="HomingProjectile.h">
+      <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Projectile.h">
-      <Filter>Header Files</Filter>
+      <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Menu.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Mine.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

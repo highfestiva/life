@@ -282,7 +282,7 @@ bool DownwashManager::Open()
 		mLockIcon->Load(GetResourceManager(), _T("icon_lock.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 
-		mArrow = new UiCure::UserRendererImageResource(mUiManager, false);
+		mArrow = new UiCure::UserRendererImageResource(mUiManager, UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, false));
 		mArrow->Load(GetResourceManager(), _T("arrow.png"),
 			UiCure::UserRendererImageResource::TypeLoadCallback(this, &DownwashManager::RendererTextureLoadCallback));
 		mArrowBillboard = new UiTbc::BillboardGeometry(1/4.0f, 1);

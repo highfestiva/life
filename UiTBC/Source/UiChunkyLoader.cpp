@@ -512,7 +512,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 				lMaterialArray[x] = Endian::BigToHostF(*(uint32*)&lBuffer[lIndex+x*sizeof(float)]);
 			}
 			lIndex += lMaterialFloatCount * sizeof(float);
-			lOk = (lIndex <= (int)(pSize-4-4));
+			lOk = (lIndex <= (int)(pSize-4-4-4));
 			deb_assert(lOk);
 			lMaterial.mAmbient.Set(lMaterialArray[0], lMaterialArray[1], lMaterialArray[2]);
 			lMaterial.mDiffuse.Set(lMaterialArray[3], lMaterialArray[4], lMaterialArray[5]);
@@ -520,6 +520,14 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			lMaterial.mShininess = lMaterialArray[9];
 			lMaterial.mAlpha = lMaterialArray[10];
 			lMaterial.mSmooth = (lMaterialArray[11] > 0.5f);
+		}
+		if (lOk)
+		{
+			Canvas::ResizeHint lResizeHint = (Canvas::ResizeHint)Endian::BigToHost(*(int32*)&lBuffer[lIndex]);
+			lIndex += sizeof(int32);
+			lOk = (lIndex <= (int)(pSize-4-4));
+			deb_assert(lOk);
+			lMaterial.mResizeHint = lResizeHint;
 		}
 		if (lOk)
 		{

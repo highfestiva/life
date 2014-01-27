@@ -7,7 +7,7 @@
 #pragma once
 
 #include "UiTBC.h"
-#include "../../Lepra/Include/Graphics2D.h"
+#include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../TBC/Include/ChunkyClass.h"
 
@@ -29,6 +29,7 @@ public:
 		float mShininess;
 		float mAlpha;
 		bool mSmooth;
+		Canvas::ResizeHint mResizeHint;
 		std::vector<str> mTextureList;
 		str mShaderName;
 

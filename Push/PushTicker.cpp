@@ -106,7 +106,7 @@ bool PushTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
-		UiCure::RendererImageResource* lEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), true);
+		UiCure::RendererImageResource* lEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
 		if (lEnvMap->Load())
 		{
 			if (lEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)

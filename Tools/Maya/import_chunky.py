@@ -507,6 +507,7 @@ class GroupReader(DefaultMAReader):
 				shininess = 0.0
 				alpha = 1.0
 				smooth = node.get_fixed_attribute("smooth", optional=True, default=True)
+				resize_hint = node.get_fixed_attribute("resize_hint", optional=True, default="resize_fast")
 				textureNames = []
 				shaderName = node.get_fixed_attribute("shader", optional=True, default="plain")
 
@@ -584,16 +585,17 @@ class GroupReader(DefaultMAReader):
 				class Material:
 					pass
 				node.mat = Material()
-				node.mat.ambient   = ambient
-				node.mat.diffuse   = diffuse
-				node.mat.specular  = specular
+				node.mat.ambient	= ambient
+				node.mat.diffuse	= diffuse
+				node.mat.specular	= specular
 ##				if len(node.mat.ambient) != 3 or len(node.mat.diffuse) != 3 or len(node.mat.specular) != 3:
 ##					print("Error:", node, node.mat.ambient, node.mat.diffuse, node.mat.specular)
-				node.mat.shininess = shininess
-				node.mat.alpha     = alpha
-				node.mat.smooth    = smooth
-				node.mat.textures  = textureNames
-				node.mat.shader    = shaderName
+				node.mat.shininess	= shininess
+				node.mat.alpha		= alpha
+				node.mat.smooth		= smooth
+				node.mat.resize_hint	= resize_hint
+				node.mat.textures	= textureNames
+				node.mat.shader		= shaderName
 				if textureNames and options.options.verbose:
 					print("%s gets textures %s with shader %s." % (node.getFullName(), ", ".join(textureNames), shaderName))
 		return ok

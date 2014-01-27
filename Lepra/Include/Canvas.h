@@ -65,6 +65,7 @@ public:
 	{
 		RESIZE_FAST = 0,
 		RESIZE_NICEST,
+		RESIZE_CANVAS,	// No scaling, simply crop or expand.
 	};
 
 	enum CmpFunc
