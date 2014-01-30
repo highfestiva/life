@@ -190,6 +190,7 @@ public:
 	const str GetType() const;
 
 	bool IsReferenceType() const;
+	ClassResource* GetParent() const;
 
 	bool Load();
 	Cure::ResourceLoadState PostProcess();

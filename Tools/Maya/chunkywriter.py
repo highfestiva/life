@@ -59,6 +59,7 @@ CHUNK_MESH_VOLATILITY			= "MEVO"
 CHUNK_MESH_CASTS_SHADOWS		= "MECS"
 CHUNK_MESH_SHADOW_DEVIATION		= "MESD"
 CHUNK_MESH_TWO_SIDED			= "METS"
+CHUNK_MESH_RECV_NO_SHADOWS		= "MERS"
 
 
 
@@ -743,40 +744,26 @@ class MeshWriter(ChunkyWriter):
 			for p in node.getparents():
 				p.writecount += 1
 			return
-		def getshadows(node):
+		def getmeshval(node, attrname, tag, isbool):
 			for mesh in node.getparents():
-				casts_shadows = mesh.get_fixed_attribute("casts_shadows", optional=True)
-				if casts_shadows != None:
+				val = mesh.get_fixed_attribute(attrname, optional=True)
+				if val != None:
 					break
-			if casts_shadows == None:
+			if val == None:
 				return []
-			elif casts_shadows:
-				return [(CHUNK_MESH_CASTS_SHADOWS, +1)]
-			if options.options.verbose:
-				print("%s will not cast shadows!" % node.getName())
-			return [(CHUNK_MESH_CASTS_SHADOWS, -1)]
+			elif isbool:
+				if not val and options.options.verbose:
+					print("%s will not /be/have %s!" % (node.getName(), attrname))
+				return [(tag, +1 if val else -1)]
+			return [(tag, val)]
+		def get_casts_shadows(node):
+			return getmeshval(node, "casts_shadows", CHUNK_MESH_CASTS_SHADOWS, True)
 		def get_shadow_deviation(node):
-			for mesh in node.getparents():
-				shadow_deviation = mesh.get_fixed_attribute("shadow_deviation", optional=True)
-				if shadow_deviation != None:
-					break
-			if shadow_deviation == None:
-				return []
-			if options.options.verbose:
-				print("%s has shadow deviation %f." % (node.getName(), shadow_deviation))
-			return [(CHUNK_MESH_SHADOW_DEVIATION, shadow_deviation)]
+			return getmeshval(node, "shadow_deviation", CHUNK_MESH_SHADOW_DEVIATION, False)
 		def gettwosided(node):
-			for mesh in node.getparents():
-				two_sided = mesh.get_fixed_attribute("two_sided", optional=True)
-				if two_sided != None:
-					break
-			if two_sided == None:
-				return []
-			elif two_sided:
-				return [(CHUNK_MESH_TWO_SIDED, +1)]
-			if options.options.verbose:
-				print("%s will not be two-sided!" % node.getName())
-			return [(CHUNK_MESH_TWO_SIDED, -1)]
+			return getmeshval(node, "two_sided", CHUNK_MESH_TWO_SIDED, True)
+		def get_recv_no_shadows(node):
+			return getmeshval(node, "recv_no_shadows", CHUNK_MESH_RECV_NO_SHADOWS, True)
 		#print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
 		self._addfeat("mesh:meshes", 1)
 		self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
@@ -785,9 +772,10 @@ class MeshWriter(ChunkyWriter):
 			default_mesh_type = {"static":1, "semi_static":2, "dynamic":3, "volatile":4}
 			mesh_type = "static" if self.config["type"] in ("world", "static") else "semi_static"
 			volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type[mesh_type])]
-			casts_shadows = getshadows(node)
+			casts_shadows = get_casts_shadows(node)
 			shadow_deviation = get_shadow_deviation(node)
 			two_sided = gettwosided(node)
+			recv_shadows = get_recv_no_shadows(node)
 			verts = [(CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx"))]
 			polys = [(CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri"))]
 			normals = [] # node.get_fixed_attribute("rgn", optional=True)
@@ -795,7 +783,7 @@ class MeshWriter(ChunkyWriter):
 			# if uvs and options.options.verbose:
 				# print("Mesh %s has UVs." % node.getFullName())
 			textureuvs = [(CHUNK_MESH_UV, uvs)] if uvs else []
-			inner_data = volatility+casts_shadows+shadow_deviation+two_sided+verts+polys+normals+textureuvs
+			inner_data = volatility+casts_shadows+shadow_deviation+two_sided+recv_shadows+verts+polys+normals+textureuvs
 			data = (
 					CHUNK_MESH,
 					inner_data

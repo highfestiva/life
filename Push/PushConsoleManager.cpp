@@ -77,6 +77,7 @@ int PushConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 				else
 				{
 					mLog.Warningf(_T("usage: %s <avatar>"), pCommand.c_str());
+					lResult = 1;
 				}
 			}
 			break;
@@ -98,6 +99,7 @@ int PushConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 				else
 				{
 					mLog.Warningf(_T("usage: %s <aspect> <power>"), pCommand.c_str());
+					lResult = 1;
 				}
 			}
 			break;

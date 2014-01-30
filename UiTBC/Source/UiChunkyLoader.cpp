@@ -52,6 +52,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	int32 lCastsShadows = 0;
 	int32 lShadowDeviationInt = -1;
 	int32 lIsTwoSided = 0;
+	int32 lRecvNoShadows = 0;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lLoadList;
@@ -60,6 +61,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_SHADOW_DEVIATION, &lShadowDeviationInt));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TWO_SIDED, &lIsTwoSided));
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_RECV_NO_SHADOWS, &lRecvNoShadows));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VERTICES, (void**)&lLoadVertices, &lVerticesSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_STRIPS, (void**)&lStripsIndices, &lStripsIndicesSize));
@@ -161,18 +163,14 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 			pMeshData->AddUVSet(lUvs[x]);
 		}
 
-		if (lIsTwoSided)
-		{
-			pMeshData->SetTwoSided(true);
-		}
-
+		pCastsShadows = lCastsShadows;
 		if (lShadowDeviationInt >= 0)
 		{
 			float32 lShadowDeviation = *(float*)&lShadowDeviationInt;	// Already big2host'ed, as it izz single value.
 			pMeshData->SetBigOrientationThreshold(lShadowDeviation);
 		}
-
-		pCastsShadows = lCastsShadows;
+		pMeshData->SetTwoSided(lIsTwoSided > 0);
+		pMeshData->SetRecvNoShadows(lRecvNoShadows > 0);
 	}
 	// TODO: reuse memory, don't new/delete constantly!
 	delete[] (lLoadVertices);
@@ -235,6 +233,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	int32 lCastsShadows = pCastsShadows;
 	int32 lShadowDeviation = Endian::HostToBigF(pMeshData->GetBigOrientationThreshold());
 	int32 lIsTwoSided = pMeshData->IsTwoSided()? 1 : 0;
+	int32 lRecvNoShadows = pMeshData->IsRecvNoShadows()? 1 : 0;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lSaveList;
@@ -242,6 +241,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_SHADOW_DEVIATION, &lShadowDeviation));
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TWO_SIDED, &lIsTwoSided));
+		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_RECV_NO_SHADOWS, &lRecvNoShadows));
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VERTICES, (void**)&lVertices, &lVerticesSize));
 		if (lTriangleIndices)
 		{

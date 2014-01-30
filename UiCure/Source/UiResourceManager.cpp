@@ -401,6 +401,11 @@ bool GeometryReferenceResource::IsReferenceType() const
 	return true;
 }
 
+GeometryReferenceResource::ClassResource* GeometryReferenceResource::GetParent() const
+{
+	return mClassResource;
+}
+
 bool GeometryReferenceResource::Load()
 {
 	//deb_assert(IsUnique());

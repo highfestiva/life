@@ -318,22 +318,22 @@ void GeometryBase::RemoveListener(Listener* pListener)
 	mListenerList.remove(pListener);
 }
 
-const GeometryBase::RenderCallback& GeometryBase::GetPreRenderCallback() const
+const GeometryBase::PreRenderCallback& GeometryBase::GetPreRenderCallback() const
 {
 	return mPreRenderCallback;
 }
 
-void GeometryBase::SetPreRenderCallback(const RenderCallback& pCallback)
+void GeometryBase::SetPreRenderCallback(const PreRenderCallback& pCallback)
 {
 	mPreRenderCallback = pCallback;
 }
 
-const GeometryBase::RenderCallback& GeometryBase::GetPostRenderCallback() const
+const GeometryBase::PostRenderCallback& GeometryBase::GetPostRenderCallback() const
 {
 	return mPostRenderCallback;
 }
 
-void GeometryBase::SetPostRenderCallback(const RenderCallback& pCallback)
+void GeometryBase::SetPostRenderCallback(const PostRenderCallback& pCallback)
 {
 	mPostRenderCallback = pCallback;
 }
@@ -1055,6 +1055,16 @@ bool GeometryBase::IsTwoSided() const
 void GeometryBase::SetTwoSided(bool pIsTwoSided)
 {
 	SetFlag(IS_TWO_SIDED, pIsTwoSided);
+}
+
+bool GeometryBase::IsRecvNoShadows() const
+{
+	return CheckFlag(RECV_NO_SHADOWS);
+}
+
+void GeometryBase::SetRecvNoShadows(bool pRecvNoShadows)
+{
+	SetFlag(RECV_NO_SHADOWS, pRecvNoShadows);
 }
 
 void GeometryBase::CalculateBoundingRadius()

@@ -13,6 +13,7 @@
 #include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiCure/Include/UiResourceManager.h"
 #include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
 #include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
@@ -45,6 +46,7 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 	{_T("start-reset-ui"), COMMAND_START_RESET_UI},
 	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
 	{_T("add-player"), COMMAND_ADD_PLAYER},
+	{_T("set-mesh-visible"), COMMAND_SET_MESH_VISIBLE},
 };
 
 
@@ -214,6 +216,7 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				else
 				{
 					mLog.Warningf(_T("usage: %s <title> <msg>"), pCommand.c_str());
+					lResult = 1;
 				}
 			}
 			break;
@@ -235,6 +238,7 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				else
 				{
 					mLog.Warningf(_T("usage: %s <server> <username> <password>"), pCommand.c_str());
+					lResult = 1;
 				}
 			}
 			break;
@@ -291,6 +295,33 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				else
 				{
 					mLog.AError("Could not add another player!");
+					lResult = 1;
+				}
+			}
+			break;
+			case COMMAND_SET_MESH_VISIBLE:
+			{
+				bool lVisible = false;
+				if (pParameterVector.size() == 2 && strutil::StringToBool(pParameterVector[1], lVisible))
+				{
+					int lAffectedMeshCount = 0;
+					typedef Cure::ResourceManager::ResourceList ResourceList;
+					ResourceList lResourceList = mResourceManager->HookAllResourcesOfType(_T("GeometryRef"));
+					for (ResourceList::iterator x = lResourceList.begin(); x != lResourceList.end(); ++x)
+					{
+						UiCure::GeometryReferenceResource* lMeshRefResource = (UiCure::GeometryReferenceResource*)*x;
+						if (lMeshRefResource->GetName().find(pParameterVector[0]) != str::npos)
+						{
+							lMeshRefResource->GetRamData()->SetAlwaysVisible(lVisible);
+							++lAffectedMeshCount;
+						}
+					}
+					mResourceManager->UnhookResources(lResourceList);
+					mLog.Infof(_T("%i meshes affected."), lAffectedMeshCount);
+				}
+				else
+				{
+					mLog.Warningf(_T("usage: %s <mesh> <bool>"), pCommand.c_str());
 					lResult = 1;
 				}
 			}

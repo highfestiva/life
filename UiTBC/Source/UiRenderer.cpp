@@ -1705,12 +1705,42 @@ Vector3DF Renderer::ScreenCoordToVector(const PixelCoord& pCoord) const
 	GetViewFrustum(lFOV, lNear, lFar);
 	lFOV = Math::Deg2Rad(lFOV);
 	const float lAspect = h2/w2;
-	float dx = tan(lFOV*0.5f) * (pCoord.x/w2-1.0f);
-	float dy = tan(lFOV*0.5f) * (1.0f-pCoord.y/h2) * lAspect;
-	Vector3DF lDirection(dx*10, 10, dy*10);
+	const float tana = tan(lFOV*0.5f);
+	float dx = tana * (pCoord.x/w2-1.0f);
+	float dy = tana * (1.0f-pCoord.y/h2) * lAspect;
+	Vector3DF lDirection(dx, 1, dy);
 	lDirection.Normalize();
 	lDirection = mCameraTransformation.GetOrientation() * lDirection;
 	return lDirection;
+}
+
+Vector2DF Renderer::PositionToScreenCoord(const Vector3DF& pPosition) const
+{
+	Vector3DF lCamDirection(pPosition - mCameraTransformation.mPosition);
+	Vector3DF lDirection;
+	mCameraTransformation.mOrientation.FastInverseRotatedVector(mCameraOrientationInverse, lDirection, lCamDirection);
+
+	// Normalize so Y-distance from camera is 1.
+	const float eps = 1e-5f;	// Something small.
+	if (std::abs(lDirection.y) < eps)
+	{
+		lDirection.y = eps;
+	}
+	lDirection.x /= lDirection.y;
+	lDirection.z /= lDirection.y;
+
+	const float w2 = mClippingRect.GetWidth() * 0.5f;
+	const float h2 = mClippingRect.GetHeight() * 0.5f;
+	float lFOV, lNear, lFar;
+	GetViewFrustum(lFOV, lNear, lFar);
+	lFOV = Math::Deg2Rad(lFOV);
+	const float lInverseAspect = w2/h2;
+	const float lInverseTanA = 1/tan(lFOV*0.5f);
+
+	Vector2DF lCoord;
+	lCoord.x = ( lDirection.x*lInverseTanA+1.0f) * w2;
+	lCoord.y = (-lDirection.z*lInverseTanA*lInverseAspect+1.0f) * h2;
+	return lCoord;
 }
 
 float Renderer::GetAspectRatio() const
@@ -1761,13 +1791,8 @@ void Renderer::ReleaseGeometries()
 		++lGeoIter)
 	{
 		GeometryData* lGeometry = *lGeoIter;
-
-		if (lGeometry->mGeometry->IsGeometryReference() == false)
-		{
-			delete lGeometry->mTA;
-			lGeometry->mTA = 0;
-		}
-
+		delete lGeometry->mTA;
+		lGeometry->mTA = 0;
 		delete lGeometry;
 	}
 }

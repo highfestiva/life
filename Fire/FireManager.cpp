@@ -138,6 +138,7 @@ void FireManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_ENABLE, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
 #endif // Debug
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_EMULATETOUCH, true);
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
@@ -551,6 +552,7 @@ void FireManager::HandleShooting()
 
 void FireManager::TickInput()
 {
+	OnLevelLoadCompleted();
 	TickNetworkInput();
 	TickUiInput();
 }
@@ -661,6 +663,53 @@ void FireManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 
 void FireManager::OnLevelLoadCompleted()
 {
+	if (!mLevel || !mLevel->IsLoaded())
+	{
+		return;
+	}
+	// Update texture UV coordinates according to FoV.
+	float lDistance;
+	CURE_RTVAR_TRYGET(lDistance, =(float), GetVariableScope(), "level.distance", 200.0);
+	static float lFormerDistance = 0;
+	if (lFormerDistance == lDistance)
+	{
+		return;
+	}
+	lFormerDistance = lDistance;
+	const UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+	const float wf = +1.0f / mUiManager->GetDisplayManager()->GetWidth();
+	const float hf = -768.0f / (1024 * mUiManager->GetDisplayManager()->GetHeight());
+	const size_t lMeshCount = ((UiTbc::ChunkyClass*)mLevel->GetClass())->GetMeshCount();
+	for (size_t x = 0; x < lMeshCount; ++x)
+	{
+		bool lUpdate = false;
+		TBC::GeometryBase* lMesh = mLevel->GetMesh(x);
+		TransformationF lTransform = lMesh->GetTransformation();
+		lTransform.mOrientation = lTransform.mOrientation.GetInverse();
+		const Vector3DF lOffset(0,lDistance,0);
+		for (unsigned y = 0; y < lMesh->GetUVSetCount(); ++y)
+		{
+			const float* xyz = lMesh->GetVertexData();
+			float* uv  = lMesh->GetUVData(y);
+			const unsigned lVertexCount = lMesh->GetVertexCount();
+			for (unsigned z = 0; z < lVertexCount; ++z)
+			{
+				Vector3DF lVector(&xyz[z*3]);
+				lVector = lTransform * lVector + lOffset;
+				Vector2DF c = lRenderer->PositionToScreenCoord(lVector);
+				uv[z*2+0] = c.x * wf;
+				uv[z*2+1] = - c.y * hf;
+			}
+			lMesh->SetUVDataChanged(true);
+			lUpdate = true;
+		}
+		lMesh->SetPreRenderCallback(TBC::GeometryBase::PreRenderCallback(this, &FireManager::DisableAmbient));
+		lMesh->SetPostRenderCallback(TBC::GeometryBase::PostRenderCallback(this, &FireManager::EnableAmbient));
+		if (lUpdate)
+		{
+			mUiManager->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)mLevel->GetMeshResource(x)->GetConstResource())->GetParent()->GetData());
+		}
+	}
 }
 
 void FireManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -756,6 +805,31 @@ void FireManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource*
 	{
 		mUiManager->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*pResource->GetRamData(), pResource->GetData(),
 			UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
+	}
+}
+
+
+
+bool FireManager::DisableAmbient()
+{
+	UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+	mStoreLightsEnabled = lRenderer->GetLightsEnabled();
+	if (mStoreLightsEnabled)
+	{
+		lRenderer->GetAmbientLight(mStoreAmbient.x, mStoreAmbient.y, mStoreAmbient.z);
+		lRenderer->SetAmbientLight(1.0f, 1.0f, 1.0f);
+		lRenderer->EnableAllLights(false);
+	}
+	return true;
+}
+
+void FireManager::EnableAmbient()
+{
+	UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+	if (mStoreLightsEnabled)
+	{
+		lRenderer->EnableAllLights(true);
+		lRenderer->SetAmbientLight(mStoreAmbient.x, mStoreAmbient.y, mStoreAmbient.z);
 	}
 }
 

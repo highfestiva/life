@@ -92,6 +92,7 @@ enum ChunkyType
 	CHUNK_MESH_CASTS_SHADOWS           = ENUMIFY('M','E','C','S'),	// Optional.
 	CHUNK_MESH_SHADOW_DEVIATION        = ENUMIFY('M','E','S','D'),	// Optional.
 	CHUNK_MESH_TWO_SIDED               = ENUMIFY('M','E','T','S'),	// Optional.
+	CHUNK_MESH_RECV_NO_SHADOWS         = ENUMIFY('M','E','R','S'),	// Optional.
 
 	// File type: skin. Unly used by graphics applications.
 	CHUNK_SKIN                         = ENUMIFY('S','K','I','N'),	// Skin file type.

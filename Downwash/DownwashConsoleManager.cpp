@@ -87,6 +87,7 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 				else
 				{
 					mLog.Warningf(_T("usage: %s <avatar>"), pCommand.c_str());
+					lResult = 1;
 				}
 			}
 			break;
@@ -123,6 +124,7 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 				else
 				{
 					mLog.Warningf(_T("usage: %s <index>"), pCommand.c_str());
+					lResult = 1;
 				}
 			}
 			break;

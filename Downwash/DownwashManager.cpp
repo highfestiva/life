@@ -352,8 +352,8 @@ bool DownwashManager::Render()
 		if (!mHemisphere->GetMesh(0)->GetUVAnimator())
 		{
 			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
-			mHemisphere->GetMesh(0)->SetPreRenderCallback(TBC::GeometryBase::RenderCallback(this, &DownwashManager::DisableDepth));
-			mHemisphere->GetMesh(0)->SetPostRenderCallback(TBC::GeometryBase::RenderCallback(this, &DownwashManager::EnableDepth));
+			mHemisphere->GetMesh(0)->SetPreRenderCallback(TBC::GeometryBase::PreRenderCallback(this, &DownwashManager::DisableDepth));
+			mHemisphere->GetMesh(0)->SetPostRenderCallback(TBC::GeometryBase::PostRenderCallback(this, &DownwashManager::EnableDepth));
 		}
 		Vector3DF lPosition = mCameraTransform.GetPosition();
 		lPosition.x = -lPosition.x;

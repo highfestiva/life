@@ -112,7 +112,7 @@ def splitverts(vs, ts, ns, uvs):
 	if not ns:
 		return vs, ts, ns, uvs
 
-	if len(vs) >= len(ts)*3:
+	if len(vs) > len(ts)*3:
 		print("Internal error: too few triangle indices.")
 		sys.exit(4)
 	if len(ns) != len(ts)*3:

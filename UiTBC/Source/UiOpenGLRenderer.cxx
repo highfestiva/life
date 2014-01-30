@@ -221,7 +221,13 @@ void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
 	Parent::SetAmbientLight(pRed, pGreen, pBlue);
 
 	float lAmbientLight[] = {pRed, pGreen, pBlue, 1.0f};
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
+	::glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbientLight);
+	if (IsPixelShadersEnabled())
+	{
+		GLfloat lLightAmbient[4] = {0,0,0,0};
+		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 3, lLightAmbient);
+	}
 	OGL_FAST_ASSERT();
 }
 
@@ -957,29 +963,32 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 		
 		// Force update of shadow volumes.
 
-		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true && lGeometry->IsGeometryReference() == false)
+		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() && !lGeometry->IsGeometryReference())
 		{
 			int lVertexCount = lGeometry->GetVertexCount();
 
-			if (lGeometry->GetVertexDataChanged() == true ||
-			   lGeometry->GetColorDataChanged() == true ||
-			   lGeometry->GetUVDataChanged() == true)
+			if (lGeometry->GetVertexDataChanged() ||
+			   lGeometry->GetColorDataChanged() ||
+			   lGeometry->GetUVDataChanged())
 			{
 				//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lGeomData->mVertexBufferID));
 				UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeomData->mVertexBufferID);
 			}
 
-			if (lGeometry->GetVertexDataChanged() == true)
+			if (lGeometry->GetVertexDataChanged())
 			{
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
 									 0,
 									 lVertexCount * sizeof(float) * 3,
 									 (void*)lGeometry->GetVertexData());
 
-				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
-									 lGeomData->mNormalOffset,
-									 lVertexCount * sizeof(float) * 3,
-									 (void*)lGeometry->GetNormalData());
+				if (lGeometry->GetNormalData())
+				{
+					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+										 lGeomData->mNormalOffset,
+										 lVertexCount * sizeof(float) * 3,
+										 (void*)lGeometry->GetNormalData());
+				}
 
 				// Only reset the flag if there are no shadows to update.
 				// The flag will be reset when the shadows are updated.
@@ -989,7 +998,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 				}
 			}
 
-			if (lGeometry->GetColorDataChanged() == true)
+			if (lGeometry->GetColorDataChanged() && lGeometry->GetColorData())
 			{
 				int lSize = 4;
 				if (lGeometry->GetColorFormat() == TBC::GeometryBase::COLOR_RGB)
@@ -1001,7 +1010,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 									 (void*)lGeometry->GetColorData());
 			}
 
-			if (lGeometry->GetUVDataChanged() == true)
+			if (lGeometry->GetUVDataChanged())
 			{
 				size_t lOffset = lGeomData->mUVOffset;
 				for (unsigned i = 0; i < lGeometry->GetUVSetCount(); i++)
@@ -1013,8 +1022,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 			}
 
 			if (lGeometry->GetTangentData() != 0 &&
-			   (lGeometry->GetVertexDataChanged() == true ||
-			    lGeometry->GetUVDataChanged() == true))
+			   (lGeometry->GetVertexDataChanged() || lGeometry->GetUVDataChanged()))
 			{
 				if (lGeomData->mTangentOffset > 0)
 				{
@@ -1033,7 +1041,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 				}
 			}
 
-			if (lGeometry->GetIndexDataChanged() == true)
+			if (lGeometry->GetIndexDataChanged())
 			{
 				UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)lGeomData->mIndexBufferID);
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
@@ -1127,6 +1135,14 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 	if (pGeometry->IsTwoSided())
 	{
 		::glDisable(GL_CULL_FACE);
+	}
+	// Check if we can avoid double-rendering (if in unlit mode).
+	if (pGeometry->IsRecvNoShadows())
+	{
+		if (GetShadowMode() != NO_SHADOWS && !GetLightsEnabled())
+		{
+			return false;
+		}
 	}
 
 	const TransformationF& t = pGeometry->GetTransformation();
@@ -1224,6 +1240,11 @@ unsigned OpenGLRenderer::RenderScene()
 #endif // !GLES
 
 		Material::EnableDrawMaterial(true);
+
+		if (!IsPixelShadersEnabled())
+		{
+			OpenGLMatPXS::CleanupShaderPrograms();
+		}
 	}
 
 	float lAmbientRed, lAmbientGreen, lAmbientBlue;
@@ -1236,11 +1257,13 @@ unsigned OpenGLRenderer::RenderScene()
 		// Disable all lights (for shadow rendering).
 		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 		{
-			if (x->second->mShadowRange > 0)
+			LightData* lLight = x->second;
+			if (lLight->mShadowRange > 0 && lLight->mEnabled)
 			{
 				::glDisable(GL_LIGHT0 + x->first);
 			}
 		}
+		Parent::SetLightsEnabled(false);
 
 		if (IsOutlineRenderingEnabled())
 		{
@@ -1281,7 +1304,7 @@ unsigned OpenGLRenderer::RenderScene()
 		::glStencilFunc(GL_GEQUAL, 128, 0xFF);
 		::glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-		SetLightsEnabled(GetLightsEnabled());
+		SetLightsEnabled(true);
 
 		// Enable all lights again.
 		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)

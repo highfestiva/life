@@ -89,7 +89,7 @@ protected:
 
 	Cure::ResourceManager* GetResourceManager() const;
 
-private:
+protected:
 	wstr LoadUserConfig(File* pFile);
 	bool SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const wstr& pUserConfig);
 	bool SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const wstr& pUserConfig);

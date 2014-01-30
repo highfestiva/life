@@ -1545,6 +1545,36 @@ void TerrainFunctionTest::UpdateScene(double, double)
 	mExtraInfo = mTriangleCountInfo;
 }
 
+bool TestRayPicker(const Lepra::LogDecorator& pLog)
+{
+	gTotalFps = 0;
+
+	str lContext = _T("clear");
+	bool lTestOk = ResetAndClearFrame();
+	gRenderer->SetCameraTransformation(TransformationF());
+
+	if (lTestOk)
+	{
+		str lContext = _T("pick and inverse");
+		PixelCoord xs(640, 480/2);
+		PixelCoord ys(640/2, 480);
+		PixelCoord zs(0, 0);
+		Vector3DF xp = gRenderer->ScreenCoordToVector(xs)*100;
+		Vector3DF yp = gRenderer->ScreenCoordToVector(ys)*100;
+		Vector3DF zp = gRenderer->ScreenCoordToVector(zs)*100;
+		Vector2DF xb = gRenderer->PositionToScreenCoord(xp);
+		Vector2DF yb = gRenderer->PositionToScreenCoord(yp);
+		Vector2DF zb = gRenderer->PositionToScreenCoord(zp);
+		lTestOk = ((int)xb.x == xs.x && (int)xb.y == xs.y &&
+			   (int)yb.x == ys.x && (int)yb.y == ys.y &&
+			   (int)zb.x == zs.x && (int)yb.y == ys.y);
+		deb_assert(lTestOk);
+	}
+
+	ReportTestResult(pLog, _T("TestRayPicker"), lContext, lTestOk);
+	return lTestOk;
+}
+
 bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 {
 	gTotalFps = 0;
@@ -1779,7 +1809,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 	// Assign FPS meter for next test.
 	gTotalFps = lFrameCount/lTotalTimer.GetTimeDiff();
 
-	ReportTestResult(pLog, _T("RenderModes"), lContext, lTestOk);
+	ReportTestResult(pLog, _T("TestMaterials"), lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -2433,10 +2463,14 @@ bool TestUiTbc()
 		}*/
 		if (lTestOk)
 		{
+			lTestOk = TestRayPicker(gUiTbcLog);
+		}
+		/*if (lTestOk)
+		{
 			LEPRA_MEASURE_SCOPE(MaterialTest);
 			lTestOk = TestMaterials(gUiTbcLog, 20.0);
 		}
-		/*if (lTestOk)
+		if (lTestOk)
 		{
 			lTestOk = TestFps(gUiTbcLog, 150.0);
 		}

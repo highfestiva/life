@@ -483,6 +483,7 @@ public:
 	// Returns true if the front face is turned towards the camera.
 	bool IsFacingFront(const Vector3DF* pVertex, int pNumVertices);
 	Vector3DF ScreenCoordToVector(const PixelCoord& pCoord) const;
+	Vector2DF PositionToScreenCoord(const Vector3DF& pPosition) const;
 
 	// Returns the triangle count in the scene. 
 	// Parameter controls counting visible OR culled triangles.

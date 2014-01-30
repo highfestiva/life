@@ -84,6 +84,7 @@ int HoverTankConsoleManager::OnCommand(const str& pCommand, const strutil::strve
 				else
 				{
 					mLog.Warningf(_T("usage: %s <avatar>"), pCommand.c_str());
+					lResult = 1;
 				}
 			}
 			break;

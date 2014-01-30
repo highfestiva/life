@@ -387,6 +387,8 @@ class OpenGLMatPXS
 {
 public:
 	static void PrepareLights(OpenGLRenderer* pRenderer);
+	static void CleanupShaderPrograms();
+	static void SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase* pGeometry);
 
 protected:
 
@@ -435,8 +437,6 @@ protected:
 	OpenGLMatPXS(const astr& pVP, const astr pFP[NUM_FP]);
 
 	void PrepareShaderPrograms(OpenGLRenderer* pRenderer);
-	void CleanupShaderPrograms();
-	void SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase* pGeometry);
 
 	static inline int AllocProgramID()
 	{

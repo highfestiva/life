@@ -38,7 +38,8 @@ public:
 		virtual void DeletingGeometry(GeometryBase* pGeometry) = 0;
 	};
 
-	typedef fastdelegate::FastDelegate0<void> RenderCallback;
+	typedef fastdelegate::FastDelegate0<bool> PreRenderCallback;
+	typedef fastdelegate::FastDelegate0<void> PostRenderCallback;
 
 	friend class BasicMeshCreator;
 	friend class PortalManager;
@@ -133,10 +134,10 @@ public:
 	
 	void AddListener(Listener* pListener);
 	void RemoveListener(Listener* pListener);
-	const RenderCallback& GetPreRenderCallback() const;
-	void SetPreRenderCallback(const RenderCallback& pCallback);
-	const RenderCallback& GetPostRenderCallback() const;
-	void SetPostRenderCallback(const RenderCallback& pCallback);
+	const PreRenderCallback& GetPreRenderCallback() const;
+	void SetPreRenderCallback(const PreRenderCallback& pCallback);
+	const PostRenderCallback& GetPostRenderCallback() const;
+	void SetPostRenderCallback(const PostRenderCallback& pCallback);
 
 	virtual bool IsGeometryReference();
 	void SetExcludeCulling();
@@ -271,6 +272,8 @@ public:
 				// Will generate surface normals if needed.
 	bool IsTwoSided() const;
 	void SetTwoSided(bool pIsTwoSided);
+	bool IsRecvNoShadows() const;
+	void SetRecvNoShadows(bool pRecvShadows);
 
 	// Debug functions.
 	bool VerifyIndexData();
@@ -321,6 +324,7 @@ public:
 		BIG_ORIENTATION_CHANGED		= (1 << 18),
 		EXCLUDE_CULLING			= (1 << 19),
 		IS_TWO_SIDED			= (1 << 20),
+		RECV_NO_SHADOWS			= (1 << 21),
 	};
 
 	void SetFlag(Lepra::uint32 pFlag, bool pValue);
@@ -371,8 +375,8 @@ protected:
 	BoneAnimator* mUVAnimator;
 
 	ListenerList mListenerList;
-	RenderCallback mPreRenderCallback;
-	RenderCallback mPostRenderCallback;
+	PreRenderCallback mPreRenderCallback;
+	PostRenderCallback mPostRenderCallback;
 
 	size_t mExtraData;
 

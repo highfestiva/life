@@ -373,7 +373,10 @@ void OpenGLMatSingleTextureSolid::DoRawRender(TBC::GeometryBase* pGeometry, int 
 {
 	if (!pGeometry->GetPreRenderCallback().empty())
 	{
-		pGeometry->GetPreRenderCallback()();
+		if (!pGeometry->GetPreRenderCallback()())
+		{
+			return;
+		}
 	}
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
@@ -1520,34 +1523,6 @@ void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 #endif // !GLES
 }
 
-void OpenGLMatPXS::PrepareShaderPrograms(OpenGLRenderer* /*pRenderer*/)
-{
-#ifndef LEPRA_GL_ES
-	// Lookup which fragment shader to use for this combination of lights.
-	int lSelectedFP = smFPLUT[smNumDirLights][smNumPntLights][smNumSptLights];
-
-	glEnable(GL_VERTEX_PROGRAM_ARB);
-	glEnable(GL_FRAGMENT_PROGRAM_ARB);
-
-	UiLepra::OpenGLExtensions::glBindProgramARB(GL_VERTEX_PROGRAM_ARB, mVPID);
-	UiLepra::OpenGLExtensions::glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, mFPID[lSelectedFP]);
-
-	for (int i = 0; i < smLightCount; i++)
-	{
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i,  &smLightPos[i * 4]);
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 4,  &smLightPos[i * 4]);
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 7,  &smLightDir[i * 4]);
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 10, &smLightCol[i * 4]);
-		// One extra copy to the vertex shader. Used in bump mapping for instance.
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i + 3,  &smLightDir[i * 4]);
-	}
-
-	// Set the cutoff angle and spot exponent.
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 1, smLightCut);
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 2, smLightExp);
-#endif // !GLES
-}
-
 void OpenGLMatPXS::CleanupShaderPrograms()
 {
 #ifndef LEPRA_GL_ES
@@ -1592,6 +1567,34 @@ void OpenGLMatPXS::SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase*
 #endif // !GLES
 }
 
+void OpenGLMatPXS::PrepareShaderPrograms(OpenGLRenderer* /*pRenderer*/)
+{
+#ifndef LEPRA_GL_ES
+	// Lookup which fragment shader to use for this combination of lights.
+	int lSelectedFP = smFPLUT[smNumDirLights][smNumPntLights][smNumSptLights];
+
+	glEnable(GL_VERTEX_PROGRAM_ARB);
+	glEnable(GL_FRAGMENT_PROGRAM_ARB);
+
+	UiLepra::OpenGLExtensions::glBindProgramARB(GL_VERTEX_PROGRAM_ARB, mVPID);
+	UiLepra::OpenGLExtensions::glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, mFPID[lSelectedFP]);
+
+	for (int i = 0; i < smLightCount; i++)
+	{
+		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i,  &smLightPos[i * 4]);
+		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 4,  &smLightPos[i * 4]);
+		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 7,  &smLightDir[i * 4]);
+		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 10, &smLightCol[i * 4]);
+		// One extra copy to the vertex shader. Used in bump mapping for instance.
+		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i + 3,  &smLightDir[i * 4]);
+	}
+
+	// Set the cutoff angle and spot exponent.
+	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 1, smLightCut);
+	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 2, smLightExp);
+#endif // !GLES
+}
+
 //
 // OpenGLMatSingleColorSolidPXS
 //
@@ -1628,7 +1631,7 @@ void OpenGLMatSingleColorSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, c
 
 void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;
@@ -1680,7 +1683,7 @@ OpenGLMatSingleTextureSolidPXS::~OpenGLMatSingleTextureSolidPXS()
 void OpenGLMatSingleTextureSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsMultiTextureSupported())
 	{
 		Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 		return;
@@ -1693,7 +1696,7 @@ void OpenGLMatSingleTextureSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame,
 
 void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;
@@ -1758,7 +1761,7 @@ OpenGLMatTextureAndLightmapPXS::~OpenGLMatTextureAndLightmapPXS()
 void OpenGLMatTextureAndLightmapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsMultiTextureSupported())
 	{
 		Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 		return;
@@ -1789,7 +1792,7 @@ void OpenGLMatTextureAndLightmapPXS::DoRenderAllGeometry(unsigned pCurrentFrame,
 
 void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;
@@ -1908,7 +1911,7 @@ OpenGLMatTextureSBMapPXS::~OpenGLMatTextureSBMapPXS()
 void OpenGLMatTextureSBMapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsMultiTextureSupported())
 	{
 		return;
 	}
@@ -1948,7 +1951,7 @@ void OpenGLMatTextureSBMapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const
 
 void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;

@@ -106,6 +106,9 @@ protected:
 
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 
+	bool DisableAmbient();
+	void EnableAmbient();
+
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	Life::Menu* mMenu;
 	Level* mLevel;
@@ -116,6 +119,8 @@ protected:
 	StopWatch mAllLoadedTimer;
 	StopWatch mSlowmoTimer;
 	GameTimer mFireDelayTimer;
+	Vector3DF mStoreAmbient;
+	bool mStoreLightsEnabled;
 
 	LOG_CLASS_DECLARE();
 };

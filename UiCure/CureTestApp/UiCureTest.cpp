@@ -215,7 +215,7 @@ bool ResourceTest::TestAtom()
 	if (lTestOk)
 	{
 		lContext = _T("load 2D image");
-		UiCure::UserRendererImageResource lImage(mUiManager, true);
+		UiCure::UserRendererImageResource lImage(mUiManager, UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
 		lImage.Load(mResourceManager, _T("Data/blue_eye.png"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
@@ -245,7 +245,7 @@ bool ResourceTest::TestAtom()
 	if (lTestOk)
 	{
 		lContext = _T("load 3D texture");
-		UiCure::UserRendererImageResource lTexture(mUiManager, false);
+		UiCure::UserRendererImageResource lTexture(mUiManager, UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, false));
 		lTexture.Load(mResourceManager, _T("NoSuchFile.tga"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();

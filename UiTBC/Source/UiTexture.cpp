@@ -225,6 +225,17 @@ void Texture::Set(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint, int p
 		lNearestPow2Height <<= 1;
 		lNumHeightBits++;
 	}
+	if (pResizeHint == Canvas::RESIZE_CANVAS)
+	{
+		if (lNearestPow2Width < lWidth)
+		{
+			lNearestPow2Width <<= 1;
+		}
+		if (lNearestPow2Height < lHeight)
+		{
+			lNearestPow2Height <<= 1;
+		}
+	}
 
 	if (pNumLevels <= 0)
 	{

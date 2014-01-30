@@ -109,6 +109,7 @@ int FireConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 				else
 				{
 					mLog.Warningf(_T("usage: %s <index>"), pCommand.c_str());
+					lResult = 1;
 				}
 			}
 			break;
