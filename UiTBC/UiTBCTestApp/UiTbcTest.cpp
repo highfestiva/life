@@ -791,7 +791,7 @@ bool ClearSubframe(int pXBox = 0, int pYBox = 0, int pSplitsX = 1, int pSplitsY 
 	int lBottom = yo + lFrameYSize-lFrameThickness-1;
 
 	gRenderer->SetViewport(Lepra::PixelRect(gX, gY, lRight, lBottom));
-	gRenderer->SetViewFrustum(gRenderer->CalcFOVAngle(90, (float)(lRight - gX) / (float)(lBottom - gY)), 1, 1000);
+	gRenderer->SetViewFrustum(90, 1, 1000);
 	gRenderer->SetClippingRect(Lepra::PixelRect(gX, gY, lRight, lBottom));
 
 
@@ -1562,9 +1562,9 @@ bool TestRayPicker(const Lepra::LogDecorator& pLog)
 		Vector3DF xp = gRenderer->ScreenCoordToVector(xs)*100;
 		Vector3DF yp = gRenderer->ScreenCoordToVector(ys)*100;
 		Vector3DF zp = gRenderer->ScreenCoordToVector(zs)*100;
-		Vector2DF xb = gRenderer->PositionToScreenCoord(xp);
-		Vector2DF yb = gRenderer->PositionToScreenCoord(yp);
-		Vector2DF zb = gRenderer->PositionToScreenCoord(zp);
+		Vector2DF xb = gRenderer->PositionToScreenCoord(xp, 0);
+		Vector2DF yb = gRenderer->PositionToScreenCoord(yp, 0);
+		Vector2DF zb = gRenderer->PositionToScreenCoord(zp, 0);
 		lTestOk = ((int)xb.x == xs.x && (int)xb.y == xs.y &&
 			   (int)yb.x == ys.x && (int)yb.y == ys.y &&
 			   (int)zb.x == zs.x && (int)yb.y == ys.y);

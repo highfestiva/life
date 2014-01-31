@@ -47,6 +47,7 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 	{_T("execute-file"), COMMAND_EXECUTE_FILE},
 	{_T("execute-variable"), COMMAND_EXECUTE_VARIABLE},
 	{_T("fork"), COMMAND_FORK},
+	{_T("nop"), COMMAND_NOP},
 	{_T("list-active-resources"), COMMAND_LIST_ACTIVE_RESOURCES},
 	{_T("push"), COMMAND_PUSH},
 	{_T("repeat"), COMMAND_REPEAT},
@@ -479,6 +480,11 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				mLog.AWarning("Creates a new thread and executes <command> asynchronously.");
 				lResult = 1;
 			}
+		}
+		break;
+		case COMMAND_NOP:
+		{
+			// Mhm...
 		}
 		break;
 		case COMMAND_EXECUTE_VARIABLE:

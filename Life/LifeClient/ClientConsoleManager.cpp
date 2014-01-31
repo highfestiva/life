@@ -195,16 +195,10 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				{
 					PushYieldCommand(pParameterVector[x]);
 				}
-				while (!Application::GetApplication()->GetTicker())
-				{
-					Thread::Sleep(0.5f);
-				}
-				Thread::Sleep(1.0f);
 				MemberThread<Cure::ConsoleManager>* lConsoleThread = mConsoleThread;
 				mConsoleThread = 0;
 				lConsoleThread->RequestSelfDestruct();
-				delete this;	// Nice...
-				lConsoleThread->Kill();
+				lConsoleThread->RequestStop();
 			}
 			break;
 			case COMMAND_ECHO_MSGBOX:
@@ -363,6 +357,7 @@ void ClientConsoleManager::HeadlessTick()
 		// Post-init.
 		SetGameManager(((Life::GameClientMasterTicker*)Application::GetApplication()->GetTicker())->GetSlave(0));
 		Life::Application::GetApplication()->SetZombieTick(Life::Application::ZombieTick());
+		delete this;	// Nice...
 	}
 }
 

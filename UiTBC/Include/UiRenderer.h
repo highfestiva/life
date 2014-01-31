@@ -312,12 +312,6 @@ public:
 	virtual void SetViewFrustum(float pFOVAngle, float pNear, float pFar);
 	void GetViewFrustum(float& pFOVAngle, float& pNear, float& pFar) const;
 
-	// Given the FOV angle you want on a 4:3 monitor (the reference angle),
-	// and the actual aspect ratio of your screen (which may be 16:9 or 
-	// something else), this function returns the FOV angle you should use
-	// on your display.
-	float CalcFOVAngle(float pReferenceAngle, float pAspectRatio);
-
 	// The clipping rectangle defines a smaller portion of the viewport where graphics 
 	// should be rendered. A clipping rect doesn't affect the perspective center. 
 	// Everything outside the clipping rect will (obviously) be clipped. Note that 
@@ -483,7 +477,7 @@ public:
 	// Returns true if the front face is turned towards the camera.
 	bool IsFacingFront(const Vector3DF* pVertex, int pNumVertices);
 	Vector3DF ScreenCoordToVector(const PixelCoord& pCoord) const;
-	Vector2DF PositionToScreenCoord(const Vector3DF& pPosition) const;
+	Vector2DF PositionToScreenCoord(const Vector3DF& pPosition, float pAspectRatio) const;
 
 	// Returns the triangle count in the scene. 
 	// Parameter controls counting visible OR culled triangles.

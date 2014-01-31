@@ -2085,8 +2085,8 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	   D * "aspect ratio".
 	*/
 
-	float lDX = 1.0f / tan(Math::Deg2Rad(pFOVAngle) / 2.0f);
-	float lDY = lDX * pAspectRatio;
+	float lDY = 1.0f / tan(Math::Deg2Rad(pFOVAngle) / 2.0f);
+	float lDX = lDY / pAspectRatio;
 	if (GetScreen()->GetOutputRotation()%180 != 0)
 	{
 		std::swap(lDX, lDY);

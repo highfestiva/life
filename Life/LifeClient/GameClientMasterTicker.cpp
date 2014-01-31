@@ -608,21 +608,12 @@ PixelRect GameClientMasterTicker::GetRenderArea() const
 
 float GameClientMasterTicker::UpdateFrustum(float pFov)
 {
-	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
-	return UpdateFrustum(pFov, lRenderArea);
-}
-
-float GameClientMasterTicker::UpdateFrustum(float pFov, const PixelRect& pRenderArea)
-{
-	pFov *= 1/3.0f;
-	pFov = pFov*2 + pFov*pRenderArea.GetWidth()/pRenderArea.GetHeight();
-
 	float lClipNear;
 	float lClipFar;
 	CURE_RTVAR_GET(lClipNear, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
 	CURE_RTVAR_GET(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 3000.0);
 	mUiManager->GetRenderer()->SetViewFrustum(pFov, lClipNear, lClipFar);
-	return (pFov);
+	return pFov;
 }
 
 
@@ -765,6 +756,9 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 	{
 		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
+#ifdef LEPRA_DEBUG
+		pSlave->GetConsoleManager()->ExecuteCommand(_T("rebuild-data"));
+#endif // Debug.
 		LoadRtvars(pSlave->GetVariableScope());
 		pSlave->RefreshOptions();
 		deb_assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);

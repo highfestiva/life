@@ -128,7 +128,7 @@ void FireManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 40.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 38.6);
 
 	Parent::LoadSettings();
 
@@ -532,7 +532,7 @@ void FireManager::UpdateCameraPosition(bool pUpdateMicPosition)
 void FireManager::HandleShooting()
 {
 	float lFOV;
-	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 40.0);
+	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.6);
 	UpdateFrustum(lFOV);
 
 	typedef UiLepra::Touch::DragManager::DragList DragList;
@@ -670,22 +670,32 @@ void FireManager::OnLevelLoadCompleted()
 	// Update texture UV coordinates according to FoV.
 	float lDistance;
 	CURE_RTVAR_TRYGET(lDistance, =(float), GetVariableScope(), "level.distance", 200.0);
+	float lMapScale;
+	CURE_RTVAR_TRYGET(lMapScale, =(float), GetVariableScope(), "level.mapscale", 1.0);
+	const UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+	float lFOV;
+	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.6);
+	//float _;
+	//lRenderer->GetViewFrustum(lFOV, _, _);
 	static float lFormerDistance = 0;
-	if (lFormerDistance == lDistance)
+	static float lFormerMapScale = 0;
+	static float lFormerFoV = 0;
+	if (lFormerDistance == lDistance && lFormerMapScale == lMapScale && lFormerFoV == lFOV)
 	{
 		return;
 	}
 	lFormerDistance = lDistance;
-	const UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+	lFormerMapScale = lMapScale;
+	lFormerFoV = lFOV;
 	const float wf = +1.0f / mUiManager->GetDisplayManager()->GetWidth();
-	const float hf = -768.0f / (1024 * mUiManager->GetDisplayManager()->GetHeight());
+	const float hp = 768/1024.0f;
+	const float hf = hp / mUiManager->GetDisplayManager()->GetHeight() * lMapScale;
 	const size_t lMeshCount = ((UiTbc::ChunkyClass*)mLevel->GetClass())->GetMeshCount();
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
 		bool lUpdate = false;
 		TBC::GeometryBase* lMesh = mLevel->GetMesh(x);
 		TransformationF lTransform = lMesh->GetTransformation();
-		lTransform.mOrientation = lTransform.mOrientation.GetInverse();
 		const Vector3DF lOffset(0,lDistance,0);
 		for (unsigned y = 0; y < lMesh->GetUVSetCount(); ++y)
 		{
@@ -695,10 +705,11 @@ void FireManager::OnLevelLoadCompleted()
 			for (unsigned z = 0; z < lVertexCount; ++z)
 			{
 				Vector3DF lVector(&xyz[z*3]);
-				lVector = lTransform * lVector + lOffset;
-				Vector2DF c = lRenderer->PositionToScreenCoord(lVector);
+				lVector = lTransform.Transform(lVector) + lOffset;
+				Vector2DF c = lRenderer->PositionToScreenCoord(lVector, 4/3.0f);
 				uv[z*2+0] = c.x * wf;
-				uv[z*2+1] = - c.y * hf;
+				float y = Math::Clamp(c.y * hf, 0.0f, hp);
+				uv[z*2+1] = y;
 			}
 			lMesh->SetUVDataChanged(true);
 			lUpdate = true;

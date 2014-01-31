@@ -73,7 +73,6 @@ public:
 
 	virtual PixelRect GetRenderArea() const;
 	virtual float UpdateFrustum(float pFov);
-	float UpdateFrustum(float pFov, const PixelRect& pRenderArea);
 
 	void PreLogin(const str& pServerAddress);
 	bool IsLocalServer() const;

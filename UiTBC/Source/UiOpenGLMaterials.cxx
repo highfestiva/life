@@ -1631,7 +1631,7 @@ void OpenGLMatSingleColorSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, c
 
 void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;
@@ -1696,7 +1696,7 @@ void OpenGLMatSingleTextureSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame,
 
 void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;
@@ -1792,7 +1792,7 @@ void OpenGLMatTextureAndLightmapPXS::DoRenderAllGeometry(unsigned pCurrentFrame,
 
 void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;
@@ -1951,7 +1951,7 @@ void OpenGLMatTextureSBMapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const
 
 void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;

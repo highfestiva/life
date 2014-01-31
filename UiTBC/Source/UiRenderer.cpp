@@ -282,18 +282,12 @@ void Renderer::GetViewFrustum(float& pFOVAngle, float& pNear, float& pFar) const
 void Renderer::RecalculateFrustumPlanes()
 {
 	float lAngle = Math::Deg2Rad(90.0f - mFOVAngle * 0.5f);
-	mFrustumPlanes[0].Set(-(float)sin(lAngle), (float)cos(lAngle), 0); // Right plane.
-	mFrustumPlanes[1].Set( (float)sin(lAngle), (float)cos(lAngle), 0); // Left plane.
+	float lAngleX = (float)atan(tan(lAngle) * GetAspectRatio());
+	mFrustumPlanes[0].Set(-(float)sin(lAngleX), (float)cos(lAngleX), 0); // Right plane.
+	mFrustumPlanes[1].Set( (float)sin(lAngleX), (float)cos(lAngleX), 0); // Left plane.
 
-	lAngle = (float)atan(tan(lAngle) / GetAspectRatio());
 	mFrustumPlanes[2].Set(0, (float)sin(lAngle), -(float)cos(lAngle)); // Top plane.
 	mFrustumPlanes[3].Set(0, (float)sin(lAngle),  (float)cos(lAngle)); // Bottom plane.
-}
-
-float Renderer::CalcFOVAngle(float pReferenceAngle, float pAspectRatio)
-{
-	float lRatio = pAspectRatio * 3.0f / 4.0f;
-	return Math::Rad2Deg(atan(tan(Math::Deg2Rad(pReferenceAngle * 0.5f)) * lRatio) * 2.0f);
 }
 
 void Renderer::SetClippingRect(const PixelRect& pRect)
@@ -1562,11 +1556,8 @@ void Renderer::PrepareProjectionData()
 	float32 lFar;
 	GetViewFrustum(lFOVAngle, lNear, lFar);
 
-	const Canvas* lScreen = GetScreen();
-	float64 lAspect = (float64)lScreen->GetWidth() / (float64)lScreen->GetHeight();
-
-	mDX = 1.0 / tan(Math::Deg2Rad(lFOVAngle) / 2.0);
-	mDY = mDX * lAspect;
+	mDY = 1.0 / tan(Math::Deg2Rad(lFOVAngle) / 2.0);
+	mDX = mDY * GetAspectRatio();
 }
 
 PixelRect Renderer::GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) const
@@ -1704,17 +1695,17 @@ Vector3DF Renderer::ScreenCoordToVector(const PixelCoord& pCoord) const
 	float lFOV, lNear, lFar;
 	GetViewFrustum(lFOV, lNear, lFar);
 	lFOV = Math::Deg2Rad(lFOV);
-	const float lAspect = h2/w2;
+	const float lAspect = w2/h2;
 	const float tana = tan(lFOV*0.5f);
-	float dx = tana * (pCoord.x/w2-1.0f);
-	float dy = tana * (1.0f-pCoord.y/h2) * lAspect;
+	float dx = tana * (pCoord.x/w2-1.0f) * lAspect;
+	float dy = tana * (1.0f-pCoord.y/h2);
 	Vector3DF lDirection(dx, 1, dy);
 	lDirection.Normalize();
 	lDirection = mCameraTransformation.GetOrientation() * lDirection;
 	return lDirection;
 }
 
-Vector2DF Renderer::PositionToScreenCoord(const Vector3DF& pPosition) const
+Vector2DF Renderer::PositionToScreenCoord(const Vector3DF& pPosition, float pAspectRatio) const
 {
 	Vector3DF lCamDirection(pPosition - mCameraTransformation.mPosition);
 	Vector3DF lDirection;
@@ -1734,12 +1725,12 @@ Vector2DF Renderer::PositionToScreenCoord(const Vector3DF& pPosition) const
 	float lFOV, lNear, lFar;
 	GetViewFrustum(lFOV, lNear, lFar);
 	lFOV = Math::Deg2Rad(lFOV);
-	const float lInverseAspect = w2/h2;
+	const float lInverseAspect = pAspectRatio? 1/pAspectRatio : h2/w2;
 	const float lInverseTanA = 1/tan(lFOV*0.5f);
 
 	Vector2DF lCoord;
-	lCoord.x = ( lDirection.x*lInverseTanA+1.0f) * w2;
-	lCoord.y = (-lDirection.z*lInverseTanA*lInverseAspect+1.0f) * h2;
+	lCoord.x = ( lDirection.x*lInverseTanA*lInverseAspect+1.0f) * w2;
+	lCoord.y = (-lDirection.z*lInverseTanA+1.0f) * h2;
 	return lCoord;
 }
 
