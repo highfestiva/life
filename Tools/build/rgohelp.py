@@ -65,6 +65,8 @@ def _getmake(builder):
 
 	winprogs = os.getenv("PROGRAMFILES")
 	if winprogs:
+		if os.path.exists(winprogs+" Files"):
+			winprogs += " Files"
 		if os.path.exists(winprogs+" (x86)"):
 			winprogs += " (x86)"
 		dirname = os.getenv("VCINSTALLDIR")
@@ -78,7 +80,7 @@ def _getmake(builder):
 			if not os.path.exists(dirname):
 				print("GOT HERE!", dirname)
 				return None	# Visual Studio might be installed, but not VC++.
-		make_exe = os.path.join(dirname, builder)
+		make_exe = '"'+os.path.join(dirname, builder)+'"'
 		if dirname.find("Studio 10.0") > 0:	vcver = 10
 		elif dirname.find("Studio 9") > 0:	vcver = 9
 		elif dirname.find("Studio 8") > 0:	vcver = 8

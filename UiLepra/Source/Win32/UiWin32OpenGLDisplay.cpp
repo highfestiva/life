@@ -241,10 +241,11 @@ bool Win32OpenGLDisplay::InitScreen()
 		return false;
 	}
 
-	glEnable(GL_SCISSOR_TEST);
+	//glEnable(GL_SCISSOR_TEST);
 	if (msContextUserCount == 1)
 	{
 		OpenGLExtensions::InitExtensions();
+		::glGetError();	// Clear errors, if any.
 	}
 
 	return true;

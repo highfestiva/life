@@ -88,6 +88,8 @@ OpenGLRenderer::OpenGLRenderer(Canvas* pScreen) :
 	mTMapIDManager(10001, 1000000, INVALID_TEXTURE),	// 1-10000 is reserved by Painter.
 	mGLClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 {
+	OGL_ASSERT();
+
 	InitRenderer();
 
 	float r, g, b;
@@ -95,8 +97,10 @@ OpenGLRenderer::OpenGLRenderer(Canvas* pScreen) :
 	SetAmbientLight(r, g, b);
 
 	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &mNumTextureUnits);
+	glGetError();	// If we have a weak card, let's do our best with funny looks.
 	glDepthFunc(GL_LEQUAL);
 	glClearStencil(128);
+	OGL_ASSERT();
 }
 
 

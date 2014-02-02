@@ -262,6 +262,7 @@
     <ClInclude Include="Include\Win32\UiWin32Core.h" />
     <ClInclude Include="Include\Win32\UiWin32DirectXDisplay.h" />
     <ClInclude Include="Include\Win32\UiWin32DisplayManager.h" />
+    <ClInclude Include="Include\Win32\UiWin32GDIDisplay.h" />
     <ClInclude Include="Include\Win32\UiWin32Input.h" />
     <ClInclude Include="Include\Win32\UiWin32OpenGLDisplay.h" />
     <ClInclude Include="Include\Win32\WGLEXT.H" />
@@ -291,6 +292,7 @@
     <ClCompile Include="Source\Win32\UiWin32Core.cpp" />
     <ClCompile Include="Source\Win32\UiWin32DirectXDisplay.cpp" />
     <ClCompile Include="Source\Win32\UiWin32DisplayManager.cpp" />
+    <ClCompile Include="Source\Win32\UiWin32GDIDisplay.cpp" />
     <ClCompile Include="Source\Win32\UiWin32Input.cpp" />
     <ClCompile Include="Source\Win32\UiWin32OpenGLDisplay.cpp" />
     <ClCompile Include="Source\X11\UiX11Core.cpp">

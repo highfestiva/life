@@ -137,6 +137,9 @@
     <ClInclude Include="Include\macglext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Win32\UiWin32GDIDisplay.h">
+      <Filter>Header Files\Win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\UiChibiXmAlStream.cpp">
@@ -213,6 +216,9 @@
     </ClCompile>
     <ClCompile Include="Source\UiTouchstick.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Win32\UiWin32GDIDisplay.cpp">
+      <Filter>Source Files\Win32</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
