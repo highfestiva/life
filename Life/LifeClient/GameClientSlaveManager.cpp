@@ -218,14 +218,11 @@ bool GameClientSlaveManager::Render()
 	LEPRA_MEASURE_SCOPE(SlaveRender);
 	bool lOutline;
 	bool lWireFrame;
-	bool lPixelShaders;
 	CURE_RTVAR_GET(lOutline, =, GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false);
 	CURE_RTVAR_GET(lWireFrame, =, GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false);
-	CURE_RTVAR_GET(lPixelShaders, =, GetVariableScope(), RTVAR_UI_3D_PIXELSHADERS, false);
 	SetLocalRender(true);
 	mUiManager->GetRenderer()->EnableOutlineRendering(lOutline);
 	mUiManager->GetRenderer()->EnableWireframe(lWireFrame);
-	mUiManager->GetRenderer()->EnablePixelShaders(lPixelShaders);
 	mUiManager->Render(mRenderArea);
 	SetLocalRender(false);	// Hide sun and mass objects from other cameras.
 

@@ -1143,9 +1143,14 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 	// Check if we can avoid double-rendering (if in unlit mode).
 	if (pGeometry->IsRecvNoShadows())
 	{
-		if (GetShadowMode() != NO_SHADOWS && !GetLightsEnabled())
+		const bool lLightsEnabled = GetLightsEnabled();
+		if (GetShadowMode() != NO_SHADOWS && !lLightsEnabled)
 		{
 			return false;
+		}
+		else if (lLightsEnabled)
+		{
+			::glDisable(GL_STENCIL_TEST);
 		}
 	}
 
@@ -1171,6 +1176,13 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 void OpenGLRenderer::PostRender(TBC::GeometryBase* pGeometry)
 {
 	pGeometry->SetTransformationChanged(false);
+	if (pGeometry->IsRecvNoShadows())
+	{
+		if (GetLightsEnabled())
+		{
+			::glEnable(GL_STENCIL_TEST);
+		}
+	}
 	if (pGeometry->IsTwoSided())
 	{
 		::glEnable(GL_CULL_FACE);

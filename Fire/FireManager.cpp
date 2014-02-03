@@ -64,6 +64,7 @@
 #include "Version.h"
 
 #define BG_COLOR			Color(110, 110, 110, 160)
+const float hp = 768/1024.0f;
 
 
 
@@ -128,11 +129,11 @@ void FireManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 38.6);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
 
 	Parent::LoadSettings();
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 #ifdef LEPRA_DEBUG
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_ENABLE, true);
@@ -202,9 +203,16 @@ void FireManager::SetFade(float pFadeAmount)
 
 bool FireManager::Render()
 {
-	// TODO: render background image.
-
-	return Parent::Render();
+	ScopeLock lLock(GetTickLock());
+	UpdateCameraPosition(true);
+	PixelRect lRenderArea;
+	const int w = (int)(mRenderArea.GetHeight()/hp);
+	lRenderArea.Set(mRenderArea.GetCenterX()-w/2, mRenderArea.mTop, mRenderArea.GetCenterX()+w/2, mRenderArea.mBottom);
+	lRenderArea.mLeft = std::max(lRenderArea.mLeft, mRenderArea.mLeft);
+	lRenderArea.mRight = std::min(lRenderArea.mRight, mRenderArea.mRight);
+	mUiManager->Render(lRenderArea);
+	SetLocalRender(false);	// Hide sun and mass objects from other cameras.
+	return true;
 }
 
 bool FireManager::Paint()
@@ -532,7 +540,7 @@ void FireManager::UpdateCameraPosition(bool pUpdateMicPosition)
 void FireManager::HandleShooting()
 {
 	float lFOV;
-	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.6);
+	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
 	UpdateFrustum(lFOV);
 
 	typedef UiLepra::Touch::DragManager::DragList DragList;
@@ -669,12 +677,12 @@ void FireManager::OnLevelLoadCompleted()
 	}
 	// Update texture UV coordinates according to FoV.
 	float lDistance;
-	CURE_RTVAR_TRYGET(lDistance, =(float), GetVariableScope(), "level.distance", 200.0);
+	CURE_RTVAR_TRYGET(lDistance, =(float), GetVariableScope(), "level.distance", 0.0);
 	float lMapScale;
-	CURE_RTVAR_TRYGET(lMapScale, =(float), GetVariableScope(), "level.mapscale", 1.0);
+	CURE_RTVAR_TRYGET(lMapScale, =(float), GetVariableScope(), "level.mapscale", 1.015);
 	const UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
 	float lFOV;
-	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.6);
+	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
 	//float _;
 	//lRenderer->GetViewFrustum(lFOV, _, _);
 	static float lFormerDistance = 0;
@@ -688,8 +696,7 @@ void FireManager::OnLevelLoadCompleted()
 	lFormerMapScale = lMapScale;
 	lFormerFoV = lFOV;
 	const float wf = +1.0f / mUiManager->GetDisplayManager()->GetWidth();
-	const float hp = 768/1024.0f;
-	const float hf = hp / mUiManager->GetDisplayManager()->GetHeight() * lMapScale;
+	const float hf = hp / mUiManager->GetDisplayManager()->GetHeight();
 	const size_t lMeshCount = ((UiTbc::ChunkyClass*)mLevel->GetClass())->GetMeshCount();
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
@@ -706,9 +713,10 @@ void FireManager::OnLevelLoadCompleted()
 			{
 				Vector3DF lVector(&xyz[z*3]);
 				lVector = lTransform.Transform(lVector) + lOffset;
-				Vector2DF c = lRenderer->PositionToScreenCoord(lVector, 4/3.0f);
-				uv[z*2+0] = c.x * wf;
-				float y = Math::Clamp(c.y * hf, 0.0f, hp);
+				Vector2DF c = lRenderer->PositionToScreenCoord(lVector, lMapScale/hp);
+				float x = c.x * wf;
+				float y = Math::Clamp(c.y * hf, -1.0f, hp);
+				uv[z*2+0] = x;
 				uv[z*2+1] = y;
 			}
 			lMesh->SetUVDataChanged(true);
