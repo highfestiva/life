@@ -1,5 +1,5 @@
 
-# Copyright 2009 Righteous Games
+# Copyright 2009-2014 Pixel Doctrine
 # Created by Jonas Byström, 2009-12-13 for Maya/Righteous Engine tool chain.
 # To be used inside of Maya for facilitating pivot moves.
 

@@ -957,13 +957,15 @@ class MAReader:
                                                                    "s":"size",
                                                                    "typ":"type",
                                                                    "av":"alteredValue",
-                                                                   "c":"clamp" }
+                                                                   "c":"clamp",
+                                                                   "ch":"capacityHint" }
                 self.setAttr_opt_def = { "keyable" : (1, None),
                                                                  "lock" : (1, None),
                                                                  "size" : (1, None),
                                                                  "type" : (1, None),
                                                                  "alteredValue" : (0, None),
-                                                                 "clamp" : (0, None)}
+                                                                 "clamp" : (0, None),
+                                                                 "capacityHint" : (1, None)}
 
                 # fileInfo options
                 self.fileInfo_name_dict = { "rm":"remove" }
@@ -1389,7 +1391,8 @@ class MAReader:
                         self.onLockNode(args, opts)
                 # unknown
                 else:
-                        print("WARNING: %s, line %d: Unknown MEL command: '%s'"%(self.filename, self.cmd_start_linenr, cmd), file=sys.stderr)
+                        #print("WARNING: %s, line %d: Unknown MEL command: '%s'"%(self.filename, self.cmd_start_linenr, cmd), file=sys.stderr)
+                        pass
 
 
         # getOpt

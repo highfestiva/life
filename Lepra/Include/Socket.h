@@ -38,6 +38,7 @@ public:
 
 	enum ShutdownFlag
 	{
+		SHUTDOWN_NONE = 0,
 		SHUTDOWN_RECV = 1,
 		SHUTDOWN_SEND = 2,
 		SHUTDOWN_BOTH  = (SHUTDOWN_RECV|SHUTDOWN_SEND)

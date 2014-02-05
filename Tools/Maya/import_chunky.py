@@ -325,12 +325,16 @@ class GroupReader(DefaultMAReader):
 				fix(node, "ra", (0,0,0), math.radians)
 			vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
 			if vtx:
-				node.fix_attribute("rgvtx", vtx)
+				node.fix_attribute("rgvtx", self._strattr2list(vtx))
 			n = node.getAttrValue("rgn", "rgn", None, n=None)
 			if n:
-				node.fix_attribute("rgn", n)
+				node.fix_attribute("rgn", self._strattr2list(n))
+			f = node.getAttrValue("rgf", "rgf", None, n=None)
+			if f:
+				node.fix_attribute("rgf", self._strattr2list(f))
 			uv = node.getAttrValue("rguv0", "rguv0", None, n=None)
 			if uv:
+				uv = self._strattr2list(uv)
 				if options.options.verbose:
 					print("%s has UVs." % node.getFullName())
 				for x in range(1, len(uv), 3):
@@ -371,21 +375,11 @@ class GroupReader(DefaultMAReader):
 			uvs = node.get_fixed_attribute("rguv", optional=True)
 			vs = node.get_fixed_attribute("rgvtx", optional=True)
 			if norms:
-				if type(norms) == str:
-					norms = norms[1]	# From ("(", "...", ")") to "..."
-					norms = eval(norms[1:-1])
 				newnorms = []
 			if uvs:
-				x = len(uvs)//3 - 1
-				while x >= 0:
-					uvs = uvs[:x*3+2] + uvs[x*3+3:]
-					x -= 1
 				newuvs = []
 			if faces:
 				triangles = []
-				if not type(faces) == str:
-					faces = faces[1]	# From ("(", "...", ")") to "..."
-				faces = eval(faces[1:-1])
 				facec = 0
 				for face in faces:
 					x0 = 0
@@ -423,6 +417,12 @@ class GroupReader(DefaultMAReader):
 					node.fix_attribute("rgn", newnorms)
 				if uvs:
 					node.fix_attribute("rguv", newuvs)
+
+
+	def _strattr2list(self, attr):
+		if type(attr) != str:
+			attr = attr[1];
+		return eval(attr[1:-1])
 
 
 	def _setchildmeshes(self, bodies, meshes):
