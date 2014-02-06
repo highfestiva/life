@@ -140,7 +140,7 @@ void GeometryBatch::SetInstances(const TransformationF* pDisplacement, const Vec
 			lIndex = 0;
 			for (j = 0; j < lTriangleCount; j++)
 			{
-				uint32 lTriIndex[3];
+				uint32 lTriIndex[4];
 				mGeometryInstance->GetTriangleIndices(j, lTriIndex);
 				mIndex[lTIndex + 0] = lTriIndex[0] + lTIOffset;
 				mIndex[lTIndex + 1] = lTriIndex[1] + lTIOffset;

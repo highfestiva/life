@@ -388,6 +388,8 @@ unsigned GeometryBase::GetMaxTriangleCount() const
 			return GetMaxIndexCount() - 2;
 		case LINES:
 			return GetMaxIndexCount() / 2;
+		case QUADS:
+			return GetMaxIndexCount() / 4;
 		default:
 			deb_assert(false);
 			return (0);
@@ -405,13 +407,15 @@ unsigned GeometryBase::GetTriangleCount() const
 			return GetIndexCount() - 2;
 		case LINES:
 			return GetIndexCount() / 2;
+		case QUADS:
+			return GetIndexCount() / 4;
 		default:
 			deb_assert(false);
 			return (0);
 	}
 }
 
-void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3]) const
+void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[4]) const
 {
 	const vtx_idx_t* lIndices = GetIndexData();
 	switch (mPrimitiveType)
@@ -447,6 +451,15 @@ void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3]) const
 			const int lOffset = pTriangle * 2;
 			pIndices[0] = lIndices[lOffset + 0];
 			pIndices[1] = lIndices[lOffset + 1];
+		}
+		break;
+		case QUADS:
+		{
+			const int lOffset = pTriangle * 3;
+			pIndices[0] = lIndices[lOffset + 0];
+			pIndices[1] = lIndices[lOffset + 1];
+			pIndices[2] = lIndices[lOffset + 2];
+			pIndices[3] = lIndices[lOffset + 3];
 		}
 		break;
 		default:
@@ -997,8 +1010,8 @@ bool GeometryBase::IsConvexVolume()
 					    mSurfaceNormalData[lT0Index + 1],
 					    mSurfaceNormalData[lT0Index + 2]);
 
-		uint32 lT0TriIndex[3];
-		uint32 lT1TriIndex[3];
+		uint32 lT0TriIndex[4];
+		uint32 lT1TriIndex[4];
 		GetTriangleIndices(lT0, lT0TriIndex);
 		GetTriangleIndices(lT1, lT1TriIndex);
 
@@ -1151,7 +1164,7 @@ void GeometryBase::GenerateVertexNormalData()
 	// Now calculate the vertex normals.
 	for (i = 0; i < lTriangleCount; i++, lIndex += 3)
 	{
-		uint32 lT[3];
+		uint32 lT[4];
 		GetTriangleIndices(i, lT);
 		int lI0 = lT[0] * 3;
 		int lI1 = lT[1] * 3;
@@ -1218,7 +1231,7 @@ void GeometryBase::GenerateSurfaceNormalData()
 	int lIndex = 0;
 	for (unsigned i = 0; i < lTriangleCount; i++, lIndex += 3)
 	{
-		uint32 lT[3];
+		uint32 lT[4];
 		GetTriangleIndices(i, lT);
 
 		int lI0 = lT[0] * 3;
@@ -1267,7 +1280,7 @@ void GeometryBase::GenerateEdgeData()
 	for (unsigned i = 0; i < lTriangleCount; i++)
 	{
 		// Get vertex indices.
-		uint32 lV[3];
+		uint32 lV[4];
 		GetTriangleIndices(i, lV);
 
 		// Note:
@@ -1372,7 +1385,7 @@ void GeometryBase::GenerateTangentAndBitangentData()
 
 	for (i = 0; i < lTriangleCount; i++)
 	{
-		uint32 lTriIndex[3];
+		uint32 lTriIndex[4];
 		GetTriangleIndices(i, lTriIndex);
 
 		int lV1  = lTriIndex[0] * 3;

@@ -270,9 +270,9 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	Vector3DF lTargetPosition;
 	if (!GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) == 1)
 	{
-		return;
+		lTargetPosition = mShootDirection*300.0f;
 	}
-
+	else
 	{
 		Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		lObject->SetInitialTransform(TransformationF(gIdentityQuaternionF, lTargetPosition));

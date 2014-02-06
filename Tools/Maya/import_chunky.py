@@ -119,6 +119,9 @@ class GroupReader(DefaultMAReader):
 
 		self.fixroottrans(group)
 
+		if not self.apply_ini_config(config, group):
+			print("Error: could not apply configuration.")
+			sys.exit(4)
 		self.faces2triangles(group)
 		#self.printnodes(group)
 		if not self.validatehierarchy(group):
@@ -128,9 +131,6 @@ class GroupReader(DefaultMAReader):
 		if not self.validate_mesh_group(group, checknorms=False):
 			print("Invalid mesh group! Terminating due to error.")
 			sys.exit(3)
-		if not self.apply_ini_config(config, group):
-			print("Error: could not apply configuration.")
-			sys.exit(4)
 		if not self.validate_phys_group(group):
 			print("Invalid physics group! Terminating due to error.")
 			sys.exit(3)
@@ -371,6 +371,12 @@ class GroupReader(DefaultMAReader):
 	def faces2triangles(self, group):
 		for node in group:
 			faces = node.get_fixed_attribute("rgf", optional=True)
+			if not faces:
+				continue
+			if node.getparentval("primitive", default="triangles") == "quads":
+				faces = [v for face in faces for v in face]	# Flatten list.
+				node.fix_attribute("rgtri", faces)
+				continue
 			norms = node.get_fixed_attribute("rgn", optional=True)
 			uvs = node.get_fixed_attribute("rguv", optional=True)
 			vs = node.get_fixed_attribute("rgvtx", optional=True)

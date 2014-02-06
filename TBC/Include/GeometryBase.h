@@ -107,6 +107,7 @@ public:
 		TRIANGLE_STRIP,
 		LINES,
 		LINE_LOOP,
+		QUADS,
 	};
 
 	class BasicMaterialSettings
@@ -179,7 +180,7 @@ public:
 	// 0 <= pTriangle < GetNumTriangles().
 	// Given the triangle index (pTriangle), the function returns the three
 	// indices by setting the values in pIndices.
-	void GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3]) const;
+	void GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[4]) const;
 
 	// Deletes the corresponding arrays and cleans stuff up.
 	virtual void ClearVertexNormalData();

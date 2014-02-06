@@ -541,7 +541,7 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 		Triangle* lTriangle = new Triangle;
 		Triangle* lTriangle2 = new Triangle;
 
-		uint32 lIndices[3];
+		uint32 lIndices[4];
 		pGeometry.GetTriangleIndices(i, lIndices);
 
 		lTriangle->mV1 = *ListUtil::FindByIndex(lVertexList, lIndices[0]);

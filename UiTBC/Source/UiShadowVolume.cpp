@@ -300,7 +300,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			}
 			/*else
 			{
-				uint32 lVertexIndex[3];
+				uint32 lVertexIndex[4];
 				mParentGeometry->GetTriangleIndices(i, lVertexIndex);
 				mTriangleOrientation[i].mV0 = lVertexIndex[0];
 				mTriangleOrientation[i].mV1 = lVertexIndex[1];

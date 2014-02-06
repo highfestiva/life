@@ -1052,7 +1052,7 @@ void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* pGeometry)
 
 	for (i = 0; i < pGeometry->GetTriangleCount(); i++, lIndex += 3)
 	{
-		uint32 lTriIndex[3];
+		uint32 lTriIndex[4];
 		pGeometry->GetTriangleIndices(i, lTriIndex);
 
 		lIndices[lIndex + 0] = lTriIndex[0] + mVertexCount;

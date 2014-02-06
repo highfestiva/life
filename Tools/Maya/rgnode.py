@@ -31,6 +31,12 @@ def adjustnode(node):
 					raise KeyError("Error fetching required attribute '%s'." % name)
 				value = default
 			return value
+	def getparentval(self, attrname, default):
+		for p in self.getparents():
+			val = p.get_fixed_attribute(attrname, optional=True)
+			if val != None:
+				return val
+		return default
 	def get_final_local_transform(self):
 		pm = self.xformparent.get_world_transform()
 		wt = self.get_world_transform()
@@ -270,6 +276,7 @@ def adjustnode(node):
 		return ir
 	node.fix_attribute = types.MethodType(fix_attribute, node)
 	node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
+	node.getparentval = types.MethodType(getparentval, node)
 	node.get_final_local_transform = types.MethodType(get_final_local_transform, node)
 	node.get_world_translation = types.MethodType(get_world_translation, node)
 	node.get_final_mesh_transform = types.MethodType(get_final_mesh_transform, node)

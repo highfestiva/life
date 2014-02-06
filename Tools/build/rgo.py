@@ -26,6 +26,7 @@ builddir_ansi = {"debug":"Debug", "rc":"Release Candidate", "final":"Final"}
 builddir_unicode = {"debug":"Unicode Debug", "rc":"Unicode Release Candidate", "final":"Unicode Final"}
 builddir_types = {"ansi":builddir_ansi, "unicode":builddir_unicode}
 own_tt = builddir_types["ansi"]
+verbose = False
 updates = 0
 removes = 0
 importscript = "Tools/Maya/import_chunky.py"
@@ -95,7 +96,8 @@ def _buildcode(command, buildtype):
 
 
 def _convertdata(filename):
-	rgohelp._run([sys.executable, '-OO', importscript, filename], "importing "+filename)
+	printout = ['--verbose'] if verbose else []
+	rgohelp._run([sys.executable, '-OO', importscript] + printout + [filename], "importing "+filename)
 
 
 def _incremental_build_data(sourcedir):
@@ -512,7 +514,8 @@ def _main():
 	parser = optparse.OptionParser(usage=usage, version="%prog 0.2")
 	parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: %s. Default is debug." % ", ".join(buildtypes))
 	parser.add_option("-c", "--chartype", dest="chartype", default="ansi", help="Pick char type: ansi/unicode (i.e. char/wchar_t). Default is ansi.")
-	parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
+	parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, action="store_true", help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
+	parser.add_option("-v", "--verbose", dest="verbose", default=False, action="store_true", help="Verbose mode; default is False.")
 	global args
 	options, args = parser.parse_args()
 
@@ -528,6 +531,8 @@ def _main():
 	ziptype = default_build_mode
 	global own_tt
 	own_tt = builddir_types[options.chartype]
+	global verbose
+	verbose = options.verbose
 
 	if options.demacappify and not any(a in exclude_demacappify for a in args):
 		demacappify()

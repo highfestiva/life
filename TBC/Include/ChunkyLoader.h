@@ -86,8 +86,8 @@ enum ChunkyType
 	CHUNK_MESH_UV                      = ENUMIFY('M','E','U','V'),	// Optional.
 	CHUNK_MESH_COLOR                   = ENUMIFY('M','E','C','O'),	// Optional.
 	CHUNK_MESH_COLOR_FORMAT            = ENUMIFY('M','E','C','F'),	// Optional.
-	CHUNK_MESH_TRIANGLES               = ENUMIFY('M','E','T','R'),	// A mesh can contain EITHER this type OR the strips type.
-	CHUNK_MESH_STRIPS                  = ENUMIFY('M','E','S','T'),	// A mesh can contain EITHER this type OR the triangles type.
+	CHUNK_MESH_TRIANGLES               = ENUMIFY('M','E','T','R'),	// Mandatory, but could mean triangle strip, quad or something else.
+	CHUNK_MESH_PRIMITIVE               = ENUMIFY('M','E','P','R'),	// Optional.
 	CHUNK_MESH_VOLATILITY              = ENUMIFY('M','E','V','O'),	// Optional.
 	CHUNK_MESH_CASTS_SHADOWS           = ENUMIFY('M','E','C','S'),	// Optional.
 	CHUNK_MESH_SHADOW_DEVIATION        = ENUMIFY('M','E','S','D'),	// Optional.

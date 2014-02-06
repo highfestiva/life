@@ -40,14 +40,13 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	unsigned lNormalsSize = 0;
 	uint32* lTriangleIndices = 0;
 	unsigned lTriangleIndicesSize = 0;
-	uint32* lStripsIndices = 0;
-	unsigned lStripsIndicesSize = 0;
 	const int lUvCount = 8;
 	uint32* lLoadUvs[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
 	unsigned lUvsSize[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
 	uint8* lColors = 0;
 	unsigned lColorsSize = 0;
 	int32 lColorFormat = 0x7FFFFFFD;
+	int32 lGeometryPrimitive = 0x7FFFFFFD;
 	int32 lGeometryVolatility = 0x7FFFFFFD;
 	int32 lCastsShadows = 0;
 	int32 lShadowDeviationInt = -1;
@@ -57,6 +56,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	{
 		TBC::ChunkyLoader::FileElementList lLoadList;
 		// TRICKY: these have to be in the exact same order as when saved.
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_PRIMITIVE, &lGeometryPrimitive));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_SHADOW_DEVIATION, &lShadowDeviationInt));
@@ -64,7 +64,6 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_RECV_NO_SHADOWS, &lRecvNoShadows));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VERTICES, (void**)&lLoadVertices, &lVerticesSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_STRIPS, (void**)&lStripsIndices, &lStripsIndicesSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_NORMALS, (void**)&lLoadNormals, &lNormalsSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_UV, (void**)lLoadUvs, lUvsSize, -lUvCount));	// Specialcasing for array loading.
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR, (void**)&lColors, &lColorsSize));
@@ -77,7 +76,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	}
 	if (lOk)
 	{
-		lOk = ((!lTriangleIndices)^(!lStripsIndices));	// One and only one must be there.
+		lOk = !!lTriangleIndices;	// One and only one must be there.
 	}
 	if (lOk)
 	{
@@ -85,6 +84,11 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 		{
 			lOk = (lColorFormat == TBC::GeometryBase::COLOR_RGB || lColorFormat == TBC::GeometryBase::COLOR_RGBA);
 		}
+	}
+	if (lOk)
+	{
+		lOk = (lGeometryPrimitive == TBC::GeometryBase::TRIANGLES ||
+			lGeometryPrimitive == TBC::GeometryBase::QUADS);
 	}
 	if (lOk)
 	{
@@ -96,8 +100,22 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	deb_assert(lOk);
 	if (lOk)
 	{
-		lOk = (lTriangleIndicesSize%(sizeof(uint32)*3) == 0 &&
-			lVerticesSize%(sizeof(float)*3) == 0 &&
+		if (lGeometryPrimitive == TBC::GeometryBase::TRIANGLES)
+		{
+			lOk = (lTriangleIndicesSize%(sizeof(uint32)*3) == 0);
+		}
+		else if (lGeometryPrimitive == TBC::GeometryBase::QUADS)
+		{
+			lOk = (lTriangleIndicesSize%(sizeof(uint32)*4) == 0);
+		}
+		else
+		{
+			lOk = false;
+		}
+	}
+	if (lOk)
+	{
+		lOk = (lVerticesSize%(sizeof(float)*3) == 0 &&
 			lUvCount >= 0 &&
 			lUvCount <= 8);
 	}
@@ -111,9 +129,9 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	{
 		// TODO: add checks on normal and color sizes, so that we don't overrun buffers.
 	}
-	const unsigned lIndexCount = (lTriangleIndices? lTriangleIndicesSize : lStripsIndicesSize) / sizeof(uint32);
+	const unsigned lIndexCount = lTriangleIndicesSize / sizeof(uint32);
 	const unsigned lVertexCount = lVerticesSize / (sizeof(float)*3);
-	uint32* lIndices = lTriangleIndices? lTriangleIndices : lStripsIndices;
+	uint32* lIndices = lTriangleIndices;
 	float* lVertices = (float*)lLoadVertices;
 	float* lNormals = (float*)lLoadNormals;
 	float* lUvs[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -147,11 +165,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	}
 	if (lOk)
 	{
-		if (lStripsIndices)
-		{
-			deb_assert(false);	// Currently not supported.
-		}
-		const TBC::GeometryBase::PrimitiveType lType = lTriangleIndices? TBC::GeometryBase::TRIANGLES : TBC::GeometryBase::TRIANGLE_STRIP;
+		const TBC::GeometryBase::PrimitiveType lType = (TBC::GeometryBase::PrimitiveType)lGeometryPrimitive;
 		// Alex/TODO: Volatility of TriangleBasedGeometry should always be GEOM_STATIC.
 		pMeshData->Set(lVertices, lNormals, lUvs[0], lColors,
 			(TBC::GeometryBase::ColorFormat)lColorFormat, lIndices,
@@ -176,7 +190,6 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	delete[] (lLoadVertices);
 	delete[] (lLoadNormals);
 	delete[] (lTriangleIndices);
-	delete[] (lStripsIndices);
 	for (int x = 0; x < lUvCount; ++x)
 	{
 		delete[] (lLoadUvs[x]);
@@ -204,8 +217,6 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	const uint32* lNormals = AllocInitBigEndian(lSaveNormals, lNormalsSize/sizeof(float));
 	unsigned lTriangleIndicesSize = pMeshData->GetIndexCount()*sizeof(uint32);
 	const uint32* lTriangleIndices = AllocInitBigEndian(pMeshData->GetIndexData(), lTriangleIndicesSize/sizeof(uint32));
-	uint32* lStripsIndices = 0;	// TODO: add strips when supported.
-	unsigned lStripsIndicesSize = 0;	// TODO: add strips when supported.
 	const int lUvCount = pMeshData->GetUVSetCount();
 	const uint32* lUvs[32];
 	unsigned lUvsSize[32];
@@ -229,6 +240,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 		}
 	}
 	int32 lColorFormat = pMeshData->GetColorFormat();
+	int32 lGeometryPrimitive = pMeshData->GetPrimitiveType();
 	int32 lGeometryVolatility = pMeshData->GetGeometryVolatility();
 	int32 lCastsShadows = pCastsShadows;
 	int32 lShadowDeviation = Endian::HostToBigF(pMeshData->GetBigOrientationThreshold());
@@ -237,6 +249,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lSaveList;
+		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_PRIMITIVE, &lGeometryPrimitive));
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_SHADOW_DEVIATION, &lShadowDeviation));
@@ -246,10 +259,6 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 		if (lTriangleIndices)
 		{
 			lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
-		}
-		if (lStripsIndices)
-		{
-			lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_STRIPS, (void**)&lStripsIndices, &lStripsIndicesSize));
 		}
 		if (lNormals)
 		{
@@ -278,7 +287,6 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	delete[] (lVertices);
 	delete[] (lNormals);
 	delete[] (lTriangleIndices);
-	delete[] (lStripsIndices);
 	for (int x = 0; x < lUvCount; ++x)
 	{
 		delete[] (lUvs[x]);

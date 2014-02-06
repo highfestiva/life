@@ -54,7 +54,7 @@ CHUNK_MESH_UV				= "MEUV"
 CHUNK_MESH_COLOR			= "MECO"
 CHUNK_MESH_COLOR_FORMAT			= "MECF"
 CHUNK_MESH_TRIANGLES			= "METR"
-CHUNK_MESH_STRIPS			= "MEST"
+CHUNK_MESH_PRIMITIVE			= "MEPR"
 CHUNK_MESH_VOLATILITY			= "MEVO"
 CHUNK_MESH_CASTS_SHADOWS		= "MECS"
 CHUNK_MESH_SHADOW_DEVIATION		= "MESD"
@@ -745,10 +745,7 @@ class MeshWriter(ChunkyWriter):
 				p.writecount += 1
 			return
 		def getmeshval(node, attrname, tag, isbool):
-			for mesh in node.getparents():
-				val = mesh.get_fixed_attribute(attrname, optional=True)
-				if val != None:
-					break
+			val = node.getparentval(attrname, None)
 			if val == None:
 				return []
 			elif isbool:
@@ -764,11 +761,18 @@ class MeshWriter(ChunkyWriter):
 			return getmeshval(node, "two_sided", CHUNK_MESH_TWO_SIDED, True)
 		def get_recv_no_shadows(node):
 			return getmeshval(node, "recv_no_shadows", CHUNK_MESH_RECV_NO_SHADOWS, True)
-		#print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
+		mesh_primitive = node.getparentval("primitive", "triangles")
+		primitive1 = mesh_primitive[:-1] if mesh_primitive[-1] == "s" else mesh_primitive
+		primitiveM = mesh_primitive if mesh_primitive[-1] == "s" else mesh_primitive+"s"
+		div = 4 if mesh_primitive == "quads" else 3
+		if options.options.verbose:
+			print("Writing mesh %s with %i %s..." % (filename, len(node.get_fixed_attribute("rgtri"))/div, primitiveM))
 		self._addfeat("mesh:meshes", 1)
-		self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
+		self._addfeat("gfx %s:gfx %s"%(primitive1, primitiveM), len(node.get_fixed_attribute("rgtri"))/div)
 		with self._fileopenwrite(filename) as f:
 			self.f = f
+			default_mesh_primitive = {"triangles":1, "triangle_strip":2, "lines":3, "line_loop":4, "quads":5}
+			primitive = [(CHUNK_MESH_PRIMITIVE, default_mesh_primitive[mesh_primitive])]
 			default_mesh_type = {"static":1, "semi_static":2, "dynamic":3, "volatile":4}
 			mesh_type = "static" if self.config["type"] in ("world", "static") else "semi_static"
 			volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type[mesh_type])]
@@ -783,7 +787,7 @@ class MeshWriter(ChunkyWriter):
 			# if uvs and options.options.verbose:
 				# print("Mesh %s has UVs." % node.getFullName())
 			textureuvs = [(CHUNK_MESH_UV, uvs)] if uvs else []
-			inner_data = volatility+casts_shadows+shadow_deviation+two_sided+recv_shadows+verts+polys+normals+textureuvs
+			inner_data = primitive+volatility+casts_shadows+shadow_deviation+two_sided+recv_shadows+verts+polys+normals+textureuvs
 			data = (
 					CHUNK_MESH,
 					inner_data
