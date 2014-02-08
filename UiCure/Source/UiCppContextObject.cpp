@@ -350,6 +350,10 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 			lTexture = mTextureResourceArray[0];
 		}
 	}
+	if (mPostLoadMaterialDelegate)
+	{
+		mPostLoadMaterialDelegate(lMesh);
+	}
 	if (lMesh->GetRamData()->GetUVData(0) && lTexture)
 	{
 		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
@@ -398,6 +402,11 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 		}
 		mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
 	}
+}
+
+void CppContextObject::SetPostLoadMaterialDelegate(const PostLoadMaterialDelegate& pDelegate)
+{
+	mPostLoadMaterialDelegate = pDelegate;
 }
 
 

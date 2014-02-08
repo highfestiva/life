@@ -94,14 +94,11 @@ void GameClientSlaveManager::LoadSettings()
 	GetConsoleManager()->ExecuteCommand(_T("alias ipad3-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 2048; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 1536; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
 	GetConsoleManager()->ExecuteCommand(_T("alias computer-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 960; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 540; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" false; start-reset-ui\""));
 #ifdef LEPRA_WINDOWS
-#define SHELL_REBUILD_DATA		"cd .. & Tools\\build\\rgo.py builddata"
-#define SHELL_REBUILD_DATA_PAUSE	"cd .. & Tools\\build\\rgo.py builddata & pause"
+#define SHELL_REBUILD_DATA		"cd .. & Tools\\build\\rgo.py --pause-on-error builddata"
 #else
-#define SHELL_REBUILD_DATA		"cd ..; Tools/build/rgo.py builddata"
-#define SHELL_REBUILD_DATA_PAUSE	"cd ..; Tools/build/rgo.py builddata; read -n 1"
+#define SHELL_REBUILD_DATA		"cd ..; Tools/build/rgo.py --pause-on-error builddata"
 #endif // Windows shell / Posix shell
 	GetConsoleManager()->ExecuteCommand(_T("alias rebuild-data shell-execute \"") _T(SHELL_REBUILD_DATA) _T("\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias rebuild-data-pause shell-execute \"") _T(SHELL_REBUILD_DATA_PAUSE) _T("\""));
 	GetConsoleManager()->ExecuteCommand(_T("alias zzz \"zombie nop\""));
 #ifdef LEPRA_DEBUG
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 zzz"));

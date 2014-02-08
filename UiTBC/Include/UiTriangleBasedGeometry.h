@@ -81,6 +81,7 @@ public:
 	int AddUVSet(const Vector2D<float>* pUVData);
 	int AddEmptyUVSet();
 	int DupUVSet(int pUVSet);
+	int PopUVSet();
 
 	// Data access...
 

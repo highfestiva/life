@@ -52,6 +52,7 @@
 #include "../UiTBC/Include/UiBillboardGeometry.h"
 #include "../UiTBC/Include/UiParticleRenderer.h"
 #include "../UiTBC/Include/UiRenderer.h"
+#include "../UiTBC/Include/UiTriangleBasedGeometry.h"
 #include "AutoPathDriver.h"
 #include "BaseMachine.h"
 #include "Fire.h"
@@ -100,7 +101,7 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 
 	TBC::GeometryBase::SetDefaultFlags(TBC::GeometryBase::EXCLUDE_CULLING);	// Save some math during rendering, as most objects are on stage in this game.
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIREDELAY, 0.5);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIREDELAY, 1.5);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 9.0);
@@ -203,16 +204,16 @@ void FireManager::SetFade(float pFadeAmount)
 
 bool FireManager::Render()
 {
-	ScopeLock lLock(GetTickLock());
-	UpdateCameraPosition(true);
 	PixelRect lRenderArea;
 	const int w = (int)(mRenderArea.GetHeight()/hp);
 	lRenderArea.Set(mRenderArea.GetCenterX()-w/2, mRenderArea.mTop, mRenderArea.GetCenterX()+w/2, mRenderArea.mBottom);
 	lRenderArea.mLeft = std::max(lRenderArea.mLeft, mRenderArea.mLeft);
 	lRenderArea.mRight = std::min(lRenderArea.mRight, mRenderArea.mRight);
-	mUiManager->Render(lRenderArea);
-	SetLocalRender(false);	// Hide sun and mass objects from other cameras.
-	return true;
+	const PixelRect lFullRenderArea = mRenderArea;
+	mRenderArea = lRenderArea;
+	bool lOk = Parent::Render();
+	mRenderArea = lFullRenderArea;
+	return lOk;
 }
 
 bool FireManager::Paint()
@@ -397,6 +398,7 @@ str FireManager::StepLevel(int pCount)
 	}
 	str lNewLevelName = strutil::Format(_T("lvl%2.2i"), lLevelNumber);
 	mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	mLevel->SetPostLoadMaterialDelegate(UiCure::CppContextObject::PostLoadMaterialDelegate(this, &FireManager::OnLoadLevelMesh));
 	mLevel->StartLoading();
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 	return lNewLevelName;
@@ -701,13 +703,14 @@ void FireManager::OnLevelLoadCompleted()
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
 		bool lUpdate = false;
-		TBC::GeometryBase* lMesh = mLevel->GetMesh(x);
+		TBC::GeometryReference* lMesh = (TBC::GeometryReference*)mLevel->GetMesh(x);
+		UiTbc::TriangleBasedGeometry* lParent = (UiTbc::TriangleBasedGeometry*)lMesh->GetParentGeometry();
 		TransformationF lTransform = lMesh->GetTransformation();
 		const Vector3DF lOffset(0,lDistance,0);
-		for (unsigned y = 0; y < lMesh->GetUVSetCount(); ++y)
+		if (lMesh->GetUVSetCount())
 		{
 			const float* xyz = lMesh->GetVertexData();
-			float* uv  = lMesh->GetUVData(y);
+			float* uvst = new float[lMesh->GetMaxVertexCount()*4];
 			const unsigned lVertexCount = lMesh->GetVertexCount();
 			for (unsigned z = 0; z < lVertexCount; ++z)
 			{
@@ -716,9 +719,14 @@ void FireManager::OnLevelLoadCompleted()
 				Vector2DF c = lRenderer->PositionToScreenCoord(lVector, lMapScale/hp);
 				float x = c.x * wf;
 				float y = Math::Clamp(c.y * hf, -1.0f, hp);
-				uv[z*2+0] = x;
-				uv[z*2+1] = y;
+				uvst[z*4+0] = x;
+				uvst[z*4+1] = y;
+				uvst[z*4+2] = 0;
+				uvst[z*4+3] = 1;
 			}
+			lParent->PopUVSet();
+			lParent->AddUVSet(uvst);
+			lParent->SetUVDataChanged(true);
 			lMesh->SetUVDataChanged(true);
 			lUpdate = true;
 		}
@@ -729,6 +737,11 @@ void FireManager::OnLevelLoadCompleted()
 			mUiManager->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)mLevel->GetMeshResource(x)->GetConstResource())->GetParent()->GetData());
 		}
 	}
+}
+
+void FireManager::OnLoadLevelMesh(UiCure::UserGeometryReferenceResource* pMesh)
+{
+	((UiCure::GeometryReferenceResource*)pMesh->GetConstResource())->GetParent()->GetRamData()->SetUVCountPerVertex(4);
 }
 
 void FireManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,

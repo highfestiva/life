@@ -324,18 +324,13 @@ void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
 		if (lGeometry.GetUVData() != 0)
 		{
 			mUVData = new float*[lGeometry.GetUVSetCount()];
+			const int lUVCountPerVertex = lGeometry.GetUVCountPerVertex();
 			
 			for (unsigned int j = 0; j < lGeometry.GetUVSetCount(); j++)
 			{
 				// Copy UV data.
-				const float* lUVData = lGeometry.GetUVData(j);
-
-				mUVData[i] = new float[mVertexCount * 2];
-				for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += 2)
-				{
-					mUVData[j][lIndex + 0] = lUVData[lIndex + 0];
-					mUVData[j][lIndex + 1] = lUVData[lIndex + 1];
-				}
+				mUVData[j] = new float[mVertexCount * lUVCountPerVertex];
+				::memcpy(mUVData[j], lGeometry.GetUVData(j), mVertexCount*lUVCountPerVertex*sizeof(float));
 			}
 		}
 
@@ -449,33 +444,21 @@ int TriangleBasedGeometry::AddUVSet(const float* pUVData)
 	float** lUVData = new float*[lUVSetCount];
 
 	unsigned int lUVSetIndex;
-	unsigned int i;
 
 	// Copy present data.
 	for (lUVSetIndex = 0; lUVSetIndex < mUVSetCount; lUVSetIndex++)
 	{
-		lUVData[lUVSetIndex] = new float[mVertexCount * 2];
-
-		for (i = 0; i < mVertexCount * 2; i++)
-		{
-			lUVData[lUVSetIndex][i] = mUVData[lUVSetIndex][i];
-		}
-
+		lUVData[lUVSetIndex] = new float[mVertexCount * GetUVCountPerVertex()];
+		::memcpy(lUVData[lUVSetIndex], mUVData[lUVSetIndex], mVertexCount*GetUVCountPerVertex()*sizeof(float));
 		delete[] mUVData[lUVSetIndex];
 	}
 
-	if (mUVData != 0)
-	{
-		delete[] mUVData;
-	}
+	delete[] mUVData;
 
-	lUVData[lUVSetIndex] = new float[mVertexCount * 2];
+	lUVData[lUVSetIndex] = new float[mVertexCount * GetUVCountPerVertex()];
 
 	// Add new data at lUVSetIndex.
-	for (i = 0; i < mVertexCount * 2; i++)
-	{
-		lUVData[lUVSetIndex][i] = pUVData[i];
-	}
+	::memcpy(lUVData[lUVSetIndex], pUVData, mVertexCount*GetUVCountPerVertex()*sizeof(float));
 
 	mUVData = lUVData;
 	mUVSetCount = lUVSetCount;
@@ -492,28 +475,24 @@ int TriangleBasedGeometry::AddUVSet(const Vector2D<float>* pUVData)
 	unsigned int i;
 
 	// Copy present data.
+	const int lUVCountPerVertex = GetUVCountPerVertex();
 	for (lUVSetIndex = 0; lUVSetIndex < mUVSetCount; lUVSetIndex++)
 	{
-		lUVData[lUVSetIndex] = new float[mVertexCount * 2];
-
-		for (i = 0; i < mVertexCount * 2; i++)
-		{
-			lUVData[lUVSetIndex][i] = mUVData[lUVSetIndex][i];
-		}
-
+		lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
+		::memcpy(lUVData[lUVSetIndex], mUVData[lUVSetIndex], mVertexCount*lUVCountPerVertex*sizeof(float));
 		delete[] mUVData[lUVSetIndex];
 	}
 
-	if (mUVData != 0)
-		delete[] mUVData;
+	delete[] mUVData;
 
-	lUVData[lUVSetIndex] = new float[mVertexCount * 2];
+	lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
+	::memset(lUVData[lUVSetIndex], 0, mVertexCount*lUVCountPerVertex*sizeof(float));
 
 	// Add new data at lUVSetIndex.
 	for (i = 0; i < mVertexCount; i++)
 	{
-		lUVData[lUVSetIndex][i * 2 + 0] = pUVData[i].x;
-		lUVData[lUVSetIndex][i * 2 + 1] = pUVData[i].y;
+		lUVData[lUVSetIndex][i * lUVCountPerVertex + 0] = pUVData[i].x;
+		lUVData[lUVSetIndex][i * lUVCountPerVertex + 1] = pUVData[i].y;
 	}
 
 	mUVData = lUVData;
@@ -528,32 +507,20 @@ int TriangleBasedGeometry::AddEmptyUVSet()
 	float** lUVData = new float*[lUVSetCount];
 
 	unsigned int lUVSetIndex;
-	unsigned int i;
 
 	// Copy present data.
+	const int lUVCountPerVertex = GetUVCountPerVertex();
 	for (lUVSetIndex = 0; lUVSetIndex < mUVSetCount; lUVSetIndex++)
 	{
-		lUVData[lUVSetIndex] = new float[mVertexCount * 2];
-
-		for (i = 0; i < mVertexCount * 2; i++)
-		{
-			lUVData[lUVSetIndex][i] = mUVData[lUVSetIndex][i];
-		}
-
+		lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
+		::memcpy(lUVData[lUVSetIndex], mUVData[lUVSetIndex], mVertexCount*lUVCountPerVertex*sizeof(float));
 		delete[] mUVData[lUVSetIndex];
 	}
 
-	if (mUVData != 0)
-		delete[] mUVData;
+	delete[] mUVData;
 
-	lUVData[lUVSetIndex] = new float[mVertexCount * 2];
-
-	// Add new data at lUVSetIndex.
-	for (i = 0; i < mVertexCount; i++)
-	{
-		lUVData[lUVSetIndex][i * 2 + 0] = 0;
-		lUVData[lUVSetIndex][i * 2 + 1] = 0;
-	}
+	lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
+	::memset(lUVData[lUVSetIndex], 0, mVertexCount*lUVCountPerVertex*sizeof(float));
 
 	mUVData = lUVData;
 	mUVSetCount = lUVSetCount;
@@ -570,32 +537,20 @@ int TriangleBasedGeometry::DupUVSet(int pUVSet)
 		float** lUVData = new float*[lUVSetCount];
 
 		unsigned int lUVSetIndex;
-		unsigned int i;
 
 		// Copy present data.
+		const int lUVCountPerVertex = GetUVCountPerVertex();
 		for (lUVSetIndex = 0; lUVSetIndex < mUVSetCount; lUVSetIndex++)
 		{
-			lUVData[lUVSetIndex] = new float[mVertexCount * 2];
-
-			for (i = 0; i < mVertexCount * 2; i++)
-			{
-				lUVData[lUVSetIndex][i] = mUVData[lUVSetIndex][i];
-			}
-
+			lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
+			::memcpy(lUVData[lUVSetIndex], mUVData[lUVSetIndex], mVertexCount*lUVCountPerVertex*sizeof(float));
 			delete[] mUVData[lUVSetIndex];
 		}
 
-		if (mUVData != 0)
-			delete[] mUVData;
+		delete[] mUVData;
 
-		lUVData[lUVSetIndex] = new float[mVertexCount * 2];
-
-		// Add new data at lUVSetIndex.
-		for (i = 0; i < mVertexCount; i++)
-		{
-			lUVData[lUVSetIndex][i * 2 + 0] = lUVData[pUVSet][i * 2 + 0];
-			lUVData[lUVSetIndex][i * 2 + 1] = lUVData[pUVSet][i * 2 + 1];
-		}
+		lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
+		::memcpy(lUVData[lUVSetIndex], lUVData[pUVSet], mVertexCount*lUVCountPerVertex*sizeof(float));
 
 		mUVData = lUVData;
 		mUVSetCount = lUVSetCount;
@@ -603,6 +558,23 @@ int TriangleBasedGeometry::DupUVSet(int pUVSet)
 		return mUVSetCount - 1;
 	}
 	return lNewUVSet;
+}
+
+int TriangleBasedGeometry::PopUVSet()
+{
+	deb_assert(mUVSetCount > 0);
+	if (mUVSetCount > 0)
+	{
+		--mUVSetCount;
+		delete[] mUVData[mUVSetCount];
+		mUVData[mUVSetCount] = 0;
+		if (mUVSetCount == 0)
+		{
+			delete[] mUVData;
+			mUVData = 0;
+		}
+	}
+	return mUVSetCount;
 }
 
 void TriangleBasedGeometry::SetColorData(uint8* pColorData, ColorFormat pColorFormat)

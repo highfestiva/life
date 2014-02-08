@@ -28,6 +28,8 @@ class CppContextObject: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
+	typedef fastdelegate::FastDelegate1<UserGeometryReferenceResource*, void> PostLoadMaterialDelegate;
+
 	CppContextObject(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
 
@@ -51,6 +53,7 @@ public:
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
 	void CenterMeshes();
 	virtual void UpdateMaterial(int pMeshIndex);
+	void SetPostLoadMaterialDelegate(const PostLoadMaterialDelegate& pDelegate);
 
 	virtual void ReplaceTexture(int pTextureIndex, const str& pNewTextureName);
 
@@ -93,6 +96,7 @@ protected:
 	size_t mTextureLoadCount;
 	TransformationF mLerpOffset;
 	MeshSlideMode mLerpMode;
+	PostLoadMaterialDelegate mPostLoadMaterialDelegate;
 
 	LOG_CLASS_DECLARE();
 };

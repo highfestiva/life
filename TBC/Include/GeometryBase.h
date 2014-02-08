@@ -160,6 +160,8 @@ public:
 	        unsigned int GetTriangleCount() const;
 	virtual unsigned int GetIndexCount() const = 0;
 	virtual unsigned int GetUVSetCount() const = 0;
+	void SetUVCountPerVertex(int pUVCountPerVertex);
+	int GetUVCountPerVertex() const;
 	unsigned int GetEdgeCount() const;
 
 	// Sets the UV-set to use when generating tangent- and bitangent vectors.
@@ -353,6 +355,7 @@ protected:
 
 	float* mVertexNormalData;
 
+	int mUVCountPerVertex;
 	Edge* mEdgeData;
 	unsigned int mEdgeCount;
 

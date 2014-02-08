@@ -273,6 +273,7 @@ GeometryBase::GeometryBase() :
 	mSurfaceNormalData(0),
 	mSurfaceNormalCount(0),
 	mVertexNormalData(0),
+	mUVCountPerVertex(2),
 	mEdgeData(0),
 	mEdgeCount(0),
 	mTangentData(0),
@@ -472,6 +473,16 @@ void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[4]) const
 		}
 		break;
 	}
+}
+
+void GeometryBase::SetUVCountPerVertex(int pUVCountPerVertex)
+{
+	mUVCountPerVertex = pUVCountPerVertex;
+}
+
+int GeometryBase::GetUVCountPerVertex() const
+{
+	return mUVCountPerVertex;
 }
 
 unsigned GeometryBase::GetEdgeCount() const

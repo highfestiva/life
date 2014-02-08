@@ -757,7 +757,11 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
 #ifdef LEPRA_DEBUG
-		pSlave->GetConsoleManager()->ExecuteCommand(_T("rebuild-data"));
+		int lErrorCode;
+		if ((lErrorCode = pSlave->GetConsoleManager()->ExecuteCommand(_T("rebuild-data"))) != 0)
+		{
+			SystemManager::ExitProcess(lErrorCode);
+		}
 #endif // Debug.
 		LoadRtvars(pSlave->GetVariableScope());
 		pSlave->RefreshOptions();

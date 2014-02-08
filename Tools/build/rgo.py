@@ -419,7 +419,8 @@ def _bgrun(name):
 def _fgrun(name, app=""):
 	_printresult()
 	pre, post = _prepare_run()
-	os.system(app+pre+name+post)
+	app = [app] if app else []
+	rgohelp._run(app+[pre+name+post], "run")
 	os.chdir("..")
 
 
@@ -516,6 +517,7 @@ def _main():
 	parser.add_option("-c", "--chartype", dest="chartype", default="ansi", help="Pick char type: ansi/unicode (i.e. char/wchar_t). Default is ansi.")
 	parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, action="store_true", help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
 	parser.add_option("-v", "--verbose", dest="verbose", default=False, action="store_true", help="Verbose mode; default is False.")
+	parser.add_option("-e", "--pause-on-error", dest="pause_on_error", default=False, action="store_true", help="Pause on error; default is False.")
 	global args
 	options, args = parser.parse_args()
 
@@ -533,6 +535,7 @@ def _main():
 	own_tt = builddir_types[options.chartype]
 	global verbose
 	verbose = options.verbose
+	rgohelp.pause_on_error = options.pause_on_error
 
 	if options.demacappify and not any(a in exclude_demacappify for a in args):
 		demacappify()

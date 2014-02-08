@@ -374,6 +374,12 @@ class GroupReader(DefaultMAReader):
 			if not faces:
 				continue
 			if node.getparentval("primitive", default="triangles") == "quads":
+				newfaces = []
+				for face in faces:
+					if len(face) != 4:
+						print("Error: mesh %s does not have ONLY quads (one face is %s)!" % (node.getName(), str(face)))
+						sys.exit(4)
+					newfaces += face
 				faces = [v for face in faces for v in face]	# Flatten list.
 				node.fix_attribute("rgtri", faces)
 				continue

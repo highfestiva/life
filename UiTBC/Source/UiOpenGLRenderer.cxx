@@ -23,7 +23,7 @@ namespace UiTbc
 
 #ifdef LEPRA_DEBUG
 #define OGL_ASSERT()		{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
-#define OGL_FAST_ASSERT()
+#define OGL_FAST_ASSERT()	OGL_ASSERT();
 #else // !Debug
 #define OGL_ASSERT()
 #define OGL_FAST_ASSERT()
@@ -761,7 +761,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 			}
 			if (pGeometry->GetUVSetCount() > 0)
 			{
-				lBufferSize += (lVertexCount * sizeof(float) * 2) * pGeometry->GetUVSetCount();
+				lBufferSize += (lVertexCount * sizeof(float) * pGeometry->GetUVCountPerVertex()) * pGeometry->GetUVSetCount();
 			}
 			if (pGeometry->GetTangentData() != 0)
 			{
@@ -829,13 +829,14 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 			lGeometryData->mUVOffset = lOffset;
 			if (pGeometry->GetUVSetCount() > 0)
 			{
+				const int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
 				for (unsigned i = 0; i < pGeometry->GetUVSetCount(); i++)
 				{
 					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
 										 lOffset,
-										 lVertexCount * sizeof(float) * 2,
+										 lVertexCount * sizeof(float) * lUVCountPerVertex,
 										 (void*)pGeometry->GetUVData(i));
-					lOffset += lVertexCount * sizeof(float) * 2;
+					lOffset += lVertexCount * sizeof(float) * lUVCountPerVertex;
 				}
 			}
 
@@ -1016,12 +1017,15 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 
 			if (lGeometry->GetUVDataChanged())
 			{
+				OGL_FAST_ASSERT();
 				size_t lOffset = lGeomData->mUVOffset;
+				int lUVCountPerVertex = lGeometry->GetUVCountPerVertex();
 				for (unsigned i = 0; i < lGeometry->GetUVSetCount(); i++)
 				{
 					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, lOffset,
-						lVertexCount * sizeof(float) * 2, (void*)lGeometry->GetUVData(i));
-					lOffset += lVertexCount * sizeof(float) * 2;
+						lVertexCount * sizeof(float) * lUVCountPerVertex, (void*)lGeometry->GetUVData(i));
+					lOffset += lVertexCount * sizeof(float) * lUVCountPerVertex;
+					OGL_FAST_ASSERT();
 				}
 			}
 

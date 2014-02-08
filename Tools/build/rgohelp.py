@@ -10,6 +10,7 @@ import sys
 vcver = 10
 NMAKE = "bin/nmake.exe"
 VCBUILD = "vcpackages/vcbuild.exe"
+pause_on_error = False
 
 
 def _getosname():
@@ -122,7 +123,8 @@ def _run(cmdlist, when):
 	if path:
 		os.environ["PATH"] = path
 	if rc != 0:
-		print("Error %i when %s!" % (rc, when))
+		err = "Error %i when %s!" % (rc, when)
+		input(err+"\nPress enter to continue.") if pause_on_error else print(err)
 		sys.exit(1)
 
 
