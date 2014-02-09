@@ -294,7 +294,7 @@ void ConsoleManager::ConsoleThreadEntry()
 	const str lPrompt(_T(">"));
 	str lInputText(_T(""));
 	size_t lEditIndex = 0;
-	while (!SystemManager::GetQuitRequest() && !mConsoleThread->GetStopRequest())
+	while (!SystemManager::GetQuitRequest() && mConsoleThread && !mConsoleThread->GetStopRequest())
 	{
 		// Execute any pending yield command.
 		if (lInputText.empty())

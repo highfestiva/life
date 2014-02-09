@@ -174,6 +174,7 @@ private:
 #define CURE_RTVAR_TOKEN(var, name)				static const HashedString hs_##var(_T(name));
 #define CURE_RTVAR_SLOW_GET(scope, name, def)			(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
 #define CURE_RTVAR_SLOW_TRYGET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
+#define deb_rt(scope, name, def)				CURE_RTVAR_SLOW_TRYGET(scope, name, def)
 #define CURE_RTVAR_GET(var, op, scope, name, def)		CURE_RTVAR_TOKEN(var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, hs_##var, def)
 #define CURE_RTVAR_TRYGET(var, op, scope, name, def)		CURE_RTVAR_TOKEN(t##var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, hs_t##var, def)
 #define CURE_RTVAR_SET(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, _T(name), value)

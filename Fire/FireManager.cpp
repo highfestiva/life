@@ -398,7 +398,6 @@ str FireManager::StepLevel(int pCount)
 	}
 	str lNewLevelName = strutil::Format(_T("lvl%2.2i"), lLevelNumber);
 	mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	mLevel->SetPostLoadMaterialDelegate(UiCure::CppContextObject::PostLoadMaterialDelegate(this, &FireManager::OnLoadLevelMesh));
 	mLevel->StartLoading();
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 	return lNewLevelName;
@@ -508,7 +507,7 @@ void FireManager::HandleWorldBoundaries()
 		{
 			const Vector3DF lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -250.0f, +250.0f) ||
-				!Math::IsInRange(lPosition.y, -10.0f, +350.0f) ||
+				!Math::IsInRange(lPosition.y, -100.0f, +350.0f) ||
 				!Math::IsInRange(lPosition.z, -250.0f, +250.0f))
 			{
 				lLostObjectArray.push_back(lObject->GetInstanceId());
@@ -702,15 +701,13 @@ void FireManager::OnLevelLoadCompleted()
 	const size_t lMeshCount = ((UiTbc::ChunkyClass*)mLevel->GetClass())->GetMeshCount();
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
-		bool lUpdate = false;
 		TBC::GeometryReference* lMesh = (TBC::GeometryReference*)mLevel->GetMesh(x);
-		UiTbc::TriangleBasedGeometry* lParent = (UiTbc::TriangleBasedGeometry*)lMesh->GetParentGeometry();
 		TransformationF lTransform = lMesh->GetTransformation();
 		const Vector3DF lOffset(0,lDistance,0);
 		if (lMesh->GetUVSetCount())
 		{
 			const float* xyz = lMesh->GetVertexData();
-			float* uvst = new float[lMesh->GetMaxVertexCount()*4];
+			float* uv = lMesh->GetUVData(0);
 			const unsigned lVertexCount = lMesh->GetVertexCount();
 			for (unsigned z = 0; z < lVertexCount; ++z)
 			{
@@ -719,29 +716,16 @@ void FireManager::OnLevelLoadCompleted()
 				Vector2DF c = lRenderer->PositionToScreenCoord(lVector, lMapScale/hp);
 				float x = c.x * wf;
 				float y = Math::Clamp(c.y * hf, -1.0f, hp);
-				uvst[z*4+0] = x;
-				uvst[z*4+1] = y;
-				uvst[z*4+2] = 0;
-				uvst[z*4+3] = 1;
+				uv[z*2+0] = x;
+				uv[z*2+1] = y;
 			}
-			lParent->PopUVSet();
-			lParent->AddUVSet(uvst);
-			lParent->SetUVDataChanged(true);
-			lMesh->SetUVDataChanged(true);
-			lUpdate = true;
-		}
-		lMesh->SetPreRenderCallback(TBC::GeometryBase::PreRenderCallback(this, &FireManager::DisableAmbient));
-		lMesh->SetPostRenderCallback(TBC::GeometryBase::PostRenderCallback(this, &FireManager::EnableAmbient));
-		if (lUpdate)
-		{
-			mUiManager->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)mLevel->GetMeshResource(x)->GetConstResource())->GetParent()->GetData());
+
+			lMesh->SetPreRenderCallback(TBC::GeometryBase::PreRenderCallback(this, &FireManager::DisableAmbient));
+			lMesh->SetPostRenderCallback(TBC::GeometryBase::PostRenderCallback(this, &FireManager::EnableAmbient));
+
+			mUiManager->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)mLevel->GetMeshResource(x)->GetConstResource())->GetParent()->GetData(), false);
 		}
 	}
-}
-
-void FireManager::OnLoadLevelMesh(UiCure::UserGeometryReferenceResource* pMesh)
-{
-	((UiCure::GeometryReferenceResource*)pMesh->GetConstResource())->GetParent()->GetRamData()->SetUVCountPerVertex(4);
 }
 
 void FireManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,

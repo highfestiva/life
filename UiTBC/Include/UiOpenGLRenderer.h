@@ -115,7 +115,7 @@ public:
 
 	virtual TextureID AddTexture(Texture* pTexture);
 
-	void UpdateGeometry(GeometryID pGeometryID);
+	void UpdateGeometry(GeometryID pGeometryID, bool pForce);
 	bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType);
 
 	virtual unsigned RenderScene();

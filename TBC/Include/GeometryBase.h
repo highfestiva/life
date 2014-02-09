@@ -390,7 +390,7 @@ protected:
 	static float mDefaultBigOrientationThreshold;
 
 public:
-	LEPRA_DEBUG_CODE(str mName);
+	str mName;
 
 	LOG_CLASS_DECLARE();
 };

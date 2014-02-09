@@ -492,7 +492,10 @@ class PhysWriter(ChunkyWriter):
 		if self.config["type"] == "dynamic":
 			friction *= totalmass / 1000.0
 		self._writefloat(friction)
-		self._writefloat(float(node.get_fixed_attribute("bounce")))
+		bounce = node.get_fixed_attribute("bounce")
+		self._writefloat(float(bounce))
+		if options.options.verbose:
+			print("Writing shape %s friction=%f, bounce=%f." % (node.getName(), friction, bounce))
 		rootindex = -1 if not node.phys_root else self.bodies.index(node.phys_root)
 		self._writeint(rootindex)
 		joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "slider":6, "universal":7}

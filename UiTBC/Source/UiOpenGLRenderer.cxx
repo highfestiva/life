@@ -956,7 +956,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 	return lOK;
 }
 
-void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
+void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 {
 	GeometryTable::Iterator lIter;
 	lIter = GetGeometryTable().Find(pGeometryID);
@@ -965,7 +965,13 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 	{
 		OGLGeometryData* lGeomData = (OGLGeometryData*)*lIter;
 		TBC::GeometryBase* lGeometry = lGeomData->mGeometry;
-		
+
+		if (pForce)
+		{
+			ReleaseGeometry(lGeometry, GRO_IGNORE_MATERIAL);
+			BindGeometry(lGeometry, pGeometryID, GetMaterialType(pGeometryID));
+			return;
+		}
 		// Force update of shadow volumes.
 
 		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() && !lGeometry->IsGeometryReference())
