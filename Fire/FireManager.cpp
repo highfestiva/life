@@ -271,7 +271,34 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	Vector3DF lTargetPosition;
 	if (!GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) == 1)
 	{
-		lTargetPosition = mShootDirection*300.0f;
+		// User aiming above ground. Find vehicle closest to that position, and adjust target range thereafter.
+		const float lDefaultDistance = 150.0f;
+		lTargetPosition = mShootDirection * lDefaultDistance;
+		float lClosestDistance2 = lDefaultDistance*lDefaultDistance;
+		Vector3DF lClosestPosition(0,lDefaultDistance,0);
+		Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
+		Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
+		for (; x != lObjectTable.end(); ++x)
+		{
+			Cure::ContextObject* lObject = x->second;
+			TBC::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
+			if (!lObject->IsLoaded() || !lPhysics)
+			{
+				continue;
+			}
+			const Vector3DF lVehiclePosition = lObject->GetPosition();
+			if (lVehiclePosition.y < 10.0f)
+			{
+				continue;
+			}
+			const float lDistance2 = lVehiclePosition.GetDistanceSquared(lTargetPosition);
+			if (lDistance2 < lClosestDistance2)
+			{
+				lClosestPosition = lVehiclePosition;
+				lClosestDistance2 = lDistance2;
+			}
+		}
+		lTargetPosition = mShootDirection * lClosestPosition.GetLength();
 	}
 	else
 	{
@@ -283,10 +310,11 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 
 	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), _T("rocket"), mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	lProjectile->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
 	TransformationF t(mCameraTransform);
 	t.GetPosition().x += 0.7f;
-	t.GetPosition().y += 3.0f;
-	t.GetPosition().z -= 0.1f;
+	t.GetPosition().y += 1.0f;
+	t.GetPosition().z += 0.1f;
 	t.GetOrientation().RotateAroundWorldX(-PIF/2);	// Tilt rocket.
 	const Vector3DF lDistance = lTargetPosition - t.GetPosition();
 	float lAcceleration;
@@ -294,10 +322,10 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	float lGravityEffect;
 	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 200.0);
 	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 160.0);
-	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 0.95);
-	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, GetPhysicsManager()->GetGravity());
-	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x*lGravityEffect);
-	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y/lGravityEffect);
+	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.2);
+	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, GetPhysicsManager()->GetGravity()*lGravityEffect);
+	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y);
+	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x);
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
 }
@@ -358,7 +386,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 				lHealth->SetValue(lValue);
 			}
 			x->second->ForceSend();
-			Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength, GetTimeManager()->GetNormalGameFrameTime());
+			Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength, GetTimeManager()->GetNormalFrameTime());
 		}
 		BaseMachine* lMachine = dynamic_cast<BaseMachine*>(lObject);
 		if (lMachine && lMachine->GetPosition().GetDistanceSquared(pPosition) < 150*150)
@@ -433,6 +461,7 @@ Cure::RuntimeVariableScope* FireManager::GetVariableScope() const
 bool FireManager::InitializeUniverse()
 {
 	mUiManager->GetRenderer()->SetLineWidth(1);
+	mUiManager->UpdateSettings();
 
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
@@ -610,7 +639,6 @@ Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		//lMachine->GetBurnEmitter()->SetFreeFlow();
-		lMachine->SetDisappearAfterDeathDelay(30.0);
 		lMachine->SetExplosiveStrength(0.6f);
 		lObject = lMachine;
 	}
@@ -681,7 +709,7 @@ void FireManager::OnLevelLoadCompleted()
 	CURE_RTVAR_TRYGET(lDistance, =(float), GetVariableScope(), "level.distance", 0.0);
 	float lMapScale;
 	CURE_RTVAR_TRYGET(lMapScale, =(float), GetVariableScope(), "level.mapscale", 1.015);
-	const UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+	UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
 	float lFOV;
 	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
 	//float _;
@@ -693,6 +721,7 @@ void FireManager::OnLevelLoadCompleted()
 	{
 		return;
 	}
+	lRenderer->ResetClippingRect();
 	lFormerDistance = lDistance;
 	lFormerMapScale = lMapScale;
 	lFormerFoV = lFOV;

@@ -231,13 +231,13 @@ def _checkplatform():
 			sys.exit(1)
 
 
-def _printresult():
+def _printresult(print_no_work=True):
 	global showed_result, updates, removes, fullname
 	if showed_result:
 		return
 	showed_result = True
 	if updates+removes:	print("%s operation successful, %i resulting files updated(/removed)." % (fullname, updates+removes))
-	else:			print("%s build up-to-date." % fullname)
+	elif print_no_work:	print("%s build up-to-date." % fullname)
 
 
 def _createmakes(force=False):
@@ -411,13 +411,13 @@ def _prepare_run():
 		sys.exit(2)
 	return pre, post
 def _bgrun(name):
-	_printresult()
+	_printresult(False)
 	pre, post = _prepare_run()
 	import subprocess
 	subprocess.Popen(pre+name+post, shell=True)
 	os.chdir("..")
 def _fgrun(name, app=""):
-	_printresult()
+	_printresult(False)
 	pre, post = _prepare_run()
 	app = [app] if app else []
 	rgohelp._run(app+[pre+name+post], "run")
@@ -489,6 +489,7 @@ def clean():
 		_buildcode("clean", buildtype)
 
 def run():
+	copycode()
 	_fgrun(appnames[0])
 
 def go():

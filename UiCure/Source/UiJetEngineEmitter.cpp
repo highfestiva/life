@@ -68,8 +68,10 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 		FV_DIRECTION_Z,
 		FV_DENSITY,
 		FV_OPACITY,
+		FV_OVERSHOOT_OPACITY,
 		FV_OVERSHOOT_CUTOFF_DOT,
-		FV_ENGINE_FACTOR_BASE,
+		FV_OVERSHOOT_DISTANCE_UPSCALE,
+		FV_OVERSHOOT_ENGINE_FACTOR_BASE,
 		FV_COUNT
 	};
 	if (pTag.mFloatValueList.size() != FV_COUNT ||
@@ -88,8 +90,8 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 		return;
 	}
 	const TBC::PhysicsEngine* lEngine = pObject->GetPhysics()->GetEngine(lEngineIndex);
-	const float lThrottleUpSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_ENGINE_FACTOR_BASE]*0.5f, pFrameTime);
-	const float lThrottleDownSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_ENGINE_FACTOR_BASE], pFrameTime);
+	const float lThrottleUpSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_OVERSHOOT_ENGINE_FACTOR_BASE]*0.5f, pFrameTime);
+	const float lThrottleDownSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_OVERSHOOT_ENGINE_FACTOR_BASE], pFrameTime);
 	const float lEngineThrottle = lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true);
 	const QuaternionF lOrientation = pObject->GetOrientation();
 	Vector3DF lRadius(pTag.mFloatValueList[FV_RADIUS_X], pTag.mFloatValueList[FV_RADIUS_Y], pTag.mFloatValueList[FV_RADIUS_Z]);
@@ -139,6 +141,7 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 	}
 	lParticleSize *= 0.2f;
 
+	const float lDistanceScaleFactor = pTag.mFloatValueList[FV_OVERSHOOT_DISTANCE_UPSCALE];
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
 		TBC::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
@@ -152,12 +155,15 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 			lTransform = lMesh->GetBaseTransformation() * lTransform;
 			Vector3DF lMeshPos = lTransform.GetPosition() + lPosition;
 
-			const Vector3DF lCamDirection = (lMeshPos - mUiManager->GetRenderer()->GetCameraTransformation().GetPosition()).GetNormalized();
+			const Vector3DF lCamDistance = lMeshPos - mUiManager->GetRenderer()->GetCameraTransformation().GetPosition();
+			const float lDistance = lCamDistance.GetLength();
+			const Vector3DF lCamDirection(lCamDistance / lDistance);
 			float lOvershootFactor = -(lCamDirection*lDirection);
 			if (lOvershootFactor > pTag.mFloatValueList[FV_OVERSHOOT_CUTOFF_DOT])
 			{
 				lOvershootFactor = Math::Lerp(lOvershootFactor*0.5f, lOvershootFactor, lEngineThrottle);
-				DrawOvershoot(lMeshPos, lOrientation, lRadius, lColor, lOvershootFactor, lCamDirection);
+				const float lOpacity = (lOvershootFactor+0.6f) * pTag.mFloatValueList[FV_OVERSHOOT_OPACITY];
+				DrawOvershoot(lMeshPos, lDistanceScaleFactor*lDistance, lRadius, lColor, lOpacity, lCamDirection);
 			}
 
 			if (lCreateParticle)
@@ -174,41 +180,13 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 
 
 
-void JetEngineEmitter::DrawOvershoot(const Vector3DF& pPosition, const QuaternionF& pOrientation, const Vector3DF& pRadius, const Vector3DF& pColor, float pOpacity, const Vector3DF& pCameraDirection)
+void JetEngineEmitter::DrawOvershoot(const Vector3DF& pPosition, float pDistanceScaleFactor, const Vector3DF& pRadius, const Vector3DF& pColor, float pOpacity, const Vector3DF& pCameraDirection)
 {
-	const QuaternionF& lCam = mUiManager->GetRenderer()->GetCameraTransformation().GetOrientation();
-	const QuaternionF& lCamInverse = mUiManager->GetRenderer()->GetCameraOrientationInverse();
-	Vector3DF x;
-	Vector3DF y;
-	Vector3DF z;
-	lCam.FastInverseRotatedVector(lCamInverse, x, pOrientation*Vector3DF(pRadius.x, 0, 0));
-	lCam.FastInverseRotatedVector(lCamInverse, y, pOrientation*Vector3DF(0, pRadius.y, 0));
-	lCam.FastInverseRotatedVector(lCamInverse, z, pOrientation*Vector3DF(0, 0, pRadius.z));
-	Vector2DF x2d(x.x, x.z);
-	Vector2DF y2d(y.x, y.z);
-	Vector2DF z2d(z.x, z.z);
-	const float x2 = x.GetLengthSquared();
-	const float y2 = y.GetLengthSquared();
-	const float z2 = z.GetLengthSquared();
-	float s;
-	if (x2 > y2 && x2 > z2)
-	{
-		s = ::sqrt(x2);
-		x2d /= s;
-	}
-	else if (y2 > z2)
-	{
-		s = ::sqrt(y2);
-		x2d = y2d/s;
-	}
-	else
-	{
-		s = ::sqrt(z2);
-		x2d = z2d/s;
-	}
+	float s = std::max(std::max(pRadius.x, pRadius.y), pRadius.z);
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	const float lMaxFlameDistance = 3 * std::max(std::max(pRadius.x, pRadius.y), pRadius.z);
-	lParticleRenderer->RenderFireBillboard(0, s, pColor, pOpacity+0.6f, pPosition-pCameraDirection*lMaxFlameDistance);
+	const float lMaxFlameDistance = 3 * s;
+	s += s * pDistanceScaleFactor * 0.1f;
+	lParticleRenderer->RenderFireBillboard(0, s, pColor, pOpacity, pPosition-pCameraDirection*lMaxFlameDistance);
 }
 
 

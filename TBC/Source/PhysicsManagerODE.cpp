@@ -577,9 +577,14 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& 
 void PhysicsManagerODE::GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const
 {
 	Object* lObject = (Object*)pBodyId;
-	if (lObject->mBodyID)
+	dBodyID lBodyId = lObject->mBodyID;
+	if (!lBodyId)
 	{
-		const dReal* lVelocity = dBodyGetLinearVel(lObject->mBodyID);
+		lBodyId = lObject->mGeomID->body;
+	}
+	if (lBodyId)
+	{
+		const dReal* lVelocity = dBodyGetLinearVel(lBodyId);
 		pVelocity.x = lVelocity[0];
 		pVelocity.y = lVelocity[1];
 		pVelocity.z = lVelocity[2];
@@ -602,9 +607,14 @@ void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVeloci
 void PhysicsManagerODE::GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
-	if(lObject->mBodyID)
+	dBodyID lBodyId = lObject->mBodyID;
+	if (!lBodyId)
 	{
-		const dReal* lAcceleration = dBodyGetForce(lObject->mBodyID);
+		lBodyId = lObject->mGeomID->body;
+	}
+	if(lBodyId)
+	{
+		const dReal* lAcceleration = dBodyGetForce(lBodyId);
 		pAcceleration.x = lAcceleration[0];
 		pAcceleration.y = lAcceleration[1];
 		pAcceleration.z = lAcceleration[2];
@@ -638,9 +648,14 @@ void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, float pTotalMass, co
 void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const
 {
 	Object* lObject = (Object*)pBodyId;
-	if(lObject->mBodyID)
+	dBodyID lBodyId = lObject->mBodyID;
+	if (!lBodyId)
 	{
-		const dReal* lAngularVelocity = ::dBodyGetAngularVel(lObject->mBodyID);
+		lBodyId = lObject->mGeomID->body;
+	}
+	if(lBodyId)
+	{
+		const dReal* lAngularVelocity = ::dBodyGetAngularVel(lBodyId);
 		pAngularVelocity.x = lAngularVelocity[0];
 		pAngularVelocity.y = lAngularVelocity[1];
 		pAngularVelocity.z = lAngularVelocity[2];
@@ -663,9 +678,14 @@ void PhysicsManagerODE::SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& 
 void PhysicsManagerODE::GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
-	if(lObject->mBodyID)
+	dBodyID lBodyId = lObject->mBodyID;
+	if (!lBodyId)
 	{
-		const dReal* lAngularAcceleration = dBodyGetTorque(lObject->mBodyID);
+		lBodyId = lObject->mGeomID->body;
+	}
+	if(lBodyId)
+	{
+		const dReal* lAngularAcceleration = dBodyGetTorque(lBodyId);
 		pAngularAcceleration.x = lAngularAcceleration[0];
 		pAngularAcceleration.y = lAngularAcceleration[1];
 		pAngularAcceleration.z = lAngularAcceleration[2];

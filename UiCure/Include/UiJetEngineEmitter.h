@@ -24,7 +24,7 @@ public:
 	void EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
 
 private:
-	void DrawOvershoot(const Vector3DF& pPosition, const QuaternionF& pOrientation, const Vector3DF& pRadius, const Vector3DF& pColor, float pOpacity, const Vector3DF& pCameraDirection);
+	void DrawOvershoot(const Vector3DF& pPosition, float pDistanceScaleFactor, const Vector3DF& pRadius, const Vector3DF& pColor, float pOpacity, const Vector3DF& pCameraDirection);
 
 	Cure::ResourceManager* mResourceManager;
 	GameUiManager* mUiManager;

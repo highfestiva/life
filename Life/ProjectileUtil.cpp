@@ -185,9 +185,9 @@ Vector3DF ProjectileUtil::CalculateInitialProjectileDirection(const Vector3DF& p
 		d = t*t*0.5f;
 	}
 	// 3
-	const Vector3DF g = pGravity.GetNormalized();
-	const float f = 1 + pDistance*g/l;
-	d *= f;
+	//const Vector3DF g = pGravity.GetNormalized();
+	//const float f = 1 + pDistance*g/l;
+	//d *= f;
 	// 4
 	const Vector3DF lTarget = pDistance - d*pGravity;
 	const float xy = ::sqrt(lTarget.x*lTarget.x + lTarget.y*lTarget.y);

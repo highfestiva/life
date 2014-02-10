@@ -1175,7 +1175,11 @@ class MAReader:
                 self.lockNode_opt_def = { "lock" : (1, None),
                                                                   "ignoreComponents" : (0, None) }
                 
-        # Provide linenr as an alias for cmd_start_linenr
+                self.requires_name_dict = {}
+                self.requires_opt_def = { "nodeType" : (1, None),
+					  "dataType" : (1, None) }
+
+	# Provide linenr as an alias for cmd_start_linenr
         @property
         def linenr(self):
                 return self.cmd_start_linenr
@@ -1375,7 +1379,7 @@ class MAReader:
                         self.onCurrentUnit(opts)
                 # requires
                 elif cmd=="requires":
-                        args, opts = self.getOpt(args, {}, {})
+                        args, opts = self.getOpt(args, self.requires_opt_def, self.requires_name_dict)
                         self.onRequires(args[0], args[1])
                 # file
                 elif cmd=="file":
