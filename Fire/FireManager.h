@@ -121,6 +121,7 @@ protected:
 	GameTimer mFireDelayTimer;
 	Vector3DF mStoreAmbient;
 	bool mStoreLightsEnabled;
+	int mKills;
 
 	LOG_CLASS_DECLARE();
 };

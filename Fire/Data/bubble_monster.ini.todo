@@ -1,0 +1,11 @@
+; Author: Jonas Byström
+; Copyright (c) 2009 Righteous Games
+
+[config:general]
+type	= "class"
+
+[config:join]
+base		= "monster"
+join		= ["bubble"]
+mesh_drop	= [".*(?!.*\|)m_wheel.*"]	; Drop meshes from base (everything but wheels).
+mesh_add	= [("bubble:.*(?!.*\|)m_wheel.*", ".*phys_body")]	; Add meshes from joins (everything but wheels attached to body).

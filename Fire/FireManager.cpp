@@ -64,13 +64,16 @@
 #include "Sunlight.h"
 #include "Version.h"
 
-#define BG_COLOR			Color(110, 110, 110, 160)
-const float hp = 768/1024.0f;
-
 
 
 namespace Fire
 {
+
+
+
+#define BG_COLOR			Color(110, 110, 110, 160)
+const float hp = 768/1024.0f;
+const int gLevels[] = {0, 1, 5, 8};
 
 
 
@@ -83,8 +86,9 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mLevel(0),
 	mSunlight(0),
 	mCameraTransform(QuaternionF(), Vector3DF()),
-	mPauseButton(0)
+	mPauseButton(0),
 	//mCheckIcon(0),
+	mKills(0)
 {
 	mFireDelayTimer.Start();
 
@@ -230,6 +234,14 @@ bool FireManager::Paint()
 
 void FireManager::DrawSyncDebugInfo()
 {
+	PixelRect lRenderArea;
+	const int w = (int)(mRenderArea.GetHeight()/hp);
+	lRenderArea.Set(mRenderArea.GetCenterX()-w/2, mRenderArea.mTop, mRenderArea.GetCenterX()+w/2, mRenderArea.mBottom);
+	lRenderArea.mLeft = std::max(lRenderArea.mLeft, mRenderArea.mLeft);
+	lRenderArea.mRight = std::min(lRenderArea.mRight, mRenderArea.mRight);
+	const PixelRect lFullRenderArea = mRenderArea;
+	mRenderArea = lRenderArea;
+
 	Parent::DrawSyncDebugInfo();
 
 	if (GetLevel() && GetLevel()->QueryPath()->GetPath(0))
@@ -245,6 +257,8 @@ void FireManager::DrawSyncDebugInfo()
 			lDebugRenderer.RenderSpline(mUiManager, lPath);
 		}
 	}
+
+	mRenderArea = lFullRenderArea;
 }
 
 
@@ -332,10 +346,24 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 
 void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
 {
-	float lExplosiveStrength;
-	CURE_RTVAR_TRYGET(lExplosiveStrength, =(float), GetVariableScope(), "shot.explosivestrength", 1.0);
-	pStrength *= lExplosiveStrength;
+	const bool lIsRocket = (pExplosive->GetClassId() == _T("rocket"));
+	if (lIsRocket)
+	{
+		float lExplosiveStrength;
+		CURE_RTVAR_TRYGET(lExplosiveStrength, =(float), GetVariableScope(), "shot.explosivestrength", 1.0);
+		pStrength *= lExplosiveStrength;
+	}
 	const float lCubicStrength = 4*(::pow(pStrength+1, 1/3.0f) - 1);	// Reduce by 3D volume. Explosion spreads in all directions.
+	if (!lIsRocket)
+	{
+		++mKills;
+		if (mKills > 5)
+		{
+			mKills = 0;
+			StepLevel(1);
+			return;
+		}
+	}
 
 	mCollisionSoundManager->OnCollision(pStrength*2, pPosition, pExplosiveGeometry, _T("explosion"));
 
@@ -416,13 +444,26 @@ str FireManager::StepLevel(int pCount)
 	lLevelNumber += pCount;
 	int lLevelCount;
 	CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
-	if (lLevelNumber >= lLevelCount)
-	{
-		lLevelNumber = 0;
-	}
 	if (lLevelNumber < 0)
 	{
 		lLevelNumber = lLevelCount-1;
+	}
+	findNextLevel: for (int x = 0; ; ++x)
+	{
+		if (x >= LEPRA_ARRAY_COUNT(gLevels))
+		{
+			++lLevelNumber;
+			if (lLevelNumber >= lLevelCount)
+			{
+				lLevelNumber = 0;
+			}
+			goto findNextLevel;
+		}
+		if (x == lLevelNumber)
+		{
+			lLevelNumber = x;
+			break;
+		}
 	}
 	str lNewLevelName = strutil::Format(_T("lvl%2.2i"), lLevelNumber);
 	mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
