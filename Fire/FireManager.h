@@ -112,6 +112,7 @@ protected:
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	Life::Menu* mMenu;
 	Level* mLevel;
+	bool mSteppedLevel;
 	Sunlight* mSunlight;
 	TransformationF mCameraTransform;
 	UiTbc::Button* mPauseButton;

@@ -84,6 +84,7 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCollisionSoundManager(0),
 	mMenu(0),
 	mLevel(0),
+	mSteppedLevel(false),
 	mSunlight(0),
 	mCameraTransform(QuaternionF(), Vector3DF()),
 	mPauseButton(0),
@@ -301,7 +302,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 				continue;
 			}
 			const Vector3DF lVehiclePosition = lObject->GetPosition();
-			if (lVehiclePosition.y < 10.0f)
+			if (lVehiclePosition.y < 10.0f || Cure::Health::Get(lObject) <= 0)
 			{
 				continue;
 			}
@@ -357,7 +358,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	if (!lIsRocket)
 	{
 		++mKills;
-		if (mKills > 5)
+		if (mKills >= 5)
 		{
 			mKills = 0;
 			StepLevel(1);
@@ -383,7 +384,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 
 	// Slowmo check.
 	bool lNormalDeath = true;
-	if (Cure::Health::Get(pExplosive) < -5500)
+	if (!lIsRocket && Cure::Health::Get(pExplosive) < -5500)
 	{
 		if (Random::Uniform(0.0f, 1.0f) > 0.7f)
 		{
@@ -459,16 +460,17 @@ str FireManager::StepLevel(int pCount)
 			}
 			goto findNextLevel;
 		}
-		if (x == lLevelNumber)
+		if (gLevels[x] == lLevelNumber)
 		{
-			lLevelNumber = x;
 			break;
 		}
 	}
+	DeleteContextObjectDelay(mLevel, 0);
 	str lNewLevelName = strutil::Format(_T("lvl%2.2i"), lLevelNumber);
 	mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	mLevel->StartLoading();
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
+	mSteppedLevel = true;
 	return lNewLevelName;
 }
 
@@ -486,7 +488,7 @@ Level* FireManager::GetLevel() const
 int FireManager::GetCurrentLevelNumber() const
 {
 	int lLevelNumber = 0;
-	strutil::StringToInt(mLevel->GetClassId().substr(6), lLevelNumber);
+	strutil::StringToInt(mLevel->GetClassId().substr(3), lLevelNumber);
 	return lLevelNumber;
 }
 
@@ -527,11 +529,12 @@ void FireManager::ScriptPhysicsTick()
 		HandleShooting();
 	}
 
-	if (!GetResourceManager()->IsLoading())
+	if (mSteppedLevel && !GetResourceManager()->IsLoading())
 	{
+		mSteppedLevel = false;
 		mAllLoadedTimer.TryStart();
 	}
-	if (mAllLoadedTimer.QuerySplitTime() > 5.0)
+	if (mAllLoadedTimer.QuerySplitTime() > 10.0)
 	{
 		mAllLoadedTimer.Stop();
 		mAllLoadedTimer.ClearTimeDiff();
@@ -758,7 +761,8 @@ void FireManager::OnLevelLoadCompleted()
 	static float lFormerDistance = 0;
 	static float lFormerMapScale = 0;
 	static float lFormerFoV = 0;
-	if (lFormerDistance == lDistance && lFormerMapScale == lMapScale && lFormerFoV == lFOV)
+	static unsigned lFormerLevelId = 0;
+	if (lFormerDistance == lDistance && lFormerMapScale == lMapScale && lFormerFoV == lFOV && lFormerLevelId == mLevel->GetInstanceId())
 	{
 		return;
 	}
@@ -766,6 +770,7 @@ void FireManager::OnLevelLoadCompleted()
 	lFormerDistance = lDistance;
 	lFormerMapScale = lMapScale;
 	lFormerFoV = lFOV;
+	lFormerLevelId = mLevel->GetInstanceId();
 	const float wf = +1.0f / mUiManager->GetDisplayManager()->GetWidth();
 	const float hf = hp / mUiManager->GetDisplayManager()->GetHeight();
 	const size_t lMeshCount = ((UiTbc::ChunkyClass*)mLevel->GetClass())->GetMeshCount();
