@@ -58,11 +58,14 @@ GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 {
 	switch (pGeometry->GetPrimitiveType())
 	{
+		default:
 		case TBC::GeometryBase::TRIANGLES:	return (GL_TRIANGLES);
 		case TBC::GeometryBase::TRIANGLE_STRIP:	return (GL_TRIANGLE_STRIP);
 		case TBC::GeometryBase::LINES:		return (GL_LINES);
 		case TBC::GeometryBase::LINE_LOOP:	return (GL_LINE_LOOP);
+#ifndef LEPRA_GL_ES
 		case TBC::GeometryBase::QUADS:		return (GL_QUADS);
+#endif // !OpenGL ES
 	}
 	deb_assert(false);
 	return (GL_TRIANGLES);

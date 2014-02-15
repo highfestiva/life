@@ -227,11 +227,13 @@ void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
 	float lAmbientLight[] = {pRed, pGreen, pBlue, 1.0f};
 	::glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
 	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbientLight);
+#ifndef LEPRA_GL_ES
 	if (IsPixelShadersEnabled())
 	{
 		GLfloat lLightAmbient[4] = {0,0,0,0};
 		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 3, lLightAmbient);
 	}
+#endif // !OpenGL ES
 	OGL_FAST_ASSERT();
 }
 
