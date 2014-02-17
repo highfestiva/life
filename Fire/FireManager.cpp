@@ -73,7 +73,7 @@ namespace Fire
 
 #define BG_COLOR			Color(110, 110, 110, 160)
 const float hp = 768/1024.0f;
-const int gLevels[] = {0, 1, 5, 8};
+const int gLevels[] = {0, 1, 2, 5, 8};
 
 
 
@@ -360,7 +360,6 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 		++mKills;
 		if (mKills >= 5)
 		{
-			mKills = 0;
 			StepLevel(1);
 			return;
 		}
@@ -441,6 +440,7 @@ bool FireManager::DidFinishLevel()
 
 str FireManager::StepLevel(int pCount)
 {
+	mKills = 0;
 	int lLevelNumber = GetCurrentLevelNumber();
 	lLevelNumber += pCount;
 	int lLevelCount;
@@ -790,6 +790,11 @@ void FireManager::OnLevelLoadCompleted()
 				lVector = lTransform.Transform(lVector) + lOffset;
 				Vector2DF c = lRenderer->PositionToScreenCoord(lVector, lMapScale/hp);
 				float x = c.x * wf;
+				if (lVector.y < 100)
+				{
+					float u = Math::Clamp(x, 0.0f, 1.0f);
+					x = Math::Lerp(u, x, std::max(lVector.y, 0.0f)/120);
+				}
 				float y = Math::Clamp(c.y * hf, -1.0f, hp);
 				uv[z*2+0] = x;
 				uv[z*2+1] = y;

@@ -876,7 +876,7 @@ class GroupReader(DefaultMAReader):
 					for e in l:
 						ok &= (len(e) == 2)
 						ok &= (type(e[0]) == str)
-						ok &= (e[1] > 0 and e[1] <= 1)
+						ok &= (e[1] > 0 and e[1] <= 1000)
 					return ok
 				required = [("type", lambda x: type(x) == str),
 					    ("function", lambda x: type(x) == str),
@@ -896,7 +896,7 @@ class GroupReader(DefaultMAReader):
 
 			elif section.startswith("tag:"):
 				tagtype = stripQuotes(config.get(section, "type")).split(":")[0]
-				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "blink_light", "engine_sound", "engine_mesh_offset", "mesh_offset", "burn", "exhaust",
+				tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_light", "blink_light", "engine_sound", "engine_mesh_offset", "mesh_offset", "mesh_rotate", "burn", "exhaust",
 						    "jet_engine_emitter", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer", "context_path", "see_through",
 						    "ammo", "textures", "mass_objects", "placement", "driver", "muzzle", "behavior", "ambient_sounds", "anything"]
 				allApplied &= tagOk

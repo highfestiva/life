@@ -1780,6 +1780,7 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		const QuaternionF lParentQ(lPQ);
+		const dReal* lPP = ::dBodyGetPosition(lParentBody);
 		// Rotate to cross piece orientation.
 		dxJointUniversal* lUniversal = (dxJointUniversal*)lJointInfo->mJointID;
 		//QuaternionF lRelativeQ(lUniversal->qrel1);
@@ -1794,17 +1795,21 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		lAxis2 = lQ * Vector3DF(lUniversal->axis2);
 		lQ = QuaternionF(-pDiff.mAngle, lAxis2) * lQ;
 		// Set orientation.
+		Vector3DF lParentP(lPP);
 		TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
+		TransformationF lParentTransformation(lParentQ, lParentP);
+		lTransform.mPosition = lParentQ*(lTransform.mPosition-lParentP) + lParentP;
+		lTransform.mOrientation = lParentQ;
 		// TODO: fix your linear algebra shit first!
 		//lTransform.SetOrientation(lQ);
 		// Align anchors (happen after rotation) and store.
 		Vector3DF lAnchor2(lUniversal->anchor2);
 		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
-		dVector3 lRealAnchor;
-		::dJointGetUniversalAnchor2(lUniversal, lRealAnchor);
+		//dVector3 lRealAnchor;
+		//::dJointGetUniversalAnchor2(lUniversal, lRealAnchor);
 		// TODO: fix your linear algebra shit first!
-		//lTransform.GetPosition() += lAnchor-lAnchor2;
+		lTransform.mPosition += lAnchor-lAnchor2;
 		SetBodyTransform(pBodyId, lTransform);
 	}
 

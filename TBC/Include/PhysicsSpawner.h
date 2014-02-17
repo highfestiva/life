@@ -73,6 +73,7 @@ private:
 	IntervalArray mIntervalArray;
 	SpawnObjectArray mSpawnObjectArray;
 	bool mIsEaseDown;
+	float mTotalObjectProbability;
 
 	LOG_CLASS_DECLARE();
 };

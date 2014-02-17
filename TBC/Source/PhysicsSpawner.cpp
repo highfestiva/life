@@ -21,7 +21,8 @@ namespace TBC
 PhysicsSpawner::PhysicsSpawner():
 	mSpawnerType(SPAWNER_INVALID),
 	mNumber(0),
-	mIsEaseDown(false)
+	mIsEaseDown(false),
+	mTotalObjectProbability(1)
 {
 }
 
@@ -110,6 +111,7 @@ const PhysicsSpawner::IntervalArray& PhysicsSpawner::GetIntervals() const
 
 const str PhysicsSpawner::GetSpawnObject(float pProbabilityThreshold) const
 {
+	pProbabilityThreshold *= mTotalObjectProbability;
 	SpawnObjectArray::const_iterator x = mSpawnObjectArray.begin();
 	for (; x != mSpawnObjectArray.end(); ++x)
 	{
@@ -200,6 +202,7 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	{
 		mIntervalArray.push_back(Endian::BigToHostF(lData[i++]));
 	}
+	mTotalObjectProbability = 0;
 	const int lSpawnObjectCount = Endian::BigToHost(lData[i++]);
 	for (int x = 0; x < lSpawnObjectCount; ++x)
 	{
@@ -208,6 +211,7 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 		deb_assert(lStringRawLength % sizeof(lData[0]) == 0);
 		i += lStringRawLength / sizeof(lData[0]);
 		const float lProbability = Endian::BigToHostF(lData[i++]);
+		mTotalObjectProbability += lProbability;
 		mSpawnObjectArray.push_back(SpawnObject(strutil::Encode(lSpawnObject), lProbability));
 	}
 	mIsEaseDown = Endian::BigToHost(lData[i++])? true : false;

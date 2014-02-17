@@ -36,7 +36,8 @@ Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, G
 	mExhaustEmitter(0),
 	mBurnEmitter(0),
 	mBlinkTime(0),
-	mMeshOffsetTime(0)
+	mMeshOffsetTime(0),
+	mMeshRotateTime(0)
 {
 	EnableMeshSlide(true);
 }
@@ -153,6 +154,10 @@ void Machine::OnTick()
 		else if (lTag.mTagName == _T("mesh_offset"))
 		{
 			HandleTagMeshOffset(lTag, lFrameTime*lRealTimeRatio);
+		}
+		else if (lTag.mTagName == _T("mesh_rotate"))
+		{
+			HandleTagMeshRotate(lTag, lFrameTime*lRealTimeRatio);
 		}
 		else if (lTag.mTagName == _T("exhaust"))
 		{
@@ -588,26 +593,10 @@ void Machine::HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 	};
 #define V(i)	pTag.mFloatValueList[i]
 
-	float lAmplitude = 0;
 	const float lStartTime = V(FV_INITIAL_DELAY);
-	if (mMeshOffsetTime < lStartTime || mMeshOffsetTime > lStartTime+V(FV_DURATION))
-	{
-		return;
-	}
-	float x = mMeshOffsetTime-lStartTime;
-	if (lFunction == _T("|sin|"))
-	{
-		lAmplitude = std::abs(::sin(x*2*PIF*V(FV_FREQUENCY)));
-	}
-	else
-	{
-		mLog.Errorf(_T("Uknown mesh_offset function '%s'."), lFunction.c_str());
-		deb_assert(false);
-	}
-	mMeshOffsetTime += pFrameTime;
+	float lAmplitude = CalculateMeshOffset(lFunction, lStartTime, V(FV_DURATION), V(FV_FREQUENCY), pFrameTime, mMeshOffsetTime);
 
 	const Vector3DF lOffsetPosition(GetOrientation().GetInverseRotatedVector(Vector3DF(V(FV_X), V(FV_Y), V(FV_Z)) * lAmplitude));
-	const TransformationF lOffset(QuaternionF(), lOffsetPosition);
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
 		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
@@ -616,8 +605,83 @@ void Machine::HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 			continue;
 		}
 		TBC::GeometryReference* lMeshRef = (TBC::GeometryReference*)lMesh;
-		lMeshRef->SetExtraOffsetTransformation(lOffset);
+		TransformationF lExtraOffset = lMeshRef->GetExtraOffsetTransformation();
+		lExtraOffset.mPosition = lOffsetPosition;
+		lMeshRef->SetExtraOffsetTransformation(lExtraOffset);
 	}
+}
+
+void Machine::HandleTagMeshRotate(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)
+{
+	// Mesh offset controlled by engine.
+
+	if (pTag.mFloatValueList.size() != 6 ||
+		pTag.mStringValueList.size() != 1 ||
+		pTag.mBodyIndexList.size() != 0 ||
+		pTag.mEngineIndexList.size() != 0 ||
+		pTag.mMeshIndexList.size() < 1)
+	{
+		mLog.Errorf(_T("The mesh_rotate tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		deb_assert(false);
+		return;
+	}
+
+	const str lFunction = pTag.mStringValueList[0];
+	enum FloatValue
+	{
+		FV_INITIAL_DELAY,
+		FV_DURATION,
+		FV_FREQUENCY,
+		FV_X,
+		FV_Y,
+		FV_Z,
+	};
+#define V(i)	pTag.mFloatValueList[i]
+
+	const float lStartTime = V(FV_INITIAL_DELAY);
+	float lAmplitude = CalculateMeshOffset(lFunction, lStartTime, V(FV_DURATION), V(FV_FREQUENCY), pFrameTime, mMeshRotateTime);
+
+	QuaternionF lOffsetOrientation;
+	lOffsetOrientation.SetEulerAngles(V(FV_Z)*lAmplitude, V(FV_X)*lAmplitude, V(FV_Y)*lAmplitude);
+	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
+	{
+		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		if (!lMesh)
+		{
+			continue;
+		}
+		TBC::GeometryReference* lMeshRef = (TBC::GeometryReference*)lMesh;
+		TransformationF lExtraOffset = lMeshRef->GetExtraOffsetTransformation();
+		lExtraOffset.mOrientation = lOffsetOrientation;
+		lMeshRef->SetExtraOffsetTransformation(lExtraOffset);
+	}
+}
+
+
+
+float Machine::CalculateMeshOffset(const str& pFunction, float lStartTime, float pDuration, float pFrequency, float pFrameTime, float& pMeshTime) const
+{
+	if (pMeshTime < lStartTime || pMeshTime > lStartTime+pDuration)
+	{
+		return 0;
+	}
+	float lAmplitude = 0;
+	float x = pMeshTime-lStartTime;
+	if (pFunction == _T("|sin|"))
+	{
+		lAmplitude = std::abs(::sin(x*2*PIF*pFrequency));
+	}
+	else if (pFunction == _T("linear"))
+	{
+		lAmplitude = x;
+	}
+	else
+	{
+		mLog.Errorf(_T("Uknown mesh_xxx function '%s'."), pFunction.c_str());
+		deb_assert(false);
+	}
+	pMeshTime += pFrameTime;
+	return lAmplitude;
 }
 
 

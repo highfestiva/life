@@ -49,6 +49,9 @@ private:
 		float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex);
 	void HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
 	void HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
+	void HandleTagMeshRotate(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
+
+	float CalculateMeshOffset(const str& pFunction, float lStartTime, float pDuration, float pFrequency, float pFrameTime, float& pMeshTime) const;
 
 	void LoadPlaySound3d(UserSound3dResource* pSoundResource);
 
@@ -63,6 +66,7 @@ private:
 	GameTimer mAmbientSoundTimer;
 	float mBlinkTime;
 	float mMeshOffsetTime;
+	float mMeshRotateTime;
 
 	LOG_CLASS_DECLARE();
 };

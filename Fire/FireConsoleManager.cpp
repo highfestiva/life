@@ -81,7 +81,6 @@ int FireConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 				GetGameManager()->GetTickLock()->Acquire();
 				((FireManager*)GetGameManager())->StepLevel(-1);
 				GetGameManager()->GetTickLock()->Release();
-				ExecuteCommand(_T("die"));
 				return 0;
 			}
 			break;
@@ -90,7 +89,6 @@ int FireConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 				GetGameManager()->GetTickLock()->Acquire();
 				((FireManager*)GetGameManager())->StepLevel(+1);
 				GetGameManager()->GetTickLock()->Release();
-				ExecuteCommand(_T("die"));
 				return 0;
 			}
 			break;
@@ -103,7 +101,6 @@ int FireConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 					const int lLevelDelta = lTargetLevelIndex - ((FireManager*)GetGameManager())->GetCurrentLevelNumber();
 					((FireManager*)GetGameManager())->StepLevel(lLevelDelta);
 					GetGameManager()->GetTickLock()->Release();
-					ExecuteCommand(_T("die"));
 					return 0;
 				}
 				else

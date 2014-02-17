@@ -278,7 +278,7 @@ void BoneHierarchy::Transform(int pBoneIndex, TransformOperation pTransformOpera
 		{
 			const TransformationF& lThisTransform = mCurrentBoneTransformation[pBoneIndex];
 			TransformationF& lChildTransform = mCurrentBoneTransformation[lChildIndex];
-			lChildTransform = lThisTransform*lChildTransform;
+			lChildTransform = lThisTransform.Transform(lChildTransform);
 		}
 
 		Transform(lChildIndex, pTransformOperation);
