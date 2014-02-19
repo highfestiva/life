@@ -83,6 +83,7 @@ protected:
 	std::list<str> mYieldCommandList;
 	typedef std::list<Thread*> ForkList;
 	ForkList mForkList;
+	bool mHistorySilentUntilNextExecute;
 
 	LOG_CLASS_DECLARE();
 };

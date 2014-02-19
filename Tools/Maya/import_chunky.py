@@ -63,7 +63,8 @@ class GroupReader(DefaultMAReader):
 				     "deleteUVSet", "plusMinusAverage", "transformGeometry", \
 				     "cameraView", "directionalLight", "brush", \
 				     "createUVSet", "animCurveTU", "animCurveTA", "bump2d",
-				     "nurbsSurface", "nurbsTessellate", "makeNurbPlane"]
+				     "nurbsSurface", "nurbsTessellate", "makeNurbPlane", \
+				     "hyperGraphInfo", "hyperView", "hyperLayout"]
 		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", \
 		                     "polyAutoProj", "polyPlane"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
@@ -1477,6 +1478,7 @@ class GroupReader(DefaultMAReader):
 				print("Error: mesh '%s' and phys node '%s' do not share the exact same World Space Pivot (%s and %s). " \
 				      "Note that Y and Z axes are transformed compared to Maya." %
 				      (mesh.getFullName(), phys.getFullName(), str(mt), str(pt)))
+				sys.exit(3)
 		else:
 			valid_ref = False
 			print("Error: no phys...")

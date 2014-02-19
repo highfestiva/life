@@ -11,6 +11,7 @@
 #define RTVAR_CONSOLE_CHARACTERDELIMITORS	"Console.CharacterDelimitors"
 #define RTVAR_CONSOLE_KEY_COMPLETION		"Console.Key.Completion"
 #define RTVAR_CONSOLE_KEY_ENTER			"Console.Key.Enter"
+#define RTVAR_CONSOLE_KEY_SILENT		"Console.Key.Silent"
 #define RTVAR_CONSOLE_KEY_BACKSPACE		"Console.Key.Backspace"
 #define RTVAR_CONSOLE_KEY_DELETE		"Console.Key.Delete"
 #define RTVAR_CONSOLE_KEY_CTRLLEFT		"Console.Key.CtrlLeft"

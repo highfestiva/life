@@ -73,7 +73,7 @@ namespace Fire
 
 #define BG_COLOR			Color(110, 110, 110, 160)
 const float hp = 768/1024.0f;
-const int gLevels[] = {0, 1, 2, 5, 8};
+const int gLevels[] = {0, 1, 2, 3, 5, 8};
 
 
 
@@ -245,6 +245,7 @@ void FireManager::DrawSyncDebugInfo()
 
 	Parent::DrawSyncDebugInfo();
 
+	ScopeLock lLock(GetTickLock());
 	if (GetLevel() && GetLevel()->QueryPath()->GetPath(0))
 	{
 		UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), mUiManager, GetContext(), 0, GetTickLock());
@@ -287,7 +288,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	if (!GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) == 1)
 	{
 		// User aiming above ground. Find vehicle closest to that position, and adjust target range thereafter.
-		const float lDefaultDistance = 150.0f;
+		const float lDefaultDistance = 350.0f;
 		lTargetPosition = mShootDirection * lDefaultDistance;
 		float lClosestDistance2 = lDefaultDistance*lDefaultDistance;
 		Vector3DF lClosestPosition(0,lDefaultDistance,0);
@@ -331,16 +332,24 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	t.GetPosition().y += 1.0f;
 	t.GetPosition().z += 0.1f;
 	t.GetOrientation().RotateAroundWorldX(-PIF/2);	// Tilt rocket.
-	const Vector3DF lDistance = lTargetPosition - t.GetPosition();
 	float lAcceleration;
 	float lTerminalVelocity;
 	float lGravityEffect;
+	float lAimAbove;
+	float lSomeRocketLength;
 	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 200.0);
-	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 160.0);
-	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.2);
+	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 220.0);
+	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.24);
+	CURE_RTVAR_TRYGET(lAimAbove, =(float), GetVariableScope(), "shot.aimabove", 2.0);
+	CURE_RTVAR_TRYGET(lSomeRocketLength, =(float), GetVariableScope(), "shot.rocketlength", 9.0);
+	Vector3DF lDistance = lTargetPosition - t.GetPosition();
+	lAimAbove = Math::Lerp(0.0f, lAimAbove, std::min(100.0f, lDistance.GetLength())/100.0f);
+	lDistance.z += lAimAbove;
 	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, GetPhysicsManager()->GetGravity()*lGravityEffect);
 	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y);
 	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x);
+	t.mPosition.x -= lSomeRocketLength*sin(lShootDirectionEulerAngles.x);
+	t.mPosition.z += lSomeRocketLength*sin(lShootDirectionEulerAngles.y);
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
 }
@@ -378,7 +387,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	Vector3DF lSpritesPosition(pPosition-pPosition.GetNormalized(4.0f));	// We just move it closer to make it less likely to be cut off by ground.
+	Vector3DF lSpritesPosition(pPosition*0.95f-pPosition.GetNormalized(2.0f));	// We just move it closer to make it less likely to be cut off by ground.
 	lParticleRenderer->CreateExplosion(lSpritesPosition, lCubicStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
 
 	// Slowmo check.
@@ -467,8 +476,11 @@ str FireManager::StepLevel(int pCount)
 	}
 	DeleteContextObjectDelay(mLevel, 0);
 	str lNewLevelName = strutil::Format(_T("lvl%2.2i"), lLevelNumber);
-	mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	mLevel->StartLoading();
+	{
+		ScopeLock lLock(GetTickLock());
+		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mLevel->StartLoading();
+	}
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 	mSteppedLevel = true;
 	return lNewLevelName;
@@ -513,8 +525,11 @@ bool FireManager::InitializeUniverse()
 
 	str lStartLevel;
 	CURE_RTVAR_GET(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
-	mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	mLevel->StartLoading();
+	{
+		ScopeLock lLock(GetTickLock());
+		mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mLevel->StartLoading();
+	}
 	mSunlight = new Sunlight(mUiManager);
 	return true;
 }
@@ -580,7 +595,7 @@ void FireManager::HandleWorldBoundaries()
 		{
 			const Vector3DF lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -250.0f, +250.0f) ||
-				!Math::IsInRange(lPosition.y, -100.0f, +350.0f) ||
+				!Math::IsInRange(lPosition.y, -100.0f, +550.0f) ||
 				!Math::IsInRange(lPosition.z, -250.0f, +250.0f))
 			{
 				lLostObjectArray.push_back(lObject->GetInstanceId());

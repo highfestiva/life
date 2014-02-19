@@ -139,12 +139,10 @@ void ConsoleManager::OnKey(const str& pKeyName)
 	KeyMap::iterator x = mKeyMap.find(pKeyName);
 	if (x != mKeyMap.end())
 	{
-		// Make it as if though it was typed in, to make the console thread run it.
-		for (str::const_iterator y = x->second.begin(); y != x->second.end(); ++y)
-		{
-			((UiTbc::ConsolePrompt*)mConsolePrompt)->OnChar(*y);
-		}
-		((UiTbc::ConsolePrompt*)mConsolePrompt)->OnChar('\r');
+		PushYieldCommand(x->second);
+		// Make console thread run it.
+		((UiTbc::ConsolePrompt*)mConsolePrompt)->OnChar(' ');
+		((UiTbc::ConsolePrompt*)mConsolePrompt)->OnChar('\b');
 	}
 }
 

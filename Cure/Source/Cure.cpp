@@ -40,6 +40,7 @@ void SetDefault(RuntimeVariableScope* pSettings)
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" \t\v\r\n.,!?:;/\\'\"()&%#@{[]+-*|<>^_$`"));
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
+	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b');
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE);
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT);

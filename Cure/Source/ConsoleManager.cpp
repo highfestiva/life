@@ -22,7 +22,8 @@ ConsoleManager::ConsoleManager(RuntimeVariableScope* pVariableScope, Interactive
 	mConsoleLogger(pConsoleLogger),
 	mConsolePrompt(pConsolePrompt),
 	mConsoleCommandManager(0),
-	mConsoleThread(0)
+	mConsoleThread(0),
+	mHistorySilentUntilNextExecute(false)
 {
 }
 
@@ -250,7 +251,8 @@ int ConsoleManager::TranslateCommand(const str& pCommand) const
 void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 {
 	std::list<str>::const_iterator x = pCommandList.begin();
-	const int lSpacing = CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONSOLE_COLUMNSPACING, 2);
+	int lSpacing;
+	CURE_RTVAR_GET(lSpacing, =, mVariableScope, RTVAR_CONSOLE_COLUMNSPACING, 2);
 	size_t lLongestCommand = 10;
 	for (; x != pCommandList.end(); ++x)
 	{
@@ -265,8 +267,9 @@ void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 		str lCommand = strutil::Format(lFormat.c_str(), x->c_str());
 		mConsoleLogger->OnLogRawMessage(lCommand);
 		lIndent += lCommand.length();
-		const size_t lConsoleWidth = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_CHARACTERWIDTH, 80);
-		if (lIndent+lLongestCommand >= lConsoleWidth)
+		int lConsoleWidth;
+		CURE_RTVAR_GET(lConsoleWidth, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERWIDTH, 80);
+		if ((int)(lIndent+lLongestCommand) >= lConsoleWidth)
 		{
 			mConsoleLogger->OnLogRawMessage(_T("\n"));
 			lIndent = 0;
@@ -311,9 +314,42 @@ void ConsoleManager::ConsoleThreadEntry()
 		int c = mConsolePrompt->WaitChar();
 		mConsoleLogger->SetAutoPrompt(_T(""));
 
-		const str lWordDelimitors(CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" ")));
+		str lWordDelimitors;
+		int lKeyCompletion;
+		int lKeyEnter;
+		int lKeySilent;
+		int lKeyBackspace;
+		int lKeyDelete;
+		int lKeyCtrlLeft;
+		int lKeyCtrlRight;
+		int lKeyHome;
+		int lKeyEnd;
+		int lKeyUp;
+		int lKeyDown;
+		int lKeyLeft;
+		int lKeyRight;
+		int lKeyEsc;
+		int lKeyPgUp;
+		int lKeyPgDn;
+		CURE_RTVAR_GET(lWordDelimitors, =, mVariableScope, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
+		CURE_RTVAR_GET(lKeyCompletion, =, mVariableScope, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
+		CURE_RTVAR_GET(lKeyEnter, =, mVariableScope, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
+		CURE_RTVAR_GET(lKeySilent, =, mVariableScope, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
+		CURE_RTVAR_GET(lKeyBackspace, =, mVariableScope, RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b');
+		CURE_RTVAR_GET(lKeyDelete, =, mVariableScope, RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE);
+		CURE_RTVAR_GET(lKeyCtrlLeft, =, mVariableScope, RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT);
+		CURE_RTVAR_GET(lKeyCtrlRight, =, mVariableScope, RTVAR_CONSOLE_KEY_CTRLRIGHT, ConsolePrompt::CON_KEY_CTRL_RIGHT);
+		CURE_RTVAR_GET(lKeyHome, =, mVariableScope, RTVAR_CONSOLE_KEY_HOME, ConsolePrompt::CON_KEY_HOME);
+		CURE_RTVAR_GET(lKeyEnd, =, mVariableScope, RTVAR_CONSOLE_KEY_END, ConsolePrompt::CON_KEY_END);
+		CURE_RTVAR_GET(lKeyUp, =, mVariableScope, RTVAR_CONSOLE_KEY_UP, ConsolePrompt::CON_KEY_UP);
+		CURE_RTVAR_GET(lKeyDown, =, mVariableScope, RTVAR_CONSOLE_KEY_DOWN, ConsolePrompt::CON_KEY_DOWN);
+		CURE_RTVAR_GET(lKeyLeft, =, mVariableScope, RTVAR_CONSOLE_KEY_LEFT, ConsolePrompt::CON_KEY_LEFT);
+		CURE_RTVAR_GET(lKeyRight, =, mVariableScope, RTVAR_CONSOLE_KEY_RIGHT, ConsolePrompt::CON_KEY_RIGHT);
+		CURE_RTVAR_GET(lKeyEsc, =, mVariableScope, RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE);
+		CURE_RTVAR_GET(lKeyPgUp, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP);
+		CURE_RTVAR_GET(lKeyPgDn, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN);
 
-		if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t'))
+		if (c == lKeyCompletion)
 		{
 			str lBestCompletionString;
 			std::list<str> lCompletions =
@@ -332,14 +368,19 @@ void ConsoleManager::ConsoleThreadEntry()
 				++lEditIndex;
 			}
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_ENTER, (int)'\r'))
+		else if (c == lKeyEnter)
 		{
 			mConsoleLogger->OnLogRawMessage(_T("\r")+lPrompt+lInputText+_T("\n"));
-			mConsoleCommandManager->Execute(lInputText, true);
+			mConsoleCommandManager->Execute(lInputText, !mHistorySilentUntilNextExecute);
+			mHistorySilentUntilNextExecute = false;
 			lInputText = _T("");
 			lEditIndex = 0;
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b'))
+		else if (c == lKeySilent)
+		{
+			mHistorySilentUntilNextExecute = true;
+		}
+		else if (c == lKeyBackspace)
 		{
 			if (lEditIndex > 0)
 			{
@@ -353,7 +394,7 @@ void ConsoleManager::ConsoleThreadEntry()
 				lInputText = lNewInputText;
 			}
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE))
+		else if (c == lKeyDelete)
 		{
 			if (lEditIndex < lInputText.length())
 			{
@@ -365,35 +406,34 @@ void ConsoleManager::ConsoleThreadEntry()
 				lInputText = lNewInputText;
 			}
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT))
+		else if (c == lKeyCtrlLeft)
 		{
 			lEditIndex = strutil::FindPreviousWord(lInputText, lWordDelimitors, lEditIndex);
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLRIGHT, ConsolePrompt::CON_KEY_CTRL_RIGHT))
+		else if (c == lKeyCtrlRight)
 		{
 			lEditIndex = strutil::FindNextWord(lInputText, lWordDelimitors, lEditIndex);
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_HOME, ConsolePrompt::CON_KEY_HOME))
+		else if (c == lKeyHome)
 		{
 			lEditIndex = 0;
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_END, ConsolePrompt::CON_KEY_END))
+		else if (c == lKeyEnd)
 		{
 			lEditIndex = lInputText.length();
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_UP, ConsolePrompt::CON_KEY_UP) ||
-			c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DOWN, ConsolePrompt::CON_KEY_DOWN))
+		else if (c == lKeyUp || c == lKeyDown)
 		{
 			// Erase current text.
 			mConsolePrompt->Backspace(lEditIndex);
 			mConsolePrompt->EraseText(lInputText.length());
 			int lDesiredHistoryIndex = mConsoleCommandManager->GetCurrentHistoryIndex();
-			if (c == ConsolePrompt::CON_KEY_UP)
+			if (c == lKeyUp)
 			{
 				// History->previous.
 				--lDesiredHistoryIndex;
 			}
-			else if (c == ConsolePrompt::CON_KEY_DOWN)
+			else if (c == lKeyDown)
 			{
 				// History->next.
 				++lDesiredHistoryIndex;
@@ -403,32 +443,32 @@ void ConsoleManager::ConsoleThreadEntry()
 			lInputText = mConsoleCommandManager->GetHistory(lDesiredHistoryIndex);
 			lEditIndex = lInputText.length();
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_LEFT, ConsolePrompt::CON_KEY_LEFT))
+		else if (c == lKeyLeft)
 		{
 			if (lEditIndex > 0)
 			{
 				--lEditIndex;
 			}
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_RIGHT, ConsolePrompt::CON_KEY_RIGHT))
+		else if (c == lKeyRight)
 		{
 			if (lEditIndex < lInputText.length())
 			{
 				++lEditIndex;
 			}
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE))
+		else if (c == lKeyEsc)
 		{
 			mConsolePrompt->Backspace(lEditIndex);
 			mConsolePrompt->EraseText(lInputText.length());
 			lInputText = _T("");
 			lEditIndex = 0;
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP))
+		else if (c == lKeyPgUp)
 		{
 			mConsoleLogger->StepPage(-1);
 		}
-		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN))
+		else if (c == lKeyPgDn)
 		{
 			mConsoleLogger->StepPage(+1);
 		}

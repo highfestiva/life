@@ -58,7 +58,6 @@ GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 {
 	switch (pGeometry->GetPrimitiveType())
 	{
-		default:
 		case TBC::GeometryBase::TRIANGLES:	return (GL_TRIANGLES);
 		case TBC::GeometryBase::TRIANGLE_STRIP:	return (GL_TRIANGLE_STRIP);
 		case TBC::GeometryBase::LINES:		return (GL_LINES);
