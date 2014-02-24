@@ -64,7 +64,9 @@ class GroupReader(DefaultMAReader):
 				     "cameraView", "directionalLight", "brush", \
 				     "createUVSet", "animCurveTU", "animCurveTA", "bump2d",
 				     "nurbsSurface", "nurbsTessellate", "makeNurbPlane", \
-				     "hyperGraphInfo", "hyperView", "hyperLayout"]
+				     "hyperGraphInfo", "hyperView", "hyperLayout", \
+				     "mentalrayItemsList", "mentalrayGlobals", \
+				     "mentalrayOptions", "mentalrayFramebuffer"]
 		self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp", "animCurveTL", \
 		                     "polyAutoProj", "polyPlane"]
 		self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \

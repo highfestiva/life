@@ -73,7 +73,7 @@ namespace Fire
 
 #define BG_COLOR			Color(110, 110, 110, 160)
 const float hp = 768/1024.0f;
-const int gLevels[] = {0, 1, 2, 3, 5, 8};
+const int gLevels[] = {0, 1, 2, 3, 4, 5, 8};
 
 
 
@@ -288,10 +288,8 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	if (!GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) == 1)
 	{
 		// User aiming above ground. Find vehicle closest to that position, and adjust target range thereafter.
-		const float lDefaultDistance = 350.0f;
-		lTargetPosition = mShootDirection * lDefaultDistance;
-		float lClosestDistance2 = lDefaultDistance*lDefaultDistance;
-		Vector3DF lClosestPosition(0,lDefaultDistance,0);
+		float lDistance = 350.0;
+		float lClosestRayDistance2 = 150.0f * 150.0f;
 		Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
 		Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
 		for (; x != lObjectTable.end(); ++x)
@@ -303,18 +301,19 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 				continue;
 			}
 			const Vector3DF lVehiclePosition = lObject->GetPosition();
-			if (lVehiclePosition.y < 10.0f || Cure::Health::Get(lObject) <= 0)
+			if (lVehiclePosition.y < 30.0f || Cure::Health::Get(lObject) <= 0)
 			{
 				continue;
 			}
-			const float lDistance2 = lVehiclePosition.GetDistanceSquared(lTargetPosition);
-			if (lDistance2 < lClosestDistance2)
+			const Vector3DF lRayRelativePosition = lVehiclePosition.ProjectOntoPlane(mShootDirection);
+			const float lDistance2 = lRayRelativePosition.GetLengthSquared();
+			if (lDistance2 < lClosestRayDistance2)
 			{
-				lClosestPosition = lVehiclePosition;
-				lClosestDistance2 = lDistance2;
+				lClosestRayDistance2 = lDistance2;
+				lDistance = lVehiclePosition * mShootDirection;
 			}
 		}
-		lTargetPosition = mShootDirection * lClosestPosition.GetLength();
+		lTargetPosition = mShootDirection * lDistance;
 	}
 	else
 	{
@@ -337,15 +336,17 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	float lGravityEffect;
 	float lAimAbove;
 	float lSomeRocketLength;
+	float lUpDownEffect;
 	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 200.0);
 	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 220.0);
 	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.24);
 	CURE_RTVAR_TRYGET(lAimAbove, =(float), GetVariableScope(), "shot.aimabove", 2.0);
 	CURE_RTVAR_TRYGET(lSomeRocketLength, =(float), GetVariableScope(), "shot.rocketlength", 9.0);
+	CURE_RTVAR_TRYGET(lUpDownEffect, =(float), GetVariableScope(), "shot.updowneffect", 0.25);
 	Vector3DF lDistance = lTargetPosition - t.GetPosition();
 	lAimAbove = Math::Lerp(0.0f, lAimAbove, std::min(100.0f, lDistance.GetLength())/100.0f);
 	lDistance.z += lAimAbove;
-	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, GetPhysicsManager()->GetGravity()*lGravityEffect);
+	const Vector3DF lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, GetPhysicsManager()->GetGravity()*lGravityEffect, lUpDownEffect);
 	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y);
 	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x);
 	t.mPosition.x -= lSomeRocketLength*sin(lShootDirectionEulerAngles.x);

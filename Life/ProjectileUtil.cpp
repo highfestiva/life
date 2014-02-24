@@ -166,7 +166,7 @@ float ProjectileUtil::GetShotSounds(Cure::ContextManager* pManager, const struti
 
 
 
-Vector3DF ProjectileUtil::CalculateInitialProjectileDirection(const Vector3DF& pDistance, float pAcceleration, float pTerminalSpeed, const Vector3DF& pGravity)
+Vector3DF ProjectileUtil::CalculateInitialProjectileDirection(const Vector3DF& pDistance, float pAcceleration, float pTerminalSpeed, const Vector3DF& pGravity, float pAccelerationGravityRecip)
 {
 	// 1. How long time, t, will it take the missile to accelerate to the endpoint?
 	// 2. Given t, how much (d) will the missile fall during it's travel (excluding g for optimization)?
@@ -185,9 +185,9 @@ Vector3DF ProjectileUtil::CalculateInitialProjectileDirection(const Vector3DF& p
 		d = t*t*0.5f;
 	}
 	// 3
-	//const Vector3DF g = pGravity.GetNormalized();
-	//const float f = 1 + pDistance*g/l;
-	//d *= f;
+	const Vector3DF g = pGravity.GetNormalized(pAccelerationGravityRecip);
+	const float f = 1 + pDistance*g/l;
+	d *= f;
 	// 4
 	const Vector3DF lTarget = pDistance - d*pGravity;
 	const float xy = ::sqrt(lTarget.x*lTarget.x + lTarget.y*lTarget.y);
