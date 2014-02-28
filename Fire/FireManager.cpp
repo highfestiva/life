@@ -337,12 +337,12 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	float lAimAbove;
 	float lSomeRocketLength;
 	float lUpDownEffect;
-	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 200.0);
-	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 220.0);
-	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.24);
-	CURE_RTVAR_TRYGET(lAimAbove, =(float), GetVariableScope(), "shot.aimabove", 2.0);
+	CURE_RTVAR_TRYGET(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 150.0);
+	CURE_RTVAR_TRYGET(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 300.0);
+	CURE_RTVAR_TRYGET(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.15);
+	CURE_RTVAR_TRYGET(lAimAbove, =(float), GetVariableScope(), "shot.aimabove", 1.5);
 	CURE_RTVAR_TRYGET(lSomeRocketLength, =(float), GetVariableScope(), "shot.rocketlength", 9.0);
-	CURE_RTVAR_TRYGET(lUpDownEffect, =(float), GetVariableScope(), "shot.updowneffect", 0.25);
+	CURE_RTVAR_TRYGET(lUpDownEffect, =(float), GetVariableScope(), "shot.updowneffect", -0.1);
 	Vector3DF lDistance = lTargetPosition - t.GetPosition();
 	lAimAbove = Math::Lerp(0.0f, lAimAbove, std::min(100.0f, lDistance.GetLength())/100.0f);
 	lDistance.z += lAimAbove;
