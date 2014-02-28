@@ -585,10 +585,10 @@ Vector3DF PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManage
 void PhysicsEngine::UprightStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
 	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
 {
-	const int lBone = pStructure->GetIndex(pGeometry);
+	const int lRootBone = 0;	// Use root bone for fetching original transform, or "up" will be off.
 	const QuaternionF lOrientation =
 		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
-		pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
+		pStructure->GetOriginalBoneTransformation(lRootBone).GetOrientation().GetInverse();
 	// 1st: angular velocity damping (skipping z).
 	Vector3DF lAngular;
 	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lAngular);

@@ -101,14 +101,13 @@ void AutoPathDriver::GetClosestPathDistance(const Vector3DF& pPosition, Vector3D
 		mPath->StartInterpolation(0);
 	}
 
-	const float lCurrentTime = mPath->GetCurrentInterpolationTime();
-
 	float lNearestDistance;
 	const float lSearchStepLength = 0.06f;
 	const int lSearchSteps = 3;
 	mPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, pClosestPoint, lSearchSteps);
 
 	{
+		float lCurrentTime = mPath->GetCurrentInterpolationTime();
 		float lDeltaTime = pWantedDistance * mPath->GetDistanceNormal();
 		if (lCurrentTime+lDeltaTime < 0)
 		{

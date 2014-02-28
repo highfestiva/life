@@ -71,9 +71,9 @@ namespace Fire
 
 
 
-#define BG_COLOR			Color(110, 110, 110, 160)
+#define BG_COLOR Color(110, 110, 110, 160)
 const float hp = 768/1024.0f;
-const int gLevels[] = {0, 1, 2, 3, 4, 5, 8};
+const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 
 
 
@@ -110,7 +110,6 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 9.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 }
 
 FireManager::~FireManager()
@@ -138,6 +137,7 @@ void FireManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
 
 	Parent::LoadSettings();
+	CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
