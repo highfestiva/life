@@ -56,7 +56,7 @@ protected:
 	LogListener* mConsoleLogger;
 
 private:
-	void TickSleep() const;
+	void TickSleep(double pMainLoopTime) const;
 	void HandleZombieMode();
 
 	static str mBaseName;

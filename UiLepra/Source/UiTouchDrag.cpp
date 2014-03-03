@@ -117,6 +117,15 @@ void DragManager::UpdateTouchsticks(InputManager* pInputManager) const
 	}
 }
 
+void DragManager::SetDragsPress(bool pIsPress)
+{
+	DragList::iterator i = mDragList.begin();
+	for (; i != mDragList.end(); ++i)
+	{
+		i->mIsPress = pIsPress;
+	}
+}
+
 void DragManager::DropReleasedDrags()
 {
 	DragList::iterator i = mDragList.begin();

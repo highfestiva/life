@@ -151,7 +151,6 @@ void Fire::Init()
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_SOUND_MUSICVOLUME, 0.6);
 
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_NETPHYS_ALLOWFPSDEGRADATION, true);
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.

@@ -175,8 +175,16 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 			break;
 			case COMMAND_QUIT:
 			{
-				mLog.AInfo("Terminating due to user command.");
-				SystemManager::AddQuitRequest(+1);
+				if (!pParameterVector.empty() && pParameterVector[0] == _T("!"))
+				{
+					mLog.AWarning("Hard process termination due to user command!");
+					SystemManager::ExitProcess(0);
+				}
+				else
+				{
+					mLog.AInfo("Terminating due to user command.");
+					SystemManager::AddQuitRequest(+1);
+				}
 			}
 			break;
 			case COMMAND_BYE:

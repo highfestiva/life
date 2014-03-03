@@ -58,6 +58,7 @@ public:
 	void UpdateDragByMouse(const InputManager* pInputManager);
 	void UpdateMouseByDrag(InputManager* pInputManager);
 	void UpdateTouchsticks(InputManager* pInputManager) const;
+	void SetDragsPress(bool pIsPress);
 	void DropReleasedDrags();
 	DragList& GetDragList();
 

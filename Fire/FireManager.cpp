@@ -73,7 +73,7 @@ namespace Fire
 
 #define BG_COLOR Color(110, 110, 110, 160)
 const float hp = 768/1024.0f;
-const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 
 
@@ -218,6 +218,11 @@ bool FireManager::Render()
 	mRenderArea = lRenderArea;
 	bool lOk = Parent::Render();
 	mRenderArea = lFullRenderArea;
+
+	// If we're 1024x768 (iPad), we don't need to clear.
+	const bool lNeedClear = (w <= mRenderArea.GetWidth()-1);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, lNeedClear);
+
 	return lOk;
 }
 
@@ -388,7 +393,7 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	Vector3DF lSpritesPosition(pPosition*0.95f-pPosition.GetNormalized(2.0f));	// We just move it closer to make it less likely to be cut off by ground.
+	Vector3DF lSpritesPosition(pPosition*0.98f-pPosition.GetNormalized(2.0f));	// We just move it closer to make it less likely to be cut off by ground.
 	lParticleRenderer->CreateExplosion(lSpritesPosition, lCubicStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
 
 	// Slowmo check.
@@ -629,15 +634,18 @@ void FireManager::UpdateCameraPosition(bool pUpdateMicPosition)
 
 void FireManager::HandleShooting()
 {
-	float lFOV;
-	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
-	UpdateFrustum(lFOV);
+	if (mUiManager->CanRender())
+	{
+		float lFOV;
+		CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
+		UpdateFrustum(lFOV);
+	}
 
 	typedef UiLepra::Touch::DragManager::DragList DragList;
 	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
 	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
-		if ((x->mFlags&1) == 0 && !mMenu->GetDialog())
+		if (x->mIsPress && (x->mFlags&1) == 0 && !mMenu->GetDialog())
 		{
 			x->mFlags |= 1;
 			mShootDirection = mUiManager->GetRenderer()->ScreenCoordToVector(x->mLast);

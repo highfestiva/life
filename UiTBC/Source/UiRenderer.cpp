@@ -117,7 +117,9 @@ Renderer::Renderer(Canvas* pScreen):
 	mShadowHint(Renderer::SH_VOLUMES_ONLY),
 	mShadowUpdateIntensity(1.0f),
 	mShadowUpdateFrameDelay(100),
-	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight())
+	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight()),
+	mShadowVolumesCreateMax(1),
+	mShadowVolumeCreateCount(0)
 {
 }
 
@@ -1276,6 +1278,9 @@ void Renderer::UpdateShadowMaps()
 	{
 		return;
 	}
+
+	mShadowVolumeCreateCount = 0;	// Reset every frame.
+
 	LightData* lLightData = GetLightData(GetClosestLight(0));
 	unsigned lTrianglesCalculatedFor = 0;
 	bool lDidStatic = false;
@@ -1319,6 +1324,14 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry, LightData* pCl
 			RemoveShadowVolumes(lGeometry);
 		}
 		return 0;
+	}
+
+	if (lGeometry->mShadowVolume[0] == 0)
+	{
+		if (++mShadowVolumeCreateCount > mShadowVolumesCreateMax)
+		{
+			return 0;	// Better luck next frame.
+		}
 	}
 
 	SortLights(pGeometry->GetTransformation().GetPosition());

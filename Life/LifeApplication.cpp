@@ -180,6 +180,7 @@ bool Application::Tick()
 	HiResTimer::StepCounterShadow();
 
 	LEPRA_DO_MEASURE_SCOPE(AppTick);
+	HiResTimer lLoopTime(false);
 
 	bool lDebug;
 	CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
@@ -198,7 +199,7 @@ bool Application::Tick()
 	if (lOk)
 	{
 		LEPRA_DO_MEASURE_SCOPE(AppSleep);
-		TickSleep();
+		TickSleep(lLoopTime.QueryTimeDiff());
 	}
 	if (lOk)
 	{
@@ -248,7 +249,7 @@ LogListener* Application::CreateConsoleLogListener() const
 
 
 
-void Application::TickSleep() const
+void Application::TickSleep(double pMainLoopTime) const
 {
 	float lPowerSaveFactor;
 	CURE_RTVAR_GET(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
@@ -273,7 +274,7 @@ void Application::TickSleep() const
 		int lFps;
 		CURE_RTVAR_GET(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
-		const double lSleepTime = lWantedFrameTime - mGameTicker->GetTickTimeReduction();
+		const double lSleepTime = lWantedFrameTime - pMainLoopTime - mGameTicker->GetTickTimeReduction();
 		const double MAXIMUM_SLEEP_TIME = 0.01;
 		if (lSleepTime >= 0)
 		{
@@ -295,6 +296,10 @@ void Application::TickSleep() const
 					Thread::YieldCpu();	// For lousy computers that have very big sleep intervals.
 				}
 				lSleepTimeLeft = lSleepTime - lSleepTimer.QueryTimeDiff();
+			}
+			if (lSleepTimeLeft < -0.01)
+			{
+				mLog.Warningf(_T("Overslept %f s!"), lSleepTimeLeft);
 			}
 			//log_volatile(mLog.Debugf(_T("Done tick sleeping, %f s left in sleep loop (measured), %f s reduction, %f s measured."), lSleepTimeLeft, mGameTicker->GetTickTimeReduction(), lSleepTime));
 		}

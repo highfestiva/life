@@ -28,6 +28,7 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 	mMouseY(0),
 	mMousePrevX(0),
 	mMousePrevY(0),
+	mMouseButtonFlags(0),
 	mPainter(pPainter)
 {
 	Init(pImageDefinitionFile, pArchive);
@@ -259,10 +260,14 @@ void DesktopWindow::OnButton1(UiLepra::InputElement* pElement)
 		GetCursorPosition(lMouseX, lMouseY);
 		if (pElement->GetBooleanValue() == true)
 		{
-			OnLButtonDown(lMouseX, lMouseY);
+			if (OnLButtonDown(lMouseX, lMouseY))
+			{
+				mMouseButtonFlags |= CONSUMED_MOUSE_BUTTON1;
+			}
 		}
 		else
 		{
+			mMouseButtonFlags &= ~CONSUMED_MOUSE_BUTTON1;
 			DispatchMouseMove(lMouseX, lMouseY);
 			OnLButtonUp(lMouseX, lMouseY);
 		}
@@ -278,10 +283,14 @@ void DesktopWindow::OnButton2(UiLepra::InputElement* pElement)
 		GetCursorPosition(lMouseX, lMouseY);
 		if (pElement->GetBooleanValue() == true)
 		{
-			OnRButtonDown(lMouseX, lMouseY);
+			if (OnRButtonDown(lMouseX, lMouseY))
+			{
+				mMouseButtonFlags |= CONSUMED_MOUSE_BUTTON2;
+			}
 		}
 		else
 		{
+			mMouseButtonFlags &= ~CONSUMED_MOUSE_BUTTON2;
 			DispatchMouseMove(lMouseX, lMouseY);
 			OnRButtonUp(lMouseX, lMouseY);
 		}
@@ -297,10 +306,14 @@ void DesktopWindow::OnButton3(UiLepra::InputElement* pElement)
 		GetCursorPosition(lMouseX, lMouseY);
 		if (pElement->GetBooleanValue() == true)
 		{
-			OnMButtonDown(lMouseX, lMouseY);
+			if (OnMButtonDown(lMouseX, lMouseY))
+			{
+				mMouseButtonFlags |= CONSUMED_MOUSE_BUTTON3;
+			}
 		}
 		else
 		{
+			mMouseButtonFlags &= ~CONSUMED_MOUSE_BUTTON3;
 			DispatchMouseMove(lMouseX, lMouseY);
 			OnMButtonUp(lMouseX, lMouseY);
 		}
@@ -365,6 +378,11 @@ bool DesktopWindow::OnDoubleClick()
 		Parent::OnDoubleClick(lMouseX, lMouseY);
 	}
 	return (false);
+}
+
+DesktopWindow::MouseButtonFlags DesktopWindow::GetMouseButtonFlags() const
+{
+	return (MouseButtonFlags)mMouseButtonFlags;
 }
 
 void DesktopWindow::PostDeleteComponent(Component* pComponent, int /*pLayer*/)

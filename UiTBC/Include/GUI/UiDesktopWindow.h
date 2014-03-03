@@ -27,6 +27,14 @@ class DesktopWindow: public RectComponent
 {
 	typedef RectComponent Parent;
 public:
+	enum MouseButtonFlags
+	{
+		CONSUMED_MOUSE_BUTTON1 = 1<<0,
+		CONSUMED_MOUSE_BUTTON2 = 1<<1,
+		CONSUMED_MOUSE_BUTTON3 = 1<<2,
+		CONSUMED_MOUSE_BUTTON  = (CONSUMED_MOUSE_BUTTON1 | CONSUMED_MOUSE_BUTTON2 | CONSUMED_MOUSE_BUTTON3),
+	};
+
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		Layout* pLayout = 0,
@@ -88,6 +96,7 @@ public:
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnDoubleClick();
+	MouseButtonFlags GetMouseButtonFlags() const;
 
 	virtual void DoSetSize(int pWidth, int pHeight);
 
@@ -132,6 +141,7 @@ private:
 	int mMouseY;
 	int mMousePrevX;
 	int mMousePrevY;
+	int mMouseButtonFlags;
 
 	Painter* mPainter;
 

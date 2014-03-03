@@ -621,6 +621,9 @@ protected:
 	TransformationF mCameraTransformation;
 	QuaternionF mCameraOrientationInverse;
 
+	int mShadowVolumesCreateMax;
+	int mShadowVolumeCreateCount;
+
 	// Since distance sorting lights is implemented using ::qsort(),
 	// we need to store the following variables "globally".
 	static Renderer* smRenderer;

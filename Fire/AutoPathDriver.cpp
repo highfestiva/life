@@ -57,22 +57,35 @@ void AutoPathDriver::OnTick()
 	const Vector3DF lPosition = lVehicle->GetPosition();
 	Vector3DF lClosestPoint;
 	GetClosestPathDistance(lPosition, lClosestPoint, AIM_DISTANCE);
-	const Vector3DF lDirection(lClosestPoint - lPosition);
+	Vector3DF lDirection(lClosestPoint - lPosition);
+	if (mPath)
+	{
+		lDirection = lDirection.GetNormalized() + mPath->GetSlope();
+	}
 
-	const float lEnginePower = Math::Lerp(0.4f, 1.0f, lVehicle->mPanicLevel) * lVehicle->mLevelSpeed;
-	lVehicle->SetEnginePower(0, lEnginePower);
+	float lEnginePower = Math::Lerp(0.4f, 1.0f, lVehicle->mPanicLevel) * lVehicle->mLevelSpeed;
 	const Vector2DF lWantedDirection(lDirection.x, lDirection.y);
 	const Vector2DF lVehicleDirection(lVehicleDirection3d.x, lVehicleDirection3d.y);
 	const float lSteeringAngle = lWantedDirection.GetAngle(lVehicleDirection);
+	lEnginePower *= Math::Lerp(1.0f, 0.6f, std::min(1.0f, std::abs(lSteeringAngle)));
+	lVehicle->SetEnginePower(0, lEnginePower);
 	lVehicle->SetEnginePower(1, lSteeringAngle);
-	const float lBrakeLimit = Math::Lerp(10.0f, 50.0f, lVehicle->mPanicLevel);
+	const float lLowLimit = 10.0f;
+	const float lPanicLimit = 30.0f;
+	const float lBrakeLimit = Math::Lerp(lLowLimit, lPanicLimit, lVehicle->mPanicLevel);
 	const float lSpeed = lVehicle->GetVelocity().GetLength();
+	float lBrakePower = 0;
 	if (lSpeed > lBrakeLimit/2)
 	{
 		float lVelocityBrakeFactor = Math::Clamp(lSpeed, 0.0f, lBrakeLimit) / lBrakeLimit;
-		const float lBrakePower = std::max(0.0f, (std::abs(lSteeringAngle)-0.5f)*0.5f*lVelocityBrakeFactor);
-		lVehicle->SetEnginePower(2, lBrakePower);
+		lBrakePower += std::max(0.0f, (std::abs(lSteeringAngle)-0.5f)*0.5f*lVelocityBrakeFactor);
 	}
+	if (lSteeringAngle > PIF/6 && lSpeed > lLowLimit / 3)
+	{
+		float lVelocityBrakeFactor = Math::Clamp(lSpeed, 0.0f, lLowLimit/2) / (lLowLimit/2);
+		lBrakePower += lVelocityBrakeFactor;
+	}
+	lVehicle->SetEnginePower(2, lBrakePower);
 
 	if (lVehicle->GetVelocity().GetLengthSquared() < 1.0f)
 	{

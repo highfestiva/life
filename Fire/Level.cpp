@@ -42,6 +42,10 @@ void Level::OnLoaded()
 		Vector3DF lGravity(lGravityTag->mFloatValueList[0], lGravityTag->mFloatValueList[1], lGravityTag->mFloatValueList[2]);
 		mManager->GetGameManager()->GetPhysicsManager()->SetGravity(lGravity);
 	}
+	else
+	{
+		deb_assert(false);
+	}
 }
 
 Cure::ContextPath* Level::QueryPath()
