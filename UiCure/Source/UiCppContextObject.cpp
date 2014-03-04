@@ -669,7 +669,6 @@ bool CppContextObject::TryComplete()
 		return (false);
 	}
 
-	ActivateLerp();
 	return (true);
 }
 

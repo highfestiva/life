@@ -1144,6 +1144,11 @@ void ResourceManager::ThreadLoaderLoop()
 	while (!mLoaderThread.GetStopRequest())
 	{
 		LoadSingleResource();
+		// Smooth out loads, so all the heavy lifting won't end up in a single frame.
+		if (mRequestLoadList.GetCount() < 20)
+		{
+			Thread::Sleep(0.01);
+		}
 		mLoadSemaphore.Wait();
 	}
 }

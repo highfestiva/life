@@ -228,7 +228,7 @@ void GameTicker::PhysicsTick()
 void GameTicker::CreatePhysicsThread()
 {
 	// If we have more than one CPU, we run a separate physics thread.
-	if (!mPhysicsWorkerThread && SystemManager::GetCoreCount() > 1)	// TODO: check performance to see if we should check for logical or physical CPUs.
+	if (!mPhysicsWorkerThread && (SystemManager::GetPhysicalCpuCount() > 1 || SystemManager::GetCoreCount() > 1))
 	{
 		mPhysicsTickStartSemaphore = new Semaphore();
 		mPhysicsTickDoneSemaphore = new Semaphore();

@@ -71,9 +71,8 @@ ClientConsoleManager::~ClientConsoleManager()
 
 bool ClientConsoleManager::Start()
 {
-	bool lOk = Parent::Start();
 	mUiConsole->Open();
-	return (lOk);
+	return Parent::Start();
 }
 
 void ClientConsoleManager::Join()

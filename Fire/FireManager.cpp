@@ -73,7 +73,7 @@ namespace Fire
 
 #define BG_COLOR Color(110, 110, 110, 160)
 const float hp = 768/1024.0f;
-const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
 
 
@@ -838,6 +838,21 @@ void FireManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 {
 	(void)pBody2Id;
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
+
+	BaseMachine* lMachine1 = dynamic_cast<BaseMachine*>(pObject1);
+	BaseMachine* lMachine2 = dynamic_cast<BaseMachine*>(pObject2);
+	if (lMachine1 && lMachine2)
+	{
+		const Vector3DF v = (lMachine2->GetPosition() - lMachine1->GetPosition());
+		if (lMachine1->GetForwardDirection()*v > 0.1f)
+		{
+			lMachine2->AddPanic(1.5f);	// 1 drives into 2.
+		}
+		if (lMachine2->GetForwardDirection()*(-v) > 0.1f)
+		{
+			lMachine1->AddPanic(1.5f);	// 2 drives into 1.
+		}
+	}
 }
 
 
