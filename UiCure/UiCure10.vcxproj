@@ -255,6 +255,7 @@
     <ClCompile Include="Source\UiCppContextObject.cpp" />
     <ClCompile Include="Source\UiCure.cpp" />
     <ClCompile Include="Source\UiDebugRenderer.cpp" />
+    <ClCompile Include="Source\UiDebugStick.cpp" />
     <ClCompile Include="Source\UiExhaustEmitter.cpp" />
     <ClCompile Include="Source\UiGameUiManager.cxx" />
     <ClCompile Include="Source\UiGravelEmitter.cpp" />
@@ -289,6 +290,7 @@
     <ClInclude Include="Include\UiCppContextObject.h" />
     <ClInclude Include="Include\UiCure.h" />
     <ClInclude Include="Include\UiDebugRenderer.h" />
+    <ClInclude Include="Include\UiDebugStick.h" />
     <ClInclude Include="Include\UiExhaustEmitter.h" />
     <ClInclude Include="Include\UiGameUiManager.h" />
     <ClInclude Include="Include\UiGravelEmitter.h" />

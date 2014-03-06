@@ -74,6 +74,9 @@
     <ClCompile Include="Source\UiGameUiManager.mm">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\UiDebugStick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\UiResourceManager.inl">
@@ -142,6 +145,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\UiBurnEmitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\UiDebugStick.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

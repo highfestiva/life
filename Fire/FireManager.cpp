@@ -38,11 +38,13 @@
 #include "../UiCure/Include/UiBurnEmitter.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiDebugRenderer.h"
+#include "../UiCure/Include/UiDebugStick.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiSoundReleaser.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
+//#include "../UiLepra/Include/UiOpenGLExtensions.h"
 #include "../UiTBC/Include/GUI/UiCheckButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFixedLayouter.h"
@@ -146,6 +148,7 @@ void FireManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
 #endif // Debug
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_EMULATETOUCH, true);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl11"));
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
@@ -233,7 +236,8 @@ bool FireManager::Paint()
 		return false;
 	}
 
-	// TODO: draw targeting crosshairs.
+	UiCure::DebugStick::Init(mUiManager);
+	UiCure::DebugStick::Draw();
 
 	return true;
 }
@@ -485,6 +489,7 @@ str FireManager::StepLevel(int pCount)
 	{
 		ScopeLock lLock(GetTickLock());
 		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mLevel->SetPostLoadMaterialDelegate(UiCure::CppContextObject::PostLoadMaterialDelegate(this, &FireManager::OnLoadLevelMesh));
 		mLevel->StartLoading();
 	}
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
@@ -534,6 +539,7 @@ bool FireManager::InitializeUniverse()
 	{
 		ScopeLock lLock(GetTickLock());
 		mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mLevel->SetPostLoadMaterialDelegate(UiCure::CppContextObject::PostLoadMaterialDelegate(this, &FireManager::OnLoadLevelMesh));
 		mLevel->StartLoading();
 	}
 	mSunlight = new Sunlight(mUiManager);
@@ -780,13 +786,36 @@ void FireManager::OnLevelLoadCompleted()
 	UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
 	float lFOV;
 	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
+	float ts;
+	CURE_RTVAR_TRYGET(ts, =(float), GetVariableScope(), "texture.s", 1.0);
+	float tt;
+	CURE_RTVAR_TRYGET(tt, =(float), GetVariableScope(), "texture.t", 1.0);
 	//float _;
 	//lRenderer->GetViewFrustum(lFOV, _, _);
 	static float lFormerDistance = 0;
 	static float lFormerMapScale = 0;
 	static float lFormerFoV = 0;
 	static unsigned lFormerLevelId = 0;
-	if (lFormerDistance == lDistance && lFormerMapScale == lMapScale && lFormerFoV == lFOV && lFormerLevelId == mLevel->GetInstanceId())
+	static float lFormerTS = 1;
+	static float lFormerTT = 1;
+	static float lFormerTS1 = 1;
+	static float lFormerTT1 = 1;
+	UiCure::DebugStick::Init(mUiManager);
+	UiCure::DebugStick lStickUV[4];
+	UiCure::DebugStick lStickST[4];
+	lStickST[0].Place(1, 0);
+	lStickST[0].SetDefaultValue(0.5f, 0.35f);
+	lStickST[1].Place(8, 0);
+	lStickST[1].SetDefaultValue(0, 0.35f);
+	lStickST[2].Place(1, 4);
+	lStickST[3].Place(8, 4);
+	lStickUV[0].Place(3, 0);
+	lStickUV[1].Place(6, 0);
+	lStickUV[1].SetDefaultValue(0.5f, 0);
+	lStickUV[2].Place(3, 4);
+	lStickUV[3].Place(6, 4);
+	if (lFormerDistance == lDistance && lFormerMapScale == lMapScale && lFormerFoV == lFOV && lFormerLevelId == mLevel->GetInstanceId() &&
+		lFormerTS == ts && lFormerTT == tt && !UiCure::DebugStick::IsUpdated())
 	{
 		return;
 	}
@@ -795,6 +824,8 @@ void FireManager::OnLevelLoadCompleted()
 	lFormerMapScale = lMapScale;
 	lFormerFoV = lFOV;
 	lFormerLevelId = mLevel->GetInstanceId();
+	lFormerTS = ts;
+	lFormerTT = tt;
 	const float wf = +1.0f / mUiManager->GetDisplayManager()->GetWidth();
 	const float hf = hp / mUiManager->GetDisplayManager()->GetHeight();
 	const size_t lMeshCount = ((UiTbc::ChunkyClass*)mLevel->GetClass())->GetMeshCount();
@@ -805,9 +836,11 @@ void FireManager::OnLevelLoadCompleted()
 		const Vector3DF lOffset(0,lDistance,0);
 		if (lMesh->GetUVSetCount())
 		{
+			UiTbc::TriangleBasedGeometry* lParent = (UiTbc::TriangleBasedGeometry*)lMesh->GetParentGeometry();
 			const float* xyz = lMesh->GetVertexData();
-			float* uv = lMesh->GetUVData(0);
+			//float* uv = lMesh->GetUVData(0);
 			const unsigned lVertexCount = lMesh->GetVertexCount();
+			float* uvst = new float[lVertexCount*4];
 			for (unsigned z = 0; z < lVertexCount; ++z)
 			{
 				Vector3DF lVector(&xyz[z*3]);
@@ -820,16 +853,175 @@ void FireManager::OnLevelLoadCompleted()
 					x = Math::Lerp(u, x, std::max(lVector.y, 0.0f)/120);
 				}
 				float y = Math::Clamp(c.y * hf, -1.0f, hp);
-				uv[z*2+0] = x;
-				uv[z*2+1] = y;
+				uvst[z*4+0] = x;
+				uvst[z*4+1] = y;
+				uvst[z*4+2] = 0;
+				uvst[z*4+3] = 0;
+				//uv[z*2+0] = x;
+				//uv[z*2+1] = y;
 			}
+			// Fix perspective correction in UVST, by walking edges.
+			const vtx_idx_t* lIndices = lMesh->GetIndexData();
+			std::vector<int> lVertexIndices;
+			lMesh->GenerateEdgeData();
+			const unsigned lEdgeCount = lMesh->GetEdgeCount();
+			TBC::GeometryBase::Edge* lEdges = lMesh->GetEdgeData();
+			for (unsigned z = 0; z < lEdgeCount; ++z)
+			{
+				// Pick out the two two opposing vertices.
+				const int lTriangleIndex = lEdges[z].mTriangle[0];
+				lVertexIndices.clear();
+				lVertexIndices.push_back(lIndices[lTriangleIndex*3+0]);
+				lVertexIndices.push_back(lIndices[lTriangleIndex*3+1]);
+				lVertexIndices.push_back(lIndices[lTriangleIndex*3+2]);
+				int v0 = lEdges[z].mVertex[0];
+				int v1 = lEdges[z].mVertex[1];
+				OrderEdgeVertices(lVertexIndices, v0, v1);
+				const Vector2DF p1(uvst[v0*4+0], uvst[v0*4+1]);
+				const Vector2DF p2(uvst[v1*4+0], uvst[v1*4+1]);
+				if (lEdges[z].mTriangleCount != 2)
+				{
+					// Just assume parallelogram on edge triangle.
+					std::remove(lVertexIndices.begin(), lVertexIndices.end(), v0);
+					std::remove(lVertexIndices.begin(), lVertexIndices.end(), v1);
+					const int v2 = lVertexIndices[0];
+					const Vector2DF p3(uvst[v2*4+0], uvst[v2*4+1]);
+					uvst[v0*4+3] = (p2-p3).GetLength()*tt;
+					uvst[v0*4+2] = 1-(p1-p3).GetLength()*ts;
+					uvst[v1*4+3] = (p2-p3).GetLength()*tt;
+					uvst[v1*4+2] = 1-(p1-p3).GetLength()*ts;
+					uvst[v2*4+3] = (p2-p3).GetLength()*tt;
+					uvst[v2*4+2] = 1-(p1-p3).GetLength()*ts;
+					continue;
+				}
+				// Use opposing triangle's opposing width, extrapolating the trapezoid.
+				const int lOpposingTriangleIndex = lEdges[z].mTriangle[1];
+				lVertexIndices.push_back(lIndices[lOpposingTriangleIndex*3+0]);
+				lVertexIndices.push_back(lIndices[lOpposingTriangleIndex*3+1]);
+				lVertexIndices.push_back(lIndices[lOpposingTriangleIndex*3+2]);
+				std::remove(lVertexIndices.begin(), lVertexIndices.end(), v0);
+				std::remove(lVertexIndices.begin(), lVertexIndices.end(), v1);
+				const int v2 = lVertexIndices[0];
+				const int v3 = lVertexIndices[1];
+				const Vector2DF p3(uvst[v2*4+0], uvst[v2*4+1]);
+				const Vector2DF p4(uvst[v3*4+0], uvst[v3*4+1]);
+				uvst[v0*4+3] = (p4-p1).GetLength()*tt;
+				uvst[v0*4+2] = 1-(p1-p3).GetLength()*ts;
+				uvst[v1*4+3] = (p2-p3).GetLength()*tt;
+				uvst[v1*4+2] = 1-(p4-p2).GetLength()*ts;
+				uvst[v2*4+3] = (p2-p3).GetLength()*tt;
+				uvst[v2*4+2] = 1-(p1-p3).GetLength()*ts;
+				uvst[v3*4+3] = (p4-p1).GetLength()*tt;
+				uvst[v3*4+2] = 1-(p4-p2).GetLength()*ts;
+				//uvst[v1*4+2] = p4.x;
+				//uvst[v1*4+3] = p4.y;
+				//uvst[v0*4+2] = p3.x;
+				//uvst[v0*4+3] = p3.y;
+				//UpdateUvTrapezoid(p1-p3, p2-p3, p4-p1, uvst[v1*4+3]);
+				//UpdateUvTrapezoid(p1-p4, p2-p4, p3-p2, uvst[v0*4+3]);
+			}
+			/*for (unsigned z = 0; z < lVertexCount; ++z)
+			{
+				deb_assert(uvst[z*4+2] && uvst[z*4+3]);
+				//uvst[z*4+2] = uvst[z*4+0];
+				//uvst[z*4+3] = uvst[z*4+1];
+			}*/
+
+			//if (x == 1)
+			{
+				for (int z = 0; z < 4; ++z)
+				{
+					uvst[z*4+0] = lStickUV[z].mValue.x*2;
+					uvst[z*4+1] = lStickUV[z].mValue.y*2;
+					uvst[z*4+2] = lStickST[z].mValue.x*2;
+					uvst[z*4+3] = lStickST[z].mValue.y*2;
+				}
+				if (x == 1)
+				{
+					mLog.Infof(_T("Mesh %s's UVSTs:"), lParent->mName.c_str());
+					for (unsigned z = 0; z < lVertexCount; ++z)
+					{
+						mLog.Infof(_T("%f\t%f\t%f\t%f"), uvst[z*4+0], uvst[z*4+1], uvst[z*4+2], uvst[z*4+3]);
+					}
+
+					vtx_idx_t* lIndices = lParent->GetIndexData();
+					std::swap(lIndices[3], lIndices[4]);
+					std::swap(lIndices[3], lIndices[5]);
+					lParent->SetIndexDataChanged(true);
+					float* lVertices = lParent->GetVertexData();
+					lVertices[0] = 0;
+					lVertices[8] = -50;
+					lParent->SetVertexDataChanged(true);
+				}
+			}
+			lParent->PopUVSet();
+			lParent->AddUVSet(uvst);
+			lParent->SetUVDataChanged(true);
+			lMesh->SetUVDataChanged(true);
 
 			lMesh->SetPreRenderCallback(TBC::GeometryBase::PreRenderCallback(this, &FireManager::DisableAmbient));
 			lMesh->SetPostRenderCallback(TBC::GeometryBase::PostRenderCallback(this, &FireManager::EnableAmbient));
 
-			mUiManager->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)mLevel->GetMeshResource(x)->GetConstResource())->GetParent()->GetData(), false);
+			mUiManager->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)mLevel->GetMeshResource(x)->GetConstResource())->GetParent()->GetData(), true);
+
+			delete[] uvst;
 		}
 	}
+}
+
+void FireManager::OrderEdgeVertices(const std::vector<int>& pVertexIndices, int& v0, int& v1)
+{
+	int vi0 = -1;	// Optimization: assuming 2 if not found saves us one loop.
+	int vi1 = -1;	// Optimization: assuming 2 if not found saves us one loop.
+	for (int x = 0; x < 3; ++x)	// Optimization: defaulting to 2 if not found saves us one loop.
+	{
+		if (pVertexIndices[x] == v0)
+		{
+			vi0 = x;
+		}
+		if (pVertexIndices[x] == v1)
+		{
+			vi1 = x;
+		}
+	}
+	deb_assert(vi0 >= 0 && vi0 <= 2);
+	deb_assert(vi1 >= 0 && vi1 <= 2);
+	const int d = vi0-vi1;
+	deb_assert(d);
+	if (std::abs(d) == 1)	// Were they found sequentially?
+	{
+		if (d > 0)
+		{
+			std::swap(v0, v1);
+		}
+	}
+	else	// Nope, separated by external vertex. Meaning that operator has to be reversed.
+	{
+		if (d < 0)
+		{
+			std::swap(v0, v1);
+		}
+	}
+}
+
+void FireManager::UpdateUvTrapezoid(const Vector2DF& v1, const Vector2DF& v2, const Vector2DF& v3, float& t)
+{
+	(void)v2;
+	(void)v3;
+	t = v1.GetLength();
+	/*const float l = std::abs((v2  / v2.GetLength()) * v3);
+	if (l < 1e-5f)
+	{
+		return;	// No update as it is impossible to make trapezoid from concave shape.
+	}
+	const Vector2DF v = (v2.GetLength()/l)*v3 - v2 + v1;
+	const float T = v.GetLength();
+	t = t? (t+T)/2 : T;	// If already set use average, otherwise just set.*/
+}
+
+void FireManager::OnLoadLevelMesh(UiCure::UserGeometryReferenceResource* pMesh)
+{
+	((UiCure::GeometryReferenceResource*)pMesh->GetConstResource())->GetParent()->GetRamData()->SetUVCountPerVertex(4);
 }
 
 void FireManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -955,6 +1147,7 @@ bool FireManager::DisableAmbient()
 		lRenderer->SetAmbientLight(1.0f, 1.0f, 1.0f);
 		lRenderer->EnableAllLights(false);
 	}
+	//glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	return true;
 }
 
@@ -966,6 +1159,7 @@ void FireManager::EnableAmbient()
 		lRenderer->EnableAllLights(true);
 		lRenderer->SetAmbientLight(mStoreAmbient.x, mStoreAmbient.y, mStoreAmbient.z);
 	}
+	//glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 }
 
 

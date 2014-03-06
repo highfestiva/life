@@ -50,6 +50,7 @@ public:
 		MODE_RELATIVE_CENTER = 0,
 		MODE_RELATIVE_START,
 		MODE_RELATIVE_LAST,
+		MODE_RELATIVE_CENTER_NOSPRING,	// Doesn't go back to center when releasing.
 		MODE_COUNT
 	};
 
@@ -67,6 +68,7 @@ public:
 	void ResetTap();
 	void SetTap(const PixelCoord& pCoord, bool pIsPress);
 	void GetValue(float& x, float& y, bool& pIsPressing);
+	void SetValue(float x, float y);
 	void SetValueScale(float pMinX, float pMaxX, float pMinY, float pMaxY);
 
 private:

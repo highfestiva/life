@@ -469,7 +469,16 @@ void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID, int pMipMapLevelCo
 	GLint lTextureParamMin = GL_NEAREST;
 	GLint lTextureParamMag = GL_NEAREST;
 
-	if (pMipMapLevelCount <= 1 || !((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled())
+	if(((OpenGLRenderer*)GetRenderer())->GetBilinearFilteringEnabled() == true)
+	{
+		if (((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
+			lTextureParamMin = GL_LINEAR_MIPMAP_NEAREST;
+		else
+			lTextureParamMin = GL_LINEAR;
+
+		lTextureParamMag = GL_LINEAR;
+	}
+	else if (pMipMapLevelCount <= 1 || !((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled())
 	{
 		// Just use plain vanilla.
 	}
@@ -477,15 +486,6 @@ void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID, int pMipMapLevelCo
 	{
 		// The trilinear setting overrides the other ones.
 		lTextureParamMin = GL_LINEAR_MIPMAP_LINEAR;
-		lTextureParamMag = GL_LINEAR;
-	}
-	else if(((OpenGLRenderer*)GetRenderer())->GetBilinearFilteringEnabled() == true)
-	{
-		if (((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
-			lTextureParamMin = GL_LINEAR_MIPMAP_NEAREST;
-		else
-			lTextureParamMin = GL_LINEAR;
-
 		lTextureParamMag = GL_LINEAR;
 	}
 	else if(((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)

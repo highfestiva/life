@@ -99,8 +99,9 @@ void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
 	}
 }
 
-void DragManager::UpdateTouchsticks(InputManager* pInputManager) const
+bool DragManager::UpdateTouchsticks(InputManager* pInputManager) const
 {
+	bool lDidUseStick = false;
 	DragList::const_iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
@@ -113,8 +114,10 @@ void DragManager::UpdateTouchsticks(InputManager* pInputManager) const
 		if (lTouchstick)
 		{
 			lTouchstick->SetTap(lDrag.mLast, lDrag.mIsPress);
+			lDidUseStick = true;
 		}
 	}
+	return lDidUseStick;
 }
 
 void DragManager::SetDragsPress(bool pIsPress)

@@ -208,7 +208,7 @@ void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 		((TouchstickInputElement*)mElementArray[1])->SetValueScaled(rx);
 		((TouchstickInputElement*)mElementArray[2])->SetValueScaled(ry);
 	}
-	else
+	else if (mMode != MODE_RELATIVE_CENTER_NOSPRING)
 	{
 		mElementArray[1]->SetValue(0.0f);
 		mElementArray[2]->SetValue(0.0f);
@@ -239,6 +239,30 @@ void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
 		y = -y;
 		std::swap(x, y);
 	}
+}
+
+void TouchstickInputDevice::SetValue(float x, float y)
+{
+	if (mAngle < 45)
+	{
+	}
+	else if (mAngle < 135)
+	{
+		x = -x;
+		std::swap(x, y);
+	}
+	else if (mAngle < 225)
+	{
+		x = -x;
+		y = -y;
+	}
+	else
+	{
+		y = -y;
+		std::swap(x, y);
+	}
+	((TouchstickInputElement*)mElementArray[1])->SetValueScaled(x);
+	((TouchstickInputElement*)mElementArray[2])->SetValueScaled(y);
 }
 
 void TouchstickInputDevice::SetValueScale(float pMinX, float pMaxX, float pMinY, float pMaxY)
