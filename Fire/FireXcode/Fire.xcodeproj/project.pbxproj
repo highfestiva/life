@@ -517,6 +517,7 @@
 		B1F594F3181EE8A100FCC9F0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F0181EE8A100FCC9F0 /* Default-568h@2x.png */; };
 		B1F594F4181EE8A100FCC9F0 /* Default-Landscape@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F1181EE8A100FCC9F0 /* Default-Landscape@2x.png */; };
 		B1F594F5181EE8A100FCC9F0 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F2181EE8A100FCC9F0 /* Default@2x.png */; };
+		B1F8678818C938E600F1DF9C /* UiDebugStick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F8678718C938E600F1DF9C /* UiDebugStick.cpp */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
 /* End PBXBuildFile section */
 
@@ -1212,6 +1213,7 @@
 		B1F594F0181EE8A100FCC9F0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Icons/Default-568h@2x.png"; sourceTree = "<group>"; };
 		B1F594F1181EE8A100FCC9F0 /* Default-Landscape@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape@2x.png"; path = "../Icons/Default-Landscape@2x.png"; sourceTree = "<group>"; };
 		B1F594F2181EE8A100FCC9F0 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Icons/Default@2x.png"; sourceTree = "<group>"; };
+		B1F8678718C938E600F1DF9C /* UiDebugStick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiDebugStick.cpp; path = ../../UiCure/Source/UiDebugStick.cpp; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1372,6 +1374,7 @@
 		B15F795413FC59E300E01A90 /* UiCure */ = {
 			isa = PBXGroup;
 			children = (
+				B1F8678718C938E600F1DF9C /* UiDebugStick.cpp */,
 				B16F032717808366000C31E0 /* UiBurnEmitter.cpp */,
 				B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */,
 				B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */,
@@ -2628,6 +2631,7 @@
 				B19A21B313A127EC0051A61C /* jcapistd.cpp in Sources */,
 				B19A21B413A127EC0051A61C /* jccoefct.cpp in Sources */,
 				B19A21B513A127EC0051A61C /* jccolor.cpp in Sources */,
+				B1F8678818C938E600F1DF9C /* UiDebugStick.cpp in Sources */,
 				B19A21B613A127EC0051A61C /* jcdctmgr.cpp in Sources */,
 				B19A21B713A127EC0051A61C /* jchuff.cpp in Sources */,
 				B19A21B813A127EC0051A61C /* jcinit.cpp in Sources */,
@@ -3008,8 +3012,9 @@
 				INFOPLIST_FILE = "Fire-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../Lepra\"",
-					"\"$(SRCROOT)/../../TBC\"",
+					"\\\"$(SRCROOT)/../../Lepra\\\"",
+					"\\\"$(SRCROOT)/../../TBC\\\"",
+					/Users/high_festiva/pd/UiCure,
 				);
 				PRODUCT_NAME = Fire;
 				PROVISIONING_PROFILE = "";
@@ -3049,8 +3054,9 @@
 				INFOPLIST_FILE = "Fire-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../Lepra\"",
-					"\"$(SRCROOT)/../../TBC\"",
+					"\\\"$(SRCROOT)/../../Lepra\\\"",
+					"\\\"$(SRCROOT)/../../TBC\\\"",
+					/Users/high_festiva/pd/UiCure,
 				);
 				PRODUCT_NAME = Fire;
 				PROVISIONING_PROFILE = "";

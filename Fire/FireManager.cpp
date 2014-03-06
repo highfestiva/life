@@ -148,7 +148,6 @@ void FireManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
 #endif // Debug
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_EMULATETOUCH, true);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl11"));
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
@@ -534,6 +533,7 @@ bool FireManager::InitializeUniverse()
 	const Vector3DF v;
 	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl11"));
 	str lStartLevel;
 	CURE_RTVAR_GET(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
 	{

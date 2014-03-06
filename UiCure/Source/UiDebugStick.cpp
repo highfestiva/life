@@ -4,7 +4,6 @@
 
 
 
-#pragma once
 #include "../../UiLepra/Include/UiTouchStick.h"
 #include "../../UiTbc/Include/UiPainter.h"
 #include "../Include/UiDebugStick.h"
@@ -41,7 +40,7 @@ void DebugStick::Draw()
 			{
 				mUiManager->GetPainter()->SetColor(WHITE);
 				PixelRect lRect = mTouchSticks[y][x]->GetArea();
-				mUiManager->GetPainter()->DrawRect(lRect, 1);
+				//mUiManager->GetPainter()->DrawRect(lRect, 1);
 				mUiManager->GetPainter()->SetColor(RED);
 				float tx;
 				float ty;
