@@ -4,6 +4,7 @@
 
 
 
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../UiLepra/Include/UiTouchStick.h"
 #include "../../UiTbc/Include/UiPainter.h"
 #include "../Include/UiDebugStick.h"
@@ -18,20 +19,39 @@ namespace UiCure
 
 
 
-void DebugStick::Init(GameUiManager* pInputManager)
+void DebugStick::Init(GameUiManager* pUiManager)
 {
 	if (!mUiManager)
 	{
-		mUiManager = pInputManager;
+		mUiManager = pUiManager;
 		::memset(mTouchSticks, 0, sizeof(mTouchSticks));
 		::memset(mPreviousValues, 0, sizeof(mPreviousValues));
 		::memset(mIsDefaultValueSet, 0, sizeof(mIsDefaultValueSet));
+		mIsInitialized = false;
 	}
 	mIsUpdated = false;
 }
 
 void DebugStick::Draw()
 {
+	bool lIsDebugging;
+	CURE_RTVAR_GET(lIsDebugging, =, mUiManager->GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
+	if (!lIsDebugging)
+	{
+		if (mIsInitialized)
+		{
+			mIsInitialized = false;
+			for (int y = 0; y < STICK_RESOLUTION; ++y)
+			{
+				for (int x = 0; x < STICK_RESOLUTION; ++x)
+				{
+					delete mTouchSticks[y][x];
+					mTouchSticks[y][x] = 0;
+				}
+			}
+		}
+		return;
+	}
 	for (int y = 0; y < STICK_RESOLUTION; ++y)
 	{
 		for (int x = 0; x < STICK_RESOLUTION; ++x)
@@ -40,7 +60,7 @@ void DebugStick::Draw()
 			{
 				mUiManager->GetPainter()->SetColor(WHITE);
 				PixelRect lRect = mTouchSticks[y][x]->GetArea();
-				//mUiManager->GetPainter()->DrawRect(lRect, 1);
+				mUiManager->GetPainter()->DrawRect(lRect);
 				mUiManager->GetPainter()->SetColor(RED);
 				float tx;
 				float ty;
@@ -79,13 +99,20 @@ void DebugStick::Place(int pPosX, int pPosY)
 	deb_assert(pPosY >= 0 && pPosY < STICK_RESOLUTION);
 	mStickX = pPosX;
 	mStickY = pPosY;
-	InitStick();
+	mValue = mPreviousValues[mStickY][mStickX];
 
+	bool lIsDebugging;
+	CURE_RTVAR_GET(lIsDebugging, =, mUiManager->GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
+	if (!lIsDebugging)
+	{
+		return;
+	}
+
+	InitStick();
 	float x;
 	float y;
 	bool lIsPressing;
 	mTouchSticks[mStickY][mStickX]->GetValue(x, y, lIsPressing);
-	mValue = mPreviousValues[mStickY][mStickX];
 	if (lIsPressing && (!Math::IsEpsEqual(x, mValue.x) || !Math::IsEpsEqual(y, mValue.y)))
 	{
 		mValue.Set(x, y);
@@ -96,7 +123,7 @@ void DebugStick::Place(int pPosX, int pPosY)
 
 void DebugStick::SetDefaultValue(float x, float y)
 {
-	if (!mIsDefaultValueSet[mStickY][mStickX])
+	if (!mIsDefaultValueSet[mStickY][mStickX] && mTouchSticks[mStickY][mStickX])
 	{
 		mIsDefaultValueSet[mStickY][mStickX] = true;
 		mTouchSticks[mStickY][mStickX]->SetValue(x, y);
@@ -116,6 +143,7 @@ void DebugStick::InitStick()
 	int h = mUiManager->GetCanvas()->GetHeight() / STICK_RESOLUTION;
 	PixelRect lRect(w*mStickX, h*mStickY, w*(mStickX+1), h*(mStickY+1));
 	mTouchSticks[mStickY][mStickX] = new UiLepra::Touch::TouchstickInputDevice(mUiManager->GetInputManager(), UiLepra::Touch::TouchstickInputDevice::MODE_RELATIVE_CENTER_NOSPRING, lRect, 0, STICK_DIAMETER/2);
+	mIsInitialized = true;
 }
 
 
@@ -123,6 +151,7 @@ GameUiManager* DebugStick::mUiManager = 0;
 UiLepra::Touch::TouchstickInputDevice* DebugStick::mTouchSticks[STICK_RESOLUTION][STICK_RESOLUTION];
 Vector2DF DebugStick::mPreviousValues[STICK_RESOLUTION][STICK_RESOLUTION];
 bool DebugStick::mIsDefaultValueSet[STICK_RESOLUTION][STICK_RESOLUTION];
+bool DebugStick::mIsInitialized = false;
 bool DebugStick::mIsUpdated = false;
 
 

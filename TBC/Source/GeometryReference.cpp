@@ -20,9 +20,10 @@ GeometryReference::GeometryReference(GeometryBase* pGeometry) :
 {
 	LEPRA_DEBUG_CODE(mName = _T("Ref->") + pGeometry->mName);
 	LEPRA_ACQUIRE_RESOURCE(GeometryReference);
-	SetPrimitiveType(mGeometry->GetPrimitiveType());
-	SetFlag(pGeometry->GetFlags()&(~VALID_FLAGS_MASK) | TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED | BIG_ORIENTATION_CHANGED);
-	SetBigOrientationThreshold(pGeometry->GetBigOrientationThreshold());
+	Copy(mGeometry);
+	mFlags = mDefaultFlags;
+	SetFlag(mGeometry->GetFlags()&(~VALID_FLAGS_MASK) | TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED | BIG_ORIENTATION_CHANGED);
+	mRendererData = 0;
 }
 
 GeometryReference::~GeometryReference()

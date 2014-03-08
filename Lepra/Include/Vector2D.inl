@@ -332,6 +332,16 @@ V2D_TEMPLATE void V2D_QUAL::Normalize(_TVarType pLength)
 	}
 }
 
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::GetNormalized() const
+{
+	_TVarType lLength = GetLength();
+	if (lLength >= MathTraits<_TVarType>::FullEps())
+	{
+		return Vector2D<_TVarType>(x/lLength, y/lLength);
+	}
+	return Vector2D<_TVarType>(0, 0);
+}
+
 V2D_TEMPLATE int V2D_QUAL::GetRawDataSize()
 {
 	return sizeof(_TVarType) * 2;

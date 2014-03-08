@@ -84,31 +84,60 @@ def splitverts_node(node, verbose=False):
 	if not ns:
 		return
 
+	dosplit = False
+	uvs_per_vertex = 2;
 	for parent in node.getparents():
 		nosplit = parent.get_fixed_attribute("nosplit", optional=True)
 		if nosplit:
 			if verbose: print("Not splitting mesh", node)
 			return
+		dosplit = dosplit or parent.get_fixed_attribute("dosplit", optional=True)
+		if dosplit:
+			if verbose: print("Forced split on mesh", node)
+		uvc = parent.get_fixed_attribute("uvs_per_vertex", optional=True, default=2)
+		if uvc != 2:
+			uvs_per_vertex = uvc
+			if verbose: print("Mesh", node, "uses", uvc, "UVs/vertex")
 
 	original_vsc = len(vs)
 	original_nsc = len(ns)
-	# print(node.getName()+":")
-	# print(len(vs))
-	# print(len(ts))
-	# print(len(ns))
-	# print(len(uvs))
-	vs, ts, ns, uvs = splitverts(vs, ts, ns, uvs)
+	# Normals and UVs are NOT indexed yet, i.e. just a flat list from 0..n, n=total number of vertices!
+	if dosplit:
+		vs, ts, ns, uvs = forcesplitverts(vs, ts, ns, uvs)
+	else:
+		vs, ts, ns, uvs = joinsplitverts(vs, ts, ns, uvs)
+	if uvs_per_vertex != 2 and uvs:
+		newuvs = []
+		for i,s in enumerate(uvs):
+			newuvs += [s]
+			if i%2 == 1:
+				newuvs += [0.0]*(uvs_per_vertex-2)
+		uvs = newuvs
 	node.fix_attribute("rgvtx", vs)
 	node.fix_attribute("rgtri", ts)
 	node.fix_attribute("rgn", ns)
 	if uvs:
 		node.fix_attribute("rguv", uvs)
 	if verbose:
-		print("Mesh %s was made %.1f times larger due to (hard?) edges, and %.1f %% of worst-case size." %
-				(node.getName(), len(ns)/original_vsc-1, len(ns)*100/original_nsc))
+		algo_reason = "(hard?) edges" if not dosplit else "forced split"
+		print("Mesh %s was made %.1f times larger due to %s, and %.1f %% of worst-case size." %
+				(node.getName(), len(ns)/original_vsc-1, algo_reason, len(ns)*100/original_nsc))
 
 
-def splitverts(vs, ts, ns, uvs):
+def forcesplitverts(vs, ts, ns, uvs):
+	verts, tris, normals, textureuvs = [], [], [], []
+	if not uvs:
+		textureuvs = None
+	for i,t in enumerate(ts):
+		tris += [i]
+		verts += vs[t*3:t*3+3]
+		normals += ns[i*3:i*3+3]
+		if textureuvs != None:
+			textureuvs += uvs[i*2:i*2+2]
+	return verts, tris, normals, textureuvs
+
+
+def joinsplitverts(vs, ts, ns, uvs):
 	if not ns:
 		return vs, ts, ns, uvs
 

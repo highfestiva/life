@@ -97,9 +97,6 @@ protected:
 	virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	virtual void OnLevelLoadCompleted();
-	void OnLoadLevelMesh(UiCure::UserGeometryReferenceResource* pMesh);
-	static void OrderEdgeVertices(const std::vector<int>& pVertexIndices, int& v0, int& v1);
-	static void UpdateUvTrapezoid(const Vector2DF& v1, const Vector2DF& v2, const Vector2DF& v3, float& t);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);

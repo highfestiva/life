@@ -34,7 +34,7 @@ class GameUiManager;
 class DebugStick
 {
 public:
-	static void Init(GameUiManager* pInputManager);
+	static void Init(GameUiManager* pUiManager);
 	static void Draw();
 	static bool IsUpdated();
 
@@ -55,6 +55,7 @@ private:
 	static UiLepra::Touch::TouchstickInputDevice* mTouchSticks[STICK_RESOLUTION][STICK_RESOLUTION];
 	static Vector2DF mPreviousValues[STICK_RESOLUTION][STICK_RESOLUTION];
 	static bool mIsDefaultValueSet[STICK_RESOLUTION][STICK_RESOLUTION];
+	static bool mIsInitialized;
 	static bool mIsUpdated;
 };
 

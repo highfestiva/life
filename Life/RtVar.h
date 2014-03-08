@@ -8,7 +8,6 @@
 
 #include "../Cure/Include/RuntimeVariable.h"
 
-#define RTVAR_DEBUG_ENABLE			"Debug.Enable"
 #define RTVAR_DEBUG_EXTRASLEEPTIME		"Debug.ExtraSleepTime"
 
 #define RTVAR_GAME_SPAWNPART			"Game.SpawnPart"

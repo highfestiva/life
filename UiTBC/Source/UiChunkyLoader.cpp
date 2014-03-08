@@ -43,6 +43,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	const int lUvCount = 8;
 	uint32* lLoadUvs[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
 	unsigned lUvsSize[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
+	int32 lUvsPerVertex = 2;
 	uint8* lColors = 0;
 	unsigned lColorsSize = 0;
 	int32 lColorFormat = 0x7FFFFFFD;
@@ -66,6 +67,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_NORMALS, (void**)&lLoadNormals, &lNormalsSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_UV, (void**)lLoadUvs, lUvsSize, -lUvCount));	// Specialcasing for array loading.
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_UVS_PER_VERTEX, &lUvsPerVertex));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR, (void**)&lColors, &lColorsSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR_FORMAT, &lColorFormat));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
@@ -119,10 +121,14 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 			lUvCount >= 0 &&
 			lUvCount <= 8);
 	}
+	if (lOk)
+	{
+		lOk = (lUvsPerVertex == 2 || lUvsPerVertex == 4);
+	}
 	deb_assert(lOk);
 	for (unsigned x = 0; lOk && lUvsSize[x] && x < lUvCount; ++x)
 	{
-		lOk = (lUvsSize[x] == lVerticesSize*2/3);
+		lOk = (lUvsSize[x] == lVerticesSize*lUvsPerVertex/3);
 	}
 	deb_assert(lOk);
 	if (lOk)
@@ -157,7 +163,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 		for (x = 0; lLoadUvs[x] && (int)x < lUvCount; ++x)
 		{
 			lUvs[x] = (float*)lLoadUvs[x];
-			for (unsigned y = 0; y < lVertexCount*2; ++y)
+			for (unsigned y = 0; y < lVertexCount*lUvsPerVertex; ++y)
 			{
 				lUvs[x][y] = Endian::BigToHostF(lLoadUvs[x][y]);
 			}
@@ -166,7 +172,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	if (lOk)
 	{
 		const TBC::GeometryBase::PrimitiveType lType = (TBC::GeometryBase::PrimitiveType)lGeometryPrimitive;
-		// Alex/TODO: Volatility of TriangleBasedGeometry should always be GEOM_STATIC.
+		pMeshData->SetUVCountPerVertex(lUvsPerVertex);
 		pMeshData->Set(lVertices, lNormals, lUvs[0], lColors,
 			(TBC::GeometryBase::ColorFormat)lColorFormat, lIndices,
 			lVertexCount, lIndexCount, lType,
@@ -217,10 +223,11 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	const uint32* lNormals = AllocInitBigEndian(lSaveNormals, lNormalsSize/sizeof(float));
 	unsigned lTriangleIndicesSize = pMeshData->GetIndexCount()*sizeof(uint32);
 	const uint32* lTriangleIndices = AllocInitBigEndian(pMeshData->GetIndexData(), lTriangleIndicesSize/sizeof(uint32));
+	const int lUvsPerVertex = pMeshData->GetUVCountPerVertex();
 	const int lUvCount = pMeshData->GetUVSetCount();
 	const uint32* lUvs[32];
 	unsigned lUvsSize[32];
-	const unsigned lFixedUvByteSize = pMeshData->GetVertexCount()*2*sizeof(float);
+	const unsigned lFixedUvByteSize = pMeshData->GetVertexCount()*lUvsPerVertex*sizeof(float);
 	for (int x = 0; x < lUvCount; ++x)
 	{
 		lUvsSize[x] = lFixedUvByteSize;

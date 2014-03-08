@@ -166,13 +166,7 @@ public:
 	void DrawLine(int pX1, int pY1, int pX2, int pY2);
 	void DrawLine(const PixelCoord& pPoint1, const PixelCoord& pPoint2);
 
-	// Renders a rectangular frame. The given coordinates defines the outer edges of the frame,
-	// expanding inwards 'pWidth' pixels.
-	// Color 0 defines the outer color.
-	// Color 1 defines the inner color.
-	void DrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth);
-	void DrawRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight, int pWidth);
-	void DrawRect(const PixelRect& pRect, int pWidth);
+	void DrawRect(const PixelRect& pRect);
 
 	void FillRect(int pLeft, int pTop, int pRight, int pBottom);
 	void FillRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight);
@@ -316,7 +310,7 @@ protected:
 
 	virtual void DoDrawPixel(int x, int y) = 0;
 	virtual void DoDrawLine(int pX1, int pY1, int pX2, int pY2) = 0;
-	virtual void DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth) = 0;
+	virtual void DoDrawRect(int pLeft, int pTop, int pRight, int pBottom) = 0;
 	virtual void DoFillRect(int pLeft, int pTop, int pRight, int pBottom) = 0;
 	virtual void DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken) = 0;
 	virtual void DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom) = 0;

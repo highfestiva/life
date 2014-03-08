@@ -84,6 +84,7 @@ enum ChunkyType
 	CHUNK_MESH_VERTICES                = ENUMIFY('M','E','V','X'),	// Mandatory.
 	CHUNK_MESH_NORMALS                 = ENUMIFY('M','E','N','O'),	// Mandatory.
 	CHUNK_MESH_UV                      = ENUMIFY('M','E','U','V'),	// Optional.
+	CHUNK_MESH_UVS_PER_VERTEX          = ENUMIFY('M','E','U','P'),	// Optional.
 	CHUNK_MESH_COLOR                   = ENUMIFY('M','E','C','O'),	// Optional.
 	CHUNK_MESH_COLOR_FORMAT            = ENUMIFY('M','E','C','F'),	// Optional.
 	CHUNK_MESH_TRIANGLES               = ENUMIFY('M','E','T','R'),	// Mandatory, but could mean triangle strip, quad or something else.

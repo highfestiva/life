@@ -26,6 +26,8 @@
 #define RTVAR_CONSOLE_KEY_PAGEUP		"Console.Key.PageUp"
 #define RTVAR_CONSOLE_KEY_PAGEDOWN		"Console.Key.PageDown"
 
+#define RTVAR_DEBUG_ENABLE			"Debug.Enable"
+
 #define RTVAR_NETPHYS_POSSENDINTERVALLIMIT	"NetPhys.PosSendIntervalLimit"
 #define RTVAR_NETPHYS_RESYNCONDIFFGT		"NetPhys.ResyncOnDiffGt"
 #define RTVAR_NETPHYS_SLOWFRAMECOUNT		"NetPhys.SlowFrameCount"

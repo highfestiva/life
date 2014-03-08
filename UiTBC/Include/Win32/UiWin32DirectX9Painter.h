@@ -65,7 +65,7 @@ protected:
 
 	void DoDrawPixel(int x, int y);
 	void DoDrawLine(int pX1, int pY1, int pX2, int pY2);
-	void DoDrawRect(int pLeft, int pTop, int pRight, int pWidth, int pBottom);
+	void DoDrawRect(int pLeft, int pTop, int pRight, int pBottom);
 	void DoFillRect(int pLeft, int pTop, int pRight, int pBottom);
 	void DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
 	void DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom);

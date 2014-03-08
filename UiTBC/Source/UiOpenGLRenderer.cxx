@@ -8,7 +8,7 @@
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/Transformation.h"
-#include "../../TBC/Include/GeometryBase.h"
+#include "../../TBC/Include/GeometryReference.h"
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
 #include "../Include/UiDynamicRenderer.h"
 #include "../Include/UiOpenGLMaterials.h"
@@ -733,12 +733,17 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 		pGeometry->GenerateTangentAndBitangentData();
 	}
 
-	if (pGeometry->IsGeometryReference() == false)
+	OGLGeometryData* lGeometryData = (OGLGeometryData*)pGeometry->GetRendererData();
+	if (pGeometry->IsGeometryReference())
+	{
+		TBC::GeometryBase* lParentGeometry = ((TBC::GeometryReference*)pGeometry)->GetParentGeometry();
+		GeometryData* lParentGeometryData = (GeometryData*)lParentGeometry->GetRendererData();
+		lGeometryData->CopyReferenceData(lParentGeometryData);
+	}
+	else
 	{
 		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
-			OGLGeometryData* lGeometryData = (OGLGeometryData*)pGeometry->GetRendererData();
-
 			// Upload geometry to the GFX hardware.
 
 			// First, get a free buffer ID and store it first in the VoidPtr array.

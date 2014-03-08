@@ -81,7 +81,7 @@ protected:
 			    float pX2, float pY2, float pU2, float pV2,
 			    float pX3, float pY3, float pU3, float pV3,
 			    ImageID pImageID);
-	void DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth);
+	void DoDrawRect(int pLeft, int pTop, int pRight, int pBottom);
 	void DoFillRect(int pLeft, int pTop, int pRight, int pBottom);
 	void DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
 	void DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom);

@@ -555,7 +555,7 @@ void GeometryBase::SetIndexDataChanged(bool pChanged)
 
 void GeometryBase::SetRendererData(void* pRendererData)
 {
-	deb_assert(!mRendererData || !pRendererData);
+	deb_assert(!mRendererData || !pRendererData || mRendererData == pRendererData);
 	mRendererData = pRendererData;
 }
 
@@ -628,12 +628,8 @@ void GeometryBase::ClearAll()
 	ClearSurfaceNormalData();
 	ClearEdgeData();
 	ClearTangentAndBitangentData();
-
 	mFlags = 0;
-
-	mBoundingRadius      = 0.0f;
 	mSurfaceNormalCount   = 0;
-
 	SetBoundingRadius(0.0f);
 }
 
@@ -779,10 +775,11 @@ void GeometryBase::Copy(GeometryBase* pGeometry)
 {
 	ClearAll();
 
+	SetPrimitiveType(pGeometry->GetPrimitiveType());
+	SetUVCountPerVertex(pGeometry->GetUVCountPerVertex());
+	SetBigOrientationThreshold(pGeometry->GetBigOrientationThreshold());
 	mMaterialSettings = pGeometry->GetBasicMaterialSettings();
-
 	mFlags = pGeometry->mFlags;
-
 	mBoundingRadius    = pGeometry->mBoundingRadius;
 
 	mSurfaceNormalCount = pGeometry->mSurfaceNormalCount;

@@ -407,81 +407,15 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	OGL_ASSERT();
 }
 
-void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth)
+void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom)
 {
-	OGL_ASSERT();
-
-	ToScreenCoords(pLeft, pTop);
-	ToScreenCoords(pRight, pBottom);
-
-	GLfloat lLeft   = (GLfloat)pLeft;
-	GLfloat lRight  = (GLfloat)pRight;
-	GLfloat lTop    = (GLfloat)pTop;
-	GLfloat lBottom = (GLfloat)pBottom;
-
-	GLfloat lVertex[8 * 2];
-	lVertex[0] = lLeft; // Outer top left.
-	lVertex[1] = lTop;
-	lVertex[2] = lRight; // Outer top right.
-	lVertex[3] = lTop;
-	lVertex[4] = lRight; // Outer bottom right.
-	lVertex[5] = lBottom;
-	lVertex[6] = lLeft; // Outer bottom left.
-	lVertex[7] = lBottom;
-	lLeft += pWidth;
-	lTop += pWidth;
-	lRight -= pWidth;
-	lBottom -= pWidth;
-	lVertex[8] = lLeft; // Inner top left.
-	lVertex[9] = lTop;
-	lVertex[10] = lRight; // Inner top right.
-	lVertex[11] = lTop;
-	lVertex[12] = lRight; // Inner bottom right.
-	lVertex[13] = lBottom;
-	lVertex[14] = lLeft; // Inner bottom left.
-	lVertex[15] = lBottom;
-
-	GLfloat lColor[8 * 3];
-	lColor[0] = mRCol[0].x;
-	lColor[1] = mRCol[0].y;
-	lColor[2] = mRCol[0].z;
-	lColor[3] = mRCol[0].x;
-	lColor[4] = mRCol[0].y;
-	lColor[5] = mRCol[0].z;
-	lColor[6] = mRCol[0].x;
-	lColor[7] = mRCol[0].y;
-	lColor[8] = mRCol[0].z;
-	lColor[9] = mRCol[0].x;
-	lColor[10] = mRCol[0].y;
-	lColor[11] = mRCol[0].z;
-	lColor[12] = mRCol[1].x;
-	lColor[13] = mRCol[1].y;
-	lColor[14] = mRCol[1].z;
-	lColor[15] = mRCol[1].x;
-	lColor[16] = mRCol[1].y;
-	lColor[17] = mRCol[1].z;
-	lColor[18] = mRCol[1].x;
-	lColor[19] = mRCol[1].y;
-	lColor[20] = mRCol[1].z;
-	lColor[21] = mRCol[1].x;
-	lColor[22] = mRCol[1].y;
-	lColor[23] = mRCol[1].z;
-
-	const static vtx_idx_t lIndices[] = {0,4,7, 0,7,3, 0,1,5, 0,5,4, 1,2,6, 1,6,5, 7,6,2, 7,2,3};
-
-	glColor4ub(255, 255, 255, GetAlphaValue());
-
-	// Enabled in ResetClippingRect().
-	glVertexPointer(2, GL_FLOAT, 0, lVertex);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glColorPointer(3, GL_FLOAT, 0, lColor);
-	glDrawElements(GL_TRIANGLES,
-			24,
-			LEPRA_GL_INDEX_TYPE,
-			lIndices);
-	glDisableClientState(GL_COLOR_ARRAY);
-
-	OGL_ASSERT();
+	std::vector<Vector2DF> lCoords;
+	lCoords.push_back(Vector2DF((float)pRight, (float)pTop));
+	lCoords.push_back(Vector2DF((float)pLeft, (float)pTop));
+	lCoords.push_back(Vector2DF((float)pLeft, (float)pBottom));
+	lCoords.push_back(Vector2DF((float)pRight, (float)pBottom));
+	lCoords.push_back(lCoords[0]);
+	DrawFan(lCoords, false);
 }
 
 void OpenGLPainter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)

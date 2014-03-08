@@ -891,22 +891,12 @@ void Painter::DrawLine(const PixelCoord& pPoint1, const PixelCoord& pPoint2)
 	DrawLine(pPoint1.x, pPoint1.y, pPoint2.x, pPoint2.y);
 }
 
-void Painter::DrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth)
+void Painter::DrawRect(const PixelRect& pRect)
 {
 	if(mCurrentDisplayList == 0)
-		DoDrawRect(pLeft, pTop, pRight, pBottom, pWidth);
+		DoDrawRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom);
 	else
-		CreateRectFrame(pLeft, pTop, pRight, pBottom, pWidth);
-}
-
-void Painter::DrawRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight, int pWidth)
-{
-	DrawRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y, pWidth);
-}
-
-void Painter::DrawRect(const PixelRect& pRect, int pWidth)
-{
-	DrawRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom, pWidth);
+		CreateRectFrame(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom, 1);
 }
 
 void Painter::FillRect(int pLeft, int pTop, int pRight, int pBottom)

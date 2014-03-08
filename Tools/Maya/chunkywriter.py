@@ -51,6 +51,7 @@ CHUNK_MESH				= "MESH"
 CHUNK_MESH_VERTICES			= "MEVX"
 CHUNK_MESH_NORMALS			= "MENO"
 CHUNK_MESH_UV				= "MEUV"
+CHUNK_MESH_UVS_PER_VERTEX		= "MEUP"
 CHUNK_MESH_COLOR			= "MECO"
 CHUNK_MESH_COLOR_FORMAT			= "MECF"
 CHUNK_MESH_TRIANGLES			= "METR"
@@ -768,6 +769,7 @@ class MeshWriter(ChunkyWriter):
 		primitive1 = mesh_primitive[:-1] if mesh_primitive[-1] == "s" else mesh_primitive
 		primitiveM = mesh_primitive if mesh_primitive[-1] == "s" else mesh_primitive+"s"
 		div = 4 if mesh_primitive == "quads" else 3
+		uvs_per_vertex = node.getparentval("uvs_per_vertex", 2)
 		if options.options.verbose:
 			print("Writing mesh %s with %i %s..." % (filename, len(node.get_fixed_attribute("rgtri"))/div, primitiveM))
 		self._addfeat("mesh:meshes", 1)
@@ -783,14 +785,16 @@ class MeshWriter(ChunkyWriter):
 			shadow_deviation = get_shadow_deviation(node)
 			two_sided = gettwosided(node)
 			recv_shadows = get_recv_no_shadows(node)
-			verts = [(CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx"))]
+			vs = node.get_fixed_attribute("rgvtx")
+			verts = [(CHUNK_MESH_VERTICES, vs)]
 			polys = [(CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri"))]
 			normals = [] # node.get_fixed_attribute("rgn", optional=True)
 			uvs = node.get_fixed_attribute("rguv", optional=True)
-			# if uvs and options.options.verbose:
-				# print("Mesh %s has UVs." % node.getFullName())
+			if uvs and options.options.verbose:
+				print("Mesh %s has a total UV float count of %i and a total vertex float count of %i." % (node.getFullName(), len(uvs), len(vs)))
 			textureuvs = [(CHUNK_MESH_UV, uvs)] if uvs else []
-			inner_data = primitive+volatility+casts_shadows+shadow_deviation+two_sided+recv_shadows+verts+polys+normals+textureuvs
+			texture_uvs_per_vertex = [(CHUNK_MESH_UVS_PER_VERTEX, uvs_per_vertex)] if uvs_per_vertex != 2 else []
+			inner_data = primitive+volatility+casts_shadows+shadow_deviation+two_sided+recv_shadows+verts+polys+normals+textureuvs+texture_uvs_per_vertex
 			data = (
 					CHUNK_MESH,
 					inner_data

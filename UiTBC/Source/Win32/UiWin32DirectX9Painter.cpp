@@ -264,7 +264,7 @@ void DirectX9Painter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 	mD3DDevice->EndScene();
 }
 
-void DirectX9Painter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth)
+void DirectX9Painter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom)
 {
 	mD3DDevice->BeginScene();
 

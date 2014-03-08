@@ -65,6 +65,7 @@ public:
 	inline _TVarType GetAngle(const Vector2D& pV) const;
 
 	void Normalize(_TVarType pLength = 1.0f);
+	Vector2D<_TVarType> GetNormalized() const;
 
 	void Cross(const Vector2D<_TVarType>& pV);
 	void CrossUnit(const Vector2D<_TVarType>& pV);
