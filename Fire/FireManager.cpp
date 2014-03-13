@@ -135,7 +135,7 @@ void FireManager::LoadSettings()
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 38.8);
 
 	Parent::LoadSettings();
 	CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
@@ -528,7 +528,6 @@ bool FireManager::InitializeUniverse()
 	const Vector3DF v;
 	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl11"));
 	str lStartLevel;
 	CURE_RTVAR_GET(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
 	{
@@ -637,7 +636,7 @@ void FireManager::HandleShooting()
 	if (mUiManager->CanRender())
 	{
 		float lFOV;
-		CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
+		CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.8);
 		UpdateFrustum(lFOV);
 	}
 
@@ -775,7 +774,7 @@ void FireManager::OnLevelLoadCompleted()
 	// Update texture UV coordinates according to FoV.
 	UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
 	float lFOV;
-	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.35);
+	CURE_RTVAR_GET(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.8);
 	static float lFormerFoV = 0;
 	static unsigned lFormerLevelId = 0;
 	if (lFormerFoV == lFOV && lFormerLevelId == mLevel->GetInstanceId())
