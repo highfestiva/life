@@ -313,8 +313,12 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 						UiCure::GeometryReferenceResource* lMeshRefResource = (UiCure::GeometryReferenceResource*)*x;
 						if (lMeshRefResource->GetName().find(pParameterVector[0]) != str::npos)
 						{
-							lMeshRefResource->GetRamData()->SetAlwaysVisible(lVisible);
-							++lAffectedMeshCount;
+							TBC::GeometryBase* lMesh = lMeshRefResource->GetRamData();
+							if (lMesh)
+							{
+								lMesh->SetAlwaysVisible(lVisible);
+								++lAffectedMeshCount;
+							}
 						}
 					}
 					mResourceManager->UnhookResources(lResourceList);

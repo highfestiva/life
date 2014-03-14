@@ -74,7 +74,7 @@ namespace Fire
 
 #define BG_COLOR Color(110, 110, 110, 160)
 const float hp = 768/1024.0f;
-const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 
 
 

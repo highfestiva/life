@@ -85,6 +85,7 @@ void AutoPathDriver::OnTick()
 		float lVelocityBrakeFactor = Math::Clamp(lSpeed, 0.0f, lLowLimit/2) / (lLowLimit/2);
 		lBrakePower += lVelocityBrakeFactor;
 	}
+	lBrakePower = Math::Clamp(lBrakePower, 0.0f, 0.3f);
 	lVehicle->SetEnginePower(2, lBrakePower);
 
 	if (lVehicle->GetVelocity().GetLengthSquared() < 1.0f)
@@ -122,9 +123,9 @@ void AutoPathDriver::GetClosestPathDistance(const Vector3DF& pPosition, Vector3D
 	{
 		float lCurrentTime = mPath->GetCurrentInterpolationTime();
 		float lDeltaTime = pWantedDistance * mPath->GetDistanceNormal();
-		if (lCurrentTime+lDeltaTime < 0)
+		if (lCurrentTime+lDeltaTime < 0.1f)
 		{
-			lDeltaTime = -lCurrentTime;
+			lDeltaTime = 0.1f-lCurrentTime;
 		}
 		mPath->StepInterpolation(lDeltaTime);
 		pClosestPoint = mPath->GetValue();
