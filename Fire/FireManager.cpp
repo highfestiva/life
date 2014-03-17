@@ -387,14 +387,14 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBon
 	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
-	const int lParticles = Math::Lerp(4, 8, lCubicStrength * 0.3f);
-	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
+	const int lParticles = Math::Lerp(6, 10, lCubicStrength * 0.3f);
+	Vector3DF lStartFireColor(1.0f, 1.0f, 0.6f);
 	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
 	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
 	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
 	Vector3DF lSpritesPosition(pPosition*0.98f-pPosition.GetNormalized(2.0f));	// We just move it closer to make it less likely to be cut off by ground.
-	lParticleRenderer->CreateExplosion(lSpritesPosition, lCubicStrength, u, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
+	lParticleRenderer->CreateExplosion(lSpritesPosition, lCubicStrength, u, 1, 1.5f, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
 
 	// Slowmo check.
 	bool lNormalDeath = true;
