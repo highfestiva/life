@@ -297,7 +297,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
 			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->DisableRootShadow();
+			lPuff->EnableRootShadow(false);
 			float x = Random::Uniform(-1.0f, 1.0f);
 			float y = Random::Uniform(-1.0f, 1.0f);
 			float z = -1;
@@ -322,7 +322,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
 			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->DisableRootShadow();
+			lPuff->EnableRootShadow(false);
 			float x = Random::Uniform(-1.0f, 1.0f);
 			float y = Random::Uniform(-1.0f, 1.0f);
 			float z = Random::Uniform(-1.0f, 1.0f);
@@ -720,7 +720,7 @@ bool Game::InitializeUniverse()
 		deb_assert(lOk);
 		if (lOk)
 		{
-			mLevel->DisableRootShadow();
+			mLevel->EnableRootShadow(false);
 			mLevel->StartLoading();
 		}
 	}

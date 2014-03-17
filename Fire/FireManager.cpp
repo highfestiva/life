@@ -23,8 +23,8 @@
 #include "../Lepra/Include/SystemManager.h"
 #include "../Lepra/Include/Time.h"
 #include "../Life/LifeClient/ExplodingMachine.h"
-#include "../Life/LifeClient/FastProjectile.h"
-#include "../Life/LifeClient/HomingProjectile.h"
+//#include "../Life/LifeClient/FastProjectile.h"
+//#include "../Life/LifeClient/HomingProjectile.h"
 #include "../Life/LifeClient/Level.h"
 #include "../Life/LifeClient/MassObject.h"
 #include "../Life/LifeClient/Menu.h"
@@ -328,6 +328,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	}
 
 	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), _T("rocket"), mUiManager, this);
+	lProjectile->EnableRootShadow(true);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	lProjectile->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
 	TransformationF t(mCameraTransform);
@@ -692,7 +693,7 @@ Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Level* lLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
-		lLevel->DisableRootShadow();
+		lLevel->EnableRootShadow(false);
 		lObject = lLevel;
 	}
 	else if (strutil::StartsWith(pClassId, _T("indicator")))

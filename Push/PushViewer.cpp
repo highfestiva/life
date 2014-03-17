@@ -114,7 +114,7 @@ bool PushViewer::InitializeUniverse()
 	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 	mLevel = new Life::Level(GetResourceManager(), _T("level_01"), mUiManager, lGravelParticleEmitter);
 	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, 0);
-	mLevel->DisableRootShadow();
+	mLevel->EnableRootShadow(false);
 	mLevel->SetAllowNetworkLogic(false);
 	mLevel->StartLoading();
 

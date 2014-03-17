@@ -45,6 +45,10 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContext
 			{
 				pPhysicsManager->DetachToDynamic(lGeometry->GetBodyId(), lGeometry->GetMass());
 			}
+			else
+			{
+				pPhysicsManager->AddMass(lGeometry->GetBodyId(), lGeometry->GetParent()->GetBodyId());
+			}
 		}
 		else if (lGeometry->GetJointId() != TBC::INVALID_JOINT)
 		{

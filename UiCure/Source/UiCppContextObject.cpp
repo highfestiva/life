@@ -70,9 +70,9 @@ void CppContextObject::EnableUi(bool pEnable)
 	mEnableUi = pEnable;
 }
 
-void CppContextObject::DisableRootShadow()
+void CppContextObject::EnableRootShadow(bool pEnable)
 {
-	mAllowRootShadow = false;
+	mAllowRootShadow = pEnable;
 }
 
 void CppContextObject::SetUseDefaultTexture(bool pUseDefaultTexture)

@@ -34,7 +34,7 @@ public:
 	virtual ~CppContextObject();
 
 	void EnableUi(bool pEnable);
-	void DisableRootShadow();
+	void EnableRootShadow(bool pEnable);
 	void SetUseDefaultTexture(bool pUseDefaultTexture);
 	void EnablePixelShader(bool pEnable);
 	void EnableMeshMove(bool pEnable);

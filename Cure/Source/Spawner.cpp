@@ -67,10 +67,10 @@ void Spawner::EaseDown(TBC::PhysicsManager* pPhysicsManager, ContextObject* pObj
 	{
 		lNewPositionalData->mPosition.mTransformation.SetPosition(*pStartPosition);
 	}
-	lNewPositionalData->mPosition.mAcceleration = Vector3DF();
+	/*lNewPositionalData->mPosition.mAcceleration = Vector3DF();
 	lNewPositionalData->mPosition.mVelocity = Vector3DF();
 	lNewPositionalData->mPosition.mAngularAcceleration = Vector3DF();
-	lNewPositionalData->mPosition.mAngularVelocity = Vector3DF();
+	lNewPositionalData->mPosition.mAngularVelocity = Vector3DF();*/
 	bool lHasTouchedGround = false;
 	float lStep = 1.0f;
 	for (int x = 0; x < 20; ++x)

@@ -371,7 +371,7 @@ bool Game::InitializeUniverse()
 		if (lOk)
 		{
 			mRacket->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0)));
-			mRacket->DisableRootShadow();
+			mRacket->EnableRootShadow(false);
 			mRacket->StartLoading();
 		}
 	}
@@ -385,7 +385,7 @@ bool Game::InitializeUniverse()
 		if (lOk)
 		{
 			mBall->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0.4f)));
-			mBall->DisableRootShadow();
+			mBall->EnableRootShadow(false);
 			mBall->StartLoading();
 		}
 	}

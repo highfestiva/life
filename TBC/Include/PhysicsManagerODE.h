@@ -41,6 +41,7 @@ public:
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody);
 	virtual bool DetachToDynamic(BodyID pStaticBody, float32 pMass);
 	virtual bool MakeStatic(BodyID pDynamicBody);
+	virtual bool AddMass(BodyID pStaticBody, BodyID pMainBody);
 
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,

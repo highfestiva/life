@@ -29,7 +29,7 @@ FastProjectile::FastProjectile(Cure::ResourceManager* pResourceManager, const st
 	mTickCount(0),
 	mIsDetonated(false)
 {
-	DisableRootShadow();
+	EnableRootShadow(false);
 	EnableMeshSlide(false);
 }
 

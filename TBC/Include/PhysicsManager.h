@@ -141,6 +141,7 @@ public:
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
 	virtual bool DetachToDynamic(BodyID pStaticBody, float32 pMass) = 0;
 	virtual bool MakeStatic(BodyID pDynamicBody) = 0;
+	virtual bool AddMass(BodyID pStaticBody, BodyID pMainBody) = 0;
 
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,

@@ -1016,7 +1016,7 @@ Cure::ContextObject* HoverTankManager::CreateContextObject(const str& pClassId) 
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Life::Level* lLevel = new Life::Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
-		lLevel->DisableRootShadow();
+		lLevel->EnableRootShadow(false);
 		lObject = lLevel;
 	}
 	else if (pClassId == _T("score_info"))

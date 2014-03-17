@@ -945,7 +945,7 @@ bool DownwashManager::InitializeUniverse()
 	lTransformBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 	mHemisphereUvTransform = new TBC::BoneAnimator(lTransformBones);
 	mHemisphere = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("hemisphere"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	mHemisphere->DisableRootShadow();
+	mHemisphere->EnableRootShadow(false);
 	mHemisphere->EnableMeshMove(false);
 	mHemisphere->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
 	mHemisphere->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 25, 0)));
@@ -1326,7 +1326,7 @@ Cure::ContextObject* DownwashManager::CreateContextObject(const str& pClassId) c
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Level* lLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
-		lLevel->DisableRootShadow();
+		lLevel->EnableRootShadow(false);
 		lObject = lLevel;
 	}
 	else if (strutil::StartsWith(pClassId, _T("helicopter_")) || strutil::StartsWith(pClassId, _T("monster")) ||

@@ -20,7 +20,7 @@ Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
 	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 		UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-0.2f, +0.2f, -1),
-		Vector3DF(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 60);
+		Vector3DF(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 70);
 }
 
 Sunlight::~Sunlight()

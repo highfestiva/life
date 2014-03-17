@@ -252,9 +252,9 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const Transfor
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
+		lObject->mBodyID = ::dBodyCreate(mWorldID);
 		dMass lMass;
 		::dMassSetBoxTotal(&lMass, (dReal)pMass, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
-		lObject->mBodyID = ::dBodyCreate(mWorldID);
 		::dBodySetMass(lObject->mBodyID, &lMass);
 		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 		::dBodySetAutoDisableDefaults(lObject->mBodyID);
@@ -310,39 +310,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 		::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
 		::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
 
-		if (lStaticObject->mMass)
-		{
-			lMainObject->mHasMassChildren = true;
-
-			dMass lMass;
-			const dReal lMassScalar = (dReal)lStaticObject->mMass;
-			deb_assert(lMassScalar > 0);
-			float* lSize = lStaticObject->mGeometryData;
-			// Adding mass to the dynamic object.
-			switch (lStaticObject->mGeomID->type)
-			{
-				case dTriMeshClass:	// TRICKY: fall through (act as sphere).
-				case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
-				case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
-				case dCapsuleClass:	::dMassSetCapsuleTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
-				case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
-				default:
-				{
-					mLog.AError("Trying to attach object of unknown type!");
-					deb_assert(false);
-					return (false);
-				}
-			}
-			const dReal* lRelRot = ::dGeomGetOffsetRotation(lStaticObject->mGeomID);
-			const dReal* lRelPos = ::dGeomGetOffsetPosition(lStaticObject->mGeomID);
-			::dMassTranslate(&lMass, lRelPos[0], lRelPos[1], lRelPos[2]);
-			::dMassRotate(&lMass, lRelRot);
-
-			dMass lDynamicMass;
-			::dBodyGetMass(lBodyId, &lDynamicMass);
-			::dMassAdd(&lMass, &lDynamicMass);
-			::dBodySetMass(lBodyId, &lMass);
-		}
+		AddMass(pStaticBody, pMainBody);
 	}
 
 	return (true);
@@ -404,6 +372,69 @@ bool PhysicsManagerODE::MakeStatic(BodyID pDynamicBody)
 		::dBodyDestroy(lDynamicObject->mBodyID);
 		lDynamicObject->mBodyID = 0;
 	}
+	return true;
+}
+
+bool PhysicsManagerODE::AddMass(BodyID pStaticBody, BodyID pMainBody)
+{
+	ObjectTable::iterator x = mObjectTable.find((Object*)pStaticBody);
+	if (x == mObjectTable.end())
+	{
+		deb_assert(false);
+		return (false);
+	}
+	ObjectTable::iterator y = mObjectTable.find((Object*)pMainBody);
+	if (y == mObjectTable.end() || x == y)
+	{
+		deb_assert(false);
+		return (false);
+	}
+	Object* lStaticObject = *x;
+	Object* lMainObject = *y;
+	if (lStaticObject->mBodyID)
+	{
+		mLog.AError("Attach() with non-static.");
+		deb_assert(false);
+		return (false);
+	}
+	dBodyID lBodyId = lMainObject->mBodyID;
+	if (!lBodyId || !lStaticObject->mMass)
+	{
+		deb_assert(false);
+		return (false);
+	}
+
+	lMainObject->mHasMassChildren = true;
+
+	dMass lMass;
+	const dReal lMassScalar = (dReal)lStaticObject->mMass;
+	deb_assert(lMassScalar > 0);
+	float* lSize = lStaticObject->mGeometryData;
+	// Adding mass to the dynamic object.
+	switch (lStaticObject->mGeomID->type)
+	{
+		case dTriMeshClass:	// TRICKY: fall through (act as sphere).
+		case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
+		case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
+		case dCapsuleClass:	::dMassSetCapsuleTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
+		case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
+		default:
+		{
+			mLog.AError("Trying to attach object of unknown type!");
+			deb_assert(false);
+			return (false);
+		}
+	}
+	const dReal* lRelRot = ::dGeomGetOffsetRotation(lStaticObject->mGeomID);
+	::dMassRotate(&lMass, lRelRot);
+	const dReal* lRelPos = ::dGeomGetOffsetPosition(lStaticObject->mGeomID);
+	::dMassTranslate(&lMass, lRelPos[0], lRelPos[1], lRelPos[2]);
+
+	dMass lDynamicMass;
+	::dBodyGetMass(lBodyId, &lDynamicMass);
+	::dMassAdd(&lDynamicMass, &lMass);
+	::dBodySetMass(lBodyId, &lDynamicMass);
+
 	return true;
 }
 
@@ -3629,7 +3660,7 @@ void PhysicsManagerODE::HandleMovableObjects()
 		if (lObject->mBodyID && ::dBodyIsEnabled(lObject->mBodyID))
 		{
 			mAutoDisabledObjectSet.erase(x++);
-			//NormalizeRotation(lObject);
+			NormalizeRotation(lObject);
 		}
 		else
 		{

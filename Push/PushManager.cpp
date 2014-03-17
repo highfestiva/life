@@ -806,7 +806,7 @@ Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Life::Level* lLevel = new Life::Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
-		lLevel->DisableRootShadow();
+		lLevel->EnableRootShadow(false);
 		mLevel = lLevel;
 		lObject = lLevel;
 	}

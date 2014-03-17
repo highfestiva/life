@@ -27,7 +27,7 @@ Projectile::Projectile(Cure::ResourceManager* pResourceManager, const str& pClas
 	mIsDetonated(false),
 	mExplosiveEnergy(1)
 {
-	DisableRootShadow();
+	EnableRootShadow(false);
 }
 
 Projectile::~Projectile()
