@@ -99,8 +99,11 @@ def splitverts_node(node, verbose=False):
 			uvs_per_vertex = uvc
 			if verbose: print("Mesh", node, "uses", uvc, "UVs/vertex")
 
+	original_tsc = len(ts)
 	original_vsc = len(vs)
 	original_nsc = len(ns)
+	if uvs:
+		original_uvs = uvs[:]
 	# Normals and UVs are NOT indexed yet, i.e. just a flat list from 0..n, n=total number of vertices!
 	if dosplit:
 		vs, ts, ns, uvs = forcesplitverts(vs, ts, ns, uvs)
@@ -113,6 +116,10 @@ def splitverts_node(node, verbose=False):
 			if i%2 == 1:
 				newuvs += [0.0]*(uvs_per_vertex-2)
 		uvs = newuvs
+	if len(vs)/3 != len(ns)/3 or (uvs and len(vs)/3 != len(uvs)/uvs_per_vertex):
+		print("Internal algo error (mesh vtx join/split). vtxc=%i, nc=%i, uvc=%i, uv/v=%i." %
+			(len(vs), len(ns), len(uvs), uvs_per_vertex))
+		sys.exit(1)
 	node.fix_attribute("rgvtx", vs)
 	node.fix_attribute("rgtri", ts)
 	node.fix_attribute("rgn", ns)
@@ -122,6 +129,14 @@ def splitverts_node(node, verbose=False):
 		algo_reason = "(hard?) edges" if not dosplit else "forced split"
 		print("Mesh %s was made %.1f times larger due to %s, and %.1f %% of worst-case size." %
 				(node.getName(), len(ns)/original_vsc-1, algo_reason, len(ns)*100/original_nsc))
+		# if uvs:
+			# print("Mesh %s's original UVs (%i, %i triangles):" % (node.getName(), len(original_uvs), original_tsc))
+			# for i in range(0, original_tsc, 3):
+				# j = i*2
+				# print("(%f, %f), (%f, %f), (%f, %f)" % (original_uvs[j], original_uvs[j+1], original_uvs[j+2], original_uvs[j+3], original_uvs[j+4], original_uvs[j+5]))
+			# print("Mesh %s's updated UVs (%i, %i triangles):" % (node.getName(), len(uvs), len(ts)))
+			# for i in range(0, len(ts), 3):
+				# print("(%f, %f), (%f, %f), (%f, %f)" % (uvs[ts[i]*2], uvs[ts[i]*2+1], uvs[ts[i+1]*2], uvs[ts[i+1]*2+1], uvs[ts[i+2]*2], uvs[ts[i+2]*2+1]))
 
 
 def forcesplitverts(vs, ts, ns, uvs):
