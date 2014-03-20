@@ -121,15 +121,10 @@ void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom
 
 	OGL_ASSERT();
 
+	::glEnable(GL_SCISSOR_TEST);
 	Painter::SetClippingRect(pLeft, pTop, pRight, pBottom);
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
-//#ifdef LEPRA_TOUCH
-//	::glScissor(GetCanvas()->GetHeight() - pBottom, GetCanvas()->GetWidth() - pRight,
-//		pBottom - pTop, pRight - pLeft);
-//#else // !iOS
-//	::glScissor(pLeft, GetCanvas()->GetHeight() - pBottom, pRight - pLeft, pBottom - pTop);
-//#endif // iOS/!iOS
 	if (GetCanvas()->GetOutputRotation()%180 != 0)
 	{
 		std::swap(pLeft, pTop);

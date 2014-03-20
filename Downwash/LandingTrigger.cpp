@@ -35,7 +35,7 @@ void LandingTrigger::DidTrigger(Cure::ContextObject* pBody)
 	}
 	if (((DownwashManager*)GetManager()->GetGameManager())->DidFinishLevel())
 	{
-		GetManager()->AddAlarmCallback(this, 0, mBulletTimeDuration, 0);
+		GetManager()->AddGameAlarmCallback(this, 0, mBulletTimeDuration, 0);
 	}
 }
 

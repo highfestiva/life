@@ -26,6 +26,9 @@ public:
 	void AddPanic(float pPanic);
 	float mLevelSpeed;
 	float mPanicLevel;
+	str mVillain;
+	float mDangerousness;
+	bool mDidGetToTown;
 
 protected:
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);

@@ -510,8 +510,15 @@ UiTbc::FontManager::FontId GameUiManager::SetScaleFont(float pScale)
 	str lFont;
 	CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 	double lFontHeight;
-	CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
-	lFontHeight *= pScale;
+	if (pScale > 0)
+	{
+		CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		lFontHeight *= pScale;
+	}
+	else
+	{
+		lFontHeight = -pScale;
+	}
 	int lFontFlags;
 	CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
 	return mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);

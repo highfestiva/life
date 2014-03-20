@@ -776,7 +776,7 @@ void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chunk
 			}
 			x->second->ForceSend();
 		}
-		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength*0.1f);
+		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength*0.1f, GetTimeManager()->GetNormalFrameTime());
 	}
 }
 
@@ -2133,17 +2133,10 @@ void DownwashManager::DrawStick(Touchstick* pStick)
 	}
 
 	const PixelRect lArea = pStick->GetArea();
-	std::vector<Vector2DF> lBoardShape;
-	lBoardShape.push_back(Vector2DF((float)lArea.GetCenterX(), (float)lArea.GetCenterY()));
-	lBoardShape.push_back(Vector2DF((float)lArea.mLeft, (float)lArea.mBottom));
-	lBoardShape.push_back(Vector2DF((float)lArea.mRight, (float)lArea.mBottom));
-	lBoardShape.push_back(Vector2DF((float)lArea.mRight, (float)lArea.mTop));
 	const int lBoardRadius = lArea.GetWidth()/2;
-	UiTbc::RectComponent::AddRadius(lBoardShape, lArea.mLeft+lBoardRadius, lArea.mTop+lBoardRadius, lBoardRadius, 0, +PIF/2);
-	lBoardShape.push_back(lBoardShape[1]);
 	mUiManager->GetPainter()->SetColor(Color(15, 10, 5));
 	mUiManager->GetPainter()->SetAlphaValue(192);
-	mUiManager->GetPainter()->DrawFan(lBoardShape, true);
+	mUiManager->GetPainter()->DrawArc(lArea.GetCenterX(), lArea.GetCenterY(), lBoardRadius*2, lBoardRadius*2, 0, 360, true);
 	mUiManager->GetPainter()->SetAlphaValue(255);
 
 	const int ow = lArea.GetWidth();
@@ -2449,11 +2442,12 @@ void DownwashManager::RendererTextureLoadCallback(UiCure::UserRendererImageResou
 
 
 
-void DownwashManager::DisableDepth()
+bool DownwashManager::DisableDepth()
 {
 	mUiManager->GetRenderer()->EnableAllLights(false);
 	mUiManager->GetRenderer()->SetDepthWriteEnabled(false);
 	mUiManager->GetRenderer()->SetDepthTestEnabled(false);
+	return true;
 }
 
 void DownwashManager::EnableDepth()

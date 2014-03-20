@@ -6,6 +6,8 @@
 
 #include "Eater.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/Health.h"
+#include "BaseMachine.h"
 
 
 
@@ -30,7 +32,17 @@ void Eater::OnTrigger(TBC::PhysicsManager::TriggerID, ContextObject* pOtherObjec
 {
 	if (pOtherObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId() == pBodyId)	// Only if whole car enters "goal", not only wheel.
 	{
-		GetManager()->PostKillObject(pOtherObject->GetInstanceId());
+		BaseMachine* lMachine = dynamic_cast<BaseMachine*>(pOtherObject);
+		if (lMachine && !lMachine->mDidGetToTown)
+		{
+			lMachine->mDidGetToTown = true;
+			if (!lMachine->mVillain.empty() && Cure::Health::Get(lMachine) > 0)
+			{
+				((FireManager*)GetManager()->GetGameManager())->OnLetThroughTerrorist(lMachine);
+			}
+		}
+
+		//GetManager()->PostKillObject(pOtherObject->GetInstanceId());
 	}
 }
 

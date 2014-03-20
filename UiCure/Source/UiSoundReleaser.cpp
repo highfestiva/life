@@ -77,6 +77,7 @@ void SoundReleaser::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 	}
 	else
 	{
+		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }
@@ -91,6 +92,7 @@ void SoundReleaser::LoadPlaySound2d(UiCure::UserSound2dResource* pSoundResource)
 	}
 	else
 	{
+		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }

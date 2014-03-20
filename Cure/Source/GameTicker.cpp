@@ -175,6 +175,13 @@ void GameTicker::PhysicsTick()
 {
 	LEPRA_MEASURE_SCOPE(Physics);
 
+	bool lStopPhysics;
+	CURE_RTVAR_GET(lStopPhysics, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
+	if (lStopPhysics)
+	{
+		return;
+	}
+
 	mPhysicsManager->InitCurrentThread();
 
 	int lMicroSteps;
@@ -188,19 +195,17 @@ void GameTicker::PhysicsTick()
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedMicroStepCount, lStepIncrement);
 	}*/
-	{
-		LEPRA_MEASURE_SCOPE(PreSteps);
-		mPhysicsManager->PreSteps();
-	}
 	bool lFastAlgo;
 	CURE_RTVAR_GET(lFastAlgo, =, GetSettings(), RTVAR_PHYSICS_FASTALGO, true);
 	bool lNoClip;
 	CURE_RTVAR_GET(lNoClip, =, GetSettings(), RTVAR_PHYSICS_NOCLIP, false);
-	bool lStopPhysics;
-	CURE_RTVAR_GET(lStopPhysics, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
+	{
+		LEPRA_MEASURE_SCOPE(PreSteps);
+		mPhysicsManager->PreSteps();
+	}
 	try
 	{
-		for (int x = 0; !lStopPhysics && x < lAffordedMicroStepCount; ++x)
+		for (int x = 0; x < lAffordedMicroStepCount; ++x)
 		{
 			WillMicroTick(lStepIncrement);	// Ticks engines, so needs to be run every physics step.
 			if (lFastAlgo)

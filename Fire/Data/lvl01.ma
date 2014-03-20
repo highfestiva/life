@@ -1,6 +1,6 @@
 //Maya ASCII 2014 scene
 //Name: lvl01.ma
-//Last modified: Thu, Mar 13, 2014 09:27:07 PM
+//Last modified: Wed, Mar 19, 2014 02:44:03 PM
 //Codeset: 1252
 requires maya "2014";
 currentUnit -l centimeter -a degree -t film;
@@ -11,8 +11,8 @@ fileInfo "cutIdentifier" "201307170459-880822";
 fileInfo "osv" "Microsoft Windows 7 Home Premium Edition, 64-bit Windows 7 Service Pack 1 (Build 7601)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" -3.256429061303395 16.618851177864634 1.5221407317716062 ;
-	setAttr ".r" -type "double3" -28.538352729905174 -2.6000000000010961 -7.9595805363161197e-016 ;
+	setAttr ".t" -type "double3" -12.050588326359588 45.874484823875619 94.729615192818102 ;
+	setAttr ".r" -type "double3" -21.33835272989576 -13.400000000002954 0 ;
 	setAttr ".rp" -type "double3" 0 -3.6637359812630166e-015 7.1054273576010019e-015 ;
 	setAttr ".rpt" -type "double3" 7.5981871650220083e-014 1.6471638655843653e-014 1.307148822229979e-013 ;
 createNode camera -s -n "perspShape" -p "persp";
@@ -20,7 +20,7 @@ createNode camera -s -n "perspShape" -p "persp";
 	setAttr ".rnd" no;
 	setAttr ".fl" 34.999999999999979;
 	setAttr ".fcp" 3000;
-	setAttr ".coi" 56.790800554016641;
+	setAttr ".coi" 493.5067382075847;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -206,14 +206,13 @@ createNode mesh -n "phys_pos_path_Shape2" -p "phys_pos_path_2";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
 createNode transform -n "phys_trig_car_eater" -p "m_ground";
-	setAttr ".t" -type "double3" -23.916619913957845 -42.950674575095093 -485.00243587512693 ;
+	setAttr ".t" -type "double3" -51.591558209743766 -56.084877096575681 -498.36547821042615 ;
 	setAttr ".r" -type "double3" 10.924542173943722 23.613028838060981 4.4209227556696788 ;
 	setAttr ".s" -type "double3" 0.99999999999999978 0.99999999999999967 0.99999999999999944 ;
-	setAttr ".rp" -type "double3" -169.38882850204763 126.51794647239598 439.25478023407203 ;
-	setAttr ".rpt" -type "double3" 193.30544841600536 -83.567271897300913 45.747655641054948 ;
-	setAttr ".sp" -type "double3" -169.3888285020476 126.51794647239603 439.2547802340722 ;
-	setAttr ".spt" -type "double3" 2.8421709430404001e-014 -5.6843418860807996e-014 
-		-2.8421709430403992e-013 ;
+	setAttr ".rpt" -type "double3" -5.6843418860808015e-014 1.4210854715202004e-014 
+		0 ;
+	setAttr ".spt" -type "double3" -2.5243548967072378e-029 -7.1054273576009918e-014 
+		-3.4106051316484708e-013 ;
 createNode mesh -n "phys_trig_car_eaterShape" -p "phys_trig_car_eater";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -226,7 +225,7 @@ createNode mesh -n "phys_trig_car_eaterShape" -p "phys_trig_car_eater";
 createNode transform -n "m_background" -p "m_ground";
 	setAttr ".t" -type "double3" -115.97009083668138 78.447098743609132 -263.76063053636568 ;
 	setAttr ".r" -type "double3" 10.924542173943722 23.613028838060981 4.4209227556696788 ;
-	setAttr ".s" -type "double3" 0.99999999999999978 0.99999999999999967 0.99999999999999944 ;
+	setAttr ".s" -type "double3" 1.2 1.2 1.2 ;
 	setAttr ".rp" -type "double3" -5.2479687278070362 -31.453758211100105 296.91042320795759 ;
 	setAttr ".rpt" -type "double3" 121.21805956448839 -46.993340532509002 -33.149792671591918 ;
 	setAttr ".sp" -type "double3" -5.247968727807037 -31.453758211100119 296.91042320795776 ;
@@ -364,9 +363,9 @@ createNode polyCube -n "polyCube1";
 	setAttr ".d" 7;
 	setAttr ".cuv" 4;
 createNode polyCube -n "polyCube2";
-	setAttr ".w" 50;
-	setAttr ".h" 50;
-	setAttr ".d" 50;
+	setAttr ".w" 150;
+	setAttr ".h" 150;
+	setAttr ".d" 150;
 	setAttr ".cuv" 4;
 createNode polyPlane -n "polyPlane2";
 	setAttr ".ax" -type "double3" 0 0 1 ;
@@ -460,9 +459,6 @@ createNode polyCut -n "polyCut6";
 	setAttr ".pc" -type "double3" 15.385313170420826 94.828449161926329 -11.174437034775456 ;
 	setAttr ".ro" -type "double3" -147.68554270418667 59.845975621024031 11.060977297995718 ;
 	setAttr ".ps" -type "double2" 235.06352996826172 78.141681671142578 ;
-createNode script -n "rg_export";
-	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2014-03-13T21:27:06.876000";
 createNode hyperGraphInfo -n "nodeEditorPanel1Info";
 createNode hyperView -n "hyperView1";
 	setAttr ".dag" no;
@@ -470,6 +466,9 @@ createNode hyperLayout -n "hyperLayout1";
 	setAttr ".ihi" 0;
 	setAttr ".hyp[0].nvs" 1920;
 	setAttr ".anf" yes;
+createNode script -n "rg_export";
+	addAttr -ci true -sn "time" -ln "time" -dt "string";
+	setAttr ".time" -type "string" "2014-03-19T14:44:02.830000";
 select -ne :time1;
 	setAttr ".o" 1;
 	setAttr ".unw" 1;
@@ -572,7 +571,6 @@ connectAttr "polyCut5.out" "polyCut6.ip";
 connectAttr "m_groundShape.wm" "polyCut6.mp";
 connectAttr "hyperView1.msg" "nodeEditorPanel1Info.b[0]";
 connectAttr "hyperLayout1.msg" "hyperView1.hl";
-connectAttr "rg_export.msg" "hyperLayout1.hyp[0].dn";
 connectAttr "phong1SG.pa" ":renderPartition.st" -na;
 connectAttr "phong2SG.pa" ":renderPartition.st" -na;
 connectAttr "phys_groundShape.iog" ":initialShadingGroup.dsm" -na;

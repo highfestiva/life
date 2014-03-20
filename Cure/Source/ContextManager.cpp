@@ -254,6 +254,12 @@ void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, floa
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
 }
 
+void ContextManager::AddGameAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
+{
+	pSeconds /= ((const GameManager*)mGameManager)->GetTimeManager()->GetRealTimeRatio();
+	AddAlarmCallback(pObject, pAlarmId, pSeconds, pExtraData);
+}
+
 void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
 {
 	ScopeLock lLock(&mAlarmMutex);

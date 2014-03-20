@@ -61,7 +61,7 @@ void Npc::SetAvatarId(Cure::GameObjectId pAvatarId)
 void Npc::StartCreateAvatar(float pTime)
 {
 	GetManager()->DisableTickCallback(this);
-	GetManager()->AddAlarmCallback(this, 5, pTime, 0);
+	GetManager()->AddGameAlarmCallback(this, 5, pTime, 0);
 }
 
 

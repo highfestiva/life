@@ -1,6 +1,6 @@
 //Maya ASCII 2014 scene
 //Name: lvl03.ma
-//Last modified: Thu, Mar 13, 2014 09:15:43 PM
+//Last modified: Wed, Mar 19, 2014 02:46:41 PM
 //Codeset: 1252
 requires maya "2014";
 currentUnit -l centimeter -a degree -t film;
@@ -11,8 +11,8 @@ fileInfo "cutIdentifier" "201307170459-880822";
 fileInfo "osv" "Microsoft Windows 7 Home Premium Edition, 64-bit Windows 7 Service Pack 1 (Build 7601)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 95.519754311825579 99.52296851643608 118.2398233635699 ;
-	setAttr ".r" -type "double3" -15.938352729954648 11.000000000004681 2.0250525957655621e-016 ;
+	setAttr ".t" -type "double3" 173.15826889774411 154.41810440985202 358.83188669311221 ;
+	setAttr ".r" -type "double3" -28.538352729966526 22.60000000000273 0 ;
 	setAttr ".rp" -type "double3" -7.1054273576010019e-015 -3.5527136788005009e-015 
 		7.1054273576010019e-015 ;
 	setAttr ".rpt" -type "double3" 8.9965712626127202e-014 -4.821627051952355e-015 2.79131386430786e-014 ;
@@ -21,7 +21,7 @@ createNode camera -s -n "perspShape" -p "persp";
 	setAttr ".rnd" no;
 	setAttr ".fl" 34.999999999999979;
 	setAttr ".fcp" 3000;
-	setAttr ".coi" 458.04203623152364;
+	setAttr ".coi" 480.29513529595806;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -252,7 +252,8 @@ createNode transform -n "phys_pos_path_5" -p "m_ground";
 createNode transform -n "phys_pos_path_8" -p "m_ground";
 	setAttr ".t" -type "double3" -100.52313206194862 -29.096193382078351 -77.420745282381759 ;
 createNode transform -n "phys_trig_car_eater" -p "m_ground";
-	setAttr ".t" -type "double3" 53.153947706062141 -55.804415148071101 23.549316158085354 ;
+	setAttr ".t" -type "double3" 20.97509307842121 -83.01417693772737 23.549316158085361 ;
+	setAttr ".r" -type "double3" -7.4482373319129955 10.752422392767954 -1.3971884679846636 ;
 createNode mesh -n "phys_trig_car_eaterShape" -p "phys_trig_car_eater";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -391,9 +392,9 @@ createNode polySphere -n "polySphere1";
 	setAttr ".sa" 6;
 	setAttr ".sh" 6;
 createNode polyCube -n "polyCube2";
-	setAttr ".w" 50;
-	setAttr ".h" 50;
-	setAttr ".d" 50;
+	setAttr ".w" 150;
+	setAttr ".h" 150;
+	setAttr ".d" 150;
 	setAttr ".cuv" 4;
 createNode phong -n "mat_env";
 	setAttr ".dc" 1;
@@ -878,7 +879,7 @@ createNode polyTweak -n "polyTweak17";
 	setAttr ".tk[7]" -type "float3" 8.3777838 -3.0660045e-015 13.808057 ;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2014-03-13T21:15:43.448000";
+	setAttr ".time" -type "string" "2014-03-19T14:46:40.532000";
 select -ne :time1;
 	setAttr ".o" 1;
 	setAttr ".unw" 1;

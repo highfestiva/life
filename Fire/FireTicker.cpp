@@ -31,8 +31,9 @@ FireTicker::FireTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager*
 {
 	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
 
+	AddBackedRtvar(_T(RTVAR_GAME_FIRSTRUN));
 	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
 	AddBackedRtvar(_T(RTVAR_UI_SOUND_MASTERVOLUME));
 }
@@ -107,8 +108,8 @@ bool FireTicker::OpenUiManager()
 		if (mUiManager->GetCanvas()->GetHeight() < 600)
 		{
 			double lFontHeight;
-			CURE_RTVAR_GET(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
-			if (lFontHeight > 29.0)
+			CURE_RTVAR_GET(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
+			if (lFontHeight > 47.0)
 			{
 				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/600.0;
 				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);

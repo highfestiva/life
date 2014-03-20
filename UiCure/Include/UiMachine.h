@@ -67,6 +67,7 @@ private:
 	float mBlinkTime;
 	float mMeshOffsetTime;
 	float mMeshRotateTime;
+	bool mPreventEngineSounds;
 
 	LOG_CLASS_DECLARE();
 };

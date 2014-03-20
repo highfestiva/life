@@ -37,7 +37,8 @@ Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, G
 	mBurnEmitter(0),
 	mBlinkTime(0),
 	mMeshOffsetTime(0),
-	mMeshRotateTime(0)
+	mMeshRotateTime(0),
+	mPreventEngineSounds(false)
 {
 	EnableMeshSlide(true);
 }
@@ -75,6 +76,7 @@ BurnEmitter* Machine::GetBurnEmitter() const
 
 void Machine::DeleteEngineSounds()
 {
+	mPreventEngineSounds = true;
 	TagSoundTable::iterator x = mEngineSoundTable.begin();
 	for (; x != mEngineSoundTable.end(); ++x)
 	{
@@ -413,7 +415,10 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TB
 	float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex)
 {
 	// Sound controlled by engine.
-
+	if (mPreventEngineSounds)
+	{
+		return;
+	}
 	if (pTag.mFloatValueList.size() != 1+9+pTag.mEngineIndexList.size() ||
 		pTag.mStringValueList.size() != 1 ||
 		pTag.mBodyIndexList.size() != 1 ||

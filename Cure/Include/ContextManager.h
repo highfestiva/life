@@ -68,6 +68,7 @@ public:
 	void EnableMicroTickCallback(ContextObject* pObject);
 	void DisableMicroTickCallback(ContextObject* pObject);
 	void AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);
+	void AddGameAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);	// Scale time by RTR.
 	void CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId);
 	void CancelPendingAlarmCallbacks(ContextObject* pObject);
 

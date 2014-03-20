@@ -1,6 +1,6 @@
 //Maya ASCII 2014 scene
 //Name: lvl02.ma
-//Last modified: Thu, Mar 13, 2014 10:01:34 PM
+//Last modified: Wed, Mar 19, 2014 02:44:56 PM
 //Codeset: 1252
 requires maya "2014";
 currentUnit -l centimeter -a degree -t film;
@@ -11,8 +11,8 @@ fileInfo "cutIdentifier" "201307170459-880822";
 fileInfo "osv" "Microsoft Windows 7 Home Premium Edition, 64-bit Windows 7 Service Pack 1 (Build 7601)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 17.032173552622634 66.553716135545443 168.09781054455911 ;
-	setAttr ".r" -type "double3" -15.338352729922928 5.7999999999961318 -1.9980754056984917e-016 ;
+	setAttr ".t" -type "double3" -101.28913381031919 59.777973093977266 118.01315478182255 ;
+	setAttr ".r" -type "double3" -17.738352729919615 -6.2000000000064235 0 ;
 	setAttr ".rp" -type "double3" -3.5527136788005009e-015 3.5527136788005009e-015 0 ;
 	setAttr ".rpt" -type "double3" 7.0001516644994774e-014 9.6979627515918769e-015 1.3291005795968145e-013 ;
 createNode camera -s -n "perspShape" -p "persp";
@@ -118,7 +118,7 @@ createNode mesh -n "m_phys_groundShape" -p "m_ground";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr -s 20 ".pt";
+	setAttr -s 19 ".pt";
 	setAttr ".pt[0]" -type "float3" -2.9617164 -0.22675152 2.3180945 ;
 	setAttr ".pt[1]" -type "float3" -0.0021378757 -1.1038486 -0.11070782 ;
 	setAttr ".pt[2]" -type "float3" -0.0021378757 -1.1038486 -0.11070782 ;
@@ -231,7 +231,7 @@ createNode mesh -n "phys_pos_path_Shape2" -p "phys_pos_path_2";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
 createNode transform -n "phys_trig_car_eater" -p "m_ground";
-	setAttr ".t" -type "double3" -14.962897123798518 -3.7276792957709919 -525.12521114979165 ;
+	setAttr ".t" -type "double3" -14.932862500690696 14.277638934781834 -571.40586338483251 ;
 	setAttr ".r" -type "double3" 5.7271794203898718 0.0057635012110320207 -0.11038926109185776 ;
 	setAttr ".s" -type "double3" 1 1.0000000000000004 0.99999999999999978 ;
 	setAttr ".rpt" -type "double3" -9.2287288921966137e-016 -2.8421709430404007e-014 
@@ -365,9 +365,9 @@ createNode polyCube -n "polyCube1";
 	setAttr ".d" 7;
 	setAttr ".cuv" 4;
 createNode polyCube -n "polyCube2";
-	setAttr ".w" 50;
-	setAttr ".h" 50;
-	setAttr ".d" 50;
+	setAttr ".w" 150;
+	setAttr ".h" 150;
+	setAttr ".d" 150;
 	setAttr ".cuv" 4;
 createNode polyPlane -n "polyPlane3";
 	setAttr ".uvs" -type "string" "map_ground";
@@ -483,7 +483,7 @@ createNode hyperLayout -n "hyperLayout1";
 	setAttr ".anf" yes;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2014-03-13T22:01:34.176000";
+	setAttr ".time" -type "string" "2014-03-19T14:44:55.623000";
 select -ne :time1;
 	setAttr ".o" 1;
 	setAttr ".unw" 1;

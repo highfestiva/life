@@ -1012,6 +1012,37 @@ void Painter::FillTriangle(const PixelCoord& pPoint1, float pU1, float pV1,
 	             (float)pPoint3.x, (float)pPoint3.y, pU3, pV3, pImageID);
 }
 
+void Painter::AddRadius(std::vector<Vector2DF>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle)
+{
+	const float lAngleDiff = pEndAngle-pStartAngle;
+	const int lCount = (int)(r * ::fabs(lAngleDiff) * 0.256f) + 3;
+	const float lAngleStep = lAngleDiff/(lCount-1);
+	float a = pStartAngle;
+	for (int i = 0; i < lCount; ++i, a+=lAngleStep)
+	{
+		pVertexList.push_back(Vector2DF(x-r*::sin(a), y-r*::cos(a)));
+	}
+}
+
+void Painter::TryAddRadius(std::vector<Vector2DF>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pCurrentCornerBit, int pCornerMask)
+{
+	if (pCornerMask&pCurrentCornerBit)
+	{
+		AddRadius(pVertexList, x, y, r, pStartAngle, pEndAngle);
+	}
+	else
+	{
+		switch (pCurrentCornerBit)
+		{
+			case 1:	x -= r;	y -= r;	break;
+			case 2:	x += r;	y -= r;	break;
+			case 4:	x += r;	y += r;	break;
+			case 8:	x -= r;	y += r;	break;
+		}
+		pVertexList.push_back(Vector2DF((float)x, (float)y));
+	}
+}
+
 void Painter::DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill)
 {
 	if (dx <= 0 || dy <= 0)
@@ -1039,6 +1070,23 @@ void Painter::DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill)
 			lMidY - sin(lAngle)*lYRadius));
 		lAngle += lDeltaAngle;
 	}
+	DrawFan(lCoords, pFill);
+}
+
+void Painter::DrawRoundedRect(const PixelRect& pRect, int pRadius, int pCornerMask, bool pFill)
+{
+	const int x = pRect.GetCenterX();
+	const int y = pRect.GetCenterY();
+	const int dx = pRect.GetWidth()/2;
+	const int dy = pRect.GetHeight()/2;
+	std::vector<Vector2DF> lCoords;
+	lCoords.push_back(Vector2DF((float)x, (float)y));
+	TryAddRadius(lCoords, x-dx+pRadius, y-dy+pRadius, pRadius, +PIF/2, 0,      0x1, pCornerMask);
+	TryAddRadius(lCoords, x+dx-pRadius, y-dy+pRadius, pRadius, 0,      -PIF/2, 0x2, pCornerMask);
+	TryAddRadius(lCoords, x+dx-pRadius, y+dy-pRadius, pRadius, -PIF/2, -PIF,   0x4, pCornerMask);
+	TryAddRadius(lCoords, x-dx+pRadius, y+dy-pRadius, pRadius, +PIF,   +PIF/2, 0x8, pCornerMask);
+	// Back to start.
+	lCoords.push_back(lCoords[1]);
 	DrawFan(lCoords, pFill);
 }
 

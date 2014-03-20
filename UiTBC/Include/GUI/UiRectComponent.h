@@ -22,8 +22,6 @@ namespace UiTbc
 class RectComponent : public Component
 {
 public:
-	typedef std::vector<Vector2DF> VertexList;
-	
 	RectComponent(const str& pName,
 				  Layout* pLayout = 0);
 	RectComponent(const Color& pColor,
@@ -64,10 +62,8 @@ public:
 	int GetCornerRadius() const;
 	void SetCornerRadius(int pRadius);
 	void SetCornerRadiusMask(int pMask);
-	static void AddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle);
 
 protected:
-	void TryAddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pMask);
 	bool IsHollow();
 	bool IsShaded();
 

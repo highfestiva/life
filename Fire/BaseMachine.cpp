@@ -26,7 +26,9 @@ namespace Fire
 BaseMachine::BaseMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
 	Parent(pResourceManager, pClassId, pUiManager, pLauncher),
 	mLevelSpeed(1),
-	mPanicLevel(0)
+	mPanicLevel(0),
+	mDangerousness(0),
+	mDidGetToTown(false)
 {
 	Cure::Health::Set(this, 1);
 }
@@ -73,7 +75,7 @@ void BaseMachine::OnDie()
 	Parent::OnDie();
 	float lVehicleRemoveDelay;
 	CURE_RTVAR_GET(lVehicleRemoveDelay, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 9.0);
-	mManager->AddAlarmCallback(this, START_SINKING_ID, lVehicleRemoveDelay, 0);
+	mManager->AddGameAlarmCallback(this, START_SINKING_ID, lVehicleRemoveDelay, 0);
 }
 
 

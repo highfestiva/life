@@ -51,8 +51,8 @@ void BulletTime::DidTrigger(Cure::ContextObject* pBody)
 		Cure::MessageStatus::INFO_COMMAND,
 		wstrutil::Encode(mClientStartCommand));
 
-	GetManager()->AddAlarmCallback(this, 0, mBulletTimeDuration, 0);
-	GetManager()->AddAlarmCallback(this, 1, std::max(mBulletTimeDuration*11, 60.0f), 0);
+	GetManager()->AddGameAlarmCallback(this, 0, mBulletTimeDuration, 0);
+	GetManager()->AddGameAlarmCallback(this, 1, std::max(mBulletTimeDuration*11, 60.0f), 0);
 }
 
 

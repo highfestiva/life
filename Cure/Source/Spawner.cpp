@@ -9,6 +9,7 @@
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/PhysicsSpawner.h"
+#include "../Include/RuntimeVariable.h"
 
 
 
@@ -23,9 +24,9 @@ Spawner::Spawner(ContextManager* pManager):
 {
 	pManager->AddLocalObject(this);
 	pManager->EnableTickCallback(this);
-	mManager->AddAlarmCallback(this, 0, 0.5f, 0);	// Create.
-	mManager->AddAlarmCallback(this, 1, 0.6f, 0);	// Destroy.
-	mManager->AddAlarmCallback(this, 2, 0.7f, 0);	// Recreate.
+	mManager->AddGameAlarmCallback(this, 0, 0.5f, 0);	// Create.
+	mManager->AddGameAlarmCallback(this, 1, 0.6f, 0);	// Destroy.
+	mManager->AddGameAlarmCallback(this, 2, 0.7f, 0);	// Recreate.
 }
 
 Spawner::~Spawner()
@@ -160,12 +161,12 @@ void Spawner::OnCreate(float pCreateInterval, bool pHasRecreate)
 	if (!pHasRecreate)
 	{
 		mRecreateTimer.Stop();	// Make sure re-create starts over when we're done.
-		GetManager()->AddAlarmCallback(this, 0, pCreateInterval, 0);
+		GetManager()->AddGameAlarmCallback(this, 0, pCreateInterval, 0);
 	}
 	else if (pCreateInterval < 0 && (int)mChildArray.size() < GetSpawnCount())
 	{
 		mRecreateTimer.Stop();	// Make sure re-create starts over when we're done.
-		GetManager()->AddAlarmCallback(this, 0, -pCreateInterval, 0);
+		GetManager()->AddGameAlarmCallback(this, 0, -pCreateInterval, 0);
 	}
 }
 
@@ -185,7 +186,7 @@ void Spawner::OnDestroy(float pDestroyInterval)
 			GetManager()->DeleteObject(lObject->GetInstanceId());
 		}
 	}
-	GetManager()->AddAlarmCallback(this, 1, pDestroyInterval, 0);
+	GetManager()->AddGameAlarmCallback(this, 1, pDestroyInterval, 0);
 }
 
 void Spawner::OnRecreate(float pRecreateInterval)
@@ -199,11 +200,17 @@ void Spawner::OnRecreate(float pRecreateInterval)
 			Create();
 		}
 	}
-	GetManager()->AddAlarmCallback(this, 2, 0.5f, 0);
+	GetManager()->AddGameAlarmCallback(this, 2, 0.5f, 0);
 }
 
 void Spawner::Create()
 {
+	bool lIsPhysicsHalted;
+	CURE_RTVAR_GET(lIsPhysicsHalted, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
+	if (lIsPhysicsHalted)
+	{
+		return;
+	}
 	const str lSpawnObject = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
 	if (!lSpawnObject.empty())
 	{

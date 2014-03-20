@@ -252,6 +252,7 @@ void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
 
 void OpenGLRenderer::DoSetClippingRect(const PixelRect& pRect)
 {
+	::glEnable(GL_SCISSOR_TEST);
 	::glScissor(pRect.mLeft, GetScreen()->GetActualHeight() - pRect.mBottom, pRect.GetWidth(), pRect.GetHeight());
 	OGL_FAST_ASSERT();
 }

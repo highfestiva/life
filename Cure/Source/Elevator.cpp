@@ -143,7 +143,7 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 		if (mActiveTrigger && mActiveTrigger->GetType() >= TBC::PhysicsTrigger::TRIGGER_MOVEMENT)
 		{
 			// Run engine for some time before *forcing* deactivation.
-			GetManager()->AddAlarmCallback(this, pAlarmId, 60, 0);
+			GetManager()->AddGameAlarmCallback(this, pAlarmId, 60, 0);
 		}
 	}
 	else
@@ -184,7 +184,7 @@ void Elevator::Trig(const TBC::PhysicsTrigger* pTrigger)
 	{
 		const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = pTrigger->GetControlledEngine(y);
 		log_volatile(mLog.Debugf(_T("TRIGGER - trigging function %s."), lEngineTrigger.mFunction.c_str()));
-		GetManager()->AddAlarmCallback(this, 0, lEngineTrigger.mDelay, (void*)&lEngineTrigger);
+		GetManager()->AddGameAlarmCallback(this, 0, lEngineTrigger.mDelay, (void*)&lEngineTrigger);
 	}
 }
 

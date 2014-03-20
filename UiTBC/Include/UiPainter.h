@@ -196,9 +196,12 @@ public:
 		const PixelCoord& pPoint2, float pU2, float pV2,
 		const PixelCoord& pPoint3, float pU3, float pV3, ImageID pImageID);
 
-	void DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill);
 	virtual void DrawFan(const std::vector<Vector2DF> pCoords, bool pFill) = 0;
 	virtual void DrawImageFan(ImageID pImageID, const std::vector<Vector2DF>& pCoords, const std::vector<Vector2DF>& pTexCoords) = 0;
+	static void AddRadius(std::vector<Vector2DF>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle);
+	static void TryAddRadius(std::vector<Vector2DF>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pCurrentCornerBit, int pCornerMask);
+	void DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill);
+	void DrawRoundedRect(const PixelRect& pRect, int pRadius, int pCornerMask, bool pFill);
 
 	// Returns an ID to the added bitmap. Returns 0 if error. 
 	// Alpha buffer or bitmap may be NULL.

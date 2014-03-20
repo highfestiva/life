@@ -127,19 +127,7 @@ void RectComponent::RepaintBackground(Painter* pPainter)
 			pPainter->SetColor(mColor[0], 0);
 			pPainter->SetAlphaValue(mColor[0].mAlpha);
 			PixelRect lRect(GetScreenPos(), GetScreenPos() + GetSize());
-			const int x = lRect.GetCenterX();
-			const int y = lRect.GetCenterY();
-			const int dx = lRect.GetWidth()/2;
-			const int dy = lRect.GetHeight()/2;
-			std::vector<Vector2DF> lCoords;
-			lCoords.push_back(Vector2DF((float)x, (float)y));
-			TryAddRadius(lCoords, x-dx+mCornerRadius, y-dy+mCornerRadius, mCornerRadius, +PIF/2, 0,      0x1);
-			TryAddRadius(lCoords, x+dx-mCornerRadius, y-dy+mCornerRadius, mCornerRadius, 0,      -PIF/2, 0x2);
-			TryAddRadius(lCoords, x+dx-mCornerRadius, y+dy-mCornerRadius, mCornerRadius, -PIF/2, -PIF,   0x4);
-			TryAddRadius(lCoords, x-dx+mCornerRadius, y+dy-mCornerRadius, mCornerRadius, +PIF,   +PIF/2, 0x8);
-			// Back to start.
-			lCoords.push_back(lCoords[1]);
-			pPainter->DrawFan(lCoords, true);
+			pPainter->DrawRoundedRect(lRect, mCornerRadius, mCornerRadiusMask, true);
 		}
 	}
 
@@ -288,37 +276,6 @@ void RectComponent::SetCornerRadius(int pRadius)
 void RectComponent::SetCornerRadiusMask(int pMask)
 {
 	mCornerRadiusMask = pMask;
-}
-
-void RectComponent::AddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle)
-{
-	const float lAngleDiff = pEndAngle-pStartAngle;
-	const int lCount = (int)(r * ::fabs(lAngleDiff) * 0.256f) + 3;
-	const float lAngleStep = lAngleDiff/(lCount-1);
-	float a = pStartAngle;
-	for (int i = 0; i < lCount; ++i, a+=lAngleStep)
-	{
-		pVertexList.push_back(Vector2DF(x-r*::sin(a), y-r*::cos(a)));
-	}
-}
-
-void RectComponent::TryAddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pMask)
-{
-	if (mCornerRadiusMask&pMask)
-	{
-		AddRadius(pVertexList, x, y, r, pStartAngle, pEndAngle);
-	}
-	else
-	{
-		switch (pMask)
-		{
-			case 1:	x -= r;	y -= r;	break;
-			case 2:	x += r;	y -= r;	break;
-			case 4:	x += r;	y += r;	break;
-			case 8:	x -= r;	y += r;	break;
-		}
-		pVertexList.push_back(Vector2DF((float)x, (float)y));
-	}
 }
 
 

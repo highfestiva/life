@@ -13,6 +13,7 @@
 #include "../../TBC/Include/PhysicsTrigger.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
+#include "../Include/RuntimeVariable.h"
 #include "../Include/TimeManager.h"
 
 
@@ -56,6 +57,12 @@ void CppContextObject::StabilizeTick()
 	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
 	const TBC::ChunkyClass* lClass = GetClass();
 	if (!lPhysics || !lClass)
+	{
+		return;
+	}
+	bool lIsPhysicsStopped;
+	CURE_RTVAR_GET(lIsPhysicsStopped, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
+	if (lIsPhysicsStopped)
 	{
 		return;
 	}

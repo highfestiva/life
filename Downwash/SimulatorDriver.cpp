@@ -23,8 +23,8 @@ SimulatorDriver::SimulatorDriver(Cure::GameManager* pGame, Cure::GameObjectId pS
 	mSimulatorId(pSimulatorId)
 {
 	pGame->GetContext()->AddLocalObject(this);
-	pGame->GetContext()->AddAlarmCallback(this, 0, 5.0f, 0);
-	pGame->GetContext()->AddAlarmCallback(this, 1, 5.7f, 0);
+	pGame->GetContext()->AddGameAlarmCallback(this, 0, 5.0f, 0);
+	pGame->GetContext()->AddGameAlarmCallback(this, 1, 5.7f, 0);
 }
 
 SimulatorDriver::~SimulatorDriver()
@@ -52,8 +52,8 @@ void SimulatorDriver::OnAlarm(int pAlarmId, void* pExtraData)
 		if (r >= lMiddle+1) lForce = +1;
 		lSimulator->GetPhysics()->SetEnginePower(pAlarmId, lForce);
 	}
-	//GetManager()->AddAlarmCallback(this, pAlarmId, Random::Uniform(0.5f, 1.5f), 0);
-	GetManager()->AddAlarmCallback(this, pAlarmId, 1.5f, 0);
+	//GetManager()->AddGameAlarmCallback(this, pAlarmId, Random::Uniform(0.5f, 1.5f), 0);
+	GetManager()->AddGameAlarmCallback(this, pAlarmId, 1.5f, 0);
 }
 
 

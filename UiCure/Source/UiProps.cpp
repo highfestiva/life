@@ -53,7 +53,7 @@ void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVel
 		Random::Uniform(-pAngularRange, pAngularRange),
 		Random::Uniform(-pAngularRange*0.1f, pAngularRange*0.1f));
 	mLifeTime = pTime;
-	GetManager()->AddAlarmCallback(this, 5, mLifeTime, 0);
+	GetManager()->AddGameAlarmCallback(this, 5, mLifeTime, 0);
 }
 
 void Props::SetFadeOutTime(float pTime)

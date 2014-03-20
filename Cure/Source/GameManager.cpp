@@ -238,7 +238,7 @@ void GameManager::DeleteContextObject(GameObjectId pInstanceId)
 
 void GameManager::DeleteContextObjectDelay(ContextObject* pObject, float pDelay)
 {
-	mContext->AddAlarmCallback(pObject, ContextManager::SYSTEM_ALARM_ID_KILL, pDelay, 0);
+	mContext->AddGameAlarmCallback(pObject, ContextManager::SYSTEM_ALARM_ID_KILL, pDelay, 0);
 }
 
 void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId)

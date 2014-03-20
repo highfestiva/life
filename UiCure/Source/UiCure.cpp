@@ -73,7 +73,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLIPFAR, 3000.0);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_SHADOWS, _T("Volumes"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_SHADOWDEVIATION, 0.0);
-	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_PAINTMODE, _T("Normal"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_FONTFLAGS, 0);

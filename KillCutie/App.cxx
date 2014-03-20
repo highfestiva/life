@@ -1894,20 +1894,11 @@ void App::DrawRoundedPolygon(float x, float y, float pRadius, const Color& pColo
 
 	mPenX = (float)x;
 	mPenY = (float)y;
-	const float dx = pRadius * pScaleX;
-	const float dy = pRadius * pScaleY;
-	std::vector<Vector2DF> lCoords;
-	// Start in center.
-	lCoords.push_back(Vector2DF(x, y));
-	UiTbc::RectComponent::AddRadius(lCoords, (int)Math::Round(x-dx)+pCornerRadius, (int)Math::Round(y-dy)+pCornerRadius, pCornerRadius, +PIF/2, 0);
-	UiTbc::RectComponent::AddRadius(lCoords, (int)Math::Round(x+dx)-pCornerRadius, (int)Math::Round(y-dy)+pCornerRadius, pCornerRadius, 0,      -PIF/2);
-	UiTbc::RectComponent::AddRadius(lCoords, (int)Math::Round(x+dx)-pCornerRadius, (int)Math::Round(y+dy)-pCornerRadius, pCornerRadius, -PIF/2, -PIF);
-	UiTbc::RectComponent::AddRadius(lCoords, (int)Math::Round(x-dx)+pCornerRadius, (int)Math::Round(y+dy)-pCornerRadius, pCornerRadius, +PIF,   +PIF/2);
-	// Back to start.
-	lCoords.push_back(lCoords[1]);
+	const int dx = (int)(pRadius * pScaleX);
+	const int dy = (int)(pRadius * pScaleY);
 	mUiManager->GetPainter()->SetColor(pColor, 0);
 	mUiManager->GetPainter()->SetAlphaValue(pColor.mAlpha);
-	mUiManager->GetPainter()->DrawFan(lCoords, true);
+	mUiManager->GetPainter()->DrawRoundedRect(PixelRect(x-dx, y-dy, x+dx, y+dx), pCornerRadius, 0xF, true);
 	mUiManager->GetPainter()->SetAlphaValue(255);
 }
 

@@ -39,6 +39,7 @@ namespace Fire
 
 
 class Autopilot;
+class BaseMachine;
 class Level;
 class Sunlight;
 
@@ -61,6 +62,7 @@ public:
 	virtual void SetIsQuitting();
 	virtual void SetFade(float pFadeAmount);
 
+	PixelRect GetRenderableArea() const;
 	virtual bool Render();
 	virtual bool Paint();
 	void PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg);
@@ -71,22 +73,46 @@ public:
 	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
 	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
+	void OnLetThroughTerrorist(BaseMachine* pTerrorist);
 
 	virtual bool DidFinishLevel();
 	virtual str StepLevel(int pCount);
+	str StoreLevelIndex(int pLevelNumber);
 
 	virtual Level* GetLevel() const;
 	virtual int GetCurrentLevelNumber() const;
 
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
-protected:
+	struct TargetInfo
+	{
+		TargetInfo(str pVillain, PixelCoord pXY, float pDangerousness, float pScale):
+			mVillain(pVillain),
+			xy(pXY),
+			mDangerousness(pDangerousness),
+			mIsActive(true),
+			mTime(0),
+			mScale(pScale)
+		{
+		}
+		str mVillain;
+		PixelCoord xy;
+		float mDangerousness;
+		bool mIsActive;
+		float mTime;
+		float mScale;
+	};
+	typedef std::unordered_map<void*, TargetInfo> VillainMap;
+	typedef std::pair<void*, TargetInfo> VillainPair;
+	typedef std::vector<VillainPair> VillainArray;
+
 	virtual bool InitializeUniverse();
 	virtual void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
 	virtual void MoveCamera();
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
 	virtual void HandleShooting();
+	virtual void HandleTargets(float pTime);
 
 	virtual void TickInput();
 	virtual void TickUiInput();
@@ -101,7 +127,9 @@ protected:
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 
-	void OnPauseButton(UiTbc::Button*);
+	void OnBombButton(UiTbc::Button*);
+	void OnPauseButton(UiTbc::Button* pButton);
+	void CreateNextLevelDialog();
 	void OnMenuAlternative(UiTbc::Button* pButton);
 
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
@@ -116,6 +144,7 @@ protected:
 	Sunlight* mSunlight;
 	TransformationF mCameraTransform;
 	UiTbc::Button* mPauseButton;
+	UiTbc::Button* mBombButton;
 	Vector3DF mShootDirection;
 	StopWatch mAllLoadedTimer;
 	StopWatch mSlowmoTimer;
@@ -123,6 +152,9 @@ protected:
 	Vector3DF mStoreAmbient;
 	bool mStoreLightsEnabled;
 	int mKills;
+	int mKillLimit;
+	int mLevelTotalKills;
+	VillainMap mVillainMap;
 
 	LOG_CLASS_DECLARE();
 };
