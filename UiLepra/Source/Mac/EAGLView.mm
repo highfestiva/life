@@ -320,7 +320,7 @@ static EAGLView* gSharedView;
 					return;	// Face up and what not: should not be acted upon!
 				}
 				orientation = UIDeviceOrientationLandscapeRight;
-				angle = 0 + _baseAngle;
+				angle = 180 + _baseAngle;
 			}
  		}
 		isLayoutSet = true;

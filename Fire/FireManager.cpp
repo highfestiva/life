@@ -174,10 +174,6 @@ void FireManager::LoadSettings()
 	CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
-#ifdef LEPRA_DEBUG
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_ENABLE, true);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
-#endif // Debug
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_EMULATETOUCH, true);
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
@@ -1185,7 +1181,7 @@ void FireManager::CreateNextLevelDialog()
 		_T("Great Scott; you are good at this!\n\nRemember to relax between wet jobs."),
 		_T("We sure are lucky to have you on our side.\n\nField work sure beats the office, huh?"),
 		_T("On behalf of all the people in the world:\n\nTHANK YOU!!!"),
-		_T("There might be a bug in our identification software.\nPlease don't worry about it while we remedy.\n\nYou should go on a mission now."),
+		_T("There might be a bug in our terrorist ID software.\nPlease don't worry about it while we remedy.\n\nYou should go on a mission now."),
 		_T("They software guys say the bug might be fixed.\n\nGo kill!"),
 		_T("Everybody dies, but it's nice to see the bad ones go first.\n\nHead out agent!"),
 		_T("Rooting out vermin is your cup of tea.\n\nI'm glad that you are not in working in pesticides."),

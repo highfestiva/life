@@ -11,6 +11,8 @@
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
 		35128A4D147262150006467C /* UiSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A4C147262150006467C /* UiSound.cpp */; };
+		B109F59318DBF07A007052DE /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B109F59218DBF07A007052DE /* StoreKit.framework */; };
+		B109F59518DBF083007052DE /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B109F59418DBF083007052DE /* GameKit.framework */; };
 		B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04914AB36A7007A84E4 /* ContextPath.cpp */; };
 		B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05114AB3720007A84E4 /* xmplay.cpp */; };
 		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
@@ -527,6 +529,8 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		35128A4C147262150006467C /* UiSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSound.cpp; path = ../../UiCure/Source/UiSound.cpp; sourceTree = "<group>"; };
+		B109F59218DBF07A007052DE /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		B109F59418DBF083007052DE /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		B110A04914AB36A7007A84E4 /* ContextPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextPath.cpp; path = ../../Cure/Source/ContextPath.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05114AB3720007A84E4 /* xmplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmplay.cpp; path = ChibiXM/xmplay.cpp; sourceTree = "<group>"; };
 		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
@@ -1223,11 +1227,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
+				B109F59318DBF07A007052DE /* StoreKit.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */,
 				B19A295813A137400051A61C /* OpenAL.framework in Frameworks */,
 				B19A295A13A137400051A61C /* OpenGLES.framework in Frameworks */,
 				B19A29E213A13B9B0051A61C /* QuartzCore.framework in Frameworks */,
+				B109F59518DBF083007052DE /* GameKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1285,6 +1291,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B109F59418DBF083007052DE /* GameKit.framework */,
+				B109F59218DBF07A007052DE /* StoreKit.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				288765FC0DF74451002DB57D /* CoreGraphics.framework */,
@@ -2424,8 +2432,11 @@
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = Z5H6E5KH6Q;
 						SystemCapabilities = {
+							com.apple.GameCenter = {
+								enabled = 1;
+							};
 							com.apple.InAppPurchase = {
-								enabled = 0;
+								enabled = 1;
 							};
 						};
 					};
@@ -3073,6 +3084,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -3087,6 +3099,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
