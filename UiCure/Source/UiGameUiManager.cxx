@@ -221,6 +221,12 @@ bool GameUiManager::OpenRest()
 	}
 	if (lOk)
 	{
+		// Cut sound some slack. Sometimes OpenAL crashes during startup.
+		for (int x = 0; x < 3; ++x)
+		{
+			UiLepra::Core::ProcessMessages();
+			Thread::Sleep(0.001f);
+		}
 		UpdateSettings();
 	}
 

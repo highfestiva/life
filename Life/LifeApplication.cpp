@@ -298,7 +298,7 @@ void Application::TickSleep(double pMainLoopTime) const
 			}
 			if (lSleepTimeLeft < -0.01)
 			{
-				mLog.Warningf(_T("Overslept %f s!"), lSleepTimeLeft);
+				mLog.Warningf(_T("Overslept %f s!"), -lSleepTimeLeft);
 			}
 			//log_volatile(mLog.Debugf(_T("Done tick sleeping, %f s left in sleep loop (measured), %f s reduction, %f s measured."), lSleepTimeLeft, mGameTicker->GetTickTimeReduction(), lSleepTime));
 		}
