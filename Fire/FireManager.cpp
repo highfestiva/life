@@ -87,16 +87,15 @@ struct VillainTypes
 int gPersonalityCount = 0;
 const VillainTypes gVillainTypes[] =
 {
-	{_O("JI9,,/0,5+*~29=:9,", "Terrorist leader"), 100},
-	{_O("]w2qM=z9:=~29=:9,", "Al-Qaeda leader"), 30},
-	{_O("Jg9,,/-,5+*", "Terrorist"), 300},
-	{_O("]P2qM=59:=", "Al-Qaeda"), 270},
-	{_O("[1/11)b05+*", "Communist"), 50},
-	{_O("P\\=$5", "Nazi"), 100},
+	{_O("JI9,,/0,5+*~29=:9,", "Terrorist leader"), 110},
+	{_O("Jg9,,/-,5+*", "Terrorist"), 440},
+	{_O("KX)<(9.,+5(9", "Subversive"), 110},
+	{_O("X<=+;5F+*", "Fascist"), 30},
+	{_O("P\\=$5", "Nazi"), 110},
 	{_O("N>)*50f", "Putin"), 1},
 	{_O("Qo),:9k,9,", "Murderer"), 50},
 	{_O("G:65+*W29<2/'9,", "Whistleblower"), 5},
-	{_O("[%6915 ;=2~]25", "Chemical Ali"), 2},
+	{_O("[%6915 ;=2~]25", "Chemical Ali"), 1},
 	{_O("=32q]+w+=:", "al-Assad"), 1},
 	{_O("Xb)75*h5(9", "Fugitive"), 20},
 	{_O("Jm,9+.}=++9,", "Trespasser"), 20},
@@ -144,7 +143,7 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTRUN, true);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIREDELAY, 1.0);
 	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 30.0);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 25.0);
 }
 
 FireManager::~FireManager()
@@ -193,6 +192,10 @@ void FireManager::SetRenderArea(const PixelRect& pRenderArea)
 bool FireManager::Open()
 {
 	bool lOk = Parent::Open();
+	if (lOk)
+	{
+		mUiManager->GetDisplayManager()->SetCaption(_T("NSAgent"));
+	}
 	if (lOk)
 	{
 		mPauseButton = ICONBTNA("btn_pause.png", "");

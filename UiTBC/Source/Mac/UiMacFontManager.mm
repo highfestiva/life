@@ -106,7 +106,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
 	CGContextSetRGBStrokeColor(textcontext, 1,1,1,0.5);
 #ifdef LEPRA_IOS
-	int y = (pRect.GetHeight() - mCurrentFont->mSize) / 2;
+	int y = (pRect.GetHeight() - ((MacFont*)mCurrentFont)->mActualSize) / 8;
 	UIGraphicsPushContext(textcontext);
 	tchar lTmpString[2] = {pChar, 0};
 	NSString* lChar = MacLog::Encode(lTmpString);
