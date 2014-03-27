@@ -280,7 +280,7 @@ def _create_zip(targetdir, buildtype):
 
 def _buildzip(builder, buildtype):
 	rgohelp._verify_base_dir()
-	subdir = appnames[0]
+	subdir = fullname
 	targetdir = subdir
 	if buildtype == "rc":
 		targetdir = "PRE_ALPHA."+targetdir
@@ -294,7 +294,7 @@ def _buildzip(builder, buildtype):
 	os.chdir(tmpdirs[0])
 	targetfile = _create_zip(subdir, buildtype)
 	os.chdir(tmpdirs[1])
-	nicefile = appnames[0]+"."+osname+"."+hwname+"."+buildtype+"."+datename+'.'+targetfile.split('.',1)[1]
+	nicefile = fullname+"."+osname+"."+hwname+"."+buildtype+"."+datename+'.'+targetfile.split('.',1)[1]
 	os.rename(tmpdirs[0]+'/'+targetfile, nicefile)
 	_cleandir('tmp')
 	os.rmdir('tmp')
