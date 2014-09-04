@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/SpinLock.h"
 #include "../Include/LepraAssert.h"
 #include <stdexcept>
@@ -26,7 +27,7 @@ void VerifySoleAccessor::OnError(const Thread* pOwner)
 
 
 
-LOG_CLASS_DEFINE(TEST, VerifySoleAccessor);
+loginstance(TEST, VerifySoleAccessor);
 
 
 

@@ -31,7 +31,7 @@ public:
 private:
 	virtual void OnLoaded();
 	virtual void OnMicroTick(float pFrameTime);
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
 
 	Launcher* mLauncher;
 	float mMaxVelocity;
@@ -39,7 +39,7 @@ private:
 	float mExplosiveEnergy;
 	bool mIsDetonated;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

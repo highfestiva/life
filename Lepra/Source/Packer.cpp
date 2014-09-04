@@ -7,6 +7,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Packer.h"
 #include "../Include/LepraAssert.h"
 #include "../Include/Endian.h"
@@ -18,7 +19,7 @@ namespace Lepra
 
 
 
-int PackerTransformation::Pack(uint8* pDestination, const TransformationF& pSource)
+int PackerTransformation::Pack(uint8* pDestination, const xform& pSource)
 {
 	typedef uint32 _T;
 	int lOffset = 0;
@@ -32,7 +33,7 @@ int PackerTransformation::Pack(uint8* pDestination, const TransformationF& pSour
 	return (lOffset);
 }
 
-int PackerTransformation::Unpack(TransformationF& pDestination, const uint8* pSource, int pSize)
+int PackerTransformation::Unpack(xform& pDestination, const uint8* pSource, int pSize)
 {
 	typedef uint32 _T;
 	int lOffset = 0;
@@ -57,7 +58,7 @@ int PackerTransformation::Unpack(TransformationF& pDestination, const uint8* pSo
 
 
 
-int PackerVector::Pack(uint8* pDestination, const Vector3DF& pSource)
+int PackerVector::Pack(uint8* pDestination, const vec3& pSource)
 {
 	// TODO: improve packer.
 	typedef uint32 _T;
@@ -68,7 +69,7 @@ int PackerVector::Pack(uint8* pDestination, const Vector3DF& pSource)
 	return (lOffset);
 }
 
-int PackerVector::Unpack(Vector3DF& pDestination, const uint8* pSource, int pSize)
+int PackerVector::Unpack(vec3& pDestination, const uint8* pSource, int pSize)
 {
 	typedef uint32 _T;
 	int lOffset = 0;

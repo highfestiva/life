@@ -2,20 +2,21 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
-#include "../../TBC/Include/TBC.h"
-#include "../Include/UiTBC.h"
+#include "pch.h"
+#include "../../Tbc/Include/Tbc.h"
+#include "../Include/UiTbc.h"
 
 namespace UiTbc
 {
 
 void Init()
 {
-	TBC::Init();
+	Tbc::Init();
 }
 
 void Shutdown()
 {
-	TBC::Shutdown();
+	Tbc::Shutdown();
 }
 
 }

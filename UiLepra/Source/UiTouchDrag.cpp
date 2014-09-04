@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiTouchDrag.h"
 #include "../Include/UiTouchstick.h"
 
@@ -152,7 +153,7 @@ DragManager::DragList& DragManager::GetDragList()
 
 
 
-LOG_CLASS_DEFINE(UI_INPUT, DragManager);
+loginstance(UI_INPUT, DragManager);
 
 
 

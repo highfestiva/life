@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Game.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
@@ -11,7 +12,7 @@
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Random.h"
-#include "../TBC/Include/PhysicsEngine.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiProps.h"
@@ -26,8 +27,8 @@
 
 
 
-#define VEHICLE_START	Vector3DF(-90, 0, 13)
-#define CAM_OFFSET	Vector3DF(+2, -10, +3)
+#define VEHICLE_START	vec3(-90, 0, 13)
+#define CAM_OFFSET	vec3(+2, -10, +3)
 
 
 
@@ -103,9 +104,9 @@ bool Game::RestartLevel()
 	return Initialize();
 }
 
-TransformationF Game::GetVehicleStart() const
+xform Game::GetVehicleStart() const
 {
-	TransformationF t(gIdentityQuaternionF, VEHICLE_START);
+	xform t(gIdentityQuaternionF, VEHICLE_START);
 	t.GetOrientation().RotateAroundOwnZ(-PIF/2);
 	return t;
 }
@@ -120,7 +121,7 @@ bool Game::Tick()
 	if (mSlowmoTimer.IsStarted() && mSlowmoTimer.QueryTimeDiff() > 4.0f)
 	{
 		mSlowmoTimer.Stop();
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
+		v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
 	}
 
 	GameTicker::GetTimeManager()->Tick();
@@ -131,11 +132,11 @@ bool Game::Tick()
 		mFlipRenderSideFactor = (float)mFlipRenderSide;
 	}
 
-	Vector3DF lPosition;
-	Vector3DF lVelocity;
+	vec3 lPosition;
+	vec3 lVelocity;
 	if (mVehicle && mVehicle->IsLoaded())
 	{
-		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, +10);
+		lPosition = mVehicle->GetPosition()+vec3(0, 0, +10);
 		if (lPosition.z < -50 || lPosition.z > 100 /*|| isnan(lPosition.z) || isinf(lPosition.z)*/)
 		{
 			const float lHealth = mVehicle->GetHealth();
@@ -150,7 +151,7 @@ bool Game::Tick()
 		}
 	}
 	mCollisionSoundManager->Tick(lPosition);
-	mUiManager->SetMicrophonePosition(TransformationF(gIdentityQuaternionF, lPosition), lVelocity);
+	mUiManager->SetMicrophonePosition(xform(gIdentityQuaternionF, lPosition), lVelocity);
 
 	/*if (win!)
 	{
@@ -215,7 +216,7 @@ Goal* Game::GetGoal() const
 	return mGoal;
 }
 
-void Game::GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity) const
+void Game::GetVehicleMotion(vec3& pPosition, vec3 pVelocity) const
 {
 	if (mVehicle && mVehicle->IsLoaded())
 	{
@@ -283,8 +284,8 @@ bool Game::IsScoreCountingEnabled() const
 	return mScoreCountingEnabled;
 }
 
-void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
-	Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId)
+void Game::Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
+	Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, Tbc::PhysicsManager::BodyID pExplosiveBodyId, Tbc::PhysicsManager::BodyID pTargetBodyId)
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pExplosive, mLevel, pExplosiveBodyId, 10000, true);
 
@@ -301,13 +302,13 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			float x = Random::Uniform(-1.0f, 1.0f);
 			float y = Random::Uniform(-1.0f, 1.0f);
 			float z = -1;
-			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
+			xform lTransform(gIdentityQuaternionF, pPosition + vec3(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
 			const float lAngle = Random::Uniform(0.0f, 2*PIF);
 			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
 			y = (6 * Random::Uniform(-1.0f, 1.0f)) * sin(lAngle);
 			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * Random::Uniform(0.0f, 1.0f)) * Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), Random::Uniform(3.0f, 7.0f) * lScale, 0.5f, Random::Uniform(3.0f, 7.0f));
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, vec3(x, y, z), Random::Uniform(3.0f, 7.0f) * lScale, 0.5f, Random::Uniform(3.0f, 7.0f));
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 			lPuff->SetFadeOutTime(0.3f);
 #endif // Touch L&F
@@ -326,14 +327,14 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			float x = Random::Uniform(-1.0f, 1.0f);
 			float y = Random::Uniform(-1.0f, 1.0f);
 			float z = Random::Uniform(-1.0f, 1.0f);
-			TransformationF lTransform(gIdentityQuaternionF, pPosition + Vector3DF(x, y, z));
+			xform lTransform(gIdentityQuaternionF, pPosition + vec3(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
 			const float lOpacity = Random::Uniform(0.025f, 0.1f);
 			lPuff->SetOpacity(lOpacity);
 			x = x*12;
 			y = y*12;
 			z = Random::Uniform(0.0f, 7.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, Random::Uniform(1.5f, 4.0f));
+			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, vec3(x, y, z), 0.003f / lOpacity, 0.1f, Random::Uniform(1.5f, 4.0f));
 			lPuff->StartLoading();
 		}
 	}
@@ -349,23 +350,23 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 	for (; x != lObjectTable.end(); ++x)
 	{
 		const Cure::ContextObject* lObject = x->second;
-		TBC::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
+		Tbc::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
 		if (!lObject->IsLoaded() || !lPhysics)
 		{
 			continue;
 		}
 		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
-		const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -0.75f);
-		const int lBoneCount = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
+		const vec3 lEpicenter = pPosition + vec3(0, 0, -0.75f);
+		const int lBoneCount = (lPhysics->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
-			const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
-			if (lGeometry->GetBodyId() == TBC::INVALID_BODY)
+			const Tbc::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
+			if (lGeometry->GetBodyId() == Tbc::INVALID_BODY)
 			{
 				continue;
 			}
-			const Vector3DF lBodyCenter = GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyPosition(lGeometry->GetBodyId());
-			Vector3DF f = lBodyCenter - lEpicenter;
+			const vec3 lBodyCenter = GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyPosition(lGeometry->GetBodyId());
+			vec3 f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
 			if (d > 80*SCALE_FACTOR ||
 				(d > 50*SCALE_FACTOR && lObject != mVehicle))
@@ -391,7 +392,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			{
 				if (d > 0.6f)
 				{
-					CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.2);
+					v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.2);
 					mSlowmoTimer.Start();
 				}
 				d = std::max(0.005f, d);
@@ -461,10 +462,10 @@ bool Game::Render()
 		return FlybyRender();
 	}
 
-	const Vector3DF lVehiclePos = mVehicle->GetPosition();
-	const Vector3DF lTargetPos = Vector3DF(lVehiclePos.x, lVehiclePos.y, lVehiclePos.z) + CAM_OFFSET;
+	const vec3 lVehiclePos = mVehicle->GetPosition();
+	const vec3 lTargetPos = vec3(lVehiclePos.x, lVehiclePos.y, lVehiclePos.z) + CAM_OFFSET;
 	mVehicleCamPos = Math::Lerp(mVehicleCamPos, lTargetPos, 0.5f);
-	TransformationF t(gIdentityQuaternionF, mVehicleCamPos);
+	xform t(gIdentityQuaternionF, mVehicleCamPos);
 	const float lVehicleCamHeight = mVehicleCamPos.z - lVehiclePos.z;
 	const float lCamDistance = mVehicleCamPos.GetDistance(lVehiclePos);
 	t.GetOrientation().RotateAroundOwnX(-::atan(lVehicleCamHeight/lCamDistance));
@@ -491,8 +492,8 @@ bool Game::Paint()
 
 bool Game::FlybyRender()
 {
-	const Vector3DF lVehicle = mVehicle->GetPosition();
-	const Vector3DF lGoal = mGoal->GetPosition();
+	const vec3 lVehicle = mVehicle->GetPosition();
+	const vec3 lGoal = mGoal->GetPosition();
 	const double lTotalFlybyTime = 37.0;
 	const double lTotalIntroductionTime = 75.0;
 	if (mFlybyMode == FLYBY_INTRODUCTION)
@@ -512,7 +513,7 @@ bool Game::FlybyRender()
 		}
 	}
 
-	TransformationF t;
+	xform t;
 	const double lSweepTime = lTotalFlybyTime * 0.25;
 	const float lDistance = 100 * SCALE_FACTOR;
 	if (mFlyByTime < lSweepTime || mFlybyMode == FLYBY_PAUSE)
@@ -521,7 +522,7 @@ bool Game::FlybyRender()
 		const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
 		t.GetOrientation().RotateAroundOwnZ(a + PIF/2);
 		t.GetOrientation().RotateAroundOwnX(-PIF/8);
-		t.SetPosition(Vector3DF(::cos(a)*lDistance, ::sin(a)*lDistance, ::sin(a+PIF/8)*lDistance*0.1f + lDistance/3.5f));
+		t.SetPosition(vec3(::cos(a)*lDistance, ::sin(a)*lDistance, ::sin(a+PIF/8)*lDistance*0.1f + lDistance/3.5f));
 	}
 	else
 	{
@@ -556,11 +557,11 @@ bool Game::FlybyRender()
 		// Position.
 		if (mFlyByTime-lSweepTime < lDetailTime * 1/3)
 		{
-			t.SetPosition(lVehicle + Vector3DF(+1.33f, +6.67f, +3.33f));
+			t.SetPosition(lVehicle + vec3(+1.33f, +6.67f, +3.33f));
 		}
 		else if (mFlyByTime-lSweepTime < lDetailTime * 2/3)
 		{
-			t.SetPosition(lGoal + Vector3DF(-13.33f, -10, +10));
+			t.SetPosition(lGoal + vec3(-13.33f, -10, +10));
 		}
 	}
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
@@ -607,13 +608,13 @@ void Game::DidPhysicsTick()
 	PostPhysicsTick();
 }
 
-void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void Game::OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pNormal);
 }
 
-void Game::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+void Game::OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	GameManager::OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 }
@@ -630,9 +631,9 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void Game::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+void Game::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
+	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
 {
 	(void)pBody2Id;
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 2000, false);
@@ -693,8 +694,8 @@ bool Game::Initialize()
 	{
 		const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
-			Vector3DF(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 300);
+			UiTbc::Renderer::LIGHT_MOVABLE, vec3(-1, 0.5f, -1.5),
+			vec3(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 300);
 		mUiManager->GetRenderer()->EnableAllLights(true);
 	}
 	if (lOk)

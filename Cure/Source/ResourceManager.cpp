@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ResourceManager.h"
 #include <algorithm>
 #include "../../Lepra/Include/LepraAssert.h"
@@ -14,7 +15,7 @@
 #include "../../Lepra/Include/ResourceTracker.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../Lepra/Include/ZipArchive.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
 #include "../Include/Cure.h"
 #include "../Include/TerrainFunctionManager.h"
 #include "../Include/TerrainPatchLoader.h"
@@ -350,7 +351,7 @@ void Resource::operator=(const Resource&)
 
 Lock Resource::mMutex;
 
-LOG_CLASS_DEFINE(GENERAL_RESOURCES, Resource);
+loginstance(GENERAL_RESOURCES, Resource);
 
 
 
@@ -386,12 +387,12 @@ bool PhysicsResource::Load()
 bool PhysicsResource::LoadName(const str& pName)
 {
 	deb_assert(GetRamData() == 0);
-	SetRamData(new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
+	SetRamData(new Tbc::ChunkyPhysics(Tbc::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
 	File* lFile = GetManager()->QueryFile(pName);
 	bool lOk = (lFile != 0);
 	if (lOk)
 	{
-		TBC::ChunkyPhysicsLoader lLoader(lFile, false);
+		Tbc::ChunkyPhysicsLoader lLoader(lFile, false);
 		lOk = lLoader.Load(GetRamData());
 	}
 	delete lFile;
@@ -441,7 +442,7 @@ PhysicalTerrainResource::UserData PhysicalTerrainResource::GetUserData(const Use
 
 bool PhysicalTerrainResource::Load()
 {
-	log_atrace("Loading actual TBC::TerrainPatch.");
+	log_atrace("Loading actual Tbc::TerrainPatch.");
 
 	deb_assert(!IsUnique());
 	// TODO: parse constants out of resource name string.
@@ -449,7 +450,7 @@ bool PhysicalTerrainResource::Load()
 	const float lLod = 0;
 
 	TerrainPatchLoader lLoader(GetManager());
-	TBC::TerrainPatch* lPatch = 0;
+	Tbc::TerrainPatch* lPatch = 0;
 	for (int x = 0; x < 3 && !lPatch; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
 	{
 		lPatch = lLoader.LoadPatch(lArea, lLod);
@@ -461,7 +462,7 @@ bool PhysicalTerrainResource::Load()
 	return (lPatch != 0);
 }
 
-LOG_CLASS_DEFINE(PHYSICS, PhysicalTerrainResource);
+loginstance(PHYSICS, PhysicalTerrainResource);
 
 
 
@@ -1297,7 +1298,7 @@ void ResourceManager::DeleteResource(Resource* pResource)
 
 
 
-LOG_CLASS_DEFINE(GENERAL_RESOURCES, ResourceManager);
+loginstance(GENERAL_RESOURCES, ResourceManager);
 
 
 

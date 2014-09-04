@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Writer.h"
 #include "../Include/OutputStream.h"
 

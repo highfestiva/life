@@ -1,6 +1,7 @@
 // This is the main project file for VC++ application project 
 // generated using an Application Wizard.
 
+#include "pch.h"
 #include "stdafx.h"
 
 #include "../../Lepra/Include/Lepra.h"

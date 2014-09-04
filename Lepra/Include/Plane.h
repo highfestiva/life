@@ -20,17 +20,17 @@ class Plane
 {
 public:
 	Plane();
-	Plane(const Vector3DF& pNormal, float D);
-	Plane(const Vector3DF& pPosition, const Vector3DF& pTangent, const Vector3DF& pApproximateNormal);
+	Plane(const vec3& pNormal, float D);
+	Plane(const vec3& pPosition, const vec3& pTangent, const vec3& pApproximateNormal);
 	void operator=(const Plane& pCopy);
 
-	float GetAbsDistance(const Vector3DF& pPosition) const;
-	float GetDistance(const Vector3DF& pPosition) const;
-	QuaternionF GetOrientation() const;
+	float GetAbsDistance(const vec3& pPosition) const;
+	float GetDistance(const vec3& pPosition) const;
+	quat GetOrientation() const;
 
 	Plane operator-() const;
 
-	Vector3DF n;
+	vec3 n;
 	float d;
 };
 

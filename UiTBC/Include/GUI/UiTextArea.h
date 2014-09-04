@@ -7,7 +7,7 @@
 #pragma once
 
 #include <list>
-#include "../../../Lepra/Include/Thread.h"
+#include "../../../Lepra/Include/Lock.h"
 #include "UiTextComponent.h"
 #include "UiWindow.h"
 

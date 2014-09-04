@@ -7,11 +7,16 @@
 #pragma once
 
 #include "../Cure/Include/ConsoleManager.h"
+#include "../Lepra/Include/File.h"
 #include "../Lepra/Include/Unordered.h"
 #include "Life.h"
 
 
 
+namespace Lepra
+{
+class LogListener;
+}
 namespace Cure
 {
 class GameManager;
@@ -106,7 +111,7 @@ protected:
 	AliasMap mAliasMap;
 	KeyMap mKeyMap;
 	LogListener* mLogger;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

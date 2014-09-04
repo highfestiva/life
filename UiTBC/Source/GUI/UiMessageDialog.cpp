@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/GUI/UiMessageDialog.h"
 
 

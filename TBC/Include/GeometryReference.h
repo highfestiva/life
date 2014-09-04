@@ -11,7 +11,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -26,14 +26,14 @@ public:
 
 	bool IsGeometryReference();
 
-	const TransformationF& GetOffsetTransformation() const;
-	void SetOffsetTransformation(const TransformationF& pOffset);
-	void AddOffset(const Vector3DF& pOffset);
-	const TransformationF& GetExtraOffsetTransformation() const;
-	void SetExtraOffsetTransformation(const TransformationF& pOffset);
+	const xform& GetOffsetTransformation() const;
+	void SetOffsetTransformation(const xform& pOffset);
+	void AddOffset(const vec3& pOffset);
+	const xform& GetExtraOffsetTransformation() const;
+	void SetExtraOffsetTransformation(const xform& pOffset);
 
 	// Overloads from GeometryBase.
-	const TransformationF& GetTransformation();
+	const xform& GetTransformation();
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility pVolatility);
 
@@ -56,9 +56,9 @@ protected:
 private:
 	GeometryBase* mGeometry;
 
-	TransformationF mOriginalOffset;
-	TransformationF mExtraOffset;
-	TransformationF mReturnTransformation;
+	xform mOriginalOffset;
+	xform mExtraOffset;
+	xform mReturnTransformation;
 };
 
 

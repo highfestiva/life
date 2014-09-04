@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Projectile.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -34,7 +35,7 @@ Projectile::~Projectile()
 {
 	delete mShreekSound;
 	mShreekSound = 0;
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy, -1);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), vec3(), mExplosiveEnergy, -1);
 }
 
 
@@ -43,7 +44,7 @@ void Projectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
 	deb_assert(lTag);
 	mExplosiveEnergy = lTag->mFloatValueList[3];
 
@@ -52,8 +53,8 @@ void Projectile::OnLoaded()
 	const float lPitch = ProjectileUtil::GetShotSounds(GetManager(), lTag->mStringValueList, lLaunchSoundName, lShreekSoundName);
 	if (!lLaunchSoundName.empty())
 	{
-		TransformationF lParentTransform;
-		Vector3DF lParentVelocity;
+		xform lParentTransform;
+		vec3 lParentVelocity;
 		if (!ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
 		{
 			lParentTransform.SetPosition(GetPosition());
@@ -76,17 +77,17 @@ void Projectile::OnTick()
 	if (mShreekSound && mShreekSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		// Point the projectile in the velocity direction.
-		const Vector3DF lPosition = GetPosition();
-		Vector3DF lVelocity = GetVelocity();
+		const vec3 lPosition = GetPosition();
+		vec3 lVelocity = GetVelocity();
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), lPosition, lVelocity);
 	}
 	Parent::OnTick();
 }
 
 void Projectile::OnForceApplied(ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque,
+	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	(void)pOwnBodyId;
 	(void)pOtherBodyId;
@@ -99,7 +100,7 @@ void Projectile::OnForceApplied(ContextObject* pOtherObject,
 		return;
 	}
 
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, Vector3DF(), mExplosiveEnergy, 0);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, vec3(), mExplosiveEnergy, 0);
 }
 
 void Projectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
@@ -114,7 +115,7 @@ void Projectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Projectile);
+loginstance(GAME_CONTEXT_CPP, Projectile);
 
 
 

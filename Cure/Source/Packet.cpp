@@ -4,9 +4,11 @@
 
 
 
+#include "pch.h"
 #include "../Include/Packet.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Packer.h"
+#include "../../Lepra/Include/Socket.h"
 #include "../Include/PositionalData.h"
 
 
@@ -151,7 +153,7 @@ bool Packet::AppendToPacketBuffer(Datagram& pWriteBuffer) const
 	{
 		const int lThisDataLength = GetPacketSize()-PACKET_SIZE_MARKER_LENGTH;
 		const int lTotalNewLength = pWriteBuffer.mDataSize+lThisDataLength;
-		lOk = (lTotalNewLength <= SocketBase::BUFFER_SIZE);
+		lOk = (lTotalNewLength <= Datagram::BUFFER_SIZE);
 		if (lOk)
 		{
 			::memcpy(&pWriteBuffer.mDataBuffer[pWriteBuffer.mDataSize], GetReadBuffer()+PACKET_SIZE_MARKER_LENGTH, lThisDataLength);
@@ -283,7 +285,7 @@ bool Packet::ReadHeader(int& pPacketSize, const uint8* pBuffer, int pByteCount)
 	return (lOk);
 }
 
-LOG_CLASS_DEFINE(NETWORK, Packet);
+loginstance(NETWORK, Packet);
 
 
 
@@ -576,7 +578,7 @@ int MessageCreateObject::Parse(const uint8* pData, int pSize)
 	return (lTotalSize);
 }
 
-int MessageCreateObject::Store(Packet* pPacket, GameObjectId pInstanceId, const TransformationF& pTransformation, const wstr& pClassId)
+int MessageCreateObject::Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const wstr& pClassId)
 {
 	int32 lInstanceId = (int32)pInstanceId;
 	unsigned lSize = Parent::Store(pPacket, lInstanceId);
@@ -586,7 +588,7 @@ int MessageCreateObject::Store(Packet* pPacket, GameObjectId pInstanceId, const 
 	return (lSize);
 }
 
-void MessageCreateObject::GetTransformation(TransformationF& pTransformation) const
+void MessageCreateObject::GetTransformation(xform& pTransformation) const
 {
 	PackerTransformation::Unpack(pTransformation, &mData[1+sizeof(int32)], 1024);
 }
@@ -630,7 +632,7 @@ int MessageCreateOwnedObject::Parse(const uint8* pData, int pSize)
 	return lTotalSize;
 }
 
-int MessageCreateOwnedObject::Store(Packet* pPacket, GameObjectId pInstanceId, const TransformationF& pTransformation, const wstr& pClassId, GameObjectId pOwnerInstanceId)
+int MessageCreateOwnedObject::Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const wstr& pClassId, GameObjectId pOwnerInstanceId)
 {
 	int32 lInstanceId = (int32)pInstanceId;
 	unsigned lSize = Parent::Store(pPacket, lInstanceId, pTransformation, pClassId);
@@ -957,10 +959,10 @@ MessageFactory* PacketFactory::GetMessageFactory() const
 	return (mMessageFactory);
 }
 
-int PacketFactory::Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize)
+/*int PacketFactory::Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize)
 {
 	return (Packet::Receive(pSocket, pBuffer, pMaxSize));
-}
+}*/
 
 
 Message* MessageFactory::Allocate(MessageType pType)
@@ -993,7 +995,7 @@ void MessageFactory::Release(Message* pMessage)
 	delete (pMessage);
 }
 
-LOG_CLASS_DEFINE(NETWORK, MessageFactory);
+loginstance(NETWORK, MessageFactory);
 
 
 

@@ -27,7 +27,7 @@ public:
 protected:
 	_T* mObject;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

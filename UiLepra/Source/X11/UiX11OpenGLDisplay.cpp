@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/X11/UiX11OpenGLDisplay.h"
 #include <stdio.h>
 #include "../../../Lepra/Include/String.h"

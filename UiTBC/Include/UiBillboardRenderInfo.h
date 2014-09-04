@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "UiTBC.h"
+#include "UiTbc.h"
 
 
 
@@ -18,7 +18,7 @@ namespace UiTbc
 struct BillboardRenderInfo
 {
 public:
-	inline BillboardRenderInfo(float pAngle, const Vector3DF& pPosition, float pScale, const Vector3DF& pColor, float pOpacity, int pUVIndex):
+	inline BillboardRenderInfo(float pAngle, const vec3& pPosition, float pScale, const vec3& pColor, float pOpacity, int pUVIndex):
 		mAngle(pAngle),
 		mPosition(pPosition),
 		mScale(pScale),
@@ -29,9 +29,9 @@ public:
 	}
 
 	float mAngle;
-	Vector3DF mPosition;
+	vec3 mPosition;
 	float mScale;
-	Vector3DF mColor;
+	vec3 mColor;
 	float mOpacity;
 	int mUVIndex;
 };

@@ -81,7 +81,7 @@ private:
 	bool mSafeReceiveToggle;
 	SocketReceiveFilterTable mSocketReceiveFilterTable;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

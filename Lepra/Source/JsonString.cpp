@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/LepraAssert.h"
 #include <utf8.h>
 #include "../Include/JsonString.h"

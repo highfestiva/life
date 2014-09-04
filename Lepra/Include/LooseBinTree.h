@@ -289,7 +289,7 @@ private:
 
 	_TObject mErrorObject;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 #include "LooseBinTree.inl"

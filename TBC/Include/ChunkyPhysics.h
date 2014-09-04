@@ -6,13 +6,13 @@
 
 #pragma once
 
-#include "TBC.h"
+#include "Tbc.h"
 #include "../Include/Bones.h"
 #include "../Include/PhysicsManager.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -57,11 +57,11 @@ public:
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
 	ChunkyBoneGeometry* GetBoneGeometry(PhysicsManager::BodyID pBodyId) const;
 	void AddBoneGeometry(ChunkyBoneGeometry* pGeometry);	// Takes ownership of the added geometry.
-	void AddBoneGeometry(const TransformationF& pTransformation, ChunkyBoneGeometry* pGeometry,
+	void AddBoneGeometry(const xform& pTransformation, ChunkyBoneGeometry* pGeometry,
 		const ChunkyBoneGeometry* pParent = 0);	// Takes ownership of the added geometry.
 	PhysicsManager::BodyType GetBodyType(const ChunkyBoneGeometry* pGeometry) const;
 	int GetIndex(const ChunkyBoneGeometry* pGeometry) const;
-	const TransformationF& GetTransformation(const ChunkyBoneGeometry* pGeometry) const;
+	const xform& GetTransformation(const ChunkyBoneGeometry* pGeometry) const;
 	void ClearBoneGeometries(PhysicsManager* pPhysics);
 	void EnableGravity(PhysicsManager* pPhysicsManager, bool pEnable);
 
@@ -86,7 +86,7 @@ public:
 	// Overrides.
 	void ClearAll(PhysicsManager* pPhysics);
 	void SetBoneCount(int pBoneCount);
-	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const TransformationF* pTransform,
+	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const xform* pTransform,
 		int pTrigListenerId, int pForceListenerId);
 
 	unsigned GetNextGeometryIndex();
@@ -106,7 +106,7 @@ private:
 	GuideMode mGuideMode;
 	unsigned mUniqeGeometryIndex;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

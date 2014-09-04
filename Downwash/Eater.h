@@ -23,9 +23,9 @@ public:
 	virtual ~Eater();
 
 protected:
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

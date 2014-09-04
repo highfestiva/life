@@ -8,10 +8,11 @@
 #pragma warning(disable: 4505)	// Crappy warning from STL/MSVC.
 
 #include "../../Lepra/Include/HashTable.h"
+#include "../../Lepra/Include/Lock.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/OrderedMap.h"
-#include "../../TBC/Include/ChunkyClass.h"
-#include "../../TBC/Include/ChunkyLoader.h"
+#include "../../Tbc/Include/ChunkyClass.h"
+#include "../../Tbc/Include/ChunkyLoader.h"
 #include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "Cure.h"
 
@@ -22,7 +23,7 @@ namespace Lepra
 class Canvas;
 class ZipArchive;
 }
-namespace TBC
+namespace Tbc
 {
 class TerrainPatch;
 }
@@ -213,7 +214,7 @@ private:
 	bool mIsUnique;
 	static Lock mMutex;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 
 	void operator=(const Resource&);
 };
@@ -284,11 +285,11 @@ protected:
 
 
 
-class PhysicsResource: public RamResource<TBC::ChunkyPhysics*>
+class PhysicsResource: public RamResource<Tbc::ChunkyPhysics*>
 {
-	typedef RamResource<TBC::ChunkyPhysics*> Parent;
+	typedef RamResource<Tbc::ChunkyPhysics*> Parent;
 public:
-	typedef TBC::ChunkyPhysics* UserData;
+	typedef Tbc::ChunkyPhysics* UserData;
 
 	PhysicsResource(ResourceManager* pManager, const str& pName);
 	virtual ~PhysicsResource();
@@ -298,7 +299,7 @@ public:
 	bool LoadName(const str& pName);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -330,12 +331,12 @@ public:
 	bool LoadWithName(const str& pName);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
-class ClassResource: public ClassResourceBase<TBC::ChunkyClass, TBC::ChunkyClassLoader>
+class ClassResource: public ClassResourceBase<Tbc::ChunkyClass, Tbc::ChunkyClassLoader>
 {
-	typedef ClassResourceBase<TBC::ChunkyClass, TBC::ChunkyClassLoader> Parent;
+	typedef ClassResourceBase<Tbc::ChunkyClass, Tbc::ChunkyClassLoader> Parent;
 public:
 	ClassResource(ResourceManager* pManager, const str& pName);
 	virtual ~ClassResource();
@@ -343,11 +344,11 @@ public:
 
 
 
-class PhysicalTerrainResource: public RamResource<TBC::TerrainPatch*>
+class PhysicalTerrainResource: public RamResource<Tbc::TerrainPatch*>
 {
-	typedef RamResource<TBC::TerrainPatch*> Parent;
+	typedef RamResource<Tbc::TerrainPatch*> Parent;
 public:
-	typedef TBC::TerrainPatch* UserData;
+	typedef Tbc::TerrainPatch* UserData;
 
 	PhysicalTerrainResource(ResourceManager* pManager, const str& pName);
 	virtual ~PhysicalTerrainResource();
@@ -356,7 +357,7 @@ public:
 	bool Load();
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -378,7 +379,7 @@ public:
 
 typedef UserTypeResource<PhysicsResource>		UserPhysicsResource;
 typedef UserTypeResource<ClassResource>			UserClassResource;
-//typedef UserTypeResource<TBC::...>			UserAnimationResource;
+//typedef UserTypeResource<Tbc::...>			UserAnimationResource;
 typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
 typedef UserTypeResource<RamImageResource>		UserRamImageResource;
 
@@ -470,7 +471,7 @@ private:
 	Lock* mZipLock;
 	ZipArchive* mZipFile;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

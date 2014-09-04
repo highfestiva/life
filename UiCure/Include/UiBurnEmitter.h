@@ -29,7 +29,7 @@ public:
 	float mBurnTimeout;
 	bool mFreeFlow;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

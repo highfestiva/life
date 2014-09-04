@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/TgaLoader.h"
 #include "../Include/Graphics2D.h"
 #include "../Include/Canvas.h"

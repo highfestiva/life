@@ -4,9 +4,11 @@
 
 
 
+#include "pch.h"
 #include "ConsoleManager.h"
 #include <algorithm>
 #include "../Cure/Include/GameManager.h"
+#include "../Cure/Include/ResourceManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/CyclicArray.h"
@@ -14,7 +16,7 @@
 #include "../Lepra/Include/Number.h"
 #include "../Lepra/Include/ResourceTracker.h"
 #include "../Lepra/Include/SystemManager.h"
-#include "../UiTBC/Include/GUI/UiConsolePrompt.h"
+#include "../UiTbc/Include/GUI/UiConsolePrompt.h"
 
 
 
@@ -321,7 +323,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				const tchar* lListenerNameArray[] = { _T("console"), _T("i-console"), _T("file"), };
 				for (size_t x = 0; x < LEPRA_ARRAY_COUNT(lListenerNameArray); ++x)
 				{
-					LogListener* lLogger = LogType::GetLog(LogType::SUB_ROOT)->GetListener(lListenerNameArray[x]);
+					LogListener* lLogger = LogType::GetLogger(LogType::SUB_ROOT)->GetListener(lListenerNameArray[x]);
 					if (lLogger)
 					{
 						lLogger->SetLevelThreashold((LogLevel)lLogLevel);
@@ -346,12 +348,12 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			int lLogLevel = 0;
 			if (pParameterVector.size() == 2 && strutil::StringToInt(pParameterVector[1], lLogLevel))
 			{
-				Log* lLog = LogType::GetLog(pParameterVector[0]);
+				Logger* lLog = LogType::GetLogger(pParameterVector[0]);
 				if (lLog)
 				{
 					lLog->SetLevelThreashold((LogLevel)lLogLevel);
 					LogLevel lNewLogLevel = lLog->GetLevelThreashold();
-					mLog.Infof(_T("Log level for subsystem '%s' set to %i."), pParameterVector[0].c_str(), lNewLogLevel);
+					mLog.Infof(_T("Logger level for subsystem '%s' set to %i."), pParameterVector[0].c_str(), lNewLogLevel);
 				}
 				else
 				{
@@ -360,8 +362,8 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			}
 			else if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lLogLevel))
 			{
-				const std::vector<Log*> lLogArray = LogType::GetLogs();
-				std::vector<Log*>::const_iterator x = lLogArray.begin();
+				const std::vector<Logger*> lLogArray = LogType::GetLoggers();
+				std::vector<Logger*>::const_iterator x = lLogArray.begin();
 				LogLevel lNewLogLevel = LEVEL_LOWEST_TYPE;
 				for (; x != lLogArray.end(); ++x)
 				{
@@ -437,7 +439,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		case COMMAND_SHOW_GAME_INFO:
 		{
 			int lTargetFps;
-			CURE_RTVAR_GET(lTargetFps, =, GetVariableScope(), RTVAR_PHYSICS_FPS, 2);
+			v_get(lTargetFps, =, GetVariableScope(), RTVAR_PHYSICS_FPS, 2);
 			mLog.Infof(_T("Target frame rate:     %i"), lTargetFps);
 			if (mGameManager)
 			{
@@ -892,7 +894,7 @@ bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<s
 	pVariableList.sort();
 	str lLastGroup;
 	str lGroupDelimitors;
-	CURE_RTVAR_GET(lGroupDelimitors, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
+	v_get(lGroupDelimitors, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
 	std::list<str>::const_iterator x = pVariableList.begin();
 	for (; x != pVariableList.end(); ++x)
 	{
@@ -952,7 +954,7 @@ str ConsoleManager::GetQuoted(const str& s)
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, ConsoleManager);
+loginstance(CONSOLE, ConsoleManager);
 
 
 

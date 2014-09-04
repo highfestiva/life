@@ -10,7 +10,7 @@
 //#include "UiTerrainPatch.h"	// TRICKY: this must be before UiTbc include due to a bug in MSVC8.
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Vector3D.h"
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include <list>
 
 namespace UiTbc
@@ -77,9 +77,9 @@ private:
 
 	typedef std::list<Range*> RangeList;
 
-	void GetAngleDependentRGB(Range* pRange, const Vector3DF& pNormal, 
+	void GetAngleDependentRGB(Range* pRange, const vec3& pNormal, 
 		float pU, float pV, float& r, float& g, float& b);
-	void GetHeightDependentRGB(const Vector3DF& pPos, const Vector3DF& pNormal,
+	void GetHeightDependentRGB(const vec3& pPos, const vec3& pNormal,
 		float pU, float pV, float& r, float& g, float& b);
 
 	RangeList mRangeList;

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "HoverTankManager.h"
 #include <algorithm>
 #include "../Cure/Include/ContextManager.h"
@@ -28,13 +29,14 @@
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
 #include "../UiCure/Include/UiJetEngineEmitter.h"
+#include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiLepra/Include/UiTouchstick.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
 #include "HoverTankConsoleManager.h"
 #include "HoverTankTicker.h"
 #include "RoadSignButton.h"
@@ -122,7 +124,7 @@ HoverTankManager::HoverTankManager(Life::GameClientMasterTicker* pMaster, const 
 
 	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
 
-	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance*3, 0);
+	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * vec3(0, mCameraTargetXyDistance*3, 0);
 
 	SetConsoleManager(new HoverTankConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 }
@@ -139,37 +141,37 @@ HoverTankManager::~HoverTankManager()
 
 void HoverTankManager::LoadSettings()
 {
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
+	v_internal(GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
 
 	Parent::LoadSettings();
 
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	v_internal(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lLeftName  = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
 	const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
 #endif // Touch device or emulated touch device
 
 #ifdef LEPRA_TOUCH
 	// TODO: remove hard-coding!
-	//CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("pixeldoctrine.dyndns.org:16650"));
-	//CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	//v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("pixeldoctrine.dyndns.org:16650"));
+	//v_internal(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
+	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 #endif // Touch device
 }
 
@@ -191,7 +193,7 @@ void HoverTankManager::SetRenderArea(const PixelRect& pRenderArea)
 
 	UpdateTouchstickPlacement();
 
-	CURE_RTVAR_GET(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	v_get(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
 
 bool HoverTankManager::Open()
@@ -236,7 +238,7 @@ void HoverTankManager::SetFade(float pFadeAmount)
 {
 	mCameraMaxSpeed = 100000.0f;
 	float lBaseDistance;
-	CURE_RTVAR_GET(lBaseDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	v_get(lBaseDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	mCameraTargetXyDistance = lBaseDistance + pFadeAmount*400.0f;
 }
 
@@ -263,7 +265,7 @@ bool HoverTankManager::Paint()
 	}
 
 	bool lDrawScore;
-	CURE_RTVAR_GET(lDrawScore, =, GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
+	v_get(lDrawScore, =, GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
 	if (lDrawScore)
 	{
 		DrawScore();
@@ -318,7 +320,7 @@ void HoverTankManager::AddLocalObjects(std::unordered_set<Cure::GameObjectId>& p
 	Parent::AddLocalObjects(pLocalObjectSet);
 }
 
-bool HoverTankManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
+bool HoverTankManager::IsObjectRelevant(const vec3& pPosition, float pDistance) const
 {
 	return (pPosition.GetDistanceSquared(mCameraPosition) <= pDistance*pDistance);
 }
@@ -332,7 +334,7 @@ Cure::GameObjectId HoverTankManager::GetAvatarInstanceId() const
 
 bool HoverTankManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 {
-	deb_assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
+	deb_assert(pAspect >= 0 && pAspect < Tbc::PhysicsEngine::ASPECT_COUNT);
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
@@ -343,7 +345,7 @@ bool HoverTankManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 
 
 
-void HoverTankManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
+void HoverTankManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength)
 {
 	(void)pExplosive;
 
@@ -352,15 +354,15 @@ void HoverTankManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chun
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	//mLog.Infof(_T("Hit object normal is (%.1f; %.1f; %.1f)"), pNormal.x, pNormal.y, pNormal.z);
 	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
-	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
+	vec3 u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
 	const int lParticles = Math::Lerp(4, 10, pStrength * 0.2f);
-	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
-	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
-	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
-	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
-	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
+	vec3 lStartFireColor(1.0f, 1.0f, 0.3f);
+	vec3 lFireColor(0.6f, 0.4f, 0.2f);
+	vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
+	vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
+	vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
 	if (dynamic_cast<Life::Mine*>(pExplosive))
 	{
 		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
@@ -385,10 +387,10 @@ void HoverTankManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextOb
 {
 	(void)pHitObject;
 
-	TBC::ChunkyPhysics* lPhysics = pBullet->GetPhysics();
+	Tbc::ChunkyPhysics* lPhysics = pBullet->GetPhysics();
 	if (lPhysics)
 	{
-		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
+		Tbc::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
 		mCollisionSoundManager->OnCollision(5.0f, pBullet->GetPosition(), lGeometry, lGeometry->GetMaterial());
 	}
 }
@@ -421,14 +423,14 @@ void HoverTankManager::CreateLoginView()
 		if (mDisconnectReason.empty())
 		{
 			str lServerName;
-			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+			v_tryget(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 			if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
 			{
 				lServerName = lServerName.substr(7);
 			}
 			const str lDefaultUserName = strutil::Format(_T("User%u"), mSlaveIndex);
 			str lUserName;
-			CURE_RTVAR_TRYGET(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
+			v_tryget(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
                         wstr lReadablePassword = L"CarPassword";
                         const Cure::MangledPassword lPassword(lReadablePassword);
 			const Cure::LoginId lLoginToken(wstrutil::Encode(lUserName), lPassword);
@@ -545,7 +547,7 @@ void HoverTankManager::UpdateTouchstickPlacement()
 	if (!mStickLeft)
 	{
 		int lScreenPixelWidth;
-		CURE_RTVAR_GET(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
+		v_get(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
 		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
 		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
 		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
@@ -599,26 +601,26 @@ void HoverTankManager::UpdateTouchstickPlacement()
 void HoverTankManager::TickUiInput()
 {
 	SteeringPlaybackMode lPlaybackMode;
-	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	v_tryget(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
 	if (lPlaybackMode != PLAYBACK_PLAY && lPhysicsStepCount > 0 && mAllowMovementInput)
 	{
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 
 		// Show billboard.
-		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_GAME_DRAWSCORE, !lObject || mOptions.GetShowScore());
+		v_internal(GetVariableScope(), RTVAR_GAME_DRAWSCORE, !lObject || mOptions.GetShowScore());
 
 		if (lObject)
 		{
 			float lChildishness;
-			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+			v_get(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 			lObject->QuerySetChildishness(lChildishness);
 
 			// Control steering.
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
-			Vector2DF lLeftPower(S(RIGHT)-S(LEFT), S(FORWARD)-S(BRAKEANDBACK));
-			Vector2DF lRightPower(S(RIGHT3D)-S(LEFT3D), S(FORWARD3D)-S(BACKWARD3D));
+			vec2 lLeftPower(S(RIGHT)-S(LEFT), S(FORWARD)-S(BRAKEANDBACK));
+			vec2 lRightPower(S(RIGHT3D)-S(LEFT3D), S(FORWARD3D)-S(BACKWARD3D));
 			if (lLeftPower*lRightPower > 0.2f)
 			{
 				// Pointing somewhat in the same direction, so let's assume that's what the user is trying to accomplish.
@@ -675,9 +677,9 @@ void HoverTankManager::TickUiInput()
 				float _;
 				lAvatar->GetOrientation().GetEulerAngles(lCurrentAngle, _, _);
 				//lCurrentAngle = +PIF/2 - lCurrentAngle;
-				//const Vector3DF fwd = lAvatar->GetForwardDirection();
+				//const vec3 fwd = lAvatar->GetForwardDirection();
 				//mLog.Infof(_T("Setting cam from avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
-				//const QuaternionF r = lAvatar->GetOrientation();
+				//const quat r = lAvatar->GetOrientation();
 				//mLog.Infof(_T("Setting cam from Q=%f, %f, %f, %f"), r.a, r.b, r.c, r.d);
 				mCameraMouseAngle = lCurrentAngle;
 				mCameraTargetAngle = lCurrentAngle;
@@ -689,11 +691,11 @@ void HoverTankManager::TickUiInput()
 				if (++pc > 20)
 				{
 					pc = 0;
-					//const Vector3DF fwd = lAvatar->GetForwardDirection();
+					//const vec3 fwd = lAvatar->GetForwardDirection();
 					//mLog.Infof(_T("Avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
-					//const QuaternionF q = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
+					//const quat q = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
 					//mLog.Infof(_T("Avatar original Q=%f, %f, %f, %f"), q.a, q.b, q.c, q.d);
-					const QuaternionF r = lAvatar->GetOrientation();
+					const quat r = lAvatar->GetOrientation();
 					mLog.Infof(_T("Avatar Q=%f, %f, %f, %f"), r.a, r.b, r.c, r.d);
 				}
 			}*/
@@ -716,7 +718,7 @@ void HoverTankManager::TickUiInput()
 				mCameraTargetAngle = mCameraMouseAngle;
 				mCameraTargetAngleFactor = 1;
 				float lAngleDiff = lCurrentAngle - mCameraMouseAngle;
-				const Vector3DF lRotationVelocity = lAvatar->GetAngularVelocity();
+				const vec3 lRotationVelocity = lAvatar->GetAngularVelocity();
 				float lRotationFriction = -lRotationVelocity.z * 0.2f;
 				if ((lAngleDelta < 0) == (lAngleDiff > 0))
 				{
@@ -759,10 +761,10 @@ void HoverTankManager::TickUiInput()
 			const Life::Options::CamControl& c = mOptions.GetCamControl();
 #define C(dir) c.mControl[Life::Options::CamControl::CAMDIR_##dir]
 			float lCamPower = C(UP)-C(DOWN);
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lCamPower*lScale, -5.0, 30.0);
+			v_internal_arithmetic(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lCamPower*lScale, -5.0, 30.0);
 			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
 			lCamPower = C(BACKWARD)-C(FORWARD);
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lCamPower*lScale, 3.0, 100.0);
+			v_internal_arithmetic(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lCamPower*lScale, 3.0, 100.0);
 
 			// Control fire.
 			const Life::Options::FireControl& f = mOptions.GetFireControl();
@@ -787,7 +789,7 @@ bool HoverTankManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsign
 	bool lSet = pAvatar->SetEnginePower(pAspect, pPower);
 
 	SteeringPlaybackMode lPlaybackMode;
-	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	v_tryget(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	if (lPlaybackMode == PLAYBACK_RECORD)
 	{
 		if (!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mPower, pPower)
@@ -836,7 +838,7 @@ void HoverTankManager::TickUiUpdate()
 	mCollisionSoundManager->Tick(mCameraPosition);
 }
 
-bool HoverTankManager::UpdateMassObjects(const Vector3DF& pPosition)
+bool HoverTankManager::UpdateMassObjects(const vec3& pPosition)
 {
 	bool lOk = true;
 	ObjectArray::const_iterator x = mMassObjectArray.begin();
@@ -869,11 +871,11 @@ void HoverTankManager::SetLocalRender(bool pRender)
 			const float x = sin(lTod*2) * lCloudDistance;
 			const float y = cos(lTod) * lCloudDistance;
 			const float z = cos(lTod*3) * lCloudDistance * 0.2f + lCloudDistance * 0.4f;
-			lCloud->SetRootPosition(Vector3DF(x, y, z));
+			lCloud->SetRootPosition(vec3(x, y, z));
 		}
 
 		bool lMass;
-		CURE_RTVAR_GET(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+		v_get(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
 		SetMassRender(lMass);
 	}
 	else
@@ -943,7 +945,7 @@ void HoverTankManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage
 			const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX - 0.5f + 0.5f*lDeltaX;
 			const float y = (mRoadSignIndex / SIGN_COUNT_X) * lDeltaY - 0.5f + 0.5f*lDeltaY;
 			++mRoadSignIndex;
-			lButton->SetTrajectory(Vector2DF(x, y), 8);
+			lButton->SetTrajectory(vec2(x, y), 8);
 			lButton->GetButton().SetOnClick(HoverTankManager, OnAvatarSelect);
 			mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
 			lButton->StartLoading();
@@ -1063,14 +1065,14 @@ void HoverTankManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void HoverTankManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+void HoverTankManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
+	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID)
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
 
-	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
-	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
+	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
 	if (!lObject1Dynamic || !lObject2Dynamic)
 	{
 		return;
@@ -1145,17 +1147,17 @@ void HoverTankManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	Life::FastProjectile* lProjectile = new Life::FastProjectile(GetResourceManager(), lAmmo, mUiManager, this);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
-	TransformationF t(pAvatar->GetOrientation(), pAvatar->GetPosition());
+	xform t(pAvatar->GetOrientation(), pAvatar->GetPosition());
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
 
 	if (pWeapon >= 0)
 	{
 		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-		TransformationF t;
-		Vector3DF v;
+		xform t;
+		vec3 v;
 		Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
-		lParticleRenderer->CreateFlare(Vector3DF(0.9f, 0.7f, 0.5f), 0.3f, 7.5f, t.GetPosition(), v);
+		lParticleRenderer->CreateFlare(vec3(0.9f, 0.7f, 0.5f), 0.3f, 7.5f, t.GetPosition(), v);
 	}
 }
 
@@ -1183,7 +1185,7 @@ void HoverTankManager::OnAvatarSelect(UiTbc::Button* pButton)
 		mPickVehicleButton = new RoadSignButton(this, GetResourceManager(), mUiManager, _T("PickVehicle"),
 			_T("road_sign_01"), _T("road_sign_car.png"), RoadSignButton::SHAPE_ROUND);
 		GetContext()->AddLocalObject(mPickVehicleButton);
-		mPickVehicleButton->SetTrajectory(Vector2DF(0, 0.45f), 20);
+		mPickVehicleButton->SetTrajectory(vec2(0, 0.45f), 20);
 		mPickVehicleButton->SetTrajectoryAngle(-PIF/2);
 		mPickVehicleButton->GetButton().SetOnClick(HoverTankManager, OnVehicleSelect);
 		mPickVehicleButton->StartLoading();
@@ -1220,7 +1222,7 @@ void HoverTankManager::DrawStick(Touchstick* pStick)
 	pStick->GetValue(x, y, lIsPressing);
 	if (lIsPressing)
 	{
-		Vector2DF v(x, y);
+		vec2 v(x, y);
 		v.Mul((ow+lMargin*2) / (float)ow);
 		const float lLength = v.GetLength();
 		if (lLength > 1)
@@ -1366,34 +1368,34 @@ void HoverTankManager::MoveCamera()
 
 		if (lObject->GetAngularVelocity().GetLengthSquared() > 30.0f)
 		{
-			Vector3DF lTarget = mCameraPivotPosition  - GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance, 0);
+			vec3 lTarget = mCameraPivotPosition  - GetCameraQuaternion() * vec3(0, mCameraTargetXyDistance, 0);
 			mCameraPosition = Math::Lerp(mCameraPosition, lTarget, 0.2f);
 			return;
 		}
 
-		const Vector3DF lForward3d = lObject->GetForwardDirection();
-		//const Vector3DF lRight3d = lForward3d.Cross(Vector3DF(0, 0, 1));
-		Vector3DF lBackward2d = -lForward3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
-		//Vector3DF lBackward2d = lRight3d.ProjectOntoPlane(Vector3DF(0, 0, 1));
+		const vec3 lForward3d = lObject->GetForwardDirection();
+		//const vec3 lRight3d = lForward3d.Cross(vec3(0, 0, 1));
+		vec3 lBackward2d = -lForward3d.ProjectOntoPlane(vec3(0, 0, 1));
+		//vec3 lBackward2d = lRight3d.ProjectOntoPlane(vec3(0, 0, 1));
 		lBackward2d.Normalize(mCameraTargetXyDistance);
 		float lCamHeight;
-		CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+		v_get(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 		lBackward2d.z = lCamHeight;
 		{
 			float lRotationFactor;
-			CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+			v_get(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
 			lRotationFactor += mCamRotateExtra * 0.06f;
 			mCameraPivotVelocity.x += lRotationFactor;
-			lBackward2d = QuaternionF(mCameraPivotVelocity.x, Vector3DF(0,0,1)) * lBackward2d;
+			lBackward2d = quat(mCameraPivotVelocity.x, vec3(0,0,1)) * lBackward2d;
 		}
 		mCameraPreviousPosition = mCameraPosition;
 		mCameraPosition = Math::Lerp(mCameraPosition, mCameraPivotPosition + lBackward2d, 0.4f);
 	}
 
-	Vector3DF lPivotXyPosition = mCameraPivotPosition;
+	vec3 lPivotXyPosition = mCameraPivotPosition;
 	lPivotXyPosition.z = mCameraPosition.z;
 	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
-	Vector3DF lTargetCameraOrientation(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2, 4*PIF/7, 0);
+	vec3 lTargetCameraOrientation(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2, 4*PIF/7, 0);
 	if (lPivotXyPosition.y-mCameraPosition.y < 0)
 	{
 		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
@@ -1413,19 +1415,19 @@ void HoverTankManager::MoveCamera()
 	lYawChange = Math::Clamp(lYawChange, -PIF*3/7, +PIF*3/7);
 	lTargetCameraOrientation.z = -lYawChange;
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
-	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, 0.4f);
+	mCameraOrientation = Math::Lerp<vec3, float>(mCameraOrientation, lTargetCameraOrientation, 0.4f);
 }
 
 void HoverTankManager::UpdateCameraPosition(bool pUpdateMicPosition)
 {
-	TransformationF lCameraTransform(GetCameraQuaternion(), mCameraPosition);
+	xform lCameraTransform(GetCameraQuaternion(), mCameraPosition);
 	mUiManager->SetCameraPosition(lCameraTransform);
 	if (pUpdateMicPosition)
 	{
 		const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
 		if (lFrameTime > 1e-4)
 		{
-			Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+			vec3 lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
 			const float lMicrophoneMaxVelocity = 100.0f;
 			if (lVelocity.GetLength() > lMicrophoneMaxVelocity)
 			{
@@ -1438,12 +1440,12 @@ void HoverTankManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	}
 }
 
-QuaternionF HoverTankManager::GetCameraQuaternion() const
+quat HoverTankManager::GetCameraQuaternion() const
 {
 	const float lTheta = mCameraOrientation.x;
 	const float lPhi = mCameraOrientation.y;
 	const float lGimbal = mCameraOrientation.z;
-	QuaternionF lOrientation;
+	quat lOrientation;
 	lOrientation.SetEulerAngles(lTheta-PIF/2, PIF/2-lPhi, lGimbal);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
@@ -1468,7 +1470,7 @@ QuaternionF HoverTankManager::GetCameraQuaternion() const
 
 
 
-LOG_CLASS_DEFINE(GAME, HoverTankManager);
+loginstance(GAME, HoverTankManager);
 
 
 

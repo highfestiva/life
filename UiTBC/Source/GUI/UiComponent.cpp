@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/GUI/UiComponent.h"
 #include "../../Include/GUI/UiDesktopWindow.h"
 #include "../../../Lepra/Include/Log.h"
@@ -1195,7 +1196,7 @@ void Component::SetImageManager(GUIImageManager* pImageManager)
 
 GUIImageManager* Component::smImageManager = 0;
 
-LOG_CLASS_DEFINE(UI_GFX_2D, Component);
+loginstance(UI_GFX_2D, Component);
 
 
 

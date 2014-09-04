@@ -37,7 +37,7 @@ private:
 		MIN_INT  = 0x80000000,
 	};
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -62,7 +62,7 @@ private:
 	int mAnalogueCount;
 	int mButtonCount;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -121,7 +121,7 @@ private:
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

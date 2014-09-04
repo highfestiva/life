@@ -180,7 +180,7 @@ protected:
 
 	void* mExtraData;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

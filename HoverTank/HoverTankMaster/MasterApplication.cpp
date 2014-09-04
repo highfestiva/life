@@ -4,10 +4,11 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/LogLevel.h"
 #include "../../Life/LifeMaster/MasterServer.h"
 #include "../../Life/LifeApplication.h"
-#include "../../TBC/Include/TBC.h"
+#include "../../Tbc/Include/Tbc.h"
 #include "../HoverTank.h"
 #include "../Version.h"
 #include "MasterServerPort.h"
@@ -58,14 +59,14 @@ MasterApplication::~MasterApplication()
 	Destroy();
 
 	Cure::Shutdown();
-	TBC::Shutdown();
+	Tbc::Shutdown();
 	Lepra::Shutdown();
 };
 
 void MasterApplication::Init()
 {
 	Lepra::Init();
-	TBC::Init();
+	Tbc::Init();
 	Cure::Init();
 
 	Parent::Init();

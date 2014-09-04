@@ -4,11 +4,7 @@
  
 
 
-/*#include "../../Lepra/Include/IOBuffer.h"
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/Reader.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../../Lepra/Include/Timer.h"*/
+#include "pch.h"
 #include "../Include/NetworkFreeAgent.h"
 #include "../Include/RuntimeVariable.h"
 
@@ -93,7 +89,7 @@ void NetworkFreeAgent::KillIoSocket(VIoSocket* pSocket)
 
 
 
-LOG_CLASS_DEFINE(NETWORK_CLIENT, NetworkFreeAgent);
+loginstance(NETWORK_CLIENT, NetworkFreeAgent);
 
 
 

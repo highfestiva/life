@@ -10,9 +10,15 @@
 
 #include "../../Lepra/Include/ConsoleCommandManager.h"
 #include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/LogListener.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../Include/Cure.h"
+
+
+
+namespace Lepra
+{
+class InteractiveConsoleLogListener;
+}
 
 
 
@@ -42,7 +48,7 @@ public:
 
 	ConsoleCommandManager* GetConsoleCommandManager() const;
 
-	virtual LogDecorator& GetLog() const;
+	virtual LogDecorator& GetLogger() const;
 
 	void AddFork(Thread* pThread);
 	void RemoveFork(Thread* pThread);
@@ -79,13 +85,13 @@ protected:
 	ConsolePrompt* mConsolePrompt;
 	ConsoleCommandManager* mConsoleCommandManager;
 	MemberThread<ConsoleManager>* mConsoleThread;
-	Lock mLock;
+	LockBC* mLock;
 	std::list<str> mYieldCommandList;
 	typedef std::list<Thread*> ForkList;
 	ForkList mForkList;
 	bool mHistorySilentUntilNextExecute;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

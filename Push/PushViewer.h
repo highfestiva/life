@@ -46,7 +46,7 @@ private:
 
 	ServerListView* mServerListView;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

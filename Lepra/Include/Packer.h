@@ -26,15 +26,15 @@ namespace Lepra
 class PackerTransformation
 {
 public:
-	static int Pack(uint8* pDestination, const TransformationF& pSource);
-	static int Unpack(TransformationF& pDestination, const uint8* pSource, int pSize);
+	static int Pack(uint8* pDestination, const xform& pSource);
+	static int Unpack(xform& pDestination, const uint8* pSource, int pSize);
 };
 
 class PackerVector
 {
 public:
-	static int Pack(uint8* pDestination, const Vector3DF& pSource);
-	static int Unpack(Vector3DF& pDestination, const uint8* pSource, int pSize);
+	static int Pack(uint8* pDestination, const vec3& pSource);
+	static int Unpack(vec3& pDestination, const uint8* pSource, int pSize);
 };
 
 class PackerInt32	// Single int32.

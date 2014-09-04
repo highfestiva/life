@@ -119,11 +119,11 @@
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetPath)</OutputFile>
@@ -141,11 +141,11 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetPath)</OutputFile>
@@ -160,11 +160,11 @@
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetPath)</OutputFile>
@@ -182,11 +182,11 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetPath)</OutputFile>
@@ -203,12 +203,12 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetPath)</OutputFile>
@@ -225,12 +225,12 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Lib>
       <OutputFile>$(TargetPath)</OutputFile>
@@ -282,11 +282,14 @@
     <ClInclude Include="Include\JpegLoader.h" />
     <ClInclude Include="Include\JsonString.h" />
     <ClInclude Include="Include\Lepra.h" />
+    <ClInclude Include="Include\LepraOS.h" />
     <ClInclude Include="Include\LepraTarget.h" />
     <ClInclude Include="Include\LepraTypes.h" />
     <ClInclude Include="Include\LepraUndef.h" />
     <ClInclude Include="Include\ListUtil.h" />
+    <ClInclude Include="Include\Lock.h" />
     <ClInclude Include="Include\Log.h" />
+    <ClInclude Include="Include\Logger.h" />
     <ClInclude Include="Include\LogListener.h" />
     <ClInclude Include="Include\LogType.h" />
     <ClInclude Include="Include\LooseBinTree.h" />
@@ -377,6 +380,7 @@
     <None Include="Include\Vector3D.inl" />
     <ClCompile Include="Source\GameTimer.cpp" />
     <ClCompile Include="Source\JsonString.cpp" />
+    <ClCompile Include="Source\Logger.cpp" />
     <ClCompile Include="Source\Obfuxator.cpp" />
     <ClCompile Include="Source\Plane.cpp" />
     <ClCompile Include="Source\Posix\MacLog.mm">
@@ -424,7 +428,9 @@
       <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Cdecl</CallingConvention>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">false</ShowIncludes>
     </ClCompile>
-    <ClCompile Include="Source\Lepra.cpp" />
+    <ClCompile Include="Source\Lepra.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Source\Log.cpp" />
     <ClCompile Include="Source\LogListener.cpp" />
     <ClCompile Include="Source\LogType.cpp" />
@@ -463,6 +469,7 @@
     <ClCompile Include="Source\TiffLoader.cpp" />
     <ClCompile Include="Source\Time.cpp" />
     <ClCompile Include="Source\TimeLogger.cpp" />
+    <ClCompile Include="Source\Timer.cpp" />
     <ClCompile Include="Source\Writer.cpp" />
     <ClCompile Include="Source\ZipArchive.cpp" />
     <ClCompile Include="Source\Win32\Win32AntiCrack.cpp" />

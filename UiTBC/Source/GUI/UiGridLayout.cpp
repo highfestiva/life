@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../../Include/GUI/UiGridLayout.h"
 #include "../../Include/GUI/UiComponent.h"
 #include <list>

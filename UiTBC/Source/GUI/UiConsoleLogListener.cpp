@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/GUI/UiConsoleLogListener.h"
 #include "../../../Lepra/Include/Math.h"
 #include "../../Include/GUI/UiTextArea.h"

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Lepra/Include/LepraTarget.h"
 #include "FireTicker.h"
 #include "../Lepra/Include/SystemManager.h"
@@ -12,9 +13,9 @@
 #include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiCure/Include/UiResourceManager.h"
 #include "../UiLepra/Include/UiCore.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
 #include "RtVar.h"
 #include "FireManager.h"
 
@@ -29,9 +30,9 @@ FireTicker::FireTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager*
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
 	mEnvMap(0)
 {
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
+	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
+	v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
 
 	AddBackedRtvar(_T(RTVAR_GAME_FIRSTRUN));
 	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
@@ -108,11 +109,11 @@ bool FireTicker::OpenUiManager()
 		if (mUiManager->GetCanvas()->GetHeight() < 600)
 		{
 			double lFontHeight;
-			CURE_RTVAR_GET(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
+			v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
 			if (lFontHeight > 47.0)
 			{
 				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/600.0;
-				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
+				v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 			}
 		}
 		lOk = mUiManager->OpenRest();
@@ -124,7 +125,7 @@ bool FireTicker::OpenUiManager()
 	return lOk;
 }
 
-void FireTicker::BeginRender(Vector3DF& pColor)
+void FireTicker::BeginRender(vec3& pColor)
 {
 	Parent::BeginRender(pColor);
 	mUiManager->GetRenderer()->SetOutlineFillColor(OFF_BLACK);
@@ -168,7 +169,7 @@ Life::GameClientSlaveManager* FireTicker::CreateSlaveManager(Life::GameClientMas
 
 
 
-LOG_CLASS_DEFINE(GAME, FireTicker);
+loginstance(GAME, FireTicker);
 
 
 

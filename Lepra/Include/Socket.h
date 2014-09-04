@@ -8,9 +8,11 @@
 
 #include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "CyclicArray.h"
+#include "Datagram.h"
 #include "FdSet.h"
 #include "HashSet.h"
 #include "InputStream.h"
+#include "Lock.h"
 #include "MemberThread.h"
 #include "OutputStream.h"
 #include "OrderedMap.h"
@@ -84,20 +86,6 @@ public:
 
 private:
 	std::string mConnectionId;
-};
-
-
-// Simple data storage, used with both UDP and TCP protocol.
-class Datagram
-{
-public:
-	inline void Init()
-	{
-		mDataSize = 0;
-	}
-
-	uint8 mDataBuffer[SocketBase::BUFFER_SIZE];
-	int mDataSize;
 };
 
 
@@ -223,7 +211,7 @@ private:
 	SocketAddress mLocalAddress;
 	DatagramReceiver* mReceiver;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -264,7 +252,7 @@ private:
 	SocketAddress mTargetAddress;
 	TcpListenerSocket* mServerSocket;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -343,7 +331,7 @@ private:
 	typedef fastdelegate::FastDelegate1<TcpVSocket*, void> SocketDispatcher;
 	SocketDispatcher mCloseDispatcher;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 class TcpVSocket: public BufferedIo, public TcpSocket, public ConnectionWithId
@@ -360,7 +348,7 @@ public:
 	int Receive(void* pData, int pMaxSize, double pTimeout, bool pDatagram);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -384,7 +372,7 @@ public:
 private:
 	SocketAddress mLocalAddress;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -440,7 +428,7 @@ private:
 
 	static const uint8 mOpenFirewallString[27];
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -494,7 +482,7 @@ private:
 	unsigned mRawReadBufferIndex;
 	bool mReceiverFollowupActive;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -602,7 +590,7 @@ private:
 		void operator=(const Connector&);
 	};
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -653,7 +641,7 @@ private:
 	bool mDefaultSafeSend;
 	bool mDefaultSafeReceive;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

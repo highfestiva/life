@@ -58,11 +58,11 @@
 #include "../../Lepra/Include/LepraAssert.h"
 #include <list>
 #include "../../Lepra/Include/File.h"
-#include "TBC.h"
+#include "Tbc.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -226,7 +226,7 @@ protected:
 	File* mFile;
 	bool mIsFileOwner;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -241,13 +241,13 @@ public:
 	virtual bool Save(const BoneAnimation* pAnimation);
 
 private:
-	bool LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(Tbc::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 
 	int32 mKeyframeCount;
 	int32 mBoneCount;
 	int32 mCurrentKeyframe;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 class ChunkyPhysicsLoader: public ChunkyLoader	// For physics and skinning. Loads the bone hierachy.
@@ -260,12 +260,12 @@ public:
 	virtual bool Save(const ChunkyPhysics* pData);
 
 private:
-	bool LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(Tbc::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 	void SetBoneChildren(int pBoneIndex);
 
 	int32 mCurrentBoneIndex;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 // Contans information on physics and animation names. Derived class handles UI: mesh, materials, sounds, etc.
@@ -282,7 +282,7 @@ protected:
 	bool LoadElementCallback(ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 /*// Contains class/group objects and links between them.

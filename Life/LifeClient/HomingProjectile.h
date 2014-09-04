@@ -29,7 +29,7 @@ protected:
 
 	Cure::GameObjectId mTarget;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

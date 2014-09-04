@@ -7,10 +7,10 @@
 #pragma once
 
 #include "../../Cure/Include/GameTicker.h"
-#include "../../Lepra/Include/Thread.h"
+#include "../../Lepra/Include/Lock.h"
 #include "../../UiCure/Include/UiLineGraph2d.h"
-#include "../../UiTBC/Include/UiFontManager.h"
-#include "../../UiTBC/Include/UiRenderer.h"
+#include "../../UiTbc/Include/UiFontManager.h"
+#include "../../UiTbc/Include/UiRenderer.h"
 #include "InputObserver.h"
 #include "ScreenPart.h"
 
@@ -111,16 +111,16 @@ protected:
 	virtual void PhysicsTick();
 	virtual void WillMicroTick(float pTimeDelta);
 	virtual void DidPhysicsTick();
-	virtual void BeginRender(Vector3DF& pColor);
+	virtual void BeginRender(vec3& pColor);
 	void DrawDebugData() const;
 	void DrawPerformanceLineGraph2d() const;
 
 	virtual float GetTickTimeReduction() const;
 	virtual float GetPowerSaveAmount() const;
 
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
-	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity);
 
 	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
 	void OnCommandError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult);
@@ -163,7 +163,7 @@ protected:
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 	std::unordered_set<Cure::GameObjectId> mLocalObjectSet;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

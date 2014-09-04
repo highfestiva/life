@@ -72,8 +72,8 @@ public:
 	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
 	int GetFrequency(SoundInstanceID pSoundIID);
 
-	void SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
-		const Vector3DF& pUp, const Vector3DF& pForward);
+	void SetListenerPosition(const vec3& pPos, const vec3& pVel,
+		const vec3& pUp, const vec3& pForward);
 
 	void SetDopplerFactor(float pFactor);
 	void SetRollOffFactor(float pFactor);
@@ -118,7 +118,7 @@ public:
 	virtual void SetFileOpener(FileOpener* pOpener);
 
 protected:
-	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
+	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel);
 
 private:
 	struct Sample;
@@ -165,7 +165,7 @@ private:
 	SampleSet mSampleSet;
 	SourceSet mSourceSet;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

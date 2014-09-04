@@ -8,12 +8,12 @@
 
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Lepra/Include/Canvas.h"
-#include "../../TBC/Include/GeometryReference.h"
+#include "../../Tbc/Include/GeometryReference.h"
 #include "../../UiLepra/Include/UiSoundManager.h"
-#include "../../UiTBC/Include/UiChunkyClass.h"
-#include "../../UiTBC/Include/UiChunkyLoader.h"
-#include "../../UiTBC/Include/UiPainter.h"
-#include "../../UiTBC/Include/UiRenderer.h"
+#include "../../UiTbc/Include/UiChunkyClass.h"
+#include "../../UiTbc/Include/UiChunkyLoader.h"
+#include "../../UiTbc/Include/UiPainter.h"
+#include "../../UiTbc/Include/UiRenderer.h"
 #include "UiCure.h"
 
 
@@ -152,9 +152,9 @@ public:
 
 
 
-class GeometryResource: public Cure::OptimizedResource<TBC::GeometryBase*, UiTbc::Renderer::GeometryID>, public UiResource
+class GeometryResource: public Cure::OptimizedResource<Tbc::GeometryBase*, UiTbc::Renderer::GeometryID>, public UiResource
 {
-	typedef Cure::OptimizedResource<TBC::GeometryBase*, UiTbc::Renderer::GeometryID> Parent;
+	typedef Cure::OptimizedResource<Tbc::GeometryBase*, UiTbc::Renderer::GeometryID> Parent;
 public:
 	typedef UiTbc::Renderer::GeometryID UserData;
 
@@ -173,7 +173,7 @@ protected:
 	int mCastsShadows;
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -203,7 +203,7 @@ private:
 	void OnLoadClass(ClassResource*);
 	ClassResource* mClassResource;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 struct GeometryOffset
@@ -213,13 +213,13 @@ struct GeometryOffset
 		mScale(1)
 	{
 	}
-	GeometryOffset(unsigned pPhysicsNodeId, Vector3DF pOffset):
+	GeometryOffset(unsigned pPhysicsNodeId, vec3 pOffset):
 		mGeometryIndex(pPhysicsNodeId),
 		mScale(1)
 	{
 		mOffset.SetPosition(pOffset);
 	}
-	GeometryOffset(unsigned pPhysicsNodeId, TransformationF pOffset, float pScale):
+	GeometryOffset(unsigned pPhysicsNodeId, xform pOffset, float pScale):
 		mGeometryIndex(pPhysicsNodeId),
 		mOffset(pOffset),
 		mScale(pScale)
@@ -227,7 +227,7 @@ struct GeometryOffset
 	}
 
 	unsigned mGeometryIndex;
-	TransformationF mOffset;
+	xform mOffset;
 	float mScale;
 };
 
@@ -244,7 +244,7 @@ public:
 	//virtual void PostProcess();
 
 	const GeometryOffset& GetOffset() const;
-	//TBC::GeometryBase* GetRamData() const;
+	//Tbc::GeometryBase* GetRamData() const;
 	//UiTbc::Renderer::GeometryID GetData() const;
 
 protected:
@@ -252,10 +252,10 @@ protected:
 
 private:
 	GeometryOffset mOffset;
-	//TBC::GeometryBase* mGeometryReference;
+	//Tbc::GeometryBase* mGeometryReference;
 	//UiTbc::Renderer::GeometryID mGeometryReferenceId;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -348,8 +348,8 @@ typedef UserUiExtraTypeResource<RendererImageResource, ImageProcessSettings>			U
 typedef UserUiExtraTypeResource<SoundResource2d, SoundResource::LoopMode>			UserSound2dResource;
 typedef UserUiExtraTypeResource<SoundResource3d, SoundResource::LoopMode>			UserSound3dResource;
 typedef UserUiTypeResource<ClassResource>							UserClassResource;
-//typedef Cure::UserTypeResource<TBC::...>							UserPhysicsResource;
-//typedef UserUiTypeResource<TBC::...>								UserAnimationResource;
+//typedef Cure::UserTypeResource<Tbc::...>							UserPhysicsResource;
+//typedef UserUiTypeResource<Tbc::...>								UserAnimationResource;
 //typedef Cure::UserTypeResource<...>								UserTerrainResource;
 
 

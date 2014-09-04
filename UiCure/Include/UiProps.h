@@ -31,7 +31,7 @@ public:
 	virtual ~Props();
 
 	void SetOpacity(float pOpacity);
-	void StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale, float pAngularRange, float pTime);
+	void StartParticle(ParticleType pParticleType, const vec3& pStartVelocity, float pScale, float pAngularRange, float pTime);
 	void SetFadeOutTime(float pTime);
 
 protected:
@@ -41,7 +41,7 @@ protected:
 	void OnAlarm(int pAlarmId, void* pExtraData);
 
 private:
-	Vector3DF mVelocity;
+	vec3 mVelocity;
 	ParticleType mParticleType;
 	float mScale;
 	float mTime;
@@ -49,9 +49,9 @@ private:
 	float mFadeOutTime;
 	float mOpacity;
 	bool mIsFadingOut;
-	Vector3DF mAngularVelocity;
+	vec3 mAngularVelocity;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

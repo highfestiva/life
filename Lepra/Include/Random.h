@@ -15,9 +15,9 @@ namespace Lepra
 
 
 
-#define RNDVEC3(q0,q1,q2)	Vector3DF(Random::Uniform(-q0, +q0), Random::Uniform(-q1, +q1), Random::Uniform(-q2, +q2))
+#define RNDVEC3(q0,q1,q2)	vec3(Random::Uniform(-q0, +q0), Random::Uniform(-q1, +q1), Random::Uniform(-q2, +q2))
 #define RNDVEC(q)		RNDVEC3(q, q, q)
-#define RNDPOSVEC()		Vector3DF(Random::Uniform(0.0f, 1.0f), Random::Uniform(0.0f, 1.0f), Random::Uniform(0.0f, 1.0f))
+#define RNDPOSVEC()		vec3(Random::Uniform(0.0f, 1.0f), Random::Uniform(0.0f, 1.0f), Random::Uniform(0.0f, 1.0f))
 
 
 

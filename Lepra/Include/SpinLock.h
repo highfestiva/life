@@ -133,7 +133,7 @@ public:
 protected:
 	void OnError(const Thread* pOwner);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 #define VERIFY_ALONE(lock)	VerifySoleAccessor __lVerifier(lock)

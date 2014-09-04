@@ -4,8 +4,8 @@
 
 
 
+#include "pch.h"
 #ifndef CURE_TEST_WITHOUT_UI
-
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ArchiveFile.h"
 #include "../../Lepra/Include/CubicDeCasteljauSpline.h"
@@ -22,10 +22,10 @@
 #include "../../Lepra/Include/Thread.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../../Lepra/Include/ZipArchive.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/GeometryReference.h"
-#include "../../TBC/Include/TerrainFunction.h"
-#include "../../TBC/Include/TerrainPatch.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/GeometryReference.h"
+#include "../../Tbc/Include/TerrainFunction.h"
+#include "../../Tbc/Include/TerrainPatch.h"
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "../../UiLepra/Include/UiInput.h"
@@ -95,7 +95,7 @@ double gTotalFps = 0;
 class UiTbcTest
 {
 };
-Lepra::LogDecorator gUiTbcLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(UiTbcTest));
+Lepra::LogDecorator gUiTbcLog(Lepra::LogType::GetLogger(Lepra::LogType::SUB_TEST), typeid(UiTbcTest));
 
 class GUITestWindow: public UiTbc::Window
 {
@@ -278,7 +278,7 @@ bool SceneTest::Run(double pTime)
 			gInput->PollEvents();
 			gScreen->SetBuffer(0);
 
-			Lepra::TransformationF lCam = gRenderer->GetCameraTransformation();
+			Lepra::xform lCam = gRenderer->GetCameraTransformation();
 			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_UP))
 				lCam.RotatePitch(mCamRotSpeed * (float)lDeltaTime);
 			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_DOWN))
@@ -315,7 +315,7 @@ bool SceneTest::Run(double pTime)
 				gPainter->PrePaint(true);
 
 				gPainter->SetColor(Lepra::WHITE);
-				const Lepra::Vector3DF& lPos = lCam.GetPosition();
+				const Lepra::vec3& lPos = lCam.GetPosition();
 				gPainter->PrintText(Lepra::strutil::Format(_T("(%.2f, %.2f, %.2f)"), lPos.x, lPos.y, lPos.z)+mExtraInfo, 10, 10);
 
 				mDesktopWindow->Repaint();
@@ -402,19 +402,19 @@ private:
 
 	void InitTerrain();
 
-	TBC::TerrainPatch* mTPatch[17];
+	Tbc::TerrainPatch* mTPatch[17];
 	UiTbc::TriangleBasedGeometry* mSphere;
 	UiTbc::TriangleBasedGeometry* mTorus;
 	UiTbc::TriangleBasedGeometry* mCone;
 
-	TBC::BoneAnimation* mAnimation;
-	TBC::BoneAnimator* mAnimator;
+	Tbc::BoneAnimation* mAnimation;
+	Tbc::BoneAnimator* mAnimator;
 	UiTbc::DefaultStaticGeometryHandler* mTorusHandler;
 	UiTbc::GraphicalModel mModel;
 
-	Lepra::Vector3DF mLightPos;
-	Lepra::Vector3DF mLightDir;
-	Lepra::Vector3DF mLightColor;
+	Lepra::vec3 mLightPos;
+	Lepra::vec3 mLightDir;
+	Lepra::vec3 mLightColor;
 
 	UiTbc::Renderer::LightID mLightID;
 };
@@ -429,9 +429,9 @@ public:
 
 private:
 	str mTriangleCountInfo;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
-LOG_CLASS_DEFINE(TEST, TerrainFunctionTest);
+loginstance(TEST, TerrainFunctionTest);
 
 
 
@@ -445,11 +445,11 @@ public:
 
 private:
 	UiTbc::TriangleBasedGeometry* mSphere;
-	TBC::GeometryReference* mSphereReference;
+	Tbc::GeometryReference* mSphereReference;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
-LOG_CLASS_DEFINE(TEST, GeometryReferenceTest);
+loginstance(TEST, GeometryReferenceTest);
 
 
 
@@ -805,10 +805,10 @@ bool ClearSubframe(int pXBox = 0, int pYBox = 0, int pSplitsX = 1, int pSplitsY 
 /*	Lepra::RotationMatrixF lRotation;
 	lRotation.MakeIdentity();
 //	lRotation.RotateAroundOwnX(1.57);
-	Lepra::Vector3DF lTransformation(0, 0, 0);
+	Lepra::vec3 lTransformation(0, 0, 0);
 	lTransformation.y -= (1.0+pXBox*2.0-pSplitsX)/pSplitsX*OBJECT_DISTANCE;
 	lTransformation.z -= (1.0+pYBox*2.0-pSplitsY)/pSplitsY*0.8*OBJECT_DISTANCE;
-	Lepra::TransformationF lCameraTrans(lRotation, lTransformation);
+	Lepra::xform lCameraTrans(lRotation, lTransformation);
 	gRenderer->SetCameraTransformation(lCameraTrans);
 */
 	unsigned lClearFlags = UiTbc::Renderer::CLEAR_COLORBUFFER;
@@ -834,24 +834,24 @@ void PrintInfo(const str& pInfo)
 	gPainter->PrintText(pInfo, gX+2, gY+2);
 }
 
-bool InitializeGeometry(TBC::GeometryBase* pGeometry)
+bool InitializeGeometry(Tbc::GeometryBase* pGeometry)
 {
 	Lepra::RotationMatrixF lRotation;
 	lRotation.MakeIdentity();
-	Lepra::TransformationF lObjectTrans(lRotation, Lepra::Vector3DF(0, OBJECT_DISTANCE, 0));
+	Lepra::xform lObjectTrans(lRotation, Lepra::vec3(0, OBJECT_DISTANCE, 0));
 	pGeometry->SetTransformation(lObjectTrans);
-	TBC::GeometryBase::BasicMaterialSettings lMaterial(
-		Lepra::Vector3DF(0, 0, 0),
-		Lepra::Vector3DF(0.8f, 0.9f, 0.7f),
-		Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+	Tbc::GeometryBase::BasicMaterialSettings lMaterial(
+		Lepra::vec3(0, 0, 0),
+		Lepra::vec3(0.8f, 0.9f, 0.7f),
+		Lepra::vec3(0.1f, 0.1f, 0.1f),
 		0.8f, 1.0f, true);
 	pGeometry->SetBasicMaterialSettings(lMaterial);
 	return (true);
 }
 
-bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialType pMaterial, bool pUpdateScreen,
-		 const Lepra::TransformationF* pTransform = 0, double pDuration = 0.5, const Lepra::tchar* /*pText*/ = 0,
-		 bool pClearScreen = true, float pRotationSpeed = 0.1f, const Lepra::Vector3DF pRotationAxis = Lepra::Vector3DF(1, 1, 1))
+bool QuickRender(Tbc::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialType pMaterial, bool pUpdateScreen,
+		 const Lepra::xform* pTransform = 0, double pDuration = 0.5, const Lepra::tchar* /*pText*/ = 0,
+		 bool pClearScreen = true, float pRotationSpeed = 0.1f, const Lepra::vec3 pRotationAxis = Lepra::vec3(1, 1, 1))
 {
 	bool lOk = true;
 
@@ -878,7 +878,7 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 		// Test Quaternion and RotationMatrix. They should give equal results.
 		//
 
-		Lepra::QuaternionF lQRot;
+		Lepra::quat lQRot;
 		Lepra::RotationMatrixF lMRot;
 		lQRot.RotateAroundWorldX(1.7f);
 		lMRot.RotateAroundWorldX(1.7f);
@@ -898,8 +898,8 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 		lQRot.RotateAroundOwnZ(1.14f);
 		lMRot.RotateAroundOwnZ(1.14f);
 
-		lQRot.RotateAroundVector(Lepra::Vector3DF(1, 0, 0), 0.2f);
-		lMRot.RotateAroundVector(Lepra::Vector3DF(1, 0, 0), 0.2f);
+		lQRot.RotateAroundVector(Lepra::vec3(1, 0, 0), 0.2f);
+		lMRot.RotateAroundVector(Lepra::vec3(1, 0, 0), 0.2f);
 
 		do
 		{
@@ -911,10 +911,10 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 
 			// Change between quaternions and matrices every second frame.
 			// If everything works the user will not see the difference.
-			Lepra::TransformationF lObjectMovement;
+			Lepra::xform lObjectMovement;
 			if (i & 2)
 			{
-				Lepra::QuaternionF lRotation;
+				Lepra::quat lRotation;
 				lRotation.RotateAroundVector(pRotationAxis, (float)lFrameTimer.GetTimeDiff()*pRotationSpeed*Lepra::PIF*2/1.5f);
 
 				// Test conversion to and from RotationMatrix.
@@ -922,7 +922,7 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 				lRotation.Set(lMtx);
 
 				lObjectMovement.SetOrientation(lRotation * lQRot);
-				lObjectMovement.SetPosition((lRotation * lQRot) * Lepra::Vector3DF(0, 5, 0) + Lepra::Vector3DF(0, OBJECT_DISTANCE, 0));
+				lObjectMovement.SetPosition((lRotation * lQRot) * Lepra::vec3(0, 5, 0) + Lepra::vec3(0, OBJECT_DISTANCE, 0));
 			}
 			//TODO:
 			//	This is a bug. When switching rotation algo every other frame (uncomment this and the if-statement above),
@@ -932,7 +932,7 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 				Lepra::RotationMatrixF lRotation;
 				lRotation.RotateAroundVector(pRotationAxis, (float)lFrameTimer.GetTimeDiff()*pRotationSpeed*Lepra::PIF*2/1.5f);
 				lObjectMovement.SetOrientation(lRotation * lMRot);
-				lObjectMovement.SetPosition((lRotation * lMRot) * Lepra::Vector3DF(0, 5, 0) + Lepra::Vector3DF(0, OBJECT_DISTANCE, 0));
+				lObjectMovement.SetPosition((lRotation * lMRot) * Lepra::vec3(0, 5, 0) + Lepra::vec3(0, OBJECT_DISTANCE, 0));
 			}
 			if (pTransform)
 			{
@@ -985,7 +985,7 @@ bool AddRandomVertexColor(UiTbc::TriangleBasedGeometry* pGeometry)
 			lVertexColor[y+2] = (Lepra::uint8)Lepra::Random::GetRandomNumber();
 			lVertexColor[y+3] = (Lepra::uint8)Lepra::Random::GetRandomNumber();
 		}
-		pGeometry->SetColorData(lVertexColor, TBC::GeometryBase::COLOR_RGBA);
+		pGeometry->SetColorData(lVertexColor, Tbc::GeometryBase::COLOR_RGBA);
 		delete[] (lVertexColor);
 	}
 	return (lOk);
@@ -1044,15 +1044,15 @@ bool AddMappingCoords(UiTbc::TriangleBasedGeometry* pGeometry)
 	return (lOk);
 }
 
-bool AddUVAnimation(TBC::GeometryBase* pGeometry)
+bool AddUVAnimation(Tbc::GeometryBase* pGeometry)
 {
 	// TODO: Fix the memory leaks.
 
-	TBC::BoneHierarchy* lBones = new TBC::BoneHierarchy;
+	Tbc::BoneHierarchy* lBones = new Tbc::BoneHierarchy;
 	lBones->SetBoneCount(1);
-	lBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+	lBones->FinalizeInit(Tbc::BoneHierarchy::TRANSFORM_NONE);
 
-	TBC::BoneAnimation* lAnimation = new TBC::BoneAnimation;
+	Tbc::BoneAnimation* lAnimation = new Tbc::BoneAnimation;
 	lAnimation->SetKeyframeCount(4, true);
 	lAnimation->SetBoneCount(1);
 	lAnimation->SetTimeTag(0, 0);
@@ -1061,22 +1061,22 @@ bool AddUVAnimation(TBC::GeometryBase* pGeometry)
 	lAnimation->SetTimeTag(3, 0.6f);
 	lAnimation->SetTimeTag(4, 0.8f);
 	lAnimation->SetBoneTransformation(0, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(0.5f, 0.5f, 0)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(0.5f, 0.5f, 0)));
 	lAnimation->SetBoneTransformation(1, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(0.5f, -0.5f, 0)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(0.5f, -0.5f, 0)));
 	lAnimation->SetBoneTransformation(2, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(-0.5f, -0.5f, 0)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(-0.5f, -0.5f, 0)));
 	lAnimation->SetBoneTransformation(3, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(-0.5, 0.5, 0)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(-0.5, 0.5, 0)));
 
-	TBC::BoneAnimator* lAnimator = new TBC::BoneAnimator(lBones);
+	Tbc::BoneAnimator* lAnimator = new Tbc::BoneAnimator(lBones);
 	str lAnimName(_T("UVAnimation"));
 	lAnimator->AddAnimation(lAnimName, lAnimation);
-	lAnimator->StartAnimation(lAnimName, 0, TBC::BoneAnimation::MODE_PLAY_LOOP);
+	lAnimator->StartAnimation(lAnimName, 0, Tbc::BoneAnimation::MODE_PLAY_LOOP);
 
 	pGeometry->SetUVAnimator(lAnimator);
 
@@ -1117,10 +1117,10 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateTorus(lCuboidLength/4.0f, lCuboidLength/10.0f, lCuboidLength/10.0f, 32, 24);
 			//UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(lCuboidLength/10.0f, lCuboidLength/10.0f, lCuboidLength/2.0f, 32);
 			Lepra::RotationMatrixF lRotation;
-			lRotation.RotateAroundVector(Lepra::Vector3DF(1, 0, 0), -Lepra::PIF/2.0f);
+			lRotation.RotateAroundVector(Lepra::vec3(1, 0, 0), -Lepra::PIF/2.0f);
 			lGeometry->Rotate(lRotation);
 			float lDisplacement = (lMeshIndex*2-1)*lCuboidLength/4.0f;
-			lGeometry->Translate(Lepra::Vector3DF(0, lDisplacement, 0));
+			lGeometry->Translate(Lepra::vec3(0, lDisplacement, 0));
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_WRITE);
 			deb_assert(lTestOk);
@@ -1196,17 +1196,17 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	if (lTestOk)
 	{
 		lContext = _T("save chain animation");
-		TBC::BoneAnimation lAnimation;
-		lAnimation.SetDefaultMode(TBC::BoneAnimation::MODE_PLAY_LOOP);
+		Tbc::BoneAnimation lAnimation;
+		lAnimation.SetDefaultMode(Tbc::BoneAnimation::MODE_PLAY_LOOP);
 		lAnimation.SetRootNodeName(_T("any_friggen_node"));
 		lAnimation.SetKeyframeCount(2, true);
 		lAnimation.SetBoneCount(2);
 		lAnimation.SetTimeTag(0, 0);
 		lAnimation.SetTimeTag(1, 0.5f);
 		lAnimation.SetTimeTag(2, 1.0f);
-		Lepra::TransformationF lTransform0 = Lepra::gIdentityTransformationF;
+		Lepra::xform lTransform0 = Lepra::gIdentityTransformationF;
 		lAnimation.SetBoneTransformation(0, 0, lTransform0);
-		Lepra::TransformationF lTransform1 = Lepra::gIdentityTransformationF;
+		Lepra::xform lTransform1 = Lepra::gIdentityTransformationF;
 		lTransform1.RotatePitch(-0.8f);
 		lAnimation.SetBoneTransformation(0, 1, lTransform1);
 		lAnimation.SetBoneTransformation(1, 0, lTransform0);
@@ -1218,12 +1218,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			TBC::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
+			Tbc::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
 			lTestOk = lAnimationLoader.Save(&lAnimation);
 			deb_assert(lTestOk);
 		}
 	}
-	TBC::BoneAnimation lAnimation;
+	Tbc::BoneAnimation lAnimation;
 	if (lTestOk)
 	{
 		lContext = _T("load chain animation");
@@ -1232,7 +1232,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			TBC::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
+			Tbc::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
 			lTestOk = lAnimationLoader.Load(&lAnimation);
 			deb_assert(lTestOk);
 		}
@@ -1243,15 +1243,15 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	if (lTestOk)
 	{
 		lContext = _T("save chain structure");
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyPhysics::DYNAMIC);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_NONE, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(2);
 		lStructure.SetBoneChildCount(0, 1);
 		lStructure.SetChildIndex(0, 0, 1);
-		Lepra::TransformationF lTransform = Lepra::gIdentityTransformationF;
+		Lepra::xform lTransform = Lepra::gIdentityTransformationF;
 		lStructure.SetOriginalBoneTransformation(0, lTransform);
 		lStructure.SetOriginalBoneTransformation(1, lTransform);
-		lStructure.SetPhysicsType(TBC::ChunkyPhysics::DYNAMIC);
-		lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+		lStructure.SetPhysicsType(Tbc::ChunkyPhysics::DYNAMIC);
+		lStructure.BoneHierarchy::FinalizeInit(Tbc::BoneHierarchy::TRANSFORM_NONE);
 		lTestOk = (lStructure.GetBoneChildCount(lStructure.GetRootBone()) == 1);
 		deb_assert(lTestOk);
 		Lepra::DiskFile lFile;
@@ -1259,12 +1259,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			TBC::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
+			Tbc::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Save(&lStructure);
 			deb_assert(lTestOk);
 		}
 	}
-	TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyPhysics::DYNAMIC);
+	Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_NONE, Tbc::ChunkyPhysics::DYNAMIC);
 	if (lTestOk)
 	{
 		lContext = _T("load chain structure");
@@ -1273,13 +1273,13 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			TBC::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
+			Tbc::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Load(&lStructure);
 			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
-			lTestOk = lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+			lTestOk = lStructure.BoneHierarchy::FinalizeInit(Tbc::BoneHierarchy::TRANSFORM_NONE);
 			deb_assert(lTestOk);
 		}
 		if (lTestOk)
@@ -1296,7 +1296,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lTestOk = ResetAndClearFrame();
 		deb_assert(lTestOk);
 	}
-	TBC::BoneAnimator lAnimator(&lStructure);
+	Tbc::BoneAnimator lAnimator(&lStructure);
 	if (lTestOk)
 	{
 		lSkin[0].SetBoneHierarchy(&lStructure);
@@ -1304,11 +1304,11 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lSkin[0].SetGeometry(&lGeometry[0]);
 		lSkin[1].SetGeometry(&lGeometry[1]);
 		lAnimator.AddAnimation(lAnimationName, &lAnimation);
-		lAnimator.StartAnimation(lAnimationName, 0, TBC::BoneAnimation::MODE_PLAY_DEFAULT);
+		lAnimator.StartAnimation(lAnimationName, 0, Tbc::BoneAnimation::MODE_PLAY_DEFAULT);
 	}
 	Lepra::Timer lTotalTimer;
 	Lepra::HiResTimer lFrameTimer;
-	Lepra::TransformationF lObjectTransform;
+	Lepra::xform lObjectTransform;
 	while (lTestOk && lTotalTimer.GetTimeDiff() < pShowTime)
 	{
 		lContext = _T("render");
@@ -1324,8 +1324,8 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		}
 		if (lTestOk)
 		{
-			Lepra::QuaternionF lRotation;
-			lRotation.RotateAroundVector(Lepra::Vector3DF(0.0f, 0.0f, 1), (float)lTotalTimer.GetTimeDiff()*Lepra::PIF*2/6.7f);
+			Lepra::quat lRotation;
+			lRotation.RotateAroundVector(Lepra::vec3(0.0f, 0.0f, 1), (float)lTotalTimer.GetTimeDiff()*Lepra::PIF*2/6.7f);
 			lObjectTransform.SetOrientation(lRotation);
 
 			lSkin[0].UpdateAnimatedGeometry();
@@ -1382,7 +1382,7 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 		lTestOk = ResetAndClearFrame();
 	}
 	Lepra::Timer lTotalTimer;
-	Lepra::TransformationF lObjectTransform;
+	Lepra::xform lObjectTransform;
 	while (lTestOk && lTotalTimer.GetTimeDiff() < pShowTime)
 	{
 		lContext = _T("render");
@@ -1392,8 +1392,8 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 		}
 		if (lTestOk)
 		{
-			Lepra::QuaternionF lRotation;
-			lRotation.RotateAroundVector(Lepra::Vector3DF(0.1f, -0.1f, 1), (float)lTotalTimer.GetTimeDiff()*Lepra::PIF*2/6.7f);
+			Lepra::quat lRotation;
+			lRotation.RotateAroundVector(Lepra::vec3(0.1f, -0.1f, 1), (float)lTotalTimer.GetTimeDiff()*Lepra::PIF*2/6.7f);
 			lObjectTransform.SetOrientation(lRotation);
 			lTotalTimer.UpdateTimer();
 		}
@@ -1434,21 +1434,21 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 {
 	const float lPatchLeft = 5;
 	const float lPatchSize = 20;
-	const Lepra::Vector2DF lVolcanoPosition(lPatchSize-lPatchLeft, 2*lPatchLeft);
-	const Lepra::Vector2DF lDunePosition(-lPatchLeft, 2*lPatchLeft);
+	const Lepra::vec2 lVolcanoPosition(lPatchSize-lPatchLeft, 2*lPatchLeft);
+	const Lepra::vec2 lDunePosition(-lPatchLeft, 2*lPatchLeft);
 
-	TBC::TerrainPatch::SetDimensions(6, lPatchSize);
+	Tbc::TerrainPatch::SetDimensions(6, lPatchSize);
 
 	int lTriangleCount = 0;
 	const int lPatchCountSide = 10;
 	const int lPatchCount = lPatchCountSide*lPatchCountSide;
-	TBC::TerrainPatch* lPatch[lPatchCount];
+	Tbc::TerrainPatch* lPatch[lPatchCount];
 	for (int y = 0; y < lPatchCountSide; ++y)
 	{
 		for (int x = 0; x < lPatchCountSide; ++x)
 		{
 			const int lHalfSideCount = lPatchCountSide/2;
-			lPatch[y*lPatchCountSide+x] = new TBC::TerrainPatch(Lepra::Vector2D<int>(x-lHalfSideCount, y-lHalfSideCount), 0, 0, 0, 0, 8, 8, 0);
+			lPatch[y*lPatchCountSide+x] = new Tbc::TerrainPatch(Lepra::Vector2D<int>(x-lHalfSideCount, y-lHalfSideCount), 0, 0, 0, 0, 8, 8, 0);
 			lTriangleCount += lPatch[y*lPatchCountSide+x]->GetTriangleCount();
 		}
 	}
@@ -1458,10 +1458,10 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 	{
 		mContext = _T("cone function");
 		const float lConeAmplitude = 4.0f;
-		TBC::TerrainConeFunction lConeFunction(lConeAmplitude, lVolcanoPosition, (lPatchLeft+1)*2, lPatchLeft*3);
-		TBC::TerrainWidthFunction lWidthFunction(0.5f, &lConeFunction);
+		Tbc::TerrainConeFunction lConeFunction(lConeAmplitude, lVolcanoPosition, (lPatchLeft+1)*2, lPatchLeft*3);
+		Tbc::TerrainWidthFunction lWidthFunction(0.5f, &lConeFunction);
 		const float lConePushVector[] = {0.0f, -2.0f, -1.5f, -3.0f, -0.0f};
-		TBC::TerrainPushFunction lPushFunction(lConePushVector, 5, &lWidthFunction);
+		Tbc::TerrainPushFunction lPushFunction(lConePushVector, 5, &lWidthFunction);
 		for (int x = 0; x < lPatchCount; ++x)
 		{
 			lPushFunction.AddFunction(*lPatch[x]);
@@ -1473,12 +1473,12 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 	{
 		mContext = _T("hemisphere functions");
 		const float lHemisphereAmplitude = 4.0f;
-		TBC::TerrainHemisphereFunction lHemisphereFunction(-lHemisphereAmplitude, lVolcanoPosition, lPatchLeft-1, lPatchLeft-1);
+		Tbc::TerrainHemisphereFunction lHemisphereFunction(-lHemisphereAmplitude, lVolcanoPosition, lPatchLeft-1, lPatchLeft-1);
 		for (int x = 0; x < lPatchCount; ++x)
 		{
 			lHemisphereFunction.AddFunction(*lPatch[x]);
 		}
-		TBC::TerrainHemisphereFunction lHemisphereFunction2(lHemisphereAmplitude, lVolcanoPosition, lPatchLeft/2, lPatchLeft/2);
+		Tbc::TerrainHemisphereFunction lHemisphereFunction2(lHemisphereAmplitude, lVolcanoPosition, lPatchLeft/2, lPatchLeft/2);
 		for (int x = 0; x < lPatchCount; ++x)
 		{
 			lHemisphereFunction2.AddFunction(*lPatch[x]);
@@ -1490,12 +1490,12 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 	{
 		mContext = _T("dune function");
 		const float lDuneAmplitude = 4.0f;
-		TBC::TerrainDuneFunction lDuneFunction(0.1f, 1.0f, lDuneAmplitude, lDunePosition, lPatchLeft*1.5f, lPatchLeft*3);
+		Tbc::TerrainDuneFunction lDuneFunction(0.1f, 1.0f, lDuneAmplitude, lDunePosition, lPatchLeft*1.5f, lPatchLeft*3);
 		const float lDuneAmplitudeVector[] = {1.0f, 2.0f, 1.0f, 1.5f, 1.0f, 1.0f};
-		TBC::TerrainAmplitudeFunction lAmplitudeFunction(lDuneAmplitudeVector, 6, &lDuneFunction);
+		Tbc::TerrainAmplitudeFunction lAmplitudeFunction(lDuneAmplitudeVector, 6, &lDuneFunction);
 		const float lDunePushVector[] = {0.0f, 1.5f, 2.5f, -1.0f, -2.0f, 0.0f};
-		TBC::TerrainPushFunction lPushFunction(lDunePushVector, 6, &lAmplitudeFunction);
-		TBC::TerrainRotateFunction lRotateFunction(-Lepra::PIF*3/4, &lPushFunction);
+		Tbc::TerrainPushFunction lPushFunction(lDunePushVector, 6, &lAmplitudeFunction);
+		Tbc::TerrainRotateFunction lRotateFunction(-Lepra::PIF*3/4, &lPushFunction);
 		for (int x = 0; x < lPatchCount; ++x)
 		{
 			lRotateFunction.AddFunction(*lPatch[x]);
@@ -1521,7 +1521,7 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 	if (mTestOk)
 	{
 		mContext = _T("rendering terrain");
-		Lepra::TransformationF lTransform;
+		Lepra::xform lTransform;
 		lTransform.RotatePitch(-0.4f);
 		lTransform.MoveUp(3.0f);
 		lTransform.MoveBackward(20.0f);
@@ -1551,7 +1551,7 @@ bool TestRayPicker(const Lepra::LogDecorator& pLog)
 
 	str lContext = _T("clear");
 	bool lTestOk = ResetAndClearFrame();
-	gRenderer->SetCameraTransformation(TransformationF());
+	gRenderer->SetCameraTransformation(xform());
 
 	if (lTestOk)
 	{
@@ -1559,12 +1559,12 @@ bool TestRayPicker(const Lepra::LogDecorator& pLog)
 		PixelCoord xs(640, 480/2);
 		PixelCoord ys(640/2, 480);
 		PixelCoord zs(0, 0);
-		Vector3DF xp = gRenderer->ScreenCoordToVector(xs)*100;
-		Vector3DF yp = gRenderer->ScreenCoordToVector(ys)*100;
-		Vector3DF zp = gRenderer->ScreenCoordToVector(zs)*100;
-		Vector2DF xb = gRenderer->PositionToScreenCoord(xp, 0);
-		Vector2DF yb = gRenderer->PositionToScreenCoord(yp, 0);
-		Vector2DF zb = gRenderer->PositionToScreenCoord(zp, 0);
+		vec3 xp = gRenderer->ScreenCoordToVector(xs)*100;
+		vec3 yp = gRenderer->ScreenCoordToVector(ys)*100;
+		vec3 zp = gRenderer->ScreenCoordToVector(zs)*100;
+		vec2 xb = gRenderer->PositionToScreenCoord(xp, 0);
+		vec2 yb = gRenderer->PositionToScreenCoord(yp, 0);
+		vec2 zb = gRenderer->PositionToScreenCoord(zp, 0);
 		lTestOk = ((int)xb.x == xs.x && (int)xb.y == xs.y &&
 			   (int)yb.x == ys.x && (int)yb.y == ys.y &&
 			   (int)zb.x == zs.x && (int)yb.y == ys.y);
@@ -1612,7 +1612,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 	Lepra::HiResTimer lTotalTimer;
 	bool lFirstTime = true;
 	Lepra::HiResTimer lFrameTimer;
-	Lepra::TransformationF lObjectTransform;
+	Lepra::xform lObjectTransform;
 	do
 	{
 		lTestOk = !Lepra::SystemManager::GetQuitRequest();
@@ -1645,14 +1645,14 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 					lContext = _T("add point light 0");
 					gRenderer->SetAmbientLight(0.1f, 0.1f, 0.1f);
 					gRenderer->SetLightsEnabled(true);
-					lLights[0] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, Vector3DF(30, OBJECT_DISTANCE - 60, -30), Vector3DF(50, 100, 50), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
+					lLights[0] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, vec3(30, OBJECT_DISTANCE - 60, -30), vec3(50, 100, 50), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
 					lTestOk = (lLights[0] != UiTbc::Renderer::INVALID_LIGHT);
 					deb_assert(lTestOk);
 				}
 				if (lTestOk)
 				{
 					lContext = _T("add point light 1");
-					lLights[1] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, Vector3DF(-30, OBJECT_DISTANCE - 60, 30), Vector3DF(50, 50, 100), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
+					lLights[1] = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_STATIC, vec3(-30, OBJECT_DISTANCE - 60, 30), vec3(50, 50, 100), OBJECT_DISTANCE, OBJECT_DISTANCE*10);
 					lTestOk = (lLights[1] != UiTbc::Renderer::INVALID_LIGHT);
 					deb_assert(lTestOk);
 				}
@@ -1781,7 +1781,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 			gDisplay->UpdateScreen();
 			UiLepra::Core::ProcessMessages();
 			Lepra::RotationMatrixF lRotation;
-			lRotation.RotateAroundVector(Lepra::Vector3DF(1, -1, 1), (float)(lFrameTimer.GetTimeDiff()*1.79));
+			lRotation.RotateAroundVector(Lepra::vec3(1, -1, 1), (float)(lFrameTimer.GetTimeDiff()*1.79));
 			lObjectTransform.SetOrientation(lRotation);
 		}
 
@@ -1926,10 +1926,10 @@ GeometryReferenceTest::GeometryReferenceTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->SetClearColor(Lepra::YELLOW);
 
 	// Default material...
-	TBC::GeometryBase::BasicMaterialSettings lMaterial(
-		Lepra::Vector3DF(0, 0, 0),
-		Lepra::Vector3DF(1.0f, 1.0f, 1.0f),
-		Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+	Tbc::GeometryBase::BasicMaterialSettings lMaterial(
+		Lepra::vec3(0, 0, 0),
+		Lepra::vec3(1.0f, 1.0f, 1.0f),
+		Lepra::vec3(0.1f, 0.1f, 0.1f),
 		0.8f, 1.0f, true);
 
 	mSphere = UiTbc::BasicMeshCreator::CreateEllipsoid(1, 1, 1, 16, 8);
@@ -1941,11 +1941,11 @@ GeometryReferenceTest::GeometryReferenceTest(const Lepra::LogDecorator& pLog) :
 	mSphere->SetAlwaysVisible(false);
 	UiTbc::Renderer::GeometryID lGraphicId = gRenderer->AddGeometry(mSphere, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::CAST_SHADOWS);
 	gRenderer->TryAddGeometryTexture(lGraphicId, gTextureId[TEXTUREMAP]);
-	Lepra::TransformationF lTransf;
-	lTransf.SetPosition(Lepra::Vector3DF(1000, 0, 1000));
+	Lepra::xform lTransf;
+	lTransf.SetPosition(Lepra::vec3(1000, 0, 1000));
 	mSphere->SetTransformation(lTransf);
 
-	mSphereReference = new TBC::GeometryReference(mSphere);
+	mSphereReference = new Tbc::GeometryReference(mSphere);
 	mSphereReference->SetAlwaysVisible(true);
 	lGraphicId = gRenderer->AddGeometry(mSphereReference, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::CAST_SHADOWS);
 	lTransf.SetIdentity();
@@ -1953,7 +1953,7 @@ GeometryReferenceTest::GeometryReferenceTest(const Lepra::LogDecorator& pLog) :
 
 	lTransf.SetIdentity();
 	lTransf.RotatePitch(-Lepra::PIF / 8.0f);
-	lTransf.SetPosition(Lepra::Vector3DF(0, -2, 4));
+	lTransf.SetPosition(Lepra::vec3(0, -2, 4));
 	gRenderer->SetCameraTransformation(lTransf);
 }
 
@@ -1965,8 +1965,8 @@ GeometryReferenceTest::~GeometryReferenceTest()
 
 void GeometryReferenceTest::UpdateScene(double pTotalTime, double)
 {
-	Lepra::TransformationF lTransf;
-	lTransf.SetPosition(Lepra::Vector3DF(0, 0, (float)::sin(pTotalTime)*3));
+	Lepra::xform lTransf;
+	lTransf.SetPosition(Lepra::vec3(0, 0, (float)::sin(pTotalTime)*3));
 	mSphereReference->SetTransformation(lTransf);
 }
 
@@ -1978,10 +1978,10 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->SetClearColor(Lepra::RED);
 
 	// Default material...
-	TBC::GeometryBase::BasicMaterialSettings lMaterial(
-		Lepra::Vector3DF(0, 0, 0),
-		Lepra::Vector3DF(1.0f, 1.0f, 1.0f),
-		Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+	Tbc::GeometryBase::BasicMaterialSettings lMaterial(
+		Lepra::vec3(0, 0, 0),
+		Lepra::vec3(1.0f, 1.0f, 1.0f),
+		Lepra::vec3(0.1f, 0.1f, 0.1f),
 		0.8f, 1.0f, true);
 
 	InitTerrain();
@@ -1994,9 +1994,9 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	mTorus->SplitVertices();
 
 	// Setup sphere.
-	lMaterial.mAmbient = Lepra::Vector3DF(1,1,1);
+	lMaterial.mAmbient = Lepra::vec3(1,1,1);
 	mSphere->SetBasicMaterialSettings(lMaterial);
-	lMaterial.mAmbient = Lepra::Vector3DF(0,0,0);
+	lMaterial.mAmbient = Lepra::vec3(0,0,0);
 	//AddRandomVertexColor(mSphere);
 	AddMappingCoords(mSphere);
 	mSphere->SetAlwaysVisible(true);
@@ -2004,10 +2004,10 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->TryAddGeometryTexture(lGraphicId, gTextureId[TEXTUREMAP]);
 
 	// Setup cone forest.
-	lMaterial.mDiffuse = Lepra::Vector3DF(0.2f,1,0.2f);
+	lMaterial.mDiffuse = Lepra::vec3(0.2f,1,0.2f);
 	mCone->SetBasicMaterialSettings(lMaterial);
 	UiTbc::GeometryBatch* lConeBatch = new UiTbc::GeometryBatch(mCone);
-	Lepra::TransformationF lPositions[100];
+	Lepra::xform lPositions[100];
 	for (int i = 0; i < 100; i++)
 	{
 		lPositions[i].GetPosition().x = Lepra::Random::Uniform(0.0f, 50.0f);
@@ -2015,10 +2015,10 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 		lPositions[i].GetPosition().z = 0;
 	}
 
-	Lepra::TransformationF lTransf;
-	lTransf.SetPosition(Lepra::Vector3DF(0, 0, -1));
+	Lepra::xform lTransf;
+	lTransf.SetPosition(Lepra::vec3(0, 0, -1));
 
-	lConeBatch->SetInstances(lPositions, Vector3DF(), 100, 0, 0.8f, 1.2f, 0.8f, 1.2f, 0.8f, 1.2f);
+	lConeBatch->SetInstances(lPositions, vec3(), 100, 0, 0.8f, 1.2f, 0.8f, 1.2f, 0.8f, 1.2f);
 	lConeBatch->SetAlwaysVisible(true);
 	lConeBatch->SetTransformation(lTransf);
 	lConeBatch->CalculateBoundingRadius();
@@ -2026,7 +2026,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->TryAddGeometryTexture(lGraphicId2, gTextureId[TEXTUREMAP]);
 
 	// Setup torus using the Model-class.
-	lMaterial.mDiffuse = Lepra::Vector3DF(1,1,1);
+	lMaterial.mDiffuse = Lepra::vec3(1,1,1);
 	mTorus->SetBasicMaterialSettings(lMaterial);
 	AddUVAnimation(mTorus);
 	AddRandomVertexColor(mTorus);
@@ -2034,18 +2034,18 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	UiTbc::UVMapper::ApplyCubeMapping(mTorus, lUVSet, 1, Lepra::Vector2DD(0.5, 0.5));
 
 	lTransf.SetIdentity();
-	lTransf.SetPosition(Lepra::Vector3DF(-0.5, 2, 0));
+	lTransf.SetPosition(Lepra::vec3(-0.5, 2, 0));
 	lTransf.RotatePitch(-Lepra::PIF / 3.0f);
 	lTransf.RotateWorldZ(Lepra::PIF / 4.0f);
 	lTransf.RotateWorldX(Lepra::PIF / 4.0f);
 	mModel.SetTransformation(lTransf);
 
 	// Setup a transform animation bone.
-	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
+	Tbc::BoneHierarchy* lTransformBones = new Tbc::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
-	lTransformBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+	lTransformBones->FinalizeInit(Tbc::BoneHierarchy::TRANSFORM_NONE);
 
-	mAnimation = new TBC::BoneAnimation;
+	mAnimation = new Tbc::BoneAnimation;
 	mAnimation->SetKeyframeCount(8, true);
 	mAnimation->SetBoneCount(1);
 	mAnimation->SetTimeTag(0, 0);
@@ -2058,31 +2058,31 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	mAnimation->SetTimeTag(7, 3.5f);
 	mAnimation->SetTimeTag(8, 4.0f);
 	mAnimation->SetBoneTransformation(0, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(-1, -1, -1)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(-1, -1, -1)));
 	mAnimation->SetBoneTransformation(1, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(-1, -1, 1)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(-1, -1, 1)));
 	mAnimation->SetBoneTransformation(2, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(-1, 1, 1)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(-1, 1, 1)));
 	mAnimation->SetBoneTransformation(3, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(-1, 1, -1)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(-1, 1, -1)));
 	mAnimation->SetBoneTransformation(4, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(1, 1, -1)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(1, 1, -1)));
 	mAnimation->SetBoneTransformation(5, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(1, 1, 1)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(1, 1, 1)));
 	mAnimation->SetBoneTransformation(6, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(1, -1, 1)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(1, -1, 1)));
 	mAnimation->SetBoneTransformation(7, 0, 
-		Lepra::TransformationF(Lepra::g3x3IdentityMatrixF,
-				       Lepra::Vector3DF(1, -1, -1)));
+		Lepra::xform(Lepra::g3x3IdentityMatrixF,
+				       Lepra::vec3(1, -1, -1)));
 
-	mAnimator = new TBC::BoneAnimator(lTransformBones);
+	mAnimator = new Tbc::BoneAnimator(lTransformBones);
 	mAnimator->AddAnimation(_T("TransformAnimation"), mAnimation);
 
 	mModel.AddAnimator(_T("TransformAnimator"), mAnimator);
@@ -2091,14 +2091,14 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	mModel.AddGeometry(_T("Torus"), mTorusHandler, _T("TransformAnimator"));
 	mModel.SetAlwaysVisible(true);
 
-	mModel.StartAnimation(_T("TransformAnimation"), 0, TBC::BoneAnimation::MODE_PLAY_LOOP);
+	mModel.StartAnimation(_T("TransformAnimation"), 0, Tbc::BoneAnimation::MODE_PLAY_LOOP);
 
 
 
-	Lepra::QuaternionF lQ1;
-	Lepra::QuaternionF lQ2;
-	Lepra::QuaternionF lQ3;
-	Lepra::QuaternionF lQ4;
+	Lepra::quat lQ1;
+	Lepra::quat lQ2;
+	Lepra::quat lQ3;
+	Lepra::quat lQ4;
 
 	lQ1.RotateAroundWorldZ(Lepra::PIF / 5.33f);
 	lQ1.RotateAroundWorldX(Lepra::PIF / 1.234f);
@@ -2109,7 +2109,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 
 	lTransf.SetIdentity();
 	lTransf.RotatePitch(-Lepra::PIF / 8.0f);
-	lTransf.SetPosition(Lepra::Vector3DF(0, -0.5, 1));
+	lTransf.SetPosition(Lepra::vec3(0, -0.5, 1));
 	gRenderer->SetCameraTransformation(lTransf);
 
 	gRenderer->SetLightsEnabled(true);
@@ -2127,7 +2127,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 
 	//mLightID = gRenderer->AddSpotLight(UiTbc::Renderer::LIGHT_MOVABLE, lLightPos, lLightDir, lLightColor, 30, 32, 100, 500);
 	//mLightID = gRenderer->AddDirectionalLight(UiTbc::Renderer::LIGHT_MOVABLE, lLightDir, lLightColor, 500);
-	mLightID = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_MOVABLE, mLightPos, Vector3DF(2.0f, 2.0f, 2.0f), 1000, 500);
+	mLightID = gRenderer->AddPointLight(UiTbc::Renderer::LIGHT_MOVABLE, mLightPos, vec3(2.0f, 2.0f, 2.0f), 1000, 500);
 }
 
 BumpMapSceneTest::~BumpMapSceneTest()
@@ -2139,25 +2139,25 @@ BumpMapSceneTest::~BumpMapSceneTest()
 
 void BumpMapSceneTest::InitTerrain()
 {
-	TBC::GeometryBase::BasicMaterialSettings lMaterial(
-		Lepra::Vector3DF(0, 0, 0),
-		Lepra::Vector3DF(1.0f, 1.0f, 1.0f),
-		Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+	Tbc::GeometryBase::BasicMaterialSettings lMaterial(
+		Lepra::vec3(0, 0, 0),
+		Lepra::vec3(1.0f, 1.0f, 1.0f),
+		Lepra::vec3(0.1f, 0.1f, 0.1f),
 		0.7f, 1.0f, true);
 
-	TBC::TerrainFunction* lTF[3];
-	lTF[0] = new TBC::TerrainConeFunction(15.0f, Lepra::Vector2DF(-50, -50), 20.0f, 30.0f);
-	lTF[1] = new TBC::TerrainHemisphereFunction(-10.0f, Lepra::Vector2DF(-50, -40), 10.0f, 15.0f);
-	lTF[2] = new TBC::TerrainHemisphereFunction(10.0f, Lepra::Vector2DF(100, 100), 40.0f, 50.0f);
-	//lTF[1] = new TBC::TerrainDuneFunction(2, 1, 10, Lepra::Vector2DF(100, 100), 20.0f, 30.0f);
-	TBC::TerrainFunctionGroup lTFGroup(lTF, 3, Lepra::COPY_REFERENCE, Lepra::TAKE_SUBDATA_OWNERSHIP);
+	Tbc::TerrainFunction* lTF[3];
+	lTF[0] = new Tbc::TerrainConeFunction(15.0f, Lepra::vec2(-50, -50), 20.0f, 30.0f);
+	lTF[1] = new Tbc::TerrainHemisphereFunction(-10.0f, Lepra::vec2(-50, -40), 10.0f, 15.0f);
+	lTF[2] = new Tbc::TerrainHemisphereFunction(10.0f, Lepra::vec2(100, 100), 40.0f, 50.0f);
+	//lTF[1] = new Tbc::TerrainDuneFunction(2, 1, 10, Lepra::vec2(100, 100), 20.0f, 30.0f);
+	Tbc::TerrainFunctionGroup lTFGroup(lTF, 3, Lepra::COPY_REFERENCE, Lepra::TAKE_SUBDATA_OWNERSHIP);
 
-	TBC::TerrainPatch::SetDimensions(4, 100);
+	Tbc::TerrainPatch::SetDimensions(4, 100);
 
-	Lepra::TransformationF lTransf;
-	lTransf.SetPosition(Lepra::Vector3DF(0, 0, -1));
+	Lepra::xform lTransf;
+	lTransf.SetPosition(Lepra::vec3(0, 0, -1));
 
-	mTPatch[0] = new TBC::TerrainPatch(Lepra::Vector2D<int>(0, 0));
+	mTPatch[0] = new Tbc::TerrainPatch(Lepra::Vector2D<int>(0, 0));
 	lTFGroup.AddFunctions(*mTPatch[0]);
 	mTPatch[0]->GenerateVertexNormalData();
 	mTPatch[0]->SetBasicMaterialSettings(lMaterial);
@@ -2182,36 +2182,36 @@ void BumpMapSceneTest::InitTerrain()
 					{
 						if (x == -1)
 						{
-							lEdgeFlags |= TBC::TerrainPatch::EAST_EDGE;
+							lEdgeFlags |= Tbc::TerrainPatch::EAST_EDGE;
 						}
 						else if (x == 1)
 						{
-							lEdgeFlags |= TBC::TerrainPatch::WEST_EDGE;
+							lEdgeFlags |= Tbc::TerrainPatch::WEST_EDGE;
 						}
 					}
 					else if (x == 0)
 					{
 						if (y == -1)
 						{
-							lEdgeFlags |= TBC::TerrainPatch::NORTH_EDGE;
+							lEdgeFlags |= Tbc::TerrainPatch::NORTH_EDGE;
 						}
 						else if (y == 1)
 						{
-							lEdgeFlags |= TBC::TerrainPatch::SOUTH_EDGE;
+							lEdgeFlags |= Tbc::TerrainPatch::SOUTH_EDGE;
 						}
 					}
 				}
 
 				if (y != 0 || x != 0)
 				{
-					mTPatch[lPatchIndex] = new TBC::TerrainPatch(Lepra::Vector2D<int>(x * lSizeMultiplier + lPrevXY, y * lSizeMultiplier + lPrevXY), 0, i, lEdgeFlags);
+					mTPatch[lPatchIndex] = new Tbc::TerrainPatch(Lepra::Vector2D<int>(x * lSizeMultiplier + lPrevXY, y * lSizeMultiplier + lPrevXY), 0, i, lEdgeFlags);
 					lTFGroup.AddFunctions(*mTPatch[lPatchIndex]);
 					mTPatch[lPatchIndex]->GenerateVertexNormalData();
 					mTPatch[lPatchIndex]->SetBasicMaterialSettings(lMaterial);
 					mTPatch[lPatchIndex]->SetAlwaysVisible(true);
 					mTPatch[lPatchIndex]->SetTransformation(lTransf);
 
-					if ((lEdgeFlags & TBC::TerrainPatch::SOUTH_EDGE) != 0)
+					if ((lEdgeFlags & Tbc::TerrainPatch::SOUTH_EDGE) != 0)
 					{
 						int lSouthIndex = -1;
 						if (y == -1)
@@ -2232,13 +2232,13 @@ void BumpMapSceneTest::InitTerrain()
 							mTPatch[lPatchIndex]->MergeNormalsWithSouthNeighbour(*mTPatch[lSouthIndex]);
 						}
 					}
-					if ((lEdgeFlags & TBC::TerrainPatch::NORTH_EDGE) != 0)
+					if ((lEdgeFlags & Tbc::TerrainPatch::NORTH_EDGE) != 0)
 					{
 					}
-					if ((lEdgeFlags & TBC::TerrainPatch::WEST_EDGE) != 0)
+					if ((lEdgeFlags & Tbc::TerrainPatch::WEST_EDGE) != 0)
 					{
 					}
-					if ((lEdgeFlags & TBC::TerrainPatch::EAST_EDGE) != 0)
+					if ((lEdgeFlags & Tbc::TerrainPatch::EAST_EDGE) != 0)
 					{
 					}
 
@@ -2275,16 +2275,16 @@ void BumpMapSceneTest::InitTerrain()
 
 void BumpMapSceneTest::UpdateScene(double pTotalTime, double pDeltaTime)
 {
-	Lepra::Vector3DF lTempPos(mLightPos + Lepra::Vector3DF(10.0f * (float)sin(pTotalTime * 2.0), 0, 0));
+	Lepra::vec3 lTempPos(mLightPos + Lepra::vec3(10.0f * (float)sin(pTotalTime * 2.0), 0, 0));
 	gRenderer->SetLightPosition(mLightID, lTempPos);
-	Lepra::TransformationF lTransf;
+	Lepra::xform lTransf;
 	lTransf.SetPosition(lTempPos);
 	mSphere->SetTransformation(lTransf);
 	
 
 	lTransf = mModel.GetTransformation();
 	const float RPS = 0.125 * 0.25;
-	Lepra::QuaternionF lQ;
+	Lepra::quat lQ;
 	lQ.RotateAroundWorldZ(RPS * (float)pTotalTime * 2.0f * Lepra::PIF);
 	lTransf.SetOrientation(lQ);
 	mModel.SetTransformation(lTransf);
@@ -2342,14 +2342,14 @@ bool TestGUI(const Lepra::LogDecorator& /*pLog*/, double pShowTime)
 
 bool TestCubicSpline(const Lepra::LogDecorator&, double pShowTime)
 {
-	Lepra::Vector2DF lCoordinates[4];
+	Lepra::vec2 lCoordinates[4];
 	lCoordinates[0].Set(0, 0);
 	lCoordinates[1].Set(10, 500);
 	lCoordinates[2].Set(400, 550);
 	lCoordinates[3].Set(400, 0);
 
 	float lTimeTags[10] = {0, 1, 2, 3, 4};
-	Lepra::CubicDeCasteljauSpline<Lepra::Vector2DF, float> lSpline(lCoordinates, lTimeTags, 4, Lepra::CubicDeCasteljauSpline<Lepra::Vector2DF, float>::TYPE_BEZIER);
+	Lepra::CubicDeCasteljauSpline<Lepra::vec2, float> lSpline(lCoordinates, lTimeTags, 4, Lepra::CubicDeCasteljauSpline<Lepra::vec2, float>::TYPE_BEZIER);
 
 	gPainter->ResetClippingRect();
 	gPainter->SetRenderMode(UiTbc::Painter::RM_NORMAL);
@@ -2361,7 +2361,7 @@ bool TestCubicSpline(const Lepra::LogDecorator&, double pShowTime)
 	lSpline.StartInterpolation(0);
 	for (unsigned int i = 0; i < gPainter->GetCanvas()->GetWidth(); i++)
 	{
-		Lepra::Vector2DF lValue = lSpline.GetValue();
+		Lepra::vec2 lValue = lSpline.GetValue();
 		float x = lValue.x;
 		float y = lValue.y;
 		

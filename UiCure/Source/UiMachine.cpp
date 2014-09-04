@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiMachine.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -12,9 +13,9 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
 #include "../Include/UiBurnEmitter.h"
 #include "../Include/UiExhaustEmitter.h"
 #include "../Include/UiGameUiManager.h"
@@ -91,8 +92,8 @@ void Machine::OnTick()
 {
 	Parent::OnTick();
 
-	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
-	const TBC::ChunkyClass* lClass = GetClass();
+	const Tbc::ChunkyPhysics* lPhysics = GetPhysics();
+	const Tbc::ChunkyClass* lClass = GetClass();
 	if (!lPhysics || !lClass)
 	{
 		return;
@@ -106,10 +107,10 @@ void Machine::OnTick()
 	float lRealTimeRatio = lTimeManager->GetRealTimeRatio();
 	const float lFrameTime = lTimeManager->GetNormalGameFrameTime();
 	const bool lIsChild = IsAttributeTrue(_T("float_childishness"));
-	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-	Vector3DF lVelocity;
-	TBC::PhysicsManager::BodyID lBodyId = lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId();
-	if (lBodyId != TBC::INVALID_BODY)
+	const Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	vec3 lVelocity;
+	Tbc::PhysicsManager::BodyID lBodyId = lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId();
+	if (lBodyId != Tbc::INVALID_BODY)
 	{
 		lPhysicsManager->GetBodyVelocity(lBodyId, lVelocity);
 	}
@@ -180,7 +181,7 @@ void Machine::OnTick()
 		}
 	}
 
-	if (lIsChild || lPhysics->GetGuideMode() == TBC::ChunkyPhysics::GUIDE_ALWAYS)
+	if (lIsChild || lPhysics->GetGuideMode() == Tbc::ChunkyPhysics::GUIDE_ALWAYS)
 	{
 		StabilizeTick();
 	}
@@ -222,7 +223,7 @@ void Machine::HandleTagAmbientSounds(const UiTbc::ChunkyClass::Tag& pTag, float 
 	}
 }
 
-void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, bool pIsChild)
+void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::PhysicsManager* pPhysicsManager, bool pIsChild)
 {
 	// Eyes follow steered wheels. Get wheel corresponding to eye and
 	// move eye accordingly á là Lightning McQueen.
@@ -241,13 +242,13 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 	if (!pTag.mBodyIndexList.empty())
 	{
 		const int lBodyIndex = pTag.mBodyIndexList[0];
-		TBC::ChunkyBoneGeometry* lBone = GetPhysics()->GetBoneGeometry(lBodyIndex);
-		TBC::PhysicsManager::JointID lJoint = lBone->GetJointId();
+		Tbc::ChunkyBoneGeometry* lBone = GetPhysics()->GetBoneGeometry(lBodyIndex);
+		Tbc::PhysicsManager::JointID lJoint = lBone->GetJointId();
 		switch (lBone->GetJointType())
 		{
-			case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
+			case Tbc::ChunkyBoneGeometry::JOINT_HINGE2:
 			{
-				TBC::PhysicsManager::Joint3Diff lDiff;
+				Tbc::PhysicsManager::Joint3Diff lDiff;
 				pPhysicsManager->GetJoint3Diff(lBone->GetBodyId(), lJoint, lDiff);
 				float lLowStop = 0;
 				float lHighStop = 0;
@@ -256,9 +257,9 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 				lJointValue = lDiff.mAngle1 * 2 / (lHighStop-lLowStop);
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
+			case Tbc::ChunkyBoneGeometry::JOINT_HINGE:
 			{
-				TBC::PhysicsManager::Joint1Diff lDiff;
+				Tbc::PhysicsManager::Joint1Diff lDiff;
 				pPhysicsManager->GetJoint1Diff(lBone->GetBodyId(), lJoint, lDiff);
 				float lLowStop = 0;
 				float lHighStop = 0;
@@ -267,7 +268,7 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 				lJointValue = lDiff.mValue * 2 / (lHighStop-lLowStop);
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
+			case Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE:
 			{
 				// Simple, dead eyes.
 				lJointValue = 0;
@@ -288,7 +289,7 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 		{
 			return;
 		}
-		TBC::PhysicsEngine* lEngine = GetPhysics()->GetEngine(lEngineIndex);
+		Tbc::PhysicsEngine* lEngine = GetPhysics()->GetEngine(lEngineIndex);
 		lJointValue = lEngine->GetLerpThrottle(0.1f, 0.1f, false);
 	}
 	const float lScale = pTag.mFloatValueList[0];
@@ -296,10 +297,10 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::Physi
 	const float lJointDownValue = (::cos(lJointValue)-1) * lScale * 0.5f;
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
 		if (lMesh)
 		{
-			TransformationF lTransform = lMesh->GetBaseTransformation();
+			xform lTransform = lMesh->GetBaseTransformation();
 			lTransform.MoveRight(lJointRightValue);
 			lTransform.MoveBackward(lJointDownValue);
 			lMesh->SetTransformation(lTransform);
@@ -326,13 +327,13 @@ void Machine::HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag)
 	{
 		return;
 	}
-	const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
+	const Tbc::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
 		if (lMesh)
 		{
-			Vector3DF& lAmbient = lMesh->GetBasicMaterialSettings().mAmbient;
+			vec3& lAmbient = lMesh->GetBasicMaterialSettings().mAmbient;
 			if (::fabs(lEngine->GetValue()) > 0.001f)
 			{
 				lAmbient.Set(pTag.mFloatValueList[0], pTag.mFloatValueList[1], pTag.mFloatValueList[2]);
@@ -365,12 +366,12 @@ void Machine::HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pF
 	const float lGlowFactor = pTag.mFloatValueList[0];
 	const float lThrottleUpSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[1]*0.5f, pFrameTime);
 	const float lThrottleDownSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[1], pFrameTime);
-	const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
+	const Tbc::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
 	const float lEngineThrottle = lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true);
 	const float lAmbientChannel = Math::Lerp(lGlowFactor, 1.0f, lEngineThrottle);
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
 		if (lMesh)
 		{
 			lMesh->GetBasicMaterialSettings().mAmbient.Set(lAmbientChannel, lAmbientChannel, lAmbientChannel);
@@ -402,7 +403,7 @@ void Machine::HandleTagBlinkLight(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 	const float b = V(B_OFF) + V(B_AMP) * sin(mBlinkTime*2*PIF*V(B_SPEED));
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
 		if (lMesh)
 		{
 			lMesh->GetBasicMaterialSettings().mAmbient.Set(r, g, b);
@@ -411,7 +412,7 @@ void Machine::HandleTagBlinkLight(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 	mBlinkTime += pFrameTime;
 }
 
-void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, const Vector3DF& pVelocity,
+void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::PhysicsManager* pPhysicsManager, const vec3& pVelocity,
 	float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex)
 {
 	// Sound controlled by engine.
@@ -444,8 +445,8 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TB
 	}
 
 	int lBodyIndex = pTag.mBodyIndexList[0];
-	TBC::ChunkyBoneGeometry* lBone = GetPhysics()->GetBoneGeometry(lBodyIndex);
-	const Vector3DF lPosition = pPhysicsManager->GetBodyPosition(lBone->GetBodyId());
+	Tbc::ChunkyBoneGeometry* lBone = GetPhysics()->GetBoneGeometry(lBodyIndex);
+	const vec3 lPosition = pPhysicsManager->GetBodyPosition(lBone->GetBodyId());
 
 	enum FloatValue
 	{
@@ -472,7 +473,7 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TB
 		{
 			continue;
 		}
-		const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
+		const Tbc::PhysicsEngine* lEngine = mPhysics->GetEngine(lEngineIndex);
 		float lEngineIntensity = Math::Clamp(lEngine->GetIntensity(), 0.0f, 1.0f);
 		if (pTag.mFloatValueList[FV_THROTTLE_FACTOR] > 0)
 		{
@@ -546,26 +547,26 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 		FV_SECONDARY_FACTOR,
 	};
 
-	TBC::PhysicsEngine* lEngine = GetPhysics()->GetEngine(lEngineIndex);
-	const float lEngineFactor = lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_PRIMARY] * pTag.mFloatValueList[FV_PRIMARY_FACTOR] +
-			lEngine->GetValues()[TBC::PhysicsEngine::ASPECT_SECONDARY] * pTag.mFloatValueList[FV_SECONDARY_FACTOR];
+	Tbc::PhysicsEngine* lEngine = GetPhysics()->GetEngine(lEngineIndex);
+	const float lEngineFactor = lEngine->GetValues()[Tbc::PhysicsEngine::ASPECT_PRIMARY] * pTag.mFloatValueList[FV_PRIMARY_FACTOR] +
+			lEngine->GetValues()[Tbc::PhysicsEngine::ASPECT_SECONDARY] * pTag.mFloatValueList[FV_SECONDARY_FACTOR];
 	const float lEngineAbsFactor = std::abs(lEngineFactor);
 
-	const Vector3DF lOffsetPosition(Vector3DF(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]) * lEngineAbsFactor);
+	const vec3 lOffsetPosition(vec3(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]) * lEngineAbsFactor);
 	const float a = pTag.mFloatValueList[FV_ROTATION_ANGLE] * lEngineFactor;
-	QuaternionF lOffsetOrientation(a, Vector3DF(pTag.mFloatValueList[FV_ROTATION_AXIS_X], pTag.mFloatValueList[FV_ROTATION_AXIS_Y], pTag.mFloatValueList[FV_ROTATION_AXIS_Z]));
-	const TransformationF lOffset(lOffsetOrientation, lOffsetPosition);
+	quat lOffsetOrientation(a, vec3(pTag.mFloatValueList[FV_ROTATION_AXIS_X], pTag.mFloatValueList[FV_ROTATION_AXIS_Y], pTag.mFloatValueList[FV_ROTATION_AXIS_Z]));
+	const xform lOffset(lOffsetOrientation, lOffsetPosition);
 	const float t = Math::GetIterateLerpTime(1/pTag.mFloatValueList[FV_INERTIA], pFrameTime);
 
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
 		if (!lMesh)
 		{
 			continue;
 		}
-		TBC::GeometryReference* lMeshRef = (TBC::GeometryReference*)lMesh;
-		TransformationF lCurrentOffset;
+		Tbc::GeometryReference* lMeshRef = (Tbc::GeometryReference*)lMesh;
+		xform lCurrentOffset;
 		lCurrentOffset.Interpolate(lMeshRef->GetExtraOffsetTransformation(), lOffset, t);
 		lMeshRef->SetExtraOffsetTransformation(lCurrentOffset);
 	}
@@ -601,16 +602,16 @@ void Machine::HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 	const float lStartTime = V(FV_INITIAL_DELAY);
 	float lAmplitude = CalculateMeshOffset(lFunction, lStartTime, V(FV_DURATION), V(FV_FREQUENCY), pFrameTime, mMeshOffsetTime);
 
-	const Vector3DF lOffsetPosition(GetOrientation().GetInverseRotatedVector(Vector3DF(V(FV_X), V(FV_Y), V(FV_Z)) * lAmplitude));
+	const vec3 lOffsetPosition(GetOrientation().GetInverseRotatedVector(vec3(V(FV_X), V(FV_Y), V(FV_Z)) * lAmplitude));
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
 		if (!lMesh)
 		{
 			continue;
 		}
-		TBC::GeometryReference* lMeshRef = (TBC::GeometryReference*)lMesh;
-		TransformationF lExtraOffset = lMeshRef->GetExtraOffsetTransformation();
+		Tbc::GeometryReference* lMeshRef = (Tbc::GeometryReference*)lMesh;
+		xform lExtraOffset = lMeshRef->GetExtraOffsetTransformation();
 		lExtraOffset.mPosition = lOffsetPosition;
 		lMeshRef->SetExtraOffsetTransformation(lExtraOffset);
 	}
@@ -646,17 +647,17 @@ void Machine::HandleTagMeshRotate(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 	const float lStartTime = V(FV_INITIAL_DELAY);
 	float lAmplitude = CalculateMeshOffset(lFunction, lStartTime, V(FV_DURATION), V(FV_FREQUENCY), pFrameTime, mMeshRotateTime);
 
-	QuaternionF lOffsetOrientation;
+	quat lOffsetOrientation;
 	lOffsetOrientation.SetEulerAngles(V(FV_Z)*lAmplitude, V(FV_X)*lAmplitude, V(FV_Y)*lAmplitude);
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = GetMesh(pTag.mMeshIndexList[y]);
 		if (!lMesh)
 		{
 			continue;
 		}
-		TBC::GeometryReference* lMeshRef = (TBC::GeometryReference*)lMesh;
-		TransformationF lExtraOffset = lMeshRef->GetExtraOffsetTransformation();
+		Tbc::GeometryReference* lMeshRef = (Tbc::GeometryReference*)lMesh;
+		xform lExtraOffset = lMeshRef->GetExtraOffsetTransformation();
 		lExtraOffset.mOrientation = lOffsetOrientation;
 		lMeshRef->SetExtraOffsetTransformation(lExtraOffset);
 	}
@@ -702,7 +703,7 @@ void Machine::LoadPlaySound3d(UserSound3dResource* pSoundResource)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Machine);
+loginstance(GAME_CONTEXT_CPP, Machine);
 
 
 

@@ -4,14 +4,16 @@
 
 
 
-/*#include "../../Lepra/Include/LepraAssert.h"
+#include "pch.h"
+/*
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/DiskFile.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/ChunkyLoader.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsManagerFactory.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/ChunkyLoader.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/PhysicsManagerFactory.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
 
 
 
@@ -22,11 +24,11 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 class TbcTest
 {
 };
-Lepra::LogDecorator gTbcLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(TbcTest));
+Lepra::LogDecorator gTbcLog(Lepra::LogType::GetLogger(Lepra::LogType::SUB_TEST), typeid(TbcTest));
 
 
 
-bool WriteStructure(const str& pFilename, const TBC::ChunkyPhysics& pStructure)
+bool WriteStructure(const str& pFilename, const Tbc::ChunkyPhysics& pStructure)
 {
 	bool lOk = true;
 	Lepra::DiskFile lFile;
@@ -36,13 +38,13 @@ bool WriteStructure(const str& pFilename, const TBC::ChunkyPhysics& pStructure)
 	}
 	if (lOk)
 	{
-		TBC::ChunkyPhysicsLoader lLoader(&lFile, false);
+		Tbc::ChunkyPhysicsLoader lLoader(&lFile, false);
 		lOk = lLoader.Save(&pStructure);
 	}
 	return (lOk);
 }
 
-bool ReadStructure(const str& pFilename, TBC::ChunkyPhysics& pStructure)
+bool ReadStructure(const str& pFilename, Tbc::ChunkyPhysics& pStructure)
 {
 	bool lOk = true;
 	Lepra::DiskFile lFile;
@@ -52,7 +54,7 @@ bool ReadStructure(const str& pFilename, TBC::ChunkyPhysics& pStructure)
 	}
 	if (lOk)
 	{
-		TBC::ChunkyPhysicsLoader lLoader(&lFile, false);
+		Tbc::ChunkyPhysicsLoader lLoader(&lFile, false);
 		lOk = lLoader.Load(&pStructure);
 	}
 	return (lOk);
@@ -64,20 +66,20 @@ bool ExportStructure()
 	bool lOk = true;
 
 	int lPhysicsFps = CURE_STANDARD_FRAME_RATE;
-	TBC::PhysicsManager* lPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE);
+	Tbc::PhysicsManager* lPhysics = Tbc::PhysicsManagerFactory::Create(Tbc::PhysicsManagerFactory::ENGINE_ODE);
 	if (lOk)
 	{
 		lContext = _T("box save");
 		str lFilename(_T("box_01.phys"));
 
-		Lepra::Vector3DF lDimensions(2.0f, 1.0f, 3.5f);
+		Lepra::vec3 lDimensions(2.0f, 1.0f, 3.5f);
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_WORLD2LOCAL, TBC::ChunkyPhysics::DYNAMIC);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(1);
 
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(
-			TBC::ChunkyBoneGeometry::BodyData(1.0f, 0.2f, 1.0f), lDimensions);
-		lStructure.AddBoneGeometry(Lepra::TransformationF(), lGeometry);
+		Tbc::ChunkyBoneGeometry* lGeometry = new Tbc::ChunkyBoneBox(
+			Tbc::ChunkyBoneGeometry::BodyData(1.0f, 0.2f, 1.0f), lDimensions);
+		lStructure.AddBoneGeometry(Lepra::xform(), lGeometry);
 
 		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
 		if (lOk)
@@ -92,21 +94,21 @@ bool ExportStructure()
 		lContext = _T("box load");
 		str lFilename(_T("box_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
 		if (lOk)
 		{
-			Lepra::TransformationF lTransformation;
+			Lepra::xform lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = (lStructure.GetBoneCount() == 1 &&
-				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
+				lStructure.GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
-				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
+				lStructure.GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY &&
 				lStructure.GetEngineCount() == 0);
 			deb_assert(lOk);
 		}
@@ -119,14 +121,14 @@ bool ExportStructure()
 
 		const float lRadius = 1.0f;
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_WORLD2LOCAL, TBC::ChunkyPhysics::DYNAMIC);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(1);
 
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneSphere(
-			TBC::ChunkyBoneGeometry::BodyData(1.0f, 0.2f, 1.0f), lRadius);
-		lStructure.AddBoneGeometry(Lepra::TransformationF(), lGeometry);
+		Tbc::ChunkyBoneGeometry* lGeometry = new Tbc::ChunkyBoneSphere(
+			Tbc::ChunkyBoneGeometry::BodyData(1.0f, 0.2f, 1.0f), lRadius);
+		lStructure.AddBoneGeometry(Lepra::xform(), lGeometry);
 
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_PUSH_RELATIVE,
+		Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE,
 			55, 50, 0, 0.01f, 0);
 		lEngine->AddControlledGeometry(lGeometry, 1);
 		lStructure.AddEngine(lEngine);
@@ -145,21 +147,21 @@ bool ExportStructure()
 		lContext = _T("sphere load");
 		str lFilename(_T("sphere_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
 		if (lOk)
 		{
-			Lepra::TransformationF lTransformation;
+			Lepra::xform lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = (lStructure.GetBoneCount() == 1 &&
-				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
+				lStructure.GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
-				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
+				lStructure.GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY &&
 				lStructure.GetEngineCount() == 1);
 			deb_assert(lOk);
 		}
@@ -176,7 +178,7 @@ bool ExportStructure()
 		lContext = _T("car save");
 		str lFilename(_T("car_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_WORLD2LOCAL, TBC::ChunkyPhysics::DYNAMIC);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(6);
 
 		const float lWheelRadius = 0.3f;
@@ -184,31 +186,31 @@ bool ExportStructure()
 		const float lWheelZOffset = 0.3f;
 		const float lBackWheelYOffset = -0.8f;
 		const float lWheelYDistance = 3.6f;
-		const Lepra::Vector3DF lBodyDimensions(1.9f, 4.9f, 0.6f);
-		const Lepra::Vector3DF lTopDimensions(1.6f, 2.9f, 0.6f);
-		Lepra::TransformationF lTransformation;
+		const Lepra::vec3 lBodyDimensions(1.9f, 4.9f, 0.6f);
+		const Lepra::vec3 lTopDimensions(1.6f, 2.9f, 0.6f);
+		Lepra::xform lTransformation;
 
 		// Body.
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(lVolvoMass, 0.1f, 1.0f, 0,
-			TBC::ChunkyBoneGeometry::JOINT_EXCLUDE, TBC::ChunkyBoneGeometry::CONNECTEE_3DOF);
-		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lBodyDimensions);
+		Tbc::ChunkyBoneGeometry::BodyData lBodyData(lVolvoMass, 0.1f, 1.0f, 0,
+			Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE, Tbc::ChunkyBoneGeometry::CONNECTEE_3DOF);
+		Tbc::ChunkyBoneGeometry* lBodyGeometry = new Tbc::ChunkyBoneBox(lBodyData, lBodyDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lBodyGeometry);
 		// Top of body.
-		Lepra::TransformationF lTopTransform(lTransformation);
+		Lepra::xform lTopTransform(lTransformation);
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
 		lTopTransform.MoveForward(0.9f);
 		lBodyData.mMass = lVolvoMass/5;
 		lBodyData.mFriction = 0.5f;
 		lBodyData.mParent = lBodyGeometry;
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTopDimensions);
+		Tbc::ChunkyBoneGeometry* lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lTopDimensions);
 		lStructure.AddBoneGeometry(lTopTransform, lGeometry, lBodyData.mParent);
 
 		// Wheels and suspension.
 		lTransformation.GetPosition().Add(-lBodyDimensions.x/2-lWheelXOffset,
 			lBodyDimensions.y/2+lBackWheelYOffset, -lWheelZOffset);
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF/2);
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE;
-		lBodyData.mConnectorType = TBC::ChunkyBoneGeometry::CONNECT_NONE;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE;
+		lBodyData.mConnectorType = Tbc::ChunkyBoneGeometry::CONNECT_NONE;
 		lBodyData.mMass = lVolvoMass/50;
 		lBodyData.mFriction = 1.0f;
 		lBodyData.mBounce = 0.5f;
@@ -216,44 +218,44 @@ bool ExportStructure()
 		lBodyData.mParameter[1] = lVolvoDampingConstant;
 		lBodyData.mParameter[2] = 0;
 		lBodyData.mParameter[3] = Lepra::PIF * 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[2] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x -= lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetPosition().y -= lWheelYDistance;
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF);
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_HINGE2;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_HINGE2;
 		lBodyData.mParameter[2] = 0;
 		lBodyData.mParameter[4] = -0.5f;
 		lBodyData.mParameter[5] = 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[2] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		// Front wheel drive engine.
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 1*lVolvoMass, 300, 20, 0.01f, 0);
+		Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_ROLL, 1*lVolvoMass, 300, 20, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), +1);
 		lStructure.AddEngine(lEngine);
 		// Turning front wheels.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_TURN, 1*lVolvoMass, 1.0f, 0, 0.01f, 1);
+		lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE2_TURN, 1*lVolvoMass, 1.0f, 0, 0.01f, 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), +1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), +1);
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbrake (rear wheels, nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, 8*lVolvoMass, lBreakInputThreashold, 0, 0.01f, 2);
+		Tbc::PhysicsEngine* lBreak = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_BRAKE, 8*lVolvoMass, lBreakInputThreashold, 0, 0.01f, 2);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(4), 0);
@@ -286,29 +288,29 @@ bool ExportStructure()
 		lContext = _T("car load");
 		str lFilename(_T("car_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
 		if (lOk)
 		{
-			Lepra::TransformationF lTransform;
-			lTransform.SetPosition(Lepra::Vector3DF(100, 100, 100));
+			Lepra::xform lTransform;
+			lTransform.SetPosition(Lepra::vec3(100, 100, 100));
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransform, 0, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = (lStructure.GetBoneCount() == 6 &&
-				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
+				lStructure.GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
-				lStructure.GetBoneGeometry(4)->GetBodyId() != TBC::INVALID_BODY &&
-				lStructure.GetBoneGeometry(4)->GetJointId() != TBC::INVALID_JOINT &&
+				lStructure.GetBoneGeometry(4)->GetBodyId() != Tbc::INVALID_BODY &&
+				lStructure.GetBoneGeometry(4)->GetJointId() != Tbc::INVALID_JOINT &&
 				lStructure.GetEngineCount() == 4);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
-			Lepra::Vector3DF lPosition = lPhysics->GetBodyPosition(lStructure.GetBoneGeometry(4)->GetBodyId());
+			Lepra::vec3 lPosition = lPhysics->GetBodyPosition(lStructure.GetBoneGeometry(4)->GetBodyId());
 			lOk = (Lepra::Math::IsInRange(lPosition.x, 99.1f, 99.3f) &&
 				Lepra::Math::IsInRange(lPosition.y, 98.0f, 98.1f) &&
 				Lepra::Math::IsInRange(lPosition.z, 99.6f, 99.8f));
@@ -342,11 +344,11 @@ bool ExportStructure()
 		}
 		if (lOk)
 		{
-			Lepra::TransformationF lTransform;
+			Lepra::xform lTransform;
 			lPhysics->GetBodyTransform(lStructure.GetBoneGeometry(4)->GetBodyId(), lTransform);
 			lTransform.GetPosition().z += 1.0f;
 			lPhysics->SetBodyTransform(lStructure.GetBoneGeometry(4)->GetBodyId(), lTransform);
-			TBC::PhysicsManager::Joint3Diff lDiff;
+			Tbc::PhysicsManager::Joint3Diff lDiff;
 			lOk = lPhysics->GetJoint3Diff(lStructure.GetBoneGeometry(4)->GetBodyId(),
 				lStructure.GetBoneGeometry(4)->GetJointId(), lDiff);
 			deb_assert(lOk);
@@ -363,7 +365,7 @@ bool ExportStructure()
 		lContext = _T("monster save");
 		str lFilename(_T("monster_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_WORLD2LOCAL, TBC::ChunkyPhysics::DYNAMIC);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(6);
 
 		const float lCarWeight = 3000;
@@ -372,21 +374,21 @@ bool ExportStructure()
 		const float lWheelZOffset = 0.8f;
 		const float lBackWheelYOffset = 0.0f;
 		const float lWheelYDistance = 5.0f;
-		const Lepra::Vector3DF lBodyDimensions(3.0f, 5.0f, 0.7f);
-		const Lepra::Vector3DF lTopDimensions(3.0f, 3.0f, 0.7f);
-		Lepra::TransformationF lTransformation;
+		const Lepra::vec3 lBodyDimensions(3.0f, 5.0f, 0.7f);
+		const Lepra::vec3 lTopDimensions(3.0f, 3.0f, 0.7f);
+		Lepra::xform lTransformation;
 
 		// Body.
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(lCarWeight, 0.1f, 0.5f);
-		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lBodyDimensions);
+		Tbc::ChunkyBoneGeometry::BodyData lBodyData(lCarWeight, 0.1f, 0.5f);
+		Tbc::ChunkyBoneGeometry* lBodyGeometry = new Tbc::ChunkyBoneBox(lBodyData, lBodyDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lBodyGeometry);
 		// Top of body.
-		Lepra::TransformationF lTopTransform(lTransformation);
+		Lepra::xform lTopTransform(lTransformation);
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
 		lBodyData.mMass = lCarWeight/10;
 		lBodyData.mFriction = 0.8f;
 		lBodyData.mParent = lBodyGeometry;
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTopDimensions);
+		Tbc::ChunkyBoneGeometry* lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lTopDimensions);
 		lStructure.AddBoneGeometry(lTopTransform, lGeometry, lBodyData.mParent);
 
 		// Wheels and suspension.
@@ -399,19 +401,19 @@ bool ExportStructure()
 		lBodyData.mMass = lCarWeight/50;
 		lBodyData.mFriction = 1.0f;
 		lBodyData.mBounce = 0.5f;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE;
-		lBodyData.mConnectorType = TBC::ChunkyBoneGeometry::CONNECT_NONE;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE;
+		lBodyData.mConnectorType = Tbc::ChunkyBoneGeometry::CONNECT_NONE;
 		lBodyData.mParameter[0] = lSpringConstant;
 		lBodyData.mParameter[1] = lDamperConstant;
 		lBodyData.mParameter[2] = 0;
 		lBodyData.mParameter[3] = Lepra::PIF * 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[2] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x -= lBodyDimensions.x+lWheelXOffset*2;
@@ -420,28 +422,28 @@ bool ExportStructure()
 		lBodyData.mParameter[2] = 0;
 		lBodyData.mParameter[4] = -0.5f;
 		lBodyData.mParameter[5] = 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[2] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		// Rear wheel drive engine.
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 5*lCarWeight, 300, 20, 0.01f, 0);
+		Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_ROLL, 5*lCarWeight, 300, 20, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
 		lStructure.AddEngine(lEngine);
 		// Turning front wheels.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_TURN, 1*lCarWeight, 0.5f, 0, 0.01f, 1);
+		lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE2_TURN, 1*lCarWeight, 0.5f, 0, 0.01f, 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), 1);
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbrake (rear wheels, nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, 8*lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
+		Tbc::PhysicsEngine* lBreak = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_BRAKE, 8*lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(4), 0);
@@ -462,21 +464,21 @@ bool ExportStructure()
 		lContext = _T("monster load");
 		str lFilename(_T("monster_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
 		if (lOk)
 		{
-			Lepra::TransformationF lTransformation;
+			Lepra::xform lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = (lStructure.GetBoneCount() == 6 &&
-				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
+				lStructure.GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
-				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
+				lStructure.GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY &&
 				lStructure.GetEngineCount() == 4);
 			deb_assert(lOk);
 		}
@@ -487,7 +489,7 @@ bool ExportStructure()
 		lContext = _T("excavator save");
 		str lFilename(_T("excavator_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_WORLD2LOCAL, TBC::ChunkyPhysics::DYNAMIC);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(13);
 
 		const float lCarWeight = 18000;
@@ -496,24 +498,24 @@ bool ExportStructure()
 		const float lWheelZOffset = 0.6f;
 		const float lBackWheelYOffset = 0.5f;
 		const float lWheelYDistance = 2.0f;
-		const Lepra::Vector3DF lBodyDimensions(2.9f, 3.0f, 1.5f);
-		const Lepra::Vector3DF lTopDimensions(1.0f, 1.5f, 0.6f);
-		Lepra::TransformationF lTransformation;
+		const Lepra::vec3 lBodyDimensions(2.9f, 3.0f, 1.5f);
+		const Lepra::vec3 lTopDimensions(1.0f, 1.5f, 0.6f);
+		Lepra::xform lTransformation;
 
 		// Body.
-		const Lepra::TransformationF lBodyTransformation(lTransformation);
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(lCarWeight, 0.5f, 0.5f);
-		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lBodyDimensions);
+		const Lepra::xform lBodyTransformation(lTransformation);
+		Tbc::ChunkyBoneGeometry::BodyData lBodyData(lCarWeight, 0.5f, 0.5f);
+		Tbc::ChunkyBoneGeometry* lBodyGeometry = new Tbc::ChunkyBoneBox(lBodyData, lBodyDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lBodyGeometry);
 		// Top of body.
-		Lepra::TransformationF lTopTransform(lTransformation);
+		Lepra::xform lTopTransform(lTransformation);
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
 		lTopTransform.MoveRight(1.0f);
 		lTopTransform.MoveBackward(0.75f);
 		lBodyData.mMass = lCarWeight/20;
 		lBodyData.mBounce = 1.0f;
 		lBodyData.mParent = lBodyGeometry;
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTopDimensions);
+		Tbc::ChunkyBoneGeometry* lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lTopDimensions);
 		lStructure.AddBoneGeometry(lTopTransform, lGeometry, lBodyData.mParent);
 
 		// Wheels and suspension.
@@ -526,60 +528,60 @@ bool ExportStructure()
 		lBodyData.mMass = lCarWeight/50;
 		lBodyData.mFriction = 4.0f;
 		lBodyData.mBounce = 0.2f;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE;
-		lBodyData.mConnectorType = TBC::ChunkyBoneGeometry::CONNECT_NONE;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE;
+		lBodyData.mConnectorType = Tbc::ChunkyBoneGeometry::CONNECT_NONE;
 		lBodyData.mParameter[0] = lSpringConstant;
 		lBodyData.mParameter[1] = lDamperConstant;
 		lBodyData.mParameter[2] = 0;
 		lBodyData.mParameter[3] = Lepra::PIF * 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[2] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x -= lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetPosition().y -= lWheelYDistance;
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF);
 		lBodyData.mParameter[2] = 0;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[2] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x -= lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetPosition().y -= lWheelYDistance;
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF);
 		lBodyData.mParameter[2] = 0;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[2] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
+		lGeometry = new Tbc::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		// Boom.
-		const Lepra::Vector3DF lBoom1Dimensions(0.6f, 0.6f, 2.5f);
-		const Lepra::Vector3DF lBoom2Dimensions(0.6f, 0.6f, 3.2f);
+		const Lepra::vec3 lBoom1Dimensions(0.6f, 0.6f, 2.5f);
+		const Lepra::vec3 lBoom2Dimensions(0.6f, 0.6f, 3.2f);
 		lTransformation = lBodyTransformation;
 		lTransformation.MoveUp(lBodyDimensions.z/2);
 		lTransformation.MoveLeft(0.5f);
 		lTransformation.MoveBackward(0.75f);
-		Lepra::Vector3DF lBoomAnchor(lTransformation.GetPosition());
+		Lepra::vec3 lBoomAnchor(lTransformation.GetPosition());
 		lTransformation.MoveUp(lBoom1Dimensions.z/2);
 		lBodyData.mMass = lCarWeight*3/(12*5);
 		lBodyData.mFriction = 1.0f;
 		lBodyData.mBounce = 0.2f;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_HINGE;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_HINGE;
 		lBodyData.mParameter[2] = 0;
 		lBodyData.mParameter[3] = Lepra::PIF * 0.5f;
 		lBodyData.mParameter[4] = -1.2f;
@@ -588,75 +590,75 @@ bool ExportStructure()
 		lBodyData.mParameter[6] = lBoomAnchor.x;
 		lBodyData.mParameter[7] = lBoomAnchor.y;
 		lBodyData.mParameter[8] = lBoomAnchor.z;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lBoom1Dimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lBoom1Dimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 		// Boom, part 2.
 		lTransformation.MoveUp(lBoom1Dimensions.z/2);
 		const float lBoom2Angle = Lepra::PIF/4;
 		lTransformation.MoveBackward(::sin(lBoom2Angle)*lBoom2Dimensions.z/2);
 		lTransformation.MoveUp(::cos(lBoom2Angle)*lBoom2Dimensions.z/2);
-		Lepra::TransformationF lBoom2Transform(lTransformation);
+		Lepra::xform lBoom2Transform(lTransformation);
 		lBoom2Transform.RotatePitch(lBoom2Angle);
 		lBodyData.mMass = lCarWeight*2/(12*5);
 		lBodyData.mParent = lGeometry;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_EXCLUDE;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lBoom2Dimensions);
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE;
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lBoom2Dimensions);
 		lStructure.AddBoneGeometry(lBoom2Transform, lGeometry, lBodyData.mParent);
 
 		// Arm.
 		lTransformation.MoveBackward(::sin(lBoom2Angle)*lBoom2Dimensions.z/2);
 		lTransformation.MoveUp(::cos(lBoom2Angle)*lBoom2Dimensions.z/2);
-		Lepra::Vector3DF lArmAnchor(lTransformation.GetPosition());
-		const Lepra::Vector3DF lArmDimensions(0.4f, 3.0f, 0.4f);
+		Lepra::vec3 lArmAnchor(lTransformation.GetPosition());
+		const Lepra::vec3 lArmDimensions(0.4f, 3.0f, 0.4f);
 		lTransformation.MoveBackward(lArmDimensions.y/2);
 		lBodyData.mMass = lCarWeight/25;
 		lBodyData.mParent = lGeometry;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_HINGE;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_HINGE;
 		lBodyData.mParameter[4] = -1.0f;
 		lBodyData.mParameter[5] = 0.5f;
 		lArmAnchor -= lTransformation.GetPosition();
 		lBodyData.mParameter[6] = lArmAnchor.x;
 		lBodyData.mParameter[7] = lArmAnchor.y;
 		lBodyData.mParameter[8] = lArmAnchor.z;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lArmDimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lArmDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		// Bucket.
 		lTransformation.MoveBackward(lArmDimensions.y/2);
-		Lepra::Vector3DF lBucketAnchor(lTransformation.GetPosition());
-		const Lepra::Vector3DF lBucketBackDimensions(1.5f, 0.8f, 0.1f);
+		Lepra::vec3 lBucketAnchor(lTransformation.GetPosition());
+		const Lepra::vec3 lBucketBackDimensions(1.5f, 0.8f, 0.1f);
 		const float lBucketBackAngle = Lepra::PIF/4;
 		lTransformation.MoveBackward(::cos(lBucketBackAngle)*lBucketBackDimensions.y/2);
 		lTransformation.MoveUp(::sin(lBucketBackAngle)*lBucketBackDimensions.y/2);
-		Lepra::TransformationF lBucketBackTransform(lTransformation);
+		Lepra::xform lBucketBackTransform(lTransformation);
 		lBucketBackTransform.RotatePitch(-lBucketBackAngle);
 		lBodyData.mMass = lCarWeight/100;
 		lBodyData.mFriction = 10.0f;
 		lBodyData.mParent = lGeometry;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_HINGE;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_HINGE;
 		lBodyData.mParameter[4] = -1.0f;
 		lBodyData.mParameter[5] = 0.5f;
 		lBodyData.mParameter[6] = 0;
 		lBodyData.mParameter[7] = lBucketBackDimensions.y/2;
 		lBodyData.mParameter[8] = 0;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lBucketBackDimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lBucketBackDimensions);
 		lStructure.AddBoneGeometry(lBucketBackTransform, lGeometry, lBodyData.mParent);
 		// Bucket, floor part.
 		lTransformation.MoveBackward(::cos(lBucketBackAngle)*lBucketBackDimensions.y/2);
 		lTransformation.MoveUp(::sin(lBucketBackAngle)*lBucketBackDimensions.y/2);
-		const Lepra::Vector3DF lBucketFloorDimensions(1.5f, 1.0f, 0.1f);
+		const Lepra::vec3 lBucketFloorDimensions(1.5f, 1.0f, 0.1f);
 		const float lBucketFloorAngle = Lepra::PIF/4;
 		lTransformation.MoveBackward(::cos(lBucketFloorAngle)*lBucketFloorDimensions.y/2);
 		lTransformation.MoveDown(::sin(lBucketFloorAngle)*lBucketFloorDimensions.y/2);
-		Lepra::TransformationF lBucketFloorTransform(lTransformation);
+		Lepra::xform lBucketFloorTransform(lTransformation);
 		lBucketFloorTransform.RotatePitch(lBucketFloorAngle);
 		lBodyData.mParent = lGeometry;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_EXCLUDE;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lBucketBackDimensions);
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE;
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lBucketBackDimensions);
 		lStructure.AddBoneGeometry(lBucketFloorTransform, lGeometry, lBodyData.mParent);
 
 		// All wheel drive engine.
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, lCarWeight, 25, 25, 0.01f, 0);
+		Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_ROLL, lCarWeight, 25, 25, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), -1);
@@ -665,7 +667,7 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(7), 1);
 		lStructure.AddEngine(lEngine);
 		// Turning with tracks are controlled by rolling of the wheels.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, lCarWeight, 20, 20, 0.01f, 1);
+		lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_ROLL, lCarWeight, 20, 20, 0.01f, 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), 1);
@@ -675,7 +677,7 @@ bool ExportStructure()
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbrake (nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BRAKE, lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
+		Tbc::PhysicsEngine* lBreak = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_BRAKE, lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), 100);
@@ -684,16 +686,16 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(7), 100);
 		lStructure.AddEngine(lBreak);
 		// The boom, arm and bucket are hinge-controlled.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_TORQUE, 20*lCarWeight, 2.0f, 1.0f, 0.01f, 3);
+		lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_TORQUE, 20*lCarWeight, 2.0f, 1.0f, 0.01f, 3);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(8), 5);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(10), 2, TBC::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(11), 1, TBC::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
+		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(10), 2, Tbc::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
+		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(11), 1, Tbc::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
 		lStructure.AddEngine(lEngine);
 
 		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
 		if (lOk)
 		{
-			const Lepra::Vector3DF& lBucketPosition = lStructure.GetBoneTransformation(11).GetPosition();
+			const Lepra::vec3& lBucketPosition = lStructure.GetBoneTransformation(11).GetPosition();
 			lOk = (Lepra::Math::IsInRange(lBucketPosition.x, -0.01f, 0.01f));
 			deb_assert(lOk);
 		}
@@ -711,37 +713,37 @@ bool ExportStructure()
 		str lFilename(_T("excavator_01.phys"));
 
 		gTbcLog.Debugf(_T("--> Loading excavator. <--"));
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
 		if (lOk)
 		{
-			const Lepra::Vector3DF& lBucketPosition = lStructure.GetOriginalBoneTransformation(11).GetPosition();
+			const Lepra::vec3& lBucketPosition = lStructure.GetOriginalBoneTransformation(11).GetPosition();
 			lOk = (Lepra::Math::IsInRange(lBucketPosition.x, -0.01f, 0.01f));
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
-			Lepra::TransformationF lTransformation;
-			lTransformation.SetPosition(Lepra::Vector3DF(4, 5, 6));
+			Lepra::xform lTransformation;
+			lTransformation.SetPosition(Lepra::vec3(4, 5, 6));
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = (lStructure.GetBoneCount() == 13 &&
-				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
+				lStructure.GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
-				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
+				lStructure.GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY &&
 				lStructure.GetBoneGeometry(8)->GetParent() == lStructure.GetBoneGeometry(0) &&
 				lStructure.GetEngineCount() == 5);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
-			Lepra::Vector3DF lBoomAnchor;
-			Lepra::Vector3DF lArmAnchor;
-			Lepra::Vector3DF lBucketAnchor;
+			Lepra::vec3 lBoomAnchor;
+			Lepra::vec3 lArmAnchor;
+			Lepra::vec3 lBucketAnchor;
 			lOk = (lPhysics->GetAnchorPos(lStructure.GetBoneGeometry(8)->GetJointId(), lBoomAnchor) &&
 				lPhysics->GetAnchorPos(lStructure.GetBoneGeometry(10)->GetJointId(), lArmAnchor) &&
 				lPhysics->GetAnchorPos(lStructure.GetBoneGeometry(11)->GetJointId(), lBucketAnchor));
@@ -767,19 +769,19 @@ bool ExportStructure()
 		lContext = _T("crane save");
 		str lFilename(_T("crane_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_WORLD2LOCAL, TBC::ChunkyPhysics::DYNAMIC);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(7);
 
 		const float lTowerWeight = 50000;
 		const float lTowerHeight = 25.0f;
 		const float lThickness = 2.5f;
-		const Lepra::Vector3DF lTowerDimensions(lThickness, lThickness, lTowerHeight);
-		Lepra::TransformationF lTransformation;
-		lTransformation.SetPosition(Lepra::Vector3DF(0, 0, lTowerHeight/2));
+		const Lepra::vec3 lTowerDimensions(lThickness, lThickness, lTowerHeight);
+		Lepra::xform lTransformation;
+		lTransformation.SetPosition(Lepra::vec3(0, 0, lTowerHeight/2));
 
 		// Body.
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(lTowerWeight, 1.0f, 0.5f);
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTowerDimensions);
+		Tbc::ChunkyBoneGeometry::BodyData lBodyData(lTowerWeight, 1.0f, 0.5f);
+		Tbc::ChunkyBoneGeometry* lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lTowerDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry);
 
 		// Jib.
@@ -789,21 +791,21 @@ bool ExportStructure()
 		const float lCounterJibLength = 5.0f;
 		const float lTotalJibLength = lJibLength+lCounterJibLength;
 
-		Lepra::TransformationF lJibTransform(lTransformation);
+		Lepra::xform lJibTransform(lTransformation);
 		lJibTransform.GetPosition().Add(0, 0, -lTowerHeight/2 + lJibPlacementHeight);
-		Lepra::Vector3DF lJibAnchor(lJibTransform.GetPosition());
+		Lepra::vec3 lJibAnchor(lJibTransform.GetPosition());
 		lJibTransform.GetPosition().Add(0, lTotalJibLength/2-lCounterJibLength, 0);
-		const Lepra::Vector3DF lJibDimensions(lThickness, lTotalJibLength, lThickness);
+		const Lepra::vec3 lJibDimensions(lThickness, lTotalJibLength, lThickness);
 		lBodyData.mMass = lJibWeight;
 		lBodyData.mParent = lGeometry;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_HINGE;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_HINGE;
 		lBodyData.mParameter[4] = -1e10f;
 		lBodyData.mParameter[5] = 1e10f;
 		lJibAnchor -= lJibTransform.GetPosition();
 		lBodyData.mParameter[6] = lJibAnchor.x;
 		lBodyData.mParameter[7] = lJibAnchor.y;
 		lBodyData.mParameter[8] = lJibAnchor.z;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lJibDimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lJibDimensions);
 		lStructure.AddBoneGeometry(lJibTransform, lGeometry, lBodyData.mParent);
 
 		// Wire.
@@ -812,22 +814,22 @@ bool ExportStructure()
 		const float lWireSegmentWeight = lWireWeight/lWireSegmentCount;
 		const float lWireLength = (lJibPlacementHeight-1)/lWireSegmentCount;
 		const float lWireThickness = 0.05f;
-		Lepra::TransformationF lWireTransform(lJibTransform);
+		Lepra::xform lWireTransform(lJibTransform);
 		lWireTransform.GetPosition().Add(0, lTotalJibLength/4, 0);
 		for (int x = 0; x < lWireSegmentCount; ++x)
 		{
-			Lepra::Vector3DF lWireAnchor(lWireTransform.GetPosition());
+			Lepra::vec3 lWireAnchor(lWireTransform.GetPosition());
 			lWireTransform.GetPosition().Add(0, 0, -lWireLength/2);
 
 			lBodyData.mMass = lWireSegmentWeight;
 			lBodyData.mParent = lGeometry;
-			lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL;
+			lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_UNIVERSAL;
 			lBodyData.mParameter[3] = Lepra::PIF * 0.5f;
 			lWireAnchor -= lWireTransform.GetPosition();
 			lBodyData.mParameter[6] = lWireAnchor.x;
 			lBodyData.mParameter[7] = lWireAnchor.y;
 			lBodyData.mParameter[8] = lWireAnchor.z;
-			lGeometry = new TBC::ChunkyBoneCapsule(lBodyData, lWireThickness/2, lWireLength);
+			lGeometry = new Tbc::ChunkyBoneCapsule(lBodyData, lWireThickness/2, lWireLength);
 			lStructure.AddBoneGeometry(lWireTransform, lGeometry, lBodyData.mParent);
 
 			lWireTransform.GetPosition().Add(0, 0, -lWireLength/2);
@@ -837,24 +839,24 @@ bool ExportStructure()
 		const float lHookWeight = 20;
 		const float lHookWidth = 0.25f;
 		const float lHookHeight = 0.5f;
-		Lepra::Vector3DF lHookAnchor(lWireTransform.GetPosition());
-		Lepra::TransformationF lHookTransform = lWireTransform;
+		Lepra::vec3 lHookAnchor(lWireTransform.GetPosition());
+		Lepra::xform lHookTransform = lWireTransform;
 		lHookTransform.GetPosition().Add(0, 0, -lHookHeight/2);
 
 		lBodyData.mMass = lHookWeight;
 		lBodyData.mParent = lGeometry;
-		lBodyData.mJointType = TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL;
+		lBodyData.mJointType = Tbc::ChunkyBoneGeometry::JOINT_UNIVERSAL;
 		lBodyData.mParameter[3] = Lepra::PIF * 0.5f;
 		lHookAnchor -= lHookTransform.GetPosition();
 		lBodyData.mParameter[6] = lHookAnchor.x;
 		lBodyData.mParameter[7] = lHookAnchor.y;
 		lBodyData.mParameter[8] = lHookAnchor.z;
-		lBodyData.mConnectorType = TBC::ChunkyBoneGeometry::CONNECTOR_3DOF;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, Lepra::Vector3DF(lHookWidth, lHookWidth, lHookHeight));
+		lBodyData.mConnectorType = Tbc::ChunkyBoneGeometry::CONNECTOR_3DOF;
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, Lepra::vec3(lHookWidth, lHookWidth, lHookHeight));
 		lStructure.AddBoneGeometry(lHookTransform, lGeometry, lBodyData.mParent);
 
 		// Jib rotational engine.
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_TORQUE, lJibWeight, 2.0f, 1.0f, 0.01f, 1);
+		Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_TORQUE, lJibWeight, 2.0f, 1.0f, 0.01f, 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(1), 1.0f);
 		lStructure.AddEngine(lEngine);
 
@@ -872,21 +874,21 @@ bool ExportStructure()
 		lContext = _T("crane load");
 		str lFilename(_T("crane_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
 		if (lOk)
 		{
-			Lepra::TransformationF lTransformation;
+			Lepra::xform lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = (lStructure.GetBoneCount() == 7 &&
-				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
+				lStructure.GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
-				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
+				lStructure.GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY &&
 				lStructure.GetEngineCount() == 1);
 			deb_assert(lOk);
 		}
@@ -904,60 +906,60 @@ bool ExportStructure()
 		static const float lPlateauLength = 15;
 		static const float lPlateauLengthCompensation = lRoadHeight/1.5f;
 		static const float lFloorSize = 500;
-		Lepra::TransformationF lTransformation;
+		Lepra::xform lTransformation;
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_WORLD2LOCAL, TBC::ChunkyPhysics::STATIC);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::STATIC);
 		lStructure.SetBoneCount(6);
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(0.0f, 1.0f, 0.6f);
+		Tbc::ChunkyBoneGeometry::BodyData lBodyData(0.0f, 1.0f, 0.6f);
 
-		Lepra::Vector3DF lDimensions(lFloorSize, lFloorSize, lFloorSize);
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
+		Lepra::vec3 lDimensions(lFloorSize, lFloorSize, lFloorSize);
+		Tbc::ChunkyBoneGeometry* lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry);
 
 		Lepra::RotationMatrixF lRotation;
 		// Place lower climb.
 		lDimensions.Set(lRoadWidth, lUphillLength, lRoadHeight);
-		lTransformation.SetPosition(Lepra::Vector3DF(
+		lTransformation.SetPosition(Lepra::vec3(
 			lPlateauLength+lUphillOrthogonalLength+lPlateauLength+lRoadWidth/2,
 			0,
 			lUphillOrthogonalLength/2+lFloorSize/2-lRoadHeight/2/1.5f));
 		lRotation.RotateAroundOwnX(Lepra::PIF/4);
 		lTransformation.SetOrientation(lRotation);
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 		// Upper climb.
 		lDimensions.Set(lUphillLength, lRoadWidth, lRoadHeight);
-		lTransformation.SetPosition(Lepra::Vector3DF(lPlateauLength+lUphillOrthogonalLength/2,
+		lTransformation.SetPosition(Lepra::vec3(lPlateauLength+lUphillOrthogonalLength/2,
 			lUphillOrthogonalLength/2+lPlateauLength-lRoadWidth/2,
 			lUphillOrthogonalLength*3/2+lFloorSize/2-lRoadHeight/2/1.5f));
 		lRotation = Lepra::RotationMatrixF();
 		lRotation.RotateAroundOwnY(Lepra::PIF/4);
 		lTransformation.SetOrientation(lRotation);
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 		// First plateau.
 		lDimensions.Set(lRoadWidth, lPlateauLength+lPlateauLengthCompensation, lRoadHeight);
-		lTransformation.SetPosition(Lepra::Vector3DF(
+		lTransformation.SetPosition(Lepra::vec3(
 			lPlateauLength+lUphillOrthogonalLength+lPlateauLength+lRoadWidth/2,
 			lUphillOrthogonalLength/2+lPlateauLength/2,
 			lUphillOrthogonalLength+lFloorSize/2-lRoadHeight/2));
 		lTransformation.SetOrientation(Lepra::RotationMatrixF());
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 		// Second plateau.
 		lDimensions.Set(lPlateauLength, lRoadWidth, lRoadHeight);
-		lTransformation.SetPosition(Lepra::Vector3DF(
+		lTransformation.SetPosition(Lepra::vec3(
 			lPlateauLength+lUphillOrthogonalLength+lPlateauLength/2,
 			lUphillOrthogonalLength/2+lPlateauLength-lRoadWidth/2,
 			lUphillOrthogonalLength+lFloorSize/2-lRoadHeight/2));
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 		// Top plateau.
 		lDimensions.Set(lPlateauLength+lPlateauLengthCompensation, lRoadWidth, lRoadHeight);
-		lTransformation.SetPosition(Lepra::Vector3DF(lPlateauLength/2,
+		lTransformation.SetPosition(Lepra::vec3(lPlateauLength/2,
 			lUphillOrthogonalLength/2+lPlateauLength-lRoadWidth/2,
 			lUphillOrthogonalLength*2+lFloorSize/2-lRoadHeight/2));
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
+		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0,  0, 0);
@@ -974,21 +976,21 @@ bool ExportStructure()
 		lContext = _T("world load");
 		str lFilename(_T("world_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
 		if (lOk)
 		{
-			Lepra::TransformationF lTransformation;
+			Lepra::xform lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = (lStructure.GetBoneCount() == 6 &&
-				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::STATIC &&
+				lStructure.GetPhysicsType() == Tbc::ChunkyPhysics::STATIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
-				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
+				lStructure.GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY &&
 				lStructure.GetEngineCount() == 0);
 			deb_assert(lOk);
 		}
@@ -999,21 +1001,21 @@ bool ExportStructure()
 		lContext = _T("tracktor load");
 		str lFilename(_T("tractor_01.phys"));
 
-		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
 		if (lOk)
 		{
-			Lepra::TransformationF lTransformation;
+			Lepra::xform lTransformation;
 			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
 		{
 			lOk = (lStructure.GetBoneCount() == 12 &&
-				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
+				lStructure.GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
-				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
+				lStructure.GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY &&
 				lStructure.GetEngineCount() == 4);
 			deb_assert(lOk);
 		}

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiSound.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../Include/UiGameUiManager.h"
@@ -63,7 +64,7 @@ void Sound::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Sound);
+loginstance(GAME_CONTEXT_CPP, Sound);
 
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Lepra/Include/LepraTarget.h"
 #include "BoundTicker.h"
 #include "../Lepra/Include/SystemManager.h"
@@ -12,9 +13,9 @@
 #include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiCure/Include/UiResourceManager.h"
 #include "../UiLepra/Include/UiCore.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
 #include "RtVar.h"
 #include "BoundManager.h"
 
@@ -31,10 +32,10 @@ BoundTicker::BoundTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManage
 	mMusicPlayer(0),
 	mEnvMap(0)
 {
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 45);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
+	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 45);
+	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
+	v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
 	AddBackedRtvar(_T(RTVAR_GAME_FIRSTTIME));
 	AddBackedRtvar(_T(RTVAR_GAME_LEVEL));
@@ -126,11 +127,11 @@ bool BoundTicker::OpenUiManager()
 		if (mUiManager->GetCanvas()->GetHeight() < 600)
 		{
 			double lFontHeight;
-			CURE_RTVAR_GET(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+			v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 			if (lFontHeight > 29.0)
 			{
 				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/600.0;
-				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
+				v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 			}
 		}
 		lOk = mUiManager->OpenRest();
@@ -157,7 +158,7 @@ bool BoundTicker::OpenUiManager()
 	return lOk;
 }
 
-void BoundTicker::BeginRender(Vector3DF& pColor)
+void BoundTicker::BeginRender(vec3& pColor)
 {
 	Parent::BeginRender(pColor);
 	mUiManager->GetRenderer()->SetOutlineFillColor(OFF_BLACK);
@@ -210,7 +211,7 @@ Life::GameClientSlaveManager* BoundTicker::CreateSlaveManager(Life::GameClientMa
 
 
 
-LOG_CLASS_DEFINE(GAME, BoundTicker);
+loginstance(GAME, BoundTicker);
 
 
 

@@ -43,7 +43,7 @@ public:
 	void Place(int pPosX, int pPosY);
 	void SetDefaultValue(float x, float y);
 
-	Vector2DF mValue;
+	vec2 mValue;
 
 private:
 	void InitStick();
@@ -53,7 +53,7 @@ private:
 
 	static GameUiManager* mUiManager;
 	static UiLepra::Touch::TouchstickInputDevice* mTouchSticks[STICK_RESOLUTION][STICK_RESOLUTION];
-	static Vector2DF mPreviousValues[STICK_RESOLUTION][STICK_RESOLUTION];
+	static vec2 mPreviousValues[STICK_RESOLUTION][STICK_RESOLUTION];
 	static bool mIsDefaultValueSet[STICK_RESOLUTION][STICK_RESOLUTION];
 	static bool mIsInitialized;
 	static bool mIsUpdated;

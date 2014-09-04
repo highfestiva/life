@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../UiCure/Include/UiCppContextObject.h"
-#include "../../UiTBC/Include/GUI/UiLabel.h"
+#include "../../UiTbc/Include/GUI/UiLabel.h"
 #include "../Life.h"
 
 
@@ -38,7 +38,7 @@ private:
 	str mAttributeName;
 	UiTbc::Label mLabel;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

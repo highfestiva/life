@@ -4,7 +4,9 @@
 
 
 
+#include "pch.h"
 #include "UiServerConsoleManager.h"
+#include "../../Lepra/Include/LogListener.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiLepra/Include/UiInput.h"
 #include "UiConsole.h"
@@ -65,7 +67,7 @@ UiConsole* UiServerConsoleManager::GetUiConsole() const
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, UiServerConsoleManager);
+loginstance(CONSOLE, UiServerConsoleManager);
 
 
 

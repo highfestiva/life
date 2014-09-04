@@ -10,8 +10,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PushServerTicker.h" />
-    <ClInclude Include="PushServerDelegate.h" />
+    <ClInclude Include="PushServerDelegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PushServerTicker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PushServer.cpp">

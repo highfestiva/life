@@ -350,7 +350,7 @@
 				RelativePath=".\stdafx.cpp">
 			</File>
 			<File
-				RelativePath="..\..\Tbc\TBCTestApp\TbcTest.cpp">
+				RelativePath="..\..\Tbc\TbcTestApp\TbcTest.cpp">
 			</File>
 			<File
 				RelativePath="..\..\Lepra\LepraTestApp\TestBigInt.cpp">

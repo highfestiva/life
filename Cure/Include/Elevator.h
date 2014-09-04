@@ -25,24 +25,24 @@ public:
 	virtual ~Elevator();
 
 	void SetStopDelay(double pStopDelay);
-	Vector3DF GetPosition() const;
-	Vector3DF GetVelocity() const;
+	vec3 GetPosition() const;
+	vec3 GetVelocity() const;
 	float GetRadius() const;
 
 protected:
 	virtual void OnTick();
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
-	void Trig(const TBC::PhysicsTrigger* pTrigger);
-	TBC::ChunkyBoneGeometry* GetFirstBody() const;
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	void Trig(const Tbc::PhysicsTrigger* pTrigger);
+	Tbc::ChunkyBoneGeometry* GetFirstBody() const;
 
 	float GetSignedMaxSpeedSquare() const;
 	void HaltActiveEngines(bool pStop);
 
-	void SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine);
+	void SetFunctionTarget(const str& pFunction, Tbc::PhysicsEngine* pEngine);
 
 private:
-	const TBC::PhysicsTrigger* mActiveTrigger;
+	const Tbc::PhysicsTrigger* mActiveTrigger;
 	HiResTimer mTrigTime;
 	StopWatch mStopTimer;
 	double mExitDelay;
@@ -51,7 +51,7 @@ private:
 	bool mElevatorIsActive;
 	float mEngineActivity;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

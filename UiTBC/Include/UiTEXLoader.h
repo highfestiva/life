@@ -31,7 +31,7 @@
 
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/Canvas.h"
-#include "../Include/UiTBC.h"
+#include "../Include/UiTbc.h"
 
 
 

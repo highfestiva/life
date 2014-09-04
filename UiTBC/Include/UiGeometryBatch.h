@@ -20,8 +20,8 @@
 
 
 
-#include "../../TBC/Include/GeometryBase.h"
-#include "../Include/UiTBC.h"
+#include "../../Tbc/Include/GeometryBase.h"
+#include "../Include/UiTbc.h"
 
 
 
@@ -30,15 +30,15 @@ namespace UiTbc
 
 
 
-class GeometryBatch: public TBC::GeometryBase
+class GeometryBatch: public Tbc::GeometryBase
 {
 public:
 
-	GeometryBatch(TBC::GeometryBase* pGeometry);
+	GeometryBatch(Tbc::GeometryBase* pGeometry);
 	virtual ~GeometryBatch();
 
 	// Creates new instances.
-	void SetInstances(const TransformationF* pDisplacement, const Vector3DF& pRootOffset,
+	void SetInstances(const xform* pDisplacement, const vec3& pRootOffset,
 		int pNumInstances, uint32 pRandomSeed,
 		float pXScaleMin, float pXScaleMax,
 		float pYScaleMin, float pYScaleMax,
@@ -72,7 +72,7 @@ private:
 	unsigned int mIndexCount;
 	unsigned int mUVSetCount;
 
-	TBC::GeometryBase* mGeometryInstance;
+	Tbc::GeometryBase* mGeometryInstance;
 };
 
 

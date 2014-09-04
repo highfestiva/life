@@ -47,7 +47,7 @@ private:
 	LPCDIDEVICEOBJECTINSTANCE mElement;
 	DIOBJECTDATAFORMAT mDataFormat;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 const LPCDIDEVICEOBJECTINSTANCE X11InputElement::GetDirectInputElement() const
@@ -90,7 +90,7 @@ private:
 	DIDATAFORMAT mDataFormat;
 	LPDIDEVICEOBJECTDATA mDeviceObjectData;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

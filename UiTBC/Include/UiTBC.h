@@ -4,9 +4,7 @@
 
 
 
-#define LEPRA_INCLUDE_NO_OS
 #include "../../UiLepra/Include/UiLepra.h"
-#undef LEPRA_INCLUDE_NO_OS
 
 
 

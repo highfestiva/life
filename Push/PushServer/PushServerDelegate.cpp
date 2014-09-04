@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "PushServerDelegate.h"
 #include "../../Cure/Include/ConsoleManager.h"
 #include "../../Cure/Include/FloatAttribute.h"
@@ -80,12 +81,12 @@ void PushServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::UserA
 		Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lPreviousAvatarId);
 		if (lObject)
 		{
-			TransformationF lTransform;
+			xform lTransform;
 			lTransform.SetPosition(lObject->GetPosition());
-			lTransform.GetPosition() += Vector3DF(0, 0, 2);
-			Vector3DF lEulerAngles;
+			lTransform.GetPosition() += vec3(0, 0, 2);
+			vec3 lEulerAngles;
 			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
-			QuaternionF q;
+			quat q;
 			q.SetEulerAngles(lEulerAngles.x, 0, 0);
 			lTransform.SetOrientation(q * lTransform.GetOrientation());
 		}
@@ -139,7 +140,7 @@ void PushServerDelegate::PreEndTick()
 
 
 
-LOG_CLASS_DEFINE(GAME, PushServerDelegate);
+loginstance(GAME, PushServerDelegate);
 
 
 

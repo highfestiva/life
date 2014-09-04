@@ -65,7 +65,7 @@ protected:
 
 	void operator=(const OptionsManager&);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

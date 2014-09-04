@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Level.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
@@ -41,7 +42,7 @@ Cure::ContextPath* Level::QueryPath()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Level);
+loginstance(GAME_CONTEXT_CPP, Level);
 
 
 

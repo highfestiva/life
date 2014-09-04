@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Npc.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -96,11 +97,11 @@ void Npc::OnTick()
 	float lRight = 0;
 	float lPhi = 0;
 	bool lCanShoot = false;
-	Vector3DF lUp(0, 0, 1);
+	vec3 lUp(0, 0, 1);
 	lUp = lMyAvatar->GetOrientation() * lUp;
 	if (lTarget && lUp.z > 0.2f)	// Just steer+shoot if we're "standing up".
 	{
-		Vector3DF lDiff = lTarget->GetPosition() - lMyAvatar->GetPosition();
+		vec3 lDiff = lTarget->GetPosition() - lMyAvatar->GetPosition();
 		float lDistance = lDiff.GetLength();
 		const float lTimeUntilHit = mIntelligence * lDistance / AMMO_VELOCITY_M_PER_S;
 		lDiff = (lTarget->GetPosition() + lTarget->GetVelocity()*lTimeUntilHit) - (lMyAvatar->GetPosition() + lMyAvatar->GetVelocity()*lTimeUntilHit);
@@ -170,7 +171,7 @@ void Npc::OnAlarm(int pAlarmId, void* pExtraData)
 
 	if (pAlarmId == 5)
 	{
-		CURE_RTVAR_GET(mIntelligence, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5f);
+		v_get(mIntelligence, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5f);
 		mIntelligence = Math::Clamp(mIntelligence, 0.1f, 1.0f);
 		if (!mLogic->CreateAvatarForNpc(this))
 		{
@@ -181,7 +182,7 @@ void Npc::OnAlarm(int pAlarmId, void* pExtraData)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Npc);
+loginstance(GAME_CONTEXT_CPP, Npc);
 
 
 

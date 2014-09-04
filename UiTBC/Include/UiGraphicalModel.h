@@ -2,14 +2,14 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
-// This class extends TBC::Model with one or more geometries of different types.
+// This class extends Tbc::Model with one or more geometries of different types.
 // It also provides functionality for the determination of the LOD-level.
 
 
 
 #pragma once
 
-#include "../../TBC/Include/Model.h"
+#include "../../Tbc/Include/Model.h"
 #include "UiRenderer.h"
 
 
@@ -25,7 +25,7 @@ class ProgressiveTriangleGeometry;
 
 
 
-class GraphicalModel: public TBC::Model
+class GraphicalModel: public Tbc::Model
 {
 public:
 
@@ -48,29 +48,29 @@ public:
 		// The update function may reload the geometry, update the LOD
 		// or animate the object.
 		virtual void UpdateGeometry(float pLODLevel) = 0;
-		virtual TBC::GeometryBase* GetGeometry() = 0;
+		virtual Tbc::GeometryBase* GetGeometry() = 0;
 	private:
-		void SetTransformAnimator(TBC::BoneAnimator* pTransformAnimator)
+		void SetTransformAnimator(Tbc::BoneAnimator* pTransformAnimator)
 		{
 			mTransformAnimator = pTransformAnimator;
 		}
-		TBC::BoneAnimator* GetTransformAnimator() const
+		Tbc::BoneAnimator* GetTransformAnimator() const
 		{
 			return mTransformAnimator;
 		}
-		TBC::BoneAnimator* mTransformAnimator;
+		Tbc::BoneAnimator* mTransformAnimator;
 	};
 
 	GraphicalModel();
 	virtual ~GraphicalModel();
 
 	// Takes ownership of the geometry handler (takes care of destruction).
-	// pTransformAnimator = The animator (see TBC::Model and BoneAnimator) to use for transform animations.
+	// pTransformAnimator = The animator (see Tbc::Model and BoneAnimator) to use for transform animations.
 	void AddGeometry(const str& pName, GeometryHandler* pGeometry, const str& pTransformAnimator = _T(""));
 
-	TBC::GeometryBase* GetGeometry(const str& pName);
+	Tbc::GeometryBase* GetGeometry(const str& pName);
 
-	// Overloaded from TBC::Model where it is declared as public.
+	// Overloaded from Tbc::Model where it is declared as public.
 	void Update(double pDeltaTime);
 
 	// Calculates the detail level depending on the camera and calls Update(double).
@@ -100,14 +100,14 @@ private:
 		GeomType mGeomType;
 		int mCurrentLODLevel;
 		int mNumLODLevels;
-		TBC::GeometryBase* mGeometry;
+		Tbc::GeometryBase* mGeometry;
 		Renderer::MaterialType mMaterialType;
 		Renderer::GeometryID mGeomID;
 		Renderer::TextureID* mTextureID;
 		int mNumTextures;
 		Renderer::Shadows mShadows;
 		str mName;
-		TBC::BoneAnimator* mTransformAnimator;
+		Tbc::BoneAnimator* mTransformAnimator;
 	};
 
 	int CalcLODIndex(int pMaxIndex);
@@ -132,7 +132,7 @@ public:
 				     Renderer* pRenderer);
 
 	void UpdateGeometry(float pLODLevel);
-	TBC::GeometryBase* GetGeometry();
+	Tbc::GeometryBase* GetGeometry();
 
 private:
 	TriangleBasedGeometry* mGeometry;
@@ -160,7 +160,7 @@ public:
 					  Renderer* pRenderer);
 
 	void UpdateGeometry(float pLODLevel);
-	TBC::GeometryBase* GetGeometry();
+	Tbc::GeometryBase* GetGeometry();
 
 private:
 	ProgressiveTriangleGeometry* mGeometry;
@@ -183,7 +183,7 @@ public:
 					     Renderer* pRenderer);
 
 	void UpdateGeometry(float pLODLevel);
-	TBC::GeometryBase* GetGeometry();
+	Tbc::GeometryBase* GetGeometry();
 private:
 	AnimatedGeometry* mGeometry;
 	int mNumLODLevels;
@@ -212,7 +212,7 @@ public:
 						  Renderer* pRenderer);
 
 	void UpdateGeometry(float pLODLevel);
-	TBC::GeometryBase* GetGeometry();
+	Tbc::GeometryBase* GetGeometry();
 private:
 	AnimatedGeometry* mGeometry;
 	Renderer::TextureID* mTextureID;

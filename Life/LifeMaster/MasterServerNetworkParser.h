@@ -28,7 +28,7 @@ public:
 
 	static bool ExtractServerInfo(const str& pServerString, ServerInfo& pInfo, const SocketAddress* pRemoteAddress);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

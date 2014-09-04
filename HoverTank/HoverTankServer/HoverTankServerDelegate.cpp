@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "HoverTankServerDelegate.h"
 #include "../../Cure/Include/ConsoleManager.h"
 #include "../../Cure/Include/Health.h"
@@ -42,8 +43,8 @@ HoverTankServerDelegate::HoverTankServerDelegate(Life::GameServerManager* pGameS
 	mLevelId(0),
 	mScoreInfoId(0)
 {
-	CURE_RTVAR_SET(mGameServerManager->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5);
-	CURE_RTVAR_SET(mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
+	v_set(mGameServerManager->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5);
+	v_set(mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
 }
 
 HoverTankServerDelegate::~HoverTankServerDelegate()
@@ -77,7 +78,7 @@ Cure::ContextObject* HoverTankServerDelegate::CreateContextObject(const str& pCl
 	}
 	else if (strutil::StartsWith(pClassId, _T("deltawing")))
 	{
-		return new BombPlane(mGameServerManager->GetResourceManager(), pClassId, (HoverTankServerDelegate*)this, Vector3DF());
+		return new BombPlane(mGameServerManager->GetResourceManager(), pClassId, (HoverTankServerDelegate*)this, vec3());
 	}
 	return new Cure::CppContextObject(mGameServerManager->GetResourceManager(), pClassId);
 }
@@ -139,12 +140,12 @@ void HoverTankServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::
 		Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lPreviousAvatarId);
 		if (lObject)
 		{
-			TransformationF lTransform;
+			xform lTransform;
 			lTransform.SetPosition(lObject->GetPosition());
-			lTransform.GetPosition() += Vector3DF(0, 0, 2);
-			Vector3DF lEulerAngles;
+			lTransform.GetPosition() += vec3(0, 0, 2);
+			vec3 lEulerAngles;
 			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
-			QuaternionF q;
+			quat q;
 			q.SetEulerAngles(lEulerAngles.x, 0, 0);
 			lTransform.SetOrientation(q * lTransform.GetOrientation());
 		}
@@ -216,13 +217,13 @@ void HoverTankServerDelegate::PreEndTick()
 
 
 
-void HoverTankServerDelegate::OrderAirStrike(const Vector3DF& pPosition, float pFlyInAngle)
+void HoverTankServerDelegate::OrderAirStrike(const vec3& pPosition, float pFlyInAngle)
 {
 	const float lPlaneDistance = 1000;
 
 	Cure::ContextObject* lPlane = new BombPlane(mGameServerManager->GetResourceManager(), _T("deltawing"), this, pPosition);
 	mGameServerManager->AddContextObject(lPlane, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	TransformationF t;
+	xform t;
 	t.GetPosition().Set(lPlaneDistance*::sin(pFlyInAngle), lPlaneDistance*::cos(pFlyInAngle), 30);
 	t.GetPosition().x += pPosition.x;
 	t.GetPosition().y += pPosition.y;
@@ -259,8 +260,8 @@ void HoverTankServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	mGameServerManager->AddContextObject(lProjectile, lNetworkType, 0);
 	log_volatile(mLog.Debugf(_T("Shooting projectile with ID %i!"), (int)lProjectile->GetInstanceId()));
 	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
-	TransformationF t;
-	Vector3DF v;
+	xform t;
+	vec3 v;
 	if (Life::ProjectileUtil::GetBarrel(lProjectile, t, v))
 	{
 		lProjectile->SetInitialTransform(t);
@@ -275,18 +276,18 @@ void HoverTankServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	}
 }
 
-void HoverTankServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
+void HoverTankServerDelegate::Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength)
 {
 	(void)pExplosiveGeometry;
 	(void)pVelocity;
 	(void)pNormal;
 
 	float lIndicateHit;
-	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
+	v_get(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
 	mGameServerManager->IndicatePosition(pPosition, lIndicateHit);
 
 	ScopeLock lLock(mGameServerManager->GetTickLock());
-	TBC::PhysicsManager* lPhysicsManager = mGameServerManager->GetPhysicsManager();
+	Tbc::PhysicsManager* lPhysicsManager = mGameServerManager->GetPhysicsManager();
 	Cure::ContextManager::ContextObjectTable lObjectTable = mGameServerManager->GetContext()->GetObjectTable();
 	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
 	for (; x != lObjectTable.end(); ++x)
@@ -316,14 +317,14 @@ void HoverTankServerDelegate::Detonate(Cure::ContextObject* pExplosive, const TB
 			}
 			x->second->ForceSend();
 		}
-		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
+		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc, 1);
 	}
 }
 
 void HoverTankServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
 {
 	float lIndicateHit;
-	CURE_RTVAR_GET(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
+	v_get(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
 	mGameServerManager->IndicatePosition(pBullet->GetPosition(), lIndicateHit);
 
 	Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(pHitObject);
@@ -332,10 +333,10 @@ void HoverTankServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::Co
 		DrainHealth(pBullet, pHitObject, lHealth, Random::Normal(0.17f, 0.01f, 0.1f, 0.3f));
 		const float lIncomingAngle = 2*PIF * Random::Uniform(0.0f, 1.0f);
 		OrderAirStrike(pHitObject->GetPosition(), lIncomingAngle);
-		Vector3DF v(27*::sin(lIncomingAngle), 27*::cos(lIncomingAngle), 2);
-		QuaternionF q = QuaternionF();
+		vec3 v(27*::sin(lIncomingAngle), 27*::cos(lIncomingAngle), 2);
+		quat q = quat();
 		q.RotateAroundWorldZ(PIF/4);
-		const Vector3DF r = RNDVEC(3.0f);
+		const vec3 r = RNDVEC(3.0f);
 		OrderAirStrike(pHitObject->GetPosition() + q*v+r, lIncomingAngle);
 		q.RotateAroundWorldZ(-PIF/2);
 		OrderAirStrike(pHitObject->GetPosition() + q*v+r, lIncomingAngle);
@@ -347,7 +348,7 @@ void HoverTankServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::Co
 Cure::ContextObject* HoverTankServerDelegate::CreateAvatarForNpc(Npc* pNpc)
 {
 	double lSpawnPart;
-	CURE_RTVAR_GET(lSpawnPart, =, mGameServerManager->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
+	v_get(lSpawnPart, =, mGameServerManager->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 	if (Random::Uniform(0.0, 0.999) >= lSpawnPart)
 	{
 		return 0;
@@ -600,7 +601,7 @@ void HoverTankServerDelegate::TickNpcGhosts()
 					continue;
 				}
 				float lResyncOnDiff;
-				CURE_RTVAR_GET(lResyncOnDiff, =(float), mGameServerManager->GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
+				v_get(lResyncOnDiff, =(float), mGameServerManager->GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
 				if (lPositionalData->GetScaledDifference(lAvatar->GetNetworkOutputGhost()) > lResyncOnDiff)
 				{
 					log_volatile(mLog.Debugf(_T("NPC avatar %s (%u) sending pos due to deviation."), lAvatar->GetClassId().c_str(), lAvatar->GetInstanceId()));
@@ -614,7 +615,7 @@ void HoverTankServerDelegate::TickNpcGhosts()
 
 
 
-LOG_CLASS_DEFINE(GAME, HoverTankServerDelegate);
+loginstance(GAME, HoverTankServerDelegate);
 
 
 

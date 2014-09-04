@@ -4,6 +4,7 @@
  
 
 
+#include "pch.h"
 #include "Client.h"
 #include "../../Cure/Include/ContextObject.h"
 #include "../../Cure/Include/Cure.h"
@@ -106,7 +107,7 @@ void Client::QuerySendStriveTimes()
 	int lNetworkFrameDiffCount = CalculateNetworkLatencyFrameDiffCount();
 	// Check if we should send or not.
 	int lSlowFrameCount;
-	CURE_RTVAR_GET(lSlowFrameCount, =, Cure::GetSettings(), RTVAR_NETPHYS_SLOWFRAMECOUNT, 2);
+	v_get(lSlowFrameCount, =, Cure::GetSettings(), RTVAR_NETPHYS_SLOWFRAMECOUNT, 2);
 	if (lNetworkFrameDiffCount < -lSlowFrameCount || lNetworkFrameDiffCount > 0)
 	{
 		++mStriveSendErrorTimeCounter;
@@ -168,11 +169,11 @@ float Client::GetPhysicsFrameAheadCount() const
 void Client::SendLoginCommands(Cure::Packet* pPacket, const str& pServerGreeting)
 {
 	int lPhysicsFps;
-	CURE_RTVAR_GET(lPhysicsFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	v_get(lPhysicsFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 	double lPhysicsRtr;
-	CURE_RTVAR_GET(lPhysicsRtr, =, Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	v_get(lPhysicsRtr, =, Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	bool lPhysicsHalt;
-	CURE_RTVAR_GET(lPhysicsHalt, =, Cure::GetSettings(), RTVAR_PHYSICS_HALT, false);
+	v_get(lPhysicsHalt, =, Cure::GetSettings(), RTVAR_PHYSICS_HALT, false);
 	const wstr lCmd = wstrutil::Format(
 		L"#" _WIDE(RTVAR_PHYSICS_FPS) L" %i;\n"
 		L"#" _WIDE(RTVAR_PHYSICS_RTR) L" %f;\n"
@@ -235,7 +236,7 @@ int Client::CalculateNetworkLatencyFrameDiffCount() const
 
 
 
-LOG_CLASS_DEFINE(NETWORK_SERVER, Client);
+loginstance(NETWORK_SERVER, Client);
 
 
 

@@ -79,7 +79,7 @@ private:
 
 	static double mSleepResolution;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

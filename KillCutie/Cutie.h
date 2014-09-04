@@ -39,7 +39,7 @@ private:
 	int mKillJointsTickCount;
 	int mWheelExpelTickCount;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

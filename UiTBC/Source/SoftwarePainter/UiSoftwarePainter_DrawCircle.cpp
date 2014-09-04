@@ -5,6 +5,7 @@
 	Copyright (c) 2002-2006, Alexander Hugestrand
 */
 
+#include "pch.h"
 #include "../../Include/UiSoftwarePainter.h"
 #include "UiSoftwarePainter_DrawPixelMacros.h"
 

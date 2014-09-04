@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/PhysicsTrigger.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Endian.h"
@@ -14,7 +15,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -229,7 +230,7 @@ void PhysicsTrigger::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, PhysicsTrigger);
+loginstance(PHYSICS, PhysicsTrigger);
 
 
 

@@ -36,7 +36,7 @@ public:
 private:
 	float mScale;
 	float mOffset;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -91,7 +91,7 @@ private:
 	HiResTimer mPressedTimer;
 	HiResTimer mReleasedTimer;*/
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

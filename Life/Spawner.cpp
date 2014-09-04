@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "Spawner.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
-#include "../TBC/Include/PhysicsSpawner.h"
+#include "../Tbc/Include/PhysicsSpawner.h"
 #include "RtVar.h"
 
 
@@ -30,7 +31,7 @@ Spawner::~Spawner()
 int Spawner::GetSpawnCount() const
 {
 	float lSpawnPart;
-	CURE_RTVAR_GET(lSpawnPart, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
+	v_get(lSpawnPart, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 	return (int)(GetSpawner()->GetNumber() * lSpawnPart);
 }
 

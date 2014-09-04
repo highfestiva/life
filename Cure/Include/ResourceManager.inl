@@ -5,7 +5,7 @@
 
 
 #include "../../Lepra/Include/ImageLoader.h"
-#include "../../TBC/Include/TerrainPatch.h"
+#include "../../Tbc/Include/TerrainPatch.h"
 
 
 

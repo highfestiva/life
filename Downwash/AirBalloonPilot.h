@@ -30,12 +30,12 @@ public:
 
 private:
 	virtual void OnTick();
-	void GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint);
+	void GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint);
 
 	DownwashManager* mGame;
 	Cure::GameObjectId mBalloonId;
 	Cure::ContextPath::SplinePath* mPath;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

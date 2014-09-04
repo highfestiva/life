@@ -1,10 +1,11 @@
 #pragma once
 #include "../Lepra/Include/Graphics2D.h"
 #include "../Lepra/Include/Log.h"
+#include "../Lepra/Include/Logger.h"
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/StringUtility.h"
 #include "../Lepra/Include/Timer.h"
-#include "../UiTBC/Include/UiPainter.h"
+#include "../UiTbc/Include/UiPainter.h"
 
 
 
@@ -114,12 +115,12 @@ private:
 	void DrawFan(int x, int y, int rx, int ry, int a1, int a2, bool pFill)
 	{
 		const size_t lCurveCount = ((rx*2 + ry*2) / 20 + std::abs(a1-a2)/20 + 12) & (~7);
-		std::vector<Vector2DF> lCoords;
+		std::vector<vec2> lCoords;
 		const float lMidX = x + rx*0.5f;
 		const float lMidY = y + ry*0.5f;
 		if (pFill)
 		{
-			lCoords.push_back(Vector2DF(lMidX, lMidY));
+			lCoords.push_back(vec2(lMidX, lMidY));
 		}
 		const float lStartAngle = Lepra::Math::Deg2Rad((float)a1);
 		const float lEndAngle = Lepra::Math::Deg2Rad((float)a2);
@@ -129,7 +130,7 @@ private:
 		float lAngle = lStartAngle;
 		for (size_t i = 0; i < lCurveCount; ++i)
 		{
-			lCoords.push_back(Vector2DF(
+			lCoords.push_back(vec2(
 				lMidX + cos(lAngle)*lXRadius,
 				lMidY - sin(lAngle)*lYRadius));
 			lAngle += lDeltaAngle;
@@ -154,7 +155,7 @@ namespace out
 {
 inline void println(astr s)
 {
-	LogType::GetLog(LogType::SUB_ROOT)->RawPrint(strutil::Encode(s)+_T("\n"));
+	LogType::GetLogger(LogType::SUB_ROOT)->RawPrint(strutil::Encode(s)+_T("\n"));
 }
 }
 inline long currentTimeMillis()

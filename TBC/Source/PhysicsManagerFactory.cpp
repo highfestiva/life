@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "../Include/PhysicsManagerFactory.h"
 #include "../Include/PhysicsManagerODE.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -27,7 +28,7 @@ PhysicsManager* PhysicsManagerFactory::Create(Engine pEngine, float pRadius, int
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, PhysicsManagerFactory);
+loginstance(PHYSICS, PhysicsManagerFactory);
 
 
 

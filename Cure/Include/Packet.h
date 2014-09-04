@@ -8,11 +8,18 @@
 
 #include <string>
 #include <vector>
-#include "../../Lepra/Include/Socket.h"
+#include "../../Lepra/Include/Datagram.h"
 #include "Cure.h"
 #include "PositionalData.h"
 #include "RemoteStatus.h"
 #include "UserAccount.h"
+
+
+
+namespace Lepra
+{
+class TcpSocket;
+}
 
 
 
@@ -63,7 +70,7 @@ protected:
 	static bool ReadHeader(int& pThisPacketSize, const uint8* pBuffer, int pByteCount);
 
 	static const int PACKET_SIZE_MARKER_LENGTH = 2;
-	static const int PACKET_LENGTH = SocketBase::BUFFER_SIZE;
+	static const int PACKET_LENGTH = Datagram::BUFFER_SIZE;
 
 	MessageFactory* mMessageFactory;
 	std::vector<Message*> mMessageVector;
@@ -71,7 +78,7 @@ protected:
 	unsigned mParsedPacketSize;
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -197,9 +204,9 @@ public:
 	MessageCreateObject();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pInstanceId, const TransformationF& pTransformation, const wstr& pClassId);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const wstr& pClassId);
 
-	void GetTransformation(TransformationF& pTransformation) const;
+	void GetTransformation(xform& pTransformation) const;
 	void GetClassId(wstr& pClassId) const;
 };
 
@@ -211,7 +218,7 @@ public:
 	MessageCreateOwnedObject();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pInstanceId, const TransformationF& pTransformation, const wstr& pClassId, GameObjectId pOwnerInstanceId);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const wstr& pClassId, GameObjectId pOwnerInstanceId);
 
 	uint32 GetOwnerInstanceId() const;
 
@@ -300,7 +307,7 @@ public:
 
 
 
-class PacketFactory: public DatagramReceiver
+class PacketFactory//: public DatagramReceiver
 {
 public:
 	PacketFactory(MessageFactory* pMessageFactory);
@@ -310,7 +317,7 @@ public:
 	void SetMessageFactory(MessageFactory* pMessageFactory);
 	MessageFactory* GetMessageFactory() const;
 
-	int Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize);
+	//int Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize);
 
 private:
 	MessageFactory* mMessageFactory;
@@ -323,7 +330,7 @@ public:
 	virtual void Release(Message* pMessage);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

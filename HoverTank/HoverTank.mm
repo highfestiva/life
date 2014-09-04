@@ -4,7 +4,7 @@
 
 
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../Lepra/Include/LepraOS.h"
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
 #endif // iOS
@@ -68,20 +68,20 @@ using namespace Lepra;
 	//NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 
 	//NSInteger hasLevels = [defaults integerForKey:@ CONTENT_LEVELS];
-	//CURE_RTVAR_SET(HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasLevels == 1));
+	//v_set(HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasLevels == 1));
 
 	//NSInteger hasVehicles = [defaults integerForKey:@ CONTENT_VEHICLES];
-	//CURE_RTVAR_SET(HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_CONTENT_VEHICLES, (hasVehicles == 1));
+	//v_set(HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_CONTENT_VEHICLES, (hasVehicles == 1));
 
 	//NSString* objcHiscoreName = [defaults stringForKey:HISCORE_NAME_KEY];
 	//const str hiscoreName = MacLog::Decode(objcHiscoreName);
-	//CURE_RTVAR_SET(HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, hiscoreName);
+	//v_set(HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, hiscoreName);
 }
 
 +(void) storeHiscoreName
 {
 	//str lLastHiscoreName;
-	//CURE_RTVAR_GET(lLastHiscoreName, =, HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, _T(""));
+	//v_get(lLastHiscoreName, =, HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, _T(""));
 	//NSString* name = [MacLog::Encode(lLastHiscoreName) retain];
 	//NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	//[defaults setObject:name forKey:HISCORE_NAME_KEY];

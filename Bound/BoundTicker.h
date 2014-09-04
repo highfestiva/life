@@ -44,7 +44,7 @@ private:
 
 	virtual bool OpenUiManager();
 
-	virtual void BeginRender(Vector3DF& pColor);
+	virtual void BeginRender(vec3& pColor);
 	void PreWaitPhysicsTick();
 
 	virtual void CloseMainMenu();
@@ -59,7 +59,7 @@ private:
 	UiCure::MusicPlayer* mMusicPlayer;
 	UiCure::RendererImageResource* mEnvMap;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,8 +4,9 @@
 
 
 
+#include "pch.h"
 #include "Launcher.h"
-#include "../TBC/Include/PhysicsEngine.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 
 
@@ -30,15 +31,15 @@ Launcher::~Launcher()
 
 void Launcher::SetBarrelAngle(float pYaw, float pPitch)
 {
-	QuaternionF lQuaternion;
+	quat lQuaternion;
 	lQuaternion.RotateAroundWorldZ(pYaw);
 	lQuaternion.RotateAroundOwnX(pPitch);
 	SetRootOrientation(lQuaternion);
 
 	// Keep supportive thingie on ground.
-	TBC::GeometryReference* lMesh = (TBC::GeometryReference*)GetMesh(1);
+	Tbc::GeometryReference* lMesh = (Tbc::GeometryReference*)GetMesh(1);
 	static bool lHasStoredTransformation = false;
-	static QuaternionF lOriginalOrientation;
+	static quat lOriginalOrientation;
 	if (!lHasStoredTransformation)
 	{
 		lOriginalOrientation = lMesh->GetOffsetTransformation().GetOrientation();
@@ -46,7 +47,7 @@ void Launcher::SetBarrelAngle(float pYaw, float pPitch)
 	}
 	lQuaternion = lOriginalOrientation;
 	lQuaternion.RotateAroundOwnX(-pPitch);
-	TransformationF lTransform = lMesh->GetOffsetTransformation();
+	xform lTransform = lMesh->GetOffsetTransformation();
 	lTransform.SetOrientation(lQuaternion);
 	lMesh->SetOffsetTransformation(lTransform);
 }
@@ -59,20 +60,20 @@ void Launcher::GetAngles(const Cure::ContextObject* pTarget, float& pPitch, floa
 	GetAngles(pTarget->GetPosition(), pTarget->GetVelocity(), pPitch, pGuidePitch, pYaw, pGuideYaw);
 }
 
-void Launcher::GetAngles(const Vector3DF& pTargetPosition, const Vector3DF& pTargetVelocity,
+void Launcher::GetAngles(const vec3& pTargetPosition, const vec3& pTargetVelocity,
 	float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const
 {
 	// GetBallisticData calculates the trajectory by polynome approximation (don't remember
 	// the math any more), but calling it twice gets us pretty close to the sweet spot.
-	Vector3DF lPosition1 = pTargetPosition;
-	const Vector3DF lPosition2 = this->GetPosition();
+	vec3 lPosition1 = pTargetPosition;
+	const vec3 lPosition2 = this->GetPosition();
 	float lRoll;
 	this->GetOrientation().GetEulerAngles(pYaw, pPitch, lRoll);
 	float lTime = 10.0f;
 	GetBallisticData(lPosition1, lPosition2, pPitch, pGuidePitch, pGuideYaw, lTime);
 	float lBetterPitch = pGuidePitch;
 	{
-		Vector3DF p = lPosition1 + pTargetVelocity * lTime;
+		vec3 p = lPosition1 + pTargetVelocity * lTime;
 		GetBallisticData(p, lPosition2, lBetterPitch, pGuidePitch, pGuideYaw, lTime);
 	}
 	lBetterPitch = pGuidePitch;
@@ -94,18 +95,18 @@ void Launcher::GetAngles(const Vector3DF& pTargetPosition, const Vector3DF& pTar
 void Launcher::CreateEngines()
 {
 	deb_assert(GetPhysics()->GetEngineCount() == 0);
-	TBC::PhysicsEngine* lPitchEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_TILTER, 1, 1, 1, 1, 0);
+	Tbc::PhysicsEngine* lPitchEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_TILTER, 1, 1, 1, 1, 0);
 	GetPhysics()->AddEngine(lPitchEngine);
-	TBC::PhysicsEngine* lYawEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 1, 1, 1, 1, 1);
+	Tbc::PhysicsEngine* lYawEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_ROLL, 1, 1, 1, 1, 1);
 	GetPhysics()->AddEngine(lYawEngine);
 }
 
-void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
+void Launcher::GetBallisticData(const vec3& pPosition1, const vec3& pPosition2,
 	float pPitch, float& pGuidePitch, float& pGuideYaw, float &pTime) const
 {
-	const Vector3DF lDelta = pPosition1 - pPosition2;
-	const Vector2DF lYawVector(lDelta.x, lDelta.y);
-	pGuideYaw = Vector2DF(0, 1).GetAngle(lYawVector);
+	const vec3 lDelta = pPosition1 - pPosition2;
+	const vec2 lYawVector(lDelta.x, lDelta.y);
+	pGuideYaw = vec2(0, 1).GetAngle(lYawVector);
 
 	const float h = lDelta.z;
 	const float v = mGame->GetMuzzleVelocity();

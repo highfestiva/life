@@ -78,15 +78,15 @@ public:
 	Plane ScreenLineToPlane(const PixelCoord& pCoord, const	PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter);
 	bool Cut(Plane pCutPlane);
 	bool DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPlane, CutMode pCutMode);
-	void AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors);
-	void AddNGonPoints(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p0, const Vector3DF& p1);
-	static void AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p);
-	void CreateNGon(std::vector<Vector3DF>& pNGon);
-	void LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort);
-	void SimplifyNGon(std::vector<Vector3DF>& pNGon);
-	void AddNGonTriangles(const Plane& pCutPlane, const std::vector<Vector3DF>& pNGon, const uint8* pColors);
+	void AddTriangle(const vec3& v0, const vec3& v1, const vec3& v2, const uint8* pColors);
+	void AddNGonPoints(std::vector<vec3>& pNGon, std::unordered_set<int>& pNGonMap, const vec3& p0, const vec3& p1);
+	static void AddNGonPoint(std::vector<vec3>& pNGon, std::unordered_set<int>& pNGonMap, const vec3& p);
+	void CreateNGon(std::vector<vec3>& pNGon);
+	void LineUpNGonBorders(std::vector<vec3>& pNGon, bool pSort);
+	void SimplifyNGon(std::vector<vec3>& pNGon);
+	void AddNGonTriangles(const Plane& pCutPlane, const std::vector<vec3>& pNGon, const uint8* pColors);
 	int CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane);
-	bool CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter, Vector3DF& pCollisionPoint);
+	bool CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter, vec3& pCollisionPoint);
 	static bool AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int pWidth, int pHeight);
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
@@ -105,13 +105,13 @@ protected:
 	virtual void TickUiUpdate();
 	virtual void SetLocalRender(bool pRender);
 
-	void CreateBall(int pIndex, const Vector3DF* pPosition);
+	void CreateBall(int pIndex, const vec3* pPosition);
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	//virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
+		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
 
 	void ShowInstruction();
 	void OnPauseButton(UiTbc::Button*);
@@ -139,7 +139,7 @@ protected:
 	Sunlight* mSunlight;
 	float mCameraAngle;
 	float mCameraRotateSpeed;
-	TransformationF mCameraTransform;
+	xform mCameraTransform;
 	float mPercentDone;
 	bool mLevelCompleted;
 	UiTbc::Button* mPauseButton;
@@ -155,7 +155,7 @@ protected:
 	int mQuickCutCount;
 	float mLevelScore;
 	UiCure::SoundReleaser* mShakeSound;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -23,9 +23,9 @@ public:
 	virtual ~Spawner();
 
 private:
-	virtual void SetSpawner(const TBC::PhysicsSpawner* pSpawner);
+	virtual void SetSpawner(const Tbc::PhysicsSpawner* pSpawner);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

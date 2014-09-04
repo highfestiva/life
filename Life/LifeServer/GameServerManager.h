@@ -53,7 +53,7 @@ public:
 	bool Initialize(MasterServerConnection* pMasterConnection, const str& pAddress);
 	float GetPowerSaveAmount() const;
 
-	LEPRA_DEBUG_CODE(virtual TBC::PhysicsManager* GetPhysicsManager() const);
+	LEPRA_DEBUG_CODE(virtual Tbc::PhysicsManager* GetPhysicsManager() const);
 
 	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
 
@@ -67,14 +67,14 @@ public:
 	wstrutil::strvec ListUsers();
 	Cure::NetworkServer* GetNetworkServer() const;
 	void SendObjects(Client* pClient, bool pCreate, const ContextTable& pObjectTable);
-	void BroadcastCreateObject(Cure::GameObjectId pInstanceId, const TransformationF& pTransform, const str& pClassId, Cure::GameObjectId pOwnerInstanceId);
+	void BroadcastCreateObject(Cure::GameObjectId pInstanceId, const xform& pTransform, const str& pClassId, Cure::GameObjectId pOwnerInstanceId);
 	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
 		Client* pExcludeClient, bool pSafe);
 	bool BroadcastChatMessage(const wstr& pMessage);
 	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
 	void BroadcastNumberMessage(Client* pExcludeClient, bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
-	void IndicatePosition(const Vector3DF pPosition, float pTime);
+	void IndicatePosition(const vec3 pPosition, float pTime);
 
 	int GetLoggedInClientCount() const;
 	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
@@ -100,9 +100,9 @@ protected:
 
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
+		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
 	void FlipCheck(Cure::ContextObject* pObject) const;
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
 	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
@@ -137,7 +137,7 @@ private:
 	float mPhysicsRtrShadow;
 	bool mPhysicsHaltShadow;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

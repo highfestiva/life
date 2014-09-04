@@ -57,7 +57,7 @@ private:
 
 	Reader* mReader;
 	Writer* mWriter;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

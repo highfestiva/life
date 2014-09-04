@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #pragma warning(push)
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
@@ -23,7 +24,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -92,8 +93,8 @@ bool PhysicsManagerODE::InitCurrentThread()
 	return ::dAllocateODEDataForThread((unsigned)dAllocateMaskAll) != 0;
 }
 
-int PhysicsManagerODE::QueryRayCollisionAgainst(const Vector3DF& pRayPosition, const Vector3DF& pRayDirection,
-	float pLength, BodyID pBody, Vector3DF* pCollisionPoints, int pMaxCollisionCount)
+int PhysicsManagerODE::QueryRayCollisionAgainst(const vec3& pRayPosition, const vec3& pRayDirection,
+	float pLength, BodyID pBody, vec3* pCollisionPoints, int pMaxCollisionCount)
 {
 	if (pMaxCollisionCount <= 0)
 	{
@@ -123,7 +124,7 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const Vector3DF& pRayPosition, c
 	for (int x = 0; x < lCollisionCount; ++x)
 	{
 		// Check that we've found a surface turned towards the given direction.
-		const Vector3DF lNormal(lContact[x].normal[0], lContact[x].normal[1], lContact[x].normal[2]);
+		const vec3 lNormal(lContact[x].normal[0], lContact[x].normal[1], lContact[x].normal[2]);
 		if (lNormal*pRayDirection > 0)
 		{
 			pCollisionPoints[lFoundCollisionPoints++].Set(lContact[x].pos[0], lContact[x].pos[1], lContact[x].pos[2]);
@@ -133,7 +134,7 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const Vector3DF& pRayPosition, c
 	return lFoundCollisionPoints;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const TransformationF& pTransform,
+PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const xform& pTransform,
 	float32 pMass, float32 pRadius, BodyType pType, float32 pFriction, float32 pBounce,
 	int pForceListenerId)
 {
@@ -168,7 +169,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Trans
 	return ((BodyID)lObject);
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const TransformationF& pTransform,
+PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const xform& pTransform,
 	float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction,
 	float32 pBounce, int pForceListenerId)
 {
@@ -205,7 +206,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Tra
 	return (BodyID)lObject;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const TransformationF& pTransform,
+PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const xform& pTransform,
 	float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction,
 	float32 pBounce, int pForceListenerId)
 {
@@ -240,8 +241,8 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Tran
 	return (BodyID)lObject;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const TransformationF& pTransform,
-	float32 pMass, const Vector3DF& pSize, BodyType pType, float32 pFriction,
+PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const xform& pTransform,
+	float32 pMass, const vec3& pSize, BodyType pType, float32 pFriction,
 	float32 pBounce, int pForceListenerId)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
@@ -440,7 +441,7 @@ bool PhysicsManagerODE::AddMass(BodyID pStaticBody, BodyID pMainBody)
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned pVertexCount,
 	const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,
-	const TransformationF& pTransform, float32 pFriction, float32 pBounce,
+	const xform& pTransform, float32 pFriction, float32 pBounce,
 	int pForceListenerId)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
@@ -513,20 +514,20 @@ void PhysicsManagerODE::DeleteBody(BodyID pBodyId)
 	}
 }
 
-Vector3DF PhysicsManagerODE::GetBodyPosition(BodyID pBodyId) const
+vec3 PhysicsManagerODE::GetBodyPosition(BodyID pBodyId) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
 		mLog.Errorf(_T("GetBodyPosition() - Body %i is not part of this world!"), pBodyId);
-		return (Vector3DF());
+		return (vec3());
 	}
 
 	const dReal* lPosition = dGeomGetPosition(lObject->mGeomID);
-	return (Vector3DF(lPosition[0], lPosition[1], lPosition[2]));
+	return (vec3(lPosition[0], lPosition[1], lPosition[2]));
 }
 
-void PhysicsManagerODE::SetBodyPosition(BodyID pBodyId, const Vector3DF& pPosition) const
+void PhysicsManagerODE::SetBodyPosition(BodyID pBodyId, const vec3& pPosition) const
 {
 	Object* lObject = (Object*)pBodyId;
 
@@ -547,7 +548,7 @@ void PhysicsManagerODE::SetBodyPosition(BodyID pBodyId, const Vector3DF& pPositi
 	}
 }
 
-QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
+quat PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
@@ -558,11 +559,11 @@ QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 
 	dQuaternion q;
 	::dGeomGetQuaternion(lObject->mGeomID, q);
-	QuaternionF lQuat(q);
+	quat lQuat(q);
 	return (lQuat);
 }
 
-void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, TransformationF& pTransform) const
+void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, xform& pTransform) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
@@ -575,7 +576,7 @@ void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, TransformationF& pTrans
 	::dGeomGetQuaternion(lObject->mGeomID, pTransform.mOrientation.mData);
 }
 
-void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform)
+void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const xform& pTransform)
 {
 	Object* lObject = (Object*)pBodyId;
 
@@ -585,8 +586,8 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& 
 		return;
 	}
 
-	const Vector3DF lPos(pTransform.GetPosition());
-	QuaternionF lQuat = pTransform.GetOrientation();
+	const vec3 lPos(pTransform.GetPosition());
+	quat lQuat = pTransform.GetOrientation();
 	dReal lQ[4];
 	lQ[0] = lQuat.a;
 	lQ[1] = lQuat.b;
@@ -605,7 +606,7 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& 
 	}
 }
 
-void PhysicsManagerODE::GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const
+void PhysicsManagerODE::GetBodyVelocity(BodyID pBodyId, vec3& pVelocity) const
 {
 	Object* lObject = (Object*)pBodyId;
 	dBodyID lBodyId = lObject->mBodyID;
@@ -626,7 +627,7 @@ void PhysicsManagerODE::GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) co
 	}
 }
 
-void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVelocity)
+void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const vec3& pVelocity)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -635,7 +636,7 @@ void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVeloci
 	}
 }
 
-void PhysicsManagerODE::GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) const
+void PhysicsManagerODE::GetBodyForce(BodyID pBodyId, vec3& pAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
 	dBodyID lBodyId = lObject->mBodyID;
@@ -656,27 +657,27 @@ void PhysicsManagerODE::GetBodyForce(BodyID pBodyId, Vector3DF& pAcceleration) c
 	}
 }
 
-void PhysicsManagerODE::SetBodyForce(BodyID pBodyId, const Vector3DF& pAcceleration)
+void PhysicsManagerODE::SetBodyForce(BodyID pBodyId, const vec3& pAcceleration)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
 		dBodySetForce(lObject->mBodyID, pAcceleration.x, pAcceleration.y, pAcceleration.z);
 }
 
-void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAcceleration) const
+void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, float pTotalMass, vec3& pAcceleration) const
 {
 	deb_assert(pTotalMass > 0);
 	GetBodyForce(pBodyId, pAcceleration);
 	pAcceleration /= pTotalMass;
 }
 
-void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAcceleration)
+void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const vec3& pAcceleration)
 {
 	deb_assert(pTotalMass > 0);
 	SetBodyForce(pBodyId, pAcceleration * pTotalMass);
 }
 
-void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const
+void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, vec3& pAngularVelocity) const
 {
 	Object* lObject = (Object*)pBodyId;
 	dBodyID lBodyId = lObject->mBodyID;
@@ -697,7 +698,7 @@ void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngul
 	}
 }
 
-void PhysicsManagerODE::SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity)
+void PhysicsManagerODE::SetBodyAngularVelocity(BodyID pBodyId, const vec3& pAngularVelocity)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -706,7 +707,7 @@ void PhysicsManagerODE::SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& 
 	}
 }
 
-void PhysicsManagerODE::GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceleration) const
+void PhysicsManagerODE::GetBodyTorque(BodyID pBodyId, vec3& pAngularAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
 	dBodyID lBodyId = lObject->mBodyID;
@@ -727,7 +728,7 @@ void PhysicsManagerODE::GetBodyTorque(BodyID pBodyId, Vector3DF& pAngularAcceler
 	}
 }
 
-void PhysicsManagerODE::SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularAcceleration)
+void PhysicsManagerODE::SetBodyTorque(BodyID pBodyId, const vec3& pAngularAcceleration)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -736,14 +737,14 @@ void PhysicsManagerODE::SetBodyTorque(BodyID pBodyId, const Vector3DF& pAngularA
 	}
 }
 
-void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, Vector3DF& pAngularAcceleration) const
+void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, vec3& pAngularAcceleration) const
 {
 	GetBodyTorque(pBodyId, pAngularAcceleration);
 	// TODO: handle moment of inertia?
 	pAngularAcceleration /= pTotalMass;
 }
 
-void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const Vector3DF& pAngularAcceleration)
+void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const vec3& pAngularAcceleration)
 {
 	// TODO: handle moment of inertia?
 	SetBodyTorque(pBodyId, pAngularAcceleration * pTotalMass);
@@ -818,7 +819,7 @@ void* PhysicsManagerODE::GetBodyData(BodyID pBodyId)
 	return lObject->mUserData;
 }
 
-PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const TransformationF& pTransform,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const xform& pTransform,
 	float32 pRadius, int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
@@ -837,7 +838,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const Transform
 	return (TriggerID)lObject;
 }
 
-PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const TransformationF& pTransform,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const xform& pTransform,
 	float32 pRadius, float32 pLength, int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
@@ -859,7 +860,7 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Transfo
 	return (TriggerID)lObject;
 }
 
-PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const TransformationF& pTransform,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const xform& pTransform,
 	float32 pRadius, float32 pLength, int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
@@ -880,8 +881,8 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const Transfor
 	return (TriggerID)lObject;
 }
 
-PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const TransformationF& pTransform,
-	const Vector3DF& pSize, int pTriggerListenerId)
+PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const xform& pTransform,
+	const vec3& pSize, int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
 
@@ -902,14 +903,14 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const Transformati
 	return (TriggerID)lObject;
 }
 
-PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const TransformationF& pTransform,
-	const Vector3DF& pFromPos, const Vector3DF& pToPos,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const xform& pTransform,
+	const vec3& pFromPos, const vec3& pToPos,
 	int pTriggerListenerId)
 {
 	Object* lObject = new Object(mWorldID, false);
 
 	// Calculate the direction vector.
-	Vector3DF lDir(pToPos - pFromPos);
+	vec3 lDir(pToPos - pFromPos);
 	float32 lLength = lDir.GetLength();
 	lDir.Div(lLength);
 
@@ -977,17 +978,17 @@ void PhysicsManagerODE::SetForceFeedbackListener(BodyID pBody, int pForceFeedbac
 	lObject->mForceFeedbackId = pForceFeedbackId;
 }
 
-void PhysicsManagerODE::GetTriggerTransform(TriggerID pTriggerID, TransformationF& pTransform)
+void PhysicsManagerODE::GetTriggerTransform(TriggerID pTriggerID, xform& pTransform)
 {
 	GetBodyTransform((BodyID)pTriggerID, pTransform);
 }
 
-void PhysicsManagerODE::SetTriggerTransform(TriggerID pTriggerID, const TransformationF& pTransform)
+void PhysicsManagerODE::SetTriggerTransform(TriggerID pTriggerID, const xform& pTransform)
 {
 	SetBodyTransform((BodyID)pTriggerID, pTransform);
 }
 
-PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID pBody2, const Vector3DF& pAnchorPos)
+PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID pBody2, const vec3& pAnchorPos)
 {
 	Object* lObject1;
 	Object* lObject2;
@@ -1032,7 +1033,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 }
 
 PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyID pBody2, 
-	const Vector3DF& pAnchorPos, const Vector3DF& pAxis)
+	const vec3& pAnchorPos, const vec3& pAxis)
 {
 	Object* lObject1;
 	Object* lObject2;
@@ -1081,8 +1082,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 }
 
 PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, BodyID pBody2,
-	const Vector3DF& pAnchorPos, const Vector3DF& pAxis1,
-	const Vector3DF& pAxis2)
+	const vec3& pAnchorPos, const vec3& pAxis1,
+	const vec3& pAxis2)
 {
 	Object* lObject1;
 	Object* lObject2;
@@ -1114,8 +1115,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, Body
 }
 
 PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, BodyID pBody2,
-	const Vector3DF& pAnchorPos, const Vector3DF& pAxis1,
-	const Vector3DF& pAxis2)
+	const vec3& pAnchorPos, const vec3& pAxis1,
+	const vec3& pAxis2)
 {
 	Object* lObject1;
 	Object* lObject2;
@@ -1154,7 +1155,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 }
 
 PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, BodyID pBody2,
-	const Vector3DF& pAxis)
+	const vec3& pAxis)
 {
 	Object* lObject1;
 	Object* lObject2;
@@ -1225,7 +1226,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyI
 }
 
 PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1, BodyID pBody2,
-	const Vector3DF& pAxis)
+	const vec3& pAxis)
 {
 	Object* lObject1;
 	Object* lObject2;
@@ -1528,20 +1529,20 @@ bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Dif
 		return (false);
 	}
 
-	Vector3DF lAxis;
+	vec3 lAxis;
 	if (!GetAxis1(pJointId, lAxis) || !GetAngle1(pJointId, pDiff.mValue))
 	{
 		return (false);
 	}
 
 	{
-		Vector3DF lVelocity;
+		vec3 lVelocity;
 		GetBodyAngularVelocity(pBodyId, lVelocity);
 		pDiff.mVelocity = lAxis * lVelocity;
 	}
 
 	{
-		Vector3DF lAcceleration;
+		vec3 lAcceleration;
 		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mAcceleration = lAxis * lAcceleration;
 	}
@@ -1559,8 +1560,8 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 		return (false);
 	}
 
-	Vector3DF lAnchor;
-	Vector3DF lAxis;
+	vec3 lAnchor;
+	vec3 lAxis;
 	if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis))
 	{
 		return (false);
@@ -1571,10 +1572,10 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 
 	// Fetch parent data (or identity if parent is World).
 	const dReal* lPos = ::dBodyGetPosition(lParentBody);
-	const Vector3DF lParentPosition(lPos);
-	QuaternionF lParentQ(-1, 0, 0, 0);
-	Vector3DF lParentVelocity;
-	Vector3DF lParentAcceleration;
+	const vec3 lParentPosition(lPos);
+	quat lParentQ(-1, 0, 0, 0);
+	vec3 lParentVelocity;
+	vec3 lParentAcceleration;
 	if (!lJointInfo->mJointID->node[1].body)
 	{
 	}
@@ -1588,9 +1589,9 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	{
 		// Rotate to original child (us) orientation.
 		dxJointHinge* lHinge = (dxJointHinge*)lJointInfo->mJointID;
-		QuaternionF lQ(lHinge->qrel);
+		quat lQ(lHinge->qrel);
 		// Set orientation.
-		TransformationF lTransform;
+		xform lTransform;
 		GetBodyTransform(pBodyId, lTransform);
 		if (lJointInfo->mJointID->node[1].body)
 		{
@@ -1601,12 +1602,12 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 			lQ.MakeInverse();
 		}
 		// Rotate to input angle.
-		lQ = QuaternionF(-pDiff.mValue, lAxis) * lQ;
+		lQ = quat(-pDiff.mValue, lAxis) * lQ;
 		lTransform.SetOrientation(lQ);
 		if (lJointInfo->mJointID->node[1].body)
 		{
 			// Align anchors (happen after rotation) and store.
-			Vector3DF lAnchor2(lHinge->anchor2);
+			vec3 lAnchor2(lHinge->anchor2);
 			lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
 			lTransform.GetPosition() += lAnchor-lAnchor2;
 		}
@@ -1616,10 +1617,10 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	{
 		if (pDiff.mVelocity < PIF*1000)
 		{
-			Vector3DF lVelocity;
+			vec3 lVelocity;
 			GetBodyAngularVelocity(pBodyId, lVelocity);
 			// Drop angular velocity along axis 1 & 2, then add the specified amount.
-			Vector3DF lAxisVelocity = lAxis*(lAxis*lVelocity);
+			vec3 lAxisVelocity = lAxis*(lAxis*lVelocity);
 			lVelocity -= lAxisVelocity;
 			lVelocity += lAxis * pDiff.mVelocity;
 			SetBodyAngularVelocity(pBodyId, lVelocity);
@@ -1629,10 +1630,10 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	{
 		if (pDiff.mAcceleration < PIF*1000)
 		{
-			Vector3DF lAcceleration;
+			vec3 lAcceleration;
 			GetBodyTorque(pBodyId, lAcceleration);
 			// Drop angular acceleration along axis, then add the specified amount.
-			Vector3DF lAxisAcceleration = lAxis*(lAxis*lAcceleration);
+			vec3 lAxisAcceleration = lAxis*(lAxis*lAcceleration);
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis * pDiff.mAcceleration;
 			SetBodyTorque(pBodyId, lAcceleration);
@@ -1652,7 +1653,7 @@ bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Di
 		return (false);
 	}
 
-	Vector3DF lAxis;
+	vec3 lAxis;
 	if (!GetAxis1(pJointId, lAxis))
 	{
 		return (false);
@@ -1663,11 +1664,11 @@ bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Di
 	GetSliderSpeed(pJointId, pDiff.mVelocity);
 
 	{
-		Vector3DF lAcceleration;
+		vec3 lAcceleration;
 		GetBodyForce(pBodyId, lAcceleration);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
-		lAcceleration -= Vector3DF(lParentForce);
+		lAcceleration -= vec3(lParentForce);
 		pDiff.mAcceleration = lAxis * lAcceleration;
 	}
 
@@ -1684,7 +1685,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 		return (false);
 	}
 
-	Vector3DF lAxis;
+	vec3 lAxis;
 	if (!GetAxis1(pJointId, lAxis))
 	{
 		return (false);
@@ -1695,10 +1696,10 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 
 	// Fetch parent data (or identity if parent is World).
 	const dReal* lPos = ::dBodyGetPosition(lParentBody);
-	const Vector3DF lParentPosition(lPos);
-	QuaternionF lParentQ(-1, 0, 0, 0);
-	Vector3DF lParentVelocity;
-	Vector3DF lParentAcceleration;
+	const vec3 lParentPosition(lPos);
+	quat lParentQ(-1, 0, 0, 0);
+	vec3 lParentVelocity;
+	vec3 lParentAcceleration;
 	if (!lJointInfo->mJointID->node[1].body)
 	{
 	}
@@ -1718,9 +1719,9 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 	{
 		// Rotate to original child (us) orientation.
 		dxJointSlider* lSlider = (dxJointSlider*)lJointInfo->mJointID;
-		QuaternionF lQ(lSlider->qrel);
+		quat lQ(lSlider->qrel);
 		// Relative translation.
-		Vector3DF lOffset(lSlider->offset);
+		vec3 lOffset(lSlider->offset);
 		if (lJointInfo->mJointID->node[1].body)
 		{
 			lQ = lParentQ * lQ;
@@ -1738,7 +1739,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 		if (lJointInfo->mJointID->node[1].body || lOffset.GetLengthSquared() > 0.5f)
 		{
 			// Set orientation.
-			TransformationF lTransform(lQ,
+			xform lTransform(lQ,
 				lParentPosition - lOffset);
 			SetBodyTransform(pBodyId, lTransform);
 		}
@@ -1762,8 +1763,8 @@ bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
 	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_UNIVERSAL));
 
-	Vector3DF lAxis1;
-	Vector3DF lAxis2;
+	vec3 lAxis1;
+	vec3 lAxis2;
 	{
 		if (!GetAxis1(pJointId, lAxis1) || !GetAxis2(pJointId, lAxis2) ||
 			!GetAngle1(pJointId, pDiff.mValue) || !GetAngle2(pJointId, pDiff.mAngle))
@@ -1782,7 +1783,7 @@ bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint
 	}
 
 	{
-		Vector3DF lAcceleration;
+		vec3 lAcceleration;
 		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = -(lAxis2 * lAcceleration);
 		pDiff.mAngleAcceleration = -(lAxis1 * lAcceleration);
@@ -1796,9 +1797,9 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
 	deb_assert(lJointInfo->mType == JOINT_UNIVERSAL);
 
-	Vector3DF lAxis1;
-	Vector3DF lAxis2;
-	Vector3DF lAnchor;
+	vec3 lAxis1;
+	vec3 lAxis2;
+	vec3 lAnchor;
 	if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis1))
 	{
 		return (false);
@@ -1810,32 +1811,32 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		deb_assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		const QuaternionF lParentQ(lPQ);
+		const quat lParentQ(lPQ);
 		const dReal* lPP = ::dBodyGetPosition(lParentBody);
 		// Rotate to cross piece orientation.
 		dxJointUniversal* lUniversal = (dxJointUniversal*)lJointInfo->mJointID;
-		//QuaternionF lRelativeQ(lUniversal->qrel1);
-		QuaternionF lQ = lParentQ;
-		//QuaternionF lQ = lParentQ.GetInverse() * lRelativeQ;
+		//quat lRelativeQ(lUniversal->qrel1);
+		quat lQ = lParentQ;
+		//quat lQ = lParentQ.GetInverse() * lRelativeQ;
 		// Rotate to body 1's input angle.
-		lQ = QuaternionF(-pDiff.mValue, lAxis1) * lQ;
+		lQ = quat(-pDiff.mValue, lAxis1) * lQ;
 		// Apply rotation from cross piece to original child (us).
 		//lRelativeQ.Set(lUniversal->qrel2);
 		//lQ = lRelativeQ.GetInverse() * lQ;
 		// Rotating around body 1's axis changes body 2's axis. Fetch and act on it AFTER rotation 'round axis1.
-		lAxis2 = lQ * Vector3DF(lUniversal->axis2);
-		lQ = QuaternionF(-pDiff.mAngle, lAxis2) * lQ;
+		lAxis2 = lQ * vec3(lUniversal->axis2);
+		lQ = quat(-pDiff.mAngle, lAxis2) * lQ;
 		// Set orientation.
-		Vector3DF lParentP(lPP);
-		TransformationF lTransform;
+		vec3 lParentP(lPP);
+		xform lTransform;
 		GetBodyTransform(pBodyId, lTransform);
-		TransformationF lParentTransformation(lParentQ, lParentP);
+		xform lParentTransformation(lParentQ, lParentP);
 		lTransform.mPosition = lParentQ*(lTransform.mPosition-lParentP) + lParentP;
 		lTransform.mOrientation = lParentQ;
 		// TODO: fix your linear algebra shit first!
 		//lTransform.SetOrientation(lQ);
 		// Align anchors (happen after rotation) and store.
-		Vector3DF lAnchor2(lUniversal->anchor2);
+		vec3 lAnchor2(lUniversal->anchor2);
 		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
 		//dVector3 lRealAnchor;
 		//::dJointGetUniversalAnchor2(lUniversal, lRealAnchor);
@@ -1845,10 +1846,10 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 	}
 
 	{
-		Vector3DF lAxisVelocity;
-		Vector3DF lOriginalVelocity;
+		vec3 lAxisVelocity;
+		vec3 lOriginalVelocity;
 		GetBodyAngularVelocity(pBodyId, lOriginalVelocity);
-		Vector3DF lVelocity = lOriginalVelocity;
+		vec3 lVelocity = lOriginalVelocity;
 		// Drop angular velocity along axis 1 & 2, then add the specified amount.
 		if (pDiff.mValueVelocity < PIF*1000)
 		{
@@ -1862,15 +1863,15 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 			lVelocity -= lAxisVelocity;
 			lVelocity += lAxis2 * -pDiff.mAngleVelocity;
 		}
-		//SetBodyVelocity(pBodyId, Vector3DF());
+		//SetBodyVelocity(pBodyId, vec3());
 		SetBodyAngularVelocity(pBodyId, lVelocity);
 	}
 
 	{
-		Vector3DF lAxisAcceleration;
-		Vector3DF lOriginalAcceleration;
+		vec3 lAxisAcceleration;
+		vec3 lOriginalAcceleration;
 		GetBodyTorque(pBodyId, lOriginalAcceleration);
-		Vector3DF lAcceleration = lOriginalAcceleration;
+		vec3 lAcceleration = lOriginalAcceleration;
 		// Drop angular acceleration along axis 1 & 2, then add the specified amount.
 		if (pDiff.mValueAcceleration < PIF*1000)
 		{
@@ -1884,7 +1885,7 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis2 * -pDiff.mAngleAcceleration;
 		}
-		//SetBodyForce(pBodyId, Vector3DF());
+		//SetBodyForce(pBodyId, vec3());
 		SetBodyTorque(pBodyId, lAcceleration);
 	}
 
@@ -1896,19 +1897,19 @@ bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
 	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_HINGE2));
 
-	Vector3DF lAxis1;
-	Vector3DF lAxis2;
+	vec3 lAxis1;
+	vec3 lAxis2;
 	{
-		TransformationF lTransform;
+		xform lTransform;
 		GetBodyTransform(pBodyId, lTransform);
-		Vector3DF lAnchor;
+		vec3 lAnchor;
 		if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis1) || !GetAxis2(pJointId, lAxis2))
 		{
 			return (false);
 		}
 		deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
 		deb_assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
-		const Vector3DF lDiff(lTransform.GetPosition()-lAnchor);
+		const vec3 lDiff(lTransform.GetPosition()-lAnchor);
 		float lPosition;
 		lPosition = -(lAxis1 * lDiff);
 		pDiff.mValue = lPosition;
@@ -1921,7 +1922,7 @@ bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 	}
 
 	{
-		Vector3DF lVelocity;
+		vec3 lVelocity;
 		GetBodyVelocity(pBodyId, lVelocity);
 		pDiff.mValueVelocity = -(lAxis1 * lVelocity);
 		GetBodyAngularVelocity(pBodyId, lVelocity);
@@ -1930,7 +1931,7 @@ bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 	}
 
 	{
-		Vector3DF lAcceleration;
+		vec3 lAcceleration;
 		GetBodyForce(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = -(lAxis1 * lAcceleration);
 		GetBodyTorque(pBodyId, lAcceleration);
@@ -1946,18 +1947,18 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
 	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_HINGE2));
 
-	Vector3DF lAxis1;
-	Vector3DF lAxis2;
+	vec3 lAxis1;
+	vec3 lAxis2;
 	{
-		Vector3DF lAnchor;
+		vec3 lAnchor;
 		if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis1) || !GetAxis2(pJointId, lAxis2))
 		{
 			return (false);
 		}
 		deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
 		deb_assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
-		const Vector3DF lDiff = lAxis1 * -pDiff.mValue;
-		TransformationF lTransform;
+		const vec3 lDiff = lAxis1 * -pDiff.mValue;
+		xform lTransform;
 		GetBodyTransform(pBodyId, lTransform);
 		lTransform.SetPosition(lAnchor+lDiff);
 		float lCurrentAngle;
@@ -1977,16 +1978,16 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 	}
 
 	{
-		Vector3DF lVelocity;
+		vec3 lVelocity;
 		GetBodyVelocity(pBodyId, lVelocity);
 		// Drop suspension velocity along axis1.
-		Vector3DF lAxisVelocity(lAxis1*(lAxis1*lVelocity));
+		vec3 lAxisVelocity(lAxis1*(lAxis1*lVelocity));
 		lVelocity -= lAxisVelocity;
 		// Add suspension velocity.
 		lVelocity += lAxis1 * -pDiff.mValueVelocity;
 		SetBodyVelocity(pBodyId, lVelocity);
 
-		Vector3DF lOriginalVelocity;
+		vec3 lOriginalVelocity;
 		GetBodyAngularVelocity(pBodyId, lOriginalVelocity);
 		lVelocity = lOriginalVelocity;
 		// Drop angular velocity along axis 1 & 2, then add the specified amount.
@@ -2006,16 +2007,16 @@ bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Jo
 	}
 
 	{
-		Vector3DF lAcceleration;
+		vec3 lAcceleration;
 		GetBodyForce(pBodyId, lAcceleration);
 		// Drop suspension acceleration along axis1.
-		Vector3DF lAxisAcceleration(lAxis1*(lAxis1*lAcceleration));
+		vec3 lAxisAcceleration(lAxis1*(lAxis1*lAcceleration));
 		lAcceleration -= lAxisAcceleration;
 		// Add suspension acceleration.
 		lAcceleration += lAxis1 * -pDiff.mValueAcceleration;
 		SetBodyForce(pBodyId, lAcceleration);
 
-		Vector3DF lOriginalAcceleration;
+		vec3 lOriginalAcceleration;
 		GetBodyTorque(pBodyId, lOriginalAcceleration);
 		lAcceleration = lOriginalAcceleration;
 		// Drop angular acceleration along axis 1 & 2, then add the specified amount.
@@ -2046,16 +2047,16 @@ bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff
 		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		QuaternionF lParentQ(lPQ);
+		quat lParentQ(lPQ);
 
-		TransformationF lTransform;
+		xform lTransform;
 		GetBodyTransform(pBodyId, lTransform);
-		const QuaternionF lQ = lTransform.GetOrientation()/lParentQ;
+		const quat lQ = lTransform.GetOrientation()/lParentQ;
 		lQ.GetEulerAngles(pDiff.mValue, pDiff.mAngle1, pDiff.mAngle2);
 	}
 
 	{
-		Vector3DF lVelocity;
+		vec3 lVelocity;
 		GetBodyAngularVelocity(pBodyId, lVelocity);
 		pDiff.mValueVelocity = lVelocity.x;
 		pDiff.mAngle1Velocity = lVelocity.y;
@@ -2063,7 +2064,7 @@ bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff
 	}
 
 	{
-		Vector3DF lAcceleration;
+		vec3 lAcceleration;
 		GetBodyTorque(pBodyId, lAcceleration);
 		pDiff.mValueAcceleration = lAcceleration.x;
 		pDiff.mAngle1Acceleration = lAcceleration.y;
@@ -2082,21 +2083,21 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 		deb_assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		QuaternionF lParentQ(lPQ);
+		quat lParentQ(lPQ);
 
-		TransformationF lTransform;
+		xform lTransform;
 		GetBodyTransform(pBodyId, lTransform);
-		QuaternionF lRelativeToParentQ(lParentQ/lTransform.GetOrientation());
+		quat lRelativeToParentQ(lParentQ/lTransform.GetOrientation());
 		dVector3 lRawAnchor;
 		::dJointGetBallAnchor2(lJointInfo->mJointID, lRawAnchor);
-		Vector3DF lAnchor2(lRawAnchor);
-		Vector3DF lPosition = lTransform.GetPosition()-lAnchor2;
+		vec3 lAnchor2(lRawAnchor);
+		vec3 lPosition = lTransform.GetPosition()-lAnchor2;
 		lPosition = lRelativeToParentQ*lPosition;	// Go to parent space.
-		QuaternionF lRelativeFromParentQ;
+		quat lRelativeFromParentQ;
 		lRelativeFromParentQ.SetEulerAngles(pDiff.mValue, pDiff.mAngle1, pDiff.mAngle2);
 		lPosition = lRelativeFromParentQ*lPosition;	// Go from parent to given child space.
 		lTransform.SetOrientation(lRelativeFromParentQ*lParentQ);	// Set complete orientation.
-		Vector3DF lAnchor;
+		vec3 lAnchor;
 		if (!GetAnchorPos(pJointId, lAnchor))
 		{
 			return (false);
@@ -2108,18 +2109,18 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 
 	{
 		// TODO: adjust linear velocity.
-		//SetBodyVelocity(pBodyId, Vector3DF(0, 0, 0));
-		//SetBodyVelocity(pBodyId, Vector3DF(pDiff.mValueVelocity, pDiff.mAngle1Velocity, pDiff.mAngle2Velocity));
-		SetBodyAngularVelocity(pBodyId, Vector3DF(pDiff.mValueVelocity, pDiff.mAngle1Velocity, pDiff.mAngle2Velocity));
-		//SetBodyAngularVelocity(pBodyId, Vector3DF(0, 0, 0));
+		//SetBodyVelocity(pBodyId, vec3(0, 0, 0));
+		//SetBodyVelocity(pBodyId, vec3(pDiff.mValueVelocity, pDiff.mAngle1Velocity, pDiff.mAngle2Velocity));
+		SetBodyAngularVelocity(pBodyId, vec3(pDiff.mValueVelocity, pDiff.mAngle1Velocity, pDiff.mAngle2Velocity));
+		//SetBodyAngularVelocity(pBodyId, vec3(0, 0, 0));
 	}
 
 	{
 		// TODO: adjust linear acceleration.
-		//SetBodyForce(pBodyId, Vector3DF(0, 0, 0));
-		//SetBodyForce(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
-		SetBodyTorque(pBodyId, Vector3DF(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
-		//SetBodyTorque(pBodyId, Vector3DF(0, 0, 0));
+		//SetBodyForce(pBodyId, vec3(0, 0, 0));
+		//SetBodyForce(pBodyId, vec3(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
+		SetBodyTorque(pBodyId, vec3(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
+		//SetBodyTorque(pBodyId, vec3(0, 0, 0));
 	}
 
 	return (true);
@@ -2250,7 +2251,7 @@ bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pO
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAnchorPos(JointID pJointId, Vector3DF& pAnchorPos) const
+bool PhysicsManagerODE::GetAnchorPos(JointID pJointId, vec3& pAnchorPos) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2292,7 +2293,7 @@ bool PhysicsManagerODE::GetAnchorPos(JointID pJointId, Vector3DF& pAnchorPos) co
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAxis1(JointID pJointId, Vector3DF& pAxis1) const
+bool PhysicsManagerODE::GetAxis1(JointID pJointId, vec3& pAxis1) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2336,7 +2337,7 @@ bool PhysicsManagerODE::GetAxis1(JointID pJointId, Vector3DF& pAxis1) const
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAxis2(JointID pJointId, Vector3DF& pAxis2) const
+bool PhysicsManagerODE::GetAxis2(JointID pJointId, vec3& pAxis2) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2540,16 +2541,16 @@ bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAng
 			{
 				return (true);
 			}
-			TransformationF lTransform;
+			xform lTransform;
 			GetBodyTransform(pBodyId, lTransform);
-			Vector3DF lAxis;
+			vec3 lAxis;
 			if (GetAxis1(pJointId, lAxis))
 			{
 				dVector3 lRawAnchor;
 				::dJointGetHingeAnchor((*x)->mJointID, lRawAnchor);
-				Vector3DF lAnchor(lRawAnchor);
+				vec3 lAnchor(lRawAnchor);
 				::dJointGetHingeAnchor2((*x)->mJointID, lRawAnchor);
-				Vector3DF lAnchor2(lRawAnchor);
+				vec3 lAnchor2(lRawAnchor);
 				lTransform.GetPosition() += lAnchor-lAnchor2;
 				lTransform.RotateAroundAnchor(lAnchor, lAxis, -pAngle+lCurrentAngle);
 				SetBodyTransform(pBodyId, lTransform);
@@ -2569,9 +2570,9 @@ bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAng
 			{
 				return (true);
 			}
-			TransformationF lTransform;
+			xform lTransform;
 			GetBodyTransform(pBodyId, lTransform);
-			Vector3DF lAxis1;
+			vec3 lAxis1;
 			if (GetAxis1(pJointId, lAxis1))
 			{
 				lTransform.GetOrientation().RotateAroundVector(lAxis1, -pAngle+lCurrentAngle);
@@ -3136,7 +3137,7 @@ bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque1, float
 	return (true);
 }
 
-void PhysicsManagerODE::AddForce(BodyID pBodyId, const Vector3DF& pForce)
+void PhysicsManagerODE::AddForce(BodyID pBodyId, const vec3& pForce)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -3155,7 +3156,7 @@ void PhysicsManagerODE::AddForce(BodyID pBodyId, const Vector3DF& pForce)
 	}
 }
 
-void PhysicsManagerODE::AddTorque(BodyID pBodyId, const Vector3DF& pTorque)
+void PhysicsManagerODE::AddTorque(BodyID pBodyId, const vec3& pTorque)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -3167,7 +3168,7 @@ void PhysicsManagerODE::AddTorque(BodyID pBodyId, const Vector3DF& pTorque)
 	dBodyAddTorque(((Object*)pBodyId)->mBodyID, pTorque.x, pTorque.y, pTorque.z);
 }
 
-void PhysicsManagerODE::AddRelForce(BodyID pBodyId, const Vector3DF& pForce)
+void PhysicsManagerODE::AddRelForce(BodyID pBodyId, const vec3& pForce)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -3179,7 +3180,7 @@ void PhysicsManagerODE::AddRelForce(BodyID pBodyId, const Vector3DF& pForce)
 	dBodyAddRelForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
 }
 
-void PhysicsManagerODE::AddRelTorque(BodyID pBodyId, const Vector3DF& pTorque)
+void PhysicsManagerODE::AddRelTorque(BodyID pBodyId, const vec3& pTorque)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -3191,8 +3192,8 @@ void PhysicsManagerODE::AddRelTorque(BodyID pBodyId, const Vector3DF& pTorque)
 	dBodyAddRelTorque(((Object*)pBodyId)->mBodyID, pTorque.x, pTorque.y, pTorque.z);
 }
 
-void PhysicsManagerODE::AddForceAtPos(BodyID pBodyId, const Vector3DF& pForce,
-									 const Vector3DF& pPos)
+void PhysicsManagerODE::AddForceAtPos(BodyID pBodyId, const vec3& pForce,
+									 const vec3& pPos)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -3204,8 +3205,8 @@ void PhysicsManagerODE::AddForceAtPos(BodyID pBodyId, const Vector3DF& pForce,
 	dBodyAddForceAtPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
 }
 
-void PhysicsManagerODE::AddForceAtRelPos(BodyID pBodyId, const Vector3DF& pForce,
-										const Vector3DF& pPos)
+void PhysicsManagerODE::AddForceAtRelPos(BodyID pBodyId, const vec3& pForce,
+										const vec3& pPos)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -3217,8 +3218,8 @@ void PhysicsManagerODE::AddForceAtRelPos(BodyID pBodyId, const Vector3DF& pForce
 	dBodyAddForceAtRelPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
 }
 
-void PhysicsManagerODE::AddRelForceAtPos(BodyID pBodyId, const Vector3DF& pForce,
-										const Vector3DF& pPos)
+void PhysicsManagerODE::AddRelForceAtPos(BodyID pBodyId, const vec3& pForce,
+										const vec3& pPos)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -3230,8 +3231,8 @@ void PhysicsManagerODE::AddRelForceAtPos(BodyID pBodyId, const Vector3DF& pForce
 	dBodyAddRelForceAtPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
 }
 
-void PhysicsManagerODE::AddRelForceAtRelPos(BodyID pBodyId, const Vector3DF& pForce,
-										   const Vector3DF& pPos)
+void PhysicsManagerODE::AddRelForceAtRelPos(BodyID pBodyId, const vec3& pForce,
+										   const vec3& pPos)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -3284,16 +3285,16 @@ void PhysicsManagerODE::EnableGravity(BodyID pBodyId, bool pEnable)
 	}
 }
 
-void PhysicsManagerODE::SetGravity(const Vector3DF& pGravity)
+void PhysicsManagerODE::SetGravity(const vec3& pGravity)
 {
 	dWorldSetGravity(mWorldID, pGravity.x, pGravity.y, pGravity.z);
 }
 
-Vector3DF PhysicsManagerODE::GetGravity() const
+vec3 PhysicsManagerODE::GetGravity() const
 {
 	dVector3 lGravity;
 	::dWorldGetGravity(mWorldID, lGravity);
-	return Vector3DF(lGravity);
+	return vec3(lGravity);
 }
 
 void PhysicsManagerODE::EnableTriggerBySelf(TriggerID pTriggerId, bool pEnable)
@@ -3392,8 +3393,8 @@ void PhysicsManagerODE::DoForceFeedback()
 					lJointInfo->mListenerId2,
 					lJointInfo->mBody1Id,
 					lJointInfo->mBody2Id,
-					Vector3DF(lFeedback->f1),
-					Vector3DF(lFeedback->t1),
+					vec3(lFeedback->f1),
+					vec3(lFeedback->t1),
 					lJointInfo->mPosition,
 					lJointInfo->mRelativeVelocity);
 			}
@@ -3407,8 +3408,8 @@ void PhysicsManagerODE::DoForceFeedback()
 						lJointInfo->mListenerId1,
 						lJointInfo->mBody2Id,
 						lJointInfo->mBody1Id,
-						Vector3DF(lFeedback->f1),
-						Vector3DF(lFeedback->t1),
+						vec3(lFeedback->f1),
+						vec3(lFeedback->t1),
 						lJointInfo->mPosition,
 						lJointInfo->mRelativeVelocity);
 				}
@@ -3419,8 +3420,8 @@ void PhysicsManagerODE::DoForceFeedback()
 						lJointInfo->mListenerId1,
 						lJointInfo->mBody2Id,
 						lJointInfo->mBody1Id,
-						Vector3DF(lFeedback->f2),
-						Vector3DF(lFeedback->t2),
+						vec3(lFeedback->f2),
+						vec3(lFeedback->t2),
 						lJointInfo->mPosition,
 						lJointInfo->mRelativeVelocity);
 				}
@@ -3478,13 +3479,13 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 	if (lObject1->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
-		Vector3DF lNormal(lContact[0].geom.normal);
+		vec3 lNormal(lContact[0].geom.normal);
 		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, (BodyID)lObject2, lNormal));
 		return;
 	}
 	if(lObject2->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
-		Vector3DF lNormal(lContact[0].geom.normal);
+		vec3 lNormal(lContact[0].geom.normal);
 		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, (BodyID)lObject1, lNormal));
 		return;
 	}
@@ -3492,15 +3493,15 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	// Bounce/slide when both objects are dynamic, non-trigger objects.
 	{
 		// Fetch force, will be used to scale friction (projected against surface normal).
-		Vector3DF lPosition1 = lThis->GetBodyPosition((BodyID)lObject1);
-		Vector3DF lPosition2 = lThis->GetBodyPosition((BodyID)lObject2);
-		Vector3DF lLinearVelocity1;
+		vec3 lPosition1 = lThis->GetBodyPosition((BodyID)lObject1);
+		vec3 lPosition2 = lThis->GetBodyPosition((BodyID)lObject2);
+		vec3 lLinearVelocity1;
 		lThis->GetBodyVelocity((BodyID)lObject1, lLinearVelocity1);
-		Vector3DF lLinearVelocity2;
+		vec3 lLinearVelocity2;
 		lThis->GetBodyVelocity((BodyID)lObject2, lLinearVelocity2);
-		Vector3DF lAngularVelocity1;
+		vec3 lAngularVelocity1;
 		lThis->GetBodyAngularVelocity((BodyID)lObject1, lAngularVelocity1);
-		Vector3DF lAngularVelocity2;
+		vec3 lAngularVelocity2;
 		lThis->GetBodyAngularVelocity((BodyID)lObject2, lAngularVelocity2);
 
 		dMass lMass;
@@ -3521,28 +3522,28 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		for (int i = 0; i < lTriggerContactPointCount; i++)
 		{
 			dContact& lC = lContact[i];
-			Vector3DF lPosition(lC.geom.pos);
-			Vector3DF lSpin;
+			vec3 lPosition(lC.geom.pos);
+			vec3 lSpin;
 			const float lTotalFriction = ::fabs(lObject1->mFriction*lObject2->mFriction)+0.0001f;
 			// Negative friction factor means simple friction model.
 			if (lObject1->mFriction > 0 || lObject2->mFriction > 0)
 			{
 				lC.surface.mode = dContactSlip1 | dContactSlip2 | dContactApprox1 | dContactFDir1 | dContactBounce;
 
-				const Vector3DF lNormal(lC.geom.normal);
-				const Vector3DF lCollisionPoint(lC.geom.pos);
-				const Vector3DF lDistance1(lCollisionPoint-lPosition1);
-				const Vector3DF lDistance2(lCollisionPoint-lPosition2);
-				const Vector3DF lAngularSurfaceVelocity1 = lAngularVelocity1.Cross(lDistance1);
-				const Vector3DF lAngularSurfaceVelocity2 = lAngularVelocity2.Cross(lDistance2);
-				const Vector3DF lSurfaceVelocity1 = -lLinearVelocity1.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
-				const Vector3DF lSurfaceVelocity2 = -lLinearVelocity2.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
+				const vec3 lNormal(lC.geom.normal);
+				const vec3 lCollisionPoint(lC.geom.pos);
+				const vec3 lDistance1(lCollisionPoint-lPosition1);
+				const vec3 lDistance2(lCollisionPoint-lPosition2);
+				const vec3 lAngularSurfaceVelocity1 = lAngularVelocity1.Cross(lDistance1);
+				const vec3 lAngularSurfaceVelocity2 = lAngularVelocity2.Cross(lDistance2);
+				const vec3 lSurfaceVelocity1 = -lLinearVelocity1.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
+				const vec3 lSurfaceVelocity2 = -lLinearVelocity2.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
 				lSpin = lSurfaceVelocity1-lSurfaceVelocity2;
 				const float lRelativeVelocity = lSpin.GetLength();
-				Vector3DF lSpinDirection(lSpin);
+				vec3 lSpinDirection(lSpin);
 				if (lSpinDirection.GetLengthSquared() <= 1e-4)
 				{
-					Vector3DF lDummy;
+					vec3 lDummy;
 					lNormal.GetOrthogonals(lSpinDirection, lDummy);
 				}
 				else
@@ -3674,14 +3675,14 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 	Object* lObject = (Object*)pObject;
 	if (lObject->mHasMassChildren || lObject->mBodyID->geom->type == dBoxClass)
 	{
-		Vector3DF lVelocity;
+		vec3 lVelocity;
 		GetBodyAngularVelocity(lObject, lVelocity);
 		const float lMaxAngularVelocity = 12.0f;
 		if (lVelocity.GetLength() > lMaxAngularVelocity)
 		{
 			lVelocity.Normalize(lMaxAngularVelocity);
 			SetBodyAngularVelocity(lObject, lVelocity);
-			SetBodyTorque(lObject, Vector3DF());
+			SetBodyTorque(lObject, vec3());
 		}
 	}
 }
@@ -3690,7 +3691,7 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 
 float PhysicsManagerODE::mWorldErp;
 float PhysicsManagerODE::mWorldCfm;
-LOG_CLASS_DEFINE(PHYSICS, PhysicsManagerODE);
+loginstance(PHYSICS, PhysicsManagerODE);
 
 
 

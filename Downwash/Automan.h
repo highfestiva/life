@@ -24,16 +24,16 @@ class Automan: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
-	Automan(Cure::GameManager* pGame, Cure::GameObjectId pCarId, const Vector3DF& pDirection);
+	Automan(Cure::GameManager* pGame, Cure::GameObjectId pCarId, const vec3& pDirection);
 	virtual ~Automan();
 	virtual void OnTick();
 
 private:
 	Cure::GameManager* mGame;
 	Cure::GameObjectId mCarId;
-	Vector3DF mDirection;
+	vec3 mDirection;
 	StopWatch mStillTimer;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Level.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
@@ -45,9 +46,9 @@ Cure::ContextPath* Level::QueryPath()
 
 
 void Level::OnForceApplied(Cure::ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque,
+	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	Parent::OnForceApplied(pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 
@@ -56,7 +57,7 @@ void Level::OnForceApplied(Cure::ContextObject* pOtherObject,
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Level);
+loginstance(GAME_CONTEXT_CPP, Level);
 
 
 

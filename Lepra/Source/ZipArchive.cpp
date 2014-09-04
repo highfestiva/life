@@ -2,6 +2,7 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
+#include "pch.h"
 #include "../Include/DiskFile.h"
 #include "../Include/Log.h"
 #include "../Include/Path.h"
@@ -473,6 +474,6 @@ bool ZipArchive::ExtractFile(const str& pFileName,
 	}
 }
 
-LOG_CLASS_DEFINE(GENERAL_RESOURCES, ZipArchive);
+loginstance(GENERAL_RESOURCES, ZipArchive);
 
 } // End namespace.

@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lepra", "..\Lepra\Lepra.vcproj", "{E7DDA722-45E3-45C9-B051-E99288ACCDD2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBC", "..\TBC\TBC.vcproj", "{BDBF3606-E371-454B-B162-27FD92B67D50}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tbc", "..\Tbc\Tbc.vcproj", "{BDBF3606-E371-454B-B162-27FD92B67D50}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThirdPartyLib", "..\ThirdParty\ThirdPartyLib_800.vcproj", "{00F89E9D-7870-4921-9022-9AD4951BC224}"
 EndProject
@@ -10,7 +10,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UiLepra", "..\UiLepra\UiLep
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cure", "..\Cure\Cure.vcproj", "{6DBF3606-E311-454B-B162-27FD92B67D53}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UiTbc", "..\UiTBC\UiTBC.vcproj", "{BDBF3606-E371-454B-B162-27FD92B67D51}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UiTbc", "..\UiTbc\UiTbc.vcproj", "{BDBF3606-E371-454B-B162-27FD92B67D51}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LifeClient", "LifeClient\LifeClient.vcproj", "{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}"
 	ProjectSection(ProjectDependencies) = postProject

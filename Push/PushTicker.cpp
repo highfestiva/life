@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Lepra/Include/LepraTarget.h"
 #include "PushTicker.h"
 #include "../Lepra/Include/SystemManager.h"
@@ -13,9 +14,9 @@
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiLepra/Include/UiCore.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
 #include "PushServer/PushServerDelegate.h"
 #include "RtVar.h"
 #include "PushDemo.h"
@@ -34,8 +35,8 @@ PushTicker::PushTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager*
 	mDemoTime(0),
 	mSunlight(0)
 {
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
+	v_override(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 }
 
 PushTicker::~PushTicker()
@@ -135,7 +136,7 @@ void PushTicker::DisplaySplashLogo()
 	{
 		if (lLogo->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
 		{
-			//mUiManager->BeginRender(Vector3DF(0, 1, 0));
+			//mUiManager->BeginRender(vec3(0, 1, 0));
 			mUiManager->PreparePaint(true);
 			const Canvas* lCanvas = mUiManager->GetCanvas();
 			const Canvas* lImage = lLogo->GetRamData();
@@ -149,7 +150,7 @@ void PushTicker::DisplaySplashLogo()
 void PushTicker::DisplayCompanyLogo()
 {
 	bool lShowLogo;
-	CURE_RTVAR_GET(lShowLogo, =, UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
+	v_get(lShowLogo, =, UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
 	if (lShowLogo)
 	{
 		Cure::UserRamImageResource* lLogo = new Cure::UserRamImageResource;
@@ -227,18 +228,18 @@ void PushTicker::DisplayCompanyLogo()
 
 }
 
-void PushTicker::BeginRender(Vector3DF& pColor)
+void PushTicker::BeginRender(vec3& pColor)
 {
 	float lRealTimeRatio;
-	CURE_RTVAR_GET(lRealTimeRatio, =(float), UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	v_get(lRealTimeRatio, =(float), UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	float lTimeOfDayFactor;
-	CURE_RTVAR_GET(lTimeOfDayFactor, =(float), UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	v_get(lTimeOfDayFactor, =(float), UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
 	mSunlight->Tick(lRealTimeRatio * lTimeOfDayFactor);
 
 	mSunlight->AddSunColor(pColor, 2);
 	Parent::BeginRender(pColor);
 
-	Vector3DF lColor(1.2f, 1.2f, 1.2f);
+	vec3 lColor(1.2f, 1.2f, 1.2f);
 	mSunlight->AddSunColor(lColor, 1);
 	Color lFillColor;
 	lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
@@ -320,7 +321,7 @@ Life::GameClientSlaveManager* PushTicker::CreateDemo(Life::GameClientMasterTicke
 
 
 
-LOG_CLASS_DEFINE(GAME, PushTicker);
+loginstance(GAME, PushTicker);
 
 
 

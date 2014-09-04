@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiChunkyLoader.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../Include/UiAnimatedGeometry.h"
@@ -18,7 +19,7 @@ namespace UiTbc
 
 
 ChunkyMeshLoader::ChunkyMeshLoader(File* pFile, bool pIsFileOwner):
-	TBC::ChunkyLoader(pFile, pIsFileOwner)
+	Tbc::ChunkyLoader(pFile, pIsFileOwner)
 {
 }
 
@@ -31,7 +32,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	bool lOk = true;
 	if (lOk)
 	{
-		lOk = VerifyFileType(TBC::CHUNK_MESH);
+		lOk = VerifyFileType(Tbc::CHUNK_MESH);
 	}
 
 	uint32* lLoadVertices = 0;
@@ -55,21 +56,21 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	int32 lRecvNoShadows = 0;
 	if (lOk)
 	{
-		TBC::ChunkyLoader::FileElementList lLoadList;
+		Tbc::ChunkyLoader::FileElementList lLoadList;
 		// TRICKY: these have to be in the exact same order as when saved.
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_PRIMITIVE, &lGeometryPrimitive));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_SHADOW_DEVIATION, &lShadowDeviationInt));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TWO_SIDED, &lIsTwoSided));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_RECV_NO_SHADOWS, &lRecvNoShadows));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VERTICES, (void**)&lLoadVertices, &lVerticesSize));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_NORMALS, (void**)&lLoadNormals, &lNormalsSize));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_UV, (void**)lLoadUvs, lUvsSize, -lUvCount));	// Specialcasing for array loading.
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_UVS_PER_VERTEX, &lUvsPerVertex));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR, (void**)&lColors, &lColorsSize));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR_FORMAT, &lColorFormat));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_PRIMITIVE, &lGeometryPrimitive));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_SHADOW_DEVIATION, &lShadowDeviationInt));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_TWO_SIDED, &lIsTwoSided));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_RECV_NO_SHADOWS, &lRecvNoShadows));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_VERTICES, (void**)&lLoadVertices, &lVerticesSize));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_NORMALS, (void**)&lLoadNormals, &lNormalsSize));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_UV, (void**)lLoadUvs, lUvsSize, -lUvCount));	// Specialcasing for array loading.
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_UVS_PER_VERTEX, &lUvsPerVertex));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_COLOR, (void**)&lColors, &lColorsSize));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_COLOR_FORMAT, &lColorFormat));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	if (lOk)
@@ -84,29 +85,29 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	{
 		if (lColors)
 		{
-			lOk = (lColorFormat == TBC::GeometryBase::COLOR_RGB || lColorFormat == TBC::GeometryBase::COLOR_RGBA);
+			lOk = (lColorFormat == Tbc::GeometryBase::COLOR_RGB || lColorFormat == Tbc::GeometryBase::COLOR_RGBA);
 		}
 	}
 	if (lOk)
 	{
-		lOk = (lGeometryPrimitive == TBC::GeometryBase::TRIANGLES ||
-			lGeometryPrimitive == TBC::GeometryBase::QUADS);
+		lOk = (lGeometryPrimitive == Tbc::GeometryBase::TRIANGLES ||
+			lGeometryPrimitive == Tbc::GeometryBase::QUADS);
 	}
 	if (lOk)
 	{
-		lOk = (lGeometryVolatility == TBC::GeometryBase::GEOM_STATIC ||
-			lGeometryVolatility == TBC::GeometryBase::GEOM_SEMI_STATIC ||
-			lGeometryVolatility == TBC::GeometryBase::GEOM_DYNAMIC ||
-			lGeometryVolatility == TBC::GeometryBase::GEOM_VOLATILE);
+		lOk = (lGeometryVolatility == Tbc::GeometryBase::GEOM_STATIC ||
+			lGeometryVolatility == Tbc::GeometryBase::GEOM_SEMI_STATIC ||
+			lGeometryVolatility == Tbc::GeometryBase::GEOM_DYNAMIC ||
+			lGeometryVolatility == Tbc::GeometryBase::GEOM_VOLATILE);
 	}
 	deb_assert(lOk);
 	if (lOk)
 	{
-		if (lGeometryPrimitive == TBC::GeometryBase::TRIANGLES)
+		if (lGeometryPrimitive == Tbc::GeometryBase::TRIANGLES)
 		{
 			lOk = (lTriangleIndicesSize%(sizeof(uint32)*3) == 0);
 		}
-		else if (lGeometryPrimitive == TBC::GeometryBase::QUADS)
+		else if (lGeometryPrimitive == Tbc::GeometryBase::QUADS)
 		{
 			lOk = (lTriangleIndicesSize%(sizeof(uint32)*4) == 0);
 		}
@@ -171,12 +172,12 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows
 	}
 	if (lOk)
 	{
-		const TBC::GeometryBase::PrimitiveType lType = (TBC::GeometryBase::PrimitiveType)lGeometryPrimitive;
+		const Tbc::GeometryBase::PrimitiveType lType = (Tbc::GeometryBase::PrimitiveType)lGeometryPrimitive;
 		pMeshData->SetUVCountPerVertex(lUvsPerVertex);
 		pMeshData->Set(lVertices, lNormals, lUvs[0], lColors,
-			(TBC::GeometryBase::ColorFormat)lColorFormat, lIndices,
+			(Tbc::GeometryBase::ColorFormat)lColorFormat, lIndices,
 			lVertexCount, lIndexCount, lType,
-			(TBC::GeometryBase::GeometryVolatility)lGeometryVolatility);
+			(Tbc::GeometryBase::GeometryVolatility)lGeometryVolatility);
 
 		for (int x = 1; lUvs[x] && x < lUvCount; ++x)
 		{
@@ -211,7 +212,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	bool lOk = true;
 	if (lOk)
 	{
-		lOk = WriteFileType(TBC::CHUNK_MESH);
+		lOk = WriteFileType(Tbc::CHUNK_MESH);
 	}
 	int64 lFileDataStart = mFile->Tell();
 
@@ -237,7 +238,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	unsigned lColorsSize = 0;
 	if (lColors)
 	{
-		if (pMeshData->GetColorFormat() == TBC::GeometryBase::COLOR_RGB)
+		if (pMeshData->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
 		{
 			lColorsSize = (pMeshData->GetVertexCount()*3+3)&(~3);
 		}
@@ -255,30 +256,30 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 	int32 lRecvNoShadows = pMeshData->IsRecvNoShadows()? 1 : 0;
 	if (lOk)
 	{
-		TBC::ChunkyLoader::FileElementList lSaveList;
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_PRIMITIVE, &lGeometryPrimitive));
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_SHADOW_DEVIATION, &lShadowDeviation));
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TWO_SIDED, &lIsTwoSided));
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_RECV_NO_SHADOWS, &lRecvNoShadows));
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VERTICES, (void**)&lVertices, &lVerticesSize));
+		Tbc::ChunkyLoader::FileElementList lSaveList;
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_PRIMITIVE, &lGeometryPrimitive));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_SHADOW_DEVIATION, &lShadowDeviation));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_TWO_SIDED, &lIsTwoSided));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_RECV_NO_SHADOWS, &lRecvNoShadows));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_VERTICES, (void**)&lVertices, &lVerticesSize));
 		if (lTriangleIndices)
 		{
-			lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
+			lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_TRIANGLES, (void**)&lTriangleIndices, &lTriangleIndicesSize));
 		}
 		if (lNormals)
 		{
-			lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_NORMALS, (void**)&lNormals, &lNormalsSize));
+			lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_NORMALS, (void**)&lNormals, &lNormalsSize));
 		}
 		if (lUvCount)
 		{
-			lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_UV, (void**)lUvs, lUvsSize, lUvCount));
+			lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_UV, (void**)lUvs, lUvsSize, lUvCount));
 		}
 		if (lColors)
 		{
-			lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR, (void**)&lColors, &lColorsSize));
-			lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR_FORMAT, &lColorFormat));
+			lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_COLOR, (void**)&lColors, &lColorsSize));
+			lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_MESH_COLOR_FORMAT, &lColorFormat));
 		}
 		lOk = SaveChunkyList(lSaveList);
 	}
@@ -305,7 +306,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, int pCastsSh
 
 
 ChunkySkinLoader::ChunkySkinLoader(File* pFile, bool pIsFileOwner):
-	TBC::ChunkyLoader(pFile, pIsFileOwner)
+	Tbc::ChunkyLoader(pFile, pIsFileOwner)
 {
 }
 
@@ -318,12 +319,12 @@ bool ChunkySkinLoader::Load(AnimatedGeometry* pSkinData)
 	bool lOk = true;
 	if (lOk)
 	{
-		lOk = VerifyFileType(TBC::CHUNK_SKIN);
+		lOk = VerifyFileType(Tbc::CHUNK_SKIN);
 	}
 	if (lOk)
 	{
-		TBC::ChunkyLoader::FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BONE_WEIGHT_GROUP, (void*)pSkinData, -1000000));
+		Tbc::ChunkyLoader::FileElementList lLoadList;
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_SKIN_BONE_WEIGHT_GROUP, (void*)pSkinData, -1000000));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	return (lOk);
@@ -335,7 +336,7 @@ bool ChunkySkinLoader::Save(const AnimatedGeometry* pSkinData)
 	bool lOk = true;
 	if (lOk)
 	{
-		lOk = WriteFileType(TBC::CHUNK_SKIN);
+		lOk = WriteFileType(Tbc::CHUNK_SKIN);
 	}
 	int64 lFileDataStart = mFile->Tell();
 	if (lOk)
@@ -354,10 +355,10 @@ bool ChunkySkinLoader::Save(const AnimatedGeometry* pSkinData)
 
 
 
-bool ChunkySkinLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
+bool ChunkySkinLoader::LoadElementCallback(Tbc::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
 {
 	bool lOk = false;
-	if (pType == TBC::CHUNK_SKIN_BONE_WEIGHT_GROUP)
+	if (pType == Tbc::CHUNK_SKIN_BONE_WEIGHT_GROUP)
 	{
 		// Setup pointers and counters for list loading.
 		AnimatedGeometry::BoneWeightGroup lWeights;
@@ -367,10 +368,10 @@ bool ChunkySkinLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, 
 		lWeights.mVectorIndexArray = 0;
 		unsigned lWeightCount = 0;
 		lWeights.mVectorWeightArray = 0;
-		TBC::ChunkyLoader::FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_BONES, (void**)&lBoneIndices, (unsigned*)&lWeights.mBoneCount));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_VERTICES, (void**)&lWeights.mVectorIndexArray, (unsigned*)&lWeights.mVectorIndexCount));
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_WEIGHTS, (void**)&lWeights.mVectorWeightArray, &lWeightCount));
+		Tbc::ChunkyLoader::FileElementList lLoadList;
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_SKIN_BWG_BONES, (void**)&lBoneIndices, (unsigned*)&lWeights.mBoneCount));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_SKIN_BWG_VERTICES, (void**)&lWeights.mVectorIndexArray, (unsigned*)&lWeights.mVectorIndexCount));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_SKIN_BWG_WEIGHTS, (void**)&lWeights.mVectorWeightArray, &lWeightCount));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 
 		if (lOk)
@@ -421,7 +422,7 @@ bool ChunkySkinLoader::SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinDat
 	if (lOk)
 	{
 		int64 lChunkEndPosition = 0;
-		lOk = SaveHead(TBC::CHUNK_SKIN_BONE_WEIGHT_GROUP, 0, lChunkEndPosition);
+		lOk = SaveHead(Tbc::CHUNK_SKIN_BONE_WEIGHT_GROUP, 0, lChunkEndPosition);
 	}
 	for (int x = 0; lOk && x < pSkinData->GetBoneWeightGroupCount(); ++x)
 	{
@@ -429,11 +430,11 @@ bool ChunkySkinLoader::SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinDat
 		uint32 bs = lBoneWeightData->mBoneCount*sizeof(uint32);
 		uint32 vs = lBoneWeightData->mVectorIndexCount*sizeof(uint32);
 		uint32 ws = lBoneWeightData->mBoneCount*lBoneWeightData->mVectorIndexCount*sizeof(uint32);
-		TBC::ChunkyLoader::FileElementList lSaveList;
+		Tbc::ChunkyLoader::FileElementList lSaveList;
 		const int* lBoneIndexArray = lBoneWeightData->mBoneIndexArray;	// TRICKY: intermediate pointer workaround for MSVC8 compiler bug.
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_BONES, (void**)&lBoneIndexArray, &bs));
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_VERTICES, (void**)&lBoneWeightData->mVectorIndexArray, &vs));
-		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_WEIGHTS, (void**)&lBoneWeightData->mVectorWeightArray, &ws));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_SKIN_BWG_BONES, (void**)&lBoneIndexArray, &bs));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_SKIN_BWG_VERTICES, (void**)&lBoneWeightData->mVectorIndexArray, &vs));
+		lSaveList.push_back(ChunkyFileElement(Tbc::CHUNK_SKIN_BWG_WEIGHTS, (void**)&lBoneWeightData->mVectorWeightArray, &ws));
 		lOk = SaveChunkyList(lSaveList);
 	}
 	// Re-write chunk size.
@@ -465,24 +466,24 @@ ChunkyClassLoader::~ChunkyClassLoader()
 {
 }
 
-void ChunkyClassLoader::AddLoadElements(Parent::FileElementList& pElementList, TBC::ChunkyClass* pData)
+void ChunkyClassLoader::AddLoadElements(Parent::FileElementList& pElementList, Tbc::ChunkyClass* pData)
 {
 	Parent::AddLoadElements(pElementList, pData);
-	pElementList.insert(--pElementList.end(), ChunkyFileElement(TBC::CHUNK_CLASS_MESH_LIST, (void*)pData, -1000));
+	pElementList.insert(--pElementList.end(), ChunkyFileElement(Tbc::CHUNK_CLASS_MESH_LIST, (void*)pData, -1000));
 }
 
-bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
+bool ChunkyClassLoader::LoadElementCallback(Tbc::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
 {
 	ChunkyClass* lClass = (ChunkyClass*)pStorage;
 	bool lOk = false;
-	if (pType == TBC::CHUNK_CLASS_MESH_LIST)
+	if (pType == Tbc::CHUNK_CLASS_MESH_LIST)
 	{
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 		deb_assert(lOk);
 	}
-	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
+	else if (pType == Tbc::CHUNK_CLASS_PHYS_MESH)
 	{
 		uint8* lBuffer = 0;
 		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
@@ -514,7 +515,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			lIndex += (lTransformFloatCount + 1) * sizeof(float);
 			lOk = (lIndex < (int)(pSize - 12*sizeof(float) - 4));
 			deb_assert(lOk);
-			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, TransformationF(lTransformArray), lScale);
+			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, xform(lTransformArray), lScale);
 			lClass->AddPhysRoot(lPhysicsIndex);
 		}
 		UiTbc::ChunkyClass::Material lMaterial;

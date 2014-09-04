@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "Explosion.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/CppContextObject.h"
 #include "../Cure/Include/GameManager.h"
-#include "../TBC/Include/ChunkyBoneGeometry.h"
-#include "../TBC/Include/ChunkyPhysics.h"
+#include "../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../Tbc/Include/ChunkyPhysics.h"
 
 
 
@@ -18,28 +19,28 @@ namespace Life
 
 
 
-float Explosion::CalculateForce(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength)
+float Explosion::CalculateForce(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength)
 {
 	return Force(pPhysicsManager, pObject, pPosition, pStrength, 0);
 }
 
-float Explosion::PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, float pTimeFactor)
+float Explosion::PushObject(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength, float pTimeFactor)
 {
 	return Force(pPhysicsManager, pObject, pPosition, pStrength, pTimeFactor);
 }
 
-void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject)
+void Explosion::FallApart(Tbc::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject)
 {
-	TBC::ChunkyPhysics* lPhysics = pObject->GetPhysics();
+	Tbc::ChunkyPhysics* lPhysics = pObject->GetPhysics();
 	const int lBoneCount = lPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
-		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
-		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY)
+		Tbc::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
+		if (lGeometry->GetBoneType() != Tbc::ChunkyBoneGeometry::BONE_BODY)
 		{
 			continue;
 		}
-		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+		if (lGeometry->GetJointType() == Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE)
 		{
 			if (pObject->GetClass()->IsPhysRoot(x))
 			{
@@ -50,7 +51,7 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContext
 				pPhysicsManager->AddMass(lGeometry->GetBodyId(), lGeometry->GetParent()->GetBodyId());
 			}
 		}
-		else if (lGeometry->GetJointId() != TBC::INVALID_JOINT)
+		else if (lGeometry->GetJointId() != Tbc::INVALID_JOINT)
 		{
 			pPhysicsManager->DeleteJoint(lGeometry->GetJointId());
 			lGeometry->ResetJointId();
@@ -65,15 +66,15 @@ void Explosion::FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContext
 	pObject->QuerySetChildishness(0);
 }
 
-void Explosion::Freeze(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject)
+void Explosion::Freeze(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject)
 {
 	// Make physics static.
-	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
+	Tbc::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
 	const int lBoneCount = lPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
-		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
-		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY)
+		Tbc::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
+		if (lGeometry->GetBoneType() != Tbc::ChunkyBoneGeometry::BONE_BODY)
 		{
 			continue;
 		}
@@ -84,9 +85,9 @@ void Explosion::Freeze(TBC::PhysicsManager* pPhysicsManager, const Cure::Context
 
 
 
-float Explosion::Force(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, float pTimeFactor)
+float Explosion::Force(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength, float pTimeFactor)
 {
-	TBC::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
+	Tbc::ChunkyPhysics* lPhysics = pObject->ContextObject::GetPhysics();
 	if (!lPhysics)
 	{
 		return 0;
@@ -94,22 +95,22 @@ float Explosion::Force(TBC::PhysicsManager* pPhysicsManager, const Cure::Context
 	const float lExplosiveDig = 0.75f;	// How much below the collision point the explosion "digs" things up. Adds angular velocity to objects.
 	const float lForceFactor = pTimeFactor? 4.8f/pTimeFactor : 0.0f;
 	// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
-	const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -lExplosiveDig);
-	const bool lIsDynamic = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const vec3 lEpicenter = pPosition + vec3(0, 0, -lExplosiveDig);
+	const bool lIsDynamic = (lPhysics->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
 	const int lBoneStart = lIsDynamic? 0 : 1;
 	const int lBoneCount = lPhysics->GetBoneCount();
 	float lForce = 0;
 	int y;
 	for (y = lBoneStart; y < lBoneCount; ++y)
 	{
-		const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(y);
-		if (lGeometry->GetBoneType() != TBC::ChunkyBoneGeometry::BONE_BODY
+		const Tbc::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(y);
+		if (lGeometry->GetBoneType() != Tbc::ChunkyBoneGeometry::BONE_BODY
 			|| pPhysicsManager->IsStaticBody(lGeometry->GetBodyId()))
 		{
 			continue;
 		}
-		Vector3DF lBodyCenter = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
-		Vector3DF f = lBodyCenter - lEpicenter;
+		vec3 lBodyCenter = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+		vec3 f = lBodyCenter - lEpicenter;
 		f.z += lExplosiveDig*2;	// Multiply by two, to end up above center, so we'll cause angular rotation.
 		float d = f.GetLength();
 		if (d > 80*pStrength)
@@ -138,7 +139,7 @@ float Explosion::Force(TBC::PhysicsManager* pPhysicsManager, const Cure::Context
 
 
 
-LOG_CLASS_DEFINE(GAME, Explosion);
+loginstance(GAME, Explosion);
 
 
 

@@ -11,6 +11,7 @@
 #include "../../Cure/Include/PositionalData.h"
 #include "../../Cure/Include/UserAccount.h"
 #include "../../Lepra/Include/Alarm.h"
+#include "../../Lepra/Include/Graphics2D.h"
 #include "ClientOptionsManager.h"
 #include "InputObserver.h"
 #include "ScreenPart.h"
@@ -112,7 +113,7 @@ protected:
 	virtual void ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage);
 	virtual void ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
 	Cure::ContextObject* CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType,
-		TransformationF* pTransform = 0);
+		xform* pTransform = 0);
 	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData, float pDeltaThreshold);
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
 	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
@@ -164,7 +165,7 @@ protected:
 	str mConnectServerAddress;
 	str mDisconnectReason;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

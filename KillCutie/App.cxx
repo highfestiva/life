@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include <list>
 #include "../Cure/Include/HiscoreAgent.h"
 #include "../Cure/Include/RuntimeVariable.h"
@@ -17,7 +18,7 @@
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
-#include "../TBC/Include/PhysicsEngine.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCppContextObject.h"
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
@@ -33,13 +34,13 @@
 #include "../UiLepra/Include/UiOpenGLExtensions.h"	// Included to get the gl-headers.
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiSoundStream.h"
-#include "../UiTBC/Include/GUI/UiCustomButton.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiMessageDialog.h"
-#include "../UiTBC/Include/GUI/UiScrollBar.h"
-#include "../UiTBC/Include/GUI/UiTextField.h"
-#include "../UiTBC/Include/UiFontManager.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/GUI/UiCustomButton.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiMessageDialog.h"
+#include "../UiTbc/Include/GUI/UiScrollBar.h"
+#include "../UiTbc/Include/GUI/UiTextField.h"
+#include "../UiTbc/Include/UiFontManager.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
 #include "Cutie.h"
 #include "Game.h"
 #include "Launcher.h"
@@ -199,7 +200,7 @@ public:
 	struct InfoTextData
 	{
 		str mText;
-		Vector2DF mCoord;
+		vec2 mCoord;
 		float mAngle;
 	};
 
@@ -234,7 +235,7 @@ public:
 	UiCure::UserPainterKeepImageResource* mScoreHud;
 	UiCure::UserPainterKeepImageResource* mBack;
 	float mGrenadeSizeFactor;
-	mutable Vector3DF mHeartPos[HEART_POINTS];
+	mutable vec3 mHeartPos[HEART_POINTS];
 	UiTbc::RectComponent* mPlayerSplitter;
 	float mAngleTime;
 	Color mInfoTextColor;
@@ -277,7 +278,7 @@ public:
 	int mMyHiscoreIndex;
 	unsigned mFrameCounter;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 class HiscoreTextField: public UiTbc::TextField
@@ -415,49 +416,49 @@ bool App::Open()
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
 
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	v_set(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, false);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, false);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.5);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.7);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
+	v_set(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, false);
+	v_set(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
+	v_set(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	v_set(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
+	v_set(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, false);
+	v_set(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
+	v_set(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
+	v_set(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
+	v_set(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
+	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
+	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
+	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.5);
+	v_set(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.7);
+	v_set(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
 
 #ifndef LEPRA_TOUCH_LOOKANDFEEL
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.5);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
+	v_set(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
+	v_set(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.5);
+	v_set(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
+	v_set(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	v_set(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
 #endif // !Touch
 
-	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, false);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, false);
+	v_set(mVariableScope, RTVAR_CONTENT_LEVELS, false);
+	v_set(mVariableScope, RTVAR_CONTENT_VEHICLES, false);
 #ifdef LEPRA_IOS
 	[AnimatedApp updateContent];
 #endif // iOS
 
 #if defined(KC_FULL_VERSION) || defined(KC_DEV_TESTING)
-	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_LEVELS, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
+	v_set(mVariableScope, RTVAR_CONTENT_LEVELS, true);
+	v_set(mVariableScope, RTVAR_CONTENT_VEHICLES, true);
 #endif // Kill Cutie full version compile
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope, 0);
@@ -669,9 +670,9 @@ int App::Run()
 	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("KillCutie")), _T("log"), _T("txt"));
 	FileLogListener lFileLogger(lLogName);
 	{
-		LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&mConsoleLogger, &mDebugLogger, &lFileLogger, 0, 0);
-		const std::vector<Log*> lLogArray = LogType::GetLogs();
-		std::vector<Log*>::const_iterator x = lLogArray.begin();
+		LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(&mConsoleLogger, &mDebugLogger, &lFileLogger, 0, 0);
+		const std::vector<Logger*> lLogArray = LogType::GetLoggers();
+		std::vector<Logger*>::const_iterator x = lLogArray.begin();
 		for (; x != lLogArray.end(); ++x)
 		{
 			(*x)->SetLevelThreashold(LEVEL_INFO);
@@ -682,11 +683,11 @@ int App::Run()
 	if (lOk)
 	{
 		mVariableScope = UiCure::GetSettings();
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms, so we can render stuff from physics data.
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 2);
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_ISFIXEDFPS, true);
-		//CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
+		v_set(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms, so we can render stuff from physics data.
+		v_set(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 2);
+		v_set(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
+		v_set(mVariableScope, RTVAR_PHYSICS_ISFIXEDFPS, true);
+		//v_set(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
 	}
 	if (lOk)
 	{
@@ -756,7 +757,7 @@ void App::DisplayLogo()
 	{
 		if (lLogo->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
 		{
-			//mUiManager->BeginRender(Vector3DF(0, 1, 0));
+			//mUiManager->BeginRender(vec3(0, 1, 0));
 			mUiManager->PreparePaint(true);
 			const Canvas* lCanvas = mUiManager->GetCanvas();
 			const Canvas* lImage = lLogo->GetRamData();
@@ -806,7 +807,7 @@ bool App::Poll()
 			if (++mSlowShadowCount > 20)
 			{
 				// Shadows is not such a good idea on this system.
-				CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
+				v_set(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
 				mSlowShadowCount = 0;
 			}
 		}
@@ -820,11 +821,11 @@ bool App::Poll()
 			{
 				lFrameRate = 10;
 			}
-			CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, lFrameRate);
+			v_set(mVariableScope, RTVAR_PHYSICS_FPS, lFrameRate);
 		}
 		else
 		{
-			CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
+			v_set(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
 			mAverageFastLoopTime = lInstantLoopTime;	// Immediately drop back sliding average to current value when FPS is normal again.
 		}
 
@@ -951,20 +952,20 @@ bool App::Poll()
 		// Set orientation restriction.
 		if (mGame->GetComputerIndex() == -1)
 		{
-			CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
+			v_set(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
 		}
 		else
 		{
-			CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+			v_set(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
 		}
 	}
 	if (lOk)
 	{
 		float r, g, b;
-		CURE_RTVAR_GET(r, =(float), mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
-		CURE_RTVAR_GET(g, =(float), mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
-		CURE_RTVAR_GET(b, =(float), mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
-		Vector3DF lColor(r, g, b);
+		v_get(r, =(float), mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
+		v_get(g, =(float), mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
+		v_get(b, =(float), mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
+		vec3 lColor(r, g, b);
 		mUiManager->BeginRender(lColor);
 	}
 	if (lOk)
@@ -1090,7 +1091,7 @@ bool App::Poll()
 	}
 	mResourceManager->Tick();
 	float lRealTimeRatio;
-	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	mUiManager->EndRender(lRealTimeRatio/FPS);
 
 	if (mMusicPlayer)
@@ -1315,7 +1316,7 @@ void App::DrawMatchStatus()
 	else
 	{
 		float lRealTimeRatio;
-		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		if (lRealTimeRatio < 0.95f)
 		{
 			const int lFrameMod = mGame->Cure::GameTicker::GetTimeManager()->GetCurrentPhysicsFrame() % 20;
@@ -1401,7 +1402,7 @@ void App::DrawVehicleSteering()
 			float px;
 			float py;
 			const float s = GetSteeringWheelGuiInfo(w, h, px, py);
-			const TBC::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
+			const Tbc::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
 			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f, false) * -1.5f - PIF/2;
 			const float ax = -::sin(a) * s * 0.45f;
 			const float ay = -::cos(a) * s * 0.45f;
@@ -1428,7 +1429,7 @@ void App::DrawVehicleSteering()
 			float px;
 			float py;
 			const float s = GetSteeringWheelGuiInfo(w, h, px, py);
-			const TBC::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
+			const Tbc::PhysicsEngine* lSteering = lAvatar1->GetPhysics()->GetEngine(1);
 			const float a = lSteering->GetLerpThrottle(0.2f, 0.2f, false) * -1.5f;
 			const float ax = -::sin(a) * s * 0.45f;
 			const float ay = -::cos(a) * s * 0.45f;
@@ -1684,7 +1685,7 @@ void App::DrawHearts()
 		{
 			if (mGame->GetComputerIndex() != 0)
 			{
-				Vector3DF v(x+iw/2, y+iw/2, lAngle);
+				vec3 v(x+iw/2, y+iw/2, lAngle);
 				if (i < lBalance)
 				{
 					const float lHeartBeatFactor = (lHeartBeatLoopTime < 2*PIF) ? 1 : 1+0.15f*sin(lHeartBeatLoopTime);
@@ -1734,7 +1735,7 @@ void App::DrawHearts()
 		{
 			if (mGame->GetComputerIndex() != 1)
 			{
-				Vector3DF v(x+iw/2, y+iw/2, lAngle);
+				vec3 v(x+iw/2, y+iw/2, lAngle);
 				if (i >= lBalance)
 				{
 					const float lHeartBeatFactor = (lHeartBeatLoopTime < 2*PIF) ? 1 : 1+0.15f*sin(lHeartBeatLoopTime);
@@ -1876,9 +1877,9 @@ void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float 
 	const float h2 = h*0.5f;
 	const float x = cx - w2*ca - h2*sa;
 	const float y = cy - h2*ca + w2*sa;
-	const Vector2DF c[] = { Vector2DF(x, y), Vector2DF(x+w*ca, y-w*sa), Vector2DF(x+w*ca+h*sa, y+h*ca-w*sa), Vector2DF(x+h*sa, y+h*ca) };
-	const Vector2DF t[] = { Vector2DF(0, 0), Vector2DF(1, 0), Vector2DF(1, 1), Vector2DF(0, 1) };
-#define V(z) std::vector<Vector2DF>(z, z+LEPRA_ARRAY_COUNT(z))
+	const vec2 c[] = { vec2(x, y), vec2(x+w*ca, y-w*sa), vec2(x+w*ca+h*sa, y+h*ca-w*sa), vec2(x+h*sa, y+h*ca) };
+	const vec2 t[] = { vec2(0, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1) };
+#define V(z) std::vector<vec2>(z, z+LEPRA_ARRAY_COUNT(z))
 	mUiManager->GetPainter()->DrawImageFan(pImageId, V(c), V(t));
 }
 
@@ -1898,7 +1899,7 @@ void App::DrawRoundedPolygon(float x, float y, float pRadius, const Color& pColo
 	const int dy = (int)(pRadius * pScaleY);
 	mUiManager->GetPainter()->SetColor(pColor, 0);
 	mUiManager->GetPainter()->SetAlphaValue(pColor.mAlpha);
-	mUiManager->GetPainter()->DrawRoundedRect(PixelRect(x-dx, y-dy, x+dx, y+dx), pCornerRadius, 0xF, true);
+	mUiManager->GetPainter()->DrawRoundedRect(PixelRect((int)x-dx, (int)y-dy, (int)x+dx, (int)y+dx), pCornerRadius, 0xF, true);
 	mUiManager->GetPainter()->SetAlphaValue(255);
 }
 
@@ -1953,8 +1954,8 @@ void App::DrawTapIndicator(int pTag, int dx, int dy, float pAngle) const
 		//dy = -dy;
 		pAngle += PIF;
 	}
-	Vector2DF lPoint((float)dx, (float)dy);
-	lPoint.RotateAround(Vector2DF(), pAngle);
+	vec2 lPoint((float)dx, (float)dy);
+	lPoint.RotateAround(vec2(), pAngle);
 	int x = (int)(mPenX + lPoint.x);
 	int y = (int)(mPenY + lPoint.y);
 	int x2 = x + (int)(20*::cos(pAngle));
@@ -2041,7 +2042,7 @@ void App::InfoText(int pPlayer, const str& pInfo, float pAngle, float dx, float 
 	}
 	InfoTextData lData;
 	lData.mText = pInfo;
-	lData.mCoord = Vector2DF(mPenX+dx, mPenY+dy);
+	lData.mCoord = vec2(mPenX+dx, mPenY+dy);
 	lData.mAngle = pAngle;
 	mInfoTextArray.push_back(lData);
 }
@@ -2723,7 +2724,7 @@ void App::UpdateHiscore(bool pError)
 		return;
 	}
 	str lLastHiscoreName;
-	CURE_RTVAR_GET(lLastHiscoreName, =, mVariableScope, RTVAR_HISCORE_NAME, _T(""));
+	v_get(lLastHiscoreName, =, mVariableScope, RTVAR_HISCORE_NAME, _T(""));
 	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
 	typedef Cure::HiscoreAgent::List HiscoreList;
 	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
@@ -2833,7 +2834,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	}
 	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
 	mHiscoreTextField->mApp = this;
-	mHiscoreTextField->SetText(CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_HISCORE_NAME, _T("")));
+	mHiscoreTextField->SetText(v_slowget(mVariableScope, RTVAR_HISCORE_NAME, _T("")));
 	mHiscoreTextField->SetPreferredSize(205, 25, false);
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 	d->AddChild(mHiscoreTextField, 70, 97);
@@ -3064,7 +3065,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 	d->AddButton(2, ICONBTN(_T("btn_lvl2.png"), gLevels[0]), true);
 	d->AddButton(3, ICONBTN(_T("btn_lvl3.png"), gLevels[1]), true);
 	d->AddButton(4, ICONBTN(_T("btn_lvl4.png"), gLevels[2]), true);
-	if (mIsMoneyIconAdded && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false))
+	if (mIsMoneyIconAdded && !v_slowget(mVariableScope, RTVAR_CONTENT_LEVELS, false))
 	{
 		AddCostIcon(gLevels[1]);
 		AddCostIcon(gLevels[2]);
@@ -3079,7 +3080,7 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 		mHiscoreTextField = 0;
 		if (!lLastHiscoreName.empty())
 		{
-			CURE_RTVAR_SET(mVariableScope, RTVAR_HISCORE_NAME, lLastHiscoreName);
+			v_set(mVariableScope, RTVAR_HISCORE_NAME, lLastHiscoreName);
 #ifdef LEPRA_IOS
 			[AnimatedApp storeHiscoreName];
 #endif // iOS
@@ -3105,7 +3106,7 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 	
 void App::OnLevelAction(UiTbc::Button* pButton)
 {
-	if (pButton->GetTag() >= 3 && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_LEVELS, false))
+	if (pButton->GetTag() >= 3 && !v_slowget(mVariableScope, RTVAR_CONTENT_LEVELS, false))
 	{
 		Purchase(_T(CONTENT_LEVELS));
 		return;
@@ -3156,7 +3157,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	d->AddButton(2, ICONBTN(_T("btn_hardie.png"), gVehicles[1]), true);
 	d->AddButton(3, ICONBTN(_T("btn_speedie.png"), gVehicles[2]), true);
 	d->AddButton(4, ICONBTN(_T("btn_sleepie.png"), gVehicles[3]), true);
-	if (mIsMoneyIconAdded && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
+	if (mIsMoneyIconAdded && !v_slowget(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
 	{
 		AddCostIcon(gVehicles[1]);
 		AddCostIcon(gVehicles[2]);
@@ -3211,7 +3212,7 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 	mDifficultyLabel = 0;
 	mDifficultySlider = 0;
 
-	if (pButton->GetTag() >= 2 && !CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
+	if (pButton->GetTag() >= 2 && !v_slowget(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
 	{
 		Purchase(_T(CONTENT_VEHICLES));
 		return;
@@ -3478,7 +3479,7 @@ str App::Int2Str(int pNumber)
 
 
 App* App::mApp = 0;
-LOG_CLASS_DEFINE(GAME, App);
+loginstance(GAME, App);
 
 
 

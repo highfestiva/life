@@ -20,7 +20,7 @@ class SoundReleaser: public CppContextObject
 	typedef CppContextObject Parent;
 public:
 	SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
-		const str& pSoundName, UiCure::UserSound3dResource* pSound, const Vector3DF& pPosition, const Vector3DF& pVelocity,
+		const str& pSoundName, UiCure::UserSound3dResource* pSound, const vec3& pPosition, const vec3& pVelocity,
 		float pVolume, float pPitch);
 	SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
 		const str& pSoundName, UiCure::UserSound2dResource* pSound, float pVolume, float pPitch);
@@ -33,8 +33,8 @@ private:
 
 	UiCure::UserSound3dResource* mSound3d;
 	UiCure::UserSound2dResource* mSound2d;
-	Vector3DF mPosition;
-	Vector3DF mVelocity;
+	vec3 mPosition;
+	vec3 mVelocity;
 	float mVolume;
 	float mPitch;
 };

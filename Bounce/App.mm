@@ -4,7 +4,7 @@
 
 
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../Lepra/Include/LepraOS.h"
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
 #import <iAd/ADBannerView.h>
@@ -57,7 +57,7 @@ using namespace Lepra;
 +(void) storeHiscoreName
 {
 	str lLastHiscoreName;
-	CURE_RTVAR_GET(lLastHiscoreName, =, Bounce::App::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, _T(""));
+	v_get(lLastHiscoreName, =, Bounce::App::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, _T(""));
 	NSString* name = [MacLog::Encode(lLastHiscoreName) retain];
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	[defaults setObject:name forKey:HISCORE_NAME_KEY];
@@ -129,7 +129,7 @@ using namespace Lepra;
 
 -(void) accelerometer:(UIAccelerometer*)accelerometer didAccelerate:(UIAcceleration*)acceleration
 {
-	Vector3DF lAcceleration(acceleration.x, acceleration.y, acceleration.z);
+	vec3 lAcceleration(acceleration.x, acceleration.y, acceleration.z);
 	const float lLength = std::max(0.1f, lAcceleration.GetLength());
 	_identityFactor = Math::Lerp(_identityFactor, 1/lLength, 0.005f);
 	lAcceleration *= _identityFactor;

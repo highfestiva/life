@@ -20,7 +20,7 @@
 #define QUAL ImageAnimator<TImageIdentifier>
 
 
-namespace TBC
+namespace Tbc
 {
 
 TEMPLATE class ImageAnimator

@@ -31,19 +31,19 @@ public:
 	OpenGLMaterial(OpenGLRenderer* pRenderer, Material::DepthSortHint pSortHint, Material* pFallBackMaterial);
 	virtual ~OpenGLMaterial();
 
-	virtual Material::RemoveStatus RemoveGeometry(TBC::GeometryBase* pGeometry);
+	virtual Material::RemoveStatus RemoveGeometry(Tbc::GeometryBase* pGeometry);
 
-	static GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
+	static GLenum GetGLElementType(Tbc::GeometryBase* pGeometry);
 
 	void EnableDisableTexturing();
-	void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
-	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, Renderer* pRenderer);
-	void ResetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
+	void SetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings& pMaterial);
+	static void SetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings& pMaterial, Renderer* pRenderer);
+	void ResetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings& pMaterial);
 
 	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
 protected:
-	void UpdateTextureMatrix(TBC::GeometryBase* pGeometry);
+	void UpdateTextureMatrix(Tbc::GeometryBase* pGeometry);
 };
 
 
@@ -69,9 +69,9 @@ public:
 	virtual void PostRender();
 
 protected:
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
-	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
+	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
+	virtual void RenderBaseGeometry(Tbc::GeometryBase* pGeometry);
 };
 
 
@@ -118,15 +118,15 @@ public:
 
 	inline virtual ~OpenGLMatVertexColorSolid(){}
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
+	virtual bool AddGeometry(Tbc::GeometryBase* pGeometry);
 
 protected:
 	virtual void PreRender();
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
+	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -169,19 +169,19 @@ public:
 
 	inline virtual ~OpenGLMatSingleTextureSolid(){}
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
+	virtual bool AddGeometry(Tbc::GeometryBase* pGeometry);
 	virtual void PreRender();
 	virtual void PostRender();
 	void BindTexture(int pTextureID, int pMipMapLevelCount);
 
-	static void DoRawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
+	static void DoRawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
 protected:
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
+	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -246,7 +246,7 @@ public:
 protected:
 	virtual void PreRender();
 	virtual void PostRender();
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
 };
 
 
@@ -269,18 +269,18 @@ public:
 
 	inline virtual ~OpenGLMatSingleColorEnvMapSolid(){}
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
+	virtual bool AddGeometry(Tbc::GeometryBase* pGeometry);
 	virtual void PreRender();
 	virtual void PostRender();
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
 
 	bool mSingleColorPass;
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -324,13 +324,13 @@ public:
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
+	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
 	bool mSingleTexturePass;
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -366,13 +366,13 @@ public:
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
+	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
 	bool mFirstPass;
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -388,7 +388,7 @@ class OpenGLMatPXS
 public:
 	static void PrepareLights(OpenGLRenderer* pRenderer);
 	static void CleanupShaderPrograms();
-	static void SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase* pGeometry);
+	static void SetAmbientLight(OpenGLRenderer* pRenderer, Tbc::GeometryBase* pGeometry);
 
 protected:
 
@@ -470,7 +470,7 @@ protected:
 	static int smLightCount;
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -486,13 +486,13 @@ public:
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
 
 	static const astr smVP;
 	static const astr smFP[NUM_FP];
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -508,13 +508,13 @@ public:
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
 
 	static const astr smVP;
 	static const astr smFP[NUM_FP];
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -530,14 +530,14 @@ public:
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
+	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
 	static const astr smVP;
 	static const astr smFP[NUM_FP];
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -557,14 +557,14 @@ public:
 
 protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
-	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex);
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
+	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
 	static const astr smVP;
 	static const astr smFP[NUM_FP];
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiPainter.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Canvas.h"
@@ -453,7 +454,7 @@ void Painter::CreateLine(int pX1, int pY1, int pX2, int pY2)
 	float g = (float)mColor[0].mGreen / 255.0f;
 	float b = (float)mColor[0].mBlue / 255.0f;
 
-	Vector2DF lNormal(lY2 - lY1, lX1 - lX2);
+	vec2 lNormal(lY2 - lY1, lX1 - lX2);
 	lNormal.Normalize();
 
 	uint32 lV0 = lGeometry->SetVertex(lX1 - lNormal.x, lY1 - lNormal.y, r, g, b);
@@ -1012,7 +1013,7 @@ void Painter::FillTriangle(const PixelCoord& pPoint1, float pU1, float pV1,
 	             (float)pPoint3.x, (float)pPoint3.y, pU3, pV3, pImageID);
 }
 
-void Painter::AddRadius(std::vector<Vector2DF>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle)
+void Painter::AddRadius(std::vector<vec2>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle)
 {
 	const float lAngleDiff = pEndAngle-pStartAngle;
 	const int lCount = (int)(r * ::fabs(lAngleDiff) * 0.256f) + 3;
@@ -1020,11 +1021,11 @@ void Painter::AddRadius(std::vector<Vector2DF>& pVertexList, int x, int y, int r
 	float a = pStartAngle;
 	for (int i = 0; i < lCount; ++i, a+=lAngleStep)
 	{
-		pVertexList.push_back(Vector2DF(x-r*::sin(a), y-r*::cos(a)));
+		pVertexList.push_back(vec2(x-r*::sin(a), y-r*::cos(a)));
 	}
 }
 
-void Painter::TryAddRadius(std::vector<Vector2DF>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pCurrentCornerBit, int pCornerMask)
+void Painter::TryAddRadius(std::vector<vec2>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pCurrentCornerBit, int pCornerMask)
 {
 	if (pCornerMask&pCurrentCornerBit)
 	{
@@ -1039,7 +1040,7 @@ void Painter::TryAddRadius(std::vector<Vector2DF>& pVertexList, int x, int y, in
 			case 4:	x += r;	y += r;	break;
 			case 8:	x -= r;	y += r;	break;
 		}
-		pVertexList.push_back(Vector2DF((float)x, (float)y));
+		pVertexList.push_back(vec2((float)x, (float)y));
 	}
 }
 
@@ -1050,14 +1051,14 @@ void Painter::DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill)
 		return;
 	}
 	const size_t lCurveCount = ((dx*2 + dy*2) / 20 + std::abs(a1-a2)/20 + 12) & (~7);
-	std::vector<Vector2DF> lCoords;
+	std::vector<vec2> lCoords;
 	const float lXRadius = dx*0.5f;
 	const float lYRadius = dy*0.5f;
 	const float lMidX = x + dx*0.5f;
 	const float lMidY = y + dy*0.5f;
 	if (pFill)
 	{
-		lCoords.push_back(Vector2DF(lMidX, lMidY));
+		lCoords.push_back(vec2(lMidX, lMidY));
 	}
 	const float lStartAngle = Lepra::Math::Deg2Rad((float)a1);
 	const float lEndAngle = Lepra::Math::Deg2Rad((float)a2);
@@ -1065,7 +1066,7 @@ void Painter::DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill)
 	float lAngle = lStartAngle;
 	for (size_t i = 0; i < lCurveCount; ++i)
 	{
-		lCoords.push_back(Vector2DF(
+		lCoords.push_back(vec2(
 			lMidX + cos(lAngle)*lXRadius,
 			lMidY - sin(lAngle)*lYRadius));
 		lAngle += lDeltaAngle;
@@ -1079,8 +1080,8 @@ void Painter::DrawRoundedRect(const PixelRect& pRect, int pRadius, int pCornerMa
 	const int y = pRect.GetCenterY();
 	const int dx = pRect.GetWidth()/2;
 	const int dy = pRect.GetHeight()/2;
-	std::vector<Vector2DF> lCoords;
-	lCoords.push_back(Vector2DF((float)x, (float)y));
+	std::vector<vec2> lCoords;
+	lCoords.push_back(vec2((float)x, (float)y));
 	TryAddRadius(lCoords, x-dx+pRadius, y-dy+pRadius, pRadius, +PIF/2, 0,      0x1, pCornerMask);
 	TryAddRadius(lCoords, x+dx-pRadius, y-dy+pRadius, pRadius, 0,      -PIF/2, 0x2, pCornerMask);
 	TryAddRadius(lCoords, x+dx-pRadius, y+dy-pRadius, pRadius, -PIF/2, -PIF,   0x4, pCornerMask);

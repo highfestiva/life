@@ -6,8 +6,10 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/HashUtil.h"
+#include "../../Lepra/Include/Lock.h"
 #include "../../Lepra/Include/Random.h"
 #include "../Include/RuntimeVariable.h"
 
@@ -248,6 +250,7 @@ bool RuntimeVariable::CheckType(DataType pType) const
 
 RuntimeVariableScope::RuntimeVariableScope(RuntimeVariableScope* pParentScope):
 	mParentScope(pParentScope),
+	mLock(new Lock),
 	mOwnerSeed(Random::GetRandomNumber())
 {
 	mVariableTable.rehash(1024);
@@ -255,14 +258,18 @@ RuntimeVariableScope::RuntimeVariableScope(RuntimeVariableScope* pParentScope):
 
 RuntimeVariableScope::~RuntimeVariableScope()
 {
-	ScopeLock lLock(&mLock);
-	VariableTable::iterator x = mVariableTable.begin();
-	while (!mVariableTable.empty())
 	{
-		RuntimeVariable* lVariable = mVariableTable.begin()->second;
-		DeleteLocalVariable(lVariable->GetName());
+		ScopeLock lLock(mLock);
+		VariableTable::iterator x = mVariableTable.begin();
+		while (!mVariableTable.empty())
+		{
+			RuntimeVariable* lVariable = mVariableTable.begin()->second;
+			DeleteLocalVariable(lVariable->GetName());
+		}
+		mParentScope = 0;
 	}
-	mParentScope = 0;
+	delete mLock;
+	mLock = 0;
 }
 
 bool RuntimeVariableScope::IsDefined(const str& pName)
@@ -422,7 +429,7 @@ bool RuntimeVariableScope::EraseVariable(const str& pName)
 {
 	bool lDeleted;
 	{
-		ScopeLock lLock(&mLock);
+		ScopeLock lLock(mLock);
 		lDeleted = DeleteLocalVariable(pName);
 	}
 	if (!lDeleted && mParentScope)
@@ -437,7 +444,7 @@ bool RuntimeVariableScope::EraseVariable(const str& pName)
 std::list<str> RuntimeVariableScope::GetVariableNameList(SearchType pSearchType, int pStartScopeIndex, int pEndScopeIndex)
 {
 	std::list<str> lVariableNameList;
-	ScopeLock lLock(&mLock);
+	ScopeLock lLock(mLock);
 	if (pEndScopeIndex > 0 && pStartScopeIndex < pEndScopeIndex && mParentScope)
 	{
 		lVariableNameList = mParentScope->GetVariableNameList(pSearchType, pStartScopeIndex-1, pEndScopeIndex-1);
@@ -700,14 +707,14 @@ void RuntimeVariableScope::CreateLocalVariable(const str& pName, DataType pType,
 		case RuntimeVariable::DATATYPE_INT:	lVariable = new RuntimeVariable(pName, pIntValue, pSetMode);	break;
 		case RuntimeVariable::DATATYPE_REAL:	lVariable = new RuntimeVariable(pName, pDoubleValue, pSetMode);	break;
 	}
-	ScopeLock lLock(&mLock);
+	ScopeLock lLock(mLock);
 	mVariableTable.insert(VariableTable::value_type(pName, lVariable));
 }
 
 bool RuntimeVariableScope::DeleteLocalVariable(const str& pName)
 {
 	bool lDeleted = false;
-	ScopeLock lLock(&mLock);
+	ScopeLock lLock(mLock);
 	VariableTable::iterator x = mVariableTable.find(pName);
 	if (x != mVariableTable.end())
 	{
@@ -736,7 +743,7 @@ RuntimeVariable* RuntimeVariableScope::GetVariable(const HashedString& pName, bo
 			return lVariable;
 		}
 	}
-	ScopeLock lLock(&mLock);
+	ScopeLock lLock(mLock);
 	VariableTable::const_iterator x = mVariableTable.find(pName);
 	if (x != mVariableTable.end())
 	{
@@ -783,8 +790,8 @@ std::list<str> RuntimeVariableCompleter::CompleteCommand(const str& pPartialComm
 
 
 
-LOG_CLASS_DEFINE(GENERAL, RuntimeVariable);
-LOG_CLASS_DEFINE(GENERAL, RuntimeVariableScope);
+loginstance(GENERAL, RuntimeVariable);
+loginstance(GENERAL, RuntimeVariableScope);
 
 
 

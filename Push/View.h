@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../UiTBC/Include/GUI/UiWindow.h"
+#include "../UiTbc/Include/GUI/UiWindow.h"
 #include "Push.h"
 
 

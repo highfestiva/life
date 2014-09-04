@@ -28,7 +28,7 @@
 
 #include "../../../Lepra/Include/HashTable.h"
 #include "../UiPainter.h"
-#include "../UiTBC.h"
+#include "../UiTbc.h"
 
 
 

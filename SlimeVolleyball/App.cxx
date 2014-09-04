@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Path.h"
@@ -15,12 +16,12 @@
 #include "../UiLepra/Include/UiInput.h"
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiSoundStream.h"
-#include "../UiTBC/Include/GUI/UiButton.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../UiTBC/Include/UiFontManager.h"
-#include "../UiTBC/Include/UiOpenGLPainter.h"
-#include "../UiTBC/Include/UiOpenGLRenderer.h"
+#include "../UiTbc/Include/GUI/UiButton.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../UiTbc/Include/UiFontManager.h"
+#include "../UiTbc/Include/UiOpenGLPainter.h"
+#include "../UiTbc/Include/UiOpenGLRenderer.h"
 #include "SlimeVolleyball.hpp"
 
 
@@ -105,7 +106,7 @@ private:
 	UiTbc::Button* mGetiPhoneButton;
 	double mExtraSleep;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -367,7 +368,7 @@ int App::Run()
 
 	StdioConsoleLogListener lConsoleLogger;
 	DebuggerLogListener lDebugLogger;
-	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, 0, 0, 0);
+	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, 0, 0, 0);
 
 	bool lOk = true;
 	if (lOk)
@@ -689,7 +690,7 @@ UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::D
 
 
 App* App::mApp = 0;
-LOG_CLASS_DEFINE(GAME, App);
+loginstance(GAME, App);
 
 
 

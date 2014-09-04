@@ -5,10 +5,12 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/Log.h"
-#include "../Include/String.h"
 #include "../Include/Network.h"
+#include "../Include/Socket.h"
+#include "../Include/String.h"
 #include "../Include/Thread.h"
 #include "../Include/Reader.h"
 #include "../Include/Writer.h"

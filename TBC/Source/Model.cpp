@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "../Include/Model.h"
 #include <math.h>
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -72,12 +73,12 @@ void Model::Update(double pDeltaTime)
 
 
 
-void Model::SetTransformation(const TransformationF& pTransformation)
+void Model::SetTransformation(const xform& pTransformation)
 {
 	mTransformation = pTransformation;
 }
 
-const TransformationF& Model::GetTransformation() const
+const xform& Model::GetTransformation() const
 {
 	return (mTransformation);
 }

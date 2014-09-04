@@ -10,11 +10,11 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../Include/PhysicsManager.h"
-#include "../Include/TBC.h"
+#include "../Include/Tbc.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -44,7 +44,7 @@ public:
 	Type GetType() const;
 	const str& GetFunction() const;
 	int GetSpawnPointCount() const;
-	TransformationF GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint, int pIndex, Vector3DF& pInitialVelocity) const;
+	xform GetSpawnPoint(const ChunkyPhysics* pStructure, const vec3& pScaledPoint, int pIndex, vec3& pInitialVelocity) const;
 	float GetNumber() const;
 	const IntervalArray& GetIntervals() const;
 	const str GetSpawnObject(float pProbabilityThreshold) const;
@@ -68,14 +68,14 @@ private:
 	Type mSpawnerType;
 	str mFunction;
 	SpawnNodeArray mSpawnerNodeArray;
-	Vector3DF mInitialVelocity;
+	vec3 mInitialVelocity;
 	float mNumber;
 	IntervalArray mIntervalArray;
 	SpawnObjectArray mSpawnObjectArray;
 	bool mIsEaseDown;
 	float mTotalObjectProbability;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

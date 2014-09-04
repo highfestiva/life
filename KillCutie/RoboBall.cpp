@@ -4,8 +4,9 @@
 
 
 
+#include "pch.h"
 #include "RoboBall.h"
-#include "../TBC/Include/PhysicsEngine.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "Cutie.h"
 
 
@@ -40,14 +41,14 @@ void RoboBall::OnTick()
 	if (mGame->GetCutie() && mGame->GetCutie()->IsLoaded())
 	{
 		float lStrength = Math::Lerp(0.25f, 1.0f, mGame->GetComputerDifficulty());
-		const Vector3DF lPosition = GetPosition();
-		const Vector3DF lCutiePosition = mGame->GetCutie()->GetPosition();
-		const Vector3DF lDirection = lCutiePosition - lPosition;
-		Vector3DF lSteerDirection;
+		const vec3 lPosition = GetPosition();
+		const vec3 lCutiePosition = mGame->GetCutie()->GetPosition();
+		const vec3 lDirection = lCutiePosition - lPosition;
+		vec3 lSteerDirection;
 		if (mHeadAwayTimer.QueryTimeDiff() > 2.0)
 		{
-			const Vector3DF lVelocity = GetVelocity();
-			const Vector3DF lCutieVelocity = mGame->GetCutie()->GetVelocity();
+			const vec3 lVelocity = GetVelocity();
+			const vec3 lCutieVelocity = mGame->GetCutie()->GetVelocity();
 			const float lDistance = lPosition.GetDistance(lCutiePosition);
 			const float lSpeed = lVelocity.GetLength();
 			if (lSpeed < 0.1f)
@@ -63,9 +64,9 @@ void RoboBall::OnTick()
 				log_adebug("Too close and too slow, backing up!");
 				mHeadAwayTimer.PopTimeDiff();
 			}
-			const Vector3DF lFuturePosition = lPosition + lVelocity*lTimeTilImpact;
-			const Vector3DF lFutureCutiePosition = lCutiePosition + lCutieVelocity*lTimeTilImpact;
-			const Vector3DF lFutureDirection = lFutureCutiePosition - lFuturePosition;
+			const vec3 lFuturePosition = lPosition + lVelocity*lTimeTilImpact;
+			const vec3 lFutureCutiePosition = lCutiePosition + lCutieVelocity*lTimeTilImpact;
+			const vec3 lFutureDirection = lFutureCutiePosition - lFuturePosition;
 			if (lFutureDirection.Dot(lDirection) > 1)
 			{
 				lSteerDirection = lFutureDirection;
@@ -88,7 +89,7 @@ void RoboBall::OnTick()
 		}
 		else
 		{
-			lSteerDirection = Vector3DF(100, 100, 13) - lPosition;
+			lSteerDirection = vec3(100, 100, 13) - lPosition;
 		}
 		if (mBadSpeedCounter > 2)
 		{
@@ -127,7 +128,7 @@ void RoboBall::OnTick()
 }
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, RoboBall);
+loginstance(GAME_CONTEXT_CPP, RoboBall);
 
 
 

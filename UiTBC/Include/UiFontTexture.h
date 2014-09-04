@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include "../../Lepra/Include/Unordered.h"
 #include "../../Lepra/Include/Canvas.h"
 

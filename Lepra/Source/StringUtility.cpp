@@ -4,8 +4,10 @@
 
 
 
+#include "pch.h"
 #include "../Include/StringUtility.h"
 #include "../Include/LepraAssert.h"
+#include "../Include/LepraOS.h"
 #ifdef _MSC_VER
 #pragma warning(disable: 4127)	// Conditional if (sizeof()...) results in constant expression.
 #pragma warning(disable: 4244)	// Converting UTF-32 code point to wchar_t on 16-bit system.

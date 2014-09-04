@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiDisplayManager.h"
 #include "../../Lepra/Include/LepraAssert.h"
 
@@ -336,7 +337,7 @@ void DisplayManager::GetScreenCanvas(Canvas* pCanvas)
 
 
 
-LOG_CLASS_DEFINE(UI_GFX, DisplayManager);
+loginstance(UI_GFX, DisplayManager);
 
 
 

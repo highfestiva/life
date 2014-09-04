@@ -4,9 +4,12 @@
 
 
 
+#include "pch.h"
 #include "PushConsoleManager.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/ResourceManager.h"
 #include "../Lepra/Include/CyclicArray.h"
+#include "../Lepra/Include/LepraOS.h"
 #include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "PushManager.h"
@@ -119,8 +122,8 @@ int PushConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 				::SetCurrentDirectoryA(astrutil::Encode(Path::GetParentDirectory(lCurrentDir)).c_str());
 				::system("c:/Program/Python31/python.exe -B Tools/build/rgo.py builddata");
 				::SetCurrentDirectoryA(astrutil::Encode(lCurrentDir).c_str());
-				const str lUserName = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_LOGIN_USERNAME, EmptyString);
-				const str lServer = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, EmptyString);
+				const str lUserName = v_slowget(GetVariableScope(), RTVAR_LOGIN_USERNAME, EmptyString);
+				const str lServer = v_slowget(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, EmptyString);
 				wstr lPw(L"CarPassword");
 				const Cure::LoginId lLoginId(wstrutil::Encode(lUserName), Cure::MangledPassword(lPw));
 				((PushManager*)GetGameManager())->RequestLogin(lServer, lLoginId);
@@ -142,7 +145,7 @@ int PushConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, PushConsoleManager);
+loginstance(CONSOLE, PushConsoleManager);
 
 
 

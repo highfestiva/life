@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/HiscoreAgent.h"
 #include "../../Cure/Include/NetworkClient.h"
@@ -11,7 +12,7 @@
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TerrainManager.h"
-#include "../../Lepra/Include/Log.h"
+#include "../../Lepra/Include/Logger.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../../Lepra/Include/Random.h"
@@ -22,7 +23,7 @@
 using namespace Lepra;
 
 class CureTest{};
-static LogDecorator gCLog(LogType::GetLog(LogType::SUB_TEST), typeid(CureTest));
+static LogDecorator gCLog(LogType::GetLogger(LogType::SUB_TEST), typeid(CureTest));
 void ReportTestResult(const LogDecorator& pLog, const str& pTestName, const str& pContext, bool pbResult);
 
 
@@ -68,7 +69,7 @@ public:
 	bool Test();
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 bool TerrainTest::Test()
@@ -84,7 +85,7 @@ bool TerrainTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("load terrain");
-		lTerrainManager.AddCamera(Vector3DF(0, 0, 0), 10000);
+		lTerrainManager.AddCamera(vec3(0, 0, 0), 10000);
 		Thread::Sleep(0.2);
 		lResourceManager->Tick();
 		int lOkCount = 0;
@@ -113,7 +114,7 @@ public:
 private:
 	bool TestSpecific(const str& pPrefix, bool pSafe);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 bool NetworkClientServerTest::Test()
@@ -131,9 +132,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	str lContext;
 	bool lTestOk = true;
 
-	//Log::SetMainLevelThreashold(LEVEL_ERROR);
+	//Logger::SetMainLevelThreashold(LEVEL_ERROR);
 
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 2.0);
+	v_set(Cure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 2.0);
 
 	if (lTestOk)
 	{
@@ -576,8 +577,8 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 
 
 
-LOG_CLASS_DEFINE(TEST, TerrainTest);
-LOG_CLASS_DEFINE(TEST, NetworkClientServerTest);
+loginstance(TEST, TerrainTest);
+loginstance(TEST, NetworkClientServerTest);
 
 
 
@@ -585,13 +586,13 @@ class HiscoreTest
 {
 public:
 	bool Test();
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 bool HiscoreTest::Test()
 {
-	const std::vector<Log*> lLogArray = LogType::GetLogs();
-	std::vector<Log*>::const_iterator x = lLogArray.begin();
+	const std::vector<Logger*> lLogArray = LogType::GetLoggers();
+	std::vector<Logger*>::const_iterator x = lLogArray.begin();
 	LogLevel lNewLogLevel = LEVEL_LOWEST_TYPE;
 	for (; x != lLogArray.end(); ++x)
 	{
@@ -790,7 +791,7 @@ bool HiscoreTest::Test()
 	return (lTestOk);
 }
 
-LOG_CLASS_DEFINE(TEST, HiscoreTest);
+loginstance(TEST, HiscoreTest);
 
 
 

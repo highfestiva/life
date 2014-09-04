@@ -4,6 +4,7 @@
  
 
 
+#include "pch.h"
 #include "MasterServer.h"
 #include "../../Lepra/Include/Socket.h"
 #include "../../Lepra/Include/SystemManager.h"
@@ -385,7 +386,7 @@ MasterServer::GameServerInfo::GameServerInfo(const ServerInfo& pServerInfo):
 
 
 
-LOG_CLASS_DEFINE(NETWORK_SERVER, MasterServer);
+loginstance(NETWORK_SERVER, MasterServer);
 
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "CanonDriver.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
@@ -32,10 +33,10 @@ CanonDriver::CanonDriver(DownwashManager* pGame, Cure::GameObjectId pCanonId, in
 
 	Cure::CppContextObject* lCanon = (Cure::CppContextObject*)mManager->GetObject(mCanonId, true);
 	deb_assert(lCanon);
-	TransformationF lMuzzleTransform;
-	Vector3DF _;
+	xform lMuzzleTransform;
+	vec3 _;
 	Life::ProjectileUtil::GetBarrelByShooter(lCanon, lMuzzleTransform, _);
-	mJointStartAngle = (lMuzzleTransform.GetOrientation() * Vector3DF(0,0,1)).GetAngle(Vector3DF(0,0,1));
+	mJointStartAngle = (lMuzzleTransform.GetOrientation() * vec3(0,0,1)).GetAngle(vec3(0,0,1));
 }
 
 CanonDriver::~CanonDriver()
@@ -60,7 +61,7 @@ void CanonDriver::OnTick()
 	}
 	if (!mTagSet)
 	{
-		const TBC::ChunkyClass::Tag* lTag = lCanon->FindTag(_T("behavior"), 2, 0);
+		const Tbc::ChunkyClass::Tag* lTag = lCanon->FindTag(_T("behavior"), 2, 0);
 		deb_assert(lTag);
 		mDistance = lTag->mFloatValueList[0];
 		mShootPeriod = 1/lTag->mFloatValueList[1];
@@ -73,14 +74,14 @@ void CanonDriver::OnTick()
 		return;
 	}
 
-	const Vector3DF lTarget(lAvatar->GetPosition() + lAvatar->GetVelocity()*0.2f);
-	const Vector2DF d(lTarget.z - lCanon->GetPosition().z, lTarget.x - lCanon->GetPosition().x);
+	const vec3 lTarget(lAvatar->GetPosition() + lAvatar->GetVelocity()*0.2f);
+	const vec2 d(lTarget.z - lCanon->GetPosition().z, lTarget.x - lCanon->GetPosition().x);
 	if (d.GetLengthSquared() >= mDistance*mDistance)
 	{
 		return;	// Don't shoot at distant objects.
 	}
-	TBC::ChunkyBoneGeometry* lBarrel = lCanon->GetPhysics()->GetBoneGeometry(1);
-	TBC::PhysicsManager::Joint1Diff lDiff;
+	Tbc::ChunkyBoneGeometry* lBarrel = lCanon->GetPhysics()->GetBoneGeometry(1);
+	Tbc::PhysicsManager::Joint1Diff lDiff;
 	mGame->GetPhysicsManager()->GetJoint1Diff(lBarrel->GetBodyId(), lBarrel->GetJointId(), lDiff);
 	const float lAngle = -d.GetAngle() - (mJointStartAngle + lDiff.mValue);
 	const float lTargetAngle = Math::Clamp(lAngle*20, -2.0f, +2.0f);
@@ -102,7 +103,7 @@ void CanonDriver::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CanonDriver);
+loginstance(GAME_CONTEXT_CPP, CanonDriver);
 
 
 

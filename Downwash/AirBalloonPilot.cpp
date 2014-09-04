@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "AirBalloonPilot.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
@@ -56,12 +57,12 @@ void AirBalloonPilot::OnTick()
 		return;
 	}
 
-	const Vector3DF lPosition = lBalloon->GetPosition();
-	Vector3DF lClosestPoint;
+	const vec3 lPosition = lBalloon->GetPosition();
+	vec3 lClosestPoint;
 	GetClosestPathDistance(lPosition, lClosestPoint);
-	const Vector3DF lDirectionForce = (lClosestPoint - lPosition) * 0.2f;
-	const Vector3DF lAntiRotationForce = lBalloon->GetAngularVelocity() * -50.0f;
-	const Vector3DF lForce(lDirectionForce.x+lAntiRotationForce.y, lDirectionForce.y-lAntiRotationForce.x, lDirectionForce.z);
+	const vec3 lDirectionForce = (lClosestPoint - lPosition) * 0.2f;
+	const vec3 lAntiRotationForce = lBalloon->GetAngularVelocity() * -50.0f;
+	const vec3 lForce(lDirectionForce.x+lAntiRotationForce.y, lDirectionForce.y-lAntiRotationForce.x, lDirectionForce.z);
 	lBalloon->SetEnginePower(0, Math::Clamp(lForce.y, -0.1f, +0.1f));
 	lBalloon->SetEnginePower(1, Math::Clamp(lForce.x, -0.1f, +0.1f));
 	lBalloon->SetEnginePower(3, Math::Clamp(lForce.z, +0.4f, +1.0f));
@@ -69,7 +70,7 @@ void AirBalloonPilot::OnTick()
 
 
 
-void AirBalloonPilot::GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint)
+void AirBalloonPilot::GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint)
 {
 	if (!mPath)
 	{
@@ -97,7 +98,7 @@ void AirBalloonPilot::GetClosestPathDistance(const Vector3DF& pPosition, Vector3
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, AirBalloonPilot);
+loginstance(GAME_CONTEXT_CPP, AirBalloonPilot);
 
 
 

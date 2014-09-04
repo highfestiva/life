@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Lepra/Include/LepraTarget.h"
 #include "DownwashTicker.h"
 #include "../Lepra/Include/SystemManager.h"
@@ -12,9 +13,9 @@
 #include "../UiCure/Include/UiParticleLoader.h"
 #include "../UiCure/Include/UiResourceManager.h"
 #include "../UiLepra/Include/UiCore.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
 #include "RtVar.h"
 #include "DownwashManager.h"
 
@@ -31,9 +32,9 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 	mMusicPlayer(0),
 	mEnvMap(0)
 {
-	CURE_RTVAR_SYS_OVERRIDE(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
+	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
+	v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
 	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
 	AddBackedRtvar(_T(RTVAR_GAME_CHILDISHNESS));
@@ -76,8 +77,8 @@ void DownwashTicker::Resume()
 	Parent::Resume();
 
 	double lRtrOffset;
-	CURE_RTVAR_GET(lRtrOffset, =, mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
-	CURE_RTVAR_SET(mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
+	v_get(lRtrOffset, =, mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+	v_set(mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
 
 	if (mMusicPlayer)
 	{
@@ -145,11 +146,11 @@ bool DownwashTicker::OpenUiManager()
 		if (mUiManager->GetCanvas()->GetHeight() < 600)
 		{
 			double lFontHeight;
-			CURE_RTVAR_GET(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+			v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 			if (lFontHeight > 29.0)
 			{
 				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/600.0;
-				CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
+				v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 			}
 		}
 		lOk = mUiManager->OpenRest();
@@ -176,7 +177,7 @@ bool DownwashTicker::OpenUiManager()
 	return lOk;
 }
 
-void DownwashTicker::BeginRender(Vector3DF& pColor)
+void DownwashTicker::BeginRender(vec3& pColor)
 {
 	Parent::BeginRender(pColor);
 	mUiManager->GetRenderer()->SetOutlineFillColor(OFF_BLACK);
@@ -237,7 +238,7 @@ Life::GameClientSlaveManager* DownwashTicker::CreateSlaveManager(Life::GameClien
 
 
 
-LOG_CLASS_DEFINE(GAME, DownwashTicker);
+loginstance(GAME, DownwashTicker);
 
 
 

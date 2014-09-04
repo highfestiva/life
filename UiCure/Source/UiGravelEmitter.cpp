@@ -4,14 +4,15 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiGravelEmitter.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../UiTBC/Include/UiParticleRenderer.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../UiTbc/Include/UiParticleRenderer.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
@@ -42,12 +43,12 @@ GravelEmitter::~GravelEmitter()
 
 
 void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque,
+	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	bool lParticlesEnabled;
-	CURE_RTVAR_GET(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
+	v_get(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
 	if (!lParticlesEnabled)
 	{
 		return;
@@ -81,20 +82,20 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	{
 		return;
 	}
-	Vector3DF lPosition(pPosition);
+	vec3 lPosition(pPosition);
 	const float lAngle = Random::Uniform(0.0f, PIF*2);
 	lPosition.x += 0.2f * cos(lAngle);
 	lPosition.y += 0.2f * sin(lAngle);
 	lPosition.z += Random::Uniform(+0.1f, +0.2f);
-	Vector3DF lRelativeVelocity(pRelativeVelocity);
-	const Vector3DF lUp(0, 0, 1);
-	Vector3DF lTorque(pTorque.Cross(lUp));
+	vec3 lRelativeVelocity(pRelativeVelocity);
+	const vec3 lUp(0, 0, 1);
+	vec3 lTorque(pTorque.Cross(lUp));
 	const float lMassFactor = 1/pOtherObject->GetMass();
 	lRelativeVelocity += lTorque * lMassFactor * 0.1f;
-	Vector3DF lRotationSpeed;
+	vec3 lRotationSpeed;
 	pOtherObject->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(pOtherBodyId, lRotationSpeed);
-	const Vector3DF lRadius = pPosition - pOtherObject->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(pOtherBodyId);
-	const Vector3DF lRollSpeed(lRotationSpeed.Cross(lRadius) * 0.2f);
+	const vec3 lRadius = pPosition - pOtherObject->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(pOtherBodyId);
+	const vec3 lRollSpeed(lRotationSpeed.Cross(lRadius) * 0.2f);
 	lPosition += lRollSpeed.GetNormalized(0.3f);
 	const float lRollLength = lRollSpeed.GetLength();
 	const float lCollisionLength = lRelativeVelocity.GetLength();
@@ -105,14 +106,14 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	{
 		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 		const float lAngularVelocity = Random::Uniform(-5.0f, 5.0f);
-		lParticleRenderer->CreatePebble(mLifeTime, mScale, lAngularVelocity, Vector3DF(0.3f, 0.15f, 0.0f), lPosition, lRelativeVelocity);
+		lParticleRenderer->CreatePebble(mLifeTime, mScale, lAngularVelocity, vec3(0.3f, 0.15f, 0.0f), lPosition, lRelativeVelocity);
 		mParticleTimer.ClearTimeDiff();
 	}
 }
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, GravelEmitter);
+loginstance(GAME_CONTEXT, GravelEmitter);
 
 
 

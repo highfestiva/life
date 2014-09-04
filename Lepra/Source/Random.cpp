@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Random.h"
 #include <math.h>
 

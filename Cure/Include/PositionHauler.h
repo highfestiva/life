@@ -10,7 +10,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 class ChunkyPhysics;
 class PhysicsManager;
@@ -30,11 +30,11 @@ class ObjectPositionalData;
 class PositionHauler
 {
 public:
-	static bool Get(ObjectPositionalData& pPosition, const TBC::PhysicsManager* pPhysicsManager, const TBC::ChunkyPhysics* pStructure, float pTotalMass);
-	static void Set(const ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure, float pTotalMass, bool pAllowMoveRoot);
+	static bool Get(ObjectPositionalData& pPosition, const Tbc::PhysicsManager* pPhysicsManager, const Tbc::ChunkyPhysics* pStructure, float pTotalMass);
+	static void Set(const ObjectPositionalData& pPosition, Tbc::PhysicsManager* pPhysicsManager, Tbc::ChunkyPhysics* pStructure, float pTotalMass, bool pAllowMoveRoot);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

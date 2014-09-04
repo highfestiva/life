@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ChunkyClass.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Endian.h"
@@ -12,7 +13,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -185,7 +186,7 @@ bool ChunkyClass::IsPhysRoot(int pPhysIndex) const
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, ChunkyClass);
+loginstance(GAME_CONTEXT, ChunkyClass);
 
 
 

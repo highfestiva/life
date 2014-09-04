@@ -36,7 +36,7 @@ private:
 	bool mTagSet;
 	GameTimer mLastShot;
 	float mJointStartAngle;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

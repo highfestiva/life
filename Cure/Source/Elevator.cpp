@@ -4,13 +4,14 @@
 
 
 
+#include "pch.h"
 #include "../Include/Elevator.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
 #include "../Include/TimeManager.h"
 #include "../../Lepra/Include/HashUtil.h"
-#include "../../TBC/Include/PhysicsEngine.h"
-#include "../../TBC/Include/PhysicsTrigger.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/PhysicsTrigger.h"
 
 
 
@@ -50,21 +51,21 @@ void Elevator::SetStopDelay(double pStopDelay)
 	mStopDelay = pStopDelay;
 }
 
-Vector3DF Elevator::GetPosition() const
+vec3 Elevator::GetPosition() const
 {
 	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(GetFirstBody()->GetBodyId());
 }
 
-Vector3DF Elevator::GetVelocity() const
+vec3 Elevator::GetVelocity() const
 {
-	Vector3DF lVelocity;
+	vec3 lVelocity;
 	GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(GetFirstBody()->GetBodyId(), lVelocity);
 	return lVelocity;
 }
 
 float Elevator::GetRadius() const
 {
-	const Vector3DF lSize = GetFirstBody()->GetShapeSize();
+	const vec3 lSize = GetFirstBody()->GetShapeSize();
 	return std::max(lSize.x, lSize.y) * 0.5f;
 }
 
@@ -83,9 +84,9 @@ void Elevator::OnTick()
 	mEngineActivity = Math::Lerp(mEngineActivity, lSignedMaxSpeed2, Math::GetIterateLerpTime(0.4f, lFrameTime));
 	if (::fabs(lSignedMaxSpeed2) < STARTS_MOVING_VELOCITY && ::fabs(mEngineActivity) < STOPS_MOVING_VELOCITY)
 	{
-		const TBC::PhysicsTrigger* lTrigger = 0;
+		const Tbc::PhysicsTrigger* lTrigger = 0;
 		const int lTriggerCount = GetTriggerCount((const void*&)lTrigger);
-		const bool lIsNonStop = (lTriggerCount == 1 && lTrigger->GetType() == TBC::PhysicsTrigger::TRIGGER_NON_STOP);
+		const bool lIsNonStop = (lTriggerCount == 1 && lTrigger->GetType() == Tbc::PhysicsTrigger::TRIGGER_NON_STOP);
 		bool lHasStopped = true;
 		if (lIsNonStop)
 		{
@@ -102,7 +103,7 @@ void Elevator::OnTick()
 				HaltActiveEngines(lStopEngines);
 
 				// Check if we need to restart "non_stop" or "always" trigger.
-				if (lTriggerCount == 1 && lTrigger->GetType() <= TBC::PhysicsTrigger::TRIGGER_ALWAYS)
+				if (lTriggerCount == 1 && lTrigger->GetType() <= Tbc::PhysicsTrigger::TRIGGER_ALWAYS)
 				{
 					Trig(lTrigger);
 				}
@@ -110,7 +111,7 @@ void Elevator::OnTick()
 			mEngineActivity = ELEVATOR_ACTIVITY_RESET;	// Don't try again in a long time.
 
 			// Low engine activity and no longer actively triggered means we lost the previous trigger.
-			if (mActiveTrigger && mActiveTrigger->GetType() >= TBC::PhysicsTrigger::TRIGGER_MOVEMENT &&
+			if (mActiveTrigger && mActiveTrigger->GetType() >= Tbc::PhysicsTrigger::TRIGGER_MOVEMENT &&
 				mTrigTime.QueryTimeDiff() > mExitDelay)
 			{
 				log_adebug("TRIGGER - exited trigger volume.");
@@ -134,13 +135,13 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 {
 	Parent::OnAlarm(pAlarmId, pExtraData);
 
-	typedef TBC::PhysicsTrigger::EngineTrigger EngineTrigger;
+	typedef Tbc::PhysicsTrigger::EngineTrigger EngineTrigger;
 	const EngineTrigger* lEngineTrigger = (const EngineTrigger*)pExtraData;
 	if (lEngineTrigger)
 	{
 		SetFunctionTarget(lEngineTrigger->mFunction, lEngineTrigger->mEngine);
 		mEngineActivity = ELEVATOR_ACTIVITY_RESET;	// Don't try again in a long time.
-		if (mActiveTrigger && mActiveTrigger->GetType() >= TBC::PhysicsTrigger::TRIGGER_MOVEMENT)
+		if (mActiveTrigger && mActiveTrigger->GetType() >= Tbc::PhysicsTrigger::TRIGGER_MOVEMENT)
 		{
 			// Run engine for some time before *forcing* deactivation.
 			GetManager()->AddGameAlarmCallback(this, pAlarmId, 60, 0);
@@ -154,13 +155,13 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 }
 
-void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void Elevator::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	(void)pOtherObject;
 	(void)pBodyId;
 	(void)pNormal;
 
-	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
+	const Tbc::PhysicsTrigger* lTrigger = (const Tbc::PhysicsTrigger*)GetTrigger(pTriggerId);
 	deb_assert(lTrigger);
 	if (lTrigger == mActiveTrigger)
 	{
@@ -174,7 +175,7 @@ void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObjec
 	Trig(lTrigger);
 }
 
-void Elevator::Trig(const TBC::PhysicsTrigger* pTrigger)
+void Elevator::Trig(const Tbc::PhysicsTrigger* pTrigger)
 {
 	GetManager()->CancelPendingAlarmCallbacksById(this, 0);
 	mActiveTrigger = pTrigger;
@@ -182,19 +183,19 @@ void Elevator::Trig(const TBC::PhysicsTrigger* pTrigger)
 	const int lEngineCount = pTrigger->GetControlledEngineCount();
 	for (int y = 0; y < lEngineCount; ++y)
 	{
-		const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = pTrigger->GetControlledEngine(y);
+		const Tbc::PhysicsTrigger::EngineTrigger& lEngineTrigger = pTrigger->GetControlledEngine(y);
 		log_volatile(mLog.Debugf(_T("TRIGGER - trigging function %s."), lEngineTrigger.mFunction.c_str()));
 		GetManager()->AddGameAlarmCallback(this, 0, lEngineTrigger.mDelay, (void*)&lEngineTrigger);
 	}
 }
 
-TBC::ChunkyBoneGeometry* Elevator::GetFirstBody() const
+Tbc::ChunkyBoneGeometry* Elevator::GetFirstBody() const
 {
-	const TBC::PhysicsTrigger* lTrigger = 0;
+	const Tbc::PhysicsTrigger* lTrigger = 0;
 	GetTriggerCount((const void*&)lTrigger);
 	deb_assert(lTrigger && lTrigger->GetControlledEngineCount() > 0);
-	const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = lTrigger->GetControlledEngine(0);
-	typedef TBC::PhysicsEngine::GeometryList BodyList;
+	const Tbc::PhysicsTrigger::EngineTrigger& lEngineTrigger = lTrigger->GetControlledEngine(0);
+	typedef Tbc::PhysicsEngine::GeometryList BodyList;
 	BodyList lBodyList = lEngineTrigger.mEngine->GetControlledGeometryList();
 	deb_assert(!lBodyList.empty());
 	return lBodyList[0];
@@ -208,12 +209,12 @@ float Elevator::GetSignedMaxSpeedSquare() const
 	float lSignedMaxSpeed2 = 0;
 	if (mActiveTrigger)
 	{
-		const TBC::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
+		const Tbc::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
 		const int lEngineCount = mActiveTrigger->GetControlledEngineCount();
 		for (int y = 0; y < lEngineCount; ++y)
 		{
-			const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
-			Vector3DF lVelocity = lEngineTrigger.mEngine->GetCurrentMaxSpeed(lPhysicsManager);
+			const Tbc::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
+			vec3 lVelocity = lEngineTrigger.mEngine->GetCurrentMaxSpeed(lPhysicsManager);
 			const float lSpeed2 = lVelocity.GetLengthSquared();
 			if (lSpeed2 > lMaxSpeed2)
 			{
@@ -234,7 +235,7 @@ void Elevator::HaltActiveEngines(bool pStop)
 		const int lEngineCount = mActiveTrigger->GetControlledEngineCount();
 		for (int y = 0; y < lEngineCount; ++y)
 		{
-			const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
+			const Tbc::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
 			lEngineTrigger.mEngine->SetValue(lEngineTrigger.mEngine->GetControllerIndex(), 0);
 		}
 		mParent->ForceSend();	// Transmit our updated engine values.
@@ -243,7 +244,7 @@ void Elevator::HaltActiveEngines(bool pStop)
 
 
 
-void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine)
+void Elevator::SetFunctionTarget(const str& pFunction, Tbc::PhysicsEngine* pEngine)
 {
 	float lTargetValue = 0;	// Default it to stop.
 	if (pFunction == _T("minimum"))
@@ -259,7 +260,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 		lTargetValue = -pEngine->GetValue();
 		if (Math::IsEpsEqual(lTargetValue, 0.0f))
 		{
-			lTargetValue = -pEngine->GetValues()[TBC::PhysicsEngine::ASPECT_LOCAL_SHADOW];	// Invert shadow if stopped.
+			lTargetValue = -pEngine->GetValues()[Tbc::PhysicsEngine::ASPECT_LOCAL_SHADOW];	// Invert shadow if stopped.
 			if (Math::IsEpsEqual(lTargetValue, 0.0f))
 			{
 				lTargetValue = -1;
@@ -272,14 +273,14 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 	}
 	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
 	mElevatorIsActive = true;
-	pEngine->ForceSetValue(TBC::PhysicsEngine::ASPECT_LOCAL_SHADOW, lTargetValue);	// Store shadow.
+	pEngine->ForceSetValue(Tbc::PhysicsEngine::ASPECT_LOCAL_SHADOW, lTargetValue);	// Store shadow.
 	pEngine->SetValue(pEngine->GetControllerIndex(), lTargetValue);
 	mParent->ForceSend();	// Transmit our updated engine values.
 }
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Elevator);
+loginstance(GAME_CONTEXT_CPP, Elevator);
 
 
 

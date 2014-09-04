@@ -68,7 +68,7 @@ private:
 	bool mMouseLastPressed;
 	int mMaxDragDiamondDistance;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

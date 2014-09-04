@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiProps.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -43,7 +44,7 @@ void Props::SetOpacity(float pOpacity)
 	mOpacity = pOpacity;
 }
 
-void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale, float pAngularRange, float pTime)
+void Props::StartParticle(ParticleType pParticleType, const vec3& pStartVelocity, float pScale, float pAngularRange, float pTime)
 {
 	//deb_assert(pStartVelocity.GetLengthSquared() < 1000*1000);
 	mParticleType = pParticleType;
@@ -102,7 +103,7 @@ void Props::OnTick()
 			SetRootPosition(GetPosition() + mVelocity*lFrameTime);
 			mVelocity.z -= 9.82f*lFrameTime;
 
-			QuaternionF lOrientation = GetOrientation();
+			quat lOrientation = GetOrientation();
 			lOrientation.RotateAroundOwnX(lFrameTime * mAngularVelocity.x * mVelocity.x);
 			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.y * mVelocity.y);
 			lOrientation.RotateAroundOwnZ(lFrameTime * mAngularVelocity.z * mVelocity.z);
@@ -136,7 +137,7 @@ void Props::OnTick()
 			mVelocity.z = Math::Lerp(mVelocity.z, 3.0f, lLerp);
 			SetRootPosition(GetPosition() + mVelocity*lFrameTime);
 
-			QuaternionF lOrientation = GetOrientation();
+			quat lOrientation = GetOrientation();
 			lOrientation.RotateAroundOwnX(lFrameTime * mAngularVelocity.x * mVelocity.x);
 			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.y * mVelocity.y);
 			lOrientation.RotateAroundOwnZ(lFrameTime * mAngularVelocity.z * mVelocity.z);
@@ -168,7 +169,7 @@ void Props::OnAlarm(int pAlarmId, void* /*pExtraData*/)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Props);
+loginstance(GAME_CONTEXT_CPP, Props);
 
 
 

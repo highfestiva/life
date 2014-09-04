@@ -3,6 +3,7 @@
 //Copyright (c) Pixel Doctrine
 
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/UiSoundManagerFMod.h"
 #include "../Include/UiSoundManagerOpenAL.h"
@@ -42,12 +43,12 @@ SoundManager::~SoundManager()
 
 
 
-void SoundManager::SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
+void SoundManager::SetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel)
 {
 	ScopeLock lLock(&mLock);
 	MicrophoneLocation& lLocation = mMicrophoneArray[mCurrentMicrophone];
-	const Vector3DF lMicRelativePos = lLocation.mTransform.InverseTransform(pPos);
-	const Vector3DF lMicRelativeVel = lLocation.mVelocityTransform.InverseTransform(pVel);
+	const vec3 lMicRelativePos = lLocation.mTransform.InverseTransform(pPos);
+	const vec3 lMicRelativeVel = lLocation.mVelocityTransform.InverseTransform(pVel);
 	DoSetSoundPosition(pSoundIID, lMicRelativePos, lMicRelativeVel);
 }
 
@@ -62,11 +63,11 @@ void SoundManager::SetCurrentListener(int pListenerIndex, int pListenerCount)
 	}
 }
 
-void SoundManager::SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
-	const Vector3DF& pUp, const Vector3DF& pForward)
+void SoundManager::SetListenerPosition(const vec3& pPos, const vec3& pVel,
+	const vec3& pUp, const vec3& pForward)
 {
 	ScopeLock lLock(&mLock);
-	const Vector3DF lLeft = pForward.Cross(pUp);
+	const vec3 lLeft = pForward.Cross(pUp);
 	RotationMatrixF lRotation(lLeft, pForward, pUp);
 	MicrophoneLocation& lLocation = mMicrophoneArray[mCurrentMicrophone];
 	lLocation.mTransform.SetPosition(pPos);

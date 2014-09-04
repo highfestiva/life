@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/Win32/UiWin32DisplayManager.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/String.h"
@@ -677,7 +678,7 @@ int Win32DisplayManager::msWindowCount = 0;
 int Win32DisplayManager::msRegisterCount = 0;
 HANDLE Win32DisplayManager::mshThisInstance = 0;
 WNDCLASSEX Win32DisplayManager::msWindowClass;
-LOG_CLASS_DEFINE(UI_GFX, Win32DisplayManager);
+loginstance(UI_GFX, Win32DisplayManager);
 
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/GUI/UiDialog.h"
 #include "../../Include/GUI/UiDesktopWindow.h"
 

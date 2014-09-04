@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../../TBC/Include/PhysicsManager.h"
+#include "../../Tbc/Include/PhysicsManager.h"
 
 
 
@@ -19,9 +19,9 @@ class ContextForceListener
 {
 public:
 	virtual void OnForceApplied(Cure::ContextObject* pObject, Cure::ContextObject* pOtherObject,
-		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque,
-		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity) = 0;
+		Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque,
+		const vec3& pPosition, const vec3& pRelativeVelocity) = 0;
 };
 
 

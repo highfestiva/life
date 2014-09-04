@@ -338,6 +338,15 @@
     <ClInclude Include="Include\TimeLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\LepraOS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Lock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\CollisionDetector2D.inl">
@@ -593,6 +602,12 @@
     </ClCompile>
     <ClCompile Include="Source\Posix\MacThread.mm">
       <Filter>Source Files\Posix</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Timer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

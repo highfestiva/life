@@ -16,7 +16,7 @@
 #define LEPRA_SOCKADDR_H
 
 #include "IPAddress.h"
-#include "LepraTypes.h"
+#include "LepraOS.h"
 #include "String.h"
 
 namespace Lepra

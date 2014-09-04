@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "Socket.h"
+#include "IPAddress.h"
+#include "Log.h"
 
 
 
@@ -27,7 +27,7 @@ public:
 
 private:
 	static bool mStarted;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

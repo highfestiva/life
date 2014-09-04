@@ -107,7 +107,7 @@
     <ClCompile Include="Source\UiShadowVolume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiTBC.cpp">
+    <ClCompile Include="Source\UiTbc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\UiTerrainTextureGenerator.cpp">
@@ -312,7 +312,7 @@
     <ClInclude Include="Include\UiShadowVolume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiTBC.h">
+    <ClInclude Include="Include\UiTbc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\UiTerrainTextureGenerator.h">

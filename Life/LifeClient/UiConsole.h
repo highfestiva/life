@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../Lepra/Include/Graphics2D.h"
-#include "../../UiTBC/Include/UiFontManager.h"
+#include "../../UiTbc/Include/UiFontManager.h"
 #include "../Life.h"
 
 namespace UiTbc
@@ -68,7 +68,7 @@ private:
 	float mConsoleTargetPosition;
 	UiTbc::FontManager::FontId mFontId;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

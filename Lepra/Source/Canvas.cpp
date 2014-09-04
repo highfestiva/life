@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include <math.h>
 #include <memory.h>
 #include "../Include/Canvas.h"

@@ -6,6 +6,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/LepraAssert.h"
 #include <memory.h>
 #include "../Include/DES.h"

@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "../Include/GameTicker.h"
 #include "../Include/RuntimeVariableName.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
-#include "../../TBC/Include/PhysicsManager.h"
-#include "../../TBC/Include/PhysicsManagerFactory.h"
+#include "../../Tbc/Include/PhysicsManager.h"
+#include "../../Tbc/Include/PhysicsManagerFactory.h"
 #include "../Include/ConsoleManager.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObject.h"
@@ -55,7 +56,7 @@ bool ApplicationTicker::QueryQuit()
 
 GameTicker::GameTicker(float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	mTimeManager(new TimeManager),
-	mPhysicsManager(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, pPhysicsRadius, pPhysicsLevels,  pPhysicsSensitivity)),
+	mPhysicsManager(Tbc::PhysicsManagerFactory::Create(Tbc::PhysicsManagerFactory::ENGINE_ODE, pPhysicsRadius, pPhysicsLevels,  pPhysicsSensitivity)),
 	mPhysicsWorkerThread(0),
 	mPhysicsTickStartSemaphore(0),
 	mPhysicsTickDoneSemaphore(0)
@@ -84,7 +85,7 @@ TimeManager* GameTicker::GetTimeManager()
 	return mTimeManager;
 }
 
-TBC::PhysicsManager* GameTicker::GetPhysicsManager(bool pIsThreadSafe) const
+Tbc::PhysicsManager* GameTicker::GetPhysicsManager(bool pIsThreadSafe) const
 {
 	(void)pIsThreadSafe;
 #ifdef LEPRA_DEBUG
@@ -120,7 +121,7 @@ void GameTicker::StartPhysicsTick()
 	}
 
 	bool lParallelPhysics;
-	CURE_RTVAR_GET(lParallelPhysics, =, GetSettings(), RTVAR_PHYSICS_PARALLEL, true);
+	v_get(lParallelPhysics, =, GetSettings(), RTVAR_PHYSICS_PARALLEL, true);
 	if (lParallelPhysics)
 	{
 		CreatePhysicsThread();
@@ -176,7 +177,7 @@ void GameTicker::PhysicsTick()
 	LEPRA_MEASURE_SCOPE(Physics);
 
 	bool lStopPhysics;
-	CURE_RTVAR_GET(lStopPhysics, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
+	v_get(lStopPhysics, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
 	if (lStopPhysics)
 	{
 		return;
@@ -185,7 +186,7 @@ void GameTicker::PhysicsTick()
 	mPhysicsManager->InitCurrentThread();
 
 	int lMicroSteps;
-	CURE_RTVAR_GET(lMicroSteps, =, GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 3);
+	v_get(lMicroSteps, =, GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTimeManager->GetAffordedPhysicsStepCount();
 	const int lAffordedMicroStepCount = lAffordedStepCount * lMicroSteps;
 	const float lStepTime = mTimeManager->GetAffordedPhysicsStepTime();
@@ -196,9 +197,9 @@ void GameTicker::PhysicsTick()
 			lAffordedMicroStepCount, lStepIncrement);
 	}*/
 	bool lFastAlgo;
-	CURE_RTVAR_GET(lFastAlgo, =, GetSettings(), RTVAR_PHYSICS_FASTALGO, true);
+	v_get(lFastAlgo, =, GetSettings(), RTVAR_PHYSICS_FASTALGO, true);
 	bool lNoClip;
-	CURE_RTVAR_GET(lNoClip, =, GetSettings(), RTVAR_PHYSICS_NOCLIP, false);
+	v_get(lNoClip, =, GetSettings(), RTVAR_PHYSICS_NOCLIP, false);
 	{
 		LEPRA_MEASURE_SCOPE(PreSteps);
 		mPhysicsManager->PreSteps();
@@ -287,7 +288,7 @@ void GameTicker::PhysicsThreadEntry()
 
 
 
-LOG_CLASS_DEFINE(GAME, GameTicker);
+loginstance(GAME, GameTicker);
 
 
 

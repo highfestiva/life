@@ -4,8 +4,10 @@
 
 
 
+#include "pch.h"
 #include "../Include/Thread.h"
 #include "../Include/LepraAssert.h"
+#include "../Include/Lock.h"
 #include <stdio.h>
 #include "../Include/LepraTypes.h"
 #include "../Include/BusLock.h"
@@ -100,29 +102,6 @@ void ScopeLock::Release()
 
 
 
-CompatibleLockBC::CompatibleLockBC()
-{
-}
-
-CompatibleLockBC::~CompatibleLockBC()
-{
-}
-
-
-CompatibleScopeLock::CompatibleScopeLock(CompatibleLockBC* pLock) :
-	mLock(pLock)
-{
-	mLock->Acquire();
-}
-
-CompatibleScopeLock::~CompatibleScopeLock()
-{
-	mLock->Release();
-	mLock = 0;
-}
-
-
-
 ConditionBC::ConditionBC()
 {
 }
@@ -130,17 +109,6 @@ ConditionBC::ConditionBC()
 ConditionBC::~ConditionBC()
 {
 }
-
-
-CompatibleConditionBC::CompatibleConditionBC(CompatibleLockBC* pExternalLock) :
-	mExternalLock(pExternalLock)
-{
-}
-
-CompatibleConditionBC::~CompatibleConditionBC()
-{
-}
-
 
 
 
@@ -151,15 +119,6 @@ SemaphoreBC::SemaphoreBC()
 SemaphoreBC::~SemaphoreBC()
 {
 }
-
-/*CompatibleSemaphoreBC::CompatibleSemaphoreBC()
-{
-}
-
-CompatibleSemaphoreBC::~CompatibleSemaphoreBC()
-{
-}*/
-
 
 
 
@@ -185,7 +144,8 @@ Thread::Thread(const astr& pThreadName):
 	mStopRequested(false),
 	mSelfDestruct(false),
 	mThreadHandle(0),
-	mThreadId(0)
+	mThreadId(0),
+	mSemaphore(new Semaphore)
 {
 }
 
@@ -198,6 +158,8 @@ Thread::~Thread()
 			Kill();
 		}
 	}
+	delete mSemaphore;
+	mSemaphore = 0;
 }
 
 void Thread::InitializeMainThread()
@@ -295,7 +257,7 @@ void Thread::RunThread()
 {
 	SetThreadId(GetCurrentThreadId());
 	SetRunning(true);
-	mSemaphore.Signal();
+	mSemaphore->Signal();
 	YieldCpu();
 	Run();
 	SetRunning(false);
@@ -311,7 +273,7 @@ void RunThread(Thread* pThread)
 	}
 }
 
-LOG_CLASS_DEFINE(GENERAL, Thread);
+loginstance(GENERAL, Thread);
 
 
 

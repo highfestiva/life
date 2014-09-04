@@ -4,14 +4,15 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiJetEngineEmitter.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTBC/Include/UiParticleRenderer.h"
+#include "../../UiTbc/Include/UiParticleRenderer.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
 
@@ -40,7 +41,7 @@ JetEngineEmitter::~JetEngineEmitter()
 void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)
 {
 	bool lParticlesEnabled;
-	CURE_RTVAR_GET(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
+	v_get(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
 	if (!lParticlesEnabled)
 	{
 		return;
@@ -89,23 +90,23 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 	{
 		return;
 	}
-	const TBC::PhysicsEngine* lEngine = pObject->GetPhysics()->GetEngine(lEngineIndex);
+	const Tbc::PhysicsEngine* lEngine = pObject->GetPhysics()->GetEngine(lEngineIndex);
 	const float lThrottleUpSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_OVERSHOOT_ENGINE_FACTOR_BASE]*0.5f, pFrameTime);
 	const float lThrottleDownSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_OVERSHOOT_ENGINE_FACTOR_BASE], pFrameTime);
 	const float lEngineThrottle = lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true);
-	const QuaternionF lOrientation = pObject->GetOrientation();
-	Vector3DF lRadius(pTag.mFloatValueList[FV_RADIUS_X], pTag.mFloatValueList[FV_RADIUS_Y], pTag.mFloatValueList[FV_RADIUS_Z]);
+	const quat lOrientation = pObject->GetOrientation();
+	vec3 lRadius(pTag.mFloatValueList[FV_RADIUS_X], pTag.mFloatValueList[FV_RADIUS_Y], pTag.mFloatValueList[FV_RADIUS_Z]);
 	lRadius.x *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_X], lEngineThrottle);
 	lRadius.y *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_Y], lEngineThrottle);
 	lRadius.z *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_Z], lEngineThrottle);
-	Vector3DF lPosition(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
+	vec3 lPosition(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
 	lPosition = lOrientation * lPosition;
-	const Vector3DF lColor(pTag.mFloatValueList[FV_END_R], pTag.mFloatValueList[FV_END_B], pTag.mFloatValueList[FV_END_B]);
+	const vec3 lColor(pTag.mFloatValueList[FV_END_R], pTag.mFloatValueList[FV_END_B], pTag.mFloatValueList[FV_END_B]);
 
 	bool lCreateParticle = false;
 	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
 	float lExhaustIntensity;
-	CURE_RTVAR_GET(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
+	v_get(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
 	mInterleaveTimeout -= Math::Lerp(0.3f, 1.0f, lEngineThrottle) * lExhaustIntensity * pFrameTime;
 	if (mInterleaveTimeout <= 0)	// Release particle this frame?
 	{
@@ -120,10 +121,10 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 	const float dx = pTag.mFloatValueList[FV_RADIUS_X];
 	const float dy = pTag.mFloatValueList[FV_RADIUS_Y];
 	const float dz = pTag.mFloatValueList[FV_RADIUS_Z];
-	const Vector3DF lStartColor(pTag.mFloatValueList[FV_START_R], pTag.mFloatValueList[FV_START_B], pTag.mFloatValueList[FV_START_B]);
+	const vec3 lStartColor(pTag.mFloatValueList[FV_START_R], pTag.mFloatValueList[FV_START_B], pTag.mFloatValueList[FV_START_B]);
 	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
-	const Vector3DF lDirection = lOrientation * Vector3DF(pTag.mFloatValueList[FV_DIRECTION_X], pTag.mFloatValueList[FV_DIRECTION_Y], pTag.mFloatValueList[FV_DIRECTION_Z]);
-	const Vector3DF lVelocity = lDirection + pObject->GetVelocity();
+	const vec3 lDirection = lOrientation * vec3(pTag.mFloatValueList[FV_DIRECTION_X], pTag.mFloatValueList[FV_DIRECTION_Y], pTag.mFloatValueList[FV_DIRECTION_Z]);
+	const vec3 lVelocity = lDirection + pObject->GetVelocity();
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	const float lParticleTime = lDensity;
 	float lParticleSize;	// Pick second size.
@@ -144,20 +145,20 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 	const float lDistanceScaleFactor = pTag.mFloatValueList[FV_OVERSHOOT_DISTANCE_UPSCALE];
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
 		if (lMesh)
 		{
 			int lPhysIndex = -1;
 			str lMeshName;
-			TransformationF lTransform;
+			xform lTransform;
 			float lMeshScale;
 			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform, lMeshScale);
 			lTransform = lMesh->GetBaseTransformation() * lTransform;
-			Vector3DF lMeshPos = lTransform.GetPosition() + lPosition;
+			vec3 lMeshPos = lTransform.GetPosition() + lPosition;
 
-			const Vector3DF lCamDistance = lMeshPos - mUiManager->GetRenderer()->GetCameraTransformation().GetPosition();
+			const vec3 lCamDistance = lMeshPos - mUiManager->GetRenderer()->GetCameraTransformation().GetPosition();
 			const float lDistance = lCamDistance.GetLength();
-			const Vector3DF lCamDirection(lCamDistance / lDistance);
+			const vec3 lCamDirection(lCamDistance / lDistance);
 			float lOvershootFactor = -(lCamDirection*lDirection);
 			if (lOvershootFactor > pTag.mFloatValueList[FV_OVERSHOOT_CUTOFF_DOT])
 			{
@@ -171,7 +172,7 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 				const float sx = Random::Normal(0.0f, dx*0.5f, -dx, +dx);
 				const float sy = Random::Normal(0.0f, dy*0.5f, -dy, +dy);
 				const float sz = Random::Normal(0.0f, dz*0.5f, -dz, +dz);
-				lMeshPos += lOrientation * Vector3DF(sx, sy, sz);
+				lMeshPos += lOrientation * vec3(sx, sy, sz);
 				lParticleRenderer->CreateGlow(lParticleTime, lParticleSize, lStartColor, lColor, lOpacity, lMeshPos, lVelocity);
 			}
 		}
@@ -180,7 +181,7 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 
 
 
-void JetEngineEmitter::DrawOvershoot(const Vector3DF& pPosition, float pDistanceScaleFactor, const Vector3DF& pRadius, const Vector3DF& pColor, float pOpacity, const Vector3DF& pCameraDirection)
+void JetEngineEmitter::DrawOvershoot(const vec3& pPosition, float pDistanceScaleFactor, const vec3& pRadius, const vec3& pColor, float pOpacity, const vec3& pCameraDirection)
 {
 	float s = std::max(std::max(pRadius.x, pRadius.y), pRadius.z);
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
@@ -191,7 +192,7 @@ void JetEngineEmitter::DrawOvershoot(const Vector3DF& pPosition, float pDistance
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, JetEngineEmitter);
+loginstance(GAME_CONTEXT, JetEngineEmitter);
 
 
 

@@ -34,7 +34,7 @@ private:
 
 	HoverTankServerDelegate* mDelegate;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

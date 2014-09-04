@@ -11,7 +11,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 class TerrainPatch;
 }
@@ -31,12 +31,12 @@ public:
 	TerrainPatchLoader(ResourceManager* pResourceManager);
 	virtual ~TerrainPatchLoader();
 
-	TBC::TerrainPatch* LoadPatch(const PatchArea& pArea, float pLod);
-	static void DeletePatch(TBC::TerrainPatch* pPatch);
+	Tbc::TerrainPatch* LoadPatch(const PatchArea& pArea, float pLod);
+	static void DeletePatch(Tbc::TerrainPatch* pPatch);
 
 private:
-	TBC::TerrainPatch* LoadPatchMesh(const PatchArea& pArea, float pLod);
-	TBC::TerrainPatch* GeneratePatchMesh(const PatchArea& pArea, float pLod);
+	Tbc::TerrainPatch* LoadPatchMesh(const PatchArea& pArea, float pLod);
+	Tbc::TerrainPatch* GeneratePatchMesh(const PatchArea& pArea, float pLod);
 
 	ResourceManager* mResourceManager;
 };

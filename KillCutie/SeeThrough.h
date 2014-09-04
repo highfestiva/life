@@ -28,12 +28,12 @@ private:
 	virtual void SetTagIndex(int pIndex);
 	virtual void OnTick();
 
-	typedef TBC::ChunkyClass::Tag Tag;
+	typedef Tbc::ChunkyClass::Tag Tag;
 	const Game* mGame;
 	const Tag* mTag;
 	float mOpacity;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiOpenGLMaterials.h"
 
 
@@ -54,12 +55,12 @@ const astr OpenGLMatTextureDiffuseBumpMapPXS::smVP =
 	 DP4 oTCoord0.y, iTCoord0, mtx[1];\n\
 	 DP4 oTCoord0.z, iTCoord0, mtx[2];\n\
 	 DP4 oTCoord0.w, iTCoord0, mtx[3];\n\
-	 #DP4 oPos.x, iPos, mvp[0];             # transform input pos by TBC::ModelViewProjection\n\
+	 #DP4 oPos.x, iPos, mvp[0];             # transform input pos by Tbc::ModelViewProjection\n\
 	 #DP4 oPos.y, iPos, mvp[1];\n\
 	 #DP4 oPos.z, iPos, mvp[2];\n\
 	 #DP4 oPos.w, iPos, mvp[3];\n\
 	 \n\
-	 DP4 V.x, iPos, mv[0];                 # transform input pos by TBC::ModelView\n\
+	 DP4 V.x, iPos, mv[0];                 # transform input pos by Tbc::ModelView\n\
 	 DP4 V.y, iPos, mv[1];\n\
 	 DP4 V.z, iPos, mv[2];\n\
 	 DP4 V.w, iPos, mv[3];\n\

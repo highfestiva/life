@@ -6,7 +6,8 @@
 
 
 
-#include "../../TBC/Include/TerrainPatch.h"
+#include "pch.h"
+#include "../../Tbc/Include/TerrainPatch.h"
 #include "../Include/TerrainPatchManager.h"
 #include "../Include/TerrainManager.h"
 
@@ -38,7 +39,7 @@ void TerrainPatchManager::Clear()
 
 void TerrainPatchManager::AddPatch(UserPhysicalTerrainResource* pResourcePatch)
 {
-	TBC::TerrainPatch* lPatch = pResourcePatch->GetData();
+	Tbc::TerrainPatch* lPatch = pResourcePatch->GetData();
 	// TODO: calculate some ID from position+size (since both are required for a unique ID)!
 	const int x = (int)lPatch->GetSouthWest().x;
 	const int y = (int)lPatch->GetSouthWest().y;
@@ -57,15 +58,15 @@ void TerrainPatchManager::MarkAllDirty()
 	}
 }
 
-void TerrainPatchManager::MarkInUse(const Vector3DF& pPosition, float pRadius)
+void TerrainPatchManager::MarkInUse(const vec3& pPosition, float pRadius)
 {
 	const float lRadiusSquare = pRadius*pRadius;
-	const Vector2DF lCameraPosition(pPosition.x, pPosition.y);	// Assume on ground for now.
+	const vec2 lCameraPosition(pPosition.x, pPosition.y);	// Assume on ground for now.
 	for (PatchTable::Iterator x = mPatchTable->First(); x != mPatchTable->End(); ++x)
 	{
 		PatchDirtyInfo& lResourcePatchInfo = x.GetObject();
-		TBC::TerrainPatch* lPatch = lResourcePatchInfo.mResourcePatch->GetData();
-		const Vector2DF lPatchPosition((lPatch->GetSouthWest()+lPatch->GetNorthEast())*0.5f);
+		Tbc::TerrainPatch* lPatch = lResourcePatchInfo.mResourcePatch->GetData();
+		const vec2 lPatchPosition((lPatch->GetSouthWest()+lPatch->GetNorthEast())*0.5f);
 		if (lPatchPosition.GetDistanceSquared(lCameraPosition) < lRadiusSquare)
 		{
 			lResourcePatchInfo.mIsDirty = false;

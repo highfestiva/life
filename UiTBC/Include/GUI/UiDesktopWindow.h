@@ -147,7 +147,7 @@ private:
 
 	GUIImageManager mImageManager;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

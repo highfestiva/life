@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/GUI/UiGUIImageManager.h"
 #include "../../../Lepra/Include/Log.h"
 

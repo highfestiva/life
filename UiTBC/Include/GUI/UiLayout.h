@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "../UiTBC.h"
+#include "../UiTbc.h"
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/Graphics2D.h"
 

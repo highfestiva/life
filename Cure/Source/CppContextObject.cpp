@@ -4,13 +4,14 @@
 
 
 
+#include "pch.h"
 #include "../Include/CppContextObject.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/HashUtil.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsEngine.h"
-#include "../../TBC/Include/PhysicsTrigger.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/PhysicsTrigger.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
 #include "../Include/RuntimeVariable.h"
@@ -43,37 +44,37 @@ CppContextObject::~CppContextObject()
 
 
 
-TBC::ChunkyPhysics::GuideMode CppContextObject::GetGuideMode() const
+Tbc::ChunkyPhysics::GuideMode CppContextObject::GetGuideMode() const
 {
 	if (GetPhysics())
 	{
 		return GetPhysics()->GetGuideMode();
 	}
-	return TBC::ChunkyPhysics::GUIDE_EXTERNAL;
+	return Tbc::ChunkyPhysics::GUIDE_EXTERNAL;
 }
 
 void CppContextObject::StabilizeTick()
 {
-	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
-	const TBC::ChunkyClass* lClass = GetClass();
+	const Tbc::ChunkyPhysics* lPhysics = GetPhysics();
+	const Tbc::ChunkyClass* lClass = GetClass();
 	if (!lPhysics || !lClass)
 	{
 		return;
 	}
 	bool lIsPhysicsStopped;
-	CURE_RTVAR_GET(lIsPhysicsStopped, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
+	v_get(lIsPhysicsStopped, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
 	if (lIsPhysicsStopped)
 	{
 		return;
 	}
-	if (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC && lPhysics->GetGuideMode() >= TBC::ChunkyPhysics::GUIDE_EXTERNAL)
+	if (lPhysics->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC && lPhysics->GetGuideMode() >= Tbc::ChunkyPhysics::GUIDE_EXTERNAL)
 	{
 		float lStabilityFactor = 1;
 		int lBodyIndex = 0;
 		const float lMicroStepFactor = mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps() / 18.0f;
 		for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 		{
-			const TBC::ChunkyClass::Tag& lTag = lClass->GetTag(x);
+			const Tbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
 			if (lTag.mTagName == _T("upright_stabilizer"))
 			{
 				if (lTag.mFloatValueList.size() != 1 ||
@@ -88,7 +89,7 @@ void CppContextObject::StabilizeTick()
 				}
 				lStabilityFactor = lTag.mFloatValueList[0];
 				lBodyIndex = lTag.mBodyIndexList[0];
-				TBC::PhysicsEngine::UprightStabilize(mManager->GetGameManager()->GetPhysicsManager(),
+				Tbc::PhysicsEngine::UprightStabilize(mManager->GetGameManager()->GetPhysicsManager(),
 					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*lMicroStepFactor, 1);
 			}
 			else if (lTag.mTagName == _T("forward_stabilizer"))
@@ -105,7 +106,7 @@ void CppContextObject::StabilizeTick()
 				}
 				lStabilityFactor = lTag.mFloatValueList[0];
 				lBodyIndex = lTag.mBodyIndexList[0];
-				TBC::PhysicsEngine::ForwardStabilize(mManager->GetGameManager()->GetPhysicsManager(),
+				Tbc::PhysicsEngine::ForwardStabilize(mManager->GetGameManager()->GetPhysicsManager(),
 					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*lMicroStepFactor, 1);
 			}
 		}
@@ -132,7 +133,7 @@ void CppContextObject::SetAllowNetworkLogic(bool pAllow)
 
 
 
-TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
+Tbc::ChunkyPhysics* CppContextObject::GetPhysics() const
 {
 	if (mPhysicsResource && mPhysicsResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -141,7 +142,7 @@ TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
 	return (0);
 }
 
-const TBC::ChunkyClass* CppContextObject::GetClass() const
+const Tbc::ChunkyClass* CppContextObject::GetClass() const
 {
 	if (mClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -150,12 +151,12 @@ const TBC::ChunkyClass* CppContextObject::GetClass() const
 	return (0);
 }
 
-const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>* pTriggerIndexArray) const
+const Tbc::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>* pTriggerIndexArray) const
 {
-	const TBC::ChunkyClass* lClass = GetClass();
+	const Tbc::ChunkyClass* lClass = GetClass();
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{
-		const TBC::ChunkyClass::Tag& lTag = lClass->GetTag(x);
+		const Tbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
 		if (lTag.mTagName == pTagType &&
 			(pFloatValueCount < 0 || lTag.mFloatValueList.size() == (size_t)pFloatValueCount) &&
 			(pStringValueCount < 0 || lTag.mStringValueList.size() == (size_t)pStringValueCount) &&
@@ -255,7 +256,7 @@ void CppContextObject::SetupChildHandlers()
 	const int lTagCount = GetClass()->GetTagCount();
 	for (int x = 0; x < lTagCount; ++x)
 	{
-		const TBC::ChunkyClass::Tag& lTag = GetClass()->GetTag(x);
+		const Tbc::ChunkyClass::Tag& lTag = GetClass()->GetTag(x);
 		CppContextObject* lHandlerChild = (CppContextObject*)GetManager()->GetGameManager()->CreateLogicHandler(lTag.mTagName);
 		if (!lHandlerChild)
 		{
@@ -279,8 +280,8 @@ void CppContextObject::OnMicroTick(float pFrameTime)
 		{
 			// Young children have the possibility of just pressing left/right which will cause
 			// a forward motion in the currently used vehicle.
-			TBC::PhysicsEngine* lAcc = GetPhysics()->GetEngine(lAccIndex);
-			const TBC::PhysicsEngine* lTurn = GetPhysics()->GetEngine(lTurnIndex);
+			Tbc::PhysicsEngine* lAcc = GetPhysics()->GetEngine(lAccIndex);
+			const Tbc::PhysicsEngine* lTurn = GetPhysics()->GetEngine(lTurnIndex);
 			const float lPowerFwdRev = lAcc->GetValue();
 			const float lPowerLR = lTurn->GetValue();
 			float lAutoTurnAccValue = 0;
@@ -292,7 +293,7 @@ void CppContextObject::OnMicroTick(float pFrameTime)
 			// Throttle up all relevant acc engines.
 			for (;;)
 			{
-				lAcc->ForceSetValue(TBC::PhysicsEngine::ASPECT_LOCAL_PRIMARY, lAutoTurnAccValue);
+				lAcc->ForceSetValue(Tbc::PhysicsEngine::ASPECT_LOCAL_PRIMARY, lAutoTurnAccValue);
 				lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(lAccIndex-1, -1, 0);
 				if (lAccIndex < 0)
 				{
@@ -309,7 +310,7 @@ void CppContextObject::OnAlarm(int /*pAlarmId*/, void* /*pExtraData*/)
 {
 }
 
-void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void CppContextObject::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	if (!GetAllowNetworkLogic())
 	{
@@ -338,9 +339,9 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Cont
 
 
 void CppContextObject::OnForceApplied(ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque,
+	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	(void)pPosition;
 	(void)pRelativeVelocity;
@@ -360,7 +361,7 @@ void CppContextObject::OnForceApplied(ContextObject* pOtherObject,
 
 void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 {
-	TBC::ChunkyClass* lClass = pClassResource->GetData();
+	Tbc::ChunkyClass* lClass = pClassResource->GetData();
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
@@ -396,7 +397,7 @@ bool CppContextObject::GetAllowNetworkLogic() const
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CppContextObject);
+loginstance(GAME_CONTEXT_CPP, CppContextObject);
 
 
 

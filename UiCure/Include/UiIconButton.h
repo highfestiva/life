@@ -8,7 +8,7 @@
 
 
 #pragma once
-#include "../../UiTBC/Include/GUI/UiButton.h"
+#include "../../UiTbc/Include/GUI/UiButton.h"
 #include "UiResourceManager.h"
 
 

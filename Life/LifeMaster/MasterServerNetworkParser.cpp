@@ -4,6 +4,7 @@
  
 
 
+#include "pch.h"
 #include "MasterServerNetworkParser.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Checksum.h"
@@ -181,7 +182,7 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 
 
 
-LOG_CLASS_DEFINE(NETWORK, MasterServerNetworkParser);
+loginstance(NETWORK, MasterServerNetworkParser);
 
 
 

@@ -53,6 +53,13 @@ enum ResourceLoadState
 	RESOURCE_LOAD_ERROR		= 4,
 };
 
+enum PhysicsOverride
+{
+	PHYSICS_OVERRIDE_NORMAL = 1,
+	PHYSICS_OVERRIDE_STATIC,
+	PHYSICS_OVERRIDE_BONES,
+};
+
 
 
 #define CURE_STANDARD_FRAME_RATE	30

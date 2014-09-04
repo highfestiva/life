@@ -41,7 +41,7 @@ private:
 
 	void operator=(const ClientOptionsManager&);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

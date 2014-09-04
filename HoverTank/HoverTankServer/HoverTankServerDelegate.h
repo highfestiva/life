@@ -53,10 +53,10 @@ private:
 
 	virtual void PreEndTick();
 
-	void OrderAirStrike(const Vector3DF& pPosition, float pFlyInAngle);
+	void OrderAirStrike(const vec3& pPosition, float pFlyInAngle);
 
 	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
-	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
+	virtual void Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 	virtual Cure::ContextObject* CreateAvatarForNpc(Npc* pNpc);
@@ -88,7 +88,7 @@ private:
 	AvatarIdSet mNpcSet;
 	HiResTimer mPingUpdateTimer;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

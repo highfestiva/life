@@ -23,7 +23,7 @@
 #ifndef EDGE_H
 #define EDGE_H
 
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include "UiGradients.h"
 
 namespace UiTbc

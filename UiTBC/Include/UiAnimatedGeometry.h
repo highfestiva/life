@@ -10,12 +10,12 @@
 
 
 #include "../../Lepra/Include/Vector3D.h"
-#include "../../TBC/Include/GeometryBase.h"
-#include "UiTBC.h"
+#include "../../Tbc/Include/GeometryBase.h"
+#include "UiTbc.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 class BoneHierarchy;
 }
@@ -25,7 +25,7 @@ class BoneHierarchy;
 namespace UiTbc
 {
 
-class AnimatedGeometry : public TBC::GeometryBase
+class AnimatedGeometry : public Tbc::GeometryBase
 {
 public:
 	struct BoneWeightGroup
@@ -41,7 +41,7 @@ public:
 	AnimatedGeometry();
 	virtual ~AnimatedGeometry();
 
-	void SetGeometry(TBC::GeometryBase* pGeometry);
+	void SetGeometry(Tbc::GeometryBase* pGeometry);
 
 	// Takes ownership of the allocated indices and weights.
 	void AddBoneWeights(BoneWeightGroup& pWeights);
@@ -49,7 +49,7 @@ public:
 	int GetBoneWeightGroupCount() const;
 	const BoneWeightGroup& GetBoneWeightGroup(int pBoneWeightGroupIndex) const;
 
-	void SetBoneHierarchy(TBC::BoneHierarchy* pBones);	// TODO: replace this with user resource object?
+	void SetBoneHierarchy(Tbc::BoneHierarchy* pBones);	// TODO: replace this with user resource object?
 
 	void UpdateAnimatedGeometry();
 
@@ -71,13 +71,13 @@ public:
 
 	ColorFormat GetColorFormat() const;
 
-	TBC::GeometryBase* GetOriginalGeometry();
+	Tbc::GeometryBase* GetOriginalGeometry();
 
 protected:
 private:
-	TBC::GeometryBase* mOriginalGeometry;
+	Tbc::GeometryBase* mOriginalGeometry;
 
-	TBC::BoneHierarchy* mBones;
+	Tbc::BoneHierarchy* mBones;
 
 	int mVertexCount;
 	float* mVertexData;

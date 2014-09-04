@@ -28,26 +28,26 @@ public:
 	Autopilot(DownwashManager* pGame);
 	virtual ~Autopilot();
 	void Reset();
-	Vector3DF GetSteering();
+	vec3 GetSteering();
 	void AttemptCloserPathDistance();
 	float GetClosestPathDistance() const;
-	Vector3DF GetClosestPathVector() const;
-	Vector3DF GetLastAvatarPosition() const;
+	vec3 GetClosestPathVector() const;
+	vec3 GetLastAvatarPosition() const;
 	float GetRotorSpeed(const Cure::ContextObject* pChopper) const;
 
 private:
 	void CheckStalledRotor(Cure::ContextObject* pChopper);
-	float GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint) const;
+	float GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint) const;
 
 	typedef Cure::ContextPath::SplinePath Spline;
 
 	DownwashManager* mGame;
 	GameTimer mStalledRotorTimer;
 	float mClosestPathDistance;
-	Vector3DF mClosestPathPosition;
-	Vector3DF mLastAvatarPosition;
+	vec3 mClosestPathPosition;
+	vec3 mLastAvatarPosition;
 	Spline* mPath;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

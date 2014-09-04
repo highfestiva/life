@@ -35,7 +35,7 @@ IosInputElement::~IosInputElement()
 {
 }
 
-LOG_CLASS_DEFINE(UI_INPUT, IosInputElement);
+loginstance(UI_INPUT, IosInputElement);
 
 
 
@@ -104,7 +104,7 @@ void IosInputDevice::AddElement(InputElement* pElement)
 
 
 
-LOG_CLASS_DEFINE(UI_INPUT, IosInputDevice);
+loginstance(UI_INPUT, IosInputDevice);
 
 
 
@@ -267,7 +267,7 @@ void IosInputManager::RemoveObserver()
 	}
 }
 
-LOG_CLASS_DEFINE(UI_INPUT, IosInputManager);
+loginstance(UI_INPUT, IosInputManager);
 
 
 

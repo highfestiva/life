@@ -125,7 +125,7 @@ private:
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

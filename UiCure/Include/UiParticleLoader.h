@@ -32,7 +32,7 @@ public:
 	ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::Renderer* pRenderer, const str& pTextureName, size_t pSubFeatureTextureCount, size_t pSubTotalTextureCount);
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

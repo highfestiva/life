@@ -3,6 +3,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include <locale>
 #include "../Include/Timer.h"

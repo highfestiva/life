@@ -4,10 +4,11 @@
 
 
 
+#include "pch.h"
 #include "View.h"
-#include "../UiTBC/Include/GUI/UiCaption.h"
-#include "../UiTBC/Include/GUI/UiCenterLayout.h"
-#include "../UiTBC/Include/GUI/UiTextField.h"
+#include "../UiTbc/Include/GUI/UiCaption.h"
+#include "../UiTbc/Include/GUI/UiCenterLayout.h"
+#include "../UiTbc/Include/GUI/UiTextField.h"
 #include "RtVar.h"
 
 

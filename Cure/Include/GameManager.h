@@ -10,10 +10,9 @@
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Timer.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/PhysicsManager.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/PhysicsManager.h"
 #include "../Include/ContextObject.h"
-#include "../Include/ResourceManager.h"
 
 
 
@@ -26,13 +25,14 @@ class ConsoleManager;
 class ContextManager;
 class GameTicker;
 class NetworkAgent;
+class ResourceManager;
 class Spawner;
 class TerrainManager;
 class TimeManager;
 
 
 
-class GameManager: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
+class GameManager: public Tbc::PhysicsManager::TriggerListener, public Tbc::PhysicsManager::ForceFeedbackListener
 {
 public:
 	typedef SequencialPerformanceData<uint64> BandwidthData;
@@ -47,21 +47,21 @@ public:
 	virtual void PreEndTick();
 	virtual bool EndTick();
 	virtual bool TickNetworkOutput();
-	Lock* GetTickLock() const;
+	LockBC* GetTickLock() const;
 
 	RuntimeVariableScope* GetVariableScope() const;
 	void SetVariableScope(RuntimeVariableScope* pScope);
 	ResourceManager* GetResourceManager() const;
 	ContextManager* GetContext() const;
 	const TimeManager* GetTimeManager() const;
-	LEPRA_DEBUG_CODE(virtual) TBC::PhysicsManager* GetPhysicsManager() const;
+	LEPRA_DEBUG_CODE(virtual) Tbc::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
 	void SetConsoleManager(ConsoleManager* pConsole);
 
 	void MicroTick(float pTimeDelta);
 	void PostPhysicsTick();
 
-	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
+	virtual bool IsObjectRelevant(const vec3& pPosition, float pDistance) const;
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
 	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
 	virtual void DeleteContextObjectDelay(Cure::ContextObject* pObject, float pDelay);
@@ -70,10 +70,10 @@ public:
 	virtual Spawner* GetAvatarSpawner(Cure::GameObjectId pLevelId) const;
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
-	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	virtual void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 		ContextObject* pObject1, ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id) = 0;
-	void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
+		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id) = 0;
+	void OnStopped(ContextObject* pObject, Tbc::PhysicsManager::BodyID pBodyId);
 	virtual bool OnPhysicsSend(ContextObject* pObject) = 0;
 	virtual bool OnAttributeSend(ContextObject* pObject) = 0;
 	virtual bool IsServer() = 0;
@@ -87,9 +87,9 @@ public:
 	void ClearPerformanceData();
 	void GetBandwidthData(BandwidthData& mSendBandwidth, BandwidthData& mReceiveBandwidth);
 
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
-	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity);
 
 protected:
 	NetworkAgent* GetNetworkAgent() const;
@@ -107,7 +107,7 @@ protected:
 private:
 	virtual void HandleWorldBoundaries();
 
-	mutable Lock mLock;
+	mutable LockBC* mLock;
 	volatile bool mIsThreadSafe;
 
 	RuntimeVariableScope* mVariableScope;
@@ -123,7 +123,7 @@ private:
 	BandwidthData mSendBandwidth;
 	BandwidthData mReceiveBandwidth;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

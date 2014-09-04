@@ -358,4 +358,4 @@ TEMPLATE typename QUAL::Node* QUAL::NewNode(Node* pParent, uint8 pIndex, _TVarTy
 	return lNode;
 }
 
-TEMPLATE LogDecorator LooseBinTree<_TKey, _TObject, _TVarType, _THashFunc>::mLog(LogType::GetLog(LogType::SUB_GENERAL), typeid(LooseBinTree));
+TEMPLATE LogDecorator LooseBinTree<_TKey, _TObject, _TVarType, _THashFunc>::mLog(LogType::GetLogger(LogType::SUB_GENERAL), typeid(LooseBinTree));

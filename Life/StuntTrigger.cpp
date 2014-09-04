@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "StuntTrigger.h"
 #include <algorithm>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/GameManager.h"
-#include "../TBC/Include/ChunkyPhysics.h"
-#include "../TBC/Include/PhysicsTrigger.h"
+#include "../Tbc/Include/ChunkyPhysics.h"
+#include "../Tbc/Include/PhysicsTrigger.h"
 
 
 
@@ -38,10 +39,10 @@ StuntTrigger::~StuntTrigger()
 
 
 
-void StuntTrigger::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
+void StuntTrigger::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
 {
 	std::vector<int> lTriggerIndexArray;
-	const TBC::ChunkyPhysics* lPhysics = mParent->GetPhysics();
+	const Tbc::ChunkyPhysics* lPhysics = mParent->GetPhysics();
 	const int lBoneCount = pTrigger->GetTriggerGeometryCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
@@ -49,7 +50,7 @@ void StuntTrigger::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 		deb_assert(lBoneIndex >= 0);
 		lTriggerIndexArray.push_back(lBoneIndex);
 	}
-	const TBC::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("stunt_trigger_data"), 5, 2, &lTriggerIndexArray);
+	const Tbc::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("stunt_trigger_data"), 5, 2, &lTriggerIndexArray);
 	deb_assert(lTag);
 	if (lTag)
 	{
@@ -72,7 +73,7 @@ void StuntTrigger::OnTick()
 	mLastFrameTriggered = false;
 }
 
-void StuntTrigger::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void StuntTrigger::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pBodyId;
@@ -104,7 +105,7 @@ void StuntTrigger::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextO
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, StuntTrigger);
+loginstance(GAME_CONTEXT_CPP, StuntTrigger);
 
 
 

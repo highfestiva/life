@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../Lepra/Include/HiResTimer.h"
-#include "../../UiTBC/Include/UiChunkyClass.h"
+#include "../../UiTbc/Include/UiChunkyClass.h"
 #include "CppContextObject.h"
 #include "Cure.h"
 
@@ -34,7 +34,7 @@ private:
 	UiTbc::ChunkyClass::Tag mTag;
 	HiResTimer mTime;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

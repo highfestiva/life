@@ -33,7 +33,7 @@ private:
 	int mTimeFrameBlown;
 	int mBadSpeedCounter;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

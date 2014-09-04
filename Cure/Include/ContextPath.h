@@ -17,12 +17,12 @@ namespace Cure
 class ContextPath: public CppContextObject
 {
 public:
-	typedef CubicDeCasteljauSpline<Vector3DF, float> SplineShape;
+	typedef CubicDeCasteljauSpline<vec3, float> SplineShape;
 	class SplinePath: public SplineShape
 	{
 		typedef SplineShape Parent;
 	public:
-		SplinePath(Vector3DF* pKeyFrames,	// pCount + 1 elements.
+		SplinePath(vec3* pKeyFrames,	// pCount + 1 elements.
 			float* pTimeTags,		// pCount + 1 elements.
 			int pCount,
 			str pType,

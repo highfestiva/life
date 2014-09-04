@@ -10,11 +10,11 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../Include/PhysicsManager.h"
-#include "../Include/TBC.h"
+#include "../Include/Tbc.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -81,7 +81,7 @@ private:
 	BoneTriggerArray mTriggerArray;
 	ConnectionArray mConnectionArray;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

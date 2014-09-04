@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/ProgressCallback.h"
 
 namespace Lepra

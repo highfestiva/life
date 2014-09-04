@@ -60,7 +60,7 @@ private:
 	ALuint mAlSource;			// audio source
 	ALenum mAlFormat;			// internal format
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

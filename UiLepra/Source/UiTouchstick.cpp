@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiTouchstick.h"
 
 
@@ -301,7 +302,7 @@ void TouchstickInputDevice::PollEvents()
 
 
 
-LOG_CLASS_DEFINE(UI_INPUT, TouchstickInputDevice);
+loginstance(UI_INPUT, TouchstickInputDevice);
 
 
 

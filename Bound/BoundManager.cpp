@@ -4,22 +4,25 @@
 
 
 
+#include "pch.h"
 #include "BoundManager.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/Plane.h"
 #include "../Lepra/Include/TimeLogger.h"
 #include "../Lepra/Include/Unordered.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
+#include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiMachine.h"
 #include "../UiCure/Include/UiSoundReleaser.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFixedLayouter.h"
-#include "../UiTBC/Include/UiMaterial.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
-#include "../UiTBC/Include/UiTriangleBasedGeometry.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFixedLayouter.h"
+#include "../UiTbc/Include/UiMaterial.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/UiTriangleBasedGeometry.h"
 #include "../Lepra/Include/Random.h"
 #include "../Life/LifeClient/UiConsole.h"
 #include "Ball.h"
@@ -70,7 +73,7 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	mSunlight(0),
 	mCameraAngle(0),
 	mCameraRotateSpeed(1.0f),
-	mCameraTransform(QuaternionF(), Vector3DF(0, -CAM_DISTANCE, 0)),
+	mCameraTransform(quat(), vec3(0, -CAM_DISTANCE, 0)),
 	mLevelCompleted(false),
 	mPauseButton(0),
 	mIsCutting(false),
@@ -92,12 +95,12 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, 0.03f, 0.2f);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_RUNADS, true);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
+	v_set(GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
+	v_set(GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	v_set(GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
+	v_set(GetVariableScope(), RTVAR_GAME_RUNADS, true);
+	v_set(GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
+	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	/*
 #define RNDMZEL \
 	for (int x = 0; x < 20; ++x) \
@@ -107,23 +110,23 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 		if (a != b) \
 			std::swap(lNGon[1], lNGon[b]); \
 	}
-	std::vector<Vector3DF> lNGon;
+	std::vector<vec3> lNGon;
 #define CLRL \
 	lNGon.clear(); \
-	lNGon.push_back(Vector3DF(-2.1314f, 0, -0.333f));	\
+	lNGon.push_back(vec3(-2.1314f, 0, -0.333f));	\
 	for (int x = 0; x < 10; ++x)	\
-		lNGon.push_back(lNGon[lNGon.size()-1] + Vector3DF(1,0,0.14f)*Random::Uniform(0.001f, 0.1f));	\
+		lNGon.push_back(lNGon[lNGon.size()-1] + vec3(1,0,0.14f)*Random::Uniform(0.001f, 0.1f));	\
 	for (int x = 0; x < 10; ++x)	\
-		lNGon.push_back(lNGon[lNGon.size()-1] + Vector3DF(0.14f,0,-1)*Random::Uniform(0.001f, 0.1f));	\
+		lNGon.push_back(lNGon[lNGon.size()-1] + vec3(0.14f,0,-1)*Random::Uniform(0.001f, 0.1f));	\
 	for (int x = 0; x < 10; ++x)	\
-		lNGon.push_back(lNGon[lNGon.size()-1] + Vector3DF(-0.34f,0,-1)*Random::Uniform(0.001f, 0.1f));	\
+		lNGon.push_back(lNGon[lNGon.size()-1] + vec3(-0.34f,0,-1)*Random::Uniform(0.001f, 0.1f));	\
 	for (int x = 0; x < 10; ++x)	\
-		lNGon.push_back(lNGon[lNGon.size()-1] + Vector3DF(-1,0,-0.14f)*Random::Uniform(0.001f, 0.1f));
+		lNGon.push_back(lNGon[lNGon.size()-1] + vec3(-1,0,-0.14f)*Random::Uniform(0.001f, 0.1f));
 	for (int y = 0; y < 100; ++y)
 	{
 		CLRL;
 		RNDMZEL;
-		std::vector<Vector3DF> lCopy(lNGon);
+		std::vector<vec3> lCopy(lNGon);
 		CreateNGon(lNGon);
 		mLog.Infof(_T("----------"));
 		for (int x = 0; x < (int)lNGon.size(); ++x)
@@ -153,15 +156,15 @@ void BoundManager::Suspend()
 
 void BoundManager::LoadSettings()
 {
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
+	v_set(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 
 	Parent::LoadSettings();
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 52.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
+	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
+	v_set(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
+	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, 52.0);
+	v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
+	v_set(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
@@ -251,15 +254,15 @@ void BoundManager::RenderBackground()
 	mUiManager->GetRenderer()->SetDepthTestEnabled(false);
 	mUiManager->GetRenderer()->SetLightsEnabled(false);
 	mUiManager->GetRenderer()->SetTexturingEnabled(false);
-	Vector3DF lTopColor(84,217,245);
-	Vector3DF lBottomColor(12,19,87);
+	vec3 lTopColor(84,217,245);
+	vec3 lBottomColor(12,19,87);
 	static float lAngle = 0;
-	Vector3DF lDeviceAcceleration(mUiManager->GetAccelerometer());
+	vec3 lDeviceAcceleration(mUiManager->GetAccelerometer());
 	float lAcceleration = lDeviceAcceleration.GetLength();
 	float lScreenAngle = 0;
 	if (lAcceleration > 0.7f && std::abs(lDeviceAcceleration.y) < 0.7f*lAcceleration)
 	{
-		Vector2DF lScreenDirection(lDeviceAcceleration.x, lDeviceAcceleration.z);
+		vec2 lScreenDirection(lDeviceAcceleration.x, lDeviceAcceleration.z);
 		lScreenDirection.Normalize();
 		lScreenAngle = -lScreenDirection.GetAngle() - PIF/2;
 	}
@@ -270,18 +273,18 @@ void BoundManager::RenderBackground()
 	float l = ::sqrt(x*x + y*y);
 	x /= l;
 	y /= l;
-	Vector2DF tl(-x,+y);
-	Vector2DF tr(+x,+y);
-	Vector2DF bl(-x,-y);
-	Vector2DF br(+x,-y);
-	tl.RotateAround(Vector2DF(), lAngle);
-	tr.RotateAround(Vector2DF(), lAngle);
-	bl.RotateAround(Vector2DF(), lAngle);
-	br.RotateAround(Vector2DF(), lAngle);
-	Vector3DF tlc = Math::Lerp(lBottomColor, lTopColor, tl.y*0.5f+0.5f)/255;
-	Vector3DF trc = Math::Lerp(lBottomColor, lTopColor, tr.y*0.5f+0.5f)/255;
-	Vector3DF blc = Math::Lerp(lBottomColor, lTopColor, bl.y*0.5f+0.5f)/255;
-	Vector3DF brc = Math::Lerp(lBottomColor, lTopColor, br.y*0.5f+0.5f)/255;
+	vec2 tl(-x,+y);
+	vec2 tr(+x,+y);
+	vec2 bl(-x,-y);
+	vec2 br(+x,-y);
+	tl.RotateAround(vec2(), lAngle);
+	tr.RotateAround(vec2(), lAngle);
+	bl.RotateAround(vec2(), lAngle);
+	br.RotateAround(vec2(), lAngle);
+	vec3 tlc = Math::Lerp(lBottomColor, lTopColor, tl.y*0.5f+0.5f)/255;
+	vec3 trc = Math::Lerp(lBottomColor, lTopColor, tr.y*0.5f+0.5f)/255;
+	vec3 blc = Math::Lerp(lBottomColor, lTopColor, bl.y*0.5f+0.5f)/255;
+	vec3 brc = Math::Lerp(lBottomColor, lTopColor, br.y*0.5f+0.5f)/255;
 	mUiManager->GetPainter()->SetColor(Color::CreateColor(tlc.x, tlc.y, tlc.z, 1), 0);
 	mUiManager->GetPainter()->SetColor(Color::CreateColor(trc.x, trc.y, trc.z, 1), 1);
 	mUiManager->GetPainter()->SetColor(Color::CreateColor(brc.x, brc.y, brc.z, 1), 2);
@@ -311,12 +314,12 @@ bool BoundManager::Paint()
 
 		mUiManager->SetScaleFont(0.9f);
 		float lPreviousScore;
-		CURE_RTVAR_GET(lPreviousScore, =(float), GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
+		v_get(lPreviousScore, =(float), GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
 		const str lScoreText = strutil::Format(_T("Score: %.0f"), mLevelScore+lPreviousScore);
 		PrintText(lScoreText, 25, 9);
 
 		int lLevel;
-		CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+		v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 		const str lLevelText = strutil::Format(_T("Level: %i"), lLevel+1);
 		int lw = mUiManager->GetPainter()->GetStringWidth(lLevelText);
 		PrintText(lLevelText, mUiManager->GetCanvas()->GetWidth()-lw-25, 9);
@@ -326,7 +329,7 @@ bool BoundManager::Paint()
 		const str lLinesText = strutil::Format(_T("Cuts: %i"), mCutsLeft);
 		PrintText(lLinesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 31);
 
-		Vector3DF v = RNDPOSVEC()*255;
+		vec3 v = RNDPOSVEC()*255;
 		Color lBlinkCol;
 		lBlinkCol.Set(v.x, v.y, v.z, 1.0f);
 		bool lIsShowingShake = (mIsShaking && mShakeTimer.QuerySplitTime() < 2.5);
@@ -364,9 +367,9 @@ bool BoundManager::HandleCutting()
 		}
 		mIsCutting = true;
 
-		Vector2DF lFrom((float)x->mStart.x, (float)x->mStart.y);
-		Vector2DF lTo((float)x->mLast.x, (float)x->mLast.y);
-		Vector2DF lVector = lTo-lFrom;
+		vec2 lFrom((float)x->mStart.x, (float)x->mStart.y);
+		vec2 lTo((float)x->mLast.x, (float)x->mLast.y);
+		vec2 lVector = lTo-lFrom;
 		bool lIsVeryNewDrag = false;
 		if (!(x->mFlags&DRAG_FLAG_STARTED))
 		{
@@ -386,14 +389,14 @@ bool BoundManager::HandleCutting()
 		mUiManager->GetPainter()->DrawArc((int)lTo.x-r, (int)lTo.y-r, d, d, 0, 360, false);
 		const float lCutLineLength = (float)(w+h);
 		lVector.Normalize(lCutLineLength);
-		Vector2DF lStart = lIsVeryNewDrag? lFrom : lFrom - lVector;
+		vec2 lStart = lIsVeryNewDrag? lFrom : lFrom - lVector;
 		if (!lDragStarted)
 		{
 			mUiManager->GetPainter()->DrawLine((int)lStart.x, (int)lStart.y, (int)lTo.x, (int)lTo.y);
 		}
 		else
 		{
-			Vector2DF lEnd = lTo + lVector;
+			vec2 lEnd = lTo + lVector;
 			mUiManager->GetPainter()->DrawLine((int)lStart.x, (int)lStart.y, (int)lEnd.x, (int)lEnd.y);
 		}
 
@@ -401,7 +404,7 @@ bool BoundManager::HandleCutting()
 		PixelCoord lScreenMid((int)(lFrom.x+lTo.x)/2, (int)(lFrom.y+lTo.y)/2);
 		Plane lCutPlaneDelimiter;
 		Plane lCutPlane = ScreenLineToPlane(lScreenMid, PixelCoord((int)lTo.x, (int)lTo.y), lCutPlaneDelimiter);
-		Vector3DF lCollisionPoint;
+		vec3 lCollisionPoint;
 
 		if (lCutPlane.n.GetLengthSquared() > 0 && !lIsVeryNewDrag && CheckBallsPlaneCollition(lCutPlane, lDragStarted? 0 : &lCutPlaneDelimiter, lCollisionPoint))
 		{
@@ -411,13 +414,13 @@ bool BoundManager::HandleCutting()
 
 			// Explosions! YES!
 			const int lParticles = Random::Uniform(5, 11);
-			Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
-			Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
-			Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
-			Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
-			Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
+			vec3 lStartFireColor(1.0f, 1.0f, 0.3f);
+			vec3 lFireColor(0.6f, 0.4f, 0.2f);
+			vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
+			vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
+			vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
 			UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-			lParticleRenderer->CreateExplosion(lCollisionPoint, 0.05f, Vector3DF(), 0.15f, 0.25f, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
+			lParticleRenderer->CreateExplosion(lCollisionPoint, 0.05f, vec3(), 0.15f, 0.25f, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
 			UiCure::UserSound2dResource* lBreakSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("broken_window.wav"), lBreakSound, 0.5f, Random::Uniform(0.9f, 1.2f));
 			mCutTimer.ReduceTimeDiff(-2.0);
@@ -461,12 +464,12 @@ bool BoundManager::HandleCutting()
 Plane BoundManager::ScreenLineToPlane(const PixelCoord& pCoord, const PixelCoord& pEndPoint, Plane& pCutPlaneDelimiter)
 {
 	const PixelCoord lScreenNormal(pCoord.y-pEndPoint.y, pCoord.x-pEndPoint.x);
-	const Vector3DF lDirectionToPlaneCenter = mUiManager->GetRenderer()->ScreenCoordToVector(pCoord);
-	Vector3DF lBadNormal((float)lScreenNormal.x, 0, (float)lScreenNormal.y);
+	const vec3 lDirectionToPlaneCenter = mUiManager->GetRenderer()->ScreenCoordToVector(pCoord);
+	vec3 lBadNormal((float)lScreenNormal.x, 0, (float)lScreenNormal.y);
 	lBadNormal = mCameraTransform.GetOrientation() * lBadNormal;
 	const Plane lCutPlane(mCameraTransform.GetPosition(), lDirectionToPlaneCenter, lBadNormal);
 
-	const Vector3DF lDirectionToEndPoint = mUiManager->GetRenderer()->ScreenCoordToVector(pEndPoint);
+	const vec3 lDirectionToEndPoint = mUiManager->GetRenderer()->ScreenCoordToVector(pEndPoint);
 	pCutPlaneDelimiter = Plane(mCameraTransform.GetPosition(), lDirectionToEndPoint, lCutPlane.n.Cross(lDirectionToEndPoint));
 	if (pCutPlaneDelimiter.n*lDirectionToPlaneCenter < 0)
 	{
@@ -501,7 +504,7 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 	mLastCutMode = pCutMode;
 	// Plane normal now "points" toward vertices that stays. Those on the other side gets cut off. The new triangles will use this normal.
 	TimeLogger lTimeLogger(&mLog, _T("CheckIfPlaneSlicesBetweenBalls + prep"));
-	const QuaternionF q = mCameraTransform.GetOrientation();
+	const quat q = mCameraTransform.GetOrientation();
 	const int tc = pMesh->GetVertexCount() / 3;
 	const float* v = pMesh->GetVertexData();
 	const uint8* c = pMesh->GetColorData();
@@ -517,16 +520,16 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 		mCutWindowVertices.reserve(tc*2*3*3);
 		mCutWindowVertices.clear();
 	}
-	std::vector<Vector3DF> lNGon;
+	std::vector<vec3> lNGon;
 	std::unordered_set<int> pNGonMap;
 	bool lDidCut = false;
 	const bool lCreateWindow = (pCutMode == CUT_ADD_WINDOW);
 	lTimeLogger.Transfer(_T("CutLoop"));
 	for (int x = 0; x < tc; ++x)
 	{
-		Vector3DF p0(v[x*9+0], v[x*9+1], v[x*9+2]);
-		Vector3DF p1(v[x*9+3], v[x*9+4], v[x*9+5]);
-		Vector3DF p2(v[x*9+6], v[x*9+7], v[x*9+8]);
+		vec3 p0(v[x*9+0], v[x*9+1], v[x*9+2]);
+		vec3 p1(v[x*9+3], v[x*9+4], v[x*9+5]);
+		vec3 p2(v[x*9+6], v[x*9+7], v[x*9+8]);
 		const float d0 = pCutPlane.GetDistance(p0);
 		const float d1 = pCutPlane.GetDistance(p1);
 		const float d2 = pCutPlane.GetDistance(p2);
@@ -563,16 +566,16 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 
 			// Go ahead and cut. Ends up with either a triangle (single point on the positive side), or
 			// a quad (two points on the positive side). Quad is cut along pseudo-shortest diagonal.
-			Vector3DF d01 = p1-p0;
-			Vector3DF d12 = p2-p1;
-			Vector3DF d20 = p0-p2;
+			vec3 d01 = p1-p0;
+			vec3 d12 = p2-p1;
+			vec3 d20 = p0-p2;
 			if (d0 > 0 && d1 > 0)
 			{
 				// Quad cut.
 				const float t3 = -d1 / (pCutPlane.n*d12);
 				const float t4 = -d0 / (pCutPlane.n*d20);
-				Vector3DF p3 = p1+t3*d12;
-				Vector3DF p4 = p0+t4*d20;
+				vec3 p3 = p1+t3*d12;
+				vec3 p4 = p0+t4*d20;
 				if (!lCreateWindow)
 				{
 					AddTriangle(p0, p1, p3, &c[x*12]);
@@ -585,8 +588,8 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 				// Quad cut.
 				const float t3 = -d2 / (pCutPlane.n*d20);
 				const float t4 = -d1 / (pCutPlane.n*d01);
-				Vector3DF p3 = p2+t3*d20;
-				Vector3DF p4 = p1+t4*d01;
+				vec3 p3 = p2+t3*d20;
+				vec3 p4 = p1+t4*d01;
 				if (!lCreateWindow)
 				{
 					AddTriangle(p1, p2, p3, &c[x*12]);
@@ -599,8 +602,8 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 				// Quad cut.
 				const float t3 = -d0 / (pCutPlane.n*d01);
 				const float t4 = -d2 / (pCutPlane.n*d12);
-				Vector3DF p3 = p0+t3*d01;
-				Vector3DF p4 = p2+t4*d12;
+				vec3 p3 = p0+t3*d01;
+				vec3 p4 = p2+t4*d12;
 				if (!lCreateWindow)
 				{
 					AddTriangle(p2, p0, p3, &c[x*12]);
@@ -613,8 +616,8 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 				// Triangle cut.
 				const float t3 = -d0 / (pCutPlane.n*d01);
 				const float t4 = -d0 / (pCutPlane.n*d20);
-				Vector3DF p3 = p0+t3*d01;
-				Vector3DF p4 = p0+t4*d20;
+				vec3 p3 = p0+t3*d01;
+				vec3 p4 = p0+t4*d20;
 				if (!lCreateWindow)
 				{
 					AddTriangle(p0, p3, p4, &c[x*12]);
@@ -626,8 +629,8 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 				// Triangle cut.
 				const float t3 = -d1 / (pCutPlane.n*d12);
 				const float t4 = -d1 / (pCutPlane.n*d01);
-				Vector3DF p3 = p1+t3*d12;
-				Vector3DF p4 = p1+t4*d01;
+				vec3 p3 = p1+t3*d12;
+				vec3 p4 = p1+t4*d01;
 				if (!lCreateWindow)
 				{
 					AddTriangle(p1, p3, p4, &c[x*12]);
@@ -639,8 +642,8 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 				// Triangle cut.
 				const float t3 = -d2 / (pCutPlane.n*d20);
 				const float t4 = -d2 / (pCutPlane.n*d12);
-				Vector3DF p3 = p2+t3*d20;
-				Vector3DF p4 = p2+t4*d12;
+				vec3 p3 = p2+t3*d20;
+				vec3 p4 = p2+t4*d12;
 				if (!lCreateWindow)
 				{
 					AddTriangle(p2, p3, p4, &c[x*12]);
@@ -686,7 +689,7 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 	return true;
 }
 
-void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const Vector3DF& v2, const uint8* pColors)
+void BoundManager::AddTriangle(const vec3& v0, const vec3& v1, const vec3& v2, const uint8* pColors)
 {
 	if (mLastCutMode == CUT_NORMAL)
 	{
@@ -703,13 +706,13 @@ void BoundManager::AddTriangle(const Vector3DF& v0, const Vector3DF& v1, const V
 	}
 }
 
-void BoundManager::AddNGonPoints(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p0, const Vector3DF& p1)
+void BoundManager::AddNGonPoints(std::vector<vec3>& pNGon, std::unordered_set<int>& pNGonMap, const vec3& p0, const vec3& p1)
 {
 	AddNGonPoint(pNGon, pNGonMap, p0);
 	AddNGonPoint(pNGon, pNGonMap, p1);
 }
 
-void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_set<int>& pNGonMap, const Vector3DF& p)
+void BoundManager::AddNGonPoint(std::vector<vec3>& pNGon, std::unordered_set<int>& pNGonMap, const vec3& p)
 {
 	const int lPositionHash = (int)(p.x*1051 + p.y*1117 + p.z*1187);
 	if (pNGonMap.find(lPositionHash) == pNGonMap.end())
@@ -718,7 +721,7 @@ void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_se
 		pNGon.push_back(p);
 	}
 	/*(void)pNGonMap;
-	std::vector<Vector3DF>::iterator x;
+	std::vector<vec3>::iterator x;
 	for (x = pNGon.begin(); x != pNGon.end(); ++x)
 	{
 		if (x->GetDistanceSquared(p) < 1e-6)
@@ -729,7 +732,7 @@ void BoundManager::AddNGonPoint(std::vector<Vector3DF>& pNGon, std::unordered_se
 	pNGon.push_back(p);*/
 }
 
-void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
+void BoundManager::CreateNGon(std::vector<vec3>& pNGon)
 {
 	//LineUpNGonSides(pNGon);
 	//SortNGonSides(pNGon);
@@ -750,7 +753,7 @@ void BoundManager::CreateNGon(std::vector<Vector3DF>& pNGon)
 	while (lSize < lPreSize);
 }
 
-void BoundManager::LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort)
+void BoundManager::LineUpNGonBorders(std::vector<vec3>& pNGon, bool pSort)
 {
 	// Create triangles from N-gon.
 	if (pNGon.size() <= 3)
@@ -761,18 +764,18 @@ void BoundManager::LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort)
 	// those adjoining vertices will be the neighbours. It will automatically appear in order.
 	// Rendering will determine if it's normal is aligned or perpendicular to the cutting plane.
 	// 1. Start with any two vertices.
-	Vector3DF p0 = pNGon[0];
-	Vector3DF p1 = pNGon[1];
-	Vector3DF t0 = (p1-p0).GetNormalized();
+	vec3 p0 = pNGon[0];
+	vec3 p1 = pNGon[1];
+	vec3 t0 = (p1-p0).GetNormalized();
 	// 2. Find the tangent with the smallect angle (biggest dot product) to this tangent.
 	float lBiggestDot = -2;
 	size_t lAdjoiningVertex = 2;
 	size_t cnt = pNGon.size();
-	Vector3DF lBoundaryVector;
+	vec3 lBoundaryVector;
 	for (size_t idx = 2; idx < cnt; ++idx)
 	{
-		Vector3DF p2 = pNGon[idx];
-		Vector3DF t1 = (p2-p1).GetNormalized();
+		vec3 p2 = pNGon[idx];
+		vec3 t1 = (p2-p1).GetNormalized();
 		float lDot = t0*t1;
 		if (lDot > lBiggestDot)
 		{
@@ -786,7 +789,7 @@ void BoundManager::LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort)
 	p0 = p1;
 	p1 = pNGon[lAdjoiningVertex];
 	t0 = lBoundaryVector;
-	std::list<Vector3DF> lRemainingVertices;
+	std::list<vec3> lRemainingVertices;
 	for (size_t idx = 0; idx < cnt; ++idx)
 	{
 		if (idx != 1 && idx != lAdjoiningVertex)
@@ -803,12 +806,12 @@ void BoundManager::LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort)
 		float lBestDistance = 1e5f;
 		float lThisDistance = 1e5f;
 		float lBiggestDot = -2;
-		std::list<Vector3DF>::iterator lAdjoiningVertex = lRemainingVertices.begin();
-		std::list<Vector3DF>::iterator x;
+		std::list<vec3>::iterator lAdjoiningVertex = lRemainingVertices.begin();
+		std::list<vec3>::iterator x;
 		for (x = lRemainingVertices.begin(); x != lRemainingVertices.end();)
 		{
-			Vector3DF p2 = *x;
-			Vector3DF t1 = p2-p1;
+			vec3 p2 = *x;
+			vec3 t1 = p2-p1;
 			lThisDistance = t1.GetLength();
 			t1.Div(lThisDistance);
 			float lDot = pSort? t0*t1 : std::abs(t0*t1);
@@ -817,7 +820,7 @@ void BoundManager::LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort)
 				if (p1.GetDistance(p0) >= p1.GetDistance(p2))
 				{
 					// Midpoint on same line (i.e. in reverse direction). Throw it away.
-					std::list<Vector3DF>::iterator y = x;
+					std::list<vec3>::iterator y = x;
 					++y;
 					lRemainingVertices.erase(x);
 					x = y;
@@ -868,7 +871,7 @@ void BoundManager::LineUpNGonBorders(std::vector<Vector3DF>& pNGon, bool pSort)
 	}
 }
 
-void BoundManager::SimplifyNGon(std::vector<Vector3DF>& pNGon)
+void BoundManager::SimplifyNGon(std::vector<vec3>& pNGon)
 {
 	// Eliminate redundant vertices. N-gon must be sorted when entering.
 	int cnt = (int)pNGon.size();
@@ -876,13 +879,13 @@ void BoundManager::SimplifyNGon(std::vector<Vector3DF>& pNGon)
 	{
 		size_t xn = NGON_INDEX(x-1);
 		size_t xp = NGON_INDEX(x+1);
-		Vector3DF p0 = pNGon[xn];
-		Vector3DF p1 = pNGon[x];
-		Vector3DF p2 = pNGon[xp];
-		Vector3DF t0 = p1-p0;
+		vec3 p0 = pNGon[xn];
+		vec3 p1 = pNGon[x];
+		vec3 p2 = pNGon[xp];
+		vec3 t0 = p1-p0;
 		float l0 = t0.GetLength();
 		t0.Div(l0);
-		Vector3DF t1 = (p2-p1).GetNormalized();
+		vec3 t1 = (p2-p1).GetNormalized();
 		const float lDot = t0*t1;
 		if (lDot > SAME_NORMAL)
 		{
@@ -907,19 +910,19 @@ void BoundManager::SimplifyNGon(std::vector<Vector3DF>& pNGon)
 	}
 }
 
-void BoundManager::AddNGonTriangles(const Plane& pCutPlane, const std::vector<Vector3DF>& pNGon, const uint8* pColors)
+void BoundManager::AddNGonTriangles(const Plane& pCutPlane, const std::vector<vec3>& pNGon, const uint8* pColors)
 {
 	// Since the N-gon is convex, we hold on to the first point and step the other two around.
-	Vector3DF p0 = pNGon[0];
-	Vector3DF p1 = pNGon[1];
-	Vector3DF p2 = pNGon[2];
-	//const Vector3DF lTriangleNormal = (p1-p0).Cross(p2-p1);
+	vec3 p0 = pNGon[0];
+	vec3 p1 = pNGon[1];
+	vec3 p2 = pNGon[2];
+	//const vec3 lTriangleNormal = (p1-p0).Cross(p2-p1);
 	//const bool lNoFlip = (pCutPlane.n*lTriangleNormal < 0);
 	const size_t cnt = pNGon.size();
 	for (size_t idx = 2; idx < cnt; ++idx)
 	{
 		p2 = pNGon[idx];
-		const Vector3DF lTriangleNormal = (p1-p0).Cross(p2-p1);
+		const vec3 lTriangleNormal = (p1-p0).Cross(p2-p1);
 		const bool lNoFlip = (pCutPlane.n*lTriangleNormal < 0);
 		if (lNoFlip)
 		{
@@ -946,7 +949,7 @@ int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane)
 		{
 			continue;
 		}
-		Vector3DF p = lBall->GetRootPosition();
+		vec3 p = lBall->GetRootPosition();
 		const float d = pCutPlane.GetDistance(p);
 		int s = (d < 0)? -1 : +1;
 		if (lSide == 0)
@@ -961,7 +964,7 @@ int BoundManager::CheckIfPlaneSlicesBetweenBalls(const Plane& pCutPlane)
 	return lSide;
 }
 
-bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter, Vector3DF& pCollisionPoint)
+bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane* pCutPlaneDelimiter, vec3& pCollisionPoint)
 {
 	std::vector<Cure::GameObjectId>::iterator x;
 	for (x = mBalls.begin(); x != mBalls.end(); ++x)
@@ -971,7 +974,7 @@ bool BoundManager::CheckBallsPlaneCollition(const Plane& pCutPlane, const Plane*
 		{
 			continue;
 		}
-		Vector3DF p = lBall->GetRootPosition();
+		vec3 p = lBall->GetRootPosition();
 		float lDistance = pCutPlane.GetAbsDistance(p);
 		if (lDistance < BALL_RADIUS)
 		{
@@ -1038,14 +1041,14 @@ bool BoundManager::AttachTouchToBorder(PixelCoord& pPoint, int pMargin, int w, i
 bool BoundManager::DidFinishLevel()
 {
 	int lLevel;
-	CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	mLog.Headlinef(_T("Level %i done!"), lLevel);
 	OnPauseButton(0);
 	UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 0.5f, Random::Uniform(0.98f, 1.02f));
 
 	bool lRunAds;
-	CURE_RTVAR_GET(lRunAds, =, GetVariableScope(), RTVAR_GAME_RUNADS, true);
+	v_get(lRunAds, =, GetVariableScope(), RTVAR_GAME_RUNADS, true);
 	if (lRunAds)
 	{
 		Bound__ShowAd();
@@ -1060,7 +1063,7 @@ int BoundManager::StepLevel(int pCount)
 	mShakesLeft = 2;
 	mPercentDone = 0;
 	float lPreviousScore;
-	CURE_RTVAR_GET(lPreviousScore, =(float), GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
+	v_get(lPreviousScore, =(float), GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
 	if (pCount > 0)
 	{
 		lPreviousScore += mLevelScore;
@@ -1073,10 +1076,10 @@ int BoundManager::StepLevel(int pCount)
 	mQuickCutCount = 0;
 
 	int lLevelNumber;
-	CURE_RTVAR_GET(lLevelNumber, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	v_get(lLevelNumber, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	lLevelNumber = std::max(0, lLevelNumber+pCount);
 	bool lVaryShapes;
-	CURE_RTVAR_GET(lVaryShapes, =, GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
+	v_get(lVaryShapes, =, GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, false);
 	mLevel->GenerateLevel(GetPhysicsManager(), lVaryShapes, lLevelNumber);
 	int lBallCount = lLevelNumber + 2;
 	for (int x = 0; x < lBallCount; ++x)
@@ -1093,8 +1096,8 @@ int BoundManager::StepLevel(int pCount)
 		mBalls.pop_back();
 		DeleteContextObjectDelay(lBall, 0.1f);
 	}
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVEL, lLevelNumber);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SCORE, (double)lPreviousScore);
+	v_set(GetVariableScope(), RTVAR_GAME_LEVEL, lLevelNumber);
+	v_set(GetVariableScope(), RTVAR_GAME_SCORE, (double)lPreviousScore);
 	return lLevelNumber;
 }
 
@@ -1111,8 +1114,8 @@ bool BoundManager::InitializeUniverse()
 {
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	const Vector3DF v;
-	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
+	const vec3 v;
+	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	mCutsLeft = 25;
 	mShakesLeft = 2;
@@ -1150,9 +1153,9 @@ void BoundManager::SetLocalRender(bool pRender)
 
 
 
-void BoundManager::CreateBall(int pIndex, const Vector3DF* pPosition)
+void BoundManager::CreateBall(int pIndex, const vec3* pPosition)
 {
-	Vector3DF lPosition;
+	vec3 lPosition;
 	if (pPosition)
 	{
 		lPosition = *pPosition;
@@ -1213,9 +1216,9 @@ void BoundManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void BoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+void BoundManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
+	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
 {
 	(void)pBody2Id;
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
@@ -1240,7 +1243,7 @@ void BoundManager::ShowInstruction()
 	UiTbc::Button* lResetLevelButton = new UiTbc::Button(GREEN_BUTTON, _T("OK"));
 	lLayouter.AddButton(lResetLevelButton, -9, 2, 3, 0, 1, 1, true);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
+	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 }
 
 void BoundManager::OnPauseButton(UiTbc::Button* pButton)
@@ -1252,7 +1255,7 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	mPauseButton->SetVisible(false);
 
 	bool lRunAds;
-	CURE_RTVAR_GET(lRunAds, =, GetVariableScope(), RTVAR_GAME_RUNADS, true);
+	v_get(lRunAds, =, GetVariableScope(), RTVAR_GAME_RUNADS, true);
 	bool lDidBuy = !lRunAds;
 	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &BoundManager::OnMenuAlternative), 0.6f, lDidBuy? 0.6f : 0.7f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
@@ -1315,13 +1318,13 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		lLayouter.AddCornerButton(lCloseButton, -9);
 	}
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
+	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 }
 
 void BoundManager::OnMenuAlternative(UiTbc::Button* pButton)
 {
 	int lLevel;
-	CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	switch (pButton->GetTag())
 	{
 		case -1:	GetConsoleManager()->PushYieldCommand(_T("step-level +1"));				break;
@@ -1332,7 +1335,7 @@ void BoundManager::OnMenuAlternative(UiTbc::Button* pButton)
 	}
 	mPauseButton->SetVisible(true);
 	HiResTimer::StepCounterShadow();
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
 }
 
 
@@ -1344,11 +1347,11 @@ void BoundManager::ScriptPhysicsTick()
 	if (lPhysicsTime > 1e-5)
 	{
 		bool lIsFirstTime;
-		CURE_RTVAR_GET(lIsFirstTime, =, GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
+		v_get(lIsFirstTime, =, GetVariableScope(), RTVAR_GAME_FIRSTTIME, true);
 		if (lIsFirstTime)
 		{
 			ShowInstruction();
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_FIRSTTIME, false);
+			v_set(GetVariableScope(), RTVAR_GAME_FIRSTTIME, false);
 		}
 		if (!mCutVertices.empty() || !mCutWindowVertices.empty() || mForceCutWindow)
 		{
@@ -1386,7 +1389,7 @@ void BoundManager::ScriptPhysicsTick()
 		{
 			OnPauseButton(0);
 		}
-		Vector3DF lAcceleration = mUiManager->GetAccelerometer();
+		vec3 lAcceleration = mUiManager->GetAccelerometer();
 		lAcceleration.x = -lAcceleration.x;
 		lAcceleration.z = -lAcceleration.z;
 		float lAccelerationLength = lAcceleration.GetLength();
@@ -1434,7 +1437,7 @@ void BoundManager::ScriptPhysicsTick()
 				lIsReallyShaking = true;
 			}
 		}
-		Vector3DF lCenter;
+		vec3 lCenter;
 		std::vector<Cure::GameObjectId>::iterator x;
 		for (x = mBalls.begin(); x != mBalls.end(); ++x)
 		{
@@ -1443,19 +1446,19 @@ void BoundManager::ScriptPhysicsTick()
 			{
 				continue;
 			}
-			Vector3DF p = lBall->GetPosition();
+			vec3 p = lBall->GetPosition();
 			lCenter += p;
-			lBall->SetInitialTransform(TransformationF(QuaternionF(), p));
+			lBall->SetInitialTransform(xform(quat(), p));
 
 			if (lIsReallyShaking)
 			{
-				Vector3DF v = lBall->GetVelocity();
+				vec3 v = lBall->GetVelocity();
 				v += lAcceleration*3.0f;
 				GetPhysicsManager()->SetBodyVelocity(lBall->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), v);
 			}
 		}
 		int lLevel;
-		CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+		v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 		if ((int)mBalls.size() < lLevel+1)
 		{
 			lCenter /= (float)mBalls.size();
@@ -1498,7 +1501,7 @@ void BoundManager::HandleWorldBoundaries()
 		Cure::ContextObject* lObject = x->second;
 		if (lObject->IsLoaded() && lObject->GetPhysics())
 		{
-			const Vector3DF lPosition = lObject->GetPosition();
+			const vec3 lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -10.0f, +10.0f) ||
 				!Math::IsInRange(lPosition.y, -10.0f, +10.0f) ||
 				!Math::IsInRange(lPosition.z, -10.0f, +10.0f))
@@ -1535,7 +1538,7 @@ void BoundManager::MoveCamera(float pFrameTime)
 	}
 
 	int lLevel;
-	CURE_RTVAR_GET(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
+	v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	float lBaseSpeed = 0.15f + lLevel * 0.01f;
 	mCameraAngle += lBaseSpeed*mCameraRotateSpeed*pFrameTime;
 	mCameraRotateSpeed = Math::Lerp(mCameraRotateSpeed, (mCameraRotateSpeed < 0)? -1.0f : 1.0f, 0.07f);
@@ -1543,10 +1546,10 @@ void BoundManager::MoveCamera(float pFrameTime)
 	{
 		mCameraAngle -= 2*PIF;
 	}
-	QuaternionF q(0, Vector3DF(0,1,0));
-	Vector3DF p(0,-CAM_DISTANCE,0);
-	mCameraTransform = TransformationF(q, p);
-	mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(0,0,1), mCameraAngle);
+	quat q(0, vec3(0,1,0));
+	vec3 p(0,-CAM_DISTANCE,0);
+	mCameraTransform = xform(q, p);
+	mCameraTransform.RotateAroundAnchor(vec3(), vec3(0,0,1), mCameraAngle);
 	mCameraTransform.RotatePitch(-sin(mCameraAngle*2)*0.3f);
 	mCameraTransform.MoveUp(sin(mCameraAngle*2)*1.5f);
 }
@@ -1556,7 +1559,7 @@ void BoundManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	mUiManager->SetCameraPosition(mCameraTransform);
 	if (pUpdateMicPosition)
 	{
-		mUiManager->SetMicrophonePosition(mCameraTransform, Vector3DF());
+		mUiManager->SetMicrophonePosition(mCameraTransform, vec3());
 	}
 }
 
@@ -1581,9 +1584,9 @@ void BoundManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float c
 	const float h2 = h*0.5f;
 	const float x = cx - w2*ca - h2*sa;
 	const float y = cy - h2*ca + w2*sa;
-	const Vector2DF c[] = { Vector2DF(x, y), Vector2DF(x+w*ca, y-w*sa), Vector2DF(x+w*ca+h*sa, y+h*ca-w*sa), Vector2DF(x+h*sa, y+h*ca) };
-	const Vector2DF t[] = { Vector2DF(0, 0), Vector2DF(1, 0), Vector2DF(1, 1), Vector2DF(0, 1) };
-#define V(z) std::vector<Vector2DF>(z, z+LEPRA_ARRAY_COUNT(z))
+	const vec2 c[] = { vec2(x, y), vec2(x+w*ca, y-w*sa), vec2(x+w*ca+h*sa, y+h*ca-w*sa), vec2(x+h*sa, y+h*ca) };
+	const vec2 t[] = { vec2(0, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1) };
+#define V(z) std::vector<vec2>(z, z+LEPRA_ARRAY_COUNT(z))
 	mUiManager->GetPainter()->DrawImageFan(pImageId, V(c), V(t));
 }
 
@@ -1600,7 +1603,7 @@ void BoundManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource
 
 
 
-LOG_CLASS_DEFINE(GAME, BoundManager);
+loginstance(GAME, BoundManager);
 
 
 

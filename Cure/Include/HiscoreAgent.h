@@ -93,7 +93,7 @@ private:
 
 	void operator=(const HiscoreAgent&);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

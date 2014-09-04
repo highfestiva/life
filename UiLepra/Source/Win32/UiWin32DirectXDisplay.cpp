@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include <stdio.h>
 #include "../../../Lepra/Include/String.h"
 #include "../../Include/Win32/UiWin32DirectXDisplay.h"

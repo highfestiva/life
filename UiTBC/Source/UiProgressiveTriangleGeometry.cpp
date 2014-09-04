@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiProgressiveTriangleGeometry.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ListUtil.h"
@@ -42,7 +43,7 @@ ProgressiveTriangleGeometry::ProgressiveTriangleGeometry():
 	mNumVertexSplits(0),
 	mVertexSplit(0),
 
-	mColorFormat(TBC::GeometryBase::COLOR_RGBA)
+	mColorFormat(Tbc::GeometryBase::COLOR_RGBA)
 {
 }
 
@@ -73,7 +74,7 @@ ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(ProgressiveTriangleGeom
 	mNumVertexSplits(0),
 	mVertexSplit(0),
 
-	mColorFormat(TBC::GeometryBase::COLOR_RGBA)
+	mColorFormat(Tbc::GeometryBase::COLOR_RGBA)
 {
 	Copy(pProgressiveGeometry);
 }
@@ -105,7 +106,7 @@ ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(TriangleBasedGeometry& 
 	mNumVertexSplits(0),
 	mVertexSplit(0),
 
-	mColorFormat(TBC::GeometryBase::COLOR_RGBA)
+	mColorFormat(Tbc::GeometryBase::COLOR_RGBA)
 {
 	Set(pGeometry);
 }
@@ -150,7 +151,7 @@ void ProgressiveTriangleGeometry::ClearAll()
 
 	mNumVertexSplits      = 0;
 
-	TBC::GeometryBase::SetBoundingRadius(0.0f);
+	Tbc::GeometryBase::SetBoundingRadius(0.0f);
 }
 
 void ProgressiveTriangleGeometry::Copy(ProgressiveTriangleGeometry& pProgressiveGeometry)
@@ -183,12 +184,12 @@ void ProgressiveTriangleGeometry::Copy(ProgressiveTriangleGeometry& pProgressive
 
 	SetTransformation(pProgressiveGeometry.GetTransformation());
 
-	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pProgressiveGeometry.GetBasicMaterialSettings();
-	TBC::GeometryBase::SetBasicMaterialSettings(lMatSettings);
+	const Tbc::GeometryBase::BasicMaterialSettings& lMatSettings = pProgressiveGeometry.GetBasicMaterialSettings();
+	Tbc::GeometryBase::SetBasicMaterialSettings(lMatSettings);
 
 	SetLastFrameVisible(pProgressiveGeometry.GetLastFrameVisible());
 
-	TBC::GeometryBase::SetRendererData(pProgressiveGeometry.GetRendererData());
+	Tbc::GeometryBase::SetRendererData(pProgressiveGeometry.GetRendererData());
 
 	int i;
 	// Copy the current state data.
@@ -294,7 +295,7 @@ void ProgressiveTriangleGeometry::Copy(ProgressiveTriangleGeometry& pProgressive
 		}
 	}
 
-	TBC::GeometryBase::SetBoundingRadius(pProgressiveGeometry.GetBoundingRadius());
+	Tbc::GeometryBase::SetBoundingRadius(pProgressiveGeometry.GetBoundingRadius());
 }
 
 void ProgressiveTriangleGeometry::FindEdgeToCollapse(VertexList& /*pOrgVertexList*/,
@@ -342,8 +343,8 @@ void ProgressiveTriangleGeometry::FindEdgeToCollapse(VertexList& /*pOrgVertexLis
 	     ++lTriIter)
 	{
 		Triangle* lTriangle = *lTriIter;
-		Vector3DF lDiff1;
-		Vector3DF lDiff2;
+		vec3 lDiff1;
+		vec3 lDiff2;
 		Vertex lMid;
 
 		// Test V1 and V2.
@@ -458,9 +459,9 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 	mMaxVertexCount  = pGeometry.GetMaxVertexCount();
 	mMaxTriangleCount = pGeometry.GetMaxTriangleCount();
 
-	TBC::GeometryBase::SetBoundingRadius(pGeometry.GetBoundingRadius());
+	Tbc::GeometryBase::SetBoundingRadius(pGeometry.GetBoundingRadius());
 
-	TBC::GeometryBase::SetBasicMaterialSettings(pGeometry.GetBasicMaterialSettings());
+	Tbc::GeometryBase::SetBasicMaterialSettings(pGeometry.GetBasicMaterialSettings());
 
 	SetLastFrameVisible(pGeometry.GetLastFrameVisible());
 	SetTransformation(pGeometry.GetTransformation());
@@ -502,7 +503,7 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 		if (pGeometry.GetColorData() != 0)
 		{
 			int lSize = 4;
-			if (pGeometry.GetColorFormat() == TBC::GeometryBase::COLOR_RGB)
+			if (pGeometry.GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
 				lSize = 3;
 
 			lVertex->r() = (float)pGeometry.GetColorData()[i * lSize + 0] / 255.0f;
@@ -1048,10 +1049,10 @@ void ProgressiveTriangleGeometry::SetDetailLevel(float pLevelOfDetail)
 		mCurrentVSplit = lTargetVSplit;
 	}
 
-	TBC::GeometryBase::SetVertexDataChanged(true);
-	TBC::GeometryBase::SetColorDataChanged(true);
-	TBC::GeometryBase::SetUVDataChanged(true);
-	TBC::GeometryBase::SetIndexDataChanged(true);
+	Tbc::GeometryBase::SetVertexDataChanged(true);
+	Tbc::GeometryBase::SetColorDataChanged(true);
+	Tbc::GeometryBase::SetUVDataChanged(true);
+	Tbc::GeometryBase::SetIndexDataChanged(true);
 }
 
 void ProgressiveTriangleGeometry::GetCurrentState(TriangleBasedGeometry& pGeometry)
@@ -1064,8 +1065,8 @@ void ProgressiveTriangleGeometry::GetCurrentState(TriangleBasedGeometry& pGeomet
 	              mCurrentIndices,
 	              mCurrentVertexCount,
 	              mCurrentTriangleCount * 3,
-	              TBC::GeometryBase::TRIANGLES,
-	              TBC::GeometryBase::GEOM_DYNAMIC);
+	              Tbc::GeometryBase::TRIANGLES,
+	              Tbc::GeometryBase::GEOM_DYNAMIC);
 }
 
 

@@ -3,12 +3,13 @@
 
 
 
-#include "../Include/TBC.h"
+#include "pch.h"
+#include "../Include/Tbc.h"
 #include <ode/ode.h>
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 

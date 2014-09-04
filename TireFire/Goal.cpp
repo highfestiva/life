@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "Goal.h"
 #include "../Cure/Include/CppContextObject.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
-#include "../TBC/Include/PhysicsTrigger.h"
+#include "../Tbc/Include/PhysicsTrigger.h"
 #include "../UiCure/Include/UiCppContextObject.h"
 
 
@@ -38,18 +39,18 @@ bool Goal::IsTriggered() const
 	return mIsTriggered;
 }
 
-Vector3DF Goal::GetPosition() const
+vec3 Goal::GetPosition() const
 {
-	const TBC::ChunkyBoneGeometry* lGoalGeometry = mTrigger->GetTriggerGeometry(0);
+	const Tbc::ChunkyBoneGeometry* lGoalGeometry = mTrigger->GetTriggerGeometry(0);
 	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGoalGeometry->GetTriggerId());
 }
 
-void Goal::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
+void Goal::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
 {
 	mTrigger = pTrigger;
 }
 
-void Goal::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void Goal::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pOtherObject;
@@ -60,7 +61,7 @@ void Goal::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* p
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Goal);
+loginstance(GAME_CONTEXT_CPP, Goal);
 
 
 

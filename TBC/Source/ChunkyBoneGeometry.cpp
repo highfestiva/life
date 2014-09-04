@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ChunkyBoneGeometry.h"
 #include <algorithm>
 #include "../../Lepra/Include/LepraAssert.h"
@@ -14,7 +15,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -133,9 +134,9 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		else if (mBodyData.mJointType == JOINT_SUSPEND_HINGE || mBodyData.mJointType == JOINT_HINGE2)
 		{
 			// Calculate axis from given euler angles.
-			Vector3DF lSuspensionAxis(-1, 0, 0);
-			Vector3DF lHingeAxis(0, 0, 1);
-			QuaternionF lRotator;
+			vec3 lSuspensionAxis(-1, 0, 0);
+			vec3 lHingeAxis(0, 0, 1);
+			quat lRotator;
 			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
 			lSuspensionAxis = lRotator*lSuspensionAxis;
 			lHingeAxis = lRotator*lHingeAxis;
@@ -153,13 +154,13 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		else if (mBodyData.mJointType == JOINT_HINGE)
 		{
 			// Calculate axis from given euler angles.
-			Vector3DF lHingeAxis(0, 0, 1);
-			QuaternionF lHingeRotator;
+			vec3 lHingeAxis(0, 0, 1);
+			quat lHingeRotator;
 			lHingeRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
 			lHingeAxis = lHingeRotator*lHingeAxis;
 
-			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
-			const Vector3DF lAnchor = lBodyTransform.GetPosition() + GetOriginalOffset();
+			const xform& lBodyTransform = pStructure->GetTransformation(this);
+			const vec3 lAnchor = lBodyTransform.GetPosition() + GetOriginalOffset();
 			mJointId = pPhysics->CreateHingeJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lHingeAxis);
 			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], mBodyData.mBounce);
@@ -170,8 +171,8 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		else if (mBodyData.mJointType == JOINT_SLIDER)
 		{
 			// Calculate axis from given euler angles.
-			Vector3DF lAxis(0, 0, 1);
-			QuaternionF lRotator;
+			vec3 lAxis(0, 0, 1);
+			quat lRotator;
 			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
 			lAxis = lRotator*lAxis;
 
@@ -184,16 +185,16 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		else if (mBodyData.mJointType == JOINT_UNIVERSAL)
 		{
 			// Calculate axis from given euler angles.
-			Vector3DF lAxis1(0, 0, 1);
-			Vector3DF lAxis2(0, 1, 0);
-			QuaternionF lRotator;
+			vec3 lAxis1(0, 0, 1);
+			vec3 lAxis2(0, 1, 0);
+			quat lRotator;
 			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
 			lAxis1 = lRotator*lAxis1;
 			lAxis2 = lRotator*lAxis2;
 
-			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
-			const Vector3DF lAnchor = lBodyTransform.GetPosition() +
-				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
+			const xform& lBodyTransform = pStructure->GetTransformation(this);
+			const vec3 lAnchor = lBodyTransform.GetPosition() +
+				vec3(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
 			mJointId = pPhysics->CreateUniversalJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lAxis1, lAxis2);
 			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
@@ -206,9 +207,9 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		}
 		else if (mBodyData.mJointType == JOINT_BALL)
 		{
-			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
-			const Vector3DF lAnchor = lBodyTransform.GetPosition() +
-				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
+			const xform& lBodyTransform = pStructure->GetTransformation(this);
+			const vec3 lAnchor = lBodyTransform.GetPosition() +
+				vec3(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
 			mJointId = pPhysics->CreateBallJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor);
 			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
@@ -332,9 +333,9 @@ void ChunkyBoneGeometry::AddConnectorType(ConnectorType pType)
 	}
 }
 
-Vector3DF ChunkyBoneGeometry::GetOriginalOffset() const
+vec3 ChunkyBoneGeometry::GetOriginalOffset() const
 {
-	return Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
+	return vec3(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
 }
 
 float ChunkyBoneGeometry::GetImpactFactor() const
@@ -449,7 +450,7 @@ ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData):
 
 bool ChunkyBoneCapsule::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	int pForceListenerId, PhysicsManager::BodyType pType,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateCapsule(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
@@ -458,7 +459,7 @@ bool ChunkyBoneCapsule::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 }
 
 bool ChunkyBoneCapsule::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mTriggerId = pPhysics->CreateCapsuleTrigger(pTransform, mRadius, mLength, pTrigListenerId);
@@ -479,9 +480,9 @@ void ChunkyBoneCapsule::SaveChunkyData(const ChunkyPhysics* pStructure, void* pD
 	lData[1] = Endian::HostToBigF(mLength);
 }
 
-Vector3DF ChunkyBoneCapsule::GetShapeSize() const
+vec3 ChunkyBoneCapsule::GetShapeSize() const
 {
-	return (Vector3DF(mRadius*2, mRadius*2, mLength+mRadius*2));
+	return (vec3(mRadius*2, mRadius*2, mLength+mRadius*2));
 }
 
 void ChunkyBoneCapsule::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
@@ -507,7 +508,7 @@ ChunkyBoneCylinder::ChunkyBoneCylinder(const BodyData& pBodyData):
 
 bool ChunkyBoneCylinder::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	int pForceListenerId, PhysicsManager::BodyType pType,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateCylinder(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
@@ -516,16 +517,16 @@ bool ChunkyBoneCylinder::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 }
 
 bool ChunkyBoneCylinder::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mTriggerId = pPhysics->CreateCylinderTrigger(pTransform, mRadius, mLength, pTrigListenerId);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
-Vector3DF ChunkyBoneCylinder::GetShapeSize() const
+vec3 ChunkyBoneCylinder::GetShapeSize() const
 {
-	return (Vector3DF(mRadius*2, mRadius*2, mLength));
+	return (vec3(mRadius*2, mRadius*2, mLength));
 }
 
 ChunkyBoneGeometry::GeometryType ChunkyBoneCylinder::GetGeometryType() const
@@ -543,7 +544,7 @@ ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData):
 
 bool ChunkyBoneSphere::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	int pForceListenerId, PhysicsManager::BodyType pType,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateSphere(pIsRoot, pTransform, mBodyData.mMass, mRadius, pType, mBodyData.mFriction,
@@ -552,7 +553,7 @@ bool ChunkyBoneSphere::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 }
 
 bool ChunkyBoneSphere::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mTriggerId = pPhysics->CreateSphereTrigger(pTransform, mRadius, pTrigListenerId);
@@ -572,9 +573,9 @@ void ChunkyBoneSphere::SaveChunkyData(const ChunkyPhysics* pStructure, void* pDa
 	lData[0] = Endian::HostToBigF(mRadius);
 }
 
-Vector3DF ChunkyBoneSphere::GetShapeSize() const
+vec3 ChunkyBoneSphere::GetShapeSize() const
 {
-	return (Vector3DF(mRadius*2, mRadius*2, mRadius*2));
+	return (vec3(mRadius*2, mRadius*2, mRadius*2));
 }
 
 void ChunkyBoneSphere::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
@@ -599,7 +600,7 @@ ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData):
 
 bool ChunkyBoneBox::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	int pForceListenerId, PhysicsManager::BodyType pType,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateBox(pIsRoot, pTransform, mBodyData.mMass, mSize, pType, mBodyData.mFriction,
@@ -608,7 +609,7 @@ bool ChunkyBoneBox::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 }
 
 bool ChunkyBoneBox::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mTriggerId = pPhysics->CreateBoxTrigger(pTransform, mSize, pTrigListenerId);
@@ -630,7 +631,7 @@ void ChunkyBoneBox::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData)
 	lData[2] = Endian::HostToBigF(mSize.z);
 }
 
-Vector3DF ChunkyBoneBox::GetShapeSize() const
+vec3 ChunkyBoneBox::GetShapeSize() const
 {
 	return (mSize);
 }
@@ -668,7 +669,7 @@ ChunkyBoneMesh::~ChunkyBoneMesh()
 
 bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	int pForceListenerId, PhysicsManager::BodyType,
-	const TransformationF& pTransform)
+	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
@@ -676,7 +677,7 @@ bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, int, const TransformationF&)
+bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, int, const xform&)
 {
 	deb_assert(false);
 	return (false);
@@ -723,9 +724,9 @@ void ChunkyBoneMesh::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	}
 }
 
-Vector3DF ChunkyBoneMesh::GetShapeSize() const
+vec3 ChunkyBoneMesh::GetShapeSize() const
 {
-	return (Vector3DF(10,10,10));	// Implement if you want to be able to debug mesh EXTENTS. Doesn't seem very interesting...
+	return (vec3(10,10,10));	// Implement if you want to be able to debug mesh EXTENTS. Doesn't seem very interesting...
 }
 
 void ChunkyBoneMesh::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
@@ -780,7 +781,7 @@ void ChunkyBoneMesh::RelocatePointers(const ChunkyPhysics* pTarget, const Chunky
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, ChunkyBoneGeometry);
+loginstance(PHYSICS, ChunkyBoneGeometry);
 
 
 

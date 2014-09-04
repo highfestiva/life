@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/LepraTypes.h"
 #include "../Include/TiffLoader.h"
 #include "../Include/Graphics2D.h"

@@ -25,11 +25,11 @@
 #include "../../Lepra/Include/Vector2D.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "TerrainPatch.h"
-#include "TBC.h"
+#include "Tbc.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 // The underlying function does generally not generate a hightfield, but instead a plain mesh.
@@ -37,25 +37,25 @@ namespace TBC
 class TerrainFunction : public TerrainPatch::Modifier
 {
 public:
-	TerrainFunction(float pAmplitude, const Vector2DF& pPosition, float pInnerRadius, float pOuterRadius);
+	TerrainFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius);
 	virtual ~TerrainFunction();
 
 	void AddFunction(TerrainPatch& pPatch) const;
 
 	float GetAmplitude() const;
-	const Vector2DF& GetPosition() const;
+	const vec2& GetPosition() const;
 	float GetInnerRadius() const;
 	float GetOuterRadius() const;
 
 	// From TerrainPatch::Modifier
-	void ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pVertex) const;
+	void ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const;
 
 	// Parameters pRelativeNormalizedX, pRelativeNormalizedY and pScale have been scaled to inclusive range [0,1].
-	virtual void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const = 0;
+	virtual void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const = 0;
 
 protected:
 	float mAmplitude;
-	Vector2DF mPosition;
+	vec2 mPosition;
 	float mInnerRadius;
 	float mOuterRadius;
 };
@@ -72,7 +72,7 @@ public:
 	// Adds all functions at once.
 	void AddFunctions(TerrainPatch& pPatch) const;
 
-	void ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pVertex) const;
+	void ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const;
 
 private:
 	TerrainFunction** mTFArray;
@@ -85,10 +85,10 @@ private:
 class TerrainConeFunction: public TerrainFunction
 {
 public:
-	TerrainConeFunction(float pAmplitude, const Vector2DF& pPosition, float pInnerRadius, float pOuterRadius);
+	TerrainConeFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius);
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const;
+	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
 
 	float mRadiusDifferance;
 	float mSlopeLength;
@@ -100,23 +100,23 @@ private:
 class TerrainHemisphereFunction: public TerrainFunction
 {
 public:
-	TerrainHemisphereFunction(float pAmplitude, const Vector2DF& pPosition, float pInnerRadius, float pOuterRadius);
+	TerrainHemisphereFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius);
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const;
+	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
 };
 
 // Generates a dune (from -X to +X) which is really a spline profile (in the XZ-plane).
 class TerrainDuneFunction: public TerrainFunction
 {
 public:
-	TerrainDuneFunction(float pWidthProportion, float pCurvature, float pAmplitude, const Vector2DF& pPosition, float pInnerRadius, float pOuterRadius);
+	TerrainDuneFunction(float pWidthProportion, float pCurvature, float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius);
 	virtual ~TerrainDuneFunction();
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const;
+	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
 
-	CubicDeCasteljauSpline<Vector2DF, float>* mProfileSpline;
+	CubicDeCasteljauSpline<vec2, float>* mProfileSpline;
 	float mWidthProportion;
 };
 
@@ -139,7 +139,7 @@ public:
 	virtual ~TerrainAmplitudeFunction();
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const;
+	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
 
 	CubicDeCasteljauSpline<float, float, float>* mAmplitudeSpline;
 };
@@ -151,7 +151,7 @@ public:
 	TerrainWidthFunction(float pWidthFactor, TerrainFunction* pFunction);
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const;
+	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
 
 	float mWidthFactor;
 };
@@ -164,7 +164,7 @@ public:
 	virtual ~TerrainPushFunction();
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const;
+	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
 
 	CubicDeCasteljauSpline<float, float, float>* mPushSpline;
 };
@@ -176,7 +176,7 @@ public:
 	TerrainRotateFunction(float pAngle, TerrainFunction* pFunction);
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const;
+	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
 
 	float mAngle;
 };

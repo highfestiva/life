@@ -14,7 +14,7 @@
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
 #include "UiRenderer.h"
 #include "UiShadowVolume.h"
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include <list>
 
 
@@ -88,20 +88,20 @@ public:
 	void AddAmbience(float pRed, float pGreen, float pBlue);
 
 	virtual LightID AddDirectionalLight(LightHint pHint,
-		const Vector3DF& pDir,
-		const Vector3DF& pColor,
+		const vec3& pDir,
+		const vec3& pColor,
 		float pShadowRange);
 
 	virtual LightID AddPointLight(LightHint pHint,
-		const Vector3DF& pPos,
-		const Vector3DF& pColor,
+		const vec3& pPos,
+		const vec3& pColor,
 		float pLightRadius,
 		float pShadowRange);
 
 	virtual LightID AddSpotLight(LightHint pHint,
-		const Vector3DF& pPos,
-		const Vector3DF& pDir,
-		const Vector3DF& pColor,
+		const vec3& pPos,
+		const vec3& pDir,
+		const vec3& pColor,
 		float pCutoffAngle,
 		float pSpotExponent,
 		float pLightRadius,
@@ -110,8 +110,8 @@ public:
 	virtual void RemoveLight(LightID pLightID);
 	virtual void EnableAllLights(bool pEnable);
 
-	void SetLightPosition(LightID pLightID, const Vector3DF& pPos);
-	void SetLightDirection(LightID pLightID, const Vector3DF& pDir);
+	void SetLightPosition(LightID pLightID, const vec3& pPos);
+	void SetLightDirection(LightID pLightID, const vec3& pDir);
 
 	virtual TextureID AddTexture(Texture* pTexture);
 
@@ -119,8 +119,8 @@ public:
 	bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType);
 
 	virtual unsigned RenderScene();
-	virtual void RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards);
-	virtual void RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation);
+	virtual void RenderBillboards(Tbc::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards);
+	virtual void RenderRelative(Tbc::GeometryBase* pGeometry, const quat* pLightOrientation);
 
 	// Only used by the OpenGL material classes.
 	int GetEnvMapID();
@@ -128,10 +128,10 @@ public:
 
 	void SetGlobalMaterialReflectance(float pRed, float pGreen, float pBlue, float pSpecularity);
 
-	bool PreRender(TBC::GeometryBase* pGeometry);
-	void PostRender(TBC::GeometryBase* pGeometry);
+	bool PreRender(Tbc::GeometryBase* pGeometry);
+	void PostRender(Tbc::GeometryBase* pGeometry);
 
-	virtual void DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor);
+	virtual void DrawLine(const vec3& pPosition, const vec3& pVector, const Color& pColor);
 
 protected:
 	virtual void DoSetClippingRect(const PixelRect& pRect);
@@ -149,9 +149,9 @@ protected:
 
 	const Canvas* GetMap(int pMapType, int pMipMapLevel, Texture* pUserTexture);
 
-	void BindGeometry(TBC::GeometryBase* pUserGeometry, GeometryID pID, MaterialType pMaterialType);
+	void BindGeometry(Tbc::GeometryBase* pUserGeometry, GeometryID pID, MaterialType pMaterialType);
 	bool BindShadowGeometry(UiTbc::ShadowVolume* pShadowGeometry, LightHint pLightHint);
-	void ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption);
+	void ReleaseGeometry(Tbc::GeometryBase* pUserGeometry, GeomReleaseOption pOption);
 
 private:
 
@@ -188,9 +188,9 @@ private:
 
 	int mNumTextureUnits;	// Number of OpenGL texture units available.
 
-	TransformationF mCamSpaceTransformation;	// Optimization to not have to run constructor.
+	xform mCamSpaceTransformation;	// Optimization to not have to run constructor.
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

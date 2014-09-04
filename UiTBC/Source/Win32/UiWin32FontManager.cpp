@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/Win32/UiWin32FontManager.h"
 #include "../../../UiLepra/Include/Win32/UiWin32DisplayManager.h"
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Life.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/IntAttribute.h"

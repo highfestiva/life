@@ -4,8 +4,9 @@
 
 
 
+#include "pch.h"
 #include "VehicleElevator.h"
-#include "../TBC/Include/PhysicsTrigger.h"
+#include "../Tbc/Include/PhysicsTrigger.h"
 #include "Vehicle.h"
 #include "Game.h"
 
@@ -26,9 +27,9 @@ VehicleElevator::~VehicleElevator()
 {
 }
 
-void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void VehicleElevator::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
-	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
+	const Tbc::PhysicsTrigger* lTrigger = (const Tbc::PhysicsTrigger*)GetTrigger(pTriggerId);
 	deb_assert(lTrigger);
 	if (lTrigger->GetPriority() > -100)
 	{
@@ -49,7 +50,7 @@ void VehicleElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Conte
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, VehicleElevator);
+loginstance(GAME_CONTEXT_CPP, VehicleElevator);
 
 
 

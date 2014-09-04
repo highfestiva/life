@@ -206,7 +206,7 @@ TEMPLATE inline Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVec, con
 typedef RotationMatrix<float> RotationMatrixF;
 typedef RotationMatrix<double> RotationMatrixD;
 
-const RotationMatrixF g3x3IdentityMatrixF(Vector3DF(1, 0, 0), Vector3DF(0, 1, 0), Vector3DF(0, 0, 1));
+const RotationMatrixF g3x3IdentityMatrixF(vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
 const RotationMatrixD g3x3IdentityMatrixD(Vector3DD(1, 0, 0), Vector3DD(0, 1, 0), Vector3DD(0, 0, 1));
 
 

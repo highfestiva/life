@@ -26,7 +26,7 @@ protected:
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	virtual void DidTrigger(Cure::ContextObject* pBody);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

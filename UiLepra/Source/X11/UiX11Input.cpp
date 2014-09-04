@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/X11/UiX11Input.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../Include/X11/UiX11Core.h"
@@ -46,7 +47,7 @@ X11InputElement::~X11InputElement()
 }
 
 
-LOG_CLASS_DEFINE(UI_INPUT, X11InputElement);
+loginstance(UI_INPUT, X11InputElement);
 
 
 
@@ -304,7 +305,7 @@ void X11InputDevice::PollEvents()
 
 
 
-LOG_CLASS_DEFINE(UI_INPUT, X11InputDevice);
+loginstance(UI_INPUT, X11InputDevice);
 
 
 

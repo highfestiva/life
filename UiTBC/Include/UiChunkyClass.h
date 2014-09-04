@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Transformation.h"
-#include "../../TBC/Include/ChunkyClass.h"
+#include "../../Tbc/Include/ChunkyClass.h"
 
 
 
@@ -18,14 +18,14 @@ namespace UiTbc
 
 
 
-class ChunkyClass: public TBC::ChunkyClass
+class ChunkyClass: public Tbc::ChunkyClass
 {
 public:
 	struct Material
 	{
-		Vector3DF mAmbient;
-		Vector3DF mDiffuse;
-		Vector3DF mSpecular;
+		vec3 mAmbient;
+		vec3 mDiffuse;
+		vec3 mSpecular;
 		float mShininess;
 		float mAlpha;
 		bool mSmooth;
@@ -39,9 +39,9 @@ public:
 	ChunkyClass();
 	virtual ~ChunkyClass();
 
-	void AddMesh(int pPhysIndex, const str& pMeshBaseName, const TransformationF& pTransform, float pScale);
+	void AddMesh(int pPhysIndex, const str& pMeshBaseName, const xform& pTransform, float pScale);
 	size_t GetMeshCount() const;
-	void GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName, TransformationF& pTransform, float& pScale) const;
+	void GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName, xform& pTransform, float& pScale) const;
 	void SetLastMeshMaterial(const Material& pMaterial);
 	const Material& GetMaterial(size_t pMeshIndex) const;
 
@@ -49,7 +49,7 @@ private:
 	struct PhysMeshEntry
 	{
 		PhysMeshEntry(int pPhysIndex, const str& pMeshBaseName,
-			const TransformationF& pTransform, float pScale):
+			const xform& pTransform, float pScale):
 			mPhysIndex(pPhysIndex),
 			mMeshBaseName(pMeshBaseName),
 			mTransform(pTransform),
@@ -58,14 +58,14 @@ private:
 		}
 		int mPhysIndex;
 		str mMeshBaseName;
-		TransformationF mTransform;
+		xform mTransform;
 		float mScale;
 		Material mMaterial;
 	};
 	typedef std::vector<PhysMeshEntry> PhysMeshArray;
 	PhysMeshArray mMeshArray;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "Spawner.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/GameManager.h"
 #include "../Lepra/Include/Random.h"
-#include "../TBC/Include/PhysicsSpawner.h"
+#include "../Tbc/Include/PhysicsSpawner.h"
 #include "Game.h"
 
 
@@ -30,7 +31,7 @@ Spawner::~Spawner()
 
 
 
-void Spawner::SetSpawner(const TBC::PhysicsSpawner* pSpawner)
+void Spawner::SetSpawner(const Tbc::PhysicsSpawner* pSpawner)
 {
 	Parent::SetSpawner(pSpawner);
 
@@ -39,8 +40,8 @@ void Spawner::SetSpawner(const TBC::PhysicsSpawner* pSpawner)
 		const str lSpawnObject = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
 		ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		AddChild(lObject);
-		Vector3DF lInitialVelocity;
-		lObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF(0.5f,0.5f,0.5f), 0, lInitialVelocity));
+		vec3 lInitialVelocity;
+		lObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), vec3(0.5f,0.5f,0.5f), 0, lInitialVelocity));
 		lObject->SetRootVelocity(lInitialVelocity);
 		lObject->StartLoading();
 	}
@@ -48,7 +49,7 @@ void Spawner::SetSpawner(const TBC::PhysicsSpawner* pSpawner)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Spawner);
+loginstance(GAME_CONTEXT_CPP, Spawner);
 
 
 

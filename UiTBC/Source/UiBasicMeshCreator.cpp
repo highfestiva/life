@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiBasicMeshCreator.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include <algorithm>
@@ -11,7 +12,7 @@
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../Include/UiAnimatedGeometry.h"
-#include "../Include/UiTBC.h"
+#include "../Include/UiTbc.h"
 #include "../Include/UiTriangleBasedGeometry.h"
 
 
@@ -34,8 +35,8 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 			     pXSegments * pZSegments * 4 +
 			     pYSegments * pZSegments * 4;
 
-	Vector3DF* lV = new Vector3DF[lVertexCount];
-	Vector3DF* lN = new Vector3DF[lVertexCount];
+	vec3* lV = new vec3[lVertexCount];
+	vec3* lN = new vec3[lVertexCount];
 	uint32* lIndices = new uint32[lNumTriangles * 3];
 
 	::memset(lIndices, 0, lNumTriangles * 3 * sizeof(uint32));
@@ -246,8 +247,8 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 	lGeometry = new TriangleBasedGeometry(lV, lN, 0, 0,
 					    TriangleBasedGeometry::COLOR_RGB,
 					    lIndices, lVertexCount, lNumTriangles * 3,
-					    TBC::GeometryBase::TRIANGLES,
-					    TBC::GeometryBase::GEOM_STATIC);
+					    Tbc::GeometryBase::TRIANGLES,
+					    Tbc::GeometryBase::GEOM_STATIC);
 
 	delete[] lV;
 	delete[] lN;
@@ -358,8 +359,8 @@ TriangleBasedGeometry* BasicMeshCreator::CreateEllipsoid(float pXRadius,
 		new TriangleBasedGeometry(lV, lN, 0, 0,
 					  TriangleBasedGeometry::COLOR_RGB,
 					  lI, lVertexCount, lNumTriangles * 3, 
-					  TBC::GeometryBase::TRIANGLES,
-					  TBC::GeometryBase::GEOM_STATIC);
+					  Tbc::GeometryBase::TRIANGLES,
+					  Tbc::GeometryBase::GEOM_STATIC);
 	delete[] lV;
 	delete[] lN;
 	delete[] lI;
@@ -435,8 +436,8 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCone(float pBaseRadius,
 		new TriangleBasedGeometry(lV, lN, 0, 0,
 					  TriangleBasedGeometry::COLOR_RGB,
 					  lI, lVertexCount, lNumTriangles * 3,
-					  TBC::GeometryBase::TRIANGLES,
-					  TBC::GeometryBase::GEOM_STATIC);
+					  Tbc::GeometryBase::TRIANGLES,
+					  Tbc::GeometryBase::GEOM_STATIC);
 
 	delete[] lV;
 	delete[] lN;
@@ -550,8 +551,8 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCylinder(float pBaseRadius,
 		new TriangleBasedGeometry(lV, lN, 0, 0,
 					  TriangleBasedGeometry::COLOR_RGB,
 					  lI, lVertexCount, lNumTriangles * 3,
-					  TBC::GeometryBase::TRIANGLES,
-					  TBC::GeometryBase::GEOM_STATIC);
+					  Tbc::GeometryBase::TRIANGLES,
+					  Tbc::GeometryBase::GEOM_STATIC);
 
 	delete[] lV;
 	delete[] lN;
@@ -632,8 +633,8 @@ TriangleBasedGeometry* BasicMeshCreator::CreateTorus(float pRadius,
 		new TriangleBasedGeometry(lV, lN, 0, 0,
 					  TriangleBasedGeometry::COLOR_RGB,
 					  lI, lVertexCount, lNumTriangles * 3,
-					  TBC::GeometryBase::TRIANGLES,
-					  TBC::GeometryBase::GEOM_STATIC);
+					  Tbc::GeometryBase::TRIANGLES,
+					  Tbc::GeometryBase::GEOM_STATIC);
 
 	delete[] lV;
 	delete[] lN;

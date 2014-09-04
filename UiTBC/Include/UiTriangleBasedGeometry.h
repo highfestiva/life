@@ -12,8 +12,8 @@
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../../Lepra/Include/Vector2D.h"
-#include "../../TBC/Include/GeometryBase.h"
-#include "UiTBC.h"
+#include "../../Tbc/Include/GeometryBase.h"
+#include "UiTbc.h"
 
 
 
@@ -22,22 +22,22 @@ namespace UiTbc
 
 
 
-class TriangleBasedGeometry: public TBC::GeometryBase
+class TriangleBasedGeometry: public Tbc::GeometryBase
 {
 public:
 	TriangleBasedGeometry();
 	TriangleBasedGeometry(const TriangleBasedGeometry& pGeometry);
 
-	TriangleBasedGeometry(const Vector3DF* pVertices,      // Must containt pVertexCount elements.
-			      const Vector3DF* pVertexNormals, // NULL or must contain pVertexCount elements.
+	TriangleBasedGeometry(const vec3* pVertices,      // Must containt pVertexCount elements.
+			      const vec3* pVertexNormals, // NULL or must contain pVertexCount elements.
 			      const Vector2D<float>* pUV,      // NULL or must contain pVertexCount elements.
 			      const Color* pColor,             // NULL or must contain pVertexCount elements.
 			      ColorFormat pColorFormat,
 			      const Lepra::uint32* pIndices,
 			      unsigned int pVertexCount,
 			      unsigned int pIndexCount,
-			      TBC::GeometryBase::PrimitiveType pPrimitiveType,
-			      TBC::GeometryBase::GeometryVolatility pGeomType);
+			      Tbc::GeometryBase::PrimitiveType pPrimitiveType,
+			      Tbc::GeometryBase::GeometryVolatility pGeomType);
 
 	TriangleBasedGeometry(const float* pVertexData,
 			      const float* pVertexNormals,
@@ -47,22 +47,22 @@ public:
 			      const Lepra::uint32* pIndices,
 			      unsigned int pVertexCount,
 			      unsigned int pIndexCount,
-			      TBC::GeometryBase::PrimitiveType pPrimitiveType,
-			      TBC::GeometryBase::GeometryVolatility pGeomType);
+			      Tbc::GeometryBase::PrimitiveType pPrimitiveType,
+			      Tbc::GeometryBase::GeometryVolatility pGeomType);
 	virtual ~TriangleBasedGeometry();
 
 	void Copy(const TriangleBasedGeometry& pGeometry);
 
-	void Set(const Vector3DF* pVertices,
-		 const Vector3DF* pVertexNormals,
+	void Set(const vec3* pVertices,
+		 const vec3* pVertexNormals,
 		 const Vector2D<float>* pUV,
 		 const Color* pColor,
 		 ColorFormat pColorFormat,
 		 const Lepra::uint32* pIndices,
 		 unsigned int pVertexCount,
 		 unsigned int pIndexCount,
-		 TBC::GeometryBase::PrimitiveType pPrimitiveType,
-		 TBC::GeometryBase::GeometryVolatility pGeomType);
+		 Tbc::GeometryBase::PrimitiveType pPrimitiveType,
+		 Tbc::GeometryBase::GeometryVolatility pGeomType);
 
 	void Set(const float* pVertexData,
 		 const float* pVertexNormals,
@@ -72,8 +72,8 @@ public:
 		 const Lepra::uint32* pIndices,
 		 unsigned int pVertexCount,
 		 unsigned int pIndexCount,
-		 TBC::GeometryBase::PrimitiveType pPrimitiveType,
-		 TBC::GeometryBase::GeometryVolatility pGeomType);
+		 Tbc::GeometryBase::PrimitiveType pPrimitiveType,
+		 Tbc::GeometryBase::GeometryVolatility pGeomType);
 
 	// AddUVSet() returns the index of the uv set.
 	// pUVData must contain mVertexCount * 2 elements.
@@ -105,7 +105,7 @@ public:
 	void ClearAll();
 
 	// Will erase all current data.
-	void SetPolygon(Vector3DF* pVertices, unsigned int pVertexCount);
+	void SetPolygon(vec3* pVertices, unsigned int pVertexCount);
 
 	// Flips the triangles from being clockwise to counter clockwise,
 	// and vice versa. FlipTriangle() only works if the primitive type
@@ -119,7 +119,7 @@ public:
 	// so use it with care. 
 	void SplitVertices();
 
-	void Translate(const Vector3DF& pPositionOffset);
+	void Translate(const vec3& pPositionOffset);
 	void Rotate(const RotationMatrix<float>& pRotation);
 
 	// This definitly won't work if "this" has a primitive type other than TRIANGLES.
@@ -131,7 +131,7 @@ public:
 	// The caller is responsible of deleting this array.
 	TriangleBasedGeometry* GetSeparateObjects(int& pNumObjects);
 
-	// Overloads from TBC::GeometryBase.
+	// Overloads from Tbc::GeometryBase.
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility pVolatility);
 
@@ -148,8 +148,8 @@ private:
 
 	ColorFormat mColorFormat;
 
-	TBC::GeometryBase::GeometryVolatility mGeometryVolatility;
-	TBC::GeometryBase::PrimitiveType mPrimitiveType;
+	Tbc::GeometryBase::GeometryVolatility mGeometryVolatility;
+	Tbc::GeometryBase::PrimitiveType mPrimitiveType;
 };
 
 

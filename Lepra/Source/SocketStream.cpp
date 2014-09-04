@@ -5,6 +5,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/SocketStream.h"
 #include "../Include/Socket.h"
 
@@ -54,18 +55,18 @@ IOError SocketInputStream::ReadRaw(void* pData, size_t pLength)
 
 IOError SocketInputStream::Skip(size_t pLength)
 {
-	uint8 lBuffer[SocketBase::BUFFER_SIZE];
-	size_t lCount = pLength / SocketBase::BUFFER_SIZE;
+	uint8 lBuffer[Datagram::BUFFER_SIZE];
+	size_t lCount = pLength / Datagram::BUFFER_SIZE;
 	IOError lIOError;
 
 	for (unsigned i = 0; i < lCount; i++)
 	{
-		lIOError = ReadRaw(lBuffer, SocketBase::BUFFER_SIZE);
+		lIOError = ReadRaw(lBuffer, Datagram::BUFFER_SIZE);
 		if (lIOError != IO_OK)
 			return lIOError;
 	}
 
-	return ReadRaw(lBuffer, pLength - lCount * SocketBase::BUFFER_SIZE);
+	return ReadRaw(lBuffer, pLength - lCount * Datagram::BUFFER_SIZE);
 }
 
 

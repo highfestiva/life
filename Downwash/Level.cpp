@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Level.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
@@ -29,7 +30,7 @@ void Level::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("textures"), 0, 1);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("textures"), 0, 1);
 	if (lTag)
 	{
 		mBackgroundName = lTag->mStringValueList[0];

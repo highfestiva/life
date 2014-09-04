@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "OptionsManager.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -86,7 +87,7 @@ OptionsManager::ValueArray* OptionsManager::GetValuePointers(const str& pKey, bo
 
 bool OptionsManager::SetDefault(int)
 {
-	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F11"));
+	v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F11"));
 	return (true);
 }
 
@@ -162,7 +163,7 @@ void OptionsManager::operator=(const OptionsManager&)
 
 
 
-LOG_CLASS_DEFINE(UI_INPUT, OptionsManager);
+loginstance(UI_INPUT, OptionsManager);
 
 
 

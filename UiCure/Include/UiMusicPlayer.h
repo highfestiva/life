@@ -64,7 +64,7 @@ private:
 	float mPostSongPauseTime;
 	HiResTimer mModeSetTimer;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

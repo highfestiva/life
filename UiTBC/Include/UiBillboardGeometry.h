@@ -9,8 +9,8 @@
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../../Lepra/Include/Vector2D.h"
-#include "../../TBC/Include/GeometryBase.h"
-#include "UiTBC.h"
+#include "../../Tbc/Include/GeometryBase.h"
+#include "UiTbc.h"
 
 
 
@@ -20,7 +20,7 @@ namespace UiTbc
 
 
 // If a billboard uses texture variations, they should be layed out equidistant horizontally on the same map.
-class BillboardGeometry: public TBC::GeometryBase
+class BillboardGeometry: public Tbc::GeometryBase
 {
 public:
 	BillboardGeometry(float pAspectRatio, unsigned pUVSetCount);
@@ -39,7 +39,7 @@ public:
 	virtual vtx_idx_t* GetIndexData() const;
 	virtual uint8* GetColorData() const;
 
-	// Overloads from TBC::GeometryBase.
+	// Overloads from Tbc::GeometryBase.
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility pVolatility);
 

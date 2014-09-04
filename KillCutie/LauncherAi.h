@@ -33,11 +33,11 @@ private:
 
 	Game* mGame;
 	HiResTimer mLastShot;
-	Vector3DF mTargetOffset;
+	vec3 mTargetOffset;
 	bool mDidShoot;
 	int mShotCount;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

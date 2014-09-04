@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "DownwashConsoleManager.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Lepra/Include/CyclicArray.h"
@@ -148,7 +149,7 @@ int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, DownwashConsoleManager);
+loginstance(CONSOLE, DownwashConsoleManager);
 
 
 

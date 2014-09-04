@@ -3,6 +3,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiOggAlStream.h"
 #include <ogg/ogg.h>
 #include "../Include/UiSoundManager.h"

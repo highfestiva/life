@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "DownwashManager.h"
 #include <algorithm>
 #include "../Cure/Include/ContextManager.h"
@@ -34,24 +35,25 @@
 #include "../Life/Explosion.h"
 #include "../Life/ProjectileUtil.h"
 #include "../Life/Spawner.h"
-#include "../TBC/Include/PhysicsTrigger.h"
+#include "../Tbc/Include/PhysicsTrigger.h"
 #include "../UiCure/Include/UiBurnEmitter.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiDebugRenderer.h"
+#include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiJetEngineEmitter.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiSoundReleaser.h"
 #include "../UiLepra/Include/UiTouchstick.h"
-#include "../UiTBC/Include/GUI/UiCheckButton.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFixedLayouter.h"
-#include "../UiTBC/Include/GUI/UiRadioButton.h"
-#include "../UiTBC/Include/GUI/UiTextArea.h"
-#include "../UiTBC/Include/GUI/UiTextField.h"
-#include "../UiTBC/Include/UiBillboardGeometry.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
-#include "../UiTBC/Include/UiRenderer.h"
+#include "../UiTbc/Include/GUI/UiCheckButton.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFixedLayouter.h"
+#include "../UiTbc/Include/GUI/UiRadioButton.h"
+#include "../UiTbc/Include/GUI/UiTextArea.h"
+#include "../UiTbc/Include/GUI/UiTextField.h"
+#include "../UiTbc/Include/UiBillboardGeometry.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/UiRenderer.h"
 #include "AirBalloonPilot.h"
 #include "Automan.h"
 #include "AutoPathDriver.h"
@@ -105,7 +107,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mHemisphereUvTransform(0),
 	mRenderHemisphere(true),
 	mSunlight(0),
-	mCameraTransform(QuaternionF(), Vector3DF(0, -200, 10)),
+	mCameraTransform(quat(), vec3(0, -200, 10)),
 	mCameraSpeed(0),
 	mZoomPlatform(false),
 	mPostZoomPlatformFrameCount(100),
@@ -146,13 +148,13 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 
 	mTouchstickTimer.ReduceTimeDiff(-5);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_06"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+	v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_06"));
+	v_set(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+	v_set(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+	v_set(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
+	v_set(GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
+	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
+	v_set(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 }
 
 DownwashManager::~DownwashManager()
@@ -191,25 +193,25 @@ void DownwashManager::Suspend()
 
 void DownwashManager::LoadSettings()
 {
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
+	v_set(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
 
 	Parent::LoadSettings();
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
+	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
+	v_set(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
+	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
 
 	UpdateCameraDistance();
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
+	v_set(GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
+	v_set(GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
+	v_set(GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
+	v_set(GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, _T("Key.LEFT"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, _T("Key.RIGHT"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, _T("Key.UP"));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
+	v_set(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
+	v_set(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, _T("Key.LEFT"));
+	v_set(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, _T("Key.RIGHT"));
+	v_set(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, _T("Key.UP"));
+	v_set(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 100.0\""));
 	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 \"#Game.Childishness 1.0\""));
@@ -222,10 +224,10 @@ void DownwashManager::LoadSettings()
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lSchtickName = _T("Touchstick");
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lSchtickName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lSchtickName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lSchtickName+_T(".AxisX-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lSchtickName+_T(".AxisX+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lSchtickName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lSchtickName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lSchtickName+_T(".AxisX-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lSchtickName+_T(".AxisX+"));
 #endif // Touch device or emulated touch device
 }
 
@@ -334,16 +336,16 @@ bool DownwashManager::Render()
 
 	{
 		double lRtrOffset;
-		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+		v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 		const bool lToyMode = lRtrOffset > 0.5;
 		const double r = lToyMode? sin(mToyModeColorTimer.QueryTimeDiff()*1.0) : 0.5;
 		const double g = lToyMode? sin(mToyModeColorTimer.QueryTimeDiff()*0.7) : 0.5;
 		const double b = lToyMode? sin(mToyModeColorTimer.QueryTimeDiff()*0.3) : 0.5;
 		const bool lEnableTexturing = lToyMode? false : true;
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTRED, r);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTGREEN, g);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_AMBIENTBLUE, b);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLETEXTURING, lEnableTexturing);
+		v_set(GetVariableScope(), RTVAR_UI_3D_AMBIENTRED, r);
+		v_set(GetVariableScope(), RTVAR_UI_3D_AMBIENTGREEN, g);
+		v_set(GetVariableScope(), RTVAR_UI_3D_AMBIENTBLUE, b);
+		v_set(GetVariableScope(), RTVAR_UI_3D_ENABLETEXTURING, lEnableTexturing);
 	}
 
 	mHemisphere->GetMesh(0)->SetAlwaysVisible(false);
@@ -352,13 +354,13 @@ bool DownwashManager::Render()
 		if (!mHemisphere->GetMesh(0)->GetUVAnimator())
 		{
 			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
-			mHemisphere->GetMesh(0)->SetPreRenderCallback(TBC::GeometryBase::PreRenderCallback(this, &DownwashManager::DisableDepth));
-			mHemisphere->GetMesh(0)->SetPostRenderCallback(TBC::GeometryBase::PostRenderCallback(this, &DownwashManager::EnableDepth));
+			mHemisphere->GetMesh(0)->SetPreRenderCallback(Tbc::GeometryBase::PreRenderCallback(this, &DownwashManager::DisableDepth));
+			mHemisphere->GetMesh(0)->SetPostRenderCallback(Tbc::GeometryBase::PostRenderCallback(this, &DownwashManager::EnableDepth));
 		}
-		Vector3DF lPosition = mCameraTransform.GetPosition();
+		vec3 lPosition = mCameraTransform.GetPosition();
 		lPosition.x = -lPosition.x;
 		lPosition.y = lPosition.z * -0.09f;
-		Vector3DF lAngle = mCameraTransform.GetOrientation()*Vector3DF(0,250,0);
+		vec3 lAngle = mCameraTransform.GetOrientation()*vec3(0,250,0);
 		lPosition.x -= lAngle.x;
 		lPosition.y -= lAngle.z;
 		mHemisphereUvTransform->GetBones()[0].GetRelativeBoneTransformation(0).GetPosition() = lPosition * 0.003f;
@@ -386,7 +388,7 @@ bool DownwashManager::Render()
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 	const float lWantedDirection = S(RIGHT3D) - S(LEFT3D);
 	const float lPower = S(UP3D) - S(DOWN3D);
-	TransformationF lTransform = GetMainRotorTransform(lObject);
+	xform lTransform = GetMainRotorTransform(lObject);
 	float lTotalPower = ::sqrt(lWantedDirection*lWantedDirection + lPower*lPower);
 	if (!lTotalPower)
 	{
@@ -398,14 +400,14 @@ bool DownwashManager::Render()
 	mArrowAngle = Math::Lerp(mArrowAngle, std::atan2(lWantedDirection, lPower), 0.3f);
 	float lSize = mArrowTotalPower*0.5f;
 	float lFoV;
-	CURE_RTVAR_GET(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+	v_get(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
 	lSize *= lTransform.GetPosition().GetDistance(mCameraTransform.GetPosition()) * lFoV / 2400;
-	Vector3DF lPosition = lTransform.GetPosition();
+	vec3 lPosition = lTransform.GetPosition();
 	lPosition.x += ::sin(mArrowAngle) * lSize * 3.4f;
 	lPosition.z += ::cos(mArrowAngle) * lSize * 3.4f;
 
 	UiTbc::BillboardRenderInfoArray lBillboards;
-	lBillboards.push_back(UiTbc::BillboardRenderInfo(mArrowAngle, lPosition, lSize, Vector3DF(1, 1, 1), 1, 0));
+	lBillboards.push_back(UiTbc::BillboardRenderInfo(mArrowAngle, lPosition, lSize, vec3(1, 1, 1), 1, 0));
 	mUiManager->GetRenderer()->RenderBillboards(mArrowBillboard, true, false, lBillboards);
 
 	return true;
@@ -454,21 +456,21 @@ bool DownwashManager::Paint()
 		const uint8 g = (int8)Math::Clamp((int)((lHealth-0.3f)*3*255), 0, 255);
 		mUiManager->GetPainter()->SetColor(Color(r, g, 0), 0);
 		const float lRemaining = Math::Clamp(lHealth*lWidth, 0.0f, lWidth);
-		std::vector<Vector2DF> lCoords;
-		lCoords.push_back(Vector2DF(lMin, 16+0.4f));
-		lCoords.push_back(Vector2DF(lMin, 24+0.6f));
-		lCoords.push_back(Vector2DF(lMin+lRemaining, 24+0.6f));
-		lCoords.push_back(Vector2DF(lMin+lRemaining, 16+0.4f));
+		std::vector<vec2> lCoords;
+		lCoords.push_back(vec2(lMin, 16+0.4f));
+		lCoords.push_back(vec2(lMin, 24+0.6f));
+		lCoords.push_back(vec2(lMin+lRemaining, 24+0.6f));
+		lCoords.push_back(vec2(lMin+lRemaining, 16+0.4f));
 		lCoords.push_back(lCoords[0]);
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
 		// Draw surrounding frame after.
 		mUiManager->GetPainter()->SetColor(Color(10, 30, 40), 0);
 		const int lPadding = 4;
 		lCoords.clear();
-		lCoords.push_back(Vector2DF(lMin-lPadding, 16-lPadding+0.4f));
-		lCoords.push_back(Vector2DF(lMin-lPadding, 24+lPadding+0.6f));
-		lCoords.push_back(Vector2DF(lMin+lWidth+lPadding, 24+lPadding+0.6f));
-		lCoords.push_back(Vector2DF(lMin+lWidth+lPadding, 16-lPadding+0.4f));
+		lCoords.push_back(vec2(lMin-lPadding, 16-lPadding+0.4f));
+		lCoords.push_back(vec2(lMin-lPadding, 24+lPadding+0.6f));
+		lCoords.push_back(vec2(lMin+lWidth+lPadding, 24+lPadding+0.6f));
+		lCoords.push_back(vec2(lMin+lWidth+lPadding, 16-lPadding+0.4f));
 		lCoords.push_back(lCoords[0]);
 		mUiManager->GetPainter()->DrawFan(lCoords, false);
 		mUiManager->GetPainter()->SetLineWidth(1);
@@ -478,7 +480,7 @@ bool DownwashManager::Paint()
 		const double lTime = mFlyTime.QuerySplitTime();
 
 		double lRtrOffset;
-		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+		v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 		if (lRtrOffset > 0.1)
 		{
 			uint8 r = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*3)*120+128);
@@ -538,10 +540,10 @@ bool DownwashManager::Paint()
 			{
 				if (mDirectionImageTimer.IsStarted())
 				{
-					const Vector3DF lPos3d = mCameraTransform.GetPosition();
-					const Vector2DF lPos(lPos3d.x, lPos3d.z);
-					const Vector3DF lGoal3d = mLastLandingTriggerPosition;
-					const Vector2DF lGoal(lGoal3d.x, lGoal3d.z);
+					const vec3 lPos3d = mCameraTransform.GetPosition();
+					const vec2 lPos(lPos3d.x, lPos3d.z);
+					const vec3 lGoal3d = mLastLandingTriggerPosition;
+					const vec2 lGoal(lGoal3d.x, lGoal3d.z);
 					const float a = (lGoal-lPos).GetAngle() - PIF/2;
 					const float lWantedSize = mUiManager->GetCanvas()->GetWidth() * 0.1f;
 					const float lSize = lWantedSize;
@@ -550,7 +552,7 @@ bool DownwashManager::Paint()
 					while (lWantedSize <= lSize/2) lSize /= 2;*/
 					// Find out the screen coordinate of the chopper, so we can place our arrow around that.
 					float lFoV;
-					CURE_RTVAR_GET(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+					v_get(lFoV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
 					lFoV /= 45.0f;
 					const float lDistance = mUiManager->GetCanvas()->GetWidth() / 6.0f;
 					const float x = mUiManager->GetCanvas()->GetWidth() /2.0f - 2*lDistance*::sin(a);
@@ -646,7 +648,7 @@ void DownwashManager::DrawSyncDebugInfo()
 
 
 
-bool DownwashManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
+bool DownwashManager::IsObjectRelevant(const vec3& pPosition, float pDistance) const
 {
 	return (pPosition.GetDistanceSquared(mCameraTransform.GetPosition()) <= pDistance*pDistance);
 }
@@ -660,7 +662,7 @@ Cure::GameObjectId DownwashManager::GetAvatarInstanceId() const
 
 bool DownwashManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 {
-	deb_assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
+	deb_assert(pAspect >= 0 && pAspect < Tbc::PhysicsEngine::ASPECT_COUNT);
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject && !mZoomPlatform)
 	{
@@ -691,31 +693,31 @@ void DownwashManager::Shoot(Cure::ContextObject* pCanon, int pAmmo)
 	}
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	lProjectile->SetOwnerInstanceId(pCanon->GetInstanceId());
-	TransformationF t(pCanon->GetOrientation(), pCanon->GetPosition());
+	xform t(pCanon->GetOrientation(), pCanon->GetPosition());
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	Vector3DF v;
+	vec3 v;
 	Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
-	lParticleRenderer->CreateFlare(Vector3DF(0.9f, 0.7f, 0.5f), 0.3f, 7.5f, t.GetPosition(), v);
+	lParticleRenderer->CreateFlare(vec3(0.9f, 0.7f, 0.5f), 0.3f, 7.5f, t.GetPosition(), v);
 }
 
-void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength)
+void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength)
 {
 	mCollisionSoundManager->OnCollision(pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
 
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
-	Vector3DF u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
+	vec3 u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
 	u.Normalize();
 	const int lParticles = Math::Lerp(8, 20, pStrength * 0.2f);
-	Vector3DF lStartFireColor(1.0f, 1.0f, 0.3f);
-	Vector3DF lFireColor(0.6f, 0.4f, 0.2f);
-	Vector3DF lStartSmokeColor(0.4f, 0.4f, 0.4f);
-	Vector3DF lSmokeColor(0.2f, 0.2f, 0.2f);
-	Vector3DF lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
+	vec3 lStartFireColor(1.0f, 1.0f, 0.3f);
+	vec3 lFireColor(0.6f, 0.4f, 0.2f);
+	vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
+	vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
+	vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
 	if (pExplosive->GetClassId().find(_T("barrel")) != str::npos)
 	{
 		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
@@ -751,7 +753,7 @@ void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const TBC::Chunk
 
 	// Shove!
 	ScopeLock lLock(GetTickLock());
-	TBC::PhysicsManager* lPhysicsManager = GetPhysicsManager();
+	Tbc::PhysicsManager* lPhysicsManager = GetPhysicsManager();
 	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
 	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
 	for (; x != lObjectTable.end(); ++x)
@@ -784,10 +786,10 @@ void DownwashManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObj
 {
 	(void)pHitObject;
 
-	TBC::ChunkyPhysics* lPhysics = pBullet->GetPhysics();
+	Tbc::ChunkyPhysics* lPhysics = pBullet->GetPhysics();
 	if (lPhysics)
 	{
-		TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
+		Tbc::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
 		mCollisionSoundManager->OnCollision(5.0f, pBullet->GetPosition(), lGeometry, lGeometry->GetMaterial());
 		Cure::Health::Add(pHitObject, -0.12f, false);
 	}
@@ -805,14 +807,14 @@ bool DownwashManager::DidFinishLevel()
 		const double lLevelBestTime = GetCurrentLevelBestTime(false);
 		const bool lIsEasyMode = (GetControlMode() == 2);
 		double lRtrOffset;
-		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+		v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 		const bool lIsToyMode = (lRtrOffset >= 0.5);
 		if (lTime > 0 && (lTime < lLevelBestTime || lLevelBestTime <= 0) && !lIsEasyMode && !lIsToyMode)
 		{
 			SetLevelBestTime(GetCurrentLevelNumber(), false, lTime);
 
 			str lPilotName;
-			CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
+			v_get(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
 			const bool lIsNonDefaultPilotName =  (lPilotName != gDefaultPilotName);
 			if (lIsNonDefaultPilotName)
 			{
@@ -847,17 +849,17 @@ str DownwashManager::StepLevel(int pCount)
 		int lLevelNumber = GetCurrentLevelNumber();
 		lLevelNumber += pCount;
 		int lLevelCount;
-		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+		v_get(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 		if (lLevelNumber >= lLevelCount)
 		{
 			lLevelNumber = 0;
 
 			double lRtrOffset;
-			CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+			v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 			lRtrOffset += 1;
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, lRtrOffset);
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, true);
+			v_set(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, lRtrOffset);
+			v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
+			v_set(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, true);
 		}
 		if (lLevelNumber < 0)
 		{
@@ -869,7 +871,7 @@ str DownwashManager::StepLevel(int pCount)
 		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
 		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 		mLevel->StartLoading();
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
+		v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 		return lNewLevelName;
 	}
 	return _T("");
@@ -932,23 +934,23 @@ bool DownwashManager::InitializeUniverse()
 {
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	const Vector3DF v;
-	lParticleRenderer->CreateExplosion(Vector3DF(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
+	const vec3 v;
+	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	str lStartLevel;
-	CURE_RTVAR_GET(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_00"));
+	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_00"));
 	mMassObjectArray.clear();
 	mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
-	TBC::BoneHierarchy* lTransformBones = new TBC::BoneHierarchy;
+	Tbc::BoneHierarchy* lTransformBones = new Tbc::BoneHierarchy;
 	lTransformBones->SetBoneCount(1);
-	lTransformBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
-	mHemisphereUvTransform = new TBC::BoneAnimator(lTransformBones);
+	lTransformBones->FinalizeInit(Tbc::BoneHierarchy::TRANSFORM_NONE);
+	mHemisphereUvTransform = new Tbc::BoneAnimator(lTransformBones);
 	mHemisphere = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("hemisphere"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mHemisphere->EnableRootShadow(false);
 	mHemisphere->EnableMeshMove(false);
 	mHemisphere->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
-	mHemisphere->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 25, 0)));
+	mHemisphere->SetInitialTransform(xform(quat(), vec3(0, 25, 0)));
 	mHemisphere->StartLoading();
 	mSunlight = new Sunlight(mUiManager);
 	mAutopilot = new Autopilot(this);
@@ -984,7 +986,7 @@ void DownwashManager::UpdateChopperColor(float pLerp)
 	const size_t lMeshCount = lClass->GetMeshCount();
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
-		const Vector3DF d = (x == 0 && mSetRandomChopperColor)? mLastChopperColor : lClass->GetMaterial(x).mDiffuse;
+		const vec3 d = (x == 0 && mSetRandomChopperColor)? mLastChopperColor : lClass->GetMaterial(x).mDiffuse;
 		lAvatar->GetMesh(x)->GetBasicMaterialSettings().mAmbient = Math::Lerp(lAvatar->GetMesh(x)->GetBasicMaterialSettings().mAmbient, lClass->GetMaterial(x).mAmbient * lLevelBrightness, pLerp);
 		lAvatar->GetMesh(x)->GetBasicMaterialSettings().mDiffuse = Math::Lerp(lAvatar->GetMesh(x)->GetBasicMaterialSettings().mDiffuse, d * lLevelBrightness, pLerp);
 	}
@@ -1008,7 +1010,7 @@ void DownwashManager::UpdateCameraDistance()
 		lCamDistance *= 0.4f;
 	}
 	lCamDistance = std::min(110.0, lCamDistance);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, lCamDistance);
+	v_set(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, lCamDistance);
 }
 
 void DownwashManager::UpdateTouchstickPlacement()
@@ -1025,7 +1027,7 @@ void DownwashManager::UpdateTouchstickPlacement()
 	if (!mStick)
 	{
 		int lScreenPixelWidth;
-		CURE_RTVAR_GET(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
+		v_get(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
 		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// Touched area is a fraction of the required 32px/iPhone classic.
 		mStick = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
 		mStick->SetUniqueIdentifier(_T("Touchstick"));
@@ -1052,7 +1054,7 @@ int DownwashManager::GetControlMode() const
 {
 	// Three modes: easy, medium, hard.
 	float lChildishness;
-	CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+	v_get(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	if (lChildishness > 0.95f)
 	{
 		return 2;	// Easy.
@@ -1076,13 +1078,13 @@ void DownwashManager::UpdateControlMode()
 	{
 		// Helper engine on + upright stabilization high.
 		lAvatar->GetPhysics()->GetEngine(lHelperEngineIndex)->SetStrength(8000.0f);
-		((TBC::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 3;
+		((Tbc::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 3;
 	}
 	else
 	{
 		// Engine off, low upright stabilization. Arcade mode compensates by having high autopilot and high durability.
 		lAvatar->GetPhysics()->GetEngine(lHelperEngineIndex)->SetStrength(0.0f);
-		((TBC::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 0.3f;
+		((Tbc::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 0.3f;
 	}
 }
 
@@ -1101,19 +1103,19 @@ void DownwashManager::TickUiInput()
 		{
 			// Control steering.
 			float lChildishness;
-			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+			v_get(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 			if (mHitGroundFrameCount >= -STILL_FRAMES_UNTIL_CAM_PANS)
 			{
 				lChildishness = 0;	// Don't help when not even started yet.
 			}
-			const Vector3DF lAutoPilot3d = mAutopilot->GetSteering();
-			const Vector2DF lAutoPilot(lAutoPilot3d.x, lAutoPilot3d.z);
-			const Vector3DF lAutoPilotDirection3d = mAutopilot->GetClosestPathVector().GetNormalized();
-			const Vector2DF lAutoPilotDirection(lAutoPilotDirection3d.x, lAutoPilotDirection3d.z);
+			const vec3 lAutoPilot3d = mAutopilot->GetSteering();
+			const vec2 lAutoPilot(lAutoPilot3d.x, lAutoPilot3d.z);
+			const vec3 lAutoPilotDirection3d = mAutopilot->GetClosestPathVector().GetNormalized();
+			const vec2 lAutoPilotDirection(lAutoPilotDirection3d.x, lAutoPilotDirection3d.z);
 			const Life::Options::Steering& s = mOptions.GetSteeringControl();
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
-			Vector2DF lUserControls(S(RIGHT3D) - S(LEFT3D), S(UP3D) - S(DOWN3D));
-			Vector2DF lUserDirection = lUserControls;
+			vec2 lUserControls(S(RIGHT3D) - S(LEFT3D), S(UP3D) - S(DOWN3D));
+			vec2 lUserDirection = lUserControls;
 			if (lUserDirection.GetLengthSquared() < 0.01f)	// User is not controlling, AI is.
 			{
 				lUserControls = lAutoPilot * lChildishness;
@@ -1189,7 +1191,7 @@ void DownwashManager::TickUiUpdate()
 	{
 		if (++mSlowSystemCounter > 30)
 		{
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+			v_set(GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
 		}
 	}
 	else
@@ -1225,7 +1227,7 @@ void DownwashManager::TickUiUpdate()
 	mCollisionSoundManager->Tick(mCameraTransform.GetPosition());
 }
 
-bool DownwashManager::UpdateMassObjects(const Vector3DF& pPosition)
+bool DownwashManager::UpdateMassObjects(const vec3& pPosition)
 {
 	if (mLevel && mLevel->IsLoaded() && mMassObjectArray.empty())
 	{
@@ -1233,7 +1235,7 @@ bool DownwashManager::UpdateMassObjects(const Vector3DF& pPosition)
 		for (Level::MassObjectList::const_iterator x = lMassObjects.begin(); x != lMassObjects.end(); ++x)
 		{
 			const Level::MassObjectInfo& lInfo = *x;
-			const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(lInfo.mGroundBodyIndex)->GetBodyId();
+			const Tbc::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(lInfo.mGroundBodyIndex)->GetBodyId();
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
 			mMassObjectArray.push_back(lMassObjectId);
 			Life::MassObject* lMassObject = new Life::MassObject(GetResourceManager(), lInfo.mClassId, mUiManager, lTerrainBodyId, lInfo.mCount, 120);
@@ -1260,7 +1262,7 @@ void DownwashManager::SetLocalRender(bool pRender)
 	if (pRender)
 	{
 		bool lMass;
-		CURE_RTVAR_GET(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+		v_get(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
 		SetMassRender(lMass);
 	}
 	else
@@ -1405,7 +1407,7 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
 			if (mSetRandomChopperColor)
 			{
-				Vector3DF lColor;
+				vec3 lColor;
 				do
 				{
 					lColor = RNDPOSVEC();
@@ -1424,9 +1426,9 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")))
 		{
 			((Life::ExplodingMachine*)pObject)->SetDeathFrameDelay(5);
-			Vector3DF lDirection(-1,0,0);
+			vec3 lDirection(-1,0,0);
 			new Automan(this, pObject->GetInstanceId(), lDirection);
-			Vector3DF lColor;
+			vec3 lColor;
 			do
 			{
 				lColor = RNDPOSVEC();
@@ -1439,7 +1441,7 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			str lBaseName = strutil::Split(pObject->GetClassId(), _T("_"))[0];
 			new AutoPathDriver(this, pObject->GetInstanceId(), lBaseName+_T("_path"));
-			Vector3DF lColor;
+			vec3 lColor;
 			do
 			{
 				lColor = RNDPOSVEC();
@@ -1460,12 +1462,12 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			new AirBalloonPilot(this, pObject->GetInstanceId());
 			if (mLastVehicleColor.y > 0.4f && mLastVehicleColor.x < 0.3f && mLastVehicleColor.z < 0.3f)
 			{
-				mLastVehicleColor = Vector3DF(0.6f, 0.2f, 0.2f);
+				mLastVehicleColor = vec3(0.6f, 0.2f, 0.2f);
 				((UiCure::CppContextObject*)pObject)->GetMesh(2)->GetBasicMaterialSettings().mDiffuse = mLastVehicleColor;
 			}
 			else
 			{
-				mLastVehicleColor = Vector3DF(0, 1, 0);
+				mLastVehicleColor = vec3(0, 1, 0);
 			}
 		}
 		else if (strutil::StartsWith(pObject->GetClassId(), _T("fighter")))
@@ -1514,12 +1516,12 @@ void DownwashManager::OnLevelLoadCompleted()
 		Cure::Health::Set(lAvatar, 1);
 		Cure::Spawner* lSpawner = GetAvatarSpawner(mLevel->GetInstanceId());
 		deb_assert(lSpawner);
-		const Vector3DF lLandingPosition = GetLandingTriggerPosition(mOldLevel);
-		const Vector3DF lHeliPosition = lAvatar->GetPosition();
-		const Vector3DF lHeliDelta = lHeliPosition - lLandingPosition;
-		Vector3DF lNewPosition = lSpawner->GetSpawnPoint().GetPosition() + lHeliDelta;
+		const vec3 lLandingPosition = GetLandingTriggerPosition(mOldLevel);
+		const vec3 lHeliPosition = lAvatar->GetPosition();
+		const vec3 lHeliDelta = lHeliPosition - lLandingPosition;
+		vec3 lNewPosition = lSpawner->GetSpawnPoint().GetPosition() + lHeliDelta;
 		const float lCamAboveHeli = mCameraTransform.GetPosition().z - lHeliPosition.z;
-		const Vector3DF lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lLandingPosition;
+		const vec3 lCamDelta = lSpawner->GetSpawnPoint().GetPosition() - lLandingPosition;
 
 		mMassObjectArray.clear();
 		GetContext()->DeleteObject(mOldLevel->GetInstanceId());
@@ -1559,9 +1561,9 @@ void DownwashManager::OnLevelLoadCompleted()
 	mZoomPlatform = false;
 }
 
-void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+void DownwashManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
+	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
 
@@ -1572,7 +1574,7 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 	if (!mIsHitThisFrame && lIsAvatar)
 	{
 		// If it's a lever or something like that, this is not a landing!
-		if (pObject2->GetPhysics()->GetPhysicsType() != TBC::ChunkyPhysics::DYNAMIC &&
+		if (pObject2->GetPhysics()->GetPhysicsType() != Tbc::ChunkyPhysics::DYNAMIC &&
 			!pObject2->GetPhysics()->GetBoneGeometry(pBody2Id)->IsCollideWithSelf())
 		{
 			mIsHitThisFrame = true;
@@ -1596,17 +1598,17 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 	float lCollisionImpactFactor = 3;
 	if (lIsAvatar && pObject2 == mLevel)
 	{
-		const TBC::ChunkyClass::Tag* lTag = mLevel->GetClass()->GetTag(_T("anything"));
+		const Tbc::ChunkyClass::Tag* lTag = mLevel->GetClass()->GetTag(_T("anything"));
 		std::vector<int>::const_iterator x = lTag->mBodyIndexList.begin();
 		for (; x != lTag->mBodyIndexList.end(); ++x)
 		{
-			TBC::ChunkyBoneGeometry* lBone = pObject2->GetPhysics()->GetBoneGeometry(*x);
+			Tbc::ChunkyBoneGeometry* lBone = pObject2->GetPhysics()->GetBoneGeometry(*x);
 			if (lBone->GetBodyId() == pBody2Id)
 			{
 				lIsLandingPad = true;
 				lCollisionImpactFactor = 1;
 				mFlyTime.Stop();
-				if (lBone->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+				if (lBone->GetJointType() != Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE)
 				{
 					lIsLandingOnElevator = true;
 				}
@@ -1615,7 +1617,7 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 		}
 	}
 
-	const float lOrientationFactor = (pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));
+	const float lOrientationFactor = (pObject1->GetOrientation()*vec3(0,0,1)*vec3(0,0,1));
 
 	// Don't do collisions if heli hasn't moved, such as in the case of standing on
 	// an elevator.
@@ -1626,7 +1628,7 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 
 	if (lIsAvatar)
 	{
-		CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+		v_get(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	}
 
 	// Check if it's a rotor!
@@ -1635,15 +1637,15 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 	if (lDamageFactor)
 	{
 		lCollisionImpactFactor *= lDamageFactor;
-		TBC::ChunkyBoneGeometry* lGeometry = pObject1->GetStructureGeometry(pBody1Id);
-		if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_HINGE &&
-			lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
+		Tbc::ChunkyBoneGeometry* lGeometry = pObject1->GetStructureGeometry(pBody1Id);
+		if (lGeometry->GetJointType() == Tbc::ChunkyBoneGeometry::JOINT_HINGE &&
+			lGeometry->GetGeometryType() == Tbc::ChunkyBoneGeometry::GEOMETRY_BOX)
 		{
 			lIsRotor = true;
-			TBC::ChunkyBoneGeometry* lHitBone = pObject2->GetPhysics()->GetBoneGeometry(pBody2Id);
+			Tbc::ChunkyBoneGeometry* lHitBone = pObject2->GetPhysics()->GetBoneGeometry(pBody2Id);
 			lCollisionImpactFactor *= Math::Lerp(1000.0f * lHitBone->GetImpactFactor(), 2.0f, lChildishness);
 		}
-		else if (lIsAvatar && pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
+		else if (lIsAvatar && pObject2->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC)
 		{
 			const float lDamageReduction = pObject2->GetAttributeFloatValue(_T("DamageReduction"));
 			if (lDamageReduction)
@@ -1664,7 +1666,7 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 	float lForce = pForce.GetLength() * lCollisionImpactFactor;
 	if (lChildishness > 0.1f)
 	{
-		float lUpFactor = 1 + 0.5f*(pObject1->GetOrientation()*Vector3DF(0,0,1)*Vector3DF(0,0,1));
+		float lUpFactor = 1 + 0.5f*(pObject1->GetOrientation()*vec3(0,0,1)*vec3(0,0,1));
 		lUpFactor *= lUpFactor;
 		lForce *= Math::Lerp(1.0f, 0.05f, lChildishness * lUpFactor);
 		if (lForce < 0)
@@ -1681,7 +1683,7 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 	if (lForce > 15000)
 	{
 		lForce /= 30000;
-		lForce *= 3 - 2*(pForce.GetNormalized()*Vector3DF(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
+		lForce *= 3 - 2*(pForce.GetNormalized()*vec3(0,0,1));	// Sideways force means non-vertical landing or landing on non-flat surface.
 		if (Cure::Health::Get(pObject1) > 0 && !mZoomPlatform)
 		{
 			float lForce2 = lForce*lForce;
@@ -1693,7 +1695,7 @@ void DownwashManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTor
 
 
 
-Vector3DF DownwashManager::GetLandingTriggerPosition(Cure::ContextObject* pLevel) const
+vec3 DownwashManager::GetLandingTriggerPosition(Cure::ContextObject* pLevel) const
 {
 	deb_assert(pLevel);
 	Cure::ContextObject::Array::const_iterator x = pLevel->GetChildArray().begin();
@@ -1705,10 +1707,10 @@ Vector3DF DownwashManager::GetLandingTriggerPosition(Cure::ContextObject* pLevel
 			const int lTriggerCount = pLevel->GetPhysics()->GetTriggerCount();
 			for (int x = 0; x < lTriggerCount; ++x)
 			{
-				const TBC::PhysicsTrigger* lTrigger = pLevel->GetPhysics()->GetTrigger(x);
+				const Tbc::PhysicsTrigger* lTrigger = pLevel->GetPhysics()->GetTrigger(x);
 				if (pLevel->GetTrigger(lTrigger->GetPhysicsTriggerId(0)) == lLandingTrigger)
 				{
-					TransformationF lTransform;
+					xform lTransform;
 					GetPhysicsManager()->GetTriggerTransform(lTrigger->GetPhysicsTriggerId(0), lTransform);
 					mLastLandingTriggerPosition = lTransform.GetPosition();
 					return mLastLandingTriggerPosition;
@@ -1717,10 +1719,10 @@ Vector3DF DownwashManager::GetLandingTriggerPosition(Cure::ContextObject* pLevel
 		}
 	}
 	deb_assert(false);
-	return Vector3DF();
+	return vec3();
 }
 
-void DownwashManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition)
+void DownwashManager::EaseDown(Cure::ContextObject* pObject, const vec3* pStartPosition)
 {
 	mAllLoadedTimer.Start();
 
@@ -1733,11 +1735,11 @@ void DownwashManager::EaseDown(Cure::ContextObject* pObject, const Vector3DF* pS
 	Cure::Spawner::EaseDown(GetPhysicsManager(), pObject, pStartPosition);
 }
 
-TransformationF DownwashManager::GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const
+xform DownwashManager::GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const
 {
 	int lPhysIndex;
 	str lMeshName;
-	TransformationF lTransform;
+	xform lTransform;
 	float lMeshScale;
 	size_t lMeshCount = ((UiTbc::ChunkyClass*)pChopper->GetClass())->GetMeshCount();
 	for (size_t x = 0; x < lMeshCount; ++x)
@@ -1768,14 +1770,14 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	UiTbc::FixedLayouter lLayouter(d);
 
 	str lPilotName;
-	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
+	v_get(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
 	const int lDifficultyMode = GetControlMode();
 	double lMasterVolume;
-	CURE_RTVAR_GET(lMasterVolume, =, GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
+	v_get(lMasterVolume, =, GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	bool lAllowToyMode;
-	CURE_RTVAR_GET(lAllowToyMode, =, GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
+	v_get(lAllowToyMode, =, GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
 	double lRtrOffset;
-	CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+	v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 
 	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE, _T("pilot_name"));
 	lNameField->SetText(lPilotName);
@@ -1834,7 +1836,7 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
 	lLayouter.AddCornerButton(lCloseButton, -9);
 
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
+	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 }
 
 void DownwashManager::OnLastHiscoreButton(UiTbc::Button* pButton)
@@ -1899,7 +1901,7 @@ void DownwashManager::UpdateHiscoreDialog()
 	UiTbc::FixedLayouter lLayouter(d);
 
 	str lPilotName;
-	CURE_RTVAR_GET(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
+	v_get(lPilotName, =, GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
 	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
 	typedef Cure::HiscoreAgent::List HiscoreList;
 	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
@@ -1950,36 +1952,36 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	UiTbc::TextField* lPilotNameField = (UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0);
 	if (lPilotNameField)
 	{
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_PILOTNAME, lPilotNameField->GetText());
+		v_set(GetVariableScope(), RTVAR_GAME_PILOTNAME, lPilotNameField->GetText());
 	}
 
 	float lPreChildishness;
-	CURE_RTVAR_GET(lPreChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+	v_get(lPreChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	if (pButton->GetTag() == -2)
 	{
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+		v_set(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	}
 	else if (pButton->GetTag() == -3)
 	{
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.5);
+		v_set(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.5);
 		if (lPreChildishness > 0.75f) mFlyTime.ReduceTimeDiff(-mFlyTime.GetTimeDiff());	// Penalty for changing from easy mode.
 	}
 	else if (pButton->GetTag() == -4)
 	{
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
+		v_set(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 0.0);
 		if (lPreChildishness > 0.75f) mFlyTime.ReduceTimeDiff(-mFlyTime.GetTimeDiff());	// Penalty for changing from easy mode.
 		if (lPreChildishness > 0.25f) mFlyTime.ReduceTimeDiff(-mFlyTime.GetTimeDiff());	// Penalty for changing from medium mode.
 	}
 	else if (pButton->GetTag() == -5)
 	{
 		const bool lToyMode = (pButton->GetState() == UiTbc::Button::PRESSED);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, lToyMode? 2.0 : 1.0);
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, lToyMode? 1.0 : 0.0);
+		v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, lToyMode? 2.0 : 1.0);
+		v_set(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, lToyMode? 1.0 : 0.0);
 	}
 	else if (pButton->GetTag() == -6)
 	{
 		double lBedsideVolume = (pButton->GetState() == UiTbc::Button::PRESSED)? 0.02 : 1.0;
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lBedsideVolume);
+		v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lBedsideVolume);
 		mUiManager->GetSoundManager()->SetMasterVolume((float)lBedsideVolume);	// Set right away for button volume.
 	}
 	else if (pButton->GetTag() == -7)
@@ -1994,7 +1996,7 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
 		mSetRandomChopperColor = false;
 	}
 	else if (pButton->GetTag() == -9)
@@ -2002,19 +2004,19 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 		mPauseButton->SetVisible(true);
 		HiResTimer::StepCounterShadow();
 		mHitGroundFrameCount = 2;
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
 	}
 	else if (pButton->GetTag() == -100)
 	{
 		int lLevelCount;
-		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+		v_get(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 		mHiscoreLevelIndex = (mHiscoreLevelIndex-1 < 0)? lLevelCount-1 : mHiscoreLevelIndex-1;
 		ShowHiscoreDialog(-1);
 	}
 	else if (pButton->GetTag() == -101)
 	{
 		int lLevelCount;
-		CURE_RTVAR_GET(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
+		v_get(lLevelCount, =, GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 		mHiscoreLevelIndex = (mHiscoreLevelIndex+1 >= lLevelCount)? 0 : mHiscoreLevelIndex+1;
 		ShowHiscoreDialog(+1);
 	}
@@ -2149,7 +2151,7 @@ void DownwashManager::DrawStick(Touchstick* pStick)
 	{
 		y = 0;
 	}
-	Vector2DF v(x, y);
+	vec2 v(x, y);
 	//v.Mul(2.0f * (ow - pStick->GetFingerRadius()-lMargin*2) / ow);
 	const float lLength = v.GetLength();
 	if (lLength > 1)
@@ -2203,14 +2205,14 @@ void DownwashManager::ScriptPhysicsTick()
 	if (mSlowmoTimer.IsStarted())
 	{
 		double lRtrOffset;
-		CURE_RTVAR_GET(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+		v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 		if (mSlowmoTimer.QueryTimeDiff() < 3.5f)
 		{
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.3*(lRtrOffset+1));
+			v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.3*(lRtrOffset+1));
 		}
 		else
 		{
-			CURE_RTVAR_SET(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
+			v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
 			mSlowmoTimer.Stop();
 		}
 	}
@@ -2260,11 +2262,11 @@ void DownwashManager::HandleWorldBoundaries()
 		mTooFarAwayTimer.Start();
 		Life::HomingProjectile* lRocket = (Life::HomingProjectile*)Parent::CreateContextObject(_T("missile"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		lRocket->SetTarget(mAvatarId);
-		Vector3DF lFirePosition(lAvatar->GetPosition().x, 0, 0);
+		vec3 lFirePosition(lAvatar->GetPosition().x, 0, 0);
 		lFirePosition.Normalize(200);
 		lFirePosition += lAvatar->GetPosition();
 		lFirePosition.z += 50;
-		lRocket->SetInitialTransform(TransformationF(QuaternionF(), lFirePosition));
+		lRocket->SetInitialTransform(xform(quat(), lFirePosition));
 		lRocket->StartLoading();
 	}
 	else if (mTooFarAwayTimer.IsStarted() && mTooFarAwayTimer.QueryTimeDiff() > 25.0)
@@ -2281,7 +2283,7 @@ void DownwashManager::HandleWorldBoundaries()
 		Cure::ContextObject* lObject = x->second;
 		if (lObject->IsLoaded() && lObject->GetPhysics())
 		{
-			const Vector3DF lPosition = lObject->GetPosition();
+			const vec3 lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -1000.0f, +1000.0f) ||
 				!Math::IsInRange(lPosition.y, -1000.0f, +1000.0f) ||
 				!Math::IsInRange(lPosition.z, -1000.0f, +1000.0f))
@@ -2307,21 +2309,21 @@ void DownwashManager::MoveCamera()
 	UpdateCameraDistance();
 
 	float lHalfCamDistance;
-	CURE_RTVAR_GET(lHalfCamDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
+	v_get(lHalfCamDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 110.0);
 	lHalfCamDistance /= 2;
 	mCameraPreviousPosition = mCameraTransform.GetPosition();
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
-	Vector3DF lAvatarPosition = mHelicopterPosition;
+	vec3 lAvatarPosition = mHelicopterPosition;
 	float lSpeedX = 0;
 	float ax;
-	CURE_RTVAR_GET(ax, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
+	v_get(ax, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
 	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
 	{
 		lAvatarPosition = lAvatar->GetPosition();
 		float ox, oy, oz;
-		CURE_RTVAR_GET(ox, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
-		CURE_RTVAR_GET(oy, =(float), GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
-		CURE_RTVAR_GET(oz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
+		v_get(ox, =(float), GetVariableScope(), RTVAR_UI_3D_CAMXOFFSET, 0.0);
+		v_get(oy, =(float), GetVariableScope(), RTVAR_UI_3D_CAMYOFFSET, 0.0);
+		v_get(oz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMZOFFSET, 0.0);
 		lAvatarPosition.x += ox;
 		lAvatarPosition.y += oy;
 		lAvatarPosition.z += oz;
@@ -2332,12 +2334,12 @@ void DownwashManager::MoveCamera()
 			mSetRandomChopperColor = true;
 		}
 	}
-	TransformationF lTargetTransform(QuaternionF(), lAvatarPosition + Vector3DF(0, -2*lHalfCamDistance, 0));
+	xform lTargetTransform(quat(), lAvatarPosition + vec3(0, -2*lHalfCamDistance, 0));
 	++mPostZoomPlatformFrameCount;
 	if (mZoomPlatform)
 	{
 		Cure::ContextObject* lLevel = mOldLevel? mOldLevel : mLevel;
-		lTargetTransform.GetPosition() = GetLandingTriggerPosition(lLevel) + Vector3DF(0, 0, 10);
+		lTargetTransform.GetPosition() = GetLandingTriggerPosition(lLevel) + vec3(0, 0, 10);
 		mPostZoomPlatformFrameCount = 0;
 	}
 	else if (mHitGroundFrameCount >= -STILL_FRAMES_UNTIL_CAM_PANS)
@@ -2345,7 +2347,7 @@ void DownwashManager::MoveCamera()
 		lTargetTransform.GetPosition().z += lHalfCamDistance;
 	}
 
-	Vector3DF lCamXZPos(mCameraTransform.GetPosition());
+	vec3 lCamXZPos(mCameraTransform.GetPosition());
 	lCamXZPos.y = 0;
 	if (lCamXZPos.GetDistance(lAvatarPosition) > 110.0)
 	{
@@ -2354,7 +2356,7 @@ void DownwashManager::MoveCamera()
 	}
 	else
 	{
-		Vector3DF lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
+		vec3 lDelta = Math::Lerp(mCameraTransform.GetPosition(), lTargetTransform.GetPosition(), 0.08f) - mCameraTransform.GetPosition();
 		mCameraTransform.GetPosition().x += lDelta.x;
 		//mCameraTransform.GetPosition().z += lDelta.z;
 		mCameraTransform.GetPosition().z += Math::SmoothClamp(lDelta.z, -2.0f, +2.0f, 0.2f);
@@ -2379,13 +2381,13 @@ void DownwashManager::MoveCamera()
 	mCameraTransform.GetOrientation().Slerp(mCameraTransform.GetOrientation(), lTargetTransform.GetOrientation(), 0.5f);
 	/*float lFoV = Math::Lerp(30.0f, 60.0f, mCameraSpeed);
 	lFoV = Math::SmoothClamp(lFoV, 30.0f, 60.0f, 0.4f);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);*/
+	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, lFoV);*/
 
-	/*CURE_RTVAR_ARITHMETIC(GetVariableScope(), "cam_ang", double, +, 0.01, 0.0, 3000.0);
-	QuaternionF q;
-	mCameraTransform = TransformationF(QuaternionF(), Vector3DF(0, -300, 50));
-	mCameraTransform.RotateAroundAnchor(Vector3DF(), Vector3DF(1,0,1), (float)CURE_RTVAR_SLOW_TRYGET(GetVariableScope(), "cam_ang", 0.0));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);*/
+	/*v_arithmetic(GetVariableScope(), "cam_ang", double, +, 0.01, 0.0, 3000.0);
+	quat q;
+	mCameraTransform = xform(quat(), vec3(0, -300, 50));
+	mCameraTransform.RotateAroundAnchor(vec3(), vec3(1,0,1), (float)v_slowtryget(GetVariableScope(), "cam_ang", 0.0));
+	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);*/
 
 	lAvatarPosition.y -= 5.0f;	// Move closer to edge to avoid jitter.
 	UpdateMassObjects(lAvatarPosition);
@@ -2399,7 +2401,7 @@ void DownwashManager::UpdateCameraPosition(bool pUpdateMicPosition)
 		Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 		if (lAvatar && lAvatar->IsLoaded())
 		{
-			TransformationF lMicPos(QuaternionF(), mHelicopterPosition);
+			xform lMicPos(quat(), mHelicopterPosition);
 			lMicPos.GetPosition().z -= 2;
 			mUiManager->SetMicrophonePosition(lMicPos, mMicrophoneSpeed);
 		}
@@ -2418,9 +2420,9 @@ void DownwashManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, floa
 	const float h2 = h*0.5f;
 	const float x = cx - w2*ca - h2*sa;
 	const float y = cy - h2*ca + w2*sa;
-	const Vector2DF c[] = { Vector2DF(x, y), Vector2DF(x+w*ca, y-w*sa), Vector2DF(x+w*ca+h*sa, y+h*ca-w*sa), Vector2DF(x+h*sa, y+h*ca) };
-	const Vector2DF t[] = { Vector2DF(0, 0), Vector2DF(1, 0), Vector2DF(1, 1), Vector2DF(0, 1) };
-#define V(z) std::vector<Vector2DF>(z, z+LEPRA_ARRAY_COUNT(z))
+	const vec2 c[] = { vec2(x, y), vec2(x+w*ca, y-w*sa), vec2(x+w*ca+h*sa, y+h*ca-w*sa), vec2(x+h*sa, y+h*ca) };
+	const vec2 t[] = { vec2(0, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1) };
+#define V(z) std::vector<vec2>(z, z+LEPRA_ARRAY_COUNT(z))
 	mUiManager->GetPainter()->DrawImageFan(pImageId, V(c), V(t));
 }
 
@@ -2459,7 +2461,7 @@ void DownwashManager::EnableDepth()
 
 
 
-LOG_CLASS_DEFINE(GAME, DownwashManager);
+loginstance(GAME, DownwashManager);
 
 
 

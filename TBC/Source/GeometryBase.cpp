@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/GeometryBase.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ResourceTracker.h"
@@ -12,7 +13,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -707,12 +708,12 @@ unsigned GeometryBase::GetLastFrameVisible() const
 	return mLastFrameVisible;
 }
 
-void GeometryBase::SetTransformation(const TransformationF& pTransformation)
+void GeometryBase::SetTransformation(const xform& pTransformation)
 {
 	mTransformation = pTransformation;
 	SetTransformationChanged(true);
 
-	QuaternionF q(mBigOrientation.mData);
+	quat q(mBigOrientation.mData);
 	q.Sub(GetTransformation().mOrientation.mData);	// Must let overrides go to work, so we can store full update.
 	if (q.GetNorm() > mBigOrientationThreshold)
 	{
@@ -721,17 +722,17 @@ void GeometryBase::SetTransformation(const TransformationF& pTransformation)
 	}
 }
 
-const TransformationF& GeometryBase::GetBaseTransformation() const
+const xform& GeometryBase::GetBaseTransformation() const
 {
 	return mTransformation;
 }
 
-const TransformationF& GeometryBase::GetTransformation()
+const xform& GeometryBase::GetTransformation()
 {
 	return mTransformation;
 }
 
-const QuaternionF& GeometryBase::GetLastBigOrientation() const
+const quat& GeometryBase::GetLastBigOrientation() const
 {
 	return mBigOrientation;
 }
@@ -1014,7 +1015,7 @@ bool GeometryBase::IsConvexVolume()
 		int lT0Index = lT0 * 3;
 		//int lT1Index = lT1 * 3;
 
-		Vector3DF lT0Normal(mSurfaceNormalData[lT0Index + 0],
+		vec3 lT0Normal(mSurfaceNormalData[lT0Index + 0],
 					    mSurfaceNormalData[lT0Index + 1],
 					    mSurfaceNormalData[lT0Index + 2]);
 
@@ -1043,7 +1044,7 @@ bool GeometryBase::IsConvexVolume()
 		lT1V0 *= 3;
 		lT1V1 *= 3;
 
-		Vector3DF lT1Edge(lVertexData[lT1V1 + 0] - lVertexData[lT1V0 + 0],
+		vec3 lT1Edge(lVertexData[lT1V1 + 0] - lVertexData[lT1V0 + 0],
 					  lVertexData[lT1V1 + 1] - lVertexData[lT1V0 + 1],
 					  lVertexData[lT1V1 + 2] - lVertexData[lT1V0 + 2]);
 		lT1Edge.Normalize();
@@ -1246,13 +1247,13 @@ void GeometryBase::GenerateSurfaceNormalData()
 		int lI1 = lT[1] * 3;
 		int lI2 = lT[2] * 3;
 
-		Vector3DF lV0(lVertexData[lI1 + 0] - lVertexData[lI0 + 0],
+		vec3 lV0(lVertexData[lI1 + 0] - lVertexData[lI0 + 0],
 				      lVertexData[lI1 + 1] - lVertexData[lI0 + 1],
 				      lVertexData[lI1 + 2] - lVertexData[lI0 + 2]);
-		Vector3DF lV1(lVertexData[lI2 + 0] - lVertexData[lI0 + 0],
+		vec3 lV1(lVertexData[lI2 + 0] - lVertexData[lI0 + 0],
 				      lVertexData[lI2 + 1] - lVertexData[lI0 + 1],
 				      lVertexData[lI2 + 2] - lVertexData[lI0 + 2]);
-		Vector3DF lC;
+		vec3 lC;
 		lC.CrossUnit(lV0, lV1);
 
 		mSurfaceNormalData[lIndex + 0] = lC.x;
@@ -1403,16 +1404,16 @@ void GeometryBase::GenerateTangentAndBitangentData()
 		int lUV2 = lTriIndex[1] * 2;
 		int lUV3 = lTriIndex[2] * 2;
 
-		Vector3DF lEdge1(lVertexData[lV2 + 0] - lVertexData[lV1 + 0],
+		vec3 lEdge1(lVertexData[lV2 + 0] - lVertexData[lV1 + 0],
 					 lVertexData[lV2 + 1] - lVertexData[lV1 + 1],
 					 lVertexData[lV2 + 2] - lVertexData[lV1 + 2]);
-		Vector3DF lEdge2(lVertexData[lV3 + 0] - lVertexData[lV1 + 0],
+		vec3 lEdge2(lVertexData[lV3 + 0] - lVertexData[lV1 + 0],
 					 lVertexData[lV3 + 1] - lVertexData[lV1 + 1],
 					 lVertexData[lV3 + 2] - lVertexData[lV1 + 2]);
 
-		Vector2DF lEdge1UV(lUVData[lUV2 + 0] - lUVData[lUV1 + 0],
+		vec2 lEdge1UV(lUVData[lUV2 + 0] - lUVData[lUV1 + 0],
 					   lUVData[lUV2 + 1] - lUVData[lUV1 + 1]);
-		Vector2DF lEdge2UV(lUVData[lUV3 + 0] - lUVData[lUV1 + 0],
+		vec2 lEdge2UV(lUVData[lUV3 + 0] - lUVData[lUV1 + 0],
 					   lUVData[lUV3 + 1] - lUVData[lUV1 + 1]);
 
 		float lCP = lEdge1UV.y * lEdge2UV.x - lEdge1UV.x * lEdge2UV.y;
@@ -1422,10 +1423,10 @@ void GeometryBase::GenerateTangentAndBitangentData()
 		{
 			float lCPRecip = 1.0f / lCP;
 
-			Vector3DF lTangent((lEdge1 * -lEdge2UV.y + lEdge2 * lEdge1UV.y) * lCPRecip);
-			Vector3DF lBitangent((lEdge1 * -lEdge2UV.x + lEdge2 * lEdge1UV.x) * lCPRecip);
-			//Vector3DF lTangent((lEdge2UV.y * lEdge1 - lEdge1UV.y * lEdge2) * lCPRecip);
-			//Vector3DF lBitangent((lEdge1UV.x * lEdge2 - lEdge2UV.x * lEdge1) * lCPRecip);
+			vec3 lTangent((lEdge1 * -lEdge2UV.y + lEdge2 * lEdge1UV.y) * lCPRecip);
+			vec3 lBitangent((lEdge1 * -lEdge2UV.x + lEdge2 * lEdge1UV.x) * lCPRecip);
+			//vec3 lTangent((lEdge2UV.y * lEdge1 - lEdge1UV.y * lEdge2) * lCPRecip);
+			//vec3 lBitangent((lEdge1UV.x * lEdge2 - lEdge2UV.x * lEdge1) * lCPRecip);
 
 			lTangent.Normalize();
 			lBitangent.Normalize();
@@ -1500,7 +1501,7 @@ bool GeometryBase::VerifyIndexData()
 	return lOk;
 }
 
-const TransformationF& GeometryBase::GetUVTransform() const
+const xform& GeometryBase::GetUVTransform() const
 {
 	if(mUVAnimator != 0)
 	{
@@ -1636,8 +1637,8 @@ GeometryBase::BasicMaterialSettings::BasicMaterialSettings():
 {
 }
 
-GeometryBase::BasicMaterialSettings::BasicMaterialSettings(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
-	const Vector3DF& pSpecular, float pShininess,
+GeometryBase::BasicMaterialSettings::BasicMaterialSettings(const vec3& pAmbient, const vec3& pDiffuse,
+	const vec3& pSpecular, float pShininess,
 	float pAlpha, bool pSmooth):
 	mAmbient(pAmbient),
 	mDiffuse(pDiffuse),
@@ -1653,8 +1654,8 @@ void GeometryBase::BasicMaterialSettings::SetColor(float pRed, float pGreen, flo
 	mDiffuse.Set(pRed, pGreen, pBlue);
 }
 
-void GeometryBase::BasicMaterialSettings::Set(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
-	const Vector3DF& pSpecular, float pShininess,
+void GeometryBase::BasicMaterialSettings::Set(const vec3& pAmbient, const vec3& pDiffuse,
+	const vec3& pSpecular, float pShininess,
 	float pAlpha, bool pSmooth)
 {
 	mAmbient	= pAmbient;
@@ -1669,7 +1670,7 @@ void GeometryBase::BasicMaterialSettings::Set(const Vector3DF& pAmbient, const V
 
 Lepra::uint32 GeometryBase::mDefaultFlags = 0;
 float GeometryBase::mDefaultBigOrientationThreshold = 1e-3f;
-LOG_CLASS_DEFINE(UI_GFX, GeometryBase);
+loginstance(UI_GFX, GeometryBase);
 
 
 

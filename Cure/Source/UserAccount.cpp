@@ -4,6 +4,7 @@
  
 
 
+#include "pch.h"
 #include "../Include/UserAccount.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../../Lepra/Include/SHA1.h"

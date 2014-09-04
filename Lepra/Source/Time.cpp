@@ -5,6 +5,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Time.h"
 #include <time.h>
 #pragma warning(disable: 4996)	// Deprecated functions are not to be used, as they may be removed in future versions. Circumvent problem instead.

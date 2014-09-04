@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/Win32/Win32Target.h"
 #include "../../Include/BusLock.h"
 

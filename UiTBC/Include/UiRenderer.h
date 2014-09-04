@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "../../TBC/Include/GeometryBase.h"
+#include "../../Tbc/Include/GeometryBase.h"
 #include "../../Lepra/Include/Unordered.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Graphics2D.h"
@@ -20,7 +20,7 @@
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../Lepra/Include/Vector2D.h"
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include "UiBillboardRenderInfo.h"
 #include "UiTexture.h"
 #include "UiShadowVolume.h"
@@ -28,7 +28,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 class GeometryReference;
 }
@@ -46,7 +46,7 @@ class Material;
 
 
 
-class Renderer : public TBC::GeometryBase::Listener
+class Renderer : public Tbc::GeometryBase::Listener
 {
 public:
 
@@ -170,7 +170,7 @@ public:
 		GeometryID mGeometryID;
 
 		// The actual geometry.
-		TBC::GeometryBase* mGeometry;
+		Tbc::GeometryBase* mGeometry;
 
 		// The associated material.
 		MaterialType mMaterialType;
@@ -249,8 +249,8 @@ public:
 
 		typedef HashSet<GeometryData*, LEPRA_VOIDP_HASHER> GeometrySet;
 
-		Vector3DF mPosition;
-		Vector3DF mDirection;
+		vec3 mPosition;
+		vec3 mDirection;
 		LightType mType;
 		LightHint mHint;
 		bool mEnabled;
@@ -282,7 +282,7 @@ public:
 	void ClearDebugInfo();
 
 	// Implementing the GeometryBase::Listener interface.
-	void DeletingGeometry(TBC::GeometryBase* pGeometry);
+	void DeletingGeometry(Tbc::GeometryBase* pGeometry);
 
 	const Canvas* GetScreen() const;
 
@@ -326,9 +326,9 @@ public:
 	void ResetClippingRect();
 	const PixelRect& GetClippingRect() const;
 
-	virtual void SetCameraTransformation(const TransformationF& pTransformation);
-	const TransformationF& GetCameraTransformation();
-	const QuaternionF& GetCameraOrientationInverse();
+	virtual void SetCameraTransformation(const xform& pTransformation);
+	const xform& GetCameraTransformation();
+	const quat& GetCameraOrientationInverse();
 
 	virtual void SetLightsEnabled(bool pEnabled);
 	bool GetLightsEnabled();
@@ -374,20 +374,20 @@ public:
 	// shadows. pShadowRange tells how far to extrude the shadow volumes relative
 	// to the light source.
 	virtual LightID AddDirectionalLight(LightHint pHint, // Helps the renderer to optimize shadow rendering.
-		const Vector3DF& pDir,
-		const Vector3DF& pColor,
+		const vec3& pDir,
+		const vec3& pColor,
 		float pShadowRange);
 
 	virtual LightID AddPointLight(LightHint pHint, // Helps the renderer to optimize shadow rendering.
-		const Vector3DF& pPos,
-		const Vector3DF& pColor,
+		const vec3& pPos,
+		const vec3& pColor,
 		float pLightRadius,
 		float pShadowRange);
 
 	virtual LightID AddSpotLight(LightHint pHint, // Helps the renderer to optimize shadow rendering.
-		const Vector3DF& pPos,
-		const Vector3DF& pDir,
-		const Vector3DF& pColor,
+		const vec3& pPos,
+		const vec3& pDir,
+		const vec3& pColor,
 		float pCutoffAngle,
 		float pSpotExponent,
 		float pLightRadius,
@@ -405,12 +405,12 @@ public:
 					 float pNearPlane,
 					 float pFarPlane);
 
-	virtual void SetLightPosition(LightID pLightID, const Vector3DF& pPos);
-	virtual void SetLightDirection(LightID pLightID, const Vector3DF& pDir);
-	virtual void SetLightColor(LightID pLightID, const Vector3DF& pColor);
-	Vector3DF GetLightPosition(LightID pLightID) const;
-	Vector3DF GetLightDirection(LightID pLightID) const;
-	Vector3DF GetLightColor(LightID pLightID) const;
+	virtual void SetLightPosition(LightID pLightID, const vec3& pPos);
+	virtual void SetLightDirection(LightID pLightID, const vec3& pDir);
+	virtual void SetLightColor(LightID pLightID, const vec3& pColor);
+	vec3 GetLightPosition(LightID pLightID) const;
+	vec3 GetLightDirection(LightID pLightID) const;
+	vec3 GetLightColor(LightID pLightID) const;
 
 	LightType GetLightType(LightID pLightID);
 	float GetLightCutoffAngle(LightID pLightID);
@@ -418,7 +418,7 @@ public:
 
 	// First sort the lights by "influence", then retrieve them one by one
 	// by calling GetClosestLight().
-	void SortLights(const Vector3DF& pReferencePosition);
+	void SortLights(const vec3& pReferencePosition);
 	LightID GetClosestLight(int pIndex);
 
 	virtual TextureID AddTexture(Texture* pTexture);
@@ -431,7 +431,7 @@ public:
 	bool IsEnvMapCubeMap(); // Returns true if environment map is a cube map.
 
 	// Adds/updates/removes geometry to/in/from the renderer.
-	virtual GeometryID AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows);
+	virtual GeometryID AddGeometry(Tbc::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows);
 	virtual bool TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture);	// Only adds a texture ID if it hasn't been added already.
 	virtual bool DisconnectGeometryTexture(GeometryID pGeometryId, TextureID pTexture);
 	virtual void UpdateGeometry(GeometryID pGeometryID, bool pForce) = 0;
@@ -444,22 +444,22 @@ public:
 
 	// These are used by the material classes in the context specific renderer.
 	// Don't use them elsewhere.
-	virtual bool PreRender(TBC::GeometryBase* pGeometry) = 0;
-	virtual void PostRender(TBC::GeometryBase* pGeometry) = 0;
+	virtual bool PreRender(Tbc::GeometryBase* pGeometry) = 0;
+	virtual void PostRender(Tbc::GeometryBase* pGeometry) = 0;
 	virtual bool PreRenderMaterial(MaterialType pMaterialType);
 	virtual void PostRenderMaterial(MaterialType pMaterialType);
 
 	void UpdateShadowMaps();
-	unsigned UpdateShadowMaps(TBC::GeometryBase* pGeometry, LightData* pClosestLightData);	// Returns the number of triangles calculated for.
+	unsigned UpdateShadowMaps(Tbc::GeometryBase* pGeometry, LightData* pClosestLightData);	// Returns the number of triangles calculated for.
 
 	virtual void Tick(float pTime);
 	virtual unsigned RenderScene() = 0;
-	virtual void RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards) = 0;
+	virtual void RenderBillboards(Tbc::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards) = 0;
 
 	// Used for rendering stuff that are NOT in the world, such as
 	// 3D-objects in the GUI. The position of the geometry is considered
 	// relative to the camera.
-	virtual void RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation) = 0;
+	virtual void RenderRelative(Tbc::GeometryBase* pGeometry, const quat* pLightOrientation) = 0;
 
 	unsigned GetCurrentFrame() const;
 
@@ -472,21 +472,21 @@ public:
 
 	// Given a polygon (pVertex) in world space, this function returns the
 	// projected bounding rectangle in screen coordinates.
-	PixelRect GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) const;
+	PixelRect GetBoundingRect(const vec3* pVertex, int pNumVertices) const;
 
 	// Returns true if the front face is turned towards the camera.
-	bool IsFacingFront(const Vector3DF* pVertex, int pNumVertices);
-	Vector3DF ScreenCoordToVector(const PixelCoord& pCoord) const;
-	Vector2DF PositionToScreenCoord(const Vector3DF& pPosition, float pAspectRatio) const;
+	bool IsFacingFront(const vec3* pVertex, int pNumVertices);
+	vec3 ScreenCoordToVector(const PixelCoord& pCoord) const;
+	vec2 PositionToScreenCoord(const vec3& pPosition, float pAspectRatio) const;
 
 	// Returns the triangle count in the scene. 
 	// Parameter controls counting visible OR culled triangles.
 	int GetTriangleCount(bool pVisible);
 
-	virtual void DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor) = 0;
+	virtual void DrawLine(const vec3& pPosition, const vec3& pVector, const Color& pColor) = 0;
 
 	void CalcCamCulling();
-	bool CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius) const;
+	bool CheckCamCulling(const vec3& pPosition, float pBoundingRadius) const;
 
 protected:
 	enum GeomReleaseOption
@@ -522,7 +522,7 @@ protected:
 	static bool CheckFlag(unsigned pFlags, unsigned pFlag);
 	float GetAspectRatio() const;
 
-	bool CheckCulling(const TransformationF& pTransform, double pBoundingRadius);
+	bool CheckCulling(const xform& pTransform, double pBoundingRadius);
 
 	virtual void BindMap(int pMapType, 
 			     TextureData* pTextureData,
@@ -532,12 +532,12 @@ protected:
 	virtual void ReleaseMap(TextureData* pTextureData) = 0;
 	virtual int ReleaseShadowMap(int pShadowMapID) = 0;
 
-	virtual void BindGeometry(TBC::GeometryBase* pGeometry,
+	virtual void BindGeometry(Tbc::GeometryBase* pGeometry,
 				  GeometryID pID,
 				  MaterialType pMaterialType) = 0;
 
 	virtual bool BindShadowGeometry(UiTbc::ShadowVolume* pShadowGeometry, LightHint pLightHint) = 0;
-	virtual void ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption) = 0;
+	virtual void ReleaseGeometry(Tbc::GeometryBase* pUserGeometry, GeomReleaseOption pOption) = 0;
 
 	LightID AllocLight();
 
@@ -567,14 +567,14 @@ protected:
 	// Used for portal rendering.
 	double mDX;
 	double mDY;
-	TransformationF mCamTransform;
+	xform mCamTransform;
 
 	// View frustum.
 	float mFOVAngle;
 	float mNear;
 	float mFar;
-	Vector3DF mFrustumPlanes[4];
-	Vector3DF mCamFrustumPlanes[4];
+	vec3 mFrustumPlanes[4];
+	vec3 mCamFrustumPlanes[4];
 
 	bool mIsOutlineRenderEnabled;
 	bool mIsWireframeEnabled;
@@ -618,8 +618,8 @@ protected:
 	unsigned mShadowUpdateFrameDelay;
 
 	PixelRect mClippingRect;
-	TransformationF mCameraTransformation;
-	QuaternionF mCameraOrientationInverse;
+	xform mCameraTransformation;
+	quat mCameraOrientationInverse;
 
 	int mShadowVolumesCreateMax;
 	int mShadowVolumeCreateCount;
@@ -627,9 +627,9 @@ protected:
 	// Since distance sorting lights is implemented using ::qsort(),
 	// we need to store the following variables "globally".
 	static Renderer* smRenderer;
-	static Vector3DF smReferencePosition;
+	static vec3 smReferencePosition;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

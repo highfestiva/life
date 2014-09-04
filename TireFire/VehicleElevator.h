@@ -27,11 +27,11 @@ public:
 	virtual ~VehicleElevator();
 
 private:
-	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
+	void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
 
 	Game* mGame;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

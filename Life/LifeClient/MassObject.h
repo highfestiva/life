@@ -28,7 +28,7 @@ class MassObject: public UiCure::CppContextObject
 	typedef UiCure::CppContextObject Parent;
 public:
 	MassObject(Cure::ResourceManager* pResourceManager, const str& pClassResourceName,
-		UiCure::GameUiManager* pUiManager, TBC::PhysicsManager::BodyID pTerrainBodyId, size_t pInstanceCount,
+		UiCure::GameUiManager* pUiManager, Tbc::PhysicsManager::BodyID pTerrainBodyId, size_t pInstanceCount,
 		float pSideLength);
 	virtual ~MassObject();
 
@@ -38,17 +38,17 @@ public:
 
 private:
 	virtual void OnLoaded();
-	void PositionToGrid(const Vector3DF& pPosition, int& pX, int& pY) const;
-	void GridToPosition(int pX, int pY, Vector3DF& pPosition) const;
+	void PositionToGrid(const vec3& pPosition, int& pX, int& pY) const;
+	void GridToPosition(int pX, int pY, vec3& pPosition) const;
 	void MoveToSquare(int pX, int pY);
 	void CreateSquare(size_t pX, size_t pY);
-	bool GetObjectPlacement(Vector3DF& pPosition) const;
+	bool GetObjectPlacement(vec3& pPosition) const;
 
 	class Square
 	{
 	public:
 		Square(uint32 pSeed, const MeshArray& pResourceArray,
-			const std::vector<TransformationF>& pDisplacementArray, UiTbc::Renderer* pRenderer);
+			const std::vector<xform>& pDisplacementArray, UiTbc::Renderer* pRenderer);
 		~Square();
 		void SetRender(bool pRender, float pAlpha);
 
@@ -67,7 +67,7 @@ private:
 		SQUARE_COUNT		= SQUARE_SIDE*SQUARE_SIDE,
 	};
 
-	TBC::PhysicsManager::BodyID mTerrainBodyId;
+	Tbc::PhysicsManager::BodyID mTerrainBodyId;
 	size_t mSquareInstanceCount;
 	Square* mSquareArray[SQUARE_COUNT];
 	const float mVisibleAddTerm;
@@ -78,7 +78,7 @@ private:
 	int mMiddleSquareY;
 	unsigned mSeed;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

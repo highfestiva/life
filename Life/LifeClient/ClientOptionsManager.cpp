@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "ClientOptionsManager.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -92,7 +93,7 @@ void ClientOptionsManager::DoRefreshConfiguration()
 	};
 	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 
-	CURE_RTVAR_TRYGET(mMouseSensitivity, =(float), mVariableScope, RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
+	v_tryget(mMouseSensitivity, =(float), mVariableScope, RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
 }
 
 bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
@@ -142,120 +143,120 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 	// TODO: check for installed devices, prioritize, etc.
 
 	// Hmmm... Same cam controls for all split-screen clients. Swell.
-	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMUP, _T("Key.PGUP"));
-	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMDOWN, _T("Key.INSERT"));
-	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMLEFT, _T("Key.DEL"));
-	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMRIGHT, _T("Key.PGDOWN"));
-	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMFORWARD, _T("Key.HOME"));
-	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMBACKWARD, _T("Key.END"));
+	v_override(mVariableScope, RTVAR_CTRL_UI_CAMUP, _T("Key.PGUP"));
+	v_override(mVariableScope, RTVAR_CTRL_UI_CAMDOWN, _T("Key.INSERT"));
+	v_override(mVariableScope, RTVAR_CTRL_UI_CAMLEFT, _T("Key.DEL"));
+	v_override(mVariableScope, RTVAR_CTRL_UI_CAMRIGHT, _T("Key.PGDOWN"));
+	v_override(mVariableScope, RTVAR_CTRL_UI_CAMFORWARD, _T("Key.HOME"));
+	v_override(mVariableScope, RTVAR_CTRL_UI_CAMBACKWARD, _T("Key.END"));
 
 	switch (pPriority)
 	{
 		case 0:
 		{
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PARAGRAPH, Key.ACUTE, Key.APOSTROPHE"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.UP"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Key.DOWN"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.LEFT"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.RIGHT"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.NUMPAD_4"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.NUMPAD_1"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.NUMPAD_4"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.NUMPAD_1"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_0"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.END"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PARAGRAPH, Key.ACUTE, Key.APOSTROPHE"));
+			v_override(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.UP"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Key.DOWN"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.LEFT"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.RIGHT"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_LEFT3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.NUMPAD_4"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.NUMPAD_1"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.NUMPAD_4"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.NUMPAD_1"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_0"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.END"));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
 			lOk = true;
 		}
 		break;
 		case 1:
 		{
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.SCROLL_LOCK"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Device0.Button1"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T("Device0.AbsoluteAxis2-"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK3D, _T("Device0.AbsoluteAxis2+"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Device0.Button0"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Device0.AbsoluteAxis3-"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Device0.AbsoluteAxis3+"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT3D, _T("Device0.AbsoluteAxis1-"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T("Device0.AbsoluteAxis1+"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Device0.AbsoluteAxis0-"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Device0.AbsoluteAxis0+"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Device0.AbsoluteAxis0-"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Device0.AbsoluteAxis0+"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Device0.Button5"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE0, _T("Device0.Button2"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.SCROLL_LOCK"));
+			v_override(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Device0.Button1"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T("Device0.AbsoluteAxis2-"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK3D, _T("Device0.AbsoluteAxis2+"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Device0.Button0"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Device0.AbsoluteAxis3-"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Device0.AbsoluteAxis3+"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_LEFT3D, _T("Device0.AbsoluteAxis1-"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T("Device0.AbsoluteAxis1+"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Device0.AbsoluteAxis0-"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Device0.AbsoluteAxis0+"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Device0.AbsoluteAxis0-"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Device0.AbsoluteAxis0+"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Device0.Button5"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE0, _T("Device0.Button2"));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
 			lOk = true;
 		}
 		break;
 		case 2:
 		{
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F12"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.W"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Key.S"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.A"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.D"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.E"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.Q"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.E"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.Q"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.E"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.LCTRL"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F12"));
+			v_override(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.W"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Key.S"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.A"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.D"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_LEFT3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.E"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.Q"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.E"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.Q"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.E"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.LCTRL"));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
 			lOk = true;
 		}
 		break;
 		case 3:
 		{
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PAUSE"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.NUMPAD_8"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Key.NUMPAD_5"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.NUMPAD_4"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.NUMPAD_6"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.NUMPAD_9"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.NUMPAD_7"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.NUMPAD_9"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.NUMPAD_7"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_9"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T("Key.NUMPAD_7"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.NUMPAD_PLUS"));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
-			CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PAUSE"));
+			v_override(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, _T("Key.TAB"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.NUMPAD_8"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Key.NUMPAD_5"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.NUMPAD_4"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.NUMPAD_6"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_LEFT3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.NUMPAD_9"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.NUMPAD_7"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.NUMPAD_9"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.NUMPAD_7"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_9"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_BRK, _T("Key.NUMPAD_7"));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_YAW, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_STEER_PITCH, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE0, _T("Key.NUMPAD_PLUS"));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE1, _T(""));
+			v_override(mVariableScope, RTVAR_CTRL_FIRE2, _T(""));
 			lOk = true;
 		}
 		break;
@@ -272,7 +273,7 @@ void ClientOptionsManager::operator=(const ClientOptionsManager&)
 
 
 
-LOG_CLASS_DEFINE(UI_INPUT, ClientOptionsManager);
+loginstance(UI_INPUT, ClientOptionsManager);
 
 
 

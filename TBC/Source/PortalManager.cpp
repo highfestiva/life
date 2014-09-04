@@ -5,11 +5,12 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/PortalManager.h"
 #include "../Include/GeometryBase.h"
 #include "../../Lepra/Include/Log.h"
 
-namespace TBC
+namespace Tbc
 {
 
 PortalManager::PortalManager()
@@ -44,7 +45,7 @@ void PortalManager::ClearAll()
 }
 
 PortalManager::Portal* PortalManager::NewPortal(int pNumVertices,
-						Vector3DF* pVertex,
+						vec3* pVertex,
 						Cell* pCell1,
 						Cell* pCell2)
 {
@@ -76,7 +77,7 @@ bool PortalManager::AddCell(const str& pCellID, const str& pCellDescription)
 }
 
 bool PortalManager::AddPortal(int pNumVertices,
-			      Vector3DF* pVertex,
+			      vec3* pVertex,
 			      const str& pCellID1,
 			      const str& pCellID2)
 {
@@ -169,8 +170,8 @@ str PortalManager::GetParentCellID(GeometryBase* pGeometry)
 	}
 }
 
-str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
-						  const Vector3DF& pToPos,
+str PortalManager::TestPortalCollision(const vec3& pFromPos,
+						  const vec3& pToPos,
 						  GeometryBase* pGeometry)
 {
 	Cell* lCell = (Cell*)pGeometry->GetParentCell();
@@ -180,7 +181,7 @@ str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
 		return *smInvalidCellID;
 	}
 
-	Vector3DF lFromPos(pFromPos);
+	vec3 lFromPos(pFromPos);
 
 	// Loop as long as we are colliding with portals.
 	for (;;)
@@ -191,7 +192,7 @@ str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
 		{
 			// We have collided. Step into the other cell and update the step vector.
 			lCell = lOtherCell;
-			Vector3DF lDiff(pToPos - lFromPos);
+			vec3 lDiff(pToPos - lFromPos);
 			lFromPos += lDiff * lTTC;
 		}
 		else
@@ -204,8 +205,8 @@ str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
 	return lCell->GetID();
 }
 
-str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
-						  const Vector3DF& pToPos,
+str PortalManager::TestPortalCollision(const vec3& pFromPos,
+						  const vec3& pToPos,
 						  const str& pCellID)
 {
 	CellTable::Iterator lIter = mCellTable.Find(pCellID);
@@ -217,7 +218,7 @@ str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
 
 	Cell* lCell = *lIter;
 
-	Vector3DF lFromPos(pFromPos);
+	vec3 lFromPos(pFromPos);
 
 	// Loop as long as we are colliding with portals.
 	for (;;)
@@ -228,7 +229,7 @@ str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
 		{
 			// We have collided. Step into the other cell and update the step vector.
 			lCell = lOtherCell;
-			Vector3DF lDiff(pToPos - lFromPos);
+			vec3 lDiff(pToPos - lFromPos);
 			lFromPos += lDiff * lTTC;
 		}
 		else
@@ -240,8 +241,8 @@ str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
 	return lCell->GetID();
 }
 
-PortalManager::Cell* PortalManager::Cell::TestPortalCollision(const Vector3DF& pFromPos,
-							      const Vector3DF& pToPos,
+PortalManager::Cell* PortalManager::Cell::TestPortalCollision(const vec3& pFromPos,
+							      const vec3& pToPos,
 							      float& pTimeToCollision)
 {
 	PortalList::iterator lIter;
@@ -278,7 +279,7 @@ PortalManager::Cell* PortalManager::Cell::TestPortalCollision(const Vector3DF& p
 
 
 PortalManager::Portal::Portal(int pNumVertices,
-			      Vector3DF* pVertex,
+			      vec3* pVertex,
 			      Cell* pCell1,
 			      Cell* pCell2) :
 	mNumVertices(pNumVertices),
@@ -298,8 +299,8 @@ PortalManager::Portal::Portal(int pNumVertices,
 
 	mD = -mNormal.Dot(pVertex[0]);
 
-	mVertex     = new Vector3DF[mNumVertices];
-	mEdgeNormal = new Vector3DF[mNumVertices];
+	mVertex     = new vec3[mNumVertices];
+	mEdgeNormal = new vec3[mNumVertices];
 	mEdgeD = new float[mNumVertices];
 
 	for (i = 0; i < mNumVertices; i++)
@@ -331,8 +332,8 @@ PortalManager::Cell* PortalManager::Portal::GetOtherCell(Cell* pCell)
 	return 0;
 }
 
-bool PortalManager::Portal::TestCollision(const Vector3DF& pFromPos,
-					  const Vector3DF& pToPos,
+bool PortalManager::Portal::TestCollision(const vec3& pFromPos,
+					  const vec3& pToPos,
 					  Cell* pFrom,
 					  float& pTimeToCollision)
 {
@@ -370,10 +371,10 @@ bool PortalManager::Portal::TestCollision(const Vector3DF& pFromPos,
 	}
 
 	// The vector is crossing the plane. Find the point of intersection (POI).
-	Vector3DF lDiff(pToPos - pFromPos);
+	vec3 lDiff(pToPos - pFromPos);
 	float lTTC = (mNormal.Dot(pToPos) + mD) / mNormal.Dot(lDiff);
 	
-	Vector3DF lPOI(pFromPos + lDiff * lTTC);
+	vec3 lPOI(pFromPos + lDiff * lTTC);
 
 	// Now check if the POI is on the portal polygon.
 	for (int i = 0; i < mNumVertices; i++)
@@ -435,9 +436,9 @@ void PortalManager::Cell::RemoveGeometry(GeometryBase* pGeometry)
 
 
 
-// Initialized in TBC::Init().
+// Initialized in Tbc::Init().
 str* PortalManager::smInvalidCellID = 0;
 
-LOG_CLASS_DEFINE(UI_GFX_3D, PortalManager);
+loginstance(UI_GFX_3D, PortalManager);
 
 }

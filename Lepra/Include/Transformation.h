@@ -93,7 +93,7 @@ public:
 
 	Transformation Transform(const Transformation& pTransformation) const;
 	Transformation InverseTransform(const Transformation& pTransformation) const;
-	void FastInverseTransform(const Transformation& pFrom, const QuaternionF pInverse, const Transformation& pTo);
+	void FastInverseTransform(const Transformation& pFrom, const quat pInverse, const Transformation& pTo);
 
 	Transformation Inverse() const;
 
@@ -133,10 +133,10 @@ TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVe
 
 
 
-typedef Transformation<float> TransformationF;
+typedef Transformation<float> xform;
 typedef Transformation<double> TransformationD;
 
-extern const TransformationF gIdentityTransformationF;
+extern const xform gIdentityTransformationF;
 extern const TransformationD gIdentityTransformationD;
 
 #undef TEMPLATE

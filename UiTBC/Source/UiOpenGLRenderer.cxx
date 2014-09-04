@@ -2,13 +2,14 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
+#include "pch.h"
 #include "../Include/UiOpenGLRenderer.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/Transformation.h"
-#include "../../TBC/Include/GeometryReference.h"
+#include "../../Tbc/Include/GeometryReference.h"
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
 #include "../Include/UiDynamicRenderer.h"
 #include "../Include/UiOpenGLMaterials.h"
@@ -281,8 +282,8 @@ int OpenGLRenderer::ReleaseShadowMap(int pShadowMapID)
 
 
 Renderer::LightID OpenGLRenderer::AddDirectionalLight(LightHint pHint,
-		const Vector3DF& pDir,
-		const Vector3DF& pColor,
+		const vec3& pDir,
+		const vec3& pColor,
 		float pShadowRange)
 {
 	LightID lLightID = Parent::AddDirectionalLight(pHint, pDir, pColor, pShadowRange);
@@ -292,8 +293,8 @@ Renderer::LightID OpenGLRenderer::AddDirectionalLight(LightHint pHint,
 }
 
 Renderer::LightID OpenGLRenderer::AddPointLight(LightHint pHint,
-		const Vector3DF& pPos,
-		const Vector3DF& pColor,
+		const vec3& pPos,
+		const vec3& pColor,
 		float pLightRadius,
 		float pShadowRange)
 {
@@ -304,9 +305,9 @@ Renderer::LightID OpenGLRenderer::AddPointLight(LightHint pHint,
 }
 
 Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint pHint,
-		const Vector3DF& pPos,
-		const Vector3DF& pDir,
-		const Vector3DF& pColor,
+		const vec3& pPos,
+		const vec3& pDir,
+		const vec3& pColor,
 		float pCutoffAngle,
 		float pSpotExponent,
 		float pLightRadius,
@@ -343,7 +344,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData* pLight)
 	if (pLight->mType == LIGHT_POINT ||
 	   pLight->mType == LIGHT_SPOT)
 	{
-		Vector3DF lLightPos = GetCameraTransformation().InverseTransform(pLight->mPosition);
+		vec3 lLightPos = GetCameraTransformation().InverseTransform(pLight->mPosition);
 		lPos[0] = (float)lLightPos.x;
 		lPos[1] = (float)lLightPos.y;
 		lPos[2] = (float)lLightPos.z;
@@ -351,7 +352,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData* pLight)
 
 		if (pLight->mType == LIGHT_SPOT)
 		{
-			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(pLight->mDirection);
+			vec3 lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(pLight->mDirection);
 
 			float lDir[3];
 			lDir[0] = (float)lLightDir.x;
@@ -420,7 +421,7 @@ void OpenGLRenderer::EnableAllLights(bool pEnable)
 
 
 
-void OpenGLRenderer::SetLightPosition(LightID pLightID, const Vector3DF& pPos)
+void OpenGLRenderer::SetLightPosition(LightID pLightID, const vec3& pPos)
 {
 	Parent::SetLightPosition(pLightID, pPos);
 
@@ -432,7 +433,7 @@ void OpenGLRenderer::SetLightPosition(LightID pLightID, const Vector3DF& pPos)
 	if (lLightData->mType == LIGHT_POINT ||
 	   lLightData->mType == LIGHT_SPOT)
 	{
-		Vector3DF lLightPos = GetCameraTransformation().InverseTransform(pPos);
+		vec3 lLightPos = GetCameraTransformation().InverseTransform(pPos);
 		float lPos[4];
 		lPos[0] = (float)lLightPos.x;
 		lPos[1] = (float)lLightPos.y;
@@ -447,7 +448,7 @@ void OpenGLRenderer::SetLightPosition(LightID pLightID, const Vector3DF& pPos)
 
 
 
-void OpenGLRenderer::SetLightDirection(LightID pLightID, const Vector3DF& pDir)
+void OpenGLRenderer::SetLightDirection(LightID pLightID, const vec3& pDir)
 {
 	Parent::SetLightDirection(pLightID, pDir);
 
@@ -721,7 +722,7 @@ void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
 	//OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
+void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 				  GeometryID /*pID*/,
 				  MaterialType pMaterialType)
 {
@@ -737,7 +738,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 	OGLGeometryData* lGeometryData = (OGLGeometryData*)pGeometry->GetRendererData();
 	if (pGeometry->IsGeometryReference())
 	{
-		TBC::GeometryBase* lParentGeometry = ((TBC::GeometryReference*)pGeometry)->GetParentGeometry();
+		Tbc::GeometryBase* lParentGeometry = ((Tbc::GeometryReference*)pGeometry)->GetParentGeometry();
 		GeometryData* lParentGeometryData = (GeometryData*)lParentGeometry->GetRendererData();
 		lGeometryData->CopyReferenceData(lParentGeometryData);
 	}
@@ -762,7 +763,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 			if (pGeometry->GetColorData() != 0)
 			{
 				int lSize = 4;
-				if (pGeometry->GetColorFormat() == TBC::GeometryBase::COLOR_RGB)
+				if (pGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
 					lSize = 3;
 
 				lBufferSize += lVertexCount * sizeof(unsigned char) * lSize;
@@ -782,14 +783,14 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 #ifndef LEPRA_GL_ES
 			switch(pGeometry->GetGeometryVolatility())
 			{
-			case TBC::GeometryBase::GEOM_STATIC:
-			case TBC::GeometryBase::GEOM_SEMI_STATIC:
+			case Tbc::GeometryBase::GEOM_STATIC:
+			case Tbc::GeometryBase::GEOM_SEMI_STATIC:
 				lGLHint = GL_STATIC_DRAW;
 				break;
-			case TBC::GeometryBase::GEOM_DYNAMIC:
+			case Tbc::GeometryBase::GEOM_DYNAMIC:
 				lGLHint = GL_DYNAMIC_DRAW;
 				break;
-			case TBC::GeometryBase::GEOM_VOLATILE:
+			case Tbc::GeometryBase::GEOM_VOLATILE:
 				lGLHint = GL_STREAM_DRAW;
 				break;
 			}
@@ -822,7 +823,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 			if (pGeometry->GetColorData() != 0)
 			{
 				int lSize = 4;
-				if (pGeometry->GetColorFormat() == TBC::GeometryBase::COLOR_RGB)
+				if (pGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
 					lSize = 3;
 
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
@@ -917,20 +918,20 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 #ifndef LEPRA_GL_ES
 		switch(pShadowVolume->GetGeometryVolatility())
 		{
-		case TBC::GeometryBase::GEOM_STATIC:
-		case TBC::GeometryBase::GEOM_SEMI_STATIC:
+		case Tbc::GeometryBase::GEOM_STATIC:
+		case Tbc::GeometryBase::GEOM_SEMI_STATIC:
 			if (pLightHint == LIGHT_MOVABLE)
 				lGLHint = GL_STREAM_DRAW;
 			else
 				lGLHint = GL_STATIC_DRAW;
 			break;
-		case TBC::GeometryBase::GEOM_DYNAMIC:
+		case Tbc::GeometryBase::GEOM_DYNAMIC:
 			if (pLightHint == LIGHT_MOVABLE)
 				lGLHint = GL_STREAM_DRAW;
 			else
 				lGLHint = GL_DYNAMIC_DRAW;
 			break;
-		case TBC::GeometryBase::GEOM_VOLATILE:
+		case Tbc::GeometryBase::GEOM_VOLATILE:
 			lGLHint = GL_STREAM_DRAW;
 			break;
 		}
@@ -972,7 +973,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 	if (lIter != GetGeometryTable().End())
 	{
 		OGLGeometryData* lGeomData = (OGLGeometryData*)*lIter;
-		TBC::GeometryBase* lGeometry = lGeomData->mGeometry;
+		Tbc::GeometryBase* lGeometry = lGeomData->mGeometry;
 
 		if (pForce)
 		{
@@ -1020,7 +1021,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 			if (lGeometry->GetColorDataChanged() && lGeometry->GetColorData())
 			{
 				int lSize = 4;
-				if (lGeometry->GetColorFormat() == TBC::GeometryBase::COLOR_RGB)
+				if (lGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
 					lSize = 3;
 
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
@@ -1075,7 +1076,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption)
+void OpenGLRenderer::ReleaseGeometry(Tbc::GeometryBase* pUserGeometry, GeomReleaseOption pOption)
 {
 	OGLGeometryData* lGeometry = (OGLGeometryData*)pUserGeometry->GetRendererData();
 
@@ -1152,7 +1153,7 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 
 
 
-bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
+bool OpenGLRenderer::PreRender(Tbc::GeometryBase* pGeometry)
 {
 	if (pGeometry->IsTwoSided())
 	{
@@ -1172,7 +1173,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		}
 	}
 
-	const TransformationF& t = pGeometry->GetTransformation();
+	const xform& t = pGeometry->GetTransformation();
 	if (pGeometry->IsExcludeCulling() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();
@@ -1191,7 +1192,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 	return false;
 }
 
-void OpenGLRenderer::PostRender(TBC::GeometryBase* pGeometry)
+void OpenGLRenderer::PostRender(Tbc::GeometryBase* pGeometry)
 {
 	pGeometry->SetTransformationChanged(false);
 	if (pGeometry->IsRecvNoShadows())
@@ -1209,10 +1210,10 @@ void OpenGLRenderer::PostRender(TBC::GeometryBase* pGeometry)
 
 
 
-void OpenGLRenderer::DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor)
+void OpenGLRenderer::DrawLine(const vec3& pPosition, const vec3& pVector, const Color& pColor)
 {
 	glEnable(GL_DEPTH_TEST);
-	TransformationF lCamTransform = GetCameraTransformation().InverseTransform(gIdentityTransformationF);
+	xform lCamTransform = GetCameraTransformation().InverseTransform(gIdentityTransformationF);
 	float lModelViewMatrix[16];
 	lCamTransform.GetAs4x4TransposeMatrix(lModelViewMatrix);
 	glMatrixMode(GL_MODELVIEW);
@@ -1356,8 +1357,8 @@ unsigned OpenGLRenderer::RenderScene()
 	{
 		Material::EnableDrawMaterial(false);
 		SetAmbientLight(1, 1, 1);
-		const Vector3DF lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
-		TBC::GeometryBase::BasicMaterialSettings lMaterial(Vector3DF(1, 1, 1), lColor, Vector3DF(), 1, 1, false);
+		const vec3 lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
+		Tbc::GeometryBase::BasicMaterialSettings lMaterial(vec3(1, 1, 1), lColor, vec3(), 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
@@ -1451,7 +1452,7 @@ unsigned OpenGLRenderer::RenderScene()
 	return (GetCurrentFrame());
 }
 
-void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards)
+void OpenGLRenderer::RenderBillboards(Tbc::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards)
 {
 	if (pBillboards.size() == 0)
 	{
@@ -1498,8 +1499,8 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	TransformationF lCamSpace;
-	//TBC::GeometryBase::BasicMaterialSettings lMaterialSettings(Vector3DF(), Vector3DF(), Vector3DF(), 0, 0, false);
+	xform lCamSpace;
+	//Tbc::GeometryBase::BasicMaterialSettings lMaterialSettings(vec3(), vec3(), vec3(), 0, 0, false);
 	BillboardRenderInfoArray::const_iterator x = pBillboards.begin();
 	for (; x != pBillboards.end(); ++x)
 	{
@@ -1508,9 +1509,9 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 		//lMaterial->SetBasicMaterial(lMaterialSettings);
 		glColor4f(x->mColor.x, x->mColor.y, x->mColor.z, x->mOpacity);
 
-		QuaternionF lRot = mCameraTransformation.GetOrientation();
+		quat lRot = mCameraTransformation.GetOrientation();
 		lRot.RotateAroundOwnY(x->mAngle);
-		lCamSpace.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, TransformationF(lRot, x->mPosition));
+		lCamSpace.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, xform(lRot, x->mPosition));
 		float lModelViewMatrix[16];
 		lCamSpace.GetAs4x4TransposeMatrix(x->mScale, lModelViewMatrix);
 		::glLoadMatrixf(lModelViewMatrix);
@@ -1531,7 +1532,7 @@ void OpenGLRenderer::RenderBillboards(TBC::GeometryBase* pGeometry, bool pRender
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation)
+void OpenGLRenderer::RenderRelative(Tbc::GeometryBase* pGeometry, const quat* pLightOrientation)
 {
 	OGL_FAST_ASSERT();
 
@@ -1548,7 +1549,7 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 	if (pLightOrientation)
 	{
 		::glEnable(GL_LIGHTING);
-		QuaternionF lOrientation = pGeometry->GetTransformation().GetOrientation().GetInverse();
+		quat lOrientation = pGeometry->GetTransformation().GetOrientation().GetInverse();
 		LightData lDataCopy = *lLightData;
 		lOrientation *= *pLightOrientation;
 		lDataCopy.mDirection = lOrientation * lLightData->mDirection;
@@ -1614,7 +1615,7 @@ void OpenGLRenderer::ProcessLights()
 
 		if (lLight->mType == LIGHT_DIRECTIONAL)
 		{
-			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight->mDirection);
+			vec3 lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight->mDirection);
 			float lPos[4] =
 			{
 				(float)-lLightDir.x,
@@ -1626,7 +1627,7 @@ void OpenGLRenderer::ProcessLights()
 		}
 		else if(lLight->mType == LIGHT_POINT)
 		{
-			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight->mPosition);
+			vec3 lLightPos = GetCameraTransformation().InverseTransform(lLight->mPosition);
 			float lPos[4] =
 			{
 				(float)lLightPos.x,
@@ -1638,8 +1639,8 @@ void OpenGLRenderer::ProcessLights()
 		}
 		else if(lLight->mType == LIGHT_SPOT)
 		{
-			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight->mPosition);
-			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight->mDirection);
+			vec3 lLightPos = GetCameraTransformation().InverseTransform(lLight->mPosition);
+			vec3 lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight->mDirection);
 			float lPos[4] =
 			{
 				(float)lLightPos.x,
@@ -1710,7 +1711,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glMatrixMode(GL_MODELVIEW);
 
 	// Offset shadow in light direction to avoid Z-fighting.
-	Vector3DF lCamShadowOffset;
+	vec3 lCamShadowOffset;
 	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
 	{
 		LightData* lLight = x->second;
@@ -1747,7 +1748,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 			if (lShadowVolume->GetParentGeometry()->GetAlwaysVisible() == true ||
 			   lShadowVolume->GetParentGeometry()->GetLastFrameVisible() == GetCurrentFrame())
 			{
-				TransformationF lShadowTransformation(lShadowVolume->GetTransformation());
+				xform lShadowTransformation(lShadowVolume->GetTransformation());
 				lShadowTransformation.GetPosition() += lCamShadowOffset;
 				mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, lShadowTransformation);
 				float lModelViewMatrix[16];
@@ -1890,7 +1891,7 @@ int OpenGLRenderer::RenderShadowMaps()
 				GetCameraTransformation().InverseTransform(lGeometry->mGeometry->GetTransformation()).GetAs4x4TransposeMatrix(lModelViewMatrix);
 
 				float lLightModelViewMatrix[16];
-				TransformationF lLightTransformation(lLight->mOrientation, lLight->mPosition);
+				xform lLightTransformation(lLight->mOrientation, lLight->mPosition);
 				(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lLightModelViewMatrix);
 
 				// Camera model view matrix.
@@ -1993,7 +1994,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	glMatrixMode(GL_MODELVIEW);
 
 
-	TransformationF lLightTransformation(pLight->mOrientation, pLight->mPosition);
+	xform lLightTransformation(pLight->mOrientation, pLight->mPosition);
     
 	// Clear depth buffer.
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -2190,7 +2191,7 @@ void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pComp
 
 
 
-LOG_CLASS_DEFINE(UI_GFX_3D, OpenGLRenderer);
+loginstance(UI_GFX_3D, OpenGLRenderer);
 
 
 

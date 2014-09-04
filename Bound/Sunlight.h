@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../Lepra/Include/HiResTimer.h"
-#include "../UiTBC/Include/UiRenderer.h"
+#include "../UiTbc/Include/UiRenderer.h"
 #include "Bound.h"
 
 
@@ -29,12 +29,12 @@ class Sunlight
 public:
 	Sunlight(UiCure::GameUiManager* pUiManager);
 	virtual ~Sunlight();
-	void Tick(const QuaternionF& pCameraOrientation);
+	void Tick(const quat& pCameraOrientation);
 
 private:
 	UiCure::GameUiManager* mUiManager;
 	UiTbc::Renderer::LightID mLightId;
-    Vector3DF mLightAverageDirection;
+    vec3 mLightAverageDirection;
 };
 
 

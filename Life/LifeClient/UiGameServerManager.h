@@ -44,7 +44,7 @@ private:
 	Options::OptionsManager mOptions;
 	bool mConsoleActive;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

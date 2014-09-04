@@ -5,6 +5,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/UiOpenGLMaterials.h"
 
 namespace UiTbc

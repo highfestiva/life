@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "CenteredMachine.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/GameManager.h"
@@ -41,9 +42,9 @@ void CenteredMachine::OnMicroTick(float pFrameTime)
 
 	if (!mIsDetonated)
 	{
-		TBC::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
-		TBC::PhysicsManager::BodyID lBodyId = GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-		Vector3DF v = lPhysicsManager->GetBodyPosition(lBodyId);
+		Tbc::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
+		Tbc::PhysicsManager::BodyID lBodyId = GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		vec3 v = lPhysicsManager->GetBodyPosition(lBodyId);
 		v.y = 0;
 		lPhysicsManager->SetBodyPosition(lBodyId, v);
 		lPhysicsManager->GetBodyVelocity(lBodyId, v);

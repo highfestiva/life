@@ -101,7 +101,7 @@ private:
 	const static double mDisconnectedIdleTimeout;
 	const static double mServerInfoTimeout;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

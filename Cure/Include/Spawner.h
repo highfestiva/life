@@ -25,8 +25,8 @@ public:
 	virtual ~Spawner();
 
 	void PlaceObject(ContextObject* pObject, int pSpawnPointIndex);
-	TransformationF GetSpawnPoint() const;
-	static void EaseDown(TBC::PhysicsManager* pPhysicsManager, ContextObject* pObject, const Vector3DF* pStartPosition);
+	xform GetSpawnPoint() const;
+	static void EaseDown(Tbc::PhysicsManager* pPhysicsManager, ContextObject* pObject, const vec3* pStartPosition);
 
 protected:
 	virtual void OnTick();
@@ -44,7 +44,7 @@ private:
 	int mSpawnPointIndex;
 	GameObjectIdArray mEaseDownObjects;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Lepra.h"
 #include "../Include/Canvas.h"
 #include "../Include/GammaLookup.h"
@@ -21,9 +22,9 @@ namespace Lepra
 
 
 
-const QuaternionF gIdentityQuaternionF;
+const quat gIdentityQuaternionF;
 const QuaternionD gIdentityQuaternionD;
-const TransformationF gIdentityTransformationF;
+const xform gIdentityTransformationF;
 const TransformationD gIdentityTransformationD;
 
 

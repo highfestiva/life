@@ -4,8 +4,8 @@
 
 
 
+#include "pch.h"
 #ifndef CURE_TEST_WITHOUT_UI
-
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -89,7 +89,7 @@ private:
 		{
 			int lPhysIndex = -1;
 			str lName;
-			Lepra::TransformationF lTransform;
+			Lepra::xform lTransform;
 			float lMeshScale;
 			lClass->GetMesh(x, lPhysIndex, lName, lTransform, lMeshScale);
 			mMeshResourceArray.push_back(new UiCure::UserGeometryReferenceResource(
@@ -134,7 +134,7 @@ private:
 	typedef std::vector<UiCure::UserGeometryReferenceResource*> MeshArray;
 	MeshArray mMeshResourceArray;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -156,11 +156,11 @@ public:
 	virtual float GetPowerSaveAmount() const {return 0;}
 	virtual void WillMicroTick(float pTimeDelta) {(void)pTimeDelta;}
 	virtual void DidPhysicsTick() {}
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID, int, int, TBC::PhysicsManager::BodyID, const Vector3DF&) {}
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID, int, int, Tbc::PhysicsManager::BodyID, const vec3&) {}
 	virtual void OnForceApplied(int, int,
-		TBC::PhysicsManager::BodyID, TBC::PhysicsManager::BodyID,
-		const Vector3DF&, const Vector3DF&,
-		const Vector3DF&, const Vector3DF&) {}
+		Tbc::PhysicsManager::BodyID, Tbc::PhysicsManager::BodyID,
+		const vec3&, const vec3&,
+		const vec3&, const vec3&) {}
 };
 
 
@@ -177,9 +177,9 @@ public:
 
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const {(void)pClassId; return 0;}
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk) {(void)pObject; (void)pOk;}
-	virtual void OnCollision(const Vector3DF&, const Vector3DF&, const Vector3DF&,
+	virtual void OnCollision(const vec3&, const vec3&, const vec3&,
 		Cure::ContextObject*, Cure::ContextObject*,
-		TBC::PhysicsManager::BodyID, TBC::PhysicsManager::BodyID) {}
+		Tbc::PhysicsManager::BodyID, Tbc::PhysicsManager::BodyID) {}
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject) {(void)pObject; return true;}
 	virtual bool OnAttributeSend(Cure::ContextObject* pObject) {(void)pObject; return true;}
 	virtual bool IsServer() {return false;}
@@ -646,18 +646,18 @@ bool ResourceTest::TestReloadContextObject()
 bool ResourceTest::InternalLoadTransformation(Cure::ContextManager& pContextManager)
 {
 	// Generate orientation to set and to test against.
-	QuaternionF q;
+	quat q;
 	q.RotateAroundOwnX(PIF/5);
 	q.RotateAroundOwnY(PIF/5);
 	q.RotateAroundOwnZ(PIF/5);
-	QuaternionF lFlip;
+	quat lFlip;
 	lFlip.RotateAroundOwnZ(PIF);
 	lFlip.RotateAroundOwnX(PIF/2);
-	QuaternionF Q = -(q * lFlip);
+	quat Q = -(q * lFlip);
 
 	UiCure::CppContextObject lObject(mResourceManager, _T("hover_tank_01"), mUiManager);
 	pContextManager.AddLocalObject(&lObject);
-	TransformationF lTransform(q, Vector3DF(1, 2, 3));
+	xform lTransform(q, vec3(1, 2, 3));
 	lObject.SetInitialTransform(lTransform);
 	lObject.StartLoading();
 	for (int x = 0; x < 10 && !lObject.IsLoaded(); ++x)
@@ -668,12 +668,12 @@ bool ResourceTest::InternalLoadTransformation(Cure::ContextManager& pContextMana
 	deb_assert(lTestOk);
 	if (lTestOk)
 	{
-		lTestOk = (lObject.GetPosition() == Vector3DF(1, 2, 3));
+		lTestOk = (lObject.GetPosition() == vec3(1, 2, 3));
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		QuaternionF r = lObject.GetOrientation();
+		quat r = lObject.GetOrientation();
 		lTestOk = (Math::IsEpsEqual(r.a, Q.a, 0.1f) &&
 			Math::IsEpsEqual(r.b, Q.b, 0.1f) &&
 			Math::IsEpsEqual(r.c, Q.c, 0.1f) &&
@@ -684,7 +684,7 @@ bool ResourceTest::InternalLoadTransformation(Cure::ContextManager& pContextMana
 }
 
 
-LOG_CLASS_DEFINE(TEST, ResourceTest);
+loginstance(TEST, ResourceTest);
 
 
 

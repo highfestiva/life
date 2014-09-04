@@ -25,9 +25,9 @@ public:
 	virtual ~StuntTrigger();
 
 protected:
-	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
+	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
 	virtual void DidTrigger(Cure::ContextObject* pBody) = 0;
 
 	bool mAllowBulletTime;
@@ -43,7 +43,7 @@ protected:
 	str mClientStartCommand;
 	str mClientStopCommand;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

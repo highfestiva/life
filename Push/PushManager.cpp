@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "PushManager.h"
 #include <algorithm>
 #include "../Cure/Include/ContextManager.h"
@@ -22,13 +23,14 @@
 #include "../Life/ProjectileUtil.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiExhaustEmitter.h"
+#include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiLepra/Include/UiTouchstick.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../UiTBC/Include/UiParticleRenderer.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../UiTbc/Include/UiParticleRenderer.h"
 #include "PushConsoleManager.h"
 #include "PushTicker.h"
 #include "RoadSignButton.h"
@@ -85,7 +87,7 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 
 	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
 
-	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance*3, 0);
+	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * vec3(0, mCameraTargetXyDistance*3, 0);
 
 	SetConsoleManager(new PushConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 }
@@ -104,33 +106,33 @@ void PushManager::LoadSettings()
 {
 	Parent::LoadSettings();
 
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	v_internal(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	const str lLeftName  = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
 	const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
-	CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
 #endif // Touch device or emulated touch device
 
 #ifdef LEPRA_TOUCH
 	// TODO: remove hard-coding!
-	//CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("pixeldoctrine.dyndns.org:16650"));
-	//CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	//v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("pixeldoctrine.dyndns.org:16650"));
+	//v_internal(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
+	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 #endif // Touch device
 }
 
@@ -152,7 +154,7 @@ void PushManager::SetRenderArea(const PixelRect& pRenderArea)
 
 	UpdateTouchstickPlacement();
 
-	CURE_RTVAR_GET(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	v_get(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
 
 void PushManager::Close()
@@ -176,7 +178,7 @@ void PushManager::SetFade(float pFadeAmount)
 {
 	mCameraMaxSpeed = 100000.0f;
 	float lBaseDistance;
-	CURE_RTVAR_GET(lBaseDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	v_get(lBaseDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	mCameraTargetXyDistance = lBaseDistance + pFadeAmount*400.0f;
 }
 
@@ -270,7 +272,7 @@ void PushManager::AddLocalObjects(std::unordered_set<Cure::GameObjectId>& pLocal
 	Parent::AddLocalObjects(pLocalObjectSet);
 }
 
-bool PushManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
+bool PushManager::IsObjectRelevant(const vec3& pPosition, float pDistance) const
 {
 	return (pPosition.GetDistanceSquared(mCameraPosition) <= pDistance*pDistance);
 }
@@ -284,7 +286,7 @@ Cure::GameObjectId PushManager::GetAvatarInstanceId() const
 
 bool PushManager::SetAvatarEnginePower(unsigned pAspect, float pPower)
 {
-	deb_assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
+	deb_assert(pAspect >= 0 && pAspect < Tbc::PhysicsEngine::ASPECT_COUNT);
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
@@ -322,14 +324,14 @@ void PushManager::CreateLoginView()
 		if (mDisconnectReason.empty())
 		{
 			str lServerName;
-			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+			v_tryget(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 			if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
 			{
 				lServerName = lServerName.substr(7);
 			}
 			const str lDefaultUserName = strutil::Format(_T("User%u"), mSlaveIndex);
 			str lUserName;
-			CURE_RTVAR_TRYGET(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
+			v_tryget(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
                         wstr lReadablePassword = L"CarPassword";
                         const Cure::MangledPassword lPassword(lReadablePassword);
 			const Cure::LoginId lLoginToken(wstrutil::Encode(lUserName), lPassword);
@@ -446,7 +448,7 @@ void PushManager::UpdateTouchstickPlacement()
 	if (!mStickLeft)
 	{
 		int lScreenPixelWidth;
-		CURE_RTVAR_GET(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
+		v_get(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
 		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
 		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
 		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
@@ -500,7 +502,7 @@ void PushManager::UpdateTouchstickPlacement()
 void PushManager::TickUiInput()
 {
 	SteeringPlaybackMode lPlaybackMode;
-	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	v_tryget(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
 	if (lPlaybackMode != PLAYBACK_PLAY && lPhysicsStepCount > 0 && mAllowMovementInput)
 	{
@@ -509,7 +511,7 @@ void PushManager::TickUiInput()
 		if (lObject)
 		{
 			float lChildishness;
-			CURE_RTVAR_GET(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+			v_get(lChildishness, =(float), GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 			lObject->QuerySetChildishness(lChildishness);
 
 			// Control steering.
@@ -557,10 +559,10 @@ void PushManager::TickUiInput()
 			const Life::Options::CamControl& c = mOptions.GetCamControl();
 #define C(dir) c.mControl[Life::Options::CamControl::CAMDIR_##dir]
 			float lCamPower = C(UP)-C(DOWN);
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lCamPower*lScale, -5.0, 30.0);
+			v_internal_arithmetic(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lCamPower*lScale, -5.0, 30.0);
 			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
 			lCamPower = C(BACKWARD)-C(FORWARD);
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lCamPower*lScale, 3.0, 100.0);
+			v_internal_arithmetic(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lCamPower*lScale, 3.0, 100.0);
 
 			mAvatarInvisibleCount = 0;
 		}
@@ -577,7 +579,7 @@ bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pA
 	bool lSet = pAvatar->SetEnginePower(pAspect, pPower);
 
 	SteeringPlaybackMode lPlaybackMode;
-	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	v_tryget(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	if (lPlaybackMode == PLAYBACK_RECORD)
 	{
 		if (!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mPower, pPower)
@@ -626,13 +628,13 @@ void PushManager::TickUiUpdate()
 	mCollisionSoundManager->Tick(mCameraPosition);
 }
 
-bool PushManager::UpdateMassObjects(const Vector3DF& pPosition)
+bool PushManager::UpdateMassObjects(const vec3& pPosition)
 {
 	bool lOk = true;
 
 	if (mLevel && mMassObjectArray.empty())
 	{
-		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		const Tbc::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 		if (lOk)
 		{
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
@@ -681,11 +683,11 @@ void PushManager::SetLocalRender(bool pRender)
 			const float x = sin(lTod*2) * lCloudDistance;
 			const float y = cos(lTod) * lCloudDistance;
 			const float z = cos(lTod*3) * lCloudDistance * 0.2f + lCloudDistance * 0.4f;
-			lCloud->SetRootPosition(Vector3DF(x, y, z));
+			lCloud->SetRootPosition(vec3(x, y, z));
 		}
 
 		bool lMass;
-		CURE_RTVAR_GET(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+		v_get(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
 		SetMassRender(lMass);
 	}
 	else
@@ -755,7 +757,7 @@ void PushManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage)
 			const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX - 0.5f + 0.5f*lDeltaX;
 			const float y = (mRoadSignIndex / SIGN_COUNT_X) * lDeltaY - 0.5f + 0.5f*lDeltaY;
 			++mRoadSignIndex;
-			lButton->SetTrajectory(Vector2DF(x, y), 8);
+			lButton->SetTrajectory(vec2(x, y), 8);
 			lButton->GetButton().SetOnClick(PushManager, OnAvatarSelect);
 			mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
 			lButton->StartLoading();
@@ -842,14 +844,14 @@ void PushManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void PushManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+void PushManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
+	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID)
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
 
-	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
-	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
+	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
 	if (!lObject1Dynamic || !lObject2Dynamic)
 	{
 		return;
@@ -903,7 +905,7 @@ void PushManager::OnAvatarSelect(UiTbc::Button* pButton)
 		mPickVehicleButton = new RoadSignButton(this, GetResourceManager(), mUiManager, _T("PickVehicle"),
 			_T("road_sign_01"), _T("road_sign_car.png"), RoadSignButton::SHAPE_ROUND);
 		GetContext()->AddLocalObject(mPickVehicleButton);
-		mPickVehicleButton->SetTrajectory(Vector2DF(0, 0.45f), 20);
+		mPickVehicleButton->SetTrajectory(vec2(0, 0.45f), 20);
 		mPickVehicleButton->SetTrajectoryAngle(-PIF/2);
 		mPickVehicleButton->GetButton().SetOnClick(PushManager, OnVehicleSelect);
 		mPickVehicleButton->StartLoading();
@@ -940,7 +942,7 @@ void PushManager::DrawStick(Touchstick* pStick)
 	pStick->GetValue(x, y, lIsPressing);
 	if (lIsPressing)
 	{
-		Vector2DF v(x, y);
+		vec2 v(x, y);
 		v.Mul((ow+lMargin*2) / (float)ow);
 		const float lLength = v.GetLength();
 		if (lLength > 1)
@@ -980,7 +982,7 @@ void PushManager::MoveCamera()
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	Vector3DF lAvatarPosition = mCameraPivotPosition;
+	vec3 lAvatarPosition = mCameraPivotPosition;
 	float lCameraPivotSpeed = 0;
 	if (lObject)
 	{
@@ -988,7 +990,7 @@ void PushManager::MoveCamera()
 		// (in the XY plane) to where the camera currently is.
 		lAvatarPosition = lObject->GetPosition();
 		mCameraPivotPosition = lAvatarPosition;
-		Vector3DF lAvatarVelocity = lObject->GetVelocity();
+		vec3 lAvatarVelocity = lObject->GetVelocity();
 		lAvatarVelocity.z *= 0.2f;	// Don't take very much action on the up/down speed, that has it's own algo.
 		mCameraPivotVelocity = Math::Lerp(mCameraPivotVelocity, lAvatarVelocity, 0.5f*lPhysicsTime/0.1f);
 		mCameraPivotPosition += mCameraPivotVelocity * 0.6f;	// Look to where the avatar will be in a while.
@@ -996,19 +998,19 @@ void PushManager::MoveCamera()
 
 		UpdateMassObjects(mCameraPivotPosition);
 	}
-	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
-	Vector3DF lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
+	const vec3 lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
+	vec3 lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
 	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetLength();
 	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + lCameraPivotSpeed*0.6f;
 	lTargetCameraPosition = lPivotXyPosition + lTargetCameraPosition*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
 	float lCamHeight;
-	CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	v_get(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	lTargetCameraPosition.z = mCameraPivotPosition.z + lCamHeight;
 
 	if (lObject)
 	{
 		/* Almost tried out "stay behind velocity". Was too jerky, since velocity varies too much.
-		Vector3DF lVelocity = lObject->GetVelocity();
+		vec3 lVelocity = lObject->GetVelocity();
 		mCameraFollowVelocity = lVelocity;
 		float lSpeed = lVelocity.GetLength();
 		if (lSpeed > 0.1f)
@@ -1017,7 +1019,7 @@ void PushManager::MoveCamera()
 			mCameraFollowVelocity = Math::Lerp(mCameraFollowVelocity, lVelocity, 0.1f).GetNormalized();
 		}
 		// Project previous "camera up" onto plane orthogonal to the velocity to get new "up".
-		Vector3DF lCameraUp = mCameraUp.ProjectOntoPlane(mCameraFollowVelocity) + Vector3DF(0, 0, 0.01f);
+		vec3 lCameraUp = mCameraUp.ProjectOntoPlane(mCameraFollowVelocity) + vec3(0, 0, 0.01f);
 		if (lCameraUp.GetLengthSquared() > 0.1f)
 		{
 			mCameraUp = lCameraUp;
@@ -1031,7 +1033,7 @@ void PushManager::MoveCamera()
 
 		/*// Temporary: changed to "cam stay behind" mode.
 		lTargetCameraPosition = lObject->GetOrientation() *
-			Vector3DF(0, -mCameraTargetXyDistance, mCameraTargetXyDistance/4) +
+			vec3(0, -mCameraTargetXyDistance, mCameraTargetXyDistance/4) +
 			mCameraPivotPosition;*/
 	}
 
@@ -1045,15 +1047,15 @@ void PushManager::MoveCamera()
 	{
 		const float lCameraAboveGround = 0.3f;
 		lTargetCameraPosition.z -= lCameraAboveGround;
-		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-		Vector3DF lCollisionPoint;
+		const Tbc::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		vec3 lCollisionPoint;
 		float lStepSize = (lTargetCameraPosition - lAvatarPosition).GetLength() * 0.5f;
 		for (int y = 0; y < 5; ++y)
 		{
 			int x;
 			for (x = 0; x < 2; ++x)
 			{
-				const Vector3DF lRay = lTargetCameraPosition - lAvatarPosition;
+				const vec3 lRay = lTargetCameraPosition - lAvatarPosition;
 				const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
 					lAvatarPosition, lRay, lRay.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
 				if (lIsCollision)
@@ -1086,9 +1088,9 @@ void PushManager::MoveCamera()
 		lMovingAveragePart = 0.8f;
 	}
 	//lMovingAveragePart = 1;
-	const Vector3DF lNewPosition = Math::Lerp<Vector3DF, float>(mCameraPosition,
+	const vec3 lNewPosition = Math::Lerp<vec3, float>(mCameraPosition,
 		lTargetCameraPosition, lMovingAveragePart);
-	const Vector3DF lDirection = lNewPosition-mCameraPosition;
+	const vec3 lDirection = lNewPosition-mCameraPosition;
 	const float lDistance = lDirection.GetLength();
 	if (lDistance > mCameraMaxSpeed*lPhysicsTime)
 	{
@@ -1106,7 +1108,7 @@ void PushManager::MoveCamera()
 	// "Roll" camera towards avatar.
 	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
 	const float lNewTargetCameraDistance = mCameraPosition.GetDistance(mCameraPivotPosition);
-	Vector3DF lTargetCameraOrientation;
+	vec3 lTargetCameraOrientation;
 	lTargetCameraOrientation.Set(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2,
 		::acos((mCameraPivotPosition.z-mCameraPosition.z)/lNewTargetCameraDistance), 0);
 	if (lPivotXyPosition.y-mCameraPosition.y < 0)
@@ -1120,15 +1122,15 @@ void PushManager::MoveCamera()
 	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
-	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
+	mCameraOrientation = Math::Lerp<vec3, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
 
 	float lRotationFactor;
-	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	v_get(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
 	lRotationFactor += mCamRotateExtra;
 	if (lRotationFactor)
 	{
-		TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
-		lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), lRotationFactor * lPhysicsTime);
+		xform lTransform(GetCameraQuaternion(), mCameraPosition);
+		lTransform.RotateAroundAnchor(mCameraPivotPosition, vec3(0, 0, 1), lRotationFactor * lPhysicsTime);
 		mCameraPosition = lTransform.GetPosition();
 		float lTheta;
 		float lPhi;
@@ -1142,14 +1144,14 @@ void PushManager::MoveCamera()
 
 void PushManager::UpdateCameraPosition(bool pUpdateMicPosition)
 {
-	TransformationF lCameraTransform(GetCameraQuaternion(), mCameraPosition);
+	xform lCameraTransform(GetCameraQuaternion(), mCameraPosition);
 	mUiManager->SetCameraPosition(lCameraTransform);
 	if (pUpdateMicPosition)
 	{
 		const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
 		if (lFrameTime > 1e-4)
 		{
-			Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+			vec3 lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
 			const float lMicrophoneMaxVelocity = 100.0f;
 			if (lVelocity.GetLength() > lMicrophoneMaxVelocity)
 			{
@@ -1162,12 +1164,12 @@ void PushManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	}
 }
 
-QuaternionF PushManager::GetCameraQuaternion() const
+quat PushManager::GetCameraQuaternion() const
 {
 	const float lTheta = mCameraOrientation.x;
 	const float lPhi = mCameraOrientation.y;
 	const float lGimbal = mCameraOrientation.z;
-	QuaternionF lOrientation;
+	quat lOrientation;
 	lOrientation.SetEulerAngles(lTheta-PIF/2, PIF/2-lPhi, lGimbal);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
@@ -1192,7 +1194,7 @@ QuaternionF PushManager::GetCameraQuaternion() const
 
 
 
-LOG_CLASS_DEFINE(GAME, PushManager);
+loginstance(GAME, PushManager);
 
 
 

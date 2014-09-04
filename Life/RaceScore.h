@@ -8,7 +8,7 @@
 
 #include "../Cure/Include/ContextObjectAttribute.h"
 #include "../Lepra/Include/HiResTimer.h"
-#include "../TBC/Include/PhysicsManager.h"
+#include "../Tbc/Include/PhysicsManager.h"
 #include "Life.h"
 
 
@@ -22,9 +22,9 @@ class RaceScore: public Cure::ContextObjectAttribute
 {
 	typedef Cure::ContextObjectAttribute Parent;
 public:
-	typedef TBC::PhysicsManager::TriggerID TriggerId;
+	typedef Tbc::PhysicsManager::TriggerID TriggerId;
 
-	RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, TBC::PhysicsManager::TriggerID pStartTrigger);
+	RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, Tbc::PhysicsManager::TriggerID pStartTrigger);
 	virtual ~RaceScore();
 
 	TriggerId GetStartTrigger() const;
@@ -39,12 +39,12 @@ private:
 	virtual int Pack(uint8* pDestination);
 	virtual int Unpack(const uint8* pSource, int pMaxSize);	// Retuns number of bytes unpacked, or -1.
 
-	typedef std::unordered_set<TBC::PhysicsManager::TriggerID> TriggerSet;
+	typedef std::unordered_set<Tbc::PhysicsManager::TriggerID> TriggerSet;
 
 	bool mIsUpdated;
 	int mLapCountLeft;
 	int mPhysicsFrameStart;
-	TBC::PhysicsManager::TriggerID mStartTrigger;
+	Tbc::PhysicsManager::TriggerID mStartTrigger;
 	TriggerSet mTriggerSet;
 	size_t mTriggedCount;
 	size_t mTriggerCount;

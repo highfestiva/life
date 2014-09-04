@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "HoverTankServerConsole.h"
 #include "HoverTankServerDelegate.h"
 
@@ -59,7 +60,7 @@ void HoverTankServerConsole::OnExecutionError(const str& pCommand, const strutil
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, HoverTankServerConsole);
+loginstance(CONSOLE, HoverTankServerConsole);
 
 
 

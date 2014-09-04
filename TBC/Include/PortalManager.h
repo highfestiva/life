@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "TBC.h"
+#include "Tbc.h"
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/HashSet.h"
 #include "../../Lepra/Include/HashTable.h"
@@ -27,7 +27,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -56,7 +56,7 @@ public:
 	// Adds a portal. Both cells must exist. Cell1 is the cell "in front" of the portal -
 	// in the direction of the surface normal.
 	bool AddPortal(int pNumVertices,
-			   Vector3DF* pVertex,
+			   vec3* pVertex,
 			   const str& pCellID1,
 			   const str& pCellID2);
 
@@ -70,15 +70,15 @@ public:
 	// Testing as if moving from pFromPos to pToPos (both given in world 
 	// coordinates), and updates the geometry's parent cell if a collision 
 	// occurs. Returns the ID of the geometry's parent cell after collision.
-	str TestPortalCollision(const Vector3DF& pFromPos,
-					   const Vector3DF& pToPos,
+	str TestPortalCollision(const vec3& pFromPos,
+					   const vec3& pToPos,
 					   GeometryBase* pGeometry);
 
 	// Test collision against portals in the cell with the given ID.
 	// Testing as if moving from pFromPos to pToPos (both given in world
 	// coordinates). Returns the ID of the cell after collision.
-	str TestPortalCollision(const Vector3DF& pFromPos,
-					   const Vector3DF& pToPos,
+	str TestPortalCollision(const vec3& pFromPos,
+					   const vec3& pToPos,
 					   const str& pCellID);
 
 	// This function is implemented in UiPortalManager.
@@ -91,14 +91,14 @@ protected:
 	{
 	public:
 		Portal(int pNumVertices,
-		       Vector3DF* pVertex,
+		       vec3* pVertex,
 		       Cell* pCell1,
 		       Cell* pCell2);
 		virtual ~Portal();
 
 		// Returns "true" on collision and the time to collision.
-		bool TestCollision(const Vector3DF& pFromPos,
-						   const Vector3DF& pToPos,
+		bool TestCollision(const vec3& pFromPos,
+						   const vec3& pToPos,
 						   Cell* pFrom,
 						   float& pTimeToCollision);
 
@@ -107,15 +107,15 @@ protected:
 	protected:
 		int mNumVertices;
 
-		Vector3DF* mVertex;
+		vec3* mVertex;
 		// Generated normals which all point towards the center of the portal.
-		Vector3DF* mEdgeNormal;
+		vec3* mEdgeNormal;
 		float* mEdgeD; // The fourth constant in the plane equation.
 
 		Cell* mCell1;
 		Cell* mCell2;
 
-		Vector3DF mNormal;
+		vec3 mNormal;
 		float mD;
 	};
 
@@ -135,8 +135,8 @@ protected:
 		void AddGeometry(GeometryBase* pGeometry);
 		void RemoveGeometry(GeometryBase* pGeometry);
 
-		Cell* TestPortalCollision(const Vector3DF& pFromPos,
-					  const Vector3DF& pToPos,
+		Cell* TestPortalCollision(const vec3& pFromPos,
+					  const vec3& pToPos,
 					  float& pTimeToCollision);
 	protected:
 
@@ -155,7 +155,7 @@ protected:
 	typedef std::list<Portal*> PortalList;
 
 	virtual Portal* NewPortal(int pNumVertices,
-				 Vector3DF* pVertex,
+				 vec3* pVertex,
 				 Cell* pCell1,
 				 Cell* pCell2);
 	virtual Cell* NewCell(const str& pCellID, 
@@ -166,10 +166,10 @@ protected:
 	CellTable mCellTable;
 	PortalList mPortalList;
 
-	// Initialized in TBC::Init().
+	// Initialized in Tbc::Init().
 	static str* smInvalidCellID;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

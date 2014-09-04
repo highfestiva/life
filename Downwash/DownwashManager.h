@@ -8,7 +8,7 @@
 
 #include "../Lepra/Include/DiskFile.h"
 #include "../Lepra/Include/GameTimer.h"
-#include "../TBC/Include/PhysicsEngine.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/Launcher.h"
 #include "../UiCure/Include/UiResourceManager.h"
@@ -80,13 +80,13 @@ public:
 	void PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg);
 	virtual void DrawSyncDebugInfo();
 
-	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
+	virtual bool IsObjectRelevant(const vec3& pPosition, float pDistance) const;
 	Cure::GameObjectId GetAvatarInstanceId() const;
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
 	virtual void Shoot(Cure::ContextObject* pCanon, int pAmmo);
-	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
+	virtual void Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 	virtual bool DidFinishLevel();
@@ -119,7 +119,7 @@ protected:
 	virtual void TickUiInput();
 	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower);
 	virtual void TickUiUpdate();
-	virtual bool UpdateMassObjects(const Vector3DF& pPosition);
+	virtual bool UpdateMassObjects(const vec3& pPosition);
 	virtual void SetLocalRender(bool pRender);
 	void SetMassRender(bool pRender);
 
@@ -127,13 +127,13 @@ protected:
 	virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	virtual void OnLevelLoadCompleted();
-	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
+		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
 
-	Vector3DF GetLandingTriggerPosition(Cure::ContextObject* pLevel) const;
-	void EaseDown(Cure::ContextObject* pObject, const Vector3DF* pStartPosition);
-	TransformationF GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const;
+	vec3 GetLandingTriggerPosition(Cure::ContextObject* pLevel) const;
+	void EaseDown(Cure::ContextObject* pObject, const vec3* pStartPosition);
+	xform GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const;
 
 	void OnPauseButton(UiTbc::Button*);
 	void OnLastHiscoreButton(UiTbc::Button*);
@@ -172,8 +172,8 @@ protected:
 	GameTimer mFlyTime;
 	StopWatch mSlowmoTimer;
 	HiResTimer mToyModeColorTimer;
-	Vector3DF mLastVehicleColor;
-	Vector3DF mLastChopperColor;
+	vec3 mLastVehicleColor;
+	vec3 mLastChopperColor;
 	bool mSetRandomChopperColor;
 	bool mHadAvatar;
 	bool mUpdateCameraForAvatar;
@@ -184,22 +184,22 @@ protected:
 	Level* mOldLevel;
 	Autopilot* mAutopilot;
 	UiCure::CppContextObject* mHemisphere;
-	TBC::BoneAnimator* mHemisphereUvTransform;
+	Tbc::BoneAnimator* mHemisphereUvTransform;
 	bool mRenderHemisphere;
 	Sunlight* mSunlight;
 	ObjectArray mMassObjectArray;
 
-	TransformationF mCameraTransform;
-	Vector3DF mCameraPreviousPosition;
-	Vector3DF mHelicopterPosition;
-	mutable Vector3DF mLastLandingTriggerPosition;
+	xform mCameraTransform;
+	vec3 mCameraPreviousPosition;
+	vec3 mHelicopterPosition;
+	mutable vec3 mLastLandingTriggerPosition;
 	float mCameraSpeed;
 	bool mZoomPlatform;
 	int mPostZoomPlatformFrameCount;
 	int mHitGroundFrameCount;
 	bool mIsHitThisFrame;
 	bool mLevelCompleted;
-	Vector3DF mMicrophoneSpeed;
+	vec3 mMicrophoneSpeed;
 	UiTbc::Button* mPauseButton;
 	UiTbc::Button* mLastHiscoreButton;
 
@@ -224,7 +224,7 @@ protected:
 	Cure::HiscoreAgent* mHiscoreAgent;
 	StopWatch mHiscoreJustUploadedTimer;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,9 +4,11 @@
 
 
 
+#include "pch.h"
 #include "LifeApplication.h"
 #include "../Cure/Include/ConsoleManager.h"
 #include "../Cure/Include/GameTicker.h"
+#include "../Cure/Include/ResourceManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Lepra/Include/AntiCrack.h"
 #include "../Lepra/Include/LogListener.h"
@@ -77,9 +79,9 @@ Application::~Application()
 
 void Application::Init()
 {
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
+	v_set(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	v_set(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
+	v_set(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 
 	mConsoleLogger = CreateConsoleLogListener();
 	//mConsoleLogger->SetLevelThreashold(LEVEL_INFO);
@@ -95,7 +97,7 @@ void Application::Init()
 	//mPerformanceLogger = new FileLogListener(GetIoFile(GetTypeName()+_T("Performance"), _T("log"), false));
 	mMemLogger = new MemFileLogListener(20*1024);
 #endif // Debug
-	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
+	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
 	str lStartMessage = _T("Starting ") + mBaseName + _T(" ") + GetTypeName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
 	mLog.RawPrint(LEVEL_HEADLINE, lStartMessage);
@@ -161,7 +163,7 @@ bool Application::MainLoop()
 	{
 		if (mMemLogger)
 		{
-			LogType::GetLog(LogType::SUB_ROOT)->RemoveListener(mMemLogger);
+			LogType::GetLogger(LogType::SUB_ROOT)->RemoveListener(mMemLogger);
 		}
 		mLog.AFatal("Terminating application due to fatal error.");
 		if (mMemLogger && mFileLogger)
@@ -182,7 +184,7 @@ bool Application::Tick()
 	HiResTimer lLoopTime(false);
 
 	bool lDebug;
-	CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	v_get(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	if (lDebug)
 	{
 		mGameTicker->Profile();
@@ -190,7 +192,7 @@ bool Application::Tick()
 	Random::GetRandomNumber();	// To move seed ahead.
 	bool lOk = mGameTicker->Tick();
 	float lExtraSleep;
-	CURE_RTVAR_GET(lExtraSleep, =(float), Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
+	v_get(lExtraSleep, =(float), Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 	if (lExtraSleep > 0)
 	{
 		Thread::Sleep(lExtraSleep);
@@ -251,7 +253,7 @@ LogListener* Application::CreateConsoleLogListener() const
 void Application::TickSleep(double pMainLoopTime) const
 {
 	float lPowerSaveFactor;
-	CURE_RTVAR_GET(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
+	v_get(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
 	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount() * lPowerSaveFactor;
 	if (lPowerSaveAmount > 0)
 	{
@@ -271,7 +273,7 @@ void Application::TickSleep(double pMainLoopTime) const
 		}
 
 		int lFps;
-		CURE_RTVAR_GET(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
+		v_get(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
 		const double lSleepTime = lWantedFrameTime - pMainLoopTime - mGameTicker->GetTickTimeReduction();
 		const double MAXIMUM_SLEEP_TIME = 0.01;
@@ -332,7 +334,7 @@ void Application::HandleZombieMode()
 
 str Application::mBaseName;
 
-LOG_CLASS_DEFINE(GAME, Application);
+loginstance(GAME, Application);
 
 
 

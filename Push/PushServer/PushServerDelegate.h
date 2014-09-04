@@ -54,7 +54,7 @@ private:
 
 	Cure::GameObjectId mLevelId;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

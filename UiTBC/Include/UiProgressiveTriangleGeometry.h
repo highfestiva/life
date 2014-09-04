@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include "UiTriangleBasedGeometry.h"
-#include "../../TBC/Include/GeometryBase.h"
+#include "../../Tbc/Include/GeometryBase.h"
 #include <list>
 
 
@@ -18,7 +18,7 @@ namespace UiTbc
 
 
 
-class ProgressiveTriangleGeometry : public TBC::GeometryBase
+class ProgressiveTriangleGeometry : public Tbc::GeometryBase
 {
 public:
 	ProgressiveTriangleGeometry();
@@ -57,7 +57,7 @@ public:
 
 	inline ColorFormat GetColorFormat() const;
 
-	// Overloads from TBC::GeometryBase.
+	// Overloads from Tbc::GeometryBase.
 	virtual inline GeometryVolatility GetGeometryVolatility() const;
 
 private:
@@ -211,7 +211,7 @@ private:
 		Vertex* mV2;
 		Vertex* mV3;
 
-		Vector3DF mNormal;    // Used in FindEdgeToCollapse().
+		vec3 mNormal;    // Used in FindEdgeToCollapse().
 		std::list<int> mVertexIndexHistory;
 		VertexList mVertexHistory;
 
@@ -463,13 +463,13 @@ float* ProgressiveTriangleGeometry::GetNormalData() const
 	return mCurrentNormalData;
 }
 
-TBC::GeometryBase::GeometryVolatility ProgressiveTriangleGeometry::GetGeometryVolatility() const
+Tbc::GeometryBase::GeometryVolatility ProgressiveTriangleGeometry::GetGeometryVolatility() const
 {
 	// Volatile, because the geometry is constantly changed.
-	return TBC::GeometryBase::GEOM_VOLATILE;
+	return Tbc::GeometryBase::GEOM_VOLATILE;
 }
 
-TBC::GeometryBase::ColorFormat ProgressiveTriangleGeometry::GetColorFormat() const
+Tbc::GeometryBase::ColorFormat ProgressiveTriangleGeometry::GetColorFormat() const
 {
 	return mColorFormat;
 }

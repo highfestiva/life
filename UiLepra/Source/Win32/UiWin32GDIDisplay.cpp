@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/Win32/UiWin32GDIDisplay.h"
 
 

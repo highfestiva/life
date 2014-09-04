@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "ExplodingMachine.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -68,12 +69,12 @@ void ExplodingMachine::OnTick()
 
 void ExplodingMachine::OnDie()
 {
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveStrength, mDisappearAfterDeathDelay);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), vec3(), mExplosiveStrength, mDisappearAfterDeathDelay);
 }
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, ExplodingMachine);
+loginstance(GAME_CONTEXT_CPP, ExplodingMachine);
 
 
 

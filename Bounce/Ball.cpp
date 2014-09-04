@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Ball.h"
 #include "../Cure/Include/ContextManager.h"
 
@@ -33,8 +34,8 @@ void Ball::OnMicroTick(float pFrameTime)
 	{
 		return;
 	}
-	TBC::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
-	Vector3DF lVelocity;
+	Tbc::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
+	vec3 lVelocity;
 	lPhysicsManager->GetBodyVelocity(
 		GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 		lVelocity);
@@ -56,7 +57,7 @@ void Ball::OnLoaded()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Ball);
+loginstance(GAME_CONTEXT_CPP, Ball);
 
 
 

@@ -21,7 +21,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -44,8 +44,8 @@ public:
 	virtual void Update(double pDeltaTime);
 
 	// Sets and gets the transformation of the entire model.
-	void SetTransformation(const TransformationF& pTransformation);
-	const TransformationF& GetTransformation() const;
+	void SetTransformation(const xform& pTransformation);
+	const xform& GetTransformation() const;
 
 protected:
 
@@ -56,11 +56,11 @@ protected:
 	{
 	public:
 		PhysicsFrame() {}
-		PhysicsFrame(const TransformationF& pTransformation,
-			     const Vector3DF& pVelocity,
-			     const Vector3DF& pRotationalVelocity,
-			     const Vector3DF& pAcceleration,
-			     const Vector3DF& pRotationalAcceleration,
+		PhysicsFrame(const xform& pTransformation,
+			     const vec3& pVelocity,
+			     const vec3& pRotationalVelocity,
+			     const vec3& pAcceleration,
+			     const vec3& pRotationalAcceleration,
 			     int pFrame) :
 			mTransformation(pTransformation),
 			mVelocity(pVelocity),
@@ -71,13 +71,13 @@ protected:
 		{	
 		}
 
-		TransformationF mTransformation;
+		xform mTransformation;
 
-		Vector3DF mVelocity;
-		Vector3DF mRotationalVelocity;
+		vec3 mVelocity;
+		vec3 mRotationalVelocity;
 
-		Vector3DF mAcceleration;
-		Vector3DF mRotationalAcceleration;
+		vec3 mAcceleration;
+		vec3 mRotationalAcceleration;
 
 		int mFrame;
 	};
@@ -93,7 +93,7 @@ protected:
 
 	// This is the transformation of the entire model. Transform animations
 	// are relative to this.
-	TransformationF mTransformation;
+	xform mTransformation;
 };
 
 

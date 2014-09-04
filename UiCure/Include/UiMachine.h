@@ -8,7 +8,7 @@
 
 #include "UiCppContextObject.h"
 #include "../../Lepra/Include/GameTimer.h"
-#include "../../UiTBC/Include/UiChunkyClass.h"
+#include "../../UiTbc/Include/UiChunkyClass.h"
 
 
 
@@ -41,11 +41,11 @@ protected:
 
 private:
 	void HandleTagAmbientSounds(const UiTbc::ChunkyClass::Tag& pTag, float pRealTimeRatio);
-	void HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, bool pIsChild);
+	void HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::PhysicsManager* pPhysicsManager, bool pIsChild);
 	void HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag);
 	void HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
 	void HandleTagBlinkLight(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
-	void HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const TBC::PhysicsManager* pPhysicsManager, const Vector3DF& pVelocity,
+	void HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::PhysicsManager* pPhysicsManager, const vec3& pVelocity,
 		float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex);
 	void HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
 	void HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
@@ -69,7 +69,7 @@ private:
 	float mMeshRotateTime;
 	bool mPreventEngineSounds;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

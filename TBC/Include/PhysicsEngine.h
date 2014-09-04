@@ -9,11 +9,11 @@
 #include <vector>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Vector3D.h"
-#include "../Include/TBC.h"
+#include "../Include/Tbc.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -83,7 +83,7 @@ public:
 	void ForceSetValue(unsigned pAspect, float pValue);
 
 	void OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;
-	Vector3DF GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManager) const;
+	vec3 GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManager) const;
 
 	static void UprightStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
 		const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction);
@@ -120,8 +120,8 @@ private:
 		mutable float mLock;
 	};
 
-	Vector3DF GetRotorLiftForce(TBC::PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
-	void ApplyTorque(TBC::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
+	vec3 GetRotorLiftForce(Tbc::PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
+	void ApplyTorque(Tbc::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
 
 	typedef std::vector<EngineNode> EngineNodeArray;
 
@@ -136,7 +136,7 @@ private:
 	mutable float mIntensity;
 	mutable float mSmoothValue[ASPECT_COUNT];
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

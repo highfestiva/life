@@ -7,11 +7,20 @@
 #pragma once
 
 #include "../../Cure/Include/CppContextObject.h"
-#include "UiCure.h"
+#include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "UiResourceManager.h"
+#include "UiCure.h"
 
 
 
+namespace Tbc
+{
+class GeometryBase;
+}
+namespace Cure
+{
+class ResourceManager;
+}
 namespace UiTbc
 {
 class ChunkyClass;
@@ -49,7 +58,7 @@ public:
 	void SetSinking(float pSinkSpeed);
 	void ShrinkMeshBigOrientationThreshold(float pThreshold);
 
-	TBC::GeometryBase* GetMesh(int pIndex) const;
+	Tbc::GeometryBase* GetMesh(int pIndex) const;
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
 	void CenterMeshes();
 	virtual void UpdateMaterial(int pMeshIndex);
@@ -58,7 +67,7 @@ public:
 	virtual void ReplaceTexture(int pTextureIndex, const str& pNewTextureName);
 
 	GameUiManager* GetUiManager() const;
-	virtual const TBC::ChunkyClass* GetClass() const;
+	virtual const Tbc::ChunkyClass* GetClass() const;
 
 protected:
 	enum MeshSlideMode
@@ -94,11 +103,11 @@ protected:
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;
 	size_t mTextureLoadCount;
-	TransformationF mLerpOffset;
+	xform mLerpOffset;
 	MeshSlideMode mLerpMode;
 	PostLoadMaterialDelegate mPostLoadMaterialDelegate;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -7,9 +7,7 @@
 #pragma once
 
 // Unreachable code warning below (MSVC8). For some reason just this file happens to temper with some shitty template.
-#define LEPRA_INCLUDE_NO_OS
 #include "../../Lepra/Include/LepraTarget.h"
-#undef LEPRA_INCLUDE_NO_OS
 #ifdef LEPRA_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
@@ -18,7 +16,7 @@
 #ifdef LEPRA_MSVC
 #pragma warning(pop)
 #endif // LEPRA_MSVC
-#include "../../Lepra/Include/LepraTarget.h"
+#include "../../Lepra/Include/LepraOS.h"
 
 
 #if defined(LEPRA_WINDOWS)

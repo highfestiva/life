@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/X11/UiX11Core.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/SystemManager.h"

@@ -4,7 +4,10 @@
 
 
 
+#include "pch.h"
 #include "../Include/ConsoleManager.h"
+#include "../../Lepra/Include/Lock.h"
+#include "../../Lepra/Include/LogListener.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../Include/Cure.h"
 #include "../Include/RuntimeVariable.h"
@@ -23,6 +26,7 @@ ConsoleManager::ConsoleManager(RuntimeVariableScope* pVariableScope, Interactive
 	mConsolePrompt(pConsolePrompt),
 	mConsoleCommandManager(0),
 	mConsoleThread(0),
+	mLock(new Lock),
 	mHistorySilentUntilNextExecute(false)
 {
 }
@@ -36,6 +40,8 @@ ConsoleManager::~ConsoleManager()
 	mVariableScope = 0;
 	delete mConsoleCommandManager;
 	mConsoleCommandManager = 0;
+	delete mLock;
+	mLock = 0;
 };
 
 void ConsoleManager::SetConsoleLogger(InteractiveConsoleLogListener* pLogger)
@@ -61,7 +67,7 @@ void ConsoleManager::Join()
 
 	{
 		// Join forks.
-		ScopeLock lLock(&mLock);
+		ScopeLock lLock(mLock);
 		ForkList::iterator x = mForkList.begin();
 		for (; x != mForkList.end(); ++x)
 		{
@@ -87,7 +93,7 @@ void ConsoleManager::Join()
 	for (int x = 0; x < 1000; ++x)
 	{
 		{
-			ScopeLock lLock(&mLock);
+			ScopeLock lLock(mLock);
 			if (mForkList.empty())
 			{
 				break;
@@ -97,7 +103,7 @@ void ConsoleManager::Join()
 	}
 	{
 		// Kill forks.
-		ScopeLock lLock(&mLock);
+		ScopeLock lLock(mLock);
 		ForkList::iterator x = mForkList.begin();
 		for (; x != mForkList.end(); ++x)
 		{
@@ -110,7 +116,7 @@ void ConsoleManager::Join()
 
 void ConsoleManager::PushYieldCommand(const str& pCommand)
 {
-	ScopeLock lLock(&mLock);
+	ScopeLock lLock(mLock);
 	mYieldCommandList.push_back(pCommand);
 }
 
@@ -123,7 +129,7 @@ int ConsoleManager::ExecuteYieldCommand()
 {
 	str lYieldCommand;
 	{
-		ScopeLock lLock(&mLock);
+		ScopeLock lLock(mLock);
 		if (!mYieldCommandList.empty())
 		{
 			lYieldCommand = mYieldCommandList.front();
@@ -144,7 +150,7 @@ ConsoleCommandManager* ConsoleManager::GetConsoleCommandManager() const
 
 
 
-LogDecorator& ConsoleManager::GetLog() const
+LogDecorator& ConsoleManager::GetLogger() const
 {
 	return (mLog);
 }
@@ -153,13 +159,13 @@ LogDecorator& ConsoleManager::GetLog() const
 
 void ConsoleManager::AddFork(Thread* pThread)
 {
-	ScopeLock lLock(&mLock);
+	ScopeLock lLock(mLock);
 	mForkList.push_back(pThread);
 }
 
 void ConsoleManager::RemoveFork(Thread* pThread)
 {
-	ScopeLock lLock(&mLock);
+	ScopeLock lLock(mLock);
 	mForkList.remove(pThread);
 }
 
@@ -196,12 +202,12 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 	private:
 		void Run()
 		{
-			log_volatile(mConsole->GetLog().Debug(_T("ForkThread: started.")));
+			log_volatile(mConsole->GetLogger().Debug(_T("ForkThread: started.")));
 			if (mConsole->ExecuteCommand(mCommand) != 0)
 			{
-				mConsole->GetLog().AError("ForkThread: execution resulted in an error.");
+				mConsole->GetLogger().AError("ForkThread: execution resulted in an error.");
 			}
-			log_volatile(mConsole->GetLog().Debug(_T("ForkThread: ended.")));
+			log_volatile(mConsole->GetLogger().Debug(_T("ForkThread: ended.")));
 			mConsole->RemoveFork(this);
 		}
 		ConsoleManager* mConsole;
@@ -252,7 +258,7 @@ void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 {
 	std::list<str>::const_iterator x = pCommandList.begin();
 	int lSpacing;
-	CURE_RTVAR_GET(lSpacing, =, mVariableScope, RTVAR_CONSOLE_COLUMNSPACING, 2);
+	v_get(lSpacing, =, mVariableScope, RTVAR_CONSOLE_COLUMNSPACING, 2);
 	size_t lLongestCommand = 10;
 	for (; x != pCommandList.end(); ++x)
 	{
@@ -268,7 +274,7 @@ void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 		mConsoleLogger->OnLogRawMessage(lCommand);
 		lIndent += lCommand.length();
 		int lConsoleWidth;
-		CURE_RTVAR_GET(lConsoleWidth, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERWIDTH, 80);
+		v_get(lConsoleWidth, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERWIDTH, 80);
 		if ((int)(lIndent+lLongestCommand) >= lConsoleWidth)
 		{
 			mConsoleLogger->OnLogRawMessage(_T("\n"));
@@ -331,23 +337,23 @@ void ConsoleManager::ConsoleThreadEntry()
 		int lKeyEsc;
 		int lKeyPgUp;
 		int lKeyPgDn;
-		CURE_RTVAR_GET(lWordDelimitors, =, mVariableScope, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
-		CURE_RTVAR_GET(lKeyCompletion, =, mVariableScope, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
-		CURE_RTVAR_GET(lKeyEnter, =, mVariableScope, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
-		CURE_RTVAR_GET(lKeySilent, =, mVariableScope, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
-		CURE_RTVAR_GET(lKeyBackspace, =, mVariableScope, RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b');
-		CURE_RTVAR_GET(lKeyDelete, =, mVariableScope, RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE);
-		CURE_RTVAR_GET(lKeyCtrlLeft, =, mVariableScope, RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT);
-		CURE_RTVAR_GET(lKeyCtrlRight, =, mVariableScope, RTVAR_CONSOLE_KEY_CTRLRIGHT, ConsolePrompt::CON_KEY_CTRL_RIGHT);
-		CURE_RTVAR_GET(lKeyHome, =, mVariableScope, RTVAR_CONSOLE_KEY_HOME, ConsolePrompt::CON_KEY_HOME);
-		CURE_RTVAR_GET(lKeyEnd, =, mVariableScope, RTVAR_CONSOLE_KEY_END, ConsolePrompt::CON_KEY_END);
-		CURE_RTVAR_GET(lKeyUp, =, mVariableScope, RTVAR_CONSOLE_KEY_UP, ConsolePrompt::CON_KEY_UP);
-		CURE_RTVAR_GET(lKeyDown, =, mVariableScope, RTVAR_CONSOLE_KEY_DOWN, ConsolePrompt::CON_KEY_DOWN);
-		CURE_RTVAR_GET(lKeyLeft, =, mVariableScope, RTVAR_CONSOLE_KEY_LEFT, ConsolePrompt::CON_KEY_LEFT);
-		CURE_RTVAR_GET(lKeyRight, =, mVariableScope, RTVAR_CONSOLE_KEY_RIGHT, ConsolePrompt::CON_KEY_RIGHT);
-		CURE_RTVAR_GET(lKeyEsc, =, mVariableScope, RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE);
-		CURE_RTVAR_GET(lKeyPgUp, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP);
-		CURE_RTVAR_GET(lKeyPgDn, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN);
+		v_get(lWordDelimitors, =, mVariableScope, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
+		v_get(lKeyCompletion, =, mVariableScope, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
+		v_get(lKeyEnter, =, mVariableScope, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
+		v_get(lKeySilent, =, mVariableScope, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
+		v_get(lKeyBackspace, =, mVariableScope, RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b');
+		v_get(lKeyDelete, =, mVariableScope, RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE);
+		v_get(lKeyCtrlLeft, =, mVariableScope, RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT);
+		v_get(lKeyCtrlRight, =, mVariableScope, RTVAR_CONSOLE_KEY_CTRLRIGHT, ConsolePrompt::CON_KEY_CTRL_RIGHT);
+		v_get(lKeyHome, =, mVariableScope, RTVAR_CONSOLE_KEY_HOME, ConsolePrompt::CON_KEY_HOME);
+		v_get(lKeyEnd, =, mVariableScope, RTVAR_CONSOLE_KEY_END, ConsolePrompt::CON_KEY_END);
+		v_get(lKeyUp, =, mVariableScope, RTVAR_CONSOLE_KEY_UP, ConsolePrompt::CON_KEY_UP);
+		v_get(lKeyDown, =, mVariableScope, RTVAR_CONSOLE_KEY_DOWN, ConsolePrompt::CON_KEY_DOWN);
+		v_get(lKeyLeft, =, mVariableScope, RTVAR_CONSOLE_KEY_LEFT, ConsolePrompt::CON_KEY_LEFT);
+		v_get(lKeyRight, =, mVariableScope, RTVAR_CONSOLE_KEY_RIGHT, ConsolePrompt::CON_KEY_RIGHT);
+		v_get(lKeyEsc, =, mVariableScope, RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE);
+		v_get(lKeyPgUp, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP);
+		v_get(lKeyPgDn, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN);
 
 		if (c == lKeyCompletion)
 		{
@@ -504,7 +510,7 @@ void ConsoleManager::OnCommandError(const str& pCommand, const strutil::strvec&,
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, ConsoleManager);
+loginstance(CONSOLE, ConsoleManager);
 
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "LandingTrigger.h"
 #include "../Cure/Include/ContextManager.h"
 #include "DownwashManager.h"
@@ -47,7 +48,7 @@ void LandingTrigger::OnAlarm(int pAlarmId, void* pExtraData)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, LandingTrigger);
+loginstance(GAME_CONTEXT_CPP, LandingTrigger);
 
 
 

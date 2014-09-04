@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Socket.h"
 #include <algorithm>
 #include <fcntl.h>
@@ -293,7 +294,7 @@ IOError BufferedIo::AppendSendBuffer(const void* pData, int pLength)
 {
 	IOError lError = IO_OK;
 
-	if (mSendBuffer.mDataSize + pLength < SocketBase::BUFFER_SIZE)
+	if (mSendBuffer.mDataSize + pLength < Datagram::BUFFER_SIZE)
 	{
 		if (!mInSendBuffer)
 		{
@@ -312,7 +313,7 @@ IOError BufferedIo::AppendSendBuffer(const void* pData, int pLength)
 	{
 		// It's all or nothing. If half a network packet arrives, we're fucked.
 		SendBuffer();
-		if (pLength <= SocketBase::BUFFER_SIZE)
+		if (pLength <= Datagram::BUFFER_SIZE)
 		{
 			lError = AppendSendBuffer(pData, pLength);
 		}
@@ -444,7 +445,7 @@ void TcpListenerSocket::DecNumConnections()
 	BusLock::Add(&mConnectionCount, -1);
 }
 
-LOG_CLASS_DEFINE(NETWORK, TcpListenerSocket);
+loginstance(NETWORK, TcpListenerSocket);
 
 
 
@@ -664,7 +665,7 @@ const SocketAddress& TcpSocket::GetTargetAddress() const
 	return (mTargetAddress);
 }
 
-LOG_CLASS_DEFINE(NETWORK, TcpSocket);
+loginstance(NETWORK, TcpSocket);
 
 
 
@@ -1103,7 +1104,7 @@ void TcpMuxSocket::SelectThreadEntry()
 
 const double TcpMuxSocket::DEFAULT_CONNECT_ID_TIMEOUT = 2.0;
 
-LOG_CLASS_DEFINE(NETWORK, TcpMuxSocket);
+loginstance(NETWORK, TcpMuxSocket);
 
 
 
@@ -1185,7 +1186,7 @@ int TcpVSocket::Receive(void* pData, int pMaxSize, double pTimeout, bool pDatagr
 	return (lReceiveCount);
 }
 
-LOG_CLASS_DEFINE(NETWORK, TcpVSocket);
+loginstance(NETWORK, TcpVSocket);
 
 
 
@@ -1269,7 +1270,7 @@ int UdpSocket::ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSour
 	return (lSize);
 }
 
-LOG_CLASS_DEFINE(NETWORK, UdpSocket);
+loginstance(NETWORK, UdpSocket);
 
 
 
@@ -1560,7 +1561,7 @@ void UdpMuxSocket::RecycleBuffer(Datagram* pBuffer)
 
 const uint8 UdpMuxSocket::mOpenFirewallString[27] = "Aaaarglebargle glop-glyph!";
 
-LOG_CLASS_DEFINE(NETWORK, UdpMuxSocket);
+loginstance(NETWORK, UdpMuxSocket);
 
 
 
@@ -1799,7 +1800,7 @@ void UdpVSocket::SetSafeSend(bool)
 {
 }
 
-LOG_CLASS_DEFINE(NETWORK, UdpVSocket);
+loginstance(NETWORK, UdpVSocket);
 
 
 
@@ -2197,7 +2198,7 @@ void DualMuxSocket::OnCloseTcpSocket(TcpVSocket* pTcpSocket)
 
 const double DualMuxSocket::DEFAULT_CONNECT_DUAL_TIMEOUT = 5.0;
 
-LOG_CLASS_DEFINE(NETWORK, DualMuxSocket);
+loginstance(NETWORK, DualMuxSocket);
 
 
 
@@ -2404,7 +2405,7 @@ UdpVSocket* DualSocket::GetUdpSocket() const
 	return (mUdpSocket);
 }
 
-LOG_CLASS_DEFINE(NETWORK, DualSocket);
+loginstance(NETWORK, DualSocket);
 
 
 

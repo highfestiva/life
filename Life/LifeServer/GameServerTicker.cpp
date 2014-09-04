@@ -4,8 +4,10 @@
 
 
 
+#include "pch.h"
 #include "GameServerTicker.h"
 #include "../../Cure/Include/ContextObjectAttribute.h"
+#include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/SystemManager.h"
@@ -30,9 +32,9 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager, floa
 	mGameManager(0),
 	mMasterConnection(0)
 {
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, true);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _("0.0.0.0:16650"));
+	v_set(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
+	v_set(Cure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, true);
+	v_set(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _("0.0.0.0:16650"));
 
 	Cure::ContextObjectAttribute::SetCreator(&CreateObjectAttribute);
 
@@ -82,7 +84,7 @@ void GameServerTicker::SetMasterServerConnection(MasterServerConnection* pConnec
 bool GameServerTicker::Initialize()
 {
 	str lServerAddress;
-	CURE_RTVAR_GET(lServerAddress, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	v_get(lServerAddress, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	return mGameManager->Initialize(mMasterConnection, lServerAddress);
 }
 
@@ -104,7 +106,7 @@ bool GameServerTicker::Tick()
 	mResourceManager->Tick();
 
 	bool lAutoShutdown;
-	CURE_RTVAR_GET(lAutoShutdown, =, Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
+	v_get(lAutoShutdown, =, Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
 	if (lAutoShutdown)
 	{
 		static size_t lMaxLoginCount = 0;
@@ -127,7 +129,7 @@ void GameServerTicker::PollRoundTrip()
 
 float GameServerTicker::GetTickTimeReduction() const
 {
-	return mGameManager->GetTimeManager()->GetTickLoopTimeReduction();
+	return GetTimeManager()->GetTickLoopTimeReduction();
 }
 
 float GameServerTicker::GetPowerSaveAmount() const
@@ -149,20 +151,20 @@ void GameServerTicker::DidPhysicsTick()
 
 
 
-void GameServerTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void GameServerTicker::OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	mGameManager->OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pNormal);
 }
 
-void GameServerTicker::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+void GameServerTicker::OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	mGameManager->OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 }
 
 
 
-LOG_CLASS_DEFINE(GAME, GameServerTicker);
+loginstance(GAME, GameServerTicker);
 
 
 

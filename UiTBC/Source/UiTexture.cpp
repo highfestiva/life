@@ -5,7 +5,8 @@
 	Copyright (c) Pixel Doctrine
 */
 
-#include "../Include/UiTBC.h"
+#include "pch.h"
+#include "../Include/UiTbc.h"
 #include "../Include/UiTexture.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/ResourceTracker.h"

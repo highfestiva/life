@@ -4,8 +4,8 @@
 
 
 
+#include "pch.h"
 #ifndef CURE_TEST_WITHOUT_UI
-
 #include "../../Lepra/Include/LepraAssert.h"
 #include <math.h>
 #include "../../Lepra/Include/Log.h"
@@ -22,7 +22,7 @@
 
 using namespace Lepra;
 class UiLepraTest{};
-static Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(UiLepraTest));
+static Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLogger(Lepra::LogType::SUB_TEST), typeid(UiLepraTest));
 void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 bool TestLepra();
 
@@ -142,8 +142,8 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 		lSoundManager->Play(lSoundInstance, 1, 1);
 		for (float x = 0; x < 6*5; x += 2.0f)
 		{
-			Lepra::Vector3DF lPosition(::sinf(x)*10, ::cosf(x)*10, 0);
-			Lepra::Vector3DF lVelocity;
+			Lepra::vec3 lPosition(::sinf(x)*10, ::cosf(x)*10, 0);
+			Lepra::vec3 lVelocity;
 			lSoundManager->SetSoundPosition(lSoundInstance, lPosition, lVelocity);
 			Lepra::Thread::Sleep(0.3);
 		}

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiSoundManagerOpenAL.h"
 #include <assert.h>
 #include "../../Lepra/Include/ResourceTracker.h"
@@ -513,7 +514,7 @@ void SoundManagerOpenAL::SetFileOpener(FileOpener* pOpener)
 
 
 
-void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
+void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel)
 {
 	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
@@ -663,7 +664,7 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 
 
 
-LOG_CLASS_DEFINE(UI_SOUND, SoundManagerOpenAL);
+loginstance(UI_SOUND, SoundManagerOpenAL);
 
 
 

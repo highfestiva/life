@@ -13,7 +13,7 @@
 #include "GeometryBase.h"
 #include <list>
 
-namespace TBC
+namespace Tbc
 {
 
 class TerrainPatch : public GeometryBase
@@ -22,7 +22,7 @@ public:
 	class Modifier
 	{
 	public:
-		virtual void ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pVertex) const = 0;
+		virtual void ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const = 0;
 	};
 	
 	// Edge resolution flags.
@@ -75,12 +75,12 @@ public:
 	inline float GetPatchSize() const;
 	inline int GetPatchSizeMultiplier() const;
 
-	const Vector2DF& GetSouthWest();
-	const Vector2DF& GetNorthEast();
+	const vec2& GetSouthWest();
+	const vec2& GetNorthEast();
 
 	bool GetEdgeFlagValue(unsigned int pEdgeFlag);
 
-	void GetPosAndNormal(float pNormalizedX, float pNormalizedY, Vector3DF& pPos, Vector3DF& pNormal) const;
+	void GetPosAndNormal(float pNormalizedX, float pNormalizedY, vec3& pPos, vec3& pNormal) const;
 
 	void ShareVerticesWithNorthNeighbour(TerrainPatch& pNorthNeighbour);
 	void ShareVerticesWithSouthNeighbour(TerrainPatch& pSouthNeighbour);
@@ -180,9 +180,9 @@ private:
 
 	void SetToFlatTerrainPatch();
 
-	static void SetFlatCallback(float pFlatX, float pFlatY, Vector3DF& pCurrentPoint);
-//	void SetVertexData(const Vector3DF* pVertexData);
-//	void SetEdgeVertexData(const Vector3DF* pVertexData, int pDstVertexIndex, int pSrcVertexStartIndex, int pPitch);
+	static void SetFlatCallback(float pFlatX, float pFlatY, vec3& pCurrentPoint);
+//	void SetVertexData(const vec3* pVertexData);
+//	void SetEdgeVertexData(const vec3* pVertexData, int pDstVertexIndex, int pSrcVertexStartIndex, int pPitch);
 
 	inline bool CheckFlag(unsigned int pFlags, unsigned int pFlag) const;
 
@@ -202,8 +202,8 @@ private:
 	vtx_idx_t* mIndexData;
 
 	// Misc data.
-	Vector2DF mSouthWestCorner;
-	Vector2DF mNorthEastCorner;
+	vec2 mSouthWestCorner;
+	vec2 mNorthEastCorner;
 	Vector2D<int> mUnitPosition;
 
 	static int smNumPatches;

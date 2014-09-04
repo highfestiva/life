@@ -71,7 +71,7 @@ private:
 	int mStriveSendUnpauseFrame;
 	int mIgnoreStriveErrorTimeCounter;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

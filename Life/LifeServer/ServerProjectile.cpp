@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "ServerProjectile.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -36,25 +37,25 @@ void ServerProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
 	deb_assert(lTag);
 	mExplosiveEnergy = lTag->mFloatValueList[3];
 
-	TransformationF lTransform;
-	Vector3DF lParentVelocity;
+	xform lTransform;
+	vec3 lParentVelocity;
 	ProjectileUtil::GetBarrel(this, lTransform, lParentVelocity);
-	Vector3DF lVelocity = lTransform.GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
+	vec3 lVelocity = lTransform.GetOrientation() * vec3(0, 0, mMuzzleVelocity);
 	lVelocity += lParentVelocity;
-	lTransform.GetPosition() += lTransform.GetOrientation() * Vector3DF(0, 0, +3);
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	lTransform.GetPosition() += lTransform.GetOrientation() * vec3(0, 0, +3);
+	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetBodyId(), lTransform);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 }
 
 void ServerProjectile::OnForceApplied(Cure::ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque,
+	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	(void)pOtherObject;
 	(void)pOtherBodyId;
@@ -63,12 +64,12 @@ void ServerProjectile::OnForceApplied(Cure::ContextObject* pOtherObject,
 	(void)pTorque;
 	(void)pRelativeVelocity;
 
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, Vector3DF(), mExplosiveEnergy, 0);
+	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, pPosition, pRelativeVelocity, vec3(), mExplosiveEnergy, 0);
 }
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, ServerProjectile);
+loginstance(GAME_CONTEXT_CPP, ServerProjectile);
 
 
 

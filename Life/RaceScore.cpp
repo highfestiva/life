@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "RaceScore.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextObject.h"
@@ -19,7 +20,7 @@ namespace Life
 
 
 
-RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, TBC::PhysicsManager::TriggerID pStartTrigger):
+RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, Tbc::PhysicsManager::TriggerID pStartTrigger):
 	Parent(pContextObject, pName),
 	mIsUpdated(true),
 	mLapCountLeft(pLapCount),
@@ -28,7 +29,7 @@ RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int 
 	mTriggerCount(2)
 {
 	mPhysicsFrameStart = mContextObject->GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
-	if (mStartTrigger != TBC::INVALID_TRIGGER)
+	if (mStartTrigger != Tbc::INVALID_TRIGGER)
 	{
 		AddTriggered(mStartTrigger);
 	}

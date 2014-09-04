@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../../../Lepra/Include/LepraTarget.h"
+#include "../../../Lepra/Include/LepraOS.h"
 #include "../UiFontManager.h"
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "HoverTankConsoleManager.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Lepra/Include/CyclicArray.h"
@@ -100,7 +101,7 @@ int HoverTankConsoleManager::OnCommand(const str& pCommand, const strutil::strve
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, HoverTankConsoleManager);
+loginstance(CONSOLE, HoverTankConsoleManager);
 
 
 

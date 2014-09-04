@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "VehicleAi.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
@@ -89,8 +90,8 @@ void VehicleAi::OnTick()
 	const float lAimDistance = AIM_DISTANCE();
 
 	float lStrength = Math::Lerp(0.6f, 1.0f, mGame->GetComputerDifficulty());
-	const Vector3DF lPosition = mGame->GetCutie()->GetPosition();
-	const Vector3DF lVelocity = mGame->GetCutie()->GetVelocity();
+	const vec3 lPosition = mGame->GetCutie()->GetPosition();
+	const vec3 lVelocity = mGame->GetCutie()->GetVelocity();
 	switch (mMode)
 	{
 		case MODE_FIND_BEST_PATH:
@@ -105,7 +106,7 @@ void VehicleAi::OnTick()
 				mActivePath = -1;
 			}
 			mLog.Headlinef(_T("Trying to find new path... starting iterating from  %.2f."), lStartTime);
-			Vector3DF lElevatorDirection;
+			vec3 lElevatorDirection;
 			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 			{
 				if (lModeRunDeltaFrameCount%5 == 3)
@@ -118,7 +119,7 @@ void VehicleAi::OnTick()
 				mGame->GetCutie()->SetEnginePower(0, 0);
 				mGame->GetCutie()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
 				const Cure::Elevator* lNearestElevator;
-				const Vector3DF lElevatorPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
+				const vec3 lElevatorPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
 				if (lElevatorPosition.GetDistanceSquared(lPosition) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
 				{
 					mLog.AHeadline("Fell off elevator while looking for get-off route. Looking for somewhere else to go.");
@@ -200,8 +201,8 @@ void VehicleAi::OnTick()
 					{
 						// Point wheels in the right direction for us to get off safely.
 						Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(lRelevantPaths[0].mPathIndex);
-						const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
-						const Vector3DF lWantedDirection = lPath->GetValue() - lPosition;
+						const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
+						const vec3 lWantedDirection = lPath->GetValue() - lPosition;
 						const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 						mGame->GetCutie()->SetEnginePower(1, lAngle*0.5f);
 					}
@@ -209,7 +210,7 @@ void VehicleAi::OnTick()
 					if (lBestPathDistance > 15)
 					{
 						const Cure::Elevator* lNearestElevator;
-						const Vector3DF lNearestLiftPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
+						const vec3 lNearestLiftPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
 						if (lNearestLiftPosition.GetDistanceSquared(lPosition) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
 						{
 							// DUCK!!! We fell off!
@@ -284,7 +285,7 @@ void VehicleAi::OnTick()
 				{
 					// First verify that we haven't ended up under path somehow. We do that by checking
 					// steepness, since pure Z-distance may be big when going over ditches.
-					const Vector3DF lPathPosition = lPath->GetValue();
+					const vec3 lPathPosition = lPath->GetValue();
 					const float lSteepness = (lPathPosition.z - lPosition.z) / lNearestPathDistance;
 					//mLog.Infof(_T("Checking steepness, nearest path distance is %.3f, steepness is %.3f."), lNearestPathDistance, lSteepness);
 					if (lSteepness > 0.6f)
@@ -329,7 +330,7 @@ void VehicleAi::OnTick()
 					return;
 				}
 				const Cure::Elevator* lNearestElevator;
-				const Vector3DF lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, lNearestElevator);
+				const vec3 lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, lNearestElevator);
 				if (lNearestLiftPosition.z > lPosition.z+0.5f)
 				{
 					mLog.AHeadline("Couldn't get on in time, going back to waiting.");
@@ -357,15 +358,15 @@ void VehicleAi::OnTick()
 			}
 
 			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-			Vector3DF lTarget = lPath->GetValue();
+			vec3 lTarget = lPath->GetValue();
 
 			// Check if vehicle stopped. That would mean either crashed against something or too steep hill.
 			if (lModeRunDeltaFrameCount%7 == 4 && mGame->GetCutie()->GetHealth() > 0)
 			{
 				if (QueryCutieHindered(lTime, lVelocity))
 				{
-					const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
-					const Vector3DF lWantedDirection = lTarget-lPosition;
+					const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
+					const vec3 lWantedDirection = lTarget-lPosition;
 					const float lForwardAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 					// Amplify angle to be either full left or full right.
 					const float lAngle = (lForwardAngle < 0)? -1.0f : 1.0f;
@@ -401,12 +402,12 @@ void VehicleAi::OnTick()
 			// Did we just pass (fly by?) the goal?
 			if (lModeRunDeltaFrameCount%3 == 0)
 			{
-				const Vector3DF lGoalDirection = mGame->GetCtf()->GetPosition() - lPosition;
+				const vec3 lGoalDirection = mGame->GetCtf()->GetPosition() - lPosition;
 				if (::fabs(lGoalDirection.z) < 2 &&
 					lGoalDirection.GetLengthSquared() < ELEVATOR_FAR_DISTANCE*ELEVATOR_FAR_DISTANCE &&
 					lVelocity.GetLengthSquared() < 6*6)
 				{
-					const Vector3DF lCutieDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+					const vec3 lCutieDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
 					const float lDeltaAngle = ::fabs(LEPRA_XY_ANGLE(lGoalDirection, lCutieDirection));
 					if (lDeltaAngle >= PIF-PIF/4 && lDeltaAngle <= PIF+PIF/4)
 					{
@@ -471,15 +472,15 @@ void VehicleAi::OnTick()
 			}
 
 			// Steer.
-			const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
-			const Vector3DF lWantedDirection = lTarget-lPosition;
+			const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
+			const vec3 lWantedDirection = lTarget-lPosition;
 			float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 			if (mMode == MODE_GET_OFF_ELEVATOR)
 			{
 				// Aborting too early might cause us to stop, waiting for the next ride in mid-air.
 				const float lGetOffDistance = GetClosestElevatorRadius() + ELEVATOR_GOT_OFF_EXTRA_DISTANCE;
-				Vector2DF lElevatorGetOff2d(mElevatorGetOffPosition.x, mElevatorGetOffPosition.y);
-				Vector2DF lPosition2d(lPosition.x, lPosition.y);
+				vec2 lElevatorGetOff2d(mElevatorGetOffPosition.x, mElevatorGetOffPosition.y);
+				vec2 lPosition2d(lPosition.x, lPosition.y);
 				mLog.Infof(_T("ElevatorGetOff (%f;%f), pos (%f;%f)"), lElevatorGetOff2d.x, lElevatorGetOff2d.y, lPosition2d.x, lPosition2d.y);
 				if (lElevatorGetOff2d.GetDistanceSquared(lPosition2d) > lGetOffDistance*lGetOffDistance)
 				{
@@ -535,7 +536,7 @@ void VehicleAi::OnTick()
 		break;
 		case MODE_BACKING_UP_TO_GOAL:
 		{
-			Vector3DF lWantedDirection = mGame->GetCtf()->GetPosition() - lPosition;
+			vec3 lWantedDirection = mGame->GetCtf()->GetPosition() - lPosition;
 			const float lDistance2 = lWantedDirection.GetLengthSquared();
 			if (lDistance2 <= ON_GOAL_DISTANCE*ON_GOAL_DISTANCE)
 			{
@@ -556,7 +557,7 @@ void VehicleAi::OnTick()
 			mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f);
 
 			// Turn steering wheel.
-			const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+			const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
 			float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 			lAngle += (lAngle < 0)? +PIF : -PIF;
 			lAngle *= 3;
@@ -637,9 +638,9 @@ void VehicleAi::OnTick()
 			{
 				mLog.AHeadline("Got too close to the elevator stop position, backing up.");
 				// Back up parallel to the spline direction.
-				const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+				const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
 				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-				const Vector3DF lWantedDirection = lPath->GetSlope();
+				const vec3 lWantedDirection = lPath->GetSlope();
 				const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 				mGame->GetCutie()->SetEnginePower(1, +lAngle);
 				const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
@@ -647,7 +648,7 @@ void VehicleAi::OnTick()
 				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f);
 
 				const Cure::Elevator* lNearestElevator;
-				Vector3DF lNearestLiftPosition2d;
+				vec3 lNearestLiftPosition2d;
 				float lElevatorXyDistance2ToElevatorStop;
 				const bool lIsElevatorHere = HasElevatorArrived(lNearestElevator, lPosition.z, lNearestLiftPosition2d, lElevatorXyDistance2ToElevatorStop);
 				if (lIsElevatorHere)
@@ -672,12 +673,12 @@ void VehicleAi::OnTick()
 			// Check that we're headed towards the elevator center.
 			if (lVelocity.GetLengthSquared() < 0.5f)
 			{
-				Vector3DF lUp(0, 0, 1);
+				vec3 lUp(0, 0, 1);
 				lUp = mGame->GetCutie()->GetOrientation() * lUp;
 				if (lUp.z > 0.7f)
 				{
-					const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
-					const Vector3DF lWantedDirection = mElevatorGetOnPosition - lPosition;
+					const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
+					const vec3 lWantedDirection = mElevatorGetOnPosition - lPosition;
 					const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 					if (::fabs(lAngle) > PIF/12)
 					{
@@ -689,11 +690,11 @@ void VehicleAi::OnTick()
 			}
 
 			const Cure::Elevator* lNearestElevator;
-			Vector3DF lNearestLiftPosition2d;
+			vec3 lNearestLiftPosition2d;
 			float lElevatorXyDistance2ToElevatorStop;
 			if (HasElevatorArrived(lNearestElevator, lPosition.z, lNearestLiftPosition2d, lElevatorXyDistance2ToElevatorStop))
 			{
-				Vector3DF lVelocityXY = lNearestElevator->GetVelocity();
+				vec3 lVelocityXY = lNearestElevator->GetVelocity();
 				bool lTryGetOn = false;
 				// Check if elevator is on it's way out.
 				if (IsVertical(lVelocityXY))
@@ -742,7 +743,7 @@ void VehicleAi::OnTick()
 			if (lModeRunTime > 0.7f && lVelocity.GetLengthSquared() > lMinimumVelocity2)
 			{
 				const Cure::Elevator* lNearestElevator;
-				const Vector3DF lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, lNearestElevator);
+				const vec3 lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, lNearestElevator);
 				if (lNearestLiftPosition.z > lPosition.z+0.2f)
 				{
 					// Crap, we missed it!
@@ -751,11 +752,11 @@ void VehicleAi::OnTick()
 					return;
 				}
 				// Vehicle speed check not enouch (bouncy wheels), so check elevator speed too.
-				Vector3DF lElevatorVelocity = lNearestElevator->GetVelocity();
+				vec3 lElevatorVelocity = lNearestElevator->GetVelocity();
 				if (lElevatorVelocity.GetLengthSquared() > lMinimumVelocity2)
 				{
 					const bool lIsHorizontal = !IsVertical(lElevatorVelocity);
-					const Vector3DF lDirection = lIsHorizontal? lElevatorVelocity : mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+					const vec3 lDirection = lIsHorizontal? lElevatorVelocity : mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
 					mRotateAngle = -GetRelativeDriveOnAngle(lDirection);
 					if (::fabs(mRotateAngle) > PIF/6 || lIsHorizontal)
 					{
@@ -781,7 +782,7 @@ void VehicleAi::OnTick()
 			if (lModeRunTime > 0.8f)
 			{
 				// Check if we should adjust pos.
-				const Vector3DF lForward = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+				const vec3 lForward = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
 				const float lDist = mElevatorGetOnPosition.GetDistanceSquared(lPosition);
 				if (lDist > mElevatorGetOnPosition.GetDistanceSquared(lPosition+lForward))
 				{
@@ -851,7 +852,7 @@ void VehicleAi::OnTick()
 			if (mMode == MODE_ROTATE_ON_THE_SPOT_WAITING)
 			{
 				const Cure::Elevator* lNearestElevator;
-				Vector3DF lNearestLiftPosition2d;
+				vec3 lNearestLiftPosition2d;
 				float lElevatorXyDistance2ToElevatorStop;
 				if (HasElevatorArrived(lNearestElevator, lPosition.z, lNearestLiftPosition2d, lElevatorXyDistance2ToElevatorStop))
 				{
@@ -920,7 +921,7 @@ void VehicleAi::OnTick()
 	}
 }
 
-bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pCaution)
+bool VehicleAi::AvoidGrenade(const vec3& pPosition, const vec3& pVelocity, float pCaution)
 {
 	if (mGame->GetComputerDifficulty() < 0.6f)
 	{
@@ -938,9 +939,9 @@ bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVeloc
 			continue;
 		}
 		// Ignore those too high up, too far down or still heading upwards.
-		const Vector3DF lGrenadePosition = lGrenade->GetPosition();
+		const vec3 lGrenadePosition = lGrenade->GetPosition();
 		const float h = lGrenadePosition.z - pPosition.z;
-		const Vector3DF lGrenadeVelocity = lGrenade->GetVelocity();
+		const vec3 lGrenadeVelocity = lGrenade->GetVelocity();
 		if (h > REACT_TO_GRENADE_HEIGHT * SCALE_FACTOR ||
 			h < 4.0f * SCALE_FACTOR ||	// Still gonna blow up in our face, so ignore it.
 			lGrenadeVelocity.z >= 0)
@@ -971,14 +972,14 @@ bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVeloc
 			t = (-b + sqrt(b2 - _4ac)) / (2*a);
 			deb_assert(t > 0);
 		}
-		const Vector2DF lGrenadeTarget(lGrenadePosition.x + lGrenadeVelocity.x * t,
+		const vec2 lGrenadeTarget(lGrenadePosition.x + lGrenadeVelocity.x * t,
 			lGrenadePosition.y + lGrenadeVelocity.y * t);
 		// Compare against some point in front of my vehicle, so that I won't break
 		// if it's better to speed up.
 		const float lDamageRange = 8.0f * SCALE_FACTOR * pCaution;
-		const Vector2DF lMyTarget(pPosition.x + pVelocity.x * t,
+		const vec2 lMyTarget(pPosition.x + pVelocity.x * t,
 			pPosition.y + pVelocity.y * t);
-		Vector2DF lMyExtraStep(pVelocity.x, pVelocity.y);
+		vec2 lMyExtraStep(pVelocity.x, pVelocity.y);
 		if (lMyExtraStep.GetLengthSquared() < SCALE_FACTOR*SCALE_FACTOR)
 		{
 			lMyExtraStep.Set(0, 0);
@@ -1015,7 +1016,7 @@ void VehicleAi::SetMode(Mode pMode)
 	}
 	if (mStuckCount >= 2)
 	{
-		Vector3DF lVelocity = mGame->GetCutie()->GetVelocity();
+		vec3 lVelocity = mGame->GetCutie()->GetVelocity();
 		lVelocity.z = 0;
 		if (lVelocity.GetLengthSquared() < 2*2)
 		{
@@ -1071,17 +1072,17 @@ void VehicleAi::SetMode(Mode pMode)
 	mLog.Headlinef(_T("Switching mode to %s."), lModeName);
 }
 
-bool VehicleAi::IsCloseToTarget(const Vector3DF& pPosition, float pDistance) const
+bool VehicleAi::IsCloseToTarget(const vec3& pPosition, float pDistance) const
 {
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-	const Vector3DF lTarget = lPath->GetValue();
+	const vec3 lTarget = lPath->GetValue();
 	const float lTargetDistance2 = lTarget.GetDistanceSquared(pPosition);
 	//mLog.Headlinef(_T("IsCloseToTarget ^2: %f."), lTargetDistance2);
 	const float lGoalDistance = pDistance*SCALE_FACTOR;
 	return (lTargetDistance2 <= lGoalDistance*lGoalDistance);
 }
 
-float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, const int pPath, float* pLikeliness, float pSteepFactor) const
+float VehicleAi::GetClosestPathDistance(const vec3& pPosition, const int pPath, float* pLikeliness, float pSteepFactor) const
 {
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath((pPath >= 0)? pPath : mActivePath);
 	if (pLikeliness)
@@ -1124,7 +1125,7 @@ float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, const int pP
 	}
 
 	float lNearestDistance;
-	Vector3DF lClosestPoint;
+	vec3 lClosestPoint;
 	const float lSearchStepLength = (pPath >= 0)? -0.1f : 0.0125f;
 	const int lSearchSteps = (pPath >= 0)? 10 : 3;
 	lPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, lClosestPoint, lSearchSteps);
@@ -1143,7 +1144,7 @@ float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, const int pP
 	return lNearestDistance;
 }
 
-Vector3DF VehicleAi::GetClosestElevatorPosition(const Vector3DF& pPosition, const Cure::Elevator*& pNearestElevator) const
+vec3 VehicleAi::GetClosestElevatorPosition(const vec3& pPosition, const Cure::Elevator*& pNearestElevator) const
 {
 	pNearestElevator = 0;
 	typedef Cure::ContextManager::ContextObjectTable ContextTable;
@@ -1151,7 +1152,7 @@ Vector3DF VehicleAi::GetClosestElevatorPosition(const Vector3DF& pPosition, cons
 	ContextTable::const_iterator x = lObjectTable.begin();
 	const str lElevatorClassId = _T("Elevator");
 	float lDistance2 = -1;
-	Vector3DF lNearestPosition;
+	vec3 lNearestPosition;
 	for (; x != lObjectTable.end(); ++x)
 	{
 		const Cure::ContextObject* lObject = x->second;
@@ -1160,7 +1161,7 @@ Vector3DF VehicleAi::GetClosestElevatorPosition(const Vector3DF& pPosition, cons
 			continue;
 		}
 		const Cure::Elevator* lElevator = (const Cure::Elevator*)lObject;
-		const Vector3DF lElevatorPosition = lElevator->GetPosition();
+		const vec3 lElevatorPosition = lElevator->GetPosition();
 		const float lThisDistance2 = lElevatorPosition.GetDistanceSquared(pPosition);
 		if (lDistance2 < 0)
 		{
@@ -1178,9 +1179,9 @@ Vector3DF VehicleAi::GetClosestElevatorPosition(const Vector3DF& pPosition, cons
 	return lNearestPosition;
 }
 
-bool VehicleAi::HasElevatorArrived(const Cure::Elevator*& pNearestElevator, const float pPositionZ, Vector3DF& pNearestLiftPosition2d, float& pElevatorXyDistance2ToElevatorStop)
+bool VehicleAi::HasElevatorArrived(const Cure::Elevator*& pNearestElevator, const float pPositionZ, vec3& pNearestLiftPosition2d, float& pElevatorXyDistance2ToElevatorStop)
 {
-	const Vector3DF lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, pNearestElevator);
+	const vec3 lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, pNearestElevator);
 	pNearestLiftPosition2d = lNearestLiftPosition;
 	pNearestLiftPosition2d.z = mElevatorGetOnPosition.z;
 	pElevatorXyDistance2ToElevatorStop = mElevatorGetOnPosition.GetDistanceSquared(pNearestLiftPosition2d);
@@ -1194,7 +1195,7 @@ float VehicleAi::GetClosestElevatorRadius() const
 	return lNearestElevator->GetRadius();
 }
 
-bool VehicleAi::IsVertical(const Vector3DF& pVector)
+bool VehicleAi::IsVertical(const vec3& pVector)
 {
 	return (::fabs(pVector.z) > 2 * (::fabs(pVector.x) + ::fabs(pVector.y)));
 }
@@ -1222,7 +1223,7 @@ int VehicleAi::GetVehicleIndex() const
 	return -1;
 }
 
-float VehicleAi::GetRelativeDriveOnAngle(const Vector3DF& pDirection) const
+float VehicleAi::GetRelativeDriveOnAngle(const vec3& pDirection) const
 {
 	deb_assert(mActivePath >= 0);
 	if (mActivePath < 0)
@@ -1231,15 +1232,15 @@ float VehicleAi::GetRelativeDriveOnAngle(const Vector3DF& pDirection) const
 	}
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
 	lPath->GotoAbsoluteTime(0.95f);
-	const Vector3DF p1 = lPath->GetValue();
+	const vec3 p1 = lPath->GetValue();
 	lPath->StepInterpolation(0.04f);
-	const Vector3DF p2 = lPath->GetValue();
-	const Vector3DF lWantedDirection = p2-p1;
+	const vec3 p2 = lPath->GetValue();
+	const vec3 lWantedDirection = p2-p1;
 	const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, pDirection);
 	return lAngle;
 }
 
-bool VehicleAi::QueryCutieHindered(const Cure::TimeManager* pTime, const Vector3DF& pVelocity)
+bool VehicleAi::QueryCutieHindered(const Cure::TimeManager* pTime, const vec3& pVelocity)
 {
 	const float lSlowSpeed = 0.35f * SCALE_FACTOR;
 	if (pVelocity.GetLengthSquared() < lSlowSpeed*lSlowSpeed)
@@ -1265,7 +1266,7 @@ bool VehicleAi::QueryCutieHindered(const Cure::TimeManager* pTime, const Vector3
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, VehicleAi);
+loginstance(GAME_CONTEXT_CPP, VehicleAi);
 
 
 

@@ -4,9 +4,10 @@
 
 
 
+#include "pch.h"
 #include "Cutie.h"
 #include "../Lepra/Include/Math.h"
-#include "../TBC/Include/ChunkyBoneGeometry.h"
+#include "../Tbc/Include/ChunkyBoneGeometry.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "Game.h"
@@ -49,13 +50,13 @@ void Cutie::DrainHealth(float pDrain)
 	mKillJointsTickCount = 2;
 	mWheelExpelTickCount = 3;
 	float lRealTimeRatio;
-	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	mWheelExpelTickCount = (int)(mWheelExpelTickCount/lRealTimeRatio);
 	if (GetPhysics())
 	{
 		GetPhysics()->ClearEngines();
 	}
-	/*TBC::ChunkyClass* lClass = (TBC::ChunkyClass*)GetClass();
+	/*Tbc::ChunkyClass* lClass = (Tbc::ChunkyClass*)GetClass();
 	size_t lTagCount = lClass->GetTagCount();
 	for (size_t x = 0; x < lTagCount;)
 	{
@@ -84,9 +85,9 @@ bool Cutie::QueryFlip()
 		Cure::ObjectPositionalData lPositionData;
 		lPositionData.CopyData(lOriginalPositionData);
 		lPositionData.Stop();
-		TransformationF& lTransform = lPositionData.mPosition.mTransformation;
-		lTransform.SetPosition(GetPosition() + Vector3DF(0, 0, 1.5f));
-		Vector3DF lEulerAngles;
+		xform& lTransform = lPositionData.mPosition.mTransformation;
+		lTransform.SetPosition(GetPosition() + vec3(0, 0, 1.5f));
+		vec3 lEulerAngles;
 		GetOrientation().GetEulerAngles(lEulerAngles);
 		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
 		lTransform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
@@ -98,7 +99,7 @@ bool Cutie::QueryFlip()
 
 bool Cutie::IsUpsideDown() const
 {
-	Vector3DF lUp(0, 0, 1);
+	vec3 lUp(0, 0, 1);
 	lUp = GetOrientation() * lUp;
 	if (lUp.z > 0.4f ||
 		GetVelocity().GetLengthSquared() > 0.1f ||
@@ -132,19 +133,19 @@ void Cutie::OnTick()
 	{
 		mKillJointsTickCount = 0x7FFFFFFF;
 		// Remove the joints, but don't allow collisions with body yet.
-		const Vector3DF lPosition = GetPosition();
+		const vec3 lPosition = GetPosition();
 		const int lBoneCount = GetPhysics()->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
-			TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
-			if (lWheel->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+			Tbc::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
+			if (lWheel->GetJointType() != Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE)
 			{
 				GetManager()->GetGameManager()->GetPhysicsManager()->DeleteJoint(lWheel->GetJointId());
 				lWheel->ResetJointId();
 				// Push the wheel away somewhat, not too much.
 				const int lPushFactor = 200;
-				const Vector3DF lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
-				const Vector3DF lForce = (lWheelPosition-lPosition).GetNormalized()*lPushFactor*lWheel->GetMass();
+				const vec3 lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
+				const vec3 lForce = (lWheelPosition-lPosition).GetNormalized()*lPushFactor*lWheel->GetMass();
 				GetManager()->GetGameManager()->GetPhysicsManager()->AddForce(lWheel->GetBodyId(), lForce);
 			}
 		}
@@ -154,21 +155,21 @@ void Cutie::OnTick()
 		return;
 	}
 	// Allow collisions with body.
-	const Vector3DF lPosition = GetPosition();
+	const vec3 lPosition = GetPosition();
 	const int lBoneCount = GetPhysics()->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
-		TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
-		if (lWheel->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_EXCLUDE ||
+		Tbc::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
+		if (lWheel->GetJointType() == Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE ||
 			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(lWheel->GetBodyId()))
 		{
 			continue;
 		}
-		Vector3DF lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
+		vec3 lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
 		bool lFarAway = (lPosition.GetDistanceSquared(lWheelPosition) >= 5*5);
 		if (!lFarAway)
 		{
-			const QuaternionF lCarInverse = GetOrientation().GetInverse();
+			const quat lCarInverse = GetOrientation().GetInverse();
 			lWheelPosition = lCarInverse * (lWheelPosition - lPosition);
 			const float lMinDistance = lWheel->GetShapeSize().x * 0.5f;
 			if (::fabs(lWheelPosition.x) > ::fabs(GetPhysics()->GetOriginalBoneTransformation(x).GetPosition().x) + lMinDistance)
@@ -191,7 +192,7 @@ void Cutie::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Cutie);
+loginstance(GAME_CONTEXT_CPP, Cutie);
 
 
 

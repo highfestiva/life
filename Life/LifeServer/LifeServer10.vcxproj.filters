@@ -91,5 +91,14 @@
     <ClInclude Include="ServerDelegate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ServerFastProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerMine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerProjectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

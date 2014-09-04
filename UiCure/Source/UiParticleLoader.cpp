@@ -4,13 +4,14 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiParticleLoader.h"
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/File.h"
 #include "../../Lepra/Include/ImageLoader.h"
-#include "../../UiTBC/Include/UiBillboardGeometry.h"
-#include "../../UiTBC/Include/UiParticleRenderer.h"
+#include "../../UiTbc/Include/UiBillboardGeometry.h"
+#include "../../UiTbc/Include/UiParticleRenderer.h"
 
 
 
@@ -76,7 +77,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 
 
 
-LOG_CLASS_DEFINE(UI_GFX_3D, ParticleLoader);
+loginstance(UI_GFX_3D, ParticleLoader);
 
 
 

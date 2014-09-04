@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "GameClientSlaveManager.h"
 #include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
@@ -50,9 +51,9 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex)
 {
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, -1.0f);	// Disable (optimization).
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
+	v_set(GetVariableScope(), RTVAR_CTRL_MOUSESENSITIVITY, 4.0f);
+	v_set(GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, -1.0f);	// Disable (optimization).
+	v_set(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 
 	SetTicker(pMaster);
 
@@ -85,7 +86,7 @@ void GameClientSlaveManager::Suspend()
 void GameClientSlaveManager::LoadSettings()
 {
 	str lExternalServerAddress;
-	CURE_RTVAR_GET(lExternalServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	v_get(lExternalServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	GetConsoleManager()->ExecuteCommand(_T("alias gfx-lo \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" false; #") _T(RTVAR_UI_3D_SHADOWS) _T(" No; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" false; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTFADING) _T(" false; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" false\""));
 	GetConsoleManager()->ExecuteCommand(_T("alias gfx-hi \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" true; #") _T(RTVAR_UI_3D_SHADOWS) _T(" Force:Volumes; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" true; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTFADING) _T(" true; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" true\""));
 	GetConsoleManager()->ExecuteCommand(_T("alias iphone4-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 960; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 640; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
@@ -105,42 +106,42 @@ void GameClientSlaveManager::LoadSettings()
 #endif // Debug
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_INPUT_PRINT, false);
+	v_set(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	v_set(UiCure::GetSettings(), RTVAR_DEBUG_INPUT_PRINT, false);
 	bool lIsServerSelected;
-	CURE_RTVAR_TRYGET(lIsServerSelected, =, UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
+	v_tryget(lIsServerSelected, =, UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
 	if (lIsServerSelected)
 	{
-		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lExternalServerAddress);
+		v_set(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lExternalServerAddress);
 	}
 	else
 	{
 		str lServerAddress;
-		CURE_RTVAR_GET(lServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+		v_get(lServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 		if (Network::IsLocalAddress(lServerAddress))
 		{
 			bool lIsOpenServer;
-			CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+			v_get(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
 			const bool lIsCurrentlyLocalhost = (strutil::StartsWith(lServerAddress, _T("localhost:")) || strutil::StartsWith(lServerAddress, _T("127.0.0.1:")));
 			if (lIsOpenServer)
 			{
 				if (lIsCurrentlyLocalhost)
 				{
-					CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+					v_set(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
 				}
 			}
 			else
 			{
 				if (!lIsCurrentlyLocalhost)
 				{
-					CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+					v_set(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 				}
 			}
 		}
 	}
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_HALT, false);
+	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_HALT, false);
 }
 
 void GameClientSlaveManager::RefreshOptions()
@@ -190,7 +191,7 @@ void GameClientSlaveManager::SetIsQuitting()
 		GetResourceManager()->Tick();
 	}
 	mQuit = true;
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
+	v_internal(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
 }
 
 
@@ -209,14 +210,14 @@ bool GameClientSlaveManager::Render()
 	UpdateCameraPosition(true);
 
 	float lFov;
-	CURE_RTVAR_GET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+	v_get(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
 	UpdateFrustum(lFov);
 
 	LEPRA_MEASURE_SCOPE(SlaveRender);
 	bool lOutline;
 	bool lWireFrame;
-	CURE_RTVAR_GET(lOutline, =, GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false);
-	CURE_RTVAR_GET(lWireFrame, =, GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false);
+	v_get(lOutline, =, GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false);
+	v_get(lWireFrame, =, GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false);
 	SetLocalRender(true);
 	mUiManager->GetRenderer()->EnableOutlineRendering(lOutline);
 	mUiManager->GetRenderer()->EnableWireframe(lWireFrame);
@@ -250,7 +251,7 @@ void GameClientSlaveManager::PreEndTick()
 bool GameClientSlaveManager::EndTick()
 {
 	bool lIsDebugDrawing = mUiManager->CanRender();
-	CURE_RTVAR_GET(lIsDebugDrawing, &=, GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
+	v_get(lIsDebugDrawing, &=, GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
 
 	if (lIsDebugDrawing)
 	{
@@ -356,7 +357,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		bool lForceSendUnsafeClientKeepalive = false;
 		mLastSendTime.UpdateTimer();
 		double lKeepaliveInterval;
-		CURE_RTVAR_GET(lKeepaliveInterval, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 1.0);
+		v_get(lKeepaliveInterval, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 1.0);
 		if (mLastSentByteCount != GetNetworkAgent()->GetSentByteCount())
 		{
 			mLastSentByteCount = GetNetworkAgent()->GetSentByteCount();
@@ -369,7 +370,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 
 		// Check if we should send updates. Send all owned objects at the same time to avoid penetration.
 		float lPosSendIntervalLimit;
-		CURE_RTVAR_GET(lPosSendIntervalLimit, =(float), GetVariableScope(), RTVAR_NETPHYS_POSSENDINTERVALLIMIT, 0.5);
+		v_get(lPosSendIntervalLimit, =(float), GetVariableScope(), RTVAR_NETPHYS_POSSENDINTERVALLIMIT, 0.5);
 		lPosSendIntervalLimit *= 0.5f;	// Sampling theorem.
 		bool lSend = false;
 		ObjectIdSet::iterator x = mOwnedObjectList.begin();
@@ -400,7 +401,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					const bool lIsAllwedDiffSend = mSendExpireAlarm.IsExpired(0.5);
 
 					float lResyncOnDiff;
-					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
+					v_get(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
 					if (lForceSendUnsafeClientKeepalive ||
 						lIsPositionExpired ||
 						(lIsAllwedDiffSend &&
@@ -432,11 +433,11 @@ bool GameClientSlaveManager::TickNetworkOutput()
 							lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), *lObject->GetNetworkOutputGhost());
 						lIsSent = true;
 
-						CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0, 1000000);
+						v_internal_arithmetic(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0, 1000000);
 
 						/*for (int x = 0; x < lObject->GetPhysics()->GetEngineCount(); ++x)
 						{
-							TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(x);
+							Tbc::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(x);
 							log_volatile(mLog.Debugf(_T("Sync'ed engine of type %i with value %f."), lEngine->GetEngineType(), lEngine->GetValue()));
 						}*/
 					}
@@ -449,12 +450,12 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		{
 			mLastUnsafeReceiveTime.UpdateTimer();
 			double lPingInterval;
-			CURE_RTVAR_GET(lPingInterval, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0);
+			v_get(lPingInterval, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0);
 			if ((!lIsSent && lForceSendUnsafeClientKeepalive) ||
 				mLastUnsafeReceiveTime.GetTimeDiff() >= lPingInterval)
 			{
 				int lPingRetryCount;
-				CURE_RTVAR_GET(lPingRetryCount, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4);
+				v_get(lPingRetryCount, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4);
 				if (++mPingAttemptCount <= lPingRetryCount)
 				{
 					mLastUnsafeReceiveTime.ReduceTimeDiff(lPingInterval);
@@ -479,7 +480,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 	if (mMasterServerConnection)
 	{
 		float lConnectTimeout;
-		CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+		v_get(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 		mMasterServerConnection->SetSocketInfo(lSendOk? GetNetworkClient() : 0, lConnectTimeout);
 		mMasterServerConnection->Tick();
 	}
@@ -526,7 +527,7 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 
 	mIsReset = false;
 
-	str lPortRange = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
+	str lPortRange = v_slowget(GetVariableScope(), RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
 	str lLocalName;
 	if (strutil::StartsWith(pServerAddress, _T("localhost:")) || strutil::StartsWith(pServerAddress, _T("127.0.0.1:")))
 	{
@@ -540,7 +541,7 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 	}
 
 	float lConnectTimeout;
-	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+	v_get(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	str lServerAddress = pServerAddress;
 
 	// Open firewall path from server.
@@ -661,7 +662,7 @@ bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 {
 	bool lOutputInput;
-	CURE_RTVAR_GET(lOutputInput, =, GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
+	v_get(lOutputInput, =, GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
 	if (lOutputInput)
 	{
 		mLog.Infof(_T("Input %s: %f."), pElement->GetFullName().c_str(), pElement->GetValue());
@@ -687,7 +688,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 void GameClientSlaveManager::HandleUnusedRelativeAxis()
 {
 	float lMouseFilter;
-	CURE_RTVAR_GET(lMouseFilter, =(float), GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, -1.0f);
+	v_get(lMouseFilter, =(float), GetVariableScope(), RTVAR_CTRL_MOUSEFILTER, -1.0f);
 	if (lMouseFilter < 0)
 	{
 		return;
@@ -803,8 +804,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 				GetNetworkClient()->SetLoginAccountId(lMessageStatus->GetInteger());
 				mDisconnectReason.clear();
 				// A successful login: lets store these parameters for next time!
-				CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_LOGIN_USERNAME, mConnectUserName);
-				CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, mConnectServerAddress);
+				v_override(GetVariableScope(), RTVAR_LOGIN_USERNAME, mConnectUserName);
+				v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, mConnectServerAddress);
 				mMasterServerConnection->GraceClose(0.1, false);
 
 				OnLoginSuccess();
@@ -826,10 +827,10 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		{
 			Cure::MessageCreateObject* lMessageCreateObject = (Cure::MessageCreateObject*)pMessage;
 			wstr lClassId;
-			Lepra::TransformationF lTransformation;
+			Lepra::xform lTransformation;
 			lMessageCreateObject->GetTransformation(lTransformation);
 			//const float a = 1.0f/::sqrt(2.0f);
-			//lTransformation.SetOrientation(QuaternionF(0, 0, -a, -a));
+			//lTransformation.SetOrientation(quat(0, 0, -a, -a));
 			lMessageCreateObject->GetClassId(lClassId);
 			/*mLog.Infof(_T("Creating network instance %u of type %s at pos (%f; %f; %f), q (%f, %f, %f, %f)."),
 				lMessageCreateObject->GetObjectId(), lClassId.c_str(),
@@ -887,7 +888,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 					}
 				}
 			}
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0, 1000000);
+			v_internal_arithmetic(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0, 1000000);
 		}
 		break;
 		case Cure::MESSAGE_TYPE_OBJECT_ATTACH:
@@ -1031,7 +1032,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 }
 
 Cure::ContextObject* GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId,
-	Cure::NetworkObjectType pNetworkType, TransformationF* pTransform)
+	Cure::NetworkObjectType pNetworkType, xform* pTransform)
 {
 	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId, true);
 	if (lObject && lObject->GetClassId() != pClassId)
@@ -1080,11 +1081,11 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 			// Client has moved forward in time since the server sent us this positional info
 			// some frames ago. Extrapolate forward the number of micro-frames that diff.
 			float lExtrapolationFactor;
-			CURE_RTVAR_GET(lExtrapolationFactor, =(float), GetVariableScope(), RTVAR_NETPHYS_EXTRAPOLATIONFACTOR, 0.0);
+			v_get(lExtrapolationFactor, =(float), GetVariableScope(), RTVAR_NETPHYS_EXTRAPOLATIONFACTOR, 0.0);
 			if (lExtrapolationFactor)
 			{
 				int lMicroSteps;
-				CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
+				v_get(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 				const int lFutureStepCount = GetTimeManager()->GetCurrentPhysicsFrameDelta(pFrameIndex) * lMicroSteps;
 				const float lStepIncrement = GetTimeManager()->GetAffordedPhysicsStepTime() / lMicroSteps;
 				pData.GhostStep(lFutureStepCount, lStepIncrement*lExtrapolationFactor);
@@ -1096,7 +1097,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 				if (lObject->UpdateFullPosition(lCurrentPos))
 				{
 					float lResyncOnDiff;
-					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
+					v_get(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
 					if (pData.GetScaledDifference(lCurrentPos) < lResyncOnDiff)
 					{
 						lSetPosition = false;	// Not enough change to take notice. Would just yield a jerky movement, not much more.
@@ -1105,7 +1106,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 			}*/
 			lObject->SetFullPosition(pData, pDeltaThreshold);
 			bool lEnableSmoothing;
-			CURE_RTVAR_GET(lEnableSmoothing, =, GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true);
+			v_get(lEnableSmoothing, =, GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true);
 			if (lEnableSmoothing)
 			{
 				lObject->ActivateLerp();
@@ -1236,17 +1237,17 @@ void GameClientSlaveManager::DrawAsyncDebugInfo()
 
 	// Draw send and receive staples.
 	int lSendCount;
-	CURE_RTVAR_TRYGET(lSendCount, =, GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
+	v_tryget(lSendCount, =, GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
 	if (lSendCount > 0)
 	{
-		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
+		v_internal(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
 	}
 	DrawDebugStaple(0, lSendCount*10, Color(255, 0, 0));
 	int lRecvCount;
-	CURE_RTVAR_TRYGET(lRecvCount, =, GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
+	v_tryget(lRecvCount, =, GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
 	if (lRecvCount > 0)
 	{
-		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
+		v_internal(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
 	}
 	DrawDebugStaple(1, lRecvCount*10, Color(0, 255, 0));
 }
@@ -1267,11 +1268,11 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 {
 	UpdateCameraPosition(false);
 	float lFov;
-	CURE_RTVAR_GET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+	v_get(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
 	UpdateFrustum(lFov);
 
 	bool lDrawLocalServer;
-	CURE_RTVAR_GET(lDrawLocalServer, =, GetVariableScope(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
+	v_get(lDrawLocalServer, =, GetVariableScope(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
 	const Cure::ContextManager* lServerContext = (lDrawLocalServer && GetMaster()->IsLocalServer())? GetMaster()->GetLocalServer()->GetContext() : 0;
 	UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), mUiManager, GetContext(), lServerContext, GetTickLock());
 	lDebugRenderer.Render(mUiManager, mRenderArea);
@@ -1279,7 +1280,7 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 
 
 
-LOG_CLASS_DEFINE(GAME, GameClientSlaveManager);
+loginstance(GAME, GameClientSlaveManager);
 
 
 

@@ -4,19 +4,20 @@
 
 
 
+#include "pch.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Thread.h"
-#include "../../TBC/Include/PhysicsManager.h"
+#include "../../Tbc/Include/PhysicsManager.h"
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiLepra/Include/UiTouchDrag.h"
 #include "../../UiLepra/Include/UiInput.h"
 #include "../../UiLepra/Include/UiSoundManager.h"
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../../UiTBC/Include/UiOpenGLPainter.h"
-#include "../../UiTBC/Include/UiOpenGLRenderer.h"
+#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../../UiTbc/Include/UiOpenGLPainter.h"
+#include "../../UiTbc/Include/UiOpenGLRenderer.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiRuntimeVariableName.h"
 
@@ -71,12 +72,12 @@ bool GameUiManager::OpenDraw()
 	int lDisplayBpp;
 	int lDisplayFrequency;
 	bool lDisplayFullScreen;
-	CURE_RTVAR_GET(lRenderTypeString, =, mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
-	CURE_RTVAR_GET(lDisplayWidth, =, mVariableScope, RTVAR_UI_DISPLAY_WIDTH, 640);
-	CURE_RTVAR_GET(lDisplayHeight, =, mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, 480);
-	CURE_RTVAR_GET(lDisplayBpp, =, mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
-	CURE_RTVAR_GET(lDisplayFrequency, =, mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, 0);
-	CURE_RTVAR_GET(lDisplayFullScreen, =, mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, false);
+	v_get(lRenderTypeString, =, mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	v_get(lDisplayWidth, =, mVariableScope, RTVAR_UI_DISPLAY_WIDTH, 640);
+	v_get(lDisplayHeight, =, mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, 480);
+	v_get(lDisplayBpp, =, mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
+	v_get(lDisplayFrequency, =, mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, 0);
+	v_get(lDisplayFullScreen, =, mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, false);
 
 	UiLepra::DisplayManager::ContextType lRenderingContext = UiLepra::DisplayManager::OPENGL_CONTEXT;
 	if (lRenderTypeString == _T("OpenGL"))
@@ -136,7 +137,7 @@ bool GameUiManager::OpenDraw()
 	{
 		mDisplay->AddResizeObserver(this);
 		const double lPhysicalScreenSize = mDisplay->GetPhysicalScreenSize();
-		CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
+		v_override(mVariableScope, RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
 	}
@@ -149,8 +150,8 @@ bool GameUiManager::OpenDraw()
 		}
 		/*else if (pContext == UiLepra::DisplayManager::DIRECTX_CONTEXT)
 		{
-			mRenderer = new TBC::Direct3DRenderer(mCanvas);
-			mPainter = new TBC::DirectXPainter;
+			mRenderer = new Tbc::Direct3DRenderer(mCanvas);
+			mPainter = new Tbc::DirectXPainter;
 		}*/
 	}
 	if (lOk)
@@ -164,7 +165,7 @@ bool GameUiManager::OpenDraw()
 bool GameUiManager::OpenRest()
 {
 	str lSoundTypeString;
-	CURE_RTVAR_GET(lSoundTypeString, =, mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	v_get(lSoundTypeString, =, mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 	UiLepra::SoundManager::ContextType lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
 	if (lSoundTypeString == _T("OpenAL"))
 	{
@@ -184,11 +185,11 @@ bool GameUiManager::OpenRest()
 		mPainter->SetFontManager(mFontManager);
 
 		str lFont;
-		CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+		v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 		double lFontHeight;
-		CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		v_get(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 		int lFontFlags;
-		CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
+		v_get(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
 		UiTbc::FontManager::FontId lFontId = mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
 		const tchar* lFontNames[] =
 		{
@@ -305,7 +306,7 @@ void GameUiManager::InputTick()
 		mDragManager->UpdateMouseByDrag(GetInputManager());
 #else // Not a touch device.
 		bool lEmulateTouch;
-		CURE_RTVAR_GET(lEmulateTouch, =, mVariableScope, RTVAR_CTRL_EMULATETOUCH, false);
+		v_get(lEmulateTouch, =, mVariableScope, RTVAR_CTRL_EMULATETOUCH, false);
 		if (lEmulateTouch)
 		{
 			mDragManager->UpdateDragByMouse(GetInputManager());
@@ -328,13 +329,13 @@ void GameUiManager::EndInputTick()
 	}
 }
 
-void GameUiManager::BeginRender(const Vector3DF& pBackgroundColor)
+void GameUiManager::BeginRender(const vec3& pBackgroundColor)
 {
 	if (CanRender())
 	{
 		mRenderer->ResetClippingRect();
 		bool lEnableClear;
-		CURE_RTVAR_GET(lEnableClear, =, mVariableScope, RTVAR_UI_3D_ENABLECLEAR, true);
+		v_get(lEnableClear, =, mVariableScope, RTVAR_UI_3D_ENABLECLEAR, true);
 		if (lEnableClear)
 		{
 			Clear(pBackgroundColor.x, pBackgroundColor.y, pBackgroundColor.z);
@@ -345,10 +346,10 @@ void GameUiManager::BeginRender(const Vector3DF& pBackgroundColor)
 		}
 
 		float lMasterVolume;
-		CURE_RTVAR_GET(lMasterVolume, =(float), mVariableScope, RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
+		v_get(lMasterVolume, =(float), mVariableScope, RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 		mSound->SetMasterVolume(lMasterVolume);
 		float lMusicVolume;
-		CURE_RTVAR_GET(lMusicVolume, =(float), mVariableScope, RTVAR_UI_SOUND_MUSICVOLUME, 1.0);
+		v_get(lMusicVolume, =(float), mVariableScope, RTVAR_UI_SOUND_MUSICVOLUME, 1.0);
 		mSound->SetMusicVolume(lMusicVolume);
 	}
 	else
@@ -456,24 +457,24 @@ UiLepra::SoundManager* GameUiManager::GetSoundManager() const
 
 
 
-Vector3DF GameUiManager::GetAccelerometer() const
+vec3 GameUiManager::GetAccelerometer() const
 {
 	float x, y, z;
-	CURE_RTVAR_GET(x, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_X,  0.0);
-	CURE_RTVAR_GET(y, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Y,  0.0);
-	CURE_RTVAR_GET(z, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Z, -1.0);
-	return Vector3DF(x,y,z);
+	v_get(x, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_X,  0.0);
+	v_get(y, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Y,  0.0);
+	v_get(z, =(float), GetVariableScope(), RTVAR_CTRL_ACCELEROMETER_Z, -1.0);
+	return vec3(x,y,z);
 }
 
-void GameUiManager::SetCameraPosition(const TransformationF& pTransform)
+void GameUiManager::SetCameraPosition(const xform& pTransform)
 {
 	mRenderer->SetCameraTransformation(pTransform);
 }
 
-void GameUiManager::SetMicrophonePosition(const TransformationF& pTransform, const Vector3DF& pVelocity)
+void GameUiManager::SetMicrophonePosition(const xform& pTransform, const vec3& pVelocity)
 {
-	Vector3DF lUp = pTransform.GetOrientation() * Vector3DF(0,0,1);
-	Vector3DF lForward = pTransform.GetOrientation() * Vector3DF(0,1,0);
+	vec3 lUp = pTransform.GetOrientation() * vec3(0,0,1);
+	vec3 lForward = pTransform.GetOrientation() * vec3(0,1,0);
 	mSound->SetListenerPosition(pTransform.GetPosition(), pVelocity, lUp, lForward);
 }
 
@@ -514,11 +515,11 @@ UiTbc::FontManager::FontId GameUiManager::SetScaleFont(float pScale)
 	SetMasterFont();
 	mCurrentFontId = GetFontManager()->GetActiveFontId();
 	str lFont;
-	CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+	v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 	double lFontHeight;
 	if (pScale > 0)
 	{
-		CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		v_get(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 		lFontHeight *= pScale;
 	}
 	else
@@ -526,7 +527,7 @@ UiTbc::FontManager::FontId GameUiManager::SetScaleFont(float pScale)
 		lFontHeight = -pScale;
 	}
 	int lFontFlags;
-	CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
+	v_get(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
 	return mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
 }
 
@@ -575,11 +576,11 @@ void GameUiManager::UpdateSettings()
 {
 	// Display.
 	bool lEnableVSync;
-	CURE_RTVAR_GET(lEnableVSync, =, mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, true);
+	v_get(lEnableVSync, =, mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, true);
 	mDisplay->SetVSyncEnabled(lEnableVSync);
 
 	str lDisplayOrientation;
-	CURE_RTVAR_GET(lDisplayOrientation, =, mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	v_get(lDisplayOrientation, =, mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
 	UiLepra::DisplayManager::Orientation lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
 	if (lDisplayOrientation == _T("AllowAny"))
 	{
@@ -620,13 +621,13 @@ void GameUiManager::UpdateSettings()
 	double lClipFar;
 	str lShadowsString;
 	double lShadowDeviation;
-	CURE_RTVAR_GET(lEnableLights, =, mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
-	CURE_RTVAR_GET(lAmbientRed, =, mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.1);
-	CURE_RTVAR_GET(lAmbientGreen, =, mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
-	CURE_RTVAR_GET(lAmbientBlue, =, mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.1);
-	CURE_RTVAR_TRYGET(lAmbientRed, *=, mVariableScope, RTVAR_UI_3D_AMBIENTREDFACTOR, 1.0);
-	CURE_RTVAR_TRYGET(lAmbientGreen, *=, mVariableScope, RTVAR_UI_3D_AMBIENTGREENFACTOR, 1.0);
-	CURE_RTVAR_TRYGET(lAmbientBlue, *=, mVariableScope, RTVAR_UI_3D_AMBIENTBLUEFACTOR, 1.0);
+	v_get(lEnableLights, =, mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
+	v_get(lAmbientRed, =, mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.1);
+	v_get(lAmbientGreen, =, mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
+	v_get(lAmbientBlue, =, mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.1);
+	v_tryget(lAmbientRed, *=, mVariableScope, RTVAR_UI_3D_AMBIENTREDFACTOR, 1.0);
+	v_tryget(lAmbientGreen, *=, mVariableScope, RTVAR_UI_3D_AMBIENTGREENFACTOR, 1.0);
+	v_tryget(lAmbientBlue, *=, mVariableScope, RTVAR_UI_3D_AMBIENTBLUEFACTOR, 1.0);
 	/*if (!mRenderer->IsPixelShadersEnabled())
 	{
 		// Without pixel shader highlights the scene becomes darker. At least on my computer...
@@ -635,16 +636,16 @@ void GameUiManager::UpdateSettings()
 		lAmbientBlue *= 1.2;
 	}*/
 
-	CURE_RTVAR_GET(lEnableTrilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	CURE_RTVAR_GET(lEnableBilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	CURE_RTVAR_GET(lEnableMipMapping, =, mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	CURE_RTVAR_GET(lEnableTexturing, =, mVariableScope, RTVAR_UI_3D_ENABLETEXTURING, false);
-	CURE_RTVAR_GET(lEnablePixelShaders, =, mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
-	CURE_RTVAR_GET(lFOV, =, mVariableScope, RTVAR_UI_3D_FOV, 45.0);
-	CURE_RTVAR_GET(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
-	CURE_RTVAR_GET(lClipFar, =, mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
-	CURE_RTVAR_GET(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Volumes"));
-	CURE_RTVAR_GET(lShadowDeviation, =, mVariableScope, RTVAR_UI_3D_SHADOWDEVIATION, 0.0);
+	v_get(lEnableTrilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	v_get(lEnableBilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
+	v_get(lEnableMipMapping, =, mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	v_get(lEnableTexturing, =, mVariableScope, RTVAR_UI_3D_ENABLETEXTURING, false);
+	v_get(lEnablePixelShaders, =, mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
+	v_get(lFOV, =, mVariableScope, RTVAR_UI_3D_FOV, 45.0);
+	v_get(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
+	v_get(lClipFar, =, mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
+	v_get(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Volumes"));
+	v_get(lShadowDeviation, =, mVariableScope, RTVAR_UI_3D_SHADOWDEVIATION, 0.0);
 
 	mRenderer->SetLightsEnabled(lEnableLights);
 	mRenderer->SetAmbientLight((float)lAmbientRed, (float)lAmbientGreen, (float)lAmbientBlue);
@@ -679,12 +680,12 @@ void GameUiManager::UpdateSettings()
 	}
 	mRenderer->SetShadowMode(lShadowMode, lShadowType);
 	mRenderer->SetShadowUpdateFrameDelay(60);
-	TBC::GeometryBase::SetDefaultBigOrientationThreshold((float)lShadowDeviation);
+	Tbc::GeometryBase::SetDefaultBigOrientationThreshold((float)lShadowDeviation);
 
 	// ----------------------------------------
 	// 2D rendering settings.
 	str lPaintModeString;
-	CURE_RTVAR_GET(lPaintModeString, =, mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
+	v_get(lPaintModeString, =, mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
 	UiTbc::Painter::RenderMode lPainterRenderMode = UiTbc::Painter::RM_ALPHABLEND;
 	if (lPaintModeString == _T("Add"))
 	{
@@ -714,11 +715,11 @@ void GameUiManager::UpdateSettings()
 	if (mFontManager)
 	{
 		str lFont;
-		CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+		v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 		double lFontHeight;
-		CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		v_get(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 		int lFontFlags;
-		CURE_RTVAR_GET(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
+		v_get(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
 		mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
 	}
 
@@ -727,14 +728,14 @@ void GameUiManager::UpdateSettings()
 	if (mSound)
 	{
 		double lSoundRollOff;
-		CURE_RTVAR_GET(lSoundRollOff, =, mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
+		v_get(lSoundRollOff, =, mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 		if (lSoundRollOff != mSoundRollOffShadow)
 		{
 			mSoundRollOffShadow = lSoundRollOff;
 			mSound->SetRollOffFactor((float)lSoundRollOff);
 		}
 		double lSoundDoppler;
-		CURE_RTVAR_GET(lSoundDoppler, =, mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
+		v_get(lSoundDoppler, =, mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
 		if (lSoundDoppler != mSoundDopplerShadow)
 		{
 			mSoundDopplerShadow = lSoundDoppler;
@@ -766,7 +767,7 @@ void GameUiManager::OnMaximize(int pWidth, int pHeight)
 
 
 
-LOG_CLASS_DEFINE(GAME, GameUiManager);
+loginstance(GAME, GameUiManager);
 
 
 

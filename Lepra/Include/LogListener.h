@@ -13,7 +13,7 @@
 #pragma once
 
 #include "DiskFile.h"
-#include "Log.h"
+#include "Logger.h"
 #include "MemFile.h"
 
 
@@ -43,10 +43,10 @@ public:
 	LogListener(str pName, OutputFormat pFormat = FORMAT_THREADEX);
 	virtual ~LogListener();
 	void KillSelf();
-	void AddLog(Log* pLog);
-	void RemoveLog(Log* pLog);
-	void OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel);
-	void OnLog(const Log* pOriginator, const str& pMessage, LogLevel pLevel);
+	void AddLog(Logger* pLog);
+	void RemoveLog(Logger* pLog);
+	void OnLog(const Logger* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel);
+	void OnLog(const Logger* pOriginator, const str& pMessage, LogLevel pLevel);
 	virtual void WriteLog(const str& pMessage, LogLevel pLevel) = 0;
 	LogLevel GetLevelThreashold() const;
 	void SetLevelThreashold(LogLevel pType);
@@ -54,7 +54,7 @@ public:
 	const str& GetName() const;
 
 protected:
-	Log* mLog;
+	Logger* mLog;
 	str mName;
 	LogLevel mLevel;
 	OutputFormat mFormat;
@@ -72,7 +72,7 @@ public:
 
 
 
-// Log listener for interactive consoles.
+// Logger listener for interactive consoles.
 class InteractiveConsoleLogListener: public LogListener
 {
 public:

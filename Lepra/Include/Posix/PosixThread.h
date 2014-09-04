@@ -87,7 +87,7 @@ protected:
 	pthread_mutex_t mMutex;
 	pthread_cond_t mCondition;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

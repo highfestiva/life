@@ -31,16 +31,16 @@ public:
 private:
 	virtual void OnLoaded();
 	virtual void OnForceApplied(Cure::ContextObject* pOtherObject,
-		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque,
-		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+		Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque,
+		const vec3& pPosition, const vec3& pRelativeVelocity);
 
 	float mMuzzleVelocity;
 	Launcher* mLauncher;
 	bool mIsDetonated;
 	float mExplosiveEnergy;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

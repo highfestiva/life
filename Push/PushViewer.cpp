@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "PushViewer.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
-#include "../TBC/Include/ChunkyPhysics.h"
-#include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../Tbc/Include/ChunkyPhysics.h"
+#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../UiTbc/Include/GUI/UiCenterLayout.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiGravelEmitter.h"
 #include "../UiCure/Include/UiMachine.h"
@@ -33,8 +34,8 @@ PushViewer::PushViewer(Life::GameClientMasterTicker* pMaster, const Cure::TimeMa
 	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mServerListView(0)
 {
-	mCameraPosition = Vector3DF(-22, -5, 43.1f);
-	mCameraOrientation = Vector3DF(-PIF*1.1f/2, PIF*0.86f/2, 0.05f);
+	mCameraPosition = vec3(-22, -5, 43.1f);
+	mCameraOrientation = vec3(-PIF*1.1f/2, PIF*0.86f/2, 0.05f);
 }
 
 PushViewer::~PushViewer()
@@ -46,12 +47,12 @@ PushViewer::~PushViewer()
 
 void PushViewer::LoadSettings()
 {
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
+	v_set(GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
 
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	v_internal(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 }
 
 void PushViewer::SaveSettings()
@@ -83,14 +84,14 @@ void PushViewer::TickUiUpdate()
 		return;
 	}
 	mCameraPivotPosition = lObject->GetPosition();
-	mCameraPosition = mCameraPivotPosition - Vector3DF(10, 0, 0);
+	mCameraPosition = mCameraPivotPosition - vec3(10, 0, 0);
 	mCameraPreviousPosition = mCameraPosition;
-	mCameraOrientation = Vector3DF(0, PIF/2, 0);*/
+	mCameraOrientation = vec3(0, PIF/2, 0);*/
 }
 
 void PushViewer::CreateLoginView()
 {
-	QuaternionF lFlip;
+	quat lFlip;
 	lFlip.RotateAroundOwnZ(PIF);
 	CreateButton(-0.2f, +0.2f,  6.0f, _T("1"),	_T("road_sign_02"), _T("road_sign_1p.png"), RoadSignButton::SHAPE_BOX);
 	RoadSignButton* lButton = CreateButton(+0.2f, +0.2f,  6.0f, _T("2"),	_T("road_sign_02"), _T("road_sign_2p.png"), RoadSignButton::SHAPE_BOX);
@@ -120,7 +121,7 @@ bool PushViewer::InitializeUniverse()
 
 	Cure::ContextObject* lVehicle = new UiCure::Machine(GetResourceManager(), _T("monster_02"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
-	lVehicle->SetInitialTransform(TransformationF(gIdentityQuaternionF, Vector3DF(-23, -80, 53)));
+	lVehicle->SetInitialTransform(xform(gIdentityQuaternionF, vec3(-23, -80, 53)));
 	lVehicle->StartLoading();
 	mAvatarId = lVehicle->GetInstanceId();
 	GetConsoleManager()->ExecuteCommand(_T("fork execute-file Data/Steering.rec"));
@@ -145,8 +146,8 @@ void PushViewer::OnCancelJoinServer()
 
 void PushViewer::OnRequestJoinServer(const str& pServerAddress)
 {
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, pServerAddress);
-	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
+	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, pServerAddress);
+	v_internal(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
 	mLog.Infof(_T("Will use server %s when logging in."), pServerAddress.c_str());
 	CloseJoinServerView();
 }
@@ -183,7 +184,7 @@ RoadSignButton* PushViewer::CreateButton(float x, float y, float z, const str& p
 {
 	RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(), mUiManager, pName, pClass, pTexture, pShape);
 	GetContext()->AddLocalObject(lButton);
-	lButton->SetTrajectory(Vector2DF(x, y), z);
+	lButton->SetTrajectory(vec2(x, y), z);
 	lButton->GetButton().SetOnClick(PushViewer, OnButtonClick);
 	mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
 	lButton->StartLoading();
@@ -201,7 +202,7 @@ void PushViewer::OnButtonClick(UiTbc::Button* pButton)
 			mUiManager->AssertDesktopLayout(new UiTbc::CenterLayout, 1);
 			mUiManager->GetDesktopWindow()->AddChild(mServerListView, 0, 0, 1);
 		}
-		CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_ENABLEONLINEMASTER, true);
+		v_set(GetVariableScope(), RTVAR_NETWORK_ENABLEONLINEMASTER, true);
 		return;
 	}
 	if (pButton->GetName() == _T("quit"))
@@ -222,7 +223,7 @@ void PushViewer::OnButtonClick(UiTbc::Button* pButton)
 
 
 
-LOG_CLASS_DEFINE(GAME, PushViewer);
+loginstance(GAME, PushViewer);
 
 
 

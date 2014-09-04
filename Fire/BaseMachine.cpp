@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "BaseMachine.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
@@ -74,7 +75,7 @@ void BaseMachine::OnDie()
 	ShrinkMeshBigOrientationThreshold(1e-3f);
 	Parent::OnDie();
 	float lVehicleRemoveDelay;
-	CURE_RTVAR_GET(lVehicleRemoveDelay, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 9.0);
+	v_get(lVehicleRemoveDelay, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 9.0);
 	mManager->AddGameAlarmCallback(this, START_SINKING_ID, lVehicleRemoveDelay, 0);
 }
 

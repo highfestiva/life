@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/MemFile.h"
 #include "../Include/LepraAssert.h"
 #include "../Include/String.h"

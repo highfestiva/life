@@ -4,9 +4,10 @@
 
 
 
+#include "pch.h"
 #include "../Include/PhysicsSharedResource.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
 #include "../Include/PositionalData.h"
 #include "../Include/PositionHauler.h"
 
@@ -17,8 +18,8 @@ namespace Cure
 
 
 
-PhysicsSharedInitData::PhysicsSharedInitData(const TransformationF& pTransformation, const Vector3DF& pVelocity, PhysicsOverride pPhysicsOverride,
-		TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
+PhysicsSharedInitData::PhysicsSharedInitData(const xform& pTransformation, const vec3& pVelocity, PhysicsOverride pPhysicsOverride,
+		Tbc::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
 	mTransformation(pTransformation),
 	mVelocity(pVelocity),
 	mPhysicsOverride(pPhysicsOverride),
@@ -48,7 +49,7 @@ PhysicsSharedResource::~PhysicsSharedResource()
 	delete mClassResource;
 	mClassResource = 0;
 
-	TBC::ChunkyPhysics* lStructure = GetRamData();
+	Tbc::ChunkyPhysics* lStructure = GetRamData();
 	if (lStructure)
 	{
 		lStructure->ClearAll(mInitData.mPhysicsManager);
@@ -125,21 +126,21 @@ ResourceLoadState PhysicsSharedResource::PostProcess()
 
 bool PhysicsSharedResource::FinalizeInit()
 {
-	TBC::ChunkyPhysics* lStructure = GetRamData();
-	TransformationF lTransformation = mInitData.mTransformation;
+	Tbc::ChunkyPhysics* lStructure = GetRamData();
+	xform lTransformation = mInitData.mTransformation;
 	if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
 		return lStructure->FinalizeInit(0, 0, &lTransformation, 0, 0);
 	}
 	else if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_STATIC)
 	{
-		lStructure->SetPhysicsType(TBC::ChunkyPhysics::STATIC);
+		lStructure->SetPhysicsType(Tbc::ChunkyPhysics::STATIC);
 	}
 
 	// Pick desired orientation, but reset for FinalizeInit() to work with proper joint orientations.
-	//const bool lIsDynamic = (lStructure->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
-	QuaternionF lTargetOrientation = lTransformation.GetOrientation();
-	lTransformation.SetOrientation(QuaternionF());
+	//const bool lIsDynamic = (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
+	quat lTargetOrientation = lTransformation.GetOrientation();
+	lTransformation.SetOrientation(quat());
 
 	const int lPhysicsFps = mInitData.mPhysicsFps;
 	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation, mInitData.mInstanceId, mInitData.mInstanceId);
@@ -149,7 +150,7 @@ bool PhysicsSharedResource::FinalizeInit()
 	// is relative to the initial root bone orientation.
 	if (lOk)
 	{
-		if (lStructure->GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY)
+		if (lStructure->GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY)
 		{
 			const float lTotalMass = lStructure->QueryTotalMass(mInitData.mPhysicsManager);
 			ObjectPositionalData lPlacement;
@@ -158,16 +159,16 @@ bool PhysicsSharedResource::FinalizeInit()
 			if (lOk)
 			{
 				ObjectPositionalData* lNewPlacement = (ObjectPositionalData*)lPlacement.Clone();
-				if (lStructure->GetPhysicsType() == TBC::ChunkyPhysics::WORLD)
+				if (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::WORLD)
 				{
 					lTargetOrientation *= lNewPlacement->mPosition.mTransformation.GetOrientation();
 				}
-				/*else if (lStructure->GetPhysicsType() == TBC::ChunkyPhysics::STATIC)
+				/*else if (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
 				{
 					lTargetOrientation.RotateAroundOwnY(PIF);
 				}*/
 				lNewPlacement->mPosition.mTransformation =
-					TransformationF(lTargetOrientation,
+					xform(lTargetOrientation,
 						lNewPlacement->mPosition.mTransformation.GetPosition());
 				lNewPlacement->mPosition.mVelocity = mInitData.mVelocity;
 				PositionHauler::Set(*lNewPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass, true);
@@ -184,7 +185,7 @@ void PhysicsSharedResource::OnLoadClass(ClassResource* pClassResource)
 	{
 		return;
 	}
-	TBC::ChunkyPhysics* lCopy = new TBC::ChunkyPhysics(*pClassResource->GetData());
+	Tbc::ChunkyPhysics* lCopy = new Tbc::ChunkyPhysics(*pClassResource->GetData());
 	SetRamData(lCopy);
 }
 

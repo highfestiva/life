@@ -5,6 +5,7 @@
 	Copyright (c) 2002-2006, Righteous Games
 */
 
+#include "pch.h"
 #include <assert.h>
 #include "../Include/Log.h"
 #include "../Include/String.h"

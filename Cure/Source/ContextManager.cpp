@@ -4,8 +4,10 @@
 
 
 
+#include "pch.h"
 #include "../Include/ContextManager.h"
 #include <list>
+#include "../../Lepra/Include/Lock.h"
 #include "../Include/ContextObjectAttribute.h"
 #include "../Include/ContextObject.h"
 #include "../Include/GameManager.h"
@@ -26,7 +28,8 @@ ContextManager::ContextManager(GameManager* pGameManager):
 	mGameManager(pGameManager),
 	mIsObjectOwner(true),
 	mLocalObjectIdManager(0x40000000, 0x7FFFFFFF-1, 0xFFFFFFFF),
-	mRemoteObjectIdManager(1, 0x40000000-1, 0xFFFFFFFF)
+	mRemoteObjectIdManager(1, 0x40000000-1, 0xFFFFFFFF),
+	mAlarmMutex(new Lock)
 {
 }
 
@@ -34,6 +37,8 @@ ContextManager::~ContextManager()
 {
 	ClearObjects();
 	mGameManager = 0;
+	delete mAlarmMutex;
+	mAlarmMutex = 0;
 }
 
 
@@ -156,14 +161,14 @@ void ContextManager::AddPhysicsSenderObject(ContextObject* pObject)
 	mPhysicsSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
 }
 
-void ContextManager::AddPhysicsBody(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId)
+void ContextManager::AddPhysicsBody(ContextObject* pObject, Tbc::PhysicsManager::BodyID pBodyId)
 {
 	mBodyTable.insert(BodyPair(pBodyId, pObject));
 }
 
-void ContextManager::RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId)
+void ContextManager::RemovePhysicsBody(Tbc::PhysicsManager::BodyID pBodyId)
 {
-	if (pBodyId != TBC::INVALID_BODY)
+	if (pBodyId != Tbc::INVALID_BODY)
 	{
 		mBodyTable.erase(pBodyId);
 	}
@@ -248,7 +253,7 @@ void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, floa
 	deb_assert(pObject->GetManager() == this);
 	deb_assert(GetObject(pObject->GetInstanceId(), true) == pObject);
 
-	ScopeLock lLock(&mAlarmMutex);
+	ScopeLock lLock(mAlarmMutex);
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
 	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
@@ -262,7 +267,7 @@ void ContextManager::AddGameAlarmCallback(ContextObject* pObject, int pAlarmId, 
 
 void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
 {
-	ScopeLock lLock(&mAlarmMutex);
+	ScopeLock lLock(mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
@@ -282,7 +287,7 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 {
 	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
 
-	ScopeLock lLock(&mAlarmMutex);
+	ScopeLock lLock(mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
@@ -315,7 +320,7 @@ void ContextManager::TickPhysics()
 
 void ContextManager::HandleIdledBodies()
 {
-	typedef TBC::PhysicsManager::BodySet BodySet;
+	typedef Tbc::PhysicsManager::BodySet BodySet;
 	const BodySet& lBodySet = mGameManager->GetPhysicsManager()->GetIdledBodies();
 	BodySet::const_iterator x = lBodySet.begin();
 	for (; x != lBodySet.end(); ++x)
@@ -419,7 +424,7 @@ void ContextManager::DispatchAlarmCallbacks()
 	// 1. Extract due alarms into list.
 	// 2. Callback alarms.
 
-	ScopeLock lLock(&mAlarmMutex);
+	ScopeLock lLock(mAlarmMutex);
 
 	std::list<Alarm> lCallbackList;
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
@@ -455,7 +460,7 @@ void ContextManager::DispatchAlarmCallbacks()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, ContextManager);
+loginstance(GAME_CONTEXT, ContextManager);
 
 
 

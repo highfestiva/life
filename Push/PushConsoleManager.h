@@ -39,7 +39,7 @@ protected:
 	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
 
 	static const CommandPair mCommandIdList[];
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

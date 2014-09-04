@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/CubicSpline.h"
 #include "../../Lepra/Include/Math.h"
@@ -11,10 +12,10 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
-TerrainFunction::TerrainFunction(float pAmplitude, const Vector2DF& pPosition, float pInnerRadius, float pOuterRadius):
+TerrainFunction::TerrainFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius):
 	mAmplitude(pAmplitude),
 	mPosition(pPosition),
 	mInnerRadius(pInnerRadius),
@@ -30,8 +31,8 @@ TerrainFunction::~TerrainFunction()
 void TerrainFunction::AddFunction(TerrainPatch& pPatch) const
 {
 	// Read all frequently used data from pGrid.
-	const Vector2DF& lWorldSouthWest(pPatch.GetSouthWest());
-	const Vector2DF& lWorldNorthEast(pPatch.GetNorthEast());
+	const vec2& lWorldSouthWest(pPatch.GetSouthWest());
+	const vec2& lWorldNorthEast(pPatch.GetNorthEast());
 	const int lVertexCountX = pPatch.GetVertexRes();
 	const int lVertexCountY = pPatch.GetVertexRes();
 	const float lGridWidth = pPatch.GetPatchSize();
@@ -90,7 +91,7 @@ void TerrainFunction::AddFunction(TerrainPatch& pPatch) const
 	pPatch.IterateOverPatch(*this, lVertexMinimumX, lVertexMaximumX, lVertexMinimumY, lVertexMaximumY);
 }
 
-void TerrainFunction::ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pVertex) const
+void TerrainFunction::ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const
 {
 	const float lDistance = pWorldFlatPos.GetDistance(mPosition);
 	if (lDistance < mOuterRadius)
@@ -108,7 +109,7 @@ void TerrainFunction::ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pV
 			// that the parameter is used in a linear fasion.
 			lScale = 1-(lDistance-mInnerRadius)/(mOuterRadius-mInnerRadius);
 		}
-		const Vector2DF lRelativeNormalizedPos = (pWorldFlatPos - mPosition) / mOuterRadius;
+		const vec2 lRelativeNormalizedPos = (pWorldFlatPos - mPosition) / mOuterRadius;
 		AddPoint(lRelativeNormalizedPos.x, lRelativeNormalizedPos.y, lScale, lDistance, pVertex);
 	}
 }
@@ -118,7 +119,7 @@ float TerrainFunction::GetAmplitude() const
 	return (mAmplitude);
 }
 
-const Vector2DF& TerrainFunction::GetPosition() const
+const vec2& TerrainFunction::GetPosition() const
 {
 	return (mPosition);
 }
@@ -171,7 +172,7 @@ void TerrainFunctionGroup::AddFunctions(TerrainPatch& pPatch) const
 	pPatch.IterateOverPatch(*this, 0, pPatch.GetVertexRes(), 0, pPatch.GetVertexRes());
 }
 
-void TerrainFunctionGroup::ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pVertex) const
+void TerrainFunctionGroup::ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const
 {
 	for (int i = 0; i < mCount; i++)
 	{
@@ -179,7 +180,7 @@ void TerrainFunctionGroup::ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3D
 	}
 }
 
-TerrainConeFunction::TerrainConeFunction(float pAmplitude, const Vector2DF& pPosition, float pInnerRadius, float pOuterRadius):
+TerrainConeFunction::TerrainConeFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius):
 	TerrainFunction(pAmplitude, pPosition, pInnerRadius, pOuterRadius)
 {
 	// Calculate the "profile length", which is the slope plus the inner radius.
@@ -194,7 +195,7 @@ TerrainConeFunction::TerrainConeFunction(float pAmplitude, const Vector2DF& pPos
 }
 
 void TerrainConeFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY,
-	float /*pScale*/, float pAbsoluteXyDistance, Vector3DF& pPoint) const
+	float /*pScale*/, float pAbsoluteXyDistance, vec3& pPoint) const
 {
 	// Does not simply crunch the terrain grid vertically, but has a smarter
 	// function that distributes the grid vertices evenly around the cone profile.
@@ -241,7 +242,7 @@ void TerrainConeFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNo
 
 
 
-TerrainHemisphereFunction::TerrainHemisphereFunction(float pAmplitude, const Vector2DF& pPosition, float pInnerRadius, float pOuterRadius):
+TerrainHemisphereFunction::TerrainHemisphereFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius):
 	TerrainFunction(pAmplitude, pPosition, pInnerRadius, pOuterRadius)
 {
 	//     ___
@@ -250,7 +251,7 @@ TerrainHemisphereFunction::TerrainHemisphereFunction(float pAmplitude, const Vec
 }
 
 void TerrainHemisphereFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY,
-	float pScale, float pAbsoluteXyDistance, Vector3DF& pPoint) const
+	float pScale, float pAbsoluteXyDistance, vec3& pPoint) const
 {
 	// Does not simply crunch the terrain grid vertically, but has a smarter
 	// function that distributes the grid vertices evenly around the hemisphere.
@@ -285,12 +286,12 @@ void TerrainHemisphereFunction::AddPoint(float pRelativeNormalizedX, float pRela
 
 
 TerrainDuneFunction::TerrainDuneFunction(float pWidthProportion, float pCurvature, float pAmplitude,
-	const Vector2DF& pPosition, float pInnerRadius, float pOuterRadius):
+	const vec2& pPosition, float pInnerRadius, float pOuterRadius):
 	TerrainFunction(pAmplitude, pPosition, pInnerRadius, pOuterRadius),
 	mProfileSpline(0),
 	mWidthProportion(pWidthProportion)
 {
-	Vector2DF* lCoordinates = new Vector2DF[10];
+	vec2* lCoordinates = new vec2[10];
 	float* lTimes = new float[11];
 	lTimes[0] = -1.0f;
 	lCoordinates[0].x = -1;
@@ -323,8 +324,8 @@ TerrainDuneFunction::TerrainDuneFunction(float pWidthProportion, float pCurvatur
 	lCoordinates[9].x = 1.0f;
 	lCoordinates[9].y = 0.0f;
 	lTimes[10] = 1.0f;
-	mProfileSpline = new CubicDeCasteljauSpline<Vector2DF, float>(lCoordinates,
-		lTimes, 10, CubicDeCasteljauSpline<Vector2DF, float>::TYPE_BSPLINE,
+	mProfileSpline = new CubicDeCasteljauSpline<vec2, float>(lCoordinates,
+		lTimes, 10, CubicDeCasteljauSpline<vec2, float>::TYPE_BSPLINE,
 		TAKE_OWNERSHIP);
 	mProfileSpline->StartInterpolation(-1);
 }
@@ -335,10 +336,10 @@ TerrainDuneFunction::~TerrainDuneFunction()
 	mProfileSpline = 0;
 }
 
-void TerrainDuneFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float, Vector3DF& pPoint) const
+void TerrainDuneFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float, vec3& pPoint) const
 {
 	mProfileSpline->GotoAbsoluteTime(pRelativeNormalizedX);
-	Vector2DF d;
+	vec2 d;
 	// Create a small bulge on the edges.
 	const float t = 3*pRelativeNormalizedX;
 	const float bz = ::exp(-t*t/mWidthProportion)*0.5f;
@@ -411,7 +412,7 @@ TerrainAmplitudeFunction::~TerrainAmplitudeFunction()
 }
 
 void TerrainAmplitudeFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale,
-	float pAbsoluteXyDistance, Vector3DF& pPoint) const
+	float pAbsoluteXyDistance, vec3& pPoint) const
 {
 	const float oz = pPoint.z;
 	mFunction->AddPoint(pRelativeNormalizedX, pRelativeNormalizedY, pScale, pAbsoluteXyDistance, pPoint);
@@ -431,7 +432,7 @@ TerrainWidthFunction::TerrainWidthFunction(float pWidthFactor, TerrainFunction* 
 }
 
 void TerrainWidthFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale,
-	float pAbsoluteXyDistance, Vector3DF& pPoint) const
+	float pAbsoluteXyDistance, vec3& pPoint) const
 {
 	const float rx = pRelativeNormalizedX/mWidthFactor;
 	pAbsoluteXyDistance = ::sqrt(rx*rx+pRelativeNormalizedY*pRelativeNormalizedY)*mOuterRadius;
@@ -486,7 +487,7 @@ TerrainPushFunction::~TerrainPushFunction()
 }
 
 void TerrainPushFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale,
-	float pAbsoluteXyDistance, Vector3DF& pPoint) const
+	float pAbsoluteXyDistance, vec3& pPoint) const
 {
 	mFunction->AddPoint(pRelativeNormalizedX, pRelativeNormalizedY, pScale, pAbsoluteXyDistance, pPoint);
 	mPushSpline->GotoAbsoluteTime(pRelativeNormalizedY);
@@ -504,12 +505,12 @@ TerrainRotateFunction::TerrainRotateFunction(float pAngle, TerrainFunction* pFun
 }
 
 void TerrainRotateFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale,
-	float pAbsoluteXyDistance, Vector3DF& pPoint) const
+	float pAbsoluteXyDistance, vec3& pPoint) const
 {
 	// TODO: optimize by using matrices for rotation.
 	const float lNewRelativeNormalizedX = ::cos(-mAngle)*pRelativeNormalizedX - ::sin(-mAngle)*pRelativeNormalizedY;
 	const float lNewRelativeNormalizedY = ::sin(-mAngle)*pRelativeNormalizedX + ::cos(-mAngle)*pRelativeNormalizedY;
-	Vector3DF lRotatePoint(lNewRelativeNormalizedX, lNewRelativeNormalizedY, pPoint.z/mOuterRadius);
+	vec3 lRotatePoint(lNewRelativeNormalizedX, lNewRelativeNormalizedY, pPoint.z/mOuterRadius);
 	lRotatePoint *= mOuterRadius;
 	lRotatePoint.x += mPosition.x;
 	lRotatePoint.y += mPosition.y;

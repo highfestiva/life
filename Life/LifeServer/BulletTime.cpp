@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "BulletTime.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "GameServerManager.h"
@@ -32,7 +33,7 @@ void BulletTime::OnAlarm(int pAlarmId, void* pExtraData)
 	switch (pAlarmId)
 	{
 		case 0:
-			CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+			v_set(Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 			((GameServerManager*)GetManager()->GetGameManager())->BroadcastStatusMessage(
 				Cure::MessageStatus::INFO_COMMAND,
 				wstrutil::Encode(mClientStopCommand));
@@ -46,7 +47,7 @@ void BulletTime::OnAlarm(int pAlarmId, void* pExtraData)
 void BulletTime::DidTrigger(Cure::ContextObject* pBody)
 {
 	(void)pBody;
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_RTR, mRealTimeRatio);
+	v_set(Cure::GetSettings(), RTVAR_PHYSICS_RTR, mRealTimeRatio);
 	((GameServerManager*)GetManager()->GetGameManager())->BroadcastStatusMessage(
 		Cure::MessageStatus::INFO_COMMAND,
 		wstrutil::Encode(mClientStartCommand));
@@ -57,7 +58,7 @@ void BulletTime::DidTrigger(Cure::ContextObject* pBody)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, BulletTime);
+loginstance(GAME_CONTEXT_CPP, BulletTime);
 
 
 

@@ -6,10 +6,18 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Socket.h"
-#include "../../Lepra/Include/Thread.h"
+#include "../../Lepra/Include/Lock.h"
+#include "../../Lepra/Include/SocketAddress.h"
 #include "Packet.h"
 #include "RemoteStatus.h"
+
+
+
+namespace Lepra
+{
+class UdpVSocket;
+class UdpMuxSocket;
+}
 
 
 
@@ -65,7 +73,7 @@ protected:
 	PacketFactory* mPacketFactory;
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

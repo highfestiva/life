@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "UiTBC.h"
-#include "../../TBC/Include/GeometryBase.h"
+#include "UiTbc.h"
+#include "../../Tbc/Include/GeometryBase.h"
 #include "../../Lepra/Include/Transformation.h"
 
 
@@ -17,19 +17,19 @@ namespace UiTbc
 
 
 
-class ShadowVolume: public TBC::GeometryBase
+class ShadowVolume: public Tbc::GeometryBase
 {
 public:
-	ShadowVolume(TBC::GeometryBase* pParentGeometry);
+	ShadowVolume(Tbc::GeometryBase* pParentGeometry);
 	virtual ~ShadowVolume();
 
-	void UpdateShadowVolume(const Vector3DF& pLightPos, float pLightRadius, bool pDirectional);
+	void UpdateShadowVolume(const vec3& pLightPos, float pLightRadius, bool pDirectional);
 
-	TBC::GeometryBase* GetParentGeometry();
-	void SetParentGeometry(TBC::GeometryBase* pParentGeometry);
+	Tbc::GeometryBase* GetParentGeometry();
+	void SetParentGeometry(Tbc::GeometryBase* pParentGeometry);
 
-	TBC::GeometryBase::GeometryVolatility GetGeometryVolatility() const;
-	void SetGeometryVolatility(TBC::GeometryBase::GeometryVolatility pVolatility);
+	Tbc::GeometryBase::GeometryVolatility GetGeometryVolatility() const;
+	void SetGeometryVolatility(Tbc::GeometryBase::GeometryVolatility pVolatility);
 
 	unsigned int GetMaxVertexCount()  const;
 	unsigned int GetMaxIndexCount() const;
@@ -71,10 +71,10 @@ private:
 	unsigned int mParentVertexCount;
 	unsigned int mMaxTriangleCount;
 
-	QuaternionF mPreviousOrientation;
+	quat mPreviousOrientation;
 
 	// The geometry that cast this shadow.
-	TBC::GeometryBase* mParentGeometry;
+	Tbc::GeometryBase* mParentGeometry;
 };
 
 

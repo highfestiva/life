@@ -5,6 +5,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../Include/Log.h"
 #include "../Include/String.h"

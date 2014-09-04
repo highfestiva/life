@@ -1,0 +1,20 @@
+Vector3DF -> vec3
+Init physics and mesh from memory. No resource sharing for those two! Might create resources for gfx card uploading and easy tracking?
+Event callbacks: ticks and timers. Implement new class! Allow callbacks to any instance, not just game objects.
+Move game state handling from game manager to other classes: logo renderer, menu renderer, game, preview, explanation...
+
+Network:
+Move hardcoded messages into separate classes. Use factories instead of enums.
+Move distributed 2D MMO logic into separate classes.
+Create tests for the logic in these classes!
+Create separate UI master & server applications to test these with an overview. For instance run one master, two servers, two clients...
+Servers must regularly report load to master, so it can make intelligent suggestions about movement.
+Master makes optimal server moves based on load info from servers. It also makes sure that all server areas are as convex as possible.
+Master must be able to inform servers about patch movement, and servers must be able to inform clients about patch movement.
+Make master server connection API an interface. Rename current API "distinct", create a new one called "massively distributed".
+Move the "DB" interface and login function from server to master. Make the code handling this into two separate parts: Distinct and MassivelyDistributed. Create a MassivelyDistributedMasterServer application.
+Make client handle several simultaneous server connections, and only send positions to those in close (upcoming) range. Clients send "disconnect" message to servers when they leave (far from boundaries).
+Client must know server boundaries, and ask master for upcoming servers' boundaries when getting close to border.
+Servers *mostly* hold objects in own area, but destroy objects for clients that haven't answered anything in a long while.
+Both server and client must be able to ask and inform one another about positional info, classes (i.e. materials, xforms, tags for sounds, etc.), meshes and physics.
+When servers move, they must tell clients to ask for patch ownership updates from master.

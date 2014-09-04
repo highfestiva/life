@@ -45,7 +45,7 @@ public:
 
 private:
 	UiConsole* mUiConsole;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

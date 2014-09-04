@@ -1,6 +1,7 @@
 // Author: Jonas Byström
 // Copyright (c) 2002-2006, Righteous Games
 
+#include "pch.h"
 #include "stdafx.h"
 #include "../../Lepra/Include/Application.h"
 #include "../../Lepra/Include/Log.h"
@@ -32,7 +33,7 @@ UiTbcTestApplication::UiTbcTestApplication(const Lepra::ArgumentList& pArgumentL
 
 int UiTbcTestApplication::Run()
 {
-	UiTBC::Init();
+	UiTbc::Init();
 
 	// Run this to get the main thread running on one CPU only. Otherwise
 	// time measurement gets screwed up when switching between cores; system CPUs
@@ -62,15 +63,15 @@ int UiTbcTestApplication::Run()
 	}
 	if (lTestOk)
 	{
-		lPerformanceLogger.LogListener::OnLogMessage(_T("TBC"), _T("\n\n---\n"), Lepra::Log::LOG_PERFORMANCE);
+		lPerformanceLogger.LogListener::OnLogMessage(_T("Tbc"), _T("\n\n---\n"), Lepra::Log::LOG_PERFORMANCE);
 		Lepra::Thread::Sleep(1.0);
-		lTestOk = TestUiTbc(_T("  TBC"));
-		Lepra::Log::OutPerformanceNode(_T("TBC"));
+		lTestOk = TestUiTbc(_T("  Tbc"));
+		Lepra::Log::OutPerformanceNode(_T("Tbc"));
 		Lepra::PerformanceScope::Clear();
 	}
-	ShowTestResult(_T("  TBC"), lTestOk);
+	ShowTestResult(_T("  Tbc"), lTestOk);
 
-	Lepra::Log::OutPerformanceNode(_T("TBCTestApp"));
+	Lepra::Log::OutPerformanceNode(_T("TbcTestApp"));
 	//lMemLogger.DumpToFile(_TEXT_ALTERNATIVE("Temp.log", L"TempUnicode.log"));
 
 	return (0);

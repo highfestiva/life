@@ -4,10 +4,11 @@
 
 
 
+#include "pch.h"
 #include "LauncherAi.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Lepra/Include/Random.h"
-#include "../TBC/Include/PhysicsEngine.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "Ctf.h"
 #include "Cutie.h"
 #include "Game.h"
@@ -48,12 +49,12 @@ void LauncherAi::OnTick()
 		return;
 	}
 
-	Vector3DF lTargetPosition = mGame->GetCutie()->GetPosition();
-	Vector3DF lTargetVelocity = (mGame->GetCutie()->GetVelocity() +
+	vec3 lTargetPosition = mGame->GetCutie()->GetPosition();
+	vec3 lTargetVelocity = (mGame->GetCutie()->GetVelocity() +
 		mGame->GetCutie()->GetAcceleration() * 7) * 1.1f;
 	const float lTargetSpeed = lTargetVelocity.GetLength();
-	const Vector3DF lCtfPosition = mGame->GetCtf()->GetPosition();
-	Vector3DF lDirection = lCtfPosition-lTargetPosition;
+	const vec3 lCtfPosition = mGame->GetCtf()->GetPosition();
+	vec3 lDirection = lCtfPosition-lTargetPosition;
 	const float lCtfDistance = lDirection.GetLength();
 	lDirection /= lCtfDistance;
 	const bool lHeadingTowardsCtf = (lDirection.Dot(lTargetVelocity/lTargetSpeed) > 0.8f);
@@ -178,8 +179,8 @@ void LauncherAi::OnTick()
 				{
 					// Guess direction depending on steering.
 					const float lAngle = mGame->GetCutie()->GetPhysics()->GetEngine(1)->GetValue();
-					Vector3DF lDirection = mGame->GetCutie()->GetForwardDirection();
-					QuaternionF lRotation(lAngle*-0.5f, Vector3DF(0, 0, 1));
+					vec3 lDirection = mGame->GetCutie()->GetForwardDirection();
+					quat lRotation(lAngle*-0.5f, vec3(0, 0, 1));
 					lDirection = lRotation * lDirection;
 					lDirection.z = 0;
 					const float lAdjustedTargetSpeed = (lTargetSpeed > 10)? 10 : lTargetSpeed;
@@ -212,7 +213,7 @@ void LauncherAi::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, LauncherAi);
+loginstance(GAME_CONTEXT_CPP, LauncherAi);
 
 
 

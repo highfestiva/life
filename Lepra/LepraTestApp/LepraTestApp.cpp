@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Application.h"
 #include "../Include/Log.h"
 #include "../Include/LogListener.h"

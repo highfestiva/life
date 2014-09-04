@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiMusicPlayer.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Random.h"
@@ -192,7 +193,7 @@ void MusicPlayer::KillSong()
 }
 
 
-LOG_CLASS_DEFINE(GAME, MusicPlayer);
+loginstance(GAME, MusicPlayer);
 
 
 

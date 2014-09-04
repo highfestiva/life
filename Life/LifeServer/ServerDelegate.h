@@ -54,7 +54,7 @@ public:
 protected:
 	GameServerManager* mGameServerManager;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "Ctf.h"
 #include "../Cure/Include/CppContextObject.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
-#include "../TBC/Include/PhysicsTrigger.h"
+#include "../Tbc/Include/PhysicsTrigger.h"
 #include "../UiCure/Include/UiCppContextObject.h"
 
 
@@ -37,9 +38,9 @@ Ctf::~Ctf()
 
 
 
-Vector3DF Ctf::GetPosition() const
+vec3 Ctf::GetPosition() const
 {
-	const TBC::ChunkyBoneGeometry* lCutieGoal = mTrigger->GetTriggerGeometry(0);
+	const Tbc::ChunkyBoneGeometry* lCutieGoal = mTrigger->GetTriggerGeometry(0);
 	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lCutieGoal->GetTriggerId());
 }
 
@@ -55,11 +56,11 @@ void Ctf::StartSlideDown()
 }
 
 
-void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
+void Ctf::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
 {
 	mTrigger = pTrigger;
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
-	const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
+	const Tbc::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
 	deb_assert(lTag && lTag->mMeshIndexList.size() == 2);
 	if (lTag && lTag->mMeshIndexList.size() == 2)
 	{
@@ -81,9 +82,9 @@ void Ctf::OnTick()
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
 	if (!mFlagMesh || !mBlinkMesh)
 	{
-		const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
-		mFlagMesh = (TBC::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[0]);
-		mBlinkMesh = (TBC::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[1]);
+		const Tbc::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
+		mFlagMesh = (Tbc::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[0]);
+		mBlinkMesh = (Tbc::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[1]);
 		if (!mFlagMesh || !mBlinkMesh)
 		{
 			return;
@@ -112,7 +113,7 @@ void Ctf::OnTick()
 			}
 		}
 		float lRealTimeRatio;
-		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		lFactor *= lRealTimeRatio;
 		mFlagMesh->AddOffset(mCatchingFlagVelocity * lFactor);
 		if ((mFlagTop - mFlagMesh->GetOffsetTransformation().GetPosition()).Dot(mCatchingFlagVelocity) <= 0)
@@ -145,7 +146,7 @@ void Ctf::OnTick()
 	mTriggerTimer.UpdateTimer();
 }
 
-void Ctf::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void Ctf::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pOtherObject;
@@ -162,7 +163,7 @@ void Ctf::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pO
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Ctf);
+loginstance(GAME_CONTEXT_CPP, Ctf);
 
 
 

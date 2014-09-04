@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "SimulatorDriver.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
@@ -58,7 +59,7 @@ void SimulatorDriver::OnAlarm(int pAlarmId, void* pExtraData)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, SimulatorDriver);
+loginstance(GAME_CONTEXT_CPP, SimulatorDriver);
 
 
 

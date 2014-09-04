@@ -6,6 +6,7 @@
 
 
 
+#include "pch.h"
 #include <memory.h>
 #include "../Include/SHA1.h"
 

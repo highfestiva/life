@@ -4,8 +4,7 @@
 
 
 
-#define INT32 a_workaround_that_undefines_INT32_typedef
-#define LEPRA_INCLUDE_NO_OS
+#include "pch.h"
 #include "../Include/UiTEXLoader.h"
 #include "../../ThirdParty/jpeg-6b/jinclude.h"
 #include "../../ThirdParty/jpeg-6b/jpeglib.h"
@@ -16,9 +15,7 @@
 #include "../../Lepra/Include/MetaFile.h"
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../Include/UiTexture.h"
-#include "../Include/UiTBC.h"
-#undef LEPRA_INCLUDE_NO_OS
-#undef INT32
+#include "../Include/UiTbc.h"
 
 
 

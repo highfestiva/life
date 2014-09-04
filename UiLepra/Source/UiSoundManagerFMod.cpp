@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiSoundManagerFMod.h"
 
 #if !defined(LEPRA_WITHOUT_FMOD)
@@ -434,7 +435,7 @@ SoundManager::SoundID SoundManagerFMod::LoadSound(const str& pFileName, const vo
 	return lSample->mID;
 }
 
-void SoundManagerFMod::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
+void SoundManagerFMod::DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel)
 {
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
@@ -473,7 +474,7 @@ int SoundManagerFMod::GetChannel(SoundInstanceID pSoundIID)
 
 
 
-LOG_CLASS_DEFINE(UI_SOUND, SoundManagerFMod);
+loginstance(UI_SOUND, SoundManagerFMod);
 
 
 

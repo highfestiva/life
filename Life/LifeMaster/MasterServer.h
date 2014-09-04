@@ -9,6 +9,7 @@
 #include "../../Lepra/Include/Unordered.h"
 #include <set>
 #include "../../Cure/Include/GameTicker.h"
+#include "../../Lepra/Include/Lock.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../Life.h"
@@ -84,7 +85,7 @@ private:
 	Timer mKeepaliveTimer;
 	Timer mServerIdleTimer;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

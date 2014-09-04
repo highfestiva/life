@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <typeinfo>
-#include <vector>
 #include "LepraTypes.h"
 #include "LogLevel.h"
 #include "LogType.h"
@@ -22,44 +20,14 @@ namespace Lepra
 
 
 
-class LogListener;
-class SpinLock;
-
-
-
-class Log
-{
-public:
-	Log(const str& pName, Log* pParent, LogLevel pLevel = LEVEL_INFO);
-	virtual ~Log();
-	void SetupBasicListeners(LogListener* pConsole = 0, LogListener* pDebug = 0,
-		LogListener* pFile = 0, LogListener* pPerformance = 0, LogListener* pMem = 0);
-	void AddListener(LogListener* pLogger, LogLevel pLevel);
-	void RemoveListener(LogListener* pLogger);
-	LogListener* GetListener(const str& pName) const;
-	const str& GetName() const;
-	LogLevel GetLevelThreashold() const;
-	void SetLevelThreashold(LogLevel pLevel);
-	void Print(const str& pAccount, const str& pMessage, LogLevel pLevel = LEVEL_INFO);
-	void RawPrint(const str& pMessage, LogLevel pLevel = LEVEL_INFO);
-
-private:
-	void DoPrint(const Log* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel = LEVEL_INFO);
-	void DoRawPrint(const str& pMessage, LogLevel pLevel = LEVEL_INFO);
-
-	str mName;
-	Log* mParent;
-	std::vector<LogListener*> mLoggerList[LEVEL_TYPE_COUNT];
-	SpinLock* mLoggerListLock;
-	LogLevel mLevel;
-};
+class Logger;
 
 
 
 class LogDecorator
 {
 public:
-	LogDecorator(Log* pLog, const std::type_info& pTypeId);
+	LogDecorator(Logger* pLog, const std::type_info& pTypeId);
 
 	void Print(LogLevel pLogLevel, const str& pText) const;
 	void RawPrint(LogLevel pLogLevel, const str& pText) const;
@@ -85,7 +53,7 @@ public:
 	const str& GetClassName() const;
 
 private:
-	Log* mLog;
+	Logger* mLogger;
 	str mClassName;
 };
 
@@ -109,10 +77,10 @@ private:
 #define log_performance(what)	log_volatile(mLog.Performance(what))
 
 #define LOG_CLASS_DECLARE_NAME(name)		private: static Lepra::LogDecorator name
-#define LOG_CLASS_DECLARE()			LOG_CLASS_DECLARE_NAME(mLog)
+#define logclass()				LOG_CLASS_DECLARE_NAME(mLog)
 #define LOG_CLASS_DEFINE_NAME(Class, to, name)	Lepra::LogDecorator Class::name(to, typeid(Class))
 #define LOG_CLASS_DEFINE_TO(Class, to)		LOG_CLASS_DEFINE_NAME(Class, to, mLog)
-#define LOG_CLASS_DEFINE(subsystem, Class)	LOG_CLASS_DEFINE_TO(Class, Lepra::LogType::GetLog(Lepra::LogType::SUB_ ## subsystem))
+#define loginstance(subsystem, Class)		LOG_CLASS_DEFINE_TO(Class, Lepra::LogType::GetLogger(Lepra::LogType::SUB_ ## subsystem))
 
 
 

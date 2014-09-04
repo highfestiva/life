@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "GameServerManager.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/CppContextObject.h"
@@ -14,9 +15,9 @@
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsEngine.h"
-#include "../../TBC/Include/PhysicsSpawner.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/PhysicsSpawner.h"
 #include "../LifeMaster/MasterServer.h"
 #include "../LifeApplication.h"
 #include "../LifeString.h"
@@ -52,11 +53,11 @@ GameServerManager::GameServerManager(const Cure::TimeManager* pTime,
 	mPhysicsRtrShadow(1),
 	mPhysicsHaltShadow(false)
 {
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my server! Enjoy the ride!\""));
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERNAME, strutil::Format(_("%s's server"), SystemManager::GetLoginName().c_str()));
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_PUBLISHSERVER, false);	// Make it overridable and possible to change between dedicated/local by using Cure::GetSettings().
+	v_set(GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
+	v_set(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
+	v_set(GetVariableScope(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my server! Enjoy the ride!\""));
+	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERNAME, strutil::Format(_("%s's server"), SystemManager::GetLoginName().c_str()));
+	v_set(Cure::GetSettings(), RTVAR_NETWORK_PUBLISHSERVER, false);	// Make it overridable and possible to change between dedicated/local by using Cure::GetSettings().
 
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 }
@@ -114,7 +115,7 @@ bool GameServerManager::BeginTick()
 			continue;
 		}
 		if (lObject->IsAttributeTrue(_T("float_childishness")) ||
-			lObject->GetGuideMode() == TBC::ChunkyPhysics::GUIDE_ALWAYS)
+			lObject->GetGuideMode() == Tbc::ChunkyPhysics::GUIDE_ALWAYS)
 		{
 			lObject->StabilizeTick();
 		}
@@ -237,7 +238,7 @@ float GameServerManager::GetPowerSaveAmount() const
 
 
 #ifdef LEPRA_DEBUG
-TBC::PhysicsManager* GameServerManager::GetPhysicsManager() const
+Tbc::PhysicsManager* GameServerManager::GetPhysicsManager() const
 {
 	deb_assert(!GetNetworkAgent()->GetLock()->IsOwner() ||
 		(GetNetworkAgent()->GetLock()->IsOwner() && GetTickLock()->IsOwner()));
@@ -359,7 +360,7 @@ wstrutil::strvec GameServerManager::ListUsers()
 			Cure::ContextObject* lObject = GetContext()->GetObject(lClient->GetAvatarId());
 			if (lObject)
 			{
-				Vector3DF lPosition = lObject->GetPosition();
+				vec3 lPosition = lObject->GetPosition();
 				lUserInfo += wstrutil::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
 			}
 			else
@@ -408,7 +409,7 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 
 		if (pCreate)	// Store creation info?
 		{
-			TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
+			xform lTransformation(lObject->GetOrientation(), lObject->GetPosition());
 			if (lObject->GetOwnerInstanceId() != 0)
 			{
 				lPacket->AddMessage(lCreateOwnedMessage);
@@ -445,7 +446,7 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-void GameServerManager::BroadcastCreateObject(Cure::GameObjectId pInstanceId, const TransformationF& pTransform, const str& pClassId, Cure::GameObjectId pOwnerInstanceId)
+void GameServerManager::BroadcastCreateObject(Cure::GameObjectId pInstanceId, const xform& pTransform, const str& pClassId, Cure::GameObjectId pOwnerInstanceId)
 {
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	if (pOwnerInstanceId)
@@ -542,14 +543,14 @@ bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr&
 	return (lOk);
 }
 
-void GameServerManager::IndicatePosition(const Vector3DF pPosition, float pTime)
+void GameServerManager::IndicatePosition(const vec3 pPosition, float pTime)
 {
 	if (pTime <= 0)
 	{
 		return;
 	}
 	Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	lObject->SetInitialTransform(TransformationF(gIdentityQuaternionF, pPosition));
+	lObject->SetInitialTransform(xform(gIdentityQuaternionF, pPosition));
 	lObject->StartLoading();
 	DeleteContextObjectDelay(lObject, pTime);
 }
@@ -623,10 +624,10 @@ void GameServerManager::Build(const str& pWhat)
 		Cure::ContextObject* lObject = GetContext()->GetObject(lClient->GetAvatarId());
 		if (lObject)
 		{
-			Vector3DF lPosition = lObject->GetPosition() + Vector3DF(10, 0, 0);
+			vec3 lPosition = lObject->GetPosition() + vec3(10, 0, 0);
 			mLog.Info(_T("Building object '")+pWhat+_T("' near user ")+strutil::Encode(lClient->GetUserConnection()->GetLoginName())+_T("."));
 			Cure::ContextObject* lObject = Parent::CreateContextObject(pWhat, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-			lObject->SetInitialTransform(TransformationF(gIdentityQuaternionF, lPosition));
+			lObject->SetInitialTransform(xform(gIdentityQuaternionF, lPosition));
 			lObject->StartLoading();
 		}
 	}
@@ -754,7 +755,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 		mAccountClientTable.Insert(pUserConnection->GetAccountId(), lClient);
 		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrameAddFrames(2), lPacket);	// TODO: adjust physics frame diff by ping-ponging some.
 		str lServerGreeting;
-		CURE_RTVAR_GET(lServerGreeting, =, GetVariableScope(), RTVAR_NETWORK_LOGINGREETING, _T(""));
+		v_get(lServerGreeting, =, GetVariableScope(), RTVAR_NETWORK_LOGINGREETING, _T(""));
 		lClient->SendLoginCommands(lPacket, lServerGreeting);
 
 		for (AvatarIdSet::const_iterator x = lAvatarIdSet->begin(); x != lAvatarIdSet->end(); ++x)
@@ -915,7 +916,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mLog.Infof(_T("Loaded avatar for %s with instance id %i."),
 					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
 					pObject->GetInstanceId());
-				/*const QuaternionF q = pObject->GetOrientation();
+				/*const quat q = pObject->GetOrientation();
 				mLog.Infof(_T("Avatar %s/%i has q=(%f, %f, %f, %f)."),
 					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
 					pObject->GetInstanceId(),
@@ -949,9 +950,9 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+void GameServerManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
+	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
 {
 	ScopeLock lLock(GetTickLock());
 
@@ -959,12 +960,12 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	(void)pBody1Id;
 	(void)pBody2Id;
 
-	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
-	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
+	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
 	const bool lBothAreDynamic = (lObject1Dynamic && lObject2Dynamic);
 	if (!lBothAreDynamic)
 	{
-		if (lObject1Dynamic && pObject1->GetPhysics()->GetGuideMode() >= TBC::ChunkyPhysics::GUIDE_EXTERNAL)
+		if (lObject1Dynamic && pObject1->GetPhysics()->GetGuideMode() >= Tbc::ChunkyPhysics::GUIDE_EXTERNAL)
 		{
 			FlipCheck(pObject1);
 		}
@@ -1014,14 +1015,14 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 {
 	bool lAutoFlipEnabled;
-	CURE_RTVAR_GET(lAutoFlipEnabled, =, GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
+	v_get(lAutoFlipEnabled, =, GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
 	if (!lAutoFlipEnabled)
 	{
 		return;
 	}
 
 	// Check if we've landed on our side.
-	Vector3DF lUp(0, 0, 1);
+	vec3 lUp(0, 0, 1);
 	lUp = pObject->GetOrientation() * lUp;
 	if (lUp.z > 0.2f ||
 		pObject->GetVelocity().GetLengthSquared() > 1*1 ||
@@ -1051,9 +1052,9 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 		Cure::ObjectPositionalData lPositionData;
 		lPositionData.CopyData(lOriginalPositionData);
 		lPositionData.Stop();
-		TransformationF& lTransform = lPositionData.mPosition.mTransformation;
-		lTransform.SetPosition(pObject->GetPosition() + Vector3DF(0, 0, 5));
-		Vector3DF lEulerAngles;
+		xform& lTransform = lPositionData.mPosition.mTransformation;
+		lTransform.SetPosition(pObject->GetPosition() + vec3(0, 0, 5));
+		vec3 lEulerAngles;
 		pObject->GetOrientation().GetEulerAngles(lEulerAngles);
 		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
 		lTransform.GetOrientation() *= pObject->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
@@ -1075,7 +1076,7 @@ bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 
 	bool lLastSend = false;
 	float lSendIntervalLimit;
-	CURE_RTVAR_GET(lSendIntervalLimit, =(float), GetVariableScope(), RTVAR_NETPHYS_POSSENDINTERVALLIMIT, 0.5);
+	v_get(lSendIntervalLimit, =(float), GetVariableScope(), RTVAR_NETPHYS_POSSENDINTERVALLIMIT, 0.5);
 	if (pObject->QueryResendTime(lSendIntervalLimit, false))
 	{
 		lLastSend = true;
@@ -1202,7 +1203,7 @@ void GameServerManager::HandleWorldBoundaries()
 		Cure::ContextObject* lObject = x->second;
 		if (lObject->IsLoaded() && lObject->GetPhysics())
 		{
-			const Vector3DF lPosition = lObject->GetPosition();
+			const vec3 lPosition = lObject->GetPosition();
 			if (!Math::IsInRange(lPosition.x, -2000.0f, +2000.0f) ||
 				!Math::IsInRange(lPosition.y, -2000.0f, +2000.0f) ||
 				!Math::IsInRange(lPosition.z, -1000.0f, +800.0f))
@@ -1255,11 +1256,11 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	}
 
 	bool lIsEngineControlled = false;
-	TransformationF lTransform;
+	xform lTransform;
 	if (pObject->GetPhysics())
 	{
-		TBC::ChunkyBoneGeometry* lStructureGeometry = pObject->GetPhysics()->GetBoneGeometry(pObject->GetPhysics()->GetRootBone());
-		TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
+		Tbc::ChunkyBoneGeometry* lStructureGeometry = pObject->GetPhysics()->GetBoneGeometry(pObject->GetPhysics()->GetRootBone());
+		Tbc::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
 		if (!lBody)
 		{
 			lBody = lStructureGeometry->GetTriggerId();
@@ -1313,9 +1314,9 @@ void GameServerManager::BroadcastPacket(const Client* pExcludeClient, Cure::Pack
 void GameServerManager::TickMasterServer()
 {
 	bool lIsOpenServer;
-	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+	v_get(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
 	bool lPublishServer;
-	CURE_RTVAR_GET(lPublishServer, =, GetVariableScope(), RTVAR_NETWORK_PUBLISHSERVER, false);
+	v_get(lPublishServer, =, GetVariableScope(), RTVAR_NETWORK_PUBLISHSERVER, false);
 	if (!mMasterConnection || !lIsOpenServer || !lPublishServer)
 	{
 		return;
@@ -1336,14 +1337,14 @@ void GameServerManager::TickMasterServer()
 	}
 
 	str lServerName;
-	CURE_RTVAR_GET(lServerName, =, GetVariableScope(), RTVAR_NETWORK_SERVERNAME, _T("?"));
+	v_get(lServerName, =, GetVariableScope(), RTVAR_NETWORK_SERVERNAME, _T("?"));
 	const str lPlayerCount = strutil::IntToString(GetLoggedInClientCount(), 10);
 	const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
 	const str lLocalServerInfo = _T("--name \"") + lServerName + _T("\" --player-count ") + lPlayerCount
 		+ _T(" --id \"") + lId + _T("\" --internal-address ") + lLocalIpAddress +
 		_T(" --internal-port ") + strutil::IntToString(GetNetworkServer()->GetLocalAddress().GetPort(), 10);
 	float lConnectTimeout;
-	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+	v_get(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	mMasterConnection->SetSocketInfo(GetNetworkServer(), lConnectTimeout);
 	mMasterConnection->SendLocalInfo(lLocalServerInfo);
 
@@ -1380,7 +1381,7 @@ void GameServerManager::MonitorRtvars()
 {
 	{
 		int lPhysicsFps;
-		CURE_RTVAR_GET(lPhysicsFps, =, GetVariableScope(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+		v_get(lPhysicsFps, =, GetVariableScope(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 		if (lPhysicsFps != mPhysicsFpsShadow)
 		{
 			mPhysicsFpsShadow = lPhysicsFps;
@@ -1390,7 +1391,7 @@ void GameServerManager::MonitorRtvars()
 	}
 	{
 		float lPhysicsRtr;
-		CURE_RTVAR_GET(lPhysicsRtr, =(float), GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
+		v_get(lPhysicsRtr, =(float), GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
 		if (!Math::IsEpsEqual(mPhysicsRtrShadow, lPhysicsRtr, 0.01f))
 		{
 			mPhysicsRtrShadow = lPhysicsRtr;
@@ -1400,7 +1401,7 @@ void GameServerManager::MonitorRtvars()
 	}
 	{
 		bool lPhysicsHalt;
-		CURE_RTVAR_GET(lPhysicsHalt, =, GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+		v_get(lPhysicsHalt, =, GetVariableScope(), RTVAR_PHYSICS_HALT, false);
 		if (lPhysicsHalt != mPhysicsHaltShadow)
 		{
 			mPhysicsHaltShadow = lPhysicsHalt;
@@ -1412,7 +1413,7 @@ void GameServerManager::MonitorRtvars()
 
 
 
-LOG_CLASS_DEFINE(GAME, GameServerManager);
+loginstance(GAME, GameServerManager);
 
 
 

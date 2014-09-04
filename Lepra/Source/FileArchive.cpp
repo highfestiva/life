@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include <ctype.h>
 #include "../Include/FileArchive.h"
 #include "../Include/ProgressCallback.h"

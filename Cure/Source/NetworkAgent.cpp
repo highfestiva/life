@@ -4,7 +4,9 @@
  
 
 
+#include "pch.h"
 #include "../../Lepra/Include/Network.h"
+#include "../../Lepra/Include/Socket.h"
 #include "../Include/NetworkAgent.h"
 
 
@@ -170,7 +172,7 @@ void NetworkAgent::SetMuxSocket(MuxSocket* pSocket)
 
 
 
-LOG_CLASS_DEFINE(NETWORK, NetworkAgent);
+loginstance(NETWORK, NetworkAgent);
 
 
 

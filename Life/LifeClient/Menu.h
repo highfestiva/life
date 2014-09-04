@@ -7,8 +7,8 @@
 #pragma once
 
 #include "../../UiCure/Include/UiResourceManager.h"
-#include "../../UiTBC/Include/GUI/UiButton.h"
-#include "../../UiTBC/Include/GUI/UiDialog.h"
+#include "../../UiTbc/Include/GUI/UiButton.h"
+#include "../../UiTbc/Include/GUI/UiDialog.h"
 #include "../Life.h"
 
 #define ICONBTN(i,n)		new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)

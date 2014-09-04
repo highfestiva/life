@@ -4,6 +4,7 @@
  
 
 
+#include "pch.h"
 #include "../Include/NetworkServer.h"
 #include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/HashUtil.h"
@@ -509,7 +510,7 @@ void NetworkServer::KillDeadSockets()
 	}
 
 	double lKillInterval;
-	CURE_RTVAR_GET(lKillInterval, =, mVariableScope, RTVAR_NETWORK_KEEPALIVE_KILLINTERVAL, 20.0);
+	v_get(lKillInterval, =, mVariableScope, RTVAR_NETWORK_KEEPALIVE_KILLINTERVAL, 20.0);
 	mKeepaliveTimer.UpdateTimer();
 	if (mKeepaliveTimer.GetTimeDiff() >= lKillInterval)
 	{
@@ -640,7 +641,7 @@ void NetworkServer::KillIoSocket(VIoSocket* pSocket)
 
 
 
-LOG_CLASS_DEFINE(NETWORK_SERVER, NetworkServer);
+loginstance(NETWORK_SERVER, NetworkServer);
 
 
 

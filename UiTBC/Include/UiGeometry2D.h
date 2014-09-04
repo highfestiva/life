@@ -14,7 +14,7 @@
 
 #include "../../Lepra/Include/LepraTypes.h"
 #include "../../Lepra/Include/Vector2D.h"
-#include "UiTBC.h"
+#include "UiTbc.h"
 
 
 
@@ -126,8 +126,8 @@ public:
 	inline int GetVertexCount() const { return mVertexCount; }
 	inline int GetTriangleCount() const { return mTriangleCount; }
 
-	inline const Vector2DF& GetPos() const { return mPos; }
-	inline void SetPos(const Vector2DF& pPos) { mPos = pPos; }
+	inline const vec2& GetPos() const { return mPos; }
+	inline void SetPos(const vec2& pPos) { mPos = pPos; }
 
 	inline bool IsFlagSet(unsigned pFlag) { return ((mVertexFormat & pFlag) != 0); }
 

@@ -43,7 +43,7 @@ protected:
 	bool mIsDetonated;
 	float mExplosiveStrength;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

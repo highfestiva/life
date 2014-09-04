@@ -2,6 +2,7 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
+#include "pch.h"
 #include "Game.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
@@ -9,7 +10,7 @@
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Random.h"
-#include "../TBC/Include/PhysicsEngine.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiProps.h"
@@ -70,17 +71,17 @@ bool Game::Tick()
 
 	GameTicker::GetTimeManager()->Tick();
 
-	Vector3DF lPosition;
-	Vector3DF lVelocity;
+	vec3 lPosition;
+	vec3 lVelocity;
 	mCollisionSoundManager->Tick(lPosition);
-	mUiManager->SetMicrophonePosition(TransformationF(gIdentityQuaternionF, lPosition), lVelocity);
+	mUiManager->SetMicrophonePosition(xform(gIdentityQuaternionF, lPosition), lVelocity);
 
 	return true;
 }
 
 
 
-void Game::SetRacketForce(float pLiftFactor, const Vector3DF& pDown)
+void Game::SetRacketForce(float pLiftFactor, const vec3& pDown)
 {
 	mRacketLiftFactor = (pDown.z > 0)? -pLiftFactor : pLiftFactor;
 	mRacketDownDirection = pDown;
@@ -91,33 +92,33 @@ bool Game::MoveRacket()
 	if (GetRacket() && GetRacket()->IsLoaded() &&
 		GetBall() && GetBall()->IsLoaded())
 	{
-		TransformationF lRacketTransform;
+		xform lRacketTransform;
 		GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyTransform(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lRacketTransform);
-		Vector3DF lRacketLinearVelocity;
+		vec3 lRacketLinearVelocity;
 		GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyVelocity(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lRacketLinearVelocity);
-		Vector3DF lRacketAngularVelocity;
+		vec3 lRacketAngularVelocity;
 		GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyAngularVelocity(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lRacketAngularVelocity);
 
 		// Calculate where ball will be as it passes z = racket z.
-		Vector3DF lBallPosition =
+		vec3 lBallPosition =
 			GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyPosition(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
-		Vector3DF lBallVelocity;
+		vec3 lBallVelocity;
 		GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyVelocity(
 			GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lBallVelocity);
 		if (lBallPosition.z < -2)
 		{
 			lBallPosition.Set(0, 0, 0.4f);
-			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyTransform(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), TransformationF(QuaternionF(), lBallPosition));
+			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyTransform(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), xform(quat(), lBallPosition));
 			lBallVelocity.Set(0, 0, 2.0f);
 			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lBallVelocity);
-			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyAngularVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), Vector3DF());
+			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyAngularVelocity(GetBall()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), vec3());
 			lRacketTransform.SetIdentity();
 			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyTransform(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketTransform);
 			lRacketLinearVelocity.Set(0, 0, 0);
@@ -126,7 +127,7 @@ bool Game::MoveRacket()
 			GameTicker::GetPhysicsManager(IsThreadSafe())->SetBodyAngularVelocity(GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lRacketAngularVelocity);
 			return false;
 		}
-		Vector3DF lHome;
+		vec3 lHome;
 		const float h = lBallPosition.z - lRacketTransform.GetPosition().z;
 		if (h > -0.5f)
 		{
@@ -152,11 +153,11 @@ bool Game::MoveRacket()
 			}
 		}
 		// Set linear force.
-		const Vector3DF lDirectionHome = lHome - lRacketTransform.GetPosition();
+		const vec3 lDirectionHome = lHome - lRacketTransform.GetPosition();
 		float f = lDirectionHome.GetLength();
 		f *= 50;
 		f *= f;
-		Vector3DF lForce = lDirectionHome * f;
+		vec3 lForce = lDirectionHome * f;
 		lForce -= lRacketLinearVelocity * 10;
 		float lUserForceFactor = ::fabs(mRacketLiftFactor) * 1.7f;
 		lUserForceFactor = std::min(1.0f, lUserForceFactor);
@@ -180,10 +181,10 @@ bool Game::MoveRacket()
 		//const float dx = -lRacketTransform.GetPosition().x * lTiltAngleFactor;
 		//const float dy = -lRacketTransform.GetPosition().y * lTiltAngleFactor;
 		mRacketDownDirection.Normalize();
-		const Vector3DF lHomeTorque = Vector3DF(::acos(mRacketDownDirection.y), ::acos(mRacketDownDirection.x), 0);
-		Vector3DF lRacketTorque = lRacketTransform.GetOrientation() * Vector3DF(0,0,1);
-		lRacketTorque = Vector3DF(::acos(lRacketTorque.y), ::acos(lRacketTorque.x), 0);
-		Vector3DF lAngleHome = lHomeTorque - lRacketTorque;
+		const vec3 lHomeTorque = vec3(::acos(mRacketDownDirection.y), ::acos(mRacketDownDirection.x), 0);
+		vec3 lRacketTorque = lRacketTransform.GetOrientation() * vec3(0,0,1);
+		lRacketTorque = vec3(::acos(lRacketTorque.y), ::acos(lRacketTorque.x), 0);
+		vec3 lAngleHome = lHomeTorque - lRacketTorque;
 		lAngleHome.y = -lAngleHome.y;
 		lAngleHome.z = 0;
 		f = Math::Clamp(-lBallVelocity.z, 0.0f, 4.0f) / 4.0f;
@@ -191,7 +192,7 @@ bool Game::MoveRacket()
 		f = lAngleHome.GetLength() * f;
 		f *= f;
 		f = 1;
-		Vector3DF lTorque = lAngleHome * f;
+		vec3 lTorque = lAngleHome * f;
 		lTorque -= lRacketAngularVelocity * 0.2f;
 		//mLog.Infof(_T("torque = (%f, %f, %f)"), lTorque.x, lTorque.y, lTorque.z);
 		GameTicker::GetPhysicsManager(IsThreadSafe())->AddTorque(
@@ -225,9 +226,9 @@ double Game::GetScore() const
 
 bool Game::Render()
 {
-	QuaternionF lOrientation;
+	quat lOrientation;
 	lOrientation.RotateAroundOwnX(-PIF/5);
-	mUiManager->SetCameraPosition(TransformationF(lOrientation, Vector3DF(0, -0.4f, 0.6f)));
+	mUiManager->SetCameraPosition(xform(lOrientation, vec3(0, -0.4f, 0.6f)));
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetWidth(), mUiManager->GetCanvas()->GetHeight());
 	mUiManager->Render(lFullRect);
 	return true;
@@ -267,13 +268,13 @@ void Game::DidPhysicsTick()
 	PostPhysicsTick();
 }
 
-void Game::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void Game::OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pNormal);
 }
 
-void Game::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+void Game::OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	GameManager::OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 }
@@ -286,9 +287,9 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	(void)pOk;
 }
 
-void Game::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+void Game::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
+	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
 {
 	(void)pBody2Id;
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 2000, false);
@@ -351,8 +352,8 @@ bool Game::Initialize()
 	{
 		const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
-			Vector3DF(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 300);
+			UiTbc::Renderer::LIGHT_MOVABLE, vec3(-1, 0.5f, -1.5),
+			vec3(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 300);
 		mUiManager->GetRenderer()->EnableAllLights(true);
 	}
 	return lOk;
@@ -370,7 +371,7 @@ bool Game::InitializeUniverse()
 		deb_assert(lOk);
 		if (lOk)
 		{
-			mRacket->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0)));
+			mRacket->SetInitialTransform(xform(quat(), vec3(0, 0, 0)));
 			mRacket->EnableRootShadow(false);
 			mRacket->StartLoading();
 		}
@@ -384,7 +385,7 @@ bool Game::InitializeUniverse()
 		deb_assert(lOk);
 		if (lOk)
 		{
-			mBall->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(0, 0, 0.4f)));
+			mBall->SetInitialTransform(xform(quat(), vec3(0, 0, 0.4f)));
 			mBall->EnableRootShadow(false);
 			mBall->StartLoading();
 		}
@@ -402,7 +403,7 @@ Cure::ContextObject* Game::CreateLogicHandler(const str& pType)
 
 
 
-LOG_CLASS_DEFINE(GAME, Game);
+loginstance(GAME, Game);
 
 
 

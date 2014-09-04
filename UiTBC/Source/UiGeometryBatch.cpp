@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiGeometryBatch.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/ResourceTracker.h"
@@ -15,7 +16,7 @@ namespace UiTbc
 
 
 
-GeometryBatch::GeometryBatch(TBC::GeometryBase* pGeometry):
+GeometryBatch::GeometryBatch(Tbc::GeometryBase* pGeometry):
 	mVertex(0),
 	mUV(0),
 	mIndex(0),
@@ -26,7 +27,7 @@ GeometryBatch::GeometryBatch(TBC::GeometryBase* pGeometry):
 	mGeometryInstance(pGeometry)
 {
 	LEPRA_ACQUIRE_RESOURCE(GeometryBatch);
-	SetPrimitiveType(TBC::GeometryBase::TRIANGLES);
+	SetPrimitiveType(Tbc::GeometryBase::TRIANGLES);
 	SetBasicMaterialSettings(mGeometryInstance->GetBasicMaterialSettings());
 }
 
@@ -36,7 +37,7 @@ GeometryBatch::~GeometryBatch()
 	LEPRA_RELEASE_RESOURCE(GeometryBatch);
 }
 
-void GeometryBatch::SetInstances(const TransformationF* pDisplacement, const Vector3DF& pRootOffset,
+void GeometryBatch::SetInstances(const xform* pDisplacement, const vec3& pRootOffset,
 	int pNumInstances, uint32 pRandomSeed,
 	float pXScaleMin, float pXScaleMax,
 	float pYScaleMin, float pYScaleMax,
@@ -102,12 +103,12 @@ void GeometryBatch::SetInstances(const TransformationF* pDisplacement, const Vec
 			float lYScale = Random::Uniform(pRandomSeed, pYScaleMin, pYScaleMax);
 			float lZScale = Random::Uniform(pRandomSeed, pZScaleMin, pZScaleMax);
 
-			const TransformationF& lTransform = pDisplacement[i];
+			const xform& lTransform = pDisplacement[i];
 			int lIndex = 0;
 			int lUVIndex2 = 0;
 			for (j = 0; j < lVertexCount; j++)
 			{
-				Vector3DF lPos(
+				vec3 lPos(
 					(lVertex[lIndex + 0] + pRootOffset.x) * lXScale,
 					(lVertex[lIndex + 1] + pRootOffset.y) * lYScale,
 					(lVertex[lIndex + 2] + pRootOffset.z) * lZScale);
@@ -192,14 +193,14 @@ void GeometryBatch::SetGeometryVolatility(GeometryVolatility)
 {
 }
 
-TBC::GeometryBase::GeometryVolatility GeometryBatch::GetGeometryVolatility() const
+Tbc::GeometryBase::GeometryVolatility GeometryBatch::GetGeometryVolatility() const
 {
-	return TBC::GeometryBase::GEOM_STATIC;
+	return Tbc::GeometryBase::GEOM_STATIC;
 }
 
-TBC::GeometryBase::ColorFormat GeometryBatch::GetColorFormat() const
+Tbc::GeometryBase::ColorFormat GeometryBatch::GetColorFormat() const
 {
-	return TBC::GeometryBase::COLOR_RGB;
+	return Tbc::GeometryBase::COLOR_RGB;
 }
 
 unsigned int GeometryBatch::GetMaxVertexCount()  const

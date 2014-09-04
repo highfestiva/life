@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../Lepra/Include/HiResTimer.h"
-#include "../UiTBC/Include/UiRenderer.h"
+#include "../UiTbc/Include/UiRenderer.h"
 #include "HoverTank.h"
 
 
@@ -31,17 +31,17 @@ public:
 	virtual ~Sunlight();
 
 	void Tick(float pFactor);
-	const Vector3DF& GetDirection() const;
-	void AddSunColor(Vector3DF& pBaseColor, float pFactor) const;
+	const vec3& GetDirection() const;
+	void AddSunColor(vec3& pBaseColor, float pFactor) const;
 	float GetTimeOfDay() const;	// Value from 0->1. 0 is 9 am.
 
-	void SetDirection(const Vector3DF& pDirection);
-	void SetColor(const Vector3DF& pColor);
+	void SetDirection(const vec3& pDirection);
+	void SetColor(const vec3& pColor);
 
 private:
 	UiCure::GameUiManager* mUiManager;
 	UiTbc::Renderer::LightID mLightId;
-	Vector3DF mCamSunDirection;
+	vec3 mCamSunDirection;
 	HiResTimer mTime;
 	float mAngle;
 };

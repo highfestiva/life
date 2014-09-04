@@ -42,7 +42,7 @@ private:
 	Cure::GameObjectId mAvatarId;
 	HiResTimer mShootWait;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

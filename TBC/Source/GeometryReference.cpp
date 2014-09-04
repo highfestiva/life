@@ -4,13 +4,14 @@
 
 
 
+#include "pch.h"
 #include "../Include/GeometryReference.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ResourceTracker.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -37,40 +38,40 @@ bool GeometryReference::IsGeometryReference()
 	return true;
 }
 
-const TransformationF& GeometryReference::GetOffsetTransformation() const
+const xform& GeometryReference::GetOffsetTransformation() const
 {
 	return mOriginalOffset;
 }
 
-void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)
+void GeometryReference::SetOffsetTransformation(const xform& pOffset)
 {
 	mOriginalOffset = pOffset;
 	SetTransformationChanged(true);
 }
 
-void GeometryReference::AddOffset(const Vector3DF& pOffset)
+void GeometryReference::AddOffset(const vec3& pOffset)
 {
 	mOriginalOffset.GetPosition() += pOffset;
 	SetTransformationChanged(true);
 }
 
-const TransformationF& GeometryReference::GetExtraOffsetTransformation() const
+const xform& GeometryReference::GetExtraOffsetTransformation() const
 {
 	return mExtraOffset;
 }
 
-void GeometryReference::SetExtraOffsetTransformation(const TransformationF& pOffset)
+void GeometryReference::SetExtraOffsetTransformation(const xform& pOffset)
 {
 	mExtraOffset = pOffset;
 	SetTransformationChanged(true);
 }
 
-const TransformationF& GeometryReference::GetTransformation()
+const xform& GeometryReference::GetTransformation()
 {
 	if (!CheckFlag(REF_TRANSFORMATION_CHANGED))
 	{
 /*#ifdef LEPRA_DEBUG
-		TransformationF lReturnTransformation = GetBaseTransformation();
+		xform lReturnTransformation = GetBaseTransformation();
 		lReturnTransformation.GetPosition() += lReturnTransformation.GetOrientation() * mOriginalOffset.GetPosition();
 		lReturnTransformation.GetOrientation() *= mOriginalOffset.GetOrientation();
 		deb_assert(lReturnTransformation == mReturnTransformation);
@@ -80,7 +81,7 @@ const TransformationF& GeometryReference::GetTransformation()
 	ClearFlag(REF_TRANSFORMATION_CHANGED);
 
 	mReturnTransformation = GetBaseTransformation();
-	Vector3DF lDelta;
+	vec3 lDelta;
 	mReturnTransformation.GetOrientation().FastRotatedVector(
 		mReturnTransformation.GetOrientation().GetConjugate(),
 		lDelta,

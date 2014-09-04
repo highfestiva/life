@@ -53,7 +53,7 @@ pRecElement MacInputElement::GetNativeElement() const
 	return (mElement);
 }
 
-LOG_CLASS_DEFINE(UI_INPUT, MacInputElement);
+loginstance(UI_INPUT, MacInputElement);
 
 
 
@@ -243,7 +243,7 @@ void MacInputDevice::EnumElements()
 
 
 
-LOG_CLASS_DEFINE(UI_INPUT, MacInputDevice);
+loginstance(UI_INPUT, MacInputDevice);
 
 
 
@@ -733,7 +733,7 @@ void MacInputManager::RemoveObserver()
 	}
 }
 
-LOG_CLASS_DEFINE(UI_INPUT, MacInputManager);
+loginstance(UI_INPUT, MacInputManager);
 
 
 

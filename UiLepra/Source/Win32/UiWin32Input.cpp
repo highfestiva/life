@@ -5,6 +5,8 @@
 
 
 
+#include "pch.h"
+#include "../../../Lepra/Include/LepraOS.h"
 #include "../../Include/Win32/UiWin32Input.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../Include/Win32/UiWin32Core.h"
@@ -42,7 +44,7 @@ Win32InputElement::~Win32InputElement()
 {
 }
 
-LOG_CLASS_DEFINE(UI_INPUT, Win32InputElement);
+loginstance(UI_INPUT, Win32InputElement);
 
 
 
@@ -303,7 +305,7 @@ void Win32InputDevice::PollEvents()
 
 
 
-LOG_CLASS_DEFINE(UI_INPUT, Win32InputDevice);
+loginstance(UI_INPUT, Win32InputDevice);
 
 
 

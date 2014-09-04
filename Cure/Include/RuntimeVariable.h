@@ -83,7 +83,7 @@ private:
 	int mDefaultIntValue;
 	double mDefaultRealValue;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -146,11 +146,11 @@ private:
 
 	typedef std::unordered_map<HashedString, RuntimeVariable*> VariableTable;
 	RuntimeVariableScope* mParentScope;
-	mutable Lock mLock;
+	mutable LockBC* mLock;
 	VariableTable mVariableTable;
 	int mOwnerSeed;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -171,26 +171,24 @@ private:
 
 
 
-#define CURE_RTVAR_TOKEN(var, name)				static const HashedString hs_##var(_T(name));
-#define CURE_RTVAR_SLOW_GET(scope, name, def)			(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
-#define CURE_RTVAR_SLOW_TRYGET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
-#define deb_rt(scope, name, def)				CURE_RTVAR_SLOW_TRYGET(scope, name, def)
-#define CURE_RTVAR_GET(var, op, scope, name, def)		CURE_RTVAR_TOKEN(var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, hs_##var, def)
-#define CURE_RTVAR_TRYGET(var, op, scope, name, def)		CURE_RTVAR_TOKEN(t##var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, hs_t##var, def)
-#define CURE_RTVAR_SET(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, _T(name), value)
-#define CURE_RTVAR_SET_IF_NOT_SET(scope, name, value)		CURE_RTVAR_SET(scope, name, CURE_RTVAR_SLOW_TRYGET(scope, name, value))
-#define CURE_RTVAR_SYS_OVERRIDE(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, _T(name), value)
-#define CURE_RTVAR_INTERNAL(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_INTERNAL, _T(name), value)
-#define CURE_RTVAR_BASE_ARITHMETIC(OP_GET, OP_SET, scope, name, type, arith, value, vmin, vmax)	\
-{												\
-	type _new_val;										\
-	OP_GET(_new_val, =, scope, name, vmin) arith value;					\
-	_new_val = std::min(_new_val, vmax);							\
-	_new_val = std::max(_new_val, vmin);							\
-	OP_SET(scope, name, _new_val);								\
+#define v_token(var, name)			static const HashedString hs_##var(_T(name));
+#define v_slowget(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
+#define v_slowtryget(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
+#define v_get(var, op, scope, name, def)	v_token(var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, hs_##var, def)
+#define v_tryget(var, op, scope, name, def)	v_token(t##var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, hs_t##var, def)
+#define v_set(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, _T(name), value)
+#define v_override(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, _T(name), value)
+#define v_internal(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_INTERNAL, _T(name), value)
+#define v_base_arithmetic(OP_GET, OP_SET, scope, name, type, arith, value, vmin, vmax)	\
+{											\
+	type _new_val;									\
+	OP_GET(_new_val, =, scope, name, vmin) arith value;				\
+	_new_val = std::min(_new_val, vmax);						\
+	_new_val = std::max(_new_val, vmin);						\
+	OP_SET(scope, name, _new_val);							\
 }
-#define CURE_RTVAR_ARITHMETIC(scope, name, type, arith, value, min, max)		CURE_RTVAR_BASE_ARITHMETIC(CURE_RTVAR_GET, CURE_RTVAR_SET, scope, name, type, arith, value, min, max)
-#define CURE_RTVAR_INTERNAL_ARITHMETIC(scope, name, type, arith, value, min, max)	CURE_RTVAR_BASE_ARITHMETIC(CURE_RTVAR_TRYGET, CURE_RTVAR_INTERNAL, scope, name, type, arith, value, min, max)
+#define v_arithmetic(scope, name, type, arith, value, min, max)			v_base_arithmetic(v_get, v_set, scope, name, type, arith, value, min, max)
+#define v_internal_arithmetic(scope, name, type, arith, value, min, max)	v_base_arithmetic(v_tryget, v_internal, scope, name, type, arith, value, min, max)
 
 
 

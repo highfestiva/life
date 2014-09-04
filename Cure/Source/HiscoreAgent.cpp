@@ -4,13 +4,14 @@
 
 
 
+#include "pch.h"
 #include "../Include/HiscoreAgent.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include <happyhttp.h>
 #include "../../Lepra/Include/Obfuxator.h"
 #include "../../Lepra/Include/JsonString.h"
 #include "../../Lepra/Include/SHA1.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
 
 
 
@@ -473,7 +474,7 @@ void HiscoreAgent::operator=(const HiscoreAgent&)
 
 
 
-LOG_CLASS_DEFINE(NETWORK_CLIENT, HiscoreAgent);
+loginstance(NETWORK_CLIENT, HiscoreAgent);
 
 
 

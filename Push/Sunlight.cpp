@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Sunlight.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../UiCure/Include/UiGameUiManager.h"
@@ -22,8 +23,8 @@ Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
 {
 	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-		UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(0, 0.5f, -1),
-		Vector3DF(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 60);
+		UiTbc::Renderer::LIGHT_MOVABLE, vec3(0, 0.5f, -1),
+		vec3(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 60);
 }
 
 Sunlight::~Sunlight()
@@ -50,19 +51,19 @@ void Sunlight::Tick(float pFactor)
 	const float r = 1.5f;
 	const float g = r * (sin(mAngle)*0.05f + 0.95f);
 	const float b = r * (sin(mAngle)*0.1f + 0.9f);
-	mUiManager->GetRenderer()->SetLightColor(mLightId, Vector3DF(r, g, b));
+	mUiManager->GetRenderer()->SetLightColor(mLightId, vec3(r, g, b));
 	const double lAmbientFactor = sin(mAngle)*0.5+0.5;
-	CURE_RTVAR_INTERNAL(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTREDFACTOR, lAmbientFactor);
-	CURE_RTVAR_INTERNAL(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTGREENFACTOR, lAmbientFactor);
-	CURE_RTVAR_INTERNAL(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTBLUEFACTOR, lAmbientFactor);
+	v_internal(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTREDFACTOR, lAmbientFactor);
+	v_internal(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTGREENFACTOR, lAmbientFactor);
+	v_internal(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTBLUEFACTOR, lAmbientFactor);
 }
 
-const Vector3DF& Sunlight::GetDirection() const
+const vec3& Sunlight::GetDirection() const
 {
 	return mCamSunDirection;
 }
 
-void Sunlight::AddSunColor(Vector3DF& pBaseColor, float pFactor) const
+void Sunlight::AddSunColor(vec3& pBaseColor, float pFactor) const
 {
 	float lColorCurve = sin(mAngle)*0.3f*pFactor + 1;
 	lColorCurve *= lColorCurve;
@@ -76,7 +77,7 @@ float Sunlight::GetTimeOfDay() const
 	return mAngle / PIF * 2;
 }
 
-void Sunlight::SetDirection(const Vector3DF& pDirection)
+void Sunlight::SetDirection(const vec3& pDirection)
 {
 	if (mUiManager->CanRender())
 	{
@@ -84,7 +85,7 @@ void Sunlight::SetDirection(const Vector3DF& pDirection)
 	}
 }
 
-void Sunlight::SetColor(const Vector3DF& pColor)
+void Sunlight::SetColor(const vec3& pColor)
 {
 	mUiManager->GetRenderer()->SetLightColor(mLightId, pColor);
 }

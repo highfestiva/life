@@ -3,6 +3,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiChibiXmAlStream.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/File.h"
@@ -398,7 +399,7 @@ int ChibiXmAlStream::XmRead(char* pBuffer, int pBufferByteCount)
 
 
 
-LOG_CLASS_DEFINE(UI_SOUND, ChibiXmAlStream);
+loginstance(UI_SOUND, ChibiXmAlStream);
 
 
 

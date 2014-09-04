@@ -3,6 +3,7 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/Cure.h"
 #include "../../Lepra/Include/Application.h"
@@ -12,10 +13,10 @@
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/Quaternion.h"
-#include "../../TBC/Include/TBC.h"
+#include "../../Tbc/Include/Tbc.h"
 #ifndef CURE_TEST_WITHOUT_UI
 #include "../../UiLepra/Include/UiLepra.h"
-#include "../../UiTBC/Include/UiTBC.h"
+#include "../../UiTbc/Include/UiTbc.h"
 #include "../../UiCure/Include/UiCure.h"
 #endif // !CURE_TEST_WITHOUT_UI
 
@@ -38,7 +39,7 @@ static bool TestRunDummy() { return (true); }
 #define TEST_RUN_CURE		TEST_RUN_CURE_CON
 #define TEST_RUN_NETPHYS	TEST_RUN_NETPHYS_CON
 #define LEPRA_NS		Lepra
-#define TBC_NS			TBC
+#define TBC_NS			Tbc
 #define CURE_NS			Cure
 #endif // With / without UI.
 
@@ -75,7 +76,7 @@ private:
 		MASTER_BITS = (CONSOLE_BIT | TRACE_BIT)
 	};
 	int mTestBits;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 LEPRA_RUN_APPLICATION(CureTestApplication, LEPRA_NS::Main);
@@ -149,10 +150,10 @@ int CureTestApplication::Run()
 	FileLogListener lFileLogger(_T("CureTestApp.log"));
 	FileLogListener lPerformanceLogger(_T("CureTestPerformance.log"));
 	MemFileLogListener lMemLogger(100*1024);
-	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
+	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
 		&lFileLogger, &lPerformanceLogger, &lMemLogger);
-	LogType::GetLog(LogType::SUB_ROOT)->SetLevelThreashold(LEVEL_TRACE);
-	LogType::GetLog(LogType::SUB_NETWORK)->SetLevelThreashold(LEVEL_ERROR);
+	LogType::GetLogger(LogType::SUB_ROOT)->SetLevelThreashold(LEVEL_TRACE);
+	LogType::GetLogger(LogType::SUB_NETWORK)->SetLevelThreashold(LEVEL_ERROR);
 
 	mLog.Headline(_T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"));
 
@@ -189,4 +190,4 @@ int CureTestApplication::Run()
 
 
 
-LOG_CLASS_DEFINE(TEST, CureTestApplication);
+loginstance(TEST, CureTestApplication);

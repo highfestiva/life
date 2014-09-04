@@ -4,17 +4,19 @@
 
 
 
+#include "pch.h"
 #include "../Include/GameManager.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
-#include "../../TBC/Include/PhysicsManager.h"
-#include "../../TBC/Include/PhysicsManagerFactory.h"
-#include "../../TBC/Include/PhysicsSpawner.h"
+#include "../../Tbc/Include/PhysicsManager.h"
+#include "../../Tbc/Include/PhysicsManagerFactory.h"
+#include "../../Tbc/Include/PhysicsSpawner.h"
 #include "../Include/ConsoleManager.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObject.h"
 #include "../Include/GameTicker.h"
 #include "../Include/NetworkAgent.h"
+#include "../Include/ResourceManager.h"
 #include "../Include/RuntimeVariable.h"
 #include "../Include/RuntimeVariableName.h"
 #include "../Include/Spawner.h"
@@ -29,6 +31,7 @@ namespace Cure
 
 
 GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
+	mLock(new Lock),
 	mIsThreadSafe(true),
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
@@ -63,10 +66,12 @@ GameManager::~GameManager()
 	delete (mVariableScope);
 	mVariableScope = 0;
 
-	while (mLock.IsOwner())
+	while (mLock->IsOwner())
 	{
-		mLock.Release();
+		mLock->Release();
 	}
+	delete mLock;
+	mLock = 0;
 }
 
 const GameTicker* GameManager::GetTicker() const
@@ -91,9 +96,9 @@ bool GameManager::BeginTick()
 	LEPRA_MEASURE_SCOPE(BeginTick);
 
 	bool lPerformanceText;
-	CURE_RTVAR_GET(lPerformanceText, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_ENABLE, false);
+	v_get(lPerformanceText, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_ENABLE, false);
 	double lReportInterval;
-	CURE_RTVAR_GET(lReportInterval, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 1.0);
+	v_get(lReportInterval, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 1.0);
 	UpdateReportPerformance(lPerformanceText, lReportInterval);
 
 	{
@@ -153,9 +158,9 @@ bool GameManager::TickNetworkOutput()
 	return true;
 }
 
-Lock* GameManager::GetTickLock() const
+LockBC* GameManager::GetTickLock() const
 {
-	return (&mLock);
+	return mLock;
 }
 
 
@@ -185,7 +190,7 @@ const TimeManager* GameManager::GetTimeManager() const
 	return (mTime);
 }
 
-TBC::PhysicsManager* GameManager::GetPhysicsManager() const
+Tbc::PhysicsManager* GameManager::GetPhysicsManager() const
 {
 	return mTicker->GetPhysicsManager(mIsThreadSafe);
 }
@@ -217,7 +222,7 @@ void GameManager::PostPhysicsTick()
 
 
 
-bool GameManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
+bool GameManager::IsObjectRelevant(const vec3& pPosition, float pDistance) const
 {
 	(void)pPosition;
 	(void)pDistance;
@@ -277,7 +282,7 @@ Spawner* GameManager::GetAvatarSpawner(GameObjectId pLevelId) const
 			continue;
 		}
 		Spawner* lSpawner = (Spawner*)*x;
-		const TBC::PhysicsSpawner* lSpawnShape = lSpawner->GetSpawner();
+		const Tbc::PhysicsSpawner* lSpawnShape = lSpawner->GetSpawner();
 		if (lSpawnShape->GetNumber() == 0)
 		{
 			return lSpawner;
@@ -291,7 +296,7 @@ bool GameManager::IsUiMoveForbidden(GameObjectId) const
 	return false;	// Non-UI implementors need not bother.
 }
 
-void GameManager::OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId)
+void GameManager::OnStopped(ContextObject* pObject, Tbc::PhysicsManager::BodyID pBodyId)
 {
 #ifdef LEPRA_DEBUG
 	const unsigned lRootIndex = 0;
@@ -389,7 +394,7 @@ void GameManager::UpdateReportPerformance(bool pReport, double pReportInterval)
 
 void GameManager::ClearPerformanceData()
 {
-	ScopeLock lLock(&mLock);
+	ScopeLock lLock(mLock);
 
 	mSendBandwidth.Clear();
 	mReceiveBandwidth.Clear();
@@ -405,7 +410,7 @@ void GameManager::GetBandwidthData(BandwidthData& pSent, BandwidthData& pReceive
 
 
 
-void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void GameManager::OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	ContextObject* lObject1 = GetContext()->GetObject(pTriggerListenerId);
 	if (lObject1)
@@ -418,8 +423,8 @@ void GameManager::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTrigge
 	}
 }
 
-void GameManager::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+void GameManager::OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	ContextObject* lObject1 = GetContext()->GetObject(pObjectId);
 	if (lObject1)
@@ -489,7 +494,7 @@ void GameManager::HandleWorldBoundaries()
 
 
 
-LOG_CLASS_DEFINE(GAME, GameManager);
+loginstance(GAME, GameManager);
 
 
 

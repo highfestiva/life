@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ContextObject.h"
 #include <algorithm>
 #include <math.h>
@@ -13,17 +14,18 @@
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/ResourceTracker.h"
 #include "../../Lepra/Include/RotationMatrix.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsEngine.h"
-#include "../../TBC/Include/PhysicsManager.h"
-#include "../../TBC/Include/PhysicsSpawner.h"
-#include "../../TBC/Include/PhysicsTrigger.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/PhysicsManager.h"
+#include "../../Tbc/Include/PhysicsSpawner.h"
+#include "../../Tbc/Include/PhysicsTrigger.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObjectAttribute.h"
 #include "../Include/Cure.h"
 #include "../Include/FloatAttribute.h"
 #include "../Include/GameManager.h"
+#include "../Include/PositionHauler.h"
 #include "../Include/TimeManager.h"
 
 
@@ -220,7 +222,7 @@ void ContextObject::SetAllowMoveRoot(bool pAllow)
 	mAllowMoveRoot = pAllow;
 }
 
-void ContextObject::AttachToObject(TBC::PhysicsManager::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsManager::BodyID pBody2)
+void ContextObject::AttachToObject(Tbc::PhysicsManager::BodyID pBody1, ContextObject* pObject2, Tbc::PhysicsManager::BodyID pBody2)
 {
 	if (IsAttachedTo(pObject2))
 	{
@@ -250,16 +252,16 @@ bool ContextObject::DetachFromObject(ContextObject* /*pObject*/)
 	{
 		if (pObject == x->mObject)
 		{
-			TBC::PhysicsManager::JointID lJointId = x->mJointId;
-			TBC::PhysicsEngine* lEngine = x->mEngine;
+			Tbc::PhysicsManager::JointID lJointId = x->mJointId;
+			Tbc::PhysicsEngine* lEngine = x->mEngine;
 			mConnectionList.erase(x);
 			pObject->DetachFromObject(this);
-			if (lJointId != TBC::INVALID_JOINT)
+			if (lJointId != Tbc::INVALID_JOINT)
 			{
 				const int lBoneCount = mPhysics->GetBoneCount();
 				for (int x = 0; x < lBoneCount; ++x)
 				{
-					TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+					Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 					if (lGeometry->GetJointId() == lJointId)
 					{
 						mPhysicsNodeArray.erase(x);
@@ -363,16 +365,16 @@ void ContextObject::OnAttributeUpdated(ContextObjectAttribute*)
 
 
 
-void ContextObject::AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void* pTrigger)
+void ContextObject::AddTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, const void* pTrigger)
 {
 	mTriggerMap.insert(TriggerMap::value_type(pTriggerId, pTrigger));
 }
 
-void ContextObject::FinalizeTrigger(const TBC::PhysicsTrigger*)
+void ContextObject::FinalizeTrigger(const Tbc::PhysicsTrigger*)
 {
 }
 
-const void* ContextObject::GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const
+const void* ContextObject::GetTrigger(Tbc::PhysicsManager::TriggerID pTriggerId) const
 {
 	return HashUtil::FindMapObject(mTriggerMap, pTriggerId);
 }
@@ -389,12 +391,12 @@ size_t ContextObject::GetTriggerCount(const void*& pTrigger) const
 
 
 
-void ContextObject::SetSpawner(const TBC::PhysicsSpawner* pSpawner)
+void ContextObject::SetSpawner(const Tbc::PhysicsSpawner* pSpawner)
 {
 	mSpawner = pSpawner;
 }
 
-const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
+const Tbc::PhysicsSpawner* ContextObject::GetSpawner() const
 {
 	return mSpawner;
 }
@@ -426,15 +428,15 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	{
 		return false;
 	}
-	TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (!lGeometry || (lGeometry->GetBodyId() == TBC::INVALID_BODY && lGeometry->GetTriggerId() == TBC::INVALID_TRIGGER))
+	Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (!lGeometry || (lGeometry->GetBodyId() == Tbc::INVALID_BODY && lGeometry->GetTriggerId() == Tbc::INVALID_TRIGGER))
 	{
 		mLog.Errorf(_T("Could not get positional update (for streaming), since %i/%s not loaded yet!"),
 			GetInstanceId(), GetClassId().c_str());
 		return false;
 	}
 
-	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	bool lOk = PositionHauler::Get(mPosition, lPhysicsManager, mPhysics, mTotalMass);
 	if (lOk)
 	{
@@ -452,8 +454,8 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 		return;
 	}
 
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (!lGeometry || (lGeometry->GetBodyId() == TBC::INVALID_BODY && lGeometry->GetTriggerId() == TBC::INVALID_TRIGGER))
+	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (!lGeometry || (lGeometry->GetBodyId() == Tbc::INVALID_BODY && lGeometry->GetTriggerId() == Tbc::INVALID_TRIGGER))
 	{
 		return;
 	}
@@ -479,33 +481,33 @@ void ContextObject::SetPositionFinalized()
 {
 }
 
-void ContextObject::SetInitialTransform(const TransformationF& pTransformation)
+void ContextObject::SetInitialTransform(const xform& pTransformation)
 {
-	//const QuaternionF& q = pTransformation.GetOrientation();
+	//const quat& q = pTransformation.GetOrientation();
 	//mLog.Infof(_T("Setting initial quaternion (%f;%f;%f;%f) for class %s."), q.a, q.b, q.c, q.d, GetClassId().c_str());
 	mPosition.mPosition.mTransformation = pTransformation;
 }
 
-TransformationF ContextObject::GetInitialTransform() const
+xform ContextObject::GetInitialTransform() const
 {
-	return TransformationF(GetOrientation(), GetPosition());
+	return xform(GetOrientation(), GetPosition());
 }
 
 void ContextObject::SetInitialPositionalData(const ObjectPositionalData& pPositionalData)
 {
-	//const QuaternionF& q = pPositionalData.mPosition.mTransformation.GetOrientation();
+	//const quat& q = pPositionalData.mPosition.mTransformation.GetOrientation();
 	//mLog.Infof(_T("Setting initial quaternion/pos (%f;%f;%f;%f) for class %s."), q.a, q.b, q.c, q.d, GetClassId().c_str());
 	mPosition.CopyData(&pPositionalData);
 }
 
-Vector3DF ContextObject::GetPosition() const
+vec3 ContextObject::GetPosition() const
 {
 	if (mPhysics && mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
 	{
-		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 		if (lGeometry)
 		{
-			TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+			Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
 			if (!lBodyId)
 			{
 				lBodyId = lGeometry->GetTriggerId();
@@ -517,7 +519,7 @@ Vector3DF ContextObject::GetPosition() const
 	return mPosition.mPosition.mTransformation.GetPosition();
 }
 
-void ContextObject::SetRootPosition(const Vector3DF& pPosition)
+void ContextObject::SetRootPosition(const vec3& pPosition)
 {
 	//deb_assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
 	mPosition.mPosition.mTransformation.SetPosition(pPosition);
@@ -528,12 +530,12 @@ void ContextObject::SetRootPosition(const Vector3DF& pPosition)
 	}
 }
 
-Vector3DF ContextObject::GetRootPosition() const
+vec3 ContextObject::GetRootPosition() const
 {
 	return mPosition.mPosition.mTransformation.GetPosition();
 }
 
-void ContextObject::SetRootOrientation(const QuaternionF& pOrientation)
+void ContextObject::SetRootOrientation(const quat& pOrientation)
 {
 	//deb_assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
 	mPosition.mPosition.mTransformation.SetOrientation(pOrientation);
@@ -544,17 +546,17 @@ void ContextObject::SetRootOrientation(const QuaternionF& pOrientation)
 	}
 }
 
-void ContextObject::SetRootVelocity(const Vector3DF& pVelocity)
+void ContextObject::SetRootVelocity(const vec3& pVelocity)
 {
 	mPosition.mPosition.mVelocity = pVelocity;
 }
 
-QuaternionF ContextObject::GetOrientation() const
+quat ContextObject::GetOrientation() const
 {
 	if (mPhysics)
 	{
-		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
 		{
 			return mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
 				mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
@@ -564,14 +566,14 @@ QuaternionF ContextObject::GetOrientation() const
 	return (mPosition.mPosition.mTransformation.GetOrientation());
 }
 
-Vector3DF ContextObject::GetVelocity() const
+vec3 ContextObject::GetVelocity() const
 {
 	if (mPhysics)
 	{
-		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
 		{
-			Vector3DF lVelocity;
+			vec3 lVelocity;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 			return lVelocity;
 		}
@@ -579,13 +581,13 @@ Vector3DF ContextObject::GetVelocity() const
 	return mPosition.mPosition.mVelocity;
 }
 
-Vector3DF ContextObject::GetAngularVelocity() const
+vec3 ContextObject::GetAngularVelocity() const
 {
 	if (mPhysics)
 	{
-		Vector3DF lAngularVelocity;
-		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		vec3 lAngularVelocity;
+		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
 		{
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocity);
 		}
@@ -597,39 +599,39 @@ Vector3DF ContextObject::GetAngularVelocity() const
 	}
 }
 
-Vector3DF ContextObject::GetAcceleration() const
+vec3 ContextObject::GetAcceleration() const
 {
-	Vector3DF lAcceleration;
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	vec3 lAcceleration;
+	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
 	{
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyForce(lGeometry->GetBodyId(), lAcceleration);
 	}
 	return lAcceleration;
 }
 
-Vector3DF ContextObject::GetForwardDirection() const
+vec3 ContextObject::GetForwardDirection() const
 {
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
 	{
-		const TransformationF& lOriginalTransform =
+		const xform& lOriginalTransform =
 			mPhysics->GetOriginalBoneTransformation(0);
-		const Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetConjugate() * Vector3DF(0, 1, 0);	// Assumes original quaternion normalized.
-		TransformationF lTransform;
+		const vec3 lForwardAxis = lOriginalTransform.GetOrientation().GetConjugate() * vec3(0, 1, 0);	// Assumes original quaternion normalized.
+		xform lTransform;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
 		return (lTransform.GetOrientation() * lForwardAxis);
 	}
-	return Vector3DF(0, 1, 0);
+	return vec3(0, 1, 0);
 }
 
 float ContextObject::GetForwardSpeed() const
 {
 	float lSpeed = 0;
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
 	{
-		Vector3DF lVelocity;
+		vec3 lVelocity;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 		lSpeed = lVelocity * GetForwardDirection();
 	}
@@ -660,7 +662,7 @@ void ContextObject::DeleteNetworkOutputGhost()
 	mNetworkOutputGhost = 0;
 }
 
-void ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
+void ContextObject::SetPhysics(Tbc::ChunkyPhysics* pStructure)
 {
 	mPhysics = pStructure;
 	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
@@ -668,7 +670,7 @@ void ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 		const int lBoneCount = mPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
-			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+			const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 			mManager->AddPhysicsBody(this, lGeometry->GetBodyId());
 		}
 	}
@@ -682,7 +684,7 @@ void ContextObject::ClearPhysics()
 		const int lBoneCount = mPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
-			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+			Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 			if (lGeometry)
 			{
 				mManager->RemovePhysicsBody(lGeometry->GetBodyId());
@@ -694,7 +696,7 @@ void ContextObject::ClearPhysics()
 	}
 }
 
-TBC::ChunkyPhysics* ContextObject::GetPhysics() const
+Tbc::ChunkyPhysics* ContextObject::GetPhysics() const
 {
 	return (mPhysics);
 }
@@ -704,12 +706,12 @@ void ContextObject::SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride)
 	mPhysicsOverride = pPhysicsOverride;
 }
 
-TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(unsigned pIndex) const
+Tbc::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(unsigned pIndex) const
 {
 	return (mPhysics->GetBoneGeometry(pIndex));
 }
 
-TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const
+Tbc::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(Tbc::PhysicsManager::BodyID pBodyId) const
 {
 	return (mPhysics->GetBoneGeometry(pBodyId));
 }
@@ -719,11 +721,11 @@ bool ContextObject::SetEnginePower(unsigned pAspect, float pPower)
 	return mPhysics->SetEnginePower(pAspect, pPower);
 }
 
-float ContextObject::GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass, float pSidewaysFactor) const
+float ContextObject::GetImpact(const vec3& pGravity, const vec3& pForce, const vec3& pTorque, float pExtraMass, float pSidewaysFactor) const
 {
 	const float lMassFactor = 1 / (GetMass() + pExtraMass);
 	const float lGravityInvertFactor = 1/pGravity.GetLength();
-	const Vector3DF lGravityDirection(pGravity * lGravityInvertFactor);
+	const vec3 lGravityDirection(pGravity * lGravityInvertFactor);
 	// High angle against direction of gravity means high impact.
 	const float lOpposingGravityFactor = -(pForce*lGravityDirection) * lGravityInvertFactor * lMassFactor;
 	const float lSidewaysFactor = pForce.Cross(lGravityDirection).GetLength() * lMassFactor;
@@ -782,7 +784,7 @@ void ContextObject::OnLoaded()
 	{
 		// Calculate total mass.
 		deb_assert(mTotalMass == 0);
-		TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+		Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 		mTotalMass = mPhysics->QueryTotalMass(lPhysicsManager);
 
 		OnTick();
@@ -805,11 +807,11 @@ void ContextObject::OnTick()
 void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositionalData)
 {
 	mPosition.CopyData(&pPositionalData);
-	deb_assert(mTotalMass != 0 || GetPhysics()->GetBoneGeometry(0)->GetTriggerId() != TBC::INVALID_TRIGGER);
+	deb_assert(mTotalMass != 0 || GetPhysics()->GetBoneGeometry(0)->GetTriggerId() != Tbc::INVALID_TRIGGER);
 	PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mTotalMass, mAllowMoveRoot);
 }
 
-void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend)
+void ContextObject::AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, Tbc::ChunkyBoneGeometry* pBoneGeometry2, bool pSend)
 {
 	deb_assert(pObject2);
 	deb_assert(!IsAttachedTo(pObject2));
@@ -820,15 +822,15 @@ void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, Cont
 
 	pSend;	// TODO: remove when new structure in place!
 
-	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-	if (pBoneGeometry1->IsConnectorType(TBC::ChunkyBoneGeometry::CONNECTOR_3DOF) &&
-		pBoneGeometry2->IsConnectorType(TBC::ChunkyBoneGeometry::CONNECTEE_3DOF))
+	Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_3DOF) &&
+		pBoneGeometry2->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTEE_3DOF))
 	{
 		pObject2->SetAllowMoveRoot(false);
 
 		// Find first parent that is a dynamic body.
-		TBC::PhysicsManager::BodyID lBody2Connectee = pBoneGeometry2->GetBodyId();
-		TBC::ChunkyBoneGeometry* lNode2Connectee = pBoneGeometry2;
+		Tbc::PhysicsManager::BodyID lBody2Connectee = pBoneGeometry2->GetBodyId();
+		Tbc::ChunkyBoneGeometry* lNode2Connectee = pBoneGeometry2;
 		while (lPhysicsManager->IsStaticBody(lBody2Connectee))
 		{
 			lNode2Connectee = lNode2Connectee->GetParent();
@@ -842,15 +844,15 @@ void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, Cont
 
 		mLog.AInfo("Attaching two objects.");
 		// TODO: fix algo when new chunky structure in place.
-		/*TransformationF lAnchor;
+		/*xform lAnchor;
 		lPhysicsManager->GetBodyTransform(pBoneGeometry2->GetBodyId(), lAnchor);
-		TBC::PhysicsManager::JointID lJoint = lPhysicsManager->CreateBallJoint(pBoneGeometry1->GetBodyId(), lBody2Connectee, lAnchor.GetPosition());
+		Tbc::PhysicsManager::JointID lJoint = lPhysicsManager->CreateBallJoint(pBoneGeometry1->GetBodyId(), lBody2Connectee, lAnchor.GetPosition());
 		unsigned lAttachNodeId = mPhysics->GetNextGeometryIndex();
-		AddPhysicsObject(PhysicsNode(pBoneGeometry1->GetId(), lAttachNodeId, TBC::INVALID_BODY, PhysicsNode::TYPE_EXCLUDE, lJoint));
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(this, TBC::PhysicsEngine::ENGINE_GLUE, 0, 0, 0, 0);
+		AddPhysicsObject(PhysicsNode(pBoneGeometry1->GetId(), lAttachNodeId, Tbc::INVALID_BODY, PhysicsNode::TYPE_EXCLUDE, lJoint));
+		Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(this, Tbc::PhysicsEngine::ENGINE_GLUE, 0, 0, 0, 0);
 		lEngine->AddControlledNode(lAttachNodeId, 1);
 		AddAttachment(pObject2, lJoint, lEngine);
-		pObject2->AddAttachment(this, TBC::INVALID_JOINT, 0);
+		pObject2->AddAttachment(this, Tbc::INVALID_JOINT, 0);
 
 		if (pSend)
 		{
@@ -872,7 +874,7 @@ bool ContextObject::IsAttachedTo(ContextObject* pObject) const
 	return (false);
 }
 
-void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine)
+void ContextObject::AddAttachment(ContextObject* pObject, Tbc::PhysicsManager::JointID pJoint, Tbc::PhysicsEngine* pEngine)
 {
 	deb_assert(!IsAttachedTo(pObject));
 	mConnectionList.push_back(Connection(pObject, pJoint, pEngine));
@@ -899,7 +901,7 @@ void ContextObject::SetupChildHandlers()
 	const int lTriggerCount = mPhysics->GetTriggerCount();
 	for (int x = 0; x < lTriggerCount; ++x)
 	{
-		const TBC::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
+		const Tbc::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
 		ContextObject* lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lTrigger->GetFunction());
 		if (!lHandlerChild)
 		{
@@ -914,7 +916,7 @@ void ContextObject::SetupChildHandlers()
 		}
 		if (lBoneTriggerCount == 0)
 		{
-			lHandlerChild->AddTrigger(TBC::INVALID_TRIGGER, lTrigger);
+			lHandlerChild->AddTrigger(Tbc::INVALID_TRIGGER, lTrigger);
 		}
 		lHandlerChild->FinalizeTrigger(lTrigger);
 	}
@@ -922,7 +924,7 @@ void ContextObject::SetupChildHandlers()
 	const int lSpawnerCount = mPhysics->GetSpawnerCount();
 	for (int x = 0; x < lSpawnerCount; ++x)
 	{
-		const TBC::PhysicsSpawner* lSpawner = mPhysics->GetSpawner(x);
+		const Tbc::PhysicsSpawner* lSpawner = mPhysics->GetSpawner(x);
 		ContextObject* lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lSpawner->GetFunction());
 		if (!lHandlerChild)
 		{
@@ -942,7 +944,7 @@ ResourceManager* ContextObject::GetResourceManager() const
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObject);
+loginstance(GAME_CONTEXT, ContextObject);
 
 
 

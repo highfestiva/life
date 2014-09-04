@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ChunkyPhysics.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ListUtil.h"
@@ -14,7 +15,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -109,7 +110,7 @@ float ChunkyPhysics::QueryTotalMass(PhysicsManager* pPhysicsManager) const
 	const int lBoneCount = GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
-		const TBC::ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
+		const Tbc::ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
 		if (lGeometry->GetBodyId())
 		{
 			lTotalMass += pPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
@@ -151,7 +152,7 @@ void ChunkyPhysics::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
 	mGeometryArray.push_back(pGeometry);
 }
 
-void ChunkyPhysics::AddBoneGeometry(const TransformationF& pTransformation,
+void ChunkyPhysics::AddBoneGeometry(const xform& pTransformation,
 	ChunkyBoneGeometry* pGeometry, const ChunkyBoneGeometry* pParent)
 {
 	const int lChildIndex = (int)mGeometryArray.size();
@@ -196,7 +197,7 @@ int ChunkyPhysics::GetIndex(const ChunkyBoneGeometry* pGeometry) const
 	return (-1);
 }
 
-const TransformationF& ChunkyPhysics::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
+const xform& ChunkyPhysics::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
 {
 	return (GetBoneTransformation(GetIndex(pGeometry)));
 }
@@ -373,7 +374,7 @@ void ChunkyPhysics::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const TransformationF* pTransform,
+bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const xform* pTransform,
 	int pTrigListenerId, int pForceListenerId)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
@@ -383,7 +384,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 		if (pTransform)
 		{
 			const int lRoot = 0;
-			TransformationF lTransformation = GetOriginalBoneTransformation(lRoot);
+			xform lTransformation = GetOriginalBoneTransformation(lRoot);
 			lTransformation = *pTransform * lTransformation;
 			SetOriginalBoneTransformation(lRoot, lTransformation);
 		}
@@ -400,7 +401,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 				case ChunkyBoneGeometry::BONE_BODY:
 				{
 					const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
-					const TransformationF& lBone = GetBoneTransformation(x);
+					const xform& lBone = GetBoneTransformation(x);
 					lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListenerId, lBodyType, lBone);
 					if (lOk)
 					{
@@ -442,7 +443,7 @@ unsigned ChunkyPhysics::GetNextGeometryIndex()
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, ChunkyPhysics);
+loginstance(PHYSICS, ChunkyPhysics);
 
 
 

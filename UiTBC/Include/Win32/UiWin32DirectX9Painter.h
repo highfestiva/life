@@ -11,7 +11,7 @@
 
 #include <d3d9.h>
 #include <list>
-#include "../UiTBC.h"
+#include "../UiTbc.h"
 #include "../../../Lepra/Include/Graphics2D.h"
 #include "../../../Lepra/Include/Canvas.h"
 #include "../../../Lepra/Include/HashTable.h"
@@ -79,7 +79,7 @@ protected:
 			  float pX2, float pY2, float pU2, float pV2,
 			  float pX3, float pY3, float pU3, float pV3,
 			  ImageID pImageID);
-	void DrawFan(const std::vector<Vector2DF> pCoords, bool pFill);
+	void DrawFan(const std::vector<vec2> pCoords, bool pFill);
 	void DoDrawImage(ImageID pImageID, int x, int y);
 	void DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect);
 	void DoDrawImage(ImageID pImageID, const PixelRect& pRect);
@@ -117,7 +117,7 @@ private:
 	IDirect3DDevice9* mD3DDevice;
 	IDirect3DTexture9* mD3DDefaultMouseCursor;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

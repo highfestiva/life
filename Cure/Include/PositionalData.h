@@ -59,11 +59,11 @@ private:
 class PositionalData6: public PositionalData
 {
 public:
-	TransformationF mTransformation;
-	Vector3DF mVelocity;
-	Vector3DF mAcceleration;
-	Vector3DF mAngularVelocity;
-	Vector3DF mAngularAcceleration;
+	xform mTransformation;
+	vec3 mVelocity;
+	vec3 mAcceleration;
+	vec3 mAngularVelocity;
+	vec3 mAngularAcceleration;
 
 	static int GetStaticPackSize();
 	int GetPackSize() const;
@@ -74,14 +74,14 @@ public:
 	virtual void Stop();
 
 private:
-	static float GetDifference(const QuaternionF& pQ1, const QuaternionF& pQ2);
-	static float GetDifference(const Vector3DF& pV1, const Vector3DF& pV2);
+	static float GetDifference(const quat& pQ1, const quat& pQ2);
+	static float GetDifference(const vec3& pV1, const vec3& pV2);
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
 	PositionalData* Clone() const;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 // Three degrees of freedom in position, velocity and acceleration.
@@ -182,7 +182,7 @@ private:
 	ObjectPositionalData(const ObjectPositionalData&);
 	void operator=(const ObjectPositionalData&);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 class RealData3: public PositionalData

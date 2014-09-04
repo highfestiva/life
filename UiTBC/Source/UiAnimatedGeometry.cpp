@@ -4,8 +4,9 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/UiAnimatedGeometry.h"
-#include "../../TBC/Include/Bones.h"
+#include "../../Tbc/Include/Bones.h"
 #include "../../Lepra/Include/LepraAssert.h"
 
 namespace UiTbc
@@ -34,7 +35,7 @@ AnimatedGeometry::~AnimatedGeometry()
 
 
 
-void AnimatedGeometry::SetGeometry(TBC::GeometryBase* pGeometry)
+void AnimatedGeometry::SetGeometry(Tbc::GeometryBase* pGeometry)
 {
 	mOriginalGeometry = pGeometry;
 	SetPrimitiveType(mOriginalGeometry->GetPrimitiveType());
@@ -100,7 +101,7 @@ const AnimatedGeometry::BoneWeightGroup& AnimatedGeometry::GetBoneWeightGroup(in
 
 
 
-void AnimatedGeometry::SetBoneHierarchy(TBC::BoneHierarchy* pBones)
+void AnimatedGeometry::SetBoneHierarchy(Tbc::BoneHierarchy* pBones)
 {
 	mBones = pBones;
 }
@@ -147,14 +148,14 @@ void AnimatedGeometry::UpdateAnimatedGeometry()
 			const unsigned lVectorIndex = lGroup.mVectorIndexArray[y] * 3;
 			deb_assert(lVectorIndex+2 < mOriginalGeometry->GetVertexCount()*3);
 
-			const Vector3DF v(lOriginalVData[lVectorIndex+0], lOriginalVData[lVectorIndex+1], lOriginalVData[lVectorIndex+2]);
-			const Vector3DF n(lOriginalNData[lVectorIndex+0], lOriginalNData[lVectorIndex+1], lOriginalNData[lVectorIndex+2]);
-			Vector3DF lWeightedVertex;
-			Vector3DF lWeightedNormal;
+			const vec3 v(lOriginalVData[lVectorIndex+0], lOriginalVData[lVectorIndex+1], lOriginalVData[lVectorIndex+2]);
+			const vec3 n(lOriginalNData[lVectorIndex+0], lOriginalNData[lVectorIndex+1], lOriginalNData[lVectorIndex+2]);
+			vec3 lWeightedVertex;
+			vec3 lWeightedNormal;
 			for (int z = 0; z < lGroup.mBoneCount; ++z, ++lVectorWeightIndex)
 			{
 				const int lBoneIndex = lGroup.mBoneIndexArray[z];
-				const TransformationF& lTransform = mBones->GetRelativeBoneTransformation(lBoneIndex);
+				const xform& lTransform = mBones->GetRelativeBoneTransformation(lBoneIndex);
 				const float lWeight = lGroup.mVectorWeightArray[lVectorWeightIndex];
 				lWeightedVertex += lTransform.Transform(v)*lWeight;
 				lWeightedNormal += lTransform.Transform(n)*lWeight;
@@ -171,9 +172,9 @@ void AnimatedGeometry::UpdateAnimatedGeometry()
 	GeometryBase::SetVertexDataChanged(true);
 }
 
-TBC::GeometryBase::GeometryVolatility AnimatedGeometry::GetGeometryVolatility() const
+Tbc::GeometryBase::GeometryVolatility AnimatedGeometry::GetGeometryVolatility() const
 {
-	return TBC::GeometryBase::GEOM_VOLATILE;
+	return Tbc::GeometryBase::GEOM_VOLATILE;
 }
 
 void AnimatedGeometry::SetGeometryVolatility(GeometryVolatility)
@@ -230,12 +231,12 @@ float* AnimatedGeometry::GetNormalData() const
 	return mNormalData;
 }
 
-TBC::GeometryBase::ColorFormat AnimatedGeometry::GetColorFormat() const
+Tbc::GeometryBase::ColorFormat AnimatedGeometry::GetColorFormat() const
 {
 	return mOriginalGeometry->GetColorFormat();
 }
 
-TBC::GeometryBase* AnimatedGeometry::GetOriginalGeometry()
+Tbc::GeometryBase* AnimatedGeometry::GetOriginalGeometry()
 {
 	return mOriginalGeometry;
 }

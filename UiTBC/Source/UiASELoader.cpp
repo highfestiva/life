@@ -4,6 +4,7 @@
 	Copyright (c) 2002-2006, Righteous Games
 */
 
+#include "pch.h"
 #include "../../Lepra/Include/ImageLoader.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/DiskFile.h"
@@ -2486,7 +2487,7 @@ void ASELoader::Mesh::GetGeometry(std::list<TriangleBasedGeometry*>& pGeometryLi
 		float* lUVData = 0;
 		if (lUVData != 0)
 			lUVData = lUVData[0];
-		TriangleBasedGeometry* lGeometry = new TriangleBasedGeometry(lVertex, 0, lUVData, lVertexColor, TBC::GeometryBase::COLOR_RGB, lIndex, lVertexList.GetCount(), lFaceList->GetCount(), TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_STATIC);
+		TriangleBasedGeometry* lGeometry = new TriangleBasedGeometry(lVertex, 0, lUVData, lVertexColor, Tbc::GeometryBase::COLOR_RGB, lIndex, lVertexList.GetCount(), lFaceList->GetCount(), Tbc::GeometryBase::TRIANGLES, Tbc::GeometryBase::GEOM_STATIC);
 
 		for (i = 1; i < lNumUVSets; i++)
 		{

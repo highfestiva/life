@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "StopWatch.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
 #include "../RaceScore.h"
 #include "ScreenPart.h"
 
@@ -71,7 +72,7 @@ void StopWatch::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, StopWatch);
+loginstance(GAME_CONTEXT_CPP, StopWatch);
 
 
 

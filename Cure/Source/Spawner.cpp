@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "../Include/Spawner.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../TBC/Include/PhysicsSpawner.h"
+#include "../../Tbc/Include/PhysicsSpawner.h"
 #include "../Include/RuntimeVariable.h"
 
 
@@ -43,23 +44,23 @@ Spawner::~Spawner()
 
 void Spawner::PlaceObject(ContextObject* pObject, int pSpawnPointIndex)
 {
-	const Vector3DF lScalePoint = RNDPOSVEC();
+	const vec3 lScalePoint = RNDPOSVEC();
 	if (pSpawnPointIndex < 0)
 	{
 		pSpawnPointIndex = Random::GetRandomNumber() % GetSpawner()->GetSpawnPointCount();
 	}
-	Vector3DF lInitialVelocity;
+	vec3 lInitialVelocity;
 	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint, pSpawnPointIndex, lInitialVelocity));
 	pObject->SetRootVelocity(lInitialVelocity);
 }
 
-TransformationF Spawner::GetSpawnPoint() const
+xform Spawner::GetSpawnPoint() const
 {
-	Vector3DF lInitialVelocity;
-	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), Vector3DF(), 0, lInitialVelocity);
+	vec3 lInitialVelocity;
+	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), vec3(), 0, lInitialVelocity);
 }
 
-void Spawner::EaseDown(TBC::PhysicsManager* pPhysicsManager, ContextObject* pObject, const Vector3DF* pStartPosition)
+void Spawner::EaseDown(Tbc::PhysicsManager* pPhysicsManager, ContextObject* pObject, const vec3* pStartPosition)
 {
 	const Cure::ObjectPositionalData* lPositionalData = 0;
 	pObject->UpdateFullPosition(lPositionalData);
@@ -68,10 +69,10 @@ void Spawner::EaseDown(TBC::PhysicsManager* pPhysicsManager, ContextObject* pObj
 	{
 		lNewPositionalData->mPosition.mTransformation.SetPosition(*pStartPosition);
 	}
-	/*lNewPositionalData->mPosition.mAcceleration = Vector3DF();
-	lNewPositionalData->mPosition.mVelocity = Vector3DF();
-	lNewPositionalData->mPosition.mAngularAcceleration = Vector3DF();
-	lNewPositionalData->mPosition.mAngularVelocity = Vector3DF();*/
+	/*lNewPositionalData->mPosition.mAcceleration = vec3();
+	lNewPositionalData->mPosition.mVelocity = vec3();
+	lNewPositionalData->mPosition.mAngularAcceleration = vec3();
+	lNewPositionalData->mPosition.mAngularVelocity = vec3();*/
 	bool lHasTouchedGround = false;
 	float lStep = 1.0f;
 	for (int x = 0; x < 20; ++x)
@@ -122,7 +123,7 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 {
 	Parent::OnAlarm(pAlarmId, pExtraData);
 
-	const TBC::PhysicsSpawner::IntervalArray& lIntervals = GetSpawner()->GetIntervals();
+	const Tbc::PhysicsSpawner::IntervalArray& lIntervals = GetSpawner()->GetIntervals();
 	const size_t lIntervalCount = lIntervals.size();
 	if (lIntervalCount < 2 || lIntervalCount > 3)
 	{
@@ -206,7 +207,7 @@ void Spawner::OnRecreate(float pRecreateInterval)
 void Spawner::Create()
 {
 	bool lIsPhysicsHalted;
-	CURE_RTVAR_GET(lIsPhysicsHalted, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
+	v_get(lIsPhysicsHalted, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
 	if (lIsPhysicsHalted)
 	{
 		return;
@@ -244,7 +245,7 @@ int Spawner::GetSpawnCount() const
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Spawner);
+loginstance(GAME_CONTEXT_CPP, Spawner);
 
 
 

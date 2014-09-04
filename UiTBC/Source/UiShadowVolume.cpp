@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiShadowVolume.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ResourceTracker.h"
@@ -16,7 +17,7 @@ namespace UiTbc
 
 
 
-ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
+ShadowVolume::ShadowVolume(Tbc::GeometryBase* pParentGeometry):
 	mVertexData(0),
 	mIndexData(0),
 	mTriangleOrientation(0),
@@ -30,7 +31,7 @@ ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
 
 	LEPRA_DEBUG_CODE(mName = _T("Shdw->") + pParentGeometry->mName);
 
-	SetPrimitiveType(TBC::GeometryBase::TRIANGLES);
+	SetPrimitiveType(Tbc::GeometryBase::TRIANGLES);
 
 	if (mParentGeometry->GetEdgeData() == 0)
 	{
@@ -56,12 +57,12 @@ ShadowVolume::~ShadowVolume()
 	LEPRA_RELEASE_RESOURCE(ShadowVolume);
 }
 
-TBC::GeometryBase* ShadowVolume::GetParentGeometry()
+Tbc::GeometryBase* ShadowVolume::GetParentGeometry()
 {
 	return mParentGeometry;
 }
 
-void ShadowVolume::SetParentGeometry(TBC::GeometryBase* pParentGeometry)
+void ShadowVolume::SetParentGeometry(Tbc::GeometryBase* pParentGeometry)
 {
 	mParentGeometry = pParentGeometry;
 
@@ -124,17 +125,17 @@ float* ShadowVolume::GetNormalData() const
 	return 0;
 }
 
-TBC::GeometryBase::GeometryVolatility ShadowVolume::GetGeometryVolatility() const
+Tbc::GeometryBase::GeometryVolatility ShadowVolume::GetGeometryVolatility() const
 {
 	if (mParentGeometry)
 	{
 		return (mParentGeometry->GetGeometryVolatility());
 	}
 
-	return (TBC::GeometryBase::GEOM_VOLATILE);
+	return (Tbc::GeometryBase::GEOM_VOLATILE);
 }
 
-void ShadowVolume::SetGeometryVolatility(TBC::GeometryBase::GeometryVolatility pVolatility)
+void ShadowVolume::SetGeometryVolatility(Tbc::GeometryBase::GeometryVolatility pVolatility)
 {
 	if (mParentGeometry)
 	{
@@ -227,7 +228,7 @@ void ShadowVolume::InitTO()
 	} \
 }
 
-void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowRange, const bool pDirectional)
+void ShadowVolume::UpdateShadowVolume(const vec3& pLightPos, float pShadowRange, const bool pDirectional)
 {
 	SetTransformation(mParentGeometry->GetTransformation());
 
@@ -235,7 +236,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	InitTO();
 
 	// Transform the light position in object space.
-	Vector3DF lLightPos;
+	vec3 lLightPos;
 	if (pDirectional == true)
 	{
 		lLightPos = mParentGeometry->GetTransformation().mOrientation.GetInverseRotatedVector(pLightPos);
@@ -292,7 +293,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		// Calculate triangle orientations relative to light source.
 		for (unsigned i = 0; i < lTriangleCount; i++, lIndices+=3, lSurfaceNormalData+=3)
 		{
-			//if (mParentGeometry->GetPrimitiveType() == TBC::GeometryBase::TRIANGLES)
+			//if (mParentGeometry->GetPrimitiveType() == Tbc::GeometryBase::TRIANGLES)
 			{
 				mTriangleOrientation[i].mV0 = lIndices[0];
 				mTriangleOrientation[i].mV1 = lIndices[1];
@@ -324,7 +325,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		{
 			// Read original vertex.
 			const int lIndex0 = i * 3;
-			Vector3DF lVector(mVertexData[lIndex0 + 0] - lLightPos.x,
+			vec3 lVector(mVertexData[lIndex0 + 0] - lLightPos.x,
 						  mVertexData[lIndex0 + 1] - lLightPos.y,
 						  mVertexData[lIndex0 + 2] - lLightPos.z);
 
@@ -341,14 +342,14 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		}
 	}
 
-	TBC::GeometryBase::SetVertexDataChanged(true);
+	Tbc::GeometryBase::SetVertexDataChanged(true);
 
 
 	// Check if we actually need to update triangle definitions, or if vertex data will suffice.
 	if (mTriangleCount != 0)
 	{
 		// We check if orientation has changed.
-		const QuaternionF& lCasterOrientation = mParentGeometry->GetTransformation().GetOrientation();
+		const quat& lCasterOrientation = mParentGeometry->GetTransformation().GetOrientation();
 		const float lOrientationDiff = (mPreviousOrientation-lCasterOrientation).GetNorm();
 		if (lOrientationDiff < 0.03f)
 		{
@@ -364,7 +365,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	{
 		mParentGeometry->GenerateEdgeData();
 	}
-	const TBC::GeometryBase::Edge* lEdges = mParentGeometry->GetEdgeData();
+	const Tbc::GeometryBase::Edge* lEdges = mParentGeometry->GetEdgeData();
 	const unsigned lEdgeCount = mParentGeometry->GetEdgeCount();
 	vtx_idx_t* lIndexData = mIndexData;
 	for (unsigned i = 0; i < lEdgeCount; ++i)
@@ -456,7 +457,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		}
 	}
 
-	TBC::GeometryBase::SetIndexDataChanged(true);
+	Tbc::GeometryBase::SetIndexDataChanged(true);
 }
 
 

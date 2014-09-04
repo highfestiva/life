@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "LoginView.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/UserAccount.h"
 #include "../Lepra/Include/Network.h"
-#include "../UiTBC/Include/GUI/UiCaption.h"
-#include "../UiTBC/Include/GUI/UiTextField.h"
+#include "../UiTbc/Include/GUI/UiCaption.h"
+#include "../UiTbc/Include/GUI/UiTextField.h"
 #include "RtVar.h"
 
 
@@ -34,7 +35,7 @@ LoginView::LoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessa
 	AddLabel(_T("Username"), WHITE);
 
 	str lUserName;
-	CURE_RTVAR_TRYGET(lUserName, =, mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("User0"));
+	v_tryget(lUserName, =, mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("User0"));
 	AddTextField(lUserName, _T("User"));
 
 	AddLabel(_T("Password"), WHITE);
@@ -44,7 +45,7 @@ LoginView::LoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessa
 	AddLabel(_T("Server"), WHITE);
 
 	str lServerName;
-	CURE_RTVAR_GET(lServerName, =, mLoginObserver->GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	v_get(lServerName, =, mLoginObserver->GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
 	{
 		lServerName = lServerName.substr(7);

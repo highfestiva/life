@@ -47,7 +47,7 @@ private:
 	void DisplaySplashLogo();
 	void DisplayCompanyLogo();
 
-	virtual void BeginRender(Vector3DF& pColor);
+	virtual void BeginRender(vec3& pColor);
 
 	virtual void CloseMainMenu();
 	virtual bool QueryQuit();
@@ -69,7 +69,7 @@ private:
 	HiResTimer* mDemoTime;
 	Sunlight* mSunlight;		// TODO: remove hack and come up with something better?
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

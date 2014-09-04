@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Math.h"
 #include "../Include/CubicSpline.h"
 

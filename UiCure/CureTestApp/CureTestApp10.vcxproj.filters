@@ -23,10 +23,10 @@
     <ClCompile Include="NetworkPhysicsTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.cpp">
+    <ClCompile Include="..\..\UiTbc\UiTbcTestApp\RotationalAgreementTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\UiTBC\UiTBCTestApp\TbcTest.cpp">
+    <ClCompile Include="..\..\UiTbc\UiTbcTestApp\TbcTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Lepra\LepraTestApp\TestBinTree.cpp">
@@ -50,7 +50,7 @@
     <ClCompile Include="..\..\UiLepra\LepraTestApp\UiLepraTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\UiTBC\UiTBCTestApp\UiTbcTest.cpp">
+    <ClCompile Include="..\..\UiTbc\UiTbcTestApp\UiTbcTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CureTestApp.cpp">
@@ -58,7 +58,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.h">
+    <ClInclude Include="..\..\UiTbc\UiTbcTestApp\RotationalAgreementTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

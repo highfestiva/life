@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/Plane.h"
 
 
@@ -18,15 +19,15 @@ Plane::Plane():
 {
 }
 
-Plane::Plane(const Vector3DF& pNormal, float D):
+Plane::Plane(const vec3& pNormal, float D):
 	n(pNormal),
 	d(D)
 {
 }
 
-Plane::Plane(const Vector3DF& pPosition, const Vector3DF& pTangent, const Vector3DF& pApproximateNormal)
+Plane::Plane(const vec3& pPosition, const vec3& pTangent, const vec3& pApproximateNormal)
 {
-	const Vector3DF lTangent2 = pTangent.Cross(pApproximateNormal);
+	const vec3 lTangent2 = pTangent.Cross(pApproximateNormal);
 	n = lTangent2.Cross(pTangent);
 	n.Normalize();
 	d = n*pPosition;
@@ -40,26 +41,26 @@ void Plane::operator=(const Plane& pCopy)
 
 
 
-float Plane::GetAbsDistance(const Vector3DF& pPosition) const
+float Plane::GetAbsDistance(const vec3& pPosition) const
 {
 	return std::abs(GetDistance(pPosition));
 }
 
-float Plane::GetDistance(const Vector3DF& pPosition) const
+float Plane::GetDistance(const vec3& pPosition) const
 {
 	return n*pPosition-d;
 }
 
-QuaternionF Plane::GetOrientation() const
+quat Plane::GetOrientation() const
 {
-	Vector3DF x(1,0,0);
+	vec3 x(1,0,0);
 	if (std::abs(n*x) > 0.7f)
 	{
-		x = Vector3DF(0,1,0);
+		x = vec3(0,1,0);
 	}
-	Vector3DF y = n.Cross(x);
+	vec3 y = n.Cross(x);
 	x = y.Cross(n);
-	return QuaternionF(RotationMatrixF(x,y,n));
+	return quat(RotationMatrixF(x,y,n));
 }
 
 

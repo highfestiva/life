@@ -519,11 +519,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.cpp"
+				RelativePath="..\..\UiTbc\UiTbcTestApp\RotationalAgreementTest.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\UiTBC\UiTBCTestApp\TbcTest.cpp"
+				RelativePath="..\..\UiTbc\UiTbcTestApp\TbcTest.cpp"
 				>
 			</File>
 			<File
@@ -555,7 +555,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\UiTBC\UiTBCTestApp\UiTbcTest.cpp"
+				RelativePath="..\..\UiTbc\UiTbcTestApp\UiTbcTest.cpp"
 				>
 			</File>
 		</Filter>
@@ -565,7 +565,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.h"
+				RelativePath="..\..\UiTbc\UiTbcTestApp\RotationalAgreementTest.h"
 				>
 			</File>
 		</Filter>

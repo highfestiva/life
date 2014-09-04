@@ -28,7 +28,7 @@ public:
 private:
 	Cure::GameManager* mGame;
 	Cure::GameObjectId mSimulatorId;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

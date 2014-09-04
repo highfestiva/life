@@ -4,13 +4,11 @@
 
 
 
-#define LEPRA_INCLUDE_NO_OS
 #include "../../Lepra/Include/Lepra.h"
-#undef LEPRA_INCLUDE_NO_OS
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 

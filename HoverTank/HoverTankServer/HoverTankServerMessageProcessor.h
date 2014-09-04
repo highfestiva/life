@@ -32,7 +32,7 @@ private:
 
 	GameServerLogic* mLogic;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

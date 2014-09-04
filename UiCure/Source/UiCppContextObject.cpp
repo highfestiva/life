@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include <math.h>
 #include "../../Cure/Include/ContextManager.h"
@@ -141,20 +142,20 @@ void CppContextObject::UiMove()
 	//	int j = i;
 	//	i = j;
 	//}
-	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
 	const float lLerpFactor = Math::GetIterateLerpTime(0.2f, lFrameTime);
-	Vector3DF lRootPosition;
-	TransformationF lPhysicsTransform;
+	vec3 lRootPosition;
+	xform lPhysicsTransform;
 	if (mSinkSpeed)
 	{
 		const int lGeometryCount = mPhysics->GetBoneCount();
 		for (int x = 0; x < lGeometryCount; ++x)
 		{
-			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+			const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 			if (lGeometry && lGeometry->GetBodyId())
 			{
-				Vector3DF lPosition = lPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+				vec3 lPosition = lPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
 				lPosition.z -= mSinkSpeed * GetManager()->GetGameManager()->GetTimeManager()->GetNormalGameFrameTime();
 				lPhysicsManager->SetBodyPosition(lGeometry->GetBodyId(), lPosition);
 			}
@@ -172,13 +173,13 @@ void CppContextObject::UiMove()
 		{
 			continue;
 		}
-		TBC::GeometryBase* lGfxGeometry = lResource->GetRamData();
+		Tbc::GeometryBase* lGfxGeometry = lResource->GetRamData();
 
 		if (mPhysicsOverride != Cure::PHYSICS_OVERRIDE_BONES)
 		{
-			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
-			TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-			if (!lGeometry || lBodyId == TBC::INVALID_BODY)
+			Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
+			Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+			if (!lGeometry || lBodyId == Tbc::INVALID_BODY)
 			{
 				if (lGeometry)
 				{
@@ -191,7 +192,7 @@ void CppContextObject::UiMove()
 				}
 			}
 			lPhysicsManager->GetBodyTransform(lBodyId, lPhysicsTransform);
-			/*if (mAutoDisableMeshMove && mPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC && mPhysics->GetBodyType(lGeometry) == TBC::PhysicsManager::STATIC)
+			/*if (mAutoDisableMeshMove && mPhysics->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC && mPhysics->GetBodyType(lGeometry) == Tbc::PhysicsManager::STATIC)
 			{
 				mEnableMeshMove = false;
 			}*/
@@ -214,7 +215,7 @@ void CppContextObject::UiMove()
 				{
 					lRootPosition = lPhysicsTransform.GetPosition();
 				}
-				Vector3DF lMeshOffsetWithRootOrientation = lPhysicsTransform.GetPosition() - lRootPosition;
+				vec3 lMeshOffsetWithRootOrientation = lPhysicsTransform.GetPosition() - lRootPosition;
 				lMeshOffsetWithRootOrientation = mLerpOffset.GetOrientation() * lMeshOffsetWithRootOrientation - lMeshOffsetWithRootOrientation;
 				lPhysicsTransform.GetOrientation() = mLerpOffset.GetOrientation() * lPhysicsTransform.GetOrientation();
 				lPhysicsTransform.GetPosition() += mLerpOffset.GetPosition() + lMeshOffsetWithRootOrientation;
@@ -271,7 +272,7 @@ void CppContextObject::ShrinkMeshBigOrientationThreshold(float pThreshold)
 		{
 			continue;
 		}
-		TBC::GeometryBase* lGeometry = lResource->GetRamData();
+		Tbc::GeometryBase* lGeometry = lResource->GetRamData();
 		if (lGeometry->GetBigOrientationThreshold() > pThreshold)
 		{
 			lGeometry->SetBigOrientationThreshold(pThreshold);
@@ -281,7 +282,7 @@ void CppContextObject::ShrinkMeshBigOrientationThreshold(float pThreshold)
 
 
 
-TBC::GeometryBase* CppContextObject::GetMesh(int pIndex) const
+Tbc::GeometryBase* CppContextObject::GetMesh(int pIndex) const
 {
 	const UserGeometryReferenceResource* lResource = GetMeshResource(pIndex);
 	if (lResource && lResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -313,9 +314,9 @@ void CppContextObject::CenterMeshes()
 		{
 			continue;
 		}
-		TBC::GeometryReference* lGfxGeometry = (TBC::GeometryReference*)lResource->GetRamData();
-		TransformationF lOffset = lGfxGeometry->GetOffsetTransformation();
-		lOffset.SetPosition(Vector3DF(0, 0, 0));
+		Tbc::GeometryReference* lGfxGeometry = (Tbc::GeometryReference*)lResource->GetRamData();
+		xform lOffset = lGfxGeometry->GetOffsetTransformation();
+		lOffset.SetPosition(vec3(0, 0, 0));
 		lGfxGeometry->SetOffsetTransformation(lOffset);
 	}
 }
@@ -445,7 +446,7 @@ GameUiManager* CppContextObject::GetUiManager() const
 	return (mUiManager);
 }
 
-const TBC::ChunkyClass* CppContextObject::GetClass() const
+const Tbc::ChunkyClass* CppContextObject::GetClass() const
 {
 	if (mUiClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -475,7 +476,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		{
 			int lPhysIndex = -1;
 			str lMeshName;
-			TransformationF lTransform;
+			xform lTransform;
 			float lScale;
 			lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform, lScale);
 			UserGeometryReferenceResource* lMesh = new UserGeometryReferenceResource(
@@ -500,7 +501,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	{
 		int lPhysIndex = -1;
 		str lMeshName;
-		TransformationF lTransform;
+		xform lTransform;
 		float lScale;
 		lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform, lScale);
 		str lMeshInstance;
@@ -570,12 +571,12 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 		}
 		const UiTbc::ChunkyClass::Material& lLoadedMaterial =
 			((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(lMeshIndex);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial(lLoadedMaterial.mAmbient,
+		Tbc::GeometryBase::BasicMaterialSettings lMaterial(lLoadedMaterial.mAmbient,
 			lLoadedMaterial.mDiffuse, lLoadedMaterial.mSpecular,
 			lLoadedMaterial.mShininess, lLoadedMaterial.mAlpha, lLoadedMaterial.mSmooth);
 		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
 
-		((TBC::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);
+		((Tbc::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);
 		pMeshResource->GetRamData()->SetScale(pMeshResource->GetOffset().mScale);
 		TryAddTexture();
 	}
@@ -679,7 +680,7 @@ str CppContextObject::GetMeshInstanceId() const
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CppContextObject);
+loginstance(GAME_CONTEXT_CPP, CppContextObject);
 
 
 

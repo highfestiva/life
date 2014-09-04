@@ -13,7 +13,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 class TerrainFunction;
 class TerrainPatch;
@@ -41,10 +41,10 @@ public:
 	void Clear();
 
 	void LoadFunctions(const FunctionArea& pArea, float pLod);
-	TBC::TerrainPatch* GeneratePatchMesh(const FunctionArea& pArea, float pLod);
+	Tbc::TerrainPatch* GeneratePatchMesh(const FunctionArea& pArea, float pLod);
 
 	void MarkAllDirty();
-	void MarkInUse(const Vector3DF& pPosition, float pRadius);
+	void MarkInUse(const vec3& pPosition, float pRadius);
 	void DeleteDirty();
 
 private:
@@ -53,13 +53,13 @@ private:
 	// TODO: move to some game logic file!
 	static const int msTerrainFunctionSize = (int)1e6;
 
-	typedef LooseQuadtree<TBC::TerrainFunction*, TBC::TerrainFunction*, float> FunctionTree;
+	typedef LooseQuadtree<Tbc::TerrainFunction*, Tbc::TerrainFunction*, float> FunctionTree;
 	FunctionTree* mFunctionTree;
 
 	// TODO: remove the dummy!
-	TBC::TerrainFunction* mDummyTerrainFunction;
+	Tbc::TerrainFunction* mDummyTerrainFunction;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

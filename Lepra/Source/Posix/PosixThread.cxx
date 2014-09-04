@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
@@ -12,7 +13,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <time.h>
-#include "../../Include/LepraTarget.h"
+#include "../../Include/LepraOS.h"
 #include "../../Include/HiResTimer.h"
 #include "../../Include/Thread.h"
 
@@ -454,7 +455,7 @@ void Thread::PostRun()
 
 
 
-LOG_CLASS_DEFINE(GENERAL, PosixSemaphore);
+loginstance(GENERAL, PosixSemaphore);
 
 
 

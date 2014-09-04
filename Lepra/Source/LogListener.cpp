@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/LepraAssert.h"
 #include "../Include/Posix/MacLog.h"
 #include "../Include/LepraTarget.h"
@@ -31,7 +32,7 @@ LogListener::~LogListener()
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
-void LogListener::AddLog(Log* pLog)
+void LogListener::AddLog(Logger* pLog)
 {
 	deb_assert(mLog == 0 || mLog == pLog);
 	if (mLog == 0 || mLog == pLog)
@@ -40,7 +41,7 @@ void LogListener::AddLog(Log* pLog)
 	}
 }
 
-void LogListener::RemoveLog(Log* pLog)
+void LogListener::RemoveLog(Logger* pLog)
 {
 	deb_assert(mLog == pLog);
 	if (mLog == pLog)
@@ -58,7 +59,7 @@ void LogListener::KillSelf()
 	}
 }
 
-void LogListener::OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel)
+void LogListener::OnLog(const Logger* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel)
 {
 	if (mFormat & FORMAT_CLASS)
 	{
@@ -70,7 +71,7 @@ void LogListener::OnLog(const Log* pOriginator, const str& pAccount, const str& 
 	}
 }
 
-void LogListener::OnLog(const Log* pOriginator, const str& pMessage, LogLevel pLevel)
+void LogListener::OnLog(const Logger* pOriginator, const str& pMessage, LogLevel pLevel)
 {
 	if (pLevel < mLevel)
 	{

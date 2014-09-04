@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Level.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextPath.h"
@@ -31,15 +32,15 @@ void Level::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lSpeedTag = FindTag(_T("driver"), 1, 0);
+	const Tbc::ChunkyClass::Tag* lSpeedTag = FindTag(_T("driver"), 1, 0);
 	if (lSpeedTag)
 	{
 		mLevelSpeed = lSpeedTag->mFloatValueList[0];
 	}
-	const TBC::ChunkyClass::Tag* lGravityTag = FindTag(_T("behavior"), 3, 0);
+	const Tbc::ChunkyClass::Tag* lGravityTag = FindTag(_T("behavior"), 3, 0);
 	if (lGravityTag)
 	{
-		Vector3DF lGravity(lGravityTag->mFloatValueList[0], lGravityTag->mFloatValueList[1], lGravityTag->mFloatValueList[2]);
+		vec3 lGravity(lGravityTag->mFloatValueList[0], lGravityTag->mFloatValueList[1], lGravityTag->mFloatValueList[2]);
 		mManager->GetGameManager()->GetPhysicsManager()->SetGravity(lGravity);
 	}
 	else

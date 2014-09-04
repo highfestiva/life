@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Automan.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
@@ -15,7 +16,7 @@ namespace Downwash
 
 
 
-Automan::Automan(Cure::GameManager* pGame, Cure::GameObjectId pCarId, const Vector3DF& pDirection):
+Automan::Automan(Cure::GameManager* pGame, Cure::GameObjectId pCarId, const vec3& pDirection):
 	Parent(pGame->GetResourceManager(), _T("Automan")),
 	mCarId(pCarId),
 	mDirection(pDirection)
@@ -45,9 +46,9 @@ void Automan::OnTick()
 		return;
 	}
 	lCar->SetEnginePower(0, 1);
-	const Vector2DF lWantedDirection(mDirection.x, mDirection.y);
-	const Vector3DF lCarDirection3d = lCar->GetOrientation()*Vector3DF(0,1,0);
-	const Vector2DF lCarDirection(lCarDirection3d.x, lCarDirection3d.y);
+	const vec2 lWantedDirection(mDirection.x, mDirection.y);
+	const vec3 lCarDirection3d = lCar->GetOrientation()*vec3(0,1,0);
+	const vec2 lCarDirection(lCarDirection3d.x, lCarDirection3d.y);
 	const float lAngle = lWantedDirection.GetAngle(lCarDirection);
 	lCar->SetEnginePower(1, lAngle);
 

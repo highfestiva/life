@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../../../Lepra/Include/DiskFile.h"
 #include "../../../Lepra/Include/Path.h"
 #include "../../Include/GUI/UiFileNameField.h"

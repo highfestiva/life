@@ -106,7 +106,7 @@ TEMPLATE Transformation<_TVarType> QUAL::InverseTransform(const Transformation& 
 	return (lTransformation);
 }
 
-TEMPLATE void QUAL::FastInverseTransform(const Transformation& pFrom, const QuaternionF pInverse, const Transformation& pTo)
+TEMPLATE void QUAL::FastInverseTransform(const Transformation& pFrom, const quat pInverse, const Transformation& pTo)
 {
 	mOrientation = pFrom.mOrientation;
 	mOrientation.FastInverseRotatedVector(pInverse, mPosition, pTo.mPosition - pFrom.mPosition);

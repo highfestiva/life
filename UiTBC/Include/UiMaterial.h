@@ -5,7 +5,7 @@
 
 	NOTES:
 
-	Materials in TBC don't work in the same manner as in other 
+	Materials in Tbc don't work in the same manner as in other 
 	3D-engines I've seen.
 
 	In the 3D-engines I've seen, you create an instance of a material
@@ -26,7 +26,7 @@
 	spending any time sorting at all. This is done by taking a somewhat
 	opposite approach.
 
-	In TBC, you don't add the material to the geometry. You add the
+	In Tbc, you don't add the material to the geometry. You add the
 	geometry to the material. All supported materials are then stored
 	in an array in the renderer. Each material is then responsible
 	for rendering all geometry using that material. This approach isn't
@@ -39,12 +39,12 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include "UiRenderer.h"
 #include "../../Lepra/Include/HashTable.h"
 #include <list>
 
-namespace TBC
+namespace Tbc
 {
 class GeometryBase;
 }
@@ -60,8 +60,8 @@ public:
 	GeometryGroup(Material* pMaterial, int pAllocSize = 8);
 	~GeometryGroup();
 
-	void AddGeometry(TBC::GeometryBase* pGeometry);
-	bool RemoveGeometry(TBC::GeometryBase* pGeometry);
+	void AddGeometry(Tbc::GeometryBase* pGeometry);
+	bool RemoveGeometry(Tbc::GeometryBase* pGeometry);
 
 	// Sorting will also calculate the depth's of the geometries
 	// and the group.
@@ -71,7 +71,7 @@ public:
 	float GetMeanDepth() const { return mMeanDepth; }
 	Renderer::TextureID GetGroupTextureID() const { return mGroupTextureID; }
 	int GetGeometryCount() const { return mGeometryCount; }
-	TBC::GeometryBase* GetGeometry(int i) { return mGeomArray[i].mGeometry; }
+	Tbc::GeometryBase* GetGeometry(int i) { return mGeomArray[i].mGeometry; }
 private:
 	int CalculateDepths(bool pF2B);
 	void BubbleSort(int (*Cmp)(const void* pGeom1, const void* pGeom2));
@@ -80,7 +80,7 @@ private:
 
 	struct Pair
 	{
-		TBC::GeometryBase* mGeometry;
+		Tbc::GeometryBase* mGeometry;
 		float mDepth;
 	};
 
@@ -125,35 +125,35 @@ public:
 
 	Renderer* GetRenderer();
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual RemoveStatus RemoveGeometry(TBC::GeometryBase* pGeometry);
+	virtual bool AddGeometry(Tbc::GeometryBase* pGeometry);
+	virtual RemoveStatus RemoveGeometry(Tbc::GeometryBase* pGeometry);
 	virtual void RemoveAllGeometry();
 
-	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial) = 0;
+	virtual void SetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings& pMaterial) = 0;
 
 	virtual void PreRender();
 	virtual void PostRender();
 
 	static void RenderAllGeometry(unsigned pCurrentFrame, Material* pGeometryContainer, Material* pRenderer = 0);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry) = 0;
-	virtual void RawRender(TBC::GeometryBase* pGeometry, int pUVSetIndex) = 0;
-	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry) = 0;
+	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry) = 0;
+	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex) = 0;
+	virtual void RenderBaseGeometry(Tbc::GeometryBase* pGeometry) = 0;
 
-	TBC::GeometryBase* GetFirstGeometry();
-	TBC::GeometryBase* GetNextGeometry();
+	Tbc::GeometryBase* GetFirstGeometry();
+	Tbc::GeometryBase* GetNextGeometry();
 
-	typedef std::list<TBC::GeometryBase*> GeometryList;
+	typedef std::list<Tbc::GeometryBase*> GeometryList;
 	typedef std::list<GeometryGroup*> GeometryGroupList;
 
 	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
-	Renderer::TextureID GetGroupTextureID(TBC::GeometryBase* pGeometry) const;
+	Renderer::TextureID GetGroupTextureID(Tbc::GeometryBase* pGeometry) const;
 	const GeometryGroupList& GetGeometryGroupList() const;
 
 protected:
-	static TBC::GeometryBase::BasicMaterialSettings mCurrentMaterial;
+	static Tbc::GeometryBase::BasicMaterialSettings mCurrentMaterial;
 
 	GeometryGroupList mGeometryGroupList;
 
@@ -183,17 +183,17 @@ public:
 	{
 	}
 
-	void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings&)
+	void SetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings&)
 	{
 	}
 
-	void RenderGeometry(TBC::GeometryBase* /*pGeometry*/)
+	void RenderGeometry(Tbc::GeometryBase* /*pGeometry*/)
 	{
 	}
-	void RawRender(TBC::GeometryBase*, int)
+	void RawRender(Tbc::GeometryBase*, int)
 	{
 	}
-	void RenderBaseGeometry(TBC::GeometryBase* /*pGeometry*/)
+	void RenderBaseGeometry(Tbc::GeometryBase* /*pGeometry*/)
 	{
 	}
 };

@@ -31,7 +31,7 @@ private:
 
 	UiCure::UserSound2dResource* mSoundResource;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

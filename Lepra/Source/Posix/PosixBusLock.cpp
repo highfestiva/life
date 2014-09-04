@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include <pthread.h>
 #include "../../Include/BusLock.h"
 

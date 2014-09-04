@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Sunlight.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../UiCure/Include/UiGameUiManager.h"
@@ -23,7 +24,7 @@ Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
 	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 		UiTbc::Renderer::LIGHT_MOVABLE, mLightAverageDirection,
-		Vector3DF(0.6f,0.6f,0.6f) * (lPixelShadersEnabled? 1.0f : 1.5f), 100);
+		vec3(0.6f,0.6f,0.6f) * (lPixelShadersEnabled? 1.0f : 1.5f), 100);
 }
 
 Sunlight::~Sunlight()
@@ -31,9 +32,9 @@ Sunlight::~Sunlight()
 	mUiManager->GetRenderer()->RemoveLight(mLightId);
 }
 
-void Sunlight::Tick(const QuaternionF& pCameraOrientation)
+void Sunlight::Tick(const quat& pCameraOrientation)
 {
-	Vector3DF d = mUiManager->GetAccelerometer();
+	vec3 d = mUiManager->GetAccelerometer();
 	d = pCameraOrientation*d.GetNormalized();
 	d = Math::Lerp(mLightAverageDirection, d, 0.5f);
 	if (d.GetDistanceSquared(mLightAverageDirection) > 1e-5f)

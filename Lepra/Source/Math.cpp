@@ -1,6 +1,7 @@
 // Author: Jonas Byström and Jonas Byström
 // Copyright (c) Pixel Doctrine
 
+#include "pch.h"
 #include "../Include/LepraTarget.h"
 #include "../Include/Math.h"
 

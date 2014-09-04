@@ -57,17 +57,17 @@ private:
 	};
 
 	virtual void OnTick();
-	bool AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pCaution);
+	bool AvoidGrenade(const vec3& pPosition, const vec3& pVelocity, float pCaution);
 	void SetMode(Mode pMode);
-	bool IsCloseToTarget(const Vector3DF& pPosition, float pDistance) const;
-	float GetClosestPathDistance(const Vector3DF& pPosition, const int pPath = -1, float* pLikeliness = 0, float pSteepFactor = 5) const;
-	Vector3DF GetClosestElevatorPosition(const Vector3DF& pPosition, const Cure::Elevator*& pNearestElevator) const;
-	bool HasElevatorArrived(const Cure::Elevator*& pNearestElevator, const float pPositionZ, Vector3DF& pNearestLiftPosition2d, float& pElevatorXyDistance2ToElevatorStop);
+	bool IsCloseToTarget(const vec3& pPosition, float pDistance) const;
+	float GetClosestPathDistance(const vec3& pPosition, const int pPath = -1, float* pLikeliness = 0, float pSteepFactor = 5) const;
+	vec3 GetClosestElevatorPosition(const vec3& pPosition, const Cure::Elevator*& pNearestElevator) const;
+	bool HasElevatorArrived(const Cure::Elevator*& pNearestElevator, const float pPositionZ, vec3& pNearestLiftPosition2d, float& pElevatorXyDistance2ToElevatorStop);
 	float GetClosestElevatorRadius() const;
-	static bool IsVertical(const Vector3DF& pVector);
+	static bool IsVertical(const vec3& pVector);
 	int GetVehicleIndex() const;
-	float GetRelativeDriveOnAngle(const Vector3DF& pDirection) const;
-	bool QueryCutieHindered(const Cure::TimeManager* pTime, const Vector3DF& pVelocity);
+	float GetRelativeDriveOnAngle(const vec3& pDirection) const;
+	bool QueryCutieHindered(const Cure::TimeManager* pTime, const vec3& pVelocity);
 
 	Game* mGame;
 	Mode mPreviousMode;
@@ -78,10 +78,10 @@ private:
 	int mStuckCount;
 	float mLastAverageAngle;
 	float mRotateAngle;
-	Vector3DF mElevatorGetOnPosition;
-	Vector3DF mElevatorGetOffPosition;
+	vec3 mElevatorGetOnPosition;
+	vec3 mElevatorGetOffPosition;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

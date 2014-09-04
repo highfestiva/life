@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/GUI/UiTextComponent.h"
 #include "../../Include/UiPainter.h"
 

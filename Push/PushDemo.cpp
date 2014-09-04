@@ -4,17 +4,18 @@
 
 
 
+#include "pch.h"
 #include "PushDemo.h"
 #ifdef PUSH_DEMO
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/SystemManager.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
-#include "../../UiTBC/Include/UiFontManager.h"
+#include "../../UiTbc/Include/UiFontManager.h"
 #include "GameClientMasterTicker.h"
 #include "Machine.h"
 
@@ -107,11 +108,11 @@ void PushDemo::TickUiUpdate()
 		return;
 	}
 	mCameraPivotPosition = lObject->GetPosition();
-	QuaternionF lRotation;
+	quat lRotation;
 	lRotation.RotateAroundWorldZ(mCameraAngle);
-	mCameraPosition = mCameraPivotPosition - lRotation*Vector3DF(10+sin(mCameraAngle*4.3f), 0, 0);
+	mCameraPosition = mCameraPivotPosition - lRotation*vec3(10+sin(mCameraAngle*4.3f), 0, 0);
 	mCameraPreviousPosition = mCameraPosition;
-	mCameraOrientation = Vector3DF(mCameraAngle, PIF/2, 0);
+	mCameraOrientation = vec3(mCameraAngle, PIF/2, 0);
 	mCameraAngle += GetTimeManager()->GetNormalFrameTime();
 }
 

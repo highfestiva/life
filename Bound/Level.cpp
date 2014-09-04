@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "Level.h"
 #include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/Plane.h"
 #include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiTBC/Include/UiBasicMeshCreator.h"
-#include "../UiTBC/Include/UiTriangleBasedGeometry.h"
+#include "../UiTbc/Include/UiBasicMeshCreator.h"
+#include "../UiTbc/Include/UiTriangleBasedGeometry.h"
 #include "RtVar.h"
 
 
@@ -39,7 +40,7 @@ Level::~Level()
 
 
 
-void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, bool pVaryShapes, int pLevel)
+void Level::GenerateLevel(Tbc::PhysicsManager* pPhysicsManager, bool pVaryShapes, int pLevel)
 {
 	(void)pLevel;
 
@@ -55,11 +56,11 @@ void Level::GenerateLevel(TBC::PhysicsManager* pPhysicsManager, bool pVaryShapes
 	}
 
 	CreateMesh(pVaryShapes, pLevel, 4.5f, 4.5f, 3);
-	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(0.5f,0.5f,0.5f);
-	mGfxMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(0,0,0);
+	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= vec3(0.5f,0.5f,0.5f);
+	mGfxMesh->GetBasicMaterialSettings().mSpecular	= vec3(0,0,0);
 	mGfxMesh->GetBasicMaterialSettings().mShininess	= false;
 	mGfxMesh->GetBasicMaterialSettings().mSmooth	= false;
-	mGfxMesh->SetGeometryVolatility(TBC::GeometryBase::GEOM_SEMI_STATIC);
+	mGfxMesh->SetGeometryVolatility(Tbc::GeometryBase::GEOM_SEMI_STATIC);
 	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
 
 	delete mGfxWindowMesh;
@@ -87,7 +88,7 @@ float Level::GetVolumePart() const
 	return mVolume / mOriginalVolume;
 }
 
-void Level::SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors)
+void Level::SetTriangles(Tbc::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors)
 {
 	mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
 
@@ -109,7 +110,7 @@ void Level::SetWindowTriangles(const std::vector<float>& pVertices)
 	mGfxWindowMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxWindowMesh, UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED, UiTbc::Renderer::FORCE_NO_SHADOWS);
 }
 
-void Level::AddCutPlane(TBC::PhysicsManager* pPhysicsManager, const Plane& pWindowPlane, const std::vector<float>& pVertices, const Color& pColor)
+void Level::AddCutPlane(Tbc::PhysicsManager* pPhysicsManager, const Plane& pWindowPlane, const std::vector<float>& pVertices, const Color& pColor)
 {
 	if (mGfxWindowMeshId)
 	{
@@ -120,8 +121,8 @@ void Level::AddCutPlane(TBC::PhysicsManager* pPhysicsManager, const Plane& pWind
 	{
 		mGfxWindowMesh = new UiTbc::TriangleBasedGeometry;
 	}
-	mGfxWindowMesh->GetBasicMaterialSettings().mDiffuse	= Vector3DF(pColor.mRed/255.0f, pColor.mGreen/255.0f, pColor.mBlue/255.0f);
-	mGfxWindowMesh->GetBasicMaterialSettings().mSpecular	= Vector3DF(1,1,1);
+	mGfxWindowMesh->GetBasicMaterialSettings().mDiffuse	= vec3(pColor.mRed/255.0f, pColor.mGreen/255.0f, pColor.mBlue/255.0f);
+	mGfxWindowMesh->GetBasicMaterialSettings().mSpecular	= vec3(1,1,1);
 	mGfxWindowMesh->GetBasicMaterialSettings().mAlpha	= pColor.mAlpha/255.0f;
 	mGfxWindowMesh->GetBasicMaterialSettings().mShininess	= true;
 	mGfxWindowMesh->GetBasicMaterialSettings().mSmooth	= false;
@@ -144,22 +145,22 @@ void Level::RenderOutline()
 	const float x = mSize.x / 2;
 	const float y = mSize.y / 2;
 	const float z = mSize.z / 2;
-	static const Vector3DF v[] =
+	static const vec3 v[] =
 	{
-		Vector3DF(-x, +y, +z), Vector3DF(+x, +y, +z),
-		Vector3DF(+x, +y, +z), Vector3DF(+x, +y, -z),
-		Vector3DF(+x, +y, -z), Vector3DF(-x, +y, -z),
-		Vector3DF(-x, +y, -z), Vector3DF(-x, +y, +z),
+		vec3(-x, +y, +z), vec3(+x, +y, +z),
+		vec3(+x, +y, +z), vec3(+x, +y, -z),
+		vec3(+x, +y, -z), vec3(-x, +y, -z),
+		vec3(-x, +y, -z), vec3(-x, +y, +z),
 
-		Vector3DF(-x, -y, +z), Vector3DF(+x, -y, +z),
-		Vector3DF(+x, -y, +z), Vector3DF(+x, -y, -z),
-		Vector3DF(+x, -y, -z), Vector3DF(-x, -y, -z),
-		Vector3DF(-x, -y, -z), Vector3DF(-x, -y, +z),
+		vec3(-x, -y, +z), vec3(+x, -y, +z),
+		vec3(+x, -y, +z), vec3(+x, -y, -z),
+		vec3(+x, -y, -z), vec3(-x, -y, -z),
+		vec3(-x, -y, -z), vec3(-x, -y, +z),
 
-		Vector3DF(-x, -y, +z), Vector3DF(-x, +y, +z),
-		Vector3DF(+x, -y, +z), Vector3DF(+x, +y, +z),
-		Vector3DF(-x, -y, -z), Vector3DF(-x, +y, -z),
-		Vector3DF(+x, -y, -z), Vector3DF(+x, +y, -z),
+		vec3(-x, -y, +z), vec3(-x, +y, +z),
+		vec3(+x, -y, +z), vec3(+x, +y, +z),
+		vec3(-x, -y, -z), vec3(-x, +y, -z),
+		vec3(+x, -y, -z), vec3(+x, +y, -z),
 	};
 	const int cnt = LEPRA_ARRAY_COUNT(v)/2;
 	for (int i = 0; i < cnt; ++i)
@@ -182,20 +183,20 @@ UiTbc::TriangleBasedGeometry* Level::CreateMesh(bool pVaryShapes, int pLevel, fl
 	{
 		case 0:
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateFlatBox(x, y, z, 1, 1, 1);
-			mSize = Vector3DF(x,y,z);
+			mSize = vec3(x,y,z);
 		break;
 		case 1:
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateEllipsoid(x*0.75f, y*0.75f, z*0.7f, 14, 14);
-			mSize = Vector3DF(x*1.5f,y*1.5f,z*1.4f);
+			mSize = vec3(x*1.5f,y*1.5f,z*1.4f);
 		break;
 		case 2:
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateCone((x+y)/2*0.6f, z*1.4f, 16);
-			mSize = Vector3DF(x*1.2f,y*1.2f,z*1.125f);
+			mSize = vec3(x*1.2f,y*1.2f,z*1.125f);
 			lMoveZ = -z*1.1f/2;
 		break;
 		case 3:
 			mGfxMesh = UiTbc::BasicMeshCreator::CreateCylinder(z*0.6f, z*0.6f, (x+y)/2*1.2f, 14);
-			mSize = Vector3DF(x*1.2f,z*1.2f,z*1.2f);
+			mSize = vec3(x*1.2f,z*1.2f,z*1.2f);
 		break;
 	}
 	// Create unique vertices for each triangle to simplify cutting.
@@ -236,7 +237,7 @@ void Level::SetVertices(UiTbc::TriangleBasedGeometry* pGfxMesh, const float* v, 
 		ni.push_back(x);
 	}
 
-	pGfxMesh->Set(v, 0, 0, pColorData, TBC::GeometryBase::COLOR_RGBA, ni.empty()? 0 : &ni[0], vc, vc, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_SEMI_STATIC);
+	pGfxMesh->Set(v, 0, 0, pColorData, Tbc::GeometryBase::COLOR_RGBA, ni.empty()? 0 : &ni[0], vc, vc, Tbc::GeometryBase::TRIANGLES, Tbc::GeometryBase::GEOM_SEMI_STATIC);
 	FlipTriangles(pGfxMesh);
 	pGfxMesh->SetAlwaysVisible(true);
 }
@@ -251,7 +252,7 @@ void Level::FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh)
 	}
 }
 
-void Level::CreatePhysicsMesh(TBC::PhysicsManager* pPhysicsManager)
+void Level::CreatePhysicsMesh(Tbc::PhysicsManager* pPhysicsManager)
 {
 	if (mPhysMeshBodyId)
 	{
@@ -268,22 +269,22 @@ void Level::CreatePhysicsMesh(TBC::PhysicsManager* pPhysicsManager)
 		mBodyIndexData[x] = mGfxMesh->GetIndexData()[x];
 	}
 	mPhysMeshBodyId = pPhysicsManager->CreateTriMesh(true, mGfxMesh->GetVertexCount(), mGfxMesh->GetVertexData(),
-		mGfxMesh->GetTriangleCount(), mBodyIndexData, TransformationF(), lFriction, lBounce, GetInstanceId());
+		mGfxMesh->GetTriangleCount(), mBodyIndexData, xform(), lFriction, lBounce, GetInstanceId());
 }
 
-void Level::AddPhysicsWindowBox(TBC::PhysicsManager* pPhysicsManager, const Plane& pPlane)
+void Level::AddPhysicsWindowBox(Tbc::PhysicsManager* pPhysicsManager, const Plane& pPlane)
 {
-	TransformationF lTransform(pPlane.GetOrientation(), pPlane.n*pPlane.d);
+	xform lTransform(pPlane.GetOrientation(), pPlane.n*pPlane.d);
 	const float lFriction = 0.7f;
 	const float lBounce = 1.0f;
-	TBC::PhysicsManager::BodyID lPhysWindowId = pPhysicsManager->CreateBox(true, lTransform, 0, Vector3DF(20,20,0.1f),
-		TBC::PhysicsManager::STATIC, lFriction, lBounce, GetInstanceId());
+	Tbc::PhysicsManager::BodyID lPhysWindowId = pPhysicsManager->CreateBox(true, lTransform, 0, vec3(20,20,0.1f),
+		Tbc::PhysicsManager::STATIC, lFriction, lBounce, GetInstanceId());
 	mPhysWindowBoxIds.push_back(lPhysWindowId);
 }
 
-void Level::DeleteWindowBoxes(TBC::PhysicsManager* pPhysicsManager)
+void Level::DeleteWindowBoxes(Tbc::PhysicsManager* pPhysicsManager)
 {
-	std::vector<TBC::PhysicsManager::BodyID>::iterator x = mPhysWindowBoxIds.begin();
+	std::vector<Tbc::PhysicsManager::BodyID>::iterator x = mPhysWindowBoxIds.begin();
 	for (; x != mPhysWindowBoxIds.end(); ++x)
 	{
 		pPhysicsManager->DeleteBody(*x);
@@ -308,9 +309,9 @@ float Level::CalculateVolume() const
 		float Ry = v[x*9+7];
 		float Rz = v[x*9+8];
 		lVolume += Px*Qy*Rz + Py*Qz*Rx + Pz*Qx*Ry - Px*Qz*Ry - Py*Qx*Rz - Pz*Qy*Rx;
-		/*Vector3DF p0(v[x*9+0], v[x*9+1], v[x*9+2]);
-		Vector3DF p1(v[x*9+3], v[x*9+4], v[x*9+5]);
-		Vector3DF p2(v[x*9+6], v[x*9+7], v[x*9+8]);
+		/*vec3 p0(v[x*9+0], v[x*9+1], v[x*9+2]);
+		vec3 p1(v[x*9+3], v[x*9+4], v[x*9+5]);
+		vec3 p2(v[x*9+6], v[x*9+7], v[x*9+8]);
 		p0.x += 100;
 		p1.x += 100;
 		p2.x += 100;

@@ -34,7 +34,7 @@ public:
 private:
 	bool mEnableDeleteDetonation;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

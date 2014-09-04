@@ -24,17 +24,17 @@ public:
 	Goal(Cure::ContextManager* pManager);
 	virtual ~Goal();
 
-	Vector3DF GetPosition() const;
+	vec3 GetPosition() const;
 	bool IsTriggered() const;
 
 private:
-	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
+	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
 
-	const TBC::PhysicsTrigger* mTrigger;
+	const Tbc::PhysicsTrigger* mTrigger;
 	bool mIsTriggered;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

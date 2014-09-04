@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "SeeThrough.h"
 #include "../Cure/Include/CppContextObject.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Lepra/Include/CollisionDetector3D.h"
-#include "../TBC/Include/PhysicsTrigger.h"
+#include "../Tbc/Include/PhysicsTrigger.h"
 #include "../UiCure/Include/UiCppContextObject.h"
 
 
@@ -76,13 +77,13 @@ void SeeThrough::OnTick()
 		ZS,
 	};
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
-	TBC::ChunkyPhysics* lPhysics = mParent->GetPhysics();
+	Tbc::ChunkyPhysics* lPhysics = mParent->GetPhysics();
 	const int lBoneIndex = mTag->mBodyIndexList[0];
-	const Vector3DF lBonePosition = lPhysics->GetBoneTransformation(lBoneIndex).GetPosition();
-	const Vector3DF lTargetPosition = lTarget->GetPosition();
-	const Vector3DF lHalfSize(mTag->mFloatValueList[XS]/2, mTag->mFloatValueList[YS]/2, mTag->mFloatValueList[ZS]/2);
+	const vec3 lBonePosition = lPhysics->GetBoneTransformation(lBoneIndex).GetPosition();
+	const vec3 lTargetPosition = lTarget->GetPosition();
+	const vec3 lHalfSize(mTag->mFloatValueList[XS]/2, mTag->mFloatValueList[YS]/2, mTag->mFloatValueList[ZS]/2);
 	AABB<float> lAABB;
-	lAABB.SetPosition(lBonePosition + Vector3DF(mTag->mFloatValueList[XO], mTag->mFloatValueList[YO], mTag->mFloatValueList[ZO]));
+	lAABB.SetPosition(lBonePosition + vec3(mTag->mFloatValueList[XO], mTag->mFloatValueList[YO], mTag->mFloatValueList[ZO]));
 	lAABB.SetSize(lHalfSize);
 	if (CollisionDetector3D<float>::IsAABBEnclosingPoint(lAABB, lTargetPosition))
 	{
@@ -112,7 +113,7 @@ void SeeThrough::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, SeeThrough);
+loginstance(GAME_CONTEXT_CPP, SeeThrough);
 
 
 

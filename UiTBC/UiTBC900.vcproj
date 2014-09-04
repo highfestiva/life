@@ -583,7 +583,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiTBC.cpp"
+				RelativePath=".\Source\UiTbc.cpp"
 				>
 			</File>
 			<File
@@ -961,7 +961,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiTBC.h"
+				RelativePath=".\Include\UiTbc.h"
 				>
 			</File>
 			<File

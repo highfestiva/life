@@ -28,7 +28,7 @@ class BombPlane: public Cure::CppContextObject
 public:
 	typedef Cure::CppContextObject Parent;
 
-	BombPlane(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher, const Vector3DF& pTarget);
+	BombPlane(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher, const vec3& pTarget);
 	virtual ~BombPlane();
 
 private:
@@ -36,13 +36,13 @@ private:
 	virtual void OnTick();
 
 	Life::Launcher* mLauncher;
-	Vector3DF mTarget;
+	vec3 mTarget;
 	int mLastBombTick;
 	float mBombingRadiusSquared;
 	float mDropInterval;
 	bool mIsDetonated;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Mine.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/Health.h"
@@ -44,7 +45,7 @@ void Mine::OnDie()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Mine);
+loginstance(GAME_CONTEXT_CPP, Mine);
 
 
 

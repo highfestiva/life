@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/PhysicsSpawner.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Endian.h"
@@ -13,7 +14,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -82,21 +83,21 @@ int PhysicsSpawner::GetSpawnPointCount() const
 	return mSpawnerNodeArray.size();
 }
 
-TransformationF PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint, int pIndex, Vector3DF& pInitialVelocity) const
+xform PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, const vec3& pScaledPoint, int pIndex, vec3& pInitialVelocity) const
 {
 	pInitialVelocity = mInitialVelocity;
 
 	deb_assert((size_t)pIndex < mSpawnerNodeArray.size() && pIndex >= 0);
-	TBC::ChunkyBoneGeometry* lSpawnGeometry = mSpawnerNodeArray[pIndex];
-	Vector3DF lPoint = lSpawnGeometry->GetShapeSize();
+	Tbc::ChunkyBoneGeometry* lSpawnGeometry = mSpawnerNodeArray[pIndex];
+	vec3 lPoint = lSpawnGeometry->GetShapeSize();
 	lPoint.x = (pScaledPoint.x-0.5f) * lPoint.x;
 	lPoint.y = (pScaledPoint.y-0.5f) * lPoint.y;
 	lPoint.z = (pScaledPoint.z-0.5f) * lPoint.z;
-	const TransformationF& lTransformation = pStructure->GetTransformation(lSpawnGeometry);
-	QuaternionF q = lTransformation.GetOrientation();
+	const xform& lTransformation = pStructure->GetTransformation(lSpawnGeometry);
+	quat q = lTransformation.GetOrientation();
 	lPoint = q * lPoint;
 	q.RotateAroundOwnY(PIF);	// This is so since the level ("the spawner") has a 180 degree orientation offset compared to objects.
-	return TransformationF(q, lTransformation.GetPosition()+lPoint);
+	return xform(q, lTransformation.GetPosition()+lPoint);
 }
 
 float PhysicsSpawner::GetNumber() const
@@ -227,7 +228,7 @@ PhysicsSpawner::SpawnObject::SpawnObject(const str& pSpawnObject, float pProbabi
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, PhysicsSpawner);
+loginstance(PHYSICS, PhysicsSpawner);
 
 
 

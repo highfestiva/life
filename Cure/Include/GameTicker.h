@@ -10,10 +10,9 @@
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Timer.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/PhysicsManager.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/PhysicsManager.h"
 #include "../Include/ContextObject.h"
-#include "../Include/ResourceManager.h"
 
 
 
@@ -48,14 +47,14 @@ public:
 
 
 
-class GameTicker: public ApplicationTicker, public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
+class GameTicker: public ApplicationTicker, public Tbc::PhysicsManager::TriggerListener, public Tbc::PhysicsManager::ForceFeedbackListener
 {
 public:
 	GameTicker(float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameTicker();
 	const TimeManager* GetTimeManager() const;
 	TimeManager* GetTimeManager();
-	TBC::PhysicsManager* GetPhysicsManager(bool pIsThreadSafe) const;
+	Tbc::PhysicsManager* GetPhysicsManager(bool pIsThreadSafe) const;
 
 	void StartPhysicsTick();
 	void WaitPhysicsTick();
@@ -71,12 +70,12 @@ private:
 	virtual void DidPhysicsTick() = 0;
 
 	TimeManager* mTimeManager;
-	TBC::PhysicsManager* mPhysicsManager;
+	Tbc::PhysicsManager* mPhysicsManager;
 	MemberThread<GameTicker>* mPhysicsWorkerThread;
-	Semaphore* mPhysicsTickStartSemaphore;
-	Semaphore* mPhysicsTickDoneSemaphore;
+	SemaphoreBC* mPhysicsTickStartSemaphore;
+	SemaphoreBC* mPhysicsTickDoneSemaphore;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -26,14 +26,14 @@ public:
 
 private:
 	virtual void OnTick();
-	void GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint, float pWantedDistance);
+	void GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint, float pWantedDistance);
 
 	FireManager* mGame;
 	Cure::GameObjectId mVehicleId;
 	const str mPathName;
 	Cure::ContextPath::SplinePath* mPath;
 	StopWatch mStillTimer;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

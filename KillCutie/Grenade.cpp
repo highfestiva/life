@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "Grenade.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
-#include "../TBC/Include/ChunkyBoneGeometry.h"
+#include "../Tbc/Include/ChunkyBoneGeometry.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiProps.h"
 #include "Game.h"
@@ -62,9 +63,9 @@ void Grenade::Launch()
 	mLaunchSound->Load(GetResourceManager(), _T("launch.wav"),
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
 
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	GetManager()->GetGameManager()->GetPhysicsManager()->EnableGravity(lGeometry->GetBodyId(), true);
-	Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
+	vec3 lVelocity = GetOrientation() * vec3(0, 0, mMuzzleVelocity);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 
 	((Game*)GetManager()->GetGameManager())->FreeLauncherBarrel();
@@ -75,25 +76,25 @@ void Grenade::OnTick()
 {
 	if (mShreekSound && mShreekSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		const Vector3DF lPosition = GetPosition();
-		Vector3DF lVelocity = GetVelocity();
+		const vec3 lPosition = GetPosition();
+		vec3 lVelocity = GetVelocity();
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), lPosition, lVelocity);
 		if (lVelocity.GetLengthSquared() > 1*1)
 		{
-			TBC::PhysicsManager::BodyID lBodyId = mPhysics->GetBoneGeometry(0)->GetBodyId();
+			Tbc::PhysicsManager::BodyID lBodyId = mPhysics->GetBoneGeometry(0)->GetBodyId();
 			const float l = lVelocity.GetLength();
-			const float lPitch = -lVelocity.GetAngle(Vector3DF(0,0,l));
-			Vector2DF lXY = Vector2DF(lVelocity.x, lVelocity.y);
+			const float lPitch = -lVelocity.GetAngle(vec3(0,0,l));
+			vec2 lXY = vec2(lVelocity.x, lVelocity.y);
 			const float l2 = lXY.GetLength();
 			if (l2)
 			{
-				const float lYaw = lXY.GetAngle(Vector2DF(0,l2));
-				QuaternionF q;
+				const float lYaw = lXY.GetAngle(vec2(0,l2));
+				quat q;
 				//q.SetEulerAngles(lYaw, lPitch, 0);
 				q.RotateAroundWorldZ(lPosition.z/100);
 				q.RotateAroundWorldX(lPitch);
 				q.RotateAroundWorldZ(-lYaw);
-				TransformationF t;
+				xform t;
 				t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
 				t.SetPosition(lPosition);
 				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBodyId, t);
@@ -102,23 +103,23 @@ void Grenade::OnTick()
 	}
 	if (mLaunchSound && mLaunchSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		Vector3DF lPosition;
-		Vector3DF lVelocity;
+		vec3 lPosition;
+		vec3 lVelocity;
 		((Game*)GetManager()->GetGameManager())->GetVehicleMotion(lPosition, lVelocity);
 		mUiManager->GetSoundManager()->SetSoundPosition(mLaunchSound->GetData(), lPosition, lVelocity);
 	}
 	if (!mIsLaunched && mTimeFrameCreated >= 0)
 	{
-		TransformationF lTransform;
+		xform lTransform;
 		((Game*)GetManager()->GetGameManager())->GetLauncherTransform(lTransform);
 		const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 		const float lTime = lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mTimeFrameCreated));
 		const float lLauncherLength = 1.1f;
 		float lRealTimeRatio;
-		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		float h = lLauncherLength/2+3 - lTime*lTime*4.0f*lRealTimeRatio;
 		h = std::max(-lLauncherLength/2, h);
-		const Vector3DF lFalling = lTransform.GetOrientation() * Vector3DF(0, 0, h);
+		const vec3 lFalling = lTransform.GetOrientation() * vec3(0, 0, h);
 		lTransform.GetPosition() += lFalling;
 		lTransform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
 		GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lTransform);
@@ -146,9 +147,9 @@ bool Grenade::TryComplete()
 }
 
 void Grenade::OnForceApplied(Cure::ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque,
+	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	pOwnBodyId;
 	pOtherBodyId;
@@ -177,8 +178,8 @@ void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 		}
 		else
 		{
-			Vector3DF lPosition;
-			Vector3DF lVelocity;
+			vec3 lPosition;
+			vec3 lVelocity;
 			((Game*)GetManager()->GetGameManager())->GetVehicleMotion(lPosition, lVelocity);
 			mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), lPosition, lVelocity);
 			mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 5.0f, 1.0);
@@ -188,7 +189,7 @@ void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Grenade);
+loginstance(GAME_CONTEXT_CPP, Grenade);
 
 
 

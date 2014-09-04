@@ -9,9 +9,7 @@
 
 
 
-// Don't replace this one with #pragma once!
-#ifndef LEPRATARGET_H
-#define LEPRATARGET_H
+#pragma once
 
 
 
@@ -127,19 +125,6 @@
 #if defined(LEPRA_IOS)
 #define LEPRA_TOUCH
 #endif // Touch device
-
-
-#endif // !LEPRATARGET_H
-
-
-// TRICKY: platform header files must cope with being included several times.
-#if defined(LEPRA_WINDOWS)
-#include "Win32/Win32Target.h"
-#elif defined(LEPRA_POSIX)
-#include "Posix/PosixTarget.h"
-#else
-#error "No recognized target platform specified!"
-#endif // LEPRA_WINDOWS/LEPRA_POSIX/?
 
 
 // We keep some graphics stuff here, since primitives are defined

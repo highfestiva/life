@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "../../TBC/Include/PortalManager.h"
+#include "../../Tbc/Include/PortalManager.h"
 #include "../../Lepra/Include/String.h"
-#include "../Include/UiTBC.h"
+#include "../Include/UiTbc.h"
 
 
 
@@ -34,7 +34,7 @@ class Renderer;
 
 
 
-class PortalManager: public TBC::PortalManager
+class PortalManager: public Tbc::PortalManager
 {
 public:
 
@@ -47,11 +47,11 @@ private:
 
 	class Cell;
 
-	class Portal : public TBC::PortalManager::Portal
+	class Portal : public Tbc::PortalManager::Portal
 	{
 	public:
 		Portal(int pNumVertices,
-		       Vector3DF* pVertex,
+		       vec3* pVertex,
 		       Cell* pCell1,
 		       Cell* pCell2);
 		virtual ~Portal();
@@ -59,7 +59,7 @@ private:
 		void Traverse(Renderer* pRenderer, const PixelRect& pRect, Cell* pFrom);
 	};
 
-	class Cell: public TBC::PortalManager::Cell
+	class Cell: public Tbc::PortalManager::Cell
 	{
 	public:
 		Cell(const str& pCellID, const str& pCellDescription, PortalManager* pPortalManager);
@@ -71,15 +71,15 @@ private:
 		int mLastFrameVisible;
 	};
 
-	virtual TBC::PortalManager::Portal* NewPortal(int pNumVertices,
-						      Vector3DF* pVertex,
+	virtual Tbc::PortalManager::Portal* NewPortal(int pNumVertices,
+						      vec3* pVertex,
 						      Cell* pCell1,
 						      Cell* pCell2);
-	virtual TBC::PortalManager::Cell* NewCell(const str& pCellID, 
+	virtual Tbc::PortalManager::Cell* NewCell(const str& pCellID, 
 						  const str& pCellDescription,
 						  PortalManager* pPortalManager);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

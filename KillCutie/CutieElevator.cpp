@@ -4,8 +4,9 @@
 
 
 
+#include "pch.h"
 #include "CutieElevator.h"
-#include "../../../TBC/Include/PhysicsTrigger.h"
+#include "../../../Tbc/Include/PhysicsTrigger.h"
 #include "Cutie.h"
 #include "Game.h"
 
@@ -26,9 +27,9 @@ CutieElevator::~CutieElevator()
 {
 }
 
-void CutieElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void CutieElevator::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
-	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
+	const Tbc::PhysicsTrigger* lTrigger = (const Tbc::PhysicsTrigger*)GetTrigger(pTriggerId);
 	deb_assert(lTrigger);
 	if (lTrigger->GetPriority() > -100)
 	{
@@ -49,7 +50,7 @@ void CutieElevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, Context
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CutieElevator);
+loginstance(GAME_CONTEXT_CPP, CutieElevator);
 
 
 

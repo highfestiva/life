@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiCollisionSoundManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/HashUtil.h"
@@ -57,14 +58,14 @@ void CollisionSoundManager::PreLoadSound(const str& pName)
 }
 
 
-void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
+void CollisionSoundManager::Tick(const vec3& pCameraPosition)
 {
 	ScopeLock lLock(&mLock);
 
 	mCameraPosition = pCameraPosition;
 
 	float lRealTimeRatio;
-	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 
 	SoundMap::iterator x = mSoundMap.begin();
 	while (x != mSoundMap.end())
@@ -101,9 +102,9 @@ void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
 	}
 }
 
-void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+void CollisionSoundManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance, bool pIsLoud)
+	Tbc::PhysicsManager::BodyID pBody1Id, float pMaxDistance, bool pIsLoud)
 {
 	if (!pObject1 || !pObject2)
 	{
@@ -127,11 +128,11 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 		lImpact = mLightImpact;
 	}
 	lImpact = std::min(2.0f, lImpact);
-	const TBC::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
+	const Tbc::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
 	OnCollision(lImpact, pPosition, lKey, lKey->GetMaterial());
 }
 
-void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPosition, const TBC::ChunkyBoneGeometry* pKey, const str& pSoundName)
+void CollisionSoundManager::OnCollision(float pImpact, const vec3& pPosition, const Tbc::ChunkyBoneGeometry* pKey, const str& pSoundName)
 {
 	ScopeLock lLock(&mLock);
 	SoundInfo* lSoundInfo = GetPlayingSound(pKey);
@@ -171,12 +172,12 @@ void CollisionSoundManager::OnCollision(float pImpact, const Vector3DF& pPositio
 
 
 
-CollisionSoundManager::SoundInfo* CollisionSoundManager::GetPlayingSound(const TBC::ChunkyBoneGeometry* pGeometryKey) const
+CollisionSoundManager::SoundInfo* CollisionSoundManager::GetPlayingSound(const Tbc::ChunkyBoneGeometry* pGeometryKey) const
 {
 	return HashUtil::FindMapObject(mSoundMap, pGeometryKey);
 }
 
-void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKey, const str& pSoundName, const Vector3DF& pPosition, float pImpact)
+void CollisionSoundManager::PlaySound(const Tbc::ChunkyBoneGeometry* pGeometryKey, const str& pSoundName, const vec3& pPosition, float pImpact)
 {
 	SoundResourceInfo lResource;
 	bool lGotSound = HashUtil::TryFindMapObject(mSoundNameMap, pSoundName, lResource);
@@ -209,9 +210,9 @@ void CollisionSoundManager::OnSoundLoaded(UiCure::UserSound3dResource* pSoundRes
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		float lRealTimeRatio;
-		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(),
-			lSoundInfo->mPosition, Vector3DF());
+			lSoundInfo->mPosition, vec3());
 		lSoundInfo->UpdateImpact();
 		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), lSoundInfo->mVolume, lSoundInfo->mPitch * lRealTimeRatio);
 	}
@@ -231,14 +232,14 @@ void CollisionSoundManager::UpdateSound(SoundInfo* pSoundInfo)
 			return;
 		}
 		float lRealTimeRatio;
-		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 		pSoundInfo->UpdateImpact();
 		mUiManager->GetSoundManager()->SetVolume(pSoundInfo->mSound->GetData(), pSoundInfo->mVolume);
 		mUiManager->GetSoundManager()->SetPitch(pSoundInfo->mSound->GetData(), pSoundInfo->mPitch * lRealTimeRatio);
 	}
 }
 
-void CollisionSoundManager::StopSound(const TBC::ChunkyBoneGeometry* pGeometryKey)
+void CollisionSoundManager::StopSound(const Tbc::ChunkyBoneGeometry* pGeometryKey)
 {
 	SoundMap::iterator x = mSoundMap.find(pGeometryKey);
 	if (x == mSoundMap.end())
@@ -329,7 +330,7 @@ void CollisionSoundManager::CollisionSoundResource::operator=(const CollisionSou
 
 
 
-LOG_CLASS_DEFINE(GAME, CollisionSoundManager);
+loginstance(GAME, CollisionSoundManager);
 
 
 

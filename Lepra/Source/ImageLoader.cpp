@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ImageLoader.h"
 #include "../Include/LepraAssert.h"
 #include "../Include/BmpLoader.h"

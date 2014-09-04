@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/TerrainPatch.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../../Lepra/Include/Timer.h"
@@ -11,7 +12,7 @@
 
 #include "../../Lepra/Include/LepraAssert.h"
 
-namespace TBC
+namespace Tbc
 {
 
 int   TerrainPatch::smNumPatches = 0;
@@ -365,9 +366,9 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 		for (x = pMinXIndex; x < pMaxXIndex; ++x)
 		{
 			int lVertexIndex = (y * (smPatchRes + 1) + x) * 3;
-			// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
+			// TRICKY: Typecasting float-array to vec3 is risky if the implementation
 			// of Vector3D changes.
-			pModifier.ModifyVertex(Vector2DF(lWorldX, lWorldY), *((Vector3DF*)&mVertexData[lVertexIndex]));
+			pModifier.ModifyVertex(vec2(lWorldX, lWorldY), *((vec3*)&mVertexData[lVertexIndex]));
 			lWorldX += lScaleX;
 		}
 
@@ -382,9 +383,9 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 		for (x = pMinXIndex; x < pMaxXIndex - 1; ++x)
 		{
 			int lVertexIndex = ((smPatchRes + 1) * (smPatchRes + 1) + y * smPatchRes + x) * 3;
-			// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
+			// TRICKY: Typecasting float-array to vec3 is risky if the implementation
 			// of Vector3D changes.
-			pModifier.ModifyVertex(Vector2DF(lWorldX, lWorldY), *((Vector3DF*)&mVertexData[lVertexIndex]));
+			pModifier.ModifyVertex(vec2(lWorldX, lWorldY), *((vec3*)&mVertexData[lVertexIndex]));
 			lWorldX += lScaleX;
 		}
 
@@ -402,9 +403,9 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			int lVertexIndex = (mSouthEdgeIndex + i * (smPatchSizeMultiplier - 1)) * 3;
 			for (int j = 1; j < smPatchSizeMultiplier; j++)
 			{
-				// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
+				// TRICKY: Typecasting float-array to vec3 is risky if the implementation
 				// of Vector3D changes.
-				pModifier.ModifyVertex(Vector2DF(lWorldX, mSouthWestCorner.y), *((Vector3DF*)&mVertexData[lVertexIndex]));
+				pModifier.ModifyVertex(vec2(lWorldX, mSouthWestCorner.y), *((vec3*)&mVertexData[lVertexIndex]));
 				lWorldX += lSmallXStep;
 				lVertexIndex += 3;
 			}
@@ -419,9 +420,9 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			int lVertexIndex = (mNorthEdgeIndex + i * (smPatchSizeMultiplier - 1)) * 3;
 			for (int j = 1; j < smPatchSizeMultiplier; j++)
 			{
-				// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
+				// TRICKY: Typecasting float-array to vec3 is risky if the implementation
 				// of Vector3D changes.
-				pModifier.ModifyVertex(Vector2DF(lWorldX, mNorthEastCorner.y), *((Vector3DF*)&mVertexData[lVertexIndex]));
+				pModifier.ModifyVertex(vec2(lWorldX, mNorthEastCorner.y), *((vec3*)&mVertexData[lVertexIndex]));
 				lWorldX += lSmallXStep;
 				lVertexIndex += 3;
 			}
@@ -436,9 +437,9 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			int lVertexIndex = (mWestEdgeIndex + i * (smPatchSizeMultiplier - 1)) * 3;
 			for (int j = 1; j < smPatchSizeMultiplier; j++)
 			{
-				// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
+				// TRICKY: Typecasting float-array to vec3 is risky if the implementation
 				// of Vector3D changes.
-				pModifier.ModifyVertex(Vector2DF(mSouthWestCorner.x, lWorldY), *((Vector3DF*)&mVertexData[lVertexIndex]));
+				pModifier.ModifyVertex(vec2(mSouthWestCorner.x, lWorldY), *((vec3*)&mVertexData[lVertexIndex]));
 				lWorldY += lSmallYStep;
 				lVertexIndex += 3;
 			}
@@ -454,9 +455,9 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			int lVertexIndex = (mEastEdgeIndex + i * (smPatchSizeMultiplier - 1)) * 3;
 			for (int j = 1; j < smPatchSizeMultiplier; j++)
 			{
-				// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
+				// TRICKY: Typecasting float-array to vec3 is risky if the implementation
 				// of Vector3D changes.
-				pModifier.ModifyVertex(Vector2DF(mNorthEastCorner.x, lWorldY), *((Vector3DF*)&mVertexData[lVertexIndex]));
+				pModifier.ModifyVertex(vec2(mNorthEastCorner.x, lWorldY), *((vec3*)&mVertexData[lVertexIndex]));
 				lWorldY += lSmallYStep;
 				lVertexIndex += 3;
 			}
@@ -468,7 +469,7 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 class FlatModifier : public TerrainPatch::Modifier
 {
 public:
-	void ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pVertex) const
+	void ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const
 	{
 		pVertex.x = pWorldFlatPos.x;
 		pVertex.y = pWorldFlatPos.y;
@@ -482,7 +483,7 @@ void TerrainPatch::SetToFlatTerrainPatch()
 	IterateOverPatch(lModifier, 0, GetVertexRes(), 0, GetVertexRes());
 }
 
-void TerrainPatch::SetFlatCallback(float pWorldX, float pWorldY, Vector3DF& pCurrentPoint)
+void TerrainPatch::SetFlatCallback(float pWorldX, float pWorldY, vec3& pCurrentPoint)
 {
 	pCurrentPoint.x = pWorldX;
 	pCurrentPoint.y = pWorldY;
@@ -490,7 +491,7 @@ void TerrainPatch::SetFlatCallback(float pWorldX, float pWorldY, Vector3DF& pCur
 }
 
 /*
-void TerrainPatch::SetVertexData(const Vector3DF* pVertexData)
+void TerrainPatch::SetVertexData(const vec3* pVertexData)
 {
 	int x;
 	int y;
@@ -543,7 +544,7 @@ void TerrainPatch::SetVertexData(const Vector3DF* pVertexData)
 	}
 }
 
-void TerrainPatch::SetEdgeVertexData(const Vector3DF* pVertexData, int pDstVertexIndex, int pSrcVertexStartIndex, int pPitch)
+void TerrainPatch::SetEdgeVertexData(const vec3* pVertexData, int pDstVertexIndex, int pSrcVertexStartIndex, int pPitch)
 {
 	for (int x = 0; x < smPatchRes; ++x)
 	{
@@ -835,7 +836,7 @@ void TerrainPatch::CopyElement(float* pDst, float* pSrc)
 
 void TerrainPatch::SetElementsToMean(float* pDst, float* pSrc)
 {
-	Vector3DF lV((pDst[0] + pSrc[0]) * 0.5f,
+	vec3 lV((pDst[0] + pSrc[0]) * 0.5f,
 			     (pDst[1] + pSrc[1]) * 0.5f,
 			     (pDst[2] + pSrc[2]) * 0.5f);
 	lV.Normalize();
@@ -854,12 +855,12 @@ Vector2D<int> TerrainPatch::GetNorthEastUnitPos() const
 	return mUnitPosition + Vector2D<int>(mSizeMultiplier, mSizeMultiplier);
 }
 
-const Vector2DF& TerrainPatch::GetSouthWest()
+const vec2& TerrainPatch::GetSouthWest()
 {
 	return mSouthWestCorner;
 }
 
-const Vector2DF& TerrainPatch::GetNorthEast()
+const vec2& TerrainPatch::GetNorthEast()
 {
 	return mNorthEastCorner;
 }
@@ -869,7 +870,7 @@ bool TerrainPatch::GetEdgeFlagValue(unsigned int pEdgeFlag)
 	return CheckFlag(mHiResEdgeFlags, pEdgeFlag);
 }
 
-void TerrainPatch::GetPosAndNormal(float pNormalizedX, float pNormalizedY, Vector3DF& pPos, Vector3DF& pNormal) const
+void TerrainPatch::GetPosAndNormal(float pNormalizedX, float pNormalizedY, vec3& pPos, vec3& pNormal) const
 {
 	pNormalizedX; pNormalizedY; pPos; pNormal;
 }

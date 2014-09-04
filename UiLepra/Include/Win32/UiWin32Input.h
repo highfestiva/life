@@ -46,7 +46,7 @@ private:
 	LPCDIDEVICEOBJECTINSTANCE mElement;
 	DIOBJECTDATAFORMAT mDataFormat;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 const LPCDIDEVICEOBJECTINSTANCE Win32InputElement::GetDirectInputElement() const
@@ -89,7 +89,7 @@ private:
 	DIDATAFORMAT mDataFormat;
 	LPDIDEVICEOBJECTDATA mDeviceObjectData;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

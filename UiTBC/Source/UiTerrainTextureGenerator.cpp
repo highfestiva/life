@@ -5,6 +5,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/UiTerrainTextureGenerator.h"
 
 namespace UiTbc
@@ -54,8 +55,8 @@ bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Can
 	float lOneOverWidth = 1.0f / ((float)pCanvas.GetWidth() - 1);
 	float lOneOverHeight = 1.0f / ((float)pCanvas.GetHeight() - 1);
 
-	Vector3DF* lPos = 0;
-	Vector3DF* lNormal = 0;
+	vec3* lPos = 0;
+	vec3* lNormal = 0;
 
 	for (unsigned y = 0; y < pCanvas.GetHeight(); y++)
 	{
@@ -65,8 +66,8 @@ bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Can
 		{
 			float lU = (float)x * lOneOverWidth;
 
-			Vector3DF lPos;
-			Vector3DF lNormal;
+			vec3 lPos;
+			vec3 lNormal;
 
 			pPatch.GetPosAndNormal(lU, lV, lPos, lNormal);
 
@@ -90,8 +91,8 @@ bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Can
 	}
 }*/
 
-void TerrainTextureGenerator::GetHeightDependentRGB(const Vector3DF& pPos,
-													const Vector3DF& pNormal,
+void TerrainTextureGenerator::GetHeightDependentRGB(const vec3& pPos,
+													const vec3& pNormal,
 													float pU, float pV,
 													float& r, float& g, float& b)
 {
@@ -171,7 +172,7 @@ void TerrainTextureGenerator::GetHeightDependentRGB(const Vector3DF& pPos,
 }
 
 void TerrainTextureGenerator::GetAngleDependentRGB(Range* pRange, 
-												   const Vector3DF& pNormal, 
+												   const vec3& pNormal, 
 												   float pU, float pV,
 												   float& r, float& g, float& b)
 {

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/NetworkManager.h"
 #include "../Include/PythonContextManager.h"
 #include "../Include/PythonContextObject.h"

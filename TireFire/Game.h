@@ -8,7 +8,7 @@
 
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/GameTicker.h"
-#include "../UiTBC/Include/UiRenderer.h"
+#include "../UiTbc/Include/UiRenderer.h"
 
 
 
@@ -119,7 +119,7 @@ public:
 	const str& GetLevelName() const;
 	bool SetLevelName(const str& pLevel);
 	bool RestartLevel();
-	TransformationF GetVehicleStart() const;
+	xform GetVehicleStart() const;
 	virtual bool Tick();
 	void TickFlyby();
 
@@ -128,7 +128,7 @@ public:
 	Level* GetLevel() const;
 	Vehicle* GetVehicle() const;
 	Goal* GetGoal() const;
-	void GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity) const;
+	void GetVehicleMotion(vec3& pPosition, vec3 pVelocity) const;
 	void SetThrottle(float pThrottle);
 	FlybyMode GetFlybyMode() const;
 	void SetFlybyMode(FlybyMode pFlybyMode);
@@ -137,8 +137,8 @@ public:
 	double GetScore() const;
 	void EnableScoreCounting(bool pEnable);
 	bool IsScoreCountingEnabled() const;
-	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
-		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
+	void Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
+		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, Tbc::PhysicsManager::BodyID pExplosiveBodyId, Tbc::PhysicsManager::BodyID pTargetBodyId);
 	void OnCapture();	// CTF
 	int GetHeartBalance() const;	// 0 = Heart is 2 love, -1 = P1 leads with 1 point, +2 P2 leads with 2 points...
 	void SetHeartBalance(int pBalance);
@@ -162,14 +162,14 @@ private:
 
 	virtual void WillMicroTick(float pTimeDelta);
 	virtual void DidPhysicsTick();
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
-	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity);
 
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	virtual void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
+		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
 	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
 	virtual bool IsServer();
@@ -190,7 +190,7 @@ private:
 	FlybyMode mFlybyMode;
 	double mFlyByTime;
 	Vehicle* mVehicle;
-	Vector3DF mVehicleCamPos;
+	vec3 mVehicleCamPos;
 
 	mutable Goal* mGoal;
 	VehicleAi* mVehicleAi;

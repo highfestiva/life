@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "ServerMine.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/Health.h"
@@ -45,7 +46,7 @@ void ServerMine::OnTick()
 	{
 		if (--mTicksTilDetonation == 0)
 		{
-			ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 1, 0);
+			ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), vec3(), 1, 0);
 		}
 		return;
 	}
@@ -70,9 +71,9 @@ void ServerMine::OnTick()
 }
 
 void ServerMine::OnForceApplied(Cure::ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque,
+	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	(void)pOtherObject;
 	(void)pOwnBodyId;
@@ -83,7 +84,7 @@ void ServerMine::OnForceApplied(Cure::ContextObject* pOtherObject,
 
 	float lForce = pForce.GetLength()/GetMass() * 0.002f;
 	if (mTicksTilFullyActivated == 0 ||
-		(pOtherObject->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
+		(pOtherObject->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC &&
 		!dynamic_cast<ServerMine*>(pOtherObject)))
 	{
 		lForce *= 10;
@@ -96,7 +97,7 @@ void ServerMine::OnForceApplied(Cure::ContextObject* pOtherObject,
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, ServerMine);
+loginstance(GAME_CONTEXT_CPP, ServerMine);
 
 
 

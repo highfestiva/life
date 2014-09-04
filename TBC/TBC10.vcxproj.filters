@@ -56,7 +56,7 @@
     <ClCompile Include="Source\PortalManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TBC.cpp">
+    <ClCompile Include="Source\Tbc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\TerrainFunction.cpp">
@@ -112,7 +112,7 @@
     <ClInclude Include="Include\PortalManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\TBC.h">
+    <ClInclude Include="Include\Tbc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\TerrainFunction.h">

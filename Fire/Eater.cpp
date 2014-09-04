@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Eater.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
@@ -28,7 +29,7 @@ Eater::~Eater()
 
 
 
-void Eater::OnTrigger(TBC::PhysicsManager::TriggerID, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF&)
+void Eater::OnTrigger(Tbc::PhysicsManager::TriggerID, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3&)
 {
 	if (pOtherObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId() == pBodyId)	// Only if whole car enters "goal", not only wheel.
 	{
@@ -48,7 +49,7 @@ void Eater::OnTrigger(TBC::PhysicsManager::TriggerID, ContextObject* pOtherObjec
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Eater);
+loginstance(GAME_CONTEXT_CPP, Eater);
 
 
 

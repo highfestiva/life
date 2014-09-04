@@ -6,19 +6,17 @@
 
 #pragma once
 
-#include "../../TBC/Include/PhysicsManager.h"
+#include "../../Tbc/Include/PhysicsManager.h"
 #include "../../Lepra/Include/Unordered.h"
 #include <list>
 #include <vector>
 #include "../../Lepra/Include/String.h"
 #include "Cure.h"
 #include "PositionalData.h"
-#include "PositionHauler.h"
-#include "PhysicsSharedResource.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 class ChunkyPhysics;
 class ChunkyBoneGeometry;
@@ -69,7 +67,7 @@ public:
 	void SetLoadResult(bool pOk);
 
 	void SetAllowMoveRoot(bool pAllow);
-	void AttachToObject(TBC::PhysicsManager::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsManager::BodyID pBody2);
+	void AttachToObject(Tbc::PhysicsManager::BodyID pBody1, ContextObject* pObject2, Tbc::PhysicsManager::BodyID pBody2);
 	void AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
 	bool DetachFromObject(ContextObject* pObject);
 
@@ -82,47 +80,47 @@ public:
 	bool IsAttributeTrue(const str& pAttributeName) const;
 	void OnAttributeUpdated(ContextObjectAttribute* pAttribute);
 
-	void AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void*);
-	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
-	const void* GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const;
+	void AddTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, const void*);
+	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
+	const void* GetTrigger(Tbc::PhysicsManager::TriggerID pTriggerId) const;
 	size_t GetTriggerCount(const void*& pTrigger) const;
 
-	virtual void SetSpawner(const TBC::PhysicsSpawner* pSpawner);
-	const TBC::PhysicsSpawner* GetSpawner() const;
+	virtual void SetSpawner(const Tbc::PhysicsSpawner* pSpawner);
+	const Tbc::PhysicsSpawner* GetSpawner() const;
 
 	void AddChild(ContextObject* pChild);
 	const Array& GetChildArray() const;
 
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);	// Fetch full phys position (and update object graph as necessary).
-	static bool UpdateFullPosition(ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure);
+	static bool UpdateFullPosition(ObjectPositionalData& pPosition, Tbc::PhysicsManager* pPhysicsManager, Tbc::ChunkyPhysics* pStructure);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData, float pDeltaThreshold);	// Sets full phys position if structure or significant difference seen.
 	virtual void SetPositionFinalized();
-	void SetInitialTransform(const TransformationF& pTransformation);
-	TransformationF GetInitialTransform() const;
+	void SetInitialTransform(const xform& pTransformation);
+	xform GetInitialTransform() const;
 	void SetInitialPositionalData(const ObjectPositionalData& pPositionalData);
-	Vector3DF GetPosition() const;
-	void SetRootPosition(const Vector3DF& pPosition);
-	Vector3DF GetRootPosition() const;
-	void SetRootOrientation(const QuaternionF& pOrientation);
-	void SetRootVelocity(const Vector3DF& pVelocity);
-	QuaternionF GetOrientation() const;
-	Vector3DF GetVelocity() const;
-	Vector3DF GetAngularVelocity() const;
-	Vector3DF GetAcceleration() const;
-	Vector3DF GetForwardDirection() const;
+	vec3 GetPosition() const;
+	void SetRootPosition(const vec3& pPosition);
+	vec3 GetRootPosition() const;
+	void SetRootOrientation(const quat& pOrientation);
+	void SetRootVelocity(const vec3& pVelocity);
+	quat GetOrientation() const;
+	vec3 GetVelocity() const;
+	vec3 GetAngularVelocity() const;
+	vec3 GetAcceleration() const;
+	vec3 GetForwardDirection() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
 	ObjectPositionalData* GetNetworkOutputGhost();
 	void DeleteNetworkOutputGhost();
 
-	void SetPhysics(TBC::ChunkyPhysics* pStructure);
+	void SetPhysics(Tbc::ChunkyPhysics* pStructure);
 	void ClearPhysics();
-	TBC::ChunkyPhysics* GetPhysics() const;
+	Tbc::ChunkyPhysics* GetPhysics() const;
 	void SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride);
-	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
-	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
+	Tbc::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
+	Tbc::ChunkyBoneGeometry* GetStructureGeometry(Tbc::PhysicsManager::BodyID pBodyId) const;
 	bool SetEnginePower(unsigned pAspect, float pPower);
-	float GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass = 0, float pSidewaysFactor = 1) const;
+	float GetImpact(const vec3& pGravity, const vec3& pForce, const vec3& pTorque, float pExtraMass = 0, float pSidewaysFactor = 1) const;
 
 	void ForceSend();
 	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
@@ -133,18 +131,18 @@ public:
 	virtual void OnLoaded();
 	virtual void OnMicroTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal) = 0;
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal) = 0;
 	virtual void OnForceApplied(ContextObject* pOtherObject,
-		 TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		 const Vector3DF& pForce, const Vector3DF& pTorque,
-		 const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity) = 0;
+		 Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		 const vec3& pForce, const vec3& pTorque,
+		 const vec3& pPosition, const vec3& pRelativeVelocity) = 0;
 	virtual void OnTick();
 
 protected:
 	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData);
-	void AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
+	void AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, Tbc::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
 	bool IsAttachedTo(ContextObject* pObject) const;
-	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
+	void AddAttachment(ContextObject* pObject, Tbc::PhysicsManager::JointID pJoint, Tbc::PhysicsEngine* pEngine);
 
 	void RemoveChild(ContextObject* pChild);
 	void SetParent(ContextObject* pParent);
@@ -154,18 +152,18 @@ protected:
 
 	struct Connection
 	{
-		Connection(ContextObject* pObject, TBC::PhysicsManager::JointID pJointId, TBC::PhysicsEngine* pEngine):
+		Connection(ContextObject* pObject, Tbc::PhysicsManager::JointID pJointId, Tbc::PhysicsEngine* pEngine):
 			mObject(pObject),
 			mJointId(pJointId),
 			mEngine(pEngine)
 		{
 		}
 		ContextObject* mObject;
-		TBC::PhysicsManager::JointID mJointId;
-		TBC::PhysicsEngine* mEngine;
+		Tbc::PhysicsManager::JointID mJointId;
+		Tbc::PhysicsEngine* mEngine;
 	};
 	typedef std::list<Connection> ConnectionList;
-	typedef std::unordered_map<TBC::PhysicsManager::TriggerID, const void*> TriggerMap;
+	typedef std::unordered_map<Tbc::PhysicsManager::TriggerID, const void*> TriggerMap;
 
 	ContextManager* mManager;
 	ResourceManager* mResourceManager;
@@ -178,10 +176,10 @@ protected:
 	void* mExtraData;
 	Array mChildArray;
 	TriggerMap mTriggerMap;
-	const TBC::PhysicsSpawner* mSpawner;
+	const Tbc::PhysicsSpawner* mSpawner;
 	bool mIsLoaded;
 	AttributeArray mAttributeArray;
-	TBC::ChunkyPhysics* mPhysics;
+	Tbc::ChunkyPhysics* mPhysics;
 	PhysicsOverride mPhysicsOverride;
 	float mTotalMass;
 	float mLastSendTime;
@@ -191,7 +189,7 @@ protected:
 	bool mAllowMoveRoot;	// This is set to false when attached to someone/something else.
 	ConnectionList mConnectionList;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

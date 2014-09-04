@@ -34,7 +34,7 @@ private:
 	MuxIoSocket* mMuxSocket;
 	SocketReceiveFilterTable mSocketReceiveFilterTable;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

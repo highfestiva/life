@@ -36,7 +36,7 @@ public:
 private:
 	Cure::ContextPath* mPath;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

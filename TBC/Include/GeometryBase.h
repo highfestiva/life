@@ -12,13 +12,13 @@
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../../Lepra/Include/Transformation.h"
-#include "TBC.h"
+#include "Tbc.h"
 #include "PortalManager.h"
 
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -114,17 +114,17 @@ public:
 	{
 	public:
 		BasicMaterialSettings();
-		BasicMaterialSettings(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
-			const Vector3DF& pSpecular, float pShininess,
+		BasicMaterialSettings(const vec3& pAmbient, const vec3& pDiffuse,
+			const vec3& pSpecular, float pShininess,
 			float pAlpha, bool pSmooth);
 		void SetColor(float pRed, float pGreen, float pBlue);
-		void Set(const Vector3DF& pAmbient, const Vector3DF& pDiffuse,
-			const Vector3DF& pSpecular, float pShininess,
+		void Set(const vec3& pAmbient, const vec3& pDiffuse,
+			const vec3& pSpecular, float pShininess,
 			float pAlpha, bool pSmooth);
 
-		Vector3DF mAmbient;
-		Vector3DF mDiffuse;
-		Vector3DF mSpecular;
+		vec3 mAmbient;
+		vec3 mDiffuse;
+		vec3 mSpecular;
 		float mShininess;	// Specular "exponent".
 		float mAlpha;	// Used on blended (and transparent? materials.
 		bool mSmooth;	// Smooth shaded or flat shaded?
@@ -234,14 +234,14 @@ public:
 	size_t GetExtraData() const;
 	void SetExtraData(size_t pExtraData);
 
-	void SetTransformation(const TransformationF& pTransformation);
-	const TransformationF& GetBaseTransformation() const;
-	virtual const TransformationF& GetTransformation();
+	void SetTransformation(const xform& pTransformation);
+	const xform& GetBaseTransformation() const;
+	virtual const xform& GetTransformation();
 	bool GetTransformationChanged() const;
 	void SetTransformationChanged(bool pTransformationChanged);
 	bool GetBigOrientationChanged() const;
 	void SetBigOrientationChanged(bool pOrientationChanged);
-	const QuaternionF& GetLastBigOrientation() const;
+	const quat& GetLastBigOrientation() const;
 	float GetBigOrientationThreshold() const;
 	void SetBigOrientationThreshold(float pBigOrientationThreshold);
 	static void SetDefaultBigOrientationThreshold(float pBigOrientationThreshold);
@@ -285,7 +285,7 @@ public:
 	// better place to put this code.
 	void SetUVAnimator(BoneAnimator* pUVAnimator);
 	BoneAnimator* GetUVAnimator();
-	const TransformationF& GetUVTransform() const;
+	const xform& GetUVTransform() const;
 
 	void SetSurfaceNormalData(const float* pSurfaceNormalData);
 	void SetVertexNormalData(const float* pVertexNormalData, unsigned int pNumVertices);
@@ -373,8 +373,8 @@ protected:
 
 	unsigned int mLastFrameVisible;
 
-	TransformationF mTransformation;
-	QuaternionF mBigOrientation;
+	xform mTransformation;
+	quat mBigOrientation;
 
 	BoneAnimator* mUVAnimator;
 
@@ -392,7 +392,7 @@ protected:
 public:
 	str mName;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

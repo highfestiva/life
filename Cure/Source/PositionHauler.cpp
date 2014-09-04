@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "../Include/PositionHauler.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsEngine.h"
-#include "../../TBC/Include/PhysicsManager.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/PhysicsManager.h"
 #include "../Include/PositionalData.h"
 #include "../../Lepra/Include/LepraAssert.h"
 
@@ -37,15 +38,15 @@ namespace Cure
 
 
 
-bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsManager* pPhysicsManager, const TBC::ChunkyPhysics* pStructure, float pTotalMass)
+bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsManager* pPhysicsManager, const Tbc::ChunkyPhysics* pStructure, float pTotalMass)
 {
 	if (!pStructure)
 	{
 		return false;
 	}
 
-	TBC::ChunkyBoneGeometry* lStructureGeometry = pStructure->GetBoneGeometry(pStructure->GetRootBone());
-	TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
+	Tbc::ChunkyBoneGeometry* lStructureGeometry = pStructure->GetBoneGeometry(pStructure->GetRootBone());
+	Tbc::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
 	if (!lBody)
 	{
 		pPhysicsManager->GetBodyTransform(lStructureGeometry->GetTriggerId(), pPosition.mPosition.mTransformation);
@@ -63,21 +64,21 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 	{
 		// TODO: add support for parent ID??? (JB 2009-07-07: Don't know anymore what this comment might mean.)
 		// ??? Could it be when connected to something else, like a car connected to a crane?
-		const TBC::ChunkyBoneGeometry* lStructureGeometry = pStructure->GetBoneGeometry(x);
+		const Tbc::ChunkyBoneGeometry* lStructureGeometry = pStructure->GetBoneGeometry(x);
 		if (!lStructureGeometry)
 		{
 			mLog.AError("Could not get positional update (for streaming), since *WHOLE* physical object not loaded!");
 			return false;
 		}
 		lBody = lStructureGeometry->GetBodyId();
-		TBC::PhysicsManager::JointID lJoint = lStructureGeometry->GetJointId();
+		Tbc::PhysicsManager::JointID lJoint = lStructureGeometry->GetJointId();
 		switch (lStructureGeometry->GetJointType())
 		{
-			case TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
+			case Tbc::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, PositionalData2, lData, PositionalData::TYPE_POSITION_2, 1);
 				++y;
-				TBC::PhysicsManager::Joint3Diff lDiff;
+				Tbc::PhysicsManager::Joint3Diff lDiff;
 				if (!pPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get hinge-2!");
@@ -91,11 +92,11 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 				lData->mAcceleration[1] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
+			case Tbc::ChunkyBoneGeometry::JOINT_HINGE2:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, PositionalData3, lData, PositionalData::TYPE_POSITION_3, 1);
 				++y;
-				TBC::PhysicsManager::Joint3Diff lDiff;
+				Tbc::PhysicsManager::Joint3Diff lDiff;
 				if (!pPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get hinge-2!");
@@ -112,12 +113,12 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 				lData->mAcceleration[2] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
-			case TBC::ChunkyBoneGeometry::JOINT_SLIDER:
+			case Tbc::ChunkyBoneGeometry::JOINT_HINGE:
+			case Tbc::ChunkyBoneGeometry::JOINT_SLIDER:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, PositionalData1, lData, PositionalData::TYPE_POSITION_1, 1);
 				++y;
-				TBC::PhysicsManager::Joint1Diff lDiff;
+				Tbc::PhysicsManager::Joint1Diff lDiff;
 				if (!pPhysicsManager->GetJoint1Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get hinge!");
@@ -128,11 +129,11 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 				lData->mAcceleration = lDiff.mAcceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_BALL:
+			case Tbc::ChunkyBoneGeometry::JOINT_BALL:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, PositionalData3, lData, PositionalData::TYPE_POSITION_3, 0.00001f);
 				++y;
-				TBC::PhysicsManager::Joint3Diff lDiff;
+				Tbc::PhysicsManager::Joint3Diff lDiff;
 				if (!pPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get ball!");
@@ -149,11 +150,11 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 				lData->mAcceleration[2] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL:
+			case Tbc::ChunkyBoneGeometry::JOINT_UNIVERSAL:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, PositionalData2, lData, PositionalData::TYPE_POSITION_2, 1);
 				++y;
-				TBC::PhysicsManager::Joint2Diff lDiff;
+				Tbc::PhysicsManager::Joint2Diff lDiff;
 				if (!pPhysicsManager->GetJoint2Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get universal!");
@@ -167,7 +168,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 				lData->mAcceleration[1] = lDiff.mAngleAcceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
+			case Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE:
 			{
 			}
 			break;
@@ -183,29 +184,29 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 	for (int z = 0; z != lEngineCount; ++z)
 	{
 		// TODO: add support for parent ID??????????? JB 2009-07-08: don't know what this is anymore.
-		const TBC::PhysicsEngine* lEngine = pStructure->GetEngine(z);
+		const Tbc::PhysicsEngine* lEngine = pStructure->GetEngine(z);
 		switch (lEngine->GetEngineType())
 		{
-			case TBC::PhysicsEngine::ENGINE_PUSH_RELATIVE:
-			case TBC::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData3, lData, PositionalData::TYPE_REAL_3, 100);
 				++y;
-				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*TBC::PhysicsEngine::ASPECT_MAX_REMOTE_COUNT);
+				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*Tbc::PhysicsEngine::ASPECT_MAX_REMOTE_COUNT);
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_HOVER:
-			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
-			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
-			case TBC::PhysicsEngine::ENGINE_HINGE_BRAKE:
-			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
-			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
-			case TBC::PhysicsEngine::ENGINE_ROTOR:
-			case TBC::PhysicsEngine::ENGINE_TILTER:
-			case TBC::PhysicsEngine::ENGINE_JET:
-			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
-			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
-			case TBC::PhysicsEngine::ENGINE_AIR_BRAKE:
+			case Tbc::PhysicsEngine::ENGINE_HOVER:
+			case Tbc::PhysicsEngine::ENGINE_HINGE_ROLL:
+			case Tbc::PhysicsEngine::ENGINE_HINGE_GYRO:
+			case Tbc::PhysicsEngine::ENGINE_HINGE_BRAKE:
+			case Tbc::PhysicsEngine::ENGINE_HINGE_TORQUE:
+			case Tbc::PhysicsEngine::ENGINE_HINGE2_TURN:
+			case Tbc::PhysicsEngine::ENGINE_ROTOR:
+			case Tbc::PhysicsEngine::ENGINE_TILTER:
+			case Tbc::PhysicsEngine::ENGINE_JET:
+			case Tbc::PhysicsEngine::ENGINE_SLIDER_FORCE:
+			case Tbc::PhysicsEngine::ENGINE_YAW_BRAKE:
+			case Tbc::PhysicsEngine::ENGINE_AIR_BRAKE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 100);
 				++y;
@@ -213,8 +214,8 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 				//deb_assert(lData->mValue >= -1 && lData->mValue <= 1);
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_GLUE:
-			case TBC::PhysicsEngine::ENGINE_BALL_BRAKE:
+			case Tbc::PhysicsEngine::ENGINE_GLUE:
+			case Tbc::PhysicsEngine::ENGINE_BALL_BRAKE:
 			{
 				// Unsynchronized "engine".
 			}
@@ -232,16 +233,16 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const TBC::PhysicsMana
 	return true;
 }
 
-void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsManager* pPhysicsManager, TBC::ChunkyPhysics* pStructure, float pTotalMass, bool pAllowMoveRoot)
+void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsManager* pPhysicsManager, Tbc::ChunkyPhysics* pStructure, float pTotalMass, bool pAllowMoveRoot)
 {
 	if (pAllowMoveRoot)
 	{
-		const TBC::ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(pStructure->GetRootBone());
-		const TBC::PhysicsManager::BodyID lBody = lRootGeometry->GetBodyId();
+		const Tbc::ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(pStructure->GetRootBone());
+		const Tbc::PhysicsManager::BodyID lBody = lRootGeometry->GetBodyId();
 		if (lBody)
 		{
 			pPhysicsManager->SetBodyTransform(lBody, pPosition.mPosition.mTransformation);
-			if (pStructure->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
+			if (pStructure->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC)
 			{
 				pPhysicsManager->SetBodyVelocity(lBody, pPosition.mPosition.mVelocity);
 				pPhysicsManager->SetBodyAcceleration(lBody, pTotalMass, pPosition.mPosition.mAcceleration);
@@ -267,12 +268,12 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 	for (int x = 0; x < lBoneCount && y < pPosition.mBodyPositionArray.size(); ++x)
 	{
 		// TODO: add support for parent ID.
-		const TBC::ChunkyBoneGeometry* lStructureGeometry = pStructure->GetBoneGeometry(x);
-		TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
-		TBC::PhysicsManager::JointID lJoint = lStructureGeometry->GetJointId();
+		const Tbc::ChunkyBoneGeometry* lStructureGeometry = pStructure->GetBoneGeometry(x);
+		Tbc::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
+		Tbc::PhysicsManager::JointID lJoint = lStructureGeometry->GetJointId();
 		switch (lStructureGeometry->GetJointType())
 		{
-			case TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
+			case Tbc::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
 			{
 				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData2, lData, PositionalData::TYPE_POSITION_2);
@@ -283,7 +284,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 					mLog.AError("Could not fetch the right type of network positional!");
 					return;
 				}
-				const TBC::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], 100000,
+				const Tbc::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], 100000,
 					lData->mVelocity[0], lData->mVelocity[1], 100000,
 					lData->mAcceleration[0], lData->mAcceleration[1], 100000);
 				if (!pPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
@@ -293,7 +294,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
+			case Tbc::ChunkyBoneGeometry::JOINT_HINGE2:
 			{
 				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData3, lData, PositionalData::TYPE_POSITION_3);
@@ -304,7 +305,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 					mLog.AError("Could not fetch the right type of network positional!");
 					return;
 				}
-				const TBC::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], lData->mTransformation[2],
+				const Tbc::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], lData->mTransformation[2],
 					lData->mVelocity[0], lData->mVelocity[1], lData->mVelocity[2],
 					lData->mAcceleration[0], lData->mAcceleration[1], lData->mAcceleration[2]);
 				if (!pPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
@@ -314,8 +315,8 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
-			case TBC::ChunkyBoneGeometry::JOINT_SLIDER:
+			case Tbc::ChunkyBoneGeometry::JOINT_HINGE:
+			case Tbc::ChunkyBoneGeometry::JOINT_SLIDER:
 			{
 				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_1);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData1, lData, PositionalData::TYPE_POSITION_1);
@@ -326,7 +327,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 					mLog.AError("Could not fetch the right type of network positional!");
 					return;
 				}
-				const TBC::PhysicsManager::Joint1Diff lDiff(lData->mTransformation,
+				const Tbc::PhysicsManager::Joint1Diff lDiff(lData->mTransformation,
 					lData->mVelocity, lData->mAcceleration);
 				if (!pPhysicsManager->SetJoint1Diff(lBody, lJoint, lDiff))
 				{
@@ -335,7 +336,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_BALL:
+			case Tbc::ChunkyBoneGeometry::JOINT_BALL:
 			{
 				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData3, lData, PositionalData::TYPE_POSITION_3);
@@ -346,7 +347,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 					mLog.AError("Could not fetch the right type of network positional!");
 					return;
 				}
-				const TBC::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], lData->mTransformation[2],
+				const Tbc::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], lData->mTransformation[2],
 					lData->mVelocity[0], lData->mVelocity[1], lData->mVelocity[2],
 					lData->mAcceleration[0], lData->mAcceleration[1], lData->mAcceleration[2]);
 				if (!pPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
@@ -356,7 +357,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL:
+			case Tbc::ChunkyBoneGeometry::JOINT_UNIVERSAL:
 			{
 				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
 				GET_OBJECT_POSITIONAL_AT(pPosition, y, const PositionalData2, lData, PositionalData::TYPE_POSITION_2);
@@ -367,7 +368,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 					mLog.AError("Could not fetch the right type of network positional!");
 					return;
 				}
-				const TBC::PhysicsManager::Joint2Diff lDiff(lData->mTransformation[0], lData->mTransformation[1],
+				const Tbc::PhysicsManager::Joint2Diff lDiff(lData->mTransformation[0], lData->mTransformation[1],
 					lData->mVelocity[0], lData->mVelocity[1],
 					lData->mAcceleration[0], lData->mAcceleration[1]);
 				if (!pPhysicsManager->SetJoint2Diff(lBody, lJoint, lDiff))
@@ -377,7 +378,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
+			case Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE:
 			{
 			}
 			break;
@@ -393,11 +394,11 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 	for (int z = 0; z != lEngineCount; ++z)
 	{
 		// TODO: add support for parent ID??????????? JB 2009-07-08: don't know what this is anymore.
-		const TBC::PhysicsEngine* lEngine = pStructure->GetEngine(z);
+		const Tbc::PhysicsEngine* lEngine = pStructure->GetEngine(z);
 		switch (lEngine->GetEngineType())
 		{
-			case TBC::PhysicsEngine::ENGINE_PUSH_RELATIVE:
-			case TBC::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
 			{
 				deb_assert(pPosition.mBodyPositionArray.size() > y);
 				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_3);
@@ -414,18 +415,18 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 				pStructure->SetEnginePower(lEngine->GetControllerIndex()+3, lData->mValue[2]);
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_HOVER:
-			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
-			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
-			case TBC::PhysicsEngine::ENGINE_HINGE_BRAKE:
-			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
-			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
-			case TBC::PhysicsEngine::ENGINE_ROTOR:
-			case TBC::PhysicsEngine::ENGINE_TILTER:
-			case TBC::PhysicsEngine::ENGINE_JET:
-			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
-			case TBC::PhysicsEngine::ENGINE_YAW_BRAKE:
-			case TBC::PhysicsEngine::ENGINE_AIR_BRAKE:
+			case Tbc::PhysicsEngine::ENGINE_HOVER:
+			case Tbc::PhysicsEngine::ENGINE_HINGE_ROLL:
+			case Tbc::PhysicsEngine::ENGINE_HINGE_GYRO:
+			case Tbc::PhysicsEngine::ENGINE_HINGE_BRAKE:
+			case Tbc::PhysicsEngine::ENGINE_HINGE_TORQUE:
+			case Tbc::PhysicsEngine::ENGINE_HINGE2_TURN:
+			case Tbc::PhysicsEngine::ENGINE_ROTOR:
+			case Tbc::PhysicsEngine::ENGINE_TILTER:
+			case Tbc::PhysicsEngine::ENGINE_JET:
+			case Tbc::PhysicsEngine::ENGINE_SLIDER_FORCE:
+			case Tbc::PhysicsEngine::ENGINE_YAW_BRAKE:
+			case Tbc::PhysicsEngine::ENGINE_AIR_BRAKE:
 			{
 				deb_assert(pPosition.mBodyPositionArray.size() > y);
 				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
@@ -441,8 +442,8 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 				pStructure->SetEnginePower(lEngine->GetControllerIndex(), lData->mValue);
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_GLUE:
-			case TBC::PhysicsEngine::ENGINE_BALL_BRAKE:
+			case Tbc::PhysicsEngine::ENGINE_GLUE:
+			case Tbc::PhysicsEngine::ENGINE_BALL_BRAKE:
 			{
 				// Unsynchronized "engine".
 			}
@@ -458,7 +459,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, TBC::PhysicsMana
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, PositionHauler);
+loginstance(GAME_CONTEXT, PositionHauler);
 
 
 

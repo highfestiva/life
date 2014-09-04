@@ -5,6 +5,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/TimeLogger.h"
 
 

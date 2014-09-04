@@ -15,7 +15,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 class TerrainPatch;
 }
@@ -54,12 +54,12 @@ public:
 	virtual ~TerrainManager();
 	void Clear();
 
-	static TBC::TerrainPatch* CreatePatch(const PatchArea& pArea, float pLod);
-	static void DeletePatch(TBC::TerrainPatch* pPatch);
+	static Tbc::TerrainPatch* CreatePatch(const PatchArea& pArea, float pLod);
+	static void DeletePatch(Tbc::TerrainPatch* pPatch);
 
-	CameraId AddCamera(const Vector3DF& pPosition, float pVisibleRadius);
+	CameraId AddCamera(const vec3& pPosition, float pVisibleRadius);
 	void RemoveCamera(CameraId pCameraId);
-	void MoveCamera(CameraId pCameraId, const Vector3DF& pPosition);
+	void MoveCamera(CameraId pCameraId, const vec3& pPosition);
 
 	void GetLoadCount(int& pLoadPatchOkCount, int& pLoadPatchErrorCount);
 
@@ -81,18 +81,18 @@ private:
 
 	struct CameraInfo
 	{
-		inline CameraInfo(const Vector3DF& pPosition, float pVisibleRadius):
+		inline CameraInfo(const vec3& pPosition, float pVisibleRadius):
 			mPosition(pPosition),
 			mVisibleRadius(pVisibleRadius)
 		{
 		}
-		Vector3DF mPosition;
+		vec3 mPosition;
 		float mVisibleRadius;
 	};
 	typedef HashTable<CameraId, CameraInfo> CameraTable;
 	CameraTable mCameraTable;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiLineGraph2d.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/LepraAssert.h"

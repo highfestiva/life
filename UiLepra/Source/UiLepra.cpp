@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiCore.h"
 #include "../Include/UiInput.h"
 #include "../Include/UiLepra.h"

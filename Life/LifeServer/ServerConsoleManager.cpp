@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
@@ -175,7 +176,7 @@ int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 	return (lResult);
 }
 
-LOG_CLASS_DEFINE(CONSOLE, ServerConsoleManager);
+loginstance(CONSOLE, ServerConsoleManager);
 
 
 

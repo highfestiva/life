@@ -5,9 +5,8 @@
 
 
 // Unreachable code warning below (MSVC8). For some reason just this file happens to temper with some shitty template.
-#define LEPRA_INCLUDE_NO_OS
+#include "pch.h"
 #include "../../Lepra/Include/LepraTarget.h"
-#undef LEPRA_INCLUDE_NO_OS
 #ifdef LEPRA_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
@@ -28,16 +27,18 @@
 #include "../Include/IOBuffer.h"
 #include "../Include/JsonString.h"
 #include "../Include/Lepra.h"
-#include "../Include/Log.h"
+#include "../Include/Logger.h"
 #include "../Include/LogListener.h"
 #include "../Include/Math.h"
 #include "../Include/Network.h"
 #include "../Include/Number.h"
+#include "../Include/OrderedMap.h"
 #include "../Include/Path.h"
 #include "../Include/Performance.h"
 #include "../Include/Random.h"
 #include "../Include/RotationMatrix.h"
 #include "../Include/SHA1.h"
+#include "../Include/Socket.h"
 #include "../Include/SpinLock.h"
 #include "../Include/String.h"
 #include "../Include/SystemManager.h"
@@ -48,7 +49,7 @@
 using namespace Lepra;
 
 class LepraTest{};
-static LogDecorator gLLog(LogType::GetLog(LogType::SUB_TEST), typeid(LepraTest));
+static LogDecorator gLLog(LogType::GetLogger(LogType::SUB_TEST), typeid(LepraTest));
 
 
 
@@ -458,14 +459,14 @@ bool TestVector3D(const LogDecorator& pAccount)
 	{
 		lDesiredResult = 0;
 		lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
-		lResult = Vector3DF(1,0,0).GetPolarCoordAngleY();
+		lResult = vec3(1,0,0).GetPolarCoordAngleY();
 		lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lDesiredResult = PIF/2;
 			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
-			lResult = Vector3DF(0,0,1).GetPolarCoordAngleY();
+			lResult = vec3(0,0,1).GetPolarCoordAngleY();
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
 			deb_assert(lTestOk);
 		}
@@ -474,7 +475,7 @@ bool TestVector3D(const LogDecorator& pAccount)
 		{
 			lDesiredResult = -5*PIF/6;
 			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
-			//lResult = Vector3DF(-sqrtf(3),0,-1).GetPolarCoordAngleY();
+			//lResult = vec3(-sqrtf(3),0,-1).GetPolarCoordAngleY();
 			lResult = atan2(-1, -sqrtf(3));
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
 			deb_assert(lTestOk);
@@ -484,7 +485,7 @@ bool TestVector3D(const LogDecorator& pAccount)
 		{
 			lDesiredResult = +PIF;
 			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
-			//lResult = Vector3DF(-1,0,0).GetPolarCoordAngleY();
+			//lResult = vec3(-1,0,0).GetPolarCoordAngleY();
 			lResult = atan2(0.0f, -1.0f);
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
 			deb_assert(lTestOk);
@@ -1700,7 +1701,7 @@ private:
 	template<class _Server> bool TestClientServerTransmit(str& pContext, _Server& pServer,
 		DualMuxSocket& pClientMuxSocket, DualSocket* pClientSocket, bool pSafe);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 template<class _MuxSocket, class _VSocket> class ServerSocketHandler: public Thread
@@ -2015,7 +2016,7 @@ class DualSocketServerTest
 public:
 	bool Test();
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 bool DualSocketServerTest::Test()
@@ -2119,8 +2120,8 @@ bool DualSocketServerTest::Test()
 	return (lTestOk);
 }
 
-LOG_CLASS_DEFINE(TEST, DualSocketClientTest);
-LOG_CLASS_DEFINE(TEST, DualSocketServerTest);
+loginstance(TEST, DualSocketClientTest);
+loginstance(TEST, DualSocketServerTest);
 
 
 
@@ -2302,14 +2303,6 @@ void ConditionThread(void*)
 	Thread::Sleep(0.1);
 }
 
-CompatibleCondition* gCompatibleCondition;
-
-void CompatibleConditionThread(void*)
-{
-	gCompatibleCondition->Wait();
-	Thread::Sleep(0.1);
-}
-
 bool TestPerformance(const LogDecorator& pAccount)
 {
 	str lContext;
@@ -2384,20 +2377,6 @@ bool TestPerformance(const LogDecorator& pAccount)
 				}
 			}
 
-			{
-				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_MEASURE_SCOPE(CompatibleLock);
-				CompatibleLock lMutex;
-				{
-					LEPRA_MEASURE_SCOPE(Acquire);
-					lMutex.Acquire();
-				}
-				{
-					LEPRA_MEASURE_SCOPE(Release);
-					lMutex.Release();
-				}
-			}
-
 #ifdef LEPRA_WINDOWS
 			{
 				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
@@ -2453,27 +2432,6 @@ bool TestPerformance(const LogDecorator& pAccount)
 				lThread.Start(ConditionThread, 0);
 				Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(Condition);
-				{
-					LEPRA_MEASURE_SCOPE(Signal);
-					lCondition.Signal();
-				}
-				{
-					LEPRA_MEASURE_SCOPE(SignalAll);
-					lCondition.SignalAll();
-				}
-				{
-					LEPRA_MEASURE_SCOPE(Wait(0));
-					lCondition.Wait(0);
-				}
-			}
-
-			{
-				StaticThread lThread("CompatibleCondition");
-				CompatibleCondition lCondition;
-				gCompatibleCondition = &lCondition;
-				lThread.Start(CompatibleConditionThread, 0);
-				Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
-				LEPRA_MEASURE_SCOPE(CompatibleCondition);
 				{
 					LEPRA_MEASURE_SCOPE(Signal);
 					lCondition.Signal();
@@ -2961,7 +2919,7 @@ bool TestMemFileConcurrency(const LogDecorator& pAccount)
 			void Run()
 			{
 				mSemaphore.Wait();
-				Log* lLog = LogType::GetLog(LogType::SUB_GENERAL_RESOURCES);
+				Logger* lLog = LogType::GetLogger(LogType::SUB_GENERAL_RESOURCES);
 				for (int x = 0; x < 1000; ++x)
 				{
 					mFile.OnLog(lLog, _T("?"), LEVEL_TRACE);

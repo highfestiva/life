@@ -19,7 +19,7 @@ namespace Lepra
 
 
 
-class Log;
+class Logger;
 
 
 
@@ -53,14 +53,14 @@ public:
 	static void Init();
 	static void Close();
 
-	static Log* GetLog(Subsystem pSubsystem);
-	static Log* GetLog(const str& pName);
-	static const std::vector<Log*> GetLogs();
+	static Logger* GetLogger(Subsystem pSubsystem);
+	static Logger* GetLogger(const str& pName);
+	static const std::vector<Logger*> GetLoggers();
 	static void SetLogLevel(LogLevel pLevel);
 
 private:
 	static bool mInitialized;
-	static Log* mLogArray[SUB_TYPE_COUNT];
+	static Logger* mLoggerArray[SUB_TYPE_COUNT];
 };
 
 

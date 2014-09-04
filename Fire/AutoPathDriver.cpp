@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "AutoPathDriver.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"
@@ -53,19 +54,19 @@ void AutoPathDriver::OnTick()
 		return;
 	}
 
-	const Vector3DF lVehicleDirection3d = lVehicle->GetOrientation()*Vector3DF(0,1,0);
-	const Vector3DF lPosition = lVehicle->GetPosition();
-	Vector3DF lClosestPoint;
+	const vec3 lVehicleDirection3d = lVehicle->GetOrientation()*vec3(0,1,0);
+	const vec3 lPosition = lVehicle->GetPosition();
+	vec3 lClosestPoint;
 	GetClosestPathDistance(lPosition, lClosestPoint, AIM_DISTANCE);
-	Vector3DF lDirection(lClosestPoint - lPosition);
+	vec3 lDirection(lClosestPoint - lPosition);
 	if (mPath)
 	{
 		lDirection = lDirection.GetNormalized() + mPath->GetSlope();
 	}
 
 	float lEnginePower = Math::Lerp(0.4f, 1.0f, lVehicle->mPanicLevel) * lVehicle->mLevelSpeed;
-	const Vector2DF lWantedDirection(lDirection.x, lDirection.y);
-	const Vector2DF lVehicleDirection(lVehicleDirection3d.x, lVehicleDirection3d.y);
+	const vec2 lWantedDirection(lDirection.x, lDirection.y);
+	const vec2 lVehicleDirection(lVehicleDirection3d.x, lVehicleDirection3d.y);
 	const float lSteeringAngle = lWantedDirection.GetAngle(lVehicleDirection);
 	lEnginePower *= Math::Lerp(1.0f, 0.6f, std::min(1.0f, std::abs(lSteeringAngle)));
 	lVehicle->SetEnginePower(0, lEnginePower);
@@ -102,7 +103,7 @@ void AutoPathDriver::OnTick()
 	}
 }
 
-void AutoPathDriver::GetClosestPathDistance(const Vector3DF& pPosition, Vector3DF& pClosestPoint, float pWantedDistance)
+void AutoPathDriver::GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint, float pWantedDistance)
 {
 	if (!mPath)
 	{
@@ -134,7 +135,7 @@ void AutoPathDriver::GetClosestPathDistance(const Vector3DF& pPosition, Vector3D
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, AutoPathDriver);
+loginstance(GAME_CONTEXT_CPP, AutoPathDriver);
 
 
 

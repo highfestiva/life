@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ConsoleCommandManager.h"
 #include "../Include/SystemManager.h"
 #ifdef LEPRA_WINDOWS

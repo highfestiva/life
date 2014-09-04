@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "BaseMachine.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/Health.h"

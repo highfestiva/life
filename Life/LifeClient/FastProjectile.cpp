@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "FastProjectile.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -40,7 +41,7 @@ FastProjectile::~FastProjectile()
 
 	if (mExplosiveEnergy && GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 	{
-		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), mExplosiveEnergy, 0);
+		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), vec3(), mExplosiveEnergy, 0);
 	}
 }
 
@@ -50,7 +51,7 @@ void FastProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
 	deb_assert(lTag);
 
 	const float lMuzzleVelocity = lTag->mFloatValueList[0];
@@ -64,8 +65,8 @@ void FastProjectile::OnLoaded()
 	const float lPitch = ProjectileUtil::GetShotSounds(GetManager(), lTag->mStringValueList, lLaunchSoundName, lShreekSoundName);
 	if (!lLaunchSoundName.empty())
 	{
-		TransformationF lParentTransform;
-		Vector3DF lParentVelocity;
+		xform lParentTransform;
+		vec3 lParentVelocity;
 		if (ProjectileUtil::GetBarrel(this, lParentTransform, lParentVelocity))
 		{
 			UiCure::UserSound3dResource* lLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
@@ -89,13 +90,13 @@ void FastProjectile::StartBullet(float pMuzzleVelocity)
 	if (lIsSynchronized && lHasBarrel)
 	{
 		// Move mesh to muzzle and let it lerp towards object.
-		TransformationF lTransform;
-		Vector3DF lVelocity;
+		xform lTransform;
+		vec3 lVelocity;
 		ProjectileUtil::GetBarrel(this, lTransform, lVelocity);
 		for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 		{
 			UiCure::UserGeometryReferenceResource* lResource = mMeshResourceArray[x];
-			TBC::GeometryBase* lGfxGeometry = lResource->GetRamData();
+			Tbc::GeometryBase* lGfxGeometry = lResource->GetRamData();
 			lGfxGeometry->SetTransformation(lTransform);
 		}
 		EnableMeshSlide(true);
@@ -114,10 +115,10 @@ void FastProjectile::OnTick()
 {
 	Parent::OnTick();
 
-	const Vector3DF lPosition = GetPosition();
+	const vec3 lPosition = GetPosition();
 	if (mShreekSound && mShreekSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		const Vector3DF lVelocity = GetVelocity();
+		const vec3 lVelocity = GetVelocity();
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), lPosition, lVelocity);
 	}
 	/*if (lPosition.GetLengthSquared() > 3000*3000)
@@ -126,7 +127,7 @@ void FastProjectile::OnTick()
 	}*/
 }
 
-void FastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void FastProjectile::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pBodyId;
@@ -158,7 +159,7 @@ void FastProjectile::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, FastProjectile);
+loginstance(GAME_CONTEXT_CPP, FastProjectile);
 
 
 

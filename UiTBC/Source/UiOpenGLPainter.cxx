@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiOpenGLPainter.h"
 #include <math.h>
 #include "../../Lepra/Include/HashUtil.h"
@@ -404,11 +405,11 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 
 void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom)
 {
-	std::vector<Vector2DF> lCoords;
-	lCoords.push_back(Vector2DF((float)pRight, (float)pTop));
-	lCoords.push_back(Vector2DF((float)pLeft, (float)pTop));
-	lCoords.push_back(Vector2DF((float)pLeft, (float)pBottom));
-	lCoords.push_back(Vector2DF((float)pRight, (float)pBottom));
+	std::vector<vec2> lCoords;
+	lCoords.push_back(vec2((float)pRight, (float)pTop));
+	lCoords.push_back(vec2((float)pLeft, (float)pTop));
+	lCoords.push_back(vec2((float)pLeft, (float)pBottom));
+	lCoords.push_back(vec2((float)pRight, (float)pBottom));
 	lCoords.push_back(lCoords[0]);
 	DrawFan(lCoords, false);
 }
@@ -582,7 +583,7 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	OGL_ASSERT();
 }
 
-void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
+void OpenGLPainter::DrawFan(const std::vector<vec2> pCoords, bool pFill)
 {
 	OGL_ASSERT();
 
@@ -590,7 +591,7 @@ void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
 	::glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 	size_t c = pCoords.size();
 	GLfloat* v = new GLfloat[c*2];
-	std::vector<Vector2DF>::const_iterator i = pCoords.begin();
+	std::vector<vec2>::const_iterator i = pCoords.begin();
 	for (int j = 0; i != pCoords.end(); ++i, ++j)
 	{
 		float x = i->x;
@@ -606,7 +607,7 @@ void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
 	OGL_ASSERT();
 }
 
-void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF>& pCoords, const std::vector<Vector2DF>& pTexCoords)
+void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<vec2>& pCoords, const std::vector<vec2>& pTexCoords)
 {
 	OGL_ASSERT();
 	deb_assert(pCoords.size() == pTexCoords.size());

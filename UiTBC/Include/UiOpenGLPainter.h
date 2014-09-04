@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "UiTBC.h"
+#include "UiTbc.h"
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/HashTable.h"
@@ -85,8 +85,8 @@ protected:
 	void DoFillRect(int pLeft, int pTop, int pRight, int pBottom);
 	void DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
 	void DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom);
-	void DrawFan(const std::vector<Vector2DF> pCoords, bool pFill);
-	void DrawImageFan(ImageID pImageID, const std::vector<Vector2DF>& pCoords, const std::vector<Vector2DF>& pTexCoords);
+	void DrawFan(const std::vector<vec2> pCoords, bool pFill);
+	void DrawImageFan(ImageID pImageID, const std::vector<vec2>& pCoords, const std::vector<vec2>& pTexCoords);
 	void DoDrawImage(ImageID pImageID, int x, int y);
 	void DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect);
 	void DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect);
@@ -104,7 +104,7 @@ protected:
 	FontTexture* SelectGlyphs(uint32 pFontHash, int pFontHeight, const str& pString);
 
 private:
-	Vector3DF mRCol[4];
+	vec3 mRCol[4];
 
 	class Texture
 	{

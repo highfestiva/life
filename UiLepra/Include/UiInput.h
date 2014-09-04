@@ -148,7 +148,7 @@ private:
 
 	FunctorArray mFunctorArray;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 #define ADD_INPUT_CALLBACK(_e, _func, _class) \
@@ -247,7 +247,7 @@ private:
 	str mIdentifier;
 	str mUniqueIdentifier;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
@@ -519,7 +519,7 @@ private:
 	int mMouseX;
 	int mMouseY;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "BombPlane.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/Health.h"
@@ -22,7 +23,7 @@ namespace HoverTank
 
 
 
-BombPlane::BombPlane(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher, const Vector3DF& pTarget):
+BombPlane::BombPlane(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher, const vec3& pTarget):
 	Parent(pResourceManager, pClassId),
 	mLauncher(pLauncher),
 	mTarget(pTarget),
@@ -55,7 +56,7 @@ void BombPlane::OnTick()
 	const float lHealth = Cure::Health::Get(this);
 	if (lHealth <= 0)
 	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), Vector3DF(), 1, 5);
+		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), vec3(), 1, 5);
 	}
 
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
@@ -64,8 +65,8 @@ void BombPlane::OnTick()
 		return;
 	}
 
-	const Vector3DF lPosition = GetPosition();
-	const Vector3DF lVelocity = GetVelocity();
+	const vec3 lPosition = GetPosition();
+	const vec3 lVelocity = GetVelocity();
 
 	// g*t^2/2 - v0*t + h = 0
 	const float g2 = +9.82f/2;	// Positive.
@@ -75,7 +76,7 @@ void BombPlane::OnTick()
 	float t2;
 	if (Math::CalculateRoot(g2, v0, h, t1, t2))
 	{
-		Vector3DF lHorizontalProjectedTarget(mTarget.x, mTarget.y, lPosition.z);
+		vec3 lHorizontalProjectedTarget(mTarget.x, mTarget.y, lPosition.z);
 		const float d = lHorizontalProjectedTarget.GetDistanceSquared(lPosition + lVelocity*t1);
 		if (d < mBombingRadiusSquared)
 		{
@@ -87,7 +88,7 @@ void BombPlane::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, BombPlane);
+loginstance(GAME_CONTEXT_CPP, BombPlane);
 
 
 

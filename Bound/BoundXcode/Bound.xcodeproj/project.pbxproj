@@ -133,7 +133,7 @@
 		B19A145113A122CE0051A61C /* UiRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13FC13A122CE0051A61C /* UiRenderer.cpp */; };
 		B19A145313A122CE0051A61C /* UiRendererFactory.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A13FE13A122CE0051A61C /* UiRendererFactory.mm */; };
 		B19A145413A122CE0051A61C /* UiShadowVolume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13FF13A122CE0051A61C /* UiShadowVolume.cpp */; };
-		B19A145513A122CE0051A61C /* UiTBC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140013A122CE0051A61C /* UiTBC.cpp */; };
+		B19A145513A122CE0051A61C /* UiTbc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140013A122CE0051A61C /* UiTbc.cpp */; };
 		B19A145613A122CE0051A61C /* UiTerrainTextureGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140113A122CE0051A61C /* UiTerrainTextureGenerator.cpp */; };
 		B19A145713A122CE0051A61C /* UiTEXLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140213A122CE0051A61C /* UiTEXLoader.cpp */; };
 		B19A145813A122CE0051A61C /* UiTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140313A122CE0051A61C /* UiTexture.cpp */; };
@@ -154,7 +154,7 @@
 		B19A14C613A1247C0051A61C /* PhysicsSpawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14B413A1247C0051A61C /* PhysicsSpawner.cpp */; };
 		B19A14C713A1247C0051A61C /* PhysicsTrigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14B513A1247C0051A61C /* PhysicsTrigger.cpp */; };
 		B19A14C813A1247C0051A61C /* PortalManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14B613A1247C0051A61C /* PortalManager.cpp */; };
-		B19A14C913A1247C0051A61C /* TBC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14B713A1247C0051A61C /* TBC.cpp */; };
+		B19A14C913A1247C0051A61C /* Tbc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14B713A1247C0051A61C /* Tbc.cpp */; };
 		B19A14CA13A1247C0051A61C /* TerrainFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14B813A1247C0051A61C /* TerrainFunction.cpp */; };
 		B19A14CB13A1247C0051A61C /* TerrainPatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14B913A1247C0051A61C /* TerrainPatch.cpp */; };
 		B19A150C13A124940051A61C /* Alarm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14CD13A124940051A61C /* Alarm.cpp */; };
@@ -651,7 +651,7 @@
 		B19A13FC13A122CE0051A61C /* UiRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiRenderer.cpp; sourceTree = "<group>"; };
 		B19A13FE13A122CE0051A61C /* UiRendererFactory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiRendererFactory.mm; sourceTree = "<group>"; };
 		B19A13FF13A122CE0051A61C /* UiShadowVolume.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiShadowVolume.cpp; sourceTree = "<group>"; };
-		B19A140013A122CE0051A61C /* UiTBC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTBC.cpp; sourceTree = "<group>"; };
+		B19A140013A122CE0051A61C /* UiTbc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTbc.cpp; sourceTree = "<group>"; };
 		B19A140113A122CE0051A61C /* UiTerrainTextureGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTerrainTextureGenerator.cpp; sourceTree = "<group>"; };
 		B19A140213A122CE0051A61C /* UiTEXLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTEXLoader.cpp; sourceTree = "<group>"; };
 		B19A140313A122CE0051A61C /* UiTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTexture.cpp; sourceTree = "<group>"; };
@@ -672,7 +672,7 @@
 		B19A14B413A1247C0051A61C /* PhysicsSpawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicsSpawner.cpp; sourceTree = "<group>"; };
 		B19A14B513A1247C0051A61C /* PhysicsTrigger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicsTrigger.cpp; sourceTree = "<group>"; };
 		B19A14B613A1247C0051A61C /* PortalManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PortalManager.cpp; sourceTree = "<group>"; };
-		B19A14B713A1247C0051A61C /* TBC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TBC.cpp; sourceTree = "<group>"; };
+		B19A14B713A1247C0051A61C /* Tbc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Tbc.cpp; sourceTree = "<group>"; };
 		B19A14B813A1247C0051A61C /* TerrainFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainFunction.cpp; sourceTree = "<group>"; };
 		B19A14B913A1247C0051A61C /* TerrainPatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainPatch.cpp; sourceTree = "<group>"; };
 		B19A14CD13A124940051A61C /* Alarm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Alarm.cpp; sourceTree = "<group>"; };
@@ -1281,9 +1281,9 @@
 				B15F795413FC59E300E01A90 /* UiCure */,
 				B15F791D13FC597B00E01A90 /* Cure */,
 				B19A15AA13A127E40051A61C /* ThirdParty */,
-				B19A137B13A122CE0051A61C /* UiTBC */,
+				B19A137B13A122CE0051A61C /* UiTbc */,
 				B19A130013A122C20051A61C /* UiLepra */,
-				B19A128813A122AF0051A61C /* TBC */,
+				B19A128813A122AF0051A61C /* Tbc */,
 				B19A10F113A1229D0051A61C /* Lepra */,
 			);
 			name = Sources;
@@ -1417,13 +1417,13 @@
 			path = ../../Lepra;
 			sourceTree = SOURCE_ROOT;
 		};
-		B19A128813A122AF0051A61C /* TBC */ = {
+		B19A128813A122AF0051A61C /* Tbc */ = {
 			isa = PBXGroup;
 			children = (
 				B19A14A713A1247C0051A61C /* Source */,
 			);
-			name = TBC;
-			path = ../../TBC;
+			name = Tbc;
+			path = ../../Tbc;
 			sourceTree = SOURCE_ROOT;
 		};
 		B19A130013A122C20051A61C /* UiLepra */ = {
@@ -1435,13 +1435,13 @@
 			path = ../../UiLepra;
 			sourceTree = SOURCE_ROOT;
 		};
-		B19A137B13A122CE0051A61C /* UiTBC */ = {
+		B19A137B13A122CE0051A61C /* UiTbc */ = {
 			isa = PBXGroup;
 			children = (
 				B19A13C013A122CE0051A61C /* Source */,
 			);
-			name = UiTBC;
-			path = ../../UiTBC;
+			name = UiTbc;
+			path = ../../UiTbc;
 			sourceTree = SOURCE_ROOT;
 		};
 		B19A13C013A122CE0051A61C /* Source */ = {
@@ -1471,7 +1471,7 @@
 				B19A13FC13A122CE0051A61C /* UiRenderer.cpp */,
 				B19A13FE13A122CE0051A61C /* UiRendererFactory.mm */,
 				B19A13FF13A122CE0051A61C /* UiShadowVolume.cpp */,
-				B19A140013A122CE0051A61C /* UiTBC.cpp */,
+				B19A140013A122CE0051A61C /* UiTbc.cpp */,
 				B19A140113A122CE0051A61C /* UiTerrainTextureGenerator.cpp */,
 				B19A140213A122CE0051A61C /* UiTEXLoader.cpp */,
 				B19A140313A122CE0051A61C /* UiTexture.cpp */,
@@ -1561,7 +1561,7 @@
 				B19A14B413A1247C0051A61C /* PhysicsSpawner.cpp */,
 				B19A14B513A1247C0051A61C /* PhysicsTrigger.cpp */,
 				B19A14B613A1247C0051A61C /* PortalManager.cpp */,
-				B19A14B713A1247C0051A61C /* TBC.cpp */,
+				B19A14B713A1247C0051A61C /* Tbc.cpp */,
 				B19A14B813A1247C0051A61C /* TerrainFunction.cpp */,
 				B19A14B913A1247C0051A61C /* TerrainPatch.cpp */,
 			);
@@ -2536,7 +2536,7 @@
 				B19A145113A122CE0051A61C /* UiRenderer.cpp in Sources */,
 				B19A145313A122CE0051A61C /* UiRendererFactory.mm in Sources */,
 				B19A145413A122CE0051A61C /* UiShadowVolume.cpp in Sources */,
-				B19A145513A122CE0051A61C /* UiTBC.cpp in Sources */,
+				B19A145513A122CE0051A61C /* UiTbc.cpp in Sources */,
 				B19A145613A122CE0051A61C /* UiTerrainTextureGenerator.cpp in Sources */,
 				B19A145713A122CE0051A61C /* UiTEXLoader.cpp in Sources */,
 				B19A145813A122CE0051A61C /* UiTexture.cpp in Sources */,
@@ -2557,7 +2557,7 @@
 				B19A14C613A1247C0051A61C /* PhysicsSpawner.cpp in Sources */,
 				B19A14C713A1247C0051A61C /* PhysicsTrigger.cpp in Sources */,
 				B19A14C813A1247C0051A61C /* PortalManager.cpp in Sources */,
-				B19A14C913A1247C0051A61C /* TBC.cpp in Sources */,
+				B19A14C913A1247C0051A61C /* Tbc.cpp in Sources */,
 				B19A14CA13A1247C0051A61C /* TerrainFunction.cpp in Sources */,
 				B19A14CB13A1247C0051A61C /* TerrainPatch.cpp in Sources */,
 				B19A150C13A124940051A61C /* Alarm.cpp in Sources */,
@@ -3021,7 +3021,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
-					"\"$(SRCROOT)/../../TBC\"",
+					"\"$(SRCROOT)/../../Tbc\"",
 				);
 				PRODUCT_NAME = Bound;
 				PROVISIONING_PROFILE = "";
@@ -3062,7 +3062,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
-					"\"$(SRCROOT)/../../TBC\"",
+					"\"$(SRCROOT)/../../Tbc\"",
 				);
 				PRODUCT_NAME = Bound;
 				PROVISIONING_PROFILE = "";

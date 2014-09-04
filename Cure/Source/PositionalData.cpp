@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/PositionalData.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Packer.h"
@@ -59,7 +60,7 @@ void PositionalData::Stop()
 
 int PositionalData6::GetStaticPackSize()
 {
-	return (1+sizeof(TransformationF::BaseType)*7 + sizeof(Vector3DF::BaseType)*3*4);
+	return (1+sizeof(xform::BaseType)*7 + sizeof(vec3::BaseType)*3*4);
 }
 
 int PositionalData6::GetPackSize() const
@@ -113,7 +114,7 @@ void PositionalData6::Stop()
 	mAngularAcceleration.Set(0, 0, 0);
 }
 
-float PositionalData6::GetDifference(const QuaternionF& pQ1, const QuaternionF& pQ2)
+float PositionalData6::GetDifference(const quat& pQ1, const quat& pQ2)
 {
 	float lWeightedDifferenceSum =
 		(::fabs(pQ1.a-pQ2.a) +
@@ -123,7 +124,7 @@ float PositionalData6::GetDifference(const QuaternionF& pQ1, const QuaternionF& 
 	return (lWeightedDifferenceSum);
 }
 
-float PositionalData6::GetDifference(const Vector3DF& pV1, const Vector3DF& pV2)
+float PositionalData6::GetDifference(const vec3& pV1, const vec3& pV2)
 {
 	float lWeightedDifferenceSum =
 		(::fabs(pV1.x-pV2.x) +
@@ -149,7 +150,7 @@ PositionalData* PositionalData6::Clone() const
 	return (new PositionalData6(*this));
 }
 
-LOG_CLASS_DEFINE(NETWORK, PositionalData6);
+loginstance(NETWORK, PositionalData6);
 
 
 
@@ -387,7 +388,7 @@ void ObjectPositionalData::GhostStep(int pFrameCount, float pDeltaTime)
 		mPosition.mTransformation.GetPosition().Add(mPosition.mVelocity*pDeltaTime);
 		mPosition.mVelocity.Add(mPosition.mAcceleration*pDeltaTime);
 
-		/*QuaternionF lQ;
+		/*quat lQ;
 		lQ.RotateAroundWorldX(mPosition.mAngularVelocity.x*pDeltaTime);
 		lQ.RotateAroundWorldY(mPosition.mAngularVelocity.y*pDeltaTime);
 		lQ.RotateAroundWorldZ(mPosition.mAngularVelocity.z*pDeltaTime);
@@ -647,7 +648,7 @@ void ObjectPositionalData::operator=(const ObjectPositionalData&)
 	deb_assert(false);
 }
 
-LOG_CLASS_DEFINE(NETWORK, ObjectPositionalData);
+loginstance(NETWORK, ObjectPositionalData);
 
 
 

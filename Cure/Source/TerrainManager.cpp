@@ -4,8 +4,9 @@
 
 
 
+#include "pch.h"
 #include "../../Lepra/Include/Log.h"
-#include "../../TBC/Include/TerrainPatch.h"
+#include "../../Tbc/Include/TerrainPatch.h"
 #include "../Include/TerrainFunctionManager.h"
 #include "../Include/TerrainManager.h"
 #include "../Include/TerrainPatchManager.h"
@@ -51,22 +52,22 @@ void TerrainManager::Clear()
 
 
 
-TBC::TerrainPatch* TerrainManager::CreatePatch(const PatchArea&, float)
+Tbc::TerrainPatch* TerrainManager::CreatePatch(const PatchArea&, float)
 {
 	// TODO: fill in the construction parameters correct.
 	const Vector2D<int> lIntegerArea(3, 4);
-	TBC::TerrainPatch* lPatch = new TBC::TerrainPatch(lIntegerArea);
+	Tbc::TerrainPatch* lPatch = new Tbc::TerrainPatch(lIntegerArea);
 	return (lPatch);
 }
 
-void TerrainManager::DeletePatch(TBC::TerrainPatch* pPatch)
+void TerrainManager::DeletePatch(Tbc::TerrainPatch* pPatch)
 {
 	delete (pPatch);
 }
 
 
 
-TerrainManager::CameraId TerrainManager::AddCamera(const Vector3DF& pPosition, float pVisibleRadius)
+TerrainManager::CameraId TerrainManager::AddCamera(const vec3& pPosition, float pVisibleRadius)
 {
 	CameraId lCameraId = mCameraIdManager.GetFreeId();
 	mCameraTable.Insert(lCameraId, CameraInfo(pPosition, pVisibleRadius));
@@ -81,7 +82,7 @@ void TerrainManager::RemoveCamera(CameraId pCameraId)
 	UpdatePatchTree();
 }
 
-void TerrainManager::MoveCamera(CameraId pCameraId, const Vector3DF& pPosition)
+void TerrainManager::MoveCamera(CameraId pCameraId, const vec3& pPosition)
 {
 	CameraTable::Iterator x = mCameraTable.Find(pCameraId);
 	if (x != mCameraTable.End())
@@ -123,7 +124,7 @@ void TerrainManager::UpdatePatchTree()
 	for (; x != mCameraTable.End(); ++x)
 	{
 		const CameraInfo& lCameraInfo = x.GetObject();
-		const Vector3DF& lCameraPosition = lCameraInfo.mPosition;
+		const vec3& lCameraPosition = lCameraInfo.mPosition;
 		const float lLoadRadius = lCameraInfo.mVisibleRadius;
 
 		// Walk through all patches+functions and mark those near this camera as "in use".
@@ -169,7 +170,7 @@ void TerrainManager::TerrainPatchLoadCallback(UserPhysicalTerrainResource* pLoad
 
 
 
-LOG_CLASS_DEFINE(GAME, TerrainManager);
+loginstance(GAME, TerrainManager);
 
 
 

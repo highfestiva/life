@@ -4,14 +4,15 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiBurnEmitter.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTBC/Include/UiParticleRenderer.h"
+#include "../../UiTbc/Include/UiParticleRenderer.h"
 #include "../Include/UiProps.h"
 #include "../Include/UiRuntimeVariableName.h"
 
@@ -41,7 +42,7 @@ BurnEmitter::~BurnEmitter()
 void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime, float pIntensity)
 {
 	bool lParticlesEnabled;
-	CURE_RTVAR_GET(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
+	v_get(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
 	if (!lParticlesEnabled || pIntensity <= 0)
 	{
 		return;
@@ -72,7 +73,7 @@ void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::Chun
 		return;
 	}
 	float lBurnIntensity;
-	CURE_RTVAR_GET(lBurnIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
+	v_get(lBurnIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
 	mBurnTimeout -= Math::Lerp(0.4f, 1.0f, pIntensity) * lBurnIntensity * pFrameTime * 25;
 	if (mBurnTimeout > 0)
 	{
@@ -84,10 +85,10 @@ void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::Chun
 	const float lScale = pTag.mFloatValueList[FV_SCALE];
 	const float lLifeTime = pTag.mFloatValueList[FV_TTL];
 
-	const QuaternionF lOriginalOrientation = pObject->GetOrientation();
-	Vector3DF lOffset(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
+	const quat lOriginalOrientation = pObject->GetOrientation();
+	vec3 lOffset(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
 	lOffset = lOriginalOrientation*lOffset;
-	Vector3DF lVelocity(pTag.mFloatValueList[FV_VX], pTag.mFloatValueList[FV_VY], pTag.mFloatValueList[FV_VZ]);
+	vec3 lVelocity(pTag.mFloatValueList[FV_VX], pTag.mFloatValueList[FV_VY], pTag.mFloatValueList[FV_VZ]);
 	const float lOpacity = Math::Lerp(0.6f, 1.0f, pIntensity) * pTag.mFloatValueList[FV_OPACITY];
 	if (!mFreeFlow)
 	{
@@ -101,12 +102,12 @@ void BurnEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::Chun
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
-		TBC::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
+		Tbc::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
 		if (lMesh)
 		{
 			int lPhysIndex = -1;
 			str lMeshName;
-			TransformationF lTransform;
+			xform lTransform;
 			float lMeshScale;
 			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform, lMeshScale);
 			lTransform = lMesh->GetBaseTransformation() * lTransform;
@@ -125,7 +126,7 @@ void BurnEmitter::SetFreeFlow()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, BurnEmitter);
+loginstance(GAME_CONTEXT, BurnEmitter);
 
 
 

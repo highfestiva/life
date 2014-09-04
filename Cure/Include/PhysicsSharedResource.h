@@ -8,7 +8,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 class PhysicsManager;
 }
@@ -20,26 +20,17 @@ namespace Cure
 
 
 
-enum PhysicsOverride
-{
-	PHYSICS_OVERRIDE_NORMAL = 1,
-	PHYSICS_OVERRIDE_STATIC,
-	PHYSICS_OVERRIDE_BONES,
-};
-
-
-
 struct PhysicsSharedInitData
 {
-	TransformationF mTransformation;
-	Vector3DF mVelocity;
+	xform mTransformation;
+	vec3 mVelocity;
 	PhysicsOverride mPhysicsOverride;
-	TBC::PhysicsManager* mPhysicsManager;
+	Tbc::PhysicsManager* mPhysicsManager;
 	const int mPhysicsFps;
 	const GameObjectId mInstanceId;
 
-	PhysicsSharedInitData(const TransformationF& pTransformation, const Vector3DF& pVelocity, PhysicsOverride pPhysicsOverride,
-		TBC::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
+	PhysicsSharedInitData(const xform& pTransformation, const vec3& pVelocity, PhysicsOverride pPhysicsOverride,
+		Tbc::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
 	void operator=(const PhysicsSharedInitData&);
 };
 
@@ -71,7 +62,7 @@ private:
 	PhysicsSharedInitData mInitData;
 	ResourceLoadState mPhysicsLoadState;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

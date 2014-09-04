@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiFontManager.h"
 #include <algorithm>
 #include "../../Lepra/Include/ResourceTracker.h"

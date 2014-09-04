@@ -105,7 +105,7 @@ private:
 	float mPhysicsFrameTime;	// How much time we should move forward each physics step.
 	int mPhysicsStepCount;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

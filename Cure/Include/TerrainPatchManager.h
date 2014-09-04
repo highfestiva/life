@@ -14,7 +14,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 class TerrainFunction;
 class TerrainPatch;
@@ -40,7 +40,7 @@ public:
 	void AddPatch(UserPhysicalTerrainResource* pPatchResource);
 
 	void MarkAllDirty();
-	void MarkInUse(const Vector3DF& pPosition, float pRadius);
+	void MarkInUse(const vec3& pPosition, float pRadius);
 	void DeleteDirty();
 
 private:

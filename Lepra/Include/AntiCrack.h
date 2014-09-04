@@ -7,8 +7,7 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT	0x0510
 #endif // _WIN32_WINNT
-#include "LepraTarget.h"
-#include "LepraTypes.h"
+#include "LepraOS.h"
 
 #pragma once
 

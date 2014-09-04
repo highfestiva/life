@@ -68,7 +68,7 @@ private:
 	LogListener* mPerformanceLogger;
 	MemFileLogListener* mMemLogger;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

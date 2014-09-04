@@ -27,7 +27,7 @@ public:
 	GameUiManager* mUiManager;
 	float mExhaustTimeout;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

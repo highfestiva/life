@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiSoundReleaser.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../Include/UiGameUiManager.h"
@@ -16,7 +17,7 @@ namespace UiCure
 
 
 SoundReleaser::SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
-	const str& pSoundName, UiCure::UserSound3dResource* pSound, const Vector3DF& pPosition, const Vector3DF& pVelocity,
+	const str& pSoundName, UiCure::UserSound3dResource* pSound, const vec3& pPosition, const vec3& pVelocity,
 	float pVolume, float pPitch):
 	Parent(pResourceManager, _T("SoundReleaser"), pUiManager),
 	mSound3d(pSound),

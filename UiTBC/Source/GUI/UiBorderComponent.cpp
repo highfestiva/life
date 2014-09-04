@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/GUI/UiBorderComponent.h"
 #include <math.h>
 #include "../../Include/GUI/UiDesktopWindow.h"

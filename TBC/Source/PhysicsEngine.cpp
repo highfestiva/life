@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/PhysicsEngine.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Endian.h"
@@ -14,7 +15,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -208,25 +209,25 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			case ENGINE_PUSH_RELATIVE:
 			case ENGINE_PUSH_ABSOLUTE:
 			{
-				Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
-					Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
+				vec3 lAxis[3] = {vec3(0, 1, 0),
+					vec3(1, 0, 0), vec3(0, 0, 1)};
 				if (mEngineType == ENGINE_PUSH_RELATIVE)
 				{
 					const ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
-					const QuaternionF lOrientation =
+					const quat lOrientation =
 						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
 						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
 					/*float lYaw;
 					float lPitch;
 					float lRoll;
 					lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
-					QuaternionF lRotation;
+					quat lRotation;
 					lRotation.RotateAroundWorldZ(lYaw);*/
 					lAxis[0] = lOrientation*lAxis[0];
 					lAxis[1] = lOrientation*lAxis[1];
 					lAxis[2] = lOrientation*lAxis[2];
 				}
-				Vector3DF lOffset;
+				vec3 lOffset;
 				while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
 				{
 					ChunkyBoneGeometry* lParent = lGeometry->GetParent();
@@ -234,16 +235,16 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					{
 						break;
 					}
-					Vector3DF lMayaOffset = lGeometry->GetOriginalOffset();
+					vec3 lMayaOffset = lGeometry->GetOriginalOffset();
 					std::swap(lMayaOffset.y, lMayaOffset.z);
 					lMayaOffset.y = -lMayaOffset.y;
 					lOffset += lMayaOffset;
 					lGeometry = lParent;
 				}
-				Vector3DF lVelocityVector;
+				vec3 lVelocityVector;
 				pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
 				//lVelocityVector = lRotation*lVelocityVector;
-				Vector3DF lPushVector;
+				vec3 lPushVector;
 				for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
 				{
 					lPushVector += mValue[i] * lAxis[i];
@@ -273,9 +274,9 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				if (lPrimaryForce != 0 || mValue[ASPECT_SECONDARY] != 0)
 				{
 					// Arcade stabilization for lifter (typically hovercraft, elevator or similar vehicle).
-					Vector3DF lLiftPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId()) + Vector3DF(0,0,1)*mFriction*lScale;
+					vec3 lLiftPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId()) + vec3(0,0,1)*mFriction*lScale;
 
-					const Vector3DF lLiftForce = Vector3DF(0,0,1)*mStrength*lScale;
+					const vec3 lLiftForce = vec3(0,0,1)*mStrength*lScale;
 					pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), lLiftForce, lLiftPivot);
 				}
 			}
@@ -288,14 +289,14 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT && mFriction >= 0)
 				{
-					Vector3DF lAxis;
+					vec3 lAxis;
 					pPhysicsManager->GetAxis1(lGeometry->GetJointId(), lAxis);
-					Vector3DF lY;
-					Vector3DF lZ;
+					vec3 lY;
+					vec3 lZ;
 					lAxis.GetNormalized().GetOrthogonals(lY, lZ);
 					const float lStrength = 3 * lPrimaryForce * mStrength;
 					lZ *= lStrength;
-					Vector3DF lPos;
+					vec3 lPos;
 					pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lPos);
 					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lZ, lPos+lY);
 					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), -lZ, lPos-lY);
@@ -384,31 +385,31 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
-					const Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
-					Vector3DF lLiftForce = lRotorForce * lPrimaryForce;
+					const vec3 lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
+					vec3 lLiftForce = lRotorForce * lPrimaryForce;
 					const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
-					const QuaternionF lOrientation =
+					const quat lOrientation =
 						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
 						pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse();
 
-					Vector3DF lRotorPivot;
+					vec3 lRotorPivot;
 					pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
-					const Vector3DF lOffset =
+					const vec3 lOffset =
 						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
-						Vector3DF(0, 0, mMaxSpeed*lScale);
+						vec3(0, 0, mMaxSpeed*lScale);
 					lRotorPivot += lOffset;
 
 					const float lAbsFriction = std::abs(mFriction);
 					if (mFriction < 0)
 					{
 						// Arcade stabilization for VTOL rotor.
-						Vector3DF lParentAngularVelocity;
+						vec3 lParentAngularVelocity;
 						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetParent()->GetBodyId(), lParentAngularVelocity);
 						lParentAngularVelocity = lOrientation.GetInverse() * lParentAngularVelocity;
-						const Vector3DF lParentAngle = lOrientation.GetInverse() * Vector3DF(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
+						const vec3 lParentAngle = lOrientation.GetInverse() * vec3(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
 						const float lStabilityX = -lParentAngle.x * 0.5f + lParentAngularVelocity.y * lAbsFriction;
 						const float lStabilityY = -lParentAngle.y * 0.5f - lParentAngularVelocity.x * lAbsFriction;
-						lRotorPivot += lOrientation * Vector3DF(lStabilityX, lStabilityY, 0);
+						lRotorPivot += lOrientation * vec3(lStabilityX, lStabilityY, 0);
 					}
 
 					// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
@@ -418,7 +419,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					lLiftForce.z = mSmoothValue[ASPECT_TERTIARY] = Math::Lerp(mSmoothValue[ASPECT_TERTIARY], lLiftForce.z, lSmooth);
 
 					// Counteract rotor's movement through perpendicular air.
-					Vector3DF lDragForce;
+					vec3 lDragForce;
 					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
 					lDragForce = ((-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lNormalizedFrameTime) * lRotorForce;
 
@@ -435,23 +436,23 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)
 				{
-					const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * std::abs(lPrimaryForce);
+					const vec3 lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * std::abs(lPrimaryForce);
 					const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
 					const float lPlacement = (lPrimaryForce >= 0)? 1.0f : -1.0f;
-					const Vector3DF lOffset =
+					const vec3 lOffset =
 						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
 						pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse() *
-						Vector3DF(lPlacement*mMaxSpeed, -lPlacement*mMaxSpeed2, 0);
-					const Vector3DF lWorldPos = lOffset + pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+						vec3(lPlacement*mMaxSpeed, -lPlacement*mMaxSpeed2, 0);
+					const vec3 lWorldPos = lOffset + pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
 					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce, lWorldPos);
 					//{
 					//	static int cnt = 0;
 					//	if ((++cnt)%300 == 0)
 					//	{
-					//		//Vector3DF r = pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()).GetInverse() * lRelPos;
-					//		//Vector3DF r = lRelPos;
-					//		Vector3DF r = lOffset;
-					//		Vector3DF w = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+					//		//vec3 r = pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()).GetInverse() * lRelPos;
+					//		//vec3 r = lRelPos;
+					//		vec3 r = lOffset;
+					//		vec3 w = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
 					//		mLog.Infof(_T("Got pos (%f, %f, %f) - world pos is (%f, %f, %f)."), r.x, r.y, r.z, w.x, w.y, w.z);
 					//	}
 					//}
@@ -465,14 +466,14 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			case ENGINE_JET:
 			{
 				ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
-				Vector3DF lVelocity;
+				vec3 lVelocity;
 				pPhysicsManager->GetBodyVelocity(lRootGeometry->GetBodyId(), lVelocity);
 				if (lPrimaryForce != 0 && lVelocity.GetLengthSquared() < mMaxSpeed*mMaxSpeed)
 				{
-					const QuaternionF lOrientation =
+					const quat lOrientation =
 						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
 						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
-					const Vector3DF lPushForce = lOrientation * Vector3DF(0, lPrimaryForce*mStrength, 0);
+					const vec3 lPushForce = lOrientation * vec3(0, lPrimaryForce*mStrength, 0);
 					pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPushForce);
 				}
 				mIntensity += lPrimaryForce;
@@ -521,8 +522,8 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			case ENGINE_YAW_BRAKE:
 			{
-				const TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-				Vector3DF lAngularVelocity;
+				const Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+				vec3 lAngularVelocity;
 				pPhysicsManager->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
 				// Reduce rotation of craft.
 				lAngularVelocity.z *= mFriction;
@@ -541,11 +542,11 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				// F =  - pv^2 C  A
 				//  D   2       d
 				const float pCdA = 0.5f * 1.225f * mFriction;	// Density of air multiplied with friction coefficient and area (the two latter combined in mFriction).
-				const TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-				Vector3DF lVelocity;
+				const Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+				vec3 lVelocity;
 				pPhysicsManager->GetBodyVelocity(lBodyId, lVelocity);
 				const float lSpeed = lVelocity.GetLength();
-				const Vector3DF lDrag = lVelocity * -lSpeed * pCdA;
+				const vec3 lDrag = lVelocity * -lSpeed * pCdA;
 				pPhysicsManager->AddForce(lBodyId, lDrag);
 			}
 			break;
@@ -559,16 +560,16 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 	mIntensity /= mEngineNodeArray.size();
 }
 
-Vector3DF PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManager) const
+vec3 PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManager) const
 {
-	Vector3DF lMaxVelocity;
+	vec3 lMaxVelocity;
 	float lMaxSpeed = 0;
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
 	{
 		const EngineNode& lEngineNode = *i;
 		ChunkyBoneGeometry* lGeometry = lEngineNode.mGeometry;
-		Vector3DF lVelocity;
+		vec3 lVelocity;
 		pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 		const float lSpeed = lVelocity.GetLengthSquared();
 		if (lSpeed > lMaxSpeed)
@@ -586,19 +587,19 @@ void PhysicsEngine::UprightStabilize(PhysicsManager* pPhysicsManager, const Chun
 	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
 {
 	const int lRootBone = 0;	// Use root bone for fetching original transform, or "up" will be off.
-	const QuaternionF lOrientation =
+	const quat lOrientation =
 		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
 		pStructure->GetOriginalBoneTransformation(lRootBone).GetOrientation().GetInverse();
 	// 1st: angular velocity damping (skipping z).
-	Vector3DF lAngular;
+	vec3 lAngular;
 	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lAngular);
 	lAngular = lOrientation.GetInverse() * lAngular;
 	lAngular.z = 0;
 	lAngular *= -pFriction;
-	Vector3DF lTorque = lOrientation * lAngular;
+	vec3 lTorque = lOrientation * lAngular;
 	// 2nd: strive towards straight.
-	lAngular = lOrientation * Vector3DF(0, 0, 1);
-	lTorque += Vector3DF(+lAngular.y * pFriction*5, -lAngular.x * pFriction*5, 0);
+	lAngular = lOrientation * vec3(0, 0, 1);
+	lTorque += vec3(+lAngular.y * pFriction*5, -lAngular.x * pFriction*5, 0);
 	pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lTorque*pStrength);
 }
 
@@ -606,18 +607,18 @@ void PhysicsEngine::ForwardStabilize(PhysicsManager* pPhysicsManager, const Chun
 	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
 {
 	const int lBone = pStructure->GetIndex(pGeometry);
-	const QuaternionF lOrientation =
+	const quat lOrientation =
 		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
 		pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
 	// 1st: angular velocity damping in Z-axis.
-	Vector3DF lVelocity3d;
+	vec3 lVelocity3d;
 	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lVelocity3d);
 	const float lAngularVelocity = lVelocity3d.z;
 	// 2nd: strive towards straight towards where we're heading.
 	pPhysicsManager->GetBodyVelocity(pGeometry->GetBodyId(), lVelocity3d);
-	Vector2DF lVelocity2d(lVelocity3d.x, lVelocity3d.y);
-	const Vector3DF lForward3d = lOrientation * Vector3DF(0, 1, 0);
-	Vector2DF lForward2d(lForward3d.x, lForward3d.y);
+	vec2 lVelocity2d(lVelocity3d.x, lVelocity3d.y);
+	const vec3 lForward3d = lOrientation * vec3(0, 1, 0);
+	vec2 lForward2d(lForward3d.x, lForward3d.y);
 	if (lForward2d.GetLengthSquared() > 0.1f && lVelocity2d.GetLengthSquared() > 0.3f)
 	{
 		float lAngle = lForward2d.GetAngle(lVelocity2d);
@@ -763,9 +764,9 @@ void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 
 
 
-Vector3DF PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const
+vec3 PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const
 {
-	Vector3DF lAxis;
+	vec3 lAxis;
 	pPhysicsManager->GetAxis1(pGeometry->GetJointId(), lAxis);
 	float lAngularRotorSpeed = 0;
 	pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lAngularRotorSpeed);
@@ -841,7 +842,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	{
 		// Wants us to scale (down) rotation angle depending on vehicle speed. Otherwise most vehicles
 		// quickly flips, not yeilding very fun gameplay. Plus, it's more like real racing cars! :)
-		Vector3DF lParentVelocity;
+		vec3 lParentVelocity;
 		pPhysicsManager->GetBodyVelocity(pGeometry->GetParent()->GetBodyId(), lParentVelocity);
 		const float lRangeFactor = ::pow(mFriction, lParentVelocity.GetLength());
 		lHiStop *= lRangeFactor;
@@ -891,7 +892,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, PhysicsEngine);
+loginstance(PHYSICS, PhysicsEngine);
 
 
 

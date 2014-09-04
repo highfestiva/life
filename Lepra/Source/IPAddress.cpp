@@ -2,6 +2,8 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
+#include "pch.h"
+#include "../Include/LepraOS.h"
 #include "../Include/LepraTypes.h"
 #include "../Include/IPAddress.h"
 #include "../Include/String.h"

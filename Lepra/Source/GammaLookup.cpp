@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/GammaLookup.h"
 #include <math.h>
 

@@ -4,6 +4,7 @@
  
 
 
+#include "pch.h"
 #include "../../Lepra/Include/IOBuffer.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Reader.h"
@@ -176,7 +177,7 @@ void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTim
 	deb_assert(pConnectTimeout >= 0);
 	mConnectTimeout = pConnectTimeout;
 	mLoginToken = pLoginToken;
-	CURE_RTVAR_GET(mLoginTimeout, =, mVariableScope, RTVAR_NETWORK_LOGIN_TIMEOUT, 3.0);
+	v_get(mLoginTimeout, =, mVariableScope, RTVAR_NETWORK_LOGIN_TIMEOUT, 3.0);
 	deb_assert(mLoginTimeout > 0);
 	StopLoginThread();
 	mLoginThread.Start(this, &NetworkClient::LoginEntry);
@@ -422,7 +423,7 @@ void NetworkClient::LoginEntry()
 			}
 			lOk = Connect(mServerHost, mConnectTimeout);
 		}
-		while (++x <= CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1) && !lOk &&
+		while (++x <= v_slowget(mVariableScope, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1) && !lOk &&
 			!SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest());
 	}
 	mIsConnecting = false;
@@ -524,7 +525,7 @@ void NetworkClient::KillIoSocket(VIoSocket* pSocket)
 
 
 
-LOG_CLASS_DEFINE(NETWORK_CLIENT, NetworkClient);
+loginstance(NETWORK_CLIENT, NetworkClient);
 
 
 

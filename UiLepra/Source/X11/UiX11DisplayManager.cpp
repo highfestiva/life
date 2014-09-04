@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/X11/UiX11DisplayManager.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/String.h"
@@ -613,7 +614,7 @@ Bool X11DisplayManager::OnMessage(XEvent* e)
 
 
 int X11DisplayManager::msWindowCount = 0;
-LOG_CLASS_DEFINE(UI_GFX, X11DisplayManager);
+loginstance(UI_GFX, X11DisplayManager);
 
 
 

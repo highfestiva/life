@@ -4,8 +4,10 @@
 
 
 
+#include "pch.h"
 #include "../Include/LepraAssert.h"
 #include "../Include/Network.h"
+#include "../Include/Socket.h"
 
 #ifdef LEPRA_WINDOWS
 #pragma comment(lib, "Ws2_32.lib")
@@ -108,7 +110,7 @@ bool Network::IsLocalAddress(const str& pAddress)
 
 
 bool Network::mStarted = false;
-LOG_CLASS_DEFINE(NETWORK, Network);
+loginstance(NETWORK, Network);
 
 
 

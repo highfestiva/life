@@ -4,8 +4,9 @@
 
 
 
+#include "pch.h"
 #include "../Include/ContextPath.h"
-#include "../../TBC/Include/ChunkyBoneGeometry.h"
+#include "../../Tbc/Include/ChunkyBoneGeometry.h"
 
 
 
@@ -14,7 +15,7 @@ namespace Cure
 
 
 
-ContextPath::SplinePath::SplinePath(Vector3DF* pKeyFrames,
+ContextPath::SplinePath::SplinePath(vec3* pKeyFrames,
 	float* pTimeTags,
 	int pCount,
 	str pType,
@@ -83,7 +84,7 @@ ContextPath::~ContextPath()
 
 void ContextPath::SetTagIndex(int pIndex)
 {
-	const TBC::ChunkyClass::Tag& lTag = ((CppContextObject*)mParent)->GetClass()->GetTag(pIndex);
+	const Tbc::ChunkyClass::Tag& lTag = ((CppContextObject*)mParent)->GetClass()->GetTag(pIndex);
 	deb_assert(lTag.mFloatValueList.size() == 1);
 	deb_assert(lTag.mStringValueList.size() <= 1);
 	const size_t lBodyCount = lTag.mBodyIndexList.size();
@@ -106,16 +107,16 @@ void ContextPath::SetTagIndex(int pIndex)
 	// TRICKY: this algorithm adds one extra head vertex and two extra tail vertices to the
 	// path, to avoid spline looping.
 	float lTotalDistance = 1;	// Start at an offset (head).
-	TBC::ChunkyPhysics* lPhysics = mParent->GetPhysics();
-	Vector3DF* lPathPositions = new Vector3DF[1+lBodyCount+2];
+	Tbc::ChunkyPhysics* lPhysics = mParent->GetPhysics();
+	vec3* lPathPositions = new vec3[1+lBodyCount+2];
 	float* lTimes = new float[1+lBodyCount+2];
 	size_t x;
 	for (x = 0; x < lBodyCount; ++x)
 	{
 		const int lBoneIndex = lTag.mBodyIndexList[x];
 #ifdef LEPRA_DEBUG
-		TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBoneIndex);
-		deb_assert(lBone->GetBoneType() == TBC::ChunkyBoneGeometry::BONE_POSITION);
+		Tbc::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBoneIndex);
+		deb_assert(lBone->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_POSITION);
 #endif // Debug
 		lPathPositions[x+1] = lPhysics->GetBoneTransformation(lBoneIndex).GetPosition();
 		if (x > 0)	// We only start from the start position (not origo).

@@ -26,9 +26,9 @@ public:
 	virtual ~RaceTimer();
 
 private:
-	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
+	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
 
 	typedef std::unordered_map<Cure::GameObjectId, int> DoneMap;
 
@@ -36,7 +36,7 @@ private:
 	unsigned mTriggerCount;
 	DoneMap mDoneMap;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

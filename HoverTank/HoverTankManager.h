@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../Lepra/Include/DiskFile.h"
-#include "../TBC/Include/PhysicsEngine.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/Launcher.h"
 #include "LoginView.h"
@@ -67,12 +67,12 @@ public:
 
 	void SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId);
 	void AddLocalObjects(std::unordered_set<Cure::GameObjectId>& pLocalObjectSet);
-	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
+	virtual bool IsObjectRelevant(const vec3& pPosition, float pDistance) const;
 	Cure::GameObjectId GetAvatarInstanceId() const;
 
 	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
 
-	virtual void Detonate(Cure::ContextObject* pExplosive, const TBC::ChunkyBoneGeometry* pExplosiveGeometry, const Vector3DF& pPosition, const Vector3DF& pVelocity, const Vector3DF& pNormal, float pStrength);
+	virtual void Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength);
 	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
 
 protected:
@@ -96,7 +96,7 @@ protected:
 	virtual void TickUiInput();
 	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower);
 	virtual void TickUiUpdate();
-	virtual bool UpdateMassObjects(const Vector3DF& pPosition);
+	virtual bool UpdateMassObjects(const vec3& pPosition);
 	virtual void SetLocalRender(bool pRender);
 	void SetMassRender(bool pRender);
 
@@ -105,9 +105,9 @@ protected:
 	virtual void ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
+		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
 
 	void OnFireButton(UiTbc::Button*);
 	void AvatarShoot();
@@ -122,7 +122,7 @@ protected:
 	void DrawScore();
 
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
-	QuaternionF GetCameraQuaternion() const;
+	quat GetCameraQuaternion() const;
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 
@@ -148,19 +148,19 @@ protected:
 
 	Cure::GameObjectId mScoreInfoId;
 
-	Vector3DF mCameraPosition;
-	Vector3DF mCameraPreviousPosition;
-	Vector3DF mCameraUp;
-	Vector3DF mCameraOrientation;
-	Vector3DF mCameraPivotPosition;
-	Vector3DF mCameraPivotVelocity;
+	vec3 mCameraPosition;
+	vec3 mCameraPreviousPosition;
+	vec3 mCameraUp;
+	vec3 mCameraOrientation;
+	vec3 mCameraPivotPosition;
+	vec3 mCameraPivotVelocity;
 	float mCameraTargetXyDistance;
 	float mCameraMaxSpeed;
 	float mCameraMouseAngle;
 	HiResTimer mCameraMouseAngleTimer;
 	float mCameraTargetAngle;
 	float mCameraTargetAngleFactor;
-	Vector3DF mMicrophoneSpeed;
+	vec3 mMicrophoneSpeed;
 	UiTbc::Window* mLoginWindow;
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
 	UiTbc::Button* mFireButton;
@@ -176,9 +176,9 @@ protected:
 	};
 	DiskFile mEnginePlaybackFile;	// Used for recording vechile steering playback.
 	float mEnginePlaybackTime;	// Used for recording vechile steering playback.
-	EnginePower mEnginePowerShadow[TBC::PhysicsEngine::ASPECT_COUNT];	// Used for recording vechile steering playback.
+	EnginePower mEnginePowerShadow[Tbc::PhysicsEngine::ASPECT_COUNT];	// Used for recording vechile steering playback.
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

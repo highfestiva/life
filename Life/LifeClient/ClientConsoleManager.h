@@ -7,7 +7,17 @@
 #pragma once
 
 #include "../ConsoleManager.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
+
+
+
+namespace Lepra
+{
+class PixelRect;
+};
+namespace UiCure
+{
+class GameUiManager;
+}
 
 
 
@@ -64,7 +74,7 @@ protected:
 
 	static const CommandPair mCommandIdList[];
 	UiConsole* mUiConsole;
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

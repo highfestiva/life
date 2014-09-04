@@ -678,7 +678,7 @@ DisplayMode MacDisplayManager::ConvertNativeDisplayMode(CGDisplayModeRef pMode)
 
 
 int MacDisplayManager::mWindowCount = 0;
-LOG_CLASS_DEFINE(UI_GFX, MacDisplayManager);
+loginstance(UI_GFX, MacDisplayManager);
 
 
 

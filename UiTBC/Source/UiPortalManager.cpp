@@ -4,23 +4,24 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/UiPortalManager.h"
 #include "../Include/UiRenderer.h"
 #include "../../Lepra/Include/Log.h"
-#include "../../TBC/Include/GeometryBase.h"
+#include "../../Tbc/Include/GeometryBase.h"
 
 namespace UiTbc
 {
 
-TBC::PortalManager::Portal* PortalManager::NewPortal(int pNumVertices,
-						     Vector3DF* pVertex,
+Tbc::PortalManager::Portal* PortalManager::NewPortal(int pNumVertices,
+						     vec3* pVertex,
 						     Cell* pCell1,
 						     Cell* pCell2)
 {
 	return new Portal(pNumVertices, pVertex, pCell1, pCell2);
 }
 
-TBC::PortalManager::Cell* PortalManager::NewCell(const str& pCellID, 
+Tbc::PortalManager::Cell* PortalManager::NewCell(const str& pCellID, 
 						 const str& pCellDescription,
 						 PortalManager* pPortalManager)
 {
@@ -74,7 +75,7 @@ void PortalManager::Cell::Traverse(Renderer* pRenderer, const PixelRect& pRect)
 		GeomSet::Iterator lGIter;
 		for (lGIter = mGeomSet.First(); lGIter != mGeomSet.End(); ++lGIter)
 		{
-			TBC::GeometryBase* lGeom = *lGIter;
+			Tbc::GeometryBase* lGeom = *lGIter;
 			lGeom->SetLastFrameVisible(pRenderer->GetCurrentFrame());
 		}
 	}
@@ -89,10 +90,10 @@ void PortalManager::Cell::Traverse(Renderer* pRenderer, const PixelRect& pRect)
 }
 
 PortalManager::Portal::Portal(int pNumVertices,
-			      Vector3DF* pVertex,
+			      vec3* pVertex,
 			      Cell* pCell1,
 			      Cell* pCell2) :
-	TBC::PortalManager::Portal(pNumVertices, pVertex, pCell1, pCell2)
+	Tbc::PortalManager::Portal(pNumVertices, pVertex, pCell1, pCell2)
 {
 }
 
@@ -104,7 +105,7 @@ PortalManager::Portal::~Portal()
 PortalManager::Cell::Cell(const str& pCellID, 
 			  const str& pCellDescription,
 			  PortalManager* pPortalManager) :
-	TBC::PortalManager::Cell(pCellID, pCellDescription, pPortalManager),
+	Tbc::PortalManager::Cell(pCellID, pCellDescription, pPortalManager),
 	mLastFrameVisible(-1)
 {
 }
@@ -114,6 +115,6 @@ PortalManager::Cell::~Cell()
 }
 
 
-LOG_CLASS_DEFINE(UI_GFX_3D, PortalManager);
+loginstance(UI_GFX_3D, PortalManager);
 
 } // End namespace.

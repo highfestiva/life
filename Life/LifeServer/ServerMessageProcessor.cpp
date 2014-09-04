@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "ServerMessageProcessor.h"
 #include "GameServerManager.h"
 
@@ -167,7 +168,7 @@ void ServerMessageProcessor::ProcessNumber(Client* pClient, Cure::MessageNumber:
 
 
 
-LOG_CLASS_DEFINE(GAME, ServerMessageProcessor);
+loginstance(GAME, ServerMessageProcessor);
 
 
 

@@ -4,11 +4,12 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiResourceManager.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/TerrainFunctionManager.h"
 #include "../../Lepra/Include/MemFile.h"
-#include "../../UiTBC/Include/UiTriangleBasedGeometry.h"
+#include "../../UiTbc/Include/UiTriangleBasedGeometry.h"
 #include "../Include/UiCure.h"
 #include "../Include/UiGameUiManager.h"
 
@@ -284,7 +285,7 @@ bool GeometryResource::Load()
 	deb_assert(!IsUnique());
 
 	//float lCubeMappingScale = -1;
-	TBC::GeometryBase::BasicMaterialSettings lMaterial;
+	Tbc::GeometryBase::BasicMaterialSettings lMaterial;
 	lMaterial.SetColor(0.5f, 0.5f, 0.5f);
 
 	UiTbc::TriangleBasedGeometry* lGeometry = 0;
@@ -365,7 +366,7 @@ int GeometryResource::GetCastsShadows() const
 	return (mCastsShadows);
 }
 
-LOG_CLASS_DEFINE(UI_GFX_3D, GeometryResource);
+loginstance(UI_GFX_3D, GeometryResource);
 
 
 
@@ -433,7 +434,7 @@ Cure::ResourceLoadState GeometryReferenceResource::CreateInstance()
 	Cure::ResourceLoadState lLoadState = mClassResource->GetLoadState();
 	if (lLoadState == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		SetRamData(new TBC::GeometryReference(mClassResource->GetRamData()));
+		SetRamData(new Tbc::GeometryReference(mClassResource->GetRamData()));
 		GetRamData()->SetAlwaysVisible(true);
 		//GetRamData()->SetBasicMaterialSettings(mClassResource->GetRamData()->GetBasicMaterialSettings());
 		lLoadState = Parent::PostProcess();
@@ -457,7 +458,7 @@ void GeometryReferenceResource::OnLoadClass(ClassResource* pResource)
 	mCastsShadows = ((const GeometryResource*)pResource->GetConstResource())->GetCastsShadows();
 }
 
-LOG_CLASS_DEFINE(UI_GFX_3D, GeometryReferenceResource);
+loginstance(UI_GFX_3D, GeometryReferenceResource);
 
 
 
@@ -489,8 +490,8 @@ UserGeometryReferenceResource::~UserGeometryReferenceResource()
 //	deb_assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
 //	deb_assert(mGeometryReference == 0);
 //
-//	TBC::GeometryBase* lOriginal = Parent::GetRamData();
-//	mGeometryReference = new TBC::GeometryReference(lOriginal);
+//	Tbc::GeometryBase* lOriginal = Parent::GetRamData();
+//	mGeometryReference = new Tbc::GeometryReference(lOriginal);
 //	mGeometryReference->SetAlwaysVisible(true);
 //	mGeometryReference->SetBasicMaterialSettings(lOriginal->GetBasicMaterialSettings());
 //	mGeometryReferenceId = GetUiManager()->GetRenderer()->AddGeometry(
@@ -503,7 +504,7 @@ const GeometryOffset& UserGeometryReferenceResource::GetOffset() const
 	return (mOffset);
 }
 
-//TBC::GeometryBase* UserGeometryReferenceResource::GetRamData() const
+//Tbc::GeometryBase* UserGeometryReferenceResource::GetRamData() const
 //{
 //	return (mGeometryReference);
 //}
@@ -518,7 +519,7 @@ Cure::Resource* UserGeometryReferenceResource::CreateResource(Cure::ResourceMana
 	return (new GeometryReferenceResource(GetUiManager(), pManager, pName));
 }
 
-LOG_CLASS_DEFINE(UI_GFX_3D, UserGeometryReferenceResource);
+loginstance(UI_GFX_3D, UserGeometryReferenceResource);
 
 
 

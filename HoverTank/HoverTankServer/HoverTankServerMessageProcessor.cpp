@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "HoverTankServerMessageProcessor.h"
 #include "../../Life/LifeServer/GameServerManager.h"
 #include "GameServerLogic.h"
@@ -48,7 +49,7 @@ void HoverTankServerMessageProcessor::ProcessNumber(Life::Client* pClient, Cure:
 
 
 
-LOG_CLASS_DEFINE(GAME, HoverTankServerMessageProcessor);
+loginstance(GAME, HoverTankServerMessageProcessor);
 
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Life/LifeServer/MasterServerConnection.h"
 #include "../../Life/LifeApplication.h"
@@ -60,14 +61,14 @@ PushServer::~PushServer()
 	Destroy();
 
 	Cure::Shutdown();
-	TBC::Shutdown();
+	Tbc::Shutdown();
 	Lepra::Shutdown();
 };
 
 void PushServer::Init()
 {
 	Lepra::Init();
-	TBC::Init();
+	Tbc::Init();
 	Cure::Init();
 
 	Parent::Init();

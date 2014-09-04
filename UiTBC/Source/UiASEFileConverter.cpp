@@ -4,6 +4,7 @@
 	Copyright (c) 2002-2006, Alexander Hugestrand
 */
 
+#include "pch.h"
 #include "../Include/UiASEFileConverter.h"
 #include "../Include/UiASELoader.h"
 #include "../Include/UiPainter.h"

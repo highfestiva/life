@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "../Include/Driver.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
 #include "../Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../Tbc/Include/PhysicsEngine.h"
 
 
 
@@ -52,7 +53,7 @@ void Driver::OnTick()
 		{
 			break;
 		}
-		TBC::PhysicsEngine* lEngine = mParent->GetPhysics()->GetEngine(lEngineIndex);
+		Tbc::PhysicsEngine* lEngine = mParent->GetPhysics()->GetEngine(lEngineIndex);
 
 		float f = 1;
 		if (mTag.mFloatValueList.size() > 0)
@@ -82,7 +83,7 @@ void Driver::OnTick()
 			}
 			else
 			{
-				Vector3DF lPush = RNDVEC(1.0f);
+				vec3 lPush = RNDVEC(1.0f);
 				lPush.x = ::pow(std::abs(lPush.x), 0.1f) * ((lPush.x <= 0)? -1 : +1);
 				lPush.y = ::pow(std::abs(lPush.y), 0.1f) * ((lPush.y <= 0)? -1 : +1);
 				lPush.z = ::pow(std::abs(lPush.z), 0.1f) * ((lPush.z <= 0)? -1 : +1);
@@ -100,7 +101,7 @@ void Driver::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Driver);
+loginstance(GAME_CONTEXT_CPP, Driver);
 
 
 

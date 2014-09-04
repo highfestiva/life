@@ -15,7 +15,7 @@ namespace Cure
 {
 class CppContextObject;
 }
-namespace TBC
+namespace Tbc
 {
 class PhysicsManager;
 }
@@ -30,15 +30,15 @@ namespace Life
 class Explosion
 {
 public:
-	static float CalculateForce(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength);
-	static float PushObject(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, float pTimeFactor);
-	static void FallApart(TBC::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject);
-	static void Freeze(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject);
+	static float CalculateForce(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength);
+	static float PushObject(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength, float pTimeFactor);
+	static void FallApart(Tbc::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject);
+	static void Freeze(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject);
 
 private:
-	static float Force(TBC::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const Vector3DF& pPosition, float pStrength, float pTimeFactor);
+	static float Force(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength, float pTimeFactor);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiBillboardGeometry.h"
 #include "../../Lepra/Include/CyclicArray.h"
 
@@ -111,12 +112,12 @@ uint8* BillboardGeometry::GetColorData() const
 	return 0;
 }
 
-TBC::GeometryBase::GeometryVolatility BillboardGeometry::GetGeometryVolatility() const
+Tbc::GeometryBase::GeometryVolatility BillboardGeometry::GetGeometryVolatility() const
 {
 	return GEOM_STATIC;
 }
 
-void BillboardGeometry::SetGeometryVolatility(TBC::GeometryBase::GeometryVolatility)
+void BillboardGeometry::SetGeometryVolatility(Tbc::GeometryBase::GeometryVolatility)
 {
 }
 

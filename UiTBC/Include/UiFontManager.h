@@ -11,7 +11,7 @@
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "../../Lepra/Include/String.h"
-#include "../Include/UiTBC.h"
+#include "../Include/UiTbc.h"
 
 
 

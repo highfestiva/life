@@ -31,16 +31,16 @@ public:
 private:
 	virtual void OnTick();
 	virtual void OnForceApplied(Cure::ContextObject* pOtherObject,
-		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque,
-		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+		Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque,
+		const vec3& pPosition, const vec3& pRelativeVelocity);
 
 	Launcher* mLauncher;
 	int mTicksTilFullyActivated;
 	int mTicksTilDetonation;
 	bool mIsDetonated;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

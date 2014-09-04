@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/TimeManager.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/GameTimer.h"
@@ -55,14 +56,14 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 
 void TimeManager::Tick()
 {
-	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
-	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	v_get(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
+	v_get(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	bool lPhysicsHalt;
-	CURE_RTVAR_GET(lPhysicsHalt, =, Cure::GetSettings(), RTVAR_PHYSICS_HALT, false);
+	v_get(lPhysicsHalt, =, Cure::GetSettings(), RTVAR_PHYSICS_HALT, false);
 	mGameRealTimeRatio = lPhysicsHalt? 0 : mRealTimeRatio;
 	GameTimer::SetRealTimeRatio(mGameRealTimeRatio);
 	bool lIsFixedFps;
-	CURE_RTVAR_GET(lIsFixedFps, =, Cure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
+	v_get(lIsFixedFps, =, Cure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 
 	mCurrentFrameTime = (float)mTime.PopTimeDiff();
 	if (mCurrentFrameTime > 1.0)	// Never take longer steps than one second.
@@ -265,7 +266,7 @@ float TimeManager::GetAffordedPhysicsTotalTime() const
 int TimeManager::GetDesiredMicroSteps() const
 {
 	int lMicroSteps;
-	CURE_RTVAR_GET(lMicroSteps, =, Cure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1);
+	v_get(lMicroSteps, =, Cure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1);
 	return (mTargetFrameRate * lMicroSteps);
 }
 
@@ -296,7 +297,7 @@ float TimeManager::ConvertPhysicsFramesToSeconds(int pSteps) const
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, TimeManager);
+loginstance(PHYSICS, TimeManager);
 
 
 

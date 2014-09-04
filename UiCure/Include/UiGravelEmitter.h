@@ -9,7 +9,7 @@
 #include "UiCppContextObject.h"
 #include "../../Cure/Include/ContextForceListener.h"
 #include "../../Lepra/Include/HiResTimer.h"
-#include "../../UiTBC/Include/UiChunkyClass.h"
+#include "../../UiTbc/Include/UiChunkyClass.h"
 
 
 
@@ -25,9 +25,9 @@ public:
 	virtual ~GravelEmitter();
 
 	virtual void OnForceApplied(Cure::ContextObject* pObject, Cure::ContextObject* pOtherObject,
-		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque,
-		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+		Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque,
+		const vec3& pPosition, const vec3& pRelativeVelocity);
 
 	Cure::ResourceManager* mResourceManager;
 	GameUiManager* mUiManager;
@@ -37,7 +37,7 @@ public:
 	float mDelay;
 	float mLifeTime;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

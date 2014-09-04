@@ -117,7 +117,7 @@ private:
 
 	int64 mFileSize;	// The uncompressed size of the current file.
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

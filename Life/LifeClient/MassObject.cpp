@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "MassObject.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../UiTBC/Include/UiGeometryBatch.h"
+#include "../../UiTbc/Include/UiGeometryBatch.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "RtVar.h"
 
@@ -21,7 +22,7 @@ namespace Life
 
 
 MassObject::MassObject(Cure::ResourceManager* pResourceManager, const str& pClassResourceName,
-	UiCure::GameUiManager* pUiManager, TBC::PhysicsManager::BodyID pTerrainBodyId, size_t pInstanceCount,
+	UiCure::GameUiManager* pUiManager, Tbc::PhysicsManager::BodyID pTerrainBodyId, size_t pInstanceCount,
 	float pSideLength):
 	Parent(pResourceManager, pClassResourceName, pUiManager),
 	mTerrainBodyId(pTerrainBodyId),
@@ -57,7 +58,7 @@ void MassObject::SetSeed(unsigned pSeed)
 
 void MassObject::SetRender(bool pRender)
 {
-	const Vector3DF& lCenterPosition = GetPosition();
+	const vec3& lCenterPosition = GetPosition();
 	for (int y = 0; y < SQUARE_SIDE; ++y)
 	{
 		for (int x = 0; x < SQUARE_SIDE; ++x)
@@ -65,7 +66,7 @@ void MassObject::SetRender(bool pRender)
 			const size_t lOffset = y*SQUARE_SIDE+x;
 			if (mSquareArray[lOffset])
 			{
-				Vector3DF lSquarePosition;
+				vec3 lSquarePosition;
 				GridToPosition(x, y, lSquarePosition);
 				const float lDistance = lSquarePosition.GetDistance(lCenterPosition);
 				const float lAlpha = (1.0f + mVisibleAddTerm) - Math::Lerp(0.0f, 1.0f, (lDistance-mFullyVisibleDistance)*mVisibleDistanceFactor);
@@ -112,7 +113,7 @@ void MassObject::OnLoaded()
 
 	for (MeshArray::const_iterator y = mMeshResourceArray.begin(); y != mMeshResourceArray.end(); ++y)
 	{
-		TBC::GeometryReference* lMesh = (TBC::GeometryReference*)(*y)->GetRamData();
+		Tbc::GeometryReference* lMesh = (Tbc::GeometryReference*)(*y)->GetRamData();
 		if (lMesh)
 		{
 			lMesh->SetAlwaysVisible(false);
@@ -120,14 +121,14 @@ void MassObject::OnLoaded()
 	}
 }
 
-void MassObject::PositionToGrid(const Vector3DF& pPosition, int& pX, int& pY) const
+void MassObject::PositionToGrid(const vec3& pPosition, int& pX, int& pY) const
 {
 	// 2's complement...
 	pX = (pPosition.x < 0)? (int)(pPosition.x/mSquareSideLength)-1 : (int)(pPosition.x/mSquareSideLength);
 	pY = (pPosition.y < 0)? (int)(pPosition.y/mSquareSideLength)-1 : (int)(pPosition.y/mSquareSideLength);
 }
 
-void MassObject::GridToPosition(int pX, int pY, Vector3DF& pPosition) const
+void MassObject::GridToPosition(int pX, int pY, vec3& pPosition) const
 {
 	// 2's complement...
 	pPosition.x = (float)((pX-SQUARE_MID_TO_CORNER+mMiddleSquareX) * mSquareSideLength);
@@ -175,14 +176,14 @@ void MassObject::CreateSquare(size_t pX, size_t pY)
 	deb_assert(!mSquareArray[pY*SQUARE_SIDE+pX]);
 
 	uint32 lSeed = mSeed + (uint32)((pY<<16)+pX);
-	std::vector<TransformationF> lDisplacementArray;
+	std::vector<xform> lDisplacementArray;
 	for (size_t x = 0; x < mSquareInstanceCount; ++x)
 	{
-		QuaternionF lRotation;
+		quat lRotation;
 		lRotation.RotateAroundOwnY(Random::Uniform(lSeed, 0.0f, PIF*2));
 		lRotation.RotateAroundOwnX(Random::Uniform(lSeed, 0.0f, PIF/8));
 		lRotation.RotateAroundOwnZ(Random::Uniform(lSeed, 0.0f, PIF/8));
-		Vector3DF lPosition;
+		vec3 lPosition;
 		GridToPosition(pX, pY, lPosition);
 		lPosition.x += Random::Uniform(lSeed, 0.3f, (float)mSquareSideLength);
 		lPosition.y += Random::Uniform(lSeed, 0.3f, (float)mSquareSideLength);
@@ -190,20 +191,20 @@ void MassObject::CreateSquare(size_t pX, size_t pY)
 		{
 			std::swap(lPosition.y, lPosition.z);	// TRICKY: transform from RG coords to Maya coords.
 			lPosition.z = -lPosition.z;	// TRICKY: transform from RG coords to Maya coords.
-			lDisplacementArray.push_back(TransformationF(lRotation, lPosition));
+			lDisplacementArray.push_back(xform(lRotation, lPosition));
 		}
 	}
 	mSquareArray[pY*SQUARE_SIDE+pX] = new Square(lSeed, mMeshResourceArray, lDisplacementArray, GetUiManager()->GetRenderer());
 }
 
-bool MassObject::GetObjectPlacement(Vector3DF& pPosition) const
+bool MassObject::GetObjectPlacement(vec3& pPosition) const
 {
 	const float lRayLength = 500;
 	pPosition.z += lRayLength * 0.5f;
-	QuaternionF lOrientation;
+	quat lOrientation;
 	lOrientation.RotateAroundOwnX(PIF);
-	TransformationF lTransform(lOrientation, pPosition);
-	Vector3DF lCollisionPosition[3];
+	xform lTransform(lOrientation, pPosition);
+	vec3 lCollisionPosition[3];
 	const int lCollisions = GetManager()->GetGameManager()->GetPhysicsManager()->QueryRayCollisionAgainst(
 		lTransform, lRayLength, mTerrainBodyId, lCollisionPosition, 3);
 	if (lCollisions >= 1)
@@ -223,7 +224,7 @@ bool MassObject::GetObjectPlacement(Vector3DF& pPosition) const
 
 
 MassObject::Square::Square(uint32 pSeed, const MeshArray& pResourceArray,
-	const std::vector<TransformationF>& pDisplacementArray, UiTbc::Renderer* pRenderer):
+	const std::vector<xform>& pDisplacementArray, UiTbc::Renderer* pRenderer):
 	mRenderer(pRenderer),
 	mDisableTransparency(false)
 {
@@ -232,15 +233,15 @@ MassObject::Square::Square(uint32 pSeed, const MeshArray& pResourceArray,
 		return;	// No mesh batches if not inside terrain.
 	}
 
-	QuaternionF lRotation;
+	quat lRotation;
 	lRotation.RotateAroundWorldX(PIF*0.5f);
 	for (MeshArray::const_iterator y = pResourceArray.begin(); y != pResourceArray.end(); ++y)
 	{
-		TBC::GeometryReference* lMesh = (TBC::GeometryReference*)(*y)->GetRamData();
+		Tbc::GeometryReference* lMesh = (Tbc::GeometryReference*)(*y)->GetRamData();
 
 		UiTbc::GeometryBatch* lBatch = new UiTbc::GeometryBatch(lMesh);
 		lBatch->SetBasicMaterialSettings(lMesh->GetBasicMaterialSettings());
-		lBatch->SetTransformation(TransformationF(lRotation, Vector3DF(0, 0, 0)));
+		lBatch->SetTransformation(xform(lRotation, vec3(0, 0, 0)));
 		lBatch->SetInstances(&pDisplacementArray[0], lMesh->GetTransformation().GetPosition(),
 			pDisplacementArray.size(), pSeed, 0.8f, 1.3f, 0.6f, 2.0f, 0.7f, 1.2f);
 		typedef UiTbc::Renderer R;
@@ -264,7 +265,7 @@ void MassObject::Square::SetRender(bool pRender, float pAlpha)
 {
 	pAlpha = Math::Clamp(pAlpha, 0.0f, 1.0f);
 	bool lMassObjectFading;
-	CURE_RTVAR_GET(lMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
+	v_get(lMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
 	if (!lMassObjectFading)
 	{
 		pAlpha = 1;
@@ -290,7 +291,7 @@ void MassObject::Square::SetRender(bool pRender, float pAlpha)
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, MassObject);
+loginstance(GAME_CONTEXT_CPP, MassObject);
 
 
 

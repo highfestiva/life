@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../UiCure/Include/UiCppContextObject.h"
-#include "../UiTBC/Include/GUI/UiCustomButton.h"
+#include "../UiTbc/Include/GUI/UiCustomButton.h"
 #include "Push.h"
 
 
@@ -40,9 +40,9 @@ public:
 	virtual ~RoadSignButton();
 
 	UiTbc::CustomButton& GetButton();
-	void SetTrajectory(const Vector2DF& pEndPoint, float pEndDistance);
+	void SetTrajectory(const vec2& pEndPoint, float pEndDistance);
 	void SetTrajectoryAngle(float pAngle);
-	void SetOrientation(const QuaternionF& pOrientation);
+	void SetOrientation(const quat& pOrientation);
 	void SetIsMovingIn(bool pIsMovingIn);
 
 	void MoveSign(const float pFrameTime);
@@ -56,11 +56,11 @@ protected:
 	void OnLoadTexture(UiCure::UserRendererImageResource* pTextureResource);
 	virtual str GetMeshInstanceId() const;
 
-	Vector2DF Get2dProjectionPosition(const Vector3DF& p3dPosition, float& p2dRadius) const;
-	Vector2DF GetAspectRatio(bool pInverse) const;
+	vec2 Get2dProjectionPosition(const vec3& p3dPosition, float& p2dRadius) const;
+	vec2 GetAspectRatio(bool pInverse) const;
 
 private:
-	void SetInitialPosition(TBC::GeometryBase* pGeometry) const;
+	void SetInitialPosition(Tbc::GeometryBase* pGeometry) const;
 	float GetTargetAngle() const;
 
 	Life::ScreenPart* mScreenPart;
@@ -72,16 +72,16 @@ private:
 	float mAngleTime;
 	float mAngle;
 	bool mIsMovingIn;
-	Vector3DF mCurrentOffset;
+	vec3 mCurrentOffset;
 	float mTrajectoryEndDistance;
-	Vector2DF mTrajectoryEndPoint;
+	vec2 mTrajectoryEndPoint;
 	float mTrajectoryAngle;
 	float mFov;
-	QuaternionF mOriginalOrientation;
-	QuaternionF mOrientation;
+	quat mOriginalOrientation;
+	quat mOrientation;
 	bool mIsOriginalOrientationSet;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

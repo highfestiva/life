@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Ball.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/GameManager.h"
@@ -31,7 +32,7 @@ void Ball::OnTick()
 {
 	Parent::OnTick();
 
-	Vector3DF lVelocity = GetVelocity();
+	vec3 lVelocity = GetVelocity();
 	bool lNormalize = false;
 	float lSpeed = lVelocity.GetLength();
 	mAverageSpeed = Math::Lerp(mAverageSpeed, lSpeed, 0.1f);
@@ -49,7 +50,7 @@ void Ball::OnTick()
 	if (lNormalize)
 	{
 		lVelocity.Normalize(lSpeed);
-		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 		mManager->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 	}
 }

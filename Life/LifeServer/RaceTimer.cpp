@@ -4,12 +4,13 @@
 
 
 
+#include "pch.h"
 #include "RaceTimer.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/TimeManager.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsTrigger.h"
+#include "../../Tbc/Include/ChunkyPhysics.h"
+#include "../../Tbc/Include/PhysicsTrigger.h"
 #include "../RaceScore.h"
 
 
@@ -34,10 +35,10 @@ RaceTimer::~RaceTimer()
 
 
 
-void RaceTimer::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
+void RaceTimer::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
 {
 	std::vector<int> lTriggerIndexArray;
-	const TBC::ChunkyPhysics* lPhysics = mParent->GetPhysics();
+	const Tbc::ChunkyPhysics* lPhysics = mParent->GetPhysics();
 	mTriggerCount = pTrigger->GetTriggerGeometryCount();
 	for (int x = 0; x < (int)mTriggerCount; ++x)
 	{
@@ -45,7 +46,7 @@ void RaceTimer::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 		deb_assert(lBoneIndex >= 0);
 		lTriggerIndexArray.push_back(lBoneIndex);
 	}
-	const TBC::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("race_trigger_data"), 0, 0, &lTriggerIndexArray);
+	const Tbc::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("race_trigger_data"), 0, 0, &lTriggerIndexArray);
 	deb_assert(lTag);
 	if (lTag)
 	{
@@ -74,7 +75,7 @@ void RaceTimer::OnTick()
 	}
 }
 
-void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void RaceTimer::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	(void)pBodyId;
 	(void)pNormal;
@@ -119,7 +120,7 @@ void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObje
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, RaceTimer);
+loginstance(GAME_CONTEXT_CPP, RaceTimer);
 
 
 

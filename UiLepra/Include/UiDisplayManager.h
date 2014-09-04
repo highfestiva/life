@@ -202,7 +202,7 @@ protected:
 	int mEnumeratedDisplayModeCount;
 
 private:
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

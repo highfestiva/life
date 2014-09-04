@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/PngLoader.h"
 #include "../Include/Graphics2D.h"
 #include "../Include/Canvas.h"
@@ -413,7 +414,7 @@ void PngLoader::FlushCallback(png_structp /*pPNG*/)
 
 
 
-LOG_CLASS_DEFINE(UI_GFX_2D, PngLoader);
+loginstance(UI_GFX_2D, PngLoader);
 
 
 

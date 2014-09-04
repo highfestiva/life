@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "Level.h"
 
 
@@ -29,7 +30,7 @@ void Level::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("mass_objects"), -1, -1);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("mass_objects"), -1, -1);
 	if (lTag)
 	{
 		deb_assert(lTag->mStringValueList.size() == lTag->mFloatValueList.size());
@@ -56,9 +57,9 @@ Level::MassObjectList Level::GetMassObjects() const
 
 
 void Level::OnForceApplied(Cure::ContextObject* pOtherObject,
-	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-	const Vector3DF& pForce, const Vector3DF& pTorque,
-	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+	const vec3& pForce, const vec3& pTorque,
+	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	Parent::OnForceApplied(pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 
@@ -67,7 +68,7 @@ void Level::OnForceApplied(Cure::ContextObject* pOtherObject,
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Level);
+loginstance(GAME_CONTEXT_CPP, Level);
 
 
 

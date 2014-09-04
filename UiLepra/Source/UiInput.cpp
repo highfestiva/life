@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiInput.h"
 #include "../../Lepra/Include/Math.h"
 #include <math.h>
@@ -192,7 +193,7 @@ bool InputElement::SetCalibration(const str& pData)
 	return (lOk);
 }
 
-LOG_CLASS_DEFINE(UI_INPUT, InputElement);
+loginstance(UI_INPUT, InputElement);
 
 
 
@@ -492,7 +493,7 @@ bool InputDevice::SetCalibration(const CalibrationData& pData)
 	return (lOk);
 }
 
-LOG_CLASS_DEFINE(UI_INPUT, InputDevice);
+loginstance(UI_INPUT, InputDevice);
 
 
 
@@ -878,7 +879,7 @@ unsigned InputManager::GetDeviceIndex(InputDevice* pDevice) const
 	return 0;
 }
 
-LOG_CLASS_DEFINE(UI_INPUT, InputManager);
+loginstance(UI_INPUT, InputManager);
 
 
 

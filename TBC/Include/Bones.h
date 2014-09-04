@@ -11,7 +11,7 @@
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Transformation.h"
-#include "TBC.h"
+#include "Tbc.h"
 
 
 
@@ -22,7 +22,7 @@ class CubicSpline;
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -80,25 +80,25 @@ public:
 	void SetChildIndex(int pParentBoneIndex, int pParentChildIndex, int pChildBoneIndex);
 	void AddChild(int pParentBoneIndex, int pChildBoneIndex);
 	int GetChildIndex(int pParentBoneIndex, int pParentChildIndex) const;
-	void SetOriginalBoneTransformation(int pBoneIndex, const TransformationF& pTransformation, int pParentBoneIndex = -1);
-	const TransformationF& GetOriginalBoneTransformation(int pBoneIndex) const;
+	void SetOriginalBoneTransformation(int pBoneIndex, const xform& pTransformation, int pParentBoneIndex = -1);
+	const xform& GetOriginalBoneTransformation(int pBoneIndex) const;
 	// Call this when the whole skeleton is complete.
 	bool FinalizeInit(TransformOperation pTransformOperation);
 
 	void Connect(BoneHierarchy* pParentBones, int pParentBoneIndex);
 
 	// Returns the current local transform.
-	const TransformationF& GetBoneTransformation(int pBoneIndex) const;
-	TransformationF& GetBoneTransformation(int pBoneIndex);
-	void SetBoneTransformation(int pBoneIndex, const TransformationF& pTransformation);
+	const xform& GetBoneTransformation(int pBoneIndex) const;
+	xform& GetBoneTransformation(int pBoneIndex);
+	void SetBoneTransformation(int pBoneIndex, const xform& pTransformation);
 	// Returns the current transform relative to the root bone's origo,
 	// which is in object space.
-	const TransformationF& GetBoneObjectTransformation(int pBoneIndex) const;
+	const xform& GetBoneObjectTransformation(int pBoneIndex) const;
 	// Same as above, but relative to the original transform.
-	const TransformationF& GetRelativeBoneTransformation(int pBoneIndex) const;
-	TransformationF& GetRelativeBoneTransformation(int pBoneIndex);
+	const xform& GetRelativeBoneTransformation(int pBoneIndex) const;
+	xform& GetRelativeBoneTransformation(int pBoneIndex);
 
-	void UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation);
+	void UpdateBonesObjectTransformation(int pBoneIndex, const xform& pParentTransformation);
 
 private:
 	friend class BoneAnimator;
@@ -111,10 +111,10 @@ private:
 	BoneHierarchy* mParent;
 	int mParentBoneIndex;
 
-	TransformationF* mOriginalBoneTransformation;
-	TransformationF* mRelativeBoneTransformation;
-	TransformationF* mCurrentBoneTransformation;
-	TransformationF* mCurrentBoneObjectTransformation;
+	xform* mOriginalBoneTransformation;
+	xform* mRelativeBoneTransformation;
+	xform* mCurrentBoneTransformation;
+	xform* mCurrentBoneObjectTransformation;
 };
 
 
@@ -145,12 +145,12 @@ public:
 	int GetBoneCount() const;
 	void SetTimeTag(int pKeyframe, float pTimeTag);
 	float GetTimeTag(int pKeyframe) const;
-	void SetBoneTransformation(int pKeyframe, int pBoneIndex, const TransformationF& pTransformation);
-	const TransformationF& GetBoneTransformation(int pKeyframe, int pBoneIndex) const;
+	void SetBoneTransformation(int pKeyframe, int pBoneIndex, const xform& pTransformation);
+	const xform& GetBoneTransformation(int pKeyframe, int pBoneIndex) const;
 
 	// pTransformation points to an array of transformations. One transformation per bone.
-	void GetAnimationState(TransformationF* pTransformation, float pTime, Mode pMode);
-	void GetAnimationStateInterpolated(TransformationF* pTransformation, float pTime, Mode pMode, float pFactor);
+	void GetAnimationState(xform* pTransformation, float pTime, Mode pMode);
+	void GetAnimationStateInterpolated(xform* pTransformation, float pTime, Mode pMode, float pFactor);
 
 private:
 	Mode mDefaultMode;
@@ -160,7 +160,7 @@ private:
 
 	// mTransformation[KeyframeCount][BoneCount]
 	// mSpline[BoneCount]
-	TransformationF** mTransformation;
+	xform** mTransformation;
 	CubicSpline* mSpline;
 	bool mUseSplines;
 

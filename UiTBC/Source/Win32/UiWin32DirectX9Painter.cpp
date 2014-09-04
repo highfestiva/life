@@ -4,7 +4,8 @@
 
 
 
-#include "../../../Lepra/Include/LepraTarget.h"
+#include "pch.h"
+#include "../../../Lepra/Include/LepraOS.h"
 #include "../../Include/Win32/UiWin32DirectX9Painter.h"
 #include <math.h>
 #ifdef new
@@ -698,7 +699,7 @@ void DirectX9Painter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	mD3DDevice->SetTexture(0, 0);
 }
 
-void DirectX9Painter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
+void DirectX9Painter::DrawFan(const std::vector<vec2> pCoords, bool pFill)
 {
 	pCoords;
 	pFill;
@@ -1568,7 +1569,7 @@ void DirectX9Painter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayL
 	PopAttrib();
 }
 
-LOG_CLASS_DEFINE(UI_GFX_2D, DirectX9Painter);
+loginstance(UI_GFX_2D, DirectX9Painter);
 
 
 

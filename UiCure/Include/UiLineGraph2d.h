@@ -8,7 +8,7 @@
 
 #include <list>
 #include "../../Lepra/Include/String.h"
-#include "../../UiTBC/Include/UiPainter.h"
+#include "../../UiTbc/Include/UiPainter.h"
 #include "../Include/UiCure.h"
 
 

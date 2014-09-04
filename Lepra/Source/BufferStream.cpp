@@ -5,6 +5,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/BufferStream.h"
 #include <memory.h>
 

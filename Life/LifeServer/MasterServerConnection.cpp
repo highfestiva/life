@@ -4,6 +4,7 @@
  
 
 
+#include "pch.h"
 #include "MasterServerConnection.h"
 #include "../../Lepra/Include/Socket.h"
 #include "../../Lepra/Include/SystemManager.h"
@@ -553,7 +554,7 @@ const double MasterServerConnection::mConnectedIdleTimeout = MASTER_SERVER_TIMEO
 const double MasterServerConnection::mDisconnectedIdleTimeout = 10.0;
 const double MasterServerConnection::mServerInfoTimeout = MASTER_SERVER_TIMEOUT/3-1;
 
-LOG_CLASS_DEFINE(NETWORK_SERVER, MasterServerConnection);
+loginstance(NETWORK_SERVER, MasterServerConnection);
 
 
 

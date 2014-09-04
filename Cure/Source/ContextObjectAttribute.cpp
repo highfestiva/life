@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ContextObjectAttribute.h"
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Packer.h"

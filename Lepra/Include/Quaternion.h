@@ -231,10 +231,10 @@ public:
 
 #include "Quaternion.inl"
 
-typedef Quaternion<float32> QuaternionF;
+typedef Quaternion<float32> quat;
 typedef Quaternion<float64> QuaternionD;
 
-extern const QuaternionF gIdentityQuaternionF;
+extern const quat gIdentityQuaternionF;
 extern const QuaternionD gIdentityQuaternionD;
 
 

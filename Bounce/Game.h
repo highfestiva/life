@@ -8,7 +8,7 @@
 
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/GameTicker.h"
-#include "../UiTBC/Include/UiRenderer.h"
+#include "../UiTbc/Include/UiRenderer.h"
 
 
 
@@ -101,7 +101,7 @@ public:
 	UiCure::GameUiManager* GetUiManager() const;
 	virtual bool Tick();
 
-	void SetRacketForce(float pLiftFactor, const Vector3DF& pDown);
+	void SetRacketForce(float pLiftFactor, const vec3& pDown);
 	bool MoveRacket();
 	Racket* GetRacket() const;
 	Ball* GetBall() const;
@@ -118,14 +118,14 @@ private:
 
 	virtual void WillMicroTick(float pTimeDelta);
 	virtual void DidPhysicsTick();
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
-	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity);
 
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	virtual void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
+		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
 	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
 	virtual bool IsServer();
@@ -144,10 +144,10 @@ private:
 	Racket* mRacket;
 	Ball* mBall;
 	float mRacketLiftFactor;
-	Vector3DF mRacketDownDirection;
+	vec3 mRacketDownDirection;
 	double mScore;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

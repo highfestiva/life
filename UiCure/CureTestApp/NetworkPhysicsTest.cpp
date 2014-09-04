@@ -4,8 +4,9 @@
 
 
 
-#ifndef CURE_TEST_WITHOUT_UI
 
+#include "pch.h"
+#ifndef CURE_TEST_WITHOUT_UI
 #include "../../Lepra/Include/LepraAssert.h"
 #include <list>
 #include "../../Cure/Include/NetworkClient.h"
@@ -17,14 +18,14 @@
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/SystemManager.h"
-#include "../../TBC/Include/PhysicsManager.h"
-#include "../../TBC/Include/PhysicsManagerFactory.h"
+#include "../../Tbc/Include/PhysicsManager.h"
+#include "../../Tbc/Include/PhysicsManagerFactory.h"
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "../../UiLepra/Include/UiInput.h"
-#include "../../UiTBC/Include/UiBasicMeshCreator.h"
-#include "../../UiTBC/Include/UiRendererFactory.h"
-#include "../../UiTBC/Include/UiTriangleBasedGeometry.h"
+#include "../../UiTbc/Include/UiBasicMeshCreator.h"
+#include "../../UiTbc/Include/UiRendererFactory.h"
+#include "../../UiTbc/Include/UiTriangleBasedGeometry.h"
 
 
 
@@ -38,7 +39,7 @@ const int NETWORK_POSITIONAL_PACKET_BUFFER_SIZE = (int)PHYSICS_FPS/2;
 class NetworkPhysicsTest
 {
 };
-Lepra::LogDecorator gNptLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(NetworkPhysicsTest));
+Lepra::LogDecorator gNptLog(Lepra::LogType::GetLogger(Lepra::LogType::SUB_TEST), typeid(NetworkPhysicsTest));
 
 
 
@@ -52,11 +53,11 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 	struct BodyInfo
 	{
 		str mType;
-		TBC::PhysicsManager::BodyID mPhysicsId;
-		TBC::GeometryBase* mGraphicsGeometry;
+		Tbc::PhysicsManager::BodyID mPhysicsId;
+		Tbc::GeometryBase* mGraphicsGeometry;
 		UiTbc::Renderer::GeometryID mGraphicsId;
 		int mLastSetFrameIndex;	// TODO: this is a hack, read up on what algo to use for clients that want to set other clients positions.
-		Lepra::Vector3DF mGraphicsPosition;
+		Lepra::vec3 mGraphicsPosition;
 		BodyInfo():
 			mType(_T("?")),
 			mPhysicsId(0),
@@ -65,7 +66,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 			mLastSetFrameIndex(0)
 		{
 		}
-		BodyInfo(str pType, TBC::PhysicsManager::BodyID pBodyId, TBC::GeometryBase* pGeometry, UiTbc::Renderer::GeometryID pGeometryId):
+		BodyInfo(str pType, Tbc::PhysicsManager::BodyID pBodyId, Tbc::GeometryBase* pGeometry, UiTbc::Renderer::GeometryID pGeometryId):
 			mType(pType),
 			mPhysicsId(pBodyId),
 			mGraphicsGeometry(pGeometry),
@@ -75,7 +76,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 		}
 	};
 	Cure::NetworkAgent* mNetworkAgent;
-	TBC::PhysicsManager* mPhysics;
+	Tbc::PhysicsManager* mPhysics;
 	std::vector<BodyInfo> mBodyArray;
 	UiLepra::DisplayManager* mDisplay;
 	Lepra::Canvas* mScreen;
@@ -158,7 +159,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 		mNetworkAgent = 0;
 	}
 
-	void AddBody(str pType, TBC::PhysicsManager::BodyID pBodyId, TBC::GeometryBase* pGeometry, UiTbc::Renderer::GeometryID pGeometryId)
+	void AddBody(str pType, Tbc::PhysicsManager::BodyID pBodyId, Tbc::GeometryBase* pGeometry, UiTbc::Renderer::GeometryID pGeometryId)
 	{
 		mBodyArray.push_back(BodyInfo(pType, pBodyId, pGeometry, pGeometryId));
 	}
@@ -352,18 +353,18 @@ bool CreateWorld(AgentData& pAgentData)
 {
 	bool lTestOk = true;
 	pAgentData.mTickTimeModulo = 0;
-	pAgentData.mPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, 1000, 6, 6);
-	pAgentData.mPhysics->SetGravity(Lepra::Vector3DF(0, 0, -10));
+	pAgentData.mPhysics = Tbc::PhysicsManagerFactory::Create(Tbc::PhysicsManagerFactory::ENGINE_ODE, 1000, 6, 6);
+	pAgentData.mPhysics->SetGravity(Lepra::vec3(0, 0, -10));
 	// Create floor on server.
 	const float lFloorSize = 100;
 	const float lClientSize = 5;
-	Lepra::TransformationF lFloorPlacement;
-	Lepra::Vector3DF lFloorPosition(0, 0, -lFloorSize/2);
+	Lepra::xform lFloorPlacement;
+	Lepra::vec3 lFloorPosition(0, 0, -lFloorSize/2);
 	lFloorPlacement.SetPosition(lFloorPosition);
-	TBC::PhysicsManager::BodyID lPhysicsId;
+	Tbc::PhysicsManager::BodyID lPhysicsId;
 	UiTbc::TriangleBasedGeometry* lGeometry;
 	UiTbc::Renderer::GeometryID lGraphicsId;
-	lPhysicsId = pAgentData.mPhysics->CreateBox(true, lFloorPlacement, 3, Lepra::Vector3DF(lFloorSize, lFloorSize, lFloorSize), TBC::PhysicsManager::STATIC, 1, 1.0f);
+	lPhysicsId = pAgentData.mPhysics->CreateBox(true, lFloorPlacement, 3, Lepra::vec3(lFloorSize, lFloorSize, lFloorSize), Tbc::PhysicsManager::STATIC, 1, 1.0f);
 	lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lFloorSize, lFloorSize, lFloorSize);
 	lGeometry->SetAlwaysVisible(true);
 	lGraphicsId = pAgentData.mRenderer->AddGeometry(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::NO_SHADOWS);
@@ -371,24 +372,24 @@ bool CreateWorld(AgentData& pAgentData)
 	// Create client spheres on server.
 	for (int y = 0; y < CLIENT_COUNT; ++y)
 	{
-		Lepra::TransformationF lClientPlacement;
-		Lepra::Vector3DF lClientPosition(-lFloorSize/2+y*lClientSize*4, 0, lClientSize*10);
+		Lepra::xform lClientPlacement;
+		Lepra::vec3 lClientPosition(-lFloorSize/2+y*lClientSize*4, 0, lClientSize*10);
 		lClientPlacement.SetPosition(lClientPosition);
-		lPhysicsId = pAgentData.mPhysics->CreateSphere(true, lClientPlacement, lClientSize, lClientSize, TBC::PhysicsManager::DYNAMIC, 1, 1.0f);
+		lPhysicsId = pAgentData.mPhysics->CreateSphere(true, lClientPlacement, lClientSize, lClientSize, Tbc::PhysicsManager::DYNAMIC, 1, 1.0f);
 		pAgentData.mPhysics->EnableGravity(lPhysicsId, true);
 		lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(lClientSize, lClientSize, lClientSize, 10, 10);
 		lGeometry->SetAlwaysVisible(true);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial(
-			Lepra::Vector3DF(0, 0, 0),
-			Lepra::Vector3DF((float)(y%2), (float)(y/2%2), (float)(y/3%2)),
-			Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+		Tbc::GeometryBase::BasicMaterialSettings lMaterial(
+			Lepra::vec3(0, 0, 0),
+			Lepra::vec3((float)(y%2), (float)(y/2%2), (float)(y/3%2)),
+			Lepra::vec3(0.1f, 0.1f, 0.1f),
 			0.8f, 1.0f, true);
 		lGeometry->SetBasicMaterialSettings(lMaterial);
 		lGraphicsId = pAgentData.mRenderer->AddGeometry(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::NO_SHADOWS);
 		pAgentData.AddBody(_T("DynamicSphere"), lPhysicsId, lGeometry, lGraphicsId);
 	}
-	Lepra::TransformationF lCameraPlacement;
-	Lepra::Vector3DF lCameraPosition(0, -lFloorSize, lClientSize*5);
+	Lepra::xform lCameraPlacement;
+	Lepra::vec3 lCameraPosition(0, -lFloorSize, lClientSize*5);
 	lCameraPlacement.SetPosition(lCameraPosition);
 	pAgentData.mRenderer->SetCameraTransformation(lCameraPlacement);
 	return (lTestOk);
@@ -607,7 +608,7 @@ void ClientSetMovement(AgentData& pClientData, int pClientIndex, int pClientFram
 		lLastFrame = pClientFrameIndex;
 		//str s = Lepra::strutil::Format(_T("client %i at frame %i"), pClientIndex, pClientFrameIndex);
 		//logdebug(_T("Client set pos of other client"), s);
-		TBC::PhysicsManager::BodyID lPhysicsId = pClientData.mBodyArray[pClientIndex+1].mPhysicsId;
+		Tbc::PhysicsManager::BodyID lPhysicsId = pClientData.mBodyArray[pClientIndex+1].mPhysicsId;
 		pClientData.mPhysics->SetBodyTransform(lPhysicsId, pData.mPosition.mTransformation);
 		pClientData.mPhysics->SetBodyVelocity(lPhysicsId, pData.mPosition.mVelocity);
 		pClientData.mPhysics->SetBodyForce(lPhysicsId, pData.mPosition.mAcceleration);
@@ -696,7 +697,7 @@ Cure::ObjectPositionalData* ServerPopClientMovement(int pClientIndex, int pServe
 
 void ServerAdjustClientMovement(int pClientIndex, const Cure::ObjectPositionalData& pData)
 {
-	TBC::PhysicsManager::BodyID lPhysicsId = gServer.mBodyArray[pClientIndex+1].mPhysicsId;
+	Tbc::PhysicsManager::BodyID lPhysicsId = gServer.mBodyArray[pClientIndex+1].mPhysicsId;
 	gServer.mPhysics->SetBodyTransform(lPhysicsId, pData.mPosition.mTransformation);
 	gServer.mPhysics->SetBodyVelocity(lPhysicsId, pData.mPosition.mVelocity);
 	gServer.mPhysics->SetBodyForce(lPhysicsId, pData.mPosition.mAcceleration);
@@ -955,7 +956,7 @@ bool UpdateGraphicsObjects(int pAgentIndex)
 	const float lLerpTime = ::pow(lCloseness, 1/(lCloseAfterTime*PHYSICS_FPS));
 
 	bool lTestOk = true;
-	Lepra::TransformationF lTransformation;
+	Lepra::xform lTransformation;
 	for (int x = 0; x < (int)lAgentData->mBodyArray.size(); ++x)
 	{
 		AgentData::BodyInfo& lBody = lAgentData->mBodyArray[x];
@@ -969,7 +970,7 @@ bool UpdateGraphicsObjects(int pAgentIndex)
 		else
 		{
 			// Client: set other with sliding (moving average).
-			lBody.mGraphicsPosition = Lepra::Math::Lerp<Lepra::Vector3DF, float>(lTransformation.GetPosition(), lBody.mGraphicsPosition, lLerpTime);
+			lBody.mGraphicsPosition = Lepra::Math::Lerp<Lepra::vec3, float>(lTransformation.GetPosition(), lBody.mGraphicsPosition, lLerpTime);
 			lTransformation.SetPosition(lBody.mGraphicsPosition);
 			lBody.mGraphicsGeometry->SetTransformation(lTransformation);
 		}
@@ -983,8 +984,8 @@ void ClientHandleUserInput(int pClientIndex)
 	//lInputManager->PollEvents();
 	AgentData& lAgentData = gClient[pClientIndex];
 	const float lForce = 800;
-	Lepra::Vector3DF lForceVector[] = { Lepra::Vector3DF(0, lForce, 0), Lepra::Vector3DF(0, -lForce, 0), Lepra::Vector3DF(-lForce, 0, 0), Lepra::Vector3DF(lForce, 0, 0), };
-	TBC::PhysicsManager::BodyID lPhysicsId = lAgentData.mBodyArray[pClientIndex+1].mPhysicsId;
+	Lepra::vec3 lForceVector[] = { Lepra::vec3(0, lForce, 0), Lepra::vec3(0, -lForce, 0), Lepra::vec3(-lForce, 0, 0), Lepra::vec3(lForce, 0, 0), };
+	Tbc::PhysicsManager::BodyID lPhysicsId = lAgentData.mBodyArray[pClientIndex+1].mPhysicsId;
 	for (int lKey = 0; lKey < 4; ++lKey)
 	{
 		if (lAgentData.mMoveKeys&(1<<lKey))

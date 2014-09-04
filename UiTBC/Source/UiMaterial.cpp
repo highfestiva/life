@@ -3,8 +3,9 @@
 
 
 
+#include "pch.h"
 #include "../Include/UiMaterial.h"
-#include "../../TBC/Include/GeometryBase.h"
+#include "../../Tbc/Include/GeometryBase.h"
 #include "../../Lepra/Include/ListUtil.h"
 #include "../../Lepra/Include/Math.h"
 
@@ -31,7 +32,7 @@ GeometryGroup::~GeometryGroup()
 	mGeomArray = 0;
 }
 
-void GeometryGroup::AddGeometry(TBC::GeometryBase* pGeometry)
+void GeometryGroup::AddGeometry(Tbc::GeometryBase* pGeometry)
 {
 	if (mGeometryCount >= mArrayLength)
 	{
@@ -50,7 +51,7 @@ void GeometryGroup::AddGeometry(TBC::GeometryBase* pGeometry)
 	mGeomArray[mGeometryCount++].mGeometry = pGeometry;
 }
 
-bool GeometryGroup::RemoveGeometry(TBC::GeometryBase* pGeometry)
+bool GeometryGroup::RemoveGeometry(Tbc::GeometryBase* pGeometry)
 {
 	int i;
 
@@ -75,14 +76,14 @@ int GeometryGroup::CalculateDepths(bool pF2B)
 {
 	mMeanDepth = 0.0f;
 
-	const TransformationF& lCam = mParentMaterial->GetRenderer()->GetCameraTransformation();
-	const QuaternionF& lCamOrientation = lCam.GetOrientation();
-	const QuaternionF& lCamOrientationInverse = mParentMaterial->GetRenderer()->GetCameraOrientationInverse();
-	const Vector3DF& lCamPosition = lCam.GetPosition();
+	const xform& lCam = mParentMaterial->GetRenderer()->GetCameraTransformation();
+	const quat& lCamOrientation = lCam.GetOrientation();
+	const quat& lCamOrientationInverse = mParentMaterial->GetRenderer()->GetCameraOrientationInverse();
+	const vec3& lCamPosition = lCam.GetPosition();
 	int lInversionCount = 0;
 
 	// The first depth goes outside the loop...
-	Vector3DF lTemp;
+	vec3 lTemp;
 	lCamOrientation.FastInverseRotatedVector(lCamOrientationInverse, lTemp, mGeomArray[0].mGeometry->GetTransformation().GetPosition() - lCamPosition);
 	mGeomArray[0].mDepth = lTemp.y;
 	mMeanDepth += mGeomArray[0].mDepth;
@@ -237,7 +238,7 @@ Renderer* Material::GetRenderer()
 	return mRenderer;
 }
 
-bool Material::AddGeometry(TBC::GeometryBase* pGeometry)
+bool Material::AddGeometry(Tbc::GeometryBase* pGeometry)
 {
 	if (pGeometry == 0)
 		return false;
@@ -268,7 +269,7 @@ bool Material::AddGeometry(TBC::GeometryBase* pGeometry)
 	return true;
 }
 
-Material::RemoveStatus Material::RemoveGeometry(TBC::GeometryBase* pGeometry)
+Material::RemoveStatus Material::RemoveGeometry(Tbc::GeometryBase* pGeometry)
 {
 	Renderer::GeometryData* lGeomData = (Renderer::GeometryData*)pGeometry->GetRendererData();
 	RemoveStatus lStatus = (lGeomData->mGeometryGroup->RemoveGeometry(pGeometry) ? REMOVED : NOT_REMOVED);
@@ -325,11 +326,11 @@ void Material::RenderAllGeometry(unsigned pCurrentFrame, Material* pGeometryCont
 	pRenderer->RenderAllGeometry(pCurrentFrame, lGeometries);
 }
 
-TBC::GeometryBase* Material::GetFirstGeometry()
+Tbc::GeometryBase* Material::GetFirstGeometry()
 {
 	mGroupIter = mGeometryGroupList.begin();
 	mIndex = 0;
-	TBC::GeometryBase* lGeometry = 0;
+	Tbc::GeometryBase* lGeometry = 0;
 	if(mGroupIter != mGeometryGroupList.end())
 	{
 		lGeometry = (*mGroupIter)->GetGeometry(mIndex);
@@ -337,9 +338,9 @@ TBC::GeometryBase* Material::GetFirstGeometry()
 	return lGeometry;
 }
 
-TBC::GeometryBase* Material::GetNextGeometry()
+Tbc::GeometryBase* Material::GetNextGeometry()
 {
-	TBC::GeometryBase* lGeometry = 0;
+	Tbc::GeometryBase* lGeometry = 0;
 	if (mGroupIter != mGeometryGroupList.end())
 	{
 		++mIndex;
@@ -370,7 +371,7 @@ void Material::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList
 
 void Material::RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
-	TBC::GeometryBase::BasicMaterialSettings lPreviousMaterial = mCurrentMaterial;
+	Tbc::GeometryBase::BasicMaterialSettings lPreviousMaterial = mCurrentMaterial;
 	bool lOldEnableDrawMaterial = mEnableDrawMaterial;
 	mEnableDrawMaterial = true;
 	mEnableDepthSort = true;
@@ -407,7 +408,7 @@ void Material::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupLi
 		const int lGeometryCount = lGroup->GetGeometryCount();
 		for (int i = 0; i < lGeometryCount; i++)
 		{
-			TBC::GeometryBase* lGeometry = lGroup->GetGeometry(i);
+			Tbc::GeometryBase* lGeometry = lGroup->GetGeometry(i);
 			if (lGeometry->GetAlwaysVisible() || lGeometry->GetLastFrameVisible() == pCurrentFrame)
 			{
 				if (mRenderer->PreRender(lGeometry))
@@ -429,7 +430,7 @@ void Material::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupLi
 	PostRender();
 }
 
-Renderer::TextureID Material::GetGroupTextureID(TBC::GeometryBase* pGeometry) const
+Renderer::TextureID Material::GetGroupTextureID(Tbc::GeometryBase* pGeometry) const
 {
 	Renderer::TextureID lTextureID = Renderer::INVALID_TEXTURE;
 
@@ -450,7 +451,7 @@ const Material::GeometryGroupList& Material::GetGeometryGroupList() const
 
 
 
-TBC::GeometryBase::BasicMaterialSettings Material::mCurrentMaterial;
+Tbc::GeometryBase::BasicMaterialSettings Material::mCurrentMaterial;
 bool Material::mEnableDepthSort = false;
 bool Material::mEnableDrawMaterial = true;
 

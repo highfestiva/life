@@ -16,7 +16,7 @@ namespace Lepra
 class Color;
 class Plane;
 }
-namespace TBC
+namespace Tbc
 {
 class PhysicsManager;
 }
@@ -39,13 +39,13 @@ public:
 	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Level();
 
-	void GenerateLevel(TBC::PhysicsManager* pPhysicsManager, bool pVaryShapes, int pLevel);
+	void GenerateLevel(Tbc::PhysicsManager* pPhysicsManager, bool pVaryShapes, int pLevel);
 	const UiTbc::TriangleBasedGeometry* GetMesh() const;
 	const UiTbc::TriangleBasedGeometry* GetWindowMesh() const;
 	float GetVolumePart() const;
-	void SetTriangles(TBC::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors);
+	void SetTriangles(Tbc::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors);
 	void SetWindowTriangles(const std::vector<float>& pVertices);
-	void AddCutPlane(TBC::PhysicsManager* pPhysicsManager, const Plane& pWindowPlane, const std::vector<float>& pVertices, const Color& pColor);
+	void AddCutPlane(Tbc::PhysicsManager* pPhysicsManager, const Plane& pWindowPlane, const std::vector<float>& pVertices, const Color& pColor);
 	void RenderOutline();
 
 private:
@@ -53,19 +53,19 @@ private:
 	static void SetVertices(UiTbc::TriangleBasedGeometry* pGfxMesh, const float* v, size_t vc, const uint8* pColorData);
 	static void FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh);
 	static void GenerateVertexColors(UiTbc::TriangleBasedGeometry* pMesh);
-	void CreatePhysicsMesh(TBC::PhysicsManager* pPhysicsManager);
-	void AddPhysicsWindowBox(TBC::PhysicsManager* pPhysicsManager, const Plane& pPlane);
-	void DeleteWindowBoxes(TBC::PhysicsManager* pPhysicsManager);
+	void CreatePhysicsMesh(Tbc::PhysicsManager* pPhysicsManager);
+	void AddPhysicsWindowBox(Tbc::PhysicsManager* pPhysicsManager, const Plane& pPlane);
+	void DeleteWindowBoxes(Tbc::PhysicsManager* pPhysicsManager);
 	float CalculateVolume() const;
 
 	UiTbc::TriangleBasedGeometry* mGfxMesh;
 	UiTbc::TriangleBasedGeometry* mGfxWindowMesh;
 	UiTbc::Renderer::GeometryID mGfxMeshId;
 	UiTbc::Renderer::GeometryID mGfxWindowMeshId;
-	TBC::PhysicsManager::BodyID mPhysMeshBodyId;
-	std::vector<TBC::PhysicsManager::BodyID> mPhysWindowBoxIds;
+	Tbc::PhysicsManager::BodyID mPhysMeshBodyId;
+	std::vector<Tbc::PhysicsManager::BodyID> mPhysWindowBoxIds;
 	uint32* mBodyIndexData;
-	Vector3DF mSize;
+	vec3 mSize;
 	int mLevel;
 	float mOriginalVolume;
 	float mVolume;

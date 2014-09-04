@@ -7,11 +7,11 @@
 #pragma once
 
 #include <set>
-#include "TBC.h"
+#include "Tbc.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -55,7 +55,7 @@ private:
 	std::vector<Tag> mTagArray;
 	std::set<int> mPhysRootSet;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

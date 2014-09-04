@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "stdafx.h"
 #include "../Include/Application.h"
 #include "../Include/Log.h"

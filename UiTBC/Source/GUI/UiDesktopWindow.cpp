@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../../UiLepra/Include/UiInput.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/ListUtil.h"
@@ -440,7 +441,7 @@ Component::Type DesktopWindow::GetType() const
 
 
 
-LOG_CLASS_DEFINE(UI_GFX_2D, DesktopWindow);
+loginstance(UI_GFX_2D, DesktopWindow);
 
 
 

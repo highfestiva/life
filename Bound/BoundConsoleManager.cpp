@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "BoundConsoleManager.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Lepra/Include/CyclicArray.h"
@@ -99,7 +100,7 @@ int BoundConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& p
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, BoundConsoleManager);
+loginstance(CONSOLE, BoundConsoleManager);
 
 
 

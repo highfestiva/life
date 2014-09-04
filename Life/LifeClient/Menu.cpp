@@ -4,10 +4,11 @@
 
 
 
+#include "pch.h"
 #include "Menu.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 
 
 

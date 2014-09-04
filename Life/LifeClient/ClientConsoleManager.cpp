@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/RuntimeVariableName.h"
@@ -14,11 +15,11 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiResourceManager.h"
-#include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
-#include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTBC/Include/GUI/UiFileNameField.h"
-#include "../../UiTBC/Include/GUI/UiTextArea.h"
+#include "../../UiTbc/Include/GUI/UiConsoleLogListener.h"
+#include "../../UiTbc/Include/GUI/UiConsolePrompt.h"
+#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTbc/Include/GUI/UiFileNameField.h"
+#include "../../UiTbc/Include/GUI/UiTextArea.h"
 #include "../LifeApplication.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientMasterTicker.h"
@@ -313,7 +314,7 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 						UiCure::GeometryReferenceResource* lMeshRefResource = (UiCure::GeometryReferenceResource*)*x;
 						if (lMeshRefResource->GetName().find(pParameterVector[0]) != str::npos)
 						{
-							TBC::GeometryBase* lMesh = lMeshRefResource->GetRamData();
+							Tbc::GeometryBase* lMesh = lMeshRefResource->GetRamData();
 							if (lMesh)
 							{
 								lMesh->SetAlwaysVisible(lVisible);
@@ -374,7 +375,7 @@ void ClientConsoleManager::HeadlessTick()
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, ClientConsoleManager);
+loginstance(CONSOLE, ClientConsoleManager);
 
 
 

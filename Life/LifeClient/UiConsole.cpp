@@ -4,17 +4,18 @@
 
 
 
+#include "pch.h"
 #include "UiConsole.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
-#include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
-#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTBC/Include/GUI/UiFileNameField.h"
-#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../../UiTBC/Include/GUI/UiTextArea.h"
+#include "../../UiTbc/Include/GUI/UiConsoleLogListener.h"
+#include "../../UiTbc/Include/GUI/UiConsolePrompt.h"
+#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTbc/Include/GUI/UiFileNameField.h"
+#include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../../UiTbc/Include/GUI/UiTextArea.h"
 #include "../ConsoleManager.h"
 #include "RtVar.h"
 
@@ -46,7 +47,7 @@ UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager
 #endif // Disallow/allow debug logging.
 		for (int x = lAllowedLevel; x < LEVEL_TYPE_COUNT; ++x)
 		{
-			LogType::GetLog(LogType::SUB_ROOT)->AddListener(mManager->GetConsoleLogger(), (LogLevel)x);
+			LogType::GetLogger(LogType::SUB_ROOT)->AddListener(mManager->GetConsoleLogger(), (LogLevel)x);
 		}
 	}
 
@@ -129,7 +130,7 @@ void UiConsole::Tick()
 
 	const float lFrameTime = mManager->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
 	float lConsoleSpeed;
-	CURE_RTVAR_GET(lConsoleSpeed, =(float), mManager->GetVariableScope(), RTVAR_CTRL_UI_CONSPEED, 2.7);
+	v_get(lConsoleSpeed, =(float), mManager->GetVariableScope(), RTVAR_CTRL_UI_CONSPEED, 2.7);
 	const float lFrameConsoleSpeed = std::min(1.0f, Math::GetIterateLerpTime(lConsoleSpeed, lFrameTime));
 	if (mIsConsoleVisible)
 	{
@@ -267,7 +268,7 @@ void UiConsole::OnConsoleChange()
 void UiConsole::PrintHelp()
 {
 	str lKeys;
-	CURE_RTVAR_GET(lKeys, =, mManager->GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
+	v_get(lKeys, =, mManager->GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
 	typedef strutil::strvec SV;
 	SV lKeyArray = strutil::Split(lKeys, _T(", \t"));
 	SV lNiceKeys;
@@ -291,7 +292,7 @@ void UiConsole::PrintHelp()
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, UiConsole);
+loginstance(CONSOLE, UiConsole);
 
 
 

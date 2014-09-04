@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "GameClientMasterTicker.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/NetworkFreeAgent.h"
@@ -17,8 +18,8 @@
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiResourceManager.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
-#include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
-#include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
+#include "../../UiTbc/Include/GUI/UiConsoleLogListener.h"
+#include "../../UiTbc/Include/GUI/UiConsolePrompt.h"
 #include "../LifeServer/MasterServerConnection.h"
 #include "../ConsoleManager.h"
 #include "../LifeApplication.h"
@@ -71,12 +72,12 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	Cure::ContextObjectAttribute::SetCreator(Cure::ContextObjectAttribute::Factory(
 		this, &GameClientMasterTicker::CreateObjectAttribute));
 
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_UI_CONSPEED, 2.7);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 10);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
+	v_set(UiCure::GetSettings(), RTVAR_CTRL_UI_CONSPEED, 2.7);
+	v_set(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
+	v_set(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	v_set(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
+	v_set(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 10);
+	v_set(UiCure::GetSettings(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
 
 	mConsole = new ConsoleManager(mResourceManager, 0, UiCure::GetSettings(), 0, 0);
 	mConsole->InitCommands();
@@ -224,11 +225,11 @@ bool GameClientMasterTicker::Tick()
 		{
 			mFreeNetworkAgent->Tick();
 			float lConnectTimeout;
-			CURE_RTVAR_GET(lConnectTimeout, =(float), UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+			v_get(lConnectTimeout, =(float), UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 			mMasterConnection->SetSocketInfo(mFreeNetworkAgent, lConnectTimeout);
 		}
 		bool lAllowOnline;
-		CURE_RTVAR_GET(lAllowOnline, =, UiCure::GetSettings(), RTVAR_NETWORK_ENABLEONLINEMASTER, false);
+		v_get(lAllowOnline, =, UiCure::GetSettings(), RTVAR_NETWORK_ENABLEONLINEMASTER, false);
 		if (lAllowOnline)
 		{
 			mMasterConnection->Tick();
@@ -239,10 +240,10 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(BeginRenderAndInput);
 
 		float r, g, b;
-		CURE_RTVAR_GET(r, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.75);
-		CURE_RTVAR_GET(g, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.80);
-		CURE_RTVAR_GET(b, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.85);
-		Vector3DF lColor(r, g, b);
+		v_get(r, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.75);
+		v_get(g, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.80);
+		v_get(b, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.85);
+		vec3 lColor(r, g, b);
 		BeginRender(lColor);
 	}
 
@@ -303,7 +304,7 @@ bool GameClientMasterTicker::Tick()
 		{
 			mUiManager->GetRenderer()->EnableAllLights(false);
 			UiTbc::Renderer::LightID lLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-				UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 1, -1), Vector3DF(1.5f, 1.5f, 1.5f), 160);
+				UiTbc::Renderer::LIGHT_STATIC, vec3(0, 1, -1), vec3(1.5f, 1.5f, 1.5f), 160);
 			mUiManager->Paint(true);
 			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
@@ -457,7 +458,7 @@ void GameClientMasterTicker::PreWaitPhysicsTick()
 	const int lAdjustmentIndex = (mPerformanceAdjustmentTicks >> 7);
 
 	bool lEnableAutoPerformance;
-	CURE_RTVAR_GET(lEnableAutoPerformance, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEAUTOPERFORMANCE, true);
+	v_get(lEnableAutoPerformance, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEAUTOPERFORMANCE, true);
 	if (!lEnableAutoPerformance)
 	{
 		return;
@@ -465,7 +466,7 @@ void GameClientMasterTicker::PreWaitPhysicsTick()
 	
 
 	double lPerformanceLoad;
-	CURE_RTVAR_TRYGET(lPerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
+	v_tryget(lPerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
 	switch (lAdjustmentIndex)
 	{
 		default:
@@ -476,23 +477,23 @@ void GameClientMasterTicker::PreWaitPhysicsTick()
 		case 1:
 		{
 			bool lEnableMassObjects;
-			CURE_RTVAR_GET(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
+			v_get(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 			bool lEnableMassObjectFading;
-			CURE_RTVAR_GET(lEnableMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
+			v_get(lEnableMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
 			if (lPerformanceLoad > 1)
 			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
+				v_internal(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
 			}
 			else if (lPerformanceLoad < 0.6 && lEnableMassObjects)
 			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
+				v_internal(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
 			}
 		}
 		break;
 		case 2:
 		{
 			double lExhaustIntensity;
-			CURE_RTVAR_GET(lExhaustIntensity, =, UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
+			v_get(lExhaustIntensity, =, UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
 			if (lPerformanceLoad > 0.9)
 			{
 				lExhaustIntensity = Math::Lerp(lExhaustIntensity, 1.9-lPerformanceLoad, 0.1);
@@ -501,20 +502,20 @@ void GameClientMasterTicker::PreWaitPhysicsTick()
 			{
 				lExhaustIntensity = Math::Lerp(lExhaustIntensity, 1.0, 0.3);
 			}
-			CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, lExhaustIntensity);
+			v_internal(UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, lExhaustIntensity);
 		}
 		break;
 		case 3:
 		{
 			bool lEnableMassObjects;
-			CURE_RTVAR_GET(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
+			v_get(lEnableMassObjects, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 			if (lPerformanceLoad > 1)
 			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+				v_internal(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
 			}
 			else if (lPerformanceLoad < 0.2)
 			{
-				CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
+				v_internal(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 			}
 		}
 		break;
@@ -610,8 +611,8 @@ float GameClientMasterTicker::UpdateFrustum(float pFov)
 {
 	float lClipNear;
 	float lClipFar;
-	CURE_RTVAR_GET(lClipNear, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	CURE_RTVAR_GET(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 3000.0);
+	v_get(lClipNear, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+	v_get(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 3000.0);
 	mUiManager->GetRenderer()->SetViewFrustum(pFov, lClipNear, lClipFar);
 	return pFov;
 }
@@ -961,7 +962,7 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 
 	int lAveragedSlaves = 1;
 	float lFps;
-	CURE_RTVAR_GET(lFps, =(float), UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 30);
+	v_get(lFps, =(float), UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 30);
 	float lFrameTime = 1/lFps;
 	for (int x = 0; x < 4; ++x)
 	{
@@ -1119,22 +1120,22 @@ void GameClientMasterTicker::MeasureLoad()
 	if (lAppSleep)
 	{
 		int lTargetFrameRate;
-		CURE_RTVAR_GET(lTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
+		v_get(lTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		const double lCurrentPerformanceLoad = (lMainLoop->GetSlidingAverage()-lAppSleep->GetSlidingAverage()) * lTargetFrameRate;
 		double lAveragePerformanceLoad;
-		CURE_RTVAR_TRYGET(lAveragePerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
+		v_tryget(lAveragePerformanceLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, 0.95);
 		if (lCurrentPerformanceLoad < 20)
 		{
 			lAveragePerformanceLoad = Math::Lerp(lAveragePerformanceLoad, lCurrentPerformanceLoad, 0.05);
 		}
-		CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, lAveragePerformanceLoad);
+		v_internal(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, lAveragePerformanceLoad);
 	}
 }
 
 void GameClientMasterTicker::Profile()
 {
 	bool lDebugGraph;
-	CURE_RTVAR_GET(lDebugGraph, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	v_get(lDebugGraph, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
 	if (!lDebugGraph)
 	{
 		return;
@@ -1243,7 +1244,7 @@ void GameClientMasterTicker::DidPhysicsTick()
 	}
 }
 
-void GameClientMasterTicker::BeginRender(Vector3DF& pColor)
+void GameClientMasterTicker::BeginRender(vec3& pColor)
 {
 	mUiManager->BeginRender(pColor);
 
@@ -1262,7 +1263,7 @@ void GameClientMasterTicker::BeginRender(Vector3DF& pColor)
 void GameClientMasterTicker::DrawDebugData() const
 {
 	bool lDebugging;
-	CURE_RTVAR_GET(lDebugging, =, UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	v_get(lDebugging, =, UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	if (!lDebugging)
 	{
 		return;
@@ -1271,12 +1272,12 @@ void GameClientMasterTicker::DrawDebugData() const
 	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
 	str lInfo = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
 	double lLoad;
-	CURE_RTVAR_TRYGET(lLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, -1.0);
+	v_tryget(lLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, -1.0);
 	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), 100 * lLoad + 0.5f);
 	int w = 110;
 	int h = 37;
 	bool lShowPerformanceCounters;
-	CURE_RTVAR_GET(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
+	v_get(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
 	if (lShowPerformanceCounters)
 	{
 		w = 130;
@@ -1312,8 +1313,8 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 {
 	bool lDebug;
 	bool lDebugGraph;
-	CURE_RTVAR_GET(lDebug, =, UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
-	CURE_RTVAR_GET(lDebugGraph, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	v_get(lDebug, =, UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	v_get(lDebugGraph, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
 	if (!lDebug || !lDebugGraph)
 	{
 		return;
@@ -1336,7 +1337,7 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 	const int lMargin = 10;
 	const float lScale = (mUiManager->GetDisplayManager()->GetWidth() - lMargin*2)/lLongestRootTime;
 	int lYOffset;
-	CURE_RTVAR_GET(lYOffset, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 0);
+	v_get(lYOffset, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 0);
 	int lY = lMargin + lYOffset;
 	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
 	{
@@ -1348,7 +1349,7 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 		mPerformanceGraphList[lRootIndex].Render(lMargin, lScale, lY);
 
 		bool lDebugNames;
-		CURE_RTVAR_GET(lDebugNames, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
+		v_get(lDebugNames, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
 		if (lDebugNames)
 		{
 			mPerformanceGraphList[lRootIndex].RenderNames(lMargin, lY);
@@ -1372,7 +1373,7 @@ float GameClientMasterTicker::GetPowerSaveAmount() const
 
 
 
-void GameClientMasterTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void GameClientMasterTicker::OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
@@ -1388,8 +1389,8 @@ void GameClientMasterTicker::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, 
 	}
 }
 
-void GameClientMasterTicker::OnForceApplied(int pObjectId, int pOtherObjectId, TBC::PhysicsManager::BodyID pBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+void GameClientMasterTicker::OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
+		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity)
 {
 	for (SlaveArray::iterator x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
@@ -1555,7 +1556,7 @@ void GameClientMasterTicker::StashCalibration()
 
 
 
-LOG_CLASS_DEFINE(GAME, GameClientMasterTicker);
+loginstance(GAME, GameClientMasterTicker);
 
 
 

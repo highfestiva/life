@@ -59,7 +59,7 @@ public:
 
 	void InputTick();
 	void EndInputTick();
-	void BeginRender(const Vector3DF& pBackgroundColor);
+	void BeginRender(const vec3& pBackgroundColor);
 	void Render(const PixelRect& pArea);
 	void Paint(bool pClearDepthBuffer);
 	void PreparePaint(bool pClearDepthBuffer);
@@ -76,9 +76,9 @@ public:
 	UiTbc::DesktopWindow* GetDesktopWindow() const;
 	UiLepra::SoundManager* GetSoundManager() const;
 
-	Vector3DF GetAccelerometer() const;
-	void SetCameraPosition(const TransformationF& pTransform);
-	void SetMicrophonePosition(const TransformationF& pTransform, const Vector3DF& pVelocity);
+	vec3 GetAccelerometer() const;
+	void SetCameraPosition(const xform& pTransform);
+	void SetMicrophonePosition(const xform& pTransform, const vec3& pVelocity);
 	void SetViewport(int pLeft, int pTop, int pWidth, int pHeight);
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	void ClearDepth();
@@ -112,7 +112,7 @@ private:
 	double mSoundDopplerShadow;	// Optimization.
 	UiTbc::FontManager::FontId mCurrentFontId;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

@@ -24,30 +24,30 @@ public:
 	Ctf(Cure::ContextManager* pManager);
 	virtual ~Ctf();
 
-	Vector3DF GetPosition() const;
+	vec3 GetPosition() const;
 	float GetCaptureLevel() const;
 	void StartSlideDown();
 
 private:
-	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
+	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
-	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
 
-	const TBC::PhysicsTrigger* mTrigger;
-	Vector3DF mFlagOffset;
-	Vector3DF mFlagTop;
-	Vector3DF mCatchingFlagVelocity;
-	Vector3DF mStartFlagVelocity;
+	const Tbc::PhysicsTrigger* mTrigger;
+	vec3 mFlagOffset;
+	vec3 mFlagTop;
+	vec3 mCatchingFlagVelocity;
+	vec3 mStartFlagVelocity;
 	bool mLastFrameTriggered;
 	bool mIsTriggerTimerStarted;
 	HiResTimer mTriggerTimer;
-	TBC::GeometryReference* mFlagMesh;
-	TBC::GeometryReference* mBlinkMesh;
+	Tbc::GeometryReference* mFlagMesh;
+	Tbc::GeometryReference* mBlinkMesh;
 	bool mSlideDown;
-	Vector3DF mBlinkStartColor;
+	vec3 mBlinkStartColor;
 	float mBlinkTime;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

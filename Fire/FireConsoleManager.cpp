@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "FireConsoleManager.h"
 #include "../Cure/Include/ContextManager.h"
 #include "../Lepra/Include/CyclicArray.h"
@@ -122,7 +123,7 @@ int FireConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 
 
 
-LOG_CLASS_DEFINE(CONSOLE, FireConsoleManager);
+loginstance(CONSOLE, FireConsoleManager);
 
 
 

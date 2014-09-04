@@ -99,7 +99,7 @@ private:
 
 	Timer mKeepaliveTimer;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

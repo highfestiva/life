@@ -104,7 +104,7 @@ public:
 
 protected:
 	SoundID LoadSound(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority, int pExtraFlags);
-	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
+	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel);
 
 private:
 	int GetChannel(SoundInstanceID pSoundIID);
@@ -242,7 +242,7 @@ private:
 	Channel* mChannel;
 	int mNumChannels;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

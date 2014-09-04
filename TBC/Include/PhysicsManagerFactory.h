@@ -11,11 +11,11 @@
 #pragma once
 
 #include "../../Lepra/Include/Log.h"
-#include "../Include/TBC.h"
+#include "../Include/Tbc.h"
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -39,7 +39,7 @@ public:
 	// what objects are still (= auto disabled in ODE).
 	static PhysicsManager* Create(Engine pEngine, float pRadius, int pLevels, float pSensitivity);
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

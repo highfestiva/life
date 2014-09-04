@@ -6,8 +6,8 @@
 
 #pragma once
 
+#include "../../Lepra/Include/Lock.h"
 #include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/Thread.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "UiLepra.h"
@@ -114,10 +114,10 @@ public:
 		Orientation in world space.
 	*/
 
-	void SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
+	void SetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel);
 	void SetCurrentListener(int pListenerIndex, int pListenerCount);
-	void SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
-		const Vector3DF& pUp, const Vector3DF& pForward);
+	void SetListenerPosition(const vec3& pPos, const vec3& pVel,
+		const vec3& pUp, const vec3& pForward);
 
 	// 0 removes the doppler effect, values greater than 1 exaggerates the effect.
 	// The speed of sound using a doppler factor of 1 is 340 m/s.
@@ -170,12 +170,12 @@ public:
 	virtual void SetFileOpener(FileOpener* pOpener) = 0;	// Takes over ownership of opener.
 
 protected:
-	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel) = 0;
+	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel) = 0;
 
 	struct MicrophoneLocation
 	{
-		TransformationF mTransform;
-		TransformationF mVelocityTransform;
+		xform mTransform;
+		xform mVelocityTransform;
 	};
 	typedef std::vector<MicrophoneLocation> MicrophoneLocationArray;
 	MicrophoneLocationArray mMicrophoneArray;

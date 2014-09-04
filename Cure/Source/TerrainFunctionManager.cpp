@@ -6,7 +6,8 @@
 
 
 
-#include "../../TBC/Include/TerrainFunction.h"
+#include "pch.h"
+#include "../../Tbc/Include/TerrainFunction.h"
 #include "../Include/TerrainFunctionManager.h"
 #include "../Include/TerrainManager.h"
 
@@ -45,13 +46,13 @@ void TerrainFunctionManager::LoadFunctions(const FunctionArea& pArea, float)
 	{
 		delete (mDummyTerrainFunction);
 	}
-	mDummyTerrainFunction = new TBC::TerrainConeFunction(pArea.GetSize().x/6, pArea.GetPosition(), 0, pArea.GetSize().x/3);
+	mDummyTerrainFunction = new Tbc::TerrainConeFunction(pArea.GetSize().x/6, pArea.GetPosition(), 0, pArea.GetSize().x/3);
 }
 
-TBC::TerrainPatch* TerrainFunctionManager::GeneratePatchMesh(const FunctionArea& pArea, float pLod)
+Tbc::TerrainPatch* TerrainFunctionManager::GeneratePatchMesh(const FunctionArea& pArea, float pLod)
 {
 	log_atrace("Generating terrain patch.");
-	TBC::TerrainPatch* lPatch = TerrainManager::CreatePatch(pArea, pLod);
+	Tbc::TerrainPatch* lPatch = TerrainManager::CreatePatch(pArea, pLod);
 	mDummyTerrainFunction->AddFunction(*lPatch);
 	return (lPatch);
 }
@@ -65,21 +66,21 @@ void TerrainFunctionManager::MarkAllDirty()
 	mFunctionTree->GetObjects(lObjectList, FunctionArea(-msTerrainFunctionSize, -msTerrainFunctionSize, 2*msTerrainFunctionSize, 2*msTerrainFunctionSize));
 	for (FunctionTree::ObjectList::Iterator x = lObjectList.First(); x != lObjectList.End(); ++x)
 	{
-		TBC::TerrainFunction* lFunction = *x;
+		Tbc::TerrainFunction* lFunction = *x;
 		// TODO: set some bool that indicates that this instance might have to be deleted in the near future.
 		//lFunction->???
 	}
 #endif
 }
 
-void TerrainFunctionManager::MarkInUse(const Vector3DF& /*pPosition*/, float /*pRadius*/)
+void TerrainFunctionManager::MarkInUse(const vec3& /*pPosition*/, float /*pRadius*/)
 {
 #if 0
 	FunctionTree::ObjectList lObjectList;
 	mFunctionTree->GetObjects(lObjectList, FunctionArea(-msTerrainFunctionSize, -msTerrainFunctionSize, 2*msTerrainFunctionSize, 2*msTerrainFunctionSize));
 	for (FunctionTree::ObjectList::Iterator x = lObjectList.First(); x != lObjectList.End(); ++x)
 	{
-		TBC::TerrainFunction* lFunction = *x;
+		Tbc::TerrainFunction* lFunction = *x;
 		// TODO: reset the dirty bool - to show that indicates instance should not be deleted.
 		//lFunction->???
 	}
@@ -100,7 +101,7 @@ void TerrainFunctionManager::Delete(bool /*pDirtyOnly*/)
 	mFunctionTree->GetObjects(lObjectList, FunctionArea(-msTerrainFunctionSize, -msTerrainFunctionSize, 2*msTerrainFunctionSize, 2*msTerrainFunctionSize));
 	for (FunctionTree::ObjectList::Iterator x = lObjectList.First(); x != lObjectList.End(); ++x)
 	{
-		TBC::TerrainFunction* lFunction = *x;
+		Tbc::TerrainFunction* lFunction = *x;
 		if (!pDirtyOnly /* TODO: || isdirty(lFunction)*/)
 		{
 			mFunctionTree->RemoveObject(lFunction);
@@ -112,7 +113,7 @@ void TerrainFunctionManager::Delete(bool /*pDirtyOnly*/)
 
 
 
-LOG_CLASS_DEFINE(GENERAL, TerrainFunctionManager);
+loginstance(GENERAL, TerrainFunctionManager);
 
 
 

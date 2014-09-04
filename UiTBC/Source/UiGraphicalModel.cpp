@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/UiGraphicalModel.h"
 #include "../Include/UiTriangleBasedGeometry.h"
 #include "../Include/UiAnimatedGeometry.h"
@@ -28,9 +29,9 @@ void GraphicalModel::AddGeometry(const str& pName, GeometryHandler* pGeometry, c
 	mGeometryTable.Insert(pName, pGeometry);
 }
 
-TBC::GeometryBase* GraphicalModel::GetGeometry(const str& pName)
+Tbc::GeometryBase* GraphicalModel::GetGeometry(const str& pName)
 {
-	TBC::GeometryBase* lGeometry = 0;
+	Tbc::GeometryBase* lGeometry = 0;
 	GeometryTable::Iterator lIter = mGeometryTable.Find(pName);
 	if (lIter != mGeometryTable.End())
 	{
@@ -50,11 +51,11 @@ void GraphicalModel::Update(double pDeltaTime)
 		GeometryHandler* lGeometryHandler = *lIter;
 		lGeometryHandler->UpdateGeometry((float)mLevelOfDetail);
 
-		TBC::GeometryBase* lGeometry = lGeometryHandler->GetGeometry();
-		TBC::BoneAnimator* lAnimator = lGeometryHandler->GetTransformAnimator();
+		Tbc::GeometryBase* lGeometry = lGeometryHandler->GetGeometry();
+		Tbc::BoneAnimator* lAnimator = lGeometryHandler->GetTransformAnimator();
 
 		// Set transformation.
-		TransformationF lTransform;
+		xform lTransform;
 		if (lAnimator != 0)
 		{
 			lTransform = mTransformation.Transform(lAnimator->GetBones()->GetRelativeBoneTransformation(0));
@@ -165,9 +166,9 @@ void DefaultStaticGeometryHandler::UpdateGeometry(float pLODLevel)
 	}
 }
 
-TBC::GeometryBase* DefaultStaticGeometryHandler::GetGeometry()
+Tbc::GeometryBase* DefaultStaticGeometryHandler::GetGeometry()
 {
-	TBC::GeometryBase* lGeometry = 0;
+	Tbc::GeometryBase* lGeometry = 0;
 	if (mCurrentLODLevel >= 0 && mCurrentLODLevel < mNumLODLevels)
 	{
 		lGeometry = &mGeometry[mCurrentLODLevel];
@@ -202,7 +203,7 @@ void DefaultProgressiveGeometryHandler::UpdateGeometry(float pLODLevel)
 	mGeometry->SetDetailLevel(pLODLevel);
 }
 
-TBC::GeometryBase* DefaultProgressiveGeometryHandler::GetGeometry()
+Tbc::GeometryBase* DefaultProgressiveGeometryHandler::GetGeometry()
 {
 	return mGeometry;
 }
@@ -252,9 +253,9 @@ void DefaultAnimatedStaticGeometryHandler::UpdateGeometry(float pLODLevel)
 	mGeometry[mCurrentLODLevel].UpdateAnimatedGeometry();
 }
 
-TBC::GeometryBase* DefaultAnimatedStaticGeometryHandler::GetGeometry()
+Tbc::GeometryBase* DefaultAnimatedStaticGeometryHandler::GetGeometry()
 {
-	TBC::GeometryBase* lGeometry = 0;
+	Tbc::GeometryBase* lGeometry = 0;
 	if (mCurrentLODLevel >= 0 && mCurrentLODLevel < mNumLODLevels)
 	{
 		lGeometry = &mGeometry[mCurrentLODLevel];
@@ -289,7 +290,7 @@ void DefaultAnimatedProgressiveGeometryHandler::UpdateGeometry(float pLODLevel)
 	mGeometry->UpdateAnimatedGeometry();
 }
 
-TBC::GeometryBase* DefaultAnimatedProgressiveGeometryHandler::GetGeometry()
+Tbc::GeometryBase* DefaultAnimatedProgressiveGeometryHandler::GetGeometry()
 {
 	return mGeometry;
 }

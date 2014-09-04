@@ -4,6 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../../ThirdParty/jpeg-6b/jinclude.h"
 #include "../../ThirdParty/jpeg-6b/jpeglib.h"
 #include "../../ThirdParty/jpeg-6b/jerror.h"

@@ -13,7 +13,7 @@
 #include "../../../Lepra/Include/HashTable.h"
 #include "../../../Lepra/Include/String.h"
 #include "../../../UiLepra/Include/UiInput.h"
-#include "../UiTBC.h"
+#include "../UiTbc.h"
 #include "../UiPainter.h"
 #include "UiLayout.h"
 #include "UiGUIImageManager.h"
@@ -272,7 +272,7 @@ protected:
 
 	static GUIImageManager* smImageManager;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

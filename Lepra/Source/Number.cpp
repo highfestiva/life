@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/CyclicArray.h"
 #include "../Include/Math.h"
 #include "../Include/Number.h"

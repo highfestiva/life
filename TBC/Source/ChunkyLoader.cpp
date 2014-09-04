@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/ChunkyLoader.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../Include/Bones.h"
@@ -16,7 +17,7 @@
 
 
 
-namespace TBC
+namespace Tbc
 {
 
 
@@ -707,7 +708,7 @@ bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, 
 			lAnimation->SetTimeTag(mCurrentKeyframe, lKeyframeTime);
 			for (int lBone = 0; lBone < mBoneCount; ++lBone)
 			{
-				TransformationF lTransform(&lTransformArray[lBone*lTransformFloatCount]);
+				xform lTransform(&lTransformArray[lBone*lTransformFloatCount]);
 				lAnimation->SetBoneTransformation(mCurrentKeyframe, lBone, lTransform);
 			}
 			++mCurrentKeyframe;
@@ -1050,7 +1051,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 			{
 				lTransformArray[x] = Endian::BigToHost(lTransformArray[x]);
 			}
-			TransformationF lTransform((const float*)lTransformArray);
+			xform lTransform((const float*)lTransformArray);
 			lPhysics->SetOriginalBoneTransformation(mCurrentBoneIndex, lTransform);
 		}
 
@@ -1211,14 +1212,14 @@ bool ChunkyClassLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int6
 		}
 		delete[] (lBuffer);
 	}
-	else if (pType == TBC::CHUNK_CLASS_MESH_LIST)
+	else if (pType == Tbc::CHUNK_CLASS_MESH_LIST)
 	{
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
+		lLoadList.push_back(ChunkyFileElement(Tbc::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 		deb_assert(lOk);
 	}
-	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
+	else if (pType == Tbc::CHUNK_CLASS_PHYS_MESH)
 	{
 		uint8* lBuffer = 0;
 		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
@@ -1240,10 +1241,10 @@ bool ChunkyClassLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int6
 
 
 
-LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyLoader);
-LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyAnimationLoader);
-LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyPhysicsLoader);
-LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyClassLoader);
+loginstance(GENERAL_RESOURCES, ChunkyLoader);
+loginstance(GENERAL_RESOURCES, ChunkyAnimationLoader);
+loginstance(GENERAL_RESOURCES, ChunkyPhysicsLoader);
+loginstance(GENERAL_RESOURCES, ChunkyClassLoader);
 
 
 

@@ -4,13 +4,14 @@
 	Copyright (c) Pixel Doctrine
 */
 
+#include "pch.h"
 #include "../Include/UiRenderer.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/ResourceTracker.h"
-#include "../../TBC/Include/GeometryReference.h"
+#include "../../Tbc/Include/GeometryReference.h"
 #include "../Include/UiDynamicRenderer.h"
 #include "../Include/UiMaterial.h"
 
@@ -166,7 +167,7 @@ void Renderer::CloseRenderer()
 	}
 }
 
-void Renderer::DeletingGeometry(TBC::GeometryBase* pGeometry)
+void Renderer::DeletingGeometry(Tbc::GeometryBase* pGeometry)
 {
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
 	if(lGeometryData != 0)
@@ -323,18 +324,18 @@ const PixelRect& Renderer::GetClippingRect() const
 	return mClippingRect;
 }
 
-void Renderer::SetCameraTransformation(const TransformationF& pTransformation)
+void Renderer::SetCameraTransformation(const xform& pTransformation)
 {
 	mCameraTransformation = pTransformation;
 	mCameraOrientationInverse = mCameraTransformation.GetOrientation().GetInverse();
 }
 
-const TransformationF& Renderer::GetCameraTransformation()
+const xform& Renderer::GetCameraTransformation()
 {
 	return mCameraTransformation;
 }
 
-const QuaternionF& Renderer::GetCameraOrientationInverse()
+const quat& Renderer::GetCameraOrientationInverse()
 {
 	return mCameraOrientationInverse;
 }
@@ -471,8 +472,8 @@ Renderer::LightID Renderer::AllocLight()
 }
 
 Renderer::LightID Renderer::AddDirectionalLight(LightHint pHint,
-		const Vector3DF& pDir,
-		const Vector3DF& pColor,
+		const vec3& pDir,
+		const vec3& pColor,
 		float pShadowRange)
 {
 	LightID lLightId = AllocLight();
@@ -483,7 +484,7 @@ Renderer::LightID Renderer::AddDirectionalLight(LightHint pHint,
 	deb_assert(lData);
 	lData->mType			= LIGHT_DIRECTIONAL;
 	lData->mHint			= pHint;
-	lData->mPosition		= Vector3DF();
+	lData->mPosition		= vec3();
 	lData->mDirection		= pDir.GetNormalized();
 	lData->mColor[0]		= pColor.x;
 	lData->mColor[1]		= pColor.y;
@@ -499,8 +500,8 @@ Renderer::LightID Renderer::AddDirectionalLight(LightHint pHint,
 }
 
 Renderer::LightID Renderer::AddPointLight(LightHint pHint,
-		const Vector3DF& pPos,
-		const Vector3DF& pColor,
+		const vec3& pPos,
+		const vec3& pColor,
 		float pLightRadius,
 		float pShadowRange)
 {
@@ -513,7 +514,7 @@ Renderer::LightID Renderer::AddPointLight(LightHint pHint,
 	lData->mType			= LIGHT_POINT;
 	lData->mHint			= pHint;
 	lData->mPosition		= pPos;
-	lData->mDirection		= Vector3DF();
+	lData->mDirection		= vec3();
 	lData->mColor[0]		= pColor.x;
 	lData->mColor[1]		= pColor.y;
 	lData->mColor[2]		= pColor.z;
@@ -528,9 +529,9 @@ Renderer::LightID Renderer::AddPointLight(LightHint pHint,
 }
 
 Renderer::LightID Renderer::AddSpotLight(LightHint pHint,
-		const Vector3DF& pPos,
-		const Vector3DF& pDir,
-		const Vector3DF& pColor,
+		const vec3& pPos,
+		const vec3& pDir,
+		const vec3& pColor,
 		float pCutoffAngle,
 		float pSpotExponent,
 		float pLightRadius,
@@ -565,20 +566,20 @@ Renderer::LightID Renderer::AddSpotLight(LightHint pHint,
 	const float lEpsilon = 1e-6f;
 
 	// Generate an orientation for the light.
-	Vector3DF lAxisX;
-	Vector3DF lAxisY;
-	Vector3DF lAxisZ;
+	vec3 lAxisX;
+	vec3 lAxisY;
+	vec3 lAxisZ;
 
 	// If light direction is pointing up.
 	if (lData->mDirection.y >= (1.0f - lEpsilon))
 	{
-		lAxisX = lData->mDirection / Vector3DF(0, 0, 1);
+		lAxisX = lData->mDirection / vec3(0, 0, 1);
 		lAxisY = lAxisX / lData->mDirection;
 		lAxisZ = lData->mDirection;
 	}
 	else
 	{
-		lAxisX = lData->mDirection / Vector3DF(0, 1, 0);
+		lAxisX = lData->mDirection / vec3(0, 1, 0);
 		lAxisY = lAxisX / lData->mDirection;
 		lAxisZ = lData->mDirection;
 	}
@@ -653,7 +654,7 @@ void Renderer::SetShadowMapOptions(LightID pLightId,
 	}
 }
 
-void Renderer::SetLightPosition(LightID pLightId, const Vector3DF& pPos)
+void Renderer::SetLightPosition(LightID pLightId, const vec3& pPos)
 {
 	LightData* lData = GetLightData(pLightId);
 	deb_assert(lData);
@@ -669,7 +670,7 @@ void Renderer::SetLightPosition(LightID pLightId, const Vector3DF& pPos)
 	}
 }
 
-void Renderer::SetLightDirection(LightID pLightId, const Vector3DF& pDir)
+void Renderer::SetLightDirection(LightID pLightId, const vec3& pDir)
 {
 	LightData* lData = GetLightData(pLightId);
 	deb_assert(lData);
@@ -677,7 +678,7 @@ void Renderer::SetLightDirection(LightID pLightId, const Vector3DF& pDir)
 	if (lData->mType == Renderer::LIGHT_DIRECTIONAL ||
 	   lData->mType == Renderer::LIGHT_SPOT)
 	{
-		Vector3DF lPrevDir(lData->mDirection);
+		vec3 lPrevDir(lData->mDirection);
 		lData->mDirection = pDir;
 		lData->mDirection.Normalize();
 
@@ -691,20 +692,20 @@ void Renderer::SetLightDirection(LightID pLightId, const Vector3DF& pDir)
 			const float lEpsilon = 1e-6f;
 
 			// Generate an orientation for the light.
-			Vector3DF lAxisX;
-			Vector3DF lAxisY;
-			Vector3DF lAxisZ;
+			vec3 lAxisX;
+			vec3 lAxisY;
+			vec3 lAxisZ;
 
 			// If light direction is pointing up.
 			if (lData->mDirection.y >= (1.0f - lEpsilon))
 			{
-				lAxisX = lData->mDirection / Vector3DF(1, 0, 0);
+				lAxisX = lData->mDirection / vec3(1, 0, 0);
 				lAxisY = lData->mDirection / lAxisX;
 				lAxisZ = lData->mDirection;
 			}
 			else
 			{
-				lAxisX = Vector3DF(0, 1, 0) / lData->mDirection;
+				lAxisX = vec3(0, 1, 0) / lData->mDirection;
 				lAxisY = lData->mDirection / lAxisX;
 				lAxisZ = lData->mDirection;
 			}
@@ -720,7 +721,7 @@ void Renderer::SetLightDirection(LightID pLightId, const Vector3DF& pDir)
 	}
 }
 
-void Renderer::SetLightColor(LightID pLightId, const Vector3DF& pColor)
+void Renderer::SetLightColor(LightID pLightId, const vec3& pColor)
 {
 	LightData* lData = GetLightData(pLightId);
 	deb_assert(lData);
@@ -730,7 +731,7 @@ void Renderer::SetLightColor(LightID pLightId, const Vector3DF& pColor)
 	lData->mColor[2] = pColor.z;
 }
 
-Vector3DF Renderer::GetLightPosition(LightID pLightId) const
+vec3 Renderer::GetLightPosition(LightID pLightId) const
 {
 	const LightData* lData = GetLightData(pLightId);
 	deb_assert(lData);
@@ -738,10 +739,10 @@ Vector3DF Renderer::GetLightPosition(LightID pLightId) const
 	{
 		return lData->mPosition;
 	}
-	return Vector3DF();
+	return vec3();
 }
 
-Vector3DF Renderer::GetLightDirection(LightID pLightId) const
+vec3 Renderer::GetLightDirection(LightID pLightId) const
 {
 	const LightData* lData = GetLightData(pLightId);
 	deb_assert(lData);
@@ -749,18 +750,18 @@ Vector3DF Renderer::GetLightDirection(LightID pLightId) const
 	{
 		return lData->mDirection;
 	}
-	return Vector3DF();
+	return vec3();
 }
 
-Vector3DF Renderer::GetLightColor(LightID pLightId) const
+vec3 Renderer::GetLightColor(LightID pLightId) const
 {
 	const LightData* lData = GetLightData(pLightId);
 	deb_assert(lData);
 	if (lData)
 	{
-		return Vector3DF(lData->mColor[0], lData->mColor[1], lData->mColor[2]);
+		return vec3(lData->mColor[0], lData->mColor[1], lData->mColor[2]);
 	}
-	return Vector3DF();
+	return vec3();
 }
 
 Renderer::LightType Renderer::GetLightType(LightID pLightId)
@@ -796,7 +797,7 @@ float Renderer::GetLightSpotExponent(LightID pLightId)
 	return 180;
 }
 
-void Renderer::SortLights(const Vector3DF& pReferencePosition)
+void Renderer::SortLights(const vec3& pReferencePosition)
 {
 	smRenderer = this;
 	int i = 0;
@@ -987,7 +988,7 @@ Renderer::TextureData* Renderer::GetEnvTexture() const
 	return mEnvTexture;
 }
 
-Renderer::GeometryID Renderer::AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows)
+Renderer::GeometryID Renderer::AddGeometry(Tbc::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows)
 {
 	if ((int)pMaterialType < 0 || (int)pMaterialType >= Renderer::MAT_COUNT)
 	{
@@ -1013,7 +1014,7 @@ Renderer::GeometryID Renderer::AddGeometry(TBC::GeometryBase* pGeometry, Materia
 
 	if (pGeometry->IsGeometryReference() == true)
 	{
-		TBC::GeometryBase* lParentGeometry = ((TBC::GeometryReference*)pGeometry)->GetParentGeometry();
+		Tbc::GeometryBase* lParentGeometry = ((Tbc::GeometryReference*)pGeometry)->GetParentGeometry();
 		GeometryData* lParentGeometryData = (GeometryData*)lParentGeometry->GetRendererData();
 		lGeometryData->CopyReferenceData(lParentGeometryData);
 		lParentGeometryData->mReferenceSet.insert((GeometryID)lID);
@@ -1186,7 +1187,7 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 
 		if (lGeometryData->mGeometry->IsGeometryReference())
 		{
-			TBC::GeometryBase* lParentGeometry = ((TBC::GeometryReference*)lGeometryData->mGeometry)->GetParentGeometry();
+			Tbc::GeometryBase* lParentGeometry = ((Tbc::GeometryReference*)lGeometryData->mGeometry)->GetParentGeometry();
 			GeometryData* lParentGeometryData = (GeometryData*)lParentGeometry->GetRendererData();
 			lParentGeometryData->mReferenceSet.erase(lGeometryData->mGeometryID);
 		}
@@ -1286,17 +1287,17 @@ void Renderer::UpdateShadowMaps()
 	bool lDidStatic = false;
 	for (int i = 0; i <= (int)MAT_LAST_SOLID; i++)
 	{
-		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstGeometry();
+		Tbc::GeometryBase* lGeometry = mMaterial[i]->GetFirstGeometry();
 		while (lGeometry)
 		{
 			if (lGeometry->GetAlwaysVisible() || lGeometry->GetLastFrameVisible() == mCurrentFrame)
 			{
-				const TBC::GeometryBase::GeometryVolatility lVolatility = lGeometry->GetGeometryVolatility();
-				bool lUpdate = (lTrianglesCalculatedFor < 1000 || lVolatility >= TBC::GeometryBase::GEOM_SEMI_STATIC || !lDidStatic);
+				const Tbc::GeometryBase::GeometryVolatility lVolatility = lGeometry->GetGeometryVolatility();
+				bool lUpdate = (lTrianglesCalculatedFor < 1000 || lVolatility >= Tbc::GeometryBase::GEOM_SEMI_STATIC || !lDidStatic);
 				if (lUpdate)
 				{
 					lTrianglesCalculatedFor += UpdateShadowMaps(lGeometry, lLightData);
-					if (lVolatility == TBC::GeometryBase::GEOM_STATIC)
+					if (lVolatility == Tbc::GeometryBase::GEOM_STATIC)
 					{
 						lDidStatic = true;
 					}
@@ -1307,7 +1308,7 @@ void Renderer::UpdateShadowMaps()
 	}
 }
 
-unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry, LightData* pClosestLightData)
+unsigned Renderer::UpdateShadowMaps(Tbc::GeometryBase* pGeometry, LightData* pClosestLightData)
 {
 	GeometryData* lGeometry = (GeometryData*)pGeometry->GetRendererData();
 	const float lLightShadowRange = pClosestLightData->mShadowRange * 4;
@@ -1457,7 +1458,7 @@ unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry, LightData* pCl
 						if (!pGeometry->GetBigOrientationChanged())
 						{
 							// Only update translation if orientation didn't change much.
-							TransformationF lTransform(pGeometry->GetLastBigOrientation(), pGeometry->GetTransformation().GetPosition());
+							xform lTransform(pGeometry->GetLastBigOrientation(), pGeometry->GetTransformation().GetPosition());
 							lShadowVolume->SetTransformation(lTransform);
 						}
 						else if (lLightData->mType == Renderer::LIGHT_DIRECTIONAL)
@@ -1573,7 +1574,7 @@ void Renderer::PrepareProjectionData()
 	mDX = mDY * GetAspectRatio();
 }
 
-PixelRect Renderer::GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) const
+PixelRect Renderer::GetBoundingRect(const vec3* pVertex, int pNumVertices) const
 {
 	const Canvas* lScreen = GetScreen();
 
@@ -1586,7 +1587,7 @@ PixelRect Renderer::GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) 
 	PixelRect lRect(0, 0, 0, 0);
 
 	int lPrevIndex = pNumVertices - 1;
-	Vector3DF lPrev(mCamTransform.InverseTransform(Vector3DF(pVertex[lPrevIndex].x, pVertex[lPrevIndex].y, pVertex[lPrevIndex].z)));
+	vec3 lPrev(mCamTransform.InverseTransform(vec3(pVertex[lPrevIndex].x, pVertex[lPrevIndex].y, pVertex[lPrevIndex].z)));
 
 	bool lLeftOK   = false;
 	bool lRightOK  = false;
@@ -1602,14 +1603,14 @@ PixelRect Renderer::GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) 
 
 	for (int i = 0; i < pNumVertices; i++)
 	{
-		Vector3DF lCurrent(mCamTransform.InverseTransform(Vector3DF(pVertex[i].x, pVertex[i].y, pVertex[i].z)));
+		vec3 lCurrent(mCamTransform.InverseTransform(vec3(pVertex[i].x, pVertex[i].y, pVertex[i].z)));
 
 		if ((lPrev.y <= 0 && lCurrent.y > 0) ||
 		    (lPrev.y >  0 && lCurrent.y <= 0))
 		{
 			// Clip at z = 0.
-			Vector3DF lDiff = lCurrent - lPrev;
-			Vector3DF lClipPos = lPrev + lDiff * (-lPrev.y / lDiff.y);
+			vec3 lDiff = lCurrent - lPrev;
+			vec3 lClipPos = lPrev + lDiff * (-lPrev.y / lDiff.y);
 
 			// Determine wether the clipped position is to the left or to the right.
 			if (lClipPos.x <= 0)
@@ -1689,19 +1690,19 @@ PixelRect Renderer::GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) 
 	return lRect;
 }
 
-bool Renderer::IsFacingFront(const Vector3DF* pVertex, int pNumVertices)
+bool Renderer::IsFacingFront(const vec3* pVertex, int pNumVertices)
 {
 	if (pNumVertices < 3)
 		return false;
 
 	// Use the cross product constructor to create the surface normal.
-	Vector3DF lNormal(pVertex[1] - pVertex[0], pVertex[2] - pVertex[0]);
-	Vector3DF lCamVector(pVertex[0] - mCamTransform.GetPosition());
+	vec3 lNormal(pVertex[1] - pVertex[0], pVertex[2] - pVertex[0]);
+	vec3 lCamVector(pVertex[0] - mCamTransform.GetPosition());
 
 	return lNormal.Dot(lCamVector) > 0;
 }
 
-Vector3DF Renderer::ScreenCoordToVector(const PixelCoord& pCoord) const
+vec3 Renderer::ScreenCoordToVector(const PixelCoord& pCoord) const
 {
 	const float w2 = mClippingRect.GetWidth() * 0.5f;
 	const float h2 = mClippingRect.GetHeight() * 0.5f;
@@ -1712,16 +1713,16 @@ Vector3DF Renderer::ScreenCoordToVector(const PixelCoord& pCoord) const
 	const float tana = tan(lFOV*0.5f);
 	float dx = tana * (pCoord.x/w2-1.0f) * lAspect;
 	float dy = tana * (1.0f-pCoord.y/h2);
-	Vector3DF lDirection(dx, 1, dy);
+	vec3 lDirection(dx, 1, dy);
 	lDirection.Normalize();
 	lDirection = mCameraTransformation.GetOrientation() * lDirection;
 	return lDirection;
 }
 
-Vector2DF Renderer::PositionToScreenCoord(const Vector3DF& pPosition, float pAspectRatio) const
+vec2 Renderer::PositionToScreenCoord(const vec3& pPosition, float pAspectRatio) const
 {
-	Vector3DF lCamDirection(pPosition - mCameraTransformation.mPosition);
-	Vector3DF lDirection;
+	vec3 lCamDirection(pPosition - mCameraTransformation.mPosition);
+	vec3 lDirection;
 	mCameraTransformation.mOrientation.FastInverseRotatedVector(mCameraOrientationInverse, lDirection, lCamDirection);
 
 	// Normalize so Y-distance from camera is 1.
@@ -1741,7 +1742,7 @@ Vector2DF Renderer::PositionToScreenCoord(const Vector3DF& pPosition, float pAsp
 	const float lInverseAspect = pAspectRatio? 1/pAspectRatio : h2/w2;
 	const float lInverseTanA = 1/tan(lFOV*0.5f);
 
-	Vector2DF lCoord;
+	vec2 lCoord;
 	lCoord.x = ( lDirection.x*lInverseTanA*lInverseAspect+1.0f) * w2;
 	lCoord.y = (-lDirection.z*lInverseTanA+1.0f) * h2;
 	return lCoord;
@@ -1752,9 +1753,9 @@ float Renderer::GetAspectRatio() const
 	return (float)mViewport.GetWidth() / (float)mViewport.GetHeight();
 }
 
-bool Renderer::CheckCulling(const TransformationF& pTransform, double pBoundingRadius)
+bool Renderer::CheckCulling(const xform& pTransform, double pBoundingRadius)
 {
-	const Vector3DF& lPos = pTransform.GetPosition();
+	const vec3& lPos = pTransform.GetPosition();
 
 	bool lVisible = true;
 	if (lVisible)
@@ -1876,10 +1877,10 @@ void Renderer::CalcCamCulling()
 	}
 }
 
-bool Renderer::CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius) const
+bool Renderer::CheckCamCulling(const vec3& pPosition, float pBoundingRadius) const
 {
 	// We only check the frustum planes on the side, and totally ignore the near and far (they currently don't add much).
-	Vector3DF lCamRelativePosition(pPosition);
+	vec3 lCamRelativePosition(pPosition);
 	lCamRelativePosition.Sub(mCameraTransformation.GetPosition());
 	bool lVisible = true;
 	for (int x = 0; lVisible && x < 4; ++x)
@@ -1892,8 +1893,8 @@ bool Renderer::CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius
 
 
 Renderer* Renderer::smRenderer = 0;
-Vector3DF Renderer::smReferencePosition;
-LOG_CLASS_DEFINE(UI_GFX_3D, Renderer);
+vec3 Renderer::smReferencePosition;
+loginstance(UI_GFX_3D, Renderer);
 
 
 

@@ -4,7 +4,8 @@
 
 
 
-#include "../../Include/LepraTarget.h"
+#include "pch.h"
+#include "../../Include/LepraOS.h"
 #include <direct.h>
 #include <LM.h>
 #pragma warning(push)
@@ -33,7 +34,7 @@ namespace Lepra
 
 
 
-LogDecorator gLog(LogType::GetLog(LogType::SUB_GENERAL), typeid(SystemManager));
+LogDecorator gLog(LogType::GetLogger(LogType::SUB_GENERAL), typeid(SystemManager));
 
 
 

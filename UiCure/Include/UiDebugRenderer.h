@@ -41,9 +41,9 @@ public:
 		DEBUG_SHAPES,
 	};
 
-	typedef CubicDeCasteljauSpline<Vector3DF, float> Spline;
+	typedef CubicDeCasteljauSpline<vec3, float> Spline;
 
-	DebugRenderer(const Cure::RuntimeVariableScope* pVariableScope, GameUiManager* pUiManager, const Cure::ContextManager* pContext, const Cure::ContextManager* pRemoteContext, Lock* pTickLock);
+	DebugRenderer(const Cure::RuntimeVariableScope* pVariableScope, GameUiManager* pUiManager, const Cure::ContextManager* pContext, const Cure::ContextManager* pRemoteContext, LockBC* pTickLock);
 	virtual ~DebugRenderer();
 
 	void Render(const GameUiManager* pUiManager, const PixelRect& pRenderArea);
@@ -55,7 +55,7 @@ private:
 	GameUiManager* mUiManager;
 	const Cure::ContextManager* mContext;
 	const Cure::ContextManager* mRemoteContext;
-	Lock* mTickLock;
+	LockBC* mTickLock;
 };
 
 

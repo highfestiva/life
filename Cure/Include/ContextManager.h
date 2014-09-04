@@ -10,7 +10,7 @@
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "../../Lepra/Include/Thread.h"
-#include "../../TBC/Include/PhysicsManager.h"
+#include "../../Tbc/Include/PhysicsManager.h"
 #include "Cure.h"
 
 
@@ -53,8 +53,8 @@ public:
 	const ContextObjectTable& GetObjectTable() const;
 	void ClearObjects();
 	void AddPhysicsSenderObject(ContextObject* pObject);
-	void AddPhysicsBody(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
-	void RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId);
+	void AddPhysicsBody(ContextObject* pObject, Tbc::PhysicsManager::BodyID pBodyId);
+	void RemovePhysicsBody(Tbc::PhysicsManager::BodyID pBodyId);
 
 	void AddAttributeSenderObject(ContextObject* pObject);
 	void UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize);
@@ -135,7 +135,7 @@ private:
 		}
 	};
 	typedef std::unordered_set<Alarm, AlarmHasher> AlarmSet;
-	typedef std::unordered_map<TBC::PhysicsManager::BodyID, ContextObject*> BodyTable;
+	typedef std::unordered_map<Tbc::PhysicsManager::BodyID, ContextObject*> BodyTable;
 	typedef std::unordered_set<GameObjectId> IdSet;
 	typedef BodyTable::value_type BodyPair;
 
@@ -151,11 +151,11 @@ private:
 	ContextObjectTable mAttributeSenderObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
 	ContextObjectTable mMicroTickCallbackObjectTable;
-	Lock mAlarmMutex;
+	LockBC* mAlarmMutex;
 	AlarmSet mAlarmCallbackObjectSet;
 	IdSet mPostKillSet;
 
-	LOG_CLASS_DECLARE();
+	logclass();
 };
 
 

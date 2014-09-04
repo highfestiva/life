@@ -8,7 +8,8 @@
 
 #include <string>
 #include "../../Lepra/Include/String.h"
-#include "../Include/ResourceManager.h"
+#include "Cure.h"
+//#include "../Include/ResourceManager.h"
 
 
 

@@ -159,7 +159,7 @@ static EAGLView* gSharedView;
 		{
 			NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
 			glGetError();
-			CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
+			v_set(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
 		}
 	}
 }

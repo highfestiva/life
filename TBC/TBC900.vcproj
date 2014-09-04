@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="TBC"
+	Name="Tbc"
 	ProjectGUID="{BDBF3606-E371-454B-B162-27FD92B67D50}"
 	RootNamespace="Migel"
 	Keyword="ManagedCProj"
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/TBCD.lib"
+				OutputFile="$(ProjectDir)/Lib/TbcD.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -135,7 +135,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/TBC.lib"
+				OutputFile="$(ProjectDir)/Lib/Tbc.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -205,7 +205,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/TBCRC.lib"
+				OutputFile="$(ProjectDir)/Lib/TbcRC.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -272,7 +272,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/TBCUD.lib"
+				OutputFile="$(ProjectDir)/Lib/TbcUD.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -342,7 +342,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/TBCU.lib"
+				OutputFile="$(ProjectDir)/Lib/TbcU.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -412,7 +412,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/TBCURC.lib"
+				OutputFile="$(ProjectDir)/Lib/TbcURC.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -515,7 +515,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\TBC.cpp"
+				RelativePath=".\Source\Tbc.cpp"
 				>
 			</File>
 			<File
@@ -593,7 +593,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\TBC.h"
+				RelativePath=".\Include\Tbc.h"
 				>
 			</File>
 			<File

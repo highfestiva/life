@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Include/GUI/UiButton.h"
 #include "../../Include/GUI/UiDesktopWindow.h"
 
@@ -598,7 +599,7 @@ void Button::SetOnDragDelegate(const DelegateXYXY& pOnDrag)
 
 
 
-LOG_CLASS_DEFINE(UI_GFX_2D, Button);
+loginstance(UI_GFX_2D, Button);
 
 
 

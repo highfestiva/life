@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="TBCTestApp710"
+	Name="TbcTestApp710"
 	ProjectGUID="{2C46C2E1-41EF-49C2-9C3C-0C69B8CFCD8A}"
 	RootNamespace="PlagueTestApp"
 	Keyword="ManagedCProj">
@@ -377,7 +377,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\TBCTestApp.cpp">
+				RelativePath=".\TbcTestApp.cpp">
 			</File>
 			<File
 				RelativePath="..\..\Lepra\LepraTestApp\TestBigInt.cpp">

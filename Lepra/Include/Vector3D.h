@@ -19,7 +19,7 @@ namespace Lepra
 
 
 
-#define LEPRA_XY_ANGLE(wanted, actual)	Vector2DF(wanted.x, wanted.y).GetAngle(Vector2DF(actual.x, actual.y))
+#define LEPRA_XY_ANGLE(wanted, actual)	vec2(wanted.x, wanted.y).GetAngle(vec2(actual.x, actual.y))
 
 
 
@@ -163,7 +163,7 @@ template<class _TVarType> inline _TVarType LineDistance(const Vector3D<_TVarType
 
 #include "Vector3D.inl"
 
-typedef Vector3D<float> Vector3DF;
+typedef Vector3D<float> vec3;
 typedef Vector3D<double> Vector3DD;
 
 

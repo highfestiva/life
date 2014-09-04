@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "UiGameServerManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
 #include "GameClientMasterTicker.h"
@@ -111,7 +112,7 @@ void UiGameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObje
 
 
 
-LOG_CLASS_DEFINE(GAME, UiGameServerManager);
+loginstance(GAME, UiGameServerManager);
 
 
 

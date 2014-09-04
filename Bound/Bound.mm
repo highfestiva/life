@@ -4,7 +4,7 @@
 
 
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../Lepra/Include/LepraOS.h"
 #include "../UiLepra/Include/Mac/UiMacTouchHandler.h"
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
@@ -116,9 +116,9 @@ using namespace Lepra;
 		const float x = _motionManager.accelerometerData.acceleration.x;
 		const float y = _motionManager.accelerometerData.acceleration.y;
 		const float z = _motionManager.accelerometerData.acceleration.z;
-		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_X, -y);
-		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Y, -z);
-		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Z, +x);
+		v_set(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_X, -y);
+		v_set(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Y, -z);
+		v_set(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Z, +x);
 		Bound::Bound::GetApp()->Tick();
 	}
 }

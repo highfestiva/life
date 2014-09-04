@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "HomingProjectile.h"
 #include "../../Cure/Include/ContextManager.h"
 
@@ -42,17 +43,17 @@ void HomingProjectile::OnTick()
 		UpdateFullPosition(lPositionalData);
 		if (lPositionalData)
 		{
-			Vector3DF lDelta = (lObject->GetPosition() - lPositionalData->mPosition.mTransformation.GetPosition()).GetNormalized();
+			vec3 lDelta = (lObject->GetPosition() - lPositionalData->mPosition.mTransformation.GetPosition()).GetNormalized();
 			if (mMaxVelocity > 0)
 			{
 				const float t = lDelta.GetLength() / mMaxVelocity;
 				lDelta += lObject->GetVelocity() * t;
 			}
-			const float xy = lDelta.ProjectOntoPlane(Vector3DF(0,0,1)).GetLength();
-			QuaternionF q;
+			const float xy = lDelta.ProjectOntoPlane(vec3(0,0,1)).GetLength();
+			quat q;
 			q.SetEulerAngles(-::atan2(lDelta.x, lDelta.y), ::atan2(lDelta.z, xy), 0);
 			const float v = lPositionalData->mPosition.mVelocity.GetLength();
-			const Vector3DF lVelocity = q * Vector3DF(0, v, 0);
+			const vec3 lVelocity = q * vec3(0, v, 0);
 			SetRootOrientation(q);
 			SetRootVelocity(lVelocity);
 		}
@@ -61,7 +62,7 @@ void HomingProjectile::OnTick()
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, HomingProjectile);
+loginstance(GAME_CONTEXT_CPP, HomingProjectile);
 
 
 

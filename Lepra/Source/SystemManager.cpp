@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../Include/SystemManager.h"
 #include <algorithm>
 #include "../Include/HiResTimer.h"
@@ -254,7 +255,7 @@ int SystemManager::mQuitRequest = 0;
 SystemManager::QuitRequestCallback SystemManager::mQuitRequestCallback;
 double SystemManager::mSleepResolution = 0;
 
-LOG_CLASS_DEFINE(GENERAL, SystemManager);
+loginstance(GENERAL, SystemManager);
 
 
 

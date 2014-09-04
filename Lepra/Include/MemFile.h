@@ -17,7 +17,7 @@
 #include "File.h"
 #include "InputStream.h"
 #include "OutputStream.h"
-#include "Thread.h"
+#include "Lock.h"
 
 
 

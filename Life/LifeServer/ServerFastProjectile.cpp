@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "ServerFastProjectile.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
@@ -37,7 +38,7 @@ void ServerFastProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const TBC::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
 	deb_assert(lTag);
 	const float lMuzzleVelocity = lTag->mFloatValueList[0];
 	ProjectileUtil::StartBullet(this, lMuzzleVelocity, true);
@@ -53,7 +54,7 @@ void ServerFastProjectile::OnMicroTick(float pFrameTime)
 	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
 }
 
-void ServerFastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, TBC::PhysicsManager::BodyID pBodyId, const Vector3DF& pNormal)
+void ServerFastProjectile::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pBodyId;
@@ -69,7 +70,7 @@ void ServerFastProjectile::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, 
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, ServerFastProjectile);
+loginstance(GAME_CONTEXT_CPP, ServerFastProjectile);
 
 
 

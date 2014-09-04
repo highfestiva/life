@@ -4,6 +4,8 @@
 
 
 
+#include "pch.h"
+#include "../Include/LepraOS.h"
 #include "../Include/Application.h"
 #include "../Include/SystemManager.h"
 

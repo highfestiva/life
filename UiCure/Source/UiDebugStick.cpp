@@ -4,6 +4,7 @@
 
 
 
+#include "pch.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../UiLepra/Include/UiTouchStick.h"
 #include "../../UiTbc/Include/UiPainter.h"
@@ -35,7 +36,7 @@ void DebugStick::Init(GameUiManager* pUiManager)
 void DebugStick::Draw()
 {
 	bool lIsDebugging;
-	CURE_RTVAR_GET(lIsDebugging, =, mUiManager->GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
+	v_get(lIsDebugging, =, mUiManager->GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
 	if (!lIsDebugging)
 	{
 		if (mIsInitialized)
@@ -102,7 +103,7 @@ void DebugStick::Place(int pPosX, int pPosY)
 	mValue = mPreviousValues[mStickY][mStickX];
 
 	bool lIsDebugging;
-	CURE_RTVAR_GET(lIsDebugging, =, mUiManager->GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
+	v_get(lIsDebugging, =, mUiManager->GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
 	if (!lIsDebugging)
 	{
 		return;
@@ -149,7 +150,7 @@ void DebugStick::InitStick()
 
 GameUiManager* DebugStick::mUiManager = 0;
 UiLepra::Touch::TouchstickInputDevice* DebugStick::mTouchSticks[STICK_RESOLUTION][STICK_RESOLUTION];
-Vector2DF DebugStick::mPreviousValues[STICK_RESOLUTION][STICK_RESOLUTION];
+vec2 DebugStick::mPreviousValues[STICK_RESOLUTION][STICK_RESOLUTION];
 bool DebugStick::mIsDefaultValueSet[STICK_RESOLUTION][STICK_RESOLUTION];
 bool DebugStick::mIsInitialized = false;
 bool DebugStick::mIsUpdated = false;
