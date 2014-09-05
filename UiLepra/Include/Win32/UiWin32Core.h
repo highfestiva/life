@@ -20,7 +20,8 @@
 #pragma once
 
 #include "../../../Lepra/Include/HashTable.h"
-#include "../../../Lepra/Include/Lock.h"
+#include "../../../Lepra/Include/LepraOS.h"
+#include "../../../Lepra/Include/Thread.h"
 #include "../UiCore.h"
 #include "../UiLepra.h"
 

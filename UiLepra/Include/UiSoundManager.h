@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Lock.h"
 #include "../../Lepra/Include/String.h"
+#include "../../Lepra/Include/Thread.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "UiLepra.h"

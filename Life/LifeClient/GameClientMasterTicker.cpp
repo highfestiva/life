@@ -757,13 +757,14 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 	{
 		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
-#ifdef LEPRA_DEBUG
+/*#ifdef LEPRA_DEBUG
 		int lErrorCode;
 		if ((lErrorCode = pSlave->GetConsoleManager()->ExecuteCommand(_T("rebuild-data"))) != 0)
 		{
+			mLog.AError("Unable to rebuild data in debug mode!");
 			SystemManager::ExitProcess(lErrorCode);
 		}
-#endif // Debug.
+#endif // Debug.*/
 		LoadRtvars(pSlave->GetVariableScope());
 		pSlave->RefreshOptions();
 		deb_assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);

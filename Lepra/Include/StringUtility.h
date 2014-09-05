@@ -1,5 +1,5 @@
 
-// Author: Jonas Byströ
+// Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
 

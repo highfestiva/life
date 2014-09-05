@@ -284,13 +284,14 @@ void Renderer::GetViewFrustum(float& pFOVAngle, float& pNear, float& pFar) const
 
 void Renderer::RecalculateFrustumPlanes()
 {
-	float lAngle = Math::Deg2Rad(90.0f - mFOVAngle * 0.5f);
-	float lAngleX = (float)atan(tan(lAngle) * GetAspectRatio());
-	mFrustumPlanes[0].Set(-(float)sin(lAngleX), (float)cos(lAngleX), 0); // Right plane.
-	mFrustumPlanes[1].Set( (float)sin(lAngleX), (float)cos(lAngleX), 0); // Left plane.
+	const float lY = Math::Deg2Rad(mFOVAngle*0.5f);
+	const float lX = asin(sin(lY) * GetAspectRatio());
 
-	mFrustumPlanes[2].Set(0, (float)sin(lAngle), -(float)cos(lAngle)); // Top plane.
-	mFrustumPlanes[3].Set(0, (float)sin(lAngle),  (float)cos(lAngle)); // Bottom plane.
+	mFrustumPlanes[0].Set(-(float)cos(lX), (float)sin(lX), 0); // Right plane.
+	mFrustumPlanes[1].Set( (float)cos(lX), (float)sin(lX), 0); // Left plane.
+
+	mFrustumPlanes[2].Set(0, (float)sin(lY), -(float)cos(lY)); // Bottom plane.
+	mFrustumPlanes[3].Set(0, (float)sin(lY),  (float)cos(lY)); // Top plane.
 }
 
 void Renderer::SetClippingRect(const PixelRect& pRect)

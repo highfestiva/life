@@ -12,6 +12,7 @@
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/CyclicArray.h"
+#include "../Lepra/Include/LepraOS.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Number.h"
 #include "../Lepra/Include/ResourceTracker.h"

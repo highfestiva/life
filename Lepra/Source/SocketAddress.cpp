@@ -3,147 +3,148 @@
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
+#include "../Include/SocketAddress.h"
 #include "../Include/Endian.h"
 #include "../Include/Network.h"
-#include "../Include/SocketAddress.h"
+#include "../Include/SocketAddressGetter.h"
 #include "../Include/StringUtility.h"
+
+
 
 namespace Lepra
 {
 
+
+
 SocketAddress::SocketAddress()
 {
 	memset(&mSockAddr, 0, sizeof(mSockAddr));
-	mSockAddr.sin_family = AF_INET;
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	lSockAddr->sin_family = AF_INET;
 #ifdef LEPRA_MAC
-	mSockAddr.sin_len = sizeof(sockaddr_in);
+	lSockAddr->sin_len = sizeof(RawSockAddr);
 #endif // Macintosh
 }
 
 #ifdef LEPRA_NETWORK_IPV6
 
-SocketAddress::SocketAddress(sockaddr_in6 pSockAddr) :
-	mSockAddr(pSockAddr)
-{
-}
-
 SocketAddress::SocketAddress(const IPAddress& pIP, uint16 pPort)
 {
 	memset(&mSockAddr, 0, sizeof(mSockAddr));
-	mSockAddr.sin6_family = AF_INET6;
-	mSockAddr.sin6_port = Endian::HostToBig(pPort);
-	pIP.Get((uint8*)&mSockAddr.sin6_addr);
-}
-
-const sockaddr_in6& SocketAddress::GetAddr() const
-{
-	return mSockAddr;
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	lSockAddr->sin6_family = AF_INET6;
+	lSockAddr->sin6_port = Endian::HostToBig(pPort);
+	pIP.Get((uint8*)&lSockAddr->sin6_addr);
 }
 
 bool SocketAddress::operator==(const SocketAddress pAddr) const
 {
-	return ((unsigned*)(&pAddr.mSockAddr.sin6_addr))[0] == 
-			((unsigned*)(&mSockAddr.sin6_addr))[0] &&
-			((unsigned*)(&pAddr.mSockAddr.sin6_addr))[1] == ;
-			((unsigned*)(&mSockAddr.sin6_addr))[1] &&
-			((unsigned*)(&pAddr.mSockAddr.sin6_addr))[2] == ;
-			((unsigned*)(&mSockAddr.sin6_addr))[2] &&
-			((unsigned*)(&pAddr.mSockAddr.sin6_addr))[3] == ;
-			((unsigned*)(&mSockAddr.sin6_addr))[3] &&
-			mSockAddr.sin6_port == pAddr.mSockAddr.sin6_port;
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	return ((unsigned*)(&pAddr.lSockAddr->sin6_addr))[0] == 
+			((unsigned*)(&lSockAddr->sin6_addr))[0] &&
+			((unsigned*)(&pAddr.lSockAddr->sin6_addr))[1] == ;
+			((unsigned*)(&lSockAddr->sin6_addr))[1] &&
+			((unsigned*)(&pAddr.lSockAddr->sin6_addr))[2] == ;
+			((unsigned*)(&lSockAddr->sin6_addr))[2] &&
+			((unsigned*)(&pAddr.lSockAddr->sin6_addr))[3] == ;
+			((unsigned*)(&lSockAddr->sin6_addr))[3] &&
+			lSockAddr->sin6_port == pAddr.lSockAddr->sin6_port;
 }
 
 size_t SocketAddress::operator() (const SocketAddress& pAddr) const
 {
 	size_t lHash = 0;
-	const size_t* lAddress = (const size_t*)&pAddr.mSockAddr.sin6_addr;
-	for (lAddress < sizeof(pAddr.mSockAddr.sin6_addr); ++lAddress)
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)pAddr.mSockAddr;
+	for (int x = 0; x < sizeof(lSockAddr->sin6_addr); ++x)
 	{
-		lHash += *lAddress;
+		lHash += lSockAddr->sin6_addr[x];	// TODO: don't hash byte by byte, instead do size_t by size_t.
 	}
-	lHash += pAddr.mSockAddr.sin6_port;
-	return (lHash);
+	lHash += pAddr.lSockAddr->sin6_port;
+	return lHash;
 }
 
 void SocketAddress::SetPort(uint16 pPort)
 {
-	mSockAddr.sin6_port = Endian::HostToBig(pPort);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	lSockAddr->sin6_port = Endian::HostToBig(pPort);
 }
 
 uint16 SocketAddress::GetPort() const
 {
-	return Endian::BigToHost(mSockAddr.sin6_port);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	return Endian::BigToHost(lSockAddr->sin6_port);
 }
 
 void SocketAddress::SetIP(const IPAddress& pIP)
 {
-	pIP.Get((uint8*)&mSockAddr.sin6_addr);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	pIP.Get((uint8*)&lSockAddr->sin6_addr);
 }
 
 IPAddress SocketAddress::GetIP() const
 {
-	return IPAddress((const uint8*)&pAddr.mSockAddr.sin6_addr, 16);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	return IPAddress((const uint8*)&lSockAddr->sin6_addr, 16);
 }
 
 #else // !LEPRA_NETWORK_IPV6
 
-SocketAddress::SocketAddress(sockaddr_in pSockAddr) :
-	mSockAddr(pSockAddr)
-{
-}
-
 SocketAddress::SocketAddress(const IPAddress& pIP, uint16 pPort)
 {
 	memset(&mSockAddr, 0, sizeof(mSockAddr));
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
 #ifdef LEPRA_MAC
-	mSockAddr.sin_len = sizeof(sockaddr_in);
+	lSockAddr->sin_len = sizeof(RawSocketAddress);
 #endif // Macintosh
-	mSockAddr.sin_family = AF_INET;
-	mSockAddr.sin_port = Endian::HostToBig(pPort);
-	pIP.Get((uint8*)&mSockAddr.sin_addr);
-}
-
-const sockaddr_in& SocketAddress::GetAddr() const
-{
-	return mSockAddr;
+	lSockAddr->sin_family = AF_INET;
+	lSockAddr->sin_port = Endian::HostToBig(pPort);
+	pIP.Get((uint8*)&lSockAddr->sin_addr);
 }
 
 bool SocketAddress::operator==(const SocketAddress& pAddr) const
 {
-	return (pAddr.mSockAddr.sin_addr.s_addr == mSockAddr.sin_addr.s_addr &&
-		pAddr.mSockAddr.sin_port == mSockAddr.sin_port);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	RawSocketAddress* lOtherSockAddr = (RawSocketAddress*)pAddr.mSockAddr;
+	return (lOtherSockAddr->sin_addr.s_addr == lSockAddr->sin_addr.s_addr &&
+		lOtherSockAddr->sin_port == lSockAddr->sin_port);
 }
 
 size_t SocketAddress::operator() (const SocketAddress& pAddr) const
 {
-	return (pAddr.mSockAddr.sin_addr.s_addr + pAddr.mSockAddr.sin_port);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)pAddr.mSockAddr;
+	return (lSockAddr->sin_addr.s_addr + lSockAddr->sin_port);
 }
 
 void SocketAddress::SetPort(uint16 pPort)
 {
-	mSockAddr.sin_port = Endian::HostToBig(pPort);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	lSockAddr->sin_port = Endian::HostToBig(pPort);
 }
 
 uint16 SocketAddress::GetPort() const
 {
-	return Endian::BigToHost(mSockAddr.sin_port);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	return Endian::BigToHost(lSockAddr->sin_port);
 }
 
 void SocketAddress::SetIP(const IPAddress& pIP)
 {
-	pIP.Get((uint8*)&mSockAddr.sin_addr);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	pIP.Get((uint8*)&lSockAddr->sin_addr);
 }
 
 IPAddress SocketAddress::GetIP() const
 {
-	return IPAddress((const uint8*)&mSockAddr.sin_addr, 4);
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	return IPAddress((const uint8*)&lSockAddr->sin_addr, 4);
 }
 
 #endif // LEPRA_NETWORK_IPV6/!LEPRA_NETWORK_IPV6
 
 void SocketAddress::Set(const IPAddress& pIP, uint16 pPort)
 {
-	mSockAddr.sin_family = AF_INET;
+	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+	lSockAddr->sin_family = AF_INET;
 	SetIP(pIP);
 	SetPort(pPort);
 }
@@ -163,6 +164,11 @@ str SocketAddress::GetAsString() const
 	str s = GetIP().GetAsString();
 	s += strutil::Format(_T(":%i"), GetPort());
 	return (s);
+}
+
+void* SocketAddress::GetRawData() const
+{
+	return (void*)mSockAddr;
 }
 
 bool SocketAddress::Resolve(const str& pAddress)
@@ -237,7 +243,7 @@ bool SocketAddress::ResolveHost(const str& pHostname)
 	if (Network::ResolveHostname(pHostname, lIpAddress))
 	{
 		lOk = true;
-		lIpAddress.Get((uint8*)&mSockAddr.sin_addr);
+		SetIP(lIpAddress);
 	}
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
@@ -247,9 +253,12 @@ bool SocketAddress::ResolveHost(const str& pHostname)
 #endif // IPv6/IPV4
 	{
 		lOk = true;
-		mSockAddr.sin_addr.s_addr = lIp;
+		RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+		lSockAddr->sin_addr.s_addr = lIp;
 	}
 	return (lOk);
 }
+
+
 
 }

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Lock.h"
+#include "../../Lepra/Include/Thread.h"
 #include "../../Lepra/Include/SocketAddress.h"
 #include "Packet.h"
 #include "RemoteStatus.h"

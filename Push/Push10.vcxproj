@@ -110,7 +110,12 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

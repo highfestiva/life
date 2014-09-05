@@ -165,9 +165,6 @@
     <ClInclude Include="zlib\zconf.h">
       <Filter>ZLib\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="zlib\zconf.in.h">
-      <Filter>ZLib\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="zlib\zlib.h">
       <Filter>ZLib\Header Files</Filter>
     </ClInclude>

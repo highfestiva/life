@@ -10,6 +10,7 @@
 #include "../../Cure/Include/RuntimeVariableName.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
+#include "../../Lepra/Include/LepraOS.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"

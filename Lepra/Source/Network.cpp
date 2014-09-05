@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "../Include/LepraAssert.h"
+#include "../Include/LepraOS.h"
 #include "../Include/Network.h"
 #include "../Include/Socket.h"
 

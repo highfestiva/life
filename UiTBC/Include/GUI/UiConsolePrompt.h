@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../../Lepra/Include/ConsoleCommandManager.h"
-#include "../../../Lepra/Include/Lock.h"
+#include "../../../Lepra/Include/Thread.h"
 #include "UiComponent.h"
 
 

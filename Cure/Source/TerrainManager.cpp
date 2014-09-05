@@ -19,7 +19,6 @@ namespace Cure
 
 
 TerrainManager::TerrainManager(ResourceManager* pResourceManager):
-	mTerrainLock(new Lock()),
 	mResourceManager(pResourceManager),
 	mLoadPatchOkCount(0),
 	mLoadPatchErrorCount(0),
@@ -40,8 +39,6 @@ TerrainManager::~TerrainManager()
 	delete (mPatchManager);
 	mPatchManager = 0;
 	mResourceManager = 0;
-	delete (mTerrainLock);
-	mTerrainLock = 0;
 }
 
 void TerrainManager::Clear()
@@ -113,7 +110,7 @@ void TerrainManager::UpdatePatchTree()
 	// 2.2. Find patches that are not yet loaded, but should be loaded. TODO: implement!
 	// 3. Remove the patches and functions that are still marked as "not used".  TODO: implement!
 
-	ScopeLock lLock(mTerrainLock);
+	ScopeLock lLock(&mTerrainLock);
 
 	// Assume all patches+functions are "not used".
 	mPatchManager->MarkAllDirty();
@@ -154,7 +151,7 @@ void TerrainManager::TerrainPatchLoadCallback(UserPhysicalTerrainResource* pLoad
 	if (pLoadedResource->GetConstResource()->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		log_adebug("Terrain patch asynchronously loaded.");
-		ScopeLock lLock(mTerrainLock);
+		ScopeLock lLock(&mTerrainLock);
 		// TODO: insert patch into tree.
 		mPatchManager->AddPatch(pLoadedResource);
 		++mLoadPatchOkCount;

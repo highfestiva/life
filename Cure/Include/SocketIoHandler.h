@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "../../Lepra/Include/Socket.h"
 #include "Cure.h"
 

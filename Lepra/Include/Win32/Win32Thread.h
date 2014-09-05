@@ -35,7 +35,7 @@ private:
 
 
 
-class Win32Lock: public LockBC
+class Win32Lock
 {
 public:
 	Win32Lock();
@@ -53,7 +53,7 @@ private:
 
 
 
-class Win32Condition: public ConditionBC
+class Win32Condition
 {
 public:
 	Win32Condition();
@@ -75,7 +75,7 @@ private:
 
 
 
-class Win32Semaphore: public SemaphoreBC
+class Win32Semaphore
 {
 public:
 	Win32Semaphore();
@@ -92,11 +92,11 @@ protected:
 
 
 
-class Win32RWLock: public RWLockBC
+class Win32RwLock
 {
 public:
-	Win32RWLock(const astr& pRWLockName);
-	virtual ~Win32RWLock();
+	Win32RwLock();
+	virtual ~Win32RwLock();
 
 	void AcquireRead();
 	void AcquireWrite();

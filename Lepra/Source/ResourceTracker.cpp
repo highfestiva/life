@@ -15,14 +15,13 @@ namespace Lepra
 
 
 
-ResourceTracker::ResourceTracker():
-	mLock(new Lock())
+ResourceTracker::ResourceTracker()
 {
 }
 
 void ResourceTracker::Add(const HashedString& pResourceName, int pValue)
 {
-	ScopeLock lLock(mLock);
+	ScopeLock lLock(&mLock);
 	CounterMap::iterator x = mCounterMap.find(pResourceName);
 	if (x == mCounterMap.end())
 	{
@@ -36,7 +35,7 @@ void ResourceTracker::Add(const HashedString& pResourceName, int pValue)
 
 ResourceTracker::CounterMap ResourceTracker::GetAll() const
 {
-	ScopeLock lLock(mLock);
+	ScopeLock lLock(&mLock);
 	return mCounterMap;
 }
 

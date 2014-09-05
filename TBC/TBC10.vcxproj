@@ -291,12 +291,6 @@
     <ClInclude Include="Include\TerrainFunction.h" />
     <ClInclude Include="Include\TerrainPatch.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Lepra\Lepra10.vcxproj">
-      <Project>{e7dda722-45e3-45c9-b051-e99288accdd2}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

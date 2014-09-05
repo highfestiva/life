@@ -146,7 +146,7 @@ private:
 
 	typedef std::unordered_map<HashedString, RuntimeVariable*> VariableTable;
 	RuntimeVariableScope* mParentScope;
-	mutable LockBC* mLock;
+	mutable Lock mLock;
 	VariableTable mVariableTable;
 	int mOwnerSeed;
 

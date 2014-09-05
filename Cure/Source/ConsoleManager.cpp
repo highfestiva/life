@@ -6,7 +6,6 @@
 
 #include "pch.h"
 #include "../Include/ConsoleManager.h"
-#include "../../Lepra/Include/Lock.h"
 #include "../../Lepra/Include/LogListener.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../Include/Cure.h"
@@ -26,7 +25,6 @@ ConsoleManager::ConsoleManager(RuntimeVariableScope* pVariableScope, Interactive
 	mConsolePrompt(pConsolePrompt),
 	mConsoleCommandManager(0),
 	mConsoleThread(0),
-	mLock(new Lock),
 	mHistorySilentUntilNextExecute(false)
 {
 }
@@ -40,8 +38,6 @@ ConsoleManager::~ConsoleManager()
 	mVariableScope = 0;
 	delete mConsoleCommandManager;
 	mConsoleCommandManager = 0;
-	delete mLock;
-	mLock = 0;
 };
 
 void ConsoleManager::SetConsoleLogger(InteractiveConsoleLogListener* pLogger)
@@ -67,7 +63,7 @@ void ConsoleManager::Join()
 
 	{
 		// Join forks.
-		ScopeLock lLock(mLock);
+		ScopeLock lLock(&mLock);
 		ForkList::iterator x = mForkList.begin();
 		for (; x != mForkList.end(); ++x)
 		{
@@ -93,7 +89,7 @@ void ConsoleManager::Join()
 	for (int x = 0; x < 1000; ++x)
 	{
 		{
-			ScopeLock lLock(mLock);
+			ScopeLock lLock(&mLock);
 			if (mForkList.empty())
 			{
 				break;
@@ -103,7 +99,7 @@ void ConsoleManager::Join()
 	}
 	{
 		// Kill forks.
-		ScopeLock lLock(mLock);
+		ScopeLock lLock(&mLock);
 		ForkList::iterator x = mForkList.begin();
 		for (; x != mForkList.end(); ++x)
 		{
@@ -116,7 +112,7 @@ void ConsoleManager::Join()
 
 void ConsoleManager::PushYieldCommand(const str& pCommand)
 {
-	ScopeLock lLock(mLock);
+	ScopeLock lLock(&mLock);
 	mYieldCommandList.push_back(pCommand);
 }
 
@@ -129,7 +125,7 @@ int ConsoleManager::ExecuteYieldCommand()
 {
 	str lYieldCommand;
 	{
-		ScopeLock lLock(mLock);
+		ScopeLock lLock(&mLock);
 		if (!mYieldCommandList.empty())
 		{
 			lYieldCommand = mYieldCommandList.front();
@@ -159,13 +155,13 @@ LogDecorator& ConsoleManager::GetLogger() const
 
 void ConsoleManager::AddFork(Thread* pThread)
 {
-	ScopeLock lLock(mLock);
+	ScopeLock lLock(&mLock);
 	mForkList.push_back(pThread);
 }
 
 void ConsoleManager::RemoveFork(Thread* pThread)
 {
-	ScopeLock lLock(mLock);
+	ScopeLock lLock(&mLock);
 	mForkList.remove(pThread);
 }
 

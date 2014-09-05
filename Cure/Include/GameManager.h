@@ -47,7 +47,7 @@ public:
 	virtual void PreEndTick();
 	virtual bool EndTick();
 	virtual bool TickNetworkOutput();
-	LockBC* GetTickLock() const;
+	Lock* GetTickLock() const;
 
 	RuntimeVariableScope* GetVariableScope() const;
 	void SetVariableScope(RuntimeVariableScope* pScope);
@@ -107,7 +107,7 @@ protected:
 private:
 	virtual void HandleWorldBoundaries();
 
-	mutable LockBC* mLock;
+	mutable Lock mLock;
 	volatile bool mIsThreadSafe;
 
 	RuntimeVariableScope* mVariableScope;

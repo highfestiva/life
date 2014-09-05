@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "Lock.h"
+#include "Thread.h"
 #include "String.h"
 #include "Unordered.h"
 
@@ -31,7 +31,7 @@ public:
 	CounterMap GetAll() const;
 
 protected:
-	Lock* mLock;
+	mutable Lock mLock;
 	CounterMap mCounterMap;
 };
 

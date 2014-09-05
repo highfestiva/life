@@ -35,7 +35,7 @@ private:
 
 
 
-class PosixLock: public LockBC
+class PosixLock
 {
 public:
 	PosixLock();
@@ -51,7 +51,7 @@ private:
 
 
 
-class PosixCondition: public ConditionBC
+class PosixCondition
 {
 public:
 	PosixCondition(PosixLock* pExternalLock = 0);
@@ -70,7 +70,7 @@ private:
 
 
 
-class PosixSemaphore: public SemaphoreBC
+class PosixSemaphore
 {
 public:
 	PosixSemaphore();
@@ -92,11 +92,11 @@ protected:
 
 
 
-class PosixRWLock: public RWLockBC
+class PosixRwLock
 {
 public:
-	PosixRWLock(const astr& pRWLockName);
-	virtual ~PosixRWLock();
+	PosixRwLock();
+	virtual ~PosixRwLock();
 
 	void AcquireRead();
 	void AcquireWrite();

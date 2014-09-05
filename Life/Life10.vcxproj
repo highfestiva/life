@@ -267,12 +267,6 @@
     <ClInclude Include="SystemUtil.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cure\Cure10.vcxproj">
-      <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Life.sln" />
     <None Include="Life.vcproj" />
     <None Include="SystemUtil.mm">

@@ -23,7 +23,7 @@ namespace UiCure
 
 
 
-DebugRenderer::DebugRenderer(const Cure::RuntimeVariableScope* pVariableScope, GameUiManager* pUiManager, const Cure::ContextManager* pContext, const Cure::ContextManager* pRemoteContext, LockBC* pTickLock):
+DebugRenderer::DebugRenderer(const Cure::RuntimeVariableScope* pVariableScope, GameUiManager* pUiManager, const Cure::ContextManager* pContext, const Cure::ContextManager* pRemoteContext, Lock* pTickLock):
 	mVariableScope(pVariableScope),
 	mUiManager(pUiManager),
 	mContext(pContext),

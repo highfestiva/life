@@ -31,7 +31,6 @@ namespace Cure
 
 
 GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
-	mLock(new Lock),
 	mIsThreadSafe(true),
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
@@ -66,12 +65,10 @@ GameManager::~GameManager()
 	delete (mVariableScope);
 	mVariableScope = 0;
 
-	while (mLock->IsOwner())
+	while (mLock.IsOwner())
 	{
-		mLock->Release();
+		mLock.Release();
 	}
-	delete mLock;
-	mLock = 0;
 }
 
 const GameTicker* GameManager::GetTicker() const
@@ -158,9 +155,9 @@ bool GameManager::TickNetworkOutput()
 	return true;
 }
 
-LockBC* GameManager::GetTickLock() const
+Lock* GameManager::GetTickLock() const
 {
-	return mLock;
+	return &mLock;
 }
 
 
@@ -394,7 +391,7 @@ void GameManager::UpdateReportPerformance(bool pReport, double pReportInterval)
 
 void GameManager::ClearPerformanceData()
 {
-	ScopeLock lLock(mLock);
+	ScopeLock lLock(&mLock);
 
 	mSendBandwidth.Clear();
 	mReceiveBandwidth.Clear();

@@ -151,7 +151,7 @@ private:
 	ContextObjectTable mAttributeSenderObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
 	ContextObjectTable mMicroTickCallbackObjectTable;
-	LockBC* mAlarmMutex;
+	Lock mAlarmMutex;
 	AlarmSet mAlarmCallbackObjectSet;
 	IdSet mPostKillSet;
 

@@ -287,7 +287,7 @@
     <ClInclude Include="Include\LepraTypes.h" />
     <ClInclude Include="Include\LepraUndef.h" />
     <ClInclude Include="Include\ListUtil.h" />
-    <ClInclude Include="Include\Lock.h" />
+    <ClInclude Include="Include\FastLock.h" />
     <ClInclude Include="Include\Log.h" />
     <ClInclude Include="Include\Logger.h" />
     <ClInclude Include="Include\LogListener.h" />
@@ -319,6 +319,8 @@
     <ClInclude Include="Include\Reader.h" />
     <ClInclude Include="Include\ResourceTracker.h" />
     <ClInclude Include="Include\RotationMatrix.h" />
+    <ClInclude Include="Include\SocketAddressGetter.h" />
+    <ClInclude Include="Include\TcpMuxSocket.h" />
     <ClInclude Include="Include\TimeLogger.h" />
     <ClInclude Include="Include\SHA1.h" />
     <ClInclude Include="Include\SkipList.h" />
@@ -464,6 +466,7 @@
     <ClCompile Include="Source\StringUtility.cpp" />
     <ClCompile Include="Source\SubFile.cpp" />
     <ClCompile Include="Source\SystemManager.cpp" />
+    <ClCompile Include="Source\TcpMuxSocket.cpp" />
     <ClCompile Include="Source\TgaLoader.cpp" />
     <ClCompile Include="Source\Thread.cpp" />
     <ClCompile Include="Source\TiffLoader.cpp" />
@@ -500,12 +503,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ThirdParty\ThirdPartyLib_10.vcxproj">
-      <Project>{00f89e9d-7870-4921-9022-9ad4951bc224}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

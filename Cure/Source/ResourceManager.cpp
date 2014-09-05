@@ -516,7 +516,6 @@ ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
 	mLoaderThreadCount(pLoaderThreadCount),
 	mPathPrefix(SystemManager::GetDataDirectory()),
 	mLoaderThread("ResourceLoader"),
-	mZipLock(new Lock),
 	mZipFile(new ZipArchive)
 {
 	if (mZipFile->OpenArchive(mPathPrefix + _T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
@@ -533,8 +532,6 @@ ResourceManager::~ResourceManager()
 
 	delete mZipFile;
 	mZipFile = 0;
-	delete mZipLock;
-	mZipLock = 0;
 }
 
 bool ResourceManager::InitDefault()
@@ -652,7 +649,7 @@ File* ResourceManager::QueryFile(const str& pFilename)
 	str lFilename = strutil::ReplaceAll(pFilename, '\\', '/');
 	if (mZipFile)
 	{
-		ScopeLock lLock(mZipLock);
+		ScopeLock lLock(&mZipLock);
 		if (mZipFile->FileOpen(lFilename))
 		{
 			const size_t lSize = (size_t)mZipFile->FileSize();
@@ -694,7 +691,7 @@ bool ResourceManager::QueryFileExists(const str& pFilename)
 {
 	if (mZipFile)
 	{
-		ScopeLock lLock(mZipLock);
+		ScopeLock lLock(&mZipLock);
 		if (mZipFile->FileExist(pFilename))
 		{
 			return true;
@@ -709,7 +706,7 @@ strutil::strvec ResourceManager::ListFiles(const str& pWildcard)
 	strutil::strvec lFilenameArray;
 	if (mZipFile)
 	{
-		ScopeLock lLock(mZipLock);
+		ScopeLock lLock(&mZipLock);
 		str lFilename;
 		for (lFilename = mZipFile->FileFindFirst(); !lFilename.empty(); lFilename = mZipFile->FileFindNext())
 		{

@@ -5,9 +5,9 @@
 
 
 #include "pch.h"
-#include "../Include/LepraAssert.h"
 #include "../Include/Posix/MacLog.h"
-#include "../Include/LepraTarget.h"
+#include "../Include/LepraAssert.h"
+#include "../Include/LepraOS.h"
 #include "../Include/LogListener.h"
 #include "../Include/Time.h"
 
@@ -165,14 +165,14 @@ void StdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 	switch(pLevel)
 	{
 		case LEVEL_TRACE:	// Fall through.
-		case LEVEL_DEBUG:		lAttributes = FOREGROUND_BLUE;									break;
-		case LEVEL_INFO:		lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;				break;
+		case LEVEL_DEBUG:	lAttributes = FOREGROUND_BLUE;									break;
+		case LEVEL_INFO:	lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;				break;
 		case LEVEL_PERFORMANCE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_GREEN;						break;
 		case LEVEL_HEADLINE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;	break;
 		case LEVEL_WARNING:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;				break;
-		case LEVEL_ERROR:		lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED;						break;
+		case LEVEL_ERROR:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED;						break;
 		default:	// Fall through.
-		case LEVEL_FATAL:		lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED;	break;
+		case LEVEL_FATAL:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED;	break;
 	}
 	::SetConsoleTextAttribute(lStdOut, lAttributes);
 	DWORD lNumChars = (DWORD)pFullMessage.length();

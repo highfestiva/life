@@ -6,9 +6,10 @@
 
 #include "pch.h"
 #include "MasterServerNetworkParser.h"
-#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/Checksum.h"
 #include "../../Lepra/Include/DES.h"
+#include "../../Lepra/Include/LepraAssert.h"
+#include "../../Lepra/Include/LepraOS.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../ServerInfo.h"
 

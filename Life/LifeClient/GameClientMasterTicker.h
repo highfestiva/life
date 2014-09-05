@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../Cure/Include/GameTicker.h"
-#include "../../Lepra/Include/Lock.h"
+#include "../../Lepra/Include/Thread.h"
 #include "../../UiCure/Include/UiLineGraph2d.h"
 #include "../../UiTbc/Include/UiFontManager.h"
 #include "../../UiTbc/Include/UiRenderer.h"

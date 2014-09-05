@@ -7,7 +7,6 @@
 #include "pch.h"
 #include "../Include/ContextManager.h"
 #include <list>
-#include "../../Lepra/Include/Lock.h"
 #include "../Include/ContextObjectAttribute.h"
 #include "../Include/ContextObject.h"
 #include "../Include/GameManager.h"
@@ -28,8 +27,7 @@ ContextManager::ContextManager(GameManager* pGameManager):
 	mGameManager(pGameManager),
 	mIsObjectOwner(true),
 	mLocalObjectIdManager(0x40000000, 0x7FFFFFFF-1, 0xFFFFFFFF),
-	mRemoteObjectIdManager(1, 0x40000000-1, 0xFFFFFFFF),
-	mAlarmMutex(new Lock)
+	mRemoteObjectIdManager(1, 0x40000000-1, 0xFFFFFFFF)
 {
 }
 
@@ -37,8 +35,6 @@ ContextManager::~ContextManager()
 {
 	ClearObjects();
 	mGameManager = 0;
-	delete mAlarmMutex;
-	mAlarmMutex = 0;
 }
 
 
@@ -253,7 +249,7 @@ void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, floa
 	deb_assert(pObject->GetManager() == this);
 	deb_assert(GetObject(pObject->GetInstanceId(), true) == pObject);
 
-	ScopeLock lLock(mAlarmMutex);
+	ScopeLock lLock(&mAlarmMutex);
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
 	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
@@ -267,7 +263,7 @@ void ContextManager::AddGameAlarmCallback(ContextObject* pObject, int pAlarmId, 
 
 void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
 {
-	ScopeLock lLock(mAlarmMutex);
+	ScopeLock lLock(&mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
@@ -287,7 +283,7 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 {
 	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
 
-	ScopeLock lLock(mAlarmMutex);
+	ScopeLock lLock(&mAlarmMutex);
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
@@ -424,7 +420,7 @@ void ContextManager::DispatchAlarmCallbacks()
 	// 1. Extract due alarms into list.
 	// 2. Callback alarms.
 
-	ScopeLock lLock(mAlarmMutex);
+	ScopeLock lLock(&mAlarmMutex);
 
 	std::list<Alarm> lCallbackList;
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();

@@ -67,7 +67,7 @@ private:
 	void UpdatePatchTree();
 	void TerrainPatchLoadCallback(UserPhysicalTerrainResource* pLoadedResource);
 
-	Lock* mTerrainLock;
+	Lock mTerrainLock;
 
 	ResourceManager* mResourceManager;
 

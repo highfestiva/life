@@ -25,9 +25,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>NotSet</CharacterSet>
     <CLRSupport>false</CLRSupport>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -43,21 +41,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)D</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -65,23 +61,29 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Lib>
-      <OutputFile>$(OutDir)$(ProjectName)d.lib</OutputFile>
+      <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Reference Include="System">
@@ -120,7 +122,6 @@
     <ClInclude Include="zlib\inftrees.h" />
     <ClInclude Include="zlib\trees.h" />
     <ClInclude Include="zlib\zconf.h" />
-    <ClInclude Include="zlib\zconf.in.h" />
     <ClInclude Include="zlib\zlib.h" />
     <ClInclude Include="zlib\zutil.h" />
     <ClInclude Include="minizip\crypt.h" />

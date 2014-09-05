@@ -85,7 +85,7 @@ protected:
 	ConsolePrompt* mConsolePrompt;
 	ConsoleCommandManager* mConsoleCommandManager;
 	MemberThread<ConsoleManager>* mConsoleThread;
-	LockBC* mLock;
+	Lock mLock;
 	std::list<str> mYieldCommandList;
 	typedef std::list<Thread*> ForkList;
 	ForkList mForkList;

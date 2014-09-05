@@ -98,22 +98,15 @@ Win32Lock::~Win32Lock()
 void Win32Lock::Acquire()
 {
 	::EnterCriticalSection(&mMutex);
-	Reference();
 }
 
 bool Win32Lock::TryAcquire()
 {
-	bool lAcquired = (::TryEnterCriticalSection(&mMutex) == TRUE);
-	if (lAcquired)
-	{
-		Reference();
-	}
-	return (lAcquired);
+	return (::TryEnterCriticalSection(&mMutex) == TRUE);
 }
 
 void Win32Lock::Release()
 {
-	Dereference();
 	::LeaveCriticalSection(&mMutex);
 }
 
@@ -215,8 +208,7 @@ void Win32Semaphore::Signal()
 
 
 
-Win32RWLock::Win32RWLock(const astr& pRWLockName) :
-	RWLockBC(pRWLockName),
+Win32RwLock::Win32RwLock():
 	mNumPendingReaders(0),
 	mNumActiveReaders(0),
 	mNumPendingWriters(0),
@@ -224,11 +216,11 @@ Win32RWLock::Win32RWLock(const astr& pRWLockName) :
 {
 }
 
-Win32RWLock::~Win32RWLock()
+Win32RwLock::~Win32RwLock()
 {
 }
 
-void Win32RWLock::AcquireRead()
+void Win32RwLock::AcquireRead()
 {
 	// If someone's writing, we will sit tight here.
 	mWriteLock.Acquire();
@@ -246,7 +238,7 @@ void Win32RWLock::AcquireRead()
 	mWriteLock.Release();
 }
 
-void Win32RWLock::AcquireWrite()
+void Win32RwLock::AcquireWrite()
 {
 	// If someone else is writing, we will sit tight here.
 	mWriteLock.Acquire();
@@ -262,7 +254,7 @@ void Win32RWLock::AcquireWrite()
 	mIsWriting = true;
 }
 
-void Win32RWLock::Release()
+void Win32RwLock::Release()
 {
 	if (mIsWriting == true)
 	{
@@ -360,7 +352,7 @@ bool Thread::Start()
 		if (mThreadHandle)
 		{
 			// Try to wait for newly created thread.
-			mSemaphore->Wait(5.0);
+			mSemaphore.Wait(5.0);
 		}
 		else
 		{

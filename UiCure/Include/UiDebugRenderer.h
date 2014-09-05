@@ -43,7 +43,7 @@ public:
 
 	typedef CubicDeCasteljauSpline<vec3, float> Spline;
 
-	DebugRenderer(const Cure::RuntimeVariableScope* pVariableScope, GameUiManager* pUiManager, const Cure::ContextManager* pContext, const Cure::ContextManager* pRemoteContext, LockBC* pTickLock);
+	DebugRenderer(const Cure::RuntimeVariableScope* pVariableScope, GameUiManager* pUiManager, const Cure::ContextManager* pContext, const Cure::ContextManager* pRemoteContext, Lock* pTickLock);
 	virtual ~DebugRenderer();
 
 	void Render(const GameUiManager* pUiManager, const PixelRect& pRenderArea);
@@ -55,7 +55,7 @@ private:
 	GameUiManager* mUiManager;
 	const Cure::ContextManager* mContext;
 	const Cure::ContextManager* mRemoteContext;
-	LockBC* mTickLock;
+	Lock* mTickLock;
 };
 
 

@@ -72,8 +72,8 @@ private:
 	TimeManager* mTimeManager;
 	Tbc::PhysicsManager* mPhysicsManager;
 	MemberThread<GameTicker>* mPhysicsWorkerThread;
-	SemaphoreBC* mPhysicsTickStartSemaphore;
-	SemaphoreBC* mPhysicsTickDoneSemaphore;
+	Semaphore* mPhysicsTickStartSemaphore;
+	Semaphore* mPhysicsTickDoneSemaphore;
 
 	logclass();
 };

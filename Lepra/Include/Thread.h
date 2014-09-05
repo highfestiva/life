@@ -40,95 +40,85 @@ private:
 	int mAcquireCount;
 };
 
-class LockBC: public OwnedLock
+class Lock: public OwnedLock
 {
 public:
-	LockBC();
-	virtual	~LockBC();
-	virtual void Acquire() = 0;
-	virtual bool TryAcquire() = 0;
-	virtual void Release() = 0;
+	Lock();
+	virtual	~Lock();
+	void Acquire();
+	bool TryAcquire();
+	void Release();
+
+private:
+	void operator=(const Lock&);
+
+	void* mSystemLock;
 };
 
 // Try using this whenever possible.
 class ScopeLock
 {
 public:
-	ScopeLock(LockBC* pLock);
+	ScopeLock(Lock* pLock);
 	~ScopeLock();
 	void Acquire();
 	void Release();
 
 protected:
-	LockBC* mLock;
+	Lock* mLock;
 };
 
 
 
-class ConditionBC
+class Condition
 {
 public:
+	Condition();
+	virtual ~Condition();
 
-	// You may set pExternalLock to NULL. But if you want to implement
-	// a monitor class, you should pass the monitor's Lock as parameter
-	// to all its conditions. The lock must then be acquired before all
-	// calls to Wait(), Signal() and SignalAll().
-	ConditionBC();
-	virtual ~ConditionBC();
+	void Wait();
+	bool Wait(float64 pMaxWaitTime);
+	void Signal();
+	void SignalAll();	// Unblock all waiting threads.
 
-	// Will block calling thread, until Signal() or SignalAll() 
-	// has been called by another thread.
-	virtual void Wait() = 0;
-
-	// Will block calling thread, until Signal() or SignalAll() 
-	// has been called by another thread, or the given time has 
-	// elapsed. If timeout occurs, the function returns false, 
-	// otherwise true. Time is given in seconds.
-	virtual bool Wait(float64 pMaxWaitTime) = 0;
-
-	// Signal that condition has occured.
-	// Will unblock one thread that is currently waiting for this 
-	// condition to occur.
-	virtual void Signal() = 0;
-
-	// Signal that condition has occured.
-	// Will unblock all threads that are currently waiting for this 
-	// condition to occur.
-	virtual void SignalAll() = 0;
+private:
+	void* mSystemCondition;
 };
 
 
 
-class SemaphoreBC
+class Semaphore
 {
 public:
-	SemaphoreBC();
-	SemaphoreBC(unsigned pMaxCount);
-	virtual ~SemaphoreBC();
+	Semaphore();
+	Semaphore(unsigned pMaxCount);
+	virtual ~Semaphore();
 
-	virtual void Wait() = 0;
-	virtual bool Wait(float64 pMaxWaitTime) = 0;
-	// Unblocks one currently, or future, waiting thread.
-	virtual void Signal() = 0;
+	void Wait();
+	bool Wait(float64 pMaxWaitTime);
+	void Signal();	// Unblocks one currently, or future, waiting thread.
+
+private:
+	void* mSystemSemaphore;
 };
 
 
 
-class RWLockBC
+class RwLock
 {
 public:
+	RwLock(const astr& pRwLockName);
+	virtual ~RwLock();
 
-	RWLockBC(const astr& pRWLockName);
-	virtual ~RWLockBC();
-
-	virtual void AcquireRead() = 0;
-	virtual void AcquireWrite() = 0;
-	virtual void Release() = 0;
+	void AcquireRead();
+	void AcquireWrite();
+	void Release();
 
 	astr GetName();
 
 private:
 	astr mName;
+	void* mSystemRwLock;
 };
 
 
@@ -194,7 +184,7 @@ private:
 	size_t mThreadHandle;
 	size_t mThreadId;
 
-	SemaphoreBC* mSemaphore;
+	Semaphore mSemaphore;
 
 	logclass();
 };

@@ -103,22 +103,15 @@ PosixLock::~PosixLock()
 void PosixLock::Acquire()
 {
 	::pthread_mutex_lock(&mMutex);
-	Reference();
 }
 
 bool PosixLock::TryAcquire()
 {
-	bool lAcquired = (::pthread_mutex_trylock(&mMutex) == 0);
-	if (lAcquired)
-	{
-		Reference();
-	}
-	return (lAcquired);
+	return (::pthread_mutex_trylock(&mMutex) == 0);
 }
 
 void PosixLock::Release()
 {
-	Dereference();
 	::pthread_mutex_unlock(&mMutex);
 }
 
@@ -251,28 +244,27 @@ void PosixSemaphore::Signal()
 
 
 
-PosixRWLock::PosixRWLock(const astr& pRWLockName):
-	RWLockBC(pRWLockName)
+PosixRwLock::PosixRwLock()
 {
 	::pthread_rwlock_init(&mReadWriteLock, 0);
 }
 
-PosixRWLock::~PosixRWLock()
+PosixRwLock::~PosixRwLock()
 {
 	::pthread_rwlock_destroy(&mReadWriteLock);
 }
 
-void PosixRWLock::AcquireRead()
+void PosixRwLock::AcquireRead()
 {
 	::pthread_rwlock_rdlock(&mReadWriteLock);
 }
 
-void PosixRWLock::AcquireWrite()
+void PosixRwLock::AcquireWrite()
 {
 	::pthread_rwlock_wrlock(&mReadWriteLock);
 }
 
-void PosixRWLock::Release()
+void PosixRwLock::Release()
 {
 	::pthread_rwlock_unlock(&mReadWriteLock);
 }

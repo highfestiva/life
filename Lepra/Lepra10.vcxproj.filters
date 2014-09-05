@@ -341,10 +341,16 @@
     <ClInclude Include="Include\LepraOS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Lock.h">
+    <ClInclude Include="Include\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Logger.h">
+    <ClInclude Include="Include\TcpMuxSocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SocketAddressGetter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\FastLock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -607,6 +613,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TcpMuxSocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

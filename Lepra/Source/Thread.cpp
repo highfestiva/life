@@ -6,13 +6,7 @@
 
 #include "pch.h"
 #include "../Include/Thread.h"
-#include "../Include/LepraAssert.h"
-#include "../Include/Lock.h"
-#include <stdio.h>
-#include "../Include/LepraTypes.h"
-#include "../Include/BusLock.h"
-#include "../Include/Timer.h"
-#include "../Include/Log.h"
+#include "../Include/FastLock.h"
 
 
 
@@ -68,17 +62,48 @@ void OwnedLock::Dereference()
 
 
 
-LockBC::LockBC()
+Lock::Lock():
+	mSystemLock(new FastLock)
 {
 }
 
-LockBC::~LockBC()
+Lock::~Lock()
 {
+	FastLock* lLock = (FastLock*)mSystemLock;
+	mSystemLock = 0;
+	delete lLock;
+}
+
+void Lock::Acquire()
+{
+	((FastLock*)mSystemLock)->Acquire();
+	Reference();
+}
+
+bool Lock::TryAcquire()
+{
+	bool lAcquired = ((FastLock*)mSystemLock)->TryAcquire();
+	if (lAcquired)
+	{
+		Reference();
+	}
+	return lAcquired;
+}
+
+void Lock::Release()
+{
+	Dereference();
+	((FastLock*)mSystemLock)->Release();
+}
+
+void Lock::operator=(const Lock&)
+{
+	deb_assert(false);
 }
 
 
 
-ScopeLock::ScopeLock(LockBC* pLock) :
+ScopeLock::ScopeLock(Lock* pLock):
 	mLock(pLock)
 {
 	mLock->Acquire();
@@ -102,36 +127,96 @@ void ScopeLock::Release()
 
 
 
-ConditionBC::ConditionBC()
+Condition::Condition():
+	mSystemCondition(new FastCondition)
 {
 }
 
-ConditionBC::~ConditionBC()
+Condition::~Condition()
 {
+	FastCondition* lCondition = (FastCondition*)mSystemCondition;
+	mSystemCondition = 0;
+	delete lCondition;
+}
+
+void Condition::Wait()
+{
+	((FastCondition*)mSystemCondition)->Wait();
+}
+
+bool Condition::Wait(float64 pMaxWaitTime)
+{
+	return ((FastCondition*)mSystemCondition)->Wait(pMaxWaitTime);
+}
+
+void Condition::Signal()
+{
+	((FastCondition*)mSystemCondition)->Signal();
+}
+
+void Condition::SignalAll()
+{
+	((FastCondition*)mSystemCondition)->SignalAll();
 }
 
 
-
-SemaphoreBC::SemaphoreBC()
+Semaphore::Semaphore():
+	mSystemSemaphore(new FastSemaphore)
 {
 }
 
-SemaphoreBC::~SemaphoreBC()
+Semaphore::~Semaphore()
 {
+	FastSemaphore* lSemaphore = (FastSemaphore*)mSystemSemaphore;
+	mSystemSemaphore = 0;
+	delete lSemaphore;
+}
+
+void Semaphore::Wait()
+{
+	((FastSemaphore*)mSystemSemaphore)->Wait();
+}
+
+bool Semaphore::Wait(float64 pMaxWaitTime)
+{
+	return ((FastSemaphore*)mSystemSemaphore)->Wait(pMaxWaitTime);
+}
+
+void Semaphore::Signal()
+{
+	((FastSemaphore*)mSystemSemaphore)->Signal();
 }
 
 
-
-RWLockBC::RWLockBC(const astr& pRWLockName) :
-	mName(pRWLockName)
+RwLock::RwLock(const astr& pRwLockName):
+	mName(pRwLockName),
+	mSystemRwLock(new FastRwLock)
 {
 }
 
-RWLockBC::~RWLockBC()
+RwLock::~RwLock()
 {
+	FastRwLock* lLock = (FastRwLock*)mSystemRwLock;
+	mSystemRwLock = 0;
+	delete lLock;
 }
 
-astr RWLockBC::GetName()
+void RwLock::AcquireRead()
+{
+	((FastRwLock*)mSystemRwLock)->AcquireRead();
+}
+
+void RwLock::AcquireWrite()
+{
+	((FastRwLock*)mSystemRwLock)->AcquireWrite();
+}
+
+void RwLock::Release()
+{
+	((FastRwLock*)mSystemRwLock)->Release();
+}
+
+astr RwLock::GetName()
 {
 	return mName;
 }
@@ -144,8 +229,7 @@ Thread::Thread(const astr& pThreadName):
 	mStopRequested(false),
 	mSelfDestruct(false),
 	mThreadHandle(0),
-	mThreadId(0),
-	mSemaphore(new Semaphore)
+	mThreadId(0)
 {
 }
 
@@ -158,8 +242,6 @@ Thread::~Thread()
 			Kill();
 		}
 	}
-	delete mSemaphore;
-	mSemaphore = 0;
 }
 
 void Thread::InitializeMainThread()
@@ -257,7 +339,7 @@ void Thread::RunThread()
 {
 	SetThreadId(GetCurrentThreadId());
 	SetRunning(true);
-	mSemaphore->Signal();
+	mSemaphore.Signal();
 	YieldCpu();
 	Run();
 	SetRunning(false);

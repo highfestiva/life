@@ -8,7 +8,6 @@
 #pragma warning(disable: 4505)	// Crappy warning from STL/MSVC.
 
 #include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/Lock.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/OrderedMap.h"
 #include "../../Tbc/Include/ChunkyClass.h"
@@ -468,7 +467,7 @@ private:
 	ResourceMapList mLoadedList;		// Loaded by worker thread, worker thread will injected into the system at end of tick.
 	ResourceArray mPostLoadDeleteArray;	// Currently loading, or probably loading, worker thread will delete on next iteration.
 	ResourceSet mResourceSafeLookup;	// Data owner for Resource*.
-	Lock* mZipLock;
+	Lock mZipLock;
 	ZipArchive* mZipFile;
 
 	logclass();

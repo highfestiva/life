@@ -42,7 +42,7 @@ void Explosion::FallApart(Tbc::PhysicsManager* pPhysicsManager, Cure::CppContext
 		}
 		if (lGeometry->GetJointType() == Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE)
 		{
-			if (pObject->GetClass()->IsPhysRoot(x))
+			if (!lGeometry->GetParent())
 			{
 				pPhysicsManager->DetachToDynamic(lGeometry->GetBodyId(), lGeometry->GetMass());
 			}
