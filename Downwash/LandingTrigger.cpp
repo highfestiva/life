@@ -38,6 +38,10 @@ void LandingTrigger::DidTrigger(Cure::ContextObject* pBody)
 	{
 		GetManager()->AddGameAlarmCallback(this, 0, mBulletTimeDuration, 0);
 	}
+	else
+	{
+		mAllowBulletTime = true;
+	}
 }
 
 void LandingTrigger::OnAlarm(int pAlarmId, void* pExtraData)

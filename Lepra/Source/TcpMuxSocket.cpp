@@ -108,7 +108,7 @@ TcpVSocket* TcpMuxSocket::Accept()
 
 TcpVSocket* TcpMuxSocket::PollAccept()
 {
-	HiResTimer lTime;
+	HiResTimer lTime(false);
 	TcpVSocket* lTcpSocket = 0;
 	size_t lPendingSocketCount = mPendingConnectIdMap.GetCountSafe();
 	for (size_t x = 0; !lTcpSocket && x < lPendingSocketCount; ++x)
@@ -375,7 +375,7 @@ void TcpMuxSocket::AcceptThreadEntry()
 		if (lSocket)
 		{
 			log_atrace("Received a connect.");
-			HiResTimer lTime;
+			HiResTimer lTime(false);
 			ScopeLock lLock(&mIoLock);
 			mPendingConnectIdMap.PushBack(lSocket, lTime);
 			mAcceptSemaphore.Signal();
@@ -514,7 +514,7 @@ int TcpVSocket::Receive(void* pData, int pMaxSize, bool pDatagram)
 
 int TcpVSocket::Receive(void* pData, int pMaxSize, double pTimeout, bool pDatagram)
 {
-	HiResTimer lTimer;
+	HiResTimer lTimer(false);
 	int lReceiveCount;
 	do
 	{
@@ -580,7 +580,7 @@ DualSocket* DualMuxSocket::Connect(const SocketAddress& pTargetAddress, const st
 	if (lTcpConnector.Start() && lUdpConnector.Start())
 	{
 		// Wait for both connectors to finish.
-		HiResTimer lTime;
+		HiResTimer lTime(false);
 		lConnectedSemaphore.Wait(pTimeout);
 		lConnectedSemaphore.Wait(pTimeout - lTime.PopTimeDiff());
 		lUdpConnector.Join();
@@ -882,7 +882,7 @@ void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 	if (!pSocket->GetTcpSocket() || !pSocket->GetUdpSocket())
 	{
 		log_atrace("Adding a not-yet-fully-connected DualSocket to 'pending dual' list.");
-		mPendingDualConnectMap.PushBack(pSocket, HiResTimer());
+		mPendingDualConnectMap.PushBack(pSocket, HiResTimer(false));
 	}
 	else
 	{

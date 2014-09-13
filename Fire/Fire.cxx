@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "../Cure/Include/RuntimeVariable.h"
+#include "../Lepra/Include/LepraOS.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
 #include "../Life/LifeApplication.h"

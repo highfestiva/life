@@ -792,6 +792,10 @@ class MeshWriter(ChunkyWriter):
 			uvs = node.get_fixed_attribute("rguv", optional=True)
 			if uvs and options.options.verbose:
 				print("Mesh %s has a total UV float count of %i and a total vertex float count of %i." % (node.getFullName(), len(uvs), len(vs)))
+				if options.options.super_verbose:
+					print('UVs:')
+					pairwise = lambda xs: zip(xs[::2], xs[1::2])
+					[print('  %6.2f %6.2f' % (x,y)) for x,y in pairwise(uvs)]
 			textureuvs = [(CHUNK_MESH_UV, uvs)] if uvs else []
 			texture_uvs_per_vertex = [(CHUNK_MESH_UVS_PER_VERTEX, uvs_per_vertex)] if uvs_per_vertex != 2 else []
 			inner_data = primitive+volatility+casts_shadows+shadow_deviation+two_sided+recv_shadows+verts+polys+normals+textureuvs+texture_uvs_per_vertex

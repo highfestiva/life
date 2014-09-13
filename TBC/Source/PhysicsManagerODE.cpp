@@ -398,8 +398,12 @@ bool PhysicsManagerODE::AddMass(BodyID pStaticBody, BodyID pMainBody)
 		deb_assert(false);
 		return (false);
 	}
+	if (!lStaticObject->mMass)	// No point in trying to add flyweight trigger.
+	{
+		return false;
+	}
 	dBodyID lBodyId = lMainObject->mBodyID;
-	if (!lBodyId || !lStaticObject->mMass)
+	if (!lBodyId)
 	{
 		deb_assert(false);
 		return (false);

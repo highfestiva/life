@@ -38,6 +38,7 @@ namespace Life
 
 
 const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
+const int ID_OWNERSHIP_LOAN_EXPIRES = 1;
 
 
 
@@ -333,8 +334,8 @@ void GameServerManager::LoanObject(Client* pClient, Cure::GameObjectId pInstance
 				GetNetworkServer()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
 					Cure::MessageNumber::INFO_GRANT_LOAN, pInstanceId, (float)lEndFrame);
 				lObject->SetBorrowerInstanceId(pClient->GetAvatarId());
-				GetContext()->CancelPendingAlarmCallbacksById(lObject, Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES);
-				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES, lServerOwnershipTime, 0);
+				GetContext()->CancelPendingAlarmCallbacksById(lObject, ID_OWNERSHIP_LOAN_EXPIRES);
+				GetContext()->AddAlarmExternalCallback(lObject, Cure::ContextManager::AlarmExternalCallback(this, &GameServerManager::OnIdOwnershipExpired), ID_OWNERSHIP_LOAN_EXPIRES, lServerOwnershipTime, 0);
 			}
 		}
 	}
@@ -552,7 +553,7 @@ void GameServerManager::IndicatePosition(const vec3 pPosition, float pTime)
 	Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 	lObject->SetInitialTransform(xform(gIdentityQuaternionF, pPosition));
 	lObject->StartLoading();
-	DeleteContextObjectDelay(lObject, pTime);
+	GetContext()->DelayKillObject(lObject, pTime);
 }
 
 
@@ -1180,17 +1181,10 @@ void GameServerManager::SendDetach(Cure::ContextObject* pObject1, Cure::ContextO
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-void GameServerManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData)
+void GameServerManager::OnIdOwnershipExpired(int, Cure::ContextObject* pObject, void*)
 {
-	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
-	{
-		pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-		pObject->SetBorrowerInstanceId(0);
-	}
-	else
-	{
-		Parent::OnAlarm(pAlarmId, pObject, pExtraData);
-	}
+	pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	pObject->SetBorrowerInstanceId(0);
 }
 
 void GameServerManager::HandleWorldBoundaries()

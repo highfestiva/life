@@ -394,6 +394,8 @@ public:
 	virtual ~ResourceManager();
 	bool InitDefault();
 	void StopClear();
+	void SetLoadIntermission(double pLoadIntermission);
+	void SetInjectTimeLimit(double pInjectTimeLimit);
 
 	File* QueryFile(const str& pFilename);
 	bool QueryFileExists(const str& pFilename);
@@ -469,6 +471,8 @@ private:
 	ResourceSet mResourceSafeLookup;	// Data owner for Resource*.
 	Lock mZipLock;
 	ZipArchive* mZipFile;
+	double mInjectTimeLimit;
+	double mLoadIntermission;
 
 	logclass();
 };

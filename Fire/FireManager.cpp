@@ -469,7 +469,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 		Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		lObject->SetInitialTransform(xform(gIdentityQuaternionF, lTargetPosition));
 		lObject->StartLoading();
-		DeleteContextObjectDelay(lObject, 1.5f);
+		GetContext()->DelayKillObject(lObject, 1.5f);
 	}
 
 	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), _T("rocket"), mUiManager, this);
@@ -631,7 +631,7 @@ str FireManager::StepLevel(int pCount)
 	int lLevelNumber = GetCurrentLevelNumber();
 	lLevelNumber += pCount;
 	str lNewLevelName = StoreLevelIndex(lLevelNumber);
-	DeleteContextObjectDelay(mLevel, 0);
+	GetContext()->PostKillObject(mLevel->GetInstanceId());
 	{
 		ScopeLock lLock(GetTickLock());
 		mKillLimit = 4+4*lLevelNumber;

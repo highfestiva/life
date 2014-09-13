@@ -64,7 +64,6 @@ public:
 	virtual bool IsObjectRelevant(const vec3& pPosition, float pDistance) const;
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
 	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
-	virtual void DeleteContextObjectDelay(Cure::ContextObject* pObject, float pDelay);
 	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	virtual ContextObject* CreateLogicHandler(const str& pType);
 	virtual Spawner* GetAvatarSpawner(Cure::GameObjectId pLevelId) const;
@@ -79,7 +78,6 @@ public:
 	virtual bool IsServer() = 0;
 	virtual void SendAttach(ContextObject* pObject1, unsigned pId1, ContextObject* pObject2, unsigned pId2) = 0;
 	virtual void SendDetach(ContextObject* pObject1, ContextObject* pObject2) = 0;
-	virtual void OnAlarm(int pAlarmId, ContextObject* pObject, void* pExtraData);
 
 	bool ValidateVariable(int pSecurityLevel, const str& pVariable, str& pValue) const;
 

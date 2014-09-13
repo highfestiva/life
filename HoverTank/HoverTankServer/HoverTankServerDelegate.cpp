@@ -565,7 +565,7 @@ void HoverTankServerDelegate::DrainHealth(Cure::ContextObject* pExplosive, Cure:
 void HoverTankServerDelegate::Die(Cure::ContextObject* pAvatar)
 {
 	Life::Explosion::FallApart(mGameServerManager->GetPhysicsManager(), (Cure::CppContextObject*)pAvatar);
-	mGameServerManager->DeleteContextObjectDelay(pAvatar, 2);
+	mGameServerManager->GetContext()->DelayKillObject(pAvatar, 2);
 	mGameServerManager->BroadcastNumberMessage(0, true, Cure::MessageNumber::INFO_FALL_APART, pAvatar->GetInstanceId(), 0);
 }
 

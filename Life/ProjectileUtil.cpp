@@ -130,7 +130,7 @@ void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated,
 		}
 		else if (pDeleteDelay > 0)
 		{
-			pGrenade->GetManager()->GetGameManager()->DeleteContextObjectDelay(pGrenade, pDeleteDelay);
+			pGrenade->GetManager()->DelayKillObject(pGrenade, pDeleteDelay);
 		}
 	}
 }

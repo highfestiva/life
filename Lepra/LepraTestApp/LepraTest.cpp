@@ -42,6 +42,7 @@
 #include "../Include/SpinLock.h"
 #include "../Include/String.h"
 #include "../Include/SystemManager.h"
+#include "../Include/TcpMuxSocket.h"
 #include "../Include/Timer.h"
 #include "../Include/Transformation.h"
 
@@ -282,7 +283,8 @@ bool TestString(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("JSON coder");
-		const str lC = _T("åäöabcÅÄÖACQñï");
+		const wstr lWC = _WIDE("åäöabcÅÄÖACQñï");
+		const str lC = strutil::Encode(lWC);
 		const str lJson = _T("\"\\u00E5\\u00E4\\u00F6abc\\u00C5\\u00C4\\u00D6ACQ\\u00F1\\u00EF\"");
 		const str lJsonString = JsonString::ToJson(lC);
 		lTestOk = (lJsonString == lJson);
@@ -322,7 +324,7 @@ bool TestRandom(const LogDecorator& pAccount)
 		{
 			lContext = _T("uniform mean");
 			lAverage /= cnt;
-			lTestOk = (lAverage >= 1.24 && lAverage <= 1.26);
+			lTestOk = (lAverage >= 1.23 && lAverage <= 1.27);
 			deb_assert(lTestOk);
 		}
 	}
@@ -348,7 +350,7 @@ bool TestRandom(const LogDecorator& pAccount)
 		{
 			lContext = _T("normal distribuion");
 			const double lActualStdDev = Math::CalculateDeviation<double>(lValues, lMean);
-			lTestOk = (lActualStdDev >= lStdDev-0.03 && lActualStdDev <= lStdDev+0.03);
+			lTestOk = (lActualStdDev >= lStdDev-0.04 && lActualStdDev <= lStdDev+0.04);
 			deb_assert(lTestOk);
 		}
 	}
@@ -1207,7 +1209,7 @@ bool TestTimers(const LogDecorator& pAccount)
 	{
 		lContext = _T("timer");
 		Thread::Sleep(0.001);	// Bail early on cpu time slice.
-		HiResTimer lHiTimer;
+		HiResTimer lHiTimer(false);
 		Timer lLoTimer;
 		Thread::Sleep(0.100);
 		const double lHiTime = lHiTimer.QueryTimeDiff();
@@ -2444,6 +2446,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 					LEPRA_MEASURE_SCOPE(Wait(0));
 					lCondition.Wait(0);
 				}
+				lThread.Join();	// Ensure thread terminates before condition is destroyed.
 			}
 
 			{

@@ -1201,7 +1201,7 @@ void UdpVSocket::SetReceiverFollowupActive(bool pActive)
 bool UdpVSocket::WaitAvailable(double pTimeout)
 {
 	const Thread* lCurrentThread = Thread::GetCurrentThread();
-	HiResTimer lTimer;
+	HiResTimer lTimer(false);
 	while (GetAvailable() == 0 && lTimer.QueryTimeDiff() < pTimeout &&
 		!lCurrentThread->GetStopRequest() && !SystemManager::GetQuitRequest())
 	{

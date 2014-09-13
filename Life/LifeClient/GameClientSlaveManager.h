@@ -120,7 +120,7 @@ protected:
 	bool IsServer();
 	void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
-	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
+	void OnIdOwnershipExpired(int, Cure::ContextObject* pObject, void*);
 	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 

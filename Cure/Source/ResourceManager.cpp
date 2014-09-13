@@ -516,7 +516,9 @@ ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
 	mLoaderThreadCount(pLoaderThreadCount),
 	mPathPrefix(SystemManager::GetDataDirectory()),
 	mLoaderThread("ResourceLoader"),
-	mZipFile(new ZipArchive)
+	mZipFile(new ZipArchive),
+	mInjectTimeLimit(0.01),
+	mLoadIntermission(0.01)
 {
 	if (mZipFile->OpenArchive(mPathPrefix + _T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
 	{
@@ -640,6 +642,16 @@ void ResourceManager::StopClear()
 	// These just contain pointers, they are not data owners. Thus no delete required.
 	mRequestLoadList.RemoveAll();
 	mLoadedList.RemoveAll();
+}
+
+void ResourceManager::SetLoadIntermission(double pLoadIntermission)
+{
+	mLoadIntermission = pLoadIntermission;
+}
+
+void ResourceManager::SetInjectTimeLimit(double pInjectTimeLimit)
+{
+	mInjectTimeLimit = pInjectTimeLimit;
 }
 
 
@@ -1093,7 +1105,7 @@ void ResourceManager::InjectResourceLoop()
 		{
 			++x;
 		}
-		if (lTimer.QueryTimeDiff() > 0.01)	// Time's up, have a go later.
+		if (lTimer.QueryTimeDiff() > mInjectTimeLimit)	// Time's up, have a go later.
 		{
 			break;
 		}
@@ -1143,9 +1155,10 @@ void ResourceManager::ThreadLoaderLoop()
 	{
 		LoadSingleResource();
 		// Smooth out loads, so all the heavy lifting won't end up in a single frame.
-		if (mRequestLoadList.GetCount() < 20)
+		size_t lCount = mRequestLoadList.GetCount();
+		if (lCount > 0 && lCount < 50)
 		{
-			Thread::Sleep(0.01);
+			Thread::Sleep(mLoadIntermission);
 		}
 		mLoadSemaphore.Wait();
 	}

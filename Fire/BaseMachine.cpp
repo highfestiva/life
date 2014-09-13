@@ -55,7 +55,7 @@ void BaseMachine::OnAlarm(int pAlarmId, void* pExtraData)
 	{
 		Life::Explosion::Freeze(mManager->GetGameManager()->GetPhysicsManager(), this);
 		SetSinking(12/SINK_TIME);
-		mManager->GetGameManager()->DeleteContextObjectDelay(this, SINK_TIME);
+		mManager->DelayKillObject(this, SINK_TIME);
 	}
 }
 

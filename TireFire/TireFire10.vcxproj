@@ -332,6 +332,10 @@
     <ClInclude Include="VehicleElevator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Tbc\Tbc10.vcxproj">
+      <Project>{BDBF3606-E371-454B-B162-27FD92B67D50}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\Cure\Cure10.vcxproj">
       <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
     </ProjectReference>

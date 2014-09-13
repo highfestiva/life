@@ -7,6 +7,7 @@
 #include "../../Lepra/Include/LepraAssert.h"
 #include "../../Cure/Include/Cure.h"
 #include "../../Lepra/Include/Application.h"
+#include "../../Lepra/Include/LepraOS.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/LogListener.h"
 #include "../../Lepra/Include/Socket.h"

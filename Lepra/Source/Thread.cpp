@@ -165,6 +165,11 @@ Semaphore::Semaphore():
 {
 }
 
+Semaphore::Semaphore(unsigned pMaxCount):
+	mSystemSemaphore(new FastSemaphore(pMaxCount))
+{
+}
+
 Semaphore::~Semaphore()
 {
 	FastSemaphore* lSemaphore = (FastSemaphore*)mSystemSemaphore;

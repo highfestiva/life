@@ -76,19 +76,23 @@ vec3 Autopilot::GetSteering()
 	mClosestPathDistance = GetClosestPathDistance(lTowards, mClosestPathPosition);
 	vec3 lAim = mClosestPathPosition - lTowards;
 	vec3 lAimNear(0, 0, ::std::max(lAim.z, 0.0f));
-	const float lSpeedLimit = (mPath->GetDistanceLeft() < 20.0f) ? 4.0f : 60.0f;
-	if (lSpeedLimit < 30.0f && (-lVelocity.x<0) == (lAim.x<0))
+	const bool lGoingWrongWay = (lVelocity*lAim <= 0);
+	const float lSpeedLimit = (lGoingWrongWay || mPath->GetDistanceLeft() < 20.0f) ? 4.0f : 60.0f;
+	if (!lGoingWrongWay)
 	{
 		lAimNear.x = lAim.x;
 	}
 	lAim = Math::Lerp(lAim, lAimNear-lVelocity, std::min(1.0f, lVelocity.GetLength()/lSpeedLimit));
 
 	// Brake before upcoming drops.
-	const float lTime = mPath->GetCurrentInterpolationTime();
-	GetClosestPathDistance(mLastAvatarPosition + lVelocity*AHEAD_TIME*20, mClosestPathPosition);
-	const vec3 lUpcomingSlope = mPath->GetSlope().GetNormalized();
-	mPath->GotoAbsoluteTime(lTime);
-	lAim.x += Math::Lerp(-15.0f, -50.0f, ::fabs(lUpcomingSlope.z)) * lUp.x;
+	if (mClosestPathDistance < 20)
+	{
+		const float lTime = mPath->GetCurrentInterpolationTime();
+		GetClosestPathDistance(mLastAvatarPosition + lVelocity*AHEAD_TIME*20, mClosestPathPosition);
+		const vec3 lUpcomingSlope = mPath->GetSlope().GetNormalized();
+		mPath->GotoAbsoluteTime(lTime);
+		lAim.x += Math::Lerp(-15.0f, -50.0f, ::fabs(lUpcomingSlope.z)) * lUp.x;
+	}
 	// End braking before drops.
 
 	lAim.x = Math::Clamp(lAim.x, -0.9f, +0.9f);

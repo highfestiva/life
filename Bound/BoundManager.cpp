@@ -1094,7 +1094,7 @@ int BoundManager::StepLevel(int pCount)
 			break;
 		}
 		mBalls.pop_back();
-		DeleteContextObjectDelay(lBall, 0.1f);
+		GetContext()->DelayKillObject(lBall, 0.1f);
 	}
 	v_set(GetVariableScope(), RTVAR_GAME_LEVEL, lLevelNumber);
 	v_set(GetVariableScope(), RTVAR_GAME_SCORE, (double)lPreviousScore);

@@ -238,11 +238,6 @@ void GameManager::DeleteContextObject(GameObjectId pInstanceId)
 	mContext->DeleteObject(pInstanceId);
 }
 
-void GameManager::DeleteContextObjectDelay(ContextObject* pObject, float pDelay)
-{
-	mContext->AddGameAlarmCallback(pObject, ContextManager::SYSTEM_ALARM_ID_KILL, pDelay, 0);
-}
-
 void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
 	pObject->SetNetworkObjectType(pNetworkType);
@@ -306,15 +301,6 @@ void GameManager::OnStopped(ContextObject* pObject, Tbc::PhysicsManager::BodyID 
 	{
 		log_volatile(mLog.Debugf(_T("Object %u/%s stopped, sending position."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
 		GetContext()->AddPhysicsSenderObject(pObject);
-	}
-}
-
-void GameManager::OnAlarm(int pAlarmId, ContextObject* pObject, void* pExtraData)
-{
-	(void)pExtraData;
-	if (pAlarmId == ContextManager::SYSTEM_ALARM_ID_KILL)
-	{
-		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
 

@@ -392,10 +392,11 @@ bool Thread::GraceJoin(float64 pTimeOut)
 	if (GetThreadHandle() != 0)
 	{
 		deb_assert(GetThreadId() != GetCurrentThreadId());
+		const astr lThreadNameCopy(GetThreadName());
 		if (::WaitForSingleObject((HANDLE)GetThreadHandle(), (DWORD)(pTimeOut * 1000.0)) == WAIT_TIMEOUT)
 		{
 			// Possible dead lock...
-			mLog.Warningf((_T("Failed to join thread \"") + strutil::Encode(GetThreadName()) + _T("\"! Deadlock?")).c_str());
+			mLog.Warningf((_T("Failed to join thread \"") + strutil::Encode(lThreadNameCopy) + _T("\"! Deadlock?")).c_str());
 			return (false);	// RAII simplifies here.
 		}
 		if (GetThreadHandle())

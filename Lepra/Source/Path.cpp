@@ -186,18 +186,16 @@ bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
 			}
 			else
 			{
-				strutil::strvec::iterator z = y;
-				--z;
+				strutil::strvec::iterator z = y-1;
 				if (*z == _T(""))	// "/../" is illegal.
 				{
-					// TRICKY: returning here is much easier; path parsing is complex enough anyway.
-					return (false);
+					return false;
 				}
 				if (*z != _T(".."))	// "../../" should remain the same.
 				{
-					++y;
-					y = lDirectoryArray.erase(z, y);	// Drop this and parent directory ("a/../" -> "").
+					lDirectoryArray.erase(z, ++y);	// Drop this and parent directory ("a/../" -> "").
 					x -= 2;
+					y = lDirectoryArray.begin() + (x + 1);
 				}
 				else
 				{

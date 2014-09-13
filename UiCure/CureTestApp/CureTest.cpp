@@ -808,8 +808,8 @@ bool TestCure()
 	}
 	if (lTestOk)
 	{
-		TerrainTest lTerrainTest;
-		lTestOk = lTerrainTest.Test();
+		//TerrainTest lTerrainTest;
+		//lTestOk = lTerrainTest.Test();
 	}
 	if (lTestOk)
 	{

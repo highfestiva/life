@@ -109,6 +109,11 @@ void ContextManager::PostKillObject(GameObjectId pInstanceId)
 	mPostKillSet.insert(pInstanceId);
 }
 
+void ContextManager::DelayKillObject(ContextObject* pObject, float pSeconds)
+{
+	AddAlarmExternalCallback(pObject, AlarmExternalCallback(this, &ContextManager::OnDelayedDelete), 1, pSeconds, 0);
+}
+
 ContextObject* ContextManager::GetObject(GameObjectId pInstanceId, bool pForce) const
 {
 	ContextObjectTable::const_iterator x = mObjectTable.find(pInstanceId);
@@ -245,20 +250,20 @@ void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
 
 void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
-	deb_assert(pObject->GetInstanceId() != 0);
-	deb_assert(pObject->GetManager() == this);
-	deb_assert(GetObject(pObject->GetInstanceId(), true) == pObject);
-
-	ScopeLock lLock(&mAlarmMutex);
-	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
-	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
-	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
+	Alarm lAlarm(pObject, 0, pAlarmId, pExtraData);
+	DoAddAlarmCallback(lAlarm, pSeconds);
 }
 
 void ContextManager::AddGameAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
 	pSeconds /= ((const GameManager*)mGameManager)->GetTimeManager()->GetRealTimeRatio();
 	AddAlarmCallback(pObject, pAlarmId, pSeconds, pExtraData);
+}
+
+void ContextManager::AddAlarmExternalCallback(ContextObject* pObject, const AlarmExternalCallback& pCallback, int pAlarmId, float pSeconds, void* pExtraData)
+{
+	Alarm lAlarm(pObject, pCallback, 0, pAlarmId, pExtraData);
+	DoAddAlarmCallback(lAlarm, pSeconds);
 }
 
 void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
@@ -395,6 +400,23 @@ void ContextManager::HandlePostKill()
 
 
 
+void ContextManager::DoAddAlarmCallback(Alarm& pAlarm, float pSeconds)
+{
+	deb_assert(pAlarm.mObject->GetInstanceId() != 0);
+	deb_assert(pAlarm.mObject->GetManager() == this);
+	deb_assert(GetObject(pAlarm.mObject->GetInstanceId(), true) == pAlarm.mObject);
+
+	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
+	pAlarm.mFrameTime = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
+	ScopeLock lLock(&mAlarmMutex);
+	mAlarmCallbackObjectSet.insert(pAlarm);
+}
+
+void ContextManager::OnDelayedDelete(int, ContextObject* pObject, void*)
+{
+	PostKillObject(pObject->GetInstanceId());
+}
+
 void ContextManager::DispatchTickCallbacks()
 {
 	ContextObjectTable::iterator x = mTickCallbackObjectTable.begin();
@@ -443,13 +465,13 @@ void ContextManager::DispatchAlarmCallbacks()
 	for (std::list<Alarm>::iterator x = lCallbackList.begin(); x != lCallbackList.end(); ++x)
 	{
 		const Alarm& lAlarm = *x;
-		if (lAlarm.mAlarmId < SYSTEM_ALARM_ID)
+		if (lAlarm.mCallback.empty())
 		{
 			lAlarm.mObject->OnAlarm(lAlarm.mAlarmId, lAlarm.mExtraData);
 		}
 		else
 		{
-			mGameManager->OnAlarm(lAlarm.mAlarmId, lAlarm.mObject, lAlarm.mExtraData);
+			lAlarm.mCallback(lAlarm.mAlarmId, lAlarm.mObject, lAlarm.mExtraData);
 		}
 	}
 }

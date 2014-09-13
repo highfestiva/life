@@ -166,6 +166,8 @@ class GroupReader(DefaultMAReader):
 			print("Materials are incorrectly modelled! Terminating due to error.")
 			sys.exit(3)
 
+		self.validatemeshes(group)
+
 		#self.printnodes(group)
 
 		self.group = group
@@ -340,7 +342,7 @@ class GroupReader(DefaultMAReader):
 				uv = self._strattr2list(uv)
 				if options.options.verbose:
 					print("%s has UVs." % node.getFullName())
-				for x in range(1, len(uv), 3):
+				for x in range(1, len(uv), 2):
 					uv[x] = -uv[x]
 				node.fix_attribute("rguv", uv)
 
@@ -1159,6 +1161,13 @@ class GroupReader(DefaultMAReader):
 		return ok
 
 
+	def validatemeshes(self, group):
+		for m in group:
+			if not m.getName().startswith("m_"):
+				continue
+			mesh.validateverts(m)
+
+
 	def connectmeshandphys(self, allowTriggers, group):
 		for mesh in group:
 			if mesh.getName().startswith("m_"):
@@ -1603,9 +1612,11 @@ def _maimport(filename):
 def main():
 	usage = "usage: %prog [options] <filespec>\n" + \
 		"Reads filespec.ma and filespec.ini and writes some output chunky files."
-	parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
+	parser = optparse.OptionParser(usage=usage, version="%prog 0.2")
 	parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="make lots of noise")
+	parser.add_option("-s", "--super-verbose", action="store_true", dest="super_verbose", default=False, help="make humongous amount of noise")
 	options.options, options.args = parser.parse_args()
+	options.options.verbose = options.options.verbose or options.options.super_verbose
 
 	if len(options.args) < 1:
 		parser.error("no filebasename supplied")

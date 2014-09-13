@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "../../Lepra/Include/Unordered.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/IdManager.h"
@@ -30,12 +31,7 @@ class ContextManager
 {
 public:
 	typedef std::unordered_map<GameObjectId, ContextObject*> ContextObjectTable;
-	enum
-	{
-		SYSTEM_ALARM_ID = 1000,
-		SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES,
-		SYSTEM_ALARM_ID_KILL,
-	};
+	typedef fastdelegate::FastDelegate3<int,ContextObject*,void*,void> AlarmExternalCallback;
 
 	ContextManager(GameManager* pGameManager);
 	virtual ~ContextManager();
@@ -49,6 +45,7 @@ public:
 	virtual void RemoveObject(ContextObject* pObject);
 	bool DeleteObject(GameObjectId pInstanceId);
 	void PostKillObject(GameObjectId pInstanceId);
+	void DelayKillObject(ContextObject* pObject, float pSeconds);
 	ContextObject* GetObject(GameObjectId pInstanceId, bool pForce = false) const;
 	const ContextObjectTable& GetObjectTable() const;
 	void ClearObjects();
@@ -69,6 +66,7 @@ public:
 	void DisableMicroTickCallback(ContextObject* pObject);
 	void AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);
 	void AddGameAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);	// Scale time by RTR.
+	void AddAlarmExternalCallback(ContextObject* pObject, const AlarmExternalCallback& pCallback, int pAlarmId, float pSeconds, void* pExtraData);
 	void CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId);
 	void CancelPendingAlarmCallbacks(ContextObject* pObject);
 
@@ -80,10 +78,6 @@ public:
 	void HandlePostKill();
 
 private:
-	void DispatchTickCallbacks();
-	void DispatchMicroTickCallbacks(float pFrameTimeDelta);
-	void DispatchAlarmCallbacks();
-
 	typedef IdManager<GameObjectId> ObjectIdManager;
 	struct GameObjectIdRecycleInfo
 	{
@@ -100,6 +94,7 @@ private:
 	struct Alarm
 	{
 		ContextObject* mObject;
+		AlarmExternalCallback mCallback;
 		int mFrameTime;
 		int mAlarmId;
 		void* mExtraData;
@@ -111,9 +106,18 @@ private:
 			mExtraData(pExtraData)
 		{
 		}
+		inline Alarm(ContextObject* pObject, const AlarmExternalCallback& pCallback, int pFrameTime, int pAlarmId, void* pExtraData):
+			mObject(pObject),
+			mCallback(pCallback),
+			mFrameTime(pFrameTime),
+			mAlarmId(pAlarmId),
+			mExtraData(pExtraData)
+		{
+		}
 		inline bool operator<(const Alarm& pOther) const
 		{
 			return (mObject < pOther.mObject &&
+				mCallback < pOther.mCallback &&
 				mFrameTime < pOther.mFrameTime &&
 				mAlarmId < pOther.mAlarmId &&
 				mExtraData < pOther.mExtraData);
@@ -121,6 +125,7 @@ private:
 		inline bool operator==(const Alarm& pOther) const
 		{
 			return (mObject == pOther.mObject &&
+				mCallback == pOther.mCallback &&
 				mFrameTime == pOther.mFrameTime &&
 				mAlarmId == pOther.mAlarmId &&
 				mExtraData == pOther.mExtraData);
@@ -130,14 +135,20 @@ private:
 	{
 		inline size_t operator()(const Alarm& pAlarm) const
 		{
-			return (pAlarm.mFrameTime + pAlarm.mAlarmId +
-				(size_t)pAlarm.mObject);
+			const int f = pAlarm.mCallback.empty()? 5527 : 1;
+			return (pAlarm.mFrameTime + pAlarm.mAlarmId + (size_t)pAlarm.mObject) * f;
 		}
 	};
 	typedef std::unordered_set<Alarm, AlarmHasher> AlarmSet;
 	typedef std::unordered_map<Tbc::PhysicsManager::BodyID, ContextObject*> BodyTable;
 	typedef std::unordered_set<GameObjectId> IdSet;
 	typedef BodyTable::value_type BodyPair;
+
+	void OnDelayedDelete(int, ContextObject* pObject, void*);
+	void DoAddAlarmCallback(Alarm& pAlarm, float pSeconds);
+	void DispatchTickCallbacks();
+	void DispatchMicroTickCallbacks(float pFrameTimeDelta);
+	void DispatchAlarmCallbacks();
 
 	GameManager* mGameManager;
 

@@ -35,6 +35,10 @@ namespace Life
 
 
 
+const int ID_OWNERSHIP_LOAN_EXPIRES = 1;
+
+
+
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
@@ -1018,7 +1022,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 				const int lOwnershipFrames = GetTimeManager()->GetPhysicsFrameDelta((int)pFloat, GetTimeManager()->GetCurrentPhysicsFrame());
 				const float lOwnershipSeconds = GetTimeManager()->ConvertPhysicsFramesToSeconds(lOwnershipFrames-2);
 				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES, lOwnershipSeconds, 0);
+				GetContext()->AddAlarmExternalCallback(lObject, Cure::ContextManager::AlarmExternalCallback(this, &GameClientSlaveManager::OnIdOwnershipExpired), ID_OWNERSHIP_LOAN_EXPIRES, lOwnershipSeconds, 0);
 				log_volatile(mLog.Debugf(_T("Got control over object with ID %i for %f seconds."), pInteger, lOwnershipSeconds));
 			}
 		}
@@ -1174,19 +1178,12 @@ void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObjec
 	// Server manages this.
 }
 
-void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData)
+void GameClientSlaveManager::OnIdOwnershipExpired(int, Cure::ContextObject* pObject, void*)
 {
-	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID_OWNERSHIP_LOAN_EXPIRES)
-	{
-		deb_assert(IsOwned(pObject->GetInstanceId()));
-		mOwnedObjectList.erase(pObject->GetInstanceId());
-		pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-		pObject->DeleteNetworkOutputGhost();
-	}
-	else
-	{
-		Parent::OnAlarm(pAlarmId, pObject, pExtraData);
-	}
+	deb_assert(IsOwned(pObject->GetInstanceId()));
+	mOwnedObjectList.erase(pObject->GetInstanceId());
+	pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	pObject->DeleteNetworkOutputGhost();
 }
 
 void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id,

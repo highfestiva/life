@@ -35,7 +35,7 @@ void BaseMachine::OnDie()
 {
 	if (mIsDetonated)
 	{
-		//GetManager()->GetGameManager()->DeleteContextObjectDelay(this, 3.0);
+		//GetManager()->DelayKillObject(this, 3);
 		return;
 	}
 

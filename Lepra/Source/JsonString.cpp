@@ -114,7 +114,7 @@ str JsonString::FromJson(const str& pJsonString)
 							lUtf16String[lUtf16Index++] = (utf8::uint16_t)lValue;
 						}
 						x += 5;
-						if (x+6 > lEnd || *x != '\\' || *(x+1) != 'u')
+						if (x > lEnd-6 || *x != '\\' || *(x+1) != 'u')
 						{
 							--x;
 							break;

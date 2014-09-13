@@ -738,12 +738,12 @@ void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::Chunk
 		{
 			lNormalDeath = false;
 			mSlowmoTimer.TryStart();
-			DeleteContextObjectDelay(pExplosive, 6.5);
+			GetContext()->DelayKillObject(pExplosive, 6.5);
 		}
 	}
 	if (lNormalDeath)
 	{
-		DeleteContextObjectDelay(pExplosive, 3.0);
+		GetContext()->DelayKillObject(pExplosive, 3.0);
 	}
 	if (lIsAvatar)
 	{
@@ -1136,7 +1136,8 @@ void DownwashManager::TickUiInput()
 				}
 			}
 			// Pull the brakes a little bit.
-			const float lCurrentFlyingDirectionX = lObject->GetVelocity().x * 0.05f;
+			const vec3 v = lObject->GetVelocity();
+			const float lCurrentFlyingDirectionX = v.x * 0.05f;
 			lUserDirection.x = Math::Clamp(lUserDirection.x-lCurrentFlyingDirectionX, -1.0f, +1.0f);
 			// X follows helicopter yaw.
 			float lYaw, _;
@@ -1149,17 +1150,16 @@ void DownwashManager::TickUiInput()
 			// Kids' push engine.
 			if (mAutopilot)
 			{
-				const float f = std::min(1.0f, mAutopilot->GetRotorSpeed(lObject) / 14.0f);
+				float f = std::min(1.0f, mAutopilot->GetRotorSpeed(lObject) / 14.0f);
+				f /= 1+0.02f*v.GetLength();	// Reduce push at higher speeds or the chopper will spin out of control for some reson.
 				SetAvatarEnginePower(lObject,  9, lUserControls.x*f);
 				SetAvatarEnginePower(lObject, 11, Math::Lerp(-1.0f, 1.0f, lUserDirection.y*f));
 			}
-
-			// Control fire.
-			const Life::Options::FireControl& f = mOptions.GetFireControl();
-#define F(alt) f.mControl[Life::Options::FireControl::FIRE##alt]
+			const Life::Options::FireControl& fc = mOptions.GetFireControl();
+#define F(alt) fc.mControl[Life::Options::FireControl::FIRE##alt]
 			if (F(0) > 0.5f)
 			{
-				//AvatarShoot();
+				//lAvatar.Shoot();
 			}
 		}
 	}

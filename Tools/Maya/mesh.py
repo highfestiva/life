@@ -84,16 +84,21 @@ def splitverts_node(node, verbose=False):
 	if not ns:
 		return
 
-	dosplit = False
+	dosplit,nosplit = False,False
 	uvs_per_vertex = 2;
 	for parent in node.getparents():
 		nosplit = parent.get_fixed_attribute("nosplit", optional=True)
 		if nosplit:
 			if verbose: print("Not splitting mesh", node)
-			return
+			if dosplit:
+				print('Error: contradicting nosplit/dosplit instructions in %s hierarchy.' % parent.getName())
+				sys.exit(5)
 		dosplit = dosplit or parent.get_fixed_attribute("dosplit", optional=True)
 		if dosplit:
 			if verbose: print("Forced split on mesh", node)
+			if nosplit:
+				print('Error: contradicting nosplit/dosplit instructions in %s hierarchy.' % parent.getName())
+				sys.exit(5)
 		uvc = parent.get_fixed_attribute("uvs_per_vertex", optional=True, default=2)
 		if uvc != 2:
 			uvs_per_vertex = uvc
@@ -108,7 +113,7 @@ def splitverts_node(node, verbose=False):
 	if dosplit:
 		vs, ts, ns, uvs = forcesplitverts(vs, ts, ns, uvs)
 	else:
-		vs, ts, ns, uvs = joinsplitverts(vs, ts, ns, uvs)
+		vs, ts, ns, uvs = joinsplitverts(nosplit, vs, ts, ns, uvs)
 	if uvs_per_vertex != 2 and uvs:
 		newuvs = []
 		for i,s in enumerate(uvs):
@@ -152,7 +157,7 @@ def forcesplitverts(vs, ts, ns, uvs):
 	return verts, tris, normals, textureuvs
 
 
-def joinsplitverts(vs, ts, ns, uvs):
+def joinsplitverts(nosplit, vs, ts, ns, uvs):
 	if not ns:
 		return vs, ts, ns, uvs
 
@@ -197,31 +202,32 @@ def joinsplitverts(vs, ts, ns, uvs):
 			ns[x+2] *= f
 		x += 3
 
-	x = 0
-	ang_cmp = 40*math.pi/180
-	while x < end:
-		c = _normal(shared_indices[ts[x]][0], ns)
-		d = _textureuv(shared_indices[ts[x]][0], uvs)
-		split = []
-		for s in shared_indices[ts[x]][1:]:
-			#if _angle(c, _normal(s, ns)) > 40 or _uvdiff_sqr(d, _textureuv(s, uvs)) > 0.0001:
-			i = s*3
-			if _angle_fast(c, ns[i],ns[i+1],ns[i+2]) > ang_cmp or _uvdiff_sqr(d, _textureuv(s, uvs)) > 0.0001:
-				split += [s]
-		# Push all the once that we don't join together at the end.
-		if split:
-			new_index = len(vs)//3
-			v = _getvertex(vs, ts[x])
-			vs += v[:]
-			shared_indices += [[]]
-			for s in split:
-				shared_indices[ts[s]].remove(s)
-				ts[s] = new_index
-				shared_indices[ts[s]] += [s]
-			if len(shared_indices) != len(vs)/3:
-				print("Internal error: normals/UVs no longer corresponds to vertices!")
-				sys.exit(4)
-		x += 1
+	if not nosplit:
+		x = 0
+		ang_cmp = 40*math.pi/180
+		while x < end:
+			c = _normal(shared_indices[ts[x]][0], ns)
+			d = _textureuv(shared_indices[ts[x]][0], uvs)
+			split = []
+			for s in shared_indices[ts[x]][1:]:
+				#if _angle(c, _normal(s, ns)) > 40 or _uvdiff_sqr(d, _textureuv(s, uvs)) > 0.0001:
+				i = s*3
+				if _angle_fast(c, ns[i],ns[i+1],ns[i+2]) > ang_cmp or _uvdiff_sqr(d, _textureuv(s, uvs)) > 0.0001:
+					split += [s]
+			# Push all the once that we don't join together at the end.
+			if split:
+				new_index = len(vs)//3
+				v = _getvertex(vs, ts[x])
+				vs += v[:]
+				shared_indices += [[]]
+				for s in split:
+					shared_indices[ts[s]].remove(s)
+					ts[s] = new_index
+					shared_indices[ts[s]] += [s]
+				if len(shared_indices) != len(vs)/3:
+					print("Internal error: normals/UVs no longer corresponds to vertices!")
+					sys.exit(4)
+			x += 1
 
 	normals = [0.0]*len(vs)
 	textureuvs = None if not uvs else [0.0]*(len(vs)*2//3)
@@ -250,6 +256,41 @@ def joinsplitverts(vs, ts, ns, uvs):
 			except ZeroDivisionError:
 				pass
 	return vs, ts, normals, textureuvs
+
+
+def validateverts(node):
+	vs = node.get_fixed_attribute("rgvtx", optional=True)
+	ts = node.get_fixed_attribute("rgtri", optional=True)
+	ns = node.get_fixed_attribute("rgn", optional=True)
+	uvs = node.get_fixed_attribute("rguv", optional=True)
+	if not vs and not ts:
+		return
+	if len(vs)%3 != 0 or len(ts)%3 != 0:
+		print('Internal error: %s has %i vertex floats and %i triangle indices.' % (node.getName(), len(vs), len(ts)))
+		sys.exit(5)
+	if ns:
+		if len(ns)%3 != 0:
+			print('Internal error: %s has %i normal floats.' % (node.getName(), len(ns)))
+			sys.exit(5)
+		if len(vs) != len(ns):
+			print('Internal error: %s has %i vertices and %i normals (and %i triangle indices).' % (node.getName(), len(vs)//3, len(ns)//3, len(ts)))
+			sys.exit(5)
+	if uvs:
+		if len(uvs)%2 != 0:
+			print('Internal error: %s has %i UV floats.' % (node.getName(), len(uvs)))
+			sys.exit(5)
+		if len(uvs)*3/2 != len(vs):
+			print('Internal error: %s has %i UVs and %i vertices.' % (node.getName(), len(uvs)//2,len(vs)//3))
+			sys.exit(5)
+	if len(ts) < len(vs)/3:
+		print('Internal error: %s has does not index all vertices (%f%% at most).' % (node.getName(), len(ns)*3/len(vs)))
+		sys.exit(5)
+	unused = [True] * (len(vs)//3)
+	for i in ts:
+		unused[i] = False
+	if list(filter(None, unused)):
+		print('Internal error: %s has does not index all vertices (vertex %i for instance not used).' % (node.getName(), unused.index(True)))
+		sys.exit(5)
 
 
 def centerverts(group, bodies, verbose):

@@ -177,7 +177,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("semaphore wait timeout - 1");
-		HiResTimer lTimer;
+		HiResTimer lTimer(false);
 		lTestOk = !gThreadTestSemaphore.Wait(0.5);
 		deb_assert(lTestOk);
 		lTimer.UpdateTimer();

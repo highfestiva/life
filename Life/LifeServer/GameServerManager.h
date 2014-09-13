@@ -109,7 +109,7 @@ protected:
 	bool IsServer();
 	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
-	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
+	void OnIdOwnershipExpired(int, Cure::ContextObject* pObject, void*);
 	virtual void HandleWorldBoundaries();
 
 	virtual Cure::ContextObject* CreateLogicHandler(const str& pType);

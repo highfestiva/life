@@ -75,6 +75,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HoverTank", "..\HoverTank\H
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bound", "..\Bound\Bound10.vcxproj", "{76132DC6-5C5F-11E3-BCA8-0019213B7B87}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BDBF3606-E371-454B-B162-27FD92B67D50} = {BDBF3606-E371-454B-B162-27FD92B67D50}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fire", "..\Fire\Fire10.vcxproj", "{C0BA93B4-79DA-11E3-B6FB-0019213B7B87}"
 EndProject

@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "../Cure/Include/RuntimeVariable.h"
+#include "../Lepra/Include/LepraOS.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../Life/LifeServer/MasterServerConnection.h"
 #include "../Life/LifeApplication.h"
@@ -130,6 +131,7 @@ void Downwash::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
+	v_override(UiCure::GetSettings(), RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);

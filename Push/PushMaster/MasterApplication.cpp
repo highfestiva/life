@@ -5,6 +5,7 @@
 
 
 #include "pch.h"
+#include "../../Lepra/Include/LepraOS.h"
 #include "../../Lepra/Include/LogLevel.h"
 #include "../../Life/LifeMaster/MasterServer.h"
 #include "../../Life/LifeApplication.h"
