@@ -269,7 +269,7 @@ void Level::CreatePhysicsMesh(Tbc::PhysicsManager* pPhysicsManager)
 		mBodyIndexData[x] = mGfxMesh->GetIndexData()[x];
 	}
 	mPhysMeshBodyId = pPhysicsManager->CreateTriMesh(true, mGfxMesh->GetVertexCount(), mGfxMesh->GetVertexData(),
-		mGfxMesh->GetTriangleCount(), mBodyIndexData, xform(), lFriction, lBounce, GetInstanceId());
+		mGfxMesh->GetTriangleCount(), mBodyIndexData, xform(), 0, Tbc::PhysicsManager::STATIC, lFriction, lBounce, GetInstanceId());
 }
 
 void Level::AddPhysicsWindowBox(Tbc::PhysicsManager* pPhysicsManager, const Plane& pPlane)

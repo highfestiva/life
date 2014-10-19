@@ -7,6 +7,7 @@
 #pragma once
 
 #include "LepraAssert.h"
+#include "LepraTypes.h"
 #include <cmath>
 #include <vector>
 
@@ -42,6 +43,11 @@ public:
 	inline static float Eps() { return 1e-34f; }
 	inline static float FullEps() { return 1e-7f; }
 	inline static float Pi() { return 3.1415926535897932384626433832795028841971693993751f; }
+	inline static bool IsNan(float fl)
+	{
+		const uint32 u = *(uint32*)&fl;
+		return (u&0x7F800000) == 0x7F800000 && (u&0x7FFFFF);	// Both NaN and qNan.
+	}
 };
 
 template<>
@@ -51,6 +57,11 @@ public:
 	inline static double Eps() { return 1e-300; }
 	inline static double FullEps() { return 1e-16f; }
 	inline static double Pi() { return 3.1415926535897932384626433832795028841971693993751; }
+	inline static bool IsNan(double d)
+	{
+		const uint64 u = *(uint64*)&d;
+		return (u&LEPRA_ULONGLONG(0x7FF0000000000000)) == LEPRA_ULONGLONG(0x7FF0000000000000) && (u&LEPRA_ULONGLONG(0xFFFFFFFFFFFFF));
+	}
 };
 
 

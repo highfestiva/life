@@ -443,10 +443,8 @@ bool PhysicsManagerODE::AddMass(BodyID pStaticBody, BodyID pMainBody)
 	return true;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned pVertexCount,
-	const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,
-	const xform& pTransform, float32 pFriction, float32 pBounce,
-	int pForceListenerId)
+PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,
+	const xform& pTransform, float32 pMass, BodyType pType, float32 pFriction, float32 pBounce, int pForceListenerId)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
@@ -467,10 +465,26 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned p
 
 //	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
 
-	// TODO: add body approximation (sphere).
+	vec3 lRadius;
+	for (unsigned x = 0; x < pVertexCount; ++x)
+	{
+		lRadius += vec3(pVertices[x*3+0], pVertices[x*3+0], pVertices[x*3+0]);
+	}
+	const float lAverageRadius = lRadius.GetLength()/pVertexCount;
+	if (pType == PhysicsManager::DYNAMIC)
+	{
+		dMass lMass;
+		::dMassSetSphereTotal(&lMass, (dReal)pMass, (dReal)lAverageRadius);
+		lObject->mBodyID = dBodyCreate(mWorldID);
+		::dBodySetMass(lObject->mBodyID, &lMass);
+		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
+		::dBodySetAutoDisableDefaults(lObject->mBodyID);
+		::dBodySetAngularDampingThreshold(lObject->mBodyID, 200.0f);
+		::dBodySetAngularDamping(lObject->mBodyID, 0.2f);
+	}
 
-	lObject->mGeometryData[0] = 1.0f;	// TODO: approximate sphere radius by calculating average vertex distance.
-	lObject->mMass = 1.0f;	// TODO: add mass to interface when/if suitable.
+	lObject->mGeometryData[0] = lAverageRadius;
+	lObject->mMass = pMass;
 	lObject->mFriction = -pFriction;
 	lObject->mBounce = pBounce;
 
@@ -3256,18 +3270,10 @@ void PhysicsManagerODE::RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 
 		return;
 	}
 
-	const dReal* lAVel = dBodyGetAngularVel(((Object*)pBodyId)->mBodyID);
+	::dBodySetMaxAngularSpeed(((Object*)pBodyId)->mBodyID, pMaxAngularSpeed);
+
 	const dReal* lLVel = dBodyGetLinearVel(((Object*)pBodyId)->mBodyID);
-
-	float32 lASpeed = lAVel[0] * lAVel[0] + lAVel[1] * lAVel[1] + lAVel[2] * lAVel[2];
 	float32 lLSpeed = lLVel[0] * lLVel[0] + lLVel[1] * lLVel[1] + lLVel[2] * lLVel[2];
-
-	if (lASpeed > pMaxAngularSpeed * pMaxAngularSpeed)
-	{
-		float32 k = pMaxAngularSpeed / sqrtf(lASpeed);
-		dBodySetAngularVel(((Object*)pBodyId)->mBodyID, lAVel[0] * k, lAVel[1] * k, lAVel[2] * k);
-	}
-
 	if (lLSpeed > pMaxSpeed * pMaxSpeed)
 	{
 		float32 k = pMaxSpeed / sqrtf(lLSpeed);
@@ -3389,9 +3395,9 @@ void PhysicsManagerODE::DoForceFeedback()
 		//const bool lOneIsDynamic = (!lIsBody1Static || !lIsBody2Static);
 		if (lJointInfo->mListenerId1 != lJointInfo->mListenerId2 /*&& lOneIsDynamic*/)
 		{
+			const dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 			if (lJointInfo->mListenerId1 != 0)
 			{
-				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 				mForceFeedbackCallback->OnForceApplied(
 					lJointInfo->mListenerId1,
 					lJointInfo->mListenerId2,
@@ -3404,7 +3410,6 @@ void PhysicsManagerODE::DoForceFeedback()
 			}
 			if (lJointInfo->mListenerId2 != 0)
 			{
-				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 				if (lIsBody1Static || lIsBody2Static)	// Only a single force/torque pair set?
 				{
 					mForceFeedbackCallback->OnForceApplied(

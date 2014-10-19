@@ -146,8 +146,8 @@ public:
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,
 		unsigned pTriangleCount, const Lepra::uint32* pIndices,
-		const xform& pTransform, float32 pFriction = 1,
-		float32 pBounce = 0, int pForceListenerId = 0) = 0;
+		const xform& pTransform, float32 pMass, BodyType pType,
+		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
 
 	virtual bool IsStaticBody(BodyID pBodyId) const = 0;
 

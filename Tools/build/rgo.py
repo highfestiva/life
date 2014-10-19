@@ -430,6 +430,14 @@ def _getmethods():
 	methods = list(filter(lambda n: not (n.startswith('_') or n.startswith('get')), methods))
 	return methods
 
+def _runlocal(script, args):
+	if os.path.exists(appnames[0]+'/script/'+script+'.py'):
+		os.chdir(appnames[0]+'/Data')
+		rgohelp._run([sys.executable, '-OO', '../script/'+script+'.py'], ' '.join([script]+args))
+		os.chdir('../..')
+		return True
+	return False
+
 
 #-------------------- High-level build stuff below. --------------------
 
@@ -550,10 +558,10 @@ def _main():
 		try:
 			arg = args[0]
 			args = args[1:]
-			exec(arg+"()")
+			if not _runlocal(arg, args):
+				exec(arg+"()")
 		except NameError as e:
 			print("Error: no such command %s!" % arg)
-			print(e)
 			suggestions = []
 			import difflib
 			for name in _getmethods():

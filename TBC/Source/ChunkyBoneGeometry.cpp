@@ -668,12 +668,12 @@ ChunkyBoneMesh::~ChunkyBoneMesh()
 }
 
 bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	int pForceListenerId, PhysicsManager::BodyType,
+	int pForceListenerId, PhysicsManager::BodyType pType,
 	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
-		pTransform, mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
+		pTransform, mBodyData.mMass, pType, mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);
 }
 

@@ -3,14 +3,15 @@ Event callbacks: ticks and timers. Fix so no specialcasing for alarms are needed
 Use immutability to keep things organized!
 Get unit tests running again.
 Fix texturing, which I broke during migration to Maya 2014.
+-Move default settings into application-specific class.
+-Convert GameManager, etc., into components instead of a inheritance frameworks. These components should have default behaviours, which can be overriden.
+-Convert ConsoleManager, etc., into components instead of inheritance frameworks.
+-Don't allow ConsoleManager to crash. (E.g. running "set-player-count" without a starting "yield".)
+-Move game state handling from game manager to other classes: logo renderer, menu renderer, game, preview, explanation...
 
 ----
 
-Move default settings into application-specific class.
-Convert GameManager, etc., into components instead of a inheritance frameworks. These components should have default behaviours, which can be overriden.
-Convert ConsoleManager, etc., into components instead of inheritance frameworks.
-Don't allow ConsoleManager to crash. (E.g. running "set-player-count" without a starting "yield".)
-Move game state handling from game manager to other classes: logo renderer, menu renderer, game, preview, explanation...
+Support using multiple physics managers and renderer. Probably involves using multiple GameTickers...
 Init physics and mesh from memory. No resource sharing for those two! Might create resources for gfx card uploading and easy tracking?
 Fix separate environments: one for physics editor/menu, another for game. Peuh!
 

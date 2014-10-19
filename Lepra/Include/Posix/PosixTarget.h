@@ -32,9 +32,6 @@
 
 #define SOCKET_LAST_ERROR()			errno
 
-#define LEPRA_LONGLONG(x)			x ## LL
-#define LEPRA_ULONGLONG(x)			x ## ULL
-
 
 
 #if defined(__cplusplus)
