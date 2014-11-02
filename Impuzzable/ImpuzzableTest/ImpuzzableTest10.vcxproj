@@ -27,9 +27,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>Impuzzable</ProjectName>
-    <ProjectGuid>{74FDED7E-57D9-11E4-8E65-BCEE7B8C67B1}</ProjectGuid>
-    <RootNamespace>Impuzzable</RootNamespace>
+    <ProjectName>ImpuzzableTest</ProjectName>
+    <ProjectGuid>{74FDED7E-57D9-11E4-8E65-BCCB7B8C67B1}</ProjectGuid>
+    <RootNamespace>ImpuzzableTest</RootNamespace>
     <Keyword>ManagedCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -110,27 +110,25 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\..\ThirdParty\dx</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(DXSDK_DIR)Lib\x86;$(LibraryPath);$(SolutionDir)..\..\ThirdParty\dx</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -140,7 +138,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>false</GenerateMapFile>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
@@ -148,16 +146,14 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_CONSOLE;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>
       </DebugInformationFormat>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -165,7 +161,7 @@
       <AdditionalLibraryDirectories>$(LEPRA_DX)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateMapFile>false</GenerateMapFile>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">
@@ -173,15 +169,13 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -190,23 +184,21 @@
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -216,7 +208,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>false</GenerateMapFile>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">
@@ -224,16 +216,14 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_CONSOLE;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>
       </DebugInformationFormat>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -242,7 +232,7 @@
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">
@@ -250,15 +240,13 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WIN32;_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Netapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -267,7 +255,7 @@
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -285,96 +273,59 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Tbc\Tbc10.vcxproj">
+    <ProjectReference Include="..\..\Tbc\Tbc10.vcxproj">
       <Project>{BDBF3606-E371-454B-B162-27FD92B67D50}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\Cure\Cure10.vcxproj">
+    <ProjectReference Include="..\..\Cure\Cure10.vcxproj">
       <Project>{6dbf3606-e311-454b-b162-27fd92b67d53}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\Lepra\Lepra10.vcxproj">
+    <ProjectReference Include="..\..\Lepra\Lepra10.vcxproj">
       <Project>{e7dda722-45e3-45c9-b051-e99288accdd2}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\freealut-1.1.0\admin\VisualStudioDotNET\alut\alut10.vcxproj">
+    <ProjectReference Include="..\..\ThirdParty\freealut-1.1.0\admin\VisualStudioDotNET\alut\alut10.vcxproj">
       <Project>{07149bcb-be8a-4503-be18-815d64233116}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\openal-soft-1.10.622\OpenAL_10.vcxproj">
+    <ProjectReference Include="..\..\ThirdParty\openal-soft-1.10.622\OpenAL_10.vcxproj">
       <Project>{00e79e9d-7870-4921-9022-9ad4951bc225}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\ThirdPartyLib_10.vcxproj">
+    <ProjectReference Include="..\..\ThirdParty\ThirdPartyLib_10.vcxproj">
       <Project>{00f89e9d-7870-4921-9022-9ad4951bc224}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\UiCure\UiCure10.vcxproj">
+    <ProjectReference Include="..\..\UiCure\UiCure10.vcxproj">
       <Project>{6dbf3606-e311-454b-b162-27fd92b67d54}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\UiLepra\UiLepra10.vcxproj">
+    <ProjectReference Include="..\..\UiLepra\UiLepra10.vcxproj">
       <Project>{e7dda722-45e3-45c9-b051-e99288accdd3}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\UiTbc\UiTbc10.vcxproj">
+    <ProjectReference Include="..\..\UiTbc\UiTbc10.vcxproj">
       <Project>{bdbf3606-e371-454b-b162-27fd92b67d51}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\Life\Life10.vcxproj">
+    <ProjectReference Include="..\..\Life\Life10.vcxproj">
       <Project>{3c64c2e1-43ef-49c2-9d3c-1c698bcfdcaa}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\Life\LifeClient\LifeClient10.vcxproj">
+    <ProjectReference Include="..\..\Life\LifeClient\LifeClient10.vcxproj">
       <Project>{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD9B}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AsciiLoader.cpp" />
-    <ClCompile Include="Impuzzable.cxx">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ImpuzzableConsoleManager.cpp" />
-    <ClCompile Include="ImpuzzableManager.cpp" />
-    <ClCompile Include="ImpuzzableTicker.cpp" />
-    <ClCompile Include="Level.cpp" />
-    <ClCompile Include="Piece.cpp" />
-    <ClCompile Include="PieceInfo.cpp" />
-    <ClCompile Include="Sunlight.cpp" />
+    <ClCompile Include="..\PieceInfo.cpp" />
+    <ClCompile Include="..\AsciiLoader.cpp" />
+    <ClCompile Include="ImpuzzableTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AsciiLoader.h" />
-    <ClInclude Include="Grid.h" />
-    <ClInclude Include="Piece.h" />
-    <ClInclude Include="Impuzzable.h" />
-    <ClInclude Include="ImpuzzableConsoleManager.h" />
-    <ClInclude Include="ImpuzzableManager.h" />
-    <ClInclude Include="ImpuzzableTicker.h" />
-    <ClInclude Include="Level.h" />
-    <ClInclude Include="PieceInfo.h" />
-    <ClInclude Include="RtVar.h" />
-    <ClInclude Include="Sunlight.h" />
-    <ClInclude Include="Version.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Impuzzable.mm">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Impuzzable.rc" />
+    <ClInclude Include="..\PieceInfo.h" />
+    <ClInclude Include="..\AsciiLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

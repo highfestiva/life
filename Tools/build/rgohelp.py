@@ -10,6 +10,7 @@ import sys
 vcver = 10
 NMAKE = "bin/nmake.exe"
 VCBUILD = "vcpackages/vcbuild.exe"
+NETBUILD = r'C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe'
 pause_on_error = False
 
 
@@ -81,13 +82,20 @@ def _getmake(builder):
 			if not os.path.exists(dirname):
 				print("GOT HERE!", dirname)
 				return None	# Visual Studio might be installed, but not VC++.
-		make_exe = '"'+os.path.join(dirname, builder)+'"'
+		make_exe = os.path.join(dirname, builder)
 		if dirname.find("Studio 10.0") > 0:	vcver = 10
 		elif dirname.find("Studio 9") > 0:	vcver = 9
 		elif dirname.find("Studio 8") > 0:	vcver = 8
 		else:
 			print("Unknown MSVC version!")
 			sys.exit(1)
+		if vcver >= 10 and builder == VCBUILD:
+			make_exe = NETBUILD
+		if not os.path.exists(make_exe):
+			print('Could not find %s.' % make_exe)
+			make_exe = None
+		#else:
+		#	make_exe = '"'+make_exe+'"'
 	elif os.path.exists("/bin/make"):
 		make_exe = "/bin/make"
 	elif os.path.exists("/usr/bin/make"):
@@ -109,6 +117,19 @@ def _hasdevenv(verbose=False):
 		print("Warning: no C++ development environment detected.")
 	return hasit
 
+def fixbuildcmd(args):
+	if vcver >= 10:
+		vc10a = { '/useenv':'/p:useenv=true', '/rebuild':'/t:rebuild', '/clean':'/t:clean', '/M2':'/M:2', '/M4':'/M:4' }
+		def r(a):
+			try:	return vc10a[a]
+			except: return a
+		args,a = [],[r(a) for a in args]
+		for b in a:
+			if '|' in b:
+				args += '/p:configuration={} /p:platform={}'.format(*b.split('|')).split()
+			else:
+				args += [b]
+	return args
 
 def _run(cmdlist, when):
 	path = None

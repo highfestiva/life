@@ -175,9 +175,13 @@ void StdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 		case LEVEL_FATAL:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED;	break;
 	}
 	::SetConsoleTextAttribute(lStdOut, lAttributes);
-	DWORD lNumChars = (DWORD)pFullMessage.length();
 	DWORD lCharsWritten = 0;
-	::WriteConsole(lStdOut, pFullMessage.c_str(), lNumChars, &lCharsWritten, NULL);
+#ifdef LEPRA_UNICODE
+	::WriteConsoleW(lStdOut, pFullMessage.c_str(), (DWORD)pFullMessage.length(), &lCharsWritten, NULL);
+#else
+	const wstr w = wstrutil::Encode(pFullMessage);
+	::WriteConsoleW(lStdOut, w.c_str(), (DWORD)w.length(), &lCharsWritten, NULL);
+#endif // UTF-16/UTF-8
 
 	// Restore normal text color.
 	lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
@@ -274,7 +278,12 @@ void DebuggerLogListener::WriteLog(const str& pFullMessage, LogLevel)
 {
 #if !defined(NO_LOG_DEBUG_INFO)
 #if defined(LEPRA_WINDOWS)
-	OutputDebugString((_T(">>>")+pFullMessage).c_str());
+#ifdef LEPRA_UNICODE
+	OutputDebugStringW((_T(">>>")+pFullMessage).c_str());
+#else
+	const wstr w = wstrutil::Encode(">>>"+pFullMessage);
+	OutputDebugStringW(w.c_str());
+#endif // UTF-16/UTF-8
 #elif defined(LEPRA_MAC)
 	MacLog::Write(_T(">>>")+pFullMessage);
 #else // !Windows

@@ -76,18 +76,21 @@ def _buildcode(command, buildtype):
 	projext = "900" if ver == 9 else "10";
 	if command == "build":
 		_buildext()
-		if osname == "Windows":	args = [make, "/useenv", "/M2", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
+		if osname == "Windows":	args = [make, "/useenv", "/M4", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
 		else:			args = [make]
 		what = "incremental building code"
 	elif command == "rebuild":
 		_buildext()
-		if osname == "Windows": args = [make, "/useenv", "/M2", "/rebuild", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
+		if osname == "Windows": args = [make, "/useenv", "/M4", "/rebuild", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
 		else:			args = [make, "clean", "all"]
 		what = "rebuilding code"
 	elif command == "clean":
 		if osname == "Windows": args = [make, "/useenv", "/clean", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
 		else:			args = [make, "clean"]
 		what = "cleaning code"
+	print(args)
+	args = rgohelp.fixbuildcmd(args)
+	print(args)
 	if osname == "Windows":
 		os.chdir("Life")
 	rgohelp._run(args, what)

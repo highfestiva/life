@@ -35,6 +35,12 @@
     <ClCompile Include="Piece.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PieceInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AsciiLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Impuzzable.h">
@@ -67,11 +73,14 @@
     <ClInclude Include="Grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PieceInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AsciiLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Impuzzable.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ToDo.txt" />
   </ItemGroup>
 </Project>
