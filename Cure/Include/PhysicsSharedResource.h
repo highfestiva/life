@@ -48,16 +48,17 @@ public:
 
 	ResourceLoadState InjectPostProcess();
 
-private:
 	void ReleasePhysics();
 	const str GetType() const;
 	bool IsReferenceType() const;
+	ClassResource* GetParent() const;
 
 	bool Load();
 	ResourceLoadState PostProcess();
 	bool FinalizeInit();
 	void OnLoadClass(ClassResource*);
 
+private:
 	ClassResource* mClassResource;
 	PhysicsSharedInitData mInitData;
 	ResourceLoadState mPhysicsLoadState;

@@ -60,6 +60,7 @@ public:
 
 	Tbc::GeometryBase* GetMesh(int pIndex) const;
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
+	void AddMeshResource(Tbc::GeometryBase* pMesh);
 	void CenterMeshes();
 	virtual void UpdateMaterial(int pMeshIndex);
 	void SetPostLoadMaterialDelegate(const PostLoadMaterialDelegate& pDelegate);

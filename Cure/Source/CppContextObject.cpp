@@ -142,6 +142,34 @@ Tbc::ChunkyPhysics* CppContextObject::GetPhysics() const
 	return (0);
 }
 
+void CppContextObject::CreatePhysics(Tbc::ChunkyPhysics* pPhysics)
+{
+	deb_assert(mPhysicsResource == 0);
+	static int lPhysicsCounter = 0;
+	str lPhysicsName = strutil::Format(_T("TestPhysics%i"), lPhysicsCounter);
+	str lPhysicsRefName = lPhysicsName+_T("Ref");
+	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
+		mManager->GetGameManager()->GetPhysicsManager(), mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
+	UserPhysicsReferenceResource* lPhysicsRef = mPhysicsResource;
+	PhysicsSharedResource* lPhysicsRefResource = (PhysicsSharedResource*)lPhysicsRef->CreateResource(GetResourceManager(), lPhysicsRefName);
+	lPhysicsRef->SetResource(lPhysicsRefResource);
+	Cure::UserResource::LoadCallback lCallbackCast;
+	lCallbackCast.SetMemento(UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics).GetMemento());
+	lPhysicsRefResource->AddCaller(lPhysicsRef, lCallbackCast);
+	PhysicsSharedResource::ClassResource* lPhysics = lPhysicsRefResource->GetParent();
+	PhysicsResource* lPhysicsResource = (PhysicsResource*)lPhysics->CreateResource(GetResourceManager(), lPhysicsName);
+	lPhysicsResource->SetIsUnique(true);
+	lPhysics->SetResource(lPhysicsResource);
+	lPhysicsResource->SetRamDataType(pPhysics);
+	Tbc::ChunkyPhysics* lCopy = new Tbc::ChunkyPhysics(*pPhysics);
+	lPhysicsRefResource->SetRamDataType(lCopy);
+	lPhysicsResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// Handle pushing to physics engine in postprocessing by some other thread at a later stage.
+	lPhysicsRefResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// We're waiting for the root resource to get loaded.
+	GetResourceManager()->AddLoaded(lPhysics);
+	GetResourceManager()->AddLoaded(lPhysicsRef);
+}
+
 const Tbc::ChunkyClass* CppContextObject::GetClass() const
 {
 	if (mClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)

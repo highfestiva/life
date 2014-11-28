@@ -38,7 +38,7 @@ void PhysicsSharedInitData::operator=(const PhysicsSharedInitData&)
 
 PhysicsSharedResource::PhysicsSharedResource(ResourceManager* pManager, const str& pName, const PhysicsSharedInitData& pInitData):
 	Parent(pManager, pName),
-	mClassResource(0),
+	mClassResource(new ClassResource),
 	mInitData(pInitData),
 	mPhysicsLoadState(RESOURCE_UNLOADED)
 {
@@ -91,20 +91,19 @@ bool PhysicsSharedResource::IsReferenceType() const
 	return true;
 }
 
+PhysicsSharedResource::ClassResource* PhysicsSharedResource::GetParent() const
+{
+	return mClassResource;
+}
+
 
 
 bool PhysicsSharedResource::Load()
 {
-	bool lOk = (mClassResource == 0);
-	deb_assert(lOk);
-	if (lOk)
-	{
-		const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
-		deb_assert(lFilename != GetName());
-		mClassResource = new ClassResource;
-		mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this, &PhysicsSharedResource::OnLoadClass));
-	}
-	return lOk;
+	const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
+	deb_assert(lFilename != GetName());
+	mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this, &PhysicsSharedResource::OnLoadClass));
+	return true;
 }
 
 ResourceLoadState PhysicsSharedResource::PostProcess()

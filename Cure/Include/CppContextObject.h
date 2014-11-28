@@ -32,6 +32,7 @@ public:
 	void SetAllowNetworkLogic(bool pAllow);
 
 	Tbc::ChunkyPhysics* GetPhysics() const;
+	void CreatePhysics(Tbc::ChunkyPhysics* pPhysics);
 	virtual const Tbc::ChunkyClass* GetClass() const;
 	const Tbc::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>* pTriggerIndexArray = 0) const;
 	virtual void SetTagIndex(int pIndex);

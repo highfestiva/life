@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
-
 import codecs
 from collections import UserList
 from copy import deepcopy
 from vec3 import vec3
 
 
+GRID = 0.5
+HALFGRID = 0.5
 W2E, NW2SE, N2S, NE2SW, E2W, SE2NW, S2N, SW2NE, F2B, B2F, NORMAL_COUNT = range(11)
 chars = ' X><^v`´,/|*ltrb'
 square_triangles =	[	[[False,False],[False,False]],
@@ -49,7 +49,7 @@ class Shape:
 						self.triangles[z][y*2  ][x*2+1]	= ts[0][1]
 						self.triangles[z][y*2+1][x*2]	= ts[1][0]
 						self.triangles[z][y*2+1][x*2+1]	= ts[1][1]
-	def chars(self):
+	def __iter__(self):
 		cs = []
 		for z,tlayer in enumerate(self.triangles):
 			layer = []
@@ -61,7 +61,7 @@ class Shape:
 						[self.triangles[z][y*2+1][x*2], self.triangles[z][y*2+1][x*2+1]],  ]
 					row += _tris2ch(ts)
 				layer.append(row)
-		return cs
+		return iter(cs)
 	def __str__(self):
 		return shape2str(self)
 
@@ -102,14 +102,6 @@ def _drop_empty_head_tail(chars):
 			chars = chars[:-1]
 	return chars
 
-def _get_topmost_tri(shape):
-	for z,layer in enumerate(shape.triangles):
-		for y,row in enumerate(layer):
-			for x,t in enumerate(row):
-				if t:
-					return vec3(x,y,z)
-	return None
-
 
 def tricnt(shape):
 	return shape.tricnt
@@ -122,9 +114,9 @@ def hastri(shape,crd):
 
 
 def idx2crd(size,idx):
-	z = idx/(size.x*size.y)
+	z = idx//(size.x*size.y)
 	idx %= size.x*size.y
-	y = idx/size.x
+	y = idx//size.x
 	x = idx%size.x
 	return vec3(x,y,z)
 
@@ -133,6 +125,27 @@ def addtri(shape,crd):
 
 def droptri(shape,crd):
 	_settri(shape,crd,False)
+
+def get_topmost_tri(shape):
+	for z,layer in enumerate(shape.triangles):
+		for y,row in enumerate(layer):
+			for x,t in enumerate(row):
+				if t:
+					return vec3(x,y,z)
+
+def get_tri_crds(shape):
+	for z,layer in enumerate(shape.triangles):
+		for y,row in enumerate(layer):
+			for x,t in enumerate(row):
+				if t:
+					yield vec3(x,y,z)
+def get_tri_pos(crd):
+	cube = vec3(crd.x//2,crd.y//2,crd.z)
+	px,py = crd.x%2,crd.y%2
+	if px == 0 and py == 0: return W2E,cube
+	if px == 1 and py == 0: return N2S,cube
+	if px == 0 and py == 1: return S2N,cube
+	if px == 1 and py == 1: return E2W,cube
 
 def merge_shapes(from_shape, to_shape):
 	for z in range(from_shape.size.z):
@@ -197,7 +210,7 @@ def get_layer_holes(shape):
 def get_split_shapes(shape):
 	parts = []
 	while True:
-		crd = _get_topmost_tri(shape)
+		crd = get_topmost_tri(shape)
 		if not crd:
 			break
 		parts += [flood_fill_move(crd,shape)]
@@ -268,33 +281,43 @@ def new_shape(size):
 def clone_shape(shape):
 	return Shape(shape)
 
-def crop_chars(chars):
+def unify_chars(chars, crop):
 	tallest_layer = max(len(layer) for layer in chars)
 	longest_line = max(len(row) for layer in chars for row in layer)
 	chars = [layer+['']*(tallest_layer-len(layer)) for layer in chars]	# Make all layers equally tall.
 	chars = [[line.ljust(longest_line) for line in layer] for layer in chars]	# Make all rows equally long.
-	chars = _drop_empty_head_tail(chars)		# Drop empty layers in front and back.
-	xpose = _drop_empty_head_tail(zip(*chars))	# Transpose layers ('deep' instead of 'high'), drop empty rows on top and bottom.
-	xpose = [[''.join(s) for s in zip(*layer)] for layer in zip(*xpose)]	# Transpose back to front-to-back layers, then turn rows into columns.
-	xpose = _drop_empty_head_tail(zip(*xpose))	# Transform to place all columns together, drop empty left-most columns.
-	chars = [[''.join(s) for s in zip(*cols)] for cols in zip(*xpose)]	# Transform back to layers, columns turn back into rows.
+	if crop:
+		chars = _drop_empty_head_tail(chars)		# Drop empty layers in front and back.
+		xpose = _drop_empty_head_tail(zip(*chars))	# Transpose layers ('deep' instead of 'high'), drop empty rows on top and bottom.
+		xpose = [[''.join(s) for s in zip(*layer)] for layer in zip(*xpose)]	# Transpose back to front-to-back layers, then turn rows into columns.
+		xpose = _drop_empty_head_tail(zip(*xpose))	# Transform to place all columns together, drop empty left-most columns.
+		chars = [[''.join(s) for s in zip(*cols)] for cols in zip(*xpose)]	# Transform back to layers, columns turn back into rows.
 	return chars
 
 
-def load_shape(ascii):
-	chars = []	# List of layers.
+def load_shapes(ascii, crop=True):
+	return load_shapes_from_file(codecs.open(ascii+'.txt', encoding='utf-8'), crop)
+
+def load_shapes_from_file(f, crop):
+	shapes = []
+	shape = []	# List of layers.
 	layer = []	# List of strings. One string per row.
-	for line in codecs.open(ascii+'.txt', encoding='utf-8'):
-		line = line.rstrip()
-		if '---' in line:
-			chars += [layer]
+	for line in f:
+		line = line.rstrip() if crop else line.rstrip('\r\n')
+		if '~~~' in line:
+			shape += [layer]
+			shapes += [shape]
+			shape,layer = [],[]
+		elif '---' in line:
+			shape += [layer]
 			layer = []
 		else:
 			layer += [line.rstrip('\n')]
-	chars += [layer]
-	return Shape(crop_chars(chars))
+	shape += [layer]
+	shapes += [shape]
+	return [Shape(unify_chars(shape,crop)) for shape in shapes]
 
 
 def shape2str(shape):
 	splitter = '\n' + '-'*max(3,shape.size.x//2) + '\n'
-	return splitter.join(['\n'.join(layer) for layer in shape.chars()])
+	return splitter.join(['\n'.join(layer) for layer in shape])

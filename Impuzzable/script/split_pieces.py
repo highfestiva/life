@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import asc
 import random
@@ -86,20 +87,21 @@ def open_cage(p, ps):
 				free2move = True
 				break
 		if not free2move:
-			print('These two pieces would be stuck (splitting):')
-			print(p)
-			print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-			print(shape)
+			# print('These two pieces would be stuck (splitting):')
+			# print(p)
+			# print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+			# print(shape)
 			idx = ps.index(p)
 			ps.remove(p)
 			[ps.insert(idx+i,t) for i,t in enumerate(take_piece(p))]
 			return True
 	return False
 
-def split_parts(txtfile, partcnt):
-	shape = asc.load_shape(txtfile)
-	before_tricnt = asc.tricnt(shape)
-	ts = [shape]
+def split_pieces(txtfile, partcnt):
+	ts = asc.load_shapes(txtfile)
+	if len(ts) != 1:
+		raise ValueError('One shape expected in the file %s, but %i found.' % (txtfile,len(ts)))
+	before_tricnt = asc.tricnt(ts[0])
 	while len(ts) < partcnt:
 		p = list(sorted(ts, key=lambda s:asc.tricnt(s), reverse=True))[0]
 		ts.remove(p)
@@ -129,5 +131,6 @@ def split_parts(txtfile, partcnt):
 		raise ValueError('The number of triangles was %i, but is now %i' % (before_tricnt,after_tricnt))
 	return ts
 
-ts = split_parts('level', 2)
-print('\n~~~~~~~~~~~~~~~~~~\n'.join([asc.shape2str(t) for t in ts]))
+if __name__ == '__main__':
+	ts = split_pieces('level', 2)
+	print('\n~~~~~~~~~~~~~~~~~~\n'.join([asc.shape2str(t) for t in ts]))

@@ -1,25 +1,14 @@
-/*
-	Class:  MemberThread
-	Author: Jonas Byström
-	Copyright (c) Pixel Doctrine
 
-	NOTES:
+// Author: Jonas Byström
+// Copyright (c) Pixel Doctrine
 
-	The MemberThread template does not require inheritance to
-	start a thread in a member method:
-
-	MemberThread<ThisClass> x;
-	x.Start(this, Thread1Start);
-	MemberThread<ThisClass> y;
-	y.Start(this, Thread2Start);
-*/
+// The MemberThread template does not require inheritance to start a thread in a member method:
+//	MemberThread<ThisClass> x;
+//	x.Start(this, &ThisClass::MyThreadedMethod);
 
 
 
-#ifndef LEPRA_MEMBERTHREAD_H
-#define LEPRA_MEMBERTHREAD_H
-
-
+#pragma once
 
 #include "LepraAssert.h"
 #include "Thread.h"
@@ -89,7 +78,3 @@ template<class _Base, class _Object> void MemberThread<_Base, _Object>::Run()
 
 
 }
-
-
-
-#endif // !LEPRA_MEMBERTHREAD_H

@@ -801,6 +801,16 @@ void ResourceManager::LoadUnique(const str& pName, UserResource* pUserResource, 
 	StartLoad(lResource);
 }
 
+void ResourceManager::AddLoaded(UserResource* pUserResource)
+{
+	deb_assert(pUserResource->GetLoadState() != RESOURCE_LOAD_ERROR);
+	ScopeLock lLock(&mThreadLock);
+	Resource* lResource = pUserResource->GetResource();
+	lResource->Reference();
+	mResourceSafeLookup.insert(lResource);
+	mLoadedList.PushBack(lResource, lResource);
+}
+
 void ResourceManager::SafeRelease(UserResource* pUserResource)
 {
 	Resource* lResource = pUserResource->GetResource();

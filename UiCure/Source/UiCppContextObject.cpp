@@ -305,6 +305,34 @@ UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) con
 	return (0);
 }
 
+void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh)
+{
+	static int lMeshCounter = 0;
+	int lPhysIndex = 0;
+	str lMeshName = strutil::Format(_T("TestMesh%i"), lMeshCounter);
+	str lMeshRefName = lMeshName+_T("Ref");
+	xform lTransform;
+	float lScale = 2;
+	// Create through instancing (only way supported for CppObjects currently.
+	UserGeometryReferenceResource* lGeometryRef = new UserGeometryReferenceResource(
+		mUiManager, GeometryOffset(lPhysIndex, lTransform, lScale));
+	GeometryReferenceResource* lGeometryRefResource = (GeometryReferenceResource*)lGeometryRef->CreateResource(GetResourceManager(), lMeshRefName);
+	lGeometryRef->SetResource(lGeometryRefResource);
+	Cure::UserResource::LoadCallback lCallbackCast;
+	lCallbackCast.SetMemento(UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh).GetMemento());
+	lGeometryRefResource->AddCaller(lGeometryRef, lCallbackCast);
+	GeometryReferenceResource::ClassResource* lGeometry = lGeometryRefResource->GetParent();
+	GeometryResource* lGeometryResource = (GeometryResource*)lGeometry->CreateResource(GetResourceManager(), lMeshName);
+	lGeometryResource->SetIsUnique(true);
+	lGeometry->SetResource(lGeometryResource);
+	lGeometryResource->SetRamDataType(pMesh);
+	lGeometryResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// Handle pushing to gfx card in postprocessing by some other thread at a later stage.
+	lGeometryRefResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// We're waiting for the root resource to get loaded.
+	GetResourceManager()->AddLoaded(lGeometry);
+	GetResourceManager()->AddLoaded(lGeometryRef);
+	mMeshResourceArray.push_back(lGeometryRef);
+}
+
 void CppContextObject::CenterMeshes()
 {
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
@@ -323,8 +351,14 @@ void CppContextObject::CenterMeshes()
 
 void CppContextObject::UpdateMaterial(int pMeshIndex)
 {
-	if (!mUiClassResource || !mUiManager->CanRender())
+	if (!mUiManager->CanRender())
 	{
+		return;
+	}
+	if (!mUiClassResource)
+	{
+		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
+		mUiManager->GetRenderer()->ChangeMaterial(mMeshResourceArray[pMeshIndex]->GetData(), lMaterialType);
 		return;
 	}
 	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
@@ -357,7 +391,7 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 	}
 	if (lMesh->GetRamData()->GetUVData(0) && lTexture)
 	{
-		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
+		const str lShader = lClass->GetMaterial(pMeshIndex).mShaderName;
 		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
 		const bool lIsHighlight = (lShader == _T("highlight"));
 		const bool lIsEnv = (lShader == _T("env"));
@@ -385,7 +419,7 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 	else
 	{
 		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
-		const str lShader = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(pMeshIndex).mShaderName;
+		const str lShader = lClass->GetMaterial(pMeshIndex).mShaderName;
 		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
 		const bool lIsEnv = (lShader == _T("env"));
 		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == _T("env_blend"));
@@ -448,7 +482,7 @@ GameUiManager* CppContextObject::GetUiManager() const
 
 const Tbc::ChunkyClass* CppContextObject::GetClass() const
 {
-	if (mUiClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	if (mUiClassResource && mUiClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		return (mUiClassResource->GetRamData());
 	}
@@ -569,12 +603,15 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 		{
 			mUiManager->GetRenderer()->SetShadows(pMeshResource->GetData(), UiTbc::Renderer::FORCE_NO_SHADOWS);
 		}
-		const UiTbc::ChunkyClass::Material& lLoadedMaterial =
-			((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(lMeshIndex);
-		Tbc::GeometryBase::BasicMaterialSettings lMaterial(lLoadedMaterial.mAmbient,
-			lLoadedMaterial.mDiffuse, lLoadedMaterial.mSpecular,
-			lLoadedMaterial.mShininess, lLoadedMaterial.mAlpha, lLoadedMaterial.mSmooth);
-		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
+		if (mUiClassResource)
+		{
+			const UiTbc::ChunkyClass::Material& lLoadedMaterial =
+				((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(lMeshIndex);
+			Tbc::GeometryBase::BasicMaterialSettings lMaterial(lLoadedMaterial.mAmbient,
+				lLoadedMaterial.mDiffuse, lLoadedMaterial.mSpecular,
+				lLoadedMaterial.mShininess, lLoadedMaterial.mAlpha, lLoadedMaterial.mSmooth);
+			pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
+		}
 
 		((Tbc::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);
 		pMeshResource->GetRamData()->SetScale(pMeshResource->GetOffset().mScale);
@@ -604,7 +641,7 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 
 void CppContextObject::TryAddTexture()
 {
-	if (!mUiClassResource || !mUiManager->CanRender())
+	if (!mUiManager->CanRender())
 	{
 		return;
 	}
@@ -637,10 +674,6 @@ void CppContextObject::TryAddTexture()
 
 bool CppContextObject::TryComplete()
 {
-	if (!mUiClassResource)
-	{
-		return (false);
-	}
 	// Meshes/textures must be both 1) all attempted, and 2) all loaded OK. Plus, server (or otherwise
 	// headless) should totally ignore this.
 	if (mEnableUi &&

@@ -49,7 +49,6 @@ public:
 	UserUiTypeResource(GameUiManager* pUiManager);
 	virtual ~UserUiTypeResource();
 
-protected:
 	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
 };
 
@@ -69,7 +68,6 @@ public:
 	ExtraType& GetExtraData() const;
 	void SetExtraData(const ExtraType& pExtraData);
 
-protected:
 	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
 
 private:
@@ -247,7 +245,6 @@ public:
 	//Tbc::GeometryBase* GetRamData() const;
 	//UiTbc::Renderer::GeometryID GetData() const;
 
-protected:
 	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
 
 private:

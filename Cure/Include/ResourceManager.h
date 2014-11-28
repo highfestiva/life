@@ -68,9 +68,6 @@ public:
 	// JB-TRICKY: for some god-awful reason polymorfism stops working here, so I changed name for this method.
 	const Resource* GetConstResource() const;
 
-protected:
-	friend class Resource;
-	friend class ResourceManager;
 	Resource* GetResource() const;
 	void SetResource(Resource* pResource);
 	virtual void PostProcess();
@@ -111,7 +108,6 @@ public:
 	UserTypeResource();
 	virtual ~UserTypeResource();
 
-protected:
 	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const;
 };
 
@@ -130,7 +126,6 @@ public:
 	ExtraType& GetExtraData() const;
 	void SetExtraData(const ExtraType& pExtraData);
 
-protected:
 	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const;
 
 private:
@@ -410,6 +405,7 @@ public:
 	// name as a renderer resource is an error with undefined behaviour.
 	void Load(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
 	void LoadUnique(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
+	void AddLoaded(UserResource* pUserResource);
 	void SafeRelease(UserResource* pUserResource);
 	void Release(Resource* pResource);
 	bool IsLoading();
@@ -446,10 +442,10 @@ protected:
 		deb_assert(mThreadLock.IsOwner());
 	}
 
-private:
 	Resource* CreateResource(UserResource* pUserResource, const str& pName);
 	void DeleteResource(Resource* pResource);
 
+private:
 	typedef HashTable<str, Resource*> ResourceTable;
 	typedef OrderedMap<str, Resource*> ResourceMap;
 	typedef OrderedMap<Resource*, Resource*, LEPRA_VOIDP_HASHER> ResourceMapList;
