@@ -7,6 +7,9 @@ class vec3:
 	def __init__(self, *args):
 		self.x,self.y,self.z = args
 
+	def set(self,v):
+		self.x,self.y,self.z = v.x,v.y,v.z
+
 	def cross(self,v):
 		return vec3(self.y*v.z-self.z*v.y, self.z*v.x-self.x*v.z, self.x*v.y-self.y*v.x)
 
@@ -18,6 +21,9 @@ class vec3:
 
 	def length(self):
 		return sqrt(self.x*self.x + self.y*self.y + self.z*self.z)
+
+	def lengthsq(self):
+		return self.x*self.x + self.y*self.y + self.z*self.z
 
 	def abs(self):
 		return vec3(abs(self.x), abs(self.y), abs(self.z))

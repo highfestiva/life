@@ -78,30 +78,27 @@ def testbig3dprism():
 
 def testsimpleshape():
 	o = piece2obj.piece2obj(codecs.open('simple.txt', encoding='utf-8'))
-	# assert len(o[0].vertices) == 6
-	# assert vec3(0,0,0) in o[0].vertices
-	# assert len(o[0].indices) == 8*3
+	assert len(o[0].vertices) == 34
+	assert len(o[0].indices) == 56*3
 
 def testcomplexshape():
 	o = piece2obj.piece2obj(codecs.open('complex.txt', encoding='utf-8'))
-	# assert len(o[0].vertices) == 6
-	# assert vec3(0,0,0) in o[0].vertices
-	# assert len(o[0].indices) == 8*3
+	assert len(o[0].vertices) == 63
+	assert len(o[0].indices) == 104*3
 
 
-from functools import partial
-from math import pi
-import tv3d
-tv3d.open(camdist=80,camangle=(pi/2,0,0),camrotspeed=(0,0.4,0),fov=15,addr='localhost:2541')
-tv3d.joint_terminate = False
-def draw(f,v,i):
-	r = f(v,i)
-	tv3d.releaseobjects()
-	tv3d.createmeshobject([f for xyz in v for f in xyz],i)
-	tv3d.sleep(0.05)
-	return r
-piece2obj.mesh_extendfaces = partial(draw, piece2obj.mesh_extendfaces)
-piece2obj.mesh_crushfaces = partial(draw, piece2obj.mesh_crushfaces)
+# from functools import partial
+# from math import pi
+# import tv3d
+# tv3d.open(camdist=80,camangle=(pi/2,0,0),camrotspeed=(0,0.4,0),fov=15,addr='localhost:2541')
+# def draw(f,v,i):
+	# r = f(v,i)
+	# tv3d.releaseobjects()
+	# tv3d.createmeshobject([f for xyz in v for f in xyz],i)
+	# tv3d.sleep(0.05)
+	# return r
+# piece2obj.mesh_extendfaces = partial(draw, piece2obj.mesh_extendfaces)
+# piece2obj.mesh_crushfaces = partial(draw, piece2obj.mesh_crushfaces)
 test2dcube()
 testirregulargfx()
 testassymeticcubes()
