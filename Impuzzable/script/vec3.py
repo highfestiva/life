@@ -5,7 +5,11 @@ def almosteq(a,b):
 
 class vec3:
 	def __init__(self, *args):
-		self.x,self.y,self.z = args
+		if type(args[0]) == vec3:
+			v = args[0]
+			self.x,self.y,self.z = v.x,v.y,v.z
+		else:
+			self.x,self.y,self.z = args
 
 	def set(self,v):
 		self.x,self.y,self.z = v.x,v.y,v.z
@@ -35,7 +39,9 @@ class vec3:
 		return vec3(self.x-v.x, self.y-v.y, self.z-v.z)
 
 	def __mul__(self,v):
-		return self.x*v.x + self.y*v.y + self.z*v.z
+		if type(v) == vec3:
+			return self.x*v.x + self.y*v.y + self.z*v.z
+		return vec3(self.x*v, self.y*v, self.z*v)
 
 	def __truediv__(self,divisor):
 		return vec3(self.x/divisor, self.y/divisor, self.z/divisor)

@@ -1,6 +1,9 @@
 class quat:
 	def __init__(self, *args):
-		self.q = [float(f) for f in args]
+		if type(args[0]) == quat:
+			self.q = args[0].q[:]
+		else:
+			self.q = [float(f) for f in args]
 
 	# def __add__(self,v):
 		# return quat(self.x+v.x, self.y+v.y, self.z+v.z)
@@ -25,3 +28,6 @@ class quat:
 
 	def __iter__(self):
 		return iter(self.q)
+
+	def __getitem__(self, i):
+		return self.q[i]

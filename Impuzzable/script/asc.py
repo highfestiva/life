@@ -5,7 +5,6 @@ from vec3 import vec3
 
 
 GRID = 0.5
-HALFGRID = 0.5
 W2E, NW2SE, N2S, NE2SW, E2W, SE2NW, S2N, SW2NE, F2B, B2F, NORMAL_COUNT = range(11)
 chars = ' X><^v`´,/|*ltrb'
 square_triangles =	[	[[False,False],[False,False]],
@@ -80,8 +79,10 @@ def _ch2tris(ch):
 def _tris2ch(tris):
 	return chars[square_triangles.index(tris)]
 
-def _settri(shape,crd,set):
+def _settri(shape,crd,set,force):
 	if shape.triangles[crd.z][crd.y][crd.x] == set:
+		if force:
+			return
 		print(shape)
 		raise ValueError('Trying to %s %s again!' % ('set' if set else 'clear', str(crd)))
 	shape.triangles[crd.z][crd.y][crd.x] = set
@@ -109,8 +110,19 @@ def tricnt(shape):
 def trimaxsize(shape):
 	return shape.size
 
+def hasboundstri(shape,crd):
+	if crd.x<0 or crd.x>=shape.size.x or crd.y<0 or crd.y>=shape.size.y or crd.z<0 or crd.z>=shape.size.z:
+		return None
+	return hastri(shape,crd)
+
 def hastri(shape,crd):
 	return shape.triangles[crd.z][crd.y][crd.x]
+
+def any_crd_out_of_bound(shape, crds):
+	return not all([hasboundstri(shape,crd) for crd in crds])
+
+def any_crd_in_bound(shape, crds):
+	return any([hasboundstri(shape,crd) for crd in crds])
 
 
 def idx2crd(size,idx):
@@ -121,10 +133,10 @@ def idx2crd(size,idx):
 	return vec3(x,y,z)
 
 def addtri(shape,crd):
-	_settri(shape,crd,True)
+	_settri(shape,crd,True,False)
 
 def droptri(shape,crd):
-	_settri(shape,crd,False)
+	_settri(shape,crd,False,False)
 
 def get_topmost_tri(shape):
 	for z,layer in enumerate(shape.triangles):
@@ -139,6 +151,7 @@ def get_tri_crds(shape):
 			for x,t in enumerate(row):
 				if t:
 					yield vec3(x,y,z)
+
 def get_tri_pos(crd):
 	cube = vec3(crd.x//2,crd.y//2,crd.z)
 	px,py = crd.x%2,crd.y%2
