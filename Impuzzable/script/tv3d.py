@@ -71,13 +71,42 @@ def closecom():
 		proc.wait()
 		proc = None
 
+def opened():
+	return sock != None
+
 def releaseobjects():
 	cmd('delete-objects')
 
-def createmeshobject(v,i):
-	cmd('set-vertices %s' % ' '.join((str(f) for f in v)))
-	cmd('set-indices %s' % ' '.join((str(j) for j in i)))
+def creategfxobject(vertices,indices):
+	initgfxmesh(quat(1,0,0,0),vec3(0,0,0),vertices,indices)
+	createobject()
+
+def createobject():
 	cmd('create-object')
+
+def clearphys():
+	cmd('clear-phys')
+
+def initphysbox(q,pos,size):
+	cmd('prep-phys-box %f %f %f %f %f %f %f %f %f %f' % tuple((pq for pq in q[:]+pos[:]+size[:])))
+
+def initphysmesh(q,pos,vertices,indices):
+	setmesh(vertices,indices)
+	prepphysmesh()
+
+def initgfxmesh(q,pos,vertices,indices):
+	setmesh(vertices,indices)
+	prepgfxmesh(quat(1,0,0,0),vec3(0,0,0))
+
+def prepphysmesh(q,pos):
+	cmd('prep-phys-mesh %f %f %f %f %f %f %f' % tuple((pq for pq in q[:]+pos[:])))
+
+def prepgfxmesh(q,pos):
+	cmd('prep-gfx-mesh %f %f %f %f %f %f %f' % tuple((pq for pq in q[:]+pos[:])))
+
+def setmesh(vertices, indices):
+	cmd('set-vertices %s' % ' '.join((str(v) for v in vertices)))
+	cmd('set-indices %s' % ' '.join((str(i) for i in indices)))
 
 def setcam(lookat=(0,0,0), angle=(0,0,0), slide=0.5, dist=3, rotspeed=(0,0,0.1), fov=60):
 	set('Ui.3D.CamLookX', float(lookat[0]))
