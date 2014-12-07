@@ -2,6 +2,8 @@
 
 import socket
 import time
+from quat import quat
+from vec3 import vec3
 
 sock = None
 proc = None

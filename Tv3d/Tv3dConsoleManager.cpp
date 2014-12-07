@@ -25,13 +25,28 @@ const Tv3dConsoleManager::CommandPair Tv3dConsoleManager::mCommandIdList[] =
 {
 	{_T("create-object"), COMMAND_CREATE_OBJECT},
 	{_T("delete-objects"), COMMAND_DELETE_OBJECTS},
-	{_T("clear-phys", COMMAND_CLEAR_PHYS},
-	{_T("prep-phys-box", COMMAND_PREP_PHYS_BOX},
+	{_T("clear-phys"), COMMAND_CLEAR_PHYS},
+	{_T("prep-phys-box"), COMMAND_PREP_PHYS_BOX},
 	{_T("prep-phys-mesh"), COMMAND_PREP_PHYS_MESH},
 	{_T("prep-gfx-mesh"), COMMAND_PREP_GFX_MESH},
 	{_T("set-vertices"), COMMAND_SET_VERTICES},
 	{_T("set-indices"), COMMAND_SET_INDICES},
 };
+
+
+
+std::vector<float> Strs2Flts(const strutil::strvec& pStrs)
+{
+	std::vector<float> lFlts;
+	strutil::strvec::const_iterator x = pStrs.begin();
+	for(; x != pStrs.end(); ++x)
+	{
+		double d = 0;
+		strutil::StringToDouble(*x, d);
+		lFlts.push_back((float)d);
+	}
+	return lFlts;
+}
 
 
 
@@ -85,9 +100,8 @@ int Tv3dConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 			case COMMAND_CREATE_OBJECT:
 			{
 				GetGameManager()->GetTickLock()->Acquire();
-				((Tv3dManager*)GetGameManager())->CreateObject(mGfxMesh, mPhysMeshes);
+				((Tv3dManager*)GetGameManager())->CreateObject(mGfxMesh, mPhysObjects);
 				GetGameManager()->GetTickLock()->Release();
-				return 1;
 			}
 			break;
 			case COMMAND_DELETE_OBJECTS:
@@ -95,27 +109,55 @@ int Tv3dConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 				GetGameManager()->GetTickLock()->Acquire();
 				((Tv3dManager*)GetGameManager())->DeleteObjects();
 				GetGameManager()->GetTickLock()->Release();
-				return 1;
 			}
 			break;
 			case COMMAND_CLEAR_PHYS:
 			{
-				return 1;
+				PhysObjectArray::iterator x;
+				for (x = mPhysObjects.begin(); x != mPhysObjects.end(); ++x)
+				{
+					delete *x;
+				}
+				mPhysObjects.clear();
 			}
 			break;
 			case COMMAND_PREP_PHYS_BOX:
 			{
-				return 1;
+				if (pParameterVector.size() != 10)
+				{
+					mLog.Warningf(_T("usage: %s followed by ten float arguments (quaternion, position, size)"), pCommand.c_str());
+					return 1;
+				}
+				std::vector<float> lFloats = Strs2Flts(pParameterVector);
+				PlacedObject* lBox = new BoxObject(quat(&lFloats[0]), vec3(&lFloats[4]), vec3(&lFloats[7]));
+				mPhysObjects.push_back(lBox);
 			}
 			break;
 			case COMMAND_PREP_PHYS_MESH:
 			{
-				return 1;
+				if (pParameterVector.size() != 7)
+				{
+					mLog.Warningf(_T("usage: %s followed by seven float arguments (quaternion and position)"), pCommand.c_str());
+					return 1;
+				}
+				std::vector<float> lFloats = Strs2Flts(pParameterVector);
+				MeshObject* lMesh = new MeshObject(quat(&lFloats[0]), vec3(&lFloats[4]));
+				lMesh->mVertices.insert(lMesh->mVertices.end(), mVertices.begin(), mVertices.end());
+				lMesh->mIndices.insert(lMesh->mIndices.end(), mIndices.begin(), mIndices.end());
+				mPhysObjects.push_back(lMesh);
 			}
 			break;
 			case COMMAND_PREP_GFX_MESH:
 			{
-				return 1;
+				if (pParameterVector.size() != 7)
+				{
+					mLog.Warningf(_T("usage: %s followed by seven float arguments (quaternion and position)"), pCommand.c_str());
+					return 1;
+				}
+				std::vector<float> lFloats = Strs2Flts(pParameterVector);
+				mGfxMesh = MeshObject(quat(&lFloats[0]), vec3(&lFloats[4]));
+				mGfxMesh.mVertices.insert(mGfxMesh.mVertices.end(), mVertices.begin(), mVertices.end());
+				mGfxMesh.mIndices.insert(mGfxMesh.mIndices.end(), mIndices.begin(), mIndices.end());
 			}
 			break;
 			case COMMAND_SET_VERTICES:
@@ -128,7 +170,6 @@ int Tv3dConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 					strutil::StringToDouble(*p, d);
 					mVertices.push_back((float)d);
 				}
-				return 1;
 			}
 			break;
 			case COMMAND_SET_INDICES:
@@ -141,7 +182,6 @@ int Tv3dConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 					strutil::StringToInt(*p, i);
 					mIndices.push_back(i);
 				}
-				return 1;
 			}
 			break;
 			default:

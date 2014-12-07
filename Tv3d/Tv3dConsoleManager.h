@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../Life/LifeClient/ClientConsoleManager.h"
+#include "PhysGfxObject.h"
 #include "Tv3d.h"
 
 
@@ -44,6 +45,8 @@ protected:
 
 	std::vector<float> mVertices;
 	std::vector<int> mIndices;
+	MeshObject mGfxMesh;
+	PhysObjectArray mPhysObjects;
 	static const CommandPair mCommandIdList[];
 	logclass();
 };

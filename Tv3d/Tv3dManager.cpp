@@ -111,8 +111,10 @@ void Tv3dManager::DeleteObjects()
 	mObjects.clear();
 }
 
-int Tv3dManager::CreateObject(const std::vector<float>& pVertices, const std::vector<int>& pIndices)
+int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects)
 {
+	(void)pPhysObjects;
+
 	Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	lObject->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
 	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics;
@@ -125,7 +127,7 @@ int Tv3dManager::CreateObject(const std::vector<float>& pVertices, const std::ve
 	v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
 	v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
 	v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
-	lObject->AddGfxMesh(pVertices, pIndices, vec3(r,g,b));
+	lObject->AddGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b));
 	mObjects.push_back(lObject->GetInstanceId());
 	return 0;
 }

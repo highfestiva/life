@@ -331,6 +331,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="PhysGfxObject.cpp" />
     <ClCompile Include="Tv3d.cxx">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">Create</PrecompiledHeader>
@@ -346,6 +347,7 @@
     <ClCompile Include="Light.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="PhysGfxObject.h" />
     <ClInclude Include="Tv3d.h" />
     <ClInclude Include="Tv3dConsoleManager.h" />
     <ClInclude Include="Tv3dManager.h" />

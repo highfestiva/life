@@ -135,19 +135,28 @@ def testcomplexshape():
 	assert len(o[0].physgeoms) == 10
 
 
-# from functools import partial
-# from math import pi
-# import tv3d
-# tv3d.open(camdist=80,camangle=(pi/2,0,0),camrotspeed=(0,0.4,0),fov=15,addr='localhost:2541')
-# tv3d.joint_terminate = False
-# def draw(f,v,i):
-	# r = f(v,i)
-	# tv3d.releaseobjects()
-	# tv3d.createmeshobject([f for xyz in v for f in xyz],i)
-	# tv3d.sleep(0.3)
-	# return r
-# piece2obj.mesh_extendfaces = partial(draw, piece2obj.mesh_extendfaces)
-# piece2obj.mesh_crushfaces = partial(draw, piece2obj.mesh_crushfaces)
+from functools import partial
+from math import pi
+import tv3d
+tv3d.open(camdist=80,camangle=(pi/2,0,0),camrotspeed=(0,0.4,0),fov=15,addr='localhost:2541')
+tv3d.joint_terminate = False
+dodraw = True
+def draw(f,v,i):
+	r = f(v,i)
+	if dodraw:
+		tv3d.releaseobjects()
+		tv3d.creategfxobject([f for xyz in v for f in xyz],i)
+		tv3d.sleep(0.05)
+	return r
+def physstuff(f, oshape, shape):
+	global dodraw
+	dodraw = False
+	r = f(oshape,shape)
+	dodraw = True
+	return r
+piece2obj.mesh_extendfaces = partial(draw, piece2obj.mesh_extendfaces)
+piece2obj.mesh_crushfaces = partial(draw, piece2obj.mesh_crushfaces)
+piece2obj.shape2physgeoms = partial(physstuff, piece2obj.shape2physgeoms)
 testcrds()
 test2dcube()
 testirregulargfx()

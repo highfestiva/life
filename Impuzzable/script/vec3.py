@@ -8,8 +8,10 @@ class vec3:
 		if type(args[0]) == vec3:
 			v = args[0]
 			self.x,self.y,self.z = v.x,v.y,v.z
+			self.l = list(v)
 		else:
 			self.x,self.y,self.z = args
+			self.l = list(args)
 
 	def set(self,v):
 		self.x,self.y,self.z = v.x,v.y,v.z
@@ -62,4 +64,11 @@ class vec3:
 		return 'vec3(%g,%g,%g)' % tuple([float(f) for f in iter(self)])
 
 	def __iter__(self):
-		return iter([self.x,self.y,self.z])
+		if not self.l:
+			self.l = [self.x,self.y,self.z]
+		return iter(self.l)
+
+	def __getitem__(self, i):
+		if not self.l:
+			self.l = [self.x,self.y,self.z]
+		return self.l[i]

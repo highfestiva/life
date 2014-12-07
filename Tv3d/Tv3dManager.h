@@ -10,6 +10,7 @@
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/LifeClient/Menu.h"
 #include "../UiCure/Include/UiResourceManager.h"
+#include "PhysGfxObject.h"
 #include "Tv3d.h"
 
 
@@ -50,7 +51,7 @@ public:
 	virtual ~Tv3dManager();
 
 	void DeleteObjects();
-	int CreateObject(const std::vector<float>& pVertices, const std::vector<int>& pIndices);
+	int CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects);
 
 	void AcceptLoop();
 	void CommandLoop();
