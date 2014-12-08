@@ -76,6 +76,9 @@ def closecom():
 def opened():
 	return sock != None
 
+def debug(enable):
+	set('Debug.Enable', enable)
+
 def releaseobjects():
 	cmd('delete-objects')
 
@@ -94,7 +97,7 @@ def initphysbox(q,pos,size):
 
 def initphysmesh(q,pos,vertices,indices):
 	setmesh(vertices,indices)
-	prepphysmesh()
+	prepphysmesh(q,pos)
 
 def initgfxmesh(q,pos,vertices,indices):
 	setmesh(vertices,indices)
@@ -134,6 +137,8 @@ def testdraw(vertices,indices):
 	pass
 
 def set(setting, value):
+	if type(value) == bool:
+		value = str(value).lower()
 	cmd('#%s %s' % (setting, str(value)))
 
 def cmd(s):
@@ -143,7 +148,7 @@ def cmd(s):
 			sock.send((s+'\n').encode())
 			return sock.recv(1024).decode()
 		except socket.error as e:
-			print(e)
+			print('tv3d connection failure:', e)
 			sock = None
 
 def _htmlcol(col):

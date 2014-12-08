@@ -113,15 +113,58 @@ void Tv3dManager::DeleteObjects()
 
 int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects)
 {
-	(void)pPhysObjects;
-
 	Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	lObject->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
 	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics;
-	lPhysics->SetBoneCount(1);
-	Tbc::ChunkyBoneGeometry::BodyData lBoneData(0,0,0);
-	Tbc::ChunkyBoneGeometry* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
-	lPhysics->AddBoneGeometry(xform(), lBone);
+	if (pPhysObjects.empty())
+	{
+		lObject->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
+		lPhysics->SetBoneCount(1);
+		Tbc::ChunkyBoneGeometry::BodyData lBoneData(0,0,0);
+		Tbc::ChunkyBoneGeometry* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
+		lPhysics->AddBoneGeometry(xform(), lBone);
+	}
+	else
+	{
+		lPhysics->SetBoneCount(pPhysObjects.size());
+		PhysObjectArray::const_iterator x = pPhysObjects.begin();
+		int y = 0;
+		for (; x != pPhysObjects.end(); ++x, ++y)
+		{
+			Tbc::ChunkyBoneGeometry::BodyData lBoneData(y==0? 15.0f:1.0f, 0.5f, 0.1f);
+			BoxObject* lBox = dynamic_cast<BoxObject*>(*x);
+			if (lBox)
+			{
+				Tbc::ChunkyBoneBox* lBone = new Tbc::ChunkyBoneBox(lBoneData);
+				lBone->mSize = lBox->size;
+				lPhysics->AddBoneGeometry(xform(lBox->q,lBox->pos), lBone);
+			}
+			else
+			{
+				MeshObject* lMesh = dynamic_cast<MeshObject*>(*x);
+				if (lMesh)
+				{
+					Tbc::ChunkyBoneMesh* lBone = new Tbc::ChunkyBoneMesh(lBoneData);
+					lBone->mVertexCount = lMesh->mVertices.size()/3;
+					lBone->mTriangleCount = lMesh->mIndices.size()/3;
+					lBone->mVertices = new float[lBone->mVertexCount*3];
+					lBone->mIndices = new uint32[lBone->mTriangleCount*3];
+					for (unsigned x = 0; x < lBone->mVertexCount; ++x)
+					{
+						lBone->mVertices[x*3+0] = lMesh->mVertices[x*3+0];
+						lBone->mVertices[x*3+1] = lMesh->mVertices[x*3+1];
+						lBone->mVertices[x*3+2] = lMesh->mVertices[x*3+2];
+					}
+					for (unsigned x = 0; x < lBone->mTriangleCount; ++x)
+					{
+						lBone->mIndices[x*3+0] = lMesh->mIndices[x*3+0];
+						lBone->mIndices[x*3+1] = lMesh->mIndices[x*3+1];
+						lBone->mIndices[x*3+2] = lMesh->mIndices[x*3+2];
+					}
+					lPhysics->AddBoneGeometry(xform(lMesh->q,lMesh->pos), lBone);
+				}
+			}
+		}
+	}
 	lObject->CreatePhysics(lPhysics);
 	float r,g,b;
 	v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);

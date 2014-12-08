@@ -167,7 +167,6 @@ public:
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
-protected:
 	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	virtual vec3 GetShapeSize() const;
 	virtual GeometryType GetGeometryType() const;
@@ -208,7 +207,6 @@ public:
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
-private:
 	virtual vec3 GetShapeSize() const;
 	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	virtual GeometryType GetGeometryType() const;
@@ -233,7 +231,6 @@ public:
 
 	virtual vec3 GetShapeSize() const;
 
-private:
 	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	virtual GeometryType GetGeometryType() const;
 
@@ -256,7 +253,6 @@ public:
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
-private:
 	virtual vec3 GetShapeSize() const;
 	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	void Clear();

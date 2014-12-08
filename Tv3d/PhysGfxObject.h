@@ -21,6 +21,7 @@ public:
 	quat q;
 	vec3 pos;
 	PlacedObject(const quat& pQuat, const vec3& pPos);
+	virtual ~PlacedObject();
 };
 
 class BoxObject: public PlacedObject

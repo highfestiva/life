@@ -20,12 +20,19 @@ PlacedObject::PlacedObject(const quat& pQuat, const vec3& pPos):
 {
 }
 
+PlacedObject::~PlacedObject()
+{
+}
+
+
 
 BoxObject::BoxObject(const quat& pQuat, const vec3& pPos, const vec3& pSize):
 	Parent(pQuat,pPos),
 	size(pSize)
 {
 }
+
+
 
 MeshObject::MeshObject():
 	Parent(quat(), vec3())

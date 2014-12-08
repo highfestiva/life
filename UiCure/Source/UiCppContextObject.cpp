@@ -312,7 +312,7 @@ void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh)
 	str lMeshName = strutil::Format(_T("TestMesh%i"), lMeshCounter);
 	str lMeshRefName = lMeshName+_T("Ref");
 	xform lTransform;
-	float lScale = 2;
+	float lScale = 1;
 	// Create through instancing (only way supported for CppObjects currently.
 	UserGeometryReferenceResource* lGeometryRef = new UserGeometryReferenceResource(
 		mUiManager, GeometryOffset(lPhysIndex, lTransform, lScale));
