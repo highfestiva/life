@@ -70,8 +70,16 @@ Tv3dManager::Tv3dManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 		lAddress.Resolve(_T("localhost:2541"));
 	}
 	mListenerSocket = new TcpListenerSocket(lAddress, true);
-	mAcceptThread->Start(this, &Tv3dManager::AcceptLoop);
-	mLog.Headlinef(_T("Command server listening on %s."), lAddress.GetAsString().c_str());
+	if (mListenerSocket->IsOpen())
+	{
+		mAcceptThread->Start(this, &Tv3dManager::AcceptLoop);
+		mLog.Headlinef(_T("Command server listening on %s."), lAddress.GetAsString().c_str());
+	}
+	else
+	{
+		mLog.Headlinef(_T("Could not open server on %s. Shutting down."), lAddress.GetAsString().c_str());
+		SystemManager::AddQuitRequest(1);
+	}
 }
 
 Tv3dManager::~Tv3dManager()
@@ -114,33 +122,52 @@ void Tv3dManager::DeleteObjects()
 int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects)
 {
 	Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics;
+	quat rot, q, pq;
+	rot.RotateAroundWorldX(PIF/-2);
+	q = rot;
+	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 	if (pPhysObjects.empty())
 	{
 		lObject->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
 		lPhysics->SetBoneCount(1);
 		Tbc::ChunkyBoneGeometry::BodyData lBoneData(0,0,0);
 		Tbc::ChunkyBoneGeometry* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
-		lPhysics->AddBoneGeometry(xform(), lBone);
+		lPhysics->AddBoneGeometry(xform(quat(1,0,0,0),vec3(0,0,0)), lBone);
 	}
 	else
 	{
 		lPhysics->SetBoneCount(pPhysObjects.size());
 		PhysObjectArray::const_iterator x = pPhysObjects.begin();
 		int y = 0;
+		Tbc::ChunkyBoneGeometry* lParent = 0;
+		PlacedObject* lParentPhysObject = 0;
 		for (; x != pPhysObjects.end(); ++x, ++y)
 		{
 			Tbc::ChunkyBoneGeometry::BodyData lBoneData(y==0? 15.0f:1.0f, 0.5f, 0.1f);
-			BoxObject* lBox = dynamic_cast<BoxObject*>(*x);
+			PlacedObject* lPhysObject = *x;
+			xform t = xform(lPhysObject->q, lPhysObject->pos);
+			if (lParentPhysObject)
+			{
+				t.mOrientation = rot.GetInverse() * t.mOrientation.GetInverse() * rot;
+				//t.RotateAroundAnchor(lPhysObject->pos, vec3(1,0,0), PIF/2);
+			}
+			else
+			{
+				//t.RotateAroundAnchor(lPhysObject->pos, vec3(1,0,0), PIF/2);
+				pq = lPhysObject->q;
+				q = pq * rot;
+				t.mOrientation = q;
+			}
+			BoxObject* lBox = dynamic_cast<BoxObject*>(lPhysObject);
 			if (lBox)
 			{
 				Tbc::ChunkyBoneBox* lBone = new Tbc::ChunkyBoneBox(lBoneData);
 				lBone->mSize = lBox->size;
-				lPhysics->AddBoneGeometry(xform(lBox->q,lBox->pos), lBone);
+				lPhysics->AddBoneGeometry(t, lBone, lParent);
 			}
 			else
 			{
-				MeshObject* lMesh = dynamic_cast<MeshObject*>(*x);
+				MeshObject* lMesh = dynamic_cast<MeshObject*>(lPhysObject);
 				if (lMesh)
 				{
 					Tbc::ChunkyBoneMesh* lBone = new Tbc::ChunkyBoneMesh(lBoneData);
@@ -160,17 +187,25 @@ int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArra
 						lBone->mIndices[x*3+1] = lMesh->mIndices[x*3+1];
 						lBone->mIndices[x*3+2] = lMesh->mIndices[x*3+2];
 					}
-					lPhysics->AddBoneGeometry(xform(lMesh->q,lMesh->pos), lBone);
+					lPhysics->AddBoneGeometry(t, lBone, lParent);
 				}
+			}
+			if (y == 0)
+			{
+				lParent = lPhysics->GetBoneGeometry(0);
+				lParentPhysObject = lPhysObject;
 			}
 		}
 	}
+	lObject->SetRootOrientation(q);
 	lObject->CreatePhysics(lPhysics);
 	float r,g,b;
 	v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
 	v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
 	v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
 	lObject->AddGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b));
+	q = q.GetInverse() * pGfxObject.q.GetInverse() * q;
+	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = q;
 	mObjects.push_back(lObject->GetInstanceId());
 	return 0;
 }
@@ -215,7 +250,7 @@ void Tv3dManager::CommandLoop()
 		{
 			break;
 		}
-		while (!mPauseButton->IsVisible())
+		while (!mPauseButton || !mPauseButton->IsVisible())
 		{
 			Thread::Sleep(0.5);
 			if (mCommandThread->GetStopRequest())

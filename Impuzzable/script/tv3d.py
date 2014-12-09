@@ -101,7 +101,7 @@ def initphysmesh(q,pos,vertices,indices):
 
 def initgfxmesh(q,pos,vertices,indices):
 	setmesh(vertices,indices)
-	prepgfxmesh(quat(1,0,0,0),vec3(0,0,0))
+	prepgfxmesh(q,pos)
 
 def prepphysmesh(q,pos):
 	cmd('prep-phys-mesh %f %f %f %f %f %f %f' % tuple((pq for pq in q[:]+pos[:])))

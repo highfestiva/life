@@ -4,12 +4,15 @@
 import asc
 import sys
 from functools import partial,reduce
-from math import sqrt
+from math import sqrt,pi,cos,sin
 from quat import quat
 from vec3 import vec3,almosteq
 
 
 sq2 = sqrt(2)
+qa,qc = cos(pi/8),sin(pi/8)
+rotq = quat(qa, 0, qc, 0)
+invrotq = quat(qa, 0, -qc, 0)
 
 
 class GfxMesh:
@@ -331,11 +334,12 @@ def cover_factor(remains,original):
 	f = (originalcnt-asc.tricnt(remains) if remains else 0)/originalcnt
 	return f*f
 
-def take(oshape, shape, grow, create, directions):
+def take(oshape, shape, find, grow, create, directions):
 	# Pick center coordinate.
 	crds = list(asc.get_tri_crds(shape))
-	crd = reduce(lambda x,y:x+y, crds) / len(crds)
-	crd = min(crds, key=lambda c:(c-crd).length())
+	crd = find(oshape, shape, crds)
+	if not crd:
+		return None,[]
 	size = vec3(0,0,0)
 	crds = []
 	bestsize = None
@@ -458,14 +462,41 @@ def creatediamond(size, crds):
 	size.x *= sq2
 	size.y *= sq2
 	size.z *= 2
-	return PhysBox(quat(0,0,0,1), crd, size)
+	return PhysBox(rotq, crd, size)
+
+def findcuboid(oshape, shape, crds):
+	offsets = (vec3(0,0,0),vec3(1,0,0),vec3(0,1,0),vec3(1,1,0))
+	bestcnt = []
+	for c in crds:
+		c.x = c.x//2*2
+		c.y = c.y//2*2
+		if all(asc.hastri(oshape,c+o) for o in offsets):
+			cnt = len([1 for o in offsets if asc.hastri(shape,c+o)])
+			if cnt == 4:
+				return c
+			bestcnt.append((c,cnt))
+	if not bestcnt:
+		return None
+	return sorted(bestcnt, key=lambda e:e[1])[0][0]
+
+def finddiamond(oshape, shape, crds):
+	for c in crds:
+		if c.x%2==0 and c.y%2==0 and asc.hasboundstri(oshape,c+vec3(-1,+1,0)):
+			return c
+		elif c.x%2==1 and c.y%2==0 and asc.hasboundstri(oshape,c+vec3(-1,-1,0)):
+			return c
+		if c.x%2==0 and c.y%2==1 and asc.hasboundstri(oshape,c+vec3(+1,+1,0)):
+			return c
+		if c.x%2==1 and c.y%2==1 and asc.hasboundstri(oshape,c+vec3(+1,-1,0)):
+			return c
+	return None
 
 def cuboid(oshape,shape):
-	remains,geom = take(oshape, shape, growcuboid, createcuboid, (vec3(+1,0,0), vec3(0,+1,0), vec3(0,0,+1), vec3(-1,0,0), vec3(0,-1,0), vec3(0,0,-1)))
+	remains,geom = take(oshape, shape, findcuboid, growcuboid, createcuboid, (vec3(+1,0,0), vec3(0,+1,0), vec3(0,0,+1), vec3(-1,0,0), vec3(0,-1,0), vec3(0,0,-1)))
 	return 1*cover_factor(remains,shape), geom, remains
 
 def diamond(oshape,shape):
-	remains,geom = take(oshape, shape, growdiamond, creatediamond, (vec3(+1,0,0), vec3(0,+1,0), vec3(0,0,+1), vec3(-1,0,0), vec3(0,-1,0), vec3(0,0,-1)))
+	remains,geom = take(oshape, shape, finddiamond, growdiamond, creatediamond, (vec3(+1,0,0), vec3(0,+1,0), vec3(0,0,+1), vec3(-1,0,0), vec3(0,-1,0), vec3(0,0,-1)))
 	return 0.99*cover_factor(remains,shape), geom, remains
 
 def shape2physgeoms(oshape, shape):
@@ -487,6 +518,7 @@ def shape2physgeoms(oshape, shape):
 def centerobjs(gfx,physgeoms):
 	if not gfx or not physgeoms:
 		return
+	gfx.q = physgeoms[0].q if physgeoms[0].q != rotq else invrotq
 	off = physgeoms[0].pos
 	for i,p in enumerate(physgeoms):
 		if type(p) == PhysBox:

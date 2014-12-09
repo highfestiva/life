@@ -72,6 +72,8 @@ def test3dcuboid():
 def testtinyrotated2dcube():
 	o = piece2obj.piece2obj(['<>'])
 	assert len(o[0].gfxmesh.vertices) == 8
+	assert piece2obj.invrotq == o[0].gfxmesh.q
+	assert vec3(0,0,0) == o[0].gfxmesh.pos
 	assert vec3(0,GRID,GRID) in o[0].gfxmesh.vertices
 	assert len(o[0].gfxmesh.indices) == 12*3
 	assert len(o[0].physgeoms) == 1
@@ -88,6 +90,7 @@ def testrotated2dcube():
 def testrotated3dcuboid():
 	o = piece2obj.piece2obj(codecs.open('rotated_3d_cuboid.txt', encoding='utf-8'))
 	assert len(o) == 1
+	assert piece2obj.invrotq == o[0].gfxmesh.q
 	assert len(o[0].gfxmesh.vertices) == 8
 	assert len(o[0].gfxmesh.indices) == 12*3
 	assert len(o[0].physgeoms) == 1
@@ -112,7 +115,7 @@ def testsmall2dtriangle():
 def testbig3dprism():
 	o = piece2obj.piece2obj(codecs.open('big_3d_prism.txt', encoding='utf-8'))
 	assert len(o[0].gfxmesh.vertices) == 6
-	assert vec3(-G2,-GRID,-1.5*G2) in o[0].gfxmesh.vertices
+	assert vec3(-GRID,-G2,-1.5*G2) in o[0].gfxmesh.vertices
 	assert len(o[0].gfxmesh.indices) == 8*3
 	assert len(o[0].physgeoms) == 5
 	assert type(o[0].physgeoms[0]) == piece2obj.PhysBox
@@ -138,30 +141,31 @@ def testcomplexshape():
 	o = piece2obj.piece2obj(codecs.open('complex.txt', encoding='utf-8'))
 	assert len(o[0].gfxmesh.vertices) == 63
 	assert len(o[0].gfxmesh.indices) == 104*3
-	assert len(o[0].physgeoms) == 10
+	assert len([1 for geom in o[0].physgeoms if type(geom) == piece2obj.PhysBox]) == 13
+	assert len([1 for geom in o[0].physgeoms if type(geom) == piece2obj.PhysMesh]) == 2
 
 
 from functools import partial
 from math import pi
 import tv3d
-tv3d.open(camdist=80,camangle=(pi/2,0,0),camrotspeed=(0,0.4,0),fov=8,addr='127.0.0.1:2541')
-tv3d.debug(True)
+tv3d.open(camdist=80,camangle=(0,0,0),camrotspeed=(0,0,0.1),fov=8,addr='127.0.0.1:2541')
 tv3d.joint_terminate = False
-# dodraw = True
-# def draw(f,v,i):
-	# r = f(v,i)
-	# if dodraw:
-		# tv3d.releaseobjects()
-		# tv3d.creategfxobject([f for xyz in v for f in xyz],i)
-		# tv3d.sleep(0.05)
-	# return r
-# def physstuff(f, oshape, shape):
-	# global dodraw
-	# dodraw = False
-	# r = f(oshape,shape)
-	# dodraw = True
-	# return r
-def draw(toobj,shape):
+dodraw = True
+def drawmesh(f,v,i):
+	r = f(v,i)
+	if dodraw:
+		tv3d.releaseobjects()
+		tv3d.creategfxobject([f for xyz in v for f in xyz],i)
+		tv3d.sleep(0.3)
+	return r
+def physstuff(f, oshape, shape):
+	global dodraw
+	dodraw = False
+	r = f(oshape,shape)
+	dodraw = True
+	return r
+def drawwithphys(toobj,shape):
+	tv3d.debug(True)
 	obj = toobj(shape)
 	tv3d.releaseobjects()
 	tv3d.clearphys()
@@ -172,12 +176,14 @@ def draw(toobj,shape):
 			tv3d.initphysmesh(phys.q, phys.pos, phys.vertices, phys.indices)
 	tv3d.initgfxmesh(obj.gfxmesh.q, obj.gfxmesh.pos, [f for xyz in obj.gfxmesh.vertices for f in xyz], obj.gfxmesh.indices)
 	tv3d.createobject()
-	tv3d.sleep(0.5)
+	tv3d.sleep(0.3)
+	tv3d.debug(False)
+	tv3d.clearphys()
 	return obj
-# piece2obj.mesh_extendfaces = partial(draw, piece2obj.mesh_extendfaces)
-# piece2obj.mesh_crushfaces = partial(draw, piece2obj.mesh_crushfaces)
-# piece2obj.shape2physgeoms = partial(physstuff, piece2obj.shape2physgeoms)
-piece2obj.shape2obj = partial(draw, piece2obj.shape2obj)
+piece2obj.mesh_extendfaces = partial(drawmesh, piece2obj.mesh_extendfaces)
+piece2obj.mesh_crushfaces = partial(drawmesh, piece2obj.mesh_crushfaces)
+piece2obj.shape2physgeoms = partial(physstuff, piece2obj.shape2physgeoms)
+piece2obj.shape2obj = partial(drawwithphys, piece2obj.shape2obj)
 testcrds()
 test2dcube()
 testirregulargfx()

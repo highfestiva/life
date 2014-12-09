@@ -469,50 +469,17 @@ loginstance(UI_GFX_3D, GeometryReferenceResource);
 UserGeometryReferenceResource::UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset):
 	UiResource(pUiManager),
 	mOffset(pOffset)
-	//mGeometryReference(0),
-	//mGeometryReferenceId(UiTbc::Renderer::INVALID_GEOMETRY)
 {
 }
 
 UserGeometryReferenceResource::~UserGeometryReferenceResource()
 {
-	//if (mGeometryReferenceId)
-	//{
-	//	GetUiManager()->GetRenderer()->RemoveGeometry(mGeometryReferenceId);
-	//	mGeometryReferenceId = UiTbc::Renderer::INVALID_GEOMETRY;
-	//}
-	//delete (mGeometryReference);
-	//mGeometryReference = 0;
 }
-
-//void UserGeometryReferenceResource::PostProcess()
-//{
-//	deb_assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
-//	deb_assert(mGeometryReference == 0);
-//
-//	Tbc::GeometryBase* lOriginal = Parent::GetRamData();
-//	mGeometryReference = new Tbc::GeometryReference(lOriginal);
-//	mGeometryReference->SetAlwaysVisible(true);
-//	mGeometryReference->SetBasicMaterialSettings(lOriginal->GetBasicMaterialSettings());
-//	mGeometryReferenceId = GetUiManager()->GetRenderer()->AddGeometry(
-//		mGeometryReference, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
-//	deb_assert(mGeometryReferenceId != UiTbc::Renderer::INVALID_GEOMETRY);
-//}
 
 const GeometryOffset& UserGeometryReferenceResource::GetOffset() const
 {
 	return (mOffset);
 }
-
-//Tbc::GeometryBase* UserGeometryReferenceResource::GetRamData() const
-//{
-//	return (mGeometryReference);
-//}
-//
-//UiTbc::Renderer::GeometryID UserGeometryReferenceResource::GetData() const
-//{
-//	return (mGeometryReferenceId);
-//}
 
 Cure::Resource* UserGeometryReferenceResource::CreateResource(Cure::ResourceManager* pManager, const str& pName) const
 {

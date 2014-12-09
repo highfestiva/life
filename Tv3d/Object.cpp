@@ -35,7 +35,7 @@ void Object::AddGfxMesh(const std::vector<float>& pVertices, const std::vector<i
 		return;
 	}
 	UiTbc::TriangleBasedGeometry* lGfxMesh = new UiTbc::TriangleBasedGeometry(&pVertices[0], 0, 0, 0, UiTbc::TriangleBasedGeometry::COLOR_RGB, (const uint32*)&pIndices[0],
-			pVertices.size(), pIndices.size(), Tbc::GeometryBase::TRIANGLES, Tbc::GeometryBase::GEOM_STATIC);
+			pVertices.size()/3, pIndices.size(), Tbc::GeometryBase::TRIANGLES, Tbc::GeometryBase::GEOM_STATIC);
 	lGfxMesh->GetBasicMaterialSettings().mDiffuse	= pColor;
 	lGfxMesh->GetBasicMaterialSettings().mSpecular	= vec3();
 	lGfxMesh->GetBasicMaterialSettings().mShininess	= true;

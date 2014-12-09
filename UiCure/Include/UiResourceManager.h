@@ -239,19 +239,11 @@ public:
 	UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset = GeometryOffset(0));
 	virtual ~UserGeometryReferenceResource();
 
-	//virtual void PostProcess();
-
 	const GeometryOffset& GetOffset() const;
-	//Tbc::GeometryBase* GetRamData() const;
-	//UiTbc::Renderer::GeometryID GetData() const;
 
 	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
 
-private:
 	GeometryOffset mOffset;
-	//Tbc::GeometryBase* mGeometryReference;
-	//UiTbc::Renderer::GeometryID mGeometryReferenceId;
-
 	logclass();
 };
 
