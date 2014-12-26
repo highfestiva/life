@@ -80,7 +80,7 @@ def testtinyrotated2dcube():
 	assert type(o[0].physgeoms[0]) == piece2obj.PhysBox
 
 def testrotated2dcube():
-	o = piece2obj.piece2obj(['/,','´`'])
+	o = piece2obj.piece2obj(['/\\','´`'])
 	assert len(o) == 1
 	assert len(o[0].gfxmesh.vertices) == 8
 	assert len(o[0].gfxmesh.indices) == 12*3
@@ -148,7 +148,7 @@ def testcomplexshape():
 from functools import partial
 from math import pi
 import tv3d
-tv3d.open(camdist=80,camangle=(0,0,0),camrotspeed=(0,0,0.1),fov=8,addr='127.0.0.1:2541')
+tv3d.open(camdist=80,camangle=(0,0,0),camrotspeed=(0,0,0.1),fov=8,addr='localhost:2541')
 tv3d.joint_terminate = False
 dodraw = True
 def drawmesh(f,v,i):
@@ -156,7 +156,7 @@ def drawmesh(f,v,i):
 	if dodraw:
 		tv3d.releaseobjects()
 		tv3d.creategfxobject([f for xyz in v for f in xyz],i)
-		tv3d.sleep(0.3)
+		tv3d.sleep(0.05)
 	return r
 def physstuff(f, oshape, shape):
 	global dodraw
@@ -176,7 +176,7 @@ def drawwithphys(toobj,shape):
 			tv3d.initphysmesh(phys.q, phys.pos, phys.vertices, phys.indices)
 	tv3d.initgfxmesh(obj.gfxmesh.q, obj.gfxmesh.pos, [f for xyz in obj.gfxmesh.vertices for f in xyz], obj.gfxmesh.indices)
 	tv3d.createobject()
-	tv3d.sleep(0.3)
+	tv3d.sleep(0.5)
 	tv3d.debug(False)
 	tv3d.clearphys()
 	return obj

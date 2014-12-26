@@ -515,21 +515,22 @@ def shape2physgeoms(oshape, shape):
 	factor,geom,remains = sorted(factor_geom_remains, key=lambda fgr:fgr[0], reverse=True)[0]
 	return [geom] + shape2physgeoms(oshape, remains)
 
-def centerobjs(gfx,physgeoms):
+def centerobjs(gfx,physgeoms,center=vec3(0,0,0)):
 	if not gfx or not physgeoms:
 		return
 	gfx.q = physgeoms[0].q if physgeoms[0].q != rotq else invrotq
-	off = physgeoms[0].pos
+	offset = physgeoms[0].pos
 	for i,p in enumerate(physgeoms):
 		if type(p) == PhysBox:
-			p.pos -= off
+			p.pos -= offset
 		else:
-			center = reduce(lambda x,y:x+y, p.vertices) / len(p.vertices)
-			p.vertices = [v-center for v in p.vertices]
+			off = reduce(lambda x,y:x+y, p.vertices) / len(p.vertices)
+			p.vertices = [v-off for v in p.vertices]
 			if i == 0:
 				p.pos = vec3(0,0,0)
-				off = center
-	gfx.vertices = [v-off for v in gfx.vertices]
+				offset = off
+	gfx.vertices = [v-offset for v in gfx.vertices]
+	physgeoms[0].pos += center
 
 def shape2obj(shape):
 	gfx,physgeoms = shape2mesh(shape),shape2physgeoms(shape, shape)

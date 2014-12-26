@@ -6,7 +6,7 @@ from vec3 import vec3
 
 GRID = 0.5
 W2E, NW2SE, N2S, NE2SW, E2W, SE2NW, S2N, SW2NE, F2B, B2F, NORMAL_COUNT = range(11)
-chars = ' X><^v`´,/|*ltrb'
+chars = r' X><^v`´\/|*ltrb'
 square_triangles =	[	[[False,False],[False,False]],
 				[[True ,True ],[True ,True ]],
 				[[True ,False],[False,False]],
@@ -66,11 +66,11 @@ class Shape:
 
 
 def _ch2tricnt(ch):
-	if ch == ' ':      return 0
-	if ch == 'X':      return 4
-	if ch in '><^v':   return 1
-	if ch in '`´,/*|': return 2
-	if ch in 'ltrb':   return 3
+	if ch == ' ':       return 0
+	if ch == 'X':       return 4
+	if ch in '><^v':    return 1
+	if ch in '`´\\/*|': return 2
+	if ch in 'ltrb':    return 3
 	raise ValueError('Invalid character %s' % repr(ch))
 
 def _ch2tris(ch):
