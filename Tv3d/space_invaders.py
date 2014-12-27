@@ -27,17 +27,18 @@ invaderspeeds,isi = [(0.5,0,0), (0,0,-0.1), (-0.5,0,0), (0,0,-0.1)],0
 invaders = set()
 for y in range(2):
 	for x in range(8):
-		invaders.add(create_ascii_object(invader, pos=(x*50-50,90-y*20,0), vel=invaderspeeds[0], col=absrndvec())
+		invaders.add(create_ascii_object(invader, pos=(x*50-50,90-y*20,0), vel=invaderspeeds[0], col=absrndvec()))
 
 cam(distance=200)
 
 while loop():
 	if taps():
-		tx = closest_taps(ship.pos()).pos3d(200).x
+		tx = closest_tap(ship.pos()).pos3d(200).x
 		sx = ship.pos().x
 		ship.vel((1 if sx<tx else -1, 0, 0))
 		if abs(sx-tx) < 0.5 and timeout(1):
-			shots += [create_sphere_object(sx+vec3(0,0,4), r=2, vel(0,0,3))]
+			shots += [create_sphere_object(sx+vec3(0,0,4), r=2, vel=(0,0,3))]
+			sound(sound_bang, shots.pos())
 	else:
 		ship.vel((0,0,0))
 	if timeout(3,timer=2):

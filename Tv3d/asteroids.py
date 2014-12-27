@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This prototype tests if right/left tapping of a screen-centered space ship is a good way to steer.
+# This Asteroids-like prototype tests if right/left tapping of a screen-centered space ship is a good way to steer.
 
 from trabant import *
 from trabant.math import *
@@ -13,16 +13,17 @@ shipasc = r'''
   /XXXXXX\
  /XXXXXXXX\
    XX  XX
-'''.strip('\n').replace('\n', '\n---\n')	# Transpose so Y becomes Z.
+'''.strip('\n').replace('\n', '\n---\n')	# Transpose so Z becomes Y.
 rockasc = 'X\\\nXX'	# Slightly irregular shape ftw.
 
 def init():
 	global ship,rocks
 	ship = create_ascii_object(shipasc)
-	ship.create_engine(push_engine, sound=sound_hizz)
-	cam(angle=(-pi/2,0,-pi/2), dist=50, target=ship)	# Camera pointing down, initial "up" is to the left (i.e. iPad in portrait layout).
+	ship.create_engine(push_engine, sound=sound_engine_hizz)
+	cam(angle=(-pi/2,0,-pi/2), distance=50, target=ship)	# Camera pointing down, initial "up" is to the left (i.e. iPad in portrait layout).
 	rocks = []
 
+init()
 shipdir = quat()
 while loop():
 	shippos,shipvel = ship.pos(),ship.vel()
@@ -30,9 +31,9 @@ while loop():
 		rocks += [create_ascii_object(rockasc, pos=shippos+shipvel.normal()*70, angular_velocity=(0.3,0.5,0.7))]
 	# Steering.
 	engineforce = 0.1
-	if tapping_left_of(shippos, shipdir*vec3(0,0,-1)):
+	if tap_above_plane(shippos, shipdir*vec3(-1,0,0)):
 		shipdir,engineforce = shipdir.rotate_z(-0.1),1
-	if tapping_right_of(shippos, shipdir*vec3(0,0,-1)):
+	if tap_above_plane(shippos, shipdir*vec3(+1,0,0)):
 		shipdir,engineforce = shipdir.rotate_z(+0.1),1
 	ship.pos(orientation=shipdir)
 	ship.engine[0].force(shipdir*vec3(0,engineforce,0))

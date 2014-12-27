@@ -21,22 +21,22 @@ XXXXXXXXXXXXXXXXXXXXXXXX
 main_rotor,tail_rotor,body = [create_ascii_object(part,col=col) for part,col in [(main_rotor,'#444'), (tail_rotor,'#444'), (body,'#623')]]
 main_rotor.pos((1,0,3.5))
 main_rotor.weight(0.5)
-body.joint(hinge_joint, main_rotor, (0,0,1))
+body.create_joint(hinge_joint, main_rotor, (0,0,1))
 thrust = []	# Collective and throttle engines go here
-thrust += [body.create_engine(rotor_engine, max_velocity=(100,40), sound=sound_hizz)]
+thrust += [body.create_engine(rotor_engine, max_velocity=(100,40), sound=sound_engine_hizz)]
 thrust += [body.create_engine(collective_engine)]
-roll = body.create_engine(tilt_engine, offset(0,-1))
-pitch = body.create_engine(tilt_engine, offset(3,0))
+roll = body.create_engine(tilt_engine, offset=(0,-1))
+pitch = body.create_engine(tilt_engine, offset=(3,0))
 tail_rotor.pos((16,-1,-0.1))
 tail_rotor.weight(0.25)
-body.joint(hinge_joint, tail_rotor, (0,-1,0))
+body.create_joint(hinge_joint, tail_rotor, (0,-1,0))
 thrust += [body.create_engine(rotor_engine, max_velocity=(70,70))]
 yaw = body.create_engine(collective_engine)
 
 # Setup ground, gravity, camera angle and controls.
-create_static_cube(pos=(0,0,-252), size=500)
+create_cube_object(pos=(0,0,-252), side=500, static=True)
 gravity((0,0,-9))
-cam(angle=(-0.3,0,0), dist=40, target=body)
+cam(angle=(-0.3,0,0), distance=40, target=body)
 left,right = create_joystick((0,1)),create_joystick((1,1))
 
 while loop():

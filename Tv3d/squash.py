@@ -4,13 +4,6 @@
 
 from trabant import *
 
-# ASCII geometry.
-ball = r'''
- ^
-<X>
- v
-'''.strip('\n')
-
 gravity((0,0,-3))	# We're on a low gravity planet.
 ball = create_sphere_object()
 while loop():

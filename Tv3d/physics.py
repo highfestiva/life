@@ -6,7 +6,7 @@ from trabant import *
 from trabant.math import *
 
 gravity((0,0,-9))
-create_static_cube(pos=(0,0,-105), size=200)
+create_cube_object(pos=(0,0,-105), side=200, static=True)
 geometry = 'XX'	# ASCII geometry.
 things = [create_ascii_object(geometry, pos=randvec()*5+vec3(0,0,5), col=absrandvec()) for _ in range(10)]
 
