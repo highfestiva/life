@@ -17,7 +17,7 @@ while loop():
 	if not tetromino:
 		tetromino_index = random.choice(range(len(tetrominos)))
 		tetromino = create_ascii_object(tetrominos[tetromino_index], pos=(0,0,gridsize.y/2), col=colors[tetromino_index])
-		tetromino_offset = vec3(1.5,0,0) - last_ascii_top_left_offset()
+		tetromino_offset = vec3(1.5,0,0) - last_ascii_top_left_offset
 		orientation = quat()
 
 	if taps() and timeout(0.3):	# Steering.

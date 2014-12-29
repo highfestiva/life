@@ -32,6 +32,9 @@ class vec3:
 	def abs(self):
 		return vec3(abs(self.x), abs(self.y), abs(self.z))
 
+	def angle_z(self, v):
+		return 0
+
 	def __add__(self,v):
 		return vec3(self.x+v.x, self.y+v.y, self.z+v.z)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# This Asteroids-like prototype tests if right/left tapping of a screen-centered space ship is a good way to steer.
+# Asteroids-like prototype.
 
 from trabant import *
 from trabant.math import *
@@ -30,13 +30,11 @@ while loop():
 	if timeout(2):	# Create a new rock every two seconds.
 		rocks += [create_ascii_object(rockasc, pos=shippos+shipvel.normal()*70, angular_velocity=(0.3,0.5,0.7))]
 	# Steering.
-	engineforce = 0.1
-	if tap_above_plane(shippos, shipdir*vec3(-1,0,0)):
-		shipdir,engineforce = shipdir.rotate_z(-0.1),1
-	if tap_above_plane(shippos, shipdir*vec3(+1,0,0)):
-		shipdir,engineforce = shipdir.rotate_z(+0.1),1
+	if taps():
+		angle = (shippos-closest_tap(shippos).pos3d(50)).angle_z(vec3(0,1,0))
+		shipdir = quat().rotate_z(angle)
 	ship.pos(orientation=shipdir)
-	ship.engine[0].force(shipdir*vec3(0,engineforce,0))
+	ship.engine[0].force(shipdir*vec3(0,1 if taps() else 0.1,0))
 	# Check if we crashed into something, if so explode.
 	if ship in collisions():
 		explode(shippos,shipvel)
