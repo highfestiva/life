@@ -25,7 +25,7 @@ def init():
 
 init()
 shipdir = quat()
-while loop():
+while loop() or True:
 	shippos,shipvel = ship.pos(),ship.vel()
 	if timeout(2):	# Create a new rock every two seconds.
 		rocks += [create_ascii_object(rockasc, pos=shippos+shipvel.normal()*70, angular_velocity=(0.3,0.5,0.7))]

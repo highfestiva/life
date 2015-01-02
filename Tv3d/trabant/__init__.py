@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from trabant.math import *
+import trabant.asc2obj
+import trabant.gameapi
 import time
 
 
@@ -16,46 +18,34 @@ _timers = {}
 
 
 class Engine:
-	def __init__(self, id):
-		self.id = id
+	def __init__(self, oid, eid):
+		self.oid,self.eid = oid,eid
 	def force(self,f):
 		try:
-			gameapi.set_engine_force(self.id, iter(f))
+			gameapi.set_engine_force(self.oid, self.eid, iter(f))
 		except TypeError:
-			gameapi.set_engine_force(self.id, [f])
+			gameapi.set_engine_force(self.oid, self.eid, [f])
 
 class Obj:
 	def __init__(self, id):
 		self.id = id
 		self.engine = []
 	def pos(self, pos=None, orientation=None):
-		if pos:
-			gameapi.setpos(self.id, pos)
-		if oirientation:
-			gameapi.setorientation(self.id, orientation)
-		if not pos and not orientation:
-			return gameapi.getpos(self.id)
-	def vel(self, vel=None):
-		if vel:
-			gameapi.setvel(self.id, vel)
+		if orientation:
+			gameapi.orientation(self.id, orientation)
 		else:
-			return gameapi.getvel(self.id)
+			return gameapi.pos(self.id, pos)
+	def orientation(self, orientation=None):
+		return gameapi.orientation(self.id, orientation)
+	def vel(self, vel=None):
+		return gameapi.vel(self.id, vel)
 	def avel(self, avel=None):
 		'''Angular velocity.'''
-		if avel:
-			gameapi.setavel(self.id, avel)
-		else:
-			return gameapi.getavel(self.id)
+		return gameapi.avel(self.id, avel)
 	def weight(self, w):
-		if w:
-			gameapi.setweight(self.id, w)
-		else:
-			return gameapi.getweight(self.id)
+		return gameapi.weight(self.id, w)
 	def col(self, col=None):
-		if col:
-			gameapi.setcol(self.id, col)
-		else:
-			return gameapi.getcol(self.id)
+		return gameapi.col(self.id, col)
 	def bounce_in_rect(self,ltn,rbf):
 		p,v = self.pos(),self.vel()
 		ltn,rbf = tovec3(ltn),tovec3(rbf)
@@ -67,11 +57,11 @@ class Obj:
 		if p.z > rbf.z: v.z = -abs(v.z)
 		self.vel(v)
 	def create_engine(self, engine_type, max_velocity=None, offset=None, sound=None):
-		eid = gameapi.create_engine(self.id, engine_type, max_velocity, offset, sound):
-		self.engine += [Engine(eid)]
+		eid = gameapi.create_engine(self.id, engine_type, max_velocity, offset, sound)
+		self.engine += [Engine(self.id, eid)]
 		return self.engine[-1]
 	def create_joint(self, joint_type, obj2, axis):
-		gameapi.create_joint(self.id, joint_type, obj2, axis)
+		gameapi.create_joint(self.id, joint_type, obj2.id, axis)
 	def release(self):
 		gameapi.releaseobj(self.id)
 
@@ -99,7 +89,7 @@ def loop():
 	global _taps,_collisions
 	_taps,_collisions = None,None
 	_poll_joysticks()
-	return gameapi.isopen()
+	return gameapi.opened()
 
 def sleep(t):
 	time.sleep(t)
@@ -113,18 +103,18 @@ def timeout(t, timer=0):
 		return True
 	return False
 
-def cam(angle=None, distance=None, target=None, fov=None):
-	gameapi.cam(angle, distance, target, fov)
+def cam(angle=None, distance=None, target=None, pos=None, fov=None):
+	gameapi.cam(tovec3(angle), distance, target.id if target else -1, tovec3(pos), fov)
 
 def fog(distance):
 	gameapi.fog(distance)
 
 def gravity(g):
-	gameapi.gravity(g)
+	gameapi.gravity(tovec3(g))
 
 def create_ascii_object(ascii, pos=None, vel=None, angular_velocity=None, col=None, static=False):
 	global last_ascii_top_left_offset
-	gfx,phys = asc2obj.asc2obj(ascii)
+	gfx,phys = asc2obj.str2obj(ascii)
 	last_ascii_top_left_offset = asc2obj.last_ascii_top_left_offset
 	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, col=col)
 
@@ -141,10 +131,10 @@ def create_sphere_object(pos=None, radius=1, vel=None, angular_velocity=None, co
 	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, col=col)
 
 def explode(pos, vel=None):
-	gameapi.explode(pos,vel)
+	gameapi.explode(tovec3(pos),tovec3(vel))
 
 def sound(snd, pos, vel=None):
-	gameapi.playsound(snd, pos, vel)
+	gameapi.playsound(snd, tovec3(pos), tovec3(vel))
 
 def rect_bound(pos,ltn,rbf):
 	pos,ltn,rbf = tovec3(pos),tovec3(ltn),tovec3(rbf)
@@ -190,14 +180,24 @@ def _poll_joysticks():
 		j = _joysticks[jid]
 		j.x,j.y = x,y
 
-def _create_object(gfx, phys, static, pos, vel, angular_velocity, col)
-	oid = gameapi.createobj(gfx,phys,static,pos)
+def _create_object(gfx, phys, static, pos, vel, angular_velocity, col):
+	objpos = tovec3(pos) if pos else vec3(0,0,0)
+	gameapi.initgfxmesh(gfx.q, gfx.pos, gfx.vertices, gfx.indices)
+	gameapi.clearprepphys()
+	for p in phys:
+		if 'Box' in str(type(p)):
+			gameapi.initphysbox(p.q, p.pos+objpos, p.size)
+		elif 'Sphere' in str(type(p)):
+			gameapi.initphysshpere(p.q, p.pos+objpos, p.radius)
+		elif 'Mesh' in str(type(p)):
+			gameapi.initphysmesh(p.q, p.pos+objpos, p.vertices, p.indices)
+	oid = gameapi.createobj(static)
 	gameapi.waitload(oid)
 	o = Obj(oid)
 	if vel:
-		o.vel(vel)
+		o.vel(tovec3(vel))
 	if angular_velocity:
-		o.avel(angular_velocity)
+		o.avel(tovec3(angular_velocity))
 	if col:
 		o.col(col)
 	return o

@@ -11,6 +11,8 @@ def absrndvec():
 	return vec3(*[random() for _ in range(3)])
 
 def tovec3(v):
+	if v == None:
+		return v
 	if type(v) == vec3:
 		return v
 	else:
