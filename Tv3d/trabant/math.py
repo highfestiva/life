@@ -7,6 +7,9 @@ from random import random
 def almosteq(a,b):
 	return int(((a-b) if a>b else (b-a))*10000) == 0
 
+def rndvec():
+	return vec3(*[random()*2-1 for _ in range(3)])
+
 def absrndvec():
 	return vec3(*[random() for _ in range(3)])
 
@@ -15,12 +18,23 @@ def tovec3(v):
 		return v
 	if type(v) == vec3:
 		return v
-	else:
+	elif len(v) == 3:
 		return vec3(*v)
+
+def toquat(q):
+	if q == None:
+		return q
+	if type(q) == quat:
+		return q
+	elif len(q) == 4:
+		return quat(*q)
+
 
 class vec3:
 	def __init__(self, *args):
-		if type(args[0]) == vec3:
+		if not args:
+			self.x,self.y,self.z = 1,0,0
+		elif type(args[0]) == vec3:
 			v = args[0]
 			self.x,self.y,self.z = v.x,v.y,v.z
 		else:
@@ -65,7 +79,10 @@ class vec3:
 		return vec3(-self.x, -self.y, -self.z)
 
 	def __eq__(self,v):
-		return almosteq(self.x,v.x) and almosteq(self.y,v.y) and almosteq(self.z,v.z)
+		v = tovec3(v)
+		if v:
+			return almosteq(self.x,v.x) and almosteq(self.y,v.y) and almosteq(self.z,v.z)
+		return False
 
 	def __hash__(self):
 		return hash((self.x,self.y,self.z))
@@ -110,8 +127,11 @@ class quat:
 	def rotate_z(self,a):
 		return self
 
-	def __eq__(self,v):
-		return all(almosteq(e,f) for e,f in zip(self.q,v.q))
+	def __eq__(self,q):
+		q = toquat(q)
+		if q:
+			return all(almosteq(e,f) for e,f in zip(self.q,q.q))
+		return False
 
 	def __str__(self):
 		return 'quat(%g,%g,%g,%g)' % tuple(float(f) for f in self.q)

@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 
+import socket
+from trabant.math import vec3
+
 
 sock = None
 proc = None
 
 
 def open(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541'):
-	opencom(addr)
+	_opencom(addr)
 	r,g,b = _htmlcol(bg)
 	set('Ui.3D.ClearRed', r)
 	set('Ui.3D.ClearGreen', g)
@@ -19,7 +22,7 @@ def open(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541'):
 	set('Ui.3D.FOV', float(fov))
 
 def close():
-	closecom()
+	_closecom()
 
 def reset():
 	'''Kill all objects and joysticks. Set some default values.'''
@@ -29,7 +32,7 @@ def debug(enable):
 	set('Debug.Enable', enable)
 
 def waitload(oid):
-	return cmd('wait-until-loaded %i' % oid)
+	cmd('wait-until-loaded %i' % oid)
 
 def opened():
 	return sock != None
@@ -76,9 +79,14 @@ def taps():
 def accelerometer():
 	return cmd('get-accelerometer')
 
+def create_joystick(x,y):
+	return cmd('create-joystick %f %f' % (x,y), int)
+
 def joystick_data():
 	return cmd('get-joystick-data')
 
+def get_aspect_ratio():
+	return cmd('get-aspect-ratio', float)
 
 def clearprepphys():
 	cmd('clear-phys')
@@ -109,7 +117,7 @@ def setmesh(vertices, indices):
 
 def createobj(static):
 	static = 'static' if static else 'dynamic'
-	return cmd('create-object %s' % static)
+	return cmd('create-object %s' % static, int)
 
 def releaseobj(oid):
 	cmd('release-object %i' % oid)
@@ -118,10 +126,10 @@ def release_all_objects():
 	cmd('release-all-objects')
 
 def create_engine(oid, engine_type, max_velocity, offset, sound):
-	return cmd('create-engine %i %s %s %s %s' % (oid, engine_type, _args2str(max_velocity, '0 0'), _args2str(offset, '0 0'), sound if sound else 'none'))
+	return cmd('create-engine %i %s %s %s %s' % (oid, engine_type, _args2str(max_velocity, '0 0'), _args2str(offset, '0 0'), sound if sound else 'none'), int)
 
 def create_joint(oid, joint_type, oid2, axis):
-	return cmd('create-joint %i %s %i %s' % (oid, joint_type, oid2, _args2str(axis)))
+	return cmd('create-joint %i %s %i %s' % (oid, joint_type, oid2, _args2str(axis)), int)
 
 
 def pos(oid, pos):
@@ -147,23 +155,27 @@ def set_engine_force(oid, eid, xyz):
 
 
 def getsetoidcmd(name, oid, *args):
-	if args:
+	if args != (None,):
 		l = []
 		for arg in args:
 			try:	l += [str(a) for a in arg if a != None]
 			except:	l += [str(arg)]
 		cmd('set-%s %i %s' % (name, oid, ' '.join(l)))
 	else:
-		return cmd('get-%s %i' % (name, oid))
+		result = cmd('get-%s %i' % (name, oid))
+		if result:
+			result = [float(r) for r in result.split()]
+			return result[0] if len(result) == 1 else vec3(*result)
 
-def cmd(c):
+def cmd(c, return_type=str):
 	global sock
-	if sock and s:
+	if sock and c:
 		try:
-			sock.send((s+'\n').encode())
-			return sock.recv(1024).decode()
+			sock.send((c+'\n').encode())
+			result = sock.recv(1024).decode()
+			return return_type(result[3:]) if result.startswith('ok\n') else result
 		except socket.error as e:
-			print('tv3d connection failure:', e)
+			print('TrabantServer connection failure:', e)
 			sock = None
 
 def set(setting, value):
@@ -171,12 +183,15 @@ def set(setting, value):
 		value = str(value).lower()
 	cmd('#%s %s' % (setting, str(value)))
 
-def opencom(addr):
+
+########################################
+
+
+def _opencom(addr):
 	global sock,proc
 	if sock:
 		return
 	_run_local_server(addr)
-	import socket
 	ip,port = addr.split(':')
 	try:
 		sock = socket.socket()
@@ -185,7 +200,7 @@ def opencom(addr):
 		sock = None
 		print('TrabantServer not available on %s.' % addr)
 
-def closecom():
+def _closecom():
 	global sock,proc
 	if sock:
 		if proc:
@@ -214,11 +229,11 @@ def _run_local_server(addr):
 		import atexit
 		import signal
 		def ctrlc(s,f):
-			closecom()
+			_closecom()
 			import sys
 			sys.exit(0)
 		signal.signal(signal.SIGINT, ctrlc)
-		atexit.register(closecom)
+		atexit.register(_closecom)
 
 def _htmlcol(col):
 	if col:

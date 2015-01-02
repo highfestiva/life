@@ -44,7 +44,7 @@ def update_terrain(pos):
 	'''Add new visible patches, drop no longer visible ones.'''
 	global terrain_meshes
 	meshes = {}
-	top,left = pos.y//terrain_patch_size-2,pos.x//terrain_patch_size-2
+	top,left = int(pos.y)//terrain_patch_size-2,int(pos.x)//terrain_patch_size-2
 	for y in range(top,top+5):
 		for x in range(left,left+5):
 			key = y*3301919+x	# Anything large prime is good.

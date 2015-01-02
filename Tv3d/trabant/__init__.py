@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from math import radians,tan
 from trabant.math import *
 import trabant.asc2obj
 import trabant.gameapi
+import trabant.objgen
 import time
 
 
 turn_engine,roll_engine,push_engine,rotor_engine,collective_engine,tilt_engine = 'turn roll push rotor collective tilt'.split()
 hinge_joint,hinge2_joint = 'hinge hinge2'.split()
 sound_explosion,sound_ping,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion = 'explosion ping bang hizz wobble combustion'.split()
-last_ascii_top_left_offset = vec3(0,0,0)
+_last_ascii_top_left_offset = None
+_fov_radians = 0.5
+_aspect_ratio = 1.33333
 _taps = None
 _collisions = None
 _joysticks = {}
 _timers = {}
+_objects = {}
 
 
 class Engine:
@@ -61,14 +66,16 @@ class Obj:
 		self.engine += [Engine(self.id, eid)]
 		return self.engine[-1]
 	def create_joint(self, joint_type, obj2, axis):
-		gameapi.create_joint(self.id, joint_type, obj2.id, axis)
+		return gameapi.create_joint(self.id, joint_type, obj2.id, axis)
 	def release(self):
 		gameapi.releaseobj(self.id)
+		global _objects
+		del _objects[self.id]
 
 
 class Tap:
-	def __init__(self, xy):
-		self.x,self.y = xy
+	def __init__(self, x, y):
+		self.x,self.y = x,y
 	def pos3d(self, z):
 		return _screen2world(x,y)*z
 	def vel3d(self,z):
@@ -78,9 +85,9 @@ class Tap:
 
 
 class Joystick:
-	def __init__(self, crdx, crdy):
+	def __init__(self, id):
 		'''Screen X,Y in [0,1].'''
-		self.crdx,self.crdy = crdx,crdy
+		self.id = id
 		self.x,self.y = 0,0
 
 
@@ -105,6 +112,9 @@ def timeout(t, timer=0):
 
 def cam(angle=None, distance=None, target=None, pos=None, fov=None):
 	gameapi.cam(tovec3(angle), distance, target.id if target else -1, tovec3(pos), fov)
+	if fov:
+		global _fov_radians
+		_fov_radians = radians(fov)
 
 def fog(distance):
 	gameapi.fog(distance)
@@ -113,12 +123,12 @@ def gravity(g):
 	gameapi.gravity(tovec3(g))
 
 def create_ascii_object(ascii, pos=None, vel=None, angular_velocity=None, col=None, static=False):
-	global last_ascii_top_left_offset
+	global _last_ascii_top_left_offset
 	gfx,phys = asc2obj.str2obj(ascii)
-	last_ascii_top_left_offset = asc2obj.last_ascii_top_left_offset
+	_last_ascii_top_left_offset = asc2obj.last_centering_offset()
 	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, col=col)
 
-def create_mesh_object(vertices, triangles, pos=None, vel=None, angular_velocity=None, static=False):
+def create_mesh_object(vertices, triangles, pos=None, vel=None, angular_velocity=None, col=None, static=False):
 	gfx,phys = objgen.createmesh(vertices,triangles)
 	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, col=col)
 
@@ -129,6 +139,14 @@ def create_cube_object(pos=None, side=1, vel=None, angular_velocity=None, static
 def create_sphere_object(pos=None, radius=1, vel=None, angular_velocity=None, col=None, static=False):
 	gfx,phys = objgen.createsphere(radius)
 	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, col=col)
+
+def release_all_objects():
+	gameapi.release_all_objects()
+	global _objects
+	_objects = {}
+
+def last_ascii_top_left_offset():
+	return _last_ascii_top_left_offset
 
 def explode(pos, vel=None):
 	gameapi.explode(tovec3(pos),tovec3(vel))
@@ -149,13 +167,15 @@ def rect_bound(pos,ltn,rbf):
 def collisions():
 	global _collisions
 	if _collisions == None:
-		_collisions = gameapi.pop_collisions()
+		oids = [int(line.split()[0]) for line in gameapi.pop_collisions().split('\n') if line]
+		_collisions = [_objects[oid] for oid in oids]
 	return _collisions
 
 def taps():
 	global _taps
 	if _taps == None:
-		_taps = gameapi.taps()
+		taps_coords = [[int(w) for w in line.split()[:4]] for line in gameapi.taps().split('\n') if line]
+		_taps = [Tap(x,y) for x,y,startx,starty in taps_coords]
 	return _taps
 
 def closest_tap(pos):
@@ -165,18 +185,27 @@ def closest_tap(pos):
 	return min(taps(), key=lambda t: t._distance2(x,y))
 
 def create_joystick(xy):
+	jid = gameapi.create_joystick(*xy)
 	global _joysticks
-	j = Joystick(*xy)
+	j = Joystick(jid)
 	_joysticks[j.id] = j
 	return j
 
 def accelerometer():
-	return gameapi.accelerometer()
+	return tovec3([float(a) for a in gameapi.accelerometer().split()])
+
+
+########################################
+
 
 def _poll_joysticks():
 	if not _joysticks:
 		return
-	for jid,x,y in gameapi.joystick_data():
+	jdata = []
+	for line in [l for l in gameapi.joystick_data().split('\n') if l]:
+		w = line.split()
+		jdata += (int(w[0]),float(w[1]),float(w[2]))
+	for jid,x,y in jdata:
 		j = _joysticks[jid]
 		j.x,j.y = x,y
 
@@ -194,6 +223,8 @@ def _create_object(gfx, phys, static, pos, vel, angular_velocity, col):
 	oid = gameapi.createobj(static)
 	gameapi.waitload(oid)
 	o = Obj(oid)
+	global _objects
+	_objects[oid] = o
 	if vel:
 		o.vel(tovec3(vel))
 	if angular_velocity:
@@ -203,12 +234,24 @@ def _create_object(gfx, phys, static, pos, vel, angular_velocity, col):
 	return o
 
 def _world2screen(crd):
-	# Project according to current FoV and scale [0,1].
-	return (0,0)
+	'''Return screen X,Y in [0,1].'''
+	iar = 1/_get_aspect_ratio()
+	itana = 1/tan(_fov_radians*0.5);
+	x,z = crd.x/crd.y,crd.z/crd.y
+	return x*itana*iar+1, -z*itana+1
 
 def _screen2world(x,y):
-	# Project according to current FoV and scale from X and Y in [0,1] to Z=1.
-	return vec3(x,y,1)
+	'''Return world X,Z scaled to Y=1.'''
+	tana = tan(_fov_radians*0.5);
+	dx = tana * (x*2-1) * _get_aspect_ratio()
+	dy = tana * (1-y*2);
+	return _cam_q * vec3(dx, 1, dy).normalize()
+
+def _get_aspect_ratio():
+	if timeout(10,timer=-152):
+		global _aspect_ratio
+		_aspect_ratio = gameapi.get_aspect_ratio()
+	return _aspect_ratio
 
 def _open():
 	global _joysticks,_timers

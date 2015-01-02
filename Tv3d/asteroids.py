@@ -28,7 +28,7 @@ shipdir = quat()
 while loop() or True:
 	shippos,shipvel = ship.pos(),ship.vel()
 	if timeout(2):	# Create a new rock every two seconds.
-		rocks += [create_ascii_object(rockasc, pos=shippos+shipvel.normal()*70, angular_velocity=(0.3,0.5,0.7))]
+		rocks += [create_ascii_object(rockasc, pos=shippos+shipvel.normalize()*70, angular_velocity=(0.3,0.5,0.7))]
 	# Steering.
 	if taps():
 		angle = (shippos-closest_tap(shippos).pos3d(50)).angle_z(vec3(0,1,0))

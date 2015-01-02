@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import trabant.asc2obj.asc
+import trabant.asc as asc
+from trabant.objects import *
 from functools import reduce
 from math import sqrt,pi,cos,sin
 from trabant.math import *
@@ -11,49 +12,8 @@ sq2 = sqrt(2)
 qa,qc = cos(pi/8),sin(pi/8)
 rotq = quat(qa, 0, qc, 0)
 invrotq = quat(qa, 0, -qc, 0)
-last_ascii_top_left_offset = 0
+_last_centering_offset = vec3(0,0,0)
 
-
-class GfxMesh:
-	def __init__(self, q, pos, vertices, indices):
-		self.q = q
-		self.pos = pos
-		self.vertices = vertices
-		self.indices = indices
-	def __repr__(self):
-		return 'gfx-mesh (%g,%g,%g,%g,%g,%g,%g) %s %s' % tuple(list(self.q)+list(self.pos)+['('+', '.join(str(v) for v in self.vertices)+')']+[tuple(self.indices)])
-
-class PhysBox:
-	def __init__(self, q, pos, size):
-		self.q = q
-		self.pos = pos
-		self.size = size
-	def __repr__(self):
-		return 'phys-box (%g,%g,%g,%g,%g,%g,%g) %g %g %g' % tuple(list(self.q)+list(self.pos)+[float(s) for s in self.size])
-
-class PhysSphere:
-	def __init__(self, q, pos, radius):
-		self.q = q
-		self.pos = pos
-		self.radius = radius
-	def __repr__(self):
-		return 'phys-sphere (%g,%g,%g,%g,%g,%g,%g) %g' % tuple(list(self.q)+list(self.pos)+[float(radius)])
-
-class PhysMesh:
-	def __init__(self, q, pos, vertices, indices):
-		self.q = quat(q)
-		self.pos = vec3(pos)
-		self.vertices = vertices[:]
-		self.indices = indices[:]
-	def __repr__(self):
-		return 'phys-mesh (%g,%g,%g,%g,%g,%g,%g) %s %s' % tuple(list(self.q)+list(self.pos)+['('+', '.join(str(v) for v in self.vertices)+')']+[tuple(self.indices)])
-
-class Obj:
-	def __init__(self, gfxmesh, physgeoms):
-		self.gfxmesh = gfxmesh
-		self.physgeoms = physgeoms
-	def __repr__(self):
-		return str(self.gfxmesh) + '\n'.join((print(geom) for geom in self.physgeoms))
 
 class _Triangle:
 	'''Internal representation of triangle face in a mesh.'''
@@ -538,6 +498,9 @@ def centerobjs(gfx,physgeoms,center=vec3(0,0,0)):
 				offset = off
 	gfx.vertices = [v-offset for v in gfx.vertices]
 	physgeoms[0].pos += center
+
+def last_centering_offset():
+	return _last_centering_offset
 
 def shape2obj(shape):
 	gfx,physgeoms = shape2mesh(shape),shape2physgeoms(shape, shape)
