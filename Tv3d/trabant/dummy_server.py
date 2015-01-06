@@ -21,8 +21,8 @@ def create_object(): return counter
 def create_engine(): return counter
 def create_joint(): return counter
 def create_joystick(): return counter
-def get_position(): return '0 0.1 0'
-def get_velocity(): return '0 0.1 0'
+def position(): return '0 0.1 0'
+def velocity(): return '0 0.1 0'
 def get_accelerometer(): return '0 9 0'
 
 print('Dummy server up and running.')
@@ -33,8 +33,8 @@ while 1:
 			data = client.recv(size).decode()
 			result = ''
 			try:
+				print(data.strip())
 				f = data.split()[0]
-				print(f)
 				result = str(eval(f.replace('-','_')+'()'))
 			except:
 				pass

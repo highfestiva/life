@@ -6,11 +6,11 @@ from trabant import *
 
 steps = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
 pos,step = vec3(0,0,0),steps[0]
-block = lambda p: create_ascii_object('X', pos=p)
+block = lambda p: create_ascii_object('X', pos=p, static=True)
 blocks,worm = [block(pos)],[pos]
 length = 5
 
-cam(distance=25)
+cam(distance=50)
 
 while loop():
 	sleep(1)
@@ -26,7 +26,7 @@ while loop():
 			blocks[-1].release()
 			blocks,worm = blocks[:-1],worm[:-1]
 			sleep(0.4)
-	blocks += [block(pos)]
+	blocks = [block(pos)]+blocks
 	worm += [pos]
 	if timeout(3):	# Every few seconds the worm gets longer.
 		length += 1

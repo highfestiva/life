@@ -29,27 +29,30 @@ namespace Tv3d
 Tv3dTicker::Tv3dTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity)
 {
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKX, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKY, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKZ, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMSLIDE, 0.5);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 3.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLEX, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLEY, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLEZ, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEX, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEY, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEZ, 0.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_PENRED, 0.7);
-	v_set(UiCure::GetSettings(), RTVAR_UI_PENGREEN, 0.3);
-	v_set(UiCure::GetSettings(), RTVAR_UI_PENBLUE, 0.6);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, true);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 1.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 1.0);
-	v_set(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 1.0);
-	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 60);
-	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
-	v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKX, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKY, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKZ, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMSLIDE, 0.5);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 3.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLEX, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLEY, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLEZ, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEX, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEY, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEZ, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_PENRED, 0.7);
+	v_override(UiCure::GetSettings(), RTVAR_UI_PENGREEN, 0.3);
+	v_override(UiCure::GetSettings(), RTVAR_UI_PENBLUE, 0.6);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, true);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 1.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 1.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 1.0);
+	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 60);
+	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
+	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYX, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYY, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYZ, -9.8);
+	v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 }
 
 Tv3dTicker::~Tv3dTicker()
@@ -99,7 +102,7 @@ bool Tv3dTicker::OpenUiManager()
 			if (lFontHeight > 29.0)
 			{
 				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/600.0;
-				v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
+				v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 			}
 		}
 		lOk = mUiManager->OpenRest();

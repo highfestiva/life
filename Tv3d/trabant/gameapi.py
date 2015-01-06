@@ -15,9 +15,9 @@ def open(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541'):
 	set('Ui.3D.ClearGreen', g)
 	set('Ui.3D.ClearBlue', b)
 	r,g,b = _htmlcol(fg)
-	set('Ui.3D.PenRed', r)
-	set('Ui.3D.PenGreen', g)
-	set('Ui.3D.PenBlue', b)
+	set('Ui.PenRed', r)
+	set('Ui.PenGreen', g)
+	set('Ui.PenBlue', b)
 	set('Physics.FPS', int(fps))
 	set('Ui.3D.FOV', float(fov))
 
@@ -59,22 +59,22 @@ def fog(distance):
 	set('Ui.3D.FogDistance', float(distance))
 
 def gravity(g):
-	cmd('Phys.GravityX %f' % g.x)
-	cmd('Phys.GravityY %f' % g.y)
-	cmd('Phys.GravityZ %f' % g.z)
+	set('Physics.GravityX', float(g.x))
+	set('Physics.GravityY', float(g.y))
+	set('Physics.GravityZ', float(g.z))
 
 def explode(pos,vel):
 	cmd('explode %s %s' % (_args2str(pos,'0 0 0'), _args2str(vel,'0 0 0')))
 
 def playsound(snd, pos, vel):
-	cmd('play-sound %s %s %s' % (snd, _args2str(pos,'0 0'), _args2str(vel,'0 0')))
+	cmd('play-sound %s %s %s' % (snd, _args2str(pos,'0 0 0'), _args2str(vel,'0 0 0')))
 
 
 def pop_collisions():
 	return cmd('pop-collisions')
 
 def taps():
-	return cmd('get-taps')
+	return cmd('get-touch-drags')
 
 def accelerometer():
 	return cmd('get-accelerometer')
@@ -112,7 +112,7 @@ def prepgfxmesh(orientation, pos):
 	cmd('prep-gfx-mesh %f %f %f %f %f %f %f' % tuple((pq for pq in orientation[:]+pos[:])))
 
 def setmesh(vertices, indices):
-	cmd('set-vertices %s' % ' '.join((str(v) for v in vertices)))
+	cmd('set-vertices %s' % ' '.join(str(f) for v in vertices for f in v))
 	cmd('set-indices %s' % ' '.join((str(i) for i in indices)))
 
 def createobj(static):
@@ -120,10 +120,10 @@ def createobj(static):
 	return cmd('create-object %s' % static, int)
 
 def releaseobj(oid):
-	cmd('release-object %i' % oid)
+	cmd('delete-object %i' % oid)
 
 def release_all_objects():
-	cmd('release-all-objects')
+	cmd('delete-all-objects')
 
 def create_engine(oid, engine_type, max_velocity, offset, sound):
 	return cmd('create-engine %i %s %s %s %s' % (oid, engine_type, _args2str(max_velocity, '0 0'), _args2str(offset, '0 0'), sound if sound else 'none'), int)
@@ -155,28 +155,19 @@ def set_engine_force(oid, eid, xyz):
 
 
 def getsetoidcmd(name, oid, *args):
+	l = []
 	if args != (None,):
-		l = []
 		for arg in args:
-			try:	l += [str(a) for a in arg if a != None]
-			except:	l += [str(arg)]
-		cmd('set-%s %i %s' % (name, oid, ' '.join(l)))
-	else:
-		result = cmd('get-%s %i' % (name, oid))
-		if result:
-			result = [float(r) for r in result.split()]
-			return result[0] if len(result) == 1 else vec3(*result)
+			l += [str(a) for a in arg if a != None]
+	result = cmd('%s %i %s' % (name, oid, ' '.join(l)))
+	if not l and result:
+		result = [float(r) for r in result.split()]
+		return result[0] if len(result) == 1 else vec3(*result)
 
 def cmd(c, return_type=str):
-	global sock
-	if sock and c:
-		try:
-			sock.send((c+'\n').encode())
-			result = sock.recv(1024).decode()
-			return return_type(result[3:]) if result.startswith('ok\n') else result
-		except socket.error as e:
-			print('TrabantServer connection failure:', e)
-			sock = None
+	sock.send((c+'\n').encode())
+	result = sock.recv(1024).decode()
+	return return_type(result[3:]) if result.startswith('ok\n') else result
 
 def set(setting, value):
 	if type(value) == bool:

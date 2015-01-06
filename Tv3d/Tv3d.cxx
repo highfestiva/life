@@ -114,7 +114,7 @@ void Tv3d::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, false);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, true);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);

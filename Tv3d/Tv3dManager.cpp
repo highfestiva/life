@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "Tv3dManager.h"
+#include <algorithm>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/CyclicArray.h"
@@ -13,6 +14,7 @@
 #include "../Lepra/Include/SystemManager.h"
 #include "../Lepra/Include/TimeLogger.h"
 #include "../Lepra/Include/Unordered.h"
+#include "../Tbc/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiIconButton.h"
@@ -109,23 +111,35 @@ Tv3dManager::~Tv3dManager()
 
 
 
-void Tv3dManager::DeleteObjects()
+void Tv3dManager::UserReset()
 {
-	std::vector<Cure::GameObjectId>::iterator x;
-	for (x = mObjects.begin(); x != mObjects.end(); ++x)
+	Cure::RuntimeVariableScope* lScope = GetVariableScope();
+	const std::list<str> lVariableList = lScope->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE);
+	std::list<str>::const_iterator x = lVariableList.begin();
+	for (; x != lVariableList.end(); ++x)
 	{
-		GetContext()->PostKillObject(*x);
+		const str lName = *x;
+		if (strutil::StartsWith(lName, _T("Ui.3D.Clear")) || strutil::StartsWith(lName, _T("Ui.3D.FOV")) || strutil::StartsWith(lName, _T("Ui.3D.Clip"))
+			 || strutil::StartsWith(lName, _T("Ui.3D.Cam")) || strutil::StartsWith(lName, _T("Ui.Pen")))
+		{
+			continue;
+		}
+		lScope->ResetDefaultValue(lName);
 	}
-	mObjects.clear();
+
+	ScopeLock _(GetTickLock());
+	// TODO: Kill all joysticks and collisions.
 }
 
-int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects)
+int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, bool pIsStatic)
 {
+	ScopeLock _(GetTickLock());
+
 	Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	quat rot, q, pq;
 	rot.RotateAroundWorldX(PIF/-2);
 	q = rot;
-	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD, pIsStatic? Tbc::ChunkyPhysics::STATIC : Tbc::ChunkyPhysics::DYNAMIC);
 	if (pPhysObjects.empty())
 	{
 		lObject->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
@@ -206,8 +220,247 @@ int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArra
 	lObject->AddGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b));
 	q = q.GetInverse() * pGfxObject.q.GetInverse() * q;
 	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = q;
-	mObjects.push_back(lObject->GetInstanceId());
+	mObjects.insert(lObject->GetInstanceId());
+	return lObject->GetInstanceId();
+}
+
+void Tv3dManager::DeleteObject(int pObjectId)
+{
+	ScopeLock _(GetTickLock());
+	GetContext()->PostKillObject(pObjectId);
+	std::set<Cure::GameObjectId>::iterator x = mObjects.find(pObjectId);
+	if (x != mObjects.end())
+	{
+		mObjects.erase(x);
+	}
+}
+
+void Tv3dManager::DeleteAllObjects()
+{
+	ScopeLock _(GetTickLock());
+	std::set<Cure::GameObjectId>::iterator x;
+	for (x = mObjects.begin(); x != mObjects.end(); ++x)
+	{
+		GetContext()->PostKillObject(*x);
+	}
+	mObjects.clear();
+}
+
+bool Tv3dManager::IsLoaded(int pObjectId)
+{
+	ScopeLock _(GetTickLock());
+	return !!GetContext()->GetObject(pObjectId);
+}
+
+void Tv3dManager::Expload(const vec3& pPos, const vec3& pVel)
+{
+	ScopeLock _(GetTickLock());
+	(void)pPos; (void)pVel;
+}
+
+void Tv3dManager::PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel)
+{
+	ScopeLock _(GetTickLock());
+	(void)pSound; (void)pPos; (void)pVel;
+}
+
+Tv3dManager::CollisionList Tv3dManager::PopCollisions()
+{
+	ScopeLock _(GetTickLock());
+	CollisionList lList;
+	return lList;
+}
+
+const Tv3dManager::DragList& Tv3dManager::GetTouchDrags() const
+{
+	ScopeLock _(GetTickLock());
+	return mUiManager->GetDragManager()->GetDragList();
+}
+
+vec3 Tv3dManager::GetAccelerometer() const
+{
+	ScopeLock _(GetTickLock());
+	return vec3(0,9,0);
+}
+
+int Tv3dManager::CreateJoystick(float x, float y)
+{
+	ScopeLock _(GetTickLock());
+	(void)x; (void)y;
 	return 0;
+}
+
+Tv3dManager::JoystickDataList Tv3dManager::GetJoystickData() const
+{
+	ScopeLock _(GetTickLock());
+	JoystickDataList lList;
+	return lList;
+}
+
+float Tv3dManager::GetAspectRatio() const
+{
+	return mUiManager->GetDisplayManager()->GetWidth()/(float)mUiManager->GetDisplayManager()->GetHeight();
+}
+
+int Tv3dManager::CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, const str& pEngineSound)
+{
+	ScopeLock _(GetTickLock());
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	if (!lObject)
+	{
+		return -1;
+	}
+
+	Tbc::PhysicsEngine::EngineType lEngineType = (pEngineType==_T("roll"))? Tbc::PhysicsEngine::ENGINE_HINGE_ROLL : Tbc::PhysicsEngine::ENGINE_HINGE2_TURN;
+	float lStrength = 15;
+	float lFriction = 0.5f;
+	Tbc::ChunkyBoneGeometry* lGeometry = lObject->GetPhysics()->GetBoneGeometry(0);
+	Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(lEngineType, lStrength, pMaxVelocity.x, pMaxVelocity.y, lFriction, lObject->GetPhysics()->GetEngineCount()*3);
+	lEngine->AddControlledGeometry(lGeometry, 1);
+	lObject->GetPhysics()->AddEngine(lEngine);
+	GetContext()->EnableMicroTickCallback(lObject);
+	if (!pEngineSound.empty())
+	{
+		//lObject->AddTag(something something engine sound something something);
+	}
+	return lObject->GetPhysics()->GetEngineCount();
+}
+
+int Tv3dManager::CreateJoint(int pObjectId, const str& pJointType, int pOtherObjectId, const vec3& pAxis)
+{
+	ScopeLock _(GetTickLock());
+	(void)pObjectId; (void)pJointType; (void)pOtherObjectId; (void)pAxis;
+	return 0;
+}
+
+void Tv3dManager::Position(int pObjectId, bool pSet, vec3& pPosition)
+{
+	ScopeLock _(GetTickLock());
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	if (!lObject)
+	{
+		return;
+	}
+	if (pSet)
+	{
+		GetPhysicsManager()->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
+	}
+	else
+	{
+		pPosition = lObject->GetPosition();
+	}
+}
+
+void Tv3dManager::Orientation(int pObjectId, bool pSet, quat& pOrientation)
+{
+	ScopeLock _(GetTickLock());
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	if (!lObject)
+	{
+		return;
+	}
+	if (pSet)
+	{
+		vec3 lPosition = lObject->GetPosition();
+		GetPhysicsManager()->SetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), xform(pOrientation, lPosition));
+	}
+	else
+	{
+		pOrientation = lObject->GetOrientation();
+	}
+}
+
+void Tv3dManager::Velocity(int pObjectId, bool pSet, vec3& pVelocity)
+{
+	ScopeLock _(GetTickLock());
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	if (!lObject)
+	{
+		return;
+	}
+	if (pSet)
+	{
+		GetPhysicsManager()->SetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
+	}
+	else
+	{
+		pVelocity = lObject->GetVelocity();
+	}
+}
+
+void Tv3dManager::AngularVelocity(int pObjectId, bool pSet, vec3& pAngularVelocity)
+{
+	ScopeLock _(GetTickLock());
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	if (!lObject)
+	{
+		return;
+	}
+	if (pSet)
+	{
+		GetPhysicsManager()->SetBodyAngularVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pAngularVelocity);
+	}
+	else
+	{
+		pAngularVelocity = lObject->GetAngularVelocity();
+	}
+}
+
+void Tv3dManager::Weight(int pObjectId, bool pSet, float pWeight)
+{
+	ScopeLock _(GetTickLock());
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	if (!lObject)
+	{
+		return;
+	}
+	if (pSet)
+	{
+		(void)pWeight;
+		//GetPhysicsManager()->Set(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pAngularVelocity);
+	}
+	else
+	{
+		//pAngularVelocity = lObject->GetPhysics()->Get
+	}
+}
+
+void Tv3dManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor)
+{
+	ScopeLock _(GetTickLock());
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	if (!lObject)
+	{
+		return;
+	}
+	if (pSet)
+	{
+		lObject->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = pColor;
+	}
+	else
+	{
+		pColor = lObject->GetMesh(0)->GetBasicMaterialSettings().mDiffuse;
+	}
+}
+
+void Tv3dManager::EngineForce(int pObjectId, int pEngineIndex, bool pSet, vec3& pForce)
+{
+	ScopeLock _(GetTickLock());
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	if (!lObject)
+	{
+		return;
+	}
+	if (pSet)
+	{
+		lObject->SetEnginePower(pEngineIndex*3+0, pForce.x);
+		lObject->SetEnginePower(pEngineIndex*3+1, pForce.y);
+		lObject->SetEnginePower(pEngineIndex*3+2, pForce.z);
+	}
+	else
+	{
+		// That's fine, wouldn't you say?
+	}
 }
 
 
@@ -260,13 +513,15 @@ void Tv3dManager::CommandLoop()
 		}
 		lData[l-1] = 0;	// Drop last linefeed.
 		const str lCommand = astrutil::Encode(astr(lData));
-		const int lResult = GetConsoleManager()->ExecuteCommand(lCommand);
-		const astr lInfo = (lResult==0)? "ok\n" : "error\n";
+		mLog.Infof(_T("Received command %s."), lCommand.c_str());
+		GetConsoleManager()->ExecuteCommand(lCommand);
+		const astr lInfo = astrutil::Encode(((Tv3dConsoleManager*)GetConsoleManager())->GetActiveResponse());
 		if (mConnectSocket->Send(lInfo.c_str(), lInfo.length()) != (int)lInfo.length())
 		{
 			break;
 		}
 	}
+	mLog.Info(_T("Terminating command thread."));
 }
 
 
@@ -361,35 +616,6 @@ void Tv3dManager::SetLocalRender(bool pRender)
 
 
 
-void Tv3dManager::CreateObject(int pIndex, const vec3* pPosition)
-{
-	vec3 lPosition;
-	if (pPosition)
-	{
-		lPosition = *pPosition;
-	}
-	else
-	{
-		lPosition.x = pIndex%3*0.5f-0.5f;
-		lPosition.y = pIndex/3%3*0.5f-0.5f;
-		lPosition.z = -pIndex/9%3*0.5f-0.5f;
-	}
-	if ((int)mObjects.size() > pIndex)
-	{
-		Cure::ContextObject* lObject = GetContext()->GetObject(mObjects[pIndex]);
-		if (lObject)
-		{
-			GetPhysicsManager()->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lPosition);
-		}
-		return;
-	}
-	Cure::ContextObject* lObject = Parent::CreateContextObject(_T("soccerball"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-	lObject->SetRootPosition(lPosition);
-	lObject->SetRootVelocity(RNDVEC(1.0f));
-	lObject->StartLoading();
-	mObjects.push_back(lObject->GetInstanceId());
-}
-
 Cure::ContextObject* Tv3dManager::CreateContextObject(const str& pClassId) const
 {
 	UiCure::Machine* lObject = new Object(GetResourceManager(), pClassId, mUiManager);
@@ -457,6 +683,11 @@ void Tv3dManager::ScriptPhysicsTick()
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	if (lPhysicsTime > 1e-5)
 	{
+		float gx,gy,gz;
+		v_get(gx, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYX, 0.0);
+		v_get(gy, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYY, 0.0);
+		v_get(gz, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYZ, -9.8);
+		GetPhysicsManager()->SetGravity(vec3(gx,gy,gz));
 		MoveCamera(lPhysicsTime);
 		mLight->Tick(mCameraTransform.mOrientation);
 		UpdateCameraPosition(false);

@@ -10,6 +10,7 @@
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include "../Life/LifeClient/Menu.h"
 #include "../UiCure/Include/UiResourceManager.h"
+#include "../UiLepra/Include/UiTouchDrag.h"
 #include "PhysGfxObject.h"
 #include "Tv3d.h"
 
@@ -45,13 +46,50 @@ class Tv3dManager: public Life::GameClientSlaveManager
 {
 	typedef Life::GameClientSlaveManager Parent;
 public:
+	struct CollisionInfo
+	{
+		int mObjectId;
+		vec3 mForce;
+		vec3 mPosition;
+		int mOtherObjectId;
+	};
+	struct JoystickData
+	{
+		int mJoystickId;
+		float x;
+		float y;
+	};
+	typedef std::vector<CollisionInfo> CollisionList;
+	typedef UiLepra::Touch::DragManager::DragList DragList;
+	typedef std::vector<JoystickData> JoystickDataList;
+
 	Tv3dManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~Tv3dManager();
 
-	void DeleteObjects();
-	int CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects);
+	void UserReset();
+	int CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, bool pIsStatic);
+	void DeleteObject(int pObjectId);
+	void DeleteAllObjects();
+	bool IsLoaded(int pObjectId);
+	void Expload(const vec3& pPos, const vec3& pVel);
+	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel);
+	CollisionList PopCollisions();
+	const DragList& GetTouchDrags() const;
+	vec3 GetAccelerometer() const;
+	int CreateJoystick(float x, float y);
+	JoystickDataList GetJoystickData() const;
+	float GetAspectRatio() const;
+	int CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, const str& pEngineSound);
+	int CreateJoint(int pObjectId, const str& pJointType, int pOtherObjectId, const vec3& pAxis);
+	void Position(int pObjectId, bool pSet, vec3& pPosition);
+	void Orientation(int pObjectId, bool pSet, quat& pOrientation);
+	void Velocity(int pObjectId, bool pSet, vec3& pVelocity);
+	void AngularVelocity(int pObjectId, bool pSet, vec3& pAngularVelocity);
+	void Weight(int pObjectId, bool pSet, float pWeight);
+	void ObjectColor(int pObjectId, bool pSet, vec3& pColor);
+	void EngineForce(int pObjectId, int pEngineIndex, bool pSet, vec3& pForce);
 
 	void AcceptLoop();
 	void CommandLoop();
@@ -71,7 +109,6 @@ protected:
 	virtual void TickUiUpdate();
 	virtual void SetLocalRender(bool pRender);
 
-	void CreateObject(int pIndex, const vec3* pPosition);
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
@@ -91,7 +128,7 @@ protected:
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
-	std::vector<Cure::GameObjectId> mObjects;
+	std::set<Cure::GameObjectId> mObjects;
 	Life::Menu* mMenu;
 	Light* mLight;
 	vec3 mCameraAngle;

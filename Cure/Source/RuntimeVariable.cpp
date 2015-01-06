@@ -222,6 +222,17 @@ RuntimeVariable::Usage RuntimeVariable::GetUsage() const
 	return (mUsage);
 }
 
+void RuntimeVariable::Reset()
+{
+	switch (mDataType)
+	{
+		case RuntimeVariable::DATATYPE_STRING:	mStrValue = mDefaultStrValue;
+		case RuntimeVariable::DATATYPE_BOOL:	mBoolValue = mDefaultBoolValue;
+		case RuntimeVariable::DATATYPE_INT:	mIntValue = mDefaultIntValue;
+		case RuntimeVariable::DATATYPE_REAL:	mRealValue = mDefaultRealValue;
+	}
+}
+
 str RuntimeVariable::GetTypeName(DataType pType)
 {
 	switch (pType)
@@ -434,6 +445,17 @@ bool RuntimeVariableScope::EraseVariable(const str& pName)
 		lDeleted = mParentScope->EraseVariable(pName);
 	}
 	return lDeleted;
+}
+
+bool RuntimeVariableScope::ResetDefaultValue(const str& pName)
+{
+	RuntimeVariable* lVariable = GetVariable(HashedString(pName));
+	if (!lVariable)
+	{
+		return false;
+	}
+	lVariable->Reset();
+	return true;
 }
 
 

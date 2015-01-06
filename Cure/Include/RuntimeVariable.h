@@ -64,6 +64,7 @@ public:
 	void SetDefaultIntValue(int pValue);
 	void SetDefaultRealValue(double pValue);
 	Usage GetUsage() const;
+	void Reset();
 	static str GetTypeName(DataType pType);
 
 private:
@@ -125,6 +126,7 @@ public:
 	double GetDefaultValue(GetMode pMode, const HashedString& pName, double pDefaultValue);
 
 	bool EraseVariable(const str& pName);
+	bool ResetDefaultValue(const str& pName);
 
 	std::list<str> GetVariableNameList(SearchType pSearchType, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
 

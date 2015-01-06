@@ -146,7 +146,7 @@ void CppContextObject::CreatePhysics(Tbc::ChunkyPhysics* pPhysics)
 {
 	deb_assert(mPhysicsResource == 0);
 	static int lPhysicsCounter = 0;
-	str lPhysicsName = strutil::Format(_T("TestPhysics%i"), lPhysicsCounter);
+	str lPhysicsName = strutil::Format(_T("TestPhysics%i"), ++lPhysicsCounter);
 	str lPhysicsRefName = lPhysicsName+_T("Ref");
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
 		mManager->GetGameManager()->GetPhysicsManager(), mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
@@ -160,6 +160,7 @@ void CppContextObject::CreatePhysics(Tbc::ChunkyPhysics* pPhysics)
 	PhysicsSharedResource::ClassResource* lPhysics = lPhysicsRefResource->GetParent();
 	PhysicsResource* lPhysicsResource = (PhysicsResource*)lPhysics->CreateResource(GetResourceManager(), lPhysicsName);
 	lPhysicsResource->SetIsUnique(true);
+	lPhysicsRefResource->SetIsUnique(true);
 	lPhysics->SetResource(lPhysicsResource);
 	lPhysicsResource->SetRamDataType(pPhysics);
 	Tbc::ChunkyPhysics* lCopy = new Tbc::ChunkyPhysics(*pPhysics);
