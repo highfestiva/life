@@ -13,7 +13,7 @@ things = [create_ascii_object(geometry, pos=rndvec()*5+vec3(0,0,5), col=absrndve
 while loop():
 	for thing in things:
 		tap = closest_tap(thing.pos())
-		if tap and (tap.pos3d(10)-thing.pos()).length() <= 3:
-			thing.vel(tap.vel3d(10))
+		if tap and (tap.pos3d()-thing.pos()).length() <= 3:
+			thing.vel(tap.vel3d())
 			break
 

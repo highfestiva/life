@@ -81,9 +81,13 @@ class Obj:
 class Tap:
 	def __init__(self, x, y):
 		self.x,self.y = x,y
-	def pos3d(self, z):
-		return _screen2world(self.x,self.y)*z
-	def vel3d(self, z):
+	def pos3d(self, z=None):
+		if not z:
+			z = _cam_distance
+		return _screen2world(self.x,self.y, z)
+	def vel3d(self, z=None):
+		if not z:
+			z = _cam_distance
 		return vec3(0,0,0)
 	def _distance2(self, x, y):
 		return (self.x-x)**2+(self.y-y)**2
@@ -96,8 +100,8 @@ class Joystick:
 		self.x,self.y = 0,0
 
 
-def loop():
-	sleep(0.1)
+def loop(delay=0.1):
+	sleep(delay)
 	global _taps,_collisions
 	_taps,_collisions,_cam_pos = None,None,None
 	_poll_joysticks()
@@ -255,19 +259,24 @@ def _create_object(gfx, phys, static, pos, vel, angular_velocity, col):
 def _world2screen(crd):
 	'''Return screen X,Y in [0,1].'''
 	_update_cam_shadow()
+	#c = crd
 	crd = _cam_inv_q*(crd-_cam_pos)
 	iar = 1/_get_aspect_ratio()
 	itana = 1/tan(_cam_fov_radians*0.5);
-	x,z = crd.x/crd.y,crd.z/crd.y
-	return x*itana*iar+1, -z*itana+1
+	x,y = crd.x/crd.y,crd.z/crd.y
+	x,y = x*itana*iar+1, -y*itana+1
+	#print('world2screen (%g,%g,%g) -> (%g,%g)' % (c.x,c.y,c.z,x,y))
+	return x,y
 
-def _screen2world(x,y):
+def _screen2world(x,y,distance):
 	'''Return world X,Z scaled to Y=1.'''
 	_update_cam_shadow()
 	tana = tan(_cam_fov_radians*0.5);
 	dx = tana * (x*2-1) * _get_aspect_ratio()
 	dy = tana * (1-y*2);
-	return (_cam_q * vec3(dx, 1, dy).normalize()) + _cam_pos
+	crd = (_cam_q * vec3(dx, 1, dy).normalize() * distance) + _cam_pos
+	#print('screen2world (%g,%g) -> (%g,%g,%g)' % (x,y,crd.x,crd.y,crd.z))
+	return crd
 
 def _update_cam_shadow():
 	global _cam_pos,_cam_q,_cam_inv_q,_cam_target

@@ -21,7 +21,7 @@ for y in range(2):
 
 while loop():
 	if taps():
-		paddle.pos((closest_tap(ball.pos()).pos3d(10).x, 0, -10))
+		paddle.pos((closest_tap(ball.pos()).pos3d().x, 0, -10))
 	ball.bounce_in_rect((-10,-0.5,-12), (10,0.5,10))
 	for o in collisions():
 		if o in bricks:

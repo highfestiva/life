@@ -23,7 +23,7 @@ while loop():
 	if taps() and timeout(0.3):	# Steering.
 		pos = tetromino.pos() - tetromino_offset
 		tap = closest_tap(pos)
-		v = min(steps, key=lambda s:(tap.pos3d(10)+s-pos).length())
+		v = min(steps, key=lambda s:(tap.pos3d()+s-pos).length())
 		if v == vec3(0,0,1):	# Tapping above means "rotate".
 			orientation = orientation.rotate_y(pi/2)
 			tetromino.pos(orientation=orientation)

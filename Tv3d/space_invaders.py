@@ -33,7 +33,7 @@ cam(distance=200)
 
 while loop():
 	if taps():
-		tx = closest_tap(ship.pos()).pos3d(200).x
+		tx = closest_tap(ship.pos()).pos3d().x
 		sx = ship.pos().x
 		ship.vel((1 if sx<tx else -1, 0, 0))
 		if abs(sx-tx) < 0.5 and timeout(1):
