@@ -1369,7 +1369,7 @@ float GameClientMasterTicker::GetTickTimeReduction() const
 float GameClientMasterTicker::GetPowerSaveAmount() const
 {
 	bool lIsMinimized = !mUiManager->GetDisplayManager()->IsVisible();
-	return (lIsMinimized? 0.4f : 0);
+	return (lIsMinimized? 0.2f : 0);
 }
 
 

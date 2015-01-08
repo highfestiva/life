@@ -1,0 +1,13 @@
++Smaller ball in breakout.
++Cam follow target.
+
+Asteroids. Fix Orientation with big O. Every friggin' game.
+Tap screen to world translation doesn't work properly. Off by some. space_invaders.py
+Light shadow should be less from above and a little more from the side. breakout.py
+Shadows do not work at all. physics.py and terminal_velocity.py
+Tap/slide velocity.
+Collisions.
+Tetris.
+Scaled texture+UVs on cubes.
+Smooth camera rotation. terminal_velocity.py
+Make taps stick until polled (snake).

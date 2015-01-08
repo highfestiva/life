@@ -87,7 +87,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Impuzzable", "..\Impuzzable
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImpuzzableTest", "..\Impuzzable\ImpuzzableTest\ImpuzzableTest10.vcxproj", "{74FDED7E-57D9-11E4-8E65-BCCB7B8C67B1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tv3d", "..\Tv3d\Tv3d10.vcxproj", "{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrabantSim", "..\TrabantSim\TrabantSim10.vcxproj", "{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -478,20 +478,20 @@ Global
 		{74FDED7E-57D9-11E4-8E65-BCCB7B8C67B1}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
 		{74FDED7E-57D9-11E4-8E65-BCCB7B8C67B1}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
 		{74FDED7E-57D9-11E4-8E65-BCCB7B8C67B1}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Debug|Win32.ActiveCfg = Debug|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Debug|Win32.Build.0 = Debug|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Final|Win32.ActiveCfg = Final|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Final|Win32.Build.0 = Final|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Release Candidate|Win32.ActiveCfg = Release Candidate|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Release Candidate|Win32.Build.0 = Release Candidate|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Release|Win32.ActiveCfg = Release Candidate|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Release|Win32.Build.0 = Release Candidate|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Unicode Final|Win32.ActiveCfg = Unicode Final|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
-		{98BF06E4-7776-11E4-8824-BCEE7B8C67B1}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Debug|Win32.Build.0 = Debug|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Final|Win32.ActiveCfg = Final|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Final|Win32.Build.0 = Final|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Release Candidate|Win32.ActiveCfg = Release Candidate|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Release Candidate|Win32.Build.0 = Release Candidate|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Release|Win32.ActiveCfg = Release Candidate|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Release|Win32.Build.0 = Release Candidate|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Unicode Final|Win32.ActiveCfg = Unicode Final|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Unicode Final|Win32.Build.0 = Unicode Final|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Unicode Release Candidate|Win32.ActiveCfg = Unicode Release Candidate|Win32
+		{FE647E10-970E-11E4-9F20-BCEE7B8C67B1}.Unicode Release Candidate|Win32.Build.0 = Unicode Release Candidate|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -80,7 +80,7 @@ Application::~Application()
 void Application::Init()
 {
 	v_set(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
-	v_set(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
+	v_set(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 1.0);
 	v_set(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 
 	mConsoleLogger = CreateConsoleLogListener();
@@ -95,7 +95,7 @@ void Application::Init()
 	//mFileLogger->SetLevelThreashold(LEVEL_INFO);
 	//mFileLogger->WriteLog(_T("\n---\n"), LEVEL_INFO);
 	//mPerformanceLogger = new FileLogListener(GetIoFile(GetTypeName()+_T("Performance"), _T("log"), false));
-	mMemLogger = new MemFileLogListener(20*1024);
+	//mMemLogger = new MemFileLogListener(20*1024);
 #endif // Debug
 	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
@@ -253,7 +253,7 @@ LogListener* Application::CreateConsoleLogListener() const
 void Application::TickSleep(double pMainLoopTime) const
 {
 	float lPowerSaveFactor;
-	v_get(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
+	v_get(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 1.0);
 	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount() * lPowerSaveFactor;
 	if (lPowerSaveAmount > 0)
 	{

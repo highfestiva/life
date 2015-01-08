@@ -342,7 +342,7 @@ def main():
         ["Downwash",        "gfx_bin",    "Downwash/Downwash10.vcxproj", "LifeClient"],
         ["Fire",            "gfx_bin",    "Fire/Fire10.vcxproj", "LifeClient"],
         ["Bound",           "gfx_bin",    "Bound/Bound10.vcxproj", "LifeClient"],
-        ["Tv3d",            "gfx_bin",    "Tv3d/Tv3d10.vcxproj", "LifeClient"],
+        ["TrabantSim",      "gfx_bin",    "TrabantSim/TrabantSim10.vcxproj", "LifeClient"],
         ["Impuzzable",      "gfx_bin",    "Impuzzable/Impuzzable10.vcxproj", "LifeClient"],
         ["Fire",            "gfx_bin",    "Fire/Fire10.vcxproj", "LifeClient"],
         ["PushServer",      "bin",        "Push/PushServer/PushServer10.vcxproj", "LifeServer"],
