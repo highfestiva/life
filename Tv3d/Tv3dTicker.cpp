@@ -49,6 +49,8 @@ Tv3dTicker::Tv3dTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager*
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 60);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
+	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_BOUNCE, 0.2);
+	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_FRICTION, 0.5);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYX, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYY, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYZ, -9.8);

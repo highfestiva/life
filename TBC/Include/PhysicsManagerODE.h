@@ -70,6 +70,7 @@ public:
 	virtual void SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const vec3& pAngularAcceleration);
 
 	virtual float GetBodyMass(BodyID pBodyId);
+	virtual void SetBodyMass(BodyID pBodyId, float pMass);
 	virtual void MassAdjustBody(BodyID pBodyId);
 
 	// Set and get user data.

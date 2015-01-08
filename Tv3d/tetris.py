@@ -6,6 +6,9 @@ from trabant import *
 from trabant.math import *
 import random
 
+cam(angle=(0,-pi/2,0), distance=30)
+gravity((0,0,0))
+
 tetrominos = 'XXXX~~~XX\nXX~~~X  \nXXX~~~XXX\nX  ~~~XXX\n X ~~~ XX\nXX ~~~XX \n XX'.split('~~~')
 colors = '#0ff #ff0 #00f #a50 #f0f #0f0 #f00'.split()
 directions = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
@@ -18,15 +21,16 @@ while loop():
 		tetromino_index = random.choice(range(len(tetrominos)))
 		tetromino = create_ascii_object(tetrominos[tetromino_index], pos=(0,0,gridsize.y/2), col=colors[tetromino_index])
 		tetromino_offset = vec3(1.5,0,0) - last_ascii_top_left_offset()
-		orientation = quat()
+		orientation = quat().rotate_x(pi/2)
+		tetromino.orientation(orientation)
 
-	if taps() and timeout(0.3):	# Steering.
+	if taps() and timeout(0.15):	# Steering.
 		pos = tetromino.pos() - tetromino_offset
 		tap = closest_tap(pos)
-		v = min(steps, key=lambda s:(tap.pos3d()+s-pos).length())
+		v = min(directions, key=lambda s:(tap.pos3d()-s-pos).length())
 		if v == vec3(0,0,1):	# Tapping above means "rotate".
-			orientation = orientation.rotate_y(pi/2)
-			tetromino.pos(orientation=orientation)
+			orientation = quat().rotate_y(pi/2) * orientation
+			tetromino.orientation(orientation)
 		else:	# Tapping left/below/right means move in that direction.
 			pos = rect_bound(pos+v, (-gridsize.x/2,0,-gridsize.y/2), (gridsize.x/2,0,gridsize.y/2))
 			tetromino.pos(pos + tetromino_offset)

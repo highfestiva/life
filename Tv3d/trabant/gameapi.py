@@ -63,6 +63,12 @@ def gravity(g):
 	set('Physics.GravityY', float(g.y))
 	set('Physics.GravityZ', float(g.z))
 
+def bounce(factor):
+	set('Physics.Bounce', float(factor))
+
+def friction(factor):
+	set('Physics.Friction', float(factor))
+
 def explode(pos,vel):
 	cmd('explode %s %s' % (_args2str(pos,'0 0 0'), _args2str(vel,'0 0 0')))
 
@@ -144,8 +150,8 @@ def vel(oid, velocity):
 def avel(oid, angular_velocity):
 	return getsetoidcmd('angular-velocity', oid, angular_velocity)
 
-def weight(oid, w):
-	return getsetoidcmd('weight', oid, w)
+def mass(oid, w):
+	return getsetoidcmd('mass', oid, w)
 
 def col(oid, color):
 	return getsetoidcmd('color', oid, _htmlcol(color))
@@ -165,6 +171,7 @@ def getsetoidcmd(name, oid, *args):
 		return result[0] if len(result) == 1 else vec3(*result)
 
 def cmd(c, return_type=str):
+	#print(c)
 	sock.send((c+'\n').encode())
 	result = sock.recv(1024).decode()
 	return return_type(result[3:]) if result.startswith('ok\n') else result
@@ -207,7 +214,7 @@ def _closecom():
 def _args2str(args, default=''):
 	if not args:
 		return default
-	' '.join(str(arg) for arg in args)
+	return ' '.join(str(arg) for arg in args)
 
 def _run_local_server(addr):
 	import os

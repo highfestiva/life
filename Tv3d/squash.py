@@ -4,10 +4,11 @@
 
 from trabant import *
 
-gravity((0,0,-3))	# We're on a low gravity planet.
+cam(distance=30)
+gravity((0,0,-9), bounce=1)
 ball = create_sphere_object()
 while loop():
 	tap = closest_tap(ball.pos())
-	if tap and (tap.pos3d()-ball.pos()).length() <= 2:
-		ball.vel(drag.vel3d())
+	if tap and (tap.pos3d(ball.pos().y)-ball.pos()).length() <= 2:
+		ball.vel(tap.vel3d())
 	ball.bounce_in_rect((-10,-3,-10),(10,3,10))

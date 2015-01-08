@@ -110,6 +110,11 @@ Tbc::PhysicsManager* GameTicker::GetPhysicsManager(bool pIsThreadSafe) const
 	return mPhysicsManager;
 }
 
+Lock* GameTicker::GetPhysicsLock()
+{
+	return &mPhysicsLock;
+}
+
 
 
 void GameTicker::StartPhysicsTick()
@@ -280,7 +285,10 @@ void GameTicker::PhysicsThreadEntry()
 		mPhysicsTickStartSemaphore->Wait();
 		if (!mPhysicsWorkerThread->GetStopRequest())
 		{
-			PhysicsTick();
+			{
+				ScopeLock lLock(GetPhysicsLock());
+				PhysicsTick();
+			}
 			mPhysicsTickDoneSemaphore->Signal();
 		}
 	}

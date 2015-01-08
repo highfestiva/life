@@ -14,9 +14,9 @@ namespace Tv3d
 
 
 
-PlacedObject::PlacedObject(const quat& pQuat, const vec3& pPos):
-	q(pQuat),
-	pos(pPos)
+PlacedObject::PlacedObject(const quat& pOrientation, const vec3& pPos):
+	mOrientation(pOrientation),
+	mPos(pPos)
 {
 }
 
@@ -28,7 +28,15 @@ PlacedObject::~PlacedObject()
 
 BoxObject::BoxObject(const quat& pQuat, const vec3& pPos, const vec3& pSize):
 	Parent(pQuat,pPos),
-	size(pSize)
+	mSize(pSize)
+{
+}
+
+
+
+SphereObject::SphereObject(const quat& pQuat, const vec3& pPos, float pRadius):
+	Parent(pQuat,pPos),
+	mRadius(pRadius)
 {
 }
 

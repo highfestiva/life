@@ -55,6 +55,7 @@ public:
 	const TimeManager* GetTimeManager() const;
 	TimeManager* GetTimeManager();
 	Tbc::PhysicsManager* GetPhysicsManager(bool pIsThreadSafe) const;
+	Lock* GetPhysicsLock();
 
 	void StartPhysicsTick();
 	void WaitPhysicsTick();
@@ -72,6 +73,7 @@ private:
 	TimeManager* mTimeManager;
 	Tbc::PhysicsManager* mPhysicsManager;
 	MemberThread<GameTicker>* mPhysicsWorkerThread;
+	Lock mPhysicsLock;
 	Semaphore* mPhysicsTickStartSemaphore;
 	Semaphore* mPhysicsTickDoneSemaphore;
 

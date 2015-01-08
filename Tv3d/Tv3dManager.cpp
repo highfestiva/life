@@ -10,10 +10,13 @@
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/CyclicArray.h"
+#include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/Socket.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../Lepra/Include/TimeLogger.h"
 #include "../Lepra/Include/Unordered.h"
+#include "../Life/LifeClient/GameClientMasterTicker.h"
+#include "../Life/LifeClient/UiConsole.h"
 #include "../Tbc/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiGameUiManager.h"
@@ -26,8 +29,6 @@
 #include "../UiTbc/Include/UiMaterial.h"
 #include "../UiTbc/Include/UiParticleRenderer.h"
 #include "../UiTbc/Include/UiTriangleBasedGeometry.h"
-#include "../Lepra/Include/Random.h"
-#include "../Life/LifeClient/UiConsole.h"
 #include "Object.h"
 #include "Tv3d.h"
 #include "Tv3dConsoleManager.h"
@@ -127,13 +128,14 @@ void Tv3dManager::UserReset()
 		lScope->ResetDefaultValue(lName);
 	}
 
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	// TODO: Kill all joysticks and collisions.
 }
 
 int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, bool pIsStatic)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 
 	Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	quat rot, q, pq;
@@ -150,6 +152,10 @@ int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArra
 	}
 	else
 	{
+		float lFriction, lBounce;
+		v_get(lFriction, =(float), GetVariableScope(), RTVAR_PHYSICS_FRICTION, 0.5);
+		v_get(lBounce, =(float), GetVariableScope(), RTVAR_PHYSICS_BOUNCE, 0.2);
+
 		lPhysics->SetBoneCount(pPhysObjects.size());
 		PhysObjectArray::const_iterator x = pPhysObjects.begin();
 		int y = 0;
@@ -157,9 +163,9 @@ int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArra
 		PlacedObject* lParentPhysObject = 0;
 		for (; x != pPhysObjects.end(); ++x, ++y)
 		{
-			Tbc::ChunkyBoneGeometry::BodyData lBoneData(y==0? 15.0f:1.0f, 0.5f, 0.1f);
+			Tbc::ChunkyBoneGeometry::BodyData lBoneData(y==0? 15.0f:1.0f, lFriction, lBounce);
 			PlacedObject* lPhysObject = *x;
-			xform t = xform(lPhysObject->q, lPhysObject->pos);
+			xform t = xform(lPhysObject->mOrientation, lPhysObject->mPos);
 			if (lParentPhysObject)
 			{
 				t.mOrientation = rot.GetInverse() * t.mOrientation.GetInverse() * rot;
@@ -168,15 +174,22 @@ int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArra
 			else
 			{
 				//t.RotateAroundAnchor(lPhysObject->pos, vec3(1,0,0), PIF/2);
-				pq = lPhysObject->q;
+				pq = lPhysObject->mOrientation;
 				q = pq * rot;
 				t.mOrientation = q;
 			}
 			BoxObject* lBox = dynamic_cast<BoxObject*>(lPhysObject);
+			SphereObject* lSphere = dynamic_cast<SphereObject*>(lPhysObject);
 			if (lBox)
 			{
 				Tbc::ChunkyBoneBox* lBone = new Tbc::ChunkyBoneBox(lBoneData);
-				lBone->mSize = lBox->size;
+				lBone->mSize = lBox->mSize;
+				lPhysics->AddBoneGeometry(t, lBone, lParent);
+			}
+			else if (lSphere)
+			{
+				Tbc::ChunkyBoneSphere* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
+				lBone->mRadius = lSphere->mRadius;
 				lPhysics->AddBoneGeometry(t, lBone, lParent);
 			}
 			else
@@ -218,7 +231,7 @@ int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArra
 	v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
 	v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
 	lObject->AddGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b));
-	q = q.GetInverse() * pGfxObject.q.GetInverse() * q;
+	q = q.GetInverse() * pGfxObject.mOrientation.GetInverse() * q;
 	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = q;
 	mObjects.insert(lObject->GetInstanceId());
 	return lObject->GetInstanceId();
@@ -226,7 +239,7 @@ int Tv3dManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArra
 
 void Tv3dManager::DeleteObject(int pObjectId)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	GetContext()->PostKillObject(pObjectId);
 	std::set<Cure::GameObjectId>::iterator x = mObjects.find(pObjectId);
 	if (x != mObjects.end())
@@ -237,7 +250,7 @@ void Tv3dManager::DeleteObject(int pObjectId)
 
 void Tv3dManager::DeleteAllObjects()
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	std::set<Cure::GameObjectId>::iterator x;
 	for (x = mObjects.begin(); x != mObjects.end(); ++x)
 	{
@@ -248,51 +261,50 @@ void Tv3dManager::DeleteAllObjects()
 
 bool Tv3dManager::IsLoaded(int pObjectId)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	return !!GetContext()->GetObject(pObjectId);
 }
 
 void Tv3dManager::Expload(const vec3& pPos, const vec3& pVel)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	(void)pPos; (void)pVel;
 }
 
 void Tv3dManager::PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	(void)pSound; (void)pPos; (void)pVel;
 }
 
 Tv3dManager::CollisionList Tv3dManager::PopCollisions()
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	CollisionList lList;
 	return lList;
 }
 
 const Tv3dManager::DragList& Tv3dManager::GetTouchDrags() const
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	return mUiManager->GetDragManager()->GetDragList();
 }
 
 vec3 Tv3dManager::GetAccelerometer() const
 {
-	ScopeLock _(GetTickLock());
-	return vec3(0,9,0);
+	return mUiManager->GetAccelerometer();
 }
 
 int Tv3dManager::CreateJoystick(float x, float y)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	(void)x; (void)y;
 	return 0;
 }
 
 Tv3dManager::JoystickDataList Tv3dManager::GetJoystickData() const
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	JoystickDataList lList;
 	return lList;
 }
@@ -304,7 +316,8 @@ float Tv3dManager::GetAspectRatio() const
 
 int Tv3dManager::CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, const str& pEngineSound)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
@@ -328,14 +341,16 @@ int Tv3dManager::CreateEngine(int pObjectId, const str& pEngineType, const vec2&
 
 int Tv3dManager::CreateJoint(int pObjectId, const str& pJointType, int pOtherObjectId, const vec3& pAxis)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 	(void)pObjectId; (void)pJointType; (void)pOtherObjectId; (void)pAxis;
 	return 0;
 }
 
 void Tv3dManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
@@ -353,7 +368,8 @@ void Tv3dManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 
 void Tv3dManager::Orientation(int pObjectId, bool pSet, quat& pOrientation)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
@@ -372,7 +388,8 @@ void Tv3dManager::Orientation(int pObjectId, bool pSet, quat& pOrientation)
 
 void Tv3dManager::Velocity(int pObjectId, bool pSet, vec3& pVelocity)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
@@ -390,7 +407,8 @@ void Tv3dManager::Velocity(int pObjectId, bool pSet, vec3& pVelocity)
 
 void Tv3dManager::AngularVelocity(int pObjectId, bool pSet, vec3& pAngularVelocity)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
@@ -406,9 +424,10 @@ void Tv3dManager::AngularVelocity(int pObjectId, bool pSet, vec3& pAngularVeloci
 	}
 }
 
-void Tv3dManager::Weight(int pObjectId, bool pSet, float pWeight)
+void Tv3dManager::Mass(int pObjectId, bool pSet, float& pMass)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
@@ -416,18 +435,17 @@ void Tv3dManager::Weight(int pObjectId, bool pSet, float pWeight)
 	}
 	if (pSet)
 	{
-		(void)pWeight;
-		//GetPhysicsManager()->Set(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pAngularVelocity);
+		GetPhysicsManager()->SetBodyMass(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pMass);
 	}
 	else
 	{
-		//pAngularVelocity = lObject->GetPhysics()->Get
+		pMass = GetPhysicsManager()->GetBodyMass(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 	}
 }
 
 void Tv3dManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
@@ -445,7 +463,8 @@ void Tv3dManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor)
 
 void Tv3dManager::EngineForce(int pObjectId, int pEngineIndex, bool pSet, vec3& pForce)
 {
-	ScopeLock _(GetTickLock());
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
@@ -513,7 +532,7 @@ void Tv3dManager::CommandLoop()
 		}
 		lData[l-1] = 0;	// Drop last linefeed.
 		const str lCommand = astrutil::Encode(astr(lData));
-		mLog.Infof(_T("Received command %s."), lCommand.c_str());
+		//mLog.Info(lCommand);
 		GetConsoleManager()->ExecuteCommand(lCommand);
 		const astr lInfo = astrutil::Encode(((Tv3dConsoleManager*)GetConsoleManager())->GetActiveResponse());
 		if (mConnectSocket->Send(lInfo.c_str(), lInfo.length()) != (int)lInfo.length())

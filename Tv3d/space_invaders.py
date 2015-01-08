@@ -21,24 +21,29 @@ invader = r'''
  X`      `X
 '''.strip('\n')
 
-ship = create_ascii_object(ship, pos=(0,0,-100))
+cam(distance=250)
+gravity((0,0,0))
+
+ship = create_ascii_object(ship, pos=(0,0,-100), col='#070')
 shots = []
-invaderspeeds,isi = [(0.5,0,0), (0,0,-0.1), (-0.5,0,0), (0,0,-0.1)],0
+invaderspeeds,isi = [(25,0,0), (0,0,-5), (-25,0,0), (0,0,-5)],0
 invaders = set()
 for y in range(2):
 	for x in range(8):
-		invaders.add(create_ascii_object(invader, pos=(x*50-50,90-y*20,0), vel=invaderspeeds[0], col=absrndvec()))
-
-cam(distance=200)
+		invaders.add(create_ascii_object(invader, pos=(x*25-87,0,90-y*20), col=absrndvec()))
+for invader in invaders:
+	invader.vel(invaderspeeds[0])
 
 while loop():
 	if taps():
 		tx = closest_tap(ship.pos()).pos3d().x
 		sx = ship.pos().x
-		ship.vel((1 if sx<tx else -1, 0, 0))
-		if abs(sx-tx) < 0.5 and timeout(1):
-			shots += [create_sphere_object(sx+vec3(0,0,4), r=2, vel=(0,0,3))]
-			sound(sound_bang, shots.pos())
+		d = abs(sx-tx)
+		vmin = min(50,d)*3
+		ship.vel((vmin if sx<tx else -vmin, 0, 0))
+		if d < 30 and timeout(1):
+			shots += [create_sphere_object(ship.pos()+vec3(0,0,10), vel=(0,0,350), col='#fff')]
+			sound(sound_bang, shots[-1].pos())
 	else:
 		ship.vel((0,0,0))
 	if timeout(3,timer=2):

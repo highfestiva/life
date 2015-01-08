@@ -19,7 +19,7 @@ namespace Tv3d
 
 Light::Light(UiCure::GameUiManager* pUiManager):
 	mUiManager(pUiManager),
-	mLightAverageDirection(0,0,-1)
+	mLightAverageDirection(-0.01f,0.05f,-1)
 {
 	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
@@ -34,7 +34,8 @@ Light::~Light()
 
 void Light::Tick(const quat& pCameraOrientation)
 {
-	if (!mUiManager->CanRender())
+	(void)pCameraOrientation;
+	/*if (!mUiManager->CanRender())
 	{
 		return;
 	}
@@ -45,7 +46,7 @@ void Light::Tick(const quat& pCameraOrientation)
 	{
 		mLightAverageDirection = d;
 		mUiManager->GetRenderer()->SetLightDirection(mLightId, mLightAverageDirection);
-	}
+	}*/
 }
 
 

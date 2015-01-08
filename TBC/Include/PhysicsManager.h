@@ -172,6 +172,7 @@ public:
 	virtual void SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const vec3& pAngularAcceleration) = 0;	// TODO: don't assume spheric shapes!
 
 	virtual float GetBodyMass(BodyID pBodyId) = 0;
+	virtual void SetBodyMass(BodyID pBodyId, float pMass) = 0;
 	virtual void MassAdjustBody(BodyID pBodyId) = 0;
 
 	// Set and get user data.

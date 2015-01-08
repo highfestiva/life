@@ -18,9 +18,9 @@ namespace Tv3d
 class PlacedObject
 {
 public:
-	quat q;
-	vec3 pos;
-	PlacedObject(const quat& pQuat, const vec3& pPos);
+	quat mOrientation;
+	vec3 mPos;
+	PlacedObject(const quat& pOrientation, const vec3& pPos);
 	virtual ~PlacedObject();
 };
 
@@ -28,8 +28,16 @@ class BoxObject: public PlacedObject
 {
 	typedef PlacedObject Parent;
 public:
-	vec3 size;
+	vec3 mSize;
 	BoxObject(const quat& pQuat, const vec3& pPos, const vec3& pSize);
+};
+
+class SphereObject: public PlacedObject
+{
+	typedef PlacedObject Parent;
+public:
+	float mRadius;
+	SphereObject(const quat& pQuat, const vec3& pPos, float pRadius);
 };
 
 class MeshObject: public PlacedObject

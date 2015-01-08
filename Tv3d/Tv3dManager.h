@@ -87,7 +87,7 @@ public:
 	void Orientation(int pObjectId, bool pSet, quat& pOrientation);
 	void Velocity(int pObjectId, bool pSet, vec3& pVelocity);
 	void AngularVelocity(int pObjectId, bool pSet, vec3& pAngularVelocity);
-	void Weight(int pObjectId, bool pSet, float pWeight);
+	void Mass(int pObjectId, bool pSet, float& pMass);
 	void ObjectColor(int pObjectId, bool pSet, vec3& pColor);
 	void EngineForce(int pObjectId, int pEngineIndex, bool pSet, vec3& pForce);
 

@@ -29,6 +29,7 @@ const Tv3dConsoleManager::CommandPair Tv3dConsoleManager::mCommandIdList[] =
 	{_T("delete-all-objects"), COMMAND_DELETE_ALL_OBJECTS},
 	{_T("clear-phys"), COMMAND_CLEAR_PHYS},
 	{_T("prep-phys-box"), COMMAND_PREP_PHYS_BOX},
+	{_T("prep-phys-sphere"), COMMAND_PREP_PHYS_SPHERE},
 	{_T("prep-phys-mesh"), COMMAND_PREP_PHYS_MESH},
 	{_T("prep-gfx-mesh"), COMMAND_PREP_GFX_MESH},
 	{_T("set-vertices"), COMMAND_SET_VERTICES},
@@ -48,7 +49,7 @@ const Tv3dConsoleManager::CommandPair Tv3dConsoleManager::mCommandIdList[] =
 	{_T("orientation"), COMMAND_ORIENTATION},
 	{_T("velocity"), COMMAND_VELOCITY},
 	{_T("angular-velocity"), COMMAND_ANGULAR_VELOCITY},
-	{_T("weight"), COMMAND_WEIGHT},
+	{_T("mass"), COMMAND_MASS},
 	{_T("color"), COMMAND_COLOR},
 	{_T("engine-force"), COMMAND_ENGINE_FORCE},
 };
@@ -259,6 +260,18 @@ int Tv3dConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 					mPhysObjects.push_back(lBox);
 				}
 				break;
+				case COMMAND_PREP_PHYS_SPHERE:
+				{
+					if (pParameterVector.size() != 8)
+					{
+						mLog.Warningf(_T("usage: %s followed by eight float arguments (quaternion, position, radius)"), pCommand.c_str());
+						return 1;
+					}
+					std::vector<float> lFloats = Strs2Flts(pParameterVector);
+					PlacedObject* lBox = new SphereObject(quat(&lFloats[0]), vec3(&lFloats[4]), lFloats[7]);
+					mPhysObjects.push_back(lBox);
+				}
+				break;
 				case COMMAND_PREP_PHYS_MESH:
 				{
 					if (pParameterVector.size() != 7)
@@ -450,11 +463,11 @@ int Tv3dConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pP
 					}
 				}
 				break;
-				case COMMAND_WEIGHT:
+				case COMMAND_MASS:
 				{
 					bool lIsSet;
 					float lValue = ParamToFloat(pParameterVector, 1, &lIsSet);
-					lManager->Weight(ParamToInt(pParameterVector, 0), lIsSet, lValue);
+					lManager->Mass(ParamToInt(pParameterVector, 0), lIsSet, lValue);
 					if (!lIsSet)
 					{
 						mActiveResponse += ToStr(lValue);

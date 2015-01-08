@@ -2,27 +2,45 @@
 # -*- coding: utf-8 -*-
 # Breakout prototyping.
 
+from math import pi
 from trabant import *
 
 # ASCII geometries.
 paddle = r'''
- ^         ^
-<XXXXXXXXXXX>
- v         v
+ ^     ^
+<XXXXXXX>
+ v     v
 '''.strip('\n')
 brick = 'XX'
 
-paddle = create_ascii_object(paddle, pos=(0,0,-10))
-ball = create_sphere_object(vel=(2,2,0))
+cam(angle=(0,-pi/2,0), distance=35)
+gravity((0,0,0), bounce=1)
+paddle = create_ascii_object(paddle, pos=(0,0,-15), mass=10000)
+ball = create_sphere_object(pos=(-7,0,10), vel=(5,0,-15), col='#fff')
 bricks = set()
 for y in range(2):
 	for x in range(8):
-		bricks.add(create_ascii_object(brick, pos=(x*3-11.5,9-y*2,0), col=absrndvec()))
+		bricks.add(create_ascii_object(brick, pos=(x*3-11.5,0,15-y*2), col=absrndvec(), static=True))
 
 while loop():
 	if taps():
-		paddle.pos((closest_tap(ball.pos()).pos3d().x, 0, -10))
-	ball.bounce_in_rect((-10,-0.5,-12), (10,0.5,10))
+		p = paddle.pos()
+		v = ((closest_tap(p).pos3d().x-p.x)*6, 0, 0)
+	else:
+		v = (0,0,0)
+	paddle.vel(v, avel=(0,0,0))
+	ball.bounce_in_rect((-14,-0.1,-25), (14,0.1,17))
+	if ball.pos().z < -17:
+		explode(ball.pos(), ball.vel())
+		ball.pos((-7,0,10))
+		ball.vel((5,0,-15))
+	# bv = ball.vel()
+	# bv = ball.vel()
+	# if bv.length() < 13 or abs(bv.z) < 7:
+		# bv.y = 0
+		# bv = bv.normalize(15)
+		# bv.z *= 8/bv.z if abs(bv.z) < 7 else 1
+		# ball.vel(bv)
 	for o in collisions():
 		if o in bricks:
 			sound(sound_ping, o.pos())

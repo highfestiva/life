@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from math import sqrt,pi
+from math import cos,sin,sqrt,pi
 from random import random
 
 
@@ -46,10 +46,10 @@ class vec3:
 	def cross(self,v):
 		return vec3(self.y*v.z-self.z*v.y, self.z*v.x-self.x*v.z, self.x*v.y-self.y*v.x)
 
-	def normalize(self):
+	def normalize(self, length=1):
 		l = self.length()
 		if l < 0.0001: return self
-		il = 1/l
+		il = length/l
 		return vec3(self.x*il, self.y*il, self.z*il)
 
 	def length(self):
@@ -79,7 +79,6 @@ class vec3:
 		return vec3(-self.x, -self.y, -self.z)
 
 	def __eq__(self,v):
-		v = tovec3(v)
 		if v:
 			return almosteq(self.x,v.x) and almosteq(self.y,v.y) and almosteq(self.z,v.z)
 		return False
@@ -119,13 +118,16 @@ class quat:
 		return self.q[0]*self.q[0] + self.q[1]*self.q[1] + self.q[2]*self.q[2] + self.q[3]*self.q[3]
 
 	def rotate_x(self,a):
-		return self
+		q = quat(cos(a*0.5), sin(a*0.5), 0, 0);
+		return self*q
 
 	def rotate_y(self,a):
-		return self
+		q = quat(cos(a*0.5), 0, sin(a*0.5), 0);
+		return self*q
 
 	def rotate_z(self,a):
-		return self
+		q = quat(cos(a*0.5), 0, 0, sin(a*0.5));
+		return self*q
 
 	def __eq__(self,q):
 		q = toquat(q)

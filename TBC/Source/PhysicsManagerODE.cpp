@@ -465,12 +465,12 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned p
 
 //	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
 
-	vec3 lRadius;
+	float lAverageRadius = 0;
 	for (unsigned x = 0; x < pVertexCount; ++x)
 	{
-		lRadius += vec3(pVertices[x*3+0], pVertices[x*3+0], pVertices[x*3+0]);
+		lAverageRadius += vec3(pVertices[x*3+0], pVertices[x*3+0], pVertices[x*3+0]).GetLength();
 	}
-	const float lAverageRadius = lRadius.GetLength()/pVertexCount;
+	lAverageRadius /= pVertexCount;
 	if (pType == PhysicsManager::DYNAMIC)
 	{
 		dMass lMass;
@@ -777,6 +777,20 @@ float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
 		return (0);
 	}
 	return (lObject->mMass);
+}
+
+void PhysicsManagerODE::SetBodyMass(BodyID pBodyId, float pMass)
+{
+	Object* lObject = (Object*)pBodyId;
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("SetBodyMass() - Body %i is not part of this world!"), pBodyId);
+		return;
+	}
+	lObject->mMass = pMass;
+	dMass lMass;
+	lMass.setSphereTotal(lObject->mMass, lObject->mGeometryData[0]);
+	::dBodySetMass(lObject->mBodyID, &lMass);
 }
 
 void PhysicsManagerODE::MassAdjustBody(BodyID pBodyId)

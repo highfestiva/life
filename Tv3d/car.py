@@ -11,8 +11,7 @@ XXXXXXXXX
 '''.strip('\n')
 chassis = '---'.join([chassis]*4)	# Make the car a bit wider.
 
-car = create_ascii_object(chassis)
-car.weight(500)
+car = create_ascii_object(chassis, mass=500)
 wheel = lambda x,y,z:create_sphere_object(pos=(x,y,z),radius=1.1,col='#222')
 rr,rl,fr,fl = wheel(-4,-2.5,-0.7), wheel(-4,+2.5,-0.7), wheel(3,-2.5,-0.7), wheel(3,+2.5,-0.7)
 car.create_joint(hinge2_joint, fl, (0,+1,0))
