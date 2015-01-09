@@ -13,6 +13,7 @@ turn_engine,roll_engine,push_engine,gyro_engine,rotor_engine,tilt_engine = 'turn
 hinge_joint,hinge2_joint = 'hinge hinge2'.split()
 sound_explosion,sound_ping,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion = 'explosion ping bang hizz wobble combustion'.split()
 
+_wait_until_loaded = True
 _has_opened = False
 _last_ascii_top_left_offset = None
 asc2obj_lookup = []
@@ -114,13 +115,16 @@ def open(**kwargs):
 	_joysticks,_timers,_has_opened = {},{},True
 	if not gameapi.open(**kwargs):
 		raise Exception('unable to connect to simulator')
-	gameapi.reset()	# Kill all joysticks. Set some default values.
 	gameapi.release_all_objects()
+	gameapi.reset()	# Kill all joysticks. Set some default values.
 	cam(angle=(0,0,0), distance=10, target=None, fov=45)
 	loop()	# Resets taps+collisions.
 
 def debug(enable=True):
 	gameapi.debug(enable)
+
+def userinfo(message=''):
+	gameapi.userinfo(message)
 
 def loop(delay=0.1):
 	_tryopen()
@@ -171,12 +175,12 @@ def create_ascii_object(ascii, pos=None, vel=None, angular_velocity=None, mass=N
 	# Keep a small cache of generated objects. Most small prototypes will reuse shapes.
 	gfx = None
 	for s,g,p,lo in asc2obj_lookup:
-		if s == ascii:
+		if s == ascii+str(physmesh):
 			gfx,phys,_last_ascii_top_left_offset = g,p,lo
 	if not gfx:
 		gfx,phys = asc2obj.str2obj(ascii, force_phys_mesh=physmesh)
 		_last_ascii_top_left_offset = asc2obj.last_centering_offset()
-		asc2obj_lookup.append((ascii,gfx,phys,_last_ascii_top_left_offset))
+		asc2obj_lookup.append((ascii+str(physmesh),gfx,phys,_last_ascii_top_left_offset))
 		if len(asc2obj_lookup) > 10:
 			del asc2obj_lookup[0]
 	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, mass=mass, col=col)
@@ -200,6 +204,10 @@ def release_all_objects():
 
 def last_ascii_top_left_offset():
 	return _last_ascii_top_left_offset
+
+def wait_until_loaded(wait=True):
+	global _wait_until_loaded
+	_wait_until_loaded = wait
 
 def explode(pos, vel=None):
 	_tryopen()
@@ -278,8 +286,11 @@ def _create_object(gfx, phys, static, pos, vel, angular_velocity, mass, col):
 			gameapi.initphyssphere(p.q, p.pos+objpos, p.radius)
 		elif 'Mesh' in str(type(p)):
 			gameapi.initphysmesh(p.q, p.pos+objpos, p.vertices, p.indices)
+		objpos = vec3(0,0,0)	# Only root should be moved, the rest have relative positions.
 	oid = gameapi.createobj(static)
-	gameapi.waitload(oid)
+	if _wait_until_loaded:
+		print('waiting...')
+		gameapi.waitload(oid)
 	o = Obj(oid)
 	global _objects
 	_objects[oid] = o

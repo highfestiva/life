@@ -122,6 +122,7 @@ protected:
 	virtual void ScriptPhysicsTick();
 	virtual void MoveCamera(float pFrameTime);
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
+	virtual void UpdateUserMessage();
 
 	void PrintText(const str& s, int x, int y) const;
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const;
@@ -139,6 +140,8 @@ protected:
 	TcpSocket* mConnectSocket;
 	MemberThread<TrabantSimManager>* mAcceptThread;
 	MemberThread<TrabantSimManager>* mCommandThread;
+	UiTbc::Dialog* mUserInfoDialog;
+	UiTbc::Label* mUserInfoLabel;
 	logclass();
 };
 

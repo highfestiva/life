@@ -63,6 +63,11 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const
 			{
 				lCurrentToken.push_back(pString[x]);
 			}
+			else if (lCurrentToken.empty() && !lInsideString)
+			{
+				// Push empty token.
+				lTokenVector.push_back(lCurrentToken);
+			}
 		}
 		else if (!lInsideString && pCharDelimitors.find_first_of(pString[x]) != str::npos)
 		{

@@ -58,7 +58,9 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mListenerSocket(0),
 	mConnectSocket(0),
 	mAcceptThread(new MemberThread<TrabantSimManager>("ConnectionListener")),
-	mCommandThread(0)
+	mCommandThread(0),
+	mUserInfoDialog(0),
+	mUserInfoLabel(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 
@@ -130,6 +132,11 @@ void TrabantSimManager::UserReset()
 		}
 		lScope->ResetDefaultValue(lName);
 	}
+	mCameraAngle.Set(0,0,0);
+
+	GetResourceManager()->ForceFreeCache();
+	GetResourceManager()->ForceFreeCache();
+	GetResourceManager()->ForceFreeCache();
 
 	ScopeLock lGameLock(GetTickLock());
 	// TODO: Kill all joysticks and collisions.
@@ -140,7 +147,8 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 	ScopeLock lGameLock(GetTickLock());
 
-	quat q;
+	xform pt;
+	quat q, pq;
 	q.RotateAroundWorldX(PIF/-2);
 	Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD, pIsStatic? Tbc::ChunkyPhysics::STATIC : Tbc::ChunkyPhysics::DYNAMIC);
@@ -170,13 +178,19 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 			xform t = xform(lPhysObject->mOrientation, lPhysObject->mPos);
 			if (lParentPhysObject)
 			{
-				//t.mOrientation = q.GetInverse() * t.mOrientation.GetInverse() * q;
-				t.mOrientation = t.mOrientation.GetInverse();
-				t.mPosition -= lParentPhysObject->mPos;
+				//t.mOrientation = t.mOrientation * pq.GetInverse();
+				//t.mOrientation = t.mOrientation.GetInverse();
+				//t.mPosition -= lParentPhysObject->mPos;
 				//t.RotateAroundAnchor(lPhysObject->pos, vec3(1,0,0), PIF/2);
+				//t = pt.InverseTransform(t);
+				t.mPosition = pq.GetInverse() * t.mPosition;
+				t.mOrientation = pq.GetInverse() * t.mOrientation;
 			}
 			else
 			{
+				pt = t;
+				pt.mPosition.Set(0,0,0);
+				pq = pt.mOrientation;
 				//t.RotateAroundAnchor(lPhysObject->pos, vec3(1,0,0), PIF/2);
 				//t.mOrientation = q.GetInverse() * t.mOrientation.GetInverse() * q;
 			}
@@ -223,7 +237,7 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 			}
 		}
 	}
-	//lObject->SetRootOrientation(q);
+	lObject->SetRootOrientation(pt.mOrientation);
 	lObject->CreatePhysics(lPhysics);
 	float r,g,b;
 	v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
@@ -232,8 +246,8 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 	lObject->AddGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b));
 	//q = q.GetInverse() * pGfxObject.mOrientation.GetInverse() * q;
 	q.Set(1,0,0,0);
-	q.RotateAroundWorldX(PIF);
-	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = q * pGfxObject.mOrientation;
+	//q.RotateAroundWorldX(PIF);
+	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
 	mObjects.insert(lObject->GetInstanceId());
 	return lObject->GetInstanceId();
 }
@@ -247,6 +261,7 @@ void TrabantSimManager::DeleteObject(int pObjectId)
 	{
 		mObjects.erase(x);
 	}
+	GetResourceManager()->ForceFreeCache();
 }
 
 void TrabantSimManager::DeleteAllObjects()
@@ -258,6 +273,7 @@ void TrabantSimManager::DeleteAllObjects()
 		GetContext()->PostKillObject(*x);
 	}
 	mObjects.clear();
+	GetResourceManager()->ForceFreeCache();
 }
 
 bool TrabantSimManager::IsLoaded(int pObjectId)
@@ -409,12 +425,14 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 	}
 	if (pSet)
 	{
+		pOrientation.RotateAroundOwnX(PIF/-2);
 		vec3 lPosition = lObject->GetPosition();
 		GetPhysicsManager()->SetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), xform(pOrientation, lPosition));
 	}
 	else
 	{
 		pOrientation = lObject->GetOrientation();
+		pOrientation.RotateAroundOwnX(PIF/2);
 	}
 }
 
@@ -574,8 +592,13 @@ void TrabantSimManager::CommandLoop()
 		}
 		lData[l-1] = 0;	// Drop last linefeed.
 		const str lCommand = astrutil::Encode(astr(lData));
-		//mLog.Info(lCommand);
+		/*if (strutil::StartsWith(lCommand, _T("set-vertices ") || strutil::StartsWith(lCommand, _T("set-indices"))
+		{
+			GetConsoleManager()->PushYieldCommand(lCommand)
+		}
+		HiResTimer t(false);*/
 		GetConsoleManager()->ExecuteCommand(lCommand);
+		//mLog.Infof(_T("%s took %f s."), lCommand.substr(0, 10).c_str(), t.QueryTimeDiff());
 		const astr lInfo = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
 		if (mConnectSocket->Send(lInfo.c_str(), lInfo.length()) != (int)lInfo.length())
 		{
@@ -757,6 +780,8 @@ void TrabantSimManager::ScriptPhysicsTick()
 		MoveCamera(lPhysicsTime);
 		mLight->Tick(mCameraTransform.mOrientation);
 		UpdateCameraPosition(false);
+
+		UpdateUserMessage();
 	}
 
 	Parent::ScriptPhysicsTick();
@@ -807,6 +832,49 @@ void TrabantSimManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	if (pUpdateMicPosition)
 	{
 		mUiManager->SetMicrophonePosition(mCameraTransform, vec3());
+	}
+}
+
+void TrabantSimManager::UpdateUserMessage()
+{
+	str lUserMessage;
+	v_get(lUserMessage, =, GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+	if (strutil::Strip(lUserMessage, _T(" \t\r\n")).empty())
+	{
+		if (mUserInfoDialog)
+		{
+			mMenu->DismissDialog();
+			mUserInfoDialog = 0;
+			mUserInfoLabel = 0;
+		}
+	}
+	else
+	{
+		if (mUserInfoDialog)
+		{
+			if (mUserInfoLabel->GetText() != lUserMessage)
+			{
+				mUserInfoLabel->SetText(lUserMessage);
+			}
+		}
+		else
+		{
+			UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &TrabantSimManager::OnMenuAlternative), 0.8f, 0.5f);
+			if (!d)
+			{
+				return;
+			}
+			d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
+			d->SetDirection(+1, false);
+			UiTbc::FixedLayouter lLayouter(d);
+
+			UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, lUserMessage);
+			lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
+			lLabel->SetAdaptive(false);
+			lLayouter.AddComponent(lLabel, 0, 1, 0, 1, 1);
+			mUserInfoDialog = d;
+			mUserInfoLabel = lLabel;
+		}
 	}
 }
 

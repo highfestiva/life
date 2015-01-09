@@ -32,13 +32,13 @@ gravity((0,0,0))
 init()
 t = 0.5
 while loop():
-	ufo.engine[0].force((0, 1, 60 if taps() else -60))
+	ufo.engine[0].force((1, 0, 60 if taps() else -60))
 	if timeout(t):
 		columns += make_column_pair(20,t*10)
 		while len(columns) > 8:
 			[c.release() for c in columns[:2]]
 			columns = columns[2:]
-		t -= 0.01
+		t -= 0.005
 	for ufo in collisions():
 		explode(ufo.pos(),ufo.vel())
 		for o in [ufo]+columns:

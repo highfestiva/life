@@ -48,6 +48,9 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 1.0);
+
+	v_override(UiCure::GetSettings(), RTVAR_GAME_USERMESSAGE, _T(""));
+
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 60);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_BOUNCE, 0.2);
@@ -100,6 +103,7 @@ bool TrabantSimTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
+		mUiManager->GetDisplayManager()->SetCaption(_T("Trabant Simulator"));
 		UiLepra::Core::ProcessMessages();
 	}
 	if (lOk)

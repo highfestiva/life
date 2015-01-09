@@ -817,13 +817,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					{
 						lManager->GetTickLock()->Release();
 					}
-					if (lOk)
-					{
-						str lValue = lScope->GetUntypedDefaultValue(RtScope::READ_ONLY, lVariable);
-						lValue = strutil::StringToCString(lValue);
-						mLog.Infof(_T("%s <- %s"), lVariable.c_str(), lValue.c_str());
-					}
-					else
+					if (!lOk)
 					{
 						lResult = 1;
 					}

@@ -34,6 +34,9 @@ def reset():
 def debug(enable):
 	set('Debug.Enable', enable)
 
+def userinfo(message):
+	set('Game.UserMessage', '"%s"' % message)
+
 def waitload(oid):
 	cmd('wait-until-loaded %i' % oid)
 

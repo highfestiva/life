@@ -26,7 +26,7 @@ def init():
 gravity((0,0,0))
 init()
 shipdir = quat()
-while loop() or True:
+while loop():
 	shippos,shipvel = ship.pos(),ship.vel()
 	if timeout(2):	# Create a new rock every two seconds.
 		print('shipvel:', shipvel)

@@ -23,6 +23,7 @@ terrain_meshes,terrain_patch_size = {},100
 zangle = 0
 cam(angle=(-pi/6,0,0), distance=50, target=ship)
 fog(350)
+wait_until_loaded(False)	# Optimization.
 
 def create_terrain_patch(patch_x,patch_y):
 	x,y = patch_x*terrain_patch_size,patch_y*terrain_patch_size
@@ -69,6 +70,6 @@ while loop():
 	orientation = quat().rotate_z(zangle)
 	update_terrain(ship.pos() + orientation*vec3(0,100,0))
 	z2y = quat().rotate_x(-pi/2)	# Point ship forward instead of upward
-	ship.orientation(z2y * orientation)
+	ship.orientation(orientation * z2y)
 	ship.vel(orientation*vec3(0,20,0))
-	#cam(angle=(-pi/6,0,zangle))
+	cam(angle=(-pi/6,0,zangle))

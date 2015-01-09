@@ -1,6 +1,7 @@
 +Smaller ball in breakout.
 +Cam follow target.
 
+Make orientation test "game": diamond-centered, cube-centered, physmesh-centered *asymmetric 3D* shapes.
 Asteroids. Fix Orientation with big O. Every friggin' game.
 Tap screen to world translation doesn't work properly. Off by some. space_invaders.py
 Light shadow should be less from above and a little more from the side. breakout.py

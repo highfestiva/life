@@ -8,6 +8,8 @@ from trabant import *
 level = r'''
 XXXXXXXXXXXXXXXXXXXXXXXXXX
 X         X   X          X
+X         X   X          X
+X         XX XX          X
 X XXXXXXX        XXXXXXX X
 X       X XX XX  X       X
 XXXXX X X X   X  X X XXXXX
@@ -18,18 +20,22 @@ X                        X
 XXXXXXXXXXXXXXXXXXXXXXXXXX
 '''.strip('\n')
 
-cam(distance=100)
+open(addr='127.0.0.1:2541')
+cam(distance=25)
+gravity((0,0,0), bounce=0, friction=0)
 
-level = create_ascii_object(level)
-man = create_sphere_object(radius=0.8)
+userinfo('Please wait while loading PacMan level...')
+level = create_ascii_object(level, pos=(-12.5,0,0), static=True)
+userinfo()
+man = create_sphere_object(radius=0.4, pos=(0,0,-3), col='#ff0')
 man.create_engine(push_engine)
 directions = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
 
+
 while loop():
 	if taps():
-		pos = man.pos()
-		tap = closest_tap(pos)
-		force = min(directions, key=lambda d:(tap.pos3d()-pos).length())
+		force = closest_tap(man.pos()).pos3d() - man.pos()
+		force.y = 0
 		man.engine[0].force(force)
 	else:
 		man.engine[0].force((0,0,0))

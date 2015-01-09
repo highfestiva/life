@@ -282,6 +282,22 @@ bool TestString(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
+		lContext = _T("block string splitting empty quote");
+		strutil::strvec lWords = strutil::BlockSplit(_T("\"\""), _T(" \t\v\r\n"), false, true);
+		lTestOk = (lWords.size() == 1 && lWords[0].empty());
+		deb_assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("block string splitting quote with spaces");
+		strutil::strvec lWords = strutil::BlockSplit(_T(" \" \" "), _T(" \t\v\r\n"), false, true);
+		lTestOk = (lWords.size() == 2 && lWords[0].empty() && lWords[1] == _T(" "));
+		deb_assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
 		lContext = _T("JSON coder");
 		const wstr lWC = _WIDE("åäöabcÅÄÖACQñï");
 		const str lC = strutil::Encode(lWC);

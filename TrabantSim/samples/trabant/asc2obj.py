@@ -9,9 +9,7 @@ from trabant.math import *
 
 
 sq2 = sqrt(2)
-qa,qc = cos(pi/8),sin(pi/8)
-rotq = quat(qa, 0, qc, 0)
-invrotq = quat(qa, 0, -qc, 0)
+rotq = quat().rotate_z(-pi/4)
 _last_centering_offset = vec3(0,0,0)
 
 
@@ -485,7 +483,6 @@ def shape2physgeoms(oshape, shape):
 def centerobjs(gfx,physgeoms,center=vec3(0,0,0)):
 	if not gfx or not physgeoms:
 		return
-	gfx.q = physgeoms[0].q if physgeoms[0].q != rotq else invrotq
 	offset = physgeoms[0].pos
 	for i,p in enumerate(physgeoms):
 		if type(p) == PhysBox:
@@ -496,25 +493,29 @@ def centerobjs(gfx,physgeoms,center=vec3(0,0,0)):
 			if i == 0:
 				p.pos = vec3(0,0,0)
 				offset = off
+			else:
+				p.pos -= offset-off
 	gfx.vertices = [v-offset for v in gfx.vertices]
+	gfx.pos -= offset
+	gfx.q = physgeoms[0].q.inverse()
 	physgeoms[0].pos += center
 
 def last_centering_offset():
 	return _last_centering_offset
 
-def flipaxis(geoms):
+def flipaxis(gfx,physgeoms):
 	'''Objects have been generated Y up, Z out; but should appear Z up, Y in.'''
+	if not physgeoms:
+		return
 	rot = quat().rotate_x(-pi/2)
-	for geom in geoms:
-		geom.pos = rot*geom.pos
-		if 'Mesh' in str(type(geom)):
-			for i,v in enumerate(geom.vertices):
-				geom.vertices[i] = vec3(v.x,-v.z,v.y)
-		elif 'Box' in str(type(geom)):
-			if geom.q == quat():
-				geom.size = vec3(geom.size.x,geom.size.z,geom.size.y)
-			else:
-				geom.q = quat().rotate_x(-pi/2) * geom.q
+	for geom in physgeoms:
+		geom.pos = rot * geom.pos
+		geom.q = rot * geom.q
+	# def pr(x):
+		# print('------------')
+		# print(x)
+	# pr(gfx)
+	# [pr(p) for p in physgeoms]
 
 def shape2obj(shape, force_phys_mesh=False):
 	gfx = shape2mesh(shape)
@@ -523,7 +524,7 @@ def shape2obj(shape, force_phys_mesh=False):
 	else:
 		physgeoms = shape2physgeoms(shape, shape)
 	centerobjs(gfx,physgeoms)
-	flipaxis([gfx]+physgeoms)
+	flipaxis(gfx,physgeoms)
 	#[print(g) for g in [gfx]+physgeoms]
 	return Obj(gfx,physgeoms)
 
