@@ -345,7 +345,7 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 	vec2 lMaxVelocity(pMaxVelocity);
 	float lStrength = 15;
 	float lFriction = 0.5f;
-	if (pEngineType == _T("turn"))
+	if (pEngineType == _T("roll_turn"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE2_TURN;
 	}
@@ -353,11 +353,17 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE_ROLL;
 	}
-	else if (pEngineType == _T("push"))
+	else if (pEngineType == _T("push_abs"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE;
-		lMaxVelocity.x = (!lMaxVelocity.x)? 100.0f : 0.0f;
-		lFriction = 0;
+		lMaxVelocity.x = (!lMaxVelocity.x)? 100.0f : lMaxVelocity.x;
+		lFriction = 0.9f;
+	}
+	else if (pEngineType == _T("push_turn_abs"))
+	{
+		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE;
+		lMaxVelocity.x = (!lMaxVelocity.x)? 0.1f : lMaxVelocity.x;
+		lFriction = 0.9f;
 	}
 	else if (pEngineType == _T("gyro"))
 	{
@@ -369,7 +375,7 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 	}
 	else if (pEngineType == _T("tilt"))
 	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_TILTER;
+		lEngineType = Tbc::PhysicsEngine::ENGINE_ROTOR_TILT;
 	}
 	else
 	{
@@ -431,7 +437,9 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 	}
 	else
 	{
-		pOrientation = lObject->GetOrientation();
+		xform t;
+		GetPhysicsManager()->GetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), t);
+		pOrientation = t.mOrientation;
 		pOrientation.RotateAroundOwnX(PIF/2);
 	}
 }
@@ -496,7 +504,7 @@ void TrabantSimManager::Mass(int pObjectId, bool pSet, float& pMass)
 void TrabantSimManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor)
 {
 	ScopeLock lGameLock(GetTickLock());
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId, true);
 	if (!lObject)
 	{
 		return;
@@ -528,6 +536,11 @@ void TrabantSimManager::EngineForce(int pObjectId, int pEngineIndex, bool pSet, 
 				lObject->SetEnginePower(pEngineIndex*4+0, pForce.y);
 				lObject->SetEnginePower(pEngineIndex*4+1, pForce.x);
 				lObject->SetEnginePower(pEngineIndex*4+3, pForce.z);
+				break;
+			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE:
+				lObject->SetEnginePower(pEngineIndex*4+0, pForce.z);
+				lObject->SetEnginePower(pEngineIndex*4+1, pForce.x);
+				lObject->SetEnginePower(pEngineIndex*4+3, pForce.y);
 				break;
 			default:
 				lObject->SetEnginePower(pEngineIndex*4+0, pForce.x);
@@ -592,15 +605,18 @@ void TrabantSimManager::CommandLoop()
 		}
 		lData[l-1] = 0;	// Drop last linefeed.
 		const str lCommand = astrutil::Encode(astr(lData));
-		/*if (strutil::StartsWith(lCommand, _T("set-vertices ") || strutil::StartsWith(lCommand, _T("set-indices"))
+		/*astr lResponse
+		if (strutil::StartsWith(lCommand, _T("set-vertices") || strutil::StartsWith(lCommand, _T("set-indices"))
 		{
 			GetConsoleManager()->PushYieldCommand(lCommand)
 		}
-		HiResTimer t(false);*/
+		else
+		{*/
+		//HiResTimer t(false);
 		GetConsoleManager()->ExecuteCommand(lCommand);
 		//mLog.Infof(_T("%s took %f s."), lCommand.substr(0, 10).c_str(), t.QueryTimeDiff());
-		const astr lInfo = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
-		if (mConnectSocket->Send(lInfo.c_str(), lInfo.length()) != (int)lInfo.length())
+		const astr lResponse = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
+		if (mConnectSocket->Send(lResponse.c_str(), lResponse.length()) != (int)lResponse.length())
 		{
 			break;
 		}
@@ -792,7 +808,9 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 {
 	int ctgt = 0;
 	float clx,cly,clz,cdist,cax,cay,caz,crx,cry,crz;
+	bool car;
 	v_get(ctgt, =, GetVariableScope(), RTVAR_UI_3D_CAMTARGETOBJECT, 0);
+	v_get(car, =, GetVariableScope(), RTVAR_UI_3D_CAMANGLERELATIVE, false);
 	v_get(clx, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKX, 0.0);
 	v_get(cly, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKY, 0.0);
 	v_get(clz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKZ, 0.0);
@@ -805,9 +823,10 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 	v_get(crz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEZ, 0.0);
 	quat q;
 	vec3 lLookAt(clx,cly,clz);
+	Cure::ContextObject* lObject = 0;
 	if (ctgt)
 	{
-		Cure::ContextObject* lObject = GetContext()->GetObject(ctgt);
+		lObject = GetContext()->GetObject(ctgt);
 		if (lObject)
 		{
 			lLookAt = lObject->GetPosition();
@@ -817,6 +836,14 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 	t.RotateAroundAnchor(lLookAt, vec3(0,1,0), cay);
 	t.RotateAroundAnchor(lLookAt, vec3(1,0,0), cax);
 	t.RotateAroundAnchor(lLookAt, vec3(0,0,1), caz);
+	if (lObject && car)
+	{
+		vec3 a;
+		lObject->GetOrientation().GetEulerAngles(a);
+		t.RotateAroundAnchor(lLookAt, vec3(0,0,1), a.x);
+		t.RotateAroundAnchor(lLookAt, vec3(1,0,0), a.y-PIF/2);
+		t.RotateAroundAnchor(lLookAt, vec3(0,1,0), a.z);
+	}
 	t.RotateAroundAnchor(lLookAt, vec3(0,1,0), mCameraAngle.y);
 	t.RotateAroundAnchor(lLookAt, vec3(1,0,0), mCameraAngle.x);
 	t.RotateAroundAnchor(lLookAt, vec3(0,0,1), mCameraAngle.z);

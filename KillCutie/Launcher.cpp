@@ -95,7 +95,7 @@ void Launcher::GetAngles(const vec3& pTargetPosition, const vec3& pTargetVelocit
 void Launcher::CreateEngines()
 {
 	deb_assert(GetPhysics()->GetEngineCount() == 0);
-	Tbc::PhysicsEngine* lPitchEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_TILTER, 1, 1, 1, 1, 0);
+	Tbc::PhysicsEngine* lPitchEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_ROTOR_TILT, 1, 1, 1, 1, 0);
 	GetPhysics()->AddEngine(lPitchEngine);
 	Tbc::PhysicsEngine* lYawEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_ROLL, 1, 1, 1, 1, 1);
 	GetPhysics()->AddEngine(lYawEngine);

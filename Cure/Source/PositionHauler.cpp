@@ -189,6 +189,8 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 		{
 			case Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE:
 			case Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(pPosition, y, RealData3, lData, PositionalData::TYPE_REAL_3, 100);
 				++y;
@@ -202,7 +204,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 			case Tbc::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case Tbc::PhysicsEngine::ENGINE_HINGE2_TURN:
 			case Tbc::PhysicsEngine::ENGINE_ROTOR:
-			case Tbc::PhysicsEngine::ENGINE_TILTER:
+			case Tbc::PhysicsEngine::ENGINE_ROTOR_TILT:
 			case Tbc::PhysicsEngine::ENGINE_JET:
 			case Tbc::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			case Tbc::PhysicsEngine::ENGINE_YAW_BRAKE:
@@ -399,6 +401,8 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 		{
 			case Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE:
 			case Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE:
 			{
 				deb_assert(pPosition.mBodyPositionArray.size() > y);
 				deb_assert(pPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_3);
@@ -422,7 +426,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 			case Tbc::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case Tbc::PhysicsEngine::ENGINE_HINGE2_TURN:
 			case Tbc::PhysicsEngine::ENGINE_ROTOR:
-			case Tbc::PhysicsEngine::ENGINE_TILTER:
+			case Tbc::PhysicsEngine::ENGINE_ROTOR_TILT:
 			case Tbc::PhysicsEngine::ENGINE_JET:
 			case Tbc::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			case Tbc::PhysicsEngine::ENGINE_YAW_BRAKE:

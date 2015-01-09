@@ -123,6 +123,8 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 		break;
 		case ENGINE_PUSH_RELATIVE:
 		case ENGINE_PUSH_ABSOLUTE:
+		case ENGINE_PUSH_TURN_RELATIVE:
+		case ENGINE_PUSH_TURN_ABSOLUTE:
 		{
 			const unsigned lControlledAspects = (mEngineType == ENGINE_PUSH_RELATIVE)? 2 : 3;
 			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+lControlledAspects)
@@ -145,7 +147,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 		case ENGINE_HINGE_TORQUE:
 		case ENGINE_HINGE2_TURN:
 		case ENGINE_ROTOR:
-		case ENGINE_TILTER:
+		case ENGINE_ROTOR_TILT:
 		case ENGINE_JET:
 		case ENGINE_SLIDER_FORCE:
 		case ENGINE_YAW_BRAKE:
@@ -250,21 +252,45 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					lPushVector += mValue[i] * lAxis[i];
 				}
 				const float lPushForce = lPushVector.GetLength();
-				if (lPushForce > 0.1f || mFriction != 0)
+				if (lPushForce > 0.1f || mFriction)
 				{
-					if (lPushForce > 0.1f)
+					if (mFriction)
 					{
-						lVelocityVector = lVelocityVector.ProjectOntoPlane(lPushVector);
-					}
-					if (lPushVector.Dot(lVelocityVector) >= 0)
-					{
-						//mLog.Infof(_T("Reducing push vector (%f; %f; %f) with velocity (%f; %f; %f) and friction."),
-						//	lPushVector.x, lPushVector.y, lPushVector.z,
-						//	lVelocityVector.x, lVelocityVector.y, lVelocityVector.z);						lVelocityVector /= mMaxSpeed;
 						lVelocityVector *= mFriction*0.5f / mMaxSpeed;
 						lPushVector -= lVelocityVector;
 					}
 					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
+				}
+				mIntensity += lPushForce;
+			}
+			break;
+			case ENGINE_PUSH_TURN_RELATIVE:
+			case ENGINE_PUSH_TURN_ABSOLUTE:
+			{
+				vec3 lAxis[3] = {vec3(0, 0, 1), vec3(1, 0, 0), vec3(0, 1, 0)};
+				if (mEngineType == ENGINE_PUSH_TURN_RELATIVE)
+				{
+					const ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
+					const quat lOrientation =
+						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
+						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+					lAxis[0] = lOrientation*lAxis[0];
+					lAxis[1] = lOrientation*lAxis[1];
+					lAxis[2] = lOrientation*lAxis[2];
+				}
+				vec3 lPushVector;
+				for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
+				{
+					lPushVector += mValue[i] * lAxis[i];
+				}
+				vec3 lAngularVelocityVector;
+				pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocityVector);
+				const float lPushForce = lPushVector.GetLength();
+				if (lPushForce > 0.1f || mFriction != 0)
+				{
+					lAngularVelocityVector *= mFriction*0.5f / mMaxSpeed;
+					lPushVector -= lAngularVelocityVector;
+					pPhysicsManager->AddTorque(lGeometry->GetBodyId(), lPushVector*mStrength*lScale);
 				}
 				mIntensity += lPushForce;
 			}
@@ -431,7 +457,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				}
 			}
 			break;
-			case ENGINE_TILTER:
+			case ENGINE_ROTOR_TILT:
 			{
 				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
 				if (lGeometry->GetJointId() != INVALID_JOINT)

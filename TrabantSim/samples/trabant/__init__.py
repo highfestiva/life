@@ -9,7 +9,7 @@ import trabant.objgen
 import time
 
 
-turn_engine,roll_engine,push_engine,gyro_engine,rotor_engine,tilt_engine = 'turn roll push gyro rotor tilt'.split()
+roll_turn_engine,roll_engine,push_engine,push_turn_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll push_abs push_turn_abs gyro rotor tilt'.split()
 hinge_joint,hinge2_joint = 'hinge hinge2'.split()
 sound_explosion,sound_ping,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion = 'explosion ping bang hizz wobble combustion'.split()
 
@@ -23,7 +23,7 @@ _collisions = None
 _joysticks = {}
 _timers = {}
 _objects = {}
-_cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians = vec3(0,0,0),10,None,vec3(0,0,0),0.5
+_cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative = vec3(0,0,0),10,None,vec3(0,0,0),0.5,False
 _cam_pos,_cam_q,_cam_inv_q = vec3(0,-10,0),quat(),quat()
 
 
@@ -146,10 +146,10 @@ def timeout(t, timer=0):
 		return True
 	return False
 
-def cam(angle=None, distance=None, target=None, pos=None, fov=None):
+def cam(angle=None, distance=None, target=None, pos=None, fov=None, use_relative_angle=None):
 	_tryopen()
 	angle = tovec3(angle)
-	gameapi.cam(angle, distance, target.id if target else None, tovec3(pos), fov)
+	gameapi.cam(angle, distance, target.id if target else None, tovec3(pos), fov, use_relative_angle)
 	# Update shadows for screen<-->world space transformations.
 	global _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians
 	if angle: 	_cam_angle = angle
@@ -157,6 +157,7 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None):
 	if target:	_cam_target = target
 	if pos:		_cam_lookat = pos
 	if fov:		_cam_fov_radians = radians(fov)
+	if use_relative_angle != None:	_cam_relative = use_relative_angle
 
 def fog(distance):
 	_tryopen()
@@ -287,9 +288,10 @@ def _create_object(gfx, phys, static, pos, vel, angular_velocity, mass, col):
 		elif 'Mesh' in str(type(p)):
 			gameapi.initphysmesh(p.q, p.pos+objpos, p.vertices, p.indices)
 		objpos = vec3(0,0,0)	# Only root should be moved, the rest have relative positions.
+	if col:
+		gameapi.setpencolor(col)
 	oid = gameapi.createobj(static)
 	if _wait_until_loaded:
-		print('waiting...')
 		gameapi.waitload(oid)
 	o = Obj(oid)
 	global _objects
@@ -300,8 +302,6 @@ def _create_object(gfx, phys, static, pos, vel, angular_velocity, mass, col):
 		o.avel(tovec3(angular_velocity))
 	if mass:
 		o.mass(mass)
-	if col:
-		o.col(col)
 	return o
 
 def _world2screen(crd):

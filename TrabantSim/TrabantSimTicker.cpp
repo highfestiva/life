@@ -41,6 +41,7 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEY, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEZ, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMTARGETOBJECT, 0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLERELATIVE, false);
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENRED, 0.7);
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENGREEN, 0.3);
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENBLUE, 0.6);

@@ -5,6 +5,7 @@
 from trabant import *
 from trabant.math import *
 import math
+from time import time
 
 # ASCII geometries.
 shipasc = r'''
@@ -18,31 +19,32 @@ XX  XX  XX
 
 gravity((0,0,0))
 ship = create_ascii_object(shipasc)
-ship.create_engine(push_engine, sound=sound_engine_hizz)
+ship.orientation(quat().rotate_x(-pi/2))
+pusher = ship.create_engine(push_engine, max_velocity=(1,0), sound=sound_engine_hizz)
+yawer = ship.create_engine(push_turn_engine)
 terrain_meshes,terrain_patch_size = {},100
-zangle = 0
-cam(angle=(-pi/6,0,0), distance=50, target=ship)
-fog(350)
-wait_until_loaded(False)	# Optimization.
+cam(angle=(-pi/9,0,0), distance=50, target=ship, use_relative_angle=True)
+fog(300)
 
 def create_terrain_patch(patch_x,patch_y):
 	x,y = patch_x*terrain_patch_size,patch_y*terrain_patch_size
-	s = terrain_patch_size//10
+	grid = 10
+	g1,g2 = grid+1,grid//2
+	s = terrain_patch_size//grid
 	vertices = []
-	for vy in range(0,11):
-		for vx in range(0,11):
-			lpos = vec3((vx-5)*s, (vy-5)*s, 0)
+	for vy in range(0,grid+1):
+		for vx in range(0,grid+1):
+			lpos = vec3((vx-g2)*s, (vy-g2)*s, 0)
 			wpos = vec3(x,y,0)+lpos
 			rnd = wpos.y*27+wpos.x*13	# Pseudo random to give terrain some fluctuation.
 			lpos.z = -65 + 25*sin2(wpos.x/73) + 21*sin2(wpos.y/123) + rnd//20%11	# Terrain well below Z=0.
 			vertices.append(lpos)
 	triangles = []
-	for ty in range(0,10):
-		for tx in range(0,10):
-			triangles += [ty*11+tx, ty*11+tx+1, (ty+1)*11+tx, ty*11+tx+1, (ty+1)*11+tx+1, (ty+1)*11+tx]
+	for ty in range(0,grid):
+		for tx in range(0,grid):
+			triangles += [ty*g1+tx, ty*g1+tx+1, (ty+1)*g1+tx, ty*g1+tx+1, (ty+1)*g1+tx+1, (ty+1)*g1+tx]
 	c = int(-cos(patch_y/9)*7+7)*16 + int(sin(patch_x/8)*7+7)*256
 	c = '#%3.3x'%c
-	#print(c)
 	return create_mesh_object(vertices, triangles, pos=(x,y,0), col=c, static=True)
 
 def update_terrain(pos):
@@ -66,10 +68,8 @@ def update_terrain(pos):
 	terrain_meshes = meshes
 
 while loop():
-	zangle += -accelerometer().x / 50
-	orientation = quat().rotate_z(zangle)
-	update_terrain(ship.pos() + orientation*vec3(0,100,0))
-	z2y = quat().rotate_x(-pi/2)	# Point ship forward instead of upward
-	ship.orientation(orientation * z2y)
-	ship.vel(orientation*vec3(0,20,0))
-	cam(angle=(-pi/6,0,zangle))
+	update_terrain(ship.pos() + ship.orientation()*vec3(0,0,100))
+
+	pusher.force(ship.orientation()*vec3(0,0,20))
+	turnforce = -accelerometer().x
+	yawer.force((0,0,turnforce))

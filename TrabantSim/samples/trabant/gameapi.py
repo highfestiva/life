@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import socket
-from trabant.math import vec3
+from trabant.math import vec3,quat
 
 
 sock = None
@@ -16,10 +16,7 @@ def open(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541'):
 	set('Ui.3D.ClearRed', r)
 	set('Ui.3D.ClearGreen', g)
 	set('Ui.3D.ClearBlue', b)
-	r,g,b = _htmlcol(fg)
-	set('Ui.PenRed', r)
-	set('Ui.PenGreen', g)
-	set('Ui.PenBlue', b)
+	setpencolor(fg)
 	set('Physics.FPS', int(fps))
 	set('Ui.3D.FOV', float(fov))
 	return True
@@ -44,7 +41,7 @@ def opened():
 	return sock != None
 
 
-def cam(angle, distance, target_oid, pos, fov):
+def cam(angle, distance, target_oid, pos, fov, relative_angle):
 	if angle:
 		set('Ui.3D.CamAngleX', float(angle.x))
 		set('Ui.3D.CamAngleY', float(angle.y))
@@ -60,6 +57,8 @@ def cam(angle, distance, target_oid, pos, fov):
 		set('Ui.3D.CamLookAtZ', float(pos.z))
 	if fov:
 		set('Ui.3D.FOV', float(fov))
+	if relative_angle != None:
+		set('Ui.3D.CamAngleRelative', bool(relative_angle))
 
 def fog(distance):
 	set('Ui.3D.FogDistance', float(distance))
@@ -127,9 +126,15 @@ def setmesh(vertices, indices):
 	verts = [f for v in vertices for f in v]
 	global _cached_vertices, _cached_indices
 	if verts != _cached_vertices or indices != _cached_indices:
-		cmd('set-vertices %s' % ' '.join(str(v) for v in verts))
-		cmd('set-indices %s' % ' '.join((str(i) for i in indices)))
+		cmd('set-vertices %s' % ','.join('%f'%v for v in verts))
+		cmd('set-indices %s' % ','.join((str(i) for i in indices)))
 		_cached_vertices,_cached_indices = verts,indices
+
+def setpencolor(col):
+	r,g,b = _htmlcol(col)
+	set('Ui.PenRed', r)
+	set('Ui.PenGreen', g)
+	set('Ui.PenBlue', b)
 
 def createobj(static):
 	static = 'static' if static else 'dynamic'
@@ -178,7 +183,13 @@ def getsetoidcmd(name, oid, *args):
 	result = cmd('%s %i %s' % (name, oid, ' '.join(l)))
 	if not l and result:
 		result = [float(r) for r in result.split()]
-		return result[0] if len(result) == 1 else vec3(*result)
+		if len(result) == 1:
+			return result[0]
+		if len(result) == 3:
+			return vec3(*result)
+		if len(result) == 4:
+			return quat(*result)
+		return result
 
 def cmd(c, return_type=str):
 	#print(c)

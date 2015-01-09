@@ -597,7 +597,7 @@ class PhysWriter(ChunkyWriter):
 
 	def _writeengine(self, node):
 		# Write all general parameters first.
-		types = {"walk":1, "push_relative":2, "push_absolute":3, "hover":4, "hinge_roll":5, "hinge_gyro":6, "hinge_brake":7, "hinge_torque":8, "hinge2_turn":9, "rotor":10, "tilter":11, "jet":12, "slider_force":13, "glue":14, "ball_brake":15, "yaw_brake":16, "air_brake":17}
+		types = {"walk":1, "push_relative":2, "push_absolute":3, "push_turn_relative":4, "push_turn_absolute":5, "hover":6, "hinge_roll":7, "hinge_gyro":8, "hinge_brake":9, "hinge_torque":10, "hinge2_turn":11, "rotor":12, "tilt":13, "jet":14, "slider_force":15, "glue":16, "ball_brake":17, "yaw_brake":18, "air_brake":19}
 		self._writeint(types[node.get_fixed_attribute("type")])
 		totalmass = self._gettotalmass()
 		self._writefloat(node.get_fixed_attribute("strength")*totalmass)

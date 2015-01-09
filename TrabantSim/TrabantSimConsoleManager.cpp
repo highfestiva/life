@@ -73,18 +73,52 @@ std::vector<float> Strs2Flts(const strutil::strvec& pStrs)
 	return lFlts;
 }
 
-int ToInt(const str& s)
+int StrToUInt(const char* s, const char** pEnd)
 {
-	int lValue = 0;
-	strutil::StringToInt(s, lValue);
-	return lValue;
+	int i = 0;
+	for(; *s >= '0' && *s <= '9'; ++s)
+	{
+		i = i*10 + (*s-'0');
+	}
+	*pEnd = s;
+	return i;
 }
 
-float ToFloat(const str& s)
+float StrToFloat(const char* s, const char** pEnd)
 {
-	double lValue = 0;
-	strutil::StringToDouble(s, lValue);
-	return (float)lValue;
+	float f = 0;
+	float ff = 0.1f;
+	bool lBeforeDot = true;
+	bool lNegative = false;
+	for (;; ++s)
+	{
+		if (*s >= '0' && *s <= '9')
+		{
+			if (lBeforeDot)
+			{
+				f = f*10 + (*s-'0');
+			}
+			else
+			{
+				f += (*s-'0')*ff;
+				ff *= 0.1f;
+			}
+		}
+		else if (*s == '.')
+		{
+			lBeforeDot = false;
+		}
+		else if (*s == '-')
+		{
+			lNegative = true;
+		}
+		else
+		{
+			break;
+		}
+	}
+	*pEnd = s;
+	return lNegative? -f : f;
 }
 
 str ToStr(int i)
@@ -294,7 +328,10 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 						return 1;
 					}
 					std::vector<float> lFloats = Strs2Flts(pParameterVector);
-					mGfxMesh = MeshObject(quat(&lFloats[0]), vec3(&lFloats[4]));
+					mGfxMesh.mOrientation.Set(&lFloats[0]);
+					mGfxMesh.mPos.Set(&lFloats[4]);
+					mGfxMesh.mVertices.clear();
+					mGfxMesh.mIndices.clear();
 					mGfxMesh.mVertices.insert(mGfxMesh.mVertices.end(), mVertices.begin(), mVertices.end());
 					mGfxMesh.mIndices.insert(mGfxMesh.mIndices.end(), mIndices.begin(), mIndices.end());
 				}
@@ -305,7 +342,15 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					strutil::strvec::const_iterator p;
 					for (p = pParameterVector.begin(); p != pParameterVector.end(); ++p)
 					{
-						mVertices.push_back(ToFloat(*p));
+						const tchar* s = p->c_str();
+						const tchar* lEnd;
+						do
+						{
+							float f = StrToFloat(s, &lEnd);
+							mVertices.push_back(f);
+							s = lEnd+1;
+						}
+						while (*lEnd == ',');
 					}
 				}
 				break;
@@ -315,7 +360,15 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					strutil::strvec::const_iterator p;
 					for (p = pParameterVector.begin(); p != pParameterVector.end(); ++p)
 					{
-						mIndices.push_back(ToInt(*p));
+						const tchar* s = p->c_str();
+						const tchar* lEnd;
+						do
+						{
+							int i = StrToUInt(s, &lEnd);
+							mIndices.push_back(i);
+							s = lEnd+1;
+						}
+						while (*lEnd == ',');
 					}
 				}
 				break;

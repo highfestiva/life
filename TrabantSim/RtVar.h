@@ -24,6 +24,7 @@
 #define RTVAR_UI_3D_CAMROTATEY		"Ui.3D.CamRotateY"
 #define RTVAR_UI_3D_CAMROTATEZ		"Ui.3D.CamRotateZ"
 #define RTVAR_UI_3D_CAMTARGETOBJECT	"Ui.3D.CamTargetObject"
+#define RTVAR_UI_3D_CAMANGLERELATIVE	"Ui.3D.CamAngleRelative"
 #define RTVAR_UI_PENRED			"Ui.PenRed"
 #define RTVAR_UI_PENGREEN		"Ui.PenGreen"
 #define RTVAR_UI_PENBLUE		"Ui.PenBlue"
