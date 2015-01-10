@@ -457,8 +457,9 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					const str lEngineType = ParamToStr(pParameterVector, 1);
 					const vec2 lMaxVelocity = ParamToVec2(pParameterVector, 2);
 					const vec2 lOffset = ParamToVec2(pParameterVector, 4);
-					const str lEngineSound = ParamToStr(pParameterVector, 6);
-					const int lEngineId = lManager->CreateEngine(lObjectId, lEngineType, lMaxVelocity+lOffset, lEngineSound);
+					const float lFriction = ParamToFloat(pParameterVector, 6);
+					const str lEngineSound = ParamToStr(pParameterVector, 7);
+					const int lEngineId = lManager->CreateEngine(lObjectId, lEngineType, lMaxVelocity+lOffset, lFriction, lEngineSound);
 					if (lEngineId < 0)
 					{
 						throw ParameterException();

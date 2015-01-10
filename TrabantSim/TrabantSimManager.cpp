@@ -122,13 +122,9 @@ void TrabantSimManager::UserReset()
 	for (; x != lVariableList.end(); ++x)
 	{
 		const str lName = *x;
-		if (strutil::StartsWith(lName, _T("Ui.3D.Clear")) || strutil::StartsWith(lName, _T("Ui.3D.FOV")) || strutil::StartsWith(lName, _T("Ui.3D.Clip"))
-			 || strutil::StartsWith(lName, _T("Ui.3D.Cam")) || strutil::StartsWith(lName, _T("Ui.Pen")))
+		if (strutil::StartsWith(lName, _T("Ui.3D.Clear")) || strutil::StartsWith(lName, _T("Ui.3D.Clip")) || strutil::StartsWith(lName, _T("Ui.Pen")))
 		{
-			if (!strutil::StartsWith(lName, _T("Ui.3D.CamTarget")))
-			{
-				continue;
-			}
+			continue;
 		}
 		lScope->ResetDefaultValue(lName);
 	}
@@ -248,6 +244,8 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 	q.Set(1,0,0,0);
 	//q.RotateAroundWorldX(PIF);
 	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
+	lObject->mInitialOrientation = pq;
+	lObject->mInitialInverseOrientation = pq.GetInverse();
 	mObjects.insert(lObject->GetInstanceId());
 	return lObject->GetInstanceId();
 }
@@ -331,7 +329,7 @@ float TrabantSimManager::GetAspectRatio() const
 	return mUiManager->GetDisplayManager()->GetWidth()/(float)mUiManager->GetDisplayManager()->GetHeight();
 }
 
-int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, const str& pEngineSound)
+int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, float pFriction, const str& pEngineSound)
 {
 	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 	ScopeLock lGameLock(GetTickLock());
@@ -344,7 +342,7 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 	Tbc::PhysicsEngine::EngineType lEngineType;
 	vec2 lMaxVelocity(pMaxVelocity);
 	float lStrength = 15;
-	float lFriction = 0.5f;
+	float lFriction = pFriction*2;
 	if (pEngineType == _T("roll_turn"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE2_TURN;
@@ -357,13 +355,11 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE;
 		lMaxVelocity.x = (!lMaxVelocity.x)? 100.0f : lMaxVelocity.x;
-		lFriction = 0.9f;
 	}
 	else if (pEngineType == _T("push_turn_abs"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE;
 		lMaxVelocity.x = (!lMaxVelocity.x)? 0.1f : lMaxVelocity.x;
-		lFriction = 0.9f;
 	}
 	else if (pEngineType == _T("gyro"))
 	{
@@ -431,7 +427,7 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 	}
 	if (pSet)
 	{
-		pOrientation.RotateAroundOwnX(PIF/-2);
+		pOrientation = pOrientation * lObject->mInitialOrientation;
 		vec3 lPosition = lObject->GetPosition();
 		GetPhysicsManager()->SetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), xform(pOrientation, lPosition));
 	}
@@ -439,8 +435,7 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 	{
 		xform t;
 		GetPhysicsManager()->GetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), t);
-		pOrientation = t.mOrientation;
-		pOrientation.RotateAroundOwnX(PIF/2);
+		pOrientation = t.mOrientation * lObject->mInitialInverseOrientation;
 	}
 }
 

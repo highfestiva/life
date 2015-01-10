@@ -616,6 +616,10 @@ void GameUiManager::UpdateSettings()
 	bool lEnableMipMapping;
 	bool lEnableTexturing;
 	bool lEnablePixelShaders;
+	double lFogNear;
+	double lFogFar;
+	double lFogDensity;
+	double lFogExponent;
 	double lFOV;
 	double lClipNear;
 	double lClipFar;
@@ -641,6 +645,10 @@ void GameUiManager::UpdateSettings()
 	v_get(lEnableMipMapping, =, mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	v_get(lEnableTexturing, =, mVariableScope, RTVAR_UI_3D_ENABLETEXTURING, false);
 	v_get(lEnablePixelShaders, =, mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
+	v_get(lFogNear, =, mVariableScope, RTVAR_UI_3D_FOGNEAR, 0.0);
+	v_get(lFogFar, =, mVariableScope, RTVAR_UI_3D_FOGFAR, 0.0);
+	v_get(lFogDensity, =, mVariableScope, RTVAR_UI_3D_FOGDENSITY, 1.0);
+	v_get(lFogExponent, =, mVariableScope, RTVAR_UI_3D_FOGEXPONENT, 0.0);
 	v_get(lFOV, =, mVariableScope, RTVAR_UI_3D_FOV, 45.0);
 	v_get(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	v_get(lClipFar, =, mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
@@ -654,6 +662,7 @@ void GameUiManager::UpdateSettings()
 	mRenderer->SetMipMappingEnabled(lEnableMipMapping);
 	mRenderer->SetTexturingEnabled(lEnableTexturing);
 	mRenderer->EnablePixelShaders(lEnablePixelShaders);
+	mRenderer->SetFog((float)lFogNear, (float)lFogFar, (float)lFogDensity, (float)lFogExponent);
 	mRenderer->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
 
 	UiTbc::Renderer::Shadows lShadowMode = UiTbc::Renderer::NO_SHADOWS;

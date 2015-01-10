@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from math import cos,sin,sqrt,pi
+from math import cos,sin,sqrt,pi,atan2
 from random import random
 
 
@@ -68,6 +68,12 @@ class vec3:
 
 	def abs(self):
 		return vec3(abs(self.x), abs(self.y), abs(self.z))
+
+	def with_y(self,y):
+		return vec3(self.x,y,self.z)
+
+	def angle_y(self,v):
+		return atan2(v.z,v.x) - atan2(self.z,self.x)
 
 	def __add__(self,v):
 		return vec3(self.x+v.x, self.y+v.y, self.z+v.z)

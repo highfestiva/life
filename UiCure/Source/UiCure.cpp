@@ -69,6 +69,10 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	v_set(pSettings, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
 	v_set(pSettings, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	v_set(pSettings, RTVAR_UI_3D_ENABLETEXTURING, true);
+	v_set(pSettings, RTVAR_UI_3D_FOGNEAR, 0.0);
+	v_set(pSettings, RTVAR_UI_3D_FOGFAR, 0.0);
+	v_set(pSettings, RTVAR_UI_3D_FOGDENSITY, 1.0);
+	v_set(pSettings, RTVAR_UI_3D_FOGEXPONENT, 0.0);
 	v_set(pSettings, RTVAR_UI_3D_FOV, 45.0);
 	v_set(pSettings, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	v_set(pSettings, RTVAR_UI_3D_CLIPFAR, 3000.0);

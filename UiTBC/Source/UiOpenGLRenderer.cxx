@@ -1269,6 +1269,18 @@ unsigned OpenGLRenderer::RenderScene()
 		::glCullFace(GL_BACK);
 		::glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 		::glEnable(GL_LINE_SMOOTH);
+		if (GetFogFar() > 0)
+		{
+			::glEnable(GL_FOG);
+			::glFogi(GL_FOG_MODE, (GetFogExponent()>0)? GL_EXP : GL_LINEAR);
+			::glFogf(GL_FOG_DENSITY, GetFogDensity());
+			::glFogf(GL_FOG_START, GetFogNear());
+			::glFogf(GL_FOG_END, GetFogFar());
+		}
+		else
+		{
+			::glDisable(GL_FOG);
+		}
 #ifndef LEPRA_GL_ES
 		::glPolygonMode(GL_FRONT_AND_BACK, IsWireframeEnabled()? GL_LINE : GL_FILL);
 		::glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
@@ -1437,6 +1449,7 @@ unsigned OpenGLRenderer::RenderScene()
 		::glDisable(GL_LIGHTING);
 		::glDisable(GL_COLOR_MATERIAL);
 		::glDisable(GL_NORMALIZE);
+		::glDisable(GL_FOG);
 		::glDisableClientState(GL_NORMAL_ARRAY);
 		//::glDisableClientState(GL_INDEX_ARRAY);
 		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);

@@ -75,8 +75,8 @@ class Obj:
 		if p.z > rbf.z: v.z = -abs(v.z)
 		if v != _v:
 			self.vel(v)
-	def create_engine(self, engine_type, max_velocity=None, offset=None, sound=None):
-		eid = gameapi.create_engine(self.id, engine_type, max_velocity, offset, sound)
+	def create_engine(self, engine_type, max_velocity=None, offset=None, friction=0, sound=None):
+		eid = gameapi.create_engine(self.id, engine_type, max_velocity, offset, friction, sound)
 		self.engine += [Engine(self.id, eid)]
 		return self.engine[-1]
 	def create_joint(self, joint_type, obj2, axis):
@@ -171,7 +171,7 @@ def gravity(g, bounce=None, friction=None):
 	if friction:
 		gameapi.friction(friction)
 
-def create_ascii_object(ascii, pos=None, vel=None, angular_velocity=None, mass=None, col=None, static=False, physmesh=False):
+def create_ascii_object(ascii, pos=None, vel=None, avel=None, mass=None, col=None, static=False, physmesh=False):
 	global _last_ascii_top_left_offset,asc2obj_lookup
 	# Keep a small cache of generated objects. Most small prototypes will reuse shapes.
 	gfx = None
@@ -184,19 +184,19 @@ def create_ascii_object(ascii, pos=None, vel=None, angular_velocity=None, mass=N
 		asc2obj_lookup.append((ascii+str(physmesh),gfx,phys,_last_ascii_top_left_offset))
 		if len(asc2obj_lookup) > 10:
 			del asc2obj_lookup[0]
-	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, mass=mass, col=col)
+	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col)
 
-def create_mesh_object(vertices, triangles, pos=None, vel=None, angular_velocity=None, mass=None, col=None, static=False):
+def create_mesh_object(vertices, triangles, pos=None, vel=None, avel=None, mass=None, col=None, static=False):
 	gfx,phys = objgen.createmesh(vertices,triangles)
-	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, mass=mass, col=col)
+	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col)
 
-def create_cube_object(pos=None, side=1, vel=None, angular_velocity=None, mass=None, static=False):
+def create_cube_object(pos=None, side=1, vel=None, avel=None, mass=None, static=False):
 	gfx,phys = objgen.createcube(side)
-	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, mass=mass, col=None)
+	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=None)
 
-def create_sphere_object(pos=None, radius=1, vel=None, angular_velocity=None, mass=None, col=None, static=False):
+def create_sphere_object(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, static=False):
 	gfx,phys = objgen.createsphere(radius)
-	return _create_object(gfx, phys, static, pos=pos, vel=vel, angular_velocity=angular_velocity, mass=mass, col=col)
+	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col)
 
 def release_all_objects():
 	gameapi.release_all_objects()
@@ -275,7 +275,7 @@ def _poll_joysticks():
 		j = _joysticks[jid]
 		j.x,j.y = x,y
 
-def _create_object(gfx, phys, static, pos, vel, angular_velocity, mass, col):
+def _create_object(gfx, phys, static, pos, vel, avel, mass, col):
 	_tryopen()
 	objpos = tovec3(pos) if pos else vec3(0,0,0)
 	gameapi.initgfxmesh(gfx.q, gfx.pos, gfx.vertices, gfx.indices)
@@ -298,8 +298,8 @@ def _create_object(gfx, phys, static, pos, vel, angular_velocity, mass, col):
 	_objects[oid] = o
 	if vel:
 		o.vel(tovec3(vel))
-	if angular_velocity:
-		o.avel(tovec3(angular_velocity))
+	if avel:
+		o.avel(tovec3(avel))
 	if mass:
 		o.mass(mass)
 	return o

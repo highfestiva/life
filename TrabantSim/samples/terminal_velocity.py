@@ -20,15 +20,15 @@ XX  XX  XX
 gravity((0,0,0))
 ship = create_ascii_object(shipasc)
 ship.orientation(quat().rotate_x(-pi/2))
-pusher = ship.create_engine(push_engine, max_velocity=(1,0), sound=sound_engine_hizz)
-yawer = ship.create_engine(push_turn_engine)
-terrain_meshes,terrain_patch_size = {},100
+pusher = ship.create_engine(push_engine, max_velocity=1, friction=0.5, sound=sound_engine_hizz)
+yawer = ship.create_engine(push_turn_engine, friction=0.5)
+terrain_meshes,terrain_patch_size = {},120
 cam(angle=(-pi/9,0,0), distance=50, target=ship, use_relative_angle=True)
-fog(300)
+fog(80)
 
 def create_terrain_patch(patch_x,patch_y):
 	x,y = patch_x*terrain_patch_size,patch_y*terrain_patch_size
-	grid = 10
+	grid = 6
 	g1,g2 = grid+1,grid//2
 	s = terrain_patch_size//grid
 	vertices = []
@@ -36,7 +36,7 @@ def create_terrain_patch(patch_x,patch_y):
 		for vx in range(0,grid+1):
 			lpos = vec3((vx-g2)*s, (vy-g2)*s, 0)
 			wpos = vec3(x,y,0)+lpos
-			rnd = wpos.y*27+wpos.x*13	# Pseudo random to give terrain some fluctuation.
+			rnd = wpos.y*29+wpos.x*13	# Pseudo random to give terrain some fluctuation.
 			lpos.z = -65 + 25*sin2(wpos.x/73) + 21*sin2(wpos.y/123) + rnd//20%11	# Terrain well below Z=0.
 			vertices.append(lpos)
 	triangles = []
@@ -51,9 +51,9 @@ def update_terrain(pos):
 	'''Add new visible patches, drop no longer visible ones.'''
 	global terrain_meshes
 	meshes,created_count = {},0
-	top,left = int(pos.y)//terrain_patch_size-2,int(pos.x)//terrain_patch_size-2
-	for y in range(top,top+5):
-		for x in range(left,left+5):
+	top,left = int(pos.y)//terrain_patch_size-3,int(pos.x)//terrain_patch_size-3
+	for y in reversed(range(top,top+7)):
+		for x in range(left,left+7):
 			key = y*3301919+x	# Anything large prime is good enough.
 			if key in terrain_meshes:
 				meshes[key] = terrain_meshes[key]

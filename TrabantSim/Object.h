@@ -41,6 +41,9 @@ public:
 
 	void AddGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor);
 
+	quat mInitialOrientation;
+	quat mInitialInverseOrientation;
+
 private:
 	UiTbc::TriangleBasedGeometry* mGfxMesh;
 	UiTbc::Renderer::GeometryID mGfxMeshId;

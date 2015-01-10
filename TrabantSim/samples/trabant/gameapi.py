@@ -61,7 +61,8 @@ def cam(angle, distance, target_oid, pos, fov, relative_angle):
 		set('Ui.3D.CamAngleRelative', bool(relative_angle))
 
 def fog(distance):
-	set('Ui.3D.FogDistance', float(distance))
+	set('Ui.3D.FogNear', distance/16)
+	set('Ui.3D.FogFar', float(distance))
 
 def gravity(g):
 	set('Physics.GravityX', float(g.x))
@@ -146,8 +147,10 @@ def releaseobj(oid):
 def release_all_objects():
 	cmd('delete-all-objects')
 
-def create_engine(oid, engine_type, max_velocity, offset, sound):
-	return cmd('create-engine %i %s %s %s %s' % (oid, engine_type, _args2str(max_velocity, '0 0'), _args2str(offset, '0 0'), sound if sound else 'none'), int)
+def create_engine(oid, engine_type, max_velocity, offset, friction, sound):
+	try:	max_velocity = (float(max_velocity), 0)	# Convert single number to tuple.
+	except:	pass
+	return cmd('create-engine %i %s %s %s %f %s' % (oid, engine_type, _args2str(max_velocity, '0 0'), _args2str(offset, '0 0'), friction, sound if sound else 'none'), int)
 
 def create_joint(oid, joint_type, oid2, axis):
 	return cmd('create-joint %i %s %i %s' % (oid, joint_type, oid2, _args2str(axis)), int)

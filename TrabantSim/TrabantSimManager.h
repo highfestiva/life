@@ -81,7 +81,7 @@ public:
 	int CreateJoystick(float x, float y);
 	JoystickDataList GetJoystickData() const;
 	float GetAspectRatio() const;
-	int CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, const str& pEngineSound);
+	int CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, float pFriction, const str& pEngineSound);
 	int CreateJoint(int pObjectId, const str& pJointType, int pOtherObjectId, const vec3& pAxis);
 	void Position(int pObjectId, bool pSet, vec3& pPosition);
 	void Orientation(int pObjectId, bool pSet, quat& pOrientation);

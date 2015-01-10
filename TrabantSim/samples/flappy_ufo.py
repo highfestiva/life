@@ -18,9 +18,9 @@ def init():
 	ufo = create_ascii_object(ufoasc, vel=(20,0,1))
 	ufo.create_engine(push_engine)
 	cam(target=ufo)
-	columns += make_column_pair(-10,5)
-	columns += make_column_pair(+3,5)
-	columns += make_column_pair(+16,5)
+	columns += make_column_pair(-10,8)
+	columns += make_column_pair(+3,8)
+	columns += make_column_pair(+16,8)
 
 def make_column_pair(dx, yoff):
 	x = ufo.pos().x
@@ -34,7 +34,7 @@ t = 0.5
 while loop():
 	ufo.engine[0].force((1, 0, 60 if taps() else -60))
 	if timeout(t):
-		columns += make_column_pair(20,t*10)
+		columns += make_column_pair(20,t*16)
 		while len(columns) > 8:
 			[c.release() for c in columns[:2]]
 			columns = columns[2:]

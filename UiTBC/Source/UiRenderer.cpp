@@ -120,7 +120,11 @@ Renderer::Renderer(Canvas* pScreen):
 	mShadowUpdateFrameDelay(100),
 	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight()),
 	mShadowVolumesCreateMax(1),
-	mShadowVolumeCreateCount(0)
+	mShadowVolumeCreateCount(0),
+	mFogNear(0),
+	mFogFar(0),
+	mFogDensity(1),
+	mFogExponent(0)
 {
 }
 
@@ -1868,6 +1872,34 @@ void Renderer::RemoveShadowVolume(GeometryID& pShadowVolume)
 int Renderer::GetTriangleCount(bool pVisible)
 {
 	return pVisible? mVisibleTriangleCount : mCulledTriangleCount;
+}
+
+float Renderer::GetFogNear() const
+{
+	return mFogNear;
+}
+
+float Renderer::GetFogFar() const
+{
+	return mFogFar;
+}
+
+float Renderer::GetFogDensity() const
+{
+	return mFogDensity;
+}
+
+float Renderer::GetFogExponent() const
+{
+	return mFogExponent;
+}
+
+void Renderer::SetFog(float pNear, float pFar, float pDensity, float pExponent)
+{
+	mFogNear = pNear;
+	mFogFar = pFar;
+	mFogDensity = pDensity;
+	mFogExponent = pExponent;
 }
 
 void Renderer::CalcCamCulling()

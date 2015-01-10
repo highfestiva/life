@@ -485,6 +485,12 @@ public:
 
 	virtual void DrawLine(const vec3& pPosition, const vec3& pVector, const Color& pColor) = 0;
 
+	float GetFogNear() const;
+	float GetFogFar() const;
+	float GetFogDensity() const;
+	float GetFogExponent() const;
+	virtual void SetFog(float pNear, float pFar, float pExponent, float pDensity);
+
 	void CalcCamCulling();
 	bool CheckCamCulling(const vec3& pPosition, float pBoundingRadius) const;
 
@@ -623,6 +629,11 @@ protected:
 
 	int mShadowVolumesCreateMax;
 	int mShadowVolumeCreateCount;
+
+	float mFogNear;
+	float mFogFar;
+	float mFogDensity;
+	float mFogExponent;
 
 	// Since distance sorting lights is implemented using ::qsort(),
 	// we need to store the following variables "globally".
