@@ -76,7 +76,7 @@ while loop():
 	update_terrain(p + o*vec3(0,0,100))
 
 	# Turn ship.
-	yaw_force = -accelerometer().x
+	yaw_force = -accelerometer().x - sum(t.x*6-3 for t in taps())
 	yawer.force((0,0,yaw_force))
 
 	# Bank ship, and adjust nose up/down levelling.

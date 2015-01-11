@@ -200,7 +200,7 @@ def getsetoidcmd(name, oid, *args):
 def cmd(c, return_type=str):
 	#print(c)
 	sock.send((c+'\n').encode())
-	result = sock.recv(1024).decode()
+	result = sock.recv(80*1024).decode()
 	return return_type(result[3:]) if result.startswith('ok\n') else result
 
 def set(setting, value):

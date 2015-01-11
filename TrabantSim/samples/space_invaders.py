@@ -42,7 +42,7 @@ while loop():
 		vmin = min(25,d*3)*4
 		ship.vel((vmin if sx<tx else -vmin, 0, 0))
 		if d < 5 and timeout(0.7):
-			shots += [create_sphere_object(ship.pos()+vec3(0,0,10), vel=(0,0,350), col='#fff')]
+			shots += [create_sphere_object(ship.pos()+vec3(0,0,10), vel=(0,0,250), col='#fff')]
 			sound(sound_bang, shots[-1].pos())
 	else:
 		ship.vel((0,0,0))

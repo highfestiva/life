@@ -402,7 +402,8 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				{
 					strutil::strvec lLines;
 					typedef TrabantSimManager::CollisionList CollisionList;
-					CollisionList lList = lManager->PopCollisions();
+					CollisionList lList;
+					lManager->PopCollisions(lList);
 					for (CollisionList::iterator x = lList.begin(); x != lList.end(); ++x)
 					{
 						lLines.push_back(strutil::Format(_T("%i %f %f %f %f %f %f %i"), x->mObjectId, x->mForce.x, x->mForce.y, x->mForce.z,

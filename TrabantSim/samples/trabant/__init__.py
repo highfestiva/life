@@ -19,6 +19,7 @@ _last_ascii_top_left_offset = None
 asc2obj_lookup = []
 _aspect_ratio = 1.33333
 _taps = None
+_invalidated_taps = set()
 _collisions = None
 _joysticks = {}
 _timers = {}
@@ -89,8 +90,9 @@ class Obj:
 
 
 class Tap:
-	def __init__(self, x, y):
+	def __init__(self, x, y, startx, starty):
 		self.x,self.y = x,y
+		self.startx,self.starty = startx,starty
 	def pos3d(self, z=None):
 		if not z:
 			z = _cam_distance
@@ -99,6 +101,9 @@ class Tap:
 		if not z:
 			z = _cam_distance
 		return vec3(0,0,0)
+	def invalidate(self):
+		global _invalidated_taps
+		_invalidated_taps.add((self.startx,self.starty))
 	def _distance2(self, x, y):
 		return (self.x-x)**2+(self.y-y)**2
 
@@ -232,14 +237,24 @@ def collisions():
 	global _collisions
 	if _collisions == None:
 		oids = [int(line.split()[0]) for line in gameapi.pop_collisions().split('\n') if line]
-		_collisions = [_objects[oid] for oid in oids]
+		_collisions = set(_objects[oid] for oid in oids if oid in _objects)
 	return _collisions
 
 def taps():
 	global _taps
-	if _taps == None:
-		taps_coords = [[float(w) for w in line.split()[:4]] for line in gameapi.taps().split('\n') if line]
-		_taps = [Tap(x,y) for x,y,startx,starty in taps_coords]
+	if _taps != None:
+		return _taps
+	taps_coords = [[float(w) for w in line.split()[:4]] for line in gameapi.taps().split('\n') if line]
+	_taps = []
+	used_invalidations = set()
+	for x,y,startx,starty in taps_coords:
+		if (startx,starty) not in _invalidated_taps:
+			_taps.append(Tap(x,y,startx,starty))
+		else:
+			used_invalidations.add((startx,starty))
+	for tapstart in set(_invalidated_taps):
+		if not tapstart in used_invalidations:
+			_invalidated_taps.remove(tapstart)
 	return _taps
 
 def closest_tap(pos):

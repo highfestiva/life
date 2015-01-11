@@ -279,11 +279,10 @@ void TrabantSimManager::PlaySound(const str& pSound, const vec3& pPos, const vec
 	(void)pSound; (void)pPos; (void)pVel;
 }
 
-TrabantSimManager::CollisionList TrabantSimManager::PopCollisions()
+void TrabantSimManager::PopCollisions(CollisionList& pCollisionList)
 {
 	ScopeLock lGameLock(GetTickLock());
-	CollisionList lList;
-	return lList;
+	pCollisionList.splice(pCollisionList.end(), mCollisionList);
 }
 
 const TrabantSimManager::DragList& TrabantSimManager::GetTouchDrags() const
@@ -737,6 +736,18 @@ void TrabantSimManager::OnCollision(const vec3& pForce, const vec3& pTorque, con
 {
 	(void)pBody2Id;
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
+
+	ScopeLock lGameLock(GetTickLock());
+	CollisionInfo ci;
+	ci.mObjectId = pObject1->GetInstanceId();
+	ci.mForce = pForce;
+	ci.mPosition = pPosition;
+	ci.mOtherObjectId = pObject2->GetInstanceId();
+	mCollisionList.push_back(ci);
+	if (mCollisionList.size() > 300)
+	{
+		mCollisionList.pop_front();
+	}
 }
 
 

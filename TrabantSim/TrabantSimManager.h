@@ -59,7 +59,7 @@ public:
 		float x;
 		float y;
 	};
-	typedef std::vector<CollisionInfo> CollisionList;
+	typedef std::list<CollisionInfo> CollisionList;
 	typedef UiLepra::Touch::DragManager::DragList DragList;
 	typedef std::vector<JoystickData> JoystickDataList;
 
@@ -75,7 +75,7 @@ public:
 	bool IsLoaded(int pObjectId);
 	void Expload(const vec3& pPos, const vec3& pVel);
 	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel);
-	CollisionList PopCollisions();
+	void PopCollisions(CollisionList& pCollisionList);
 	const DragList& GetTouchDrags() const;
 	vec3 GetAccelerometer() const;
 	int CreateJoystick(float x, float y);
@@ -131,6 +131,7 @@ protected:
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	std::set<Cure::GameObjectId> mObjects;
+	CollisionList mCollisionList;
 	Life::Menu* mMenu;
 	Light* mLight;
 	vec3 mCameraAngle;
