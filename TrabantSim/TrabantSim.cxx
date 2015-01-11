@@ -128,9 +128,9 @@ void TrabantSim::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.1);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.1);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.1);
 	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.1);
 	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_MUSICVOLUME, 0.6);

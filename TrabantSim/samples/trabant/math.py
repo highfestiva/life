@@ -69,11 +69,23 @@ class vec3:
 	def abs(self):
 		return vec3(abs(self.x), abs(self.y), abs(self.z))
 
+	def with_x(self,x):
+		return vec3(x,self.y,self.z)
+
 	def with_y(self,y):
 		return vec3(self.x,y,self.z)
 
+	def with_z(self,z):
+		return vec3(self.x,self.y,z)
+
+	def angle_x(self,v):
+		return atan2(v.z,v.y) - atan2(self.z,self.y)
+
 	def angle_y(self,v):
 		return atan2(v.z,v.x) - atan2(self.z,self.x)
+
+	def angle_z(self,v):
+		return atan2(v.y,v.x) - atan2(self.y,self.x)
 
 	def __add__(self,v):
 		return vec3(self.x+v.x, self.y+v.y, self.z+v.z)

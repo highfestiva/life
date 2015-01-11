@@ -166,6 +166,7 @@ public:
 	Cure::ResourceLoadState PostProcess();
 
 	int GetCastsShadows() const;
+	void SetCastsShadows(int pCastsShadows);
 
 protected:
 	int mCastsShadows;

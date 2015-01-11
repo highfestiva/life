@@ -9,7 +9,7 @@ import trabant.objgen
 import time
 
 
-roll_turn_engine,roll_engine,push_engine,push_turn_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll push_abs push_turn_abs gyro rotor tilt'.split()
+roll_turn_engine,roll_engine,push_abs_engine,push_rel_engine,push_abs_turn_engine,push_rel_turn_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
 hinge_joint,hinge2_joint = 'hinge hinge2'.split()
 sound_explosion,sound_ping,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion = 'explosion ping bang hizz wobble combustion'.split()
 
@@ -115,8 +115,6 @@ def open(**kwargs):
 	_joysticks,_timers,_has_opened = {},{},True
 	if not gameapi.open(**kwargs):
 		raise Exception('unable to connect to simulator')
-	gameapi.release_all_objects()
-	gameapi.reset()	# Kill all joysticks. Set some default values.
 	cam(angle=(0,0,0), distance=10, target=None, fov=45)
 	loop()	# Resets taps+collisions.
 
@@ -137,10 +135,12 @@ def loop(delay=0.1):
 def sleep(t):
 	time.sleep(t)
 
-def timeout(t, timer=0):
+def timeout(t, timer=0, first_hit=False):
 	global _timers
 	if not timer in _timers:
 		_timers[timer] = time.time()
+		if first_hit:
+			return True
 	if time.time() - _timers[timer] > t:
 		_timers[timer] = time.time()
 		return True
@@ -171,7 +171,7 @@ def gravity(g, bounce=None, friction=None):
 	if friction:
 		gameapi.friction(friction)
 
-def create_ascii_object(ascii, pos=None, vel=None, avel=None, mass=None, col=None, static=False, physmesh=False):
+def create_ascii_object(ascii, pos=None, vel=None, avel=None, mass=None, col=None, mat='flat', static=False, physmesh=False):
 	global _last_ascii_top_left_offset,asc2obj_lookup
 	# Keep a small cache of generated objects. Most small prototypes will reuse shapes.
 	gfx = None
@@ -184,19 +184,19 @@ def create_ascii_object(ascii, pos=None, vel=None, avel=None, mass=None, col=Non
 		asc2obj_lookup.append((ascii+str(physmesh),gfx,phys,_last_ascii_top_left_offset))
 		if len(asc2obj_lookup) > 10:
 			del asc2obj_lookup[0]
-	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col)
+	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_mesh_object(vertices, triangles, pos=None, vel=None, avel=None, mass=None, col=None, static=False):
+def create_mesh_object(vertices, triangles, pos=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False):
 	gfx,phys = objgen.createmesh(vertices,triangles)
-	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col)
+	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_cube_object(pos=None, side=1, vel=None, avel=None, mass=None, static=False):
+def create_cube_object(pos=None, side=1, vel=None, avel=None, mass=None, mat='checker', static=False):
 	gfx,phys = objgen.createcube(side)
-	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=None)
+	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=None, mat=mat)
 
-def create_sphere_object(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, static=False):
+def create_sphere_object(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False):
 	gfx,phys = objgen.createsphere(radius)
-	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col)
+	return _create_object(gfx, phys, static, pos=pos, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def release_all_objects():
 	gameapi.release_all_objects()
@@ -275,9 +275,11 @@ def _poll_joysticks():
 		j = _joysticks[jid]
 		j.x,j.y = x,y
 
-def _create_object(gfx, phys, static, pos, vel, avel, mass, col):
+def _create_object(gfx, phys, static, pos, vel, avel, mass, col, mat):
 	_tryopen()
 	objpos = tovec3(pos) if pos else vec3(0,0,0)
+	# if mat != 'smooth':
+		# gfx = objgen.flatten_mesh(gfx)
 	gameapi.initgfxmesh(gfx.q, gfx.pos, gfx.vertices, gfx.indices)
 	gameapi.clearprepphys()
 	for p in phys:
@@ -290,7 +292,7 @@ def _create_object(gfx, phys, static, pos, vel, avel, mass, col):
 		objpos = vec3(0,0,0)	# Only root should be moved, the rest have relative positions.
 	if col:
 		gameapi.setpencolor(col)
-	oid = gameapi.createobj(static)
+	oid = gameapi.createobj(static, mat)
 	if _wait_until_loaded:
 		gameapi.waitload(oid)
 	o = Obj(oid)
@@ -321,8 +323,8 @@ def _screen2world(x,y,distance):
 	_update_cam_shadow()
 	tana = tan(_cam_fov_radians*0.5);
 	dx = tana * (x*2-1) * _get_aspect_ratio()
-	dy = tana * (1-y*2);
-	crd = (_cam_q * vec3(dx, 1, dy).normalize() * distance) + _cam_pos
+	dy = tana * (1-y*2)
+	crd = (_cam_q * vec3(dx, 1, dy) * distance) + _cam_pos
 	#print('screen2world (%g,%g) -> (%g,%g,%g)' % (x,y,crd.x,crd.y,crd.z))
 	return crd
 
@@ -345,7 +347,7 @@ def _update_cam_shadow():
 		_cam_pos += _cam_q * vec3(0,-_cam_distance,0)
 
 def _get_aspect_ratio():
-	if timeout(10,timer=-152):
+	if timeout(3,timer=-152,first_hit=True):
 		global _aspect_ratio
 		_aspect_ratio = gameapi.get_aspect_ratio()
 	return _aspect_ratio

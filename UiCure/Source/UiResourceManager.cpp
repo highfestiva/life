@@ -366,6 +366,11 @@ int GeometryResource::GetCastsShadows() const
 	return (mCastsShadows);
 }
 
+void GeometryResource::SetCastsShadows(int pCastsShadows)
+{
+	mCastsShadows = pCastsShadows;
+}
+
 loginstance(UI_GFX_3D, GeometryResource);
 
 

@@ -56,4 +56,13 @@ typedef std::vector<PlacedObject*> PhysObjectArray;
 
 
 
+enum ObjectMaterial
+{
+	MaterialSmooth = 1,
+	MaterialFlat,
+	MaterialChecker
+};
+
+
+
 }

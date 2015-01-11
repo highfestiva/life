@@ -138,14 +138,12 @@ void TrabantSimManager::UserReset()
 	// TODO: Kill all joysticks and collisions.
 }
 
-int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, bool pIsStatic)
+int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic)
 {
 	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 	ScopeLock lGameLock(GetTickLock());
 
-	xform pt;
-	quat q, pq;
-	q.RotateAroundWorldX(PIF/-2);
+	quat pq;
 	Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD, pIsStatic? Tbc::ChunkyPhysics::STATIC : Tbc::ChunkyPhysics::DYNAMIC);
 	if (pPhysObjects.empty())
@@ -174,21 +172,12 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 			xform t = xform(lPhysObject->mOrientation, lPhysObject->mPos);
 			if (lParentPhysObject)
 			{
-				//t.mOrientation = t.mOrientation * pq.GetInverse();
-				//t.mOrientation = t.mOrientation.GetInverse();
-				//t.mPosition -= lParentPhysObject->mPos;
-				//t.RotateAroundAnchor(lPhysObject->pos, vec3(1,0,0), PIF/2);
-				//t = pt.InverseTransform(t);
 				t.mPosition = pq.GetInverse() * t.mPosition;
 				t.mOrientation = pq.GetInverse() * t.mOrientation;
 			}
 			else
 			{
-				pt = t;
-				pt.mPosition.Set(0,0,0);
-				pq = pt.mOrientation;
-				//t.RotateAroundAnchor(lPhysObject->pos, vec3(1,0,0), PIF/2);
-				//t.mOrientation = q.GetInverse() * t.mOrientation.GetInverse() * q;
+				pq = t.mOrientation;
 			}
 			BoxObject* lBox = dynamic_cast<BoxObject*>(lPhysObject);
 			SphereObject* lSphere = dynamic_cast<SphereObject*>(lPhysObject);
@@ -233,16 +222,14 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 			}
 		}
 	}
-	lObject->SetRootOrientation(pt.mOrientation);
+	lObject->SetRootOrientation(pq);
 	lObject->CreatePhysics(lPhysics);
 	float r,g,b;
 	v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
 	v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
 	v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
-	lObject->AddGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b));
-	//q = q.GetInverse() * pGfxObject.mOrientation.GetInverse() * q;
-	q.Set(1,0,0,0);
-	//q.RotateAroundWorldX(PIF);
+	const bool lIsSmooth = (pMaterial == MaterialSmooth);
+	lObject->AddGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b), lIsSmooth, pIsStatic? -1 : 1);
 	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
 	lObject->mInitialOrientation = pq;
 	lObject->mInitialInverseOrientation = pq.GetInverse();
@@ -356,9 +343,19 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE;
 		lMaxVelocity.x = (!lMaxVelocity.x)? 100.0f : lMaxVelocity.x;
 	}
+	else if (pEngineType == _T("push_rel"))
+	{
+		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE;
+		lMaxVelocity.x = (!lMaxVelocity.x)? 100.0f : lMaxVelocity.x;
+	}
 	else if (pEngineType == _T("push_turn_abs"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE;
+		lMaxVelocity.x = (!lMaxVelocity.x)? 0.1f : lMaxVelocity.x;
+	}
+	else if (pEngineType == _T("push_turn_rel"))
+	{
+		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE;
 		lMaxVelocity.x = (!lMaxVelocity.x)? 0.1f : lMaxVelocity.x;
 	}
 	else if (pEngineType == _T("gyro"))
@@ -528,11 +525,13 @@ void TrabantSimManager::EngineForce(int pObjectId, int pEngineIndex, bool pSet, 
 		switch (lObject->GetPhysics()->GetEngine(pEngineIndex)->GetEngineType())
 		{
 			case Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE:
 				lObject->SetEnginePower(pEngineIndex*4+0, pForce.y);
 				lObject->SetEnginePower(pEngineIndex*4+1, pForce.x);
 				lObject->SetEnginePower(pEngineIndex*4+3, pForce.z);
 				break;
 			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE:
+			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE:
 				lObject->SetEnginePower(pEngineIndex*4+0, pForce.z);
 				lObject->SetEnginePower(pEngineIndex*4+1, pForce.x);
 				lObject->SetEnginePower(pEngineIndex*4+3, pForce.y);
@@ -816,12 +815,11 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 	v_get(crx, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEX, 0.0);
 	v_get(cry, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEY, 0.0);
 	v_get(crz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEZ, 0.0);
-	quat q;
 	vec3 lLookAt(clx,cly,clz);
-	Cure::ContextObject* lObject = 0;
+	Object* lObject = 0;
 	if (ctgt)
 	{
-		lObject = GetContext()->GetObject(ctgt);
+		lObject = (Object*)GetContext()->GetObject(ctgt);
 		if (lObject)
 		{
 			lLookAt = lObject->GetPosition();
@@ -833,11 +831,11 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 	t.RotateAroundAnchor(lLookAt, vec3(0,0,1), caz);
 	if (lObject && car)
 	{
-		vec3 a;
-		lObject->GetOrientation().GetEulerAngles(a);
-		t.RotateAroundAnchor(lLookAt, vec3(0,0,1), a.x);
-		t.RotateAroundAnchor(lLookAt, vec3(1,0,0), a.y-PIF/2);
-		t.RotateAroundAnchor(lLookAt, vec3(0,1,0), a.z);
+		xform pt;
+		GetPhysicsManager()->GetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pt);
+		quat q = pt.mOrientation * lObject->mInitialInverseOrientation;
+		t.mOrientation = q * t.mOrientation;
+		t.mPosition = q*(t.mPosition-lLookAt) + lLookAt;
 	}
 	t.RotateAroundAnchor(lLookAt, vec3(0,1,0), mCameraAngle.y);
 	t.RotateAroundAnchor(lLookAt, vec3(1,0,0), mCameraAngle.x);

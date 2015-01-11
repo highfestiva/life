@@ -2,18 +2,23 @@
 +Cam follow target.
 +Make orientation test "game": diamond-centered, cube-centered, physmesh-centered *asymmetric 3D* shapes.
 +Asteroids. Fix Orientation with big O. Every friggin' game.
++Fog. terminal_velocity.py
+-Smooth camera rotation. geometry_test.py
++Shadows do not work at all. physics.py
+-Make taps stick until polled. snake.py
+-Light shadow should be less from above and a little more from the side. breakout.py
++Tap screen to world translation doesn't work properly. Off by some. space_invaders.py
 
-Fog. terminal_velocity.py
-Tap screen to world translation doesn't work properly. Off by some. space_invaders.py
-Light shadow should be less from above and a little more from the side. breakout.py
-Shadows do not work at all. physics.py and terminal_velocity.py
-Tap/slide velocity.
 Collisions.
 Tetris.
-Scaled texture+UVs on cubes.
-Smooth camera rotation. terminal_velocity.py
-Make taps stick until polled. snake.py
+Tap/slide velocity.
+Fix engine sounds.
+Car.
+Scaled texture+UVs on cubes. Implement checker material.
+Heli.
+Reduce code mass. Cam setting on each game? Etc.
+
 Quake.
+Descent. Relative accelerometer for pitch.
 Rolling ball, avoiding holes. Using accelerometer.
 Tower defence game.
-Descent. Accelerometer.

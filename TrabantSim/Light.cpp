@@ -19,7 +19,7 @@ namespace TrabantSim
 
 Light::Light(UiCure::GameUiManager* pUiManager):
 	mUiManager(pUiManager),
-	mLightAverageDirection(-0.1f,0.2f,-1)
+	mLightAverageDirection(-0.2f,1,-1)
 {
 	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(

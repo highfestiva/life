@@ -17,10 +17,10 @@ rockasc = 'X\\\nXX'	# Slightly irregular shape ftw.
 create_rock = lambda p: create_ascii_object(rockasc, pos=p, vel=(rndvec()*3).with_y(0), avel=rndvec())
 
 def init():
-	global ship,shipdir,rocks
-	ship,shipdir = create_ascii_object(shipasc, vel=(0,0,5)),quat()
-	ship.create_engine(push_engine, max_velocity=2, sound=sound_engine_hizz)
-	cam(angle=(0,-pi/2,0), distance=100, target=ship)	# Rotated camera yields portrait layout for tablet.
+	global ship,rocks
+	ship = create_ascii_object(shipasc, vel=(0,0,5))
+	ship.create_engine(push_rel_engine, max_velocity=2, sound=sound_engine_hizz)
+	cam(distance=100, target=ship)
 	rocks = [create_rock((rndvec()*60).with_y(0)) for _ in range(5)]
 
 gravity((0,0,0))
@@ -32,9 +32,8 @@ while loop():
 	# Steering.
 	if taps():
 		angle = (closest_tap(shippos).pos3d()-shippos).angle_y(vec3(0,0,1))
-		shipdir = quat().rotate_y(angle)
-		ship.orientation(shipdir)
-	ship.engine[0].force(shipdir*vec3(0,0,30 if taps() else 0))
+		ship.orientation(quat().rotate_y(angle))
+	ship.engine[0].force((0,0,30 if taps() else 0))
 	# Check if we crashed into something, if so explode.
 	if ship in collisions():
 		explode(shippos,shipvel)

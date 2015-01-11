@@ -28,7 +28,7 @@ userinfo('Please wait while loading PacMan level...')
 level = create_ascii_object(level, pos=(-12.5,0,0), static=True)
 userinfo()
 man = create_sphere_object(radius=0.4, pos=(0,0,-3), col='#ff0')
-man.create_engine(push_engine)
+man.create_engine(push_abs_engine)
 directions = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
 
 

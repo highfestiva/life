@@ -126,7 +126,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 		case ENGINE_PUSH_TURN_RELATIVE:
 		case ENGINE_PUSH_TURN_ABSOLUTE:
 		{
-			const unsigned lControlledAspects = (mEngineType == ENGINE_PUSH_RELATIVE)? 2 : 3;
+			const unsigned lControlledAspects = 3;
 			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+lControlledAspects)
 			{
 				switch (pAspect - mControllerIndex)

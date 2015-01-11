@@ -9,9 +9,12 @@ proc = None
 _cached_vertices,_cached_indices = [],[]
 
 
-def open(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541'):
+def open(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', restart=True):
 	if not _opencom(addr):
 		return False
+	if restart:
+		release_all_objects()
+		reset()	# Kill all joysticks, set all default values, etc.
 	r,g,b = _htmlcol(bg)
 	set('Ui.3D.ClearRed', r)
 	set('Ui.3D.ClearGreen', g)
@@ -137,9 +140,9 @@ def setpencolor(col):
 	set('Ui.PenGreen', g)
 	set('Ui.PenBlue', b)
 
-def createobj(static):
+def createobj(static, mat):
 	static = 'static' if static else 'dynamic'
-	return cmd('create-object %s' % static, int)
+	return cmd('create-object %s %s' % (static, mat), int)
 
 def releaseobj(oid):
 	cmd('delete-object %i' % oid)
@@ -271,5 +274,5 @@ def _htmlcol(col):
 			if len(col) == 4:
 				col = [int(c,16)/16 for c in col[1:]]
 			elif len(col) == 7:
-				col = [int(col[i:i+2],16)/16 for i in range(1,7,2)]
+				col = [int(col[i:i+2],16)/256 for i in range(1,7,2)]
 	return col

@@ -16,7 +16,7 @@ columns = []
 def init():
 	global ufo,columns
 	ufo = create_ascii_object(ufoasc, vel=(20,0,1))
-	ufo.create_engine(push_engine)
+	ufo.create_engine(push_abs_engine)
 	cam(target=ufo)
 	columns += make_column_pair(-10,8)
 	columns += make_column_pair(+3,8)
@@ -24,8 +24,8 @@ def init():
 
 def make_column_pair(dx, yoff):
 	x = ufo.pos().x
-	return	[create_ascii_object(column, pos=(x+dx,0,5+yoff), static=True),
-		 create_ascii_object(column, pos=(x+dx,0,-5-yoff), static=True)]
+	return	[create_ascii_object(column, pos=(x+dx,0,5+yoff), col='#ba0', static=True),
+		 create_ascii_object(column, pos=(x+dx,0,-5-yoff), col='#ba0', static=True)]
 
 cam(distance=30)
 gravity((0,0,0))

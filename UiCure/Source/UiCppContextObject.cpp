@@ -305,7 +305,7 @@ UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) con
 	return (0);
 }
 
-void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh)
+void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh, int pCastsShadows)
 {
 	static int lMeshCounter = 0;
 	int lPhysIndex = 0;
@@ -328,6 +328,7 @@ void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh)
 	lGeometryResource->SetRamDataType(pMesh);
 	lGeometryResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// Handle pushing to gfx card in postprocessing by some other thread at a later stage.
 	lGeometryRefResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// We're waiting for the root resource to get loaded.
+	lGeometryRefResource->SetCastsShadows(pCastsShadows);
 	GetResourceManager()->AddLoaded(lGeometry);
 	GetResourceManager()->AddLoaded(lGeometryRef);
 	mMeshResourceArray.push_back(lGeometryRef);

@@ -69,7 +69,7 @@ public:
 	virtual ~TrabantSimManager();
 
 	void UserReset();
-	int CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, bool pIsStatic);
+	int CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic);
 	void DeleteObject(int pObjectId);
 	void DeleteAllObjects();
 	bool IsLoaded(int pObjectId);
