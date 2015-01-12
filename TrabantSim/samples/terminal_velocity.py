@@ -42,7 +42,7 @@ def create_terrain_patch(patch_x,patch_y):
 			lpos = vec3((vx-g2)*s, (vy-g2)*s, 0)
 			wpos = vec3(x,y,0)+lpos
 			rnd = wpos.y*29+wpos.x*13	# Pseudo random to give terrain some fluctuation.
-			lpos.z = -60 + 25*sin2(wpos.x/73) + 21*sin2(wpos.y/123) + rnd//20%11	# Terrain below Z=0.
+			lpos.z = -54 + 25*sin2(wpos.x/73) + 21*sin2(wpos.y/123) + rnd//20%11	# Terrain mostly below Z=0.
 			vertices.append(lpos)
 	triangles = []
 	for ty in range(0,grid):
@@ -76,11 +76,13 @@ while loop():
 	update_terrain(p + o*vec3(0,0,100))
 
 	# Turn ship.
-	yaw_force = -accelerometer().x - sum(t.x*6-3 for t in taps())
+	acc = accelerometer(relative=True)
+	yaw_force = -acc.roll - sum(t.x*10-5 for t in taps())	# Control by accelerometer and taps.
 	yawer.force((0,0,yaw_force))
 
-	# Bank ship, and adjust nose up/down levelling.
+	# Banking and nose.
 	roll_factor = -(o*vec3(1,0,0)).z*10
 	roll_force = -yaw_force*1.3 - roll_factor	# Banking.
-	pitch_force = -(o*vec3(0,0,1)).z*10 - ship.pos().z/10	# Try to level ship at Z=0.
+	pitch_factor = (o*vec3(0,0,1)).z*10 + ship.pos().z/10	# Try to level ship at Z=0.
+	pitch_force = acc.pitch - pitch_factor
 	roller.force((pitch_force,0,roll_force))

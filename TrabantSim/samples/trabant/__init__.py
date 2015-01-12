@@ -22,9 +22,10 @@ _taps = None
 _invalidated_taps = set()
 _collisions = None
 _joysticks = {}
+_accelerometer_calibration = vec3()
 _timers = {}
 _objects = {}
-_cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative = vec3(0,0,0),10,None,vec3(0,0,0),0.5,False
+_cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative = vec3(),10,None,vec3(),0.5,False
 _cam_pos,_cam_q,_cam_inv_q = vec3(0,-10,0),quat(),quat()
 
 
@@ -87,6 +88,8 @@ class Obj:
 		global _objects
 		del _objects[self.id]
 		self.id = None
+	def released(self):
+		return self.id == None
 
 
 class Tap:
@@ -100,7 +103,7 @@ class Tap:
 	def vel3d(self, z=None):
 		if not z:
 			z = _cam_distance
-		return vec3(0,0,0)
+		return vec3()	# TODO
 	def invalidate(self):
 		global _invalidated_taps
 		_invalidated_taps.add((self.startx,self.starty))
@@ -116,12 +119,13 @@ class Joystick:
 
 
 def open(**kwargs):
-	global _joysticks,_timers,_has_opened
+	global _joysticks,_timers,_has_opened,_accelerometer_calibration
 	_joysticks,_timers,_has_opened = {},{},True
 	if not gameapi.open(**kwargs):
 		raise Exception('unable to connect to simulator')
 	cam(angle=(0,0,0), distance=10, target=None, fov=45)
-	loop()	# Resets taps+collisions.
+	loop(delay=0)	# Resets taps+collisions.
+	_accelerometer_calibration = accelerometer()
 
 def debug(enable=True):
 	gameapi.debug(enable)
@@ -160,7 +164,7 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None, use_relative
 	if angle: 	_cam_angle = angle
 	if distance:	_cam_distance = distance
 	if target:	_cam_target = target
-	if pos:		_cam_lookat = pos
+	if pos:		_cam_lookat = tovec3(pos)
 	if fov:		_cam_fov_radians = radians(fov)
 	if use_relative_angle != None:	_cam_relative = use_relative_angle
 
@@ -185,7 +189,7 @@ def create_ascii_object(ascii, pos=None, vel=None, avel=None, mass=None, col=Non
 			gfx,phys,_last_ascii_top_left_offset = g,p,lo
 	if not gfx:
 		gfx,phys = asc2obj.str2obj(ascii, force_phys_mesh=physmesh)
-		_last_ascii_top_left_offset = asc2obj.last_centering_offset()
+		_last_ascii_top_left_offset = -vec3(min(gfx.vertices, key=lambda v:v.x).x, min(gfx.vertices, key=lambda v:v.z).z, min(gfx.vertices, key=lambda v:v.y).y)
 		asc2obj_lookup.append((ascii+str(physmesh),gfx,phys,_last_ascii_top_left_offset))
 		if len(asc2obj_lookup) > 10:
 			del asc2obj_lookup[0]
@@ -219,7 +223,7 @@ def explode(pos, vel=None):
 	_tryopen()
 	gameapi.explode(tovec3(pos),tovec3(vel))
 
-def sound(snd, pos, vel=None):
+def sound(snd, pos=None, vel=None):
 	_tryopen()
 	gameapi.playsound(snd, tovec3(pos), tovec3(vel))
 
@@ -233,11 +237,21 @@ def rect_bound(pos,ltn,rbf):
 	if pos.z > rbf.z: pos.z = rbf.z
 	return pos
 
+def collided_objects():
+	return set(o for o,_,_,_ in collisions())
+
 def collisions():
 	global _collisions
 	if _collisions == None:
-		oids = [int(line.split()[0]) for line in gameapi.pop_collisions().split('\n') if line]
-		_collisions = set(_objects[oid] for oid in oids if oid in _objects)
+		_collisions = []
+		for line in gameapi.pop_collisions().split('\n'):
+			if not line:
+				continue
+			words = line.split()
+			oid,other_oid = int(words[0]),int(words[7])
+			if oid in _objects and other_oid in _objects:
+				force,pos = tovec3([float(f) for f in words[1:4]]),tovec3([float(f) for f in words[4:7]])
+				_collisions.append((_objects[oid],_objects[other_oid],force,pos))
 	return _collisions
 
 def taps():
@@ -271,9 +285,15 @@ def create_joystick(xy):
 	_joysticks[j.id] = j
 	return j
 
-def accelerometer():
+def accelerometer(relative=False):
 	_tryopen()
-	return tovec3([float(a) for a in gameapi.accelerometer().split()])
+	acc = tovec3([float(a) for a in gameapi.accelerometer().split()])
+	if not relative:
+		return acc
+	rel = acc - _accelerometer_calibration
+	rel.pitch = -_accelerometer_calibration.angle_x(acc)
+	rel.roll = -_accelerometer_calibration.angle_y(acc)
+	return rel
 
 
 ########################################
@@ -292,7 +312,7 @@ def _poll_joysticks():
 
 def _create_object(gfx, phys, static, pos, vel, avel, mass, col, mat):
 	_tryopen()
-	objpos = tovec3(pos) if pos else vec3(0,0,0)
+	objpos = tovec3(pos) if pos else vec3()
 	# if mat != 'smooth':
 		# gfx = objgen.flatten_mesh(gfx)
 	gameapi.initgfxmesh(gfx.q, gfx.pos, gfx.vertices, gfx.indices)
@@ -304,7 +324,7 @@ def _create_object(gfx, phys, static, pos, vel, avel, mass, col, mat):
 			gameapi.initphyssphere(p.q, p.pos+objpos, p.radius)
 		elif 'Mesh' in str(type(p)):
 			gameapi.initphysmesh(p.q, p.pos+objpos, p.vertices, p.indices)
-		objpos = vec3(0,0,0)	# Only root should be moved, the rest have relative positions.
+		objpos = vec3()	# Only root should be moved, the rest have relative positions.
 	if col:
 		gameapi.setpencolor(col)
 	oid = gameapi.createobj(static, mat)
@@ -355,7 +375,7 @@ def _update_cam_shadow():
 	elif _cam_lookat:
 		_cam_pos = _cam_lookat
 	else:
-		_cam_pos = vec3(0,0,0)
+		_cam_pos = vec3()
 	_cam_q = quat().rotate_y(_cam_angle.y).rotate_x(_cam_angle.x).rotate_z(_cam_angle.z)
 	_cam_inv_q = _cam_q.inverse()
 	if _cam_distance:

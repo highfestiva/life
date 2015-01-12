@@ -6,61 +6,48 @@ from trabant import *
 from trabant.math import *
 import random
 
-cam(angle=(0,-pi/2,0), distance=30)
+cam(angle=(0,-pi/2,0), distance=30, pos=(5,0,10))
 gravity((0,0,0))
 
 tetromino_lines = '''
-XXXX  |  XX  |  X    |    X  |   X   |   XX  |  XX 
-      |  XX  |  XXX  |  XXX  |  XXX  |  XX   |   XX
+XXXX  |  XX  |  X    |    X  |  XXX  |   XX  |  XX 
+      |  XX  |  XXX  |  XXX  |   X   |  XX   |   XX
 '''.strip('\n').split('\n')
+# Slice and dice the tetrominos to get them on the form 'XX \n XX'.
 tetromino_lines = [tl.split('  |  ') for tl in tetromino_lines]
 tetrominos = ['\n'.join(t) for t in zip(*tetromino_lines)]
+
 colors = '#0ff #ff0 #00f #a50 #f0f #0f0 #f00'.split()
 directions = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
 gridsize = vec3(10,20,0)
-tetromino_index,tetromino,tetromino_offset = None,None,None
-fixed_blocks = [[None]*gridsize.x for _ in range(gridsize.y)]
+tetromino_index,tetromino,tetromino_rot_center = None,None,None
+fixed_blocks = [[None]*gridsize.x for _ in range(gridsize.y+5)]
 
-create_cube_object(pos=(0,0,-gridsize.y/2-50), side=100, static=True)
+# Create floor and walls.
+create_cube_object(pos=(5,0,-20-0.5), side=40, static=True)
+create_cube_object(pos=(-20-0.5,0,10), side=40, static=True)
+create_cube_object(pos=(10+20-0.5,0,10), side=40, static=True)
 
-while loop():
-	if not tetromino:
-		tetromino_index = random.choice(range(len(tetrominos)))
-		tetromino = create_ascii_object(tetrominos[tetromino_index], pos=(0,0,gridsize.y/2), col=colors[tetromino_index])
-		tetromino_offset = vec3(1.5,0,0) - last_ascii_top_left_offset()
-		orientation = quat()#.rotate_x(pi/2)
-		#tetromino.orientation(orientation)
+def getblocks(pos, orientation):
+	coords = []
+	piece = [line for line in tetrominos[tetromino_index].split('\n') if line.strip()]
+	for y,row in enumerate(piece):
+		for x,block in enumerate(row):
+			if block == 'X':
+				intpos = vec3(*[int(n) for n in (orientation*vec3(x-1, 0, -y-tetromino_rot_center.z*2) + pos)])
+				coords += [vec3(intpos.x,intpos.z,0)]
+	return coords
 
-	if taps() and timeout(0.15):	# Steering.
-		pos = tetromino.pos() - tetromino_offset
-		tap = closest_tap(pos)
-		v = min(directions, key=lambda s:(tap.pos3d()-s-pos).length())
-		if v == vec3(0,0,1):	# Tapping above means "rotate".
-			orientation = quat().rotate_y(pi/2) * orientation
-			tetromino.orientation(orientation)
-		else:	# Tapping left/below/right means move in that direction.
-			pos = rect_bound(pos+v, (-gridsize.x/2,0,-gridsize.y/2), (gridsize.x/2,0,gridsize.y/2))
-			tetromino._p = pos + tetromino_offset
-			tetromino.pos(tetromino._p)
-
-	if timeout(1,timer=2):	# Move down.
-		tetromino._p = tetromino.pos()+vec3(0,0,-1)
-		tetromino.pos(tetromino._p)
-
-	if collisions():
-		# Drop tetromino, fixate position one step above (as if we collided by movement downwards).
-		pos = tetromino._p - tetromino_offset + vec3(0,0,+1)
+def trymove(movement, orientation):
+	global tetromino,fixed_blocks
+	pos = tetromino.pos() + tetromino.orientation()*tetromino_rot_center
+	coords = getblocks(pos+movement, orientation)
+	if movement.z<0 and ([c for c in coords if c.y<0] or [c for c in coords if fixed_blocks[c.y][c.x]]):
+		# We've hit something below, kill tetromino and fixate blocks without movement.
 		tetromino.release()
 		tetromino = None
-
-		# Break tetromino into blocks. Place each block according to orientation.
-		piece = tetrominos[tetromino_index].split('\n')
-		for y,row in enumerate(piece):
-			for x,block in enumerate(row):
-				if block == 'X':
-					p = intvec(orientation*vec3(x-1, y, 0) + pos)
-					fixed_blocks[p.y+gridsize.y//2][p.x+gridsize.x//2] = create_ascii_object('X', pos=p, col=colors[tetromino_index], static=True)
-
+		for coord in getblocks(pos, orientation):
+			fixed_blocks[coord.y][coord.x] = create_ascii_object('X', pos=(coord.x, 0, coord.y), col=colors[tetromino_index], static=True)
 		# Consume completed rows.
 		ri = 0
 		while ri < len(fixed_blocks):
@@ -69,7 +56,32 @@ while loop():
 				[block.release() for block in row]
 				for rj in range(ri+1,len(fixed_blocks)):
 					fixed_blocks[rj-1] = fixed_blocks[rj]
+					for x,block in enumerate(fixed_blocks[rj-1]):
+						if block: block.pos((x,0,rj-1))
 				fixed_blocks[-1] = [None]*gridsize.x
 				sound(sound_bang)
 			else:
 				ri += 1
+
+	elif not [c for c in coords if c.x<0 or c.x>=gridsize.x or c.y<0] and not [c for c in coords if fixed_blocks[c.y][c.x]]:
+		# This is an ok rotation or move: it neither hits the side nor a fixed block.
+		tetromino.pos(pos+movement - orientation*tetromino_rot_center, orientation=orientation)
+
+while loop(delay=0.05):
+	if not tetromino:
+		tetromino_index = random.choice(range(len(tetrominos)))
+		tetromino = create_ascii_object(tetrominos[tetromino_index], pos=(0,0,100), col=colors[tetromino_index])
+		tetromino_rot_center = vec3(1.5,0.5,0.5) - last_ascii_top_left_offset()	# Rotate about a point in the middle of the first row.
+		tetromino.pos(vec3(gridsize.x/2,0,gridsize.y) - tetromino_rot_center)
+
+	if taps() and timeout(0.1):	# Steering.
+		pos = tetromino.pos()
+		tap = closest_tap(pos)
+		v = min(directions, key=lambda s:(tap.pos3d()-s-pos).length())
+		if v == vec3(0,0,1):	# Tapping above means "rotate".
+			trymove(vec3(), tetromino.orientation().rotate_y(pi/2))
+		else:	# Tapping left/below/right means move in that direction.
+			trymove(v, tetromino.orientation())
+
+	if tetromino and timeout(0.7,timer=2):	# Move down.
+		trymove(vec3(0,0,-1), tetromino.orientation())

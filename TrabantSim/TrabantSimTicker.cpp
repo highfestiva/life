@@ -29,9 +29,9 @@ namespace TrabantSim
 TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
 	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity)
 {
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKX, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKY, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKZ, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKATX, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKATY, 0.0);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKATZ, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMSLIDE, 0.5);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 3.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLEX, 0.0);

@@ -285,10 +285,10 @@ void TrabantSimManager::PopCollisions(CollisionList& pCollisionList)
 	pCollisionList.splice(pCollisionList.end(), mCollisionList);
 }
 
-const TrabantSimManager::DragList& TrabantSimManager::GetTouchDrags() const
+void TrabantSimManager::GetTouchDrags(DragList& pDragList) const
 {
 	ScopeLock lGameLock(GetTickLock());
-	return mUiManager->GetDragManager()->GetDragList();
+	pDragList = mUiManager->GetDragManager()->GetDragList();
 }
 
 vec3 TrabantSimManager::GetAccelerometer() const
@@ -816,9 +816,9 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 	bool car;
 	v_get(ctgt, =, GetVariableScope(), RTVAR_UI_3D_CAMTARGETOBJECT, 0);
 	v_get(car, =, GetVariableScope(), RTVAR_UI_3D_CAMANGLERELATIVE, false);
-	v_get(clx, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKX, 0.0);
-	v_get(cly, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKY, 0.0);
-	v_get(clz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKZ, 0.0);
+	v_get(clx, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKATX, 0.0);
+	v_get(cly, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKATY, 0.0);
+	v_get(clz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKATZ, 0.0);
 	v_get(cdist, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 3.0);
 	v_get(cax, =(float), GetVariableScope(), RTVAR_UI_3D_CAMANGLEX, 0.0);
 	v_get(cay, =(float), GetVariableScope(), RTVAR_UI_3D_CAMANGLEY, 0.0);

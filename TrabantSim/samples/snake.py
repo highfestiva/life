@@ -7,7 +7,7 @@ from trabant import *
 cam(distance=60)
 
 steps = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
-pos,step = vec3(0,0,0),steps[0]
+pos,step = vec3(),steps[0]
 block = lambda p: create_ascii_object('X', pos=p, static=True)
 blocks,snake_coords = [block(pos)],[pos]
 length = 5

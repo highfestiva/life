@@ -37,6 +37,7 @@ private:
 
 	_Base* mObject;
 	void (_Base::*mThreadEntry)();
+	_Object mObjectData;
 };
 
 
@@ -66,6 +67,16 @@ template<class _Base, class _Object> bool MemberThread<_Base, _Object>::Start(_B
 	mObject = pObject;
 	mThreadEntry = pThreadEntry;
 	return (Thread::Start());	// Will call Run() when the new thread starts.
+}
+
+template<class _Base, class _Object> _Object MemberThread<_Base, _Object>::GetObjectData()
+{
+	return mObjectData;
+}
+
+template<class _Base, class _Object> void MemberThread<_Base, _Object>::SetObjectData(_Object pData)
+{
+	mObjectData = pData;
 }
 
 template<class _Base, class _Object> void MemberThread<_Base, _Object>::Run()

@@ -41,7 +41,7 @@ def toquat(q):
 class vec3:
 	def __init__(self, *args):
 		if not args:
-			self.x,self.y,self.z = 1,0,0
+			self.x,self.y,self.z = 0,0,0
 		elif type(args[0]) == vec3:
 			v = args[0]
 			self.x,self.y,self.z = v.x,v.y,v.z

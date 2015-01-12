@@ -49,7 +49,7 @@ while loop():
 	if timeout(3,timer=2):
 		isi = (isi+1)%len(invaderspeeds)
 		[i.vel(invaderspeeds[isi]) for i in invaders]
-	for o in collisions():
+	for o in collided_objects():
 		if o in invaders:
 			invaders.remove(o)
 		explode(o.pos(),o.vel())

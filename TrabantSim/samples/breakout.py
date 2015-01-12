@@ -41,7 +41,7 @@ while loop():
 		# bv = bv.normalize(15)
 		# bv.z *= 8/bv.z if abs(bv.z) < 7 else 1
 		# ball.vel(bv)
-	for o in collisions():
+	for o in collided_objects():
 		if o in bricks:
 			sound(sound_ping, o.pos())
 			o.release()

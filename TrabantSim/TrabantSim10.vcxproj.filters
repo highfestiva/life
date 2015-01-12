@@ -62,4 +62,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="TrabantSim.mm">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

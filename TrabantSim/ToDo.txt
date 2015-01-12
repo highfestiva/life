@@ -5,12 +5,13 @@
 +Fog. terminal_velocity.py
 -Smooth camera rotation. geometry_test.py
 +Shadows do not work at all. physics.py
--Make taps stick until polled. snake.py
 -Light shadow should be less from above and a little more from the side. breakout.py
 +Tap screen to world translation doesn't work properly. Off by some. space_invaders.py
++Collisions.
 
-Collisions.
-Tetris.
+tetris.py
+Make taps stick until polled. flappy_ufo.py, snake.py, tetris.py
+Relative accelerometer. terminal_velocity.py
 Tap/slide velocity.
 Fix engine sounds.
 Car.

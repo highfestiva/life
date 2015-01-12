@@ -353,6 +353,9 @@
     <ClInclude Include="Include\FastLock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Include\CollisionDetector2D.inl">

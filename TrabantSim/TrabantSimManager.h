@@ -76,7 +76,7 @@ public:
 	void Expload(const vec3& pPos, const vec3& pVel);
 	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel);
 	void PopCollisions(CollisionList& pCollisionList);
-	const DragList& GetTouchDrags() const;
+	void GetTouchDrags(DragList& pDragList) const;
 	vec3 GetAccelerometer() const;
 	int CreateJoystick(float x, float y);
 	JoystickDataList GetJoystickData() const;

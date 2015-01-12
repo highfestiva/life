@@ -44,7 +44,8 @@ while loop(delay=0.03):
 			[c.release() for c in columns[:2]]
 			columns = columns[2:]
 		t -= 0.002
-	if collisions():
+	if collided_objects():
+		ufo.engine[0].force((0,0,0))
 		explode(ufo.pos(),ufo.vel())
 		sleep(1)
 		release_all_objects()

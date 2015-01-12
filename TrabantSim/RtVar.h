@@ -12,9 +12,9 @@
 
 
 
-#define RTVAR_UI_3D_CAMLOOKX		"Ui.3D.CamLookX"
-#define RTVAR_UI_3D_CAMLOOKY		"Ui.3D.CamLookY"
-#define RTVAR_UI_3D_CAMLOOKZ		"Ui.3D.CamLookZ"
+#define RTVAR_UI_3D_CAMLOOKATX		"Ui.3D.CamLookAtX"
+#define RTVAR_UI_3D_CAMLOOKATY		"Ui.3D.CamLookAtY"
+#define RTVAR_UI_3D_CAMLOOKATZ		"Ui.3D.CamLookAtZ"
 #define RTVAR_UI_3D_CAMSLIDE		"Ui.3D.CamSlide"
 #define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
 #define RTVAR_UI_3D_CAMANGLEX		"Ui.3D.CamAngleX"

@@ -10,7 +10,7 @@ from trabant.math import *
 
 sq2 = sqrt(2)
 rotq = quat().rotate_z(-pi/4)
-_last_centering_offset = vec3(0,0,0)
+_last_centering_offset = vec3()
 
 
 class _Triangle:
@@ -292,7 +292,7 @@ def shape2mesh(shape):
 		i += [k+idx for k in j]
 		idx += 6
 	mesh_optimize(v,i)
-	return GfxMesh(quat(1,0,0,0), vec3(0,0,0), v, i)
+	return GfxMesh(quat(1,0,0,0), vec3(), v, i)
 
 def cover_factor(remains,original):
 	originalcnt = asc.tricnt(original)
@@ -305,7 +305,7 @@ def take(oshape, shape, find, grow, create, directions):
 	crd = find(oshape, shape, crds)
 	if not crd:
 		return None,[]
-	size = vec3(0,0,0)
+	size = vec3()
 	crds = []
 	bestsize = None
 	growing = True
@@ -339,13 +339,13 @@ def take(oshape, shape, find, grow, create, directions):
 	return remains,create(bestsize,crds)
 
 def prepgrowcuboid(crd, size, direction):
-	if size==vec3(0,0,0):
+	if size==vec3():
 		size = vec3(1,1,1)
-		off = vec3(0,0,0)
+		off = vec3()
 	elif direction.x<0 or direction.y<0 or direction.z<0:
 		crd += direction
 		size = size-direction
-		off = vec3(0,0,0)
+		off = vec3()
 	else:
 		off = vec3(size)
 		size = size+direction
@@ -430,7 +430,7 @@ def creatediamond(size, crds):
 	return PhysBox(rotq, crd, size)
 
 def findcuboid(oshape, shape, crds):
-	offsets = (vec3(0,0,0),vec3(1,0,0),vec3(0,1,0),vec3(1,1,0))
+	offsets = (vec3(),vec3(1,0,0),vec3(0,1,0),vec3(1,1,0))
 	bestcnt = []
 	for c in crds:
 		c.x = c.x//2*2
@@ -480,10 +480,13 @@ def shape2physgeoms(oshape, shape):
 	factor,geom,remains = sorted(factor_geom_remains, key=lambda fgr:fgr[0], reverse=True)[0]
 	return [geom] + shape2physgeoms(oshape, remains)
 
-def centerobjs(gfx,physgeoms,center=vec3(0,0,0)):
+def centerobjs(gfx,physgeoms,center=vec3()):
+	global _last_ascii_top_left_offset
 	if not gfx or not physgeoms:
 		return
 	offset = physgeoms[0].pos
+	_last_centering_offset = offset
+	#print('_last_centering_offset', _last_centering_offset)
 	for i,p in enumerate(physgeoms):
 		if type(p) == PhysBox:
 			p.pos -= offset
@@ -491,7 +494,7 @@ def centerobjs(gfx,physgeoms,center=vec3(0,0,0)):
 			off = reduce(lambda x,y:x+y, p.vertices) / len(p.vertices)
 			p.vertices = [v-off for v in p.vertices]
 			if i == 0:
-				p.pos = vec3(0,0,0)
+				p.pos = vec3()
 				offset = off
 			else:
 				p.pos -= offset-off
