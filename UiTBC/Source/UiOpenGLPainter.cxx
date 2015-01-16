@@ -583,7 +583,7 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	OGL_ASSERT();
 }
 
-void OpenGLPainter::DrawFan(const std::vector<vec2> pCoords, bool pFill)
+void OpenGLPainter::DrawFan(const std::vector<vec2>& pCoords, bool pFill)
 {
 	OGL_ASSERT();
 

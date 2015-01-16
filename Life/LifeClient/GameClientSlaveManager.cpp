@@ -900,9 +900,9 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::MessageObjectAttach* lMessageAttach = (Cure::MessageObjectAttach*)pMessage;
 			Cure::GameObjectId lObject1Id = lMessageAttach->GetObjectId();
 			Cure::GameObjectId lObject2Id = lMessageAttach->GetObject2Id();
-			unsigned lBody1Id = lMessageAttach->GetBody1Id();
-			unsigned lBody2Id = lMessageAttach->GetBody2Id();
-			AttachObjects(lObject1Id, lBody1Id, lObject2Id, lBody2Id);
+			unsigned lBody1Index = lMessageAttach->GetBody1Index();
+			unsigned lBody2Index = lMessageAttach->GetBody2Index();
+			AttachObjects(lObject1Id, lBody1Index, lObject2Id, lBody2Index);
 		}
 		break;
 		case Cure::MESSAGE_TYPE_OBJECT_DETACH:
@@ -1186,14 +1186,14 @@ void GameClientSlaveManager::OnIdOwnershipExpired(int, Cure::ContextObject* pObj
 	pObject->DeleteNetworkOutputGhost();
 }
 
-void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id,
-	Cure::GameObjectId pObject2Id, unsigned pBody2Id)
+void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Index,
+	Cure::GameObjectId pObject2Id, unsigned pBody2Index)
 {
 	Cure::ContextObject* lObject1 = GetContext()->GetObject(pObject1Id);
 	Cure::ContextObject* lObject2 = GetContext()->GetObject(pObject2Id);
 	if (lObject1 && lObject2)
 	{
-		lObject1->AttachToObject(pBody1Id, lObject2, pBody2Id);
+		lObject1->AttachToObjectByBodyIndices(pBody1Index, lObject2, pBody2Index);
 	}
 	else
 	{

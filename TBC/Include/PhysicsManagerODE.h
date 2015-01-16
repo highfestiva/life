@@ -214,7 +214,8 @@ private:
 			mUserData(0),
 			mTriggerListenerId(0),
 			mForceFeedbackId(0),
-			mHasMassChildren(false)
+			mHasMassChildren(false),
+			mIsRotational(false)
 		{
 		}
 
@@ -238,6 +239,7 @@ private:
 		int mForceFeedbackId;
 
 		bool mHasMassChildren;
+		bool mIsRotational;
 	};
 
 	class TriggerInfo;

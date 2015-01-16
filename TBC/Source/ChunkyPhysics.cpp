@@ -276,6 +276,11 @@ void ChunkyPhysics::AddEngine(PhysicsEngine* pEngine)
 	mEngineArray.push_back(pEngine);
 }
 
+void ChunkyPhysics::RemoveEngine(PhysicsEngine* pEngine)
+{
+	mEngineArray.erase(std::remove(mEngineArray.begin(), mEngineArray.end(), pEngine), mEngineArray.end());
+}
+
 bool ChunkyPhysics::SetEnginePower(unsigned pAspect, float pPower)
 {
 	bool lOk = false;

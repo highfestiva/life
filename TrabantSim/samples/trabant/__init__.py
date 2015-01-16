@@ -10,8 +10,8 @@ import time
 
 
 roll_turn_engine,roll_engine,push_abs_engine,push_rel_engine,push_abs_turn_engine,push_rel_turn_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
-hinge_joint,hinge2_joint = 'hinge hinge2'.split()
-sound_explosion,sound_ping,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion = 'explosion ping bang hizz wobble combustion'.split()
+hinge_joint,suspend_hinge_joint,turn_hinge_joint = 'hinge suspend_hinge turn_hinge'.split()
+sound_explosion,sound_ping,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'explosion ping bang hizz wobble combustion rotor'.split()
 
 _wait_until_loaded = True
 _has_opened = False
@@ -37,6 +37,11 @@ class Engine:
 			gameapi.set_engine_force(self.oid, self.eid, iter(f))
 		except TypeError:
 			gameapi.set_engine_force(self.oid, self.eid, (f,0,0))
+	def addsound(self, sound, intensity=1):
+		if sound == sound_engine_rotor:
+			gameapi.addtag(self.oid, 'engine_sound', [0, 0.001,0.8*intensity,1.4, 0,20,1, 0,1,1, 1], [sound+'.wav'], [0], [self.eid], [])
+		else:
+			gameapi.addtag(self.oid, 'engine_sound', [1, 1,5*intensity,1, 1,20,1, 0,0.5,1, 1], [sound+'.wav'], [0], [self.eid], [])
 
 class Obj:
 	def __init__(self, id):
@@ -77,12 +82,17 @@ class Obj:
 		if p.z > rbf.z: v.z = -abs(v.z)
 		if v != _v:
 			self.vel(v)
-	def create_engine(self, engine_type, max_velocity=None, offset=None, friction=0, sound=None):
-		eid = gameapi.create_engine(self.id, engine_type, max_velocity, offset, friction, sound)
+	def create_engine(self, engine_type, max_velocity=None, offset=None, strength=1, friction=0, targets=None, sound=None):
+		target_efcts = [(t.id,efct) for t,efct in targets] if targets else []
+		eid = gameapi.create_engine(self.id, engine_type, max_velocity, offset, strength, friction, target_efcts)
 		self.engine += [Engine(self.id, eid)]
+		if sound:
+			self.engine[-1].addsound(sound, 1)
 		return self.engine[-1]
-	def create_joint(self, joint_type, obj2, axis):
-		return gameapi.create_joint(self.id, joint_type, obj2.id, axis)
+	def create_joint(self, joint_type, obj2, axis=None, stop=None, spring=None):
+		return gameapi.create_joint(self.id, joint_type, obj2.id, axis, stop, spring)
+	def add_stabilizer(self, force=1):
+		gameapi.addtag(self.id, 'upright_stabilizer', [force], [], [0], [], [])
 	def release(self):
 		gameapi.releaseobj(self.id)
 		global _objects
@@ -112,9 +122,10 @@ class Tap:
 
 
 class Joystick:
-	def __init__(self, id):
+	def __init__(self, id, sloppy):
 		'''Screen X,Y in [0,1].'''
 		self.id = id
+		self.sloppy = sloppy
 		self.x,self.y = 0,0
 
 
@@ -219,11 +230,11 @@ def wait_until_loaded(wait=True):
 	global _wait_until_loaded
 	_wait_until_loaded = wait
 
-def explode(pos, vel=None):
+def explode(pos, vel=vec3()):
 	_tryopen()
 	gameapi.explode(tovec3(pos),tovec3(vel))
 
-def sound(snd, pos=None, vel=None):
+def sound(snd, pos=vec3(), vel=vec3()):
 	_tryopen()
 	gameapi.playsound(snd, tovec3(pos), tovec3(vel))
 
@@ -275,13 +286,15 @@ def closest_tap(pos):
 	if not taps():
 		return None
 	x,y = _world2screen(pos)
-	return min(taps(), key=lambda t: t._distance2(x,y))
+	tap = min(taps(), key=lambda t: t._distance2(x,y))
+	tap.close_pos = pos
+	return tap
 
-def create_joystick(xy):
+def create_joystick(xy, sloppy=False):
 	_tryopen()
-	jid = gameapi.create_joystick(*xy)
+	jid = gameapi.create_joystick(*xy, sloppy=sloppy)
 	global _joysticks
-	j = Joystick(jid)
+	j = Joystick(jid, sloppy)
 	_joysticks[j.id] = j
 	return j
 
@@ -302,13 +315,16 @@ def accelerometer(relative=False):
 def _poll_joysticks():
 	if not _joysticks:
 		return
-	jdata = []
+	jdata,used_joys = [],set()
 	for line in [l for l in gameapi.joystick_data().split('\n') if l]:
 		w = line.split()
-		jdata += (int(w[0]),float(w[1]),float(w[2]))
+		jdata.append((int(w[0]),float(w[1]),float(w[2])))
 	for jid,x,y in jdata:
+		used_joys.add(jid)
 		j = _joysticks[jid]
 		j.x,j.y = x,y
+	for j in [joy for jid,joy in _joysticks.items() if jid not in used_joys and not joy.sloppy]:
+		j.x = j.y = 0.0
 
 def _create_object(gfx, phys, static, pos, vel, avel, mass, col, mat):
 	_tryopen()
@@ -350,7 +366,6 @@ def _world2screen(crd):
 	itana = 1/tan(_cam_fov_radians*0.5);
 	x,y = crd.x/crd.y,crd.z/crd.y
 	x,y = x*itana*iar+1, -y*itana+1
-	#print('world2screen (%g,%g,%g) -> (%g,%g)' % (c.x,c.y,c.z,x,y))
 	return x,y
 
 def _screen2world(x,y,distance):
@@ -360,7 +375,6 @@ def _screen2world(x,y,distance):
 	dx = tana * (x*2-1) * _get_aspect_ratio()
 	dy = tana * (1-y*2)
 	crd = (_cam_q * vec3(dx, 1, dy) * distance) + _cam_pos
-	#print('screen2world (%g,%g) -> (%g,%g,%g)' % (x,y,crd.x,crd.y,crd.z))
 	return crd
 
 def _update_cam_shadow():

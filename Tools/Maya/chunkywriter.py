@@ -21,6 +21,7 @@ import sys
 physics_type = {"world":1, "static":2, "dynamic":3, "collision_detect_only":4}
 guide_mode = {"never":0, "external":1, "always":2, None:1}
 resize_hints = {"resize_fast":0, "resize_nicest":1, "resize_canvas":2}
+connector_types = {"connector_slider":1, "connector_universal":2, "connector_hinge":3, "connector_hinge2":4, "connector_3dof":5, "connectee_3dof":6}
 
 CHUNK_CLASS				= "CLAS"
 CHUNK_CLASS_PHYSICS			= "CLPH"
@@ -571,7 +572,6 @@ class PhysWriter(ChunkyWriter):
 				print("Error: connector_types for '%s' must be a list." % node.getFullName())
 				sys.exit(19)
 			self._writeint(len(connectors))
-			connector_types = {"connector_3dof":1, "connectee_3dof":2}
 			for c in connectors:
 				self._writeint(connector_types[c])
 		else:

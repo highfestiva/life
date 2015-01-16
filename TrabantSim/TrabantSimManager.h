@@ -20,6 +20,13 @@ namespace Lepra
 {
 class TcpListenerSocket;
 }
+namespace UiLepra
+{
+namespace Touch
+{
+class TouchstickInputDevice;
+}
+}
 namespace UiCure
 {
 class CollisionSoundManager;
@@ -46,6 +53,7 @@ class TrabantSimManager: public Life::GameClientSlaveManager
 {
 	typedef Life::GameClientSlaveManager Parent;
 public:
+	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
 	struct CollisionInfo
 	{
 		int mObjectId;
@@ -58,10 +66,31 @@ public:
 		int mJoystickId;
 		float x;
 		float y;
+		JoystickData(int pJoystickId, float px, float py);
+	};
+	struct TouchstickInfo
+	{
+		Touchstick* mStick;
+		float x;
+		float y;
+		int mOrientation;
+		bool mIsSloppy;
+		TouchstickInfo(Touchstick* pStick, float px, float py, int pOrientation, bool pIsSloppy);
+	};
+	struct EngineTarget
+	{
+		int mInstanceId;
+		float mStrength;
+		EngineTarget(int pInstanceId, float pStrength);
 	};
 	typedef std::list<CollisionInfo> CollisionList;
 	typedef UiLepra::Touch::DragManager::DragList DragList;
 	typedef std::vector<JoystickData> JoystickDataList;
+	typedef std::vector<TouchstickInfo> TouchstickList;
+	typedef std::vector<EngineTarget> EngineTargetList;
+	typedef std::vector<float> FloatList;
+	typedef std::vector<int> IntList;
+	typedef std::vector<str> StringList;
 
 	TrabantSimManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
@@ -78,11 +107,11 @@ public:
 	void PopCollisions(CollisionList& pCollisionList);
 	void GetTouchDrags(DragList& pDragList) const;
 	vec3 GetAccelerometer() const;
-	int CreateJoystick(float x, float y);
+	int CreateJoystick(float x, float y, bool pIsSloppy);
 	JoystickDataList GetJoystickData() const;
 	float GetAspectRatio() const;
-	int CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, float pFriction, const str& pEngineSound);
-	int CreateJoint(int pObjectId, const str& pJointType, int pOtherObjectId, const vec3& pAxis);
+	int CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, float pStrength, float pFriction, const EngineTargetList& pEngineTargets);
+	int CreateJoint(int pObjectId, const str& pJointType, int pOtherObjectId, const vec3& pAxis, const vec2& pStop, const vec2& pSpringSettings);
 	void Position(int pObjectId, bool pSet, vec3& pPosition);
 	void Orientation(int pObjectId, bool pSet, quat& pOrientation);
 	void Velocity(int pObjectId, bool pSet, vec3& pVelocity);
@@ -90,22 +119,28 @@ public:
 	void Mass(int pObjectId, bool pSet, float& pMass);
 	void ObjectColor(int pObjectId, bool pSet, vec3& pColor);
 	void EngineForce(int pObjectId, int pEngineIndex, bool pSet, vec3& pForce);
+	void AddTag(int pObjectId, const str& pTagType, const FloatList& pFloats, const StringList& pStrings, const IntList& pPhys, const IntList& pEngines, const IntList& pMeshes);
 
 	void AcceptLoop();
 	void CommandLoop();
 	bool IsControlled() const;
 
 	virtual void SaveSettings();
+	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();
 	virtual void SetIsQuitting();
 	virtual void SetFade(float pFadeAmount);
+
+	virtual bool Paint();
+	void DrawStick(Touchstick* pStick, bool pIsSloppy);
 
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 protected:
 	virtual bool InitializeUniverse();
 	virtual void TickInput();
+	void UpdateTouchstickPlacement();
 	virtual void TickUiInput();
 	virtual void TickUiUpdate();
 	virtual void SetLocalRender(bool pRender);
@@ -132,6 +167,8 @@ protected:
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	std::set<Cure::GameObjectId> mObjects;
 	CollisionList mCollisionList;
+	HiResTimer mTouchstickTimer;
+	TouchstickList mTouchstickList;
 	Life::Menu* mMenu;
 	Light* mLight;
 	vec3 mCameraAngle;

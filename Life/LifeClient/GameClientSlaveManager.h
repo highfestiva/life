@@ -121,7 +121,7 @@ protected:
 	void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
 	void OnIdOwnershipExpired(int, Cure::ContextObject* pObject, void*);
-	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
+	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Index, Cure::GameObjectId pObject2Id, unsigned pBody2Index);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 
 	Cure::NetworkClient* GetNetworkClient() const;

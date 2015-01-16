@@ -17,6 +17,7 @@ namespace TrabantSim
 
 Object::Object(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
+	mClass(new UiTbc::ChunkyClass),
 	mGfxMesh(0),
 	mGfxMeshId(0)
 {
@@ -24,9 +25,15 @@ Object::Object(Cure::ResourceManager* pResourceManager, const str& pClassId, UiC
 
 Object::~Object()
 {
+	delete mClass;
 }
 
 
+
+const Tbc::ChunkyClass* Object::GetClass() const
+{
+	return mClass;
+}
 
 void Object::AddGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, bool pIsSmooth, int pCastsShadows)
 {

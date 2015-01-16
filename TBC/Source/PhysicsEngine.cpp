@@ -91,6 +91,19 @@ void PhysicsEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float p
 	mEngineNodeArray.push_back(EngineNode(pGeometry, pScale, pMode));
 }
 
+void PhysicsEngine::RemoveControlledGeometry(ChunkyBoneGeometry* pGeometry)
+{
+	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
+	for (; i != mEngineNodeArray.end(); ++i)
+	{
+		if (i->mGeometry == pGeometry)
+		{
+			mEngineNodeArray.erase(i);
+			return;
+		}
+	}
+}
+
 PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const
 {
 	GeometryList lList;
@@ -583,7 +596,10 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 		}
 	}
-	mIntensity /= mEngineNodeArray.size();
+	if (mIntensity)
+	{
+		mIntensity /= mEngineNodeArray.size();
+	}
 }
 
 vec3 PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManager) const

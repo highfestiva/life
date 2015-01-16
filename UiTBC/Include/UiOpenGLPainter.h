@@ -85,7 +85,7 @@ protected:
 	void DoFillRect(int pLeft, int pTop, int pRight, int pBottom);
 	void DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
 	void DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom);
-	void DrawFan(const std::vector<vec2> pCoords, bool pFill);
+	void DrawFan(const std::vector<vec2>& pCoords, bool pFill);
 	void DrawImageFan(ImageID pImageID, const std::vector<vec2>& pCoords, const std::vector<vec2>& pTexCoords);
 	void DoDrawImage(ImageID pImageID, int x, int y);
 	void DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect);

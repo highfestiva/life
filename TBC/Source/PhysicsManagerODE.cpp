@@ -1030,6 +1030,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateBall(mWorldID, 0);
 	lJointInfo->mType = JOINT_BALL;
+	lJointInfo->mBody1Id = pBody1;
+	lJointInfo->mBody2Id = pBody2;
 	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
 	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
@@ -1075,6 +1077,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE;
+	lJointInfo->mBody1Id = pBody1;
+	lJointInfo->mBody2Id = pBody2;
 	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
 	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
@@ -1093,11 +1097,13 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 			// rotation/low torque engines (usually rotor or similar).
 			::dBodySetMaxAngularSpeed(lObject2->mBodyID, 50.0f);
 			::dBodySetAngularDampingThreshold(lObject2->mBodyID, 55.0f);
+			lObject2->mIsRotational = true;
 		}
 	}
 	else
 	{
 		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, 0);
+		lObject1->mIsRotational = true;
 	}
 
 	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
@@ -1125,6 +1131,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, Body
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge2(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE2;
+	lJointInfo->mBody1Id = pBody1;
+	lJointInfo->mBody2Id = pBody2;
 	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
 	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
@@ -1132,6 +1140,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, Body
 
 	lObject1->mHasMassChildren = true;
 	lObject2->mHasMassChildren = true;
+	lObject2->mIsRotational = true;
 	/*if (lObject1->mForceFeedbackId != 0 || 
 	   lObject2->mForceFeedbackId != 0)
 	{
@@ -1158,6 +1167,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = ::dJointCreateUniversal(mWorldID, 0);
 	lJointInfo->mType = JOINT_UNIVERSAL;
+	lJointInfo->mBody1Id = pBody1;
+	lJointInfo->mBody2Id = pBody2;
 	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
 	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
@@ -1197,6 +1208,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, Body
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateSlider(mWorldID, 0);
 	lJointInfo->mType = JOINT_SLIDER;
+	lJointInfo->mBody1Id = pBody1;
+	lJointInfo->mBody2Id = pBody2;
 	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
 	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
@@ -1233,6 +1246,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyI
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateFixed(mWorldID, 0);
 	lJointInfo->mType = JOINT_FIXED;
+	lJointInfo->mBody1Id = pBody1;
+	lJointInfo->mBody2Id = pBody2;
 	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
 	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
@@ -1268,18 +1283,22 @@ PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateAMotor(mWorldID, 0);
 	lJointInfo->mType = JOINT_ANGULARMOTOR;
+	lJointInfo->mBody1Id = pBody1;
+	lJointInfo->mBody2Id = pBody2;
 	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
 	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
 
 	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
 	{
-		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
+		lObject2->mHasMassChildren = true;
+		lObject2->mIsRotational = true;
 	}
 	else
 	{
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
+		lObject1->mIsRotational = true;
 	}
 
 	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
@@ -1303,6 +1322,20 @@ void PhysicsManagerODE::DeleteJoint(JointID pJointId)
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
 	dJointDestroy(lJointInfo->mJointID);
 	RemoveJoint(lJointInfo);
+
+	Object* lObject1;
+	Object* lObject2;
+	if (lJointInfo->mBody1Id && CheckBodies(lJointInfo->mBody1Id, lJointInfo->mBody2Id, lObject1, lObject2, _T("DeleteJoint()")))
+	{
+		if (lObject2)
+		{
+			lObject2->mIsRotational = false;
+		}
+		else
+		{
+			lObject1->mIsRotational = false;
+		}
+	}
 }
 
 bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
@@ -3696,7 +3729,7 @@ void PhysicsManagerODE::HandleMovableObjects()
 void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 {
 	Object* lObject = (Object*)pObject;
-	if (lObject->mHasMassChildren || lObject->mBodyID->geom->type == dBoxClass)
+	if (!lObject->mIsRotational && (lObject->mHasMassChildren || lObject->mBodyID->geom->type == dBoxClass))
 	{
 		vec3 lVelocity;
 		GetBodyAngularVelocity(lObject, lVelocity);

@@ -9,7 +9,7 @@ cam(distance=25)
 gravity((0,0,-9), bounce=0.3)
 create_cube_object(pos=(0,0,-105), side=200, static=True)
 geometry = 'XX'	# ASCII geometry.
-things = [create_ascii_object(geometry, pos=rndvec()*5+vec3(0,0,5), vel=rndvec()*3, col=absrndvec()) for _ in range(10)]
+things = [create_ascii_object(geometry, pos=rndvec()*5+vec3(0,0,5), vel=rndvec()*3, col=rndvec().abs()) for _ in range(10)]
 
 while loop():
 	if not taps():

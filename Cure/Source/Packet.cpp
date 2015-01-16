@@ -818,14 +818,14 @@ uint32 MessageObjectAttach::GetObject2Id() const
 	return (lObject2Id);
 }
 
-uint16 MessageObjectAttach::GetBody1Id() const
+uint16 MessageObjectAttach::GetBody1Index() const
 {
 	int lBody1Id;
 	PackerInt16::Unpack(lBody1Id, &mData[1+sizeof(uint32)*2], sizeof(lBody1Id));
 	return ((uint16)lBody1Id);
 }
 
-uint16 MessageObjectAttach::GetBody2Id() const
+uint16 MessageObjectAttach::GetBody2Index() const
 {
 	int lBody2Id;
 	PackerInt16::Unpack(lBody2Id, &mData[1+sizeof(uint32)*2+sizeof(uint16)], sizeof(lBody2Id));

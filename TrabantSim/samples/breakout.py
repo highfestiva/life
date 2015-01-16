@@ -20,7 +20,7 @@ ball = create_sphere_object(pos=(-7,0,10), vel=(10,0,-30), radius=0.5, col='#fff
 bricks = set()
 for y in range(2):
 	for x in range(8):
-		bricks.add(create_ascii_object(brick, pos=(x*3-11.5,0,15-y*2), col=absrndvec(), static=True))
+		bricks.add(create_ascii_object(brick, pos=(x*3-11.5,0,15-y*2), col=rndvec().abs(), static=True))
 
 while loop():
 	if taps():

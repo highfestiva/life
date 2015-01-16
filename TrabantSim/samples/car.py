@@ -9,26 +9,26 @@ chassis = r'''
   /XX\
 XXXXXXXXX
 '''.strip('\n')
-chassis = '---'.join([chassis]*4)	# Make the car a bit wider.
+chassis = '\n---\n'.join([chassis]*3)	# Make the car a bit wider.
 
-car = create_ascii_object(chassis, mass=500)
-wheel = lambda x,y,z:create_sphere_object(pos=(x,y,z),radius=1.1,col='#222')
-rr,rl,fr,fl = wheel(-4,-2.5,-0.7), wheel(-4,+2.5,-0.7), wheel(3,-2.5,-0.7), wheel(3,+2.5,-0.7)
-car.create_joint(hinge2_joint, fl, (0,+1,0))
-turn = [car.create_engine(roll_turn_engine)]
-car.create_joint(hinge2_joint, fr, (0,-1,0))
-turn += [car.create_engine(roll_turn_engine)]
-car.create_joint(hinge_joint, rl, (0,+1,0))
-roll = [car.create_engine(roll_engine, sound=sound_engine_combustion)]
-car.create_joint(hinge_joint, rr, (0,-1,0))
-roll += [car.create_engine(roll_engine)]
+gravity((0,0,0))	# Create objects floating in mid-air.
+
+car = create_ascii_object(chassis, mass=500, col='#36a')
+wheel = lambda x,y,z: create_sphere_object(pos=(x,y,z), radius=1.1, col='#654')
+rr,rl,fr,fl = wheel(-2.8,-2.7,-1.2), wheel(-2.8,+2.7,-1.2), wheel(3.4,-2.7,-1.2), wheel(3.4,+2.7,-1.2)
+car.create_joint(turn_hinge_joint, fl, axis=(0,-1,0))
+car.create_joint(turn_hinge_joint, fr, axis=(0,-1,0))
+car.create_joint(suspend_hinge_joint, rl, axis=(0,-1,0))
+car.create_joint(suspend_hinge_joint, rr, axis=(0,-1,0))
+turn = car.create_engine(roll_turn_engine, targets=[(fl,1),(fr,1)])
+roll = car.create_engine(roll_engine, targets=[(rl,1),(rr,1)], strength=0.5, sound=sound_engine_combustion)
 
 # Setup ground, gravity, camera angle and controls.
-create_cube_object(pos=(0,0,-252), side=500, static=True)
-gravity((0,0,-9))
+create_cube_object(pos=(0,0,-253), side=500, static=True)
+gravity((0,0,-9))	# Allow objects to fall down now that they're attached by joints.
 cam(angle=(-0.3,0,0), distance=20, target=car)
-left,right = create_joystick((0,1)),create_joystick((1,1))
+left_stick,right_stick = create_joystick((0,0)),create_joystick((1,0))
 
 while loop():
-	[e.force(left.y) for e in roll]
-	[e.force(right.x) for e in turn]
+	roll.force(left_stick.y)
+	turn.force(right_stick.x)

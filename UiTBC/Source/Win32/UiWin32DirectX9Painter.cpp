@@ -699,7 +699,7 @@ void DirectX9Painter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	mD3DDevice->SetTexture(0, 0);
 }
 
-void DirectX9Painter::DrawFan(const std::vector<vec2> pCoords, bool pFill)
+void DirectX9Painter::DrawFan(const std::vector<vec2>& pCoords, bool pFill)
 {
 	pCoords;
 	pFill;

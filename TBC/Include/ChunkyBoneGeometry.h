@@ -54,8 +54,28 @@ public:
 	enum ConnectorType
 	{
 		CONNECT_NONE = 0,
+		CONNECTOR_SLIDER,
+		CONNECTOR_UNIVERSAL,
+		CONNECTOR_SUSPEND_HINGE,
+		CONNECTOR_HINGE,
+		CONNECTOR_HINGE2,
 		CONNECTOR_3DOF,	// Three degrees of freedom.
 		CONNECTEE_3DOF,
+	};
+
+	enum BodyParameters
+	{
+		PARAM_SPRING_CONSTANT = 0,
+		PARAM_SPRING_DAMPING,
+		PARAM_EULER_THETA,
+		PARAM_EULER_PHI,
+		PARAM_LOW_STOP,
+		PARAM_HIGH_STOP,
+		PARAM_OFFSET_X,
+		PARAM_OFFSET_Y,
+		PARAM_OFFSET_Z,
+		PARAM_IMPACT_FACTOR,
+		PARAM_COLLIDE_WITH_SELF,
 	};
 
 	struct BodyDataBase
@@ -113,16 +133,19 @@ public:
 	float GetMass() const;
 	ChunkyBoneGeometry* GetParent() const;
 	JointType GetJointType() const;
+	void SetJointType(JointType pJointType);
 	bool IsAffectedByGravity() const;
 	bool IsCollideWithSelf() const;
 	BoneType GetBoneType() const;
 	PhysicsManager::JointID GetJointId() const;
 	void ResetJointId();
+	void SetJointId(PhysicsManager::JointID pJointId);
 	PhysicsManager::BodyID GetBodyId() const;
 	void ResetBodyId();
 	PhysicsManager::TriggerID GetTriggerId() const;
 	bool IsConnectorType(ConnectorType pType) const;
 	void AddConnectorType(ConnectorType pType);
+	void ClearConnectorTypes();
 	vec3 GetOriginalOffset() const;
 	float GetImpactFactor() const;
 	const str& GetMaterial() const;
@@ -130,6 +153,8 @@ public:
 
 	float GetExtraData() const;
 	void SetExtraData(float pExtraData);
+
+	BodyDataBase& GetBodyData();	// Only use when fiddling with internals.
 
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;

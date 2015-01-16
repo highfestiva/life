@@ -67,9 +67,12 @@ public:
 	void SetLoadResult(bool pOk);
 
 	void SetAllowMoveRoot(bool pAllow);
-	void AttachToObject(Tbc::PhysicsManager::BodyID pBody1, ContextObject* pObject2, Tbc::PhysicsManager::BodyID pBody2);
-	void AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
+	void AttachToObjectByBodyIds(Tbc::PhysicsManager::BodyID pBody1, ContextObject* pObject2, Tbc::PhysicsManager::BodyID pBody2);
+	void AttachToObjectByBodyIndices(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
+	void DetachAll();
 	bool DetachFromObject(ContextObject* pObject);
+	Array GetAttachedObjects() const;
+	void AddAttachedObjectEngine(ContextObject* pAttachedObject, Tbc::PhysicsEngine* pEngine);
 
 	void AddAttribute(ContextObjectAttribute* pAttribute);
 	void DeleteAttribute(const str& pName);
@@ -110,6 +113,7 @@ public:
 	vec3 GetForwardDirection() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
+	float QueryMass();
 	ObjectPositionalData* GetNetworkOutputGhost();
 	void DeleteNetworkOutputGhost();
 
@@ -150,17 +154,21 @@ protected:
 
 	ResourceManager* GetResourceManager() const;
 
+	typedef std::vector<Tbc::PhysicsEngine*> EngineList;
 	struct Connection
 	{
-		Connection(ContextObject* pObject, Tbc::PhysicsManager::JointID pJointId, Tbc::PhysicsEngine* pEngine):
+		Connection(ContextObject* pObject, Tbc::PhysicsManager::JointID pJointId, Tbc::PhysicsEngine* pEngine=0):
 			mObject(pObject),
-			mJointId(pJointId),
-			mEngine(pEngine)
+			mJointId(pJointId)
 		{
+			if (pEngine)
+			{
+				mEngineList.push_back(pEngine);
+			}
 		}
 		ContextObject* mObject;
 		Tbc::PhysicsManager::JointID mJointId;
-		Tbc::PhysicsEngine* mEngine;
+		EngineList mEngineList;
 	};
 	typedef std::list<Connection> ConnectionList;
 	typedef std::unordered_map<Tbc::PhysicsManager::TriggerID, const void*> TriggerMap;

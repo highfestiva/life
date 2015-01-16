@@ -89,14 +89,7 @@ ContextObject::~ContextObject()
 		mManager->RemoveObject(this);
 	}
 
-	// Detach from other context objects.
-	{
-		while (!mConnectionList.empty())
-		{
-			ContextObject* lObject2 = mConnectionList.front().mObject;
-			DetachFromObject(lObject2);
-		}
-	}
+	ClearPhysics();
 
 	// Fuck off, attributes.
 	{
@@ -222,7 +215,7 @@ void ContextObject::SetAllowMoveRoot(bool pAllow)
 	mAllowMoveRoot = pAllow;
 }
 
-void ContextObject::AttachToObject(Tbc::PhysicsManager::BodyID pBody1, ContextObject* pObject2, Tbc::PhysicsManager::BodyID pBody2)
+void ContextObject::AttachToObjectByBodyIds(Tbc::PhysicsManager::BodyID pBody1, ContextObject* pObject2, Tbc::PhysicsManager::BodyID pBody2)
 {
 	if (IsAttachedTo(pObject2))
 	{
@@ -231,7 +224,7 @@ void ContextObject::AttachToObject(Tbc::PhysicsManager::BodyID pBody1, ContextOb
 	AttachToObject(GetStructureGeometry(pBody1), pObject2, pObject2->GetStructureGeometry(pBody2), true);
 }
 
-void ContextObject::AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index)
+void ContextObject::AttachToObjectByBodyIndices(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index)
 {
 	if (IsAttachedTo(pObject2))
 	{
@@ -241,46 +234,78 @@ void ContextObject::AttachToObject(unsigned pBody1Index, ContextObject* pObject2
 	AttachToObject(mPhysics->GetBoneGeometry(pBody1Index), pObject2, pObject2->GetStructureGeometry(pBody2Index), false);
 }
 
-bool ContextObject::DetachFromObject(ContextObject* /*pObject*/)
+void ContextObject::DetachAll()
+{
+	while (!mConnectionList.empty())
+	{
+		ContextObject* lObject2 = mConnectionList.front().mObject;
+		DetachFromObject(lObject2);
+	}
+}
+
+bool ContextObject::DetachFromObject(ContextObject* pObject)
 {
 	bool lRemoved = false;
 
-	// TODO: implement when new design is in place.
-
-	/*ConnectionList::iterator x = mConnectionList.begin();
+	ConnectionList::iterator x = mConnectionList.begin();
 	for (; x != mConnectionList.end(); ++x)
 	{
 		if (pObject == x->mObject)
 		{
 			Tbc::PhysicsManager::JointID lJointId = x->mJointId;
-			Tbc::PhysicsEngine* lEngine = x->mEngine;
+			EngineList lEngineList = x->mEngineList;
 			mConnectionList.erase(x);
 			pObject->DetachFromObject(this);
 			if (lJointId != Tbc::INVALID_JOINT)
 			{
-				const int lBoneCount = mPhysics->GetBoneCount();
-				for (int x = 0; x < lBoneCount; ++x)
-				{
-					Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
-					if (lGeometry->GetJointId() == lJointId)
-					{
-						mPhysicsNodeArray.erase(x);
-						break;
-					}
-				}
 				mManager->GetGameManager()->GetPhysicsManager()->DeleteJoint(lJointId);
 				mManager->GetGameManager()->SendDetach(this, pObject);
 			}
-			if (lEngine)
+			const int lBoneCount = pObject->GetPhysics()->GetBoneCount();
+			for (int x = 0; x < lBoneCount; ++x)
 			{
-				RemoveAttribute(lEngine);
-				delete (lEngine);
+				if (pObject->GetPhysics()->GetBoneGeometry(x)->GetJointId() == lJointId)
+				{
+					pObject->GetPhysics()->GetBoneGeometry(x)->GetBodyData().mParent = 0;
+					pObject->GetPhysics()->GetBoneGeometry(x)->SetJointId(Tbc::INVALID_JOINT);
+					pObject->GetPhysics()->GetBoneGeometry(x)->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE);
+					break;
+				}
+			}
+			EngineList::iterator x = lEngineList.begin();
+			for (; x != lEngineList.end(); ++x)
+			{
+				Tbc::PhysicsEngine* lEngine = *x;
+				lEngine->RemoveControlledGeometry(pObject->GetPhysics()->GetBoneGeometry(0));
 			}
 			lRemoved = true;
 			break;
 		}
-	}*/
+	}
 	return (lRemoved);
+}
+
+ContextObject::Array ContextObject::GetAttachedObjects() const
+{
+	Array lObjects;
+	ConnectionList::const_iterator x = mConnectionList.begin();
+	for (; x != mConnectionList.end(); ++x)
+	{
+		lObjects.push_back(x->mObject);
+	}
+	return lObjects;
+}
+
+void ContextObject::AddAttachedObjectEngine(ContextObject* pAttachedObject, Tbc::PhysicsEngine* pEngine)
+{
+	ConnectionList::iterator x = mConnectionList.begin();
+	for (; x != mConnectionList.end(); ++x)
+	{
+		if (x->mObject == pAttachedObject)
+		{
+			x->mEngineList.push_back(pEngine);
+		}
+	}
 }
 
 
@@ -647,6 +672,13 @@ float ContextObject::GetMass() const
 	return mTotalMass;
 }
 
+float ContextObject::QueryMass()
+{
+	Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	mTotalMass = mPhysics->QueryTotalMass(lPhysicsManager);
+	return mTotalMass;
+}
+
 ObjectPositionalData* ContextObject::GetNetworkOutputGhost()
 {
 	if (!mNetworkOutputGhost)
@@ -681,6 +713,8 @@ void ContextObject::ClearPhysics()
 	// Removes bodies from manager, then destroys all physical stuff.
 	if (mManager && mPhysics && mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
 	{
+		DetachAll();
+
 		const int lBoneCount = mPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
@@ -784,8 +818,7 @@ void ContextObject::OnLoaded()
 	{
 		// Calculate total mass.
 		deb_assert(mTotalMass == 0);
-		Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-		mTotalMass = mPhysics->QueryTotalMass(lPhysicsManager);
+		QueryMass();
 
 		OnTick();
 
@@ -819,45 +852,74 @@ void ContextObject::AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, Cont
 	{
 		return;
 	}
-
-	pSend;	// TODO: remove when new structure in place!
-
-	Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-	if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_3DOF) &&
-		pBoneGeometry2->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTEE_3DOF))
+	if (!pBoneGeometry2->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTEE_3DOF))
 	{
-		pObject2->SetAllowMoveRoot(false);
+		return;
+	}
 
-		// Find first parent that is a dynamic body.
-		Tbc::PhysicsManager::BodyID lBody2Connectee = pBoneGeometry2->GetBodyId();
-		Tbc::ChunkyBoneGeometry* lNode2Connectee = pBoneGeometry2;
-		while (lPhysicsManager->IsStaticBody(lBody2Connectee))
+	// Find first parent that is a dynamic body.
+	Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	const int lPhysicsFps = mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps();
+	Tbc::PhysicsManager::BodyID lBody2Connectee = pBoneGeometry2->GetBodyId();
+	Tbc::ChunkyBoneGeometry* lNode2Connectee = pBoneGeometry2;
+	while (lPhysicsManager->IsStaticBody(lBody2Connectee))
+	{
+		lNode2Connectee = lNode2Connectee->GetParent();
+		if (!lNode2Connectee)
 		{
-			lNode2Connectee = lNode2Connectee->GetParent();
-			if (!lNode2Connectee)
-			{
-				mLog.AError("Failing to attach to a static object.");
-				return;
-			}
-			lBody2Connectee = lNode2Connectee->GetBodyId();
+			mLog.AError("Failing to attach to a static object.");
+			return;
 		}
+		lBody2Connectee = lNode2Connectee->GetBodyId();
+		pBoneGeometry2 = lNode2Connectee;
+	}
 
-		mLog.AInfo("Attaching two objects.");
-		// TODO: fix algo when new chunky structure in place.
-		/*xform lAnchor;
-		lPhysicsManager->GetBodyTransform(pBoneGeometry2->GetBodyId(), lAnchor);
-		Tbc::PhysicsManager::JointID lJoint = lPhysicsManager->CreateBallJoint(pBoneGeometry1->GetBodyId(), lBody2Connectee, lAnchor.GetPosition());
-		unsigned lAttachNodeId = mPhysics->GetNextGeometryIndex();
-		AddPhysicsObject(PhysicsNode(pBoneGeometry1->GetId(), lAttachNodeId, Tbc::INVALID_BODY, PhysicsNode::TYPE_EXCLUDE, lJoint));
-		Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(this, Tbc::PhysicsEngine::ENGINE_GLUE, 0, 0, 0, 0);
-		lEngine->AddControlledNode(lAttachNodeId, 1);
-		AddAttachment(pObject2, lJoint, lEngine);
-		pObject2->AddAttachment(this, Tbc::INVALID_JOINT, 0);
+	pObject2->SetAllowMoveRoot(false);
 
-		if (pSend)
-		{
-			mManager->GetGameManager()->SendAttach(this, pBoneGeometry1->GetId(), pObject2, pBoneGeometry2->GetId());
-		}*/
+	if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_3DOF))
+	{
+		mLog.AInfo("Attaching two objects with ball joint.");
+		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_BALL);
+	}
+	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE2))
+	{
+		mLog.AInfo("Attaching two objects with hinge-2 joint.");
+		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_HINGE2);
+	}
+	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_SUSPEND_HINGE))
+	{
+		mLog.AInfo("Attaching two objects with suspend hinge joint.");
+		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE);
+	}
+	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE))
+	{
+		mLog.AInfo("Attaching two objects with hinge joint.");
+		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_HINGE);
+	}
+	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_UNIVERSAL))
+	{
+		mLog.AInfo("Attaching two objects with universal joint.");
+		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_UNIVERSAL);
+	}
+	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_SLIDER))
+	{
+		mLog.AInfo("Attaching two objects with slider joint.");
+		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_SLIDER);
+	}
+	else
+	{
+		mLog.AInfo("Could not find connection type to attach two objects with a joint.");
+		return;
+	}
+	pBoneGeometry2->GetBodyData().mParent = pBoneGeometry1;
+	pBoneGeometry2->CreateJoint(pObject2->GetPhysics(), lPhysicsManager, lPhysicsFps);
+
+	AddAttachment(pObject2, pBoneGeometry2->GetJointId(), 0);
+	pObject2->AddAttachment(this, Tbc::INVALID_JOINT, 0);
+
+	if (pSend)
+	{
+		//mManager->GetGameManager()->SendAttach(this, pBoneGeometry1->GetId(), pObject2, pBoneGeometry2->GetId());
 	}
 }
 
@@ -868,7 +930,7 @@ bool ContextObject::IsAttachedTo(ContextObject* pObject) const
 	{
 		if (pObject == x->mObject)
 		{
-			return (true);	// TRICKY: RAII.
+			return (true);
 		}
 	}
 	return (false);

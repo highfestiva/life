@@ -30,7 +30,7 @@ invaderspeeds,isi = [(25,0,0), (0,0,-10), (-25,0,0), (0,0,-10)],0
 invaders = set()
 for y in range(2):
 	for x in range(8):
-		invaders.add(create_ascii_object(invader, pos=(x*25-130,0,100-y*20), col=absrndvec(), physmesh=True))
+		invaders.add(create_ascii_object(invader, pos=(x*25-130,0,100-y*20), col=rndvec().abs(), physmesh=True))
 for invader in invaders:
 	invader.vel(invaderspeeds[0])
 

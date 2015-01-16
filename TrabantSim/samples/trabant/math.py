@@ -10,9 +10,6 @@ def almosteq(a,b):
 def rndvec():
 	return vec3(*[random()*2-1 for _ in range(3)])
 
-def absrndvec():
-	return vec3(*[random() for _ in range(3)])
-
 def sin2(a):
 	x = sin(a)
 	return x*x

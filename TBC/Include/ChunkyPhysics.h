@@ -70,6 +70,7 @@ public:
 	int GetEngineIndexFromControllerIndex(int pStartEngineIndex, int pEngineStep, unsigned pControllerIndex) const;
 	int GetEngineIndex(const PhysicsEngine* pEngine) const;
 	void AddEngine(PhysicsEngine* pEngine);	// Takes ownership of the given engine.
+	void RemoveEngine(PhysicsEngine* pEngine);
 	bool SetEnginePower(unsigned pAspect, float pPower);
 	void ClearEngines();
 

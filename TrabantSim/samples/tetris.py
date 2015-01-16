@@ -15,12 +15,11 @@ XXXX  |  XX  |  X    |    X  |  XXX  |   XX  |  XX
 '''.strip('\n').split('\n')
 # Slice and dice the tetrominos to get them on the form 'XX \n XX'.
 tetromino_lines = [tl.split('  |  ') for tl in tetromino_lines]
-tetrominos = ['\n'.join(t) for t in zip(*tetromino_lines)]
+tetromino,tetrominos = None,['\n'.join(t) for t in zip(*tetromino_lines)]
 
 colors = '#0ff #ff0 #00f #a50 #f0f #0f0 #f00'.split()
 directions = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
 gridsize = vec3(10,20,0)
-tetromino_index,tetromino,tetromino_rot_center = None,None,None
 fixed_blocks = [[None]*gridsize.x for _ in range(gridsize.y+5)]
 
 # Create floor and walls.
@@ -34,7 +33,7 @@ def getblocks(pos, orientation):
 	for y,row in enumerate(piece):
 		for x,block in enumerate(row):
 			if block == 'X':
-				intpos = vec3(*[int(n) for n in (orientation*vec3(x-1, 0, -y-tetromino_rot_center.z*2) + pos)])
+				intpos = vec3(*[round(n) for n in (orientation*vec3(x-1, 0, -y-tetromino_rot_center.z*2) + pos)])
 				coords += [vec3(intpos.x,intpos.z,0)]
 	return coords
 
@@ -44,8 +43,7 @@ def trymove(movement, orientation):
 	coords = getblocks(pos+movement, orientation)
 	if movement.z<0 and ([c for c in coords if c.y<0] or [c for c in coords if fixed_blocks[c.y][c.x]]):
 		# We've hit something below, kill tetromino and fixate blocks without movement.
-		tetromino.release()
-		tetromino = None
+		tetromino = tetromino.release()
 		for coord in getblocks(pos, orientation):
 			fixed_blocks[coord.y][coord.x] = create_ascii_object('X', pos=(coord.x, 0, coord.y), col=colors[tetromino_index], static=True)
 		# Consume completed rows.
@@ -56,8 +54,7 @@ def trymove(movement, orientation):
 				[block.release() for block in row]
 				for rj in range(ri+1,len(fixed_blocks)):
 					fixed_blocks[rj-1] = fixed_blocks[rj]
-					for x,block in enumerate(fixed_blocks[rj-1]):
-						if block: block.pos((x,0,rj-1))
+					[block.pos((x,0,rj-1)) for x,block in enumerate(fixed_blocks[rj-1]) if block]
 				fixed_blocks[-1] = [None]*gridsize.x
 				sound(sound_bang)
 			else:
@@ -75,13 +72,12 @@ while loop(delay=0.05):
 		tetromino.pos(vec3(gridsize.x/2,0,gridsize.y) - tetromino_rot_center)
 
 	if taps() and timeout(0.1):	# Steering.
-		pos = tetromino.pos()
-		tap = closest_tap(pos)
-		v = min(directions, key=lambda s:(tap.pos3d()-s-pos).length())
-		if v == vec3(0,0,1):	# Tapping above means "rotate".
-			trymove(vec3(), tetromino.orientation().rotate_y(pi/2))
-		else:	# Tapping left/below/right means move in that direction.
-			trymove(v, tetromino.orientation())
+		tap = closest_tap(tetromino.pos())
+		v = min(directions, key=lambda s:(tap.pos3d()-s-tap.close_pos).length())
+		# Tapping above means "rotate", tapping left/below/right means move in that direction.
+		if v == vec3(0,0,1):	trymove(vec3(), tetromino.orientation().rotate_y(pi/2))
+		else:			trymove(v, tetromino.orientation())
 
-	if tetromino and timeout(0.7,timer=2):	# Move down.
+	# Move down every 0.8 seconds.
+	if tetromino and timeout(0.8,timer=2):
 		trymove(vec3(0,0,-1), tetromino.orientation())

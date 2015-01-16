@@ -52,6 +52,12 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandId
 	{_T("mass"), COMMAND_MASS},
 	{_T("color"), COMMAND_COLOR},
 	{_T("engine-force"), COMMAND_ENGINE_FORCE},
+	{_T("set-tag-floats"), COMMAND_SET_TAG_FLOATS},
+	{_T("set-tag-strings"), COMMAND_SET_TAG_STRINGS},
+	{_T("set-tag-phys"), COMMAND_SET_TAG_PHYS},
+	{_T("set-tag-engine"), COMMAND_SET_TAG_ENGINE},
+	{_T("set-tag-mesh"), COMMAND_SET_TAG_MESH},
+	{_T("add-tag"), COMMAND_ADD_TAG},
 };
 
 
@@ -140,6 +146,15 @@ str ParamToStr(const strutil::strvec& pParam, size_t pIndex)
 	return pParam[pIndex];
 }
 
+bool ParamToBool(const strutil::strvec& pParam, size_t pIndex)
+{
+	if (pIndex >= pParam.size())
+	{
+		throw ParameterException();
+	}
+	return pParam[pIndex] == _T("true");
+}
+
 int ParamToInt(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
 {
 	int lValue = 0;
@@ -189,6 +204,42 @@ vec3 ParamToVec3(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
 quat ParamToQuat(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
 {
 	return quat(ParamToFloat(pParam,pIndex,pIsSet), ParamToFloat(pParam,pIndex+1,pIsSet), ParamToFloat(pParam,pIndex+2,pIsSet), ParamToFloat(pParam,pIndex+3,pIsSet));
+}
+
+void Params2Ints(const strutil::strvec& pParam, std::vector<int>& pInts)
+{
+	pInts.clear();
+	strutil::strvec::const_iterator p;
+	for (p = pParam.begin(); p != pParam.end(); ++p)
+	{
+		const tchar* s = p->c_str();
+		const tchar* lEnd;
+		do
+		{
+			int i = StrToUInt(s, &lEnd);
+			pInts.push_back(i);
+			s = lEnd+1;
+		}
+		while (*lEnd == ',');
+	}
+}
+
+void Params2Floats(const strutil::strvec& pParam, std::vector<float>& pFloats)
+{
+	pFloats.clear();
+	strutil::strvec::const_iterator p;
+	for (p = pParam.begin(); p != pParam.end(); ++p)
+	{
+		const tchar* s = p->c_str();
+		const tchar* lEnd;
+		do
+		{
+			float f = StrToFloat(s, &lEnd);
+			pFloats.push_back(f);
+			s = lEnd+1;
+		}
+		while (*lEnd == ',');
+	}
 }
 
 
@@ -342,38 +393,12 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				break;
 				case COMMAND_SET_VERTICES:
 				{
-					mVertices.clear();
-					strutil::strvec::const_iterator p;
-					for (p = pParameterVector.begin(); p != pParameterVector.end(); ++p)
-					{
-						const tchar* s = p->c_str();
-						const tchar* lEnd;
-						do
-						{
-							float f = StrToFloat(s, &lEnd);
-							mVertices.push_back(f);
-							s = lEnd+1;
-						}
-						while (*lEnd == ',');
-					}
+					Params2Floats(pParameterVector, mVertices);
 				}
 				break;
 				case COMMAND_SET_INDICES:
 				{
-					mIndices.clear();
-					strutil::strvec::const_iterator p;
-					for (p = pParameterVector.begin(); p != pParameterVector.end(); ++p)
-					{
-						const tchar* s = p->c_str();
-						const tchar* lEnd;
-						do
-						{
-							int i = StrToUInt(s, &lEnd);
-							mIndices.push_back(i);
-							s = lEnd+1;
-						}
-						while (*lEnd == ',');
-					}
+					Params2Ints(pParameterVector, mIndices);
 				}
 				break;
 				case COMMAND_WAIT_UNTIL_LOADED:
@@ -436,7 +461,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				break;
 				case COMMAND_CREATE_JOYSTICK:
 				{
-					const int lJoyId = lManager->CreateJoystick(ParamToFloat(pParameterVector, 0), ParamToFloat(pParameterVector, 1));
+					const int lJoyId = lManager->CreateJoystick(ParamToFloat(pParameterVector, 0), ParamToFloat(pParameterVector, 1), ParamToBool(pParameterVector, 2));
 					mActiveResponse += ToStr(lJoyId);
 				}
 				break;
@@ -463,9 +488,15 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					const str lEngineType = ParamToStr(pParameterVector, 1);
 					const vec2 lMaxVelocity = ParamToVec2(pParameterVector, 2);
 					const vec2 lOffset = ParamToVec2(pParameterVector, 4);
-					const float lFriction = ParamToFloat(pParameterVector, 6);
-					const str lEngineSound = ParamToStr(pParameterVector, 7);
-					const int lEngineId = lManager->CreateEngine(lObjectId, lEngineType, lMaxVelocity+lOffset, lFriction, lEngineSound);
+					const float lStrength = ParamToFloat(pParameterVector, 6);
+					const float lFriction = ParamToFloat(pParameterVector, 7);
+					TrabantSimManager::EngineTargetList lTargets;
+					size_t lCount = pParameterVector.size();
+					for (size_t x = 8; x+1 < lCount; x += 2)
+					{
+						lTargets.push_back(TrabantSimManager::EngineTarget(ParamToInt(pParameterVector, x), ParamToFloat(pParameterVector, x+1)));
+					}
+					const int lEngineId = lManager->CreateEngine(lObjectId, lEngineType, lMaxVelocity+lOffset, lStrength, lFriction, lTargets);
 					if (lEngineId < 0)
 					{
 						throw ParameterException();
@@ -479,7 +510,9 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					const str lJointType = ParamToStr(pParameterVector, 1);
 					const int lOtherObjectId = ParamToInt(pParameterVector, 2);
 					const vec3 lAxis = ParamToVec3(pParameterVector, 3);
-					const int lJointId = lManager->CreateJoint(lObjectId, lJointType, lOtherObjectId, lAxis);
+					const vec2 lStop = ParamToVec2(pParameterVector, 6);
+					const vec2 lSpring = ParamToVec2(pParameterVector, 8);
+					const int lJointId = lManager->CreateJoint(lObjectId, lJointType, lOtherObjectId, lAxis, lStop, lSpring);
 					if (lJointId < 0)
 					{
 						throw ParameterException();
@@ -562,6 +595,38 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					{
 						mActiveResponse += strutil::Format(_T("%f %f %f"), lValue.x, lValue.y, lValue.z);
 					}
+				}
+				break;
+				case COMMAND_SET_TAG_FLOATS:
+				{
+					Params2Floats(pParameterVector, mTagFloats);
+				}
+				break;
+				case COMMAND_SET_TAG_STRINGS:
+				{
+					mTagStrings = pParameterVector;
+				}
+				break;
+				case COMMAND_SET_TAG_PHYS:
+				{
+					Params2Ints(pParameterVector, mTagPhys);
+				}
+				break;
+				case COMMAND_SET_TAG_ENGINE:
+				{
+					Params2Ints(pParameterVector, mTagEngines);
+				}
+				break;
+				case COMMAND_SET_TAG_MESH:
+				{
+					Params2Ints(pParameterVector, mTagMeshes);
+				}
+				break;
+				case COMMAND_ADD_TAG:
+				{
+					const int lObjectId = ParamToInt(pParameterVector, 0);
+					const str lTagType = ParamToStr(pParameterVector, 1);
+					lManager->AddTag(lObjectId, lTagType, mTagFloats, mTagStrings, mTagPhys, mTagEngines, mTagMeshes);
 				}
 				break;
 				default:

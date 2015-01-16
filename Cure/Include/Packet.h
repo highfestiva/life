@@ -276,10 +276,10 @@ public:
 	MessageObjectAttach();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, uint32 pObject1Id, uint32 pObject2Id, uint16 pBody1Id, uint16 pBody2Id);
+	int Store(Packet* pPacket, uint32 pObject1Id, uint32 pObject2Id, uint16 pBody1Index, uint16 pBody2Index);
 	uint32 GetObject2Id() const;
-	uint16 GetBody1Id() const;
-	uint16 GetBody2Id() const;
+	uint16 GetBody1Index() const;
+	uint16 GetBody2Index() const;
 };
 
 class MessageObjectDetach: public MessageObject

@@ -20,20 +20,6 @@ namespace Tbc
 
 
 
-const int PARAM_SPRING_CONSTANT		=  0;
-const int PARAM_SPRING_DAMPING		=  1;
-const int PARAM_EULER_THETA		=  2;
-const int PARAM_EULER_PHI		=  3;
-const int PARAM_LOW_STOP		=  4;
-const int PARAM_HIGH_STOP		=  5;
-const int PARAM_OFFSET_X		=  6;
-const int PARAM_OFFSET_Y		=  7;
-const int PARAM_OFFSET_Z		=  8;
-const int PARAM_IMPACT_FACTOR		=  9;
-const int PARAM_COLLIDE_WITH_SELF	= 10;
-
-
-
 ChunkyBoneGeometry::ChunkyBoneGeometry(const BodyData& pBodyData):
 	mBodyData(pBodyData),
 	mJointId(INVALID_JOINT),
@@ -279,6 +265,11 @@ ChunkyBoneGeometry::JointType ChunkyBoneGeometry::GetJointType() const
 	return (mBodyData.mJointType);
 }
 
+void ChunkyBoneGeometry::SetJointType(JointType pJointType)
+{
+	mBodyData.mJointType = pJointType;
+}
+
 bool ChunkyBoneGeometry::IsAffectedByGravity() const
 {
 	return mBodyData.mIsAffectedByGravity;
@@ -303,6 +294,11 @@ PhysicsManager::JointID ChunkyBoneGeometry::GetJointId() const
 void ChunkyBoneGeometry::ResetJointId()
 {
 	mJointId = INVALID_JOINT;
+}
+
+void ChunkyBoneGeometry::SetJointId(PhysicsManager::JointID pJointId)
+{
+	mJointId = pJointId;
 }
 
 PhysicsManager::BodyID ChunkyBoneGeometry::GetBodyId() const
@@ -331,6 +327,11 @@ void ChunkyBoneGeometry::AddConnectorType(ConnectorType pType)
 	{
 		mConnectorArray.push_back(pType);
 	}
+}
+
+void ChunkyBoneGeometry::ClearConnectorTypes()
+{
+	mConnectorArray.clear();
 }
 
 vec3 ChunkyBoneGeometry::GetOriginalOffset() const
@@ -363,6 +364,11 @@ float ChunkyBoneGeometry::GetExtraData() const
 void ChunkyBoneGeometry::SetExtraData(float pExtraData)
 {
 	mExtraData = pExtraData;
+}
+
+ChunkyBoneGeometry::BodyDataBase& ChunkyBoneGeometry::GetBodyData()
+{
+	return mBodyData;
 }
 
 

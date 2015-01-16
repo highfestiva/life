@@ -309,7 +309,7 @@ void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh, int pCastsShado
 {
 	static int lMeshCounter = 0;
 	int lPhysIndex = 0;
-	str lMeshName = strutil::Format(_T("TestMesh%i"), lMeshCounter);
+	str lMeshName = strutil::Format(_T("TestMesh%i"), lMeshCounter++);
 	str lMeshRefName = lMeshName+_T("Ref");
 	xform lTransform;
 	float lScale = 1;
@@ -317,6 +317,7 @@ void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh, int pCastsShado
 	UserGeometryReferenceResource* lGeometryRef = new UserGeometryReferenceResource(
 		mUiManager, GeometryOffset(lPhysIndex, lTransform, lScale));
 	GeometryReferenceResource* lGeometryRefResource = (GeometryReferenceResource*)lGeometryRef->CreateResource(GetResourceManager(), lMeshRefName);
+	lGeometryRefResource->SetIsUnique(true);
 	lGeometryRef->SetResource(lGeometryRefResource);
 	Cure::UserResource::LoadCallback lCallbackCast;
 	lCallbackCast.SetMemento(UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh).GetMemento());

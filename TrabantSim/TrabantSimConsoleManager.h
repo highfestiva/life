@@ -60,6 +60,12 @@ protected:
 		COMMAND_MASS,
 		COMMAND_COLOR,
 		COMMAND_ENGINE_FORCE,
+		COMMAND_SET_TAG_FLOATS,
+		COMMAND_SET_TAG_STRINGS,
+		COMMAND_SET_TAG_PHYS,
+		COMMAND_SET_TAG_ENGINE,
+		COMMAND_SET_TAG_MESH,
+		COMMAND_ADD_TAG,
 	};
 
 	virtual unsigned GetCommandCount() const;
@@ -70,6 +76,11 @@ protected:
 	std::vector<int> mIndices;
 	MeshObject mGfxMesh;
 	PhysObjectArray mPhysObjects;
+	std::vector<float> mTagFloats;
+	std::vector<str> mTagStrings;
+	std::vector<int> mTagPhys;
+	std::vector<int> mTagEngines;
+	std::vector<int> mTagMeshes;
 	str mActiveResponse;
 	static const CommandPair mCommandIdList[];
 	logclass();

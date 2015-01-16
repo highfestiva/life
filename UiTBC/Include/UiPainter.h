@@ -196,7 +196,7 @@ public:
 		const PixelCoord& pPoint2, float pU2, float pV2,
 		const PixelCoord& pPoint3, float pU3, float pV3, ImageID pImageID);
 
-	virtual void DrawFan(const std::vector<vec2> pCoords, bool pFill) = 0;
+	virtual void DrawFan(const std::vector<vec2>& pCoords, bool pFill) = 0;
 	virtual void DrawImageFan(ImageID pImageID, const std::vector<vec2>& pCoords, const std::vector<vec2>& pTexCoords) = 0;
 	static void AddRadius(std::vector<vec2>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle);
 	static void TryAddRadius(std::vector<vec2>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pCurrentCornerBit, int pCornerMask);

@@ -79,6 +79,7 @@ public:
 	EngineType GetEngineType() const;
 
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
+	void RemoveControlledGeometry(ChunkyBoneGeometry* pGeometry);
 	GeometryList GetControlledGeometryList() const;
 	void SetStrength(float pStrength);
 	bool SetValue(unsigned pAspect, float pValue);

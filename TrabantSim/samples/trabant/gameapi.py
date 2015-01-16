@@ -94,8 +94,9 @@ def taps():
 def accelerometer():
 	return cmd('get-accelerometer')
 
-def create_joystick(x,y):
-	return cmd('create-joystick %f %f' % (x,y), int)
+def create_joystick(x,y,sloppy):
+	sloppy = str(not not sloppy).lower()
+	return cmd('create-joystick %f %f %s' % (x,y,sloppy), int)
 
 def joystick_data():
 	return cmd('get-joystick-data')
@@ -150,13 +151,24 @@ def releaseobj(oid):
 def release_all_objects():
 	cmd('delete-all-objects')
 
-def create_engine(oid, engine_type, max_velocity, offset, friction, sound):
+def create_engine(oid, engine_type, max_velocity, offset, strength, friction, target_efcts):
 	try:	max_velocity = (float(max_velocity), 0)	# Convert single number to tuple.
 	except:	pass
-	return cmd('create-engine %i %s %s %s %f %s' % (oid, engine_type, _args2str(max_velocity, '0 0'), _args2str(offset, '0 0'), friction, sound if sound else 'none'), int)
+	max_velocity = _args2str(max_velocity, '0 0')
+	offset = _args2str(offset, '0 0')
+	target_efcts = ' '.join('%i %f'%(oid,efct) for oid,efct in target_efcts) if target_efcts else ''
+	return cmd('create-engine %i %s %s %s %f %f %s' % (oid, engine_type, max_velocity, offset, strength, friction, target_efcts), int)
 
-def create_joint(oid, joint_type, oid2, axis):
-	return cmd('create-joint %i %s %i %s' % (oid, joint_type, oid2, _args2str(axis)), int)
+def create_joint(oid, joint_type, oid2, axis, stop, spring):
+	return cmd('create-joint %i %s %i %s %s %s' % (oid, joint_type, oid2, _args2str(axis, '0 0 0'), _args2str(stop, '0 0'), _args2str(spring, '0 0')), int)
+
+def addtag(oid, name, floats, strings, physidxs, engineidxs, meshidxs):
+	cmd('set-tag-floats %s' % ','.join('%f'%float(f) for f in floats))
+	cmd('set-tag-strings %s' % ' '.join(strings))
+	cmd('set-tag-phys %s' % ','.join('%i'%i for i in physidxs))
+	cmd('set-tag-engine %s' % ','.join('%i'%i for i in engineidxs))
+	cmd('set-tag-mesh %s' % ','.join('%i'%i for i in meshidxs))
+	cmd('add-tag %i %s' % (oid, name))
 
 
 def pos(oid, pos):
@@ -201,7 +213,10 @@ def cmd(c, return_type=str):
 	#print(c)
 	sock.send((c+'\n').encode())
 	result = sock.recv(80*1024).decode()
-	return return_type(result[3:]) if result.startswith('ok\n') else result
+	if result.startswith('ok\n'):
+		return return_type(result[3:])
+	print(result)
+	result
 
 def set(setting, value):
 	if type(value) == bool:
