@@ -487,16 +487,15 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					const int lObjectId = ParamToInt(pParameterVector, 0);
 					const str lEngineType = ParamToStr(pParameterVector, 1);
 					const vec2 lMaxVelocity = ParamToVec2(pParameterVector, 2);
-					const vec2 lOffset = ParamToVec2(pParameterVector, 4);
-					const float lStrength = ParamToFloat(pParameterVector, 6);
-					const float lFriction = ParamToFloat(pParameterVector, 7);
+					const float lStrength = ParamToFloat(pParameterVector, 4);
+					const float lFriction = ParamToFloat(pParameterVector, 5);
 					TrabantSimManager::EngineTargetList lTargets;
 					size_t lCount = pParameterVector.size();
-					for (size_t x = 8; x+1 < lCount; x += 2)
+					for (size_t x = 6; x+1 < lCount; x += 2)
 					{
 						lTargets.push_back(TrabantSimManager::EngineTarget(ParamToInt(pParameterVector, x), ParamToFloat(pParameterVector, x+1)));
 					}
-					const int lEngineId = lManager->CreateEngine(lObjectId, lEngineType, lMaxVelocity+lOffset, lStrength, lFriction, lTargets);
+					const int lEngineId = lManager->CreateEngine(lObjectId, lEngineType, lMaxVelocity, lStrength, lFriction, lTargets);
 					if (lEngineId < 0)
 					{
 						throw ParameterException();

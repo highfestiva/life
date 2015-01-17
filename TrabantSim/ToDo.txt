@@ -12,6 +12,7 @@
 +Relative accelerometer. terminal_velocity.py
 +Joysticks.
 
+Fix engine sound intensity on push engines.
 Make taps stick until polled. flappy_ufo.py, snake.py, tetris.py
 Fix fog.
 Tap/slide velocity.

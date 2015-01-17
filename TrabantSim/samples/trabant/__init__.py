@@ -9,7 +9,7 @@ import trabant.objgen
 import time
 
 
-roll_turn_engine,roll_engine,push_abs_engine,push_rel_engine,push_abs_turn_engine,push_rel_turn_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
+roll_turn_engine,roll_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint = 'hinge suspend_hinge turn_hinge'.split()
 sound_explosion,sound_ping,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'explosion ping bang hizz wobble combustion rotor'.split()
 
@@ -47,6 +47,7 @@ class Obj:
 	def __init__(self, id):
 		self.id = id
 		self.engine = []
+		self.last_joint_axis = None
 	def pos(self, pos=None, orientation=None):
 		if pos:
 			gameapi.pos(self.id, pos)
@@ -83,13 +84,16 @@ class Obj:
 		if v != _v:
 			self.vel(v)
 	def create_engine(self, engine_type, max_velocity=None, offset=None, strength=1, friction=0, targets=None, sound=None):
+		topmounted_gyro = self.last_joint_axis and self.last_joint_axis.normalize()*vec3(0,0,1) > 0.8
+		max_velocity, strength, friction = _normalize_engine_values(engine_type, max_velocity, offset, strength, friction, topmounted_gyro)
 		target_efcts = [(t.id,efct) for t,efct in targets] if targets else []
-		eid = gameapi.create_engine(self.id, engine_type, max_velocity, offset, strength, friction, target_efcts)
+		eid = gameapi.create_engine(self.id, engine_type, max_velocity, strength, friction, target_efcts)
 		self.engine += [Engine(self.id, eid)]
 		if sound:
 			self.engine[-1].addsound(sound, 1)
 		return self.engine[-1]
 	def create_joint(self, joint_type, obj2, axis=None, stop=None, spring=None):
+		self.last_joint_axis = tovec3(axis)
 		return gameapi.create_joint(self.id, joint_type, obj2.id, axis, stop, spring)
 	def add_stabilizer(self, force=1):
 		gameapi.addtag(self.id, 'upright_stabilizer', [force], [], [0], [], [])
@@ -356,6 +360,46 @@ def _create_object(gfx, phys, static, pos, vel, avel, mass, col, mat):
 	if mass:
 		o.mass(mass)
 	return o
+
+def _normalize_engine_values(engine_type, max_velocity, offset, strength, friction, topmounted_gyro):
+	# Convert single number to list.
+	try:	max_velocity = (float(max_velocity), 0)
+	except:	max_velocity = (0,0) if not max_velocity else max_velocity
+	try:	offset = (float(offset), 0)
+	except:	offset = (0,0) if not offset else offset
+
+	# Offset and max_velocity are used for different purposes for different engines.
+	max_velocity = [mv+ov for mv,ov in zip(max_velocity,offset)]
+
+	# Make engine-specific adjustions.
+	if engine_type == roll_turn_engine:
+		max_velocity[0] = 2 if not max_velocity[0] else max_velocity[0]
+		max_velocity[1] = 2 if not max_velocity[1] else max_velocity[1]
+	elif engine_type == roll_engine:
+		max_velocity[0] = 100 if not max_velocity[0] else max_velocity[0]
+		max_velocity[1] = -20 if not max_velocity[1] else max_velocity[1]
+		strength *= 10
+	elif engine_type in (push_abs_engine, push_rel_engine):
+		max_velocity[0] = 100 if not max_velocity[0] else max_velocity[0]
+	elif engine_type in (push_turn_abs_engine, push_turn_rel_engine):
+		max_velocity[0] = 0.1 if not max_velocity[0] else max_velocity[0]
+	elif engine_type == gyro_engine:
+		max_velocity[0] = 50 if not max_velocity[0] else max_velocity[0]
+		max_velocity[1] = 20 if not max_velocity[1] else max_velocity[1]
+		strength *= 3
+		friction = 0.05 if not friction else friction
+	elif engine_type == rotor_engine:
+		strength /= 15
+		if topmounted_gyro:
+			if not max_velocity[0] and not max_velocity[1]:
+				max_velocity[0] = 2	# Rotor Z lift offset.
+				max_velocity[1] = 2	# This means rotor VTOL stabilization factor.
+			friction = 0.001 if not friction else friction
+		else:
+			friction = 0.1 if not friction else friction
+	elif engine_type == tilt_engine:
+		strength /= 1500
+	return max_velocity, strength, friction
 
 def _world2screen(crd):
 	'''Return screen X,Y in [0,1].'''

@@ -433,21 +433,18 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 
 					vec3 lRotorPivot;
 					pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
-					const vec3 lOffset =
-						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
-						vec3(0, 0, mMaxSpeed*lScale);
+					const vec3 lOffset = lOrientation * vec3(0, 0, mMaxSpeed*lScale);
 					lRotorPivot += lOffset;
 
-					const float lAbsFriction = std::abs(mFriction);
-					if (mFriction < 0)
+					if (mMaxSpeed2)
 					{
 						// Arcade stabilization for VTOL rotor.
 						vec3 lParentAngularVelocity;
 						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetParent()->GetBodyId(), lParentAngularVelocity);
 						lParentAngularVelocity = lOrientation.GetInverse() * lParentAngularVelocity;
 						const vec3 lParentAngle = lOrientation.GetInverse() * vec3(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
-						const float lStabilityX = -lParentAngle.x * 0.5f + lParentAngularVelocity.y * lAbsFriction;
-						const float lStabilityY = -lParentAngle.y * 0.5f - lParentAngularVelocity.x * lAbsFriction;
+						const float lStabilityX = -lParentAngle.x * 0.5f + lParentAngularVelocity.y * mMaxSpeed2;
+						const float lStabilityY = -lParentAngle.y * 0.5f - lParentAngularVelocity.x * mMaxSpeed2;
 						lRotorPivot += lOrientation * vec3(lStabilityX, lStabilityY, 0);
 					}
 
@@ -460,7 +457,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					// Counteract rotor's movement through perpendicular air.
 					vec3 lDragForce;
 					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
-					lDragForce = ((-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lNormalizedFrameTime) * lRotorForce;
+					lDragForce = ((-lDragForce*lRotorForce.GetNormalized()) * mFriction * lNormalizedFrameTime) * lRotorForce;
 
 					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce + lDragForce, lRotorPivot);
 				}

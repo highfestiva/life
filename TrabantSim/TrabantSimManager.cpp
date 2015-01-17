@@ -393,58 +393,42 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 	if (pEngineType == _T("roll_turn"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE2_TURN;
-		lMaxVelocity.x = (!lMaxVelocity.x)? 2.0f : lMaxVelocity.x;
-		lMaxVelocity.y = (!lMaxVelocity.y)? 2.0f : lMaxVelocity.y;
 		lIsAttachment = true;
 	}
 	else if (pEngineType == _T("roll"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE_ROLL;
-		lMaxVelocity.x = (!lMaxVelocity.x)? 100.0f : lMaxVelocity.x;
-		lMaxVelocity.y = (!lMaxVelocity.y)? -20.0f : lMaxVelocity.y;
-		lStrength *= 10;
 		lIsAttachment = true;
 	}
 	else if (pEngineType == _T("push_abs"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE;
-		lMaxVelocity.x = (!lMaxVelocity.x)? 100.0f : lMaxVelocity.x;
 	}
 	else if (pEngineType == _T("push_rel"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE;
-		lMaxVelocity.x = (!lMaxVelocity.x)? 100.0f : lMaxVelocity.x;
 	}
 	else if (pEngineType == _T("push_turn_abs"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE;
-		lMaxVelocity.x = (!lMaxVelocity.x)? 0.1f : lMaxVelocity.x;
 	}
 	else if (pEngineType == _T("push_turn_rel"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE;
-		lMaxVelocity.x = (!lMaxVelocity.x)? 0.1f : lMaxVelocity.x;
 	}
 	else if (pEngineType == _T("gyro"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE_GYRO;
-		lMaxVelocity.x = (!lMaxVelocity.x)? 150.0f : lMaxVelocity.x;
-		lMaxVelocity.y = (!lMaxVelocity.y)? 40.0f : lMaxVelocity.y;
-		lStrength *= 3;
-		lFriction = lFriction? lFriction : 0.01f;
 		lIsAttachment = true;
 	}
 	else if (pEngineType == _T("rotor"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_ROTOR;
-		lStrength *= 0.4f;
-		lFriction = lFriction? lFriction : 0.01f;
 		lIsAttachment = true;
 	}
 	else if (pEngineType == _T("tilt"))
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_ROTOR_TILT;
-		lStrength /= 15;
 		lIsAttachment = true;
 	}
 	else
@@ -465,25 +449,18 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 		}
 		lTargets.push_back(EngineTarget(lEngineObject->GetInstanceId(),1));
 	}
+
 	Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(lEngineType, lStrength, lMaxVelocity.x, lMaxVelocity.y, lFriction, lObject->GetPhysics()->GetEngineCount()*4);
-	EngineTargetList::iterator x = lTargets.begin();
-	for (; x != lTargets.end(); ++x)
+	for (EngineTargetList::iterator x = lTargets.begin(); x != lTargets.end(); ++x)
 	{
 		Cure::ContextObject* lEngineObject = GetContext()->GetObject(x->mInstanceId);
-		if (!lEngineObject)
-		{
-			mLog.Warningf(_T("No object %i attached to create a %s engine to."), x->mInstanceId, pEngineType.c_str());
-			delete lEngine;
-			return -1;
-		}
 		Tbc::ChunkyBoneGeometry* lGeometry = lEngineObject->GetPhysics()->GetBoneGeometry(0);
 		lEngine->AddControlledGeometry(lGeometry, x->mStrength);
 	}
 	lObject->GetPhysics()->AddEngine(lEngine);
 	if (lIsAttachment)
 	{
-		EngineTargetList::iterator x = lTargets.begin();
-		for (; x != lTargets.end(); ++x)
+		for (EngineTargetList::iterator x = lTargets.begin(); x != lTargets.end(); ++x)
 		{
 			Cure::ContextObject* lEngineObject = GetContext()->GetObject(x->mInstanceId);
 			lObject->AddAttachedObjectEngine(lEngineObject, lEngine);

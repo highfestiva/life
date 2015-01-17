@@ -151,13 +151,10 @@ def releaseobj(oid):
 def release_all_objects():
 	cmd('delete-all-objects')
 
-def create_engine(oid, engine_type, max_velocity, offset, strength, friction, target_efcts):
-	try:	max_velocity = (float(max_velocity), 0)	# Convert single number to tuple.
-	except:	pass
+def create_engine(oid, engine_type, max_velocity, strength, friction, target_efcts):
 	max_velocity = _args2str(max_velocity, '0 0')
-	offset = _args2str(offset, '0 0')
 	target_efcts = ' '.join('%i %f'%(oid,efct) for oid,efct in target_efcts) if target_efcts else ''
-	return cmd('create-engine %i %s %s %s %f %f %s' % (oid, engine_type, max_velocity, offset, strength, friction, target_efcts), int)
+	return cmd('create-engine %i %s %s %f %f %s' % (oid, engine_type, max_velocity, strength, friction, target_efcts), int)
 
 def create_joint(oid, joint_type, oid2, axis, stop, spring):
 	return cmd('create-joint %i %s %i %s %s %s' % (oid, joint_type, oid2, _args2str(axis, '0 0 0'), _args2str(stop, '0 0'), _args2str(spring, '0 0')), int)
