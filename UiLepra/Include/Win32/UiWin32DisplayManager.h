@@ -75,7 +75,7 @@ protected:
 	// Different implementations needed whether you want to use a software
 	// renderer, OpenGL or DirectX.
 	virtual bool InitScreen() = 0;
-	virtual void SetFocus(bool pFocus) = 0;
+	virtual void SetFocus(bool pFocus);
 
 	bool Register();
 	void Unregister();

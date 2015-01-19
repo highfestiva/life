@@ -9,16 +9,13 @@ proc = None
 _cached_vertices,_cached_indices = [],[]
 
 
-def open(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', restart=True):
+def init(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', restart=True):
 	if not _opencom(addr):
 		return False
 	if restart:
 		release_all_objects()
 		reset()	# Kill all joysticks, set all default values, etc.
-	r,g,b = _htmlcol(bg)
-	set('Ui.3D.ClearRed', r)
-	set('Ui.3D.ClearGreen', g)
-	set('Ui.3D.ClearBlue', b)
+	setbgcolor(bg)
 	setpencolor(fg)
 	set('Physics.FPS', int(fps))
 	set('Ui.3D.FOV', float(fov))
@@ -134,6 +131,12 @@ def setmesh(vertices, indices):
 		cmd('set-vertices %s' % ','.join('%f'%v for v in verts))
 		cmd('set-indices %s' % ','.join((str(i) for i in indices)))
 		_cached_vertices,_cached_indices = verts,indices
+
+def setbgcolor(col):
+	r,g,b = _htmlcol(col)
+	set('Ui.3D.ClearRed', r)
+	set('Ui.3D.ClearGreen', g)
+	set('Ui.3D.ClearBlue', b)
 
 def setpencolor(col):
 	r,g,b = _htmlcol(col)

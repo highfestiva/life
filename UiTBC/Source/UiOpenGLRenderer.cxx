@@ -149,6 +149,7 @@ void OpenGLRenderer::Clear(unsigned pClearFlags)
 
 void OpenGLRenderer::SetClearColor(const Color& pColor)
 {
+	Parent::SetClearColor(pColor);
 	::glClearColor(pColor.GetRf(), pColor.GetGf(), pColor.GetBf(), 1.0f);
 	OGL_FAST_ASSERT();
 }
@@ -1276,6 +1277,8 @@ unsigned OpenGLRenderer::RenderScene()
 			::glFogf(GL_FOG_DENSITY, GetFogDensity());
 			::glFogf(GL_FOG_START, GetFogNear());
 			::glFogf(GL_FOG_END, GetFogFar());
+			const float lFogColor[4] = {mClearColor.GetRf(), mClearColor.GetGf(), mClearColor.GetBf(), mClearColor.GetAf()};
+			::glFogfv(GL_FOG_COLOR, lFogColor);
 		}
 		else
 		{

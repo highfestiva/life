@@ -141,6 +141,8 @@ TrabantSimManager::~TrabantSimManager()
 
 void TrabantSimManager::UserReset()
 {
+	mUiManager->GetDisplayManager()->SetFocus(true);
+
 	Cure::RuntimeVariableScope* lScope = GetVariableScope();
 	const std::list<str> lVariableList = lScope->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE);
 	std::list<str>::const_iterator x = lVariableList.begin();
@@ -162,6 +164,8 @@ void TrabantSimManager::UserReset()
 	ScopeLock lGameLock(GetTickLock());
 
 	mCollisionList.clear();
+	mDragList.clear();
+	mUiManager->GetDragManager()->ClearDrags(mUiManager->GetInputManager());
 
 	TouchstickList::iterator y = mTouchstickList.begin();
 	for (; y != mTouchstickList.end(); ++y)
@@ -319,10 +323,11 @@ void TrabantSimManager::PopCollisions(CollisionList& pCollisionList)
 	pCollisionList.splice(pCollisionList.end(), mCollisionList);
 }
 
-void TrabantSimManager::GetTouchDrags(DragList& pDragList) const
+void TrabantSimManager::GetTouchDrags(DragList& pDragList)
 {
 	ScopeLock lGameLock(GetTickLock());
-	pDragList = mUiManager->GetDragManager()->GetDragList();
+	pDragList = mDragList;
+	mDragList.clear();
 }
 
 vec3 TrabantSimManager::GetAccelerometer() const
@@ -768,6 +773,7 @@ void TrabantSimManager::AcceptLoop()
 		{
 			if (mCommandThread) mCommandThread->RequestStop();
 			mConnectSocket->Disconnect();
+			Thread::Sleep(0.1f);
 			delete mCommandThread;
 			mCommandThread = 0;
 			delete mConnectSocket;
@@ -1096,6 +1102,33 @@ void TrabantSimManager::ScriptPhysicsTick()
 		UpdateCameraPosition(false);
 
 		UpdateUserMessage();
+	}
+
+	if (mDragList.size() < 10)
+	{
+		const DragList& lDrags = mUiManager->GetDragManager()->GetDragList();
+		for (DragList::const_iterator x = lDrags.begin(); x != lDrags.end(); ++x)
+		{
+			if (!x->mIsPress)
+			{
+				continue;
+			}
+			bool lFound = false;
+			for (DragList::iterator y = mDragList.begin(); y != mDragList.end(); ++y)
+			{
+				if (y->mStart.x == x->mStart.x && y->mStart.y == x->mStart.y)
+				{
+					lFound = true;
+					y->mLast = x->mLast;
+					y->mIsPress = x->mIsPress;
+					y->mFlags = x->mFlags;
+				}
+			}
+			if (!lFound)
+			{
+				mDragList.push_back(*x);
+			}
+		}
 	}
 
 	Parent::ScriptPhysicsTick();

@@ -188,6 +188,13 @@ const Canvas* Renderer::GetScreen() const
 
 
 
+void Renderer::SetClearColor(const Color& pColor)
+{
+	mClearColor = pColor;
+}
+
+
+
 DynamicRenderer* Renderer::GetDynamicRenderer(str pName) const
 {
 	return HashUtil::FindMapObject(mDynamicRendererMap, pName);

@@ -19,13 +19,15 @@ XX  XX  XX
 
 ship = create_ascii_object(shipasc)
 ship.orientation(quat().rotate_x(-pi/2))	# Point ship forward instead of upward. Ship-relative coordinate system hereafter is +Y down, +Z in.
-pusher = ship.create_engine(push_rel_engine, max_velocity=1, friction=0.7, sound=sound_engine_hizz)
-pusher.force((0,0,30))	# Always full throttle.
+pusher = ship.create_engine(push_rel_engine, strength=30, max_velocity=30, friction=0.7)
+pusher.addsound(sound_engine_hizz, intensity=0.5, volume=0.5)
+pusher.force((0,0,1))	# Always full throttle.
 yawer = ship.create_engine(push_turn_abs_engine, friction=0.5)
 roller = ship.create_engine(push_turn_rel_engine, friction=0.5)	# Handles both banking and levelling ship.
 
 terrain_meshes,patch_size = {},120
 
+bgcol('#aaa')
 gravity((0,0,0))
 cam(angle=(pi/2.5,0,0), distance=80, target=ship, use_relative_angle=True)
 fog(80)

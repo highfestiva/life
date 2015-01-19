@@ -107,6 +107,7 @@ void Win32OpenGLDisplay::SetFocus(bool pFocus)
 			DispatchResize(mDisplayMode.mWidth, mDisplayMode.mHeight);
 		}
 	}
+	Parent::SetFocus(pFocus);
 }
 
 void Win32OpenGLDisplay::Deactivate()

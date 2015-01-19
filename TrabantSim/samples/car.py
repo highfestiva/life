@@ -11,6 +11,7 @@ XXXXXXXXX
 '''.strip('\n')
 chassis = '\n---\n'.join([chassis]*3)	# Make the car a bit wider.
 
+bgcol('#5af')
 gravity((0,0,0))	# Create objects floating in mid-air.
 
 car = create_ascii_object(chassis, mass=500, col='#36a')

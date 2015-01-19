@@ -37,11 +37,11 @@ class Engine:
 			gameapi.set_engine_force(self.oid, self.eid, iter(f))
 		except TypeError:
 			gameapi.set_engine_force(self.oid, self.eid, (f,0,0))
-	def addsound(self, sound, intensity=1):
+	def addsound(self, sound, intensity=1, volume=20):
 		if sound == sound_engine_rotor:
-			gameapi.addtag(self.oid, 'engine_sound', [0, 0.001,0.8*intensity,1.4, 0,20,1, 0,1,1, 1], [sound+'.wav'], [0], [self.eid], [])
+			gameapi.addtag(self.oid, 'engine_sound', [0, 0.001*intensity,0.8*intensity,1.4, 0,volume,1, 0,1,1, 1], [sound+'.wav'], [0], [self.eid], [])
 		else:
-			gameapi.addtag(self.oid, 'engine_sound', [1, 1,5*intensity,1, 1,20,1, 0,0.5,1, 1], [sound+'.wav'], [0], [self.eid], [])
+			gameapi.addtag(self.oid, 'engine_sound', [1, 1*intensity,5*intensity,1, 0.05*volume,volume,1, 0,0.5,1, 1], [sound+'.wav'], [0], [self.eid], [])
 
 class Obj:
 	def __init__(self, id):
@@ -133,10 +133,10 @@ class Joystick:
 		self.x,self.y = 0,0
 
 
-def open(**kwargs):
+def tabant_init(**kwargs):
 	global _joysticks,_timers,_has_opened,_accelerometer_calibration
 	_joysticks,_timers,_has_opened = {},{},True
-	if not gameapi.open(**kwargs):
+	if not gameapi.init(**kwargs):
 		raise Exception('unable to connect to simulator')
 	cam(angle=(0,0,0), distance=10, target=None, fov=45)
 	loop(delay=0)	# Resets taps+collisions.
@@ -149,7 +149,7 @@ def userinfo(message=''):
 	gameapi.userinfo(message)
 
 def loop(delay=0.1):
-	_tryopen()
+	_tryinit()
 	sleep(delay)
 	global _taps,_collisions,_cam_pos
 	_taps,_collisions,_cam_pos = None,None,None
@@ -171,7 +171,7 @@ def timeout(t, timer=0, first_hit=False):
 	return False
 
 def cam(angle=None, distance=None, target=None, pos=None, fov=None, use_relative_angle=None):
-	_tryopen()
+	_tryinit()
 	angle = tovec3(angle)
 	gameapi.cam(angle, distance, target.id if target else None, tovec3(pos), fov, use_relative_angle)
 	# Update shadows for screen<-->world space transformations.
@@ -183,12 +183,16 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None, use_relative
 	if fov:		_cam_fov_radians = radians(fov)
 	if use_relative_angle != None:	_cam_relative = use_relative_angle
 
+def bgcol(col):
+	_tryinit()
+	gameapi.setbgcolor(col)
+
 def fog(distance):
-	_tryopen()
+	_tryinit()
 	gameapi.fog(distance)
 
 def gravity(g, bounce=None, friction=None):
-	_tryopen()
+	_tryinit()
 	gameapi.gravity(tovec3(g))
 	if bounce:
 		gameapi.bounce(bounce)
@@ -235,11 +239,11 @@ def wait_until_loaded(wait=True):
 	_wait_until_loaded = wait
 
 def explode(pos, vel=vec3()):
-	_tryopen()
+	_tryinit()
 	gameapi.explode(tovec3(pos),tovec3(vel))
 
 def sound(snd, pos=vec3(), vel=vec3()):
-	_tryopen()
+	_tryinit()
 	gameapi.playsound(snd, tovec3(pos), tovec3(vel))
 
 def rect_bound(pos,ltn,rbf):
@@ -295,7 +299,7 @@ def closest_tap(pos):
 	return tap
 
 def create_joystick(xy, sloppy=False):
-	_tryopen()
+	_tryinit()
 	jid = gameapi.create_joystick(*xy, sloppy=sloppy)
 	global _joysticks
 	j = Joystick(jid, sloppy)
@@ -303,7 +307,7 @@ def create_joystick(xy, sloppy=False):
 	return j
 
 def accelerometer(relative=False):
-	_tryopen()
+	_tryinit()
 	acc = tovec3([float(a) for a in gameapi.accelerometer().split()])
 	if not relative:
 		return acc
@@ -331,7 +335,7 @@ def _poll_joysticks():
 		j.x = j.y = 0.0
 
 def _create_object(gfx, phys, static, pos, vel, avel, mass, col, mat):
-	_tryopen()
+	_tryinit()
 	objpos = tovec3(pos) if pos else vec3()
 	# if mat != 'smooth':
 		# gfx = objgen.flatten_mesh(gfx)
@@ -445,6 +449,6 @@ def _get_aspect_ratio():
 		_aspect_ratio = gameapi.get_aspect_ratio()
 	return _aspect_ratio
 
-def _tryopen():
+def _tryinit():
 	if not _has_opened:
-		open()
+		tabant_init()

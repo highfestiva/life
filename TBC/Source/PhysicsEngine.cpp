@@ -232,12 +232,6 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					const quat lOrientation =
 						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
 						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
-					/*float lYaw;
-					float lPitch;
-					float lRoll;
-					lOrientation.GetEulerAngles(lYaw, lPitch, lRoll);
-					quat lRotation;
-					lRotation.RotateAroundWorldZ(lYaw);*/
 					lAxis[0] = lOrientation*lAxis[0];
 					lAxis[1] = lOrientation*lAxis[1];
 					lAxis[2] = lOrientation*lAxis[2];
@@ -258,7 +252,6 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				}
 				vec3 lVelocityVector;
 				pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
-				//lVelocityVector = lRotation*lVelocityVector;
 				vec3 lPushVector;
 				for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
 				{
@@ -501,6 +494,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 			break;
 			case ENGINE_JET:
 			{
+				deb_assert(false);	// TODO: use relative push instead!
 				ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
 				vec3 lVelocity;
 				pPhysicsManager->GetBodyVelocity(lRootGeometry->GetBodyId(), lVelocity);

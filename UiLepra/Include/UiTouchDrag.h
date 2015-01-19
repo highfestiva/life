@@ -60,6 +60,7 @@ public:
 	bool UpdateTouchsticks(InputManager* pInputManager) const;
 	void SetDragsPress(bool pIsPress);
 	void DropReleasedDrags();
+	void ClearDrags(InputManager* pInputManager);
 	DragList& GetDragList();
 
 private:

@@ -138,6 +138,7 @@ public:
 	void DispatchMinimize();
 	void DispatchMaximize(int pWidth, int pHeight);
 
+	virtual void SetFocus(bool pFocus) = 0;
 	virtual bool Activate() = 0;
 	// Swaps buffers etc.
 	virtual bool UpdateScreen() = 0;

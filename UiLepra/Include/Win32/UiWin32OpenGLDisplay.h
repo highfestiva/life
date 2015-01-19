@@ -17,6 +17,7 @@ namespace UiLepra
 
 class Win32OpenGLDisplay: public Win32DisplayManager
 {
+	typedef Win32DisplayManager Parent;
 public:	
 	Win32OpenGLDisplay();
 	virtual ~Win32OpenGLDisplay();

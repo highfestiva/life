@@ -287,7 +287,7 @@ public:
 	const Canvas* GetScreen() const;
 
 	virtual void Clear(unsigned pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER) = 0;
-	virtual void SetClearColor(const Color& pColor) = 0;
+	virtual void SetClearColor(const Color& pColor);
 
 	DynamicRenderer* GetDynamicRenderer(str pName) const;
 	void AddDynamicRenderer(str pName, DynamicRenderer* pRenderer);
@@ -568,6 +568,7 @@ protected:
 
 	Canvas* mScreen;
 
+	Color mClearColor;
 	Color mOutlineFillColor;
 
 	// Used for portal rendering.

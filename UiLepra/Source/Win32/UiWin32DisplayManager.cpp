@@ -91,6 +91,19 @@ Win32DisplayManager::~Win32DisplayManager()
 	}
 }
 
+void Win32DisplayManager::SetFocus(bool pFocus)
+{
+	if (pFocus)
+	{
+		//::BringWindowToTop(mWnd);
+		//::SwitchToThisWindow(mWnd, FALSE);
+		::SetWindowPos(mWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+		::SetWindowPos(mWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+		::SetForegroundWindow(mWnd);
+		//HWND_NOTOPMOST
+	}
+}
+
 bool Win32DisplayManager::Register() 
 {
 	bool lOk = true;

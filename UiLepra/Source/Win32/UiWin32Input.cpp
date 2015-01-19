@@ -236,7 +236,6 @@ void Win32InputDevice::PollEvents()
 				// System won't let us in yet. Keep trying.
 				return;
 			}
-			mReacquire = false;
 			log_debug(GetIdentifier()+_T(": acquired input device."));
 		}
 
@@ -291,7 +290,7 @@ void Win32InputDevice::PollEvents()
 				else
 				{
 					const int lValue = mDeviceObjectData[i].dwData;
-					lElement->SetValue((lValue&0x80)? 1.0f : 0.0f);
+					lElement->SetValue(((lValue&0x80) && !mReacquire)? 1.0f : 0.0f);	// If reacquiring we release all buttons.
 				}
 			}
 
@@ -300,6 +299,8 @@ void Win32InputDevice::PollEvents()
 				lMore = false;
 			}*/
 		}
+
+		mReacquire = false;
 	}
 }
 

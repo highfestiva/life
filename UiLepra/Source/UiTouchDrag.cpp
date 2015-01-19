@@ -96,7 +96,7 @@ void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
 	for (; i != mDragList.end(); ++i)
 	{
 		pInputManager->SetMousePosition(i->mLast.x, i->mLast.y);
-		pInputManager->GetMouse()->GetButton(0)->SetValue(i->mIsPress);
+		pInputManager->GetMouse()->GetButton(0)->SetValue(i->mIsPress? 1 : 0);
 	}
 }
 
@@ -143,6 +143,15 @@ void DragManager::DropReleasedDrags()
 		{
 			++i;
 		}
+	}
+}
+
+void DragManager::ClearDrags(InputManager* pInputManager)
+{
+	mDragList.clear();
+	if (pInputManager->GetMouse())
+	{
+		pInputManager->GetMouse()->GetButton(0)->SetValue(0);
 	}
 }
 

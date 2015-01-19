@@ -64,14 +64,14 @@ def trymove(movement, orientation):
 		# This is an ok rotation or move: it neither hits the side nor a fixed block.
 		tetromino.pos(pos+movement - orientation*tetromino_rot_center, orientation=orientation)
 
-while loop(delay=0.05):
+while loop():
 	if not tetromino:
 		tetromino_index = random.choice(range(len(tetrominos)))
 		tetromino = create_ascii_object(tetrominos[tetromino_index], pos=(0,0,100), col=colors[tetromino_index])
 		tetromino_rot_center = vec3(1.5,0.5,0.5) - last_ascii_top_left_offset()	# Rotate about a point in the middle of the first row.
 		tetromino.pos(vec3(gridsize.x/2,0,gridsize.y) - tetromino_rot_center)
 
-	if taps() and timeout(0.1):	# Steering.
+	if taps() and timeout(0.15):	# Steering.
 		tap = closest_tap(tetromino.pos())
 		v = min(directions, key=lambda s:(tap.pos3d()-s-tap.close_pos).length())
 		# Tapping above means "rotate", tapping left/below/right means move in that direction.
@@ -79,5 +79,5 @@ while loop(delay=0.05):
 		else:			trymove(v, tetromino.orientation())
 
 	# Move down every 0.8 seconds.
-	if tetromino and timeout(0.8,timer=2):
+	if tetromino and timeout(0.8):	# Use same timer as user movement. This hinders step down indefinitely when tapping/holding.
 		trymove(vec3(0,0,-1), tetromino.orientation())

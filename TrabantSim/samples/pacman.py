@@ -20,7 +20,6 @@ X                        X
 XXXXXXXXXXXXXXXXXXXXXXXXXX
 '''.strip('\n')
 
-open(addr='127.0.0.1:2541')
 cam(distance=25)
 gravity((0,0,0), bounce=0, friction=0)
 

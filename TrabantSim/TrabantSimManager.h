@@ -105,7 +105,7 @@ public:
 	void Expload(const vec3& pPos, const vec3& pVel);
 	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel);
 	void PopCollisions(CollisionList& pCollisionList);
-	void GetTouchDrags(DragList& pDragList) const;
+	void GetTouchDrags(DragList& pDragList);
 	vec3 GetAccelerometer() const;
 	int CreateJoystick(float x, float y, bool pIsSloppy);
 	JoystickDataList GetJoystickData() const;
@@ -167,6 +167,7 @@ protected:
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	std::set<Cure::GameObjectId> mObjects;
 	CollisionList mCollisionList;
+	DragList mDragList;
 	HiResTimer mTouchstickTimer;
 	TouchstickList mTouchstickList;
 	Life::Menu* mMenu;

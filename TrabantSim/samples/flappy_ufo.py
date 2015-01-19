@@ -15,7 +15,9 @@ column = 'X\n'*5
 def init():
 	global ufo,columns,t
 	ufo = create_ascii_object(ufoasc, vel=(20,0,1), col='#a33')
-	ufo.create_engine(push_abs_engine, sound=sound_engine_hizz).force((1,0,0))
+	engine = ufo.create_engine(push_abs_engine)
+	engine.addsound(sound_engine_wobble, intensity=0.3, volume=1)
+	engine.force((1,0,0))
 	cam(target=ufo)
 	columns = []
 	columns += make_column_pair(-10,8)
@@ -32,12 +34,10 @@ def make_column_pair(dx, yoff):
 cam(distance=30)
 gravity((0,0,-40))
 init()
-while loop(delay=0.03):
+while loop():
 	for tap in taps():
-		v = ufo.vel()
-		v.z = min(v.z+15, 20)
-		v.z = max(v.z, 5)
-		ufo.vel(v)
+		ufo.vel(ufo.vel().with_z(15))
+		ufo.avel(rndvec()*0.3)
 	if timeout(t):
 		columns += make_column_pair(18,t*26)
 		if len(columns) > 14:

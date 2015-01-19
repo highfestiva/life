@@ -20,6 +20,7 @@ near,middle,far = [body]*3	# Make the body a bit wider.
 near,far = [s.replace('XXXXXXXXX\n', '\n') for s in [near,far]]	# Only keep tail in the middle.
 body = near+'\n---\n'+middle+'\n---\n'+far
 
+bgcol('#5af')
 gravity((0,0,0))	# Create objects afloat in space.
 
 # Create and place helicopter parts.
