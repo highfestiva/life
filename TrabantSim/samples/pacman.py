@@ -24,17 +24,29 @@ cam(distance=25)
 gravity((0,0,0), bounce=0, friction=0)
 
 userinfo('Please wait while loading PacMan level...')
-level = create_ascii_object(level, pos=(-12.5,0,0), static=True)
+level = create_ascii_object(level, pos=(-12.5,0,0), col='#00f', static=True)
 userinfo()
-man = create_sphere_object(radius=0.4, pos=(0,0,-3), col='#ff0')
-man.create_engine(push_abs_engine)
-directions = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
-
+def ball(pos, col):
+	ball = create_sphere_object(radius=0.4, pos=pos, col=col)
+	ball.create_engine(push_abs_engine)
+	return ball
+pacman = ball((0,0,-3),'#ff0')
+ghosts = [ball(p,c) for p,c in [((-9.5,0,4),'#f00'), ((8.5,0,4),'#aaf'), ((-0.5,0,4),'#faa')]]
+ghost_random_directions = [None,None,None]
 
 while loop():
+	# Steering.
+	force = vec3(keydir().x, 0, keydir().y) * 5
 	if taps():
-		force = closest_tap(man.pos()).pos3d() - man.pos()
-		force.y = 0
-		man.engine[0].force(force)
-	else:
-		man.engine[0].force((0,0,0))
+		force += closest_tap(pacman.pos()).pos3d() - pacman.pos()
+	pacman.engine[0].force(force)
+
+	# Ghost movement.
+	if timeout(2):	# Move randomly.
+		[ghost.engine[0].force(rndvec().normalize(5).with_y(0)) for ghost in ghosts]
+	if timeout(5.5, timer=2):	# Move towards Pacman.
+		[ghost.engine[0].force(pacman.pos()-ghost.pos().limit(5)) for ghost in ghosts]
+
+	for o1,o2,_,_ in collisions():
+		if o1 == pacman and o2 in ghosts:
+			explode(pacman.pos(), pacman.vel())

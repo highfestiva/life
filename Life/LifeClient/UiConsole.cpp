@@ -51,7 +51,9 @@ UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager
 		}
 	}
 
+	UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
 	mFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Courier New"), 14.0f);
+	mUiManager->GetFontManager()->SetActiveFont(lFontId);
 }
 
 UiConsole::~UiConsole()

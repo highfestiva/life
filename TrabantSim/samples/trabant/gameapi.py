@@ -60,9 +60,15 @@ def cam(angle, distance, target_oid, pos, fov, relative_angle):
 	if relative_angle != None:
 		set('Ui.3D.CamAngleRelative', bool(relative_angle))
 
-def fog(distance):
-	set('Ui.3D.FogNear', distance/16)
-	set('Ui.3D.FogFar', float(distance))
+def light(angle):
+	if angle:
+		set('Ui.3D.LightAngleX', float(angle.x))
+		set('Ui.3D.LightAngleY', float(angle.y))
+		set('Ui.3D.LightAngleZ', float(angle.z))
+
+def fog(near,far):
+	set('Ui.3D.FogNear', float(near))
+	set('Ui.3D.FogFar', float(far))
 
 def gravity(g):
 	set('Physics.GravityX', float(g.x))
@@ -75,8 +81,8 @@ def bounce(factor):
 def friction(factor):
 	set('Physics.Friction', float(factor))
 
-def explode(pos,vel):
-	cmd('explode %s %s' % (_args2str(pos,'0 0 0'), _args2str(vel,'0 0 0')))
+def explode(pos,vel,strength):
+	cmd('explode %s %s %f' % (_args2str(pos,'0 0 0'), _args2str(vel,'0 0 0'), float(strength)))
 
 def playsound(snd, pos, vel):
 	cmd('play-sound %s %s %s' % (snd, _args2str(pos,'0 0 0'), _args2str(vel,'0 0 0')))
@@ -84,6 +90,9 @@ def playsound(snd, pos, vel):
 
 def pop_collisions():
 	return cmd('pop-collisions')
+
+def keys():
+	return cmd('get-keys')
 
 def taps():
 	return cmd('get-touch-drags')
@@ -212,7 +221,9 @@ def getsetoidcmd(name, oid, *args):
 def cmd(c, return_type=str):
 	#print(c)
 	sock.send((c+'\n').encode())
-	result = sock.recv(80*1024).decode()
+	result = sock.recv(80*1024)
+	#print(result)
+	result = result.decode(errors='replace')
 	if result.startswith('ok\n'):
 		return return_type(result[3:])
 	print(result)

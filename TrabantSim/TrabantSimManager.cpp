@@ -88,6 +88,8 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mUserInfoLabel(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
+	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 
 	SetConsoleManager(new TrabantSimConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -156,6 +158,7 @@ void TrabantSimManager::UserReset()
 		lScope->ResetDefaultValue(lName);
 	}
 	mCameraAngle.Set(0,0,0);
+	mCameraVelocity.Set(0,0,0);
 
 	GetResourceManager()->ForceFreeCache();
 	GetResourceManager()->ForceFreeCache();
@@ -305,10 +308,21 @@ bool TrabantSimManager::IsLoaded(int pObjectId)
 	return !!GetContext()->GetObject(pObjectId);
 }
 
-void TrabantSimManager::Expload(const vec3& pPos, const vec3& pVel)
+void TrabantSimManager::Explode(const vec3& pPos, const vec3& pVel, float pStrength)
 {
 	ScopeLock lGameLock(GetTickLock());
-	(void)pPos; (void)pVel;
+
+	mCollisionSoundManager->OnCollision(pStrength, pPos, 0, _T("explosion"));
+
+	const float lKeepOnGoingFactor = 1.0f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
+	const int lParticles = Math::Lerp(8, 20, pStrength * 0.2f);
+	vec3 lStartFireColor(1.0f, 1.0f, 0.3f);
+	vec3 lFireColor(0.6f, 0.4f, 0.2f);
+	vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
+	vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
+	vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	lParticleRenderer->CreateExplosion(pPos, pStrength, pVel*lKeepOnGoingFactor, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
 }
 
 void TrabantSimManager::PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel)
@@ -323,11 +337,43 @@ void TrabantSimManager::PopCollisions(CollisionList& pCollisionList)
 	pCollisionList.splice(pCollisionList.end(), mCollisionList);
 }
 
+void TrabantSimManager::GetKeys(strutil::strvec& pKeys)
+{
+	ScopeLock lGameLock(GetTickLock());
+	for (KeyMap::iterator x = mKeyMap.begin(); x != mKeyMap.end();)
+	{
+		pKeys.push_back(UiLepra::InputManager::GetKeyName(x->first));
+		if (x->second)
+		{
+			x = mKeyMap.erase(x);
+		}
+		else
+		{
+			++x;
+		}
+	}
+}
+
 void TrabantSimManager::GetTouchDrags(DragList& pDragList)
 {
 	ScopeLock lGameLock(GetTickLock());
 	pDragList = mDragList;
-	mDragList.clear();
+
+	for (DragEraseList::iterator x = mDragEraseList.begin(); x != mDragEraseList.end(); ++x)
+	{
+		for (DragList::iterator y = mDragList.begin(); y != mDragList.end();)
+		{
+			if (y->mStart.x == x->x && y->mStart.y == x->y)
+			{
+				y = mDragList.erase(y);
+			}
+			else
+			{
+				++y;
+			}
+		}
+	}
+	mDragEraseList.clear();
 }
 
 vec3 TrabantSimManager::GetAccelerometer() const
@@ -343,7 +389,8 @@ int TrabantSimManager::CreateJoystick(float x, float y, bool pIsSloppy)
 	const int lScreenPixelWidth = mUiManager->GetDisplayManager()->GetWidth();
 	const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
 	PixelRect lRect(0,0,10,10);
-	Touchstick* lStick = new Touchstick(mUiManager->GetInputManager(), UiLepra::Touch::TouchstickInputDevice::MODE_RELATIVE_CENTER, lRect, 0, lMinimumTouchRadius);
+	Touchstick::InputMode lMode = pIsSloppy? Touchstick::MODE_RELATIVE_CENTER_NOSPRING : Touchstick::MODE_RELATIVE_CENTER;
+	Touchstick* lStick = new Touchstick(mUiManager->GetInputManager(), lMode, lRect, 0, lMinimumTouchRadius);
 	const str lName = strutil::Format(_T("Touchstick%i"), mTouchstickList.size());
 	lStick->SetUniqueIdentifier(lName);
 	mTouchstickList.push_back(TouchstickInfo(lStick, x, y, -90, pIsSloppy));
@@ -794,8 +841,12 @@ void TrabantSimManager::CommandLoop()
 	char lData[128*1024];
 	while (!mCommandThread->GetStopRequest())
 	{
-		int l = mConnectSocket->ReceiveDatagram(lData, sizeof(lData));
-		if (l <= 0 || lData[l-1] != '\n')
+		const int l = mConnectSocket->ReceiveDatagram(lData, sizeof(lData));
+		if (!l)
+		{
+			continue;
+		}
+		if (l < 0 || lData[l-1] != '\n')
 		{
 			break;
 		}
@@ -817,6 +868,10 @@ void TrabantSimManager::CommandLoop()
 		else
 		{*/
 		//HiResTimer t(false);
+		if (!GetConsoleManager())
+		{
+			break;
+		}
 		GetConsoleManager()->ExecuteCommand(lCommand);
 		//mLog.Infof(_T("%s took %f s."), lCommand.substr(0, 10).c_str(), t.QueryTimeDiff());
 		const astr lResponse = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
@@ -1097,37 +1152,44 @@ void TrabantSimManager::ScriptPhysicsTick()
 		v_get(gy, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYY, 0.0);
 		v_get(gz, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYZ, -9.8);
 		GetPhysicsManager()->SetGravity(vec3(gx,gy,gz));
+		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+		lParticleRenderer->SetGravity(vec3(gx,gy,gz));
 		MoveCamera(lPhysicsTime);
 		mLight->Tick(mCameraTransform.mOrientation);
-		UpdateCameraPosition(false);
+		UpdateCameraPosition(true);
 
 		UpdateUserMessage();
 	}
 
-	if (mDragList.size() < 10)
+	const UiDragList& lDrags = mUiManager->GetDragManager()->GetDragList();
+	for (UiDragList::const_iterator x = lDrags.begin(); x != lDrags.end(); ++x)
 	{
-		const DragList& lDrags = mUiManager->GetDragManager()->GetDragList();
-		for (DragList::const_iterator x = lDrags.begin(); x != lDrags.end(); ++x)
+		bool lFound = false;
+		for (DragList::iterator y = mDragList.begin(); y != mDragList.end(); ++y)
 		{
-			if (!x->mIsPress)
+			if (y->mStart.x == x->mStart.x && y->mStart.y == x->mStart.y)
 			{
-				continue;
-			}
-			bool lFound = false;
-			for (DragList::iterator y = mDragList.begin(); y != mDragList.end(); ++y)
-			{
-				if (y->mStart.x == x->mStart.x && y->mStart.y == x->mStart.y)
+				lFound = true;
+				const float tf = 1 / (float)y->mTimer.PopTimeDiff();
+				if (tf > 1e-3)
 				{
-					lFound = true;
-					y->mLast = x->mLast;
-					y->mIsPress = x->mIsPress;
-					y->mFlags = x->mFlags;
+					y->mVelocity = Math::Lerp(y->mVelocity, vec2((x->mLast.x - y->mLast.x)*tf, (x->mLast.y - y->mLast.y)*tf), 0.5f);
 				}
+				y->mLast = x->mLast;
+				y->mIsPress = x->mIsPress;
 			}
-			if (!lFound)
-			{
-				mDragList.push_back(*x);
-			}
+		}
+		if (!lFound)
+		{
+			Drag d;
+			d.mStart = x->mStart;
+			d.mLast = x->mLast;
+			d.mIsPress = x->mIsPress;
+			mDragList.push_back(d);
+		}
+		if (!x->mIsPress)
+		{
+			mDragEraseList.push_back(x->mStart);
 		}
 	}
 
@@ -1160,6 +1222,7 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 		if (lObject)
 		{
 			lLookAt = lObject->GetPosition();
+			mCameraVelocity = lObject->GetVelocity();
 		}
 	}
 	xform t(quat(), lLookAt+vec3(0,-cdist,0));
@@ -1188,7 +1251,7 @@ void TrabantSimManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	mUiManager->SetCameraPosition(mCameraTransform);
 	if (pUpdateMicPosition)
 	{
-		mUiManager->SetMicrophonePosition(mCameraTransform, vec3());
+		mUiManager->SetMicrophonePosition(mCameraTransform, mCameraVelocity);
 	}
 }
 
@@ -1263,6 +1326,26 @@ void TrabantSimManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, fl
 }
 
 
+
+bool TrabantSimManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
+{
+	if (!Parent::OnKeyDown(pKeyCode))
+	{
+		ScopeLock lGameLock(GetTickLock());
+		mKeyMap.insert(KeyMap::value_type(pKeyCode,false));
+		return false;
+	}
+	return true;
+}
+
+bool TrabantSimManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
+{
+	{
+		ScopeLock lGameLock(GetTickLock());
+		mKeyMap[pKeyCode] = true;
+	}
+	return Parent::OnKeyUp(pKeyCode);
+}
 
 void TrabantSimManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)
 {

@@ -18,6 +18,7 @@ _has_opened = False
 _last_ascii_top_left_offset = None
 asc2obj_lookup = []
 _aspect_ratio = 1.33333
+_keys = None
 _taps = None
 _invalidated_taps = set()
 _collisions = None
@@ -107,9 +108,10 @@ class Obj:
 
 
 class Tap:
-	def __init__(self, x, y, startx, starty):
+	def __init__(self, x, y, startx, starty, vx, vy):
 		self.x,self.y = x,y
 		self.startx,self.starty = startx,starty
+		self.vx,self.vy = vx,vy
 	def pos3d(self, z=None):
 		if not z:
 			z = _cam_distance
@@ -117,12 +119,14 @@ class Tap:
 	def vel3d(self, z=None):
 		if not z:
 			z = _cam_distance
-		return vec3()	# TODO
+		return _relscreen2world(self.vx,self.vy, z)
 	def invalidate(self):
 		global _invalidated_taps
 		_invalidated_taps.add((self.startx,self.starty))
 	def _distance2(self, x, y):
 		return (self.x-x)**2+(self.y-y)**2
+	def __hash__(self):
+		return self.starty*35797+self.startx	# Prime larger than screen width is ok.
 
 
 class Joystick:
@@ -135,10 +139,17 @@ class Joystick:
 
 def tabant_init(**kwargs):
 	global _joysticks,_timers,_has_opened,_accelerometer_calibration
-	_joysticks,_timers,_has_opened = {},{},True
-	if not gameapi.init(**kwargs):
+	_joysticks,_timers,_has_opened,online = {},{},True,False
+	for _ in range(2):
+		try:
+			if gameapi.init(**kwargs):
+				online = True
+				break
+		except:
+			pass
+	if not online:
 		raise Exception('unable to connect to simulator')
-	cam(angle=(0,0,0), distance=10, target=None, fov=45)
+	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
 	loop(delay=0)	# Resets taps+collisions.
 	_accelerometer_calibration = accelerometer()
 
@@ -151,8 +162,8 @@ def userinfo(message=''):
 def loop(delay=0.1):
 	_tryinit()
 	sleep(delay)
-	global _taps,_collisions,_cam_pos
-	_taps,_collisions,_cam_pos = None,None,None
+	global _keys,_taps,_collisions,_cam_pos
+	_keys,_taps,_collisions,_cam_pos = None,None,None,None
 	_poll_joysticks()
 	return gameapi.opened()
 
@@ -170,26 +181,27 @@ def timeout(t, timer=0, first_hit=False):
 		return True
 	return False
 
-def cam(angle=None, distance=None, target=None, pos=None, fov=None, use_relative_angle=None):
+def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relative_angle=None, light_angle=None):
 	_tryinit()
 	angle = tovec3(angle)
-	gameapi.cam(angle, distance, target.id if target else None, tovec3(pos), fov, use_relative_angle)
-	# Update shadows for screen<-->world space transformations.
+	gameapi.cam(angle, distance, target.id if target else None, tovec3(pos), fov, target_relative_angle)
+	gameapi.light(tovec3(light_angle))
+	# Update shadow variables for screen<-->world space transformations.
 	global _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians
 	if angle: 	_cam_angle = angle
 	if distance:	_cam_distance = distance
 	if target:	_cam_target = target
 	if pos:		_cam_lookat = tovec3(pos)
 	if fov:		_cam_fov_radians = radians(fov)
-	if use_relative_angle != None:	_cam_relative = use_relative_angle
+	if target_relative_angle != None: _cam_relative = target_relative_angle
 
 def bgcol(col):
 	_tryinit()
 	gameapi.setbgcolor(col)
 
-def fog(distance):
+def fog(near,far):
 	_tryinit()
-	gameapi.fog(distance)
+	gameapi.fog(near,far)
 
 def gravity(g, bounce=None, friction=None):
 	_tryinit()
@@ -238,9 +250,10 @@ def wait_until_loaded(wait=True):
 	global _wait_until_loaded
 	_wait_until_loaded = wait
 
-def explode(pos, vel=vec3()):
+def explode(pos, vel=vec3(), strength=1):
 	_tryinit()
-	gameapi.explode(tovec3(pos),tovec3(vel))
+	if timeout(0.5,timer=-153,first_hit=True):
+		gameapi.explode(tovec3(pos),tovec3(vel),strength)
 
 def sound(snd, pos=vec3(), vel=vec3()):
 	_tryinit()
@@ -273,16 +286,33 @@ def collisions():
 				_collisions.append((_objects[oid],_objects[other_oid],force,pos))
 	return _collisions
 
+def keys():
+	global _keys
+	if _keys != None:
+		return _keys
+	_keys = [key for key in gameapi.keys().split('\n') if key]
+	return _keys
+
+def keydir():
+	directions = vec3()
+	directions += vec3(0,+1,0) if   'UP'  in keys() or 'W' in keys() else vec3()
+	directions += vec3(0,-1,0) if  'DOWN' in keys() or 'S' in keys() else vec3()
+	directions += vec3(-1,0,0) if  'LEFT' in keys() or 'A' in keys() else vec3()
+	directions += vec3(+1,0,0) if 'RIGHT' in keys() or 'D' in keys() else vec3()
+	directions += vec3(0,0,+1) if 'SPACE' in keys() else vec3()
+	directions += vec3(0,0,-1) if [1 for k in keys() if k in ('SHIFT','LSHIFT','RSHIFT')] else vec3()
+	return directions
+
 def taps():
 	global _taps
 	if _taps != None:
 		return _taps
-	taps_coords = [[float(w) for w in line.split()[:4]] for line in gameapi.taps().split('\n') if line]
+	taps_coords = [[float(w) for w in line.split()[:6]] for line in gameapi.taps().split('\n') if line]
 	_taps = []
 	used_invalidations = set()
-	for x,y,startx,starty in taps_coords:
+	for x,y,startx,starty,vx,vy in taps_coords:
 		if (startx,starty) not in _invalidated_taps:
-			_taps.append(Tap(x,y,startx,starty))
+			_taps.append(Tap(x,y,startx,starty,vx,vy))
 		else:
 			used_invalidations.add((startx,starty))
 	for tapstart in set(_invalidated_taps):
@@ -297,6 +327,9 @@ def closest_tap(pos):
 	tap = min(taps(), key=lambda t: t._distance2(x,y))
 	tap.close_pos = pos
 	return tap
+
+clicks = taps
+closest_click = closest_tap
 
 def create_joystick(xy, sloppy=False):
 	_tryinit()
@@ -384,7 +417,7 @@ def _normalize_engine_values(engine_type, max_velocity, offset, strength, fricti
 		max_velocity[1] = -20 if not max_velocity[1] else max_velocity[1]
 		strength *= 10
 	elif engine_type in (push_abs_engine, push_rel_engine):
-		max_velocity[0] = 100 if not max_velocity[0] else max_velocity[0]
+		max_velocity[0] = 30 if not max_velocity[0] else max_velocity[0]
 	elif engine_type in (push_turn_abs_engine, push_turn_rel_engine):
 		max_velocity[0] = 0.1 if not max_velocity[0] else max_velocity[0]
 	elif engine_type == gyro_engine:
@@ -422,6 +455,15 @@ def _screen2world(x,y,distance):
 	tana = tan(_cam_fov_radians*0.5);
 	dx = tana * (x*2-1) * _get_aspect_ratio()
 	dy = tana * (1-y*2)
+	crd = (_cam_q * vec3(dx, 1, dy) * distance) + _cam_pos
+	return crd
+
+def _relscreen2world(x,y,distance):
+	'''From relative screen coordinates, return world X,Z scaled to Y=1.'''
+	_update_cam_shadow()
+	tana = tan(_cam_fov_radians*0.5);
+	dx = tana * 2*x * _get_aspect_ratio()
+	dy = tana * -2*y
 	crd = (_cam_q * vec3(dx, 1, dy) * distance) + _cam_pos
 	return crd
 

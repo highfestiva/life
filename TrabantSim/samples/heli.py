@@ -52,8 +52,8 @@ cam(angle=(-0.3,0,0), distance=40, target=body)
 left,right = create_joystick((0,0),sloppy=True),create_joystick((1,0),sloppy=True)
 
 while loop():
-	thrust.force(left.y)
-	lift.force(max(left.y,0))
+	thrust.force(left.y + keydir().z*0.3)
+	lift.force(max(left.y+keydir().z,0))
 	yaw.force(left.x)
-	pitch.force(right.y)
-	roll.force(right.x)
+	pitch.force(right.y + keydir().y*0.3)
+	roll.force(right.x + keydir().x*0.3)

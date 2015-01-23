@@ -52,5 +52,5 @@ while loop():
 	for o in collided_objects():
 		if o in invaders:
 			invaders.remove(o)
-		explode(o.pos(),o.vel())
+		explode(o.pos(),o.vel(),5)
 		o.release()

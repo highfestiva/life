@@ -46,7 +46,7 @@ BombPlane::~BombPlane()
 void BombPlane::OnLoaded()
 {
 	SetEnginePower(0, 1.0f);	// Jet.
-	SetEnginePower(1, 1.0f);	// Hoover.
+	SetEnginePower(4, 1.0f);	// Hoover.
 
 	Parent::OnLoaded();
 }

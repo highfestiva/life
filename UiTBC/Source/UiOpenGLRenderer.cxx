@@ -345,7 +345,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData* pLight)
 	if (pLight->mType == LIGHT_POINT ||
 	   pLight->mType == LIGHT_SPOT)
 	{
-		vec3 lLightPos = GetCameraTransformation().InverseTransform(pLight->mPosition);
+		vec3 lLightPos = GetCameraActualTransformation().InverseTransform(pLight->mPosition);
 		lPos[0] = (float)lLightPos.x;
 		lPos[1] = (float)lLightPos.y;
 		lPos[2] = (float)lLightPos.z;
@@ -353,7 +353,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData* pLight)
 
 		if (pLight->mType == LIGHT_SPOT)
 		{
-			vec3 lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(pLight->mDirection);
+			vec3 lLightDir = GetCameraActualOrientationInverse() * pLight->mDirection;
 
 			float lDir[3];
 			lDir[0] = (float)lLightDir.x;
@@ -373,9 +373,10 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData* pLight)
 	}
 	else if(pLight->mType == LIGHT_DIRECTIONAL)
 	{
-		lPos[0] = -(float)pLight->mDirection.x;
-		lPos[1] = -(float)pLight->mDirection.y;
-		lPos[2] = -(float)pLight->mDirection.z;
+		vec3 lLightDir = GetCameraActualOrientationInverse() * pLight->mDirection;
+		lPos[0] = -(float)lLightDir.x;
+		lPos[1] = -(float)lLightDir.y;
+		lPos[2] = -(float)lLightDir.z;
 		lPos[3] = 0.0f;
 
 		float lConst = 1.0f;
@@ -434,7 +435,7 @@ void OpenGLRenderer::SetLightPosition(LightID pLightID, const vec3& pPos)
 	if (lLightData->mType == LIGHT_POINT ||
 	   lLightData->mType == LIGHT_SPOT)
 	{
-		vec3 lLightPos = GetCameraTransformation().InverseTransform(pPos);
+		vec3 lLightPos = GetCameraActualTransformation().InverseTransform(pPos);
 		float lPos[4];
 		lPos[0] = (float)lLightPos.x;
 		lPos[1] = (float)lLightPos.y;
@@ -1178,12 +1179,11 @@ bool OpenGLRenderer::PreRender(Tbc::GeometryBase* pGeometry)
 	if (pGeometry->IsExcludeCulling() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();
-		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, t);
+		mCamSpaceTransformation.FastInverseTransform(mCameraActualTransformation, mCameraActualOrientationInverse, t);
 		float lModelViewMatrix[16];
 		mCamSpaceTransformation.GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(lModelViewMatrix);
-		//OGL_FAST_ASSERT();
 		return true;
 	}
 	else
@@ -1214,7 +1214,7 @@ void OpenGLRenderer::PostRender(Tbc::GeometryBase* pGeometry)
 void OpenGLRenderer::DrawLine(const vec3& pPosition, const vec3& pVector, const Color& pColor)
 {
 	glEnable(GL_DEPTH_TEST);
-	xform lCamTransform = GetCameraTransformation().InverseTransform(gIdentityTransformationF);
+	xform lCamTransform = GetCameraActualTransformation().InverseTransform(gIdentityTransformationF);
 	float lModelViewMatrix[16];
 	lCamTransform.GetAs4x4TransposeMatrix(lModelViewMatrix);
 	glMatrixMode(GL_MODELVIEW);
@@ -1527,7 +1527,7 @@ void OpenGLRenderer::RenderBillboards(Tbc::GeometryBase* pGeometry, bool pRender
 
 		quat lRot = mCameraTransformation.GetOrientation();
 		lRot.RotateAroundOwnY(x->mAngle);
-		lCamSpace.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, xform(lRot, x->mPosition));
+		lCamSpace.FastInverseTransform(mCameraActualTransformation, mCameraActualOrientationInverse, xform(lRot, x->mPosition));
 		float lModelViewMatrix[16];
 		lCamSpace.GetAs4x4TransposeMatrix(x->mScale, lModelViewMatrix);
 		::glLoadMatrixf(lModelViewMatrix);
@@ -1631,7 +1631,7 @@ void OpenGLRenderer::ProcessLights()
 
 		if (lLight->mType == LIGHT_DIRECTIONAL)
 		{
-			vec3 lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight->mDirection);
+			vec3 lLightDir = GetCameraActualOrientationInverse() * lLight->mDirection;
 			float lPos[4] =
 			{
 				(float)-lLightDir.x,
@@ -1643,7 +1643,7 @@ void OpenGLRenderer::ProcessLights()
 		}
 		else if(lLight->mType == LIGHT_POINT)
 		{
-			vec3 lLightPos = GetCameraTransformation().InverseTransform(lLight->mPosition);
+			vec3 lLightPos = GetCameraActualTransformation().InverseTransform(lLight->mPosition);
 			float lPos[4] =
 			{
 				(float)lLightPos.x,
@@ -1655,8 +1655,8 @@ void OpenGLRenderer::ProcessLights()
 		}
 		else if(lLight->mType == LIGHT_SPOT)
 		{
-			vec3 lLightPos = GetCameraTransformation().InverseTransform(lLight->mPosition);
-			vec3 lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight->mDirection);
+			vec3 lLightPos = GetCameraActualTransformation().InverseTransform(lLight->mPosition);
+			vec3 lLightDir = GetCameraActualOrientationInverse() * lLight->mDirection;
 			float lPos[4] =
 			{
 				(float)lLightPos.x,
@@ -1766,7 +1766,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 			{
 				xform lShadowTransformation(lShadowVolume->GetTransformation());
 				lShadowTransformation.GetPosition() += lCamShadowOffset;
-				mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, lShadowTransformation);
+				mCamSpaceTransformation.FastInverseTransform(mCameraActualTransformation, mCameraActualOrientationInverse, lShadowTransformation);
 				float lModelViewMatrix[16];
 				mCamSpaceTransformation.GetAs4x4TransposeMatrix(lShadowVolume->GetScale(), lModelViewMatrix);
 				::glLoadMatrixf(lModelViewMatrix);
@@ -1904,15 +1904,16 @@ int OpenGLRenderer::RenderShadowMaps()
 				OGLGeometryData* lGeometry = (OGLGeometryData*)*lGeoIter;
 
 				float lModelViewMatrix[16];
-				GetCameraTransformation().InverseTransform(lGeometry->mGeometry->GetTransformation()).GetAs4x4TransposeMatrix(lModelViewMatrix);
-
-				float lLightModelViewMatrix[16];
-				xform lLightTransformation(lLight->mOrientation, lLight->mPosition);
-				(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lLightModelViewMatrix);
+				GetCameraActualTransformation().InverseTransform(lGeometry->mGeometry->GetTransformation()).GetAs4x4TransposeMatrix(lModelViewMatrix);
 
 				// Camera model view matrix.
 				glMatrixMode(GL_MODELVIEW);
 				glLoadMatrixf(lModelViewMatrix);
+
+				float lLightModelViewMatrix[16];
+				xform lLightTransformation(lLight->mOrientation, lLight->mPosition);
+				lLightTransformation.mOrientation *= mCameraActualRotation;
+				(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lLightModelViewMatrix);
 
 				// Setup the texture projection matrix.
 				glMatrixMode(GL_TEXTURE);
@@ -2151,23 +2152,23 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	lProjectionMatrix[3]  = 0;
 
 	lProjectionMatrix[4]  = 0;
-	lProjectionMatrix[5]  = 0;
-	lProjectionMatrix[6]  = (pFar + pNear) / (pFar - pNear);
-	lProjectionMatrix[7]  = 1;
+	lProjectionMatrix[5]  = lDY;
+	lProjectionMatrix[6]  = 0;
+	lProjectionMatrix[7]  = 0;
 
 	lProjectionMatrix[8]  = 0;
-	lProjectionMatrix[9]  = lDY;
-	lProjectionMatrix[10] = 0;
-	lProjectionMatrix[11] = 0;
+	lProjectionMatrix[9]  = 0;
+	lProjectionMatrix[10] = -(pFar + pNear) / (pFar - pNear);
+	lProjectionMatrix[11] = -1;
 
 	lProjectionMatrix[12] = 0;
 	lProjectionMatrix[13] = 0;
-	lProjectionMatrix[14] = -(2.0f * pFar * pNear) / (pFar - pNear);
+	lProjectionMatrix[14] = (-2.0f * pFar * pNear) / (pFar - pNear);
 	lProjectionMatrix[15] = 0;
 
 	::glMatrixMode(GL_PROJECTION);
 	::glLoadMatrixf(lProjectionMatrix);
-	::glRotatef((float)GetScreen()->GetOutputRotation(), 0, 1, 0);
+	::glRotatef((float)GetScreen()->GetOutputRotation(), 0, 0, 1);
 
 	::glMatrixMode(GL_MODELVIEW);
 

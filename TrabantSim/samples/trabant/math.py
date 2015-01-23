@@ -60,8 +60,13 @@ class vec3:
 	def length(self):
 		return sqrt(self.x*self.x + self.y*self.y + self.z*self.z)
 
-	def lengthsq(self):
+	def length2(self):
 		return self.x*self.x + self.y*self.y + self.z*self.z
+
+	def limit(self, maxlen):
+		if self.length2() > maxlen*maxlen:
+			return self.normalize(maxlen)
+		return self
 
 	def abs(self):
 		return vec3(abs(self.x), abs(self.y), abs(self.z))

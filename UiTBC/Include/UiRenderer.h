@@ -328,7 +328,9 @@ public:
 
 	virtual void SetCameraTransformation(const xform& pTransformation);
 	const xform& GetCameraTransformation();
+	const xform& GetCameraActualTransformation();
 	const quat& GetCameraOrientationInverse();
+	const quat& GetCameraActualOrientationInverse();
 
 	virtual void SetLightsEnabled(bool pEnabled);
 	bool GetLightsEnabled();
@@ -626,7 +628,10 @@ protected:
 
 	PixelRect mClippingRect;
 	xform mCameraTransformation;
+	xform mCameraActualTransformation;
 	quat mCameraOrientationInverse;
+	quat mCameraActualOrientationInverse;
+	quat mCameraActualRotation;
 
 	int mShadowVolumesCreateMax;
 	int mShadowVolumeCreateCount;

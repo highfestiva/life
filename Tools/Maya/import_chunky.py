@@ -761,7 +761,7 @@ class GroupReader(DefaultMAReader):
 			if section.startswith("engine:"):
 				enginetype = stripQuotes(config.get(section, "type"))
 				pushengines = ["push_relative", "push_absolute", "hover", "jet", "yaw_brake", "air_brake"]
-				jointengines = ["hinge_roll", "hinge_gyro", "hinge_brake", "hinge_torque", "hinge2_turn", "rotor", "tilter", "slider_force", "glue", "ball_brake"]
+				jointengines = ["hinge_roll", "hinge_gyro", "hinge_brake", "hinge_torque", "hinge2_turn", "rotor", "tilt", "slider_force", "glue", "ball_brake"]
 				engineOk = enginetype in pushengines+jointengines
 				allApplied &= engineOk
 				if not engineOk:

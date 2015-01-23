@@ -17,16 +17,24 @@
 +Heli.
 +Make taps stick until polled. flappy_ufo.py, snake.py, tetris.py
 +Taps seem to be pressed when game starts. Reset at start!
-+Fix bug: sometimes won't TCP socket connect!
 +Bg on some games.
++Fix fog.
++Fix keyboard steering on computers.
++Add "click" for those computer enthusiasts.
++Fix joystick setting: sloppy. When released outside of joystick it works, but when tap released inside it resets.
++Stop font from changing after application load.
++Tap/slide velocity.
+.Fix bug in taps! Dunno, but my latest fix messed something up.
++Ghosts that hunt ball in Pac-Man!
++Explosions!
 
-Fix fog.
-Tap/slide velocity.
+Fix bug in explosions: one of the textures seems to be taken over by a letter "P"!!!
+PlaySound!
 Scaled texture+UVs on cubes. Implement checker material.
-Fix joystick setting: sloppy. When released outside of joystick it works, but when tap released inside it resets.
 Reduce code mass. Cam setting on each game? Etc.
 Optimize ASCII to object loading times. Pacman level must load in 0.1 seconds.
-Ghosts that hunt ball in Pac-Man!
+Fix helisim!
+Fix bug: sometimes won't TCP socket connect! Worst case: try again!
 
 Capsules.
 City!

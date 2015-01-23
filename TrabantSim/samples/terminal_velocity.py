@@ -19,7 +19,7 @@ XX  XX  XX
 
 ship = create_ascii_object(shipasc)
 ship.orientation(quat().rotate_x(-pi/2))	# Point ship forward instead of upward. Ship-relative coordinate system hereafter is +Y down, +Z in.
-pusher = ship.create_engine(push_rel_engine, strength=30, max_velocity=30, friction=0.7)
+pusher = ship.create_engine(push_rel_engine, strength=30, friction=0.7)
 pusher.addsound(sound_engine_hizz, intensity=0.5, volume=0.5)
 pusher.force((0,0,1))	# Always full throttle.
 yawer = ship.create_engine(push_turn_abs_engine, friction=0.5)
@@ -29,8 +29,8 @@ terrain_meshes,patch_size = {},120
 
 bgcol('#aaa')
 gravity((0,0,0))
-cam(angle=(pi/2.5,0,0), distance=80, target=ship, use_relative_angle=True)
-fog(80)
+cam(angle=(pi/2.5,0,0), distance=80, target=ship, target_relative_angle=True)
+fog(350,430)
 
 def create_terrain_patch(px,py):
 	x,y,grid = px*patch_size,py*patch_size,6
@@ -72,11 +72,11 @@ while loop():
 	update_terrain(ship.pos() + orientation*vec3(0,0,100))
 
 	# Turn ship.
-	yaw_force = -acc.roll*3 - sum(t.x*10-5 for t in taps())	# Control by either accelerometer or tapping.
+	yaw_force = -acc.roll*3 - sum(t.x*10-5 for t in taps()) - 5*keydir().x	# Control by either accelerometer, tapping or keyboard.
 	yawer.force((0,0,yaw_force))
 
 	# Banking and nose.
 	roll_force = -yaw_force*1.3 + (orientation*vec3(1,0,0)).z*10	# Banking.
 	pitch_factor = (orientation*vec3(0,0,1)).z*10 + ship.pos().z/10	# Level ship at around Z=0.
-	pitch_force = acc.pitch*6 - sum(t.y*20-10 for t in taps()) - pitch_factor	# Control nose by either accelerometer or tapping.
+	pitch_force = acc.pitch*6 - sum(t.y*20-10 for t in taps()) - 3*keydir().y - pitch_factor	# Control nose by either accelerometer, tapping or keyboard.
 	roller.force((pitch_force,0,roll_force))

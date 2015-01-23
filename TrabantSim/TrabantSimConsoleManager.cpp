@@ -35,9 +35,10 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandId
 	{_T("set-vertices"), COMMAND_SET_VERTICES},
 	{_T("set-indices"), COMMAND_SET_INDICES},
 	{_T("wait-until-loaded"), COMMAND_WAIT_UNTIL_LOADED},
-	{_T("explode"), COMMAND_EXPLOAD},
+	{_T("explode"), COMMAND_EXPLODE},
 	{_T("play-sound"), COMMAND_PLAY_SOUND},
 	{_T("pop-collisions"), COMMAND_POP_COLLISIONS},
+	{_T("get-keys"), COMMAND_GET_KEYS},
 	{_T("get-touch-drags"), COMMAND_GET_TOUCH_DRAGS},
 	{_T("get-accelerometer"), COMMAND_GET_ACCELEROMETER},
 	{_T("create-joystick"), COMMAND_CREATE_JOYSTICK},
@@ -413,9 +414,9 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					}
 				}
 				break;
-				case COMMAND_EXPLOAD:
+				case COMMAND_EXPLODE:
 				{
-					lManager->Expload(ParamToVec3(pParameterVector, 0), ParamToVec3(pParameterVector, 3));
+					lManager->Explode(ParamToVec3(pParameterVector, 0), ParamToVec3(pParameterVector, 3), ParamToFloat(pParameterVector, 6));
 				}
 				break;
 				case COMMAND_PLAY_SOUND:
@@ -437,6 +438,13 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					mActiveResponse += strutil::Join(lLines, _T("\n"));
 				}
 				break;
+				case COMMAND_GET_KEYS:
+				{
+					strutil::strvec lKeys;
+					lManager->GetKeys(lKeys);
+					mActiveResponse += strutil::Join(lKeys, _T("\n"));
+				}
+				break;
 				case COMMAND_GET_TOUCH_DRAGS:
 				{
 					PixelRect lRect = lManager->GetRenderArea();
@@ -448,7 +456,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->GetTouchDrags(lList);
 					for (DragList::iterator x = lList.begin(); x != lList.end(); ++x)
 					{
-						lLines.push_back(strutil::Format(_T("%f %f %f %f"), x->mLast.x*sx, x->mLast.y*sy, x->mStart.x*sx, x->mStart.y*sy));
+						lLines.push_back(strutil::Format(_T("%f %f %f %f %f %f"), x->mLast.x*sx, x->mLast.y*sy, x->mStart.x*sx, x->mStart.y*sy, x->mVelocity.x*sx, x->mVelocity.y*sy));
 					}
 					mActiveResponse += strutil::Join(lLines, _T("\n"));
 				}

@@ -6,9 +6,9 @@
 
 #include "pch.h"
 #include "Light.h"
-#include "../Cure/Include/RuntimeVariable.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
+#include "RtVar.h"
 
 
 
@@ -35,18 +35,23 @@ Light::~Light()
 void Light::Tick(const quat& pCameraOrientation)
 {
 	(void)pCameraOrientation;
-	/*if (!mUiManager->CanRender())
+	if (!mUiManager->CanRender())
 	{
 		return;
 	}
-	vec3 d = mUiManager->GetAccelerometer();
-	d = pCameraOrientation*d.GetNormalized();
+	float ax,az;
+	v_get(ax, =(float), mUiManager->GetVariableScope(), RTVAR_UI_3D_LIGHTANGLEX, -1.4);
+	v_get(az, =(float), mUiManager->GetVariableScope(), RTVAR_UI_3D_LIGHTANGLEZ, 0.1);
+	quat q;
+	q.RotateAroundOwnX(ax);
+	q.RotateAroundOwnZ(az);
+	vec3 d = q*vec3(0,1,0);
 	d = Math::Lerp(mLightAverageDirection, d, 0.5f);
 	if (d.GetDistanceSquared(mLightAverageDirection) > 1e-5f)
 	{
 		mLightAverageDirection = d;
 		mUiManager->GetRenderer()->SetLightDirection(mLightId, mLightAverageDirection);
-	}*/
+	}
 }
 
 

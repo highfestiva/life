@@ -126,6 +126,7 @@ Renderer::Renderer(Canvas* pScreen):
 	mFogDensity(1),
 	mFogExponent(0)
 {
+	mCameraActualRotation.RotateAroundOwnX(PIF/2);	// Default for OpenGL.
 }
 
 Renderer::~Renderer()
@@ -339,7 +340,10 @@ const PixelRect& Renderer::GetClippingRect() const
 void Renderer::SetCameraTransformation(const xform& pTransformation)
 {
 	mCameraTransformation = pTransformation;
-	mCameraOrientationInverse = mCameraTransformation.GetOrientation().GetInverse();
+	mCameraActualTransformation = pTransformation;
+	mCameraActualTransformation.mOrientation *= mCameraActualRotation;
+	mCameraOrientationInverse = mCameraTransformation.mOrientation.GetInverse();
+	mCameraActualOrientationInverse = mCameraActualTransformation.mOrientation.GetInverse();
 }
 
 const xform& Renderer::GetCameraTransformation()
@@ -347,9 +351,19 @@ const xform& Renderer::GetCameraTransformation()
 	return mCameraTransformation;
 }
 
+const xform& Renderer::GetCameraActualTransformation()
+{
+	return mCameraActualTransformation;
+}
+
 const quat& Renderer::GetCameraOrientationInverse()
 {
 	return mCameraOrientationInverse;
+}
+
+const quat& Renderer::GetCameraActualOrientationInverse()
+{
+	return mCameraActualOrientationInverse;
 }
 
 void Renderer::SetLightsEnabled(bool pEnabled)
@@ -1921,7 +1935,7 @@ bool Renderer::CheckCamCulling(const vec3& pPosition, float pBoundingRadius) con
 {
 	// We only check the frustum planes on the side, and totally ignore the near and far (they currently don't add much).
 	vec3 lCamRelativePosition(pPosition);
-	lCamRelativePosition.Sub(mCameraTransformation.GetPosition());
+	lCamRelativePosition.Sub(mCameraTransformation.mPosition);
 	bool lVisible = true;
 	for (int x = 0; lVisible && x < 4; ++x)
 	{

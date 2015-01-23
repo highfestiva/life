@@ -25,6 +25,7 @@ public:
 	ParticleRenderer(Renderer* pRenderer, int pMaxLightCount);
 	virtual ~ParticleRenderer();
 
+	void SetGravity(vec3 pGravity);
 	void SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark, BillboardGeometry* pGlow);
 
 	virtual void Render();
@@ -88,6 +89,7 @@ protected:
 		BillboardArray& pBillboards, int pCount);
 	static void StepBillboards(BillboardArray& pBillboards, float pTime, float pFriction);
 
+	vec3 mGravity;
 	LightArray mLights;
 	size_t mMaxLightCount;
 	size_t mGasTextureCount;

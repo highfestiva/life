@@ -31,5 +31,5 @@ cam(angle=(-0.3,0,0), distance=20, target=car)
 left_stick,right_stick = create_joystick((0,0)),create_joystick((1,0))
 
 while loop():
-	roll.force(left_stick.y)
-	turn.force(right_stick.x)
+	roll.force(left_stick.y + keydir().y)
+	turn.force(right_stick.x + keydir().x)

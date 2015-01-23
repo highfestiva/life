@@ -412,6 +412,19 @@ TEMPLATE void QUAL::InvAMulB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType
 	d = lD * lLRecip;
 }
 
+TEMPLATE void QUAL::FastInvAMulB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
+{
+	_TVarType lA = a * pA + b * pB + c * pC + d * pD;
+	_TVarType lB = a * pB - b * pA - c * pD + d * pC;
+	_TVarType lC = a * pC - c * pA - d * pB + b * pD;
+	_TVarType lD = a * pD - d * pA - b * pC + c * pB;
+
+	a = lA;
+	b = lB;
+	c = lC;
+	d = lD;
+}
+
 TEMPLATE void QUAL::InvAMulB(const _TVarType pData[4])
 {
 	_TVarType lA = mData[0] * pData[0] + mData[1] * pData[1] + mData[2] * pData[2] + mData[3] * pData[3];

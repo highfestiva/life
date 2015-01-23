@@ -42,6 +42,8 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATEZ, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMTARGETOBJECT, 0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMANGLERELATIVE, false);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_LIGHTANGLEX, -1.4);
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_LIGHTANGLEZ, 0.1);
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENRED, 0.7);
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENGREEN, 0.3);
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENBLUE, 0.6);
@@ -110,16 +112,19 @@ bool TrabantSimTicker::OpenUiManager()
 	if (lOk)
 	{
 		mUiManager->UpdateSettings();
+		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
+		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
 	}
 	if (lOk)
 	{
-		if (mUiManager->GetCanvas()->GetHeight() < 600)
+		if (mUiManager->GetCanvas()->GetHeight() < 500)
 		{
 			double lFontHeight;
 			v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 			if (lFontHeight > 29.0)
 			{
-				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/600.0;
+				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/500.0;
 				v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 			}
 		}

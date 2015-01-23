@@ -22,6 +22,7 @@ namespace UiTbc
 
 ParticleRenderer::ParticleRenderer(Renderer* pRenderer, int pMaxLightCount):
 	Parent(pRenderer),
+	mGravity(0,0,-9.8f),
 	mMaxLightCount(pMaxLightCount),
 	mGasTextureCount(1),
 	mTotalTextureCount(1),
@@ -42,6 +43,13 @@ ParticleRenderer::~ParticleRenderer()
 	mBillboardSpark = 0;
 	delete mBillboardGlow;
 	mBillboardGlow = 0;
+}
+
+
+
+void ParticleRenderer::SetGravity(vec3 pGravity)
+{
+	mGravity = pGravity;
 }
 
 void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark, BillboardGeometry* pGlow)
@@ -154,11 +162,11 @@ void ParticleRenderer::CreateExplosion(const vec3& pPosition, float pStrength, c
 	const vec3& pStartSmokeColor, const vec3& pSmokeColor, const vec3& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels)
 {
 	const float lRandomXYEndSpeed = 1.0f;
-	const float lSparkSize = ::sqrt(pStrength)*0.8f;
-	CreateBillboards(pPosition, pStrength* 7, pDirection, vec3(0, 0,  +9)*pFalloff, lRandomXYEndSpeed, 5.3f/pTime, pStrength*0.4f, pStartFireColor, pFireColor, mFires, pFires);
-	CreateBillboards(pPosition, pStrength* 8, pDirection, vec3(0, 0,  +5)*pFalloff, lRandomXYEndSpeed,    3/pTime, pStrength*0.8f, pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
-	CreateBillboards(pPosition, pStrength*14, pDirection, vec3(0, 0,  -8)*pFalloff, lRandomXYEndSpeed, 4.5f/pTime, lSparkSize, vec3(), vec3(), mSparks, pSparks);
-	CreateBillboards(pPosition, pStrength* 5, pDirection, vec3(0, 0, -10)*pFalloff, lRandomXYEndSpeed, 0.7f/pTime, pStrength*0.20f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
+	const float lSparkSize = (pStrength>2)? ::sqrt(pStrength)*0.8f : pStrength*0.8f;
+	CreateBillboards(pPosition, pStrength* 7, pDirection, mGravity*(0.9f*pFalloff), lRandomXYEndSpeed, 5.3f/pTime, pStrength*0.4f, pStartFireColor, pFireColor, mFires, pFires);
+	CreateBillboards(pPosition, pStrength* 8, pDirection, mGravity*(0.5f*pFalloff), lRandomXYEndSpeed,    3/pTime, pStrength*0.8f, pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
+	CreateBillboards(pPosition, pStrength*14, pDirection, mGravity*(0.8f*pFalloff), lRandomXYEndSpeed, 4.5f/pTime, lSparkSize, vec3(), vec3(), mSparks, pSparks);
+	CreateBillboards(pPosition, pStrength* 5, pDirection, mGravity*(1.1f*pFalloff), lRandomXYEndSpeed, 0.7f/pTime, pStrength*0.20f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
 
 	const float lMinSparkVelocity2 = pStrength*100;
 	const vec3 lCamPlane = mRenderer->GetCameraTransformation().GetOrientation() * vec3(0,1,0);
@@ -305,10 +313,10 @@ void ParticleRenderer::CreateBillboards(const vec3& pPosition, float pStrength, 
 	{
 		pBillboards.push_back(Billboard());
 		Billboard& lBillboard = pBillboards.back();
-		lBillboard.mVelocity = RNDVEC(pStrength) + pDirection*pStrength * 1.2f;
+		lBillboard.mVelocity = pDirection + RNDVEC(pStrength);
 		const vec3 lThisParticlesTargetVelocity = Math::Lerp(pTargetVelocity*0.8f, pTargetVelocity, Random::Uniform(0.0f, 2.0f));
 		lBillboard.mTargetVelocity = RNDVEC(pEndTurbulence) + lThisParticlesTargetVelocity;
-		lBillboard.mPosition = pPosition + lBillboard.mVelocity * 0.05f + pDirection*0.5f;
+		lBillboard.mPosition = pPosition + lBillboard.mVelocity * 0.01f;
 		lBillboard.mStartColor = RNDCOL(pStartColor, 0.9f, 1.1f);
 		lBillboard.mColor = RNDCOL(pColor, 0.7f, 1.3f);
 		lBillboard.mTextureIndex = Random::GetRandomNumber() % mGasTextureCount;

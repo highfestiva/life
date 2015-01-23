@@ -294,7 +294,16 @@ double SoundManagerOpenAL::GetStreamTime(SoundID pSoundID)
 	if (!lSample->mSourceList.empty())
 	{
 		Source* lSource = *lSample->mSourceList.begin();
-		::alGetSourcef(lSource->mSid, AL_SEC_OFFSET, &lSourceTime);
+		ALint lState = AL_PAUSED;
+		alGetSourcei(lSource->mSid, AL_SOURCE_STATE, &lState);
+		if (lState == AL_PLAYING)
+		{
+			::alGetSourcef(lSource->mSid, AL_SEC_OFFSET, &lSourceTime);
+		}
+		else
+		{
+			lSourceTime = 1e12f;	// Anything big is good, this sample is done.
+		}
 	}
 	OAL_ASSERT();
 	return (lSourceTime);

@@ -13,7 +13,7 @@ paddle = r'''
 '''.strip('\n')
 brick = 'XX'
 
-cam(angle=(0,-pi/2,0), distance=35)
+cam(angle=(0,-pi/2,0), distance=35)	# Flip camera for iPad portrait layout.
 gravity((0,0,0), bounce=1, friction=1)
 paddle = create_ascii_object(paddle, pos=(0,0,-15), mass=10000)
 ball = create_sphere_object(pos=(-7,0,10), vel=(10,0,-30), radius=0.5, col='#fff')
@@ -25,9 +25,9 @@ for y in range(2):
 while loop():
 	if taps():
 		p = paddle.pos()
-		v = ((closest_tap(p).pos3d().x-p.x)*6, 0, 0)
+		v = ((closest_tap(p).pos3d().x-p.x)*6 - keydir().y*20, 0, 0)
 	else:
-		v = (0,0,0)
+		v = (-keydir().y*20,0,0)
 	paddle.vel(v, avel=(0,0,0))
 	ball.bounce_in_rect((-14,-0.1,-25), (14,0.1,17))
 	if ball.pos().z < -17:

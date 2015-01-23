@@ -178,7 +178,7 @@ def mesh_dropopposingfaces(v,i):
 		for fi,f in enumerate(faces):
 			for ti in range(fi+1,len(faces)):
 				t = faces[ti]
-				if f.normal*t.normal<-0.99 and (f.center-t.center).lengthsq() < asc.GRID*asc.GRID:
+				if f.normal*t.normal<-0.99 and (f.center-t.center).length2() < asc.GRID*asc.GRID:
 					if f.contains(t.center):
 						opposingfaces[f.baseindex] = f
 						opposingfaces[t.baseindex] = t

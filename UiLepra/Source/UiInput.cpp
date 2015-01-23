@@ -719,7 +719,7 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 
 void InputManager::SetKey(KeyCode pKeyCode, bool pValue)
 {
-	mKeyDown[(int)pKeyCode] = pValue;
+	mKeyDown[(unsigned char)pKeyCode] = pValue;
 }
 
 void InputManager::PollEvents()

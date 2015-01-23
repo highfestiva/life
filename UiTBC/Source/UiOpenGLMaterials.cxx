@@ -723,7 +723,7 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(Tbc::GeometryBase* pGeometr
 		float lTextureMatrix[16];
 		xform lObjectTransform = pGeometry->GetTransformation();
 		lObjectTransform.RotateWorldX(PIF/2);
-		(lObjectTransform.Inverse() * ((OpenGLRenderer*)GetRenderer())->GetCameraTransformation()).GetAs4x4OrientationMatrix(lTextureMatrix);
+		(lObjectTransform.Inverse() * GetRenderer()->GetCameraActualTransformation()).GetAs4x4OrientationMatrix(lTextureMatrix);
 		lTextureMatrix[15] *= 3.0f;
 		::glLoadMatrixf(lTextureMatrix);
 
@@ -859,7 +859,7 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 
 	glMatrixMode(GL_TEXTURE);
 	float lTextureMatrix[16];
-	((OpenGLRenderer*)GetRenderer())->GetCameraTransformation().GetAs4x4OrientationMatrix(lTextureMatrix);
+	GetRenderer()->GetCameraActualTransformation().GetAs4x4OrientationMatrix(lTextureMatrix);
 
 	glLoadMatrixf(lTextureMatrix);
 	glMatrixMode(GL_MODELVIEW);

@@ -115,6 +115,7 @@ public:
 	inline void AMulInvB(const _TVarType pData[4]);
 	inline void AMulInvB(const Quaternion& pQuaternion);
 	inline void InvAMulB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
+	inline void FastInvAMulB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);
 	inline void InvAMulB(const _TVarType pData[4]);
 	inline void InvAMulB(const Quaternion& pQuaternion);
 	inline void InvAMulInvB(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD);

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../Lepra/Include/Plane.h"
 #include "../Life/LifeClient/GameClientSlaveManager.h"
+#include <map>
 #include "../Life/LifeClient/Menu.h"
 #include "../UiCure/Include/UiResourceManager.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
@@ -83,8 +83,18 @@ public:
 		float mStrength;
 		EngineTarget(int pInstanceId, float pStrength);
 	};
+	struct Drag
+	{
+		PixelCoord mStart;
+		PixelCoord mLast;
+		vec2 mVelocity;
+		HiResTimer mTimer;
+		bool mIsPress;
+	};
 	typedef std::list<CollisionInfo> CollisionList;
-	typedef UiLepra::Touch::DragManager::DragList DragList;
+	typedef std::vector<Drag> DragList;
+	typedef std::vector<PixelCoord> DragEraseList;
+	typedef UiLepra::Touch::DragManager::DragList UiDragList;
 	typedef std::vector<JoystickData> JoystickDataList;
 	typedef std::vector<TouchstickInfo> TouchstickList;
 	typedef std::vector<EngineTarget> EngineTargetList;
@@ -102,9 +112,10 @@ public:
 	void DeleteObject(int pObjectId);
 	void DeleteAllObjects();
 	bool IsLoaded(int pObjectId);
-	void Expload(const vec3& pPos, const vec3& pVel);
+	void Explode(const vec3& pPos, const vec3& pVel, float pStrength);
 	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel);
 	void PopCollisions(CollisionList& pCollisionList);
+	void GetKeys(strutil::strvec& pKeys);
 	void GetTouchDrags(DragList& pDragList);
 	vec3 GetAccelerometer() const;
 	int CreateJoystick(float x, float y, bool pIsSloppy);
@@ -138,6 +149,8 @@ public:
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 protected:
+	typedef std::map<UiLepra::InputManager::KeyCode,bool> KeyMap;
+
 	virtual bool InitializeUniverse();
 	virtual void TickInput();
 	void UpdateTouchstickPlacement();
@@ -162,18 +175,23 @@ protected:
 	void PrintText(const str& s, int x, int y) const;
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const;
 
+	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	std::set<Cure::GameObjectId> mObjects;
 	CollisionList mCollisionList;
+	KeyMap mKeyMap;
 	DragList mDragList;
+	DragEraseList mDragEraseList;
 	HiResTimer mTouchstickTimer;
 	TouchstickList mTouchstickList;
 	Life::Menu* mMenu;
 	Light* mLight;
 	vec3 mCameraAngle;
 	xform mCameraTransform;
+	vec3 mCameraVelocity;
 	UiTbc::Button* mPauseButton;
 	TcpListenerSocket* mListenerSocket;
 	TcpSocket* mConnectSocket;
