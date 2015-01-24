@@ -158,6 +158,8 @@ protected:
 	virtual void TickUiUpdate();
 	virtual void SetLocalRender(bool pRender);
 
+	void AddCheckerTexturing(UiTbc::TriangleBasedGeometry* pMesh);
+
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,

@@ -226,18 +226,21 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 			if (lBox)
 			{
 				Tbc::ChunkyBoneBox* lBone = new Tbc::ChunkyBoneBox(lBoneData);
+				lBone->SetMaterial(_T("rubber"));
 				lBone->mSize = lBox->mSize;
 				lPhysics->AddBoneGeometry(t, lBone, lParent);
 			}
 			else if (lSphere)
 			{
 				Tbc::ChunkyBoneSphere* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
+				lBone->SetMaterial(_T("rubber"));
 				lBone->mRadius = lSphere->mRadius;
 				lPhysics->AddBoneGeometry(t, lBone, lParent);
 			}
 			else if (lMesh)
 			{
 				Tbc::ChunkyBoneMesh* lBone = new Tbc::ChunkyBoneMesh(lBoneData);
+				lBone->SetMaterial(_T("rubber"));
 				lBone->mVertexCount = lMesh->mVertices.size()/3;
 				lBone->mTriangleCount = lMesh->mIndices.size()/3;
 				lBone->mVertices = new float[lBone->mVertexCount*3];
@@ -266,11 +269,30 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 	lObject->SetRootOrientation(pq);
 	lObject->CreatePhysics(lPhysics);
 	float r,g,b;
-	v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
-	v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
-	v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
+	if (pMaterial == MaterialChecker)
+	{
+		r = g = b = 1;
+	}
+	else
+	{
+		v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
+		v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
+		v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
+	}
 	const bool lIsSmooth = (pMaterial == MaterialSmooth);
-	lObject->AddGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b), lIsSmooth, pIsStatic? -1 : 1);
+	UiTbc::TriangleBasedGeometry* lMesh = lObject->CreateGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b), lIsSmooth);
+	if (!lMesh)
+	{
+		delete lObject;
+		return -1;
+	}
+	if (pMaterial == MaterialChecker)
+	{
+		AddCheckerTexturing(lMesh);
+		lObject->LoadTexture(_T("checker.png"));
+	}
+	lObject->AddMeshResource(lMesh, pIsStatic? -1 : 1);
+	lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), _T("texture"), _T("checker.png"));
 	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
 	lObject->mInitialOrientation = pq;
 	lObject->mInitialInverseOrientation = pq.GetInverse();
@@ -601,6 +623,9 @@ int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOt
 	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_OFFSET_Y] = 0;
 	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_OFFSET_Z] = 0;
 	lObject->AttachToObjectByBodyIndices(0, lObject2, 0);
+	const float lTotalMass = lObject->GetMass() + lObject2->GetMass();
+	lObject->SetMass(lTotalMass);	// Avoid collision sounds.
+	lObject2->SetMass(lTotalMass);
 	return 0;
 }
 
@@ -1073,6 +1098,58 @@ void TrabantSimManager::SetLocalRender(bool pRender)
 
 
 
+void TrabantSimManager::AddCheckerTexturing(UiTbc::TriangleBasedGeometry* pMesh)
+{
+	const float* lVertices = pMesh->GetVertexData();
+	const vtx_idx_t* lTriangles = pMesh->GetIndexData();
+	const unsigned tc = pMesh->GetTriangleCount();
+	std::vector<float> lUVs;
+	lUVs.resize(pMesh->GetVertexCount()*2);
+	for (unsigned t = 0; t < tc; ++t)
+	{
+		int v0,v1,v2;
+		v0 = lTriangles[t*3+0];
+		v1 = lTriangles[t*3+1];
+		v2 = lTriangles[t*3+2];
+		vec3 u0(lVertices[v0*3+0], lVertices[v0*3+1], lVertices[v0*3+2]);
+		vec3 u1(lVertices[v1*3+0], lVertices[v1*3+1], lVertices[v1*3+2]);
+		vec3 u2(lVertices[v2*3+0], lVertices[v2*3+1], lVertices[v2*3+2]);
+		vec3 n = (u1-u0).Cross(u2-u0);
+		n.x = fabs(n.x); n.y = fabs(n.y); n.z = fabs(n.z);
+		u0 *= 0.1f; u1 *= 0.1f; u2 *= 0.1f;
+		if (n.x > n.y && n.x > n.z)
+		{
+			lUVs[v0*2+0] = u0.y;
+			lUVs[v0*2+1] = u0.z;
+			lUVs[v1*2+0] = u1.y;
+			lUVs[v1*2+1] = u1.z;
+			lUVs[v2*2+0] = u2.y;
+			lUVs[v2*2+1] = u2.z;
+		}
+		else if (n.y > n.z)
+		{
+			lUVs[v0*2+0] = u0.x;
+			lUVs[v0*2+1] = u0.z;
+			lUVs[v1*2+0] = u1.x;
+			lUVs[v1*2+1] = u1.z;
+			lUVs[v2*2+0] = u2.x;
+			lUVs[v2*2+1] = u2.z;
+		}
+		else
+		{
+			lUVs[v0*2+0] = u0.x;
+			lUVs[v0*2+1] = u0.y;
+			lUVs[v1*2+0] = u1.x;
+			lUVs[v1*2+1] = u1.y;
+			lUVs[v2*2+0] = u2.x;
+			lUVs[v2*2+1] = u2.y;
+		}
+	}
+	pMesh->AddUVSet(lUVs.data());
+}
+
+
+
 Cure::ContextObject* TrabantSimManager::CreateContextObject(const str& pClassId) const
 {
 	UiCure::Machine* lObject = new Object(GetResourceManager(), pClassId, mUiManager);
@@ -1094,6 +1171,12 @@ void TrabantSimManager::OnCollision(const vec3& pForce, const vec3& pTorque, con
 	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
 {
 	(void)pBody2Id;
+
+	if (pObject1->GetPhysics()->GetPhysicsType() != Tbc::ChunkyPhysics::DYNAMIC)
+	{
+		return;
+	}
+
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
 
 	ScopeLock lGameLock(GetTickLock());

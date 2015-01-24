@@ -114,6 +114,7 @@ public:
 	float GetForwardSpeed() const;
 	float GetMass() const;
 	float QueryMass();
+	void SetMass(float pMass);
 	ObjectPositionalData* GetNetworkOutputGhost();
 	void DeleteNetworkOutputGhost();
 

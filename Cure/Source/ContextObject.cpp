@@ -679,6 +679,11 @@ float ContextObject::QueryMass()
 	return mTotalMass;
 }
 
+void ContextObject::SetMass(float pMass)
+{
+	mTotalMass = pMass;
+}
+
 ObjectPositionalData* ContextObject::GetNetworkOutputGhost()
 {
 	if (!mNetworkOutputGhost)

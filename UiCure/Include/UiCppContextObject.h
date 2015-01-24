@@ -62,6 +62,7 @@ public:
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
 	void AddMeshResource(Tbc::GeometryBase* pMesh, int pCastsShadows);
 	void CenterMeshes();
+	void LoadTexture(const str& pName, Canvas::ResizeHint pResizeHint=Canvas::RESIZE_FAST);
 	virtual void UpdateMaterial(int pMeshIndex);
 	void SetPostLoadMaterialDelegate(const PostLoadMaterialDelegate& pDelegate);
 

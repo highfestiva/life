@@ -35,11 +35,11 @@ const Tbc::ChunkyClass* Object::GetClass() const
 	return mClass;
 }
 
-void Object::AddGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, bool pIsSmooth, int pCastsShadows)
+UiTbc::TriangleBasedGeometry* Object::CreateGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, bool pIsSmooth)
 {
 	if (pVertices.empty() || pIndices.empty())
 	{
-		return;
+		return 0;
 	}
 	UiTbc::TriangleBasedGeometry* lGfxMesh = new UiTbc::TriangleBasedGeometry(&pVertices[0], 0, 0, 0, UiTbc::TriangleBasedGeometry::COLOR_RGB, (const uint32*)&pIndices[0],
 			pVertices.size()/3, pIndices.size(), Tbc::GeometryBase::TRIANGLES, Tbc::GeometryBase::GEOM_STATIC);
@@ -54,7 +54,21 @@ void Object::AddGfxMesh(const std::vector<float>& pVertices, const std::vector<i
 	lGfxMesh->GetBasicMaterialSettings().mShininess	= !pIsSmooth;
 	lGfxMesh->GetBasicMaterialSettings().mSmooth	= pIsSmooth;
 	lGfxMesh->SetGeometryVolatility(Tbc::GeometryBase::GEOM_SEMI_STATIC);
-	AddMeshResource(lGfxMesh, pCastsShadows);
+	return lGfxMesh;
+}
+
+void Object::AddMeshInfo(const str& pMeshName, const str& pShader, const str& pTexture)
+{
+	mClass->AddMesh(0, pMeshName, xform(), 1);
+	UiTbc::ChunkyClass::Material lMaterial;
+	lMaterial.mDiffuse.Set(1,1,1);
+	lMaterial.mShininess = 1;
+	lMaterial.mAlpha = 1;
+	lMaterial.mSmooth = false;
+	lMaterial.mResizeHint = Canvas::RESIZE_FAST;
+	lMaterial.mTextureList.push_back(pTexture);
+	lMaterial.mShaderName = pShader;
+	mClass->SetLastMeshMaterial(lMaterial);
 }
 
 

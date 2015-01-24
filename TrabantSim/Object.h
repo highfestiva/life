@@ -40,13 +40,14 @@ public:
 	virtual ~Object();
 
 	virtual const Tbc::ChunkyClass* GetClass() const;
-	void AddGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, bool pIsSmooth, int pCastsShadows);
+	UiTbc::TriangleBasedGeometry* CreateGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, bool pIsSmooth);
+	void AddMeshInfo(const str& pMeshName, const str& pShader, const str& pTexture);
 
 	quat mInitialOrientation;
 	quat mInitialInverseOrientation;
 
 private:
-	Tbc::ChunkyClass* mClass;
+	UiTbc::ChunkyClass* mClass;
 	UiTbc::TriangleBasedGeometry* mGfxMesh;
 	UiTbc::Renderer::GeometryID mGfxMeshId;
 };

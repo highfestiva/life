@@ -351,19 +351,26 @@ void CppContextObject::CenterMeshes()
 	}
 }
 
+void CppContextObject::LoadTexture(const str& pName, Canvas::ResizeHint pResizeHint)
+{
+	UserRendererImageResource* lTexture = new UserRendererImageResource(mUiManager, ImageProcessSettings(pResizeHint, mUiManager->GetRenderer()->GetMipMappingEnabled()));
+	mTextureResourceArray.push_back(lTexture);
+	lTexture->Load(GetResourceManager(), pName, UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
+}
+
 void CppContextObject::UpdateMaterial(int pMeshIndex)
 {
 	if (!mUiManager->CanRender())
 	{
 		return;
 	}
-	if (!mUiClassResource)
+	const UiTbc::ChunkyClass* lClass = (const UiTbc::ChunkyClass*)GetClass();
+	if (!lClass)
 	{
 		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
 		mUiManager->GetRenderer()->ChangeMaterial(mMeshResourceArray[pMeshIndex]->GetData(), lMaterialType);
 		return;
 	}
-	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
 	UserGeometryReferenceResource* lMesh = mMeshResourceArray[pMeshIndex];
 	const bool lTransparent = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1);
 	UserRendererImageResource* lTexture = 0;
@@ -573,10 +580,7 @@ void CppContextObject::LoadTextures()
 		const std::vector<str>& lTextureList = lClass->GetMaterial(x).mTextureList;
 		for (std::vector<str>::const_iterator y = lTextureList.begin(); y != lTextureList.end(); ++y)
 		{
-			UserRendererImageResource* lTexture = new UserRendererImageResource(mUiManager, ImageProcessSettings(lResizeHint, mUiManager->GetRenderer()->GetMipMappingEnabled()));
-			mTextureResourceArray.push_back(lTexture);
-			lTexture->Load(GetResourceManager(), *y,
-				UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
+			LoadTexture(*y, lResizeHint);
 		}
 	}
 }

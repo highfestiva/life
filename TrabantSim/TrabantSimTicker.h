@@ -53,6 +53,8 @@ private:
 		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
 		int pSlaveIndex, const PixelRect& pRenderArea);
 
+	UiCure::RendererImageResource* mEnvMap;
+
 	logclass();
 };
 

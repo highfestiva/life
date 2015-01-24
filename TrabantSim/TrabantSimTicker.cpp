@@ -27,7 +27,8 @@ namespace TrabantSim
 
 
 TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
-	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity)
+	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
+	mEnvMap(0)
 {
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKATX, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CAMLOOKATY, 0.0);
@@ -67,6 +68,8 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 TrabantSimTicker::~TrabantSimTicker()
 {
 	CloseMainMenu();
+	delete mEnvMap;
+	mEnvMap = 0;
 }
 
 
@@ -115,6 +118,18 @@ bool TrabantSimTicker::OpenUiManager()
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
 		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
 		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
+	}
+	if (lOk)
+	{
+		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
+		if (mEnvMap->Load())
+		{
+			if (mEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
+			{
+				UiTbc::Renderer::TextureID lTextureId = mEnvMap->GetUserData(0);
+				mUiManager->GetRenderer()->SetEnvironmentMap(lTextureId);
+			}
+		}
 	}
 	if (lOk)
 	{
