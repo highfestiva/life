@@ -84,8 +84,8 @@ def friction(factor):
 def explode(pos,vel,strength):
 	cmd('explode %s %s %f' % (_args2str(pos,'0 0 0'), _args2str(vel,'0 0 0'), float(strength)))
 
-def playsound(snd, pos, vel):
-	cmd('play-sound %s %s %s' % (snd, _args2str(pos,'0 0 0'), _args2str(vel,'0 0 0')))
+def playsound(snd, pos, vel, volume):
+	cmd('play-sound %s %s %s %f' % (snd, _args2str(pos,'0 0 0'), _args2str(vel,'0 0 0'), float(volume)))
 
 
 def pop_collisions():

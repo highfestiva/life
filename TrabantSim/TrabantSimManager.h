@@ -113,7 +113,7 @@ public:
 	void DeleteAllObjects();
 	bool IsLoaded(int pObjectId);
 	void Explode(const vec3& pPos, const vec3& pVel, float pStrength);
-	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel);
+	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel, float pVolume);
 	void PopCollisions(CollisionList& pCollisionList);
 	void GetKeys(strutil::strvec& pKeys);
 	void GetTouchDrags(DragList& pDragList);

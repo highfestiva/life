@@ -15,6 +15,8 @@ length = 5
 while loop():
 	if taps():
 		step = min(steps, key=lambda s:(closest_tap(pos).pos3d()-s-pos).length())
+	elif keydir().x or keydir().y:
+		step = vec3(keydir().x,0,keydir().y)
 	pos += step
 	if pos in snake_coords:	# Collide with block?
 		explode(pos)

@@ -56,7 +56,7 @@ def trymove(movement, orientation):
 					fixed_blocks[rj-1] = fixed_blocks[rj]
 					[block.pos((x,0,rj-1)) for x,block in enumerate(fixed_blocks[rj-1]) if block]
 				fixed_blocks[-1] = [None]*gridsize.x
-				sound(sound_bang)
+				sound(sound_clank)
 			else:
 				ri += 1
 

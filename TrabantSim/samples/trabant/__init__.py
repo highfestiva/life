@@ -11,7 +11,7 @@ import time
 
 roll_turn_engine,roll_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint = 'hinge suspend_hinge turn_hinge'.split()
-sound_explosion,sound_ping,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'explosion ping bang hizz wobble combustion rotor'.split()
+sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
 _wait_until_loaded = True
 _has_opened = False
@@ -255,9 +255,9 @@ def explode(pos, vel=vec3(), strength=1):
 	if timeout(0.5,timer=-153,first_hit=True):
 		gameapi.explode(tovec3(pos),tovec3(vel),strength)
 
-def sound(snd, pos=vec3(), vel=vec3()):
+def sound(snd, pos=vec3(), vel=vec3(), volume=5):
 	_tryinit()
-	gameapi.playsound(snd, tovec3(pos), tovec3(vel))
+	gameapi.playsound(snd+'.wav', tovec3(pos), tovec3(vel), volume)
 
 def rect_bound(pos,ltn,rbf):
 	pos,ltn,rbf = tovec3(pos),tovec3(ltn),tovec3(rbf)
@@ -270,27 +270,27 @@ def rect_bound(pos,ltn,rbf):
 	return pos
 
 def collided_objects():
-	return set(o for o,_,_,_ in collisions())
+	return set([o for o,_,_,_ in collisions()] + [o2 for _,o2,_,_ in collisions()])
 
 def collisions():
 	global _collisions
-	if _collisions == None:
-		_collisions = []
-		for line in gameapi.pop_collisions().split('\n'):
-			if not line:
-				continue
-			words = line.split()
-			oid,other_oid = int(words[0]),int(words[7])
-			if oid in _objects and other_oid in _objects:
-				force,pos = tovec3([float(f) for f in words[1:4]]),tovec3([float(f) for f in words[4:7]])
-				_collisions.append((_objects[oid],_objects[other_oid],force,pos))
+	if _collisions != None:
+		return _collisions
+	_collisions = []
+	for line in gameapi.pop_collisions().split('\n'):
+		if not line:
+			continue
+		words = line.split()
+		oid,other_oid = int(words[0]),int(words[7])
+		if oid in _objects and other_oid in _objects:
+			force,pos = tovec3([float(f) for f in words[1:4]]),tovec3([float(f) for f in words[4:7]])
+			_collisions.append((_objects[oid],_objects[other_oid],force,pos))
 	return _collisions
 
 def keys():
 	global _keys
-	if _keys != None:
-		return _keys
-	_keys = [key for key in gameapi.keys().split('\n') if key]
+	if _keys == None:
+		_keys = [key for key in gameapi.keys().split('\n') if key]
 	return _keys
 
 def keydir():

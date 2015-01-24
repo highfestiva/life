@@ -158,15 +158,16 @@ void ParticleRenderer::CreateFlare(const vec3& pColor, float pStrength, float pT
 	CreateTempLight(pColor, pStrength, pPosition, pVelocity, pVelocity, pTimeFactor);
 }
 
-void ParticleRenderer::CreateExplosion(const vec3& pPosition, float pStrength, const vec3& pDirection, float pFalloff, float pTime, const vec3& pStartFireColor, const vec3& pFireColor,
+void ParticleRenderer::CreateExplosion(const vec3& pPosition, float pStrength, const vec3& pVelocity, float pFalloff, float pTime, const vec3& pStartFireColor, const vec3& pFireColor,
 	const vec3& pStartSmokeColor, const vec3& pSmokeColor, const vec3& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels)
 {
 	const float lRandomXYEndSpeed = 1.0f;
-	const float lSparkSize = (pStrength>2)? ::sqrt(pStrength)*0.8f : pStrength*0.8f;
-	CreateBillboards(pPosition, pStrength* 7, pDirection, mGravity*(0.9f*pFalloff), lRandomXYEndSpeed, 5.3f/pTime, pStrength*0.4f, pStartFireColor, pFireColor, mFires, pFires);
-	CreateBillboards(pPosition, pStrength* 8, pDirection, mGravity*(0.5f*pFalloff), lRandomXYEndSpeed,    3/pTime, pStrength*0.8f, pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
-	CreateBillboards(pPosition, pStrength*14, pDirection, mGravity*(0.8f*pFalloff), lRandomXYEndSpeed, 4.5f/pTime, lSparkSize, vec3(), vec3(), mSparks, pSparks);
-	CreateBillboards(pPosition, pStrength* 5, pDirection, mGravity*(1.1f*pFalloff), lRandomXYEndSpeed, 0.7f/pTime, pStrength*0.20f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
+	const float lSparkSize = (pStrength>1)? ::sqrt(pStrength)*0.5f : pStrength*0.4f;
+	const float lSpeed = pVelocity.GetLength() * 0.01f;
+	CreateBillboards(pPosition,  7*pStrength+ 1*lSpeed,      pVelocity, mGravity*(0.9f*pFalloff), lRandomXYEndSpeed, 5.3f/pTime, pStrength*0.4f, pStartFireColor, pFireColor, mFires, pFires);
+	CreateBillboards(pPosition,  8*pStrength+ 1*lSpeed,      pVelocity, mGravity*(0.5f*pFalloff), lRandomXYEndSpeed,    3/pTime, pStrength*0.8f, pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
+	CreateBillboards(pPosition, 20*pStrength+20*lSpeed, 1.2f*pVelocity, mGravity*(0.8f*pFalloff), lRandomXYEndSpeed, 4.5f/pTime, lSparkSize, vec3(), vec3(), mSparks, pSparks);
+	CreateBillboards(pPosition,  9*pStrength+10*lSpeed, 1.1f*pVelocity, mGravity*(1.1f*pFalloff), lRandomXYEndSpeed, 0.7f/pTime, pStrength*0.20f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
 
 	const float lMinSparkVelocity2 = pStrength*100;
 	const vec3 lCamPlane = mRenderer->GetCameraTransformation().GetOrientation() * vec3(0,1,0);
@@ -193,7 +194,7 @@ void ParticleRenderer::CreatePebble(float pTime, float pScale, float pAngularVel
 	const float lTimeFactor = PARTICLE_TIME*0.5f/pTime;	// Split in two, as we're only using latter half of sine curve (don't fade into existance).
 	const float lRandomXYEndSpeed = 1.0f;
 
-	CreateBillboards(pPosition, 0, vec3(), vec3(0, 0, -10), lRandomXYEndSpeed, lTimeFactor, pScale*0.1f, vec3(), pColor, mShrapnels, 1);
+	CreateBillboards(pPosition, 0, vec3(), vec3(0,0,-10), lRandomXYEndSpeed, lTimeFactor, pScale*0.1f, vec3(), pColor, mShrapnels, 1);
 	Billboard& lPebbleBillboard = mShrapnels.back();
 	lPebbleBillboard.mVelocity = pVelocity;
 	lPebbleBillboard.mAngularVelocity = Random::Uniform(-pAngularVelocity, +pAngularVelocity);
@@ -306,17 +307,17 @@ void ParticleRenderer::StepLights(float pTime, float pFriction)
 	}
 }
 
-void ParticleRenderer::CreateBillboards(const vec3& pPosition, float pStrength, const vec3& pDirection, const vec3& pTargetVelocity,
+void ParticleRenderer::CreateBillboards(const vec3& pPosition, float pStrength, const vec3& pVelocity, const vec3& pTargetVelocity,
 	float pEndTurbulence, float pTimeFactor, float pSizeFactor, const vec3& pStartColor, const vec3& pColor, BillboardArray& pBillboards, int pCount)
 {
 	for (int x = 0; x < pCount; ++x)
 	{
 		pBillboards.push_back(Billboard());
 		Billboard& lBillboard = pBillboards.back();
-		lBillboard.mVelocity = pDirection + RNDVEC(pStrength);
+		lBillboard.mVelocity = pVelocity + RNDVEC(pStrength);
 		const vec3 lThisParticlesTargetVelocity = Math::Lerp(pTargetVelocity*0.8f, pTargetVelocity, Random::Uniform(0.0f, 2.0f));
 		lBillboard.mTargetVelocity = RNDVEC(pEndTurbulence) + lThisParticlesTargetVelocity;
-		lBillboard.mPosition = pPosition + lBillboard.mVelocity * 0.01f;
+		lBillboard.mPosition = pPosition + lBillboard.mVelocity*0.1f;
 		lBillboard.mStartColor = RNDCOL(pStartColor, 0.9f, 1.1f);
 		lBillboard.mColor = RNDCOL(pColor, 0.7f, 1.3f);
 		lBillboard.mTextureIndex = Random::GetRandomNumber() % mGasTextureCount;

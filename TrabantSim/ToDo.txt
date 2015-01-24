@@ -27,14 +27,18 @@
 .Fix bug in taps! Dunno, but my latest fix messed something up.
 +Ghosts that hunt ball in Pac-Man!
 +Explosions!
++Fix bug in explosions: one of the textures seems to be taken over by a letter "P"!!!
++PlaySound!
 
-Fix bug in explosions: one of the textures seems to be taken over by a letter "P"!!!
-PlaySound!
 Scaled texture+UVs on cubes. Implement checker material.
-Reduce code mass. Cam setting on each game? Etc.
+Reduce code mass. ''.strip()? Cam setting on each game? Etc.
 Optimize ASCII to object loading times. Pacman level must load in 0.1 seconds.
 Fix helisim!
 Fix bug: sometimes won't TCP socket connect! Worst case: try again!
+Add support for gamepad controller.
+Test in release build.
+Test using API in strange ways. Crash control.
+Test accelerometer.
 
 Capsules.
 City!

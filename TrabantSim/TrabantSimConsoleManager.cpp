@@ -421,7 +421,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				break;
 				case COMMAND_PLAY_SOUND:
 				{
-					lManager->PlaySound(ParamToStr(pParameterVector, 0), ParamToVec3(pParameterVector, 1), ParamToVec3(pParameterVector, 4));
+					lManager->PlaySound(ParamToStr(pParameterVector, 0), ParamToVec3(pParameterVector, 1), ParamToVec3(pParameterVector, 4), ParamToFloat(pParameterVector, 7));
 				}
 				break;
 				case COMMAND_POP_COLLISIONS:

@@ -43,6 +43,6 @@ while loop():
 		# ball.vel(bv)
 	for o in collided_objects():
 		if o in bricks:
-			sound(sound_ping, o.pos())
+			sound(sound_clank, o.pos())
 			o.release()
 			bricks.remove(o)

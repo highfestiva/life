@@ -32,7 +32,7 @@ public:
 	virtual void Tick(float pTime);
 
 	void CreateFlare(const vec3& pColor, float pStrength, float pTimeFactor, const vec3& pPosition, const vec3& pVelocity);
-	void CreateExplosion(const vec3& pPosition, float pStrength, const vec3& pDirection, float pFalloff, float pTime, const vec3& pStartFireColor, const vec3& pFireColor,
+	void CreateExplosion(const vec3& pPosition, float pStrength, const vec3& pVelocity, float pFalloff, float pTime, const vec3& pStartFireColor, const vec3& pFireColor,
 		const vec3& pStartSmokeColor, const vec3& pSmokeColor, const vec3& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels);
 	void CreatePebble(float pTime, float pScale, float pAngularVelocity, const vec3& pColor, const vec3& pPosition, const vec3& pVelocity);
 	void CreateFume(float pTime, float pScale, float pAngularVelocity, float pOpacity, const vec3& pPosition, const vec3& pVelocity);
@@ -84,7 +84,7 @@ protected:
 	void CreateTempLight(const vec3& pColor, float pStrength, const vec3& pPosition, const vec3& pVelocity, const vec3& pTargetVelocity, float pTimeFactor);
 	void StepLights(float pTime, float pFriction);
 
-	void CreateBillboards(const vec3& pPosition, float pStrength, const vec3& pDirection, const vec3& pTargetVelocity,
+	void CreateBillboards(const vec3& pPosition, float pStrength, const vec3& pVelocity, const vec3& pTargetVelocity,
 		float pEndTurbulence, float pTimeFactor, float pSizeFactor, const vec3& pStartColor, const vec3& pColor,
 		BillboardArray& pBillboards, int pCount);
 	static void StepBillboards(BillboardArray& pBillboards, float pTime, float pFriction);

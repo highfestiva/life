@@ -43,3 +43,6 @@ while loop():
 		sleep(3)
 		release_all_objects()
 		init()
+
+	if 'SPACE' in keys():
+		explode(shippos,shipvel)

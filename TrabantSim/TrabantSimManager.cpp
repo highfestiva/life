@@ -316,19 +316,24 @@ void TrabantSimManager::Explode(const vec3& pPos, const vec3& pVel, float pStren
 
 	const float lKeepOnGoingFactor = 1.0f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
 	const int lParticles = Math::Lerp(8, 20, pStrength * 0.2f);
+	const int lFires    = lParticles;
+	const int lSmokes   = lParticles;
+	const int lSparks   = lParticles/2;
+	const int lShrapnel = lParticles/3;
 	vec3 lStartFireColor(1.0f, 1.0f, 0.3f);
 	vec3 lFireColor(0.6f, 0.4f, 0.2f);
 	vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
 	vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
 	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	lParticleRenderer->CreateExplosion(pPos, pStrength, pVel*lKeepOnGoingFactor, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
+	lParticleRenderer->CreateExplosion(pPos, pStrength, pVel*lKeepOnGoingFactor, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lFires, lSmokes, lSparks, lShrapnel);
 }
 
-void TrabantSimManager::PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel)
+void TrabantSimManager::PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel, float pVolume)
 {
 	ScopeLock lGameLock(GetTickLock());
-	(void)pSound; (void)pPos; (void)pVel;
+	UiCure::UserSound3dResource* lSoundResource = new UiCure::UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), pSound, lSoundResource, pPos, pVel, pVolume, 1);
 }
 
 void TrabantSimManager::PopCollisions(CollisionList& pCollisionList)
