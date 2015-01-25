@@ -10,7 +10,8 @@ cam(distance=camdistance)
 gravity((0,0,-9), bounce=0.3)
 create_cube_object(pos=(0,0,-105), side=200, static=True)
 geometry = 'XX'	# ASCII geometry.
-things = [create_ascii_object(geometry, pos=rndvec()*5+vec3(0,0,5), vel=rndvec()*3, col=rndvec().abs()) for _ in range(10)]
+things = [create_ascii_object(geometry, pos=rndvec()*5+vec3(0,0,5), vel=rndvec()*3, col=rndvec().abs()) for _ in range(20)]
+things += [create_sphere_object(pos=rndvec()*5+vec3(0,0,5), radius=random()*0.5+0.2, col=rndvec().abs()) for _ in range(5)]
 
 while loop(delay=0.01):	# Need low latencies to be able to get accurate tap velocities.
 	if not taps():

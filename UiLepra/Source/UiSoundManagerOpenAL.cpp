@@ -584,10 +584,16 @@ SoundManagerOpenAL::Sample::Sample(bool pLooping, int pPriority):
 
 SoundManagerOpenAL::Sample::~Sample()
 {
+	OAL_ASSERT();
 	if (mBuffer != AL_NONE)
 	{
 		::alDeleteBuffers(1, &mBuffer);
 		mBuffer = AL_NONE;
+		const int lError = ::alGetError();
+		if (lError != AL_NO_ERROR)
+		{
+			mLog.Errorf(_T("Could not delete OpenAL buffer (%4.4X)."), lError);
+		}
 		LEPRA_RELEASE_RESOURCE(alBuffer);
 	}
 	OAL_ASSERT();
@@ -647,7 +653,10 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 	if (mSid == (ALuint)-1)
 	{
 		const int lError = ::alGetError();
-		mLog.Errorf(_T("Could not generate OpenAL source (%4.4X), thus not possible to create sound instance."), lError);
+		if (lError != AL_NO_ERROR)
+		{
+			mLog.Errorf(_T("Could not generate OpenAL source (%4.4X), thus not possible to create sound instance."), lError);
+		}
 		return false;
 	}
 

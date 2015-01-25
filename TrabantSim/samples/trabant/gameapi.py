@@ -10,6 +10,8 @@ _cached_vertices,_cached_indices = [],[]
 
 
 def init(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', restart=True):
+	if ':' not in addr:
+		addr += ':2541'
 	if not _opencom(addr):
 		return False
 	if restart:
@@ -28,7 +30,7 @@ def reset():
 	'''Kill all objects and joysticks. Set some default values.'''
 	cmd('reset')
 
-def debug(enable):
+def simdebug(enable):
 	set('Debug.Enable', enable)
 
 def userinfo(message):
@@ -226,6 +228,7 @@ def cmd(c, return_type=str):
 	result = result.decode(errors='replace')
 	if result.startswith('ok\n'):
 		return return_type(result[3:])
+	result = result.strip()
 	print(result)
 	result
 
@@ -239,33 +242,35 @@ def set(setting, value):
 
 
 def _opencom(addr):
-	global sock,_cached_vertices,_cached_indices
+	global _cached_vertices,_cached_indices
 	if sock:
 		return True
 	_cached_vertices,_cached_indices = [],[]
-	_run_local_sim(addr)
-	ip,port = addr.split(':')
-	for attempt in range(1,3+1):
-		try:
-			sock = socket.socket()
-			sock.connect((ip,int(port)))
-			return True
-		except socket.error:
-			sock = None
-			if attempt == 3 or not proc:
-				print('TrabantSim not available on %s.' % addr)
-				break
-	return False
+	_tryconnect(addr, 1)
+	if not sock:
+		_run_local_sim(addr)
+		_tryconnect(addr, 3)
+	if proc or sock:
+		import atexit
+		import signal
+		def ctrlc(s,f):
+			_closecom()
+			import sys
+			sys.exit(0)
+		[signal.signal(s,ctrlc) for s in (signal.SIGABRT,signal.SIGINT,signal.SIGTERM)]
+		atexit.register(_closecom)
+	return sock != None
 
 def _closecom():
 	global sock,proc
 	if sock:
 		if proc:
 			cmd('quit')
+		sock.shutdown(socket.SHUT_RDWR)
 		sock.close()
 		sock = None
 	if proc:
-		print('Closing TrabantSim...')
+		#print('Closing TrabantSim...')
 		proc.kill()
 		proc.wait()
 		proc = None
@@ -275,23 +280,38 @@ def _args2str(args, default=''):
 		return default
 	return ' '.join(str(arg) for arg in args)
 
+def _tryconnect(addr, retries):
+	global sock
+	ip,port = addr.split(':')
+	for attempt in range(1,retries+1):
+		try:
+			sock = socket.socket()
+			sock.connect((ip,int(port)))
+			cmd('system-info')	# To make sure connection alright.
+			break
+		except socket.error:
+			sock = None
+			if retries>1 and attempt==retries:
+				print('TrabantSim not available on %s.' % addr)
+				break
+
 def _run_local_sim(addr):
 	global proc
 	import os
 	if 'localhost' in addr and os.name in ('nt','darwin'):
-		import subprocess
-		try:
-			proc = subprocess.Popen(['TrabantSim', addr], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-		except:
-			print('Error: TrabantSim could not be started.')
-		import atexit
-		import signal
-		def ctrlc(s,f):
-			_closecom()
-			import sys
-			sys.exit(0)
-		signal.signal(signal.SIGINT, ctrlc)
-		atexit.register(_closecom)
+		for directory in ['', './', '../']:
+			import os.path
+			import subprocess
+			curdir = os.path.abspath(os.path.curdir)
+			try:
+				os.chdir(directory)
+				proc = subprocess.Popen(['TrabantSim', addr], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+			except:
+				os.chdir(curdir)
+				continue
+		if not proc:
+			print('Error: TrabantSim process could not be started.')
+	return proc != None
 
 def _htmlcol(col):
 	if col:

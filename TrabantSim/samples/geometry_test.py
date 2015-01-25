@@ -22,7 +22,7 @@ diamond_with_bom_hook = r'''
   ´`
 ---
  X
-'''
+'''.strip('\n')
 
 square_with_diamond = r'''
    ^
@@ -34,10 +34,10 @@ XX
  XXX>
  XXX
  XXX
-'''
+'''.strip('\n')
 
 gravity((0,0,0))
-debug()
+simdebug()
 cam(distance=50)
 
 create_ascii_object(shipasc, pos=(-10,-10,10), col='#f00', static=True)

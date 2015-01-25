@@ -360,6 +360,9 @@
   <ItemGroup>
     <None Include="TrabantSim.mm" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TrabantSim.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

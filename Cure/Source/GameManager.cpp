@@ -438,6 +438,10 @@ void GameManager::SetNetworkAgent(NetworkAgent* pNetwork)
 
 void GameManager::ScriptPhysicsTick()
 {
+	GetTickLock()->Release();
+	ScopeLock lPhysLock(((GameTicker*)GetTicker())->GetPhysicsLock());
+	GetTickLock()->Acquire();
+
 	//if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
 		mContext->HandlePostKill();

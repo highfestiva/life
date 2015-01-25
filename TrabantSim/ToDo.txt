@@ -37,8 +37,9 @@
 +Fix helisim controls!
 +Test in release build.
 +Test using API in strange ways. Crash control.
++Add some comments. What is "avel" for instance?
++Configuration for running towards a simulator on another machine.
 
-Add some comments. What is "avel" for instance?
 Fix bug: sometimes won't TCP socket connect! Reproduce how?
 Build and run on Mac.
 Test accelerometer controls on iOS.
