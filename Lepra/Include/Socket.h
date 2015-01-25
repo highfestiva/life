@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <list>
 #include "CyclicArray.h"
 #include "Datagram.h"
 #include "HashSet.h"

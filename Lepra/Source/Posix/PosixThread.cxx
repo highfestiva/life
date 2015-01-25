@@ -15,7 +15,7 @@
 #include <time.h>
 #include "../../Include/LepraOS.h"
 #include "../../Include/HiResTimer.h"
-#include "../../Include/Thread.h"
+#include "../../Include/Posix/PosixThread.h"
 
 
 

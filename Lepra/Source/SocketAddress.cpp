@@ -22,7 +22,7 @@ SocketAddress::SocketAddress()
 	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
 	lSockAddr->sin_family = AF_INET;
 #ifdef LEPRA_MAC
-	lSockAddr->sin_len = sizeof(RawSockAddr);
+	lSockAddr->sin_len = sizeof(RawSocketAddress);
 #endif // Macintosh
 }
 

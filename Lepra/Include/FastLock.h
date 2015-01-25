@@ -24,7 +24,7 @@
 #define FastLock	PosixLock
 #define FastCondition	PosixCondition
 #define FastSemaphore	PosixSemaphore
-#define fastRwLock	Win32RwLock
+#define FastRwLock	PosixRwLock
 
 #else
 

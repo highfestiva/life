@@ -10,7 +10,7 @@
 #include <termios.h>
 #include "../../Include/DiskFile.h"
 #include "../../Include/JsonString.h"
-#include "../../Include/Lepra.h"
+#include "../../Include/LepraOS.h"
 #include "../../Include/Log.h"
 #include "../../Include/Path.h"
 #include "../../Include/String.h"

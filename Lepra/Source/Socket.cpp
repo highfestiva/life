@@ -407,8 +407,8 @@ TcpSocket* TcpListenerSocket::Accept(SocketFactory pSocketFactory)
 		int lAcceptCount = 0;
 		while (IsOpen() && lAcceptCount == 0)
 		{
-			fd_set lAcceptSet;
-			FD_ZERO(&lAcceptSet);
+			FdSet lAcceptSet;
+			LEPRA_FD_ZERO(&lAcceptSet);
 #pragma warning(push)
 #pragma warning(disable: 4127)	// MSVC warning: conditional expression is constant.
 			LEPRA_FD_SET((sys_socket)mSocket, &lAcceptSet);
@@ -416,7 +416,7 @@ TcpSocket* TcpListenerSocket::Accept(SocketFactory pSocketFactory)
 			timeval lTime;
 			lTime.tv_sec = 1;
 			lTime.tv_usec = 0;
-			lAcceptCount = ::select((int)mSocket+1, &lAcceptSet, NULL, NULL, &lTime);
+			lAcceptCount = ::select((int)mSocket+1, LEPRA_FDS(&lAcceptSet), NULL, NULL, &lTime);
 		}
 		if (lAcceptCount >= 1)
 		{
@@ -607,16 +607,16 @@ int TcpSocket::Receive(void* pData, int pMaxSize, double pTimeout)
 	{
 		pTimeout = 0;
 	}
-	fd_set lAcceptSet;
-	FD_ZERO(&lAcceptSet);
+	FdSet lAcceptSet;
+	LEPRA_FD_ZERO(&lAcceptSet);
 #pragma warning(push)
 #pragma warning(disable: 4127)	// MSVC warning: conditional expression is constant.
-	LEPRA_FD_SET((SOCKET)mSocket, &lAcceptSet);
+	LEPRA_FD_SET((sys_socket)mSocket, &lAcceptSet);
 #pragma warning(pop)
 	timeval lTime;
 	lTime.tv_sec = (long)pTimeout;
 	lTime.tv_usec = (long)((pTimeout-lTime.tv_sec) * 1000000);
-	int lReadCount = ::select((int)mSocket+1, &lAcceptSet, NULL, NULL, &lTime);
+	int lReadCount = ::select((int)mSocket+1, LEPRA_FDS(&lAcceptSet), NULL, NULL, &lTime);
 	if (lReadCount == 1)
 	{
 		return Receive(pData, pMaxSize);

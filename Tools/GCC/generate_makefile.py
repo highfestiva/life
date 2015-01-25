@@ -344,7 +344,6 @@ def main():
         ["Bound",           "gfx_bin",    "Bound/Bound10.vcxproj", "LifeClient"],
         ["TrabantSim",      "gfx_bin",    "TrabantSim/TrabantSim10.vcxproj", "LifeClient"],
         ["Impuzzable",      "gfx_bin",    "Impuzzable/Impuzzable10.vcxproj", "LifeClient"],
-        ["Fire",            "gfx_bin",    "Fire/Fire10.vcxproj", "LifeClient"],
         ["PushServer",      "bin",        "Push/PushServer/PushServer10.vcxproj", "LifeServer"],
         ["HoverTankServer", "bin",        "HoverTank/HoverTankServer/HoverTankServer10.vcxproj", "LifeServer"],
         ["PushMaster",      "bin",        "Push/PushMaster/PushMaster10.vcxproj", "LifeMaster"],

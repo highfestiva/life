@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "../Include/ConsoleCommandManager.h"
+#include "../Include/LepraOS.h"
 #include "../Include/SystemManager.h"
 #ifdef LEPRA_WINDOWS
 #include <conio.h>
