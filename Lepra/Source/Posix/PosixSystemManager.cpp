@@ -219,6 +219,10 @@ str SystemManager::GetCpuName()
 	return (_T("x64"));
 #elif defined(LEPRA_GCC_POWERPC)
 	return (_T("PowerPC"));
+#elif defined(LEPRA_GCC_ARM_32)
+	return (_T("ARM"));
+#elif defined(LEPRA_GCC_ARM_64)
+	return (_T("ARM64"));
 #else // Unkonwn CPU type.
 	return (_T("Unknown"));
 #endif // CPU check.

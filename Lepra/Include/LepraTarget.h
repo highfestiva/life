@@ -65,8 +65,12 @@
 #define LEPRA_GCC_X86_32
 #elif defined(__POWERPC__)
 #define LEPRA_GCC_POWERPC
+#elif defined(__arm64__)
+#define LEPRA_GCC_ARM
+#define LEPRA_GCC_ARM_64
 #elif defined(__arm__)
 #define LEPRA_GCC_ARM
+#define LEPRA_GCC_ARM_32
 #else	// Unknown hardware.
 #error "Hardware platform not supported!"
 #endif

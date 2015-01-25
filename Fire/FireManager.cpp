@@ -89,22 +89,22 @@ struct VillainTypes
 int gPersonalityCount = 0;
 const VillainTypes gVillainTypes[] =
 {
-	{_O("JI9,,/0,5+*~29=:9,", "Terrorist leader"), 110},
-	{_O("Jg9,,/-,5+*", "Terrorist"), 440},
-	{_O("KX)<(9.,+5(9", "Subversive"), 110},
-	{_O("X<=+;5F+*", "Fascist"), 30},
-	{_O("P\\=$5", "Nazi"), 110},
+	{_O("JI9,,/0,5+*~29=:9,", "Terrorist leader"), 331},
+	{_O("Jg9,,/-,5+*", "Terrorist"), 1502},
+	{_O("KX)<(9.,+5(9", "Subversive"), 333},
+	{_O("U+22)1050=*5", "Illuminati"), 9},
+	{_O("Kp5*6", "Sith"), 31},
 	{_O("N>)*50f", "Putin"), 1},
-	{_O("Qo),:9k,9,", "Murderer"), 50},
-	{_O("G:65+*W29<2/'9,", "Whistleblower"), 5},
+	{_O("Qo),:9k,9,", "Murderer"), 157},
+	{_O("G:65+*W29<2/'9,", "Whistleblower"), 14},
 	{_O("[%6915 ;=2~]25", "Chemical Ali"), 1},
 	{_O("=32q]+w+=:", "al-Assad"), 1},
-	{_O("Xb)75*h5(9", "Fugitive"), 20},
-	{_O("Jm,9+.}=++9,", "Trespasser"), 20},
-	{_O("J]9,,/s,5+*~'=00=<9B", "Terrorist wannabe"), 30},
-	{_O("]-GOR", "AWOL"), 10},
-	{_O("[5/.%,z576*~(5/2=*/{,", "Copyright violator"), 1},
-	{_O("]:00/%*507~7)%", "Annoying guy"), 1},
+	{_O("Xb)75*h5(9", "Fugitive"), 61},
+	{_O("Jm,9+.}=++9,", "Trespasser"), 59},
+	{_O("J]9,,/s,5+*~'=00=<9B", "Terrorist wannabe"), 91},
+	{_O("]-GOR", "AWOL"), 33},
+	{_O("[5/.%,z576*~(5/2=*/{,", "Copyright violator"), 3},
+	{_O("]:00/%*507~7)%", "Annoying guy"), 3},
 };
 
 

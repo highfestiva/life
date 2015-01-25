@@ -3021,6 +3021,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "Fire-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\\\"$(SRCROOT)/../../Lepra\\\"",
@@ -3063,6 +3064,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "Fire-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\\\"$(SRCROOT)/../../Lepra\\\"",
