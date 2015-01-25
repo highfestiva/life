@@ -15,7 +15,7 @@ shipasc = r'''
 XX  XX  XX
 ´XXXXXXXX`
  ´XXXXXX`
-'''.strip('\n')
+'''
 
 ship = create_ascii_object(shipasc)
 ship.orientation(quat().rotate_x(-pi/2))	# Point ship forward instead of upward. Ship-relative coordinate system hereafter is +Y down, +Z in.
@@ -59,8 +59,7 @@ def update_terrain(pos):
 			if key in terrain_meshes:
 				del old_meshes[key]
 			elif not created:
-				terrain_meshes[key] = create_terrain_patch(x,y)
-				created = True
+				terrain_meshes[key],created = create_terrain_patch(x,y),True
 	# Drop patches that have gone out of range.
 	for key,mesh in old_meshes.items():
 		del terrain_meshes[key]

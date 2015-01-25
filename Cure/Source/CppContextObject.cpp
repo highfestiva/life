@@ -14,6 +14,7 @@
 #include "../../Tbc/Include/PhysicsTrigger.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
+#include "../Include/GameTicker.h"
 #include "../Include/RuntimeVariable.h"
 #include "../Include/TimeManager.h"
 
@@ -149,7 +150,8 @@ void CppContextObject::CreatePhysics(Tbc::ChunkyPhysics* pPhysics)
 	str lPhysicsName = strutil::Format(_T("TestPhysics%i"), ++lPhysicsCounter);
 	str lPhysicsRefName = lPhysicsName+_T("Ref");
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
-		mManager->GetGameManager()->GetPhysicsManager(), mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+		((Cure::GameTicker*)mManager->GetGameManager()->GetTicker())->GetPhysicsLock(), mManager->GetGameManager()->GetPhysicsManager(),
+		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
 	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
 	UserPhysicsReferenceResource* lPhysicsRef = mPhysicsResource;
 	PhysicsSharedResource* lPhysicsRefResource = (PhysicsSharedResource*)lPhysicsRef->CreateResource(GetResourceManager(), lPhysicsRefName);
@@ -216,7 +218,8 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 	const str lInstanceId = strutil::IntToString(GetInstanceId(), 10);
 	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
-		mManager->GetGameManager()->GetPhysicsManager(), mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+		((Cure::GameTicker*)mManager->GetGameManager()->GetTicker())->GetPhysicsLock(), mManager->GetGameManager()->GetPhysicsManager(),
+		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
 	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
 	if (!mForceLoadUnique)
 	{

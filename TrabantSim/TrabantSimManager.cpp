@@ -239,6 +239,12 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 			}
 			else if (lMesh)
 			{
+				if (lMesh->mIndices.size() <= 3)
+				{
+					mLog.Warningf(_T("Need two triangles or more (%i indices is too few) to create physics mesh."), lMesh->mIndices.size());
+					delete lPhysics;
+					return -1;
+				}
 				Tbc::ChunkyBoneMesh* lBone = new Tbc::ChunkyBoneMesh(lBoneData);
 				lBone->SetMaterial(_T("rubber"));
 				lBone->mVertexCount = lMesh->mVertices.size()/3;
@@ -288,7 +294,8 @@ int TrabantSimManager::CreateObject(const MeshObject& pGfxObject, const PhysObje
 	}
 	if (pMaterial == MaterialChecker)
 	{
-		AddCheckerTexturing(lMesh);
+		const float lScale = (fabs(pGfxObject.mVertices[pGfxObject.mVertices.size()-3]-pGfxObject.mVertices[0]) >= 60)? 20.0f : 2.0f;
+		AddCheckerTexturing(lMesh, lScale);
 		lObject->LoadTexture(_T("checker.png"));
 	}
 	lObject->AddMeshResource(lMesh, pIsStatic? -1 : 1);
@@ -660,6 +667,10 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 	if (pSet)
 	{
 		pOrientation = pOrientation * lObject->mInitialOrientation;
+		if (pOrientation.GetNorm() < 0.5)
+		{
+			return;
+		}
 		vec3 lPosition = lObject->GetPosition();
 		GetPhysicsManager()->SetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), xform(pOrientation, lPosition));
 	}
@@ -849,6 +860,7 @@ void TrabantSimManager::AcceptLoop()
 		if (mConnectSocket)
 		{
 			if (mCommandThread) mCommandThread->RequestStop();
+			mConnectSocket->Shutdown(SocketBase::SHUTDOWN_BOTH);
 			mConnectSocket->Disconnect();
 			Thread::Sleep(0.1f);
 			delete mCommandThread;
@@ -1089,6 +1101,7 @@ void TrabantSimManager::TickUiInput()
 void TrabantSimManager::TickUiUpdate()
 {
 	((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
+	mCollisionSoundManager->Tick(mCameraTransform.GetPosition());
 }
 
 void TrabantSimManager::SetLocalRender(bool pRender)
@@ -1098,8 +1111,10 @@ void TrabantSimManager::SetLocalRender(bool pRender)
 
 
 
-void TrabantSimManager::AddCheckerTexturing(UiTbc::TriangleBasedGeometry* pMesh)
+void TrabantSimManager::AddCheckerTexturing(UiTbc::TriangleBasedGeometry* pMesh, float pScale)
 {
+	const float lScale = 1/pScale;
+	const float lOff = lScale*0.5f;
 	const float* lVertices = pMesh->GetVertexData();
 	const vtx_idx_t* lTriangles = pMesh->GetIndexData();
 	const unsigned tc = pMesh->GetTriangleCount();
@@ -1116,33 +1131,33 @@ void TrabantSimManager::AddCheckerTexturing(UiTbc::TriangleBasedGeometry* pMesh)
 		vec3 u2(lVertices[v2*3+0], lVertices[v2*3+1], lVertices[v2*3+2]);
 		vec3 n = (u1-u0).Cross(u2-u0);
 		n.x = fabs(n.x); n.y = fabs(n.y); n.z = fabs(n.z);
-		u0 *= 0.1f; u1 *= 0.1f; u2 *= 0.1f;
+		u0 *= lScale; u1 *= lScale; u2 *= lScale;
 		if (n.x > n.y && n.x > n.z)
 		{
-			lUVs[v0*2+0] = u0.y;
-			lUVs[v0*2+1] = u0.z;
-			lUVs[v1*2+0] = u1.y;
-			lUVs[v1*2+1] = u1.z;
-			lUVs[v2*2+0] = u2.y;
-			lUVs[v2*2+1] = u2.z;
+			lUVs[v0*2+0] = u0.y+lOff;
+			lUVs[v0*2+1] = u0.z+lOff;
+			lUVs[v1*2+0] = u1.y+lOff;
+			lUVs[v1*2+1] = u1.z+lOff;
+			lUVs[v2*2+0] = u2.y+lOff;
+			lUVs[v2*2+1] = u2.z+lOff;
 		}
 		else if (n.y > n.z)
 		{
-			lUVs[v0*2+0] = u0.x;
-			lUVs[v0*2+1] = u0.z;
-			lUVs[v1*2+0] = u1.x;
-			lUVs[v1*2+1] = u1.z;
-			lUVs[v2*2+0] = u2.x;
-			lUVs[v2*2+1] = u2.z;
+			lUVs[v0*2+0] = u0.x+lOff;
+			lUVs[v0*2+1] = u0.z+lOff;
+			lUVs[v1*2+0] = u1.x+lOff;
+			lUVs[v1*2+1] = u1.z+lOff;
+			lUVs[v2*2+0] = u2.x+lOff;
+			lUVs[v2*2+1] = u2.z+lOff;
 		}
 		else
 		{
-			lUVs[v0*2+0] = u0.x;
-			lUVs[v0*2+1] = u0.y;
-			lUVs[v1*2+0] = u1.x;
-			lUVs[v1*2+1] = u1.y;
-			lUVs[v2*2+0] = u2.x;
-			lUVs[v2*2+1] = u2.y;
+			lUVs[v0*2+0] = u0.x+lOff;
+			lUVs[v0*2+1] = u0.y+lOff;
+			lUVs[v1*2+0] = u1.x+lOff;
+			lUVs[v1*2+1] = u1.y+lOff;
+			lUVs[v2*2+0] = u2.x+lOff;
+			lUVs[v2*2+1] = u2.y+lOff;
 		}
 	}
 	pMesh->AddUVSet(lUVs.data());

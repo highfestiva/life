@@ -34,14 +34,14 @@ for y in range(2):
 for invader in invaders:
 	invader.vel(invaderspeeds[0])
 
-tap_dx = 100
 while loop():
 	# Steering, shooting.
+	tap_dx = 100
 	if taps():
-		dx = ship.pos().x - closest_tap(ship.pos()).pos3d().x
+		dx = closest_tap(ship.pos()).pos3d().x - ship.pos().x
 		tap_dx = abs(dx)
 		vmin = min(25,tap_dx*3)*4
-		ship.vel((vmin if sx<tx else -vmin, 0, 0))
+		ship.vel((vmin if dx>0 else -vmin, 0, 0))
 	else:
 		ship.vel((keydir().x*50,0,0))
 	if ('SPACE' in keys() or tap_dx<5) and timeout(0.7):

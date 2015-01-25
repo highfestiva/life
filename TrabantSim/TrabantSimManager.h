@@ -158,7 +158,7 @@ protected:
 	virtual void TickUiUpdate();
 	virtual void SetLocalRender(bool pRender);
 
-	void AddCheckerTexturing(UiTbc::TriangleBasedGeometry* pMesh);
+	void AddCheckerTexturing(UiTbc::TriangleBasedGeometry* pMesh, float pScale);
 
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);

@@ -19,10 +19,11 @@ namespace Cure
 
 
 PhysicsSharedInitData::PhysicsSharedInitData(const xform& pTransformation, const vec3& pVelocity, PhysicsOverride pPhysicsOverride,
-		Tbc::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
+		Lock* pPhysicsLock, Tbc::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
 	mTransformation(pTransformation),
 	mVelocity(pVelocity),
 	mPhysicsOverride(pPhysicsOverride),
+	mPhysicsLock(pPhysicsLock),
 	mPhysicsManager(pPhysicsManager),
 	mPhysicsFps(pPhysicsFps),
 	mInstanceId(pInstanceId)
@@ -52,6 +53,7 @@ PhysicsSharedResource::~PhysicsSharedResource()
 	Tbc::ChunkyPhysics* lStructure = GetRamData();
 	if (lStructure)
 	{
+		ScopeLock lLock(mInitData.mPhysicsLock);
 		lStructure->ClearAll(mInitData.mPhysicsManager);
 	}
 }
@@ -142,6 +144,7 @@ bool PhysicsSharedResource::FinalizeInit()
 	lTransformation.SetOrientation(quat());
 
 	const int lPhysicsFps = mInitData.mPhysicsFps;
+	ScopeLock lLock(mInitData.mPhysicsLock);
 	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation, mInitData.mInstanceId, mInitData.mInstanceId);
 	deb_assert(lOk);
 

@@ -20,7 +20,7 @@ namespace Tbc
 
 
 
-#define MAX_ASPECT_INDEX	40
+#define MAX_ASPECT_INDEX	400
 
 
 

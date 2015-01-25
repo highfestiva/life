@@ -315,6 +315,10 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					if (lMaterialInfo == _T("flat")) lMaterial = MaterialFlat;
 					else if (lMaterialInfo == _T("checker")) lMaterial = MaterialChecker;
 					const int lObjectId = lManager->CreateObject(mGfxMesh, mPhysObjects, lMaterial, lIsStatic);
+					if (lObjectId == -1)
+					{
+						throw ParameterException();
+					}
 					mActiveResponse += ToStr(lObjectId);
 				}
 				break;

@@ -5,7 +5,6 @@
 from trabant import *
 
 cam(distance=30)
-gravity((0,0,-9), bounce=1)
 ball = create_sphere_object()
 
 while loop(delay=0.01):	# Need low latencies to be able to get accurate tap velocities.

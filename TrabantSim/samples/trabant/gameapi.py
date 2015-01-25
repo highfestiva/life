@@ -49,7 +49,7 @@ def cam(angle, distance, target_oid, pos, fov, relative_angle):
 	if distance:
 		set('Ui.3D.CamDistance', float(distance))
 		set('Ui.3D.ClipFar', float(distance*20))
-	if target_oid:
+	if target_oid != None:
 		set('Ui.3D.CamTargetObject', target_oid)
 	if pos:
 		set('Ui.3D.CamLookAtX', float(pos.x))

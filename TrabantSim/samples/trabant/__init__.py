@@ -14,6 +14,7 @@ hinge_joint,suspend_hinge_joint,turn_hinge_joint = 'hinge suspend_hinge turn_hin
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
 _wait_until_loaded = True
+_fast_ascii_generate = True
 _has_opened = False
 _last_ascii_top_left_offset = None
 asc2obj_lookup = []
@@ -96,7 +97,7 @@ class Obj:
 	def create_joint(self, joint_type, obj2, axis=None, stop=None, spring=None):
 		self.last_joint_axis = tovec3(axis)
 		return gameapi.create_joint(self.id, joint_type, obj2.id, axis, stop, spring)
-	def add_stabilizer(self, force=1):
+	def add_stabilizer(self, force=0.5):
 		gameapi.addtag(self.id, 'upright_stabilizer', [force], [], [0], [], [])
 	def release(self):
 		gameapi.releaseobj(self.id)
@@ -137,18 +138,19 @@ class Joystick:
 		self.x,self.y = 0,0
 
 
-def tabant_init(**kwargs):
+def trabant_init(**kwargs):
 	global _joysticks,_timers,_has_opened,_accelerometer_calibration
 	_joysticks,_timers,_has_opened,online = {},{},True,False
+	exc = None
 	for _ in range(2):
 		try:
 			if gameapi.init(**kwargs):
 				online = True
 				break
-		except:
-			pass
+		except Exception as e:
+			exc = e
 	if not online:
-		raise Exception('unable to connect to simulator')
+		raise exc if exc else Exception('unable to connect to simulator')
 	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
 	loop(delay=0)	# Resets taps+collisions.
 	_accelerometer_calibration = accelerometer()
@@ -184,7 +186,7 @@ def timeout(t, timer=0, first_hit=False):
 def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relative_angle=None, light_angle=None):
 	_tryinit()
 	angle = tovec3(angle)
-	gameapi.cam(angle, distance, target.id if target else None, tovec3(pos), fov, target_relative_angle)
+	gameapi.cam(angle, distance, target.id if target else target, tovec3(pos), fov, target_relative_angle)
 	gameapi.light(tovec3(light_angle))
 	# Update shadow variables for screen<-->world space transformations.
 	global _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians
@@ -213,13 +215,14 @@ def gravity(g, bounce=None, friction=None):
 
 def create_ascii_object(ascii, pos=None, vel=None, avel=None, mass=None, col=None, mat='flat', static=False, physmesh=False):
 	global _last_ascii_top_left_offset,asc2obj_lookup
+	physmesh = True if physmesh==True else False
 	# Keep a small cache of generated objects. Most small prototypes will reuse shapes.
 	gfx = None
 	for s,g,p,lo in asc2obj_lookup:
 		if s == ascii+str(physmesh):
 			gfx,phys,_last_ascii_top_left_offset = g,p,lo
 	if not gfx:
-		gfx,phys = asc2obj.str2obj(ascii, force_phys_mesh=physmesh)
+		gfx,phys = asc2obj.str2obj(ascii, fast=_fast_ascii_generate, force_phys_mesh=physmesh)
 		_last_ascii_top_left_offset = -vec3(min(gfx.vertices, key=lambda v:v.x).x, min(gfx.vertices, key=lambda v:v.z).z, min(gfx.vertices, key=lambda v:v.y).y)
 		asc2obj_lookup.append((ascii+str(physmesh),gfx,phys,_last_ascii_top_left_offset))
 		if len(asc2obj_lookup) > 10:
@@ -245,10 +248,6 @@ def release_all_objects():
 
 def last_ascii_top_left_offset():
 	return _last_ascii_top_left_offset
-
-def wait_until_loaded(wait=True):
-	global _wait_until_loaded
-	_wait_until_loaded = wait
 
 def explode(pos, vel=vec3(), strength=1):
 	_tryinit()
@@ -369,9 +368,7 @@ def _poll_joysticks():
 
 def _create_object(gfx, phys, static, pos, vel, avel, mass, col, mat):
 	_tryinit()
-	objpos = tovec3(pos) if pos else vec3()
-	# if mat != 'smooth':
-		# gfx = objgen.flatten_mesh(gfx)
+	objpos = tovec3(pos) if tovec3(pos) else vec3()
 	gameapi.initgfxmesh(gfx.q, gfx.pos, gfx.vertices, gfx.indices)
 	gameapi.clearprepphys()
 	for p in phys:
@@ -493,4 +490,4 @@ def _get_aspect_ratio():
 
 def _tryinit():
 	if not _has_opened:
-		tabant_init()
+		trabant_init()

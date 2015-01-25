@@ -678,6 +678,7 @@ bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	const xform& pTransform)
 {
 	RemovePhysics(pPhysics);
+	deb_assert(mTriangleCount > 1);
 	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
 		pTransform, mBodyData.mMass, pType, mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
 	return (mBodyId != INVALID_BODY);

@@ -365,6 +365,7 @@ bool GameClientMasterTicker::Tick()
 			if (lSlave)
 			{
 				lOk = lSlave->EndTick();
+				lSlave->GetTickLock()->Acquire();	// Lock all slaves so we can work on resources.
 			}
 		}
 	}
@@ -375,6 +376,15 @@ bool GameClientMasterTicker::Tick()
 		// as well as upload data to the GPU and so forth; parallelization here will certainly cause threading
 		// errors.
 		mResourceManager->Tick();
+		// OK done, now we can release all slave locks.
+		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+		{
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				lSlave->GetTickLock()->Release();
+			}
+		}
 	}
 
 	{

@@ -25,12 +25,13 @@ struct PhysicsSharedInitData
 	xform mTransformation;
 	vec3 mVelocity;
 	PhysicsOverride mPhysicsOverride;
+	Lock* mPhysicsLock;
 	Tbc::PhysicsManager* mPhysicsManager;
 	const int mPhysicsFps;
 	const GameObjectId mInstanceId;
 
 	PhysicsSharedInitData(const xform& pTransformation, const vec3& pVelocity, PhysicsOverride pPhysicsOverride,
-		Tbc::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
+		Lock* pPhysicsLock, Tbc::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
 	void operator=(const PhysicsSharedInitData&);
 };
 

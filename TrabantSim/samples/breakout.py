@@ -10,7 +10,7 @@ paddle = r'''
  ^     ^
 <XXXXXXX>
  v     v
-'''.strip('\n')
+'''
 brick = 'XX'
 
 cam(angle=(0,-pi/2,0), distance=35)	# Flip camera for iPad portrait layout.

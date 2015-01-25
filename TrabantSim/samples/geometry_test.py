@@ -13,7 +13,7 @@ shipasc = r'''
   /XXXXXX\
  /XXXXXXXX\
    XX  XX
-'''.strip('\n')
+'''
 
 diamond_with_bom_hook = r'''
  XX\
@@ -22,7 +22,7 @@ diamond_with_bom_hook = r'''
   ´`
 ---
  X
-'''.strip('\n')
+'''
 
 square_with_diamond = r'''
    ^
@@ -34,7 +34,7 @@ XX
  XXX>
  XXX
  XXX
-'''.strip('\n')
+'''
 
 gravity((0,0,0))
 debug()

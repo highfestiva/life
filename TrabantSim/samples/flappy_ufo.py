@@ -17,7 +17,7 @@ def init():
 	gravity((0,0,0))	# Suspend objects while initializing.
 	global ufo,columns,t
 	ufo = create_ascii_object(ufoasc, vel=(8,0,1), col='#a33')
-	engine = ufo.create_engine(push_abs_engine, strength=0.1)
+	engine = ufo.create_engine(push_abs_engine, strength=0.8)
 	engine.addsound(sound_engine_wobble, intensity=0.3, volume=1)
 	engine.force((1,0,0))
 	cam(target=ufo)
@@ -33,7 +33,7 @@ def make_column_pair(dx, yoff):
 
 cam(distance=30)
 init()
-while loop():
+while loop(delay=0.01):	# Low latency needed for reaction-type game.
 	if taps() or keys():
 		ufo.vel(ufo.vel().with_z(11))
 		ufo.avel(rndvec()*0.1)

@@ -787,6 +787,11 @@ void PhysicsManagerODE::SetBodyMass(BodyID pBodyId, float pMass)
 		mLog.Errorf(_T("SetBodyMass() - Body %i is not part of this world!"), pBodyId);
 		return;
 	}
+	if (!lObject->mBodyID || pMass <= 0)
+	{
+		mLog.Errorf(_T("SetBodyMass() - body %i is static or mass %f is not greater than zero!"), pBodyId, pMass);
+		return;
+	}
 	lObject->mMass = pMass;
 	dMass lMass;
 	lMass.setSphereTotal(lObject->mMass, lObject->mGeometryData[0]);

@@ -694,7 +694,7 @@ float Machine::CalculateMeshOffset(const str& pFunction, float lStartTime, float
 
 void Machine::LoadPlaySound3d(UserSound3dResource* pSoundResource)
 {
-	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	//deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0, 1.0);

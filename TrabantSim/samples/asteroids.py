@@ -11,7 +11,7 @@ shipasc = r'''
     /XX\
    /XXXX\
     X  X
-'''.strip('\n')
+'''
 rockasc = 'X\\\nXX'	# Slightly irregular shape ftw.
 
 create_rock = lambda p: create_ascii_object(rockasc, pos=p, vel=(rndvec()*3).with_y(0), avel=rndvec(), col='#777')
@@ -38,11 +38,8 @@ while loop():
 	ship.engine[1].force((0,keydir().x,0))
 	# Check if we crashed into something, if so explode.
 	if ship in collided_objects():
-		ship.engine[0].force((0,0,0))
+		[e.force((0,0,0)) for e in ship.engine]
 		explode(shippos,shipvel)
 		sleep(3)
 		release_all_objects()
 		init()
-
-	if 'SPACE' in keys():
-		explode(shippos,shipvel)

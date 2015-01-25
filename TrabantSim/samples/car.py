@@ -8,7 +8,7 @@ from trabant import *
 chassis = r'''
   /XX\
 XXXXXXXXX
-'''.strip('\n')
+'''
 chassis = '\n---\n'.join([chassis]*3)	# Make the car a bit wider.
 
 bgcol('#5af')

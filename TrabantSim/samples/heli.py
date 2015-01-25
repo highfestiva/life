@@ -6,7 +6,7 @@ from trabant import *
 from trabant.math import *
 
 # ASCII geometries. An X is one unit wide, high and deep. This is going to be a very flat helicopter.
-main_rotor,tail_rotor,body = [part.strip('\n') for part in r'''
+main_rotor,tail_rotor,body = r'''
 XXXXXXXXXXX
 ~~~
 XXX
@@ -15,9 +15,9 @@ XXX
 /XXXXXXXXX\
 XXXXXXXXXXXXXXXXXXXX
 ´XXXXXXXXX`
-'''.split('~~~')]
+'''.split('~~~')
 near,middle,far = [body]*3	# Make the body a bit wider.
-near,far = [s.replace('XXXXXXXXX\n', '\n') for s in [near,far]]	# Only keep tail in the middle.
+near,far = [s.replace('XXXXXXXXX\n', '\n') for s in [near,far]]	# Only keep tail in the middle (i.e. make it thin).
 body = near+'\n---\n'+middle+'\n---\n'+far
 
 bgcol('#5af')
@@ -40,8 +40,11 @@ body.create_joint(hinge_joint, tail_rotor, (0,-1,0))
 body.create_engine(gyro_engine, max_velocity=(30,30), strength=0.1)	# No controls necessary as it always spins up to operational speed.
 yaw = body.create_engine(rotor_engine, strength=0.1)
 
-# Stabilize the chopper, or it will be a nightmare to fly.
-#body.add_stabilizer(5)
+# This will have to do as air resistance.
+body.create_engine(push_abs_engine, strength=5, friction=0.5)
+
+# Stabilize the chopper, or it will be a nightmare to fly for the n00bs.
+body.add_stabilizer()
 
 [create_ascii_object('X', pos=vec3(0,50,3)+rndvec()*3, col=rndvec().abs()) for _ in range(5)]
 
@@ -52,8 +55,10 @@ cam(angle=(-0.3,0,0), distance=40, target=body)
 left,right = create_joystick((0,0),sloppy=True),create_joystick((1,0),sloppy=True)
 
 while loop():
-	thrust.force(left.y + keydir().z*0.3)
-	lift.force(max(left.y+keydir().z,0))
+	thrust.force(left.y)
+	liftforce = max(left.y,0)
+	lift.force(liftforce)
 	yaw.force(left.x)
-	pitch.force(right.y + keydir().y*0.3)
-	roll.force(right.x + keydir().x*0.3)
+	tiltscale = 0.3+liftforce
+	pitch.force(right.y * tiltscale)
+	roll.force(right.x * tiltscale)

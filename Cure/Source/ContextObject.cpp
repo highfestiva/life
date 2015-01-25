@@ -228,7 +228,7 @@ void ContextObject::AttachToObjectByBodyIndices(unsigned pBody1Index, ContextObj
 {
 	if (IsAttachedTo(pObject2))
 	{
-		deb_assert(false);
+		mLog.Warningf(_T("Object %i already attached to object %i!"), GetInstanceId(), pObject2->GetInstanceId());
 		return;
 	}
 	AttachToObject(mPhysics->GetBoneGeometry(pBody1Index), pObject2, pObject2->GetStructureGeometry(pBody2Index), false);

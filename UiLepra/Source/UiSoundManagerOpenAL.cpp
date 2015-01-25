@@ -6,7 +6,7 @@
 
 #include "pch.h"
 #include "../Include/UiSoundManagerOpenAL.h"
-#include <assert.h>
+#include "../../Lepra/Include/LepraAssert.h"
 #include "../../Lepra/Include/ResourceTracker.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../ThirdParty/freealut-1.1.0/include/AL/alut.h"
@@ -21,8 +21,8 @@ extern "C" ALC_API void ALC_APIENTRY alc_deinit(void);	// Not intended for this 
 #endif // Windows
 
 #ifdef LEPRA_DEBUG
-#define OAL_ASSERT()	{ ALenum lAlError = alGetError(); assert(lAlError == AL_NO_ERROR); }
-#define OALUT_ASSERT()	{ ALenum lAlutError = alutGetError(); assert(lAlutError == ALUT_ERROR_NO_ERROR); }
+#define OAL_ASSERT()	{ ALenum lAlError = alGetError(); deb_assert(lAlError == AL_NO_ERROR); }
+#define OALUT_ASSERT()	{ ALenum lAlutError = alutGetError(); deb_assert(lAlutError == ALUT_ERROR_NO_ERROR); }
 #else // !Debug
 #define OAL_ASSERT()	alGetError()
 #define OALUT_ASSERT()	alutGetError()
@@ -231,13 +231,13 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 	if (lOk)
 	{
 		ScopeLock lLock(&mLock);
-		assert(mSampleSet.find(lSample) == mSampleSet.end());
+		deb_assert(mSampleSet.find(lSample) == mSampleSet.end());
 		mSampleSet.insert(lSample);
 	}
 	else
 	{
 		mLog.Errorf(_T("Could not get load sound %s, thus not possible to create sound."), pFileName.c_str());
-		assert(false);
+		deb_assert(false);
 		delete (lSample);
 		lSample = 0;
 	}
@@ -323,12 +323,11 @@ SoundManager::SoundInstanceID SoundManagerOpenAL::CreateSoundInstance(SoundID pS
 	Source* lSource = new Source;
 	if (lSource->SetSample(lSample, mRollOffFactor))
 	{
-		assert(mSourceSet.find(lSource) == mSourceSet.end());
+		deb_assert(mSourceSet.find(lSource) == mSourceSet.end());
 		mSourceSet.insert(lSource);
 	}
 	else
 	{
-		assert(false);
 		delete (lSource);
 		lSource = 0;
 	}
@@ -341,7 +340,7 @@ void SoundManagerOpenAL::DeleteSoundInstance(SoundInstanceID pSoundIID)
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 
@@ -446,7 +445,7 @@ void SoundManagerOpenAL::SetVolume(SoundInstanceID pSoundIID, float pVolume)
 {
 	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
+	if (!lSource || pVolume <= 0)
 	{
 		return;
 	}
@@ -458,7 +457,7 @@ void SoundManagerOpenAL::SetPitch(SoundInstanceID pSoundIID, float pPitch)
 {
 	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
+	if (!lSource || pPitch <= 0)
 	{
 		return;
 	}
@@ -529,7 +528,7 @@ void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID pSoundIID, const vec
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
-		assert(false);
+		deb_assert(false);
 		return;
 	}
 
@@ -555,7 +554,7 @@ SoundManagerOpenAL::Sample* SoundManagerOpenAL::GetSample(SoundID pSoundID) cons
 	SampleSet::const_iterator x = mSampleSet.find(lSample);
 	if (x == mSampleSet.end())
 	{
-		assert(false);
+		deb_assert(false);
 		lSample = 0;
 	}
 	return (lSample);
@@ -567,7 +566,7 @@ SoundManagerOpenAL::Source* SoundManagerOpenAL::GetSource(SoundInstanceID pSound
 	SourceSet::const_iterator x = mSourceSet.find(lSource);
 	if (x == mSourceSet.end())
 	{
-		assert(false);
+		deb_assert(false);
 		lSource = 0;
 	}
 	return (lSource);
@@ -596,7 +595,7 @@ SoundManagerOpenAL::Sample::~Sample()
 
 bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 {
-	assert(mBuffer == AL_NONE);
+	deb_assert(mBuffer == AL_NONE);
 	LEPRA_ACQUIRE_RESOURCE(alBuffer);
 	mBuffer = ::alutCreateBufferFromFile(astrutil::Encode(pFileName).c_str());
 	OALUT_ASSERT();
@@ -605,7 +604,7 @@ bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 
 bool SoundManagerOpenAL::Sample::Load(const void* pData, size_t pDataSize)
 {
-	assert(mBuffer == AL_NONE);
+	deb_assert(mBuffer == AL_NONE);
 	LEPRA_ACQUIRE_RESOURCE(alBuffer);
 	mBuffer = ::alutCreateBufferFromFileImage(pData, pDataSize);
 	OALUT_ASSERT();
@@ -622,6 +621,7 @@ SoundManagerOpenAL::Source::Source():
 
 SoundManagerOpenAL::Source::~Source()
 {
+	OAL_ASSERT();
 	if (mSample)
 	{
 		mSample->mSourceList.erase(this);
@@ -630,7 +630,9 @@ SoundManagerOpenAL::Source::~Source()
 	if (mSid != (ALuint)-1)
 	{
 		::alSourceStop(mSid);
+		OAL_ASSERT();
 		::alDeleteSources(1, &mSid);
+		OAL_ASSERT();
 		mSid = (ALuint)-1;
 		LEPRA_RELEASE_RESOURCE(alSources);
 	}
@@ -639,19 +641,19 @@ SoundManagerOpenAL::Source::~Source()
 
 bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor)
 {
-	assert(mSid == (ALuint)-1);
+	deb_assert(mSid == (ALuint)-1);
 	LEPRA_ACQUIRE_RESOURCE(alSources);
 	::alGenSources(1, &mSid);
 	if (mSid == (ALuint)-1)
 	{
-		assert(false);
-		mLog.AError("Could not generate OpenAL source, thus not possible to create sound instance.");
+		const int lError = ::alGetError();
+		mLog.Errorf(_T("Could not generate OpenAL source (%4.4X), thus not possible to create sound instance."), lError);
 		return false;
 	}
 
-	assert(mSample == 0);
+	deb_assert(mSample == 0);
 	mSample = pSample;
-	assert(mSample->mSourceList.find(this) == mSample->mSourceList.end());
+	deb_assert(mSample->mSourceList.find(this) == mSample->mSourceList.end());
 	mSample->mSourceList.insert(this);
 
 	::alSourcei(mSid, AL_LOOPING, mSample->mIsLooping? 1 : 0);

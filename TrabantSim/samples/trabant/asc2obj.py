@@ -17,11 +17,21 @@ class _Triangle:
 	'''Internal representation of triangle face in a mesh.'''
 	def __init__(self, v1,v2,v3, vidxs, baseindex):
 		self.v = (v1,v2,v3)
-		self.center = (v1+v2+v3)/3
-		self.normal = (v2-v1).cross(v2-v3).normalize()
+		self._center = None
+		self._normal = None
 		self.vidxs = vidxs
 		self.baseindex = baseindex
 		self.inwards = None
+	def getcenter(self):
+		if not self._center:
+			self._center = (self.v[0]+self.v[1]+self.v[2])/3
+		return self._center
+	def getnormal(self):
+		if not self._normal:
+			self._normal = (self.v[1]-self.v[0]).cross(self.v[1]-self.v[2]).normalize()
+		return self._normal
+	center = property(getcenter)
+	normal = property(getnormal)
 	def sides(self, vtxidx):
 		sx = [k for k,ia in enumerate(self.vidxs) if ia==vtxidx][0]
 		osx = [k for k,ia in enumerate(self.vidxs) if ia!=vtxidx]
@@ -143,7 +153,7 @@ def mesh_mergevtxs(v,i):
 		else:
 			found[va] = vj
 	movcnt = [0]*len(v)
-	subcnt = [0]*len(v)
+	subcnt = list(movcnt)
 	for vj,vi in sorted(drop_v_indices, key=lambda e:e[0]):
 		movcnt[vj] = vj-vi+subcnt[vi]
 		for z in range(vj+1,len(v)):
@@ -242,7 +252,7 @@ def mesh_crushfaces(v,i):
 	if usedfaces:
 		mesh_mergevtxs(v,i)
 		mesh_dropsquashedfaces(v,i)
-		#mesh_dropequalfaces(v,i)
+		mesh_dropequalfaces(v,i)
 		mesh_dropunusedvtxs(v,i)
 	return len(usedfaces)
 
@@ -294,6 +304,26 @@ def shape2mesh(shape):
 	mesh_optimize(v,i)
 	return GfxMesh(quat(1,0,0,0), vec3(), v, i)
 
+def geoms2mesh(geoms):
+	'''Convert physical geometries to a mesh. Count on overlapping triangles.'''
+	v = []
+	i = []
+	for g in geoms:
+		b = len(v)
+		if type(g) == PhysMesh:
+			v += g.vertices
+			i += [b+gi for gi in g.indices]
+		else:
+			sx,sy,sz = g.size.x/2,g.size.y/2,g.size.z/2
+			bv = [	vec3(-sx,-sy,-sz), vec3(+sx,-sy,-sz),
+				vec3(-sx,+sy,-sz), vec3(+sx,+sy,-sz),
+				vec3(-sx,-sy,+sz), vec3(+sx,-sy,+sz),
+				vec3(-sx,+sy,+sz), vec3(+sx,+sy,+sz)  ]
+			v += [g.pos+g.q*c for c in bv]
+			i += [b+c for c in (0,2,1, 1,2,3, 5,7,4, 4,7,6, 1,5,0, 0,5,4, 2,6,3, 3,6,7, 1,3,5, 5,3,7, 4,6,0, 0,6,2)]
+	mesh_mergevtxs(v,i)
+	return GfxMesh(quat(1,0,0,0), vec3(), v, i)
+
 def cover_factor(remains,original):
 	originalcnt = asc.tricnt(original)
 	f = (originalcnt-asc.tricnt(remains) if remains else 0)/originalcnt
@@ -314,6 +344,7 @@ def take(oshape, shape, find, grow, create, directions):
 		for d in directions:
 			_crd,_size,_crds = grow(crd,size,d)
 			if asc.any_crd_out_of_bound(oshape,_crds):
+				#directions.remove(d)	# No way we could ever grow in this direction.
 				continue
 			if asc.any_crd_in_bound(shape,_crds):
 				crd,size,crds = _crd,_size,crds+_crds
@@ -325,7 +356,7 @@ def take(oshape, shape, find, grow, create, directions):
 					_crd,_size,__crds = grow(_crd,_size,d)
 					_crds += __crds
 					if asc.any_crd_out_of_bound(oshape,__crds):
-						break
+						break	# Nope, nothing found in this direction this time, but who knows when we've grown in other directions.
 					if asc.any_crd_in_bound(shape,__crds):	# We went through! At least a little... but I suppose some is better than nothing.
 						crd,size,crds = _crd,_size,crds+_crds
 						bestsize = size
@@ -457,11 +488,11 @@ def finddiamond(oshape, shape, crds):
 	return None
 
 def cuboid(oshape,shape):
-	remains,geom = take(oshape, shape, findcuboid, growcuboid, createcuboid, (vec3(+1,0,0), vec3(0,+1,0), vec3(0,0,+1), vec3(-1,0,0), vec3(0,-1,0), vec3(0,0,-1)))
+	remains,geom = take(oshape, shape, findcuboid, growcuboid, createcuboid, [vec3(+1,0,0), vec3(0,+1,0), vec3(0,0,+1), vec3(-1,0,0), vec3(0,-1,0), vec3(0,0,-1)])
 	return 1*cover_factor(remains,shape), geom, remains
 
 def diamond(oshape,shape):
-	remains,geom = take(oshape, shape, finddiamond, growdiamond, creatediamond, (vec3(+1,0,0), vec3(0,+1,0), vec3(0,0,+1), vec3(-1,0,0), vec3(0,-1,0), vec3(0,0,-1)))
+	remains,geom = take(oshape, shape, finddiamond, growdiamond, creatediamond, [vec3(+1,0,0), vec3(0,+1,0), vec3(0,0,+1), vec3(-1,0,0), vec3(0,-1,0), vec3(0,0,-1)])
 	return 0.99*cover_factor(remains,shape), geom, remains
 
 def shape2physgeoms(oshape, shape):
@@ -520,25 +551,32 @@ def flipaxis(gfx,physgeoms):
 	# pr(gfx)
 	# [pr(p) for p in physgeoms]
 
-def shape2obj(shape, force_phys_mesh=False):
-	gfx = shape2mesh(shape)
+def shape2obj(shape, fast=True, force_phys_mesh=False):
+	'''Fast means redundant and suboptimal meshes. In fast generation we build
+	physical geometries, then graphics meshes from "meshified" geometries.'''
+	physgeoms = []
+	if fast:
+		physgeoms = shape2physgeoms(shape, shape)
+		gfx = geoms2mesh(physgeoms)
+	else:
+		gfx = shape2mesh(shape)
 	if force_phys_mesh:
 		physgeoms = [PhysMesh(quat(),vec3(),gfx.vertices[:],gfx.indices[:])]
-	else:
+	elif not physgeoms:
 		physgeoms = shape2physgeoms(shape, shape)
 	centerobjs(gfx,physgeoms)
 	flipaxis(gfx,physgeoms)
 	#[print(g) for g in [gfx]+physgeoms]
 	return Obj(gfx,physgeoms)
 
-def iter2objs(f, force_phys_mesh=False):
+def iter2objs(f, fast=True, force_phys_mesh=False):
 	'''May also load objects from an opened file.'''
 	shapes = asc.load_shapes_from_file(f, crop=False)
-	objs = [shape2obj(s,force_phys_mesh) for s in shapes]
+	objs = [shape2obj(s,fast,force_phys_mesh) for s in shapes]
 	return objs
 
-def str2obj(s, force_phys_mesh=False):
-	objs = iter2objs(s.split('\n'), force_phys_mesh)
+def str2obj(s, fast=True, force_phys_mesh=False):
+	objs = iter2objs(s.split('\n'), fast, force_phys_mesh)
 	if len(objs) == 1:
 		return objs[0].gfxmesh, objs[0].physgeoms
 	return objs

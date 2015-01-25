@@ -10,7 +10,7 @@
 +Collisions.
 +tetris.py
 +Relative accelerometer. terminal_velocity.py
-+Joysticks.
++Touch joysticks.
 +Fix engine sounds.
 +Fix engine sound intensity on push engines.
 +Car.
@@ -30,19 +30,29 @@
 +Fix bug in explosions: one of the textures seems to be taken over by a letter "P"!!!
 +PlaySound!
 +Scaled texture+UVs on cubes. Implement checker material.
++Optimize ASCII to object loading times.
++Reduce code mass. ''.strip()? Cam setting on each game? Etc.
+-Add support for gamepad controller?
+-Fix touch stick size when using high resolution (i.e. full screen)!
++Fix helisim controls!
++Test in release build.
++Test using API in strange ways. Crash control.
 
-Reduce code mass. ''.strip()? Cam setting on each game? Etc.
-Optimize ASCII to object loading times. Pacman level must load in 0.1 seconds.
-Fix helisim!
-Fix bug: sometimes won't TCP socket connect!
-Add support for gamepad controller?
-Test in release build.
-Test using API in strange ways. Crash control.
-Test accelerometer.
+Add some comments. What is "avel" for instance?
+Fix bug: sometimes won't TCP socket connect! Reproduce how?
+Build and run on Mac.
+Test accelerometer controls on iOS.
 
+Fix pause button (icon). Add back button.
+Create icons for all three platforms. Create splash screens for iOS.
+Build mobile Python IDE.
 Capsules.
 City!
 Quake.
 Descent. Relative accelerometer for pitch.
 Rolling ball, avoiding holes. Using accelerometer.
 Tower defence game.
+Stunt car racer.
+Mario.
+Minecraft.
+Legend of the Void.

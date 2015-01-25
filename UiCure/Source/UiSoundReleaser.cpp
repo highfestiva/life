@@ -69,7 +69,7 @@ void SoundReleaser::OnTick()
 
 void SoundReleaser::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 {
-	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	//deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), mPosition, mVelocity);
@@ -78,8 +78,9 @@ void SoundReleaser::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 	}
 	else
 	{
-		deb_assert(false);
+		//deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
+
 	}
 }
 

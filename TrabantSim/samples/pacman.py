@@ -18,7 +18,7 @@ X   X   X       X    X   X
 X   X XXXX     XXXX  X   X
 X                        X
 XXXXXXXXXXXXXXXXXXXXXXXXXX
-'''.strip('\n')
+'''
 
 cam(distance=25)
 gravity((0,0,0), bounce=0, friction=0)
