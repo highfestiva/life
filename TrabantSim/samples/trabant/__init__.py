@@ -165,7 +165,7 @@ def trabant_init(**kwargs):
 			words = line.split()
 			if len(words) == 3 and words[1] == '=':
 				config[words[0]] = words[2]
-	except FileNotFoundError:
+	except:
 		pass
 	config.update(kwargs)
 	global _joysticks,_timers,_has_opened,_accelerometer_calibration
@@ -369,6 +369,7 @@ def closest_tap(pos):
 	'''The parameter pos is a 3D coordinate. Returns an instance of the Tap class or None.'''
 	if not taps():
 		return None
+	pos = tovec3(pos)
 	x,y = _world2screen(pos)
 	tap = min(taps(), key=lambda t: t._distance2(x,y))
 	tap.close_pos = pos

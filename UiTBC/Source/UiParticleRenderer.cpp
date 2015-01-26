@@ -355,7 +355,7 @@ void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, 
 		x->mOpacity = (::sin(x->mOpacityTime) + 0.7f) * x->mOpacityFactor;
 		if (x->mOpacity <= 0.0f || x->mOpacityTime > PARTICLE_TIME)
 		{
-			deb_assert(x->mOpacityTime > PIF);	// Verify that the particle was visible at all, or the algo's wrong.
+			//deb_assert(x->mOpacityTime > PIF);	// Verify that the particle was visible at all, or the algo's wrong.
 			x = pBillboards.erase(x);
 		}
 		else

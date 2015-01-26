@@ -512,6 +512,7 @@ void TcpSocket::Disconnect()
 	if (mServerSocket != 0)
 	{
 		mServerSocket->DecNumConnections();
+		mServerSocket = 0;
 	}
 
 	Close();

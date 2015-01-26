@@ -884,11 +884,7 @@ void TrabantSimManager::CommandLoop()
 	while (!mCommandThread->GetStopRequest())
 	{
 		const int l = mConnectSocket->ReceiveDatagram(lData, sizeof(lData));
-		if (!l)
-		{
-			continue;
-		}
-		if (l < 0 || lData[l-1] != '\n')
+		if (l <= 0 || lData[l-1] != '\n')
 		{
 			break;
 		}
@@ -902,20 +898,11 @@ void TrabantSimManager::CommandLoop()
 		}
 		lData[l-1] = 0;	// Drop last linefeed.
 		const str lCommand = astrutil::Encode(astr(lData));
-		/*astr lResponse
-		if (strutil::StartsWith(lCommand, _T("set-vertices") || strutil::StartsWith(lCommand, _T("set-indices"))
-		{
-			GetConsoleManager()->PushYieldCommand(lCommand)
-		}
-		else
-		{*/
-		//HiResTimer t(false);
 		if (!GetConsoleManager())
 		{
 			break;
 		}
 		GetConsoleManager()->ExecuteCommand(lCommand);
-		//mLog.Infof(_T("%s took %f s."), lCommand.substr(0, 10).c_str(), t.QueryTimeDiff());
 		const astr lResponse = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
 		if (mConnectSocket->Send(lResponse.c_str(), lResponse.length()) != (int)lResponse.length())
 		{
@@ -924,6 +911,10 @@ void TrabantSimManager::CommandLoop()
 	}
 	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 0.0);
 	mLog.Info(_T("Terminating command thread."));
+	mCommandThread->RequestSelfDestruct();
+	mCommandThread = 0;
+	delete mConnectSocket;
+	mConnectSocket = 0;
 }
 
 bool TrabantSimManager::IsControlled() const

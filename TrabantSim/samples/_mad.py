@@ -18,7 +18,7 @@ def mix_args(aa,bb):
 def protect(f, allow_fail, *args):
 	try:
 		return f(*args)
-	except (ValueError,TypeError,AttributeError,AssertionError) as e:
+	except (ValueError,TypeError,AttributeError,AssertionError,IOError,TypeError) as e:
 		if not allow_fail:
 			print(f)
 			print(*args)
