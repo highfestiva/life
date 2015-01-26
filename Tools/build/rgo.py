@@ -268,7 +268,7 @@ def _posix_no_lib_exes(targetdir):
 def _create_zip(targetdir, buildtype):
 	_posix_no_lib_exes(targetdir)
 	print("Building compressed archive.")
-	if os.name == "nt":
+	if sys.platform in ("win32", "darwin"):
 		targetfile = targetdir+".zip"
 		if buildtype != "final":
 			targetfile = targetdir+".iszip"

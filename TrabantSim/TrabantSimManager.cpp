@@ -124,7 +124,11 @@ TrabantSimManager::~TrabantSimManager()
 	if (mConnectSocket)	// Must be destroyed before the server socket.
 	{
 		if (mCommandThread) mCommandThread->RequestStop();
-		mConnectSocket->Disconnect();
+		for (int x = 0; x < 3 && mConnectSocket; ++x)
+		{
+			Thread::Sleep(0.1f);
+			if (mConnectSocket) mConnectSocket->Disconnect();
+		}
 		delete mCommandThread;
 		mCommandThread = 0;
 		delete mConnectSocket;
@@ -860,9 +864,11 @@ void TrabantSimManager::AcceptLoop()
 		if (mConnectSocket)
 		{
 			if (mCommandThread) mCommandThread->RequestStop();
-			mConnectSocket->Shutdown(SocketBase::SHUTDOWN_BOTH);
-			mConnectSocket->Disconnect();
-			Thread::Sleep(0.1f);
+			for (int x = 0; x < 3 && mConnectSocket; ++x)
+			{
+				Thread::Sleep(0.1f);
+				if (mConnectSocket) mConnectSocket->Disconnect();
+			}
 			delete mCommandThread;
 			mCommandThread = 0;
 			delete mConnectSocket;
