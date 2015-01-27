@@ -162,9 +162,9 @@ def trabant_init(**kwargs):
 		import os.path
 		configfile = os.path.join(os.path.expanduser("~"), '.trabant')
 		for line in open(configfile, 'rt'):
-			words = line.split()
-			if len(words) == 3 and words[1] == '=':
-				config[words[0]] = words[2]
+			words = [w.strip() for w in line.split('=')]
+			if len(words) == 2:
+				config[words[0]] = words[1]
 	except:
 		pass
 	config.update(kwargs)

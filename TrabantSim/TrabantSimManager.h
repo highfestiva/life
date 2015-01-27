@@ -18,7 +18,7 @@
 
 namespace Lepra
 {
-class TcpListenerSocket;
+class UdpSocket;
 }
 namespace UiLepra
 {
@@ -132,7 +132,6 @@ public:
 	void EngineForce(int pObjectId, int pEngineIndex, bool pSet, vec3& pForce);
 	void AddTag(int pObjectId, const str& pTagType, const FloatList& pFloats, const StringList& pStrings, const IntList& pPhys, const IntList& pEngines, const IntList& pMeshes);
 
-	void AcceptLoop();
 	void CommandLoop();
 	bool IsControlled() const;
 
@@ -140,6 +139,7 @@ public:
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();
+	void CloseConnection();
 	virtual void SetIsQuitting();
 	virtual void SetFade(float pFadeAmount);
 
@@ -195,9 +195,8 @@ protected:
 	xform mCameraTransform;
 	vec3 mCameraVelocity;
 	UiTbc::Button* mPauseButton;
-	TcpListenerSocket* mListenerSocket;
-	TcpSocket* mConnectSocket;
-	MemberThread<TrabantSimManager>* mAcceptThread;
+	bool mIsControlled;
+	UdpSocket* mCommandSocket;
 	MemberThread<TrabantSimManager>* mCommandThread;
 	UiTbc::Dialog* mUserInfoDialog;
 	UiTbc::Label* mUserInfoLabel;

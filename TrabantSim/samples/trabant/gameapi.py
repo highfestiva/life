@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import socket
+import trabant.socket
 from trabant.math import vec3,quat
 
 
@@ -266,7 +267,6 @@ def _closecom():
 	if sock:
 		if proc:
 			cmd('quit')
-		sock.shutdown(socket.SHUT_RDWR)
 		sock.close()
 		sock = None
 	if proc:
@@ -285,7 +285,7 @@ def _tryconnect(addr, retries):
 	ip,port = addr.split(':')
 	for attempt in range(1,retries+1):
 		try:
-			sock = socket.socket()
+			sock = trabant.socket.socket()
 			sock.connect((ip,int(port)))
 			cmd('system-info')	# To make sure connection alright.
 			break

@@ -135,7 +135,7 @@ def _incremental_build_data(sourcedir):
 				break
 
 
-def _incremental_copy(filelist, targetdir, buildtype, recursiveNixDir=False):
+def _incremental_copy(filelist, targetdir, buildtype, recursive=False):
 	global updates
 	import shutil
 	for filename in filelist:
@@ -143,18 +143,17 @@ def _incremental_copy(filelist, targetdir, buildtype, recursiveNixDir=False):
 		if buildtype != default_build_mode and filename.lower().find("test") >= 0:
 			print("Skipping test binary named '%s'." % filename)
 			continue
-		if os.path.isdir(filename) and not recursiveNixDir:
+		if os.path.isdir(filename) and not recursive:
 			continue
 		if not os.path.exists(targetdir):
 			os.makedirs(targetdir)
 		targetfile = os.path.join(targetdir, os.path.split(filename)[1])
 		if not os.path.exists(targetfile) or rgohelp._filetime(filename) > rgohelp._filetime(targetfile):
 			print("Copying %s -> %s." % (filename, targetfile))
-			if os.name == "nt":
-				shutil.copyfile(filename, targetfile)
+			if os.path.isdir(filename):
+				shutil.copytree(filename, targetfile)
 			else:
-				runargs = ["cp", filename, targetfile] if not recursiveNixDir else ["cp", "-R", filename, targetfile]
-				rgohelp._run(runargs, "copying of file")
+				shutil.copyfile(filename, targetfile)
 			updates += 1
 
 
@@ -307,7 +306,7 @@ def _buildzip(builder, buildtype):
 def _copybin(targetdir, buildtype):
 	import glob
 	fl = glob.glob("bin/*")
-	_incremental_copy(fl, targetdir, buildtype, ismac)
+	_incremental_copy(fl, targetdir, buildtype, True)
 	fl = glob.glob("bin/Data/*")
 	_incremental_copy(fl, os.path.join(targetdir, "Data"), buildtype)
 

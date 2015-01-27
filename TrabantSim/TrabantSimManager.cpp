@@ -80,9 +80,8 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mLight(0),
 	mCameraTransform(quat(), vec3(0, -3, 0)),
 	mPauseButton(0),
-	mListenerSocket(0),
-	mConnectSocket(0),
-	mAcceptThread(new MemberThread<TrabantSimManager>("ConnectionListener")),
+	mIsControlled(false),
+	mCommandSocket(0),
 	mCommandThread(0),
 	mUserInfoDialog(0),
 	mUserInfoLabel(0)
@@ -99,12 +98,13 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	const strutil::strvec& args = SystemManager::GetArgumentVector();
 	if (!lAddress.Resolve(args[args.size()-1]))
 	{
-		lAddress.Resolve(_T("localhost:2541"));
+		lAddress.Resolve(_T(":2541"));
 	}
-	mListenerSocket = new TcpListenerSocket(lAddress, true);
-	if (mListenerSocket->IsOpen())
+	mCommandSocket = new UdpSocket(lAddress, true);
+	if (mCommandSocket->IsOpen())
 	{
-		mAcceptThread->Start(this, &TrabantSimManager::AcceptLoop);
+		mCommandThread = new MemberThread<TrabantSimManager>("CommandRecvThread");
+		mCommandThread->Start(this, &TrabantSimManager::CommandLoop);
 		mLog.Headlinef(_T("Command server listening on %s."), lAddress.GetAsString().c_str());
 	}
 	else
@@ -116,31 +116,12 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 
 TrabantSimManager::~TrabantSimManager()
 {
+	CloseConnection();
+
 	Close();
 
 	delete mCollisionSoundManager;
 	mCollisionSoundManager = 0;
-
-	if (mConnectSocket)	// Must be destroyed before the server socket.
-	{
-		if (mCommandThread) mCommandThread->RequestStop();
-		for (int x = 0; x < 3 && mConnectSocket; ++x)
-		{
-			Thread::Sleep(0.1f);
-			if (mConnectSocket) mConnectSocket->Disconnect();
-		}
-		delete mCommandThread;
-		mCommandThread = 0;
-		delete mConnectSocket;
-		mConnectSocket = 0;
-	}
-
-	mAcceptThread->RequestStop();
-	TcpSocket(0).Connect(mListenerSocket->GetLocalAddress());
-	delete mAcceptThread;
-	mAcceptThread = 0;
-	delete mListenerSocket;
-	mListenerSocket = 0;
 }
 
 
@@ -851,81 +832,56 @@ void TrabantSimManager::AddTag(int pObjectId, const str& pTagType, const FloatLi
 
 
 
-void TrabantSimManager::AcceptLoop()
-{
-	for (;;)
-	{
-		TcpSocket* s = mListenerSocket->Accept();
-		if (mAcceptThread->GetStopRequest())
-		{
-			return;
-		}
-		// Kill current socket.
-		if (mConnectSocket)
-		{
-			if (mCommandThread) mCommandThread->RequestStop();
-			for (int x = 0; x < 3 && mConnectSocket; ++x)
-			{
-				Thread::Sleep(0.1f);
-				if (mConnectSocket) mConnectSocket->Disconnect();
-			}
-			delete mCommandThread;
-			mCommandThread = 0;
-			delete mConnectSocket;
-			mConnectSocket = 0;
-		}
-		if (s)
-		{
-			mConnectSocket = s;
-			mCommandThread = new MemberThread<TrabantSimManager>("CommandRecvThread");
-			mCommandThread->Start(this, &TrabantSimManager::CommandLoop);
-		}
-	}
-}
-
 void TrabantSimManager::CommandLoop()
 {
-	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
-	char lData[128*1024];
+	mIsControlled = false;
+	SocketAddress lFromAddress;
+	uint8 lData[128*1024];
 	while (!mCommandThread->GetStopRequest())
 	{
-		const int l = mConnectSocket->ReceiveDatagram(lData, sizeof(lData));
-		if (l <= 0 || lData[l-1] != '\n')
+		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), lFromAddress, 1.5);
+		if (l <= 0 || lData[l-1] != '\n' || ::memcmp("disconnect\n", lData, 11) == 0)
 		{
-			break;
+			mIsControlled = false;
+			while (mCommandSocket->ReceiveFrom(lData, sizeof(lData), lFromAddress, 0) != 0)
+					;
+			continue;
 		}
+		mIsControlled = true;
 		while (!mPauseButton || !mPauseButton->IsVisible())
 		{
 			Thread::Sleep(0.5);
 			if (mCommandThread->GetStopRequest())
 			{
-				return;
+				break;
 			}
 		}
+		if (mCommandThread->GetStopRequest())
+		{
+			break;
+		}
 		lData[l-1] = 0;	// Drop last linefeed.
-		const str lCommand = astrutil::Encode(astr(lData));
+		const str lCommand = astrutil::Encode(astr((char*)lData));
 		if (!GetConsoleManager())
 		{
 			break;
 		}
 		GetConsoleManager()->ExecuteCommand(lCommand);
 		const astr lResponse = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
-		if (mConnectSocket->Send(lResponse.c_str(), lResponse.length()) != (int)lResponse.length())
+		if (mCommandSocket->SendTo((const uint8*)lResponse.c_str(), lResponse.length(), lFromAddress) != (int)lResponse.length())
 		{
 			break;
 		}
 	}
-	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 0.0);
 	mLog.Info(_T("Terminating command thread."));
-	mCommandThread->RequestSelfDestruct();
-	mCommandThread = 0;
-	delete mConnectSocket;
-	mConnectSocket = 0;
+	mIsControlled = false;
+	deb_assert(mCommandThread);
+	deb_assert(mCommandSocket);
 }
 
 bool TrabantSimManager::IsControlled() const
 {
-	return mCommandThread && mCommandThread->IsRunning();
+	return mCommandThread && mCommandThread->IsRunning() && mIsControlled;
 }
 
 
@@ -977,6 +933,18 @@ void TrabantSimManager::Close()
 	Parent::Close();
 }
 
+void TrabantSimManager::CloseConnection()
+{
+	if (mCommandSocket)
+	{
+		if (mCommandThread) mCommandThread->RequestStop();
+		UdpSocket(SocketAddress(), false).SendTo((uint8*)"?", 1, mCommandSocket->GetLocalAddress());
+		delete mCommandThread;
+		mCommandThread = 0;
+		delete mCommandSocket;
+		mCommandSocket = 0;
+	}
+}
 void TrabantSimManager::SetIsQuitting()
 {
 	((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->SetVisible(false);
@@ -1260,6 +1228,8 @@ void TrabantSimManager::ScriptPhysicsTick()
 
 		UpdateUserMessage();
 	}
+
+	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, IsControlled()? 1.0 : 0.0);
 
 	const UiDragList& lDrags = mUiManager->GetDragManager()->GetDragList();
 	for (UiDragList::const_iterator x = lDrags.begin(); x != lDrags.end(); ++x)

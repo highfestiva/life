@@ -257,6 +257,7 @@
     <ClInclude Include="Include\CubicSpline.h" />
     <ClInclude Include="Include\CyclicArray.h" />
     <ClInclude Include="Include\Cylinder.h" />
+    <ClInclude Include="Include\Datagram.h" />
     <ClInclude Include="Include\DES.h" />
     <ClInclude Include="Include\DiskFile.h" />
     <ClInclude Include="Include\Endian.h" />

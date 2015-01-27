@@ -275,6 +275,7 @@ public:
 
 	virtual int SendTo(const uint8* pData, unsigned pSize, const SocketAddress& pTargetAddress);
 	virtual int ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSourceAddress);
+	virtual int ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSourceAddress, double pTimeout);
 
 private:
 	SocketAddress mLocalAddress;

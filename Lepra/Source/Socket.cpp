@@ -750,6 +750,29 @@ int UdpSocket::ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSour
 	return (lSize);
 }
 
+int UdpSocket::ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSourceAddress, double pTimeout)
+{
+	if (pTimeout < 0)
+	{
+		pTimeout = 0;
+	}
+	FdSet lReadSet;
+	LEPRA_FD_ZERO(&lReadSet);
+#pragma warning(push)
+#pragma warning(disable: 4127)	// MSVC warning: conditional expression is constant.
+	LEPRA_FD_SET((sys_socket)mSocket, &lReadSet);
+#pragma warning(pop)
+	timeval lTime;
+	lTime.tv_sec = (long)pTimeout;
+	lTime.tv_usec = (long)((pTimeout-lTime.tv_sec) * 1000000);
+	int lReadCount = ::select((int)mSocket+1, LEPRA_FDS(&lReadSet), NULL, NULL, &lTime);
+	if (lReadCount == 1)
+	{
+		return ReceiveFrom(pData, pMaxSize, pSourceAddress);
+	}
+	return 0;
+}
+
 loginstance(NETWORK, UdpSocket);
 
 
@@ -977,9 +1000,9 @@ void UdpMuxSocket::Run()
 			{
 				// Look for "VSocket connect magic".
 				if (lBuffer->mDataSize >= (int)sizeof(mConnectionString) &&
-					::memcmp(lBuffer->mDataBuffer, mConnectionString, sizeof(mConnectionString)) == 0)
+					::memcmp(lBuffer->mDataBuffer, mConnectionString, sizeof(mConnectionString)-1) == 0)
 				{
-					std::string lConnectionId((const char*)&lBuffer->mDataBuffer[sizeof(mConnectionString)], lBuffer->mDataSize-sizeof(mConnectionString));
+					std::string lConnectionId((const char*)&lBuffer->mDataBuffer[sizeof(mConnectionString)-1], lBuffer->mDataSize+1-sizeof(mConnectionString));
 					unsigned lAcceptCount = (unsigned)mAcceptList.size();
 					unsigned lSocketCount = (unsigned)mSocketTable.GetCount();
 					// TODO: drop old acceptance socket instead of new?
