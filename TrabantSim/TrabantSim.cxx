@@ -33,16 +33,23 @@ class TrabantSim: public Life::Application
 {
 	typedef Life::Application Parent;
 public:
+	static TrabantSim* GetApp();
+
 	TrabantSim(const strutil::strvec& pArgumentList);
 	virtual ~TrabantSim();
 	virtual void Init();
 	virtual void Destroy();
+	virtual bool MainLoop();
 
-	static TrabantSim* GetApp();
+	virtual void Suspend();
+	virtual void Resume();
+	void SavePurchase();
+
 	str GetTypeName() const;
 	str GetVersion() const;
 	Cure::ApplicationTicker* CreateTicker() const;
 
+	static TrabantSim* mApp;
 #ifdef LEPRA_TOUCH
 	AnimatedApp* mAnimatedApp;
 #endif // Touch
@@ -50,7 +57,6 @@ public:
 	UiCure::GameUiManager* mUiManager;
 	UiLepra::Touch::DragManager mDragManager;
 
-	static TrabantSim* mApp;
 	logclass();
 };
 
@@ -66,6 +72,13 @@ LEPRA_RUN_APPLICATION(TrabantSim::TrabantSim, UiLepra::UiMain);
 
 namespace TrabantSim
 {
+
+
+
+TrabantSim* TrabantSim::GetApp()
+{
+	return mApp;
+}
 
 
 
@@ -158,12 +171,42 @@ void TrabantSim::Destroy()
 	mUiManager = 0;
 }
 
-
-
-TrabantSim* TrabantSim::GetApp()
+bool TrabantSim::MainLoop()
 {
-	return mApp;
+#ifndef LEPRA_IOS
+	return Parent::MainLoop();
+#else // iOS
+	// iOS has uses timer callbacks instead of a main loop.
+	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
+	return true;
+#endif // !iOS/iOS
 }
+
+
+
+void TrabantSim::Suspend()
+{
+	mGameTicker->Suspend();
+	mUiManager->GetSoundManager()->Suspend();
+#ifdef LEPRA_IOS
+	[mAnimatedApp stopTick];
+#endif // iOS
+}
+
+void TrabantSim::Resume()
+{
+#ifdef LEPRA_IOS
+	[mAnimatedApp startTick];
+#endif // iOS
+	mUiManager->GetSoundManager()->Resume();
+	mGameTicker->Resume();
+}
+
+void TrabantSim::SavePurchase()
+{
+}
+
+
 
 str TrabantSim::GetTypeName() const
 {

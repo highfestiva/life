@@ -8,7 +8,7 @@ class socket:
 
 	def connect(self, hostport):
 		self.hostport = (_socket.gethostbyname(hostport[0]), hostport[1])
-		self.s.settimeout(1)
+		self.s.settimeout(5)
 
 	def close(self):
 		try:	self.send('disconnect\n'.encode())

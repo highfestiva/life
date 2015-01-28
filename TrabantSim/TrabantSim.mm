@@ -253,7 +253,7 @@ using namespace Lepra;
 
 -(void) provideContent:(NSString*)productIdentifier confirm:(BOOL)confirm
 {
-	//TrabantSim::TrabantSim::GetApp()->SavePurchase();
+	TrabantSim::TrabantSim::GetApp()->SavePurchase();
 
 	if (confirm)
 	{
