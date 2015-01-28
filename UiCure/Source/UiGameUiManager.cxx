@@ -8,6 +8,7 @@
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/Math.h"
+#include "../../Lepra/Include/LepraTarget.h"
 #include "../../Lepra/Include/Thread.h"
 #include "../../Tbc/Include/PhysicsManager.h"
 #include "../../UiLepra/Include/UiCore.h"
@@ -93,6 +94,11 @@ bool GameUiManager::OpenDraw()
 	bool lOk = true;
 	mDisplay = UiLepra::DisplayManager::CreateDisplayManager(lRenderingContext);
 	UiLepra::DisplayMode lDisplayMode;
+	lDisplayMode.mWidth = lDisplayWidth;
+	lDisplayMode.mHeight = lDisplayHeight;
+	lDisplayMode.mRefreshRate = 0;
+	lDisplayMode.mBitDepth = 0;
+#ifndef LEPRA_TOUCH
 	if (lDisplayBpp > 0 && lDisplayFrequency > 0)
 	{
 		lOk = mDisplay->FindDisplayMode(lDisplayMode, lDisplayWidth, lDisplayHeight, lDisplayBpp, lDisplayFrequency);
@@ -122,6 +128,7 @@ bool GameUiManager::OpenDraw()
 			lDisplayMode.mRefreshRate = lDisplayFrequency;
 		}
 	}
+#endif // Touch device.
 	if (lOk)
 	{
 		if (lDisplayFullScreen)

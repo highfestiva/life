@@ -39,6 +39,8 @@ static void HandleTouches(NSSet* pTouches, const Canvas* pCanvas, DragManager& p
 			lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.y*s, lPrevTapPosition.x*s);
 			lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.y*s, lTapPosition.x*s);
 		}
+		lPreviousTap = PixelCoord(lPrevTapPosition.x, lPrevTapPosition.y);
+		lThisTap = PixelCoord(lTapPosition.x, lTapPosition.y);
 		pDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed);
 	}
 }

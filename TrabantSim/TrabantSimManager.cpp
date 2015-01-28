@@ -842,12 +842,17 @@ void TrabantSimManager::CommandLoop()
 	uint8 lData[128*1024];
 	while (!mCommandThread->GetStopRequest())
 	{
-		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), lFromAddress, 1.5);
+		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), lFromAddress);
 		if (l <= 0 || lData[l-1] != '\n' || ::memcmp("disconnect\n", lData, 11) == 0)
 		{
 			mIsControlled = false;
-			while (mCommandSocket->ReceiveFrom(lData, sizeof(lData), lFromAddress, 0) != 0)
-					;
+			for (int x = 0; x < 10; ++x)
+			{
+				if (mCommandSocket->ReceiveFrom(lData, sizeof(lData), lFromAddress, 0.01) == 0)
+				{
+					break;
+				}
+			}
 			continue;
 		}
 		mIsControlled = true;
@@ -873,7 +878,7 @@ void TrabantSimManager::CommandLoop()
 		const astr lResponse = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
 		if (mCommandSocket->SendTo((const uint8*)lResponse.c_str(), lResponse.length(), lFromAddress) != (int)lResponse.length())
 		{
-			break;
+			mIsControlled = false;
 		}
 	}
 	mLog.Info(_T("Terminating command thread."));

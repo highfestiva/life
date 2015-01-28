@@ -1300,15 +1300,13 @@ void Renderer::PostRenderMaterial(MaterialType pMaterialType)
 
 void Renderer::UpdateShadowMaps()
 {
-	const int lLightCount = GetLightCount();
-	if (lLightCount < 1)
-	{
-		return;
-	}
-
 	mShadowVolumeCreateCount = 0;	// Reset every frame.
 
 	LightData* lLightData = GetLightData(GetClosestLight(0));
+	if (!lLightData)
+	{
+		return;
+	}
 	unsigned lTrianglesCalculatedFor = 0;
 	bool lDidStatic = false;
 	for (int i = 0; i <= (int)MAT_LAST_SOLID; i++)

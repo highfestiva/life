@@ -108,8 +108,8 @@ void TrabantSim::Init()
 	Thread::Sleep(3.0);	// Wait a bit longer so Pixel Doctrine splash is visible.
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	int lScale = [[UIScreen mainScreen] scale];
-	const int lDisplayWidth = lSize.height * lScale;
-	const int lDisplayHeight = lSize.width * lScale;
+	const int lDisplayWidth = lSize.width * lScale;
+	const int lDisplayHeight = lSize.height * lScale;
 #else // Computer L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;

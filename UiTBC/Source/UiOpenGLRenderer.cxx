@@ -255,15 +255,14 @@ void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
 void OpenGLRenderer::DoSetClippingRect(const PixelRect& pRect)
 {
 	::glEnable(GL_SCISSOR_TEST);
-	::glScissor(pRect.mLeft, GetScreen()->GetActualHeight() - pRect.mBottom, pRect.GetWidth(), pRect.GetHeight());
+	::glScissor(GetScreen()->GetActualWidth() - pRect.mRight, GetScreen()->GetActualHeight() - pRect.mBottom, pRect.GetWidth(), pRect.GetHeight());
 	OGL_FAST_ASSERT();
 }
 
 void OpenGLRenderer::DoSetViewport(const PixelRect& pViewport)
 {
 	OGL_FAST_ASSERT();
-	::glViewport(pViewport.mLeft, GetScreen()->GetActualHeight() - pViewport.mBottom, 
-		pViewport.GetWidth(), pViewport.GetHeight());
+	::glViewport(GetScreen()->GetActualWidth() - pViewport.mRight, GetScreen()->GetActualHeight() - pViewport.mBottom, pViewport.GetWidth(), pViewport.GetHeight());
 	OGL_FAST_ASSERT();
 }
 

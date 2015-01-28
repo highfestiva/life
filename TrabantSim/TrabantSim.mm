@@ -63,7 +63,7 @@ using namespace Lepra;
 {
 	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
 	_canvas = pCanvas;
-	_canvas->SetDeviceRotation(+90);
+	_canvas->SetDeviceRotation(180);
 	_animationTimer = nil;
 	_motionManager = [[CMMotionManager alloc] init];
 	[self createAd];
