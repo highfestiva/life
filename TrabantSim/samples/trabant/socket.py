@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import socket as _socket
+from time import sleep
 
 class socket:
 	def __init__(self):
@@ -11,8 +12,11 @@ class socket:
 		self.s.settimeout(5)
 
 	def close(self):
-		try:	self.send('disconnect\n'.encode())
-		except:	pass
+		try:
+			self.send('disconnect\n'.encode())
+			time.sleep(0.01)
+		except:
+			pass
 		return self.s.close()
 
 	def send(self, data):

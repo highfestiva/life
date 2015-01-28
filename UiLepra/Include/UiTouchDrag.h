@@ -12,6 +12,12 @@
 
 
 
+namespace Lepra
+{
+class Lock;
+}
+
+
 namespace UiLepra
 {
 
@@ -61,9 +67,10 @@ public:
 	void SetDragsPress(bool pIsPress);
 	void DropReleasedDrags();
 	void ClearDrags(InputManager* pInputManager);
-	DragList& GetDragList();
+	DragList GetDragList();
 
 private:
+	Lock* mLock;
 	DragList mDragList;
 	PixelCoord mLastMouse;
 	bool mMouseLastPressed;

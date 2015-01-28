@@ -397,7 +397,10 @@ def accelerometer(relative=False):
 		return acc
 	rel = acc - _accelerometer_calibration
 	rel.pitch = -_accelerometer_calibration.angle_x(acc)
-	rel.roll = -_accelerometer_calibration.angle_y(acc)
+	if abs(_accelerometer_calibration.z) > abs(_accelerometer_calibration.y):
+		rel.roll = -_accelerometer_calibration.angle_y(acc)
+	else:
+		rel.roll = _accelerometer_calibration.angle_z(acc)
 	return rel
 
 

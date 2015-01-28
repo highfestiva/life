@@ -71,7 +71,7 @@ while loop():
 	update_terrain(ship.pos() + orientation*vec3(0,0,100))
 
 	# Turn ship.
-	yaw_force = -acc.roll*3 - sum(t.x*10-5 for t in taps()) - 5*keydir().x	# Control by either accelerometer, tapping or keyboard.
+	yaw_force = acc.roll*6 - sum(t.x*10-5 for t in taps()) - 5*keydir().x	# Control by either accelerometer, tapping or keyboard.
 	yawer.force((0,0,yaw_force))
 
 	# Banking and nose.

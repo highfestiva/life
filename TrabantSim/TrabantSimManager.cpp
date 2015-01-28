@@ -1234,35 +1234,38 @@ void TrabantSimManager::ScriptPhysicsTick()
 
 	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, IsControlled()? 1.0 : 0.0);
 
-	const UiDragList& lDrags = mUiManager->GetDragManager()->GetDragList();
-	for (UiDragList::const_iterator x = lDrags.begin(); x != lDrags.end(); ++x)
 	{
-		bool lFound = false;
-		for (DragList::iterator y = mDragList.begin(); y != mDragList.end(); ++y)
+		ScopeLock lGameLock(GetTickLock());
+		const UiDragList lDrags = mUiManager->GetDragManager()->GetDragList();
+		for (UiDragList::const_iterator x = lDrags.begin(); x != lDrags.end(); ++x)
 		{
-			if (y->mStart.x == x->mStart.x && y->mStart.y == x->mStart.y)
+			bool lFound = false;
+			for (DragList::iterator y = mDragList.begin(); y != mDragList.end(); ++y)
 			{
-				lFound = true;
-				const float tf = 1 / (float)y->mTimer.PopTimeDiff();
-				if (tf > 1e-3)
+				if (y->mStart.x == x->mStart.x && y->mStart.y == x->mStart.y)
 				{
-					y->mVelocity = Math::Lerp(y->mVelocity, vec2((x->mLast.x - y->mLast.x)*tf, (x->mLast.y - y->mLast.y)*tf), 0.5f);
+					lFound = true;
+					const float tf = 1 / (float)y->mTimer.PopTimeDiff();
+					if (tf > 1e-3)
+					{
+						y->mVelocity = Math::Lerp(y->mVelocity, vec2((x->mLast.x - y->mLast.x)*tf, (x->mLast.y - y->mLast.y)*tf), 0.5f);
+					}
+					y->mLast = x->mLast;
+					y->mIsPress = x->mIsPress;
 				}
-				y->mLast = x->mLast;
-				y->mIsPress = x->mIsPress;
 			}
-		}
-		if (!lFound)
-		{
-			Drag d;
-			d.mStart = x->mStart;
-			d.mLast = x->mLast;
-			d.mIsPress = x->mIsPress;
-			mDragList.push_back(d);
-		}
-		if (!x->mIsPress)
-		{
-			mDragEraseList.push_back(x->mStart);
+			if (!lFound)
+			{
+				Drag d;
+				d.mStart = x->mStart;
+				d.mLast = x->mLast;
+				d.mIsPress = x->mIsPress;
+				mDragList.push_back(d);
+			}
+			if (!x->mIsPress)
+			{
+				mDragEraseList.push_back(x->mStart);
+			}
 		}
 	}
 

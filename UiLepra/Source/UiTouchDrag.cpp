@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "../Include/UiTouchDrag.h"
+#include "../../Lepra/Include/Thread.h"
 #include "../Include/UiTouchstick.h"
 
 
@@ -41,6 +42,7 @@ int Drag::GetDiamondDistanceTo(const PixelCoord& pCoord) const
 
 
 DragManager::DragManager():
+	mLock(new Lock),
 	mMouseLastPressed(false),
 	mMaxDragDiamondDistance(106)
 {
@@ -57,6 +59,7 @@ void DragManager::SetMaxDragDistance(int pMaxDragDistance)
 
 void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed)
 {
+	ScopeLock lLock(mLock);
 	int lClosestDiamondDistance = 1000000;
 	DragList::iterator i = mDragList.begin();
 	DragList::iterator lBestDrag = i;
@@ -79,6 +82,7 @@ void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLoc
 
 void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
 {
+	ScopeLock lLock(mLock);
 	PixelCoord lMouse;
 	pInputManager->GetMousePosition(lMouse.x, lMouse.y);
 	bool lIsPressed = pInputManager->GetMouse()->GetButton(0)->GetBooleanValue();
@@ -92,6 +96,7 @@ void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
 
 void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
 {
+	ScopeLock lLock(mLock);
 	DragList::iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
@@ -102,6 +107,7 @@ void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
 
 bool DragManager::UpdateTouchsticks(InputManager* pInputManager) const
 {
+	ScopeLock lLock(mLock);
 	bool lDidUseStick = false;
 	DragList::const_iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
@@ -123,6 +129,7 @@ bool DragManager::UpdateTouchsticks(InputManager* pInputManager) const
 
 void DragManager::SetDragsPress(bool pIsPress)
 {
+	ScopeLock lLock(mLock);
 	DragList::iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
@@ -132,6 +139,7 @@ void DragManager::SetDragsPress(bool pIsPress)
 
 void DragManager::DropReleasedDrags()
 {
+	ScopeLock lLock(mLock);
 	DragList::iterator i = mDragList.begin();
 	for (; i != mDragList.end();)
 	{
@@ -148,6 +156,7 @@ void DragManager::DropReleasedDrags()
 
 void DragManager::ClearDrags(InputManager* pInputManager)
 {
+	ScopeLock lLock(mLock);
 	mDragList.clear();
 	if (pInputManager->GetMouse())
 	{
@@ -155,8 +164,9 @@ void DragManager::ClearDrags(InputManager* pInputManager)
 	}
 }
 
-DragManager::DragList& DragManager::GetDragList()
+DragManager::DragList DragManager::GetDragList()
 {
+	ScopeLock lLock(mLock);
 	return mDragList;
 }
 
