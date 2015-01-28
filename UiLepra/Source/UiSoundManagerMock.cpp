@@ -133,7 +133,7 @@ void SoundManagerMock::SetParamEQ(SoundInstanceID, int, float, float, float)
 
 
 
-void SoundManagerMock::DoSetSoundPosition(SoundInstanceID, const Vector3DF&, const Vector3DF&)
+void SoundManagerMock::DoSetSoundPosition(SoundInstanceID, const vec3&, const vec3&)
 {
 }
 

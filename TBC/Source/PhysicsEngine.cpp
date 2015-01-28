@@ -93,7 +93,7 @@ void PhysicsEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float p
 
 void PhysicsEngine::RemoveControlledGeometry(ChunkyBoneGeometry* pGeometry)
 {
-	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
+	EngineNodeArray::iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
 	{
 		if (i->mGeometry == pGeometry)

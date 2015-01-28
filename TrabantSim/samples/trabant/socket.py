@@ -13,7 +13,6 @@ class socket:
 	def close(self):
 		try:	self.send('disconnect\n'.encode())
 		except:	pass
-		self.s.shutdown(_socket.SHUT_RDWR)
 		return self.s.close()
 
 	def send(self, data):

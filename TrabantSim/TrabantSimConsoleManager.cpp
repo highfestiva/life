@@ -80,7 +80,7 @@ std::vector<float> Strs2Flts(const strutil::strvec& pStrs)
 	return lFlts;
 }
 
-int StrToUInt(const char* s, const char** pEnd)
+int StrToUInt(const tchar* s, const tchar** pEnd)
 {
 	int i = 0;
 	for(; *s >= '0' && *s <= '9'; ++s)
@@ -91,7 +91,7 @@ int StrToUInt(const char* s, const char** pEnd)
 	return i;
 }
 
-float StrToFloat(const char* s, const char** pEnd)
+float StrToFloat(const tchar* s, const tchar** pEnd)
 {
 	float f = 0;
 	float ff = 0.1f;

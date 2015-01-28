@@ -81,6 +81,11 @@
 		B15F798113FC5E1500E01A90 /* UiGameUiManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */; };
 		B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16F032717808366000C31E0 /* UiBurnEmitter.cpp */; };
 		B1740478179469EB00DB7AD5 /* ResourceTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */; };
+		B18D39A01A76F54300D8F48B /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399C1A76F54300D8F48B /* Light.cpp */; };
+		B18D39A11A76F54300D8F48B /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399D1A76F54300D8F48B /* Object.cpp */; };
+		B18D39A21A76F54300D8F48B /* PhysGfxObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */; };
+		B18D39A51A76FC9A00D8F48B /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D39A41A76FC9A00D8F48B /* Timer.cpp */; };
+		B18D39A71A76FCF600D8F48B /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D39A61A76FCF600D8F48B /* Logger.cpp */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
 		B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560E13BE6C3B006A1422 /* Icon-72.png */; };
@@ -474,7 +479,6 @@
 		B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4124118035EA0007D64F7 /* Icon-120.png */; };
 		B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4124218035EA0007D64F7 /* Icon-152.png */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
-		B1CF1ED31854E14200765E60 /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1CF1ED21854E14200765E60 /* Ball.cpp */; };
 		B1CF1ED51854E66800765E60 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1CF1ED41854E66800765E60 /* CoreMotion.framework */; };
 		B1D37EE6166AB2FC00536CE5 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */; };
 		B1D37EE7166AB2FC00536CE5 /* Life.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE5166AB2FC00536CE5 /* Life.cpp */; };
@@ -490,11 +494,10 @@
 		B1D37EFF166AB37000536CE5 /* UiConsole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF4166AB37000536CE5 /* UiConsole.cpp */; };
 		B1D37F01166AB37000536CE5 /* UiRaceScore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF6166AB37000536CE5 /* UiRaceScore.cpp */; };
 		B1D37F02166AB37000536CE5 /* UiServerConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EF7166AB37000536CE5 /* UiServerConsoleManager.cpp */; };
-		B1D37F20166AB3F100536CE5 /* Impuzzable.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F15166AB3F100536CE5 /* Impuzzable.mm */; };
-		B1D37F21166AB3F100536CE5 /* ImpuzzableConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F16166AB3F100536CE5 /* ImpuzzableConsoleManager.cpp */; };
-		B1D37F23166AB3F100536CE5 /* ImpuzzableManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F18166AB3F100536CE5 /* ImpuzzableManager.cpp */; };
-		B1D37F24166AB3F100536CE5 /* ImpuzzableTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F19166AB3F100536CE5 /* ImpuzzableTicker.cpp */; };
-		B1D37F28166AB3F100536CE5 /* Sunlight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */; };
+		B1D37F20166AB3F100536CE5 /* TrabantSim.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F15166AB3F100536CE5 /* TrabantSim.mm */; };
+		B1D37F21166AB3F100536CE5 /* TrabantSimConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F16166AB3F100536CE5 /* TrabantSimConsoleManager.cpp */; };
+		B1D37F23166AB3F100536CE5 /* TrabantSimManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F18166AB3F100536CE5 /* TrabantSimManager.cpp */; };
+		B1D37F24166AB3F100536CE5 /* TrabantSimTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F19166AB3F100536CE5 /* TrabantSimTicker.cpp */; };
 		B1D37F38166AB53A00536CE5 /* MacThread.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F37166AB53A00536CE5 /* MacThread.mm */; };
 		B1D37F40166AB57A00536CE5 /* GameTicker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */; };
 		B1D37F41166AB57A00536CE5 /* PhysicsSharedResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */; };
@@ -504,7 +507,6 @@
 		B1D37F48166AB59C00536CE5 /* UiGravelEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */; };
 		B1D37F4B166AB5BF00536CE5 /* UiTouchDrag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */; };
 		B1D37F4C166AB5BF00536CE5 /* UiTouchstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */; };
-		B1D4C4CC174ABA9B005E1587 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D4C4CB174ABA9B005E1587 /* Level.cpp */; };
 		B1D5E29F172B1F6C00984602 /* UiJetEngineEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */; };
 		B1D88DAB14DEA7080000CD85 /* Obfuxator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */; };
 		B1D88DAD14DEA71D0000CD85 /* HiscoreAgent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */; };
@@ -525,7 +527,7 @@
 
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		1D6058910D05DD3D006BFB54 /* Impuzzable.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Impuzzable.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* Trabant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trabant.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		35128A4C147262150006467C /* UiSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSound.cpp; path = ../../UiCure/Source/UiSound.cpp; sourceTree = "<group>"; };
@@ -599,6 +601,11 @@
 		B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = UiGameUiManager.mm; path = ../../UiCure/Source/UiGameUiManager.mm; sourceTree = SOURCE_ROOT; };
 		B16F032717808366000C31E0 /* UiBurnEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiBurnEmitter.cpp; path = ../../UiCure/Source/UiBurnEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ResourceTracker.cpp; sourceTree = "<group>"; };
+		B18D399C1A76F54300D8F48B /* Light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Light.cpp; sourceTree = "<group>"; };
+		B18D399D1A76F54300D8F48B /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
+		B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysGfxObject.cpp; sourceTree = "<group>"; };
+		B18D39A41A76FC9A00D8F48B /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
+		B18D39A61A76FCF600D8F48B /* Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Logger.cpp; sourceTree = "<group>"; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
 		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
 		B196560E13BE6C3B006A1422 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../Icons/Icon-72.png"; sourceTree = SOURCE_ROOT; };
@@ -964,7 +971,7 @@
 		B19A199113A127E50051A61C /* IceAABB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IceAABB.cpp; sourceTree = "<group>"; };
 		B19A199213A127E50051A61C /* IceAABB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IceAABB.h; sourceTree = "<group>"; };
 		B19A199313A127E50051A61C /* IceAxes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IceAxes.h; sourceTree = "<group>"; };
-		B19A199413A127E50051A61C /* IceImpuzzableingSphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IceImpuzzableingSphere.h; sourceTree = "<group>"; };
+		B19A199413A127E50051A61C /* IceBoundingSphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IceBoundingSphere.h; sourceTree = "<group>"; };
 		B19A199513A127E50051A61C /* IceContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IceContainer.cpp; sourceTree = "<group>"; };
 		B19A199613A127E50051A61C /* IceContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IceContainer.h; sourceTree = "<group>"; };
 		B19A199713A127E50051A61C /* IceFPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IceFPU.h; sourceTree = "<group>"; };
@@ -1160,8 +1167,8 @@
 		B1A8B1B316C7EA9700F57DC1 /* UiSoundReleaser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSoundReleaser.cpp; path = ../../UiCure/Source/UiSoundReleaser.cpp; sourceTree = SOURCE_ROOT; };
 		B1A971B818148AB30029E569 /* UiFixedLayouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiFixedLayouter.cpp; sourceTree = "<group>"; };
 		B1B0C87D17FE08B4000953EF /* RotatingController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RotatingController.mm; sourceTree = "<group>"; };
-		B1B4898F13F9BD6C0047C78A /* Impuzzable-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Impuzzable-Info.plist"; sourceTree = "<group>"; };
-		B1B489A313F9BE4A0047C78A /* Impuzzable_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Impuzzable_Prefix.pch; path = ImpuzzableXcode/Impuzzable_Prefix.pch; sourceTree = "<group>"; };
+		B1B4898F13F9BD6C0047C78A /* Trabant-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Trabant-Info.plist"; sourceTree = "<group>"; };
+		B1B489A313F9BE4A0047C78A /* Trabant_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Trabant_Prefix.pch; path = TrabantXcode/Trabant_Prefix.pch; sourceTree = "<group>"; };
 		B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameTimer.cpp; sourceTree = "<group>"; };
 		B1B559E917F7800A00A4BB17 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Driver.cpp; path = ../../Cure/Source/Driver.cpp; sourceTree = SOURCE_ROOT; };
 		B1B80C3C180F4294003AE676 /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Menu.cpp; path = ../../Life/LifeClient/Menu.cpp; sourceTree = SOURCE_ROOT; };
@@ -1172,7 +1179,6 @@
 		B1C4124118035EA0007D64F7 /* Icon-120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-120.png"; path = "../Icons/Icon-120.png"; sourceTree = SOURCE_ROOT; };
 		B1C4124218035EA0007D64F7 /* Icon-152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-152.png"; path = "../Icons/Icon-152.png"; sourceTree = SOURCE_ROOT; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
-		B1CF1ED21854E14200765E60 /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
 		B1CF1ED41854E66800765E60 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Life/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37EE5166AB2FC00536CE5 /* Life.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Life.cpp; path = ../../Life/Life.cpp; sourceTree = SOURCE_ROOT; };
@@ -1188,11 +1194,10 @@
 		B1D37EF4166AB37000536CE5 /* UiConsole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiConsole.cpp; path = ../../Life/LifeClient/UiConsole.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37EF6166AB37000536CE5 /* UiRaceScore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiRaceScore.cpp; path = ../../Life/LifeClient/UiRaceScore.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37EF7166AB37000536CE5 /* UiServerConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiServerConsoleManager.cpp; path = ../../Life/LifeClient/UiServerConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
-		B1D37F15166AB3F100536CE5 /* Impuzzable.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Impuzzable.mm; sourceTree = "<group>"; };
-		B1D37F16166AB3F100536CE5 /* ImpuzzableConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImpuzzableConsoleManager.cpp; sourceTree = "<group>"; };
-		B1D37F18166AB3F100536CE5 /* ImpuzzableManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImpuzzableManager.cpp; sourceTree = "<group>"; };
-		B1D37F19166AB3F100536CE5 /* ImpuzzableTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImpuzzableTicker.cpp; sourceTree = "<group>"; };
-		B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sunlight.cpp; sourceTree = "<group>"; };
+		B1D37F15166AB3F100536CE5 /* TrabantSim.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TrabantSim.mm; sourceTree = "<group>"; };
+		B1D37F16166AB3F100536CE5 /* TrabantSimConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TrabantSimConsoleManager.cpp; sourceTree = "<group>"; };
+		B1D37F18166AB3F100536CE5 /* TrabantSimManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TrabantSimManager.cpp; sourceTree = "<group>"; };
+		B1D37F19166AB3F100536CE5 /* TrabantSimTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TrabantSimTicker.cpp; sourceTree = "<group>"; };
 		B1D37F37166AB53A00536CE5 /* MacThread.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacThread.mm; sourceTree = "<group>"; };
 		B1D37F3D166AB57A00536CE5 /* GameTicker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GameTicker.cpp; path = ../../Cure/Source/GameTicker.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37F3E166AB57A00536CE5 /* PhysicsSharedResource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhysicsSharedResource.cpp; path = ../../Cure/Source/PhysicsSharedResource.cpp; sourceTree = SOURCE_ROOT; };
@@ -1202,7 +1207,6 @@
 		B1D37F45166AB59C00536CE5 /* UiGravelEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiGravelEmitter.cpp; path = ../../UiCure/Source/UiGravelEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D37F49166AB5BF00536CE5 /* UiTouchDrag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchDrag.cpp; sourceTree = "<group>"; };
 		B1D37F4A166AB5BF00536CE5 /* UiTouchstick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTouchstick.cpp; sourceTree = "<group>"; };
-		B1D4C4CB174ABA9B005E1587 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Level.cpp; sourceTree = "<group>"; };
 		B1D5E29E172B1F6C00984602 /* UiJetEngineEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiJetEngineEmitter.cpp; path = ../../UiCure/Source/UiJetEngineEmitter.cpp; sourceTree = SOURCE_ROOT; };
 		B1D88DAA14DEA7080000CD85 /* Obfuxator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obfuxator.cpp; sourceTree = "<group>"; };
 		B1D88DAC14DEA71D0000CD85 /* HiscoreAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HiscoreAgent.cpp; path = ../../Cure/Source/HiscoreAgent.cpp; sourceTree = SOURCE_ROOT; };
@@ -1244,7 +1248,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* Impuzzable.app */,
+				1D6058910D05DD3D006BFB54 /* Trabant.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1252,7 +1256,7 @@
 		28EEBF621118D79A00187D67 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				B1B4898F13F9BD6C0047C78A /* Impuzzable-Info.plist */,
+				B1B4898F13F9BD6C0047C78A /* Trabant-Info.plist */,
 			);
 			name = Shared;
 			sourceTree = "<group>";
@@ -1276,7 +1280,7 @@
 		29B97315FDCFA39411CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				B19A146913A122DE0051A61C /* Impuzzable */,
+				B19A146913A122DE0051A61C /* Trabant */,
 				B1D37EE3166AB29400536CE5 /* Life */,
 				B15F795413FC59E300E01A90 /* UiCure */,
 				B15F791D13FC597B00E01A90 /* Cure */,
@@ -1527,19 +1531,19 @@
 			path = Mac;
 			sourceTree = "<group>";
 		};
-		B19A146913A122DE0051A61C /* Impuzzable */ = {
+		B19A146913A122DE0051A61C /* Trabant */ = {
 			isa = PBXGroup;
 			children = (
-				B1CF1ED21854E14200765E60 /* Ball.cpp */,
-				B1D4C4CB174ABA9B005E1587 /* Level.cpp */,
-				B1D37F15166AB3F100536CE5 /* Impuzzable.mm */,
-				B1D37F16166AB3F100536CE5 /* ImpuzzableConsoleManager.cpp */,
-				B1D37F18166AB3F100536CE5 /* ImpuzzableManager.cpp */,
-				B1D37F19166AB3F100536CE5 /* ImpuzzableTicker.cpp */,
-				B1D37F1D166AB3F100536CE5 /* Sunlight.cpp */,
-				B1B489A313F9BE4A0047C78A /* Impuzzable_Prefix.pch */,
+				B18D399C1A76F54300D8F48B /* Light.cpp */,
+				B18D399D1A76F54300D8F48B /* Object.cpp */,
+				B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */,
+				B1D37F15166AB3F100536CE5 /* TrabantSim.mm */,
+				B1D37F16166AB3F100536CE5 /* TrabantSimConsoleManager.cpp */,
+				B1D37F18166AB3F100536CE5 /* TrabantSimManager.cpp */,
+				B1D37F19166AB3F100536CE5 /* TrabantSimTicker.cpp */,
+				B1B489A313F9BE4A0047C78A /* Trabant_Prefix.pch */,
 			);
-			name = Impuzzable;
+			name = Trabant;
 			path = ..;
 			sourceTree = SOURCE_ROOT;
 		};
@@ -1571,6 +1575,8 @@
 		B19A14CC13A124940051A61C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B18D39A61A76FCF600D8F48B /* Logger.cpp */,
+				B18D39A41A76FC9A00D8F48B /* Timer.cpp */,
 				B1F2F934185E072800D6C78D /* TimeLogger.cpp */,
 				B14108051859215C005F84F1 /* Plane.cpp */,
 				B1B559CF17F77E5800A4BB17 /* GameTimer.cpp */,
@@ -2061,7 +2067,7 @@
 				B19A199113A127E50051A61C /* IceAABB.cpp */,
 				B19A199213A127E50051A61C /* IceAABB.h */,
 				B19A199313A127E50051A61C /* IceAxes.h */,
-				B19A199413A127E50051A61C /* IceImpuzzableingSphere.h */,
+				B19A199413A127E50051A61C /* IceBoundingSphere.h */,
 				B19A199513A127E50051A61C /* IceContainer.cpp */,
 				B19A199613A127E50051A61C /* IceContainer.h */,
 				B19A199713A127E50051A61C /* IceFPU.h */,
@@ -2404,9 +2410,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1D6058900D05DD3D006BFB54 /* Impuzzable */ = {
+		1D6058900D05DD3D006BFB54 /* Trabant */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "Impuzzable" */;
+			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "Trabant" */;
 			buildPhases = (
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
@@ -2416,9 +2422,9 @@
 			);
 			dependencies = (
 			);
-			name = Impuzzable;
-			productName = Impuzzable;
-			productReference = 1D6058910D05DD3D006BFB54 /* Impuzzable.app */;
+			name = Trabant;
+			productName = Trabant;
+			productReference = 1D6058910D05DD3D006BFB54 /* Trabant.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2440,7 +2446,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Impuzzable" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Trabant" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -2454,7 +2460,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1D6058900D05DD3D006BFB54 /* Impuzzable */,
+				1D6058900D05DD3D006BFB54 /* Trabant */,
 			);
 		};
 /* End PBXProject section */
@@ -2494,6 +2500,7 @@
 				B19A141D13A122CE0051A61C /* UiCheckButton.cpp in Sources */,
 				B19A141E13A122CE0051A61C /* UiComponent.cpp in Sources */,
 				B19A141F13A122CE0051A61C /* UiConsoleLogListener.cpp in Sources */,
+				B18D39A71A76FCF600D8F48B /* Logger.cpp in Sources */,
 				B19A142013A122CE0051A61C /* UiConsolePrompt.cpp in Sources */,
 				B19A142113A122CE0051A61C /* UiCustomButton.cpp in Sources */,
 				B19A142213A122CE0051A61C /* UiDesktopWindow.cpp in Sources */,
@@ -2521,7 +2528,6 @@
 				B19A143B13A122CE0051A61C /* UiChunkyClass.cpp in Sources */,
 				B19A143C13A122CE0051A61C /* UiChunkyLoader.cpp in Sources */,
 				B19A143D13A122CE0051A61C /* UiFontManager.cpp in Sources */,
-				B1CF1ED31854E14200765E60 /* Ball.cpp in Sources */,
 				B19A143E13A122CE0051A61C /* UiFontTexture.cpp in Sources */,
 				B19A143F13A122CE0051A61C /* UiGeometry2D.cpp in Sources */,
 				B19A144013A122CE0051A61C /* UiGeometryBatch.cpp in Sources */,
@@ -2628,6 +2634,7 @@
 				B19A157013A124AB0051A61C /* UiSoundManagerMock.cpp in Sources */,
 				B19A157113A124AB0051A61C /* UiSoundManagerOpenAL.cpp in Sources */,
 				B19A217C13A127EC0051A61C /* alutBufferData.c in Sources */,
+				B18D39A01A76F54300D8F48B /* Light.cpp in Sources */,
 				B19A217D13A127EC0051A61C /* alutCodec.c in Sources */,
 				B19A217E13A127EC0051A61C /* alutError.c in Sources */,
 				B19A217F13A127EC0051A61C /* alutInit.c in Sources */,
@@ -2688,6 +2695,7 @@
 				B19A221313A127EC0051A61C /* rdgif.cpp in Sources */,
 				B19A221713A127EC0051A61C /* rdppm.cpp in Sources */,
 				B19A221813A127EC0051A61C /* rdrle.cpp in Sources */,
+				B18D39A51A76FC9A00D8F48B /* Timer.cpp in Sources */,
 				B19A221913A127EC0051A61C /* rdswitch.cpp in Sources */,
 				B19A221A13A127EC0051A61C /* rdtarga.cpp in Sources */,
 				B19A222313A127EC0051A61C /* transupp.cpp in Sources */,
@@ -2877,6 +2885,7 @@
 				B15F794A13FC59DE00E01A90 /* ResourceManager.cpp in Sources */,
 				B15F794B13FC59DE00E01A90 /* RuntimeVariable.cpp in Sources */,
 				B15F794C13FC59DE00E01A90 /* TerrainFunctionManager.cpp in Sources */,
+				B18D39A11A76F54300D8F48B /* Object.cpp in Sources */,
 				B15F794D13FC59DE00E01A90 /* TerrainManager.cpp in Sources */,
 				B15F794E13FC59DE00E01A90 /* TerrainPatchLoader.cpp in Sources */,
 				B15F794F13FC59DE00E01A90 /* TerrainPatchManager.cpp in Sources */,
@@ -2916,6 +2925,7 @@
 				B1D37EF9166AB37000536CE5 /* ClientOptionsManager.cpp in Sources */,
 				B14108061859215C005F84F1 /* Plane.cpp in Sources */,
 				B1D37EFA166AB37000536CE5 /* GameClientMasterTicker.cpp in Sources */,
+				B18D39A21A76F54300D8F48B /* PhysGfxObject.cpp in Sources */,
 				B1D37EFB166AB37000536CE5 /* GameClientSlaveManager.cpp in Sources */,
 				B1D37EFC166AB37000536CE5 /* MassObject.cpp in Sources */,
 				B1D37EFD166AB37000536CE5 /* OptionsManager.cpp in Sources */,
@@ -2923,11 +2933,10 @@
 				B1D37EFF166AB37000536CE5 /* UiConsole.cpp in Sources */,
 				B1D37F01166AB37000536CE5 /* UiRaceScore.cpp in Sources */,
 				B1D37F02166AB37000536CE5 /* UiServerConsoleManager.cpp in Sources */,
-				B1D37F20166AB3F100536CE5 /* Impuzzable.mm in Sources */,
-				B1D37F21166AB3F100536CE5 /* ImpuzzableConsoleManager.cpp in Sources */,
-				B1D37F23166AB3F100536CE5 /* ImpuzzableManager.cpp in Sources */,
-				B1D37F24166AB3F100536CE5 /* ImpuzzableTicker.cpp in Sources */,
-				B1D37F28166AB3F100536CE5 /* Sunlight.cpp in Sources */,
+				B1D37F20166AB3F100536CE5 /* TrabantSim.mm in Sources */,
+				B1D37F21166AB3F100536CE5 /* TrabantSimConsoleManager.cpp in Sources */,
+				B1D37F23166AB3F100536CE5 /* TrabantSimManager.cpp in Sources */,
+				B1D37F24166AB3F100536CE5 /* TrabantSimTicker.cpp in Sources */,
 				B1D37F38166AB53A00536CE5 /* MacThread.mm in Sources */,
 				B1D37F40166AB57A00536CE5 /* GameTicker.cpp in Sources */,
 				B1D37F41166AB57A00536CE5 /* PhysicsSharedResource.cpp in Sources */,
@@ -2969,7 +2978,6 @@
 				B13DA5FB173EDB9800A73400 /* Projectile.cpp in Sources */,
 				B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */,
 				B13DA607173EDBF400A73400 /* Level.cpp in Sources */,
-				B1D4C4CC174ABA9B005E1587 /* Level.cpp in Sources */,
 				B1A83020177A42E40078D5E8 /* Health.cpp in Sources */,
 				B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */,
 				B1740478179469EB00DB7AD5 /* ResourceTracker.cpp in Sources */,
@@ -2995,7 +3003,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Impuzzable_Prefix.pch;
+				GCC_PREFIX_HEADER = Trabant_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					_DEBUG,
 					"HAVE_STDINT_H=1",
@@ -3017,13 +3025,13 @@
 					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
-				INFOPLIST_FILE = "Impuzzable-Info.plist";
+				INFOPLIST_FILE = "Trabant-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
 					"\"$(SRCROOT)/../../Tbc\"",
 				);
-				PRODUCT_NAME = Impuzzable;
+				PRODUCT_NAME = Trabant;
 				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
@@ -3037,7 +3045,7 @@
 				COMPRESS_PNG_FILES = NO;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Impuzzable_Prefix.pch;
+				GCC_PREFIX_HEADER = Trabant_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LEPRA_UNICODE,
 					"HAVE_STDINT_H=1",
@@ -3058,13 +3066,13 @@
 					"\"$(SRCROOT)/../../ThirdParty/happyhttp-0.1\"",
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
-				INFOPLIST_FILE = "Impuzzable-Info.plist";
+				INFOPLIST_FILE = "Trabant-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
 					"\"$(SRCROOT)/../../Tbc\"",
 				);
-				PRODUCT_NAME = Impuzzable;
+				PRODUCT_NAME = Trabant;
 				PROVISIONING_PROFILE = "";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -3101,7 +3109,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "Impuzzable" */ = {
+		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "Trabant" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
@@ -3110,7 +3118,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Impuzzable" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Trabant" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,

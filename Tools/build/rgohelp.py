@@ -166,7 +166,11 @@ def _zipdir(dirname, include, arcname):
 	import zipfile
 	zf = zipfile.ZipFile(arcname, "w", zipfile.ZIP_DEFLATED)
 	fs = glob.glob(os.path.join(dirname, "*"))
-	_zipfiles(zf, include, fs)
+	def arc_no_inc(filename):
+		if filename.endswith(arcname):
+			return False
+		return include(filename)
+	_zipfiles(zf, arc_no_inc, fs)
 	zf.close()
 
 

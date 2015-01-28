@@ -38,6 +38,7 @@ public:
 	virtual void Init();
 	virtual void Destroy();
 
+	static TrabantSim* GetApp();
 	str GetTypeName() const;
 	str GetVersion() const;
 	Cure::ApplicationTicker* CreateTicker() const;
@@ -49,6 +50,7 @@ public:
 	UiCure::GameUiManager* mUiManager;
 	UiLepra::Touch::DragManager mDragManager;
 
+	static TrabantSim* mApp;
 	logclass();
 };
 
@@ -71,6 +73,7 @@ TrabantSim::TrabantSim(const strutil::strvec& pArgumentList):
 	Parent(_T("TrabantSim"), pArgumentList),
 	mUiManager(0)
 {
+	mApp = this;
 }
 
 TrabantSim::~TrabantSim()
@@ -90,7 +93,7 @@ void TrabantSim::Init()
 
 #if defined(LEPRA_IOS)
 	Thread::Sleep(3.0);	// Wait a bit longer so Pixel Doctrine splash is visible.
-	CGSize lSize = [UIScreen mainScreen].trabant_sims.size;
+	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	int lScale = [[UIScreen mainScreen] scale];
 	const int lDisplayWidth = lSize.height * lScale;
 	const int lDisplayHeight = lSize.width * lScale;
@@ -157,6 +160,11 @@ void TrabantSim::Destroy()
 
 
 
+TrabantSim* TrabantSim::GetApp()
+{
+	return mApp;
+}
+
 str TrabantSim::GetTypeName() const
 {
 	return _T("Viewer");
@@ -174,6 +182,7 @@ Cure::ApplicationTicker* TrabantSim::CreateTicker() const
 
 
 
+TrabantSim* TrabantSim::mApp;
 loginstance(GAME, TrabantSim);
 
 

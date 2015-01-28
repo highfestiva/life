@@ -264,26 +264,22 @@ def _posix_no_lib_exes(targetdir):
 		rgohelp._run(["chmod", "-x", lib], "changing .so +x status to -x")
 
 
-def _create_zip(targetdir, buildtype):
+def _create_zip(targetdir, targetfile, buildtype):
 	_posix_no_lib_exes(targetdir)
 	print("Building compressed archive.")
 	if sys.platform in ("win32", "darwin"):
-		targetfile = targetdir+".zip"
-		if buildtype != "final":
-			targetfile = targetdir+".iszip"
+		targetfile += ".zip" if buildtype == "final" else ".iszip"
 		rgohelp._zipdir(targetdir, lambda x: True, targetfile)
 	else:
-		targetfile = targetdir+".tar.gz"
-		if buildtype != "final":
-			targetfile = targetdir+".tar.isgz"
+		targetfile += ".tar.gz" if buildtype == "final" else ".tar.isgz"
 		rgohelp._targzdir(targetdir, targetfile)
 	return targetfile
 
 
 def _buildzip(builder, buildtype):
 	rgohelp._verify_base_dir()
-	subdir = fullname
-	targetdir = subdir
+	subdir = fullname if not ismac else '.'
+	targetdir = fullname
 	if buildtype == "rc":
 		targetdir = "PRE_ALPHA."+targetdir
 	elif buildtype != "final":
@@ -292,9 +288,8 @@ def _buildzip(builder, buildtype):
 	os.makedirs(targetdir)
 	builder(targetdir, buildtype)
 	tmpdirs = ('tmp', '..') if not ismac else (targetdir, '../..')
-	subdir = subdir if not ismac else subdir+'.app'
 	os.chdir(tmpdirs[0])
-	targetfile = _create_zip(subdir, buildtype)
+	targetfile = _create_zip(subdir, fullname, buildtype)
 	os.chdir(tmpdirs[1])
 	nicefile = fullname+"."+osname+"."+hwname+"."+buildtype+"."+datename+'.'+targetfile.split('.',1)[1]
 	os.rename(tmpdirs[0]+'/'+targetfile, nicefile)

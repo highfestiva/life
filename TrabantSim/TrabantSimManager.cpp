@@ -364,7 +364,10 @@ void TrabantSimManager::GetKeys(strutil::strvec& pKeys)
 		pKeys.push_back(UiLepra::InputManager::GetKeyName(x->first));
 		if (x->second)
 		{
-			x = mKeyMap.erase(x);
+			KeyMap::iterator y = x;
+			++y;
+			mKeyMap.erase(x);
+			x = y;
 		}
 		else
 		{
@@ -861,7 +864,7 @@ void TrabantSimManager::CommandLoop()
 			break;
 		}
 		lData[l-1] = 0;	// Drop last linefeed.
-		const str lCommand = astrutil::Encode(astr((char*)lData));
+		const str lCommand = strutil::Encode(astr((char*)lData));
 		if (!GetConsoleManager())
 		{
 			break;
@@ -902,7 +905,7 @@ bool TrabantSimManager::Open()
 	bool lOk = Parent::Open();
 	if (lOk)
 	{
-		mPauseButton = new UiTbc::Button(GREEN_BUTTON, "Pause");
+		mPauseButton = new UiTbc::Button(GREEN_BUTTON, _T("Pause"));
 		int x = mRenderArea.mLeft + 2;
 		int y = mRenderArea.mTop + 2;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);

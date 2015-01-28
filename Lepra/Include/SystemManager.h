@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../ThirdParty/FastDelegate/FastDelegate.h"
+#include "LepraOS.h"
 #include "LepraTypes.h"
 #include "Log.h"
 #include "String.h"
