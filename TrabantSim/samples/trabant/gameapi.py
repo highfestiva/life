@@ -18,10 +18,10 @@ def init(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', restart=Tr
 	if restart:
 		release_all_objects()
 		reset()	# Kill all joysticks, set all default values, etc.
-	setbgcolor(bg)
-	setpencolor(fg)
-	set('Physics.FPS', int(fps))
-	set('Ui.3D.FOV', float(fov))
+		setbgcolor(bg)
+		setpencolor(fg)
+		set('Physics.FPS', int(fps))
+		set('Ui.3D.FOV', float(fov))
 	return True
 
 def close():

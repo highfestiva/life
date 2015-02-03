@@ -889,7 +889,9 @@ void TrabantSimManager::CommandLoop()
 
 bool TrabantSimManager::IsControlled() const
 {
-	return mCommandThread && mCommandThread->IsRunning() && mIsControlled;
+	bool lAllowPowerDown;
+	v_get(lAllowPowerDown, =, GetVariableScope(), RTVAR_GAME_ALLOWPOWERDOWN, true);
+	return !lAllowPowerDown || (mCommandThread && mCommandThread->IsRunning() && mIsControlled);
 }
 
 

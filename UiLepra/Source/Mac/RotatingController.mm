@@ -12,6 +12,12 @@
 
 @implementation RotatingController
 
+
+- (void) viewWillAppear:(BOOL)animated
+{
+	[[UIDevice currentDevice] setOrientation:UIInterfaceOrientationLandscapeRight];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
 	return [[EAGLView sharedView] shouldAutorotateToInterfaceOrientation:interfaceOrientation];

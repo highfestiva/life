@@ -39,11 +39,12 @@
 +Test using API in strange ways. Crash control.
 +Add some comments. What is "avel" for instance?
 +Configuration for running towards a simulator on another machine.
++Fix bug: sometimes won't TCP socket connect! Reproduce how?
++Build and run on Mac.
++Test accelerometer controls on iOS.
 
-Fix bug: sometimes won't TCP socket connect! Reproduce how?
-Build and run on Mac.
-Test accelerometer controls on iOS.
-
+Fix fog on iOS.
+Fix iOS screen orientation from all four angles. ViewController won't rotate. Including tap position from all four positions.
 Fix pause button (icon). Add back button.
 Create icons for all three platforms. Create splash screens for iOS.
 Build mobile Python IDE.

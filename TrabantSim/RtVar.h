@@ -31,6 +31,7 @@
 #define RTVAR_UI_PENGREEN		"Ui.PenGreen"
 #define RTVAR_UI_PENBLUE		"Ui.PenBlue"
 
+#define RTVAR_GAME_ALLOWPOWERDOWN	"Game.AllowPowerDown"
 #define RTVAR_GAME_USERMESSAGE		"Game.UserMessage"
 
 #define RTVAR_PHYSICS_BOUNCE		"Physics.Bounce"
