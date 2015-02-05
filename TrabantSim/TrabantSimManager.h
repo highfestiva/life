@@ -8,6 +8,7 @@
 
 #include "../Life/LifeClient/GameClientSlaveManager.h"
 #include <map>
+#include "../Lepra/Include/SocketAddress.h"
 #include "../Life/LifeClient/Menu.h"
 #include "../UiCure/Include/UiResourceManager.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
@@ -196,6 +197,8 @@ protected:
 	vec3 mCameraVelocity;
 	UiTbc::Button* mPauseButton;
 	bool mIsControlled;
+	bool mIsControlTimeout;
+	SocketAddress mLastRemoteAddress;
 	UdpSocket* mCommandSocket;
 	MemberThread<TrabantSimManager>* mCommandThread;
 	UiTbc::Dialog* mUserInfoDialog;

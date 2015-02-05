@@ -81,6 +81,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mCameraTransform(quat(), vec3(0, -3, 0)),
 	mPauseButton(0),
 	mIsControlled(false),
+	mIsControlTimeout(false),
 	mCommandSocket(0),
 	mCommandThread(0),
 	mUserInfoDialog(0),
@@ -100,6 +101,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	{
 		lAddress.Resolve(_T(":2541"));
 	}
+	mLastRemoteAddress = lAddress;
 	mCommandSocket = new UdpSocket(lAddress, true);
 	if (mCommandSocket->IsOpen())
 	{
@@ -838,17 +840,24 @@ void TrabantSimManager::AddTag(int pObjectId, const str& pTagType, const FloatLi
 void TrabantSimManager::CommandLoop()
 {
 	mIsControlled = false;
-	SocketAddress lFromAddress;
+	mIsControlTimeout = false;
 	uint8 lData[128*1024];
 	while (!mCommandThread->GetStopRequest())
 	{
-		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), lFromAddress);
+		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, 2);
 		if (l <= 0 || lData[l-1] != '\n' || ::memcmp("disconnect\n", lData, 11) == 0)
 		{
-			mIsControlled = false;
+			if (l == 0)
+			{
+				mIsControlTimeout = true;
+			}
+			else
+			{
+				mIsControlled = false;
+			}
 			for (int x = 0; x < 10; ++x)
 			{
-				if (mCommandSocket->ReceiveFrom(lData, sizeof(lData), lFromAddress, 0.01) == 0)
+				if (mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, 0.01) == 0)
 				{
 					break;
 				}
@@ -856,6 +865,7 @@ void TrabantSimManager::CommandLoop()
 			continue;
 		}
 		mIsControlled = true;
+		mIsControlTimeout = false;
 		while (!mPauseButton || !mPauseButton->IsVisible())
 		{
 			Thread::Sleep(0.5);
@@ -876,7 +886,7 @@ void TrabantSimManager::CommandLoop()
 		}
 		GetConsoleManager()->ExecuteCommand(lCommand);
 		const astr lResponse = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
-		if (mCommandSocket->SendTo((const uint8*)lResponse.c_str(), lResponse.length(), lFromAddress) != (int)lResponse.length())
+		if (mCommandSocket->SendTo((const uint8*)lResponse.c_str(), lResponse.length(), mLastRemoteAddress) != (int)lResponse.length())
 		{
 			mIsControlled = false;
 		}
@@ -889,9 +899,15 @@ void TrabantSimManager::CommandLoop()
 
 bool TrabantSimManager::IsControlled() const
 {
+	if (!mCommandThread || !mCommandThread->IsRunning())
+	{
+		return false;
+	}
+
 	bool lAllowPowerDown;
 	v_get(lAllowPowerDown, =, GetVariableScope(), RTVAR_GAME_ALLOWPOWERDOWN, true);
-	return !lAllowPowerDown || (mCommandThread && mCommandThread->IsRunning() && mIsControlled);
+	const bool lIsPowerDown = (lAllowPowerDown && mIsControlTimeout);
+	return !lIsPowerDown && mIsControlled;
 }
 
 
@@ -947,10 +963,14 @@ void TrabantSimManager::CloseConnection()
 {
 	if (mCommandSocket)
 	{
+		mCommandSocket->Shutdown(SocketBase::SHUTDOWN_RECV);
+		mCommandSocket->SendTo((uint8*)"disconnect\n", 11, mLastRemoteAddress);
+		mCommandSocket->Shutdown(SocketBase::SHUTDOWN_BOTH);
 		if (mCommandThread) mCommandThread->RequestStop();
 		UdpSocket(SocketAddress(), false).SendTo((uint8*)"?", 1, mCommandSocket->GetLocalAddress());
 		delete mCommandThread;
 		mCommandThread = 0;
+		Thread::Sleep(0.1);	// Wait for shutdown.
 		delete mCommandSocket;
 		mCommandSocket = 0;
 	}

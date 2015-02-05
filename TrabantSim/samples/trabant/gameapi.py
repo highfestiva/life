@@ -250,7 +250,7 @@ def _opencom(addr):
 	_tryconnect(addr, 1)
 	if not sock:
 		_run_local_sim(addr)
-		_tryconnect(addr, 3)
+		_tryconnect(addr, 10 if proc else 3)
 	if proc or sock:
 		import atexit
 		import signal
@@ -285,11 +285,15 @@ def _tryconnect(addr, retries):
 	ip,port = addr.split(':')
 	for attempt in range(1,retries+1):
 		try:
+			if proc:
+				import time
+				time.sleep(1)
 			sock = trabant.socket.socket()
 			sock.connect((ip,int(port)))
 			cmd('system-info')	# To make sure connection alright.
 			break
-		except socket.error:
+		except socket.error as e:
+			print(e)
 			sock = None
 			if retries>1 and attempt==retries:
 				print('TrabantSim not available on %s.' % addr)
@@ -299,13 +303,13 @@ def _run_local_sim(addr):
 	global proc
 	import os
 	if 'localhost' in addr and os.name in ('nt','darwin'):
-		for directory in ['', './', '../']:
+		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./')]:
 			import os.path
 			import subprocess
 			curdir = os.path.abspath(os.path.curdir)
 			try:
 				os.chdir(directory)
-				proc = subprocess.Popen(['TrabantSim', addr], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+				proc = subprocess.Popen([rel+'TrabantSim', addr], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 			except:
 				os.chdir(curdir)
 				continue

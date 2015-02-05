@@ -161,7 +161,7 @@ class Joystick:
 
 def trabant_init(**kwargs):
 	import sys
-	interactive = hasattr(sys, 'ps1') or sys.flags.interactive
+	interactive = bool(hasattr(sys, 'ps1') or sys.flags.interactive)
 	config = {'restart': not interactive}
 	try:
 		import os.path
@@ -185,6 +185,8 @@ def trabant_init(**kwargs):
 			exc = e
 	if not online:
 		raise exc if exc else Exception('unable to connect to simulator')
+	gameapi.set('Game.AllowPowerDown', not interactive)
+	gameapi.sock.settimeout(None if interactive else 5*60)
 	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
 	loop(delay=0)	# Resets taps+collisions.
 	_accelerometer_calibration = accelerometer()
@@ -292,7 +294,8 @@ def create_cube_object(pos=None, orientation=None, side=1, vel=None, avel=None, 
 
 def create_sphere_object(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
-	gfx,phys = objgen.createsphere(radius)
+	resolution = int(min(8, max(4,radius**0.3)*8))
+	gfx,phys = objgen.createsphere(radius, latitude=resolution, longitude=int(resolution*1.5))
 	return _create_object(gfx, phys, static, pos=pos, orientation=None, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def last_created_object():
