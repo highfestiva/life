@@ -293,7 +293,6 @@ def _tryconnect(addr, retries):
 			cmd('system-info')	# To make sure connection alright.
 			break
 		except socket.error as e:
-			print(e)
 			sock = None
 			if retries>1 and attempt==retries:
 				print('TrabantSim not available on %s.' % addr)

@@ -1,0 +1,24 @@
++Drop all other languages...
++Place all configuration files in subfolder.
++Use monospaced font!
++Configure look similar to Notepad++.
+-Create tab for running simulation inside.
+-Somehow make simulation run in tab...
++Move scripts into a subdir.
++Drop menus and menu alternatives for other languages. (Remove other .properties files?)
++Remove syntax check menu command (=added command, SciTEWin.cxx:1206).
++Add button in toolbar for running.
++Build as TrabantIDE.exe.
+-Condense text in editor (in X).
++Replace program icon (SciBall.ico).
++ESC should hide the output window.
+
+Bugfix: output window should be minimized when editor started. (VK_ESCAPE caused this?)
+Get help to work with http://...
+Resize window every time a prototype is started/stopped.
+Show/hide output log every time a prototype is started/stopped.
+Make toolbar enabled by default.
+Change About text!
+Give cred to SciTE!
+Release source!
+Add Python binaries to downloadable archive.
