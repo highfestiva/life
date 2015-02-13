@@ -129,11 +129,6 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
 	switch (mEngineType)
 	{
 		case ENGINE_WALK:
-		{
-			deb_assert(false);
-			mLog.AError("Walk not implemented!");
-		}
-		break;
 		case ENGINE_PUSH_RELATIVE:
 		case ENGINE_PUSH_ABSOLUTE:
 		case ENGINE_PUSH_TURN_RELATIVE:
@@ -216,11 +211,6 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 		switch (mEngineType)
 		{
 			case ENGINE_WALK:
-			{
-				deb_assert(false);
-				mLog.AError("Walk not implemented!");
-			}
-			break;
 			case ENGINE_PUSH_RELATIVE:
 			case ENGINE_PUSH_ABSOLUTE:
 			{
@@ -263,6 +253,10 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					if (mFriction)
 					{
 						lVelocityVector *= mFriction*0.5f / mMaxSpeed;
+						if (mEngineType == ENGINE_WALK)
+						{
+							lVelocityVector.z = 0;	// When walking we won't apply brakes in Z.
+						}
 						lPushVector -= lVelocityVector;
 					}
 					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
@@ -678,7 +672,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 float PhysicsEngine::GetValue() const
 {
 	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
-	if (mEngineType == ENGINE_PUSH_RELATIVE || mEngineType == ENGINE_PUSH_ABSOLUTE)
+	if (mEngineType == ENGINE_WALK || mEngineType == ENGINE_PUSH_RELATIVE || mEngineType == ENGINE_PUSH_ABSOLUTE)
 	{
 		const float a = std::abs(mValue[ASPECT_PRIMARY]);
 		const float b = std::abs(mValue[ASPECT_SECONDARY]);

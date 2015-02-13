@@ -143,12 +143,17 @@ Tbc::ChunkyPhysics* CppContextObject::GetPhysics() const
 	return (0);
 }
 
+UserPhysicsReferenceResource* CppContextObject::GetPhysicsResource() const
+{
+	return mPhysicsResource;
+}
+
 void CppContextObject::CreatePhysics(Tbc::ChunkyPhysics* pPhysics)
 {
 	deb_assert(mPhysicsResource == 0);
 	static int lPhysicsCounter = 0;
-	str lPhysicsName = strutil::Format(_T("TestPhysics%i"), ++lPhysicsCounter);
-	str lPhysicsRefName = lPhysicsName+_T("Ref");
+	const str lPhysicsName = strutil::Format(_T("RawPhys%i.phys"), ++lPhysicsCounter);
+	const str lPhysicsRefName = strutil::Format(_T("%s;%i"), lPhysicsName.c_str(), GetInstanceId());
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
 		((Cure::GameTicker*)mManager->GetGameManager()->GetTicker())->GetPhysicsLock(), mManager->GetGameManager()->GetPhysicsManager(),
 		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
@@ -171,6 +176,11 @@ void CppContextObject::CreatePhysics(Tbc::ChunkyPhysics* pPhysics)
 	lPhysicsRefResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// We're waiting for the root resource to get loaded.
 	GetResourceManager()->AddLoaded(lPhysics);
 	GetResourceManager()->AddLoaded(lPhysicsRef);
+}
+
+void CppContextObject::CreatePhysicsRef(const str& pName)
+{
+	StartLoadingPhysics(pName);
 }
 
 const Tbc::ChunkyClass* CppContextObject::GetClass() const

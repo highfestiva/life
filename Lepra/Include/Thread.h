@@ -28,6 +28,7 @@ class OwnedLock
 public:
 	bool IsOwner() const;
 	Thread* GetOwner() const;
+	int GetReferenceCount() const;
 
 protected:
 	OwnedLock();

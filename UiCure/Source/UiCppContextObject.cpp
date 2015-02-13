@@ -136,12 +136,6 @@ void CppContextObject::OnTick()
 
 void CppContextObject::UiMove()
 {
-	//if (strutil::StartsWith(mClassId, _T("indic")))
-	//{
-	//	int i = 7;
-	//	int j = i;
-	//	i = j;
-	//}
 	Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
 	const float lLerpFactor = Math::GetIterateLerpTime(0.2f, lFrameTime);
@@ -308,31 +302,13 @@ UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) con
 void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh, int pCastsShadows)
 {
 	static int lMeshCounter = 0;
-	int lPhysIndex = 0;
-	str lMeshName = strutil::Format(_T("TestMesh%i"), lMeshCounter++);
-	str lMeshRefName = lMeshName+_T("Ref");
-	xform lTransform;
-	float lScale = 1;
-	// Create through instancing (only way supported for CppObjects currently.
-	UserGeometryReferenceResource* lGeometryRef = new UserGeometryReferenceResource(
-		mUiManager, GeometryOffset(lPhysIndex, lTransform, lScale));
-	GeometryReferenceResource* lGeometryRefResource = (GeometryReferenceResource*)lGeometryRef->CreateResource(GetResourceManager(), lMeshRefName);
-	lGeometryRefResource->SetIsUnique(true);
-	lGeometryRef->SetResource(lGeometryRefResource);
-	Cure::UserResource::LoadCallback lCallbackCast;
-	lCallbackCast.SetMemento(UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh).GetMemento());
-	lGeometryRefResource->AddCaller(lGeometryRef, lCallbackCast);
-	GeometryReferenceResource::ClassResource* lGeometry = lGeometryRefResource->GetParent();
-	GeometryResource* lGeometryResource = (GeometryResource*)lGeometry->CreateResource(GetResourceManager(), lMeshName);
-	lGeometryResource->SetIsUnique(true);
-	lGeometry->SetResource(lGeometryResource);
-	lGeometryResource->SetRamDataType(pMesh);
-	lGeometryResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// Handle pushing to gfx card in postprocessing by some other thread at a later stage.
-	lGeometryRefResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// We're waiting for the root resource to get loaded.
-	lGeometryRefResource->SetCastsShadows(pCastsShadows);
-	GetResourceManager()->AddLoaded(lGeometry);
-	GetResourceManager()->AddLoaded(lGeometryRef);
-	mMeshResourceArray.push_back(lGeometryRef);
+	str lMeshName = strutil::Format(_T("RawMesh%i"), lMeshCounter++);
+	DoAddMeshResource(lMeshName, pMesh, pCastsShadows);
+}
+
+void CppContextObject::AddMeshResourceRef(const str& pMeshName, int pCastsShadows)
+{
+	DoAddMeshResource(pMeshName, 0, pCastsShadows);
 }
 
 void CppContextObject::CenterMeshes()
@@ -496,6 +472,46 @@ const Tbc::ChunkyClass* CppContextObject::GetClass() const
 		return (mUiClassResource->GetRamData());
 	}
 	return (0);
+}
+
+
+
+void CppContextObject::DoAddMeshResource(const str& pMeshName, Tbc::GeometryBase* pMesh, int pCastsShadows)
+{
+	const str lMeshName = pMeshName + _T(".mesh");
+	const str lMeshRefName = strutil::Format(_T("%s;%i"), lMeshName.c_str(), GetInstanceId());
+	int lPhysIndex = 0;
+	xform lTransform;
+	float lScale = 1;
+	UserGeometryReferenceResource* lGeometryRef = new UserGeometryReferenceResource(mUiManager, GeometryOffset(lPhysIndex, lTransform, lScale));
+	mMeshResourceArray.push_back(lGeometryRef);
+	if (pMesh)
+	{
+		GeometryReferenceResource* lGeometryRefResource = (GeometryReferenceResource*)lGeometryRef->CreateResource(GetResourceManager(), lMeshRefName);
+		lGeometryRefResource->SetIsUnique(true);
+		lGeometryRef->SetResource(lGeometryRefResource);
+		Cure::UserResource::LoadCallback lCallbackCast;
+		lCallbackCast.SetMemento(UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh).GetMemento());
+		lGeometryRefResource->AddCaller(lGeometryRef, lCallbackCast);
+		lGeometryRefResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// We're waiting for the root resource to get loaded.
+		lGeometryRefResource->SetCastsShadows(pCastsShadows);
+		GeometryReferenceResource::ClassResource* lGeometry = lGeometryRefResource->GetParent();
+		GeometryResource* lGeometryResource = (GeometryResource*)lGeometry->CreateResource(GetResourceManager(), lMeshName);
+		lGeometryResource->SetIsUnique(true);
+		lGeometry->SetResource(lGeometryResource);
+		lGeometryResource->SetRamDataType(pMesh);
+		lGeometryResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// Handle pushing to gfx card in postprocessing by some other thread at a later stage.
+		GetResourceManager()->AddLoaded(lGeometry);
+		GetResourceManager()->AddLoaded(lGeometryRef);
+	}
+	else
+	{
+		lGeometryRef->Load(GetResourceManager(),
+			lMeshRefName,
+			UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh),
+			false);
+		((GeometryReferenceResource*)lGeometryRef->GetResource())->SetCastsShadows(pCastsShadows);
+	}
 }
 
 

@@ -89,6 +89,9 @@ class vec3:
 	def angle_z(self,v):
 		return atan2(v.y,v.x) - atan2(self.y,self.x)
 
+	def mulvec(self,v):
+		return vec3(self.x*v.x, self.y*v.y, self.z*v.z)
+
 	def __add__(self,v):
 		return vec3(self.x+v.x, self.y+v.y, self.z+v.z)
 

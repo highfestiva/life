@@ -8,7 +8,11 @@
 
 +Downwash, i.e. Helicopter Gravity Force 2D/3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
-.Cutaway - 3D realtime physics puzzle. Box contains balls. Cut out as much of the box as you can by drawing cutting planes. When you've reduced the space for the balls by 50% or so, you've completed the level. The next level contains one more ball.
+-Cutaway - 3D realtime physics puzzle. Box contains balls. Cut out as much of the box as you can by drawing cutting planes. When you've reduced the space for the balls by 50% or so, you've completed the level. The next level contains one more ball.
+
+Rapid prototyping game IDE. Python.
+
+AI vs. AI programming game. Python.
 
 Bacteria eater. Bacteria will grow exponentially, eat them! Eating grows you reach, moving shrinks it.
 

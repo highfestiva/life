@@ -61,6 +61,7 @@ public:
 	Tbc::GeometryBase* GetMesh(int pIndex) const;
 	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
 	void AddMeshResource(Tbc::GeometryBase* pMesh, int pCastsShadows);
+	void AddMeshResourceRef(const str& pMeshName, int pCastsShadows);
 	void CenterMeshes();
 	void LoadTexture(const str& pName, Canvas::ResizeHint pResizeHint=Canvas::RESIZE_FAST);
 	virtual void UpdateMaterial(int pMeshIndex);
@@ -78,6 +79,8 @@ protected:
 		LERP_START,
 		LERP_RUN,
 	};
+
+	void DoAddMeshResource(const str& pMeshName, Tbc::GeometryBase* pMesh, int pCastsShadows);
 
 	void OnLoadClass(UserClassResource* pClassResource);
 	virtual void LoadTextures();

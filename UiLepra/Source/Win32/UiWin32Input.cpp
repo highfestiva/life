@@ -317,6 +317,7 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	mInitialized(false),
 	mScreenWidth(0),
 	mScreenHeight(0),
+	mCursorVisible(true),
 	mCursorX(0),
 	mCursorY(0),
 	mMouse(0),
@@ -330,9 +331,6 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	::GetCursorPos(&lPoint);
 	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);
 	SetCursorVisible(false);
-#ifdef LEPRA_DEBUG
-	SetCursorVisible(true);
-#endif // Debug
 
 	::memset(&mTypeCount, 0, sizeof(mTypeCount));
 
@@ -365,6 +363,8 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 
 Win32InputManager::~Win32InputManager()
 {
+	SetCursorVisible(true);
+
 	if (mInitialized == true)
 	{
 		mDirectInput->Release();
@@ -450,6 +450,41 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 		{
 			SetKey((KeyCode)pwParam, plParam, true);
 			lConsumed = NotifyOnKeyDown((KeyCode)pwParam);
+		}
+		break;
+		case WM_ACTIVATE:
+		{
+			if (!mCursorVisible)
+			{
+				if (pwParam == WA_INACTIVE)
+				{
+					SetCursorVisible(true);
+					mCursorVisible = false;
+				}
+				else
+				{
+					mCursorVisible = true;
+					SetCursorVisible(false);
+				}
+			}
+		}
+		break;
+		case WM_SETFOCUS:
+		{
+			if (!mCursorVisible)
+			{
+				mCursorVisible = true;
+				SetCursorVisible(false);
+			}
+		}
+		break;
+		case WM_KILLFOCUS:
+		{
+			if (!mCursorVisible)
+			{
+				SetCursorVisible(true);
+				mCursorVisible = false;
+			}
 		}
 		break;
 	}
@@ -559,7 +594,20 @@ void Win32InputManager::SetCursorVisible(bool pVisible)
 	{
 		::ClipCursor(0);
 	}
-	::ShowCursor(pVisible? TRUE : FALSE);
+	if (mCursorVisible != pVisible)
+	{
+		if (pVisible)
+		{
+			while(::ShowCursor(pVisible) < 1)
+				;
+		}
+		else
+		{
+			while(::ShowCursor(pVisible) > -2)
+				;
+		}
+		mCursorVisible = pVisible;
+	}
 }
 
 float Win32InputManager::GetCursorX()
@@ -618,6 +666,9 @@ void Win32InputManager::AddObserver()
 		mDisplayManager->AddObserver(WM_LBUTTONUP, this);
 		mDisplayManager->AddObserver(WM_RBUTTONUP, this);
 		mDisplayManager->AddObserver(WM_MBUTTONUP, this);
+		mDisplayManager->AddObserver(WM_ACTIVATE, this);
+		mDisplayManager->AddObserver(WM_SETFOCUS, this);
+		mDisplayManager->AddObserver(WM_KILLFOCUS, this);
 	}
 }
 

@@ -25,6 +25,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandId
 {
 	{_T("reset"), COMMAND_RESET},
 	{_T("create-object"), COMMAND_CREATE_OBJECT},
+	{_T("create-clones"), COMMAND_CREATE_CLONES},
 	{_T("delete-object"), COMMAND_DELETE_OBJECT},
 	{_T("delete-all-objects"), COMMAND_DELETE_ALL_OBJECTS},
 	{_T("clear-phys"), COMMAND_CLEAR_PHYS},
@@ -41,6 +42,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandId
 	{_T("get-keys"), COMMAND_GET_KEYS},
 	{_T("get-touch-drags"), COMMAND_GET_TOUCH_DRAGS},
 	{_T("get-accelerometer"), COMMAND_GET_ACCELEROMETER},
+	{_T("get-mousemove"), COMMAND_GET_MOUSEMOVE},
 	{_T("create-joystick"), COMMAND_CREATE_JOYSTICK},
 	{_T("get-joystick-data"), COMMAND_GET_JOYSTICK_DATA},
 	{_T("get-aspect-ratio"), COMMAND_GET_ASPECT_RATIO},
@@ -67,10 +69,10 @@ struct ParameterException
 {
 };
 
-std::vector<float> Strs2Flts(const strutil::strvec& pStrs)
+std::vector<float> Strs2Flts(const strutil::strvec& pStrs, size_t pIndex=0)
 {
 	std::vector<float> lFlts;
-	strutil::strvec::const_iterator x = pStrs.begin();
+	strutil::strvec::const_iterator x = pStrs.begin() + pIndex;
 	for(; x != pStrs.end(); ++x)
 	{
 		double d = 0;
@@ -225,11 +227,11 @@ void Params2Ints(const strutil::strvec& pParam, std::vector<int>& pInts)
 	}
 }
 
-void Params2Floats(const strutil::strvec& pParam, std::vector<float>& pFloats)
+void Params2Floats(const strutil::strvec& pParam, std::vector<float>& pFloats, size_t pParamIndex=0)
 {
 	pFloats.clear();
 	strutil::strvec::const_iterator p;
-	for (p = pParam.begin(); p != pParam.end(); ++p)
+	for (p = pParam.begin()+pParamIndex; p != pParam.end(); ++p)
 	{
 		const tchar* s = p->c_str();
 		const tchar* lEnd;
@@ -266,7 +268,7 @@ bool TrabantSimConsoleManager::Start()
 #endif // Computer / touch
 }
 
-str TrabantSimConsoleManager::GetActiveResponse() const
+const str& TrabantSimConsoleManager::GetActiveResponse() const
 {
 	return mActiveResponse;
 }
@@ -310,16 +312,57 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				{
 					const str lType = ParamToStr(pParameterVector, 0);
 					const str lMaterialInfo = ParamToStr(pParameterVector, 1);
+					const vec3 lPosition = ParamToVec3(pParameterVector, 2);
+					const quat lOrientation = ParamToQuat(pParameterVector, 5);
+					// Work out material.
 					const bool lIsStatic = (lType == _T("static"));
 					ObjectMaterial lMaterial = MaterialSmooth;
 					if (lMaterialInfo == _T("flat")) lMaterial = MaterialFlat;
 					else if (lMaterialInfo == _T("checker")) lMaterial = MaterialChecker;
-					const int lObjectId = lManager->CreateObject(mGfxMesh, mPhysObjects, lMaterial, lIsStatic);
+
+					const int lObjectId = lManager->CreateObject(lOrientation, lPosition, mGfxMesh, mPhysObjects, lMaterial, lIsStatic);
 					if (lObjectId == -1)
 					{
 						throw ParameterException();
 					}
 					mActiveResponse += ToStr(lObjectId);
+				}
+				break;
+				case COMMAND_CREATE_CLONES:
+				{
+					const int lOriginalId = ParamToInt(pParameterVector, 0);
+					const str lType = ParamToStr(pParameterVector, 1);
+					const str lMaterialInfo = ParamToStr(pParameterVector, 2);
+					std::vector<float> lPlacements;
+					Params2Floats(pParameterVector, lPlacements, 3);
+					// Work out material.
+					const bool lIsStatic = (lType == _T("static"));
+					ObjectMaterial lMaterial = MaterialSmooth;
+					if (lMaterialInfo == _T("flat")) lMaterial = MaterialFlat;
+					else if (lMaterialInfo == _T("checker")) lMaterial = MaterialChecker;
+
+					std::vector<xform> lTransforms;
+					int x = 0, cnt = (int)lPlacements.size();
+					for (; x <= cnt-7; x += 7)
+					{
+						lTransforms.push_back(xform(quat(&lPlacements[x+3]), vec3(&lPlacements[x])));
+					}
+					std::vector<int> lObjectIds;
+					lManager->CreateClones(lObjectIds, lOriginalId, lTransforms, lMaterial, lIsStatic);
+					if (lObjectIds.empty())
+					{
+						throw ParameterException();
+					}
+					bool lFirst = true;
+					for (std::vector<int>::iterator y = lObjectIds.begin(); y != lObjectIds.end(); ++y)
+					{
+						if (!lFirst)
+						{
+							mActiveResponse += _T(',');
+						}
+						lFirst = false;
+						mActiveResponse += ToStr(*y);
+					}
 				}
 				break;
 				case COMMAND_DELETE_OBJECT:
@@ -469,6 +512,12 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				{
 					const vec3 a = lManager->GetAccelerometer();
 					mActiveResponse += strutil::Format(_T("%f %f %f"), a.x, a.y, a.z);
+				}
+				break;
+				case COMMAND_GET_MOUSEMOVE:
+				{
+					const vec3 m = lManager->GetMouseMove();
+					mActiveResponse += strutil::Format(_T("%f %f %f"), m.x, m.y, m.z);
 				}
 				break;
 				case COMMAND_CREATE_JOYSTICK:

@@ -460,7 +460,10 @@ void GeometryReferenceResource::Suspend()
 
 void GeometryReferenceResource::OnLoadClass(ClassResource* pResource)
 {
-	mCastsShadows = ((const GeometryResource*)pResource->GetConstResource())->GetCastsShadows();
+	if (mCastsShadows == 0)
+	{
+		mCastsShadows = ((const GeometryResource*)pResource->GetConstResource())->GetCastsShadows();
+	}
 }
 
 loginstance(UI_GFX_3D, GeometryReferenceResource);

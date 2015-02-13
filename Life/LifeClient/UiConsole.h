@@ -46,6 +46,7 @@ public:
 	void SetColor(const Color& pColor);
 	bool ToggleVisible();
 	void SetVisible(bool pVisible);
+	bool IsVisible() const;
 	void Tick();
 	UiCure::GameUiManager* GetUiManager() const;
 	UiTbc::FontManager::FontId GetFontId() const;

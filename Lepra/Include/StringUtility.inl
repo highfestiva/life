@@ -452,52 +452,48 @@ STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StringToInt(const _String& pString, int& p
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::IntToString(int64 pValue, int pRadix)
 {
 	bool lSign = (pValue < 0);
-	if (lSign == true)
+	if (lSign)
 	{
 		pValue = -pValue;
 	}
 
-	typename _String::value_type lString[64];
-	int i = 0;
-
-	while (pValue > 0)
+	static typename _String::value_type lString[64] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	int i = 62;	// Leave a zero at the end.
+	if (pRadix == 10)
 	{
-		int lDigit = (int)(pValue % pRadix);
-		pValue /= pRadix;
-
-		if (lDigit >= 0 && lDigit <= 9)
+		while (pValue > 0)
 		{
-			lString[i] = (typename _String::value_type)('0' + lDigit);
+			const int lDigit = (int)(pValue % 10);
+			lString[i--] = (typename _String::value_type)('0' + lDigit);
+			pValue /= 10;
 		}
-		else if(lDigit > 9)
+	}
+	else
+	{
+		while (pValue > 0)
 		{
-			lString[i] = (typename _String::value_type)('a' + (lDigit - 10));
+			int lDigit = (int)(pValue % pRadix);
+			pValue /= pRadix;
+
+			if (lDigit >= 0 && lDigit <= 9)
+			{
+				lString[i--] = (typename _String::value_type)('0' + lDigit);
+			}
+			else if(lDigit > 9)
+			{
+				lString[i--] = (typename _String::value_type)('a' + (lDigit - 10));
+			}
 		}
-		i++;
 	}
-
-	if (lSign == true)
+	if (lSign)
 	{
-		lString[i] = '-';
-		i++;
+		lString[i--] = '-';
 	}
-
-	if (i == 0)
+	if (i == 62)	// Empty string means zero.
 	{
-		lString[i] = '0';
-		i++;
+		lString[i--] = '0';
 	}
-	lString[i] = 0;
-
-	// Reverse string.
-	for (int j = 0; j < i; j++, i--)
-	{
-		typename _String::value_type lTemp = lString[i - 1];
-		lString[i - 1] = lString[j];
-		lString[j] = lTemp;
-	}
-
-	return (lString);
+	return &lString[i+1];
 }
 
 STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StringToBool(const _String& pString, bool& pValue)

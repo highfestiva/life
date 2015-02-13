@@ -102,6 +102,7 @@ public:
 	typedef std::vector<float> FloatList;
 	typedef std::vector<int> IntList;
 	typedef std::vector<str> StringList;
+	typedef std::vector<xform> XformList;
 
 	TrabantSimManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
@@ -109,7 +110,8 @@ public:
 	virtual ~TrabantSimManager();
 
 	void UserReset();
-	int CreateObject(const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic);
+	int CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic);
+	void CreateClones(IntList& pCreatedObjectIds, int pOriginalId, const XformList& pPlacements, ObjectMaterial pMaterial, bool pIsStatic);
 	void DeleteObject(int pObjectId);
 	void DeleteAllObjects();
 	bool IsLoaded(int pObjectId);
@@ -119,6 +121,7 @@ public:
 	void GetKeys(strutil::strvec& pKeys);
 	void GetTouchDrags(DragList& pDragList);
 	vec3 GetAccelerometer() const;
+	vec3 GetMouseMove();
 	int CreateJoystick(float x, float y, bool pIsSloppy);
 	JoystickDataList GetJoystickData() const;
 	float GetAspectRatio() const;
@@ -134,7 +137,7 @@ public:
 	void AddTag(int pObjectId, const str& pTagType, const FloatList& pFloats, const StringList& pStrings, const IntList& pPhys, const IntList& pEngines, const IntList& pMeshes);
 
 	void CommandLoop();
-	bool IsControlled() const;
+	bool IsControlled();
 
 	virtual void SaveSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
@@ -180,6 +183,7 @@ protected:
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual void OnInput(UiLepra::InputElement* pElement);
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
@@ -188,6 +192,8 @@ protected:
 	KeyMap mKeyMap;
 	DragList mDragList;
 	DragEraseList mDragEraseList;
+	bool mIsMouseControlled;
+	vec3 mMouseMove;
 	HiResTimer mTouchstickTimer;
 	TouchstickList mTouchstickList;
 	Life::Menu* mMenu;

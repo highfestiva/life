@@ -29,6 +29,11 @@ Thread* OwnedLock::GetOwner() const
 	return (mOwner);
 }
 
+int OwnedLock::GetReferenceCount() const
+{
+	return mAcquireCount;
+}
+
 OwnedLock::OwnedLock():
 	mOwner(0),
 	mAcquireCount(0)

@@ -33,7 +33,7 @@ def make_column_pair(dx, yoff):
 
 cam(distance=30)
 init()
-while loop(delay=0.01):	# Low latency needed for reaction-type game.
+while loop():
 	if taps() or keys():
 		ufo.vel(ufo.vel().with_z(11))
 		ufo.avel(rndvec()*0.1)

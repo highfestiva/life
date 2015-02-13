@@ -123,6 +123,11 @@ void UiConsole::SetVisible(bool pVisible)
 	OnConsoleChange();
 }
 
+bool UiConsole::IsVisible() const
+{
+	return mIsConsoleVisible;
+}
+
 void UiConsole::Tick()
 {
 	if (!mConsoleComponent)

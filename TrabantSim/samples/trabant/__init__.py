@@ -9,7 +9,7 @@ import trabant.objgen
 import time
 
 
-roll_turn_engine,roll_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
+roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint = 'hinge suspend_hinge turn_hinge'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
@@ -18,10 +18,13 @@ _fast_ascii_generate = True
 _has_opened = False
 _last_ascii_top_left_offset = None
 _last_created_object = None
+_prev_gfx = None
+_prev_phys = []
 asc2obj_lookup = []
 _aspect_ratio = 1.33333
 _keys = None
 _taps = None
+_mousemove = vec3()
 _invalidated_taps = set()
 _collisions = None
 _joysticks = {}
@@ -199,13 +202,14 @@ def userinfo(message=''):
 	'''Shows a message dialog to the user. Dismiss dialog by calling without parameters.'''
 	gameapi.userinfo(message)
 
-def loop(delay=0.1, end_after=None):
+def loop(delay=0.03, end_after=None):
 	'''Call this every loop, check return value if you should continue looping.'''
 	_tryinit()
 	sleep(delay)
-	global _keys,_taps,_collisions,_cam_pos
+	global _keys,_taps,_mousemove,_collisions,_cam_pos
 	_keys,_taps,_collisions,_cam_pos = None,None,None,None
 	_poll_joysticks()
+	_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
 	if end_after and timeout(end_after,timer=-154):
 		global _timers
 		del _timers[-154]
@@ -240,7 +244,7 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relat
 	# Update shadow variables for screen<-->world space transformations.
 	global _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians
 	if angle: 	_cam_angle = angle
-	if distance:	_cam_distance = distance
+	if distance != None:	_cam_distance = distance
 	if target:	_cam_target = target
 	if pos:		_cam_lookat = tovec3(pos)
 	if fov:		_cam_fov_radians = radians(fov)
@@ -260,46 +264,68 @@ def gravity(g, bounce=None, friction=None):
 	   new objects created will have.'''
 	_tryinit()
 	gameapi.gravity(tovec3(g))
-	if bounce:
+	if bounce != None:
 		gameapi.bounce(bounce)
-	if friction:
+	if friction != None:
 		gameapi.friction(friction)
 
-def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='flat', static=False, physmesh=False):
+def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='flat', static=False, physmesh=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	global _last_ascii_top_left_offset,asc2obj_lookup
 	physmesh = True if physmesh==True else False
 	# Keep a small cache of generated objects. Most small prototypes will reuse shapes.
 	gfx = None
 	for s,g,p,lo in asc2obj_lookup:
-		if s == ascii+str(physmesh):
+		if s == ascii+str(physmesh)+str(process):
 			gfx,phys,_last_ascii_top_left_offset = g,p,lo
 	if not gfx:
 		gfx,phys = asc2obj.str2obj(ascii, fast=_fast_ascii_generate, force_phys_mesh=physmesh)
 		_last_ascii_top_left_offset = -vec3(min(gfx.vertices, key=lambda v:v.x).x, min(gfx.vertices, key=lambda v:v.z).z, min(gfx.vertices, key=lambda v:v.y).y)
-		asc2obj_lookup.append((ascii+str(physmesh),gfx,phys,_last_ascii_top_left_offset))
+		if process: process(orientation,gfx,phys)
+		asc2obj_lookup.append((ascii+str(physmesh)+str(process),gfx,phys,_last_ascii_top_left_offset))
 		if len(asc2obj_lookup) > 10:
 			del asc2obj_lookup[0]
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
 
-def create_mesh_object(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False):
+def create_mesh_object(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	gfx,phys = objgen.createmesh(vertices,triangles)
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	if process: process(orientation,gfx,phys)
+	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
 
-def create_cube_object(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', static=False):
+def create_cube_object(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
+	try:	side = tovec3(side)
+	except:	side = vec3(side,side,side)
 	gfx,phys = objgen.createcube(side)
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=None, mat=mat)
+	if process: process(orientation,gfx,phys)
+	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
 
-def create_sphere_object(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False):
+def create_sphere_object(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	resolution = int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createsphere(radius, latitude=resolution, longitude=int(resolution*1.5))
-	return _create_object(gfx, phys, static, pos=pos, orientation=None, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	if process: process(quat(), gfx,phys)
+	return _create_object(gfx, phys, static, pos=pos, orientation=None, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
+
+def create_clones(obj, placements, mat=None, static=False):
+	'''Creates multiple clones at once of the original obj. Placement is a list of tuples, each tuple contains
+	   position and orientation (quat).'''
+	global _objects
+	mat = mat if mat else _last_mat
+	objs = []
+	for oid in gameapi.cloneobjs(obj.id, static, mat, placements):
+		o = Obj(oid)
+		_objects[oid] = o
+		objs.append(o)
+	return objs
 
 def last_created_object():
 	return _last_created_object
+
+def wait_until_loaded(wait=True):
+	global _wait_until_loaded
+	_wait_until_loaded = wait
 
 def release_all_objects():
 	'''Delete all objects.'''
@@ -418,6 +444,9 @@ def accelerometer(relative=False):
 		rel.roll = _accelerometer_calibration.angle_z(acc)
 	return rel
 
+def mousemove():
+	return _mousemove
+
 
 ########################################
 
@@ -436,24 +465,27 @@ def _poll_joysticks():
 	for j in [joy for jid,joy in _joysticks.items() if jid not in used_joys and not joy.sloppy]:
 		j.x = j.y = 0.0
 
-def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, mat):
+def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, mat, process):
 	_tryinit()
-	objpos = tovec3(pos) if tovec3(pos) else vec3()
-	objori = toquat(orientation) if toquat(orientation) else quat()
-	gameapi.initgfxmesh(gfx.q, gfx.pos, gfx.vertices, gfx.indices)
-	gameapi.clearprepphys()
-	for p in phys:
-		if 'Box' in str(type(p)):
-			gameapi.initphysbox(objori*p.q, p.pos+objpos, p.size)
-		elif 'Sphere' in str(type(p)):
-			gameapi.initphyssphere(objori*p.q, p.pos+objpos, p.radius)
-		elif 'Mesh' in str(type(p)):
-			gameapi.initphysmesh(objori*p.q, p.pos+objpos, p.vertices, p.indices)
-		objpos = vec3()	# Only root should be moved, the rest have relative positions.
-		objori = quat()
+	global _prev_gfx,_prev_phys,_last_mat
+	_last_mat = mat
+	base_eq = (_prev_gfx == gfx and len(_prev_phys) == len(phys))
+	if not base_eq or any(pp!=p for pp,p in zip(_prev_phys, phys)):
+		gameapi.initgfxmesh(gfx.q, gfx.pos, gfx.vertices, gfx.indices)
+		gameapi.clearprepphys()
+		for p in phys:
+			if 'Box' in str(type(p)):
+				gameapi.initphysbox(p.q, p.pos, p.size)
+			elif 'Sphere' in str(type(p)):
+				gameapi.initphyssphere(p.q, p.pos, p.radius)
+			elif 'Mesh' in str(type(p)):
+				gameapi.initphysmesh(p.q, p.pos, p.vertices, p.indices)
+	_prev_gfx,_prev_phys = gfx,phys
 	if col:
 		gameapi.setpencolor(col)
-	oid = gameapi.createobj(static, mat)
+	objpos = tovec3(pos) if tovec3(pos) else vec3()
+	objori = toquat(orientation) if toquat(orientation) else quat()
+	oid = gameapi.createobj(static, mat, objpos, objori)
 	if _wait_until_loaded:
 		gameapi.waitload(oid)
 	o = Obj(oid)
@@ -486,7 +518,7 @@ def _normalize_engine_values(engine_type, max_velocity, offset, strength, fricti
 		max_velocity[0] = 100 if not max_velocity[0] else max_velocity[0]
 		max_velocity[1] = -20 if not max_velocity[1] else max_velocity[1]
 		strength *= 10
-	elif engine_type in (push_abs_engine, push_rel_engine):
+	elif engine_type in (walk_abs_engine, push_abs_engine, push_rel_engine):
 		max_velocity[0] = 30 if not max_velocity[0] else max_velocity[0]
 	elif engine_type in (push_turn_abs_engine, push_turn_rel_engine):
 		max_velocity[0] = 0.1 if not max_velocity[0] else max_velocity[0]

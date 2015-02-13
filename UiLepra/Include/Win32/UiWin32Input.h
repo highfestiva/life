@@ -150,6 +150,7 @@ private:
 	int mScreenHeight;
 
 	// Mouse related stuff.
+	bool mCursorVisible;
 	float mCursorX;
 	float mCursorY;
 

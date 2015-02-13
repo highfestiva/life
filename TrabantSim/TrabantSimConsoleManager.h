@@ -26,13 +26,14 @@ public:
 	virtual ~TrabantSimConsoleManager();
 	virtual bool Start();
 
-	str GetActiveResponse() const;
+	const str& GetActiveResponse() const;
 
 protected:
 	enum CommandClient
 	{
 		COMMAND_RESET = Parent::COMMAND_COUNT_LIFE_CLIENT,
 		COMMAND_CREATE_OBJECT,
+		COMMAND_CREATE_CLONES,
 		COMMAND_DELETE_OBJECT,
 		COMMAND_DELETE_ALL_OBJECTS,
 		COMMAND_CLEAR_PHYS,
@@ -49,6 +50,7 @@ protected:
 		COMMAND_GET_KEYS,
 		COMMAND_GET_TOUCH_DRAGS,
 		COMMAND_GET_ACCELEROMETER,
+		COMMAND_GET_MOUSEMOVE,
 		COMMAND_CREATE_JOYSTICK,
 		COMMAND_GET_JOYSTICK_DATA,
 		COMMAND_GET_ASPECT_RATIO,

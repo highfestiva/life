@@ -298,13 +298,13 @@ bool GameClientMasterTicker::Tick()
 		}
 	}
 
+	bool lLightsEnabled = true;
 	{
 		LEPRA_MEASURE_SCOPE(Paint);
 		if (mUiManager->CanRender())
 		{
-			mUiManager->GetRenderer()->EnableAllLights(false);
-			UiTbc::Renderer::LightID lLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-				UiTbc::Renderer::LIGHT_STATIC, vec3(0, 1, -1), vec3(1.5f, 1.5f, 1.5f), 160);
+			lLightsEnabled = mUiManager->GetRenderer()->GetLightsEnabled();
+			mUiManager->GetRenderer()->SetLightsEnabled(false);
 			mUiManager->Paint(true);
 			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
@@ -314,8 +314,6 @@ bool GameClientMasterTicker::Tick()
 					lOk = lSlave->Paint();
 				}
 			}
-			mUiManager->GetRenderer()->RemoveLight(lLightId);
-			mUiManager->GetRenderer()->EnableAllLights(true);
 		}
 	}
 
@@ -329,6 +327,7 @@ bool GameClientMasterTicker::Tick()
 			}
 			DrawDebugData();
 			DrawPerformanceLineGraph2d();
+			mUiManager->GetRenderer()->SetLightsEnabled(lLightsEnabled);
 		}
 	}
 
@@ -365,7 +364,6 @@ bool GameClientMasterTicker::Tick()
 			if (lSlave)
 			{
 				lOk = lSlave->EndTick();
-				lSlave->GetTickLock()->Acquire();	// Lock all slaves so we can work on resources.
 			}
 		}
 	}
@@ -375,7 +373,19 @@ bool GameClientMasterTicker::Tick()
 		// This must be synchronous. The reason is that it may add objects to "script" or "physics" enginges,
 		// as well as upload data to the GPU and so forth; parallelization here will certainly cause threading
 		// errors.
+		lLock.Release();
+		GetPhysicsLock()->Acquire();	// Fetch the physics lock first.
+		lLock.Acquire();
+		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+		{
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				lSlave->GetTickLock()->Acquire();
+			}
+		}
 		mResourceManager->Tick();
+		GetPhysicsLock()->Release();
 		// OK done, now we can release all slave locks.
 		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 		{

@@ -17,7 +17,7 @@ deimos.create_engine(push_abs_engine)
 
 phobos.vel((-15,0,0))
 deimos.vel((12,0,0))
-while loop(delay=0.01):	# We need low latencies in this type of simulation to aim forces more accurately.
+while loop():
     dir1 = phobos.pos() - mars.pos()
     dir2 = deimos.pos() - mars.pos()
     dir3 = phobos.pos() - deimos.pos()

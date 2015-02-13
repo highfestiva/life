@@ -49,9 +49,9 @@ def cam(angle, distance, target_oid, pos, fov, relative_angle):
 		set('Ui.3D.CamAngleX', float(angle.x))
 		set('Ui.3D.CamAngleY', float(angle.y))
 		set('Ui.3D.CamAngleZ', float(angle.z))
-	if distance:
+	if distance != None:
 		set('Ui.3D.CamDistance', float(distance))
-		set('Ui.3D.ClipFar', float(distance*20))
+		set('Ui.3D.ClipFar', float((distance+10)*20))
 	if target_oid != None:
 		set('Ui.3D.CamTargetObject', target_oid)
 	if pos:
@@ -102,6 +102,9 @@ def taps():
 
 def accelerometer():
 	return cmd('get-accelerometer')
+
+def mousemove():
+	return cmd('get-mousemove')
 
 def create_joystick(x,y,sloppy):
 	sloppy = str(not not sloppy).lower()
@@ -156,9 +159,17 @@ def setpencolor(col):
 	set('Ui.PenGreen', g)
 	set('Ui.PenBlue', b)
 
-def createobj(static, mat):
+def createobj(static, mat, pos, orientation):
 	static = 'static' if static else 'dynamic'
-	return cmd('create-object %s %s' % (static, mat), int)
+	c = 'create-object %s %s %s %s' % (static, mat, _args2str(pos,'0 0 0'), _args2str(orientation,'0 0 0 0'))
+	return cmd(c, int)
+
+def cloneobjs(oid, static, mat, placements):
+	static = 'static' if static else 'dynamic'
+	fs = [f for pos,quat in placements for f in ([p for p in pos]+[q for q in quat])]
+	c = 'create-clones %i %s %s %s' % (oid, static, mat, ','.join('%f'%f for f in fs))
+	s = cmd(c, lambda s:s)
+	return (int(i) for i in s.split(','))
 
 def releaseobj(oid):
 	cmd('delete-object %i' % oid)
@@ -324,4 +335,6 @@ def _htmlcol(col):
 				col = [int(c,16)/16 for c in col[1:]]
 			elif len(col) == 7:
 				col = [int(col[i:i+2],16)/256 for i in range(1,7,2)]
+		else:
+			col = [float(c) for c in col]
 	return col

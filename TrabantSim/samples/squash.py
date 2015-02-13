@@ -7,7 +7,7 @@ from trabant import *
 cam(distance=30)
 ball = create_sphere_object()
 
-while loop(delay=0.01):	# Need low latencies to be able to get accurate tap velocities.
+while loop():
 	tap = closest_tap(ball.pos())
 	if tap and (tap.pos3d()-ball.pos()).length() <= 5:
 		ball.vel(tap.vel3d().limit(50))

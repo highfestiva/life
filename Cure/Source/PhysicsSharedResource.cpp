@@ -188,6 +188,8 @@ void PhysicsSharedResource::OnLoadClass(ClassResource* pClassResource)
 		return;
 	}
 	Tbc::ChunkyPhysics* lCopy = new Tbc::ChunkyPhysics(*pClassResource->GetData());
+	lCopy->SetOriginalBoneTransformation(0, xform());
+	lCopy->SetBoneTransformation(0, xform());
 	SetRamData(lCopy);
 }
 

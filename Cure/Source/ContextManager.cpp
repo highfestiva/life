@@ -372,12 +372,17 @@ void ContextManager::HandleAttributeSend()
 
 void ContextManager::HandlePostKill()
 {
-	IdSet::iterator x = mPostKillSet.begin();
-	for (; x != mPostKillSet.end(); ++x)
+	HiResTimer lTimer(false);
+	const double lMaxProcessingTime = 0.01;
+	while (!mPostKillSet.empty())
 	{
-		mGameManager->DeleteContextObject(*x);
+		mGameManager->DeleteContextObject(*mPostKillSet.begin());
+		mPostKillSet.erase(mPostKillSet.begin());
+		if (lTimer.QueryTimeDiff() > lMaxProcessingTime)	// Time's up, have a go later.
+		{
+			break;
+		}
 	}
-	mPostKillSet.clear();
 
 	RecycledIdQueue::iterator y = mRecycledIdQueue.begin();
 	while (y != mRecycledIdQueue.end())

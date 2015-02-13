@@ -187,6 +187,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 		const Tbc::PhysicsEngine* lEngine = pStructure->GetEngine(z);
 		switch (lEngine->GetEngineType())
 		{
+			case Tbc::PhysicsEngine::ENGINE_WALK:
 			case Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE:
 			case Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
 			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE:
@@ -399,6 +400,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 		const Tbc::PhysicsEngine* lEngine = pStructure->GetEngine(z);
 		switch (lEngine->GetEngineType())
 		{
+			case Tbc::PhysicsEngine::ENGINE_WALK:
 			case Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE:
 			case Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
 			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE:

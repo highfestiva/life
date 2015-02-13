@@ -808,6 +808,7 @@ void ResourceManager::AddLoaded(UserResource* pUserResource)
 	Resource* lResource = pUserResource->GetResource();
 	lResource->Reference();
 	mResourceSafeLookup.insert(lResource);
+	mActiveResourceTable.Insert(lResource->GetName(), lResource);
 	mLoadedList.PushBack(lResource, lResource);
 }
 
@@ -1310,10 +1311,17 @@ void ResourceManager::DeleteResource(Resource* pResource)
 	deb_assert(mResourceSafeLookup.find(pResource) != mResourceSafeLookup.end());
 	deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 	mResourceSafeLookup.erase(pResource);
-	delete (pResource);
 
 	// Drop resource from post load delete array.
 	mPostLoadDeleteArray.erase(std::remove(mPostLoadDeleteArray.begin(), mPostLoadDeleteArray.end(), pResource), mPostLoadDeleteArray.end());
+
+	{
+		const int lLockCount = mThreadLock.GetReferenceCount();
+		for (int i = 0; i < lLockCount; ++i) mThreadLock.Release();	// Required since we may need other system-wide locks in destructor.
+		deb_assert(!mThreadLock.IsOwner());
+		delete (pResource);
+		for (int i = 0; i < lLockCount; ++i) mThreadLock.Acquire();
+	}
 }
 
 

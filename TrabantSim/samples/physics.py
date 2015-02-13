@@ -13,7 +13,7 @@ geometry = 'XX'	# ASCII geometry.
 things = [create_ascii_object(geometry, pos=rndvec()*5+vec3(0,0,5), vel=rndvec()*3, col=rndvec().abs()) for _ in range(20)]
 things += [create_sphere_object(pos=rndvec()*5+vec3(0,0,5), radius=random()*0.5+0.2, col=rndvec().abs()) for _ in range(5)]
 
-while loop(delay=0.01):	# Need low latencies to be able to get accurate tap velocities.
+while loop():
 	if not taps():
 		continue
 	tap = taps()[0]

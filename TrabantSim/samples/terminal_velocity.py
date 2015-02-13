@@ -4,8 +4,6 @@
 
 from trabant import *
 from trabant.math import *
-import math
-from time import time
 
 # ASCII geometries.
 shipasc = r'''

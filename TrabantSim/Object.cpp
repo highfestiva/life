@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "Object.h"
+#include "../Cure/Include/ContextManager.h"
 #include "../UiTbc/Include/UiTriangleBasedGeometry.h"
 
 
@@ -57,18 +58,29 @@ UiTbc::TriangleBasedGeometry* Object::CreateGfxMesh(const std::vector<float>& pV
 	return lGfxMesh;
 }
 
-void Object::AddMeshInfo(const str& pMeshName, const str& pShader, const str& pTexture)
+void Object::AddMeshInfo(const str& pMeshName, const str& pShader, const str& pTexture, const vec3& pColor, bool pIsSmooth)
 {
 	mClass->AddMesh(0, pMeshName, xform(), 1);
 	UiTbc::ChunkyClass::Material lMaterial;
-	lMaterial.mDiffuse.Set(1,1,1);
+	lMaterial.mDiffuse = pColor;
 	lMaterial.mShininess = 1;
 	lMaterial.mAlpha = 1;
-	lMaterial.mSmooth = false;
+	lMaterial.mSmooth = pIsSmooth;
 	lMaterial.mResizeHint = Canvas::RESIZE_FAST;
 	lMaterial.mTextureList.push_back(pTexture);
 	lMaterial.mShaderName = pShader;
 	mClass->SetLastMeshMaterial(lMaterial);
+}
+
+
+
+void Object::OnLoaded()
+{
+	Parent::OnLoaded();
+	if (GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
+	{
+		GetManager()->DisableTickCallback(this);
+	}
 }
 
 
