@@ -261,7 +261,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					}
 					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
 				}
-				mIntensity += lPushForce;
+				mIntensity += Math::Lerp(Math::Clamp(mFriction,0.1f,0.5f), 1.0f, lPushForce);
 			}
 			break;
 			case ENGINE_PUSH_TURN_RELATIVE:

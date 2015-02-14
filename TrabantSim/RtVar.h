@@ -30,6 +30,7 @@
 #define RTVAR_UI_PENRED			"Ui.PenRed"
 #define RTVAR_UI_PENGREEN		"Ui.PenGreen"
 #define RTVAR_UI_PENBLUE		"Ui.PenBlue"
+#define RTVAR_UI_PENALPHA		"Ui.PenAlpha"
 
 #define RTVAR_GAME_ALLOWPOWERDOWN	"Game.AllowPowerDown"
 #define RTVAR_GAME_USERMESSAGE		"Game.UserMessage"

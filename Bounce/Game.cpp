@@ -40,7 +40,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	SetTicker(this);
 
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->SetScale(0.05f, 0.1f, 0.1f);
+	mCollisionSoundManager->SetScale(0.05f, 0.1f, 1, 0.1f);
 	mCollisionSoundManager->AddSound(_T("hit"), UiCure::CollisionSoundManager::SoundResourceInfo(0.9f, 0.1f, 0.5f));
 
 	Initialize();

@@ -18,7 +18,7 @@ XX  XX  XX
 ship = create_ascii_object(shipasc)
 ship.orientation(quat().rotate_x(-pi/2))	# Point ship forward instead of upward. Ship-relative coordinate system hereafter is +Y down, +Z in.
 pusher = ship.create_engine(push_rel_engine, strength=30, friction=0.7)
-pusher.addsound(sound_engine_hizz, intensity=0.5, volume=0.5)
+pusher.addsound(sound_engine_hizz, intensity=0.3, volume=0.3)
 pusher.force((0,0,1))	# Always full throttle.
 yawer = ship.create_engine(push_turn_abs_engine, friction=0.5)
 roller = ship.create_engine(push_turn_rel_engine, friction=0.5)	# Handles both banking and levelling ship.

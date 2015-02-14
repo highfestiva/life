@@ -28,7 +28,7 @@ CollisionSoundManager::CollisionSoundManager(Cure::GameManager* pGameManager, Ui
 	mGameManager(pGameManager),
 	mUiManager(pUiManager)
 {
-	SetScale(50, 0.5f, 0.2f);
+	SetScale(50, 0.5f, 1, 0.2f);
 }
 
 CollisionSoundManager::~CollisionSoundManager()
@@ -37,10 +37,11 @@ CollisionSoundManager::~CollisionSoundManager()
 	mGameManager = 0;
 }
 
-void CollisionSoundManager::SetScale(float pSmallMass, float pLightImpact, float pSoundCutoffDuration)
+void CollisionSoundManager::SetScale(float pSmallMass, float pLightImpact, float pImpactVolumeFactor, float pSoundCutoffDuration)
 {
 	mSmallMass = pSmallMass;
 	mLightImpact = pLightImpact;
+	mImpactVolumeFactor = pImpactVolumeFactor;
 	mSoundCutoffDuration = pSoundCutoffDuration;
 }
 
@@ -114,22 +115,29 @@ void CollisionSoundManager::OnCollision(const vec3& pForce, const vec3& pTorque,
 	{
 		return;
 	}
-	if (pObject1->GetVelocity().GetDistanceSquared(pObject2->GetVelocity()) < mLightImpact)
+	/*if (pObject1->GetVelocity().GetDistanceSquared(pObject2->GetVelocity()) < mLightImpact)
 	{
+		mLog.Infof(_T("Not playing sound due to low velocity diff. Force=(%g,%g,%g), light impact %g, v1=(%g,%g,%g), v2=(%g,%g,%g)"),
+				pForce.x, pForce.y, pForce.z, mLightImpact, pObject1->GetVelocity().x, pObject1->GetVelocity().y, pObject1->GetVelocity().z,
+				pObject2->GetVelocity().x, pObject2->GetVelocity().y, pObject2->GetVelocity().z);
 		return;
-	}
+	}*/
 	float lImpact = pObject1->GetImpact(mGameManager->GetPhysicsManager()->GetGravity(), pForce, pTorque*0.01f, mSmallMass);
 	if (lImpact < mLightImpact)
 	{
 		if (!pIsLoud)
 		{
+			/*mLog.Infof(_T("Not playing sound due to light impact %g (light impact %g). Force (%g,%g,%g), torque (%g,%g,%g)"),
+					lImpact, mLightImpact, pForce.x, pForce.y, pForce.z, pTorque.x, pTorque.y, pTorque.z);*/
 			return;
 		}
 		lImpact = mLightImpact;
 	}
-	lImpact = std::min(2.0f, lImpact);
+	/*mLog.Infof(_T("Playing sound. Impact %g (light impact %g). Force (%g,%g,%g), torque (%g,%g,%g)"),
+			lImpact, mLightImpact, pForce.x, pForce.y, pForce.z, pTorque.x, pTorque.y, pTorque.z);*/
+	const float lVolumeImpact = std::min(2.0f, lImpact*mImpactVolumeFactor);
 	const Tbc::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
-	OnCollision(lImpact, pPosition, lKey, lKey->GetMaterial());
+	OnCollision(lVolumeImpact, pPosition, lKey, lKey->GetMaterial());
 }
 
 void CollisionSoundManager::OnCollision(float pImpact, const vec3& pPosition, const Tbc::ChunkyBoneGeometry* pKey, const str& pSoundName)

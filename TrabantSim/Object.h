@@ -40,8 +40,8 @@ public:
 	virtual ~Object();
 
 	virtual const Tbc::ChunkyClass* GetClass() const;
-	UiTbc::TriangleBasedGeometry* CreateGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, bool pIsSmooth);
-	void AddMeshInfo(const str& pMeshName, const str& pShader, const str& pTexture, const vec3& pColor=vec3(1,1,1), bool pIsSmooth=false);
+	UiTbc::TriangleBasedGeometry* CreateGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, float pAlpha, bool pIsSmooth);
+	void AddMeshInfo(const str& pMeshName, const str& pShader, const str& pTexture, const vec3& pColor=vec3(1,1,1), float pAlpha=1, bool pIsSmooth=false);
 
 	virtual void OnLoaded();
 

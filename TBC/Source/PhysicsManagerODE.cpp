@@ -292,28 +292,36 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 		return (false);
 	}
 	Object* lStaticObject = *x;
-	Object* lMainObject = *y;
-	if (lStaticObject->mBodyID)
-	{
-		mLog.AError("Attach() with non-static.");
-		deb_assert(false);
-		return (false);
-	}
 	dVector3 lPos;
 	::dGeomCopyPosition(lStaticObject->mGeomID, lPos);
 	dQuaternion o;
 	::dGeomGetQuaternion(lStaticObject->mGeomID, o);
-
+	Object* lMainObject = *y;
 	dBodyID lBodyId = lMainObject->mBodyID;
-	if (lBodyId)
+	if (!lBodyId)
+	{
+		return true;
+	}
+	if (lStaticObject->mBodyID)
+	{
+		JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
+		lJointInfo->mJointID = dJointCreateFixed(mWorldID, 0);
+		lJointInfo->mType = JOINT_FIXED;
+		lJointInfo->mBody1Id = pStaticBody;
+		lJointInfo->mBody2Id = pMainBody;
+		lJointInfo->mListenerId1 = lStaticObject->mForceFeedbackId;
+		lJointInfo->mListenerId2 = lMainObject->mForceFeedbackId;
+		lMainObject->mHasMassChildren = true;
+		dJointAttach(lJointInfo->mJointID, lStaticObject->mBodyID, lMainObject->mBodyID);
+		dJointSetFixed(lJointInfo->mJointID);
+	}
+	else
 	{
 		::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
 		::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
 		::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
-
 		AddMass(pStaticBody, pMainBody);
 	}
-
 	return (true);
 }
 

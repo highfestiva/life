@@ -74,6 +74,7 @@ protected:
 
 	static const CommandPair mCommandIdList[];
 	UiConsole* mUiConsole;
+	bool mWasCursorVisible;
 	logclass();
 };
 

@@ -48,6 +48,7 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENRED, 0.7);
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENGREEN, 0.3);
 	v_override(UiCure::GetSettings(), RTVAR_UI_PENBLUE, 0.6);
+	v_override(UiCure::GetSettings(), RTVAR_UI_PENALPHA, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, true);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 1.0);
@@ -156,7 +157,7 @@ bool TrabantSimTicker::OpenUiManager()
 void TrabantSimTicker::BeginRender(vec3& pColor)
 {
 	Parent::BeginRender(pColor);
-	mUiManager->GetRenderer()->SetOutlineFillColor(OFF_BLACK);
+	mUiManager->GetRenderer()->SetOutlineFillColor(mUiManager->GetRenderer()->GetClearColor());
 }
 
 

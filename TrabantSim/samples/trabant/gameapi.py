@@ -148,16 +148,17 @@ def setmesh(vertices, indices):
 		_cached_vertices,_cached_indices = verts,indices
 
 def setbgcolor(col):
-	r,g,b = _htmlcol(col)
+	r,g,b,a = _htmlcol(col)
 	set('Ui.3D.ClearRed', r)
 	set('Ui.3D.ClearGreen', g)
 	set('Ui.3D.ClearBlue', b)
 
 def setpencolor(col):
-	r,g,b = _htmlcol(col)
+	r,g,b,a = _htmlcol(col)
 	set('Ui.PenRed', r)
 	set('Ui.PenGreen', g)
 	set('Ui.PenBlue', b)
+	set('Ui.PenAlpha', a)
 
 def createobj(static, mat, pos, orientation):
 	static = 'static' if static else 'dynamic'
@@ -331,10 +332,12 @@ def _htmlcol(col):
 	if col:
 		if type(col) == str:
 			assert col[0]=='#'
-			if len(col) == 4:
+			if len(col) in (4,5):	# 5 = with alpha.
 				col = [int(c,16)/16 for c in col[1:]]
-			elif len(col) == 7:
-				col = [int(col[i:i+2],16)/256 for i in range(1,7,2)]
+			elif len(col) in (7,9):	# 9 = with alpha.
+				col = [int(col[i:i+2],16)/256 for i in range(1,len(col),2)]
 		else:
 			col = [float(c) for c in col]
+		if len(col) < 4:	# No alpha included?
+			col += [1.0]	# Opaque by default.
 	return col

@@ -56,7 +56,8 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 ClientConsoleManager::ClientConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
 	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
 	ConsoleManager(pResourceManager, pGameManager, pVariableScope, new UiTbc::ConsoleLogListener,
-		new UiTbc::ConsolePrompt)
+		new UiTbc::ConsolePrompt),
+	mWasCursorVisible(true)
 {
 	mUiConsole = new UiConsole(this, pUiManager, pArea);
 }
@@ -88,7 +89,15 @@ void ClientConsoleManager::Join()
 bool ClientConsoleManager::ToggleVisible()
 {
 	const bool lConsoleActive = mUiConsole->ToggleVisible();
-	mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(lConsoleActive);
+	if (lConsoleActive)
+	{
+		mWasCursorVisible = mUiConsole->GetUiManager()->GetInputManager()->IsCursorVisible();
+		mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(lConsoleActive);
+	}
+	else
+	{
+		mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(mWasCursorVisible);
+	}
 	return lConsoleActive;
 }
 

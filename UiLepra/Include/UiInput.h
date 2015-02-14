@@ -482,6 +482,7 @@ public:
 
 	// Show/hide system default cursor.
 	virtual void SetCursorVisible(bool pVisible) = 0;
+	bool IsCursorVisible() const;
 
 	// Range: [-1, 1] (Left and right, up and down)
 	virtual float GetCursorX() = 0;
@@ -506,8 +507,6 @@ protected:
 
 	void SetKey(KeyCode pKeyCode, bool pValue);
 
-private:
-
 	typedef std::unordered_set<TextInputObserver*, LEPRA_VOIDP_HASHER> TextObserverList;
 	typedef std::unordered_set<KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyCodeObserverList;
 	typedef std::unordered_set<MouseInputObserver*, LEPRA_VOIDP_HASHER> MouseObserverList;
@@ -518,6 +517,7 @@ private:
 	bool mKeyDown[256];
 	int mMouseX;
 	int mMouseY;
+	bool mIsCursorVisible;
 
 	logclass();
 };

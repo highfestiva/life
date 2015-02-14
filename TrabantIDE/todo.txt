@@ -16,10 +16,13 @@
 +Resize window every time a prototype is started/stopped.
 +Show output log every time a prototype is started.
 +Make toolbar disabled by default.
++Prototype: Quake
++Fix explosion look in Quake - looks extremely poor since the strength/size is small and gravity is to heavy on smoke and fire, etc.
++Idling push engine (sound). Currently only combustion and the like idles. descent.py
++Fix collision sounds in Quake - hard hit when moving forward but not when falling straight down. Too hard hits in general. Grenades whack the floor.
 
 Remove all the unused imports in .py.
-Fix collision sounds in Quake - hard hit when moving forward but not when falling straight down.
-Idling push engine (sound). Currently only combustion and the like idles.
+Add outline rendering for iOS! That way it won't look like crap!
 Add sloppy camera controls (orientation slerp).
 Bugfix: output window should be minimized when editor started. (VK_ESCAPE caused this? Falling through a case-statement?)
 Default: forced termination without time-out!
@@ -28,14 +31,14 @@ Editor: clear output pane when new program is executed.
 Editor: add Shift-F5 as stop execute command.
 Editor: also when pressing F5, it should automatically stop running program first. Also GO should never be disabled when program is running. Not in MenuBar, not in ToolBar.
 Get help to work with http://...
-Prototype: Quake
 Prototype: Stunt Car Racer
 Prototype: City
 Prototype: MineCraft
+Prototype: Boat.
 Prototype: Fire Power
 Change About text!
 Give cred to SciTE!
 Release source!
 Add Python binaries to downloadable archive.
 Relative Python path!
-Build final for release (not debug)!
+Build editor for release (not debug)!

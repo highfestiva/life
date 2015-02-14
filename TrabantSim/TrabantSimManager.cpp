@@ -77,6 +77,9 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mCollisionSoundManager(0),
 	mIsMouseControlled(false),
+	mSetFocus(false),
+	mSetCursorVisible(false),
+	mSetCursorInvisible(false),
 	mMenu(0),
 	mLight(0),
 	mCameraTransform(quat(), vec3(0, -3, 0)),
@@ -89,8 +92,9 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mUserInfoLabel(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
+	mCollisionSoundManager->SetScale(1, 0.5f, 0.08f, 0.2f);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.3f, 0));
 
 	SetConsoleManager(new TrabantSimConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -131,8 +135,8 @@ TrabantSimManager::~TrabantSimManager()
 
 void TrabantSimManager::UserReset()
 {
-	mUiManager->GetDisplayManager()->SetFocus(true);
-	mUiManager->GetInputManager()->SetCursorVisible(true);
+	mSetFocus = true;
+	mSetCursorVisible = true;
 	mIsMouseControlled = false;
 
 	Cure::RuntimeVariableScope* lScope = GetVariableScope();
@@ -268,19 +272,21 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 	}
 	lObject->SetRootOrientation(pq);
 	lObject->CreatePhysics(lPhysics);
-	float r,g,b;
+	float r,g,b,a;
 	if (pMaterial == MaterialChecker)
 	{
-		r = g = b = 1;
+		r = g = b = a = 1;
 	}
 	else
 	{
 		v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
 		v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
 		v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
+		v_get(a, =(float), GetVariableScope(), RTVAR_UI_PENALPHA, 1.0);
 	}
+	vec3 lColor(r,g,b);
 	const bool lIsSmooth = (pMaterial == MaterialSmooth);
-	UiTbc::TriangleBasedGeometry* lMesh = lObject->CreateGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, vec3(r,g,b), lIsSmooth);
+	UiTbc::TriangleBasedGeometry* lMesh = lObject->CreateGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, lColor, a, lIsSmooth);
 	if (!lMesh)
 	{
 		delete lObject;
@@ -293,7 +299,7 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 		lObject->LoadTexture(_T("checker.png"));
 	}
 	lObject->AddMeshResource(lMesh, pIsStatic? -1 : 1);
-	lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), _T("texture"), _T("checker.png"));
+	lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), _T("texture"), _T("checker.png"), lColor, a);
 	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
 	lObject->mInitialOrientation = pq;
 	lObject->mInitialInverseOrientation = pq.GetInverse();
@@ -305,16 +311,17 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 {
 	str lMeshName;
 	str lPhysName;
-	float r,g,b;
+	float r,g,b,a;
 	if (pMaterial == MaterialChecker)
 	{
-		r = g = b = 1;
+		r = g = b = a = 1;
 	}
 	else
 	{
 		v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
 		v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
 		v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
+		v_get(a, =(float), GetVariableScope(), RTVAR_UI_PENALPHA, 1.0);
 	}
 	const vec3 lColor(r,g,b);
 	const bool lIsSmooth = (pMaterial == MaterialSmooth);
@@ -360,7 +367,7 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 					LEPRA_MEASURE_SCOPE(CreateClonesTexture);
 					lObject->LoadTexture(_T("checker.png"));
 				}
-				lObject->AddMeshInfo(lMeshName, _T("texture"), _T("checker.png"), lColor, lIsSmooth);
+				lObject->AddMeshInfo(lMeshName, _T("texture"), _T("checker.png"), lColor, a, lIsSmooth);
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesMesh);
 					lObject->AddMeshResourceRef(lMeshName, pIsStatic? -1 : 1);
@@ -429,7 +436,7 @@ void TrabantSimManager::Explode(const vec3& pPos, const vec3& pVel, float pStren
 	mCollisionSoundManager->OnCollision(pStrength, pPos, 0, _T("explosion"));
 
 	const float lKeepOnGoingFactor = 1.0f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
-	const int lParticles = Math::Lerp(8, 20, pStrength * 0.2f);
+	const int lParticles = std::max(10, Math::Lerp(8, 20, pStrength * 0.2f));
 	const int lFires    = lParticles;
 	const int lSmokes   = lParticles;
 	const int lSparks   = lParticles/2;
@@ -511,8 +518,7 @@ vec3 TrabantSimManager::GetMouseMove()
 	if (!mIsMouseControlled)
 	{
 		mIsMouseControlled = true;
-		mUiManager->GetInputManager()->SetCursorVisible(true);
-		mUiManager->GetInputManager()->SetCursorVisible(false);
+		mSetCursorInvisible = true;
 	}
 	vec3 m(mMouseMove);
 	mMouseMove.Set(0,0,0);
@@ -725,6 +731,11 @@ int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOt
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_UNIVERSAL;
 	}
+	else if (pJointType == _T("fixed"))
+	{
+		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_FIXED;
+		GetPhysicsManager()->MakeStatic(lObject2->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+	}
 	else
 	{
 		return -1;
@@ -857,7 +868,7 @@ void TrabantSimManager::Mass(int pObjectId, bool pSet, float& pMass)
 	}
 }
 
-void TrabantSimManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor)
+void TrabantSimManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor, float pAlpha)
 {
 	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId, true);
@@ -868,6 +879,8 @@ void TrabantSimManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor)
 	if (pSet)
 	{
 		lObject->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = pColor;
+		lObject->GetMesh(0)->GetBasicMaterialSettings().mAlpha = pAlpha;
+		lObject->GetMesh(0)->SetAlwaysVisible(!!pAlpha);
 	}
 	else
 	{
@@ -1038,7 +1051,7 @@ bool TrabantSimManager::IsControlled()
 	bool lIsControlled = (!lIsPowerDown && mIsControlled);
 	if (!lIsControlled)
 	{
-		mUiManager->GetInputManager()->SetCursorVisible(true);
+		mSetCursorVisible = true;
 		mIsMouseControlled = false;
 	}
 	return lIsControlled;
@@ -1196,6 +1209,21 @@ void TrabantSimManager::TickInput()
 {
 	TickNetworkInput();
 	TickUiInput();
+	if (mSetFocus)
+	{
+		mSetFocus = false;
+		mUiManager->GetDisplayManager()->SetFocus(true);
+	}
+	if (mSetCursorVisible)
+	{
+		mSetCursorVisible = false;
+		mUiManager->GetInputManager()->SetCursorVisible(true);
+	}
+	if (mSetCursorInvisible)
+	{
+		mSetCursorInvisible = false;
+		mUiManager->GetInputManager()->SetCursorVisible(false);
+	}
 }
 
 void TrabantSimManager::UpdateTouchstickPlacement()

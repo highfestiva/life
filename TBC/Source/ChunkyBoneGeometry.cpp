@@ -117,6 +117,10 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		{
 			lOk = pPhysics->Attach(GetBodyId(), mBodyData.mParent->GetBodyId());
 		}
+		else if (mBodyData.mJointType == JOINT_FIXED)
+		{
+			lOk = pPhysics->Attach(GetBodyId(), mBodyData.mParent->GetBodyId());
+		}
 		else if (mBodyData.mJointType == JOINT_SUSPEND_HINGE || mBodyData.mJointType == JOINT_HINGE2)
 		{
 			// Calculate axis from given euler angles.

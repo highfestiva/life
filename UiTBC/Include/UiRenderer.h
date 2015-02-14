@@ -288,6 +288,7 @@ public:
 
 	virtual void Clear(unsigned pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER) = 0;
 	virtual void SetClearColor(const Color& pColor);
+	const Color& GetClearColor() const;
 
 	DynamicRenderer* GetDynamicRenderer(str pName) const;
 	void AddDynamicRenderer(str pName, DynamicRenderer* pRenderer);

@@ -194,6 +194,11 @@ void Renderer::SetClearColor(const Color& pColor)
 	mClearColor = pColor;
 }
 
+const Color& Renderer::GetClearColor() const
+{
+	return mClearColor;
+}
+
 
 
 DynamicRenderer* Renderer::GetDynamicRenderer(str pName) const

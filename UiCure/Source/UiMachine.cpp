@@ -477,10 +477,8 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const Tb
 		float lEngineIntensity = Math::Clamp(lEngine->GetIntensity(), 0.0f, 1.0f);
 		if (pTag.mFloatValueList[FV_THROTTLE_FACTOR] > 0)
 		{
-			const float lThrottle =
-				lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true) *
-				pTag.mFloatValueList[FV_THROTTLE_FACTOR];
-			lEngineIntensity *= lThrottle;
+			const float lThrottle = lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true);
+			lEngineIntensity *= Math::Lerp(1.0f, lThrottle, pTag.mFloatValueList[FV_THROTTLE_FACTOR]);
 			const float lCarburetorSound = std::min(std::fabs(lEngine->GetValue()) * 0.7f, 1.0f);
 			lLowVolume = Math::Lerp(lLowVolume, pTag.mFloatValueList[FV_VOLUME_HIGH], lCarburetorSound);
 		}

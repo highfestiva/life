@@ -639,7 +639,8 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				{
 					bool lIsSet;
 					vec3 lValue = ParamToVec3(pParameterVector, 1, &lIsSet);
-					lManager->ObjectColor(ParamToInt(pParameterVector, 0), lIsSet, lValue);
+					float lAlpha = ParamToFloat(pParameterVector, 4, &lIsSet);
+					lManager->ObjectColor(ParamToInt(pParameterVector, 0), lIsSet, lValue, lAlpha);
 					if (!lIsSet)
 					{
 						mActiveResponse += strutil::Format(_T("%f %f %f"), lValue.x, lValue.y, lValue.z);

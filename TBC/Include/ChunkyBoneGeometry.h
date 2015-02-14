@@ -43,6 +43,7 @@ public:
 	enum JointType
 	{
 		JOINT_EXCLUDE = 1,
+		JOINT_FIXED,
 		JOINT_SUSPEND_HINGE,
 		JOINT_HINGE2,
 		JOINT_HINGE,
@@ -60,6 +61,7 @@ public:
 		CONNECTOR_HINGE,
 		CONNECTOR_HINGE2,
 		CONNECTOR_3DOF,	// Three degrees of freedom.
+		CONNECTOR_FIXED,
 		CONNECTEE_3DOF,
 	};
 

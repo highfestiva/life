@@ -254,14 +254,18 @@ void Win32InputDevice::PollEvents()
 			return;
 		}
 
-		//bool lMore = true;
-		//while (lMore)
+		bool lMore = true;
+		while (lMore)
 		{
 			DWORD lInOut = (DWORD)mElementArray.size();
 			lHR = mDIDevice->GetDeviceData(sizeof(mDeviceObjectData[0]), mDeviceObjectData, &lInOut, 0);
 			if (lHR != DI_OK)
 			{
 				return;
+			}
+			if (lInOut == 0)
+			{
+				break;
 			}
 
 			for (unsigned i = 0; i < lInOut; i++)
@@ -293,11 +297,6 @@ void Win32InputDevice::PollEvents()
 					lElement->SetValue(((lValue&0x80) && !mReacquire)? 1.0f : 0.0f);	// If reacquiring we release all buttons.
 				}
 			}
-
-			/*if (lInOut == 0)
-			{
-				lMore = false;
-			}*/
 		}
 
 		mReacquire = false;
@@ -317,7 +316,6 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	mInitialized(false),
 	mScreenWidth(0),
 	mScreenHeight(0),
-	mCursorVisible(true),
 	mCursorX(0),
 	mCursorY(0),
 	mMouse(0),
@@ -454,16 +452,16 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 		break;
 		case WM_ACTIVATE:
 		{
-			if (!mCursorVisible)
+			if (!mIsCursorVisible)
 			{
 				if (pwParam == WA_INACTIVE)
 				{
 					SetCursorVisible(true);
-					mCursorVisible = false;
+					mIsCursorVisible = false;
 				}
 				else
 				{
-					mCursorVisible = true;
+					mIsCursorVisible = true;
 					SetCursorVisible(false);
 				}
 			}
@@ -471,19 +469,19 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 		break;
 		case WM_SETFOCUS:
 		{
-			if (!mCursorVisible)
+			if (!mIsCursorVisible)
 			{
-				mCursorVisible = true;
+				mIsCursorVisible = true;
 				SetCursorVisible(false);
 			}
 		}
 		break;
 		case WM_KILLFOCUS:
 		{
-			if (!mCursorVisible)
+			if (!mIsCursorVisible)
 			{
 				SetCursorVisible(true);
-				mCursorVisible = false;
+				mIsCursorVisible = false;
 			}
 		}
 		break;
@@ -582,6 +580,8 @@ BOOL CALLBACK Win32InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, L
 
 void Win32InputManager::SetCursorVisible(bool pVisible)
 {
+	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
+
 	if (!pVisible && GetDisplayManager())
 	{
 		RECT lRect;
@@ -594,19 +594,21 @@ void Win32InputManager::SetCursorVisible(bool pVisible)
 	{
 		::ClipCursor(0);
 	}
-	if (mCursorVisible != pVisible)
+	if (mIsCursorVisible != pVisible)
 	{
 		if (pVisible)
 		{
-			while(::ShowCursor(pVisible) < 1)
+			log_volatile(mLog.Debug(_T("Showing cursor.")));
+			for(int x = 0; x < 10 && ::ShowCursor(pVisible) < 1; ++x)
 				;
 		}
 		else
 		{
-			while(::ShowCursor(pVisible) > -2)
+			log_volatile(mLog.Debug(_T("Hiding cursor.")));
+			for(int x = 0; x < 10 && ::ShowCursor(pVisible) > -2; ++x)
 				;
 		}
-		mCursorVisible = pVisible;
+		mIsCursorVisible = pVisible;
 	}
 }
 
@@ -698,6 +700,10 @@ bool Win32InputManager::IsInitialized()
 {
 	return mInitialized;
 }
+
+
+
+loginstance(UI_INPUT, Win32InputManager);
 
 
 

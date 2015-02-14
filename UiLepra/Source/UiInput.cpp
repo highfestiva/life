@@ -506,6 +506,7 @@ InputManager::InputManager()
 	::memset(mKeyDown, 0, sizeof(mKeyDown));
 	mMouseX = 0;
 	mMouseY = 0;
+	mIsCursorVisible = true;
 }
 
 InputManager::~InputManager()
@@ -811,6 +812,11 @@ void InputManager::ActivateKeyboard()
 
 void InputManager::ReleaseKeyboard()
 {
+}
+
+bool InputManager::IsCursorVisible() const
+{
+	return mIsCursorVisible;
 }
 
 InputDevice* InputManager::FindDevice(const str& pDeviceIdentifier, int pN)

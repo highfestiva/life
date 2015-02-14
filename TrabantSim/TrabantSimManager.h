@@ -132,7 +132,7 @@ public:
 	void Velocity(int pObjectId, bool pSet, vec3& pVelocity);
 	void AngularVelocity(int pObjectId, bool pSet, vec3& pAngularVelocity);
 	void Mass(int pObjectId, bool pSet, float& pMass);
-	void ObjectColor(int pObjectId, bool pSet, vec3& pColor);
+	void ObjectColor(int pObjectId, bool pSet, vec3& pColor, float pAlpha);
 	void EngineForce(int pObjectId, int pEngineIndex, bool pSet, vec3& pForce);
 	void AddTag(int pObjectId, const str& pTagType, const FloatList& pFloats, const StringList& pStrings, const IntList& pPhys, const IntList& pEngines, const IntList& pMeshes);
 
@@ -193,6 +193,9 @@ protected:
 	DragList mDragList;
 	DragEraseList mDragEraseList;
 	bool mIsMouseControlled;
+	bool mSetFocus;
+	bool mSetCursorVisible;
+	bool mSetCursorInvisible;
 	vec3 mMouseMove;
 	HiResTimer mTouchstickTimer;
 	TouchstickList mTouchstickList;

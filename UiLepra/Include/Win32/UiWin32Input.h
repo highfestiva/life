@@ -150,7 +150,6 @@ private:
 	int mScreenHeight;
 
 	// Mouse related stuff.
-	bool mCursorVisible;
 	float mCursorX;
 	float mCursorY;
 
@@ -158,6 +157,7 @@ private:
 	InputDevice* mKeyboard;
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
+	logclass();
 };
 
 

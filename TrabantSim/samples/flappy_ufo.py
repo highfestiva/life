@@ -7,9 +7,9 @@ from math import sin
 
 # ASCII geometry.
 ufoasc = r'''
-  X
-XXXXX
- ´X`
+  /XXX\
+XXXXXXXXX
+   ´X`
 '''
 column = 'X\n'*5
 

@@ -872,6 +872,10 @@ void ContextObject::AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, Cont
 		lNode2Connectee = lNode2Connectee->GetParent();
 		if (!lNode2Connectee)
 		{
+			if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_FIXED))
+			{
+				break;
+			}
 			mLog.AError("Failing to attach to a static object.");
 			return;
 		}
@@ -885,6 +889,11 @@ void ContextObject::AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, Cont
 	{
 		mLog.AInfo("Attaching two objects with ball joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_BALL);
+	}
+	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_FIXED))
+	{
+		mLog.AInfo("Attaching two objects with fixed joint.");
+		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_FIXED);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE2))
 	{

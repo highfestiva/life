@@ -10,7 +10,7 @@ import time
 
 
 roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
-hinge_joint,suspend_hinge_joint,turn_hinge_joint = 'hinge suspend_hinge turn_hinge'.split()
+hinge_joint,suspend_hinge_joint,turn_hinge_joint,fixed_joint = 'hinge suspend_hinge turn_hinge fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
 _wait_until_loaded = True
@@ -24,6 +24,7 @@ asc2obj_lookup = []
 _aspect_ratio = 1.33333
 _keys = None
 _taps = None
+_want_mousemove = False
 _mousemove = vec3()
 _invalidated_taps = set()
 _collisions = None
@@ -36,8 +37,8 @@ _cam_pos,_cam_q,_cam_inv_q = vec3(0,-10,0),quat(),quat()
 
 
 class Engine:
-	def __init__(self, oid, eid):
-		self.oid,self.eid = oid,eid
+	def __init__(self, oid, eid, etype):
+		self.oid,self.eid,self.etype = oid,eid,etype
 	def force(self,f):
 		'''Force parameter can either be a number or a 3-tuple controlling force in X, Y and Z.'''
 		try:
@@ -46,8 +47,10 @@ class Engine:
 			gameapi.set_engine_force(self.oid, self.eid, (f,0,0))
 	def addsound(self, sound, intensity=1, volume=20):
 		'''Intensity controls pitch, volume controls audible distance.'''
-		if sound == sound_engine_rotor:
+		if self.etype == gyro_engine:
 			gameapi.addtag(self.oid, 'engine_sound', [0, 0.001*intensity,0.8*intensity,1.4, 0,volume,1, 0,1,1, 1], [sound+'.wav'], [0], [self.eid], [])
+		elif self.etype in (push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine):
+			gameapi.addtag(self.oid, 'engine_sound', [0.5, 1*intensity,5*intensity,1, 0.05*volume,volume,1, 0,0.5,1, 1], [sound+'.wav'], [0], [self.eid], [])
 		else:
 			gameapi.addtag(self.oid, 'engine_sound', [1, 1*intensity,5*intensity,1, 0.05*volume,volume,1, 0,0.5,1, 1], [sound+'.wav'], [0], [self.eid], [])
 
@@ -106,7 +109,7 @@ class Obj:
 		max_velocity, strength, friction = _normalize_engine_values(engine_type, max_velocity, offset, strength, friction, topmounted_gyro)
 		target_efcts = [(t.id,efct) for t,efct in targets] if targets else []
 		eid = gameapi.create_engine(self.id, engine_type, max_velocity, strength, friction, target_efcts)
-		self.engine += [Engine(self.id, eid)]
+		self.engine += [Engine(self.id, eid, engine_type)]
 		if sound:
 			self.engine[-1].addsound(sound, 1)
 		return self.engine[-1]
@@ -209,7 +212,8 @@ def loop(delay=0.03, end_after=None):
 	global _keys,_taps,_mousemove,_collisions,_cam_pos
 	_keys,_taps,_collisions,_cam_pos = None,None,None,None
 	_poll_joysticks()
-	_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
+	if _want_mousemove:
+		_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
 	if end_after and timeout(end_after,timer=-154):
 		global _timers
 		del _timers[-154]
@@ -445,6 +449,8 @@ def accelerometer(relative=False):
 	return rel
 
 def mousemove():
+	global _want_mousemove
+	_want_mousemove = True
 	return _mousemove
 
 

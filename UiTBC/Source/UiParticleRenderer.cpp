@@ -162,14 +162,15 @@ void ParticleRenderer::CreateExplosion(const vec3& pPosition, float pStrength, c
 	const vec3& pStartSmokeColor, const vec3& pSmokeColor, const vec3& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels)
 {
 	const float lRandomXYEndSpeed = 1.0f;
-	const float lSparkSize = (pStrength>1)? ::sqrt(pStrength)*0.5f : pStrength*0.4f;
+	const float lStrength2 = (pStrength>1)? ::sqrt(pStrength) : pStrength*pStrength;
+	const float lParticleSize = lStrength2*0.5f;
 	const float lSpeed = pVelocity.GetLength() * 0.01f;
-	CreateBillboards(pPosition,  7*pStrength+ 1*lSpeed,      pVelocity, mGravity*(0.9f*pFalloff), lRandomXYEndSpeed, 5.3f/pTime, pStrength*0.4f, pStartFireColor, pFireColor, mFires, pFires);
-	CreateBillboards(pPosition,  8*pStrength+ 1*lSpeed,      pVelocity, mGravity*(0.5f*pFalloff), lRandomXYEndSpeed,    3/pTime, pStrength*0.8f, pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
-	CreateBillboards(pPosition, 20*pStrength+20*lSpeed, 1.2f*pVelocity, mGravity*(0.8f*pFalloff), lRandomXYEndSpeed, 4.5f/pTime, lSparkSize, vec3(), vec3(), mSparks, pSparks);
-	CreateBillboards(pPosition,  9*pStrength+10*lSpeed, 1.1f*pVelocity, mGravity*(1.1f*pFalloff), lRandomXYEndSpeed, 0.7f/pTime, pStrength*0.20f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
+	CreateBillboards(pPosition,  7*lStrength2+ 1*lSpeed,      pVelocity, Math::Lerp(pVelocity,mGravity*-0.2f,pFalloff), lRandomXYEndSpeed, 5.3f/pTime, lParticleSize,      pStartFireColor, pFireColor, mFires, pFires);
+	CreateBillboards(pPosition,  8*lStrength2+ 1*lSpeed,      pVelocity, Math::Lerp(pVelocity,mGravity*+0.2f,pFalloff), lRandomXYEndSpeed,    3/pTime, lParticleSize*2,    pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
+	CreateBillboards(pPosition, 20*lStrength2+20*lSpeed, 1.2f*pVelocity, Math::Lerp(pVelocity,mGravity*+0.8f,pFalloff), lRandomXYEndSpeed, 4.5f/pTime, lParticleSize*0.4f, vec3(), vec3(), mSparks, pSparks);
+	CreateBillboards(pPosition,  9*lStrength2+10*lSpeed, 1.1f*pVelocity, Math::Lerp(pVelocity,mGravity*+1.1f,pFalloff), lRandomXYEndSpeed, 0.7f/pTime, lParticleSize*0.5f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
 
-	const float lMinSparkVelocity2 = pStrength*100;
+	const float lMinSparkVelocity2 = lStrength2*100;
 	const vec3 lCamPlane = mRenderer->GetCameraTransformation().GetOrientation() * vec3(0,1,0);
 	BillboardArray::reverse_iterator x = mSparks.rbegin();
 	for (int y = 0; y < pSparks; ++y, ++x)
