@@ -16,14 +16,14 @@ XXXX      XXXX
 
 
 --------------
-    X    X
-XXXXX    XXXXX
+  XXX     XX
+XXXXX     XXXX
 
 
 
 
-XXXXX    XXXXX
-    X    X
+XXXX     XXXXX
+  XX     XXX
 --------------
      XXXX
      XXXX
@@ -45,34 +45,47 @@ rotx = lambda a: quat().rotate_x(a)
 roty = lambda a: quat().rotate_y(a)
 rotz = lambda a: quat().rotate_z(a)
 
+accurate_ascii_generate(False)
 floor = create_ascii_object(floorasc, orientation=rotx(-pi/2), mat='checker', static=True, process=orthoscale((3,3,1)))
-bg = vec3(0.4,0.8,1)
-bgcol(bg)
+floor = create_ascii_object(floorasc, orientation=rotx(-pi/2), mat='checker', static=True, process=orthoscale((3,3,1)))
+bgcol = vec3(0.4,0.8,1)
+bg(col=bgcol)
 gravity((0,0,0), friction=0, bounce=0.1)
 def create_avatar(pos, col):
 	# Create a snowman. The bottom is the actual avatar, the rest is just for show.
 	bottom = avatar = create_sphere_object(pos, radius=0.5, col=col)
-	## center = create_sphere_object(tovec3(pos)+vec3(0,0,0.75), radius=0.25, col=col)
-	## head = create_sphere_object(tovec3(pos)+vec3(0,0,1.125), radius=0.125, col=col)
-	## avatar.create_joint(fixed_joint, head)
-	## avatar.create_joint(fixed_joint, center)
+	center = create_sphere_object(tovec3(pos)+vec3(0,0,0.75), radius=0.25, col=col)
+	head = create_sphere_object(tovec3(pos)+vec3(0,0,1.125), radius=0.125, col=col)
+	avatar.joint(fixed_joint, head)
+	avatar.joint(fixed_joint, center)
 	avatar.create_engine(walk_abs_engine, strength=30, max_velocity=150, friction=30)
 	avatar.floortime = time()
 	avatar.powerup = 1
 	return avatar
 player = create_avatar((0,0,1), '#00f0')	# Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
-bot = None#create_avatar((30,0,1), '#f00')
-avatars = (player,)#bot)
+bot = create_avatar((30,0,1), '#f00')
+avatars = (player,bot)
 cam(distance=0, fov=60, target=player, target_relative_angle=True, light_angle=(-pi/2,0,0))
 powerup = None
 
-# Create walls and pillars.
+# Create walls.
 levelcenter = vec3(15,0,0)
 symmetry = [(rotz(0.2),vec3(1,1,1)), (rotz(-0.2),vec3(-1,1,1)), (rotz(-0.2),vec3(1,-1,1)), (rotz(0.2),vec3(-1,-1,1))]
 longwalls = [vec3(-10.5,10.5,0),(18,1,4)]
-[create_cube_object(longwalls[0].mulvec(sym)+levelcenter, side=longwalls[1], orientation=orientation, mat='flat', col='#943', static=True) for orientation,sym in symmetry]
+walls = [create_cube_object(longwalls[0].mulvec(sym)+levelcenter, side=longwalls[1], orientation=orientation, mat='flat', col='#943', static=True) for orientation,sym in symmetry]
+# Pillars
 symmetry = [vec3(1,1,1), vec3(-1,1,1), vec3(1,-1,1), vec3(-1,-1,1)]
 [create_cube_object(vec3(-2.7,2.7,0).mulvec(sym)+levelcenter, side=(0.3,0.3,3), mat='flat', col=rndvec().abs(), static=True) for sym in symmetry]
+
+# Create sliding doors.
+doorcenter,doorwidth = levelcenter+vec3(0,-12,-0.5),1.6
+coords = [vec3(-doorwidth/2,0,0), vec3(+doorwidth/2,0,0)]
+doors = []
+for i,c in enumerate(coords):
+	door = create_cube_object(doorcenter+c, side=(doorwidth,0.2,2))
+	walls[i+2].joint(slider_joint, door, axis=(-c).normalize(), stop=(0,1.5))	# We're bolting the door to the wall, that's why we need to invert the axis.
+	door.opener = walls[i+2].create_engine(slider_engine)
+	doors += [door]
 
 yaw,pitch = -pi/2,0	# Start looking to the right, towards the center of the map.
 grenades = []
@@ -92,7 +105,7 @@ while loop():
 	# Look around.
 	orientation = xyrot.rotate_x(pitch)
 	player.orientation(orientation)
-	player.avel((0,0,0))	# Angular velocity. Makes sure the player object doesn't start rotating for some reason .
+	player.avel((0,0,0))	# Angular velocity. Makes sure the player object doesn't start rotating for some reason.
 
 	# Throw grenades.
 	if clicks() and timeout(1, timer=2, first_hit=True):
@@ -118,8 +131,9 @@ while loop():
 			powerup.release()
 			powerup = None
 	# Respawn powerup.
-	## if not powerup and timeout(10, timer=3):
-		## powerup = create_cube_object((15,-26,0), side=0.5, mat='flat', col='#ff0')
+	if not powerup and timeout(10, timer=3):
+		powerup = create_cube_object((15,-25.5,-0.5), side=0.5, mat='flat', col='#ff0')
+		timeout(-1, timer=3)	# Erase timeout to avoid immediate spawn next time.
 
 	# Explode grenades and remove missed grenades.
 	for g in list(grenades):
@@ -135,18 +149,24 @@ while loop():
 				if hurt > 10:
 					avatar.vel(direction*hurt)
 
+	pos,bpos = player.pos(),bot.pos()
+
+	# Open sliding doors if anyone nearby, otherwise close 'em.
+	if timeout(0.2, timer=4):
+		neardoors = [1 for distance in [(p-doorcenter).length() for p in (pos,bpos)] if distance<3.5]
+		[door.opener.force(1 if neardoors else -1) for door in doors]
+
 	# Respawn if fell down.
-	pos = player.pos()
 	if pos.z < -5:	# Fade to black.
-		bgcol(bg*-5/pos.z)
+		bg(col=bgcol*-5/pos.z)
 		pitch += 0.05	# Look up towards the level you're falling down from.
 	if pos.z < -50:
 		sound(sound_clank, pos)
 		player.vel((0,0,0))
 		player.pos((0,0,1))
 		player.powerup = 1
-		bgcol(bg)
+		bg(col=bgcol)
 		yaw,pitch = -pi/2,0
-	## if bot.pos().z < -50:
-		## bot.vel((0,0,0))
-		## bot.pos((30,0,1))
+	if bpos.z < -50:
+		bot.vel((0,0,0))
+		bot.pos((30,0,1))

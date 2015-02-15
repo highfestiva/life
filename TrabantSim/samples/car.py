@@ -11,16 +11,16 @@ XXXXXXXXX
 '''
 chassis = '\n---\n'.join([chassis]*3)	# Make the car a bit wider.
 
-bgcol('#5af')
+bg(col='#5af')
 gravity((0,0,0))	# Create objects floating in mid-air.
 
 car = create_ascii_object(chassis, mass=500, col='#36a')
 wheel = lambda x,y,z: create_sphere_object(pos=(x,y,z), radius=1.1, col='#654')
 rr,rl,fr,fl = wheel(-2.8,-2.7,-1.2), wheel(-2.8,+2.7,-1.2), wheel(3.4,-2.7,-1.2), wheel(3.4,+2.7,-1.2)
-car.create_joint(turn_hinge_joint, fl, axis=(0,-1,0))
-car.create_joint(turn_hinge_joint, fr, axis=(0,-1,0))
-car.create_joint(suspend_hinge_joint, rl, axis=(0,-1,0))
-car.create_joint(suspend_hinge_joint, rr, axis=(0,-1,0))
+car.joint(turn_hinge_joint, fl, axis=(0,-1,0))
+car.joint(turn_hinge_joint, fr, axis=(0,-1,0))
+car.joint(suspend_hinge_joint, rl, axis=(0,-1,0))
+car.joint(suspend_hinge_joint, rr, axis=(0,-1,0))
 turn = car.create_engine(roll_turn_engine, targets=[(fl,1),(fr,1)])
 roll = car.create_engine(roll_engine, targets=[(rl,1),(rr,1)], strength=0.5, sound=sound_engine_combustion)
 

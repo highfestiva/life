@@ -25,7 +25,7 @@ roller = ship.create_engine(push_turn_rel_engine, friction=0.5)	# Handles both b
 
 terrain_meshes,patch_size = {},120
 
-bgcol('#aaa')
+bg(col='#aaa')
 gravity((0,0,0))
 cam(angle=(pi/2.5,0,0), distance=80, target=ship, target_relative_angle=True)
 fog(350,430)

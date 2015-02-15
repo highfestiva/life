@@ -636,6 +636,11 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 		lEngineType = Tbc::PhysicsEngine::ENGINE_ROTOR_TILT;
 		lIsAttachment = true;
 	}
+	else if (pEngineType == _T("slider"))
+	{
+		lEngineType = Tbc::PhysicsEngine::ENGINE_SLIDER_FORCE;
+		lIsAttachment = true;
+	}
 	else
 	{
 		return -1;
@@ -726,6 +731,11 @@ int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOt
 	else if (pJointType == _T("slider"))
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_SLIDER;
+		if (lLoStop == 0 && lHiStop == 0)
+		{
+			lLoStop = -1.0f;
+			lHiStop = +1.0f;
+		}
 	}
 	else if (pJointType == _T("universal"))
 	{
@@ -897,7 +907,7 @@ void TrabantSimManager::EngineForce(int pObjectId, int pEngineIndex, bool pSet, 
 	{
 		return;
 	}
-	if (pEngineIndex >= lObject->GetPhysics()->GetEngineCount())
+	if (pEngineIndex < 0 || pEngineIndex >= lObject->GetPhysics()->GetEngineCount())
 	{
 		mLog.Warningf(_T("Object %i does not have an engine with index %i."), pObjectId, pEngineIndex);
 		return;

@@ -60,9 +60,9 @@ testrun(cam, good, bad)
 for _ in range(2):	# Reset cam twice for upcoming tests. Twice since it otherwise moves at the speed of light following the rouge object.
 	cam(angle=(0,0,0),distance=20,target=0,pos=(0,0,0),fov=45,target_relative_angle=False,light_angle=(-1,0,-0.1))
 
-good = [('#333',),('#FFAACC',),((0,1,0),)]
-bad = [((1,2,),{},(-1,))]
-testrun(bgcol, good, bad)
+good = [('#333',True),('#FFAACC',False),((0,1,0),)]
+bad = [((1,2,3,),{},(-1,))]
+testrun(bg, good, bad)
 
 good = [(0.1,10),(-10,1000)]
 bad = [(-1,'100'),('a',{})]
@@ -148,7 +148,7 @@ testrun(obj.col, good, bad)
 joint_obj = create_ascii_object('XX')
 good = [[hinge_joint,joint_obj,(0,1,0),(-1,+1),(0.5,0.5)]]
 bad = [['gack?',None,(0,0),(+1,-1,0),(-0.5,-0.5)], [{},{},{},'ab','cd']]
-testrun(obj.create_joint, good, bad)
+testrun(obj.joint, good, bad)
 
 good = [[1]]
 bad = [['a'], [{}]]

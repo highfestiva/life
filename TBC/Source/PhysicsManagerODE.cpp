@@ -29,6 +29,21 @@ namespace Tbc
 
 
 
+bool AreBodiesConnectedExcluding(dBodyID b1, dBodyID b2, int joint_type)
+{
+	deb_assert(b1 || b2);
+	dBodyID b = b1? b1 : b2;
+	dBodyID s = b1? b2 : b1;
+	for (dxJointNode* n=b->firstjoint; n; n=n->next)
+	{
+		if (dJointGetType(n->joint) != joint_type && n->body == s)
+			return true;
+	}
+	return false;
+}
+
+
+
 PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels, float pSensitivity)
 {
 	mWorldID = dWorldCreate();
@@ -2934,6 +2949,7 @@ bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float
 			dJointSetSliderParam(lJointId, dParamLoStop, pLowStop);
 			dJointSetSliderParam(lJointId, dParamHiStop, pHighStop);
 			dJointSetSliderParam(lJointId, dParamBounce, pBounce);
+			dJointSetSliderParam(lJointId, dParamBounce2, pBounce);
 		}
 		break;
 		case JOINT_HINGE:
@@ -3529,7 +3545,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		}
 	}
 	// Exit without doing anything if the two bodies are connected by a joint.
-	if (lBody1 && lBody2 && ::dAreConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)
+	if (AreBodiesConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)
 	{
 		if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
 		{

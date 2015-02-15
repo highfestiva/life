@@ -876,7 +876,7 @@ void ContextObject::AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, Cont
 			{
 				break;
 			}
-			mLog.AError("Failing to attach to a static object.");
+			mLog.AError("Failing to attach joint to a static object. Try reversing the attachment!");
 			return;
 		}
 		lBody2Connectee = lNode2Connectee->GetBodyId();

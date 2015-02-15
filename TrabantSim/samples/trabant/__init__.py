@@ -9,12 +9,12 @@ import trabant.objgen
 import time
 
 
-roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt'.split()
-hinge_joint,suspend_hinge_joint,turn_hinge_joint,fixed_joint = 'hinge suspend_hinge turn_hinge fixed'.split()
+roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider'.split()
+hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
 _wait_until_loaded = True
-_fast_ascii_generate = True
+_accurate_ascii_generate = True
 _has_opened = False
 _last_ascii_top_left_offset = None
 _last_created_object = None
@@ -113,7 +113,7 @@ class Obj:
 		if sound:
 			self.engine[-1].addsound(sound, 1)
 		return self.engine[-1]
-	def create_joint(self, joint_type, obj2, axis=None, stop=None, spring=None):
+	def joint(self, joint_type, obj2, axis=None, stop=None, spring=None):
 		'''Create a joint between two objects. The stop parameter contains low and high stops, in hinge-type joints this
 		   is the low and high angle (in radians).'''
 		self.last_joint_axis = tovec3(axis)
@@ -215,8 +215,7 @@ def loop(delay=0.03, end_after=None):
 	if _want_mousemove:
 		_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
 	if end_after and timeout(end_after,timer=-154):
-		global _timers
-		del _timers[-154]
+		timeout(-1,timer=-154)	# Remove timer.
 		return False
 	return gameapi.opened()
 
@@ -232,6 +231,9 @@ def timeout(t, timer=0, first_hit=False):
 		_timers[timer] = time.time()
 		if first_hit:
 			return True
+	elif t < 0:
+		del _timers[timer]
+		return False
 	if time.time() - _timers[timer] > t:
 		_timers[timer] = time.time()
 		return True
@@ -254,9 +256,16 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relat
 	if fov:		_cam_fov_radians = radians(fov)
 	if target_relative_angle != None: _cam_relative = target_relative_angle
 
-def bgcol(col):
+def bg(col):
 	_tryinit()
 	gameapi.setbgcolor(col)
+
+def fg(col=None, outline=None):
+	_tryinit()
+	if col:
+		gameapi.setpencolor(col)
+	if outline != None:
+		gameapi.setoutline(outline)
 
 def fog(near,far):
 	_tryinit()
@@ -283,7 +292,7 @@ def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, 
 		if s == ascii+str(physmesh)+str(process):
 			gfx,phys,_last_ascii_top_left_offset = g,p,lo
 	if not gfx:
-		gfx,phys = asc2obj.str2obj(ascii, fast=_fast_ascii_generate, force_phys_mesh=physmesh)
+		gfx,phys = asc2obj.str2obj(ascii, fast=not _accurate_ascii_generate, force_phys_mesh=physmesh)
 		_last_ascii_top_left_offset = -vec3(min(gfx.vertices, key=lambda v:v.x).x, min(gfx.vertices, key=lambda v:v.z).z, min(gfx.vertices, key=lambda v:v.y).y)
 		if process: process(orientation,gfx,phys)
 		asc2obj_lookup.append((ascii+str(physmesh)+str(process),gfx,phys,_last_ascii_top_left_offset))
@@ -326,6 +335,10 @@ def create_clones(obj, placements, mat=None, static=False):
 
 def last_created_object():
 	return _last_created_object
+
+def accurate_ascii_generate(enable):
+	global _accurate_ascii_generate
+	_accurate_ascii_generate = enable
 
 def wait_until_loaded(wait=True):
 	global _wait_until_loaded
@@ -487,8 +500,7 @@ def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, ma
 			elif 'Mesh' in str(type(p)):
 				gameapi.initphysmesh(p.q, p.pos, p.vertices, p.indices)
 	_prev_gfx,_prev_phys = gfx,phys
-	if col:
-		gameapi.setpencolor(col)
+	fg(col)
 	objpos = tovec3(pos) if tovec3(pos) else vec3()
 	objori = toquat(orientation) if toquat(orientation) else quat()
 	oid = gameapi.createobj(static, mat, objpos, objori)
@@ -544,6 +556,10 @@ def _normalize_engine_values(engine_type, max_velocity, offset, strength, fricti
 			friction = 0.1 if not friction else friction
 	elif engine_type == tilt_engine:
 		strength /= 1500
+	elif engine_type == slider_engine:
+		strength *= 5
+		max_velocity[0] = 3 if not max_velocity[0] else max_velocity[0]
+		max_velocity[1] = 3 if not max_velocity[1] else max_velocity[1]
 	return max_velocity, strength, friction
 
 def _world2screen(crd):

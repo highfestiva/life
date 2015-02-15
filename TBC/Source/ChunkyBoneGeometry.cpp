@@ -168,7 +168,7 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 
 			mJointId = pPhysics->CreateSliderJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAxis);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
+			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], mBodyData.mBounce);
 			pPhysics->SetMotorTarget(mJointId, 0, 0);
 			lOk = true;
 		}

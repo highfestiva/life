@@ -153,6 +153,9 @@ def setbgcolor(col):
 	set('Ui.3D.ClearGreen', g)
 	set('Ui.3D.ClearBlue', b)
 
+def setoutline(enable):
+	set('Ui.3D.OutlineMode', enable)
+
 def setpencolor(col):
 	r,g,b,a = _htmlcol(col)
 	set('Ui.PenRed', r)
@@ -184,7 +187,7 @@ def create_engine(oid, engine_type, max_velocity, strength, friction, target_efc
 	return cmd('create-engine %i %s %s %f %f %s' % (oid, engine_type, max_velocity, strength, friction, target_efcts), int)
 
 def create_joint(oid, joint_type, oid2, axis, stop, spring):
-	return cmd('create-joint %i %s %i %s %s %s' % (oid, joint_type, oid2, _args2str(axis, '0 0 0'), _args2str(stop, '0 0'), _args2str(spring, '0 0')), int)
+	return cmd('create-joint %i %s %i %s %s %s' % (oid, joint_type, oid2, _args2str(axis, '0 0 1'), _args2str(stop, '0 0'), _args2str(spring, '0 0')), int)
 
 def addtag(oid, name, floats, strings, physidxs, engineidxs, meshidxs):
 	cmd('set-tag-floats %s' % ','.join('%f'%float(f) for f in floats))

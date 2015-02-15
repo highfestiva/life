@@ -38,7 +38,7 @@ r'''
     XX
 '''
 
-bgcol('#aaa')
+bg(col='#aaa')
 gravity((0,0,0), bounce=1, friction=0)
 
 ship = create_ascii_object(shipasc)

@@ -368,8 +368,8 @@ V3D_TEMPLATE _TVarType V3D_QUAL::GetAngle(const Vector3D<_TVarType>& pV) const
 
 V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleZ() const
 {
-	_TVarType lX = (_TVarType)sqrt(x * x + z * z);
-	return ::atan2(y, lX);
+	_TVarType lX = (_TVarType)sqrt(x*x + z*z);
+	return ::atan2(y, (x>=0)?lX:-lX);
 }
 
 V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleY() const

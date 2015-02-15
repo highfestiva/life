@@ -37,6 +37,7 @@ XX
 '''.strip('\n')
 
 gravity((0,0,0))
+fg(outline=False)
 simdebug()
 cam(distance=50)
 

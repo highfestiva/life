@@ -21,6 +21,7 @@ invader = r'''
  X`      `X
 '''
 
+fg(outline=False)
 cam(distance=250)
 gravity((0,0,0))
 
