@@ -33,7 +33,7 @@ def toaxis(v):
 	global _axis
 	if not _axis:
 		_axis = (vec3(1,0,0),vec3(-1,0,0),vec3(0,1,0),vec3(0,-1,0),vec3(0,0,1),vec3(0,0,-1))
-	return min(_axis, key=lambda a: (a-v).length2())
+	return min(_axis, key=lambda a:(a-v).length2())
 
 def toquat(q):
 	if q == None:
