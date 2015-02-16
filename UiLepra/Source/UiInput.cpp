@@ -273,7 +273,7 @@ unsigned InputDevice::GetNumElements() const
 	return ((unsigned)mElementArray.size());
 }
 
-unsigned InputDevice::GetNumDigitalElements()
+unsigned InputDevice::GetNumDigitalElements() const
 {
 	if (mNumDigitalElements == -1)
 	{
@@ -282,7 +282,7 @@ unsigned InputDevice::GetNumDigitalElements()
 	return mNumDigitalElements;
 }
 
-unsigned InputDevice::GetNumAnalogueElements()
+unsigned InputDevice::GetNumAnalogueElements() const
 {
 	if (mNumAnalogueElements == -1)
 	{
@@ -291,12 +291,12 @@ unsigned InputDevice::GetNumAnalogueElements()
 	return mNumAnalogueElements;
 }
 
-void InputDevice::CountElements()
+void InputDevice::CountElements() const
 {
 	mNumDigitalElements  = 0;
 	mNumAnalogueElements = 0;
 
-	ElementArray::iterator x;
+	ElementArray::const_iterator x;
 	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
 	{
 		InputElement* lElement = *x;

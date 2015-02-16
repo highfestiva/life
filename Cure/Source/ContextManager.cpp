@@ -27,7 +27,8 @@ ContextManager::ContextManager(GameManager* pGameManager):
 	mGameManager(pGameManager),
 	mIsObjectOwner(true),
 	mLocalObjectIdManager(0x40000000, 0x7FFFFFFF-1, 0xFFFFFFFF),
-	mRemoteObjectIdManager(1, 0x40000000-1, 0xFFFFFFFF)
+	mRemoteObjectIdManager(1, 0x40000000-1, 0xFFFFFFFF),
+	mMaxPostKillProcessingTime(0.01)
 {
 }
 
@@ -102,6 +103,11 @@ bool ContextManager::DeleteObject(GameObjectId pInstanceId)
 		log_volatile(mLog.Debugf(_T("Could not delete context object %i, since not found."), pInstanceId));
 	}
 	return (lOk);
+}
+
+void ContextManager::SetPostKillTimeout(double pTimeout)
+{
+	mMaxPostKillProcessingTime = pTimeout;
 }
 
 void ContextManager::PostKillObject(GameObjectId pInstanceId)
@@ -373,12 +379,11 @@ void ContextManager::HandleAttributeSend()
 void ContextManager::HandlePostKill()
 {
 	HiResTimer lTimer(false);
-	const double lMaxProcessingTime = 0.01;
 	while (!mPostKillSet.empty())
 	{
 		mGameManager->DeleteContextObject(*mPostKillSet.begin());
 		mPostKillSet.erase(mPostKillSet.begin());
-		if (lTimer.QueryTimeDiff() > lMaxProcessingTime)	// Time's up, have a go later.
+		if (lTimer.QueryTimeDiff() > mMaxPostKillProcessingTime)	// Time's up, have a go later.
 		{
 			break;
 		}

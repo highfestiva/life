@@ -44,6 +44,7 @@ public:
 	void AddObject(ContextObject* pObject);
 	virtual void RemoveObject(ContextObject* pObject);
 	bool DeleteObject(GameObjectId pInstanceId);
+	void SetPostKillTimeout(double pTimeout);
 	void PostKillObject(GameObjectId pInstanceId);
 	void DelayKillObject(ContextObject* pObject, float pSeconds);
 	ContextObject* GetObject(GameObjectId pInstanceId, bool pForce = false) const;
@@ -164,6 +165,7 @@ private:
 	ContextObjectTable mMicroTickCallbackObjectTable;
 	Lock mAlarmMutex;
 	AlarmSet mAlarmCallbackObjectSet;
+	double mMaxPostKillProcessingTime;
 	IdSet mPostKillSet;
 
 	logclass();

@@ -38,14 +38,15 @@ using namespace Lepra;
 
 struct Drag
 {
-	Drag(int x, int y, bool isPress);
-	void Update(const PixelCoord& pCoord, bool pIsPress);
+	Drag(int x, int y, bool isPress, int pButtonMask);
+	void Update(const PixelCoord& pCoord, bool pIsPress, int pButtonMask);
 	int GetDiamondDistanceTo(const PixelCoord& pCoord) const;
 
 	PixelCoord mStart;
 	PixelCoord mLast;
 	bool mIsPress;
 	bool mIsNew;
+	int mButtonMask;
 	uint32 mFlags;
 };
 
@@ -60,7 +61,7 @@ public:
 	virtual ~DragManager();
 
 	void SetMaxDragDistance(int pMaxDragDistance);
-	void UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed);
+	void UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed, int pButtonMask);
 	void UpdateDragByMouse(const InputManager* pInputManager);
 	void UpdateMouseByDrag(InputManager* pInputManager);
 	bool UpdateTouchsticks(InputManager* pInputManager) const;

@@ -131,7 +131,7 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const vec3& pRayPosition, const 
 
 	dContactGeom lContact[8];
 	const int lMaxCount = std::min((int)LEPRA_ARRAY_COUNT(lContact), pMaxCollisionCount*2);
-	const int lCollisionCount = ::dCollide(lObject->mGeomID, lRayGeometryId, lMaxCount, &lContact[0], sizeof(lContact[0]));
+	const int lCollisionCount = ::dCollide(lRayGeometryId, lObject->mGeomID, lMaxCount, &lContact[0], sizeof(lContact[0]));
 
 	::dGeomDestroy(lRayGeometryId);
 
@@ -147,6 +147,31 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const vec3& pRayPosition, const 
 	}
 
 	return lFoundCollisionPoints;
+}
+
+int PhysicsManagerODE::QueryRayPick(const vec3& pRayPosition, const vec3& pRayDirection, float pLength, int* pForceFeedbackIds, vec3* pPositions, int pMaxBodies)
+{
+	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
+	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
+		pRayDirection.x, pRayDirection.y, pRayDirection.z);
+	dContactGeom lContact[1];
+
+	ObjectTable::iterator x = mObjectTable.begin();
+	int y = 0;
+	for (; y < pMaxBodies && x != mObjectTable.end(); ++x)
+	{
+		Object* lObject = *x;
+		if (::dCollide(lRayGeometryId, lObject->mGeomID, 1, &lContact[0], sizeof(lContact[0])))
+		{
+			pForceFeedbackIds[y] = lObject->mForceFeedbackId;
+			pPositions[y] = vec3(lContact[0].pos);
+			++y;
+		}
+	}
+
+	::dGeomDestroy(lRayGeometryId);
+
+	return y;
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const xform& pTransform,

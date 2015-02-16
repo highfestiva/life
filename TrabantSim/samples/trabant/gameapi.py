@@ -181,6 +181,14 @@ def releaseobj(oid):
 def release_all_objects():
 	cmd('delete-all-objects')
 
+def pickobjs(pos, direction, near, far):
+	c = 'pick-objects %s %s %f %f' % (_args2str(pos,'0 0 0'), _args2str(direction,'0 0 0'), near, far)
+	s = cmd(c, lambda s:s)
+	if s:
+		h = s.split(',')
+		return [(int(h[i]),vec3(*[float(j) for j in h[i+1:i+4]])) for i in range(0,len(h),4)]
+	return []
+
 def create_engine(oid, engine_type, max_velocity, strength, friction, target_efcts):
 	max_velocity = _args2str(max_velocity, '0 0')
 	target_efcts = ' '.join('%i %f'%(oid,efct) for oid,efct in target_efcts) if target_efcts else ''

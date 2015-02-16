@@ -28,6 +28,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandId
 	{_T("create-clones"), COMMAND_CREATE_CLONES},
 	{_T("delete-object"), COMMAND_DELETE_OBJECT},
 	{_T("delete-all-objects"), COMMAND_DELETE_ALL_OBJECTS},
+	{_T("pick-objects"), COMMAND_PICK_OBJECTS},
 	{_T("clear-phys"), COMMAND_CLEAR_PHYS},
 	{_T("prep-phys-box"), COMMAND_PREP_PHYS_BOX},
 	{_T("prep-phys-sphere"), COMMAND_PREP_PHYS_SPHERE},
@@ -375,6 +376,26 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->DeleteAllObjects();
 				}
 				break;
+				case COMMAND_PICK_OBJECTS:
+				{
+					const vec3 lPosition = ParamToVec3(pParameterVector, 0);
+					const vec3 lDirection = ParamToVec3(pParameterVector, 3);
+					const vec2 lRange = ParamToVec2(pParameterVector, 6);
+					std::vector<int> lObjectIds;
+					std::vector<vec3> lPositions;
+					lManager->PickObjects(lPosition, lDirection, lRange, lObjectIds, lPositions);
+					size_t c = lObjectIds.size();
+					for (size_t x = 0; x < c; ++x)
+					{
+						if (x)
+						{
+							mActiveResponse += _T(',');
+						}
+						const vec3& v = lPositions[x];
+						mActiveResponse += strutil::Format(_T("%i,%f,%f,%f"), lObjectIds[x], v.x, v.y, v.z);
+					}
+				}
+				break;
 				case COMMAND_CLEAR_PHYS:
 				{
 					PhysObjectArray::iterator x;
@@ -451,13 +472,19 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				break;
 				case COMMAND_WAIT_UNTIL_LOADED:
 				{
-					for (int x = 0; x < 20; ++x)
+					int lObjectId = ParamToInt(pParameterVector, 0);
+					bool lLoaded = false;
+					for (int x = 0; !lLoaded && x < 900; ++x)
 					{
-						if (lManager->IsLoaded(ParamToInt(pParameterVector, 0)))
+						lLoaded = lManager->IsLoaded(lObjectId);
+						if (!lLoaded)
 						{
-							break;
+							Thread::Sleep(0.03);
 						}
-						Thread::Sleep(0.05);
+					}
+					if (!lLoaded)
+					{
+						mLog.Warningf(_T("Object %i did not load in time. Try calling again."), lObjectId);
 					}
 				}
 				break;
@@ -503,7 +530,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->GetTouchDrags(lList);
 					for (DragList::iterator x = lList.begin(); x != lList.end(); ++x)
 					{
-						lLines.push_back(strutil::Format(_T("%f %f %f %f %f %f"), x->mLast.x*sx, x->mLast.y*sy, x->mStart.x*sx, x->mStart.y*sy, x->mVelocity.x*sx, x->mVelocity.y*sy));
+						lLines.push_back(strutil::Format(_T("%f %f %f %f %f %f %i"), x->mLast.x*sx, x->mLast.y*sy, x->mStart.x*sx, x->mStart.y*sy, x->mVelocity.x*sx, x->mVelocity.y*sy, x->mButtonMask));
 					}
 					mActiveResponse += strutil::Join(lLines, _T("\n"));
 				}

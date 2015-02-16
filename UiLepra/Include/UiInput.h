@@ -211,9 +211,9 @@ public:
 	InputElement* GetAxis(unsigned pAxisIndex) const;
 
 	unsigned GetNumElements() const;
-	unsigned GetNumDigitalElements();
-	unsigned GetNumAnalogueElements();
-	void CountElements();
+	unsigned GetNumDigitalElements() const;
+	unsigned GetNumAnalogueElements() const;
+	void CountElements() const;
 
 	void SetIdentifier(const str& pIdentifier);
 	void SetUniqueIdentifier(const str& pIdentifier);
@@ -239,8 +239,8 @@ private:
 	InputManager* mManager;
 	Interpretation mInterpretation;
 	int mTypeIndex;
-	int mNumDigitalElements;
-	int mNumAnalogueElements;
+	mutable int mNumDigitalElements;
+	mutable int mNumAnalogueElements;
 
 	bool mActive;
 

@@ -133,10 +133,11 @@ class Obj:
 
 
 class Tap:
-	def __init__(self, x, y, startx, starty, vx, vy):
+	def __init__(self, x, y, startx, starty, vx, vy, buttonmask):
 		self.x,self.y = x,y
 		self.startx,self.starty = startx,starty
 		self.vx,self.vy = vx,vy
+		self.buttonmask = buttonmask
 	def pos3d(self, z=None):
 		'''Converts the tap on-screen 2D position to a world 3D position.'''
 		if not z:
@@ -323,7 +324,7 @@ def create_sphere_object(pos=None, radius=1, vel=None, avel=None, mass=None, col
 
 def create_clones(obj, placements, mat=None, static=False):
 	'''Creates multiple clones at once of the original obj. Placement is a list of tuples, each tuple contains
-	   position and orientation (quat).'''
+	   position (vec3) and orientation (quat) IN THAT ORDER. Types are not checked for performance.'''
 	global _objects
 	mat = mat if mat else _last_mat
 	objs = []
@@ -343,6 +344,10 @@ def accurate_ascii_generate(enable):
 def wait_until_loaded(wait=True):
 	global _wait_until_loaded
 	_wait_until_loaded = wait
+
+def pick_objects(pos, direction, near=2, far=1000):
+	objects = [(_objects[oid],pos) for oid,pos in gameapi.pickobjs(pos, direction, near, far)]
+	return sorted(objects, key=lambda op: (op[1]-pos).length2())
 
 def release_all_objects():
 	'''Delete all objects.'''
@@ -410,12 +415,15 @@ def taps():
 	global _taps
 	if _taps != None:
 		return _taps
-	taps_coords = [[float(w) for w in line.split()[:6]] for line in gameapi.taps().split('\n') if line]
+	def processline(line):
+		ws = line.split()
+		return [float(w) for w in ws[:6]] + [int(ws[6])]
+	taps_coords = [processline(line) for line in gameapi.taps().split('\n') if line]
 	_taps = []
 	used_invalidations = set()
-	for x,y,startx,starty,vx,vy in taps_coords:
+	for x,y,startx,starty,vx,vy,buttonmask in taps_coords:
 		if (startx,starty) not in _invalidated_taps:
-			_taps.append(Tap(x,y,startx,starty,vx,vy))
+			_taps.append(Tap(x,y,startx,starty,vx,vy,buttonmask))
 		else:
 			used_invalidations.add((startx,starty))
 	for tapstart in set(_invalidated_taps):
@@ -435,6 +443,10 @@ def closest_tap(pos):
 
 clicks = taps
 closest_click = closest_tap
+
+def rightclick():
+	rcs = [c for c in clicks() if c.buttonmask&6]
+	return rcs[0] if rcs else None
 
 def create_joystick(xy, sloppy=False):
 	'''Creates an on-screen tap soft joystick. sloppy=True keeps the stick in place, as if it had no spring.'''

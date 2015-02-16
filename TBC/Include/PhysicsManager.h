@@ -128,6 +128,7 @@ public:
 
 	int QueryRayCollisionAgainst(const xform& pRayTransform, float pLength, BodyID pBody, vec3* pCollisionPoints, int pMaxCollisionCount);
 	virtual int QueryRayCollisionAgainst(const vec3& pRayPosition, const vec3& pRayDirection, float pLength, BodyID pBody, vec3* pCollisionPoints, int pMaxCollisionCount) = 0;
+	virtual int QueryRayPick(const vec3& pRayPosition, const vec3& pRayDirection, float pLength, int* pForceFeedbackIds, vec3* pPositions, int pMaxBodies) = 0;
 
 	// The "friction" parameter is a factor such that the friction coefficient
 	// between two bodies is calculated as mu = body1.friction * body2.friction.

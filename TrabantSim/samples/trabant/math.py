@@ -4,6 +4,9 @@ from math import cos,sin,sqrt,pi,atan2
 from random import random
 
 
+_axis = None
+
+
 def almosteq(a,b):
 	return int(((a-b) if a>b else (b-a))*10000) == 0
 
@@ -25,6 +28,12 @@ def tovec3(v):
 		return v
 	elif len(v) == 3:
 		return vec3(*v)
+
+def toaxis(v):
+	global _axis
+	if not _axis:
+		_axis = (vec3(1,0,0),vec3(-1,0,0),vec3(0,1,0),vec3(0,-1,0),vec3(0,0,1),vec3(0,0,-1))
+	return min(_axis, key=lambda a: (a-v).length2())
 
 def toquat(q):
 	if q == None:

@@ -91,6 +91,7 @@ public:
 		vec2 mVelocity;
 		HiResTimer mTimer;
 		bool mIsPress;
+		int mButtonMask;
 	};
 	typedef std::list<CollisionInfo> CollisionList;
 	typedef std::vector<Drag> DragList;
@@ -102,6 +103,7 @@ public:
 	typedef std::vector<float> FloatList;
 	typedef std::vector<int> IntList;
 	typedef std::vector<str> StringList;
+	typedef std::vector<vec3> Vec3List;
 	typedef std::vector<xform> XformList;
 
 	TrabantSimManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
@@ -114,6 +116,7 @@ public:
 	void CreateClones(IntList& pCreatedObjectIds, int pOriginalId, const XformList& pPlacements, ObjectMaterial pMaterial, bool pIsStatic);
 	void DeleteObject(int pObjectId);
 	void DeleteAllObjects();
+	void PickObjects(const vec3& pPosition, const vec3& pDirection, const vec2& pRange, IntList& pPickedObjectIds, Vec3List& pPickedPositions);
 	bool IsLoaded(int pObjectId);
 	void Explode(const vec3& pPos, const vec3& pVel, float pStrength);
 	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel, float pVolume);

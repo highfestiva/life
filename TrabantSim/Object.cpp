@@ -78,6 +78,8 @@ void Object::AddMeshInfo(const str& pMeshName, const str& pShader, const str& pT
 void Object::OnLoaded()
 {
 	Parent::OnLoaded();
+	const UiTbc::ChunkyClass::Material& lMaterial = mClass->GetMaterial(0);
+	GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lMaterial.mDiffuse;
 	if (GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
 	{
 		GetManager()->DisableTickCallback(this);

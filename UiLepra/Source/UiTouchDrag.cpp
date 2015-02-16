@@ -18,20 +18,22 @@ namespace Touch
 
 
 
-Drag::Drag(int x, int y, bool pIsPress):
+Drag::Drag(int x, int y, bool pIsPress, int pButtonMask):
 	mStart(x, y),
 	mLast(x, y),
 	mIsPress(pIsPress),
 	mIsNew(true),
+	mButtonMask(pButtonMask),
 	mFlags(0)
 {
 }
 
-void Drag::Update(const PixelCoord& pCoord, bool pIsPress)
+void Drag::Update(const PixelCoord& pCoord, bool pIsPress, int pButtonMask)
 {
 	mIsNew = false;
 	mLast = pCoord;
 	mIsPress = pIsPress;
+	mButtonMask = pButtonMask;
 }
 
 int Drag::GetDiamondDistanceTo(const PixelCoord& pCoord) const
@@ -57,7 +59,7 @@ void DragManager::SetMaxDragDistance(int pMaxDragDistance)
 	mMaxDragDiamondDistance = (int)(pMaxDragDistance*1.2f);
 }
 
-void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed)
+void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed, int pButtonMask)
 {
 	ScopeLock lLock(mLock);
 	int lClosestDiamondDistance = 1000000;
@@ -74,10 +76,10 @@ void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLoc
 	}
 	if (lBestDrag != mDragList.end() && (!pIsPressed || lClosestDiamondDistance <= mMaxDragDiamondDistance))	// If releasing we must do this.
 	{
-		lBestDrag->Update(pLocation, pIsPressed);
+		lBestDrag->Update(pLocation, pIsPressed, pButtonMask);
 		return;
 	}
-	mDragList.push_back(Drag(pLocation.x, pLocation.y, pIsPressed));
+	mDragList.push_back(Drag(pLocation.x, pLocation.y, pIsPressed, pButtonMask));
 }
 
 void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
@@ -85,10 +87,16 @@ void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
 	ScopeLock lLock(mLock);
 	PixelCoord lMouse;
 	pInputManager->GetMousePosition(lMouse.x, lMouse.y);
-	bool lIsPressed = pInputManager->GetMouse()->GetButton(0)->GetBooleanValue();
+	int lButtonMask = 0;
+	const int c = pInputManager->GetMouse()->GetNumDigitalElements();
+	for (int x = 0; x < c; ++x)
+	{
+		lButtonMask |= ((pInputManager->GetMouse()->GetButton(x)->GetBooleanValue()? 1:0) << x);
+	}
+	bool lIsPressed = !!lButtonMask;
 	if (lIsPressed || mMouseLastPressed)
 	{
-		UpdateDrag(mLastMouse, lMouse, lIsPressed);
+		UpdateDrag(mLastMouse, lMouse, lIsPressed, lButtonMask);
 	}
 	mLastMouse = lMouse;
 	mMouseLastPressed = lIsPressed;
@@ -101,7 +109,12 @@ void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
 	for (; i != mDragList.end(); ++i)
 	{
 		pInputManager->SetMousePosition(i->mLast.x, i->mLast.y);
-		pInputManager->GetMouse()->GetButton(0)->SetValue(i->mIsPress? 1 : 0);
+		int lButtonMask = i->mButtonMask;
+		const int c = pInputManager->GetMouse()->GetNumDigitalElements();
+		for (int x = 0; x < c; ++x)
+		{
+			pInputManager->GetMouse()->GetButton(x)->SetValue((lButtonMask&(1<<x))? 1 : 0);
+		}
 	}
 }
 
@@ -134,6 +147,14 @@ void DragManager::SetDragsPress(bool pIsPress)
 	for (; i != mDragList.end(); ++i)
 	{
 		i->mIsPress = pIsPress;
+		if (pIsPress)
+		{
+			i->mButtonMask |= 1;
+		}
+		else
+		{
+			i->mButtonMask = 0;
+		}
 	}
 }
 
@@ -160,7 +181,11 @@ void DragManager::ClearDrags(InputManager* pInputManager)
 	mDragList.clear();
 	if (pInputManager->GetMouse())
 	{
-		pInputManager->GetMouse()->GetButton(0)->SetValue(0);
+		const int c = pInputManager->GetMouse()->GetNumDigitalElements();
+		for (int x = 0; x < c; ++x)
+		{
+			pInputManager->GetMouse()->GetButton(x)->SetValue(0);
+		}
 	}
 }
 

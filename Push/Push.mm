@@ -159,7 +159,7 @@ using namespace Lepra;
 			lPreviousTap = PixelCoord(_canvas->GetActualHeight() - lPrevTapPosition.y, lPrevTapPosition.x);
 			lThisTap = PixelCoord(_canvas->GetActualHeight() - lTapPosition.y, lTapPosition.x);
 		}
-		Push::Push::GetApp()->mDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed);
+		Push::Push::GetApp()->mDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed, lIsPressed? 1 : 0);
 	}
 }
 

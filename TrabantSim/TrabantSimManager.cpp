@@ -7,6 +7,7 @@
 #include "pch.h"
 #include "TrabantSimManager.h"
 #include <algorithm>
+#include <iterator>
 #include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/CyclicArray.h"
@@ -397,6 +398,7 @@ void TrabantSimManager::DeleteObject(int pObjectId)
 
 void TrabantSimManager::DeleteAllObjects()
 {
+	GetContext()->SetPostKillTimeout(1);
 	{
 		ScopeLock lGameLock(GetTickLock());
 		std::set<Cure::GameObjectId>::iterator x;
@@ -421,6 +423,20 @@ void TrabantSimManager::DeleteAllObjects()
 			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Cleaning up..."));
 		}
 	}
+	GetContext()->SetPostKillTimeout(0.01);
+}
+
+void TrabantSimManager::PickObjects(const vec3& pPosition, const vec3& pDirection, const vec2& pRange, IntList& pPickedObjectIds, Vec3List& pPickedPositions)
+{
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
+	vec3 lDirection = pDirection.GetNormalized();
+	vec3 lPosition = pPosition + lDirection*pRange.x;
+	int lHitObjects[16];
+	vec3 lHitPositions[16];
+	const int lHits = GetPhysicsManager()->QueryRayPick(lPosition, lDirection, pRange.y-pRange.x, lHitObjects, lHitPositions, LEPRA_ARRAY_COUNT(lHitObjects));
+	std::copy(&lHitObjects[0], &lHitObjects[lHits], std::back_inserter(pPickedObjectIds));
+	std::copy(&lHitPositions[0], &lHitPositions[lHits], std::back_inserter(pPickedPositions));
 }
 
 bool TrabantSimManager::IsLoaded(int pObjectId)
@@ -1458,6 +1474,7 @@ void TrabantSimManager::ScriptPhysicsTick()
 				d.mStart = x->mStart;
 				d.mLast = x->mLast;
 				d.mIsPress = x->mIsPress;
+				d.mButtonMask = x->mButtonMask;
 				mDragList.push_back(d);
 			}
 			if (!x->mIsPress)
