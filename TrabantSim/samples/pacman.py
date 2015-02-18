@@ -21,7 +21,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXX
 '''
 
 cam(distance=25)
-gravity((0,0,0), bounce=0, friction=0)
+gravity((0,0,0), bounce=0.1, friction=0)
 accurate_ascii_generate(False)	# Optimization to load faster.
 
 userinfo('Please wait while loading PacMan level...')

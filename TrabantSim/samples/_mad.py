@@ -3,6 +3,8 @@
 # Binary API checking.
 
 from trabant import *
+from trabant.objects import orthoscale
+
 trabant_init()
 
 
@@ -50,8 +52,8 @@ good = [(0.1,0,False),(0.01,1,True)]
 bad = [('0','a','q'),(0,[],{})]
 testrun(timeout, good, bad)
 
-good = [('X',(1,2,3),(5,4,3),(2,1,3),1,'#ff5','checker',False,False)]
-bad = [('asbv',1,4,2,'a',(3,),7,'a','b'),('asbv',(1,),(4,5),(2,0,0,0),-1,'#aqQ','moz',protect,{})]
+good = [('X',(1,2,3),(1,0,0,0),(5,4,3),(2,1,3),1,'#ff5','checker',False,False,None)]
+bad = [('asbv',1,4,2,-1,'a',(3,),7,'a','b',''),('asbv',(1,),(4,5),(2,0,0,0),-1,'#aqQ','moz',protect,{},str)]
 o = testrun(create_ascii_object, good, bad)
 
 good = [((1,2,3),5,o,(1,2,3),45,True,(-3,-2,-1))]
@@ -60,9 +62,13 @@ testrun(cam, good, bad)
 for _ in range(2):	# Reset cam twice for upcoming tests. Twice since it otherwise moves at the speed of light following the rouge object.
 	cam(angle=(0,0,0),distance=20,target=0,pos=(0,0,0),fov=45,target_relative_angle=False,light_angle=(-1,0,-0.1))
 
-good = [('#333',True),('#FFAACC',False),((0,1,0),)]
+good = [('#333',),('#FFAACC',),((0,1,0),)]
 bad = [((1,2,3,),{},(-1,))]
 testrun(bg, good, bad)
+
+good = [((0,1,0),),('#333',True),('#FFAACC',False)]
+bad = [((1,2,3,),{},(-1,))]
+testrun(fg, good, bad)
 
 good = [(0.1,10),(-10,1000)]
 bad = [(-1,'100'),('a',{})]
@@ -72,17 +78,25 @@ good = [((0,1,0),1,-1),((0,-1,100),None,0.3)]
 bad = [((0,1,),'1',good),((0,1,2,3),[],{})]
 testrun(gravity, good, bad)
 
-good = [([(0,0,0),(1,0,0),(0,0,-1),(1,1,-1)], (0,1,2,2,1,3), (-1,-1,-1), (-1,-1,-1), (1,1,1), 1, '#0ff', 'checker', False)]
-bad = [(['a',(1,0,0),[]], (0,1,-2,'a'), [], {}, (0,), -1, 'fun', good, -3)]
+good = [([(0,0,0),(1,0,0),(0,0,-1),(1,1,-1)], (0,1,2,2,1,3), (-1,-1,-1), (1,0,0,0), (-1,-1,-1), (1,1,1), 1, '#0ff', 'checker', False, None)]
+bad = [(['a',(1,0,0),[]], (0,1,-2,'a'), [], (), {}, (0,), -1, 'fun', good, -3, '')]
 testrun(create_mesh_object, good, bad)
 
-good = [((1,0,0), 2, (-1,-1,-1), (5,4,3), 1e10, 'smooth', False)]
-bad = [('a', (1,), [], (0,1,-2,'a'), [], {}, -3)]
+good = [((1,0,0), (1,0,0,0), 2, (-1,-1,-1), (5,4,3), 1e10, 'smooth', '#f00', False, orthoscale((1,2,3)))]
+bad = [('a', {}, (1,), [], (0,1,-2,'a'), [], {}, 0, -3, str)]
 testrun(create_cube_object, good, bad)
 
-good = [((0,-1,0), 2, (1,1,1), (-5,4,-3), 1e-10, '#369', 'flat', False)]
-bad = [('a', (1,), [], (0,1,-2,'a'), [], '_', {}, -3)]
+good = [((0,-1,0), 2, (1,1,1), (-5,4,-3), 1e-10, '#369', 'flat', False, orthoscale((2,2,2)))]
+bad = [('a', (1,), [], (0,1,-2,'a'), [], '_', {}, -3, list)]
 testrun(create_sphere_object, good, bad)
+
+good = [(o, [((1,1,1),(1,0,0,0))], 'flat', False)]
+bad = [('a', (1,), [], '_')]
+testrun(create_clones, good, bad)
+
+good = [((0,0,0),(1,1,1), 0, 10)]
+bad = [('a', (1,), [], '_')]
+testrun(pick_objects, good, bad)
 
 good = [[(0,0,0),(1,2,3),5],[(0,-1,0),(0,-2,0),0.1]]
 bad = [[(0,0,),(-2,3),-5],['a',{},[]]]

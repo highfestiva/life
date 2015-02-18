@@ -4,7 +4,6 @@
 # When you realize how objects are created through ASCII, you'll quickly grasp the rest.
 
 from trabant import *
-from trabant.gameapi import set
 
 shipasc = r'''
      /\
@@ -54,7 +53,7 @@ ball = create_sphere_object(pos=(0,0,-500), radius=0.5, mass=1)
 a = 0
 while loop():
 	cam(angle=(0,0,a))
-	a += 0.01
+	a += 0.002
 
 	if taps():
 		tap = taps()[0]

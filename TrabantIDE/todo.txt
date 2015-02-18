@@ -24,8 +24,10 @@
 -Prototype: Boat
 +Prototype: MineCraft
 -Prototype: City
++Remote running.
++CreateClones API on large chunks.
 
-Remote running.
+Reduce network load by using %g instead of %f formatting.
 Remove all the unused imports in .py.
 Add outline rendering for iOS! That way it won't look like crap!
 Add sloppy camera controls (orientation slerp).

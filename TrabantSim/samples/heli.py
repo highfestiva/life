@@ -3,7 +3,6 @@
 # An RC heli sim prototype, using physical motors for control.
 
 from trabant import *
-from trabant.math import *
 
 # ASCII geometries. An X is one unit wide, high and deep. This is going to be a very flat helicopter.
 main_rotor,tail_rotor,body = r'''

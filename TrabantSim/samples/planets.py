@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Planet simulation.
+# Planet+moons simulation.
 
 from trabant import *
 

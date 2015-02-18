@@ -3,7 +3,6 @@
 # Terminal Velocity prototype, accelerometer controlled.
 
 from trabant import *
-from trabant.math import *
 
 # ASCII geometries.
 shipasc = r'''

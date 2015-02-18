@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Breakout prototyping.
 
-from math import pi
 from trabant import *
 
 # ASCII geometries.

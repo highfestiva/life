@@ -3,7 +3,6 @@
 # Just some pieces to play with.
 
 from trabant import *
-from trabant.math import *
 
 fg(outline=False)
 camdistance = 25

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from trabant.math import tovec3
+from trabant.math import tovec3,toquat
 
 
 class GfxMesh:
@@ -72,6 +72,7 @@ class Obj:
 def orthoscale(scale):
 	def doscale(orientation,gfx,phys):
 		s = tovec3(scale)
-		gfx.orthoscale(orientation,s)
-		[p.orthoscale(orientation,s) for p in phys]
+		o = toquat(orientation)
+		gfx.orthoscale(o,s)
+		[p.orthoscale(o,s) for p in phys]
 	return doscale

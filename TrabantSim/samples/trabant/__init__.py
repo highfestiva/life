@@ -13,8 +13,8 @@ roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,pus
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
-_lasttime = time.time()
-_wait_until_loaded = True
+wait_until_loaded = True
+_lastlooptime = time.time()
 _accurate_ascii_generate = True
 _has_opened = False
 _last_ascii_top_left_offset = None
@@ -210,9 +210,9 @@ def userinfo(message=''):
 def loop(delay=0.03, end_after=None):
 	'''Call this every loop, check return value if you should continue looping.'''
 	_tryinit()
-	global _lasttime
-	looptime = time.time()-_lasttime
-	_lasttime += looptime
+	global _lastlooptime
+	looptime = time.time()-_lastlooptime
+	_lastlooptime += looptime
 	sleep(max(0,delay-looptime))
 	global _keys,_taps,_mousemove,_collisions,_cam_pos
 	_keys,_taps,_collisions,_cam_pos = None,None,None,None
@@ -332,10 +332,20 @@ def create_clones(obj, placements, mat=None, static=False):
 	global _objects
 	mat = mat if mat else _last_mat
 	objs = []
-	for oid in gameapi.cloneobjs(obj.id, static, mat, placements):
-		o = Obj(oid)
-		_objects[oid] = o
-		objs.append(o)
+	str_placements = ''
+	def append(splacements):
+		for oid in gameapi.cloneobjs(obj.id, static, mat, splacements):
+			o = Obj(oid)
+			_objects[oid] = o
+			objs.append(o)
+	for pos,q in placements:
+		str_placements += ',' if str_placements else ''
+		str_placements += '%g,%g,%g,%g,%g,%g,%g' % (pos.x,pos.y,pos.z,q.q[0],q.q[1],q.q[2],q.q[3])
+		if len(str_placements) >= 1440:
+			append(str_placements)
+			str_placements = ''
+	if str_placements:
+		append(str_placements)
 	return objs
 
 def last_created_object():
@@ -345,11 +355,8 @@ def accurate_ascii_generate(enable):
 	global _accurate_ascii_generate
 	_accurate_ascii_generate = enable
 
-def wait_until_loaded(wait=True):
-	global _wait_until_loaded
-	_wait_until_loaded = wait
-
 def pick_objects(pos, direction, near=2, far=1000):
+	pos = tovec3(pos)
 	objects = [(_objects[oid],pos) for oid,pos in gameapi.pickobjs(pos, direction, near, far)]
 	return sorted(objects, key=lambda op: (op[1]-pos).length2())
 
@@ -520,7 +527,7 @@ def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, ma
 	objpos = tovec3(pos) if tovec3(pos) else vec3()
 	objori = toquat(orientation) if toquat(orientation) else quat()
 	oid = gameapi.createobj(static, mat, objpos, objori)
-	if _wait_until_loaded:
+	if wait_until_loaded:
 		gameapi.waitload(oid)
 	o = Obj(oid)
 	global _objects,_last_created_object

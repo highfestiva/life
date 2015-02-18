@@ -3,7 +3,6 @@
 # Asteroids-like prototype.
 
 from trabant import *
-from trabant.math import *
 
 # ASCII geometries. Ship is created in X and Z; the Y axis is depth.
 shipasc = r'''

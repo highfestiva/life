@@ -3,7 +3,6 @@
 # Simple Tetris prototyping. Move left/right/down by tapping left/right/below tetromino. Rotate by tapping above.
 
 from trabant import *
-#from trabant.math import *
 import random
 
 bg(col='#888')

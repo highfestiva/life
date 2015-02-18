@@ -35,7 +35,9 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandId
 	{_T("prep-phys-mesh"), COMMAND_PREP_PHYS_MESH},
 	{_T("prep-gfx-mesh"), COMMAND_PREP_GFX_MESH},
 	{_T("set-vertices"), COMMAND_SET_VERTICES},
+	{_T("add-vertices"), COMMAND_ADD_VERTICES},
 	{_T("set-indices"), COMMAND_SET_INDICES},
+	{_T("add-indices"), COMMAND_ADD_INDICES},
 	{_T("wait-until-loaded"), COMMAND_WAIT_UNTIL_LOADED},
 	{_T("explode"), COMMAND_EXPLODE},
 	{_T("play-sound"), COMMAND_PLAY_SOUND},
@@ -98,13 +100,20 @@ float StrToFloat(const tchar* s, const tchar** pEnd)
 {
 	float f = 0;
 	float ff = 0.1f;
+	float e = 0;
 	bool lBeforeDot = true;
 	bool lNegative = false;
+	bool lExponent = false;
+	bool lNegativeExponent = false;
 	for (;; ++s)
 	{
 		if (*s >= '0' && *s <= '9')
 		{
-			if (lBeforeDot)
+			if (lExponent)
+			{
+				e = e*10 + (*s-'0');
+			}
+			else if (lBeforeDot)
 			{
 				f = f*10 + (*s-'0');
 			}
@@ -120,7 +129,18 @@ float StrToFloat(const tchar* s, const tchar** pEnd)
 		}
 		else if (*s == '-')
 		{
-			lNegative = true;
+			if (lExponent)
+			{
+				lNegativeExponent = true;
+			}
+			else
+			{
+				lNegative = true;
+			}
+		}
+		else if (*s == 'e')
+		{
+			lExponent = true;
 		}
 		else
 		{
@@ -128,7 +148,13 @@ float StrToFloat(const tchar* s, const tchar** pEnd)
 		}
 	}
 	*pEnd = s;
-	return lNegative? -f : f;
+	f = lNegative? -f : f;
+	if (!lExponent)
+	{
+		return f;
+	}
+	e = lNegativeExponent? -e : e;
+	return f*pow(10,e);
 }
 
 str ToStr(int i)
@@ -212,7 +238,6 @@ quat ParamToQuat(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
 
 void Params2Ints(const strutil::strvec& pParam, std::vector<int>& pInts)
 {
-	pInts.clear();
 	strutil::strvec::const_iterator p;
 	for (p = pParam.begin(); p != pParam.end(); ++p)
 	{
@@ -230,7 +255,6 @@ void Params2Ints(const strutil::strvec& pParam, std::vector<int>& pInts)
 
 void Params2Floats(const strutil::strvec& pParam, std::vector<float>& pFloats, size_t pParamIndex=0)
 {
-	pFloats.clear();
 	strutil::strvec::const_iterator p;
 	for (p = pParam.begin()+pParamIndex; p != pParam.end(); ++p)
 	{
@@ -461,11 +485,17 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				}
 				break;
 				case COMMAND_SET_VERTICES:
+					mVertices.clear();
+					// TRICKY: fall through!
+				case COMMAND_ADD_VERTICES:
 				{
 					Params2Floats(pParameterVector, mVertices);
 				}
 				break;
 				case COMMAND_SET_INDICES:
+					mIndices.clear();
+					// TRICKY: fall through!
+				case COMMAND_ADD_INDICES:
 				{
 					Params2Ints(pParameterVector, mIndices);
 				}
@@ -687,6 +717,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				break;
 				case COMMAND_SET_TAG_FLOATS:
 				{
+					mTagFloats.clear();
 					Params2Floats(pParameterVector, mTagFloats);
 				}
 				break;
@@ -697,16 +728,19 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				break;
 				case COMMAND_SET_TAG_PHYS:
 				{
+					mTagPhys.clear();
 					Params2Ints(pParameterVector, mTagPhys);
 				}
 				break;
 				case COMMAND_SET_TAG_ENGINE:
 				{
+					mTagEngines.clear();
 					Params2Ints(pParameterVector, mTagEngines);
 				}
 				break;
 				case COMMAND_SET_TAG_MESH:
 				{
+					mTagMeshes.clear();
 					Params2Ints(pParameterVector, mTagMeshes);
 				}
 				break;

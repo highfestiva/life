@@ -143,8 +143,8 @@ def setmesh(vertices, indices):
 	verts = [f for v in vertices for f in v]
 	global _cached_vertices, _cached_indices
 	if verts != _cached_vertices or indices != _cached_indices:
-		cmd('set-vertices %s' % ','.join('%f'%v for v in verts))
-		cmd('set-indices %s' % ','.join((str(i) for i in indices)))
+		_break_any_cmd('set-vertices ', 'add-vertices ', '%g', verts)
+		_break_any_cmd('set-indices ', 'add-indices ', '%i', indices)
 		_cached_vertices,_cached_indices = verts,indices
 
 def setbgcolor(col):
@@ -168,10 +168,9 @@ def createobj(static, mat, pos, orientation):
 	c = 'create-object %s %s %s %s' % (static, mat, _args2str(pos,'0 0 0'), _args2str(orientation,'0 0 0 0'))
 	return cmd(c, int)
 
-def cloneobjs(oid, static, mat, placements):
+def cloneobjs(oid, static, mat, str_placements):
 	static = 'static' if static else 'dynamic'
-	fs = [f for pos,quat in placements for f in ([p for p in pos]+[q for q in quat])]
-	c = 'create-clones %i %s %s %s' % (oid, static, mat, ','.join('%f'%f for f in fs))
+	c = 'create-clones %i %s %s %s' % (oid, static, mat, str_placements)
 	s = cmd(c, lambda s:s)
 	return (int(i) for i in s.split(','))
 
@@ -198,7 +197,7 @@ def create_joint(oid, joint_type, oid2, axis, stop, spring):
 	return cmd('create-joint %i %s %i %s %s %s' % (oid, joint_type, oid2, _args2str(axis, '0 0 1'), _args2str(stop, '0 0'), _args2str(spring, '0 0')), int)
 
 def addtag(oid, name, floats, strings, physidxs, engineidxs, meshidxs):
-	cmd('set-tag-floats %s' % ','.join('%f'%float(f) for f in floats))
+	cmd('set-tag-floats %s' % ','.join('%g'%float(f) for f in floats))
 	cmd('set-tag-strings %s' % ' '.join(strings))
 	cmd('set-tag-phys %s' % ','.join('%i'%i for i in physidxs))
 	cmd('set-tag-engine %s' % ','.join('%i'%i for i in engineidxs))
@@ -297,6 +296,17 @@ def _closecom():
 		proc.kill()
 		proc.wait()
 		proc = None
+
+def _break_any_cmd(start, add, fmt, values):
+	c,s = start,''
+	for v in values:
+		s += ',' if s else ''
+		s += fmt%v
+		if len(s) > 1450:
+			cmd(c+s)
+			c,s = add,''
+	if s:
+		cmd(c+s)
 
 def _args2str(args, default=''):
 	if not args:

@@ -409,13 +409,29 @@ void TrabantSimManager::DeleteAllObjects()
 		mObjects.clear();
 		GetResourceManager()->ForceFreeCache();
 	}
+	int lStableCount = 0;
+	size_t lLastCount = 0;
 	for (int x = 0;; ++x)
 	{
 		Thread::Sleep(0.1);
 		ScopeLock lGameLock(GetTickLock());
-		if (GetContext()->GetObjectTable().empty())
+		const size_t lCount = GetContext()->GetObjectTable().size();
+		if (lCount == lLastCount)
+		{
+			++lStableCount;
+		}
+		else
+		{
+			lStableCount = 0;
+		}
+		lLastCount = lCount;
+		if (lCount == 0 || lStableCount >= 5)
 		{
 			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+			if (lCount)
+			{
+				mLog.Warningf(_T("Unable to delete all objects, %i remaining."), lCount);
+			}
 			break;
 		}
 		if (x > 5)
@@ -1008,6 +1024,11 @@ void TrabantSimManager::CommandLoop()
 {
 	mIsControlled = false;
 	mIsControlTimeout = false;
+	{
+		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+		ScopeLock lGameLock(GetTickLock());
+		GetPhysicsManager()->InitCurrentThread();
+	}
 	uint8 lData[128*1024];
 	while (!mCommandThread->GetStopRequest())
 	{

@@ -3,8 +3,6 @@
 # Descent-like prototype, tap/keyboard controlled.
 
 from trabant import *
-from trabant.math import *
-from collections import namedtuple
 
 # ASCII geometries.
 shipasc = \
@@ -53,7 +51,6 @@ cube_side = 140
 grid_scale = cube_side*2	# Corridor length=room side.
 room_prio = [1,0,2,-1]		# Create center room first (1=center).
 cube = create_cube_object(pos=(-1e5,-1e5,-1e5), side=cube_side, static=True)	# Create a cube far away to have something to clone.
-wait_until_loaded(False)	# Load all clone level pieces ascynchronously.
 # Rooms are lists of cubes. Cubes actualy constitutes half rooms. The remainder is made up by adjoining rooms.
 # Rooms are hashed by their grid positions.
 rooms = {}
