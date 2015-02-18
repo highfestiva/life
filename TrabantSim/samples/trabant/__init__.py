@@ -13,6 +13,7 @@ roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,pus
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
+_lasttime = time.time()
 _wait_until_loaded = True
 _accurate_ascii_generate = True
 _has_opened = False
@@ -209,7 +210,10 @@ def userinfo(message=''):
 def loop(delay=0.03, end_after=None):
 	'''Call this every loop, check return value if you should continue looping.'''
 	_tryinit()
-	sleep(delay)
+	global _lasttime
+	looptime = time.time()-_lasttime
+	_lasttime += looptime
+	sleep(max(0,delay-looptime))
 	global _keys,_taps,_mousemove,_collisions,_cam_pos
 	_keys,_taps,_collisions,_cam_pos = None,None,None,None
 	_poll_joysticks()
