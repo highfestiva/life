@@ -28,7 +28,7 @@ userinfo('Please wait while loading PacMan level...')
 level = create_ascii_object(level, pos=(-12.5,0,0), col='#00f', static=True)
 userinfo()
 def ball(pos, col):
-	ball = create_sphere_object(radius=0.4, pos=pos, col=col)
+	ball = create_sphere(radius=0.4, pos=pos, col=col)
 	ball.create_engine(push_abs_engine)
 	return ball
 pacman = ball((0,0,-3),'#ff0')

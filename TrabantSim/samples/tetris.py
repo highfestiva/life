@@ -23,9 +23,9 @@ gridsize = vec3(10,20,0)
 fixed_blocks = [[None]*gridsize.x for _ in range(gridsize.y+5)]
 
 # Create floor and walls.
-create_cube_object(pos=(5,0,-20-0.5), side=40, static=True)
-create_cube_object(pos=(-20-0.5,0,10), side=40, static=True)
-create_cube_object(pos=(10+20-0.5,0,10), side=40, static=True)
+create_cube(pos=(5,0,-20-0.5), side=40, static=True)
+create_cube(pos=(-20-0.5,0,10), side=40, static=True)
+create_cube(pos=(10+20-0.5,0,10), side=40, static=True)
 
 def getblocks(pos, orientation):
 	coords = []

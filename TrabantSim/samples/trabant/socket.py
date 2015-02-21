@@ -11,7 +11,7 @@ class socket:
 
 	def connect(self, hostport):
 		self.hostport = (_socket.gethostbyname(hostport[0]), hostport[1])
-		self.timeout = 5
+		self.timeout = 3
 
 	def close(self):
 		try:

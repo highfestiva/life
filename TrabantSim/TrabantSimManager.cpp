@@ -85,7 +85,9 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mLight(0),
 	mCameraTransform(quat(), vec3(0, -3, 0)),
 	mPauseButton(0),
+	mIsPaused(false),
 	mIsControlled(false),
+	mWasControlled(false),
 	mIsControlTimeout(false),
 	mCommandSocket(0),
 	mCommandThread(0),
@@ -139,6 +141,8 @@ void TrabantSimManager::UserReset()
 	mSetFocus = true;
 	mSetCursorVisible = true;
 	mIsMouseControlled = false;
+
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 \"\""));
 
 	Cure::RuntimeVariableScope* lScope = GetVariableScope();
 	const std::list<str> lVariableList = lScope->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE);
@@ -913,7 +917,7 @@ void TrabantSimManager::Mass(int pObjectId, bool pSet, float& pMass)
 void TrabantSimManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor, float pAlpha)
 {
 	ScopeLock lGameLock(GetTickLock());
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId, true);
+	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject)
 	{
 		return;
@@ -1054,7 +1058,7 @@ void TrabantSimManager::CommandLoop()
 		}
 		mIsControlled = true;
 		mIsControlTimeout = false;
-		while (!mPauseButton || !mPauseButton->IsVisible())
+		while (mIsPaused)
 		{
 			Thread::Sleep(0.5);
 			if (mCommandThread->GetStopRequest())
@@ -1095,7 +1099,19 @@ bool TrabantSimManager::IsControlled()
 	bool lAllowPowerDown;
 	v_get(lAllowPowerDown, =, GetVariableScope(), RTVAR_GAME_ALLOWPOWERDOWN, true);
 	const bool lIsPowerDown = (lAllowPowerDown && mIsControlTimeout);
-	bool lIsControlled = (!lIsPowerDown && mIsControlled);
+	const bool lIsControlled = (!lIsPowerDown && mIsControlled);
+	if (lIsControlled != mWasControlled)
+	{
+		if (lIsControlled)
+		{
+			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+		}
+		else
+		{
+			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controlling application went silent."));
+		}
+		mWasControlled = lIsControlled;
+	}
 	if (!lIsControlled)
 	{
 		mSetCursorVisible = true;
@@ -1265,11 +1281,13 @@ void TrabantSimManager::TickInput()
 	{
 		mSetCursorVisible = false;
 		mUiManager->GetInputManager()->SetCursorVisible(true);
+		mPauseButton->SetVisible(true);
 	}
 	if (mSetCursorInvisible)
 	{
 		mSetCursorInvisible = false;
 		mUiManager->GetInputManager()->SetCursorVisible(false);
+		mPauseButton->SetVisible(false);
 	}
 }
 
@@ -1419,6 +1437,7 @@ void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 		mMenu->OnTapSound(pButton);
 	}
 	mPauseButton->SetVisible(false);
+	mIsPaused = true;
 
 	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &TrabantSimManager::OnMenuAlternative), 0.5f, 0.3f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
@@ -1441,6 +1460,7 @@ void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 void TrabantSimManager::OnMenuAlternative(UiTbc::Button*)
 {
 	mPauseButton->SetVisible(true);
+	mIsPaused = false;
 	HiResTimer::StepCounterShadow();
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
 }
@@ -1512,7 +1532,7 @@ void TrabantSimManager::ScriptPhysicsTick()
 void TrabantSimManager::MoveCamera(float pFrameTime)
 {
 	int ctgt = 0;
-	float clx,cly,clz,cdist,cax,cay,caz,crx,cry,crz;
+	float clx,cly,clz,cdist,cax,cay,caz,crx,cry,crz,smooth;
 	bool car;
 	v_get(ctgt, =, GetVariableScope(), RTVAR_UI_3D_CAMTARGETOBJECT, 0);
 	v_get(car, =, GetVariableScope(), RTVAR_UI_3D_CAMANGLERELATIVE, false);
@@ -1526,6 +1546,7 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 	v_get(crx, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEX, 0.0);
 	v_get(cry, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEY, 0.0);
 	v_get(crz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEZ, 0.0);
+	v_get(smooth, =(float), GetVariableScope(), RTVAR_UI_3D_CAMSMOOTH, 0.0);
 	vec3 lLookAt(clx,cly,clz);
 	Object* lObject = 0;
 	if (ctgt)
@@ -1555,7 +1576,8 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 	mCameraAngle.x = fmod(mCameraAngle.x+crx*pFrameTime*2*PIF,2*PIF);
 	mCameraAngle.y = fmod(mCameraAngle.y+cry*pFrameTime*2*PIF,2*PIF);
 	mCameraAngle.z = fmod(mCameraAngle.z+crz*pFrameTime*2*PIF,2*PIF);
-	mCameraTransform = t;
+	mCameraTransform.mPosition = t.mPosition;
+	mCameraTransform.mOrientation.Slerp(t.mOrientation, mCameraTransform.mOrientation, smooth);
 }
 
 void TrabantSimManager::UpdateCameraPosition(bool pUpdateMicPosition)
@@ -1652,6 +1674,18 @@ bool TrabantSimManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 bool TrabantSimManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
+	if (pKeyCode == UiLepra::InputManager::IN_KBD_ESC && mIsMouseControlled)
+	{
+		if (mPauseButton->IsVisible())
+		{
+			mSetCursorInvisible = true;
+		}
+		else
+		{
+			mSetCursorVisible = true;
+		}
+	}
+
 	{
 		ScopeLock lGameLock(GetTickLock());
 		mKeyMap[pKeyCode] = true;

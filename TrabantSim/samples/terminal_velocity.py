@@ -19,14 +19,14 @@ ship.orientation(quat().rotate_x(-pi/2))	# Point ship forward instead of upward.
 pusher = ship.create_engine(push_rel_engine, strength=30, friction=0.7)
 pusher.addsound(sound_engine_hizz, intensity=0.3, volume=0.3)
 pusher.force((0,0,1))	# Always full throttle.
-yawer = ship.create_engine(push_turn_abs_engine, friction=0.5)
+yawer = ship.create_engine(push_turn_abs_engine, max_velocity=1, friction=0.5)
 roller = ship.create_engine(push_turn_rel_engine, friction=0.5)	# Handles both banking and levelling ship.
 
 terrain_meshes,patch_size = {},120
 
 bg(col='#aaa')
 gravity((0,0,0))
-cam(angle=(pi/2.5,0,0), distance=80, target=ship, target_relative_angle=True)
+cam(angle=(pi/2.5,0,0), distance=80, target=ship, target_relative_angle=True, smooth=0.3)
 fog(350,430)
 
 def create_terrain_patch(px,py):
@@ -43,7 +43,7 @@ def create_terrain_patch(px,py):
 			if v < grid and u < grid:
 				triangles += [v*g1+u, v*g1+u+1, (v+1)*g1+u, v*g1+u+1, (v+1)*g1+u+1, (v+1)*g1+u]
 	col = int(-cos(py/9)*80+160)*256 + int(sin(px/8)*80+160)*65536	# Vary the patch color a little.
-	return create_mesh_object(vertices, triangles, pos=(x,y,0), col='#%6.6x'%col, static=True)
+	return create_mesh(vertices, triangles, pos=(x,y,0), col='#%6.6x'%col, static=True)
 
 def update_terrain(pos):
 	'''Add new visible patches, drop no longer visible ones.'''

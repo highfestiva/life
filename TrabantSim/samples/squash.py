@@ -4,12 +4,11 @@
 
 from trabant import *
 
-cam(distance=30)
-ball = create_sphere_object()
+ball = create_sphere()
 
 while loop():
 	tap = closest_tap(ball.pos())
-	if tap and (tap.pos3d()-ball.pos()).length() <= 5:
+	if tap and (tap.pos3d()-ball.pos()).length() <= 1:
 		ball.vel(tap.vel3d().limit(50))
 		tap.invalidate()
-	ball.bounce_in_rect((-17,0,-10),(17,0,10))
+	ball.bounce_in_rect((-5,0,-3),(5,0,3))

@@ -12,7 +12,7 @@ block = lambda p: create_ascii_object('X', pos=p, static=True)
 blocks,snake_coords = [block(pos)],[pos]
 length = 5
 
-while loop():
+while loop(delay=0.2):	# Slow down snake.
 	if taps():
 		step = min(steps, key=lambda s:(closest_tap(pos).pos3d()-s-pos).length())
 	elif keydir().x or keydir().y:

@@ -10,11 +10,11 @@ proc = None
 _cached_vertices,_cached_indices = [],[]
 
 
-def init(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', restart=True):
+def init(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', connect_retries=2, restart=True):
 	if ':' not in addr:
 		addr += ':2541'
-	if not _opencom(addr):
-		return False
+	if not _opencom(addr, connect_retries):
+		raise Exception('unable to connect to simulator at %s' % addr)
 	if restart:
 		release_all_objects()
 		reset()	# Kill all joysticks, set all default values, etc.
@@ -44,7 +44,7 @@ def opened():
 	return sock != None
 
 
-def cam(angle, distance, target_oid, pos, fov, relative_angle):
+def cam(angle, distance, target_oid, pos, fov, relative_angle, smooth):
 	if angle:
 		set('Ui.3D.CamAngleX', float(angle.x))
 		set('Ui.3D.CamAngleY', float(angle.y))
@@ -62,6 +62,11 @@ def cam(angle, distance, target_oid, pos, fov, relative_angle):
 		set('Ui.3D.FOV', float(fov))
 	if relative_angle != None:
 		set('Ui.3D.CamAngleRelative', bool(relative_angle))
+	if smooth != None:
+		smooth = float(smooth)
+		if smooth < 0 or smooth >= 1:
+			print('Camera smooth %f is outside range [0,1). Causing problems?' % smooth)
+		set('Ui.3D.CamSmooth', float(smooth))
 
 def light(angle):
 	if angle:
@@ -264,7 +269,7 @@ def set(setting, value):
 ########################################
 
 
-def _opencom(addr):
+def _opencom(addr, retries):
 	global _cached_vertices,_cached_indices
 	if sock:
 		return True
@@ -272,7 +277,7 @@ def _opencom(addr):
 	_tryconnect(addr, 1)
 	if not sock:
 		_run_local_sim(addr)
-		_tryconnect(addr, 10 if proc else 3)
+		_tryconnect(addr, 10 if proc else retries)
 	if proc or sock:
 		import atexit
 		import signal
@@ -318,7 +323,7 @@ def _tryconnect(addr, retries):
 	ip,port = addr.split(':')
 	for attempt in range(1,retries+1):
 		try:
-			if proc:
+			if proc and attempt>1:
 				import time
 				time.sleep(1)
 			sock = trabant.socket.socket()
@@ -333,6 +338,8 @@ def _tryconnect(addr, retries):
 
 def _run_local_sim(addr):
 	global proc
+	if proc:
+		return
 	import os
 	if 'localhost' in addr and os.name in ('nt','darwin'):
 		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./')]:

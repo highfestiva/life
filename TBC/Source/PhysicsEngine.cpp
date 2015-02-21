@@ -240,8 +240,6 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					lOffset += lMayaOffset;
 					lGeometry = lParent;
 				}
-				vec3 lVelocityVector;
-				pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
 				vec3 lPushVector;
 				for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
 				{
@@ -252,12 +250,15 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				{
 					if (mFriction)
 					{
-						lVelocityVector *= mFriction*0.5f / mMaxSpeed;
+						vec3 lVelocityVector;
+						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
+						lVelocityVector /= mMaxSpeed;
 						if (mEngineType == ENGINE_WALK)
 						{
 							lVelocityVector.z = 0;	// When walking we won't apply brakes in Z.
 						}
-						lPushVector -= lVelocityVector;
+						vec3 f = (lVelocityVector-lPushVector) * (0.5f*mFriction);
+						lPushVector -= f;
 					}
 					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
 				}
@@ -283,16 +284,20 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				{
 					lPushVector += mValue[i] * lAxis[i];
 				}
-				vec3 lAngularVelocityVector;
-				pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocityVector);
 				const float lPushForce = lPushVector.GetLength();
 				if (lPushForce > 0.1f || mFriction != 0)
 				{
-					lAngularVelocityVector *= mFriction*0.5f / mMaxSpeed;
-					lPushVector -= lAngularVelocityVector;
+					if (mFriction)
+					{
+						vec3 lAngularVelocityVector;
+						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocityVector);
+						lAngularVelocityVector /= mMaxSpeed;
+						vec3 f = (lAngularVelocityVector-lPushVector) * (0.5f*mFriction);
+						lPushVector -= f;
+					}
 					pPhysicsManager->AddTorque(lGeometry->GetBodyId(), lPushVector*mStrength*lScale);
 				}
-				mIntensity += lPushForce;
+				mIntensity += Math::Lerp(Math::Clamp(mFriction,0.1f,0.5f), 1.0f, lPushForce);
 			}
 			break;
 			case ENGINE_HOVER:

@@ -9,11 +9,11 @@ cam(distance=65, angle=(-0.2,0,0), light_angle=(-0.05,0,0.3))
 gravity((0,0,0))
 
 # Create a small gravity simulation of mars.
-mars = create_sphere_object(radius=2.5, col='#c83', avel=(0.01,0,0.3), mass=1e6)
+mars = create_sphere(radius=2.5, col='#c83', avel=(0.01,0,0.3), mass=1e6)
 mars.create_engine(push_abs_engine)
-phobos = create_sphere_object(pos=(-1,18,-1), radius=0.3, col='#789', avel=(0.01,0.01,1), mass=1e3)
+phobos = create_sphere(pos=(-1,18,-1), radius=0.3, col='#789', avel=(0.01,0.01,1), mass=1e3)
 phobos.create_engine(push_abs_engine)
-deimos = create_sphere_object(pos=(1,-25,0), radius=0.3, col='#897', avel=(0.01,0.01,1), mass=1e3)
+deimos = create_sphere(pos=(1,-25,0), radius=0.3, col='#897', avel=(0.01,0.01,1), mass=1e3)
 deimos.create_engine(push_abs_engine)
 
 phobos.vel((15,0,0))

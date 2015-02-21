@@ -46,7 +46,7 @@ while loop():
 	else:
 		ship.vel((keydir().x*50,0,0))
 	if ('SPACE' in keys() or tap_dx<5) and timeout(0.7):
-		shots += [create_sphere_object(ship.pos()+vec3(0,0,10), vel=(0,0,200), col='#fff')]
+		shots += [create_sphere(ship.pos()+vec3(0,0,10), vel=(0,0,200), col='#fff')]
 		sound(sound_bang, shots[-1].pos())
 
 	# Run invaders.

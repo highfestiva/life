@@ -26,23 +26,31 @@
 -Prototype: City
 +Remote running.
 +CreateClones API on large chunks.
++Reduce network load by using %g instead of %f formatting.
++Remove all the unused imports in .py.
++Remove pause button on computers when capturing mouse.
++Add sloppy camera controls (orientation slerp).
++Editor bugfix: output window should be minimized when editor started. (VK_ESCAPE caused this? Falling through a case-statement?)
++Editor: forced termination without time-out!
++Editor: don't scroll back to program start when program terminates.
++Editor: clear output pane when new program is executed.
++Editor: add Shift-F5 as stop execute command.
++Editor: also when pressing F5, it should automatically stop running program first. Also GO should never be disabled when program is running. Not in MenuBar, not in ToolBar.
++Editor: Build editor for release (not debug)!
++Editor: Get About to work with http://...
++Editor: Give cred to SciTE!
+-Editor: create dialog for picking target device.
++Editor: Release source!
++Copyright text: include in package!
++API: replace all "_object" to simply "".
++Simulator: release mouse when pressing ESC! (Pause button?)
 
-Reduce network load by using %g instead of %f formatting.
-Remove all the unused imports in .py.
+Simulator/API: Add support for capsules.
+Make web page for Trabant.
+Fix starting orientation in iOS.
+Create editor in iOS.
 Add outline rendering for iOS! That way it won't look like crap!
-Add sloppy camera controls (orientation slerp).
-Bugfix: output window should be minimized when editor started. (VK_ESCAPE caused this? Falling through a case-statement?)
-Default: forced termination without time-out!
-Editor: don't scroll back to program start when program terminates.
-Editor: clear output pane when new program is executed.
-Editor: add Shift-F5 as stop execute command.
-Editor: also when pressing F5, it should automatically stop running program first. Also GO should never be disabled when program is running. Not in MenuBar, not in ToolBar.
-Get help to work with http://...
 Prototype: Limbo gfx
 Prototype: Fire Power
-Change About text!
-Give cred to SciTE!
-Release source!
-Add Python binaries to downloadable archive.
+Add 32-bit Python binaries to downloadable archive.
 Relative Python path!
-Build editor for release (not debug)!

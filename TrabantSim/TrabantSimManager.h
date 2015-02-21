@@ -208,7 +208,9 @@ protected:
 	xform mCameraTransform;
 	vec3 mCameraVelocity;
 	UiTbc::Button* mPauseButton;
+	bool mIsPaused;
 	bool mIsControlled;
+	bool mWasControlled;
 	bool mIsControlTimeout;
 	SocketAddress mLastRemoteAddress;
 	UdpSocket* mCommandSocket;

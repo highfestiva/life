@@ -33,7 +33,7 @@ _joysticks = {}
 _accelerometer_calibration = vec3()
 _timers = {}
 _objects = {}
-_cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative = vec3(),10,None,vec3(),0.5,False
+_cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative,_cam_is_smooth = vec3(),10,None,vec3(),0.5,False,False
 _cam_pos,_cam_q,_cam_inv_q = vec3(0,-10,0),quat(),quat()
 
 
@@ -180,19 +180,16 @@ def trabant_init(**kwargs):
 				config[words[0]] = words[1]
 	except:
 		pass
+	for arg in sys.argv[1:]:
+		try:
+			k,v = arg.split('=')
+			config[k] = v
+		except:
+			pass
 	config.update(kwargs)
 	global _joysticks,_timers,_has_opened,_accelerometer_calibration
-	_joysticks,_timers,_has_opened,online = {},{},True,False
-	exc = None
-	for _ in range(2):
-		try:
-			if gameapi.init(**config):
-				online = True
-				break
-		except Exception as e:
-			exc = e
-	if not online:
-		raise exc if exc else Exception('unable to connect to simulator')
+	_joysticks,_timers,_has_opened = {},{},True
+	gameapi.init(**config)
 	gameapi.set('Game.AllowPowerDown', not interactive)
 	gameapi.sock.settimeout(None if interactive else 5*60)
 	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
@@ -244,22 +241,23 @@ def timeout(t, timer=0, first_hit=False):
 		return True
 	return False
 
-def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relative_angle=None, light_angle=None):
+def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relative_angle=None, light_angle=None, smooth=None):
 	'''Set camera angle, distance, target object, position, fov. target_relative_angle=True means that the angle
 	   is relative to your target object rather than absolute. light_angle is used to change the direction of the
 	   directional light in the scene.'''
 	_tryinit()
 	angle = tovec3(angle)
-	gameapi.cam(angle, distance, target.id if target else target, tovec3(pos), fov, target_relative_angle)
+	gameapi.cam(angle, distance, target.id if target else target, tovec3(pos), fov, target_relative_angle, smooth)
 	gameapi.light(tovec3(light_angle))
 	# Update shadow variables for screen<-->world space transformations.
-	global _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians
-	if angle: 	_cam_angle = angle
+	global _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative,_cam_is_smooth
+	if angle: 		_cam_angle = angle
 	if distance != None:	_cam_distance = distance
-	if target:	_cam_target = target
-	if pos:		_cam_lookat = tovec3(pos)
-	if fov:		_cam_fov_radians = radians(fov)
+	if target:		_cam_target = target
+	if pos:			_cam_lookat = tovec3(pos)
+	if fov:			_cam_fov_radians = radians(fov)
 	if target_relative_angle != None: _cam_relative = target_relative_angle
+	if smooth != None:	_cam_is_smooth = not not smooth
 
 def bg(col):
 	_tryinit()
@@ -305,13 +303,13 @@ def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, 
 			del asc2obj_lookup[0]
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
 
-def create_mesh_object(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
+def create_mesh(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	gfx,phys = objgen.createmesh(vertices,triangles)
 	if process: process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
 
-def create_cube_object(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, process=None):
+def create_cube(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	try:	side = tovec3(side)
 	except:	side = vec3(side,side,side)
@@ -319,7 +317,7 @@ def create_cube_object(pos=None, orientation=None, side=1, vel=None, avel=None, 
 	if process: process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
 
-def create_sphere_object(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
+def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	resolution = int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createsphere(radius, latitude=resolution, longitude=int(resolution*1.5))
@@ -334,11 +332,14 @@ def create_clones(obj, placements, mat=None, static=False):
 	objs = []
 	str_placements = ''
 	def append(splacements):
+		global _last_created_object
 		for oid in gameapi.cloneobjs(obj.id, static, mat, splacements):
 			o = Obj(oid)
 			_objects[oid] = o
 			objs.append(o)
+			_last_created_object = o
 	for pos,q in placements:
+		pos,q = tovec3(pos),toquat(q)
 		str_placements += ',' if str_placements else ''
 		str_placements += '%g,%g,%g,%g,%g,%g,%g' % (pos.x,pos.y,pos.z,q.q[0],q.q[1],q.q[2],q.q[3])
 		if len(str_placements) >= 1440:
@@ -455,8 +456,10 @@ def closest_tap(pos):
 clicks = taps
 closest_click = closest_tap
 
-def rightclick():
-	rcs = [c for c in clicks() if c.buttonmask&6]
+def click(left=False, right=False, middle=False):
+	mask = (1 if left else 0) | (2 if right else 0) | (4 if middle else 0)
+	mask = mask if mask else 0xFF	# Default to any click.
+	rcs = [c for c in clicks() if c.buttonmask&mask]
 	return rcs[0] if rcs else None
 
 def create_joystick(xy, sloppy=False):
@@ -489,6 +492,11 @@ def mousemove():
 	_want_mousemove = True
 	return _mousemove
 
+def mousewheel():
+	global _want_mousemove
+	_want_mousemove = True
+	return _mousemove.z
+
 
 ########################################
 
@@ -504,8 +512,9 @@ def _poll_joysticks():
 		used_joys.add(jid)
 		j = _joysticks[jid]
 		j.x,j.y = x,y
-	for j in [joy for jid,joy in _joysticks.items() if jid not in used_joys and not joy.sloppy]:
-		j.x = j.y = 0.0
+	if timeout(0.05, timer=-155):	# Ensure an engine frame has passed.
+		for j in [joy for jid,joy in _joysticks.items() if jid not in used_joys and not joy.sloppy]:
+			j.x = j.y = 0.0
 
 def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, mat, process):
 	_tryinit()
@@ -560,9 +569,11 @@ def _normalize_engine_values(engine_type, max_velocity, offset, strength, fricti
 		max_velocity[1] = -20 if not max_velocity[1] else max_velocity[1]
 		strength *= 10
 	elif engine_type in (walk_abs_engine, push_abs_engine, push_rel_engine):
-		max_velocity[0] = 30 if not max_velocity[0] else max_velocity[0]
+		max_velocity[0] = 20 if not max_velocity[0] else max_velocity[0]
+		if engine_type == walk_abs_engine:
+			friction = friction if friction else 1
 	elif engine_type in (push_turn_abs_engine, push_turn_rel_engine):
-		max_velocity[0] = 0.1 if not max_velocity[0] else max_velocity[0]
+		max_velocity[0] = 0.03 if not max_velocity[0] else max_velocity[0]
 	elif engine_type == gyro_engine:
 		max_velocity[0] = 50 if not max_velocity[0] else max_velocity[0]
 		max_velocity[1] = 20 if not max_velocity[1] else max_velocity[1]

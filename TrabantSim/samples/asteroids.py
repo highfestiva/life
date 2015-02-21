@@ -19,7 +19,7 @@ def init():
 	global ship
 	ship = create_ascii_object(shipasc, vel=(0,0,5), col='#fff')
 	ship.create_engine(push_rel_engine, strength=30).addsound(sound_engine_hizz, intensity=0.5, volume=0.5)
-	ship.create_engine(push_turn_abs_engine, friction=1, strength=30, max_velocity=4)
+	ship.create_engine(push_turn_abs_engine, friction=2, strength=30, max_velocity=4)
 	cam(distance=100, target=ship)
 	[create_rock((rndvec()*60).with_y(0)) for _ in range(10)]
 

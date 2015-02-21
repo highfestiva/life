@@ -5,17 +5,17 @@
 from trabant import *
 
 bg(col='#9df')
-fg(col='#975', outline=False)
 gravity((0,0,-15), friction=0, bounce=0.1)
 
-cube = create_cube_object(pos=(1e5,1e5,1e5), side=1, mat='smooth', static=True)	# Template.
+player = create_sphere((0,0,15), col='#00f0')	# Alpha=0 means invisible object.
+player.create_engine(walk_abs_engine, strength=20, max_velocity=2)
+cam(distance=0, fov=60, target=player, target_relative_angle=True)
+
+fg(col='#975', outline=False)	# Brownish floor.
+cube = create_cube(pos=(1e5,1e5,1e5), side=1, mat='smooth', static=True)	# Template.
 flooring_coords = [(vec3(x,y,0),quat()) for y in range(-8,8+1) for x in range(-8,8+1)]
 create_clones(cube, flooring_coords, static=True)
-
-player = create_sphere_object((0,0,2), col='#00f0')	# Alpha=0 means invisible object.
-player.create_engine(walk_abs_engine, strength=30, max_velocity=70, friction=30)
-cam(distance=0, fov=60, target=player, target_relative_angle=True)
-fg(col='#3a4')
+fg(col='#3a4')	# Build in green color.
 
 yaw,pitch = 0,0
 while loop():
@@ -34,16 +34,22 @@ while loop():
 	player.orientation(orientation)
 	player.avel((0,0,0))	# Angular velocity. Makes sure the player object doesn't start rotating for some reason.
 
-	# Build/destroy blocks.
-	if (rightclick() or clicks()) and timeout(0.3, timer=2, first_hit=True):
+	# Build/destroy blocks or pick color.
+	if click() and timeout(0.2, timer=2, first_hit=True):
 		os = [(o,p) for o,p in pick_objects(player.pos(), orientation*vec3(0,1,0), 0,6) if o!=player]
 		if os:
 			obj,pos = os[0]	# Pick nearest cube.
-			if rightclick():
+			if click(left=True):
+				obj.release()
+			elif click(right=True):
 				cubepos = obj.pos()
 				create_clones(cube, [(toaxis(pos-cubepos)+cubepos,quat())], static=True)
-			else:
-				obj.release()
+			elif click(middle=True):
+				fg(col=obj.col())
+
+	# Change color.
+	if mousewheel():
+		fg(col=rndvec().abs())
 
 	# Respawn if fell down.
 	if player.pos().z < -30:
