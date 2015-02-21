@@ -225,6 +225,7 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 			}
 			BoxObject* lBox = dynamic_cast<BoxObject*>(lPhysObject);
 			SphereObject* lSphere = dynamic_cast<SphereObject*>(lPhysObject);
+			CapsuleObject* lCapsule = dynamic_cast<CapsuleObject*>(lPhysObject);
 			MeshObject* lMesh = dynamic_cast<MeshObject*>(lPhysObject);
 			if (lBox)
 			{
@@ -238,6 +239,14 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 				Tbc::ChunkyBoneSphere* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
 				lBone->SetMaterial(_T("rubber"));
 				lBone->mRadius = lSphere->mRadius;
+				lPhysics->AddBoneGeometry(t, lBone, lParent);
+			}
+			else if (lCapsule)
+			{
+				Tbc::ChunkyBoneCapsule* lBone = new Tbc::ChunkyBoneCapsule(lBoneData);
+				lBone->SetMaterial(_T("rubber"));
+				lBone->mRadius = lCapsule->mRadius;
+				lBone->mLength = lCapsule->mLength;
 				lPhysics->AddBoneGeometry(t, lBone, lParent);
 			}
 			else if (lMesh)

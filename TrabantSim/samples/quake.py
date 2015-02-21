@@ -47,25 +47,20 @@ rotz = lambda a: quat().rotate_z(a)
 
 accurate_ascii_generate(False)
 floor = create_ascii_object(floorasc, orientation=rotx(-pi/2), mat='checker', static=True, process=orthoscale((3,3,1)))
-floor = create_ascii_object(floorasc, orientation=rotx(-pi/2), mat='checker', static=True, process=orthoscale((3,3,1)))
 bgcol = vec3(0.4,0.8,1)
 bg(col=bgcol)
 gravity((0,0,0), friction=0, bounce=0.1)
 def create_avatar(pos, col):
 	# Create a snowman. The bottom is the actual avatar, the rest is just for show.
-	bottom = avatar = create_sphere(pos, radius=0.5, col=col)
-	center = create_sphere(tovec3(pos)+vec3(0,0,0.75), radius=0.25, col=col)
-	head = create_sphere(tovec3(pos)+vec3(0,0,1.125), radius=0.125, col=col)
-	avatar.joint(fixed_joint, head)
-	avatar.joint(fixed_joint, center)
+	avatar = create_capsule(pos, col=col)
 	avatar.create_engine(walk_abs_engine, strength=30, max_velocity=3)
 	avatar.floortime = time()
 	avatar.powerup = 1
 	return avatar
-player = create_avatar((0,0,1), '#00f0')	# Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
-bot = create_avatar((30,0,1), '#f00')
+player = create_avatar((0,0,2), '#00f0')	# Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
+bot = create_avatar((30,0,2), '#f00')
 avatars = (player,bot)
-cam(distance=0, fov=60, target=player, target_relative_angle=True, light_angle=(-pi/2,0,0))
+cam(distance=0, fov=60, target=player, target_relative_angle=True)
 powerup = None
 
 # Create walls.

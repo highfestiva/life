@@ -42,6 +42,15 @@ SphereObject::SphereObject(const quat& pQuat, const vec3& pPos, float pRadius):
 
 
 
+CapsuleObject::CapsuleObject(const quat& pQuat, const vec3& pPos, float pRadius, float pLength):
+	Parent(pQuat,pPos),
+	mRadius(pRadius),
+	mLength(pLength)
+{
+}
+
+
+
 MeshObject::MeshObject():
 	Parent(quat(), vec3())
 {

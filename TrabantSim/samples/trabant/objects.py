@@ -42,9 +42,25 @@ class PhysSphere:
 		self.pos = self.pos.mulvec((orientation*scale).abs())
 		self.radius *= scale.length()/3
 	def __repr__(self):
-		return 'phys-sphere (%g,%g,%g,%g,%g,%g,%g) %g' % tuple(list(self.q)+list(self.pos)+[float(radius)])
+		return 'phys-sphere (%g,%g,%g,%g,%g,%g,%g) %g' % tuple(list(self.q)+list(self.pos)+[float(self.radius)])
 	def __eq__(self,o):
 		if type(o)==PhysSphere: return self.q==o.q and self.pos==o.pos and self.radius==o.radius
+		return False
+
+class PhysCapsule:
+	def __init__(self, q, pos, radius, length):
+		self.q = q
+		self.pos = pos
+		self.radius = radius
+		self.length = length
+	def orthoscale(self, orientation, scale):
+		self.pos = self.pos.mulvec((orientation*scale).abs())
+		self.radius *= scale.length()/3
+		self.length *= scale.length()/3
+	def __repr__(self):
+		return 'phys-capsule (%g,%g,%g,%g,%g,%g,%g) %g %g' % tuple(list(self.q)+list(self.pos)+[float(self.radius),float(self.length)])
+	def __eq__(self,o):
+		if type(o)==PhysCapsule: return self.q==o.q and self.pos==o.pos and self.radius==o.radius and self.length==o.length
 		return False
 
 class PhysMesh:

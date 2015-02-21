@@ -130,6 +130,9 @@ def initphysbox(orientation, pos, size):
 def initphyssphere(orientation, pos, radius):
 	cmd('prep-phys-sphere %f %f %f %f %f %f %f %f' % tuple((pq for pq in orientation[:]+pos[:]+[radius])))
 
+def initphyscapsule(orientation, pos, radius, length):
+	cmd('prep-phys-capsule %f %f %f %f %f %f %f %f %f' % tuple((pq for pq in orientation[:]+pos[:]+[radius,length])))
+
 def initphysmesh(orientation, pos, vertices, indices):
 	setmesh(vertices, indices)
 	prepphysmesh(orientation, pos)

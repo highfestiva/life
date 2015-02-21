@@ -44,8 +44,8 @@
 +Copyright text: include in package!
 +API: replace all "_object" to simply "".
 +Simulator: release mouse when pressing ESC! (Pause button?)
++Simulator/API: Add support for capsules.
 
-Simulator/API: Add support for capsules.
 Make web page for Trabant.
 Fix starting orientation in iOS.
 Create editor in iOS.

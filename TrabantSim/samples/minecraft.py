@@ -7,7 +7,7 @@ from trabant import *
 bg(col='#9df')
 gravity((0,0,-15), friction=0, bounce=0.1)
 
-player = create_sphere((0,0,15), col='#00f0')	# Alpha=0 means invisible object.
+player = create_capsule((0,0,15), col='#00f0')	# Alpha=0 means invisible object.
 player.create_engine(walk_abs_engine, strength=20, max_velocity=2)
 cam(distance=0, fov=60, target=player, target_relative_angle=True)
 
@@ -30,12 +30,13 @@ while loop():
 		player.vel(player.vel()+vec3(0,0,6))
 
 	# Look around.
-	orientation = xyrot.rotate_x(pitch)
-	player.orientation(orientation)
+	cam(angle=(pitch,0,yaw))
 	player.avel((0,0,0))	# Angular velocity. Makes sure the player object doesn't start rotating for some reason.
+	player.orientation(quat())	# Keep player object straight at all times.
 
 	# Build/destroy blocks or pick color.
 	if click() and timeout(0.2, timer=2, first_hit=True):
+		orientation = xyrot.rotate_x(pitch)
 		os = [(o,p) for o,p in pick_objects(player.pos(), orientation*vec3(0,1,0), 0,6) if o!=player]
 		if os:
 			obj,pos = os[0]	# Pick nearest cube.

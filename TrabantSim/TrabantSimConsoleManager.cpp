@@ -32,6 +32,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandId
 	{_T("clear-phys"), COMMAND_CLEAR_PHYS},
 	{_T("prep-phys-box"), COMMAND_PREP_PHYS_BOX},
 	{_T("prep-phys-sphere"), COMMAND_PREP_PHYS_SPHERE},
+	{_T("prep-phys-capsule"), COMMAND_PREP_PHYS_CAPSULE},
 	{_T("prep-phys-mesh"), COMMAND_PREP_PHYS_MESH},
 	{_T("prep-gfx-mesh"), COMMAND_PREP_GFX_MESH},
 	{_T("set-vertices"), COMMAND_SET_VERTICES},
@@ -450,8 +451,20 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 						return 1;
 					}
 					std::vector<float> lFloats = Strs2Flts(pParameterVector);
-					PlacedObject* lBox = new SphereObject(quat(&lFloats[0]), vec3(&lFloats[4]), lFloats[7]);
-					mPhysObjects.push_back(lBox);
+					PlacedObject* lSphere = new SphereObject(quat(&lFloats[0]), vec3(&lFloats[4]), lFloats[7]);
+					mPhysObjects.push_back(lSphere);
+				}
+				break;
+				case COMMAND_PREP_PHYS_CAPSULE:
+				{
+					if (pParameterVector.size() != 9)
+					{
+						mLog.Warningf(_T("usage: %s followed by eight float arguments (quaternion, position, radius, length)"), pCommand.c_str());
+						return 1;
+					}
+					std::vector<float> lFloats = Strs2Flts(pParameterVector);
+					PlacedObject* lCapsule = new CapsuleObject(quat(&lFloats[0]), vec3(&lFloats[4]), lFloats[7], lFloats[8]);
+					mPhysObjects.push_back(lCapsule);
 				}
 				break;
 				case COMMAND_PREP_PHYS_MESH:

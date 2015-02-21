@@ -40,6 +40,15 @@ public:
 	SphereObject(const quat& pQuat, const vec3& pPos, float pRadius);
 };
 
+class CapsuleObject: public PlacedObject
+{
+	typedef PlacedObject Parent;
+public:
+	float mRadius;
+	float mLength;
+	CapsuleObject(const quat& pQuat, const vec3& pPos, float pRadius, float pLength);
+};
+
 class MeshObject: public PlacedObject
 {
 	typedef PlacedObject Parent;

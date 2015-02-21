@@ -301,13 +301,13 @@ def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, 
 		asc2obj_lookup.append((ascii+str(physmesh)+str(process),gfx,phys,_last_ascii_top_left_offset))
 		if len(asc2obj_lookup) > 10:
 			del asc2obj_lookup[0]
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
+	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_mesh(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	gfx,phys = objgen.createmesh(vertices,triangles)
 	if process: process(orientation,gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
+	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_cube(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
@@ -315,14 +315,21 @@ def create_cube(pos=None, orientation=None, side=1, vel=None, avel=None, mass=No
 	except:	side = vec3(side,side,side)
 	gfx,phys = objgen.createcube(side)
 	if process: process(orientation,gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
+	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	resolution = int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createsphere(radius, latitude=resolution, longitude=int(resolution*1.5))
 	if process: process(quat(), gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=None, vel=vel, avel=avel, mass=mass, col=col, mat=mat, process=process)
+	return _create_object(gfx, phys, static, pos=pos, orientation=None, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+
+def create_capsule(pos=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
+	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
+	resolution = int(min(8, max(4,radius**0.3)*8))
+	gfx,phys = objgen.createcapsule(radius, length, latitude=resolution, longitude=int(resolution*1.5))
+	if process: process(quat(), gfx,phys)
+	return _create_object(gfx, phys, static, pos=pos, orientation=None, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_clones(obj, placements, mat=None, static=False):
 	'''Creates multiple clones at once of the original obj. Placement is a list of tuples, each tuple contains
@@ -516,7 +523,7 @@ def _poll_joysticks():
 		for j in [joy for jid,joy in _joysticks.items() if jid not in used_joys and not joy.sloppy]:
 			j.x = j.y = 0.0
 
-def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, mat, process):
+def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, mat):
 	_tryinit()
 	global _prev_gfx,_prev_phys,_last_mat
 	_last_mat = mat
@@ -529,6 +536,8 @@ def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, ma
 				gameapi.initphysbox(p.q, p.pos, p.size)
 			elif 'Sphere' in str(type(p)):
 				gameapi.initphyssphere(p.q, p.pos, p.radius)
+			elif 'Capsule' in str(type(p)):
+				gameapi.initphyscapsule(p.q, p.pos, p.radius, p.length)
 			elif 'Mesh' in str(type(p)):
 				gameapi.initphysmesh(p.q, p.pos, p.vertices, p.indices)
 	_prev_gfx,_prev_phys = gfx,phys
