@@ -404,6 +404,7 @@ bool App::Open()
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	const int lDisplayWidth = lSize.height;
 	const int lDisplayHeight = lSize.width;
+	bool lDisplayFullScreen = true;
 #else // !Touch
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 	const int lDisplayWidth = 480;
@@ -412,10 +413,10 @@ bool App::Open()
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
 #endif // Touch / Computer L&F
+	bool lDisplayFullScreen = false;
 #endif // Touch/!Touch
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
-	bool lDisplayFullScreen = false;
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);

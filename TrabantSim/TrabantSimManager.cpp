@@ -1563,7 +1563,7 @@ void TrabantSimManager::MoveCamera(float pFrameTime)
 		lObject = (Object*)GetContext()->GetObject(ctgt);
 		if (lObject)
 		{
-			lLookAt = lObject->GetPosition();
+			lLookAt = lObject->GetPosition() + lObject->GetOrientation()*lLookAt;
 			mCameraVelocity = lObject->GetVelocity();
 		}
 	}

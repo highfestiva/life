@@ -113,16 +113,18 @@ void Push::Init()
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	const int lDisplayWidth = lSize.height;
 	const int lDisplayHeight = lSize.width;
+	bool lDisplayFullScreen = true;
 #elif defined(EMULATE_TOUCH)
 	const int lDisplayWidth = 480;
 	const int lDisplayHeight = 320;
+	bool lDisplayFullScreen = false;
 #else // Computer L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
+	bool lDisplayFullScreen = false;
 #endif // Touch / Emulated / Computer L&F
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
-	bool lDisplayFullScreen = false;
 	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);

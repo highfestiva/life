@@ -98,12 +98,13 @@ while loop():
 		player.vel(player.vel()+vec3(0,0,6))
 
 	# Look around.
-	orientation = xyrot.rotate_x(pitch)
-	player.orientation(orientation)
+	cam(angle=(pitch,0,yaw))
 	player.avel((0,0,0))	# Angular velocity. Makes sure the player object doesn't start rotating for some reason.
+	player.orientation(quat())	# Keep player object straight at all times.
 
 	# Throw grenades.
 	if click(left=True) and timeout(1, timer=2, first_hit=True):
+		orientation = xyrot.rotate_x(pitch)
 		vel = player.vel()
 		pos = player.pos() + vel*0.05 + orientation*vec3(0,1,0)
 		vel = vel + orientation*vec3(0,10,0)

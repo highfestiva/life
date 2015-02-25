@@ -643,6 +643,8 @@ def _update_cam_shadow():
 		if not _cam_pos:
 			_cam_target = None
 			return _update_cam_shadow()
+		elif _cam_lookat:
+			_cam_pos += _cam_target.orientation()*_cam_lookat
 	elif _cam_lookat:
 		_cam_pos = _cam_lookat
 	else:

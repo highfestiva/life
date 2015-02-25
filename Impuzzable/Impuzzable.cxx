@@ -110,13 +110,14 @@ void Impuzzable::Init()
 	int lScale = [[UIScreen mainScreen] scale];
 	const int lDisplayWidth = lSize.height * lScale;
 	const int lDisplayHeight = lSize.width * lScale;
+	bool lDisplayFullScreen = true;
 #else // Computer L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
+	bool lDisplayFullScreen = false;
 #endif // Touch / Computer L&F
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
-	bool lDisplayFullScreen = false;
 	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);

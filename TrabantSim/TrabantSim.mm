@@ -61,13 +61,38 @@ using namespace Lepra;
 
 -(id) init:(Canvas*)pCanvas
 {
-	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
+	// Init stuff for future simulation.
+	//[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
 	_canvas = pCanvas;
-	_canvas->SetDeviceRotation(180);
+	_canvas->SetDeviceRotation(0);
 	_animationTimer = nil;
 	_motionManager = [[CMMotionManager alloc] init];
+
+	// Prepare background ad and payment stuff.
 	[self createAd];
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+
+	// Initialize the IDE.
+	UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	ListViewController* listController = [ListViewController new];
+	listController.title = @"Trabant Prototypes";
+	UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:listController];
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		EditViewController* editController = [EditViewController new];
+		editController.title = @"???";
+		UINavigationController* editHeadController = [[UINavigationController alloc] initWithRootViewController:editController];
+		UISplitViewController* splitController = [[UISplitViewController alloc] init];
+		splitController.delegate = self;
+		splitController.viewControllers = @[navigationController, editHeadController];
+		window.rootViewController = splitController;
+	}
+	else
+	{
+		window.rootViewController = navigationController;
+	}
+	[window makeKeyAndVisible];
+
 	return self;
 }
 

@@ -53,6 +53,7 @@ public:
 #ifdef LEPRA_TOUCH
 	AnimatedApp* mAnimatedApp;
 #endif // Touch
+	bool mIsActive;
 
 	UiCure::GameUiManager* mUiManager;
 	UiLepra::Touch::DragManager mDragManager;
@@ -84,7 +85,8 @@ TrabantSim* TrabantSim::GetApp()
 
 TrabantSim::TrabantSim(const strutil::strvec& pArgumentList):
 	Parent(_T("TrabantSim"), pArgumentList),
-	mUiManager(0)
+	mUiManager(0),
+	mIsActive(false)
 {
 	mApp = this;
 }
@@ -186,6 +188,11 @@ bool TrabantSim::MainLoop()
 
 void TrabantSim::Suspend()
 {
+	if (!mIsActive)
+	{
+		return;
+	}
+
 	mGameTicker->Suspend();
 	mUiManager->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
@@ -195,6 +202,11 @@ void TrabantSim::Suspend()
 
 void TrabantSim::Resume()
 {
+	if (!mIsActive)
+	{
+		return;
+	}
+
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS

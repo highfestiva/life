@@ -352,12 +352,15 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 #ifdef LEPRA_IOS
 	mGlView = [[EAGLView alloc] initWithFrame:mWnd.bounds];
 	mGlView.orientationStrictness = (int)mOrientation;
-	// Add the controller, and add the subview by setting root controller.
-	RotatingController* controller = [[RotatingController alloc] init];
-	controller.navigationBarHidden = YES;
-	controller.view = mGlView;
-	mWnd.rootViewController = controller;
-	[mWnd makeKeyAndVisible];	// Only visible after we add the view.
+	if (IsFullScreen())
+	{
+		// Add the controller, and add the subview by setting root controller.
+		RotatingController* controller = [[RotatingController alloc] init];
+		controller.navigationBarHidden = YES;
+		controller.view = mGlView;
+		mWnd.rootViewController = controller;
+		[mWnd makeKeyAndVisible];	// Only visible after we add the view.
+	}
 #else // !iOS
 	NSOpenGLPixelFormatAttribute lPixelFormatAttribs[32];
 	NSOpenGLPixelFormatAttribute* lAttrib = lPixelFormatAttribs;

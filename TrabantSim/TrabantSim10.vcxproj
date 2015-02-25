@@ -348,7 +348,14 @@
     <ClCompile Include="Light.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CYRLayoutManager.h" />
+    <ClInclude Include="CYRTextStorage.h" />
+    <ClInclude Include="CYRTextView.h" />
+    <ClInclude Include="CYRToken.h" />
+    <ClInclude Include="EditViewController.h" />
+    <ClInclude Include="ListViewController.h" />
     <ClInclude Include="PhysGfxObject.h" />
+    <ClInclude Include="PythonTextView.h" />
     <ClInclude Include="TrabantSim.h" />
     <ClInclude Include="TrabantSimConsoleManager.h" />
     <ClInclude Include="TrabantSimManager.h" />
@@ -359,6 +366,13 @@
     <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CYRLayoutManager.m" />
+    <None Include="CYRTextStorage.m" />
+    <None Include="CYRTextView.m" />
+    <None Include="CYRToken.m" />
+    <None Include="EditViewController.m" />
+    <None Include="ListViewController.m" />
+    <None Include="PythonTextView.m" />
     <None Include="TrabantSim.mm" />
   </ItemGroup>
   <ItemGroup>

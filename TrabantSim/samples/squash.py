@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # As simple as it gets: bounce the ball around.
 
 from trabant import *

@@ -9,7 +9,8 @@ gravity((0,0,-15), friction=0, bounce=0.1)
 
 player = create_capsule((0,0,15), col='#00f0')	# Alpha=0 means invisible object.
 player.create_engine(walk_abs_engine, strength=20, max_velocity=2)
-cam(distance=0, fov=60, target=player, target_relative_angle=True)
+cam_offset = vec3(0,0,0.5)	# Keep the camera in eye level, same as in the original Minecraft.
+cam(distance=0, fov=60, pos=cam_offset, target=player, target_relative_angle=True)
 
 fg(col='#975', outline=False)	# Brownish floor.
 cube = create_cube(pos=(1e5,1e5,1e5), side=1, mat='smooth', static=True)	# Template.
@@ -17,7 +18,7 @@ flooring_coords = [(vec3(x,y,0),quat()) for y in range(-8,8+1) for x in range(-8
 create_clones(cube, flooring_coords, static=True)
 fg(col='#3a4')	# Build in green color.
 
-yaw,pitch = 0,0
+yaw,pitch = 0,-pi*0.4
 while loop():
 	# Update mouse look angles.
 	yaw,pitch = yaw-mousemove().x*0.09, pitch-mousemove().y*0.05
@@ -37,7 +38,7 @@ while loop():
 	# Build/destroy blocks or pick color.
 	if click() and timeout(0.2, timer=2, first_hit=True):
 		orientation = xyrot.rotate_x(pitch)
-		os = [(o,p) for o,p in pick_objects(player.pos(), orientation*vec3(0,1,0), 0,6) if o!=player]
+		os = [(o,p) for o,p in pick_objects(player.pos()+cam_offset, orientation*vec3(0,1,0), 0,6) if o!=player]
 		if os:
 			obj,pos = os[0]	# Pick nearest cube.
 			if click(left=True):
@@ -56,4 +57,4 @@ while loop():
 	if player.pos().z < -30:
 		player.vel((0,0,0))
 		player.pos((0,0,30))
-		yaw,pitch = 0,0
+		yaw,pitch = 0,-pi*0.4

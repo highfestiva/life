@@ -46,11 +46,15 @@
 +Simulator: release mouse when pressing ESC! (Pause button?)
 +Simulator/API: Add support for capsules.
 
+Editor: use F6 for deploy to alternate target host! Message box.
+Simulator: cube always pushes capsules to +x for some reason. Push upwards? Towards cylinder direction?
+
 Make web page for Trabant.
 Fix starting orientation in iOS.
 Create editor in iOS.
+Port Python 3.4 to iOS. Github?
 Add outline rendering for iOS! That way it won't look like crap!
 Prototype: Limbo gfx
 Prototype: Fire Power
-Add 32-bit Python binaries to downloadable archive.
-Relative Python path!
+Windows: Add 32-bit Python binaries to downloadable archive.
+Windows: Relative Python path!

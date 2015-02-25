@@ -61,9 +61,51 @@
     <ClInclude Include="PhysGfxObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EditViewController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ListViewController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PythonTextView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CYRLayoutManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CYRTextStorage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CYRTextView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CYRToken.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="TrabantSim.mm">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="EditViewController.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="PythonTextView.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="ListViewController.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CYRLayoutManager.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CYRToken.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CYRTextStorage.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CYRTextView.m">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
