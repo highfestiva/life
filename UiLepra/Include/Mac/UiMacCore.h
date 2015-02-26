@@ -61,7 +61,7 @@ public:
 
 private:
 	static Lock* mLock;
-	typedef HashTable<LEPRA_APPLE_WINDOW*, MacDisplayManager*, LEPRA_VOIDP_HASHER> WindowTable;
+	typedef HashTable<void*, MacDisplayManager*, LEPRA_VOIDP_HASHER> WindowTable;
 	static WindowTable mWindowTable;
 };
 

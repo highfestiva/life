@@ -24,12 +24,10 @@ void SystemUtil::SaveRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvar
 	}
 #ifdef LEPRA_IOS
 	const str lValue = pScope->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, pRtvarName);
-	NSString* key = [MacLog::Encode(pRtvarName) retain];
-	NSString* object = [MacLog::Encode(lValue) retain];
+	NSString* key = MacLog::Encode(pRtvarName);
+	NSString* object = MacLog::Encode(lValue);
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	[defaults setObject:object forKey:key];
-	[key release];
-	[object release];
 #endif // iOS
 }
 
@@ -38,7 +36,7 @@ void SystemUtil::LoadRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvar
 	(void)pScope;
 	(void)pRtvarName;
 #ifdef LEPRA_IOS
-	NSString* key = [MacLog::Encode(pRtvarName) retain];
+	NSString* key = MacLog::Encode(pRtvarName);
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	NSString* value = [defaults stringForKey:key];
 	if (value != nil)
@@ -46,7 +44,6 @@ void SystemUtil::LoadRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvar
 		const str lValue = MacLog::Decode(value);
 		pScope->SetUntypedValue(Cure::RuntimeVariable::USAGE_NORMAL, pRtvarName, lValue);
 	}
-	[key release];
 #endif // iOS
 }
 

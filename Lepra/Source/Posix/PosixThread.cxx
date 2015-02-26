@@ -280,13 +280,13 @@ void* ThreadEntry(void* pThread)
 	deb_assert(gThreadStorage.GetPointer() == lThread);
 	deb_assert(Thread::GetCurrentThread() == lThread);
 	//InitializeSignalMask();
-#ifdef LEPRA_MAC
+#if defined(LEPRA_MAC) && !defined(LEPRA_IOS)
 	NSAutoreleasePool* lPool = [[NSAutoreleasePool alloc] init];
-#endif // !Apple
+#endif // Mac
 	RunThread(lThread);
-#ifdef LEPRA_MAC
+#if defined(LEPRA_MAC) && !defined(LEPRA_IOS)
 	[lPool release];
-#endif // !Apple
+#endif // Mac
 	return (0);
 }
 
@@ -298,9 +298,9 @@ void Thread::InitializeThread(Thread* pThread)
 	deb_assert(gThreadStorage.GetPointer() == pThread);
 	deb_assert(Thread::GetCurrentThread() == pThread);
 	InitializeSignalMask();
-#ifdef LEPRA_MAC
+#if defined(LEPRA_MAC) && !defined(LEPRA_IOS)
 	[[NSAutoreleasePool alloc] init];
-#endif // !Apple
+#endif // Mac
 }
 
 size_t Thread::GetCurrentThreadId()

@@ -123,10 +123,10 @@ static const float kCursorVelocity = 1.0f/8.0f;
 
 - (void)dealloc
 {
-    [self removeObserver:self forKeyPath:NSStringFromSelector(@selector(font))];
-    [self removeObserver:self forKeyPath:NSStringFromSelector(@selector(textColor))];
-    [self removeObserver:self forKeyPath:NSStringFromSelector(@selector(selectedTextRange))];
-    [self removeObserver:self forKeyPath:NSStringFromSelector(@selector(selectedRange))];
+	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(font))];
+	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(textColor))];
+	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(selectedTextRange))];
+	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(selectedRange))];
 }
 
 

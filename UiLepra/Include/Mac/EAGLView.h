@@ -29,7 +29,7 @@
 	GLuint defaultFramebuffer, colorRenderbuffer, depthRenderbuffer;
 
 	bool isOpen;
-	UIResponder* responder;
+	//UIResponder* responder;
 	int _orientationStrictness;
 	int _preResponderStrictness;
 	bool isLayoutSet;

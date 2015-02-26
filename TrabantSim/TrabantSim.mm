@@ -11,6 +11,8 @@
 #import <CoreMotion/CoreMotion.h>
 #import <iAd/ADInterstitialAd.h>
 #endif // iOS
+#include "EditViewController.h"
+#include "ListViewController.h"
 
 
 namespace Lepra
@@ -30,6 +32,8 @@ using namespace Lepra;
 	CMMotionManager* _motionManager;
 	ADInterstitialAd* _ad;
 }
+
+@property (nonatomic, strong) UIWindow* window;
 
 -(id) init:(Canvas*)pCanvas;
 -(void) dealloc;
@@ -73,7 +77,8 @@ using namespace Lepra;
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 
 	// Initialize the IDE.
-	UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	UIWindow* window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	self.window = window;	// Retain it!
 	ListViewController* listController = [ListViewController new];
 	listController.title = @"Trabant Prototypes";
 	UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:listController];
@@ -83,7 +88,7 @@ using namespace Lepra;
 		editController.title = @"???";
 		UINavigationController* editHeadController = [[UINavigationController alloc] initWithRootViewController:editController];
 		UISplitViewController* splitController = [[UISplitViewController alloc] init];
-		splitController.delegate = self;
+		//splitController.delegate = self;
 		splitController.viewControllers = @[navigationController, editHeadController];
 		window.rootViewController = splitController;
 	}
@@ -98,7 +103,7 @@ using namespace Lepra;
 
 -(void) dealloc
 {
-        [super dealloc];
+        //[super dealloc];
 }
 
 -(void) startTick
@@ -176,14 +181,14 @@ using namespace Lepra;
 
 -(void) interstitialAdDidUnload:(ADInterstitialAd*)interstitialAd
 {
-	[interstitialAd release];
+	//[interstitialAd release];
 	_ad = nil;
 	[self createAd];
 }
 
 -(void) interstitialAd:(ADInterstitialAd*)interstitialAd didFailWithError:(NSError*)error
 {
-	[interstitialAd release];
+	//[interstitialAd release];
 	_ad = nil;
 	[self createAd];
 }
@@ -212,7 +217,7 @@ using namespace Lepra;
 			message:@"You have disabled purchases in settings." delegate:self
 			cancelButtonTitle:@"OK" otherButtonTitles:nil];
 		[alertView show];
-		[alertView release];
+		//[alertView release];
 	}
 }
 
@@ -226,7 +231,7 @@ using namespace Lepra;
 	SKProduct* requestedProduct = [products objectAtIndex:0];
 	SKPayment *payment = [SKPayment paymentWithProduct:requestedProduct];
 	[[SKPaymentQueue defaultQueue] addPayment:payment];
-	[request autorelease];
+	//[request autorelease];
 }
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error
@@ -235,7 +240,7 @@ using namespace Lepra;
 		message:@"Unable to contact App Store." delegate:self
 		cancelButtonTitle:@"OK" otherButtonTitles:nil];
 	[alertView show];
-	[alertView release];
+	//[alertView release];
 }
 
 -(void) paymentQueue:(SKPaymentQueue*)queue updatedTransactions:(NSArray*)transactions
@@ -271,7 +276,7 @@ using namespace Lepra;
 			message:@"Purchase failed. No money deducted, no content unlocked." delegate:self
 			cancelButtonTitle:@"OK" otherButtonTitles:nil];
 		[alertView show];
-		[alertView release];
+		//[alertView release];
 	}
 	[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 }
@@ -286,13 +291,12 @@ using namespace Lepra;
 			message:@"Content purchased and unlocked."
 			delegate:self cancelButtonTitle:@"Great!" otherButtonTitles:nil];
 		[alertView show];
-		[alertView release];
+		//[alertView release];
 	}
 	else
 	{
 		[self alertViewCancel:nil];
 	}
-
 }
 
 -(void) alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex

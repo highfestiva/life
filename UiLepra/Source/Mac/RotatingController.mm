@@ -15,7 +15,7 @@
 
 - (void) viewWillAppear:(BOOL)animated
 {
-	[[UIDevice currentDevice] setOrientation:UIInterfaceOrientationLandscapeRight];
+	//[[UIDevice currentDevice] setOrientation:UIInterfaceOrientationLandscapeRight];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

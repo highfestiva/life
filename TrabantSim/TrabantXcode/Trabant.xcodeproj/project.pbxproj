@@ -86,10 +86,17 @@
 		B18D39A21A76F54300D8F48B /* PhysGfxObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */; };
 		B18D39A51A76FC9A00D8F48B /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D39A41A76FC9A00D8F48B /* Timer.cpp */; };
 		B18D39A71A76FCF600D8F48B /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D39A61A76FCF600D8F48B /* Logger.cpp */; };
+		B18D588D1A9E14680029D2C0 /* CYRLayoutManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D588C1A9E14680029D2C0 /* CYRLayoutManager.m */; };
+		B18D58931A9E14810029D2C0 /* CYRTextStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D588E1A9E14810029D2C0 /* CYRTextStorage.m */; };
+		B18D58941A9E14810029D2C0 /* CYRTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D588F1A9E14810029D2C0 /* CYRTextView.m */; };
+		B18D58951A9E14810029D2C0 /* CYRToken.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58901A9E14810029D2C0 /* CYRToken.m */; };
+		B18D58961A9E14810029D2C0 /* EditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58911A9E14810029D2C0 /* EditViewController.m */; };
+		B18D58971A9E14810029D2C0 /* ListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58921A9E14810029D2C0 /* ListViewController.m */; };
+		B18D58991A9E15D10029D2C0 /* PythonTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58981A9E15D10029D2C0 /* PythonTextView.m */; };
+		B18D589B1A9E19A90029D2C0 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B18D589A1A9E19A90029D2C0 /* CoreText.framework */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
 		B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560E13BE6C3B006A1422 /* Icon-72.png */; };
-		B196562513BE6F94006A1422 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = B196562413BE6F94006A1422 /* Default.png */; };
 		B19A141913A122CE0051A61C /* UiBorderComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */; };
 		B19A141A13A122CE0051A61C /* UiButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C313A122CE0051A61C /* UiButton.cpp */; };
 		B19A141B13A122CE0051A61C /* UiCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C413A122CE0051A61C /* UiCaption.cpp */; };
@@ -474,7 +481,6 @@
 		B1B80C3D180F4294003AE676 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B80C3C180F4294003AE676 /* Menu.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1C4116718033EC7007D64F7 /* SystemUtil.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1C4116618033EC7007D64F7 /* SystemUtil.mm */; };
-		B1C4123B18035E90007D64F7 /* Default-Landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123418035E90007D64F7 /* Default-Landscape.png */; };
 		B1C4124018035E90007D64F7 /* Icon-76.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123918035E90007D64F7 /* Icon-76.png */; };
 		B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4124118035EA0007D64F7 /* Icon-120.png */; };
 		B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4124218035EA0007D64F7 /* Icon-152.png */; };
@@ -519,9 +525,6 @@
 		B1F3C40B16E0027100B2EFB5 /* UiBillboardGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */; };
 		B1F3C40C16E0027100B2EFB5 /* UiParticleRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */; };
 		B1F3C40E16E0029C00B2EFB5 /* UiParticleLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */; };
-		B1F594F3181EE8A100FCC9F0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F0181EE8A100FCC9F0 /* Default-568h@2x.png */; };
-		B1F594F4181EE8A100FCC9F0 /* Default-Landscape@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F1181EE8A100FCC9F0 /* Default-Landscape@2x.png */; };
-		B1F594F5181EE8A100FCC9F0 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B1F594F2181EE8A100FCC9F0 /* Default@2x.png */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
 /* End PBXBuildFile section */
 
@@ -606,10 +609,17 @@
 		B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysGfxObject.cpp; sourceTree = "<group>"; };
 		B18D39A41A76FC9A00D8F48B /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
 		B18D39A61A76FCF600D8F48B /* Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Logger.cpp; sourceTree = "<group>"; };
+		B18D588C1A9E14680029D2C0 /* CYRLayoutManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRLayoutManager.m; sourceTree = "<group>"; };
+		B18D588E1A9E14810029D2C0 /* CYRTextStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRTextStorage.m; sourceTree = "<group>"; };
+		B18D588F1A9E14810029D2C0 /* CYRTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRTextView.m; sourceTree = "<group>"; };
+		B18D58901A9E14810029D2C0 /* CYRToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRToken.m; sourceTree = "<group>"; };
+		B18D58911A9E14810029D2C0 /* EditViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditViewController.m; sourceTree = "<group>"; };
+		B18D58921A9E14810029D2C0 /* ListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListViewController.m; sourceTree = "<group>"; };
+		B18D58981A9E15D10029D2C0 /* PythonTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PythonTextView.m; sourceTree = "<group>"; };
+		B18D589A1A9E19A90029D2C0 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
 		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
 		B196560E13BE6C3B006A1422 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../Icons/Icon-72.png"; sourceTree = SOURCE_ROOT; };
-		B196562413BE6F94006A1422 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Icons/Default.png; sourceTree = SOURCE_ROOT; };
 		B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBorderComponent.cpp; sourceTree = "<group>"; };
 		B19A13C313A122CE0051A61C /* UiButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiButton.cpp; sourceTree = "<group>"; };
 		B19A13C413A122CE0051A61C /* UiCaption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiCaption.cpp; sourceTree = "<group>"; };
@@ -1174,7 +1184,6 @@
 		B1B80C3C180F4294003AE676 /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Menu.cpp; path = ../../Life/LifeClient/Menu.cpp; sourceTree = SOURCE_ROOT; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1C4116618033EC7007D64F7 /* SystemUtil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SystemUtil.mm; path = ../../Life/SystemUtil.mm; sourceTree = SOURCE_ROOT; };
-		B1C4123418035E90007D64F7 /* Default-Landscape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape.png"; path = "../Icons/Default-Landscape.png"; sourceTree = SOURCE_ROOT; };
 		B1C4123918035E90007D64F7 /* Icon-76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-76.png"; path = "../Icons/Icon-76.png"; sourceTree = SOURCE_ROOT; };
 		B1C4124118035EA0007D64F7 /* Icon-120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-120.png"; path = "../Icons/Icon-120.png"; sourceTree = SOURCE_ROOT; };
 		B1C4124218035EA0007D64F7 /* Icon-152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-152.png"; path = "../Icons/Icon-152.png"; sourceTree = SOURCE_ROOT; };
@@ -1219,9 +1228,6 @@
 		B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBillboardGeometry.cpp; sourceTree = "<group>"; };
 		B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiParticleRenderer.cpp; sourceTree = "<group>"; };
 		B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiParticleLoader.cpp; path = ../../UiCure/Source/UiParticleLoader.cpp; sourceTree = SOURCE_ROOT; };
-		B1F594F0181EE8A100FCC9F0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Icons/Default-568h@2x.png"; sourceTree = "<group>"; };
-		B1F594F1181EE8A100FCC9F0 /* Default-Landscape@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape@2x.png"; path = "../Icons/Default-Landscape@2x.png"; sourceTree = "<group>"; };
-		B1F594F2181EE8A100FCC9F0 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Icons/Default@2x.png"; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -1230,6 +1236,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B18D589B1A9E19A90029D2C0 /* CoreText.framework in Frameworks */,
 				B11E415718662E3B00C25073 /* StoreKit.framework in Frameworks */,
 				B1CF1ED51854E66800765E60 /* CoreMotion.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
@@ -1296,6 +1303,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B18D589A1A9E19A90029D2C0 /* CoreText.framework */,
 				B11E415618662E3B00C25073 /* StoreKit.framework */,
 				B11E4154186613CB00C25073 /* iAd.framework */,
 				B1CF1ED41854E66800765E60 /* CoreMotion.framework */,
@@ -1534,6 +1542,13 @@
 		B19A146913A122DE0051A61C /* Trabant */ = {
 			isa = PBXGroup;
 			children = (
+				B18D58981A9E15D10029D2C0 /* PythonTextView.m */,
+				B18D588E1A9E14810029D2C0 /* CYRTextStorage.m */,
+				B18D588F1A9E14810029D2C0 /* CYRTextView.m */,
+				B18D58901A9E14810029D2C0 /* CYRToken.m */,
+				B18D58911A9E14810029D2C0 /* EditViewController.m */,
+				B18D58921A9E14810029D2C0 /* ListViewController.m */,
+				B18D588C1A9E14680029D2C0 /* CYRLayoutManager.m */,
 				B18D399C1A76F54300D8F48B /* Light.cpp */,
 				B18D399D1A76F54300D8F48B /* Object.cpp */,
 				B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */,
@@ -2331,11 +2346,6 @@
 			isa = PBXGroup;
 			children = (
 				B1FB291E1450C8A600F1C762 /* Data */,
-				B196562413BE6F94006A1422 /* Default.png */,
-				B1F594F2181EE8A100FCC9F0 /* Default@2x.png */,
-				B1C4123418035E90007D64F7 /* Default-Landscape.png */,
-				B1F594F1181EE8A100FCC9F0 /* Default-Landscape@2x.png */,
-				B1F594F0181EE8A100FCC9F0 /* Default-568h@2x.png */,
 				B196560713BE6AB5006A1422 /* Icon.png */,
 				B196560813BE6AB5006A1422 /* Icon@2x.png */,
 				B196560E13BE6C3B006A1422 /* Icon-72.png */,
@@ -2470,15 +2480,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B1F594F3181EE8A100FCC9F0 /* Default-568h@2x.png in Resources */,
 				B196560B13BE6AB5006A1422 /* Icon.png in Resources */,
 				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
-				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
-				B1F594F5181EE8A100FCC9F0 /* Default@2x.png in Resources */,
-				B1C4123B18035E90007D64F7 /* Default-Landscape.png in Resources */,
-				B1F594F4181EE8A100FCC9F0 /* Default-Landscape@2x.png in Resources */,
 				B1C4124018035E90007D64F7 /* Icon-76.png in Resources */,
 				B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */,
 				B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */,
@@ -2499,6 +2504,7 @@
 				B19A141C13A122CE0051A61C /* UiCenterLayout.cpp in Sources */,
 				B19A141D13A122CE0051A61C /* UiCheckButton.cpp in Sources */,
 				B19A141E13A122CE0051A61C /* UiComponent.cpp in Sources */,
+				B18D588D1A9E14680029D2C0 /* CYRLayoutManager.m in Sources */,
 				B19A141F13A122CE0051A61C /* UiConsoleLogListener.cpp in Sources */,
 				B18D39A71A76FCF600D8F48B /* Logger.cpp in Sources */,
 				B19A142013A122CE0051A61C /* UiConsolePrompt.cpp in Sources */,
@@ -2527,6 +2533,7 @@
 				B19A143A13A122CE0051A61C /* UiBasicMeshCreator.cpp in Sources */,
 				B19A143B13A122CE0051A61C /* UiChunkyClass.cpp in Sources */,
 				B19A143C13A122CE0051A61C /* UiChunkyLoader.cpp in Sources */,
+				B18D58931A9E14810029D2C0 /* CYRTextStorage.m in Sources */,
 				B19A143D13A122CE0051A61C /* UiFontManager.cpp in Sources */,
 				B19A143E13A122CE0051A61C /* UiFontTexture.cpp in Sources */,
 				B19A143F13A122CE0051A61C /* UiGeometry2D.cpp in Sources */,
@@ -2740,6 +2747,7 @@
 				B19A236413A127EC0051A61C /* collision_trimesh_box.cpp in Sources */,
 				B19A236513A127EC0051A61C /* collision_trimesh_ccylinder.cpp in Sources */,
 				B19A236613A127EC0051A61C /* collision_trimesh_disabled.cpp in Sources */,
+				B18D58961A9E14810029D2C0 /* EditViewController.m in Sources */,
 				B19A236713A127EC0051A61C /* collision_trimesh_distance.cpp in Sources */,
 				B19A236813A127EC0051A61C /* collision_trimesh_gimpact.cpp in Sources */,
 				B19A236913A127EC0051A61C /* collision_trimesh_opcode.cpp in Sources */,
@@ -2781,6 +2789,7 @@
 				B19A239213A127EC0051A61C /* misc.cpp in Sources */,
 				B19A239313A127EC0051A61C /* obstack.cpp in Sources */,
 				B19A239413A127EC0051A61C /* ode.cpp in Sources */,
+				B18D58991A9E15D10029D2C0 /* PythonTextView.m in Sources */,
 				B19A239513A127EC0051A61C /* odeinit.cpp in Sources */,
 				B19A239613A127EC0051A61C /* odemath.cpp in Sources */,
 				B19A239713A127EC0051A61C /* odeou.cpp in Sources */,
@@ -2802,6 +2811,7 @@
 				B19A23AA13A127EC0051A61C /* IceMatrix3x3.cpp in Sources */,
 				B19A23AB13A127EC0051A61C /* IceMatrix4x4.cpp in Sources */,
 				B19A23AC13A127EC0051A61C /* IceOBB.cpp in Sources */,
+				B18D58941A9E14810029D2C0 /* CYRTextView.m in Sources */,
 				B19A23AD13A127EC0051A61C /* IcePlane.cpp in Sources */,
 				B19A23AE13A127EC0051A61C /* IcePoint.cpp in Sources */,
 				B19A23AF13A127EC0051A61C /* IceRandom.cpp in Sources */,
@@ -2939,6 +2949,7 @@
 				B1D37F24166AB3F100536CE5 /* TrabantSimTicker.cpp in Sources */,
 				B1D37F38166AB53A00536CE5 /* MacThread.mm in Sources */,
 				B1D37F40166AB57A00536CE5 /* GameTicker.cpp in Sources */,
+				B18D58971A9E14810029D2C0 /* ListViewController.m in Sources */,
 				B1D37F41166AB57A00536CE5 /* PhysicsSharedResource.cpp in Sources */,
 				B1D37F42166AB57A00536CE5 /* PositionHauler.cpp in Sources */,
 				B1D37F46166AB59C00536CE5 /* UiDebugRenderer.cpp in Sources */,
@@ -2976,6 +2987,7 @@
 				B13DA5F7173EDB6D00A73400 /* MasterServerNetworkParser.cpp in Sources */,
 				B13DA5FA173EDB9800A73400 /* Mine.cpp in Sources */,
 				B13DA5FB173EDB9800A73400 /* Projectile.cpp in Sources */,
+				B18D58951A9E14810029D2C0 /* CYRToken.m in Sources */,
 				B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */,
 				B13DA607173EDBF400A73400 /* Level.cpp in Sources */,
 				B1A83020177A42E40078D5E8 /* Health.cpp in Sources */,
@@ -3014,6 +3026,7 @@
 					LEPRA_IPHONE_SIMULATOR,
 					LEPRA_UNICODE,
 					USE_FILE32API,
+					"PNG_NO_MMX_CODE=1",
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/ode-0.11.1/include\"",
@@ -3026,6 +3039,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "Trabant-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
@@ -3055,6 +3069,7 @@
 					LEPRA_WITHOUT_FMOD,
 					LEPRA_IPHONE_SIMULATOR,
 					USE_FILE32API,
+					"PNG_NO_MMX_CODE=1",
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/ode-0.11.1/include\"",
@@ -3067,6 +3082,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "Trabant-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
@@ -3081,10 +3097,11 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = iphoneos;
@@ -3095,10 +3112,11 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PREBINDING = NO;
 				SDKROOT = iphoneos;

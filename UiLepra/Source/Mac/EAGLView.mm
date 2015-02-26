@@ -90,9 +90,14 @@ static EAGLView* gSharedView;
 {
 	[self deleteFramebuffer];
 	canvas = 0;
+#ifndef LEPRA_IOS
 	[context release];
+#endif // !iOS
+	context = nil;
 
+#ifndef LEPRA_IOS
 	[super dealloc];
+#endif // !iOS
 }
 
 - (void)setOrientationStrictness:(int)strictness
@@ -109,8 +114,12 @@ static EAGLView* gSharedView;
 	{
 		[self deleteFramebuffer];
 
+#ifdef LEPRA_IOS
+		context = newContext;
+#else // Mac
 		[context release];
 		context = [newContext retain];
+#endif // iOS/Mac
 
 		[EAGLContext setCurrentContext:nil];
 	}
@@ -335,7 +344,7 @@ static EAGLView* gSharedView;
 			canvas->SetDeviceRotation(angle);
 		}
 
-		[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
+		//[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
 	}
 }
 

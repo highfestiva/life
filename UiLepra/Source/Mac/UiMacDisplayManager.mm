@@ -371,8 +371,10 @@ void MacDisplayManager::CloseScreen()
 		if (mWnd)
 		{
 			((NativeWindow*)mWnd)->mDisplayManager = nil;
+#ifndef LEPRA_IOS
 			[mWnd release];
-			mWnd = 0;
+#endif // iOS
+			mWnd = nil;
 		}
 	}
 }
@@ -645,7 +647,7 @@ void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 	    cancelButtonTitle:@"OK"
 	    otherButtonTitles:nil];
 	[message show];
-	[message release];
+	//[message release];
 #endif // !iOS / iOS
 }
 

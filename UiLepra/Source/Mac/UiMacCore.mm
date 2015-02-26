@@ -165,7 +165,9 @@ static void setupWindowMenu(void)
 
 int UiMain(Application& pApplication)
 {
+#ifndef LEPRA_IOS
 	NSAutoreleasePool* lPool = [[NSAutoreleasePool alloc] init];
+#endif // Mac
 
 	gApplication = &pApplication;
 
@@ -202,7 +204,9 @@ int UiMain(Application& pApplication)
 	UIApplicationMain(0, 0, nil, @"UiLepraLoadedDispatcher");
 #endif // !iOS/iOS
 
+#ifndef LEPRA_IOS
 	[lPool release];
+#endif // Mac
 	return 0;
 }
 
@@ -274,19 +278,19 @@ void MacCore::ProcessMessages()
 void MacCore::AddDisplayManager(MacDisplayManager* pDisplayManager)
 {
 	ScopeLock lLock(mLock);
-	mWindowTable.Insert(pDisplayManager->GetWindow(), pDisplayManager);
+	mWindowTable.Insert((__bridge void*)pDisplayManager->GetWindow(), pDisplayManager);
 }
 
 void MacCore::RemoveDisplayManager(MacDisplayManager* pDisplayManager)
 {
 	ScopeLock lLock(mLock);
-	mWindowTable.Remove(pDisplayManager->GetWindow());
+	mWindowTable.Remove((__bridge void*)pDisplayManager->GetWindow());
 }
 
 MacDisplayManager* MacCore::GetDisplayManager(LEPRA_APPLE_WINDOW* pWindowHandle)
 {
 	ScopeLock lLock(mLock);
-	return (mWindowTable.FindObject(pWindowHandle));
+	return (mWindowTable.FindObject((__bridge void*)pWindowHandle));
 }
 
 

@@ -44,8 +44,8 @@
 @property (nonatomic, strong) UIPanGestureRecognizer *singleFingerPanRecognizer;
 @property (nonatomic, strong) UIPanGestureRecognizer *doubleFingerPanRecognizer;
 
-@property UIColor *gutterBackgroundColor;
-@property UIColor *gutterLineColor;
+@property (nonatomic, strong) UIColor *gutterBackgroundColor;
+@property (nonatomic, strong) UIColor *gutterLineColor;
 
 @property (nonatomic, assign) BOOL lineCursorEnabled;
 
