@@ -38,6 +38,10 @@
 	[[EAGLView sharedView] orientationDidChange:notification];
 }
 
+-(BOOL) prefersStatusBarHidden {
+	return YES;
+}
+
 @end
 
 

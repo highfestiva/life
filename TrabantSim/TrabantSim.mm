@@ -6,52 +6,9 @@
 
 #include "../Lepra/Include/LepraOS.h"
 #include "../UiLepra/Include/Mac/UiMacTouchHandler.h"
-#ifdef LEPRA_IOS
-#import <StoreKit/StoreKit.h>
-#import <CoreMotion/CoreMotion.h>
-#import <iAd/ADInterstitialAd.h>
-#endif // iOS
 #include "EditViewController.h"
 #include "ListViewController.h"
-
-
-namespace Lepra
-{
-class Canvas;
-}
-using namespace Lepra;
-
-
-
-#ifdef LEPRA_IOS
-@interface AnimatedApp: UIResponder <ADInterstitialAdDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
-{
-@private
-	Canvas* _canvas;
-	NSTimer* _animationTimer;
-	CMMotionManager* _motionManager;
-	ADInterstitialAd* _ad;
-}
-
-@property (nonatomic, strong) UIWindow* window;
-
--(id) init:(Canvas*)pCanvas;
--(void) dealloc;
--(void) startTick;
--(void) stopTick;
--(void) showAd;
--(void) tick;
-
--(void) startPurchase:(NSString*)productName;
--(void) completeTransaction:(SKPaymentTransaction*)transaction;
--(void) restoreTransaction:(SKPaymentTransaction*)transaction;
--(void) failedTransaction: (SKPaymentTransaction*)transaction;
--(void) provideContent:(NSString*)productIdentifier confirm:(BOOL)confirm;
-@end
-#endif // iOS
-
-
-
+#include "AnimatedApp.h"
 #include "TrabantSim.h"
 #include "TrabantSim.cxx"
 

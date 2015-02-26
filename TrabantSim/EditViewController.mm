@@ -5,6 +5,10 @@
 
 
 #import "EditViewController.h"
+#include "../UiLepra/Include/Mac/EAGLView.h"
+#include "../UiLepra/Include/Mac/RotatingController.h"
+#include "../UiLepra/Include/Mac/UiMacDisplayManager.h"
+#import "AnimatedApp.h"
 #import "PythonTextView.h"
 
 
@@ -82,6 +86,18 @@
 
 - (void)execute
 {
+	UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
+	if (!window.rootViewController)
+	{
+		RotatingController* controller = [[RotatingController alloc] init];
+		controller.navigationBarHidden = YES;
+		controller.view = [EAGLView sharedView];
+		window.rootViewController = controller;
+	}
+	[window makeKeyAndVisible];
+	TrabantSim::TrabantSim::mApp->mIsActive = true;
+	TrabantSim::TrabantSim::mApp->Resume();
+	[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
 }
 
 @end

@@ -16,54 +16,14 @@
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
+#ifdef LEPRA_IOS
+#include "../UiLepra/Include/Mac/UiMacDisplayManager.h"
+#endif // iOS
 #include "../UiTbc/Include/UiTbc.h"
 #include "TrabantSim.h"
 #include "TrabantSimTicker.h"
 #include "RtVar.h"
 #include "Version.h"
-
-
-
-namespace TrabantSim
-{
-
-
-
-class TrabantSim: public Life::Application
-{
-	typedef Life::Application Parent;
-public:
-	static TrabantSim* GetApp();
-
-	TrabantSim(const strutil::strvec& pArgumentList);
-	virtual ~TrabantSim();
-	virtual void Init();
-	virtual void Destroy();
-	virtual bool MainLoop();
-
-	virtual void Suspend();
-	virtual void Resume();
-	void SavePurchase();
-
-	str GetTypeName() const;
-	str GetVersion() const;
-	Cure::ApplicationTicker* CreateTicker() const;
-
-	static TrabantSim* mApp;
-#ifdef LEPRA_TOUCH
-	AnimatedApp* mAnimatedApp;
-#endif // Touch
-	bool mIsActive;
-
-	UiCure::GameUiManager* mUiManager;
-	UiLepra::Touch::DragManager mDragManager;
-
-	logclass();
-};
-
-
-
-}
 
 
 
@@ -73,6 +33,13 @@ LEPRA_RUN_APPLICATION(TrabantSim::TrabantSim, UiLepra::UiMain);
 
 namespace TrabantSim
 {
+
+
+
+void FoldSimulator()
+{
+	TrabantSim::mApp->FoldSimulator();
+}
 
 
 
@@ -212,6 +179,17 @@ void TrabantSim::Resume()
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
 	mGameTicker->Resume();
+}
+
+void TrabantSim::FoldSimulator()
+{
+#ifdef LEPRA_IOS
+	Suspend();
+	mIsActive = false;
+	UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
+	[window setHidden:YES];
+	[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
+#endif // iOS
 }
 
 void TrabantSim::SavePurchase()

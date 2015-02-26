@@ -174,6 +174,7 @@ protected:
 		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
 
 	void OnPauseButton(UiTbc::Button*);
+	void OnBackButton(UiTbc::Button*);
 	void OnMenuAlternative(UiTbc::Button* pButton);
 
 	virtual void ScriptPhysicsTick();
@@ -208,6 +209,7 @@ protected:
 	xform mCameraTransform;
 	vec3 mCameraVelocity;
 	UiTbc::Button* mPauseButton;
+	UiTbc::Button* mBackButton;
 	bool mIsPaused;
 	bool mIsControlled;
 	bool mWasControlled;

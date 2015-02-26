@@ -90,7 +90,7 @@
 		B18D58931A9E14810029D2C0 /* CYRTextStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D588E1A9E14810029D2C0 /* CYRTextStorage.m */; };
 		B18D58941A9E14810029D2C0 /* CYRTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D588F1A9E14810029D2C0 /* CYRTextView.m */; };
 		B18D58951A9E14810029D2C0 /* CYRToken.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58901A9E14810029D2C0 /* CYRToken.m */; };
-		B18D58961A9E14810029D2C0 /* EditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58911A9E14810029D2C0 /* EditViewController.m */; };
+		B18D58961A9E14810029D2C0 /* EditViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B18D58911A9E14810029D2C0 /* EditViewController.mm */; };
 		B18D58971A9E14810029D2C0 /* ListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58921A9E14810029D2C0 /* ListViewController.m */; };
 		B18D58991A9E15D10029D2C0 /* PythonTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58981A9E15D10029D2C0 /* PythonTextView.m */; };
 		B18D589B1A9E19A90029D2C0 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B18D589A1A9E19A90029D2C0 /* CoreText.framework */; };
@@ -613,7 +613,7 @@
 		B18D588E1A9E14810029D2C0 /* CYRTextStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRTextStorage.m; sourceTree = "<group>"; };
 		B18D588F1A9E14810029D2C0 /* CYRTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRTextView.m; sourceTree = "<group>"; };
 		B18D58901A9E14810029D2C0 /* CYRToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRToken.m; sourceTree = "<group>"; };
-		B18D58911A9E14810029D2C0 /* EditViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditViewController.m; sourceTree = "<group>"; };
+		B18D58911A9E14810029D2C0 /* EditViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = EditViewController.mm; sourceTree = "<group>"; };
 		B18D58921A9E14810029D2C0 /* ListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListViewController.m; sourceTree = "<group>"; };
 		B18D58981A9E15D10029D2C0 /* PythonTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PythonTextView.m; sourceTree = "<group>"; };
 		B18D589A1A9E19A90029D2C0 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
@@ -1229,6 +1229,8 @@
 		B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiParticleRenderer.cpp; sourceTree = "<group>"; };
 		B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiParticleLoader.cpp; path = ../../UiCure/Source/UiParticleLoader.cpp; sourceTree = SOURCE_ROOT; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
+		B1FFC8C81A9F52F6002368AA /* TrabantSim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrabantSim.h; sourceTree = "<group>"; };
+		B1FFC8C91A9F547E002368AA /* AnimatedApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AnimatedApp.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1546,17 +1548,19 @@
 				B18D588E1A9E14810029D2C0 /* CYRTextStorage.m */,
 				B18D588F1A9E14810029D2C0 /* CYRTextView.m */,
 				B18D58901A9E14810029D2C0 /* CYRToken.m */,
-				B18D58911A9E14810029D2C0 /* EditViewController.m */,
+				B18D58911A9E14810029D2C0 /* EditViewController.mm */,
 				B18D58921A9E14810029D2C0 /* ListViewController.m */,
 				B18D588C1A9E14680029D2C0 /* CYRLayoutManager.m */,
 				B18D399C1A76F54300D8F48B /* Light.cpp */,
 				B18D399D1A76F54300D8F48B /* Object.cpp */,
 				B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */,
+				B1FFC8C81A9F52F6002368AA /* TrabantSim.h */,
 				B1D37F15166AB3F100536CE5 /* TrabantSim.mm */,
 				B1D37F16166AB3F100536CE5 /* TrabantSimConsoleManager.cpp */,
 				B1D37F18166AB3F100536CE5 /* TrabantSimManager.cpp */,
 				B1D37F19166AB3F100536CE5 /* TrabantSimTicker.cpp */,
 				B1B489A313F9BE4A0047C78A /* Trabant_Prefix.pch */,
+				B1FFC8C91A9F547E002368AA /* AnimatedApp.h */,
 			);
 			name = Trabant;
 			path = ..;
@@ -2747,7 +2751,7 @@
 				B19A236413A127EC0051A61C /* collision_trimesh_box.cpp in Sources */,
 				B19A236513A127EC0051A61C /* collision_trimesh_ccylinder.cpp in Sources */,
 				B19A236613A127EC0051A61C /* collision_trimesh_disabled.cpp in Sources */,
-				B18D58961A9E14810029D2C0 /* EditViewController.m in Sources */,
+				B18D58961A9E14810029D2C0 /* EditViewController.mm in Sources */,
 				B19A236713A127EC0051A61C /* collision_trimesh_distance.cpp in Sources */,
 				B19A236813A127EC0051A61C /* collision_trimesh_gimpact.cpp in Sources */,
 				B19A236913A127EC0051A61C /* collision_trimesh_opcode.cpp in Sources */,

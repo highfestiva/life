@@ -8,7 +8,7 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import <OpenGLES/EAGL.h>
-#import "../../Lepra/Include/Canvas.h"
+#import "../../../Lepra/Include/Canvas.h"
 #import "../UiInput.h"
 
 // This class wraps the CAEAGLLayer from CoreAnimation into a convenient UIView subclass.

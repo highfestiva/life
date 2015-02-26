@@ -48,6 +48,10 @@ namespace TrabantSim
 
 
 
+void FoldSimulator();
+
+
+
 TrabantSimManager::JoystickData::JoystickData(int pJoystickId, float px, float py):
 	mJoystickId(pJoystickId),
 	x(px),
@@ -85,6 +89,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mLight(0),
 	mCameraTransform(quat(), vec3(0, -3, 0)),
 	mPauseButton(0),
+	mBackButton(0),
 	mIsPaused(false),
 	mIsControlled(false),
 	mWasControlled(false),
@@ -1147,14 +1152,21 @@ bool TrabantSimManager::Open()
 	bool lOk = Parent::Open();
 	if (lOk)
 	{
+#ifndef LEPRA_TOUCH
 		mPauseButton = new UiTbc::Button(GREEN_BUTTON, _T("Pause"));
+		mPauseButton->SetOnClick(TrabantSimManager, OnPauseButton);
+		UiTbc::Button* lButton = mPauseButton;
+#else
+		mBackButton = new UiTbc::Button(GREEN_BUTTON, _T("Back"));
+		mBackButton->SetOnClick(TrabantSimManager, OnBackButton);
+		UiTbc::Button* lButton = mBackButton;
+#endif
 		int x = mRenderArea.mLeft + 2;
 		int y = mRenderArea.mTop + 2;
-		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
-		mPauseButton->SetPreferredSize(70,30);
-		mPauseButton->SetRoundedRadius(4);
-		mPauseButton->SetVisible(true);
-		mPauseButton->SetOnClick(TrabantSimManager, OnPauseButton);
+		mUiManager->GetDesktopWindow()->AddChild(lButton, x, y);
+		lButton->SetPreferredSize(70,30);
+		lButton->SetRoundedRadius(4);
+		lButton->SetVisible(true);
 	}
 	if (lOk)
 	{
@@ -1168,6 +1180,8 @@ void TrabantSimManager::Close()
 	ScopeLock lLock(GetTickLock());
 	delete mPauseButton;
 	mPauseButton = 0;
+	delete mBackButton;
+	mBackButton = 0;
 	delete mMenu;
 	mMenu = 0;
 	if (mLight)
@@ -1290,13 +1304,19 @@ void TrabantSimManager::TickInput()
 	{
 		mSetCursorVisible = false;
 		mUiManager->GetInputManager()->SetCursorVisible(true);
-		mPauseButton->SetVisible(true);
+		if (mPauseButton)
+		{
+			mPauseButton->SetVisible(true);
+		}
 	}
 	if (mSetCursorInvisible)
 	{
 		mSetCursorInvisible = false;
 		mUiManager->GetInputManager()->SetCursorVisible(false);
-		mPauseButton->SetVisible(false);
+		if (mPauseButton)
+		{
+			mPauseButton->SetVisible(false);
+		}
 	}
 }
 
@@ -1464,6 +1484,15 @@ void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 	lLayouter.AddButton(lUnpauseButton, -1000, 1, 2, 0, 1, 1, true);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
+}
+
+void TrabantSimManager::OnBackButton(UiTbc::Button* pButton)
+{
+	if (pButton)
+	{
+		mMenu->OnTapSound(pButton);
+	}
+	FoldSimulator();
 }
 
 void TrabantSimManager::OnMenuAlternative(UiTbc::Button*)
@@ -1685,13 +1714,16 @@ bool TrabantSimManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	if (pKeyCode == UiLepra::InputManager::IN_KBD_ESC && mIsMouseControlled)
 	{
-		if (mPauseButton->IsVisible())
+		if (mPauseButton)
 		{
-			mSetCursorInvisible = true;
-		}
-		else
-		{
-			mSetCursorVisible = true;
+			if (mPauseButton->IsVisible())
+			{
+				mSetCursorInvisible = true;
+			}
+			else
+			{
+				mSetCursorVisible = true;
+			}
 		}
 	}
 
