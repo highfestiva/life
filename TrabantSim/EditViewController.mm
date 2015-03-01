@@ -9,6 +9,7 @@
 #include "../UiLepra/Include/Mac/RotatingController.h"
 #include "../UiLepra/Include/Mac/UiMacDisplayManager.h"
 #import "AnimatedApp.h"
+#include "PythonRunner.h"
 #import "PythonTextView.h"
 
 
@@ -86,6 +87,12 @@
 
 - (void)execute
 {
+	[self resignFirstResponder];
+
+	const wchar_t* lAppDir = (wchar_t*)[[[[NSBundle mainBundle] bundlePath] stringByAppendingString:@"/"] cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
+	const wchar_t* lFilename = (wchar_t*)[self.title cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
+	TrabantSim::PythonRunner::Run(lAppDir, lFilename);
+
 	UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
 	if (!window.rootViewController)
 	{
