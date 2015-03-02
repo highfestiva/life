@@ -296,6 +296,7 @@ bool TestString(const LogDecorator& pAccount)
 		deb_assert(lTestOk);
 	}
 
+#ifdef LEPRA_WINDOWS
 	if (lTestOk)
 	{
 		lContext = _T("JSON coder");
@@ -312,6 +313,7 @@ bool TestString(const LogDecorator& pAccount)
 			deb_assert(lTestOk);
 		}
 	}
+#endif // Win32
 
 	ReportTestResult(pAccount, _T("String"), lContext, lTestOk);
 	return (lTestOk);

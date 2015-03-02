@@ -33,9 +33,13 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
 #import "CYRLayoutManager.h"
 
+
 static CGFloat kMinimumGutterWidth = 30.f;
+
 
 @interface CYRLayoutManager ()
 
@@ -224,3 +228,6 @@ static CGFloat kMinimumGutterWidth = 30.f;
 }
 
 @end
+
+#endif // iOS
+

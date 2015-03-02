@@ -6,8 +6,6 @@
 
 #include "../Lepra/Include/LepraOS.h"
 #include "../UiLepra/Include/Mac/UiMacTouchHandler.h"
-#include "EditViewController.h"
-#include "ListViewController.h"
 #include "AnimatedApp.h"
 #include "TrabantSim.h"
 #include "TrabantSim.cxx"
@@ -17,6 +15,8 @@
 #ifdef LEPRA_IOS
 
 #import "../UiLepra/Include/Mac/EAGLView.h"
+#include "EditViewController.h"
+#include "ListViewController.h"
 
 @implementation AnimatedApp
 

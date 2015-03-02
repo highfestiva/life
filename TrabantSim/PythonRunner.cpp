@@ -11,7 +11,8 @@ extern "C" void Py_SetProgramName(wchar_t* pn);
 extern "C" void Py_Initialize(void);
 extern "C" void Py_Finalize(void);
 extern "C" int Py_IsInitialized(void);
-extern "C" int PyRun_SimpleFileEx(FILE *f, const char *p, int c);
+extern "C" void PySys_SetArgv(int argc, wchar_t** argv);
+extern "C" int PyRun_SimpleFileEx(FILE* f, const char* p, int c);
 
 
 
@@ -49,6 +50,8 @@ void PythonRunner::WorkerEntry(void*)
 	}
 	Py_SetProgramName((wchar_t*)mDirectory.c_str());
 	Py_Initialize();
+	wchar_t* wargv[2] = { (wchar_t*)mFilename.c_str(), (wchar_t*)L"addr=localhost" };
+	PySys_SetArgv(2, wargv);
 	PyRun_SimpleFileEx(fp, lFilename.c_str(), 1);
 	Py_Finalize();
 }

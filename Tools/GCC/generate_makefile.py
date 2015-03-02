@@ -337,8 +337,8 @@ def main():
         ["LifeClient",      "gfx_lib",    "Life/LifeClient/LifeClient10.vcxproj", "Life UiCure"],
         ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball10.vcxproj", "UiTbc"],
         ["KillCutie",       "gfx_bin",    "KillCutie/KillCutie10.vcxproj", "UiCure"],
-        ["Push",            "gfx_bin",    "Push/Push10.vcxproj", "LifeClient"],
-        ["HoverTank",       "gfx_bin",    "HoverTank/HoverTank10.vcxproj", "LifeClient"],
+        ["Push",            "gfx_bin",    "Push/Push10.vcxproj", "LifeClient LifeServer"],
+        ["HoverTank",       "gfx_bin",    "HoverTank/HoverTank10.vcxproj", "LifeClient LifeServer"],
         ["Downwash",        "gfx_bin",    "Downwash/Downwash10.vcxproj", "LifeClient"],
         ["Fire",            "gfx_bin",    "Fire/Fire10.vcxproj", "LifeClient"],
         ["Bound",           "gfx_bin",    "Bound/Bound10.vcxproj", "LifeClient"],
@@ -363,7 +363,7 @@ def main():
             drop_projects = []
             for project in projects:
                 if project[0].find(skip) >= 0:
-                    #print("Dropping project %s." % project)
+                    print("Dropping project %s." % str(project))
                     drop_projects += [project]
             [projects.remove(dp) for dp in drop_projects]
     #print(projects)

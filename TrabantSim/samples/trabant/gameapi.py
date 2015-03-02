@@ -282,14 +282,17 @@ def _opencom(addr, retries):
 		_run_local_sim(addr)
 		_tryconnect(addr, 10 if proc else retries)
 	if proc or sock:
-		import atexit
-		import signal
-		def ctrlc(s,f):
-			_closecom()
-			import sys
-			sys.exit(0)
-		[signal.signal(s,ctrlc) for s in (signal.SIGABRT,signal.SIGINT,signal.SIGTERM)]
-		atexit.register(_closecom)
+		try:
+			import atexit
+			import signal
+			def ctrlc(s,f):
+				_closecom()
+				import sys
+				sys.exit(0)
+			[signal.signal(s,ctrlc) for s in (signal.SIGABRT,signal.SIGINT,signal.SIGTERM)]
+			atexit.register(_closecom)
+		except ImportError:
+			pass
 	return sock != None
 
 def _closecom():
@@ -343,8 +346,8 @@ def _run_local_sim(addr):
 	global proc
 	if proc:
 		return
-	import os
-	if 'localhost' in addr and os.name in ('nt','darwin'):
+	import sys
+	if 'localhost' in addr and sys.platform in ('win32','darwin'):
 		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./')]:
 			import os.path
 			import subprocess

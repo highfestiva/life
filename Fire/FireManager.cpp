@@ -816,7 +816,7 @@ void FireManager::HandleShooting()
 	}
 
 	typedef UiLepra::Touch::DragManager::DragList DragList;
-	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
+	DragList lDragList = mUiManager->GetDragManager()->GetDragList();
 	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
 		if (x->mIsPress && (x->mFlags&1) == 0 && !mMenu->GetDialog())

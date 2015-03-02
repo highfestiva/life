@@ -32,15 +32,17 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
 #import "CYRTextStorage.h"
 #import "CYRToken.h"
 
-@interface CYRTextStorage ()
 
+@interface CYRTextStorage ()
 @property (nonatomic, strong) NSMutableAttributedString *attributedString;
 @property (nonatomic, strong) NSMutableDictionary *regularExpressionCache;
-
 @end
+
 
 @implementation CYRTextStorage
 
@@ -190,3 +192,5 @@
 }
 
 @end
+
+#endif // iOS

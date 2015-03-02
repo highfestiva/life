@@ -4,6 +4,8 @@
 
 
 
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
 #import "ListViewController.h"
 #import "EditViewController.h"
 
@@ -73,3 +75,5 @@
 }
 
 @end
+
+#endif // iOS

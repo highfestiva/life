@@ -3,11 +3,17 @@
 // Copyright (c) Pixel Doctrine
 
 
-#import "PythonTextView.h"
 
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
+#import "PythonTextView.h"
 #import <CoreText/CoreText.h>
 
+
+
 #define RGB(r,g,b) [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:1.0f]
+
+
 
 @implementation PythonTextView
 
@@ -151,3 +157,6 @@
 }
 
 @end
+
+#endif // iOS
+

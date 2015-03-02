@@ -34,21 +34,25 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
 #import "CYRTextView.h"
 #import "CYRLayoutManager.h"
 #import "CYRTextStorage.h"
 
+
 #define RGB(r,g,b) [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:1.0f]
+
 
 static void *CYRTextViewContext = &CYRTextViewContext;
 static const float kCursorVelocity = 1.0f/8.0f;
 
-@interface CYRTextView ()
 
+@interface CYRTextView ()
 @property (nonatomic, strong) CYRLayoutManager *lineNumberLayoutManager;
 @property (nonatomic, strong) CYRTextStorage *syntaxTextStorage;
-
 @end
+
 
 @implementation CYRTextView
 {
@@ -283,3 +287,5 @@ static const float kCursorVelocity = 1.0f/8.0f;
 }
 
 @end
+
+#endif // iOS

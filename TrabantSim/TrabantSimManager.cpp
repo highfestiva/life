@@ -112,7 +112,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	const strutil::strvec& args = SystemManager::GetArgumentVector();
 	if (!lAddress.Resolve(args[args.size()-1]))
 	{
-		lAddress.Resolve(_T(":2541"));
+		lAddress.Resolve(_T("0.0.0.0:2541"));
 	}
 	mLastRemoteAddress = lAddress;
 	mCommandSocket = new UdpSocket(lAddress, true);
