@@ -37,7 +37,7 @@
 	UIWindow* window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.window = window;	// Retain it!
 	ListViewController* listController = [ListViewController new];
-	listController.title = @"Trabant Prototypes";
+	listController.title = @"Prototypes";
 	UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:listController];
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{

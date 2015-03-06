@@ -33,9 +33,9 @@
 
 - (void)commonSetup
 {
-	_defaultFont = [UIFont systemFontOfSize:14.0f];
-	_boldFont = [UIFont boldSystemFontOfSize:14.0f];
-	_italicFont = [UIFont fontWithName:@"HelveticaNeue-Oblique" size:14.0f];
+	_defaultFont = [UIFont fontWithName:@"Courier" size:12.0f];
+	_boldFont = [UIFont fontWithName:@"Courier-Bold" size:12.0f];
+	_italicFont = [UIFont fontWithName:@"Courier-Oblique" size:12.0f ];
 
 	self.font = _defaultFont;
 	self.textColor = [UIColor blackColor];
@@ -44,10 +44,15 @@
 	[self addObserver:self forKeyPath:NSStringFromSelector(@selector(boldFont)) options:NSKeyValueObservingOptionNew context:0];
 	[self addObserver:self forKeyPath:NSStringFromSelector(@selector(italicFont)) options:NSKeyValueObservingOptionNew context:0];
 
-	if (_italicFont == nil && ([UIFontDescriptor class] != nil))
+	if (_boldFont == nil)
 	{
-		// This works around a bug in 7.0.3 where HelveticaNeue-Italic is not present as a UIFont option
-		_italicFont = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("HelveticaNeue-Italic"), 14.0f, NULL);
+		// This works around a bug in 7.0.3 where font is not present as a UIFont option
+		_boldFont = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("Courier New Bold"), 12.0f, NULL);
+	}
+	if (_italicFont == nil)
+	{
+		// This works around a bug in 7.0.3 where font is not present as a UIFont option
+		_italicFont = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("Courier New Italic"), 12.0f, NULL);
 	}
 
 	self.tokens = [self solverTokens];
@@ -100,21 +105,50 @@
 				 NSFontAttributeName : self.boldFont
 				 }],
 	   [CYRToken tokenWithName:@"double_quoted_string"
-			expression:@"\".*?(\"|$)"
+			expression:@"r*\".*?(\"|$)"
 			attributes:@{
 				 NSForegroundColorAttributeName : RGB(24, 110, 109)
 				 }],
 	   [CYRToken tokenWithName:@"string"
-			expression:@"'.*?('|$)"
+			expression:@"r*'.*?('|$)"
+			attributes:@{
+				 NSForegroundColorAttributeName : RGB(24, 110, 109)
+				 }],
+	   [CYRToken tokenWithName:@"block_double_quoted_string"
+			expression:@"r*\"\"\".*?\"\"\""
+			attributes:@{
+				 NSForegroundColorAttributeName : RGB(24, 110, 109)
+				 }],
+	   [CYRToken tokenWithName:@"block_string"
+			expression:@"r*'''.*?'''"
 			attributes:@{
 				 NSForegroundColorAttributeName : RGB(24, 110, 109)
 				 }],
 	   [CYRToken tokenWithName:@"comment"
-			expression:@"#.*"
+			expression:@".*?#.*?(\\n|$)"
+		      processRange:^(NSString* str, NSRange range) {
+			      // Unable to device a non-matching group regex for NSRegularExpression. Oh the suffering.
+			      NSArray* splits = [[str substringWithRange:range] componentsSeparatedByString:@"#"];
+			      int offset = 0;
+			      int singleqs = 0;
+			      int doubleqs = 0;
+			      for (NSString* split in splits) {
+				      singleqs += [split componentsSeparatedByString:@"'"].count-1;
+				      doubleqs += [split componentsSeparatedByString:@"\""].count-1;
+				      offset += [split length]+1;	// One more # down the line...
+				      if ((singleqs&1) == 0 && (doubleqs&1) == 0) {
+					      range.location += offset-1;
+					      range.length -= offset-1;
+					      return range;
+				      }
+			      }
+			      range.length = 0;
+			      return range;
+		      	}
 			attributes:@{
 				 NSForegroundColorAttributeName : RGB(31, 131, 0),
 				 NSFontAttributeName : self.italicFont
-				 }]
+				 }],
 	];
 	return solverTokens;
 }

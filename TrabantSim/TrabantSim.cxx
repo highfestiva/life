@@ -53,7 +53,8 @@ TrabantSim* TrabantSim::GetApp()
 TrabantSim::TrabantSim(const strutil::strvec& pArgumentList):
 	Parent(_T("TrabantSim"), pArgumentList),
 	mUiManager(0),
-	mIsActive(false)
+	mActiveCounter(-100),
+	mIsInTick(false)
 {
 	mApp = this;
 }
@@ -151,11 +152,34 @@ bool TrabantSim::MainLoop()
 #endif // !iOS/iOS
 }
 
+bool TrabantSim::Tick()
+{
+	if (mActiveCounter > 0)
+	{
+		mIsInTick = true;
+		const bool lOk = Parent::Tick();
+		mIsInTick = false;
+		if (mActiveCounter <= 0)
+		{
+			const int c = mActiveCounter;
+			mActiveCounter = 1;
+			Suspend();
+			mActiveCounter = c;
+		}
+		return lOk;
+	}
+	return true;
+}
+
 
 
 void TrabantSim::Suspend()
 {
-	if (!mIsActive)
+	if (--mActiveCounter != 0)
+	{
+		return;
+	}
+	if (mIsInTick)
 	{
 		return;
 	}
@@ -169,7 +193,7 @@ void TrabantSim::Suspend()
 
 void TrabantSim::Resume()
 {
-	if (!mIsActive)
+	if (++mActiveCounter != 1)
 	{
 		return;
 	}
@@ -185,10 +209,10 @@ void TrabantSim::FoldSimulator()
 {
 #ifdef LEPRA_IOS
 	Suspend();
-	mIsActive = false;
 	UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
 	[window setHidden:YES];
 	[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
+	[TrabantSim::TrabantSim::mApp->mAnimatedApp.window makeKeyAndVisible];
 #endif // iOS
 }
 

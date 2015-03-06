@@ -4,6 +4,7 @@
 
 
 #include "PythonRunner.h"
+#import "AnimatedApp.h"
 
 
 
@@ -50,10 +51,13 @@ void PythonRunner::WorkerEntry(void*)
 	}
 	Py_SetProgramName((wchar_t*)mDirectory.c_str());
 	Py_Initialize();
-	wchar_t* wargv[2] = { (wchar_t*)mFilename.c_str(), (wchar_t*)L"addr=localhost" };
-	PySys_SetArgv(2, wargv);
+	wchar_t* wargv[3] = { (wchar_t*)mFilename.c_str(), (wchar_t*)L"addr=localhost", (wchar_t*)L"osname=ios" };
+	PySys_SetArgv(3, wargv);
 	PyRun_SimpleFileEx(fp, lFilename.c_str(), 1);
 	Py_Finalize();
+
+	// No use showing simulator still frame?
+	TrabantSim::mApp->FoldSimulator();
 }
 
 

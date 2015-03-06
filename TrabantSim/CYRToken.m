@@ -49,6 +49,18 @@
     return textAttribute;
 }
 
++ (instancetype)tokenWithName:(NSString*)name expression:(NSString*)expression processRange:(NSRange (^)(NSString* str,NSRange range))process attributes:(NSDictionary*)attributes
+{
+	CYRToken *textAttribute = [CYRToken new];
+
+	textAttribute.name = name;
+	textAttribute.expression = expression;
+	textAttribute.processRange = process;
+	textAttribute.attributes = attributes;
+
+	return textAttribute;
+}
+
 @end
 
 #endif // iOS

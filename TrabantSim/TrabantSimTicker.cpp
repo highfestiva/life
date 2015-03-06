@@ -137,16 +137,10 @@ bool TrabantSimTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
-		if (mUiManager->GetCanvas()->GetHeight() < 500)
-		{
-			double lFontHeight;
-			v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
-			if (lFontHeight > 29.0)
-			{
-				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/500.0;
-				v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
-			}
-		}
+		double lFontHeight;
+		v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+		lFontHeight *= mUiManager->GetCanvas()->GetHeight()/500.0;
+		v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 		lOk = mUiManager->OpenRest();
 	}
 	if (lOk)

@@ -1166,7 +1166,11 @@ void ResourceManager::ThreadLoaderLoop()
 	{
 		LoadSingleResource();
 		// Smooth out loads, so all the heavy lifting won't end up in a single frame.
-		size_t lCount = mRequestLoadList.GetCount();
+		size_t lCount = 0;
+		{
+			ScopeLock lLock(&mThreadLock);
+			lCount = mRequestLoadList.GetCount();
+		}
 		if (lCount > 0 && lCount < 50)
 		{
 			Thread::Sleep(mLoadIntermission);

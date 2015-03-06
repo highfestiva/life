@@ -87,6 +87,10 @@ void GameClientSlaveManager::Suspend()
 {
 }
 
+void GameClientSlaveManager::Resume()
+{
+}
+
 void GameClientSlaveManager::LoadSettings()
 {
 	str lExternalServerAddress;

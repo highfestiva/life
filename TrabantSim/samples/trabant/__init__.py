@@ -188,10 +188,14 @@ def trabant_init(**kwargs):
 			pass
 	config.update(kwargs)
 	global _joysticks,_timers,_has_opened,_accelerometer_calibration
-	_joysticks,_timers,_has_opened = {},{},True
+	_joysticks,_timers,_has_opened,osname = {},{},True,sys.platform
+	if 'osname' in config:
+		osname = config['osname']
+		del config['osname']
 	gameapi.init(**config)
 	gameapi.set('Game.AllowPowerDown', not interactive)
-	gameapi.sock.settimeout(None if interactive else 5*60)
+	if osname not in ['ios']:
+		gameapi.sock.settimeout(None if interactive else 5*60)
 	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
 	loop(delay=0)	# Resets taps+collisions.
 	_accelerometer_calibration = accelerometer()

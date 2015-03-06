@@ -36,6 +36,6 @@ class socket:
 			if not r: raise _socket.error('timeout')
 		data,hostport = self.s.recvfrom(l)
 		if hostport == self.hostport:
-			if data == b'disconnected\n':
+			if data == b'disconnect\n':
 				raise _socket.error('disconnected')
 			return data

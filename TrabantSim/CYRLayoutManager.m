@@ -38,7 +38,7 @@
 #import "CYRLayoutManager.h"
 
 
-static CGFloat kMinimumGutterWidth = 30.f;
+static CGFloat kMinimumGutterWidth = 18.f;
 
 
 @interface CYRLayoutManager ()
@@ -84,7 +84,7 @@ static CGFloat kMinimumGutterWidth = 30.f;
     self.gutterWidth = kMinimumGutterWidth;
     self.selectedRange = NSMakeRange(0, 0);
     
-    self.lineAreaInset = UIEdgeInsetsMake(0, 10, 0, 4);
+    self.lineAreaInset = UIEdgeInsetsMake(0, 2, 0, 1);
     self.lineNumberColor = [UIColor grayColor];
     self.lineNumberFont = [UIFont systemFontOfSize:10.0f];
     self.selectedLineNumberColor = [UIColor colorWithWhite:0.9 alpha:1];
@@ -102,7 +102,7 @@ static CGFloat kMinimumGutterWidth = 30.f;
     CGRect endRect = [self lineFragmentRectForGlyphAtIndex:range.location + range.length - 1 effectiveRange:NULL];
     
     CGRect paragraphRectForRange = CGRectUnion(startRect, endRect);
-    paragraphRectForRange = CGRectOffset(paragraphRectForRange, _gutterWidth, 8);
+    paragraphRectForRange = CGRectOffset(paragraphRectForRange, _gutterWidth, 1);
     
     return paragraphRectForRange;
 }
@@ -207,7 +207,7 @@ static CGFloat kMinimumGutterWidth = 30.f;
                                        if (showCursorRect)
                                        {
                                            CGContextRef context = UIGraphicsGetCurrentContext();
-                                           CGRect cursorRect = CGRectMake(0, usedRect.origin.y + 8, _gutterWidth, usedRect.size.height);
+                                           CGRect cursorRect = CGRectMake(0, usedRect.origin.y + 1, _gutterWidth, usedRect.size.height);
                                            
                                            CGContextSetFillColorWithColor(context, _selectedLineNumberColor.CGColor);
                                            CGContextFillRect(context, cursorRect);

@@ -14,7 +14,8 @@
 @interface ListViewController () <UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong) UITableView* tableView;
-@property (nonatomic, strong) NSArray* files;
+@property (nonatomic, strong) NSMutableArray* files;
+@property (nonatomic, strong) NSMutableArray* loc;
 
 @end
 
@@ -40,7 +41,29 @@
 
 	[self.view addSubview:tableView];
 
-	self.files = [NSArray arrayWithObjects:@"asteroids.py", @"breakout.py", @"descent.py", @"minecraft.py", @"quake.py", @"space_invaders.py", @"tetris.py", @"terminal_velocity.py", nil];
+	self.files = [NSMutableArray new];
+	self.loc = [NSMutableArray new];
+	NSDirectoryEnumerator* dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:[[NSBundle mainBundle] bundlePath]];
+	NSString* filename;
+	while ((filename = [dirEnum nextObject])) {
+		if ([filename hasSuffix:@".py"]) {
+			[self.files addObject:filename];
+
+			NSString* path = [[NSBundle mainBundle] pathForResource:filename ofType:nil];
+			NSString* code = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+			int loc = 0;
+			NSCharacterSet* whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+			NSArray* lines = [code componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]];
+			for (NSString* line in lines) {
+				NSString* strippedLine = [[line componentsSeparatedByCharactersInSet:whitespace] componentsJoinedByString:@""];
+				if (![strippedLine hasPrefix:@"#"] && [strippedLine length] > 0) {
+					++loc;
+				}
+			}
+			[self.loc addObject:[NSString stringWithFormat:@"%i loc",loc]];
+		}
+		[dirEnum skipDescendents];
+	}
 }
 
 - (void) viewWillAppear:(BOOL)animated {
@@ -60,13 +83,14 @@
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:identifier];
 	}
 	cell.textLabel.text = [self.files objectAtIndex:indexPath.row];
-	cell.detailTextLabel.text = @"32 LoC";
+	cell.detailTextLabel.text = [self.loc objectAtIndex:indexPath.row];
 	return cell;
 }
 
 -(void) tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-	EditViewController* editController = [EditViewController new];
+	EditViewController* editController = [EditViewController alloc];
 	editController.title = [self.files objectAtIndex:indexPath.row];
+	editController = [editController init];
 	[self.navigationController pushViewController:editController animated:YES];
 }
 

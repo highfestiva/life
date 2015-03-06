@@ -111,6 +111,9 @@ public:
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~TrabantSimManager();
 
+	virtual void Resume();
+	virtual void Suspend();
+
 	void UserReset();
 	int CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic);
 	void CreateClones(IntList& pCreatedObjectIds, int pOriginalId, const XformList& pPlacements, ObjectMaterial pMaterial, bool pIsStatic);
@@ -214,6 +217,7 @@ protected:
 	bool mIsControlled;
 	bool mWasControlled;
 	bool mIsControlTimeout;
+	SocketAddress mLocalAddress;
 	SocketAddress mLastRemoteAddress;
 	UdpSocket* mCommandSocket;
 	MemberThread<TrabantSimManager>* mCommandThread;

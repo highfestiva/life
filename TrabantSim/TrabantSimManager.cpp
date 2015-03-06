@@ -110,23 +110,13 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 
 	SocketAddress lAddress;
 	const strutil::strvec& args = SystemManager::GetArgumentVector();
-	if (!lAddress.Resolve(args[args.size()-1]))
+	if (args.size() <= 1 || !lAddress.Resolve(args[args.size()-1]))
 	{
 		lAddress.Resolve(_T("0.0.0.0:2541"));
 	}
+	mLocalAddress = lAddress;
 	mLastRemoteAddress = lAddress;
-	mCommandSocket = new UdpSocket(lAddress, true);
-	if (mCommandSocket->IsOpen())
-	{
-		mCommandThread = new MemberThread<TrabantSimManager>("CommandRecvThread");
-		mCommandThread->Start(this, &TrabantSimManager::CommandLoop);
-		mLog.Headlinef(_T("Command server listening on %s."), lAddress.GetAsString().c_str());
-	}
-	else
-	{
-		mLog.Headlinef(_T("Could not open server on %s. Shutting down."), lAddress.GetAsString().c_str());
-		SystemManager::AddQuitRequest(1);
-	}
+	Resume();
 }
 
 TrabantSimManager::~TrabantSimManager()
@@ -137,6 +127,46 @@ TrabantSimManager::~TrabantSimManager()
 
 	delete mCollisionSoundManager;
 	mCollisionSoundManager = 0;
+}
+
+
+
+void TrabantSimManager::Suspend()
+{
+	mIsControlTimeout = false;
+	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+
+	if (mCommandSocket && mCommandSocket->IsOpen())
+	{
+		if (mLastRemoteAddress != mLocalAddress)
+		{
+			mCommandSocket->SendTo((const unsigned char*)"disconnect\n", 11, mLastRemoteAddress);
+		}
+	}
+}
+
+void TrabantSimManager::Resume()
+{
+	mIsControlTimeout = false;
+	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+
+	if (mCommandSocket)
+	{
+		return;
+	}
+
+	mCommandSocket = new UdpSocket(mLocalAddress, true);
+	if (mCommandSocket->IsOpen())
+	{
+		mCommandThread = new MemberThread<TrabantSimManager>("CommandRecvThread");
+		mCommandThread->Start(this, &TrabantSimManager::CommandLoop);
+		mLog.Headlinef(_T("Command server listening on %s."), mLocalAddress.GetAsString().c_str());
+	}
+	else
+	{
+		mLog.Headlinef(_T("Could not open server on %s. Shutting down."), mLocalAddress.GetAsString().c_str());
+		SystemManager::AddQuitRequest(1);
+	}
 }
 
 
@@ -206,7 +236,7 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 		v_get(lFriction, =(float), GetVariableScope(), RTVAR_PHYSICS_FRICTION, 0.5);
 		v_get(lBounce, =(float), GetVariableScope(), RTVAR_PHYSICS_BOUNCE, 0.2);
 
-		lPhysics->SetBoneCount(pPhysObjects.size());
+		lPhysics->SetBoneCount((int)pPhysObjects.size());
 		PhysObjectArray::const_iterator x = pPhysObjects.begin();
 		int y = 0;
 		Tbc::ChunkyBoneGeometry* lParent = 0;
@@ -264,8 +294,8 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 				}
 				Tbc::ChunkyBoneMesh* lBone = new Tbc::ChunkyBoneMesh(lBoneData);
 				lBone->SetMaterial(_T("rubber"));
-				lBone->mVertexCount = lMesh->mVertices.size()/3;
-				lBone->mTriangleCount = lMesh->mIndices.size()/3;
+				lBone->mVertexCount = (int)lMesh->mVertices.size()/3;
+				lBone->mTriangleCount = (int)lMesh->mIndices.size()/3;
 				lBone->mVertices = new float[lBone->mVertexCount*3];
 				lBone->mIndices = new uint32[lBone->mTriangleCount*3];
 				for (unsigned x = 0; x < lBone->mVertexCount; ++x)
@@ -594,7 +624,7 @@ int TrabantSimManager::CreateJoystick(float x, float y, bool pIsSloppy)
 	lStick->SetUniqueIdentifier(lName);
 	mTouchstickList.push_back(TouchstickInfo(lStick, x, y, -90, pIsSloppy));
 	mTouchstickTimer.ReduceTimeDiff(-10);
-	return mTouchstickList.size()-1;
+	return (int)mTouchstickList.size()-1;
 }
 
 TrabantSimManager::JoystickDataList TrabantSimManager::GetJoystickData() const
@@ -1092,7 +1122,7 @@ void TrabantSimManager::CommandLoop()
 		}
 		GetConsoleManager()->ExecuteCommand(lCommand);
 		const astr lResponse = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
-		if (mCommandSocket->SendTo((const uint8*)lResponse.c_str(), lResponse.length(), mLastRemoteAddress) != (int)lResponse.length())
+		if (mCommandSocket->SendTo((const uint8*)lResponse.c_str(), (int)lResponse.length(), mLastRemoteAddress) != (int)lResponse.length())
 		{
 			mIsControlled = false;
 		}
@@ -1164,7 +1194,9 @@ bool TrabantSimManager::Open()
 		int x = mRenderArea.mLeft + 2;
 		int y = mRenderArea.mTop + 2;
 		mUiManager->GetDesktopWindow()->AddChild(lButton, x, y);
-		lButton->SetPreferredSize(70,30);
+		double lFontHeight;
+		v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+		lButton->SetPreferredSize(lFontHeight*7/3,lFontHeight);
 		lButton->SetRoundedRadius(4);
 		lButton->SetVisible(true);
 	}

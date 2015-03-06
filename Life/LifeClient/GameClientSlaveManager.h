@@ -50,6 +50,7 @@ public:
 	virtual ~GameClientSlaveManager();
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
 	virtual void Suspend();
+	virtual void Resume();
 	virtual void LoadSettings();
 	virtual void SaveSettings() = 0;
 	virtual void RefreshOptions();

@@ -136,7 +136,6 @@ void GameClientMasterTicker::Suspend()
 	Parent::Suspend();
 
 	ScopeLock lLock(&mLock);
-
 	SlaveArray::iterator x;
 	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
@@ -155,6 +154,17 @@ void GameClientMasterTicker::Suspend()
 void GameClientMasterTicker::Resume()
 {
 	Parent::Resume();
+
+	ScopeLock lLock(&mLock);
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->Resume();
+		}
+	}
 
 	Cure::RuntimeVariableScope* lScope = UiCure::GetSettings();
 	lScope = mSlaveArray[0]? mSlaveArray[0]->GetVariableScope() : lScope;

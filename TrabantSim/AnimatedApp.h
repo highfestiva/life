@@ -78,6 +78,7 @@ public:
 	virtual void Init();
 	virtual void Destroy();
 	virtual bool MainLoop();
+	virtual bool Tick();
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -93,7 +94,8 @@ public:
 #ifdef LEPRA_TOUCH
 	AnimatedApp* mAnimatedApp;
 #endif // Touch
-	bool mIsActive;
+	int mActiveCounter;
+	bool mIsInTick;
 
 	UiCure::GameUiManager* mUiManager;
 	UiLepra::Touch::DragManager mDragManager;

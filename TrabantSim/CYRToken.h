@@ -38,8 +38,10 @@
 
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *expression;
+@property (nonatomic, strong) NSRange (^processRange)(NSString*,NSRange);
 @property (nonatomic, strong) NSDictionary *attributes;
 
 + (instancetype)tokenWithName:(NSString *)name expression:(NSString *)expression attributes:(NSDictionary *)attributes;
++ (instancetype)tokenWithName:(NSString*)name expression:(NSString*)expression processRange:(NSRange (^)(NSString* str,NSRange range))process attributes:(NSDictionary*)attributes;
 
 @end

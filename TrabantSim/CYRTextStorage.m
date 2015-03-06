@@ -143,6 +143,7 @@
     }
     
     NSRange paragaphRange = [self.string paragraphRangeForRange: self.editedRange];
+    NSRange fullRange = NSMakeRange(0, [self.string length]);
 
     // Reset the text attributes
     NSDictionary *attributes =
@@ -155,14 +156,18 @@
     for (CYRToken *attribute in self.tokens)
     {
         NSRegularExpression *regex = [self expressionForDefinition:attribute.name];
+	NSRange scopeRange = [attribute.name hasPrefix:@"block_"]? fullRange : paragaphRange;
         
-        [regex enumerateMatchesInString:self.string options:0 range:paragaphRange
-                             usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
-                                 
-                                 [attribute.attributes enumerateKeysAndObjectsUsingBlock:^(NSString *attributeName, id attributeValue, BOOL *stop) {
-                                     [self addAttribute:attributeName value:attributeValue range:result.range];
-                                 }];
-                             }];
+        [regex enumerateMatchesInString:self.string options:0 range:scopeRange
+		usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
+			NSRange range = result.range;
+			if (attribute.processRange) {
+				range = attribute.processRange(self.string, range);
+			}
+			[attribute.attributes enumerateKeysAndObjectsUsingBlock:^(NSString *attributeName, id attributeValue, BOOL *stop) {
+				[self addAttribute:attributeName value:attributeValue range:range];
+			}];
+		}];
     }
 }
 
@@ -182,9 +187,9 @@
     
     if (!expression)
     {
+	NSRegularExpressionOptions options = [attribute.name hasPrefix:@"block_"]? NSRegularExpressionDotMatchesLineSeparators : 0;
         expression = [NSRegularExpression regularExpressionWithPattern:attribute.expression
-                                                               options:NSRegularExpressionCaseInsensitive error:nil];
-        
+                                                               options:NSRegularExpressionCaseInsensitive|options error:nil];
         [self.regularExpressionCache setObject:expression forKey:definition];
     }
     

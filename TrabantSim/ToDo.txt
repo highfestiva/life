@@ -42,16 +42,23 @@
 +Fix bug: sometimes won't TCP socket connect! Reproduce how?
 +Build and run on Mac.
 +Test accelerometer controls on iOS.
++Capsules.
++Quake.
++Descent. Relative accelerometer for pitch.
++Add back button on iOS.
++iOS Editor: fix uitextview frame when user inserts text... Keep a margin!
 
+iOS: add "save" on back button.
+iOS: fix bug where .py file can't be opened by interpreter all the time!
+iOS: fix so that starting from a computer works even if simulator is not active.
+Fix cam/light angle on asteroids? Don't know what's causing the strange look.
+Fix screen bounds on iPhone 6.
 Fix fog on iOS.
 Fix iOS screen orientation from all four angles. ViewController won't rotate. Including tap position from all four positions.
-Fix pause button (icon). Add back button.
+Fix pause button (icon).
 Create icons for all three platforms. Create splash screens for iOS.
 Build mobile Python IDE.
-Capsules.
 City!
-Quake.
-Descent. Relative accelerometer for pitch.
 Rolling ball, avoiding holes. Using accelerometer.
 Tower defence game.
 Stunt car racer.
