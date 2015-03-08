@@ -11,29 +11,14 @@
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
 		35128A4D147262150006467C /* UiSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A4C147262150006467C /* UiSound.cpp */; };
+		B1021FA91AAA669100E05260 /* CreateNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B1021FA81AAA669100E05260 /* CreateNewViewController.m */; };
 		B1049DF41AAA0BDA00E34D85 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = B1049DF31AAA0BDA00E34D85 /* LaunchScreen.xib */; };
-		B108F9F61AA3589200523BFA /* asteroids.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9D21AA3589200523BFA /* asteroids.py */; };
-		B108F9F71AA3589200523BFA /* breakout.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9D31AA3589200523BFA /* breakout.py */; };
-		B108F9F81AA3589200523BFA /* car.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9D41AA3589200523BFA /* car.py */; };
-		B108F9F91AA3589200523BFA /* descent.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9D51AA3589200523BFA /* descent.py */; };
-		B108F9FA1AA3589200523BFA /* flappy_ufo.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9D61AA3589200523BFA /* flappy_ufo.py */; };
-		B108F9FB1AA3589200523BFA /* geometry_test.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9D71AA3589200523BFA /* geometry_test.py */; };
-		B108F9FC1AA3589200523BFA /* heli.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9D81AA3589200523BFA /* heli.py */; };
-		B108F9FD1AA3589200523BFA /* minecraft.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9D91AA3589200523BFA /* minecraft.py */; };
-		B108F9FE1AA3589200523BFA /* pacman.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9DA1AA3589200523BFA /* pacman.py */; };
-		B108F9FF1AA3589200523BFA /* physics.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9DB1AA3589200523BFA /* physics.py */; };
-		B108FA001AA3589200523BFA /* planets.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9DC1AA3589200523BFA /* planets.py */; };
-		B108FA011AA3589200523BFA /* quake.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9DD1AA3589200523BFA /* quake.py */; };
-		B108FA021AA3589200523BFA /* snake.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9DE1AA3589200523BFA /* snake.py */; };
-		B108FA031AA3589200523BFA /* space_invaders.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9DF1AA3589200523BFA /* space_invaders.py */; };
-		B108FA041AA3589200523BFA /* squash.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9E01AA3589200523BFA /* squash.py */; };
-		B108FA051AA3589200523BFA /* terminal_velocity.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9E11AA3589200523BFA /* terminal_velocity.py */; };
-		B108FA061AA3589200523BFA /* tetris.py in Resources */ = {isa = PBXBuildFile; fileRef = B108F9E21AA3589200523BFA /* tetris.py */; };
 		B110A04A14AB36A7007A84E4 /* ContextPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A04914AB36A7007A84E4 /* ContextPath.cpp */; };
 		B110A05214AB3720007A84E4 /* xmplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05114AB3720007A84E4 /* xmplay.cpp */; };
 		B110A05514AB374E007A84E4 /* UiIconButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05314AB374E007A84E4 /* UiIconButton.cpp */; };
 		B110A05614AB374E007A84E4 /* UiMusicPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */; };
 		B110A05814AB3795007A84E4 /* UiChibiXmAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */; };
+		B1148AE11AAB328500B313B6 /* BackButtonHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = B1148AE01AAB328500B313B6 /* BackButtonHandler.m */; };
 		B11732CA16DD51DD00C2DA5B /* UiDynamicRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B11732C916DD51DD00C2DA5B /* UiDynamicRenderer.cpp */; };
 		B11E4155186613CB00C25073 /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B11E4154186613CB00C25073 /* iAd.framework */; };
 		B11E415718662E3B00C25073 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B11E415618662E3B00C25073 /* StoreKit.framework */; };
@@ -556,29 +541,16 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		35128A4C147262150006467C /* UiSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSound.cpp; path = ../../UiCure/Source/UiSound.cpp; sourceTree = "<group>"; };
+		B1021FA71AAA669100E05260 /* CreateNewViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateNewViewController.h; sourceTree = "<group>"; };
+		B1021FA81AAA669100E05260 /* CreateNewViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateNewViewController.m; sourceTree = "<group>"; };
 		B1049DF31AAA0BDA00E34D85 /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LaunchScreen.xib; sourceTree = "<group>"; };
-		B108F9D21AA3589200523BFA /* asteroids.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = asteroids.py; sourceTree = "<group>"; };
-		B108F9D31AA3589200523BFA /* breakout.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = breakout.py; sourceTree = "<group>"; };
-		B108F9D41AA3589200523BFA /* car.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = car.py; sourceTree = "<group>"; };
-		B108F9D51AA3589200523BFA /* descent.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = descent.py; sourceTree = "<group>"; };
-		B108F9D61AA3589200523BFA /* flappy_ufo.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = flappy_ufo.py; sourceTree = "<group>"; };
-		B108F9D71AA3589200523BFA /* geometry_test.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = geometry_test.py; sourceTree = "<group>"; };
-		B108F9D81AA3589200523BFA /* heli.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = heli.py; sourceTree = "<group>"; };
-		B108F9D91AA3589200523BFA /* minecraft.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = minecraft.py; sourceTree = "<group>"; };
-		B108F9DA1AA3589200523BFA /* pacman.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = pacman.py; sourceTree = "<group>"; };
-		B108F9DB1AA3589200523BFA /* physics.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = physics.py; sourceTree = "<group>"; };
-		B108F9DC1AA3589200523BFA /* planets.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = planets.py; sourceTree = "<group>"; };
-		B108F9DD1AA3589200523BFA /* quake.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = quake.py; sourceTree = "<group>"; };
-		B108F9DE1AA3589200523BFA /* snake.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = snake.py; sourceTree = "<group>"; };
-		B108F9DF1AA3589200523BFA /* space_invaders.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = space_invaders.py; sourceTree = "<group>"; };
-		B108F9E01AA3589200523BFA /* squash.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = squash.py; sourceTree = "<group>"; };
-		B108F9E11AA3589200523BFA /* terminal_velocity.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = terminal_velocity.py; sourceTree = "<group>"; };
-		B108F9E21AA3589200523BFA /* tetris.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = tetris.py; sourceTree = "<group>"; };
 		B110A04914AB36A7007A84E4 /* ContextPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextPath.cpp; path = ../../Cure/Source/ContextPath.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05114AB3720007A84E4 /* xmplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmplay.cpp; path = ChibiXM/xmplay.cpp; sourceTree = "<group>"; };
 		B110A05314AB374E007A84E4 /* UiIconButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiIconButton.cpp; path = ../../UiCure/Source/UiIconButton.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05414AB374E007A84E4 /* UiMusicPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiMusicPlayer.cpp; path = ../../UiCure/Source/UiMusicPlayer.cpp; sourceTree = SOURCE_ROOT; };
 		B110A05714AB3795007A84E4 /* UiChibiXmAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiChibiXmAlStream.cpp; sourceTree = "<group>"; };
+		B1148ADF1AAB328500B313B6 /* BackButtonHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BackButtonHandler.h; sourceTree = "<group>"; };
+		B1148AE01AAB328500B313B6 /* BackButtonHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BackButtonHandler.m; sourceTree = "<group>"; };
 		B11732C916DD51DD00C2DA5B /* UiDynamicRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiDynamicRenderer.cpp; sourceTree = "<group>"; };
 		B11E4154186613CB00C25073 /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
 		B11E415618662E3B00C25073 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
@@ -1320,7 +1292,6 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				B1049DF31AAA0BDA00E34D85 /* LaunchScreen.xib */,
 				B1A1E04913AA970E0097B8D0 /* Resources */,
 				28EEBF621118D79A00187D67 /* Shared */,
 				29B97315FDCFA39411CA2CEA /* Sources */,
@@ -1366,31 +1337,6 @@
 				B19A29E113A13B9B0051A61C /* QuartzCore.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		B108F9D01AA3589200523BFA /* samples */ = {
-			isa = PBXGroup;
-			children = (
-				B108F9D21AA3589200523BFA /* asteroids.py */,
-				B108F9D31AA3589200523BFA /* breakout.py */,
-				B108F9D41AA3589200523BFA /* car.py */,
-				B108F9D51AA3589200523BFA /* descent.py */,
-				B108F9D61AA3589200523BFA /* flappy_ufo.py */,
-				B108F9D71AA3589200523BFA /* geometry_test.py */,
-				B108F9D81AA3589200523BFA /* heli.py */,
-				B108F9D91AA3589200523BFA /* minecraft.py */,
-				B108F9DA1AA3589200523BFA /* pacman.py */,
-				B108F9DB1AA3589200523BFA /* physics.py */,
-				B108F9DC1AA3589200523BFA /* planets.py */,
-				B108F9DD1AA3589200523BFA /* quake.py */,
-				B108F9DE1AA3589200523BFA /* snake.py */,
-				B108F9DF1AA3589200523BFA /* space_invaders.py */,
-				B108F9E01AA3589200523BFA /* squash.py */,
-				B108F9E11AA3589200523BFA /* terminal_velocity.py */,
-				B108F9E21AA3589200523BFA /* tetris.py */,
-			);
-			name = samples;
-			path = ../samples;
 			sourceTree = "<group>";
 		};
 		B110A04F14AB370D007A84E4 /* ChibiXM */ = {
@@ -1618,6 +1564,10 @@
 		B19A146913A122DE0051A61C /* Trabant */ = {
 			isa = PBXGroup;
 			children = (
+				B1148ADF1AAB328500B313B6 /* BackButtonHandler.h */,
+				B1148AE01AAB328500B313B6 /* BackButtonHandler.m */,
+				B1021FA71AAA669100E05260 /* CreateNewViewController.h */,
+				B1021FA81AAA669100E05260 /* CreateNewViewController.m */,
 				B18D58981A9E15D10029D2C0 /* PythonTextView.m */,
 				B18D588E1A9E14810029D2C0 /* CYRTextStorage.m */,
 				B18D588F1A9E14810029D2C0 /* CYRTextView.m */,
@@ -2426,7 +2376,7 @@
 		B1A1E04913AA970E0097B8D0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				B108F9D01AA3589200523BFA /* samples */,
+				B1049DF31AAA0BDA00E34D85 /* LaunchScreen.xib */,
 				B19D7FED1AA0BDE700B02A36 /* pylib */,
 				B1FB291E1450C8A600F1C762 /* Data */,
 				B196560713BE6AB5006A1422 /* Icon.png */,
@@ -2563,31 +2513,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B108F9FF1AA3589200523BFA /* physics.py in Resources */,
-				B108F9F81AA3589200523BFA /* car.py in Resources */,
 				B196560B13BE6AB5006A1422 /* Icon.png in Resources */,
-				B108F9FB1AA3589200523BFA /* geometry_test.py in Resources */,
-				B108FA041AA3589200523BFA /* squash.py in Resources */,
-				B108FA001AA3589200523BFA /* planets.py in Resources */,
-				B108FA011AA3589200523BFA /* quake.py in Resources */,
-				B108FA061AA3589200523BFA /* tetris.py in Resources */,
-				B108FA031AA3589200523BFA /* space_invaders.py in Resources */,
-				B108F9F91AA3589200523BFA /* descent.py in Resources */,
 				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
-				B108F9FC1AA3589200523BFA /* heli.py in Resources */,
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
-				B108F9FD1AA3589200523BFA /* minecraft.py in Resources */,
 				B19D7FEE1AA0BDE700B02A36 /* pylib in Resources */,
-				B108F9F61AA3589200523BFA /* asteroids.py in Resources */,
 				B1049DF41AAA0BDA00E34D85 /* LaunchScreen.xib in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
-				B108F9F71AA3589200523BFA /* breakout.py in Resources */,
-				B108F9FE1AA3589200523BFA /* pacman.py in Resources */,
-				B108FA021AA3589200523BFA /* snake.py in Resources */,
 				B1C4124018035E90007D64F7 /* Icon-76.png in Resources */,
 				B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */,
-				B108F9FA1AA3589200523BFA /* flappy_ufo.py in Resources */,
-				B108FA051AA3589200523BFA /* terminal_velocity.py in Resources */,
 				B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */,
 				B153FDC4181DF12B002D3C5D /* Icon-72@2x.png in Resources */,
 			);
@@ -2915,6 +2848,7 @@
 				B19A23AB13A127EC0051A61C /* IceMatrix4x4.cpp in Sources */,
 				B19A23AC13A127EC0051A61C /* IceOBB.cpp in Sources */,
 				B18D58941A9E14810029D2C0 /* CYRTextView.m in Sources */,
+				B1021FA91AAA669100E05260 /* CreateNewViewController.m in Sources */,
 				B19A23AD13A127EC0051A61C /* IcePlane.cpp in Sources */,
 				B19A23AE13A127EC0051A61C /* IcePoint.cpp in Sources */,
 				B19A23AF13A127EC0051A61C /* IceRandom.cpp in Sources */,
@@ -3072,6 +3006,7 @@
 				B13DA598173ED81600A73400 /* Spawner.cpp in Sources */,
 				B13DA599173ED81600A73400 /* StuntTrigger.cpp in Sources */,
 				B13DA5C9173EDA9600A73400 /* BulletTime.cpp in Sources */,
+				B1148AE11AAB328500B313B6 /* BackButtonHandler.m in Sources */,
 				B13DA5CA173EDA9600A73400 /* Client.cpp in Sources */,
 				B13DA5CB173EDA9600A73400 /* GameServerManager.cpp in Sources */,
 				B13DA5CC173EDA9600A73400 /* GameServerTicker.cpp in Sources */,

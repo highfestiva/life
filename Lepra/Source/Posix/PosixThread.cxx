@@ -203,6 +203,7 @@ void PosixSemaphore::Wait()
 		pthread_cond_wait(&mCondition, &mMutex);
 	}
 	--mPermitCount;
+	deb_assert(mPermitCount >= 0);
 	pthread_mutex_unlock(&mMutex);
 }
 
@@ -227,6 +228,7 @@ bool PosixSemaphore::Wait(float64 pMaxWaitTime)
 	{
 		--mPermitCount;
 	}
+	deb_assert(mPermitCount >= 0);
 	pthread_mutex_unlock(&mMutex);
 	return (!lTimeout);
 }
@@ -361,6 +363,7 @@ bool Thread::Start()
 		pthread_attr_t	lThreadAttributes;
 
 		SetStopRequest(false);
+		mSemaphore.Wait(0.001);	// Reset the internal counter if this is a restart and GraceJoin() wasn't called (or called early).
 
 		pthread_attr_init(&lThreadAttributes);
 		pthread_attr_setdetachstate(&lThreadAttributes, PTHREAD_CREATE_JOINABLE);
@@ -389,7 +392,7 @@ bool Thread::Join()
 	{
 		deb_assert(GetThreadId() != GetCurrentThreadId());
 		::pthread_join((pthread_t)mThreadHandle, 0);
-		deb_assert(!IsRunning());
+		//deb_assert(!IsRunning());
 		mThreadHandle = 0;
 		mThreadId = 0;
 	}

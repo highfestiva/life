@@ -1272,9 +1272,7 @@ unsigned OpenGLRenderer::RenderScene()
 		if (GetFogFar() > 0)
 		{
 			::glEnable(GL_FOG);
-#ifndef LEPRA_GL_ES
-			::glFogi(GL_FOG_MODE, (GetFogExponent()>0)? GL_EXP : GL_LINEAR);
-#endif // !GLES
+			::glFogf(GL_FOG_MODE, (GetFogExponent()>0)? GL_EXP : GL_LINEAR);
 			::glFogf(GL_FOG_DENSITY, GetFogDensity());
 			::glFogf(GL_FOG_START, GetFogNear());
 			::glFogf(GL_FOG_END, GetFogFar());

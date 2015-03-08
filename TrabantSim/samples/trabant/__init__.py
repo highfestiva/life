@@ -226,7 +226,7 @@ def loop(delay=0.03, end_after=None):
 	return gameapi.opened()
 
 def sleep(t):
-	time.sleep(t)
+	time.sleep(min(0.5,t))
 
 def timeout(t, timer=0, first_hit=False):
 	'''Will check if time t elapsed since first called. If first_hit is true, it will elapse

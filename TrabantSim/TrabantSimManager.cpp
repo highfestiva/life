@@ -1520,10 +1520,6 @@ void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 
 void TrabantSimManager::OnBackButton(UiTbc::Button* pButton)
 {
-	if (pButton)
-	{
-		mMenu->OnTapSound(pButton);
-	}
 	FoldSimulator();
 }
 

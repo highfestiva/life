@@ -20,6 +20,7 @@ class PythonRunner
 {
 public:
 	static void Run(const wchar_t* pDirectory, const wchar_t* pFilename);
+	static void Break();
 
 private:
 	static void WorkerEntry(void*);
@@ -27,6 +28,8 @@ private:
 	static StaticThread mPythonWorker;
 	static wstr mDirectory;
 	static wstr mFilename;
+	static bool mKillSimulator;
+	static bool mIsStopping;
 };
 
 

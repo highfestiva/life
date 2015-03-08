@@ -18,6 +18,7 @@
 #include "../UiLepra/Include/UiTouchDrag.h"
 #ifdef LEPRA_IOS
 #include "../UiLepra/Include/Mac/UiMacDisplayManager.h"
+#include "PythonRunner.h"
 #endif // iOS
 #include "../UiTbc/Include/UiTbc.h"
 #include "TrabantSim.h"
@@ -213,6 +214,7 @@ void TrabantSim::FoldSimulator()
 	[window setHidden:YES];
 	[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
 	[TrabantSim::TrabantSim::mApp->mAnimatedApp.window makeKeyAndVisible];
+	PythonRunner::Break();
 #endif // iOS
 }
 
