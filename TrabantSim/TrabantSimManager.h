@@ -111,8 +111,8 @@ public:
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~TrabantSimManager();
 
-	virtual void Resume();
-	virtual void Suspend();
+	virtual void Resume(bool pHard);
+	virtual void Suspend(bool pHard);
 
 	void UserReset();
 	int CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic);

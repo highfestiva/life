@@ -31,12 +31,14 @@ Application::~Application()
 {
 }
 
-void Application::Suspend()
+void Application::Resume(bool pHard)
 {
+	(void)pHard;
 }
 
-void Application::Resume()
+void Application::Suspend(bool pHard)
 {
+	(void)pHard;
 }
 
 

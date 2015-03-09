@@ -131,9 +131,9 @@ void GameClientMasterTicker::AddBackedRtvar(const str& pRtvarName)
 	mRtvars.push_back(pRtvarName);
 }
 
-void GameClientMasterTicker::Suspend()
+void GameClientMasterTicker::Resume(bool pHard)
 {
-	Parent::Suspend();
+	Parent::Resume(pHard);
 
 	ScopeLock lLock(&mLock);
 	SlaveArray::iterator x;
@@ -142,33 +142,33 @@ void GameClientMasterTicker::Suspend()
 		GameClientSlaveManager* lSlave = *x;
 		if (lSlave)
 		{
-			lSlave->Suspend();
-		}
-	}
-
-	Cure::RuntimeVariableScope* lScope = UiCure::GetSettings();
-	lScope = mSlaveArray[0]? mSlaveArray[0]->GetVariableScope() : lScope;
-	SaveRtvars(lScope);
-}
-
-void GameClientMasterTicker::Resume()
-{
-	Parent::Resume();
-
-	ScopeLock lLock(&mLock);
-	SlaveArray::iterator x;
-	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
-	{
-		GameClientSlaveManager* lSlave = *x;
-		if (lSlave)
-		{
-			lSlave->Resume();
+			lSlave->Resume(pHard);
 		}
 	}
 
 	Cure::RuntimeVariableScope* lScope = UiCure::GetSettings();
 	lScope = mSlaveArray[0]? mSlaveArray[0]->GetVariableScope() : lScope;
 	LoadRtvars(lScope);
+}
+	
+void GameClientMasterTicker::Suspend(bool pHard)
+{
+	Parent::Suspend(pHard);
+
+	ScopeLock lLock(&mLock);
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->Suspend(pHard);
+		}
+	}
+
+	Cure::RuntimeVariableScope* lScope = UiCure::GetSettings();
+	lScope = mSlaveArray[0]? mSlaveArray[0]->GetVariableScope() : lScope;
+	SaveRtvars(lScope);
 }
 
 void GameClientMasterTicker::LoadRtvars(Cure::RuntimeVariableScope* pScope)

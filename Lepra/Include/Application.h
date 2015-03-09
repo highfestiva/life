@@ -77,8 +77,8 @@ public:
 
 	virtual int Run() = 0;
 
-	virtual void Suspend();
-	virtual void Resume();
+	virtual void Resume(bool pHard);
+	virtual void Suspend(bool pHard);
 };
 
 

@@ -700,6 +700,7 @@ void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const vec3& pVelocity)
 	if(lObject->mBodyID)
 	{
 		::dBodySetLinearVel(lObject->mBodyID, pVelocity.x, pVelocity.y, pVelocity.z);
+		::dBodyEnable(lObject->mBodyID);
 	}
 }
 

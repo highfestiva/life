@@ -14,14 +14,21 @@
 
 
 
+bool gBackspaceToLinefeed = false;
+
+
+
 @interface RestrictedScrollView : UIScrollView
 @end
 @implementation RestrictedScrollView
 -(void)scrollRectToVisible:(CGRect)rect animated:(BOOL)animated
 {
 	if (rect.size.width > 100) {
-		rect.origin.x += rect.size.width-100;
-		rect.size.width = 100;
+		if (!gBackspaceToLinefeed) {
+			rect.origin.x += rect.size.width-100;
+		}
+		gBackspaceToLinefeed = false;
+		rect.size.width = 50;
 	}
 	[super scrollRectToVisible:rect animated:animated];
 }
@@ -30,6 +37,10 @@
 
 
 @interface EditViewController () <UITextViewDelegate>
+{
+@private
+	NSMutableString* _smartIndent;
+}
 @property (nonatomic, strong) PythonTextView* textView;
 @property (nonatomic, strong) UIScrollView* scrollView;
 @end
@@ -44,8 +55,11 @@
 {
 	[super viewDidLoad];
 
+	_smartIndent = [NSMutableString new];
+
 	UIBarButtonItem* executeButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(execute)];
 	[self.navigationItem setRightBarButtonItem:executeButton];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
 
 	self.view.backgroundColor = [UIColor whiteColor];
 
@@ -71,12 +85,64 @@
 	self.textView.text = text;
 }
 
+-(void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 
 #pragma mark - Notification Handlers
 
+-(BOOL) textView:(UITextView*)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString*)text
+{
+	if ([text hasPrefix:@"\n"]) {
+		NSString* file = textView.text;
+		NSRange found = [file rangeOfString:@"\n" options:NSBackwardsSearch range:NSMakeRange(0,range.location)];
+		found.location = (found.location == NSNotFound)? 0 : found.location+1;
+		int remaining = (int)range.location - (int)found.location - 1;
+		int spacecnts = 0;
+		for (; remaining > 0; ++found.location, --remaining) {
+			unichar u = [file characterAtIndex:found.location];
+			if (u == ' ') {
+				++spacecnts;
+				if (spacecnts >= 4) {
+					spacecnts = 0;
+					[_smartIndent appendString:@"    "];
+				}
+			} else if (u == '\t') {
+				spacecnts = 0;
+				[_smartIndent appendString:@"    "];
+			} else {
+				break;
+			}
+		}
+		if (range.location > 0 && [file characterAtIndex:range.location-1] == ':') {
+			[_smartIndent appendString:@"    "];
+		}
+	} else if ([text length] == 0 && range.location > 0 && [textView.text characterAtIndex:range.location-1] == '\n') {
+		gBackspaceToLinefeed = true;
+	} else {
+		gBackspaceToLinefeed = false;
+	}
+	return YES;
+}
+
 -(void) textViewDidChange:(UITextView*)textView
 {
+	if ([_smartIndent length] > 0) {
+		NSString* indent = [NSString stringWithString:_smartIndent];
+		[_smartIndent setString:@""];
+		NSRange selectedRange = textView.selectedRange;
+		UITextRange* textRange = [textView textRangeFromPosition:textView.selectedTextRange.start toPosition:textView.selectedTextRange.start];
+		[textView replaceRange:textRange withText:indent];
+		[textView setSelectedRange:NSMakeRange(selectedRange.location+[indent length], 0)];
+	}
 	[self viewWillLayoutSubviews];
+}
+
+-(void) willResignActive:(NSNotification*)notification
+{
+	[self saveIfChanged];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -150,7 +216,7 @@
 	}
 	[window makeKeyAndVisible];
 	TrabantSim::TrabantSim::mApp->mActiveCounter = 0;	// Make sure no lost event causes a halt.
-	TrabantSim::TrabantSim::mApp->Resume();
+	TrabantSim::TrabantSim::mApp->Resume(false);
 	[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
 
 	wchar_t appDir[4096];

@@ -33,9 +33,9 @@
 
 - (void)commonSetup
 {
-	_defaultFont = [UIFont fontWithName:@"Courier" size:12.0f];
-	_boldFont = [UIFont fontWithName:@"Courier-Bold" size:12.0f];
-	_italicFont = [UIFont fontWithName:@"Courier-Oblique" size:12.0f ];
+	_defaultFont = [UIFont fontWithName:@"Courier" size:14.0f];
+	_boldFont = [UIFont fontWithName:@"Courier-Bold" size:14.0f];
+	_italicFont = [UIFont fontWithName:@"Courier-Oblique" size:14.0f ];
 
 	self.font = _defaultFont;
 	self.textColor = [UIColor blackColor];
@@ -47,12 +47,12 @@
 	if (_boldFont == nil)
 	{
 		// This works around a bug in 7.0.3 where font is not present as a UIFont option
-		_boldFont = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("Courier New Bold"), 12.0f, NULL);
+		_boldFont = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("Courier New Bold"), 14.0f, NULL);
 	}
 	if (_italicFont == nil)
 	{
 		// This works around a bug in 7.0.3 where font is not present as a UIFont option
-		_italicFont = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("Courier New Italic"), 12.0f, NULL);
+		_italicFont = (__bridge_transfer UIFont*)CTFontCreateWithName(CFSTR("Courier New Italic"), 14.0f, NULL);
 	}
 
 	self.tokens = [self solverTokens];
@@ -79,22 +79,22 @@
 				 NSFontAttributeName : self.boldFont
 				 }],
 	   [CYRToken tokenWithName:@"hex"
-			expression:@"0x[0-9a-fA-F]+"
+			expression:@"\\b0x[0-9a-fA-F]+\\b"
 			attributes:@{
 				 NSForegroundColorAttributeName : RGB(0, 0, 255)
 				 }],
 	   [CYRToken tokenWithName:@"binary"
-			expression:@"0b[01]+"
+			expression:@"\\b0b[01]+\\b"
 			attributes:@{
 				 NSForegroundColorAttributeName : RGB(0, 0, 255)
 				 }],
 	   [CYRToken tokenWithName:@"float"
-			expression:@"\\d+\\.?\\d+e[\\+\\-]?\\d+|\\d+\\.\\d+"
+			expression:@"\\b\\d+\\.?\\d+e[\\+\\-]?\\d+|\\d+\\.\\d+\\b"
 			attributes:@{
 				 NSForegroundColorAttributeName : RGB(0, 0, 255)
 				 }],
 	   [CYRToken tokenWithName:@"integer"
-			expression:@"\\d+"
+			expression:@"\\b\\d+\\b"
 			attributes:@{
 				 NSForegroundColorAttributeName : RGB(0, 0, 255)
 				 }],

@@ -83,12 +83,14 @@ void GameClientSlaveManager::SetMasterServerConnection(MasterServerConnection* p
 	mMasterServerConnection = pConnection;
 }
 
-void GameClientSlaveManager::Suspend()
+void GameClientSlaveManager::Resume(bool pHard)
 {
+	(void)pHard;
 }
 
-void GameClientSlaveManager::Resume()
+void GameClientSlaveManager::Suspend(bool pHard)
 {
+	(void)pHard;
 }
 
 void GameClientSlaveManager::LoadSettings()

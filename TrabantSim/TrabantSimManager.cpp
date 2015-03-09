@@ -116,7 +116,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	}
 	mLocalAddress = lAddress;
 	mLastRemoteAddress = lAddress;
-	Resume();
+	Resume(true);
 }
 
 TrabantSimManager::~TrabantSimManager()
@@ -131,21 +131,7 @@ TrabantSimManager::~TrabantSimManager()
 
 
 
-void TrabantSimManager::Suspend()
-{
-	mIsControlTimeout = false;
-	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
-
-	if (mCommandSocket && mCommandSocket->IsOpen())
-	{
-		if (mLastRemoteAddress != mLocalAddress)
-		{
-			mCommandSocket->SendTo((const unsigned char*)"disconnect\n", 11, mLastRemoteAddress);
-		}
-	}
-}
-
-void TrabantSimManager::Resume()
+void TrabantSimManager::Resume(bool pHard)
 {
 	mIsControlTimeout = false;
 	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
@@ -166,6 +152,24 @@ void TrabantSimManager::Resume()
 	{
 		mLog.Headlinef(_T("Could not open server on %s. Shutting down."), mLocalAddress.GetAsString().c_str());
 		SystemManager::AddQuitRequest(1);
+	}
+}
+
+void TrabantSimManager::Suspend(bool pHard)
+{
+	mIsControlTimeout = false;
+	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+
+	if (mCommandSocket && mCommandSocket->IsOpen())
+	{
+		if (mLastRemoteAddress != mLocalAddress)
+		{
+			mCommandSocket->SendTo((const unsigned char*)"disconnect\n", 11, mLastRemoteAddress);
+		}
+	}
+	if (pHard)
+	{
+		CloseConnection();
 	}
 }
 

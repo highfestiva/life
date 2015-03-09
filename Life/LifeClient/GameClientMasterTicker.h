@@ -48,8 +48,8 @@ public:
 	virtual ~GameClientMasterTicker();
 
 	virtual void AddBackedRtvar(const str& pRtvarName);
-	virtual void Suspend();
-	virtual void Resume();
+	virtual void Resume(bool pHard);
+	virtual void Suspend(bool pHard);
 	virtual void LoadRtvars(Cure::RuntimeVariableScope* pScope);
 	virtual void SaveRtvars(Cure::RuntimeVariableScope* pScope);
 

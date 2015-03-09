@@ -164,7 +164,7 @@ bool TrabantSim::Tick()
 		{
 			const int c = mActiveCounter;
 			mActiveCounter = 1;
-			Suspend();
+			Suspend(false);
 			mActiveCounter = c;
 		}
 		return lOk;
@@ -174,25 +174,7 @@ bool TrabantSim::Tick()
 
 
 
-void TrabantSim::Suspend()
-{
-	if (--mActiveCounter != 0)
-	{
-		return;
-	}
-	if (mIsInTick)
-	{
-		return;
-	}
-
-	mGameTicker->Suspend();
-	mUiManager->GetSoundManager()->Suspend();
-#ifdef LEPRA_IOS
-	[mAnimatedApp stopTick];
-#endif // iOS
-}
-
-void TrabantSim::Resume()
+void TrabantSim::Resume(bool pHard)
 {
 	if (++mActiveCounter != 1)
 	{
@@ -203,13 +185,35 @@ void TrabantSim::Resume()
 	[mAnimatedApp startTick];
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
-	mGameTicker->Resume();
+	mGameTicker->Resume(pHard);
+}
+
+void TrabantSim::Suspend(bool pHard)
+{
+	if (pHard)
+	{
+		mGameTicker->Suspend(pHard);
+	}
+	if (--mActiveCounter != 0)
+	{
+		return;
+	}
+	if (mIsInTick)
+	{
+		return;
+	}
+
+	mGameTicker->Suspend(pHard);
+	mUiManager->GetSoundManager()->Suspend();
+#ifdef LEPRA_IOS
+	[mAnimatedApp stopTick];
+#endif // iOS
 }
 
 void TrabantSim::FoldSimulator()
 {
 #ifdef LEPRA_IOS
-	Suspend();
+	Suspend(false);
 	UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
 	[window setHidden:YES];
 	[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];

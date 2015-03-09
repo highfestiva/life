@@ -49,8 +49,8 @@ public:
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~GameClientSlaveManager();
 	void SetMasterServerConnection(MasterServerConnection* pConnection);
-	virtual void Suspend();
-	virtual void Resume();
+	virtual void Resume(bool pHard);
+	virtual void Suspend(bool pHard);
 	virtual void LoadSettings();
 	virtual void SaveSettings() = 0;
 	virtual void RefreshOptions();

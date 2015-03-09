@@ -91,22 +91,20 @@
 	NSDirectoryEnumerator* dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:path];
 	NSString* filename;
 	while ((filename = [dirEnum nextObject])) {
-		if ([filename hasSuffix:@".py"]) {
-			[self.files addObject:filename];
+		[self.files addObject:filename];
 
-			NSString* filepath = [path stringByAppendingPathComponent:filename];
-			NSString* code = [NSString stringWithContentsOfFile:filepath encoding:NSUTF8StringEncoding error:nil];
-			int loc = 0;
-			NSCharacterSet* whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-			NSArray* lines = [code componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]];
-			for (NSString* line in lines) {
-				NSString* strippedLine = [[line componentsSeparatedByCharactersInSet:whitespace] componentsJoinedByString:@""];
-				if (![strippedLine hasPrefix:@"#"] && [strippedLine length] > 0) {
-					++loc;
-				}
+		NSString* filepath = [path stringByAppendingPathComponent:filename];
+		NSString* code = [NSString stringWithContentsOfFile:filepath encoding:NSUTF8StringEncoding error:nil];
+		int loc = 0;
+		NSCharacterSet* whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+		NSArray* lines = [code componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]];
+		for (NSString* line in lines) {
+			NSString* strippedLine = [[line componentsSeparatedByCharactersInSet:whitespace] componentsJoinedByString:@""];
+			if (![strippedLine hasPrefix:@"#"] && [strippedLine length] > 0) {
+				++loc;
 			}
-			[self.loc addObject:[NSString stringWithFormat:@"%i loc",loc]];
 		}
+		[self.loc addObject:[NSString stringWithFormat:@"%i loc",loc]];
 		[dirEnum skipDescendents];
 	}
 	[self.tableView reloadData];

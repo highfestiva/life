@@ -60,11 +60,11 @@ static Lepra::Application* gApplication = 0;
 #ifdef LEPRA_IOS
 - (void)applicationWillResignActive:(UIApplication *)application
 {
-	gApplication->Suspend();
+	gApplication->Suspend(true);
 }
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-	gApplication->Resume();
+	gApplication->Resume(true);
 }
 #endif // iOS
 @end

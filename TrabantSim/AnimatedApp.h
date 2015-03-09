@@ -80,8 +80,8 @@ public:
 	virtual bool MainLoop();
 	virtual bool Tick();
 
-	virtual void Suspend();
-	virtual void Resume();
+	virtual void Resume(bool pHard);
+	virtual void Suspend(bool pHard);
 	void FoldSimulator();
 
 	void SavePurchase();
