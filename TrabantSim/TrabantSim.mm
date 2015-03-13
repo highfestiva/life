@@ -17,6 +17,7 @@
 #import "../UiLepra/Include/Mac/EAGLView.h"
 #include "EditViewController.h"
 #include "ListViewController.h"
+#include "StdOutViewController.h"
 
 @implementation AnimatedApp
 
@@ -80,6 +81,23 @@
 	[[EAGLView sharedView] powerDownAcc];
 	[_animationTimer invalidate];
 	_animationTimer = nil;
+}
+
+-(void) handleStdOut:(const astr&)pStdOut
+{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+	}
+	else
+	{
+		NSString* text = [NSString stringWithCString:pStdOut.c_str() encoding:NSUTF8StringEncoding];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			StdOutViewController* stdOutController = [StdOutViewController new];
+			stdOutController.title = @"Output";
+			stdOutController.text = text;
+			[(UINavigationController*)self.window.rootViewController pushViewController:stdOutController animated:NO];
+		});
+	}
 }
 
 -(void) showAd

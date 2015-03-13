@@ -1156,7 +1156,12 @@ bool TrabantSimManager::IsControlled()
 		}
 		else
 		{
-			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controlling application went silent."));
+#ifdef LEPRA_TOUCH
+			if (mLastRemoteAddress.GetIP().GetAsString() != _T("127.0.0.1"))
+#endif // Touch device.
+			{
+				v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
+			}
 		}
 		mWasControlled = lIsControlled;
 	}

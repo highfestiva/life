@@ -213,12 +213,17 @@ void TrabantSim::Suspend(bool pHard)
 void TrabantSim::FoldSimulator()
 {
 #ifdef LEPRA_IOS
+	astr lStdOut = PythonRunner::GetStdOut();
 	Suspend(false);
 	UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
 	[window setHidden:YES];
 	[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
 	[TrabantSim::TrabantSim::mApp->mAnimatedApp.window makeKeyAndVisible];
 	PythonRunner::Break();
+	if (!lStdOut.empty())
+	{
+		[TrabantSim::TrabantSim::mApp->mAnimatedApp handleStdOut:lStdOut];
+	}
 #endif // iOS
 }
 

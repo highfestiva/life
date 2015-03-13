@@ -72,11 +72,13 @@
 	NSData* rawContents = [content dataUsingEncoding:NSUTF8StringEncoding];
 	[[NSFileManager defaultManager] createFileAtPath:filename contents:rawContents attributes:nil];
 	[self.parent reloadPrototypes];
-	[self.navigationController popViewControllerAnimated:NO];
-	EditViewController* editController = [EditViewController alloc];
-	editController.title = filename;
-	editController = [editController init];
-	[self.navigationController pushViewController:editController animated:YES];
+	UINavigationController* navController = self.navigationController;
+	[navController popViewControllerAnimated:NO];
+	dispatch_async(dispatch_get_main_queue(), ^{
+		EditViewController* editController = [EditViewController new];
+		editController.title = self.nameField.text;
+		[navController pushViewController:editController animated:YES];
+	});
 }
 
 @end

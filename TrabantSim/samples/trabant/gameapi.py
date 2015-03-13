@@ -334,7 +334,7 @@ def _tryconnect(addr, retries):
 				time.sleep(1)
 			sock = trabant.socket.socket()
 			sock.connect((ip,int(port)))
-			cmd('system-info')	# To make sure connection alright.
+			cmd('nop')	# To make sure connection alright.
 			break
 		except socket.error as e:
 			sock = None

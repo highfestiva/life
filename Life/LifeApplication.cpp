@@ -259,7 +259,9 @@ void Application::TickSleep(double pMainLoopTime) const
 	{
 		if (!mIsPowerSaving)
 		{
+#ifndef LEPRA_TOUCH
 			mLog.AInfo("Entering power save mode.");
+#endif // !Touch.
 			mIsPowerSaving = true;
 		}
 		Thread::Sleep(1.0*lPowerSaveAmount);
@@ -268,7 +270,9 @@ void Application::TickSleep(double pMainLoopTime) const
 	{
 		if (mIsPowerSaving)
 		{
+#ifndef LEPRA_TOUCH
 			mLog.AInfo("Leaving power save mode.");
+#endif // !Touch.
 			mIsPowerSaving = false;
 		}
 
@@ -298,7 +302,11 @@ void Application::TickSleep(double pMainLoopTime) const
 				}
 				lSleepTimeLeft = lSleepTime - lSleepTimer.QueryTimeDiff();
 			}
+#ifdef LEPRA_TOUCH
+			if (lSleepTimeLeft < -0.5)
+#else // Computer
 			if (lSleepTimeLeft < -0.01)
+#endif // Touch device / computer.
 			{
 				mLog.Warningf(_T("Overslept %f s!"), -lSleepTimeLeft);
 			}

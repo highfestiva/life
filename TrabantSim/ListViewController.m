@@ -67,9 +67,8 @@
 }
 
 -(void) tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-	EditViewController* editController = [EditViewController alloc];
+	EditViewController* editController = [EditViewController new];
 	editController.title = [self.files objectAtIndex:indexPath.row];
-	editController = [editController init];
 	[self.navigationController pushViewController:editController animated:YES];
 }
 
@@ -137,10 +136,9 @@
 
 - (void)createNew
 {
-	CreateNewViewController* newController = [CreateNewViewController alloc];
+	CreateNewViewController* newController = [CreateNewViewController new];
 	newController.title = @"New Prototype";
 	newController.parent = self;
-	newController = [newController init];
 	[self.navigationController pushViewController:newController animated:YES];
 }
 

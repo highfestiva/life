@@ -167,6 +167,16 @@ class Joystick:
 		self.x,self.y = 0,0
 
 
+class flushfile:
+	def __init__(self, f):
+		self.f = f
+	def write(self, x):
+		self.f.write(x)
+		self.f.flush()
+	def flush(self):
+		pass
+
+
 def trabant_init(**kwargs):
 	import sys
 	interactive = bool(hasattr(sys, 'ps1') or sys.flags.interactive)
@@ -192,6 +202,8 @@ def trabant_init(**kwargs):
 	if 'osname' in config:
 		osname = config['osname']
 		del config['osname']
+	if osname in ['ios']:
+		sys.stdout = flushfile(sys.stdout)
 	gameapi.init(**config)
 	gameapi.set('Game.AllowPowerDown', not interactive)
 	if osname not in ['ios']:

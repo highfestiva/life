@@ -85,6 +85,7 @@
 		B16547CB1AA07AE80035F3F7 /* libpython.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B16547CA1AA07AE80035F3F7 /* libpython.a */; };
 		B16547CD1AA07F350035F3F7 /* PythonRunner.mm in Sources */ = {isa = PBXBuildFile; fileRef = B16547CC1AA07F350035F3F7 /* PythonRunner.mm */; };
 		B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16F032717808366000C31E0 /* UiBurnEmitter.cpp */; };
+		B173DCEE1AB2E53500928E13 /* StdOutViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B173DCED1AB2E53500928E13 /* StdOutViewController.mm */; };
 		B1740478179469EB00DB7AD5 /* ResourceTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */; };
 		B18D39A01A76F54300D8F48B /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399C1A76F54300D8F48B /* Light.cpp */; };
 		B18D39A11A76F54300D8F48B /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399D1A76F54300D8F48B /* Object.cpp */; };
@@ -618,6 +619,8 @@
 		B16547CC1AA07F350035F3F7 /* PythonRunner.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PythonRunner.mm; sourceTree = "<group>"; };
 		B16547CE1AA07FB40035F3F7 /* PythonRunner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PythonRunner.h; sourceTree = "<group>"; };
 		B16F032717808366000C31E0 /* UiBurnEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiBurnEmitter.cpp; path = ../../UiCure/Source/UiBurnEmitter.cpp; sourceTree = SOURCE_ROOT; };
+		B173DCEC1AB2E52500928E13 /* StdOutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StdOutViewController.h; sourceTree = "<group>"; };
+		B173DCED1AB2E53500928E13 /* StdOutViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = StdOutViewController.mm; sourceTree = "<group>"; };
 		B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ResourceTracker.cpp; sourceTree = "<group>"; };
 		B18D399C1A76F54300D8F48B /* Light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Light.cpp; sourceTree = "<group>"; };
 		B18D399D1A76F54300D8F48B /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
@@ -1564,6 +1567,8 @@
 		B19A146913A122DE0051A61C /* Trabant */ = {
 			isa = PBXGroup;
 			children = (
+				B173DCED1AB2E53500928E13 /* StdOutViewController.mm */,
+				B173DCEC1AB2E52500928E13 /* StdOutViewController.h */,
 				B1148ADF1AAB328500B313B6 /* BackButtonHandler.h */,
 				B1148AE01AAB328500B313B6 /* BackButtonHandler.m */,
 				B1021FA71AAA669100E05260 /* CreateNewViewController.h */,
@@ -2668,6 +2673,7 @@
 				B19A156413A124AB0051A61C /* EAGLView.mm in Sources */,
 				B19A156513A124AB0051A61C /* UiMacCore.mm in Sources */,
 				B19A156613A124AB0051A61C /* UiMacDisplayManager.mm in Sources */,
+				B173DCEE1AB2E53500928E13 /* StdOutViewController.mm in Sources */,
 				B19A156813A124AB0051A61C /* UiMacOpenGLDisplay.mm in Sources */,
 				B19A156913A124AB0051A61C /* UiDisplayManager.cpp in Sources */,
 				B19A156A13A124AB0051A61C /* UiInput.cpp in Sources */,

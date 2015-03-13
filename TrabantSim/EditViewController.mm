@@ -77,12 +77,14 @@ bool gBackspaceToLinefeed = false;
 	[scrollView addSubview:textView];
 	[self.view addSubview:scrollView];
 
-	NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString* path = [paths objectAtIndex:0];
-	NSString* filename = [path stringByAppendingPathComponent:self.title];
-	NSString* text = [NSString stringWithContentsOfFile:filename encoding:NSUTF8StringEncoding error:nil];
-	text = [text stringByReplacingOccurrencesOfString:@"\t" withString:@"    "];	// Tabs wrap line when entered to the right of screen width.
-	self.textView.text = text;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString* path = [paths objectAtIndex:0];
+		NSString* filename = [path stringByAppendingPathComponent:self.title];
+		NSString* text = [NSString stringWithContentsOfFile:filename encoding:NSUTF8StringEncoding error:nil];
+		text = [text stringByReplacingOccurrencesOfString:@"\t" withString:@"    "];	// Tabs wrap line when entered to the right of screen width.
+		[self.textView setText:text];
+	});
 }
 
 -(void)dealloc
@@ -165,7 +167,9 @@ bool gBackspaceToLinefeed = false;
 	float w = [@"W" sizeWithFont:self.textView.boldFont].width;
 	fit.width += w*3;
 	fit.height += w;
-	CGRect r = CGRectUnion(CGRectMake(0,0,fit.width,fit.height), self.scrollView.frame);
+	CGRect r = CGRectUnion(CGRectMake(0,0,fit.width,fit.height), self.scrollView.bounds);
+	r.size.height += r.origin.y;
+	r.origin.y = 0;
 	self.scrollView.contentSize = r.size;
 	self.textView.frame = r;
 }
@@ -229,6 +233,7 @@ bool gBackspaceToLinefeed = false;
 	NSString* filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:self.title];
 	[filePath getCString:(char*)filename maxLength:sizeof(filename) encoding:NSUTF32LittleEndianStringEncoding];
 	TrabantSim::PythonRunner::Run(appDir, filename);
+	TrabantSim::PythonRunner::ClearStdOut();
 }
 
 -(void) saveIfChanged

@@ -46,6 +46,7 @@ using namespace Lepra;
 -(void) dealloc;
 -(void) startTick;
 -(void) stopTick;
+-(void) handleStdOut:(const astr&)pStdOut;
 -(void) showAd;
 -(void) tick;
 

@@ -50,6 +50,7 @@ void PythonRunner::Run(const wchar_t* pDirectory, const wchar_t* pFilename)
 	mDirectory = pDirectory;
 	mFilename = pFilename;
 	mPythonWorker.Start(&PythonRunner::WorkerEntry, 0);
+	mStdOutReader.Start(&PythonRunner::StdOutReadEntry, 0);
 }
 
 void PythonRunner::Break()
@@ -61,7 +62,7 @@ void PythonRunner::Break()
 		PyGILState_STATE state = PyGILState_Ensure();
 		Py_AddPendingCall(&quit, NULL);
 		PyGILState_Release(state);
-		mPythonWorker.GraceJoin(1.5);
+		mPythonWorker.GraceJoin(0.7);
 		if (mPythonWorker.IsRunning())
 		{
 			printf("Warning: killing python thread!\n");
@@ -73,6 +74,23 @@ void PythonRunner::Break()
 		mIsStopping = false;
 	}
 }
+
+astr PythonRunner::GetStdOut()
+{
+	ScopeLock _(&mStdOutLock);
+	return mStdOut;
+}
+
+void PythonRunner::ClearStdOut()
+{
+	if (mStdOutReader.IsRunning())
+	{
+		ScopeLock _(&mStdOutLock);
+		mStdOut.clear();
+	}
+}
+
+
 
 void PythonRunner::WorkerEntry(void*)
 {
@@ -115,9 +133,47 @@ void PythonRunner::WorkerEntry(void*)
 	}
 }
 
+void PythonRunner::StdOutReadEntry(void*)
+{
+	int _;
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &_);
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &_);
+
+	static int lPipePair[2];
+	if (pipe(lPipePair) != 0)
+	{
+		mStdOut = "Unable to read stdout.";
+		return;
+	}
+	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stderr, NULL, _IONBF, 0);
+	dup2(lPipePair[1], STDOUT_FILENO);
+	dup2(lPipePair[1], STDERR_FILENO);
+	char* lBuffer = (char*)malloc(sizeof(char)*1024);
+	for (;;)
+	{
+		ssize_t lReadCount = read(lPipePair[0], lBuffer, 1023);
+		if (lReadCount > 0)
+		{
+			lBuffer[lReadCount] = 0;
+			ScopeLock _(&mStdOutLock);
+			mStdOut += lBuffer;
+		}
+		else if (lReadCount == -1)
+		{
+			break;
+		}
+	}
+	free(lBuffer);
+	mStdOut += "\nBroken pipe, unable to read more of stdout!";
+}
+
 
 
 StaticThread PythonRunner::mPythonWorker("PythonWorker");
+StaticThread PythonRunner::mStdOutReader("StdOutReader");
+Lock PythonRunner::mStdOutLock;
+astr PythonRunner::mStdOut;
 wstr PythonRunner::mDirectory;
 wstr PythonRunner::mFilename;
 bool PythonRunner::mKillSimulator = true;

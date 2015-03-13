@@ -887,42 +887,42 @@ void ContextObject::AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, Cont
 
 	if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_3DOF))
 	{
-		mLog.AInfo("Attaching two objects with ball joint.");
+		log_adebug("Attaching two objects with ball joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_BALL);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_FIXED))
 	{
-		mLog.AInfo("Attaching two objects with fixed joint.");
+		log_adebug("Attaching two objects with fixed joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_FIXED);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE2))
 	{
-		mLog.AInfo("Attaching two objects with hinge-2 joint.");
+		log_adebug("Attaching two objects with hinge-2 joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_HINGE2);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_SUSPEND_HINGE))
 	{
-		mLog.AInfo("Attaching two objects with suspend hinge joint.");
+		log_adebug("Attaching two objects with suspend hinge joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE))
 	{
-		mLog.AInfo("Attaching two objects with hinge joint.");
+		log_adebug("Attaching two objects with hinge joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_HINGE);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_UNIVERSAL))
 	{
-		mLog.AInfo("Attaching two objects with universal joint.");
+		log_adebug("Attaching two objects with universal joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_UNIVERSAL);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_SLIDER))
 	{
-		mLog.AInfo("Attaching two objects with slider joint.");
+		log_adebug("Attaching two objects with slider joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_SLIDER);
 	}
 	else
 	{
-		mLog.AInfo("Could not find connection type to attach two objects with a joint.");
+		mLog.AError("Could not find connection type to attach two objects with a joint.");
 		return;
 	}
 	pBoneGeometry2->GetBodyData().mParent = pBoneGeometry1;
