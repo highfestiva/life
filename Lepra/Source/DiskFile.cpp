@@ -593,12 +593,7 @@ bool DiskFile::FindNext(FindData& pFindData)
 		str lPath = Path::SplitPath(pFindData.mFileSpec)[0];
 		pFindData.mName = Path::JoinPath(lPath, strutil::Encode(astr(lData.name)));	// TODO: needs real Unicode findxxx()!
 		pFindData.mSize = lData.size;
-
-		if ((lData.attrib & _A_SUBDIR) != 0)
-		{
-			pFindData.mSubDir = true;
-		}
-
+		pFindData.mSubDir = ((lData.attrib & _A_SUBDIR) != 0);
 		pFindData.mTime  = lData.time_write;
 	}
 #elif defined LEPRA_POSIX

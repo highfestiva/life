@@ -80,6 +80,10 @@ char FileServer::ReadCommand(TcpSocket* pSocket, astr& pData)
 		int32 lDataLength = 0;
 		PackerInt32::Unpack(lDataLength, (const uint8*)&lCommand[1], 4);
 		pData.resize(lDataLength);
+		if (!lDataLength)
+		{
+			return lCommand[0];
+		}
 		if (pSocket->Receive(&pData[0], lDataLength))
 		{
 			return lCommand[0];
@@ -95,9 +99,13 @@ char FileServer::WriteCommand(TcpSocket* pSocket, char pCommand, const astr& pDa
 		return 'q';
 	}
 	astr lWriteBuffer;
-	lWriteBuffer.resize(1+pData.size());
+	lWriteBuffer.resize(5+pData.size());
 	lWriteBuffer[0] = pCommand;
-	::memcpy(&lWriteBuffer[1], &pData[0], pData.size());
+	PackerInt32::Pack((uint8*)&lWriteBuffer[1], (int32)pData.size());
+	if (!pData.empty())
+	{
+		::memcpy(&lWriteBuffer[5], &pData[0], pData.size());
+	}
 	if (pSocket->Send(&lWriteBuffer[0], lWriteBuffer.size()) == (int)lWriteBuffer.size())
 	{
 		return '+';
@@ -121,19 +129,23 @@ void FileServer::ClientCommandEntry(TcpSocket* pSocket)
 			DiskFile::FindData lInfo;
 			for (bool lOk = DiskFile::FindFirst(lWildCard, lInfo); lOk; lOk = DiskFile::FindNext(lInfo))
 			{
-				lFiles.push_back(lInfo.GetName());
+				if (lInfo.IsSubDir())
+				{
+					continue;
+				}
+				lFiles.push_back(Path::GetCompositeFilename(lInfo.GetName()));
 			}
 			astr lFilenames = astrutil::Encode(strutil::Join(lFiles, _T("\n")));
 			WriteCommand(pSocket, 'l', lFilenames);
 			for (strutil::strvec::iterator f = lFiles.begin(); f != lFiles.end(); ++f)
 			{
 				astr lFileData;
-				char** lData = 0;
+				char* lData = 0;
 				int64 lDataSize = 0;
-				const str lFilename = Path::JoinPath(lDocDir, lFilename);
-				if (DiskFile::Load(lFilename, (void**)lData, lDataSize) == IO_OK)
+				const str lFilename = Path::JoinPath(lDocDir, *f);
+				if (DiskFile::Load(lFilename, (void**)&lData, lDataSize) == IO_OK)
 				{
-					lFileData.append(*lData, (size_t)lDataSize);
+					lFileData.append(lData, (size_t)lDataSize);
 				}
 				lCommand = WriteCommand(pSocket, 'r', lFileData);
 			}
