@@ -45,8 +45,9 @@ namespace TrabantSim
 
 
 
-class Object;
+class FileServer;
 class Light;
+class Object;
 
 
 
@@ -221,6 +222,7 @@ protected:
 	SocketAddress mLastRemoteAddress;
 	UdpSocket* mCommandSocket;
 	MemberThread<TrabantSimManager>* mCommandThread;
+	FileServer* mFileServer;
 	UiTbc::Dialog* mUserInfoDialog;
 	UiTbc::Label* mUserInfoLabel;
 	logclass();

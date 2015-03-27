@@ -81,7 +81,7 @@ str SystemManager::GetCurrentDirectory()
 	lBuffer[0] = 0;
 	if (::getcwd(lBuffer, sizeof(lBuffer)) == NULL)
 	{
-		mLog.AError("Failed in GetCurrentDirectory()");
+		mLog.AError("Failed to GetCurrentDirectory()");
 	}
 	str lString(strutil::Encode(astr(lBuffer)));
 	return (lString);
@@ -89,7 +89,18 @@ str SystemManager::GetCurrentDirectory()
 
 str SystemManager::GetUserDirectory()
 {
-	return (strutil::Encode(astr(::getenv("HOME"))));
+	return strutil::Encode(astr(::getenv("HOME")));
+}
+
+str SystemManager::GetDocumentsDirectory()
+{
+#ifdef LEPRA_IOS
+	NSArray* lPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString* lPath = [lPaths objectAtIndex:0];
+	return MacLog::Decode(lPath);
+#else // Mac
+	return Path::Join(GetUserDirectory(), _T("Documents"));
+#endif
 }
 
 str SystemManager::GetIoDirectory(const str& pAppName)

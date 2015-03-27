@@ -34,6 +34,7 @@ public:
 	static str GetRootDirectory();
 	static str GetCurrentDirectory();
 	static str GetUserDirectory();
+	static str GetDocumentsDirectory();
 	static str GetIoDirectory(const str& pAppName);
 	static str GetDataDirectoryFromPath(const str& pArgv0);
 	static str GetLoginName();

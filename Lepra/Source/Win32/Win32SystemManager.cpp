@@ -119,7 +119,7 @@ str SystemManager::GetCurrentDirectory()
 	lBuffer[0] = 0;
 	if (::_getcwd(lBuffer, sizeof(lBuffer)) == NULL)
 	{
-		mLog.AError("Failed in GetCurrentDirectory()");
+		mLog.AError("Failed to GetCurrentDirectory()");
 	}
 
 	str lString(strutil::Encode(astr(lBuffer)));
@@ -133,11 +133,23 @@ str SystemManager::GetUserDirectory()
 	tchar lHomeDir[2048];
 	if (FAILED(::SHGetFolderPath(0, CSIDL_PROFILE, NULL, 0, lHomeDir)))
 	{
-		mLog.AWarning("Failed in GetUserDirectory()");
+		mLog.AWarning("Failed to GetUserDirectory()");
 	}
 	str lString(lHomeDir);
 	lString = strutil::ReplaceAll(lString, _T('\\'), _T('/'));
-	return (lString);
+	return lString;
+}
+
+str SystemManager::GetDocumentsDirectory()
+{
+	tchar lDocsDir[2048];
+	if (FAILED(::SHGetFolderPath(0, CSIDL_MYDOCUMENTS, NULL, 0, lDocsDir)))
+	{
+		mLog.AWarning("Failed to GetDocumentsDirectory()");
+	}
+	str lString(lDocsDir);
+	lString = strutil::ReplaceAll(lString, _T('\\'), _T('/'));
+	return lString;
 }
 
 str SystemManager::GetIoDirectory(const str& pAppName)
@@ -145,7 +157,7 @@ str SystemManager::GetIoDirectory(const str& pAppName)
 	tchar lAppDir[2048];
 	if (FAILED(::SHGetFolderPath(0, CSIDL_APPDATA, NULL, 0, lAppDir)))
 	{
-		mLog.AWarning("Failed in GetIoDirectory()");
+		mLog.AWarning("Failed to GetIoDirectory()");
 	}
 	str lIoDir(lAppDir);
 	lIoDir = strutil::ReplaceAll(lIoDir, _T('\\'), _T('/'));

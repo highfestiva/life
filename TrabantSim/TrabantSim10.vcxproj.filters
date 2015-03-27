@@ -32,6 +32,9 @@
     <ClCompile Include="PhysGfxObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FileServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TrabantSim.h">
@@ -87,9 +90,6 @@
     <None Include="TrabantSim.mm">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="EditViewController.m">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="PythonTextView.m">
       <Filter>Source Files</Filter>
     </None>
@@ -106,6 +106,9 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="CYRTextView.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="EditViewController.mm">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

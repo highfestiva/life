@@ -45,14 +45,15 @@
 +API: replace all "_object" to simply "".
 +Simulator: release mouse when pressing ESC! (Pause button?)
 +Simulator/API: Add support for capsules.
++Create editor in iOS.
++Port Python 3.4 to iOS. Github?
 
-Editor: use F6 for deploy to alternate target host! Message box.
+iOS: add synchronization file server.
+Editor: add (foreground) device synchronization. Message box.
+Editor: use F6 for deploy to alternate target host! Message box. Synchronize in background.
 Simulator: cube always pushes capsules to +x for some reason. Push upwards? Towards cylinder direction?
-
 Make web page for Trabant.
 Fix starting orientation in iOS.
-Create editor in iOS.
-Port Python 3.4 to iOS. Github?
 Add outline rendering for iOS! That way it won't look like crap!
 Prototype: Limbo gfx
 Prototype: Fire Power

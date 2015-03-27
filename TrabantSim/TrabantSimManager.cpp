@@ -31,11 +31,12 @@
 #include "../UiTbc/Include/UiMaterial.h"
 #include "../UiTbc/Include/UiParticleRenderer.h"
 #include "../UiTbc/Include/UiTriangleBasedGeometry.h"
+#include "FileServer.h"
+#include "Light.h"
 #include "Object.h"
+#include "RtVar.h"
 #include "TrabantSim.h"
 #include "TrabantSimConsoleManager.h"
-#include "RtVar.h"
-#include "Light.h"
 #include "Version.h"
 
 #define BG_COLOR		Color(25, 35, 45, 190)
@@ -96,6 +97,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mIsControlTimeout(false),
 	mCommandSocket(0),
 	mCommandThread(0),
+	mFileServer(0),
 	mUserInfoDialog(0),
 	mUserInfoLabel(0)
 {
@@ -116,12 +118,17 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	}
 	mLocalAddress = lAddress;
 	mLastRemoteAddress = lAddress;
+
+	mFileServer = new FileServer;
+
 	Resume(true);
 }
 
 TrabantSimManager::~TrabantSimManager()
 {
 	CloseConnection();
+	delete mFileServer;
+	mFileServer = 0;
 
 	Close();
 
@@ -133,8 +140,13 @@ TrabantSimManager::~TrabantSimManager()
 
 void TrabantSimManager::Resume(bool pHard)
 {
+	(void)pHard;
 	mIsControlTimeout = false;
 	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+
+#ifdef LEPRA_TOUCH
+	mFileServer->Start();
+#endif // Touch device.
 
 	if (mCommandSocket)
 	{
@@ -1205,7 +1217,7 @@ bool TrabantSimManager::Open()
 		mUiManager->GetDesktopWindow()->AddChild(lButton, x, y);
 		double lFontHeight;
 		v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
-		lButton->SetPreferredSize(lFontHeight*7/3,lFontHeight);
+		lButton->SetPreferredSize((int)(lFontHeight*7/3), (int)lFontHeight);
 		lButton->SetRoundedRadius(4);
 		lButton->SetVisible(true);
 	}
@@ -1248,7 +1260,9 @@ void TrabantSimManager::CloseConnection()
 		delete mCommandSocket;
 		mCommandSocket = 0;
 	}
+	mFileServer->Stop();
 }
+
 void TrabantSimManager::SetIsQuitting()
 {
 	((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->SetVisible(false);
@@ -1527,7 +1541,7 @@ void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 }
 
-void TrabantSimManager::OnBackButton(UiTbc::Button* pButton)
+void TrabantSimManager::OnBackButton(UiTbc::Button*)
 {
 	FoldSimulator();
 }

@@ -51,12 +51,12 @@ ball = create_sphere(pos=(0,0,-500), radius=0.5, mass=1)
 
 a = 0
 while loop():
-	cam(angle=(0,0,a))
-	a += 0.002
+    cam(angle=(0,0,a))
+    a += 0.002
 
-	if taps():
-		tap = taps()[0]
-		pos = tap.pos3d(1)
-		vel = (tap.pos3d(5) - pos)*5
-		ball.pos(pos)
-		ball.vel(vel, avel=(0,0,0))
+    if taps():
+        tap = taps()[0]
+        pos = tap.pos3d(1)
+        vel = (tap.pos3d(5) - pos)*5
+        ball.pos(pos)
+        ball.vel(vel, avel=(0,0,0))

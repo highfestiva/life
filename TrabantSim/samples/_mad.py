@@ -9,27 +9,27 @@ trabant_init()
 
 
 def mix_args(aa,bb):
-	for a in aa:
-		for b in bb:
-			for i in range(len(a)):
-				for j in range(i,len(a)+1):
-					if i == j: yield True,a
-					yield False,a[:i] + b[i:j] + a[j:]
-	yield True,a
+    for a in aa:
+        for b in bb:
+            for i in range(len(a)):
+                for j in range(i,len(a)+1):
+                    if i == j: yield True,a
+                    yield False,a[:i] + b[i:j] + a[j:]
+    yield True,a
 
 def protect(f, allow_fail, *args):
-	try:
-		return f(*args)
-	except (ValueError,TypeError,AttributeError,AssertionError,IOError,TypeError) as e:
-		if not allow_fail:
-			print(f)
-			print(*args)
-			print('Should pass, but got:')
-			raise e
+    try:
+        return f(*args)
+    except (ValueError,TypeError,AttributeError,AssertionError,IOError,TypeError) as e:
+        if not allow_fail:
+            print(f)
+            print(*args)
+            print('Should pass, but got:')
+            raise e
 
 def testrun(f,good,bad):
-	print(f.__name__)
-	return [protect(f, not ok, *args) for ok,args in mix_args(good,bad)][-1]
+    print(f.__name__)
+    return [protect(f, not ok, *args) for ok,args in mix_args(good,bad)][-1]
 
 
 good = [(True,),(False,)]
@@ -59,8 +59,8 @@ o = testrun(create_ascii_object, good, bad)
 good = [((1,2,3),5,o,(1,2,3),45,True,(-3,-2,-1))]
 bad = [((1,2,),{},-1,(2,3),-45,-1,(-3,-2,-1,5))]
 testrun(cam, good, bad)
-for _ in range(2):	# Reset cam twice for upcoming tests. Twice since it otherwise moves at the speed of light following the rouge object.
-	cam(angle=(0,0,0),distance=20,target=0,pos=(0,0,0),fov=45,target_relative_angle=False,light_angle=(-1,0,-0.1))
+for _ in range(2):    # Reset cam twice for upcoming tests. Twice since it otherwise moves at the speed of light following the rouge object.
+    cam(angle=(0,0,0),distance=20,target=0,pos=(0,0,0),fov=45,target_relative_angle=False,light_angle=(-1,0,-0.1))
 
 good = [('#333',),('#FFAACC',),((0,1,0),)]
 bad = [((1,2,3,),{},(-1,))]

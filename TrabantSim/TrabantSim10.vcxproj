@@ -332,6 +332,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileServer.cpp" />
     <ClCompile Include="PhysGfxObject.cpp" />
     <ClCompile Include="TrabantSim.cxx">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -370,7 +371,7 @@
     <None Include="CYRTextStorage.m" />
     <None Include="CYRTextView.m" />
     <None Include="CYRToken.m" />
-    <None Include="EditViewController.m" />
+    <None Include="EditViewController.mm" />
     <None Include="ListViewController.m" />
     <None Include="PythonTextView.m" />
     <None Include="TrabantSim.mm" />

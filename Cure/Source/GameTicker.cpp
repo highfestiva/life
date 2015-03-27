@@ -36,11 +36,13 @@ ApplicationTicker::~ApplicationTicker()
 
 void ApplicationTicker::Resume(bool pHard)
 {
+	(void)pHard;
 	HiResTimer::StepCounterShadow();
 }
 
 void ApplicationTicker::Suspend(bool pHard)
 {
+	(void)pHard;
 }
 	
 void ApplicationTicker::Profile()

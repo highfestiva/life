@@ -585,9 +585,6 @@
     <ClCompile Include="Source\Posix\PosixBusLock.cpp">
       <Filter>Source Files\Posix</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Posix\PosixSystemManager.cpp">
-      <Filter>Source Files\Posix</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Posix\MacLog.mm">
       <Filter>Source Files\Posix</Filter>
     </ClCompile>
@@ -623,6 +620,12 @@
     </ClCompile>
     <ClCompile Include="Source\TcpMuxSocket.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Posix\PosixSystemManager.cxx">
+      <Filter>Source Files\Posix</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Posix\MacSystemManager.mm">
+      <Filter>Source Files\Posix</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

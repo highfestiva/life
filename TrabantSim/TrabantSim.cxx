@@ -21,7 +21,7 @@
 #include "PythonRunner.h"
 #endif // iOS
 #include "../UiTbc/Include/UiTbc.h"
-#include "TrabantSim.h"
+#include "AnimatedApp.h"
 #include "TrabantSimTicker.h"
 #include "RtVar.h"
 #include "Version.h"
@@ -145,6 +145,7 @@ void TrabantSim::Destroy()
 bool TrabantSim::MainLoop()
 {
 #ifndef LEPRA_IOS
+	mActiveCounter = 1;
 	return Parent::MainLoop();
 #else // iOS
 	// iOS has uses timer callbacks instead of a main loop.
