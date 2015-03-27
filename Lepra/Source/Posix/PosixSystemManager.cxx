@@ -8,6 +8,7 @@
 #include <sys/sysctl.h>
 #include <stdlib.h>
 #include <termios.h>
+#include "../../Include/Posix/MacLog.h"
 #include "../../Include/DiskFile.h"
 #include "../../Include/JsonString.h"
 #include "../../Include/LepraOS.h"

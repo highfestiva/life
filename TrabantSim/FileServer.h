@@ -24,10 +24,17 @@ namespace TrabantSim
 
 
 
+struct SyncDelegate
+{
+	virtual void DidSync() = 0;
+};
+
+
+
 class FileServer
 {
 public:
-	FileServer();
+	FileServer(SyncDelegate* pSyncDelegate);
 	virtual ~FileServer();
 	void Start();
 	void Stop();
@@ -40,6 +47,7 @@ private:
 
 	MemberThread<FileServer>* mAcceptThread;
 	TcpListenerSocket* mAcceptSocket;
+	SyncDelegate* mSyncDelegate;
 };
 
 

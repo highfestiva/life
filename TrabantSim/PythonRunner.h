@@ -20,6 +20,7 @@ class PythonRunner
 {
 public:
 	static void Run(const wchar_t* pDirectory, const wchar_t* pFilename);
+	static bool IsRunning();
 	static void Break();
 	static astr GetStdOut();
 	static void ClearStdOut();

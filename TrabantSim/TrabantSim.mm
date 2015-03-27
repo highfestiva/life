@@ -37,9 +37,9 @@
 	// Initialize the IDE.
 	UIWindow* window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.window = window;	// Retain it!
-	ListViewController* listController = [ListViewController new];
-	listController.title = @"Prototypes";
-	UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:listController];
+	self.listController = [ListViewController new];
+	self.listController.title = @"Prototypes";
+	UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:self.listController];
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
 		EditViewController* editController = [EditViewController new];

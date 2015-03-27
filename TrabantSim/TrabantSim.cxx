@@ -17,6 +17,8 @@
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
 #ifdef LEPRA_IOS
+#include "../UiLepra/Include/Mac/EAGLView.h"
+#include "../UiLepra/Include/Mac/RotatingController.h"
 #include "../UiLepra/Include/Mac/UiMacDisplayManager.h"
 #include "PythonRunner.h"
 #endif // iOS
@@ -42,6 +44,16 @@ void FoldSimulator()
 	TrabantSim::mApp->FoldSimulator();
 }
 
+void UnfoldSimulator()
+{
+	TrabantSim::mApp->UnfoldSimulator();
+}
+	
+void DidSyncFiles()
+{
+	TrabantSim::mApp->DidSyncFiles();
+}
+
 
 
 TrabantSim* TrabantSim::GetApp()
@@ -52,7 +64,7 @@ TrabantSim* TrabantSim::GetApp()
 
 
 TrabantSim::TrabantSim(const strutil::strvec& pArgumentList):
-	Parent(_T("TrabantSim"), pArgumentList),
+	Parent(_T("Trabant"), pArgumentList),
 	mUiManager(0),
 	mActiveCounter(-100),
 	mIsInTick(false)
@@ -177,6 +189,15 @@ bool TrabantSim::Tick()
 
 void TrabantSim::Resume(bool pHard)
 {
+	if (pHard)
+	{
+		// If we're only coming back from background all we don't
+		// want to start ticking the simulator.
+		mGameTicker->Resume(true);	// Resume's hard/soft has no effect.
+		mActiveCounter = 0;
+		return;
+	}
+
 	if (++mActiveCounter != 1)
 	{
 		return;
@@ -186,48 +207,90 @@ void TrabantSim::Resume(bool pHard)
 	[mAnimatedApp startTick];
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
-	mGameTicker->Resume(pHard);
+	mGameTicker->Resume(false);	// Resume's hard/soft has no effect.
 }
 
 void TrabantSim::Suspend(bool pHard)
 {
 	if (pHard)
 	{
-		mGameTicker->Suspend(pHard);
+		mActiveCounter = 0;
 	}
-	if (--mActiveCounter != 0)
+	else
 	{
-		return;
+		if (--mActiveCounter != 0)
+		{
+			return;
+		}
+		if (mIsInTick && !pHard)
+		{
+			return;
+		}
 	}
-	if (mIsInTick)
-	{
-		return;
-	}
-
-	mGameTicker->Suspend(pHard);
+#ifdef LEPRA_IOS
+	const bool lIsRunningLocally = PythonRunner::IsRunning();
+#endif // iOS
+	mGameTicker->Suspend(pHard);	// Hard means cut the chord, soft just sends "disconnect" to remote end.
 	mUiManager->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
 #endif // iOS
+	if (!lIsRunningLocally)
+	{
+		FoldSimulator();
+	}
 }
 
 void TrabantSim::FoldSimulator()
 {
 #ifdef LEPRA_IOS
-	astr lStdOut = PythonRunner::GetStdOut();
-	Suspend(false);
-	UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
-	[window setHidden:YES];
-	[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
-	[TrabantSim::TrabantSim::mApp->mAnimatedApp.window makeKeyAndVisible];
-	PythonRunner::Break();
-	if (!lStdOut.empty())
-	{
-		[TrabantSim::TrabantSim::mApp->mAnimatedApp handleStdOut:lStdOut];
-	}
+	dispatch_async(dispatch_get_main_queue(), ^{
+		const int lWasActive = mActiveCounter;
+		astr lStdOut = PythonRunner::GetStdOut();
+		Suspend(false);
+		UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
+		[window setHidden:YES];
+		[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
+		[TrabantSim::TrabantSim::mApp->mAnimatedApp.window makeKeyAndVisible];
+		PythonRunner::Break();
+		if (!lStdOut.empty() && lWasActive > 0)
+		{
+			[TrabantSim::TrabantSim::mApp->mAnimatedApp handleStdOut:lStdOut];
+		}
+	});
 #endif // iOS
 }
 
+void TrabantSim::UnfoldSimulator()
+{
+#ifdef LEPRA_IOS
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[TrabantSim::TrabantSim::mAnimatedApp.window setHidden:YES];
+		UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
+		if (!window.rootViewController)
+		{
+			RotatingController* controller = [[RotatingController alloc] init];
+			controller.navigationBarHidden = YES;
+			controller.view = [EAGLView sharedView];
+			window.rootViewController = controller;
+		}
+		[window makeKeyAndVisible];
+		TrabantSim::TrabantSim::mApp->mActiveCounter = 0;	// Make sure no lost event causes a halt.
+		TrabantSim::TrabantSim::mApp->Resume(false);
+		[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+		PythonRunner::ClearStdOut();
+	});
+#endif // iOS
+}
+
+void TrabantSim::DidSyncFiles()
+{
+#ifdef LEPRA_IOS
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[TrabantSim::TrabantSim::mAnimatedApp.listController reloadPrototypes];
+	});
+#endif // iOS
+}
 void TrabantSim::SavePurchase()
 {
 }
@@ -236,12 +299,12 @@ void TrabantSim::SavePurchase()
 
 str TrabantSim::GetTypeName() const
 {
-	return _T("Viewer");
+	return _T("Simulator");
 }
 
 str TrabantSim::GetVersion() const
 {
-	return _T(VIEWER_VERSION);
+	return _T(TRABANT_VERSION);
 }
 
 Cure::ApplicationTicker* TrabantSim::CreateTicker() const

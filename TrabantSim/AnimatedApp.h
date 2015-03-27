@@ -9,6 +9,7 @@
 #include "../Life/LifeApplication.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
+#include "ListViewController.h"
 #include "RtVar.h"
 #include "TrabantSim.h"
 #include "Version.h"
@@ -41,6 +42,7 @@ using namespace Lepra;
 }
 
 @property (nonatomic, strong) UIWindow* window;
+@property (nonatomic, strong) ListViewController* listController;
 
 -(id) init:(Canvas*)pCanvas;
 -(void) dealloc;
@@ -84,6 +86,8 @@ public:
 	virtual void Resume(bool pHard);
 	virtual void Suspend(bool pHard);
 	void FoldSimulator();
+	void UnfoldSimulator();
+	void DidSyncFiles();
 
 	void SavePurchase();
 	str GetTypeName() const;

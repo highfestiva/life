@@ -270,7 +270,6 @@ RuntimeVariableScope::~RuntimeVariableScope()
 {
 	{
 		ScopeLock lLock(&mLock);
-		VariableTable::iterator x = mVariableTable.begin();
 		while (!mVariableTable.empty())
 		{
 			RuntimeVariable* lVariable = mVariableTable.begin()->second;

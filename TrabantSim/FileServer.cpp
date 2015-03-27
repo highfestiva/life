@@ -19,9 +19,10 @@ namespace TrabantSim
 
 
 
-FileServer::FileServer():
+FileServer::FileServer(SyncDelegate* pSyncDelegate):
 	mAcceptThread(0),
-	mAcceptSocket(0)
+	mAcceptSocket(0),
+	mSyncDelegate(pSyncDelegate)
 {
 }
 
@@ -39,7 +40,7 @@ void FileServer::Start()
 	SocketAddress lAddress;
 	lAddress.Resolve(_T("0.0.0.0:2541"));
 	mAcceptSocket = new TcpListenerSocket(lAddress, true);
-	mAcceptThread = new MemberThread<FileServer>(_T("FileServerAcceptor"));
+	mAcceptThread = new MemberThread<FileServer>("FileServerAcceptor");
 	mAcceptThread->Start(this, &FileServer::AcceptThreadEntry);
 }
 
@@ -84,7 +85,17 @@ char FileServer::ReadCommand(TcpSocket* pSocket, astr& pData)
 		{
 			return lCommand[0];
 		}
-		if (pSocket->Receive(&pData[0], lDataLength))
+		int lReadBytes = 0;
+		while (lReadBytes < lDataLength)
+		{
+			int lBytes = pSocket->Receive(&pData[lReadBytes], lDataLength-lReadBytes);
+			if (lBytes < 0)
+			{
+				break;
+			}
+			lReadBytes += lBytes;
+		}
+		if (lReadBytes == lDataLength)
 		{
 			return lCommand[0];
 		}
@@ -106,7 +117,17 @@ char FileServer::WriteCommand(TcpSocket* pSocket, char pCommand, const astr& pDa
 	{
 		::memcpy(&lWriteBuffer[5], &pData[0], pData.size());
 	}
-	if (pSocket->Send(&lWriteBuffer[0], lWriteBuffer.size()) == (int)lWriteBuffer.size())
+	int lWrittenBytes = 0;
+	while (lWrittenBytes < lWriteBuffer.size())
+	{
+		int lBytes = pSocket->Send(&lWriteBuffer[lWrittenBytes], (int)lWriteBuffer.size() - lWrittenBytes);
+		if (lBytes < 0)
+		{
+			break;
+		}
+		lWrittenBytes += lBytes;
+	}
+	if (lWrittenBytes == lWriteBuffer.size())
 	{
 		return '+';
 	}
@@ -118,6 +139,7 @@ void FileServer::ClientCommandEntry(TcpSocket* pSocket)
 	char lCommand = ' ';
 	astr lArgument;
 	const str lDocDir = SystemManager::GetDocumentsDirectory();
+	astr lFileData;
 	while (lCommand != 'q' && mAcceptSocket)
 	{
 		lCommand = ReadCommand(pSocket, lArgument);
@@ -139,7 +161,7 @@ void FileServer::ClientCommandEntry(TcpSocket* pSocket)
 			WriteCommand(pSocket, 'l', lFilenames);
 			for (strutil::strvec::iterator f = lFiles.begin(); f != lFiles.end(); ++f)
 			{
-				astr lFileData;
+				lFileData.clear();
 				char* lData = 0;
 				int64 lDataSize = 0;
 				const str lFilename = Path::JoinPath(lDocDir, *f);
@@ -147,26 +169,38 @@ void FileServer::ClientCommandEntry(TcpSocket* pSocket)
 				{
 					lFileData.append(lData, (size_t)lDataSize);
 				}
+				delete lData;
 				lCommand = WriteCommand(pSocket, 'r', lFileData);
 			}
 		}
 		else if (lCommand == 'w')
 		{
-			astr lFilename = lArgument;
+			str lFilename = strutil::Encode(lArgument);
 			astr lContents;
 			lCommand = ReadCommand(pSocket, lContents);
 			bool lOk = false;
 			if (lCommand == 'b')
 			{
 				const str lFilePath = Path::JoinPath(lDocDir, lFilename);
-				DiskFile lWriteFile;
-				if (lWriteFile.Open(lFilePath, DiskFile::MODE_WRITE))
+				if (lContents.empty())
 				{
-					lOk = (lWriteFile.WriteData(&lContents[0], lContents.size()) == IO_OK);
+					lOk = DiskFile::Delete(lFilePath);
+				}
+				else
+				{
+					DiskFile lWriteFile;
+					if (lWriteFile.Open(lFilePath, DiskFile::MODE_WRITE))
+					{
+						lOk = (lWriteFile.WriteData(&lContents[0], lContents.size()) == IO_OK);
+					}
 				}
 			}
 			lCommand = WriteCommand(pSocket, 'w', astr(lOk? "ok":"error"));
 		}
+	}
+	if (mAcceptSocket && mSyncDelegate)
+	{
+		mSyncDelegate->DidSync();
 	}
 }
 
@@ -182,7 +216,7 @@ void FileServer::AcceptThreadEntry()
 		}
 		if (lSocket)
 		{
-			MemberThread<FileServer,TcpSocket*>* lServer = new MemberThread<FileServer,TcpSocket*>(_T("FileServer"));
+			MemberThread<FileServer,TcpSocket*>* lServer = new MemberThread<FileServer,TcpSocket*>("FileServer");
 			lServer->RequestSelfDestruct();
 			lServer->Start(this, &FileServer::ClientCommandEntry, lSocket);
 		}

@@ -8,4 +8,4 @@
 
 #include "../Lepra/Include/LepraTypes.h"
 
-#define VIEWER_VERSION "0.8"
+#define TRABANT_VERSION "0.9"

@@ -213,7 +213,6 @@
 		B19A152F13A124940051A61C /* PngLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F013A124940051A61C /* PngLoader.cpp */; };
 		B19A153013A124940051A61C /* PosixAntiCrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F213A124940051A61C /* PosixAntiCrack.cpp */; };
 		B19A153113A124940051A61C /* PosixBusLock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F313A124940051A61C /* PosixBusLock.cpp */; };
-		B19A153213A124940051A61C /* PosixSystemManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F413A124940051A61C /* PosixSystemManager.cpp */; };
 		B19A153413A124940051A61C /* ProgressCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F613A124940051A61C /* ProgressCallback.cpp */; };
 		B19A153513A124940051A61C /* Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F713A124940051A61C /* Random.cpp */; };
 		B19A153613A124940051A61C /* Reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14F813A124940051A61C /* Reader.cpp */; };
@@ -534,6 +533,8 @@
 		B1F3C40E16E0029C00B2EFB5 /* UiParticleLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */; };
 		B1F61C861AA8EE9B00D38387 /* libpython_sim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B1F61C851AA8EE9B00D38387 /* libpython_sim.a */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
+		B1FBD9811AC58E9B009C3973 /* MacSystemManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1FBD9801AC58E9B009C3973 /* MacSystemManager.mm */; };
+		B1FBD9831AC58EB7009C3973 /* FileServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1FBD9821AC58EB7009C3973 /* FileServer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -748,7 +749,6 @@
 		B19A14F013A124940051A61C /* PngLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PngLoader.cpp; sourceTree = "<group>"; };
 		B19A14F213A124940051A61C /* PosixAntiCrack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixAntiCrack.cpp; sourceTree = "<group>"; };
 		B19A14F313A124940051A61C /* PosixBusLock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixBusLock.cpp; sourceTree = "<group>"; };
-		B19A14F413A124940051A61C /* PosixSystemManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixSystemManager.cpp; sourceTree = "<group>"; };
 		B19A14F613A124940051A61C /* ProgressCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProgressCallback.cpp; sourceTree = "<group>"; };
 		B19A14F713A124940051A61C /* Random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Random.cpp; sourceTree = "<group>"; };
 		B19A14F813A124940051A61C /* Reader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Reader.cpp; sourceTree = "<group>"; };
@@ -1249,6 +1249,8 @@
 		B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiParticleLoader.cpp; path = ../../UiCure/Source/UiParticleLoader.cpp; sourceTree = SOURCE_ROOT; };
 		B1F61C851AA8EE9B00D38387 /* libpython_sim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpython_sim.a; path = "../../../RnD/python-embedded/libpython_sim.a"; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
+		B1FBD9801AC58E9B009C3973 /* MacSystemManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacSystemManager.mm; sourceTree = "<group>"; };
+		B1FBD9821AC58EB7009C3973 /* FileServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileServer.cpp; sourceTree = "<group>"; };
 		B1FFC8C81A9F52F6002368AA /* TrabantSim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrabantSim.h; sourceTree = "<group>"; };
 		B1FFC8C91A9F547E002368AA /* AnimatedApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AnimatedApp.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1567,6 +1569,7 @@
 		B19A146913A122DE0051A61C /* Trabant */ = {
 			isa = PBXGroup;
 			children = (
+				B1FBD9821AC58EB7009C3973 /* FileServer.cpp */,
 				B173DCED1AB2E53500928E13 /* StdOutViewController.mm */,
 				B173DCEC1AB2E52500928E13 /* StdOutViewController.h */,
 				B1148ADF1AAB328500B313B6 /* BackButtonHandler.h */,
@@ -1695,11 +1698,11 @@
 		B19A14F113A124940051A61C /* Posix */ = {
 			isa = PBXGroup;
 			children = (
+				B1FBD9801AC58E9B009C3973 /* MacSystemManager.mm */,
 				B1D37F37166AB53A00536CE5 /* MacThread.mm */,
 				B1BC733C140EEAEE003F70F3 /* MacLog.mm */,
 				B19A14F213A124940051A61C /* PosixAntiCrack.cpp */,
 				B19A14F313A124940051A61C /* PosixBusLock.cpp */,
-				B19A14F413A124940051A61C /* PosixSystemManager.cpp */,
 			);
 			path = Posix;
 			sourceTree = "<group>";
@@ -2652,7 +2655,6 @@
 				B19A152F13A124940051A61C /* PngLoader.cpp in Sources */,
 				B19A153013A124940051A61C /* PosixAntiCrack.cpp in Sources */,
 				B19A153113A124940051A61C /* PosixBusLock.cpp in Sources */,
-				B19A153213A124940051A61C /* PosixSystemManager.cpp in Sources */,
 				B19A153413A124940051A61C /* ProgressCallback.cpp in Sources */,
 				B19A153513A124940051A61C /* Random.cpp in Sources */,
 				B19A153613A124940051A61C /* Reader.cpp in Sources */,
@@ -2689,6 +2691,7 @@
 				B19A217F13A127EC0051A61C /* alutInit.c in Sources */,
 				B19A218013A127EC0051A61C /* alutInputStream.c in Sources */,
 				B19A218113A127EC0051A61C /* alutLoader.c in Sources */,
+				B1FBD9831AC58EB7009C3973 /* FileServer.cpp in Sources */,
 				B19A218213A127EC0051A61C /* alutOutputStream.c in Sources */,
 				B19A218313A127EC0051A61C /* alutUtil.c in Sources */,
 				B19A218413A127EC0051A61C /* alutVersion.c in Sources */,
@@ -2841,6 +2844,7 @@
 				B19A239B13A127EC0051A61C /* ray.cpp in Sources */,
 				B19A239C13A127EC0051A61C /* rotation.cpp in Sources */,
 				B19A239D13A127EC0051A61C /* sphere.cpp in Sources */,
+				B1FBD9811AC58E9B009C3973 /* MacSystemManager.mm in Sources */,
 				B19A239E13A127EC0051A61C /* step.cpp in Sources */,
 				B19A239F13A127EC0051A61C /* stepfast.cpp in Sources */,
 				B19A23A013A127EC0051A61C /* testing.cpp in Sources */,

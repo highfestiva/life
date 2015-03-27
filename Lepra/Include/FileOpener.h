@@ -13,6 +13,7 @@ class File;
 class FileOpener
 {
 public:
+	virtual ~FileOpener() {};
 	virtual File* Open(const str& pFilename) = 0;
 };
 

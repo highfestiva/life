@@ -53,6 +53,11 @@ void PythonRunner::Run(const wchar_t* pDirectory, const wchar_t* pFilename)
 	mStdOutReader.Start(&PythonRunner::StdOutReadEntry, 0);
 }
 
+bool PythonRunner::IsRunning()
+{
+	return mPythonWorker.IsRunning();
+}
+
 void PythonRunner::Break()
 {
 	if (!mIsStopping && mPythonWorker.IsRunning())

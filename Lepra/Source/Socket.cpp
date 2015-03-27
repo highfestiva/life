@@ -485,6 +485,7 @@ TcpSocket::TcpSocket(s_socket pSocket, const SocketAddress& pTargetAddress,
 	mServerSocket(pServerSocket)
 {
 	log_atrace("TcpSocket()");
+	InitSocket(mSocket, 32*1024, false);
 }
 
 TcpSocket::~TcpSocket()

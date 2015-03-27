@@ -80,15 +80,15 @@ testrun(gravity, good, bad)
 
 good = [([(0,0,0),(1,0,0),(0,0,-1),(1,1,-1)], (0,1,2,2,1,3), (-1,-1,-1), (1,0,0,0), (-1,-1,-1), (1,1,1), 1, '#0ff', 'checker', False, None)]
 bad = [(['a',(1,0,0),[]], (0,1,-2,'a'), [], (), {}, (0,), -1, 'fun', good, -3, '')]
-testrun(create_mesh_object, good, bad)
+testrun(create_mesh, good, bad)
 
 good = [((1,0,0), (1,0,0,0), 2, (-1,-1,-1), (5,4,3), 1e10, 'smooth', '#f00', False, orthoscale((1,2,3)))]
 bad = [('a', {}, (1,), [], (0,1,-2,'a'), [], {}, 0, -3, str)]
-testrun(create_cube_object, good, bad)
+testrun(create_cube, good, bad)
 
 good = [((0,-1,0), 2, (1,1,1), (-5,4,-3), 1e-10, '#369', 'flat', False, orthoscale((2,2,2)))]
 bad = [('a', (1,), [], (0,1,-2,'a'), [], '_', {}, -3, list)]
-testrun(create_sphere_object, good, bad)
+testrun(create_sphere, good, bad)
 
 good = [(o, [((1,1,1),(1,0,0,0))], 'flat', False)]
 bad = [('a', (1,), [], '_')]

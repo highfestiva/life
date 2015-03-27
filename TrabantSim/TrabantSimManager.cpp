@@ -50,6 +50,18 @@ namespace TrabantSim
 
 
 void FoldSimulator();
+void UnfoldSimulator();
+void DidSyncFiles();
+
+
+
+struct AppSyncDelegate: SyncDelegate
+{
+	virtual void DidSync()
+	{
+		DidSyncFiles();
+	};
+};
 
 
 
@@ -119,7 +131,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mLocalAddress = lAddress;
 	mLastRemoteAddress = lAddress;
 
-	mFileServer = new FileServer;
+	mFileServer = new FileServer(new AppSyncDelegate);
 
 	Resume(true);
 }
@@ -1116,6 +1128,15 @@ void TrabantSimManager::CommandLoop()
 			}
 			continue;
 		}
+#ifdef LEPRA_TOUCH
+		if (!mIsControlled || mIsControlTimeout)
+		{
+			if (mLastRemoteAddress.GetIP().GetAsString() != _T("127.0.0.1"))
+			{
+				UnfoldSimulator();
+			}
+		}
+#endif // Touch device.
 		mIsControlled = true;
 		mIsControlTimeout = false;
 		while (mIsPaused)
@@ -1170,10 +1191,12 @@ bool TrabantSimManager::IsControlled()
 		{
 #ifdef LEPRA_TOUCH
 			if (mLastRemoteAddress.GetIP().GetAsString() != _T("127.0.0.1"))
-#endif // Touch device.
 			{
-				v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
+				FoldSimulator();
 			}
+#else // Computer
+			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
+#endif // Touch device.
 		}
 		mWasControlled = lIsControlled;
 	}

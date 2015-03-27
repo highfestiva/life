@@ -5,9 +5,6 @@
 
 
 #import "EditViewController.h"
-#include "../UiLepra/Include/Mac/EAGLView.h"
-#include "../UiLepra/Include/Mac/RotatingController.h"
-#include "../UiLepra/Include/Mac/UiMacDisplayManager.h"
 #import "AnimatedApp.h"
 #include "PythonRunner.h"
 #import "PythonTextView.h"
@@ -209,19 +206,8 @@ bool gBackspaceToLinefeed = false;
 {
 	[self.view endEditing:YES];
 	[self saveIfChanged];
-	[self.view.window setHidden:YES];
 
-	UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
-	if (!window.rootViewController) {
-		RotatingController* controller = [[RotatingController alloc] init];
-		controller.navigationBarHidden = YES;
-		controller.view = [EAGLView sharedView];
-		window.rootViewController = controller;
-	}
-	[window makeKeyAndVisible];
-	TrabantSim::TrabantSim::mApp->mActiveCounter = 0;	// Make sure no lost event causes a halt.
-	TrabantSim::TrabantSim::mApp->Resume(false);
-	[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+	TrabantSim::TrabantSim::mApp->UnfoldSimulator();
 
 	wchar_t appDir[4096];
 	wchar_t filename[4096];

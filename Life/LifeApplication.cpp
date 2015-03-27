@@ -99,7 +99,11 @@ void Application::Init()
 #endif // Debug
 	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
-	str lStartMessage = _T("Starting ") + mBaseName + _T(" ") + GetTypeName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
+	strutil::strvec lNameParts;
+	lNameParts.push_back(mBaseName);
+	lNameParts.push_back(GetTypeName());
+	str lAppName = strutil::Join(lNameParts, _T(" "));
+	str lStartMessage = _T("Starting ") + lAppName + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
 	mLog.RawPrint(LEVEL_HEADLINE, lStartMessage);
 
 	mResourceManager = new Cure::ResourceManager(1);

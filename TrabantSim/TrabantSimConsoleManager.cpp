@@ -517,12 +517,12 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				{
 					int lObjectId = ParamToInt(pParameterVector, 0);
 					bool lLoaded = false;
-					for (int x = 0; !lLoaded && x < 900; ++x)
+					for (int x = 0; !lLoaded && x < 150; ++x)
 					{
 						lLoaded = lManager->IsLoaded(lObjectId);
 						if (!lLoaded)
 						{
-							Thread::Sleep(0.03);
+							Thread::Sleep(0.01);
 						}
 					}
 					if (!lLoaded)
