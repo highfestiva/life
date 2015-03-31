@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from math import radians,tan
-from trabant.math import *
-import trabant.asc2obj
-import trabant.gameapi
-import trabant.objgen
+from .math import *
+import .asc2obj
+import .gameapi
+import .objgen
 import time
 
 

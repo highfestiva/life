@@ -51,7 +51,7 @@ bgcol = vec3(0.4,0.8,1)
 bg(col=bgcol)
 gravity((0,0,0), friction=0, bounce=0.1)
 def create_avatar(pos, col):
-    # Create a snowman. The bottom is the actual avatar, the rest is just for show.
+    # Create a man-like capsule. OK, maybe not man-like but a capsule then.
     avatar = create_capsule(pos, col=col)
     avatar.create_engine(walk_abs_engine, strength=30, max_velocity=3)
     avatar.floortime = time()

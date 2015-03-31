@@ -111,7 +111,7 @@
 
 -(void) copySamples
 {
-	NSString* srcPath = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"/pylib/samples"];
+	NSString* srcPath = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"/pylib/prototypes"];
 	NSDirectoryEnumerator* dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:srcPath];
 	NSString* filename;
 	while ((filename = [dirEnum nextObject])) {
@@ -123,7 +123,7 @@
 
 -(void) restoreSample:(NSString*)filename
 {
-	NSString* srcPath = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"/pylib/samples"];
+	NSString* srcPath = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"/pylib/prototypes"];
 	NSArray* docPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString* dstPath = [docPaths objectAtIndex:0];
 	NSString* srcFile = [srcPath stringByAppendingPathComponent:filename];

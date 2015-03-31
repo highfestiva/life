@@ -4,7 +4,7 @@
 import codecs
 from collections import UserList
 from copy import deepcopy
-from trabant.math import vec3
+from .math import vec3
 
 
 GRID = 0.5

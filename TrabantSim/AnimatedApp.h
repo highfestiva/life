@@ -9,7 +9,6 @@
 #include "../Life/LifeApplication.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiLepra/Include/UiTouchDrag.h"
-#include "ListViewController.h"
 #include "RtVar.h"
 #include "TrabantSim.h"
 #include "Version.h"
@@ -21,6 +20,7 @@
 #import <StoreKit/StoreKit.h>
 #import <CoreMotion/CoreMotion.h>
 #import <iAd/ADInterstitialAd.h>
+#include "ListViewController.h"
 
 
 

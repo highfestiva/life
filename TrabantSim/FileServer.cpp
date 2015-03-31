@@ -118,7 +118,7 @@ char FileServer::WriteCommand(TcpSocket* pSocket, char pCommand, const astr& pDa
 		::memcpy(&lWriteBuffer[5], &pData[0], pData.size());
 	}
 	int lWrittenBytes = 0;
-	while (lWrittenBytes < lWriteBuffer.size())
+	while (lWrittenBytes < (int)lWriteBuffer.size())
 	{
 		int lBytes = pSocket->Send(&lWriteBuffer[lWrittenBytes], (int)lWriteBuffer.size() - lWrittenBytes);
 		if (lBytes < 0)
@@ -127,7 +127,7 @@ char FileServer::WriteCommand(TcpSocket* pSocket, char pCommand, const astr& pDa
 		}
 		lWrittenBytes += lBytes;
 	}
-	if (lWrittenBytes == lWriteBuffer.size())
+	if (lWrittenBytes == (int)lWriteBuffer.size())
 	{
 		return '+';
 	}

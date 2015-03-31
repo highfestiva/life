@@ -234,11 +234,11 @@ void TrabantSim::Suspend(bool pHard)
 	mUiManager->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
-#endif // iOS
 	if (!lIsRunningLocally)
 	{
 		FoldSimulator();
 	}
+#endif // iOS
 }
 
 void TrabantSim::FoldSimulator()

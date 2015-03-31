@@ -349,14 +349,21 @@
     <ClCompile Include="Light.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimatedApp.h" />
+    <ClInclude Include="BackButtonHandler.h" />
+    <ClInclude Include="CreateNewViewController.h" />
     <ClInclude Include="CYRLayoutManager.h" />
     <ClInclude Include="CYRTextStorage.h" />
     <ClInclude Include="CYRTextView.h" />
     <ClInclude Include="CYRToken.h" />
     <ClInclude Include="EditViewController.h" />
+    <ClInclude Include="FileServer.h" />
     <ClInclude Include="ListViewController.h" />
+    <ClInclude Include="pch.h" />
     <ClInclude Include="PhysGfxObject.h" />
+    <ClInclude Include="PythonRunner.h" />
     <ClInclude Include="PythonTextView.h" />
+    <ClInclude Include="StdOutViewController.h" />
     <ClInclude Include="TrabantSim.h" />
     <ClInclude Include="TrabantSimConsoleManager.h" />
     <ClInclude Include="TrabantSimManager.h" />

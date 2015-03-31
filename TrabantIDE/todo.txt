@@ -47,10 +47,11 @@
 +Simulator/API: Add support for capsules.
 +Create editor in iOS.
 +Port Python 3.4 to iOS. Github?
++iOS: add synchronization file server.
++Editor: add (foreground) device synchronization. Message box.
++Editor: use F6 for deploy to alternate target host! Message box. Synchronize in background.
++Editor: load all prototypes if no files opened by default in session.
 
-iOS: add synchronization file server.
-Editor: add (foreground) device synchronization. Message box.
-Editor: use F6 for deploy to alternate target host! Message box. Synchronize in background.
 Simulator: cube always pushes capsules to +x for some reason. Push upwards? Towards cylinder direction?
 Make web page for Trabant.
 Fix starting orientation in iOS.

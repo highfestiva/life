@@ -8,10 +8,10 @@ class socket:
 	def __init__(self):
 		self.s = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM)
 		self.s.setblocking(0)
+		self.timeout = 0.2
 
 	def connect(self, hostport):
 		self.hostport = (_socket.gethostbyname(hostport[0]), hostport[1])
-		self.timeout = 3
 
 	def close(self):
 		try:

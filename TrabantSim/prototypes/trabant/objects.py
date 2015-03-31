@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from trabant.math import tovec3,toquat
+from .math import tovec3,toquat
 
 
 class GfxMesh:

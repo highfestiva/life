@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import socket
-import trabant.socket
-from trabant.math import vec3,quat
+import .socket
+from .math import vec3,quat
 
 
 sock = None
@@ -333,8 +333,10 @@ def _tryconnect(addr, retries):
 				import time
 				time.sleep(1)
 			sock = trabant.socket.socket()
+			if retries>1 and attempt==retries:
+				sock.settimeout(sock.timeout+1)
 			sock.connect((ip,int(port)))
-			cmd('nop')	# To make sure connection alright.
+			cmd('nop')	# To make sure UDP connection alright.
 			break
 		except socket.error as e:
 			sock = None
