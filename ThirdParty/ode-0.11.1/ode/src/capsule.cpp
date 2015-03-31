@@ -196,6 +196,18 @@ int dCollideCapsuleBox (dxGeom *o1, dxGeom *o2, int flags,
   dVector3 pl,pb;
   dClosestLineBoxPoints (p1,p2,c,R,side,pl,pb);
 
+  // if capsule center line penetrates the box we don't want to return a collision normal=(1,0,0)
+  dVector3 d;
+  dOP(d,-,pl,pb);
+  if (dLENGTHSQUARED(d) <= 1e-5f) {
+    // separate contact points along "shortest way out"
+    dOP(d,-,pl,c);
+    dNormalize3(d);
+    dOPEC(d,*=,radius*0.01f);
+    dOPE(pl,+=,d);
+    dOPE(pb,-=,d);
+  }
+
   // generate contact point
   return dCollideSpheres (pl,radius,pb,0,contact);
 }
