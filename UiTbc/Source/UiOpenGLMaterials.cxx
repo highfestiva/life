@@ -57,6 +57,10 @@ void OpenGLMaterial::EnableDisableTexturing()
 
 GLenum OpenGLMaterial::GetGLElementType(Tbc::GeometryBase* pGeometry)
 {
+	if (mEnableWireframe)
+	{
+		return GL_LINES;
+	}
 	switch (pGeometry->GetPrimitiveType())
 	{
 		case Tbc::GeometryBase::TRIANGLES:	return (GL_TRIANGLES);
@@ -196,32 +200,32 @@ void OpenGLMatSingleColorSolid::RenderBaseGeometry(Tbc::GeometryBase* pGeometry)
 		glEnableClientState(GL_NORMAL_ARRAY);
 	}
 
+	const int lTypeIndex = mEnableWireframe? 1 : 0;
+	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
-		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-
 		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
-		glVertexPointer(3, GL_FLOAT, 0, 0);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
 
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       0);
+			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	else
 	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+		glVertexPointer(3, GL_FLOAT, 0, (char*)pGeometry->GetVertexData() + lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (char*)pGeometry->GetNormalData() + lGeometry->mVertexOffset[lTypeIndex]);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       pGeometry->GetIndexData());
+			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
 	}
 }
 
@@ -303,17 +307,17 @@ void OpenGLMatVertexColorSolid::RawRender(Tbc::GeometryBase* pGeometry, int pUVS
 {
 	(void)pUVSetIndex;
 	OGL_ASSERT();
+	const int lTypeIndex = mEnableWireframe? 1 : 0;
+	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
-		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-
 		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
 
-		glVertexPointer(3, GL_FLOAT, 0, 0);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
 
 		int lSize = 4;
 		if (pGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
@@ -323,14 +327,14 @@ void OpenGLMatVertexColorSolid::RawRender(Tbc::GeometryBase* pGeometry, int pUVS
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       0);
+			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	else
 	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+		glVertexPointer(3, GL_FLOAT, 0, (char*)pGeometry->GetVertexData() + lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (char*)pGeometry->GetNormalData() + lGeometry->mVertexOffset[lTypeIndex]);
 
 		int lSize = 4;
 		if (pGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
@@ -339,9 +343,9 @@ void OpenGLMatVertexColorSolid::RawRender(Tbc::GeometryBase* pGeometry, int pUVS
 		glColorPointer(lSize, GL_UNSIGNED_BYTE, 0, pGeometry->GetColorData());
 
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       pGeometry->GetIndexData());
+			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	OGL_ASSERT();
 }
@@ -384,29 +388,35 @@ void OpenGLMatSingleTextureSolid::DoRawRender(Tbc::GeometryBase* pGeometry, int 
 	}
 
 	int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
+	const int lTypeIndex = mEnableWireframe? 1 : 0;
+	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
-		OpenGLRenderer::OGLGeometryData* lGeometryData = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-
-		GLuint lVertexBufferID = (GLuint)lGeometryData->mVertexBufferID;
-		GLuint lIndexBufferID  = (GLuint)lGeometryData->mIndexBufferID;
+		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
+		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
 
-		glVertexPointer(3, GL_FLOAT, 0, 0);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometryData->mNormalOffset);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometryData->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
+		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, 0);
+		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
+			       lGeometry->mIndexCount[lTypeIndex],
+			       LEPRA_GL_INDEX_TYPE,
+			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	else
 	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+		glVertexPointer(3, GL_FLOAT, 0, (char*)pGeometry->GetVertexData() + lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (char*)pGeometry->GetNormalData() + lGeometry->mVertexOffset[lTypeIndex]);
 		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
+		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
+				lGeometry->mIndexCount[lTypeIndex],
+				LEPRA_GL_INDEX_TYPE,
+				(char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	OGL_ASSERT();
 
@@ -727,29 +737,35 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(Tbc::GeometryBase* pGeometr
 		lTextureMatrix[15] *= 3.0f;
 		::glLoadMatrixf(lTextureMatrix);
 
+		const int lTypeIndex = mEnableWireframe? 1 : 0;
+		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
-			OpenGLRenderer::OGLGeometryData* lGeometryData = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-
-			GLuint lVertexBufferID = (GLuint)lGeometryData->mVertexBufferID;
-			GLuint lIndexBufferID  = (GLuint)lGeometryData->mIndexBufferID;
+			GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
+			GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
 
-			glVertexPointer(3, GL_FLOAT, 0, 0);
-			glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometryData->mNormalOffset);
-			glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometryData->mNormalOffset);	// Use vertex coordinates instead.
+			glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
+			glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
+			glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);	// Use vertex coordinates instead.
 
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 
-			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, 0);
+			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
+				       lGeometry->mIndexCount[lTypeIndex],
+				       LEPRA_GL_INDEX_TYPE,
+				       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
 		}
 		else
 		{
-			glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-			glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+			glVertexPointer(3, GL_FLOAT, 0, (char*)pGeometry->GetVertexData() + lGeometry->mVertexOffset[lTypeIndex]);
+			glNormalPointer(GL_FLOAT, 0, (char*)pGeometry->GetNormalData() + lGeometry->mVertexOffset[lTypeIndex]);
 			glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetNormalData());	// Use vertex coordinates instead.
-			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
+			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
+				       lGeometry->mIndexCount[lTypeIndex],
+				       LEPRA_GL_INDEX_TYPE,
+				       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
 		}
 		OGL_ASSERT();
 	}
@@ -936,34 +952,34 @@ void OpenGLMatSingleTextureEnvMapSolid::RenderGeometry(Tbc::GeometryBase* pGeome
 void OpenGLMatSingleTextureEnvMapSolid::RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
 {
 	int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
+	const int lTypeIndex = mEnableWireframe? 1 : 0;
+	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
-		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-
 		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
 
-		glVertexPointer(3, GL_FLOAT, 0, 0);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
 		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       0);
+			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	else
 	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+		glVertexPointer(3, GL_FLOAT, 0, (char*)pGeometry->GetVertexData() + lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (char*)pGeometry->GetNormalData() + lGeometry->mVertexOffset[lTypeIndex]);
 		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       pGeometry->GetIndexData());
+			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
 	}
 }
 
@@ -1092,6 +1108,7 @@ void OpenGLMatTextureAndLightmap::RawRender(Tbc::GeometryBase* pGeometry, int pU
 	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
+	const int lTypeIndex = mEnableWireframe? 1 : 0;
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
@@ -1134,23 +1151,23 @@ void OpenGLMatTextureAndLightmap::RawRender(Tbc::GeometryBase* pGeometry, int pU
 		// Vertex buffer already bound.
 		//OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
 
-		glVertexPointer(3, GL_FLOAT, 0, 0);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       0);
+			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	else
 	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+		glVertexPointer(3, GL_FLOAT, 0, (char*)pGeometry->GetVertexData() + lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (char*)pGeometry->GetNormalData() + lGeometry->mVertexOffset[lTypeIndex]);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       pGeometry->GetIndexData());
+			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
 	}
 }
 
@@ -1822,6 +1839,7 @@ void OpenGLMatTextureAndLightmapPXS::RawRender(Tbc::GeometryBase* pGeometry, int
 	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 
 	const int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
+	const int lTypeIndex = mEnableWireframe? 1 : 0;
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
@@ -1865,22 +1883,22 @@ void OpenGLMatTextureAndLightmapPXS::RawRender(Tbc::GeometryBase* pGeometry, int
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
-		glVertexPointer(3, GL_FLOAT, 0, 0);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
 
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       0);
+			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	else
 	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+		glVertexPointer(3, GL_FLOAT, 0, (char*)pGeometry->GetVertexData() + lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (char*)pGeometry->GetNormalData() + lGeometry->mVertexOffset[lTypeIndex]);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       pGeometry->GetIndexData());
+			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
 	}
 }
 
@@ -1985,6 +2003,7 @@ void OpenGLMatTextureSBMapPXS::RawRender(Tbc::GeometryBase* pGeometry, int pUVSe
 	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
 
 	int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
+	const int lTypeIndex = mEnableWireframe? 1 : 0;
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
@@ -2047,22 +2066,22 @@ void OpenGLMatTextureSBMapPXS::RawRender(Tbc::GeometryBase* pGeometry, int pUVSe
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
-		glVertexPointer(3, GL_FLOAT, 0, 0);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
 
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       0);
+			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
 	}
 	else
 	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+		glVertexPointer(3, GL_FLOAT, 0, (char*)pGeometry->GetVertexData() + lGeometry->mVertexOffset[lTypeIndex]);
+		glNormalPointer(GL_FLOAT, 0, (char*)pGeometry->GetNormalData() + lGeometry->mVertexOffset[lTypeIndex]);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       pGeometry->GetIndexCount(),
+			       lGeometry->mIndexCount[lTypeIndex],
 			       LEPRA_GL_INDEX_TYPE,
-			       pGeometry->GetIndexData());
+			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
 	}
 }
 

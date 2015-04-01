@@ -56,6 +56,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	v_set(pSettings, RTVAR_UI_3D_OUTLINEMODE, false);
 	v_set(pSettings, RTVAR_UI_3D_WIREFRAMEMODE, false);
 	v_set(pSettings, RTVAR_UI_3D_PIXELSHADERS, true);
+	v_set(pSettings, RTVAR_UI_3D_LINEWIDTH, 3.0);
 	v_set(pSettings, RTVAR_UI_3D_CLEARRED, 0.75);
 	v_set(pSettings, RTVAR_UI_3D_CLEARGREEN, 0.80);
 	v_set(pSettings, RTVAR_UI_3D_CLEARBLUE, 0.85);

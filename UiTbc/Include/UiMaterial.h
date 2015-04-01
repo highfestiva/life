@@ -120,6 +120,7 @@ public:
 	Material(Renderer* pRenderer, DepthSortHint pSortHint, Material* pFallBackMaterial);
 	virtual ~Material();
 
+	static void EnableWireframe(bool pEnabled);
 	static void SetEnableDepthSorting(bool pEnabled);
 	static void EnableDrawMaterial(bool pEnabled);
 
@@ -159,7 +160,6 @@ protected:
 
 	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
 
-private:
 	Renderer* mRenderer;
 	DepthSortHint mSortHint;
 
@@ -167,6 +167,7 @@ private:
 	GeometryGroupList::const_iterator mGroupIter;
 	int mIndex;
 
+	static bool mEnableWireframe;
 	static bool mEnableDepthSort;
 	static bool mEnableDrawMaterial;
 };

@@ -51,11 +51,13 @@
 +Editor: add (foreground) device synchronization. Message box.
 +Editor: use F6 for deploy to alternate target host! Message box. Synchronize in background.
 +Editor: load all prototypes if no files opened by default in session.
++Simulator: cube always pushes capsules to +x for some reason. Push upwards? Towards cylinder direction?
 
-Simulator: cube always pushes capsules to +x for some reason. Push upwards? Towards cylinder direction?
-Make web page for Trabant.
-Fix starting orientation in iOS.
 Add outline rendering for iOS! That way it won't look like crap!
+Make web page for Trabant.
+iPad version.
+Fix iOS crash boogs.
+Fix starting orientation in iOS.
 Prototype: Limbo gfx
 Prototype: Fire Power
 Windows: Add 32-bit Python binaries to downloadable archive.

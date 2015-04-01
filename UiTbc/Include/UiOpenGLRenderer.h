@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../../Lepra/Include/Canvas.h"
+#include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/HashSet.h"
 #include "../../Lepra/Include/HashTable.h"
@@ -32,38 +33,29 @@ public:
 	class OGLGeometryData: public GeometryData
 	{
 	public:
-		OGLGeometryData() :
-			mVertexBufferID(0),
-			mIndexBufferID(0),
-			mNormalOffset(0),
-			mColorOffset(0),
-			mUVOffset(0),
-			mTangentOffset(0),
-			mBitangentOffset(0)
+		OGLGeometryData()
 		{
+			LEPRA_INSTANCE_CLEAR(&mVertexBufferID, &mBitangentOffset[2]);
 		}
 
 		virtual void CopyReferenceData(GeometryData* pGeom)
 		{
 			GeometryData::CopyReferenceData(pGeom);
 			OGLGeometryData* lGeom = (OGLGeometryData*)pGeom;
-			mVertexBufferID = lGeom->mVertexBufferID;
-			mIndexBufferID  = lGeom->mIndexBufferID;
-			mNormalOffset    = lGeom->mNormalOffset;
-			mColorOffset     = lGeom->mColorOffset;
-			mUVOffset        = lGeom->mUVOffset;
-			mTangentOffset   = lGeom->mTangentOffset;
-			mBitangentOffset = lGeom->mBitangentOffset;
+			LEPRA_INSTANCE_COPY(&mVertexBufferID, &mBitangentOffset[2], &lGeom->mVertexBufferID);
 		}
 
 		// Access to the OpenGL buffer object data.
 		int mVertexBufferID;
 		int mIndexBufferID;
-		size_t mNormalOffset;
-		size_t mColorOffset;
-		size_t mUVOffset;
-		size_t mTangentOffset;   // Used with bump/normal mapping.
-		size_t mBitangentOffset; // Used with bump/normal mapping.
+		size_t mVertexOffset[2];
+		size_t mIndexOffset[2];
+		size_t mIndexCount[2];
+		size_t mNormalOffset[2];
+		size_t mColorOffset[2];
+		size_t mUVOffset[2];
+		size_t mTangentOffset[2];   // Used with bump/normal mapping.
+		size_t mBitangentOffset[2]; // Used with bump/normal mapping.
 	};
 
 	OpenGLRenderer(Canvas* pScreen);

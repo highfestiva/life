@@ -207,7 +207,7 @@ int GeometryGroup::B2FCompare(const void* pPair1, const void* pPair2)
 
 
 
-Material::Material(Renderer* pRenderer, DepthSortHint pSortHint, Material* pFallBackMaterial) :
+Material::Material(Renderer* pRenderer, DepthSortHint pSortHint, Material* pFallBackMaterial):
 	mRenderer(pRenderer),
 	mSortHint(pSortHint),
 	mFallBackMaterial(pFallBackMaterial)
@@ -220,6 +220,11 @@ Material::~Material()
 }
 
 
+
+void Material::EnableWireframe(bool pEnabled)
+{
+	mEnableWireframe = pEnabled;
+}
 
 void Material::SetEnableDepthSorting(bool pEnabled)
 {
@@ -452,6 +457,7 @@ const Material::GeometryGroupList& Material::GetGeometryGroupList() const
 
 
 Tbc::GeometryBase::BasicMaterialSettings Material::mCurrentMaterial;
+bool Material::mEnableWireframe = false;
 bool Material::mEnableDepthSort = false;
 bool Material::mEnableDrawMaterial = true;
 
