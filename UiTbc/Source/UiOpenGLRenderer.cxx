@@ -815,6 +815,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 
 			// Upload normal data.
 			lGeometryData->mNormalOffset[0] = lOffset;
+			lGeometryData->mNormalOffset[1] = lOffset;
 			if (pGeometry->GetNormalData() != 0)
 			{
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, lOffset,
@@ -824,6 +825,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 
 			// Upload color data.
 			lGeometryData->mColorOffset[0] = lOffset;
+			lGeometryData->mColorOffset[1] = lOffset;
 			if (pGeometry->GetColorData() != 0)
 			{
 				int lSize = 4;
@@ -840,6 +842,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 
 			// Upload UV data.
 			lGeometryData->mUVOffset[0] = lOffset;
+			lGeometryData->mUVOffset[1] = lOffset;
 			if (pGeometry->GetUVSetCount() > 0)
 			{
 				const int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
@@ -855,6 +858,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 
 			// Upload tangent data.
 			lGeometryData->mTangentOffset[0] = lOffset;
+			lGeometryData->mTangentOffset[1] = lOffset;
 			if (pGeometry->GetTangentData() != 0)
 			{
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
@@ -866,10 +870,12 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 			else
 			{
 				lGeometryData->mTangentOffset[0] = 0;
+				lGeometryData->mTangentOffset[1] = 0;
 			}
 
 			// Upload bitangent data.
 			lGeometryData->mBitangentOffset[0] = lOffset;
+			lGeometryData->mBitangentOffset[1] = lOffset;
 			if (pGeometry->GetBitangentData() != 0)
 			{
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
@@ -881,6 +887,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 			else
 			{
 				lGeometryData->mBitangentOffset[0] = 0;
+				lGeometryData->mBitangentOffset[1] = 0;
 			}
 
 			// Bind and create the index buffer in GFX memory.

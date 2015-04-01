@@ -399,7 +399,7 @@ void OpenGLMatSingleTextureSolid::DoRawRender(Tbc::GeometryBase* pGeometry, int 
 
 		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
 		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset[lTypeIndex] + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 
@@ -963,7 +963,7 @@ void OpenGLMatSingleTextureEnvMapSolid::RawRender(Tbc::GeometryBase* pGeometry, 
 
 		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset[lTypeIndex]);
 		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset[lTypeIndex]);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset[lTypeIndex] + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
@@ -1112,7 +1112,7 @@ void OpenGLMatTextureAndLightmap::RawRender(Tbc::GeometryBase* pGeometry, int pU
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset[lTypeIndex] + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
 	}
 	else
 	{
@@ -1136,7 +1136,7 @@ void OpenGLMatTextureAndLightmap::RawRender(Tbc::GeometryBase* pGeometry, int pU
 		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-			glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*(pUVSetIndex+1)*pGeometry->GetMaxVertexCount()));
+			glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset[lTypeIndex] + sizeof(float)*lUVCountPerVertex*(pUVSetIndex+1)*pGeometry->GetMaxVertexCount()));
 		}
 		else
 		{
@@ -1844,7 +1844,7 @@ void OpenGLMatTextureAndLightmapPXS::RawRender(Tbc::GeometryBase* pGeometry, int
 	{
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset[lTypeIndex] + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 	}
@@ -1862,7 +1862,7 @@ void OpenGLMatTextureAndLightmapPXS::RawRender(Tbc::GeometryBase* pGeometry, int
 	{
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*(pUVSetIndex+1)*pGeometry->GetMaxVertexCount()));
+		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset[lTypeIndex] + sizeof(float)*lUVCountPerVertex*(pUVSetIndex+1)*pGeometry->GetMaxVertexCount()));
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 	}
@@ -2008,7 +2008,7 @@ void OpenGLMatTextureSBMapPXS::RawRender(Tbc::GeometryBase* pGeometry, int pUVSe
 	{
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset[lTypeIndex] + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 	}
