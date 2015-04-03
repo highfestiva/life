@@ -32,6 +32,21 @@ namespace UiTbc
 
 
 
+static void EnableGlLights(OpenGLRenderer* pRenderer, std::unordered_map<Renderer::LightID,Renderer::LightData*>& pLightMap, bool pEnable)
+{
+		// Disable all lights (for shadow rendering).
+		for (std::unordered_map<Renderer::LightID,Renderer::LightData*>::iterator x = pLightMap.begin(); x != pLightMap.end(); ++x)
+		{
+			if (x->second->mEnabled)
+			{
+				pEnable? glEnable(GL_LIGHT0 + x->first) : glDisable(GL_LIGHT0 + x->first);
+			}
+		}
+		pEnable? pRenderer->SetLightsEnabled(pEnable) : pRenderer->Renderer::SetLightsEnabled(pEnable);
+}
+
+
+
 Material* OpenGLRenderer::CreateMaterial(MaterialType pMaterialType)
 {
 	switch(pMaterialType)
@@ -1330,22 +1345,13 @@ unsigned OpenGLRenderer::RenderScene()
 	{
 		UpdateShadowMaps();
 
-		// Disable all lights (for shadow rendering).
-		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-		{
-			LightData* lLight = x->second;
-			if (lLight->mShadowRange > 0 && lLight->mEnabled)
-			{
-				::glDisable(GL_LIGHT0 + x->first);
-			}
-		}
-		Parent::SetLightsEnabled(false);
+		EnableGlLights(this, mLightDataMap, false);
 
 		if (IsOutlineRenderingEnabled())
 		{
 			SetAmbientLight(lAmbientRed*0.5f, lAmbientGreen*0.5f, lAmbientBlue*0.5f);
 			glEnable(GL_POLYGON_OFFSET_FILL);
-			glPolygonOffset(0, -1100*mLineWidth);
+			glPolygonOffset(-1, -2000);
 		}
 
 		// Prepare the pixel shader materials.
@@ -1366,6 +1372,7 @@ unsigned OpenGLRenderer::RenderScene()
 		// Render the outline before shadow volumes, to avoid obfuscation.
 		if (IsOutlineRenderingEnabled())
 		{
+			EnableGlLights(this, mLightDataMap, true);
 			glPolygonOffset(0, 0);
 			glDisable(GL_POLYGON_OFFSET_FILL);
 			SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
@@ -1375,6 +1382,7 @@ unsigned OpenGLRenderer::RenderScene()
 			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 			Material::EnableWireframe(false);
+			EnableGlLights(this, mLightDataMap, false);
 		}
 
 		// Shadow stencil buffer operations.
@@ -1398,17 +1406,7 @@ unsigned OpenGLRenderer::RenderScene()
 		::glStencilFunc(GL_GEQUAL, 128, 0xFF);
 		::glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-		SetLightsEnabled(true);
-
-		// Enable all lights again.
-		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-		{
-			LightData* lLight = x->second;
-			if (lLight->mEnabled)
-			{
-				::glEnable(GL_LIGHT0 + x->first);
-			}
-		}
+		EnableGlLights(this, mLightDataMap, true);
 	}
 
 	bool lSkipOutlined = false;
@@ -1417,7 +1415,7 @@ unsigned OpenGLRenderer::RenderScene()
 		Material::EnableDrawMaterial(false);
 		SetAmbientLight(1, 1, 1);
 		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(0, -1100*(mLineWidth+1));
+		glPolygonOffset(-1, -2600);
 		const vec3 lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
 		Tbc::GeometryBase::BasicMaterialSettings lMaterial(vec3(1, 1, 1), lColor, vec3(), 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
@@ -1727,11 +1725,10 @@ void OpenGLRenderer::RenderShadowVolumes()
 	OGL_FAST_ASSERT();
 
 	// Disable all fancy gfx.
-	glEnable(GL_POLYGON_OFFSET_FILL);
 #if !defined(LEPRA_GL_ES) && !defined(LEPRA_MAC)
 	//glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_LOGIC_OP);
-	glEnable(GL_POLYGON_OFFSET_EXT);
+	//glEnable(GL_POLYGON_OFFSET_EXT);
 #endif // !GLES
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
@@ -1750,7 +1747,8 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glEnable(GL_STENCIL_TEST);
 
 	glDepthFunc(GL_LESS);
-	glPolygonOffset(0, 1100);
+	//glEnable(GL_POLYGON_OFFSET_FILL);
+	//glPolygonOffset(1.5f, 700);
 
 	glMatrixMode(GL_MODELVIEW);
 
@@ -1836,15 +1834,11 @@ void OpenGLRenderer::RenderShadowVolumes()
 	}
 
 	// Reset all settings.
-#if !defined(LEPRA_GL_ES) && !defined(LEPRA_MAC)
-	//glPopAttrib();
-	glDisable(GL_POLYGON_OFFSET_EXT);
-#endif // !GLES
-	glDisable(GL_POLYGON_OFFSET_FILL);
 	glShadeModel(GL_SMOOTH);
 	glColorMask(1, 1, 1, 1);
 	glDepthFunc(GL_LEQUAL);
-	glPolygonOffset(0, 0);
+	//glPolygonOffset(0, 0);
+	//glDisable(GL_POLYGON_OFFSET_FILL);
 	glDepthMask(GL_TRUE);
 
 	OGL_FAST_ASSERT();
@@ -2051,10 +2045,8 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	// The scene in this case are all objects within the light's bounding radius.
 
 	// Overcome imprecision.
-	glEnable(GL_POLYGON_OFFSET_FILL);
-//	glPolygonOffset(1.1f, 4.0f);
-	//glPolygonOffset(1.1f, 2.0f);
-	glPolygonOffset(0, 1100);
+	//glEnable(GL_POLYGON_OFFSET_FILL);
+	//glPolygonOffset(1.5f, 700);
 
 	LightData::GeometrySet::Iterator lIter;
 	for (lIter = pLight->mShadowMapGeometrySet.First(); 
@@ -2112,8 +2104,8 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 					 0, 0, pLight->mShadowMapRes, pLight->mShadowMapRes, 0);
 #endif // !GLES
 
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(0, 0);
+	//glDisable(GL_POLYGON_OFFSET_FILL);
+	//glPolygonOffset(0, 0);
 	glDisable(GL_TEXTURE_2D);
 	//glPopAttrib();
 	glShadeModel(GL_SMOOTH);

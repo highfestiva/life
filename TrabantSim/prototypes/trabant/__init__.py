@@ -207,7 +207,7 @@ def trabant_init(**kwargs):
 	gameapi.init(**config)
 	gameapi.set('Game.AllowPowerDown', not interactive)
 	if osname not in ['ios']:
-		gameapi.sock.settimeout(None if interactive else 5*60)
+		gameapi.sock.settimeout(None if interactive else 5)
 	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
 	loop(delay=0)	# Resets taps+collisions.
 	_accelerometer_calibration = accelerometer()

@@ -385,13 +385,13 @@ unsigned GeometryBase::GetMaxTriangleCount() const
 	{
 		case TRIANGLES:
 		case LINE_LOOP:
-			return GetMaxIndexCount() / 3;
+			return GetIndexCount() / 3;
 		case TRIANGLE_STRIP:
-			return GetMaxIndexCount() - 2;
+			return GetIndexCount() - 2;
 		case LINES:
-			return GetMaxIndexCount() / 2;
+			return GetIndexCount() / 2;
 		case QUADS:
-			return GetMaxIndexCount() / 4;
+			return GetIndexCount() / 4;
 		default:
 			deb_assert(false);
 			return (0);

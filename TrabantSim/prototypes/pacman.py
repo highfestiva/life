@@ -20,6 +20,7 @@ X                        X
 XXXXXXXXXXXXXXXXXXXXXXXXXX
 '''
 
+fg(outline=False)
 cam(distance=25)
 gravity((0,0,0), bounce=0.1, friction=0)
 accurate_ascii_generate(False)    # Optimization to load faster.

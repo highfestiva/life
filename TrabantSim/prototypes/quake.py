@@ -99,8 +99,8 @@ while loop():
 
     # Look around.
     cam(angle=(pitch,0,yaw))
-    player.avel((0,0,0))    # Angular velocity. Makes sure the player object doesn't start rotating for some reason.
-    player.orientation(quat())    # Keep player object straight at all times.
+    [avatar.avel((0,0,0)) for avatar in [player,bot]]    # Angular velocity. Makes sure the avatars doesn't start rotating for some reason.
+    [avatar.orientation(quat()) for avatar in [player,bot]]    # Keep avatars straight at all times.
 
     # Throw grenades.
     if click(left=True) and timeout(1, timer=2, first_hit=True):

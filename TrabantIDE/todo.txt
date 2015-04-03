@@ -52,9 +52,9 @@
 +Editor: use F6 for deploy to alternate target host! Message box. Synchronize in background.
 +Editor: load all prototypes if no files opened by default in session.
 +Simulator: cube always pushes capsules to +x for some reason. Push upwards? Towards cylinder direction?
++Add outline rendering for iOS! That way it won't look like crap!
+.Add possibility to disable OpenGL buffer object support. Test outline rendering with it!
 
-Add outline rendering for iOS! That way it won't look like crap!
-Add possibility to disable OpenGL buffer object support. Test outline rendering with it!
 Make web page for Trabant.
 iPad version.
 Fix iOS crash boogs.
