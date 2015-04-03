@@ -2,9 +2,9 @@
 
 
 from math import pi,cos,sin
-from .asc2obj import mesh_mergevtxs
-from .objects import *
-from .math import quat,vec3,tovec3
+from trabant.asc2obj import mesh_mergevtxs
+from trabant.objects import *
+from trabant.math import quat,vec3,tovec3
 
 
 def createmesh(vertices,triangles):

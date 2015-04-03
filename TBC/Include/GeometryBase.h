@@ -290,6 +290,7 @@ public:
 	void SetSurfaceNormalData(const float* pSurfaceNormalData);
 	void SetVertexNormalData(const float* pVertexNormalData, unsigned int pNumVertices);
 	void SetTangentAndBitangentData(const float* pTangentData, const float* pBitangentData, unsigned int pNumVertices);
+	virtual void SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount);
 
 	void Copy(GeometryBase* pGeometry);
 	void ClearAll();
@@ -328,6 +329,7 @@ public:
 		EXCLUDE_CULLING			= (1 << 19),
 		IS_TWO_SIDED			= (1 << 20),
 		RECV_NO_SHADOWS			= (1 << 21),
+		CONTAINS_WIREFRAME		= (1 << 22),
 	};
 
 	void SetFlag(Lepra::uint32 pFlag, bool pValue);

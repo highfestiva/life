@@ -104,6 +104,9 @@ public:
 	// Misc work funcs.
 	void ClearAll();
 
+	// Know what you're doing when calling this internal function.
+	virtual void SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount);
+
 	// Will erase all current data.
 	void SetPolygon(vec3* pVertices, unsigned int pVertexCount);
 
@@ -139,6 +142,7 @@ private:
 
 	unsigned int mVertexCount;
 	unsigned int mIndexCount;
+	unsigned int mMaxIndexCount;
 	unsigned int mUVSetCount;
 
 	float* mVertexData;			// Triplets of (x, y, z).

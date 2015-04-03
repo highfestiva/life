@@ -19,6 +19,7 @@ namespace UiTbc
 TriangleBasedGeometry::TriangleBasedGeometry() :
 	mVertexCount(0),
 	mIndexCount(0),
+	mMaxIndexCount(0),
 	mUVSetCount(0),
 	mVertexData(0),
 	mUVData(0),
@@ -34,6 +35,7 @@ TriangleBasedGeometry::TriangleBasedGeometry() :
 TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& pGeometry) :
 	mVertexCount(0),
 	mIndexCount(0),
+	mMaxIndexCount(0),
 	mUVSetCount(0),
 	mVertexData(0),
 	mUVData(0),
@@ -59,6 +61,7 @@ TriangleBasedGeometry::TriangleBasedGeometry(const vec3* pVertices,
                                              Tbc::GeometryBase::GeometryVolatility pGeomType) :
 	mVertexCount(0),
 	mIndexCount(0),
+	mMaxIndexCount(0),
 	mUVSetCount(0),
 	mVertexData(0),
 	mUVData(0),
@@ -93,6 +96,7 @@ TriangleBasedGeometry::TriangleBasedGeometry(const float* pVertexData,
                                              Tbc::GeometryBase::GeometryVolatility pGeomType) :
 	mVertexCount(0),
 	mIndexCount(0),
+	mMaxIndexCount(0),
 	mUVSetCount(0),
 	mVertexData(0),
 	mUVData(0),
@@ -138,6 +142,7 @@ void TriangleBasedGeometry::Set(const vec3* pVertices,
 
 		mVertexCount = pVertexCount;
 		mIndexCount = pIndexCount;
+		mMaxIndexCount = pIndexCount;
 
 		// Copy vertex data.
 		mVertexData = new float[mVertexCount * 3];
@@ -224,6 +229,7 @@ void TriangleBasedGeometry::Set(const float* pVertexData,
 
 		mVertexCount = pVertexCount;
 		mIndexCount = pIndexCount;
+		mMaxIndexCount = pIndexCount;
 
 		// Copy vertex data.
 		mVertexData = new float[mVertexCount * 3];
@@ -294,6 +300,7 @@ void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
 
 		mVertexCount = pGeometry.GetVertexCount();
 		mIndexCount = pGeometry.GetIndexCount();
+		mMaxIndexCount = pGeometry.GetMaxIndexCount();
 
 		mGeometryVolatility = pGeometry.GetGeometryVolatility();
 
@@ -361,8 +368,8 @@ void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
 		{
 			// Copy index data.
 			const vtx_idx_t* lIndices = lGeometry.GetIndexData();
-			mIndexData = new vtx_idx_t[mIndexCount];
-			for (i = 0; i < mIndexCount; i++)
+			mIndexData = new vtx_idx_t[mMaxIndexCount];
+			for (i = 0; i < mMaxIndexCount; i++)
 			{
 				mIndexData[i] = lIndices[i];
 			}
@@ -414,12 +421,20 @@ void TriangleBasedGeometry::ClearAll()
 
 	mVertexCount = 0;
 	mIndexCount = 0;
+	mMaxIndexCount = 0;
 
 	Tbc::GeometryBase::ClearAll();
 	SetVertexDataChanged(true);
 	SetUVDataChanged(true);
 	SetColorDataChanged(true);
 	SetIndexDataChanged(true);
+}
+
+void TriangleBasedGeometry::SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount)
+{
+	mIndexData = pIndexData;
+	mIndexCount = pIndexCount;
+	mMaxIndexCount = pMaxIndexCount;
 }
 
 void TriangleBasedGeometry::SetPolygon(vec3* pVertices, unsigned int pVertexCount)
@@ -1041,6 +1056,7 @@ void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* pGeometry)
 
 	mVertexCount = lVertexCount;
 	mIndexCount = lNumTriangles * 3;
+	mMaxIndexCount = lNumTriangles * 3;
 
 	if (mUVData != 0)
 	{
@@ -1137,7 +1153,7 @@ unsigned int TriangleBasedGeometry::GetMaxVertexCount() const
 
 unsigned int TriangleBasedGeometry::GetMaxIndexCount() const
 {
-	return mIndexCount;
+	return mMaxIndexCount;
 }
 
 unsigned int TriangleBasedGeometry::GetVertexCount() const

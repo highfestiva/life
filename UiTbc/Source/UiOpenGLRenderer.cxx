@@ -219,6 +219,7 @@ void OpenGLRenderer::SetTexturingEnabled(bool pEnabled)
 
 void OpenGLRenderer::SetLineWidth(float pPixels)
 {
+	Parent::SetLineWidth(pPixels);
 	::glLineWidth(pPixels);
 }
 
@@ -745,8 +746,10 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 	}
 	else
 	{
+		AppendWireframeLines(pGeometry);
 		lGeometryData->mIndexCount[0] = pGeometry->GetIndexCount();
-		lGeometryData->mIndexCount[1] = lGeometryData->mIndexCount[0];
+		lGeometryData->mIndexCount[1] = pGeometry->GetMaxIndexCount() - pGeometry->GetIndexCount();
+		lGeometryData->mIndexOffset[1] = pGeometry->GetIndexCount()*sizeof(vtx_idx_t);
 
 		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
@@ -814,18 +817,16 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 			lOffset += lVertexCount * sizeof(float) * 3;
 
 			// Upload normal data.
-			lGeometryData->mNormalOffset[0] = lOffset;
-			lGeometryData->mNormalOffset[1] = lOffset;
+			lGeometryData->mNormalOffset = lOffset;
 			if (pGeometry->GetNormalData() != 0)
 			{
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, lOffset,
-					lVertexCount * sizeof(float) * 3, (void*)pGeometry->GetNormalData());
+						lVertexCount * sizeof(float) * 3, (void*)pGeometry->GetNormalData());
 				lOffset += lVertexCount * sizeof(float) * 3;
 			}
 
 			// Upload color data.
-			lGeometryData->mColorOffset[0] = lOffset;
-			lGeometryData->mColorOffset[1] = lOffset;
+			lGeometryData->mColorOffset = lOffset;
 			if (pGeometry->GetColorData() != 0)
 			{
 				int lSize = 4;
@@ -841,8 +842,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 
 
 			// Upload UV data.
-			lGeometryData->mUVOffset[0] = lOffset;
-			lGeometryData->mUVOffset[1] = lOffset;
+			lGeometryData->mUVOffset = lOffset;
 			if (pGeometry->GetUVSetCount() > 0)
 			{
 				const int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
@@ -857,8 +857,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 			}
 
 			// Upload tangent data.
-			lGeometryData->mTangentOffset[0] = lOffset;
-			lGeometryData->mTangentOffset[1] = lOffset;
+			lGeometryData->mTangentOffset = lOffset;
 			if (pGeometry->GetTangentData() != 0)
 			{
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
@@ -869,13 +868,11 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 			}
 			else
 			{
-				lGeometryData->mTangentOffset[0] = 0;
-				lGeometryData->mTangentOffset[1] = 0;
+				lGeometryData->mTangentOffset = 0;
 			}
 
 			// Upload bitangent data.
-			lGeometryData->mBitangentOffset[0] = lOffset;
-			lGeometryData->mBitangentOffset[1] = lOffset;
+			lGeometryData->mBitangentOffset = lOffset;
 			if (pGeometry->GetBitangentData() != 0)
 			{
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
@@ -886,8 +883,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 			}
 			else
 			{
-				lGeometryData->mBitangentOffset[0] = 0;
-				lGeometryData->mBitangentOffset[1] = 0;
+				lGeometryData->mBitangentOffset = 0;
 			}
 
 			// Bind and create the index buffer in GFX memory.
@@ -898,7 +894,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 
 			UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
 								 0,
-								 pGeometry->GetIndexCount() * sizeof(vtx_idx_t),
+								 pGeometry->GetMaxIndexCount() * sizeof(vtx_idx_t),
 								 (void*)pGeometry->GetIndexData());
 		}
 	}
@@ -1009,14 +1005,14 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 			if (lGeometry->GetVertexDataChanged())
 			{
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
-									 lGeomData->mVertexOffset[0],
+									 lGeomData->mVertexOffset,
 									 lVertexCount * sizeof(float) * 3,
 									 (void*)lGeometry->GetVertexData());
 
 				if (lGeometry->GetNormalData())
 				{
 					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
-										 lGeomData->mNormalOffset[0],
+										 lGeomData->mNormalOffset,
 										 lVertexCount * sizeof(float) * 3,
 										 (void*)lGeometry->GetNormalData());
 				}
@@ -1036,7 +1032,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 					lSize = 3;
 
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-									 lGeomData->mColorOffset[0],
+									 lGeomData->mColorOffset,
 									 lVertexCount * sizeof(unsigned char) * lSize,
 									 (void*)lGeometry->GetColorData());
 			}
@@ -1044,7 +1040,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 			if (lGeometry->GetUVDataChanged())
 			{
 				OGL_FAST_ASSERT();
-				size_t lOffset = lGeomData->mUVOffset[0];
+				size_t lOffset = lGeomData->mUVOffset;
 				int lUVCountPerVertex = lGeometry->GetUVCountPerVertex();
 				for (unsigned i = 0; i < lGeometry->GetUVSetCount(); i++)
 				{
@@ -1061,7 +1057,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 				if (lGeomData->mTangentOffset > 0)
 				{
 					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-										 lGeomData->mTangentOffset[0],
+										 lGeomData->mTangentOffset,
 										 lVertexCount * sizeof(float) * 3,
 										 (void*)lGeometry->GetTangentData());
 				}
@@ -1069,7 +1065,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 				if (lGeomData->mBitangentOffset > 0)
 				{
 					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-										 lGeomData->mBitangentOffset[0],
+										 lGeomData->mBitangentOffset,
 										 lVertexCount * sizeof(float) * 3,
 										 (void*)lGeometry->GetBitangentData());
 				}
@@ -1125,6 +1121,31 @@ void OpenGLRenderer::ReleaseGeometry(Tbc::GeometryBase* pUserGeometry, GeomRelea
 	}
 
 	//OGL_FAST_ASSERT();
+}
+
+void OpenGLRenderer::AppendWireframeLines(Tbc::GeometryBase* pGeometry)
+{
+	if (pGeometry->GetPrimitiveType() != Tbc::GeometryBase::TRIANGLES || pGeometry->CheckFlag(Tbc::GeometryBase::CONTAINS_WIREFRAME))
+	{
+		return;
+	}
+	pGeometry->SetFlag(Tbc::GeometryBase::CONTAINS_WIREFRAME);
+	if (!pGeometry->GetEdgeData())
+	{
+		pGeometry->GenerateEdgeData();
+	}
+	const int lLineCount = pGeometry->GetEdgeCount();
+	const int lBaseIndex = pGeometry->GetIndexCount();
+	const int lTotalIndexCount = lBaseIndex+lLineCount*2;
+	vtx_idx_t* lIndexData = new vtx_idx_t[lTotalIndexCount];
+	::memcpy(lIndexData, pGeometry->GetIndexData(), pGeometry->GetIndexCount()*sizeof(vtx_idx_t));
+	const Tbc::GeometryBase::Edge* lEdges = pGeometry->GetEdgeData();
+	for (int i = 0; i < lLineCount; ++i)
+	{
+		lIndexData[i*2+0+lBaseIndex] = lEdges[i].mVertex[0];
+		lIndexData[i*2+1+lBaseIndex] = lEdges[i].mVertex[1];
+	}
+	pGeometry->SetIndexData(lIndexData, pGeometry->GetIndexCount(), lTotalIndexCount);
 }
 
 
@@ -1323,6 +1344,8 @@ unsigned OpenGLRenderer::RenderScene()
 		if (IsOutlineRenderingEnabled())
 		{
 			SetAmbientLight(lAmbientRed*0.5f, lAmbientGreen*0.5f, lAmbientBlue*0.5f);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(0, -1100*mLineWidth);
 		}
 
 		// Prepare the pixel shader materials.
@@ -1331,11 +1354,27 @@ unsigned OpenGLRenderer::RenderScene()
 		// Render the scene darkened.
 		for (int i = 0; i <= (int)MAT_LAST_SOLID; i++)
 		{
-			if (GetMaterial((MaterialType)i) != 0)
+			Material* lMaterial = GetMaterial((MaterialType)i);
+			if (lMaterial == 0)
 			{
-				Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial((MaterialType)i));
-				OGL_FAST_ASSERT();
+				continue;
 			}
+			Material::RenderAllGeometry(GetCurrentFrame(), lMaterial);
+			OGL_FAST_ASSERT();
+		}
+
+		// Render the outline before shadow volumes, to avoid obfuscation.
+		if (IsOutlineRenderingEnabled())
+		{
+			glPolygonOffset(0, 0);
+			glDisable(GL_POLYGON_OFFSET_FILL);
+			SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+			Material::EnableWireframe(true);
+			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
+			Material::EnableWireframe(false);
 		}
 
 		// Shadow stencil buffer operations.
@@ -1375,23 +1414,10 @@ unsigned OpenGLRenderer::RenderScene()
 	bool lSkipOutlined = false;
 	if (IsOutlineRenderingEnabled() && !IsWireframeEnabled())
 	{
-		Material::EnableWireframe(true);
-		::glDepthRange(0.02f, 1.02f);
-		::glDisable(GL_LIGHTING);
-		SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
-		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
-		if (GetLightsEnabled())
-		{
-			::glEnable(GL_LIGHTING);
-		}
-		::glDepthRange(0, 1);
-		Material::EnableWireframe(false);
-
 		Material::EnableDrawMaterial(false);
 		SetAmbientLight(1, 1, 1);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(0, -1100*(mLineWidth+1));
 		const vec3 lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
 		Tbc::GeometryBase::BasicMaterialSettings lMaterial(vec3(1, 1, 1), lColor, vec3(), 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
@@ -1462,6 +1488,8 @@ unsigned OpenGLRenderer::RenderScene()
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
+		glPolygonOffset(0, 0);
+		glDisable(GL_POLYGON_OFFSET_FILL);
 	}
 
 	OGL_ASSERT();
@@ -1699,6 +1727,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 	OGL_FAST_ASSERT();
 
 	// Disable all fancy gfx.
+	glEnable(GL_POLYGON_OFFSET_FILL);
 #if !defined(LEPRA_GL_ES) && !defined(LEPRA_MAC)
 	//glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_LOGIC_OP);
@@ -1721,8 +1750,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glEnable(GL_STENCIL_TEST);
 
 	glDepthFunc(GL_LESS);
-	glPolygonOffset(0.05f, 0);
-
+	glPolygonOffset(0, 1100);
 
 	glMatrixMode(GL_MODELVIEW);
 
@@ -1812,6 +1840,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 	//glPopAttrib();
 	glDisable(GL_POLYGON_OFFSET_EXT);
 #endif // !GLES
+	glDisable(GL_POLYGON_OFFSET_FILL);
 	glShadeModel(GL_SMOOTH);
 	glColorMask(1, 1, 1, 1);
 	glDepthFunc(GL_LEQUAL);
@@ -2024,7 +2053,8 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	// Overcome imprecision.
 	glEnable(GL_POLYGON_OFFSET_FILL);
 //	glPolygonOffset(1.1f, 4.0f);
-	glPolygonOffset(1.1f, 2.0f);
+	//glPolygonOffset(1.1f, 2.0f);
+	glPolygonOffset(0, 1100);
 
 	LightData::GeometrySet::Iterator lIter;
 	for (lIter = pLight->mShadowMapGeometrySet.First(); 
@@ -2083,6 +2113,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 #endif // !GLES
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(0, 0);
 	glDisable(GL_TEXTURE_2D);
 	//glPopAttrib();
 	glShadeModel(GL_SMOOTH);

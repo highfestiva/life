@@ -360,7 +360,7 @@ public:
 
 	virtual void SetDepthWriteEnabled(bool pEnabled) = 0;
 	virtual void SetDepthTestEnabled(bool pEnabled) = 0;
-	virtual void SetLineWidth(float pPixels) = 0;
+	virtual void SetLineWidth(float pPixels);
 
 	// These simply forwards the call to Material::SetDepthSortEnabled().
 	void SetEnableDepthSorting(bool pEnabled);
@@ -641,6 +641,8 @@ protected:
 	float mFogFar;
 	float mFogDensity;
 	float mFogExponent;
+
+	float mLineWidth;
 
 	// Since distance sorting lights is implemented using ::qsort(),
 	// we need to store the following variables "globally".

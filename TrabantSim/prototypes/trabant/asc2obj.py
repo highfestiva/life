@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import .asc as asc
-from .objects import *
+import trabant.asc as asc
+from trabant.objects import *
 from functools import reduce
 from math import sqrt,pi,cos,sin
-from .math import *
+from trabant.math import *
 
 
 sq2 = sqrt(2)

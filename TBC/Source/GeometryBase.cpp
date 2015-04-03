@@ -1147,6 +1147,14 @@ void GeometryBase::SetTangentAndBitangentData(const float* pTangentData, const f
 	SetFlag(TANGENTS_VALID);
 }
 
+void GeometryBase::SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount)
+{
+	mLog.Warningf(_T("Unable to set index data on mesh %s."), mName.c_str());
+	delete pIndexData;
+	(void)pIndexCount;
+	(void)pMaxIndexCount;
+}
+
 void GeometryBase::GenerateVertexNormalData()
 {
 	if (CheckFlag(VERTEX_NORMALS_VALID) == true || GetIndexData() == 0)

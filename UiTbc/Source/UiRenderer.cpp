@@ -124,7 +124,8 @@ Renderer::Renderer(Canvas* pScreen):
 	mFogNear(0),
 	mFogFar(0),
 	mFogDensity(1),
-	mFogExponent(0)
+	mFogExponent(0),
+	mLineWidth(1)
 {
 	mCameraActualRotation.RotateAroundOwnX(PIF/2);	// Default for OpenGL.
 }
@@ -450,6 +451,11 @@ void Renderer::SetShadowUpdateIntensity(float pUpdateIntensity)
 void Renderer::SetShadowUpdateFrameDelay(unsigned pFrameDelay)
 {
 	mShadowUpdateFrameDelay = pFrameDelay;
+}
+
+void Renderer::SetLineWidth(float pPixels)
+{
+	mLineWidth = pPixels;
 }
 
 void Renderer::SetEnableDepthSorting(bool pEnabled)

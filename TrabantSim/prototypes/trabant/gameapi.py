@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import socket
-import .socket
-from .math import vec3,quat
+import trabant.socket
+from trabant.math import vec3,quat
 
 
 sock = None

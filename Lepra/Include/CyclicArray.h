@@ -18,8 +18,8 @@
 		a[x] = v[x];					\
 	}							\
 }
-#define LEPRA_INSTANCE_CLEAR(ptr,end)		::memset(ptr, 0, (size_t)(((char*)end)-((char*)ptr)))
-#define LEPRA_INSTANCE_COPY(ptr,end,from)	::memcpy(ptr, from, (size_t)(((char*)end)-((char*)ptr)))
+#define LEPRA_INSTANCE_CLEAR(ptr,end)		::memset(ptr, 0, (size_t)(((char*)(end))-((char*)(ptr))))
+#define LEPRA_INSTANCE_COPY(ptr,end,from)	::memcpy(ptr, from, (size_t)(((char*)(end))-((char*)(ptr))))
 
 
 

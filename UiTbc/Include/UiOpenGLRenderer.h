@@ -35,27 +35,27 @@ public:
 	public:
 		OGLGeometryData()
 		{
-			LEPRA_INSTANCE_CLEAR(&mVertexBufferID, &mBitangentOffset[2]);
+			LEPRA_INSTANCE_CLEAR(&mVertexBufferID, (char*)(&mBitangentOffset)+sizeof(size_t));
 		}
 
 		virtual void CopyReferenceData(GeometryData* pGeom)
 		{
 			GeometryData::CopyReferenceData(pGeom);
 			OGLGeometryData* lGeom = (OGLGeometryData*)pGeom;
-			LEPRA_INSTANCE_COPY(&mVertexBufferID, &mBitangentOffset[2], &lGeom->mVertexBufferID);
+			LEPRA_INSTANCE_COPY(&mVertexBufferID, (char*)(&mBitangentOffset)+sizeof(size_t), &lGeom->mVertexBufferID);
 		}
 
 		// Access to the OpenGL buffer object data.
 		int mVertexBufferID;
 		int mIndexBufferID;
-		size_t mVertexOffset[2];
+		size_t mVertexOffset;
 		size_t mIndexOffset[2];
 		size_t mIndexCount[2];
-		size_t mNormalOffset[2];
-		size_t mColorOffset[2];
-		size_t mUVOffset[2];
-		size_t mTangentOffset[2];   // Used with bump/normal mapping.
-		size_t mBitangentOffset[2]; // Used with bump/normal mapping.
+		size_t mNormalOffset;
+		size_t mColorOffset;
+		size_t mUVOffset;
+		size_t mTangentOffset;   // Used with bump/normal mapping.
+		size_t mBitangentOffset; // Used with bump/normal mapping.
 	};
 
 	OpenGLRenderer(Canvas* pScreen);
@@ -144,6 +144,7 @@ protected:
 	void BindGeometry(Tbc::GeometryBase* pUserGeometry, GeometryID pID, MaterialType pMaterialType);
 	bool BindShadowGeometry(UiTbc::ShadowVolume* pShadowGeometry, LightHint pLightHint);
 	void ReleaseGeometry(Tbc::GeometryBase* pUserGeometry, GeomReleaseOption pOption);
+	void AppendWireframeLines(Tbc::GeometryBase* pGeometry);
 
 private:
 
