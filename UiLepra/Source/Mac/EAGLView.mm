@@ -30,6 +30,7 @@ static EAGLView* gSharedView;
 @synthesize isOpen;
 @synthesize responder;
 @synthesize orientationStrictness = _orientationStrictness;
+@synthesize preferredRotation = _preferredRotation;
 @synthesize inputManager;
 // UITextInputTraits protocol:
 @synthesize autocapitalizationType;
@@ -59,6 +60,7 @@ static EAGLView* gSharedView;
 	eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
 		kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+	eaglLayer.anchorPoint = CGPointMake(0.5, 0.5);
 	if ([self respondsToSelector:@selector(setContentScaleFactor:)])
 	{
 		self.contentScaleFactor = [[UIScreen mainScreen] scale];
@@ -72,6 +74,7 @@ static EAGLView* gSharedView;
 	_baseAngle = 0;
 	_orientationStrictness = 0;
 	_preResponderStrictness = -1;
+	_preferredRotation = UIInterfaceOrientationLandscapeRight;
 	isLayoutSet = false;
 
 	autocapitalizationType = UITextAutocapitalizationTypeWords;
@@ -106,6 +109,11 @@ static EAGLView* gSharedView;
 	{
 		_orientationStrictness = strictness;
 	}
+}
+
+- (void)setPreferredRotation:(UIInterfaceOrientation)rotation
+{
+	_preferredRotation = rotation;
 }
 
 - (void)setContext:(EAGLContext *)newContext
@@ -225,16 +233,12 @@ static EAGLView* gSharedView;
 - (BOOL)presentFramebuffer
 {
 	BOOL success = FALSE;
-	
 	if (context)
 	{
 		[EAGLContext setCurrentContext:context];
-		
 		glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
-		
 		success = [context presentRenderbuffer:GL_RENDERBUFFER];
 	}
-	
 	return success;
 }
 
@@ -281,17 +285,16 @@ static EAGLView* gSharedView;
 
 - (NSUInteger)supportedInterfaceOrientations
 {
-	/*if (_orientationStrictness >= 2)
+	if (_orientationStrictness >= 2)
 	{
-		return UIInterfaceOrientationLandscapeLeft;
+		return UIInterfaceOrientationMaskLandscapeLeft;
 	}
 	else if (_orientationStrictness == 1)
 	{
-		return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight;
+		return UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
 	}
-	return UIInterfaceOrientationLandscapeLeft | UIInterfaceOrientationLandscapeRight
-		| UIInterfaceOrientationPortrait | UIInterfaceOrientationPortraitUpsideDown;*/
-    return UIInterfaceOrientationMaskAll;
+	return UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight
+		| UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown;
 }
 
 - (void)orientationDidChange:(NSNotification*)notification

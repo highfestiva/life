@@ -39,7 +39,7 @@
 	self.window = window;	// Retain it!
 	self.listController = [ListViewController new];
 	self.listController.title = @"Prototypes";
-	UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:self.listController];
+	UINavigationController* navigationController = [[RotatingController alloc] initWithRootViewController:self.listController];
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
 		EditViewController* editController = [EditViewController new];
@@ -83,20 +83,68 @@
 	_animationTimer = nil;
 }
 
+-(void) pushViewController:(UIViewController*)viewController animated:(BOOL)animated
+{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		// TODO: Push using split controller somehow.
+	}
+	else
+	{
+		if ([UIApplication sharedApplication].isStatusBarHidden)
+		{
+			((UINavigationController*)self.window.rootViewController).navigationBarHidden = YES;
+			const bool isRight = self.window.rootViewController.interfaceOrientation == UIInterfaceOrientationLandscapeRight;
+			[EAGLView sharedView].preferredRotation = isRight? UIInterfaceOrientationLandscapeRight : UIInterfaceOrientationLandscapeLeft;
+		}
+		[(UINavigationController*)self.window.rootViewController pushViewController:viewController animated:animated];
+	}
+	[UIViewController attemptRotationToDeviceOrientation];
+}
+
+-(void) popViewControllerAnimated:(BOOL)animated
+{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		// TODO: Push using split controller somehow.
+	}
+	else
+	{
+		[(UINavigationController*)self.window.rootViewController popViewControllerAnimated:animated];
+		((UINavigationController*)self.window.rootViewController).navigationBarHidden = NO;
+	}
+	[UIViewController attemptRotationToDeviceOrientation];
+}
+
+-(void) popIfGame
+{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		// TODO: Push using split controller somehow.
+	}
+	else
+	{
+		if (((UINavigationController*)self.window.rootViewController).visibleViewController.view == [EAGLView sharedView])
+		{
+			[self popViewControllerAnimated:YES];
+		}
+	}
+}
+
 -(void) handleStdOut:(const astr&)pStdOut
 {
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
+		// TODO: handle stdout one way or another with more screen real estate.
 	}
 	else
 	{
 		NSString* text = [NSString stringWithCString:pStdOut.c_str() encoding:NSUTF8StringEncoding];
-		dispatch_async(dispatch_get_main_queue(), ^{
-			StdOutViewController* stdOutController = [StdOutViewController new];
-			stdOutController.title = @"Output";
-			stdOutController.text = text;
-			[(UINavigationController*)self.window.rootViewController pushViewController:stdOutController animated:NO];
-		});
+		[self popViewControllerAnimated:NO];
+		StdOutViewController* stdOutController = [StdOutViewController new];
+		stdOutController.title = @"Output";
+		stdOutController.text = text;
+		[self pushViewController:stdOutController animated:NO];
 	}
 }
 

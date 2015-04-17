@@ -31,16 +31,35 @@ static void HandleTouches(NSSet* pTouches, const Canvas* pCanvas, DragManager& p
 		CGPoint lPrevTapPosition = [lTouch previousLocationInView:nil];
 		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
 		const int s = [[UIScreen mainScreen] scale];
-		//NSLog(@"Touch: %f, %f", lTapPosition.x*s, lTapPosition.y*s);
-		PixelCoord lPreviousTap(lPrevTapPosition.y*s, pCanvas->GetActualHeight() - lPrevTapPosition.x*s);
-		PixelCoord lThisTap(lTapPosition.y*s, pCanvas->GetActualHeight() - lTapPosition.x*s);
-		if (pCanvas && pCanvas->GetDeviceOutputRotation() != 0)
+		PixelCoord lPreviousTap;
+		PixelCoord lThisTap;
+		switch (pCanvas->GetOutputRotation())
 		{
-			lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.y*s, lPrevTapPosition.x*s);
-			lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.y*s, lTapPosition.x*s);
+			case 0:
+			{
+				lPreviousTap = PixelCoord(lPrevTapPosition.x*s, lPrevTapPosition.y*s);
+				lThisTap = PixelCoord(lTapPosition.x*s, lTapPosition.y*s);
+			}
+			break;
+			case 90:
+			{
+				lPreviousTap = PixelCoord(lPrevTapPosition.y*s, pCanvas->GetActualHeight() - lPrevTapPosition.x*s);
+				lThisTap = PixelCoord(lTapPosition.y*s, pCanvas->GetActualHeight() - lTapPosition.x*s);
+			}
+			break;
+			case 180:
+			{
+				lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.x*s, pCanvas->GetActualHeight() - lPrevTapPosition.y*s);
+				lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.x*s, pCanvas->GetActualHeight() - lTapPosition.y*s);
+			}
+			break;
+			default:
+			{
+				lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.y*s, lPrevTapPosition.x*s);
+				lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.y*s, lTapPosition.x*s);
+			}
+			break;
 		}
-		lPreviousTap = PixelCoord(lPrevTapPosition.x, lPrevTapPosition.y);
-		lThisTap = PixelCoord(lTapPosition.x, lTapPosition.y);
 		pDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed, lIsPressed? 1 : 0);
 	}
 }

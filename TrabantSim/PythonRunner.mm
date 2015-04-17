@@ -28,6 +28,11 @@ extern "C" void PyErr_SetString(PyObject *exception, const char *string);
 extern "C" void PyErr_SetInterrupt(void);
 extern "C" void Py_Jb_ClearPendingCalls(void);
 
+// This is to circumvent problems with the UINavigationViewController. The reason it goes here instead of into
+// The rotating view controller is that it needs to be in a separate thread. I trust this way more than the
+// Apple dispatch_whatever() macros.
+#define MINIMUM_PYTHON_RUN_TIME	1.0
+
 
 
 namespace TrabantSim
@@ -64,10 +69,17 @@ void PythonRunner::Break()
 	{
 		mIsStopping = true;
 		mKillSimulator = false;
-		PyGILState_STATE state = PyGILState_Ensure();
-		Py_AddPendingCall(&quit, NULL);
-		PyGILState_Release(state);
-		mPythonWorker.GraceJoin(0.7);
+		for (int x = 0; x < 3 && !Py_IsInitialized(); ++x)
+		{
+			Thread::Sleep(0.1f);
+		}
+		if (Py_IsInitialized())
+		{
+			PyGILState_STATE state = PyGILState_Ensure();
+			Py_AddPendingCall(&quit, NULL);
+			PyGILState_Release(state);
+			mPythonWorker.GraceJoin(0.7);
+		}
 		if (mPythonWorker.IsRunning())
 		{
 			printf("Warning: killing python thread!\n");
@@ -103,6 +115,7 @@ void PythonRunner::WorkerEntry(void*)
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &_);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &_);
 
+	HiResTimer lTimer(false);
 	astr lFullPathname = astrutil::Encode(mFilename);
 	astrutil::strvec lParts = astrutil::Split(lFullPathname, "/");
 	astr lFilename = lParts[lParts.size()-1];
@@ -110,7 +123,9 @@ void PythonRunner::WorkerEntry(void*)
 	if (!fp)
 	{
 		printf("Error: could not open file %s!\n", lFilename.c_str());
+		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-lTimer.QueryTimeDiff());
 		TrabantSim::mApp->FoldSimulator();
+		TrabantSim::mApp->Suspend(true);
 		return;
 	}
 	if (Py_IsInitialized())
@@ -127,13 +142,14 @@ void PythonRunner::WorkerEntry(void*)
 	PyRun_SimpleFileEx(fp, lFilename.c_str(), 1);
 	Py_Finalize();
 	PyEval_ReleaseLock();
-	printf("Python thread exits.\n");
 
 	if (mKillSimulator)
 	{
 		// No use showing simulator still frame?
-		mIsStopping = true;
+	 	mIsStopping = true;
+		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-lTimer.QueryTimeDiff());
 		TrabantSim::mApp->FoldSimulator();
+		TrabantSim::mApp->Suspend(true);
 		mIsStopping = false;
 	}
 }

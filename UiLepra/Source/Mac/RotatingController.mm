@@ -2,7 +2,7 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
-//#include "../../../Lepra/Include/LepraTarget.h"
+#include "../../../Lepra/Include/LepraTarget.h"
 #ifdef LEPRA_IOS
 
 
@@ -10,36 +10,65 @@
 #import "../../Include/Mac/RotatingController.h"
 #import "../../Include/Mac/EAGLView.h"
 
+
+
 @implementation RotatingController
 
 
-- (void) viewWillAppear:(BOOL)animated
+-(void) pushViewController:(UIViewController*)viewController animated:(BOOL)animated
 {
-	//[[UIDevice currentDevice] setOrientation:UIInterfaceOrientationLandscapeRight];
+	forceGameLayout = (viewController.view == [EAGLView sharedView]);
+	[super pushViewController:viewController animated:animated];
+	if (animated && (!forceGameLayout || ![[EAGLView sharedView] shouldAutorotateToInterfaceOrientation:self.interfaceOrientation]))
+	{
+		UIViewController *viewController = [[UIViewController alloc] init];
+		[self presentViewController:viewController animated:NO completion:^{
+			[self dismissViewControllerAnimated:NO completion:nil];
+
+		}];
+	}
+	forceGameLayout = false;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-	return [[EAGLView sharedView] shouldAutorotateToInterfaceOrientation:interfaceOrientation];
+	if (forceGameLayout || self.visibleViewController.view == [EAGLView sharedView])
+	{
+		return [[EAGLView sharedView] shouldAutorotateToInterfaceOrientation:interfaceOrientation];
+	}
+	return [super shouldAutorotateToInterfaceOrientation:interfaceOrientation];
 }
 
 - (BOOL)shouldAutorotate
 {
-	return [[EAGLView sharedView] shouldAutorotate];
+	if (forceGameLayout || self.visibleViewController.view == [EAGLView sharedView])
+	{
+		return [[EAGLView sharedView] shouldAutorotate];
+	}
+	return [super shouldAutorotate];
 }
 
 -(NSUInteger)supportedInterfaceOrientations
 {
-	return [[EAGLView sharedView] supportedInterfaceOrientations];
+	if (forceGameLayout || self.visibleViewController.view == [EAGLView sharedView])
+	{
+		return [[EAGLView sharedView] supportedInterfaceOrientations];
+	}
+	return [super supportedInterfaceOrientations];
 }
 
--(void) orientationDidChange:(NSNotification*)notification
+-(UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
 {
-	[[EAGLView sharedView] orientationDidChange:notification];
+	if (forceGameLayout || self.visibleViewController.view == [EAGLView sharedView])
+	{
+		return [EAGLView sharedView].preferredRotation;
+	}
+	return [super preferredInterfaceOrientationForPresentation];
 }
 
--(BOOL) prefersStatusBarHidden {
-	return YES;
+-(BOOL) prefersStatusBarHidden
+{
+	return (forceGameLayout || self.visibleViewController.view == [EAGLView sharedView]);
 }
 
 @end

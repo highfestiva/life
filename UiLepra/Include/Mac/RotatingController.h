@@ -6,6 +6,8 @@
 
 @interface RotatingController: UINavigationController
 {
+@private
+	bool forceGameLayout;
 }
 
 @end

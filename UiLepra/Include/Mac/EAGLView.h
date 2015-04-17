@@ -32,6 +32,7 @@
 	//UIResponder* responder;
 	int _orientationStrictness;
 	int _preResponderStrictness;
+	UIInterfaceOrientation _preferredRotation;
 	bool isLayoutSet;
 }
 
@@ -41,6 +42,7 @@
 @property(nonatomic, readonly) bool isOpen;
 @property(nonatomic, assign) UIResponder* responder;
 @property(nonatomic, assign) int orientationStrictness;
+@property(nonatomic, assign) UIInterfaceOrientation preferredRotation;
 @property(nonatomic, assign) UiLepra::InputManager* inputManager;
 // Mandatory under the UITextInputTraits protocol.
 @property(nonatomic) UITextAutocapitalizationType autocapitalizationType;

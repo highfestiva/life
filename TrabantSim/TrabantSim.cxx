@@ -91,8 +91,13 @@ void TrabantSim::Init()
 	Thread::Sleep(3.0);	// Wait a bit longer so Pixel Doctrine splash is visible.
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	int lScale = [[UIScreen mainScreen] scale];
-	const int lDisplayWidth = lSize.width * lScale;
-	const int lDisplayHeight = lSize.height * lScale;
+	int lDisplayWidth = lSize.width * lScale;
+	int lDisplayHeight = lSize.height * lScale;
+	if (lDisplayHeight > lDisplayWidth)
+	{
+		// Phone might start up in portrait, but our game will always be in landscape mode.
+		std::swap(lDisplayWidth, lDisplayHeight);
+	}
 #else // Computer L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
@@ -107,7 +112,7 @@ void TrabantSim::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
 	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
@@ -244,42 +249,63 @@ void TrabantSim::Suspend(bool pHard)
 void TrabantSim::FoldSimulator()
 {
 #ifdef LEPRA_IOS
-	dispatch_async(dispatch_get_main_queue(), ^{
+	dispatch_block_t Fold = ^
+	{
 		const int lWasActive = mActiveCounter;
 		astr lStdOut = PythonRunner::GetStdOut();
 		Suspend(false);
-		UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
-		[window setHidden:YES];
+		//UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
+		//[window setHidden:YES];
 		[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
-		[TrabantSim::TrabantSim::mApp->mAnimatedApp.window makeKeyAndVisible];
+		//[TrabantSim::TrabantSim::mApp->mAnimatedApp.window makeKeyAndVisible];
 		PythonRunner::Break();
 		if (!lStdOut.empty() && lWasActive > 0)
 		{
 			[TrabantSim::TrabantSim::mApp->mAnimatedApp handleStdOut:lStdOut];
 		}
-	});
+		else
+		{
+			[TrabantSim::TrabantSim::mAnimatedApp popIfGame];
+		}
+	};
+	if ([NSThread isMainThread])
+	{
+		Fold();
+	}
+	else
+	{
+		dispatch_sync(dispatch_get_main_queue(), Fold);
+	}
 #endif // iOS
 }
 
 void TrabantSim::UnfoldSimulator()
 {
 #ifdef LEPRA_IOS
-	dispatch_async(dispatch_get_main_queue(), ^{
-		[TrabantSim::TrabantSim::mAnimatedApp.window setHidden:YES];
-		UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
-		if (!window.rootViewController)
-		{
-			RotatingController* controller = [[RotatingController alloc] init];
-			controller.navigationBarHidden = YES;
-			controller.view = [EAGLView sharedView];
-			window.rootViewController = controller;
-		}
-		[window makeKeyAndVisible];
+	dispatch_block_t Unfold = ^
+	{
+		//[TrabantSim::TrabantSim::mAnimatedApp.window setHidden:YES];
+		//UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
+		//if (!window.rootViewController)
+		[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+		UIViewController* controller = [[UIViewController alloc] init];
+		controller.view = [EAGLView sharedView];
+		//window.rootViewController = controller;
+		[TrabantSim::TrabantSim::mApp->mAnimatedApp pushViewController:controller animated:YES];
+		//[window makeKeyAndVisible];
 		TrabantSim::TrabantSim::mApp->mActiveCounter = 0;	// Make sure no lost event causes a halt.
 		TrabantSim::TrabantSim::mApp->Resume(false);
-		[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+		//[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
 		PythonRunner::ClearStdOut();
-	});
+	};
+	if ([NSThread isMainThread])
+	{
+		Unfold();
+	}
+	else
+	{
+		dispatch_sync(dispatch_get_main_queue(), Unfold);
+	}
 #endif // iOS
 }
 
