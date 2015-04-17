@@ -54,6 +54,7 @@
 +Simulator: cube always pushes capsules to +x for some reason. Push upwards? Towards cylinder direction?
 +Add outline rendering for iOS! That way it won't look like crap!
 .Add possibility to disable OpenGL buffer object support. Test outline rendering with it!
++Don't hide+show navbar when pushing editor view controller!
 
 Make web page for Trabant.
 iPad version.

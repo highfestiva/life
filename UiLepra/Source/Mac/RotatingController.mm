@@ -19,8 +19,9 @@
 {
 	forceGameLayout = (viewController.view == [EAGLView sharedView]);
 	[super pushViewController:viewController animated:animated];
-	if (animated && (!forceGameLayout || ![[EAGLView sharedView] shouldAutorotateToInterfaceOrientation:self.interfaceOrientation]))
+	if (animated && (hadGameLayout || (forceGameLayout && ![[EAGLView sharedView] shouldAutorotateToInterfaceOrientation:self.interfaceOrientation])))
 	{
+		hadGameLayout = forceGameLayout;
 		UIViewController *viewController = [[UIViewController alloc] init];
 		[self presentViewController:viewController animated:NO completion:^{
 			[self dismissViewControllerAnimated:NO completion:nil];

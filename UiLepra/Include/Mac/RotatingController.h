@@ -8,6 +8,7 @@
 {
 @private
 	bool forceGameLayout;
+	bool hadGameLayout;
 }
 
 @end
