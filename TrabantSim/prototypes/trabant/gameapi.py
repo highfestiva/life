@@ -20,8 +20,8 @@ def init(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', connect_re
 		reset()	# Kill all joysticks, set all default values, etc.
 		setbgcolor(bg)
 		setpencolor(fg)
-		set('Physics.FPS', int(fps))
-		set('Ui.3D.FOV', float(fov))
+		setvar('Physics.FPS', int(fps))
+		setvar('Ui.3D.FOV', float(fov))
 	return True
 
 def close():
@@ -32,10 +32,10 @@ def reset():
 	cmd('reset')
 
 def simdebug(enable):
-	set('Debug.Enable', enable)
+	setvar('Debug.Enable', enable)
 
 def userinfo(message):
-	set('Game.UserMessage', '"%s"' % message)
+	setvar('Game.UserMessage', '"%s"' % message)
 
 def waitload(oid):
 	cmd('wait-until-loaded %i' % oid)
@@ -46,48 +46,48 @@ def opened():
 
 def cam(angle, distance, target_oid, pos, fov, relative_angle, smooth):
 	if angle:
-		set('Ui.3D.CamAngleX', float(angle.x))
-		set('Ui.3D.CamAngleY', float(angle.y))
-		set('Ui.3D.CamAngleZ', float(angle.z))
+		setvar('Ui.3D.CamAngleX', float(angle.x))
+		setvar('Ui.3D.CamAngleY', float(angle.y))
+		setvar('Ui.3D.CamAngleZ', float(angle.z))
 	if distance != None:
-		set('Ui.3D.CamDistance', float(distance))
-		set('Ui.3D.ClipFar', float((distance+10)*20))
+		setvar('Ui.3D.CamDistance', float(distance))
+		setvar('Ui.3D.ClipFar', float((distance+10)*20))
 	if target_oid != None:
-		set('Ui.3D.CamTargetObject', target_oid)
+		setvar('Ui.3D.CamTargetObject', target_oid)
 	if pos:
-		set('Ui.3D.CamLookAtX', float(pos.x))
-		set('Ui.3D.CamLookAtY', float(pos.y))
-		set('Ui.3D.CamLookAtZ', float(pos.z))
+		setvar('Ui.3D.CamLookAtX', float(pos.x))
+		setvar('Ui.3D.CamLookAtY', float(pos.y))
+		setvar('Ui.3D.CamLookAtZ', float(pos.z))
 	if fov:
-		set('Ui.3D.FOV', float(fov))
+		setvar('Ui.3D.FOV', float(fov))
 	if relative_angle != None:
-		set('Ui.3D.CamAngleRelative', bool(relative_angle))
+		setvar('Ui.3D.CamAngleRelative', bool(relative_angle))
 	if smooth != None:
 		smooth = float(smooth)
 		if smooth < 0 or smooth >= 1:
 			print('Camera smooth %f is outside range [0,1). Causing problems?' % smooth)
-		set('Ui.3D.CamSmooth', float(smooth))
+		setvar('Ui.3D.CamSmooth', float(smooth))
 
 def light(angle):
 	if angle:
-		set('Ui.3D.LightAngleX', float(angle.x))
-		set('Ui.3D.LightAngleY', float(angle.y))
-		set('Ui.3D.LightAngleZ', float(angle.z))
+		setvar('Ui.3D.LightAngleX', float(angle.x))
+		setvar('Ui.3D.LightAngleY', float(angle.y))
+		setvar('Ui.3D.LightAngleZ', float(angle.z))
 
 def fog(near,far):
-	set('Ui.3D.FogNear', float(near))
-	set('Ui.3D.FogFar', float(far))
+	setvar('Ui.3D.FogNear', float(near))
+	setvar('Ui.3D.FogFar', float(far))
 
 def gravity(g):
-	set('Physics.GravityX', float(g.x))
-	set('Physics.GravityY', float(g.y))
-	set('Physics.GravityZ', float(g.z))
+	setvar('Physics.GravityX', float(g.x))
+	setvar('Physics.GravityY', float(g.y))
+	setvar('Physics.GravityZ', float(g.z))
 
 def bounce(factor):
-	set('Physics.Bounce', float(factor))
+	setvar('Physics.Bounce', float(factor))
 
 def friction(factor):
-	set('Physics.Friction', float(factor))
+	setvar('Physics.Friction', float(factor))
 
 def explode(pos,vel,strength):
 	cmd('explode %s %s %f' % (_args2str(pos,'0 0 0'), _args2str(vel,'0 0 0'), float(strength)))
@@ -157,19 +157,19 @@ def setmesh(vertices, indices):
 
 def setbgcolor(col):
 	r,g,b,a = _htmlcol(col)
-	set('Ui.3D.ClearRed', r)
-	set('Ui.3D.ClearGreen', g)
-	set('Ui.3D.ClearBlue', b)
+	setvar('Ui.3D.ClearRed', r)
+	setvar('Ui.3D.ClearGreen', g)
+	setvar('Ui.3D.ClearBlue', b)
 
 def setoutline(enable):
-	set('Ui.3D.OutlineMode', enable)
+	setvar('Ui.3D.OutlineMode', enable)
 
 def setpencolor(col):
 	r,g,b,a = _htmlcol(col)
-	set('Ui.PenRed', r)
-	set('Ui.PenGreen', g)
-	set('Ui.PenBlue', b)
-	set('Ui.PenAlpha', a)
+	setvar('Ui.PenRed', r)
+	setvar('Ui.PenGreen', g)
+	setvar('Ui.PenBlue', b)
+	setvar('Ui.PenAlpha', a)
 
 def createobj(static, mat, pos, orientation):
 	static = 'static' if static else 'dynamic'
@@ -263,7 +263,7 @@ def cmd(c, return_type=str):
 	print(result)
 	result
 
-def set(setting, value):
+def setvar(setting, value):
 	if type(value) == bool:
 		value = str(value).lower()
 	cmd('#%s %s' % (setting, str(value)))

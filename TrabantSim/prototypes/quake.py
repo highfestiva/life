@@ -57,23 +57,22 @@ def create_avatar(pos, col):
     avatar.floortime = time()
     avatar.powerup = 1
     return avatar
-player = create_avatar((0,0,2), '#00f0')    # Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
-bot = create_avatar((30,0,2), '#f00')
+player = create_avatar((-15,0,4), '#00f0')    # Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
+bot = create_avatar((15,0,2), '#f00')
 avatars = (player,bot)
 cam(distance=0, fov=60, target=player, target_relative_angle=True)
 powerup = None
 
 # Create walls.
-levelcenter = vec3(15,0,0)
 symmetry = [(rotz(0.2),vec3(1,1,1)), (rotz(-0.2),vec3(-1,1,1)), (rotz(-0.2),vec3(1,-1,1)), (rotz(0.2),vec3(-1,-1,1))]
-longwalls = [vec3(-10.5,10.5,0),(18,1,4)]
-walls = [create_cube(longwalls[0].mulvec(sym)+levelcenter, side=longwalls[1], orientation=orientation, mat='flat', col='#943', static=True) for orientation,sym in symmetry]
+longwalls = [vec3(-10.5,10.5,2),(18,1,4)]
+walls = [create_cube(longwalls[0].mulvec(sym), side=longwalls[1], orientation=orientation, mat='flat', col='#943', static=True) for orientation,sym in symmetry]
 # Pillars
 symmetry = [vec3(1,1,1), vec3(-1,1,1), vec3(1,-1,1), vec3(-1,-1,1)]
-[create_cube(vec3(-2.7,2.7,0).mulvec(sym)+levelcenter, side=(0.3,0.3,3), mat='flat', col=rndvec().abs(), static=True) for sym in symmetry]
+[create_cube(vec3(-2.7,2.7,2).mulvec(sym), side=(0.3,0.3,3), mat='flat', col=rndvec().abs(), static=True) for sym in symmetry]
 
 # Create sliding doors.
-doorcenter,doorwidth = levelcenter+vec3(0,-12,-0.5),1.6
+doorcenter,doorwidth = vec3(0,-12,1.5),1.6
 coords = [vec3(-doorwidth/2,0,0), vec3(+doorwidth/2,0,0)]
 doors = []
 for i,c in enumerate(coords):
@@ -113,7 +112,7 @@ while loop():
         grenades += [grenade]
         sound(sound_bang, pos)
 
-    # Check if rocket exploded or if a player touched ground.
+    # Check if grenade exploded or if a player touched ground.
     for obj,obj2,force,pos in collisions():
         if obj in grenades and obj2 in avatars:
             obj.starttime -= 100    # Set timeout to long ago, will explode below.
@@ -128,7 +127,7 @@ while loop():
             powerup = None
     # Respawn powerup.
     if not powerup and timeout(10, timer=3):
-        powerup = create_cube((15,-25.5,-0.5), side=0.5, mat='flat', col='#ff0')
+        powerup = create_cube(vec3(0,-25.5,1.5), side=0.5, mat='flat', col='#ff0')
         timeout(-1, timer=3)    # Erase timeout to avoid immediate spawn next time.
 
     # Explode grenades and remove missed grenades.
@@ -159,10 +158,10 @@ while loop():
     if pos.z < -50:
         sound(sound_clank, pos)
         player.vel((0,0,0))
-        player.pos((0,0,1))
+        player.pos((-15,0,4))
         player.powerup = 1
         bg(col=bgcol)
         yaw,pitch = -pi/2,0
     if bpos.z < -50:
         bot.vel((0,0,0))
-        bot.pos((30,0,1))
+        bot.pos((15,0,4))

@@ -511,6 +511,19 @@ def shape2physgeoms(oshape, shape):
 	factor,geom,remains = sorted(factor_geom_remains, key=lambda fgr:fgr[0], reverse=True)[0]
 	return [geom] + shape2physgeoms(oshape, remains)
 
+def setcenterobj(gfx,physgeoms):
+	physboxes = [p for p in physgeoms if type(p)==PhysBox]
+	if not physboxes:
+		return
+	avgpos = sum((p.pos for p in physboxes), vec3()) / len(physboxes)
+	q = physboxes[0].q
+	sameqs = [p for p in physboxes if p.q==q]
+	most_centered = min(physboxes, key=lambda p:(p.pos-avgpos).mulvec(vec3(3,1,1)).length())	# Most important to center around Y and Z, X is secondary.
+	if gfx:
+		gfx.pos -= most_centered.pos-physboxes[0].pos
+	imc = physgeoms.index(most_centered)
+	physgeoms[0],physgeoms[imc] = most_centered,physgeoms[0]
+
 def centerobjs(gfx,physgeoms,center=vec3()):
 	global _last_ascii_top_left_offset
 	if not gfx or not physgeoms:
@@ -564,6 +577,7 @@ def shape2obj(shape, fast=True, force_phys_mesh=False):
 		physgeoms = [PhysMesh(quat(),vec3(),gfx.vertices[:],gfx.indices[:])]
 	elif not physgeoms:
 		physgeoms = shape2physgeoms(shape, shape)
+	setcenterobj(gfx,physgeoms)
 	centerobjs(gfx,physgeoms)
 	flipaxis(gfx,physgeoms)
 	#[print(g) for g in [gfx]+physgeoms]

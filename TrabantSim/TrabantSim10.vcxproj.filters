@@ -132,6 +132,19 @@
     <None Include="EditViewController.mm">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="ToDo.txt" />
+    <None Include="BackButtonHandler.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="StdOutViewController.mm">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CreateNewViewController.m">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="PythonRunner.mm">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TrabantSim.rc" />

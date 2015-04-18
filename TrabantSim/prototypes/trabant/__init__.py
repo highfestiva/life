@@ -205,7 +205,7 @@ def trabant_init(**kwargs):
 	if osname in ['ios']:
 		sys.stdout = flushfile(sys.stdout)
 	gameapi.init(**config)
-	gameapi.set('Game.AllowPowerDown', not interactive)
+	gameapi.setvar('Game.AllowPowerDown', not interactive)
 	if osname not in ['ios']:
 		gameapi.sock.settimeout(None if interactive else 5)
 	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
@@ -313,7 +313,9 @@ def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, 
 	if not gfx:
 		gfx,phys = asc2obj.str2obj(ascii, fast=not _accurate_ascii_generate, force_phys_mesh=physmesh)
 		_last_ascii_top_left_offset = -vec3(min(gfx.vertices, key=lambda v:v.x).x, min(gfx.vertices, key=lambda v:v.z).z, min(gfx.vertices, key=lambda v:v.y).y)
-		if process: process(orientation,gfx,phys)
+		orientation = toquat(orientation) if orientation else quat()
+		if process:
+			orientation,gfx,phys = process(orientation,gfx,phys)
 		asc2obj_lookup.append((ascii+str(physmesh)+str(process),gfx,phys,_last_ascii_top_left_offset))
 		if len(asc2obj_lookup) > 10:
 			del asc2obj_lookup[0]
@@ -321,31 +323,37 @@ def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, 
 
 def create_mesh(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
+	orientation = toquat(orientation) if orientation else quat()
 	gfx,phys = objgen.createmesh(vertices,triangles)
-	if process: process(orientation,gfx,phys)
+	if process:
+		orientation,gfx,phys = process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_cube(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
 	try:	side = tovec3(side)
 	except:	side = vec3(side,side,side)
+	orientation = toquat(orientation) if orientation else quat()
 	gfx,phys = objgen.createcube(side)
-	if process: process(orientation,gfx,phys)
+	if process:
+		orientation,gfx,phys = process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
-	resolution = int(min(8, max(4,radius**0.3)*8))
+	orientation,resolution = quat(),int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createsphere(radius, latitude=resolution, longitude=int(resolution*1.5))
-	if process: process(quat(), gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=None, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	if process:
+		orientation,gfx,phys = process(orientation,gfx,phys)
+	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_capsule(pos=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
-	resolution = int(min(8, max(4,radius**0.3)*8))
+	orientation,resolution = quat(),int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createcapsule(radius, length, latitude=resolution, longitude=int(resolution*1.5))
-	if process: process(quat(), gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=None, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	if process:
+		orientation,gfx,phys = process(orientation,gfx,phys)
+	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_clones(obj, placements, mat=None, static=False):
 	'''Creates multiple clones at once of the original obj. Placement is a list of tuples, each tuple contains

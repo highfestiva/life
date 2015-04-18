@@ -55,12 +55,21 @@
 +Add outline rendering for iOS! That way it won't look like crap!
 .Add possibility to disable OpenGL buffer object support. Test outline rendering with it!
 +Don't hide+show navbar when pushing editor view controller!
++Prototype: Limbo gfx
++Fix starting orientation on iPhone.
++Fix iPhone controls (possibly caused by portrait layout).
+-Use both outline and wireframe for Tetris.
++Fix iOS crash boogs.
 
-Make web page for Trabant.
-iPad version.
-Fix iOS crash boogs.
-Fix starting orientation in iOS.
-Prototype: Limbo gfx
 Prototype: Fire Power
+IDE fix: when prototype crashes, don't scroll to top of output window.
+iPad version.
+Fix starting orientation on iPad.
+Fix iPad controls (possibly caused by portrait layout).
+Add 'noise' material?
+Make web page for Trabant.
 Windows: Add 32-bit Python binaries to downloadable archive.
 Windows: Relative Python path!
+Fix iOS "Create New" options.
+Tetris fix: touch/mouse release should not count as movement!
+Fix all games on iOS.

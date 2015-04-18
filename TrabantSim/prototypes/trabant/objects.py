@@ -55,8 +55,8 @@ class PhysCapsule:
 		self.length = length
 	def orthoscale(self, orientation, scale):
 		self.pos = self.pos.mulvec((orientation*scale).abs())
-		self.radius *= scale.length()/3
-		self.length *= scale.length()/3
+		self.radius *= scale.with_z(0).length()/2
+		self.length *= scale.with_x(0).with_y(0)
 	def __repr__(self):
 		return 'phys-capsule (%g,%g,%g,%g,%g,%g,%g) %g %g' % tuple(list(self.q)+list(self.pos)+[float(self.radius),float(self.length)])
 	def __eq__(self,o):
@@ -91,4 +91,15 @@ def orthoscale(scale):
 		o = toquat(orientation)
 		gfx.orthoscale(o,s)
 		[p.orthoscale(o,s) for p in phys]
+		return o,gfx,phys
 	return doscale
+
+def nophys(orientation,gfx,phys):
+	return orientation,gfx,[]
+
+def process_chain(*processors):
+	def doprocess(orientation,gfx,phys):
+		for process in processors:
+			orientation,gfx,phys = process(orientation,gfx,phys)
+		return orientation,gfx,phys
+	return doprocess

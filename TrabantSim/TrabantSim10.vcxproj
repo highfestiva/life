@@ -374,13 +374,18 @@
     <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BackButtonHandler.m" />
+    <None Include="CreateNewViewController.m" />
     <None Include="CYRLayoutManager.m" />
     <None Include="CYRTextStorage.m" />
     <None Include="CYRTextView.m" />
     <None Include="CYRToken.m" />
     <None Include="EditViewController.mm" />
     <None Include="ListViewController.m" />
+    <None Include="PythonRunner.mm" />
     <None Include="PythonTextView.m" />
+    <None Include="StdOutViewController.mm" />
+    <None Include="ToDo.txt" />
     <None Include="TrabantSim.mm" />
   </ItemGroup>
   <ItemGroup>

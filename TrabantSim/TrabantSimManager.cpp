@@ -256,7 +256,7 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 		lPhysics->SetBoneCount(1);
 		Tbc::ChunkyBoneGeometry::BodyData lBoneData(0,0,0);
 		Tbc::ChunkyBoneGeometry* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
-		lPhysics->AddBoneGeometry(xform(quat(1,0,0,0),vec3(0,0,0)), lBone);
+		lPhysics->AddBoneGeometry(xform(pOrientation,pPosition), lBone);
 	}
 	else
 	{
