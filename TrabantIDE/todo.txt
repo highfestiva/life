@@ -60,16 +60,17 @@
 +Fix iPhone controls (possibly caused by portrait layout).
 -Use both outline and wireframe for Tetris.
 +Fix iOS crash boogs.
++Prototype: Fire Power
++IDE fix: when prototype crashes, don't scroll to top of output window.
++Make tap+release inside soft joystick ignored by the tap API.
++Tetris fix: touch/mouse release should not count as movement!
 
-Prototype: Fire Power
-IDE fix: when prototype crashes, don't scroll to top of output window.
 iPad version.
 Fix starting orientation on iPad.
 Fix iPad controls (possibly caused by portrait layout).
-Add 'noise' material?
+Add 'noise' material!
 Make web page for Trabant.
 Windows: Add 32-bit Python binaries to downloadable archive.
 Windows: Relative Python path!
 Fix iOS "Create New" options.
-Tetris fix: touch/mouse release should not count as movement!
 Fix all games on iOS.

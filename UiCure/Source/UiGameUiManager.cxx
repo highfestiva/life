@@ -319,11 +319,11 @@ void GameUiManager::InputTick()
 			mDragManager->UpdateDragByMouse(GetInputManager());
 		}
 #endif // Touch device / Not a touch device.
-		bool lIsDragging = mDragManager->UpdateTouchsticks(GetInputManager());
+		mDragManager->UpdateTouchsticks(GetInputManager());
 		// Check if the actual tap/click has been consumed by any button or such.
-		if (lIsDragging || (mDesktopWindow && mDesktopWindow->GetMouseButtonFlags()&UiTbc::DesktopWindow::CONSUMED_MOUSE_BUTTON))
+		if (mDesktopWindow && mDesktopWindow->GetMouseButtonFlags()&UiTbc::DesktopWindow::CONSUMED_MOUSE_BUTTON)
 		{
-			mDragManager->SetDragsPress(false);
+			mDragManager->SetDraggingUi(true);
 		}
 	}
 }

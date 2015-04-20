@@ -36,6 +36,14 @@ using namespace Lepra;
 
 
 
+enum DragFlags
+{
+	DRAGGING_STICK	= (1<<0),
+	DRAGGING_UI	= (1<<1),
+	DRAGGING_OTHER	= 0xFFFF,
+	DRAG_USER	= (1<<16)
+};
+
 struct Drag
 {
 	Drag(int x, int y, bool isPress, int pButtonMask);
@@ -48,6 +56,7 @@ struct Drag
 	bool mIsNew;
 	int mButtonMask;
 	uint32 mFlags;
+	intptr_t mExtra;
 };
 
 
@@ -65,7 +74,7 @@ public:
 	void UpdateDragByMouse(const InputManager* pInputManager);
 	void UpdateMouseByDrag(InputManager* pInputManager);
 	bool UpdateTouchsticks(InputManager* pInputManager) const;
-	void SetDragsPress(bool pIsPress);
+	void SetDraggingUi(bool pIsUi);
 	void DropReleasedDrags();
 	void ClearDrags(InputManager* pInputManager);
 	DragList GetDragList();

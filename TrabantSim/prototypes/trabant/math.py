@@ -21,6 +21,13 @@ def cos2(a):
 	x = cos(a)
 	return x*x
 
+def angmod(a):
+    if a > pi:
+        return a-2*pi
+    if a < -pi:
+        return a+2*pi
+    return a
+
 def tovec3(v):
 	if v == None:
 		return v
@@ -90,13 +97,13 @@ class vec3:
 		return vec3(self.x,self.y,z)
 
 	def angle_x(self,v):
-		return atan2(v.z,v.y) - atan2(self.z,self.y)
+		return angmod(atan2(v.z,v.y) - atan2(self.z,self.y))
 
 	def angle_y(self,v):
-		return atan2(v.z,v.x) - atan2(self.z,self.x)
+		return angmod(atan2(v.z,v.x) - atan2(self.z,self.x))
 
 	def angle_z(self,v):
-		return atan2(v.y,v.x) - atan2(self.y,self.x)
+		return angmod(atan2(v.y,v.x) - atan2(self.y,self.x))
 
 	def mulvec(self,v):
 		return vec3(self.x*v.x, self.y*v.y, self.z*v.z)

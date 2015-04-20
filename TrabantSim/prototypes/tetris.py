@@ -72,13 +72,13 @@ while loop():
         tetromino_rot_center = vec3(1.5,0.5,0.5) - last_ascii_top_left_offset()    # Rotate about a point in the middle of the first row.
         tetromino.pos(vec3(gridsize.x/2,0,gridsize.y) - tetromino_rot_center)
 
-    if (keys() or taps()) and timeout(0.12):    # Steering.
+    if (keys() or taps()) and timeout(0.2):    # Steering.
         tap = closest_tap(tetromino.pos())
         v = min(directions, key=lambda s:(tap.pos3d()-s-tap.close_pos).length()) if tap else vec3(keydir().x,0,keydir().y)
         # Tapping above means "rotate", tapping left/below/right means move in that direction.
-        if v == vec3(0,0,1):    trymove(vec3(), tetromino.orientation().rotate_y(pi/2))
-        else:            trymove(v, tetromino.orientation())
+        if v == vec3(0,0,1): trymove(vec3(), tetromino.orientation().rotate_y(pi/2))
+        else:                trymove(v, tetromino.orientation())
 
-    # Move down every 0.8 seconds.
-    if tetromino and timeout(0.6):    # Use same timer as user movement. This hinders step down indefinitely when tapping/holding/pressing.
+    # Move down every once in a while.
+    if tetromino and timeout(0.8):    # Use same timer as user movement. This hinders step down indefinitely when tapping/holding/pressing.
         trymove(vec3(0,0,-1), tetromino.orientation())

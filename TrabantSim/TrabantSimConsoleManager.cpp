@@ -573,7 +573,8 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->GetTouchDrags(lList);
 					for (DragList::iterator x = lList.begin(); x != lList.end(); ++x)
 					{
-						lLines.push_back(strutil::Format(_T("%f %f %f %f %f %f %i"), x->mLast.x*sx, x->mLast.y*sy, x->mStart.x*sx, x->mStart.y*sy, x->mVelocity.x*sx, x->mVelocity.y*sy, x->mButtonMask));
+						lLines.push_back(strutil::Format(_T("%f %f %f %f %f %f %s %i"), x->mLast.x*sx, x->mLast.y*sy, x->mStart.x*sx, x->mStart.y*sy,
+								x->mVelocity.x*sx, x->mVelocity.y*sy, x->mIsPress?_T("true"):_T("false"), x->mButtonMask));
 					}
 					mActiveResponse += strutil::Join(lLines, _T("\n"));
 				}

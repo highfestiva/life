@@ -337,7 +337,7 @@ void ImpuzzableManager::HandleDrag()
 	const int m = (int)Math::Lerp(lTouchScale * w * 0.25f, lResolutionMargin, 0.7f);
 	const int r = m-2;
 	typedef UiLepra::Touch::DragManager::DragList DragList;
-	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
+	DragList lDragList = mUiManager->GetDragManager()->GetDragList();
 	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
 		Piece* lPiece = 0;
@@ -355,7 +355,7 @@ void ImpuzzableManager::HandleDrag()
 		}
 		if (!x->mIsPress)
 		{
-			x->mFlags = 0;
+			x->mExtra = 0;
 			lPiece->SetDragging(false, CAM_DISTANCE);
 		}
 		else
@@ -410,7 +410,7 @@ Piece* ImpuzzableManager::PickPiece(UiLepra::Touch::Drag& pDrag, int pRadius)
 	}
 	std::sort(lTappedPieces.begin(), lTappedPieces.end(), PieceDistanceAscending(mCameraTransform.mPosition));
 	Piece* lPiece = lTappedPieces[0];
-	pDrag.mFlags = lPiece->GetInstanceId();
+	pDrag.mExtra = lPiece->GetInstanceId();
 	const float lDepth = mCameraTransform.mPosition.GetDistance(lPiece->GetDragPosition());
 	lPiece->SetDragging(true, lDepth);
 	return lPiece;
@@ -418,14 +418,14 @@ Piece* ImpuzzableManager::PickPiece(UiLepra::Touch::Drag& pDrag, int pRadius)
 
 Piece* ImpuzzableManager::GetDraggedPiece(UiLepra::Touch::Drag& pDrag)
 {
-	if (!pDrag.mFlags)
+	if (!pDrag.mExtra)
 	{
 		return 0;
 	}
-	Piece* lPiece = (Piece*)GetContext()->GetObject(pDrag.mFlags);
+	Piece* lPiece = (Piece*)GetContext()->GetObject(pDrag.mExtra);
 	if (!lPiece)
 	{
-		pDrag.mFlags = 0;
+		pDrag.mExtra = 0;
 	}
 	return lPiece;
 }

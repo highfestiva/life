@@ -36,8 +36,8 @@
 #define BG_COLOR		Color(5, 10, 15, 230)
 #define CAM_DISTANCE		7.0f
 #define BALL_RADIUS		0.15f
-#define DRAG_FLAG_INVALID	1
-#define DRAG_FLAG_STARTED	2
+#define DRAG_FLAG_INVALID	UiLepra::Touch::DRAG_USER
+#define DRAG_FLAG_STARTED	(UiLepra::Touch::DRAG_USER<<1)
 #define CLOSE_NORMAL		5e-5
 #define SAME_NORMAL		(1-CLOSE_NORMAL)
 #define NGON_INDEX(i)		(((int)i<0)? cnt-1 : (i>=(int)cnt)? 0 : i)
@@ -410,7 +410,7 @@ bool BoundManager::HandleCutting()
 		{
 			// Invalidate swipe.
 			--mCutsLeft;
-			x->mFlags |= 1;
+			x->mFlags |= DRAG_FLAG_INVALID;
 
 			// Explosions! YES!
 			const int lParticles = Random::Uniform(5, 11);

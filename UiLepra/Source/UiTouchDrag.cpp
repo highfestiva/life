@@ -24,7 +24,8 @@ Drag::Drag(int x, int y, bool pIsPress, int pButtonMask):
 	mIsPress(pIsPress),
 	mIsNew(true),
 	mButtonMask(pButtonMask),
-	mFlags(0)
+	mFlags(0),
+	mExtra(0)
 {
 }
 
@@ -125,7 +126,7 @@ bool DragManager::UpdateTouchsticks(InputManager* pInputManager) const
 	DragList::const_iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
-		const Drag& lDrag = *i;
+		Drag& lDrag = (Drag&)*i;
 		TouchstickInputDevice* lTouchstick = TouchstickInputDevice::GetByCoordinate(pInputManager, lDrag.mStart);
 		if (!lTouchstick)
 		{
@@ -134,26 +135,30 @@ bool DragManager::UpdateTouchsticks(InputManager* pInputManager) const
 		if (lTouchstick)
 		{
 			lTouchstick->SetTap(lDrag.mLast, lDrag.mIsPress);
+			lDrag.mFlags |= DRAGGING_STICK;
 			lDidUseStick = true;
+		}
+		else
+		{
+			lDrag.mFlags &= ~DRAGGING_STICK;
 		}
 	}
 	return lDidUseStick;
 }
 
-void DragManager::SetDragsPress(bool pIsPress)
+void DragManager::SetDraggingUi(bool pIsUi)
 {
 	ScopeLock lLock(mLock);
 	DragList::iterator i = mDragList.begin();
 	for (; i != mDragList.end(); ++i)
 	{
-		i->mIsPress = pIsPress;
-		if (pIsPress)
+		if (pIsUi)
 		{
-			i->mButtonMask |= 1;
+			i->mFlags |= DRAGGING_UI;
 		}
 		else
 		{
-			i->mButtonMask = 0;
+			i->mFlags &= ~DRAGGING_UI;
 		}
 	}
 }

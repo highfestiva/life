@@ -75,6 +75,7 @@ namespace Fire
 
 
 
+#define DRAG_FLAG	UiLepra::Touch::DRAG_USER
 #define BG_COLOR Color(40, 40, 40, 160)
 const float hp = 768/1024.0f;
 const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
@@ -819,9 +820,9 @@ void FireManager::HandleShooting()
 	DragList lDragList = mUiManager->GetDragManager()->GetDragList();
 	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
-		if (x->mIsPress && (x->mFlags&1) == 0 && !mMenu->GetDialog())
+		if (x->mIsPress && (x->mFlags&DRAG_FLAG) == 0 && !mMenu->GetDialog())
 		{
-			x->mFlags |= 1;
+			x->mFlags |= DRAG_FLAG;
 			mShootDirection = mUiManager->GetRenderer()->ScreenCoordToVector(x->mLast);
 			Shoot(0, 0);
 		}

@@ -1606,6 +1606,15 @@ void TrabantSimManager::ScriptPhysicsTick()
 		const UiDragList lDrags = mUiManager->GetDragManager()->GetDragList();
 		for (UiDragList::const_iterator x = lDrags.begin(); x != lDrags.end(); ++x)
 		{
+			if (x->mFlags&UiLepra::Touch::DRAGGING_OTHER)
+			{
+				// Ignore drag if pressing some UI element, but don't ignore release if it originated outside of a stick.
+				if (x->mIsPress || ((x->mFlags&UiLepra::Touch::DRAGGING_STICK) && UiLepra::Touch::TouchstickInputDevice::GetByCoordinate(mUiManager->GetInputManager(), x->mStart)))
+				{
+					continue;
+				}
+			}
+
 			bool lFound = false;
 			for (DragList::iterator y = mDragList.begin(); y != mDragList.end(); ++y)
 			{

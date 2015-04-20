@@ -134,10 +134,11 @@ class Obj:
 
 
 class Tap:
-	def __init__(self, x, y, startx, starty, vx, vy, buttonmask):
+	def __init__(self, x, y, startx, starty, vx, vy, ispress, buttonmask):
 		self.x,self.y = x,y
 		self.startx,self.starty = startx,starty
 		self.vx,self.vy = vx,vy
+		self.ispress = ispress
 		self.buttonmask = buttonmask
 	def pos3d(self, z=None):
 		'''Converts the tap on-screen 2D position to a world 3D position.'''
@@ -460,13 +461,13 @@ def taps():
 		return _taps
 	def processline(line):
 		ws = line.split()
-		return [float(w) for w in ws[:6]] + [int(ws[6])]
+		return [float(w) for w in ws[:6]] + [bool(ws[6]),int(ws[7])]
 	taps_coords = [processline(line) for line in gameapi.taps().split('\n') if line]
 	_taps = []
 	used_invalidations = set()
-	for x,y,startx,starty,vx,vy,buttonmask in taps_coords:
+	for x,y,startx,starty,vx,vy,ispress,buttonmask in taps_coords:
 		if (startx,starty) not in _invalidated_taps:
-			_taps.append(Tap(x,y,startx,starty,vx,vy,buttonmask))
+			_taps.append(Tap(x,y,startx,starty,vx,vy,ispress,buttonmask))
 		else:
 			used_invalidations.add((startx,starty))
 	for tapstart in set(_invalidated_taps):
