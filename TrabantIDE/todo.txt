@@ -64,13 +64,86 @@
 +IDE fix: when prototype crashes, don't scroll to top of output window.
 +Make tap+release inside soft joystick ignored by the tap API.
 +Tetris fix: touch/mouse release should not count as movement!
++Add 'noise' material!
++Windows: Add 32-bit Python binaries to downloadable archive.
++Windows: Relative Python path!
++Smaller ball in breakout.
++Cam follow target.
++Make orientation test "game": diamond-centered, cube-centered, physmesh-centered *asymmetric 3D* shapes.
++Asteroids. Fix Orientation with big O. Every friggin' game.
++Fog. terminal_velocity.py
+-Smooth camera rotation. geometry_test.py
++Shadows do not work at all. physics.py
+-Light shadow should be less from above and a little more from the side. breakout.py
++Tap screen to world translation doesn't work properly. Off by some. space_invaders.py
++Collisions.
++tetris.py
++Relative accelerometer. terminal_velocity.py
++Touch joysticks.
++Fix engine sounds.
++Fix engine sound intensity on push engines.
++Car.
++Heli.
++Make taps stick until polled. flappy_ufo.py, snake.py, tetris.py
++Taps seem to be pressed when game starts. Reset at start!
++Bg on some games.
++Fix fog.
++Fix keyboard steering on computers.
++Add "click" for those computer enthusiasts.
++Fix joystick setting: sloppy. When released outside of joystick it works, but when tap released inside it resets.
++Stop font from changing after application load.
++Tap/slide velocity.
+.Fix bug in taps! Dunno, but my latest fix messed something up.
++Ghosts that hunt ball in Pac-Man!
++Explosions!
++Fix bug in explosions: one of the textures seems to be taken over by a letter "P"!!!
++PlaySound!
++Scaled texture+UVs on cubes. Implement checker material.
++Optimize ASCII to object loading times.
++Reduce code mass. ''.strip()? Cam setting on each game? Etc.
+-Add support for gamepad controller?
+-Fix touch stick size when using high resolution (i.e. full screen)!
++Fix helisim controls!
++Test in release build.
++Test using API in strange ways. Crash control.
++Add some comments. What is "avel" for instance?
++Configuration for running towards a simulator on another machine.
++Fix bug: sometimes won't TCP socket connect! Reproduce how?
++Build and run on Mac.
++Test accelerometer controls on iOS.
++Capsules.
++Quake.
++Descent. Relative accelerometer for pitch.
++Add back button on iOS.
++iOS Editor: fix uitextview frame when user inserts text... Keep a margin!
++iOS: add "save" on back button.
++iOS: fix bug where .py file can't be opened by interpreter all the time!
++iOS: fix so that starting from a computer works even if simulator is not active.
++Fix cam/light angle on asteroids? Don't know what's causing the strange look.
++Fix screen bounds on iPhone 6.
++Fix fog on iOS.
++Fix iOS screen orientation from all four angles. ViewController won't rotate. Including tap position from all four positions.
+-Fix pause button (icon).
++Build mobile Python IDE.
++City!
++Disable/enable collisions.
+.Only allow mouselook inside window client area!
 
+Fix accelerator orientation when device rotated (Terminal Velocity).
+Fix often shows "connection lost".
+Fix initial connect often timeouts (Minecraft)!
+Fix soft joystick controls in iOS (Heli).
+Add "allow/disallow/ban" to iOS.
+Fix all games on iOS.
 iPad version.
 Fix starting orientation on iPad.
-Fix iPad controls (possibly caused by portrait layout).
-Add 'noise' material!
+Check iPad controls.
 Make web page for Trabant.
-Windows: Add 32-bit Python binaries to downloadable archive.
-Windows: Relative Python path!
 Fix iOS "Create New" options.
-Fix all games on iOS.
+iOS icons.
+iOS splash screens.
+
+Rolling ball, avoiding holes. Using accelerometer.
+Tower defence game.
+Mario.
+Legend of the Void.

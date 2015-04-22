@@ -3,6 +3,7 @@
 
 from math import radians,tan
 from trabant.math import *
+import sys
 import trabant.asc2obj
 import trabant.gameapi
 import trabant.objgen
@@ -14,6 +15,7 @@ hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hin
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
 wait_until_loaded = True
+osname = sys.platform
 _lastlooptime = time.time()
 _accurate_ascii_generate = True
 _has_opened = False
@@ -140,6 +142,9 @@ class Tap:
 		self.vx,self.vy = vx,vy
 		self.ispress = ispress
 		self.buttonmask = buttonmask
+	@property
+	def isrelease(self):
+		return not self.ispress
 	def pos3d(self, z=None):
 		'''Converts the tap on-screen 2D position to a world 3D position.'''
 		if not z:
@@ -154,6 +159,8 @@ class Tap:
 		'''This tap won't be returned again from the taps() function.'''
 		global _invalidated_taps
 		_invalidated_taps.add((self.startx,self.starty))
+	def movement2(self):
+		return (self.x-self.startx)**2+(self.y-self.starty)**2
 	def _distance2(self, x, y):
 		return (self.x-x)**2+(self.y-y)**2
 	def __hash__(self):
@@ -179,7 +186,6 @@ class flushfile:
 
 
 def trabant_init(**kwargs):
-	import sys
 	interactive = bool(hasattr(sys, 'ps1') or sys.flags.interactive)
 	config = {'restart': not interactive}
 	try:
@@ -199,11 +205,12 @@ def trabant_init(**kwargs):
 			pass
 	config.update(kwargs)
 	global _joysticks,_timers,_has_opened,_accelerometer_calibration
-	_joysticks,_timers,_has_opened,osname = {},{},True,sys.platform
+	_joysticks,_timers,_has_opened = {},{},True
 	if 'osname' in config:
+		global osname
 		osname = config['osname']
 		del config['osname']
-	if osname in ['ios']:
+	if is_touch_device():
 		sys.stdout = flushfile(sys.stdout)
 	gameapi.init(**config)
 	gameapi.setvar('Game.AllowPowerDown', not interactive)
@@ -234,14 +241,14 @@ def loop(delay=0.03, end_after=None):
 	if _want_mousemove:
 		_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
 	if end_after and timeout(end_after,timer=-154):
-		timeout(-1,timer=-154)	# Remove timer.
+		timeout(timer=-154, reset=True)	# Remove timer.
 		return False
 	return gameapi.opened()
 
 def sleep(t):
 	time.sleep(min(0.5,t))
 
-def timeout(t, timer=0, first_hit=False):
+def timeout(t=1, timer=0, first_hit=False, reset=False):
 	'''Will check if time t elapsed since first called. If first_hit is true, it will elapse
 	   immediately on first call. You can run several simultaneous timers, use the timer parameter
 	   to select which one.'''
@@ -250,11 +257,19 @@ def timeout(t, timer=0, first_hit=False):
 		_timers[timer] = time.time()
 		if first_hit:
 			return True
-	elif t < 0:
+	if reset:
 		del _timers[timer]
 		return False
 	if time.time() - _timers[timer] > t:
 		_timers[timer] = time.time()
+		return True
+	return False
+
+def timein(t, timer=0):
+	global _timers
+	if not timer in _timers:
+		_timers[timer] = time.time()
+	if time.time() - _timers[timer] < t:
 		return True
 	return False
 
@@ -390,7 +405,7 @@ def accurate_ascii_generate(enable):
 
 def pick_objects(pos, direction, near=2, far=1000):
 	pos = tovec3(pos)
-	objects = [(_objects[oid],pos) for oid,pos in gameapi.pickobjs(pos, direction, near, far)]
+	objects = [(_objects[oid],pos) for oid,pos in gameapi.pickobjs(pos, direction, near, far) if oid in _objects]
 	return sorted(objects, key=lambda op: (op[1]-pos).length2())
 
 def release_all_objects():
@@ -418,9 +433,12 @@ def collided_objects():
 	'''Returns all objects that collided last loop.'''
 	return set([o for o,_,_,_ in collisions()] + [o2 for _,o2,_,_ in collisions()])
 
-def collisions():
+def collisions(enable=None):
 	'''Returns all collisions that occured last loop. Each collision is a 4-tuple:
 	   (object1,object2,force,position).'''
+	if enable in (True, False):
+		gameapi.setvar('Physics.NoClip', not enable)
+		return
 	global _collisions
 	if _collisions != None:
 		return _collisions
@@ -461,11 +479,11 @@ def taps():
 		return _taps
 	def processline(line):
 		ws = line.split()
-		return [float(w) for w in ws[:6]] + [bool(ws[6]),int(ws[7])]
-	taps_coords = [processline(line) for line in gameapi.taps().split('\n') if line]
+		return [float(w) for w in ws[:6]] + [ws[6]=='true',int(ws[7])]
+	taps_info = [processline(line) for line in gameapi.taps().split('\n') if line]
 	_taps = []
 	used_invalidations = set()
-	for x,y,startx,starty,vx,vy,ispress,buttonmask in taps_coords:
+	for x,y,startx,starty,vx,vy,ispress,buttonmask in taps_info:
 		if (startx,starty) not in _invalidated_taps:
 			_taps.append(Tap(x,y,startx,starty,vx,vy,ispress,buttonmask))
 		else:
@@ -528,6 +546,10 @@ def mousewheel():
 	global _want_mousemove
 	_want_mousemove = True
 	return _mousemove.z
+
+def is_touch_device():
+    '''Only use this function if your touch device's and computer's controls clash.'''
+    return osname in ('ios', 'android')
 
 
 ########################################
@@ -664,17 +686,21 @@ def _update_cam_shadow():
 	if _cam_pos:
 		return
 	if _cam_target:
+		o = None
 		_cam_pos = _cam_target.pos()
 		if not _cam_pos:
 			_cam_target = None
 			return _update_cam_shadow()
 		elif _cam_lookat:
-			_cam_pos += _cam_target.orientation()*_cam_lookat
+			o = _cam_target.orientation()
+			_cam_pos += o*_cam_lookat
 	elif _cam_lookat:
 		_cam_pos = _cam_lookat
 	else:
 		_cam_pos = vec3()
-	_cam_q = quat().rotate_y(_cam_angle.y).rotate_x(_cam_angle.x).rotate_z(_cam_angle.z)
+	_cam_q = quat().rotate_z(_cam_angle.z).rotate_x(_cam_angle.x).rotate_y(_cam_angle.y)
+	if _cam_target:
+		_cam_q = (o if o else _cam_target.orientation()) * _cam_q
 	_cam_inv_q = _cam_q.inverse()
 	if _cam_distance:
 		_cam_pos += _cam_q * vec3(0,-_cam_distance,0)

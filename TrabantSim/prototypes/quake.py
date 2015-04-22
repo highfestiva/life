@@ -61,6 +61,7 @@ player = create_avatar((-15,0,4), '#00f0')    # Alpha=0 means invisible. We hide
 bot = create_avatar((15,0,2), '#f00')
 avatars = (player,bot)
 cam(distance=0, fov=60, target=player, target_relative_angle=True)
+stick = create_joystick((0,0))
 powerup = None
 
 # Create walls.
@@ -85,14 +86,23 @@ yaw,pitch = -pi/2,0    # Start looking to the right, towards the center of the m
 grenades = []
 gravity((0,0,-15), friction=1, bounce=4)    # Higer gravity than Earth in Quake. Bounce is a state variable. We want bouncing grenades.
 
+# Touch device controls.
+fasttap = lambda: timein(0.2, timer=5) and bool(taps()) and taps()[0].isrelease
+check_reset_time_tap = lambda: not taps() and timeout(timer=5, reset=True)
+is_shoot_tap = lambda: (fasttap() or check_reset_time_tap()) if is_touch_device() else click(left=True)
+
 while loop():
     # Update mouse look angles.
-    yaw,pitch = yaw-mousemove().x*0.09, pitch-mousemove().y*0.05
+    if is_touch_device():
+        for tap in taps():
+            yaw,pitch = yaw+tap.vx*0.1, pitch+tap.vy*0.1
+    else:
+        yaw,pitch = yaw-mousemove().x*0.09, pitch-mousemove().y*0.05
     pitch = max(min(pitch,pi/2),-pi/2)    # Allowed to look straight up and straight down, but no further.
 
     # XY movement relative to the current yaw angle, jumps are controlled with Z velocity.
     xyrot = rotz(yaw)
-    player.engine[0].force(xyrot * (keydir().with_z(0)*player.powerup))
+    player.engine[0].force(xyrot * (vec3(stick.x,stick.y,0)+keydir().with_z(0)) * player.powerup)
     if keydir().z>0 and time()-player.floortime < 0.1 and timeout(0.3, first_hit=True):
         player.vel(player.vel()+vec3(0,0,6))
 
@@ -102,15 +112,15 @@ while loop():
     [avatar.orientation(quat()) for avatar in [player,bot]]    # Keep avatars straight at all times.
 
     # Throw grenades.
-    if click(left=True) and timeout(1, timer=2, first_hit=True):
-        orientation = xyrot.rotate_x(pitch)
-        vel = player.vel()
-        pos = player.pos() + vel*0.05 + orientation*vec3(0,1,0)
-        vel = vel + orientation*vec3(0,10,0)
-        grenade = create_sphere(pos=pos, vel=vel, radius=0.05, col='#3a3')
-        grenade.starttime = time()
-        grenades += [grenade]
-        sound(sound_bang, pos)
+    if is_shoot_tap() and timeout(1, timer=2, first_hit=True): # Limit shooting frequency.
+            orientation = xyrot.rotate_x(pitch)
+            vel = player.vel()
+            pos = player.pos() + vel*0.05 + orientation*vec3(0,1,0)
+            vel = vel + orientation*vec3(0,10,0)
+            grenade = create_sphere(pos=pos, vel=vel, radius=0.05, col='#3a3')
+            grenade.starttime = time()
+            grenades += [grenade]
+            sound(sound_bang, pos)
 
     # Check if grenade exploded or if a player touched ground.
     for obj,obj2,force,pos in collisions():
@@ -128,7 +138,7 @@ while loop():
     # Respawn powerup.
     if not powerup and timeout(10, timer=3):
         powerup = create_cube(vec3(0,-25.5,1.5), side=0.5, mat='flat', col='#ff0')
-        timeout(-1, timer=3)    # Erase timeout to avoid immediate spawn next time.
+        timeout(timer=3, reset=True)    # Erase timeout to avoid immediate spawn next time.
 
     # Explode grenades and remove missed grenades.
     for g in list(grenades):

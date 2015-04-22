@@ -16,17 +16,19 @@ tank = '\n---\n'.join([r'/XXXXXXXXXXXX\ ']   +
 gravity((0,0,0), bounce=0.2, friction=3)    # Create objects floating in mid-air. Use high friction to simulate tank moment better.
 
 # Create the objects and three wheels on each side.
+collisions(False)   # Disallow collisions while we're mounting wheels inside tank.
 turret,tank = [create_ascii_object(part,pos=pos,col='#282') for part,pos in [(turret,(0.5,0,1.5)), (tank,(0,0,0))]]
 [t.mass(m) for t,m in [(turret,500), (tank,8000)]]
 wheel = lambda x,y: create_sphere(pos=(x,y,-0.5), radius=1.1, col='#531')
-rwheels,lwheels = [wheel(-5,-3.7),wheel(0,-3.7),wheel(+5,-3.7)],[wheel(-5,+3.7),wheel(0,+3.7),wheel(+5,+3.7)]
+rwheels,lwheels = [wheel(-5,-3),wheel(0,-3),wheel(+5,-3)],[wheel(-5,+3),wheel(0,+3),wheel(+5,+3)]
+collisions(True)   # Wheels mounted, allow collisions again.
 
 # Connect turret and wheels to body.
 tank.joint(hinge_joint, turret, (0,0,1))
 [tank.joint(hinge_joint, wheel, axis=(0,-1,0)) for wheel in lwheels+rwheels]
 turret_turn = tank.create_engine(roll_engine, targets=[(turret,1)], max_velocity=[6,-6], strength=0.1, friction=1)
-lroll = tank.create_engine(roll_engine, max_velocity=[15,-15], targets=[(w,1) for w in lwheels])
-rroll = tank.create_engine(roll_engine, max_velocity=[15,-15], targets=[(w,1) for w in rwheels])
+lroll = tank.create_engine(roll_engine, max_velocity=[15,-15], targets=[(w,1) for w in lwheels], friction=0.1)
+rroll = tank.create_engine(roll_engine, max_velocity=[15,-15], targets=[(w,1) for w in rwheels], friction=0.1)
 rroll.addsound(sound_engine_combustion, 0.2)
 
 # Aiming stuff for turret.
@@ -37,7 +39,7 @@ terrain_meshes,patch_size = {},80
 
 def create_terrain_patch(px,py):
     x,y = px*patch_size,py*patch_size
-    ground = create_cube(pos=(x,y,-patch_size/2-2), side=patch_size, mat='smooth', col='#c93', static=True)
+    ground = create_cube(pos=(x,y,-patch_size/2-2), side=patch_size, mat='noise', col='#c93', static=True)
     house = create_cube(pos=(x,y+patch_size/4,2-2), side=(patch_size/2,12,4), mat='flat', col='#274', static=True)
     house2 = create_cube(pos=(x-patch_size/4,y-patch_size/4,8-2), side=(10,10,16), mat='flat', col='#ddf', static=True)
     return [ground, house, house2]
@@ -75,7 +77,7 @@ while loop():
     # Auto aim and shooting.
     if closest_tap(tankpos):
         target_pos,reset_turret = closest_tap(tankpos).pos3d(),False
-        timeout(-1)
+        timeout(reset=True)
     elif timeout(10.0):
         turret_turn.force(0)    # Stop following target after some seconds.
         target_pos,reset_turret = None,not target_pos   # Double that time, we rotate turret forward again.

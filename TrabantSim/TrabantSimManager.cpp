@@ -369,14 +369,15 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 		delete lObject;
 		return -1;
 	}
-	if (pMaterial == MaterialChecker)
+	const str lTexture = (pMaterial==MaterialChecker)? _T("checker.png") : _T("noise.png");
+	if (pMaterial == MaterialChecker || pMaterial == MaterialNoise)
 	{
 		const float lScale = (fabs(pGfxObject.mVertices[pGfxObject.mVertices.size()-3]-pGfxObject.mVertices[0]) >= 60)? 20.0f : 2.0f;
 		AddCheckerTexturing(lMesh, lScale);
-		lObject->LoadTexture(_T("checker.png"));
+		lObject->LoadTexture(lTexture);
 	}
 	lObject->AddMeshResource(lMesh, pIsStatic? -1 : 1);
-	lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), _T("texture"), _T("checker.png"), lColor, a);
+	lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), _T("texture"), lTexture, lColor, a);
 	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
 	lObject->mInitialOrientation = pq;
 	lObject->mInitialInverseOrientation = pq.GetInverse();
@@ -443,8 +444,14 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesTexture);
 					lObject->LoadTexture(_T("checker.png"));
+					lObject->AddMeshInfo(lMeshName, _T("texture"), _T("checker.png"), lColor, a, lIsSmooth);
 				}
-				lObject->AddMeshInfo(lMeshName, _T("texture"), _T("checker.png"), lColor, a, lIsSmooth);
+				else if (pMaterial == MaterialNoise)
+				{
+					LEPRA_MEASURE_SCOPE(CreateClonesTexture);
+					lObject->LoadTexture(_T("noise.png"));
+					lObject->AddMeshInfo(lMeshName, _T("texture"), _T("noise.png"), lColor, a, lIsSmooth);
+				}
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesMesh);
 					lObject->AddMeshResourceRef(lMeshName, pIsStatic? -1 : 1);

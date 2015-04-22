@@ -29,7 +29,7 @@ main_rotor,tail_rotor,body = [create_ascii_object(part,pos=pos,col=col) for part
 main_rotor.mass(0.3)
 body.joint(hinge_joint, main_rotor, (0,0,1))
 thrust = body.create_engine(gyro_engine, sound=sound_engine_rotor, max_velocity=(50,10))
-lift = body.create_engine(rotor_engine)
+lift = body.create_engine(rotor_engine, strength=0.2)
 roll = body.create_engine(tilt_engine, offset=(0,10))
 pitch = body.create_engine(tilt_engine, offset=(10,0))
 

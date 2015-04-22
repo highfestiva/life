@@ -345,6 +345,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					ObjectMaterial lMaterial = MaterialSmooth;
 					if (lMaterialInfo == _T("flat")) lMaterial = MaterialFlat;
 					else if (lMaterialInfo == _T("checker")) lMaterial = MaterialChecker;
+					else if (lMaterialInfo == _T("noise")) lMaterial = MaterialNoise;
 
 					const int lObjectId = lManager->CreateObject(lOrientation, lPosition, mGfxMesh, mPhysObjects, lMaterial, lIsStatic);
 					if (lObjectId == -1)
@@ -366,6 +367,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					ObjectMaterial lMaterial = MaterialSmooth;
 					if (lMaterialInfo == _T("flat")) lMaterial = MaterialFlat;
 					else if (lMaterialInfo == _T("checker")) lMaterial = MaterialChecker;
+					else if (lMaterialInfo == _T("noise")) lMaterial = MaterialNoise;
 
 					std::vector<xform> lTransforms;
 					int x = 0, cnt = (int)lPlacements.size();

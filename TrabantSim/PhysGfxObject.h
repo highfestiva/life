@@ -69,7 +69,8 @@ enum ObjectMaterial
 {
 	MaterialSmooth = 1,
 	MaterialFlat,
-	MaterialChecker
+	MaterialChecker,
+	MaterialNoise
 };
 
 

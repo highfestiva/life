@@ -44,7 +44,7 @@ def create_terrain_patch(px,py):
             if v < grid and u < grid:
                 triangles += [v*g1+u, v*g1+u+1, (v+1)*g1+u, v*g1+u+1, (v+1)*g1+u+1, (v+1)*g1+u]
     col = int(-cos(py/9)*80+160)*256 + int(sin(px/8)*80+160)*65536    # Vary the patch color a little.
-    return create_mesh(vertices, triangles, pos=(x,y,0), col='#%6.6x'%col, static=True)
+    return create_mesh(vertices, triangles, pos=(x,y,0), mat='noise', col='#%6.6x'%col, static=True)
 
 def update_terrain(pos):
     '''Add new visible patches, drop no longer visible ones.'''
