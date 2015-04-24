@@ -337,7 +337,7 @@ def _tryconnect(addr, retries):
 				sock.settimeout(sock.timeout+1)
 			sock.connect((ip,int(port)))
 			cmd('nop')	# To make sure UDP connection alright.
-			sock.settimeout(sock.timeout+1)
+			sock.settimeout(sock.timeout+3)
 			break
 		except socket.error as e:
 			sock = None

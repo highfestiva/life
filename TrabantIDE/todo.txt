@@ -128,11 +128,12 @@
 +City!
 +Disable/enable collisions.
 .Only allow mouselook inside window client area!
-
-Fix accelerator orientation when device rotated (Terminal Velocity).
-Fix often shows "connection lost".
 Fix initial connect often timeouts (Minecraft)!
-Fix soft joystick controls in iOS (Heli).
+
+Test on iPhone 4s.
+iOS: Fix accelerator orientation when device rotated (terminal_velocity).
+Check that device rotation works on iPad.
+Fix soft joystick bug in iOS (car, heli).
 Add "allow/disallow/ban" to iOS.
 Fix all games on iOS.
 iPad version.
