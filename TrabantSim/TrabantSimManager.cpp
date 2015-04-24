@@ -49,7 +49,7 @@ namespace TrabantSim
 
 
 
-void FoldSimulator();
+void SuspendSimulator();
 void UnfoldSimulator();
 void DidSyncFiles();
 
@@ -154,6 +154,8 @@ void TrabantSimManager::Resume(bool pHard)
 {
 	(void)pHard;
 	mIsControlTimeout = false;
+	mIsControlled = true;
+	mWasControlled = true;
 	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
 
 #ifdef LEPRA_TOUCH
@@ -440,18 +442,13 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 					LEPRA_MEASURE_SCOPE(CreateClonesPhys);
 					lObject->CreatePhysicsRef(lPhysName);
 				}
-				if (pMaterial == MaterialChecker)
+				const str lTexture = (pMaterial==MaterialChecker)? _T("checker.png") : _T("noise.png");
+				if (pMaterial == MaterialChecker || pMaterial == MaterialNoise)
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesTexture);
-					lObject->LoadTexture(_T("checker.png"));
-					lObject->AddMeshInfo(lMeshName, _T("texture"), _T("checker.png"), lColor, a, lIsSmooth);
+					lObject->LoadTexture(lTexture);
 				}
-				else if (pMaterial == MaterialNoise)
-				{
-					LEPRA_MEASURE_SCOPE(CreateClonesTexture);
-					lObject->LoadTexture(_T("noise.png"));
-					lObject->AddMeshInfo(lMeshName, _T("texture"), _T("noise.png"), lColor, a, lIsSmooth);
-				}
+				lObject->AddMeshInfo(lMeshName, _T("texture"), lTexture, lColor, a, lIsSmooth);
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesMesh);
 					lObject->AddMeshResourceRef(lMeshName, pIsStatic? -1 : 1);
@@ -574,8 +571,39 @@ void TrabantSimManager::PlaySound(const str& pSound, const vec3& pPos, const vec
 
 void TrabantSimManager::PopCollisions(CollisionList& pCollisionList)
 {
-	ScopeLock lGameLock(GetTickLock());
-	pCollisionList.splice(pCollisionList.end(), mCollisionList);
+	{
+		ScopeLock lGameLock(GetTickLock());
+		pCollisionList.splice(pCollisionList.end(), mCollisionList);
+	}
+
+	// Reduce the number of collisions to avoid bandwidth problems.
+	typedef std::unordered_map<unsigned,CollisionInfo> CollisionMap;
+	CollisionMap lReducedCollisions;
+	for (CollisionList::iterator x = pCollisionList.begin(); x != pCollisionList.end(); ++x)
+	{
+		unsigned y = x->mObjectId;
+		unsigned z = x->mOtherObjectId;
+		uint64 lKey = ((y^z)<<16) + (y+z);
+		CollisionMap::iterator c = lReducedCollisions.find(lKey);
+		if (c != lReducedCollisions.end())
+		{
+			CollisionInfo& lCollision = c->second;
+			if (lCollision.mForce*x->mForce > 0)
+			{
+				lCollision.mForce = (lCollision.mForce+x->mForce)*0.5f;
+				lCollision.mPosition = (lCollision.mPosition+x->mPosition)*0.5f;
+			}
+		}
+		else
+		{
+			lReducedCollisions.insert(CollisionMap::value_type(lKey, *x));
+		}
+	}
+	pCollisionList.clear();
+	for (CollisionMap::iterator x = lReducedCollisions.begin(); x != lReducedCollisions.end(); ++x)
+	{
+		pCollisionList.push_back(x->second);
+	}
 }
 
 void TrabantSimManager::GetKeys(strutil::strvec& pKeys)
@@ -1112,10 +1140,15 @@ void TrabantSimManager::CommandLoop()
 		ScopeLock lGameLock(GetTickLock());
 		GetPhysicsManager()->InitCurrentThread();
 	}
+#ifdef LEPRA_TOUCH
+	const double lNetworkTimeout = 5;
+#else // Computer
+	const double lNetworkTimeout = 2;
+#endif // Touch / computer
 	uint8 lData[128*1024];
 	while (!mCommandThread->GetStopRequest())
 	{
-		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, 2);
+		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, lNetworkTimeout);
 		if (l <= 0 || lData[l-1] != '\n' || ::memcmp("disconnect\n", lData, 11) == 0)
 		{
 			if (l == 0)
@@ -1126,22 +1159,20 @@ void TrabantSimManager::CommandLoop()
 			{
 				mIsControlled = false;
 			}
-			for (int x = 0; x < 10; ++x)
+			mCommandSocket->ClearErrors();
+			/*for (int x = 0; x < 10; ++x)
 			{
 				if (mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, 0.01) == 0)
 				{
 					break;
 				}
-			}
+			}*/
 			continue;
 		}
 #ifdef LEPRA_TOUCH
 		if (!mIsControlled || mIsControlTimeout)
 		{
-			if (mLastRemoteAddress.GetIP().GetAsString() != _T("127.0.0.1"))
-			{
-				UnfoldSimulator();
-			}
+			UnfoldSimulator();
 		}
 #endif // Touch device.
 		mIsControlled = true;
@@ -1197,10 +1228,7 @@ bool TrabantSimManager::IsControlled()
 		else
 		{
 #ifdef LEPRA_TOUCH
-			if (mLastRemoteAddress.GetIP().GetAsString() != _T("127.0.0.1"))
-			{
-				FoldSimulator();
-			}
+			SuspendSimulator();
 #else // Computer
 			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
 #endif // Touch device.
@@ -1573,7 +1601,7 @@ void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 
 void TrabantSimManager::OnBackButton(UiTbc::Button*)
 {
-	FoldSimulator();
+	SuspendSimulator();
 }
 
 void TrabantSimManager::OnMenuAlternative(UiTbc::Button*)

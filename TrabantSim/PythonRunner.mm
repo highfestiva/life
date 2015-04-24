@@ -125,7 +125,7 @@ void PythonRunner::WorkerEntry(void*)
 		printf("Error: could not open file %s!\n", lFilename.c_str());
 		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-lTimer.QueryTimeDiff());
 		TrabantSim::mApp->FoldSimulator();
-		TrabantSim::mApp->Suspend(true);
+		TrabantSim::mApp->Suspend(false);
 		return;
 	}
 	if (Py_IsInitialized())
@@ -149,7 +149,7 @@ void PythonRunner::WorkerEntry(void*)
 	 	mIsStopping = true;
 		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-lTimer.QueryTimeDiff());
 		TrabantSim::mApp->FoldSimulator();
-		TrabantSim::mApp->Suspend(true);
+		TrabantSim::mApp->Suspend(false);
 		mIsStopping = false;
 	}
 }

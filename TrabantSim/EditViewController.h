@@ -7,5 +7,5 @@
 #import <UIKit/UIKit.h>
 
 @interface EditViewController : UIViewController
-
+-(void) updateEditor;
 @end

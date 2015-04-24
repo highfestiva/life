@@ -63,10 +63,12 @@ bool gBackspaceToLinefeed = false;
 	PythonTextView* textView = [[PythonTextView alloc] initWithFrame:self.view.bounds];
 	textView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
 	[textView setScrollEnabled:NO];
+	textView.editable = YES;
 	textView.delegate = self;
 	UIScrollView* scrollView = [[RestrictedScrollView alloc] initWithFrame:self.view.bounds];
 	scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
 	[scrollView setScrollEnabled:YES];
+	scrollView.bounces = NO;
 
 	self.textView = textView;
 	self.scrollView = scrollView;
@@ -74,13 +76,22 @@ bool gBackspaceToLinefeed = false;
 	[scrollView addSubview:textView];
 	[self.view addSubview:scrollView];
 
+	[self updateEditor];
+}
+
+-(void) updateEditor
+{
 	dispatch_async(dispatch_get_main_queue(), ^{
+		[self.scrollView setContentOffset:CGPointMake(0, -self.scrollView.contentInset.top)];
+		[self.scrollView setContentSize:CGSizeMake(300,300)];
 		NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString* path = [paths objectAtIndex:0];
 		NSString* filename = [path stringByAppendingPathComponent:self.title];
 		NSString* text = [NSString stringWithContentsOfFile:filename encoding:NSUTF8StringEncoding error:nil];
-		text = [text stringByReplacingOccurrencesOfString:@"\t" withString:@"    "];	// Tabs wrap line when entered to the right of screen width.
-		[self.textView setText:text];
+		if (text != nil) {
+			text = [text stringByReplacingOccurrencesOfString:@"\t" withString:@"    "];	// Tabs wrap line when entered to the right of screen width.
+			[self.textView setText:text];
+		}
 	});
 }
 
@@ -160,10 +171,7 @@ bool gBackspaceToLinefeed = false;
 
 -(void) viewWillLayoutSubviews
 {
-	CGSize fit = [self.textView sizeThatFits:CGSizeMake(10000, 100000)];
-	float w = [@"W" sizeWithFont:self.textView.boldFont].width;
-	fit.width += w*3;
-	fit.height += w;
+	CGSize fit = [self.textView fitTextSize];
 	CGRect r = CGRectUnion(CGRectMake(0,0,fit.width,fit.height), self.scrollView.bounds);
 	r.size.height += r.origin.y;
 	r.origin.y = 0;

@@ -47,7 +47,11 @@
 		B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA600173EDBD200A73400 /* Spawner.cpp */; };
 		B13DA607173EDBF400A73400 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA606173EDBF400A73400 /* Level.cpp */; };
 		B14108061859215C005F84F1 /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B14108051859215C005F84F1 /* Plane.cpp */; };
-		B153FDC4181DF12B002D3C5D /* Icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B153FDC3181DF12B002D3C5D /* Icon-72@2x.png */; };
+		B14F04BD1AEA401D00B6DE14 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */; };
+		B14F04BE1AEA401D00B6DE14 /* Default-Landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */; };
+		B14F04BF1AEA401D00B6DE14 /* Default-Landscape@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04BA1AEA401D00B6DE14 /* Default-Landscape@2x.png */; };
+		B14F04C01AEA401D00B6DE14 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04BB1AEA401D00B6DE14 /* Default@2x.png */; };
+		B14F04C11AEA401D00B6DE14 /* Icon-180.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04BC1AEA401D00B6DE14 /* Icon-180.png */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -100,9 +104,6 @@
 		B18D58971A9E14810029D2C0 /* ListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58921A9E14810029D2C0 /* ListViewController.m */; };
 		B18D58991A9E15D10029D2C0 /* PythonTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58981A9E15D10029D2C0 /* PythonTextView.m */; };
 		B18D589B1A9E19A90029D2C0 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B18D589A1A9E19A90029D2C0 /* CoreText.framework */; };
-		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
-		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
-		B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560E13BE6C3B006A1422 /* Icon-72.png */; };
 		B19A141913A122CE0051A61C /* UiBorderComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */; };
 		B19A141A13A122CE0051A61C /* UiButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C313A122CE0051A61C /* UiButton.cpp */; };
 		B19A141B13A122CE0051A61C /* UiCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C413A122CE0051A61C /* UiCaption.cpp */; };
@@ -527,6 +528,7 @@
 		B1E30E07150E90760076E336 /* Elevator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E30E06150E90760076E336 /* Elevator.cpp */; };
 		B1E4528A14E9FA13001C2BE2 /* UiDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E4528814E9FA13001C2BE2 /* UiDialog.cpp */; };
 		B1E4528B14E9FA13001C2BE2 /* UiMessageDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1E4528914E9FA13001C2BE2 /* UiMessageDialog.cpp */; };
+		B1EF09301AEAED850046FFF3 /* CreateNew.xib in Resources */ = {isa = PBXBuildFile; fileRef = B1EF092F1AEAED850046FFF3 /* CreateNew.xib */; };
 		B1F2F935185E072800D6C78D /* TimeLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F2F934185E072800D6C78D /* TimeLogger.cpp */; };
 		B1F3C40B16E0027100B2EFB5 /* UiBillboardGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */; };
 		B1F3C40C16E0027100B2EFB5 /* UiParticleRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */; };
@@ -581,7 +583,11 @@
 		B13DA600173EDBD200A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Cure/Source/Spawner.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA606173EDBF400A73400 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Level.cpp; path = ../../Life/LifeClient/Level.cpp; sourceTree = SOURCE_ROOT; };
 		B14108051859215C005F84F1 /* Plane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plane.cpp; sourceTree = "<group>"; };
-		B153FDC3181DF12B002D3C5D /* Icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72@2x.png"; path = "../Icons/Icon-72@2x.png"; sourceTree = SOURCE_ROOT; };
+		B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Icons/Default-568h@2x.png"; sourceTree = "<group>"; };
+		B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape.png"; path = "../Icons/Default-Landscape.png"; sourceTree = "<group>"; };
+		B14F04BA1AEA401D00B6DE14 /* Default-Landscape@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape@2x.png"; path = "../Icons/Default-Landscape@2x.png"; sourceTree = "<group>"; };
+		B14F04BB1AEA401D00B6DE14 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Icons/Default@2x.png"; sourceTree = "<group>"; };
+		B14F04BC1AEA401D00B6DE14 /* Icon-180.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-180.png"; path = "../Icons/Icon-180.png"; sourceTree = "<group>"; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -636,9 +642,6 @@
 		B18D58921A9E14810029D2C0 /* ListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListViewController.m; sourceTree = "<group>"; };
 		B18D58981A9E15D10029D2C0 /* PythonTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PythonTextView.m; sourceTree = "<group>"; };
 		B18D589A1A9E19A90029D2C0 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
-		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
-		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icons/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
-		B196560E13BE6C3B006A1422 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../Icons/Icon-72.png"; sourceTree = SOURCE_ROOT; };
 		B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBorderComponent.cpp; sourceTree = "<group>"; };
 		B19A13C313A122CE0051A61C /* UiButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiButton.cpp; sourceTree = "<group>"; };
 		B19A13C413A122CE0051A61C /* UiCaption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiCaption.cpp; sourceTree = "<group>"; };
@@ -1243,6 +1246,7 @@
 		B1E30E06150E90760076E336 /* Elevator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Elevator.cpp; path = ../../Cure/Source/Elevator.cpp; sourceTree = SOURCE_ROOT; };
 		B1E4528814E9FA13001C2BE2 /* UiDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiDialog.cpp; sourceTree = "<group>"; };
 		B1E4528914E9FA13001C2BE2 /* UiMessageDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiMessageDialog.cpp; sourceTree = "<group>"; };
+		B1EF092F1AEAED850046FFF3 /* CreateNew.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CreateNew.xib; sourceTree = "<group>"; };
 		B1F2F934185E072800D6C78D /* TimeLogger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimeLogger.cpp; sourceTree = "<group>"; };
 		B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBillboardGeometry.cpp; sourceTree = "<group>"; };
 		B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiParticleRenderer.cpp; sourceTree = "<group>"; };
@@ -2384,13 +2388,15 @@
 		B1A1E04913AA970E0097B8D0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */,
+				B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */,
+				B14F04BA1AEA401D00B6DE14 /* Default-Landscape@2x.png */,
+				B14F04BB1AEA401D00B6DE14 /* Default@2x.png */,
+				B14F04BC1AEA401D00B6DE14 /* Icon-180.png */,
 				B1049DF31AAA0BDA00E34D85 /* LaunchScreen.xib */,
+				B1EF092F1AEAED850046FFF3 /* CreateNew.xib */,
 				B19D7FED1AA0BDE700B02A36 /* pylib */,
 				B1FB291E1450C8A600F1C762 /* Data */,
-				B196560713BE6AB5006A1422 /* Icon.png */,
-				B196560813BE6AB5006A1422 /* Icon@2x.png */,
-				B196560E13BE6C3B006A1422 /* Icon-72.png */,
-				B153FDC3181DF12B002D3C5D /* Icon-72@2x.png */,
 				B1C4123918035E90007D64F7 /* Icon-76.png */,
 				B1C4124118035EA0007D64F7 /* Icon-120.png */,
 				B1C4124218035EA0007D64F7 /* Icon-152.png */,
@@ -2521,16 +2527,18 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B196560B13BE6AB5006A1422 /* Icon.png in Resources */,
-				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
-				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B19D7FEE1AA0BDE700B02A36 /* pylib in Resources */,
 				B1049DF41AAA0BDA00E34D85 /* LaunchScreen.xib in Resources */,
+				B14F04C11AEA401D00B6DE14 /* Icon-180.png in Resources */,
+				B14F04C01AEA401D00B6DE14 /* Default@2x.png in Resources */,
+				B1EF09301AEAED850046FFF3 /* CreateNew.xib in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
 				B1C4124018035E90007D64F7 /* Icon-76.png in Resources */,
+				B14F04BF1AEA401D00B6DE14 /* Default-Landscape@2x.png in Resources */,
 				B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */,
+				B14F04BE1AEA401D00B6DE14 /* Default-Landscape.png in Resources */,
+				B14F04BD1AEA401D00B6DE14 /* Default-568h@2x.png in Resources */,
 				B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */,
-				B153FDC4181DF12B002D3C5D /* Icon-72@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

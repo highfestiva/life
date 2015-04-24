@@ -10,5 +10,8 @@
 @property (nonatomic, strong) UIFont *boldFont;
 @property (nonatomic, strong) UIFont *italicFont;
 
+-(CGSize) fitTextSize;
++(CGSize) slowFitTextSize:(NSString*)text;
+
 @end
 

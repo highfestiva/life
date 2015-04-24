@@ -32,9 +32,9 @@ void Shutdown()
 void SetDefault(Cure::RuntimeVariableScope* pSettings)
 {
 	v_set(pSettings, RTVAR_CTRL_EMULATETOUCH, false);
-	v_set(pSettings, RTVAR_CTRL_ACCELEROMETER_X,  0.0);
-	v_set(pSettings, RTVAR_CTRL_ACCELEROMETER_Y, +1.0);
-	v_set(pSettings, RTVAR_CTRL_ACCELEROMETER_Z,  0.0);
+	v_internal(pSettings, RTVAR_CTRL_ACCELEROMETER_X,  0.0);
+	v_internal(pSettings, RTVAR_CTRL_ACCELEROMETER_Y, +1.0);
+	v_internal(pSettings, RTVAR_CTRL_ACCELEROMETER_Z,  0.0);
 	v_set(pSettings, RTVAR_DEBUG_3D_ENABLEAXES, false);
 	v_set(pSettings, RTVAR_DEBUG_3D_ENABLEJOINTS, false);
 	v_set(pSettings, RTVAR_DEBUG_3D_ENABLESHAPES, true);

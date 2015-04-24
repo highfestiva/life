@@ -43,7 +43,8 @@
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
 		EditViewController* editController = [EditViewController new];
-		editController.title = @"???";
+		editController.title = @"";
+		self.listController.editController = editController;
 		UINavigationController* editHeadController = [[UINavigationController alloc] initWithRootViewController:editController];
 		UISplitViewController* splitController = [[UISplitViewController alloc] init];
 		//splitController.delegate = self;
@@ -83,11 +84,19 @@
 	_animationTimer = nil;
 }
 
+-(void) pushSimulatorController:(UIViewController*)viewController
+{
+	[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+	[self pushViewController:viewController animated:YES];
+}
+
 -(void) pushViewController:(UIViewController*)viewController animated:(BOOL)animated
 {
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-		// TODO: Push using split controller somehow.
+		const bool isRight = self.window.rootViewController.interfaceOrientation == UIInterfaceOrientationLandscapeRight;
+		[EAGLView sharedView].preferredRotation = isRight? UIInterfaceOrientationLandscapeRight : UIInterfaceOrientationLandscapeLeft;
+		[(UISplitViewController*)self.window.rootViewController presentViewController:viewController animated:animated completion:nil];
 	}
 	else
 	{
@@ -106,7 +115,7 @@
 {
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-		// TODO: Push using split controller somehow.
+		[(UISplitViewController*)self.window.rootViewController dismissViewControllerAnimated:animated completion:nil];
 	}
 	else
 	{
@@ -118,32 +127,41 @@
 
 -(void) popIfGame
 {
+	if ([self showingSimulator])
+	{
+		[self popViewControllerAnimated:YES];
+	}
+}
+
+-(bool) showingSimulator
+{
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-		// TODO: Push using split controller somehow.
+		return (((UISplitViewController*)self.window.rootViewController).presentedViewController.view == [EAGLView sharedView]);
 	}
 	else
 	{
-		if (((UINavigationController*)self.window.rootViewController).visibleViewController.view == [EAGLView sharedView])
-		{
-			[self popViewControllerAnimated:YES];
-		}
+		return (((UINavigationController*)self.window.rootViewController).visibleViewController.view == [EAGLView sharedView]);
 	}
 }
 
 -(void) handleStdOut:(const astr&)pStdOut
 {
+	NSString* text = [NSString stringWithCString:pStdOut.c_str() encoding:NSUTF8StringEncoding];
+	[self popViewControllerAnimated:NO];
+	StdOutViewController* stdOutController = [StdOutViewController new];
+	stdOutController.title = @"Output";
+	stdOutController.text = text;
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-		// TODO: handle stdout one way or another with more screen real estate.
+		stdOutController.modalPresentationStyle = UIModalPresentationPopover;
+		UIPopoverController* popover = [[UIPopoverController alloc] initWithContentViewController:stdOutController];
+		CGSize fit = [PythonTextView slowFitTextSize:text];
+		popover.popoverContentSize = fit;
+		[popover presentPopoverFromBarButtonItem:self.listController.editController.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
 	}
 	else
 	{
-		NSString* text = [NSString stringWithCString:pStdOut.c_str() encoding:NSUTF8StringEncoding];
-		[self popViewControllerAnimated:NO];
-		StdOutViewController* stdOutController = [StdOutViewController new];
-		stdOutController.title = @"Output";
-		stdOutController.text = text;
 		[self pushViewController:stdOutController animated:NO];
 	}
 }
@@ -169,9 +187,9 @@
 		const float x = _motionManager.accelerometerData.acceleration.x;
 		const float y = _motionManager.accelerometerData.acceleration.y;
 		const float z = _motionManager.accelerometerData.acceleration.z;
-		v_set(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_X, -y);
-		v_set(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Y, -z);
-		v_set(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Z, +x);
+		v_internal(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_X, -y);
+		v_internal(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Y, -z);
+		v_internal(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Z, +x);
 		TrabantSim::TrabantSim::GetApp()->Tick();
 	}
 }

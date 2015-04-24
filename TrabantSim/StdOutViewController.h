@@ -5,8 +5,11 @@
 
 
 #import <UIKit/UIKit.h>
+#import "PythonTextView.h"
 
 
 @interface StdOutViewController : UIViewController
+@property (nonatomic, strong) PythonTextView* textView;
+@property (nonatomic, strong) UIScrollView* scrollView;
 @property (nonatomic, strong) NSString* text;
 @end

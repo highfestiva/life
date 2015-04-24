@@ -39,6 +39,11 @@ namespace TrabantSim
 
 
 
+void SuspendSimulator()
+{
+	TrabantSim::mApp->Suspend(false);
+}
+
 void FoldSimulator()
 {
 	TrabantSim::mApp->FoldSimulator();
@@ -208,29 +213,23 @@ void TrabantSim::Resume(bool pHard)
 		return;
 	}
 
+	mGameTicker->Resume(false);	// Resume sets some internal states of the simulator state machine.
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
-	mGameTicker->Resume(false);	// Resume's hard/soft has no effect.
 }
 
 void TrabantSim::Suspend(bool pHard)
 {
-	if (pHard)
+	if (mActiveCounter == 0 && !pHard)
 	{
-		mActiveCounter = 0;
+		return;
 	}
-	else
+	mActiveCounter = 0;
+	if (mIsInTick && !pHard)
 	{
-		if (--mActiveCounter != 0)
-		{
-			return;
-		}
-		if (mIsInTick && !pHard)
-		{
-			return;
-		}
+		return;
 	}
 #ifdef LEPRA_IOS
 	const bool lIsRunningLocally = PythonRunner::IsRunning();
@@ -282,16 +281,20 @@ void TrabantSim::FoldSimulator()
 void TrabantSim::UnfoldSimulator()
 {
 #ifdef LEPRA_IOS
+	if ([TrabantSim::TrabantSim::mApp->mAnimatedApp showingSimulator])
+	{
+		return;
+	}
+
 	dispatch_block_t Unfold = ^
 	{
 		//[TrabantSim::TrabantSim::mAnimatedApp.window setHidden:YES];
 		//UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
 		//if (!window.rootViewController)
-		[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
 		UIViewController* controller = [[UIViewController alloc] init];
 		controller.view = [EAGLView sharedView];
 		//window.rootViewController = controller;
-		[TrabantSim::TrabantSim::mApp->mAnimatedApp pushViewController:controller animated:YES];
+		[TrabantSim::TrabantSim::mApp->mAnimatedApp pushSimulatorController:controller];
 		//[window makeKeyAndVisible];
 		TrabantSim::TrabantSim::mApp->mActiveCounter = 0;	// Make sure no lost event causes a halt.
 		TrabantSim::TrabantSim::mApp->Resume(false);

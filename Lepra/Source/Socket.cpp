@@ -146,6 +146,14 @@ void SocketBase::Shutdown(ShutdownFlag pHow)
 	::shutdown(mSocket, (int)pHow);
 }
 
+int SocketBase::ClearErrors() const
+{
+	int lError = 0;
+	int lSize = sizeof(lError);
+	::getsockopt(mSocket, SOL_SOCKET, SO_ERROR, &lError, (socklen_t*)&lSize);
+	return lError;
+}
+
 uint64 SocketBase::GetSentByteCount() const
 {
 	return (mSentByteCount);

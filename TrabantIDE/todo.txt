@@ -128,21 +128,27 @@
 +City!
 +Disable/enable collisions.
 .Only allow mouselook inside window client area!
-Fix initial connect often timeouts (Minecraft)!
++Fix initial connect often timeouts (Minecraft)!
++Fix 3D taps on iOS.
++Make rotation work after simulation crashed.
++iPad version.
++Landscape layout only on iPad.
++iOS icons. 
++iOS splash screens.
 
+Fix shadows on iOS. Looks like crap on the simulator at least. glDepthRange?
+Create new on iPad.
+Minimize the list view on iPad.
 Test on iPhone 4s.
 iOS: Fix accelerator orientation when device rotated (terminal_velocity).
 Check that device rotation works on iPad.
 Fix soft joystick bug in iOS (car, heli).
 Add "allow/disallow/ban" to iOS.
 Fix all games on iOS.
-iPad version.
 Fix starting orientation on iPad.
 Check iPad controls.
 Make web page for Trabant.
 Fix iOS "Create New" options.
-iOS icons.
-iOS splash screens.
 
 Rolling ball, avoiding holes. Using accelerometer.
 Tower defence game.

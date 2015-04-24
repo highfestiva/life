@@ -10,13 +10,10 @@
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFiles</key>
 	<array>
-		<string>Icon.png</string>
-		<string>Icon@2x.png</string>
-		<string>Icon-72.png</string>
 		<string>Icon-76.png</string>
 		<string>Icon-120.png</string>
-		<string>Icon-72@2x.png</string>
 		<string>Icon-152.png</string>
+		<string>Icon-180.png</string>
 	</array>
 	<key>CFBundleIdentifier</key>
 	<string>com.pixeldoctrine.trabant</string>
@@ -34,8 +31,16 @@
 	<string>1.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<false/>
+	<key>UILaunchImages</key>
+	<array>
+		<string>Default-568h@2x.png</string>
+		<string>Default@2x.png</string>
+	</array>
 	<key>UILaunchImages~ipad</key>
-	<array/>
+	<array>
+		<string>Default-Landscape.png</string>
+		<string>Default-Landscape@2x.png</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIPrerenderedIcon</key>
@@ -52,9 +57,7 @@
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>

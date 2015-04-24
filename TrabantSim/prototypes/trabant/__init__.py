@@ -530,6 +530,9 @@ def accelerometer(relative=False):
 	if not relative:
 		return acc
 	rel = acc - _accelerometer_calibration
+	if rel.length() < 0.1:
+		rel.pitch = rel.roll = 0.0
+		return rel
 	rel.pitch = -_accelerometer_calibration.angle_x(acc)
 	if abs(_accelerometer_calibration.z) > abs(_accelerometer_calibration.y):
 		rel.roll = -_accelerometer_calibration.angle_y(acc)
@@ -549,7 +552,7 @@ def mousewheel():
 
 def is_touch_device():
     '''Only use this function if your touch device's and computer's controls clash.'''
-    return osname in ('ios', 'android')
+    return gameapi.osname.lower() in ('ios', 'android')
 
 
 ########################################
@@ -699,8 +702,8 @@ def _update_cam_shadow():
 	else:
 		_cam_pos = vec3()
 	_cam_q = quat().rotate_z(_cam_angle.z).rotate_x(_cam_angle.x).rotate_y(_cam_angle.y)
-	if _cam_target:
-		_cam_q = (o if o else _cam_target.orientation()) * _cam_q
+	#if _cam_target:
+	#	_cam_q = (o if o else _cam_target.orientation()) * _cam_q
 	_cam_inv_q = _cam_q.inverse()
 	if _cam_distance:
 		_cam_pos += _cam_q * vec3(0,-_cam_distance,0)

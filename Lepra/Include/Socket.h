@@ -66,6 +66,8 @@ public:
 
 	void Shutdown(ShutdownFlag pHow);
 
+	int ClearErrors() const;
+
 	uint64 GetSentByteCount() const;
 	uint64 GetReceivedByteCount() const;
 

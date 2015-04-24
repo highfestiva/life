@@ -24,6 +24,7 @@ namespace TrabantSim
 const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandIdList[] =
 {
 	{_T("reset"), COMMAND_RESET},
+	{_T("get-platform-name"), COMMAND_GET_PLATFORM_NAME},
 	{_T("create-object"), COMMAND_CREATE_OBJECT},
 	{_T("create-clones"), COMMAND_CREATE_CLONES},
 	{_T("delete-object"), COMMAND_DELETE_OBJECT},
@@ -334,6 +335,20 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->UserReset();
 				}
 				break;
+				case COMMAND_GET_PLATFORM_NAME:
+				{
+#if defined(LEPRA_IOS)
+					mActiveResponse += _T("iOS");
+#elif defined(LEPRA_MAC)
+					mActiveResponse += _T("Mac");
+#elif defined(LEPRA_WINDOWS)
+					mActiveResponse += _T("Win");
+#else
+					mActiveResponse += _T("Unknown");
+#endif // Platform
+
+				}
+				break;
 				case COMMAND_CREATE_OBJECT:
 				{
 					const str lType = ParamToStr(pParameterVector, 0);
@@ -549,7 +564,8 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					typedef TrabantSimManager::CollisionList CollisionList;
 					CollisionList lList;
 					lManager->PopCollisions(lList);
-					for (CollisionList::iterator x = lList.begin(); x != lList.end(); ++x)
+					int y = 0;
+					for (CollisionList::iterator x = lList.begin(); x != lList.end() && y < 10; ++x, ++y)
 					{
 						lLines.push_back(strutil::Format(_T("%i %f %f %f %f %f %f %i"), x->mObjectId, x->mForce.x, x->mForce.y, x->mForce.z,
 								x->mPosition.x, x->mPosition.y, x->mPosition.z, x->mOtherObjectId));

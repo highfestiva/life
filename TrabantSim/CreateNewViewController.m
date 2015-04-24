@@ -11,13 +11,6 @@
 
 
 
-@interface CreateNewViewController () <UITextViewDelegate>
-@property (nonatomic, strong) UITextField* nameField;
-@property (nonatomic, strong) UIButton* boilerplateButton;
-@end
-
-
-
 @implementation CreateNewViewController
 
 #pragma mark - View Lifecycle
@@ -33,51 +26,47 @@
 	UIBarButtonItem* createButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(createFile)];
 	[self.navigationItem setRightBarButtonItem:createButton];
 
-	self.nameField = [[UITextField alloc] initWithFrame:CGRectMake(8, 60, self.view.bounds.size.width-16, 40)];
-	self.nameField.text = @"test.py";
-	self.nameField.autocorrectionType = UITextAutocorrectionTypeNo;
-	self.boilerplateButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-	[self.boilerplateButton setTitle:@"Create boilerplate" forState:UIControlStateNormal];
-	self.boilerplateButton.frame = CGRectMake(8, 108, self.view.bounds.size.width-16, 40);
-	[self.view addSubview:self.nameField];
-	[self.view addSubview:self.boilerplateButton];
-
-	[self.nameField becomeFirstResponder];
+	[self.filename becomeFirstResponder];
 }
 
 
 -(void) cancel
 {
-	[self.navigationController popViewControllerAnimated:YES];
+	[self.parent popCreateNew:nil];
 }
 
 -(void) createFile
 {
-	if (self.nameField.text.length == 0) {
+	if (self.filename.text.length == 0) {
 		return;
 	}
 
 	NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString* path = [paths objectAtIndex:0];
-	NSString* filename = [path stringByAppendingPathComponent:self.nameField.text];
+	NSString* filename = [path stringByAppendingPathComponent:self.filename.text];
 	if ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
 		return;
 	}
-	NSString* content = @"from trabant import *\n\n";
-	if ([self.boilerplateButton isSelected]) {
-		content = [@"#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\n" stringByAppendingString:content];
+	NSString* content = @"";
+	if ([self.createComments isOn]) [content stringByAppendingString:@"#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\n"];
+	if ([self.createBoilerplate isOn]) {
+		content = [content stringByAppendingString:@"from trabant import *\n\n"];
 		content = [content stringByAppendingString:@"floor = create_cube(pos=(0,0,-15),side=20,static=True)\n"];
-		content = [content stringByAppendingString:@"box = create_cube()\n\nwhile loop():\n    pass\n"];
+		content = [content stringByAppendingString:@"box = create_cube()\n\n"];
+
+		if ([self.createComments isOn]) [content stringByAppendingString:@"# main game loop\n"];
+		content = [content stringByAppendingString:@"while loop():\n"];
+		if ([self.createComments isOn]) [content stringByAppendingString:@"\n    # print tap/click info\n"];
+		content = [content stringByAppendingString:@"    if taps(): print('currently %i active taps' % len(taps))\n"];
+		content = [content stringByAppendingString:@"    [print('tap at x=%f,y=%f. Tap translated to 3D space: %s.' % (tap.x,tap.y,tap.pos3d())) for tap in taps()]\n"];
+		content = [content stringByAppendingString:@"    if taps():\n"];
+		content = [content stringByAppendingString:@"        print('tap closest to box is at: %s' % closest_tap(box.pos()).pos3d())\n"];
 	}
 	NSData* rawContents = [content dataUsingEncoding:NSUTF8StringEncoding];
 	[[NSFileManager defaultManager] createFileAtPath:filename contents:rawContents attributes:nil];
-	[self.parent reloadPrototypes];
-	UINavigationController* navController = self.navigationController;
-	[navController popViewControllerAnimated:NO];
 	dispatch_async(dispatch_get_main_queue(), ^{
-		EditViewController* editController = [EditViewController new];
-		editController.title = self.nameField.text;
-		[navController pushViewController:editController animated:YES];
+		[self.parent reloadPrototypes];
+		[self.parent popCreateNew:self.filename.text];
 	});
 }
 

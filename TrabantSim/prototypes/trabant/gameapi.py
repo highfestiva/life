@@ -7,6 +7,7 @@ from trabant.math import vec3,quat
 
 sock = None
 proc = None
+osname = '???'
 _cached_vertices,_cached_indices = [],[]
 
 
@@ -325,7 +326,7 @@ def _args2str(args, default=''):
 	return ' '.join(str(arg) for arg in args)
 
 def _tryconnect(addr, retries):
-	global sock
+	global sock,osname
 	ip,port = addr.split(':')
 	for attempt in range(1,retries+1):
 		try:
@@ -336,7 +337,7 @@ def _tryconnect(addr, retries):
 			if retries>1 and attempt==retries:
 				sock.settimeout(sock.timeout+1)
 			sock.connect((ip,int(port)))
-			cmd('nop')	# To make sure UDP connection alright.
+			osname = cmd('get-platform-name')	# To make sure UDP connection alright.
 			sock.settimeout(sock.timeout+3)
 			break
 		except socket.error as e:

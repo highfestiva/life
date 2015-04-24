@@ -17,6 +17,7 @@
 @property (nonatomic, strong) UITableView* tableView;
 @property (nonatomic, strong) NSMutableArray* files;
 @property (nonatomic, strong) NSMutableArray* loc;
+@property (nonatomic, strong) UIPopoverController* createNewPopover;
 
 @end
 
@@ -66,10 +67,24 @@
 	return cell;
 }
 
--(void) tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-	EditViewController* editController = [EditViewController new];
-	editController.title = [self.files objectAtIndex:indexPath.row];
-	[self.navigationController pushViewController:editController animated:YES];
+-(void) tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath
+{
+	[self showFile:[self.files objectAtIndex:indexPath.row]];
+}
+
+-(void) showFile:(NSString*)filename
+{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		self.editController.title = filename;
+		[self.editController updateEditor];
+	}
+	else
+	{
+		EditViewController* editController = [EditViewController new];
+		editController.title = filename;
+		[self.navigationController pushViewController:editController animated:YES];
+	}
 }
 
 -(void) reloadPrototypes
@@ -78,6 +93,23 @@
 	if ([self.files count] == 0) {
 		[self copySamples];
 		[self doReloadPrototypes];
+	}
+}
+
+-(void) popCreateNew:(NSString*)filename
+{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		[self.createNewPopover dismissPopoverAnimated:YES];
+		self.createNewPopover = nil;
+	}
+	else
+	{
+		[self.navigationController popViewControllerAnimated:(filename==nil)];
+	}
+	if (filename != nil)
+	{
+		[self showFile:filename];
 	}
 }
 
@@ -139,7 +171,15 @@
 	CreateNewViewController* newController = [CreateNewViewController new];
 	newController.title = @"New Prototype";
 	newController.parent = self;
-	[self.navigationController pushViewController:newController animated:YES];
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		self.createNewPopover = [[UIPopoverController alloc] initWithContentViewController:newController];
+		[self.createNewPopover presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+	}
+	else
+	{
+		[self.navigationController pushViewController:newController animated:YES];
+	}
 }
 
 @end

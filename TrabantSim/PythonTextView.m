@@ -190,7 +190,25 @@
 	self.font = defaultFont;
 }
 
+
+-(CGSize) fitTextSize
+{
+	CGSize fit = [self sizeThatFits:CGSizeMake(10000, 100000)];
+	float w = [@"W" sizeWithFont:self.boldFont].width;
+	fit.width += w*3;
+	fit.height += w;
+	return fit;
+}
+
++(CGSize) slowFitTextSize:(NSString*)text
+{
+	PythonTextView* pyView = [[PythonTextView alloc] initWithFrame:CGRectMake(0, 0, 300, 300)];
+	pyView.text = text;
+	return [pyView fitTextSize];
+}
+
 @end
 
-#endif // iOS
 
+
+#endif // iOS
