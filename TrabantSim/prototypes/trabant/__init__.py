@@ -11,8 +11,13 @@ import time
 
 
 # Use unbuffered output, for debugging purposes.
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-
+class flushfile:
+	def __init__(self, f):
+		self.f = f
+	def write(self, x):
+		self.f.write(x)
+		self.f.flush()
+sys.stdout = flushfile(sys.stdout)
 
 roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
