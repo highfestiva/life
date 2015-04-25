@@ -39,8 +39,9 @@ namespace TrabantSim
 
 
 
-void SuspendSimulator()
+void FoldSuspendSimulator()
 {
+	TrabantSim::mApp->FoldSimulator();
 	TrabantSim::mApp->Suspend(false);
 }
 
@@ -93,7 +94,6 @@ void TrabantSim::Init()
 	UiCure::Init();
 
 #if defined(LEPRA_IOS)
-	Thread::Sleep(3.0);	// Wait a bit longer so Pixel Doctrine splash is visible.
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
 	int lScale = [[UIScreen mainScreen] scale];
 	int lDisplayWidth = lSize.width * lScale;
@@ -103,6 +103,8 @@ void TrabantSim::Init()
 		// Phone might start up in portrait, but our game will always be in landscape mode.
 		std::swap(lDisplayWidth, lDisplayHeight);
 	}
+	const double lFontHeight = 30.0*lScale;
+	v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 #else // Computer L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;

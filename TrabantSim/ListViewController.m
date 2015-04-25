@@ -173,7 +173,9 @@
 	newController.parent = self;
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-		self.createNewPopover = [[UIPopoverController alloc] initWithContentViewController:newController];
+		UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:newController];
+		self.createNewPopover = [[UIPopoverController alloc] initWithContentViewController:nav];
+		self.createNewPopover.popoverContentSize = CGSizeMake(320,216);
 		[self.createNewPopover presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
 	}
 	else

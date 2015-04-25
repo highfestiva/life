@@ -170,19 +170,15 @@ void PythonRunner::StdOutReadEntry(void*)
 	setvbuf(stderr, NULL, _IONBF, 0);
 	dup2(lPipePair[1], STDOUT_FILENO);
 	dup2(lPipePair[1], STDERR_FILENO);
-	char* lBuffer = (char*)malloc(sizeof(char)*1024);
+	char* lBuffer = (char*)malloc(100);
 	for (;;)
 	{
-		ssize_t lReadCount = read(lPipePair[0], lBuffer, 1023);
+		ssize_t lReadCount = read(lPipePair[0], lBuffer, 10);
 		if (lReadCount > 0)
 		{
 			lBuffer[lReadCount] = 0;
 			ScopeLock _(&mStdOutLock);
 			mStdOut += lBuffer;
-		}
-		else if (lReadCount == -1)
-		{
-			break;
 		}
 	}
 	free(lBuffer);

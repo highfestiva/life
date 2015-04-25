@@ -66,7 +66,6 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYX, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYY, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYZ, -9.8);
-	v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 }
 
 TrabantSimTicker::~TrabantSimTicker()

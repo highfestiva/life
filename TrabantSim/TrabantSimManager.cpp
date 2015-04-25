@@ -49,7 +49,7 @@ namespace TrabantSim
 
 
 
-void SuspendSimulator();
+void FoldSuspendSimulator();
 void UnfoldSimulator();
 void DidSyncFiles();
 
@@ -1228,7 +1228,7 @@ bool TrabantSimManager::IsControlled()
 		else
 		{
 #ifdef LEPRA_TOUCH
-			SuspendSimulator();
+			FoldSuspendSimulator();
 #else // Computer
 			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
 #endif // Touch device.
@@ -1601,7 +1601,7 @@ void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 
 void TrabantSimManager::OnBackButton(UiTbc::Button*)
 {
-	SuspendSimulator();
+	FoldSuspendSimulator();
 }
 
 void TrabantSimManager::OnMenuAlternative(UiTbc::Button*)

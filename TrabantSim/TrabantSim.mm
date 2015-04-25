@@ -184,9 +184,14 @@
 	else
 	{
 		lGlView.canvas = _canvas;
-		const float x = _motionManager.accelerometerData.acceleration.x;
-		const float y = _motionManager.accelerometerData.acceleration.y;
-		const float z = _motionManager.accelerometerData.acceleration.z;
+		float x = _motionManager.accelerometerData.acceleration.x;
+		float y = _motionManager.accelerometerData.acceleration.y;
+		float z = _motionManager.accelerometerData.acceleration.z;
+		if (_canvas->GetDeviceOutputRotation() == 180)
+		{
+			x = -x;
+			y = -y;
+		}
 		v_internal(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_X, -y);
 		v_internal(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Y, -z);
 		v_internal(UiCure::GetSettings(), RTVAR_CTRL_ACCELEROMETER_Z, +x);
