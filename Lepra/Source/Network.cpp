@@ -95,7 +95,7 @@ bool Network::ResolveIp(const IPAddress& pIpAddress, str& pHostname)
 	hostent* lHostent = ::gethostbyaddr((const char*)lRawAddress, pIpAddress.GetNumBytes(), AF_INET);
 	if (lHostent && lHostent->h_name && lHostent->h_name[0])
 	{
-		pHostName = strutil::Encode(lHostent->h_name);
+		pHostname = strutil::Encode(lHostent->h_name);
 		return true;
 	}
 	return false;

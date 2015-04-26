@@ -26,6 +26,7 @@ namespace TrabantSim
 
 struct SyncDelegate
 {
+	virtual bool WillSync(const str& pHostname) = 0;
 	virtual void DidSync() = 0;
 };
 

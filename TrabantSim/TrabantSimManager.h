@@ -220,6 +220,7 @@ protected:
 	bool mIsControlTimeout;
 	SocketAddress mLocalAddress;
 	SocketAddress mLastRemoteAddress;
+	SocketAddress mLastAcceptedAddress;
 	UdpSocket* mCommandSocket;
 	MemberThread<TrabantSimManager>* mCommandThread;
 	FileServer* mFileServer;

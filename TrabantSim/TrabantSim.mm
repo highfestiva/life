@@ -5,6 +5,8 @@
 
 
 #include "../Lepra/Include/LepraOS.h"
+#include "../Lepra/Include/LepraTypes.h"
+#include "../UiCure/Include/UiCure.h"
 #include "../UiLepra/Include/Mac/UiMacTouchHandler.h"
 #include "AnimatedApp.h"
 #include "TrabantSim.h"
@@ -31,7 +33,7 @@
 	_motionManager = [[CMMotionManager alloc] init];
 
 	// Prepare background ad and payment stuff.
-	[self createAd];
+	//[self createAd];
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 
 	// Initialize the IDE.
@@ -108,7 +110,7 @@
 		}
 		[(UINavigationController*)self.window.rootViewController pushViewController:viewController animated:animated];
 	}
-	[UIViewController attemptRotationToDeviceOrientation];
+	//[UIViewController attemptRotationToDeviceOrientation];
 }
 
 -(void) popViewControllerAnimated:(BOOL)animated
@@ -122,7 +124,7 @@
 		[(UINavigationController*)self.window.rootViewController popViewControllerAnimated:animated];
 		((UINavigationController*)self.window.rootViewController).navigationBarHidden = NO;
 	}
-	[UIViewController attemptRotationToDeviceOrientation];
+	//[UIViewController attemptRotationToDeviceOrientation];
 }
 
 -(void) popIfGame
@@ -166,12 +168,56 @@
 	}
 }
 
+-(void) showNetworkControlFor:(NSString*)hostname
+{
+	if (self.alert)
+	{
+		return;
+	}
+
+	NSString* message = [NSString stringWithFormat:@"Do you wish to grant '%@' access to simulation and prototypes?", hostname];
+	self.alert = [UIAlertController alertControllerWithTitle:@"Network control" message:message preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertAction* grantAction = [UIAlertAction actionWithTitle:@"Permanently"
+							      style:UIAlertActionStyleDefault
+							    handler:^(UIAlertAction*){
+								    self.alert = nil;
+								    str lHosts;
+								    v_get(lHosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", "");
+								    strutil::strvec lHostnames = strutil::Split(lHosts, _T(":"));
+								    lHostnames.push_back(MacLog::Decode(hostname));
+								    lHosts = strutil::Join(lHostnames, _T(":"));
+								    v_override(UiCure::GetSettings(), "Simulator.AllowedHosts", lHosts);
+							    }];
+	UIAlertAction* denyAction = [UIAlertAction actionWithTitle:@"No"
+							     style:UIAlertActionStyleCancel
+							   handler:^(UIAlertAction*){
+								   self.alert = nil;
+							   }];
+
+	UIAlertAction* banAction = [UIAlertAction actionWithTitle:@"Never"
+							    style:UIAlertActionStyleDestructive
+							  handler:^(UIAlertAction*){
+								  self.alert = nil;
+								  str lHosts;
+								  v_get(lHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", "");
+								  strutil::strvec lHostnames = strutil::Split(lHosts, _T(":"));
+								  lHostnames.push_back(MacLog::Decode(hostname));
+								  lHosts = strutil::Join(lHostnames, _T(":"));
+								  v_override(UiCure::GetSettings(), "Simulator.DeniedHosts", lHosts);
+							  }];
+
+	[self.alert addAction:grantAction];
+	[self.alert addAction:denyAction];
+	[self.alert addAction:banAction];
+	[self.window.rootViewController presentViewController:self.alert animated:YES completion:nil];
+}
+
 -(void) showAd
 {
-	if (_ad.loaded)
+	/*if (_ad.loaded)
 	{
 		[_ad presentFromViewController:[EAGLView sharedView].window.rootViewController];
-	}
+	}*/
 }
 
 -(void) tick
@@ -214,7 +260,7 @@
 	[self touchesMoved:touches withEvent:event];
 }
 
--(void) interstitialAdActionDidFinish:(ADInterstitialAd*)interstitialAd
+/*-(void) interstitialAdActionDidFinish:(ADInterstitialAd*)interstitialAd
 {
 	[self startTick];
 }
@@ -246,7 +292,7 @@
 		_ad = [[ADInterstitialAd alloc] init];
 		_ad.delegate = self;
 	}
-}
+}*/
 
 -(void) startPurchase:(NSString*)productName
 {

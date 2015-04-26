@@ -52,11 +52,16 @@ namespace TrabantSim
 void FoldSuspendSimulator();
 void UnfoldSimulator();
 void DidSyncFiles();
+bool ConnectQuery(const str& pHostname);
 
 
 
 struct AppSyncDelegate: SyncDelegate
 {
+	virtual bool WillSync(const str& pHostname)
+	{
+		return ConnectQuery(pHostname);
+	};
 	virtual void DidSync()
 	{
 		DidSyncFiles();
@@ -1170,6 +1175,24 @@ void TrabantSimManager::CommandLoop()
 			continue;
 		}
 #ifdef LEPRA_TOUCH
+		if (mLastRemoteAddress.GetIP() != mLastAcceptedAddress.GetIP())
+		{
+			str lHostname;
+			if (!mLastRemoteAddress.ResolveIpToHostname(lHostname))
+			{
+				lHostname = mLastRemoteAddress.GetIP().GetAsString();
+			}
+			if (ConnectQuery(lHostname))
+			{
+				mLastAcceptedAddress = mLastRemoteAddress;
+			}
+			else
+			{
+				mCommandSocket->SendTo((const uint8*)"disconnect\n", 11, mLastRemoteAddress);
+				continue;
+			}
+		}
+
 		if (!mIsControlled || mIsControlTimeout)
 		{
 			UnfoldSimulator();

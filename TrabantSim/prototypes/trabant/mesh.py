@@ -413,7 +413,7 @@ def mesh_reduce_redundant_vtxs(v,i,stop_at_edge_cost=0):
 	return len(dropped_triangles)
 
 
-def mesh_optimize(v,i,stop_at_edge_cost=0.1):
+def mesh_optimize(v,i,stop_at_edge_cost=0.02):
 	mesh_dropunusedvtxs(v,i)
 	mesh_mergevtxs(v,i)
 	while True:

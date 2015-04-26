@@ -19,7 +19,7 @@
 #import <UIKit/UIKit.h>
 #import <StoreKit/StoreKit.h>
 #import <CoreMotion/CoreMotion.h>
-#import <iAd/ADInterstitialAd.h>
+//#import <iAd/ADInterstitialAd.h>
 #include "ListViewController.h"
 
 
@@ -32,17 +32,17 @@ using namespace Lepra;
 
 
 
-@interface AnimatedApp: UIResponder <ADInterstitialAdDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
+@interface AnimatedApp: UIResponder <SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
 {
 @private
 	Canvas* _canvas;
 	NSTimer* _animationTimer;
 	CMMotionManager* _motionManager;
-	ADInterstitialAd* _ad;
 }
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) ListViewController* listController;
+@property (nonatomic, strong) UIAlertController* alert;
 
 -(id) init:(Canvas*)pCanvas;
 -(void) dealloc;
@@ -54,14 +54,15 @@ using namespace Lepra;
 -(void) popIfGame;
 -(bool) showingSimulator;
 -(void) handleStdOut:(const astr&)pStdOut;
--(void) showAd;
+-(void) showNetworkControlFor:(NSString*)hostname;
+//-(void) showAd;
 -(void) tick;
 
--(void) startPurchase:(NSString*)productName;
+/*-(void) startPurchase:(NSString*)productName;
 -(void) completeTransaction:(SKPaymentTransaction*)transaction;
 -(void) restoreTransaction:(SKPaymentTransaction*)transaction;
 -(void) failedTransaction: (SKPaymentTransaction*)transaction;
--(void) provideContent:(NSString*)productIdentifier confirm:(BOOL)confirm;
+-(void) provideContent:(NSString*)productIdentifier confirm:(BOOL)confirm;*/
 @end
 
 
@@ -93,6 +94,7 @@ public:
 	void FoldSimulator();
 	void UnfoldSimulator();
 	void DidSyncFiles();
+	bool ConnectQuery(const str& pHostname);
 
 	void SavePurchase();
 	str GetTypeName() const;

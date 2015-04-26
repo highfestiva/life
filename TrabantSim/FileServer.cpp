@@ -214,6 +214,16 @@ void FileServer::AcceptThreadEntry()
 			delete lSocket;
 			break;
 		}
+		str lHostname;
+		if (!lSocket->GetTargetAddress().ResolveIpToHostname(lHostname))
+		{
+			lHostname = lSocket->GetTargetAddress().GetIP().GetAsString();
+		}
+		if (!mSyncDelegate->WillSync(lHostname))
+		{
+			delete lSocket;
+			continue;
+		}
 		if (lSocket)
 		{
 			MemberThread<FileServer,TcpSocket*>* lServer = new MemberThread<FileServer,TcpSocket*>("FileServer");

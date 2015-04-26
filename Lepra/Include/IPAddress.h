@@ -24,7 +24,7 @@ public:
 	inline void Set(const IPAddress& pIP);
 
 	void Get(uint8* pIPAddress) const;
-	inline int GetNumBytes();
+	inline int GetNumBytes() const;
 	inline uint8 Read(int pIndex);
 
 	str GetAsString() const;
@@ -46,7 +46,7 @@ private:
 	bool mIsHashValid;
 };
 
-int IPAddress::GetNumBytes()
+int IPAddress::GetNumBytes() const
 {
 	return mByteCount;
 }

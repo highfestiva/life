@@ -20,6 +20,7 @@
 #include "../UiLepra/Include/Mac/EAGLView.h"
 #include "../UiLepra/Include/Mac/RotatingController.h"
 #include "../UiLepra/Include/Mac/UiMacDisplayManager.h"
+#include "../Lepra/Include/Posix/MacLog.h"
 #include "PythonRunner.h"
 #endif // iOS
 #include "../UiTbc/Include/UiTbc.h"
@@ -60,6 +61,10 @@ void DidSyncFiles()
 	TrabantSim::mApp->DidSyncFiles();
 }
 
+bool ConnectQuery(const str& pHostname)
+{
+	return TrabantSim::mApp->ConnectQuery(pHostname);
+}
 
 
 TrabantSim* TrabantSim::GetApp()
@@ -322,7 +327,21 @@ void TrabantSim::DidSyncFiles()
 	});
 #endif // iOS
 }
-void TrabantSim::SavePurchase()
+
+bool TrabantSim::ConnectQuery(const str& pHostname)
+{
+#ifdef LEPRA_IOS
+	// TODO: check if address already present in registered hosts.
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[TrabantSim::TrabantSim::mAnimatedApp showNetworkControlFor:MacLog::Encode(pHostname)];
+	});
+	return false;
+#else // !iOS
+	return true;
+#endif // iOS
+}
+
+	void TrabantSim::SavePurchase()
 {
 }
 
