@@ -218,6 +218,7 @@ protected:
 	bool mIsControlled;
 	bool mWasControlled;
 	bool mIsControlTimeout;
+	HiResTimer mStartupTimer;
 	SocketAddress mLocalAddress;
 	SocketAddress mLastRemoteAddress;
 	SocketAddress mLastAcceptedAddress;

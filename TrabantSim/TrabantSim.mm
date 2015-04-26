@@ -69,6 +69,7 @@
 
 -(void) startTick
 {
+	self.alert = nil;
 	if (!_animationTimer)
 	{
 		_animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0001 target:self selector:@selector(tick) userInfo:nil repeats:YES];

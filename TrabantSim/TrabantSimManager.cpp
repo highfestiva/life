@@ -135,6 +135,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	}
 	mLocalAddress = lAddress;
 	mLastRemoteAddress = lAddress;
+	mLastAcceptedAddress = lAddress;
 
 	mFileServer = new FileServer(new AppSyncDelegate);
 
@@ -161,6 +162,7 @@ void TrabantSimManager::Resume(bool pHard)
 	mIsControlTimeout = false;
 	mIsControlled = true;
 	mWasControlled = false;
+	mStartupTimer.PopTimeDiff();
 	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
 
 #ifdef LEPRA_TOUCH
@@ -1158,7 +1160,10 @@ void TrabantSimManager::CommandLoop()
 		{
 			if (l == 0)
 			{
-				mIsControlTimeout = true;
+				if (mStartupTimer.QueryTimeDiff() >= 12)
+				{
+					mIsControlTimeout = true;
+				}
 			}
 			else
 			{
@@ -1175,7 +1180,9 @@ void TrabantSimManager::CommandLoop()
 			continue;
 		}
 #ifdef LEPRA_TOUCH
-		if (mLastRemoteAddress.GetIP() != mLastAcceptedAddress.GetIP())
+		static const IPAddress lLocalIp(_T("127.0.0.1"));
+		if (mLastRemoteAddress.GetIP() != lLocalIp &&
+		    mLastRemoteAddress.GetIP() != mLastAcceptedAddress.GetIP())
 		{
 			str lHostname;
 			if (!mLastRemoteAddress.ResolveIpToHostname(lHostname))
@@ -1251,6 +1258,11 @@ bool TrabantSimManager::IsControlled()
 		else
 		{
 #ifdef LEPRA_TOUCH
+			if (mIsControlTimeout)
+			{
+				mLog.AWarning("Prototype script is not responding, possibly hung?");
+				Thread::Sleep(0.1);	// Wait for it to reach stdout reader thread.
+			}
 			FoldSuspendSimulator();
 #else // Computer
 			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
