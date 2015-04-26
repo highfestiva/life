@@ -3,7 +3,6 @@
 # A bit like Amiga Fire Power of 1987.
 
 from trabant import *
-from math import fmod
 
 # ASCII geometries.
 turret = '\n---\n'.join([r'      /XX\ '] +

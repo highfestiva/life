@@ -155,7 +155,7 @@ void TrabantSimManager::Resume(bool pHard)
 	(void)pHard;
 	mIsControlTimeout = false;
 	mIsControlled = true;
-	mWasControlled = true;
+	mWasControlled = false;
 	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
 
 #ifdef LEPRA_TOUCH
@@ -583,7 +583,7 @@ void TrabantSimManager::PopCollisions(CollisionList& pCollisionList)
 	{
 		unsigned y = x->mObjectId;
 		unsigned z = x->mOtherObjectId;
-		uint64 lKey = ((y^z)<<16) + (y+z);
+		unsigned lKey = ((y^z)<<16) + (y+z);
 		CollisionMap::iterator c = lReducedCollisions.find(lKey);
 		if (c != lReducedCollisions.end())
 		{

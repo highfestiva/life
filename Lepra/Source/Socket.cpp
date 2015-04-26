@@ -150,7 +150,7 @@ int SocketBase::ClearErrors() const
 {
 	int lError = 0;
 	int lSize = sizeof(lError);
-	::getsockopt(mSocket, SOL_SOCKET, SO_ERROR, &lError, (socklen_t*)&lSize);
+	::getsockopt(mSocket, SOL_SOCKET, SO_ERROR, (char*)&lError, (socklen_t*)&lSize);
 	return lError;
 }
 

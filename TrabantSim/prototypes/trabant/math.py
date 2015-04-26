@@ -8,7 +8,7 @@ _axis = None
 
 
 def almosteq(a,b):
-	return int(((a-b) if a>b else (b-a))*10000) == 0
+	return int(((a-b) if a>b else (b-a))*1000) == 0
 
 def rndvec():
 	return vec3(*[random()*2-1 for _ in range(3)])

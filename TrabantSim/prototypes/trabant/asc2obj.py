@@ -4,281 +4,14 @@
 import trabant.asc as asc
 from trabant.objects import *
 from functools import reduce
-from math import sqrt,pi,cos,sin
+from math import sqrt,pi
 from trabant.math import *
+from trabant.mesh import mesh_optimize,mesh_mergevtxs
 
 
 sq2 = sqrt(2)
 rotq = quat().rotate_z(-pi/4)
 _last_centering_offset = vec3()
-
-
-class _Triangle:
-	'''Internal representation of triangle face in a mesh.'''
-	def __init__(self, v1,v2,v3, vidxs, baseindex):
-		self.v = (v1,v2,v3)
-		self._center = None
-		self._normal = None
-		self.vidxs = vidxs
-		self.baseindex = baseindex
-		self.inwards = None
-	def getcenter(self):
-		if not self._center:
-			self._center = (self.v[0]+self.v[1]+self.v[2])/3
-		return self._center
-	def getnormal(self):
-		if not self._normal:
-			self._normal = (self.v[1]-self.v[0]).cross(self.v[1]-self.v[2]).normalize()
-		return self._normal
-	center = property(getcenter)
-	normal = property(getnormal)
-	def sides(self, vtxidx):
-		sx = [k for k,ia in enumerate(self.vidxs) if ia==vtxidx][0]
-		osx = [k for k,ia in enumerate(self.vidxs) if ia!=vtxidx]
-		return [self.v[k]-self.v[sx] for k in osx]
-	def contains(self, point):
-		if not self.inwards:
-			self.inwards = [(w-q).normalize().cross(self.normal) for w,q in zip(self.v[1:]+self.v[0:1],self.v)]
-		return len([1 for inw,w in zip(self.inwards,self.v) if (point-w)*inw>=-0.1]) == 3
-	def prepare_join(self, t):
-		# Two things: check the opposing end lines up with either endpoint AND that resulting side length is approximately doubled.
-		s = [k for k,ia in enumerate(self.vidxs) if ia not in t.vidxs]
-		if len(s) > 1:
-			return
-		sx = s[0]
-		tx = [k for k,ia in enumerate(t.vidxs) if ia not in self.vidxs][0]
-		osx = [k for k,ia in enumerate(self.vidxs) if ia in t.vidxs]
-		if len(osx) < 2:
-			return
-		dn = t.v[tx]-self.v[sx]
-		dn /= dn.length()
-		v1,v2 = self.v[osx[0]]-self.v[sx], self.v[osx[1]]-self.v[sx]
-		l1,l2 = v1.length(),v2.length()
-		joinable1,joinable2 = almosteq((v1/l1)*dn,1), almosteq((v2/l2)*dn,1)
-		if joinable1 or joinable2:
-			self.join_from_idx = self.baseindex + osx[0 if joinable1 else 1]
-			self.join_to_idx = t.baseindex + tx
-		return joinable1 or joinable2
-	def extend(self, t, i):
-		i[self.join_from_idx] = i[self.join_to_idx]
-		i[t.baseindex] = i[t.baseindex+1] = i[t.baseindex+2] = 0
-	def __eq__(self, t):
-		return self.baseindex==t.baseindex
-	def __hash__(self):
-		return hash(self.baseindex)
-	def __repr__(self):
-		return str(self.v)
-
-
-def printobj(o):
-	print('Object has a gfx mesh and %i physical geometries:' % len(o.physgeoms))
-	printvi(o.gfxmesh.vertices,o.gfxmesh.indices)
-	[print(p) for p in o.physgeoms]
-
-def printvi(v,i):
-	print('Mesh has %i vertices, %i triangles=%i indices:' % (len(v),len(i)//3,len(i)))
-	print(v)
-	for j in range(0,len(i),3):
-		p = ''
-		if v[i[j]].x == v[i[j+1]].x and v[i[j+1]].x == v[i[j+2]].x:
-			p += '-x' if v[i[j]].x<1 else '+x'
-		if v[i[j]].y == v[i[j+1]].y and v[i[j+1]].y == v[i[j+2]].y:
-			p += '-y' if v[i[j]].y<1 else '+y'
-		if v[i[j]].z == v[i[j+1]].z and v[i[j+1]].z == v[i[j+2]].z:
-			p += '-z' if v[i[j]].z<1 else '+z'
-		if not p:
-			p = '??'
-		print('  %2i: %s %s %s (%s)' % (j, str(v[i[j]]), str(v[i[j+1]]), str(v[i[j+2]]), p))
-
-def _get_vertex_crush_pos(v, vtxidx, faces, i):
-	# Check for corners. Corner vertices may never be moved.
-	if len(faces) >= 3:
-		n0 = faces[0].normal
-		n1 = None
-		for f in faces:
-			if n0*f.normal < 0.99:
-				n1 = f.normal
-				break
-		if n1:
-			c = n0.cross(n1).normalize()
-			for f in faces:
-				dot = c*f.normal
-				if dot<-0.01 or dot>0.01:
-					return
-	# Check for adjacent sides. They must be equally long, or only reversed direction joins are allowed.
-	req_direction = set()
-	sides = [(s,s.length(),s.normalize()) for f in faces for s in f.sides(vtxidx)]
-	for si,sln in enumerate(sides):
-		sa,la,na = sln
-		for sj in range(si+1,len(sides)):
-			sb,lb,nb = sides[sj]
-			if na*nb > 0.99:
-				q = la/lb
-				if q < 0.99 or q > 1.01:
-					req_direction.add(-na)
-					break
-	if len(req_direction) > 1:	# Can only have one required direction.
-		return
-	normal = reduce(lambda x,y:x+y, [f.normal for f in faces])
-	normal = normal.normalize()
-	goodsides = []
-	for f in faces:
-		for s in f.sides(vtxidx):
-			sn = s.normalize()
-			dot = sn*normal
-			if dot>-0.01 and dot<0.01:
-				for rd in req_direction:
-					if sn*rd<0.99:
-						sn = None
-						break
-				if not sn:
-					continue
-				for gs,gsn in goodsides:
-					if sn*gsn < -0.99:
-						return v[vtxidx]+gs
-				goodsides.append((s,sn))
-	if goodsides:
-		for gs,gsn in goodsides:
-			if gs.z == 0:
-				return v[vtxidx]+gs	# A flat crush is always better, if available.
-		return v[vtxidx]+goodsides[0][0]	# Last pick, some skewed stuff.
-
-def mesh_mergevtxs(v,i):
-	found = {}
-	drop_v_indices = []
-	for vj,va in enumerate(v):
-		vi = found.get(va)
-		if vi != None:
-			drop_v_indices.append((vj,vi))
-		else:
-			found[va] = vj
-	movcnt = [0]*len(v)
-	subcnt = list(movcnt)
-	for vj,vi in sorted(drop_v_indices, key=lambda e:e[0]):
-		movcnt[vj] = vj-vi+subcnt[vi]
-		for z in range(vj+1,len(v)):
-			subcnt[z] += 1
-	for j,ia in enumerate(i):
-		i[j] -= movcnt[ia] if movcnt[ia] else subcnt[ia]
-	for vj,_ in sorted(drop_v_indices, key=lambda e:e[0], reverse=True):
-		del v[vj]	# Drop vertex.
-
-def mesh_getfaces(v, wanted_indices, i, facecache):
-	faces = []
-	for wi in wanted_indices:
-		bi = wi//3*3
-		t = facecache.get(bi)
-		if not t:
-			idxs = i[bi],i[bi+1],i[bi+2]
-			t = _Triangle(v[idxs[0]],v[idxs[1]],v[idxs[2]], idxs, bi)
-			facecache[bi] = t
-		faces.append(t)
-	return faces
-
-def mesh_dropface(baseindex, i):
-	del i[baseindex]; del i[baseindex]; del i[baseindex]	# Drop all three indices.
-
-def mesh_dropopposingfaces(v,i):
-	usedvtxs = [[] for _ in range(len(v))]
-	for ia,j in enumerate(i): usedvtxs[j].append(ia)
-	facecache = {}
-	opposingfaces = {}
-	for c in usedvtxs:
-		faces = mesh_getfaces(v, c, i, facecache)
-		for fi,f in enumerate(faces):
-			for ti in range(fi+1,len(faces)):
-				t = faces[ti]
-				if f.normal*t.normal<-0.99 and (f.center-t.center).length2() < asc.GRID*asc.GRID:
-					if f.contains(t.center):
-						opposingfaces[f.baseindex] = f
-						opposingfaces[t.baseindex] = t
-	for of in sorted(opposingfaces.values(), key=lambda o:o.baseindex, reverse=True):
-		mesh_dropface(of.baseindex, i)
-
-def mesh_dropsquashedfaces(v,i):
-	drops = set()
-	for bi in range(0,len(i),3):
-		b = i[bi:bi+3]
-		if b[0]==b[1] or b[0]==b[2] or b[1]==b[2]:
-			drops.add(bi)
-	[mesh_dropface(bi,i) for bi in sorted(drops,reverse=True)]
-
-def mesh_dropequalfaces(v,i):
-	drops = set()
-	for bi in range(0,len(i),3):
-		bs = i[bi:bi+3]
-		for ci in range(bi+3,len(i),3):
-			cs = i[ci:ci+3]
-			if len([1 for b in bs if b in cs]) == 3:
-				drops.add(ci)
-	[mesh_dropface(bi,i) for bi in sorted(drops,reverse=True)]
-
-def mesh_extendfaces(v,i):
-	vtxidxs = [[] for _ in range(len(v))]
-	for ia,j in enumerate(i): vtxidxs[j].append(ia)
-	facecache = {}
-	usedfaces = set()
-	for c in vtxidxs:
-		faces = mesh_getfaces(v, c, i, facecache)
-		for fi,f in enumerate(faces):
-			if f.baseindex in usedfaces: continue
-			for ti in range(fi+1,len(faces)):
-				t = faces[ti]
-				if t.baseindex in usedfaces: continue
-				if f.normal*t.normal > 0.99 and f.prepare_join(t):
-					usedfaces.add(f.baseindex)
-					usedfaces.add(t.baseindex)
-					f.extend(t,i)
-					break
-	if usedfaces:
-		mesh_dropsquashedfaces(v,i)
-		#mesh_dropequalfaces(v,i)
-		mesh_dropunusedvtxs(v,i)
-	return len(usedfaces)
-
-def mesh_crushfaces(v,i):
-	vtxidxs = [[] for _ in range(len(v))]
-	for ia,j in enumerate(i): vtxidxs[j].append(ia)
-	facecache = {}
-	usedfaces = set()
-	for vi,c in enumerate(vtxidxs):
-		faces = mesh_getfaces(v, c, i, facecache)
-		if not faces or [f for f in faces if f in usedfaces]:
-			continue
-		target = _get_vertex_crush_pos(v, vi, faces, i)
-		if target:
-			usedfaces.update(faces)
-			v[vi] = target
-	if usedfaces:
-		mesh_mergevtxs(v,i)
-		mesh_dropsquashedfaces(v,i)
-		mesh_dropequalfaces(v,i)
-		mesh_dropunusedvtxs(v,i)
-	return len(usedfaces)
-
-def mesh_joinfaces(v,i):
-	while True:
-		while mesh_extendfaces(v,i): pass
-		if not mesh_crushfaces(v,i): break
-
-def mesh_dropunusedvtxs(v,i):
-	vtxusecnt = [[] for _ in range(len(v))]
-	for ia,j in enumerate(i): vtxusecnt[j].append(ia)
-	unused = [vi for vi,c in enumerate(vtxusecnt) if not c]
-	subcnt = [0]*len(v)
-	for u in unused:
-		for z in range(u+1,len(v)):
-			subcnt[z] += 1
-	for j in range(len(i)):
-		i[j] -= subcnt[i[j]]
-	for u in reversed(unused):
-		del v[u]
-
-def mesh_optimize(v,i):
-	# Merge vertices on same position.
-	mesh_mergevtxs(v,i)
-	mesh_dropopposingfaces(v,i)
-	mesh_joinfaces(v,i)
 
 
 def shape2mesh(shape):
@@ -290,15 +23,39 @@ def shape2mesh(shape):
 		lx,cx,rx = topleft.x,topleft.x+asc.GRID,topleft.x+asc.GRID*2
 		ty,cy,by = topleft.y,topleft.y+asc.GRID,topleft.y+asc.GRID*2
 		fz,bz = topleft.z,topleft.z+asc.GRID*2
+		hasfront = asc.hasboundstri(shape,crd+vec3(0,0,-1))
+		hasback  = asc.hasboundstri(shape,crd+vec3(0,0,+1))
 		if o == asc.W2E:
-			v += [vec3(lx,ty,fz),vec3(cx,cy,fz),vec3(lx,by,fz), vec3(lx,ty,bz),vec3(cx,cy,bz),vec3(lx,by,bz)]
+			tv = [vec3(lx,ty,fz),vec3(cx,cy,fz),vec3(lx,by,fz), vec3(lx,ty,bz),vec3(cx,cy,bz),vec3(lx,by,bz)]
+			hastop   = asc.hasboundstri(shape,crd+vec3(-1,+1,0))
+			hasleft  = asc.hasboundstri(shape,crd+vec3( 0,+1,0))
+			hasright = asc.hasboundstri(shape,crd+vec3(+1, 0,0))
 		elif o == asc.N2S:
-			v += [vec3(rx,ty,fz),vec3(cx,cy,fz),vec3(lx,ty,fz), vec3(rx,ty,bz),vec3(cx,cy,bz),vec3(lx,ty,bz)]
+			tv = [vec3(rx,ty,fz),vec3(cx,cy,fz),vec3(lx,ty,fz), vec3(rx,ty,bz),vec3(cx,cy,bz),vec3(lx,ty,bz)]
+			hastop   = asc.hasboundstri(shape,crd+vec3(-1,-1,0))
+			hasleft  = asc.hasboundstri(shape,crd+vec3(-1, 0,0))
+			hasright = asc.hasboundstri(shape,crd+vec3( 0,+1,0))
 		elif o == asc.E2W:
-			v += [vec3(rx,by,fz),vec3(cx,cy,fz),vec3(rx,ty,fz), vec3(rx,by,bz),vec3(cx,cy,bz),vec3(rx,ty,bz)]
+			tv = [vec3(rx,by,fz),vec3(cx,cy,fz),vec3(rx,ty,fz), vec3(rx,by,bz),vec3(cx,cy,bz),vec3(rx,ty,bz)]
+			hastop   = asc.hasboundstri(shape,crd+vec3(+1,-1,0))
+			hasleft  = asc.hasboundstri(shape,crd+vec3( 0,-1,0))
+			hasright = asc.hasboundstri(shape,crd+vec3(-1, 0,0))
 		elif o == asc.S2N:
-			v += [vec3(lx,by,fz),vec3(cx,cy,fz),vec3(rx,by,fz), vec3(lx,by,bz),vec3(cx,cy,bz),vec3(rx,by,bz)]
-		j = [0,2,1, 5,3,4, 0,1,3, 3,1,4, 1,2,4, 4,2,5, 2,0,5, 5,0,3]
+			tv = [vec3(lx,by,fz),vec3(cx,cy,fz),vec3(rx,by,fz), vec3(lx,by,bz),vec3(cx,cy,bz),vec3(rx,by,bz)]
+			hastop   = asc.hasboundstri(shape,crd+vec3(+1,+1,0))
+			hasleft  = asc.hasboundstri(shape,crd+vec3(+1, 0,0))
+			hasright = asc.hasboundstri(shape,crd+vec3( 0,-1,0))
+		else:
+			raise Exception('Internal error!')
+		j = []
+		if not hasfront:	j += [0,2,1]
+		if not hasback:		j += [5,3,4]
+		if not hastop:		j += [2,0,5, 5,0,3]
+		if not hasleft:		j += [1,2,4, 4,2,5]
+		if not hasright:	j += [0,1,3, 3,1,4]
+		if not j:
+			continue
+		v += tv
 		i += [k+idx for k in j]
 		idx += 6
 	mesh_optimize(v,i)

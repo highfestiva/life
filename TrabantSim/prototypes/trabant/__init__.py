@@ -16,6 +16,8 @@ class flushfile:
 		self.f = f
 	def write(self, x):
 		self.f.write(x)
+		self.flush()
+	def flush(self):
 		self.f.flush()
 sys.stdout = flushfile(sys.stdout)
 
@@ -67,10 +69,12 @@ class Engine:
 			gameapi.addtag(self.oid, 'engine_sound', [1, 1*intensity,5*intensity,1, 0.05*volume,volume,1, 0,0.5,1, 1], [sound+'.wav'], [0], [self.eid], [])
 
 class Obj:
-	def __init__(self, id):
+	def __init__(self, id, gfx, phys):
 		self.id = id
 		self.engine = []
 		self.last_joint_axis = None
+		self.gfx = gfx
+		self.phys = phys
 	def pos(self, pos=None, orientation=None):
 		'''Orientation is a quaternion.'''
 		if pos:
@@ -390,7 +394,7 @@ def create_clones(obj, placements, mat=None, static=False):
 	def append(splacements):
 		global _last_created_object
 		for oid in gameapi.cloneobjs(obj.id, static, mat, splacements):
-			o = Obj(oid)
+			o = Obj(oid,None,None)
 			_objects[oid] = o
 			objs.append(o)
 			_last_created_object = o
@@ -606,7 +610,7 @@ def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, ma
 	oid = gameapi.createobj(static, mat, objpos, objori)
 	if wait_until_loaded:
 		gameapi.waitload(oid)
-	o = Obj(oid)
+	o = Obj(oid,gfx,phys)
 	global _objects,_last_created_object
 	_objects[oid] = o
 	if vel:

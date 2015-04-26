@@ -341,7 +341,7 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 		return;
 	}
 	const UiTbc::ChunkyClass* lClass = (const UiTbc::ChunkyClass*)GetClass();
-	if (!lClass || lClass->GetMeshCount() <= pMeshIndex)
+	if (!lClass || (int)lClass->GetMeshCount() <= pMeshIndex)
 	{
 		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
 		mUiManager->GetRenderer()->ChangeMaterial(mMeshResourceArray[pMeshIndex]->GetData(), lMaterialType);
