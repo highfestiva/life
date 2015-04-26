@@ -88,6 +88,19 @@ bool Network::ResolveHostname(const str& pHostname, IPAddress& pIPAddress)
 	return false;
 }
 
+bool Network::ResolveIp(const IPAddress& pIpAddress, str& pHostname)
+{
+	uint8 lRawAddress[16];
+	pIpAddress.Get(lRawAddress);
+	hostent* lHostent = ::gethostbyaddr((const char*)lRawAddress, pIpAddress.GetNumBytes(), AF_INET);
+	if (lHostent && lHostent->h_name && lHostent->h_name[0])
+	{
+		pHostName = strutil::Encode(lHostent->h_name);
+		return true;
+	}
+	return false;
+}
+
 bool Network::IsLocalAddress(const str& pAddress)
 {
 	bool lIsLocalAddress = false;

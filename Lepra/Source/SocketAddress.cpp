@@ -259,6 +259,11 @@ bool SocketAddress::ResolveHost(const str& pHostname)
 	return (lOk);
 }
 
+bool SocketAddress::ResolveIpToHostname(str& pHostname) const
+{
+	return Network::ResolveIp(GetIP(), pHostname);
+}
+
 
 
 }

@@ -39,6 +39,7 @@ public:
 	bool Resolve(const str& pAddress);
 	bool ResolveRange(const str& pAddress, uint16& pEndPort);
 	bool ResolveHost(const str& pHostname);	// Only changes address, not port.
+	bool ResolveIpToHostname(str& pHostname) const;
 
 private:
 	uint8 mSockAddr[64];
