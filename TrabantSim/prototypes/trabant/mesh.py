@@ -9,12 +9,20 @@ from trabant.math import *
 class _Triangle:
 	'''Internal representation of triangle face in a mesh.'''
 	def __init__(self, v1,v2,v3, vidxs, baseindex):
-		self.v = (v1,v2,v3)
+		self.v = [v1,v2,v3]
 		self.center = (self.v[0]+self.v[1]+self.v[2])/3
 		self.normal = (self.v[1]-self.v[0]).cross(self.v[1]-self.v[2]).normalize()
 		self.vidxs = vidxs
 		self.baseindex = baseindex
 		self.inwards = None
+	def replacevertex(self,vold,vnew):
+		if vold in self.v:
+			self.v[self.v.index(vold)] = vnew
+			# Only update normal if we have area, otherse we're considered having unchanged normal.
+			a,b,c = (self.v[1]-self.v[0]).length(),(self.v[2]-self.v[1]).length(),(self.v[0]-self.v[2]).length()
+			p = (a+b+c)*0.5
+			if p*(p-a)*(p-b)*(p-c) > 0.1:
+				self.normal = (self.v[1]-self.v[0]).cross(self.v[1]-self.v[2]).normalize()
 	# def getcenter(self):
 		# if not self._center:
 			# self._center = (self.v[0]+self.v[1]+self.v[2])/3
@@ -252,12 +260,21 @@ def mesh_crushfaces(v,i):
 	usedfaces = set()
 	for vi,c in enumerate(vtxidxs):
 		faces = mesh_getfaces(v, c, i, facecache)
-		if not faces or [f for f in faces if f in usedfaces]:
+		if not faces or [1 for f in faces if f in usedfaces]:
 			continue
 		target = _get_vertex_crush_pos(v, vi, faces, i)
 		if target:
-			usedfaces.update(faces)
-			v[vi] = target
+			ns = [f.normal for f in faces]
+			# Check if any of the polys flipped - if so go back!
+			for f in faces:
+				f.replacevertex(v[vi],target)
+			if [1 for f,n in zip(faces,ns) if f.normal*n < 0.7]:
+				for f in faces:
+					f.replacevertex(target,v[vi])
+			else:
+				v[vi] = target
+				usedfaces.update(faces)
+			
 	if usedfaces:
 		mesh_mergevtxs(v,i)
 		mesh_dropsquashedfaces(v,i)
@@ -299,8 +316,8 @@ def mesh_reduce_redundant_vtxs(v,i,stop_at_edge_cost=0):
 			self.vertex[self.vertex.index(vold)] = vnew
 			self.vertexset = set(self.vertex)
 			vnew.face.add(self)
-			if vold.cost != 0:
-				self.normal = (self.vertex[1].v-self.vertex[0].v).cross(self.vertex[1].v-self.vertex[2].v).normalize()
+			#if vold.cost != 0:
+			self.normal = (self.vertex[1].v-self.vertex[0].v).cross(self.vertex[1].v-self.vertex[2].v).normalize()
 	class vtx:
 		def __init__(self,_v,idx):
 			self.v = _v
@@ -396,9 +413,10 @@ def mesh_reduce_redundant_vtxs(v,i,stop_at_edge_cost=0):
 	return len(dropped_triangles)
 
 
-def mesh_optimize(v,i,stop_at_edge_cost=0):
+def mesh_optimize(v,i,stop_at_edge_cost=0.1):
 	mesh_dropunusedvtxs(v,i)
 	mesh_mergevtxs(v,i)
-	mesh_reduce_redundant_vtxs(v,i,stop_at_edge_cost)
-	#while mesh_crushfaces(v,i): pass
+	while True:
+		mesh_reduce_redundant_vtxs(v,i,stop_at_edge_cost)
+		if not mesh_crushfaces(v,i): break
 	mesh_dropunusedvtxs(v,i)
