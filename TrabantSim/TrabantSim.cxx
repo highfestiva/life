@@ -331,6 +331,20 @@ void TrabantSim::DidSyncFiles()
 bool TrabantSim::ConnectQuery(const str& pHostname)
 {
 #ifdef LEPRA_IOS
+	str lDeniedHosts;
+	v_get(lDeniedHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", "");
+	strutil::strvec lHosts = strutil::Split(lDeniedHosts, _T(":"));
+	if (std::find(lHosts.begin(), lHosts.end(), pHostname) != lHosts.end())
+	{
+		return false;
+	}
+	str lAllowedHosts;
+	v_get(lAllowedHosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", "");
+	lHosts = strutil::Split(lAllowedHosts, _T(":"));
+	if (std::find(lHosts.begin(), lHosts.end(), pHostname) != lHosts.end())
+	{
+		return true;
+	}
 	// TODO: check if address already present in registered hosts.
 	dispatch_async(dispatch_get_main_queue(), ^{
 		[TrabantSim::TrabantSim::mAnimatedApp showNetworkControlFor:MacLog::Encode(pHostname)];

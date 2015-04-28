@@ -150,6 +150,7 @@ public:
 	virtual void SetRenderArea(const PixelRect& pRenderArea);
 	virtual bool Open();
 	virtual void Close();
+	bool OpenConnection();
 	void CloseConnection();
 	virtual void SetIsQuitting();
 	virtual void SetFade(float pFadeAmount);
@@ -219,6 +220,8 @@ protected:
 	bool mWasControlled;
 	bool mIsControlTimeout;
 	HiResTimer mStartupTimer;
+	SocketAddress mOpenLocalAddress;
+	SocketAddress mInternalLocalAddress;
 	SocketAddress mLocalAddress;
 	SocketAddress mLastRemoteAddress;
 	SocketAddress mLastAcceptedAddress;

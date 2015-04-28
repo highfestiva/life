@@ -100,7 +100,7 @@
 		B18D58941A9E14810029D2C0 /* CYRTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D588F1A9E14810029D2C0 /* CYRTextView.m */; };
 		B18D58951A9E14810029D2C0 /* CYRToken.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58901A9E14810029D2C0 /* CYRToken.m */; };
 		B18D58961A9E14810029D2C0 /* EditViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B18D58911A9E14810029D2C0 /* EditViewController.mm */; };
-		B18D58971A9E14810029D2C0 /* ListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58921A9E14810029D2C0 /* ListViewController.m */; };
+		B18D58971A9E14810029D2C0 /* ListViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B18D58921A9E14810029D2C0 /* ListViewController.mm */; };
 		B18D58991A9E15D10029D2C0 /* PythonTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = B18D58981A9E15D10029D2C0 /* PythonTextView.m */; };
 		B18D589B1A9E19A90029D2C0 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B18D589A1A9E19A90029D2C0 /* CoreText.framework */; };
 		B19A141913A122CE0051A61C /* UiBorderComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */; };
@@ -531,6 +531,8 @@
 		B1F3C40B16E0027100B2EFB5 /* UiBillboardGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */; };
 		B1F3C40C16E0027100B2EFB5 /* UiParticleRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */; };
 		B1F3C40E16E0029C00B2EFB5 /* UiParticleLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */; };
+		B1F48EB61AEED4A0004FD96A /* SettingsViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1F48EB51AEED4A0004FD96A /* SettingsViewController.mm */; };
+		B1F48EB91AEEFD64004FD96A /* FileHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = B1F48EB81AEEFD64004FD96A /* FileHelper.m */; };
 		B1F61C861AA8EE9B00D38387 /* libpython_sim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B1F61C851AA8EE9B00D38387 /* libpython_sim.a */; };
 		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
 		B1FBD9811AC58E9B009C3973 /* MacSystemManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1FBD9801AC58E9B009C3973 /* MacSystemManager.mm */; };
@@ -636,7 +638,7 @@
 		B18D588F1A9E14810029D2C0 /* CYRTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRTextView.m; sourceTree = "<group>"; };
 		B18D58901A9E14810029D2C0 /* CYRToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CYRToken.m; sourceTree = "<group>"; };
 		B18D58911A9E14810029D2C0 /* EditViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = EditViewController.mm; sourceTree = "<group>"; };
-		B18D58921A9E14810029D2C0 /* ListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListViewController.m; sourceTree = "<group>"; };
+		B18D58921A9E14810029D2C0 /* ListViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ListViewController.mm; sourceTree = "<group>"; };
 		B18D58981A9E15D10029D2C0 /* PythonTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PythonTextView.m; sourceTree = "<group>"; };
 		B18D589A1A9E19A90029D2C0 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBorderComponent.cpp; sourceTree = "<group>"; };
@@ -1247,6 +1249,10 @@
 		B1F3C40916E0027100B2EFB5 /* UiBillboardGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBillboardGeometry.cpp; sourceTree = "<group>"; };
 		B1F3C40A16E0027100B2EFB5 /* UiParticleRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiParticleRenderer.cpp; sourceTree = "<group>"; };
 		B1F3C40D16E0029C00B2EFB5 /* UiParticleLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiParticleLoader.cpp; path = ../../UiCure/Source/UiParticleLoader.cpp; sourceTree = SOURCE_ROOT; };
+		B1F48EB41AEED4A0004FD96A /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
+		B1F48EB51AEED4A0004FD96A /* SettingsViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SettingsViewController.mm; sourceTree = "<group>"; };
+		B1F48EB71AEEFD64004FD96A /* FileHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileHelper.h; sourceTree = "<group>"; };
+		B1F48EB81AEEFD64004FD96A /* FileHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileHelper.m; sourceTree = "<group>"; };
 		B1F61C851AA8EE9B00D38387 /* libpython_sim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpython_sim.a; path = "../../../RnD/python-embedded/libpython_sim.a"; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
 		B1FBD9801AC58E9B009C3973 /* MacSystemManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacSystemManager.mm; sourceTree = "<group>"; };
@@ -1567,6 +1573,10 @@
 		B19A146913A122DE0051A61C /* Trabant */ = {
 			isa = PBXGroup;
 			children = (
+				B1F48EB71AEEFD64004FD96A /* FileHelper.h */,
+				B1F48EB81AEEFD64004FD96A /* FileHelper.m */,
+				B1F48EB41AEED4A0004FD96A /* SettingsViewController.h */,
+				B1F48EB51AEED4A0004FD96A /* SettingsViewController.mm */,
 				B1FBD9821AC58EB7009C3973 /* FileServer.cpp */,
 				B173DCED1AB2E53500928E13 /* StdOutViewController.mm */,
 				B173DCEC1AB2E52500928E13 /* StdOutViewController.h */,
@@ -1580,7 +1590,7 @@
 				B18D58901A9E14810029D2C0 /* CYRToken.m */,
 				B18D588C1A9E14680029D2C0 /* CYRLayoutManager.m */,
 				B18D58911A9E14810029D2C0 /* EditViewController.mm */,
-				B18D58921A9E14810029D2C0 /* ListViewController.m */,
+				B18D58921A9E14810029D2C0 /* ListViewController.mm */,
 				B18D399C1A76F54300D8F48B /* Light.cpp */,
 				B18D399D1A76F54300D8F48B /* Object.cpp */,
 				B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */,
@@ -2553,6 +2563,7 @@
 				B19A142013A122CE0051A61C /* UiConsolePrompt.cpp in Sources */,
 				B19A142113A122CE0051A61C /* UiCustomButton.cpp in Sources */,
 				B19A142213A122CE0051A61C /* UiDesktopWindow.cpp in Sources */,
+				B1F48EB61AEED4A0004FD96A /* SettingsViewController.mm in Sources */,
 				B19A142313A122CE0051A61C /* UiFileNameField.cpp in Sources */,
 				B19A142413A122CE0051A61C /* UiFloatingLayout.cpp in Sources */,
 				B19A142513A122CE0051A61C /* UiGridLayout.cpp in Sources */,
@@ -2651,6 +2662,7 @@
 				B19A152B13A124940051A61C /* Number.cpp in Sources */,
 				B19A152C13A124940051A61C /* Packer.cpp in Sources */,
 				B19A152D13A124940051A61C /* Path.cpp in Sources */,
+				B1F48EB91AEEFD64004FD96A /* FileHelper.m in Sources */,
 				B19A152E13A124940051A61C /* Performance.cpp in Sources */,
 				B19A152F13A124940051A61C /* PngLoader.cpp in Sources */,
 				B19A153013A124940051A61C /* PosixAntiCrack.cpp in Sources */,
@@ -2996,7 +3008,7 @@
 				B1D37F24166AB3F100536CE5 /* TrabantSimTicker.cpp in Sources */,
 				B1D37F38166AB53A00536CE5 /* MacThread.mm in Sources */,
 				B1D37F40166AB57A00536CE5 /* GameTicker.cpp in Sources */,
-				B18D58971A9E14810029D2C0 /* ListViewController.m in Sources */,
+				B18D58971A9E14810029D2C0 /* ListViewController.mm in Sources */,
 				B1D37F41166AB57A00536CE5 /* PhysicsSharedResource.cpp in Sources */,
 				B1D37F42166AB57A00536CE5 /* PositionHauler.cpp in Sources */,
 				B1D37F46166AB59C00536CE5 /* UiDebugRenderer.cpp in Sources */,

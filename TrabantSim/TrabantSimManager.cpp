@@ -133,6 +133,16 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	{
 		lAddress.Resolve(_T("0.0.0.0:2541"));
 	}
+	mOpenLocalAddress = lAddress;
+	SocketAddress lInternalAddress;
+	lInternalAddress.Resolve(_T("127.0.0.1:2541"));
+	mInternalLocalAddress = lInternalAddress;
+	bool lAllowRemoteSync;
+	v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+	if (!lAllowRemoteSync)
+	{
+		lAddress = lInternalAddress;
+	}
 	mLocalAddress = lAddress;
 	mLastRemoteAddress = lAddress;
 	mLastAcceptedAddress = lAddress;
@@ -160,32 +170,19 @@ void TrabantSimManager::Resume(bool pHard)
 {
 	(void)pHard;
 	mIsControlTimeout = false;
-	mIsControlled = true;
+	mIsControlled = false;
 	mWasControlled = false;
 	mStartupTimer.PopTimeDiff();
 	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
 
-#ifdef LEPRA_TOUCH
-	mFileServer->Start();
-#endif // Touch device.
-
-	if (mCommandSocket)
+	bool lAllowRemoteSync;
+	v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+	if (lAllowRemoteSync)
 	{
-		return;
+		mFileServer->Start();
 	}
 
-	mCommandSocket = new UdpSocket(mLocalAddress, true);
-	if (mCommandSocket->IsOpen())
-	{
-		mCommandThread = new MemberThread<TrabantSimManager>("CommandRecvThread");
-		mCommandThread->Start(this, &TrabantSimManager::CommandLoop);
-		mLog.Headlinef(_T("Command server listening on %s."), mLocalAddress.GetAsString().c_str());
-	}
-	else
-	{
-		mLog.Headlinef(_T("Could not open server on %s. Shutting down."), mLocalAddress.GetAsString().c_str());
-		SystemManager::AddQuitRequest(1);
-	}
+	OpenConnection();
 }
 
 void TrabantSimManager::Suspend(bool pHard)
@@ -195,7 +192,7 @@ void TrabantSimManager::Suspend(bool pHard)
 
 	if (mCommandSocket && mCommandSocket->IsOpen())
 	{
-		if (mLastRemoteAddress != mLocalAddress)
+		if (mLastRemoteAddress != mInternalLocalAddress)
 		{
 			mCommandSocket->SendTo((const unsigned char*)"disconnect\n", 11, mLastRemoteAddress);
 		}
@@ -1160,6 +1157,22 @@ void TrabantSimManager::CommandLoop()
 		{
 			if (l == 0)
 			{
+				bool lAllowRemoteSync;
+				v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+				if (lAllowRemoteSync != (mLocalAddress == mOpenLocalAddress))
+				{
+					delete mCommandSocket;
+					mCommandSocket = 0;
+					OpenConnection();
+					if (lAllowRemoteSync)
+					{
+						mFileServer->Start();
+					}
+					else
+					{
+						mFileServer->Stop();
+					}
+				}
 				if (mStartupTimer.QueryTimeDiff() >= 12)
 				{
 					mIsControlTimeout = true;
@@ -1180,8 +1193,7 @@ void TrabantSimManager::CommandLoop()
 			continue;
 		}
 #ifdef LEPRA_TOUCH
-		static const IPAddress lLocalIp(_T("127.0.0.1"));
-		if (mLastRemoteAddress.GetIP() != lLocalIp &&
+		if (mLastRemoteAddress.GetIP() != mInternalLocalAddress.GetIP() &&
 		    mLastRemoteAddress.GetIP() != mLastAcceptedAddress.GetIP())
 		{
 			str lHostname;
@@ -1336,6 +1348,35 @@ void TrabantSimManager::Close()
 		mLight = 0;
 	}
 	Parent::Close();
+}
+
+bool TrabantSimManager::OpenConnection()
+{
+	if (mCommandSocket)
+	{
+		return true;
+	}
+
+	bool lAllowRemoteSync;
+	v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+	mLocalAddress = lAllowRemoteSync? mOpenLocalAddress : mInternalLocalAddress;
+	mCommandSocket = new UdpSocket(mLocalAddress, true);
+	if (mCommandSocket->IsOpen())
+	{
+		if (!mCommandThread)
+		{
+			mCommandThread = new MemberThread<TrabantSimManager>("CommandRecvThread");
+			mCommandThread->Start(this, &TrabantSimManager::CommandLoop);
+		}
+		mLog.Headlinef(_T("Command server listening on %s."), mLocalAddress.GetAsString().c_str());
+		return true;
+	}
+	else
+	{
+		mLog.Headlinef(_T("Could not open server on %s. Shutting down."), mLocalAddress.GetAsString().c_str());
+		SystemManager::AddQuitRequest(1);
+		return false;
+	}
 }
 
 void TrabantSimManager::CloseConnection()

@@ -8,6 +8,7 @@
 #ifdef LEPRA_IOS
 #import "CreateNewViewController.h"
 #import "EditViewController.h"
+#import "FileHelper.h"
 
 
 
@@ -28,7 +29,7 @@
 
 	NSString* fn = @"test.py";
 	for (int i = 2; i < 100; ++i) {
-		if (![self fileExists:fn]) {
+		if (![FileHelper fileExists:fn]) {
 			break;
 		}
 		fn = [NSString stringWithFormat:@"test%i.py", i];
@@ -69,10 +70,10 @@
 
 -(void) createFile
 {
-	if (self.filename.text.length == 0 || [self fileExists:self.filename.text]) {
+	if (self.filename.text.length == 0 || [FileHelper fileExists:self.filename.text]) {
 		return;
 	}
-	NSString* full = [self fullPath:self.filename.text];
+	NSString* full = [FileHelper fullPath:self.filename.text];
 	NSString* content = @"";
 	if (self.createComments.on) content = [content stringByAppendingString:@"#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\n"];
 	if (self.createBoilerplate.on) {
@@ -82,11 +83,9 @@
 
 		if (self.createComments.on) content = [content stringByAppendingString:@"# main game loop\n"];
 		content = [content stringByAppendingString:@"while loop():\n"];
-		if (self.createComments.on) content = [content stringByAppendingString:@"\n    # print tap/click info\n"];
-		content = [content stringByAppendingString:@"    if taps(): print('currently %i active taps' % len(taps()))\n"];
-		content = [content stringByAppendingString:@"    [print('tap at x=%f,y=%f. Tap translated to 3D space: %s.' % (tap.x,tap.y,tap.pos3d())) for tap in taps()]\n"];
+		if (self.createComments.on) content = [content stringByAppendingString:@"\n    # place box where you tap\n"];
 		content = [content stringByAppendingString:@"    if taps():\n"];
-		content = [content stringByAppendingString:@"        print('tap closest to box is at: %s' % closest_tap(box.pos()).pos3d())\n"];
+		content = [content stringByAppendingString:@"        box.pos(closest_tap(box.pos()).pos3d())\n"];
 	}
 	NSData* rawContents = [content dataUsingEncoding:NSUTF8StringEncoding];
 	[[NSFileManager defaultManager] createFileAtPath:full contents:rawContents attributes:nil];
@@ -94,19 +93,6 @@
 		[self.parent reloadPrototypes];
 		[self.parent popCreateNew:self.filename.text];
 	});
-}
-
--(NSString*) fullPath:(NSString*)filename
-{
-	NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString* path = [paths objectAtIndex:0];
-	return [path stringByAppendingPathComponent:filename];
-}
-
--(bool) fileExists:(NSString*)filename
-{
-	NSString* full = [self fullPath:filename];
-	return [[NSFileManager defaultManager] fileExistsAtPath:full];
 }
 
 @end

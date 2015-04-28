@@ -47,6 +47,7 @@
 		EditViewController* editController = [EditViewController new];
 		editController.title = @"";
 		self.listController.editController = editController;
+		editController.listController = self.listController;
 		UINavigationController* editHeadController = [[UINavigationController alloc] initWithRootViewController:editController];
 		UISplitViewController* splitController = [[UISplitViewController alloc] init];
 		//splitController.delegate = self;
@@ -118,10 +119,15 @@
 {
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
+		self.window.rootViewController.presentedViewController.view = [UIView new];
 		[(UISplitViewController*)self.window.rootViewController dismissViewControllerAnimated:animated completion:nil];
 	}
 	else
 	{
+		if (((UINavigationController*)self.window.rootViewController).visibleViewController.view == [EAGLView sharedView])
+		{
+			((UINavigationController*)self.window.rootViewController).visibleViewController.view = [UIView new];
+		}
 		[(UINavigationController*)self.window.rootViewController popViewControllerAnimated:animated];
 		((UINavigationController*)self.window.rootViewController).navigationBarHidden = NO;
 	}
@@ -183,7 +189,7 @@
 							    handler:^(UIAlertAction*){
 								    self.alert = nil;
 								    str lHosts;
-								    v_get(lHosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", "");
+								    v_get(lHosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", _T(""));
 								    strutil::strvec lHostnames = strutil::Split(lHosts, _T(":"));
 								    lHostnames.push_back(MacLog::Decode(hostname));
 								    lHosts = strutil::Join(lHostnames, _T(":"));
@@ -200,7 +206,7 @@
 							  handler:^(UIAlertAction*){
 								  self.alert = nil;
 								  str lHosts;
-								  v_get(lHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", "");
+								  v_get(lHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));
 								  strutil::strvec lHostnames = strutil::Split(lHosts, _T(":"));
 								  lHostnames.push_back(MacLog::Decode(hostname));
 								  lHosts = strutil::Join(lHostnames, _T(":"));

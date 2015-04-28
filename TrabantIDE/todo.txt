@@ -138,20 +138,28 @@
 +Fix iOS "Create New" options.
 +Create new on iPad.
 +Fix Back button size on iPhone 6!
++Seriously optimize ASCII object generation (firepower).
++Fix crashes/timeouts sometimes/often.
+.Fix status bar on/off when "unlocking" rotation.
+.Fix shadows on iOS. Looks like crap on the simulator at least. glDepthRange?
++iOS: Fix accelerator orientation when device rotated (terminal_velocity).
++Check that device rotation works on iPad.
+.Fix soft joystick bug in iOS (car, heli).
++Fix all games on iOS.
++Fix starting orientation on iPad.
++Check iPad controls.
++Remove files.
++Restore files.
++Rename files.
++Add enable/disable synchronization on iOS.
++Add "allow/disallow/ban" to iOS.
 
-Seriously optimize ASCII object generation (firepower).
-Fix crashes/timeouts sometimes/often.
-Fix status bar on/off when "unlocking" rotation.
-Fix shadows on iOS. Looks like crap on the simulator at least. glDepthRange?
+Test allow/disallow/ban thoroughly.
 Minimize the list view on iPad.
+Fix icon background.
 Test on iPhone 4s.
-iOS: Fix accelerator orientation when device rotated (terminal_velocity).
-Check that device rotation works on iPad.
-Fix soft joystick bug in iOS (car, heli).
-Add "allow/disallow/ban" to iOS.
-Fix all games on iOS.
-Fix starting orientation on iPad.
-Check iPad controls.
+Make soft joysticks larger on iPad.
+Reduce fog city by binary encoding...
 Make web page for Trabant.
 
 Rolling ball, avoiding holes. Using accelerometer.

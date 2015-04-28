@@ -179,6 +179,9 @@ void PythonRunner::StdOutReadEntry(void*)
 			lBuffer[lReadCount] = 0;
 			ScopeLock _(&mStdOutLock);
 			mStdOut += lBuffer;
+#ifdef LEPRA_DEBUG
+			//NSLog(@"%s", lBuffer);
+#endif // Debug
 		}
 	}
 	free(lBuffer);

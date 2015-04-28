@@ -6,6 +6,8 @@
 
 #import "EditViewController.h"
 #import "AnimatedApp.h"
+#import "FileHelper.h"
+#import "ListViewController.h"
 #include "PythonRunner.h"
 #import "PythonTextView.h"
 
@@ -54,8 +56,18 @@ bool gBackspaceToLinefeed = false;
 
 	_smartIndent = [NSMutableString new];
 
+	UIBarButtonItem* organizeButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemReply target:self action:@selector(manageFile)];
 	UIBarButtonItem* executeButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(execute)];
-	[self.navigationItem setRightBarButtonItem:executeButton];
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		self.navigationItem.leftBarButtonItem = organizeButton;
+		self.navigationItem.rightBarButtonItem = executeButton;
+	}
+	else
+	{
+		self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:organizeButton, executeButton, nil];
+		[self.navigationItem setRightBarButtonItem:executeButton];
+	}
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
 
 	self.view.backgroundColor = [UIColor whiteColor];
@@ -208,6 +220,79 @@ bool gBackspaceToLinefeed = false;
 {
 	[self saveIfChanged];
 	return YES;
+}
+
+- (void) alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+	if (buttonIndex == 1)
+	{
+		UITextField* input = [alertView textFieldAtIndex:0];
+		NSString* newFilename = input.text;
+		if (![FileHelper fileExists:newFilename])
+		{
+			NSString* oldFilename = [FileHelper fullPath:self.title];
+			NSString* newFullFilename = [FileHelper fullPath:newFilename];
+			if ([[NSFileManager defaultManager] moveItemAtPath:oldFilename toPath:newFullFilename error:nil])
+			{
+				self.title = newFilename;
+				dispatch_async(dispatch_get_main_queue(), ^{
+					ListViewController* listController = (ListViewController*)self.listController;
+					[listController reloadPrototypes];
+				});
+			}
+		}
+	}
+}
+
+- (void) actionSheet:(UIActionSheet*)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+	if (buttonIndex == 0)	// Delete!
+	{
+		NSString* filename = self.title;
+		self.title = @"";
+		self.textView.text = @"";
+		if ([FileHelper fileExists:filename])
+		{
+			filename = [FileHelper fullPath:filename];
+			[[NSFileManager defaultManager] removeItemAtPath:filename error:nil];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				ListViewController* listController = (ListViewController*)self.listController;
+				[listController reloadPrototypes];
+				[listController popDeleteFile];
+			});
+		}
+	}
+	else if (buttonIndex == 1)	// Rename!
+	{
+		UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Rename prototype"
+								message:@"Enter new name:"
+							       delegate:self
+						      cancelButtonTitle:@"Cancel"
+						      otherButtonTitles:@"Rename", nil];
+		alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+		UITextField* input = [alert textFieldAtIndex:0];
+		input.keyboardType = UIKeyboardTypeASCIICapable;
+		input.text = self.title;
+		[alert show];
+	}
+	else if (buttonIndex == 2)	// Restore or Cancel button.
+	{
+		if ([FileHelper hasOriginal:self.title])	// Button index 2 is restore if we have it.
+		{
+			[FileHelper restoreSample:self.title];
+			[self updateEditor];
+		}
+	}
+}
+
+- (void) manageFile
+{
+	bool restorable = [FileHelper hasOriginal:self.title];
+	UIActionSheet* sheet = [[UIActionSheet alloc] initWithTitle:@"Manage prototype" delegate:self
+						  cancelButtonTitle:@"Cancel"
+					     destructiveButtonTitle:@"Delete"
+						  otherButtonTitles:@"Rename", restorable?@"Restore":nil, nil];
+	[sheet showInView:self.view];
 }
 
 - (void)execute

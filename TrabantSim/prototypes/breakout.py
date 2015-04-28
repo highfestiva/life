@@ -12,8 +12,10 @@ paddle = r'''
 '''
 brick = 'XX'
 
+fg(outline=False)
 cam(angle=(0,-pi/2,0), distance=45)    # Flip camera for iPad portrait layout.
 gravity((0,0,0), bounce=1, friction=1)
+
 paddle = create_ascii_object(paddle, pos=(0,0,-15), mass=10000)
 ball = create_sphere(pos=(-7,0,10), vel=(10,0,-30), radius=0.5, col='#fff')
 bricks = set()

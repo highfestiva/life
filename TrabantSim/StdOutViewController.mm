@@ -27,7 +27,11 @@
 	[self.view addSubview:self.scrollView];
 
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[self.textView setText:self.text];
+		NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"File \".*pylib/" options:0 error:nil];
+		NSRange fullRange = NSMakeRange(0, [self.text length]);
+		NSMutableString* text = [NSMutableString stringWithString:self.text];
+		[regex replaceMatchesInString:text options:0 range:fullRange withTemplate:@"File \""];
+		[self.textView setText:text];
 
 		CGSize fit = [self.textView fitTextSize];
 		CGRect r = CGRectUnion(CGRectMake(0,0,fit.width,fit.height), self.scrollView.bounds);

@@ -25,7 +25,6 @@
 		UIViewController *viewController = [[UIViewController alloc] init];
 		[self presentViewController:viewController animated:NO completion:^{
 			[self dismissViewControllerAnimated:NO completion:nil];
-
 		}];
 	}
 	forceGameLayout = false;

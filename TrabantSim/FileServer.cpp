@@ -37,6 +37,7 @@ void FileServer::Start()
 	{
 		return;
 	}
+	mLog.Info(_T("Starting file server."));
 	SocketAddress lAddress;
 	lAddress.Resolve(_T("0.0.0.0:2541"));
 	mAcceptSocket = new TcpListenerSocket(lAddress, true);
@@ -46,6 +47,7 @@ void FileServer::Start()
 
 void FileServer::Stop()
 {
+	mLog.Info(_T("Stopping file server."));
 	if (mAcceptThread)
 	{
 		mAcceptThread->RequestStop();
@@ -234,6 +236,10 @@ void FileServer::AcceptThreadEntry()
 	delete mAcceptSocket;
 	mAcceptSocket = 0;
 }
+
+
+
+loginstance(GAME, FileServer);
 
 
 

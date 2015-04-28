@@ -7,8 +7,12 @@
 #include "../Lepra/Include/LepraTarget.h"
 #ifdef LEPRA_IOS
 #import "ListViewController.h"
+#include "../UiCure/Include/UiCure.h"
+#include "../Cure/Include/RuntimeVariable.h"
 #import "CreateNewViewController.h"
 #import "EditViewController.h"
+#import "FileHelper.h"
+#import "SettingsViewController.h"
 
 
 
@@ -31,6 +35,11 @@
 {
 	[super viewDidLoad];
 
+	UIBarButtonItem* settingsButton = [[UIBarButtonItem alloc] initWithTitle:@"\u2699" style:UIBarButtonItemStylePlain target:self action:@selector(settings)];
+	UIFont* cogWheelFont = [UIFont fontWithName:@"Helvetica" size:24.0];
+	NSDictionary* fontDict = @{NSFontAttributeName: cogWheelFont};
+	[settingsButton setTitleTextAttributes:fontDict forState:UIControlStateNormal];
+	[self.navigationItem setLeftBarButtonItem:settingsButton];
 	UIBarButtonItem* createButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCompose target:self action:@selector(createNew)];
 	[self.navigationItem setRightBarButtonItem:createButton];
 
@@ -76,6 +85,10 @@
 {
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
+		if ([self.editController.title length] != 0)
+		{
+			[self.editController saveIfChanged];
+		}
 		self.editController.title = filename;
 		[self.editController updateEditor];
 	}
@@ -83,6 +96,7 @@
 	{
 		EditViewController* editController = [EditViewController new];
 		editController.title = filename;
+		editController.listController = self;
 		[self.navigationController pushViewController:editController animated:YES];
 	}
 }
@@ -91,7 +105,7 @@
 {
 	[self doReloadPrototypes];
 	if ([self.files count] == 0) {
-		[self copySamples];
+		[FileHelper copySamples];
 		[self doReloadPrototypes];
 	}
 }
@@ -110,6 +124,19 @@
 	if (filename != nil)
 	{
 		[self showFile:filename];
+	}
+}
+
+-(void) popDeleteFile
+{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		[self.createNewPopover dismissPopoverAnimated:YES];
+		self.createNewPopover = nil;
+	}
+	else
+	{
+		[self.navigationController popViewControllerAnimated:YES];
 	}
 }
 
@@ -141,28 +168,40 @@
 	[self.tableView reloadData];
 }
 
--(void) copySamples
+-(void) popoverControllerDidDismissPopover:(UIPopoverController*)popoverController
 {
-	NSString* srcPath = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"/pylib/prototypes"];
-	NSDirectoryEnumerator* dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:srcPath];
-	NSString* filename;
-	while ((filename = [dirEnum nextObject])) {
-		if ([filename hasSuffix:@".py"]) {
-			[self restoreSample:filename];
-		}
-	}
+	const bool lAllowRemoteSync = self.settingsController.allowRemote.isOn;
+	v_override(UiCure::GetSettings(), "Simulator.AllowRemoteSync", lAllowRemoteSync);
+	self.createNewPopover = nil;
+	self.settingsController = nil;
 }
 
--(void) restoreSample:(NSString*)filename
+-(void) doneiPhoneSettings
 {
-	NSString* srcPath = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:@"/pylib/prototypes"];
-	NSArray* docPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString* dstPath = [docPaths objectAtIndex:0];
-	NSString* srcFile = [srcPath stringByAppendingPathComponent:filename];
-	NSString* dstFile = [dstPath stringByAppendingPathComponent:filename];
-	NSError* error = nil;
-	if (![[NSFileManager defaultManager] copyItemAtPath:srcFile toPath:dstFile error:&error]) {
-		NSLog(@"File copy error %@: %@", error, [error userInfo]);
+	const bool lAllowRemoteSync = self.settingsController.allowRemote.isOn;
+	v_override(UiCure::GetSettings(), "Simulator.AllowRemoteSync", lAllowRemoteSync);
+	[self.navigationController dismissViewControllerAnimated:YES completion:nil];
+	self.settingsController = nil;
+}
+
+- (void)settings
+{
+	self.settingsController = [SettingsViewController new];
+	self.settingsController.title = @"Settings";
+	UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.settingsController];
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		self.createNewPopover = [[UIPopoverController alloc] initWithContentViewController:nav];
+		self.createNewPopover.popoverContentSize = CGSizeMake(320,280);
+		self.createNewPopover.delegate = self;
+		[self.createNewPopover presentPopoverFromBarButtonItem:self.navigationItem.leftBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+	}
+	else
+	{
+		UIBarButtonItem* doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneiPhoneSettings)];
+		self.settingsController.navigationItem.rightBarButtonItem = doneButton;
+		nav.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+		[self.navigationController presentViewController:nav animated:YES completion:nil];
 	}
 }
 

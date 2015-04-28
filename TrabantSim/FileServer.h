@@ -49,6 +49,8 @@ private:
 	MemberThread<FileServer>* mAcceptThread;
 	TcpListenerSocket* mAcceptSocket;
 	SyncDelegate* mSyncDelegate;
+
+	logclass();
 };
 
 
