@@ -52,6 +52,7 @@
 		UISplitViewController* splitController = [[UISplitViewController alloc] init];
 		//splitController.delegate = self;
 		splitController.viewControllers = @[navigationController, editHeadController];
+		splitController.preferredPrimaryColumnWidthFraction = 0.3;
 		window.rootViewController = splitController;
 	}
 	else

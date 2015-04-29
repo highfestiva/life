@@ -228,13 +228,22 @@ double MacDisplayManager::GetPhysicalScreenSize() const
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
 	{
 		CGSize size = [[UIScreen mainScreen] bounds].size;
-		if (size.height < 500)
+		const float lHeight = std::max(size.width, size.height);
+		if (lHeight < 500)
 		{
-			return SCREEN_SIZE_IPHONE_CLASSIC;	// iPhone 4S / 4th Gen iPod Touch or earlier.
+			return SCREEN_SIZE_IPHONE_4;	// Or 4th Gen iPod Touch or earlier.
+		}
+		else if (lHeight < 600)
+		{
+			return SCREEN_SIZE_IPHONE_5;
+		}
+		else if (lHeight < 700)
+		{
+			return SCREEN_SIZE_IPHONE_6;
 		}
 		else
 		{
-			return SCREEN_SIZE_IPHONE_TALL;	// iPhone 5.
+			return SCREEN_SIZE_IPHONE_6P;
 		}
 	}
 	else

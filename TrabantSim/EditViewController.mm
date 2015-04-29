@@ -40,6 +40,7 @@ bool gBackspaceToLinefeed = false;
 @private
 	NSMutableString* _smartIndent;
 }
+@property (nonatomic, strong) UIBarButtonItem* manageButton;
 @property (nonatomic, strong) PythonTextView* textView;
 @property (nonatomic, strong) UIScrollView* scrollView;
 @end
@@ -56,16 +57,17 @@ bool gBackspaceToLinefeed = false;
 
 	_smartIndent = [NSMutableString new];
 
-	UIBarButtonItem* organizeButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemReply target:self action:@selector(manageFile)];
+	self.manageButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemReply target:self action:@selector(manageFile)];
 	UIBarButtonItem* executeButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(execute)];
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-		self.navigationItem.leftBarButtonItem = organizeButton;
+		((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth = 0;
+		[self toggleiPadSidebar];
 		self.navigationItem.rightBarButtonItem = executeButton;
 	}
 	else
 	{
-		self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:organizeButton, executeButton, nil];
+		self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:self.manageButton, executeButton, nil];
 		[self.navigationItem setRightBarButtonItem:executeButton];
 	}
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
@@ -94,15 +96,20 @@ bool gBackspaceToLinefeed = false;
 -(void) updateEditor
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
+		[self setEditing:NO animated:YES];
 		[self.scrollView setContentOffset:CGPointMake(0, -self.scrollView.contentInset.top)];
 		[self.scrollView setContentSize:CGSizeMake(300,300)];
 		NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString* path = [paths objectAtIndex:0];
 		NSString* filename = [path stringByAppendingPathComponent:self.title];
-		NSString* text = [NSString stringWithContentsOfFile:filename encoding:NSUTF8StringEncoding error:nil];
+		NSError* error = nil;
+		NSString* text = [NSString stringWithContentsOfFile:filename encoding:NSUTF8StringEncoding error:&error];
 		if (text != nil) {
 			text = [text stringByReplacingOccurrencesOfString:@"\t" withString:@"    "];	// Tabs wrap line when entered to the right of screen width.
 			[self.textView setText:text];
+		} else if (error) {
+			self.title = @"";
+			[self.textView setText:@""];
 		}
 	});
 }
@@ -281,12 +288,40 @@ bool gBackspaceToLinefeed = false;
 		{
 			[FileHelper restoreSample:self.title];
 			[self updateEditor];
+			[(ListViewController*)self.listController updateLoc];
 		}
 	}
 }
 
+- (void) toggleiPadSidebar
+{
+	int maxWidth;
+	UIBarButtonItem* toggleFullscreenButton;
+	if (((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth == 0)
+	{
+		maxWidth = 5000;
+		toggleFullscreenButton = [[UIBarButtonItem alloc] initWithTitle:@"<" style:UIBarButtonItemStylePlain target:self action:@selector(toggleiPadSidebar)];
+	}
+	else
+	{
+		maxWidth = 0;
+		toggleFullscreenButton = [[UIBarButtonItem alloc] initWithTitle:@">" style:UIBarButtonItemStylePlain target:self action:@selector(toggleiPadSidebar)];
+	}
+	UIFont* cogWheelFont = [UIFont fontWithName:@"Helvetica" size:24.0];
+	NSDictionary* fontDict = @{NSFontAttributeName: cogWheelFont};
+	[toggleFullscreenButton setTitleTextAttributes:fontDict forState:UIControlStateNormal];
+	self.navigationItem.leftBarButtonItems = [NSArray arrayWithObjects:toggleFullscreenButton, self.manageButton, nil];
+
+	((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth = maxWidth;
+}
+
 - (void) manageFile
 {
+	if ([self.title length] <= 0)
+	{
+		return;
+	}
+
 	bool restorable = [FileHelper hasOriginal:self.title];
 	UIActionSheet* sheet = [[UIActionSheet alloc] initWithTitle:@"Manage prototype" delegate:self
 						  cancelButtonTitle:@"Cancel"
@@ -297,6 +332,11 @@ bool gBackspaceToLinefeed = false;
 
 - (void)execute
 {
+	if ([self.title length] <= 0)
+	{
+		return;
+	}
+
 	[self.view endEditing:YES];
 	[self saveIfChanged];
 
@@ -315,8 +355,12 @@ bool gBackspaceToLinefeed = false;
 	TrabantSim::PythonRunner::ClearStdOut();
 }
 
--(void) saveIfChanged
+-(bool) saveIfChanged
 {
+	if ([self.title length] <= 0)
+	{
+		return false;
+	}
 	// Only write if we've made some changes.
 	NSString* editText = self.textView.text;
 	NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -330,8 +374,11 @@ bool gBackspaceToLinefeed = false;
 			NSData* rawContents = [editText dataUsingEncoding:NSUTF8StringEncoding];
 			[file writeData:rawContents];
 			[file closeFile];
+			[(ListViewController*)self.listController updateLoc];
+			return true;
 		}
 	}
+	return false;
 }
 
 @end

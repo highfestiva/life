@@ -1238,11 +1238,13 @@ void TrabantSimManager::CommandLoop()
 			break;
 		}
 		GetConsoleManager()->ExecuteCommand(lCommand);
-		const astr lResponse = astrutil::Encode(((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse());
+		const str lCmdResponse = ((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse();
+		const astr lResponse = astrutil::Encode(lCmdResponse);
 		if (mCommandSocket->SendTo((const uint8*)lResponse.c_str(), (int)lResponse.length(), mLastRemoteAddress) != (int)lResponse.length())
 		{
 			mIsControlled = false;
 		}
+		//mLog.Infof(_T("Responded to %s with %s (to %s)."), lCommand.c_str(), lCmdResponse.c_str(), mLastRemoteAddress.GetAsString().c_str());
 	}
 	mLog.Info(_T("Terminating command thread."));
 	mIsControlled = false;
@@ -1518,8 +1520,12 @@ void TrabantSimManager::UpdateTouchstickPlacement()
 	mTouchstickTimer.ClearTimeDiff();
 
 	const float lTouchSideScale = 1.28f;	// Inches.
-	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	const int lSide = std::max((int)(mRenderArea.GetHeight() * lTouchScale), 80);
+	float lPhysicalScale = (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
+	lPhysicalScale -= 2.5f;
+	lPhysicalScale = ::sqrt(lPhysicalScale);
+	lPhysicalScale += 2.5f;
+	const float lTouchScale = lTouchSideScale / lPhysicalScale;
+	const int lSide = (int)(mRenderArea.GetHeight() * lTouchScale);
 	TouchstickList::iterator x = mTouchstickList.begin();
 	for (; x != mTouchstickList.end(); ++x)
 	{

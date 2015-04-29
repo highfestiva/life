@@ -9,5 +9,5 @@
 @interface EditViewController : UIViewController <UIActionSheetDelegate, UIAlertViewDelegate>
 @property (nonatomic, strong) UIViewController* listController;
 -(void) updateEditor;
--(void) saveIfChanged;
+-(bool) saveIfChanged;
 @end

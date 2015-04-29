@@ -42,7 +42,7 @@ void SystemUtil::LoadRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvar
 	if (value != nil)
 	{
 		const str lValue = MacLog::Decode(value);
-		pScope->SetUntypedValue(Cure::RuntimeVariable::USAGE_NORMAL, pRtvarName, lValue);
+		pScope->SetUntypedValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, pRtvarName, lValue);
 	}
 #endif // iOS
 }

@@ -13,4 +13,5 @@
 -(void) reloadPrototypes;
 -(void) popCreateNew:(NSString*)filename;
 -(void) popDeleteFile;
+-(void) updateLoc;
 @end

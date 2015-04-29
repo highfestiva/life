@@ -881,6 +881,7 @@ bool GameClientMasterTicker::Reinitialize()
 	SystemManager::AddQuitRequest(-1);
 
 	// (Re)open.
+	LoadRtvars(UiCure::GetSettings());
 	bool lOk = mResourceManager->InitDefault();
 	if (lOk)
 	{

@@ -58,6 +58,22 @@
 	}
 }
 
++(NSString*) countLoc:(NSString *)filename
+{
+	NSString* filepath = [FileHelper fullPath:filename];
+	NSString* code = [NSString stringWithContentsOfFile:filepath encoding:NSUTF8StringEncoding error:nil];
+	int loc = 0;
+	NSCharacterSet* whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+	NSArray* lines = [code componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]];
+	for (NSString* line in lines) {
+		NSString* strippedLine = [[line componentsSeparatedByCharactersInSet:whitespace] componentsJoinedByString:@""];
+		if (![strippedLine hasPrefix:@"#"] && [strippedLine length] > 0) {
+			++loc;
+		}
+	}
+	return [NSString stringWithFormat:@"%i loc",loc];
+}
+
 @end
 
 #endif // iOS

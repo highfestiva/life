@@ -67,9 +67,9 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYY, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYZ, -9.8);
 
-	v_override(UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));
-	v_override(UiCure::GetSettings(), "Simulator.AllowedHosts", _T(""));
-	v_override(UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+	v_set(UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));
+	v_set(UiCure::GetSettings(), "Simulator.AllowedHosts", _T(""));
+	v_set(UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
 
 	AddBackedRtvar(_T("Simulator.DeniedHosts"));
 	AddBackedRtvar(_T("Simulator.AllowedHosts"));

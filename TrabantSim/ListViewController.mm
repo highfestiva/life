@@ -17,6 +17,10 @@
 
 
 @interface ListViewController () <UITableViewDelegate, UITableViewDataSource>
+{
+@private
+	bool _allowUpdateSelection;
+}
 
 @property (nonatomic, strong) UITableView* tableView;
 @property (nonatomic, strong) NSMutableArray* files;
@@ -34,6 +38,8 @@
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
+
+	_allowUpdateSelection = true;
 
 	UIBarButtonItem* settingsButton = [[UIBarButtonItem alloc] initWithTitle:@"\u2699" style:UIBarButtonItemStylePlain target:self action:@selector(settings)];
 	UIFont* cogWheelFont = [UIFont fontWithName:@"Helvetica" size:24.0];
@@ -56,8 +62,11 @@
 }
 
 - (void) viewWillAppear:(BOOL)animated {
-	if ([self.tableView indexPathForSelectedRow]) {
-		[self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
+	NSIndexPath* indexPath = [self.tableView indexPathForSelectedRow];
+	if (indexPath) {
+		NSString* loc = [FileHelper countLoc:self.editController.title];
+		[self.loc setObject:loc atIndexedSubscript:indexPath.row];
+		[self.tableView deselectRowAtIndexPath:indexPath animated:YES];
  	}
 }
 
@@ -68,7 +77,8 @@
 - (UITableViewCell*) tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
 	static NSString* identifier = @"CellId";
 	UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:identifier];
-	if (cell == nil) {
+	if (cell == nil)
+	{
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:identifier];
 	}
 	cell.textLabel.text = [self.files objectAtIndex:indexPath.row];
@@ -85,10 +95,9 @@
 {
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-		if ([self.editController.title length] != 0)
-		{
-			[self.editController saveIfChanged];
-		}
+		_allowUpdateSelection = false;
+		[self.editController saveIfChanged];
+		_allowUpdateSelection = true;
 		self.editController.title = filename;
 		[self.editController updateEditor];
 	}
@@ -150,22 +159,37 @@
 	NSString* filename;
 	while ((filename = [dirEnum nextObject])) {
 		[self.files addObject:filename];
-
-		NSString* filepath = [path stringByAppendingPathComponent:filename];
-		NSString* code = [NSString stringWithContentsOfFile:filepath encoding:NSUTF8StringEncoding error:nil];
-		int loc = 0;
-		NSCharacterSet* whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-		NSArray* lines = [code componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n"]];
-		for (NSString* line in lines) {
-			NSString* strippedLine = [[line componentsSeparatedByCharactersInSet:whitespace] componentsJoinedByString:@""];
-			if (![strippedLine hasPrefix:@"#"] && [strippedLine length] > 0) {
-				++loc;
-			}
-		}
-		[self.loc addObject:[NSString stringWithFormat:@"%i loc",loc]];
+		NSString* loc = [FileHelper countLoc:filename];
+		[self.loc addObject:loc];
 		[dirEnum skipDescendents];
 	}
 	[self.tableView reloadData];
+	if ([self.editController.title length] > 0)
+	{
+		[self.editController updateEditor];
+		if ([self.editController.title length] > 0)
+		{
+			int lFileIndex = [self.files indexOfObject:self.editController.title];
+			[self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:lFileIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+		}
+	}
+}
+
+-(void) updateLoc
+{
+	if ([self.editController.title length] <= 0)
+	{
+		return;
+	}
+	NSString* loc = [FileHelper countLoc:self.editController.title];
+	int lFileIndex = [self.files indexOfObject:self.editController.title];
+	[self.loc setObject:loc atIndexedSubscript:lFileIndex];
+	NSIndexPath* indexPath = [NSIndexPath indexPathForRow:lFileIndex inSection:0];
+	[self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationBottom];
+	if (_allowUpdateSelection)
+	{
+		[self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
+	}
 }
 
 -(void) popoverControllerDidDismissPopover:(UIPopoverController*)popoverController

@@ -12,4 +12,5 @@
 +(void) copySamples;
 +(bool) hasOriginal:(NSString*)filename;
 +(void) restoreSample:(NSString*)filename;
++(NSString*) countLoc:(NSString*)filename;
 @end

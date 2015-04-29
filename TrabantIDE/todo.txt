@@ -153,13 +153,19 @@
 +Rename files.
 +Add enable/disable synchronization on iOS.
 +Add "allow/disallow/ban" to iOS.
++Minimize the list view on iPad.
++iOS: reload current file after synchronization.
++Fix synchronization (linefeeds and tabs).
++Test allow/disallow/ban thoroughly.
++Make soft joysticks larger on iPad.
++Reduce fog city by binary encoding...
++Fix car shape generation. Front-left corner is off!
 
-Test allow/disallow/ban thoroughly.
-Minimize the list view on iPad.
+IDE: reload all files after synchronization.
+IDE: save all files before synchronization.
+Handle WiFi UDP packet loss by resending from simulator.
 Fix icon background.
 Test on iPhone 4s.
-Make soft joysticks larger on iPad.
-Reduce fog city by binary encoding...
 Make web page for Trabant.
 
 Rolling ball, avoiding holes. Using accelerometer.
