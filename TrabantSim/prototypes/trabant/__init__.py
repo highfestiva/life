@@ -464,6 +464,7 @@ def collisions(enable=None):
 		if oid in _objects and other_oid in _objects:
 			force,pos = tovec3([float(f) for f in words[1:4]]),tovec3([float(f) for f in words[4:7]])
 			_collisions.append((_objects[oid],_objects[other_oid],force,pos))
+			_collisions.append((_objects[other_oid],_objects[oid],-force,pos))
 	return _collisions
 
 def keys():
