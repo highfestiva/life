@@ -400,18 +400,18 @@ shipascii = r'''
 /XXXX\
 '''
 def create_ship(pos, d):
-	pos = vec3(*pos) + rndvec()*20
-	za = +pi/2 if d<0 else -pi/2
-	vel = vec3(+10 if d<0 else -10,0,0) + rndvec()*1
-	return create_ascii_object(shipascii, pos=pos, orientation=quat().rotate_z(za).rotate_x(pi/2), vel=vel)
-	return
+    pos = vec3(*pos) + rndvec()*20
+    za = +pi/2 if d<0 else -pi/2
+    vel = vec3(+10 if d<0 else -10,0,0) + rndvec()*1
+    return create_ascii_object(shipascii, pos=pos, orientation=quat().rotate_z(za).rotate_x(pi/2), vel=vel)
+    return
 
 ships = []
 for x in range(-2,3):
-	ships += [create_ship((x* 40,40,20), -1)]
-	ships += [create_ship((x*250,250,45), -1)]
-	ships += [create_ship((x*220,220,25), +1)]
-	ships += [create_ship((x*300,300,60), +1)]
+    ships += [create_ship((x* 40,40,20), -1)]
+    ships += [create_ship((x*250,250,45), -1)]
+    ships += [create_ship((x*220,220,25), +1)]
+    ships += [create_ship((x*300,300,60), +1)]
 
 
 # Simplistic semi-transparent triangles to create an illusion of smoke.
@@ -421,19 +421,19 @@ smokes = create_clones(smoke_template, [(vec3(30,115,19)+rndvec()*2,quat().rotat
 
 
 while loop():
-	try:
-		ship = next(shipiter)
-		p,v = ship.pos(),ship.vel()
-		if abs(p.x)>(abs(p.y)*2+50) and abs(p.x+v.x)>abs(p.x):
-			p = p-v.normalize()*abs(p.x)*2
-			ship.pos(p)
-	except:
-		shipiter = iter(ships)
+    try:
+        ship = next(shipiter)
+        p,v = ship.pos(),ship.vel()
+        if abs(p.x)>(abs(p.y)*2+50) and abs(p.x+v.x)>abs(p.x):
+            p = p-v.normalize()*abs(p.x)*2
+            ship.pos(p)
+    except:
+        shipiter = iter(ships)
 
-	for s in smokes:
-		p = s.pos()
-		if p.z < 26:
-			p += vec3(0.1,0,0.3)+rndvec()*0.3
-		else:
-			p = vec3(30,115,19)+rndvec()*2
-		s.pos(p)
+    for s in smokes:
+        p = s.pos()
+        if p.z < 26:
+            p += vec3(0.1,0,0.3)+rndvec()*0.3
+        else:
+            p = vec3(30,115,19)+rndvec()*2
+        s.pos(p)

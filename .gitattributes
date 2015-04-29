@@ -1,2 +1,4 @@
-* text=auto
-*.ma -diff
+*				text=auto
+*.ma				-diff
+TrabantSim/prototypes/*.py	eol=lf
+TrabantIDE/sync/*.py		eol=lf

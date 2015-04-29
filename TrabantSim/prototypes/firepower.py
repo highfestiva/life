@@ -20,7 +20,6 @@ turret,tank = [create_ascii_object(part,pos=pos,col='#282') for part,pos in [(tu
 [t.mass(m) for t,m in [(turret,500), (tank,8000)]]
 wheel = lambda x,y: create_sphere(pos=(x,y,-0.5), radius=1.1, col='#531')
 rwheels,lwheels = [wheel(-5,-3),wheel(0,-3),wheel(+5,-3)],[wheel(-5,+3),wheel(0,+3),wheel(+5,+3)]
-collisions(True)   # Wheels mounted, allow collisions again.
 
 # Connect turret and wheels to body.
 tank.joint(hinge_joint, turret, (0,0,1))
@@ -29,6 +28,7 @@ turret_turn = tank.create_engine(roll_engine, targets=[(turret,1)], max_velocity
 lroll = tank.create_engine(roll_engine, max_velocity=[15,-15], targets=[(w,1) for w in lwheels], friction=0.1)
 rroll = tank.create_engine(roll_engine, max_velocity=[15,-15], targets=[(w,1) for w in rwheels], friction=0.1)
 rroll.addsound(sound_engine_combustion, 0.2)
+collisions(True)   # Wheels mounted, allow collisions again.
 
 # Aiming stuff for turret.
 target_pos,reset_turret,shots = None,False,[]
