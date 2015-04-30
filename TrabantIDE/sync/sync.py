@@ -5,6 +5,7 @@ import glob
 import merge3
 import os
 import os.path
+import shutil
 import socket
 import struct
 
@@ -12,6 +13,7 @@ import struct
 remotepath = 'remote/'
 localpath = '../prototypes/'
 storepath = 'store_%s/'
+originalpath = 'original/'
 EQUAL,BOTHSAME,LOCALMERGE,REMOTEMERGE = '= ~ < >'.split()
 nopath = lambda filename: filename.replace('\\','/').split('/')[-1]
 nopathset = lambda files: set(nopath(f) for f in files)
@@ -84,7 +86,23 @@ def makedirs(*dirs):
 		except:	pass
 
 
+def backup_originals(local_files):
+	for local in local_files:
+		original = originalpath + local[len(localpath):]
+		if not os.path.exists(original):
+			shutil.copyfile(local, original)
+
+
 def merge(basename, remote_hostname):
+	# TRICKY:	The file exists both locally and remote but it has never been synchronized
+	#		before. As common root we then pick the original (first local version
+	#		detected on any synchronization). We don't use it when one part is missing
+	#		the file, as chances are this is a new file on either end. Better safe than
+	#		sorry, so rather restore the file than lose it.
+	if os.path.exists(localpath+basename) and os.path.exists(remotepath+basename):
+		if not os.path.exists(storepath+basename):
+			shutil.copyfile(originalpath+basename, storepath+basename)
+
 	local_hostname = socket.gethostname()
 	preprocess = lambda s:s.replace('\t','    ')	# Replace spaces for best iOS experience.
 	basefile = merge3.mergefile(storepath+basename, preprocess=preprocess)
@@ -107,28 +125,36 @@ def merge(basename, remote_hostname):
 
 
 def sync(remote_addr, download_only=False):
+	# Start out by backing up local files. This is important as to get an as old common
+	# version as possible. For future merge. A bit like "git init ." if you follow.
+	makedirs(remotepath, localpath, originalpath)
+	local_files = _glob(localpath+'*')
+	backup_originals(local_files)
+
+	# Connect.
 	remote_addr = remote_addr.split(':')
 	remote_hostname,port = remote_addr if len(remote_addr)==2 else (remote_addr[0],2541)
-	sock = socket.socket()
-	sock.settimeout(1)
-	sock.connect((remote_hostname,int(port)))
+	try:
+		sock = socket.socket()
+		sock.settimeout(1)
+		sock.connect((remote_hostname,int(port)))
+	except socket.timeout:
+		print('Failed to connect to %s:%i.' % (remote_hostname,port))
+		import sys
+		sys.exit(1)
 
+	# Create common base directory with name derived from remote host's name.
 	global storepath
 	storepath = storepath % remote_hostname.lower()
-	makedirs(remotepath, localpath, storepath)
+	makedirs(storepath)
 
+	# Download files from remote host.
 	remote_files = download(sock)
-	local_files = _glob(localpath+'*')
-	store_files = _glob(storepath+'*')
 	if download_only:
 		output('Download of %i files done.' % len(remote_files))
 		return
 
 	all_files = nopathset(local_files) | nopathset(remote_files)
-
-	# Probably not a good idea to clean out old storage. We use this as backup.
-	#old_store_files = nopathset(store_files) - all_files
-	#[os.remove(storepath+file) for file in old_store_files]
 
 	# Merge and transmit those that changed.
 	remote_files = []
@@ -157,4 +183,5 @@ def sync(remote_addr, download_only=False):
 if __name__ == '__main__':
 	import sys
 	addr = sys.argv[-1] if len(sys.argv) > 1 else 'localhost:2541'
-	sync(addr, '--download-only' in sys.argv)
+	download_only = '--download-only' in sys.argv
+	sync(addr, download_only)
