@@ -43,6 +43,8 @@ public:
 	virtual void CloseScreen();
 
 	virtual bool IsVisible() const;
+	virtual bool IsFocused() const;
+	virtual void HideWindow(bool pHide);
 
 	virtual unsigned GetWidth() const;
 	virtual unsigned GetHeight() const;

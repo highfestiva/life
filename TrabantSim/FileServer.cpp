@@ -47,9 +47,9 @@ void FileServer::Start()
 
 void FileServer::Stop()
 {
-	mLog.Info(_T("Stopping file server."));
 	if (mAcceptThread)
 	{
+		mLog.Info(_T("Stopping file server."));
 		mAcceptThread->RequestStop();
 	}
 	if (mAcceptSocket)

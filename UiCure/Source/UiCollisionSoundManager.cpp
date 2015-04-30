@@ -158,8 +158,8 @@ void CollisionSoundManager::OnCollision(float pImpact, const vec3& pPosition, co
 		}
 		else
 		{
-			// We are newer or different.
-			if (pImpact > lSoundInfo->mBaseImpact * 0.7f)
+			// We are newer or different, or the sound has already stopped.
+			if (lTime > 100 || pImpact > lSoundInfo->mBaseImpact * 0.7f)
 			{
 				// ... and we almost as load! Play us instead!
 				StopSound(pKey);

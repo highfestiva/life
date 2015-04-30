@@ -111,6 +111,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mIsPaused(false),
 	mIsControlled(false),
 	mWasControlled(false),
+	mHideCounter(0),
 	mIsControlTimeout(false),
 	mCommandSocket(0),
 	mCommandThread(0),
@@ -1152,7 +1153,16 @@ void TrabantSimManager::CommandLoop()
 	uint8 lData[128*1024];
 	while (!mCommandThread->GetStopRequest())
 	{
-		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, lNetworkTimeout);
+		const double lThisTimeout = mIsControlled? 0.2 : lNetworkTimeout;
+		if (!mIsControlled || mIsControlTimeout)
+		{
+			mResendLastResponse.clear();
+		}
+		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, lThisTimeout);
+		if (mCommandThread->GetStopRequest())
+		{
+			break;
+		}
 		if (l <= 0 || lData[l-1] != '\n' || ::memcmp("disconnect\n", lData, 11) == 0)
 		{
 			if (l == 0)
@@ -1161,9 +1171,12 @@ void TrabantSimManager::CommandLoop()
 				v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
 				if (lAllowRemoteSync != (mLocalAddress == mOpenLocalAddress))
 				{
-					delete mCommandSocket;
-					mCommandSocket = 0;
-					OpenConnection();
+					if (mOpenLocalAddress != mInternalLocalAddress)
+					{
+						delete mCommandSocket;
+						mCommandSocket = 0;
+						OpenConnection();
+					}
 					if (lAllowRemoteSync)
 					{
 						mFileServer->Start();
@@ -1173,7 +1186,25 @@ void TrabantSimManager::CommandLoop()
 						mFileServer->Stop();
 					}
 				}
-				if (mStartupTimer.QueryTimeDiff() >= 12)
+				bool lAllowTimeout = (mStartupTimer.QueryTimeDiff() >= 12);
+				if (mIsControlled)
+				{
+					// Try a re-send if we haven't had a response in a long time.
+					const double lWaited = mResendTimeOfLastPacket.QueryTimeDiff();
+					lAllowTimeout &= (lWaited >= lNetworkTimeout);
+					if (!lAllowTimeout)
+					{
+						if (!mResendLastResponse.empty() && lWaited > std::max(mResendIntermediatePacketTime*2, 0.5))
+						{
+							if (mCommandSocket->SendTo((const uint8*)mResendLastResponse.c_str(), (int)mResendLastResponse.length(), mLastRemoteAddress) != (int)mResendLastResponse.length())
+							{
+								mIsControlled = false;
+							}
+							mResendLastResponse.clear();
+						}
+					}
+				}
+				if (lAllowTimeout)
 				{
 					mIsControlTimeout = true;
 				}
@@ -1211,36 +1242,44 @@ void TrabantSimManager::CommandLoop()
 				continue;
 			}
 		}
+#endif // Touch device.
 
 		if (!mIsControlled || mIsControlTimeout)
 		{
 			UnfoldSimulator();
+			mResendTimeOfLastPacket.PopTimeDiff();
+			mResendIntermediatePacketTime = 10;	// Just make it big to begin with.
 		}
-#endif // Touch device.
 		mIsControlled = true;
 		mIsControlTimeout = false;
 		while (mIsPaused)
 		{
+			mResendTimeOfLastPacket.PopTimeDiff();
 			Thread::Sleep(0.5);
 			if (mCommandThread->GetStopRequest())
 			{
 				break;
 			}
 		}
+		mResendIntermediatePacketTime = Math::Lerp(mResendIntermediatePacketTime, mResendTimeOfLastPacket.PopTimeDiff(), 0.05);
 		if (mCommandThread->GetStopRequest())
 		{
 			break;
 		}
 		lData[l-1] = 0;	// Drop last linefeed.
 		const str lCommand = strutil::Encode(astr((char*)lData));
+		if (strutil::StartsWith(lCommand, _T("get-platform-name")))	// Check if user started over without terminating.
+		{
+			mResendIntermediatePacketTime = 10;	// Just make it big to begin with.
+		}
 		if (!GetConsoleManager())
 		{
 			break;
 		}
 		GetConsoleManager()->ExecuteCommand(lCommand);
 		const str lCmdResponse = ((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse();
-		const astr lResponse = astrutil::Encode(lCmdResponse);
-		if (mCommandSocket->SendTo((const uint8*)lResponse.c_str(), (int)lResponse.length(), mLastRemoteAddress) != (int)lResponse.length())
+		mResendLastResponse = astrutil::Encode(lCmdResponse);
+		if (mCommandSocket->SendTo((const uint8*)mResendLastResponse.c_str(), (int)mResendLastResponse.length(), mLastRemoteAddress) != (int)mResendLastResponse.length())
 		{
 			mIsControlled = false;
 		}
@@ -1279,7 +1318,14 @@ bool TrabantSimManager::IsControlled()
 			}
 			FoldSuspendSimulator();
 #else // Computer
-			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
+			if (mUiManager->GetDisplayManager()->IsFocused())
+			{
+				v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
+			}
+			else if (mHideCounter == 0)
+			{
+				mHideCounter = 1;
+			}
 #endif // Touch device.
 		}
 		mWasControlled = lIsControlled;
@@ -1385,10 +1431,10 @@ void TrabantSimManager::CloseConnection()
 {
 	if (mCommandSocket)
 	{
+		if (mCommandThread) mCommandThread->RequestStop();
 		mCommandSocket->Shutdown(SocketBase::SHUTDOWN_RECV);
 		mCommandSocket->SendTo((uint8*)"disconnect\n", 11, mLastRemoteAddress);
 		mCommandSocket->Shutdown(SocketBase::SHUTDOWN_BOTH);
-		if (mCommandThread) mCommandThread->RequestStop();
 		UdpSocket(SocketAddress(), false).SendTo((uint8*)"?", 1, mCommandSocket->GetLocalAddress());
 		delete mCommandThread;
 		mCommandThread = 0;
@@ -1545,6 +1591,19 @@ void TrabantSimManager::TickUiInput()
 
 void TrabantSimManager::TickUiUpdate()
 {
+	if (mHideCounter > 0)
+	{
+		Suspend(true);
+		mUiManager->GetDisplayManager()->HideWindow(true);
+		Resume(true);
+		mHideCounter = -1;
+	}
+	else if (mHideCounter < 0 && mIsControlled)
+	{
+		mUiManager->GetDisplayManager()->HideWindow(false);
+		mHideCounter = 0;
+	}
+
 	((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 	mCollisionSoundManager->Tick(mCameraTransform.GetPosition());
 }
@@ -1716,7 +1775,9 @@ void TrabantSimManager::ScriptPhysicsTick()
 		UpdateUserMessage();
 	}
 
-	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, IsControlled()? 1.0 : 0.0);
+	const double lVolume = IsControlled()? 1.0 : 0.0;
+	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lVolume);
+	mUiManager->GetSoundManager()->SetMasterVolume((float)lVolume);
 
 	{
 		ScopeLock lGameLock(GetTickLock());
@@ -1925,6 +1986,15 @@ bool TrabantSimManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 				mSetCursorVisible = true;
 			}
 		}
+	}
+	if (pKeyCode == UiLepra::InputManager::IN_KBD_F5)
+	{
+		if (mIsControlled)
+		{
+			mCommandSocket->SendTo((const unsigned char*)"disconnect\n", 11, mLastRemoteAddress);
+			mIsControlled = false;
+		}
+		mHideCounter = 1;
 	}
 
 	{

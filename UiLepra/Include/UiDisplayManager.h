@@ -145,7 +145,9 @@ public:
 
 	virtual bool IsVSyncEnabled() const = 0;
 	virtual bool SetVSyncEnabled(bool pEnabled) = 0;
-	virtual bool IsVisible() const = 0;	// Visible means "not visible for user" (such as when minimized).
+	virtual bool IsVisible() const = 0;
+	virtual bool IsFocused() const = 0;
+	virtual void HideWindow(bool pHide) = 0;
 
 	/*
 		Display mode enumeration (fullscreen modes).

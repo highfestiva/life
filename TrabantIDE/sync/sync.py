@@ -11,7 +11,7 @@ import struct
 
 remotepath = 'remote/'
 localpath = '../prototypes/'
-storepath = 'store/'
+storepath = 'store_%s/'
 EQUAL,BOTHSAME,LOCALMERGE,REMOTEMERGE = '= ~ < >'.split()
 nopath = lambda filename: filename.replace('\\','/').split('/')[-1]
 nopathset = lambda files: set(nopath(f) for f in files)
@@ -113,6 +113,8 @@ def sync(remote_addr, download_only=False):
 	sock.settimeout(1)
 	sock.connect((remote_hostname,int(port)))
 
+	global storepath
+	storepath = storepath % remote_hostname.lower()
 	makedirs(remotepath, localpath, storepath)
 
 	remote_files = download(sock)

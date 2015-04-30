@@ -8,7 +8,7 @@ from trabant.asc2obj import str2obj
 #gravity((0,0,-0.1))
 
 body = '\n---\n'.join([r'/XXXXXXXXXXXX\ ']   +
-                      [r'XXXXXXXXXXXXXX ']*3 +
+                      [r'XXXXXXXXXXXXXX ']*8 +
                       [r'/XXXXXXXXXXXX\ '])
 #body = '/XXXXX\n---\nXXXXXX'
 #body = [create_ascii_object(part,pos=pos,col=col) for part,pos,col in [(body,(0,0,-2),'#a23')]][0]

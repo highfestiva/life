@@ -393,6 +393,27 @@ bool MacDisplayManager::IsVisible() const
 	return (!IsMinimized());
 }
 
+bool MacDisplayManager::IsFocused() const
+{
+	return (!IsMinimized());
+}
+
+void MacDisplayManager::HideWindow(bool pHide)
+{
+#ifdef LEPRA_IOS
+#else
+	if (pHide)
+	{
+		[mWnd orderOut:self];
+	}
+	else
+	{
+		[mWnd makeKeyAndOrderFront:self];
+		[NSApp activateIgnoringOtherApps:YES];
+	}
+#endif // iOS / Mac
+}
+
 bool MacDisplayManager::InitWindow()
 {
 	CloseScreen();

@@ -65,6 +65,9 @@ HoverTank/HoverTankServer/HoverTankServer
 HoverTank/HoverTank
 Impuzzable/Impuzzable
 TrabantSim/TrabantSim
+TrabantIDE/tools/*.html
+TrabantIDE/sync/remote
+TrabantIDE/sync/store_*
 /ThirdParty/stlport/build
 /bin/
 */Data/Download

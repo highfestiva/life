@@ -49,7 +49,7 @@ fog(230,350)
 
 cube_side,grid_scale = 140,280
 room_prio = [1,0,2,-1]        # Create center room first (1=center).
-cube = create_cube(pos=(-1e5,-1e5,-1e5), side=cube_side, static=True)    # Create a cube far away to have something to clone.
+cube = create_box(pos=(-1e5,-1e5,-1e5), side=cube_side, static=True)    # Create a cube far away to have something to clone.
 # Rooms are lists of cubes. Cubes actualy constitutes half rooms. The remainder is made up by adjoining rooms.
 # Rooms are hashed by their grid positions.
 rooms = {}

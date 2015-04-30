@@ -14,7 +14,7 @@ cam(distance=0, fov=60, pos=cam_offset, target=player, target_relative_angle=Tru
 stick = create_joystick((0,0))
 
 fg(col='#975', outline=False)    # Brownish floor.
-cube = create_cube(pos=(1e5,1e5,1e5), side=1, mat='noise', static=True)    # Template.
+cube = create_box(pos=(1e5,1e5,1e5), side=1, mat='noise', static=True)    # Template.
 flooring_coords = [(vec3(x,y,0),quat()) for y in range(-8,8+1) for x in range(-8,8+1)]
 create_clones(cube, flooring_coords, static=True)
 fg(col='#3a4')    # Build in green color.

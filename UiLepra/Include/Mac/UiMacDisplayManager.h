@@ -39,6 +39,8 @@ public:
 	virtual void CloseScreen();
 
 	virtual bool IsVisible() const;
+	virtual bool IsFocused() const;
+	virtual void HideWindow(bool pHide);
 
 	// Returns the pointer if available, NULL otherwise.
 	virtual unsigned GetWidth() const;

@@ -10,8 +10,8 @@ import trabant.objgen
 import time
 
 
-# Use unbuffered output, for debugging purposes.
-class flushfile:
+class _flushfile:
+	'''Use unbuffered standard output, for debugging purposes.'''
 	def __init__(self, f):
 		self.f = f
 	def write(self, x):
@@ -19,7 +19,7 @@ class flushfile:
 		self.flush()
 	def flush(self):
 		self.f.flush()
-sys.stdout = flushfile(sys.stdout)
+sys.stdout = _flushfile(sys.stdout)
 
 roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
@@ -28,13 +28,13 @@ sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combus
 wait_until_loaded = True
 osname = sys.platform
 _lastlooptime = time.time()
-_accurate_ascii_generate = True
+_accurate_ascii_generate = False
 _has_opened = False
 _last_ascii_top_left_offset = None
 _last_created_object = None
 _prev_gfx = None
 _prev_phys = []
-asc2obj_lookup = []
+_asc2obj_lookup = []
 _aspect_ratio = 1.33333
 _keys = None
 _taps = None
@@ -51,10 +51,13 @@ _cam_pos,_cam_q,_cam_inv_q = vec3(0,-10,0),quat(),quat()
 
 
 class Engine:
+	'''An engine adds force and/or torque to an Obj (a game object). Use engines for simulation-style games.'''
 	def __init__(self, oid, eid, etype):
 		self.oid,self.eid,self.etype = oid,eid,etype
 	def force(self,f):
-		'''Force parameter can either be a number or a 3-tuple controlling force in X, Y and Z.'''
+		'''Force parameter can either be a number or a 3-tuple controlling force in X, Y and Z; both are ok.
+		   For example, a rolling wheel engine typically uses a number (throttle), while a push engine
+		   ("spaceship") is usually controlled in 3D.'''
 		try:
 			gameapi.set_engine_force(self.oid, self.eid, iter(f))
 		except TypeError:
@@ -98,6 +101,7 @@ class Obj:
 		'''Angular velocity.'''
 		return gameapi.avel(self.id, avel)
 	def mass(self, w):
+		'''Setting mass is only useful for interaction between dynamic objects.'''
 		return gameapi.mass(self.id, (w,))
 	def col(self, col=None):
 		'''Set color, input is either a 3-tuple (R,G,B) or an html string color such as #ff3 or #304099.'''
@@ -117,10 +121,11 @@ class Obj:
 		if v != _v:
 			self.vel(v)
 	def create_engine(self, engine_type, max_velocity=None, offset=None, strength=1, friction=0, targets=None, sound=None):
-		'''Offset is only used in a few engines (such as rotor tilt). Friction is used for engine brake, friction=1 means
-		   "try to stop at once" in push and roll engines. The targets parameter is used when adding multiple controlled
-		   objects from a single engine, for example a roll engine controlling two hinge joints on the rear wheels in a
-		   rear-wheel drive car. Each targets tuple contains a controlled object and a factor.'''
+		'''Offset is only used in a few engines (such as rotor tilt). Friction is used for engine brake,
+		   friction=1 means "try to stop at once" in push and roll engines. The targets parameter is used
+		   when adding multiple controlled objects from a single engine, for example a roll engine
+		   controlling two hinge joints on the rear wheels in a rear-wheel drive car. Each targets tuple
+		   contains a controlled object and a factor.'''
 		topmounted_gyro = self.last_joint_axis and self.last_joint_axis.normalize()*vec3(0,0,1) > 0.8
 		max_velocity, strength, friction = _normalize_engine_values(engine_type, max_velocity, offset, strength, friction, topmounted_gyro)
 		target_efcts = [(t.id,efct) for t,efct in targets] if targets else []
@@ -130,14 +135,15 @@ class Obj:
 			self.engine[-1].addsound(sound, 1)
 		return self.engine[-1]
 	def joint(self, joint_type, obj2, axis=None, stop=None, spring=None):
-		'''Create a joint between two objects. The stop parameter contains low and high stops, in hinge-type joints this
-		   is the low and high angle (in radians).'''
+		'''Create a joint between two objects. The stop parameter contains low and high stops, in hinge-type
+		   joints this is the low and high angle (in radians).'''
 		self.last_joint_axis = tovec3(axis)
 		return gameapi.create_joint(self.id, joint_type, obj2.id, axis, stop, spring)
 	def add_stabilizer(self, force=0.5):
 		'''Adds a stabilizer to the object, this is useful if you're building a helicopter or similar.'''
 		gameapi.addtag(self.id, 'upright_stabilizer', [force], [], [0], [], [])
 	def release(self):
+		'''Remove the object from the game.'''
 		gameapi.releaseobj(self.id)
 		global _objects,_last_created_object
 		del _objects[self.id]
@@ -145,10 +151,13 @@ class Obj:
 			_last_created_object = None
 		self.id = None
 	def released(self):
+		'''Check if an object is still present in the game.'''
 		return self.id == None
 
 
 class Tap:
+	'''Represents a tap/click/swipe/drag. 2D positions in range [0,1], but you can get ahold of 3D
+	   coordinates by functions in this class.'''
 	def __init__(self, x, y, startx, starty, vx, vy, ispress, buttonmask):
 		self.x,self.y = x,y
 		self.startx,self.starty = startx,starty
@@ -159,12 +168,14 @@ class Tap:
 	def isrelease(self):
 		return not self.ispress
 	def pos3d(self, z=None):
-		'''Converts the tap on-screen 2D position to a world 3D position.'''
+		'''Converts the tap on-screen 2D position to a world 3D position. z=None returns a position
+		   on the camera distance.'''
 		if not z:
 			z = _cam_distance
 		return _screen2world(self.x,self.y, z)
 	def vel3d(self, z=None):
-		'''Converts the swipe/drag on-screen 2D velocity to a world 3D velocity.'''
+		'''Converts the swipe/drag on-screen 2D velocity to a world 3D velocity. z=None returns a
+		   velocity relative to the camera distance.'''
 		if not z:
 			z = _cam_distance
 		return _relscreen2world(self.vx,self.vy, z)
@@ -173,6 +184,7 @@ class Tap:
 		global _invalidated_taps
 		_invalidated_taps.add((self.startx,self.starty))
 	def movement2(self):
+		'''Returns the magnitude between the tap and it's starting point.'''
 		return (self.x-self.startx)**2+(self.y-self.starty)**2
 	def _distance2(self, x, y):
 		return (self.x-x)**2+(self.y-y)**2
@@ -182,23 +194,14 @@ class Tap:
 
 class Joystick:
 	def __init__(self, id, sloppy):
-		'''Screen X,Y in [0,1].'''
+		'''X,Y in [-1,1].'''
 		self.id = id
 		self.sloppy = sloppy
 		self.x,self.y = 0,0
 
 
-class flushfile:
-	def __init__(self, f):
-		self.f = f
-	def write(self, x):
-		self.f.write(x)
-		self.f.flush()
-	def flush(self):
-		pass
-
-
 def trabant_init(**kwargs):
+	'''Usually called implicitly by some other function in the API.'''
 	interactive = bool(hasattr(sys, 'ps1') or sys.flags.interactive)
 	config = {'restart': not interactive}
 	try:
@@ -223,12 +226,11 @@ def trabant_init(**kwargs):
 		global osname
 		osname = config['osname']
 		del config['osname']
-	if is_touch_device():
-		sys.stdout = flushfile(sys.stdout)
 	gameapi.init(**config)
 	gameapi.setvar('Game.AllowPowerDown', not interactive)
 	if osname not in ['ios']:
 		gameapi.sock.settimeout(None if interactive else 5)
+		gameapi.sock.s.setblocking(interactive)
 	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
 	loop(delay=0)	# Resets taps+collisions.
 	_accelerometer_calibration = accelerometer()
@@ -259,12 +261,13 @@ def loop(delay=0.03, end_after=None):
 	return gameapi.opened()
 
 def sleep(t):
+	'''Wraps time.sleep so you won't have to import it.'''
 	time.sleep(min(0.5,t))
 
 def timeout(t=1, timer=0, first_hit=False, reset=False):
-	'''Will check if time t elapsed since first called. If first_hit is true, it will elapse
+	'''Will check if t seconds elapsed since first called. If first_hit is true, it will elapse
 	   immediately on first call. You can run several simultaneous timers, use the timer parameter
-	   to select which one.'''
+	   to select which one. Uses the same timers as timein().'''
 	global _timers
 	if not timer in _timers:
 		_timers[timer] = time.time()
@@ -279,6 +282,7 @@ def timeout(t=1, timer=0, first_hit=False, reset=False):
 	return False
 
 def timein(t, timer=0):
+	'''Checks if a less than t seconds elapsed since last called. Uses the same times as timeout().'''
 	global _timers
 	if not timer in _timers:
 		_timers[timer] = time.time()
@@ -287,9 +291,9 @@ def timein(t, timer=0):
 	return False
 
 def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relative_angle=None, light_angle=None, smooth=None):
-	'''Set camera angle, distance, target object, position, fov. target_relative_angle=True means that the angle
-	   is relative to your target object rather than absolute. light_angle is used to change the direction of the
-	   directional light in the scene.'''
+	'''Set camera angle, distance, target object, position, fov. target_relative_angle=True means that the
+	   angle is relative to your target object rather than absolute. light_angle is used to change the
+	   direction of the directional light in the scene.'''
 	_tryinit()
 	angle = tovec3(angle)
 	gameapi.cam(angle, distance, target.id if target else target, tovec3(pos), fov, target_relative_angle, smooth)
@@ -305,10 +309,13 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relat
 	if smooth != None:	_cam_is_smooth = not not smooth
 
 def bg(col):
+	'''Set background color either as (0.3,1,0.5), '#ffa', or '#F6AA03'.'''
 	_tryinit()
 	gameapi.setbgcolor(col)
 
 def fg(col=None, outline=None):
+	'''Set default foreground color either as (0.3,1,0.5), '#ffa', or '#F6AA03'. outline=False means the whole
+	   shape will be filled with color. Default is outline=True.'''
 	_tryinit()
 	if col:
 		gameapi.setpencolor(col)
@@ -316,6 +323,7 @@ def fg(col=None, outline=None):
 		gameapi.setoutline(outline)
 
 def fog(near,far):
+	'''Sets fog near and far plane in physical range, e.g. fog(130,750).'''
 	_tryinit()
 	gameapi.fog(near,far)
 
@@ -331,12 +339,14 @@ def gravity(g, bounce=None, friction=None):
 		gameapi.friction(friction)
 
 def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='flat', static=False, physmesh=False, process=None):
-	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
-	global _last_ascii_top_left_offset,asc2obj_lookup
+	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
+	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
+	   process the physics and graphics with the process callback function before it's added to the simulation.'''
+	global _last_ascii_top_left_offset,_asc2obj_lookup
 	physmesh = True if physmesh==True else False
 	# Keep a small cache of generated objects. Most small prototypes will reuse shapes.
 	gfx = None
-	for s,g,p,lo in asc2obj_lookup:
+	for s,g,p,lo in _asc2obj_lookup:
 		if s == ascii+str(physmesh)+str(process):
 			gfx,phys,_last_ascii_top_left_offset = g,p,lo
 	if not gfx:
@@ -345,21 +355,27 @@ def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, 
 		orientation = toquat(orientation) if orientation else quat()
 		if process:
 			orientation,gfx,phys = process(orientation,gfx,phys)
-		asc2obj_lookup.append((ascii+str(physmesh)+str(process),gfx,phys,_last_ascii_top_left_offset))
-		if len(asc2obj_lookup) > 10:
-			del asc2obj_lookup[0]
+		_asc2obj_lookup.append((ascii+str(physmesh)+str(process),gfx,phys,_last_ascii_top_left_offset))
+		if len(_asc2obj_lookup) > 10:
+			del _asc2obj_lookup[0]
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_mesh(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
-	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
+	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
+	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
+	   process the physics and graphics with the process callback function before it's added to the simulation.'''
 	orientation = toquat(orientation) if orientation else quat()
 	gfx,phys = objgen.createmesh(vertices,triangles)
 	if process:
 		orientation,gfx,phys = process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_cube(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, process=None):
-	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
+def create_box(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, process=None):
+	'''Returns an Obj. static=True means object if fixed in absolute space. A box can have different length
+	   sides (cuboid), you create one by supplying a three-tuple instead of a scalar. Only four types of
+	   materials exist: flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity.
+	   You can pre-process the physics and graphics with the process callback function before it's added to
+	   the simulation.'''
 	try:	side = tovec3(side)
 	except:	side = vec3(side,side,side)
 	orientation = toquat(orientation) if orientation else quat()
@@ -369,7 +385,9 @@ def create_cube(pos=None, orientation=None, side=1, vel=None, avel=None, mass=No
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
-	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
+	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
+	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
+	   process the physics and graphics with the process callback function before it's added to the simulation.'''
 	orientation,resolution = quat(),int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createsphere(radius, latitude=resolution, longitude=int(resolution*1.5))
 	if process:
@@ -377,7 +395,9 @@ def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, 
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_capsule(pos=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
-	'''static=True means object if fixed in absolute space. Only three types of materials exist: flat, smooth and checker.'''
+	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
+	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
+	   process the physics and graphics with the process callback function before it's added to the simulation.'''
 	orientation,resolution = quat(),int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createcapsule(radius, length, latitude=resolution, longitude=int(resolution*1.5))
 	if process:
@@ -385,8 +405,9 @@ def create_capsule(pos=None, radius=0.5, length=1, vel=None, avel=None, mass=Non
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_clones(obj, placements, mat=None, static=False):
-	'''Creates multiple clones at once of the original obj. Placement is a list of tuples, each tuple contains
-	   position (vec3) and orientation (quat) IN THAT ORDER. Types are not checked for performance.'''
+	'''Creates multiple clones at once of the original Obj, returns a list of Objs. Placement is a list of
+	   tuples, each tuple contains position (vec3) and orientation (quat) IN THAT ORDER. This function is
+	   much faster when creating many objects.'''
 	global _objects
 	mat = mat if mat else _last_mat
 	objs = []
@@ -410,25 +431,31 @@ def create_clones(obj, placements, mat=None, static=False):
 	return objs
 
 def last_created_object():
+	'''Returns the last created object. Pretty much only useful if experimenting in an interactive shell.'''
 	return _last_created_object
 
 def accurate_ascii_generate(enable):
+	'''Turn this on to remove unnecessary graphics triangles when generating ascii objects. It's sloooww.'''
 	global _accurate_ascii_generate
 	_accurate_ascii_generate = enable
 
 def pick_objects(pos, direction, near=2, far=1000):
+	'''Ray-pick an list of Objs.'''
 	pos = tovec3(pos)
 	objects = [(_objects[oid],pos) for oid,pos in gameapi.pickobjs(pos, direction, near, far) if oid in _objects]
 	return sorted(objects, key=lambda op: (op[1]-pos).length2())
 
 def release_all_objects():
-	'''Delete all objects.'''
+	'''Clean slate, start over fresh.'''
 	gameapi.release_all_objects()
 	global _objects,_last_created_object
+	for o in _objects.values():
+		o.id = None
 	_objects,_last_created_object = {},None
 
 def last_ascii_top_left_offset():
-	'''Returns the distance from the center of the last create ASCII object to the top-left-front corner of its AABB.'''
+	'''Returns the distance from the center of the last create ASCII object to the top-left-front corner of
+	   its AABB. See the tetris example for how it's used.'''
 	return _last_ascii_top_left_offset
 
 def explode(pos, vel=vec3(), strength=1):
@@ -444,10 +471,10 @@ def sound(snd, pos=vec3(), vel=vec3(), volume=5):
 
 def collided_objects():
 	'''Returns all objects that collided last loop.'''
-	return set([o for o,_,_,_ in collisions()] + [o2 for _,o2,_,_ in collisions()])
+	return set(o for o,_,_,_ in collisions())
 
 def collisions(enable=None):
-	'''Returns all collisions that occured last loop. Each collision is a 4-tuple:
+	'''Returns all collisions that occurred last loop. Each collision is a 4-tuple:
 	   (object1,object2,force,position).'''
 	if enable in (True, False):
 		gameapi.setvar('Physics.NoClip', not enable)
@@ -507,20 +534,22 @@ def taps():
 			_invalidated_taps.remove(tapstart)
 	return _taps
 
-def closest_tap(pos):
-	'''The parameter pos is a 3D coordinate. Returns an instance of the Tap class or None.'''
+def closest_tap(pos3):
+	'''The parameter pos3 is a 3D coordinate. Returns an instance of the Tap class or None.'''
 	if not taps():
 		return None
-	pos = tovec3(pos)
-	x,y = _world2screen(pos)
+	pos3 = tovec3(pos3)
+	x,y = _world2screen(pos3)
 	tap = min(taps(), key=lambda t: t._distance2(x,y))
-	tap.close_pos = pos
+	tap.close_pos = pos3
 	return tap
 
 clicks = taps
 closest_click = closest_tap
 
 def click(left=False, right=False, middle=False):
+	'''Returns clicks (instances of Tap) matching left/right/middle.
+	   E.g. click(right=True) returns a tap when you right-click.'''
 	mask = (1 if left else 0) | (2 if right else 0) | (4 if middle else 0)
 	mask = mask if mask else 0xFF	# Default to any click.
 	rcs = [c for c in clicks() if c.buttonmask&mask]
@@ -555,11 +584,13 @@ def accelerometer(relative=False):
 	return rel
 
 def mousemove():
+	'''Useful for mouselook computer controls (quake, minecraft). Hides the cursor.'''
 	global _want_mousemove
 	_want_mousemove = True
 	return _mousemove
 
 def mousewheel():
+	'''Useful for mouselook computer controls (quake, minecraft). Hides the cursor.'''
 	global _want_mousemove
 	_want_mousemove = True
 	return _mousemove.z

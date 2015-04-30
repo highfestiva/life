@@ -84,7 +84,7 @@ testrun(create_mesh, good, bad)
 
 good = [((1,0,0), (1,0,0,0), 2, (-1,-1,-1), (5,4,3), 1e10, 'smooth', '#f00', False, orthoscale((1,2,3)))]
 bad = [('a', {}, (1,), [], (0,1,-2,'a'), [], {}, 0, -3, str)]
-testrun(create_cube, good, bad)
+testrun(create_box, good, bad)
 
 good = [((0,-1,0), 2, (1,1,1), (-5,4,-3), 1e-10, '#369', 'flat', False, orthoscale((2,2,2)))]
 bad = [('a', (1,), [], (0,1,-2,'a'), [], '_', {}, -3, list)]

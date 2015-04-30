@@ -48,7 +48,7 @@ body.add_stabilizer()
 [create_ascii_object('X', pos=vec3(0,50,3)+rndvec()*3, col=rndvec().abs()) for _ in range(5)]
 
 # Setup ground, gravity, camera angle and controls.
-create_cube(pos=(0,0,-1003), side=2000, static=True)
+create_box(pos=(0,0,-1003), side=2000, static=True)
 gravity((0,0,-9))
 cam(angle=(-0.3,0,0), distance=40, target=body)
 left,right = create_joystick((0,0),sloppy=True),create_joystick((1,0),sloppy=True)

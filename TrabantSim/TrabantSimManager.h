@@ -218,8 +218,12 @@ protected:
 	bool mIsPaused;
 	bool mIsControlled;
 	bool mWasControlled;
+	int mHideCounter;
 	bool mIsControlTimeout;
 	HiResTimer mStartupTimer;
+	HiResTimer mResendTimeOfLastPacket;
+	double mResendIntermediatePacketTime;
+	astr mResendLastResponse;
 	SocketAddress mOpenLocalAddress;
 	SocketAddress mInternalLocalAddress;
 	SocketAddress mLocalAddress;

@@ -240,6 +240,16 @@ bool X11DisplayManager::IsVisible() const
 	return (!IsMinimized());
 }
 
+bool X11DisplayManager::IsFocused() const
+{
+	return (!IsMinimized());
+}
+
+void X11DisplayManager::HideWindow(bool pHide)
+{
+	::ShowWindow(mWnd, pHide? SW_HIDE : SW_SHOW);
+}
+
 bool X11DisplayManager::InitWindow()
 {
 	bool lOk = mIsOpen;

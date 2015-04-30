@@ -330,6 +330,7 @@ void TrabantSim::DidSyncFiles()
 
 bool TrabantSim::ConnectQuery(const str& pHostname)
 {
+	(void)pHostname;
 #ifdef LEPRA_IOS
 	str lDeniedHosts;
 	v_get(lDeniedHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));

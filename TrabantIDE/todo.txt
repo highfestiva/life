@@ -160,15 +160,29 @@
 +Make soft joysticks larger on iPad.
 +Reduce fog city by binary encoding...
 +Fix car shape generation. Front-left corner is off!
++create separate store dir per device synced to
++PC sim: hide simulator on F5.
++Handle WiFi UDP packet loss by resending from simulator.
++Document Python API.
++generate api dox for online and local
++PC IDE: view file:// api dox
++PC IDE: Make web page for IDE help, including the API, but not in an iframe.
++PC IDE: save all files before synchronization.
++PC IDE: reload all files after synchronization.
 
-IDE: reload all files after synchronization.
-IDE: save all files before synchronization.
-Handle WiFi UDP packet loss by resending from simulator.
-Fix icon background.
+ios: add pydoc again
+ios: Testa WiFi UDP packet resends
+ios create new: klar på tangentbordet funkar ej
+ios create new: filen ej selectad i list view
+ios: add button to right of cog wheel for local api dox
+ios: local webview to show api dox
+ios: Fix icon background.
 Test on iPhone 4s.
 Make web page for Trabant.
+Release the Mac version.
 
 Rolling ball, avoiding holes. Using accelerometer.
 Tower defence game.
 Mario.
 Legend of the Void.
+Populous

@@ -24,7 +24,7 @@ cam(distance=25)
 gravity((0,0,0), bounce=0.1, friction=0)
 accurate_ascii_generate(False)    # Optimization to load faster.
 
-userinfo('Please wait while loading PacMan level...')
+userinfo('Loading level...')
 level = create_ascii_object(level, pos=(0,0,0), col='#00f', static=True)
 userinfo()
 def ball(pos, col):

@@ -322,7 +322,17 @@ void Win32DisplayManager::CloseScreen()
 
 bool Win32DisplayManager::IsVisible() const
 {
-	return (!IsMinimized());
+	return !IsMinimized() && ::IsWindowVisible(mWnd);
+}
+
+bool Win32DisplayManager::IsFocused() const
+{
+	return IsVisible() && (::GetActiveWindow() == mWnd);
+}
+
+void Win32DisplayManager::HideWindow(bool pHide)
+{
+	::ShowWindow(mWnd, pHide? SW_HIDE : SW_SHOW);
 }
 
 bool Win32DisplayManager::InitWindow()

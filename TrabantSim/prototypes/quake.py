@@ -67,17 +67,17 @@ powerup = None
 # Create walls.
 symmetry = [(rotz(0.2),vec3(1,1,1)), (rotz(-0.2),vec3(-1,1,1)), (rotz(-0.2),vec3(1,-1,1)), (rotz(0.2),vec3(-1,-1,1))]
 longwalls = [vec3(-10.5,10.5,2),(18,1,4)]
-walls = [create_cube(longwalls[0].mulvec(sym), side=longwalls[1], orientation=orientation, mat='flat', col='#943', static=True) for orientation,sym in symmetry]
+walls = [create_box(longwalls[0].mulvec(sym), side=longwalls[1], orientation=orientation, mat='flat', col='#943', static=True) for orientation,sym in symmetry]
 # Pillars
 symmetry = [vec3(1,1,1), vec3(-1,1,1), vec3(1,-1,1), vec3(-1,-1,1)]
-[create_cube(vec3(-2.7,2.7,2).mulvec(sym), side=(0.3,0.3,3), mat='flat', col=rndvec().abs(), static=True) for sym in symmetry]
+[create_box(vec3(-2.7,2.7,2).mulvec(sym), side=(0.3,0.3,3), mat='flat', col=rndvec().abs(), static=True) for sym in symmetry]
 
 # Create sliding doors.
 doorcenter,doorwidth = vec3(0,-12,1.5),1.6
 coords = [vec3(-doorwidth/2,0,0), vec3(+doorwidth/2,0,0)]
 doors = []
 for i,c in enumerate(coords):
-    door = create_cube(doorcenter+c, side=(doorwidth,0.2,2))
+    door = create_box(doorcenter+c, side=(doorwidth,0.2,2))
     walls[i+2].joint(slider_joint, door, axis=(-c).normalize(), stop=(0,1.5))    # We're bolting the door to the wall, that's why we need to invert the axis.
     door.opener = walls[i+2].create_engine(slider_engine)
     doors += [door]
@@ -137,7 +137,7 @@ while loop():
             powerup = None
     # Respawn powerup.
     if not powerup and timeout(10, timer=3):
-        powerup = create_cube(vec3(0,-25.5,1.5), side=0.5, mat='flat', col='#ff0')
+        powerup = create_box(vec3(0,-25.5,1.5), side=0.5, mat='flat', col='#ff0')
         timeout(timer=3, reset=True)    # Erase timeout to avoid immediate spawn next time.
 
     # Explode grenades and remove missed grenades.
