@@ -180,8 +180,9 @@
 +ios: local webview to show api dox
 +ios: Fix icon background.
 +Improve sync by placing original in separate store folder.
++Test on iPhone 4s.
 
-Test on iPhone 4s.
+Build release version for PC. Publish.
 Make web page for Trabant.
 Release the Mac version.
 
