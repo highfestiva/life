@@ -33,7 +33,9 @@ static void HandleTouches(NSSet* pTouches, const Canvas* pCanvas, DragManager& p
 		const int s = [[UIScreen mainScreen] scale];
 		PixelCoord lPreviousTap;
 		PixelCoord lThisTap;
-		switch (pCanvas->GetOutputRotation())
+		static const bool lIsIOS7 = ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0);
+		const int lRotation = lIsIOS7? (pCanvas->GetDeviceOutputRotation()+90)%360 : pCanvas->GetOutputRotation();
+		switch (lRotation)
 		{
 			case 0:
 			{

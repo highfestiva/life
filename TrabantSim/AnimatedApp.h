@@ -38,11 +38,13 @@ using namespace Lepra;
 	Canvas* _canvas;
 	NSTimer* _animationTimer;
 	CMMotionManager* _motionManager;
+	NSString* _alertHost;
 }
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) ListViewController* listController;
 @property (nonatomic, strong) UIAlertController* alert;
+@property (nonatomic, strong) UIAlertView* alertView;
 
 -(id) init:(Canvas*)pCanvas;
 -(void) dealloc;

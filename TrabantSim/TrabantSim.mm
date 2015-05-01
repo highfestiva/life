@@ -29,6 +29,10 @@
 	//[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
 	_canvas = pCanvas;
 	_canvas->SetDeviceRotation(0);
+	/*if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0)
+	{
+		_canvas->SetOutputRotation(90);
+	}*/
 	_animationTimer = nil;
 	_motionManager = [[CMMotionManager alloc] init];
 
@@ -178,23 +182,26 @@
 
 -(void) showNetworkControlFor:(NSString*)hostname
 {
-	if (self.alert)
+	if (self.alert || self.alertView)
 	{
 		return;
 	}
 
-	NSString* message = [NSString stringWithFormat:@"Do you wish to grant '%@' access to simulation and prototypes?", hostname];
+	NSString* message = [NSString stringWithFormat:@"Grant '%@' access to simulation and prototypes?", hostname];
 	self.alert = [UIAlertController alertControllerWithTitle:@"Network control" message:message preferredStyle:UIAlertControllerStyleAlert];
+	if (!self.alert)
+	{
+		_alertHost = hostname;
+		self.alertView = [[UIAlertView alloc] initWithTitle:@"Network control" message:message delegate:self cancelButtonTitle:@"No" otherButtonTitles:@"Always", @"Never", nil];
+		self.alertView.delegate = self;
+		[self.alertView show];
+		return;
+	}
 	UIAlertAction* grantAction = [UIAlertAction actionWithTitle:@"Permanently"
 							      style:UIAlertActionStyleDefault
 							    handler:^(UIAlertAction*){
 								    self.alert = nil;
-								    str lHosts;
-								    v_get(lHosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", _T(""));
-								    strutil::strvec lHostnames = strutil::Split(lHosts, _T(":"));
-								    lHostnames.push_back(MacLog::Decode(hostname));
-								    lHosts = strutil::Join(lHostnames, _T(":"));
-								    v_override(UiCure::GetSettings(), "Simulator.AllowedHosts", lHosts);
+								    [self setAccessFor:hostname allow:YES];
 							    }];
 	UIAlertAction* denyAction = [UIAlertAction actionWithTitle:@"No"
 							     style:UIAlertActionStyleCancel
@@ -206,12 +213,7 @@
 							    style:UIAlertActionStyleDestructive
 							  handler:^(UIAlertAction*){
 								  self.alert = nil;
-								  str lHosts;
-								  v_get(lHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));
-								  strutil::strvec lHostnames = strutil::Split(lHosts, _T(":"));
-								  lHostnames.push_back(MacLog::Decode(hostname));
-								  lHosts = strutil::Join(lHostnames, _T(":"));
-								  v_override(UiCure::GetSettings(), "Simulator.DeniedHosts", lHosts);
+								  [self setAccessFor:hostname allow:NO];
 							  }];
 
 	[self.alert addAction:grantAction];
@@ -399,13 +401,31 @@
 	}
 }
 
+-(void) setAccessFor:(NSString*)hostname allow:(BOOL)allow
+{
+	str lHosts = allow? v_slowget(UiCure::GetSettings(), "Simulator.AllowedHosts", _T("")) : v_slowget(UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));
+	strutil::strvec lHostnames = strutil::Split(lHosts, _T(":"));
+	lHostnames.push_back(MacLog::Decode(hostname));
+	lHosts = strutil::Join(lHostnames, _T(":"));
+	allow? v_override(UiCure::GetSettings(), "Simulator.AllowedHosts", lHosts) : v_override(UiCure::GetSettings(), "Simulator.DeniedHosts", lHosts);
+}
+
 -(void) alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
+	if (buttonIndex == 1)
+	{
+		[self setAccessFor:_alertHost allow:YES];
+	}
+	else
+	{
+		[self setAccessFor:_alertHost allow:NO];
+	}
 	[self alertViewCancel:alertView];
 }
 
 -(void) alertViewCancel:(UIAlertView*)alertView
 {
+	self.alertView = nil;
 	//TrabantSim::TrabantSim::GetApp()->SetIsPurchasing(false);
 }
 

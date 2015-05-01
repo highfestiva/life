@@ -1313,7 +1313,10 @@ bool TrabantSimManager::IsControlled()
 #ifdef LEPRA_TOUCH
 			if (mIsControlTimeout)
 			{
-				mLog.AWarning("Prototype script is not responding, possibly hung?");
+				if (mLastRemoteAddress.GetIP() == mInternalLocalAddress.GetIP())	// Otherwise it's just a push on the ESC key.
+				{
+					mLog.AWarning("Prototype script is not responding, possibly hung?");
+				}
 				Thread::Sleep(0.1);	// Wait for it to reach stdout reader thread.
 			}
 			FoldSuspendSimulator();

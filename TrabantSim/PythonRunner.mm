@@ -152,8 +152,8 @@ void PythonRunner::WorkerEntry(void*)
 		// No use showing simulator still frame?
 	 	mIsStopping = true;
 		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-lTimer.QueryTimeDiff());
-		TrabantSim::mApp->FoldSimulator();
 		TrabantSim::mApp->Suspend(false);
+		TrabantSim::mApp->FoldSimulator();
 		mIsStopping = false;
 	}
 }

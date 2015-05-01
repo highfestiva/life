@@ -22,10 +22,13 @@
 	if (animated && (hadGameLayout || (forceGameLayout && ![[EAGLView sharedView] shouldAutorotateToInterfaceOrientation:self.interfaceOrientation])))
 	{
 		hadGameLayout = forceGameLayout;
-		UIViewController *viewController = [[UIViewController alloc] init];
-		[self presentViewController:viewController animated:NO completion:^{
-			[self dismissViewControllerAnimated:NO completion:nil];
-		}];
+		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0)
+		{
+			UIViewController *viewController = [[UIViewController alloc] init];
+			[self presentViewController:viewController animated:NO completion:^{
+				[self dismissViewControllerAnimated:NO completion:nil];
+			}];
+		}
 	}
 	forceGameLayout = false;
 }

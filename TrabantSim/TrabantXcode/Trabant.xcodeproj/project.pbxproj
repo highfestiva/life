@@ -48,7 +48,6 @@
 		B14108061859215C005F84F1 /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B14108051859215C005F84F1 /* Plane.cpp */; };
 		B14F04BD1AEA401D00B6DE14 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */; };
 		B14F04BE1AEA401D00B6DE14 /* Default-Landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */; };
-		B14F04BF1AEA401D00B6DE14 /* Default-Landscape@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04BA1AEA401D00B6DE14 /* Default-Landscape@2x.png */; };
 		B14F04C01AEA401D00B6DE14 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04BB1AEA401D00B6DE14 /* Default@2x.png */; };
 		B14F04C11AEA401D00B6DE14 /* Icon-180.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04BC1AEA401D00B6DE14 /* Icon-180.png */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
@@ -586,7 +585,6 @@
 		B14108051859215C005F84F1 /* Plane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plane.cpp; sourceTree = "<group>"; };
 		B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Icons/Default-568h@2x.png"; sourceTree = "<group>"; };
 		B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape.png"; path = "../Icons/Default-Landscape.png"; sourceTree = "<group>"; };
-		B14F04BA1AEA401D00B6DE14 /* Default-Landscape@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape@2x.png"; path = "../Icons/Default-Landscape@2x.png"; sourceTree = "<group>"; };
 		B14F04BB1AEA401D00B6DE14 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Icons/Default@2x.png"; sourceTree = "<group>"; };
 		B14F04BC1AEA401D00B6DE14 /* Icon-180.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-180.png"; path = "../Icons/Icon-180.png"; sourceTree = "<group>"; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
@@ -2402,7 +2400,6 @@
 				B1EF1B2F1AF2BBD600AEA0D8 /* trabant_py_api.html */,
 				B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */,
 				B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */,
-				B14F04BA1AEA401D00B6DE14 /* Default-Landscape@2x.png */,
 				B14F04BB1AEA401D00B6DE14 /* Default@2x.png */,
 				B14F04BC1AEA401D00B6DE14 /* Icon-180.png */,
 				B1049DF31AAA0BDA00E34D85 /* LaunchScreen.xib */,
@@ -2545,7 +2542,6 @@
 				B14F04C01AEA401D00B6DE14 /* Default@2x.png in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
 				B1C4124018035E90007D64F7 /* Icon-76.png in Resources */,
-				B14F04BF1AEA401D00B6DE14 /* Default-Landscape@2x.png in Resources */,
 				B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */,
 				B14F04BE1AEA401D00B6DE14 /* Default-Landscape.png in Resources */,
 				B14F04BD1AEA401D00B6DE14 /* Default-568h@2x.png in Resources */,
