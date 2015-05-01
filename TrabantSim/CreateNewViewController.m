@@ -36,6 +36,7 @@
 	}
 
 	self.filename = [[UITextField alloc] initWithFrame:CGRectMake(8, 72, 304, 36)];
+	self.filename.delegate = self;
 	self.filename.text = fn;
 	self.filename.borderStyle = UITextBorderStyleRoundedRect;
 	self.filename.placeholder = @"Enter filename";
@@ -62,24 +63,28 @@
 	[self.filename becomeFirstResponder];
 }
 
+-(BOOL) textFieldShouldReturn:(UITextField*)textField
+{
+	return [self createFile];
+}
 
 -(void) cancel
 {
 	[self.parent popCreateNew:nil];
 }
 
--(void) createFile
+-(bool) createFile
 {
 	if (self.filename.text.length == 0 || [FileHelper fileExists:self.filename.text]) {
-		return;
+		return false;
 	}
 	NSString* full = [FileHelper fullPath:self.filename.text];
 	NSString* content = @"";
 	if (self.createComments.on) content = [content stringByAppendingString:@"#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\n"];
 	if (self.createBoilerplate.on) {
 		content = [content stringByAppendingString:@"from trabant import *\n\n"];
-		content = [content stringByAppendingString:@"floor = create_cube(pos=(0,0,-15),side=20,static=True)\n"];
-		content = [content stringByAppendingString:@"box = create_cube()\n\n"];
+		content = [content stringByAppendingString:@"floor = create_box(pos=(0,0,-15),side=20,static=True)\n"];
+		content = [content stringByAppendingString:@"box = create_box()\n\n"];
 
 		if (self.createComments.on) content = [content stringByAppendingString:@"# main game loop\n"];
 		content = [content stringByAppendingString:@"while loop():\n"];
@@ -93,6 +98,7 @@
 		[self.parent reloadPrototypes];
 		[self.parent popCreateNew:self.filename.text];
 	});
+	return true;
 }
 
 @end

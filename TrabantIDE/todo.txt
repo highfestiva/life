@@ -169,14 +169,18 @@
 +PC IDE: Make web page for IDE help, including the API, but not in an iframe.
 +PC IDE: save all files before synchronization.
 +PC IDE: reload all files after synchronization.
++iPhone: when synchronizing and there are changes in the current file, it is not updated.
++iPhone: when stepping out of in-editor sync the LoC becomes 0.
++ios: add pydoc again
++ios: Testa WiFi UDP packet resends
++ios: fix firepower tank engine volume.
++ios create new: klar på tangentbordet funkar ej
++ios create new: filen ej selectad i list view
++ios: add button to right of cog wheel for local api dox
++ios: local webview to show api dox
++ios: Fix icon background.
++Improve sync by placing original in separate store folder.
 
-ios: add pydoc again
-ios: Testa WiFi UDP packet resends
-ios create new: klar på tangentbordet funkar ej
-ios create new: filen ej selectad i list view
-ios: add button to right of cog wheel for local api dox
-ios: local webview to show api dox
-ios: Fix icon background.
 Test on iPhone 4s.
 Make web page for Trabant.
 Release the Mac version.

@@ -9,6 +9,8 @@
 
 
 
+extern "C" int Py_OptimizeFlag;
+extern "C" int Py_VerboseFlag;
 extern "C" void Py_SetProgramName(wchar_t* pn);
 extern "C" void Py_Initialize(void);
 extern "C" void Py_Finalize(void);
@@ -135,6 +137,8 @@ void PythonRunner::WorkerEntry(void*)
 		Py_Finalize();
 	}
 	Py_SetProgramName((wchar_t*)mDirectory.c_str());
+	Py_OptimizeFlag = 1;
+	//Py_VerboseFlag = 1;
 	Py_Initialize();
 	PyEval_InitThreads();
 	wchar_t* wargv[3] = { (wchar_t*)mFilename.c_str(), (wchar_t*)L"addr=localhost", (wchar_t*)L"osname=ios" };

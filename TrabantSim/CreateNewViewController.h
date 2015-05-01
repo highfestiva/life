@@ -7,7 +7,7 @@
 #import <UIKit/UIKit.h>
 #import "ListViewController.h"
 
-@interface CreateNewViewController : UIViewController
+@interface CreateNewViewController : UIViewController <UITextFieldDelegate>
 @property (nonatomic, strong) ListViewController* parent;
 @property (nonatomic, strong) UITextField* filename;
 @property (nonatomic, strong) UISwitch* createComments;

@@ -61,13 +61,19 @@
 	[self reloadPrototypes];
 }
 
-- (void) viewWillAppear:(BOOL)animated {
+- (void) viewWillAppear:(BOOL)animated
+{
 	NSIndexPath* indexPath = [self.tableView indexPathForSelectedRow];
 	if (indexPath) {
 		NSString* loc = [FileHelper countLoc:self.editController.title];
 		[self.loc setObject:loc atIndexedSubscript:indexPath.row];
 		[self.tableView deselectRowAtIndexPath:indexPath animated:YES];
  	}
+
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+	{
+		self.editController = nil;
+	}
 }
 
 - (NSInteger) tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
@@ -103,10 +109,10 @@
 	}
 	else
 	{
-		EditViewController* editController = [EditViewController new];
-		editController.title = filename;
-		editController.listController = self;
-		[self.navigationController pushViewController:editController animated:YES];
+		self.editController = [EditViewController new];
+		self.editController.title = filename;
+		self.editController.listController = self;
+		[self.navigationController pushViewController:self.editController animated:YES];
 	}
 }
 
@@ -134,6 +140,8 @@
 	{
 		[self showFile:filename];
 	}
+	NSUInteger lFileIndex = [self.files indexOfObject:self.editController.title];
+	[self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:lFileIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
 }
 
 -(void) popDeleteFile
@@ -164,12 +172,12 @@
 		[dirEnum skipDescendents];
 	}
 	[self.tableView reloadData];
-	if ([self.editController.title length] > 0)
+	if (self.editController && [self.editController.title length] > 0)
 	{
 		[self.editController updateEditor];
 		if ([self.editController.title length] > 0)
 		{
-			int lFileIndex = [self.files indexOfObject:self.editController.title];
+			NSUInteger lFileIndex = [self.files indexOfObject:self.editController.title];
 			[self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:lFileIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
 		}
 	}
@@ -177,12 +185,12 @@
 
 -(void) updateLoc
 {
-	if ([self.editController.title length] <= 0)
+	if (!self.editController || [self.editController.title length] <= 0)
 	{
 		return;
 	}
 	NSString* loc = [FileHelper countLoc:self.editController.title];
-	int lFileIndex = [self.files indexOfObject:self.editController.title];
+	NSUInteger lFileIndex = [self.files indexOfObject:self.editController.title];
 	[self.loc setObject:loc atIndexedSubscript:lFileIndex];
 	NSIndexPath* indexPath = [NSIndexPath indexPathForRow:lFileIndex inSection:0];
 	[self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationBottom];

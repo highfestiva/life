@@ -10,6 +10,7 @@
 #import "ListViewController.h"
 #include "PythonRunner.h"
 #import "PythonTextView.h"
+#import "WebViewController.h"
 
 
 
@@ -57,7 +58,7 @@ bool gBackspaceToLinefeed = false;
 
 	_smartIndent = [NSMutableString new];
 
-	self.manageButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemReply target:self action:@selector(manageFile)];
+	self.manageButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(manageFile)];
 	UIBarButtonItem* executeButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(execute)];
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
@@ -96,6 +97,14 @@ bool gBackspaceToLinefeed = false;
 -(void) updateEditor
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+		{
+			// Pop any covering web view.
+			if ([self.navigationController.viewControllers count] > 1)
+			{
+				[self.navigationController popToRootViewControllerAnimated:YES];
+			}
+		}
 		[self setEditing:NO animated:YES];
 		[self.scrollView setContentOffset:CGPointMake(0, -self.scrollView.contentInset.top)];
 		[self.scrollView setContentSize:CGSizeMake(300,300)];
@@ -282,7 +291,7 @@ bool gBackspaceToLinefeed = false;
 		input.text = self.title;
 		[alert show];
 	}
-	else if (buttonIndex == 2)	// Restore or Cancel button.
+	else if (buttonIndex == 2)	// Restore or API docs.
 	{
 		if ([FileHelper hasOriginal:self.title])	// Button index 2 is restore if we have it.
 		{
@@ -290,7 +299,26 @@ bool gBackspaceToLinefeed = false;
 			[self updateEditor];
 			[(ListViewController*)self.listController updateLoc];
 		}
+		else
+		{
+			[self showApiDox];
+		}
 	}
+	else if (buttonIndex == 3)	// API dox or Cancel button.
+	{
+		if ([FileHelper hasOriginal:self.title])	// Button index 3 is API dox if we have it.
+		{
+			[self showApiDox];
+		}
+	}
+}
+
+-(void) showApiDox
+{
+	WebViewController* webView = [WebViewController new];
+	webView.title = @"Trabant API";
+	webView.filename = @"trabant_py_api";
+	[self.navigationController pushViewController:webView animated:YES];
 }
 
 - (void) toggleiPadSidebar
@@ -323,10 +351,17 @@ bool gBackspaceToLinefeed = false;
 	}
 
 	bool restorable = [FileHelper hasOriginal:self.title];
+	NSString* button2 = @"Restore";
+	NSString* button3 = @"Trabant API pydoc";
+	if (!restorable)
+	{
+		button2 = button3;
+		button3 = nil;
+	}
 	UIActionSheet* sheet = [[UIActionSheet alloc] initWithTitle:@"Manage prototype" delegate:self
 						  cancelButtonTitle:@"Cancel"
 					     destructiveButtonTitle:@"Delete"
-						  otherButtonTitles:@"Rename", restorable?@"Restore":nil, nil];
+						  otherButtonTitles:@"Rename", button2, button3, nil];
 	[sheet showInView:self.view];
 }
 
