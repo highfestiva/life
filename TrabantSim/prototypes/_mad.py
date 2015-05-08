@@ -34,7 +34,7 @@ def testrun(f,good,bad):
 
 good = [(True,),(False,)]
 bad = [('apa',),(6,)]
-testrun(simdebug, good, bad)
+testrun(debugsim, good, bad)
 
 good = [('hello',),('',)]
 bad = [([],),(-8,)]

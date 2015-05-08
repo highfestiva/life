@@ -11,5 +11,6 @@ sed '/__api__/{
 	r ../../TrabantIDE/tools/trabant_py_api.html
 	}' /c/Users/Jonte/Documents/Pixel\ Doctrine\ AB/WebDev/html/trabant_help.template > \
 		/c/Users/Jonte/Documents/Pixel\ Doctrine\ AB/WebDev/html/trabant_help.html
+echo "Updated html documentation."
 fi
 

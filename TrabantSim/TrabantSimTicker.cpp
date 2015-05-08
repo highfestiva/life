@@ -56,6 +56,8 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_OUTLINEMODE, true);
 
+	v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+
 	v_override(UiCure::GetSettings(), RTVAR_GAME_ALLOWPOWERDOWN, true);
 	v_override(UiCure::GetSettings(), RTVAR_GAME_USERMESSAGE, _T(""));
 

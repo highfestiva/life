@@ -32,7 +32,7 @@ def reset():
 	'''Kill all objects and joysticks. Set some default values.'''
 	cmd('reset')
 
-def simdebug(enable):
+def debugsim(enable):
 	setvar('Debug.Enable', enable)
 
 def userinfo(message):

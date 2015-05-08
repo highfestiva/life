@@ -235,9 +235,9 @@ def trabant_init(**kwargs):
 	loop(delay=0)	# Resets taps+collisions.
 	_accelerometer_calibration = accelerometer()
 
-def simdebug(enable=True):
+def debugsim(enable=True):
 	'''Turns on/off simulation debug mode, which by default renders physics shapes.'''
-	gameapi.simdebug(enable)
+	gameapi.debugsim(enable)
 
 def userinfo(message=''):
 	'''Shows a message dialog to the user. Dismiss dialog by calling without parameters.'''

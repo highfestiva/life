@@ -66,9 +66,7 @@ HoverTank/HoverTank
 Impuzzable/Impuzzable
 TrabantSim/TrabantSim
 TrabantIDE/tools/*.html
-TrabantIDE/sync/remote
-TrabantIDE/sync/original
-TrabantIDE/sync/store_*
+TrabantIDE/python34/
 /ThirdParty/stlport/build
 /bin/
 */Data/Download

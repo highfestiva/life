@@ -101,7 +101,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mCollisionSoundManager(0),
 	mIsMouseControlled(false),
 	mSetFocus(false),
-	mSetCursorVisible(false),
+	mSetCursorVisible(true),
 	mSetCursorInvisible(false),
 	mMenu(0),
 	mLight(0),
@@ -122,7 +122,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->SetScale(1, 0.5f, 0.08f, 0.2f);
 	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.3f, 0));
+	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.2f, 0));
 
 	SetConsoleManager(new TrabantSimConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -1301,7 +1301,7 @@ bool TrabantSimManager::IsControlled()
 	bool lAllowPowerDown;
 	v_get(lAllowPowerDown, =, GetVariableScope(), RTVAR_GAME_ALLOWPOWERDOWN, true);
 	const bool lIsPowerDown = (lAllowPowerDown && mIsControlTimeout);
-	const bool lIsControlled = (!lIsPowerDown && mIsControlled);
+	const bool lIsControlled = (!lIsPowerDown || mIsControlled);
 	if (lIsControlled != mWasControlled)
 	{
 		if (lIsControlled)

@@ -36,7 +36,7 @@ XX
 
 gravity((0,0,0))
 fg(outline=False)
-simdebug()
+debugsim()
 cam(distance=50)
 
 create_ascii_object(shipasc, pos=(-10,-10,10), col='#f00', static=True)
