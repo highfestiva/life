@@ -46,10 +46,6 @@
 		B13DA601173EDBD200A73400 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA600173EDBD200A73400 /* Spawner.cpp */; };
 		B13DA607173EDBF400A73400 /* Level.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B13DA606173EDBF400A73400 /* Level.cpp */; };
 		B14108061859215C005F84F1 /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B14108051859215C005F84F1 /* Plane.cpp */; };
-		B14F04BD1AEA401D00B6DE14 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */; };
-		B14F04BE1AEA401D00B6DE14 /* Default-Landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */; };
-		B14F04C01AEA401D00B6DE14 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04BB1AEA401D00B6DE14 /* Default@2x.png */; };
-		B14F04C11AEA401D00B6DE14 /* Icon-180.png in Resources */ = {isa = PBXBuildFile; fileRef = B14F04BC1AEA401D00B6DE14 /* Icon-180.png */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -89,6 +85,7 @@
 		B16F032817808366000C31E0 /* UiBurnEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B16F032717808366000C31E0 /* UiBurnEmitter.cpp */; };
 		B173DCEE1AB2E53500928E13 /* StdOutViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B173DCED1AB2E53500928E13 /* StdOutViewController.mm */; };
 		B1740478179469EB00DB7AD5 /* ResourceTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */; };
+		B187FA051AFD8C8700E0272B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B187FA041AFD8C8700E0272B /* Images.xcassets */; };
 		B18D39A01A76F54300D8F48B /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399C1A76F54300D8F48B /* Light.cpp */; };
 		B18D39A11A76F54300D8F48B /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399D1A76F54300D8F48B /* Object.cpp */; };
 		B18D39A21A76F54300D8F48B /* PhysGfxObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */; };
@@ -486,9 +483,6 @@
 		B1B80C3D180F4294003AE676 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1B80C3C180F4294003AE676 /* Menu.cpp */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1C4116718033EC7007D64F7 /* SystemUtil.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1C4116618033EC7007D64F7 /* SystemUtil.mm */; };
-		B1C4124018035E90007D64F7 /* Icon-76.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4123918035E90007D64F7 /* Icon-76.png */; };
-		B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4124118035EA0007D64F7 /* Icon-120.png */; };
-		B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */ = {isa = PBXBuildFile; fileRef = B1C4124218035EA0007D64F7 /* Icon-152.png */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 		B1CF1ED51854E66800765E60 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1CF1ED41854E66800765E60 /* CoreMotion.framework */; };
 		B1D37EE6166AB2FC00536CE5 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */; };
@@ -583,10 +577,6 @@
 		B13DA600173EDBD200A73400 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spawner.cpp; path = ../../Cure/Source/Spawner.cpp; sourceTree = SOURCE_ROOT; };
 		B13DA606173EDBF400A73400 /* Level.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Level.cpp; path = ../../Life/LifeClient/Level.cpp; sourceTree = SOURCE_ROOT; };
 		B14108051859215C005F84F1 /* Plane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plane.cpp; sourceTree = "<group>"; };
-		B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Icons/Default-568h@2x.png"; sourceTree = "<group>"; };
-		B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape.png"; path = "../Icons/Default-Landscape.png"; sourceTree = "<group>"; };
-		B14F04BB1AEA401D00B6DE14 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Icons/Default@2x.png"; sourceTree = "<group>"; };
-		B14F04BC1AEA401D00B6DE14 /* Icon-180.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-180.png"; path = "../Icons/Icon-180.png"; sourceTree = "<group>"; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -628,6 +618,7 @@
 		B173DCEC1AB2E52500928E13 /* StdOutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StdOutViewController.h; sourceTree = "<group>"; };
 		B173DCED1AB2E53500928E13 /* StdOutViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = StdOutViewController.mm; sourceTree = "<group>"; };
 		B1740477179469EB00DB7AD5 /* ResourceTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ResourceTracker.cpp; sourceTree = "<group>"; };
+		B187FA041AFD8C8700E0272B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Trabant/Images.xcassets; sourceTree = "<group>"; };
 		B18D399C1A76F54300D8F48B /* Light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Light.cpp; sourceTree = "<group>"; };
 		B18D399D1A76F54300D8F48B /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
 		B18D399E1A76F54300D8F48B /* PhysGfxObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysGfxObject.cpp; sourceTree = "<group>"; };
@@ -1205,9 +1196,6 @@
 		B1B80C3C180F4294003AE676 /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Menu.cpp; path = ../../Life/LifeClient/Menu.cpp; sourceTree = SOURCE_ROOT; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1C4116618033EC7007D64F7 /* SystemUtil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SystemUtil.mm; path = ../../Life/SystemUtil.mm; sourceTree = SOURCE_ROOT; };
-		B1C4123918035E90007D64F7 /* Icon-76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-76.png"; path = "../Icons/Icon-76.png"; sourceTree = SOURCE_ROOT; };
-		B1C4124118035EA0007D64F7 /* Icon-120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-120.png"; path = "../Icons/Icon-120.png"; sourceTree = SOURCE_ROOT; };
-		B1C4124218035EA0007D64F7 /* Icon-152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-152.png"; path = "../Icons/Icon-152.png"; sourceTree = SOURCE_ROOT; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
 		B1CF1ED41854E66800765E60 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		B1D37EE4166AB2FC00536CE5 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Life/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
@@ -2397,17 +2385,11 @@
 		B1A1E04913AA970E0097B8D0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B187FA041AFD8C8700E0272B /* Images.xcassets */,
 				B1EF1B2F1AF2BBD600AEA0D8 /* trabant_py_api.html */,
-				B14F04B81AEA401D00B6DE14 /* Default-568h@2x.png */,
-				B14F04B91AEA401D00B6DE14 /* Default-Landscape.png */,
-				B14F04BB1AEA401D00B6DE14 /* Default@2x.png */,
-				B14F04BC1AEA401D00B6DE14 /* Icon-180.png */,
 				B1049DF31AAA0BDA00E34D85 /* LaunchScreen.xib */,
 				B19D7FED1AA0BDE700B02A36 /* pylib */,
 				B1FB291E1450C8A600F1C762 /* Data */,
-				B1C4123918035E90007D64F7 /* Icon-76.png */,
-				B1C4124118035EA0007D64F7 /* Icon-120.png */,
-				B1C4124218035EA0007D64F7 /* Icon-152.png */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -2536,16 +2518,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B19D7FEE1AA0BDE700B02A36 /* pylib in Resources */,
+				B187FA051AFD8C8700E0272B /* Images.xcassets in Resources */,
 				B1049DF41AAA0BDA00E34D85 /* LaunchScreen.xib in Resources */,
-				B14F04C11AEA401D00B6DE14 /* Icon-180.png in Resources */,
 				B1EF1B301AF2BBD600AEA0D8 /* trabant_py_api.html in Resources */,
-				B14F04C01AEA401D00B6DE14 /* Default@2x.png in Resources */,
 				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
-				B1C4124018035E90007D64F7 /* Icon-76.png in Resources */,
-				B1C4124318035EA0007D64F7 /* Icon-120.png in Resources */,
-				B14F04BE1AEA401D00B6DE14 /* Default-Landscape.png in Resources */,
-				B14F04BD1AEA401D00B6DE14 /* Default-568h@2x.png in Resources */,
-				B1C4124418035EA0007D64F7 /* Icon-152.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3075,6 +3051,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
@@ -3105,7 +3083,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "Trabant-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
@@ -3121,6 +3099,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COMPRESS_PNG_FILES = NO;
@@ -3149,7 +3129,7 @@
 					"\"$(SRCROOT)/../../ThirdParty/ChibiXM\"",
 				);
 				INFOPLIST_FILE = "Trabant-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
@@ -3169,7 +3149,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = iphoneos;
@@ -3184,7 +3164,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PREBINDING = NO;
 				SDKROOT = iphoneos;

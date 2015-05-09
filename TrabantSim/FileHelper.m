@@ -51,11 +51,10 @@
 	NSString* dstPath = [docPaths objectAtIndex:0];
 	NSString* srcFile = [srcPath stringByAppendingPathComponent:filename];
 	NSString* dstFile = [dstPath stringByAppendingPathComponent:filename];
-	NSError* error = nil;
 	[[NSFileManager defaultManager] removeItemAtPath:dstFile error:nil];
-	if (![[NSFileManager defaultManager] copyItemAtPath:srcFile toPath:dstFile error:&error]) {
-		NSLog(@"File copy error %@: %@", error, [error userInfo]);
-	}
+	NSString* contents = [NSString stringWithContentsOfFile:srcFile encoding:NSUTF8StringEncoding error:nil];
+	contents = [contents stringByReplacingOccurrencesOfString:@"#dummycomment" withString:@"#!/usr/bin/env python3"];
+	[[NSFileManager defaultManager] createFileAtPath:dstFile contents:[contents dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
 }
 
 +(NSString*) countLoc:(NSString *)filename
