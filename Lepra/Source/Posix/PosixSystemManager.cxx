@@ -100,7 +100,7 @@ str SystemManager::GetDocumentsDirectory()
 	NSString* lPath = [lPaths objectAtIndex:0];
 	return MacLog::Decode(lPath);
 #else // Mac
-	return Path::Join(GetUserDirectory(), _T("Documents"));
+	return Path::JoinPath(GetUserDirectory(), _T("Documents"));
 #endif
 }
 

@@ -126,10 +126,10 @@ static void setApplicationMenu(void)
 	// Put menu into the menubar.
 	menuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
 	[menuItem setSubmenu:appleMenu];
-	[[NSApp mainMenu] addItem:menuItem];
+	[[[NSApplication sharedApplication] mainMenu] addItem:menuItem];
 
 	// Tell the application object that this is now the application menu.
-	[NSApp setAppleMenu:appleMenu];
+	[[NSApplication sharedApplication] setAppleMenu:appleMenu];
 
 	[appleMenu release];
 	[menuItem release];
@@ -151,10 +151,10 @@ static void setupWindowMenu(void)
 	// Put menu into the menubar.
 	windowMenuItem = [[NSMenuItem alloc] initWithTitle:@"Window" action:nil keyEquivalent:@""];
 	[windowMenuItem setSubmenu:windowMenu];
-	[[NSApp mainMenu] addItem:windowMenuItem];
+	[[[NSApplication sharedApplication] mainMenu] addItem:windowMenuItem];
 
 	// Tell the application object that this is now the window menu.
-	[NSApp setWindowsMenu:windowMenu];
+	[[NSApplication sharedApplication] setWindowsMenu:windowMenu];
 
 	[windowMenu release];
 	[windowMenuItem release];
@@ -187,16 +187,16 @@ int UiMain(Application& pApplication)
 	}
 #endif // CPS
 
-	MacCore::mApplication = NSApp;
+	MacCore::mApplication = [NSApplication sharedApplication];
 
 	// Setup menu.
-	[NSApp setMainMenu:[[NSMenu alloc] init]];
+	[[NSApplication sharedApplication] setMainMenu:[[NSMenu alloc] init]];
 	setApplicationMenu();
 	setupWindowMenu();
 
 	UiLepraLoadedDispatcher* lLoadedDispatcher = [[UiLepraLoadedDispatcher alloc] init];
-	[NSApp setDelegate:lLoadedDispatcher];
-	[NSApp run];
+	[[NSApplication sharedApplication] setDelegate:lLoadedDispatcher];
+	[[NSApplication sharedApplication] run];
 	[lLoadedDispatcher release];
 
 #else // iOS

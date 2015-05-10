@@ -23,6 +23,9 @@
 //  THE SOFTWARE.
 //
 
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
+
 #import "BackButtonHandler.h"
 
 @implementation UIViewController (BackButtonHandler)
@@ -62,3 +65,5 @@
 }
 
 @end
+
+#endif // iOS

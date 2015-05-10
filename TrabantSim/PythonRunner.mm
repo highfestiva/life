@@ -3,6 +3,9 @@
 // Copyright (c) Pixel Doctrine
 
 
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
+
 #include "PythonRunner.h"
 #import "AnimatedApp.h"
 #include "TrabantSimTicker.h"
@@ -206,3 +209,5 @@ bool PythonRunner::mIsStopping = false;
 
 
 }
+
+#endif // iOS

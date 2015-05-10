@@ -178,6 +178,7 @@ unsigned long  HIDQueueElement (pRecDevice pDevice, pRecElement pElement)
 			HIDREPORTERROR ("HIDQueueElement - Device does not have interface.");
 			return kIOReturnError;
 		}
+		result = kIOReturnSuccess;
 		if (NULL == pDevice->queue) // if no queue create queue
 			result = hid_CreateQueue (pDevice);
 		if ((kIOReturnSuccess != result) || (NULL == pDevice->queue))

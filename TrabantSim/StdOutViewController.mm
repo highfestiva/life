@@ -4,7 +4,10 @@
 
 
 
-#import "StdOutViewController.h"
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
+
+import "StdOutViewController.h"
 
 
 
@@ -53,3 +56,5 @@
 }
 
 @end
+
+#endif // iOS

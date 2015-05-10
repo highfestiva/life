@@ -404,12 +404,12 @@ void MacDisplayManager::HideWindow(bool pHide)
 #else
 	if (pHide)
 	{
-		[mWnd orderOut:self];
+		[mWnd orderOut:mWnd];
 	}
 	else
 	{
-		[mWnd makeKeyAndOrderFront:self];
-		[NSApp activateIgnoringOtherApps:YES];
+		[mWnd makeKeyAndOrderFront:mWnd];
+		[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
 	}
 #endif // iOS / Mac
 }

@@ -4,6 +4,9 @@
 
 
 
+#include "../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
+
 #import "EditViewController.h"
 #import "AnimatedApp.h"
 #import "FileHelper.h"
@@ -417,3 +420,5 @@ bool gBackspaceToLinefeed = false;
 }
 
 @end
+
+#endif // iOS
