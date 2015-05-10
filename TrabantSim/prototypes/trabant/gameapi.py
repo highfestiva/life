@@ -352,13 +352,19 @@ def _run_local_sim(addr):
 		return
 	import sys
 	if 'localhost' in addr and sys.platform in ('win32','darwin'):
+		open_prefix,end_suffix,binname = (['/usr/bin/open','-W'],['--args'],'TrabantSim.app') if sys.platform=='darwin' else ([],[],'TrabantSim')
 		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./')]:
 			import os.path
 			import subprocess
 			curdir = os.path.abspath(os.path.curdir)
 			try:
 				os.chdir(directory)
-				proc = subprocess.Popen([rel+'TrabantSim', addr], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+				if not os.path.exists(rel+binname):
+					continue
+				args = open_prefix+[rel+binname]+end_suffix+[addr]
+				#print(args)
+				proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+				break
 			except:
 				os.chdir(curdir)
 				continue

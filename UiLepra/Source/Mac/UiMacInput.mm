@@ -615,10 +615,12 @@ void MacInputManager::SetCursorVisible(bool pVisible)
 	if (pVisible)
 	{
 		CGDisplayShowCursor(kCGDirectMainDisplay);
+		CGAssociateMouseAndMouseCursorPosition(true);
 	}
 	else
 	{
 		CGDisplayHideCursor(kCGDirectMainDisplay);
+		CGAssociateMouseAndMouseCursorPosition(false);
 	}
 }
 
