@@ -30,4 +30,4 @@ cd bin
 /c/Program\ Files/7-Zip/7z.exe a -tzip Trabant_Win32
 cd ..
 mv bin/Trabant_Win32.zip .
-echo "Done!"
+echo "Done! .zip in PD root folder."
