@@ -109,11 +109,12 @@ void TrabantSim::Init()
 		std::swap(lDisplayWidth, lDisplayHeight);
 	}
 	const double lFontHeight = 30.0*lScale;
-	v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 #else // Computer L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
+	const double lFontHeight = 30.0;
 #endif // Touch / Computer L&F
+	v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;

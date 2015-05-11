@@ -7,7 +7,7 @@
 #include "../Lepra/Include/LepraTarget.h"
 #ifdef LEPRA_IOS
 
-import "StdOutViewController.h"
+#import "StdOutViewController.h"
 
 
 
