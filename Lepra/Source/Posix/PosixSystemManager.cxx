@@ -187,11 +187,15 @@ void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBod
 
 str SystemManager::GetHwName()
 {
+#ifdef LEPRA_MAC
 	char lMachine[4096];
 	size_t lSize = sizeof(lMachine);
 	::memset(lMachine, 0, lSize);
 	::sysctlbyname("hw.machine", lMachine, &lSize, 0, 0);
 	return strutil::Encode(astr(lMachine));
+#else // Other Posix
+	return _T("PC");
+#endif // OS X / Other Posix
 }
 
 unsigned SystemManager::GetLogicalCpuCount()

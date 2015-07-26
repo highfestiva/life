@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #define INVALID_SOCKET (-1)
 #define SOCKET_ERROR (-1)

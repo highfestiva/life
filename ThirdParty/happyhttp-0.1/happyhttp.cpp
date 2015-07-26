@@ -519,7 +519,7 @@ Response::Response( const char* method, Connection& conn ) :
 const char* Response::getheader( const char* name ) const
 {
 	std::string lname( name );
-	std::transform( lname.begin(), lname.end(), lname.begin(), tolower );
+	std::transform( lname.begin(), lname.end(), lname.begin(), ::tolower );
 
 	HeaderMap::const_iterator it = m_Headers.find( lname );
 	if( it == m_Headers.end() )

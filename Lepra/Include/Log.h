@@ -12,7 +12,7 @@
 #include "LogLevel.h"
 #include "LogType.h"
 #include "String.h"
-
+#include <typeinfo>
 
 
 namespace Lepra
