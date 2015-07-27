@@ -54,7 +54,7 @@ private:
 class PosixCondition
 {
 public:
-	PosixCondition(PosixLock* pExternalLock = 0);
+	PosixCondition(PosixLock* pExternalLock);
 	virtual	~PosixCondition();
 
 	void Wait();
@@ -63,7 +63,6 @@ public:
 	void SignalAll();
 
 private:
-	PosixLock mExternalLockImpl;
 	PosixLock* mExternalLock;
 	pthread_cond_t mCondition;
 };

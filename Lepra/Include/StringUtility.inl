@@ -77,6 +77,7 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const
 				lCurrentToken.clear();
 				if (++lSplitCount >= pSplitMaxCount)
 				{
+					x = pString.find_first_not_of(pCharDelimitors, x);
 					break;
 				}
 			}

@@ -56,7 +56,7 @@ private:
 class Win32Condition
 {
 public:
-	Win32Condition();
+	Win32Condition(Win32Lock* pExternalLock);
 	virtual	~Win32Condition();
 
 	void Wait();
@@ -68,9 +68,9 @@ private:
 	long Increase();
 	long Decrease();
 
+	Win32Lock* mExternalLock;
 	HANDLE mSemaphore;
 	volatile long mWaitThreadCount;
-	CRITICAL_SECTION mSignalLock;
 };
 
 

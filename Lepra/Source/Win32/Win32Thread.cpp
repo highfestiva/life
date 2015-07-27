@@ -113,11 +113,11 @@ void Win32Lock::Release()
 
 
 
-Win32Condition::Win32Condition():
+Win32Condition::Win32Condition(Win32Lock* pExternalLock):
+	mExternalLock(pExternalLock),
 	mSemaphore(::CreateSemaphore(0, 0, 0x7fffffff, 0)),
 	mWaitThreadCount(0)
 {
-	::InitializeCriticalSection(&mSignalLock);
 }
 
 Win32Condition::~Win32Condition()
@@ -128,7 +128,9 @@ Win32Condition::~Win32Condition()
 void Win32Condition::Wait()
 {
 	::InterlockedIncrement(&mWaitThreadCount);
+	mExternalLock->Release();
 	::WaitForSingleObject(mSemaphore, INFINITE);
+	mExternalLock->Acquire();
 	::InterlockedDecrement(&mWaitThreadCount);
 }
 
@@ -139,7 +141,9 @@ bool Win32Condition::Wait(float64 pMaxWaitTime)
 		pMaxWaitTime = 0;
 	}
 	::InterlockedIncrement(&mWaitThreadCount);
+	mExternalLock->Release();
 	bool lSignalled = (::WaitForSingleObject(mSemaphore, (DWORD)(pMaxWaitTime*1000.0)) == WAIT_OBJECT_0);
+	mExternalLock->Acquire();
 	::InterlockedDecrement(&mWaitThreadCount);
 	return (lSignalled);
 }
@@ -148,12 +152,7 @@ void Win32Condition::Signal()
 {
 	if (mWaitThreadCount)
 	{
-		::EnterCriticalSection(&mSignalLock);
-		if (mWaitThreadCount)	// Double check (required after lock).
-		{
-			::ReleaseSemaphore(mSemaphore, 1, 0);
-		}
-		::LeaveCriticalSection(&mSignalLock);
+		::ReleaseSemaphore(mSemaphore, 1, 0);
 	}
 }
 
@@ -161,9 +160,7 @@ void Win32Condition::SignalAll()
 {
 	if (mWaitThreadCount)
 	{
-		::EnterCriticalSection(&mSignalLock);
 		::ReleaseSemaphore(mSemaphore, mWaitThreadCount, 0);
-		::LeaveCriticalSection(&mSignalLock);
 	}
 }
 
@@ -209,6 +206,8 @@ void Win32Semaphore::Signal()
 
 
 Win32RwLock::Win32RwLock():
+	mReadCondition(0),
+	mWriteCondition(0),
 	mNumPendingReaders(0),
 	mNumActiveReaders(0),
 	mNumPendingWriters(0),

@@ -30,7 +30,7 @@ public:
 	Thread* GetOwner() const;
 	int GetReferenceCount() const;
 
-protected:
+	// Avoid using the below.
 	OwnedLock();
 	virtual	~OwnedLock();
 	void Reference();
@@ -49,6 +49,7 @@ public:
 	void Acquire();
 	bool TryAcquire();
 	void Release();
+	void* GetSystemLock() const;	// Don't use this!
 
 private:
 	void operator=(const Lock&);
@@ -74,7 +75,7 @@ protected:
 class Condition
 {
 public:
-	Condition();
+	Condition(Lock* pExternalLock = 0);
 	virtual ~Condition();
 
 	void Wait();
@@ -83,6 +84,7 @@ public:
 	void SignalAll();	// Unblock all waiting threads.
 
 private:
+	Lock* mExternalLock;
 	void* mSystemCondition;
 };
 

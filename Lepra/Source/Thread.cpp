@@ -101,6 +101,11 @@ void Lock::Release()
 	((FastLock*)mSystemLock)->Release();
 }
 
+void* Lock::GetSystemLock() const
+{
+	return mSystemLock;
+}
+
 void Lock::operator=(const Lock&)
 {
 	deb_assert(false);
@@ -132,8 +137,9 @@ void ScopeLock::Release()
 
 
 
-Condition::Condition():
-	mSystemCondition(new FastCondition)
+Condition::Condition(Lock* pExternalLock):
+	mExternalLock(pExternalLock),
+	mSystemCondition(new FastCondition(pExternalLock? (FastLock*)pExternalLock->GetSystemLock() : 0))
 {
 }
 
@@ -146,12 +152,17 @@ Condition::~Condition()
 
 void Condition::Wait()
 {
+	mExternalLock->Dereference();
 	((FastCondition*)mSystemCondition)->Wait();
+	mExternalLock->Reference();
 }
 
 bool Condition::Wait(float64 pMaxWaitTime)
 {
-	return ((FastCondition*)mSystemCondition)->Wait(pMaxWaitTime);
+	mExternalLock->Dereference();
+	const bool lSignalled = ((FastCondition*)mSystemCondition)->Wait(pMaxWaitTime);
+	mExternalLock->Reference();
+	return lSignalled;
 }
 
 void Condition::Signal()

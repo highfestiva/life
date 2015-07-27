@@ -8,11 +8,15 @@
 
 +Downwash, i.e. Helicopter Gravity Force 2D/3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
 
--Cutaway - 3D realtime physics puzzle. Box contains balls. Cut out as much of the box as you can by drawing cutting planes. When you've reduced the space for the balls by 50% or so, you've completed the level. The next level contains one more ball.
++Cutaway - 3D realtime physics puzzle. Box contains balls. Cut out as much of the box as you can by drawing cutting planes. When you've reduced the space for the balls by 50% or so, you've completed the level. The next level contains one more ball.
 
-Rapid prototyping game IDE. Python.
++Rapid prototyping game IDE. Python.
 
 AI vs. AI programming game. Python.
+
+Multiplayer FPS and tank game in Gbg, generated through Google maps/street view.
+
+Driving simulator.
 
 Bacteria eater. Bacteria will grow exponentially, eat them! Eating grows you reach, moving shrinks it.
 
@@ -49,8 +53,6 @@ UFO Strike - Be a flying saucer and take out Earth's defenses. UFO flies automat
 WW2 tank vs. tank, similar to the Cyber Sled remake.
 
 For web: https://konklone.com/post/switch-to-https-now-for-free?hn
-
-Multiplayer tank game in Gbg, generated through Google maps/street view.
 
 Fleeing animal made up by particles and can shape-shift. Tiger to run across trees, cliffs; horse to run across plains and mountains; bird to span gaps. Run during night. Full moon. A bit like a DEMO!
 

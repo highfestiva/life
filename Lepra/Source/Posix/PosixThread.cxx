@@ -122,14 +122,6 @@ PosixCondition::PosixCondition(PosixLock* pExternalLock):
 	mExternalLock(pExternalLock)
 {
 	::pthread_cond_init(&mCondition, 0);
-	
-	if (mExternalLock == 0)
-	{
-		// There must be a lock associated with the condition,
-		// since the behaviour of ::pthread_cond_wait() is undefined
-		// otherwise.
-		mExternalLock = &mExternalLockImpl;
-	}
 }
 
 PosixCondition::~PosixCondition()

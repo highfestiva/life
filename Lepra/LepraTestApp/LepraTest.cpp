@@ -259,7 +259,7 @@ bool TestString(const LogDecorator& pAccount)
 		const str& lWord3 = lWords[3];
 		const str& lWord4 = lWords[4];
 		lTestOk = (lPhraseCount == 5 && lWord0 == _T("Hej du glade") && lWord1 == _T("sade") &&
-			lWord2 == _T("jag") && lWord3 == _T("till") && lWord4 == _T("\n\n\r\vhonom igen."));
+			lWord2 == _T("jag") && lWord3 == _T("till") && lWord4 == _T("honom igen."));
 		deb_assert(lTestOk);
 	}
 
@@ -268,7 +268,7 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("block string splitting 2");
 		strutil::strvec lWords = strutil::BlockSplit(_T("\"Hej du glade \" sade jag  \t\"till\n\"\n\r\vhan..\nhonom igen."), _T(" \t\v\r\n"), true, false, 4);
 		lTestOk = (lWords.size() == 5 && lWords[0] == _T("\"Hej du glade \"") && lWords[1] == _T("sade") &&
-			lWords[2] == _T("jag") && lWords[3] == _T("\"till\n\"") && lWords[4] == _T("\n\r\vhan..\nhonom igen."));
+			lWords[2] == _T("jag") && lWords[3] == _T("\"till\n\"") && lWords[4] == _T("han..\nhonom igen."));
 		deb_assert(lTestOk);
 	}
 
@@ -277,6 +277,14 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("block string splitting 3");
 		strutil::strvec lWords = strutil::BlockSplit(_T("\"a\\\"b\""), _T(" \t\v\r\n\""), false, true, 4);
 		lTestOk = (lWords.size() == 1 && lWords[0] == _T("a\\\"b"));
+		deb_assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("block whitespace limited splitting");
+		strutil::strvec lWords = strutil::BlockSplit(_T("abc def"), _T(" \t\v\r\n\""), false, false, 1);
+		lTestOk = (lWords.size() == 2 && lWords[0] == _T("abc") && lWords[1] == _T("def"));
 		deb_assert(lTestOk);
 	}
 
@@ -2315,11 +2323,14 @@ void DummyThread(void*)
 {
 }
 
+Lock* gMutex;
 Condition* gCondition;
 
 void ConditionThread(void*)
 {
+	gMutex->Acquire();
 	gCondition->Wait();
+	gMutex->Release();
 	Thread::Sleep(0.1);
 }
 
@@ -2447,7 +2458,9 @@ bool TestPerformance(const LogDecorator& pAccount)
 
 			{
 				StaticThread lThread("Condition");
-				Condition lCondition;
+				Lock lMutex;
+				Condition lCondition(&lMutex);
+				gMutex = &lMutex;
 				gCondition = &lCondition;
 				lThread.Start(ConditionThread, 0);
 				Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
@@ -2462,7 +2475,9 @@ bool TestPerformance(const LogDecorator& pAccount)
 				}
 				{
 					LEPRA_MEASURE_SCOPE(Wait(0));
+					lMutex.Acquire();
 					lCondition.Wait(0);
+					lMutex.Release();
 				}
 				lThread.Join();	// Ensure thread terminates before condition is destroyed.
 			}
