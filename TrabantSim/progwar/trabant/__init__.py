@@ -398,11 +398,11 @@ def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, 
 		orientation,gfx,phys = process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_capsule(pos=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
+def create_capsule(pos=None, orientation=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
 	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
 	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
 	   process the physics and graphics with the process callback function before it's added to the simulation.'''
-	orientation,resolution = quat(),int(min(8, max(4,radius**0.3)*8))
+	resolution = int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createcapsule(radius, length, latitude=resolution, longitude=int(resolution*1.5))
 	if process:
 		orientation,gfx,phys = process(orientation,gfx,phys)

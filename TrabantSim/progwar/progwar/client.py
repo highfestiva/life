@@ -65,7 +65,7 @@ def handle_server_data(data):
         #[explode(vec3(*[float(f) for f in pos.split(',')]),strength=5) for pos in args]
         pass
     elif cmd == 'm':
-        print(' '.join(args))
+        print(data[2:])
     elif cmd == 'p':
         global my_tanks
         crds = []

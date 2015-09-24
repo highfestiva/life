@@ -41,4 +41,4 @@ def update(blips):
             tank.shoot(yaw, pitch, 'damage')
 
 
-join_game('Nessie', update)
+join_game('localhost', update)

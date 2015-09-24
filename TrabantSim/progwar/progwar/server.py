@@ -238,17 +238,16 @@ def msg(sock, s):
         u.send(sock, 'm '+s)
 
 def print_score(sock):
-    print('Score:')
+    s = ['Score:']
     for u in users.values():
-        print('  %15s  %2i' % (u.username,u.score))
+        s += ['  %15s  %2i' % (u.username,u.score)]
+    msg(sock, '\n'.join(s))
 
 
 def handle_round(sock):
     global round_started, round_t, round_wait, normal_round_wait
     if not round_started and round_t and round_t-now() <= 0:
-        [u.addscore(len(users)) for u in users.values() if u.tanks]
         [u.kill_all_tanks(sock) for u in users.values()]
-        print_score(sock)
         cu = connected_users()
         [users.pop(u.addr) for u in list(users.values()) if u not in cu]  # Drop all disconnected users.
         [u.send(sock, 'b ') for u in users.values()]    # Empty all blips.
@@ -277,6 +276,9 @@ def handle_round(sock):
                 msg(sock, '%s wins the round!' % u[0].username)
                 round_started = False
                 round_t = None
+            if not round_started:
+                [u.addscore(len(users)) for u in users.values() if u.tanks]
+                print_score(sock)
     elif not round_started and not round_t:
         if len(connected_users()) >= 2:
             round_t = now()+round_wait
@@ -286,10 +288,9 @@ def handle_round(sock):
         throttle(False)
 
 def run():
-    host = pw_socket.gethostname()
     sock = pw_socket()
-    sock.bind((host,4554))
-    print('Server running at %s.' % host)
+    sock.bind(('0.0.0.0',4554))
+    print('Server running at %s.' % pw_socket.gethostname())
     settings = _readsettings()
     trabant_init(addr=settings['sim_addr'])
     fg(outline=False)

@@ -135,4 +135,4 @@ def update(blips):
     if len(my_tanks) == 1 or (enemy_tank and enemy_tank.epos.z > -10):
         enemy_tank = None
 
-join_game('Nessie', update)
+join_game('localhost', update)
