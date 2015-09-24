@@ -1412,12 +1412,17 @@ unsigned Renderer::UpdateShadowMaps(Tbc::GeometryBase* pGeometry, LightData* pCl
 
 	// Iterate over all the closest light sources and update shadow volumes.
 	unsigned lActiveLightCount = 0;
-	const int lLoopMax = MAX_SHADOW_VOLUMES < GetLightCount() ? MAX_SHADOW_VOLUMES : lLightCount;
+	int lLoopMax = MAX_SHADOW_VOLUMES < GetLightCount() ? MAX_SHADOW_VOLUMES : lLightCount;
 	int i;
 	for (i = 0; i < lLoopMax; i++)
 	{
 		bool lProcessLight = false;
-		LightData* lLightData = (i==0)? pClosestLightData : GetLightData(GetClosestLight(i));
+		LightData* lLightData = (i==0)? pClosestLightData : GetLightData(GetClosestLight(i-1));
+		if (i != 0 && pClosestLightData == lLightData)
+		{
+			++lLoopMax;
+			continue;
+		}
 		if (lLightData->mShadowRange <= 0)
 		{
 			continue;

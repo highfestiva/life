@@ -137,6 +137,10 @@ bool PhysicsSharedResource::FinalizeInit()
 	{
 		lStructure->SetPhysicsType(Tbc::ChunkyPhysics::STATIC);
 	}
+	else if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_DYNAMIC)
+	{
+		lStructure->SetPhysicsType(Tbc::ChunkyPhysics::DYNAMIC);
+	}
 
 	// Pick desired orientation, but reset for FinalizeInit() to work with proper joint orientations.
 	//const bool lIsDynamic = (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);

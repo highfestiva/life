@@ -14,8 +14,8 @@ cp -r TrabantIDE/* bin/
 rm -Rf bin/tools
 rm bin/todo.txt
 
-cp -r TrabantSim/prototypes bin/
-rm -Rf bin/prototypes/_*.py bin/prototypes/__pycache__ bin/prototypes/trabant/__pycache__
+cp -r TrabantSim/prototypes TrabantSim/progwar bin/
+rm -Rf bin/prototypes/_*.py bin/*/__pycache__ bin/*/*/__pycache__
 
 mkdir bin/sync
 cp ../py/sync/* bin/sync/

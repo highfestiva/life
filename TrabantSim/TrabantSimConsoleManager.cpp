@@ -318,7 +318,7 @@ const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetComman
 
 int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
 {
-	mActiveResponse = _T("ok\n");
+	mActiveResponse = str(_T("ok\n"));
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)
 	{

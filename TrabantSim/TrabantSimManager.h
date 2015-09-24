@@ -215,6 +215,8 @@ protected:
 	vec3 mCameraVelocity;
 	UiTbc::Button* mPauseButton;
 	UiTbc::Button* mBackButton;
+	double mLastSoundVolume;
+	double mMasterVolume;
 	bool mIsPaused;
 	bool mIsControlled;
 	bool mWasControlled;

@@ -1,4 +1,4 @@
-+Drop all other languages...
+﻿+Drop all other languages...
 +Place all configuration files in subfolder.
 +Use monospaced font!
 +Configure look similar to Notepad++.
@@ -183,6 +183,7 @@
 +Fix "navbar stuck" on iOS7-.
 +Fix ugly printout ever run on iOS7.
 +Test on iPhone 4s.
++ProgWars!!! :)
 
 Build release version for PC. Publish.
 Make web page for Trabant.

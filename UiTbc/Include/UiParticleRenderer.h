@@ -5,6 +5,7 @@
 #pragma once
 
 #include "UiDynamicRenderer.h"
+#include "../../Lepra/Include/Thread.h"
 #include "UiRenderer.h"
 
 
@@ -89,6 +90,7 @@ protected:
 		BillboardArray& pBillboards, int pCount);
 	static void StepBillboards(BillboardArray& pBillboards, float pTime, float pFriction);
 
+	Lock* mLock;
 	vec3 mGravity;
 	LightArray mLights;
 	size_t mMaxLightCount;

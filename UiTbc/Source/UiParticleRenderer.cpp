@@ -22,6 +22,7 @@ namespace UiTbc
 
 ParticleRenderer::ParticleRenderer(Renderer* pRenderer, int pMaxLightCount):
 	Parent(pRenderer),
+	mLock(new Lock),
 	mGravity(0,0,-9.8f),
 	mMaxLightCount(pMaxLightCount),
 	mGasTextureCount(1),
@@ -43,6 +44,8 @@ ParticleRenderer::~ParticleRenderer()
 	mBillboardSpark = 0;
 	delete mBillboardGlow;
 	mBillboardGlow = 0;
+	delete mLock;
+	mLock = 0;
 }
 
 
@@ -70,6 +73,8 @@ void ParticleRenderer::Render()
 	{
 		return;
 	}
+
+	ScopeLock lLock(mLock);
 
 	const float q = 1;
 	BillboardArray::iterator x;
@@ -144,6 +149,8 @@ void ParticleRenderer::Render()
 
 void ParticleRenderer::Tick(float pTime)
 {
+	ScopeLock lLock(mLock);
+
 	StepLights(pTime, 6);
 
 	StepBillboards(mFires, pTime, 6);
@@ -155,12 +162,15 @@ void ParticleRenderer::Tick(float pTime)
 
 void ParticleRenderer::CreateFlare(const vec3& pColor, float pStrength, float pTimeFactor, const vec3& pPosition, const vec3& pVelocity)
 {
+	ScopeLock lLock(mLock);
 	CreateTempLight(pColor, pStrength, pPosition, pVelocity, pVelocity, pTimeFactor);
 }
 
 void ParticleRenderer::CreateExplosion(const vec3& pPosition, float pStrength, const vec3& pVelocity, float pFalloff, float pTime, const vec3& pStartFireColor, const vec3& pFireColor,
 	const vec3& pStartSmokeColor, const vec3& pSmokeColor, const vec3& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels)
 {
+	ScopeLock lLock(mLock);
+
 	const float lRandomXYEndSpeed = 1.0f;
 	const float lStrength2 = (pStrength>1)? ::sqrt(pStrength) : pStrength*pStrength;
 	const float lParticleSize = lStrength2*0.5f;
@@ -195,6 +205,8 @@ void ParticleRenderer::CreatePebble(float pTime, float pScale, float pAngularVel
 	const float lTimeFactor = PARTICLE_TIME*0.5f/pTime;	// Split in two, as we're only using latter half of sine curve (don't fade into existance).
 	const float lRandomXYEndSpeed = 1.0f;
 
+	ScopeLock lLock(mLock);
+
 	CreateBillboards(pPosition, 0, vec3(), vec3(0,0,-10), lRandomXYEndSpeed, lTimeFactor, pScale*0.1f, vec3(), pColor, mShrapnels, 1);
 	Billboard& lPebbleBillboard = mShrapnels.back();
 	lPebbleBillboard.mVelocity = pVelocity;
@@ -208,6 +220,8 @@ void ParticleRenderer::CreateFume(float pTime, float pScale, float pAngularVeloc
 	const float lTimeFactor = PARTICLE_TIME/pTime;
 	const float lRandomXYEndSpeed = 0.5f;
 
+	ScopeLock lLock(mLock);
+
 	CreateBillboards(pPosition, 0, vec3(), vec3(0,0,2), lRandomXYEndSpeed, lTimeFactor, pScale*0.1f, vec3(0.4f,0.4f,0.4f), vec3(), mSmokes, 1);
 	Billboard& lPebbleBillboard = mSmokes.back();
 	lPebbleBillboard.mVelocity = pVelocity;
@@ -218,6 +232,8 @@ void ParticleRenderer::CreateFume(float pTime, float pScale, float pAngularVeloc
 
 void ParticleRenderer::CreateGlow(float pTime, float pScale, const vec3& pStartColor, const vec3& pColor, float pOpacity, const vec3& pPosition, const vec3& pVelocity)
 {
+	ScopeLock lLock(mLock);
+
 	const float lTimeFactor = PARTICLE_TIME/pTime;
 	CreateBillboards(pPosition, 0, vec3(), vec3(), 0, lTimeFactor, pScale, pStartColor, pColor, mFires, 1);
 	Billboard& lGlowBillboard = mFires.back();
@@ -228,6 +244,8 @@ void ParticleRenderer::CreateGlow(float pTime, float pScale, const vec3& pStartC
 
 void ParticleRenderer::RenderFireBillboard(float pAngle, float pSize, const vec3& pColor, float pOpacity, const vec3& pPosition)
 {
+	ScopeLock lLock(mLock);
+
 	mTempFires.push_back(Billboard());
 	Billboard& lBillboard = mTempFires.back();
 	lBillboard.mPosition = pPosition;

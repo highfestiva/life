@@ -108,6 +108,8 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mCameraTransform(quat(), vec3(0, -3, 0)),
 	mPauseButton(0),
 	mBackButton(0),
+	mLastSoundVolume(1.0),
+	mMasterVolume(1.0),
 	mIsPaused(false),
 	mIsControlled(false),
 	mWasControlled(false),
@@ -137,6 +139,7 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mOpenLocalAddress = lAddress;
 	SocketAddress lInternalAddress;
 	lInternalAddress.Resolve(_T("127.0.0.1:2541"));
+	lInternalAddress.SetPort(lAddress.GetPort());
 	mInternalLocalAddress = lInternalAddress;
 	bool lAllowRemoteSync;
 	v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
@@ -250,6 +253,11 @@ void TrabantSimManager::UserReset()
 int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects,
 					ObjectMaterial pMaterial, bool pIsStatic)
 {
+	if (pGfxObject.mVertices.empty() || pGfxObject.mIndices.empty())
+	{
+		return -1;
+	}
+
 	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 	ScopeLock lGameLock(GetTickLock());
 
@@ -435,10 +443,10 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 		lGameLock.Acquire();
 	}
 	{
-
 		for (XformList::const_iterator x = pPlacements.begin(); x != pPlacements.end(); ++x)
 		{
 			Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+			lObject->SetPhysicsTypeOverride(pIsStatic? Cure::PHYSICS_OVERRIDE_STATIC : Cure::PHYSICS_OVERRIDE_DYNAMIC);
 			{
 				const quat pq = x->mOrientation * lOriginalRoot;
 				lObject->SetRootOrientation(pq);
@@ -1778,9 +1786,16 @@ void TrabantSimManager::ScriptPhysicsTick()
 		UpdateUserMessage();
 	}
 
-	const double lVolume = IsControlled()? 1.0 : 0.0;
+	double lSoundVolume;
+	v_get(lSoundVolume, =, GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
+	if (lSoundVolume != mLastSoundVolume)
+	{
+		mMasterVolume = lSoundVolume;
+	}
+	const double lVolume = IsControlled()? mMasterVolume : 0.0;
 	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lVolume);
 	mUiManager->GetSoundManager()->SetMasterVolume((float)lVolume);
+	mLastSoundVolume = lVolume;
 
 	{
 		ScopeLock lGameLock(GetTickLock());
