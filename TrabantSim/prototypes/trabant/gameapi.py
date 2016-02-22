@@ -9,6 +9,7 @@ sock = None
 proc = None
 osname = '???'
 _cached_vertices,_cached_indices = [],[]
+_connecting = False
 
 
 def init(bg='#000', fg='#b59', fps=30, fov=60, addr='localhost:2541', connect_retries=2, restart=True):
@@ -255,9 +256,23 @@ def getsetoidcmd(name, oid, *args):
 		return result
 
 def cmd(c, return_type=str):
+	global sock
 	#print(c)
 	sock.send((c+'\n').encode())
-	result = sock.recv(80*1024)
+	try:
+		result = sock.recv(80*1024)
+	except ConnectionResetError as e:
+		if not _connecting:
+			import sys
+			sys.exit(1)
+		raise e
+	except socket.error as e:
+		if str(e) == 'timeout':
+			print('Simulator timed out!')
+			sock = None	# Don't even try to close to avoid delay.
+			import sys
+			sys.exit(1)
+		raise e
 	#print(result)
 	result = result.decode(errors='replace')
 	if result.startswith('ok\n'):
@@ -302,7 +317,10 @@ def _closecom():
 	global sock,proc
 	if sock:
 		if proc:
-			cmd('quit')
+			try:
+				cmd('quit')
+			except:
+				pass
 		sock.close()
 		sock = None
 	if proc:
@@ -328,7 +346,8 @@ def _args2str(args, default=''):
 	return ' '.join(str(arg) for arg in args)
 
 def _tryconnect(addr, retries):
-	global sock,osname
+	global sock,osname,_connecting
+	_connecting = True
 	ip,port = addr.split(':')
 	for attempt in range(1,retries+1):
 		try:
@@ -341,6 +360,7 @@ def _tryconnect(addr, retries):
 			sock.connect((ip,int(port)))
 			osname = cmd('get-platform-name')	# To make sure UDP connection alright.
 			sock.settimeout(sock.timeout+3)
+			_connecting = False
 			break
 		except socket.error as e:
 			sock = None

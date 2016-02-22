@@ -46,6 +46,8 @@ _collisions = None
 _joysticks = {}
 _accelerometer_calibration = vec3()
 _timers = {}
+_frame_callbacks = {}
+_timer_callbacks = {}
 _objects = {}
 _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative,_cam_is_smooth = vec3(),10,None,vec3(),0.5,False,False
 _cam_pos,_cam_q,_cam_inv_q = vec3(0,-10,0),quat(),quat()
@@ -222,7 +224,7 @@ def trabant_init(**kwargs):
 			pass
 	config.update(kwargs)
 	global _joysticks,_timers,_has_opened,_accelerometer_calibration
-	_joysticks,_timers,_has_opened = {},{},True
+	_joysticks,_timers,_frame_callbacks,_timer_callbacks,_has_opened = {},{},[],{},True
 	if 'osname' in config:
 		global osname
 		osname = config['osname']
@@ -242,18 +244,28 @@ def debugsim(enable=True):
 
 def userinfo(message=''):
 	'''Shows a message dialog to the user. Dismiss dialog by calling without parameters.'''
+	_tryinit()
 	gameapi.userinfo(message)
 
 def loop(delay=0.03, end_after=None):
 	'''Call this every loop, check return value if you should continue looping.'''
 	_tryinit()
-	global _lastlooptime
+	global _lastlooptime,_frame_callbacks,_timer_callbacks
 	looptime = time.time()-_lastlooptime
 	_lastlooptime += looptime
 	sleep(max(0,delay-looptime))
 	global _keys,_taps,_mousemove,_collisions,_cam_pos
 	_keys,_taps,_collisions,_cam_pos = None,None,None,None
 	_poll_joysticks()
+	fcbs,_frame_callbacks = _frame_callbacks,[]
+	for f in fcbs:
+		f()
+	for timer,t_func in list(_timer_callbacks.items()):
+		t,func = t_func
+		if timeout(t, timer):
+			del _timer_callbacks[timer]
+			timeout(timer, reset=True)
+			func()
 	if _want_mousemove:
 		_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
 	if end_after and timeout(end_after,timer=-154):
@@ -291,6 +303,18 @@ def timein(t, timer=0):
 		return True
 	return False
 
+def frame_callback(func):
+	global _frame_callbacks
+	_frame_callbacks.append(func)
+
+def timer_callback(t, func):
+	global _timer_callbacks
+	for tr in range(1000,2000):
+		if tr not in _timers:
+			timeout(t, timer=tr)
+			_timer_callbacks[tr] = (t,func)
+			break
+
 def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relative_angle=None, light_angle=None, smooth=None):
 	'''Set camera angle, distance, target object, position, fov. target_relative_angle=True means that the
 	   angle is relative to your target object rather than absolute. light_angle is used to change the
@@ -301,7 +325,7 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relat
 	gameapi.light(tovec3(light_angle))
 	# Update shadow variables for screen<-->world space transformations.
 	global _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative,_cam_is_smooth
-	if angle: 		_cam_angle = angle
+	if angle:		 _cam_angle = angle
 	if distance != None:	_cam_distance = distance
 	if target:		_cam_target = target
 	if pos:			_cam_lookat = tovec3(pos)
@@ -320,7 +344,7 @@ def fg(col=None, outline=None):
 	_tryinit()
 	if col:
 		global _prev_col
-		if _prev_col != col:
+		if type(_prev_col)!=type(col) or _prev_col!=col:
 			_prev_col = col
 			gameapi.setpencolor(col)
 	if outline != None:
@@ -600,8 +624,8 @@ def mousewheel():
 	return _mousemove.z
 
 def is_touch_device():
-    '''Only use this function if your touch device's and computer's controls clash.'''
-    return gameapi.osname.lower() in ('ios', 'android')
+	'''Only use this function if your touch device's and computer's controls clash.'''
+	return gameapi.osname.lower() in ('ios', 'android')
 
 
 ########################################
