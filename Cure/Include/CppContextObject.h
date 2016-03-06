@@ -47,7 +47,7 @@ protected:
 
 	void OnMicroTick(float pFrameTime);
 	void OnAlarm(int pAlarmId, void* pExtraData);
-	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
 	virtual void OnForceApplied(ContextObject* pOtherObject,
 		 Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
 		 const vec3& pForce, const vec3& pTorque,

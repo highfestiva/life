@@ -131,7 +131,7 @@ bool PhysicsSharedResource::FinalizeInit()
 	xform lTransformation = mInitData.mTransformation;
 	if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
-		return lStructure->FinalizeInit(0, 0, &lTransformation, 0, 0);
+		return lStructure->FinalizeInit(0, 0, &lTransformation, 0);
 	}
 	else if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_STATIC)
 	{
@@ -149,7 +149,7 @@ bool PhysicsSharedResource::FinalizeInit()
 
 	const int lPhysicsFps = mInitData.mPhysicsFps;
 	ScopeLock lLock(mInitData.mPhysicsLock);
-	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation, mInitData.mInstanceId, mInitData.mInstanceId);
+	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation, mInitData.mInstanceId);
 	deb_assert(lOk);
 
 	// Set orienation (as given in initial transform). The orientation in initial transform

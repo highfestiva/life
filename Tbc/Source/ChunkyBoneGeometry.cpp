@@ -24,7 +24,6 @@ ChunkyBoneGeometry::ChunkyBoneGeometry(const BodyData& pBodyData):
 	mBodyData(pBodyData),
 	mJointId(INVALID_JOINT),
 	mBodyId(INVALID_BODY),
-	mTriggerId(INVALID_TRIGGER),
 	mExtraData(0)
 {
 	AddConnectorType(pBodyData.mConnectorType);
@@ -33,7 +32,7 @@ ChunkyBoneGeometry::ChunkyBoneGeometry(const BodyData& pBodyData):
 ChunkyBoneGeometry::~ChunkyBoneGeometry()
 {
 	// Ensure all resources has been released prior to delete.
-	deb_assert(mJointId == INVALID_JOINT && mBodyId == INVALID_BODY && mTriggerId == INVALID_TRIGGER);
+	deb_assert(mJointId == INVALID_JOINT && mBodyId == INVALID_BODY);
 }
 
 void ChunkyBoneGeometry::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal)
@@ -108,10 +107,6 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		{
 			// Need not do jack. It's not a physical object.
 			lOk = true;
-		}
-		else if (GetTriggerId())
-		{
-			lOk = pPhysics->Attach(GetTriggerId(), mBodyData.mParent->GetBodyId());
 		}
 		else if (mBodyData.mJointType == JOINT_EXCLUDE)
 		{
@@ -242,14 +237,6 @@ void ChunkyBoneGeometry::RemovePhysics(PhysicsManager* pPhysics)
 		}
 		mBodyId = INVALID_BODY;
 	}
-	if (mTriggerId != INVALID_TRIGGER)
-	{
-		if (pPhysics)
-		{
-			pPhysics->DeleteTrigger(mTriggerId);
-		}
-		mTriggerId = INVALID_TRIGGER;
-	}
 }
 
 
@@ -313,11 +300,6 @@ PhysicsManager::BodyID ChunkyBoneGeometry::GetBodyId() const
 void ChunkyBoneGeometry::ResetBodyId()
 {
 	mBodyId = INVALID_BODY;
-}
-
-PhysicsManager::TriggerID ChunkyBoneGeometry::GetTriggerId() const
-{
-	return (mTriggerId);
 }
 
 bool ChunkyBoneGeometry::IsConnectorType(ConnectorType pType) const
@@ -464,16 +446,8 @@ bool ChunkyBoneCapsule::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateCapsule(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
-		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
+		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId, mBodyData.mBoneType==BONE_TRIGGER);
 	return (mBodyId != INVALID_BODY);
-}
-
-bool ChunkyBoneCapsule::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateCapsuleTrigger(pTransform, mRadius, mLength, pTrigListenerId);
-	return (mTriggerId != INVALID_TRIGGER);
 }
 
 unsigned ChunkyBoneCapsule::GetChunkySize(const void* pData) const
@@ -522,16 +496,8 @@ bool ChunkyBoneCylinder::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateCylinder(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
-		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
+		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId, mBodyData.mBoneType==BONE_TRIGGER);
 	return (mBodyId != INVALID_BODY);
-}
-
-bool ChunkyBoneCylinder::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateCylinderTrigger(pTransform, mRadius, mLength, pTrigListenerId);
-	return (mTriggerId != INVALID_TRIGGER);
 }
 
 vec3 ChunkyBoneCylinder::GetShapeSize() const
@@ -558,16 +524,8 @@ bool ChunkyBoneSphere::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateSphere(pIsRoot, pTransform, mBodyData.mMass, mRadius, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pForceListenerId);
+		mBodyData.mBounce, pForceListenerId, mBodyData.mBoneType==BONE_TRIGGER);
 	return (mBodyId != INVALID_BODY);
-}
-
-bool ChunkyBoneSphere::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateSphereTrigger(pTransform, mRadius, pTrigListenerId);
-	return (mTriggerId != INVALID_TRIGGER);
 }
 
 unsigned ChunkyBoneSphere::GetChunkySize(const void* pData) const
@@ -614,16 +572,8 @@ bool ChunkyBoneBox::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateBox(pIsRoot, pTransform, mBodyData.mMass, mSize, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pForceListenerId);
+		mBodyData.mBounce, pForceListenerId, mBodyData.mBoneType==BONE_TRIGGER);
 	return (mBodyId != INVALID_BODY);
-}
-
-bool ChunkyBoneBox::CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateBoxTrigger(pTransform, mSize, pTrigListenerId);
-	return (mTriggerId != INVALID_TRIGGER);
 }
 
 unsigned ChunkyBoneBox::GetChunkySize(const void* pData) const
@@ -684,14 +634,9 @@ bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	RemovePhysics(pPhysics);
 	deb_assert(mTriangleCount > 1);
 	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
-		pTransform, mBodyData.mMass, pType, mBodyData.mFriction, mBodyData.mBounce, pForceListenerId);
+		pTransform, mBodyData.mMass, pType, mBodyData.mFriction, mBodyData.mBounce, pForceListenerId,
+		mBodyData.mBoneType==BONE_TRIGGER);
 	return (mBodyId != INVALID_BODY);
-}
-
-bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, int, const xform&)
-{
-	deb_assert(false);
-	return (false);
 }
 
 unsigned ChunkyBoneMesh::GetChunkySize(const void* pData) const

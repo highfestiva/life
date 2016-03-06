@@ -52,7 +52,7 @@ public:
 	static PhysicsTrigger* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
 	Type GetType() const;
-	PhysicsManager::TriggerID GetPhysicsTriggerId(int pTriggerGeometryIndex) const;
+	PhysicsManager::BodyID GetPhysicsTriggerId(int pTriggerGeometryIndex) const;
 	//int GetGroupIndex() const;
 	int GetPriority() const;
 	const str& GetFunction() const;

@@ -31,9 +31,8 @@ public:
 protected:
 	virtual void OnLoaded();
 	void StartBullet(float pMuzzleVelocity);
-	virtual void OnMicroTick(float pFrameTime);
 	void OnTick();
-	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	UiCure::UserSound3dResource* mShreekSound;

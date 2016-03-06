@@ -25,7 +25,6 @@ roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,pus
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
-wait_until_loaded = True
 osname = sys.platform
 _lastlooptime = time.time()
 _accurate_ascii_generate = False
@@ -46,9 +45,10 @@ _collisions = None
 _joysticks = {}
 _accelerometer_calibration = vec3()
 _timers = {}
-_frame_callbacks = {}
 _timer_callbacks = {}
 _objects = {}
+_async_load = False
+_async_loaders = {}
 _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative,_cam_is_smooth = vec3(),10,None,vec3(),0.5,False,False
 _cam_pos,_cam_q,_cam_inv_q = vec3(0,-10,0),quat(),quat()
 
@@ -109,19 +109,32 @@ class Obj:
 	def col(self, col=None):
 		'''Set color, input is either a 3-tuple (R,G,B) or an html string color such as #ff3 or #304099.'''
 		return gameapi.col(self.id, col)
-	def bounce_in_rect(self,ltn,rbf):
+	def bounce_in_rect(self,ltn,rbf,spring=1):
 		'''Change velocity if position goes outside box defined by left-top-near corner (ltn)
 		   and right-bottom-far corner (rbf).'''
 		p,v = self.pos(),self.vel()
 		_v = vec3(v)
 		ltn,rbf = tovec3(ltn),tovec3(rbf)
-		if p.x < ltn.x: v.x = +abs(v.x)
-		if p.x > rbf.x: v.x = -abs(v.x)
-		if p.y < ltn.y: v.y = +abs(v.y)
-		if p.y > rbf.y: v.y = -abs(v.y)
-		if p.z < ltn.z: v.z = +abs(v.z)
-		if p.z > rbf.z: v.z = -abs(v.z)
+		if p.x < ltn.x:
+			p.x = ltn.x
+			v.x = +abs(v.x)*spring
+		if p.x > rbf.x:
+			p.x = rbf.x
+			v.x = -abs(v.x)*spring
+		if p.y < ltn.y:
+			p.y = ltn.y
+			v.y = +abs(v.y)*spring
+		if p.y > rbf.y:
+			p.y = rbf.y
+			v.y = -abs(v.y)*spring
+		if p.z < ltn.z:
+			p.z = ltn.z
+			v.z = +abs(v.z)*spring
+		if p.z > rbf.z:
+			p.z = rbf.z
+			v.z = -abs(v.z)*spring
 		if v != _v:
+			self.pos(p)
 			self.vel(v)
 	def create_engine(self, engine_type, max_velocity=None, offset=None, strength=1, friction=0, targets=None, sound=None):
 		'''Offset is only used in a few engines (such as rotor tilt). Friction is used for engine brake,
@@ -223,8 +236,8 @@ def trabant_init(**kwargs):
 		except:
 			pass
 	config.update(kwargs)
-	global _joysticks,_timers,_has_opened,_accelerometer_calibration
-	_joysticks,_timers,_frame_callbacks,_timer_callbacks,_has_opened = {},{},[],{},True
+	global _joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened,_accelerometer_calibration
+	_joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened = {},{},{},{},True
 	if 'osname' in config:
 		global osname
 		osname = config['osname']
@@ -237,10 +250,15 @@ def trabant_init(**kwargs):
 	cam(angle=(0,0,0), distance=10, target=None, fov=45, light_angle=(-0.8,0,0.1))
 	loop(delay=0)	# Resets taps+collisions.
 	_accelerometer_calibration = accelerometer()
+	async_load(False)
 
 def debugsim(enable=True):
 	'''Turns on/off simulation debug mode, which by default renders physics shapes.'''
 	gameapi.debugsim(enable)
+
+def async_load(enable=True):
+    global _async_load
+    _async_load = enable
 
 def userinfo(message=''):
 	'''Shows a message dialog to the user. Dismiss dialog by calling without parameters.'''
@@ -250,22 +268,26 @@ def userinfo(message=''):
 def loop(delay=0.03, end_after=None):
 	'''Call this every loop, check return value if you should continue looping.'''
 	_tryinit()
-	global _lastlooptime,_frame_callbacks,_timer_callbacks
+	global _lastlooptime,_timer_callbacks,_async_loaders
 	looptime = time.time()-_lastlooptime
 	_lastlooptime += looptime
 	sleep(max(0,delay-looptime))
 	global _keys,_taps,_mousemove,_collisions,_cam_pos
 	_keys,_taps,_collisions,_cam_pos = None,None,None,None
 	_poll_joysticks()
-	fcbs,_frame_callbacks = _frame_callbacks,[]
-	for f in fcbs:
-		f()
 	for timer,t_func in list(_timer_callbacks.items()):
 		t,func = t_func
 		if timeout(t, timer):
 			del _timer_callbacks[timer]
-			timeout(timer, reset=True)
+			timeout(timer=timer, reset=True)
 			func()
+	if _async_loaders:
+		loaded = gameapi.areloaded(_async_loaders.keys())
+		for loaded,oid_ldr in zip(loaded,list(_async_loaders.items())):
+			if loaded:
+				oid,loader = oid_ldr
+				loader()
+				del _async_loaders[oid]
 	if _want_mousemove:
 		_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
 	if end_after and timeout(end_after,timer=-154):
@@ -303,13 +325,9 @@ def timein(t, timer=0):
 		return True
 	return False
 
-def frame_callback(func):
-	global _frame_callbacks
-	_frame_callbacks.append(func)
-
 def timer_callback(t, func):
 	global _timer_callbacks
-	for tr in range(1000,2000):
+	for tr in range(-2000,-1000):
 		if tr not in _timers:
 			timeout(t, timer=tr)
 			_timer_callbacks[tr] = (t,func)
@@ -320,6 +338,9 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relat
 	   angle is relative to your target object rather than absolute. light_angle is used to change the
 	   direction of the directional light in the scene.'''
 	_tryinit()
+	if not (angle or distance or target or pos or fov or target_relative_angle or light_angle or smooth):
+		_update_cam_shadow()
+		return _cam_pos
 	angle = tovec3(angle)
 	gameapi.cam(angle, distance, target.id if target else target, tovec3(pos), fov, target_relative_angle, smooth)
 	gameapi.light(tovec3(light_angle))
@@ -366,10 +387,11 @@ def gravity(g, bounce=None, friction=None):
 	if friction != None:
 		gameapi.friction(friction)
 
-def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='flat', static=False, physmesh=False, process=None):
-	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
-	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
-	   process the physics and graphics with the process callback function before it's added to the simulation.'''
+def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='flat', static=False, trigger=False, physmesh=False, process=None):
+	'''Returns an Obj. static=True means object if fixed in absolute space. trigger=True means it won't apply any
+	   force during collisions. Only four types of materials exist: flat, smooth, checker and noise. orientation
+	   is a quaternion, avel is angular velocity. You can pre-process the physics and graphics with the process
+	   callback function before it's added to the simulation.'''
 	global _last_ascii_top_left_offset,_asc2obj_lookup
 	physmesh = True if physmesh==True else False
 	# Keep a small cache of generated objects. Most small prototypes will reuse shapes.
@@ -386,51 +408,54 @@ def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, 
 		_asc2obj_lookup.append((ascii+str(physmesh)+str(process),gfx,phys,_last_ascii_top_left_offset))
 		if len(_asc2obj_lookup) > 10:
 			del _asc2obj_lookup[0]
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	return _create_object(gfx, phys, static, trigger, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_mesh(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
-	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
-	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
-	   process the physics and graphics with the process callback function before it's added to the simulation.'''
+def create_mesh(vertices, triangles, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, trigger=False, process=None):
+	'''Returns an Obj. static=True means object if fixed in absolute space. trigger=True means it won't apply any
+	   force during collisions. Only four types of materials exist: flat, smooth, checker and noise. orientation
+	   is a quaternion, avel is angular velocity. You can pre-process the physics and graphics with the process
+	   callback function before it's added to the simulation.'''
 	orientation = toquat(orientation) if orientation else quat()
 	gfx,phys = objgen.createmesh(vertices,triangles)
 	if process:
 		orientation,gfx,phys = process(orientation,gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	return _create_object(gfx, phys, static, trigger, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_box(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, process=None):
-	'''Returns an Obj. static=True means object if fixed in absolute space. A box can have different length
-	   sides (cuboid), you create one by supplying a three-tuple instead of a scalar. Only four types of
-	   materials exist: flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity.
-	   You can pre-process the physics and graphics with the process callback function before it's added to
-	   the simulation.'''
+def create_box(pos=None, orientation=None, side=1, vel=None, avel=None, mass=None, mat='checker', col=None, static=False, trigger=False, process=None):
+	'''Returns an Obj. static=True means object if fixed in absolute space. trigger=True means it won't apply any
+	   force during collisions. A box can have different length sides (cuboid), you create one by supplying a
+	   three-tuple instead of a scalar. Only four types of materials exist: flat, smooth, checker and noise.
+	   orientation is a quaternion, avel is angular velocity. You can pre-process the physics and graphics with
+	   the process callback function before it's added to the simulation.'''
 	try:	side = tovec3(side)
 	except:	side = vec3(side,side,side)
 	orientation = toquat(orientation) if orientation else quat()
 	gfx,phys = objgen.createcube(side)
 	if process:
 		orientation,gfx,phys = process(orientation,gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	return _create_object(gfx, phys, static, trigger, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
-	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
-	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
-	   process the physics and graphics with the process callback function before it's added to the simulation.'''
+def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, trigger=False, process=None):
+	'''Returns an Obj. static=True means object if fixed in absolute space. trigger=True means it won't apply any
+	   force during collisions. Only four types of materials exist: flat, smooth, checker and noise. orientation
+	   is a quaternion, avel is angular velocity. You can pre-process the physics and graphics with the process
+	   callback function before it's added to the simulation.'''
 	orientation,resolution = quat(),int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createsphere(radius, latitude=resolution, longitude=int(resolution*1.5))
 	if process:
 		orientation,gfx,phys = process(orientation,gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	return _create_object(gfx, phys, static, trigger, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_capsule(pos=None, orientation=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, process=None):
-	'''Returns an Obj. static=True means object if fixed in absolute space. Only four types of materials exist:
-	   flat, smooth, checker and noise. orientation is a quaternion, avel is angular velocity. You can pre-
-	   process the physics and graphics with the process callback function before it's added to the simulation.'''
+def create_capsule(pos=None, orientation=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, trigger=False, process=None):
+	'''Returns an Obj. static=True means object if fixed in absolute space. trigger=True means it won't apply any
+	   force during collisions. Only four types of materials exist: flat, smooth, checker and noise. orientation
+	   is a quaternion, avel is angular velocity. You can pre-process the physics and graphics with the process
+	   callback function before it's added to the simulation.'''
 	resolution = int(min(8, max(4,radius**0.3)*8))
 	gfx,phys = objgen.createcapsule(radius, length, latitude=resolution, longitude=int(resolution*1.5))
 	if process:
 		orientation,gfx,phys = process(orientation,gfx,phys)
-	return _create_object(gfx, phys, static, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
+	return _create_object(gfx, phys, static, trigger, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
 def create_clones(obj, placements, mat=None, static=False):
 	'''Creates multiple clones at once of the original Obj, returns a list of Objs. Placement is a list of
@@ -646,7 +671,7 @@ def _poll_joysticks():
 		for j in [joy for jid,joy in _joysticks.items() if jid not in used_joys and not joy.sloppy]:
 			j.x = j.y = 0.0
 
-def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, mat):
+def _create_object(gfx, phys, static, trigger, pos, orientation, vel, avel, mass, col, mat):
 	_tryinit()
 	global _prev_gfx,_prev_phys,_last_mat
 	_last_mat = mat
@@ -667,18 +692,23 @@ def _create_object(gfx, phys, static, pos, orientation, vel, avel, mass, col, ma
 	fg(col)
 	objpos = tovec3(pos) if tovec3(pos) else vec3()
 	objori = toquat(orientation) if toquat(orientation) else quat()
-	oid = gameapi.createobj(static, mat, objpos, objori)
-	if wait_until_loaded:
+	oid = gameapi.createobj(static, trigger, mat, objpos, objori)
+	if not _async_load:
 		gameapi.waitload(oid)
 	o = Obj(oid,gfx,phys)
-	global _objects,_last_created_object
+	global _objects,_last_created_object,_async_loaders
 	_objects[oid] = o
-	if vel:
-		o.vel(tovec3(vel))
-	if avel:
-		o.avel(tovec3(avel))
-	if mass:
-		o.mass(mass)
+	def postload(o):
+		if vel:
+			o.vel(tovec3(vel))
+		if avel:
+			o.avel(tovec3(avel))
+		if mass:
+			o.mass(mass)
+	if _async_load:
+		_async_loaders[oid] = lambda: postload(o)
+	else:
+		postload(o)
 	_last_created_object = o
 	return o
 

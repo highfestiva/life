@@ -116,7 +116,7 @@ public:
 	virtual void Suspend(bool pHard);
 
 	void UserReset();
-	int CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic);
+	int CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic, bool pIsTrigger);
 	void CreateClones(IntList& pCreatedObjectIds, int pOriginalId, const XformList& pPlacements, ObjectMaterial pMaterial, bool pIsStatic);
 	void DeleteObject(int pObjectId);
 	void DeleteAllObjects();
@@ -174,9 +174,11 @@ protected:
 
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
 	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
+	void PushCollision(Cure::GameObjectId pObjectId1, const vec3& pForce, const vec3& pPosition, Cure::GameObjectId pObjectId2);
 
 	void OnPauseButton(UiTbc::Button*);
 	void OnBackButton(UiTbc::Button*);

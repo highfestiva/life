@@ -103,7 +103,7 @@ void DebugRenderer::DebugDrawPrimitive(Cure::ContextObject* pObject, DebugPrimit
 	for (int x = 0; x < lBoneCount; ++x)
 	{
 		const Tbc::ChunkyBoneGeometry* lGeometry = pObject->GetPhysics()->GetBoneGeometry(x);
-		Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId()? lGeometry->GetBodyId() : lGeometry->GetTriggerId();
+		Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
 		if (lBodyId != Tbc::INVALID_BODY)
 		{
 			lContextManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBodyId, lPhysicsTransform);

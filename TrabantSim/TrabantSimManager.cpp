@@ -251,7 +251,7 @@ void TrabantSimManager::UserReset()
 }
 
 int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects,
-					ObjectMaterial pMaterial, bool pIsStatic)
+					ObjectMaterial pMaterial, bool pIsStatic, bool pIsTrigger)
 {
 	if (pGfxObject.mVertices.empty() || pGfxObject.mIndices.empty())
 	{
@@ -287,6 +287,7 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 		for (; x != pPhysObjects.end(); ++x, ++y)
 		{
 			Tbc::ChunkyBoneGeometry::BodyData lBoneData(y==0? 15.0f:1.0f, lFriction, lBounce, lParent, Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE, Tbc::ChunkyBoneGeometry::CONNECTEE_3DOF);
+			lBoneData.mBoneType = pIsTrigger? Tbc::ChunkyBoneGeometry::BONE_TRIGGER : Tbc::ChunkyBoneGeometry::BONE_BODY;
 			PlacedObject* lPhysObject = *x;
 			xform t = xform(lPhysObject->mOrientation, lPhysObject->mPos);
 			if (lParentPhysObject)
@@ -1696,6 +1697,12 @@ void TrabantSimManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
+void TrabantSimManager::OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
+{
+	Parent::OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pPosition, pNormal);
+	PushCollision(pTriggerListenerId, vec3(), pPosition, pOtherObjectId);
+}
+
 void TrabantSimManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
@@ -1709,19 +1716,23 @@ void TrabantSimManager::OnCollision(const vec3& pForce, const vec3& pTorque, con
 
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
 
+	PushCollision(pObject1->GetInstanceId(), pForce, pPosition, pObject2->GetInstanceId());
+}
+
+void TrabantSimManager::PushCollision(Cure::GameObjectId pObjectId1, const vec3& pForce, const vec3& pPosition, Cure::GameObjectId pObjectId2)
+{
 	ScopeLock lGameLock(GetTickLock());
 	CollisionInfo ci;
-	ci.mObjectId = pObject1->GetInstanceId();
+	ci.mObjectId = pObjectId1;
 	ci.mForce = pForce;
 	ci.mPosition = pPosition;
-	ci.mOtherObjectId = pObject2->GetInstanceId();
+	ci.mOtherObjectId = pObjectId2;
 	mCollisionList.push_back(ci);
 	if (mCollisionList.size() > 300)
 	{
 		mCollisionList.pop_front();
 	}
 }
-
 
 
 void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)

@@ -128,8 +128,6 @@ public:
 	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 		int pForceListenerId, PhysicsManager::BodyType pType,
 		const xform& pTransform) = 0;
-	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-		const xform& pTransform) = 0;
 	void RemovePhysics(PhysicsManager* pPhysics);
 
 	float GetMass() const;
@@ -144,7 +142,6 @@ public:
 	void SetJointId(PhysicsManager::JointID pJointId);
 	PhysicsManager::BodyID GetBodyId() const;
 	void ResetBodyId();
-	PhysicsManager::TriggerID GetTriggerId() const;
 	bool IsConnectorType(ConnectorType pType) const;
 	void AddConnectorType(ConnectorType pType);
 	void ClearConnectorTypes();
@@ -171,7 +168,7 @@ protected:
 	BodyDataBase mBodyData;
 	PhysicsManager::JointID mJointId;
 	PhysicsManager::BodyID mBodyId;
-	PhysicsManager::TriggerID mTriggerId;
+	PhysicsManager::BodyID mTriggerId;
 	ConnectorArray mConnectorArray;
 	str mMaterial;
 	float mExtraData;
@@ -188,8 +185,6 @@ public:
 	ChunkyBoneCapsule(const BodyData& pBodyData);
 	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const xform& pTransform);
-	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-		const xform& pTransform);
 
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
@@ -211,8 +206,6 @@ public:
 	ChunkyBoneCylinder(const BodyData& pBodyData);
 	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const xform& pTransform);
-	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-		const xform& pTransform);
 
 private:
 	virtual vec3 GetShapeSize() const;
@@ -228,8 +221,6 @@ public:
 	ChunkyBoneSphere(const BodyData& pBodyData);
 	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const xform& pTransform);
-	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-		const xform& pTransform);
 
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
@@ -250,8 +241,6 @@ public:
 	ChunkyBoneBox(const BodyData& pBodyData);
 	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const xform& pTransform);
-	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-		const xform& pTransform);
 
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
@@ -274,8 +263,6 @@ public:
 	virtual ~ChunkyBoneMesh();
 	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
 		PhysicsManager::BodyType pType, const xform& pTransform);
-	virtual bool CreateTrigger(PhysicsManager* pPhysics, int pTrigListenerId,
-		const xform& pTransform);
 
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;

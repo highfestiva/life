@@ -27,7 +27,7 @@ Eater::~Eater()
 
 
 
-void Eater::OnTrigger(Tbc::PhysicsManager::TriggerID, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID, const vec3&)
+void Eater::OnTrigger(Tbc::PhysicsManager::BodyID, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID, const vec3&, const vec3&)
 {
 	if (pOtherObject->GetClassId().find(_T("helicopter")) == str::npos)
 	{

@@ -167,6 +167,15 @@ class quat:
 		conjugate[1],conjugate[2],conjugate[3] = -conjugate[1],-conjugate[2],-conjugate[3]
 		return quat(*conjugate)/l2
 
+	def normalize(self, length=1):
+		l = self.length()
+		if l < 0.0001: return self
+		il = length/l
+		return quat(*[q*il for q in self.q])
+
+	def length(self):
+		return sqrt(self.norm())
+
 	def norm(self):
 		return self.q[0]*self.q[0] + self.q[1]*self.q[1] + self.q[2]*self.q[2] + self.q[3]*self.q[3]
 

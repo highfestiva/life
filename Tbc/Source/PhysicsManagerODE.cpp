@@ -177,12 +177,18 @@ int PhysicsManagerODE::QueryRayPick(const vec3& pRayPosition, const vec3& pRayDi
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const xform& pTransform,
 	float32 pMass, float32 pRadius, BodyType pType, float32 pFriction, float32 pBounce,
-	int pForceListenerId)
+	int pForceListenerId, bool pIsTrigger)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
-	lObject->mForceFeedbackId = pForceListenerId;
-	//deb_assert(pType == STATIC || lObject->mForceFeedbackId);
+	if (pIsTrigger)
+	{
+		lObject->mTriggerListenerId = pForceListenerId;
+	}
+	else
+	{
+		lObject->mForceFeedbackId = pForceListenerId;
+	}
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -212,15 +218,21 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const xform
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const xform& pTransform,
 	float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction,
-	float32 pBounce, int pForceListenerId)
+	float32 pBounce, int pForceListenerId, bool pIsTrigger)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	// TODO: Create a real cylinder when ODE supports it.
 	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 
-	lObject->mForceFeedbackId = pForceListenerId;
-	//deb_assert(pType == STATIC || lObject->mForceFeedbackId);
+	if (pIsTrigger)
+	{
+		lObject->mTriggerListenerId = pForceListenerId;
+	}
+	else
+	{
+		lObject->mForceFeedbackId = pForceListenerId;
+	}
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -249,13 +261,19 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const xfo
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const xform& pTransform,
 	float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction,
-	float32 pBounce, int pForceListenerId)
+	float32 pBounce, int pForceListenerId, bool pIsTrigger)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	lObject->mGeomID = ::dCreateCapsule(mSpaceID, (dReal)pRadius, (dReal)pLength);
-	lObject->mForceFeedbackId = pForceListenerId;
-	//deb_assert(pType == STATIC || lObject->mForceFeedbackId);
+	if (pIsTrigger)
+	{
+		lObject->mTriggerListenerId = pForceListenerId;
+	}
+	else
+	{
+		lObject->mForceFeedbackId = pForceListenerId;
+	}
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -284,13 +302,19 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const xfor
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const xform& pTransform,
 	float32 pMass, const vec3& pSize, BodyType pType, float32 pFriction,
-	float32 pBounce, int pForceListenerId)
+	float32 pBounce, int pForceListenerId, bool pIsTrigger)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	lObject->mGeomID = ::dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
-	lObject->mForceFeedbackId = pForceListenerId;
-	//deb_assert(pType == STATIC || lObject->mForceFeedbackId);
+	if (pIsTrigger)
+	{
+		lObject->mTriggerListenerId = pForceListenerId;
+	}
+	else
+	{
+		lObject->mForceFeedbackId = pForceListenerId;
+	}
 
 	if (pType == PhysicsManager::DYNAMIC)
 	{
@@ -493,7 +517,7 @@ bool PhysicsManagerODE::AddMass(BodyID pStaticBody, BodyID pMainBody)
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,
-	const xform& pTransform, float32 pMass, BodyType pType, float32 pFriction, float32 pBounce, int pForceListenerId)
+	const xform& pTransform, float32 pMass, BodyType pType, float32 pFriction, float32 pBounce, int pForceListenerId, bool pIsTrigger)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
@@ -509,8 +533,14 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned p
 	lObject->mGeomID = ::dCreateTriMesh(mSpaceID, lObject->mTriMeshID, 0, 0, 0);
 	//::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	::dGeomSetData(lObject->mGeomID, lObject);
-	lObject->mForceFeedbackId = pForceListenerId;
-	deb_assert(lObject->mForceFeedbackId);
+	if (pIsTrigger)
+	{
+		lObject->mTriggerListenerId = pForceListenerId;
+	}
+	else
+	{
+		lObject->mForceFeedbackId = pForceListenerId;
+	}
 
 //	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
 
@@ -906,133 +936,8 @@ void* PhysicsManagerODE::GetBodyData(BodyID pBodyId)
 	return lObject->mUserData;
 }
 
-PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const xform& pTransform,
-	float32 pRadius, int pTriggerListenerId)
-{
-	Object* lObject = new Object(mWorldID, false);
-	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
 
-	dGeomSetData(lObject->mGeomID, lObject);
-
-	lObject->mGeometryData[0] = pRadius;
-
-	lObject->mTriggerListenerId = pTriggerListenerId;
-
-	mObjectTable.insert(lObject);
-
-	SetBodyTransform((BodyID)lObject, pTransform);
-
-	return (TriggerID)lObject;
-}
-
-PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const xform& pTransform,
-	float32 pRadius, float32 pLength, int pTriggerListenerId)
-{
-	Object* lObject = new Object(mWorldID, false);
-
-	// TODO: Create a real cylinder when ODE supports it.
-	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
-
-	dGeomSetData(lObject->mGeomID, lObject);
-
-	lObject->mGeometryData[0] = pRadius;
-	lObject->mGeometryData[1] = pLength;
-
-	lObject->mTriggerListenerId = pTriggerListenerId;
-
-	mObjectTable.insert(lObject);
-
-	SetBodyTransform((BodyID)lObject, pTransform);
-
-	return (TriggerID)lObject;
-}
-
-PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const xform& pTransform,
-	float32 pRadius, float32 pLength, int pTriggerListenerId)
-{
-	Object* lObject = new Object(mWorldID, false);
-
-	lObject->mGeomID = ::dCreateCapsule(mSpaceID, (dReal)pRadius, (dReal)pLength);
-
-	dGeomSetData(lObject->mGeomID, lObject);
-
-	lObject->mGeometryData[0] = pRadius;
-	lObject->mGeometryData[1] = pLength;
-
-	lObject->mTriggerListenerId = pTriggerListenerId;
-
-	mObjectTable.insert(lObject);
-
-	SetBodyTransform((BodyID)lObject, pTransform);
-
-	return (TriggerID)lObject;
-}
-
-PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const xform& pTransform,
-	const vec3& pSize, int pTriggerListenerId)
-{
-	Object* lObject = new Object(mWorldID, false);
-
-	lObject->mGeomID = dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
-
-	dGeomSetData(lObject->mGeomID, lObject);
-
-	lObject->mGeometryData[0] = pSize.x;
-	lObject->mGeometryData[1] = pSize.y;
-	lObject->mGeometryData[2] = pSize.z;
-
-	lObject->mTriggerListenerId = pTriggerListenerId;
-
-	mObjectTable.insert(lObject);
-
-	SetBodyTransform((BodyID)lObject, pTransform);
-
-	return (TriggerID)lObject;
-}
-
-PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const xform& pTransform,
-	const vec3& pFromPos, const vec3& pToPos,
-	int pTriggerListenerId)
-{
-	Object* lObject = new Object(mWorldID, false);
-
-	// Calculate the direction vector.
-	vec3 lDir(pToPos - pFromPos);
-	float32 lLength = lDir.GetLength();
-	lDir.Div(lLength);
-
-	lObject->mGeomID = dCreateRay(mSpaceID, lLength);
-
-	dGeomSetData(lObject->mGeomID, lObject);
-
-	dGeomRaySet(lObject->mGeomID, pFromPos.x, pFromPos.y, pFromPos.z, lDir.x, lDir.y, lDir.z);
-
-	lObject->mTriggerListenerId = pTriggerListenerId;
-
-	mObjectTable.insert(lObject);
-
-	SetBodyTransform((BodyID)lObject, pTransform);
-
-	return (TriggerID)lObject;
-}
-
-void PhysicsManagerODE::DeleteTrigger(TriggerID pTriggerID)
-{
-	ObjectTable::iterator x = mObjectTable.find((Object*)pTriggerID);
-
-	if (x != mObjectTable.end())
-	{
-		dGeomDestroy((*x)->mGeomID);
-		delete *x;
-		mObjectTable.erase(x);
-	}
-	else
-	{
-		mLog.AError("DeleteBody() - Can't find body to delete!");
-	}
-}
-
-int PhysicsManagerODE::GetTriggerListenerId(TriggerID pTrigger)
+int PhysicsManagerODE::GetTriggerListenerId(BodyID pTrigger)
 {
 	Object* lObject = (Object*)pTrigger;
 	if (lObject->mWorldID != mWorldID)
@@ -1063,16 +968,6 @@ void PhysicsManagerODE::SetForceFeedbackListener(BodyID pBody, int pForceFeedbac
 		return;
 	}
 	lObject->mForceFeedbackId = pForceFeedbackId;
-}
-
-void PhysicsManagerODE::GetTriggerTransform(TriggerID pTriggerID, xform& pTransform)
-{
-	GetBodyTransform((BodyID)pTriggerID, pTransform);
-}
-
-void PhysicsManagerODE::SetTriggerTransform(TriggerID pTriggerID, const xform& pTransform)
-{
-	SetBodyTransform((BodyID)pTriggerID, pTransform);
 }
 
 PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID pBody2, const vec3& pAnchorPos)
@@ -3410,11 +3305,6 @@ vec3 PhysicsManagerODE::GetGravity() const
 	return vec3(lGravity);
 }
 
-void PhysicsManagerODE::EnableTriggerBySelf(TriggerID pTriggerId, bool pEnable)
-{
-	EnableCollideWithSelf((BodyID)pTriggerId, pEnable);
-}
-
 void PhysicsManagerODE::EnableCollideWithSelf(BodyID pBodyId, bool pEnable)
 {
 	ObjectTable::iterator x = mObjectTable.find((Object*)pBodyId);
@@ -3484,7 +3374,7 @@ void PhysicsManagerODE::DoForceFeedback()
 	for (y = mTriggerInfoList.begin(); y != mTriggerInfoList.end(); ++y)
 	{
 		const TriggerInfo& lTriggerInfo = *y;
-		mTriggerCallback->OnTrigger(lTriggerInfo.mTriggerId, lTriggerInfo.mTriggerListenerId, lTriggerInfo.mBodyListenerId, lTriggerInfo.mBodyId, lTriggerInfo.mNormal);
+		mTriggerCallback->OnTrigger(lTriggerInfo.mTriggerId, lTriggerInfo.mTriggerListenerId, lTriggerInfo.mBodyListenerId, lTriggerInfo.mBodyId, lTriggerInfo.mPosition, lTriggerInfo.mNormal);
 	}
 	mTriggerInfoList.clear();
 
@@ -3591,14 +3481,16 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 	if (lObject1->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
+		vec3 lPosition(lContact[0].geom.pos);
 		vec3 lNormal(lContact[0].geom.normal);
-		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, (BodyID)lObject2, lNormal));
+		lThis->mTriggerInfoList.push_back(TriggerInfo((BodyID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, (BodyID)lObject2, lPosition, lNormal));
 		return;
 	}
 	if(lObject2->mTriggerListenerId != 0)	// Only trig, no force application.
 	{
+		vec3 lPosition(lContact[0].geom.pos);
 		vec3 lNormal(lContact[0].geom.normal);
-		lThis->mTriggerInfoList.push_back(TriggerInfo((TriggerID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, (BodyID)lObject1, lNormal));
+		lThis->mTriggerInfoList.push_back(TriggerInfo((BodyID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, (BodyID)lObject1, lPosition, lNormal));
 		return;
 	}
 

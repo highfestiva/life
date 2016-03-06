@@ -41,7 +41,7 @@ Ctf::~Ctf()
 vec3 Ctf::GetPosition() const
 {
 	const Tbc::ChunkyBoneGeometry* lCutieGoal = mTrigger->GetTriggerGeometry(0);
-	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lCutieGoal->GetTriggerId());
+	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lCutieGoal->GetBodyId());
 }
 
 float Ctf::GetCaptureLevel() const
@@ -146,7 +146,7 @@ void Ctf::OnTick()
 	mTriggerTimer.UpdateTimer();
 }
 
-void Ctf::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
+void Ctf::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pOtherObject;

@@ -40,6 +40,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandId
 	{_T("add-vertices"), COMMAND_ADD_VERTICES},
 	{_T("set-indices"), COMMAND_SET_INDICES},
 	{_T("add-indices"), COMMAND_ADD_INDICES},
+	{_T("are-loaded"), COMMAND_ARE_LOADED},
 	{_T("wait-until-loaded"), COMMAND_WAIT_UNTIL_LOADED},
 	{_T("explode"), COMMAND_EXPLODE},
 	{_T("play-sound"), COMMAND_PLAY_SOUND},
@@ -356,13 +357,14 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					const vec3 lPosition = ParamToVec3(pParameterVector, 2);
 					const quat lOrientation = ParamToQuat(pParameterVector, 5);
 					// Work out material.
-					const bool lIsStatic = (lType == _T("static"));
+					const bool lIsStatic = strutil::StartsWith(lType, _T("static"));
+					const bool lIsTrigger = (lType.find(_T("trigger")) != str::npos);
 					ObjectMaterial lMaterial = MaterialSmooth;
 					if (lMaterialInfo == _T("flat")) lMaterial = MaterialFlat;
 					else if (lMaterialInfo == _T("checker")) lMaterial = MaterialChecker;
 					else if (lMaterialInfo == _T("noise")) lMaterial = MaterialNoise;
 
-					const int lObjectId = lManager->CreateObject(lOrientation, lPosition, mGfxMesh, mPhysObjects, lMaterial, lIsStatic);
+					const int lObjectId = lManager->CreateObject(lOrientation, lPosition, mGfxMesh, mPhysObjects, lMaterial, lIsStatic, lIsTrigger);
 					if (lObjectId == -1)
 					{
 						throw ParameterException();
@@ -528,6 +530,22 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				case COMMAND_ADD_INDICES:
 				{
 					Params2Ints(pParameterVector, mIndices);
+				}
+				break;
+				case COMMAND_ARE_LOADED:
+				{
+					std::vector<int> lObjectIds;
+					Params2Ints(pParameterVector, lObjectIds);
+					bool lFirst = true;
+					for (std::vector<int>::iterator y = lObjectIds.begin(); y != lObjectIds.end(); ++y)
+					{
+						if (!lFirst)
+						{
+							mActiveResponse += _T(',');
+						}
+						lFirst = false;
+						mActiveResponse += lManager->IsLoaded(*y)? _T("1") : _T("0");
+					}
 				}
 				break;
 				case COMMAND_WAIT_UNTIL_LOADED:

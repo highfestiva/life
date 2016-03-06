@@ -47,14 +47,7 @@ void ServerFastProjectile::OnLoaded()
 	mExplosiveEnergy = lTag->mFloatValueList[3];
 }
 
-void ServerFastProjectile::OnMicroTick(float pFrameTime)
-{
-	Parent::OnMicroTick(pFrameTime);
-
-	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
-}
-
-void ServerFastProjectile::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
+void ServerFastProjectile::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pBodyId;

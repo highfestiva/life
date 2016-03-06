@@ -29,7 +29,7 @@ Eater::~Eater()
 
 
 
-void Eater::OnTrigger(Tbc::PhysicsManager::TriggerID, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3&)
+void Eater::OnTrigger(Tbc::PhysicsManager::BodyID, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3&, const vec3&)
 {
 	if (pOtherObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId() == pBodyId)	// Only if whole car enters "goal", not only wheel.
 	{

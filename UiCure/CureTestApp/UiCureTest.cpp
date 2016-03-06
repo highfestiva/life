@@ -158,7 +158,7 @@ public:
 	virtual float GetPowerSaveAmount() const {return 0;}
 	virtual void WillMicroTick(float pTimeDelta) {(void)pTimeDelta;}
 	virtual void DidPhysicsTick() {}
-	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID, int, int, Tbc::PhysicsManager::BodyID, const vec3&) {}
+	virtual void OnTrigger(Tbc::PhysicsManager::BodyID, int, int, Tbc::PhysicsManager::BodyID, const vec3&, const vec3&) {}
 	virtual void OnForceApplied(int, int,
 		Tbc::PhysicsManager::BodyID, Tbc::PhysicsManager::BodyID,
 		const vec3&, const vec3&,

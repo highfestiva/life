@@ -390,7 +390,7 @@ void ContextObject::OnAttributeUpdated(ContextObjectAttribute*)
 
 
 
-void ContextObject::AddTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, const void* pTrigger)
+void ContextObject::AddTrigger(Tbc::PhysicsManager::BodyID pTriggerId, const void* pTrigger)
 {
 	mTriggerMap.insert(TriggerMap::value_type(pTriggerId, pTrigger));
 }
@@ -399,7 +399,7 @@ void ContextObject::FinalizeTrigger(const Tbc::PhysicsTrigger*)
 {
 }
 
-const void* ContextObject::GetTrigger(Tbc::PhysicsManager::TriggerID pTriggerId) const
+const void* ContextObject::GetTrigger(Tbc::PhysicsManager::BodyID pTriggerId) const
 {
 	return HashUtil::FindMapObject(mTriggerMap, pTriggerId);
 }
@@ -454,7 +454,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 		return false;
 	}
 	Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (!lGeometry || (lGeometry->GetBodyId() == Tbc::INVALID_BODY && lGeometry->GetTriggerId() == Tbc::INVALID_TRIGGER))
+	if (!lGeometry || lGeometry->GetBodyId() == Tbc::INVALID_BODY)
 	{
 		mLog.Errorf(_T("Could not get positional update (for streaming), since %i/%s not loaded yet!"),
 			GetInstanceId(), GetClassId().c_str());
@@ -480,7 +480,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 	}
 
 	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (!lGeometry || (lGeometry->GetBodyId() == Tbc::INVALID_BODY && lGeometry->GetTriggerId() == Tbc::INVALID_TRIGGER))
+	if (!lGeometry || lGeometry->GetBodyId() == Tbc::INVALID_BODY)
 	{
 		return;
 	}
@@ -533,10 +533,6 @@ vec3 ContextObject::GetPosition() const
 		if (lGeometry)
 		{
 			Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-			if (!lBodyId)
-			{
-				lBodyId = lGeometry->GetTriggerId();
-			}
 			return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lBodyId));
 		}
 		//deb_assert(false);
@@ -845,7 +841,7 @@ void ContextObject::OnTick()
 void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositionalData)
 {
 	mPosition.CopyData(&pPositionalData);
-	deb_assert(mTotalMass != 0 || GetPhysics()->GetBoneGeometry(0)->GetTriggerId() != Tbc::INVALID_TRIGGER);
+	deb_assert(mTotalMass != 0 || GetPhysics()->GetBoneGeometry(0)->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_TRIGGER);
 	PositionHauler::Set(mPosition, mManager->GetGameManager()->GetPhysicsManager(), mPhysics, mTotalMass, mAllowMoveRoot);
 }
 
@@ -992,7 +988,7 @@ void ContextObject::SetupChildHandlers()
 		}
 		if (lBoneTriggerCount == 0)
 		{
-			lHandlerChild->AddTrigger(Tbc::INVALID_TRIGGER, lTrigger);
+			lHandlerChild->AddTrigger(Tbc::INVALID_BODY, lTrigger);
 		}
 		lHandlerChild->FinalizeTrigger(lTrigger);
 	}

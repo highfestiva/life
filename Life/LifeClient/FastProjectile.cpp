@@ -104,13 +104,6 @@ void FastProjectile::StartBullet(float pMuzzleVelocity)
 	}
 }
 
-void FastProjectile::OnMicroTick(float pFrameTime)
-{
-	Parent::OnMicroTick(pFrameTime);
-
-	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
-}
-
 void FastProjectile::OnTick()
 {
 	Parent::OnTick();
@@ -127,10 +120,11 @@ void FastProjectile::OnTick()
 	}*/
 }
 
-void FastProjectile::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
+void FastProjectile::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pBodyId;
+	(void)pPosition;
 
 	if (++mTickCount < 10 && pOtherObject->GetInstanceId() == GetOwnerInstanceId())	// Disallow self-hit during the first few frames.
 	{

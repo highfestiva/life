@@ -39,6 +39,11 @@ def debugsim(enable):
 def userinfo(message):
 	setvar('Game.UserMessage', '"%s"' % message)
 
+def areloaded(oids):
+	c = 'are-loaded %s' % ','.join('%i'%oid for oid in oids)
+	conv = lambda r: [s=='1' for s in r.split(',')]
+	return cmd(c, conv)
+
 def waitload(oid):
 	cmd('wait-until-loaded %i' % oid)
 
@@ -173,9 +178,10 @@ def setpencolor(col):
 	setvar('Ui.PenBlue', b)
 	setvar('Ui.PenAlpha', a)
 
-def createobj(static, mat, pos, orientation):
-	static = 'static' if static else 'dynamic'
-	c = 'create-object %s %s %s %s' % (static, mat, _args2str(pos,'0 0 0'), _args2str(orientation,'0 0 0 0'))
+def createobj(static, trigger, mat, pos, orientation):
+	phystype = 'static' if static else 'dynamic'
+	phystype += '_trigger' if trigger else ''
+	c = 'create-object %s %s %s %s' % (phystype, mat, _args2str(pos,'0 0 0'), _args2str(orientation,'0 0 0 0'))
 	for _ in range(3):
 		try:	return cmd(c, int)
 		except:	pass

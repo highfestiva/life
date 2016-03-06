@@ -84,27 +84,7 @@ void ProjectileUtil::StartBullet(Cure::ContextObject* pBullet, float pMuzzleVelo
 		lTransform = pBullet->GetInitialTransform();
 	}
 	const Tbc::ChunkyBoneGeometry* lGeometry = pBullet->GetPhysics()->GetBoneGeometry(pBullet->GetPhysics()->GetRootBone());
-	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetTriggerId(), lTransform);
-
-	pBullet->GetManager()->EnableMicroTickCallback(pBullet);	// Used hires movement/collision detection.
-}
-
-void ProjectileUtil::BulletMicroTick(Cure::ContextObject* pBullet, float pFrameTime, float pMaxVelocity, float pAcceleration)
-{
-	const Tbc::ChunkyBoneGeometry* lRootGeometry = pBullet->GetPhysics()->GetBoneGeometry(0);
-	Tbc::PhysicsManager::TriggerID lTrigger = lRootGeometry->GetTriggerId();
-	xform lTransform;
-	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->GetTriggerTransform(lTrigger, lTransform);
-	vec3 lVelocity = pBullet->GetVelocity();
-	lTransform.GetPosition() += lVelocity * pFrameTime;
-	lTransform.GetOrientation() = pBullet->GetOrientation();
-	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetTriggerTransform(lTrigger, lTransform);
-	if (pAcceleration && lVelocity.GetLengthSquared() < pMaxVelocity*pMaxVelocity)
-	{
-		const vec3 lForward(0, pAcceleration*pFrameTime, 0);
-		lVelocity += lTransform.GetOrientation() * lForward;
-		pBullet->SetRootVelocity(lVelocity);
-	}
+	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetBodyId(), lTransform);
 }
 
 void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated, Launcher* pLauncher, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal,

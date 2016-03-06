@@ -27,13 +27,13 @@ CutieElevator::~CutieElevator()
 {
 }
 
-void CutieElevator::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
+void CutieElevator::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
 {
 	const Tbc::PhysicsTrigger* lTrigger = (const Tbc::PhysicsTrigger*)GetTrigger(pTriggerId);
 	deb_assert(lTrigger);
 	if (lTrigger->GetPriority() > -100)
 	{
-		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pNormal);
+		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pPosition, pNormal);
 		return;
 	}
 	if (!pOtherObject || !mGame->GetCutie())
@@ -44,7 +44,7 @@ void CutieElevator::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, Context
 	Cure::ContextObject* lObject = (Cure::ContextObject*)pOtherObject;
 	if (lObject->GetInstanceId() == mGame->GetCutie()->GetInstanceId())
 	{
-		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pNormal);
+		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pPosition, pNormal);
 	}
 }
 

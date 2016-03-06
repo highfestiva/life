@@ -393,7 +393,7 @@ void GameManager::GetBandwidthData(BandwidthData& pSent, BandwidthData& pReceive
 
 
 
-void GameManager::OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
+void GameManager::OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
 {
 	ContextObject* lObject1 = GetContext()->GetObject(pTriggerListenerId);
 	if (lObject1)
@@ -401,7 +401,7 @@ void GameManager::OnTrigger(Tbc::PhysicsManager::TriggerID pTrigger, int pTrigge
 		ContextObject* lObject2 = GetContext()->GetObject(pOtherObjectId);
 		if (lObject2)
 		{
-			lObject1->OnTrigger(pTrigger, lObject2, pBodyId, pNormal);
+			lObject1->OnTrigger(pTrigger, lObject2, pBodyId, pPosition, pNormal);
 		}
 	}
 }

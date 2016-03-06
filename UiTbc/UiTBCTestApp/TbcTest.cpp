@@ -81,7 +81,7 @@ bool ExportStructure()
 			Tbc::ChunkyBoneGeometry::BodyData(1.0f, 0.2f, 1.0f), lDimensions);
 		lStructure.AddBoneGeometry(Lepra::xform(), lGeometry);
 
-		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
+		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0);
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
@@ -100,7 +100,7 @@ bool ExportStructure()
 		if (lOk)
 		{
 			Lepra::xform lTransformation;
-			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
+			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
@@ -133,7 +133,7 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lGeometry, 1);
 		lStructure.AddEngine(lEngine);
 
-		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
+		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0);
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
@@ -153,7 +153,7 @@ bool ExportStructure()
 		if (lOk)
 		{
 			Lepra::xform lTransformation;
-			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
+			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
@@ -262,7 +262,7 @@ bool ExportStructure()
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(5), 0);
 		lStructure.AddEngine(lBreak);
 
-		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
+		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0);
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
@@ -295,7 +295,7 @@ bool ExportStructure()
 		{
 			Lepra::xform lTransform;
 			lTransform.SetPosition(Lepra::vec3(100, 100, 100));
-			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransform, 0, 0);
+			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransform, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
@@ -450,7 +450,7 @@ bool ExportStructure()
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(5), 0);
 		lStructure.AddEngine(lBreak);
 
-		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
+		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0);
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
@@ -470,7 +470,7 @@ bool ExportStructure()
 		if (lOk)
 		{
 			Lepra::xform lTransformation;
-			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
+			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
@@ -692,7 +692,7 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(11), 1, Tbc::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
 		lStructure.AddEngine(lEngine);
 
-		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
+		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0);
 		if (lOk)
 		{
 			const Lepra::vec3& lBucketPosition = lStructure.GetBoneTransformation(11).GetPosition();
@@ -726,7 +726,7 @@ bool ExportStructure()
 		{
 			Lepra::xform lTransformation;
 			lTransformation.SetPosition(Lepra::vec3(4, 5, 6));
-			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
+			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
@@ -860,7 +860,7 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(1), 1.0f);
 		lStructure.AddEngine(lEngine);
 
-		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
+		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0);
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
@@ -880,7 +880,7 @@ bool ExportStructure()
 		if (lOk)
 		{
 			Lepra::xform lTransformation;
-			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
+			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)
@@ -962,7 +962,7 @@ bool ExportStructure()
 		lGeometry = new Tbc::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
-		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0,  0, 0);
+		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0,  0);
 		if (lOk)
 		{
 			lOk = WriteStructure(lFilename, lStructure);
@@ -982,7 +982,7 @@ bool ExportStructure()
 		if (lOk)
 		{
 			Lepra::xform lTransformation;
-			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
+			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0);
 			deb_assert(lOk);
 		}
 		if (lOk)

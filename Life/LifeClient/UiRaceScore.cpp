@@ -18,7 +18,7 @@ namespace Life
 
 UiRaceScore::UiRaceScore(Cure::ContextObject* pContextObject, const str& pAttributeName, ScreenPart* pScreenPart,
 	UiCure::GameUiManager* pUiManager, const str& pClassResourceName):
-	Parent(pContextObject, pAttributeName, 0, Tbc::INVALID_TRIGGER)
+	Parent(pContextObject, pAttributeName, 0, Tbc::INVALID_BODY)
 {
 	StopWatch* lStopWatchChild = new StopWatch(pScreenPart, pUiManager, pClassResourceName, pAttributeName);
 	lStopWatchChild->Start(pContextObject);

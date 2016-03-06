@@ -30,8 +30,7 @@ public:
 
 private:
 	virtual void OnLoaded();
-	virtual void OnMicroTick(float pFrameTime);
-	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pBody, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pBody, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
 
 	Launcher* mLauncher;
 	float mMaxVelocity;

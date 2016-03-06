@@ -20,7 +20,7 @@ namespace Life
 
 
 
-RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, Tbc::PhysicsManager::TriggerID pStartTrigger):
+RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, Tbc::PhysicsManager::BodyID pStartTrigger):
 	Parent(pContextObject, pName),
 	mIsUpdated(true),
 	mLapCountLeft(pLapCount),
@@ -29,7 +29,7 @@ RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int 
 	mTriggerCount(2)
 {
 	mPhysicsFrameStart = mContextObject->GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
-	if (mStartTrigger != Tbc::INVALID_TRIGGER)
+	if (mStartTrigger != Tbc::INVALID_BODY)
 	{
 		AddTriggered(mStartTrigger);
 	}

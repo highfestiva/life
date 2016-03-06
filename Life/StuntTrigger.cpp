@@ -73,10 +73,11 @@ void StuntTrigger::OnTick()
 	mLastFrameTriggered = false;
 }
 
-void StuntTrigger::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
+void StuntTrigger::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pBodyId;
+	(void)pPosition;
 	(void)pNormal;
 
 	if (!mAllowBulletTime)

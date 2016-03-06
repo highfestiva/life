@@ -175,15 +175,8 @@ void CppContextObject::UiMove()
 			Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
 			if (!lGeometry || lBodyId == Tbc::INVALID_BODY)
 			{
-				if (lGeometry)
-				{
-					lBodyId = lGeometry->GetTriggerId();
-				}
-				if (!lBodyId)
-				{
-					mLog.Warningf(_T("Physical body (index %u) for %s not loaded!"), lResource->GetOffset().mGeometryIndex, lResource->GetName().c_str());
-					continue;
-				}
+				mLog.Warningf(_T("Physical body (index %u) for %s not loaded!"), lResource->GetOffset().mGeometryIndex, lResource->GetName().c_str());
+				continue;
 			}
 			lPhysicsManager->GetBodyTransform(lBodyId, lPhysicsTransform);
 			/*if (mAutoDisableMeshMove && mPhysics->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC && mPhysics->GetBodyType(lGeometry) == Tbc::PhysicsManager::STATIC)

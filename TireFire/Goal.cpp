@@ -42,7 +42,7 @@ bool Goal::IsTriggered() const
 vec3 Goal::GetPosition() const
 {
 	const Tbc::ChunkyBoneGeometry* lGoalGeometry = mTrigger->GetTriggerGeometry(0);
-	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGoalGeometry->GetTriggerId());
+	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGoalGeometry->GetBodyId());
 }
 
 void Goal::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
@@ -50,7 +50,7 @@ void Goal::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
 	mTrigger = pTrigger;
 }
 
-void Goal::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
+void Goal::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
 {
 	(void)pTriggerId;
 	(void)pOtherObject;

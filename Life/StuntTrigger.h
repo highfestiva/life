@@ -27,7 +27,7 @@ public:
 protected:
 	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
-	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
 	virtual void DidTrigger(Cure::ContextObject* pBody) = 0;
 
 	bool mAllowBulletTime;

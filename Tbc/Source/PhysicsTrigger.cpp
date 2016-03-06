@@ -95,11 +95,11 @@ PhysicsTrigger::Type PhysicsTrigger::GetType() const
 	return (mTriggerType);
 }
 
-PhysicsManager::TriggerID PhysicsTrigger::GetPhysicsTriggerId(int pTriggerGeometryIndex) const
+PhysicsManager::BodyID PhysicsTrigger::GetPhysicsTriggerId(int pTriggerGeometryIndex) const
 {
 	deb_assert((size_t)pTriggerGeometryIndex < mTriggerArray.size());
-	deb_assert(mTriggerArray[pTriggerGeometryIndex]->GetTriggerId() != 0);
-	return mTriggerArray[pTriggerGeometryIndex]->GetTriggerId();
+	deb_assert(mTriggerArray[pTriggerGeometryIndex]->GetBodyId() != 0);
+	return mTriggerArray[pTriggerGeometryIndex]->GetBodyId();
 }
 
 /*int PhysicsTrigger::GetGroupIndex() const

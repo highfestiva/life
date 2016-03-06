@@ -29,7 +29,7 @@ public:
 
 private:
 	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
-	virtual void OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal);
+	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
 
 	const Tbc::PhysicsTrigger* mTrigger;
 	bool mIsTriggered;

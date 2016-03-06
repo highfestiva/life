@@ -1255,10 +1255,6 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	{
 		Tbc::ChunkyBoneGeometry* lStructureGeometry = pObject->GetPhysics()->GetBoneGeometry(pObject->GetPhysics()->GetRootBone());
 		Tbc::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
-		if (!lBody)
-		{
-			lBody = lStructureGeometry->GetTriggerId();
-		}
 		GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
 		lIsEngineControlled = (pObject->GetPhysics()->GetEngineCount() > 0);
 	}

@@ -352,7 +352,7 @@ void CppContextObject::OnAlarm(int /*pAlarmId*/, void* /*pExtraData*/)
 {
 }
 
-void CppContextObject::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pNormal)
+void CppContextObject::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
 {
 	if (!GetAllowNetworkLogic())
 	{
@@ -362,7 +362,7 @@ void CppContextObject::OnTrigger(Tbc::PhysicsManager::TriggerID pTriggerId, Cont
 	ContextObject* lChild = (ContextObject*)GetTrigger(pTriggerId);
 	if (lChild)
 	{
-		lChild->OnTrigger(pTriggerId, pOtherObject, pBodyId, pNormal);
+		lChild->OnTrigger(pTriggerId, pOtherObject, pBodyId, pPosition, pNormal);
 	}
 	else
 	{

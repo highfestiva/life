@@ -23,14 +23,13 @@ public:
 	typedef void* BodyID;
 	typedef void* JointID;
 	typedef void* GeomID;
-	typedef void* TriggerID;
 
 	typedef std::unordered_set<BodyID> BodySet;
 
 	class TriggerListener
 	{
 	public:
-		virtual void OnTrigger(TriggerID pTrigger, int pTriggerListenerId, int pOtherObjectId, BodyID pBodyId, const vec3& pNormal) = 0;
+		virtual void OnTrigger(BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, BodyID pBodyId, const vec3& pPosition, const vec3& pNormal) = 0;
 	};
 
 	class ForceFeedbackListener
@@ -135,10 +134,10 @@ public:
 	// This is indeed a "hack", but it's there to make life easier writing games.
 	//
 	// The cylinder and capsule are both created along the local Z-axis.
-	virtual BodyID CreateSphere(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
-	virtual BodyID CreateCylinder(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
-	virtual BodyID CreateCapsule(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
-	virtual BodyID CreateBox(bool pIsRoot, const xform& pTransform, float32 pMass, const vec3& pSize, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
+	virtual BodyID CreateSphere(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false) = 0;
+	virtual BodyID CreateCylinder(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false) = 0;
+	virtual BodyID CreateCapsule(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false) = 0;
+	virtual BodyID CreateBox(bool pIsRoot, const xform& pTransform, float32 pMass, const vec3& pSize, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false) = 0;
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
 	virtual bool DetachToDynamic(BodyID pStaticBody, float32 pMass) = 0;
 	virtual bool MakeStatic(BodyID pDynamicBody) = 0;
@@ -148,7 +147,7 @@ public:
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,
 		unsigned pTriangleCount, const Lepra::uint32* pIndices,
 		const xform& pTransform, float32 pMass, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0) = 0;
+		float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false) = 0;
 
 	virtual bool IsStaticBody(BodyID pBodyId) const = 0;
 
@@ -180,25 +179,9 @@ public:
 	virtual void SetBodyData(BodyID pBodyId, void* pUserData) = 0;
 	virtual void* GetBodyData(BodyID pBodyId) = 0;
 
-	//
-	// Create/delete triggers. A trigger is collision geometry which doesn't
-	// affect the simulation. It's only purpose is to tell the listener
-	// when an object intersects the trigger volume.
-	//
-	virtual TriggerID CreateSphereTrigger(const xform& pTransform, float32 pRadius, int pTriggerListenerId) = 0;
-	virtual TriggerID CreateCylinderTrigger(const xform& pTransform, float32 pRadius, float32 pLength, int pTriggerListenerId) = 0;
-	virtual TriggerID CreateCapsuleTrigger(const xform& pTransform, float32 pRadius, float32 pLength, int pTriggerListenerId) = 0;
-	virtual TriggerID CreateBoxTrigger(const xform& pTransform, const vec3& pSize, int pTriggerListenerId) = 0;
-	virtual TriggerID CreateRayTrigger(const xform& pTransform, const vec3& pFromPos, const vec3& pToPos, int pTriggerListenerId) = 0;
-
-	virtual void DeleteTrigger(TriggerID pTriggerID) = 0;
-
-	virtual int GetTriggerListenerId(TriggerID pTrigger) = 0;
+	virtual int GetTriggerListenerId(BodyID pBody) = 0;
 	virtual int GetForceFeedbackListenerId(BodyID pBody) = 0;
 	virtual void SetForceFeedbackListener(BodyID pBody, int pForceFeedbackId) = 0;
-
-	virtual void GetTriggerTransform(TriggerID pTriggerID, xform& pTransform) = 0;
-	virtual void SetTriggerTransform(TriggerID pTriggerID, const xform& pTransform) = 0;
 
 	//
 	// Create/delete joints.
@@ -273,7 +256,6 @@ public:
 	virtual void SetGravity(const vec3& pGravity) = 0;
 	virtual vec3 GetGravity() const = 0;
 
-	virtual void EnableTriggerBySelf(TriggerID pTriggerId, bool pEnable) = 0;
 	virtual void EnableCollideWithSelf(BodyID pBodyId, bool pEnable) = 0;
 
 	virtual void PreSteps() = 0;
@@ -295,7 +277,6 @@ protected:
 const PhysicsManager::BodyID INVALID_BODY = 0;
 const PhysicsManager::JointID INVALID_JOINT = 0;
 const PhysicsManager::GeomID INVALID_GEOM = 0;
-const PhysicsManager::TriggerID INVALID_TRIGGER = 0;
 
 
 

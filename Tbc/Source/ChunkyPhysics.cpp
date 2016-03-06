@@ -379,8 +379,7 @@ void ChunkyPhysics::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const xform* pTransform,
-	int pTrigListenerId, int pForceListenerId)
+bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const xform* pTransform, int pForceListenerId)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
 	deb_assert(lOk);
@@ -404,6 +403,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 			switch (lGeometry->GetBoneType())
 			{
 				case ChunkyBoneGeometry::BONE_BODY:
+				case ChunkyBoneGeometry::BONE_TRIGGER:
 				{
 					const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
 					const xform& lBone = GetBoneTransformation(x);
@@ -415,15 +415,6 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 					if (lOk)
 					{
 						pPhysics->EnableCollideWithSelf(lGeometry->GetBodyId(), lGeometry->IsCollideWithSelf());
-					}
-				}
-				break;
-				case ChunkyBoneGeometry::BONE_TRIGGER:
-				{
-					lOk = lGeometry->CreateTrigger(pPhysics, pTrigListenerId, GetBoneTransformation(x));
-					if (lOk)
-					{
-						pPhysics->EnableTriggerBySelf(lGeometry->GetTriggerId(), lGeometry->IsCollideWithSelf());
 					}
 				}
 				break;

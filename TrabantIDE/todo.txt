@@ -188,13 +188,15 @@
 +Make web page for Trabant.
 +Release the Mac version.
 -Future! loading of gfx+phys objects. Increase socket buffer size?
++Doom 1
 
+Fix polygons all over the place in Doom prototype.
+Fix camera jerks in Doom prototype.
 Flipping order of for instance a slider joint should work. Default thinking must work!
 Requested: scaling (gfx and phys separately?).
 sound_engine_hizz not working in slider elevators.
 Rescale pause button and font (also used in user message view) when scaling down screen.
 
-Doom 1
 Agar.io
 Rolling ball, avoiding holes. Using accelerometer.
 Tower defence game.
