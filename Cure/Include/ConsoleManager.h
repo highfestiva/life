@@ -11,6 +11,7 @@
 #include "../../Lepra/Include/ConsoleCommandManager.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/MemberThread.h"
+#include "../../Lepra/Include/String.h"
 #include "../Include/Cure.h"
 
 
@@ -63,6 +64,8 @@ protected:
 		const tchar* mCommandName;
 		int mCommandId;
 	};
+	typedef std::unordered_map<HashedString, int> CommandLookupMap;
+	typedef std::list<Thread*> ForkList;
 
 	bool ForkExecuteCommand(const str& pCommand);
 
@@ -85,9 +88,9 @@ protected:
 	ConsolePrompt* mConsolePrompt;
 	ConsoleCommandManager* mConsoleCommandManager;
 	MemberThread<ConsoleManager>* mConsoleThread;
+	CommandLookupMap mCommandLookup;
 	Lock mLock;
 	std::list<str> mYieldCommandList;
-	typedef std::list<Thread*> ForkList;
 	ForkList mForkList;
 	bool mHistorySilentUntilNextExecute;
 

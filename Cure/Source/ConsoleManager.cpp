@@ -238,16 +238,12 @@ std::list<str> ConsoleManager::GetCommandList() const
 
 int ConsoleManager::TranslateCommand(const str& pCommand) const
 {
-	int lCommand = -1;
-	for (unsigned x = 0; x < GetCommandCount(); ++x)
+	CommandLookupMap::const_iterator x = mCommandLookup.find(pCommand);
+	if (x != mCommandLookup.end())
 	{
-		if (pCommand == GetCommand(x).mCommandName)
-		{
-			lCommand = GetCommand(x).mCommandId;
-			break;
-		}
+		return x->second;
 	}
-	return (lCommand);
+	return -1;
 }
 
 void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
@@ -289,7 +285,10 @@ void ConsoleManager::AddCommands()
 {
 	for (unsigned x = 0; x < GetCommandCount(); ++x)
 	{
-		mConsoleCommandManager->AddCommand(GetCommand(x).mCommandName);
+		const CommandPair& lCommand = GetCommand(x);
+		HashedString lName(lCommand.mCommandName);
+		mConsoleCommandManager->AddCommand(lName);
+		mCommandLookup.insert(CommandLookupMap::value_type(lName, lCommand.mCommandId));
 	}
 }
 

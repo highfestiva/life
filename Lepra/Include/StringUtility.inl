@@ -46,6 +46,12 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const
 {
 	strvec lTokenVector;
 	_String lCurrentToken;
+	FastBlockSplit(lTokenVector, lCurrentToken, pString, pCharDelimitors, pKeepQuotes, pIsCString, pSplitMaxCount);
+	return lTokenVector;
+}
+
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, _String& pCurrentToken, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
+{
 	bool lTakeNextString = true;
 	bool lInsideString = false;
 	size_t x = 0;
@@ -53,28 +59,28 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const
 	{
 		if (pIsCString && pString[x] == _T('\\') && x+1 < pString.length())
 		{
-			lCurrentToken.push_back(pString[x]);
-			lCurrentToken.push_back(pString[++x]);
+			pCurrentToken.push_back(pString[x]);
+			pCurrentToken.push_back(pString[++x]);
 		}
 		else if (pString[x] == _T('"'))
 		{
 			lInsideString = !lInsideString;
 			if (pKeepQuotes)
 			{
-				lCurrentToken.push_back(pString[x]);
+				pCurrentToken.push_back(pString[x]);
 			}
-			else if (lCurrentToken.empty() && !lInsideString)
+			else if (pCurrentToken.empty() && !lInsideString)
 			{
 				// Push empty token.
-				lTokenVector.push_back(lCurrentToken);
+				pTokenVector.push_back(pCurrentToken);
 			}
 		}
 		else if (!lInsideString && pCharDelimitors.find_first_of(pString[x]) != str::npos)
 		{
 			if (lTakeNextString)
 			{
-				lTokenVector.push_back(lCurrentToken);
-				lCurrentToken.clear();
+				pTokenVector.push_back(pCurrentToken);
+				pCurrentToken.clear();
 				if (++lSplitCount >= pSplitMaxCount)
 				{
 					x = pString.find_first_not_of(pCharDelimitors, x);
@@ -85,20 +91,19 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const
 		}
 		else
 		{
-			lCurrentToken.push_back(pString[x]);
+			pCurrentToken.push_back(pString[x]);
 			lTakeNextString = true;
 		}
 	}
 	// If we reached end of string while parsing.
-	if (!lCurrentToken.empty())
+	if (!pCurrentToken.empty())
 	{
-		lTokenVector.push_back(lCurrentToken);
+		pTokenVector.push_back(pCurrentToken);
 	}
 	if (x < pString.length())	// If we stopped splitting due to split maximum count.
 	{
-		lTokenVector.push_back(pString.substr(x));
+		pTokenVector.push_back(pString.substr(x));
 	}
-	return (lTokenVector);
 }
 
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Join(const strvec& pStringVector, const _String& pJoinString, size_t pStartIndex, size_t pEndIndex)
@@ -247,6 +252,10 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StripLeft(const _String& pString, const
 {
 	// Skip delimitor characters at beginning, find start of first token.
 	size_t lTokenStartPosition = pString.find_first_not_of(pCharDelimitors, 0);
+	if (lTokenStartPosition == 0)
+	{
+		return pString;
+	}
 	if (lTokenStartPosition != _String::npos)
 	{
 		return (pString.substr(lTokenStartPosition));

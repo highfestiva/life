@@ -67,8 +67,7 @@ V3D_TEMPLATE void V3D_QUAL::Normalize(_TVarType pLength)
 	_TVarType lLength = GetLength();
 	if (lLength >= MathTraits<_TVarType>::FullEps())
 	{
-		Div(lLength);
-		Mul(pLength);
+		Mul(pLength/lLength);
 	}
 	else
 	{

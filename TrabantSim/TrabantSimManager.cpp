@@ -951,7 +951,7 @@ void TrabantSimManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 	if (pSet)
 	{
 		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		GetTicker()->GetPhysicsManager(true)->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
+		GetPhysicsManager()->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
 		if (lObject->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
 		{
 			lObject->UiMove();
@@ -965,8 +965,6 @@ void TrabantSimManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 
 void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation)
 {
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
@@ -979,21 +977,19 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 		{
 			return;
 		}
+		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 		vec3 lPosition = lObject->GetPosition();
 		GetPhysicsManager()->SetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), xform(pOrientation, lPosition));
 	}
 	else
 	{
-		xform t;
-		GetPhysicsManager()->GetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), t);
-		pOrientation = t.mOrientation * lObject->mInitialInverseOrientation;
+		quat lOrientation = GetTicker()->GetPhysicsManager(true)->GetBodyOrientation(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		pOrientation = lOrientation * lObject->mInitialInverseOrientation;
 	}
 }
 
 void TrabantSimManager::Velocity(int pObjectId, bool pSet, vec3& pVelocity)
 {
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
@@ -1001,11 +997,12 @@ void TrabantSimManager::Velocity(int pObjectId, bool pSet, vec3& pVelocity)
 	}
 	if (pSet)
 	{
+		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 		GetPhysicsManager()->SetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
 	}
 	else
 	{
-		pVelocity = lObject->GetVelocity();
+		GetTicker()->GetPhysicsManager(true)->GetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
 	}
 }
 

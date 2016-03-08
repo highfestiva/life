@@ -130,7 +130,11 @@ int ConsoleCommandManager::Execute(const str& pCommand, bool pAppendToHistory)
 		lInCommand = lInCommand.substr(0, lInCommand.find(mComment, 0));
 	}
 
-	strutil::strvec lCommandList = strutil::BlockSplit(lInCommand, _T(";"), true, true);
+	strutil::strvec lCommandList;
+	lCommandList.reserve(10);
+	str s;
+	s.reserve(512);
+	strutil::FastBlockSplit(lCommandList, s, lInCommand, _T(";"), true, true);
 
 	if (lCommandList.size() == 0)
 	{
@@ -141,20 +145,28 @@ int ConsoleCommandManager::Execute(const str& pCommand, bool pAppendToHistory)
 		AppendHistory(pCommand);
 	}
 
-	for (size_t lCommandIndex = 0; lExecutionResult == 0 && lCommandIndex < lCommandList.size(); ++lCommandIndex)
+	strutil::strvec lCommandTokenList;
+	lCommandTokenList.reserve(2);
+	strutil::strvec lParameterTokenList;
+	lParameterTokenList.reserve(128);
+	const size_t lSize = lCommandList.size();
+	for (size_t lCommandIndex = 0; lExecutionResult == 0 && lCommandIndex < lSize; ++lCommandIndex)
 	{
 		const str& lTempCommand = lCommandList[lCommandIndex];
 		str lCommand = strutil::StripLeft(lTempCommand, lCommandDelimitors);
-		strutil::strvec lCommandTokenList = strutil::BlockSplit(lCommand, lCommandDelimitors, 1, false, true);
+		lCommandTokenList.clear();
+		s.clear();
+		strutil::FastBlockSplit(lCommandTokenList, s, lCommand, lCommandDelimitors, false, true, 1);
 		if (lCommandTokenList.size() > 0)
 		{
 			lCommand = lCommandTokenList[0];
-			strutil::strvec lParameterTokenList;
+			lParameterTokenList.clear();
 			if (lCommandTokenList.size() > 1)
 			{
 				str lParameters = lCommandTokenList[1];
 				lParameters = strutil::StripLeft(lParameters, lCommandDelimitors);
-				lParameterTokenList = strutil::BlockSplit(lParameters, lCommandDelimitors, false, true);
+				s.clear();
+				strutil::FastBlockSplit(lParameterTokenList, s, lParameters, lCommandDelimitors, false, true);
 			}
 
 			bool lExecutedOk = false;
