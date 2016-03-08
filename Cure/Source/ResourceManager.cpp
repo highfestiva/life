@@ -138,6 +138,10 @@ void UserResource::PostProcess()
 {
 }
 
+void UserResource::FinalizeLoad()
+{
+}
+
 
 
 // ----------------------------------------------------------------------------
@@ -306,6 +310,7 @@ void Resource::Callback()
 		else
 		{
 			//const int lPreviousCount = (int)lCallbackList.size();
+			lCaller.mUserResource->FinalizeLoad();
 			ResourceLoadState lLoadState = lCaller.mUserResource->GetResource()->GetLoadState();
 			lCaller.mCallback(lCaller.mUserResource);
 			lCaller.mUserResource->CallbackParent(lLoadState);
@@ -518,7 +523,7 @@ ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
 	mLoaderThread("ResourceLoader"),
 	mZipFile(new ZipArchive),
 	mInjectTimeLimit(0.01),
-	mLoadIntermission(0.01)
+	mLoadIntermission(0)
 {
 	if (mZipFile->OpenArchive(mPathPrefix + _T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
 	{
@@ -1226,7 +1231,7 @@ bool ResourceManager::PrepareRemoveInLoadProgress(Resource* pResource)
 	}
 	deb_assert(mRequestLoadList.GetCount() < 10000);
 	mLoadedList.Remove(pResource);
-	deb_assert(mLoadedList.GetCount() < 1000);
+	deb_assert(mLoadedList.GetCount() < 10000);
 	return (lAllowDelete);
 }
 

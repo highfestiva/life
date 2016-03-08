@@ -114,6 +114,7 @@ public:
 
 	virtual void Resume(bool pHard);
 	virtual void Suspend(bool pHard);
+	virtual void RefreshOptions();
 
 	void UserReset();
 	int CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects, ObjectMaterial pMaterial, bool pIsStatic, bool pIsTrigger);
@@ -122,7 +123,7 @@ public:
 	void DeleteAllObjects();
 	void PickObjects(const vec3& pPosition, const vec3& pDirection, const vec2& pRange, IntList& pPickedObjectIds, Vec3List& pPickedPositions);
 	bool IsLoaded(int pObjectId);
-	void Explode(const vec3& pPos, const vec3& pVel, float pStrength);
+	void Explode(const vec3& pPos, const vec3& pVel, float pStrength, float pVolume);
 	void PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel, float pVolume);
 	void PopCollisions(CollisionList& pCollisionList);
 	void GetKeys(strutil::strvec& pKeys);

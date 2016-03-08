@@ -47,6 +47,7 @@ public:
 
 	quat mInitialOrientation;
 	quat mInitialInverseOrientation;
+	Tbc::ChunkyPhysics* mGeneratedPhysics;
 
 private:
 	UiTbc::ChunkyClass* mClass;

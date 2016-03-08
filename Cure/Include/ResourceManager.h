@@ -71,6 +71,7 @@ public:
 	Resource* GetResource() const;
 	void SetResource(Resource* pResource);
 	virtual void PostProcess();
+	virtual void FinalizeLoad();
 	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const = 0;
 
 private:
@@ -94,6 +95,8 @@ public:
 
 	void Load(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback, bool pKeep = true);
 	void LoadUnique(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback);
+
+	virtual void FinalizeLoad();
 
 	typename ResourceType::UserRamData GetRamData() const;
 	typename ResourceType::UserData GetData() const;

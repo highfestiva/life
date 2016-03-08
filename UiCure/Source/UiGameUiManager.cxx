@@ -417,6 +417,11 @@ Cure::RuntimeVariableScope* GameUiManager::GetVariableScope() const
 	return mVariableScope;
 }
 
+void GameUiManager::SetVariableScope(Cure::RuntimeVariableScope* pVariableScope)
+{
+	mVariableScope = pVariableScope;
+}
+
 UiLepra::DisplayManager* GameUiManager::GetDisplayManager() const
 {
 	return mDisplay;

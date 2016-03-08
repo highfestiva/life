@@ -253,6 +253,23 @@ int TimeManager::GetAffordedPhysicsStepCount() const
 	return (mPhysicsStepCount);
 }
 
+int TimeManager::GetAffordedPhysicsMicroStepCount() const
+{
+	int lMicroSteps;
+	v_get(lMicroSteps, =, Cure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1);
+	float lSlowdown = mTargetFrameRate * mAverageFrameTime * 0.5f;
+	if (lSlowdown < 1)
+	{
+		lSlowdown = 1;
+	}
+	lMicroSteps = (int)(lMicroSteps / lSlowdown);
+	if (lMicroSteps < 1)
+	{
+		lMicroSteps = 1;
+	}
+	return lMicroSteps;
+}
+
 float TimeManager::GetAffordedPhysicsStepTime() const
 {
 	return (mPhysicsFrameTime);

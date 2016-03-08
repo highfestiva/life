@@ -277,6 +277,8 @@ protected:
 private:
 	SoundDimension mDimension;
 	LoopMode mLoopMode;
+
+	logclass();
 };
 
 class SoundResource2d: public SoundResource

@@ -493,6 +493,10 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 						mLog.Warningf(_T("usage: %s followed by seven float arguments (quaternion and position)"), pCommand.c_str());
 						return 1;
 					}
+					if (mVertices.size() % 3 || mIndices.size() % 3)
+					{
+						throw ParameterException();
+					}
 					std::vector<float> lFloats = Strs2Flts(pParameterVector);
 					MeshObject* lMesh = new MeshObject(quat(&lFloats[0]), vec3(&lFloats[4]));
 					lMesh->mVertices.insert(lMesh->mVertices.end(), mVertices.begin(), mVertices.end());
@@ -506,6 +510,10 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					{
 						mLog.Warningf(_T("usage: %s followed by seven float arguments (quaternion and position)"), pCommand.c_str());
 						return 1;
+					}
+					if (mVertices.size() % 3 || mIndices.size() % 3)
+					{
+						throw ParameterException();
 					}
 					std::vector<float> lFloats = Strs2Flts(pParameterVector);
 					mGfxMesh.mOrientation.Set(&lFloats[0]);
@@ -568,7 +576,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				break;
 				case COMMAND_EXPLODE:
 				{
-					lManager->Explode(ParamToVec3(pParameterVector, 0), ParamToVec3(pParameterVector, 3), ParamToFloat(pParameterVector, 6));
+					lManager->Explode(ParamToVec3(pParameterVector, 0), ParamToVec3(pParameterVector, 3), ParamToFloat(pParameterVector, 6), ParamToFloat(pParameterVector, 7));
 				}
 				break;
 				case COMMAND_PLAY_SOUND:

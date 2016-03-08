@@ -753,6 +753,16 @@ RuntimeVariable* RuntimeVariableScope::GetVariable(const HashedString& pName, bo
 
 	// We must assume the stored value in the HashedString can be found in the parent class (with a different "owner seed"),
 	// or we're dealing with either a rebooted application or a variable that simply can't be found.
+	{
+		ScopeLock lLock(&mLock);
+		VariableTable::const_iterator x = mVariableTable.find(pName);
+		if (x != mVariableTable.end())
+		{
+			pName.mValue = x->second;
+			pName.mValueExpireCount = mOwnerSeed;
+			return x->second;
+		}
+	}
 	if (pRecursive && mParentScope)
 	{
 		RuntimeVariable* lVariable = mParentScope->GetVariable(pName, pRecursive);
@@ -760,14 +770,6 @@ RuntimeVariable* RuntimeVariableScope::GetVariable(const HashedString& pName, bo
 		{
 			return lVariable;
 		}
-	}
-	ScopeLock lLock(&mLock);
-	VariableTable::const_iterator x = mVariableTable.find(pName);
-	if (x != mVariableTable.end())
-	{
-		pName.mValue = x->second;
-		pName.mValueExpireCount = mOwnerSeed;
-		return x->second;
 	}
 	return 0;
 }

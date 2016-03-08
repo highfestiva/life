@@ -192,16 +192,15 @@ void GameTicker::PhysicsTick()
 
 	mPhysicsManager->InitCurrentThread();
 
-	int lMicroSteps;
-	v_get(lMicroSteps, =, GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTimeManager->GetAffordedPhysicsStepCount();
-	const int lAffordedMicroStepCount = lAffordedStepCount * lMicroSteps;
+	const int lAffordedMicroSteps = mTimeManager->GetAffordedPhysicsMicroStepCount();
+	const int lMicroStepCount = lAffordedStepCount * lAffordedMicroSteps;
 	const float lStepTime = mTimeManager->GetAffordedPhysicsStepTime();
-	const float lStepIncrement = lStepTime / lMicroSteps;
+	const float lStepIncrement = lStepTime / lAffordedMicroSteps;
 	/*if (lAffordedStepCount != 1)
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
-			lAffordedMicroStepCount, lStepIncrement);
+			lMicroStepCount, lStepIncrement);
 	}*/
 	bool lFastAlgo;
 	v_get(lFastAlgo, =, GetSettings(), RTVAR_PHYSICS_FASTALGO, true);
@@ -213,7 +212,7 @@ void GameTicker::PhysicsTick()
 	}
 	try
 	{
-		for (int x = 0; x < lAffordedMicroStepCount; ++x)
+		for (int x = 0; x < lMicroStepCount; ++x)
 		{
 			WillMicroTick(lStepIncrement);	// Ticks engines, so needs to be run every physics step.
 			if (lFastAlgo)

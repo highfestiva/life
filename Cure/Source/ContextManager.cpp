@@ -383,7 +383,8 @@ void ContextManager::HandlePostKill()
 	{
 		mGameManager->DeleteContextObject(*mPostKillSet.begin());
 		mPostKillSet.erase(mPostKillSet.begin());
-		if (lTimer.QueryTimeDiff() > mMaxPostKillProcessingTime)	// Time's up, have a go later.
+		double lDelta = lTimer.QueryTimeDiff();
+		if (lDelta > mMaxPostKillProcessingTime)	// Time's up, have a go later.
 		{
 			break;
 		}

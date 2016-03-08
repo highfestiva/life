@@ -336,7 +336,7 @@ void ParticleRenderer::CreateBillboards(const vec3& pPosition, float pStrength, 
 		lBillboard.mVelocity = pVelocity + RNDVEC(pStrength);
 		const vec3 lThisParticlesTargetVelocity = Math::Lerp(pTargetVelocity*0.8f, pTargetVelocity, Random::Uniform(0.0f, 2.0f));
 		lBillboard.mTargetVelocity = RNDVEC(pEndTurbulence) + lThisParticlesTargetVelocity;
-		lBillboard.mPosition = pPosition + lBillboard.mVelocity*0.1f;
+		lBillboard.mPosition = pPosition;
 		lBillboard.mStartColor = RNDCOL(pStartColor, 0.9f, 1.1f);
 		lBillboard.mColor = RNDCOL(pColor, 0.7f, 1.3f);
 		lBillboard.mTextureIndex = Random::GetRandomNumber() % mGasTextureCount;

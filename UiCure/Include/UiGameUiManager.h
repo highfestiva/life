@@ -66,6 +66,7 @@ public:
 	void EndRender(float pFrameTime);
 
 	Cure::RuntimeVariableScope* GetVariableScope() const;
+	void SetVariableScope(Cure::RuntimeVariableScope* pVariableScope);
 	UiLepra::DisplayManager* GetDisplayManager() const;
 	Canvas* GetCanvas() const;
 	UiTbc::Renderer* GetRenderer() const;

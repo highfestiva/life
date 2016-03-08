@@ -18,6 +18,7 @@ namespace TrabantSim
 
 Object::Object(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
+	mGeneratedPhysics(0),
 	mClass(new UiTbc::ChunkyClass),
 	mGfxMesh(0),
 	mGfxMeshId(0)
@@ -26,6 +27,7 @@ Object::Object(Cure::ResourceManager* pResourceManager, const str& pClassId, UiC
 
 Object::~Object()
 {
+	delete mGeneratedPhysics;
 	delete mClass;
 }
 

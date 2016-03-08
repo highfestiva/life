@@ -121,10 +121,12 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	mUserInfoDialog(0),
 	mUserInfoLabel(0)
 {
+	mUiManager->SetVariableScope(pVariableScope);
+
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->SetScale(1, 0.5f, 0.08f, 0.2f);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.2f, 0));
+	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.1f, 0));
+	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.1f, 0));
 
 	SetConsoleManager(new TrabantSimConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -207,6 +209,16 @@ void TrabantSimManager::Suspend(bool pHard)
 	}
 }
 
+void TrabantSimManager::RefreshOptions()
+{
+	Parent::RefreshOptions();
+
+	double lFontHeight;
+	v_get(lFontHeight, =, Cure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+	lFontHeight *= mUiManager->GetCanvas()->GetHeight()/500.0;
+	v_override(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
+	mUiManager->UpdateSettings();
+}
 
 
 void TrabantSimManager::UserReset()
@@ -253,16 +265,8 @@ void TrabantSimManager::UserReset()
 int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects,
 					ObjectMaterial pMaterial, bool pIsStatic, bool pIsTrigger)
 {
-	if (pGfxObject.mVertices.empty() || pGfxObject.mIndices.empty())
-	{
-		return -1;
-	}
-
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
-
 	quat pq, rootq;
-	Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	Object* lObject = (Object*)CreateContextObject(_T("object"));
 	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD, pIsStatic? Tbc::ChunkyPhysics::STATIC : Tbc::ChunkyPhysics::DYNAMIC);
 	lPhysics->SetGuideMode(Tbc::ChunkyPhysics::GUIDE_ALWAYS);
 	if (pPhysObjects.empty())
@@ -364,40 +368,49 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 		}
 	}
 	lObject->SetRootOrientation(pq);
-	lObject->CreatePhysics(lPhysics);
-	float r,g,b,a;
-	if (pMaterial == MaterialChecker)
+	if (!pGfxObject.mVertices.empty() && !pGfxObject.mIndices.empty())
 	{
-		r = g = b = a = 1;
+		float r,g,b,a;
+		if (pMaterial == MaterialChecker)
+		{
+			r = g = b = a = 1;
+		}
+		else
+		{
+			v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
+			v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
+			v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
+			v_get(a, =(float), GetVariableScope(), RTVAR_UI_PENALPHA, 1.0);
+		}
+		vec3 lColor(r,g,b);
+		const bool lIsSmooth = (pMaterial == MaterialSmooth);
+		UiTbc::TriangleBasedGeometry* lMesh = lObject->CreateGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, lColor, a, lIsSmooth);
+		if (!lMesh)
+		{
+			delete lObject;
+			return -1;
+		}
+		const str lTexture = (pMaterial==MaterialChecker)? _T("checker.png") : _T("noise.png");
+		if (pMaterial == MaterialChecker || pMaterial == MaterialNoise)
+		{
+			const float lScale = (fabs(pGfxObject.mVertices[pGfxObject.mVertices.size()-3]-pGfxObject.mVertices[0]) >= 60)? 20.0f : 2.0f;
+			AddCheckerTexturing(lMesh, lScale);
+			lObject->LoadTexture(lTexture);
+		}
+		lObject->AddMeshResource(lMesh, pIsStatic? -1 : 1);
+		lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), _T("texture"), lTexture, lColor, a);
+		lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
 	}
-	else
-	{
-		v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
-		v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
-		v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
-		v_get(a, =(float), GetVariableScope(), RTVAR_UI_PENALPHA, 1.0);
-	}
-	vec3 lColor(r,g,b);
-	const bool lIsSmooth = (pMaterial == MaterialSmooth);
-	UiTbc::TriangleBasedGeometry* lMesh = lObject->CreateGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, lColor, a, lIsSmooth);
-	if (!lMesh)
-	{
-		delete lObject;
-		return -1;
-	}
-	const str lTexture = (pMaterial==MaterialChecker)? _T("checker.png") : _T("noise.png");
-	if (pMaterial == MaterialChecker || pMaterial == MaterialNoise)
-	{
-		const float lScale = (fabs(pGfxObject.mVertices[pGfxObject.mVertices.size()-3]-pGfxObject.mVertices[0]) >= 60)? 20.0f : 2.0f;
-		AddCheckerTexturing(lMesh, lScale);
-		lObject->LoadTexture(lTexture);
-	}
-	lObject->AddMeshResource(lMesh, pIsStatic? -1 : 1);
-	lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), _T("texture"), lTexture, lColor, a);
-	lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
 	lObject->mInitialOrientation = pq;
 	lObject->mInitialInverseOrientation = pq.GetInverse();
+
+	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+	ScopeLock lGameLock(GetTickLock());
+	AddContextObject(lObject, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	mObjects.insert(lObject->GetInstanceId());
+	lObject->CreatePhysics(lPhysics);
+	//lObject->mGeneratedPhysics = lPhysics;
+
 	return lObject->GetInstanceId();
 }
 
@@ -534,6 +547,7 @@ void TrabantSimManager::DeleteAllObjects()
 		}
 	}
 	GetContext()->SetPostKillTimeout(0.01);
+	GetResourceManager()->SetInjectTimeLimit(0.01);
 }
 
 void TrabantSimManager::PickObjects(const vec3& pPosition, const vec3& pDirection, const vec2& pRange, IntList& pPickedObjectIds, Vec3List& pPickedPositions)
@@ -555,11 +569,11 @@ bool TrabantSimManager::IsLoaded(int pObjectId)
 	return !!GetContext()->GetObject(pObjectId);
 }
 
-void TrabantSimManager::Explode(const vec3& pPos, const vec3& pVel, float pStrength)
+void TrabantSimManager::Explode(const vec3& pPos, const vec3& pVel, float pStrength, float pVolume)
 {
 	ScopeLock lGameLock(GetTickLock());
 
-	mCollisionSoundManager->OnCollision(pStrength, pPos, 0, _T("explosion"));
+	mCollisionSoundManager->OnCollision(pStrength*pVolume, pPos, 0, _T("explosion"));
 
 	const float lKeepOnGoingFactor = 1.0f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
 	const int lParticles = std::max(10, Math::Lerp(8, 20, pStrength * 0.2f));
@@ -929,16 +943,15 @@ int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOt
 
 void TrabantSimManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 {
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
+	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
 		return;
 	}
 	if (pSet)
 	{
-		GetPhysicsManager()->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
+		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+		GetTicker()->GetPhysicsManager(true)->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
 		if (lObject->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
 		{
 			lObject->UiMove();
@@ -946,7 +959,7 @@ void TrabantSimManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 	}
 	else
 	{
-		pPosition = lObject->GetPosition();
+		pPosition = GetTicker()->GetPhysicsManager(true)->GetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 	}
 }
 
@@ -955,7 +968,7 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
+	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
 		return;
 	}
@@ -982,7 +995,7 @@ void TrabantSimManager::Velocity(int pObjectId, bool pSet, vec3& pVelocity)
 	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
+	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
 		return;
 	}
@@ -1001,7 +1014,7 @@ void TrabantSimManager::AngularVelocity(int pObjectId, bool pSet, vec3& pAngular
 	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
+	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
 		return;
 	}
@@ -1020,7 +1033,7 @@ void TrabantSimManager::Mass(int pObjectId, bool pSet, float& pMass)
 	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
+	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
 		return;
 	}
@@ -1381,7 +1394,7 @@ bool TrabantSimManager::Open()
 		int y = mRenderArea.mTop + 2;
 		mUiManager->GetDesktopWindow()->AddChild(lButton, x, y);
 		double lFontHeight;
-		v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
+		v_get(lFontHeight, =, GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 		lButton->SetPreferredSize((int)(lFontHeight*7/3), (int)lFontHeight);
 		lButton->SetRoundedRadius(4);
 		lButton->SetVisible(true);
@@ -1779,6 +1792,19 @@ void TrabantSimManager::OnMenuAlternative(UiTbc::Button*)
 
 void TrabantSimManager::ScriptPhysicsTick()
 {
+	/*typedef Cure::ContextManager::ContextObjectTable ContextTable;
+	const ContextTable& lObjectTable = GetContext()->GetObjectTable();
+	ContextTable::const_iterator x = lObjectTable.begin();
+	for (; x != lObjectTable.end(); ++x)
+	{
+		Object* lObject = (Object*)x->second;
+		if (lObject->mGeneratedPhysics)
+		{
+			lObject->CreatePhysics(lObject->mGeneratedPhysics);
+			lObject->mGeneratedPhysics = 0;
+		}
+	}*/
+
 	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	if (lPhysicsTime > 1e-5)

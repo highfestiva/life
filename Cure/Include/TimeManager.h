@@ -70,6 +70,8 @@ public:
 	void SetCurrentPhysicsFrame(int pPhysicsFrame);
 	// Returns how many "actual" physics steps a we can take this frame without ending up lagged behind. a >= 1.
 	int GetAffordedPhysicsStepCount() const;
+	// Returns how many physics micro-steps we should take this frame to avoid lag.
+	int GetAffordedPhysicsMicroStepCount() const;
 	// Return how long each physics step should be if we want to progress total time of s in a steps.
 	float GetAffordedPhysicsStepTime() const;
 	// Return how long each physics step should be if we want to progress total time of s in a steps.

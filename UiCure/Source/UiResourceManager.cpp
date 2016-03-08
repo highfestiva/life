@@ -590,6 +590,10 @@ bool SoundResource::Load()
 SoundResource::UserData SoundResource::CreateDiversifiedData() const
 {
 	UserData lInstanceId = GetUiManager()->GetSoundManager()->CreateSoundInstance(GetRamData());
+	if (!lInstanceId)
+	{
+		mLog.Errorf(_T("Unable to create diversified sound data for %s!"), GetName().c_str());
+	}
 	return (lInstanceId);
 }
 
@@ -597,6 +601,11 @@ void SoundResource::ReleaseDiversifiedData(UserData pData) const
 {
 	GetUiManager()->GetSoundManager()->DeleteSoundInstance(pData);
 }
+
+
+loginstance(UI_SOUND, SoundResource);
+
+
 
 SoundResource2d::SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
 	LoopMode pLoopMode):

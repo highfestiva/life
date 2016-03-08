@@ -50,6 +50,18 @@ void UserTypeResourceBase<UserResourceType, ResourceType>::LoadUnique(
 }
 
 template<class UserResourceType, class ResourceType>
+void UserTypeResourceBase<UserResourceType, ResourceType>::FinalizeLoad()
+{
+	if (GetConstResource()->GetLoadState() == RESOURCE_LOAD_COMPLETE)
+	{
+		if (GetData() == ResourceType::UserData(0))
+		{
+			GetResource()->SetLoadState(RESOURCE_LOAD_ERROR);
+		}
+	}
+}
+
+template<class UserResourceType, class ResourceType>
 typename ResourceType::UserRamData UserTypeResourceBase<UserResourceType, ResourceType>::GetRamData() const
 {
 	return (((const ResourceType*)GetConstResource())->GetRamData());
@@ -236,13 +248,16 @@ DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const
 	if (x != mUserDiversifiedTable.end())
 	{
 		lInstanceId = x->second;
+		deb_assert(lInstanceId != 0);
 	}
 	else
 	{
 		lInstanceId = CreateDiversifiedData();
-		mUserDiversifiedTable.insert(typename UserDataTable::value_type(pUserResource, lInstanceId));
+		if (lInstanceId)
+		{
+			mUserDiversifiedTable.insert(typename UserDataTable::value_type(pUserResource, lInstanceId));
+		}
 	}
-	deb_assert(lInstanceId != 0);
 	return (lInstanceId);
 }
 

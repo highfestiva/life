@@ -20,7 +20,7 @@ namespace UiCure
 
 
 
-#define MINIMUM_PLAYED_VOLUME_FACTOR	0.6f
+#define MINIMUM_PLAYED_VOLUME_FACTOR	0.1f
 
 
 
@@ -214,7 +214,7 @@ void CollisionSoundManager::OnSoundLoaded(UiCure::UserSound3dResource* pSoundRes
 {
 	ScopeLock lLock(&mLock);
 	SoundInfo* lSoundInfo = ((CollisionSoundResource*)pSoundResource)->mSoundInfo;
-	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	//deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		float lRealTimeRatio;
