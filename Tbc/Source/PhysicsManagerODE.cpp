@@ -154,25 +154,14 @@ int PhysicsManagerODE::QueryRayPick(const vec3& pRayPosition, const vec3& pRayDi
 	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
 	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
 		pRayDirection.x, pRayDirection.y, pRayDirection.z);
-	dContactGeom lContact[4];
 
-	ObjectTable::iterator x = mObjectTable.begin();
-	int y = 0;
-	for (; y < pMaxBodies && x != mObjectTable.end(); ++x)
-	{
-		Object* lObject = *x;
-		const int lHits = ::dCollide(lRayGeometryId, lObject->mGeomID, 1, &lContact[0], sizeof(lContact[0]));
-		if (lHits)
-		{
-			pForceFeedbackIds[y] = lObject->mForceFeedbackId;
-			pPositions[y] = vec3(lContact[0].pos);
-			++y;
-		}
-	}
+	void* lData[4] = {pForceFeedbackIds, pPositions, 0, (void*)pMaxBodies};
+	mSpaceID->collide2(&lData, lRayGeometryId, &PhysicsManagerODE::RayPickCallback);
 
 	::dGeomDestroy(lRayGeometryId);
 
-	return y;
+	int lHits = (int)lData[2];
+	return lHits;
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const xform& pTransform,
@@ -3713,6 +3702,31 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 			SetBodyTorque(lObject, vec3());
 		}
 	}
+}
+
+
+
+void PhysicsManagerODE::RayPickCallback(void* pDataPtr, dGeomID o1, dGeomID o2)
+{
+	void** lData = (void**)pDataPtr;
+	int* lForceFeedbackIds = (int*)lData[0];
+	vec3* lPositions = (vec3*)lData[1];
+	int lHits = (int)lData[2];
+	const int lMaxBodies = (int)lData[3];
+	if (lHits >= lMaxBodies)
+	{
+		return;
+	}
+	dContactGeom lContact[4];
+	const int lCollisions = ::dCollide(o1, o2, 1, &lContact[0], sizeof(lContact[0]));
+	if (lCollisions)
+	{
+		Object* lObject = (Object*)::dGeomGetData(o1);
+		lForceFeedbackIds[lHits] = lObject->mForceFeedbackId;
+		lPositions[lHits++] = vec3(lContact[0].pos);
+		lData[2] = (void*)lHits;
+	}
+
 }
 
 

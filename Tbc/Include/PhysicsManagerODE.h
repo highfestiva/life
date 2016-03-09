@@ -171,6 +171,8 @@ private:
 
 	void NormalizeRotation(BodyID pObject);
 
+	static void RayPickCallback(void* pDataPtr, dGeomID o1, dGeomID o2);
+
 	enum JointType
 	{
 		JOINT_INVALID = 0,

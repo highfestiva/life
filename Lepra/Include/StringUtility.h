@@ -11,6 +11,7 @@
 #include <locale>
 #include <vector>
 #include "String.h"
+#include "LepraAssert.h"
 
 
 

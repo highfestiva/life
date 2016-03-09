@@ -51,7 +51,7 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const
 
 STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
 {
-	_String::value_type lCurrentToken[4096];
+	_String::value_type lCurrentToken[32*1024];
 	int y = 0;
 	bool lTakeNextString = true;
 	bool lInsideString = false;
@@ -95,6 +95,7 @@ STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, const
 			lCurrentToken[y++] = pString[x];
 			lTakeNextString = true;
 		}
+		deb_assert(y < sizeof(lCurrentToken));
 	}
 	// If we reached end of string while parsing.
 	if (y != 0)

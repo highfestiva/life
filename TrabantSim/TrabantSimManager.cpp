@@ -954,6 +954,7 @@ void TrabantSimManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 		GetMaster()->GetPhysicsManager(true)->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
 		if (lObject->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
 		{
+			ScopeLock lGameLock(GetTickLock());
 			lObject->UiMove();
 		}
 	}
@@ -979,6 +980,11 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 		}
 		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
 		GetMaster()->GetPhysicsManager(true)->SetBodyOrientation(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pOrientation);
+		if (lObject->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
+		{
+			ScopeLock lGameLock(GetTickLock());
+			lObject->UiMove();
+		}
 	}
 	else
 	{
