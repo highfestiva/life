@@ -26,7 +26,7 @@ public:
 	virtual ~TrabantSimConsoleManager();
 	virtual bool Start();
 
-	const str& GetActiveResponse() const;
+	const str GetActiveResponse() const;
 
 protected:
 	enum CommandClient
@@ -90,7 +90,7 @@ protected:
 	std::vector<int> mTagPhys;
 	std::vector<int> mTagEngines;
 	std::vector<int> mTagMeshes;
-	str mActiveResponse;
+	strstream mActiveResponse;
 	static const CommandPair mCommandIdList[];
 	logclass();
 };

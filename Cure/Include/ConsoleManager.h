@@ -64,7 +64,7 @@ protected:
 		const tchar* mCommandName;
 		int mCommandId;
 	};
-	typedef std::unordered_map<HashedString, int> CommandLookupMap;
+	typedef std::unordered_map<HashedString, int, HashedStringHasher> CommandLookupMap;
 	typedef std::list<Thread*> ForkList;
 
 	bool ForkExecuteCommand(const str& pCommand);

@@ -251,6 +251,7 @@ template<> const astr astrutil::Encode(const wstr& pString)
 {
 	// Convert to UTF-8.
 	astr lAnsi;
+	lAnsi.reserve(((pString.size()*9)>>3) + 6);	// UTF-8 might be around 9/8ths and then some in many languages.
 	if (sizeof(wchar_t) == 2)
 	{
 		utf8::unchecked::utf16to8(pString.begin(), pString.end(), back_inserter(lAnsi));
@@ -267,6 +268,7 @@ template<> const wstr wstrutil::Encode(const astr& pString)
 {
 	// Convert to UTF-16 or UTF-32.
 	wstr lUnicode;
+	lUnicode.reserve(pString.size());
 	if (sizeof(wchar_t) == 2)
 	{
 		utf8::unchecked::utf8to16(pString.begin(), pString.end(), back_inserter(lUnicode));

@@ -24,7 +24,7 @@ class ResourceTracker;
 class ResourceTracker
 {
 public:
-	typedef std::unordered_map<HashedString, int> CounterMap;
+	typedef std::unordered_map<HashedString, int, HashedStringHasher> CounterMap;
 
 	ResourceTracker();
 	void Add(const HashedString& pResourceName, int pValue);

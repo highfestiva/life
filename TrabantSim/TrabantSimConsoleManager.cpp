@@ -160,16 +160,6 @@ float StrToFloat(const tchar* s, const tchar** pEnd)
 	return f*pow(10,e);
 }
 
-str ToStr(int i)
-{
-	return strutil::IntToString(i, 10);
-}
-
-str ToStr(float f)
-{
-	return strutil::DoubleToString(f, 10);
-}
-
 str ParamToStr(const strutil::strvec& pParam, size_t pIndex)
 {
 	if (pIndex >= pParam.size())
@@ -273,6 +263,58 @@ void Params2Floats(const strutil::strvec& pParam, std::vector<float>& pFloats, s
 	}
 }
 
+strstream& operator<<(strstream& os, const strutil::strvec& pVec)
+{
+	int j = 0;
+	for (strutil::strvec::const_iterator i = pVec.begin(); i != pVec.end(); ++i, ++j)
+	{
+		if (j)
+		{
+			os << ' ';
+		}
+		os << *i;
+	}
+	return os;
+}
+
+strstream& operator<<(strstream& os, tchar c)
+{
+	(*(std::ostream*)&os) << c;
+	return os;
+}
+
+strstream& operator<<(strstream& os, const tchar* s)
+{
+	(*(std::ostream*)&os) << s;
+	return os;
+}
+
+strstream& operator<<(strstream& os, const str& s)
+{
+	(*(std::ostream*)&os) << s;
+	return os;
+}
+
+strstream& operator<<(strstream& os, int i)
+{
+	return os << strutil::IntToString(i, 10);
+}
+
+strstream& operator<<(strstream& os, float f)
+{
+	return os << strutil::FastDoubleToString(f);
+}
+
+strstream& operator<<(strstream& os, const vec3& pVec)
+{
+	return os << pVec.x << ' ' << pVec.y << ' ' << pVec.z;
+}
+
+strstream& operator<<(strstream& os, const quat& pQuat)
+{
+	return os << pQuat.a << ' ' << pQuat.b << ' ' << pQuat.c << ' ' << pQuat.d;
+}
+
 
 
 TrabantSimConsoleManager::TrabantSimConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
@@ -296,9 +338,9 @@ bool TrabantSimConsoleManager::Start()
 #endif // Computer / touch
 }
 
-const str& TrabantSimConsoleManager::GetActiveResponse() const
+const str TrabantSimConsoleManager::GetActiveResponse() const
 {
-	return mActiveResponse;
+	return mActiveResponse.str();
 }
 
 
@@ -319,7 +361,8 @@ const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetComman
 
 int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
 {
-	mActiveResponse = str(_T("ok\n"));
+	mActiveResponse.str(str());
+	mActiveResponse << _T("ok\n");
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)
 	{
@@ -339,13 +382,13 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				case COMMAND_GET_PLATFORM_NAME:
 				{
 #if defined(LEPRA_IOS)
-					mActiveResponse += _T("iOS");
+					mActiveResponse << _T("iOS");
 #elif defined(LEPRA_MAC)
-					mActiveResponse += _T("Mac");
+					mActiveResponse << _T("Mac");
 #elif defined(LEPRA_WINDOWS)
-					mActiveResponse += _T("Win");
+					mActiveResponse << _T("Win");
 #else
-					mActiveResponse += _T("Unknown");
+					mActiveResponse << _T("Unknown");
 #endif // Platform
 
 				}
@@ -369,7 +412,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					{
 						throw ParameterException();
 					}
-					mActiveResponse += ToStr(lObjectId);
+					mActiveResponse << lObjectId;
 				}
 				break;
 				case COMMAND_CREATE_CLONES:
@@ -398,15 +441,14 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					{
 						throw ParameterException();
 					}
-					bool lFirst = true;
-					for (std::vector<int>::iterator y = lObjectIds.begin(); y != lObjectIds.end(); ++y)
+					x = 0;
+					for (std::vector<int>::iterator y = lObjectIds.begin(); y != lObjectIds.end(); ++y, ++x)
 					{
-						if (!lFirst)
+						if (x)
 						{
-							mActiveResponse += _T(',');
+							mActiveResponse << _T(',');
 						}
-						lFirst = false;
-						mActiveResponse += ToStr(*y);
+						mActiveResponse << *y;
 					}
 				}
 				break;
@@ -433,10 +475,10 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					{
 						if (x)
 						{
-							mActiveResponse += _T(',');
+							mActiveResponse << _T(',');
 						}
 						const vec3& v = lPositions[x];
-						mActiveResponse += strutil::Format(_T("%i,%f,%f,%f"), lObjectIds[x], v.x, v.y, v.z);
+						mActiveResponse << lObjectIds[x] << ',' << v.x << ',' << v.y << ',' << v.z;
 					}
 				}
 				break;
@@ -549,10 +591,10 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					{
 						if (!lFirst)
 						{
-							mActiveResponse += _T(',');
+							mActiveResponse << _T(',');
 						}
 						lFirst = false;
-						mActiveResponse += lManager->IsLoaded(*y)? _T("1") : _T("0");
+						mActiveResponse << (lManager->IsLoaded(*y)? '1' : '0');
 					}
 				}
 				break;
@@ -586,24 +628,25 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 				break;
 				case COMMAND_POP_COLLISIONS:
 				{
-					strutil::strvec lLines;
 					typedef TrabantSimManager::CollisionList CollisionList;
 					CollisionList lList;
 					lManager->PopCollisions(lList);
 					int y = 0;
 					for (CollisionList::iterator x = lList.begin(); x != lList.end() && y < 10; ++x, ++y)
 					{
-						lLines.push_back(strutil::Format(_T("%i %f %f %f %f %f %f %i"), x->mObjectId, x->mForce.x, x->mForce.y, x->mForce.z,
-								x->mPosition.x, x->mPosition.y, x->mPosition.z, x->mOtherObjectId));
+						if (y)
+						{
+							mActiveResponse << '\n';
+						}
+						mActiveResponse << x->mObjectId << ' ' << x->mForce << ' ' << x->mPosition << ' ' << x->mOtherObjectId;
 					}
-					mActiveResponse += strutil::Join(lLines, _T("\n"));
 				}
 				break;
 				case COMMAND_GET_KEYS:
 				{
 					strutil::strvec lKeys;
 					lManager->GetKeys(lKeys);
-					mActiveResponse += strutil::Join(lKeys, _T("\n"));
+					mActiveResponse << strutil::Join(lKeys, _T("\n"));
 				}
 				break;
 				case COMMAND_GET_TOUCH_DRAGS:
@@ -611,51 +654,57 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					PixelRect lRect = lManager->GetRenderArea();
 					const float sx = 1.0f/lRect.GetWidth();
 					const float sy = 1.0f/lRect.GetHeight();
-					strutil::strvec lLines;
 					typedef TrabantSimManager::DragList DragList;
 					DragList lList;
 					lManager->GetTouchDrags(lList);
-					for (DragList::iterator x = lList.begin(); x != lList.end(); ++x)
+					int y = 0;
+					for (DragList::iterator x = lList.begin(); x != lList.end(); ++x, ++y)
 					{
-						lLines.push_back(strutil::Format(_T("%f %f %f %f %f %f %s %i"), x->mLast.x*sx, x->mLast.y*sy, x->mStart.x*sx, x->mStart.y*sy,
-								x->mVelocity.x*sx, x->mVelocity.y*sy, x->mIsPress?_T("true"):_T("false"), x->mButtonMask));
+						if (y)
+						{
+							mActiveResponse << '\n';
+						}
+						mActiveResponse << x->mLast.x*sx << ' ' << x->mLast.y*sy << ' ' << x->mStart.x*sx << ' ' << x->mStart.y*sy << ' '
+								<< x->mVelocity.x*sx << ' ' << x->mVelocity.y*sy << ' ' << (x->mIsPress?_T("true"):_T("false")) << ' ' << x->mButtonMask;
 					}
-					mActiveResponse += strutil::Join(lLines, _T("\n"));
 				}
 				break;
 				case COMMAND_GET_ACCELEROMETER:
 				{
 					const vec3 a = lManager->GetAccelerometer();
-					mActiveResponse += strutil::Format(_T("%f %f %f"), a.x, a.y, a.z);
+					mActiveResponse << a;
 				}
 				break;
 				case COMMAND_GET_MOUSEMOVE:
 				{
 					const vec3 m = lManager->GetMouseMove();
-					mActiveResponse += strutil::Format(_T("%f %f %f"), m.x, m.y, m.z);
+					mActiveResponse << m;
 				}
 				break;
 				case COMMAND_CREATE_JOYSTICK:
 				{
 					const int lJoyId = lManager->CreateJoystick(ParamToFloat(pParameterVector, 0), ParamToFloat(pParameterVector, 1), ParamToBool(pParameterVector, 2));
-					mActiveResponse += ToStr(lJoyId);
+					mActiveResponse << lJoyId;
 				}
 				break;
 				case COMMAND_GET_JOYSTICK_DATA:
 				{
-					strutil::strvec lLines;
 					typedef TrabantSimManager::JoystickDataList JoyList;
 					JoyList lList = lManager->GetJoystickData();
-					for (JoyList::iterator x = lList.begin(); x != lList.end(); ++x)
+					int y = 0;
+					for (JoyList::iterator x = lList.begin(); x != lList.end(); ++x, ++y)
 					{
-						lLines.push_back(strutil::Format(_T("%i %f %f"), x->mJoystickId, x->x, x->y));
+						if (y)
+						{
+							mActiveResponse << '\n';
+						}
+						mActiveResponse << x->mJoystickId << ' ' << x->x << ' ' << x->y;
 					}
-					mActiveResponse += strutil::Join(lLines, _T("\n"));
 				}
 				break;
 				case COMMAND_GET_ASPECT_RATIO:
 				{
-					mActiveResponse += ToStr(lManager->GetAspectRatio());
+					mActiveResponse << lManager->GetAspectRatio();
 				}
 				break;
 				case COMMAND_CREATE_ENGINE:
@@ -676,7 +725,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					{
 						throw ParameterException();
 					}
-					mActiveResponse += ToStr(lEngineId);
+					mActiveResponse << lEngineId;
 				}
 				break;
 				case COMMAND_CREATE_JOINT:
@@ -692,7 +741,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					{
 						throw ParameterException();
 					}
-					mActiveResponse += ToStr(lJointId);
+					mActiveResponse << lJointId;
 				}
 				break;
 				case COMMAND_POSITION:
@@ -702,7 +751,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->Position(ParamToInt(pParameterVector, 0), lIsSet, lValue);
 					if (!lIsSet)
 					{
-						mActiveResponse += strutil::Format(_T("%f %f %f"), lValue.x, lValue.y, lValue.z);
+						mActiveResponse << lValue;
 					}
 				}
 				break;
@@ -713,7 +762,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->Orientation(ParamToInt(pParameterVector, 0), lIsSet, lValue);
 					if (!lIsSet)
 					{
-						mActiveResponse += strutil::Format(_T("%f %f %f %f"), lValue.a, lValue.b, lValue.c, lValue.d);
+						mActiveResponse << lValue;
 					}
 				}
 				break;
@@ -724,7 +773,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->Velocity(ParamToInt(pParameterVector, 0), lIsSet, lValue);
 					if (!lIsSet)
 					{
-						mActiveResponse += strutil::Format(_T("%f %f %f"), lValue.x, lValue.y, lValue.z);
+						mActiveResponse << lValue;
 					}
 				}
 				break;
@@ -735,7 +784,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->AngularVelocity(ParamToInt(pParameterVector, 0), lIsSet, lValue);
 					if (!lIsSet)
 					{
-						mActiveResponse += strutil::Format(_T("%f %f %f"), lValue.x, lValue.y, lValue.z);
+						mActiveResponse << lValue;
 					}
 				}
 				break;
@@ -746,7 +795,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->Mass(ParamToInt(pParameterVector, 0), lIsSet, lValue);
 					if (!lIsSet)
 					{
-						mActiveResponse += ToStr(lValue);
+						mActiveResponse << lValue;
 					}
 				}
 				break;
@@ -758,7 +807,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->ObjectColor(ParamToInt(pParameterVector, 0), lIsSet, lValue, lAlpha);
 					if (!lIsSet)
 					{
-						mActiveResponse += strutil::Format(_T("%f %f %f"), lValue.x, lValue.y, lValue.z);
+						mActiveResponse << lValue;
 					}
 				}
 				break;
@@ -769,7 +818,7 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 					lManager->EngineForce(ParamToInt(pParameterVector, 0), ParamToInt(pParameterVector, 1), lIsSet, lValue);
 					if (!lIsSet)
 					{
-						mActiveResponse += strutil::Format(_T("%f %f %f"), lValue.x, lValue.y, lValue.z);
+						mActiveResponse << lValue;
 					}
 				}
 				break;
@@ -819,7 +868,8 @@ int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strv
 		catch (ParameterException)
 		{
 			lResult = 1;
-			mActiveResponse = strutil::Format(_T("ERROR: bad or missing parameter for %s (%s)!\n"), pCommand.c_str(), strutil::Join(pParameterVector, _T(", ")).c_str());
+			mActiveResponse.str(str());
+			mActiveResponse << _T("ERROR: bad or missing parameter for ") << pCommand << '(' << pParameterVector << _T(")!\n");
 			mLog.Warningf(_T("%s has missing or bad arguments (%s)"), pCommand.c_str(), strutil::Join(pParameterVector, _T(", ")).c_str());
 		}
 	}

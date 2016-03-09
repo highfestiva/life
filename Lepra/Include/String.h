@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <sstream>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string>
@@ -19,12 +20,16 @@
 
 namespace Lepra
 {
-typedef std::string	astr;
-typedef std::wstring	wstr;
+typedef std::string		astr;
+typedef std::wstring		wstr;
+typedef std::stringstream	astrstream;
+typedef std::wstringstream	wstrstream;
 #ifdef LEPRA_UNICODE
-typedef wstr		str;
+typedef wstr			str;
+typedef wstrstream		strstream;
 #else // !LEPRA_UNICODE
-typedef astr		str;
+typedef astr			str;
+typedef astrstream		strstream;
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE
 
 inline size_t HashString(const char* s);
@@ -54,6 +59,19 @@ public:
 	mutable void* mValue;
 	mutable int mValueExpireCount;
 };
+
+struct HashedStringHasher
+{
+	size_t operator()(const HashedString& k) const
+	{
+		return k.mHash;
+	}
+};
+
+inline bool operator==(const HashedString& a, const HashedString& b)
+{
+	return (a.mHash == b.mHash) && ((*(str*)&a) == (*(str*)&b));
+}
 }
 
 

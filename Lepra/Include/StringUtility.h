@@ -30,7 +30,7 @@ public:
 	static strvec Split(const _String& pString, const _String& pCharDelimitors, int pSplitMaxCount = 10000);
 	// Splits strings, but also keeps track of quotes. Strings within quotes are left untouched from the delimitors.
 	static strvec BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
-	static void FastBlockSplit(strvec& pTokenVector, _String& pCurrentToken, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
+	static void FastBlockSplit(strvec& pTokenVector, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
 	static _String Join(const strvec& pStringVector, const _String& pJoinString, size_t pStartIndex = 0, size_t pEndIndex = _String::npos);
 
 	static _String StringToCString(const _String& pString);

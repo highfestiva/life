@@ -724,10 +724,10 @@ int UdpSocket::SendTo(const uint8* pData, unsigned pSize, const SocketAddress& p
 		}
 		else
 		{
-			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)50)));
+			/*log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)50)));
 			log_volatile(mLog.Tracef(_T("UDP -> %u bytes (%s -> %s): %s."), pSize,
 				mLocalAddress.GetAsString().c_str(), pTargetAddress.GetAsString().c_str(),
-				lData.c_str()));
+				lData.c_str()));*/
 			mSentByteCount += lSentByteCount;
 		}
 	}
@@ -749,10 +749,10 @@ int UdpSocket::ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSour
 		}
 		else
 		{
-			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 50)));
+			/*log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 50)));
 			log_volatile(mLog.Tracef(_T("UDP <- %u bytes (%s <- %s): %s."), lSize,
 				mLocalAddress.GetAsString().c_str(), pSourceAddress.GetAsString().c_str(),
-				lData.c_str()));
+				lData.c_str()));*/
 			mReceivedByteCount += lSize;
 		}
 	}

@@ -45,13 +45,14 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::Split(const _Str
 STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
 {
 	strvec lTokenVector;
-	_String lCurrentToken;
-	FastBlockSplit(lTokenVector, lCurrentToken, pString, pCharDelimitors, pKeepQuotes, pIsCString, pSplitMaxCount);
+	FastBlockSplit(lTokenVector, pString, pCharDelimitors, pKeepQuotes, pIsCString, pSplitMaxCount);
 	return lTokenVector;
 }
 
-STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, _String& pCurrentToken, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
 {
+	_String::value_type lCurrentToken[4096];
+	int y = 0;
 	bool lTakeNextString = true;
 	bool lInsideString = false;
 	size_t x = 0;
@@ -59,28 +60,28 @@ STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, _Stri
 	{
 		if (pIsCString && pString[x] == _T('\\') && x+1 < pString.length())
 		{
-			pCurrentToken.push_back(pString[x]);
-			pCurrentToken.push_back(pString[++x]);
+			lCurrentToken[y++] = pString[x];
+			lCurrentToken[y++] = pString[++x];
 		}
 		else if (pString[x] == _T('"'))
 		{
 			lInsideString = !lInsideString;
 			if (pKeepQuotes)
 			{
-				pCurrentToken.push_back(pString[x]);
+				lCurrentToken[y++] = pString[x];
 			}
-			else if (pCurrentToken.empty() && !lInsideString)
+			else if (y == 0 && !lInsideString)
 			{
 				// Push empty token.
-				pTokenVector.push_back(pCurrentToken);
+				pTokenVector.push_back(_String());
 			}
 		}
 		else if (!lInsideString && pCharDelimitors.find_first_of(pString[x]) != str::npos)
 		{
 			if (lTakeNextString)
 			{
-				pTokenVector.push_back(pCurrentToken);
-				pCurrentToken.clear();
+				pTokenVector.push_back(_String(lCurrentToken, y));
+				y = 0;
 				if (++lSplitCount >= pSplitMaxCount)
 				{
 					x = pString.find_first_not_of(pCharDelimitors, x);
@@ -91,14 +92,14 @@ STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, _Stri
 		}
 		else
 		{
-			pCurrentToken.push_back(pString[x]);
+			lCurrentToken[y++] = pString[x];
 			lTakeNextString = true;
 		}
 	}
 	// If we reached end of string while parsing.
-	if (!pCurrentToken.empty())
+	if (y != 0)
 	{
-		pTokenVector.push_back(pCurrentToken);
+		pTokenVector.push_back(_String(lCurrentToken, y));
 	}
 	if (x < pString.length())	// If we stopped splitting due to split maximum count.
 	{

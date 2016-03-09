@@ -156,6 +156,7 @@ public:
 	virtual vec3 GetBodyPosition(BodyID pBodyId) const = 0;
 	virtual void SetBodyPosition(BodyID pBodyId, const vec3& pPosition) const = 0;
 	virtual quat GetBodyOrientation(BodyID pBodyId) const = 0;
+	virtual void SetBodyOrientation(BodyID pBodyId, const quat& pOrientation) = 0;
 	virtual void GetBodyTransform(BodyID pBodyId, xform& pTransform) const = 0;
 	virtual void SetBodyTransform(BodyID pBodyId, const xform& pTransform) = 0;
 	virtual void GetBodyVelocity(BodyID pBodyId, vec3& pVelocity) const = 0;
@@ -265,7 +266,7 @@ public:
 	virtual void PostSteps() = 0;
 
 	// Returns the bodies that were "idled" last step.
-	virtual const BodySet& GetIdledBodies() const = 0;
+	virtual const BodySet& GetIdledBodies() = 0;
 
 protected:
 	TriggerListener* mTriggerCallback;

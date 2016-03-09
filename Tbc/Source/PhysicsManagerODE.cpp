@@ -602,7 +602,6 @@ void PhysicsManagerODE::DeleteBody(BodyID pBodyId)
 		::dGeomDestroy(lObject->mGeomID);
 		delete (lObject);
 		mObjectTable.erase(x);
-		mAutoDisabledObjectSet.erase(lObject);
 	}
 	else
 	{
@@ -654,10 +653,30 @@ quat PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 		return gIdentityQuaternionF;
 	}
 
-	dQuaternion q;
-	::dGeomGetQuaternion(lObject->mGeomID, q);
-	quat lQuat(q);
-	return (lQuat);
+	quat lQuat;
+	::dGeomGetQuaternion(lObject->mGeomID, lQuat.mData);
+	return lQuat;
+}
+
+void PhysicsManagerODE::SetBodyOrientation(BodyID pBodyId, const quat& pOrientation)
+{
+	Object* lObject = (Object*)pBodyId;
+
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("SetBodyOrientation() - Body %i is not part of this world!"), pBodyId);
+		return;
+	}
+
+	if(lObject->mBodyID)
+	{
+		::dBodySetQuaternion(lObject->mBodyID, pOrientation.mData);
+		::dBodyEnable(lObject->mBodyID);
+	}
+	else
+	{
+		::dGeomSetQuaternion(lObject->mGeomID, pOrientation.mData);
+	}
 }
 
 void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, xform& pTransform) const
@@ -3635,8 +3654,18 @@ void PhysicsManagerODE::CollisionNoteCallback(void* pData, dGeomID pGeom1, dGeom
 
 
 
-const PhysicsManager::BodySet& PhysicsManagerODE::GetIdledBodies() const
+const PhysicsManager::BodySet& PhysicsManagerODE::GetIdledBodies()
 {
+	mAutoDisabledObjectSet.clear();
+	ObjectTable::iterator x = mObjectTable.begin();
+	for (; x != mObjectTable.end(); ++x)
+	{
+		Object* lObject = *x;
+		if (lObject->mDidStop)
+		{
+			mAutoDisabledObjectSet.insert((BodyID)lObject);
+		}
+	}
 	return (mAutoDisabledObjectSet);
 }
 
@@ -3644,32 +3673,27 @@ const PhysicsManager::BodySet& PhysicsManagerODE::GetIdledBodies() const
 
 void PhysicsManagerODE::FlagMovingObjects()
 {
-	mAutoDisabledObjectSet.clear();
 	ObjectTable::iterator x = mObjectTable.begin();
 	for (; x != mObjectTable.end(); ++x)
 	{
 		Object* lObject = *x;
 		if (lObject->mBodyID && lObject->mIsRoot && ::dBodyIsEnabled(lObject->mBodyID))
 		{
-			mAutoDisabledObjectSet.insert((BodyID)lObject);
+			lObject->mDidStop = true;
 		}
 	}
 }
 
 void PhysicsManagerODE::HandleMovableObjects()
 {
-	BodySet::iterator x = mAutoDisabledObjectSet.begin();
-	while(x != mAutoDisabledObjectSet.end())
+	ObjectTable::iterator x = mObjectTable.begin();
+	for (; x != mObjectTable.end(); ++x)
 	{
 		Object* lObject = (Object*)(*x);
 		if (lObject->mBodyID && ::dBodyIsEnabled(lObject->mBodyID))
 		{
-			mAutoDisabledObjectSet.erase(x++);
+			lObject->mDidStop = false;
 			NormalizeRotation(lObject);
-		}
-		else
-		{
-			++x;
 		}
 	}
 }

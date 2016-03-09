@@ -951,7 +951,7 @@ void TrabantSimManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 	if (pSet)
 	{
 		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		GetPhysicsManager()->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
+		GetMaster()->GetPhysicsManager(true)->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
 		if (lObject->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
 		{
 			lObject->UiMove();
@@ -959,7 +959,7 @@ void TrabantSimManager::Position(int pObjectId, bool pSet, vec3& pPosition)
 	}
 	else
 	{
-		pPosition = GetTicker()->GetPhysicsManager(true)->GetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		pPosition = GetMaster()->GetPhysicsManager(true)->GetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 	}
 }
 
@@ -978,12 +978,11 @@ void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation
 			return;
 		}
 		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		vec3 lPosition = lObject->GetPosition();
-		GetPhysicsManager()->SetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), xform(pOrientation, lPosition));
+		GetMaster()->GetPhysicsManager(true)->SetBodyOrientation(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pOrientation);
 	}
 	else
 	{
-		quat lOrientation = GetTicker()->GetPhysicsManager(true)->GetBodyOrientation(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		quat lOrientation = GetMaster()->GetPhysicsManager(true)->GetBodyOrientation(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 		pOrientation = lOrientation * lObject->mInitialInverseOrientation;
 	}
 }
@@ -998,18 +997,16 @@ void TrabantSimManager::Velocity(int pObjectId, bool pSet, vec3& pVelocity)
 	if (pSet)
 	{
 		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		GetPhysicsManager()->SetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
+		GetMaster()->GetPhysicsManager(true)->SetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
 	}
 	else
 	{
-		GetTicker()->GetPhysicsManager(true)->GetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
+		GetMaster()->GetPhysicsManager(true)->GetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
 	}
 }
 
 void TrabantSimManager::AngularVelocity(int pObjectId, bool pSet, vec3& pAngularVelocity)
 {
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
@@ -1017,18 +1014,17 @@ void TrabantSimManager::AngularVelocity(int pObjectId, bool pSet, vec3& pAngular
 	}
 	if (pSet)
 	{
-		GetPhysicsManager()->SetBodyAngularVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pAngularVelocity);
+		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->SetBodyAngularVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pAngularVelocity);
 	}
 	else
 	{
-		pAngularVelocity = lObject->GetAngularVelocity();
+		GetMaster()->GetPhysicsManager(true)->GetBodyAngularVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pAngularVelocity);
 	}
 }
 
 void TrabantSimManager::Mass(int pObjectId, bool pSet, float& pMass)
 {
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
 	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
 	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
 	{
@@ -1036,12 +1032,13 @@ void TrabantSimManager::Mass(int pObjectId, bool pSet, float& pMass)
 	}
 	if (pSet)
 	{
-		GetPhysicsManager()->SetBodyMass(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pMass);
+		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->SetBodyMass(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pMass);
 		lObject->QueryMass();
 	}
 	else
 	{
-		pMass = GetPhysicsManager()->GetBodyMass(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		pMass = GetMaster()->GetPhysicsManager(true)->GetBodyMass(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 	}
 }
 

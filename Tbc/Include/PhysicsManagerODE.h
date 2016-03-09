@@ -55,6 +55,7 @@ public:
 	virtual vec3 GetBodyPosition(BodyID pBodyId) const;
 	virtual void SetBodyPosition(BodyID pBodyId, const vec3& pPosition) const;
 	virtual quat GetBodyOrientation(BodyID pBodyId) const;
+	virtual void SetBodyOrientation(BodyID pBodyId, const quat& pOrientation);
 	virtual void GetBodyTransform(BodyID pBodyId, xform& pTransform) const;
 	virtual void SetBodyTransform(BodyID pBodyId, const xform& pTransform);
 	virtual void GetBodyVelocity(BodyID pBodyId, vec3& pVelocity) const;
@@ -162,7 +163,7 @@ public:
 	virtual bool IsColliding(int pForceFeedbackId);
 	virtual void PostSteps();
 
-	virtual const BodySet& GetIdledBodies() const;
+	virtual const BodySet& GetIdledBodies();
 
 private:
 	void FlagMovingObjects();
@@ -199,7 +200,8 @@ private:
 			mTriggerListenerId(0),
 			mForceFeedbackId(0),
 			mHasMassChildren(false),
-			mIsRotational(false)
+			mIsRotational(false),
+			mDidStop(false)
 		{
 		}
 
@@ -224,6 +226,7 @@ private:
 
 		bool mHasMassChildren;
 		bool mIsRotational;
+		bool mDidStop;
 	};
 
 	class TriggerInfo;
