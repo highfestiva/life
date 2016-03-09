@@ -81,6 +81,7 @@ class Obj:
 		self.last_joint_axis = None
 		self.gfx = gfx
 		self.phys = phys
+		self.isloaded = False
 	def pos(self, pos=None, orientation=None):
 		'''Orientation is a quaternion.'''
 		if pos:
@@ -160,6 +161,8 @@ class Obj:
 		gameapi.addtag(self.id, 'upright_stabilizer', [force], [], [0], [], [])
 	def release(self):
 		'''Remove the object from the game.'''
+		if self.id in _async_loaders:
+			del _async_loaders[self.id]
 		gameapi.releaseobj(self.id)
 		global _objects,_last_created_object
 		del _objects[self.id]
@@ -236,8 +239,8 @@ def trabant_init(**kwargs):
 		except:
 			pass
 	config.update(kwargs)
-	global _joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened,_accelerometer_calibration
-	_joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened = {},{},{},{},True
+	global _keys,_joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened,_accelerometer_calibration
+	_keys,_joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened = None,{},{},{},{},True
 	if 'osname' in config:
 		global osname
 		osname = config['osname']
@@ -511,11 +514,10 @@ def last_ascii_top_left_offset():
 	   its AABB. See the tetris example for how it's used.'''
 	return _last_ascii_top_left_offset
 
-def explode(pos, vel=vec3(), strength=1):
+def explode(pos, vel=vec3(), strength=1, volume=1):
 	'''Show a graphical explosion and play an explosion sound.'''
 	_tryinit()
-	if timeout(0.01,timer=-153,first_hit=True):
-		gameapi.explode(tovec3(pos),tovec3(vel),strength)
+	gameapi.explode(tovec3(pos),tovec3(vel),strength,volume)
 
 def sound(snd, pos=vec3(), vel=vec3(), volume=5):
 	'''Play a sound using the given position, velocity and volume. Volume controls audible distance.'''
@@ -652,6 +654,15 @@ def is_touch_device():
 	'''Only use this function if your touch device's and computer's controls clash.'''
 	return gameapi.osname.lower() in ('ios', 'android')
 
+def onload(obj, func):
+	'''Perform function when object has been loaded.'''
+	global _async_loaders
+	oldfunc = _async_loaders[obj.id]
+	def doit():
+		oldfunc()
+		func()
+	_async_loaders[obj.id] = doit
+
 
 ########################################
 
@@ -699,12 +710,15 @@ def _create_object(gfx, phys, static, trigger, pos, orientation, vel, avel, mass
 	global _objects,_last_created_object,_async_loaders
 	_objects[oid] = o
 	def postload(o):
+		if not o.id:
+			return
 		if vel:
 			o.vel(tovec3(vel))
 		if avel:
 			o.avel(tovec3(avel))
 		if mass:
 			o.mass(mass)
+		o.isloaded = True
 	if _async_load:
 		_async_loaders[oid] = lambda: postload(o)
 	else:

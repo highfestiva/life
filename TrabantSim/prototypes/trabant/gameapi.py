@@ -96,8 +96,8 @@ def bounce(factor):
 def friction(factor):
 	setvar('Physics.Friction', float(factor))
 
-def explode(pos,vel,strength):
-	cmd('explode %s %s %f' % (_args2str(pos,'0 0 0'), _args2str(vel,'0 0 0'), float(strength)))
+def explode(pos,vel,strength,volume):
+	cmd('explode %s %s %f %f' % (_args2str(pos,'0 0 0'), _args2str(vel,'0 0 0'), float(strength), float(volume)))
 
 def playsound(snd, pos, vel, volume):
 	cmd('play-sound %s %s %s %f' % (snd, _args2str(pos,'0 0 0'), _args2str(vel,'0 0 0'), float(volume)))

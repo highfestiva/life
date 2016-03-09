@@ -155,12 +155,12 @@ int PhysicsManagerODE::QueryRayPick(const vec3& pRayPosition, const vec3& pRayDi
 	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
 		pRayDirection.x, pRayDirection.y, pRayDirection.z);
 
-	void* lData[4] = {pForceFeedbackIds, pPositions, 0, (void*)pMaxBodies};
+	int lHits = 0;
+	void* lData[4] = {pForceFeedbackIds, pPositions, &lHits, (void*)pMaxBodies};
 	mSpaceID->collide2(&lData, lRayGeometryId, &PhysicsManagerODE::RayPickCallback);
 
 	::dGeomDestroy(lRayGeometryId);
 
-	int lHits = (int)lData[2];
 	return lHits;
 }
 
@@ -3711,9 +3711,9 @@ void PhysicsManagerODE::RayPickCallback(void* pDataPtr, dGeomID o1, dGeomID o2)
 	void** lData = (void**)pDataPtr;
 	int* lForceFeedbackIds = (int*)lData[0];
 	vec3* lPositions = (vec3*)lData[1];
-	int lHits = (int)lData[2];
+	int* lHits = (int*)lData[2];
 	const int lMaxBodies = (int)lData[3];
-	if (lHits >= lMaxBodies)
+	if (*lHits >= lMaxBodies)
 	{
 		return;
 	}
@@ -3722,11 +3722,10 @@ void PhysicsManagerODE::RayPickCallback(void* pDataPtr, dGeomID o1, dGeomID o2)
 	if (lCollisions)
 	{
 		Object* lObject = (Object*)::dGeomGetData(o1);
-		lForceFeedbackIds[lHits] = lObject->mForceFeedbackId;
-		lPositions[lHits++] = vec3(lContact[0].pos);
-		lData[2] = (void*)lHits;
+		lForceFeedbackIds[*lHits] = lObject->mForceFeedbackId;
+		lPositions[*lHits] = vec3(lContact[0].pos);
+		(*lHits)++;
 	}
-
 }
 
 
