@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../UiInput.h"
+#include "../X11/UiX11DisplayManager.h"
 #include "../UiLepra.h"
 
 
@@ -21,52 +22,33 @@ class X11InputDevice;
 
 
 
-#if 0
-
-
-
 class X11InputElement: public InputElement
 {
 public:
 	X11InputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
-		X11InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset);
+		X11InputDevice* pParentDevice, void* pRawElement, unsigned pFieldOffset);
 	virtual ~X11InputElement();
 
-	const LPCDIDEVICEOBJECTINSTANCE GetDirectInputElement() const;
-	const LPDIOBJECTDATAFORMAT GetDataFormat() const;
+	const void* GetRawElement() const;
 
 protected:
 private:
-
-	enum
-	{
-		MAX_INT = 0x7FFFFFFF,
-		MIN_INT  = 0x80000000,
-	};
-
-	LPCDIDEVICEOBJECTINSTANCE mElement;
-	DIOBJECTDATAFORMAT mDataFormat;
+	void* mRawElement;
 
 	logclass();
 };
 
-const LPCDIDEVICEOBJECTINSTANCE X11InputElement::GetDirectInputElement() const
+const void* X11InputElement::GetRawElement() const
 {
-	return mElement;
+	return mRawElement;
 }
-
-const LPDIOBJECTDATAFORMAT X11InputElement::GetDataFormat() const
-{
-	return (LPDIOBJECTDATAFORMAT)&mDataFormat;
-}
-
 
 
 
 class X11InputDevice: public InputDevice
 {
 public:
-	X11InputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEINSTANCE pInfo, InputManager* pManager);
+	X11InputDevice(void* pRawDevice, InputManager* pManager);
 	virtual ~X11InputDevice();
 
 	virtual void Activate();
@@ -76,19 +58,12 @@ public:
 
 protected:
 private:
-	static BOOL CALLBACK EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef);
-
-	LPDIRECTINPUTDEVICE8 mDIDevice;
-	bool mReacquire;
+	void* mRawDevice;
 
 	int mRelAxisCount;
 	int mAbsAxisCount;
 	int mAnalogueCount;
 	int mButtonCount;
-
-	// The DirectInput data format description of mInputData.
-	DIDATAFORMAT mDataFormat;
-	LPDIDEVICEOBJECTDATA mDeviceObjectData;
 
 	logclass();
 };
@@ -124,24 +99,17 @@ public:
 
 	bool IsInitialized();
 
-
 protected:
-	bool OnMessage(int pMsg, int pwParam, long plParam);
-	void SetKey(KeyCode pWParam, long pLParam, bool pIsDown);
+	bool OnMessage(XEvent& pEvent);
+	void SetKey(XKeyEvent& pKey, bool pIsDown);
 
 private:
-	// The DirectInput device enumeration callback.
-	static BOOL CALLBACK EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
-
 	void AddObserver();
 	void RemoveObserver();
 
-	void SetMousePosition(int pMsg, int x, int y);
+	void SetMousePosition(unsigned pEventType, int x, int y);
 
 	X11DisplayManager* mDisplayManager;
-
-	// The DirectInput object.
-	LPDIRECTINPUT8 mDirectInput;
 
 	bool mEnumError;
 	bool mInitialized;
@@ -159,10 +127,6 @@ private:
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
 };
-
-
-
-#endif // 0
 
 
 

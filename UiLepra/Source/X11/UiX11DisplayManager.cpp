@@ -295,15 +295,7 @@ bool X11DisplayManager::InitWindow()
 
 	if (lOk && !mWnd)
 	{
-		int lX11Attributes[] =
-		{
-			GLX_RGBA, GLX_DOUBLEBUFFER,
-			GLX_RED_SIZE, 1,
-			GLX_GREEN_SIZE, 1,
-			GLX_BLUE_SIZE, 1,
-			None
-		};
-		XVisualInfo* lVisualInfo = ::glXChooseVisual(mDisplay, DefaultScreen(mDisplay), lX11Attributes);
+		XVisualInfo* lVisualInfo = GetVisualInfo();
 		Screen* lScreen = DefaultScreenOfDisplay(mDisplay);
 		const int lScreenWidth  = WidthOfScreen(lScreen);
 		const int lScreenHeight = HeightOfScreen(lScreen);
@@ -575,6 +567,19 @@ bool X11DisplayManager::OnMessage(XEvent& pEvent)
 Bool X11DisplayManager::WaitForNotify(Display* d, XEvent* e, char* arg)
 {
 	return((e->type == MapNotify) && (e->xmap.window == (::Window)arg));
+}
+
+XVisualInfo* X11DisplayManager::GetVisualInfo() const
+{
+	int lX11AttributeList[] =
+	{
+			GLX_RGBA, GLX_DOUBLEBUFFER,
+			GLX_RED_SIZE, 1,
+			GLX_GREEN_SIZE, 1,
+			GLX_BLUE_SIZE, 1,
+			None
+	};
+	return(::glXChooseVisual(mDisplay, DefaultScreen(mDisplay), lX11AttributeList));
 }
 
 

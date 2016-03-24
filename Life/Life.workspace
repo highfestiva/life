@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="Life" Database="">
-  <Project Name="Life" Path="Life.project" Active="Yes"/>
-  <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project"/>
+  <Project Name="Life" Path="Life.project" Active="No"/>
+  <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>

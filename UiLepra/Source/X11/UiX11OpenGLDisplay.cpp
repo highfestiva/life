@@ -219,14 +219,15 @@ bool X11OpenGLDisplay::InitScreen()
 			   _T("or try closing other running applications..."),
 			   _T("OpenGL Error") ,MB_OK | MB_ICONWARNING );
 		return false;
-	}
+	}*/
 
 	if (!CreateGLContext())
 	{
-		MessageBox(NULL,
+		/*MessageBox(NULL,
 			   _T("Unable to setup OpenGL, Please install a new OpenGL driver,") \
 			   _T("or try closing other running applications..."),
-			   _T("OpenGL Error"),MB_OK | MB_ICONWARNING );
+			   _T("OpenGL Error"),MB_OK | MB_ICONWARNING );*/
+		mLog.AError("Unable to setup OpenGL. Driver error?");
 		return false;
 	}
 
@@ -234,7 +235,7 @@ bool X11OpenGLDisplay::InitScreen()
 	if (mContextUserCount == 1)
 	{
 		OpenGLExtensions::InitExtensions();
-	}*/
+	}
 
 	return true;
 }
@@ -278,23 +279,12 @@ void X11OpenGLDisplay::DeleteGLContext()
 	}
 }
 
-XVisualInfo* X11OpenGLDisplay::GetVisualInfo() const
-{
-	int lX11AttributeList[] =
-	{
-			GLX_RGBA, GLX_DOUBLEBUFFER,
-			GLX_RED_SIZE, 1,
-			GLX_GREEN_SIZE, 1,
-			GLX_BLUE_SIZE, 1,
-			None
-	};
-	return(::glXChooseVisual(GetDisplay(), DefaultScreen(GetDisplay()), lX11AttributeList));
-}
-
 
 
 GLXContext X11OpenGLDisplay::mGlContext = 0;
 int X11OpenGLDisplay::mContextUserCount = 0;
+
+loginstance(UI_GFX_3D, X11OpenGLDisplay);
 
 
 

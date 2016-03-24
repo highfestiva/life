@@ -85,6 +85,11 @@ void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLoc
 
 void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
 {
+	if (!pInputManager->GetMouse())
+	{
+		return;
+	}
+
 	ScopeLock lLock(mLock);
 	PixelCoord lMouse;
 	pInputManager->GetMousePosition(lMouse.x, lMouse.y);

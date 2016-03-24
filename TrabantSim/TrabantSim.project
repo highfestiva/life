@@ -1,10 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="TrabantSim" InternalType="Console">
+  <Plugins>
+    <Plugin Name="CMakePlugin">
+      <![CDATA[[{
+  "name": "Debug",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }]]]>
+    </Plugin>
+    <Plugin Name="qmake">
+      <![CDATA[00010001N0005Debug000000000000]]>
+    </Plugin>
+  </Plugins>
   <Description/>
   <Dependencies/>
+  <VirtualDirectory Name="Source">
+    <File Name="Light.cpp"/>
+    <File Name="Light.h"/>
+    <File Name="Object.cpp"/>
+    <File Name="Object.h"/>
+    <File Name="pch.h"/>
+    <File Name="PhysGfxObject.cpp"/>
+    <File Name="PhysGfxObject.h"/>
+    <File Name="RtVar.h"/>
+    <File Name="TrabantSim.cxx"/>
+    <File Name="TrabantSim.h"/>
+    <File Name="TrabantSimConsoleManager.cpp"/>
+    <File Name="TrabantSimConsoleManager.h"/>
+    <File Name="TrabantSimManager.cpp"/>
+    <File Name="TrabantSimManager.h"/>
+    <File Name="TrabantSimTicker.cpp"/>
+    <File Name="TrabantSimTicker.h"/>
+    <File Name="Version.h"/>
+    <File Name="FileServer.cpp"/>
+    <File Name="FileServer.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Mac">
+    <File Name="AnimatedApp.h" ExcludeProjConfig="Debug"/>
+    <File Name="BackButtonHandler.h" ExcludeProjConfig="Debug"/>
+    <File Name="BackButtonHandler.m" ExcludeProjConfig="Debug"/>
+    <File Name="CreateNewViewController.h" ExcludeProjConfig="Debug"/>
+    <File Name="CreateNewViewController.m" ExcludeProjConfig="Debug"/>
+    <File Name="CYRLayoutManager.h" ExcludeProjConfig="Debug"/>
+    <File Name="CYRLayoutManager.m" ExcludeProjConfig="Debug"/>
+    <File Name="CYRTextStorage.h" ExcludeProjConfig="Debug"/>
+    <File Name="CYRTextStorage.m" ExcludeProjConfig="Debug"/>
+    <File Name="CYRTextView.h" ExcludeProjConfig="Debug"/>
+    <File Name="CYRTextView.m" ExcludeProjConfig="Debug"/>
+    <File Name="CYRToken.h" ExcludeProjConfig="Debug"/>
+    <File Name="CYRToken.m" ExcludeProjConfig="Debug"/>
+    <File Name="EditViewController.h" ExcludeProjConfig="Debug"/>
+    <File Name="EditViewController.mm" ExcludeProjConfig="Debug"/>
+    <File Name="FileHelper.h" ExcludeProjConfig="Debug"/>
+    <File Name="FileHelper.m" ExcludeProjConfig="Debug"/>
+    <File Name="ListViewController.h" ExcludeProjConfig="Debug"/>
+    <File Name="ListViewController.mm" ExcludeProjConfig="Debug"/>
+    <File Name="PythonRunner.h" ExcludeProjConfig="Debug"/>
+    <File Name="PythonRunner.mm" ExcludeProjConfig="Debug"/>
+    <File Name="PythonTextView.h" ExcludeProjConfig="Debug"/>
+    <File Name="PythonTextView.m" ExcludeProjConfig="Debug"/>
+    <File Name="SettingsViewController.h" ExcludeProjConfig="Debug"/>
+    <File Name="SettingsViewController.mm" ExcludeProjConfig="Debug"/>
+    <File Name="StdOutViewController.h" ExcludeProjConfig="Debug"/>
+    <File Name="StdOutViewController.mm" ExcludeProjConfig="Debug"/>
+    <File Name="TrabantSim.mm" ExcludeProjConfig="Debug"/>
+    <File Name="WebViewController.h" ExcludeProjConfig="Debug"/>
+    <File Name="WebViewController.m" ExcludeProjConfig="Debug"/>
+  </VirtualDirectory>
+  <Dependencies Name="Debug">
+    <Project Name="Life"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="Life"/>
+  </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
-      <Compiler Options="" C_Options="" Assembler="">
+      <Compiler Options="-std=c++11" C_Options="" Assembler="">
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="">
@@ -13,10 +89,18 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="clang++" DebuggerType="LLDB Debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-g;-O0;-Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE" C_Options="-g;-O0;-Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
       </Compiler>
-      <Linker Options="" Required="yes"/>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../Life/Debug"/>
+        <Library Value="pthread"/>
+        <Library Value="X11"/>
+        <Library Value="GL"/>
+        <Library Value="openal"/>
+        <Library Value="alut"/>
+        <Library Value="Life"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
@@ -90,63 +174,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="Source">
-    <File Name="Light.cpp"/>
-    <File Name="Light.h"/>
-    <File Name="Object.cpp"/>
-    <File Name="Object.h"/>
-    <File Name="pch.h"/>
-    <File Name="PhysGfxObject.cpp"/>
-    <File Name="PhysGfxObject.h"/>
-    <File Name="RtVar.h"/>
-    <File Name="TrabantSim.cxx"/>
-    <File Name="TrabantSim.h"/>
-    <File Name="TrabantSimConsoleManager.cpp"/>
-    <File Name="TrabantSimConsoleManager.h"/>
-    <File Name="TrabantSimManager.cpp"/>
-    <File Name="TrabantSimManager.h"/>
-    <File Name="TrabantSimTicker.cpp"/>
-    <File Name="TrabantSimTicker.h"/>
-    <File Name="Version.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Mac">
-    <File Name="AnimatedApp.h" ExcludeProjConfig="Debug"/>
-    <File Name="BackButtonHandler.h" ExcludeProjConfig="Debug"/>
-    <File Name="BackButtonHandler.m" ExcludeProjConfig="Debug"/>
-    <File Name="CreateNewViewController.h" ExcludeProjConfig="Debug"/>
-    <File Name="CreateNewViewController.m" ExcludeProjConfig="Debug"/>
-    <File Name="CYRLayoutManager.h" ExcludeProjConfig="Debug"/>
-    <File Name="CYRLayoutManager.m" ExcludeProjConfig="Debug"/>
-    <File Name="CYRTextStorage.h" ExcludeProjConfig="Debug"/>
-    <File Name="CYRTextStorage.m" ExcludeProjConfig="Debug"/>
-    <File Name="CYRTextView.h" ExcludeProjConfig="Debug"/>
-    <File Name="CYRTextView.m" ExcludeProjConfig="Debug"/>
-    <File Name="CYRToken.h" ExcludeProjConfig="Debug"/>
-    <File Name="CYRToken.m" ExcludeProjConfig="Debug"/>
-    <File Name="EditViewController.h" ExcludeProjConfig="Debug"/>
-    <File Name="EditViewController.mm" ExcludeProjConfig="Debug"/>
-    <File Name="FileHelper.h" ExcludeProjConfig="Debug"/>
-    <File Name="FileHelper.m" ExcludeProjConfig="Debug"/>
-    <File Name="FileServer.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="FileServer.h" ExcludeProjConfig="Debug"/>
-    <File Name="ListViewController.h" ExcludeProjConfig="Debug"/>
-    <File Name="ListViewController.mm" ExcludeProjConfig="Debug"/>
-    <File Name="PythonRunner.h" ExcludeProjConfig="Debug"/>
-    <File Name="PythonRunner.mm" ExcludeProjConfig="Debug"/>
-    <File Name="PythonTextView.h" ExcludeProjConfig="Debug"/>
-    <File Name="PythonTextView.m" ExcludeProjConfig="Debug"/>
-    <File Name="SettingsViewController.h" ExcludeProjConfig="Debug"/>
-    <File Name="SettingsViewController.mm" ExcludeProjConfig="Debug"/>
-    <File Name="StdOutViewController.h" ExcludeProjConfig="Debug"/>
-    <File Name="StdOutViewController.mm" ExcludeProjConfig="Debug"/>
-    <File Name="TrabantSim.mm" ExcludeProjConfig="Debug"/>
-    <File Name="WebViewController.h" ExcludeProjConfig="Debug"/>
-    <File Name="WebViewController.m" ExcludeProjConfig="Debug"/>
-  </VirtualDirectory>
-  <Dependencies Name="Debug">
-    <Project Name="Life"/>
-  </Dependencies>
-  <Dependencies Name="Release">
-    <Project Name="Life"/>
-  </Dependencies>
 </CodeLite_Project>

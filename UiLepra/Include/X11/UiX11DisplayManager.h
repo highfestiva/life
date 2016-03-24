@@ -9,6 +9,7 @@
 #include "../../../Lepra/Include/Unordered.h"
 #include "../UiDisplayManager.h"
 #include "UiX11Core.h"
+#include <X11/Xutil.h>
 
 
 
@@ -99,6 +100,7 @@ protected:
 	}
 
 	static Bool WaitForNotify(Display* d, XEvent* e, char* arg);
+	XVisualInfo* GetVisualInfo() const;
 
 	//Screen Stuff
 

@@ -1282,6 +1282,15 @@
       <File Name="../UiLepra/Source/UiTouchDrag.cpp"/>
       <File Name="../UiLepra/Source/UiSoundStream.cpp"/>
       <File Name="../UiLepra/Source/UiTouchstick.cpp"/>
+      <VirtualDirectory Name="Mac">
+        <File Name="../UiLepra/Source/Mac/EAGLView.mm" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Mac/RotatingController.mm" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Mac/UiIosInput.mm" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Mac/UiMacCore.mm" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Mac/UiMacDisplayManager.mm" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Mac/UiMacInput.mm" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Mac/UiMacOpenGLDisplay.mm" ExcludeProjConfig="Debug"/>
+      </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="Include">
       <VirtualDirectory Name="X11">
@@ -1337,7 +1346,7 @@
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
-  <Settings Type="Executable">
+  <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
         <IncludePath Value="."/>
@@ -1347,7 +1356,7 @@
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
-    <Configuration Name="Debug" CompilerType="clang++" DebuggerType="LLDB Debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+    <Configuration Name="Debug" CompilerType="clang++" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g -Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE" C_Options="-DPNG_NO_ASSEMBLER_CODE" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value="../ThirdParty/happyhttp-0.1"/>
@@ -1363,14 +1372,9 @@
       <Linker Options="-O0" Required="yes">
         <LibraryPath Value="."/>
         <LibraryPath Value="Debug"/>
-        <Library Value="pthread"/>
-        <Library Value="X11"/>
-        <Library Value="GL"/>
-        <Library Value="openal"/>
-        <Library Value="alut"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="./Debug" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

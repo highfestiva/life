@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -19,27 +19,22 @@ namespace UiLepra
 
 InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 {
-	//return (new X11InputManager((X11DisplayManager*)pDisplayManager));
-	return (0);
+	return (new X11InputManager((X11DisplayManager*)pDisplayManager));
 }
 
 
 
-#if 0
-
-
-
 X11InputElement::X11InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
-	X11InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset):
+	X11InputDevice* pParentDevice, void* pRawElement, unsigned pFieldOffset):
 	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
-	mElement(pElement)
+	mRawElement(pRawElement)
 {
-	SetIdentifier(mElement->tszName);
+	/*SetIdentifier(mElement->tszName);
 
 	mDataFormat.dwType  = mElement->dwType;
 	mDataFormat.pguid   = 0;
 	mDataFormat.dwOfs   = (DWORD)pFieldOffset;
-	mDataFormat.dwFlags = 0;
+	mDataFormat.dwFlags = 0;*/
 }
 
 X11InputElement::~X11InputElement()
@@ -55,15 +50,15 @@ loginstance(UI_INPUT, X11InputElement);
 	class X11InputDevice
 */
 
-X11InputDevice::X11InputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEINSTANCE pInfo, InputManager* pManager):
+X11InputDevice::X11InputDevice(void* pRawDevice, InputManager* pManager):
 	InputDevice(pManager),
-	mDIDevice(pDIDevice),
+	mRawDevice(pRawDevice),
 	mRelAxisCount(0),
 	mAbsAxisCount(0),
 	mAnalogueCount(0),
 	mButtonCount(0)
 {
-	SetIdentifier(pInfo->tszInstanceName);
+	/*SetIdentifier(pInfo->tszInstanceName);
 
 	mDIDevice->EnumObjects(EnumElementsCallback, this, DIDFT_ALL);
 
@@ -105,102 +100,23 @@ X11InputDevice::X11InputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEINSTAN
 		X11InputElement* lElement = (X11InputElement*)(*lIter);
 
 		memcpy(&mDataFormat.rgodf[i], lElement->GetDataFormat(), sizeof(DIOBJECTDATAFORMAT));
-	}
+	}*/
 }
 
 X11InputDevice::~X11InputDevice()
 {
 	if (IsActive() == true)
 	{
-		mDIDevice->Unacquire();
+		//mDIDevice->Unacquire();
 	}
-	mDIDevice->Release();
-
-	delete[] mDeviceObjectData;
-	delete[] mDataFormat.rgodf;
-}
-
-BOOL CALLBACK X11InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef)
-{
-	X11InputDevice* lDevice = (X11InputDevice*)pvRef;
-
-	X11InputElement* lElement = 0;
-	// Is this an analogue or digital element?
-	if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0 ||
-		(lpddoi->dwType & DIDFT_AXIS)    != 0 ||
-		(lpddoi->dwType & DIDFT_POV)     != 0 ||
-		(lpddoi->dwType & DIDFT_RELAXIS) != 0)
-	{
-		InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;
-		// Count number of relative and absolute axes.
-		// These values are used later on in the constructor to determine
-		// the data format.
-		if ((lpddoi->dwType & DIDFT_RELAXIS) != 0)
-		{
-			++lDevice->mRelAxisCount;
-			lInterpretation = InputElement::RELATIVE_AXIS;
-		}
-		else if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
-		{
-			lDevice->mAbsAxisCount++;
-		}
-
-		lElement = new X11InputElement(InputElement::ANALOGUE, lInterpretation, lDevice->mAnalogueCount,
-			lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
-		++lDevice->mAnalogueCount;
-
-		// Set absolute axis range.
-		if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
-		{
-			log_volatile(mLog.Debugf(_T("Found absolute axis element '%s' = '%s'."),
-				lElement->GetFullName().c_str(),
-				lElement->GetIdentifier().c_str()));
-
-			DIPROPRANGE lRange;
-			lRange.diph.dwSize = sizeof(DIPROPRANGE);
-			lRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-			lRange.diph.dwHow = DIPH_BYID;
-			lRange.diph.dwObj = lpddoi->dwType;
-			if (lDevice->mDIDevice->GetProperty(DIPROP_RANGE, &lRange.diph) == DI_OK)
-			{
-				const int lIntervalRange = lRange.lMax-lRange.lMin;
-				const int lMid = lIntervalRange / 2 + lRange.lMin;
-				const int lMin = lMid - lIntervalRange/2/8;	// Don't use full range, might not be physically accessible.
-				const int lMax = lMid + lIntervalRange/2/8;	// Don't use full range, might not be physically accessible.
-				lElement->SetValue(lMin);
-				lElement->SetValue(lMax);
-				lElement->SetValue(lMid);
-			}
-		}
-	}
-	else if((lpddoi->dwType&DIDFT_BUTTON)    != 0 ||
-			(lpddoi->dwType&DIDFT_PSHBUTTON) != 0 ||
-			(lpddoi->dwType&DIDFT_TGLBUTTON) != 0)
-	{
-		InputElement::Interpretation lInterpretation = (InputElement::Interpretation)((int)InputElement::BUTTON1 + lDevice->mButtonCount);
-		lElement = new X11InputElement(InputElement::DIGITAL, lInterpretation,
-			lDevice->mButtonCount, lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
-		++lDevice->mButtonCount;
-	}
-	else if(lpddoi->dwType&DIDFT_FFACTUATOR)
-	{
-		// TODO: handle force feedback elements!
-	}
-
-	if (lElement)
-	{
-		lElement->SetIdentifier(lpddoi->tszName);
-		lDevice->mElementArray.push_back(lElement);
-	}
-
-	return (DIENUM_CONTINUE);
+	//mDIDevice->Release();
 }
 
 void X11InputDevice::Activate()
 {
 	if (IsActive() == false)
 	{
-		HRESULT lHR;
+		/*HRESULT lHR;
 		DWORD lCooperativeFlags = 0;
 		if (this == GetManager()->GetKeyboard())
 		{
@@ -215,16 +131,16 @@ void X11InputDevice::Activate()
 		lProp.diph.dwHow = DIPH_DEVICE;
 		lProp.diph.dwObj = 0;
 		lProp.dwData = 1024;
-		mDIDevice->SetProperty(DIPROP_BUFFERSIZE, &lProp.diph);
+		mDIDevice->SetProperty(DIPROP_BUFFERSIZE, &lProp.diph);*/
 
-		mReacquire = true;
+		//mReacquire = true;
 		SetActive(true);
 	}
 }
 
 void X11InputDevice::Release()
 {
-	mDIDevice->Unacquire();
+	//mDIDevice->Unacquire();
 	SetActive(false);
 }
 
@@ -232,7 +148,7 @@ void X11InputDevice::PollEvents()
 {
 	if (IsActive() == true)
 	{
-		if (mReacquire)
+		/*if (mReacquire)
 		{
 			if (mDIDevice->Acquire() != DI_OK)
 			{
@@ -241,10 +157,10 @@ void X11InputDevice::PollEvents()
 			}
 			mReacquire = false;
 			log_debug(GetIdentifier()+_T(": acquired input device."));
-		}
+		}*/
 
 
-		HRESULT lHR = mDIDevice->Poll();
+		/*HRESULT lHR = mDIDevice->Poll();
 		if (lHR == DIERR_INPUTLOST)
 		{
 			mReacquire = true;
@@ -299,7 +215,7 @@ void X11InputDevice::PollEvents()
 			{
 				lMore = false;
 			}
-		}
+		}*/
 	}
 }
 
@@ -311,23 +227,23 @@ loginstance(UI_INPUT, X11InputDevice);
 
 X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	mDisplayManager(pDisplayManager),
-	mDirectInput(0),
+	//mDirectInput(0),
 	mEnumError(false),
 	mInitialized(false),
 	mScreenWidth(0),
 	mScreenHeight(0),
 	mCursorX(0),
 	mCursorY(0),
-	mMouse(0),
-	mKeyboard(0)
+	mKeyboard(0),
+	mMouse(0)
 {
-	POINT lPoint;
+	/*POINT lPoint;
 	::GetCursorPos(&lPoint);
-	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);
+	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);*/
 
 	::memset(&mTypeCount, 0, sizeof(mTypeCount));
 
-	HRESULT lHR;
+	/*HRESULT lHR;
 	
 	// Create the DirectInput object.
 	lHR = DirectInput8Create(X11Core::GetAppInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8,
@@ -347,7 +263,7 @@ X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	{
 		mDisplayManager->ShowMessageBox(_T("DirectInput failed enumerating your devices!"), _T("DirectInput error!"));
 		return;
-	}
+	}*/
 
 	Refresh();
 
@@ -360,7 +276,7 @@ X11InputManager::~X11InputManager()
 {
 	if (mInitialized == true)
 	{
-		mDirectInput->Release();
+		//mDirectInput->Release();
 	}
 
 	RemoveObserver();
@@ -370,17 +286,17 @@ X11InputManager::~X11InputManager()
 
 void X11InputManager::Refresh()
 {
-	if (mDisplayManager != 0 && mDisplayManager->GetHWND() != 0)
+	if (mDisplayManager != 0 && mDisplayManager->GetWindow() != 0)
 	{
-		RECT lRect;
+		/*RECT lRect;
 		::GetClientRect(mDisplayManager->GetHWND(), &lRect);
 		
 		mScreenWidth  = lRect.right - lRect.left;
-		mScreenHeight = lRect.bottom - lRect.top;
+		mScreenHeight = lRect.bottom - lRect.top;*/
 	}
 	else
 	{
-		// Get the entire screen area.
+		/*// Get the entire screen area.
 		mScreenWidth  = ::GetSystemMetrics(SM_CXVIRTUALSCREEN);
 		mScreenHeight = ::GetSystemMetrics(SM_CYVIRTUALSCREEN);
 
@@ -389,7 +305,7 @@ void X11InputManager::Refresh()
 			// Virtual screen not supported, use the primary display.
 			mScreenWidth  = ::GetSystemMetrics(SM_CXSCREEN);
 			mScreenHeight = ::GetSystemMetrics(SM_CYSCREEN);
-		}
+		}*/
 	}
 }
 
@@ -398,10 +314,10 @@ X11DisplayManager* X11InputManager::GetDisplayManager() const
 	return (mDisplayManager);
 }
 
-bool X11InputManager::OnMessage(int pMsg, int pwParam, long plParam)
+bool X11InputManager::OnMessage(XEvent& pEvent)
 {
 	bool lConsumed = false;
-	switch (pMsg)
+	/*switch (pMsg)
 	{
 		case WM_CHAR:
 		{
@@ -445,13 +361,13 @@ bool X11InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 			lConsumed = NotifyOnKeyDown((KeyCode)pwParam);
 		}
 		break;
-	}
+	}*/
 	return (lConsumed);
 }
 
-void X11InputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
+void X11InputManager::SetKey(XKeyEvent& pKey, bool pIsDown)
 {
-	if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
+	/*if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
 	{
 		switch (pWParam)
 		{
@@ -463,84 +379,12 @@ void X11InputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
 	{
 		pWParam = IN_KBD_RSHIFT;
 	}
-	Parent::SetKey(pWParam, pIsDown);
-}
-
-BOOL CALLBACK X11InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
-{
-	X11InputManager* lInputManager = (X11InputManager*)pvRef;
-
-	HRESULT lHR;
-	LPDIRECTINPUTDEVICE8 lDIDevice;
-	
-	lHR = lInputManager->mDirectInput->CreateDevice(lpddi->guidInstance, &lDIDevice, 0);
-
-	if (lHR != DI_OK)
-	{
-		lInputManager->mEnumError = true;
-		return DIENUM_STOP;
-	}
-
-	X11InputDevice* lDevice = new X11InputDevice(lDIDevice, lpddi, lInputManager);
-	InputDevice::Interpretation lInterpretation = InputDevice::TYPE_OTHER;
-	switch (lpddi->dwDevType & 0xFF)
-	{
-		case DI8DEVTYPE_MOUSE:		lInterpretation = InputDevice::TYPE_MOUSE;	break;
-		case DI8DEVTYPE_KEYBOARD:	lInterpretation = InputDevice::TYPE_KEYBOARD;	break;
-		case DI8DEVTYPE_JOYSTICK:	lInterpretation = InputDevice::TYPE_JOYSTICK;	break;
-		case DI8DEVTYPE_GAMEPAD:	lInterpretation = InputDevice::TYPE_GAMEPAD;	break;
-		case DI8DEVTYPE_1STPERSON:	lInterpretation = InputDevice::TYPE_1STPERSON;	break;
-		case DI8DEVTYPE_DRIVING:
-		{
-			switch ((lpddi->dwDevType>>8) & 0xFF)
-			{
-				case DI8DEVTYPEDRIVING_COMBINEDPEDALS:
-				case DI8DEVTYPEDRIVING_DUALPEDALS:
-				case DI8DEVTYPEDRIVING_THREEPEDALS:	lInterpretation = InputDevice::TYPE_PEDALS;	break;
-				default:				lInterpretation = InputDevice::TYPE_WHEEL;	break;
-			}
-		}
-		break;
-		case DI8DEVTYPE_FLIGHT:
-		{
-			switch ((lpddi->dwDevType>>8) & 0xFF)
-			{
-				case DI8DEVTYPEFLIGHT_RC:	lInterpretation = InputDevice::TYPE_GAMEPAD;	break;
-				case DI8DEVTYPEFLIGHT_STICK:	lInterpretation = InputDevice::TYPE_JOYSTICK;	break;
-				default:			lInterpretation = InputDevice::TYPE_FLIGHT;	break;
-			}
-		}
-		break;
-		case DI8DEVTYPE_SUPPLEMENTAL:
-		{
-			switch ((lpddi->dwDevType>>8) & 0xFF)
-			{
-				case DI8DEVTYPESUPPLEMENTAL_COMBINEDPEDALS:
-				case DI8DEVTYPESUPPLEMENTAL_DUALPEDALS:
-				case DI8DEVTYPESUPPLEMENTAL_RUDDERPEDALS:
-				case DI8DEVTYPESUPPLEMENTAL_THREEPEDALS:	lInterpretation = InputDevice::TYPE_PEDALS;	break;
-			}
-		}
-		break;
-	}
-	lDevice->SetInterpretation(lInterpretation, lInputManager->mTypeCount[lInterpretation]);
-	++lInputManager->mTypeCount[lInterpretation];
-	if (lInterpretation == InputDevice::TYPE_MOUSE && lInputManager->mMouse == 0)
-	{
-		lInputManager->mMouse = lDevice;
-	}
-	else if (lInterpretation == InputDevice::TYPE_KEYBOARD && lInputManager->mKeyboard == 0)
-	{
-		lInputManager->mKeyboard = lDevice;
-	}
-	lInputManager->mDeviceList.push_back(lDevice);
-
-	return (DIENUM_CONTINUE);
+	Parent::SetKey(pWParam, pIsDown);*/
 }
 
 void X11InputManager::SetCursorVisible(bool pVisible)
 {
-	::ShowCursor(pVisible? TRUE : FALSE);
+	//::ShowCursor(pVisible? TRUE : FALSE);
 }
 
 float X11InputManager::GetCursorX()
@@ -551,6 +395,13 @@ float X11InputManager::GetCursorX()
 float X11InputManager::GetCursorY()
 {
 	return mCursorY;
+}
+
+void X11InputManager::SetMousePosition(int x, int y)
+{
+	Parent::SetMousePosition(x, y);
+	mCursorX = 2.0f * x / mScreenWidth  - 1.0f;
+	mCursorY = 2.0f * y / mScreenHeight - 1.0f;
 }
 
 const InputDevice* X11InputManager::GetKeyboard() const
@@ -577,7 +428,7 @@ void X11InputManager::AddObserver()
 {
 	if (mDisplayManager)
 	{
-		// Listen to text input and standard mouse events.
+		/*// Listen to text input and standard mouse events.
 		mDisplayManager->AddObserver(WM_CHAR, this);
 		mDisplayManager->AddObserver(WM_SYSKEYDOWN, this);
 		mDisplayManager->AddObserver(WM_SYSKEYUP, this);
@@ -592,6 +443,9 @@ void X11InputManager::AddObserver()
 		mDisplayManager->AddObserver(WM_LBUTTONUP, this);
 		mDisplayManager->AddObserver(WM_RBUTTONUP, this);
 		mDisplayManager->AddObserver(WM_MBUTTONUP, this);
+		mDisplayManager->AddObserver(WM_ACTIVATE, this);
+		mDisplayManager->AddObserver(WM_SETFOCUS, this);
+		mDisplayManager->AddObserver(WM_KILLFOCUS, this);*/
 	}
 }
 
@@ -603,9 +457,9 @@ void X11InputManager::RemoveObserver()
 	}
 }
 
-void X11InputManager::SetMousePosition(int pMsg, int x, int y)
+void X11InputManager::SetMousePosition(unsigned pEventType, int x, int y)
 {
-	if (pMsg == WM_NCMOUSEMOVE && mDisplayManager)
+	/*if (pMsg == WM_NCMOUSEMOVE && mDisplayManager)
 	{
 		POINT lPoint;
 		lPoint.x = x;
@@ -613,20 +467,14 @@ void X11InputManager::SetMousePosition(int pMsg, int x, int y)
 		::ScreenToClient(mDisplayManager->GetHWND(), &lPoint);
 		x = lPoint.x;
 		y = lPoint.y;
-	}
-
-	mCursorX = 2.0f * (float)x / (float)mScreenWidth  - 1.0f;
-	mCursorY = 2.0f * (float)y / (float)mScreenHeight - 1.0f;
+	}*/
+	SetMousePosition(x, y);
 }
 
 bool X11InputManager::IsInitialized()
 {
 	return mInitialized;
 }
-
-
-
-#endif // 0
 
 
 
