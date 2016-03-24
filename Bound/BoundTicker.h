@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -36,8 +36,8 @@ public:
 	virtual ~BoundTicker();
 
 private:
-	void Suspend();
-	void Resume();
+	void Suspend(bool pHard);
+	void Resume(bool pHard);
 	virtual bool CreateSlave();
 	virtual void OnSlavesKilled();
 	virtual void OnServerCreated(Life::UiGameServerManager* pServer);

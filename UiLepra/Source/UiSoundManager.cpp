@@ -21,7 +21,7 @@ SoundManager* SoundManager::CreateSoundManager(ContextType pType)
 	{
 		case CONTEXT_FMOD:
 #if !defined(LEPRA_WITHOUT_FMOD)
-			return (new SoundManagerFMod(44100));
+			//return (new SoundManagerFMod(44100));
 #endif // !WITHOUT_FMOD
 		case CONTEXT_OPENAL:
 			return (new SoundManagerOpenAL(44100));

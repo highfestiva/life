@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -40,8 +40,8 @@ public:
 	virtual void Destroy();
 	virtual bool MainLoop();
 
-	virtual void Suspend();
-	virtual void Resume();
+	virtual void Suspend(bool pHard);
+	virtual void Resume(bool pHard);
 
 	str GetTypeName() const;
 	str GetVersion() const;
@@ -193,9 +193,9 @@ bool Downwash::MainLoop()
 
 
 
-void Downwash::Suspend()
+void Downwash::Suspend(bool pHard)
 {
-	mGameTicker->Suspend();
+	mGameTicker->Suspend(pHard);
 	//if (mMusicPlayer)
 	//{
 	//	mMusicPlayer->Pause();
@@ -207,13 +207,13 @@ void Downwash::Suspend()
 #endif // iOS
 }
 
-void Downwash::Resume()
+void Downwash::Resume(bool pHard)
 {
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
-	mGameTicker->Resume();
+	mGameTicker->Resume(pHard);
 	//if (mMusicPlayer)
 	//{
 	//	mMusicPlayer->Stop();

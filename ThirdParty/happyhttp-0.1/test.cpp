@@ -3,6 +3,7 @@
 #ifdef WIN32
 #include <winsock2.h>
 #endif // WIN32
+#include <string.h>
 
 int count=0;
 

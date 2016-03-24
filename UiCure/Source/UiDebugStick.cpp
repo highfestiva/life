@@ -1,12 +1,12 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
 #include "../../Cure/Include/RuntimeVariable.h"
-#include "../../UiLepra/Include/UiTouchStick.h"
+#include "../../UiLepra/Include/UiTouchstick.h"
 #include "../../UiTbc/Include/UiPainter.h"
 #include "../Include/UiDebugStick.h"
 #include "../Include/UiGameUiManager.h"

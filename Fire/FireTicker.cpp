@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -48,14 +48,14 @@ FireTicker::~FireTicker()
 
 
 
-void FireTicker::Suspend()
+void FireTicker::Suspend(bool pHard)
 {
-	Parent::Suspend();
+	Parent::Suspend(pHard);
 }
 
-void FireTicker::Resume()
+void FireTicker::Resume(bool pHard)
 {
-	Parent::Resume();
+	Parent::Resume(pHard);
 }
 
 bool FireTicker::CreateSlave()

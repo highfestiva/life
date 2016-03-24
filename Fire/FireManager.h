@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -53,7 +53,7 @@ public:
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~FireManager();
-	virtual void Suspend();
+	virtual void Suspend(bool pHard);
 	virtual void LoadSettings();
 	virtual void SaveSettings();
 	virtual void SetRenderArea(const PixelRect& pRenderArea);

@@ -1,6 +1,6 @@
 /*
 	Class:  Canvas
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -2454,7 +2454,7 @@ void Canvas::ConvertTo15()
 	uint16 lData;
 	uint8 r, g, b;
 
-	if (mBitDepth == 15)
+	if (mBitDepth == BITDEPTH_15_BIT)
 	{
 		return;
 	}
@@ -2619,7 +2619,7 @@ void Canvas::ConvertTo16()
 	uint8 r, g, b;
 	int i;
 
-	if (mBitDepth == 16)
+	if (mBitDepth == BITDEPTH_16_BIT)
 	{
 		return;
 	}
@@ -3913,7 +3913,7 @@ uint8 Canvas::GetPaletteColor(int pRed, int pGreen, int pBlue)
 
 void Canvas::GetPixelColor(unsigned x, unsigned y, Color& pColor) const
 {
-	if (x >= 0 && x < mWidth && y >= 0 && y < mHeight && mBuffer != 0)
+	if (x < mWidth && y < mHeight && mBuffer != 0)
 	{
 		switch(mBitDepth)
 		{
@@ -3980,7 +3980,7 @@ void Canvas::GetPixelColor(unsigned x, unsigned y, Color& pColor) const
 
 void Canvas::SetPixelColor(unsigned x, unsigned y, Color& pColor)
 {
-	if (x >= 0 && x < mWidth && y >= 0 && y < mHeight && mBuffer != 0)
+	if (x < mWidth && y < mHeight && mBuffer != 0)
 	{
 		switch(mBitDepth)
 		{

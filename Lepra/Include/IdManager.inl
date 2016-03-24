@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -222,7 +222,7 @@ void ID_QUAL::FreeIdOnSegment(_TInt pId, const typename IdSegmentList::iterator&
 	else	// Split current segment in two. Place free number on the first segment.
 	{
 		// Create new segment to hold this ID.
-		typename IdSegmentList::iterator z = mIdSegmentList.insert(x, AllocFreeSegment(x->mFirstAllocId, pId, pId));
+		mIdSegmentList.insert(x, AllocFreeSegment(x->mFirstAllocId, pId, pId));
 		// Cut the second of the two segments short.
 		x->mFirstAllocId = pId-1;
 	}

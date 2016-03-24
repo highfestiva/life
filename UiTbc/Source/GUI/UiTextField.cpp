@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -541,7 +541,7 @@ void TextField::SetCaption(Caption*)
 	// Do nothing. TextField can't have a caption.
 }
 
-void TextField::AddChild(Component*, int, int)
+void TextField::AddChild(Component*, int, int, int)
 {
 	// Do nothing. TextField can't have children.
 }
@@ -693,7 +693,7 @@ void TextField::UpdateMarkerPos(Painter* pPainter)
 
 void TextField::SetMarkerPos(size_t pPos)
 {
-	if (pPos >= 0 && pPos <= mText.length())
+	if (pPos <= mText.length())
 	{
 		mMarkerPos = pPos;
 		mMarkerTimer.ClearTimeDiff();

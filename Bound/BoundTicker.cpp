@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -55,9 +55,9 @@ BoundTicker::~BoundTicker()
 
 
 
-void BoundTicker::Suspend()
+void BoundTicker::Suspend(bool pHard)
 {
-	Parent::Suspend();
+	Parent::Suspend(pHard);
 
 	if (mMusicPlayer)
 	{
@@ -65,9 +65,9 @@ void BoundTicker::Suspend()
 	}
 }
 
-void BoundTicker::Resume()
+void BoundTicker::Resume(bool pHard)
 {
-	Parent::Resume();
+	Parent::Resume(pHard);
 
 	if (mMusicPlayer)
 	{

@@ -80,3 +80,15 @@ Doc/getting_real.pdf
 Downwash/Icons/icon_data/
 project.xcworkspace/
 xcuserdata/
+
+.codelite/
+ThirdParty/libogg-1.2.2/config.h
+ThirdParty/libogg-1.2.2/config.status
+ThirdParty/libogg-1.2.2/include/ogg/config_types.h
+ThirdParty/libogg-1.2.2/libtool
+ThirdParty/libogg-1.2.2/ogg-uninstalled.pc
+ThirdParty/libogg-1.2.2/ogg.pc
+ThirdParty/libogg-1.2.2/src/.deps/
+ThirdParty/libogg-1.2.2/stamp-h1
+pd.mk
+pd.txt

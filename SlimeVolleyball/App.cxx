@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -62,8 +62,8 @@ private:
 	void EndRender();
 	bool CanRender() const;
 
-	virtual void Suspend();
-	virtual void Resume();
+	virtual void Suspend(bool pHard);
+	virtual void Resume(bool pHard);
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
@@ -537,7 +537,7 @@ bool App::CanRender() const
 
 
 
-void App::Suspend()
+void App::Suspend(bool pHard)
 {
 	if (mGame->fInPlay)
 	{
@@ -548,7 +548,7 @@ void App::Suspend()
 #endif // iOS
 }
 
-void App::Resume()
+void App::Resume(bool pHard)
 {
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
@@ -581,9 +581,9 @@ bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 
 void App::OnMouseMove(float x, float y, bool pPressed)
 {
-	x;
-	y;
-	pPressed;
+	(void)x;
+	(void)y;
+	(void)pPressed;
 #ifdef LEPRA_IOS
 	((UiLepra::IosInputManager*)mInput)->SetMousePosition(x, y);
 	((UiLepra::IosInputElement*)mInput->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);

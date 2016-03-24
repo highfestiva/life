@@ -1,11 +1,11 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2007, Righteous Games
 
 
 
 #include "pch.h"
-#include "../Include/NetworkManager.h"
+//#include "../Include/NetworkManager.h"
 #include "../Include/PythonContextManager.h"
 #include "../Include/PythonContextObject.h"
 #include "../Include/PythonInterface.h"

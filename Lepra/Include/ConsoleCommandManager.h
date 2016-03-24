@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // This is a high-level functionality inside a low-level class (however proven well-working).
@@ -36,6 +36,8 @@ namespace Lepra
 class CommandCompleter
 {
 public:
+	CommandCompleter();
+	virtual ~CommandCompleter();
 	virtual std::list<str> CompleteCommand(const str& pPartialCommand) const = 0;
 };
 

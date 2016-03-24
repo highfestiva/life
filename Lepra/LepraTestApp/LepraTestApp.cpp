@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2006, Righteous Games
 
 
@@ -8,7 +8,6 @@
 #include "../Include/Application.h"
 #include "../Include/Log.h"
 #include "../Include/LogListener.h"
-#include "../Include/PerformanceScope.h"
 #include "../Include/String.h"
 #include "../Include/Thread.h"
 
@@ -22,19 +21,24 @@ void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pTestOk);
 class LepraTestApplication: public Lepra::Application
 {
 public:
-	LepraTestApplication(const Lepra::ArgumentList& pArgumentList);
-	int Run();
+	LepraTestApplication(const Lepra::strutil::strvec& pArgumentVector);
+	virtual void Init();
+	virtual int Run();
 
 private:
 	static Lepra::LogDecorator mLog;
 };
 
-LEPRA_RUN_APPLICATION(LepraTestApplication);
+LEPRA_RUN_APPLICATION(LepraTestApplication, Lepra::Main);
 
-LepraTestApplication::LepraTestApplication(const Lepra::ArgumentList& pArgumentList):
-	Lepra::Application(pArgumentList)
+LepraTestApplication::LepraTestApplication(const Lepra::strutil::strvec& pArgumentVector):
+	Lepra::Application(pArgumentVector)
 {
 };
+
+void LepraTestApplication::Init()
+{
+}
 
 int LepraTestApplication::Run()
 {
@@ -61,8 +65,6 @@ int LepraTestApplication::Run()
 
 	bool lTestOk = TestLepra();
 	ShowTestResult(mLog, lTestOk);
-
-	Lepra::PerformanceScope::Log(mLog);
 
 	lMemLogger.DumpToFile(_TEXT_ALTERNATIVE("Temp.log", L"TempUnicode.log"));
 

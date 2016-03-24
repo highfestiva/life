@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -59,7 +59,7 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glxext.h>
-#include "GLEXT.H"
+#include "linuxglext.h"
 
 #else // Unkonwn platform.
 

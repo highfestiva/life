@@ -1,6 +1,6 @@
 /*
 	Class:  ListControl
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -141,9 +141,9 @@ void ListControl::SetScrollBars(ScrollBar* pHScrollBar,
 
 }
 
-void ListControl::AddChild(Component* pChild, int pParam1, int pParam2)
+void ListControl::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer)
 {
-	mListRect->AddChild(pChild, pParam1, pParam2);
+	mListRect->AddChild(pChild, pParam1, pParam2, pLayer);
 
 	if (mLastSelected == 0)
 	{

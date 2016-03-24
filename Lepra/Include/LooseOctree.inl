@@ -1,6 +1,6 @@
 /*
 	Class:  LooseOctree
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -205,7 +205,7 @@ TEMPLATE _TObject QUAL::MoveObject(_TKey pKey, const Vector3D<_TVarType>& pToPos
 	if (lNodeIter == mNodeTable.End())
 	{
 		//LOG(PHYSIC, DEBUG, "LooseOctree::MoveObject, trying to move non existing object!");
-		return false;
+		return _TObject();
 	}
 	Node* lNode = *lNodeIter;
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -151,9 +151,9 @@ void Grenade::OnForceApplied(Cure::ContextObject* pOtherObject,
 	const vec3& pForce, const vec3& pTorque,
 	const vec3& pPosition, const vec3& pRelativeVelocity)
 {
-	pOwnBodyId;
-	pOtherBodyId;
-	pRelativeVelocity;
+	(void)pOwnBodyId;
+	(void)pOtherBodyId;
+	(void)pRelativeVelocity;
 
 	if (mExploded)
 	{

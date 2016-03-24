@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -107,8 +107,8 @@ private:
 	UiTbc::FontManager* mFontManager;
 	UiTbc::DesktopWindow* mDesktopWindow;
 	UiLepra::InputManager* mInput;
-	UiLepra::SoundManager* mSound;
 	UiLepra::Touch::DragManager* mDragManager;
+	UiLepra::SoundManager* mSound;
 	double mSoundRollOffShadow;	// Optimization.
 	double mSoundDopplerShadow;	// Optimization.
 	UiTbc::FontManager::FontId mCurrentFontId;

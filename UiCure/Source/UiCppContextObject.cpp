@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-, Pixel Doctrine
 
 
@@ -35,9 +35,9 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mEnableMeshSlide(false),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
-	mLerpMode(LERP_STOP),
 	mSinkSpeed(0),
-	mSinkOffset(0)
+	mSinkOffset(0),
+	mLerpMode(LERP_STOP)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }

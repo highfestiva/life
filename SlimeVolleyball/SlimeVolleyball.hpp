@@ -996,10 +996,8 @@ class SlimeVolleyball
 
 	private: void gameOver(bool fDidWin)
 	{
-		FontMetrics localFontMetrics1 = this->screen.getFontMetrics();
 		drawScores();
 		DrawStatus();
-		FontMetrics localFontMetrics2 = this->screen.getFontMetrics();
 		if (!fDidWin)
 		{
 			promptMsg += "\n" + this->loserText1[this->aiMode] + "\n" + this->loserText2[this->aiMode] + "\nGAME OVER";

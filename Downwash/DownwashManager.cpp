@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -182,7 +182,7 @@ DownwashManager::~DownwashManager()
 
 }
 
-void DownwashManager::Suspend()
+void DownwashManager::Suspend(bool pHard)
 {
 	if (!mMenu->GetDialog())
 	{
@@ -433,7 +433,7 @@ bool DownwashManager::Paint()
 		return false;
 	}
 
-	if (mStick && !mMenu->GetDialog() != 0)
+	if (mStick && mMenu->GetDialog() == 0)
 	{
 		DrawStick(mStick);
 		mStick->ResetTap();
@@ -1710,9 +1710,7 @@ vec3 DownwashManager::GetLandingTriggerPosition(Cure::ContextObject* pLevel) con
 				const Tbc::PhysicsTrigger* lTrigger = pLevel->GetPhysics()->GetTrigger(x);
 				if (pLevel->GetTrigger(lTrigger->GetPhysicsTriggerId(0)) == lLandingTrigger)
 				{
-					xform lTransform;
-					GetPhysicsManager()->GetTriggerTransform(lTrigger->GetPhysicsTriggerId(0), lTransform);
-					mLastLandingTriggerPosition = lTransform.GetPosition();
+					mLastLandingTriggerPosition = GetPhysicsManager()->GetBodyPosition(lTrigger->GetPhysicsTriggerId(0));
 					return mLastLandingTriggerPosition;
 				}
 			}

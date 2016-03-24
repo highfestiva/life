@@ -1,6 +1,6 @@
 /*
 	Class:  TextField
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -90,7 +90,7 @@ public:
 
 	// Override these and remove the functionality.
 	virtual void SetCaption(Caption* pCaption);
-	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0);
+	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
 
 	virtual void DoSetPos(int x, int y);
 	virtual void DoSetSize(int pWidth, int pHeight);

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -192,7 +192,7 @@ bool Fire::MainLoop()
 
 void Fire::Suspend()
 {
-	mGameTicker->Suspend();
+	mGameTicker->Suspend(true);
 	//if (mMusicPlayer)
 	//{
 	//	mMusicPlayer->Pause();
@@ -210,7 +210,7 @@ void Fire::Resume()
 	[mAnimatedApp startTick];
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
-	mGameTicker->Resume();
+	mGameTicker->Resume(true);
 	//if (mMusicPlayer)
 	//{
 	//	mMusicPlayer->Stop();

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -41,8 +41,8 @@ public:
 	virtual void Destroy();
 	virtual bool MainLoop();
 
-	virtual void Suspend();
-	virtual void Resume();
+	virtual void Suspend(bool pHard);
+	virtual void Resume(bool pHard);
 	void SavePurchase();
 
 	str GetTypeName() const;
@@ -185,22 +185,22 @@ bool Bound::MainLoop()
 
 
 
-void Bound::Suspend()
+void Bound::Suspend(bool pHard)
 {
-	mGameTicker->Suspend();
+	mGameTicker->Suspend(pHard);
 	mUiManager->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
 #endif // iOS
 }
 
-void Bound::Resume()
+void Bound::Resume(bool pHard)
 {
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
-	mGameTicker->Resume();
+	mGameTicker->Resume(pHard);
 }
 
 void Bound::SavePurchase()

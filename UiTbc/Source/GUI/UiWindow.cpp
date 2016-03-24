@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -415,9 +415,9 @@ RectComponent* Window::GetClientRectComponent() const
 	return mClientRect;
 }
 
-void Window::AddChild(Component* pChild, int pParam1, int pParam2)
+void Window::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer)
 {
-	mClientRect->AddChild(pChild, pParam1, pParam2);
+	mClientRect->AddChild(pChild, pParam1, pParam2, pLayer);
 }
 
 void Window::RemoveChild(Component* pChild, int pLayer)

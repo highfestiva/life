@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -187,7 +187,7 @@ bool Impuzzable::MainLoop()
 
 void Impuzzable::Suspend()
 {
-	mGameTicker->Suspend();
+	mGameTicker->Suspend(true);
 	mUiManager->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
@@ -200,7 +200,7 @@ void Impuzzable::Resume()
 	[mAnimatedApp startTick];
 #endif // iOS
 	mUiManager->GetSoundManager()->Resume();
-	mGameTicker->Resume();
+	mGameTicker->Resume(true);
 }
 
 void Impuzzable::SavePurchase()

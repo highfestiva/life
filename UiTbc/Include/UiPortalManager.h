@@ -1,6 +1,6 @@
 /*
 	Class:  PortalManager
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -36,8 +36,8 @@ class Renderer;
 
 class PortalManager: public Tbc::PortalManager
 {
+	typedef Tbc::PortalManager Parent;
 public:
-
 	PortalManager(){}
 	virtual ~PortalManager(){}
 
@@ -47,7 +47,7 @@ private:
 
 	class Cell;
 
-	class Portal : public Tbc::PortalManager::Portal
+	class Portal : public Parent::Portal
 	{
 	public:
 		Portal(int pNumVertices,
@@ -59,7 +59,7 @@ private:
 		void Traverse(Renderer* pRenderer, const PixelRect& pRect, Cell* pFrom);
 	};
 
-	class Cell: public Tbc::PortalManager::Cell
+	class Cell: public Parent::Cell
 	{
 	public:
 		Cell(const str& pCellID, const str& pCellDescription, PortalManager* pPortalManager);
@@ -71,13 +71,13 @@ private:
 		int mLastFrameVisible;
 	};
 
-	virtual Tbc::PortalManager::Portal* NewPortal(int pNumVertices,
+	virtual Parent::Portal* NewPortal(int pNumVertices,
 						      vec3* pVertex,
-						      Cell* pCell1,
-						      Cell* pCell2);
-	virtual Tbc::PortalManager::Cell* NewCell(const str& pCellID, 
+						      Parent::Cell* pCell1,
+						      Parent::Cell* pCell2);
+	virtual Parent::Cell* NewCell(const str& pCellID, 
 						  const str& pCellDescription,
-						  PortalManager* pPortalManager);
+						  Parent::PortalManager* pPortalManager);
 
 	logclass();
 };

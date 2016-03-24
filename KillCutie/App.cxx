@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -139,8 +139,8 @@ public:
 	void Purchase(const str& pProductName);
 	void SetIsPurchasing(bool pIsPurchasing);
 
-	virtual void Suspend();
-	virtual void Resume();
+	virtual void Suspend(bool pHard);
+	virtual void Resume(bool pHard);
 
 	bool Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
@@ -342,9 +342,9 @@ namespace GrenadeRun
 App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
 	mGame(0),
+	mIntroStreamer(0),
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
-	mIntroStreamer(0),
 	mAverageLoopTime(1.0/(FPS+1)),
 	mAverageFastLoopTime(1.0/(FPS+1)),
 	mIsLoaded(false),
@@ -2159,7 +2159,7 @@ void App::Layout()
 
 
 
-void App::Suspend()
+void App::Suspend(bool pHard)
 {
 	if (mMusicPlayer)
 	{
@@ -2171,7 +2171,7 @@ void App::Suspend()
 #endif // iOS
 }
 
-void App::Resume()
+void App::Resume(bool pHard)
 {
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];

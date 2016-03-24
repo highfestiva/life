@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -19,8 +19,7 @@ namespace GrenadeRun
 RoboBall::RoboBall(const Game* pGame, const str& pClassId):
 	Parent(pGame->GetResourceManager(), pClassId, pGame->GetUiManager()),
 	mGame(pGame),
-	mSound(0),
-	mTimeFrameBlown(-1)
+	mSound(0)
 {
 	mHeadAwayTimer.EnableShadowCounter(true);
 }

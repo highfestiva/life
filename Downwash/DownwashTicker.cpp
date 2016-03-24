@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -62,9 +62,9 @@ DownwashTicker::~DownwashTicker()
 
 
 
-void DownwashTicker::Suspend()
+void DownwashTicker::Suspend(bool pHard)
 {
-	Parent::Suspend();
+	Parent::Suspend(pHard);
 
 	if (mMusicPlayer)
 	{
@@ -72,9 +72,9 @@ void DownwashTicker::Suspend()
 	}
 }
 
-void DownwashTicker::Resume()
+void DownwashTicker::Resume(bool pHard)
 {
-	Parent::Resume();
+	Parent::Resume(pHard);
 
 	double lRtrOffset;
 	v_get(lRtrOffset, =, mSlaveArray[0]->GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);

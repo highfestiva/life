@@ -23,7 +23,7 @@ public:
 	// Returns true if the message was processed. Returns false otherwise.
 	// If there are many observers listening to the same message,
 	// returning true will stop propagation.
-	virtual Bool OnMessage(XEvent* e) = 0;
+	virtual bool OnMessage(XEvent& e) = 0;
 };
 
 class X11DisplayManager: public DisplayManager, public X11Observer
@@ -51,20 +51,20 @@ public:
 	virtual unsigned GetBitDepth() const;
 	virtual unsigned GetRefreshRate() const;
 	virtual bool IsFullScreen() const;
+	virtual double GetPhysicalScreenSize() const;
 
 	Display* GetDisplay() const;
 	Window GetWindow() const;
 
-	static Bool WaitForNotify(Display* d, XEvent* e, char* arg);
-	Bool InternalDispatchMessage(XEvent* e);
+	static Bool WaitForNotify(Display* d, XEvent& e, char* arg);
 	void ProcessMessages();
-	void AddObserver(Window pMessage, X11Observer* pObserver);
-	void RemoveObserver(Window pMessage, X11Observer* pObserver);
+	void AddObserver(unsigned pMessage, X11Observer* pObserver);
+	void RemoveObserver(unsigned pMessage, X11Observer* pObserver);
 	void RemoveObserver(X11Observer* pObserver);
 	// Show a popup dialog with a message.
 	void ShowMessageBox(const str& pMsg, const str& pCaption);
 
-	virtual Bool OnMessage(XEvent* e);
+	virtual bool OnMessage(XEvent& e);
 
 protected:
 
@@ -98,12 +98,15 @@ protected:
 		return mMaximized;
 	}
 
+	static Bool WaitForNotify(Display* d, XEvent* e, char* arg);
+
 	//Screen Stuff
 
 	static int msWindowCount;
 	Display* mDisplay;
 	Window mWnd;
-	bool mIsOpen;
+	bool mIsScreenOpen;
+	bool mIsHidden;
 
 	bool mMinimized;
 	bool mMaximized;

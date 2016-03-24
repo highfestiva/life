@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -156,7 +156,7 @@ int PhysicsManagerODE::QueryRayPick(const vec3& pRayPosition, const vec3& pRayDi
 		pRayDirection.x, pRayDirection.y, pRayDirection.z);
 
 	int lHits = 0;
-	void* lData[4] = {pForceFeedbackIds, pPositions, &lHits, (void*)pMaxBodies};
+	void* lData[4] = {pForceFeedbackIds, pPositions, (void*)&lHits, (void*)&pMaxBodies};
 	mSpaceID->collide2(&lData, lRayGeometryId, &PhysicsManagerODE::RayPickCallback);
 
 	::dGeomDestroy(lRayGeometryId);
@@ -3712,7 +3712,7 @@ void PhysicsManagerODE::RayPickCallback(void* pDataPtr, dGeomID o1, dGeomID o2)
 	int* lForceFeedbackIds = (int*)lData[0];
 	vec3* lPositions = (vec3*)lData[1];
 	int* lHits = (int*)lData[2];
-	const int lMaxBodies = (int)lData[3];
+	const int lMaxBodies = *(int*)lData[3];
 	if (*lHits >= lMaxBodies)
 	{
 		return;

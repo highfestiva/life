@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
@@ -21,7 +21,7 @@ bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
 		return false;
 
 	astr lGLExtensions((char*)glGetString(GL_EXTENSIONS));
-	return (lGLExtensions.find(lExtension.c_str(), 0) >= 0);
+	return (lGLExtensions.find(lExtension.c_str(), 0) != str::npos);
 }
 
 #if defined(LEPRA_MAC)

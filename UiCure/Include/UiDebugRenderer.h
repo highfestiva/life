@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -51,7 +51,6 @@ public:
 	void RenderSpline(const GameUiManager* pUiManager, Spline* pSpline);
 
 private:
-	const Cure::RuntimeVariableScope* mVariableScope;
 	GameUiManager* mUiManager;
 	const Cure::ContextManager* mContext;
 	const Cure::ContextManager* mRemoteContext;

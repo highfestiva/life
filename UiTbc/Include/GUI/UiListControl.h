@@ -1,6 +1,6 @@
 /*
 	Class:  ListControl
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -67,7 +67,7 @@ public:
 
 	void SetScrollBars(ScrollBar* pHScrollBar, ScrollBar* pVScrollBar, RectComponent* pCornerRect);
 
-	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0);
+	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
 	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;

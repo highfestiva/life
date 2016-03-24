@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -30,7 +30,6 @@ private:
 	const Game* mGame;
 	HiResTimer mHeadAwayTimer;
 	UiCure::UserSound3dResource* mSound;
-	int mTimeFrameBlown;
 	int mBadSpeedCounter;
 
 	logclass();

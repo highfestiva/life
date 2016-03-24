@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -200,7 +200,7 @@ LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey pKey, const Vector2D<_TVarType>& 
 	if (lNodeIter == mNodeTable.End())
 	{
 		//LOG(PHYSIC, DEBUG, "LooseQuadtree::MoveObject, trying to move non existing object!");
-		return false;
+		return _TObject();
 	}
 	Node* lNode = *lNodeIter;
 

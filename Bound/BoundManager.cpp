@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -145,7 +145,7 @@ BoundManager::~BoundManager()
 	mCollisionSoundManager = 0;
 }
 
-void BoundManager::Suspend()
+void BoundManager::Suspend(bool pHard)
 {
 	if (!mMenu->GetDialog())
 	{
@@ -358,7 +358,7 @@ bool BoundManager::HandleCutting()
 	const int r = m-2;
 	const int d = r*2;
 	typedef UiLepra::Touch::DragManager::DragList DragList;
-	DragList& lDragList = mUiManager->GetDragManager()->GetDragList();
+	DragList lDragList = mUiManager->GetDragManager()->GetDragList();
 	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
 	{
 		if (x->mFlags&DRAG_FLAG_INVALID)
@@ -458,6 +458,7 @@ bool BoundManager::HandleCutting()
 		}
 		lAnyDragStarted |= lDragStarted;
 	}
+	mUiManager->GetDragManager()->SetDragList(lDragList);
 	return lAnyDragStarted;
 }
 

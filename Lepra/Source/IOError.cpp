@@ -1,6 +1,6 @@
 /*
 	Class:  -
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -34,7 +34,7 @@ const char* gIOErrorString[] =
 
 const char* GetIOErrorString(IOError pErr)
 {
-	const char* lString = gIOErrorString[(int)NUM_IO_ERRORS];
+	const char* lString = gIOErrorString[(int)NUM_IO_ERRORS-1];
 
 	int lErr = (int)pErr;
 	if (lErr >= 0 && lErr < NUM_IO_ERRORS)

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -78,6 +78,7 @@ public:
 	void DropReleasedDrags();
 	void ClearDrags(InputManager* pInputManager);
 	DragList GetDragList();
+	void SetDragList(const DragList& pDragList);
 
 private:
 	Lock* mLock;

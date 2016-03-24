@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -54,7 +54,8 @@ void UserTypeResourceBase<UserResourceType, ResourceType>::FinalizeLoad()
 {
 	if (GetConstResource()->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
-		if (GetData() == ResourceType::UserData(0))
+		typedef typename ResourceType::UserData UData;
+		if (GetData() == UData(0))
 		{
 			GetResource()->SetLoadState(RESOURCE_LOAD_ERROR);
 		}

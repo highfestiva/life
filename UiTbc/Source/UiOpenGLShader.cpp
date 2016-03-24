@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -124,7 +124,7 @@ bool UiOpenGLShader::Link()
 
 
 
-LOG_CLASS_DEFINE(UI_GFX_3D, UiOpenGLShader);
+loginstance(UI_GFX_3D, UiOpenGLShader);
 
 
 

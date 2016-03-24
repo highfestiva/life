@@ -1,7 +1,7 @@
 /*
 	Class:  SocketInputStream,
 			SocketOutputStream
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -36,7 +36,7 @@ public:
 
 	virtual void Close();
 	virtual void Flush();
-	virtual IOError WriteRaw(void* pData, size_t pLength);
+	virtual IOError WriteRaw(const void* pData, size_t pLength);
 protected:
 private:
 	TcpSocket* mSocket;

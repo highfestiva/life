@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -263,10 +263,10 @@ private:
 	{
 	public:
 		inline JointInfo() :
-			mListenerId1(0),
-			mListenerId2(0),
 			mBody1Id(0),
-			mBody2Id(0)
+			mBody2Id(0),
+			mListenerId1(0),
+			mListenerId2(0)
 		{
 		}
 

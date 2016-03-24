@@ -1,6 +1,6 @@
 /*
 	Class:  PortalManager
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -15,17 +15,17 @@ namespace UiTbc
 
 Tbc::PortalManager::Portal* PortalManager::NewPortal(int pNumVertices,
 						     vec3* pVertex,
-						     Cell* pCell1,
-						     Cell* pCell2)
+						     Parent::Cell* pCell1,
+						     Parent::Cell* pCell2)
 {
-	return new Portal(pNumVertices, pVertex, pCell1, pCell2);
+	return new Portal(pNumVertices, pVertex, (Cell*)pCell1, (Cell*)pCell2);
 }
 
 Tbc::PortalManager::Cell* PortalManager::NewCell(const str& pCellID, 
 						 const str& pCellDescription,
-						 PortalManager* pPortalManager)
+						 Parent::PortalManager* pPortalManager)
 {
-	return new Cell(pCellID, pCellDescription, pPortalManager);
+	return new Cell(pCellID, pCellDescription, (PortalManager*)pPortalManager);
 }
 
 void PortalManager::TraverseGraph(Renderer* pRenderer, const str& pCellID)

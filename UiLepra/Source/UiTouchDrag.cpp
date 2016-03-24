@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -198,6 +198,12 @@ DragManager::DragList DragManager::GetDragList()
 {
 	ScopeLock lLock(mLock);
 	return mDragList;
+}
+
+void DragManager::SetDragList(const DragList& pDragList)
+{
+	ScopeLock lLock(mLock);
+	mDragList = pDragList;
 }
 
 

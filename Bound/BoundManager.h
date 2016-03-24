@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -51,7 +51,7 @@ class BoundManager: public Life::GameClientSlaveManager
 {
 	typedef Life::GameClientSlaveManager Parent;
 public:
-	typedef enum CutMode
+	enum CutMode
 	{
 		CUT_NORMAL,
 		CUT_ADD_WINDOW,
@@ -62,7 +62,7 @@ public:
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~BoundManager();
-	virtual void Suspend();
+	virtual void Suspend(bool pHard);
 	virtual void LoadSettings();
 	virtual void SaveSettings();
 	virtual bool Open();

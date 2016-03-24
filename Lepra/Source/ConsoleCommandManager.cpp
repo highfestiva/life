@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -49,6 +49,15 @@ int Getc(float pTimeout)
 	return (lResult);
 }
 #endif // Posix.
+
+
+
+CommandCompleter::CommandCompleter()
+{}
+
+CommandCompleter::~CommandCompleter()
+{
+}
 
 
 

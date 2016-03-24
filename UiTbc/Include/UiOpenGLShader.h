@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -33,7 +33,7 @@ private:
     unsigned mVertexShader;
     unsigned mShaderProgram;
 
-    LOG_CLASS_DECLARE();
+	logclass();
 };
 
 
