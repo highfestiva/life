@@ -1,7 +1,7 @@
 /*
 	Class:  SocketInputStream,
 			SocketOutputStream
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -89,7 +89,7 @@ void SocketOutputStream::Flush()
 	// Do nothing.
 }
 
-IOError SocketOutputStream::WriteRaw(void* pData, size_t pLength)
+IOError SocketOutputStream::WriteRaw(const void* pData, size_t pLength)
 {
 	if (mSocket->IsOpen() == true)
 	{

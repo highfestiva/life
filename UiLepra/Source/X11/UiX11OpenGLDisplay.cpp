@@ -31,7 +31,7 @@ void X11OpenGLDisplay::CloseScreen()
 {
 	Deactivate();
 
-	if (!mIsOpen)
+	if (!mIsScreenOpen)
 	{
 		return;
 	}
@@ -55,7 +55,7 @@ bool X11OpenGLDisplay::Activate()
 
 bool X11OpenGLDisplay::UpdateScreen()
 {
-	if (!mIsOpen)
+	if (!mIsScreenOpen)
 	{
 		return (false);
 	}
@@ -79,7 +79,7 @@ bool X11OpenGLDisplay::IsVSyncEnabled() const
 
 bool X11OpenGLDisplay::SetVSyncEnabled(bool pEnabled)
 {
-	return (mIsOpen? OpenGLExtensions::SetVSyncEnabled(pEnabled) : false);
+	return (mIsScreenOpen? OpenGLExtensions::SetVSyncEnabled(pEnabled) : false);
 }
 
 DisplayManager::ContextType X11OpenGLDisplay::GetContextType()

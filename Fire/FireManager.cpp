@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -157,7 +157,7 @@ FireManager::~FireManager()
 	mCollisionSoundManager = 0;
 }
 
-void FireManager::Suspend()
+void FireManager::Suspend(bool pHard)
 {
 	if (!mMenu->GetDialog())
 	{

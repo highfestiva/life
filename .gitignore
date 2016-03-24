@@ -90,5 +90,6 @@ ThirdParty/libogg-1.2.2/ogg-uninstalled.pc
 ThirdParty/libogg-1.2.2/ogg.pc
 ThirdParty/libogg-1.2.2/src/.deps/
 ThirdParty/libogg-1.2.2/stamp-h1
-pd.mk
-pd.txt
+*.mk
+Life.txt
+.build-*/

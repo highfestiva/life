@@ -444,6 +444,11 @@ int X11DisplayManager::GetClientHeight(int pWindowHeight)
 	return pWindowHeight - lBorderSizeY;
 }
 
+Display* X11DisplayManager::GetDisplay() const
+{
+	return mDisplay;
+}
+
 Window X11DisplayManager::GetWindow() const
 {
 	return mWnd;
