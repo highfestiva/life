@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -570,7 +570,7 @@ void InputManager::SetMousePosition(int x, int y)
 	mMouseY = y;
 }
 
-bool InputManager::NotifyOnChar(tchar pChar)
+bool InputManager::NotifyOnChar(wchar_t pChar)
 {
 	bool lConsumed = false;
 	TextObserverList::iterator x = mTextObserverList.begin();

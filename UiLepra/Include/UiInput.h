@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -490,7 +490,7 @@ public:
 	void GetMousePosition(int& x, int& y) const;
 	virtual void SetMousePosition(int x, int y);
 
-	bool NotifyOnChar(tchar pChar);
+	bool NotifyOnChar(wchar_t pChar);
 	bool NotifyOnKeyDown(KeyCode pKeyCode);
 	bool NotifyOnKeyUp(KeyCode pKeyCode);
 	bool NotifyMouseDoubleClick();

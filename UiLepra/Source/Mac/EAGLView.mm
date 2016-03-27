@@ -408,9 +408,10 @@ static EAGLView* gSharedView;
 - (void)insertText:(NSString*)text
 {
 	Lepra::str s = Lepra::MacLog::Decode(text);
-	for (size_t x = 0; x < s.length(); ++x)
+	Lepra::wstr w = Lepra::wstrutil::Encode(s);
+	for (size_t x = 0; x < w.length(); ++x)
 	{
-		inputManager->NotifyOnChar(s[x]);
+		inputManager->NotifyOnChar(w[x]);
 	}
 }
 

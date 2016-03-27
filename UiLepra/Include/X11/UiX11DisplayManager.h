@@ -24,7 +24,7 @@ public:
 	// Returns true if the message was processed. Returns false otherwise.
 	// If there are many observers listening to the same message,
 	// returning true will stop propagation.
-	virtual bool OnMessage(XEvent& e) = 0;
+	virtual bool OnMessage(const XEvent& e) = 0;
 };
 
 class X11DisplayManager: public DisplayManager, public X11Observer
@@ -65,7 +65,8 @@ public:
 	// Show a popup dialog with a message.
 	void ShowMessageBox(const str& pMsg, const str& pCaption);
 
-	virtual bool OnMessage(XEvent& e);
+	virtual bool OnMessage(const XEvent& e);
+	virtual bool DispatchMessage(const XEvent& e);
 
 protected:
 
@@ -118,8 +119,6 @@ protected:
 
 private:
 	bool mCaptionSet;
-
-	bool mConsumeChar;
 
 	typedef std::unordered_set<X11Observer*, LEPRA_VOIDP_HASHER> ObserverSet;
 	typedef HashTable<int, ObserverSet*> ObserverSetTable;

@@ -100,14 +100,12 @@ public:
 	bool IsInitialized();
 
 protected:
-	bool OnMessage(XEvent& pEvent);
-	void SetKey(XKeyEvent& pKey, bool pIsDown);
+	bool OnMessage(const XEvent& pEvent);
+	static KeyCode TranslateKey(int pState, KeySym pKeySym);
 
 private:
 	void AddObserver();
 	void RemoveObserver();
-
-	void SetMousePosition(unsigned pEventType, int x, int y);
 
 	X11DisplayManager* mDisplayManager;
 
@@ -126,6 +124,8 @@ private:
 	InputDevice* mKeyboard;
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
+
+	logclass();
 };
 
 

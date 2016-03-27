@@ -314,72 +314,143 @@ X11DisplayManager* X11InputManager::GetDisplayManager() const
 	return (mDisplayManager);
 }
 
-bool X11InputManager::OnMessage(XEvent& pEvent)
+bool X11InputManager::OnMessage(const XEvent& pEvent)
 {
 	bool lConsumed = false;
-	/*switch (pMsg)
+	switch (pEvent.type)
 	{
-		case WM_CHAR:
+		case KeyPress:
+		case KeyRelease:
 		{
-			lConsumed = NotifyOnChar((tchar)pwParam);
+			XKeyEvent& lKeyEvent = (XKeyEvent&)pEvent;
+			char lKey[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+			KeySym lSym;
+			::XLookupString(&lKeyEvent, lKey, sizeof(lKey), &lSym, NULL);
+			mLog.Infof(_T("Key event %i: keycode=%i, state=%i, lookup=%s, keysym=%i"),
+					lKeyEvent.type, lKeyEvent.keycode, lKeyEvent.state, lKey, lSym);
+			KeyCode lKeyCode = TranslateKey(lKeyEvent.state, lSym);
+			if (pEvent.type == KeyPress)
+			{
+				SetKey(lKeyCode, true);
+				lConsumed = NotifyOnKeyDown(lKeyCode);
+
+				if (!lConsumed && lKey[0])
+				{
+					wstr lWideKey = wstrutil::Encode(lKey);
+					lConsumed |= NotifyOnChar(lWideKey[0]);
+				}
+			}
+			else
+			{
+				SetKey(lKeyCode, false);
+				lConsumed = NotifyOnKeyUp(lKeyCode);
+			}
 		}
 		break;
-		case WM_LBUTTONDBLCLK:
+		case ButtonPress:
+		case ButtonRelease:
 		{
-			lConsumed = NotifyMouseDoubleClick();
+			// TODO: handle mouse button press.
 		}
 		break;
-		case WM_MOUSEMOVE:
-		case WM_NCMOUSEMOVE:
+		case MotionNotify:
 		{
-			int x = GET_X_LPARAM(plParam);
-			int y = GET_Y_LPARAM(plParam);
-			SetMousePosition(pMsg, x, y);
+			// TODO: handle mouse move.
 		}
 		break;
-		case WM_KEYUP:
-		{
-			SetKey((KeyCode)pwParam, plParam, false);
-			lConsumed = NotifyOnKeyUp((KeyCode)pwParam);
-		}
-		break;
-		case WM_KEYDOWN:
-		{
-			SetKey((KeyCode)pwParam, plParam, true);
-			lConsumed = NotifyOnKeyDown((KeyCode)pwParam);
-		}
-		break;
-		case WM_SYSKEYUP:
-		{
-			SetKey((KeyCode)pwParam, plParam, false);
-			lConsumed = NotifyOnKeyUp((KeyCode)pwParam);
-		}
-		break;
-		case WM_SYSKEYDOWN:
-		{
-			SetKey((KeyCode)pwParam, plParam, true);
-			lConsumed = NotifyOnKeyDown((KeyCode)pwParam);
-		}
-		break;
-	}*/
+	}
 	return (lConsumed);
 }
 
-void X11InputManager::SetKey(XKeyEvent& pKey, bool pIsDown)
+X11InputManager::KeyCode X11InputManager::TranslateKey(int pState, KeySym pKeySym)
 {
-	/*if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
+	switch (pKeySym)
 	{
-		switch (pWParam)
-		{
-			case IN_KBD_LCTRL:		pWParam = IN_KBD_RCTRL;	break;
-			case IN_KBD_LALT:		pWParam = IN_KBD_RALT;	break;
-		}
+		case 65288:	return IN_KBD_BACKSPACE;
+		case 65289:	return IN_KBD_TAB;
+		case 65293:	return IN_KBD_ENTER;
+		case 65421:	return IN_KBD_ENTER;	// Numpad.
+		case 65437:	return IN_KBD_CENTER;
+		case 65505:	return IN_KBD_LSHIFT;
+		case 65507:	return IN_KBD_LCTRL;
+		case 65513:	return IN_KBD_LALT;
+		case 65299:	return IN_KBD_PAUSE;
+		case 65509:	return IN_KBD_CAPS_LOCK;
+
+		case 65307:	return IN_KBD_ESC;
+
+		case 65365:	return IN_KBD_PGUP;
+		case 65366:	return IN_KBD_PGDOWN;
+		case 65367:	return IN_KBD_END;
+		case 65360:	return IN_KBD_HOME;
+		case 65361:	return IN_KBD_LEFT;
+		case 65362:	return IN_KBD_UP;
+		case 65363:	return IN_KBD_RIGHT;
+		case 65364:	return IN_KBD_DOWN;
+		case 65379:	return IN_KBD_INSERT;
+		case 65535:	return IN_KBD_DEL;
+
+		case 65516:	return IN_KBD_ROS;
+		case 65383:	return IN_KBD_CONTEXT_MENU;
+
+		case 65456:	return IN_KBD_NUMPAD_0;
+		case 65457:	return IN_KBD_NUMPAD_1;
+		case 65458:	return IN_KBD_NUMPAD_2;
+		case 65459:	return IN_KBD_NUMPAD_3;
+		case 65460:	return IN_KBD_NUMPAD_4;
+		case 65461:	return IN_KBD_NUMPAD_5;
+		case 65462:	return IN_KBD_NUMPAD_6;
+		case 65463:	return IN_KBD_NUMPAD_7;
+		case 65464:	return IN_KBD_NUMPAD_8;
+		case 65465:	return IN_KBD_NUMPAD_9;
+
+		case 65455:	return IN_KBD_NUMPAD_DIV;
+		case 65450:	return IN_KBD_NUMPAD_MUL;
+		case 65453:	return IN_KBD_NUMPAD_MINUS;
+		case 65451:	return IN_KBD_NUMPAD_PLUS;
+		case 65452:	return IN_KBD_NUMPAD_DOT;
+
+		case 65470:	return IN_KBD_F1;
+		case 65471:	return IN_KBD_F2;
+		case 65472:	return IN_KBD_F3;
+		case 65473:	return IN_KBD_F4;
+		case 65474:	return IN_KBD_F5;
+		case 65475:	return IN_KBD_F6;
+		case 65476:	return IN_KBD_F7;
+		case 65477:	return IN_KBD_F8;
+		case 65478:	return IN_KBD_F9;
+		case 65479:	return IN_KBD_F10;
+		case 65480:	return IN_KBD_F11;
+		case 65481:	return IN_KBD_F12;
+
+		case 65407:	return IN_KBD_NUM_LOCK;
+		case 65300:	return IN_KBD_SCROLL_LOCK;
+
+		case 65111:	return IN_KBD_DIAERESIS;
+		case '+':	return IN_KBD_PLUS;
+		case ',':	return IN_KBD_COMMA;
+		case '.':	return IN_KBD_DOT;
+		case '-':	return IN_KBD_MINUS;
+		case 65104:	return IN_KBD_APOSTROPHE;
+		case 65105:	return IN_KBD_APOSTROPHE;
+
+		case 246:	return IN_KBD_OE;
+		case 167:	return IN_KBD_PARAGRAPH;
+		case 229:	return IN_KBD_AA;
+		case 228:	return IN_KBD_AE;
+
+		case '<':	return IN_KBD_COMPARE;
+		case '>':	return IN_KBD_COMPARE;
+
+		case 65506:	return IN_KBD_RSHIFT;
+		case 65508:	return IN_KBD_RCTRL;
+		case 65027:	return IN_KBD_RALT;
 	}
-	else if (pWParam == IN_KBD_LSHIFT && (pLParam&0xFF0000) == 0x360000)
+	if (pKeySym >= 'a' && pKeySym <= 'z')
 	{
-		pWParam = IN_KBD_RSHIFT;
+		return KeyCode(pKeySym-'a'+'A');
 	}
-	Parent::SetKey(pWParam, pIsDown);*/
+	return (KeyCode)pKeySym;
 }
 
 void X11InputManager::SetCursorVisible(bool pVisible)
@@ -428,24 +499,12 @@ void X11InputManager::AddObserver()
 {
 	if (mDisplayManager)
 	{
-		/*// Listen to text input and standard mouse events.
-		mDisplayManager->AddObserver(WM_CHAR, this);
-		mDisplayManager->AddObserver(WM_SYSKEYDOWN, this);
-		mDisplayManager->AddObserver(WM_SYSKEYUP, this);
-		mDisplayManager->AddObserver(WM_KEYDOWN, this);
-		mDisplayManager->AddObserver(WM_KEYUP, this);
-		mDisplayManager->AddObserver(WM_MOUSEMOVE, this);
-		mDisplayManager->AddObserver(WM_NCMOUSEMOVE, this);
-		mDisplayManager->AddObserver(WM_LBUTTONDBLCLK, this);
-		mDisplayManager->AddObserver(WM_LBUTTONDOWN, this);
-		mDisplayManager->AddObserver(WM_RBUTTONDOWN, this);
-		mDisplayManager->AddObserver(WM_MBUTTONDOWN, this);
-		mDisplayManager->AddObserver(WM_LBUTTONUP, this);
-		mDisplayManager->AddObserver(WM_RBUTTONUP, this);
-		mDisplayManager->AddObserver(WM_MBUTTONUP, this);
-		mDisplayManager->AddObserver(WM_ACTIVATE, this);
-		mDisplayManager->AddObserver(WM_SETFOCUS, this);
-		mDisplayManager->AddObserver(WM_KILLFOCUS, this);*/
+		// Listen to text input and standard mouse events.
+		mDisplayManager->AddObserver(KeyPress, this);
+		mDisplayManager->AddObserver(KeyRelease, this);
+		mDisplayManager->AddObserver(ButtonPress, this);
+		mDisplayManager->AddObserver(ButtonRelease, this);
+		mDisplayManager->AddObserver(MotionNotify, this);
 	}
 }
 
@@ -457,24 +516,14 @@ void X11InputManager::RemoveObserver()
 	}
 }
 
-void X11InputManager::SetMousePosition(unsigned pEventType, int x, int y)
-{
-	/*if (pMsg == WM_NCMOUSEMOVE && mDisplayManager)
-	{
-		POINT lPoint;
-		lPoint.x = x;
-		lPoint.y = y;
-		::ScreenToClient(mDisplayManager->GetHWND(), &lPoint);
-		x = lPoint.x;
-		y = lPoint.y;
-	}*/
-	SetMousePosition(x, y);
-}
-
 bool X11InputManager::IsInitialized()
 {
 	return mInitialized;
 }
+
+
+
+loginstance(UI_INPUT, X11InputManager);
 
 
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -410,7 +410,7 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 	{
 		case WM_CHAR:
 		{
-			lConsumed = NotifyOnChar((tchar)pwParam);
+			lConsumed = NotifyOnChar((wchar_t)pwParam);
 		}
 		break;
 		case WM_LBUTTONDBLCLK:

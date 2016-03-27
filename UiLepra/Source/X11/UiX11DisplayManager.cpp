@@ -47,8 +47,7 @@ X11DisplayManager::X11DisplayManager() :
 	mMaximized(false),
 	mNormalWidth(0),
 	mNormalHeight(0),
-	mCaptionSet(false),
-	mConsumeChar(true)
+	mCaptionSet(false)
 {
 
 	/* TODO: implement!
@@ -223,8 +222,7 @@ bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 		lOk = mIsScreenOpen = InitScreen();
 		if (lOk)
 		{
-			//AddObserver(WM_SIZE, this);
-			//AddObserver(WM_SIZING, this);
+			AddObserver(ResizeRequest, this);
 		}
 	}
 
@@ -328,7 +326,7 @@ bool X11DisplayManager::InitWindow()
 				lWinAttr.border_pixel = 0;
 				lWinAttr.event_mask = StructureNotifyMask | KeyPressMask | KeyReleaseMask |
 							ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-							Button1MotionMask | Button2MotionMask |Button3MotionMask;
+							Button1MotionMask | Button2MotionMask | Button3MotionMask;
 				mWnd = ::XCreateWindow(
 					mDisplay,
 					RootWindow(mDisplay, lVisualInfo->screen),
@@ -454,13 +452,13 @@ void X11DisplayManager::ProcessMessages()
 	}
 
 	// TODO: add resize and user window shutdown (the X in the corner).
-	const int lMessageMask = KeyPressMask | KeyReleaseMask |
+	const int lMessageMask = StructureNotifyMask | KeyPressMask | KeyReleaseMask |
 			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 			Button1MotionMask | Button2MotionMask | Button3MotionMask;
 	XEvent lEvent;
 	while (::XCheckMaskEvent(mDisplay, lMessageMask, &lEvent))
 	{
-		OnMessage(lEvent);
+		DispatchMessage(lEvent);
 	}
 }
 
@@ -535,17 +533,51 @@ void X11DisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 	//::MessageBox(mWnd, pMsg.c_str(), pCaption.c_str(), MB_OK);
 }
 
-bool X11DisplayManager::OnMessage(XEvent& pEvent)
+bool X11DisplayManager::OnMessage(const XEvent& pEvent)
 {
 	switch(pEvent.type)
 	{
-		// TODO: Handle resize and user window shutdown (the X in the corner).
+		case ResizeRequest:
+		{
+			const XResizeRequestEvent& lResizeEvent = (const XResizeRequestEvent&)pEvent;
+			DispatchResize(lResizeEvent.width, lResizeEvent.height);
+
+			/*switch(pwParam)
+			{
+				case SIZE_MINIMIZED:
+				{
+					DispatchMinimize();
+					mMinimized = true;
+					mMaximized = false;
+				}
+				break;
+				case SIZE_MAXIMIZED:
+				{
+					mNormalWidth  = mDisplayMode.mWidth;
+					mNormalHeight = mDisplayMode.mHeight;
+					DispatchMaximize((int)LOWORD(plParam), (int)HIWORD(plParam));
+					mMaximized = true;
+					mMinimized = false;
+				}
+				break;
+				case SIZE_RESTORED:
+				{
+					DispatchResize((int)LOWORD(plParam), (int)HIWORD(plParam));
+					mMinimized = false;
+					mMaximized = false;
+				}
+				break;
+			}*/
+		}
 	}
 
-	if (pEvent.type == ButtonPress && mConsumeChar)	// Consume all follow-up presses' when we already dispatched the press.
-	{
-		return (true);
-	}
+	return false;
+}
+
+bool X11DisplayManager::DispatchMessage(const XEvent& pEvent)
+{
+	mLog.Infof(_T("X message: %i"), pEvent.type);
+
 	bool lConsumed = false;
 	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pEvent.type);
 	if (lTIter != mObserverSetTable.End())
@@ -556,10 +588,6 @@ bool X11DisplayManager::OnMessage(XEvent& pEvent)
 		{
 			lConsumed |= (*lLIter)->OnMessage(pEvent);
 		}
-	}
-	if (pEvent.type == ButtonPress)
-	{
-		mConsumeChar = lConsumed;
 	}
 	return lConsumed;
 }
