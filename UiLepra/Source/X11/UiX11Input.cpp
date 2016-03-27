@@ -9,6 +9,7 @@
 #include "../../../Lepra/Include/Log.h"
 #include "../../Include/X11/UiX11Core.h"
 #include "../../Include/X11/UiX11DisplayManager.h"
+#include <X11/cursorfont.h>
 
 
 
@@ -286,26 +287,10 @@ X11InputManager::~X11InputManager()
 
 void X11InputManager::Refresh()
 {
-	if (mDisplayManager != 0 && mDisplayManager->GetWindow() != 0)
+	if (mDisplayManager != 0)
 	{
-		/*RECT lRect;
-		::GetClientRect(mDisplayManager->GetHWND(), &lRect);
-		
-		mScreenWidth  = lRect.right - lRect.left;
-		mScreenHeight = lRect.bottom - lRect.top;*/
-	}
-	else
-	{
-		/*// Get the entire screen area.
-		mScreenWidth  = ::GetSystemMetrics(SM_CXVIRTUALSCREEN);
-		mScreenHeight = ::GetSystemMetrics(SM_CYVIRTUALSCREEN);
-
-		if (mScreenWidth == 0 || mScreenHeight == 0)
-		{
-			// Virtual screen not supported, use the primary display.
-			mScreenWidth  = ::GetSystemMetrics(SM_CXSCREEN);
-			mScreenHeight = ::GetSystemMetrics(SM_CYSCREEN);
-		}*/
+		mScreenWidth  = mDisplayManager->GetWidth();
+		mScreenHeight = mDisplayManager->GetHeight();
 	}
 }
 
@@ -342,6 +327,18 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 			}
 			else
 			{
+				if (XEventsQueued(mDisplayManager->GetDisplay(), QueuedAfterReading))
+				{
+					XEvent e;
+					XPeekEvent(mDisplayManager->GetDisplay(), &e);
+					if (e.type == KeyPress &&
+						e.xkey.time == lKeyEvent.time &&
+						e.xkey.keycode == lKeyEvent.keycode)
+					{
+						lConsumed = true;
+						break;
+					}
+				}
 				SetKey(lKeyCode, false);
 				lConsumed = NotifyOnKeyUp(lKeyCode);
 			}
@@ -355,7 +352,26 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 		break;
 		case MotionNotify:
 		{
-			// TODO: handle mouse move.
+			const XMotionEvent& lMotion = (const XMotionEvent&)pEvent;
+			SetMousePosition(lMotion.x, lMotion.y);
+		}
+		break;
+		case FocusIn:
+		{
+			if (!mIsCursorVisible)
+			{
+				mIsCursorVisible = true;
+				SetCursorVisible(false);
+			}
+		}
+		break;
+		case FocusOut:
+		{
+			if (!mIsCursorVisible)
+			{
+				SetCursorVisible(true);
+				mIsCursorVisible = false;
+			}
 		}
 		break;
 	}
@@ -455,7 +471,30 @@ X11InputManager::KeyCode X11InputManager::TranslateKey(int pState, KeySym pKeySy
 
 void X11InputManager::SetCursorVisible(bool pVisible)
 {
-	//::ShowCursor(pVisible? TRUE : FALSE);
+	if (mIsCursorVisible != pVisible)
+	{
+		if (pVisible)
+		{
+			log_volatile(mLog.Debug(_T("Showing cursor.")));
+			Cursor lCursor = XCreateFontCursor(mDisplayManager->GetDisplay(), XC_X_cursor);
+			XDefineCursor(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), lCursor);
+			XFreeCursor(mDisplayManager->GetDisplay(), lCursor);
+		}
+		else
+		{
+			log_volatile(mLog.Debug(_T("Hiding cursor.")));
+			XColor lBlack;
+			lBlack.red = lBlack.green = lBlack.blue = 0;
+			static char noData[] = { 0,0,0,0,0,0,0,0 };
+			Pixmap lBitmapNoData = XCreateBitmapFromData(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), noData, 8, 8);
+			Cursor lInvisibleCursor = XCreatePixmapCursor(mDisplayManager->GetDisplay(), lBitmapNoData, lBitmapNoData, 
+								&lBlack, &lBlack, 0, 0);
+			XDefineCursor(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), lInvisibleCursor);
+			XFreeCursor(mDisplayManager->GetDisplay(), lInvisibleCursor);
+			XFreePixmap(mDisplayManager->GetDisplay(), lBitmapNoData);
+		}
+		mIsCursorVisible = pVisible;
+	}
 }
 
 float X11InputManager::GetCursorX()
@@ -505,6 +544,8 @@ void X11InputManager::AddObserver()
 		mDisplayManager->AddObserver(ButtonPress, this);
 		mDisplayManager->AddObserver(ButtonRelease, this);
 		mDisplayManager->AddObserver(MotionNotify, this);
+		mDisplayManager->AddObserver(FocusIn, this);
+		mDisplayManager->AddObserver(FocusOut, this);
 	}
 }
 

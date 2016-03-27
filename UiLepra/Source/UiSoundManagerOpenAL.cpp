@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -60,6 +60,10 @@ bool SoundManagerOpenAL::Open()
 	mDevice = ::alcOpenDevice(0);
 #else // !Windows
 	mDevice = ::alcOpenDevice("'((direction \"write\")) '((devices '(alsa sdl native null)))");
+	if (!mDevice)
+	{
+		mDevice = ::alcOpenDevice(0);
+	}
 #endif // Windows / !Windows
 	if (!mDevice)
 	{
