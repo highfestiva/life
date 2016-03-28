@@ -26,7 +26,7 @@ class X11InputElement: public InputElement
 {
 public:
 	X11InputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
-		X11InputDevice* pParentDevice, void* pRawElement, unsigned pFieldOffset);
+		X11InputDevice* pParentDevice, void* pRawElement);
 	virtual ~X11InputElement();
 
 	const void* GetRawElement() const;
@@ -38,11 +38,6 @@ private:
 	logclass();
 };
 
-const void* X11InputElement::GetRawElement() const
-{
-	return mRawElement;
-}
-
 
 
 class X11InputDevice: public InputDevice
@@ -50,6 +45,8 @@ class X11InputDevice: public InputDevice
 public:
 	X11InputDevice(void* pRawDevice, InputManager* pManager);
 	virtual ~X11InputDevice();
+
+	void AddElement(X11InputElement* pElement);
 
 	virtual void Activate();
 	virtual void Release();
@@ -59,11 +56,6 @@ public:
 protected:
 private:
 	void* mRawDevice;
-
-	int mRelAxisCount;
-	int mAbsAxisCount;
-	int mAnalogueCount;
-	int mButtonCount;
 
 	logclass();
 };

@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "../../Include/X11/UiX11DisplayManager.h"
+#include "../../../Lepra/Include/CyclicArray.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
@@ -222,7 +223,7 @@ bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 		lOk = mIsScreenOpen = InitScreen();
 		if (lOk)
 		{
-			AddObserver(ResizeRequest, this);
+			AddObserver(ConfigureNotify, this);
 		}
 	}
 
@@ -324,7 +325,8 @@ bool X11DisplayManager::InitWindow()
 				XSetWindowAttributes lWinAttr;
 				lWinAttr.colormap = lColMap;
 				lWinAttr.border_pixel = 0;
-				lWinAttr.event_mask = StructureNotifyMask | KeyPressMask | KeyReleaseMask |
+				lWinAttr.event_mask = StructureNotifyMask |
+							KeyPressMask | KeyReleaseMask |
 							ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 							Button1MotionMask | Button2MotionMask | Button3MotionMask;
 				mWnd = ::XCreateWindow(
@@ -452,7 +454,8 @@ void X11DisplayManager::ProcessMessages()
 	}
 
 	// TODO: add resize and user window shutdown (the X in the corner).
-	const int lMessageMask = StructureNotifyMask | KeyPressMask | KeyReleaseMask |
+	const int lMessageMask = StructureNotifyMask |
+			KeyPressMask | KeyReleaseMask |
 			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 			Button1MotionMask | Button2MotionMask | Button3MotionMask;
 	XEvent lEvent;
@@ -537,10 +540,13 @@ bool X11DisplayManager::OnMessage(const XEvent& pEvent)
 {
 	switch(pEvent.type)
 	{
-		case ResizeRequest:
+		case ConfigureNotify:
 		{
-			const XResizeRequestEvent& lResizeEvent = (const XResizeRequestEvent&)pEvent;
-			DispatchResize(lResizeEvent.width, lResizeEvent.height);
+			const XConfigureEvent& lConfigEvent = (const XConfigureEvent&)pEvent;
+			if (lConfigEvent.width != mDisplayMode.mWidth || lConfigEvent.height != mDisplayMode.mHeight)
+			{
+				DispatchResize(lConfigEvent.width, lConfigEvent.height);
+			}
 
 			/*switch(pwParam)
 			{
@@ -601,14 +607,26 @@ XVisualInfo* X11DisplayManager::GetVisualInfo() const
 {
 	int lX11AttributeList[] =
 	{
-			GLX_RGBA, GLX_DOUBLEBUFFER,
+			GLX_RGBA,
 			GLX_RED_SIZE, 1,
 			GLX_GREEN_SIZE, 1,
 			GLX_BLUE_SIZE, 1,
+			GLX_DOUBLEBUFFER,
 			GLX_DEPTH_SIZE, 24,
+			GLX_STENCIL_SIZE, 8,
 			None
 	};
-	return(::glXChooseVisual(mDisplay, DefaultScreen(mDisplay), lX11AttributeList));
+	int lAttributeOffsets[] = {12, 10, 8, 7, 1, 0};
+	for (int x = 0; x < LEPRA_ARRAY_COUNT(lAttributeOffsets); ++x)
+	{
+		lX11AttributeList[lAttributeOffsets[x]] = None;
+		XVisualInfo* lVisual = ::glXChooseVisual(mDisplay, DefaultScreen(mDisplay), lX11AttributeList);
+		if (lVisual)
+		{
+			return lVisual;
+		}
+	}
+	return 0;
 }
 
 

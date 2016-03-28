@@ -231,7 +231,7 @@ bool X11OpenGLDisplay::InitScreen()
 		return false;
 	}
 
-	glEnable(GL_SCISSOR_TEST);
+	//glEnable(GL_SCISSOR_TEST);
 	if (mContextUserCount == 1)
 	{
 		OpenGLExtensions::InitExtensions();

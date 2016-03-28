@@ -95,7 +95,7 @@ public:
 	{
 		ABSOLUTE_AXIS,
 		RELATIVE_AXIS,
-		BUTTON1,	// BUTTON1 + offset gives the button index.
+		BUTTON,
 	};
 
 	InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, InputDevice* pParentDevice);

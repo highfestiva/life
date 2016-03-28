@@ -95,6 +95,14 @@ def orthoscale(scale):
 		return o,gfx,phys
 	return doscale
 
+def gfxscale(scale):
+	def doscale(orientation,gfx,phys):
+		s = tovec3(scale)
+		o = toquat(orientation)
+		gfx.orthoscale(o,s)
+		return o,gfx,phys
+	return doscale
+
 def nophys(orientation,gfx,phys):
 	return orientation,gfx,[]
 

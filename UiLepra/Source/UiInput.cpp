@@ -763,6 +763,10 @@ void InputManager::AddInputDevice(InputDevice* pDevice)
 	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
 	{
 		const InputDevice* lDevice = *x;
+		if (lDevice->GetNumElements() <= 0)
+		{
+			continue;
+		}
 		const InputElement* lElement = lDevice->GetElement(0);
 		if (lElement)
 		{

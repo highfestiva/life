@@ -11,6 +11,8 @@
 #include "../../Include/X11/UiX11DisplayManager.h"
 #include <X11/cursorfont.h>
 
+#define MOUSE_BUTTON_COUNT	10
+#define MOUSE_AXIS_COUNT	10
 
 
 namespace UiLepra
@@ -26,7 +28,7 @@ InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 
 
 X11InputElement::X11InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
-	X11InputDevice* pParentDevice, void* pRawElement, unsigned pFieldOffset):
+	X11InputDevice* pParentDevice, void* pRawElement):
 	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
 	mRawElement(pRawElement)
 {
@@ -42,6 +44,11 @@ X11InputElement::~X11InputElement()
 {
 }
 
+const void* X11InputElement::GetRawElement() const
+{
+	return mRawElement;
+}
+
 
 loginstance(UI_INPUT, X11InputElement);
 
@@ -53,11 +60,7 @@ loginstance(UI_INPUT, X11InputElement);
 
 X11InputDevice::X11InputDevice(void* pRawDevice, InputManager* pManager):
 	InputDevice(pManager),
-	mRawDevice(pRawDevice),
-	mRelAxisCount(0),
-	mAbsAxisCount(0),
-	mAnalogueCount(0),
-	mButtonCount(0)
+	mRawDevice(pRawDevice)
 {
 	/*SetIdentifier(pInfo->tszInstanceName);
 
@@ -113,6 +116,11 @@ X11InputDevice::~X11InputDevice()
 	//mDIDevice->Release();
 }
 
+void X11InputDevice::AddElement(X11InputElement* pElement)
+{
+	mElementArray.push_back(pElement);
+}
+
 void X11InputDevice::Activate()
 {
 	if (IsActive() == false)
@@ -147,76 +155,11 @@ void X11InputDevice::Release()
 
 void X11InputDevice::PollEvents()
 {
-	if (IsActive() == true)
+	if (GetInterpretation() == TYPE_MOUSE)
 	{
-		/*if (mReacquire)
-		{
-			if (mDIDevice->Acquire() != DI_OK)
-			{
-				// System won't let us in yet. Keep trying.
-				return;
-			}
-			mReacquire = false;
-			log_debug(GetIdentifier()+_T(": acquired input device."));
-		}*/
-
-
-		/*HRESULT lHR = mDIDevice->Poll();
-		if (lHR == DIERR_INPUTLOST)
-		{
-			mReacquire = true;
-			log_debug(GetIdentifier()+_T(": lost input device."));
-			return;
-		}
-		else if (lHR != DI_OK && lHR != DI_NOEFFECT)
-		{
-			mReacquire = true;
-			mLog.Warningf((GetIdentifier() + _T(": Failed reaquiring device. Error=0x%8.8X.")).c_str(), lHR);
-			return;
-		}
-
-		bool lMore = true;
-		while (lMore)
-		{
-			DWORD lInOut = (DWORD)mElementArray.size();
-			lHR = mDIDevice->GetDeviceData(sizeof(mDeviceObjectData[0]), mDeviceObjectData, &lInOut, 0);
-			lMore = (lHR == DI_OK);
-
-			for (unsigned i = 0; lMore && i < lInOut; i++)
-			{
-				// The following is a hack. I don't know if it works as 
-				// intended on non-Swedish keyboards. The issue is 
-				// that when pressing the right Alt key (Alt Gr), we will 
-				// receive one Ctrl-event, and then one "Right Alt"-event
-				// at the same time (on Swedish keyboards at least).
-				if (i + 1 < lInOut && 
-					mDeviceObjectData[i].dwTimeStamp == 
-					mDeviceObjectData[i + 1].dwTimeStamp &&
-					mDeviceObjectData[i + 1].dwOfs == 400)	// Right Alt at offset 400.
-				{
-					i++;
-				}
-
-				int lElementIndex = mDeviceObjectData[i].dwOfs / sizeof(unsigned);
-				X11InputElement* lElement = (X11InputElement*)mElementArray[lElementIndex];
-
-				if (lElement->GetType() == InputElement::ANALOGUE)
-				{
-					int lValue = mDeviceObjectData[i].dwData;
-					lElement->SetValue(lValue);
-				}
-				else
-				{
-					int lValue = mDeviceObjectData[i].dwData;
-					SetElementValue(lElement, (lValue&0x80)? 1.0 : 0.0);
-				}
-			}
-
-			if (lInOut == 0)
-			{
-				lMore = false;
-			}
-		}*/
+		GetAxis(0)->SetValue(0);
+		GetAxis(1)->SetValue(0);
+		GetAxis(2)->SetValue(0);
 	}
 }
 
@@ -238,33 +181,30 @@ X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	mKeyboard(0),
 	mMouse(0)
 {
-	/*POINT lPoint;
-	::GetCursorPos(&lPoint);
-	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);*/
+	Window rw, cw;
+	int _, x, y;
+	unsigned lMask;
+	XQueryPointer(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), &rw, &cw, &_, &_, &x, &y, &lMask);
+	SetMousePosition(x, y);
 
 	::memset(&mTypeCount, 0, sizeof(mTypeCount));
-
-	/*HRESULT lHR;
-	
-	// Create the DirectInput object.
-	lHR = DirectInput8Create(X11Core::GetAppInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8,
-		(LPVOID*)&mDirectInput, 0);
-
-	if (lHR != DI_OK)
+	++mTypeCount[InputDevice::TYPE_KEYBOARD];
+	++mTypeCount[InputDevice::TYPE_MOUSE];
+	mKeyboard = new X11InputDevice(0, this);
+	mKeyboard->SetInterpretation(InputDevice::TYPE_KEYBOARD, 0);
+	X11InputDevice* lMouse = new X11InputDevice(0, this);
+	mMouse = lMouse;
+	mMouse->SetInterpretation(InputDevice::TYPE_MOUSE, 0);
+	for (int x = 0; x < MOUSE_BUTTON_COUNT; ++x)
 	{
-		mDisplayManager->ShowMessageBox(_T("DirectX 8 not supported (dinput creation failure)!"), _T("DirectInput error!"));
-		return;
+		lMouse->AddElement(new X11InputElement(InputElement::DIGITAL, InputElement::BUTTON, x, lMouse, 0));
 	}
-
-	// Enumerate all devices.
-	lHR = mDirectInput->EnumDevices(DI8DEVCLASS_ALL, EnumDeviceCallback, this, DIEDFL_ALLDEVICES);
-
-	// mEnumError will be set if an error has occured.
-	if (lHR != DI_OK || mEnumError == true)
+	for (int x = 0; x < MOUSE_AXIS_COUNT; ++x)
 	{
-		mDisplayManager->ShowMessageBox(_T("DirectInput failed enumerating your devices!"), _T("DirectInput error!"));
-		return;
-	}*/
+		lMouse->AddElement(new X11InputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, x, lMouse, 0));
+	}
+	mDeviceList.push_back(mKeyboard);
+	mDeviceList.push_back(mMouse);
 
 	Refresh();
 
@@ -347,13 +287,18 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 		case ButtonPress:
 		case ButtonRelease:
 		{
-			// TODO: handle mouse button press.
+			const XButtonEvent& lButton = (const XButtonEvent&)pEvent;
+			mMouse->GetButton(lButton.button-1)->SetValue((pEvent.type == ButtonPress)? 1.0f : 0.0f);
 		}
 		break;
 		case MotionNotify:
 		{
 			const XMotionEvent& lMotion = (const XMotionEvent&)pEvent;
+			const int dx = lMotion.x - mMouseX;
+			const int dy = lMotion.y - mMouseY;
 			SetMousePosition(lMotion.x, lMotion.y);
+			mMouse->GetAxis(0)->SetValue(dx);
+			mMouse->GetAxis(1)->SetValue(dy);
 		}
 		break;
 		case FocusIn:

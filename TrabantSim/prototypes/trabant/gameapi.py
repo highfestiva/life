@@ -261,19 +261,23 @@ def getsetoidcmd(name, oid, *args):
 			return quat(*result)
 		return result
 
-def cmd(c, return_type=str):
+def cmd(c, return_type=str, errhandle=None):
 	global sock
 	#print(c)
 	sock.send((c+'\n').encode())
 	try:
 		result = sock.recv(80*1024)
 	except ConnectionResetError as e:
-		if not _connecting:
+		if errhandle:
+			errhandle(e)
+		elif not _connecting:
 			import sys
 			sys.exit(1)
 		raise e
 	except socket.error as e:
-		if str(e) == 'timeout':
+		if errhandle:
+			errhandle(e)
+		elif str(e) == 'timeout':
 			print('Simulator timed out!')
 			sock = None	# Don't even try to close to avoid delay.
 			import sys
@@ -327,7 +331,10 @@ def _closecom():
 				cmd('quit')
 			except:
 				pass
-		sock.close()
+		try:
+			sock.close()
+		except:
+			pass
 		sock = None
 	if proc:
 		#print('Closing TrabantSim...')
@@ -364,7 +371,10 @@ def _tryconnect(addr, retries):
 			if retries>1 and attempt==retries:
 				sock.settimeout(sock.timeout+1)
 			sock.connect((ip,int(port)))
-			osname = cmd('get-platform-name')	# To make sure UDP connection alright.
+			def errhandle(exc):
+				global sock
+				sock = None
+			osname = cmd('get-platform-name', errhandle=errhandle)	# To make sure UDP connection alright.
 			sock.settimeout(sock.timeout+3)
 			_connecting = False
 			break
@@ -379,9 +389,14 @@ def _run_local_sim(addr):
 	if proc:
 		return
 	import sys
-	if 'localhost' in addr and sys.platform in ('win32','darwin'):
-		open_prefix,end_suffix,binname = (['/usr/bin/open','-W'],['--args'],'TrabantSim.app') if sys.platform=='darwin' else ([],[],'TrabantSim.exe')
-		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./')]:
+	if 'localhost' in addr and sys.platform in ('win32','darwin','linux'):
+		if sys.platform == 'darwin':
+			open_prefix,end_suffix,binname = ['/usr/bin/open','-W'],['--args'],'TrabantSim.app'
+		elif sys.platform == 'linux':
+			open_prefix,end_suffix,binname = [],[],'TrabantSim'
+		else:
+			open_prefix,end_suffix,binname = [],[],'TrabantSim.exe'
+		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./'), ('..','Final/'), ('..','Debug/')]:
 			import os.path
 			import subprocess
 			curdir = os.path.abspath(os.path.curdir)

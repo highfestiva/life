@@ -174,8 +174,7 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 			(lpddoi->dwType&DIDFT_PSHBUTTON) != 0 ||
 			(lpddoi->dwType&DIDFT_TGLBUTTON) != 0)
 	{
-		InputElement::Interpretation lInterpretation = (InputElement::Interpretation)((int)InputElement::BUTTON1 + lDevice->mButtonCount);
-		lElement = new Win32InputElement(InputElement::DIGITAL, lInterpretation,
+		lElement = new Win32InputElement(InputElement::DIGITAL, InputElement::BUTTON,
 			lDevice->mButtonCount, lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
 		++lDevice->mButtonCount;
 	}

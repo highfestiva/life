@@ -13,6 +13,7 @@
 
 from trabant import *
 from trabant.gameapi import setvar
+from trabant.objects import gfxscale
 from math import fmod
 from time import time
 from random import choice
@@ -146,9 +147,10 @@ while loop():
         sound(sound_bang, p, volume=0.1)
     elif 'LCTRL' in keys() and timeout(1, first_hit=True):
         p = ship.pos()
-        laser_shots  = [create_capsule(p+vec3(85,0, 0), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True)]
-        laser_shots += [create_capsule(p+vec3(75,0,+2.5), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True)]
-        laser_shots += [create_capsule(p+vec3(75,0,-2.5), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True)]
+        scale = gfxscale((0.3, 0.3, 1)) # Scale X & Y, Z is height of capsule.
+        laser_shots  = [create_capsule(p+vec3(85,0, 0.0), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True, process=scale)]
+        laser_shots += [create_capsule(p+vec3(75,0,+2.5), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True, process=scale)]
+        laser_shots += [create_capsule(p+vec3(75,0,-2.5), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True, process=scale)]
         for shot in laser_shots:
             shot.physical = False
             shot.shooters = ship_parts

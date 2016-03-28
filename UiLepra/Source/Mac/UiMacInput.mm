@@ -1,5 +1,5 @@
 
-// Author: Jonas Bystršm
+// Author: Jonas BystrÂšm
 // Copyright (c) Pixel Doctrine
 
 
@@ -148,8 +148,7 @@ void MacInputDevice::EnumElements()
 		{
 			case kIOHIDElementTypeInput_Button:
 			{
-				InputElement::Interpretation lInterpretation = (InputElement::Interpretation)((int)InputElement::BUTTON1 + mButtonCount);
-				lElement = new MacInputElement(InputElement::DIGITAL, lInterpretation, mButtonCount, this, lCurrentElement);
+				lElement = new MacInputElement(InputElement::DIGITAL, InputElement::BUTTON, mButtonCount, this, lCurrentElement);
 				++mButtonCount;
 			}
 			break;
@@ -181,8 +180,7 @@ void MacInputDevice::EnumElements()
 						case kHIDUsage_GD_DPadRight:
 						case kHIDUsage_GD_DPadLeft:
 						{
-							InputElement::Interpretation lInterpretation = (InputElement::Interpretation)((int)InputElement::BUTTON1 + mButtonCount);
-							lElement = new MacInputElement(InputElement::DIGITAL, lInterpretation, mButtonCount, this, lCurrentElement);
+							lElement = new MacInputElement(InputElement::DIGITAL, InputElement::BUTTON, mButtonCount, this, lCurrentElement);
 							++mButtonCount;
 						}
 						break;

@@ -1,5 +1,5 @@
 
-// Author: Jonas Bystršm
+// Author: Jonas BystrÂšm
 // Copyright (c) Pixel Doctrine
 
 
@@ -124,7 +124,7 @@ IosInputManager::IosInputManager(MacOpenGLDisplay* pDisplayManager):
 	IosInputDevice* lTouch = new IosInputDevice(this);
 	IosInputElement* x = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 0, lTouch);
 	IosInputElement* y = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 1, lTouch);
-	IosInputElement* lButton = new IosInputElement(InputElement::DIGITAL, InputElement::BUTTON1, 0, lTouch);
+	IosInputElement* lButton = new IosInputElement(InputElement::DIGITAL, InputElement::BUTTON, 0, lTouch);
 	lTouch->SetIdentifier(_T("IosVirtualMouse"));
 	x->SetIdentifier(_T("RelAxisX"));
 	y->SetIdentifier(_T("RelAxisY"));

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -771,8 +771,14 @@ void GameUiManager::OnResize(int pWidth, int pHeight)
 	if (mCanvas)
 	{
 		mCanvas->Reset(pWidth, pHeight, mCanvas->GetBitDepth());
-		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mDesktopWindow->SetSize(mCanvas->GetWidth(), mCanvas->GetHeight());
+		if (mDesktopWindow)
+		{
+			mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
+			mDesktopWindow->SetSize(mCanvas->GetWidth(), mCanvas->GetHeight());
+		}
+	}
+	if (mInput)
+	{
 		mInput->Refresh();
 	}
 }
