@@ -118,6 +118,7 @@ public:
 	void SetValue(float pNewValue);
 	// (Only useful with analogue elements).
 	void SetValue(int pValue);
+	void AddValue(int pValue);
 
 	void SetIdentifier(const str& pIdentifier);
 	const str& GetIdentifier() const;
@@ -458,8 +459,8 @@ public:
 	void AddMouseInputObserver(MouseInputObserver* pListener);
 	void RemoveMouseInputObserver(MouseInputObserver* pListener);
 
-	// Call this every frame, or at least at a regular basis.
-	void PollEvents();
+	virtual void PreProcessEvents();
+	virtual void PollEvents();
 
 	// Sets one observer on all input devices, and all elements.
 	// The input manager takes care of deleting the functor.

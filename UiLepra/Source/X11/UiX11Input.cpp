@@ -155,12 +155,6 @@ void X11InputDevice::Release()
 
 void X11InputDevice::PollEvents()
 {
-	if (GetInterpretation() == TYPE_MOUSE)
-	{
-		GetAxis(0)->SetValue(0);
-		GetAxis(1)->SetValue(0);
-		GetAxis(2)->SetValue(0);
-	}
 }
 
 
@@ -172,12 +166,17 @@ loginstance(UI_INPUT, X11InputDevice);
 X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	mDisplayManager(pDisplayManager),
 	//mDirectInput(0),
-	mEnumError(false),
 	mInitialized(false),
 	mScreenWidth(0),
 	mScreenHeight(0),
 	mCursorX(0),
 	mCursorY(0),
+	mIgnoreNextMouseMove(true),
+	mGrabCursor(false),
+	mMouseGrabX(0),
+	mMouseGrabY(0),
+	mMouseGrabDeltaX(0),
+	mMouseGrabDeltaY(0),
 	mKeyboard(0),
 	mMouse(0)
 {
@@ -186,6 +185,8 @@ X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	unsigned lMask;
 	XQueryPointer(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), &rw, &cw, &_, &_, &x, &y, &lMask);
 	SetMousePosition(x, y);
+	mMouseGrabX = x;
+	mMouseGrabY = y;
 
 	::memset(&mTypeCount, 0, sizeof(mTypeCount));
 	++mTypeCount[InputDevice::TYPE_KEYBOARD];
@@ -225,6 +226,44 @@ X11InputManager::~X11InputManager()
 	mDisplayManager = 0;
 }
 
+void X11InputManager::PreProcessEvents()
+{
+	mMouse->GetAxis(0)->SetValue(0);
+	mMouse->GetAxis(1)->SetValue(0);
+	mMouse->GetAxis(2)->SetValue(0);
+
+	// Warp pointer.
+	if (mGrabCursor)
+	{
+		const int sx = mScreenWidth/2;
+		const int sy = mScreenHeight/2;
+		Window rw, cw;
+		int _, x, y;
+		unsigned lMask;
+		XQueryPointer(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), &rw, &cw, &_, &_, &x, &y, &lMask);
+		if (abs(x-sx) >= 100 || abs(y-sy) >= 100)
+		{
+			//mLog.Infof(_T("mwarp: (%i; %i)"), sx-x, sy-y);
+			mMouseGrabDeltaX += sx - x;
+			mMouseGrabDeltaY += sy - y;
+			XWarpPointer(mDisplayManager->GetDisplay(), None, mDisplayManager->GetWindow(),
+					0, 0, 0, 0, sx, sy);
+		}
+	}
+}
+
+void X11InputManager::PollEvents()
+{
+	Parent::PollEvents();
+
+	if (mMouseGrabDeltaX || mMouseGrabDeltaY)
+	{
+		mMouseGrabX += mMouseGrabDeltaX;
+		mMouseGrabY += mMouseGrabDeltaY;
+		mMouseGrabDeltaX = mMouseGrabDeltaY = 0;
+	}
+}
+
 void X11InputManager::Refresh()
 {
 	if (mDisplayManager != 0)
@@ -251,8 +290,8 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 			char lKey[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 			KeySym lSym;
 			::XLookupString(&lKeyEvent, lKey, sizeof(lKey), &lSym, NULL);
-			mLog.Infof(_T("Key event %i: keycode=%i, state=%i, lookup=%s, keysym=%i"),
-					lKeyEvent.type, lKeyEvent.keycode, lKeyEvent.state, lKey, lSym);
+			//mLog.Infof(_T("Key event %i: keycode=%i, state=%i, lookup=%s, keysym=%i"),
+			//		lKeyEvent.type, lKeyEvent.keycode, lKeyEvent.state, lKey, lSym);
 			KeyCode lKeyCode = TranslateKey(lKeyEvent.state, lSym);
 			if (pEvent.type == KeyPress)
 			{
@@ -288,17 +327,44 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 		case ButtonRelease:
 		{
 			const XButtonEvent& lButton = (const XButtonEvent&)pEvent;
-			mMouse->GetButton(lButton.button-1)->SetValue((pEvent.type == ButtonPress)? 1.0f : 0.0f);
+			int lButtonIndex = lButton.button-1;
+			if (lButtonIndex == 1)
+			{
+				lButtonIndex = 2;
+			}
+			else if (lButtonIndex == 2)
+			{
+				lButtonIndex = 1;
+			}
+			mMouse->GetButton(lButtonIndex)->SetValue((pEvent.type == ButtonPress)? 1.0f : 0.0f);
+			if (lButtonIndex == 3)
+			{
+				mMouse->GetAxis(2)->AddValue(+1);
+			}
+			if (lButtonIndex == 4)
+			{
+				mMouse->GetAxis(2)->AddValue(-1);
+			}
 		}
 		break;
 		case MotionNotify:
 		{
 			const XMotionEvent& lMotion = (const XMotionEvent&)pEvent;
-			const int dx = lMotion.x - mMouseX;
-			const int dy = lMotion.y - mMouseY;
 			SetMousePosition(lMotion.x, lMotion.y);
-			mMouse->GetAxis(0)->SetValue(dx);
-			mMouse->GetAxis(1)->SetValue(dy);
+			const int x = lMotion.x;
+			const int y = lMotion.y;
+			const int dx = x - mMouseGrabX;
+			const int dy = y - mMouseGrabY;
+			mMouseGrabX = x;
+			mMouseGrabY = y;
+			if (mIgnoreNextMouseMove)
+			{
+				mIgnoreNextMouseMove = false;
+				break;
+			}
+			//mLog.Infof(_T("mmove: (%i; %i), cnt=%i"), dx, dy, mWarpCount);
+			mMouse->GetAxis(0)->AddValue(dx);
+			mMouse->GetAxis(1)->AddValue(dy);
 		}
 		break;
 		case FocusIn:
@@ -308,6 +374,7 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 				mIsCursorVisible = true;
 				SetCursorVisible(false);
 			}
+			mIgnoreNextMouseMove = true;
 		}
 		break;
 		case FocusOut:
@@ -317,6 +384,12 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 				SetCursorVisible(true);
 				mIsCursorVisible = false;
 			}
+			mIgnoreNextMouseMove = true;
+		}
+		break;
+		case EnterNotify:
+		{
+			mIgnoreNextMouseMove = true;
 		}
 		break;
 	}
@@ -424,6 +497,9 @@ void X11InputManager::SetCursorVisible(bool pVisible)
 			Cursor lCursor = XCreateFontCursor(mDisplayManager->GetDisplay(), XC_X_cursor);
 			XDefineCursor(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), lCursor);
 			XFreeCursor(mDisplayManager->GetDisplay(), lCursor);
+
+			XUngrabPointer(mDisplayManager->GetDisplay(), CurrentTime);
+			mGrabCursor = false;
 		}
 		else
 		{
@@ -437,6 +513,9 @@ void X11InputManager::SetCursorVisible(bool pVisible)
 			XDefineCursor(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), lInvisibleCursor);
 			XFreeCursor(mDisplayManager->GetDisplay(), lInvisibleCursor);
 			XFreePixmap(mDisplayManager->GetDisplay(), lBitmapNoData);
+
+			XGrabPointer(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), True, 0, GrabModeAsync, GrabModeAsync, mDisplayManager->GetWindow(), None, CurrentTime);
+			mGrabCursor = true;
 		}
 		mIsCursorVisible = pVisible;
 	}
@@ -491,6 +570,7 @@ void X11InputManager::AddObserver()
 		mDisplayManager->AddObserver(MotionNotify, this);
 		mDisplayManager->AddObserver(FocusIn, this);
 		mDisplayManager->AddObserver(FocusOut, this);
+		mDisplayManager->AddObserver(EnterNotify, this);
 	}
 }
 

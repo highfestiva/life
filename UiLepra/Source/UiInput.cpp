@@ -113,6 +113,12 @@ void InputElement::SetValue(int pValue)
 	}
 }
 
+void InputElement::AddValue(int pValue)
+{
+	const int lPrevValue = (mValue*(mMax-mMin) + (mMax+mMin)) / 2.0f;
+	SetValue(lPrevValue + pValue);
+}
+
 const str& InputElement::GetIdentifier() const
 {
 	return mIdentifier;
@@ -721,6 +727,10 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 void InputManager::SetKey(KeyCode pKeyCode, bool pValue)
 {
 	mKeyDown[(unsigned char)pKeyCode] = pValue;
+}
+
+void InputManager::PreProcessEvents()
+{
 }
 
 void InputManager::PollEvents()

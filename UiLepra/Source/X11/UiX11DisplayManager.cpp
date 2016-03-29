@@ -326,6 +326,7 @@ bool X11DisplayManager::InitWindow()
 				lWinAttr.colormap = lColMap;
 				lWinAttr.border_pixel = 0;
 				lWinAttr.event_mask = StructureNotifyMask |
+							FocusChangeMask | EnterWindowMask | LeaveWindowMask |
 							KeyPressMask | KeyReleaseMask |
 							ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 							Button1MotionMask | Button2MotionMask | Button3MotionMask;
@@ -455,9 +456,10 @@ void X11DisplayManager::ProcessMessages()
 
 	// TODO: add resize and user window shutdown (the X in the corner).
 	const int lMessageMask = StructureNotifyMask |
-			KeyPressMask | KeyReleaseMask |
-			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-			Button1MotionMask | Button2MotionMask | Button3MotionMask;
+					FocusChangeMask | EnterWindowMask | LeaveWindowMask |
+					KeyPressMask | KeyReleaseMask |
+					ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
+					Button1MotionMask | Button2MotionMask | Button3MotionMask;
 	XEvent lEvent;
 	while (::XCheckMaskEvent(mDisplay, lMessageMask, &lEvent))
 	{

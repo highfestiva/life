@@ -298,6 +298,10 @@ bool GameUiManager::CanRender() const
 
 void GameUiManager::InputTick()
 {
+	if (CanRender())
+	{
+		mInput->PreProcessEvents();
+	}
 	UiLepra::Core::ProcessMessages();
 	if (CanRender())
 	{

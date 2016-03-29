@@ -326,9 +326,10 @@ def _opencom(addr, retries):
 def _closecom():
 	global sock,proc
 	if sock:
+		sock.settimeout(0.1)
 		if proc:
 			try:
-				cmd('quit')
+				cmd('quit', errhandle=lambda x:None)
 			except:
 				pass
 		try:

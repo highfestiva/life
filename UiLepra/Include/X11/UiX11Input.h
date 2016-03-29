@@ -72,6 +72,8 @@ public:
 	X11InputManager(X11DisplayManager* pDisplayManager);
 	virtual ~X11InputManager();
 
+	virtual void PreProcessEvents();
+	virtual void PollEvents();
 	virtual void Refresh();
 
 	X11DisplayManager* GetDisplayManager() const;
@@ -101,7 +103,6 @@ private:
 
 	X11DisplayManager* mDisplayManager;
 
-	bool mEnumError;
 	bool mInitialized;
 
 	// The entire display area (not just the user's window).
@@ -111,6 +112,12 @@ private:
 	// Mouse related stuff.
 	float mCursorX;
 	float mCursorY;
+	bool mIgnoreNextMouseMove;	// Leave+enter.
+	bool mGrabCursor;	// Used when invisible but lost focus.
+	int mMouseGrabX;
+	int mMouseGrabY;
+	int mMouseGrabDeltaX;
+	int mMouseGrabDeltaY;
 
 	// Default devices.
 	InputDevice* mKeyboard;
