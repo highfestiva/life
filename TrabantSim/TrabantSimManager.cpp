@@ -1457,13 +1457,13 @@ void TrabantSimManager::CloseConnection()
 	if (mCommandSocket)
 	{
 		if (mCommandThread) mCommandThread->RequestStop();
-		mCommandSocket->Shutdown(SocketBase::SHUTDOWN_RECV);
+		//mCommandSocket->Shutdown(SocketBase::SHUTDOWN_RECV);
 		mCommandSocket->SendTo((uint8*)"disconnect\n", 11, mLastRemoteAddress);
-		mCommandSocket->Shutdown(SocketBase::SHUTDOWN_BOTH);
+		//mCommandSocket->Shutdown(SocketBase::SHUTDOWN_BOTH);
 		UdpSocket(SocketAddress(), false).SendTo((uint8*)"?", 1, mCommandSocket->GetLocalAddress());
 		delete mCommandThread;
 		mCommandThread = 0;
-		Thread::Sleep(0.1);	// Wait for shutdown.
+		//Thread::Sleep(0.1);	// Wait for shutdown.
 		delete mCommandSocket;
 		mCommandSocket = 0;
 	}

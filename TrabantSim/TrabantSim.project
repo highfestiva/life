@@ -14,6 +14,15 @@
   "buildType": "",
   "arguments": [],
   "parentProject": ""
+ }, {
+  "name": "Release",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
  }]]]>
     </Plugin>
   </Plugins>
@@ -89,7 +98,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="clang++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-O0;-Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE" C_Options="-g;-O0;-Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-g;-O0;-Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE -DDEBUG" C_Options="-g;-O0;-Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE -DDEBUG" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="" Required="yes">

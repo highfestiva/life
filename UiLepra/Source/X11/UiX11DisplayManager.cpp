@@ -176,23 +176,23 @@ bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 			if (pDisplayMode.mBitDepth == 0)
 			{
 				lSupportedMode = FindDisplayMode(mDisplayMode,
-								   pDisplayMode.mWidth, 
-								   pDisplayMode.mHeight);
+								pDisplayMode.mWidth,
+								pDisplayMode.mHeight);
 			}
 			else if(pDisplayMode.mRefreshRate == 0)
 			{
 				lSupportedMode = FindDisplayMode(mDisplayMode,
-								   pDisplayMode.mWidth, 
-								   pDisplayMode.mHeight, 
-								   pDisplayMode.mBitDepth);
+								pDisplayMode.mWidth,
+								pDisplayMode.mHeight,
+								pDisplayMode.mBitDepth);
 			}
 			else
 			{
 				lSupportedMode = FindDisplayMode(mDisplayMode,
-								   pDisplayMode.mWidth, 
-								   pDisplayMode.mHeight, 
-								   pDisplayMode.mBitDepth,
-								   pDisplayMode.mRefreshRate);
+								pDisplayMode.mWidth,
+								pDisplayMode.mHeight,
+								pDisplayMode.mBitDepth,
+								pDisplayMode.mRefreshRate);
 			}
 
 			if (lSupportedMode == false)
@@ -224,6 +224,7 @@ bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 		if (lOk)
 		{
 			AddObserver(ConfigureNotify, this);
+			AddObserver(ClientMessage, this);
 		}
 	}
 
@@ -347,6 +348,10 @@ bool X11DisplayManager::InitWindow()
 
 				if (mWnd)
 				{
+					// Don't delete without telling.
+					Atom lDeleteWindow = XInternAtom(mDisplay, "WM_DELETE_WINDOW", False);
+					XSetWMProtocols(mDisplay, mWnd, &lDeleteWindow, 1);
+
 					HideWindow(false);
 					XEvent lEvent;
 					::XIfEvent(mDisplay, &lEvent, WaitForNotify, (char*)mWnd);
@@ -454,16 +459,14 @@ void X11DisplayManager::ProcessMessages()
 		return;
 	}
 
-	// TODO: add resize and user window shutdown (the X in the corner).
-	const int lMessageMask = StructureNotifyMask |
-					FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-					KeyPressMask | KeyReleaseMask |
-					ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-					Button1MotionMask | Button2MotionMask | Button3MotionMask;
-	XEvent lEvent;
-	while (::XCheckMaskEvent(mDisplay, lMessageMask, &lEvent))
+	while (::XPending(mDisplay) > 0)
 	{
-		DispatchMessage(lEvent);
+		XEvent lEvent;
+		::XNextEvent(mDisplay, &lEvent);
+		if (!SystemManager::GetQuitRequest())
+		{
+			DispatchMessage(lEvent);
+		}
 	}
 }
 
@@ -577,6 +580,15 @@ bool X11DisplayManager::OnMessage(const XEvent& pEvent)
 				break;
 			}*/
 		}
+		break;
+		case ClientMessage:
+		{
+			if(pEvent.xclient.data.l[0] == XInternAtom(mDisplay, "WM_DELETE_WINDOW", False))
+			{
+				SystemManager::AddQuitRequest(1);
+			}
+		}
+		break;
 	}
 
 	return false;
@@ -584,7 +596,7 @@ bool X11DisplayManager::OnMessage(const XEvent& pEvent)
 
 bool X11DisplayManager::DispatchMessage(const XEvent& pEvent)
 {
-	mLog.Infof(_T("X message: %i"), pEvent.type);
+	//mLog.Infof(_T("X message: %i"), pEvent.type);
 
 	bool lConsumed = false;
 	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pEvent.type);

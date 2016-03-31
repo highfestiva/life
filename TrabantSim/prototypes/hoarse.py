@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from trabant import *
 
 gravity((0,0,0))

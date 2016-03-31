@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -26,6 +26,7 @@ public:
 
 	static void Init();
 	static void Shutdown();
+	static void ResetTerminal();
 
 	static void SetArgumentVector(const strutil::strvec& pArgumentVector);
 	static const strutil::strvec& GetArgumentVector();

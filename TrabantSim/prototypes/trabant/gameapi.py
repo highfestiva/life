@@ -277,6 +277,10 @@ def cmd(c, return_type=str, errhandle=None):
 	except socket.error as e:
 		if errhandle:
 			errhandle(e)
+		elif str(e) == 'disconnected':
+			print('Simulator disconnected.')
+			import os
+			os._exit(1)
 		elif str(e) == 'timeout':
 			print('Simulator timed out!')
 			sock = None	# Don't even try to close to avoid delay.
@@ -397,7 +401,7 @@ def _run_local_sim(addr):
 			open_prefix,end_suffix,binname = [],[],'TrabantSim'
 		else:
 			open_prefix,end_suffix,binname = [],[],'TrabantSim.exe'
-		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./'), ('..','Final/'), ('..','Debug/')]:
+		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./'), ('..','Release/'), ('..','Debug/')]:
 			import os.path
 			import subprocess
 			curdir = os.path.abspath(os.path.curdir)

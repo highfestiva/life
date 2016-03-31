@@ -113,14 +113,13 @@ bool GameUiManager::OpenDraw()
 	}
 	if (!lOk)
 	{
-		str lError(strutil::Format(_T("Unsupported resolution %ux%u."), lDisplayWidth, lDisplayHeight));
 		if (lDisplayFullScreen)
 		{
-			mLog.Error(lError);
+			mLog.Errorf(_T("Unsupported resolution %ux%u."), lDisplayWidth, lDisplayHeight);
 		}
 		else
 		{
-			mLog.Warning(lError);
+			mLog.Infof(_T("Note that resolution %ux%u only supported in windowed mode."), lDisplayWidth, lDisplayHeight);
 			lOk = true;	// Go ahead - running in a window is OK.
 			lDisplayMode.mWidth = lDisplayWidth;
 			lDisplayMode.mHeight = lDisplayHeight;
@@ -251,7 +250,7 @@ void GameUiManager::Close()
 
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
-	Thread::Sleep(0.05);
+	Thread::Sleep(0.001);
 	UiLepra::Core::ProcessMessages();
 
 	delete (mSound);
@@ -277,7 +276,7 @@ void GameUiManager::Close()
 
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
-	Thread::Sleep(0.05);
+	Thread::Sleep(0.001);
 	UiLepra::Core::ProcessMessages();
 }
 

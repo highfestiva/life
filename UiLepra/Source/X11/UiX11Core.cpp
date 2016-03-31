@@ -29,6 +29,7 @@ int UiMain(Lepra::Application& pApplication)
 void Core::Init()
 {
 	X11Core::Init();
+	SystemManager::ResetTerminal();
 }
 
 void Core::Shutdown()

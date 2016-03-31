@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -155,7 +155,10 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 		SendDisconnect();
 	}
 	SetLoginAccountId(0);
-	Thread::Sleep(0.1);	// Try to wait until data sent. SO_LINGER doesn't seem trustworthy.
+	if (mSocket)
+	{
+		Thread::Sleep(0.1);	// Try to wait until data sent. SO_LINGER doesn't seem trustworthy.
+	}
 	Stop();
 }
 

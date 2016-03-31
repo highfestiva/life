@@ -1357,7 +1357,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="clang++" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g -Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE" C_Options="-DPNG_NO_ASSEMBLER_CODE" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-g -Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE -DDEBUG" C_Options="-DPNG_NO_ASSEMBLER_CODE -DDEBUG" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value="../ThirdParty/happyhttp-0.1"/>
         <IncludePath Value="../ThirdParty/utf8cpp"/>

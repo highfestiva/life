@@ -3461,13 +3461,13 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	dBodyID lBody1 = ::dGeomGetBody(pGeom1);
 	dBodyID lBody2 = ::dGeomGetBody(pGeom2);
 
-	// Check if both bodies are static or disabled.
-	if ((!lBody1 || !::dBodyIsEnabled(lBody1)) && (!lBody2 || !::dBodyIsEnabled(lBody2)))
+	if (!lBody1 && !lBody2)	// Static body or trigger against static body or trigger?
 	{
-		if (!lObject1->mTriggerListenerId && !lObject2->mTriggerListenerId)
-		{
-			return;
-		}
+		return;
+	}
+	if ((lBody1 && !::dBodyIsEnabled(lBody1)) && (lBody2 && !::dBodyIsEnabled(lBody2)))	// Both disabled?
+	{
+		return;
 	}
 	// Exit without doing anything if the two bodies are connected by a joint.
 	if (AreBodiesConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)

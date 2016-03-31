@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -106,6 +106,10 @@ void SystemManager::Init()
 void SystemManager::Shutdown()
 {
 	::timeEndPeriod(1);
+}
+
+void SystemManager::ResetTerminal()
+{
 }
 
 str SystemManager::GetRootDirectory()

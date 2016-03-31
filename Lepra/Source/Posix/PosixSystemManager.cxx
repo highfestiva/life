@@ -68,6 +68,11 @@ void SystemManager::Init()
 
 void SystemManager::Shutdown()
 {
+	ResetTerminal();
+}
+
+void SystemManager::ResetTerminal()
+{
 	::tcsetattr(STDIN_FILENO, TCSANOW, &gInitialTermios);
 }
 

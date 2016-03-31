@@ -17,14 +17,14 @@ gravity((0,0,0))
 cam(distance=30)
 pos = [(x-12,0,5-y) for y,l in enumerate(text.split('\n')) for x,ch in enumerate(l) if ch!=' ']
 objs = create_clones(create_box((0,-100,-100)), zip(pos,[quat()]*len(pos)))
-for o in objs: waitload(o.id)
-create_sphere((73,-19,-12), vel=(-30,9,6), radius=1.2, mass=120)
+#for o in objs: waitload(o.id)
+create_sphere((73,-1,0), vel=(-37,0.6,0.6), radius=1.2, mass=140)
 
 rec = {o:[] for o in objs}
 fwd = True
 
 while loop():
-    if timeout(8):
+    if timeout(5):
         fwd = False
         setvar('Physics.NoClip', True)
     for o in objs:
@@ -36,5 +36,5 @@ while loop():
         elif rec[o]:
             p,v,av,ori = rec[o][-1]
             del rec[o][-1]
-            o.pos(p, orientation=ori)
             o.vel(-v, avel=-av)
+            o.pos(p, orientation=ori)

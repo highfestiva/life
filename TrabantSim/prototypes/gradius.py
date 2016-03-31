@@ -57,7 +57,7 @@ async_load()
 def create_celestial(x):
     global celestials
     if random() > 0.95:  # Create planets sometimes.
-        celestials += [create_sphere((x, 40, random()*80-40), radius=random()*2+1, col='#444', vel=(-35,0,0))]
+        celestials += [create_sphere((x, 40, random()*80-40), radius=random()*2+1, col='#333', vel=(-35,0,0))]
     else:   # Create stars.
         idist = random()*0.6+0.4
         celestials += [create_sphere((x, 50-10*idist, random()*80-40), radius=0.2, col=vec3(idist,idist,idist), vel=(idist*-30, 0, 0))]
@@ -96,7 +96,6 @@ def update_tunnel():
     if px == 0:
         return  # Object not loaded yet.
     if px < 90-10:
-        print('Creating tunnel seg', px)
         create_tunnel_segs(px+20-0.5)
 create_tunnel_segs(-90)
 
@@ -148,9 +147,9 @@ while loop():
     elif 'LCTRL' in keys() and timeout(1, first_hit=True):
         p = ship.pos()
         scale = gfxscale((0.3, 0.3, 1)) # Scale X & Y, Z is height of capsule.
-        laser_shots  = [create_capsule(p+vec3(85,0, 0.0), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True, process=scale)]
-        laser_shots += [create_capsule(p+vec3(75,0,+2.5), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True, process=scale)]
-        laser_shots += [create_capsule(p+vec3(75,0,-2.5), orientation=quat().rotate_y(pi/2), length=150, radius=1, col='#f0f', trigger=True, process=scale)]
+        laser_shots  = [create_capsule(p+vec3(85,0, 0.0), orientation=quat().rotate_y(pi/2), length=150, radius=0.8, col='#f0f8', trigger=True, process=scale)]
+        laser_shots += [create_capsule(p+vec3(75,0,+2.5), orientation=quat().rotate_y(pi/2), length=150, radius=0.8, col='#f0f8', trigger=True, process=scale)]
+        laser_shots += [create_capsule(p+vec3(75,0,-2.5), orientation=quat().rotate_y(pi/2), length=150, radius=0.8, col='#f0f8', trigger=True, process=scale)]
         for shot in laser_shots:
             shot.physical = False
             shot.shooters = ship_parts
