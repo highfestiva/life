@@ -108,6 +108,7 @@
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
+        <Library Value="freetype"/>
         <Library Value="Life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>

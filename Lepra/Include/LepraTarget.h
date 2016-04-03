@@ -34,7 +34,7 @@
 #endif // DEBUG
 
 #if defined(UNICODE) || defined(_UNICODE)
-#define LEPRA_UNICODE
+#define LEPRA_UTF32
 #else // <ANSI>
 #define LEPRA_ANSI
 #endif // UNICODE/<ANSI>
@@ -87,7 +87,7 @@
 #endif // DEBUG
 
 #if defined(UNICODE) || defined(_UNICODE)
-#define LEPRA_UNICODE
+#define LEPRA_UTF32
 #else // <ANSI>
 #define LEPRA_ANSI
 #endif // UNICODE/<ANSI>
@@ -120,7 +120,7 @@
 #define LEPRA_DEBUG_CODE(x)
 #endif // _DEBUG/!NO_LOG_DEBUG_INFO/FINAL
 
-#if defined(LEPRA_UNICODE)
+#if defined(LEPRA_UTF32)
 #define LEPRA_STRING_TYPE_TEXT	"Unicode"
 #else // LEPRA_ANSI
 #define LEPRA_STRING_TYPE_TEXT	"Ansi"

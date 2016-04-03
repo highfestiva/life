@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,7 +7,10 @@
 #pragma once
 
 #include "../../../Lepra/Include/LepraTarget.h"
+#include "../../../Lepra/Include/Unordered.h"
 #include "../UiFontManager.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 
 
@@ -27,29 +30,31 @@ class X11FontManager: public FontManager
 {
 	typedef FontManager Parent;
 public:
-	X11FontManager(UiLepra::X11DisplayManager* pDisplayManager);
+	X11FontManager();
 	virtual ~X11FontManager();
 
-	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0);
-	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
-	virtual bool RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect);
-	virtual int GetCharWidth(const tchar pChar) const;
+	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL);
+	virtual bool RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect);
+	virtual int GetCharWidth(wchar_t pChar) const;
+	virtual int GetCharOffset(wchar_t pChar) const;
 
 private:
-	/*struct X11BitmapInfo
-	{
-		BITMAPINFOHEADER bmiHeader;
-		RGBQUAD bmiColors[256];
-	};
-
+	typedef std::pair<int,int> CharWidthOffset;
+	typedef std::unordered_map<wchar_t, CharWidthOffset> CharPlacementMap;
 	struct X11Font: Font
 	{
-		HFONT mX11FontHandle;
-	};*/
+		FT_Face mX11Face;
+		wchar_t mX11LoadedCharFace;
+		CharPlacementMap mCharPlacements;
+	};
 
-	UiLepra::X11DisplayManager* mDisplayManager;
-	/*HDC mDC;
-	COLORREF mColorRef[4];*/
+	static strutil::strvec FindAllFontFiles(const str& pPath);
+	str GetFontFile(const str& pFontName, const strutil::strvec& pSuffixes) const;
+
+	FT_Library mLibrary;
+	strutil::strvec mFontFiles;
+
+	logclass();
 };
 
 

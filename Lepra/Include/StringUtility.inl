@@ -122,6 +122,11 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Join(const strvec& pStringVector, const
 	return (lResultString);
 }
 
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::Append(strvec& pDestination, const strvec& pAppend)
+{
+		pDestination.insert(pDestination.end(), pAppend.begin(), pAppend.end());
+}
+
 
 
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StringToCString(const _String& pString)

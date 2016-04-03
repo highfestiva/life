@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -42,27 +42,21 @@ public:
 		UNDERLINE	= (1 << 2),
 		STRIKEOUT	= (1 << 3),
 	};
-	enum CharacterSet
-	{
-		NATIVE = 1,
-		ANSI,
-	};
 
 	static FontManager* Create(UiLepra::DisplayManager* pDisplayManager);
 	FontManager();
 	virtual ~FontManager();
 
-	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0) = 0;
-
-	FontId QueryAddFont(const str& pFontName, double pSize, int pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
-	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL, CharacterSet pCharSet = NATIVE) = 0;
+	FontId QueryAddFont(const str& pFontName, double pSize, int pFlags = NORMAL);
+	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL) = 0;
 	void SetActiveFont(FontId pFontId);
 	FontId GetActiveFontId() const;
 	str GetActiveFontName() const;
 
-	virtual bool RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect) = 0;
+	virtual bool RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect) = 0;
 
-	virtual int GetCharWidth(const tchar pChar) const = 0;
+	virtual int GetCharWidth(wchar_t pChar) const = 0;
+	virtual int GetCharOffset(wchar_t pChar) const = 0;
 	int GetStringWidth(const str& pString) const;
 	int GetStringHeight(const str& pString) const;
 	int GetFontHeight() const;

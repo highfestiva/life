@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -27,7 +27,7 @@ FontManager::~FontManager()
 }
 
 
-FontManager::FontId FontManager::QueryAddFont(const str& pFontName, double pSize, int pFlags, CharacterSet pCharSet)
+FontManager::FontId FontManager::QueryAddFont(const str& pFontName, double pSize, int pFlags)
 {
 	FontTable::iterator x = mFontTable.begin();
 	for (; x != mFontTable.end(); ++x)
@@ -39,7 +39,7 @@ FontManager::FontId FontManager::QueryAddFont(const str& pFontName, double pSize
 			return lFont->mFontId;
 		}
 	}
-	const FontId lFontId = AddFont(pFontName, pSize, pFlags, pCharSet);
+	const FontId lFontId = AddFont(pFontName, pSize, pFlags);
 	if (lFontId)
 	{
 		SetActiveFont(lFontId);
@@ -85,10 +85,11 @@ int FontManager::GetStringWidth(const str& pString) const
 {
 	int lMaxX = 0;
 	int lCurrentX = 0;
-	const size_t lLength = pString.length();
+	const wstr lWideString = wstrutil::Encode(pString);
+	const size_t lLength = lWideString.length();
 	for (size_t i = 0; i < lLength; i++)
 	{
-		tchar lChar = pString[i];
+		wchar_t lChar = lWideString[i];
 
 		if (lChar == _T('\n'))
 		{
@@ -98,7 +99,7 @@ int FontManager::GetStringWidth(const str& pString) const
 			lChar != _T('\b') &&
 			lChar != _T('\t'))
 		{
-			lCurrentX += GetCharWidth(lChar);
+			lCurrentX += GetCharWidth(lChar) + GetCharOffset(lChar);
 		}
 
 		if (lCurrentX > lMaxX)

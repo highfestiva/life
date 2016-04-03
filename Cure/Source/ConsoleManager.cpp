@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -478,9 +478,9 @@ void ConsoleManager::ConsoleThreadEntry()
 		}
 		else
 		{
-			tchar lChars[2] = _T("?");
-			lChars[0] = (tchar)c;
-			lInputText.insert(lEditIndex, lChars);
+			const wstr lChar(1, c);
+			const str lUtf8Char = strutil::Encode(lChar);
+			lInputText.insert(lEditIndex, lUtf8Char);
 			++lEditIndex;
 		}
 	}

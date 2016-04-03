@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -53,15 +53,7 @@ Win32FontManager::~Win32FontManager()
 
 
 
-void Win32FontManager::SetColor(const Color& pColor, unsigned pColorIndex)
-{
-	deb_assert(pColorIndex <= 1);
-
-	COLORREF lColor = RGB(pColor.mRed, pColor.mGreen, pColor.mBlue);
-	mColorRef[pColorIndex] = lColor;
-}
-
-Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double pSize, int pFlags, CharacterSet pCharSet)
+Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double pSize, int pFlags)
 {
 	int lWeight  = ((pFlags & BOLD) != 0) ? FW_BOLD : FW_NORMAL;
 	DWORD lItalic = ((pFlags & ITALIC) != 0) ? TRUE : FALSE;
@@ -75,7 +67,7 @@ Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double 
 					  lItalic,
 					  lUnderline,
 					  lStrikeOut,
-					  (pCharSet == NATIVE) ? DEFAULT_CHARSET : ANSI_CHARSET,
+					  DEFAULT_CHARSET,
 					  OUT_DEFAULT_PRECIS,
 					  CLIP_DEFAULT_PRECIS,
 					  DEFAULT_QUALITY,
@@ -104,7 +96,7 @@ Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double 
 	return (FontId)lId;
 }
 
-bool Win32FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect)
+bool Win32FontManager::RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect)
 {
 	bool lOk = (mCurrentFont != 0);
 	if (lOk)
@@ -221,7 +213,7 @@ bool Win32FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect&
 
 
 
-int Win32FontManager::GetCharWidth(const tchar pChar) const
+int Win32FontManager::GetCharWidth(wchar_t pChar) const
 {
 	Win32Font* lFont = (Win32Font*)mCurrentFont;
 	HGDIOBJ lDefaultObject = ::SelectObject(mDC, lFont->mWin32FontHandle);
@@ -238,6 +230,18 @@ int Win32FontManager::GetCharWidth(const tchar pChar) const
 	}
 	::SelectObject(mDC, lDefaultObject);
 	return lCharWidth;
+}
+
+int Win32FontManager::GetCharOffset(wchar_t pChar) const
+{
+	Win32Font* lFont = (Win32Font*)mCurrentFont;
+	HGDIOBJ lDefaultObject = ::SelectObject(mDC, lFont->mWin32FontHandle);
+	ABC lABC;
+	if (::GetCharABCWidths(mDC, (utchar)pChar, (utchar)pChar, &lABC) != FALSE)
+	{
+		return lABC.abcA;
+	}
+	return 0;
 }
 
 

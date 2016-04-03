@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 //
 // NOTES: 
@@ -101,7 +101,7 @@ protected:
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
 
 	virtual void ClearFontBuffers();
-	FontTexture* SelectGlyphs(uint32 pFontHash, int pFontHeight, const str& pString);
+	FontTexture* SelectGlyphs(uint32 pFontHash, int pFontHeight, const wstr& pString);
 
 private:
 	vec3 mRCol[4];

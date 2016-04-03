@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -36,7 +36,7 @@ uint32 FontTexture::GetFontHash() const
 	return (mFontHash);
 }
 
-void FontTexture::StoreGlyph(tchar pChar, FontManager* pFontManager)
+void FontTexture::StoreGlyph(wchar_t pChar, FontManager* pFontManager)
 {
 	if (pChar == ' ' || pChar == '\r' || pChar == '\n' || pChar == '\t' || pChar == '\b')
 	{
@@ -48,7 +48,8 @@ void FontTexture::StoreGlyph(tchar pChar, FontManager* pFontManager)
 	{
 		const int lCharStartX = mFreeXOffset;
 		const int lWidth = pFontManager->GetCharWidth(pChar);
-		mGlyphXOffsetMap.insert(GlyphXMap::value_type(pChar, GlyphX(lCharStartX, lWidth)));
+		const int lOffset = pFontManager->GetCharOffset(pChar);
+		mGlyphXOffsetMap.insert(GlyphXMap::value_type(pChar, GlyphX{lCharStartX, lWidth, lOffset}));
 		mFreeXOffset += lWidth;
 		if (mFreeXOffset > (int)mCanvas.GetWidth())
 		{
@@ -81,14 +82,15 @@ void FontTexture::StoreGlyph(tchar pChar, FontManager* pFontManager)
 	}
 }
 
-bool FontTexture::GetGlyphX(tchar pChar, int& pX, int& pWidth) const
+bool FontTexture::GetGlyphX(wchar_t pChar, int& pX, int& pWidth, int& pPlacementOffset) const
 {
 	GlyphXMap::const_iterator x = mGlyphXOffsetMap.find(pChar);
 	deb_assert(x != mGlyphXOffsetMap.end());
 	if (x != mGlyphXOffsetMap.end())
 	{
-		pX = x->second.first;
-		pWidth = x->second.second;
+		pX = x->second.mStartX;
+		pWidth = x->second.mWidth;
+		pPlacementOffset = x->second.mPlacementOffset;
 		return (true);
 	}
 	return (false);

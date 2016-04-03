@@ -914,6 +914,7 @@
       <File Name="../Lepra/Include/SkipList.h"/>
       <File Name="../Lepra/Include/FileArchive.h"/>
       <File Name="../Lepra/Include/ProgressCallback.h"/>
+      <File Name="../Lepra/Include/StringUtility.inl"/>
     </VirtualDirectory>
     <VirtualDirectory Name="LepraTestApp">
       <File Name="../Lepra/LepraTestApp/LepraTest.cpp"/>
@@ -1057,6 +1058,9 @@
       <File Name="../UiTbc/Source/UiOpenGLShader.cpp"/>
       <File Name="../UiTbc/Source/UiMaterial.cpp"/>
       <File Name="../UiTbc/Source/UiOpenGLMaterial_TextureAndLightmapShaders.cxx"/>
+      <VirtualDirectory Name="Mac">
+        <File Name="../UiTbc/Source/Mac/UiMacFontManager.mm" ExcludeProjConfig="Debug"/>
+      </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="Include">
       <VirtualDirectory Name="X11">
@@ -1368,6 +1372,7 @@
         <IncludePath Value="../ThirdParty/libvorbis-1.3.2/include"/>
         <IncludePath Value="../ThirdParty/libvorbis-1.3.2/lib"/>
         <IncludePath Value="../ThirdParty/libogg-1.2.2/include"/>
+        <IncludePath Value="/usr/include/freetype2"/>
       </Compiler>
       <Linker Options="-O0" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>

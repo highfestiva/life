@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -1276,13 +1276,13 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 
 	const Color lColor = GetColorInternal(0);
 	deb_assert(lColor != BLACK);	// Does not show.
-	GetFontManager()->SetColor(Color(255, 255, 255, 255));
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
 	const uint32 lFontHash = (GetFontManager()->GetActiveFontId() << 16) + lFontHeight;
-	FontTexture* lFontTexture = SelectGlyphs(lFontHash, lFontHeight, pString);
+	wstr lWideString = wstrutil::Encode(pString);
+	FontTexture* lFontTexture = SelectGlyphs(lFontHash, lFontHeight, lWideString);
 	const int lFontTextureHeight = lFontTexture->GetHeight();
 
-	const size_t lStringLength = pString.length();
+	const size_t lStringLength = lWideString.length();
 	int lGlyphIndex = 0;
 	const size_t STACK_GLYPH_CAPACITY = 256;
 #ifdef LEPRA_GL_ES
@@ -1318,7 +1318,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 
 	for (size_t i = 0; i < lStringLength; i++)
 	{
-		const tchar lChar = pString[i];
+		const wchar_t lChar = lWideString[i];
 		if (lChar == _T('\n'))
 		{
 			lCurrentY += lLineHeight;
@@ -1337,11 +1337,13 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 		{
 			int lTextureX = 0;
 			int lCharWidth = 5;
-			if (!lFontTexture->GetGlyphX(lChar, lTextureX, lCharWidth))
+			int lPlacementOffset = 0;
+			if (!lFontTexture->GetGlyphX(lChar, lTextureX, lCharWidth, lPlacementOffset))
 			{
 				deb_assert(false);
 				continue;
 			}
+			lCurrentX += lPlacementOffset;
 			const float lTextureWidth = (float)lFontTexture->GetWidth();
 			const VERTEX_TYPE lTemplateVertices[2*4] =
 			{
@@ -1615,7 +1617,7 @@ void OpenGLPainter::ClearFontBuffers()
 	//OGL_ASSERT();
 }
 
-FontTexture* OpenGLPainter::SelectGlyphs(uint32 pFontHash, int pFontHeight, const str& pString)
+FontTexture* OpenGLPainter::SelectGlyphs(uint32 pFontHash, int pFontHeight, const wstr& pString)
 {
 	FontTexture* lFontTexture = HashUtil::FindMapObject(mFontTextureTable, pFontHash);
 	if (!lFontTexture)

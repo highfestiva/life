@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -30,8 +30,8 @@ public:
 
 	uint32 GetFontHash() const;
 
-	void StoreGlyph(tchar pChar, FontManager* pFontManager);
-	bool GetGlyphX(tchar pChar, int& pX, int& pWidth) const;
+	void StoreGlyph(wchar_t pChar, FontManager* pFontManager);
+	bool GetGlyphX(wchar_t pChar, int& pX, int& pWidth, int& pPlacementOffset) const;
 
 	bool IsUpdated() const;
 	void ResetIsUpdated();
@@ -41,7 +41,12 @@ public:
 	void* GetBuffer() const;
 
 private:
-	typedef std::pair<int, int> GlyphX;
+	struct GlyphX
+	{
+		int mStartX;
+		int mWidth;
+		int mPlacementOffset;
+	};
 	typedef std::unordered_map<int32, GlyphX> GlyphXMap;
 	GlyphXMap mGlyphXOffsetMap;
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -30,18 +30,12 @@ public:
 	Win32FontManager(UiLepra::Win32DisplayManager* pDisplayManager);
 	virtual ~Win32FontManager();
 
-	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0);
-	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
-	virtual bool RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect);
-	virtual int GetCharWidth(const tchar pChar) const;
+	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL);
+	virtual bool RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect);
+	virtual int GetCharWidth(wchar_t pChar) const;
+	virtual int GetCharOffset(wchar_t pChar) const;
 
 private:
-	struct Win32BitmapInfo
-	{
-		BITMAPINFOHEADER bmiHeader;
-		RGBQUAD bmiColors[256];
-	};
-
 	struct Win32Font: Font
 	{
 		HFONT mWin32FontHandle;

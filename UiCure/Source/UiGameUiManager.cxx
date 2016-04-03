@@ -186,8 +186,6 @@ bool GameUiManager::OpenRest()
 	if (lOk)
 	{
 		mFontManager = UiTbc::FontManager::Create(mDisplay);
-		//mFontManager->SetColor(Color(255, 255, 255, 255), 0);
-		//mFontManager->SetColor(Color(0, 0, 0, 0), 1);
 		mPainter->SetFontManager(mFontManager);
 
 		str lFont;
@@ -201,14 +199,29 @@ bool GameUiManager::OpenRest()
 		{
 			_T("Times New Roman"),
 			_T("Arial"),
-			_T("Courier New"),
 			_T("Verdana"),
 			_T("Helvetica"),
+			_T("Courier New"),
+			_T("Segoe UI"),
+			_T("Open Sans"),
+			_T("Liberation Sans"),
+			_T("Liberation Serif"),
+			_T("Nimbus"),
+			_T("Cantarell"),
+			_T("Bookman"),
+			_T("Gothic"),
+			_T("Sans"),
+			_T("Serif"),
+			_T(""),
 			0
 		};
 		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
 		{
 			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight, lFontFlags);
+			if (lFontId != UiTbc::FontManager::INVALID_FONTID)
+			{
+				v_set(mVariableScope, RTVAR_UI_2D_FONT, lFontNames[x]);
+			}
 		}
 	}
 	if (lOk)

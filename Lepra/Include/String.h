@@ -24,13 +24,13 @@ typedef std::string		astr;
 typedef std::wstring		wstr;
 typedef std::stringstream	astrstream;
 typedef std::wstringstream	wstrstream;
-#ifdef LEPRA_UNICODE
+#ifdef LEPRA_UTF32
 typedef wstr			str;
 typedef wstrstream		strstream;
-#else // !LEPRA_UNICODE
+#else // !LEPRA_UTF32
 typedef astr			str;
 typedef astrstream		strstream;
-#endif // LEPRA_UNICODE/!LEPRA_UNICODE
+#endif // LEPRA_UTF32/!LEPRA_UTF32
 
 inline size_t HashString(const char* s);
 inline size_t HashString(const wchar_t* w);

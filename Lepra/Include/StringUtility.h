@@ -33,6 +33,7 @@ public:
 	static strvec BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
 	static void FastBlockSplit(strvec& pTokenVector, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
 	static _String Join(const strvec& pStringVector, const _String& pJoinString, size_t pStartIndex = 0, size_t pEndIndex = _String::npos);
+	static void Append(strvec& pDestination, const strvec& pAppend);
 
 	static _String StringToCString(const _String& pString);
 	static bool CStringToString(const _String& pCString, _String& _pString);
@@ -93,11 +94,11 @@ typedef StringUtilityTemplate<wstr>	wstrutil;
 typedef StringUtilityTemplate<str>	strutil;
 extern const astr gEmptyAnsiString;
 extern const wstr gEmptyUnicodeString;
-#ifdef LEPRA_UNICODE
+#ifdef LEPRA_UTF32
 #define EmptyString		gEmptyUnicodeString
-#else // !LEPRA_UNICODE
+#else // !LEPRA_UTF32
 #define EmptyString		gEmptyAnsiString
-#endif // LEPRA_UNICODE/!LEPRA_UNICODE
+#endif // LEPRA_UTF32/!LEPRA_UTF32
 #define EmptyAnsiString		gEmptyAnsiString
 #define EmptyUnicodeString	gEmptyUnicodeString
 

@@ -53,21 +53,21 @@ typedef uint16			wchar_t;
 #endif // LEPRA_MSVC && !_NATIVE_WCHAR_T_DEFINED
 #define	__WIDE(x)	L ## x
 #define	_WIDE(x)	__WIDE(x)
-#ifdef	LEPRA_UNICODE
+#ifdef	LEPRA_UTF32
 typedef	wchar_t			utchar;
 typedef	wchar_t			tchar;
 #ifdef __T
 #undef __T
 #endif
 #define	__T			__WIDE
-#else	// !LEPRA_UNICODE
+#else	// !LEPRA_UTF32
 typedef unsigned char		utchar;
 typedef char			tchar;
 #ifdef __T
 #undef __T
 #endif
 #define	__T(x)			x
-#endif	// LEPRA_UNICODE/!LEPRA_UNICODE
+#endif	// LEPRA_UTF32/!LEPRA_UTF32
 #ifdef _T
 #undef _T
 #endif

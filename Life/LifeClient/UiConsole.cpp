@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -51,9 +51,22 @@ UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager
 		}
 	}
 
-	UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
-	mFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Courier New"), 14.0f);
-	mUiManager->GetFontManager()->SetActiveFont(lFontId);
+	mFontId = UiTbc::FontManager::INVALID_FONTID;
+	const tchar* lFontNames[] =
+	{
+		_T("Courier New"),
+		_T("LiberationMono"),
+		_T("DejaVuSansMono"),
+		_T("Mono"),
+		_T(""),
+		0
+	};
+	UiTbc::FontManager::FontId lDefaultFontId = mUiManager->GetFontManager()->GetActiveFontId();
+	for (int x = 0; lFontNames[x] && mFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
+	{
+		mFontId = mUiManager->GetFontManager()->QueryAddFont(lFontNames[x], 14.0f);
+	}
+	mUiManager->GetFontManager()->SetActiveFont(lDefaultFontId);
 }
 
 UiConsole::~UiConsole()

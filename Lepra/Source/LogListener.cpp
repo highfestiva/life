@@ -176,7 +176,7 @@ void StdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 	}
 	::SetConsoleTextAttribute(lStdOut, lAttributes);
 	DWORD lCharsWritten = 0;
-#ifdef LEPRA_UNICODE
+#ifdef LEPRA_UTF32
 	::WriteConsoleW(lStdOut, pFullMessage.c_str(), (DWORD)pFullMessage.length(), &lCharsWritten, NULL);
 #else
 	const wstr w = wstrutil::Encode(pFullMessage);
@@ -278,7 +278,7 @@ void DebuggerLogListener::WriteLog(const str& pFullMessage, LogLevel)
 {
 #if !defined(NO_LOG_DEBUG_INFO)
 #if defined(LEPRA_WINDOWS)
-#ifdef LEPRA_UNICODE
+#ifdef LEPRA_UTF32
 	OutputDebugStringW((_T(">>>")+pFullMessage).c_str());
 #else
 	const wstr w = wstrutil::Encode(">>>"+pFullMessage);

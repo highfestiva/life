@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -53,12 +53,7 @@ MacFontManager::~MacFontManager()
 
 
 
-void MacFontManager::SetColor(const Color& pColor, unsigned pColorIndex)
-{
-	deb_assert(pColorIndex <= 1);
-}
-
-MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSize, int pFlags, CharacterSet pCharSet)
+MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSize, int pFlags)
 {
 	FontId lId = INVALID_FONTID;
 	{
@@ -80,7 +75,7 @@ MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSiz
 	return lId;
 }
 
-bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect)
+bool MacFontManager::RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect)
 {
 	pImage.Reset(pRect.GetWidth(), pRect.GetHeight(), Canvas::BITDEPTH_32_BIT);
 	pImage.CreateBuffer();
@@ -163,7 +158,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 
 
 
-int MacFontManager::GetCharWidth(const tchar pChar) const
+int MacFontManager::GetCharWidth(wchar_t pChar) const
 {
 	NSString* lFontName = MacLog::Encode(mCurrentFont->mName);
 	const float lCorrectedFontSize = ((MacFont*)mCurrentFont)->mActualSize;	// Similar to other platforms...
@@ -180,6 +175,11 @@ int MacFontManager::GetCharWidth(const tchar pChar) const
 	NSSize lSize = [lFont advancementForGlyph:lGlyph];
 #endif // iOS/!iOS
 	return lSize.width+1;
+}
+
+int MacFontManager::GetCharOffset(wchar_t pChar) const
+{
+	return 0;	// TODO: implement! I.e. "j" should return a negative offset, since only the bottom bend of sans serifs goes left.
 }
 
 
