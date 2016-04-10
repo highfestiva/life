@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // Loads icon from resource manager and shows it once loaded. Frees the icon
@@ -33,7 +33,7 @@ class IconButton: public UiTbc::Button
 {
 	typedef UiTbc::Button Parent;
 public:
-	IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, const str& pIconImageName, const str& pText);
+	IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, const str& pIconImageName, const wstr& pText);
 	virtual ~IconButton();
 
 private:

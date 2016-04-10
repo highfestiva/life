@@ -157,7 +157,6 @@ public:
 
 	bool Start();
 	static void Sleep(float64 pTime);
-	static void Sleep(unsigned int pMilliSeconds);
 	static void YieldCpu();
 
 	bool Join();
@@ -167,6 +166,7 @@ public:
 	void Kill();
 
 protected:
+	static void Sleep(unsigned int pMicroSeconds);
 	virtual void Run() = 0;
 	void PostRun();
 

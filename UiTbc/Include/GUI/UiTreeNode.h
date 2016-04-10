@@ -1,6 +1,6 @@
 /*
 	Class:  TreeNode
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -44,23 +44,20 @@ class TreeNode: public Component
 	typedef Component Parent;
 public:
 	// Uses the default icons.
-	TreeNode(const str& pText,
-		 const str& pName);
+	TreeNode(const wstr& pText);
 
 	// User specifies his own node icons. The default 
 	// expand/collapse icons are still used.
 	TreeNode(Painter::ImageID pCollapsedIconID,
 		 Painter::ImageID pExpandedIconID,
-		 const str& pText,
-		 const str& pName);
+		 const wstr& pText);
 
 	// User defines all icons.
 	TreeNode(Painter::ImageID pCollapsedIconID,
 		 Painter::ImageID pExpandedIconID,
 		 Painter::ImageID pCollapseIconID,
 		 Painter::ImageID pExpandeIconID,
-		 const str& pText,
-		 const str& pName);
+		 const wstr& pText);
 
 	~TreeNode();
 
@@ -95,10 +92,10 @@ private:
 	// with ListControl::AddChildrenAfter().
 	typedef std::list<Component*> NodeList;
 
-	void Init(const str& pText);
+	void Init(const wstr& pText);
 	void ValidatePainterAndIcons();
 	bool ValidateExpandButton();
-	bool ValidateIconRect(const str& pText);
+	bool ValidateIconRect(const wstr& pText);
 
 	void AddDefaultIconIfNeeded(Painter::ImageID& pLocalIconID, Painter::ImageID& pStaticIconID, void* pBuffer, int pXOffset, int pYOffset);
 	void ResetUserIcons();

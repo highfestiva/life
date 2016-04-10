@@ -1,6 +1,6 @@
 /*
 	Class:  StackLayout
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -66,19 +66,6 @@ void StackLayout::Remove(Component* pComponent)
 			mNumComponents--;
 		}
 	}
-}
-
-Component* StackLayout::Find(const str& pComponentName)
-{
-	for (int i = 0; i < mNumLevels; i++)
-	{
-		if (mChild[i] != 0 && mChild[i]->GetName() == pComponentName)
-		{
-			return mChild[i];
-		}
-	}
-
-	return 0;
 }
 
 int StackLayout::GetNumComponents() const

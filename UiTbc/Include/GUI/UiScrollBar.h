@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -34,15 +34,13 @@ public:
 		  const Color& pBodyColor = Color(192, 192, 192),
 		  const Color& pBackgColor = Color(192, 192, 192),
 		  BorderComponent::BorderShadeFunc pBorderShadeFunc = BorderComponent::LINEAR,
-		  int pBorderWidth = 3,
-		  const str& pName = _T("ScrollBar"));
+		  int pBorderWidth = 3);
 
 	ScrollBar(Style pStyle,
 		  Painter::ImageID pBackgImageID,
 		  Button* pTopLeftButton,
 		  Button* pBottomRightButton,
-		  Button* pScrollerButton,
-		  const str& pName = _T("ScrollBar"));
+		  Button* pScrollerButton);
 
 	// 0 <= visible <= max.
 	void SetScrollRatio(float64 pVisible, float64 pMax);

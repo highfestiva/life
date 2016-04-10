@@ -94,7 +94,7 @@ protected:
 	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
 
 	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
-	void PrintText(const str& pString, int x, int y);
+	void PrintText(const wstr& pString, int x, int y);
 	void SetFontSmoothness(bool pSmooth);
 
 	virtual void AdjustVertexFormat(unsigned& pVertexFormat);

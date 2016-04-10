@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -15,8 +15,8 @@ namespace UiTbc
 
 
 
-RectComponent::RectComponent(const str& pName, Layout* pLayout):
-	Component(pName, pLayout),
+RectComponent::RectComponent(Layout* pLayout):
+	Component(pLayout),
 	mShaded(false),
 	mHollow(true),
 	mBehaveSolid(false),
@@ -26,8 +26,8 @@ RectComponent::RectComponent(const str& pName, Layout* pLayout):
 {
 }
 
-RectComponent::RectComponent(const Color& pColor, const str& pName, Layout* pLayout):
-	Component(pName, pLayout),
+RectComponent::RectComponent(const Color& pColor, Layout* pLayout):
+	Component(pLayout),
 	mShaded(false),
 	mHollow(false),
 	mBehaveSolid(false),
@@ -45,9 +45,8 @@ RectComponent::RectComponent(const Color& pTopLeftColor,
 			     const Color& pTopRightColor,
 			     const Color& pBottomRightColor,
 			     const Color& pBottomLeftColor,
-			     const str& pName,
 			     Layout* pLayout):
-	Component(pName, pLayout),
+	Component(pLayout),
 	mShaded(true),
 	mHollow(false),
 	mBehaveSolid(false),
@@ -61,8 +60,8 @@ RectComponent::RectComponent(const Color& pTopLeftColor,
 	mColor[3] = pBottomLeftColor;
 }
 
-RectComponent::RectComponent(Painter::ImageID pImageID, const str& pName, Layout* pLayout):
-	Component(pName, pLayout),
+RectComponent::RectComponent(Painter::ImageID pImageID, Layout* pLayout):
+	Component(pLayout),
 	mShaded(false),
 	mHollow(false),
 	mBehaveSolid(false),

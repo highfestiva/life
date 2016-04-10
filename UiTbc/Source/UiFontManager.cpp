@@ -81,15 +81,14 @@ str FontManager::GetActiveFontName() const
 
 
 
-int FontManager::GetStringWidth(const str& pString) const
+int FontManager::GetStringWidth(const wstr& pString) const
 {
 	int lMaxX = 0;
 	int lCurrentX = 0;
-	const wstr lWideString = wstrutil::Encode(pString);
-	const size_t lLength = lWideString.length();
+	const size_t lLength = pString.length();
 	for (size_t i = 0; i < lLength; i++)
 	{
-		wchar_t lChar = lWideString[i];
+		wchar_t lChar = pString[i];
 
 		if (lChar == _T('\n'))
 		{
@@ -110,9 +109,9 @@ int FontManager::GetStringWidth(const str& pString) const
 	return (lMaxX);
 }
 
-int FontManager::GetStringHeight(const str& pString) const
+int FontManager::GetStringHeight(const wstr& pString) const
 {
-	return GetLineHeight() * (std::count(pString.begin(), pString.end(), _T('\n')) + 1);
+	return GetLineHeight() * (std::count(pString.begin(), pString.end(), L'\n') + 1);
 }
 
 int FontManager::GetFontHeight() const

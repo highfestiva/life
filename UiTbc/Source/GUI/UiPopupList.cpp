@@ -1,6 +1,6 @@
 /*
 	Class:  PopupList
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -14,25 +14,23 @@ namespace UiTbc
 
 
 
-PopupList::PopupList(unsigned pBorderStyle, int pBorderWidth, const Color& pColor, 
-			 ListLayout::ListType pListType, const str& pName):
-	ListControl(pBorderStyle, pBorderWidth, pColor, pListType, pName)
+PopupList::PopupList(unsigned pBorderStyle, int pBorderWidth, const Color& pColor, ListLayout::ListType pListType):
+	ListControl(pBorderStyle, pBorderWidth, pColor, pListType)
 {
 }
 
-PopupList::PopupList(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-			 ListLayout::ListType pListType, const str& pName):
-	ListControl(pBorderStyle, pBorderWidth, pImageID, pListType, pName)
+PopupList::PopupList(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID, ListLayout::ListType pListType):
+	ListControl(pBorderStyle, pBorderWidth, pImageID, pListType)
 {
 }
 
-PopupList::PopupList(const Color& pColor, ListLayout::ListType pListType, const str& pName):
-	ListControl(pColor, pListType, pName)
+PopupList::PopupList(const Color& pColor, ListLayout::ListType pListType):
+	ListControl(pColor, pListType)
 {
 }
 
-PopupList::PopupList(Painter::ImageID pImageID, ListLayout::ListType pListType, const str& pName):
-	ListControl(pImageID, pListType, pName)
+PopupList::PopupList(Painter::ImageID pImageID, ListLayout::ListType pListType):
+	ListControl(pImageID, pListType)
 {
 }
 

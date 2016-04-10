@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -21,12 +21,12 @@ class Label: public RectComponent, public TextComponent
 	typedef RectComponent Parent;
 public:
 
-	Label(const Color& pColor, const str& pText);
+	Label(const Color& pColor, const wstr& pText);
 	virtual ~Label();
 
 	void SetIcon(Painter::ImageID pIconID, IconAlignment pAlignment);
-	void SetText(const str& pText);
-	const str& GetText() const;
+	void SetText(const wstr& pText);
+	const wstr& GetText() const;
 	virtual void SetSelected(bool pSelected);
 
 	virtual void Repaint(Painter* pPainter);
@@ -42,7 +42,7 @@ protected:
 	Painter::ImageID mIconId;
 	IconAlignment mIconAlignment;
 
-	str mText;
+	wstr mText;
 
 	int mTextWidth;
 	int mTextHeight;

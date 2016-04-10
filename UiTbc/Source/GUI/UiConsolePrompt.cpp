@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -50,11 +50,11 @@ void ConsolePrompt::SetInputComponent(TextField* pInputComponent)
 
 
 
-bool ConsolePrompt::OnChar(tchar pChar)
+bool ConsolePrompt::OnChar(wchar_t pChar)
 {
 	{
 		ScopeLock lLock(&mLock);
-		int lChar = (int)(utchar)pChar;
+		wchar_t lChar = pChar;
 		if (lChar == 27)
 		{
 			lChar = CON_KEY_ESCAPE;
@@ -188,7 +188,7 @@ void ConsolePrompt::PrintPrompt(const str& pPrompt, const str& pInputText, size_
 {
 	if (mParent)
 	{
-		mParent->SetText(pPrompt+pInputText);
+		mParent->SetText(wstrutil::Encode(pPrompt+pInputText));
 		mParent->SetMarkerPosition(pPrompt.length()+pEditIndex);
 	}
 }

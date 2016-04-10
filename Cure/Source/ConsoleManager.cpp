@@ -295,8 +295,8 @@ void ConsoleManager::AddCommands()
 void ConsoleManager::ConsoleThreadEntry()
 {
 	// Main console IO loop.
-	const str lPrompt(_T(">"));
-	str lInputText(_T(""));
+	const str lPrompt(">");
+	wstr lInputText;
 	size_t lEditIndex = 0;
 	while (!SystemManager::GetQuitRequest() && mConsoleThread && !mConsoleThread->GetStopRequest())
 	{
@@ -309,13 +309,13 @@ void ConsoleManager::ConsoleThreadEntry()
 			}
 		}
 
-		mConsolePrompt->PrintPrompt(lPrompt, lInputText, lEditIndex);
+		mConsolePrompt->PrintPrompt(lPrompt, strutil::Encode(lInputText), lEditIndex);
 
-		mConsoleLogger->SetAutoPrompt(lPrompt+lInputText);
+		mConsoleLogger->SetAutoPrompt(lPrompt + strutil::Encode(lInputText));
 		int c = mConsolePrompt->WaitChar();
-		mConsoleLogger->SetAutoPrompt(_T(""));
+		mConsoleLogger->SetAutoPrompt("");
 
-		str lWordDelimitors;
+		str lWordDelimitorsUtf8;
 		int lKeyCompletion;
 		int lKeyEnter;
 		int lKeySilent;
@@ -332,7 +332,7 @@ void ConsoleManager::ConsoleThreadEntry()
 		int lKeyEsc;
 		int lKeyPgUp;
 		int lKeyPgDn;
-		v_get(lWordDelimitors, =, mVariableScope, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
+		v_get(lWordDelimitorsUtf8, =, mVariableScope, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
 		v_get(lKeyCompletion, =, mVariableScope, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
 		v_get(lKeyEnter, =, mVariableScope, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
 		v_get(lKeySilent, =, mVariableScope, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
@@ -349,19 +349,20 @@ void ConsoleManager::ConsoleThreadEntry()
 		v_get(lKeyEsc, =, mVariableScope, RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE);
 		v_get(lKeyPgUp, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP);
 		v_get(lKeyPgDn, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN);
+		const wstr lWordDelimitors = wstrutil::Encode(lWordDelimitorsUtf8);
 
 		if (c == lKeyCompletion)
 		{
 			str lBestCompletionString;
 			std::list<str> lCompletions =
-				mConsoleCommandManager->GetCommandCompletionList(lInputText, lBestCompletionString);
+				mConsoleCommandManager->GetCommandCompletionList(strutil::Encode(lInputText), lBestCompletionString);
 			// Print command completion list.
 			if (lCompletions.size() > 1)
 			{
 				mConsoleLogger->OnLogRawMessage(_T("\n"));
 				PrintCommandList(lCompletions);
 			}
-			lInputText = lBestCompletionString;
+			lInputText = wstrutil::Encode(lBestCompletionString);
 			lEditIndex = lInputText.length();
 			if (lCompletions.size() == 1)
 			{
@@ -371,10 +372,10 @@ void ConsoleManager::ConsoleThreadEntry()
 		}
 		else if (c == lKeyEnter)
 		{
-			mConsoleLogger->OnLogRawMessage(_T("\r")+lPrompt+lInputText+_T("\n"));
-			mConsoleCommandManager->Execute(lInputText, !mHistorySilentUntilNextExecute);
+			mConsoleLogger->OnLogRawMessage("\r" + lPrompt + strutil::Encode(lInputText) + "\n");
+			mConsoleCommandManager->Execute(strutil::Encode(lInputText), !mHistorySilentUntilNextExecute);
 			mHistorySilentUntilNextExecute = false;
-			lInputText = _T("");
+			lInputText = L"";
 			lEditIndex = 0;
 		}
 		else if (c == lKeySilent)
@@ -391,7 +392,7 @@ void ConsoleManager::ConsoleThreadEntry()
 				--lEditIndex;
 				mConsolePrompt->Backspace(1);
 				mConsolePrompt->EraseText(lInputText.length()-lEditIndex);
-				str lNewInputText = lInputText.substr(0, lEditIndex) + lInputText.substr(lEditIndex+1);
+				wstr lNewInputText = lInputText.substr(0, lEditIndex) + lInputText.substr(lEditIndex+1);
 				lInputText = lNewInputText;
 			}
 		}
@@ -403,17 +404,17 @@ void ConsoleManager::ConsoleThreadEntry()
 				mConsoleCommandManager->SetCurrentHistoryIndex((int)mConsoleCommandManager->GetHistoryCount());
 
 				mConsolePrompt->EraseText(lInputText.length()-lEditIndex);
-				str lNewInputText = lInputText.substr(0, lEditIndex) + lInputText.substr(lEditIndex+1);
+				wstr lNewInputText = lInputText.substr(0, lEditIndex) + lInputText.substr(lEditIndex+1);
 				lInputText = lNewInputText;
 			}
 		}
 		else if (c == lKeyCtrlLeft)
 		{
-			lEditIndex = strutil::FindPreviousWord(lInputText, lWordDelimitors, lEditIndex);
+			lEditIndex = wstrutil::FindPreviousWord(lInputText, lWordDelimitors, lEditIndex);
 		}
 		else if (c == lKeyCtrlRight)
 		{
-			lEditIndex = strutil::FindNextWord(lInputText, lWordDelimitors, lEditIndex);
+			lEditIndex = wstrutil::FindNextWord(lInputText, lWordDelimitors, lEditIndex);
 		}
 		else if (c == lKeyHome)
 		{
@@ -441,7 +442,7 @@ void ConsoleManager::ConsoleThreadEntry()
 			}
 			mConsoleCommandManager->SetCurrentHistoryIndex(lDesiredHistoryIndex);
 			lDesiredHistoryIndex = mConsoleCommandManager->GetCurrentHistoryIndex();
-			lInputText = mConsoleCommandManager->GetHistory(lDesiredHistoryIndex);
+			lInputText = wstrutil::Encode(mConsoleCommandManager->GetHistory(lDesiredHistoryIndex));
 			lEditIndex = lInputText.length();
 		}
 		else if (c == lKeyLeft)
@@ -462,7 +463,7 @@ void ConsoleManager::ConsoleThreadEntry()
 		{
 			mConsolePrompt->Backspace(lEditIndex);
 			mConsolePrompt->EraseText(lInputText.length());
-			lInputText = _T("");
+			lInputText = L"";
 			lEditIndex = 0;
 		}
 		else if (c == lKeyPgUp)
@@ -479,8 +480,7 @@ void ConsoleManager::ConsoleThreadEntry()
 		else
 		{
 			const wstr lChar(1, c);
-			const str lUtf8Char = strutil::Encode(lChar);
-			lInputText.insert(lEditIndex, lUtf8Char);
+			lInputText.insert(lEditIndex, lChar);
 			++lEditIndex;
 		}
 	}

@@ -1,6 +1,6 @@
 /*
 	Class:  ListLayout
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -44,7 +44,6 @@ public:
 	// pParam2 is not used.
 	virtual void Add(Component* pComponent, int pParam1, int pParam2);
 	virtual void Remove(Component* pComponent);
-	virtual Component* Find(const str& pComponentName);
 
 	void AddChildAfter(Component* pChild, Component* pAfterThis, int pIndentationLevel);
 	void AddChildrenAfter(std::list<Component*>& pChildList, Component* pAfterThis, int pIndentationLevel);

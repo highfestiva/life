@@ -46,19 +46,13 @@ public:
 	ListControl(unsigned pBorderStyle,
 		    int pBorderWidth,
 		    const Color& pColor,
-		    ListLayout::ListType pListType = ListLayout::COLUMN,
-		    const str& pName = _T("ListControl"));
+		    ListLayout::ListType pListType = ListLayout::COLUMN);
 	ListControl(unsigned pBorderStyle,
 		    int pBorderWidth,
 		    Painter::ImageID pImageID,
-		    ListLayout::ListType pListType = ListLayout::COLUMN,
-		    const str& pName = _T("ListControl"));
-	ListControl(const Color& pColor,
-		    ListLayout::ListType pListType = ListLayout::COLUMN,
-		    const str& pName = _T("ListControl"));
-	ListControl(Painter::ImageID pImageID,
-		    ListLayout::ListType pListType = ListLayout::COLUMN,
-		    const str& pName = _T("ListControl"));
+		    ListLayout::ListType pListType = ListLayout::COLUMN);
+	ListControl(const Color& pColor, ListLayout::ListType pListType = ListLayout::COLUMN);
+	ListControl(Painter::ImageID pImageID, ListLayout::ListType pListType = ListLayout::COLUMN);
 
 	virtual ~ListControl();
 
@@ -69,7 +63,6 @@ public:
 
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
-	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;
 
 	void AddChildAfter(Component* pChild, Component* pAfterThis, int pIndentationLevel);

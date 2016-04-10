@@ -31,7 +31,7 @@ class InputManager;
 class TextInputObserver
 {
 public:
-	virtual bool OnChar(tchar pChar) = 0;
+	virtual bool OnChar(wchar_t pChar) = 0;
 };
 
 class KeyCodeInputObserver;

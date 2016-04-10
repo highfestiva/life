@@ -1,6 +1,6 @@
 /*
 	Class:  StackLayout
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -22,7 +22,6 @@ public:
 
 	virtual void Add(Component* pComponent, int pParam1, int pParam2);
 	virtual void Remove(Component* pComponent);
-	virtual Component* Find(const str& pComponentName);
 	virtual int GetNumComponents() const;
 
 	virtual Component* GetFirst();

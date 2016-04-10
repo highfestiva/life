@@ -1222,7 +1222,7 @@ void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) co
 	}
 }
 
-void OpenGLPainter::PrintText(const str& pString, int x, int y)
+void OpenGLPainter::PrintText(const wstr& pString, int x, int y)
 {
 	if (pString.empty())
 	{
@@ -1278,11 +1278,10 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	deb_assert(lColor != BLACK);	// Does not show.
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
 	const uint32 lFontHash = (GetFontManager()->GetActiveFontId() << 16) + lFontHeight;
-	wstr lWideString = wstrutil::Encode(pString);
-	FontTexture* lFontTexture = SelectGlyphs(lFontHash, lFontHeight, lWideString);
+	FontTexture* lFontTexture = SelectGlyphs(lFontHash, lFontHeight, pString);
 	const int lFontTextureHeight = lFontTexture->GetHeight();
 
-	const size_t lStringLength = lWideString.length();
+	const size_t lStringLength = pString.length();
 	int lGlyphIndex = 0;
 	const size_t STACK_GLYPH_CAPACITY = 256;
 #ifdef LEPRA_GL_ES
@@ -1318,7 +1317,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 
 	for (size_t i = 0; i < lStringLength; i++)
 	{
-		const wchar_t lChar = lWideString[i];
+		const wchar_t lChar = pString[i];
 		if (lChar == _T('\n'))
 		{
 			lCurrentY += lLineHeight;

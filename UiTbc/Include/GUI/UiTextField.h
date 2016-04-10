@@ -46,17 +46,11 @@ public:
 	// pTopParent points to the window that contains this textfield.
 	// If this pointer is null the popup list feature will be disabled.
 	// The popup list will be a child of this parent, in an upper layer.
-	TextField(Component* pTopParent, const str& pName);
-	TextField(Component* pTopParent, 
-		  unsigned pBorderStyle, int pBorderWidth, const Color& pColor,
-		  const str& pName);
-	TextField(Component* pTopParent, 
-		  unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-		  const str& pName);
-	TextField(Component* pTopParent, 
-		  const Color& pColor, const str& pName);
-	TextField(Component* pTopParent, 
-		  Painter::ImageID pImageID, const str& pName);
+	TextField(Component* pTopParent);
+	TextField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, const Color& pColor);
+	TextField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID);
+	TextField(Component* pTopParent, const Color& pColor);
+	TextField(Component* pTopParent, Painter::ImageID pImageID);
 	virtual ~TextField();
 
 	Component* GetTopParent() const;
@@ -65,9 +59,9 @@ public:
 	void SetIsReadOnly(bool pIsReadOnly);
 	void SetPasswordCharacter(tchar pCharacter);
 
-	str GetVisibleText() const;
-	void SetText(const str& pText);
-	const str& GetText() const;
+	wstr GetVisibleText() const;
+	void SetText(const wstr& pText);
+	const wstr& GetText() const;
 
 	void SetMarker(Painter::ImageID pImageID);
 	void SetMarkerBlinkRate(float64 pVisibleTime, float64 pInvisibleTime);
@@ -76,7 +70,7 @@ public:
 
 	virtual void Repaint(Painter* pPainter);
 
-	virtual bool OnChar(tchar pChar);
+	virtual bool OnChar(wchar_t pChar);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual void OnIdle();
 
@@ -122,7 +116,7 @@ protected:
 	void ForceRepaint();
 
 private:
-	str mText;
+	wstr mText;
 	bool mIsReadOnly;
 	tchar mPasswordCharacter;
 	int mTextX;

@@ -1,6 +1,6 @@
 /*
 	Class:  GridLayout
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -96,24 +96,6 @@ void GridLayout::Remove(Component* pComponent)
 			mNumComponents--;
 		}
 	}
-}
-
-Component* GridLayout::Find(const str& pComponentName)
-{
-	if (mComponent == 0)
-	{
-		return 0;
-	}
-
-	for (int i = 0; i < mNumRows * mNumCols; i++)
-	{
-		if (mComponent[i] != 0 && mComponent[i]->GetName() == pComponentName)
-		{
-			return mComponent[i];
-		}
-	}
-
-	return 0;
 }
 
 int GridLayout::GetNumComponents() const

@@ -40,7 +40,7 @@ public:
 
 	UiTbc::Dialog* CreateTestDialog(const ButtonAction& pAction);
 	UiTbc::Dialog* CreateTbcDialog(const ButtonAction& pAction, float pWidth, float pHeight);
-	UiTbc::Button* CreateButton(const str& pText, const Color& pColor) const;
+	UiTbc::Button* CreateButton(const wstr& pText, const Color& pColor) const;
 	void InitButton(UiTbc::Button* pButton) const;
 	void DismissDialog();
 	UiTbc::Dialog* GetDialog();

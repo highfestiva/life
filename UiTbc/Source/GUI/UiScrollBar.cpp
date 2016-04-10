@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -77,8 +77,8 @@ ScrollBar::ScrollbarCleaner* ScrollBar::smCleaner = 0;
 
 ScrollBar::ScrollBar(Style pStyle, int pSize,  int pButtonSize, const Color& pBodyColor,
 	const Color& pBackgColor, BorderComponent::BorderShadeFunc pBorderShadeFunc,
-	int pBorderWidth, const str& pName):
-	RectComponent(pBackgColor, pName, CreateLayout(pStyle)),
+	int pBorderWidth):
+	RectComponent(pBackgColor, CreateLayout(pStyle)),
 	mStyle(pStyle),
 	mUserDefinedGfx(false),
 	mBackgImageID(Painter::INVALID_IMAGEID),
@@ -115,8 +115,8 @@ ScrollBar::ScrollBar(Style pStyle, int pSize,  int pButtonSize, const Color& pBo
 }
 
 ScrollBar::ScrollBar(Style pStyle, Painter::ImageID pBackgImageID, Button* pTopLeftButton,
-	Button* pBottomRightButton, Button* pScrollerButton, const str& pName):
-	RectComponent(pBackgImageID, pName, CreateLayout(pStyle)),
+	Button* pBottomRightButton, Button* pScrollerButton):
+	RectComponent(pBackgImageID, CreateLayout(pStyle)),
 	mStyle(pStyle),
 	mUserDefinedGfx(true),
 	mBackgImageID(pBackgImageID),
@@ -269,9 +269,9 @@ void ScrollBar::SetupScrollButton()
 	if (mScrollerButton == 0)
 	{
 		if (mStyle == HORIZONTAL)
-			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("HScroller"));
+			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
 		else
-			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("VScroller"));
+			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
 	}
 
 	if (mStyle == HORIZONTAL)
@@ -289,12 +289,12 @@ void ScrollBar::LoadButtons()
 	{
 		if (mStyle == HORIZONTAL)
 		{
-			mTLButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("LeftButton"));
+			mTLButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
 			mTLButton->SetIcon(smIconLeftID, Button::ICON_CENTER);
 		}
 		else
 		{
-			mTLButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("UpButton"));
+			mTLButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
 			mTLButton->SetIcon(smIconUpID, Button::ICON_CENTER);
 		}
 	}
@@ -308,12 +308,12 @@ void ScrollBar::LoadButtons()
 	{
 		if (mStyle == HORIZONTAL)
 		{
-			mBRButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("RightButton"));
+			mBRButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
 			mBRButton->SetIcon(smIconRightID, Button::ICON_CENTER);
 		}
 		else
 		{
-			mBRButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, _T("DownButton"));
+			mBRButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
 			mBRButton->SetIcon(smIconDownID, Button::ICON_CENTER);
 		}
 	}
@@ -324,8 +324,8 @@ void ScrollBar::LoadButtons()
 		AddChild(mBRButton, 4, 0);
 
 	// Finally add the two dummy rects.
-	mTLRect = new RectComponent(_T("TLDummyRect"));
-	mBRRect = new RectComponent(_T("BRDummyRect"));
+	mTLRect = new RectComponent;
+	mBRRect = new RectComponent;
 	
 	if (mStyle == HORIZONTAL)
 	{

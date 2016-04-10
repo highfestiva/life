@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -14,8 +14,8 @@ namespace UiTbc
 
 
 
-RadioButton::RadioButton(const Color& pBodyColor, const str& pName):
-	Parent(pBodyColor, pName)
+RadioButton::RadioButton(const Color& pBodyColor, const wstr& pText):
+	Parent(pBodyColor, pText)
 {
 	SetBaseColor(GetColor());
 }

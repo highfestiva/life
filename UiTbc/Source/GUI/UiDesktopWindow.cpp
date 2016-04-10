@@ -20,7 +20,7 @@ namespace UiTbc
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, 
 	Layout* pLayout, const tchar* pImageDefinitionFile,
 	const tchar* pArchive):
-	RectComponent(_T("DesktopWindow"), pLayout),
+	RectComponent(pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
 	mKeyboardEnabled(true),
@@ -37,7 +37,7 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, const Color& pColor,
 	Layout* pLayout, const tchar* pImageDefinitionFile, const tchar* pArchive):
-	RectComponent(pColor, _T("DesktopWindow"), pLayout),
+	RectComponent(pColor, pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
 	mKeyboardEnabled(true),
@@ -56,7 +56,7 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 	const Color& pBottomRightColor, const Color& pBottomLeftColor,
 	Layout* pLayout, const tchar* pImageDefinitionFile,
 	const tchar* pArchive):
-	RectComponent(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor, _T("DesktopWindow"), pLayout),
+	RectComponent(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor, pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
 	mKeyboardEnabled(true),
@@ -72,7 +72,7 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, Painter::ImageID pImageID,
 	Layout* pLayout, const tchar* pImageDefinitionFile, const tchar* pArchive):
-	RectComponent(pImageID, _T("DesktopWindow"), pLayout),
+	RectComponent(pImageID, pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
 	mKeyboardEnabled(true),
@@ -352,7 +352,7 @@ void DesktopWindow::DispatchMouseMove(int pMouseX, int pMouseY)
 	}
 }
 
-bool DesktopWindow::OnChar(tchar pChar)
+bool DesktopWindow::OnChar(wchar_t pChar)
 {
 	return (Parent::OnChar(pChar));
 }

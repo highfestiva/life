@@ -26,15 +26,11 @@ class X11InputElement: public InputElement
 {
 public:
 	X11InputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
-		X11InputDevice* pParentDevice, void* pRawElement);
+		X11InputDevice* pParentDevice);
 	virtual ~X11InputElement();
-
-	const void* GetRawElement() const;
 
 protected:
 private:
-	void* mRawElement;
-
 	logclass();
 };
 
@@ -43,7 +39,7 @@ private:
 class X11InputDevice: public InputDevice
 {
 public:
-	X11InputDevice(void* pRawDevice, InputManager* pManager);
+	X11InputDevice(InputManager* pManager);
 	virtual ~X11InputDevice();
 
 	void AddElement(X11InputElement* pElement);
@@ -55,8 +51,6 @@ public:
 
 protected:
 private:
-	void* mRawDevice;
-
 	logclass();
 };
 
@@ -123,6 +117,8 @@ private:
 	InputDevice* mKeyboard;
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
+
+	XIC mInputContext;
 
 	logclass();
 };

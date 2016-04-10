@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -32,7 +32,7 @@ public:
 	typedef ButtonType<CustomButton>::Delegate Delegate;
 	typedef ButtonType<CustomButton>::DelegateXY DelegateXY;
 
-	CustomButton(const str& pName);
+	CustomButton(const wstr& pText);
 	virtual ~CustomButton();
 
 	void SetOnRenderDelegate(const Delegate& pOnRenderer);

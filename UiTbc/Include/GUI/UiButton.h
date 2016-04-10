@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 //NOTES:
@@ -83,20 +83,20 @@ public:
 		PRESSING,
 	};
 
-	Button(const str& pName);
+	Button(const wstr& pText);
 	Button(const Color& pColor,
-		   const str& pName);
+		   const wstr& pText);
 	Button(BorderComponent::BorderShadeFunc pShadeFunc,
 		   int pBorderWidth,
 		   const Color& pColor,
-		   const str& pName);
+		   const wstr& pText);
 	Button(Painter::ImageID pReleasedImageID,
 		   Painter::ImageID pPressedImageID,
 		   Painter::ImageID pReleasedActiveImageID,	// Mouse over.
 		   Painter::ImageID pPressedActiveImageID,
 		   Painter::ImageID pReleasingImageID,
 		   Painter::ImageID pPressingImageID,
-		   const str& pName);
+		   const wstr& pText);
 
 	virtual ~Button();
 
@@ -120,8 +120,8 @@ public:
 	void SetDisabledIcon(Painter::ImageID pIconId);
 	virtual Painter::ImageID GetCurrentIcon() const;
 
-	void SetText(const str& pText, const Color& pTextColor = Lepra::WHITE, const Color& pBackgColor = Lepra::BLACK);
-	const str& GetText();
+	void SetText(const wstr& pText, const Color& pTextColor = Lepra::WHITE, const Color& pBackgColor = Lepra::BLACK);
+	const wstr& GetText();
 
 	virtual void Repaint(Painter* pPainter);
 	virtual void RepaintBackground(Painter* pPainter);
@@ -166,7 +166,7 @@ protected:
 	Painter::ImageID mDisabledIconId;
 	IconAlignment mIconAlignment;
 
-	str mText;
+	wstr mText;
 	int mTextMargin;
 	Color mTextBackgColor;
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -92,7 +92,7 @@ public:
 	virtual void Repaint(Painter* pPainter = 0);
 	virtual void RepaintChild(Component* pChild, Painter* pPainter);
 
-	virtual bool OnChar(tchar pChar);
+	virtual bool OnChar(wchar_t pChar);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnDoubleClick();

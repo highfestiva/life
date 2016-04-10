@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -48,8 +48,8 @@ public:
 protected:
 	virtual void ForceRepaint() = 0;
 
-	void DoPrintText(Painter* pPainter, const str& pText, int x, int y);
-	void PrintTextDeactivate(Painter* pPainter, const str& pText, int x, int y);
+	void DoPrintText(Painter* pPainter, const wstr& pText, int x, int y);
+	void PrintTextDeactivate(Painter* pPainter, const wstr& pText, int x, int y);
 	Color GetTextColor() const;
 	VAlign GetVAlign() const;
 

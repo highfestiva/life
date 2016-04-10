@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -66,13 +66,16 @@ void TextComponent::ActivateFont(Painter* pPainter)
 void TextComponent::DeactivateFont(Painter* pPainter)
 {
 	deb_assert(mIsFontActive || mFontId == FontManager::INVALID_FONTID);
-	if (mIsFontActive && mFontId != FontManager::INVALID_FONTID)
+	if (mIsFontActive)
 	{
 		const FontManager::FontId lOurFontId = pPainter->GetFontManager()->GetActiveFontId();
-		pPainter->GetFontManager()->SetActiveFont(mFontId);
+		if (mFontId != FontManager::INVALID_FONTID)
+		{
+			pPainter->GetFontManager()->SetActiveFont(mFontId);
+		}
 		mFontId = lOurFontId;
-		mIsFontActive = false;
 	}
+	mIsFontActive = false;
 }
 
 void TextComponent::SetHorizontalMargin(int pHorizontalMargin)
@@ -85,13 +88,13 @@ void TextComponent::SetVericalAlignment(VAlign pAlignment)
 	mVAlignment = pAlignment;
 }
 
-void TextComponent::DoPrintText(Painter* pPainter, const str& pText, int x, int y)
+void TextComponent::DoPrintText(Painter* pPainter, const wstr& pText, int x, int y)
 {
 	pPainter->SetColor(mTextColor, 0);
 	pPainter->PrintText(pText, x, y);
 }
 
-void TextComponent::PrintTextDeactivate(Painter* pPainter, const str& pText, int x, int y)
+void TextComponent::PrintTextDeactivate(Painter* pPainter, const wstr& pText, int x, int y)
 {
 	DoPrintText(pPainter, pText, x, y);
 	DeactivateFont(pPainter);

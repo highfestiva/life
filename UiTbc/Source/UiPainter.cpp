@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -298,7 +298,7 @@ FontManager* Painter::GetFontManager() const
 	return (mFontManager);
 }
 
-int Painter::GetStringWidth(const str& pString) const
+int Painter::GetStringWidth(const wstr& pString) const
 {
 	if (!mFontManager)
 	{

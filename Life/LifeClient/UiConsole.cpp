@@ -216,11 +216,11 @@ void UiConsole::InitGraphics()
 {
 	CloseGraphics();
 
-	mConsoleComponent = new UiTbc::Component(_T("CON:"), new UiTbc::ListLayout());
+	mConsoleComponent = new UiTbc::Component(new UiTbc::ListLayout());
 	mConsoleOutput = new UiTbc::TextArea(mColor);
 	Color lInputColor = mColor - mColor * 0.3f;
 	lInputColor.mAlpha = mColor.mAlpha;
-	mConsoleInput = new UiTbc::TextField(mConsoleComponent, lInputColor, _T("CONI:"));
+	mConsoleInput = new UiTbc::TextField(mConsoleComponent, lInputColor);
 
 	SetRenderArea(mArea);
 

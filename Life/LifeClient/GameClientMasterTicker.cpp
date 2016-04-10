@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -1302,10 +1302,10 @@ void GameClientMasterTicker::DrawDebugData() const
 	}
 
 	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
-	str lInfo = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	wstr lInfo = wstrutil::Format(L"FPS %.1f", 1/lMainLoop->GetSlidingAverage());
 	double lLoad;
 	v_tryget(lLoad, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_LOAD, -1.0);
-	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), 100 * lLoad + 0.5f);
+	lInfo += wstrutil::Format(L"\nUsedPerf %2.f %%", 100 * lLoad + 0.5f);
 	int w = 110;
 	int h = 37;
 	bool lShowPerformanceCounters;
@@ -1327,11 +1327,11 @@ void GameClientMasterTicker::DrawDebugData() const
 			}
 		}
 		
-		lInfo += strutil::Format(_T("\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s"),
+		lInfo += wstrutil::Format(L"\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s",
 			mUiManager->GetRenderer()->GetTriangleCount(true),
 			mUiManager->GetRenderer()->GetTriangleCount(false),
-			Number::ConvertToPostfixNumber(lUpBandwidth, 1).c_str(),
-			Number::ConvertToPostfixNumber(lDownBandwidth, 1).c_str());
+			wstrutil::Encode(Number::ConvertToPostfixNumber(lUpBandwidth, 1)).c_str(),
+			wstrutil::Encode(Number::ConvertToPostfixNumber(lDownBandwidth, 1)).c_str());
 		h += 17*4;
 	}
 	mUiManager->GetPainter()->SetColor(Color(0, 0, 0));

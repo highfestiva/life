@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -25,7 +25,7 @@ StopWatch::StopWatch(ScreenPart* pScreenPart, UiCure::GameUiManager* pUiManager,
 	Parent(0, pClassResourceName, pUiManager),
 	mScreenPart(pScreenPart),
 	mAttributeName(pAttributeName),
-	mLabel(RED, _T(""))
+	mLabel(RED, L"")
 {
 	mLabel.SetPreferredSize(50, 20);
 	mLabel.SetMinSize(30, 15);
@@ -67,7 +67,7 @@ void StopWatch::OnTick()
 	const int lMinute = (int)(lTime / 60);
 	const int lSecond = (int)::fmod(lTime, 60);
 	const int lCentiSecond = (int)(100 * (lTime - lMinute*60 - lSecond));
-	mLabel.SetText(strutil::Format(_T("%i:%2.2i.%2.2i"), lMinute, lSecond, lCentiSecond));
+	mLabel.SetText(wstrutil::Format(L"%i:%2.2i.%2.2i", lMinute, lSecond, lCentiSecond));
 }
 
 

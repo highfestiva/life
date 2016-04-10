@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -20,7 +20,7 @@ class RadioButton : public Button
 	typedef Button Parent;
 public:
 
-	RadioButton(const Color& pBodyColor, const str& pName);
+	RadioButton(const Color& pBodyColor, const wstr& pText);
 	virtual ~RadioButton();
 
 	virtual void SetBaseColor(const Color& pColor);

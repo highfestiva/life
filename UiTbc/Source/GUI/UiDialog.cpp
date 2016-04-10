@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -20,7 +20,7 @@ namespace UiTbc
 
 
 Dialog::Dialog(Component* pParent, Action pTarget):
-	Parent(WHITE, _T("Dialog"), new FloatingLayout),
+	Parent(WHITE, new FloatingLayout),
 	mLabel(0),
 	mTarget(pTarget),
 	mClickedButton(0),
@@ -116,7 +116,7 @@ void Dialog::Center()
 	SetPos(lParentSize.x/2 - lSize.x/2, lParentSize.y/2 - lSize.y/2);
 }
 
-Label* Dialog::SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId)
+Label* Dialog::SetQueryLabel(const wstr& pText, UiTbc::FontManager::FontId pFontId)
 {
 	if (!mLabel)
 	{
@@ -146,7 +146,7 @@ void Dialog::SetQueryLabel(Label* pLabel)
 	mLabel = pLabel;
 }
 
-void Dialog::UpdateQueryLabel(const str& pText, const Color& pColor)
+void Dialog::UpdateQueryLabel(const wstr& pText, const Color& pColor)
 {
 	deb_assert(mLabel);
 	if (mLabel)
@@ -156,7 +156,7 @@ void Dialog::UpdateQueryLabel(const str& pText, const Color& pColor)
 	}
 }
 
-void Dialog::AddButton(int pTag, const str& pText, bool pAutoDismiss)
+void Dialog::AddButton(int pTag, const wstr& pText, bool pAutoDismiss)
 {
 	Button* lButton = new Button(BorderComponent::ZIGZAG, 3, Color(mColor[0], mColor[1], 0.2f), pText);
 	lButton->SetText(pText, mColor[1]);

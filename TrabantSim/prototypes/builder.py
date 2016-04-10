@@ -60,4 +60,5 @@ while loop():
             objs += [obj]
         else:
             obj.pos(poke_vector)
+        print(cam(), tap.pos3d(1), poke_vector)
         loop()

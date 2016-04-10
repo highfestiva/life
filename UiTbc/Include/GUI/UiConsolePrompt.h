@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -29,7 +29,7 @@ public:
 
 	void SetInputComponent(TextField* pInputComponent);
 
-	bool OnChar(tchar pChar);
+	bool OnChar(wchar_t pChar);
 	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void SetFocus(bool pFocus);

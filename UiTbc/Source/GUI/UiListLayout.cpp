@@ -1,6 +1,6 @@
 /*
 	Class:  ListLayout
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -166,21 +166,6 @@ void ListLayout::Remove(Component* pComponent)
 			i++;
 		}
 	}
-}
-
-Component* ListLayout::Find(const str& pComponentName)
-{
-	NodeList::const_iterator lIter;
-	for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
-	{
-		const Node& lNode = *lIter;
-		if (lNode.mComponent->GetName() == pComponentName)
-		{
-			return lNode.mComponent;
-		}
-	}
-
-	return 0;
 }
 
 int ListLayout::GetNumComponents() const

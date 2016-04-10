@@ -1,6 +1,6 @@
 /*
 	Class:  CenterLayout
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -43,16 +43,6 @@ void CenterLayout::Remove(Component* pComponent)
 	{
 		mChild = 0;
 	}
-}
-
-Component* CenterLayout::Find(const str& pComponentName)
-{
-	if (mChild && mChild->GetName() == pComponentName)
-	{
-		return mChild;
-	}
-
-	return 0;
 }
 
 int CenterLayout::GetNumComponents() const

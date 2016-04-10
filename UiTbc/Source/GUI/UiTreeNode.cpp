@@ -1,6 +1,6 @@
 /*
 	Class:  TreeNode
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -15,8 +15,8 @@
 namespace UiTbc
 {
 
-TreeNode::TreeNode(const str& pText, const str& pName) :
-	Component(pName, new GridLayout(1, 1)),
+TreeNode::TreeNode(const wstr& pText):
+	Component(new GridLayout(1, 1)),
 	mParentNode(0),
 	mChildNodes(0),
 	mExpandButton(0),
@@ -33,9 +33,8 @@ TreeNode::TreeNode(const str& pText, const str& pName) :
 
 TreeNode::TreeNode(Painter::ImageID pCollapsedIconID,
 		   Painter::ImageID pExpandedIconID,
-		   const str& pText, 
-		   const str& pName) :
-	Component(pName, new GridLayout(1, 1)),
+		   const wstr& pText) :
+	Component(new GridLayout(1, 1)),
 	mParentNode(0),
 	mChildNodes(0),
 	mExpandButton(0),
@@ -54,9 +53,8 @@ TreeNode::TreeNode(Painter::ImageID pCollapsedIconID,
 		   Painter::ImageID pExpandedIconID,
 		   Painter::ImageID pCollapseIconID,
 		   Painter::ImageID pExpandeIconID,
-		   const str& pText, 
-		   const str& pName) :
-	Component(pName, new GridLayout(1, 1)),
+		   const wstr& pText):
+	Component(new GridLayout(1, 1)),
 	mParentNode(0),
 	mChildNodes(0),
 	mExpandButton(0),
@@ -89,7 +87,7 @@ TreeNode::~TreeNode()
 	}
 }
 
-void TreeNode::Init(const str& pText)
+void TreeNode::Init(const wstr& pText)
 {
 	ValidatePainterAndIcons();
 	ValidateExpandButton();
@@ -310,7 +308,7 @@ bool TreeNode::ValidateExpandButton()
 		mExpandButton->SetOnClick(TreeNode, OnExpandButtonUnclicked);
 
 		// Create a rect with a CenterLayout in order to keep the button centered.
-		RectComponent* lRect = new RectComponent(_T("ExpandButtonRect"), new CenterLayout());
+		RectComponent* lRect = new RectComponent(new CenterLayout());
 		lRect->AddChild(mExpandButton);
 
 		lRect->SetPreferredSize(mExpandButton->GetPreferredSize());
@@ -331,7 +329,7 @@ bool TreeNode::ValidateExpandButton()
 	{
 		GUIImageManager* lIMan = GetImageManager();
 
-		RectComponent* lRect = new RectComponent(_T("ExpandButtonRect"), new CenterLayout());
+		RectComponent* lRect = new RectComponent(new CenterLayout());
 
 		lRect->SetPreferredSize(lIMan->GetImageSize(mExpandIconID));
 		lRect->SetMinSize(lRect->GetPreferredSize());
@@ -343,7 +341,7 @@ bool TreeNode::ValidateExpandButton()
 	return lRepaint;
 }
 
-bool TreeNode::ValidateIconRect(const str& pText)
+bool TreeNode::ValidateIconRect(const wstr& pText)
 {
 	bool lRepaint = false;
 

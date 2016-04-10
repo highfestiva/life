@@ -346,7 +346,7 @@ void Thread::Sleep(float64 pTime)
 {
 	if (pTime > 0)
 	{
-		Sleep((unsigned int)(pTime * 1000.0));
+		Sleep((unsigned int)(pTime * 1000000.0));
 	}
 }
 

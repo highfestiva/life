@@ -1,6 +1,6 @@
 /*
 	Class:  ProgressBar
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -28,13 +28,11 @@ public:
 	ProgressBar(Style pStyle = STYLE_NORMAL,
 				const Color& pBodyColor = Color(192, 192, 192),
 				const Color& pProgressColorLeft  = Color(0, 0, 255),
-				const Color& pProgressColorRight = Color(0, 0, 255),
-				const str& pName = _T("ProgressBar"));
+				const Color& pProgressColorRight = Color(0, 0, 255));
 
 	ProgressBar(Style pStyle,
 				Painter::ImageID pBackgroundImageID,
-				Painter::ImageID pProgressImageID,
-				const str& pName = _T("ProgressBar"));
+				Painter::ImageID pProgressImageID);
 
 	inline Style GetStyle();
 

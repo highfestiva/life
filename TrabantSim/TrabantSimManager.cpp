@@ -209,6 +209,12 @@ void TrabantSimManager::Suspend(bool pHard)
 	}
 }
 
+void TrabantSimManager::LoadSettings()
+{
+	Parent::LoadSettings();
+	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 \"\""));
+}
+
 void TrabantSimManager::RefreshOptions()
 {
 	Parent::RefreshOptions();
@@ -1185,6 +1191,14 @@ void TrabantSimManager::CommandLoop()
 		{
 			break;
 		}
+		if (mHideWatch.IsStarted())
+		{
+			if (mHideWatch.QuerySplitTime() < 0.5)
+			{
+				continue;
+			}
+			mHideWatch.Stop();
+		}
 		if (l <= 0 || lData[l-1] != '\n' || ::memcmp("disconnect\n", lData, 11) == 0)
 		{
 			if (l == 0)
@@ -1272,17 +1286,19 @@ void TrabantSimManager::CommandLoop()
 			mResendTimeOfLastPacket.PopTimeDiff();
 			mResendIntermediatePacketTime = 10;	// Just make it big to begin with.
 		}
+		if (mIsPaused && mIsControlled)
+		{
+			Thread::Sleep(0.5);
+			mResendTimeOfLastPacket.PopTimeDiff();
+			const str lPauseResponse = "\x16pause\x16";
+			if (mCommandSocket->SendTo((const uint8*)lPauseResponse.c_str(), (int)lPauseResponse.length(), mLastRemoteAddress) != (int)lPauseResponse.length())
+			{
+				mIsControlled = false;
+			}
+			continue;
+		}
 		mIsControlled = true;
 		mIsControlTimeout = false;
-		while (mIsPaused)
-		{
-			mResendTimeOfLastPacket.PopTimeDiff();
-			Thread::Sleep(0.5);
-			if (mCommandThread->GetStopRequest())
-			{
-				break;
-			}
-		}
 		mResendIntermediatePacketTime = Math::Lerp(mResendIntermediatePacketTime, mResendTimeOfLastPacket.PopTimeDiff(), 0.05);
 		if (mCommandThread->GetStopRequest())
 		{
@@ -1329,6 +1345,8 @@ bool TrabantSimManager::IsControlled()
 		if (lIsControlled)
 		{
 			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+			const int lMicroSteps = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, RTVAR_PHYSICS_MICROSTEPS, 3);
+			v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, lMicroSteps);
 		}
 		else
 		{
@@ -1343,6 +1361,12 @@ bool TrabantSimManager::IsControlled()
 			}
 			FoldSuspendSimulator();
 #else // Computer
+			if (mIsPaused)
+			{
+				mMenu->DismissDialog();
+				OnMenuAlternative(0);
+			}
+			v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 1);
 			if (mUiManager->GetDisplayManager()->IsFocused())
 			{
 				v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
@@ -1382,11 +1406,11 @@ bool TrabantSimManager::Open()
 	if (lOk)
 	{
 #ifndef LEPRA_TOUCH
-		mPauseButton = new UiTbc::Button(GREEN_BUTTON, _T("Pause"));
+		mPauseButton = new UiTbc::Button(GREEN_BUTTON, L"Pause");
 		mPauseButton->SetOnClick(TrabantSimManager, OnPauseButton);
 		UiTbc::Button* lButton = mPauseButton;
 #else
-		mBackButton = new UiTbc::Button(GREEN_BUTTON, _T("Back"));
+		mBackButton = new UiTbc::Button(GREEN_BUTTON, L"Back");
 		mBackButton->SetOnClick(TrabantSimManager, OnBackButton);
 		UiTbc::Button* lButton = mBackButton;
 #endif
@@ -1618,14 +1642,19 @@ void TrabantSimManager::TickUiUpdate()
 {
 	if (mHideCounter > 0)
 	{
+		mHideWatch.Start();
+		mIsControlled = false;
 		Suspend(true);
 		mUiManager->GetDisplayManager()->HideWindow(true);
 		Resume(true);
+		v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 1);
 		mHideCounter = -1;
 	}
 	else if (mHideCounter < 0 && mIsControlled)
 	{
 		mUiManager->GetDisplayManager()->HideWindow(false);
+		const int lMicroSteps = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, RTVAR_PHYSICS_MICROSTEPS, 3);
+		v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, lMicroSteps);
 		mHideCounter = 0;
 	}
 
@@ -1750,6 +1779,12 @@ void TrabantSimManager::PushCollision(Cure::GameObjectId pObjectId1, const vec3&
 
 void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 {
+	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &TrabantSimManager::OnMenuAlternative), 0.5f, 0.3f);
+	if (!d)
+	{
+		return;
+	}
+
 	if (pButton)
 	{
 		mMenu->OnTapSound(pButton);
@@ -1757,19 +1792,18 @@ void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
 	mPauseButton->SetVisible(false);
 	mIsPaused = true;
 
-	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &TrabantSimManager::OnMenuAlternative), 0.5f, 0.3f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
 	d->SetDirection(+1, false);
 	UiTbc::FixedLayouter lLayouter(d);
 
-	UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Paused"));
+	UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, L"Paused");
 	lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
 	mUiManager->SetMasterFont();
 	lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
 	lLabel->SetAdaptive(false);
 	lLayouter.AddComponent(lLabel, 0, 2, 0, 1, 1);
 
-	UiTbc::Button* lUnpauseButton = new UiTbc::Button(GREEN_BUTTON, _T(">"));
+	UiTbc::Button* lUnpauseButton = new UiTbc::Button(GREEN_BUTTON, L">");
 	lLayouter.AddButton(lUnpauseButton, -1000, 1, 2, 0, 1, 1, true);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
@@ -1958,11 +1992,12 @@ void TrabantSimManager::UpdateUserMessage()
 	}
 	else
 	{
+		wstr lWideUserMessage = wstrutil::Encode(lUserMessage);
 		if (mUserInfoDialog)
 		{
-			if (mUserInfoLabel->GetText() != lUserMessage)
+			if (mUserInfoLabel->GetText() != lWideUserMessage)
 			{
-				mUserInfoLabel->SetText(lUserMessage);
+				mUserInfoLabel->SetText(lWideUserMessage);
 			}
 		}
 		else
@@ -1976,7 +2011,7 @@ void TrabantSimManager::UpdateUserMessage()
 			d->SetDirection(+1, false);
 			UiTbc::FixedLayouter lLayouter(d);
 
-			UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, lUserMessage);
+			UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, lWideUserMessage);
 			lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
 			lLabel->SetAdaptive(false);
 			lLayouter.AddComponent(lLabel, 0, 1, 0, 1, 1);
@@ -1988,7 +2023,7 @@ void TrabantSimManager::UpdateUserMessage()
 
 
 
-void TrabantSimManager::PrintText(const str& s, int x, int y) const
+void TrabantSimManager::PrintText(const wstr& s, int x, int y) const
 {
 	Color lOldColor = mUiManager->GetPainter()->GetColor(0);
 	mUiManager->GetPainter()->SetColor(DARK_BLUE, 0);

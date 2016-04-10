@@ -36,13 +36,11 @@ public:
 		BORDER_HALF          = (1 << 3),
 	};
 
-	Window(const str& pName, Layout* pLayout = 0);
-	Window(unsigned pBorderStyle, int pBorderWidth, const Color& pColor,
-		const str& pName, Layout* pLayout = 0);
-	Window(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-		const str& pName, Layout* pLayout = 0);
-	Window(const Color& pColor, const str& pName, Layout* pLayout = 0);
-	Window(Painter::ImageID pImageID, const str& pName, Layout* pLayout = 0);
+	Window(Layout* pLayout = 0);
+	Window(unsigned pBorderStyle, int pBorderWidth, const Color& pColor, Layout* pLayout = 0);
+	Window(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID, Layout* pLayout = 0);
+	Window(const Color& pColor, Layout* pLayout = 0);
+	Window(Painter::ImageID pImageID, Layout* pLayout = 0);
 	virtual ~Window();
 
 	void Init();
@@ -82,12 +80,11 @@ public:
 
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
-	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;
 
 	virtual Type GetType() const;
 
-	virtual bool OnChar(tchar pChar);
+	virtual bool OnChar(wchar_t pChar);
 	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnRButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnMButtonDown(int pMouseX, int pMouseY);

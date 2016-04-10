@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -65,7 +65,7 @@ void ConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 			lText.resize(lText.length()-1);
 			mLineFeed = true;
 		}
-		mOutputComponent->AddText(lText, &lColor);
+		mOutputComponent->AddText(wstrutil::Encode(lText), &lColor);
 	}
 }
 

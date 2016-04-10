@@ -118,12 +118,14 @@ protected:
 	int mNormalHeight;
 
 private:
-	bool mCaptionSet;
-
 	typedef std::unordered_set<X11Observer*, LEPRA_VOIDP_HASHER> ObserverSet;
 	typedef HashTable<int, ObserverSet*> ObserverSetTable;
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;
+
+	int mWindowX;
+	int mWindowY;
+	bool mCaptionSet;
 
 	logclass();
 };

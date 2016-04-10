@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -24,17 +24,11 @@ class FileNameField: public TextField
 	typedef TextField Parent;
 public:
 	// Read more about the constructor paramters in TextField.h.
-	FileNameField(Component* pTopParent, const str& pName);
-	FileNameField(Component* pTopParent, 
-		      unsigned pBorderStyle, int pBorderWidth, const Color& pColor,
-		      const str& pName);
-	FileNameField(Component* pTopParent, 
-		      unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-		      const str& pName);
-	FileNameField(Component* pTopParent, 
-		      const Color& pColor, const str& pName);
-	FileNameField(Component* pTopParent, 
-		      Painter::ImageID pImageID, const str& pName);
+	FileNameField(Component* pTopParent);
+	FileNameField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, const Color& pColor);
+	FileNameField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID);
+	FileNameField(Component* pTopParent, const Color& pColor);
+	FileNameField(Component* pTopParent, Painter::ImageID pImageID);
 	virtual ~FileNameField();
 
 	// If no extensions are added, all files will be listed.

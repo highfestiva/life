@@ -1,6 +1,6 @@
 /*
 	Class:  RectComponent
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -22,20 +22,14 @@ namespace UiTbc
 class RectComponent : public Component
 {
 public:
-	RectComponent(const str& pName,
-				  Layout* pLayout = 0);
-	RectComponent(const Color& pColor,
-				  const str& pName,
-				  Layout* pLayout = 0);
+	RectComponent(Layout* pLayout = 0);
+	RectComponent(const Color& pColor, Layout* pLayout = 0);
 	RectComponent(const Color& pTopLeftColor,
 				  const Color& pTopRightColor,
 				  const Color& pBottomRightColor,
 				  const Color& pBottomLeftColor,
-				  const str& pName,
 				  Layout* pLayout = 0);
-	RectComponent(Painter::ImageID pImageID,
-				  const str& pName,
-				  Layout* pLayout = 0);
+	RectComponent(Painter::ImageID pImageID, Layout* pLayout = 0);
 
 	virtual ~RectComponent();
 

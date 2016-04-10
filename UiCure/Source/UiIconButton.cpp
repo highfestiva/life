@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -16,7 +16,7 @@ namespace UiCure
 
 
 IconButton::IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager,
-		const str& pIconImageName, const str& pText):
+		const str& pIconImageName, const wstr& pText):
 	Parent(pText),
 	mIconResource(new UserPainterKeepImageResource(pUiManager, PainterImageResource::RELEASE_NONE)),
 	mHighlightedIconId(UiTbc::Painter::INVALID_IMAGEID)

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -333,9 +333,9 @@ void Thread::SetCpuAffinityMask(uint64 pAffinityMask)
 	YieldCpu();
 }
 
-void Thread::Sleep(unsigned int pMilliSeconds)
+void Thread::Sleep(unsigned int pMicroSeconds)
 {
-	::Sleep(pMilliSeconds);
+	::Sleep(pMicroSeconds/1000);
 }
 
 bool Thread::Start()

@@ -1,6 +1,6 @@
 /*
 	Class:  PopupList
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -36,19 +36,13 @@ public:
 	PopupList(unsigned pBorderStyle,
 		  int pBorderWidth,
 		  const Color& pColor,
-		  ListLayout::ListType pListType = ListLayout::COLUMN,
-		  const str& pName = _T("PopupList"));
+		  ListLayout::ListType pListType = ListLayout::COLUMN);
 	PopupList(unsigned pBorderStyle,
 		  int pBorderWidth,
 		  Painter::ImageID pImageID,
-		  ListLayout::ListType pListType = ListLayout::COLUMN,
-		  const str& pName = _T("PopupList"));
-	PopupList(const Color& pColor,
-		  ListLayout::ListType pListType = ListLayout::COLUMN,
-		  const str& pName = _T("PopupList"));
-	PopupList(Painter::ImageID pImageID,
-		  ListLayout::ListType pListType = ListLayout::COLUMN,
-		  const str& pName = _T("PopupList"));
+		  ListLayout::ListType pListType = ListLayout::COLUMN);
+	PopupList(const Color& pColor, ListLayout::ListType pListType = ListLayout::COLUMN);
+	PopupList(Painter::ImageID pImageID, ListLayout::ListType pListType = ListLayout::COLUMN);
 
 	virtual ~PopupList();
 

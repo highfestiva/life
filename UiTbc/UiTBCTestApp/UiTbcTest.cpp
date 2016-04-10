@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -102,18 +102,18 @@ class GUITestWindow: public UiTbc::Window
 public:
 	GUITestWindow() :
 		Window(UiTbc::Window::BORDER_LINEARSHADING | UiTbc::Window::BORDER_RESIZABLE, 
-			10, Lepra::LIGHT_GREEN, _T("TestWindow1"), new UiTbc::GridLayout(5, 1))
+			10, Lepra::LIGHT_GREEN, new UiTbc::GridLayout(5, 1))
 	{
 		Init();
 		SetPreferredSize(200, 300);
 
 		UiTbc::Caption* lCaption = new UiTbc::Caption(Lepra::BLUE, Lepra::DARK_BLUE, Lepra::BLUE, Lepra::DARK_BLUE,
 			Lepra::LIGHT_GRAY, Lepra::GRAY, Lepra::LIGHT_GRAY, Lepra::GRAY, 20);
-		lCaption->SetText(_T("My Test Window"), Lepra::WHITE, Lepra::BLACK, Lepra::OFF_BLACK, Lepra::BLACK);
+		lCaption->SetText(L"My Test Window", Lepra::WHITE, Lepra::BLACK, Lepra::OFF_BLACK, Lepra::BLACK);
 		SetCaption(lCaption);
 
-		UiTbc::Button* lCloseButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 2, Lepra::RED, _T("Close Button"));
-		lCloseButton->SetText(_T("y"), Lepra::WHITE, Lepra::BLACK);
+		UiTbc::Button* lCloseButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 2, Lepra::RED, L"x");
+		lCloseButton->SetText(L"x", Lepra::WHITE, Lepra::BLACK);
 		lCloseButton->SetPreferredSize(16, 16);
 		lCloseButton->SetMinSize(16, 16);
 
@@ -156,13 +156,13 @@ public:
 		AddChild(lListControl);
 */
 		UiTbc::FileNameField* lTextField = new UiTbc::FileNameField(GetClientRectComponent(), UiTbc::Window::BORDER_SUNKEN | UiTbc::Window::BORDER_LINEARSHADING,
-			3, Lepra::WHITE, _T("TextField"));
+			3, Lepra::WHITE);
 		lTextField->SetPreferredSize(0, 24);
 		lTextField->SetFontColor(Lepra::OFF_BLACK);
-		lTextField->SetText(_T("Hullo!"));
+		lTextField->SetText(L"Hullo!");
 		AddChild(lTextField);
 
-		UiTbc::Label* lLabel = new UiTbc::Label(Lepra::OFF_BLACK, _T("A Row List:"));
+		UiTbc::Label* lLabel = new UiTbc::Label(Lepra::OFF_BLACK, L"A Row List:");
 		lLabel->SetPreferredSize(0, 24, false);
 		AddChild(lLabel);
 
@@ -170,14 +170,14 @@ public:
 		lListControl->SetPreferredHeight(30);
 		for (int i = 0; i < 20; i++)
 		{
-			UiTbc::Label* lListItem = new UiTbc::Label(Lepra::OFF_BLACK, Lepra::strutil::Format(_T("Apa %i"), i));
+			UiTbc::Label* lListItem = new UiTbc::Label(Lepra::OFF_BLACK, Lepra::wstrutil::Format(L"Apa %i", i));
 			lListItem->SetPreferredWidth(12 * 6);
 			lListControl->AddChild(lListItem);
 		}
 		AddChild(lListControl);
 
-		UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 3, Lepra::GRAY, _T("NewWindow"));
-		lButton->SetText(_T("New Window"), Lepra::OFF_BLACK, Lepra::BLACK);
+		UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 3, Lepra::GRAY, L"NewWindow");
+		lButton->SetText(L"New Window", Lepra::OFF_BLACK, Lepra::BLACK);
 		lButton->SetPreferredSize(0, 40);
 		lButton->SetMinSize(20, 20);
 		lButton->SetOnClick(GUITestWindow, OnNewWindow);
@@ -227,13 +227,13 @@ public:
 	virtual void UpdateScene(double pTotalTime, double pDeltaTime) = 0;
 
 protected:
-	static void RenderGDITestImage(const Lepra::tchar* pText);
+	static void RenderGDITestImage(const wchar_t* pText);
 	static void PrintFps(double pFps);
 
 	bool mTestOk;
 	const Lepra::LogDecorator& mLog;
 	str mContext;
-	str mExtraInfo;
+	wstr mExtraInfo;
 
 private:
 	void operator=(const SceneTest&)
@@ -316,7 +316,7 @@ bool SceneTest::Run(double pTime)
 
 				gPainter->SetColor(Lepra::WHITE);
 				const Lepra::vec3& lPos = lCam.GetPosition();
-				gPainter->PrintText(Lepra::strutil::Format(_T("(%.2f, %.2f, %.2f)"), lPos.x, lPos.y, lPos.z)+mExtraInfo, 10, 10);
+				gPainter->PrintText(Lepra::wstrutil::Format(L"(%.2f, %.2f, %.2f)", lPos.x, lPos.y, lPos.z)+mExtraInfo, 10, 10);
 
 				mDesktopWindow->Repaint();
 			}
@@ -353,17 +353,16 @@ bool SceneTest::Run(double pTime)
 	return (mTestOk);
 }
 
-void SceneTest::RenderGDITestImage(const Lepra::tchar* pText = 0)
+void SceneTest::RenderGDITestImage(const wchar_t* pText = 0)
 {
 	LEPRA_MEASURE_SCOPE(TextOutput);
 
 	static int x = 0;
 	static int dir = 1;
 
-	gFontManager->SetColor(Lepra::GREEN);
 	if (!pText)
 	{
-		pText = _T("This text is printed using GDI!");
+		pText = L"This text is printed using GDI!";
 	}
 	gPainter->PrintText(pText, x, 20);
 
@@ -384,7 +383,7 @@ void SceneTest::PrintFps(double pFps)
 		lFrameCount = 0;
 		lFps = pFps;
 	}
-	str lText = Lepra::strutil::Format(_T("%f FPS"), lFps);
+	wstr lText = Lepra::wstrutil::Format(L"%f FPS", lFps);
 	RenderGDITestImage(lText.c_str());
 }
 
@@ -521,7 +520,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		gRenderer->SetMipMappingEnabled(true);
 
 		gFontManager = UiTbc::FontManager::Create(gDisplay);
-		UiTbc::FontManager::FontId lFontId = gFontManager->AddFont(_T("Arial"), 16, 0, UiTbc::FontManager::NATIVE);
+		UiTbc::FontManager::FontId lFontId = gFontManager->AddFont(_T("Arial"), 16, 0);
 		gFontManager->SetActiveFont(lFontId);
 		gPainter->SetFontManager(gFontManager);
 
@@ -826,7 +825,7 @@ bool ResetAndClearFrame()
 	return (lCleared);
 }
 
-void PrintInfo(const str& pInfo)
+void PrintInfo(const wstr& pInfo)
 {
 	gPainter->ResetClippingRect();
 	gPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
@@ -1452,7 +1451,7 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 			lTriangleCount += lPatch[y*lPatchCountSide+x]->GetTriangleCount();
 		}
 	}
-	mTriangleCountInfo = _T(" - ") + Lepra::Number::ConvertToPostfixNumber(lTriangleCount, 1) + _T(" triangles in scene.");
+	mTriangleCountInfo = " - " + Lepra::Number::ConvertToPostfixNumber(lTriangleCount, 1) + " triangles in scene.";
 	log_volatile(mLog.Debug(mTriangleCountInfo));
 	if (mTestOk)
 	{
@@ -1542,7 +1541,7 @@ TerrainFunctionTest::~TerrainFunctionTest()
 
 void TerrainFunctionTest::UpdateScene(double, double)
 {
-	mExtraInfo = mTriangleCountInfo;
+	mExtraInfo = wstrutil::Encode(mTriangleCountInfo);
 }
 
 bool TestRayPicker(const Lepra::LogDecorator& pLog)
@@ -1629,17 +1628,17 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 		lLights[1] = UiTbc::Renderer::INVALID_LIGHT;
 		for (int y = 0; y < 4; y += 2)
 		{
-			str lModeInfo;
+			wstr lModeInfo;
 			// Set lighting according to what row we're rendering.
 			if (y == 0)
 			{
-				lModeInfo = _T("Ambient");
+				lModeInfo = L"Ambient";
 				gRenderer->SetLightsEnabled(false);
 				gRenderer->SetAmbientLight(0.5, 0.5, 0.5);
 			}
 			else
 			{
-				lModeInfo = _T("2 point lights");
+				lModeInfo = L"2 point lights";
 				if (lTestOk)
 				{
 					lContext = _T("add point light 0");
@@ -1671,7 +1670,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				ClearSubframe(0, 0+y, 5, 4, 30, false);
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, false, &lObjectTransform);
 				deb_assert(lTestOk);
-				PrintInfo(_T("Flat\nSolid\n") + lModeInfo);
+				PrintInfo(L"Flat\nSolid\n" + lModeInfo);
 			}
 			if (lTestOk)
 			{
@@ -1680,7 +1679,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				// TODO: make this render correctly with vertex colors.
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, false, &lObjectTransform);
 				deb_assert(lTestOk);
-				PrintInfo(_T("Vertex color\nSolid\n") + lModeInfo);
+				PrintInfo(L"Vertex color\nSolid\n" + lModeInfo);
 			}
 			if (lTestOk)
 			{
@@ -1690,7 +1689,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED, false, &lObjectTransform);
 				deb_assert(lTestOk);
 				gTextureMapCount = 0;
-				PrintInfo(_T("Tex\nTransparent\n") + lModeInfo);
+				PrintInfo(L"Tex\nTransparent\n" + lModeInfo);
 			}
 			if (lTestOk)
 			{
@@ -1700,7 +1699,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_TEXTURE_AND_LIGHTMAP, false, &lObjectTransform);
 				deb_assert(lTestOk);
 				gTextureMapCount = 0;
-				PrintInfo(_T("Tex&lightmap\nSolid\n") + lModeInfo);
+				PrintInfo(L"Tex&lightmap\nSolid\n" + lModeInfo);
 			}
 			if (lTestOk)
 			{
@@ -1713,7 +1712,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				deb_assert(lTestOk);
 				gTextureMapCount = 0;
 				gTextureIndex = TEXTUREMAP;
-				PrintInfo(_T("Envmap\nSolid\n") + lModeInfo);
+				PrintInfo(L"Envmap\nSolid\n" + lModeInfo);
 			}
 			if (lTestOk)
 			{
@@ -1721,7 +1720,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				ClearSubframe(0, 1+y, 5, 4, 30, false);
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS, false, &lObjectTransform);
 				deb_assert(lTestOk);
-				PrintInfo(_T("Flat PXS\nSolid\n") + lModeInfo);
+				PrintInfo(L"Flat PXS\nSolid\n" + lModeInfo);
 			}
 			if (lTestOk)
 			{
@@ -1731,7 +1730,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS, false, &lObjectTransform);
 				deb_assert(lTestOk);
 				gTextureMapCount = 0;
-				PrintInfo(_T("Texture PXS\nSolid\n") + lModeInfo);
+				PrintInfo(L"Texture PXS\nSolid\n" + lModeInfo);
 			}
 			if (lTestOk)
 			{
@@ -1741,7 +1740,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				lTestOk = QuickRender(lGeometry, UiTbc::Renderer::MAT_TEXTURE_AND_LIGHTMAP_PXS, false, &lObjectTransform);
 				deb_assert(lTestOk);
 				gTextureMapCount = 0;
-				PrintInfo(_T("Tex&light PXS\nSolid\n") + lModeInfo);
+				PrintInfo(L"Tex&light PXS\nSolid\n" + lModeInfo);
 			}
 			if (lTestOk)
 			{
@@ -1753,7 +1752,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 				deb_assert(lTestOk);
 				gTextureMapCount = 0;
 				gTextureIndex = TEXTUREMAP;
-				PrintInfo(_T("Tex&sbmap PXS\nSolid\n") + lModeInfo);
+				PrintInfo(L"Tex&sbmap PXS\nSolid\n" + lModeInfo);
 			}
 
 			// Remove lights.

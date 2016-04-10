@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -30,14 +30,14 @@ public:
 		ANCHOR_BOTTOM_LINE,
 	};
 
-	TextArea(const Color& pColor, const str& pName = _T("TextArea"));
-	TextArea(Painter::ImageID pImageId, const str& pName = _T("TextArea"));
+	TextArea(const Color& pColor);
+	TextArea(Painter::ImageID pImageId);
 	virtual ~TextArea();
 
 	void Clear();
-	bool InsertLine(unsigned pLineIndex, const str& pText, Color* pColor = 0);
-	unsigned AddLine(const str& pText, Color* pColor = 0);
-	void AddText(const str& pText, Color* pColor = 0);
+	bool InsertLine(unsigned pLineIndex, const wstr& pText, Color* pColor = 0);
+	unsigned AddLine(const wstr& pText, Color* pColor = 0);
+	void AddText(const wstr& pText, Color* pColor = 0);
 	bool RemoveLine(unsigned pLineIndex);
 	unsigned GetLineCount() const;
 	unsigned GetFirstVisibleLineIndex() const;
@@ -57,7 +57,7 @@ protected:
 private:
 	struct LineInfo
 	{
-		str mText;
+		wstr mText;
 		Color mColor;
 	};
 	typedef std::list<LineInfo> TextLineList;

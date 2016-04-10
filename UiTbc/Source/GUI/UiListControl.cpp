@@ -12,9 +12,8 @@
 namespace UiTbc
 {
 
-ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, const Color& pColor, 
-			 ListLayout::ListType pListType, const str& pName):
-	Window(pBorderStyle, pBorderWidth, pColor, pName, new GridLayout(2, 2)),
+ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, const Color& pColor, ListLayout::ListType pListType):
+	Window(pBorderStyle, pBorderWidth, pColor, new GridLayout(2, 2)),
 	mStyle(SINGLE_SELECT),
 	mHScrollBar(0),
 	mVScrollBar(0),
@@ -25,9 +24,8 @@ ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, const Color& p
 	Init(pListType);
 }
 
-ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-			 ListLayout::ListType pListType, const str& pName):
-	Window(pBorderStyle, pBorderWidth, pImageID, pName, new GridLayout(2, 2)),
+ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID, ListLayout::ListType pListType):
+	Window(pBorderStyle, pBorderWidth, pImageID, new GridLayout(2, 2)),
 	mStyle(SINGLE_SELECT),
 	mHScrollBar(0),
 	mVScrollBar(0),
@@ -38,8 +36,8 @@ ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, Painter::Image
 	Init(pListType);
 }
 
-ListControl::ListControl(const Color& pColor, ListLayout::ListType pListType, const str& pName):
-	Window(pColor, pName, new GridLayout(2, 2)),
+ListControl::ListControl(const Color& pColor, ListLayout::ListType pListType):
+	Window(pColor, new GridLayout(2, 2)),
 	mStyle(SINGLE_SELECT),
 	mHScrollBar(0),
 	mVScrollBar(0),
@@ -50,8 +48,8 @@ ListControl::ListControl(const Color& pColor, ListLayout::ListType pListType, co
 	Init(pListType);
 }
 
-ListControl::ListControl(Painter::ImageID pImageID, ListLayout::ListType pListType, const str& pName):
-	Window(pImageID, pName, new GridLayout(2, 2)),
+ListControl::ListControl(Painter::ImageID pImageID, ListLayout::ListType pListType):
+	Window(pImageID, new GridLayout(2, 2)),
 	mStyle(SINGLE_SELECT),
 	mHScrollBar(0),
 	mVScrollBar(0),
@@ -70,8 +68,8 @@ void ListControl::Init(ListLayout::ListType pListType)
 {
 	mHScrollBar = new ScrollBar(ScrollBar::HORIZONTAL);
 	mVScrollBar = new ScrollBar(ScrollBar::VERTICAL);
-	mListRect   = new RectComponent(_T("ListRect"), new ListLayout(pListType));
-	mCornerRect = new RectComponent(Color(192, 192, 192), _T("CornerRect"));
+	mListRect   = new RectComponent(new ListLayout(pListType));
+	mCornerRect = new RectComponent(Color(192, 192, 192));
 
 	mHScrollBar->SetPreferredSize(0, 16, false);
 	mVScrollBar->SetPreferredSize(16, 0, false);
@@ -184,11 +182,6 @@ void ListControl::AddChildrenAfter(std::list<Component*>& pChildList, Component*
 void ListControl::RemoveChild(Component* pChild, int pLayer)
 {
 	mListRect->RemoveChild(pChild, pLayer);
-}
-
-Component* ListControl::GetChild(const str& pName, int pLayer)
-{
-	return mListRect->GetChild(pName, pLayer);
 }
 
 int ListControl::GetNumChildren() const

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -114,6 +114,7 @@ public:
 
 	virtual void Resume(bool pHard);
 	virtual void Suspend(bool pHard);
+	virtual void LoadSettings();
 	virtual void RefreshOptions();
 
 	void UserReset();
@@ -190,7 +191,7 @@ protected:
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
 	virtual void UpdateUserMessage();
 
-	void PrintText(const str& s, int x, int y) const;
+	void PrintText(const wstr& s, int x, int y) const;
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
@@ -227,6 +228,7 @@ protected:
 	bool mIsControlTimeout;
 	HiResTimer mStartupTimer;
 	HiResTimer mResendTimeOfLastPacket;
+	StopWatch mHideWatch;
 	double mResendIntermediatePacketTime;
 	astr mResendLastResponse;
 	SocketAddress mOpenLocalAddress;

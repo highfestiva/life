@@ -57,8 +57,8 @@ public:
 
 	virtual int GetCharWidth(wchar_t pChar) const = 0;
 	virtual int GetCharOffset(wchar_t pChar) const = 0;
-	int GetStringWidth(const str& pString) const;
-	int GetStringHeight(const str& pString) const;
+	int GetStringWidth(const wstr& pString) const;
+	int GetStringHeight(const wstr& pString) const;
 	int GetFontHeight() const;
 	int GetLineHeight() const;	// Font height + some extra pixels as distance to next line.
 

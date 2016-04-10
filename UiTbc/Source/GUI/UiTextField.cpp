@@ -18,8 +18,8 @@ namespace UiTbc
 
 
 
-TextField::TextField(Component* pTopParent, const str& pName) :
-	Window(pName),
+TextField::TextField(Component* pTopParent):
+	Window(),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
@@ -39,10 +39,8 @@ TextField::TextField(Component* pTopParent, const str& pName) :
 	Init();
 }
 
-TextField::TextField(Component* pTopParent, 
-		     unsigned pBorderStyle, int pBorderWidth, 
-		     const Color& pColor, const str& pName) :
-	Window(pBorderStyle, pBorderWidth, pColor, pName),
+TextField::TextField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, const Color& pColor):
+	Window(pBorderStyle, pBorderWidth, pColor),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
@@ -62,10 +60,8 @@ TextField::TextField(Component* pTopParent,
 	Init();
 }
 
-TextField::TextField(Component* pTopParent, 
-		     unsigned pBorderStyle, int pBorderWidth, 
-		     Painter::ImageID pImageID, const str& pName) :
-	Window(pBorderStyle, pBorderWidth, pImageID, pName),
+TextField::TextField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID) :
+	Window(pBorderStyle, pBorderWidth, pImageID),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
@@ -85,9 +81,8 @@ TextField::TextField(Component* pTopParent,
 	Init();
 }
 
-TextField::TextField(Component* pTopParent, 
-		     const Color& pColor, const str& pName) :
-	Window(pColor, pName),
+TextField::TextField(Component* pTopParent, const Color& pColor) :
+	Window(pColor),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
@@ -107,9 +102,8 @@ TextField::TextField(Component* pTopParent,
 	Init();
 }
 
-TextField::TextField(Component* pTopParent, 
-		     Painter::ImageID pImageID, const str& pName) :
-	Window(pImageID, pName),
+TextField::TextField(Component* pTopParent, Painter::ImageID pImageID):
+	Window(pImageID),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
 	mTextX(0),
@@ -219,9 +213,9 @@ void TextField::SetPasswordCharacter(tchar pCharacter)
 	mPasswordCharacter = pCharacter;
 }
 
-str TextField::GetVisibleText() const
+wstr TextField::GetVisibleText() const
 {
-	str lText;
+	wstr lText;
 	if (mPasswordCharacter)
 	{
 		lText.assign(mText.length(), mPasswordCharacter);
@@ -233,7 +227,7 @@ str TextField::GetVisibleText() const
 	return (lText);
 }
 
-void TextField::SetText(const str& pText)
+void TextField::SetText(const wstr& pText)
 {
 	mText = pText;
 	mTextX = 0;
@@ -241,7 +235,7 @@ void TextField::SetText(const str& pText)
 	SetNeedsRepaint(true);
 }
 
-const str& TextField::GetText() const
+const wstr& TextField::GetText() const
 {
 	return mText;
 }
@@ -267,7 +261,7 @@ void TextField::SetMarkerPosition(size_t pIndex)
 	}
 }
 
-bool TextField::OnChar(tchar pChar)
+bool TextField::OnChar(wchar_t pChar)
 {
 	Parent::OnChar(pChar);
 	if (mIsReadOnly)
@@ -319,7 +313,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 	bool lCtrlDown = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LCTRL) ||
 		lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RCTRL);
-	const str lDelimitors = _T(" \t");
+	const wstr lDelimitors = L" \t";
 
 
 	switch(pKeyCode)
@@ -330,7 +324,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 			{
 				if (lCtrlDown == true)
 				{
-					mMarkerPos = strutil::FindPreviousWord(GetVisibleText(), lDelimitors, mMarkerPos);
+					mMarkerPos = wstrutil::FindPreviousWord(GetVisibleText(), lDelimitors, mMarkerPos);
 				}
 				else
 				{
@@ -349,7 +343,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				{
 					size_t lIndex = GetVisibleText().find_first_not_of(lDelimitors, mMarkerPos);
 					lIndex = GetVisibleText().find_first_of(lDelimitors, lIndex);
-					if (lIndex == str::npos)
+					if (lIndex == wstr::npos)
 					{
 						// We have reached the end.
 						mMarkerPos = mText.length();

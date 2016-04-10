@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -102,7 +102,7 @@ void LineGraph2d::RenderNames(int x, int& pIoY) const
 		ColorPicker lPicker(lIndex, mPainter);
 		mPainter->FillRect(x, y+1, x+8, y+8);
 		//const double lPercent = (ix->x2 - ix->x1) / lLongest;
-		mPainter->PrintText(*in, x+12, y);
+		mPainter->PrintText(wstrutil::Encode(*in), x+12, y);
 	}
 	pIoY = y;
 }

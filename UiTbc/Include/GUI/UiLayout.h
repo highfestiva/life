@@ -1,6 +1,6 @@
 /*
 	Class:  Layout
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -51,7 +51,6 @@ public:
 
 	virtual void Add(Component* pComponent, int pParam1, int pParam2) = 0;
 	virtual void Remove(Component* pComponent) = 0;
-	virtual Component* Find(const str& pComponentName) = 0;
 	virtual int GetNumComponents() const = 0;
 
 	virtual Component* GetFirst() = 0;

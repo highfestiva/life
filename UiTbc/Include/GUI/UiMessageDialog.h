@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -18,7 +18,7 @@ class MessageDialog: public Dialog
 {
 	typedef Dialog Parent;
 public:
-	MessageDialog(Component* pParent, Action pOk, const str& pMessage);
+	MessageDialog(Component* pParent, Action pOk, const wstr& pMessage);
 	virtual ~MessageDialog();
 
 private:

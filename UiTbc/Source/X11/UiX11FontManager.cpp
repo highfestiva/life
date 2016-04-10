@@ -131,7 +131,7 @@ bool X11FontManager::RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect&
 		const uint8* lRawFaceBitmap = lGlyph->bitmap.buffer;
 		const int lWidth = lFaceBitmap->width/3;
 		const int lHeight = lFaceBitmap->rows;
-		const int lBaseLine = int(lFont->mSize * lFont->mX11Face->bbox.yMax / float(lFont->mX11Face->bbox.yMax - lFont->mX11Face->bbox.yMin));
+		const int lBaseLine = int(lFont->mSize * lFont->mX11Face->bbox.yMax / float(lFont->mX11Face->bbox.yMax - lFont->mX11Face->bbox.yMin)) + 1;
 		const int lYOffset = lBaseLine - lGlyph->metrics.horiBearingY / 64;
 		deb_assert(lWidth <= pRect.GetWidth());
 		deb_assert(lYOffset >= 0);

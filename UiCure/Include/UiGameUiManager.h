@@ -86,7 +86,7 @@ public:
 
 	UiTbc::FontManager::FontId SetScaleFont(float pScale);
 	void SetMasterFont();
-	void PrintText(int pX, int pY, const str& pText);
+	void PrintText(int pX, int pY, const wstr& pText);
 
 	PixelCoord GetMouseDisplayPosition() const;
 

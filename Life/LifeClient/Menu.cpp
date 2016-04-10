@@ -59,9 +59,9 @@ UiTbc::Dialog* Menu::CreateTestDialog(const ButtonAction& pAction)
 	{
 		return 0;
 	}
-	d->AddButton(1, CreateButton(_T("Test"), Color(40, 210, 40)), false);
-	d->AddButton(2, CreateButton(_T("Eminency"), Color(50, 90, 210)), false);
-	d->AddButton(3, CreateButton(_T("Thirst"), Color(210, 50, 40)), true);
+	d->AddButton(1, CreateButton(L"Test", Color(40, 210, 40)), false);
+	d->AddButton(2, CreateButton(L"Eminency", Color(50, 90, 210)), false);
+	d->AddButton(3, CreateButton(L"Thirst", Color(210, 50, 40)), true);
 	return d;
 }
 
@@ -82,10 +82,10 @@ UiTbc::Dialog* Menu::CreateTbcDialog(const ButtonAction& pAction, float pWidth, 
 	return d;
 }
 
-UiTbc::Button* Menu::CreateButton(const str& pText, const Color& pColor) const
+UiTbc::Button* Menu::CreateButton(const wstr& pText, const Color& pColor) const
 {
 	UiTbc::Button* lButton = new UiTbc::Button(pColor, pText);
-	lButton->SetText(pText);
+	//lButton->SetText(pText);
 	InitButton(lButton);
 	return lButton;
 }

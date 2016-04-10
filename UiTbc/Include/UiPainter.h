@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 //
 // NOTES:
@@ -235,12 +235,12 @@ public:
 	void SetFontManager(FontManager* pFontManager);
 	FontManager* GetFontManager() const;
 	virtual void SetFontSmoothness(bool pSmooth) = 0;
-	int GetStringWidth(const str& pString) const;
+	int GetStringWidth(const wstr& pString) const;
 	int GetFontHeight() const;
 	int GetLineHeight() const;
 	int GetTabSize() const;
 	void SetTabSize(int pSize);
-	virtual void PrintText(const str& pString, int x, int y) = 0;
+	virtual void PrintText(const wstr& pString, int x, int y) = 0;
 
 	Lepra::uint8 FindMatchingColor(const Color& pColor);
 	virtual void ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect) = 0;

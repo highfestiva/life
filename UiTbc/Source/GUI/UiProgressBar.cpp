@@ -1,6 +1,6 @@
 /*
 	Class:  ProgressBar
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -13,9 +13,8 @@ namespace UiTbc
 ProgressBar::ProgressBar(Style pStyle,
 						 const Color& pBodyColor,
 						 const Color& pProgressColorLeft,
-						 const Color& pProgressColorRight,
-						 const str& pName) :
-	Window(BORDER_SUNKEN | BORDER_LINEARSHADING, 2, pBodyColor, pName),
+						 const Color& pProgressColorRight) :
+	Window(BORDER_SUNKEN | BORDER_LINEARSHADING, 2, pBodyColor),
 	mStyle(pStyle),
 	mBoxSize(16),
 	mMax(1),
@@ -28,11 +27,8 @@ ProgressBar::ProgressBar(Style pStyle,
 	Init();
 }
 
-ProgressBar::ProgressBar(Style pStyle,
-						 Painter::ImageID pBackgroundImageID,
-						 Painter::ImageID pProgressImageID,
-						 const str& pName) :
-	Window(pBackgroundImageID, pName),
+ProgressBar::ProgressBar(Style pStyle, Painter::ImageID pBackgroundImageID, Painter::ImageID pProgressImageID):
+	Window(pBackgroundImageID),
 	mStyle(pStyle),
 	mBoxSize(16),
 	mMax(1),

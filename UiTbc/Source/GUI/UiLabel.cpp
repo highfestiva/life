@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -17,8 +17,8 @@ namespace UiTbc
 
 
 
-Label::Label(const Color& pColor, const str& pText):
-	Parent(pColor, pText),
+Label::Label(const Color& pColor, const wstr& pText):
+	Parent(pColor),
 	mIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_RIGHT),
 	mText(pText),
@@ -40,12 +40,12 @@ void Label::SetIcon(Painter::ImageID pIconId, IconAlignment pAlignment)
 	mIconAlignment = pAlignment;
 }
 
-void Label::SetText(const str& pText)
+void Label::SetText(const wstr& pText)
 {
 	mText = pText;
 }
 
-const str& Label::GetText() const
+const wstr& Label::GetText() const
 {
 	return mText;
 }

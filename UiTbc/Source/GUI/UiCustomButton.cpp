@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -14,7 +14,7 @@ namespace UiTbc
 
 
 
-CustomButton::CustomButton(const str& pText):
+CustomButton::CustomButton(const wstr& pText):
 	Parent(pText),
 	mOnRender(0),
 	mIsOver(0)

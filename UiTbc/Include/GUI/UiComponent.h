@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // Base class of all GUI components.
@@ -63,12 +63,9 @@ public:
 		RECURSE_DOWN,
 	};
 
-	Component(const str& pName, Layout* pLayout);
+	Component(Layout* pLayout);
 	virtual ~Component();
 	void DeleteAllLayers();
-
-	const str& GetName() const;
-	void SetName(const str& pName);
 
 	Component* GetParent();
 	Layout* GetLayout(int pLayer = 0) const;
@@ -112,7 +109,6 @@ public:
 	// The exact interpretation of pParam1 and pParam2 depends on the layout.
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
-	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;
 	
 	void AddTextListener(UiLepra::TextInputObserver* pListener);
@@ -161,7 +157,7 @@ public:
 	virtual bool OnMouseWheel(int pMouseX, int pMouseY, int pChange, bool pDown);
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
-	virtual bool OnChar(tchar pChar);
+	virtual bool OnChar(wchar_t pChar);
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
@@ -236,7 +232,7 @@ protected:
 
 	virtual void SetKeyboardFocus(Component* pChild);
 	virtual void SetMouseFocus(Component* pChild);
-	void DispatchChar(tchar pChar);
+	void DispatchChar(wchar_t pChar);
 	bool IsDispatcher() const;
 
 	void DeleteLayout(int pLayer);
@@ -246,7 +242,6 @@ protected:
 	TextListenerSet mTextListenerSet;
 	KeyListenerSet mKeyListenerSet;
 
-	str mName;
 	Component* mParent;
 	Component* mMouseFocusChild;
 	Component* mKeyboardFocusChild;

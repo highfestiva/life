@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -16,9 +16,8 @@ namespace UiTbc
 
 
 
-BorderComponent::BorderComponent(BorderPart pPart, const Color& pColor, BorderShadeFunc pShadeFunc,
-	const str& pName):
-	RectComponent(pColor, pName),
+BorderComponent::BorderComponent(BorderPart pPart, const Color& pColor, BorderShadeFunc pShadeFunc):
+	RectComponent(pColor),
 	mImageBorder(false),
 	mResizable(false),
 	mResizing(false),
@@ -29,8 +28,8 @@ BorderComponent::BorderComponent(BorderPart pPart, const Color& pColor, BorderSh
 	Set(pColor, pShadeFunc);
 }
 
-BorderComponent::BorderComponent(BorderPart pPart, Painter::ImageID pImageID, const str& pName):
-	RectComponent(pImageID, pName),
+BorderComponent::BorderComponent(BorderPart pPart, Painter::ImageID pImageID):
+	RectComponent(pImageID),
 	mImageBorder(true),
 	mResizable(false),
 	mResizing(false),

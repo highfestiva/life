@@ -1,6 +1,6 @@
 /*
 	Class:  BorderComponent
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -37,9 +37,8 @@ public:
 		ZIGZAG,
 	};
 
-	BorderComponent(BorderPart pPart, const Color& pColor, BorderShadeFunc pShadeFunc,
-		const str& pName);
-	BorderComponent(BorderPart pPart, Painter::ImageID pImageID, const str& pName);
+	BorderComponent(BorderPart pPart, const Color& pColor, BorderShadeFunc pShadeFunc);
+	BorderComponent(BorderPart pPart, Painter::ImageID pImageID);
 	virtual ~BorderComponent();
 
 	void SetSunken(bool pSunken);

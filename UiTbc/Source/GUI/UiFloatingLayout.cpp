@@ -1,6 +1,6 @@
 /*
 	Class:  FloatingLayout
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -79,21 +79,6 @@ void FloatingLayout::Remove(Component* pComponent)
 			((Window*)lComp)->SetActive(true);
 		}
 	}
-}
-
-Component* FloatingLayout::Find(const str& pComponentName)
-{
-	ComponentList::const_iterator lIter;
-
-	for (lIter = mChildList.begin(); lIter != mChildList.end(); ++lIter)
-	{
-		if ((*lIter)->GetName() == pComponentName)
-		{
-			return (*lIter);
-		}
-	}
-
-	return 0;
 }
 
 int FloatingLayout::GetNumComponents() const

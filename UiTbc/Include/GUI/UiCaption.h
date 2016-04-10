@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -56,7 +56,7 @@ public:
 	Button* SetMiddleButton(Button* pButton);
 
 	void SetIcon(Painter::ImageID pIconID);
-	void SetText(const str& pText,
+	void SetText(const wstr& pText,
 						const Color& pActiveTextColor,
 						const Color& pActiveBackgColor,
 						const Color& pInactiveTextColor,
@@ -117,7 +117,7 @@ private:
 	Painter::ImageID mInactiveRightImageID;
 	Painter::ImageID mInactiveCenterImageID;
 
-	str mText;
+	wstr mText;
 	Color mActiveTextBackgColor;
 	Color mInactiveTextColor;
 	Color mInactiveTextBackgColor;

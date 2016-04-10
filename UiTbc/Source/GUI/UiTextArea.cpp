@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -16,8 +16,8 @@ namespace UiTbc
 
 
 
-TextArea::TextArea(const Color& pColor, const str& pName):
-	Parent(0, 1, pColor, pName),
+TextArea::TextArea(const Color& pColor):
+	Parent(0, 1, pColor),
 	mFirstVisibleLine(0),
 	mVisibleLineCount(0),
 	mLineHeight(0),
@@ -29,8 +29,8 @@ TextArea::TextArea(const Color& pColor, const str& pName):
 	Init();
 }
 
-TextArea::TextArea(Painter::ImageID pImageId, const str& pName):
-	Parent(0, 1, pImageId, pName),
+TextArea::TextArea(Painter::ImageID pImageId):
+	Parent(0, 1, pImageId),
 	mFirstVisibleLine(0),
 	mVisibleLineCount(0),
 	mLineHeight(0),
@@ -58,7 +58,7 @@ void TextArea::Clear()
 	SetNeedsRepaint(true);
 }
 
-bool TextArea::InsertLine(unsigned pLineIndex, const str& pText, Color* pColor)
+bool TextArea::InsertLine(unsigned pLineIndex, const wstr& pText, Color* pColor)
 {
 	ScopeLock lLock(&mLock);
 	bool lOk = false;
@@ -90,17 +90,17 @@ bool TextArea::InsertLine(unsigned pLineIndex, const str& pText, Color* pColor)
 	return (lOk);
 }
 
-unsigned TextArea::AddLine(const str& pText, Color* pColor)
+unsigned TextArea::AddLine(const wstr& pText, Color* pColor)
 {
 	InsertLine(GetLineCount(), pText, pColor);
 	return (GetLineCount()-1);
 }
 
-void TextArea::AddText(const str& pText, Color* pColor)
+void TextArea::AddText(const wstr& pText, Color* pColor)
 {
 	ScopeLock lLock(&mLock);
 	bool lFirstLine = true;
-	strutil::strvec lLines = strutil::Split(pText, _T("\n"));
+	wstrutil::strvec lLines = wstrutil::Split(pText, L"\n");
 	for (unsigned x = 0; x < lLines.size(); ++x)
 	{
 		if (lFirstLine)

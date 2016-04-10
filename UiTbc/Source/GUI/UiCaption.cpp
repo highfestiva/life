@@ -1,6 +1,6 @@
 /*
 	Class:  Caption
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -13,7 +13,7 @@ namespace UiTbc
 {
 
 Caption::Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHeight) :
-	RectComponent(pActiveColor, _T("Caption"), new StackLayout(1)),
+	RectComponent(pActiveColor, new StackLayout(1)),
 	mLabel(0),
 	mCaptionRect(0),
 	mButtonRect(0),
@@ -37,7 +37,7 @@ Caption::Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHe
 	mInactiveLeftImageID(Painter::INVALID_IMAGEID),
 	mInactiveRightImageID(Painter::INVALID_IMAGEID),
 	mInactiveCenterImageID(Painter::INVALID_IMAGEID),
-	mText(_T("")),
+	mText(),
 	mActiveTextBackgColor(255, 255, 255),
 	mInactiveTextColor(0, 0, 0),
 	mInactiveTextBackgColor(255, 255, 255),
@@ -50,22 +50,22 @@ Caption::Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHe
 	SetMinSize(0, pHeight);
 	SetPreferredSize(PixelCoord(0, pHeight));
 
-	mLabel = new Label(GetTextColor(), _T(""));
+	mLabel = new Label(GetTextColor(), mText);
 	mLabel->SetPreferredHeight(pHeight);
 
-	RectComponent* lTopLayer = new RectComponent(_T("TopLayer"), new GridLayout(1, 2));
+	RectComponent* lTopLayer = new RectComponent(new GridLayout(1, 2));
 	lTopLayer->SetPreferredSize(0, 0);
 	AddChild(lTopLayer);
 
-	mCaptionRect = new RectComponent(_T("CaptionRect"), new GridLayout(1, 1));
+	mCaptionRect = new RectComponent(new GridLayout(1, 1));
 	mCaptionRect->AddChild(mLabel);
 	lTopLayer->AddChild(mCaptionRect);
 
-	RectComponent* lButtonRect = new RectComponent(_T("ButtonArea"), new CenterLayout);
+	RectComponent* lButtonRect = new RectComponent(new CenterLayout);
 	lButtonRect->SetPreferredSize(0, 0);
 	lTopLayer->AddChild(lButtonRect);
 
-	mButtonRect = new RectComponent(Color(255, 255, 255), _T("ButtonRect"), new GridLayout(1, 3));
+	mButtonRect = new RectComponent(Color(255, 255, 255), new GridLayout(1, 3));
 	mButtonRect->SetPreferredSize(1, 0);
 	lButtonRect->AddChild(mButtonRect);
 }
@@ -75,7 +75,7 @@ Caption::Caption(const Color& pActiveTopLeftColor, const Color& pActiveTopRightC
 	const Color& pInactiveTopLeftColor, const Color& pInactiveTopRightColor,
 	const Color& pInactiveBottomLeftColor, const Color& pInactiveBottomRightColor,
 	int pHeight) :
-	RectComponent(pActiveTopLeftColor, pActiveTopRightColor, pActiveBottomRightColor, pActiveBottomLeftColor, _T("Caption"), new StackLayout(1)),
+	RectComponent(pActiveTopLeftColor, pActiveTopRightColor, pActiveBottomRightColor, pActiveBottomLeftColor, new StackLayout(1)),
 	mLabel(0),
 	mCaptionRect(0),
 	mButtonRect(0),
@@ -99,7 +99,7 @@ Caption::Caption(const Color& pActiveTopLeftColor, const Color& pActiveTopRightC
 	mInactiveLeftImageID(Painter::INVALID_IMAGEID),
 	mInactiveRightImageID(Painter::INVALID_IMAGEID),
 	mInactiveCenterImageID(Painter::INVALID_IMAGEID),
-	mText(_T("")),
+	mText(),
 	mActiveTextBackgColor(255, 255, 255),
 	mInactiveTextColor(0, 0, 0),
 	mInactiveTextBackgColor(255, 255, 255),
@@ -112,21 +112,21 @@ Caption::Caption(const Color& pActiveTopLeftColor, const Color& pActiveTopRightC
 	SetMinSize(0, pHeight);
 	SetPreferredSize(PixelCoord(0, pHeight));
 
-	mLabel = new Label(GetTextColor(), _T(""));
+	mLabel = new Label(GetTextColor(), mText);
 	mLabel->SetPreferredHeight(pHeight);
 
-	RectComponent* lTopLayer = new RectComponent(_T("TopLayer"), new GridLayout(1, 2));
+	RectComponent* lTopLayer = new RectComponent(new GridLayout(1, 2));
 	AddChild(lTopLayer);
 
-	mCaptionRect = new RectComponent(_T("CaptionRect"), new GridLayout(1, 1));
+	mCaptionRect = new RectComponent(new GridLayout(1, 1));
 	mCaptionRect->AddChild(mLabel);
 	lTopLayer->AddChild(mCaptionRect);
 
-	RectComponent* lButtonRect = new RectComponent(_T("ButtonArea"), new CenterLayout);
+	RectComponent* lButtonRect = new RectComponent(new CenterLayout);
 	lButtonRect->SetPreferredSize(0, 0);
 	lTopLayer->AddChild(lButtonRect);
 
-	mButtonRect = new RectComponent(Color(255, 255, 255), _T("ButtonRect"), new GridLayout(1, 3));
+	mButtonRect = new RectComponent(Color(255, 255, 255), new GridLayout(1, 3));
 	mButtonRect->SetPreferredSize(1, 0);
 	lButtonRect->AddChild(mButtonRect);
 }
@@ -135,7 +135,7 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 	Painter::ImageID pActiveCenterImageID, Painter::ImageID pInactiveLeftImageID,
 	Painter::ImageID pInactiveRightImageID, Painter::ImageID pInactiveCenterImageID,
 	int pHeight) :
-	RectComponent(_T("Caption"), new StackLayout(2)),
+	RectComponent(new StackLayout(2)),
 	mLabel(0),
 	mCaptionRect(0),
 	mButtonRect(0),
@@ -159,7 +159,7 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 	mInactiveLeftImageID(pInactiveLeftImageID),
 	mInactiveRightImageID(pInactiveRightImageID),
 	mInactiveCenterImageID(pInactiveCenterImageID),
-	mText(_T("")),
+	mText(),
 	mActiveTextBackgColor(255, 255, 255),
 	mInactiveTextColor(0, 0, 0),
 	mInactiveTextBackgColor(255, 255, 255),
@@ -178,38 +178,38 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 	SetMinSize(lLeftImageSize.x + lRightImageSize.x, pHeight);
 	SetPreferredSize(0, pHeight);
 
-	mLabel = new Label(GetTextColor(), _T(""));
+	mLabel = new Label(GetTextColor(), mText);
 	mLabel->SetPreferredHeight(pHeight);
 
-	RectComponent* lBottomLayer = new RectComponent(_T("BottomLayer"), new GridLayout(1, 3));
+	RectComponent* lBottomLayer = new RectComponent(new GridLayout(1, 3));
 	lBottomLayer->SetPreferredSize(0, 0);
 	AddChild(lBottomLayer);
 
-	RectComponent* lTopLayer = new RectComponent(_T("TopLayer"), new GridLayout(1, 2));
+	RectComponent* lTopLayer = new RectComponent(new GridLayout(1, 2));
 	lTopLayer->SetPreferredSize(0, 0);
 	AddChild(lTopLayer);
 
-	mCaptionRect = new RectComponent(_T("CaptionRect"), new GridLayout(1, 1));
+	mCaptionRect = new RectComponent(new GridLayout(1, 1));
 	mCaptionRect->AddChild(mLabel);
 	lTopLayer->AddChild(mCaptionRect);
 
-	RectComponent* lButtonRect = new RectComponent(_T("ButtonArea"), new CenterLayout);
+	RectComponent* lButtonRect = new RectComponent(new CenterLayout);
 	lButtonRect->SetPreferredSize(0, 0);
 	lTopLayer->AddChild(lButtonRect);
 
-	mButtonRect = new RectComponent(_T("ButtonRect"), new GridLayout(1, 3));
+	mButtonRect = new RectComponent(new GridLayout(1, 3));
 	mButtonRect->SetPreferredSize(1, 0);
 	lButtonRect->AddChild(mButtonRect);
 
-	mLeftImageRect = new RectComponent(pActiveLeftImageID, _T("CaptionRectLeft"));
+	mLeftImageRect = new RectComponent(pActiveLeftImageID);
 	mLeftImageRect->SetPreferredSize(lLeftImageSize);
 	lBottomLayer->AddChild(mLeftImageRect, 0, 0);
 
-	mCenterImageRect = new RectComponent(pActiveCenterImageID, _T("CaptionRectCenter"));
+	mCenterImageRect = new RectComponent(pActiveCenterImageID);
 	mCenterImageRect->SetPreferredSize(0, lCenterImageSize.y, false);
 	lBottomLayer->AddChild(mCenterImageRect, 0, 1);
 
-	mRightImageRect = new RectComponent(pActiveRightImageID, _T("CaptionRectRight"));
+	mRightImageRect = new RectComponent(pActiveRightImageID);
 	mRightImageRect->SetPreferredSize(lRightImageSize);
 	lBottomLayer->AddChild(mRightImageRect, 0, 2);
 }
@@ -399,7 +399,7 @@ void Caption::SetIcon(Painter::ImageID pIconID)
 	mLabel->SetIcon(pIconID, Label::ICON_LEFT);
 }
 
-void Caption::SetText(const str& pText,
+void Caption::SetText(const wstr& pText,
 					  const Color& pActiveTextColor,
 					  const Color& pActiveBackgColor,
 					  const Color& pInactiveTextColor,

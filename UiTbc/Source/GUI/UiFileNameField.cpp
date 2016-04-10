@@ -1,6 +1,6 @@
 /*
 	Class:  FileNameField
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -15,34 +15,28 @@
 namespace UiTbc
 {
 
-FileNameField::FileNameField(Component* pTopParent, const str& pName) :
-	TextField(pTopParent, pName)
+FileNameField::FileNameField(Component* pTopParent):
+	TextField(pTopParent)
 {
 }
 
-FileNameField::FileNameField(Component* pTopParent, 
-			     unsigned pBorderStyle, int pBorderWidth, const Color& pColor,
-			     const str& pName) :
-	TextField(pTopParent, pBorderStyle, pBorderWidth, pColor, pName)
+FileNameField::FileNameField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, const Color& pColor):
+	TextField(pTopParent, pBorderStyle, pBorderWidth, pColor)
 {
 }
 
-FileNameField::FileNameField(Component* pTopParent, 
-			     unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-			     const str& pName) :
-	TextField(pTopParent, pBorderStyle, pBorderWidth, pImageID, pName)
+FileNameField::FileNameField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID):
+	TextField(pTopParent, pBorderStyle, pBorderWidth, pImageID)
 {
 }
 
-FileNameField::FileNameField(Component* pTopParent, 
-			     const Color& pColor, const str& pName) :
-	TextField(pTopParent, pColor, pName)
+FileNameField::FileNameField(Component* pTopParent, const Color& pColor):
+	TextField(pTopParent, pColor)
 {
 }
 
-FileNameField::FileNameField(Component* pTopParent, 
-			     Painter::ImageID pImageID, const str& pName) :
-	TextField(pTopParent, pImageID, pName)
+FileNameField::FileNameField(Component* pTopParent, Painter::ImageID pImageID):
+	TextField(pTopParent, pImageID)
 {
 }
 
@@ -52,7 +46,7 @@ FileNameField::~FileNameField()
 
 PopupList* FileNameField::CreatePopupList()
 {
-	str lSearchString(GetText());
+	str lSearchString = strutil::Encode(GetText());
 	lSearchString += _T("*");
 
 	Painter* lPainter = 0;
@@ -96,7 +90,7 @@ PopupList* FileNameField::CreatePopupList()
 		int lLabelHeight = 0;
 		for (lIter = lFileList.begin(); lIter != lFileList.end(); ++lIter)
 		{
-			Label* lLabel = new Label(GetTextColor(), (*lIter).mName);
+			Label* lLabel = new Label(GetTextColor(), wstrutil::Encode((*lIter).mName));
 			lLabel->SetPreferredSize(0, 12);
 			lPopupList->AddChild(lLabel);
 
@@ -194,7 +188,7 @@ void FileNameField::FinalizeSelection()
 {
 	if (GetPopupList() != 0)
 	{
-		str lText(GetText());
+		str lText = strutil::Encode(GetText());
 
 		if (!lText.empty())
 		{
@@ -209,13 +203,14 @@ void FileNameField::FinalizeSelection()
 
 		ValidatePath(lText);
 		Label* lSelectedItem = (Label*)GetPopupList()->GetFirstSelectedItem();
-		lText += lSelectedItem->GetText().c_str();
+		lText += strutil::Encode(lSelectedItem->GetText());
 
 		ValidatePath(lText);
-		SetText(lText);
+		const wstr lWideText = wstrutil::Encode(lText);
+		SetText(lWideText);
 
 		DestroyPopupList();
-		SetMarkerPos(lText.length());
+		SetMarkerPos(lWideText.length());
 		SetKeyboardFocus();
 	}
 }

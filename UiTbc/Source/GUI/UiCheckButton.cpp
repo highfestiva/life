@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -14,8 +14,8 @@ namespace UiTbc
 
 
 
-CheckButton::CheckButton(const Color& pBodyColor, const str& pName):
-	Parent(pBodyColor, pName),
+CheckButton::CheckButton(const Color& pBodyColor, const wstr& pText):
+	Parent(pBodyColor, pText),
 	mCheckedIconId(Painter::INVALID_IMAGEID)
 {
 }

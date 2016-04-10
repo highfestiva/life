@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -331,18 +331,13 @@ void Thread::SetCpuAffinityMask(uint64 /*pAffinityMask*/)
 	// I'm also guessing that we won't need it.
 }
 
-void Thread::Sleep(unsigned int pMilliSeconds)
+void Thread::Sleep(unsigned int pMicroSeconds)
 {
-	if (pMilliSeconds <= 0)
+	if (pMicroSeconds <= 0)
 	{
 		return;
 	}
-	time_t lSeconds = pMilliSeconds/1000;
-	long lNanoSeconds = (pMilliSeconds - lSeconds*1000) * 1000000.0;
-	timespec lTimeSpec;
-	lTimeSpec.tv_sec = lSeconds;
-	lTimeSpec.tv_nsec = lNanoSeconds;
-	::nanosleep(&lTimeSpec, 0);
+	::usleep(pMicroSeconds);
 }
 
 bool Thread::Start()

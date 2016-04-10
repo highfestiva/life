@@ -786,19 +786,19 @@ def _world2screen(crd):
 def _screen2world(x,y,distance):
 	'''Return world X,Z scaled to Y=1.'''
 	_update_cam_shadow()
-	tana = tan(_cam_fov_radians*0.5);
+	tana = tan(_cam_fov_radians*0.5) * distance;
 	dx = tana * (x*2-1) * _get_aspect_ratio()
 	dy = tana * (1-y*2)
-	crd = (_cam_q * vec3(dx, 1, dy) * distance) + _cam_pos
+	crd = (_cam_q * vec3(dx, distance, dy)) + _cam_pos
 	return crd
 
 def _relscreen2world(x,y,distance):
 	'''From relative screen coordinates, return world X,Z scaled to Y=1.'''
 	_update_cam_shadow()
-	tana = tan(_cam_fov_radians*0.5);
+	tana = tan(_cam_fov_radians*0.5) * distance;
 	dx = tana * 2*x * _get_aspect_ratio()
 	dy = tana * -2*y
-	crd = (_cam_q * vec3(dx, 1, dy) * distance) + _cam_pos
+	crd = (_cam_q * vec3(dx, distance, dy)) + _cam_pos
 	return crd
 
 def _update_cam_shadow():

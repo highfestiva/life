@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -18,7 +18,7 @@ class CheckButton: public Button
 {
 	typedef Button Parent;
 public:
-	CheckButton(const Color& pBodyColor, const str& pName);
+	CheckButton(const Color& pBodyColor, const wstr& pText);
 	virtual ~CheckButton();
 
 	virtual void Repaint(Painter* pPainter);

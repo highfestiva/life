@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -16,8 +16,7 @@ namespace UiTbc
 
 
 
-Component::Component(const str& pName, Layout* pLayout) :
-	mName(pName),
+Component::Component(Layout* pLayout) :
 	mParent(0),
 	mMouseFocusChild(0),
 	mKeyboardFocusChild(0),
@@ -234,16 +233,6 @@ void Component::RemoveChild(Component* pChild, int pLayer)
 		}
 		pChild->SetParent(0);
 	}
-}
-
-Component* Component::GetChild(const str& pName, int pLayer)
-{
-	if (pLayer >= 0 && pLayer < mLayerCount && mLayout[pLayer] != 0)
-	{
-		return mLayout[pLayer]->Find(pName);
-	}
-
-	return 0;
 }
 
 int Component::GetNumChildren() const
@@ -550,7 +539,7 @@ bool Component::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 	return lIsOver;
 }
 
-bool Component::OnChar(tchar pChar)
+bool Component::OnChar(wchar_t pChar)
 {
 	DispatchChar(pChar);
 
@@ -816,7 +805,7 @@ void Component::SetMouseFocus(Component* pChild)
 	}
 }
 
-void Component::DispatchChar(tchar pChar)
+void Component::DispatchChar(wchar_t pChar)
 {
 	TextListenerSet::iterator x = mTextListenerSet.begin();
 	for (; x != mTextListenerSet.end(); ++x)
@@ -890,16 +879,6 @@ void Component::ReleaseKeyboardFocus(RecurseDir pDir, Component* pFocusedCompone
 			mKeyboardFocusChild = 0;
 		}
 	}
-}
-
-const str& Component::GetName() const
-{
-	return mName;
-}
-
-void Component::SetName(const str& pName)
-{
-	mName = pName;
 }
 
 Component* Component::GetParent()

@@ -48,6 +48,8 @@ X11DisplayManager::X11DisplayManager() :
 	mMaximized(false),
 	mNormalWidth(0),
 	mNormalHeight(0),
+	mWindowX(0),
+	mWindowY(0),
 	mCaptionSet(false)
 {
 
@@ -270,11 +272,18 @@ void X11DisplayManager::HideWindow(bool pHide)
 
 	if (pHide)
 	{
+		Window lChild;
+		::XTranslateCoordinates(mDisplay, mWnd, ::XDefaultRootWindow(mDisplay), 0, 0, &mWindowX, &mWindowY, &lChild);
+		XWindowAttributes lWndAttr;
+		::XGetWindowAttributes(mDisplay, mWnd, &lWndAttr);
+		mWindowX -= lWndAttr.x;
+		mWindowY -= lWndAttr.y;
 		::XUnmapWindow(mDisplay, mWnd);
 	}
 	else
 	{
 		::XMapWindow(mDisplay, mWnd);
+		::XMoveWindow(mDisplay, mWnd, mWindowX, mWindowY);
 	}
 	mIsHidden = pHide;
 }
@@ -331,11 +340,13 @@ bool X11DisplayManager::InitWindow()
 							KeyPressMask | KeyReleaseMask |
 							ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 							Button1MotionMask | Button2MotionMask | Button3MotionMask;
+				mWindowX = lScreenWidth/2 - lWindowWidth/2;
+				mWindowY = lScreenHeight/2 - lWindowHeight/2;
 				mWnd = ::XCreateWindow(
 					mDisplay,
 					RootWindow(mDisplay, lVisualInfo->screen),
-					lScreenWidth/2 - lWindowWidth/2,
-					lScreenHeight/2 - lWindowHeight/2,
+					mWindowX,
+					mWindowY,
 					lWindowWidth,
 					lWindowHeight,
 					0,

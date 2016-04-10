@@ -27,10 +27,8 @@ InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 
 
 
-X11InputElement::X11InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
-	X11InputDevice* pParentDevice, void* pRawElement):
-	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
-	mRawElement(pRawElement)
+X11InputElement::X11InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, X11InputDevice* pParentDevice):
+	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice)
 {
 	/*SetIdentifier(mElement->tszName);
 
@@ -44,10 +42,6 @@ X11InputElement::~X11InputElement()
 {
 }
 
-const void* X11InputElement::GetRawElement() const
-{
-	return mRawElement;
-}
 
 
 loginstance(UI_INPUT, X11InputElement);
@@ -58,9 +52,8 @@ loginstance(UI_INPUT, X11InputElement);
 	class X11InputDevice
 */
 
-X11InputDevice::X11InputDevice(void* pRawDevice, InputManager* pManager):
-	InputDevice(pManager),
-	mRawDevice(pRawDevice)
+X11InputDevice::X11InputDevice(InputManager* pManager):
+	InputDevice(pManager)
 {
 	/*SetIdentifier(pInfo->tszInstanceName);
 
@@ -180,6 +173,9 @@ X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	mKeyboard(0),
 	mMouse(0)
 {
+	XIM lInputMethod = XOpenIM(mDisplayManager->GetDisplay(), NULL, NULL, NULL);
+	mInputContext = XCreateIC(lInputMethod, XNInputStyle, XIMPreeditNothing|XIMStatusNothing, XNClientWindow, mDisplayManager->GetWindow(), NULL);;
+
 	Window rw, cw;
 	int _, x, y;
 	unsigned lMask;
@@ -191,18 +187,18 @@ X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	::memset(&mTypeCount, 0, sizeof(mTypeCount));
 	++mTypeCount[InputDevice::TYPE_KEYBOARD];
 	++mTypeCount[InputDevice::TYPE_MOUSE];
-	mKeyboard = new X11InputDevice(0, this);
+	mKeyboard = new X11InputDevice(this);
 	mKeyboard->SetInterpretation(InputDevice::TYPE_KEYBOARD, 0);
-	X11InputDevice* lMouse = new X11InputDevice(0, this);
+	X11InputDevice* lMouse = new X11InputDevice(this);
 	mMouse = lMouse;
 	mMouse->SetInterpretation(InputDevice::TYPE_MOUSE, 0);
 	for (int x = 0; x < MOUSE_BUTTON_COUNT; ++x)
 	{
-		lMouse->AddElement(new X11InputElement(InputElement::DIGITAL, InputElement::BUTTON, x, lMouse, 0));
+		lMouse->AddElement(new X11InputElement(InputElement::DIGITAL, InputElement::BUTTON, x, lMouse));
 	}
 	for (int x = 0; x < MOUSE_AXIS_COUNT; ++x)
 	{
-		lMouse->AddElement(new X11InputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, x, lMouse, 0));
+		lMouse->AddElement(new X11InputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, x, lMouse));
 	}
 	mDeviceList.push_back(mKeyboard);
 	mDeviceList.push_back(mMouse);
@@ -289,10 +285,17 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 			XKeyEvent& lKeyEvent = (XKeyEvent&)pEvent;
 			char lKey[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 			KeySym lSym;
-			::XLookupString(&lKeyEvent, lKey, sizeof(lKey), &lSym, NULL);
-			//mLog.Infof(_T("Key event %i: keycode=%i, state=%i, lookup=%s, keysym=%i"),
-			//		lKeyEvent.type, lKeyEvent.keycode, lKeyEvent.state, lKey, lSym);
+			if (pEvent.type == KeyPress)
+			{
+				::Xutf8LookupString(mInputContext, &lKeyEvent, lKey, sizeof(lKey), &lSym, NULL);
+			}
+			else
+			{
+				::XLookupString(&lKeyEvent, lKey, sizeof(lKey), &lSym, NULL);
+			}
 			KeyCode lKeyCode = TranslateKey(lKeyEvent.state, lSym);
+			//mLog.Infof(_T("Key event %i: keycode=%i, state=%i, lookup=%s, keysym=%i, keycode=%i"),
+			//		lKeyEvent.type, lKeyEvent.keycode, lKeyEvent.state, lKey, lSym, lKeyCode);
 			if (pEvent.type == KeyPress)
 			{
 				SetKey(lKeyCode, true);

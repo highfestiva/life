@@ -18,9 +18,8 @@ namespace UiTbc
 
 
 
-Window::Window(const str& pName,
-			   Layout* pLayout) :
-	Component(pName, new GridLayout(1, 1)),
+Window::Window(Layout* pLayout) :
+	Component(new GridLayout(1, 1)),
 	mTLBorder(0),
 	mTRBorder(0),
 	mBRBorder(0),
@@ -37,8 +36,8 @@ Window::Window(const str& pName,
 	mBodyColor(0, 0, 0),
 	mBorderStyle(0)
 {
-	mClientRect = new RectComponent(_T("ClientRect"), pLayout);
-	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mClientRect = new RectComponent(pLayout);
+	mCenterComponent = new RectComponent(new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	//Init();
 }
@@ -46,9 +45,8 @@ Window::Window(const str& pName,
 Window::Window(unsigned pBorderStyle,
 			   int pBorderWidth,
 			   const Color& pColor,
-			   const str& pName,
 			   Layout* pLayout) :
-	Component(pName, new GridLayout(3, 3)),
+	Component(new GridLayout(3, 3)),
 	mTLBorder(0),
 	mTRBorder(0),
 	mBRBorder(0),
@@ -65,9 +63,9 @@ Window::Window(unsigned pBorderStyle,
 	mBodyColor(pColor),
 	mBorderStyle(pBorderStyle)
 {
-	mClientRect = new RectComponent(pColor, _T("ClientRect"), pLayout);
+	mClientRect = new RectComponent(pColor, pLayout);
 	//mClientRect->SetPreferredSize(0, 0, true);
-	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent = new RectComponent(new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	//InitBorder();
 }
@@ -75,9 +73,8 @@ Window::Window(unsigned pBorderStyle,
 Window::Window(unsigned pBorderStyle,
 			 int pBorderWidth,
 			 Painter::ImageID pImageID,
-			 const str& pName,
 			 Layout* pLayout) :
-	Component(pName, new GridLayout(3, 3)),
+	Component(new GridLayout(3, 3)),
 	mTLBorder(0),
 	mTRBorder(0),
 	mBRBorder(0),
@@ -94,17 +91,16 @@ Window::Window(unsigned pBorderStyle,
 	mBodyColor(192, 192, 192),
 	mBorderStyle(pBorderStyle)
 {
-	mClientRect = new RectComponent(pImageID, _T("ClientRect"), pLayout);
+	mClientRect = new RectComponent(pImageID, pLayout);
 	//mClientRect->SetPreferredSize(0, 0, true);
-	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent = new RectComponent(new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	//InitBorder();
 }
 
 Window::Window(const Color& pColor,
-			 const str& pName,
 			 Layout* pLayout) :
-	Component(pName, new GridLayout(1, 1)),
+	Component(new GridLayout(1, 1)),
 	mTLBorder(0),
 	mTRBorder(0),
 	mBRBorder(0),
@@ -121,17 +117,16 @@ Window::Window(const Color& pColor,
 	mBodyColor(pColor),
 	mBorderStyle(0)
 {
-	mClientRect = new RectComponent(pColor, _T("ClientRect"), pLayout);
+	mClientRect = new RectComponent(pColor, pLayout);
 	//mClientRect->SetPreferredSize(0, 0, true);
-	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent = new RectComponent(new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	//InitBorder();
 }
 
 Window::Window(Painter::ImageID pImageID,
-			 const str& pName,
 			 Layout* pLayout) :
-	Component(pName, new GridLayout(1, 1)),
+	Component(new GridLayout(1, 1)),
 	mTLBorder(0),
 	mTRBorder(0),
 	mBRBorder(0),
@@ -148,9 +143,9 @@ Window::Window(Painter::ImageID pImageID,
 	mBodyColor(192, 192, 192),
 	mBorderStyle(0)
 {
-	mClientRect = new RectComponent(pImageID, _T("ClientRect"), pLayout);
+	mClientRect = new RectComponent(pImageID, pLayout);
 	//mClientRect->SetPreferredSize(0, 0, true);
-	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent = new RectComponent(new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	Parent::AddChild(mCenterComponent);
 	//InitBorder();
@@ -190,15 +185,15 @@ void Window::InitBorder()
 
 	if (Check(mBorderStyle, BORDER_HALF) == false)
 	{
-		mTRBorder = new BorderComponent(BorderComponent::TOPRIGHT_CORNER,    mBodyColor, lFunc, GetName() + _T(":TRBorder"));
-		mBRBorder = new BorderComponent(BorderComponent::BOTTOMRIGHT_CORNER, mBodyColor, lFunc, GetName() + _T(":BRBorder"));
-		mBLBorder = new BorderComponent(BorderComponent::BOTTOMLEFT_CORNER,  mBodyColor, lFunc, GetName() + _T(":BLBorder"));
-		mBBorder  = new BorderComponent(BorderComponent::BOTTOM_BORDER,      mBodyColor, lFunc, GetName() + _T(":BBorder"));
-		mRBorder  = new BorderComponent(BorderComponent::RIGHT_BORDER,       mBodyColor, lFunc, GetName() + _T(":RBorder"));
+		mTRBorder = new BorderComponent(BorderComponent::TOPRIGHT_CORNER,    mBodyColor, lFunc);
+		mBRBorder = new BorderComponent(BorderComponent::BOTTOMRIGHT_CORNER, mBodyColor, lFunc);
+		mBLBorder = new BorderComponent(BorderComponent::BOTTOMLEFT_CORNER,  mBodyColor, lFunc);
+		mBBorder  = new BorderComponent(BorderComponent::BOTTOM_BORDER,      mBodyColor, lFunc);
+		mRBorder  = new BorderComponent(BorderComponent::RIGHT_BORDER,       mBodyColor, lFunc);
 	}
-	mTLBorder = new BorderComponent(BorderComponent::TOPLEFT_CORNER,     mBodyColor, lFunc, GetName() + _T(":TLBorder"));
-	mTBorder  = new BorderComponent(BorderComponent::TOP_BORDER,         mBodyColor, lFunc, GetName() + _T(":TBorder"));
-	mLBorder  = new BorderComponent(BorderComponent::LEFT_BORDER,        mBodyColor, lFunc, GetName() + _T(":LBorder"));
+	mTLBorder = new BorderComponent(BorderComponent::TOPLEFT_CORNER,     mBodyColor, lFunc);
+	mTBorder  = new BorderComponent(BorderComponent::TOP_BORDER,         mBodyColor, lFunc);
+	mLBorder  = new BorderComponent(BorderComponent::LEFT_BORDER,        mBodyColor, lFunc);
 
 	if (Check(mBorderStyle, BORDER_SUNKEN) == true)
 	{
@@ -425,11 +420,6 @@ void Window::RemoveChild(Component* pChild, int pLayer)
 	mClientRect->RemoveChild(pChild, pLayer);
 }
 
-Component* Window::GetChild(const str& pName, int pLayer)
-{
-	return mClientRect->GetChild(pName, pLayer);
-}
-
 int Window::GetNumChildren() const
 {
 	return mClientRect->GetNumChildren();
@@ -473,7 +463,7 @@ void Window::SetActive(bool pActive)
 	}
 }
 
-bool Window::OnChar(tchar pChar)
+bool Window::OnChar(wchar_t pChar)
 {
 	bool lOk;
 	if (pChar == _T('\t'))

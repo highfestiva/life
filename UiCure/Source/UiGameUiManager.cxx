@@ -220,7 +220,7 @@ bool GameUiManager::OpenRest()
 			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight, lFontFlags);
 			if (lFontId != UiTbc::FontManager::INVALID_FONTID)
 			{
-				v_set(mVariableScope, RTVAR_UI_2D_FONT, lFontNames[x]);
+				v_override(mVariableScope, RTVAR_UI_2D_FONT, lFontNames[x]);
 			}
 		}
 	}
@@ -568,7 +568,7 @@ void GameUiManager::SetMasterFont()
 	}
 }
 
-void GameUiManager::PrintText(int pX, int pY, const str& pText)
+void GameUiManager::PrintText(int pX, int pY, const wstr& pText)
 {
 	//mPainter->ResetClippingRect();
 	mPainter->SetColor(Color(255, 255, 255, 255), 0);

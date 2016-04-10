@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -31,10 +31,10 @@ public:
 	void SetPreClickTarget(Action pPreClickTarget);
 	void SetPostClickTarget(Action pPostClickTarget);
 	virtual void Center();
-	Label* SetQueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId);
+	Label* SetQueryLabel(const wstr& pText, UiTbc::FontManager::FontId pFontId);
 	void SetQueryLabel(Label* pLabel);
-	void UpdateQueryLabel(const str& pText, const Color& pColor);
-	void AddButton(int pTag, const str& pText, bool pAutoDismiss);	// Tag < 0 to layout yourself.
+	void UpdateQueryLabel(const wstr& pText, const Color& pColor);
+	void AddButton(int pTag, const wstr& pText, bool pAutoDismiss);	// Tag < 0 to layout yourself.
 	void AddButton(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
 	void SetButtonHandler(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
 	bool IsAutoDismissButton(Button* pButton) const;

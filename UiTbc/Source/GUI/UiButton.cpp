@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -15,8 +15,8 @@ namespace UiTbc
 
 
 
-Button::Button(const str& pName):
-	Window(pName),
+Button::Button(const wstr& pText):
+	Parent(),
 	mOnPress(0),
 	mOnRelease(0),
 	mOnClick(0),
@@ -25,7 +25,7 @@ Button::Button(const str& pName):
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
 	mDisabledIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
-	mText(_T("")),
+	mText(),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mImageButton(false),
@@ -34,11 +34,11 @@ Button::Button(const str& pName):
 {
 	SetBaseColor(GetColor());
 	Init();
-	SetText(pName);
+	SetText(pText);
 }
 
-Button::Button(const Color& pColor, const str& pName):
-	Window(pColor, pName),
+Button::Button(const Color& pColor, const wstr& pText):
+	Parent(pColor),
 	mOnPress(0),
 	mOnRelease(0),
 	mOnClick(0),
@@ -47,7 +47,7 @@ Button::Button(const Color& pColor, const str& pName):
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
 	mDisabledIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
-	mText(_T("")),
+	mText(pText),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mImageButton(false),
@@ -56,12 +56,11 @@ Button::Button(const Color& pColor, const str& pName):
 {
 	SetBaseColor(GetColor());
 	Init();
-	SetText(pName);
+	SetText(pText);
 }
 
-Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Color& pColor,
-	const str& pName):
-	Window((pShadeFunc == BorderComponent::LINEAR ? Parent::BORDER_LINEARSHADING : 0), pBorderWidth, pColor, pName),
+Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Color& pColor, const wstr& pText):
+	Parent((pShadeFunc == BorderComponent::LINEAR ? Parent::BORDER_LINEARSHADING : 0), pBorderWidth, pColor),
 	mOnPress(0),
 	mOnRelease(0),
 	mOnClick(0),
@@ -70,7 +69,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
 	mDisabledIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
-	mText(_T("")),
+	mText(pText),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mImageButton(false),
@@ -79,14 +78,14 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 {
 	SetBaseColor(GetColor());
 	Init();
-	SetText(pName);
+	SetText(pText);
 }
 
 Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImageID,
 	Painter::ImageID pReleasedActiveImageID,	// Mouse over.
 	Painter::ImageID pPressedActiveImageID, Painter::ImageID pReleasingImageID,
-	Painter::ImageID pPressingImageID, const str& pName):
-	Window(pReleasedImageID, pName),
+	Painter::ImageID pPressingImageID, const wstr& pText):
+	Parent(pReleasedImageID),
 	mOnPress(0),
 	mOnRelease(0),
 	mOnClick(0),
@@ -101,7 +100,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
 	mDisabledIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
-	mText(_T("")),
+	mText(pText),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mImageButton(true),
@@ -110,7 +109,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 {
 	SetBaseColor(GetColor());
 	Init();
-	SetText(pName);
+	SetText(pText);
 }
 
 Button::~Button()
@@ -542,7 +541,7 @@ Painter::ImageID Button::GetCurrentIcon() const
 	return mIconID;
 }
 
-void Button::SetText(const str& pText, 
+void Button::SetText(const wstr& pText,
 		     const Color& pTextColor,
 		     const Color& pBackgColor)
 {
@@ -554,7 +553,7 @@ void Button::SetText(const str& pText,
 	OnTextChanged();
 }
 
-const str& Button::GetText()
+const wstr& Button::GetText()
 {
 	return mText;
 }

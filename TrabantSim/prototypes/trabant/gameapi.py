@@ -263,10 +263,13 @@ def getsetoidcmd(name, oid, *args):
 
 def cmd(c, return_type=str, errhandle=None):
 	global sock
-	#print(c)
-	sock.send((c+'\n').encode())
 	try:
-		result = sock.recv(80*1024)
+		resend = True
+		while resend:
+			#print(c)
+			sock.send((c+'\n').encode())
+			result = sock.recv(80*1024)
+			resend = (result == b'\x16pause\x16')
 	except ConnectionResetError as e:
 		if errhandle:
 			errhandle(e)
