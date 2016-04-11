@@ -217,12 +217,14 @@ bool GameUiManager::OpenRest()
 		};
 		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
 		{
-			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight, lFontFlags);
-			if (lFontId != UiTbc::FontManager::INVALID_FONTID)
-			{
-				v_override(mVariableScope, RTVAR_UI_2D_FONT, lFontNames[x]);
-			}
+			lFont = lFontNames[x];
+			lFontId = mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
 		}
+		if (lFontId != UiTbc::FontManager::INVALID_FONTID)
+		{
+			v_override(mVariableScope, RTVAR_UI_2D_FONT, lFont);
+		}
+		mCurrentFontId = lFontId;
 	}
 	if (lOk)
 	{
@@ -541,7 +543,6 @@ void GameUiManager::ClearDepth()
 UiTbc::FontManager::FontId GameUiManager::SetScaleFont(float pScale)
 {
 	SetMasterFont();
-	mCurrentFontId = GetFontManager()->GetActiveFontId();
 	str lFont;
 	v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 	double lFontHeight;
@@ -564,7 +565,10 @@ void GameUiManager::SetMasterFont()
 	if (mCurrentFontId != UiTbc::FontManager::INVALID_FONTID)
 	{
 		mFontManager->SetActiveFont(mCurrentFontId);
-		mCurrentFontId = UiTbc::FontManager::INVALID_FONTID;
+	}
+	else
+	{
+		mCurrentFontId = mFontManager->GetActiveFontId();
 	}
 }
 
@@ -757,7 +761,7 @@ void GameUiManager::UpdateSettings()
 		v_get(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 		int lFontFlags;
 		v_get(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
-		mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
+		mCurrentFontId = mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
 	}
 
 	// --------------

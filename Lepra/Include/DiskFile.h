@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 //
 // NOTES:
@@ -30,6 +30,7 @@
 #ifdef LEPRA_POSIX
 #include <sys/types.h>
 #include <dirent.h>
+#include <glob.h>
 #endif // LEPRA_POSIX
 
 
@@ -69,6 +70,8 @@ public:
 #if defined LEPRA_WINDOWS
 			mFindHandle(-1),
 #elif defined LEPRA_POSIX
+			mGlobList(),
+			mGlobIndex(0xffff),
 #endif
 			mFileSpec(),
 			mName(),
@@ -120,6 +123,8 @@ public:
 #if defined LEPRA_WINDOWS
 		intptr_t mFindHandle;
 #elif defined LEPRA_POSIX
+		glob_t mGlobList;
+		size_t mGlobIndex;
 #else
 #error DiskFile::FindData is not properly implemented on this platform!
 #endif // LEPRA_POSIX

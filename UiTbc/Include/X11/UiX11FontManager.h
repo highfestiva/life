@@ -39,13 +39,23 @@ public:
 	virtual int GetCharOffset(wchar_t pChar) const;
 
 private:
-	typedef std::pair<int,int> CharWidthOffset;
+	struct CharWidthOffset
+	{
+		bool mSet;
+		int mWidth;
+		int mOffset;
+	};
 	typedef std::unordered_map<wchar_t, CharWidthOffset> CharPlacementMap;
 	struct X11Font: Font
 	{
 		FT_Face mX11Face;
 		wchar_t mX11LoadedCharFace;
+		CharWidthOffset mCharWidthOffset[128];
 		CharPlacementMap mCharPlacements;
+
+		X11Font();
+		bool GetCharWidth(wchar_t pChar, int& pWidth, int& pOffset);
+		void PutCharWidth(wchar_t pChar, int pWidth, int pOffset);
 	};
 
 	static strutil::strvec FindAllFontFiles(const str& pPath);

@@ -315,7 +315,7 @@ def _opencom(addr, retries):
 	_tryconnect(addr, 1)
 	if not sock:
 		_run_local_sim(addr)
-		_tryconnect(addr, 10 if proc else retries)
+		_tryconnect(addr, 50 if proc else retries)
 	if proc or sock:
 		try:
 			import atexit
@@ -374,7 +374,7 @@ def _tryconnect(addr, retries):
 		try:
 			if proc and attempt>1:
 				import time
-				time.sleep(1)
+				time.sleep(0.1)
 			sock = trabant.socket.socket()
 			if retries>1 and attempt==retries:
 				sock.settimeout(sock.timeout+1)

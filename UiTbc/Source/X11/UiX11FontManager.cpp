@@ -23,6 +23,46 @@ FontManager* FontManager::Create(UiLepra::DisplayManager* pDisplayManager)
 
 
 
+X11FontManager::X11Font::X11Font():
+	mX11LoadedCharFace(0)
+{
+	::memset(&mCharWidthOffset[0], sizeof(mCharWidthOffset), 0);
+}
+
+bool X11FontManager::X11Font::GetCharWidth(wchar_t pChar, int& pWidth, int& pOffset)
+{
+	if (pChar < 128)
+	{
+		pWidth  = mCharWidthOffset[pChar].mWidth;
+		pOffset = mCharWidthOffset[pChar].mOffset;
+		return mCharWidthOffset[pChar].mSet;
+	}
+	CharPlacementMap::const_iterator x = mCharPlacements.find(pChar);
+	if (x != mCharPlacements.end())
+	{
+		pWidth  = x->second.mWidth;
+		pOffset = x->second.mOffset;
+		return true;
+	}
+	return false;
+}
+
+void X11FontManager::X11Font::PutCharWidth(wchar_t pChar, int pWidth, int pOffset)
+{
+	if (pChar < 128)
+	{
+		mCharWidthOffset[pChar].mSet = true;
+		mCharWidthOffset[pChar].mWidth = pWidth;
+		mCharWidthOffset[pChar].mOffset = pOffset;
+	}
+	else
+	{
+		mCharPlacements[pChar] = {true, pWidth, pOffset};
+	}
+}
+
+
+
 X11FontManager::X11FontManager()
 {
 	FT_Init_FreeType(&mLibrary);
@@ -190,31 +230,34 @@ int X11FontManager::GetCharWidth(wchar_t pChar) const
 	}
 
 	X11Font* lFont = (X11Font*)mCurrentFont;
-	CharPlacementMap::const_iterator x = lFont->mCharPlacements.find(pChar);
-	if (x != lFont->mCharPlacements.end())
+	int lWidth;
+	int lOffset;
+	if (lFont->GetCharWidth(pChar, lWidth, lOffset))
 	{
-		return x->second.first;
+		return lWidth;
 	}
 	if (lFont->mX11LoadedCharFace != pChar)
 	{
 		FT_Load_Char(lFont->mX11Face, pChar, FT_LOAD_RENDER|FT_LOAD_TARGET_LCD|FT_LOAD_PEDANTIC|FT_LOAD_FORCE_AUTOHINT);
 		lFont->mX11LoadedCharFace = pChar;
 	}
-	const int lWidth = (lFont->mX11Face->glyph->metrics.horiAdvance - lFont->mX11Face->glyph->metrics.horiBearingX) / 64 + 1;
-	const int lOffset = (lFont->mX11Face->glyph->metrics.horiBearingX - 63) / 64;
-	lFont->mCharPlacements[pChar] = CharWidthOffset(lWidth, lOffset);
+	lWidth = (lFont->mX11Face->glyph->metrics.horiAdvance - lFont->mX11Face->glyph->metrics.horiBearingX) / 64 + 1;
+	lOffset = (lFont->mX11Face->glyph->metrics.horiBearingX - 63) / 64;
+	lFont->PutCharWidth(pChar, lWidth, lOffset);
 	return lWidth;
 }
 
 int X11FontManager::GetCharOffset(wchar_t pChar) const
 {
 	X11Font* lFont = (X11Font*)mCurrentFont;
-	CharPlacementMap::const_iterator x = lFont->mCharPlacements.find(pChar);
-	if (x == lFont->mCharPlacements.end())
+	int lWidth;
+	int lOffset;
+	if (!lFont->GetCharWidth(pChar, lWidth, lOffset))
 	{
 		GetCharWidth(pChar);
+		lFont->GetCharWidth(pChar, lWidth, lOffset);
 	}
-	return std::min(0, lFont->mCharPlacements[pChar].second);
+	return std::min(0, lOffset);
 }
 
 

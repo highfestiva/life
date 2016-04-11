@@ -14,6 +14,15 @@
   "buildType": "",
   "arguments": [],
   "parentProject": ""
+ }, {
+  "name": "Profile",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
  }]]]>
     </Plugin>
   </Plugins>
@@ -218,7 +227,7 @@
       <File Name="../ThirdParty/lpng1212/pngtrans.c"/>
       <File Name="../ThirdParty/lpng1212/pngget.c"/>
       <File Name="../ThirdParty/lpng1212/pngwutil.c"/>
-      <File Name="../ThirdParty/lpng1212/pngtest.c" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/lpng1212/pngtest.c" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/lpng1212/pngread.c"/>
       <File Name="../ThirdParty/lpng1212/png.c"/>
       <File Name="../ThirdParty/lpng1212/pngconf.h"/>
@@ -289,13 +298,13 @@
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/lpc.h"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/masking.h"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/mdct.h"/>
-        <File Name="../ThirdParty/libvorbis-1.3.2/lib/tone.c" ExcludeProjConfig="Debug"/>
+        <File Name="../ThirdParty/libvorbis-1.3.2/lib/tone.c" ExcludeProjConfig="Debug;Profile;Release"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/smallft.h"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/misc.h"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/window.c"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/bitrate.c"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/mdct.c"/>
-        <File Name="../ThirdParty/libvorbis-1.3.2/lib/psytune.c" ExcludeProjConfig="Debug"/>
+        <File Name="../ThirdParty/libvorbis-1.3.2/lib/psytune.c" ExcludeProjConfig="Debug;Profile;Release"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/lpc.c"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/scales.h"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/mapping0.c"/>
@@ -303,7 +312,7 @@
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/res0.c"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/registry.h"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/lsp.c"/>
-        <File Name="../ThirdParty/libvorbis-1.3.2/lib/barkmel.c" ExcludeProjConfig="Debug"/>
+        <File Name="../ThirdParty/libvorbis-1.3.2/lib/barkmel.c" ExcludeProjConfig="Debug;Profile;Release"/>
         <File Name="../ThirdParty/libvorbis-1.3.2/lib/smallft.c"/>
       </VirtualDirectory>
       <VirtualDirectory Name="include">
@@ -583,10 +592,10 @@
         </VirtualDirectory>
         <VirtualDirectory Name="src">
           <VirtualDirectory Name="ou">
-            <File Name="../ThirdParty/ode-0.11.1/ou/src/ou/threadlocalstorage.cpp" ExcludeProjConfig="Debug"/>
-            <File Name="../ThirdParty/ode-0.11.1/ou/src/ou/atomic.cpp" ExcludeProjConfig="Debug"/>
-            <File Name="../ThirdParty/ode-0.11.1/ou/src/ou/customization.cpp" ExcludeProjConfig="Debug"/>
-            <File Name="../ThirdParty/ode-0.11.1/ou/src/ou/malloc.cpp" ExcludeProjConfig="Debug"/>
+            <File Name="../ThirdParty/ode-0.11.1/ou/src/ou/threadlocalstorage.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+            <File Name="../ThirdParty/ode-0.11.1/ou/src/ou/atomic.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+            <File Name="../ThirdParty/ode-0.11.1/ou/src/ou/customization.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+            <File Name="../ThirdParty/ode-0.11.1/ou/src/ou/malloc.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
           </VirtualDirectory>
         </VirtualDirectory>
       </VirtualDirectory>
@@ -597,22 +606,22 @@
     <VirtualDirectory Name="happyhttp-0.1">
       <File Name="../ThirdParty/happyhttp-0.1/happyhttp.cpp"/>
       <File Name="../ThirdParty/happyhttp-0.1/happyhttp.h"/>
-      <File Name="../ThirdParty/happyhttp-0.1/test.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/happyhttp-0.1/test.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
     </VirtualDirectory>
     <VirtualDirectory Name="jpeg-6b">
       <File Name="../ThirdParty/jpeg-6b/jpegint.h"/>
-      <File Name="../ThirdParty/jpeg-6b/jpegtran.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/jpegtran.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/rdgif.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jquant1.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jdtrans.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/rdjpgcom.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/rdjpgcom.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/jcdctmgr.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/jmemansi.cpp" ExcludeProjConfig="Debug"/>
-      <File Name="../ThirdParty/jpeg-6b/ansi2knr.cpp" ExcludeProjConfig="Debug"/>
-      <File Name="../ThirdParty/jpeg-6b/jdatadst.org.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/jmemansi.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+      <File Name="../ThirdParty/jpeg-6b/ansi2knr.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+      <File Name="../ThirdParty/jpeg-6b/jdatadst.org.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/jdmainct.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jdct.h"/>
-      <File Name="../ThirdParty/jpeg-6b/djpeg.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/djpeg.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/jmemsys.h"/>
       <File Name="../ThirdParty/jpeg-6b/jdhuff.h"/>
       <File Name="../ThirdParty/jpeg-6b/jcomapi.cpp"/>
@@ -625,7 +634,7 @@
       <File Name="../ThirdParty/jpeg-6b/jdcoefct.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/wrgif.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jcinit.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/jmemmac.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/jmemmac.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/rdrle.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jdinput.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jcmainct.cpp"/>
@@ -637,24 +646,24 @@
       <File Name="../ThirdParty/jpeg-6b/jccoefct.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jquant2.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/rdppm.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/cjpeg.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/cjpeg.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/jinclude.h"/>
       <File Name="../ThirdParty/jpeg-6b/jdhuff.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/transupp.h"/>
       <File Name="../ThirdParty/jpeg-6b/jdphuff.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jfdctfst.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/rdtarga.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/cdjpeg.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/cdjpeg.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/wrbmp.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/cdjpeg.h" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/cdjpeg.h" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/jpeglib.h"/>
       <File Name="../ThirdParty/jpeg-6b/jdpostct.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/wrrle.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/wrjpgcom.cpp" ExcludeProjConfig="Debug"/>
-      <File Name="../ThirdParty/jpeg-6b/jmemname.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/wrjpgcom.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+      <File Name="../ThirdParty/jpeg-6b/jmemname.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/cderror.h"/>
       <File Name="../ThirdParty/jpeg-6b/jcprepct.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/ckconfig.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/ckconfig.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/jfdctflt.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jcmarker.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jversion.h"/>
@@ -673,7 +682,7 @@
       <File Name="../ThirdParty/jpeg-6b/jidctred.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jccolor.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jchuff.h"/>
-      <File Name="../ThirdParty/jpeg-6b/jmemdos.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/jmemdos.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/jpeg-6b/jdapimin.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jcapistd.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jctrans.cpp"/>
@@ -686,21 +695,21 @@
       <File Name="../ThirdParty/jpeg-6b/jcphuff.cpp"/>
       <File Name="../ThirdParty/jpeg-6b/jconfig.h"/>
       <File Name="../ThirdParty/jpeg-6b/jmemmgr.cpp"/>
-      <File Name="../ThirdParty/jpeg-6b/example.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/jpeg-6b/example.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
     </VirtualDirectory>
     <VirtualDirectory Name="minizip">
-      <File Name="../ThirdParty/minizip/iowin32.h" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/minizip/iowin32.h" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/minizip/zip.c"/>
       <File Name="../ThirdParty/minizip/ioapi.c"/>
       <File Name="../ThirdParty/minizip/unzip.h"/>
       <File Name="../ThirdParty/minizip/unzip.c"/>
       <File Name="../ThirdParty/minizip/ioapi.h"/>
-      <File Name="../ThirdParty/minizip/miniunz.c" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/minizip/miniunz.c" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/minizip/zip.h"/>
-      <File Name="../ThirdParty/minizip/iowin32.c" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/minizip/iowin32.c" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/minizip/mztools.c"/>
       <File Name="../ThirdParty/minizip/crypt.h"/>
-      <File Name="../ThirdParty/minizip/minizip.c" ExcludeProjConfig="Debug"/>
+      <File Name="../ThirdParty/minizip/minizip.c" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../ThirdParty/minizip/mztools.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="FastDelegate">
@@ -723,10 +732,10 @@
         <File Name="../Lepra/Source/Posix/PosixThread.cxx"/>
       </VirtualDirectory>
       <VirtualDirectory Name="Win32">
-        <File Name="../Lepra/Source/Win32/Win32AntiCrack.cpp" ExcludeProjConfig="Debug"/>
-        <File Name="../Lepra/Source/Win32/Win32Thread.cpp" ExcludeProjConfig="Debug"/>
-        <File Name="../Lepra/Source/Win32/Win32BusLock.cpp" ExcludeProjConfig="Debug"/>
-        <File Name="../Lepra/Source/Win32/Win32SystemManager.cpp" ExcludeProjConfig="Debug"/>
+        <File Name="../Lepra/Source/Win32/Win32AntiCrack.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../Lepra/Source/Win32/Win32Thread.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../Lepra/Source/Win32/Win32BusLock.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../Lepra/Source/Win32/Win32SystemManager.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
         <File Name="../Lepra/Source/Win32/pch.h"/>
       </VirtualDirectory>
       <File Name="../Lepra/Source/ResourceTracker.cpp"/>
@@ -918,13 +927,13 @@
     </VirtualDirectory>
     <VirtualDirectory Name="LepraTestApp">
       <File Name="../Lepra/LepraTestApp/LepraTest.cpp"/>
-      <File Name="../Lepra/LepraTestApp/LepraTestApp.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../Lepra/LepraTestApp/LepraTestApp.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../Lepra/LepraTestApp/TestThreading.cpp"/>
       <File Name="../Lepra/LepraTestApp/TestBinTree.cpp"/>
       <File Name="../Lepra/LepraTestApp/TestUDPSockets.cpp"/>
       <File Name="../Lepra/LepraTestApp/TestSkipList.cpp"/>
       <File Name="../Lepra/LepraTestApp/pch.h"/>
-      <File Name="../Lepra/LepraTestApp/TestBigInt.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../Lepra/LepraTestApp/TestBigInt.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../Lepra/LepraTestApp/TestLooseTree.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
@@ -979,8 +988,8 @@
         <File Name="../UiTbc/Source/X11/pch.h"/>
       </VirtualDirectory>
       <VirtualDirectory Name="Win32">
-        <File Name="../UiTbc/Source/Win32/UiWin32FontManager.cpp" ExcludeProjConfig="Debug"/>
-        <File Name="../UiTbc/Source/Win32/UiWin32DirectX9Painter.cpp" ExcludeProjConfig="Debug"/>
+        <File Name="../UiTbc/Source/Win32/UiWin32FontManager.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiTbc/Source/Win32/UiWin32DirectX9Painter.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
         <File Name="../UiTbc/Source/Win32/pch.h"/>
       </VirtualDirectory>
       <VirtualDirectory Name="GUI">
@@ -1018,7 +1027,7 @@
         <File Name="../UiTbc/Source/GUI/UiCustomButton.cpp"/>
       </VirtualDirectory>
       <VirtualDirectory Name="SoftwarePainter">
-        <File Name="../UiTbc/Source/SoftwarePainter/UiSoftwarePainter_DrawCircle.cpp" ExcludeProjConfig="Debug"/>
+        <File Name="../UiTbc/Source/SoftwarePainter/UiSoftwarePainter_DrawCircle.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
         <File Name="../UiTbc/Source/SoftwarePainter/pch.h"/>
       </VirtualDirectory>
       <File Name="../UiTbc/Source/UiFontManager.cpp"/>
@@ -1048,8 +1057,8 @@
       <File Name="../UiTbc/Source/UiTexture.cpp"/>
       <File Name="../UiTbc/Source/UiDynamicRenderer.cpp"/>
       <File Name="../UiTbc/Source/UiOpenGLMaterials.cxx"/>
-      <File Name="../UiTbc/Source/UiASEFileConverter.cpp" ExcludeProjConfig="Debug"/>
-      <File Name="../UiTbc/Source/UiASELoader.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../UiTbc/Source/UiASEFileConverter.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+      <File Name="../UiTbc/Source/UiASELoader.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../UiTbc/Source/UiOpenGLPainter.cxx"/>
       <File Name="../UiTbc/Source/UiFontTexture.cpp"/>
       <File Name="../UiTbc/Source/UiTriangleBasedGeometry.cpp"/>
@@ -1059,7 +1068,7 @@
       <File Name="../UiTbc/Source/UiMaterial.cpp"/>
       <File Name="../UiTbc/Source/UiOpenGLMaterial_TextureAndLightmapShaders.cxx"/>
       <VirtualDirectory Name="Mac">
-        <File Name="../UiTbc/Source/Mac/UiMacFontManager.mm" ExcludeProjConfig="Debug"/>
+        <File Name="../UiTbc/Source/Mac/UiMacFontManager.mm" ExcludeProjConfig="Debug;Profile;Release"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="Include">
@@ -1116,7 +1125,7 @@
       <File Name="../UiTbc/Include/UiAnimatedGeometry.h"/>
       <File Name="../UiTbc/Include/UiGeometryBatch.h"/>
       <File Name="../UiTbc/Include/UiGeometry2D.h"/>
-      <File Name="../UiTbc/Include/UiASEFileConverter.h" ExcludeProjConfig="Debug"/>
+      <File Name="../UiTbc/Include/UiASEFileConverter.h" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../UiTbc/Include/UiBasicMeshCreator.h"/>
       <File Name="../UiTbc/Include/UiShadowVolume.h"/>
       <File Name="../UiTbc/Include/UiParticleRenderer.h"/>
@@ -1124,7 +1133,7 @@
       <File Name="../UiTbc/Include/UiTBC.h"/>
       <File Name="../UiTbc/Include/UiDynamicRenderer.h"/>
       <File Name="../UiTbc/Include/UiOpenGLPainter.h"/>
-      <File Name="../UiTbc/Include/UiASELoader.h" ExcludeProjConfig="Debug"/>
+      <File Name="../UiTbc/Include/UiASELoader.h" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../UiTbc/Include/UiOpenGLMaterials.h"/>
       <File Name="../UiTbc/Include/UiUVMapper.h"/>
       <File Name="../UiTbc/Include/UiRendererFactory.h"/>
@@ -1145,7 +1154,7 @@
     <VirtualDirectory Name="UiTBCTestApp">
       <File Name="../UiTbc/UiTBCTestApp/RotationalAgreementTest.h"/>
       <File Name="../UiTbc/UiTBCTestApp/UiTbcTest.cpp"/>
-      <File Name="../UiTbc/UiTBCTestApp/UiTbcTestApp.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../UiTbc/UiTBCTestApp/UiTbcTestApp.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../UiTbc/UiTBCTestApp/RotationalAgreementTest.cpp"/>
       <File Name="../UiTbc/UiTBCTestApp/pch.h"/>
       <File Name="../UiTbc/UiTBCTestApp/TbcTest.cpp"/>
@@ -1264,15 +1273,15 @@
         <File Name="../UiLepra/Source/X11/UiX11DisplayManager.cpp"/>
       </VirtualDirectory>
       <VirtualDirectory Name="Win32">
-        <File Name="../UiLepra/Source/Win32/UiWin32Core.cpp" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Win32/UiWin32Input.cpp" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Win32/UiWin32OpenGLDisplay.cpp" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Win32/UiWin32DisplayManager.cpp" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Win32/UiWin32GDIDisplay.cpp" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Win32/UiWin32Core.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Win32/UiWin32Input.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Win32/UiWin32OpenGLDisplay.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Win32/UiWin32DisplayManager.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Win32/UiWin32GDIDisplay.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
         <File Name="../UiLepra/Source/Win32/pch.h"/>
-        <File Name="../UiLepra/Source/Win32/UiWin32DirectXDisplay.cpp" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Win32/UiWin32DirectXDisplay.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       </VirtualDirectory>
-      <File Name="../UiLepra/Source/UiSoundManagerFMod.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../UiLepra/Source/UiSoundManagerFMod.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../UiLepra/Source/UiSoundManagerOpenAL.cpp"/>
       <File Name="../UiLepra/Source/UiLepra.cpp"/>
       <File Name="../UiLepra/Source/UiOpenGLExtensions.cxx"/>
@@ -1287,13 +1296,13 @@
       <File Name="../UiLepra/Source/UiSoundStream.cpp"/>
       <File Name="../UiLepra/Source/UiTouchstick.cpp"/>
       <VirtualDirectory Name="Mac">
-        <File Name="../UiLepra/Source/Mac/EAGLView.mm" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Mac/RotatingController.mm" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Mac/UiIosInput.mm" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Mac/UiMacCore.mm" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Mac/UiMacDisplayManager.mm" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Mac/UiMacInput.mm" ExcludeProjConfig="Debug"/>
-        <File Name="../UiLepra/Source/Mac/UiMacOpenGLDisplay.mm" ExcludeProjConfig="Debug"/>
+        <File Name="../UiLepra/Source/Mac/EAGLView.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Mac/RotatingController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Mac/UiIosInput.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Mac/UiMacCore.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Mac/UiMacDisplayManager.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Mac/UiMacInput.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../UiLepra/Source/Mac/UiMacOpenGLDisplay.mm" ExcludeProjConfig="Debug;Profile;Release"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="Include">
@@ -1344,7 +1353,7 @@
     </VirtualDirectory>
     <VirtualDirectory Name="LepraTestApp">
       <File Name="../UiLepra/LepraTestApp/UiLepraTest.cpp"/>
-      <File Name="../UiLepra/LepraTestApp/UiLepraTestApp.cpp" ExcludeProjConfig="Debug"/>
+      <File Name="../UiLepra/LepraTestApp/UiLepraTestApp.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
       <File Name="../UiLepra/LepraTestApp/pch.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
@@ -1361,6 +1370,102 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="clang++" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g -Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE -DDEBUG" C_Options="-DPNG_NO_ASSEMBLER_CODE -DDEBUG" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../ThirdParty/happyhttp-0.1"/>
+        <IncludePath Value="../ThirdParty/utf8cpp"/>
+        <IncludePath Value="../ThirdParty/ode-0.11.1/include"/>
+        <IncludePath Value="../ThirdParty/ode-0.11.1/ode/src"/>
+        <IncludePath Value="../ThirdParty/ode-0.11.1/OPCODE"/>
+        <IncludePath Value="../ThirdParty/ChibiXM"/>
+        <IncludePath Value="../ThirdParty/libvorbis-1.3.2/include"/>
+        <IncludePath Value="../ThirdParty/libvorbis-1.3.2/lib"/>
+        <IncludePath Value="../ThirdParty/libogg-1.2.2/include"/>
+        <IncludePath Value="/usr/include/freetype2"/>
+      </Compiler>
+      <Linker Options="-O0" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Profile" CompilerType="clang++" DebuggerType="" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-pg;-g -Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE -DDEBUG" C_Options="-DPNG_NO_ASSEMBLER_CODE -DDEBUG" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../ThirdParty/happyhttp-0.1"/>
+        <IncludePath Value="../ThirdParty/utf8cpp"/>
+        <IncludePath Value="../ThirdParty/ode-0.11.1/include"/>
+        <IncludePath Value="../ThirdParty/ode-0.11.1/ode/src"/>
+        <IncludePath Value="../ThirdParty/ode-0.11.1/OPCODE"/>
+        <IncludePath Value="../ThirdParty/ChibiXM"/>
+        <IncludePath Value="../ThirdParty/libvorbis-1.3.2/include"/>
+        <IncludePath Value="../ThirdParty/libvorbis-1.3.2/lib"/>
+        <IncludePath Value="../ThirdParty/libogg-1.2.2/include"/>
+        <IncludePath Value="/usr/include/freetype2"/>
+      </Compiler>
+      <Linker Options="-pg;-O0" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Profile" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="clang++" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g -Wall -Wno-unknown-pragmas -Wno-unused-local-typedef -Wno-switch -DPNG_NO_ASSEMBLER_CODE -DDEBUG" C_Options="-DPNG_NO_ASSEMBLER_CODE -DDEBUG" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value="../ThirdParty/happyhttp-0.1"/>

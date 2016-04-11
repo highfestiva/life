@@ -337,7 +337,10 @@ void Thread::Sleep(unsigned int pMicroSeconds)
 	{
 		return;
 	}
-	::usleep(pMicroSeconds);
+	const int lSeconds = pMicroSeconds/1000000;
+	const int lNanoSeconds = (pMicroSeconds-lSeconds*1000000) * 1000;
+	timespec t = {lSeconds, lNanoSeconds};
+	::nanosleep(&t, 0);
 }
 
 bool Thread::Start()

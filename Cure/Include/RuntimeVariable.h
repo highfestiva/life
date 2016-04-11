@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -9,8 +9,8 @@
 #include "../../Lepra/Include/ConsoleCommandManager.h"
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/Log.h"
+#include "../../Lepra/Include/SpinLock.h"
 #include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/Thread.h"
 #include "Cure.h"
 #include "RuntimeVariableName.h"
 
@@ -148,7 +148,7 @@ private:
 
 	typedef std::unordered_map<HashedString, RuntimeVariable*, HashedStringHasher> VariableTable;
 	RuntimeVariableScope* mParentScope;
-	mutable Lock mLock;
+	mutable SpinLock mLock;
 	VariableTable mVariableTable;
 	int mOwnerSeed;
 

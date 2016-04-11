@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -99,7 +99,7 @@ void ConsoleManager::InitCommands()
 	GetConsoleCommandManager()->SetComment(_T("//"));
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(GetVariableScope(), _T("#")));
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("#/")));
-	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("#.")));
+	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(GetVariableScope(), _T("#.")));
 
 	ExecuteCommand(_T("alias trace-log-level \"set-stdout-log-level 0; set-subsystem-log-level 0\""));
 	ExecuteCommand(_T("alias debug-log-level \"set-stdout-log-level 1; set-subsystem-log-level 1\""));

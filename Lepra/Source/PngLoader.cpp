@@ -1,6 +1,6 @@
 /*
 	Class:  PngLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -144,6 +144,10 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 	png_set_sig_bytes(lPNG, 8);
 	png_read_png(lPNG, lInfo, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, 0);
 
+	const int lPitch = pCanvas.GetPitch();
+	const int lPixelByteSize = pCanvas.GetPixelByteSize();
+	const int lWidth = pCanvas.GetWidth();
+	const int lHeight = pCanvas.GetHeight();
 	int i;
 	switch(png_get_color_type(lPNG, lInfo))
 	{
@@ -151,6 +155,7 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		{
 			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_8_BIT);
 			pCanvas.CreateBuffer();
+			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
 
 			Color lPalette[256];
 			for (i = 0; i < 256; i++)
@@ -164,9 +169,9 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 			pCanvas.SetPalette(lPalette);
 
 			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (i = 0; i < (int)pCanvas.GetHeight(); i++)
+			for (i = 0; i < (int)lHeight; i++)
 			{
-				memcpy(&((uint8*)pCanvas.GetBuffer())[i * pCanvas.GetPitch() * pCanvas.GetPixelByteSize()], lRow[i], pCanvas.GetWidth() * pCanvas.GetPixelByteSize());
+				memcpy(&lBuffer[i * lPitch * lPixelByteSize], lRow[i], lWidth * lPixelByteSize);
 			}
 		}
 		break;
@@ -174,6 +179,7 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		{
 			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_32_BIT);
 			pCanvas.CreateBuffer();
+			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
 
 			Color lPalette[256];
 			for (i = 0; i < 256; i++)
@@ -187,12 +193,12 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 			pCanvas.SetPalette(lPalette);
 
 			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (int y = 0; y < (int)pCanvas.GetHeight(); y++)
+			for (int y = 0; y < (int)lHeight; y++)
 			{
-				uint8* lDstRow = &((uint8*)pCanvas.GetBuffer())[y * pCanvas.GetPitch() * pCanvas.GetPixelByteSize()];
-				for (int x = 0; x < (int)pCanvas.GetWidth(); x++)
+				uint8* lDstRow = &lBuffer[y * lPitch * lPixelByteSize];
+				for (int x = 0; x < (int)lWidth; x++)
 				{
-					int lIndex = x * pCanvas.GetPixelByteSize();
+					int lIndex = x * lPixelByteSize;
 					lDstRow[lIndex + 0] = lRow[y][x * 2 + 0];
 					lDstRow[lIndex + 1] = lRow[y][x * 2 + 0];
 					lDstRow[lIndex + 2] = lRow[y][x * 2 + 0];
@@ -205,6 +211,7 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		{
 			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_8_BIT);
 			pCanvas.CreateBuffer();
+			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
 
 			int i;
 			int lNumEntries;
@@ -231,9 +238,9 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 			pCanvas.SetPalette(lPalette);
 
 			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (int i = 0; i < (int)pCanvas.GetHeight(); i++)
+			for (int i = 0; i < (int)lHeight; i++)
 			{
-				memcpy(&((uint8*)pCanvas.GetBuffer())[i * pCanvas.GetPitch() * pCanvas.GetPixelByteSize()], lRow[i], pCanvas.GetWidth() * pCanvas.GetPixelByteSize());
+				memcpy(&lBuffer[i * lPitch * lPixelByteSize], lRow[i], lWidth * lPixelByteSize);
 			}
 		}
 		break;
@@ -241,10 +248,11 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		{
 			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_24_BIT);
 			pCanvas.CreateBuffer();
+			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
 			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (i = 0; i < (int)pCanvas.GetHeight(); i++)
+			for (i = 0; i < (int)lHeight; i++)
 			{
-				memcpy(&((uint8*)pCanvas.GetBuffer())[i * pCanvas.GetPitch() * pCanvas.GetPixelByteSize()], lRow[i], pCanvas.GetWidth() * pCanvas.GetPixelByteSize());
+				memcpy(&lBuffer[i * lPitch * lPixelByteSize], lRow[i], lWidth * lPixelByteSize);
 			}
 		}
 		break;
@@ -252,10 +260,11 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		{
 			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_32_BIT);
 			pCanvas.CreateBuffer();
+			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
 			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (i = 0; i < (int)pCanvas.GetHeight(); i++)
+			for (i = 0; i < (int)lHeight; i++)
 			{
-				memcpy(&((uint8*)pCanvas.GetBuffer())[i * pCanvas.GetPitch() * pCanvas.GetPixelByteSize()], lRow[i], pCanvas.GetWidth() * pCanvas.GetPixelByteSize());
+				memcpy(&lBuffer[i * lPitch * lPixelByteSize], lRow[i], lWidth * lPixelByteSize);
 			}
 		}
 		break;

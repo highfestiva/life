@@ -3,17 +3,20 @@
   <Project Name="Life" Path="Life.project" Active="No"/>
   <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
+    <WorkspaceConfiguration Name="Debug" Selected="no">
       <Environment/>
-      <Project Name="Life" ConfigName="Debug"/>
       <Project Name="Life" ConfigName="Debug"/>
       <Project Name="TrabantSim" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
-      <Project Name="Life" ConfigName="Debug"/>
-      <Project Name="Life" ConfigName="Debug"/>
       <Project Name="TrabantSim" ConfigName="Release"/>
+      <Project Name="Life" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Profile" Selected="yes">
+      <Environment/>
+      <Project Name="TrabantSim" ConfigName="Profile"/>
+      <Project Name="Life" ConfigName="Profile"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

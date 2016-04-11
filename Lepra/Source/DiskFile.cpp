@@ -19,7 +19,6 @@
 #include <io.h>
 #elif defined LEPRA_POSIX
 #include <sys/stat.h>
-#include <glob.h>
 #include <unistd.h>
 #endif // Windows / Posix
 
@@ -534,12 +533,10 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 #if defined LEPRA_WINDOWS
 	_finddata_t lData;
 	pFindData.mFindHandle = _findfirst(astrutil::Encode(pFileSpec).c_str(), &lData);
-
 	if (pFindData.mFindHandle == -1)
 	{
 		lOk = false;
 	}
-
 	if (lOk == true)
 	{
 		str lPath = Path::SplitPath(pFileSpec)[0];
@@ -554,23 +551,23 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 		pFindData.mTime  = lData.time_write;
 	}
 #elif defined LEPRA_POSIX
-	glob_t lGlobList;
-	lGlobList.gl_offs = 1;
-	::glob(astrutil::Encode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
-	if (lGlobList.gl_pathc >= 1)
+	pFindData.mGlobList.gl_offs = 0;
+	::glob(astrutil::Encode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &pFindData.mGlobList);
+	if (pFindData.mGlobList.gl_pathc >= 1)
 	{
-		pFindData.mName = strutil::Encode(lGlobList.gl_pathv[1]);
+		pFindData.mName = strutil::Encode(pFindData.mGlobList.gl_pathv[0]);
 		struct stat lFileInfo;
-		::stat(lGlobList.gl_pathv[1], &lFileInfo);	// TODO: error check.
+		::stat(pFindData.mGlobList.gl_pathv[1], &lFileInfo);	// TODO: error check.
 		pFindData.mSize = lFileInfo.st_size;
 		pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
 		pFindData.mTime = lFileInfo.st_mtime;
+		pFindData.mGlobIndex = 2;
 	}
 	else
 	{
 		lOk = false;
+		pFindData.mGlobIndex = 0xffff;
 	}
-	::globfree(&lGlobList);
 #else
 #error DiskFile::FindFirst() not implemented on this platform!
 #endif
@@ -598,30 +595,24 @@ bool DiskFile::FindNext(FindData& pFindData)
 	}
 #elif defined LEPRA_POSIX
 	lOk = false;
-	glob_t lGlobList;
-	lGlobList.gl_offs = 1;
-	::glob(astrutil::Encode(pFindData.mFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
-	for (size_t x = 1; x <= lGlobList.gl_pathc; ++x)
+	if (pFindData.mGlobIndex < pFindData.mGlobList.gl_pathc)
 	{
-		if (strutil::Encode(lGlobList.gl_pathv[x]) == pFindData.mName)
-		{
-			++x;
-			if (x <= lGlobList.gl_pathc)
-			{
-				lOk = true;
-				pFindData.mName = strutil::Encode(lGlobList.gl_pathv[x]);
-				struct stat lFileInfo;
-				::stat(lGlobList.gl_pathv[x], &lFileInfo);	// TODO: error check.
-				pFindData.mSize = lFileInfo.st_size;
-				pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
-				pFindData.mTime = lFileInfo.st_mtime;
-				break;
-			}
-		}
+		lOk = true;
+		pFindData.mName = strutil::Encode(pFindData.mGlobList.gl_pathv[pFindData.mGlobIndex]);
+		struct stat lFileInfo;
+		::stat(pFindData.mGlobList.gl_pathv[pFindData.mGlobIndex], &lFileInfo);	// TODO: error check.
+		pFindData.mSize = lFileInfo.st_size;
+		pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
+		pFindData.mTime = lFileInfo.st_mtime;
+		++pFindData.mGlobIndex;
 	}
-	::globfree(&lGlobList);
+	else if (pFindData.mGlobIndex != 0xffff)
+	{
+		::globfree(&pFindData.mGlobList);
+		pFindData.mGlobIndex = 0xffff;
+	}
 #else
-#error DiskFile::FindFirst() not implemented on this platform!
+#error DiskFile::FindNext() not implemented on this platform!
 #endif
 
 	if (!lOk)

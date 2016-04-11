@@ -1564,13 +1564,6 @@ void TrabantSimManager::DrawStick(Touchstick* pStick, bool pIsSloppy)
 
 
 
-Cure::RuntimeVariableScope* TrabantSimManager::GetVariableScope() const
-{
-	return (Parent::GetVariableScope());
-}
-
-
-
 bool TrabantSimManager::InitializeUniverse()
 {
 	mLight = new Light(mUiManager);

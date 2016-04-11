@@ -160,8 +160,6 @@ public:
 	virtual bool Paint();
 	void DrawStick(Touchstick* pStick, bool pIsSloppy);
 
-	Cure::RuntimeVariableScope* GetVariableScope() const;
-
 protected:
 	typedef std::map<UiLepra::InputManager::KeyCode,bool> KeyMap;
 
