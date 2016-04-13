@@ -359,7 +359,7 @@ const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetComman
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int TrabantSimConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	mActiveResponse.str(str());
 	mActiveResponse << _T("ok\n");

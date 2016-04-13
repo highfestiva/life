@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -64,7 +64,7 @@ const ServerConsoleManager::CommandPair& ServerConsoleManager::GetCommand(unsign
 	return mCommandIdList[lLocalIndex];
 }
 
-int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int ServerConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)

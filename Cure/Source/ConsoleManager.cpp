@@ -236,7 +236,7 @@ std::list<str> ConsoleManager::GetCommandList() const
 	return (lCommandList);
 }
 
-int ConsoleManager::TranslateCommand(const str& pCommand) const
+int ConsoleManager::TranslateCommand(const HashedString& pCommand) const
 {
 	CommandLookupMap::const_iterator x = mCommandLookup.find(pCommand);
 	if (x != mCommandLookup.end())

@@ -65,7 +65,7 @@ const BoundConsoleManager::CommandPair& BoundConsoleManager::GetCommand(unsigned
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int BoundConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int BoundConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)

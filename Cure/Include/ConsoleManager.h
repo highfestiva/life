@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -71,7 +71,7 @@ protected:
 
 	virtual void InitCommands();
 	std::list<str> GetCommandList() const;
-	virtual int TranslateCommand(const str& pCommand) const;
+	virtual int TranslateCommand(const HashedString& pCommand) const;
 	void PrintCommandList(const std::list<str>& pCommandList);
 
 	void AddCommands();
@@ -81,7 +81,7 @@ protected:
 
 	virtual unsigned GetCommandCount() const = 0;
 	virtual const CommandPair& GetCommand(unsigned pIndex) const = 0;
-	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector) = 0;
+	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector) = 0;
 
 	RuntimeVariableScope* mVariableScope;
 	InteractiveConsoleLogListener* mConsoleLogger;

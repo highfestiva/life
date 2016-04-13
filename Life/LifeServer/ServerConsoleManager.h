@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -43,7 +43,7 @@ private:
 
 	virtual unsigned GetCommandCount() const;
 	virtual const CommandPair& GetCommand(unsigned pIndex) const;
-	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
+	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
 
 	static const CommandPair mCommandIdList[];
 	logclass();

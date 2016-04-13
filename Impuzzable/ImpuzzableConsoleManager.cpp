@@ -65,7 +65,7 @@ const ImpuzzableConsoleManager::CommandPair& ImpuzzableConsoleManager::GetComman
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int ImpuzzableConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int ImpuzzableConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)

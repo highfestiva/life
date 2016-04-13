@@ -69,7 +69,7 @@ const DownwashConsoleManager::CommandPair& DownwashConsoleManager::GetCommand(un
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int DownwashConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int DownwashConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)

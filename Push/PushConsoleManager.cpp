@@ -61,7 +61,7 @@ const PushConsoleManager::CommandPair& PushConsoleManager::GetCommand(unsigned p
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int PushConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int PushConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)

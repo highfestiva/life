@@ -144,18 +144,18 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 	png_set_sig_bytes(lPNG, 8);
 	png_read_png(lPNG, lInfo, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, 0);
 
-	const int lPitch = pCanvas.GetPitch();
-	const int lPixelByteSize = pCanvas.GetPixelByteSize();
-	const int lWidth = pCanvas.GetWidth();
-	const int lHeight = pCanvas.GetHeight();
+	const int lWidth = png_get_image_width(lPNG, lInfo);
+	const int lHeight = png_get_image_height(lPNG, lInfo);
 	int i;
 	switch(png_get_color_type(lPNG, lInfo))
 	{
 	case PNG_COLOR_TYPE_GRAY:
 		{
-			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_8_BIT);
+			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_8_BIT);
 			pCanvas.CreateBuffer();
 			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
+			const int lPixelByteSize = pCanvas.GetPixelByteSize();
+			const int lPitch = pCanvas.GetPitch();
 
 			Color lPalette[256];
 			for (i = 0; i < 256; i++)
@@ -177,9 +177,11 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		break;
 	case PNG_COLOR_TYPE_GRAY_ALPHA:
 		{
-			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_32_BIT);
+			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_32_BIT);
 			pCanvas.CreateBuffer();
 			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
+			const int lPixelByteSize = pCanvas.GetPixelByteSize();
+			const int lPitch = pCanvas.GetPitch();
 
 			Color lPalette[256];
 			for (i = 0; i < 256; i++)
@@ -209,9 +211,11 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		break;
 	case PNG_COLOR_TYPE_PALETTE:
 		{
-			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_8_BIT);
+			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_8_BIT);
 			pCanvas.CreateBuffer();
 			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
+			const int lPixelByteSize = pCanvas.GetPixelByteSize();
+			const int lPitch = pCanvas.GetPitch();
 
 			int i;
 			int lNumEntries;
@@ -246,9 +250,12 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		break;
 	case PNG_COLOR_TYPE_RGB:
 		{
-			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_24_BIT);
+			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
 			pCanvas.CreateBuffer();
 			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
+			const int lPixelByteSize = pCanvas.GetPixelByteSize();
+			const int lPitch = pCanvas.GetPitch();
+
 			uint8** lRow = png_get_rows(lPNG, lInfo);
 			for (i = 0; i < (int)lHeight; i++)
 			{
@@ -258,9 +265,12 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		break;
 	case PNG_COLOR_TYPE_RGB_ALPHA:
 		{
-			pCanvas.Reset(png_get_image_width(lPNG, lInfo), png_get_image_height(lPNG, lInfo), Canvas::BITDEPTH_32_BIT);
+			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_32_BIT);
 			pCanvas.CreateBuffer();
 			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
+			const int lPixelByteSize = pCanvas.GetPixelByteSize();
+			const int lPitch = pCanvas.GetPitch();
+
 			uint8** lRow = png_get_rows(lPNG, lInfo);
 			for (i = 0; i < (int)lHeight; i++)
 			{

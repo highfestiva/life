@@ -67,7 +67,7 @@ const FireConsoleManager::CommandPair& FireConsoleManager::GetCommand(unsigned p
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int FireConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int FireConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)

@@ -3,7 +3,7 @@
   <Project Name="Life" Path="Life.project" Active="No"/>
   <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="no">
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="Life" ConfigName="Debug"/>
       <Project Name="TrabantSim" ConfigName="Debug"/>
@@ -13,7 +13,7 @@
       <Project Name="TrabantSim" ConfigName="Release"/>
       <Project Name="Life" ConfigName="Release"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Profile" Selected="yes">
+    <WorkspaceConfiguration Name="Profile" Selected="no">
       <Environment/>
       <Project Name="TrabantSim" ConfigName="Profile"/>
       <Project Name="Life" ConfigName="Profile"/>

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -558,11 +558,6 @@ void GeometryBase::SetRendererData(void* pRendererData)
 {
 	deb_assert(!mRendererData || !pRendererData || mRendererData == pRendererData);
 	mRendererData = pRendererData;
-}
-
-void* GeometryBase::GetRendererData() const
-{
-	return mRendererData;
 }
 
 size_t GeometryBase::GetExtraData() const

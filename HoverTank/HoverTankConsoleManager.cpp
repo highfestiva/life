@@ -66,7 +66,7 @@ const HoverTankConsoleManager::CommandPair& HoverTankConsoleManager::GetCommand(
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int HoverTankConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int HoverTankConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)

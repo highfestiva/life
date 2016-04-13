@@ -293,7 +293,8 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 			{
 				::XLookupString(&lKeyEvent, lKey, sizeof(lKey), &lSym, NULL);
 			}
-			KeyCode lKeyCode = TranslateKey(lKeyEvent.state, lSym);
+			bool lIsSpecialKey;
+			KeyCode lKeyCode = TranslateKey(lKeyEvent.state, lSym, lIsSpecialKey);
 			//mLog.Infof(_T("Key event %i: keycode=%i, state=%i, lookup=%s, keysym=%i, keycode=%i"),
 			//		lKeyEvent.type, lKeyEvent.keycode, lKeyEvent.state, lKey, lSym, lKeyCode);
 			if (pEvent.type == KeyPress)
@@ -301,7 +302,7 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 				SetKey(lKeyCode, true);
 				lConsumed = NotifyOnKeyDown(lKeyCode);
 
-				if (!lConsumed && lKey[0])
+				if (!lIsSpecialKey && !lConsumed && lKey[0])
 				{
 					wstr lWideKey = wstrutil::Encode(lKey);
 					lConsumed |= NotifyOnChar(lWideKey[0]);
@@ -399,8 +400,31 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 	return (lConsumed);
 }
 
-X11InputManager::KeyCode X11InputManager::TranslateKey(int pState, KeySym pKeySym)
+X11InputManager::KeyCode X11InputManager::TranslateKey(int pState, KeySym pKeySym, bool& pIsSpecialKey)
 {
+	switch (pKeySym)
+	{
+		case 65505:	// LSHIFT;
+		case 65507:	// LCTRL;
+		case 65513:	// LALT;
+		case 65506:	// RSHIFT;
+		case 65508:	// RCTRL;
+		case 65027:	// RALT;
+		case 65361:	// LEFT;
+		case 65362:	// UP;
+		case 65363:	// RIGHT;
+		case 65364:	// DOWN;
+		case 65365:	// PGUP;
+		case 65366:	// PGDOWN;
+		case 65367:	// END;
+		case 65360:	// HOME;
+		case 65535:	// DEL;
+			pIsSpecialKey = true;
+			break;
+		default:
+			pIsSpecialKey = false;
+			break;
+	}
 	switch (pKeySym)
 	{
 		case 65288:	return IN_KBD_BACKSPACE;

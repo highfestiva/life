@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-, Pixel Doctrine
 
 
@@ -229,7 +229,7 @@ public:
 	// It would be better design to remove these functions and use a hash
 	// table instead to do the association, but that is not as efficient.
 	void SetRendererData(void* pRendererData);
-	virtual void* GetRendererData() const;
+	inline void* GetRendererData() const;
 
 	size_t GetExtraData() const;
 	void SetExtraData(size_t pExtraData);
@@ -396,6 +396,13 @@ public:
 
 	logclass();
 };
+
+
+
+inline void* GeometryBase::GetRendererData() const
+{
+	return mRendererData;
+}
 
 
 

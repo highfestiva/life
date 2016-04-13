@@ -89,7 +89,7 @@ public:
 
 protected:
 	bool OnMessage(const XEvent& pEvent);
-	static KeyCode TranslateKey(int pState, KeySym pKeySym);
+	static KeyCode TranslateKey(int pState, KeySym pKeySym, bool& pIsSpecialKey);
 
 private:
 	void AddObserver();

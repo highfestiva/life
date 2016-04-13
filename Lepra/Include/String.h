@@ -70,7 +70,7 @@ struct HashedStringHasher
 
 inline bool operator==(const HashedString& a, const HashedString& b)
 {
-	return (a.mHash == b.mHash) && ((*(str*)&a) == (*(str*)&b));
+	return (a.mHash == b.mHash) && ((str&)a == (str&)b);
 }
 }
 

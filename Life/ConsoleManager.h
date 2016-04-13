@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -88,8 +88,8 @@ protected:
 
 	virtual unsigned GetCommandCount() const;
 	virtual const CommandPair& GetCommand(unsigned pIndex) const;
-	int TranslateCommand(const str& pCommand) const;
-	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
+	int TranslateCommand(const HashedString& pCommand) const;
+	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
 
 	virtual bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
 
@@ -102,7 +102,7 @@ protected:
 	static str GetQuoted(const str& s);
 
 	static const CommandPair mCommandIdList[];
-	typedef std::unordered_map<str, str> AliasMap;
+	typedef std::unordered_map<HashedString, str, HashedStringHasher> AliasMap;
 	typedef AliasMap KeyMap;
 
 	int mSecurityLevel;

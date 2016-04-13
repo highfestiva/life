@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -79,6 +79,7 @@ void TimeManager::Tick()
 		mPhysicsFrameCounter = GetCurrentPhysicsFrameAddFrames(1);
 		mAverageFrameTime = Math::Lerp(mAverageFrameTime, mCurrentFrameTime, 0.2f);
 		mTickTimeOverhead = 0;
+		mPhysicsStepCount = 1;
 		return;
 	}
 

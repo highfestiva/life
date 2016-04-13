@@ -161,7 +161,7 @@ const ConsoleManager::CommandPair& ConsoleManager::GetCommand(unsigned pIndex) c
 	return (mCommandIdList[pIndex]);
 }
 
-int ConsoleManager::TranslateCommand(const str& pCommand) const
+int ConsoleManager::TranslateCommand(const HashedString& pCommand) const
 {
 	int lTranslation = Parent::TranslateCommand(pCommand);
 	if (lTranslation == -1)
@@ -174,7 +174,7 @@ int ConsoleManager::TranslateCommand(const str& pCommand) const
 	return (lTranslation);
 }
 
-int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int ConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = 0;
 	CommandCommon lCommand = (CommandCommon)TranslateCommand(pCommand);

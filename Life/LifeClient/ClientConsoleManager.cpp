@@ -168,7 +168,7 @@ const ClientConsoleManager::CommandPair& ClientConsoleManager::GetCommand(unsign
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
+int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)
